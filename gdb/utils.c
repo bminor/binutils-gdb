@@ -2544,3 +2544,15 @@ string_to_core_addr (const char *my_string)
     }
   return addr;
 }
+
+char *
+gdb_realpath (const char *filename)
+{
+#ifdef HAVE_REALPATH
+  char buf[PATH_MAX];
+  char *rp = realpath (filename, buf);
+  return xstrdup (rp ? rp : filename);
+#else
+  return xstrdup (filename);
+#endif
+}

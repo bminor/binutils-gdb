@@ -234,6 +234,7 @@ forget_cached_source_info (void)
 {
   register struct symtab *s;
   register struct objfile *objfile;
+  struct partial_symtab *pst;
 
   for (objfile = object_files; objfile != NULL; objfile = objfile->next)
     {
@@ -250,6 +251,15 @@ forget_cached_source_info (void)
 	      s->fullname = NULL;
 	    }
 	}
+
+      ALL_OBJFILE_PSYMTABS (objfile, pst)
+      {
+	if (pst->fullname != NULL)
+	  {
+	    xfree (pst->fullname);
+	    pst->fullname = NULL;
+	  }
+      }
     }
 }
 
@@ -603,15 +613,17 @@ done:
       if (fd < 0)
 	*filename_opened = NULL;
       else if (IS_ABSOLUTE_PATH (filename))
-	*filename_opened = savestring (filename, strlen (filename));
+	*filename_opened = gdb_realpath (filename);
       else
 	{
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
 
-	  *filename_opened = concat (current_directory,
+	  char *f = concat (current_directory,
            IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
 				     ? "" : SLASH_STRING,
 				     filename, NULL);
+	  *filename_opened = gdb_realpath (f);
+	  xfree (f);
 	}
     }
   /* OBSOLETE #ifdef MPW  */

@@ -575,6 +575,8 @@ extern void init_page_info (void);
 extern CORE_ADDR host_pointer_to_address (void *ptr);
 extern void *address_to_host_pointer (CORE_ADDR addr);
 
+extern char *gdb_realpath (const char *);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);

@@ -1,3 +1,18 @@
+2001-12-21  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuilt.
+	* configure.in: Check for realpath.
+	* defs.h (gdb_realpath): Declare.
+	* symtab.h (partial_symtab): Added fullname field.
+	* source.c (openp): Use gdb_realpath.
+	(forget_cached_source_info): Clear full name of each partial
+	symtab.
+	* utils.c (gdb_realpath): New function.
+	* symtab.c (lookup_symtab): Removed.
+	(lookup_symtab_1): Renamed to lookup_symtab.
+	(lookup_symtab): Look for real path.
+	(lookup_partial_symtab): Likewise.
+
 2001-12-21  Michael Snyder  <msnyder@redhat.com>
 
 	* maint.c (match_substring): New function.  Tokenizer for

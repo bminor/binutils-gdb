@@ -967,6 +967,10 @@ struct partial_symtab
 
     char *filename;
 
+    /* Full path of the source file.  NULL if not known.  */
+
+    char *fullname;
+
     /* Information about the object file from which symbols should be read.  */
 
     struct objfile *objfile;

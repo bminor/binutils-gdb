@@ -141,14 +141,38 @@ lookup_symtab (const char *name)
   register struct symtab *s;
   register struct partial_symtab *ps;
   register struct objfile *objfile;
+  char *real_path = NULL;
+
+  /* Here we are interested in canonicalizing an absolute path, not
+     absolutizing a relative path.  */
+  if (IS_ABSOLUTE_PATH (name))
+    real_path = gdb_realpath (name);
 
 got_symtab:
 
   /* First, search for an exact match */
 
   ALL_SYMTABS (objfile, s)
+  {
     if (FILENAME_CMP (name, s->filename) == 0)
-      return s;
+      {
+	xfree (real_path);
+	return s;
+      }
+    /* If the user gave us an absolute path, try to find the file in
+       this symtab and use its absolute path.  */
+    if (real_path != NULL)
+      {
+	char *rp = symtab_to_filename (s);
+	if (FILENAME_CMP (real_path, rp) == 0)
+	  {
+	    xfree (real_path);
+	    return s;
+	  }
+      }
+  }
+
+  xfree (real_path);
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
@@ -195,14 +219,36 @@ lookup_partial_symtab (const char *name)
 {
   register struct partial_symtab *pst;
   register struct objfile *objfile;
+  char *real_path = NULL;
+
+  /* Here we are interested in canonicalizing an absolute path, not
+     absolutizing a relative path.  */
+  if (IS_ABSOLUTE_PATH (name))
+    real_path = gdb_realpath (name);
 
   ALL_PSYMTABS (objfile, pst)
   {
     if (FILENAME_CMP (name, pst->filename) == 0)
       {
+	xfree (real_path);
 	return (pst);
       }
+    /* If the user gave us an absolute path, try to find the file in
+       this symtab and use its absolute path.  */
+    if (real_path != NULL)
+      {
+	if (pst->fullname == NULL)
+	  source_full_path_of (pst->filename, &pst->fullname);
+	if (pst->fullname != NULL
+	    && FILENAME_CMP (real_path, pst->fullname) == 0)
+	  {
+	    xfree (real_path);
+	    return pst;
+	  }
+      }
   }
+
+  xfree (real_path);
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
