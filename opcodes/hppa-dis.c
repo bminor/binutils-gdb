@@ -67,24 +67,50 @@ static const char control_reg[][6] = {
 };
 
 static const char compare_cond_names[][5] = {
-  "", ",=", ",<", ",<=", ",<<", ",<<=", ",sv",
-  ",od", ",tr", ",<>", ",>=", ",>", ",>>=",
-  ",>>", ",nsv", ",ev"
+  "", ",=", ",<", ",<=", ",<<", ",<<=", ",sv", ",od",
+  ",tr", ",<>", ",>=", ",>", ",>>=", ",>>", ",nsv", ",ev"
+};
+static const char compare_cond_64_names[][6] = {
+  "", ",*=", ",*<", ",*<=", ",*<<", ",*<<=", ",*sv", ",*od",
+  ",*tr", ",*<>", ",*>=", ",*>", ",*>>=", ",*>>", ",*nsv", ",*ev"
+};
+static const char cmpib_cond_64_names[][6] = {
+  ",*<<", ",*=", ",*<", ",*<=", ",*>>=", ",*<>", ",*>=", ",*>"
 };
 static const char add_cond_names[][5] = {
-  "", ",=", ",<", ",<=", ",nuv", ",znv", ",sv",
-  ",od", ",tr", ",<>", ",>=", ",>", ",uv",
-  ",vnz", ",nsv", ",ev"
+  "", ",=", ",<", ",<=", ",nuv", ",znv", ",sv", ",od",
+  ",tr", ",<>", ",>=", ",>", ",uv", ",vnz", ",nsv", ",ev"
+};
+static const char add_cond_64_names[][6] = {
+  ",*", ",*=", ",*<", ",*<=", ",*nuv", ",*znv", ",*sv", ",*od",
+  ",*tr", ",*<>", ",*>=", ",*>", ",*uv", ",*vnz", ",*nsv", ",*ev"
+};
+static const char wide_add_cond_names[][5] = {
+  "", ",=", ",<", ",<=", ",nuv", ",*=", ",*<", ",*<=",
+  ",tr", ",<>", ",>=", ",>", ",uv", ",*<>", ",*>=", ",*>"
 };
 static const char *const logical_cond_names[] = {
   "", ",=", ",<", ",<=", 0, 0, 0, ",od",
   ",tr", ",<>", ",>=", ",>", 0, 0, 0, ",ev"};
+static const char *const logical_cond_64_names[] = {
+  ",*", ",*=", ",*<", ",*<=", 0, 0, 0, ",*od",
+  ",*tr", ",*<>", ",*>=", ",*>", 0, 0, 0, ",*ev"};
 static const char *const unit_cond_names[] = {
   "", 0, ",sbz", ",shz", ",sdc", 0, ",sbc", ",shc",
   ",tr", 0, ",nbz", ",nhz", ",ndc", 0, ",nbc", ",nhc"
 };
+static const char *const unit_cond_64_names[] = {
+  ",*", ",*swz", ",*sbz", ",*shz", ",*sdc", ",*swc", ",*sbc", ",*shc",
+  ",*tr", ",*nwz", ",*nbz", ",*nhz", ",*ndc", ",*nwc", ",*nbc", ",*nhc"
+};
 static const char shift_cond_names[][4] = {
   "", ",=", ",<", ",od", ",tr", ",<>", ",>=", ",ev"
+};
+static const char shift_cond_64_names[][5] = {
+  ",*", ",*=", ",*<", ",*od", ",*tr", ",*<>", ",*>=", ",*ev"
+};
+static const char bb_cond_64_names[][5] = {
+  ",*<", ",*>="
 };
 static const char index_compl_names[][4] = {"", ",m", ",s", ",sm"};
 static const char short_ldst_compl_names[][4] = {"", ",ma", "", ",mb"};
@@ -388,6 +414,7 @@ print_insn_hppa (memaddr, info)
 		  (*info->fprintf_func) (info->stream,
 					 "sr%d", GET_FIELD (insn, 16, 17));
 		  break;
+
 		case 'S':
 		  (*info->fprintf_func) (info->stream, "sr%d", extract_3 (insn));
 		  break;
@@ -425,6 +452,22 @@ print_insn_hppa (memaddr, info)
 								      18)],
 					info);
 			break;
+		      case 'T':
+			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)
+							  + 8], info);
+			break;
+		      case 'r':
+			fputs_filtered (compare_cond_64_names[GET_FIELD (insn, 16, 18)],
+					info);
+			break;
+		      case 'R':
+			fputs_filtered (compare_cond_64_names[GET_FIELD (insn, 16, 18)
+							     + 8], info);
+			break;
+		      case 'Q':
+			fputs_filtered (cmpib_cond_64_names[GET_FIELD (insn, 16, 18)],
+					info);
+			break;
 		      case 'n':
 			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16,
 								      18)
@@ -438,9 +481,17 @@ print_insn_hppa (memaddr, info)
 			(*info->fprintf_func) (info->stream, "%s ",
 					       compare_cond_names[GET_COND (insn)]);
 			break;
+		      case 'S':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       compare_cond_64_names[GET_COND (insn)]);
+			break;
 		      case 'a':
 			(*info->fprintf_func) (info->stream, "%s ",
 					       add_cond_names[GET_COND (insn)]);
+			break;
+		      case 'A':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       add_cond_64_names[GET_COND (insn)]);
 			break;
 		      case 'd':
 			(*info->fprintf_func) (info->stream, "%s",
@@ -448,14 +499,39 @@ print_insn_hppa (memaddr, info)
 									 16,
 									 18)]);
 			break;
+		      case 'D':
+			(*info->fprintf_func) (info->stream, "%s",
+					       add_cond_names[GET_FIELD (insn,
+									 16, 18)
+							      + 8]);
+			break;
+		      case 'w':
+			(*info->fprintf_func)
+			  (info->stream, "%s",
+			   wide_add_cond_names[GET_FIELD (insn, 16, 18)]);
+			break;
+
+		      case 'W':
+			(*info->fprintf_func)
+			  (info->stream, "%s",
+			   wide_add_cond_names[GET_FIELD (insn, 16, 18) + 8]);
+			break;
 
 		      case 'l':
 			(*info->fprintf_func) (info->stream, "%s ",
 					       logical_cond_names[GET_COND (insn)]);
 			break;
+		      case 'L':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       logical_cond_64_names[GET_COND (insn)]);
+			break;
 		      case 'u':
 			(*info->fprintf_func) (info->stream, "%s ",
 					       unit_cond_names[GET_COND (insn)]);
+			break;
+		      case 'U':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       unit_cond_64_names[GET_COND (insn)]);
 			break;
 		      case 'y':
 		      case 'x':
@@ -469,7 +545,20 @@ print_insn_hppa (memaddr, info)
 			if (s[1] != 'n')
 			  (*info->fprintf_func) (info->stream, " ");
 			break;
+		      case 'X':
+			(*info->fprintf_func) (info->stream, "%s",
+					       shift_cond_64_names[GET_FIELD (insn, 16, 18)]);
+			break;
+		      case 'B':
+			(*info->fprintf_func)
+			  (info->stream, "%s",
+			   bb_cond_64_names[GET_FIELD (insn, 16, 16)]);
 
+			/* If the next character in args is 'n', it will handle
+			   putting out the space.  */
+			if (s[1] != 'n')
+			  (*info->fprintf_func) (info->stream, " ");
+			break;
 		      }
 		    break;
 		  }
