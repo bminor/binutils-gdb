@@ -10,6 +10,11 @@ Thu Sep 12 12:45:34 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 Tue Sep 12 12:14:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (do_maintainer_clean): Rename from do_realclean.
+	(maintainer-clean): Rename from realclean, passing
+	maintainer-clean down to subdirectories, but leave realclean as a
+	synonym.
+
 	* linker.c (_bfd_generic_link_add_one_symbol): Pass symbol name to
 	warning callback.
 

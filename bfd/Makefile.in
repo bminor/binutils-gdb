@@ -381,7 +381,7 @@ do_distclean: do_clean
 # this makefile.  Well, they can, but only via an explicit "make headers";
 # the makefile does not regenerate them as needed.  So I guess we should not
 # remove them in realclean.
-do_realclean: do_distclean
+do_maintainer_clean: do_distclean
 
 mostlyclean: do_mostlyclean
 	$(MAKE) subdir_do DO=mostlyclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
@@ -390,9 +390,9 @@ clean: do_clean
 distclean:
 	$(MAKE) subdir_do DO=distclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 	$(MAKE) do_distclean
-clobber realclean:
-	$(MAKE) subdir_do DO=realclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-	$(MAKE) do_realclean
+clobber maintainer-clean realclean:
+	$(MAKE) subdir_do DO=maintainer-clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	$(MAKE) do_maintainer_clean
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h
 LOCAL_H_DEPS= libbfd.h sysdep.h config.h
