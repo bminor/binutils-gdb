@@ -117,12 +117,14 @@ struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const domain_enum domain,
 					   struct symtab **symtab);
 
+#if 0
 static
 struct symbol *lookup_symbol_aux_minsyms (const char *name,
 					  const char *mangled_name,
 					  const domain_enum domain,
 					  int *is_a_field_of_this,
 					  struct symtab **symtab);
+#endif
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -1065,21 +1067,6 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   if (sym != NULL)
     return sym;
 
-#ifndef HPUXHPPA
-
-  /* Check for the possibility of the symbol being a function or
-     a mangled variable that is stored in one of the minimal symbol tables.
-     Eventually, all global symbols might be resolved in this way.  */
-
-  sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   domain, is_a_field_of_this,
-				   symtab);
-  
-  if (sym != NULL)
-    return sym;
-
-#endif
-
   sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, mangled_name,
 				    domain, symtab);
   if (sym != NULL)
@@ -1100,33 +1087,6 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 				    domain, symtab);
   if (sym != NULL)
     return sym;
-
-#ifdef HPUXHPPA
-
-  /* Check for the possibility of the symbol being a function or
-     a global variable that is stored in one of the minimal symbol tables.
-     The "minimal symbol table" is built from linker-supplied info.
-
-     RT: I moved this check to last, after the complete search of
-     the global (p)symtab's and static (p)symtab's. For HP-generated
-     symbol tables, this check was causing a premature exit from
-     lookup_symbol with NULL return, and thus messing up symbol lookups
-     of things like "c::f". It seems to me a check of the minimal
-     symbol table ought to be a last resort in any case. I'm vaguely
-     worried about the comment below which talks about FORTRAN routines "foo_"
-     though... is it saying we need to do the "minsym" check before
-     the static check in this case? 
-   */
-
-
-  sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   domain, is_a_field_of_this,
-				   symtab);
-  
-  if (sym != NULL)
-    return sym;
-
-#endif
 
   if (symtab != NULL)
     *symtab = NULL;
@@ -1304,6 +1264,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   return NULL;
 }
 
+#if 0
 /* Check for the possibility of the symbol being a function or a
    mangled variable that is stored in one of the minimal symbol
    tables.  Eventually, all global symbols might be resolved in this
@@ -1316,6 +1277,11 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
    it didn't happen every time that msymbol was non-NULL, but only if
    some additional conditions held as well, and it caused problems
    with HP-generated symbol tables.  */
+
+/* NOTE: carlton/2003-05-14: This function was once used as part of
+   lookup_symbol.  It is currently unnecessary for correctness
+   reasons, however, and using it doesn't seem to be any faster than
+   using lookup_symbol_aux_psymtabs, so I'm commenting it out.  */
 
 static struct symbol *
 lookup_symbol_aux_minsyms (const char *name,
@@ -1417,21 +1383,12 @@ lookup_symbol_aux_minsyms (const char *name,
 		*symtab = s;
 	      return fixup_symbol_section (sym, s->objfile);
 	    }
-	  else if (MSYMBOL_TYPE (msymbol) != mst_text
-		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && !STREQ (name, DEPRECATED_SYMBOL_NAME (msymbol)))
-	    {
-	      /* This is a mangled variable, look it up by its
-	         mangled name.  */
-	      return lookup_symbol_aux (DEPRECATED_SYMBOL_NAME (msymbol), mangled_name,
-					NULL, domain, is_a_field_of_this,
-					symtab);
-	    }
 	}
     }
 
   return NULL;
 }
+#endif /* 0 */
 
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.
    If LINKAGE_NAME is non-NULL, check in addition that the symbol's

@@ -1,3 +1,11 @@
+2003-05-15  David Carlton  <carlton@bactrian.org>
+	
+	Committed by Elena Zannoni <ezannoni@redhat.com>    
+        * symtab.c (lookup_symbol_aux): Delete calls to
+        lookup_symbol_aux_minsyms.
+        (lookup_symbol_aux_minsyms): Comment out function and
+        prototype. Delete lookup by mangled name.
+
 2003-05-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2expr.c (new_dwarf_expr_context): Set ``stack_len'' to
