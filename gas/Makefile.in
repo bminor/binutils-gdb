@@ -252,7 +252,9 @@ $(OBJS): @ALL_OBJ_DEPS@
 as.new: $(OBJS) $(LIBS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
-$(OBJS): config.h
+$(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
+	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
+	listing.h bignum.h
 
 gasp.new: gasp.o
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new gasp.o $(LIBS) $(LOADLIBES)
@@ -287,104 +289,38 @@ config-stamp: Makefile conf
 # Compiling object files from source files.
 
 gasp.o : gasp.c config.h
-app.o : app.c as.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-as.o : as.c as.h targ-env.h obj-format.h output-file.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h subsegs.h \
-  tc.h obj.h config.h
-atof-generic.o : atof-generic.c as.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-bignum-copy.o : bignum-copy.c as.h \
-  targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-cond.o : cond.c as.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-
-debug.o : debug.c as.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h 
-expr.o : expr.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-
-flonum-konst.o : flonum-konst.c flonum.h bignum.h 
-flonum-copy.o : flonum-copy.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-flonum-mult.o : flonum-mult.c flonum.h bignum.h 
-frags.o : frags.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h  
-hash.o : hash.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-hex-value.o : hex-value.c 
-input-file.o : input-file.c as.h \
-   targ-env.h obj-format.h targ-cpu.h \
-   struc-symbol.h write.h flonum.h bignum.h expr.h \
-  frags.h hash.h read.h symbols.h tc.h obj.h input-file.h 
-input-scrub.o : input-scrub.c /usr/include/errno.h /usr/include/sys/errno.h \
-  as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  input-file.h 
-listing.o : listing.c as.h targ-env.h flonum.h bignum.h \
-  listing.h obj-format.h targ-cpu.h struc-symbol.h write.h expr.h \
-  frags.h hash.h read.h symbols.h tc.h obj.h input-file.h subsegs.h
-literal.o : literal.c subsegs.h as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-messages.o : messages.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-output-file.o : output-file.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  output-file.h 
-read.o : read.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-subsegs.o : subsegs.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h  
-symbols.o : symbols.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-   subsegs.h 
-write.o : write.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h  output-file.h 
-ecoff.o : ecoff.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  ecoff.h $(srcdir)/../include/coff/internal.h \
-  $(srcdir)/../include/coff/sym.h $(srcdir)/../include/coff/ecoff.h \
-  $(srcdir)/../include/coff/symconst.h $(srcdir)/../include/aout/stab_gnu.h
-stabs.o : stabs.c as.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h $(srcdir)/../include/aout/stab_gnu.h
-atof-targ.o : atof-targ.c as.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
-  symbols.h tc.h obj.h 
-obj-format.o : obj-format.c as.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
-  subsegs.h symbols.h tc.h obj.h  
-targ-cpu.o : targ-cpu.c config.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
-  symbols.h tc.h obj.h $(TARG_CPU_DEPENDENTS)
+app.o : app.c write.h
+as.o : as.c output-file.h write.h subsegs.h
+atof-generic.o : atof-generic.c
+bignum-copy.o : bignum-copy.c
+cond.o : cond.c
+debug.o : debug.c subsegs.h
+expr.o : expr.c
+flonum-konst.o : flonum-konst.c
+flonum-copy.o : flonum-copy.c
+flonum-mult.o : flonum-mult.c
+frags.o : frags.c subsegs.h
+hash.o : hash.c
+hex-value.o : hex-value.c
+input-file.o : input-file.c input-file.h
+input-scrub.o : input-scrub.c input-file.h
+listing.o : listing.c input-file.h subsegs.h
+literal.o : literal.c subsegs.h
+messages.o : messages.c
+output-file.o : output-file.c output-file.h
+read.o : read.c
+subsegs.o : subsegs.c subsegs.h
+symbols.o : symbols.c subsegs.h
+write.o : write.c subsegs.h output-file.h
+ecoff.o : ecoff.c ecoff.h \
+	$(srcdir)/../include/coff/internal.h $(srcdir)/../include/coff/sym.h \
+	$(srcdir)/../include/coff/ecoff.h \
+	$(srcdir)/../include/coff/symconst.h \
+	$(srcdir)/../include/aout/stab_gnu.h
+stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h
+atof-targ.o : atof-targ.c
+obj-format.o : obj-format.c
+targ-cpu.o : targ-cpu.c $(TARG_CPU_DEPENDENTS)
 
 # Remake the info files.
 

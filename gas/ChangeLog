@@ -5,6 +5,10 @@ Fri Dec 30 18:21:41 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	at least as wide, after handling the special case of 4-byte
 	values.
 
+	* Makefile.in (dependencies): Make $(OBJS) depend on as.h and
+	everything it includes.  Delete those files from per-file
+	dependencies.
+
 Wed Dec 28 20:57:37 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_subspace): For sections with the ZERO
