@@ -1,5 +1,12 @@
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* linux-low.c (linux_wait): Unblock async I/O.
+	(linux_resume): Block and enable async I/O.
+	* remote-utils.c (block_async_io, unblock_async_io): New functions.
+	* server.h (block_async_io, unblock_async_io): Add prototypes.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* remote-utils.c (remote_open): Print a status notice after
 	opening a TCP port.
 	* server.c (attach_inferior): Print a status notice after

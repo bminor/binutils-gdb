@@ -368,6 +368,24 @@ input_interrupt (int unused)
 }
 
 void
+block_async_io (void)
+{
+  sigset_t sigio_set;
+  sigemptyset (&sigio_set);
+  sigaddset (&sigio_set, SIGIO);
+  sigprocmask (SIG_BLOCK, &sigio_set, NULL);
+}
+
+void
+unblock_async_io (void)
+{
+  sigset_t sigio_set;
+  sigemptyset (&sigio_set);
+  sigaddset (&sigio_set, SIGIO);
+  sigprocmask (SIG_UNBLOCK, &sigio_set, NULL);
+}
+
+void
 enable_async_io (void)
 {
   signal (SIGIO, input_interrupt);
