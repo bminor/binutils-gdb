@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    1.92) behaves like sun cc.  REG_STRUCT_HAS_ADDR is smart enough to
    distinguish between Sun cc, gcc version 1 and gcc version 2.  */
 
-#define REG_STRUCT_HAS_ADDR(gcc_p) (gcc_p != 1)
+#define REG_STRUCT_HAS_ADDR(gcc_p,type) (gcc_p != 1)
 
 /* Sun /bin/cc gets this right as of SunOS 4.1.x.  We need to define
    BELIEVE_PCC_PROMOTION to get this right now that the code which

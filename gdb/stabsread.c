@@ -485,7 +485,7 @@ read_type_number (pp, typenums)
 static char *type_synonym_name;
 
 #if !defined (REG_STRUCT_HAS_ADDR)
-#define REG_STRUCT_HAS_ADDR(gcc_p) 0
+#define REG_STRUCT_HAS_ADDR(gcc_p,type) 0
 #endif
 
 /* ARGSUSED */
@@ -983,7 +983,8 @@ define_symbol (valu, string, desc, type, objfile)
 
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
-	      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation)
+	      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
+				      SYMBOL_TYPE (sym))
 	      && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
 		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION))
 	    {
@@ -1176,7 +1177,8 @@ define_symbol (valu, string, desc, type, objfile)
      to LOC_REGPARM_ADDR for structures and unions.  */
 
   if (SYMBOL_CLASS (sym) == LOC_REGPARM
-      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation)
+      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
+			      SYMBOL_TYPE (sym))
       && ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
 	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
     SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
@@ -1184,7 +1186,8 @@ define_symbol (valu, string, desc, type, objfile)
   /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th and
      subsequent arguments on the sparc, for example).  */
   if (SYMBOL_CLASS (sym) == LOC_ARG
-      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation)
+      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
+			      SYMBOL_TYPE (sym))
       && ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
 	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
     SYMBOL_CLASS (sym) = LOC_REF_ARG;
