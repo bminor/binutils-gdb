@@ -17206,8 +17206,14 @@ Show a single frame:
 @end smallexample
 
 Display the local variable names for the current frame.  With an
-argument of 0 prints only the names of the variables, with argument of 1
-prints also their values.
+argument of 0 or @code{--no-values}, prints only the names of the variables.
+With argument of 1 or @code{--all-values}, prints also their values.  With
+argument of 2 or @code{--simple-values}, prints the name, type and value for
+simple data types and the name and type for arrays, structures and
+unions.  In this last case, the idea is that the user can see the
+value of simple data types immediately and he can create variable
+objects for other data types if he wishes to explore their values in
+more detail.
 
 @subsubheading @value{GDBN} Command
 
@@ -17220,9 +17226,12 @@ prints also their values.
 -stack-list-locals 0
 ^done,locals=[name="A",name="B",name="C"]
 (@value{GDBP})
--stack-list-locals 1
+-stack-list-locals --all-values
 ^done,locals=[@{name="A",value="1"@},@{name="B",value="2"@},
-  @{name="C",value="3"@}]
+  @{name="C",value="@{1, 2, 3@}"@}]
+-stack-list-locals --simple-values
+^done,locals=[@{name="A",type="int",value="1"@},
+  @{name="B",type="int",value="2"@},@{name="C",type="int [3]"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -18166,14 +18175,26 @@ Returns the number of children of a variable object @var{name}:
 @subsubheading Synopsis
 
 @smallexample
- -var-list-children @var{name}
+ -var-list-children [@var{print-values}] @var{name}
 @end smallexample
 
-Returns a list of the children of the specified variable object:
+Returns a list of the children of the specified variable object.  With
+just the variable object name as an argument or with an optional
+preceding argument of 0 or @code{--no-values}, prints only the names of the
+variables.  With an optional preceding argument of 1 or @code{--all-values},
+also prints their values.
+
+@subsubheading Example
 
 @smallexample
+(@value{GDBP})
+ -var-list-children n
  numchild=@var{n},children=[@{name=@var{name},
  numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
+(@value{GDBP})
+ -var-list-children --all-values n
+ numchild=@var{n},children=[@{name=@var{name},
+ numchild=@var{n},value=@var{value},type=@var{type}@},@r{(repeats N times)}]
 @end smallexample
 
 
