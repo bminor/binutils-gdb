@@ -2363,7 +2363,7 @@ and both watchpoints must be the same kind.  For example, you can set two
 watchpoints with @code{watch} commands, two with @code{rwatch}
 commands, @strong{or} two with @code{awatch} commands, but you cannot set one
 watchpoint with one command and the other with a different command. 
-@value{GBDN} will reject the command if you try to mix watchpoints.
+@value{GDBN} will reject the command if you try to mix watchpoints.
 Delete or disable unused watchpoint commands before setting new ones.
 
 @kindex rwatch

@@ -1,3 +1,7 @@
+1998-12-14  J.T. Conklin  <jtc@redbacknetworks.com>
+
+	* gdb.texinfo: Fix tipo.
+
 Sun Dec 13 10:27:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo: Document TARGET_BYTE_ORDER_DEFAULT and
