@@ -1,3 +1,8 @@
+2002-07-17  Ian Rickards  <irickard@arm.com>
+
+	* dwarf2.c (concat_filename): If we can't establish the directory 
+	just return the filename.
+
 2002-07-16  Moritz Jodeit  <moritz@jodeit.org>
 
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Correct order of memset args.

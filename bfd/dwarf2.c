@@ -856,13 +856,18 @@ concat_filename (table, file)
   filename = table->files[file - 1].name;
   if (IS_ABSOLUTE_PATH(filename))
     return filename;
-
   else
     {
       char* dirname = (table->files[file - 1].dir
 		       ? table->dirs[table->files[file - 1].dir - 1]
 		       : table->comp_dir);
-      return (char*) concat (dirname, "/", filename, NULL);
+
+      /* Not all tools set DW_AT_comp_dir, so dirname may be unknown.  The
+	 best we can do is return the filename part.  */
+      if (dirname == NULL)
+	return filename;
+      else
+	return (char*) concat (dirname, "/", filename, NULL);
     }
 }
 
