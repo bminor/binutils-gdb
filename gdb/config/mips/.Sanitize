@@ -37,6 +37,8 @@ nm-irix3.h
 nm-irix4.h
 nm-mips.h
 nm-news-mips.h
+nm-riscos.h
+riscos.mh
 tm-bigmips.h
 tm-irix3.h
 tm-mips.h
@@ -44,6 +46,7 @@ xm-irix3.h
 xm-irix4.h
 xm-mips.h
 xm-news-mips.h
+xm-riscos.h
 
 Things-to-lose:
 
