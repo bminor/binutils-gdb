@@ -1,3 +1,14 @@
+2003-02-05  Fred Fish  <fnf@intrinsity.com>
+
+	* remote-e7000.c (e7000_drain_command): Fix precedence problem with
+	'=' and '!='.
+	* rdi-share/ardi.c (wait_for_debug_message): Fix precedence problem
+	with '&' and '=='.
+	(angel_RDI_info): Ditto.
+	* infttrace.c (threads_continue_all_but_one): Fix precedence problem
+	with '&' and '!='.
+	(threads_continue_all_with_signals): Ditto.
+  
 2003-02-05  Jim Ingham <jingham@apple.com>
             Keith Seitz  <keiths@redhat.com>
             Elena Zannoni  <ezannoni@redhat.com>

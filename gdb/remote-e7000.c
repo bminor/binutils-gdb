@@ -1,7 +1,7 @@
 /* Remote debugging interface for Hitachi E7000 ICE, for GDB
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support. 
 
@@ -1812,7 +1812,7 @@ e7000_drain_command (char *args, int fromtty)
   puts_e7000debug ("end\r");
   putchar_e7000 (CTRLC);
 
-  while ((c = readchar (1) != -1))
+  while ((c = readchar (1)) != -1)
     {
       if (quit_flag)
 	{
