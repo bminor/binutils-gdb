@@ -1257,12 +1257,11 @@ cons_fix_new_hppa (frag, where, size, exp)
 {
   unsigned int rel_type;
 
-  /* Get a base relocation type.  We use NONE for complex as it should
-     always be reducable to a constant in the cases we generate.  */
+  /* Get a base relocation type.  */
   if (is_DP_relative (*exp))
     rel_type = R_HPPA_GOTOFF;
   else if (is_complex (*exp))
-    rel_type = R_HPPA_NONE;
+    rel_type = R_HPPA_COMPLEX;
   else
     rel_type = R_HPPA;
 
