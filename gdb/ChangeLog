@@ -1,5 +1,7 @@
 Wed Jul  7 14:30:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* expression.h: Clean up comment about string in STRUCT_STRUCT etc.
+
 	* config/{rs6000/tm-rs6000.h,sparc/tm-sparc.h,pyr/tm-pyr.h},
 	inferior.h (PC_IN_CALL_DUMMY) [ON_STACK]: Add comments about stack
 	frame tops and bottoms.
