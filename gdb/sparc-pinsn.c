@@ -26,8 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "string.h"
 #include "target.h"
 
-#define SORT_NEEDED
-
 extern char *reg_names[];
 #define	freg_names	(&reg_names[4 * 8])
 
@@ -91,12 +89,16 @@ is_delayed_branch (insn)
   return 0;
 }
 
-#ifdef SORT_NEEDED
 static int opcodes_sorted = 0;
 extern void qsort ();
-#endif
 
-/* Print one instruction from MEMADDR on STREAM.  */
+/* Print one instruction from MEMADDR on STREAM.
+
+   We suffix the instruction with a comment that gives the absolute
+   address involved, as well as its symbolic form, if the instruction
+   is preceded by a findable `sethi' and it either adds an immediate
+   displacement to that register, or it is an `add' or `or' instruction
+   on that register.  */
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
@@ -106,7 +108,6 @@ print_insn (memaddr, stream)
 
   register unsigned int i;
 
-#ifdef SORT_NEEDED
   if (!opcodes_sorted)
     {
       static int compare_opcodes ();
@@ -114,7 +115,6 @@ print_insn (memaddr, stream)
 	     sizeof (sparc_opcodes[0]), compare_opcodes);
       opcodes_sorted = 1;
     }
-#endif
 
   read_memory (memaddr, &insn, sizeof (insn));
 
@@ -132,9 +132,10 @@ print_insn (memaddr, stream)
 	     field of the opcode table.  */
 	  int found_plus = 0;
 	  
-	  /* Do we have an 'or' instruction where rs1 is the same
+	  /* Do we have an `add' or `or' instruction where rs1 is the same
 	     as rsd, and which has the i bit set?  */
-	  if (opcode->match == 0x80102000
+	  if ((opcode->match == 0x80102000 || opcode->match == 0x80002000)
+	  /*			  (or)				 (add)  */
 	      && insn.rs1 == insn.rd)
 	    imm_added_to_rs1 = 1;
 
@@ -370,7 +371,6 @@ print_insn (memaddr, stream)
   return sizeof (insn);
 }
 
-#ifdef SORT_NEEDED
 /* Compare opcodes A and B.  */
 
 static int
@@ -438,19 +438,12 @@ compare_opcodes (a, b)
      better have the same opcode.  This is a sanity check on the table.  */
   i = strcmp (op0->name, op1->name);
   if (i)
-    {
-      /* *** FIXME - There must be a better way to deal with this! */
-      /* We prefer names used in the earliest architecture */
-      if (op0->architecture != op1->architecture)
-	return op0->architecture - op1->architecture;
-
       if (op0->flags & F_ALIAS) /* If they're both aliases, be arbitrary. */
-	return i;
+	  return i;
       else
-	fprintf (stderr,
-		 "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
-		 op0->name, op1->name);
-    }
+	  fprintf (stderr,
+		   "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
+		   op0->name, op1->name);
 
   /* Fewer arguments are preferred.  */
   {
@@ -485,4 +478,3 @@ compare_opcodes (a, b)
      written, so just say there are equal.  */
   return 0;
 }
-#endif
