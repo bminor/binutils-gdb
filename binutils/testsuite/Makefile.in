@@ -47,11 +47,11 @@ INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
-$(start-sanitize-chill)
+# start-sanitize-chill
 CFLAGS = -g
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
-$(end-sanitize-chill)
+# end-sanitize-chill
 
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/../../gcc/xgcc ] ; then \
