@@ -1,3 +1,9 @@
+2002-02-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in (hppa-*-netbsd*): New target.
+	* configure: Regenerate.
+	* config/tc-hppa.h: Also define WARN_COMMENTS if TE_NetBSD.
+
 2002-02-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-v850.c: Add missing prototypes amd use old-style

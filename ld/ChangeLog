@@ -1,3 +1,14 @@
+2002-02-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add ehppanbsd.o.
+	(ehppanbsd.c): New rule.
+	* Makefile.in: Regenerate.
+	* configure.tgt (hppa*-*-netbsd*): New target.
+	* emulparams/hppalinux.sh: Add comment to check other files
+	that source this file it is modified, and list which
+	files that do.
+	* emulparams/hppanbsd.sh: New file.
+
 2002-02-01  Geoffrey Keating  <geoffk@redhat.com>
 
 	* scripttempl/xstormy16.sc: Don't allocate extra space for the

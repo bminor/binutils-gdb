@@ -1,3 +1,6 @@
+# If you change this file, please also look at files which source this one:
+# hppanbsd.sh
+
 SCRIPT_NAME=elf
 ELFSIZE=32
 OUTPUT_FORMAT="elf32-hppa-linux"
