@@ -333,6 +333,14 @@ free_so (struct so_list *so)
 }
 
 
+/* Return address of first so_list entry in master shared object list.  */
+struct so_list *
+master_so_list (void)
+{
+  return so_list_head;
+}
+
+
 /* A small stub to get us past the arg-passing pinhole of catch_errors.  */
 
 static int
