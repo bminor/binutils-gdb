@@ -32,7 +32,6 @@ Things-to-keep:
 aout_gnu.h
 alpha-opcode.h
 atof-ieee.c
-atof-ns32k.c
 atof-tahoe.c
 atof-vax.c
 cplus-dem.c
