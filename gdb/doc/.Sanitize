@@ -20,15 +20,15 @@ Do-first:
 
 gdbtk_files="gdbgui.texinfo"
 
-if ( echo $* | grep keep\-gdbtk > /dev/null ) ; then
-	keep_these_too="${gdbtk_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${gdbtk_files}
-	fi
-else
+if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	lose_these_too="${gdbtk_files} ${lose_these_too}"
 	if [ -n "${verbose}" ] ; then
 		echo Deleting ${gdbtk_files}
+	fi
+else
+	keep_these_too="${gdbtk_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${gdbtk_files}
 	fi
 fi
 
@@ -71,22 +71,29 @@ snapshots.readme
 
 Do-last:
 
-echo Catering to RMS by removing traces of \"gdbtk\"...
-
 # Don't try to clean directories here, as the 'mv' command will fail.
 # Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-gdbtk > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
-			echo Keeping gdbtk stuff in $i
-		fi
-	done
-else
+if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
+	echo Catering to RMS by removing traces of \"gdbtk\"...
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
 			echo Removing traces of \"gdbtk\" out of $i...
 			cp $i new
 			sed '/start\-sanitize\-gdbtk/,/end-\sanitize\-gdbtk/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				echo Caching $i in .Recover...
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+else
+	echo Leaving \"gdbtk\" in the sources...
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
+			echo Keeping \"gdbtk\" stuff in $i, but editing out sanitize lines...
+			cp $i new
+			sed -e '/start\-sanitize\-gdbtk/d' -e '/end\-sanitize\-gdbtk/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				echo Caching $i in .Recover...
 				mv $i .Recover
