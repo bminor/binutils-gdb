@@ -1,3 +1,11 @@
+2002-09-25  Keith Seitz  <keiths@redhat.com>
+
+	* mi-pthreads.exp (get_mi_thread_list): Check if expect_out
+	exists before using it.
+	(check_mi_and_console_threads): Likewise.
+	* gdb669.exp (get_mi_thread_list): Likewise.
+	(check_mi_and_console_threads): Likewise.
+
 2002-09-24  Keith Seitz  <keiths@redhat.com>
 
 	* configure.in: Add config header.

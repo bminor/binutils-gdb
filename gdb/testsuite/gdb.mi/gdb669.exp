@@ -49,8 +49,12 @@ proc get_mi_thread_list {name} {
     {\^done,thread-ids={(thread-id="[0-9]+"(,)?)+},number-of-threads="[0-9]+"} \
     "-thread_list_ids ($name)"
 
+  set output {}
+  if {[info exists expect_out(buffer)]} {
+    set output $expect_out(buffer)
+  }
   set thread_list {}
-  if {![regexp {thread-ids=\{(thread-id="[0-9]+"(,)?)*\}} $expect_out(buffer) threads]} {
+  if {![regexp {thread-ids=\{(thread-id="[0-9]+"(,)?)*\}} $output threads]} {
     fail "finding threads in MI output ($name)"
   } else {
     pass "finding threads in MI output ($name)"
@@ -77,7 +81,10 @@ proc check_mi_and_console_threads {name} {
   mi_gdb_test "-thread-list-ids" \
     {\^done,thread-ids={(thread-id="[0-9]+"(,)*)+},number-of-threads="[0-9]+"} \
     "-thread-list-ids ($name)"
-  set mi_output $expect_out(buffer)
+  set mi_output {}
+  if {[info exists expect_out(buffer)]} {
+    set mi_output $expect_out(buffer)
+  }
 
   # GDB will return a list of thread ids and some more info:
   #
@@ -91,7 +98,10 @@ proc check_mi_and_console_threads {name} {
   mi_gdb_test "info threads" \
     {.*(~".*"[\r\n]*)+.*} \
     "info threads ($name)"
-  set console_output $expect_out(buffer)
+  set console_output {}
+  if {[info exists expect_out(buffer)]} {
+    set console_output $expect_out(buffer)
+  }
 
   # Make a list of all known threads to console (gdb's thread IDs)
   set console_thread_list {}
