@@ -43,7 +43,7 @@ CVS_TAG :=
 CVS_MODULE := latest
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest-921224
+RELEASE_TAG := latest-921229
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)

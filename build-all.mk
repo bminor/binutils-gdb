@@ -15,7 +15,7 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 921224
+DATE	= 921229
 
 TAG	= latest-$(DATE)
 
