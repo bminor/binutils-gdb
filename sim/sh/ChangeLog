@@ -1,5 +1,8 @@
 2003-06-27  Michael Snyder  <msnyder@redhat.com>
 
+	* gencode.c (op movsxy_tab): Fix up some copy/paste errors
+	in name: s/REG_x/REG_y/.
+
 	* gencode.c (op tab): Move misplaced semicolon.
 
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
