@@ -3168,11 +3168,14 @@ process_dynamic_segment (file)
     {
       if (do_dynamic)
 	{
+	  const char *dtype;
+
 	  putchar (' ');
 	  print_vma (entry->d_tag, FULL_HEX);
-	  printf (" (%s)%*s",
-		  get_dynamic_type (entry->d_tag),
-		  (is_32bit_elf ? 27 : 19) - strlen (get_dynamic_type (entry->d_tag)),
+	  dtype = get_dynamic_type (entry->d_tag);
+	  printf (" (%s)%*s", dtype,
+		  ((is_32bit_elf ? 27 : 19)
+		   - (int) strlen (dtype)),
 		  " ");
 	}
 
