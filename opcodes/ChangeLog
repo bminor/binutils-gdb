@@ -1,5 +1,8 @@
 Mon Mar 14 14:53:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* m68881-ext.c: Removed; no longer used.
+	* Makefile.in: Changed accordingly.
+
 	* m68k-dis.c (ext_format_68881): Don't declare.
 	(print_insn_m68k): If an instruction uses place 'i', it uses at
 	least four fixed bytes.
