@@ -1,3 +1,16 @@
+1999-07-16  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf32-mips.c (mips_elf_local_relocation_p): New static
+	function.
+	(mips_elf_next_lo16_addend): Call bfd_set_error on failure.
+	(mips_elf_calculate_relocation): Use mips_elf_local_relocation_p.
+	Always set *require_jalxp.
+	(mips_elf_stub_section_p): Mark abfd parameter as unused.
+	(_bfd_mips_elf_relocate_section): Only look for LO16 following
+	GOT16 if the GOT16 is against a local symbol.  Don't return false
+	for an undefined symbol.  If there is an overflow, assert that we
+	have a name.
+
 1999-07-16  Andreas Schwab  <schwab@suse.de>
 
 	* elflink.h (elf_link_record_local_dynamic_symbol): Remove unused

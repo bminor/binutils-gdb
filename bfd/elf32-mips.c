@@ -184,6 +184,8 @@ static boolean mips_elf_sort_hash_table
 static asection * mips_elf_got_section PARAMS ((bfd *));
 static struct mips_got_info *mips_elf_got_info 
   PARAMS ((bfd *, asection **));
+static boolean mips_elf_local_relocation_p
+  PARAMS ((bfd *, const Elf_Internal_Rela *, asection **));
 static bfd_vma mips_elf_create_local_got_entry 
   PARAMS ((bfd *, struct mips_got_info *, asection *, bfd_vma));
 static bfd_vma mips_elf_got16_entry 
@@ -5150,6 +5152,29 @@ mips_elf_got_info (abfd, sgotp)
   return g;
 }
 
+/* Return whether a relocation is against a local symbol.  */
+
+static boolean
+mips_elf_local_relocation_p (input_bfd, relocation, local_sections)
+     bfd *input_bfd;
+     const Elf_Internal_Rela *relocation;
+     asection **local_sections;
+{
+  unsigned long r_symndx;
+  Elf_Internal_Shdr *symtab_hdr;
+
+  r_symndx = ELF32_R_SYM (relocation->r_info);
+  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  if (! elf_bad_symtab (input_bfd))
+    return r_symndx < symtab_hdr->sh_info;
+  else
+    {
+      /* The symbol table does not follow the rule that local symbols
+	 must come before globals.  */
+      return local_sections[r_symndx] != NULL;
+    }
+}
+
 /* Sign-extend VALUE, which has the indicated number of BITS.  */
 
 static bfd_vma
@@ -5554,6 +5579,7 @@ mips_elf_next_lo16_addend (relocation, relend, addendp)
     }
 
   /* We didn't find it.  */
+  bfd_set_error (bfd_error_bad_value);
   return false;
 }
 
@@ -5754,19 +5780,18 @@ mips_elf_calculate_relocation (abfd,
   /* Assume that there will be no overflow.  */
   overflowed_p = false;
 
-  /* Figure out whether or not the symbol is local.  */
+  /* Figure out whether or not the symbol is local, and get the offset
+     used in the array of hash table entries.  */
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  if (elf_bad_symtab (input_bfd))
+  local_p = mips_elf_local_relocation_p (input_bfd, relocation,
+					 local_sections);
+  if (! elf_bad_symtab (input_bfd))
+    extsymoff = symtab_hdr->sh_info;
+  else
     {
       /* The symbol table does not follow the rule that local symbols
 	 must come before globals.  */
       extsymoff = 0;
-      local_p = local_sections[r_symndx] != NULL;
-    }
-  else
-    {
-      extsymoff = symtab_hdr->sh_info;
-      local_p = r_symndx < extsymoff;
     }
       
   /* Figure out the value of the symbol.  */
@@ -5905,9 +5930,8 @@ mips_elf_calculate_relocation (abfd,
 
   /* Calls from 16-bit code to 32-bit code and vice versa require the
      special jalx instruction.  */
-  if (!info->relocateable
-      && ((r_type == R_MIPS16_26) != target_is_16_bit_code_p))
-    *require_jalxp = true;
+  *require_jalxp = (!info->relocateable
+		    && ((r_type == R_MIPS16_26) != target_is_16_bit_code_p));
 
   /* If we haven't already determined the GOT offset, or the GP value,
      and we're going to need it, get it now.  */
@@ -6381,7 +6405,7 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 
 static boolean
 mips_elf_stub_section_p (abfd, section)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *section;
 {
   const char *name = bfd_get_section_name (abfd, section);
@@ -6463,7 +6487,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* For some kinds of relocations, the ADDEND is a
 		 combination of the addend stored in two different
 		 relocations.   */
-	      if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
+	      if (r_type == R_MIPS_HI16
+		  || (r_type == R_MIPS_GOT16
+		      && mips_elf_local_relocation_p (input_bfd, rel,
+						      local_sections)))
 		{
 		  /* Scan ahead to find a matching R_MIPS_LO16
 		     relocation.  */
@@ -6486,7 +6513,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  /* Used the saved HI16 addend.  */
 		  if (!last_hi16_addend_valid_p)
-		    return false;
+		    {
+		      bfd_set_error (bfd_error_bad_value);
+		      return false;
+		    }
 		  addend |= last_hi16_addend;
 		}
 	      else if (r_type == R_MIPS16_GPREL)
@@ -6533,7 +6563,9 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 
 	case bfd_reloc_undefined:
-	  return false;
+	  /* mips_elf_calculate_relocation already called the
+             undefined_symbol callback.  */
+	  break;
 
 	case bfd_reloc_notsupported:
 	  abort ();
@@ -6544,12 +6576,14 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    /* Ignore overflow until we reach the last relocation for
 	       a given location.  */
 	    ;
-	  else if (!name
-		   || ! ((*info->callbacks->reloc_overflow)
-			 (info, name, howto->name, (bfd_vma) 0,
-			  input_bfd, input_section, rel->r_offset)))
-	    return false;
-	  
+	  else
+	    {
+	      BFD_ASSERT (name != NULL);
+	      if (! ((*info->callbacks->reloc_overflow)
+		     (info, name, howto->name, (bfd_vma) 0,
+		      input_bfd, input_section, rel->r_offset)))
+		return false;
+	    }
 	  break;
 
 	case bfd_reloc_ok:
