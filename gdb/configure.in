@@ -71,8 +71,21 @@ changequote(,)dnl
 
 . ${srcdir}/configure.tgt
 
+targ=${target} ; . ${srcdir}/../bfd/config.bfd
+
 dnl
 changequote([,])dnl
+
+dnl use BFD to determine the default architecture and byte order
+dnl (bfd_vec->byteorder provides the latter).
+targ=${target}
+. ${srcdir}/../bfd/config.bfd
+if test x"${targ_archs}" != x ; then
+    AC_DEFINE_UNQUOTED(DEFAULT_BFD_ARCH, ${targ_archs})
+fi
+if test x"${targ_defvec}" != x ; then
+    AC_DEFINE_UNQUOTED(DEFAULT_BFD_VEC, ${targ_defvec})
+fi
 
 AC_PROG_AWK
 AC_PROG_INSTALL

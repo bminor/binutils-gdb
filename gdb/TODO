@@ -109,6 +109,16 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00467.html
 
 --
 
+Find something better than DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC to
+determine the default isa/byte-order.
+
+--
+
+Rely on BFD_BIG_ENDIAN and BFD_LITTLE_ENDIAN instead of host dependant
+BIG_ENDIAN and LITTLE_ENDIAN.
+
+--
+
 		Code Cleanups: General
 		======================
 

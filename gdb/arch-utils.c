@@ -41,6 +41,8 @@
 #include "symfile.h"		/* for overlay functions */
 #endif
 
+#include "version.h"
+
 #include "floatformat.h"
 
 /* Convenience macro for allocting typesafe memory. */
@@ -246,6 +248,9 @@ generic_register_convertible_not (num)
 #ifndef TARGET_BYTE_ORDER_DEFAULT
 #define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN /* arbitrary */
 #endif
+/* ``target_byte_order'' is only used when non- multi-arch.
+   Multi-arch targets obtain the current byte order using
+   TARGET_BYTE_ORDER which is controlled by gdbarch.*. */
 int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
 int target_byte_order_auto = 1;
 
@@ -287,7 +292,6 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
     }
   else if (set_endian_string == endian_little)
     {
-      target_byte_order = LITTLE_ENDIAN;
       target_byte_order_auto = 0;
       if (GDB_MULTI_ARCH)
 	{
@@ -296,10 +300,13 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	  info.byte_order = LITTLE_ENDIAN;
 	  gdbarch_update (info);
 	}
+      else
+	{
+	  target_byte_order = LITTLE_ENDIAN;
+	}
     }
   else if (set_endian_string == endian_big)
     {
-      target_byte_order = BIG_ENDIAN;
       target_byte_order_auto = 0;
       if (GDB_MULTI_ARCH)
 	{
@@ -307,6 +314,10 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	  memset (&info, 0, sizeof info);
 	  info.byte_order = BIG_ENDIAN;
 	  gdbarch_update (info);
+	}
+      else
+	{
+	  target_byte_order = BIG_ENDIAN;
 	}
     }
   else
@@ -319,6 +330,8 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 static void
 set_endian_from_file (bfd *abfd)
 {
+  if (GDB_MULTI_ARCH)
+    internal_error ("set_endian_from_file: not for multi-arch");
   if (TARGET_BYTE_ORDER_SELECTABLE_P)
     {
       int want;
@@ -547,32 +560,93 @@ set_gdbarch_from_file (abfd)
    architecture'' command so that it specifies a list of valid
    architectures.  */
 
+#ifdef DEFAULT_BFD_ARCH
+extern const bfd_arch_info_type DEFAULT_BFD_ARCH;
+static const bfd_arch_info_type *default_bfd_arch = &DEFAULT_BFD_ARCH;
+#else
+static const bfd_arch_info_type *default_bfd_arch
+#endif
+
+#ifdef DEFAULT_BFD_VEC
+extern const bfd_target DEFAULT_BFD_VEC;
+static const bfd_target *default_bfd_vec = &DEFAULT_BFD_VEC;
+#else
+static const bfd_target *default_bfd_vec;
+#endif
+
 void
 initialize_current_architecture (void)
 {
   const char **arches = gdbarch_printable_names ();
-  const char *chosen = arches[0];
 
-  if (GDB_MULTI_ARCH)
+  /* determine a default architecture and byte order. */
+  struct gdbarch_info info;
+  memset (&info, 0, sizeof (info));
+  
+  /* Find a default architecture. */
+  if (info.bfd_arch_info == NULL
+      && default_bfd_arch != NULL)
+    info.bfd_arch_info = default_bfd_arch;
+  if (info.bfd_arch_info == NULL)
     {
+      /* Choose the architecture by taking the first one
+	 alphabetically. */
+      const char *chosen = arches[0];
       const char **arch;
-      struct gdbarch_info info;
       for (arch = arches; *arch != NULL; arch++)
 	{
-	  /* Choose the first architecture alphabetically.  */
 	  if (strcmp (*arch, chosen) < 0)
 	    chosen = *arch;
 	}
       if (chosen == NULL)
 	internal_error ("initialize_current_architecture: No arch");
-      memset (&info, 0, sizeof info);
       info.bfd_arch_info = bfd_scan_arch (chosen);
       if (info.bfd_arch_info == NULL)
 	internal_error ("initialize_current_architecture: Arch not found");
+    }
+
+  /* take several guesses at a byte order. */
+  /* NB: can't use TARGET_BYTE_ORDER_DEFAULT as its definition is
+     forced above. */
+  if (info.byte_order == 0
+      && default_bfd_vec != NULL)
+    {
+      /* Extract BFD's default vector's byte order. */
+      switch (default_bfd_vec->byteorder)
+	{
+	case BFD_ENDIAN_BIG:
+	  info.byte_order = BIG_ENDIAN;
+	  break;
+	case BFD_ENDIAN_LITTLE:
+	  info.byte_order = LITTLE_ENDIAN;
+	  break;
+	default:
+	  break;
+	}
+    }
+  if (info.byte_order == 0)
+    {
+      /* look for ``*el-*'' in the target name. */
+      const char *chp;
+      chp = strchr (target_name, '-');
+      if (chp != NULL
+	  && chp - 2 >= target_name
+	  && strncmp (chp - 2, "el", 2) == 0)
+	info.byte_order = LITTLE_ENDIAN;
+    }
+  if (info.byte_order == 0)
+    {
+      /* Wire it to big-endian!!! */
+      info.byte_order = BIG_ENDIAN;
+    }
+
+  if (GDB_MULTI_ARCH)
+    {
       gdbarch_update (info);
     }
 
-  /* Create the ``set architecture'' command prepending ``auto''. */
+  /* Create the ``set architecture'' command appending ``auto'' to the
+     list of architectures. */
   {
     struct cmd_list_element *c;
     /* Append ``auto''. */

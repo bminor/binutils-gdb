@@ -33,10 +33,6 @@ struct value;
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
-#if !defined (TARGET_BYTE_ORDER_DEFAULT)
-#define TARGET_BYTE_ORDER_DEFAULT LITTLE_ENDIAN
-#endif
-
 #if !defined (GDB_TARGET_IS_MIPS64)
 #define GDB_TARGET_IS_MIPS64 0
 #endif

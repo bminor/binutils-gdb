@@ -1,3 +1,21 @@
+Wed Jun  7 18:27:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC): Use config.bfd
+ 	to determine the default architecture / target.
+	* acconfig (DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC): Add.
+	* configure, config.in: Regenerate.
+	
+	* arch-utils.c (set_endian): Better separate multi-arch and non-
+ 	multi-arch cases.
+	(set_endian_from_file): Call internal_error when multi-arch.
+	(initialize_current_architecture): Rewrite logic selecting a byte
+ 	order.  Use DEFAULT_BFD_ARCH DEFAULT_BFD_VEC.
+	(version.h): Include.
+
+	* config/mips/tm-mips.h, config/mips/tm-bigmips64.h,
+ 	config/mips/tm-bigmips.h: Delete definition of
+ 	TARGET_BYTE_ORDER_DEFAULT.
+
 Thu Jun  8 11:41:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* infrun.c (follow_inferior_fork): Bad merge from below.  Compare
