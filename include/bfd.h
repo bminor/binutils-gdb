@@ -1050,6 +1050,18 @@ before); else determine modify time, cache it, and return it.
 #define bfd_stat_arch_elt(abfd, stat) \
         BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
 
+    /* Special entry points for gdb to swap in coff symbol table parts */
+
+#define	bfd_coff_swap_aux_in(abfd, ext, type, class, in) \
+	BFD_SEND (abfd, _bfd_coff_swap_aux_in, (abfd, ext, type, class, in))
+
+#define	bfd_coff_swap_sym_in(abfd, ext, in) \
+	BFD_SEND (abfd, _bfd_coff_swap_sym_in, (abfd, ext, in))
+
+#define	bfd_coff_swap_lineno_in(abfd, ext, in) \
+	BFD_SEND (abfd, _bfd_coff_swap_lineno_in, (abfd, ext, in))
+
+
 /* What this does
 */
 PROTO(symindex, bfd_get_next_mapent, (bfd *, symindex, carsym **));
@@ -1507,5 +1519,13 @@ returns a pointer to a const string "invalid", "object", "archive",
 "core" or "unknown" depending upon the value of the enumeration.
 */
 PROTO(CONST char *, bfd_format_string, (bfd_format));
+
+/* Core file stuff */
+
+PROTO(CONST char *, bfd_core_file_failing_command, (bfd *));
+PROTO(int, bfd_core_file_failing_signal, (bfd *));
+PROTO(boolean, core_file_matches_executable_p,
+    (bfd *core_bfd, bfd *exec_bfd));
+
 #endif
 
