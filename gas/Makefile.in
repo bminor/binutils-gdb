@@ -102,7 +102,6 @@ REAL_SOURCES = \
 	$(srcdir)/read.c \
 	$(srcdir)/subsegs.c \
 	$(srcdir)/symbols.c \
-	$(srcdir)/version.c \
 	$(srcdir)/write.c \
 	$(srcdir)/listing.c \
 	$(srcdir)/xmalloc.c
@@ -173,6 +172,8 @@ OBJS = \
 
 #### host, target, and site specific Makefile frags come in here.
 
+VERSION=2.0.1-alpha
+
 all: as.new
 	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
 
@@ -188,12 +189,14 @@ clean-info:
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
-ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES) -DTARGET_CPU=\"$(target_cpu)\"
+ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES) \
+	$(BFDDEF)
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
-LIBS = ../opcodes/libopcodes.a $(LOCAL_LOADLIBES) $(CLIB) ../libiberty/libiberty.a
+LIBS = ../opcodes/libopcodes.a $(BFDLIB) $(LOCAL_LOADLIBES) \
+	../libiberty/libiberty.a
 
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
@@ -214,14 +217,30 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 STAGESTUFF = *.o as.new
 
 as.new: $(OBJS) $(LIBS)
-	[ ! -f as.new ] || mv as.new as.old
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
 check:
+	@echo No checks are available yet for the GNU assembler.
 
 config.status:
 	@echo You must configure gas.  Look at the INSTALL file for details.
 	@false
+
+config.h: config-stamp ; @true
+config-stamp: Makefile
+	-rm -f config.new config-stamp
+	echo '#define TARGET_CPU       "$(target_cpu)"'        > config.new
+	echo '#define TARGET_ALIAS     "$(target_alias)"'     >> config.new
+	echo '#define TARGET_CANONICAL "$(target_canonical)"' >> config.new
+	$(srcdir)/../move-if-change config.new config.h
+	touch config-stamp
+
+version.c: vers-stamp ; @true
+vers-stamp: Makefile
+	echo '#include "ansidecl.h"'                        > version.new
+	echo 'CONST char version_string[] = "$(VERSION)";' >> version.new
+	$(srcdir)/../move-if-change version.new version.c
+	touch vers-stamp
 
 # Compiling object files from source files.
 
@@ -231,7 +250,7 @@ app.o : app.c as.h host.h targ-env.h obj-format.h \
 as.o : as.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h subsegs.h \
-  tc.h obj.h 
+  tc.h obj.h config.h
 atof-generic.o : atof-generic.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
@@ -419,6 +438,6 @@ de-stage3: force
 
 force:
 
-Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag) \
+		$(srcdir)/configure.in
 	$(SHELL) ./config.status
-
