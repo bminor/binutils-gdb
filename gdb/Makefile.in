@@ -574,6 +574,7 @@ gdbcore_h =	gdbcore.h $(bfd_h)
 
 frame_h =	frame.h
 symtab_h =	symtab.h bcache.h
+symfile_h =	symfile.h
 gdbtypes_h =	gdbtypes.h
 expression_h =	expression.h
 value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h)
@@ -1623,7 +1624,8 @@ main.o: main.c top.h $(defs_h) gdb_string.h $(event_loop_h) \
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h) objfiles.h symfile.h
 
-mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(gdbcmd_h) $(value_h) $(symtab_h)
+mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(gdbcmd_h) $(value_h) \
+	$(symtab_h) $(symfile_h) $(gdbcore_h) $(inferior_h)
 
 mcore-rom.o: mcore-rom.c $(defs_h) $(gdbcore_h) target.h monitor.h \
 	gdb_string.h $(regcache_h)

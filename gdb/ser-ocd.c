@@ -134,6 +134,12 @@ ocd_setbaudrate (serial_t scb, int rate)
 }
 
 static int
+ocd_setstopbits (serial_t scb, int rate)
+{
+  return 0;
+}
+
+static int
 ocd_write (serial_t scb, const char *str, int len)
 {
 #ifdef _WIN32
@@ -168,6 +174,7 @@ static struct serial_ops ocd_ops =
   ocd_print_tty_state,
   ocd_noflush_set_tty_state,
   ocd_setbaudrate,
+  ocd_setstopbits,
   ocd_noop,			/* wait for output to drain */
 };
 

@@ -103,7 +103,9 @@ void ocd_files_info (struct target_ops *ignore);
 
 
 int ocd_xfer_memory (CORE_ADDR memaddr, char *myaddr,
-		     int len, int should_write, struct target_ops *target);
+		     int len, int should_write,
+		     struct mem_attrib *attrib,
+		     struct target_ops *target);
 
 void ocd_mourn (void);
 

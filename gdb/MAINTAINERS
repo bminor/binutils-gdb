@@ -83,7 +83,7 @@ maintainer works with the native maintainer when resolving API issues.
 	i386		--target=i386-elf,i386-aout ,-Werror
 			Mark Kettenis           kettenis@gnu.org
 
-	i960		(--target=i960-coff broken)
+	i960		--target=i960-coff ,-Werror
 			Maintenance only
 
 	ia64		(--target=ia64-elf broken)
@@ -101,7 +101,7 @@ maintainer works with the native maintainer when resolving API issues.
 	m88k		(?)
 			Maintenance only
 
-	mcore		(--target=mcore-elf,mcore-pe broken)
+	mcore		--target=mcore-elf,mcore-pe ,-Werror
 			Maintenance only
 
 	mips		--target=mips-elf,mips64-elf ,-Werror
@@ -113,13 +113,13 @@ maintainer works with the native maintainer when resolving API issues.
 	mn10300		--target=mn10300-elf ,-Werror
 			Andrew Cagney		cagney@cygnus.com
 
-	ns32k		(--target=ns32k-netbsd broken)
+	ns32k		(--target=ns32k-pc532 broken)
 			Maintenance only
 
 	pa		(--target=hppa1.1-hp-proelf broken)
 			Jeff Law		law@cygnus.com
 
-	powerpc		(--target=powerpc-eabi,powerpcle-eabi broken)
+	powerpc		--target=powerpc-eabi,powerpcle-eabi ,-Werror
 			Kevin Buettner		kevinb@cygnus.com
 			Nick Duffek		nsd@cygnus.com
 

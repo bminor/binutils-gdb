@@ -760,7 +760,7 @@ ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 /* ARGSUSED */
 int
 ocd_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
-		 struct target_ops *target)
+		 struct mem_attrib *attrib, struct target_ops *target)
 {
   int res;
 

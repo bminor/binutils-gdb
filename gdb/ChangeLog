@@ -1,3 +1,20 @@
+2001-03-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* ocd.h (ocd_xfer_memory): Add ``attrib'' parameter.
+	* ocd.c (ocd_xfer_memory): Ditto.
+	* ser-ocd.c (ocd_setstopbits): New function. Add to ocd_ops.
+	* MAINTAINERS: Document powerpc-eabi and powerpcle-eabi as
+	buildable with ,-Werror.
+
+	* Makefile.in (symfile_h): Define.
+	(mcore-tdep.o): Add $(symfile_h), $(gdbcore_h) and $(inferior_h).
+	* mcore-tdep.c: Include "symfile.h", "gdbcore.h" and "inferior.h".
+	* MAINTAINERS: Document mcore-elf and mcore-pe as buildable with
+	,-Werror.
+
+	* dsrec.c (make_srec): Fix internal_error fmt arg.
+	* MAINTAINERS: Document i960-coff as buildable with ,-Werror.
+
 2001-03-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c (aix5_relocate_main_executable): Don't use ANOFFSET

@@ -23,6 +23,9 @@
 #include "value.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "symfile.h"
+#include "gdbcore.h"
+#include "inferior.h"
 
 /* Functions declared and used only in this file */
 
