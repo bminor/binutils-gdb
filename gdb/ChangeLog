@@ -1,3 +1,9 @@
+Fri Apr 10 08:30:58 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (depend):  Fix dependancy generation so that it does
+	not include gcc 'fixincluded' files, which are usually in a system
+	specific location.
+
 Thu Apr  9 13:35:00 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik).

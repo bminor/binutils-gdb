@@ -423,7 +423,7 @@ depend: $(SOURCES) Makefile.in
 	@echo can safely be ignored.
 	@echo Also ignore parse errors in valops.c, and any errors in
 	@echo arm-convert.s.
-	-$(GCC) -MM $(CFLAGS) -I$(BFD_DIR) \
+	-$(GCC) -MM -nostdinc -I/usr/include $(CFLAGS) -I$(BFD_DIR) \
 	  `ls $(SOURCES) | grep -v '\.[hy]$$' |sort -u` >depend.tmp
 # If running in srcdir, translate "./foo.c" into "$srcdir/foo.c" except
 # for xm.h and tm.h.  This allows the same "depend" file to be used
