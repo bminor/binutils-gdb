@@ -1,3 +1,13 @@
+Thu Oct 20 13:28:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (elf_map_symbols): Don't worry about section symbols
+	in a section not owned by any BFD.
+	(elf_section_from_bfd_section): Separate out loop which calls
+	backend routine.  Check bfd_section and call the backend routine
+	even for a section not owned by any BFD.
+	* elf32-mips.c (mips_elf_section_from_bfd_section): Handle
+	.acommon section.
+
 Wed Oct 19 13:28:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* coffgen.c (coff_print_symbol): Make names for section number and

@@ -179,7 +179,6 @@ static void elf_debug_file PARAMS ((Elf_Internal_Ehdr *));
 #define elf_string_from_elf_strtab(abfd,strindex) \
      elf_string_from_elf_section(abfd,elf_elfheader(abfd)->e_shstrndx,strindex)
 
-
 /* Structure swapping routines */
 
 /* Should perhaps use put_offset, put_word, etc.  For now, the two versions
@@ -1461,19 +1460,17 @@ elf_map_symbols (abfd)
   int num_globals2 = 0;
   int max_index = 0;
   int num_sections = 0;
-  Elf_Sym_Extra *sym_extra;
   int idx;
   asection *asect;
+  asymbol **new_syms;
 
 #ifdef DEBUG
   fprintf (stderr, "elf_map_symbols\n");
   fflush (stderr);
 #endif
 
-  /* Add local symbols for each section for which there are relocs.
-     FIXME: How can we tell which sections have relocs at this point?
-     Will reloc_count always be accurate?  Actually, I think most ELF
-     targets create section symbols for all sections anyhow.  */
+  /* Add a section symbol for each BFD section.  FIXME: Is this really
+     necessary?  */
   for (asect = abfd->sections; asect; asect = asect->next)
     {
       if (max_index < asect->index)
@@ -1482,13 +1479,12 @@ elf_map_symbols (abfd)
 
   max_index++;
   sect_syms = (asymbol **) bfd_zalloc (abfd, max_index * sizeof (asymbol *));
-  elf_section_syms (abfd) = sect_syms;
-
-  if (sect_syms == 0)
+  if (sect_syms == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
+  elf_section_syms (abfd) = sect_syms;
 
   for (idx = 0; idx < symcount; idx++)
     {
@@ -1497,7 +1493,7 @@ elf_map_symbols (abfd)
 	  asection *sec;
 
 	  sec = syms[idx]->section;
-	  if (! bfd_is_abs_section (sec))
+	  if (sec->owner != NULL)
 	    {
 	      if (sec->owner != abfd)
 		{
@@ -1534,48 +1530,7 @@ elf_map_symbols (abfd)
 #endif
     }
 
-  if (num_sections)
-    {
-      if (syms)
-	{
-	  asymbol **osyms = syms;
-	  syms = (asymbol **) bfd_alloc (abfd,
-					 ((symcount + num_sections + 1)
-					  * sizeof (asymbol *)));
-	  memcpy (syms, osyms, symcount * sizeof (asymbol *));
-	}
-      else
-	syms = (asymbol **) bfd_alloc (abfd,
-				   (num_sections + 1) * sizeof (asymbol *));
-      if (!syms)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
-
-      for (asect = abfd->sections; asect; asect = asect->next)
-	{
-	  if (sect_syms[asect->index] != NULL
-	      && sect_syms[asect->index]->flags == 0)
-	    {
-	      sect_syms[asect->index]->flags = BSF_SECTION_SYM;
-	      syms[symcount++] = sect_syms[asect->index];
-	    }
-	}
-
-      syms[symcount] = (asymbol *) 0;
-      bfd_set_symtab (abfd, syms, symcount);
-    }
-
-  elf_sym_extra (abfd) = sym_extra
-    = (Elf_Sym_Extra *) bfd_alloc (abfd, symcount * sizeof (Elf_Sym_Extra));
-  if (!sym_extra)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-
-  /* Identify and classify all of the symbols.  */
+  /* Classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
     {
       if (!sym_is_global (abfd, syms[idx]))
@@ -1583,17 +1538,61 @@ elf_map_symbols (abfd)
       else
 	num_globals++;
     }
+  for (asect = abfd->sections; asect; asect = asect->next)
+    {
+      if (sect_syms[asect->index] != NULL
+	  && sect_syms[asect->index]->flags == 0)
+	{
+	  sect_syms[asect->index]->flags = BSF_SECTION_SYM;
+	  if (!sym_is_global (abfd, sect_syms[asect->index]))
+	    num_locals++;
+	  else
+	    num_globals++;
+	  sect_syms[asect->index]->flags = 0;
+	}
+    }
 
-  /* Now provide mapping information.  Add +1 for skipping over the
-     dummy symbol.  */
+  /* Now sort the symbols so the local symbols are first.  */
+  new_syms = ((asymbol **)
+	      bfd_alloc (abfd,
+			 (num_locals + num_globals) * sizeof (asymbol *)));
+  if (new_syms == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+
   for (idx = 0; idx < symcount; idx++)
     {
-      syms[idx]->udata = (PTR) & sym_extra[idx];
-      if (!sym_is_global (abfd, syms[idx]))
-	sym_extra[idx].elf_sym_num = 1 + num_locals2++;
+      asymbol *sym = syms[idx];
+      int i;
+
+      if (!sym_is_global (abfd, sym))
+	i = num_locals2++;
       else
-	sym_extra[idx].elf_sym_num = 1 + num_locals + num_globals2++;
+	i = num_locals + num_globals2++;
+      new_syms[i] = sym;
+      sym->udata.i = i + 1;
     }
+  for (asect = abfd->sections; asect; asect = asect->next)
+    {
+      if (sect_syms[asect->index] != NULL
+	  && sect_syms[asect->index]->flags == 0)
+	{
+	  asymbol *sym = sect_syms[asect->index];
+	  int i;
+
+	  sym->flags = BSF_SECTION_SYM;
+	  if (!sym_is_global (abfd, sym))
+	    i = num_locals2++;
+	  else
+	    i = num_locals + num_globals2++;
+	  new_syms[i] = sym;
+	  sym->udata.i = i + 1;
+	}
+    }
+
+  bfd_set_symtab (abfd, new_syms, num_locals + num_globals);
 
   elf_num_locals (abfd) = num_locals;
   elf_num_globals (abfd) = num_globals;
@@ -2271,13 +2270,16 @@ swap_out_syms (abfd, sttp)
     symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
     symstrtab_hdr->sh_type = SHT_STRTAB;
 
-    outbound_syms = (Elf_External_Sym *)
-      bfd_alloc (abfd, (1 + symcount) * sizeof (Elf_External_Sym));
-    if (!outbound_syms)
+    outbound_syms = ((Elf_External_Sym *)
+		     bfd_alloc (abfd,
+				(1 + symcount) * sizeof (Elf_External_Sym)));
+    if (outbound_syms == NULL)
       {
 	bfd_set_error (bfd_error_no_memory);
 	return false;
       }
+    symtab_hdr->contents = (PTR) outbound_syms;
+
     /* now generate the data (for "contents") */
     {
       /* Fill in zeroth symbol and swap it out.  */
@@ -2289,6 +2291,7 @@ swap_out_syms (abfd, sttp)
       sym.st_other = 0;
       sym.st_shndx = SHN_UNDEF;
       elf_swap_symbol_out (abfd, &sym, outbound_syms);
+      ++outbound_syms;
     }
     for (idx = 0; idx < symcount; idx++)
       {
@@ -2385,12 +2388,9 @@ swap_out_syms (abfd, sttp)
 	  }
 
 	sym.st_other = 0;
-	elf_swap_symbol_out (abfd, &sym,
-			     (outbound_syms
-			      + elf_sym_extra (abfd)[idx].elf_sym_num));
+	elf_swap_symbol_out (abfd, &sym, outbound_syms);
+	++outbound_syms;
       }
-
-    symtab_hdr->contents = (PTR) outbound_syms;
 
     *sttp = stt;
     symstrtab_hdr->sh_size = _bfd_stringtab_size (stt);
@@ -2558,29 +2558,27 @@ elf_section_from_bfd_section (abfd, asect)
   Elf_Internal_Shdr *hdr;
   int maxindex = elf_elfheader (abfd)->e_shnum;
 
-  if (asect->owner == NULL)
-    {
-      if (bfd_is_abs_section (asect))
-	return SHN_ABS;
-      if (bfd_is_com_section (asect))
-	return SHN_COMMON;
-      if (bfd_is_und_section (asect))
-	return SHN_UNDEF;
-      return -1;
-    }
-
-  BFD_ASSERT (asect->owner == abfd);
+  if (bfd_is_abs_section (asect))
+    return SHN_ABS;
+  if (bfd_is_com_section (asect))
+    return SHN_COMMON;
+  if (bfd_is_und_section (asect))
+    return SHN_UNDEF;
 
   for (index = 0; index < maxindex; index++)
     {
       hdr = i_shdrp[index];
       if (hdr->bfd_section == asect)
 	return index;
+    }
 
-      if (bed->elf_backend_section_from_bfd_section)
+  if (bed->elf_backend_section_from_bfd_section)
+    {
+      for (index = 0; index < maxindex; index++)
 	{
 	  int retval;
 
+	  hdr = i_shdrp[index];
 	  retval = index;
 	  if ((*bed->elf_backend_section_from_bfd_section)
 	      (abfd, hdr, asect, &retval))
@@ -2606,7 +2604,7 @@ elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
      symbol chain, so udata is 0.  When the linker is generating
      relocatable output, this section symbol may be for one of the
      input sections rather than the output section.  */
-  if (asym_ptr->udata == (PTR) 0
+  if (asym_ptr->udata.i == 0
       && (flags & BSF_SECTION_SYM)
       && asym_ptr->section)
     {
@@ -2617,15 +2615,12 @@ elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
       else
 	indx = asym_ptr->section->index;
       if (elf_section_syms (abfd)[indx])
-	asym_ptr->udata = elf_section_syms (abfd)[indx]->udata;
+	asym_ptr->udata.i = elf_section_syms (abfd)[indx]->udata.i;
     }
 
-  if (asym_ptr->udata)
-    idx = ((Elf_Sym_Extra *) asym_ptr->udata)->elf_sym_num;
-  else
-    {
-      abort ();
-    }
+  idx = asym_ptr->udata.i;
+  if (idx == 0)
+    abort ();
 
 #if DEBUG & 4
   {
