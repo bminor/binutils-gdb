@@ -1,3 +1,16 @@
+2002-02-21  Elena Zannoni  <ezannoni@redhat.com>
+
+	* ppc-linux-nat.c (PTRACE_GETVRREGS, PTRACE_SETVRREGS): Define.
+	(have_ptrace_getvrregs): Define for run time checks.
+	(gdb_vrregset_t): New type for Altivec register handling.
+	(fetch_register, store_register): Fetch/store altivec register
+	when needed.
+	(fetch_altivec_register, store_altivec_register): New functions.
+	(supply_vrregset, fill_vrregset): New functions.
+	(fetch_altivec_registers, store_altivec_registers): New functions.
+	(fetch_ppc_registers, store_ppc_registers): Fetch/store altivec
+	registers as well.
+
 2002-02-21  Jiri Smid  <smid@suse.cz>
 
 	* config/i386/x86-64linux.mh (NATDEPFILES): Remove x86-64-nat.o.

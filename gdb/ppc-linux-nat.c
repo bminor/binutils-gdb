@@ -1,4 +1,4 @@
-/* PPC linux native support.
+/* PPC GNU/Linux native support.
    Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
@@ -50,6 +50,56 @@
 #ifndef PTRACE_XFER_TYPE
 #define PTRACE_XFER_TYPE int
 #endif
+
+/* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
+   configure time check.  Some older glibc's (for instance 2.2.1)
+   don't have a specific powerpc version of ptrace.h, and fall back on
+   a generic one.  In such cases, sys/ptrace.h defines
+   PTRACE_GETFPXREGS and PTRACE_SETFPXREGS to the same numbers that
+   ppc kernel's asm/ptrace.h defines PTRACE_GETVRREGS and
+   PTRACE_SETVRREGS to be.  This also makes a configury check pretty
+   much useless.  */
+
+/* These definitions should really come from the glibc header files,
+   but Glibc doesn't know about the vrregs yet.  */
+#ifndef PTRACE_GETVRREGS
+#define PTRACE_GETVRREGS 18
+#define PTRACE_SETVRREGS 19
+#endif
+
+/* This oddity is because the Linux kernel defines elf_vrregset_t as
+   an array of 33 16 bytes long elements.  I.e. it leaves out vrsave.
+   However the PTRACE_GETVRREGS and PTRACE_SETVRREGS requests return
+   the vrsave as an extra 4 bytes at the end.  I opted for creating a
+   flat array of chars, so that it is easier to manipulate for gdb.
+
+   There are 32 vector registers 16 bytes longs, plus a VSCR register
+   which is only 4 bytes long, but is fetched as a 16 bytes
+   quantity. Up to here we have the elf_vrregset_t structure.
+   Appended to this there is space for the VRSAVE register: 4 bytes.
+   Even though this vrsave register is not included in the regset
+   typedef, it is handled by the ptrace requests.
+
+   Note that GNU/Linux doesn't support little endian PPC hardware,
+   therefore the offset at which the real value of the VSCR register
+   is located will be always 12 bytes.
+
+   The layout is like this (where x is the actual value of the vscr reg): */
+
+/* *INDENT-OFF* */
+/*
+   |.|.|.|.|.....|.|.|.|.||.|.|.|x||.|
+   <------->     <-------><-------><->
+     VR0           VR31     VSCR    VRSAVE
+*/
+/* *INDENT-ON* */
+
+#define SIZEOF_VRREGS 33*16+4
+
+typedef char gdb_vrregset_t[SIZEOF_VRREGS];
+
+/* For runtime check of ptrace support for VRREGS.  */
+int have_ptrace_getvrregs = 1;
 
 int
 kernel_u_size (void)
@@ -109,6 +159,40 @@ ppc_ptrace_cannot_fetch_store_register (int regno)
   return (ppc_register_u_addr (regno) == -1);
 }
 
+/* The Linux kernel ptrace interface for AltiVec registers uses the
+   registers set mechanism, as opposed to the interface for all the
+   other registers, that stores/fetches each register individually.  */
+static void
+fetch_altivec_register (int tid, int regno)
+{
+  int ret;
+  int offset = 0;
+  gdb_vrregset_t regs;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+
+  ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
+  if (ret < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getvrregs = 0;
+          return;
+        }
+      perror_with_name ("Unable to fetch AltiVec register");
+    }
+ 
+  /* VSCR is fetched as a 16 bytes quantity, but it is really 4 bytes
+     long on the hardware.  We deal only with the lower 4 bytes of the
+     vector.  VRSAVE is at the end of the array in a 4 bytes slot, so
+     there is no need to define an offset for it.  */
+  if (regno == (tdep->ppc_vrsave_regnum - 1))
+    offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+  
+  supply_register (regno,
+                   regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
+}
+
 static void
 fetch_register (int tid, int regno)
 {
@@ -118,6 +202,22 @@ fetch_register (int tid, int regno)
   unsigned int offset;         /* Offset of registers within the u area. */
   char *buf = alloca (MAX_REGISTER_RAW_SIZE);
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
+
+  if (altivec_register_p (regno))
+    {
+      /* If this is the first time through, or if it is not the first
+         time through, and we have comfirmed that there is kernel
+         support for such a ptrace request, then go and fetch the
+         register.  */
+      if (have_ptrace_getvrregs)
+       {
+         fetch_altivec_register (tid, regno);
+         return;
+       }
+     /* If we have discovered that there is no ptrace support for
+        AltiVec registers, fall through and return zeroes, because
+        regaddr will be -1 in this case.  */
+    }
 
   if (regaddr == -1)
     {
@@ -142,14 +242,59 @@ fetch_register (int tid, int regno)
   supply_register (regno, buf);
 }
 
+static void
+supply_vrregset (gdb_vrregset_t *vrregsetp)
+{
+  int i;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
+  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+
+  for (i = 0; i < num_of_vrregs; i++)
+    {
+      /* The last 2 registers of this set are only 32 bit long, not
+         128.  However an offset is necessary only for VSCR because it
+         occupies a whole vector, while VRSAVE occupies a full 4 bytes
+         slot.  */
+      if (i == (num_of_vrregs - 2))
+        supply_register (tdep->ppc_vr0_regnum + i,
+                         *vrregsetp + i * vrregsize + offset);
+      else
+        supply_register (tdep->ppc_vr0_regnum + i, *vrregsetp + i * vrregsize);
+    }
+}
+
+static void
+fetch_altivec_registers (int tid)
+{
+  int ret;
+  gdb_vrregset_t regs;
+  
+  ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
+  if (ret < 0)
+    {
+      if (errno == EIO)
+	{
+          have_ptrace_getvrregs = 0;
+	  return;
+	}
+      perror_with_name ("Unable to fetch AltiVec registers");
+    }
+  supply_vrregset (&regs);
+}
+
 static void 
 fetch_ppc_registers (int tid)
 {
   int i;
-  int last_register = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
-  
-  for (i = 0; i <= last_register; i++)
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  for (i = 0; i <= tdep->ppc_mq_regnum; i++)
     fetch_register (tid, i);
+  if (have_ptrace_getvrregs)
+    if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
+      fetch_altivec_registers (tid);
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
@@ -158,20 +303,53 @@ fetch_ppc_registers (int tid)
 void
 fetch_inferior_registers (int regno)
 {
- /* Overload thread id onto process id */
+  /* Overload thread id onto process id */
   int tid = TIDGET (inferior_ptid);
 
   /* No thread id, just use process id */
   if (tid == 0)
     tid = PIDGET (inferior_ptid);
 
-   if (regno == -1)
+  if (regno == -1)
     fetch_ppc_registers (tid);
   else 
     fetch_register (tid, regno);
 }
 
 /* Store one register. */
+static void
+store_altivec_register (int tid, int regno)
+{
+  int ret;
+  int offset = 0;
+  gdb_vrregset_t regs;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+
+  ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
+  if (ret < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getvrregs = 0;
+          return;
+        }
+      perror_with_name ("Unable to fetch AltiVec register");
+    }
+
+  /* VSCR is fetched as a 16 bytes quantity, but it is really 4 bytes
+     long on the hardware.  */
+  if (regno == (tdep->ppc_vrsave_regnum - 1))
+    offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+
+  regcache_collect (regno,
+                    regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
+
+  ret = ptrace (PTRACE_SETVRREGS, tid, 0, &regs);
+  if (ret < 0)
+    perror_with_name ("Unable to store AltiVec register");
+}
+
 static void
 store_register (int tid, int regno)
 {
@@ -182,10 +360,14 @@ store_register (int tid, int regno)
   unsigned int offset;         /* Offset of registers within the u area.  */
   char *buf = alloca (MAX_REGISTER_RAW_SIZE);
 
-  if (regaddr == -1)
+  if (altivec_register_p (regno))
     {
+      store_altivec_register (tid, regno);
       return;
     }
+
+  if (regaddr == -1)
+    return;
 
   regcache_collect (regno, buf);
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
@@ -204,13 +386,60 @@ store_register (int tid, int regno)
 }
 
 static void
+fill_vrregset (gdb_vrregset_t *vrregsetp)
+{
+  int i;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
+  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+
+  for (i = 0; i < num_of_vrregs; i++)
+    {
+      /* The last 2 registers of this set are only 32 bit long, not
+         128, but only VSCR is fetched as a 16 bytes quantity.  */
+      if (i == (num_of_vrregs - 2))
+        regcache_collect (tdep->ppc_vr0_regnum + i,
+                          *vrregsetp + i * vrregsize + offset);
+      else
+        regcache_collect (tdep->ppc_vr0_regnum + i, *vrregsetp + i * vrregsize);
+    }
+}
+
+static void
+store_altivec_registers (int tid)
+{
+  int ret;
+  gdb_vrregset_t regs;
+
+  ret = ptrace (PTRACE_GETVRREGS, tid, 0, (int) &regs);
+  if (ret < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getvrregs = 0;
+          return;
+        }
+      perror_with_name ("Couldn't get AltiVec registers");
+    }
+
+  fill_vrregset (&regs);
+  
+  if (ptrace (PTRACE_SETVRREGS, tid, 0, (int) &regs) < 0)
+    perror_with_name ("Couldn't write AltiVec registers");
+}
+
+static void
 store_ppc_registers (int tid)
 {
   int i;
-  int last_register = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
-  for (i = 0; i <= last_register; i++)
+  for (i = 0; i <= tdep->ppc_mq_regnum; i++)
     store_register (tid, i);
+  if (have_ptrace_getvrregs)
+    if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
+      store_altivec_registers (tid);
 }
 
 void
@@ -281,15 +510,15 @@ void
 supply_fpregset (gdb_fpregset_t * fpregsetp)
 {
   int regi;
+
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
 }
 
-/*  Given a pointer to a floating point register set in /proc format
-   (fpregset_t *), update the register specified by REGNO from gdb's idea
-   of the current floating point register set.  If REGNO is -1, update
-   them all. */
-
+/* Given a pointer to a floating point register set in /proc format
+   (fpregset_t *), update the register specified by REGNO from gdb's
+   idea of the current floating point register set.  If REGNO is -1,
+   update them all.  */
 void
 fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
