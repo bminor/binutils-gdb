@@ -99,6 +99,7 @@ symbols.c
 symbols.h
 tc.h
 testsuite
+vmsconf.sh
 write.c
 write.h
 xmalloc.c
