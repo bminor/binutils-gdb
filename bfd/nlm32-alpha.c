@@ -641,7 +641,7 @@ nlm_alpha_read_import (abfd, sym)
   sym -> symbol.value = 0;
   sym -> symbol.section = &bfd_und_section;
   if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    return faflse;
+    return false;
   rcount = bfd_h_get_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
