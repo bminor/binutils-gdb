@@ -1,3 +1,97 @@
+Fri Mar 27 16:06:02 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fix some gcc -Wall warnings:
+	* aout-arm.c (MY(fix_pcrel_26)): Add casts to avoid warnings.
+	* archive.c (_bfd_generic_read_ar_hdr_mag): Likewise.
+	* archures.c (bfd_default_scan): Likewise.
+	* bfd.c (bfd_scan_vma): Likewise.
+	* binary.c (mangle_name): Likewise
+	* coff-arm.c (aoutarm_fix_pcrel_26): Likewise.
+	* coff-sh.c (sh_relocate_section): Likewise.
+	* coff-stgo32.c (create_go32_stub): Likewise.
+	* coffcode.h (coff_slurp_line_table): Likewise.
+	* ecoff.c (_bfd_ecoff_write_armap): Likewise.
+	* elf.c (_bfd_elf_make_section_from_shdr): Likewise.
+	(assign_file_positions_for_segments): Likewise.
+	* elf32-mips.c (mips_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* oasys.c (oasys_write_sections): Likewise.
+	* ppcboot.c (ppcboot_object_p): Likewise.
+	(mangle_name): Likewise.
+	* riscix.c (riscix_fix_pcrel_26): Likewise.
+	* srec.c (srec_scan): Likewise.
+	* stabs.c (_bfd_write_section_stabs): Likewise.
+	* sunos.c (sunos_add_dynamic_symbols): Likewise.
+	* aout-ns32k.c (_bfd_ns32k_relocate_contents): Add default case to
+	switch.  Declare parameters for function pointers.
+	* archures.c (bfd_default_scan): Add braces to avoid ambiguous if
+	warning.
+	* elf.c (elf_sort_sections): Likewise.
+	* coff-arm.c (coff_thumb_pcrel_common): Initialize relocation.
+	Add default cases to switches.
+	(coff_arm_relocate_section): Remove unused local variables.
+	Always set rstat.
+	(coff_arm_bfd_set_private_flags): Change flag variable to type
+	flagword.
+	* coff-mips.c (mips_relocate_section): Initialize use_lo.
+	* coff-ppc.c (ppc_record_toc_entry): Change i to unsigned int.
+	(dump_toc): Change cat to const, and initialize it.
+	* coff-sh.c (sh_relax_delete_bytes): Initialize start and voff.
+	* elf32-sh.c (sh_elf_relax_delete_bytes): Likewise.
+	(sh_elf_relocate_section): Initialize r_symndx.
+	* coffcode.h (coff_compute_section_file_positions): Only declare
+	old_sofar if ALIGN_SECTIONS_IN_FILE.
+	(coff_write_object_contents): Initialize csym.
+	* coffgen.c (coff_pointerize_aux): Make type and class unsigned.
+	* cpu-ns32k.c (_bfd_ns32k_get_displacement): Add default case to
+	switch.
+	* dwarf2.c: Include libiberty.h.
+	(read_2_signed_bytes, read_4_signed_bytes): Comment out.
+	(decode_line_info): Remove unused local variables.
+	* elf32-m32r.c (m32r_elf_sda16_reloc): Likewise.
+	(m32r_elf_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_store_addend_in_insn): Likewise.
+	(v850_elf_reloc): Likewise.
+	* elf-bfd.h (elf_linker_section_t): Make alignment unsigned.
+	(struct elf_obj_tdata): Make cverdefs and cverrefs unsigned.
+	* elf.c (assign_file_positions_for_segments): Always set adjust.
+	* elf32-d30v.c (bfd_elf_d30v_reloc): Initialize tmp_addr.  Fully
+	parenthesize expression.
+	* elf32-m32r.c (m32r_elf_relocate_section): Always initialize h.
+	(m32r_elf_object_p): Return a value.
+	(m32r_elf_print_private_bfd_data): Change fprintf format string.
+	* elf32-mips.c (mips_elf_final_link): Initialize last.
+	(mips_elf_finish_dynamic_sections): Initialize last and dindx.
+	* elf32-v850.c (v850_elf_object_p): Return a value.
+	(v850_elf_print_private_bfd_data): Change fprintf format string.
+	* elfcode.h (elf_slurp_symbol_table): Change symcount and i to
+	unsigned long.
+	* elflink.h (elf_link_add_object_symbols): Change vernum to
+	unsigned int, and initialize it.  Change fprintf format string.
+	(NAME(bfd_elf,size_dynamic_sections)): Cast -1 to bfd_size_type
+	when setting or comparing to soname_indx.
+	(elf_create_pointer_linker_section): Change num_symbols to
+	unsigned int.
+	* libcoff-in.h (coff_data_type): Change flags to flagword.
+	* peicode.h (pe_print_idata): Initialize idx.  Change j to
+	bfd_size_type.  Initialize hint_member.  Remove useless test to
+	time_stamp.
+	(pe_print_edata): Change num_functions and num_names in struct
+	EDT_type to unsigned long.  Remove cast.  Change fprintf format
+	string.
+	* ppcboot.c (ppcboot_object_p): Change i to size_t.
+	* reloc.c (bfd_get_reloc_size): Change return type to unsigned
+	int.
+	* reloc16.c (bfd_coff_reloc16_relax_section): Change shrinks to
+	int *.  Update uses.  Change j to long.
+	* bfd-in2.h, libcoff.h: Rebuild.
+
+Thu Mar 26 13:32:17 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_new_section_hook): Set the type and storage
+	class in the native symbol information allocated for a new section
+	symbol.
+
 Thu Mar 26 10:13:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h: Chain together calls to

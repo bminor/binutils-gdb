@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -401,7 +401,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 	      && phdr->p_vaddr <= hdr->sh_addr
 	      && phdr->p_vaddr + phdr->p_memsz >= hdr->sh_addr + hdr->sh_size
 	      && ((flags & SEC_LOAD) == 0
-		  || (phdr->p_offset <= hdr->sh_offset
+		  || (phdr->p_offset <= (bfd_vma) hdr->sh_offset
 		      && (phdr->p_offset + phdr->p_filesz
 			  >= hdr->sh_offset + hdr->sh_size))))
 	    {
@@ -2276,10 +2276,12 @@ elf_sort_sections (arg1, arg2)
 #define TOEND(x) (((x)->flags & SEC_LOAD) == 0)
 
   if (TOEND (sec1))
-    if (TOEND (sec2))
-      return sec1->target_index - sec2->target_index;
-    else 
-      return 1;
+    {
+      if (TOEND (sec2))
+	return sec1->target_index - sec2->target_index;
+      else 
+	return 1;
+    }
 
   if (TOEND (sec2))
     return -1;
@@ -2432,7 +2434,7 @@ assign_file_positions_for_segments (abfd)
 	    {
 	      BFD_ASSERT (p->p_type == PT_LOAD);
 
-	      if (p->p_vaddr < off)
+	      if (p->p_vaddr < (bfd_vma) off)
 		{
 		  _bfd_error_handler ("%s: Not enough room for program headers, try linking with -N",
 				      bfd_get_filename (abfd));
@@ -2526,6 +2528,8 @@ assign_file_positions_for_segments (abfd)
 		  else
 		    adjust = (sec->vma - voff) % align;
 		}
+	      else
+		adjust = 0;
 
 	      if (adjust != 0)
 		{
@@ -2909,11 +2913,6 @@ prep_headers (abfd)
     case bfd_arch_mn10300:
       i_ehdrp->e_machine = EM_CYGNUS_MN10300;
       break;
-/* start-sanitize-sky */
-    case bfd_arch_txvu:
-      i_ehdrp->e_machine = EM_CYGNUS_TXVU;
-      break;
-/* end-sanitize-sky */
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
       i_ehdrp->e_machine = EM_NONE;

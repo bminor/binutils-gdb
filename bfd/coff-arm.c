@@ -1,5 +1,6 @@
 /* BFD back-end for ARM COFF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -496,7 +497,7 @@ aoutarm_fix_pcrel_26 (abfd, reloc_entry, symbol, data, input_section,
   /* Check for overflow */
   if (relocation & 0x02000000)
     {
-      if ((relocation & ~0x03ffffff) != ~0x03ffffff)
+      if ((relocation & ~ (bfd_vma) 0x03ffffff) != ~ (bfd_vma) 0x03ffffff)
 	flag = bfd_reloc_overflow;
     }
   else if (relocation & ~0x03ffffff)
@@ -527,7 +528,7 @@ coff_thumb_pcrel_common (abfd, reloc_entry, symbol, data, input_section,
      char **error_message;
      thumb_pcrel_branchtype btype;
 {
-  bfd_vma relocation;
+  bfd_vma relocation = 0;
   bfd_size_type addr = reloc_entry->address;
   long target = bfd_get_32 (abfd, (bfd_byte *) data + addr);
   bfd_reloc_status_type flag = bfd_reloc_ok;
@@ -586,6 +587,9 @@ coff_thumb_pcrel_common (abfd, reloc_entry, symbol, data, input_section,
       else
 	relocation = ((target & 0x7ff) << 12) | ((target & 0x07ff0000) >> 15);
       break;
+
+    default:
+      abort ();
     }
 
   relocation = (relocation ^ signbit) - signbit; /* Sign extend */
@@ -623,6 +627,9 @@ coff_thumb_pcrel_common (abfd, reloc_entry, symbol, data, input_section,
      else
        target |= ((relocation & 0xffe) << 15) | ((relocation >> 12) & 0x7ff);
      break;
+
+   default:
+     abort ();
    }
 
   bfd_put_32 (abfd, target, (bfd_byte *) data + addr);
@@ -1073,7 +1080,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && (   h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak))
             {
-	      asection *   sec;
 	      asection *   h_sec = h->root.u.def.section;
 	      const char * name  = h->root.root.string;
 	      
@@ -1088,14 +1094,10 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || h->class == C_THUMBEXTFUNC)
 		    {
 		      /* Arm code calling a Thumb function */
-		      signed long int                final_disp;
 		      unsigned long int              tmp;
 		      long int                       my_offset;
-		      long int                       offset;
 		      asection *                     s = 0;
-		      unsigned long int              return_address;
 		      long int                       ret_offset;
-		      long int                       disp;
 		      struct coff_link_hash_entry *  myh; 
 
 		      myh = find_arm_glue (info, name, input_bfd);
@@ -1166,8 +1168,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || h->class == C_LABEL)
 		    {
 		      /* Thumb code calling an ARM function */
-		      unsigned long int              return_address;
-		      signed long int                final_disp;
 		      asection *                     s = 0;
 		      long int                       my_offset;
 		      unsigned long int              tmp;
@@ -1292,7 +1292,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   
 #if 1 /* THUMBEXTENSION */
       if (done)
-	;
+	rstat = bfd_reloc_ok;
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
       else if (! info->relocateable
 	       && howto->type == ARM_THUMB23)
@@ -1932,7 +1932,7 @@ coff_arm_bfd_set_private_flags (abfd, flags)
 	bfd *	   abfd;
 	flagword   flags;
 {
-  int flag;
+  flagword flag;
 
   BFD_ASSERT (abfd != NULL);
 
@@ -2064,9 +2064,11 @@ coff_arm_is_local_label_name (abfd, name)
 #define coff_bfd_set_private_flags              coff_arm_bfd_set_private_flags
 #define coff_bfd_copy_private_bfd_data          coff_arm_bfd_copy_private_bfd_data
 
-extern boolean coff_arm_final_link_postscript ();
 extern boolean coff_arm_bfd_set_private_flags ();
 extern boolean coff_arm_bfd_merge_private_bfd_data ();
+extern boolean coff_arm_bfd_copy_private_bfd_data ();
+extern boolean coff_arm_bfd_print_private_bfd_data ();
+extern boolean coff_arm_final_link_postscript ();
 extern boolean coff_arm_link_output_has_begun ();
 extern boolean coff_arm_is_local_label_name ();
 

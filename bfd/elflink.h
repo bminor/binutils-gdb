@@ -1,5 +1,5 @@
 /* ELF linker support.
-   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1098,7 +1098,7 @@ elf_link_add_object_symbols (abfd, info)
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
 	  Elf_Internal_Versym iver;
-	  int vernum;
+	  unsigned int vernum = 0;
 	  boolean override;
 
 	  if (ever != NULL)
@@ -1123,7 +1123,7 @@ elf_link_add_object_symbols (abfd, info)
 		      if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
 			{
 			  (*_bfd_error_handler)
-			    ("%s: %s: invalid version %d (max %d)",
+			    ("%s: %s: invalid version %u (max %d)",
 			     abfd->filename, name, vernum,
 			     elf_tdata (abfd)->dynverdef_hdr.sh_info);
 			  bfd_set_error (bfd_error_bad_value);
@@ -2211,7 +2211,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
   *sinterpptr = NULL;
 
-  soname_indx = -1;
+  soname_indx = (bfd_size_type) -1;
 
   if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return true;
@@ -2458,7 +2458,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  def.vd_next = (sizeof (Elf_External_Verdef)
 			 + sizeof (Elf_External_Verdaux));
 
-	  if (soname_indx != -1)
+	  if (soname_indx != (bfd_size_type) -1)
 	    {
 	      def.vd_hash = bfd_elf_hash ((const unsigned char *) soname);
 	      defaux.vda_name = soname_indx;
@@ -5101,7 +5101,7 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
       /* Allocate a table to hold the local symbols if first time */
       if (!ptr)
 	{
-	  int num_symbols = elf_tdata (abfd)->symtab_hdr.sh_info;
+	  unsigned int num_symbols = elf_tdata (abfd)->symtab_hdr.sh_info;
 	  register unsigned int i;
 
 	  ptr = (elf_linker_section_pointers_t **)
