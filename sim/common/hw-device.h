@@ -157,7 +157,7 @@ struct _sim_cpu *hw_system_cpu (struct hw *hw);
 
 /* Perform a soft reset of the device */
 
-typedef unsigned (hw_reset_callback)
+typedef unsigned (hw_reset_method)
      (struct hw *me);
 
 #define hw_reset(hw) ((hw)->to_reset (hw))
@@ -190,7 +190,7 @@ typedef unsigned (hw_reset_callback)
    The SPACE:ADDR pair specify an address on the common bus that
    connects the parent and child devices. */
 
-typedef void (hw_attach_address_callback)
+typedef void (hw_attach_address_method)
      (struct hw *me,
       int level,
       int space,
@@ -204,7 +204,7 @@ typedef void (hw_attach_address_callback)
 #define set_hw_attach_address(hw, method) \
 ((hw)->to_attach_address = (method))
 
-typedef void (hw_detach_address_callback)
+typedef void (hw_detach_address_method)
      (struct hw *me,
       int level,
       int space,
@@ -224,7 +224,7 @@ typedef void (hw_detach_address_callback)
    The SPACE:ADDR pair specify an address on the bus shared between
    the parent and child devices. */
 
-typedef unsigned (hw_io_read_buffer_callback)
+typedef unsigned (hw_io_read_buffer_method)
      (struct hw *me,
       void *dest,
       int space,
@@ -237,7 +237,7 @@ typedef unsigned (hw_io_read_buffer_callback)
 #define set_hw_io_read_buffer(hw, method) \
 ((hw)->to_io_read_buffer = (method))
 
-typedef unsigned (hw_io_write_buffer_callback)
+typedef unsigned (hw_io_write_buffer_method)
      (struct hw *me,
       const void *source,
       int space,
@@ -260,7 +260,7 @@ typedef unsigned (hw_io_write_buffer_callback)
    The SPACE:ADDR pair specify an address on the common bus connecting
    the parent and child devices. */
 
-typedef unsigned (hw_dma_read_buffer_callback)
+typedef unsigned (hw_dma_read_buffer_method)
      (struct hw *bus,
       void *dest,
       int space,
@@ -273,7 +273,7 @@ typedef unsigned (hw_dma_read_buffer_callback)
 #define set_hw_dma_read_buffer(me, method) \
 ((me)->to_dma_read_buffer = (method))
 
-typedef unsigned (hw_dma_write_buffer_callback)
+typedef unsigned (hw_dma_write_buffer_method)
      (struct hw *bus,
       const void *source,
       int space,
@@ -324,7 +324,7 @@ const hw_unit *hw_unit_address
    textual representation.  This is because the textual address of a
    device is specified using the parent busses notation. */
 
-typedef int (hw_unit_decode_callback)
+typedef int (hw_unit_decode_method)
      (struct hw *bus,
       const char *encoded,
       hw_unit *unit);
@@ -335,7 +335,7 @@ typedef int (hw_unit_decode_callback)
 #define set_hw_unit_decode(hw, method) \
 ((hw)->to_unit_decode = (method))
 
-typedef int (hw_unit_encode_callback)
+typedef int (hw_unit_encode_method)
      (struct hw *bus,
       const hw_unit *unit,
       char *encoded,
@@ -355,7 +355,7 @@ typedef int (hw_unit_encode_callback)
    Return a zero result if the address should be ignored when looking
    for attach addresses. */
 
-typedef int (hw_unit_address_to_attach_address_callback)
+typedef int (hw_unit_address_to_attach_address_method)
      (struct hw *bus,
       const hw_unit *unit_addr,
       int *attach_space,
@@ -368,7 +368,7 @@ typedef int (hw_unit_address_to_attach_address_callback)
 #define set_hw_unit_address_to_attach_address(hw, method) \
 ((hw)->to_unit_address_to_attach_address = (method))
 
-typedef int (hw_unit_size_to_attach_size_callback)
+typedef int (hw_unit_size_to_attach_size_method)
      (struct hw *bus,
       const hw_unit *unit_size,
       unsigned *attach_size,
@@ -406,7 +406,7 @@ typedef enum {
   nr_hw_ioctl_requests,
 } hw_ioctl_request;
 
-typedef int (hw_ioctl_callback)
+typedef int (hw_ioctl_method)
      (struct hw *me,
       hw_ioctl_request request,
       va_list ap);
@@ -498,25 +498,25 @@ struct hw {
   int nr_size_cells_of_hw_unit;
 
   /* Soft reset */
-  hw_reset_callback *to_reset;
+  hw_reset_method *to_reset;
 
   /* Basic callbacks */
-  hw_io_read_buffer_callback *to_io_read_buffer;
-  hw_io_write_buffer_callback *to_io_write_buffer;
-  hw_dma_read_buffer_callback *to_dma_read_buffer;
-  hw_dma_write_buffer_callback *to_dma_write_buffer;
-  hw_attach_address_callback *to_attach_address;
-  hw_detach_address_callback *to_detach_address;
+  hw_io_read_buffer_method *to_io_read_buffer;
+  hw_io_write_buffer_method *to_io_write_buffer;
+  hw_dma_read_buffer_method *to_dma_read_buffer;
+  hw_dma_write_buffer_method *to_dma_write_buffer;
+  hw_attach_address_method *to_attach_address;
+  hw_detach_address_method *to_detach_address;
 
   /* More complicated callbacks */
-  hw_ioctl_callback *to_ioctl;
+  hw_ioctl_method *to_ioctl;
   int trace_of_hw_p;
 
   /* address callbacks */
-  hw_unit_decode_callback *to_unit_decode;
-  hw_unit_encode_callback *to_unit_encode;
-  hw_unit_address_to_attach_address_callback *to_unit_address_to_attach_address;
-  hw_unit_size_to_attach_size_callback *to_unit_size_to_attach_size;
+  hw_unit_decode_method *to_unit_decode;
+  hw_unit_encode_method *to_unit_encode;
+  hw_unit_address_to_attach_address_method *to_unit_address_to_attach_address;
+  hw_unit_size_to_attach_size_method *to_unit_size_to_attach_size;
 
   /* related data */
   struct hw_property_data *properties_of_hw;

@@ -65,6 +65,7 @@ hw-device.c
 hw-device.h
 hw-events.c
 hw-events.h
+hw-main.h
 hw-ports.c
 hw-ports.h
 hw-properties.c
@@ -100,6 +101,8 @@ sim-fpu.c
 sim-fpu.h
 sim-hload.c
 sim-hrw.c
+sim-hw.c
+sim-hw.h
 sim-info.c
 sim-inline.c
 sim-inline.h

@@ -1,3 +1,31 @@
+Mon May 25 18:55:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-core.c: Include hw-main.h and sim-main.h.
+	* dv-pal.c: Include hw-main.h and sim-io.h.
+	* dv-glue.c: Include hw-main.h.
+
+	* hw-main.h: New file.  Move list of includes to here.
+	* hw-base.h: From here.
+	* Make-common.in (hw_base_headers): Rename to hw_main_headers.
+	(hw-*.o, dv-*.o): Update.
+	* hw-tree.c, hw-base.c, hw-properties.c, hw-ports.c, hw-device.c,
+ 	hw-events.c, hw-alloc.c, sim-hw.c: Include hw-main.h instead of
+ 	sim-main.h.
+
+	* hw-base.h (do_hw_attach_regs, do_hw_poll_read_method,
+ 	do_hw_poll_read): Move declarations from here.
+	* hw-main.h: To here.
+	
+	* hw-base.h (struct hw_device_descriptor, hw_finish_callback):
+ 	Move from here.
+	* hw-main.h (struct hw_descriptor, hw_finish_method): To here,
+ 	rename.
+	* Make-common.in (hw-config.h): Update
+	* hw-base.c, dv-pal.c, dv-glue.c: Update
+
+	* dv-glue.c, hw-device.h, hw-base.h, hw-ports.c: Rename
+ 	`*_callback' to `*_method.
+
 Mon May 25 18:41:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-base.h (set_*): Move set method macros from here.

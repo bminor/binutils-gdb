@@ -19,27 +19,8 @@
     */
 
 
-#ifndef HW_ROOT
-#define HW_ROOT
-
-/* A root device from which dv-* devices can be built */
-
-#include "hw-device.h"
-
-#include "hw-properties.h"
-#include "hw-events.h"
-#include "hw-alloc.h"
-/* #include "hw-instances.h" */
-/* #include "hw-handles.h" */
-#include "hw-ports.h"
-
-typedef void (hw_finish_callback)
-     (struct hw *me);
-
-struct hw_device_descriptor {
-  const char *family;
-  hw_finish_callback *to_finish;
-};
+#ifndef HW_BASE
+#define HW_BASE
 
 /* Create a primative device */
 
@@ -75,32 +56,6 @@ typedef void (hw_delete_callback)
 
 #define set_hw_delete(hw, method) \
 ((hw)->base_of_hw->to_delete = (method))
-
-
-/* Helper functions to make the implementation of a device easier */
-
-/* Go through the devices reg properties and look for those specifying
-   an address to attach various registers to */
-
-void do_hw_attach_regs (struct hw *me);
-
-/* Perform a polling read on FD returning either the number of bytes
-   or a hw_io status code that indicates the reason for the read
-   failure */
-
-enum {
-  HW_IO_EOF = -1, HW_IO_NOT_READY = -2, /* See: IEEE 1275 */
-};
-
-typedef int (do_hw_poll_read_method)
-     (SIM_DESC sd, int, char *, int);
-
-int do_hw_poll_read
-(struct hw *me,
- do_hw_poll_read_method *read,
- int sim_io_fd,
- void *buf,
- unsigned size_of_buf);
 
 
 /* ALLOC */

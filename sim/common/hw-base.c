@@ -19,7 +19,7 @@
     */
 
 
-#include "sim-main.h"
+#include "hw-main.h"
 #include "hw-base.h"
 
 
@@ -41,7 +41,7 @@
 
 struct hw_base_data {
   int finished_p;
-  const struct hw_device_descriptor *descriptor;
+  const struct hw_descriptor *descriptor;
   hw_delete_callback *to_delete;
 };
 
@@ -393,12 +393,12 @@ hw_create (struct sim_state *sd,
 
   /* locate a descriptor */
   {
-    const struct hw_device_descriptor **table;
+    const struct hw_descriptor **table;
     for (table = hw_descriptors;
 	 *table != NULL;
 	 table++)
       {
-	const struct hw_device_descriptor *entry;
+	const struct hw_descriptor *entry;
 	for (entry = *table;
 	     entry->family != NULL;
 	     entry++)
