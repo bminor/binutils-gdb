@@ -29,6 +29,7 @@ lib
 ld-bootstrap
 ld-cdtest
 ld-scripts
+ld-shared
 
 Things-to-lose:
 
