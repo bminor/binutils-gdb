@@ -1,6 +1,6 @@
 # .Sanitize for devo/gdb.
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -11,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
@@ -19,6 +19,34 @@ if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	keep_these_too="sp64-tdep.c"
 else
 	lose_these_too="sp64-tdep.c"
+fi
+
+mpw_files="mpw-config.in mpw-make.in ser-mac.c ChangeLog.mpw"
+
+if ( echo $* | grep keep\-mpw > /dev/null ) ; then
+	keep_these_too="${mpw_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${mpw_files}
+	fi
+else
+	lose_these_too="${mpw_files} ${lose_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${mpw_files}
+	fi
+fi
+
+gm_files="mpw-xconfig.in mpw-init.c ChangeLog.gm"
+
+if ( echo $* | grep keep\-mpw > /dev/null ) ; then
+	keep_these_too="${gm_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${gm_files}
+	fi
+else
+	lose_these_too="${gm_files} ${lose_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${gm_files}
+	fi
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -329,6 +357,31 @@ else
 			echo Cleaning the \"v9\" out of $i...
 			cp $i new
 			sed '/start\-sanitize\-v9/,/end-\sanitize\-v9/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				echo Caching $i in .Recover...
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+echo Removing traces of \"mpw\"...
+
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+if ( echo $* | grep keep\-mpw > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
+			echo Keeping mpw stuff in $i
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
+			echo Removing traces of \"mpw\" out of $i...
+			cp $i new
+			sed '/start\-sanitize\-mpw/,/end-\sanitize\-mpw/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				echo Caching $i in .Recover...
 				mv $i .Recover
