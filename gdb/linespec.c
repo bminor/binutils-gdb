@@ -81,6 +81,12 @@ symtabs_and_lines decode_all_digits (char **argptr,
 				     struct symtab *s,
 				     char *q);
 
+static struct symtabs_and_lines decode_dollar (char *copy,
+					       int funfirstline,
+					       struct symtab *default_symtab,
+					       char ***canonical,
+					       struct symtab *s);
+
 static struct
 symtabs_and_lines symbol_found (int funfirstline,
 				char ***canonical,
@@ -548,8 +554,6 @@ struct symtabs_and_lines
 decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	       int default_line, char ***canonical)
 {
-  struct symtabs_and_lines values;
-  struct symtab_and_line val;
   char *p;
   char *q;
   struct symtab *s = NULL;
@@ -569,8 +573,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Is part of *ARGPTR is enclosed in double quotes?  */
   int is_quote_enclosed;
   char *saved_arg = *argptr;
-
-  init_sal (&val);		/* initialize to zeroes */
 
   /* Defaults have defaults.  */
 
@@ -705,64 +707,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
      be history value, or it may be a convenience variable */
 
   if (*copy == '$')
-    {
-      struct value *valx;
-      int index = 0;
-      int need_canonical = 0;
-
-      p = (copy[1] == '$') ? copy + 2 : copy + 1;
-      while (*p >= '0' && *p <= '9')
-	p++;
-      if (!*p)			/* reached end of token without hitting non-digit */
-	{
-	  /* We have a value history reference */
-	  sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
-	  valx = access_value_history ((copy[1] == '$') ? -index : index);
-	  if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
-	    error ("History values used in line specs must have integer values.");
-	}
-      else
-	{
-	  /* Not all digits -- may be user variable/function or a
-	     convenience variable */
-
-	  /* Look up entire name as a symbol first */
-	  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
-	  s = (struct symtab *) 0;
-	  need_canonical = 1;
-	  /* Symbol was found --> jump to normal symbol processing.  */
-	  if (sym)
-	    return symbol_found (funfirstline, canonical, copy, sym,
-				 NULL, sym_symtab);
-
-	  /* If symbol was not found, look in minimal symbol tables */
-	  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
-	  /* Min symbol was found --> jump to minsym processing. */
-	  if (msymbol)
-	    return minsym_found (funfirstline, msymbol);
-
-	  /* Not a user variable or function -- must be convenience variable */
-	  need_canonical = (s == 0) ? 1 : 0;
-	  valx = value_of_internalvar (lookup_internalvar (copy + 1));
-	  if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
-	    error ("Convenience variables used in line specs must have integer values.");
-	}
-
-      /* Either history value or convenience value from above, in valx */
-      val.symtab = s ? s : default_symtab;
-      val.line = value_as_long (valx);
-      val.pc = 0;
-
-      values.sals = (struct symtab_and_line *) xmalloc (sizeof val);
-      values.sals[0] = val;
-      values.nelts = 1;
-
-      if (need_canonical)
-	build_canonical_line_spec (values.sals, NULL, canonical);
-
-      return values;
-    }
-
+    return decode_dollar (copy, funfirstline, default_symtab,
+			  canonical, s);
 
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
@@ -785,7 +731,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     error ("No symbol table is loaded.  Use the \"file\" command.");
 
   error ("Function \"%s\" not defined.", copy);
-  return values;		/* for lint */
 }
 
 
@@ -1365,6 +1310,80 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
   values.nelts = 1;
   if (need_canonical)
     build_canonical_line_spec (values.sals, NULL, canonical);
+  return values;
+}
+
+
+
+/* Decode a linespec starting with a dollar sign.  */
+
+static struct symtabs_and_lines
+decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
+	       char ***canonical, struct symtab *s)
+{
+  struct value *valx;
+  int index = 0;
+  int need_canonical = 0;
+  struct symtabs_and_lines values;
+  struct symtab_and_line val;
+  char *p;
+  struct symbol *sym;
+  /* The symtab that SYM was found in.  */
+  struct symtab *sym_symtab;
+  struct minimal_symbol *msymbol;
+
+  p = (copy[1] == '$') ? copy + 2 : copy + 1;
+  while (*p >= '0' && *p <= '9')
+    p++;
+  if (!*p)			/* reached end of token without hitting non-digit */
+    {
+      /* We have a value history reference */
+      sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
+      valx = access_value_history ((copy[1] == '$') ? -index : index);
+      if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
+	error ("History values used in line specs must have integer values.");
+    }
+  else
+    {
+      /* Not all digits -- may be user variable/function or a
+	 convenience variable */
+
+      /* Look up entire name as a symbol first */
+      sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+      s = (struct symtab *) 0;
+      need_canonical = 1;
+      /* Symbol was found --> jump to normal symbol processing.  */
+      if (sym)
+	return symbol_found (funfirstline, canonical, copy, sym,
+			     NULL, sym_symtab);
+
+      /* If symbol was not found, look in minimal symbol tables */
+      msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+      /* Min symbol was found --> jump to minsym processing. */
+      if (msymbol)
+	return minsym_found (funfirstline, msymbol);
+
+      /* Not a user variable or function -- must be convenience variable */
+      need_canonical = (s == 0) ? 1 : 0;
+      valx = value_of_internalvar (lookup_internalvar (copy + 1));
+      if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
+	error ("Convenience variables used in line specs must have integer values.");
+    }
+
+  init_sal (&val);
+
+  /* Either history value or convenience value from above, in valx */
+  val.symtab = s ? s : default_symtab;
+  val.line = value_as_long (valx);
+  val.pc = 0;
+
+  values.sals = (struct symtab_and_line *) xmalloc (sizeof val);
+  values.sals[0] = val;
+  values.nelts = 1;
+
+  if (need_canonical)
+    build_canonical_line_spec (values.sals, NULL, canonical);
+
   return values;
 }
 
