@@ -35,8 +35,6 @@
 
 #include "vax-tdep.h"
 
-static gdbarch_register_name_ftype vax_register_name;
-
 static gdbarch_skip_prologue_ftype vax_skip_prologue;
 static gdbarch_frame_num_args_ftype vax_frame_num_args;
 static gdbarch_deprecated_frame_chain_ftype vax_frame_chain;
@@ -45,45 +43,32 @@ static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
 
 static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
 
+
+/* Return the name of register REGNUM.  */
+
 static const char *
-vax_register_name (int regno)
+vax_register_name (int regnum)
 {
   static char *register_names[] =
   {
-    "r0",  "r1",  "r2",  "r3", "r4", "r5", "r6", "r7",
-    "r8",  "r9", "r10", "r11", "ap", "fp", "sp", "pc",
+    "r0", "r1", "r2",  "r3",  "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "ap", "fp", "sp", "pc",
     "ps",
   };
 
-  if (regno < 0)
-    return (NULL);
-  if (regno >= (sizeof(register_names) / sizeof(*register_names)))
-    return (NULL);
-  return (register_names[regno]);
+  if (regnum >= 0 && regnum < ARRAY_SIZE (register_names))
+    return register_names[regnum];
+
+  return NULL;
 }
 
-static int
-vax_register_byte (int regno)
-{
-  return (regno * 4);
-}
-
-static int
-vax_register_raw_size (int regno)
-{
-  return (4);
-}
-
-static int
-vax_register_virtual_size (int regno)
-{
-  return (4);
-}
+/* Return the GDB type object for the "standard" data type of data in
+   register REGNUM. */
 
 static struct type *
-vax_register_virtual_type (int regno)
+vax_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  return (builtin_type_int);
+  return builtin_type_int;
 }
 
 static void
@@ -273,13 +258,20 @@ vax_store_return_value (struct type *valtype, char *valbuf)
   deprecated_write_register_bytes (0, valbuf, TYPE_LENGTH (valtype));
 }
 
-static const unsigned char *
-vax_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
-{
-  static const unsigned char vax_breakpoint[] = { 3 };
 
-  *lenptr = sizeof(vax_breakpoint);
-  return (vax_breakpoint);
+/* Use the program counter to determine the contents and size of a
+   breakpoint instruction.  Return a pointer to a string of bytes that
+   encode a breakpoint instruction, store the length of the string in
+   *LEN and optionally adjust *PC to point to the correct memory
+   location for inserting the breakpoint.  */
+   
+static const unsigned char *
+vax_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static unsigned char break_insn[] = { 3 };
+
+  *len = sizeof (break_insn);
+  return break_insn;
 }
 
 /* Advance PC across any function entry prologue instructions
@@ -342,21 +334,12 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);
+  set_gdbarch_register_name (gdbarch, vax_register_name);
+  set_gdbarch_register_type (gdbarch, vax_register_type);
   set_gdbarch_sp_regnum (gdbarch, VAX_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, VAX_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, VAX_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, VAX_PS_REGNUM);
-
-  set_gdbarch_register_name (gdbarch, vax_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, VAX_REGISTER_SIZE);
-  set_gdbarch_deprecated_register_bytes (gdbarch, VAX_REGISTER_BYTES);
-  set_gdbarch_deprecated_register_byte (gdbarch, vax_register_byte);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, vax_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, VAX_MAX_REGISTER_RAW_SIZE);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, vax_register_virtual_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
-                                         VAX_MAX_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, vax_register_virtual_type);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);
@@ -373,6 +356,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 4);
 
+  /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Return value info */
