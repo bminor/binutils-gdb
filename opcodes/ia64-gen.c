@@ -697,6 +697,8 @@ parse_semantics (char *sem)
     return IA64_DVS_INSTR;
   else if (strcmp (sem, "specific") == 0)
     return IA64_DVS_SPECIFIC;
+  else if (strcmp (sem, "stop") == 0)
+    return IA64_DVS_STOP;
   else 
     return IA64_DVS_OTHER;
 }
@@ -1332,8 +1334,10 @@ lookup_specifier (const char *name)
         return IA64_RS_FRb;
       if (strstr (name, "GR%") != NULL)
         return IA64_RS_GR;
-      if (strstr (name, "PR%") != NULL)
+      if (strstr (name, "PR%, % in 1 ") != NULL)
         return IA64_RS_PR;
+      if (strstr (name, "PR%, % in 16 ") != NULL)
+	return IA64_RS_PRr;
 
       fprintf (stderr, "Warning! Don't know how to specify %% dependency %s\n",
                name);

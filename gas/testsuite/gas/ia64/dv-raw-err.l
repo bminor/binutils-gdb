@@ -173,11 +173,11 @@
 .*:334: Warning: This is the location of the conflicting usage
 .*:341: Warning: Use of 'mov' .* RAW dependency 'PMD#' \(impliedf\)
 .*:340: Warning: This is the location of the conflicting usage
-.*:346: Warning: Use of 'add' .* RAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 1
+.*:346: Warning: Use of 'add' .* RAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 1
 .*:345: Warning: This is the location of the conflicting usage
-.*:349: Warning: Use of 'add' .* RAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 2
+.*:349: Warning: Use of 'add' .* RAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 2
 .*:348: Warning: This is the location of the conflicting usage
-.*:352: Warning: Use of 'br\.cond\.sptk' .* RAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 5
+.*:352: Warning: Use of 'br\.cond\.sptk' .* RAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 5
 .*:351: Warning: This is the location of the conflicting usage
 .*:360: Warning: Use of 'add' .* RAW dependency 'CFM' \(impliedf\)
 .*:359: Warning: This is the location of the conflicting usage
@@ -269,3 +269,11 @@
 .*:554: Warning: This is the location of the conflicting usage
 .*:559: Warning: Use of 'mov' violates RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 32
 .*:558: Warning: This is the location of the conflicting usage
+.*:564: Warning: Use of 'add' may violate RAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 21
+.*:563: Warning: This is the location of the conflicting usage
+.*:567: Warning: Use of 'add' may violate RAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 22
+.*:566: Warning: This is the location of the conflicting usage
+.*:570: Warning: Use of 'add' may violate RAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 23
+.*:569: Warning: This is the location of the conflicting usage
+.*:573: Warning: Use of 'br.cond.sptk' may violate RAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 25
+.*:572: Warning: This is the location of the conflicting usage

@@ -528,7 +528,7 @@ static int regdepslen = 0;
 static int regdepstotlen = 0;
 static const char *dv_mode[] = { "RAW", "WAW", "WAR" };
 static const char *dv_sem[] = { "none", "implied", "impliedf",
-				"data", "instr", "specific", "other" };
+				"data", "instr", "specific", "stop", "other" };
 static const char *dv_cmp_type[] = { "none", "OR", "AND" };
 
 /* Current state of PR mutexation */
@@ -6921,24 +6921,127 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	}
       break;
 
+      /* This is the same as IA64_RS_PRr, except that the register range is
+	 from 1 - 15, and there are no rotating register reads/writes here.  */
     case IA64_RS_PR:
       if (note == 0)
 	{
-	  if (idesc->operands[0] == IA64_OPND_PR_ROT)
+	  for (i = 1; i < 16; i++)
 	    {
-	      for (i = 16; i < 63; i++)
+	      specs[count] = tmpl;
+	      specs[count++].index = i;
+	    }
+	}
+      else if (note == 7)
+	{
+	  valueT mask = 0;
+	  /* Mark only those registers indicated by the mask.  */
+	  if (rsrc_write)
+	    {
+	      mask = CURR_SLOT.opnd[2].X_add_number;
+	      for (i = 1; i < 16; i++)
+		if (mask & ((valueT) 1 << i))
+		  {
+		    specs[count] = tmpl;
+		    specs[count++].index = i;
+		  }
+	    }
+	  else
+	    {
+	      UNHANDLED;
+	    }
+	}
+      else if (note == 11) /* note 11 implies note 1 as well */
+	{
+	  if (rsrc_write)
+	    {
+	      for (i = 0; i < idesc->num_outputs; i++)
 		{
-		  specs[count] = tmpl;
-		  specs[count++].index = i;
+		  if (idesc->operands[i] == IA64_OPND_P1
+		      || idesc->operands[i] == IA64_OPND_P2)
+		    {
+		      int regno = CURR_SLOT.opnd[i].X_add_number - REG_P;
+		      if (regno >= 1 && regno < 16)
+			{
+			  specs[count] = tmpl;
+			  specs[count++].index = regno;
+			}
+		    }
 		}
 	    }
 	  else
 	    {
-	      for (i = 1; i < 63; i++)
+	      UNHANDLED;
+	    }
+	}
+      else if (note == 12)
+	{
+	  if (CURR_SLOT.qp_regno >= 1 && CURR_SLOT.qp_regno < 16)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = CURR_SLOT.qp_regno;
+	    }
+	}
+      else if (note == 1)
+	{
+	  if (rsrc_write)
+	    {
+	      int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
+	      int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
+	      int or_andcm = strstr(idesc->name, "or.andcm") != NULL;
+	      int and_orcm = strstr(idesc->name, "and.orcm") != NULL;
+
+	      if ((idesc->operands[0] == IA64_OPND_P1
+		   || idesc->operands[0] == IA64_OPND_P2)
+		  && p1 >= 1 && p1 < 16)
 		{
 		  specs[count] = tmpl;
-		  specs[count++].index = i;
+		  specs[count].cmp_type =
+		    (or_andcm ? CMP_OR : (and_orcm ? CMP_AND : CMP_NONE));
+		  specs[count++].index = p1;
 		}
+	      if ((idesc->operands[1] == IA64_OPND_P1
+		   || idesc->operands[1] == IA64_OPND_P2)
+		  && p2 >= 1 && p2 < 16)
+		{
+		  specs[count] = tmpl;
+		  specs[count].cmp_type =
+		    (or_andcm ? CMP_AND : (and_orcm ? CMP_OR : CMP_NONE));
+		  specs[count++].index = p2;
+		}
+	    }
+	  else
+	    {
+	      if (CURR_SLOT.qp_regno >= 1 && CURR_SLOT.qp_regno < 16)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = CURR_SLOT.qp_regno;
+		}
+	      if (idesc->operands[1] == IA64_OPND_PR)
+		{
+		  for (i = 1; i < 16; i++)
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].index = i;
+		    }
+		}
+	    }
+	}
+      else
+	{
+	  UNHANDLED;
+	}
+      break;
+
+      /* This is the general case for PRs.  IA64_RS_PR and IA64_RS_PR63 are
+	 simplified cases of this.  */
+    case IA64_RS_PRr:
+      if (note == 0)
+	{
+	  for (i = 16; i < 63; i++)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = i;
 	    }
 	}
       else if (note == 7)
@@ -6949,16 +7052,12 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	      && idesc->operands[0] == IA64_OPND_PR)
 	    {
 	      mask = CURR_SLOT.opnd[2].X_add_number;
-	      if (mask & ((valueT) 1 << 16))
-		mask |= ~(valueT) 0xffff;
-	      for (i = 1; i < 63; i++)
-		{
-		  if (mask & ((valueT) 1 << i))
-		    {
-		      specs[count] = tmpl;
-		      specs[count++].index = i;
-		    }
-		}
+	      if (mask & ((valueT) 1<<16))
+		for (i = 16; i < 63; i++)
+		  {
+		    specs[count] = tmpl;
+		    specs[count++].index = i;
+		  }
 	    }
 	  else if (rsrc_write
 		   && idesc->operands[0] == IA64_OPND_PR_ROT)
@@ -6984,7 +7083,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		      || idesc->operands[i] == IA64_OPND_P2)
 		    {
 		      int regno = CURR_SLOT.opnd[i].X_add_number - REG_P;
-		      if (regno != 0)
+		      if (regno >= 16 && regno < 63)
 			{
 			  specs[count] = tmpl;
 			  specs[count++].index = regno;
@@ -6999,7 +7098,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	}
       else if (note == 12)
 	{
-	  if (CURR_SLOT.qp_regno != 0)
+	  if (CURR_SLOT.qp_regno >= 16 && CURR_SLOT.qp_regno < 63)
 	    {
 	      specs[count] = tmpl;
 	      specs[count++].index = CURR_SLOT.qp_regno;
@@ -7016,7 +7115,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 
 	      if ((idesc->operands[0] == IA64_OPND_P1
 		   || idesc->operands[0] == IA64_OPND_P2)
-		  && p1 != 0 && p1 != 63)
+		  && p1 >= 16 && p1 < 63)
 		{
 		  specs[count] = tmpl;
 		  specs[count].cmp_type =
@@ -7025,7 +7124,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		}
 	      if ((idesc->operands[1] == IA64_OPND_P1
 		   || idesc->operands[1] == IA64_OPND_P2)
-		  && p2 != 0 && p2 != 63)
+		  && p2 >= 16 && p2 < 63)
 		{
 		  specs[count] = tmpl;
 		  specs[count].cmp_type =
@@ -7035,14 +7134,14 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	    }
 	  else
 	    {
-	      if (CURR_SLOT.qp_regno != 0)
+	      if (CURR_SLOT.qp_regno >= 16 && CURR_SLOT.qp_regno < 63)
 		{
 		  specs[count] = tmpl;
 		  specs[count++].index = CURR_SLOT.qp_regno;
 		}
 	      if (idesc->operands[1] == IA64_OPND_PR)
 		{
-		  for (i = 1; i < 63; i++)
+		  for (i = 16; i < 63; i++)
 		    {
 		      specs[count] = tmpl;
 		      specs[count++].index = i;
@@ -7436,11 +7535,21 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	}
       break;
 
+      /* This is the same as IA64_RS_PRr, except simplified to account for
+	 the fact that there is only one register.  */
     case IA64_RS_PR63:
       if (note == 0)
 	{
 	  specs[count++] = tmpl;
 	}
+      else if (note == 7)
+        {
+          valueT mask = 0;
+          if (idesc->operands[2] == IA64_OPND_IMM17)
+            mask = CURR_SLOT.opnd[2].X_add_number;
+          if (mask & ((valueT) 1 << 63))
+	    specs[count++] = tmpl;
+        }
       else if (note == 11)
 	{
 	  if ((idesc->operands[0] == IA64_OPND_P1
@@ -7454,16 +7563,6 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
       else if (note == 12)
 	{
 	  if (CURR_SLOT.qp_regno == 63)
-	    {
-	      specs[count++] = tmpl;
-	    }
-	}
-      else if (note == 7)
-	{
-	  valueT mask = 0;
-	  if (idesc->operands[2] == IA64_OPND_IMM17)
-	    mask = CURR_SLOT.opnd[2].X_add_number;
-	  if (mask & ((valueT) 1 << 63))
 	    {
 	      specs[count++] = tmpl;
 	    }
@@ -8407,6 +8506,7 @@ mark_resources (idesc)
       if (add_only_qp_reads
 	  && !(dep->mode == IA64_DV_WAR
 	       && (dep->specifier == IA64_RS_PR
+		   || dep->specifier == IA64_RS_PRr
 		   || dep->specifier == IA64_RS_PR63)))
 	continue;
 

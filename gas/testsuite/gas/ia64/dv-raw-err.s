@@ -341,7 +341,7 @@
 	mov	r2 = pmd[r3]
 	;;
 	
-// PR%
+// PR%, 1 - 15
 	cmp.eq	p1, p2 = r0, r1	// pr-writer/pr-reader-nobr-nomovpr
 (p1)	add	r2 = r3, r4	
 	;;
@@ -558,4 +558,22 @@
 	ld8	r2 = [r32], 8
 	mov	r8 = r32	// impliedf
 	;;
+
+// PR%, 16 - 62
+	cmp.eq	p21, p22 = r0, r1 // pr-writer/pr-reader-nobr-nomovpr
+(p21)	add	r2 = r3, r4	
+	;;
+	mov	pr = r5, 0x1ffff // mov-to-pr-allreg/pr-reader-nobr-nomovpr
+(p22)	add	r6 = r7, r8	
+	;;
+	mov	pr.rot = 0xffff0000 // mov-to-pr-rotreg/pr-reader-nobr-nomovpr
+(p23)	add	r9 = r10, r11
+	;;
+	fcmp.eq p25, p26 = f2, f3 // pr-writer-fp/pr-reader-br
+(p25)	br.cond.sptk	b0
+	;;
+	cmp.eq	p27, p28 = r11, r12
+(p27)	br.cond.sptk	b1	// no DV here
+	;;
+	
 L:	

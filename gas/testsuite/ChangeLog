@@ -1,3 +1,12 @@
+2000-09-22  Jim Wilson  <wilson@cygnus.com>
+
+	* gas/ia64/dv-raw-err.s: Add new testcases for PR%, 16 - 62.
+	* gas/ia64/dv-waw-err.s: Likewise.
+	* gas/ia64/dv-imply.d: Regenerate.
+	* gas/ia64/dv-mutex.d, gas/ia64/dv-raw-err.l, gas/ia64/dv-safe.d,
+	gas/ia64/dv-srlz.d, gas/ia64/dv-war-err.l, gas/ia64/dv-waw-err.l,
+	gas/ia64/opc-f.d, gas/ia64/opc-i.d, gas/ia64/opc-m.d: Likewise.
+
 2000-09-14  Timothy Wall  <twall@cygnus.com>
 
 	* gas/ia64/dv-waw-err.[sl]: Additional tests for parallel

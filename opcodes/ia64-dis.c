@@ -117,7 +117,7 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
     {
       /* skip L slot in MLI template: */
       slotnum = 2;
-      retval = 16 - slot_multiplier;
+      retval += slot_multiplier;
     }
 
   insn = slot[slotnum];

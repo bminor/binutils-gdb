@@ -327,7 +327,7 @@
 	mov	pmd[r4] = r1
 	;;
 	
-// PR%
+// PR%, 1 - 15
 	cmp.eq	p1, p0 = r0, r1
 	cmp.eq	p1, p0 = r2, r3
 	;;
@@ -512,8 +512,7 @@
 	mov	rr[r2] = r1
 	mov	rr[r2] = r3
 	;;
-// RSE
-	
+
 // PR, additional cases (or.andcm and and.orcm interaction)
 	cmp.eq.or.andcm	p6, p7 = 1, r32
 	cmp.eq.or.andcm p6, p7 = 5, r36	// no DV here
@@ -542,4 +541,27 @@
 	cmp.eq.or.andcm	p6, p63 = 1, r32
 	cmp.eq.and.orcm p6, p63 = 5, r36	
 	;;
-L:	
+
+// PR%, 16 - 62
+	cmp.eq	p21, p0 = r0, r1
+	cmp.eq	p21, p0 = r2, r3
+	;;
+	fcmp.eq p21, p22 = f2, f3
+	fcmp.eq p21, p23 = f2, f3
+	;;
+	cmp.eq.and p21, p22 = r0, r1
+	cmp.eq.or  p21, p23 = r2, r3
+	;;
+	cmp.eq.or  p21, p23 = r2, r3
+	cmp.eq.and p21, p22 = r0, r1
+	;;
+	cmp.eq.and p21, p22 = r0, r1
+	cmp.eq.and p21, p23 = r2, r3 // no DV here
+	;;
+	cmp.eq.or p21, p22 = r0, r1
+	cmp.eq.or p21, p23 = r2, r3 // no DV here
+	;;
+
+// RSE
+
+L:

@@ -213,17 +213,17 @@
 .*:321: Warning: This is the location of the conflicting usage
 .*:327: Warning: Use of 'mov' .* WAW dependency 'PMD#' \(impliedf\)
 .*:326: Warning: This is the location of the conflicting usage
-.*:332: Warning: Use of 'cmp\.eq' .* WAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 1
+.*:332: Warning: Use of 'cmp\.eq' .* WAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 1
 .*:331: Warning: This is the location of the conflicting usage
-.*:332: Warning: Use of 'cmp\.eq' .* WAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 1
+.*:332: Warning: Use of 'cmp\.eq' .* WAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 1
 .*:331: Warning: This is the location of the conflicting usage
-.*:335: Warning: Use of 'fcmp\.eq' .* WAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 1
+.*:335: Warning: Use of 'fcmp\.eq' .* WAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 1
 .*:334: Warning: This is the location of the conflicting usage
-.*:335: Warning: Use of 'fcmp\.eq' .* WAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 1
+.*:335: Warning: Use of 'fcmp\.eq' .* WAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 1
 .*:334: Warning: This is the location of the conflicting usage
-.*:338: Warning: Use of 'cmp\.eq\.or' .* WAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 1
+.*:338: Warning: Use of 'cmp\.eq\.or' .* WAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 1
 .*:337: Warning: This is the location of the conflicting usage
-.*:341: Warning: Use of 'cmp\.eq\.and' .* WAW dependency 'PR%, % in 1 - 62' \(impliedf\), specific resource number is 1
+.*:341: Warning: Use of 'cmp\.eq\.and' .* WAW dependency 'PR%, % in 1 - 15' \(impliedf\), specific resource number is 1
 .*:340: Warning: This is the location of the conflicting usage
 .*:352: Warning: Use of 'br\.wtop\.sptk' .* RAW dependency 'AR\[EC\]' \(impliedf\)
 .*:351: Warning: This is the location of the conflicting usage
@@ -351,27 +351,39 @@
 .*:507: Warning: This is the location of the conflicting usage
 .*:513: Warning: Use of 'mov' .* WAW dependency 'RR#' \(impliedf\), specific resource number is 7
 .*:512: Warning: This is the location of the conflicting usage
-.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
-.*:536: Warning: This is the location of the conflicting usage
-.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
-.*:536: Warning: This is the location of the conflicting usage
-.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
-.*:536: Warning: This is the location of the conflicting usage
-.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
-.*:536: Warning: This is the location of the conflicting usage
-.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
-.*:539: Warning: This is the location of the conflicting usage
-.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
-.*:539: Warning: This is the location of the conflicting usage
-.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
-.*:539: Warning: This is the location of the conflicting usage
-.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
-.*:539: Warning: This is the location of the conflicting usage
-.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
-.*:542: Warning: This is the location of the conflicting usage
-.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
-.*:542: Warning: This is the location of the conflicting usage
-.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
-.*:542: Warning: This is the location of the conflicting usage
-.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
-.*:542: Warning: This is the location of the conflicting usage
+.*:536: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:535: Warning: This is the location of the conflicting usage
+.*:536: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:535: Warning: This is the location of the conflicting usage
+.*:536: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:535: Warning: This is the location of the conflicting usage
+.*:536: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:535: Warning: This is the location of the conflicting usage
+.*:539: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:538: Warning: This is the location of the conflicting usage
+.*:539: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:538: Warning: This is the location of the conflicting usage
+.*:539: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:538: Warning: This is the location of the conflicting usage
+.*:539: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:538: Warning: This is the location of the conflicting usage
+.*:542: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:541: Warning: This is the location of the conflicting usage
+.*:542: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:541: Warning: This is the location of the conflicting usage
+.*:542: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:541: Warning: This is the location of the conflicting usage
+.*:542: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:541: Warning: This is the location of the conflicting usage
+.*:547: Warning: Use of 'cmp.eq' violates WAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 21
+.*:546: Warning: This is the location of the conflicting usage
+.*:547: Warning: Use of 'cmp.eq' violates WAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 21
+.*:546: Warning: This is the location of the conflicting usage
+.*:550: Warning: Use of 'fcmp.eq' violates WAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 21
+.*:549: Warning: This is the location of the conflicting usage
+.*:550: Warning: Use of 'fcmp.eq' violates WAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 21
+.*:549: Warning: This is the location of the conflicting usage
+.*:553: Warning: Use of 'cmp.eq.or' violates WAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 21
+.*:552: Warning: This is the location of the conflicting usage
+.*:556: Warning: Use of 'cmp.eq.and' violates WAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 21
+.*:555: Warning: This is the location of the conflicting usage

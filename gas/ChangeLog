@@ -1,3 +1,12 @@
+2000-09-22  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-ia64.c (dv_sem): Add "stop".
+	(specify_resource, case IA64_RS_PR): Only handles regs 1 to 15 now.
+	(specify_resource, case IA64_RS_PRr): New for regs 16 to 62.
+	(specify_resource, case IA64_RS_PR63): Reorder (note == 7) test to
+	match above.
+	(mark_resources): Check IA64_RS_PRr.
+
 2000-09-22  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* config/tc-m68k.c (md_relax_table, m68k_ip, md_convert_frag_1, 

@@ -1,3 +1,11 @@
+2000-09-22  Jim Wilson  <wilson@cygnus.com>
+
+	* ia64-dis.c (print_insn_ia64): Revert Aug 7 byte skip count change.
+	* ia64-gen.c (parse_semantics): Handle IA64_DVS_STOP.
+	(lookup_specifier): Handle "PR%, 1 to 15" and "PR%, 16 to 62".
+	* ia64-ic.tbl, ia64-raw.tbl, ia64-war.tbl, ia64-waw.tbl: Update.
+	* ia64-asmtab.c: Regnerate.
+
 2000-09-13  Anders Norlander  <anorland@acc.umu.se>
 	
  	* mips-opc.c (mips_builtin_opcodes): Support cache instruction on 4K cores.

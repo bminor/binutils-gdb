@@ -219,9 +219,9 @@ Disassembly of section \.text:
  460:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
  466:	30 08 10 84 2c 60 	            tnat\.z\.or\.andcm p3,p2=r4
  46c:	40 88 08 07       	            mov b3=r4
- 470:	01 00 00 00 01 00 	\[MII\]       nop\.m 0x0
- 476:	30 20 24 84 03 00 	            mov\.imp b3=r4,570 <_start\+0x570>
- 47c:	00 00 04 00       	            nop\.i 0x0;;
+ 470:	0d 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
+ 476:	00 00 00 02 00 60 	            nop\.f 0x0
+ 47c:	40 48 08 07       	            mov\.imp b3=r4,570 <_start\+0x570>;;
 	\.\.\.
  570:	01 00 00 00 01 00 	\[MII\]       nop\.m 0x0
  576:	30 20 00 84 03 60 	            mov\.sptk b3=r4,670 <_start\+0x670>
