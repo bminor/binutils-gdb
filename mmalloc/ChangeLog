@@ -1,4 +1,12 @@
+Thu Mar 26 17:06:04 1992  Fred Fish  (fnf@cygnus.com)
+
+	* attach.c (reuse):  Explicitly discard return value of mmcheck.
+	* mmcheck.c (mmcheck):  Document requirements for installing
+	corruption checking hooks and set up to enforce restrictions.
+
 Tue Mar 24 23:41:10 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* config/mh-irix4: new file.
 
 	* Makefile.in: added standard targets, fixed install directories.
 
