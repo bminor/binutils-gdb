@@ -53,7 +53,7 @@ mon960_load_gen (char *filename, int from_tty)
 #else
 
 static void
-mon960_load (serial_t desc, char *file, int hashmark)
+mon960_load (struct serial *desc, char *file, int hashmark)
 {
   bfd *abfd;
   asection *s;

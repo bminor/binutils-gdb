@@ -160,7 +160,7 @@ static int hashmark = 1;	/* flag set by "set hash" */
 extern struct monitor_ops w89k_cmds;	/* fwd decl */
 
 static void
-w89k_load (serial_t desc, char *file, int hashmark)
+w89k_load (struct serial *desc, char *file, int hashmark)
 {
   bfd *abfd;
   asection *s;

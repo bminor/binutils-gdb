@@ -362,10 +362,10 @@ static int mips_receive_wait = 5;
 static int mips_need_reply = 0;
 
 /* Handle used to access serial I/O stream.  */
-static serial_t mips_desc;
+static struct serial *mips_desc;
 
 /* UDP handle used to download files to target.  */
-static serial_t udp_desc;
+static struct serial *udp_desc;
 static int udp_in_use;
 
 /* TFTP filename used to download files to DDB board, in the form
@@ -1540,7 +1540,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 
   /* Open and initialize the serial port.  */
   mips_desc = SERIAL_OPEN (serial_port_name);
-  if (mips_desc == (serial_t) NULL)
+  if (mips_desc == NULL)
     perror_with_name (serial_port_name);
 
   if (baud_rate != -1)

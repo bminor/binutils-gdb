@@ -70,7 +70,7 @@ static void terminal_ours_1 (int);
 
 /* Record terminal status separately for debugger and inferior.  */
 
-static serial_t stdin_serial;
+static struct serial *stdin_serial;
 
 /* TTY state for the inferior.  We save it whenever the inferior stops, and
    restore it when it resumes.  */

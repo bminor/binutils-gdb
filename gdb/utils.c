@@ -825,7 +825,7 @@ print_sys_errmsg (char *string, int errcode)
 void
 quit (void)
 {
-  serial_t gdb_stdout_serial = serial_fdopen (1);
+  struct serial *gdb_stdout_serial = serial_fdopen (1);
 
   target_terminal_ours ();
 

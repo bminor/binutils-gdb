@@ -38,14 +38,14 @@
 static struct target_ops sparclite_ops;
 
 static char *remote_target_name = NULL;
-static serial_t remote_desc = NULL;
+static struct serial *remote_desc = NULL;
 static int serial_flag;
 #ifdef HAVE_SOCKETS
 static int udp_fd = -1;
 #endif
 
-static serial_t open_tty (char *name);
-static int send_resp (serial_t desc, char c);
+static struct serial *open_tty (char *name);
+static int send_resp (struct serial *desc, char c);
 static void close_tty (void * ignore);
 #ifdef HAVE_SOCKETS
 static int recv_udp_buf (int fd, unsigned char *buf, int len, int timeout);
@@ -259,10 +259,10 @@ sparclite_stopped_data_address (void)
     return 0;
 }
 
-static serial_t
+static struct serial *
 open_tty (char *name)
 {
-  serial_t desc;
+  struct serial *desc;
 
   desc = SERIAL_OPEN (name);
   if (!desc)
@@ -287,7 +287,7 @@ open_tty (char *name)
 /* Read a single character from the remote end, masking it down to 7 bits. */
 
 static int
-readchar (serial_t desc, int timeout)
+readchar (struct serial *desc, int timeout)
 {
   int ch;
   char s[10];
@@ -313,7 +313,7 @@ readchar (serial_t desc, int timeout)
 }
 
 static void
-debug_serial_write (serial_t desc, char *buf, int len)
+debug_serial_write (struct serial *desc, char *buf, int len)
 {
   char s[10];
 
@@ -331,7 +331,7 @@ debug_serial_write (serial_t desc, char *buf, int len)
 
 
 static int
-send_resp (serial_t desc, char c)
+send_resp (struct serial *desc, char c)
 {
   debug_serial_write (desc, &c, 1);
   return readchar (desc, remote_timeout);

@@ -27,7 +27,7 @@
 
 int
 tty_flush (serial)
-     serial_t serial;
+     struct serial *serial;
 {
   while (1)
     {

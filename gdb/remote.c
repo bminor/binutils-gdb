@@ -240,7 +240,7 @@ static int remote_break;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
-static serial_t remote_desc = NULL;
+static struct serial *remote_desc = NULL;
 
 /* This is set by the target (thru the 'S' message)
    to denote that the target is in kernel mode.  */
@@ -5669,7 +5669,7 @@ static void *async_client_context;
 static serial_event_ftype remote_async_serial_handler;
 
 static void
-remote_async_serial_handler (serial_t scb, void *context)
+remote_async_serial_handler (struct serial *scb, void *context)
 {
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */

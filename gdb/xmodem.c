@@ -36,7 +36,7 @@ static int blknum;		/* XMODEM block number */
 static int crcflag;		/* Sez we are using CRC's instead of cksums */
 
 static int
-readchar (serial_t desc, int timeout)
+readchar (struct serial *desc, int timeout)
 {
   int c;
 
@@ -109,7 +109,7 @@ docrc (unsigned char *p, int len)
    send NAK or CRC request.  */
 
 int
-xmodem_init_xfer (serial_t desc)
+xmodem_init_xfer (struct serial *desc)
 {
   int c;
   int i;
@@ -160,7 +160,7 @@ xmodem_init_xfer (serial_t desc)
  */
 
 void
-xmodem_send_packet (serial_t desc, unsigned char *packet, int len, int hashmark)
+xmodem_send_packet (struct serial *desc, unsigned char *packet, int len, int hashmark)
 {
   int i;
   int retries;
@@ -246,7 +246,7 @@ xmodem_send_packet (serial_t desc, unsigned char *packet, int len, int hashmark)
 /* Finish off the transfer.  Send out the EOT, and wait for an ACK.  */
 
 void
-xmodem_finish_xfer (serial_t desc)
+xmodem_finish_xfer (struct serial *desc)
 {
   int retries;
 

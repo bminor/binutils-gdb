@@ -83,7 +83,7 @@ static int remote_timeout = 2;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    ocd_open knows that we don't have a file open when the program
    starts.  */
-static serial_t ocd_desc = NULL;
+static struct serial *ocd_desc = NULL;
 
 void
 ocd_error (char *s, int error_code)

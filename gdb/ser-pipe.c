@@ -34,8 +34,8 @@
 
 #include <signal.h>
 
-static int pipe_open (serial_t scb, const char *name);
-static void pipe_close (serial_t scb);
+static int pipe_open (struct serial *scb, const char *name);
+static void pipe_close (struct serial *scb);
 
 extern void _initialize_ser_pipe (void);
 
@@ -47,7 +47,7 @@ struct pipe_state
 /* Open up a raw pipe */
 
 static int
-pipe_open (serial_t scb, const char *name)
+pipe_open (struct serial *scb, const char *name)
 {
 #if !HAVE_SOCKETPAIR
   return -1;
@@ -117,7 +117,7 @@ pipe_open (serial_t scb, const char *name)
 }
 
 static void
-pipe_close (serial_t scb)
+pipe_close (struct serial *scb)
 {
   struct pipe_state *state = scb->state;
   if (state != NULL)

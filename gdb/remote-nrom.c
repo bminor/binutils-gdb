@@ -46,8 +46,8 @@ static void nrom_passthru (char *, int);
 
 /* We talk to the NetROM over these sockets.  */
 
-static serial_t load_desc = NULL;
-static serial_t ctrl_desc = NULL;
+static struct serial *load_desc = NULL;
+static struct serial *ctrl_desc = NULL;
 
 static int load_port = DEFAULT_NETROM_LOAD_PORT;
 static int control_port = DEFAULT_NETROM_CONTROL_PORT;
@@ -97,11 +97,11 @@ nrom_kill (void)
   nrom_close (0);
 }
 
-static serial_t
+static struct serial *
 open_socket (char *name, int port)
 {
   char sockname[100];
-  serial_t desc;
+  struct serial *desc;
 
   sprintf (sockname, "%s:%d", name, port);
   desc = SERIAL_OPEN (sockname);

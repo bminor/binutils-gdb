@@ -33,14 +33,14 @@
 #include <sys/dos.h>
 #endif
 
-static int e7000pc_open (serial_t scb, const char *name);
-static void e7000pc_raw (serial_t scb);
-static int e7000pc_readchar (serial_t scb, int timeout);
-static int e7000pc_setbaudrate (serial_t scb, int rate);
-static int e7000pc_write (serial_t scb, const char *str, int len);
-static void e7000pc_close (serial_t scb);
-static serial_ttystate e7000pc_get_tty_state (serial_t scb);
-static int e7000pc_set_tty_state (serial_t scb, serial_ttystate state);
+static int e7000pc_open (struct serial *scb, const char *name);
+static void e7000pc_raw (struct serial *scb);
+static int e7000pc_readchar (struct serial *scb, int timeout);
+static int e7000pc_setbaudrate (struct serial *scb, int rate);
+static int e7000pc_write (struct serial *scb, const char *str, int len);
+static void e7000pc_close (struct serial *scb);
+static serial_ttystate e7000pc_get_tty_state (struct serial *scb);
+static int e7000pc_set_tty_state (struct serial *scb, serial_ttystate state);
 
 #define OFF_DPD 	0x0000
 #define OFF_DDP 	0x1000
@@ -291,7 +291,7 @@ dosasync_write (int fd, const char *buf, int len)
 }
 
 static int
-e7000pc_open (serial_t scb, const char *name)
+e7000pc_open (struct serial *scb, const char *name)
 {
   if (strncasecmp (name, "pc", 2) != 0)
     {
@@ -308,19 +308,19 @@ e7000pc_open (serial_t scb, const char *name)
 }
 
 static int
-e7000pc_noop (serial_t scb)
+e7000pc_noop (struct serial *scb)
 {
   return 0;
 }
 
 static void
-e7000pc_raw (serial_t scb)
+e7000pc_raw (struct serial *scb)
 {
   /* Always in raw mode */
 }
 
 static int
-e7000pc_readchar (serial_t scb, int timeout)
+e7000pc_readchar (struct serial *scb, int timeout)
 {
   char buf;
 
@@ -345,7 +345,7 @@ struct e7000pc_ttystate
    vector.  Someday, they may do something real... */
 
 static serial_ttystate
-e7000pc_get_tty_state (serial_t scb)
+e7000pc_get_tty_state (struct serial *scb)
 {
   struct e7000pc_ttystate *state;
 
@@ -355,20 +355,21 @@ e7000pc_get_tty_state (serial_t scb)
 }
 
 static int
-e7000pc_set_tty_state (serial_t scb, serial_ttystate ttystate)
+e7000pc_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 {
   return 0;
 }
 
 static int
-e7000pc_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
+e7000pc_noflush_set_tty_state (struct serial *scb,
+			       serial_ttystate new_ttystate,
 			       serial_ttystate old_ttystate)
 {
   return 0;
 }
 
 static void
-e7000pc_print_tty_state (serial_t scb,
+e7000pc_print_tty_state (struct serial *scb,
 			 serial_ttystate ttystate,
 			 struct ui_file *stream)
 {
@@ -377,19 +378,19 @@ e7000pc_print_tty_state (serial_t scb,
 }
 
 static int
-e7000pc_setbaudrate (serial_t scb, int rate)
+e7000pc_setbaudrate (struct serial *scb, int rate)
 {
   return 0;
 }
 
 static int
-e7000pc_setstopbits (serial_t scb, int rate)
+e7000pc_setstopbits (struct serial *scb, int rate)
 {
   return 0;
 }
 
 static int
-e7000pc_write (serial_t scb, const char *str, int len)
+e7000pc_write (struct serial *scb, const char *str, int len)
 {
   dosasync_write (scb->fd, str, len);
 
@@ -397,7 +398,7 @@ e7000pc_write (serial_t scb, const char *str, int len)
 }
 
 static void
-e7000pc_close (serial_t scb)
+e7000pc_close (struct serial *scb)
 {
 }
 

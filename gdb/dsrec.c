@@ -33,19 +33,20 @@ static int make_srec (char *srec, CORE_ADDR targ_addr, bfd * abfd,
 		      int flags);
 
 /* Download an executable by converting it to S records.  DESC is a
-   serial_t to send the data to.  FILE is the name of the file to be
-   loaded.  LOAD_OFFSET is the offset into memory to load data into.
-   It is usually specified by the user and is useful with the a.out
-   file format.  MAXRECSIZE is the length in chars of the largest
-   S-record the host can accomodate.  This is measured from the
-   starting `S' to the last char of the checksum.  FLAGS is various
-   random flags, and HASHMARK is non-zero to cause a `#' to be
+   `struct serial *' to send the data to.  FILE is the name of the
+   file to be loaded.  LOAD_OFFSET is the offset into memory to load
+   data into.  It is usually specified by the user and is useful with
+   the a.out file format.  MAXRECSIZE is the length in chars of the
+   largest S-record the host can accomodate.  This is measured from
+   the starting `S' to the last char of the checksum.  FLAGS is
+   various random flags, and HASHMARK is non-zero to cause a `#' to be
    printed out for each record loaded.  WAITACK, if non-NULL, is a
-   function that waits for an acknowledgement after each S-record,
-   and returns non-zero if the ack is read correctly.  */
+   function that waits for an acknowledgement after each S-record, and
+   returns non-zero if the ack is read correctly.  */
 
 void
-load_srec (serial_t desc, const char *file, bfd_vma load_offset, int maxrecsize,
+load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
+	   int maxrecsize,
 	   int flags, int hashmark, int (*waitack) (void))
 {
   bfd *abfd;

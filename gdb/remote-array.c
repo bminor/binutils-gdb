@@ -90,7 +90,7 @@ static int timeout = 30;
  * Descriptor for I/O to remote machine.  Initialize it to NULL so that
  * array_open knows that we don't have a file open when the program starts.
  */
-serial_t array_desc = NULL;
+struct serial *array_desc = NULL;
 
 /*
  * this array of registers need to match the indexes used by GDB. The
@@ -694,7 +694,7 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
   int old_timeout = timeout;
   int result, i;
   char c;
-  serial_t tty_desc;
+  struct serial *tty_desc;
   serial_ttystate ttystate;
 
   debuglogs (1, "array_wait (), printing extraneous text.");

@@ -127,7 +127,7 @@ static int sds_timeout = 2;
    that sds_open knows that we don't have a file open when the program
    starts.  */
 
-static serial_t sds_desc = NULL;
+static struct serial *sds_desc = NULL;
 
 /* This limit comes from the monitor.  */
 

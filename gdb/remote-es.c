@@ -231,7 +231,7 @@ static int m68020;
    es1800_open knows that we don't have a file open when the program
    starts.  */
 
-static serial_t es1800_desc = NULL;
+static struct serial *es1800_desc = NULL;
 
 #define	PBUFSIZ	1000
 #define HDRLEN sizeof("@.BAAAAAAAA=$VV\r")

@@ -80,7 +80,7 @@ static int tty_xoff = 0;
 static int timeout = 10;
 static int is_trace_mode = 0;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL */
-static serial_t monitor_desc = NULL;
+static struct serial *monitor_desc = NULL;
 
 static CORE_ADDR bufaddr = 0;
 static int buflen = 0;

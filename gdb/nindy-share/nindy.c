@@ -89,7 +89,7 @@
 #define TIMEOUT		-1
 
 int quiet = 0;	/* 1 => stifle unnecessary messages */
-serial_t nindy_serial;
+struct serial *nindy_serial;
 
 static int old_nindy = 0; /* 1 => use old (hex) communication protocol */
 static ninStrGet();
@@ -514,7 +514,7 @@ parse_baudrate(s)
 
 static int
 try_baudrate (serial, brp)
-     serial_t serial;
+     struct serial *serial;
      struct baudrate *brp;
 {
   unsigned char c;
@@ -540,7 +540,7 @@ try_baudrate (serial, brp)
  ******************************************************************************/
 static
 autobaud( serial, brp )
-     serial_t serial;
+     struct serial *serial;
      struct baudrate *brp;
 {
   int i;

@@ -105,7 +105,7 @@ sparclet_supply_register (char *regname, int regnamelen, char *val, int vallen)
 }
 
 static void
-sparclet_load (serial_t desc, char *file, int hashmark)
+sparclet_load (struct serial *desc, char *file, int hashmark)
 {
   bfd *abfd;
   asection *s;

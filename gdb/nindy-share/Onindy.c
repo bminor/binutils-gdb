@@ -58,7 +58,7 @@
 extern int quiet;	/* 1 => stifle unnecessary messages */
 
 /* tty connected to 960/NINDY board.  */
-extern serial_t nindy_serial;
+extern struct serial *nindy_serial;
 
 static OninStrGet();
 

@@ -61,7 +61,7 @@ static int timeout = 24;
    st2000_open knows that we don't have a file open when the program
    starts.  */
 
-static serial_t st2000_desc;
+static struct serial *st2000_desc;
 
 /* Send data to stdebug.  Works just like printf. */
 

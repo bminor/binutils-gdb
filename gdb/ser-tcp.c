@@ -34,15 +34,15 @@
 #include <signal.h>
 #include "gdb_string.h"
 
-static int tcp_open (serial_t scb, const char *name);
-static void tcp_close (serial_t scb);
+static int tcp_open (struct serial *scb, const char *name);
+static void tcp_close (struct serial *scb);
 
 void _initialize_ser_tcp (void);
 
 /* Open up a raw tcp socket */
 
 static int
-tcp_open (serial_t scb, const char *name)
+tcp_open (struct serial *scb, const char *name)
 {
   char *port_str;
   int port;
@@ -122,7 +122,7 @@ tcp_open (serial_t scb, const char *name)
 }
 
 static void
-tcp_close (serial_t scb)
+tcp_close (struct serial *scb)
 {
   if (scb->fd < 0)
     return;

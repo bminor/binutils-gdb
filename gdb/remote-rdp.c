@@ -55,7 +55,7 @@
 #endif
 
 extern struct target_ops remote_rdp_ops;
-static serial_t io;
+static struct serial *io;
 static host_callback *callback = &default_callback;
 
 struct

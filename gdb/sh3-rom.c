@@ -28,7 +28,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 
-static serial_t parallel;
+static struct serial *parallel;
 static int parallel_in_use;
 
 static void sh3_open (char *args, int from_tty);
@@ -120,7 +120,7 @@ sh3_supply_register (char *regname, int regnamelen, char *val, int vallen)
 }
 
 static void
-sh3_load (serial_t desc, char *file, int hashmark)
+sh3_load (struct serial *desc, char *file, int hashmark)
 {
   if (parallel_in_use)
     {

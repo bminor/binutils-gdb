@@ -228,14 +228,14 @@ ports[4] =
   }
 };
 
-static int dos_open (serial_t scb, const char *name);
-static void dos_raw (serial_t scb);
-static int dos_readchar (serial_t scb, int timeout);
-static int dos_setbaudrate (serial_t scb, int rate);
-static int dos_write (serial_t scb, const char *str, int len);
-static void dos_close (serial_t scb);
-static serial_ttystate dos_get_tty_state (serial_t scb);
-static int dos_set_tty_state (serial_t scb, serial_ttystate state);
+static int dos_open (struct serial *scb, const char *name);
+static void dos_raw (struct serial *scb);
+static int dos_readchar (struct serial *scb, int timeout);
+static int dos_setbaudrate (struct serial *scb, int rate);
+static int dos_write (struct serial *scb, const char *str, int len);
+static void dos_close (struct serial *scb);
+static serial_ttystate dos_get_tty_state (struct serial *scb);
+static int dos_set_tty_state (struct serial *scb, serial_ttystate state);
 static int dos_baudconv (int rate);
 
 #define inb(p,a)	inportb((p)->base + (a))
@@ -453,7 +453,7 @@ dos_unhookirq (struct intrupt *intr)
 
 
 static int
-dos_open (serial_t scb, const char *name)
+dos_open (struct serial *scb, const char *name)
 {
   struct dos_ttystate *port;
   int fd, i;
@@ -558,7 +558,7 @@ ok:
 
 
 static void
-dos_close (serial_t scb)
+dos_close (struct serial *scb)
 {
   struct dos_ttystate *port;
   struct intrupt *intrupt;
@@ -600,19 +600,19 @@ dos_close (serial_t scb)
 
 
 static int
-dos_noop (serial_t scb)
+dos_noop (struct serial *scb)
 {
   return 0;
 }
 
 static void
-dos_raw (serial_t scb)
+dos_raw (struct serial *scb)
 {
   /* Always in raw mode */
 }
 
 static int
-dos_readchar (serial_t scb, int timeout)
+dos_readchar (struct serial *scb, int timeout)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   long then;
@@ -630,7 +630,7 @@ dos_readchar (serial_t scb, int timeout)
 
 
 static serial_ttystate
-dos_get_tty_state (serial_t scb)
+dos_get_tty_state (struct serial *scb)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   struct dos_ttystate *state;
@@ -654,7 +654,7 @@ dos_get_tty_state (serial_t scb)
 }
 
 static int
-dos_set_tty_state (serial_t scb, serial_ttystate ttystate)
+dos_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 {
   struct dos_ttystate *state;
 
@@ -664,7 +664,7 @@ dos_set_tty_state (serial_t scb, serial_ttystate ttystate)
 }
 
 static int
-dos_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
+dos_noflush_set_tty_state (struct serial *scb, serial_ttystate new_ttystate,
 			   serial_ttystate old_ttystate)
 {
   struct dos_ttystate *state;
@@ -675,7 +675,7 @@ dos_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
 }
 
 static int
-dos_flush_input (serial_t scb)
+dos_flush_input (struct serial *scb)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   disable ();
@@ -687,7 +687,7 @@ dos_flush_input (serial_t scb)
 }
 
 static void
-dos_print_tty_state (serial_t scb, serial_ttystate ttystate,
+dos_print_tty_state (struct serial *scb, serial_ttystate ttystate,
 		     struct ui_file *stream)
 {
   /* Nothing to print */
@@ -718,7 +718,7 @@ dos_baudconv (int rate)
 
 
 static int
-dos_setbaudrate (serial_t scb, int rate)
+dos_setbaudrate (struct serial *scb, int rate)
 {
   struct dos_ttystate *port = &ports[scb->fd];
 
@@ -750,7 +750,7 @@ dos_setbaudrate (serial_t scb, int rate)
 }
 
 static int
-dos_setstopbits (serial_t scb, int num)
+dos_setstopbits (struct serial *scb, int num)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   unsigned char cfcr;
@@ -777,7 +777,7 @@ dos_setstopbits (serial_t scb, int num)
 }
 
 static int
-dos_write (serial_t scb, const char *str, int len)
+dos_write (struct serial *scb, const char *str, int len)
 {
   volatile struct dos_ttystate *port = &ports[scb->fd];
   int fifosize = port->fifo ? 16 : 1;
@@ -818,7 +818,7 @@ dos_write (serial_t scb, const char *str, int len)
 
 
 static int
-dos_sendbreak (serial_t scb)
+dos_sendbreak (struct serial *scb)
 {
   volatile struct dos_ttystate *port = &ports[scb->fd];
   unsigned char cfcr;
@@ -856,7 +856,7 @@ static struct serial_ops dos_ops =
   dos_setbaudrate,
   dos_setstopbits,
   dos_noop,			/* wait for output to drain */
-  (void (*)(serial_t, int))NULL	/* change into async mode */
+  (void (*)(struct serial *, int))NULL	/* change into async mode */
 };
 
 

@@ -141,7 +141,7 @@ char *nindy_ttyname;		/* name of tty to talk to nindy on, or null */
 #define FALSE	0
 
 /* From nindy-share/nindy.c.  */
-extern serial_t nindy_serial;
+extern struct serial *nindy_serial;
 
 static int have_regs = 0;	/* 1 iff regs read since i960 last halted */
 static int regs_changed = 0;	/* 1 iff regs were modified since last read */
@@ -277,7 +277,7 @@ nindy_resume (ptid_t ptid, int step, enum target_signal siggnal)
 struct clean_up_tty_args
 {
   serial_ttystate state;
-  serial_t serial;
+  struct serial *serial;
 };
 static struct clean_up_tty_args tty_args;
 

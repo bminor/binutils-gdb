@@ -1,3 +1,42 @@
+2001-07-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* serial.h (typedef serial_t): Delete. Replace all references to
+	serial_t with `struct serial *'.
+	* serial.c: Update.
+	* nindy-share/ttyflush.c: Update.
+	* nindy-share/ttyflush.c: Update.
+	* nindy-share/Onindy.c: Update.
+	* nindy-share/nindy.c: Update.
+	* remote-rdp.c: Update.
+	* remote-sds.c: Update.
+	* remote-st.c: Update.
+	* remote-nindy.c: Update.
+	* remote-mips.c: Update.
+	* remote-e7000.c: Update.
+	* remote-os9k.c: Update.
+	* remote-nrom.c: Update.
+	* remote-es.c: Update.
+	* remote-array.c: Update.
+	* ocd.c: Update.
+	* mon960-rom.c: Update.
+	* dsrec.c: Update.
+	* inflow.c: Update.
+	* ser-e7kpc.c: Update.
+	* sparclet-rom.c: Update.
+	* srec.h: Update.
+	* ser-tcp.c: Update.
+	* ser-go32.c: Update.
+	* sparcl-tdep.c: Update.
+	* w89k-rom.c: Update.
+	* utils.c: Update.
+	* sh3-rom.c: Update.
+	* remote.c: Update.
+	* ser-pipe.c: Update.
+	* ser-unix.c: Update.
+	* ser-unix.h: Update.
+	* xmodem.c: Update.
+	* xmodem.h: Update.
+
 2001-07-11  J.T. Conklin  <jtc@redback.com>
 
 	From Greg McGary <greg@mcgary.org>:

@@ -115,7 +115,7 @@ static void expect_prompt (void);
 static int e7000_parse_device (char *args, char *dev_name, int baudrate);
 /* Variables. */
 
-static serial_t e7000_desc;
+static struct serial *e7000_desc;
 
 /* Allow user to chose between using hardware breakpoints or memory. */
 static int use_hard_breakpoints = 0;	/* use sw breakpoints by default */
