@@ -65,13 +65,25 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM16    (IMM8+1)
   {16, 0, MN10300_OPERAND_PROMOTE},
 
+#define IMM16_PCREL    (IMM16+1)
+  {16, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_PCREL},
+
+#define IMM16_MEM    (IMM16_PCREL+1)
+  {16, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
+
 /* 32bit immediate, high 16 bits in the main instruction
    word, 16bits in the extension word. 
 
    The "bits" field indicates how many bits are in the
    main instruction word for MN10300_OPERAND_SPLIT!  */
-#define IMM32    (IMM16+1)
+#define IMM32    (IMM16_MEM+1)
   {16, 0, MN10300_OPERAND_SPLIT},
+
+#define IMM32_PCREL    (IMM32+1)
+  {16, 0, MN10300_OPERAND_SPLIT | MN10300_OPERAND_PCREL},
+
+#define IMM32_MEM    (IMM32_PCREL+1)
+  {16, 0, MN10300_OPERAND_SPLIT | MN10300_OPERAND_MEMADDR},
 
 /* 32bit immediate, high 16 bits in the main instruction
    word, 16bits in the extension word, low 16bits are left
@@ -79,8 +91,8 @@ const struct mn10300_operand mn10300_operands[] = {
 
    The "bits" field indicates how many bits are in the
    main instruction word for MN10300_OPERAND_SPLIT!  */
-#define IMM32_LOWSHIFT8    (IMM32+1)
-  {16, 8, MN10300_OPERAND_SPLIT},
+#define IMM32_LOWSHIFT8    (IMM32_MEM+1)
+  {16, 8, MN10300_OPERAND_SPLIT | MN10300_OPERAND_MEMADDR},
 
 /* 32bit immediate, high 24 bits in the main instruction
    word, 8 in the extension word.
@@ -88,7 +100,7 @@ const struct mn10300_operand mn10300_operands[] = {
    The "bits" field indicates how many bits are in the
    main instruction word for MN10300_OPERAND_SPLIT!  */
 #define IMM32_HIGH24    (IMM32_LOWSHIFT8+1)
-  {24, 0, MN10300_OPERAND_SPLIT},
+  {24, 0, MN10300_OPERAND_SPLIT | MN10300_OPERAND_PCREL},
 
 /* 32bit immediate, high 24 bits in the main instruction
    word, 8 in the extension word, low 8 bits are left
@@ -97,7 +109,7 @@ const struct mn10300_operand mn10300_operands[] = {
    The "bits" field indicates how many bits are in the
    main instruction word for MN10300_OPERAND_SPLIT!  */
 #define IMM32_HIGH24_LOWSHIFT16    (IMM32_HIGH24+1)
-  {24, 16, MN10300_OPERAND_SPLIT},
+  {24, 16, MN10300_OPERAND_SPLIT | MN10300_OPERAND_PCREL},
 
 #define SP    (IMM32_HIGH24_LOWSHIFT16+1)
   {8, 0, MN10300_OPERAND_SP},
@@ -120,7 +132,10 @@ const struct mn10300_operand mn10300_operands[] = {
 #define SD8N    (SD16+1)
   {8, 0, MN10300_OPERAND_SIGNED},
 
-#define SD8N_SHIFT8    (SD8N+1)
+#define SD8N_PCREL    (SD8N+1)
+  {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PCREL},
+
+#define SD8N_SHIFT8    (SD8N_PCREL+1)
   {8, 8, MN10300_OPERAND_SIGNED},
 
 #define SIMM8    (SD8N_SHIFT8+1)
@@ -139,7 +154,7 @@ const struct mn10300_operand mn10300_operands[] = {
   {2, 0, MN10300_OPERAND_AREG | MN10300_OPERAND_REPEATED},
 
 #define D16_SHIFT (AN01+1)
-  {16, 8, MN10300_OPERAND_PROMOTE},
+  {16, 8, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_PCREL},
 
 #define IMM8E    (D16_SHIFT+1)
   {8, 0, MN10300_OPERAND_EXTENDED},
@@ -196,8 +211,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfab40000,	0xfffc0000,	FMT_D2, {MEM2(IMM16, SP), DN0}},
 { "mov",	0xfcb40000,	0xfffc0000,	FMT_D4, {MEM2(IMM32, SP), DN0}},
 { "mov",	0xf300,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN2}},
-{ "mov",	0x300000,	0xfc0000,	FMT_S2, {MEM(IMM16), DN0}},
-{ "mov",	0xfca40000,	0xfffc0000,	FMT_D4, {MEM(IMM32), DN0}},
+{ "mov",	0x300000,	0xfc0000,	FMT_S2, {MEM(IMM16_MEM), DN0}},
+{ "mov",	0xfca40000,	0xfffc0000,	FMT_D4, {MEM(IMM32_MEM), DN0}},
 { "mov",	0xf000,		0xfff0,		FMT_D0, {MEM(AM0), AN1}},
 { "mov",	0xf82000,	0xfff000,	FMT_D1, {MEM2(SD8,AM0), AN1}},
 { "mov",	0xfa200000,	0xfff00000,	FMT_D2, {MEM2(SD16, AM0), AN1}},
@@ -206,8 +221,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfab00000,	0xfffc0000,	FMT_D2, {MEM2(IMM16, SP), AN0}},
 { "mov",	0xfcb00000,	0xfffc0000,	FMT_D4, {MEM2(IMM32, SP), AN0}},
 { "mov",	0xf380,		0xffc0,		FMT_D0, {MEM2(DI, AM0), AN2}},
-{ "mov",	0xfaa00000,	0xfffc0000,	FMT_D2, {MEM(IMM16), AN0}},
-{ "mov",	0xfca00000,	0xfffc0000,	FMT_D4, {MEM(IMM32), AN0}},
+{ "mov",	0xfaa00000,	0xfffc0000,	FMT_D2, {MEM(IMM16_MEM), AN0}},
+{ "mov",	0xfca00000,	0xfffc0000,	FMT_D4, {MEM(IMM32_MEM), AN0}},
 { "mov",	0xf8f000,	0xfffc00,	FMT_D1, {MEM2(SD8N, AM0), SP}},
 { "mov",	0x60,		0xf0,		FMT_S0, {DM1, MEM(AN0)}},
 { "mov",	0xf81000,	0xfff000,	FMT_D1, {DM1, MEM2(SD8, AN0)}},
@@ -217,8 +232,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfa910000,	0xfff30000,	FMT_D2, {DM1, MEM2(IMM16, SP)}},
 { "mov",	0xfc910000,	0xfff30000,	FMT_D4, {DM1, MEM2(IMM32, SP)}},
 { "mov",	0xf340,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
-{ "mov",	0x010000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16)}},
-{ "mov",	0xfc810000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32)}},
+{ "mov",	0x010000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16_MEM)}},
+{ "mov",	0xfc810000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32_MEM)}},
 { "mov",	0xf010,		0xfff0,		FMT_D0, {AM1, MEM(AN0)}},
 { "mov",	0xf83000,	0xfff000,	FMT_D1, {AM1, MEM2(SD8, AN0)}},
 { "mov",	0xfa300000,	0xfff00000,	FMT_D2, {AM1, MEM2(SD16, AN0)}},
@@ -227,8 +242,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfa900000,	0xfff30000,	FMT_D2, {AM1, MEM2(IMM16, SP)}},
 { "mov",	0xfc900000,	0xfc930000,	FMT_D4, {AM1, MEM2(IMM32, SP)}},
 { "mov",	0xf3c0,		0xffc0,		FMT_D0, {AM2, MEM2(DI, AN0)}},
-{ "mov",	0xfa800000,	0xfff30000,	FMT_D2, {AM1, MEM(IMM16)}},
-{ "mov",	0xfc800000,	0xfff30000,	FMT_D4, {AM1, MEM(IMM32)}},
+{ "mov",	0xfa800000,	0xfff30000,	FMT_D2, {AM1, MEM(IMM16_MEM)}},
+{ "mov",	0xfc800000,	0xfff30000,	FMT_D4, {AM1, MEM(IMM32_MEM)}},
 { "mov",	0xf8f400,	0xfffc00,	FMT_D1, {SP, MEM2(SD8N, AN0)}},
 { "mov",	0x2c0000,	0xfc0000,	FMT_S2, {SIMM16, DN0}},
 { "mov",	0xfccc0000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
@@ -243,8 +258,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movbu",	0xfab80000,	0xfffc0000,	FMT_D2, {MEM2(IMM16, SP), DN0}},
 { "movbu",	0xfcb80000,	0xfffc0000,	FMT_D4, {MEM2(IMM32, SP), DN0}},
 { "movbu",	0xf400,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN2}},
-{ "movbu",	0x340000,	0xfc0000,	FMT_S2, {MEM(IMM16), DN0}},
-{ "movbu",	0xfca80000,	0xfffc0000,	FMT_D4, {MEM(IMM32), DN0}},
+{ "movbu",	0x340000,	0xfc0000,	FMT_S2, {MEM(IMM16_MEM), DN0}},
+{ "movbu",	0xfca80000,	0xfffc0000,	FMT_D4, {MEM(IMM32_MEM), DN0}},
 { "movbu",	0xf050,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
 { "movbu",	0xf85000,	0xfff000,	FMT_D1, {DM1, MEM2(SD8, AN0)}},
 { "movbu",	0xfa500000,	0xfff00000,	FMT_D2, {DM1, MEM2(SD16, AN0)}},
@@ -253,8 +268,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movbu",	0xfa920000,	0xfff30000,	FMT_D2, {DM1, MEM2(IMM16, SP)}},
 { "movbu",	0xfc920000,	0xfff30000,	FMT_D4, {DM1, MEM2(IMM32, SP)}},
 { "movbu",	0xf440,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
-{ "movbu",	0x020000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16)}},
-{ "movbu",	0xfc820000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32)}},
+{ "movbu",	0x020000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16_MEM)}},
+{ "movbu",	0xfc820000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32_MEM)}},
 
 { "movhu",	0xf060,		0xfff0,		FMT_D0, {MEM(AM0), DN1}},
 { "movhu",	0xf86000,	0xfff000,	FMT_D1, {MEM2(SD8, AM0), DN1}},
@@ -264,8 +279,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movhu",	0xfabc0000,	0xfffc0000,	FMT_D2, {MEM2(IMM16, SP), DN0}},
 { "movhu",	0xfcbc0000,	0xfffc0000,	FMT_D4, {MEM2(IMM32, SP), DN0}},
 { "movhu",	0xf480,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN2}},
-{ "movhu",	0x380000,	0xfc0000,	FMT_S2, {MEM(IMM16), DN0}},
-{ "movhu",	0xfcac0000,	0xfffc0000,	FMT_D4, {MEM(IMM32), DN0}},
+{ "movhu",	0x380000,	0xfc0000,	FMT_S2, {MEM(IMM16_MEM), DN0}},
+{ "movhu",	0xfcac0000,	0xfffc0000,	FMT_D4, {MEM(IMM32_MEM), DN0}},
 { "movhu",	0xf070,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
 { "movhu",	0xf87000,	0xfff000,	FMT_D1, {DM1, MEM2(SD8, AN0)}},
 { "movhu",	0xfa700000,	0xfff00000,	FMT_D2, {DM1, MEM2(SD16, AN0)}},
@@ -274,8 +289,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movhu",	0xfa930000,	0xfff30000,	FMT_D2, {DM1, MEM2(IMM16, SP)}},
 { "movhu",	0xfc930000,	0xfff30000,	FMT_D4, {DM1, MEM2(IMM32, SP)}},
 { "movhu",	0xf4c0,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
-{ "movhu",	0x030000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16)}},
-{ "movhu",	0xfc830000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32)}},
+{ "movhu",	0x030000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16_MEM)}},
+{ "movhu",	0xfc830000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32_MEM)}},
 
 { "ext",	0xf2d0,		0xfffc,		FMT_D0, {DN0}},
 { "extb",	0x10, 		0xfc,		FMT_S0, {DN0}},
@@ -375,21 +390,21 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "ror",	0xf284,		0xfffc,		FMT_D0, {DN0}},
 { "rol",	0xf280,		0xfffc,		FMT_D0, {DN0}},
 
-{ "beq",	0xc800,		0xff00,		FMT_S1, {SD8N}},
-{ "bne",	0xc900,		0xff00,		FMT_S1, {SD8N}},
-{ "bgt",	0xc100,		0xff00,		FMT_S1, {SD8N}},
-{ "bge",	0xc200,		0xff00,		FMT_S1, {SD8N}},
-{ "ble",	0xc300,		0xff00,		FMT_S1, {SD8N}},
-{ "blt",	0xc000,		0xff00,		FMT_S1, {SD8N}},
-{ "bhi",	0xc500,		0xff00,		FMT_S1, {SD8N}},
-{ "bcc",	0xc600,		0xff00,		FMT_S1, {SD8N}},
-{ "bls",	0xc700,		0xff00,		FMT_S1, {SD8N}},
-{ "bcs",	0xc400,		0xff00,		FMT_S1, {SD8N}},
-{ "bvc",	0xf8e800,	0xffff00,	FMT_D1, {SD8N}},
-{ "bvs",	0xf8e900,	0xffff00,	FMT_D1, {SD8N}},
-{ "bnc",	0xf8ea00,	0xffff00,	FMT_D1, {SD8N}},
-{ "bns",	0xf8eb00,	0xffff00,	FMT_D1, {SD8N}},
-{ "bra",	0xca00,		0xff00,		FMT_S1, {SD8N}},
+{ "beq",	0xc800,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bne",	0xc900,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bgt",	0xc100,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bge",	0xc200,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "ble",	0xc300,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "blt",	0xc000,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bhi",	0xc500,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bcc",	0xc600,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bls",	0xc700,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bcs",	0xc400,		0xff00,		FMT_S1, {SD8N_PCREL}},
+{ "bvc",	0xf8e800,	0xffff00,	FMT_D1, {SD8N_PCREL}},
+{ "bvs",	0xf8e900,	0xffff00,	FMT_D1, {SD8N_PCREL}},
+{ "bnc",	0xf8ea00,	0xffff00,	FMT_D1, {SD8N_PCREL}},
+{ "bns",	0xf8eb00,	0xffff00,	FMT_D1, {SD8N_PCREL}},
+{ "bra",	0xca00,		0xff00,		FMT_S1, {SD8N_PCREL}},
 
 { "leq",	0xd8,		0xff,		FMT_S0, {UNUSED}},
 { "lne",	0xd9,		0xff,		FMT_S0, {UNUSED}},
@@ -406,14 +421,14 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "setlb",	0xdb,		0xff,	 	FMT_S0, {UNUSED}},
 
 { "jmp",	0xf0f4,		0xfffc,		FMT_D0, {PAREN,AN0,PAREN}},
-{ "jmp",	0xcc0000,	0xff0000,	FMT_S2, {IMM16}},
+{ "jmp",	0xcc0000,	0xff0000,	FMT_S2, {IMM16_PCREL}},
 { "jmp",	0xdc000000,	0xff000000,	FMT_S4, {IMM32_HIGH24}},
 { "call",	0xcd000000,	0xff000000,	FMT_S4, {D16_SHIFT,IMM8,IMM8E}},
 { "call",	0xdd000000,	0xff000000,	FMT_S6,
 					{IMM32_HIGH24_LOWSHIFT16,IMM8E_SHIFT8,IMM8E}},
 { "calls",	0xf0f0,		0xfffc,		FMT_D0, {PAREN,AN0,PAREN}},
-{ "calls",	0xfaff0000,	0xffff0000,	FMT_D2, {IMM16}},
-{ "calls",	0xfcff0000,	0xffff0000,	FMT_D4, {IMM32}},
+{ "calls",	0xfaff0000,	0xffff0000,	FMT_D2, {IMM16_PCREL}},
+{ "calls",	0xfcff0000,	0xffff0000,	FMT_D4, {IMM32_PCREL}},
 
 { "ret",	0xdf0000,	0xff0000,	FMT_S2, {IMM8_SHIFT8, IMM8}},
 { "retf",	0xde0000,	0xff0000,	FMT_S2, {IMM8_SHIFT8, IMM8}},

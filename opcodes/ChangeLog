@@ -1,5 +1,10 @@
 Wed Nov 20 10:37:13 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-dis.c (disassemble): Print PC-relative and memory
+	addresses symbolically if possible.
+	* mn10300-opc.c: Distinguish between absolute memory addresses,
+	pc-relative offsets & random immediates.
+
 	* mn10300-dis.c (print_insn_mn10300): Fix fetch of last byte
 	in 7 byte insns.
 	(disassemble): Handle SPLIT and EXTENDED operands.

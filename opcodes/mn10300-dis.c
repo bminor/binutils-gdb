@@ -364,6 +364,12 @@ disassemble (memaddr, info, insn, extension, size)
 		  paren = !paren;
 		}
 
+	      else if ((operand->flags & MN10300_OPERAND_PCREL) != 0)
+		(*info->print_address_func) (value + memaddr, info);
+
+	      else if ((operand->flags & MN10300_OPERAND_MEMADDR) != 0)
+		(*info->print_address_func) (value, info);
+
 	      else 
 		(*info->fprintf_func) (info->stream, "%d", value);
 	    }
