@@ -66,3 +66,10 @@
         lr %r0, %r0
         lr %r0, %r0
         .endm
+
+### Declare an `int' variable.
+        .macro gdbasm_datavar name value
+        .data
+\name:
+        .long \value
+        .endm

@@ -1,3 +1,8 @@
+2001-12-03  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.asm/s390.inc (gdbasm_datavar): Use `.long' to create `int'
+	variables on the S/390, not `.word'.
+
 2001-11-30  Jim Blandy  <jimb@redhat.com>
 
 	Add assembly-source tests for s390-ibm-linux.
