@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright (c) 1988 1989 1990 1991 1992 1993 Free Software Foundation, Inc.
+@c Copyright 1988 1989 1990 1991 1992 1993 1994 Free Software Foundation, Inc.
 @c
 @c %**start of header 
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
@@ -4378,6 +4378,17 @@ Show whether or not @value{GDBN} will print the source file name and
 line number of a symbol in the symbolic form of an address.
 @end table
 
+Another situation where it's helpful to show symbol filenames and line
+numbers is when disassembling code; @value{GDBN} will show you the line
+number and source file that corresponds to each instruction.
+
+If you have a pointer and you aren't sure what object it points to,
+you can turn on printing of symbolic addresses and filenames, and
+determine the name and source file location of the variable which
+is being pointed to, using the @code{x/x @var{pointer}} command.
+This displays the memory location pointed to, and as a side effect,
+interprets the address in symbolic form.
+
 Also, you may wish to see the symbolic form only if the address being
 printed is reasonably close to the closest earlier symbol:
 
@@ -4394,6 +4405,32 @@ symbolic form of an address, if any symbol precedes it.
 Ask how large the maximum offset is that @value{GDBN} will print in a
 symbolic address.
 @end table
+
+Sometimes @value{GDBN} can tell you more about an address if it does an
+extensive search of its symbol information.  The default is to provide
+a quick symbolic display that is usually correct, but which may not give
+the most useful answer when working in some object file formats.  If
+you aren't getting the information you need, try:
+
+@table @code
+@item set print fast-symbolic-addr off
+@kindex set print fast-symbolic-addr
+Search all symbolic information when displaying an address symbolically.
+This setting may display more information about static variables, for
+example, but will take longer.
+
+@item set print fast-symbolic-addr
+@item set print fast-symbolic-addr on
+Search only the ``minimal symbol information'' when displaying symbolic
+information about an address.  This is the default.
+
+@item show print fast-symbolic-addr
+@kindex show print fast-symbolic-addr
+Ask whether @value{GDBN} will use a fast or slow method of printing
+symbolic address.
+@end table
+
+Other settings control how different kinds of objects are printed:
 
 @table @code
 @item set print array
@@ -4461,12 +4498,13 @@ Show which format @value{GDBN} will use to print structures.
 @kindex set print sevenbit-strings
 Print using only seven-bit characters; if this option is set,
 @value{GDBN} will display any eight-bit characters (in strings or character
-values) using the notation @code{\}@var{nnn}.  For example, @kbd{M-a} is
-displayed as @code{\341}.
+values) using the notation @code{\}@var{nnn}.  This setting is best when
+working in English (ASCII) and the high-order bit of characters is used
+as a marker or ``meta'' bit.
 
 @item set print sevenbit-strings off
-Print using either seven-bit or eight-bit characters, as required.  This
-is the default.
+Print full eight-bit characters.  This
+allows the use of full international character sets, and is the default.
 
 @item show print sevenbit-strings
 @kindex show print sevenbit-strings
