@@ -1,5 +1,7 @@
 Tue Aug  5 14:08:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (NM_FOR_TARGET): Change nm.new to nm-new.
+
 	* ylwrap: If the program is a relative path, force it to be
 	absolute.
 

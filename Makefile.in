@@ -182,7 +182,7 @@ CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/xgcc ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
-        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/$(TARGET_SUBDIR)/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       else \
         echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       fi; \
@@ -303,8 +303,8 @@ RANLIB_FOR_TARGET = ` \
   fi`
 
 NM_FOR_TARGET = ` \
-  if [ -f $$r/binutils/nm.new ] ; then \
-    echo $$r/binutils/nm.new ; \
+  if [ -f $$r/binutils/nm-new ] ; then \
+    echo $$r/binutils/nm-new ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(NM); \
