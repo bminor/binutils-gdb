@@ -1,3 +1,8 @@
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (ia64_parse_name): Only update next character if
+	input_line_pointer was advanced.
+
 2005-02-14  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (md_apply_fix3): Add parentheses around &

@@ -7619,7 +7619,7 @@ ia64_parse_name (name, e, nextcharP)
 	  if (*nextcharP != '(')
 	    {
 	      as_bad ("Expected '('");
-	      goto done;
+	      break;
 	    }
 	  /* Skip '('.  */
 	  ++input_line_pointer;
@@ -7662,6 +7662,8 @@ ia64_parse_name (name, e, nextcharP)
 	     in relocs.  */
 	  e->X_op = O_pseudo_fixup;
 	  e->X_op_symbol = pseudo_func[idx].u.sym;
+	done:
+	  *nextcharP = *input_line_pointer;
 	  break;
 
 	case PSEUDO_FUNC_CONST:
@@ -7677,8 +7679,6 @@ ia64_parse_name (name, e, nextcharP)
 	default:
 	  return 0;
 	}
-    done:
-      *nextcharP = *input_line_pointer;
       return 1;
     }
 

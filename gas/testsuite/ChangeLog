@@ -1,3 +1,7 @@
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/operand-or.d: Pass -xnone to assembler.
+
 2005-02-13  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/label.l: Adjust line numbers.
