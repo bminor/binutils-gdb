@@ -3344,7 +3344,7 @@ read_range_type (pp, typenums, objfile)
       if (n3 ==        (               1 << (8 * sizeof (short) - 1)) - 1)
 	return (lookup_fundamental_type (objfile, FT_SHORT));
       if (n3 ==        (               1 << (8 * sizeof (char)  - 1)) - 1)
-	return (lookup_fundamental_type (objfile, FT_CHAR));
+	return (lookup_fundamental_type (objfile, FT_SIGNED_CHAR));
     }
 
   /* We have a real range type on our hands.  Allocate space and

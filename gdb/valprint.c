@@ -1350,7 +1350,8 @@ type_print_1 (type, varstring, stream, show, level)
      int level;
 {
   register enum type_code code;
-  char *demangled;
+  char *demangled = NULL;
+  int demangled_args;
 
   type_print_base (type, stream, show, level);
   code = TYPE_CODE (type);
@@ -1367,22 +1368,25 @@ type_print_1 (type, varstring, stream, show, level)
 	|| code == TYPE_CODE_REF)))
     fprintf_filtered (stream, " ");
   type_print_varspec_prefix (type, stream, show, 0);
+
+  /* See if the name has a C++ demangled equivalent, and if so, print that
+     instead. */
+
   if (demangle)
     {
       demangled = cplus_demangle (varstring, DMGL_ANSI | DMGL_PARAMS);
     }
-  if ((demangled != NULL) && (code == TYPE_CODE_FUNC))
+  fputs_filtered ((demangled != NULL) ? demangled : varstring, stream);
+
+  /* For demangled function names, we have the arglist as part of the name,
+     so don't print an additional pair of ()'s */
+
+  demangled_args = (demangled != NULL) && (code == TYPE_CODE_FUNC);
+  type_print_varspec_suffix (type, stream, show, 0, demangled_args);
+
+  if (demangled)
     {
-      /* For demangled function names, we have the arglist as part
-	 of the name, so don't print an additional pair of ()'s */
-      fputs_filtered (demangled, stream);
-      type_print_varspec_suffix (type, stream, show, 0, 1);
       free (demangled);
-    }
-  else
-    {
-      fputs_filtered (varstring, stream);
-      type_print_varspec_suffix (type, stream, show, 0, 0);
     }
 }
 
@@ -1681,6 +1685,8 @@ type_print_base (type, stream, show, level)
   register int i;
   register int len;
   register int lastval;
+  char *mangled_name;
+  char *demangled_name;
 
   QUIT;
 
@@ -1809,11 +1815,11 @@ type_print_base (type, stream, show, level)
 		  if (TYPE_FN_FIELD_STUB (f, j))
 		    {
 		      /* Build something we can demangle.  */
-		      char *mangled_name = gdb_mangle_name (type, i, j);
-		      char *demangled_name =
+		      mangled_name = gdb_mangle_name (type, i, j);
+		      demangled_name =
 			  cplus_demangle (mangled_name,
 					  DMGL_ANSI | DMGL_PARAMS);
-		      if (demangled_name == 0)
+		      if (demangled_name == NULL)
 			fprintf_filtered (stream, "<badly mangled name %s>",
 			    mangled_name);
 		      else 
