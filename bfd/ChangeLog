@@ -1,5 +1,7 @@
 Sat Nov  9 13:45:01 1991  Fred Fish  (fnf at cygnus.com)
 
+	* config/mt-m68k-elf:  Define DEFAULT_VECTOR as elf_big_vec.
+
 	* elf.c (elf_object_p):  Don't try to create a bfd section for
 	the first ELF section header.  It is just a placeholder.
 
