@@ -527,13 +527,10 @@ sparclite_close (int quitting)
 #define LOAD_ADDRESS 0x40000000
 
 static void
-download (target_name, args, from_tty, write_routine, start_routine)
-     char *target_name;
-     char *args;
-     int from_tty;
-     void (*write_routine) (bfd * from_bfd, asection * from_sec,
-			    file_ptr from_addr, bfd_vma to_addr, int len);
-     void (*start_routine) (bfd_vma entry);
+download (char *target_name, char *args, int from_tty,
+	  void (*write_routine) (bfd *from_bfd, asection *from_sec,
+				 file_ptr from_addr, bfd_vma to_addr, int len),
+	  void (*start_routine) (bfd_vma entry))
 {
   struct cleanup *old_chain;
   asection *section;

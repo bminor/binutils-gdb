@@ -1,3 +1,8 @@
+2000-10-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* sparc-nat.c (fetch_core_registers): Protoize.
+	* sparcl-tdep.c (download): Protoize.
+
 Fri Oct 20 19:08:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Fred Fish to Blanket Write Privs list.

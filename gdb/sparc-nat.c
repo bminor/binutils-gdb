@@ -248,13 +248,21 @@ store_inferior_registers (int regno)
     }
 }
 
+/* Provide registers to GDB from a core file.
+
+   CORE_REG_SECT points to an array of bytes, which are the contents
+   of a `note' from a core file which BFD thinks might contain
+   register contents.  CORE_REG_SIZE is its size.
+
+   WHICH says which register set corelow suspects this is:
+     0 --- the general-purpose register set
+     2 --- the floating-point register set
+
+   IGNORE is unused.  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR ignore;		/* reg addr, unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR ignore)
 {
 
   if (which == 0)
