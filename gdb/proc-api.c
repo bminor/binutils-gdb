@@ -747,7 +747,7 @@ procfs_note (char *msg, char *file, int line)
       if (info_verbose)
 	fprintf (procfs_file ? procfs_file : stdout, 
 		 "%s:%d -- ", file, line);
-      fprintf (procfs_file ? procfs_file : stdout, msg);
+      fprintf (procfs_file ? procfs_file : stdout, "%s", msg);
       if (procfs_file)
 	fflush (procfs_file);
     }

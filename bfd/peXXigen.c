@@ -943,22 +943,58 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
   PUT_SCNHDR_LNNOPTR (abfd, scnhdr_int->s_lnnoptr,
 		      scnhdr_ext->s_lnnoptr);
 
-  /* Extra flags must be set when dealing with NT.  All sections should also
-     have the IMAGE_SCN_MEM_READ (0x40000000) flag set.  In addition, the
-     .text section must have IMAGE_SCN_MEM_EXECUTE (0x20000000) and the data
-     sections (.idata, .data, .bss, .CRT) must have IMAGE_SCN_MEM_WRITE set
-     (this is especially important when dealing with the .idata section since
-     the addresses for routines from .dlls must be overwritten).  If .reloc
-     section data is ever generated, we must add IMAGE_SCN_MEM_DISCARDABLE
-     (0x02000000).  Also, the resource data should also be read and
-     writable.  */
-
-  /* FIXME: alignment is also encoded in this field, at least on ppc (krk) */
-  /* FIXME: even worse, I don't see how to get the original alignment field*/
-  /*        back...                                                        */
-
   {
+    /* Extra flags must be set when dealing with PE.  All sections should also
+       have the IMAGE_SCN_MEM_READ (0x40000000) flag set.  In addition, the
+       .text section must have IMAGE_SCN_MEM_EXECUTE (0x20000000) and the data
+       sections (.idata, .data, .bss, .CRT) must have IMAGE_SCN_MEM_WRITE set
+       (this is especially important when dealing with the .idata section since
+       the addresses for routines from .dlls must be overwritten).  If .reloc
+       section data is ever generated, we must add IMAGE_SCN_MEM_DISCARDABLE
+       (0x02000000).  Also, the resource data should also be read and
+       writable.  */
+
+    /* FIXME: Alignment is also encoded in this field, at least on PPC and 
+       ARM-WINCE.  Although - how do we get the original alignment field
+       back ?  */
+
+    typedef struct
+    {
+      const char * 	section_name;
+      unsigned long	must_have;
+    }
+    pe_required_section_flags;
+    
+    pe_required_section_flags known_sections [] =
+      {
+	{ ".arch",  IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN_ALIGN_8BYTES },
+	{ ".bss",   IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_MEM_WRITE },
+	{ ".data",  IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_WRITE },
+	{ ".edata", IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA },
+	{ ".idata", IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_WRITE },
+	{ ".pdata", IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA },
+	{ ".rdata", IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA },
+	{ ".reloc", IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_DISCARDABLE },
+	{ ".rsrc",  IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_WRITE },
+	{ ".text" , IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE },
+	{ ".tls",   IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_WRITE },
+	{ ".xdata", IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA },
+	{ NULL, 0}
+      };
+
+    pe_required_section_flags * p;
     int flags = scnhdr_int->s_flags;
+
+    for (p = known_sections; p->section_name; p++)
+      if (strcmp (scnhdr_int->s_name, p->section_name) == 0)
+	{
+	  /* We have defaulted to adding the IMAGE_SCN_MEM_WRITE flag, but now
+	     we know exactly what this specific section wants so we remove it
+	     and then allow the must_have field to add it back in if necessary.  */
+	  flags &= ~IMAGE_SCN_MEM_WRITE;
+	  flags |= p->must_have;
+	  break;
+	}
 
     H_PUT_32 (abfd, flags, scnhdr_ext->s_flags);
   }

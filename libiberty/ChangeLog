@@ -1,3 +1,56 @@
+2003-12-19  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	Fix for PR c++/13447:
+	* cp-demangle.c (enum d_comp_type): Add D_COMP_LOCAL_NAME.
+	(d_dump, d_make_comp): Handle D_COMP_LOCAL_NAME.
+	(is_ctor_dtor_or_conversion): Handle D_COMP_LOCAL_NAME like
+	D_COMP_QUAL_NAME.
+	(is_ctor_or_dtor): Likewise.
+	(d_local_name): Use D_COMP_LOCAL_NAME rather than
+	D_COMP_QUAL_NAME.
+	(d_print_comp) [D_COMP_LOCAL_NAME]: New.
+	(d_prinT_comp) [D_COMP_TYPED_NAME]: If the left tree is
+	D_COMP_LOCAL_NAME, pull any qualifiers off its right subtree.
+	(d_print_mod_list): Handle D_COMP_LOCAL_NAME.
+	* testsuite/demangle-expected: Add two test cases.
+
+	* cp-demangle.c (d_print_function_type): Clear the global modifier
+	list when printing the modifiers, not just when printing the
+	function parameters.
+	* testsuite/demangle-expected: Add two test cases.
+
+2003-12-15  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (d_print_function_type): Print the function
+	parameters with no modifiers.
+	* testsuite/demangle-expected: Add test case.
+
+	* cp-demangle.c (d_demangle): If DMGL_PARAMS is not set, don't
+	expect that we've read the entire string.
+	(is_ctor_or_dtor): Don't expect that we've read the entire
+	string--reverse patch of 2003-11-29.
+
+2003-12-15  Brendan Kehoe  <brendan@zen.org>
+
+	* libiberty/Makefile.in (floatformat.o): Add dependency on
+	config.h to accompany change of 2003-12-03.
+
+2003-12-15  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	Fix handling of constructor/destructor of standard substitution:
+	* cp-demangle.c (struct d_standard_sub_info): Define.
+	(d_substitution): Add prefix argument.  Change all callers.
+	Rework handling of standard substitutions to print full name when
+	qualifying a constructor/destructor, or when DMGL_VERBOSE is set.
+	* testsuite/demangle-expected: Add test case.
+
+	Fix handling of negative literal constants:
+	* cp-demangle.c (enum d_comp_type): Add D_COMP_LITERAL_NEG.
+	(d_dump, d_make_comp): Handle D_COMP_LITERAL_NEG.
+	(d_expr_primary): Use D_COMP_LITERAL_NEG for a negative number.
+	(d_print_comp): Handle D_COMP_LITERAL_NEG.
+	* testsuite/demangle-expected: Add test case.
+
 2003-12-04  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* cp-demangle.c (IS_UPPER, IS_LOWER): Define.
@@ -123,10 +176,6 @@
 
 	* cp-demangle.c: Complete rewrite.
 
-2003-11-20  Ian Lance Taylor  <ian@wasabisystems.com>
-
-	* cp-demangle.c: Complete rewrite.
-
 2003-11-19  Mark Mitchell  <mark@codesourcery.com>
 
 	* cp-demangle.c (demangle_type): Correct thinko in substitution
@@ -148,16 +197,16 @@
 
 	* testsuite/Makefile.in (test-demangle): Depend upon libiberty.a.
 
-2003-11-18  Ian Lance Taylor  <ian@wasabisystems.com>
-
-	* testsuite/test-demangle.c (main): Don't pass DMGL_VERBOSE to
-	cplus_demangle.
-
-	* testsuite/Makefile.in (test-demangle): Depend upon libiberty.a.
-
 2003-10-31  Andreas Jaeger  <aj@suse.de>
 
 	* floatformat.c (floatformat_always_valid): Add unused attribute.
+
+2003-10-30  Josef Zlomek  <zlomekj@suse.cz>
+
+	Jan Hubicka <jh@suse.cz>
+	* vasprintf.c (int_vasprintf): Pass va_list by value.
+	Use va_copy for copying va_list.
+	(vasprintf): Pass va_list by value.
 
 2003-10-30  Josef Zlomek  <zlomekj@suse.cz>
 

@@ -1,3 +1,27 @@
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/sect-cmd.exp: Handle compiling test case from multiple
+	source files.
+
+2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/environ.exp: Handle compiling test case from multiple
+	source files.
+
+2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/structs.exp: Call gdb_exit as well as gdb_start.
+
+2003-12-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/freebpcmd.c: Add copyright notice.
+
+	* gdb.base/freebpcmd.exp: Mark the interesting failure as known.
+
+2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/maint.exp: Add generic FAIL patterns to prevent timeouts.
+
 2003-12-13  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/freebpcmd.exp, gdb.base/freebpcmd.c: New test.

@@ -508,9 +508,13 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	    subl %edx, %edx
 	    subl %eax, %eax
 
+	 Because of the symmetry, there are actually two ways to
+	 encode these instructions; with opcode bytes 0x29 and 0x2b
+	 for `subl' and opcode bytes 0x31 and 0x33 for `xorl'.
+
 	 Make sure we only skip these instructions if we later see the
 	 `movl %esp, %ebp' that actually sets up the frame.  */
-      while (op == 0x29 || op == 0x31)
+      while (op == 0x29 || op == 0x2b || op == 0x31 || op == 0x33)
 	{
 	  op = read_memory_unsigned_integer (pc + skip + 2, 1);
 	  switch (op)

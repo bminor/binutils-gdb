@@ -1082,8 +1082,8 @@ _bfd_mips_elf_gprel16_with_gp (bfd *abfd, asymbol *symbol,
 			       bfd_boolean relocatable, void *data, bfd_vma gp)
 {
   bfd_vma relocation;
-  unsigned long insn = 0;
   bfd_signed_vma val;
+  bfd_reloc_status_type status;
 
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -1099,13 +1099,7 @@ _bfd_mips_elf_gprel16_with_gp (bfd *abfd, asymbol *symbol,
   /* Set val to the offset into the section or symbol.  */
   val = reloc_entry->addend;
 
-  if (reloc_entry->howto->partial_inplace)
-    {
-      insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
-      val += insn & 0xffff;
-    }
-
-  _bfd_mips_elf_sign_extend(val, 16);
+  _bfd_mips_elf_sign_extend (val, 16);
 
   /* Adjust val for the final section location and GP value.  If we
      are producing relocatable output, we don't want to do this for
@@ -1116,16 +1110,215 @@ _bfd_mips_elf_gprel16_with_gp (bfd *abfd, asymbol *symbol,
 
   if (reloc_entry->howto->partial_inplace)
     {
-      insn = (insn & ~0xffff) | (val & 0xffff);
-      bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
+      status = _bfd_relocate_contents (reloc_entry->howto, abfd, val,
+				       (bfd_byte *) data
+				       + reloc_entry->address);
+      if (status != bfd_reloc_ok)
+	return status;
     }
   else
     reloc_entry->addend = val;
 
   if (relocatable)
     reloc_entry->address += input_section->output_offset;
-  else if (((val & ~0xffff) != ~0xffff) && ((val & ~0xffff) != 0))
-    return bfd_reloc_overflow;
+
+  return bfd_reloc_ok;
+}
+
+/* Used to store a REL high-part relocation such as R_MIPS_HI16 or
+   R_MIPS_GOT16.  REL is the relocation, INPUT_SECTION is the section
+   that contains the relocation field and DATA points to the start of
+   INPUT_SECTION.  */
+
+struct mips_hi16
+{
+  struct mips_hi16 *next;
+  bfd_byte *data;
+  asection *input_section;
+  arelent rel;
+};
+
+/* FIXME: This should not be a static variable.  */
+
+static struct mips_hi16 *mips_hi16_list;
+
+/* A howto special_function for REL *HI16 relocations.  We can only
+   calculate the correct value once we've seen the partnering
+   *LO16 relocation, so just save the information for later.
+
+   The ABI requires that the *LO16 immediately follow the *HI16.
+   However, as a GNU extension, we permit an arbitrary number of
+   *HI16s to be associated with a single *LO16.  This significantly
+   simplies the relocation handling in gcc.  */
+
+bfd_reloc_status_type
+_bfd_mips_elf_hi16_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+			  asymbol *symbol ATTRIBUTE_UNUSED, void *data,
+			  asection *input_section, bfd *output_bfd,
+			  char **error_message ATTRIBUTE_UNUSED)
+{
+  struct mips_hi16 *n;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  n = bfd_malloc (sizeof *n);
+  if (n == NULL)
+    return bfd_reloc_outofrange;
+
+  n->next = mips_hi16_list;
+  n->data = data;
+  n->input_section = input_section;
+  n->rel = *reloc_entry;
+  mips_hi16_list = n;
+
+  if (output_bfd != NULL)
+    reloc_entry->address += input_section->output_offset;
+
+  return bfd_reloc_ok;
+}
+
+/* A howto special_function for REL R_MIPS_GOT16 relocations.  This is just
+   like any other 16-bit relocation when applied to global symbols, but is
+   treated in the same as R_MIPS_HI16 when applied to local symbols.  */
+
+bfd_reloc_status_type
+_bfd_mips_elf_got16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			   void *data, asection *input_section,
+			   bfd *output_bfd, char **error_message)
+{
+  if ((symbol->flags & (BSF_GLOBAL | BSF_WEAK)) != 0
+      || bfd_is_und_section (bfd_get_section (symbol))
+      || bfd_is_com_section (bfd_get_section (symbol)))
+    /* The relocation is against a global symbol.  */
+    return _bfd_mips_elf_generic_reloc (abfd, reloc_entry, symbol, data,
+					input_section, output_bfd,
+					error_message);
+
+  return _bfd_mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
+				   input_section, output_bfd, error_message);
+}
+
+/* A howto special_function for REL *LO16 relocations.  The *LO16 itself
+   is a straightforward 16 bit inplace relocation, but we must deal with
+   any partnering high-part relocations as well.  */
+
+bfd_reloc_status_type
+_bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			  void *data, asection *input_section,
+			  bfd *output_bfd, char **error_message)
+{
+  bfd_vma vallo;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+  while (mips_hi16_list != NULL)
+    {
+      bfd_reloc_status_type ret;
+      struct mips_hi16 *hi;
+
+      hi = mips_hi16_list;
+
+      /* R_MIPS_GOT16 relocations are something of a special case.  We
+	 want to install the addend in the same way as for a R_MIPS_HI16
+	 relocation (with a rightshift of 16).  However, since GOT16
+	 relocations can also be used with global symbols, their howto
+	 has a rightshift of 0.  */
+      if (hi->rel.howto->type == R_MIPS_GOT16)
+	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS_HI16, FALSE);
+
+      /* VALLO is a signed 16-bit number.  Bias it by 0x8000 so that any
+	 carry or borrow will induce a change of +1 or -1 in the high part.  */
+      hi->rel.addend += (vallo + 0x8000) & 0xffff;
+
+      /* R_MIPS_GNU_REL_HI16 relocations are relative to the address of the
+	 lo16 relocation, not their own address.  If we're calculating the
+	 final value, and hence subtracting the "PC", subtract the offset
+	 of the lo16 relocation from here.  */
+      if (output_bfd == NULL && hi->rel.howto->type == R_MIPS_GNU_REL_HI16)
+	hi->rel.addend -= reloc_entry->address - hi->rel.address;
+
+      ret = _bfd_mips_elf_generic_reloc (abfd, &hi->rel, symbol, hi->data,
+					 hi->input_section, output_bfd,
+					 error_message);
+      if (ret != bfd_reloc_ok)
+	return ret;
+
+      mips_hi16_list = hi->next;
+      free (hi);
+    }
+
+  return _bfd_mips_elf_generic_reloc (abfd, reloc_entry, symbol, data,
+				      input_section, output_bfd,
+				      error_message);
+}
+
+/* A generic howto special_function.  This calculates and installs the
+   relocation itself, thus avoiding the oft-discussed problems in
+   bfd_perform_relocation and bfd_install_relocation.  */
+
+bfd_reloc_status_type
+_bfd_mips_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+			     asymbol *symbol, void *data ATTRIBUTE_UNUSED,
+			     asection *input_section, bfd *output_bfd,
+			     char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_signed_vma val;
+  bfd_reloc_status_type status;
+  bfd_boolean relocatable;
+
+  relocatable = (output_bfd != NULL);
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  /* Build up the field adjustment in VAL.  */
+  val = 0;
+  if (!relocatable || (symbol->flags & BSF_SECTION_SYM) != 0)
+    {
+      /* Either we're calculating the final field value or we have a
+	 relocation against a section symbol.  Add in the section's
+	 offset or address.  */
+      val += symbol->section->output_section->vma;
+      val += symbol->section->output_offset;
+    }
+
+  if (!relocatable)
+    {
+      /* We're calculating the final field value.  Add in the symbol's value
+	 and, if pc-relative, subtract the address of the field itself.  */
+      val += symbol->value;
+      if (reloc_entry->howto->pc_relative)
+	{
+	  val -= input_section->output_section->vma;
+	  val -= input_section->output_offset;
+	  val -= reloc_entry->address;
+	}
+    }
+
+  /* VAL is now the final adjustment.  If we're keeping this relocation
+     in the output file, and if the relocation uses a separate addend,
+     we just need to add VAL to that addend.  Otherwise we need to add
+     VAL to the relocation field itself.  */
+  if (relocatable && !reloc_entry->howto->partial_inplace)
+    reloc_entry->addend += val;
+  else
+    {
+      /* Add in the separate addend, if any.  */
+      val += reloc_entry->addend;
+
+      /* Add VAL to the relocation field.  */
+      status = _bfd_relocate_contents (reloc_entry->howto, abfd, val,
+				       (bfd_byte *) data
+				       + reloc_entry->address);
+      if (status != bfd_reloc_ok)
+	return status;
+    }
+
+  if (relocatable)
+    reloc_entry->address += input_section->output_offset;
 
   return bfd_reloc_ok;
 }
@@ -3203,7 +3396,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_GNU_REL16_S2:
-      value = symbol + _bfd_mips_elf_sign_extend (addend << 2, 18) - p;
+      value = symbol + _bfd_mips_elf_sign_extend (addend, 18) - p;
       overflowed_p = mips_elf_overflow_p (value, 18);
       value = (value >> 2) & howto->dst_mask;
       break;
@@ -3226,9 +3419,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 R_MIPS_26 case here.  */
     case R_MIPS_26:
       if (local_p)
-	value = (((addend << 2) | ((p + 4) & 0xf0000000)) + symbol) >> 2;
+	value = ((addend | ((p + 4) & 0xf0000000)) + symbol) >> 2;
       else
-	value = (_bfd_mips_elf_sign_extend (addend << 2, 28) + symbol) >> 2;
+	value = (_bfd_mips_elf_sign_extend (addend, 28) + symbol) >> 2;
       value &= howto->dst_mask;
       break;
 
@@ -6067,7 +6260,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      addend = mips_elf_obtain_contents (howto, rel, input_bfd,
 						 contents);
 	      addend &= howto->src_mask;
-	      addend <<= howto->rightshift;
 
 	      /* For some kinds of relocations, the ADDEND is a
 		 combination of the addend stored in two different
@@ -6131,6 +6323,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			    | ((addend & 0x7e00000) >> 16)
 			    | (addend & 0x1f));
 		}
+	      else
+		addend <<= howto->rightshift;
 	    }
 	  else
 	    addend = rel->r_addend;
@@ -6170,33 +6364,25 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    /* Adjust the addend appropriately.  */
 	    addend += local_sections[r_symndx]->output_offset;
 
-	  if (howto->partial_inplace)
+	  if (rela_relocation_p)
+	    /* If this is a RELA relocation, just update the addend.  */
+	    rel->r_addend = addend;
+	  else
 	    {
-	      /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
-		 then we only want to write out the high-order 16 bits.
-		 The subsequent R_MIPS_LO16 will handle the low-order bits.
-	       */
-	      if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16
+	      if (r_type == R_MIPS_HI16
+		  || r_type == R_MIPS_GOT16
 		  || r_type == R_MIPS_GNU_REL_HI16)
 		addend = mips_elf_high (addend);
 	      else if (r_type == R_MIPS_HIGHER)
 		addend = mips_elf_higher (addend);
 	      else if (r_type == R_MIPS_HIGHEST)
 		addend = mips_elf_highest (addend);
-	    }
+	      else
+		addend >>= howto->rightshift;
 
-	  if (rela_relocation_p)
-	    /* If this is a RELA relocation, just update the addend.
-	       We have to cast away constness for REL.  */
-	    rel->r_addend = addend;
-	  else
-	    {
-	      /* Otherwise, we have to write the value back out.  Note
-		 that we use the source mask, rather than the
-		 destination mask because the place to which we are
-		 writing will be source of the addend in the final
-		 link.  */
-	      addend >>= howto->rightshift;
+	      /* We use the source mask, rather than the destination
+		 mask because the place to which we are writing will be
+		 source of the addend in the final link.  */
 	      addend &= howto->src_mask;
 
 	      if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd))
@@ -6259,8 +6445,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	use_saved_addend_p = TRUE;
       else
 	use_saved_addend_p = FALSE;
-
-      addend >>= howto->rightshift;
 
       /* Figure out what value we are supposed to relocate.  */
       switch (mips_elf_calculate_relocation (output_bfd, input_bfd,

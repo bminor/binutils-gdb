@@ -542,6 +542,9 @@ extern const bfd_target bfd_elf32_littlearm_oabi_vec;
 extern const bfd_target bfd_elf32_littlearm_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
 extern const bfd_target bfd_elf32_m32r_vec;
+extern const bfd_target bfd_elf32_m32rle_vec;
+extern const bfd_target bfd_elf32_m32rlin_vec;
+extern const bfd_target bfd_elf32_m32rlelin_vec;
 extern const bfd_target bfd_elf32_m68hc11_vec;
 extern const bfd_target bfd_elf32_m68hc12_vec;
 extern const bfd_target bfd_elf32_m68k_vec;
@@ -831,6 +834,9 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_littlearm_vec,
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m32r_vec,
+        &bfd_elf32_m32rle_vec,
+        &bfd_elf32_m32rlin_vec,
+        &bfd_elf32_m32rlelin_vec,
 	&bfd_elf32_m68hc11_vec,
 	&bfd_elf32_m68hc12_vec,
 	&bfd_elf32_m68k_vec,

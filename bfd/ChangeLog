@@ -1,3 +1,111 @@
+2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	Adfd m32r-linux and PIC support.  Add new ABI that uses RELA.
+	* config.bfd (m32r*-*-linux*, m32r*le-*-linux*, m32r*le-*-*): Added.
+	* configure.in (bfd_elf32_m32rlin_vec, bfd_elf32_m32rlelin_vec,
+	bfd_elf32_m32rle_vec): Added
+	* configure: Regenerated.
+	* elf32-m32r.c (m32r_info_to_howto, m32r_elf_adjust_dynamic_symbol,
+	m32r_elf_size_dynamic_sections, m32r_elf_create_dynamic_sections,
+	m32r_elf_finish_dynamic_sections, m32r_elf_finish_dynamic_symbol,
+	allocate_dynrelocs, readonly_dynrelocs, m32r_elf_reloc_type_class,
+	m32r_elf_fake_sections): Added.
+	(m32r_elf_howto_table): Added
+	R_M32R_16_RELA, R_M32R_32_RELA, R_M32R_24_RELA,
+	R_M32R_10_PCREL_RELA, R_M32R_18_PCREL_RELA,
+	R_M32R_26_PCREL_RELA, R_M32R_HI16_ULO_RELA,
+	R_M32R_HI16_SLO_RELA, R_M32R_LO16_RELA,
+	R_M32R_SDA16_RELA, R_M32R_RELA_GNU_VTINHERIT,
+	R_M32R_RELA_GNU_VTENTRY, R_M32R_GOT24,
+	R_M32R_26_PLTREL, R_M32R_COPY, R_M32R_GLOB_DAT,
+	R_M32R_JMP_SLOT, R_M32R_RELATIVE, R_M32R_GOTOFF,
+	R_M32R_GOTPC24, R_M32R_GOT16_HI_ULO,
+	R_M32R_GOT16_HI_SLO, R_M32R_GOT16_LO,
+	R_M32R_GOTPC_HI_ULO, R_M32R_GOTPC_HI_SLO,
+	R_M32R_GOTPC_LO.
+	(m32r_elf_relocate_section, m32r_elf_check_relocs): Changed for
+	New ABI.
+	* reloc.c: Add BFD_RELOC_M32R_GOT24, BFD_RELOC_M32R_26_PLTREL,
+	BFD_RELOC_M32R_COPY, BFD_RELOC_M32R_GLOB_DAT,
+	BFD_RELOC_M32R_JMP_SLOT, BFD_RELOC_M32R_RELATIVE,
+	BFD_RELOC_M32R_GOTOFF, BFD_RELOC_M32R_GOTPC24,
+	BFD_RELOC_M32R_GOT16_HI_ULO, BFD_RELOC_M32R_GOT16_HI_SLO,
+	BFD_RELOC_M32R_GOT16_LO, BFD_RELOC_M32R_GOTPC_HI_ULO,
+	BFD_RELOC_M32R_GOTPC_HI_SLO, BFD_RELOC_M32R_GOTPC_LO.
+	* targets.c (bfd_elf32_m32rlin_vec, bfd_elf32_m32rlelin_vec,
+	bfd_elf32_m32rle_vec): Added.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+
+2003-12-19  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* coffcode.h (styp_to_sec_flags): Don't treat .reloc section
+	as SEC_DEBUGGING.
+
+2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf32-mips.c (elf_mips_howto_table_rel): Replace all uses of
+	mips_elf_generic_reloc with _bfd_mips_elf_generic_reloc.  Use
+	_bfd_mips_elf_hi16_reloc for R_MIPS_HI16 and R_MIPS_GNU_REL_HI16,
+	_bfd_mips_elf_lo16_reloc for R_MIPS_LO16 and R_MIPS_GNU_REL_LO16,
+	and _bfd_mips_elf_got16_reloc for R_MIPS_GOT16.  Change rightshift
+	to 16 for R_MIPS_HI16 and R_MIPS_GNU_REL_HI16.
+	(mips_elf_generic_reloc, struct mips_hi16, mips_elf_hi16_reloc)
+	(mips_elf_lo16_reloc, mips_elf_got16_reloc): Delete.
+	(_bfd_mips_elf32_gprel16_reloc): Remove special case.
+	(mips_elf_gprel32_reloc, mips32_64bit_reloc): Likewise.
+
+	* elf64-mips.c (mips_elf64_howto_table_rel): Replace all uses of
+	mips_elf_generic_reloc with _bfd_mips_elf_generic_reloc.  Use
+	_bfd_mips_elf_hi16_reloc for R_MIPS_HI16, _bfd_mips_elf_lo16_reloc
+	for R_MIPS_LO16 and _bfd_mips_elf_got16_reloc for R_MIPS_GOT16.
+	Change R_MIPS_HI16's rightshift to 16.
+	(mips_elf64_howto_table_rela): Replace all uses of
+	mips_elf_generic_reloc with _bfd_mips_elf_generic_reloc.
+	Use _bfd_mips_elf_generic_reloc for R_MIPS_GOT16 as well.
+	(mips_elf64_hi16_reloc, mips_elf64_got16_reloc): Delete.
+	(mips_elf64_shift6_reloc): Remove special case.  Use
+	_bfd_mips_elf_generic_reloc instead of returning bfd_reloc_continue.
+
+	* elfn32-mips.c (prev_reloc_section): Delete.
+	(prev_reloc_address, prev_reloc_addend): Delete.
+	(elf_mips_howto_table_rel, elf_mips_howto_table_rela): As for
+	elf64-mips.c
+	(GET_RELOC_ADDEND, SET_RELOC_ADDEND): Delete.
+	(mips_elf_generic_reloc, struct mips_hi16, mips_elf_hi16_reloc)
+	(mips_elf_lo16_reloc, mips_elf_got16_reloc): Delete.
+	(mips_elf_gprel16_reloc): Delete use of GET_RELOC_ADDEND.
+	(mips_elf_literal_reloc, mips_elf_gprel32_reloc): Likewise.
+	(mips16_jump_reloc, mips16_gprel_reloc): Likewise.
+	(mips_elf_shift6_reloc): Likewise.  Delete use of SET_RELOC_ADDEND.
+
+	* elfxx-mips.c (_bfd_mips_elf_gprel16_with_gp): Use
+	_bfd_relocate_contents to install an in-place addend.
+	(mips_hi16): New structure.
+	(mips_hi16_list): Moved from elf32-mips.c.
+	(_bfd_mips_elf_hi16_reloc, _bfd_mips_elf_got16_reloc): New functions.
+	(_bfd_mips_elf_lo16_reloc, _bfd_mips_elf_generic_reloc): New functions.
+	(mips_elf_calculate_relocation): Assume addend is unshifted.
+	(_bfd_mips_elf_relocate_section): Don't apply the howto rightshift
+	on top of the usual high-part shift.  Don't shift the addend right
+	before calling mips_elf_calculate_relocation.
+
+	* elfxx-mips.h (_bfd_mips_elf_hi16_reloc): Declare.
+	(_bfd_mips_elf_got16_reloc, _bfd_mips_elf_lo16_reloc): Declare.
+	(_bfd_mips_elf_generic_reloc): Declare.
+
+2003-12-16  Eric Youngdale  <eric@mkssoftware.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* peicode.h (pe_ILF_build_a_bfd): Only skip one instance of each
+	prefix character, if they are present.
+
+2003-12-15  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Ensure that correct flags
+	are set on known section types.
+	
 2003-12-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: Updated translation.

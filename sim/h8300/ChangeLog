@@ -1,3 +1,8 @@
+2003-12-16  Michael Snyder  <msnyder@redhat.com>
+
+	Patch submitted by Anil Paranjape <AnilP1@KPITCummins.com>
+	* sim-main.h (H8300H_MSIZE): Increase from 18 bits to 24 bits.
+
 2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
 
         * compile.c (set_h8300h): Initialize globals to zero.

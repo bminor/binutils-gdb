@@ -73,17 +73,12 @@ deprecated_inside_entry_file (CORE_ADDR addr)
 }
 
 /* Test whether PC is in the range of addresses that corresponds to
-   the "main" function.
-
-   A PC of zero is always considered to be the bottom of the stack.  */
+   the "main" function.  */
 
 int
 inside_main_func (CORE_ADDR pc)
 {
   struct minimal_symbol *msymbol;
-
-  if (pc == 0)
-    return 1;
 
   if (symfile_objfile == 0)
     return 0;

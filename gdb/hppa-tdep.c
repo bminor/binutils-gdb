@@ -5064,6 +5064,41 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
   return addr;
 }
 
+/* Here is a table of C type sizes on hppa with various compiles
+   and options.  I measured this on PA 9000/800 with HP-UX 11.11
+   and these compilers:
+
+     /usr/ccs/bin/cc    HP92453-01 A.11.01.21
+     /opt/ansic/bin/cc  HP92453-01 B.11.11.28706.GP
+     /opt/aCC/bin/aCC   B3910B A.03.45
+     gcc                gcc 3.3.2 native hppa2.0w-hp-hpux11.11
+
+     cc            : 1 2 4 4 8 : 4 8 -- : 4 4
+     ansic +DA1.1  : 1 2 4 4 8 : 4 8 16 : 4 4
+     ansic +DA2.0  : 1 2 4 4 8 : 4 8 16 : 4 4
+     ansic +DA2.0W : 1 2 4 8 8 : 4 8 16 : 8 8
+     acc   +DA1.1  : 1 2 4 4 8 : 4 8 16 : 4 4
+     acc   +DA2.0  : 1 2 4 4 8 : 4 8 16 : 4 4
+     acc   +DA2.0W : 1 2 4 8 8 : 4 8 16 : 8 8
+     gcc           : 1 2 4 4 8 : 4 8 16 : 4 4
+
+   Each line is:
+
+     compiler and options
+     char, short, int, long, long long
+     float, double, long double
+     char *, void (*)()
+
+   So all these compilers use either ILP32 or LP64 model.
+   TODO: gcc has more options so it needs more investigation.
+
+   For floating point types, see:
+
+     http://docs.hp.com/hpux/pdf/B3906-90006.pdf
+     HP-UX floating-point guide, hpux 11.00
+
+   -- chastain 2003-12-18  */
+
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -5144,8 +5179,13 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_register_bytes
     (gdbarch, gdbarch_num_regs (gdbarch) * tdep->bytes_per_address);
   set_gdbarch_long_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
-  set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
+
+  /* The following gdbarch vector elements are the same in both ILP32
+     and LP64, but might show differences some day.  */
+  set_gdbarch_long_long_bit (gdbarch, 64);
+  set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
 
   /* The following gdbarch vector elements do not depend on the address
      size, or in any other gdbarch element previously set.  */

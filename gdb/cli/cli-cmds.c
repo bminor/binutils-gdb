@@ -557,7 +557,7 @@ edit_command (char *arg, int from_tty)
       /* Now should only be one argument -- decode it in SAL */
 
       arg1 = arg;
-      sals = decode_line_1 (&arg1, 0, 0, 0, 0);
+      sals = decode_line_1 (&arg1, 0, 0, 0, 0, 0);
 
       if (! sals.nelts) return;  /*  C++  */
       if (sals.nelts > 1) {
@@ -681,7 +681,7 @@ list_command (char *arg, int from_tty)
     dummy_beg = 1;
   else
     {
-      sals = decode_line_1 (&arg1, 0, 0, 0, 0);
+      sals = decode_line_1 (&arg1, 0, 0, 0, 0, 0);
 
       if (!sals.nelts)
 	return;			/*  C++  */
@@ -714,9 +714,9 @@ list_command (char *arg, int from_tty)
       else
 	{
 	  if (dummy_beg)
-	    sals_end = decode_line_1 (&arg1, 0, 0, 0, 0);
+	    sals_end = decode_line_1 (&arg1, 0, 0, 0, 0, 0);
 	  else
-	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line, 0);
+	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line, 0, 0);
 	  if (sals_end.nelts == 0)
 	    return;
 	  if (sals_end.nelts > 1)

@@ -145,7 +145,7 @@ class_name_from_physname (const char *physname)
   char *ret = NULL;
   const char *end;
   int depth = 0;
-  char *demangled_name = cplus_demangle (physname, DMGL_ANSI);
+  char *demangled_name = cplus_demangle (physname, DMGL_ANSI | DMGL_PARAMS);
 
   if (demangled_name == NULL)
     return NULL;
@@ -170,7 +170,7 @@ method_name_from_physname (const char *physname)
   char *ret = NULL;
   const char *end;
   int depth = 0;
-  char *demangled_name = cplus_demangle (physname, DMGL_ANSI);
+  char *demangled_name = cplus_demangle (physname, DMGL_ANSI | DMGL_PARAMS);
 
   if (demangled_name == NULL)
     return NULL;

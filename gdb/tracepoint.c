@@ -392,7 +392,7 @@ trace_command (char *arg, int from_tty)
     printf_filtered ("TRACE %s\n", arg);
 
   addr_start = arg;
-  sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 0, &canonical);
+  sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 0, &canonical, NULL);
   addr_end = arg;
   if (!sals.nelts)
     return;			/* ??? Presumably decode_line_1 has already warned? */
@@ -2341,7 +2341,7 @@ scope_info (char *args, int from_tty)
   if (args == 0 || *args == 0)
     error ("requires an argument (function, line or *addr) to define a scope");
 
-  sals = decode_line_1 (&args, 1, NULL, 0, &canonical);
+  sals = decode_line_1 (&args, 1, NULL, 0, &canonical, NULL);
   if (sals.nelts == 0)
     return;			/* presumably decode_line_1 has already warned */
 

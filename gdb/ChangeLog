@@ -1,3 +1,84 @@
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* hppa-tdep.c (hppa_gdbarch_init): Set long double floating
+	point type to floatformat_ia64_quad_big.
+
+2003-12-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (skip_prologue_using_sal): New function.  Taken verbatim
+	from mips-tdep.c.
+	(frv_analyze_prologue): Rework to account for intermixed prologue /
+	body instructions.
+
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* hppa-tdep.c (hppa_gdbarch_init): Set sizeof(long_double) to 128.
+	Document type sizes for hppa*-*-hpux* compilers available to me.
+
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* hppam3-nat.c: Delete obsolete file.
+	* hppab-nat.c: Delete obsolete file.
+	* Makefile.in: Remove references.
+
+2003-12-17  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* symtab.c (decode_line_spec): Change call to decode_line_1.
+
+2003-12-17  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* linespec.h (decode_line_1): Add new not_found_ptr parameter.
+	* linespec.c (decode_line_1): Add new parameter.  Pass on
+	new parameter to decode_variable and symtab_from_filename
+	functions.
+	(decode_variable): Add new not_found_ptr parameter.  Throw exception
+	rather than failing if the not_found_ptr is non-null and the
+	function is not found.
+	(symtab_from_filename): Add new not_found_ptr parametr.   Throw 
+	exception rather than failing if the not_found_ptr is non-null and 
+	the source file is not found.
+	* breakpoint.c: Change all callers of decode_line_1 to add default
+	extra parameter for decode_line_1 calls.
+	* tracepoint.c: Ditto.
+	* cli/cli-cmds.c: Ditto.
+
+2003-12-16  J. Brobecker  <brobecker@gnat.com>
+
+	* irix5-nat.c: Include mips-tdep.h.
+
+2003-12-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib.h (SOLIB_CREATE_CATCH_LOAD_HOOK)
+	(SOLIB_CREATE_CATCH_UNLOAD_HOOK, SOLIB_LOADED_LIBRARY_PATHNAME)
+	(SOLIB_UNLOADED_LIBRARY_PATHNAME, SOLIB_HAVE_LOAD_EVENT)
+	(SOLIB_HAVE_UNLOAD_EVENT): Remove defines.
+
+	* blockframe.c (inside_main_func): Don't treat a zero PC specially.
+	Needed to fix PR backtrace/1476.
+
+2003-12-16  David Carlton  <carlton@kealia.com>
+
+	* cp-support.c (class_name_from_physname): Add DMGL_PARAMS.
+	(method_name_from_physname): Ditto.
+
+2003-12-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-sol2-tdep.c (i386_sol2_gregset_reg_offset): New variable.
+	(i386_sol2_init_abi): Initialize TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs, TDEP->sizeof_gregset and
+	TDEP->sizeof_fpregset.
+	* config/i386/i386sol2.mh (XM_FILE): Set to xm-i386.h.
+	(XM_CLIBS): Remove.
+	(NATDEPFILES): Remove core-regset.o and corelow.o.
+	* config/i386/i386sol2.mt (TDEPFILES): Add corelow.o.
+
+2003-12-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* proc-api.c (procfs_note): Add format string to fprintf call.
+
+	* i386-tdep.c (i386_analyze_frame_setup): Add missing encodings
+	for `subl' and `xorl' instructions.
+
 2003-12-13  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (dwarf2_add_member_fn, read_structure_scope):

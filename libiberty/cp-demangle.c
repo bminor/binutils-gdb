@@ -141,6 +141,23 @@ struct d_builtin_type_info
   enum d_builtin_type_print print;
 };
 
+/* Information we keep for the standard substitutions.  */
+
+struct d_standard_sub_info
+{
+  /* The code for this substitution.  */
+  char code;
+  /* The simple string it expands to.  */
+  const char *simple_expansion;
+  /* The results of a full, verbose, expansion.  This is used when
+     qualifying a constructor/destructor, or when in verbose mode.  */
+  const char *full_expansion;
+  /* What to set the last_name field of d_info to; NULL if we should
+     not set it.  This is only relevant when qualifying a
+     constructor/destructor.  */
+  const char *set_last_name;
+};
+
 /* Component types found in mangled names.  */
 
 enum d_comp_type
@@ -149,6 +166,8 @@ enum d_comp_type
   D_COMP_NAME,
   /* A qualified name.  */
   D_COMP_QUAL_NAME,
+  /* A local name.  */
+  D_COMP_LOCAL_NAME,
   /* A typed name.  */
   D_COMP_TYPED_NAME,
   /* A template.  */
@@ -239,7 +258,9 @@ enum d_comp_type
   D_COMP_TRINARY_ARG1,
   D_COMP_TRINARY_ARG2,
   /* A literal.  */
-  D_COMP_LITERAL
+  D_COMP_LITERAL,
+  /* A negative literal.  */
+  D_COMP_LITERAL_NEG
 };
 
 /* A component of the mangled name.  */
@@ -489,7 +510,7 @@ static struct d_comp *d_expr_primary PARAMS ((struct d_info *));
 static struct d_comp *d_local_name PARAMS ((struct d_info *));
 static int d_discriminator PARAMS ((struct d_info *));
 static int d_add_substitution PARAMS ((struct d_info *, struct d_comp *));
-static struct d_comp *d_substitution PARAMS ((struct d_info *));
+static struct d_comp *d_substitution PARAMS ((struct d_info *, int));
 static void d_print_resize PARAMS ((struct d_print_info *, size_t));
 static void d_print_append_char PARAMS ((struct d_print_info *, int));
 static void d_print_append_buffer PARAMS ((struct d_print_info *, const char *,
@@ -565,6 +586,9 @@ d_dump (dc, indent)
 
     case D_COMP_QUAL_NAME:
       printf ("qualified name\n");
+      break;
+    case D_COMP_LOCAL_NAME:
+      printf ("local name\n");
       break;
     case D_COMP_TYPED_NAME:
       printf ("typed name\n");
@@ -683,6 +707,9 @@ d_dump (dc, indent)
     case D_COMP_LITERAL:
       printf ("literal\n");
       break;
+    case D_COMP_LITERAL_NEG:
+      printf ("negative literal\n");
+      break;
     }
 
   d_dump (d_left (dc), indent + 2);
@@ -726,6 +753,7 @@ d_make_comp (di, type, left, right)
     {
       /* These types require two parameters.  */
     case D_COMP_QUAL_NAME:
+    case D_COMP_LOCAL_NAME:
     case D_COMP_TYPED_NAME:
     case D_COMP_TEMPLATE:
     case D_COMP_VENDOR_TYPE_QUAL:
@@ -737,6 +765,7 @@ d_make_comp (di, type, left, right)
     case D_COMP_TRINARY_ARG1:
     case D_COMP_TRINARY_ARG2:
     case D_COMP_LITERAL:
+    case D_COMP_LITERAL_NEG:
       if (left == NULL || right == NULL)
 	return NULL;
       break;
@@ -1002,6 +1031,7 @@ is_ctor_dtor_or_conversion (dc)
     default:
       return 0;
     case D_COMP_QUAL_NAME:
+    case D_COMP_LOCAL_NAME:
       return is_ctor_dtor_or_conversion (d_right (dc));
     case D_COMP_CTOR:
     case D_COMP_DTOR:
@@ -1087,7 +1117,7 @@ d_name (di)
 
 	if (d_peek_next_char (di) != 't')
 	  {
-	    dc = d_substitution (di);
+	    dc = d_substitution (di, 0);
 	    subst = 1;
 	  }
 	else
@@ -1202,7 +1232,7 @@ d_prefix (di)
 	  || peek == 'D')
 	dc = d_unqualified_name (di);
       else if (peek == 'S')
-	dc = d_substitution (di);
+	dc = d_substitution (di, 1);
       else if (peek == 'I')
 	{
 	  if (ret == NULL)
@@ -1776,7 +1806,7 @@ d_type (di)
 	    || peek_next == '_'
 	    || IS_UPPER (peek_next))
 	  {
-	    ret = d_substitution (di);
+	    ret = d_substitution (di, 0);
 	    /* The substituted name may have been a template name and
 	       may be followed by tepmlate args.  */
 	    if (d_peek_char (di) == 'I')
@@ -2254,6 +2284,7 @@ d_expr_primary (di)
   else
     {
       struct d_comp *type;
+      enum d_comp_type t;
       const char *s;
 
       type = d_type (di);
@@ -2269,11 +2300,16 @@ d_expr_primary (di)
 	 constant in any readable form anyhow.  We don't attempt to
 	 handle these cases.  */
 
+      t = D_COMP_LITERAL;
+      if (d_peek_char (di) == 'n')
+	{
+	  t = D_COMP_LITERAL_NEG;
+	  d_advance (di, 1);
+	}
       s = d_str (di);
       while (d_peek_char (di) != 'E')
 	d_advance (di, 1);
-      ret = d_make_comp (di, D_COMP_LITERAL, type,
-			 d_make_name (di, s, d_str (di) - s));
+      ret = d_make_comp (di, t, type, d_make_name (di, s, d_str (di) - s));
     }
   if (d_next_char (di) != 'E')
     return NULL;
@@ -2303,7 +2339,7 @@ d_local_name (di)
       d_advance (di, 1);
       if (! d_discriminator (di))
 	return NULL;
-      return d_make_comp (di, D_COMP_QUAL_NAME, function,
+      return d_make_comp (di, D_COMP_LOCAL_NAME, function,
 			  d_make_name (di, "string literal",
 				       sizeof "string literal" - 1));
     }
@@ -2314,7 +2350,7 @@ d_local_name (di)
       name = d_name (di);
       if (! d_discriminator (di))
 	return NULL;
-      return d_make_comp (di, D_COMP_QUAL_NAME, function, name);
+      return d_make_comp (di, D_COMP_LOCAL_NAME, function, name);
     }
 }
 
@@ -2363,11 +2399,39 @@ d_add_substitution (di, dc)
                   ::= Si
                   ::= So
                   ::= Sd
+
+   If PREFIX is non-zero, then this type is being used as a prefix in
+   a qualified name.  In this case, for the standard substitutions, we
+   need to check whether we are being used as a prefix for a
+   constructor or destructor, and return a full template name.
+   Otherwise we will get something like std::iostream::~iostream()
+   which does not correspond particularly well to any function which
+   actually appears in the source.
 */
 
+static const struct d_standard_sub_info standard_subs[] =
+{
+  { 't', "std", "std", NULL },
+  { 'a', "std::allocator", "std::allocator", "allocator" },
+  { 'b', "std::basic_string", "std::basic_string", "basic_string" },
+  { 's', "std::string",
+    "std::basic_string<char, std::char_traits<char>, std::allocator<char> >",
+    "basic_string" },
+  { 'i', "std::istream",
+    "std::basic_istream<char, std::char_traits<char> >",
+    "basic_istream" },
+  { 'o', "std::ostream",
+    "std::basic_ostream<char, std::char_traits<char> >",
+    "basic_ostream" },
+  { 'd', "std::iostream",
+    "std::basic_iostream<char, std::char_traits<char> >",
+    "basic_iostream" }
+};
+
 static struct d_comp *
-d_substitution (di)
+d_substitution (di, prefix)
      struct d_info *di;
+     int prefix;
 {
   char c;
 
@@ -2404,31 +2468,36 @@ d_substitution (di)
     }
   else
     {
-      switch (c)
+      int verbose;
+      const struct d_standard_sub_info *p;
+      const struct d_standard_sub_info *pend;
+
+      verbose = (di->options & DMGL_VERBOSE) != 0;
+      if (! verbose && prefix)
 	{
-	case 't':
-	  return d_make_sub (di, "std");
-	case 'a':
-	  di->last_name = d_make_sub (di, "allocator");
-	  return d_make_sub (di, "std::allocator");
-	case 'b':
-	  di->last_name = d_make_sub (di, "basic_string");
-	  return d_make_sub (di, "std::basic_string");
-	case 's':
-	  di->last_name = d_make_sub (di, "string");
-	  return d_make_sub (di, "std::string");
-	case 'i':
-	  di->last_name = d_make_sub (di, "istream");
-	  return d_make_sub (di, "std::istream");
-	case 'o':
-	  di->last_name = d_make_sub (di, "ostream");
-	  return d_make_sub (di, "std::ostream");
-	case 'd':
-	  di->last_name = d_make_sub (di, "iostream");
-	  return d_make_sub (di, "std::iostream");
-	default:
-	  return NULL;
+	  char peek;
+
+	  peek = d_peek_char (di);
+	  if (peek == 'C' || peek == 'D')
+	    verbose = 1;
 	}
+
+      pend = (&standard_subs[0]
+	      + sizeof standard_subs / sizeof standard_subs[0]);
+      for (p = &standard_subs[0]; p < pend; ++p)
+	{
+	  if (c == p->code)
+	    {
+	      if (p->set_last_name != NULL)
+		di->last_name = d_make_sub (di, p->set_last_name);
+	      if (verbose)
+		return d_make_sub (di, p->full_expansion);
+	      else
+		return d_make_sub (di, p->simple_expansion);
+	    }
+	}
+
+      return NULL;
     }
 }
 
@@ -2579,6 +2648,7 @@ d_print_comp (dpi, dc)
       return;
 
     case D_COMP_QUAL_NAME:
+    case D_COMP_LOCAL_NAME:
       d_print_comp (dpi, d_left (dc));
       d_append_string (dpi, (dpi->options & DMGL_JAVA) == 0 ? "::" : ".");
       d_print_comp (dpi, d_right (dc));
@@ -2628,6 +2698,38 @@ d_print_comp (dpi, dc)
 	    dpt.next = dpi->templates;
 	    dpi->templates = &dpt;
 	    dpt.template = typed_name;
+	  }
+
+	/* If typed_name is a D_COMP_LOCAL_NAME, then there may be
+	   CV-qualifiers on its right argument which really apply
+	   here; this happens when parsing a class which is local to a
+	   function.  */
+	if (typed_name->type == D_COMP_LOCAL_NAME)
+	  {
+	    struct d_comp *local_name;
+
+	    local_name = d_right (typed_name);
+	    while (local_name->type == D_COMP_RESTRICT_THIS
+		   || local_name->type == D_COMP_VOLATILE_THIS
+		   || local_name->type == D_COMP_CONST_THIS)
+	      {
+		if (i >= sizeof adpm / sizeof adpm[0])
+		  {
+		    d_print_error (dpi);
+		    return;
+		  }
+
+		adpm[i] = adpm[i - 1];
+		adpm[i].next = &adpm[i - 1];
+		dpi->modifiers = &adpm[i];
+
+		adpm[i - 1].mod = local_name;
+		adpm[i - 1].printed = 0;
+		adpm[i - 1].templates = dpi->templates;
+		++i;
+
+		local_name = d_left (local_name);
+	      }
 	  }
 
 	d_print_comp (dpi, d_right (dc));
@@ -3031,6 +3133,7 @@ d_print_comp (dpi, dc)
       return;
 
     case D_COMP_LITERAL:
+    case D_COMP_LITERAL_NEG:
       /* For some builtin types, produce simpler output.  */
       if (d_left (dc)->type == D_COMP_BUILTIN_TYPE)
 	{
@@ -3039,6 +3142,8 @@ d_print_comp (dpi, dc)
 	    case D_PRINT_INT:
 	      if (d_right (dc)->type == D_COMP_NAME)
 		{
+		  if (dc->type == D_COMP_LITERAL_NEG)
+		    d_append_char (dpi, '-');
 		  d_print_comp (dpi, d_right (dc));
 		  return;
 		}
@@ -3047,6 +3152,8 @@ d_print_comp (dpi, dc)
 	    case D_PRINT_LONG:
 	      if (d_right (dc)->type == D_COMP_NAME)
 		{
+		  if (dc->type == D_COMP_LITERAL_NEG)
+		    d_append_char (dpi, '-');
 		  d_print_comp (dpi, d_right (dc));
 		  d_append_char (dpi, 'l');
 		  return;
@@ -3055,7 +3162,8 @@ d_print_comp (dpi, dc)
 
 	    case D_PRINT_BOOL:
 	      if (d_right (dc)->type == D_COMP_NAME
-		  && d_right (dc)->u.s_name.len == 1)
+		  && d_right (dc)->u.s_name.len == 1
+		  && dc->type == D_COMP_LITERAL)
 		{
 		  switch (d_right (dc)->u.s_name.s[0])
 		    {
@@ -3079,6 +3187,8 @@ d_print_comp (dpi, dc)
       d_append_char (dpi, '(');
       d_print_comp (dpi, d_left (dc));
       d_append_char (dpi, ')');
+      if (dc->type == D_COMP_LITERAL_NEG)
+	d_append_char (dpi, '-');
       d_print_comp (dpi, d_right (dc));
       return;
 
@@ -3190,6 +3300,34 @@ d_print_mod_list (dpi, mods, suffix)
       dpi->templates = hold_dpt;
       return;
     }
+  else if (mods->mod->type == D_COMP_LOCAL_NAME)
+    {
+      struct d_print_mod *hold_modifiers;
+      struct d_comp *dc;
+
+      /* When this is on the modifier stack, we have pulled any
+	 qualifiers off the right argument already.  Otherwise, we
+	 print it as usual, but don't let the left argument see any
+	 modifiers.  */
+
+      hold_modifiers = dpi->modifiers;
+      dpi->modifiers = NULL;
+      d_print_comp (dpi, d_left (mods->mod));
+      dpi->modifiers = hold_modifiers;
+
+      d_append_string (dpi, (dpi->options & DMGL_JAVA) == 0 ? "::" : ".");
+
+      dc = d_right (mods->mod);
+      while (dc->type == D_COMP_RESTRICT_THIS
+	     || dc->type == D_COMP_VOLATILE_THIS
+	     || dc->type == D_COMP_CONST_THIS)
+	dc = d_left (dc);
+
+      d_print_comp (dpi, dc);
+
+      dpi->templates = hold_dpt;
+      return;
+    }
 
   d_print_mod (dpi, mods->mod);
 
@@ -3265,6 +3403,7 @@ d_print_function_type (dpi, dc, mods)
   int need_paren;
   int saw_mod;
   struct d_print_mod *p;
+  struct d_print_mod *hold_modifiers;
 
   need_paren = 0;
   saw_mod = 0;
@@ -3318,6 +3457,9 @@ d_print_function_type (dpi, dc, mods)
       d_append_char (dpi, '(');
     }
 
+  hold_modifiers = dpi->modifiers;
+  dpi->modifiers = NULL;
+
   d_print_mod_list (dpi, mods, 0);
 
   if (need_paren)
@@ -3331,6 +3473,8 @@ d_print_function_type (dpi, dc, mods)
   d_append_char (dpi, ')');
 
   d_print_mod_list (dpi, mods, 1);
+
+  dpi->modifiers = hold_modifiers;
 }
 
 /* Print an array type, except for the element type.  */
@@ -3552,9 +3696,11 @@ d_demangle (mangled, options, palc)
   else
     dc = d_type (&di);
 
-  /* If we didn't consume the entire mangled string, then we didn't
-     successfully demangle it.  */
-  if (d_peek_char (&di) != '\0')
+  /* If DMGL_PARAMS is set, then if we didn't consume the entire
+     mangled string, then we didn't successfully demangle it.  If
+     DMGL_PARAMS is not set, we didn't look at the trailing
+     parameters.  */
+  if (((options & DMGL_PARAMS) != 0) && d_peek_char (&di) != '\0')
     dc = NULL;
 
 #ifdef CP_DEMANGLE_DEBUG
@@ -3759,37 +3905,38 @@ is_ctor_or_dtor (mangled, ctor_kind, dtor_kind)
 
   dc = d_mangled_name (&di, 1);
 
+  /* Note that because we did not pass DMGL_PARAMS, we don't expect to
+     demangle the entire string.  */
+
   ret = 0;
-  if (d_peek_char (&di) == '\0')
+  while (dc != NULL)
     {
-      while (dc != NULL)
+      switch (dc->type)
 	{
-	  switch (dc->type)
-	    {
-	    default:
-	      dc = NULL;
-	      break;
-	    case D_COMP_TYPED_NAME:
-	    case D_COMP_TEMPLATE:
-	    case D_COMP_RESTRICT_THIS:
-	    case D_COMP_VOLATILE_THIS:
-	    case D_COMP_CONST_THIS:
-	      dc = d_left (dc);
-	      break;
-	    case D_COMP_QUAL_NAME:
-	      dc = d_right (dc);
-	      break;
-	    case D_COMP_CTOR:
-	      *ctor_kind = dc->u.s_ctor.kind;
-	      ret = 1;
-	      dc = NULL;
-	      break;
-	    case D_COMP_DTOR:
-	      *dtor_kind = dc->u.s_dtor.kind;
-	      ret = 1;
-	      dc = NULL;
-	      break;
-	    }
+	default:
+	  dc = NULL;
+	  break;
+	case D_COMP_TYPED_NAME:
+	case D_COMP_TEMPLATE:
+	case D_COMP_RESTRICT_THIS:
+	case D_COMP_VOLATILE_THIS:
+	case D_COMP_CONST_THIS:
+	  dc = d_left (dc);
+	  break;
+	case D_COMP_QUAL_NAME:
+	case D_COMP_LOCAL_NAME:
+	  dc = d_right (dc);
+	  break;
+	case D_COMP_CTOR:
+	  *ctor_kind = dc->u.s_ctor.kind;
+	  ret = 1;
+	  dc = NULL;
+	  break;
+	case D_COMP_DTOR:
+	  *dtor_kind = dc->u.s_dtor.kind;
+	  ret = 1;
+	  dc = NULL;
+	  break;
 	}
     }
 
