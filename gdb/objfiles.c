@@ -180,7 +180,7 @@ allocate_objfile (bfd *abfd, int flags)
   objfile->obfd = abfd;
   if (objfile->name != NULL)
     {
-      xmfree (objfile->md, objfile->name);
+      xfree (objfile->name);
     }
   if (abfd != NULL)
     {
@@ -443,19 +443,19 @@ free_objfile (struct objfile *objfile)
   objfile_free_data (objfile);
   if (objfile->name != NULL)
     {
-      xmfree (objfile->md, objfile->name);
+      xfree (objfile->name);
     }
   if (objfile->global_psymbols.list)
-    xmfree (objfile->md, objfile->global_psymbols.list);
+    xfree (objfile->global_psymbols.list);
   if (objfile->static_psymbols.list)
-    xmfree (objfile->md, objfile->static_psymbols.list);
+    xfree (objfile->static_psymbols.list);
   /* Free the obstacks for non-reusable objfiles */
   bcache_xfree (objfile->psymbol_cache);
   bcache_xfree (objfile->macro_cache);
   if (objfile->demangled_names_hash)
     htab_delete (objfile->demangled_names_hash);
   obstack_free (&objfile->objfile_obstack, 0);
-  xmfree (objfile->md, objfile);
+  xfree (objfile);
   objfile = NULL;
 }
 

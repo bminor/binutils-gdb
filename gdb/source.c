@@ -325,12 +325,12 @@ forget_cached_source_info (void)
 	{
 	  if (s->line_charpos != NULL)
 	    {
-	      xmfree (objfile->md, s->line_charpos);
+	      xfree (s->line_charpos);
 	      s->line_charpos = NULL;
 	    }
 	  if (s->fullname != NULL)
 	    {
-	      xmfree (objfile->md, s->fullname);
+	      xfree (s->fullname);
 	      s->fullname = NULL;
 	    }
 	}
@@ -851,7 +851,7 @@ find_and_open_source (struct objfile *objfile,
       if (result >= 0)
 	return result;
       /* Didn't work -- free old one, try again. */
-      xmfree (objfile->md, *fullname);
+      xfree (*fullname);
       *fullname = NULL;
     }
 

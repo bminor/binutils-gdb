@@ -2286,7 +2286,7 @@ hpread_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_private != NULL)
     {
-      xmfree (objfile->md, objfile->sym_private);
+      xfree (objfile->sym_private);
     }
 }
 

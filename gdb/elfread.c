@@ -608,7 +608,7 @@ free_elfinfo (void *objp)
   while (ssi)
     {
       nssi = ssi->next;
-      xmfree (objfile->md, ssi);
+      xfree (ssi);
       ssi = nssi;
     }
 
@@ -639,7 +639,7 @@ elf_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
-      xmfree (objfile->md, objfile->sym_stab_info);
+      xfree (objfile->sym_stab_info);
     }
 }
 

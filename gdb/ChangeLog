@@ -1,5 +1,19 @@
 2004-08-10  Andrew Cagney  <cagney@gnu.org>
 
+	* defs.h (xmfree): Delete.
+	* utils.c (xmfree): Delete function.
+	(xfree): Inline calls to xmfree and mfree.
+	* symmisc.c (free_symtab_block, free_symtab): Use xfree.
+	* symfile.c (reread_symbols, init_psymbol_list): Ditto.
+	* source.c (forget_cached_source_info, find_and_open_source): Ditto.
+	* somread.c (som_symfile_finish): Ditto.
+	* objfiles.c (allocate_objfile, free_objfile): 
+	* nlmread.c (nlm_symfile_finish): Ditto.
+	* hpread.c (hpread_symfile_finish): Ditto.
+	* elfread.c (free_elfinfo, elf_symfile_finish): Ditto.
+	* dbxread.c (dbx_symfile_finish, free_bincl_list): Ditto.
+	* coffread.c (coff_symfile_finish): Ditto.
+
 	* defs.h (xmcalloc): Delete declaration.
 	* utils.c (xmcalloc): Delete.
 	(xcalloc): Inline calls to xmcalloc and mcalloc.

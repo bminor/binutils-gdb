@@ -404,7 +404,7 @@ som_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
-      xmfree (objfile->md, objfile->sym_stab_info);
+      xfree (objfile->sym_stab_info);
     }
   hpread_symfile_finish (objfile);
 }

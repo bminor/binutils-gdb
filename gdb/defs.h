@@ -873,10 +873,6 @@ extern char *msavestring (void *, const char *, size_t);
 
 extern char *mstrsave (void *, const char *);
 
-/* Robust versions of same.  Throw an internal error when no memory,
-   guard against stray NULL arguments. */
-extern void xmfree (void *md, void *ptr);
-
 /* xmalloc(), xrealloc() and xcalloc() have already been declared in
    "libiberty.h". */
 extern void xfree (void *);

@@ -1037,13 +1037,6 @@ nomem (long size)
     }
 }
 
-void
-xmfree (void *md, void *ptr)
-{
-  if (ptr != NULL)
-    mfree (md, ptr);
-}
-
 /* The xmalloc() (libiberty.h) family of memory management routines.
 
    These are like the ISO-C malloc() family except that they implement
@@ -1113,7 +1106,8 @@ xcalloc (size_t number, size_t size)
 void
 xfree (void *ptr)
 {
-  xmfree (NULL, ptr);
+  if (ptr != NULL)
+    free (ptr);		/* OK: free */
 }
 
 

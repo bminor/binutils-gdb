@@ -1862,11 +1862,11 @@ reread_symbols (void)
 	      /* FIXME: Do we have to free a whole linked list, or is this
 	         enough?  */
 	      if (objfile->global_psymbols.list)
-		xmfree (objfile->md, objfile->global_psymbols.list);
+		xfree (objfile->global_psymbols.list);
 	      memset (&objfile->global_psymbols, 0,
 		      sizeof (objfile->global_psymbols));
 	      if (objfile->static_psymbols.list)
-		xmfree (objfile->md, objfile->static_psymbols.list);
+		xfree (objfile->static_psymbols.list);
 	      memset (&objfile->static_psymbols, 0,
 		      sizeof (objfile->static_psymbols));
 
@@ -2690,11 +2690,11 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 
   if (objfile->global_psymbols.list)
     {
-      xmfree (objfile->md, objfile->global_psymbols.list);
+      xfree (objfile->global_psymbols.list);
     }
   if (objfile->static_psymbols.list)
     {
-      xmfree (objfile->md, objfile->static_psymbols.list);
+      xfree (objfile->static_psymbols.list);
     }
 
   /* Current best guess is that approximately a twentieth
