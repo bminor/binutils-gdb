@@ -31,7 +31,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef COFF_ENCAPSULATE
 #define NAMES_HAVE_UNDERSCORE
-/* Avoid conflicts between "a.out.gnu.h" and <sys/exec.h> */
+/* Avoid conflicts between our include files and <sys/exec.h>
+   (maybe not needed anymore).  */
 #define _EXEC_
 #endif
 

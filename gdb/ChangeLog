@@ -1,5 +1,7 @@
 Wed Nov 20 18:35:56 1991  John Gilmore  (gnu at cygnus.com)
 
+	* infptrace.c, tm-sun386.h:  Cashier <a.out.gnu.h>, remove refs.
+
 	* configure.in, xconfig, tconfig, Makefile.in, doc/gdbint.texinfo:
 	Makefile fragments for various hosts and targets now come from
 	gdb/config/mh-* and gdb/config/mt-*.  This is for consistency with

@@ -56,9 +56,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include "gdbcore.h"
-#include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 #include <sys/stat.h>
+
+#if !defined (FETCH_INFERIOR_REGISTERS)
+#include <sys/user.h>		/* Probably need to poke the user structure */
+#if defined (KERNEL_U_ADDR_BSD)
+#include <a.out.h>		/* For struct nlist */
+#endif /* KERNEL_U_ADDR_BSD.  */
+#endif /* !FETCH_INFERIOR_REGISTERS */
 
 /* This function simply calls ptrace with the given arguments.  
    It exists so that all calls to ptrace are isolated in this 
@@ -161,6 +167,7 @@ detach (signal)
 #if defined (KERNEL_U_ADDR_BSD)
 /* Get kernel_u_addr using BSD-style nlist().  */
 CORE_ADDR kernel_u_addr;
+#include <a.out.h>		/* For struct nlist */
 
 void
 _initialize_kernel_u_addr ()
@@ -193,7 +200,6 @@ static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
 /* read the value of the u area from the hp-ux kernel */
 void _initialize_kernel_u_addr ()
 {
-    struct user u;
     nlist ("/hp-ux", &nl);
     kernel_u_addr = nl[0].n_value;
 }
@@ -210,26 +216,49 @@ void _initialize_kernel_u_addr ()
 	  (int *)(offsetof (struct user, u_ar0)), 0) - KERNEL_U_ADDR
 #endif
 
+/* Registers we shouldn't try to fetch.  */
+#if !defined (CANNOT_FETCH_REGISTER)
+#define CANNOT_FETCH_REGISTER(regno) 0
+#endif
+
 /* Fetch one register.  */
+
 static void
 fetch_register (regno)
      int regno;
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
+  char mess[128];				/* For messages */
   register int i;
 
   /* Offset of registers within the u area.  */
-  unsigned int offset = U_REGS_OFFSET;
+  unsigned int offset;
+
+  if (CANNOT_FETCH_REGISTER (regno))
+    {
+      bzero (buf, REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
+      supply_register (regno, buf);
+      return;
+    }
+
+  offset = U_REGS_OFFSET;
 
   regaddr = register_addr (regno, offset);
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
     {
+      errno = 0;
       *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid, (int *)regaddr, 0);
       regaddr += sizeof (int);
+      if (errno != 0)
+	{
+	  sprintf (mess, "reading register %s (#%d)", reg_names[regno], regno);
+	  perror_with_name (mess);
+	}
     }
   supply_register (regno, buf);
 }
+
 
 /* Fetch all registers, or just one, from the child process.  */
 
