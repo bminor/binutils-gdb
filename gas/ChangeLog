@@ -1,3 +1,11 @@
+Thu Feb 13 14:48:03 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* config/tc-m68k.c (LEX_TILDE): Define if TE_DELTA.
+	* read.c (LEX_TILDE): Define if not defined.
+	(lex_type): Use LEX_TILDE.
+	* expr.c (get_symbol_end): Check first char with is_name_beginner,
+	not is_part_of_name.
+
 Thu Feb 13 11:40:58 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips16_extended_frag): Correct base address
