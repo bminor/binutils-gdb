@@ -379,6 +379,11 @@ read_unwind_info (objfile)
       elf_unwind_size = bfd_section_size (objfile->obfd, elf_unwind_sec);
       elf_unwind_entries = elf_unwind_size / UNWIND_ENTRY_SIZE;
     }
+  else
+    {
+      elf_unwind_size = 0;
+      elf_unwind_entries = 0;
+    }
 
   if (stub_unwind_sec)
     {

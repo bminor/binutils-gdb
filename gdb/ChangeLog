@@ -1,5 +1,8 @@
 Thu May 12 10:46:27 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (read_unwind_info): Make sure elf_unwind_size and
+	elf_unwind_entries are always initialized.
+
 	* hppa-tdep.c (skip_trampoline_code): Handle argument relocation
 	stubs which return directly to the caller rather than to the stub
 	itself.
