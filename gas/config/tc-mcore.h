@@ -74,6 +74,10 @@ struct mcore_tc_sy
 
 #define TC_SYMFIELD_TYPE struct mcore_tc_sy
 
+# if defined TE_PE
+#  define TC_FORCE_RELOCATION(x) ((x)->fx_r_type == BFD_RELOC_RVA)
+# endif
+
 #endif /* OBJ_COFF */
 
 

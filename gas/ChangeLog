@@ -1,3 +1,13 @@
+1999-11-18  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.h (TC_FORCE_RELOCATION): Define for Mcore-pe
+	target.
+	
+	* config/tc-mcore.c (tc_gen_reloc): Support generation of RVA
+	relocs.
+	(mcore_force_relocation): Force relocations to be generated for
+	RVA relocs.
+
 1999-11-16  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (i386_immediate): Disallow O_big immediates.

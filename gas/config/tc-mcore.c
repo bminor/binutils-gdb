@@ -2193,6 +2193,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_MCORE_PCREL_IMM8BY4:
     case BFD_RELOC_MCORE_PCREL_IMM11BY2:
     case BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2:
+    case BFD_RELOC_RVA:      
       code = fixp->fx_r_type;
       break;
     
@@ -2246,7 +2247,8 @@ mcore_force_relocation (fix)
      fixS * fix;
 {
   if (   fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fixP->fx_r_type == BFD_RELOC_RVA)
     return 1;
 
   return 0;
