@@ -621,7 +621,7 @@ typedef struct _bfd_window {
 extern void bfd_init_window PARAMS ((bfd_window *));
 extern void bfd_free_window PARAMS ((bfd_window *));
 extern boolean bfd_get_file_window
-  PARAMS ((bfd *, file_ptr, bfd_size_type, bfd_window *, int));
+  PARAMS ((bfd *, file_ptr, bfd_size_type, bfd_window *, boolean));
 
 /* XCOFF support routines for the linker.  */
 

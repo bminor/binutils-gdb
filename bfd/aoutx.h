@@ -1230,7 +1230,7 @@ aout_get_external_symbols (abfd)
 
       if (bfd_get_file_window (abfd,
 			       obj_sym_filepos (abfd), exec_hdr (abfd)->a_syms,
-			       &obj_aout_sym_window (abfd), 1) == false)
+			       &obj_aout_sym_window (abfd), true) == false)
 	return false;
       syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
 
@@ -1253,7 +1253,7 @@ aout_get_external_symbols (abfd)
       stringsize = GET_WORD (abfd, string_chars);
 
       if (bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
-			       &obj_aout_string_window (abfd), 1) == false)
+			       &obj_aout_string_window (abfd), true) == false)
 	return false;
       strings = (char *) obj_aout_string_window (abfd).data;
 

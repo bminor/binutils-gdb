@@ -308,7 +308,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
      file_ptr offset;
      bfd_size_type size;
      bfd_window *windowp;
-     int writable;
+     boolean writable;
 {
   static size_t pagesize;
   bfd_window_internal *i = windowp->i;
@@ -367,7 +367,9 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
 	}
       i->data = mmap (i->data, real_size,
 		      writable ? PROT_WRITE | PROT_READ : PROT_READ,
-		      writable ? MAP_FILE | MAP_PRIVATE : MAP_FILE,
+		      (writable
+		       ? MAP_FILE | MAP_PRIVATE
+		       : MAP_FILE | MAP_SHARED),
 		      fd, file_offset);
       if (i->data == (PTR) -1)
 	{
@@ -393,7 +395,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
     {
       if (ok_to_map)
 	fprintf (stderr, "not mapping: data=%x mapped=%d\n",
-		 i->data, i->mapped);
+		 i->data, (int) i->mapped);
       else
 	fprintf (stderr, "not mapping: env var not set\n");
     }
@@ -1039,7 +1041,7 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
       return bfd_get_section_contents (abfd, section, w->data, offset, count);
     }
   if ((bfd_size_type) (offset+count) > section->_raw_size
-      || (bfd_get_file_window (abfd, section->filepos + offset, count, w, 1)
+      || (bfd_get_file_window (abfd, section->filepos + offset, count, w, true)
 	  == false))
     return false;
   return true;

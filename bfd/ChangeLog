@@ -1,5 +1,13 @@
 Wed Nov  8 11:31:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libbfd.c (bfd_get_file_window): Change writable parameter from
+	int to boolean; update all callers.  Pass MAP_SHARED if not
+	writable--it's required on Solaris.  Cast fprintf argument to
+	avoid warning.
+	* bfd-in.h (bfd_get_file_window): Update declaration.
+	* bfd-in2.h: Rebuild.
+	* aoutx.h: Update calls to bfd_get_file_window.
+
 	* xcofflink.c (XCOFF_DEF_DYNAMIC): Rename from XCOFF_REF_DYNAMIC.
 	Change all uses.
 	(xcoff_swap_ldhdr_in): New static function.
