@@ -1,3 +1,15 @@
+2001-05-25  Alan Modra  <amodra@one.net.au>
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): Don't allow
+	undefined millicode syms in shared libs.
+	(hppa_build_one_stub): Turn BFD_ASSERTs into aborts.
+	(elf32_hppa_check_relocs): Likewise.
+	(elf32_hppa_adjust_dynamic_symbol): Likewise.
+	(elf32_hppa_size_dynamic_sections): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	(elf32_hppa_finish_dynamic_symbol): Likewise.
+	(elf32_hppa_finish_dynamic_sections): Likewise.
+
 2001-05-24  Tom Rix <trix@redhat.com>
 
         * Makefile.am coff-pmac bfd now defined in coff-rs6000.c
