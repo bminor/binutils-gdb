@@ -1,5 +1,10 @@
 2002-02-27  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (PREFX): This is a 64-bit instruction, use '64'
+	as the filter flag.
+
+2002-02-27  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (PREFX): Tweak instruction opcode fields (i.e.,
 	add a comma) so that it more closely match the MIPS ISA
 	documentation opcode partitioning.
