@@ -230,6 +230,8 @@ generic symtabs		Jim Blandy		jimb@cygnus.com
   stabs reader		Jim Blandy		jimb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
   coff reader		Philippe De Muyter	phdm@macqel.be
+  xcoff reader		Any maintainer can modify this; please send tricky
+			ones to Kevin Buettner <kevinb@cygnus.com>
   linespec		Jim Blandy		jimb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com

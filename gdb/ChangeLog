@@ -1,5 +1,10 @@
 2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
+        * MAINTAINERS: Declare xcoffread.c open to all maintainers,
+        and make Kevin Buettner (kevinb@redhat.com) the reference person.
+
+2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
+
 	* proc-api.c (ioctl_with_trace): Fix uninitialized variable.
 
 2001-05-10  Fernando Nasser  <fnasser@redhat.com>
