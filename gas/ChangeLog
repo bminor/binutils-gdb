@@ -1,3 +1,8 @@
+Wed Sep 11 00:09:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_new_file): Don't do anything if we are still in
+	the same file.
+
 Tue Sep 10 11:45:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (append_insn): Fill in the value for a constant

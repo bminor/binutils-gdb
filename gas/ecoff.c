@@ -2351,6 +2351,8 @@ void
 ecoff_new_file (name)
      const char *name;
 {
+  if (cur_file_ptr != NULL && strcmp (cur_file_ptr->name, name) == 0)
+    return;
   add_file (name, 0, 0);
   generate_asm_lineno = 1;
 }
