@@ -383,10 +383,23 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 
   /* The debugging sections appear to be recognized only by name, not
      any sort of flag.  */
-  if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
-      || strncmp (name, ".line", sizeof ".line" - 1) == 0
-      || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
-    flags |= SEC_DEBUGGING;
+  {
+    const char * debug_sec_names [] =
+    {
+      ".debug",
+      ".gnu.linkonce.wi.",
+      ".line",
+      ".stab"
+    };
+    int i;
+
+    for (i = sizeof (debug_sec_names) / sizeof (debug_sec_names[0]); i--;)
+      if (strncmp (name, debug_sec_names[i], strlen (debug_sec_names[i])) == 0)
+	break;
+
+    if (i >= 0)
+      flags |= SEC_DEBUGGING;
+  }
 
   /* As a GNU extension, if the name begins with .gnu.linkonce, we
      only link a single copy of the section.  This is used to support

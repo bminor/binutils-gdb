@@ -1,3 +1,8 @@
+2000-09-02  Daniel Berlin <dberlin@redhat.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Add
+	.gnu.linkobce.wi. to the list of debug section names.
+
 2000-09-02  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.c (find_debug_info): New function: Locate a section
