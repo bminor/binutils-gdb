@@ -1,3 +1,8 @@
+
+Mon Apr 29 16:17:31 1996  Dawn Perchik <dawn@cygnus.com>
+	* c-valprint.c (c_val_print): Fix printing for arrays defined 
+	with 0 length.
+
 Sun Apr 28 15:08:05 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Support for bi-endian remote breakpoints.
