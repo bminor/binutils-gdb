@@ -1,3 +1,7 @@
+Mon Oct 20 14:54:06 1997  Klaus K"ampf  <kkaempf@progis.de>
+
+	* config/obj-evax.c: support .weak pseudo-op
+
 Mon Oct 20 10:13:32 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* tc-sparc.c (default_arch_size): New static local.
