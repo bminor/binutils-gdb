@@ -50,6 +50,7 @@ struct simops
   long opcode;
   long mask;
   void (*func)();
+  int length;
   int numops;
   int operands[16];
 };

@@ -95,8 +95,27 @@ write_opcodes ()
   
   for (opcode = (struct mn10300_opcode *)mn10300_opcodes; opcode->name; opcode++)
     {
-      printf ("  { 0x%x,0x%x,OP_%X,",
-	      opcode->opcode, opcode->mask, opcode->opcode);
+      int size;
+
+      if (opcode->format == FMT_S0)
+	size = 1;
+      else if (opcode->format == FMT_S1
+               || opcode->format == FMT_D0)
+	size = 2;
+      else if (opcode->format == FMT_S2
+               || opcode->format == FMT_D1)
+	size = 3;
+      else if (opcode->format == FMT_S4)
+	size = 5;
+      else if (opcode->format == FMT_D2)
+	size = 4;
+      else if (opcode->format == FMT_D4)
+	size = 6;
+      else
+	size = 7;
+
+      printf ("  { 0x%x,0x%x,OP_%X,%d,",
+	      opcode->opcode, opcode->mask, opcode->opcode, size);
       
       Opcodes[curop++] = opcode->opcode;
 
@@ -139,5 +158,5 @@ write_opcodes ()
 
       printf ("}},\n");
     }
-  printf ("{ 0,0,NULL,0,{0,0,0,0,0,0}},\n};\n");
+  printf ("{ 0,0,NULL,0,0,{0,0,0,0,0,0}},\n};\n");
 }

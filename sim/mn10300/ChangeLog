@@ -1,3 +1,7 @@
+Tue Nov 26 13:36:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gencode.c, interp.c: Snapshot current simulator code.
+
 Mon Nov 25 12:46:38 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in, config.in, configure, configure.in: New files.
