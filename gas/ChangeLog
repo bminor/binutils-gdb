@@ -4,7 +4,8 @@ Wed Feb 18 15:49:56 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* config/tc-dvp.c (parse_float): New function.
 	(assemble_vu): Handle loi insns.
 	(assemble_one_insn): Simplify suffix parsing.
-	Handle DVP_OPERAND_FLOAT.
+	Handle DVP_OPERAND_FLOAT.  Allow FAKE arguments to have a parser
+	handler.
 
 end-sanitize-sky
 start-sanitize-m32rx
