@@ -1,3 +1,8 @@
+2000-05-23  Nick Clifton  <nickc@cygnus.com>
+
+	* wrapper.c (sim_store_register): Special handling for CPSR
+	register.
+
 2000-03-11  Philip Blundell  <philb@gnu.org>
 
 	* armemu.c (LoadSMult, LoadMult): Correct handling of aborts.

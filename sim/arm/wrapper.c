@@ -320,7 +320,13 @@ sim_store_register (sd, rn, memory, length)
      int length ATTRIBUTE_UNUSED;
 {
   init ();
-  ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+  if (rn == 25)
+    {
+      state->Cpsr = frommem (state, memory);
+      ARMul_CPSRAltered (state);	     
+    }
+  else
+    ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
   return -1;
 }
 
