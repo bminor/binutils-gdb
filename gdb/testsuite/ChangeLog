@@ -1,3 +1,10 @@
+2000-05-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/step-test.exp: On IA-64 targets, when stepping out of
+	a call, do not require that gdb stop on the line after the call. 
+	Instead, it is permissible for gdb to stop on the line of the
+	call itself.
+
 2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* gdb.base/interrupt.exp: Make "pass" message say "send" 

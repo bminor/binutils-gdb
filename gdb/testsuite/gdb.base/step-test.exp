@@ -75,8 +75,10 @@ gdb_test "step" ".*${decimal}.*myglob.*"   "step into"
 # instruction, which is attributed to the line containing the function
 # call?
 
-# On PA64 we end up at a different instruction than PA32
-if { [istarget "hppa2.0w-hp-hpux*"] } {
+# On PA64, we end up at a different instruction than PA32.
+# On IA-64, we also end up on callee instead of on the next line due
+# to the restoration of the global pointer (which is a caller-save).
+if { [istarget "hppa2.0w-hp-hpux*"] || [istarget "ia64-*-*"]} {
     send_gdb "finish\n"
     gdb_expect {
         -re ".*${decimal}.*a.*5.*= a.*3.*$gdb_prompt $" { pass "step out 1" }
@@ -171,8 +173,10 @@ gdb_expect {
     pass "stepi: finish call"
   }
   -re ".*${decimal}.*callee.*STEPI.*$gdb_prompt $" {
-    # On PA64 we end up at a different instruction than PA32
-    if { [istarget "hppa2.0w-hp-hpux*"] } {
+    # On PA64, we end up at a different instruction than PA32.
+    # On IA-64, we end up on callee instead of on the following line due
+    # to the restoration of the global pointer.
+    if { [istarget "hppa2.0w-hp-hpux*"] || [istarget "ia64-*-*"] } {
         pass "stepi: finish call 2"
     } else {
 	fail "stepi: finish call 2"
