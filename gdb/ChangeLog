@@ -1,3 +1,23 @@
+Fri Dec  2 15:03:07 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* solib.c (auto_solib_add_at_startup): New global.
+	(solib_create_inferior_hook): Call solib_add only if
+	auto_solib_add_at_startup is nonzero.
+	(_initialize_solib): New command "set auto-solib-add".
+
+Fri Dec  2 12:52:04 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* parse.c (msymbol_addr_type):  Replaced by
+	lookup_pointer_type (builtin_type_void).
+
+	* printcmd.c (_initialize_printcmd):  Give examine_*_type
+	a name for `ptype $_'.
+
+Fri Dec  2 12:52:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmd.c (print_formatted): Call val_print_string directly,
+	rather than via value_print.
+
 Wed Nov 30 22:27:27 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somsolib.c (som_solib_get_got_by_pc): New function.
