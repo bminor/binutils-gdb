@@ -1,5 +1,6 @@
 	.text
 foo:
+	.ent foo
 	sync
 	sync.p
 	sync.l

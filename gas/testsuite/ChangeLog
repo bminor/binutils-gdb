@@ -1,3 +1,8 @@
+2001-03-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/sync.s: Declare 'foo' as a function so that this
+	test will work on properly on ECOFF targets.
+
 2001-03-24  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/ssemmx2.s: Change movntq to movntdq.
