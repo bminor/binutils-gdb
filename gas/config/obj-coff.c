@@ -1631,7 +1631,7 @@ obj_coff_init_stab_section (seg)
   /* Zero it out.  */
   memset (p, 0, 12);
   as_where (&file, (unsigned int *) NULL);
-  stabstr_name = (char *) alloca (strlen (seg->name) + 4);
+  stabstr_name = (char *) xmalloc (strlen (seg->name) + 4);
   strcpy (stabstr_name, seg->name);
   strcat (stabstr_name, "str");
   stroff = get_stab_string_offset (file, stabstr_name);
