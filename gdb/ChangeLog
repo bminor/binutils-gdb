@@ -1,3 +1,13 @@
+Mon Feb 21 11:03:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS: Update: IA-64 - Kevin Buettner; ARM - Fernando
+ 	nasser, Jim Ingham and Scott Bambrough; GNU/Linux ARM - Scott
+ 	Bambrough; event loop - Elena Zannoni; SDS and RDI/APD protocol -
+ 	to Fernando Nasser and Jim Ingham; KOD - Fernando Nasser; MI -
+ 	Andrew Cagney, Elena Zannoni and Fernando Nasser; Web pages - Jim
+ 	Kingdon.
+	* MAINTAINERS: Add Nick Clifton to write after approval list.
+	
 Mon Feb 21 10:30:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add note on multiple maintainers.

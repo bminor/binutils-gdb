@@ -5,6 +5,7 @@ Andrew Cagney			ac131313@cygnus.com
 Stan Shebs			shebs@cygnus.com
 
 
+
 			Various Maintainers
 
 Note individuals who maintain parts of the debugger need approval to
@@ -29,8 +30,11 @@ mips target		Andrew Cagney		cagney@cygnus.com
 mn10300 target		Andrew Cagney		cagney@cygnus.com
 powerpc target		Kevin Buettner		kevinb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
-arm target		Jim Ingham		jingham@cygnus.com
+arm target		Fernando Nasser		fnasser@cygnus.com
+			Jim Ingham		jingham@cygnus.com
+			Scott Bambrough	scottb@netwinder.org
 m32r target		Michael Snyder		msnyder@cygnus.com
+IA-64 target		Kevin Buettner		kevinb@cygnus.com
 
 
 Host/Native: Target specific native support - typically shared
@@ -48,6 +52,7 @@ hurd native		Mark Kettenis		kettenis@wins.va.nl
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
 UnixWare Threads	Nick Duffek		nsd@cygnus.com
+GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 
 
 Core: Generic components used by all of GDB
@@ -56,6 +61,7 @@ generic arch support	Andrew Cagney		cagney@cygnus.com
 target vector		Andrew Cagney		cagney@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 readline		Elena Zannoni		ezannoni@cygnus.com
+event loop		Elena Zannoni           ezannoni@cygnus.com
 generic symtabs		Jim Blandy		jimb@cygnus.com
 dwarf readers		Jim Blandy		jimb@cygnus.com
 elf reader		Jim Blandy		jimb@cygnus.com
@@ -71,11 +77,15 @@ Scheme support		Jim Blandy		jimb@cygnus.com
 svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
 coff reader		Philippe De Muyter	phdm@macqel.be
 remote.c		Andrew Cagney		cagney@cygnus.com
-sds protocol		Stan Shebs		shebs@apple.com
-rdi/adp protocol	Stan Shebs		shebs@apple.com
+			J.T. Conklin		jtc@redback.com
+sds protocol		Fernando Nasser		fnasser@cygnus.com
+			Jim Ingham		jingham@cygnus.com
+rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
+			Jim Ingham		jingham@cygnus.com
 gdbserver		Stan Shebs		shebs@apple.com
 documentation	 	Stan Shebs		shebs@apple.com
 testsuite	 	Stan Shebs		shebs@apple.com
+Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
 
 
 UI: External (user) interfaces.
@@ -83,6 +93,16 @@ UI: External (user) interfaces.
 command interpreter	Fernando Nasser		fnasser@cygnus.com
 gdbtk (c & tcl)		Jim Ingham		jingham@cygnus.com
 libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
+mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
+			Elena Zannoni           ezannoni@cygnus.com
+			Fernando Nasser		fnasser@cygnus.com
+
+
+Misc:
+
+Web pages.		Jim Kingdon		kingdon@redhat.com
+			(but apparently anyone can tweek stuff?)
+Makefile.in, configure*	ALL
 
 
 
@@ -92,6 +112,8 @@ J.T. Conklin					jtc@redback.com
 Jim Kingdon					kingdon@redhat.com
 Jason Molenda					jsm@cygnus.com
 H.J. Lu						hjl@lucon.org
+Nick Clifton					nickc@cygnus.com
+
 
 * Indicates folks we need to get Kerberos/ssh accounts ready so they
 can write in the source tree
