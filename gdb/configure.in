@@ -162,6 +162,27 @@ if test x"$enable_tui" = xyes; then
   fi
 fi
 
+# Enable gdbtk.
+AC_ARG_ENABLE(gdbtk,
+[  --enable-gtk            enable gdbtk graphical user interface (GUI)],
+  [case $enableval in
+    yes | no)
+      ;;
+    *)
+      AC_MSG_ERROR([bad value $enableval for --enable-gdbtk]) ;;
+  esac],
+  [if test -d $srcdir/gdbtk; then
+    enable_gdbtk=yes
+  else
+    enable_gdbtk=no
+  fi])
+# We unconditionally disable gdbtk tests on selected platforms.
+case $host_os in
+  go32* | windows*)
+    AC_MSG_WARN([gdbtk isn't supported on $host; disabling])
+    enable_gdbtk=no ;;
+esac
+
 # --------------------- #
 # Checks for programs.  #
 # --------------------- #
@@ -943,38 +964,6 @@ LIBGUI="../libgui/src/libgui.a"
 GUI_CFLAGS_X="-I${srcdir}/../libgui/src"
 AC_SUBST(LIBGUI)
 AC_SUBST(GUI_CFLAGS_X)
-
-AC_ARG_ENABLE(gdbtk,
-[  --enable-gdbtk          Enable GDBTK GUI front end],
-[case "${enableval}" in
-    yes)
-	case "$host" in
-	*go32*)
-	    AC_MSG_WARN([GDB does not support GDBtk on host ${host}.  GDBtk will be disabled.])
-	    enable_gdbtk=no ;;
-	*windows*)
-	    AC_MSG_WARN([GDB does not support GDBtk on host ${host}.  GDBtk will be disabled.])
-	    enable_gdbtk=no ;;
-	*)
-	    enable_gdbtk=yes ;;
-	esac ;;
-    no)
-	enable_gdbtk=no  ;;
-    *)
-	AC_MSG_ERROR(bad value ${enableval} given for gdbtk option) ;;
-esac],
-[
-# Default is on for everything but go32 and Cygwin
-case "$host" in
-    *go32* | *windows*)
-	;;
-    *)
- 	if test -d "${srcdir}/gdbtk" ; then
-            enable_gdbtk=yes
-	fi
-	;;
-esac
-])
 
 WIN32LDAPP=
 AC_SUBST(WIN32LIBS)
