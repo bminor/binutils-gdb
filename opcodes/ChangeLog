@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Tue Dec 16 15:22:51 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* d30v-opc.c (d30v_opcode_table): Set new flags bits
+	FLAG_{2WORD,MUL{16,32},ADDSUBppp}, in appropriate instructions.
+
+end-sanitize-r5900
 1997-12-15  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure: Only build libopcodes shared if --enable-shared's value
