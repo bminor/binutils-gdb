@@ -22,8 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    token (which is one byte in this lexicon) lookahead recursive decent
    parser.  */
 
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "ieee.h"
 #include "libieee.h"
@@ -1110,7 +1110,7 @@ DEFUN(ieee_object_p,(abfd),
   /* Determine the architecture and machine type of the object file.
      */
     {
-      bfd_arch_info_struct_type *arch = bfd_scan_arch(processor);
+      bfd_arch_info_type *arch = bfd_scan_arch(processor);
       if (arch == 0) goto fail;
       abfd->arch_info = arch;
     }
@@ -1174,22 +1174,22 @@ DEFUN(ieee_print_symbol,(ignore_abfd, afile,  symbol, how),
       bfd *ignore_abfd AND
       PTR afile AND
       asymbol *symbol AND
-      bfd_print_symbol_enum_type how)
+      bfd_print_symbol_type how)
 {
   FILE *file = (FILE *)afile;
 
   switch (how) {
-  case bfd_print_symbol_name_enum:
+  case bfd_print_symbol_name:
     fprintf(file,"%s", symbol->name);
     break;
-  case bfd_print_symbol_type_enum:
+  case bfd_print_symbol_more:
 #if 0
     fprintf(file,"%4x %2x",aout_symbol(symbol)->desc & 0xffff,
 	    aout_symbol(symbol)->other  & 0xff);
 #endif
     BFD_FAIL();
     break;
-  case bfd_print_symbol_all_enum:
+  case bfd_print_symbol_all:
       {
 	CONST char *section_name = symbol->section == (asection *)NULL ?
 	  "*abs" : symbol->section->name;
@@ -2905,7 +2905,7 @@ DEFUN(ieee_bfd_debug_info_accumulate,(abfd, section),
 #define ieee_slurp_armap bfd_true
 #define ieee_slurp_extended_name_table bfd_true
 #define ieee_truncate_arname (void (*)())bfd_nullvoidptr
-#define ieee_write_armap  (FOO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
+#define ieee_write_armap  (FOO( boolean, (*),(bfd *, unsigned int, struct orl *, unsigned int, int))) bfd_nullvoidptr
 #define ieee_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
 #define	ieee_close_and_cleanup		bfd_generic_close_and_cleanup
 #define ieee_set_arch_mach bfd_default_set_arch_mach
@@ -2914,7 +2914,7 @@ DEFUN(ieee_bfd_debug_info_accumulate,(abfd, section),
 bfd_target ieee_vec =
 {
   "ieee",			/* name */
-  bfd_target_ieee_flavour_enum,
+  bfd_target_ieee_flavour,
   true,				/* target byte order */
   true,				/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */

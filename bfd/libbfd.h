@@ -21,6 +21,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
+/* Align an address upward to a boundary, expressed as a number of bytes.
+   E.g. align to an 8-byte boundary with argument of 8.  */
+#define ALIGN(this, boundary) \
+  ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
+
 /* If you want to read and write large blocks, you might want to do it
    in quanta of this amount */
 #define DEFAULT_BUFFERSIZE 8192
@@ -129,10 +134,10 @@ PROTO (void, bfd_gnu_truncate_arname, (bfd *abfd, CONST char *filename,
 					char *hdr));
 
 PROTO (boolean, bsd_write_armap, (bfd *arch, unsigned int elength,
-				  struct orl *map, int orl_count, int stridx));
+				  struct orl *map, unsigned int orl_count, int stridx));
 
 PROTO (boolean, coff_write_armap, (bfd *arch, unsigned int elength,
-				   struct orl *map, int orl_count, int stridx));
+				   struct orl *map, unsigned int orl_count, int stridx));
 
 PROTO (bfd *, bfd_generic_openr_next_archived_file, (bfd *archive,
 						     bfd *last_file));
@@ -140,7 +145,12 @@ PROTO (bfd *, bfd_generic_openr_next_archived_file, (bfd *archive,
 PROTO(int, bfd_generic_stat_arch_elt, (bfd *, struct stat *));
 
 PROTO(boolean, bfd_generic_get_section_contents,
-      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset, bfd_size_type count));
+      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset,
+       bfd_size_type count));
+
+PROTO(boolean, bfd_generic_set_section_contents,
+      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset,
+       bfd_size_type count));
 
 /* Macros to tell if bfds are read or write enabled.
 
@@ -194,7 +204,14 @@ bfd_init has been called.
 */
 
 /*:libbfd.c*/
-/* *i bfd_log2
+/* bfd_write_bigendian_4byte_int
+*/
+
+ PROTO(void, bfd_write_bigendian_4byte_int,( bfd *abfd,  int i));
+
+/*
+
+*i bfd_log2
 Return the log base 2 of the value supplied, rounded up. eg an arg
 of 1025 would return 11.
 */
@@ -285,7 +302,7 @@ one first, to avoid running out of file descriptors.
 What bfds are seeded with 
 */
 
-extern bfd_arch_info_struct_type bfd_default_arch_struct;
+extern bfd_arch_info_type bfd_default_arch_struct;
 
 /*
  bfd_default_set_arch_mach
@@ -313,7 +330,7 @@ all installed architecture packages and getting them to poke around.
 Link the provided arch info structure into the list
 */
 
- void EXFUN(bfd_arch_linkin,(bfd_arch_info_struct_type *));
+ void EXFUN(bfd_arch_linkin,(bfd_arch_info_type *));
 
 /*
 
@@ -322,9 +339,9 @@ Link the provided arch info structure into the list
 The default function for testing for compatibility 
 */
 
- CONST bfd_arch_info_struct_type *EXFUN(bfd_default_compatible,
-     (CONST bfd_arch_info_struct_type *a,
-     CONST bfd_arch_info_struct_type *b));
+ CONST bfd_arch_info_type *EXFUN(bfd_default_compatible,
+     (CONST bfd_arch_info_type *a,
+     CONST bfd_arch_info_type *b));
 
 /*
 
@@ -333,7 +350,7 @@ The default function for working out whether this is an architecture
 hit and a machine hit 
 */
 
- boolean EXFUN(bfd_default_scan,(CONST struct bfd_arch_info_struct *, CONST char *));
+ boolean EXFUN(bfd_default_scan,(CONST struct bfd_arch_info *, CONST char *));
 
 /*
 */
