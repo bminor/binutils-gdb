@@ -43,7 +43,7 @@ static boolean coff_a29k_adjust_symndx
 #define INSERT_HWORD(WORD,HWORD)	\
     (((WORD) & 0xff00ff00) | (((HWORD) & 0xff00) << 8) | ((HWORD)& 0xff))
 #define EXTRACT_HWORD(WORD) \
-    (((WORD) & 0x00ff0000) >> 8) | ((WORD)& 0xff)
+    ((((WORD) & 0x00ff0000) >> 8) | ((WORD)& 0xff))
 #define SIGN_EXTEND_HWORD(HWORD) \
     ((HWORD) & 0x8000 ? (HWORD)|0xffff0000 : (HWORD))
 
