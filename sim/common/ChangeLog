@@ -1,3 +1,8 @@
+2001-03-15  Frank Ch. Eigler  <fche@redhat.com>
+
+	* sim-core.c (sim_core_map_attach): Correct overlap-related
+	error messages.
+
 2001-03-07  Michael Meissner  <meissner@redhat.com>
 
 	* run.c (alloca-conf.h): Delete, no longer provided.
