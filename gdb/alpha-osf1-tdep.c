@@ -35,14 +35,11 @@ alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 }
 
 static CORE_ADDR
-alpha_osf1_sigcontext_addr (struct frame_info *frame)
+alpha_osf1_sigcontext_addr (struct frame_info *next_frame)
 {
-  struct frame_info *next_frame = get_next_frame (frame);
+  const struct frame_id next_id = get_frame_id (next_frame);
 
-  if (next_frame != NULL)
-    return (read_memory_integer (get_frame_base (next_frame), 8));
-  else
-    return (read_memory_integer (get_frame_base (frame), 8));
+  return (read_memory_integer (next_id.stack_addr, 8));
 }
 
 static void
