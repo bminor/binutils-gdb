@@ -30,6 +30,10 @@
 #include "i386/tm-i386.h"
 #include "tm-linux.h"
 
+/* Use target_specific function to define link map offsets.  */
+extern struct link_map_offsets *i386_linux_svr4_fetch_link_map_offsets (void);
+#define SVR4_FETCH_LINK_MAP_OFFSETS() i386_linux_svr4_fetch_link_map_offsets ()
+
 /* FIXME: kettenis/2000-03-26: We should get rid of this last piece of
    Linux-specific `long double'-support code, probably by adding code
    to valprint.c:print_floating() to recognize various extended

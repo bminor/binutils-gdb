@@ -1,3 +1,22 @@
+2000-10-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/sh/tm-linux.h: New file.  Include generic tm-linux.h, 
+	plus tm-sh.h, then define SVR4_FETCH_LINK_MAP_OFFSETS to use
+	the sh target function instead of the default link map offsets.
+	* config/sh/sh.mt: Add solib.o and solib-svr4.o to TDEPFILES.
+	Use sh/tm-linux.h instead of sh/tm-sh.h.
+	* sh-tdep.c (sh_linux_svr4_fetch_link_map_offsets): 
+	New function.  Construct target-specific link map offsets.
+	* i386-linux-tdep.c (i386_linux_svr4_fetch_link_map_offsets:
+	New function.  Construct target-specific link map offsets.
+	* config/i386/tm-linux.h: Use above function instead of default.
+
+2000-10-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/i386/tm-linux.h: Remove definition of SVR4_SHARED_LIBS,
+	and inclusion of solib.h.  Move up into ../tm-linux.h.
+	config/tm-linux.h: Define SVR4_SHARED_LIBS, include solib.h.
+
 2000-10-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* top.c (simplified_command_loop, add_info, add_com,

@@ -27,6 +27,7 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "solib-svr4.h"	/* for struct link_map_offsets */
 
 
 /* Recognizing signal handler frames.  */
@@ -372,3 +373,45 @@ i386_linux_skip_solib_resolver (CORE_ADDR pc)
 
   return 0;
 }
+
+/* Fetch (and possibly build) an appropriate link_map_offsets structure
+   for native i386 linux targets using the struct offsets defined in
+   link.h (but without actual reference to that file).
+
+   This makes it possible to access i386-linux shared libraries from
+   a gdb that was not built on an i386-linux host (for cross debugging).
+   */
+
+struct link_map_offsets *
+i386_linux_svr4_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = 0;
+
+  if (lmp == 0)
+    {
+      lmp = &lmo;
+
+      lmo.r_debug_size = 8;	/* 20 not actual size but all we need */
+
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;	/* 552 not actual size but all we need */
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+    return lmp;
+}
+
