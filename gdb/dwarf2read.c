@@ -36,6 +36,7 @@
 #include "buildsym.h"
 #include "demangle.h"
 #include "expression.h"
+#include "filenames.h"	/* for DOSish file names */
 
 #include "language.h"
 #include "complaints.h"
@@ -4063,14 +4064,14 @@ dwarf2_start_subfile (char *filename, char *dirname)
   /* If the filename isn't absolute, try to match an existing subfile
      with the full pathname.  */
 
-  if (*filename != '/' && dirname != NULL)
+  if (!IS_ABSOLUTE_PATH (filename) && dirname != NULL)
     {
       struct subfile *subfile;
       char *fullname = concat (dirname, "/", filename, NULL);
 
       for (subfile = subfiles; subfile; subfile = subfile->next)
 	{
-	  if (STREQ (subfile->name, fullname))
+	  if (FILENAME_CMP (subfile->name, fullname) == 0)
 	    {
 	      current_subfile = subfile;
 	      xfree (fullname);

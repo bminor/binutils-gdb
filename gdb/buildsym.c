@@ -38,6 +38,7 @@
 #include "expression.h"		/* For "enum exp_opcode" used by... */
 #include "language.h"		/* For "longest_local_hex_string_custom" */
 #include "bcache.h"
+#include "filenames.h"		/* For DOSish file names */
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -532,7 +533,7 @@ start_subfile (char *name, char *dirname)
 
   for (subfile = subfiles; subfile; subfile = subfile->next)
     {
-      if (STREQ (subfile->name, name))
+      if (FILENAME_CMP (subfile->name, name) == 0)
 	{
 	  current_subfile = subfile;
 	  return;
