@@ -1,3 +1,7 @@
+Tue May 28 12:30:50 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-README: Document GCCIncludes.
+
 Sun May 26 15:16:27 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (alpha-*-linux*): Set enable_shared to yes.
