@@ -14,15 +14,6 @@ People encountering problems with these targets should consult GDB's
 web pages and mailing lists (http://www.gnu.org/software/gdb/) to see
 if there is an update.
 
-arm-*-*
-
-GDB's ARM target, in 6.0, has not been updated to use the new frame
-mechanism.
-
-Fortunately the ARM target, in the GDB's mainline sources, has been
-updated so people encountering problems should consider downloading a
-more current GDB (http://www.gnu.org/software/gdb/current).
-
 *** Regressions since gdb 6.0
 
 gdb/826: variables in C++ namespaces have to be enclosed in quotes
