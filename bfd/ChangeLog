@@ -1,5 +1,7 @@
 Sat Nov 30 21:19:15 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
+	* cpu-h8300.c: Add support for MEMIND addressing mode
+
 	* coff-a29k.c: defined RELOC_PROCESSING to take the #ifdef out of
 	coffcode.h
 	* coffcode.h: use the new macro if available

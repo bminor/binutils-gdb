@@ -135,6 +135,7 @@ FILE *stream)
       case IMM8:
       case ABS8SRC:
       case ABS8DST:
+      case MEMIND:
       case DISP8:
 	abs= data[len>>1];
 	len++;
@@ -193,39 +194,55 @@ FILE *stream)
 	case IMM16:
 	case IMM8:
 	case IMM3:
-	  fprintf(stream, "#0x%x", (unsigned)abs); break;
+	  fprintf(stream, "#0x%x", (unsigned)abs); 
+	  break;
 	case RD8:
-	  fprintf(stream, "%s", regnames[rd]); break;
+	  fprintf(stream, "%s", regnames[rd]); 
+	  break;
 	case RS8:
-	  fprintf(stream, "%s",regnames[rs]); break;
+	  fprintf(stream, "%s",regnames[rs]);
+	  break;
 	case RD16:
-	  fprintf(stream, "r%d", rd& 0x7); break;
+	  fprintf(stream, "r%d", rd& 0x7);
+	  break;
 	case RS16:
-	  fprintf(stream, "r%d", rs & 0x7); break;
+	  fprintf(stream, "r%d", rs & 0x7);
+	  break;
 	case RSINC:
-	  fprintf(stream, "@r%d+", rs & 0x7); break;
+	  fprintf(stream, "@r%d+", rs & 0x7);
+	  break;
 	case RDDEC:
-	  fprintf(stream, "@-r%d", rd & 0x7); break;
+	  fprintf(stream, "@-r%d", rd & 0x7);
+	  break;
 	case RDIND: 
-	  fprintf(stream, "@r%d", rd & 0x7); break;
+	  fprintf(stream, "@r%d", rd & 0x7);
+	  break;
 	case RSIND:
-	  fprintf(stream, "@r%d",rs & 0x7); break;
+	  fprintf(stream, "@r%d",rs & 0x7);
+	  break;
 	case ABS8SRC:
 	case ABS16SRC:
 	case ABS16DST:
 	case ABS8DST:
-	  fprintf(stream, "@0x%x", (unsigned)abs); break;
+	  fprintf(stream, "@0x%x", (unsigned)abs);
+	  break;
+	case MEMIND:
+	  fprintf(stream, "@@%d (%x)",abs, abs);
+	  break;
 	case DISP8:
 	  fprintf(stream, ".%s%d (%x)",(char)abs>0 ? "+" :"", (char)abs,
 		  addr + (char)abs);
 	  break;
 	case DISPSRC:
 	case DISPDST:
-	  fprintf(stream, "@(0x%x,r%d)", abs, rdisp & 0x7); break;
+	  fprintf(stream, "@(0x%x,r%d)", abs, rdisp & 0x7); 
+	  break;
 	case CCR:
-	  fprintf(stream, "ccr"); break;
+	  fprintf(stream, "ccr"); 
+	  break;
 	case KBIT:
-	  fprintf(stream, "#%d",abs); break;
+	  fprintf(stream, "#%d",abs); 
+	  break;
 	default:
 	  abort();
 	}
