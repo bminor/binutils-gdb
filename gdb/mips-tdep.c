@@ -3751,6 +3751,72 @@ mips_coerce_float_to_double (struct type *formal, struct type *actual)
   return current_language->la_language == language_c;
 }
 
+/* When debugging a 64 MIPS target running a 32 bit ABI, the size of
+   the register stored on the stack (32) is different to its real raw
+   size (64).  The below ensures that registers are fetched from the
+   stack using their ABI size and then stored into the RAW_BUFFER
+   using their raw size.
+
+   The alternative to adding this function would be to add an ABI
+   macro - REGISTER_STACK_SIZE(). */
+
+static void
+mips_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
+{
+  CORE_ADDR addr;
+
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+  addr = find_saved_register (frame, regnum);
+  if (addr != 0)
+    {
+      if (lval != NULL)
+	*lval = lval_memory;
+      if (regnum == SP_REGNUM)
+	{
+	  if (raw_buffer != NULL)
+	    {
+	      /* Put it back in target format.  */
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+			     (LONGEST) addr);
+	    }
+	  if (addrp != NULL)
+	    *addrp = 0;
+	  return;
+	}
+      if (raw_buffer != NULL)
+	{
+	  LONGEST val;
+	  if (regnum < 32)
+	    /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
+               saved. */
+	    val = read_memory_integer (addr, MIPS_SAVED_REGSIZE);
+	  else
+	    val = read_memory_integer (addr, REGISTER_RAW_SIZE (regnum));
+	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	}
+    }
+  else
+    {
+      if (lval != NULL)
+	*lval = lval_register;
+      addr = REGISTER_BYTE (regnum);
+      if (raw_buffer != NULL)
+	read_register_gen (regnum, raw_buffer);
+    }
+  if (addrp != NULL)
+    *addrp = addr;
+}
 
 static gdbarch_init_ftype mips_gdbarch_init;
 static struct gdbarch *
@@ -4010,7 +4076,7 @@ mips_gdbarch_init (info, arches)
   set_gdbarch_coerce_float_to_double (gdbarch, mips_coerce_float_to_double);
 
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
-  set_gdbarch_get_saved_register (gdbarch, default_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, mips_get_saved_register);
 
   if (gdbarch_debug)
     {

@@ -1,3 +1,10 @@
+Fri May 12 19:13:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_get_saved_register): New function.  Handle
+ 	case of 32 ABI saving 32 bit registers on stack when target has 64
+ 	bit ISA.
+	(mips_gdbarch_init): Update.
+
 Fri May 12 14:46:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (MIPS_EABI): Fix typo.  Test for MIPS_ABI_EABI64.
