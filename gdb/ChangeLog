@@ -1,3 +1,10 @@
+2002-05-28  Theodore A. Roth  <troth@verinet.com>
+
+	* Makefile.in: Add support for AVR target.
+	* configure.tgt: Add support for AVR target.
+	* avr-tdep.c: New file.
+	* config/avr/avr.mt: New file.
+
 2002-05-23  Andrew Cagney  <ac131313@redhat.com>
 
 	From Ross Alexander at NEC Europe:
