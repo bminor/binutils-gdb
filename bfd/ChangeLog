@@ -1,3 +1,11 @@
+2000-08-03  Nick Clifton  <nickc@cygnus.com>
+
+	* section.c: Restore backed out code.
+	* elf.c: Restore backed out code.
+	(copy_private_bfd_data): Fix bug preventing stipped dynamic
+	binaries from working.
+	* bfd-in2.h: Regenerate.
+
 2000-08-03  H.J. Lu  <hjl@gnu.org>
 
 	* section.c: Back out the change made by Nick Clifton
