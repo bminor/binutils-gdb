@@ -48,6 +48,8 @@ static void record_arm_to_thumb_glue
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static void record_thumb_to_arm_glue
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static void elf32_arm_post_process_headers
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* The linker script knows the section names for placement.
    The entry_names are used to do simple name mangling on the stubs.
@@ -115,7 +117,7 @@ struct elf32_arm_pcrel_relocs_copied
   bfd_size_type count;
 };
 
-/* arm ELF linker hash entry.  */
+/* Arm ELF linker hash entry.  */
 
 struct elf32_arm_link_hash_entry
 {
@@ -156,6 +158,10 @@ struct elf32_arm_link_hash_table
 
     /* An arbitary input BFD chosen to hold the glue sections.  */
     bfd * bfd_of_glue_owner;
+
+    /* A boolean indicating whether knowledge of the ARM's pipeline
+       length should be applied by the linker.  */
+    int no_pipeline_knowledge;
   };
 
 
@@ -212,6 +218,7 @@ elf32_arm_link_hash_table_create (abfd)
   ret->thumb_glue_size = 0;
   ret->arm_glue_size = 0;
   ret->bfd_of_glue_owner = NULL;
+  ret->no_pipeline_knowledge = 0;
 
   return &ret->root.root;
 }
@@ -563,9 +570,10 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 }
 
 boolean
-bfd_elf32_arm_process_before_allocation (abfd, link_info)
+bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
      bfd *abfd;
      struct bfd_link_info *link_info;
+     int no_pipeline_knowledge;
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *free_relocs = NULL;
@@ -591,6 +599,8 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
+  globals->no_pipeline_knowledge = no_pipeline_knowledge;
+  
   /* Rummage around all the relocs and map the glue vectors.  */
   sec = abfd->sections;
 
@@ -623,7 +633,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
 	  r_index = ELF32_R_SYM (irel->r_info);
 
 	  /* These are the only relocation types we care about */
-	  if (r_type != R_ARM_PC24
+	  if (   r_type != R_ARM_PC24
 	      && r_type != R_ARM_THM_PC22)
 	    continue;
 
@@ -1000,6 +1010,10 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   asection *                    splt = NULL;
   asection *                    sreloc = NULL;
   bfd_vma                       addend;
+  bfd_signed_vma                signed_addend;
+  struct elf32_arm_link_hash_table * globals;
+  
+  globals = elf32_arm_hash_table (info);
     
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj)
@@ -1013,9 +1027,18 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   r_symndx = ELF32_R_SYM (rel->r_info);
 
 #ifdef USE_REL
-  addend = (bfd_get_32 (input_bfd, hit_data) & howto->src_mask);
+  addend = bfd_get_32 (input_bfd, hit_data) & howto->src_mask;
+
+  if (addend & ((howto->src_mask + 1) >> 1))
+    {
+      signed_addend = -1;
+      signed_addend &= ~ howto->src_mask;
+      signed_addend |= addend;
+    }
+  else
+    signed_addend = addend;
 #else
-  addend = rel->r_addend;
+  addend = signed_addend = rel->r_addend;
 #endif
   
   switch (r_type)
@@ -1144,15 +1167,66 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 				       input_section, hit_data, sym_sec, rel->r_offset, addend, value);
 	      return bfd_reloc_ok;
 	    }
+
+	  if (   strcmp (bfd_get_target (input_bfd), "elf32-littlearm-oabi") == 0
+	      || strcmp (bfd_get_target (input_bfd), "elf32-bigarm-oabi") == 0)
+	    {
+	      /* The old way of doing things.  Trearing the addend as a
+		 byte sized field and adding in the pipeline offset.  */
+	      
+	      value -= (input_section->output_section->vma
+			+ input_section->output_offset);
+	      value -= rel->r_offset;
+	      value += addend;
+	      
+	      if (! globals->no_pipeline_knowledge)
+		value -= 8;
+	    }
+	  else
+	    {
+	      /* The ARM ELF ABI says that this reloc is computed as: S - P + A
+		 where:
+		  S is the address of the symbol in the relocation.
+		  P is address of the instruction being relocated.
+		  A is the addend (extracted from the instruction) in bytes.
+		 
+		 S is held in 'value'.
+		 P is the base address of the section containing the instruction
+		   plus the offset of the reloc into that section, ie:
+		     (input_section->output_section->vma +
+		      input_section->output_offset +
+		      rel->r_offset).
+		 A is the addend, converted into bytes, ie:
+		     (signed_addend * 4)
+
+		 Note: None of these operations have knowledge of the pipeline
+		 size of the processor, thus it is up to the assembler to encode
+		 this information into the addend.  */
+
+	      value -= (input_section->output_section->vma
+			+ input_section->output_offset);
+	      value -= rel->r_offset;
+	      value += (signed_addend << howto->size);
+	      
+	      /* Previous versions of this code also used to add in the pipeline
+		 offset here.  This is wrong because the linker is not supposed
+		 to know about such things, and one day it might change.  In order
+		 to support old binaries that need the old behaviour however, so
+		 we attempt to detect which ABI was used to create the reloc.  */
+	      if (! globals->no_pipeline_knowledge)
+		{ 
+		  Elf_Internal_Ehdr * i_ehdrp; /* Elf file header, internal form */
+		  
+		  i_ehdrp = elf_elfheader (input_bfd);
+		  
+		  if (i_ehdrp->e_ident[EI_OSABI] == 0)
+		    value -= 8;
+		}
+	    }
 	  
-	  value = value + addend;
-	  value -= (input_section->output_section->vma
-		    + input_section->output_offset + 8);
-	  value -= rel->r_offset;
-	  value = value >> howto->rightshift;
-	  
-	  value &= 0xffffff;
-	  value |= (bfd_get_32 (input_bfd, hit_data) & 0xff000000);
+	  value >>= howto->rightshift;	  
+	  value &= howto->dst_mask;
+	  value |= (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
 	  break;
 	  
 	case R_ARM_ABS32:
@@ -1222,26 +1296,25 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     case R_ARM_THM_PC22:
       /* Thumb BL (branch long instruction). */
       {
-	bfd_vma relocation;
-	boolean overflow = false;
-	bfd_vma upper_insn = bfd_get_16 (input_bfd, hit_data);
-	bfd_vma lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
-	bfd_vma src_mask = 0x007FFFFE;
+	bfd_vma        relocation;
+	boolean        overflow = false;
+	bfd_vma        upper_insn = bfd_get_16 (input_bfd, hit_data);
+	bfd_vma        lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
+	bfd_vma        src_mask = 0x007FFFFE;
 	bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
-	bfd_signed_vma reloc_signed_min = ~reloc_signed_max;
-	bfd_vma check;
+	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
+	bfd_vma        check;
 	bfd_signed_vma signed_check;
-	bfd_vma add;
-	bfd_signed_vma signed_add;
 
 #ifdef USE_REL
 	/* Need to refetch the addend and squish the two 11 bit pieces
 	   together.  */
 	{
-	  bfd_vma upper = bfd_get_16 (input_bfd, hit_data) & 0x7ff;
-	  bfd_vma lower = bfd_get_16 (input_bfd, hit_data + 2) & 0x7ff;
+	  bfd_vma upper = upper_insn & 0x7ff;
+	  bfd_vma lower = lower_insn & 0x7ff;
 	  upper = (upper ^ 0x400) - 0x400; /* sign extend */
 	  addend = (upper << 12) | (lower << 1);
+	  signed_addend = addend;
 	}
 #endif
 
@@ -1255,13 +1328,30 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	    else
 	      return bfd_reloc_dangerous;
 	  }
-
-	/* +4: pc is offset by 4 */
-	relocation = value + addend + 4;
+	
+	relocation = value + signed_addend;
+	
 	relocation -= (input_section->output_section->vma
-		       + input_section->output_offset);
-	relocation -= rel->r_offset;
-
+		       + input_section->output_offset
+		       + rel->r_offset);
+      
+	if (! globals->no_pipeline_knowledge)
+	  {
+	    Elf_Internal_Ehdr * i_ehdrp; /* Elf file header, internal form */
+		
+	    i_ehdrp = elf_elfheader (input_bfd);
+	    
+	    /* Previous versions of this code also used to add in the pipline
+	       offset here.  This is wrong because the linker is not supposed
+	       to know about such things, and one day it might change.  In order
+	       to support old binaries that need the old behaviour however, so
+	       we attempt to detect which ABI was used to create the reloc.  */
+	    if (   strcmp (bfd_get_target (input_bfd), "elf32-littlearm-oabi") == 0
+		|| strcmp (bfd_get_target (input_bfd), "elf32-bigarm-oabi") == 0
+		|| i_ehdrp->e_ident[EI_OSABI] == 0)
+	      relocation += 4;
+	  }
+	
 	check = relocation >> howto->rightshift;
 
 	/* If this is a signed value, the rightshift just dropped
@@ -1271,17 +1361,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	else
 	  signed_check = check | ~((bfd_vma) -1 >> howto->rightshift);
 
-	add = ((upper_insn & 0x7ff) << 12) | ((lower_insn & 0x7ff) << 1);
-	/* sign extend */
-	signed_add = (add ^ 0x400000) - 0x400000;
-
-	/* Add the value from the object file.  */
-	signed_check += signed_add;
-	relocation += signed_add;
-
 	/* Assumes two's complement.  */
-	if (signed_check > reloc_signed_max
-	    || signed_check < reloc_signed_min)
+	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = true;
 
 	/* Put RELOCATION back into the insn.  */
@@ -1515,25 +1596,25 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
     {
-      int r_type;
-      reloc_howto_type * howto;
-      unsigned long r_symndx;
-      Elf_Internal_Sym * sym;
-      asection * sec;
+      int                          r_type;
+      reloc_howto_type *           howto;
+      unsigned long                r_symndx;
+      Elf_Internal_Sym *           sym;
+      asection *                   sec;
       struct elf_link_hash_entry * h;
-      bfd_vma relocation;
-      bfd_reloc_status_type r;
-
+      bfd_vma                      relocation;
+      bfd_reloc_status_type        r;
+      arelent                      bfd_reloc;
+      
       r_symndx = ELF32_R_SYM (rel->r_info);
-      r_type = ELF32_R_TYPE (rel->r_info);
+      r_type   = ELF32_R_TYPE (rel->r_info);
 
-      if (r_type == R_ARM_GNU_VTENTRY
-          || r_type == R_ARM_GNU_VTINHERIT )
+      if (   r_type == R_ARM_GNU_VTENTRY
+          || r_type == R_ARM_GNU_VTINHERIT)
         continue;
 
-      /* ScottB: range check r_type here. */
-      
-      howto = elf32_arm_howto_table + r_type;
+      elf32_arm_info_to_howto (input_bfd, & bfd_reloc, rel);
+      howto = bfd_reloc.howto;
 
       if (info->relocateable)
 	{
@@ -3015,6 +3096,20 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
+static void
+elf32_arm_post_process_headers (abfd, link_info)
+     bfd * abfd;
+     struct bfd_link_info * link_info;
+{
+  Elf_Internal_Ehdr * i_ehdrp;	/* Elf file header, internal form */
+
+  i_ehdrp = elf_elfheader (abfd);
+
+  i_ehdrp->e_ident[EI_OSABI]      = ARM_ELF_OS_ABI_VERSION;
+  i_ehdrp->e_ident[EI_ABIVERSION] = ARM_ELF_ABI_VERSION;
+}
+
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #define ELF_MAXPAGE_SIZE		0x8000
@@ -3038,6 +3133,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_finish_dynamic_symbol	elf32_arm_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	elf32_arm_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
+#define elf_backend_post_process_headers	elf32_arm_post_process_headers
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_plt_readonly    1

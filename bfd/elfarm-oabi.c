@@ -37,6 +37,9 @@
 #define elf_info_to_howto               elf32_arm_info_to_howto
 #define elf_info_to_howto_rel           0
 
+#define ARM_ELF_ABI_VERSION		0
+#define ARM_ELF_OS_ABI_VERSION		0
+
 static reloc_howto_type elf32_arm_howto_table[] =
 {
   /* No relocation */
@@ -177,7 +180,7 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_SBREL32",	/* name */
 	 false,			/* partial_inplace */
@@ -373,19 +376,19 @@ struct elf32_arm_reloc_map
 
 static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
 {
-  {BFD_RELOC_NONE,                 R_ARM_NONE,},
-  {BFD_RELOC_ARM_PCREL_BRANCH,     R_ARM_PC24,},
-  {BFD_RELOC_32,                   R_ARM_ABS32,},
-  {BFD_RELOC_32_PCREL,             R_ARM_REL32,},
-  {BFD_RELOC_8,                    R_ARM_ABS8,},
-  {BFD_RELOC_16,                   R_ARM_ABS16,},
-  {BFD_RELOC_ARM_OFFSET_IMM,       R_ARM_ABS12,},
-  {BFD_RELOC_ARM_THUMB_OFFSET,     R_ARM_THM_ABS5,},
-  {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22,},
-  {BFD_RELOC_NONE,                 R_ARM_SBREL32,},
-  {BFD_RELOC_NONE,                 R_ARM_AMP_VCALL9,},
-  {BFD_RELOC_THUMB_PCREL_BRANCH12, R_ARM_THM_PC11,},
-  {BFD_RELOC_THUMB_PCREL_BRANCH9,  R_ARM_THM_PC9,},  
+  {BFD_RELOC_NONE,                 R_ARM_NONE },
+  {BFD_RELOC_ARM_PCREL_BRANCH,     R_ARM_PC24 },
+  {BFD_RELOC_32,                   R_ARM_ABS32 },
+  {BFD_RELOC_32_PCREL,             R_ARM_REL32 },
+  {BFD_RELOC_8,                    R_ARM_ABS8 },
+  {BFD_RELOC_16,                   R_ARM_ABS16 },
+  {BFD_RELOC_ARM_OFFSET_IMM,       R_ARM_ABS12 },
+  {BFD_RELOC_ARM_THUMB_OFFSET,     R_ARM_THM_ABS5 },
+  {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22 },
+  {BFD_RELOC_NONE,                 R_ARM_SBREL32 },
+  {BFD_RELOC_NONE,                 R_ARM_AMP_VCALL9 },
+  {BFD_RELOC_THUMB_PCREL_BRANCH12, R_ARM_THM_PC11 },
+  {BFD_RELOC_THUMB_PCREL_BRANCH9,  R_ARM_THM_PC9 },  
   {BFD_RELOC_VTABLE_INHERIT,       R_ARM_GNU_VTINHERIT },
   {BFD_RELOC_VTABLE_ENTRY,         R_ARM_GNU_VTENTRY }
 };

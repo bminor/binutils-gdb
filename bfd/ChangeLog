@@ -1,3 +1,51 @@
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* bfd-in.h: Amend prototype for
+	bfd_elf32_arm_process_before_allocation .
+	* bfd-in.h: Regenerate.
+	
+	* elfarm-oabi.c (NUM_ELEM): New macro: Compute the number of
+	elements in a fixed sized array.
+	(ARM_ELF_ABI_VERSION): Define.
+	(ARM_ELF_OS_ABI_VERSION): Define.
+	(R_ARM_THM_ABS5): Fix rightshift and size.
+	(R_ARM_THM_PC22): Fix size.
+	(R_ARM_PLT32): Define Howto.
+	(find_howto): New function: Locate a howto based on a reloc
+	number.
+	(elf32_arm_info_to_howto): Use find_howto if necessary.
+	(elf32_arm_reloc_map): Change type of field bfd_reloc_val to
+	bfd_reloc_code_real_type.
+	(elf32_arm_reloc_map[]): Add entries for BFD_RELOC_VTABLE_INHERIT
+	and BFD_RELOC_VTABLE_ENTRY.
+	(elf32_arm_reloc_type_lookup): Use find_howto if necessary.
+
+	* elfarm-nabi.c (NUM_ELEM): New macro: Compute the number of
+	elements in a fixed sized array.
+	(ARM_ELF_ABI_VERSION): Define.
+	(ARM_ELF_OS_ABI_VERSION): Define.
+	(R_ARM_THM_ABS5): Fix rightshift and size.
+	(R_ARM_THM_PC22): Fix size.
+	(elf32_arm_info_to_howto_rel): Rename to elf32_arm_info_to_howto.
+	(elf32_arm_reloc_map): Change type of field bfd_reloc_val to
+	bfd_reloc_code_real_type.
+
+	* elf32-arm.h (struct elf32_arm_link_hash_table): Add new field:
+	no_pipeline_knowledge.
+	(elf32_arm_link_hash_create): Initialise new field to zero.
+	(bfd_elf32_arm_process_before_allocation): Add new paraemter:
+	no_pipeline_knowledge.  Use this parameter to initialise the field
+	in the globals data structure.
+	(elf32_arm_final_link_relocate): Only add in pipeline offset if
+	no_pipeline_knowledge is false and the binary is from an old
+	toolchain.
+	(elf32_arm_merge_private_data): Generate an error if an attempt is
+	made to linl together big endian and little endian code.
+	(elf32_arm_post_process_headers): New function:  Initialise the
+	EI_OSABI and EI_ABIVERSION fields of the newly created ELF program
+	header. 
+	(elf_backend_post_process_headers): Define.
+
 1999-05-28  Nick Clifton  <nickc@cygnus.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add new field:
