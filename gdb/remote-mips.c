@@ -1,5 +1,5 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
-   Copyright 1993-1995, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
 
@@ -1654,7 +1654,24 @@ mips_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  common_open (&mips_ops, name, from_tty, MON_IDT, TARGET_MONITOR_PROMPT);
+  const char *monitor_prompt = NULL;
+  if (TARGET_ARCHITECTURE != NULL
+      && TARGET_ARCHITECTURE->arch == bfd_arch_mips)
+    {
+    switch (TARGET_ARCHITECTURE->mach)
+      {
+      case bfd_mach_mips4100:
+      case bfd_mach_mips4300:
+      case bfd_mach_mips4600:
+      case bfd_mach_mips4650:
+      case bfd_mach_mips5000:
+	monitor_prompt = "<RISQ> ";
+	break;
+      }
+    }
+  if (monitor_prompt == NULL)
+    monitor_prompt = "<IDT>";
+  common_open (&mips_ops, name, from_tty, MON_IDT, monitor_prompt);
 }
 
 static void

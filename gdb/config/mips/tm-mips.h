@@ -45,10 +45,6 @@ struct value;
 #define MIPS_EABI 0
 #endif
 
-#if !defined (TARGET_MONITOR_PROMPT)
-#define TARGET_MONITOR_PROMPT "<IDT>"
-#endif
-
 /* PC should be masked to remove possible MIPS16 flag */
 #if !defined (GDB_TARGET_MASK_DISAS_PC)
 #define GDB_TARGET_MASK_DISAS_PC(addr) UNMAKE_MIPS16_ADDR(addr)

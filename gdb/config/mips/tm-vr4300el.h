@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1996 Free Software Foundation, Inc.
+/* Copyright (C) 1993, 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,6 +18,5 @@
    Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER_SELECTABLE_P 1
-#define TARGET_MONITOR_PROMPT "<RISQ> "
 
 #include "mips/tm-mips64.h"

@@ -1,3 +1,17 @@
+Tue Jun  6 15:07:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c (mips_open): Select the default monitor prompt
+ 	based on the target ISA.
+
+	* config/mips/tm-vr4100.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4300el.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4300.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4xxx.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4xxxel.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr5000el.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr5000.h (TARGET_MONITOR_PROMPT),
+	config/mips/tm-mips.h (TARGET_MONITOR_PROMPT): Delete macro.
+
 2000-06-05  Daniel Berlin  <dan@cgsoftware.com>
 
 	* c-exp.y (yylex): template handling fixes.
