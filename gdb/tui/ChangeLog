@@ -1,5 +1,10 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiDisassem.c (tuiSetDisassemContent): Use breakpoint_here_p.
+	(_hasBreak): Remove.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiDisassem.c (tuiGetBeginAsmAddress): Use lookup_minimal_symbol
 	to find symbol address.
 

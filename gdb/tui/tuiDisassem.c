@@ -54,17 +54,6 @@
 #include "tui-file.h"
 
 
-/*****************************************
-** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
-******************************************/
-
-static struct breakpoint *_hasBreak (CORE_ADDR);
-
-
-/*****************************************
-** PUBLIC FUNCTIONS                        **
-******************************************/
-
 /*
    ** tuiSetDisassemContent().
    **        Function to set the disassembly window's content.
@@ -107,7 +96,6 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
 	  for (curLine = 0, pc = startAddr; (curLine < maxLines);)
 	    {
 	      TuiWinElementPtr element = (TuiWinElementPtr) disassemWin->generic.content[curLine];
-	      struct breakpoint *bp;
 
 	      print_address (pc, gdb_dis_out);
 
@@ -137,11 +125,9 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
 	      element->whichElement.source.lineOrAddr.addr = pc;
 	      element->whichElement.source.isExecPoint =
 		(pc == (CORE_ADDR) ((TuiWinElementPtr) locator->content[0])->whichElement.locator.addr);
-	      bp = _hasBreak (pc);
 	      element->whichElement.source.hasBreak =
-		(bp != (struct breakpoint *) NULL &&
-		 (!element->whichElement.source.isExecPoint ||
-		  (bp->disposition != disp_del || bp->hit_count <= 0)));
+		(breakpoint_here_p (pc) != no_breakpoint_here
+		 && !element->whichElement.source.isExecPoint);
 	      curLine++;
 	      pc = newpc;
 	      /* reset the buffer to empty */
@@ -301,31 +287,3 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 
   return;
 }				/* tuiVerticalDisassemScroll */
-
-
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS                 **
-******************************************/
-/*
-   ** _hasBreak().
-   **      Answer whether there is a break point at the input line in the
-   **      source file indicated
- */
-static struct breakpoint *
-_hasBreak (CORE_ADDR addr)
-{
-  struct breakpoint *bpWithBreak = (struct breakpoint *) NULL;
-  struct breakpoint *bp;
-  extern struct breakpoint *breakpoint_chain;
-
-
-  for (bp = breakpoint_chain;
-       (bp != (struct breakpoint *) NULL &&
-	bpWithBreak == (struct breakpoint *) NULL);
-       bp = bp->next)
-    if (addr == bp->address)
-      bpWithBreak = bp;
-
-  return bpWithBreak;
-}				/* _hasBreak */
