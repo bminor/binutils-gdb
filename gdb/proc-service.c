@@ -51,7 +51,7 @@ typedef size_t gdb_ps_size_t;
 
 /* Building process ids.  */
 
-#define BUILD_LWP(tid, pid)	MERGEPID (pid, tid)
+#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
 
 
 /* Helper functions.  */
