@@ -31,7 +31,4 @@
 #undef SKIP_TRAMPOLINE_CODE
 #undef IGNORE_HELPER_CALL
 
-/* XXX undef a bunch of stuff we want to use multi-arch */
-#undef DEPRECATED_IN_SIGTRAMP
-
 #endif /* TM_NBSD_H */
