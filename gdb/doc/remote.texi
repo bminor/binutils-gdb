@@ -1048,26 +1048,37 @@ the time of attachment.
 
 @ifset H8
 @node Hitachi Remote
-@subsection @value{GDBN} and Hitachi Microprocessors
+@subsection @value{GDBN} and Hitachi microprocessors
 @value{GDBN} needs to know these things to talk to your
 Hitachi SH, H8/300, or H8/500: 
 
 @enumerate
 @item
 that you want to use @samp{target hms}, the remote debugging interface
-for Hitachi microprocessors (this is the default when GDB is configured
-specifically for the Hitachi SH, H8/300, or H8/500);
+for Hitachi microprocessors, or @samp{target e7000}, the in-circuit
+emulator for the Hitachi SH and the Hitachi 300H.  (@samp{target hms} is
+the default when GDB is configured specifically for the Hitachi SH,
+H8/300, or H8/500.)
 
 @item
 what serial device connects your host to your Hitachi board (the first
-serial device available on your host is the default);
+serial device available on your host is the default).
 
-@ignore
-@c this is only for Unix hosts, not currently of interest.
+@ifclear H8EXCLUSIVE
+@c this is only for Unix hosts, not of interest to Hitachi
 @item
 what speed to use over the serial device.
-@end ignore
+@end ifclear
 @end enumerate
+
+@menu
+* Hitachi Boards::      Connecting to Hitachi boards
+* Hitachi ICE::         Using the E7000 In-Circuit Emulator
+* H8500 Special::       Special @value{GDBN} commands for the H8/500
+@end menu
+
+@node Hitachi Boards
+@subsubsection Connecting to Hitachi boards
 
 @ifclear H8EXCLUSIVE
 @c only for Unix hosts
@@ -1181,6 +1192,52 @@ to detect program completion.
 
 In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
+
+@node Hitachi ICE
+@subsubsection Using the E7000 in-circuit emulator
+
+@kindex target e7000
+You can use the E7000 in-circuit emulator to develop code for either the
+Hitachi SH or the H8/300H.  Use one of these forms of the @samp{target
+e7000} command to connect @value{GDBN} to your E7000:
+
+@table @code
+@item target e7000 @var{port} @var{speed}
+Use this form if your E7000 is connected to a serial port.  The
+@var{port} argument identifies what serial port to use (for example,
+@samp{com2}).  The third argument is the line speed in bits per second
+(for example, @samp{9600}).
+
+@item target e7000 @var{hostname}
+If your E7000 is installed as a host on a TCP/IP network, you can just
+specify its hostname; @value{GDBN} uses @code{telnet} to connect.
+@end table
+
+@node Hitachi Special
+@subsubsection Special @value{GDBN} commands for Hitachi micros
+
+Some @value{GDBN} commands are available only on the H8/300 or the
+H8/500 configurations:
+
+@table @code
+@kindex set machine
+@kindex show machine
+@item set machine h8300
+@itemx set machine h8300h
+Condition @value{GDBN} for one of the two variants of the H8/300
+architecture with @samp{set machine}.  You can use @samp{show machine}
+to check which variant is currently in effect.
+
+@kindex set memory @var{mod}
+@cindex memory models, H8/500
+@item set memory @var{mod}
+@itemx show memory
+Specify which H8/500 memory model (@var{mod}) you are using with
+@samp{set memory}; check which memory model is in effect with @samp{show
+memory}.  The accepted values for @var{mod} are @code{small},
+@code{big}, @code{medium}, and @code{compact}.
+@end table
+
 @end ifset
 @end ifset
 
