@@ -29,12 +29,6 @@ else
 	fi
 fi
 
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="v850 ${keep_these_too}"
-else
-	lose_these_too="v850 ${lose_these_too}"
-fi
-
 d30v_files="d30v"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -95,6 +89,7 @@ tm-nbsd.h
 tm-sunos.h
 tm-sysv4.h
 vax
+v850
 xm-aix4.h
 xm-lynx.h
 xm-mpw.h
