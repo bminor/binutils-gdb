@@ -18,6 +18,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
+#include "serial.h"
 #include <sys/dos.h>
 
 #if 0
@@ -40,7 +41,7 @@ static void go32_close PARAMS ((serial_t scb));
 static serial_ttystate go32_get_tty_state PARAMS ((serial_t scb));
 static int go32_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
 static unsigned long getivec PARAMS ((int which));
-static int dos_read PARAMS ((int fd, char *buf, int len, int timeout));
+static int dos_read PARAMS ((int fd, char *buf, int len));
 static int dos_write PARAMS ((int fd, const char *buf, int len));
 
 #if 0
@@ -120,7 +121,7 @@ go32_open (scb, name)
      serial_t scb;
      const char *name;
 {
-  int port;
+  int port, ret;
 
   if (strncasecmp (name, "lpt", 3) != 0)
     {
@@ -136,8 +137,8 @@ go32_open (scb, name)
       return -11;
     }
 
-  return = biosprn (1, 0, port);
-  if (!return)
+  ret = biosprn (1, 0, port);
+  if (!ret)
     return -1;
 
   scb->fd = port;

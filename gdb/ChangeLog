@@ -1,3 +1,7 @@
+Fri Feb  3 16:47:31 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* ser-go32-para.c (dos_read): fix syntax errors.
+
 Fri Feb  3 11:19:20 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* core.c (dis_asm_read_memory), defs.h, gdbtk.c (gdb_disassemble),
