@@ -489,6 +489,9 @@ case "${target}" in
   m32r-*-*)
     noconfigdirs="$noconfigdirs target-libgloss libio libstdc++ libg++ gdb"
     ;;
+  mn10x00-*-*)
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-libgloss ld gcc gdb"
+    ;;
 # end-sanitize-m32r
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
