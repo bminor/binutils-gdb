@@ -1054,12 +1054,12 @@ mips_wait (pid, status)
   /* Translate a MIPS waitstatus.  We use constants here rather than WTERMSIG
      and so on, because the constants we want here are determined by the
      MIPS protocol and have nothing to do with what host we are running on.  */
-  if ((rstatus & 0x377) == 0)
+  if ((rstatus & 0377) == 0)
     {
       status->kind = TARGET_WAITKIND_EXITED;
       status->value.integer = (((rstatus) >> 8) & 0377);
     }
-  else if ((rstatus & 0x377) == 0x177)
+  else if ((rstatus & 0377) == 0177)
     {
       status->kind = TARGET_WAITKIND_STOPPED;
       /* Don't want to use target_signal_from_host because we are converting
@@ -1075,7 +1075,7 @@ mips_wait (pid, status)
 	 from MIPS signal numbers, not host ones.  Our internal numbers
 	 match the MIPS numbers for the signals the board can return, which
 	 are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
-      status->value.sig = (enum target_signal) (rstatus & 0x177);
+      status->value.sig = (enum target_signal) (rstatus & 0177);
     }
 
   return 0;
