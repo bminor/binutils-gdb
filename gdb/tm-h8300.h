@@ -102,7 +102,8 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 
 #define REGISTER_TYPE  unsigned short
 
-#  define NUM_REGS 10 /* 20 for fake HW support */
+/*#  define NUM_REGS 20 /* 20 for fake HW support */
+#  define NUM_REGS 11
 #  define REGISTER_BYTES (NUM_REGS*2)
 
 
@@ -153,10 +154,15 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
 
+#if NUM_REGS==20
 #define REGISTER_NAMES  \
  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp",\
-  "ccr","pc","cycles","hcheck","tier","tcsr","frc","ocra","ocrb","tcr","tocr","icra"} 
-
+  "ccr","pc","cycles","hcheck","tier","tcsr","frc",\
+   "ocra","ocrb","tcr","tocr","icra"} 
+#else
+#define REGISTER_NAMES \
+  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp", "ccr","pc","cycles"}
+#endif
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,

@@ -1,4 +1,15 @@
+Fri Feb 12 08:06:05 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* h8300-tdep.c, tm-h8300.h: turn off some experimental features
+
 Thu Feb 11 00:59:07 1993  John Gilmore  (gnu@cygnus.com)
+
+	* stabsread.c (dbx_lookup_type):  Handle negative type numbers.
+	Previously, would bogusly index off the bottom of type_vector.
+	(rs6000_builtin_type):  Accept type number as argument.
+	(read_type, case '-'):  Handle negatives like any other type number.
+
+	* symfile.c (deduce_language_from_filename):  Handle null name.
 
 	* mips-tdep.c (isa_NAN):  Fix byte order dependency.
 	Reported by Nobuyuki Hikichi <hikichi@sra.co.jp>,

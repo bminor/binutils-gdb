@@ -26,6 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "obstack.h"
 #include "symtab.h"
+#undef NUM_REGS
+#define NUM_REGS 11
+
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
 
 /* an easy to debug H8 stack frame looks like:
@@ -220,10 +223,10 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 
   unsigned int auto_depth = 0;	/* Number of bytes of autos */
 
-  char in_frame[NUM_REGS];	/* One for each reg */
+  char in_frame[8];	/* One for each reg */
 
-  memset (in_frame, 1, NUM_REGS);
-  for (r = 0; r < NUM_REGS; r++)
+  memset (in_frame, 1, 8);
+  for (r = 0; r < 8; r++)
     {
       fsr->regs[r] = 0;
     }
@@ -377,7 +380,7 @@ h8300_pop_frame ()
   fi = get_frame_info (frame);
   get_frame_saved_regs (fi, &fsr);
 
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
+  for (regnum = 0; regnum < 8; regnum++)
     {
       if (fsr.regs[regnum])
 	{
