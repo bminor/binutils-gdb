@@ -1,3 +1,10 @@
+Fri Aug  5 17:50:59 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* remote.c (remote_open):  Move setting of inferior_pid prior to
+	call to remote_start_remote.  Also use unique value for pid to
+	avoid confusion with read_register_pid & friends.
+	* (remote_wait):  Return inferior_pid instead of 0 in all cases.
+
 Fri Aug  5 12:23:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* dwarfread.c (bfd.h): Don't include.
