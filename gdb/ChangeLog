@@ -1,5 +1,7 @@
 2004-08-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/obsd64.mt (TDEPFILES): Add i386obsd-tdep.o.
+
 	* defs.h (deprecated_error_hook): Remove RETURN and ATTR_NORETURN
 	from declaration.
 	* top.c (deprecated_error_hook): Remove RETURN and ATTR_NORETURN
