@@ -1,6 +1,6 @@
 /* Evaluate expressions for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000
+   1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -44,25 +44,25 @@ extern int objectprint;
 
 /* Prototypes for local functions. */
 
-static value_ptr evaluate_subexp_for_sizeof (struct expression *, int *);
+static struct value *evaluate_subexp_for_sizeof (struct expression *, int *);
 
-static value_ptr evaluate_subexp_for_address (struct expression *,
-					      int *, enum noside);
+static struct value *evaluate_subexp_for_address (struct expression *,
+						  int *, enum noside);
 
-static value_ptr evaluate_subexp (struct type *, struct expression *,
-				  int *, enum noside);
+static struct value *evaluate_subexp (struct type *, struct expression *,
+				      int *, enum noside);
 
 static char *get_label (struct expression *, int *);
 
-static value_ptr
-evaluate_struct_tuple (value_ptr, struct expression *, int *,
-		       enum noside, int);
+static struct value *evaluate_struct_tuple (struct value *,
+					    struct expression *, int *,
+					    enum noside, int);
 
-static LONGEST
-init_array_element (value_ptr, value_ptr, struct expression *,
-		    int *, enum noside, LONGEST, LONGEST);
+static LONGEST init_array_element (struct value *, struct value *,
+				   struct expression *, int *, enum noside,
+				   LONGEST, LONGEST);
 
-static value_ptr
+static struct value *
 evaluate_subexp (struct type *expect_type, register struct expression *exp,
 		 register int *pos, enum noside noside)
 {
@@ -116,11 +116,11 @@ parse_and_eval_long (char *exp)
   return (retval);
 }
 
-value_ptr
+struct value *
 parse_and_eval (char *exp)
 {
   struct expression *expr = parse_expression (exp);
-  register value_ptr val;
+  struct value *val;
   register struct cleanup *old_chain
   = make_cleanup (free_current_contents, &expr);
 
@@ -133,11 +133,11 @@ parse_and_eval (char *exp)
    in the string EXPP as an expression, evaluate it, and return the value.
    EXPP is advanced to point to the comma.  */
 
-value_ptr
+struct value *
 parse_to_comma_and_eval (char **expp)
 {
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
-  register value_ptr val;
+  struct value *val;
   register struct cleanup *old_chain
   = make_cleanup (free_current_contents, &expr);
 
@@ -151,7 +151,7 @@ parse_to_comma_and_eval (char **expp)
 
    See expression.h for info on the format of an expression.  */
 
-value_ptr
+struct value *
 evaluate_expression (struct expression *exp)
 {
   int pc = 0;
@@ -161,7 +161,7 @@ evaluate_expression (struct expression *exp)
 /* Evaluate an expression, avoiding all memory references
    and getting a value whose type alone is correct.  */
 
-value_ptr
+struct value *
 evaluate_type (struct expression *exp)
 {
   int pc = 0;
@@ -189,8 +189,9 @@ get_label (register struct expression *exp, int *pos)
 /* This function evaluates tuples (in Chill) or brace-initializers
    (in C/C++) for structure types.  */
 
-static value_ptr
-evaluate_struct_tuple (value_ptr struct_val, register struct expression *exp,
+static struct value *
+evaluate_struct_tuple (struct value *struct_val,
+		       register struct expression *exp,
 		       register int *pos, enum noside noside, int nargs)
 {
   struct type *struct_type = check_typedef (VALUE_TYPE (struct_val));
@@ -202,7 +203,7 @@ evaluate_struct_tuple (value_ptr struct_val, register struct expression *exp,
   while (--nargs >= 0)
     {
       int pc = *pos;
-      value_ptr val = NULL;
+      struct value *val = NULL;
       int nlabels = 0;
       int bitpos, bitsize;
       char *addr;
@@ -333,7 +334,7 @@ evaluate_struct_tuple (value_ptr struct_val, register struct expression *exp,
    Returns last index value.  */
 
 static LONGEST
-init_array_element (value_ptr array, value_ptr element,
+init_array_element (struct value *array, struct value *element,
 		    register struct expression *exp, register int *pos,
 		    enum noside noside, LONGEST low_bound, LONGEST high_bound)
 {
@@ -373,7 +374,7 @@ init_array_element (value_ptr array, value_ptr element,
   return index;
 }
 
-value_ptr
+struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  register struct expression *exp, register int *pos,
 			  enum noside noside)
@@ -381,10 +382,12 @@ evaluate_subexp_standard (struct type *expect_type,
   enum exp_opcode op;
   int tem, tem2, tem3;
   register int pc, pc2 = 0, oldpos;
-  register value_ptr arg1 = NULL, arg2 = NULL, arg3;
+  struct value *arg1 = NULL;
+  struct value *arg2 = NULL;
+  struct value *arg3;
   struct type *type;
   int nargs;
-  value_ptr *argvec;
+  struct value **argvec;
   int upper, lower, retcode;
   int code;
   int ix;
@@ -444,7 +447,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_REGISTER:
       {
 	int regno = longest_to_int (exp->elts[pc + 1].longconst);
-	value_ptr val = value_of_register (regno);
+	struct value *val = value_of_register (regno);
 
 	(*pos) += 2;
 	if (val == NULL)
@@ -487,7 +490,7 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
 	  && TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	{
-	  value_ptr rec = allocate_value (expect_type);
+	  struct value *rec = allocate_value (expect_type);
 	  memset (VALUE_CONTENTS_RAW (rec), '\0', TYPE_LENGTH (type));
 	  return evaluate_struct_tuple (rec, exp, pos, noside, nargs);
 	}
@@ -497,7 +500,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	{
 	  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
 	  struct type *element_type = TYPE_TARGET_TYPE (type);
-	  value_ptr array = allocate_value (expect_type);
+	  struct value *array = allocate_value (expect_type);
 	  int element_size = TYPE_LENGTH (check_typedef (element_type));
 	  LONGEST low_bound, high_bound, index;
 	  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
@@ -509,7 +512,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  memset (VALUE_CONTENTS_RAW (array), 0, TYPE_LENGTH (expect_type));
 	  for (tem = nargs; --nargs >= 0;)
 	    {
-	      value_ptr element;
+	      struct value *element;
 	      int index_pc = 0;
 	      if (exp->elts[*pos].opcode == BINOP_RANGE)
 		{
@@ -545,7 +548,7 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
 	  && TYPE_CODE (type) == TYPE_CODE_SET)
 	{
-	  value_ptr set = allocate_value (expect_type);
+	  struct value *set = allocate_value (expect_type);
 	  char *valaddr = VALUE_CONTENTS_RAW (set);
 	  struct type *element_type = TYPE_INDEX_TYPE (type);
 	  struct type *check_type = element_type;
@@ -563,7 +566,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    {
 	      LONGEST range_low, range_high;
 	      struct type *range_low_type, *range_high_type;
-	      value_ptr elem_val;
+	      struct value *elem_val;
 	      if (exp->elts[*pos].opcode == BINOP_RANGE)
 		{
 		  (*pos)++;
@@ -629,7 +632,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case TERNOP_SLICE:
       {
-	value_ptr array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	struct value *array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	int lowbound
 	= value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 	int upper
@@ -641,7 +644,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case TERNOP_SLICE_COUNT:
       {
-	value_ptr array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	struct value *array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	int lowbound
 	= value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 	int length
@@ -728,7 +731,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		    for (j = TYPE_FN_FIELDLIST_LENGTH (basetype, i) - 1; j >= 0; --j)
 		      if ((int) TYPE_FN_FIELD_VOFFSET (f, j) == fnoffset)
 			{
-			  value_ptr temp = value_ind (arg2);
+			  struct value *temp = value_ind (arg2);
 			  arg1 = value_virtual_fn_field (&temp, f, j, domain_type, 0);
 			  arg2 = value_addr (temp);
 			  goto got_it;
@@ -818,7 +821,7 @@ evaluate_subexp_standard (struct type *expect_type,
       if (op == STRUCTOP_STRUCT || op == STRUCTOP_PTR)
 	{
 	  int static_memfuncp;
-	  value_ptr temp = arg2;
+	  struct value *temp = arg2;
 	  char tstr[256];
 
 	  /* Method invocation : stuff "this" as first parameter */
@@ -833,7 +836,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (overload_resolution && (exp->language_defn->la_language == language_cplus))
 	    {
 	      /* Language is C++, do some overload resolution before evaluation */
-	      value_ptr valp = NULL;
+	      struct value *valp = NULL;
 
 	      /* Prepare list of argument types for overload resolution */
 	      arg_types = (struct type **) xmalloc (nargs * (sizeof (struct type *)));
@@ -1020,7 +1023,7 @@ evaluate_subexp_standard (struct type *expect_type,
 			   lval_memory);
       else
 	{
-	  value_ptr temp = arg1;
+	  struct value *temp = arg1;
 	  return value_struct_elt (&temp, NULL, &exp->elts[pc + 2].string,
 				   NULL, "structure");
 	}
@@ -1063,7 +1066,7 @@ evaluate_subexp_standard (struct type *expect_type,
 			   lval_memory);
       else
 	{
-	  value_ptr temp = arg1;
+	  struct value *temp = arg1;
 	  return value_struct_elt (&temp, NULL, &exp->elts[pc + 2].string,
 				   NULL, "structure pointer");
 	}
@@ -1637,7 +1640,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  value_ptr retvalp = evaluate_subexp_for_address (exp, pos, noside);
+	  struct value *retvalp = evaluate_subexp_for_address (exp, pos, noside);
 	  /* If HP aCC object, use bias for pointers to members */
 	  if (hp_som_som_object_present &&
 	      (TYPE_CODE (VALUE_TYPE (retvalp)) == TYPE_CODE_PTR) &&
@@ -1773,7 +1776,7 @@ nosideret:
    NOSIDE may be EVAL_AVOID_SIDE_EFFECTS;
    then only the type of the result need be correct.  */
 
-static value_ptr
+static struct value *
 evaluate_subexp_for_address (register struct expression *exp, register int *pos,
 			     enum noside noside)
 {
@@ -1829,7 +1832,7 @@ evaluate_subexp_for_address (register struct expression *exp, register int *pos,
     default_case:
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
-	  value_ptr x = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	  struct value *x = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	  if (VALUE_LVAL (x) == lval_memory)
 	    return value_zero (lookup_pointer_type (VALUE_TYPE (x)),
 			       not_lval);
@@ -1853,13 +1856,13 @@ evaluate_subexp_for_address (register struct expression *exp, register int *pos,
 
  */
 
-value_ptr
+struct value *
 evaluate_subexp_with_coercion (register struct expression *exp,
 			       register int *pos, enum noside noside)
 {
   register enum exp_opcode op;
   register int pc;
-  register value_ptr val;
+  struct value *val;
   struct symbol *var;
 
   pc = (*pos);
@@ -1890,13 +1893,13 @@ evaluate_subexp_with_coercion (register struct expression *exp,
    and return a value for the size of that subexpression.
    Advance *POS over the subexpression.  */
 
-static value_ptr
+static struct value *
 evaluate_subexp_for_sizeof (register struct expression *exp, register int *pos)
 {
   enum exp_opcode op;
   register int pc;
   struct type *type;
-  value_ptr val;
+  struct value *val;
 
   pc = (*pos);
   op = exp->elts[pc].opcode;
