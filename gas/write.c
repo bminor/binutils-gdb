@@ -117,12 +117,10 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_bit_fixP = 0;
   fixP->fx_addnumber = 0;
   fixP->tc_fix_data = NULL;
+  fixP->fx_tcbit = 0;
 
 #ifdef TC_something
   fixP->fx_bsr = 0;
-#endif
-#ifdef TC_I960
-  fixP->fx_callj = 0;
 #endif
 
   as_where (&fixP->fx_file, &fixP->fx_line);
@@ -297,7 +295,7 @@ static void
 chain_frchains_together (abfd, section, xxx)
      bfd *abfd;			/* unused */
      segT section;
-     char *xxx;			/* unused */
+     PTR xxx;			/* unused */
 {
   segment_info_type *info;
 
@@ -408,7 +406,7 @@ static void
 relax_and_size_seg (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     char *xxx;
+     PTR xxx;
 {
   flagword flags;
   fragS *fragp;
@@ -432,17 +430,18 @@ relax_and_size_seg (abfd, sec, xxx)
     }
   else
     size = 0;
-  if (size > 0)
-    {
-      flags |= SEC_HAS_CONTENTS;
-      /* @@ This is just an approximation.  */
-      if (seginfo->fix_root)
-	flags |= SEC_RELOC;
-      else
-	flags &= ~SEC_RELOC;
-      x = bfd_set_section_flags (abfd, sec, flags);
-      assert (x == true);
-    }
+
+  if (size > 0 && ! seginfo->bss)
+    flags |= SEC_HAS_CONTENTS;
+
+  /* @@ This is just an approximation.  */
+  if (seginfo->fix_root)
+    flags |= SEC_RELOC;
+  else
+    flags &= ~SEC_RELOC;
+  x = bfd_set_section_flags (abfd, sec, flags);
+  assert (x == true);
+
   newsize = md_section_align (sec, size);
   x = bfd_set_section_size (abfd, sec, newsize);
   assert (x == true);
@@ -503,7 +502,7 @@ static void
 adjust_reloc_syms (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     char *xxx;
+     PTR xxx;
 {
   segment_info_type *seginfo = seg_info (sec);
   fixS *fixp;
@@ -520,8 +519,11 @@ adjust_reloc_syms (abfd, sec, xxx)
 	asection *symsec = sym->bsym->section;
 	segment_info_type *symseginfo = seg_info (symsec);
 
-	/* If it's one of these sections, assume the symbol is definitely
-	   going to be output.  */
+	/* If it's one of these sections, assume the symbol is
+	   definitely going to be output.  The code in
+	   md_estimate_size_before_relax in tc-mips.c uses this test
+	   as well, so if you change this code you should look at that
+	   code.  */
 	if (symsec == &bfd_und_section
 	    || symsec == &bfd_abs_section
 	    || bfd_is_com_section (symsec))
@@ -587,7 +589,7 @@ static void
 write_relocs (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     char *xxx;
+     PTR xxx;
 {
   segment_info_type *seginfo = seg_info (sec);
   int i;
@@ -691,7 +693,8 @@ write_relocs (abfd, sec, xxx)
 	abort ();
       for (j = 0; reloc[j]; j++)
         {
-          s = bfd_perform_relocation (stdoutput, reloc[j], data - reloc[j]->address,
+          s = bfd_perform_relocation (stdoutput, reloc[j],
+				      data - reloc[0]->address,
 				      sec, stdoutput);
           switch (s)
 	    {
@@ -732,7 +735,7 @@ static void
 write_contents (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     char *xxx;
+     PTR xxx;
 {
   segment_info_type *seginfo = seg_info (sec);
   unsigned long offset = 0;
@@ -1449,6 +1452,8 @@ write_object_file ()
  * these frag addresses may not be the same as final object-file addresses.
  */
 
+#ifndef md_relax_frag
+
 /* Subroutines of relax_segment.  */
 static int 
 is_dnrange (f1, f2)
@@ -1460,6 +1465,8 @@ is_dnrange (f1, f2)
       return 1;
   return 0;
 }
+
+#endif /* ! defined (md_relax_frag) */
 
 /* Relax_align. Advance location counter to next address that has 'alignment'
    lowest order bits all 0s, return size of adjustment made.  */
@@ -1664,6 +1671,11 @@ relax_segment (segment_frag_root, segment)
 		break;
 
 	      case rs_machine_dependent:
+#ifdef md_relax_frag
+		growth = md_relax_frag (fragP, stretch);
+#else
+		/* The default way to relax a frag is to look through
+		   md_relax_table.  */
 		{
 		  const relax_typeS *this_type;
 		  const relax_typeS *start_type;
@@ -1756,6 +1768,7 @@ relax_segment (segment_frag_root, segment)
 		  if (growth != 0)
 		    fragP->fr_subtype = this_state;
 		}
+#endif
 		break;
 
 	      default:
@@ -1831,7 +1844,7 @@ fixup_segment (fixP, this_segment_type)
 	size = fixP->fx_size;
 	add_symbolP = fixP->fx_addsy;
 #ifdef TC_I960
-	if (fixP->fx_callj && TC_S_IS_CALLNAME (add_symbolP))
+	if (fixP->fx_tcbit && TC_S_IS_CALLNAME (add_symbolP))
 	  {
 	    /* Relocation should be done via the associated 'bal'
 	       entry point symbol. */
@@ -1874,7 +1887,7 @@ fixup_segment (fixP, this_segment_type)
 #ifdef TC_I960
 		/* Makes no sense to use the difference of 2 arbitrary symbols
 		   as the target of a call instruction.  */
-		if (fixP->fx_callj)
+		if (fixP->fx_tcbit)
 		  {
 		    as_bad ("callj to difference of 2 symbols");
 		  }
@@ -1885,7 +1898,6 @@ fixup_segment (fixP, this_segment_type)
 		add_symbolP = NULL;
 		fixP->fx_addsy = NULL;
 	      }
-#if !defined(SEG_DIFF_ALLOWED) && !defined (GLOBAL_DIFF_ALLOWED)
 	    else
 	      {
 		/* Different segments in subtraction. */
@@ -1925,14 +1937,6 @@ fixup_segment (fixP, this_segment_type)
 			    S_GET_NAME (sub_symbolP), buf);
 		  }
 	      }
-#else
-              else
-                {
-                  seg_reloc_count++;
-		  fixP->fx_addnumber = add_number;	/* Remember value for emit_reloc */
-                  continue;
-                }		/* if absolute */
-#endif
 	  }
 
 	if (add_symbolP)
@@ -2069,7 +2073,7 @@ fixup_segment (fixP, this_segment_type)
 
     /* two relocs per callj under coff. */
     for (fixP = topP; fixP; fixP = fixP->fx_next)
-      if (fixP->fx_callj && fixP->fx_addsy != 0)
+      if (fixP->fx_tcbit && fixP->fx_addsy != 0)
 	++seg_reloc_count;
   }
 #endif /* OBJ_COFF && TC_I960 */
