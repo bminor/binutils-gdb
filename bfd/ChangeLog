@@ -1,3 +1,8 @@
+2004-05-06  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Remove R_ARM_PLT32
+	special case.
+
 2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.in (bfd_elf32_frvfdpic_vec): New.

@@ -2130,6 +2130,8 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	        case R_ARM_PC24:
 	        case R_ARM_ABS32:
 		case R_ARM_THM_PC22:
+	        case R_ARM_PLT32:
+
 	          if (info->shared
 	              && (
 			  (!info->symbolic && h->dynindx != -1)
@@ -2160,11 +2162,6 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	                  || (!info->symbolic && h->dynindx != -1)
 	                  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
-	            relocation = 0;
-		  break;
-
-	        case R_ARM_PLT32:
-	          if (h->plt.offset != (bfd_vma)-1)
 	            relocation = 0;
 		  break;
 
