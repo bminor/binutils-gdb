@@ -1,5 +1,13 @@
 Tue Oct 24 12:26:14 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* monitor.c (monitor_expect_regexp):  Same as monitor_expect, but
+	with the obvious extension.  (monitor_read_memory_single):  Use
+	regexp for getmem.resp_delim because of parsing ambiguities caused
+	by certain monitors.  (monitor_read_memory):  Use new regexp stuff
+	to parse getmem.resp_delim.
+	* sh3-rom.c:  Finish off table.  Use new regexp capability for
+	getmem commands.
+
 	* infrun.c (wait_for_inferior):  Disable questionable code near
 	the step range test.  Replace call detection test with much
 	simpler (and more efficient) test that doesn't require prologue

@@ -123,7 +123,8 @@ static char *sh3_inits[] = {"\003", NULL}; /* Exits sub-command mode & download 
 
 static struct monitor_ops sh3_cmds =
 {
-  0,				/* flags */
+  MO_CLR_BREAK_USES_ADDR
+    | MO_GETMEM_READ_SINGLE,	/* flags */
   sh3_inits,			/* monitor init string */
   "g\r",			/* continue command */
   "s\r",			/* single step */
@@ -142,13 +143,13 @@ static struct monitor_ops sh3_cmds =
     NULL,			/* setreg.term_cmd */
   },
   {
-    "d %x@%x;b\r",		/* getmem.cmdb (addr, len) */
-    "d %x@%x;w\r",		/* getmem.cmdw (addr, len) */
-    "d %x@%x;l\r",		/* getmem.cmdl (addr, len) */
+    "m %x\r",			/* getmem.cmdb (addr, len) */
+    "m %x;w\r",			/* getmem.cmdw (addr, len) */
+    "m %x;l\r",			/* getmem.cmdl (addr, len) */
     NULL,			/* getmem.cmdll (addr, len) */
-    "^[0-9A-F]+  ",		/* getmem.resp_delim */
-    NULL,			/* getmem.term */
-    NULL,			/* getmem.term_cmd */
+    "^ [0-9A-F]+ ",		/* getmem.resp_delim */
+    "? ",			/* getmem.term */
+    ".\r",			/* getmem.term_cmd */
   },
   {
     ".%s %x\r",			/* setreg.cmd (name, value) */
@@ -167,7 +168,7 @@ static struct monitor_ops sh3_cmds =
   "\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)",
   sh3_supply_register,		/* supply_register */
   NULL,				/* load_routine (defaults to SRECs) */
-  "l\r",			/* download command */
+  "il;s:x\r\006",		/* download command */
   NULL,				/* Load response */
   "\n:",			/* monitor command prompt */
   "\r",				/* end-of-line terminator */

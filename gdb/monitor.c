@@ -106,13 +106,10 @@ static serial_t monitor_desc = NULL;
 /* Pointer to regexp pattern matching data */
 
 static struct re_pattern_buffer register_pattern;
+static char register_fastmap[256];
 
-/* Element 0 points to start of register name, and element 1 points to the
-   start of the register value.  */
-
-static struct re_registers register_strings;
-
-static char fastmap[256];
+static struct re_pattern_buffer getmem_resp_delim_pattern;
+static char getmem_resp_delim_fastmap[256];
 
 static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
@@ -275,6 +272,8 @@ monitor_expect (string, buf, buflen)
 	    }
 
 	  c = readchar (timeout);
+	  if (c == '\000')
+	    continue;
 	  *buf++ = c;
 	  buflen--;
 	}
@@ -302,6 +301,48 @@ monitor_expect (string, buf, buflen)
 	  if (c == *p)
 	    p++;
 	}
+    }
+}
+
+/* Search for a regexp.  */
+
+int
+monitor_expect_regexp (pat, buf, buflen)
+     struct re_pattern_buffer *pat;
+     char *buf;
+     int buflen;
+{
+  char *mybuf;
+  char *p;
+
+  if (buf)
+    mybuf = buf;
+  else
+    {
+      mybuf = alloca (1024);
+      buflen = 1024;
+    }
+
+  p = mybuf;
+  while (1)
+    {
+      int retval;
+
+      if (p - mybuf >= buflen)
+	{			/* Buffer about to overflow */
+
+/* On overflow, we copy the upper half of the buffer to the lower half.  Not
+   great, but it usually works... */
+
+	  memcpy (mybuf, mybuf + buflen / 2, buflen / 2);
+	  p = mybuf + buflen / 2;
+	}
+
+      *p++ = readchar (timeout);
+
+      retval = re_search (pat, mybuf, p - mybuf, 0, p - mybuf, NULL);
+      if (retval >= 0)
+	return 1;
     }
 }
 
@@ -355,6 +396,30 @@ get_hex_word ()
   return val;
 }
 
+static void
+compile_pattern (pattern, compiled_pattern, fastmap)
+     char *pattern;
+     struct re_pattern_buffer *compiled_pattern;
+     char *fastmap;
+{
+  int tmp;
+  char *val;
+
+  compiled_pattern->fastmap = fastmap;
+
+  tmp = re_set_syntax (RE_SYNTAX_EMACS);
+  val = re_compile_pattern (pattern,
+			    strlen (pattern),
+			    compiled_pattern);
+  re_set_syntax (tmp);
+
+  if (val)
+    error ("compile_pattern: Can't compile pattern string `%s': %s!", pattern, val);
+
+  if (fastmap)
+    re_compile_fastmap (compiled_pattern);
+}
+
 /* Open a connection to a remote debugger. NAME is the filename used
    for communication.  */
 
@@ -386,20 +451,12 @@ monitor_open (args, mon_ops, from_tty)
   /* Setup pattern for register dump */
 
   if (mon_ops->register_pattern)
-    {
-      int tmp;
-      char *val;
+    compile_pattern (mon_ops->register_pattern, &register_pattern,
+		     register_fastmap);
 
-      register_pattern.fastmap = fastmap;
-      tmp = re_set_syntax (RE_SYNTAX_EMACS);
-      val = re_compile_pattern (mon_ops->register_pattern,
-				strlen (mon_ops->register_pattern),
-				&register_pattern);
-      re_set_syntax (tmp);
-      if (val)
-	error ("Can't compiler register pattern string: %s!", val);
-      re_compile_fastmap (&register_pattern);
-    }
+  if (mon_ops->getmem.resp_delim)
+    compile_pattern (mon_ops->getmem.resp_delim, &getmem_resp_delim_pattern,
+		     getmem_resp_delim_fastmap);
 
   unpush_target (targ_ops);
 
@@ -556,6 +613,9 @@ parse_register_dump (buf, len)
     {
       int regnamelen, vallen;
       char *regname, *val;
+/* Element 0 points to start of register name, and element 1 points to the
+   start of the register value.  */
+      struct re_registers register_strings;
 
       if (re_search (&register_pattern, buf, len, 0, len,
 		     &register_strings) == -1)
@@ -963,7 +1023,7 @@ monitor_read_memory_single (memaddr, myaddr, len)
    the buf.  */
 
   if (current_monitor->getmem.resp_delim)
-    monitor_expect (current_monitor->getmem.resp_delim, NULL, 0);
+    monitor_expect_regexp (getmem_resp_delim_pattern, NULL, 0);
 
 /* Now, read the appropriate number of hex digits for this loc, skipping
    spaces.  */
@@ -1084,11 +1144,25 @@ monitor_read_memory (memaddr, myaddr, len)
 
   if (current_monitor->getmem.resp_delim)
     {
+      int retval, tmp;
+      struct re_registers resp_strings;
+
+      tmp = strlen (p);
+      retval = re_search (&getmem_resp_delim_pattern, p, tmp, 0, tmp,
+			  &resp_strings);
+
+      if (retval < 0)
+	error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
+	       memaddr, resp_len, buf);
+
+      p += resp_strings.end[0];
+#if 0
       p = strstr (p, current_monitor->getmem.resp_delim);
       if (!p)
 	error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
 	       memaddr, resp_len, buf);
       p += strlen (current_monitor->getmem.resp_delim);
+#endif
     }
 
   for (i = len; i > 0; i--)
