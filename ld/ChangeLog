@@ -1,3 +1,10 @@
+2004-11-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 518
+	* ld.texinfo (MEMORY): Update the descriptions of the ORIGIN and
+	LENGTH fields in the MEMORY command, to explicitly state that
+	symbols cannot be used in their expressions.
+
 2004-11-19  Jon Beniston <jon@beniston.com>
 
 	* ld/ldlex.l: Allow ORIGIN and LENGTH in EXPRESSION.

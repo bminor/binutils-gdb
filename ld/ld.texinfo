@@ -3843,19 +3843,19 @@ attributes.
 @kindex ORIGIN =
 @kindex o =
 @kindex org =
-The @var{origin} is an expression for the start address of the memory
-region.  The expression must evaluate to a constant before memory
-allocation is performed, which means that you may not use any section
-relative symbols.  The keyword @code{ORIGIN} may be abbreviated to
-@code{org} or @code{o} (but not, for example, @code{ORG}).
+The @var{origin} is an numerical expression for the start address of
+the memory region.  The expression must evaluate to a constant and it
+cannot involve any symbols.  The keyword @code{ORIGIN} may be
+abbreviated to @code{org} or @code{o} (but not, for example,
+@code{ORG}).
 
 @kindex LENGTH =
 @kindex len =
 @kindex l =
 The @var{len} is an expression for the size in bytes of the memory
 region.  As with the @var{origin} expression, the expression must
-evaluate to a constant before memory allocation is performed.  The
-keyword @code{LENGTH} may be abbreviated to @code{len} or @code{l}.
+be numerical only and must evaluate to a constant.  The keyword
+@code{LENGTH} may be abbreviated to @code{len} or @code{l}.
 
 In the following example, we specify that there are two memory regions
 available for allocation: one starting at @samp{0} for 256 kilobytes,
