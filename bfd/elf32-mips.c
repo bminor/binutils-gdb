@@ -63,8 +63,8 @@ static boolean mips_elf32_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
 static boolean mips_elf32_section_processing
   PARAMS ((bfd *, Elf32_Internal_Shdr *));
-static boolean mips_elf_is_local_label
-  PARAMS ((bfd *, asymbol *));
+static boolean mips_elf_is_local_label_name
+  PARAMS ((bfd *, const char *));
 static struct bfd_hash_entry *mips_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table *mips_elf_link_hash_table_create
@@ -2942,11 +2942,11 @@ _bfd_mips_elf_read_ecoff_info (abfd, section, debug)
 
 /*ARGSUSED*/
 static boolean
-mips_elf_is_local_label (abfd, symbol)
+mips_elf_is_local_label_name (abfd, name)
      bfd *abfd;
-     asymbol *symbol;
+     const char *name;
 {
-  return symbol->name[0] == '$';
+  return name[0] == '$';
 }
 
 /* MIPS ELF uses a special find_nearest_line routine in order the
@@ -3283,7 +3283,6 @@ mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  mips_elf_text_section.name = ".text";
 	  mips_elf_text_section.flags = SEC_NO_FLAGS;
 	  mips_elf_text_section.output_section = NULL;
-	  mips_elf_text_section.owner = abfd;
 	  mips_elf_text_section.symbol = &mips_elf_text_symbol;
 	  mips_elf_text_section.symbol_ptr_ptr = &mips_elf_text_symbol_ptr;
 	  mips_elf_text_symbol.name = ".text";
@@ -3292,10 +3291,10 @@ mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  mips_elf_text_symbol_ptr = &mips_elf_text_symbol;
 	  mips_elf_text_section_ptr = &mips_elf_text_section;
 	}
-      if (info->shared)
-	*secp = bfd_und_section_ptr;
-      else
-	*secp = mips_elf_text_section_ptr;
+      /* This code used to do *secp = bfd_und_section_ptr if
+         info->shared.  I don't know why, and that doesn't make sense,
+         so I took it out.  */
+      *secp = mips_elf_text_section_ptr;
       break;
 
     case SHN_MIPS_ACOMMON:
@@ -3308,7 +3307,6 @@ mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  mips_elf_data_section.name = ".data";
 	  mips_elf_data_section.flags = SEC_NO_FLAGS;
 	  mips_elf_data_section.output_section = NULL;
-	  mips_elf_data_section.owner = abfd;
 	  mips_elf_data_section.symbol = &mips_elf_data_symbol;
 	  mips_elf_data_section.symbol_ptr_ptr = &mips_elf_data_symbol_ptr;
 	  mips_elf_data_symbol.name = ".data";
@@ -3317,10 +3315,10 @@ mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  mips_elf_data_symbol_ptr = &mips_elf_data_symbol;
 	  mips_elf_data_section_ptr = &mips_elf_data_section;
 	}
-      if (info->shared)
-	*secp = bfd_und_section_ptr;
-      else
-	*secp = mips_elf_data_section_ptr;
+      /* This code used to do *secp = bfd_und_section_ptr if
+         info->shared.  I don't know why, and that doesn't make sense,
+         so I took it out.  */
+      *secp = mips_elf_data_section_ptr;
       break;
 
     case SHN_MIPS_SUNDEFINED:
@@ -4058,7 +4056,7 @@ mips_elf_final_link (abfd, info)
 		  rtproc_sec = bfd_make_section (abfd, ".rtproc");
 		  if (rtproc_sec == NULL
 		      || ! bfd_set_section_flags (abfd, rtproc_sec, flags)
-		      || ! bfd_set_section_alignment (abfd, rtproc_sec, 12))
+		      || ! bfd_set_section_alignment (abfd, rtproc_sec, 4))
 		    return false;
 		}
 
@@ -5165,13 +5163,33 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      /* It's easiest to do the normal relocation, and then
                  dig out the instruction and swap the first word the
-                 way the mips16 expects it.  */
+                 way the mips16 expects it.  If this is little endian,
+                 though, we need to swap the two words first, and then
+                 swap them back again later, so that the address looks
+                 right.  */
+
+	      if (bfd_little_endian (input_bfd))
+		{
+		  unsigned long insn;
+
+		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  insn = ((insn >> 16) & 0xffff) | ((insn & 0xffff) << 16);
+		  bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+		}
+
 	      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					    contents, rel->r_offset,
 					    relocation, addend);
 	      if (r == bfd_reloc_ok)
 		{
 		  unsigned long insn;
+
+		  if (bfd_little_endian (input_bfd))
+		    {
+		      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		      insn = ((insn >> 16) & 0xffff) | ((insn & 0xffff) << 16);
+		      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+		    }
 
 		  insn = bfd_get_16 (input_bfd, contents + rel->r_offset);
 		  insn = ((insn & 0xfc00)
@@ -5452,7 +5470,7 @@ mips_elf_create_dynamic_sections (abfd, info)
 	      get_elf_backend_data (abfd)->collect,
 	      (struct bfd_link_hash_entry **) &h)))
 	return false;
-      h->elf_link_hash_flags ^=~ ELF_LINK_NON_ELF;
+      h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
 
@@ -5797,7 +5815,16 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
       if (r_symndx < extsymoff)
 	h = NULL;
       else
-	h = sym_hashes[r_symndx - extsymoff];
+	{
+	  h = sym_hashes[r_symndx - extsymoff];
+
+	  /* This may be an indirect symbol created because of a version.  */
+	  if (h != NULL)
+	    {
+	      while (h->root.type == bfd_link_hash_indirect)
+		h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	    }
+	}
 
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL || sgot == NULL)
@@ -6654,7 +6681,7 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  sym->st_value = mips_elf_hash_table (info)->procedure_count;
 	  sym->st_shndx = SHN_ABS;
 	}
-      else if (sym->st_shndx != SHN_UNDEF)
+      else if (sym->st_shndx != SHN_UNDEF && sym->st_shndx != SHN_ABS)
 	{
 	  if (h->type == STT_FUNC)
 	    sym->st_shndx = SHN_MIPS_TEXT;
@@ -7265,7 +7292,8 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 					_bfd_mips_elf_final_write_processing
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
-#define bfd_elf32_bfd_is_local_label	mips_elf_is_local_label
+#define bfd_elf32_bfd_is_local_label_name \
+					mips_elf_is_local_label_name
 #define bfd_elf32_find_nearest_line	_bfd_mips_elf_find_nearest_line
 #define bfd_elf32_set_section_contents	_bfd_mips_elf_set_section_contents
 #define bfd_elf32_bfd_link_hash_table_create \
