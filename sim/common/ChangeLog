@@ -1,3 +1,7 @@
+2000-06-23  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cgen-trace.h (TRACE_USEFUL_MASK): Remove TRACE_EVENTS_IDX.
+
 2000-06-24  Frank Ch. Eigler  <fche@redhat.com>
 
 	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>:
