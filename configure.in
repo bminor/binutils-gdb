@@ -135,7 +135,7 @@ case "${host}" in
           could_use=
           [ -d /opt/SUNWspro/bin ] && could_use="/opt/SUNWspro/bin"
           if [ -d /opt/cygnus/bin ] ; then
-              if [ "$could_use" == "" ] ; then
+              if [ "$could_use" = "" ] ; then
                   could_use="/opt/cygnus/bin"
               else
                   could_use="$could_use or /opt/cygnus/bin"
