@@ -953,10 +953,6 @@ EOF
 #define M88KCOFF 1
 EOF
  ;;
-      ppc) cat >> confdefs.h <<\EOF
-#define PPC 1
-EOF
- ;;
     esac
     ;;
 esac
