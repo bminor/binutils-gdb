@@ -1,3 +1,8 @@
+2000-08-28  Dave Brolley  <brolley@redhat.com>
+
+	* cpu.h: Regenerated.
+	* decode.c: Regenerated.
+
 2000-08-21  Frank Ch. Eigler  <fche@redhat.com>
 
 	* Makefile.in (fr30-clean): Add stamp-arch, stamp-cpu.
