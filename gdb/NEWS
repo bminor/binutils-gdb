@@ -20,17 +20,6 @@ kernel.
 
 * Cygwin support for DWARF 2 added.
 
-* Fixed build problem on IRIX 5
-
-Due to header problems with <sys/proc.h>, the file gdb/proc-api.c
-wasn't able to compile compile on an IRIX 5 system.
-
-* Added execute permission to gdb/gdbserver/configure
-
-The shell script gdb/testsuite/gdb.stabs/configure lacked execute
-permission.  This bug would cause configure to fail on a number of
-systems (Solaris, IRIX).  Ref: server/519.
-
 * New native configurations
 
 OpenBSD/m68k					m68*-*-openbsd*
@@ -52,6 +41,62 @@ decstation					mips-dec-* mips-little-*
 riscos						mips-*-riscos* mips-*-sysv*
 sonymips					mips-sony-*
 sysv					mips*-*-sysv4* (IRIX 5/6 not included)
+
+*** Changes in GDB 6.1.1:
+
+* TUI (Text-mode User Interface) built-in (also included in GDB 6.1)
+
+The TUI (Text-mode User Interface) is now built as part of a default
+GDB configuration.  It is enabled by either selecting the TUI with the
+command line option "-i=tui" or by running the separate "gdbtui"
+program.  For more information on the TUI, see the manual "Debugging
+with GDB".
+
+* Pending breakpoint support (also included in GDB 6.1)
+
+Support has been added to allow you to specify breakpoints in shared
+libraries that have not yet been loaded.  If a breakpoint location
+cannot be found, and the "breakpoint pending" option is set to auto,
+GDB queries you if you wish to make the breakpoint pending on a future
+shared-library load.  If and when GDB resolves the breakpoint symbol,
+the pending breakpoint is removed as one or more regular breakpoints
+are created.
+
+Pending breakpoints are very useful for GCJ Java debugging.
+
+* Fixed ISO-C build problems
+
+The files bfd/elf-bfd.h, gdb/dictionary.c and gdb/types.c contained
+non ISO-C code that stopped them being built using a more strict ISO-C
+compiler (e.g., IBM's C compiler).
+
+* Fixed build problem on IRIX 5
+
+Due to header problems with <sys/proc.h>, the file gdb/proc-api.c
+wasn't able to compile compile on an IRIX 5 system.
+
+* Added execute permission to gdb/gdbserver/configure
+
+The shell script gdb/testsuite/gdb.stabs/configure lacked execute
+permission.  This bug would cause configure to fail on a number of
+systems (Solaris, IRIX).  Ref: server/519.
+
+* Fixed build problem on hpux2.0w-hp-hpux11.00 using the HP ANSI C compiler
+
+Older HPUX ANSI C compilers did not accept variable array sizes.  somsolib.c
+has been updated to use constant array sizes.
+
+* Fixed a panic in the DWARF Call Frame Info code on Solaris 2.7
+
+GCC 3.3.2, on Solaris 2.7, includes the DW_EH_PE_funcrel encoding in
+its generated DWARF Call Frame Info.  This encoding was causing GDB to
+panic, that panic has been fixed.  Ref: gdb/1628.
+
+* Fixed a problem when examining parameters in shared library code.
+
+When examining parameters in optimized shared library code generated
+by a mainline GCC, GDB would incorrectly report ``Variable "..." is
+not available''.  GDB now correctly displays the variable's value.
 
 *** Changes in GDB 6.1:
 
