@@ -1,531 +1,195 @@
-Return-Path: owner-egcs@cygnus.com Sun
-Received: from cygnus.com (runyon.cygnus.com [205.180.230.5]) by hurl.cygnus.com with ESMTP (8.7.1/8.7.1) id RAA11988 for <law@hurl.cygnus.com>; Sun, 5 Oct 1997 17:27:27 -0600 (MDT)
-Received: (from majordom@localhost)
-	by runyon.cygnus.com (8.8.7-cygnus/8.8.7) id QAA27817;
-	Sun, 5 Oct 1997 16:16:45 -0700 (PDT)
-Received: from YALPH1.physics.yale.edu (hepvms1.physics.yale.edu [198.125.138.1])
-	by runyon.cygnus.com (8.8.7-cygnus/8.8.7) with ESMTP id QAA27802;
-	Sun, 5 Oct 1997 16:16:38 -0700 (PDT)
-Received: from hepunix2.physics.yale.edu by hepmail.physics.yale.edu
- (PMDF V5.1-8 #17719)
- with ESMTP id <01IOGJ0WO510CFQE02@hepmail.physics.yale.edu>; Sun,
- 5 Oct 1997 19:20:08 EDT
-Received: from hepunix1.physics.yale.edu by hepunix.physics.yale.edu
- (PMDF V5.1-5 #17721) with SMTP id <0EHLPVM0N00788@hepunix.physics.yale.edu>;
- Sun, 05 Oct 1997 19:14:13 -0400 (EDT)
-Date: Sun, 05 Oct 1997 19:14:09 -0400 (EDT)
-From: Weiwen Liu <liu@hepvms.physics.yale.edu>
-Subject: Re: complex support on alpha
-In-reply-to: <199710020532.WAA16123@dot.cygnus.com>
-X-Sender: liu@hepunix1.physics.yale.edu
-To: rth@cygnus.com
-Cc: egcs@cygnus.com
-Message-id: <Pine.OSF.3.96.971005190110.31383A-100000@hepunix1.physics.yale.edu>
-MIME-version: 1.0
-Content-type: TEXT/PLAIN; charset=US-ASCII
-Sender: owner-egcs@cygnus.com
-Precedence: bulk
+What's LRS?
+===========
 
-On Wed, 1 Oct 1997, Richard Henderson wrote:
+LRS, or Live Range Splitting is an optimization technique which allows a user
+variable to reside in different locations during different parts of a function.
 
-> Well, it is enough to compile those examples properly, but it is
-> not completely correct.  The problem is that complex numbers should
-> be treated as two distinct arguments on Alpha, which affects padding
-> of the arguments passed on the stack.
-> 
+For example, a variable might reside in the stack for part of a function and
+in a register during a loop and in a different register during another loop.
 
-Here is a patch for it.  It should be applied against egcs-970929.
-Beside fixing complex-5.c in the testsuite, egcs with this patch generates
-the same result from 'make check-gcc' as without it.
+Clearly, if a variable may reside in different locations, then the compiler
+must describe to the debugger where the variable resides for any given part
+of the function.
 
-On an alpha-dec-osf4.0, this patch correctly compiles the following test
-program with F=char, short, int, long, float, double:
-#ifndef F
-#define F float
-#endif
+This document describes the debug format for encoding these extensions in
+stabs.
 
-typedef __complex__ F FC;
+Since these extensions are gcc specific, these additional symbols and stabs 
+can be disabled by the gcc command option -gstabs.
 
-FC f1(int odd, FC a, FC b, FC c)
-{
-  return a + b + c;
-}
 
-FC f2a(F a, F b, F c, F d, F e, F f, F g, F h)
-{
-  return (a + c + e + g) + 1i * (b + d + f + h);
-}
+GNU extensions for LRS under stabs:
+===================================
 
-FC f2b(FC a, FC b, FC c, FC d)
-{
-  return a + b + c + d;
-}
 
-int main()
-{
-    FC a, b, c, d, e;
-    a = 1 + 2i;
-    b = 3+4i;
-    c = 5+6i;
-    d = 7+8i;
+range symbols:
+-------------
 
-    e = f1(1,a,b,c);
-    if (e != 9+12i)
-        abort ();
-    e=f2b(a,b,c,d);
-    if (e != 16+20i)
-        abort ();
-    e=f2a(1,2,3,4,5,6,7,8);
-    if (e != 16+20i)
-        abort ();
-    return 0;
-}
+    A range symbol will be used to mark the beginning or end of a live range
+    (the range which describes where a symbol is active, or live).
+    These symbols will later be referenced in the stabs for debug purposes.
+    For simplicity, we'll use the terms "range_start" and "range_end" to 
+    identify the range symbols which mark the beginning and end of a live 
+    range respectively.
 
-This patch has only been tested on alpha-dec-osf4.0, because I have no
-access to other machines.  To support compless on other machines, the
-machine-dependent tm.h has to be modified similarly to what is done for
-alpha.h here.
+    Any text symbol which would normally appear in the symbol table (eg. a 
+    function name) can be used as range symbol.  If an address is needed to 
+    delimit a live range and does not match any of the values of symbols 
+    which would normally appear in the symbol table, a new symbol will be 
+    added to the table whose value is that address.
 
-Weiwen
+    The three new symbol types described below have been added for this 
+    purpose.
 
-Sun Oct  5 19:00:00  Weiwen Liu  <liu@hepunix.phycis.yale.edu>
+    For efficiency, the compiler should use existing symbols as range symbols 
+    whenever possible; this reduces the number of additional symbols which 
+    need to be added to the symbol table.
 
-	 * c-tree.h: Define complex_long_integer_type_node
-	 to support __complex__ long.
-	 * c-decl.c (init_decl_processing): Initialize 
-	 complex_long_integer_type_node.
-	 * c-lex.c (yylex): Enable __complex__ long.
+    
+New debug symbol type for defining ranges:
+------------------------------------------
 
-	 * expr.h:  Define COMPLEX_WORD_MODE and GET_COMPLEX_MODE_SIZE.
-	 * emit-rtl.c (gen_lowpart_common, gen_highpart,
-	 operand_subword): Use them.
-	 * expr.c (move_block_to_reg, emit_push_insn): Use them.
+    range_off - contains PC function offset for start/end of a live range.
+		Its location is relative to the function start and therefore 
+		eliminates the need for additional relocation.
 
-	 * emit-rtl.c (operand_subword): Deal with a complex mode.
+    This symbol has a values in the text section, and does not have a name.
 
-	 * regs.h: Correctly calculate REG_SIZE for a complex mode.
+	    NOTE: the following may not be needed but are included here just 
+		in case.
+	    range - contains PC value of beginning or end of a live range
+		(relocs required).
 
-	 * config/alpha/alpha.h: Correctly deal with a complex mode in 
-	 HARD_REGNO_NREGS, FUNCTION_VALUE, ALPHA_ARG_SIZE.
+	    NOTE: the following will be required if we desire LRS debugging
+		to work with old style a.out stabs.
+	    range_abs - contains absolute PC value of start/end of a live 
+		range.  The range_abs debug symbol is provided for 
+		completeness, in case there is a need to describe addresses 
+		in ROM, etc.
 
-*** gcc/c-decl.c.orig	Sat Sep 27 14:16:06 1997
---- gcc/c-decl.c	Wed Oct  1 16:19:39 1997
-*************** tree double_type_node;
-*** 135,140 ****
---- 135,141 ----
-  tree long_double_type_node;
-  
-  tree complex_integer_type_node;
-+ tree complex_long_integer_type_node;
-  tree complex_float_type_node;
-  tree complex_double_type_node;
-  tree complex_long_double_type_node;
-*************** init_decl_processing ()
-*** 2989,2994 ****
---- 2990,3001 ----
-  			complex_integer_type_node));
-    TREE_TYPE (complex_integer_type_node) = integer_type_node;
-    layout_type (complex_integer_type_node);
-+ 
-+   complex_long_integer_type_node = make_node (COMPLEX_TYPE);
-+   pushdecl (build_decl (TYPE_DECL, get_identifier ("complex long int"),
-+ 			complex_long_integer_type_node));
-+   TREE_TYPE (complex_long_integer_type_node) = long_integer_type_node;
-+   layout_type (complex_long_integer_type_node);
-  
-    complex_float_type_node = make_node (COMPLEX_TYPE);
-    pushdecl (build_decl (TYPE_DECL, get_identifier ("complex float"),
-*** gcc/c-lex.c.orig	Fri Aug 15 01:32:53 1997
---- gcc/c-lex.c	Wed Oct  1 16:19:39 1997
-*************** yylex ()
-*** 1769,1774 ****
---- 1769,1780 ----
-  		    = build_complex (NULL_TREE, integer_zero_node,
-  				     convert (integer_type_node,
-  					      yylval.ttype));
-+ 		else if (TYPE_PRECISION (type)
-+ 		    <= TYPE_PRECISION (long_integer_type_node))
-+ 		  yylval.ttype
-+ 		    = build_complex (NULL_TREE, integer_zero_node,
-+ 				     convert (long_integer_type_node,
-+ 					      yylval.ttype));
-  		else
-  		  error ("complex integer constant is too wide for `complex int'");
-  	      }
-*** gcc/c-tree.h.orig	Mon Aug 11 11:57:03 1997
---- gcc/c-tree.h	Wed Oct  1 16:19:40 1997
-*************** extern tree long_long_integer_type_node;
-*** 219,224 ****
---- 219,225 ----
-  extern tree long_long_unsigned_type_node;
-  extern tree long_unsigned_type_node;
-  extern tree complex_integer_type_node;
-+ extern tree complex_long_integer_type_node;
-  extern tree complex_float_type_node;
-  extern tree complex_double_type_node;
-  extern tree complex_long_double_type_node;
-*** gcc/emit-rtl.c.orig	Mon Sep 22 13:41:24 1997
---- gcc/emit-rtl.c	Sun Oct  5 17:48:05 1997
-*************** gen_lowpart_common (mode, x)
-*** 635,644 ****
-  	     / UNITS_PER_WORD)))
-      return 0;
-  
-!   if (WORDS_BIG_ENDIAN && GET_MODE_SIZE (GET_MODE (x)) > UNITS_PER_WORD)
-!     word = ((GET_MODE_SIZE (GET_MODE (x))
-! 	     - MAX (GET_MODE_SIZE (mode), UNITS_PER_WORD))
-! 	    / UNITS_PER_WORD);
-  
-    if ((GET_CODE (x) == ZERO_EXTEND || GET_CODE (x) == SIGN_EXTEND)
-        && (GET_MODE_CLASS (mode) == MODE_INT
---- 635,644 ----
-  	     / UNITS_PER_WORD)))
-      return 0;
-  
-!   if (WORDS_BIG_ENDIAN && GET_MODE_SIZE (GET_MODE (x)) >0)
-!     word = GET_COMPLEX_MODE_SIZE (GET_MODE (x))
-!         - ((GET_MODE_SIZE (mode) + (UNITS_PER_WORD - 1))
-!            / UNITS_PER_WORD);
-  
-    if ((GET_CODE (x) == ZERO_EXTEND || GET_CODE (x) == SIGN_EXTEND)
-        && (GET_MODE_CLASS (mode) == MODE_INT
-*************** gen_highpart (mode, x)
-*** 1013,1022 ****
-        int word = 0;
-  
-        if (! WORDS_BIG_ENDIAN
-! 	  && GET_MODE_SIZE (GET_MODE (x)) > UNITS_PER_WORD)
-! 	word = ((GET_MODE_SIZE (GET_MODE (x))
-! 		 - MAX (GET_MODE_SIZE (mode), UNITS_PER_WORD))
-! 		/ UNITS_PER_WORD);
-  
-        /*
-         * ??? This fails miserably for complex values being passed in registers
---- 1013,1022 ----
-        int word = 0;
-  
-        if (! WORDS_BIG_ENDIAN
-! 	  && GET_MODE_SIZE (GET_MODE (x)) > 0)
-!         word = GET_COMPLEX_MODE_SIZE (GET_MODE (x))
-!             - ((GET_MODE_SIZE (mode) + (UNITS_PER_WORD - 1))
-!                / UNITS_PER_WORD);
-  
-        /*
-         * ??? This fails miserably for complex values being passed in registers
-*************** operand_subword (op, i, validate_address
-*** 1100,1105 ****
---- 1100,1107 ----
-  
-    /* If OP is narrower than a word or if we want a word outside OP, fail.  */
-    if (mode != BLKmode
-+       && (GET_MODE_CLASS (mode) != MODE_COMPLEX_INT
-+           && GET_MODE_CLASS (mode) != MODE_COMPLEX_FLOAT)
-        && (GET_MODE_SIZE (mode) < UNITS_PER_WORD
-  	  || (i + 1) * UNITS_PER_WORD > GET_MODE_SIZE (mode)))
-      return 0;
-*************** operand_subword (op, i, validate_address
-*** 1127,1133 ****
-  	       || op == arg_pointer_rtx
-  #endif
-  	       || op == stack_pointer_rtx)
-! 	return gen_rtx (SUBREG, word_mode, op, i);
-        else
-  	return gen_rtx (REG, word_mode, REGNO (op) + i);
-      }
---- 1129,1135 ----
-  	       || op == arg_pointer_rtx
-  #endif
-  	       || op == stack_pointer_rtx)
-! 	return gen_rtx (SUBREG, COMPLEX_WORD_MODE (mode), op, i);
-        else
-  	return gen_rtx (REG, word_mode, REGNO (op) + i);
-      }
-*************** operand_subword (op, i, validate_address
-*** 1135,1141 ****
-      return gen_rtx (SUBREG, word_mode, SUBREG_REG (op), i + SUBREG_WORD (op));
-    else if (GET_CODE (op) == CONCAT)
-      {
-!       int partwords = GET_MODE_UNIT_SIZE (GET_MODE (op)) / UNITS_PER_WORD;
-        if (i < partwords)
-  	return operand_subword (XEXP (op, 0), i, validate_address, mode);
-        return operand_subword (XEXP (op, 1), i - partwords,
---- 1137,1144 ----
-      return gen_rtx (SUBREG, word_mode, SUBREG_REG (op), i + SUBREG_WORD (op));
-    else if (GET_CODE (op) == CONCAT)
-      {
-!       int partwords = (GET_MODE_UNIT_SIZE (GET_MODE (op))
-!                        + (UNITS_PER_WORD - 1))/ UNITS_PER_WORD;
-        if (i < partwords)
-  	return operand_subword (XEXP (op, 0), i, validate_address, mode);
-        return operand_subword (XEXP (op, 1), i - partwords,
-*************** operand_subword (op, i, validate_address
-*** 1145,1151 ****
-    /* Form a new MEM at the requested address.  */
-    if (GET_CODE (op) == MEM)
-      {
-!       rtx addr = plus_constant (XEXP (op, 0), i * UNITS_PER_WORD);
-        rtx new;
-  
-        if (validate_address)
---- 1148,1158 ----
-    /* Form a new MEM at the requested address.  */
-    if (GET_CODE (op) == MEM)
-      {
-!       rtx addr = plus_constant (
-!           XEXP (op, 0),
-!           (GET_MODE_CLASS (mode) == MODE_COMPLEX_INT
-!            || GET_MODE_CLASS (mode) == MODE_COMPLEX_FLOAT)?
-!           i*GET_MODE_UNIT_SIZE (mode): i * UNITS_PER_WORD);
-        rtx new;
-  
-        if (validate_address)
-*************** operand_subword (op, i, validate_address
-*** 1159,1165 ****
-  	    addr = memory_address (word_mode, addr);
-  	}
-  
-!       new = gen_rtx (MEM, word_mode, addr);
-  
-        MEM_VOLATILE_P (new) = MEM_VOLATILE_P (op);
-        MEM_IN_STRUCT_P (new) = MEM_IN_STRUCT_P (op);
---- 1166,1172 ----
-  	    addr = memory_address (word_mode, addr);
-  	}
-  
-!       new = gen_rtx (MEM, COMPLEX_WORD_MODE (mode), addr);
-  
-        MEM_VOLATILE_P (new) = MEM_VOLATILE_P (op);
-        MEM_IN_STRUCT_P (new) = MEM_IN_STRUCT_P (op);
-*** gcc/expr.c.orig	Sat Oct  4 03:12:35 1997
---- gcc/expr.c	Sun Oct  5 18:21:18 1997
-*************** move_block_to_reg (regno, x, nregs, mode
-*** 1701,1707 ****
-  #endif
-  
-    for (i = 0; i < nregs; i++)
-!     emit_move_insn (gen_rtx (REG, word_mode, regno + i),
-  		    operand_subword_force (x, i, mode));
-  }
-  
---- 1701,1707 ----
-  #endif
-  
-    for (i = 0; i < nregs; i++)
-!     emit_move_insn (gen_rtx (REG, COMPLEX_WORD_MODE (mode), regno + i),
-  		    operand_subword_force (x, i, mode));
-  }
-  
-*************** move_block_from_reg (regno, x, nregs, si
-*** 1724,1729 ****
---- 1724,1731 ----
-    /* If SIZE is that of a mode no bigger than a word, just use that
-       mode's store operation.  */
-    if (size <= UNITS_PER_WORD
-+       && GET_MODE_CLASS (GET_MODE (x)) != MODE_COMPLEX_INT
-+       && GET_MODE_CLASS (GET_MODE (x)) != MODE_COMPLEX_FLOAT
-        && (mode = mode_for_size (size * BITS_PER_UNIT, MODE_INT, 0)) != BLKmode)
-      {
-        emit_move_insn (change_address (x, mode, NULL),
-*************** move_block_from_reg (regno, x, nregs, si
-*** 1769,1780 ****
-  
-    for (i = 0; i < nregs; i++)
-      {
-!       rtx tem = operand_subword (x, i, 1, BLKmode);
-  
-        if (tem == 0)
-  	abort ();
-  
-!       emit_move_insn (tem, gen_rtx (REG, word_mode, regno + i));
-      }
-  }
-  
---- 1771,1786 ----
-  
-    for (i = 0; i < nregs; i++)
-      {
-!       rtx tem = operand_subword
-!           (x, i, 1, (GET_MODE_CLASS(GET_MODE (x)) == MODE_COMPLEX_INT
-!                      || GET_MODE_CLASS(GET_MODE (x)) == MODE_COMPLEX_FLOAT)?
-!            GET_MODE(x):BLKmode);
-  
-        if (tem == 0)
-  	abort ();
-  
-!       emit_move_insn (tem, gen_rtx (REG, COMPLEX_WORD_MODE (GET_MODE (x)),
-!                                     regno + i));
-      }
-  }
-  
-*************** emit_push_insn (x, mode, type, size, ali
-*** 2687,2693 ****
-      {
-        /* Scalar partly in registers.  */
-  
-!       int size = GET_MODE_SIZE (mode) / UNITS_PER_WORD;
-        int i;
-        int not_stack;
-        /* # words of start of argument
---- 2693,2699 ----
-      {
-        /* Scalar partly in registers.  */
-  
-!       int size = GET_COMPLEX_MODE_SIZE (mode);
-        int i;
-        int not_stack;
-        /* # words of start of argument
-*************** emit_push_insn (x, mode, type, size, ali
-*** 2696,2701 ****
---- 2702,2716 ----
-        int args_offset = INTVAL (args_so_far);
-        int skip;
-  
-+       /* For a complex argument passing partially in a register,
-+          save the image part in stack immedially following the space
-+          used for save the part passig in register (see function
-+          assign_parms in function.c).  */
-+       if (GET_MODE_CLASS (mode) == MODE_COMPLEX_INT
-+           || GET_MODE_CLASS (mode) == MODE_COMPLEX_FLOAT)
-+           if (GET_MODE_UNIT_SIZE (mode) < UNITS_PER_WORD)
-+               args_offset += GET_MODE_UNIT_SIZE (mode) - UNITS_PER_WORD;
-+       
-        /* Push padding now if padding above and stack grows down,
-  	 or if padding below and stack grows up.
-  	 But if space already allocated, this has already been done.  */
-*************** emit_push_insn (x, mode, type, size, ali
-*** 2742,2748 ****
-  #endif
-  	if (i >= not_stack + offset)
-  	  emit_push_insn (operand_subword_force (x, i, mode),
-! 			  word_mode, NULL_TREE, NULL_RTX, align, 0, NULL_RTX,
-  			  0, args_addr,
-  			  GEN_INT (args_offset + ((i - not_stack + skip)
-  						  * UNITS_PER_WORD)));
---- 2757,2764 ----
-  #endif
-  	if (i >= not_stack + offset)
-  	  emit_push_insn (operand_subword_force (x, i, mode),
-!                           COMPLEX_WORD_MODE (mode),
-!                           NULL_TREE, NULL_RTX, align, 0, NULL_RTX,
-  			  0, args_addr,
-  			  GEN_INT (args_offset + ((i - not_stack + skip)
-  						  * UNITS_PER_WORD)));
-*** gcc/expr.h.orig	Sat Oct  4 23:46:34 1997
---- gcc/expr.h	Sun Oct  5 18:21:14 1997
-*************** extern void bc_adjust_stack			PROTO ((in
-*** 952,954 ****
---- 952,970 ----
-  extern void bc_load_localaddr			PROTO ((rtx));
-  extern void do_jump_by_parts_greater_rtx	PROTO ((enum machine_mode, int,
-  							rtx, rtx, rtx, rtx));
-+ 
-+ /* Determine the mode for the imagine and real part of a complex MODE.
-+    For a non-complex MODE, use WORD_MODE.*/
-+ #define COMPLEX_WORD_MODE(MODE) \
-+ (((GET_MODE_CLASS (MODE) == MODE_COMPLEX_INT \
-+   || GET_MODE_CLASS (MODE) == MODE_COMPLEX_FLOAT) \
-+  && GET_MODE_UNIT_SIZE (MODE) < UNITS_PER_WORD)? \
-+ mode_for_size (GET_MODE_UNIT_SIZE(MODE)*BITS_PER_UNIT, \
-+                (GET_MODE_CLASS (MODE) == MODE_COMPLEX_INT)? \
-+                MODE_INT:MODE_FLOAT, \
-+                0):word_mode)
-+ 
-+ /* Calculate number of bytes needed for a complex MODE */
-+ #define GET_COMPLEX_MODE_SIZE(MODE) \
-+ (((GET_MODE_UNIT_SIZE (MODE) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD) \
-+  * (GET_MODE_SIZE (MODE)) / GET_MODE_UNIT_SIZE (MODE))
-*** gcc/regs.h.orig	Mon Aug 11 11:57:12 1997
---- gcc/regs.h	Wed Oct  1 16:19:31 1997
-*************** Boston, MA 02111-1307, USA.  */
-*** 27,33 ****
-     valid way to get this value.  You cannot get it from the regno.  */
-  
-  #define REG_SIZE(R) \
-!   ((mode_size[(int) GET_MODE (R)] + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
-  
-  /* Maximum register number used in this function, plus one.  */
-  
---- 27,36 ----
-     valid way to get this value.  You cannot get it from the regno.  */
-  
-  #define REG_SIZE(R) \
-!   (GET_MODE_SIZE (GET_MODE (R)) == 0?					\
-!    0:(((GET_MODE_UNIT_SIZE (GET_MODE (R)) + (UNITS_PER_WORD - 1))	\
-!       / UNITS_PER_WORD) * (GET_MODE_SIZE (GET_MODE (R))			\
-!       / GET_MODE_UNIT_SIZE (GET_MODE (R)))))
-  
-  /* Maximum register number used in this function, plus one.  */
-  
-*** gcc/config/alpha/alpha.h.orig	Wed Oct  1 16:16:31 1997
---- gcc/config/alpha/alpha.h	Fri Oct  3 11:41:58 1997
-*************** extern void override_options ();
-*** 515,521 ****
-     but can be less for certain modes in special long registers.  */
-  
-  #define HARD_REGNO_NREGS(REGNO, MODE)   \
-!   ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
-  
-  /* Value is 1 if hard register REGNO can hold a value of machine-mode MODE.
-     On Alpha, the integer registers can hold any mode.  The floating-point
---- 515,524 ----
-     but can be less for certain modes in special long registers.  */
-  
-  #define HARD_REGNO_NREGS(REGNO, MODE)   \
-!   (GET_MODE_SIZE (MODE) == 0?					\
-!    0:(((GET_MODE_UNIT_SIZE (MODE) + (UNITS_PER_WORD - 1))	\
-!       / UNITS_PER_WORD) * (GET_MODE_SIZE (MODE)			\
-!       / GET_MODE_UNIT_SIZE (MODE))))
-  
-  /* Value is 1 if hard register REGNO can hold a value of machine-mode MODE.
-     On Alpha, the integer registers can hold any mode.  The floating-point
-*************** enum reg_class { NO_REGS, GENERAL_REGS, 
-*** 891,901 ****
-  #define FUNCTION_VALUE(VALTYPE, FUNC)	\
-    gen_rtx (REG,							\
-  	   (INTEGRAL_MODE_P (TYPE_MODE (VALTYPE))		\
-  	    && TYPE_PRECISION (VALTYPE) < BITS_PER_WORD) 	\
-  	   ? word_mode : TYPE_MODE (VALTYPE),			\
-  	   ((TARGET_FPREGS					\
-  	     && (TREE_CODE (VALTYPE) == REAL_TYPE		\
-! 		 || TREE_CODE (VALTYPE) == COMPLEX_TYPE))	\
-  	    ? 32 : 0))
-  
-  /* Define how to find the value returned by a library function
---- 894,908 ----
-  #define FUNCTION_VALUE(VALTYPE, FUNC)	\
-    gen_rtx (REG,							\
-  	   (INTEGRAL_MODE_P (TYPE_MODE (VALTYPE))		\
-+             && (GET_MODE_CLASS(TYPE_MODE (VALTYPE))		\
-+                 != MODE_COMPLEX_INT)				\
-  	    && TYPE_PRECISION (VALTYPE) < BITS_PER_WORD) 	\
-  	   ? word_mode : TYPE_MODE (VALTYPE),			\
-  	   ((TARGET_FPREGS					\
-  	     && (TREE_CODE (VALTYPE) == REAL_TYPE		\
-! 		 || TREE_CODE (VALTYPE) == COMPLEX_TYPE)	\
-!              && (GET_MODE_CLASS(TYPE_MODE (VALTYPE))		\
-!                  != MODE_COMPLEX_INT))				\
-  	    ? 32 : 0))
-  
-  /* Define how to find the value returned by a library function
-*************** enum reg_class { NO_REGS, GENERAL_REGS, 
-*** 953,959 ****
-  
-  #define ALPHA_ARG_SIZE(MODE, TYPE, NAMED)				\
-  ((MODE) != BLKmode							\
-!  ? (GET_MODE_SIZE (MODE) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD 	\
-   : (int_size_in_bytes (TYPE) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD)
-  
-  /* Update the data in CUM to advance over an argument
---- 960,969 ----
-  
-  #define ALPHA_ARG_SIZE(MODE, TYPE, NAMED)				\
-  ((MODE) != BLKmode							\
-!  ? (GET_MODE_SIZE (MODE) > 0?						\
-!     (GET_MODE_UNIT_SIZE (MODE) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD	\
-!     * GET_MODE_SIZE (MODE) / GET_MODE_UNIT_SIZE (MODE)			\
-!     : 0)								\
-   : (int_size_in_bytes (TYPE) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD)
-  
-  /* Update the data in CUM to advance over an argument
+
+Live range:
+-----------
+
+    The compiler and debugger view a variable with multiple homes as a primary
+    symbol and aliases for that symbol.  The primary symbol describes the default
+    home of the variable while aliases describe alternate homes for the variable.
+
+    A live range defines the interval of instructions beginning with 
+    range_start and ending at range_end-1, and is used to specify a range of 
+    instructions where an alias is active or "live".  So, the actual end of 
+    the range will be one less than the value of the range_end symbol.
+
+    Ranges do not have to be nested. Eg. Two ranges may intersect while 
+        each range contains subranges which are not in the other range.
+
+    There does not have to be a 1-1 mapping from range_start to
+        range_end symbols.  Eg. Two range_starts can share the same 
+        range_end, while one symbol's range_start can be another symbol's
+        range_end.
+
+    When a variable's storage class changes (eg. from stack to register, or
+	from one register to another), a new symbol entry will be added to 
+	the symbol table with stabs describing the new type, and appropriate 
+	live ranges refering to the variable's initial symbol index.
+
+    For variables which are defined in the source but optimized away, a symbol
+        should be emitted with the live range l(0,0).
+
+    Live ranges for aliases of a particular variable should always be disjoint.	
+	Overlapping ranges for aliases of the same variable will be treated as
+	an error by the debugger, and the overlapping range will be ignored.
+
+    If no live range information is given, the live range will be assumed to 
+	span the symbol's entire lexical scope.
+
+
+New stabs string identifiers:
+-----------------------------
+
+  "id" in "#id" in the following section refers to a numeric value.
+
+  New stab syntax for live range:  l(<ref_from>,<ref_to>) 
+
+    <ref_from> - "#id" where #id identifies the text symbol (range symbol) to
+		use as the start of live range (range_start).  The value for 
+		the referenced text symbol is the starting address of the 
+		live range.
+
+    <ref_to> - "#id" where #id identifies the text symbol (range symbol) to
+		use as the end of live range (range_end).  The value for 
+		the referenced text symbol is ONE BYTE PAST the ending 
+		address of the live range.
+
+
+  New stab syntax for identifying symbols.
+
+    <def> - "#id="
+
+	    Uses:
+	      <def><name>:<typedef1>...
+		  When used in front of a symbol name, "#id=" defines a
+		  unique reference number for this symbol.  The reference
+		  number can be used later when defining aliases for this
+		  symbol.
+	      <def>
+		  When used as the entire stab string, "#id=" identifies this 
+		  nameless symbol as being the symbol for which "#id" refers to.
+
+
+    <ref> - "#id" where "#id" refers to the symbol for which the string 
+		"#id=" identifies.
+	    Uses:
+	      <ref>:<typedef2>;<liverange>;<liverange>...
+		  Defines an alias for the symbol identified by the reference
+		  number ID.
+	      l(<ref1>,<ref2>)
+		  When used within a live range, "#id" refers to the text 
+		  symbol identified by "#id=" to use as the range symbol.
+
+    <liverange> - "l(<ref_from>,<ref_to>)" - specifies a live range for a 
+		symbol.  Multiple "l" specifiers can be combined to represent 
+		mutiple live ranges, separated by semicolons.
+
+
+
+
+Example:
+========
+
+Consider a program of the form:
+
+    void foo(){
+      int a = ...;
+      ...
+      while (b--)
+       c += a;
+      ..
+      d = a;
+      ..
+    }
+
+Assume that "a" lives in the stack at offset -8, except for inside the loop where
+"a" resides in register "r5".
+
+The way to describe this is to create a stab for the variable "a" which describes
+"a" as living in the stack and an alias for the variable "a" which describes it
+as living in register "r5" in the loop.
+
+Let's assume that "#1" and "#2" are symbols which bound the area where "a" lives
+in a register.
+
+The stabs to describe "a" and its alias would look like this:
+
+        .stabs "#3=a:1",128,0,8,-8
+        .stabs "#3:r1;l(#1,#2)",64,0,0,5
+
+
+
+
+This design implies that the debugger will keep a chain of aliases for any
+given variable with aliases and that chain will be searched first to find
+out if an alias is active.  If no alias is active, then the debugger will
+assume that the main variable is active.
 
 
