@@ -463,7 +463,7 @@ char *name;
 #ifdef STRIP_UNDERSCORE
 	return(symbol_find_base(name, 1));
 #else /* STRIP_UNDERSCORE */
-	return(symbol_find_base(name, ));
+	return(symbol_find_base(name, 0));
 #endif /* STRIP_UNDERSCORE */
 } /* symbol_find() */
 
