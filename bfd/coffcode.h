@@ -1947,17 +1947,18 @@ coff_compute_section_file_positions (abfd)
 	 do this (FIXME) so we can stay in sync with Intel.  960
 	 doesn't yet page from files... */
 #ifndef I960
-      {
-	/* make sure this section is aligned on the right boundary - by
-	   padding the previous section up if necessary */
+      if ((abfd->flags & EXEC_P) != 0)
+	{
+	  /* make sure this section is aligned on the right boundary - by
+	     padding the previous section up if necessary */
 
-	old_sofar = sofar;
-	sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
-	if (previous != (asection *) NULL)
-	  {
-	    previous->_raw_size += sofar - old_sofar;
-	  }
-      }
+	  old_sofar = sofar;
+	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	  if (previous != (asection *) NULL)
+	    {
+	      previous->_raw_size += sofar - old_sofar;
+	    }
+	}
 
 #endif
 
