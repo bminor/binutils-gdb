@@ -353,6 +353,445 @@ mips_fetch_instruction (addr)
 }
 
 
+/* These the fields of 32 bit mips instructions */
+#define mips32_op(x) (x >> 25)
+#define itype_op(x) (x >> 25)
+#define itype_rs(x) ((x >> 21)& 0x1f)
+#define itype_rt(x) ((x >> 16) & 0x1f)
+#define itype_immediate(x) ( x & 0xffff)
+
+#define jtype_op(x) (x >> 25)
+#define jtype_target(x) ( x & 0x03fffff)
+
+#define rtype_op(x) (x >>25)
+#define rtype_rs(x) ((x>>21) & 0x1f)
+#define rtype_rt(x) ((x>>16)  & 0x1f)
+#define rtype_rd(x) ((x>>11) & 0x1f) 
+#define rtype_shamt(x) ((x>>6) & 0x1f)
+#define rtype_funct(x) (x & 0x3f )
+
+static CORE_ADDR
+mips32_relative_offset(unsigned long inst)
+{ long x ;
+  x = itype_immediate(inst) ;
+  if (x & 0x8000) /* sign bit set */
+    {
+      x |= 0xffff0000 ; /* sign extension */
+    }
+  x = x << 2 ;
+  return x ;
+}
+
+/* Determine whate to set a single step breakpoint while considering
+   branch prediction */
+CORE_ADDR
+mips32_next_pc(CORE_ADDR pc)
+{
+  unsigned long inst ;
+  int op ;
+  inst = mips_fetch_instruction(pc) ;
+  if ((inst & 0xe0000000) != 0) /* Not a special, junp or branch instruction */
+    { if ((inst >> 27) == 5) /* BEQL BNEZ BLEZL BGTZE , bits 0101xx */
+	{ op = ((inst >> 25) & 0x03) ;
+	  switch (op)
+	    {
+	    case 0 : goto equal_branch ; /* BEQL   */
+	    case 1 : goto neq_branch ;   /* BNEZ   */
+	    case 2 : goto less_branch ;  /* BLEZ   */
+	    case 3 : goto greater_branch ; /* BGTZ */
+	    default : pc += 4 ;
+	    }
+	}
+      else pc += 4 ; /* Not a branch, next instruction is easy */
+    }
+  else
+    { /* This gets way messy */
+      
+      /* Further subdivide into SPECIAL, REGIMM and other */
+      switch (op = ((inst >> 26) & 0x07))  /* extract bits 28,27,26 */
+	{
+	  case 0 : /* SPECIAL */
+	    op = rtype_funct(inst) ;
+	    switch (op)
+	      {
+	      case 8 : /* JR */
+	      case 9 : /* JALR */
+		pc = read_register(rtype_rs(inst)) ; /* Set PC to that address */
+		break ;
+	      default: pc += 4 ;
+	      }
+	    
+	    break ; /* end special */
+	case 1 :  /* REGIMM */
+	  {
+	    op = jtype_op(inst) ; /* branch condition */
+	    switch (jtype_op(inst))
+	      {
+	      case 0 : /* BLTZ */
+	      case 2 : /* BLTXL */
+	      case 16 : /* BLTZALL */
+	      case 18 : /* BLTZALL */
+	      less_branch:
+		if (read_register(itype_rs(inst)) < 0)
+		  pc += mips32_relative_offset(inst) + 4 ;
+		else pc += 8 ;  /* after the delay slot */
+	      break ;
+	      case 1 : /* GEZ */
+	      case 3 : /* BGEZL */
+	      case 17 : /* BGEZAL */
+	      case 19 : /* BGEZALL */
+	      greater_equal_branch:
+	      if (read_register(itype_rs(inst)) >= 0)
+		  pc += mips32_relative_offset(inst) + 4 ;
+	      else pc += 8 ; /* after the delay slot */
+	      break ;
+	      /* All of the other intructions in the REGIMM catagory */
+	      default: pc += 4 ;
+	      }
+	  }
+	  break ; /* end REGIMM */
+	case 2 :  /* J */
+	case 3 :  /* JAL */
+	  { unsigned long reg ;
+	    reg = jtype_target(inst) << 2 ;
+	    pc = reg + ((pc+4) & 0xf0000000)  ;
+	    /* Whats this mysterious 0xf000000 adjustment ??? */
+	  }
+	  break ;
+	  /* FIXME case JALX :*/
+	  { unsigned long reg ;
+	    reg = jtype_target(inst) << 2 ;
+	    pc = reg + ((pc+4) & 0xf0000000) + 1 ; /* yes, +1 */
+	    /* Add 1 to indicate 16 bit mode - Invert ISA mode */
+	  }
+	  break ; /* The new PC will be alternate mode */
+	case 4 :     /* BEQ , BEQL */
+	  equal_branch :
+	   if (read_register(itype_rs(inst)) ==
+	       read_register(itype_rt(inst)))
+	     pc += mips32_relative_offset(inst) + 4 ;
+	   else pc += 8 ;
+	   break ;
+	case 5 : /* BNE , BNEL */
+	  neq_branch :
+	  if (read_register(itype_rs(inst)) != 
+	      read_register(itype_rs(inst)))
+	    pc += mips32_relative_offset(inst) + 4 ;
+	  else pc += 8 ;
+	  break ;
+	case 6 : /* BLEZ , BLEZL */
+	less_zero_branch:
+	  if (read_register(itype_rs(inst) <= 0))
+	     pc += mips32_relative_offset(inst) + 4 ;
+	  else pc += 8 ;
+	  break ;
+	case 7 :
+	greater_branch :   /* BGTZ BGTZL */
+	  if (read_register(itype_rs(inst) > 0))
+	    pc += mips32_relative_offset(inst) + 4 ;
+	  else pc += 8 ;
+	break ;
+	default : pc += 8 ;
+	} /* switch */
+    }  /* else */
+  return pc ;
+} /* mips32_next_pc */
+
+/* Decoding the next place to set a breakpoint is irregular for the
+   mips 16 variant, but fortunatly, there fewer instructions. We have to cope
+   ith extensions for 16 bit instructions and a pair of actual 32 bit instructions.
+   We dont want to set a single step instruction on the extend instruction
+   either.
+   */
+
+/* Lots of mips16 instruction formats */
+/* Predicting jumps requires itype,ritype,i8type
+   and their extensions      extItype,extritype,extI8type
+   */
+enum mips16_inst_fmts
+{
+  itype,          /* 0  immediate 5,10 */
+  ritype,         /* 1   5,3,8 */
+  rrtype,         /* 2   5,3,3,5 */
+  rritype,        /* 3   5,3,3,5 */
+  rrrtype,        /* 4   5,3,3,3,2 */ 
+  rriatype,       /* 5   5,3,3,1,4 */ 
+  shifttype,      /* 6   5,3,3,3,2 */
+  i8type,         /* 7   5,3,8 */
+  i8movtype,      /* 8   5,3,3,5 */
+  i8mov32rtype,   /* 9   5,3,5,3 */
+  i64type,        /* 10  5,3,8 */
+  ri64type,       /* 11  5,3,3,5 */
+  jalxtype,       /* 12  5,1,5,5,16 - a 32 bit instruction */
+  exiItype,       /* 13  5,6,5,5,1,1,1,1,1,1,5 */
+  extRitype,      /* 14  5,6,5,5,3,1,1,1,5 */
+  extRRItype,     /* 15  5,5,5,5,3,3,5 */
+  extRRIAtype,    /* 16  5,7,4,5,3,3,1,4 */
+  EXTshifttype,   /* 17  5,5,1,1,1,1,1,1,5,3,3,1,1,1,2 */
+  extI8type,      /* 18  5,6,5,5,3,1,1,1,5 */
+  extI64type,     /* 19  5,6,5,5,3,1,1,1,5 */
+  extRi64type,    /* 20  5,6,5,5,3,3,5 */
+  extshift64type  /* 21  5,5,1,1,1,1,1,1,5,1,1,1,3,5 */
+} ;
+/* I am heaping all the fields of the formats into one structure and then,
+   only the fields which are involved in instruction extension */
+struct upk_mips16
+{
+  unsigned short inst ;
+  enum mips16_inst_fmts fmt ;
+  unsigned long offset ;
+  unsigned int regx ; /* Function in i8 type */
+  unsigned int regy ;
+} ;
+
+
+
+static void print_unpack(char * comment,
+			 struct upk_mips16 * u)
+{
+  printf("%s %04x ,f(%d) off(%08x) (x(%x) y(%x)\n",
+	 comment,u->inst,u->fmt,u->offset,u->regx,u->regy) ;
+}
+
+/* The EXT-I, EXT-ri nad EXT-I8 instructions all have the same
+   format for the bits which make up the immediatate extension.
+   */
+static unsigned long
+extended_offset(unsigned long extension)
+{
+  unsigned long value  ;
+  value = (extension >> 21) & 0x3f ; /* * extract 15:11 */
+  value = value << 6 ;
+  value |= (extension >> 16) & 0x1f ; /* extrace 10:5 */
+  value = value << 5 ;
+  value |= extension & 0x01f ; 	/* extract 4:0 */
+  return value ;
+}
+
+/* Only call this function if you know that this is an extendable
+   instruction, It wont malfunction, but why make excess remote memory references?
+   If the immediate operands get sign extended or somthing, do it after
+   the extension is performed.
+   */
+/* FIXME: Every one of these cases needs to worry about sign extension
+   when the offset is to be used in relative addressing */
+
+
+static unsigned short fetch_mips_16(CORE_ADDR pc)
+{
+  char buf[8] ;
+  pc &= 0xfffffffe ; /* clear the low order bit */
+  target_read_memory(pc,buf,2) ;
+  return extract_unsigned_integer(buf,2) ;
+}
+
+static void
+unpack_mips16(CORE_ADDR pc,
+		  struct upk_mips16 * upk)
+{
+  CORE_ADDR extpc ;
+  unsigned long extension ;
+  int extended ;
+  extpc = (pc - 4) & ~0x01 ; /* Extensions are 32 bit instructions */
+  /* Decrement to previous address and loose the 16bit mode flag */
+  /* return if the instruction was extendable, but not actually extended */
+  extended = ((mips32_op(extension) == 30) ? 1 : 0) ;
+  if (extended) { extension = mips_fetch_instruction(extpc) ;}
+  switch (upk->fmt)
+    {
+    case itype :
+      {
+	unsigned long value  ;
+	if (extended)
+	  { value = extended_offset(extension) ;
+	  value = value << 11 ;            /* rom for the original value */
+	  value |= upk->inst & 0x7ff ;    /* eleven bits from instruction */
+	  }
+	else
+	  { value = upk->inst & 0x7ff ;
+	  /* FIXME : Consider sign extension */
+	  }
+	upk->offset = value ;
+      }
+      break ;
+    case ritype :
+    case i8type :
+      { /* A register identifier and an offset */
+	/* Most of the fields are the same as I type but the
+	   immediate value is of a different length */
+	unsigned long value  ;
+	if (extended)
+	  {
+	    value = extended_offset(extension) ;
+	    value = value << 8  ;          /* from the original instruction */
+	    value |= upk->inst & 0xff ;    /* eleven bits from instruction */
+	    upk->regx = (extension >> 8) & 0x07 ; /* or i8 funct */
+	    if (value & 0x4000) /* test the sign bit , bit 26 */
+	      {	value &= ~ 0x3fff ; /* remove the sign bit */
+		value = -value ;
+	      }
+	  }
+	else {
+	  value = upk->inst & 0xff ;  /* 8 bits */
+	  upk->regx = (upk->inst >> 8) & 0x07 ; /* or i8 funct */
+	  /* FIXME: Do sign extension , this format needs it */
+	  if (value & 0x80)   /* THIS CONFUSES ME */
+	    { value &= 0xef ; /* remove the sign bit */
+	      value = -value ;
+	    }
+	  
+	}
+	upk->offset = value ;
+	break ;
+      }
+    case jalxtype :
+      {
+	unsigned long value ;
+	unsigned short nexthalf ;
+	value = ((upk->inst & 0x1f)  << 5) | ((upk->inst >> 5) & 0x1f) ;
+	value = value << 16 ;
+	nexthalf = mips_fetch_instruction(pc+2) ; /* low bit still set */
+	value |= nexthalf ;
+	upk->offset = value ;
+	break ;
+      }
+    default:
+      printf_filtered("Decoding unimplemented instruction format type\n") ;
+      break ;
+    }
+  /* print_unpack("UPK",upk) ; */
+}
+
+
+#define mips16_op(x) (x >> 11)
+
+/* This is a map of the opcodes which ae known to perform branches */
+static unsigned char map16[32] =
+{ 0,0,1,1,1,1,0,0,
+  0,0,0,0,1,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,1,1,0
+} ;
+
+static CORE_ADDR add_offset_16(CORE_ADDR pc, int offset)
+{
+  return ((offset << 2) | ((pc + 2) & (0xf0000000))) ;
+  
+}
+
+
+
+static struct upk_mips16 upk ;
+
+CORE_ADDR mips16_next_pc(CORE_ADDR pc)
+{
+  int op ;
+  t_inst inst ;
+  /* inst = mips_fetch_instruction(pc) ; - This doesnt always work */
+  inst = fetch_mips_16(pc) ;
+  upk.inst = inst ;
+  op = mips16_op(upk.inst) ;
+  if (map16[op])
+    {
+      int reg ;
+      switch (op)
+	{
+	case 2 : /* Branch */
+	  upk.fmt = itype ;
+	  unpack_mips16(pc,&upk) ;
+	  { long offset ;
+	    offset = upk.offset ;
+	    if (offset & 0x800)
+	      { offset &= 0xeff ;
+		offset = - offset ;
+	      }
+	    pc += (offset << 1) + 2 ;
+	  }
+	  break ;
+	case 3 : /* JAL , JALX - Watch out, these are 32 bit instruction*/
+	   upk.fmt = jalxtype ;
+	   unpack_mips16(pc,&upk) ;
+	   pc = add_offset_16(pc,upk.offset) ;
+	   if ((upk.inst >> 10) & 0x01) /* Exchange mode */
+	     pc = pc & ~ 0x01 ; /* Clear low bit, indicate 32 bit mode */
+	   else pc |= 0x01 ;
+	  break ;
+	case 4 : /* beqz */
+	    upk.fmt = ritype ;
+	    unpack_mips16(pc,&upk) ;
+	    reg = read_register(upk.regx) ;
+	    if (reg == 0) 
+		pc += (upk.offset << 1) + 2 ;
+	    else pc += 2 ;
+	  break ;
+	case 5 : /* bnez */
+	    upk.fmt = ritype ;
+	    unpack_mips16(pc,&upk) ;
+	    reg = read_register(upk.regx) ;
+	    if (reg != 0)
+	       pc += (upk.offset << 1) + 2 ;
+	    else pc += 2 ;
+	  break ;
+	case 12 : /* I8 Formats btez btnez */
+	    upk.fmt = i8type ;
+	    unpack_mips16(pc,&upk) ;
+	    /* upk.regx contains the opcode */
+	    reg = read_register(24) ; /* Test register is 24 */
+	    if (((upk.regx == 0) && (reg == 0))        /* BTEZ */
+		|| ((upk.regx == 1 ) && (reg != 0))) /* BTNEZ */
+	      /* pc = add_offset_16(pc,upk.offset) ; */
+	      pc += (upk.offset << 1) + 2 ; 
+	    else pc += 2 ;
+	  break ;
+	case 29 : /* RR Formats JR, JALR, JALR-RA */
+	  upk.fmt = rrtype ;
+	  op = upk.inst & 0x1f ;
+	  if (op == 0)
+	    { 
+	      upk.regx = (upk.inst >> 8) & 0x07 ;
+	      upk.regy = (upk.inst >> 5) & 0x07 ;
+	      switch (upk.regy)
+		{
+		case 0 : reg = upk.regx ;   break ;
+		case 1 :   reg = 31 ;       break ; /* Function return instruction*/
+		case 2 :   reg = upk.regx ; break ;
+		default:   reg = 31 ; break ; /* BOGUS Guess */
+		}
+	      pc = read_register(reg) ;
+	    }
+	  else pc += 2 ;
+	  break ;
+	case 30 : /* This is an extend instruction */
+	  pc += 4 ; /* Dont be setting breakpints on the second half */
+	  break ;
+	default :
+	  printf("Filtered - next PC probably incorrrect due to jump inst\n");
+	  pc += 2 ;
+	  break ;
+	}
+    }
+  else pc+= 2 ; /* just a good old instruction */
+  /* See if we CAN actually break on the next instruction */
+  /* printf("NXTm16PC %08x\n",(unsigned long)pc) ; */
+  return pc ;
+} /* mips16_next_pc */
+
+/* The mips_next_pc function supports single_tep when the remote target monitor or
+   stub is not developed enough to so a single_step.
+   It works by decoding the current instruction and predicting where a branch
+   will go. This isnt hard because all the data is available.
+   The MIPS32 and MIPS16 variants are quite different
+   */
+CORE_ADDR mips_next_pc(CORE_ADDR pc)
+{
+  t_inst inst ;
+  /* inst = mips_fetch_instruction(pc) ; */
+  /* if (pc_is_mips16) <----- This is failing */
+  if (pc & 0x01) 
+    return mips16_next_pc(pc) ;
+  else return mips32_next_pc(pc) ;
+} /* mips_next_pc */
+
 /* Guaranteed to set fci->saved_regs to some values (it never leaves it
    NULL).  */
 
@@ -2385,9 +2824,9 @@ gdb_print_insn_mips (memaddr, info)
      it's definitely a 16-bit function.  Otherwise, we have to just
      guess that if the address passed in is odd, it's 16-bits.  */
   if (proc_desc)
-    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ? 16 : 0;
+    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ? 16 : TM_PRINT_INSN_MACH;
   else
-    info->mach = pc_is_mips16 (memaddr) ? 16 : 0;
+    info->mach = pc_is_mips16 (memaddr) ? 16 : TM_PRINT_INSN_MACH;
 
   /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == 16 ? ~1 : ~3);

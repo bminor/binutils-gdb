@@ -1,3 +1,22 @@
+Tue Apr 21 11:20:54 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips-tdep.c (gdb_print_insn_mips): Disassemble MIPS instructions
+ 	with subtarget-specific `mach', rather than fixed default.
+	* config/mips/tm-mips.h (TM_PRINT_INSN_MACH): New macro, default
+	disassembly `mach'.
+start-sanitize-r5900
+	* config/mips/tm-r5900.h (TM_PRINT_INSN_MACH): Override.
+end-sanitize-r5900
+start-sanitize-sky
+	* config/mips/tm-txvu.h (TM_PRINT_INSN_MACH): Override.
+end-sanitize-sky
+
+Mon Apr 20 15:35:03 1998  Philippe De Muyter  <phdm@macqel.be>
+
+        * coffread.c (decode_base_type): Treat a long field with size greater
+        than TARGET_LONG_BIT as long long.
+        * values.c (value_from_longest): Print code value in error message.
+
 Mon Apr 20 15:32:21 1998   Mark Kettenis  <kettenis@phys.uva.nl>
 
         * gdb/gdb_string.h (strdup): Declare only if not defined as a

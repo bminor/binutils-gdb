@@ -529,6 +529,11 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
 #define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)
 
+/* Select the default mips disassembler */
+
+#define TM_PRINT_INSN_MACH 0
+
+
 /* These are defined in mdebugread.c and are used in mips-tdep.c  */
 extern CORE_ADDR sigtramp_address, sigtramp_end;
 extern void fixup_sigtramp PARAMS ((void));
