@@ -1,3 +1,8 @@
+Tue Jun 13 09:11:20 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* ldlang.c (lang_size_sections):  Any section with a DATA
+	statement has contents.
+
 Sun Jun 11 15:20:46 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* emulparams/m68kelf.sh (NOP): Define.
