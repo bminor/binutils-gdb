@@ -1,5 +1,13 @@
 2004-12-07  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.h (gdbarch_tdep): Add unwind_adjust_stub method.
+	* hppa-hpux-tdep.c (hppa_hpux_unwind_adjust_stub): New function.
+	(hppa_hpux_init_abi) Set unwind_adjust_stub method.
+	* hppa-tdep.c (hppa_frame_cache): Call unwind_adjust_stub method
+    	if defined.
+
+2004-12-07  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_stub_Frame_unwind_cache): Stop unwinding if 
 	unwinding from a frame with pc == 0.
 	(hppa_stub_frame_this_id): Likewise.

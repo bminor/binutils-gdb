@@ -1471,6 +1471,44 @@ hppa_hpux_inferior_created (struct target_ops *objfile, int from_tty)
   hp_cxx_exception_support_initialized = 0;
 }
 
+/* Given the current value of the pc, check to see if it is inside a stub, and
+   if so, change the value of the pc to point to the caller of the stub.
+   NEXT_FRAME is the next frame in the current list of frames.
+   BASE contains to stack frame base of the current frame. 
+   SAVE_REGS is the register file stored in the frame cache. */
+static void
+hppa_hpux_unwind_adjust_stub (struct frame_info *next_frame, CORE_ADDR base,
+			      struct trad_frame_saved_reg *saved_regs)
+{
+  int optimized, realreg;
+  enum lval_type lval;
+  CORE_ADDR addr;
+  char buffer[sizeof(ULONGEST)];
+  ULONGEST val;
+  CORE_ADDR stubpc;
+  struct unwind_table_entry *u;
+
+  trad_frame_get_prev_register (next_frame, saved_regs, 
+				HPPA_PCOQ_HEAD_REGNUM, 
+				&optimized, &lval, &addr, &realreg, buffer);
+  val = extract_unsigned_integer (buffer, 
+				  register_size (get_frame_arch (next_frame), 
+      				  		 HPPA_PCOQ_HEAD_REGNUM));
+
+  u = find_unwind_entry (val);
+  if (u && u->stub_unwind.stub_type == EXPORT)
+    {
+      stubpc = read_memory_integer (base - 24, TARGET_PTR_BIT / 8);
+      trad_frame_set_value (saved_regs, HPPA_PCOQ_HEAD_REGNUM, stubpc);
+    }
+  else if (hppa_symbol_address ("__gcc_plt_call") 
+           == get_pc_function_start (val))
+    {
+      stubpc = read_memory_integer (base - 8, TARGET_PTR_BIT / 8);
+      trad_frame_set_value (saved_regs, HPPA_PCOQ_HEAD_REGNUM, stubpc);
+    }
+}
+
 static void
 hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1480,6 +1518,8 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     tdep->in_solib_call_trampoline = hppa32_hpux_in_solib_call_trampoline;
   else
     tdep->in_solib_call_trampoline = hppa64_hpux_in_solib_call_trampoline;
+
+  tdep->unwind_adjust_stub = hppa_hpux_unwind_adjust_stub;
 
   set_gdbarch_in_solib_return_trampoline (gdbarch,
 					  hppa_hpux_in_solib_return_trampoline);

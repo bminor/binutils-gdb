@@ -1905,6 +1905,19 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
       }
   }
 
+  {
+    struct gdbarch *gdbarch;
+    struct gdbarch_tdep *tdep;
+
+    gdbarch = get_frame_arch (next_frame);
+    tdep = gdbarch_tdep (gdbarch);
+
+    if (tdep->unwind_adjust_stub)
+      {
+        tdep->unwind_adjust_stub (next_frame, cache->base, cache->saved_regs);
+      }
+  }
+
   if (hppa_debug)
     fprintf_unfiltered (gdb_stdlog, "base=0x%s }", 
       paddr_nz (((struct hppa_frame_cache *)*this_cache)->base));

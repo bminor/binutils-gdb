@@ -88,6 +88,15 @@ struct gdbarch_tdep
      IN_SOLIB_CALL_TRAMPOLINE evaluates to nonzero if we are currently
      stopped in one of these.  */
   int (*in_solib_call_trampoline) (CORE_ADDR pc, char *name);
+
+  /* For targets that support multiple spaces, we may have additional stubs
+     in the return path.  These stubs are internal to the ABI, and users are
+     not interested in them.  If we detect that we are returning to a stub,
+     adjust the pc to the real caller.  This improves the behavior of commands
+     that traverse frames such as "up" and "finish".  */
+  void (*unwind_adjust_stub) (struct frame_info *next_frame, CORE_ADDR base,
+  			      struct trad_frame_saved_reg *saved_regs);
+
 };
 
 /*
