@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h" /* Required by objfiles.h.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
+#include "completer.h" /* For skip_quoted().  */
 
 /* Flag indicating we're dealing with HP-compiled objects */ 
 extern int hp_som_som_object_present;

@@ -1,3 +1,49 @@
+2002-09-18  Michael Snyder  <msnyder@redhat.com>
+
+	Preliminary support for Objective-C:
+	* defs.h (language_objc): New enum value.
+	(puts_filtered_tabular): Declaration only, exported from utils.c.
+	(skip_quoted): Delete, declared in completer.h.
+	* c-exp.y: Include completer.h.
+	* p-exp.y: Ditto.
+	* jv-exp.y: Ditto.
+	* expression.h (OP_MSGCALL, OP_SELECTOR, OP_SELF, OP_NSSTRING): 
+	New operator enum values.
+	* language.h (CAST_IS_CONVERSION): Test for language_objc.
+	* language.c (binop_result_type): Handle language_objc case.
+	(integral_type, character_type, string_type, boolean_type,
+	structured_type, binop_type_check): Ditto.
+	* symtab.h (SYMBOL_OBJC_DEMANGLED_NAME): Define.
+	(struct objc_specific): Add to general_symbol_info.
+	(SYMBOL_INIT_LANGUAGE_SPECIFIC): Add objc initialization.
+	(SYMBOL_DEMANGLED_NAME): Handle objc case.
+	* parser-defs.h (struct objc_class_str): New struct type.
+	(start_msglist, end_msglist, add_msglist): Declaration only,
+	exported from objc-lang.c.
+	* value.h (value_of_local, value_nsstring, 
+	call_function_by_hand_expecting_type): Exported from valops.c.
+	* valops.c (find_function_addr): Export.
+	(call_function_by_hand_expecting_type): New function.
+	(value_of_local): New function.
+	* symfile.c (init_filename_language_table): Add ".m" extension
+	for Objective-C.
+	* utils.c (puts_filtered_tabular): New function.
+	(fprintf_symbol_filtered): Add objc demangling support (disabled).
+	(set/show demangle): Extend help-string to refer to ObjC.
+	* elfread.c (elf_symtab_read): Skip Objective-C special symbols.
+	* stabsread.c (symbol_reference_defined): Objective-C symbols
+	may contain colons: make allowances when scanning stabs strings
+	for colons.
+	(objc_find_colon): New function.
+	* printcmd.c (address_info): If language == objc then print
+	"self" instead of "this".
+	* parse.c (length_of_subexp): Handle new operators OP_MSGCALL,
+	OP_NSSTRING, and OP_SELF.
+	(prefixify_subexp): Ditto.
+	* source.c (print_source_lines): Mention objc in comment.
+	* breakpoint.c (parse_breakpoint_sals): Recognize Objective-C
+	method names.
+
 2002-09-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* complaints.h: Update copyright.

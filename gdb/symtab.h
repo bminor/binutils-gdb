@@ -89,6 +89,11 @@ struct general_symbol_info
       char *demangled_name;
     }
     cplus_specific;
+    struct objc_specific
+    {
+      char *demangled_name;
+    }
+    objc_specific;
 #if 0
 /* OBSOLETE struct chill_specific        *//* For Chill */
     /* OBSOLETE   { */
@@ -146,6 +151,10 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
       {									\
 	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
       }									\
+    else if (SYMBOL_LANGUAGE (symbol) == language_objc)			\
+      {									\
+	SYMBOL_OBJC_DEMANGLED_NAME (symbol) = NULL;			\
+      }									\
     /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */ \
     /* OBSOLETE   { */						 	\
     /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */	\
@@ -170,12 +179,17 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
   (SYMBOL_LANGUAGE (symbol) == language_cplus				\
    || SYMBOL_LANGUAGE (symbol) == language_java				\
    ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
+      : (SYMBOL_LANGUAGE (symbol) == language_objc			\
+         ? SYMBOL_OBJC_DEMANGLED_NAME (symbol)				\
    : /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */		\
      /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */		\
-     NULL)
+	 NULL))
 
 /* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
 /* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
+
+#define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
+   (symbol)->ginfo.language_specific.objc_specific.demangled_name
 
 /* Macro that returns the "natural source name" of a symbol.  In C++ this is
    the "demangled" form of the name if demangle is on and the "mangled" form

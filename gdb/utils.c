@@ -152,13 +152,13 @@ int quit_flag;
 
 int immediate_quit;
 
-/* Nonzero means that encoded C++ names should be printed out in their
-   C++ form rather than raw.  */
+/* Nonzero means that encoded C++/ObjC names should be printed out in their
+   C++/ObjC form rather than raw.  */
 
 int demangle = 1;
 
-/* Nonzero means that encoded C++ names should be printed out in their
-   C++ form even in assembler language displays.  If this is set, but
+/* Nonzero means that encoded C++/ObjC names should be printed out in their
+   C++/ObjC form even in assembler language displays.  If this is set, but
    DEMANGLE is zero, names are printed raw, i.e. DEMANGLE controls.  */
 
 int asm_demangle = 0;
@@ -276,7 +276,7 @@ make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		 void *arg)
 {
   register struct cleanup *new
-  = (struct cleanup *) xmalloc (sizeof (struct cleanup));
+    = (struct cleanup *) xmalloc (sizeof (struct cleanup));
   register struct cleanup *old_chain = *pmy_chain;
 
   new->next = *pmy_chain;
@@ -1776,6 +1776,51 @@ wrap_here (char *indent)
     }
 }
 
+/* Print input string to gdb_stdout, filtered, with wrap, 
+   arranging strings in columns of n chars. String can be
+   right or left justified in the column.  Never prints 
+   trailing spaces.  String should never be longer than
+   width.  FIXME: this could be useful for the EXAMINE 
+   command, which currently doesn't tabulate very well.  */
+
+void
+puts_filtered_tabular (char *string, int width, int right)
+{
+  int spaces = 0;
+  int stringlen;
+  char *spacebuf;
+
+  gdb_assert (chars_per_line > 0);
+  if (chars_per_line == UINT_MAX)
+    {
+      fputs_filtered (string, gdb_stdout);
+      fputs_filtered ("\n", gdb_stdout);
+      return;
+    }
+
+  if (((chars_printed - 1) / width + 2) * width >= chars_per_line)
+    fputs_filtered ("\n", gdb_stdout);
+
+  if (width >= chars_per_line)
+    width = chars_per_line - 1;
+
+  stringlen = strlen (string);
+
+  if (chars_printed > 0)
+    spaces = width - (chars_printed - 1) % width - 1;
+  if (right)
+    spaces += width - stringlen;
+
+  spacebuf = alloca (spaces + 1);
+  spacebuf[spaces] = '\0';
+  while (spaces--)
+    spacebuf[spaces] = ' ';
+
+  fputs_filtered (spacebuf, gdb_stdout);
+  fputs_filtered (string, gdb_stdout);
+}
+
+
 /* Ensure that whatever gets printed next, using the filtered output
    commands, starts at the beginning of the line.  I.E. if there is
    any pending output for the current line, flush it and start a new
@@ -2203,15 +2248,18 @@ print_spaces_filtered (int n, struct ui_file *stream)
   fputs_filtered (n_spaces (n), stream);
 }
 
-/* C++ demangler stuff.  */
+/* C++/ObjC demangler stuff.  */
 
-/* fprintf_symbol_filtered attempts to demangle NAME, a symbol in language
-   LANG, using demangling args ARG_MODE, and print it filtered to STREAM.
-   If the name is not mangled, or the language for the name is unknown, or
-   demangling is off, the name is printed in its "raw" form. */
+/* fprintf_symbol_filtered attempts to demangle NAME, a symbol in
+   language LANG, using demangling args ARG_MODE, and print it
+   filtered to STREAM.  If the name is not mangled, or the language
+   for the name is unknown, or demangling is off, the name is printed
+   in its "raw" form.  */
 
 void
-fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
+fprintf_symbol_filtered (struct ui_file *stream, 
+			 char *name, 
+			 enum language lang,
 			 int arg_mode)
 {
   char *demangled;
@@ -2233,6 +2281,11 @@ fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
 	    case language_java:
 	      demangled = cplus_demangle (name, arg_mode | DMGL_JAVA);
 	      break;
+#if 0 /* Enable once objective-c support is turned on.  */
+	    case language_objc:
+	      demangled = objc_demangle (name);
+	      break;
+#endif
 #if 0
 	      /* OBSOLETE case language_chill: */
 	      /* OBSOLETE   demangled = chill_demangle (name); */
@@ -2352,7 +2405,7 @@ initialize_utils (void)
   add_show_from_set
     (add_set_cmd ("demangle", class_support, var_boolean,
 		  (char *) &demangle,
-	     "Set demangling of encoded C++ names when displaying symbols.",
+	     "Set demangling of encoded C++/ObjC names when displaying symbols.",
 		  &setprintlist),
      &showprintlist);
 
@@ -2380,7 +2433,7 @@ initialize_utils (void)
   add_show_from_set
     (add_set_cmd ("asm-demangle", class_support, var_boolean,
 		  (char *) &asm_demangle,
-		  "Set demangling of C++ names in disassembly listings.",
+		  "Set demangling of C++/ObjC names in disassembly listings.",
 		  &setprintlist),
      &showprintlist);
 }

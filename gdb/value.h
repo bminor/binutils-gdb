@@ -535,6 +535,12 @@ extern void clear_value_history (void);
 
 extern void clear_internalvars (void);
 
+/* Objective-C */
+
+extern struct value *value_of_local (const char *name, int complain);
+
+extern struct value *value_nsstring (char *ptr, int len);
+
 /* From values.c */
 
 extern struct value *value_copy (struct value *);
@@ -547,6 +553,10 @@ extern struct value *value_slice (struct value *, int, int);
 
 extern struct value *call_function_by_hand (struct value *, int,
 					    struct value **);
+
+extern struct value *call_function_by_hand_expecting_type (struct value *,
+						       struct type *, int,
+						       struct value **, int);
 
 extern int default_coerce_float_to_double (struct type *, struct type *);
 
@@ -565,5 +575,7 @@ extern struct value *value_allocate_space_in_inferior (int);
 extern CORE_ADDR default_push_arguments (int nargs, struct value ** args,
 					 CORE_ADDR sp, int struct_return,
 					 CORE_ADDR struct_addr);
+
+extern CORE_ADDR find_function_addr (struct value *, struct type **);
 
 #endif /* !defined (VALUE_H) */

@@ -349,7 +349,13 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		}
 	      else if (sym->section->flags & SEC_CODE)
 		{
-		  if (sym->flags & BSF_GLOBAL)
+		  if (sym->name[0] == '.' 
+		      && (strncmp (sym->name + 1, "objc_", 4) == 0))
+		    {
+		      /* Looks like an Objective-C special symbol */
+		      continue;
+		    }
+		  else if (sym->flags & BSF_GLOBAL)
 		    {
 		      ms_type = mst_text;
 		    }

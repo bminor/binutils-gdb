@@ -1104,7 +1104,11 @@ address_info (char *exp, int from_tty)
 	  printf_filtered ("Symbol \"");
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
-	  printf_filtered ("\" is a field of the local class variable `this'\n");
+	  printf_filtered ("\" is a field of the local class variable ");
+	  if (current_language->la_language == language_objc)
+	    printf_filtered ("'self'\n");	/* ObjC equivalent of "this" */
+	  else
+	    printf_filtered ("'this'\n");
 	  return;
 	}
 

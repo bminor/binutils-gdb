@@ -18,22 +18,21 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Parse a C expression from text in a string,
-   and return the result as a  struct expression  pointer.
-   That structure contains arithmetic operations in reverse polish,
-   with constants represented by operations that are followed by special data.
-   See expression.h for the details of the format.
-   What is important here is that it can be built up sequentially
-   during the process of parsing; the lower levels of the tree always
-   come first in the result.
+/* Parse a C expression from text in a string, and return the result
+   as a struct expression pointer.  That structure contains arithmetic
+   operations in reverse polish, with constants represented by
+   operations that are followed by special data.  See expression.h for
+   the details of the format.  What is important here is that it can
+   be built up sequentially during the process of parsing; the lower
+   levels of the tree always come first in the result.
 
    Note that malloc's and realloc's in this file are transformed to
    xmalloc and xrealloc respectively by the same sed command in the
-   makefile that remaps any other malloc/realloc inserted by the parser
-   generator.  Doing this with #defines and trying to control the interaction
-   with include files (<malloc.h> and <stdlib.h> for example) just became
-   too messy, particularly when such includes can be inserted at random
-   times by the parser generator.  */
+   makefile that remaps any other malloc/realloc inserted by the
+   parser generator.  Doing this with #defines and trying to control
+   the interaction with include files (<malloc.h> and <stdlib.h> for
+   example) just became too messy, particularly when such includes can
+   be inserted at random times by the parser generator.  */
    
 %{
 
@@ -42,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <ctype.h>
 #include "expression.h"
 
-#include "objc-lang.h"	/* for objc language constructs */
+#include "objc-lang.h"	/* For objc language constructs.  */
 
 #include "value.h"
 #include "parser-defs.h"
@@ -50,16 +49,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "c-lang.h"
 #include "bfd.h" /* Required by objfiles.h.  */
 #include "symfile.h" /* Required by objfiles.h.  */
-#include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
+#include "objfiles.h" /* For have_full_symbols and have_partial_symbols.  */
 #include "top.h"
 #include "completer.h" /* For skip_quoted().  */
 
-/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
-   as well as gratuitiously global symbol names, so we can have multiple
-   yacc generated parsers in gdb.  Note that these are only the variables
-   produced by yacc.  If other parser generators (bison, byacc, etc) produce
-   additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list. */
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
+   etc), as well as gratuitiously global symbol names, so we can have
+   multiple yacc generated parsers in gdb.  Note that these are only
+   the variables produced by yacc.  If other parser generators (bison,
+   byacc, etc) produce additional global names that conflict at link
+   time, then those parser generators need to be fixed instead of
+   adding those names to this list.  */
 
 #define	yymaxdepth	objc_maxdepth
 #define	yyparse		objc_parse
@@ -103,7 +103,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define yycheck		objc_yycheck
 
 #ifndef YYDEBUG
-#define	YYDEBUG	0		/* Default to no yydebug support */
+#define	YYDEBUG	0		/* Default to no yydebug support.  */
 #endif
 
 int
@@ -148,7 +148,7 @@ yyerror PARAMS ((char *));
   }
 
 %{
-/* YYSTYPE gets defined by %union */
+/* YYSTYPE gets defined by %union.  */
 static int
 parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %}
@@ -167,13 +167,12 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %token <typed_val_int> INT
 %token <typed_val_float> FLOAT
 
-/* Both NAME and TYPENAME tokens represent symbols in the input,
-   and both convey their data as strings.
-   But a TYPENAME is a string that happens to be defined as a typedef
-   or builtin type name (such as int or char)
-   and a NAME is any other symbol.
-   Contexts where this distinction is not important can use the
-   nonterminal "name", which matches either NAME or TYPENAME.  */
+/* Both NAME and TYPENAME tokens represent symbols in the input, and
+   both convey their data as strings.  But a TYPENAME is a string that
+   happens to be defined as a typedef or builtin type name (such as
+   int or char) and a NAME is any other symbol.  Contexts where this
+   distinction is not important can use the nonterminal "name", which
+   matches either NAME or TYPENAME.  */
 
 %token <sval> STRING
 %token <sval> NSSTRING		/* ObjC Foundation "NSString" literal */
@@ -196,8 +195,8 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %token TEMPLATE
 %token ERROR
 
-/* Special type cases, put in to allow the parser to distinguish different
-   legal basetypes.  */
+/* Special type cases, put in to allow the parser to distinguish
+   different legal basetypes.  */
 %token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD DOUBLE_KEYWORD
 
 %token <voidval> VARIABLE
@@ -386,9 +385,9 @@ msgarglist :	msgarg
 
 msgarg	:	name ':' exp
 			{ add_msglist(&$1, 1); }
-	|	':' exp	/* unnamed arg */
+	|	':' exp	/* Unnamed arg.  */
 			{ add_msglist(0, 1);   }
-	|	',' exp	/* variable number of args */
+	|	',' exp	/* Variable number of args.  */
 			{ add_msglist(0, 0);   }
 	;
 
@@ -564,7 +563,7 @@ exp	:	variable
 	;
 
 exp	:	VARIABLE
-			/* Already written by write_dollar_variable. */
+			/* Already written by write_dollar_variable.  */
 	;
 
 exp	:	SELECTOR 
@@ -582,11 +581,12 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 	;
 
 exp	:	STRING
-			{ /* C strings are converted into array constants with
-			     an explicit null byte added at the end.  Thus
-			     the array upper bound is the string length.
-			     There is no such thing in C as a completely empty
-			     string. */
+			{ /* C strings are converted into array
+			     constants with an explicit null byte
+			     added at the end.  Thus the array upper
+			     bound is the string length.  There is no
+			     such thing in C as a completely empty
+			     string.  */
 			  char *sp = $1.ptr; int count = $1.length;
 			  while (count-- > 0)
 			    {
@@ -606,7 +606,7 @@ exp	:	STRING
 	;
 
 exp     :	NSSTRING	/* ObjC NextStep NSString constant
-				 * of the form '@' '"' string '"'
+				 * of the form '@' '"' string '"'.
 				 */
 			{ write_exp_elt_opcode (OP_NSSTRING);
 			  write_exp_string ($1);
@@ -798,11 +798,11 @@ variable:	name_not_typename
 
 
 ptype	:	typebase
-	/* "const" and "volatile" are curently ignored.  A type qualifier
-	   before the type is currently handled in the typebase rule.
-	   The reason for recognizing these here (shift/reduce conflicts)
-	   might be obsolete now that some pointer to member rules have
-	   been deleted.  */
+	/* "const" and "volatile" are curently ignored.  A type
+	   qualifier before the type is currently handled in the
+	   typebase rule.  The reason for recognizing these here
+	   (shift/reduce conflicts) might be obsolete now that some
+	   pointer to member rules have been deleted.  */
 	|	typebase CONST_KEYWORD
 	|	typebase VOLATILE_KEYWORD
 	|	typebase abs_decl
@@ -857,8 +857,8 @@ func_mod:	'(' ')'
 	;
 
 /* We used to try to recognize more pointer to member types here, but
-   that didn't work (shift/reduce conflicts meant that these rules never
-   got executed).  The problem is that
+   that didn't work (shift/reduce conflicts meant that these rules
+   never got executed).  The problem is that
      int (foo::bar::baz::bizzle)
    is a function type but
      int (foo::bar::baz::bizzle::*)
@@ -869,7 +869,7 @@ type	:	ptype
 			{ $$ = lookup_member_type (builtin_type_int, $1); }
 	;
 
-typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
+typebase  /* Implements (approximately): (type-qualifier)* type-specifier.  */
 	:	TYPENAME
 			{ $$ = $1.type; }
 	|	CLASSNAME
@@ -930,9 +930,9 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = lookup_template_type(copy_name($2), $4,
 						    expression_context_block);
 			}
-	/* "const" and "volatile" are curently ignored.  A type qualifier
-	   after the type is handled in the ptype rule.  I think these could
-	   be too.  */
+	/* "const" and "volatile" are curently ignored.  A type
+	   qualifier after the type is handled in the ptype rule.  I
+	   think these could be too.  */
 	|	CONST_KEYWORD typebase { $$ = $2; }
 	|	VOLATILE_KEYWORD typebase { $$ = $2; }
 	;
@@ -961,7 +961,7 @@ typename:	TYPENAME
 nonempty_typelist
 	:	type
 		{ $$ = (struct type **) malloc (sizeof (struct type *) * 2);
-		  $<ivec>$[0] = 1;	/* Number of types in vector */
+		  $<ivec>$[0] = 1;	/* Number of types in vector.  */
 		  $$[1] = $1;
 		}
 	|	nonempty_typelist ',' type
@@ -980,22 +980,22 @@ name	:	NAME        { $$ = $1.stoken; }
 
 name_not_typename :	NAME
 	|	BLOCKNAME
-/* These would be useful if name_not_typename was useful, but it is just
-   a fake for "variable", so these cause reduce/reduce conflicts because
-   the parser can't tell whether NAME_OR_INT is a name_not_typename (=variable,
-   =exp) or just an exp.  If name_not_typename was ever used in an lvalue
-   context where only a name could occur, this might be useful.
-  	|	NAME_OR_INT
- */
+/* These would be useful if name_not_typename was useful, but it is
+   just a fake for "variable", so these cause reduce/reduce conflicts
+   because the parser can't tell whether NAME_OR_INT is a
+   name_not_typename (=variable, =exp) or just an exp.  If
+   name_not_typename was ever used in an lvalue context where only a
+   name could occur, this might be useful.  */
+  	| NAME_OR_INT */
 	;
 
 %%
 
 /* Take care of parsing a number (anything that starts with a digit).
-   Set yylval and return the token type; update lexptr.
-   LEN is the number of characters in it.  */
+   Set yylval and return the token type; update lexptr.  LEN is the
+   number of characters in it.  */
 
-/*** Needs some error checking for the float case ***/
+/*** Needs some error checking for the float case.  ***/
 
 static int
 parse_number (p, len, parsed_float, putithere)
@@ -1004,8 +1004,9 @@ parse_number (p, len, parsed_float, putithere)
      int parsed_float;
      YYSTYPE *putithere;
 {
-  /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
-     here, and we do kind of silly things like cast to unsigned.  */
+  /* FIXME: Shouldn't these be unsigned?  We don't deal with negative
+     values here, and we do kind of silly things like cast to
+     unsigned.  */
   register LONGEST n = 0;
   register LONGEST prevn = 0;
   unsigned LONGEST un;
@@ -1042,7 +1043,7 @@ parse_number (p, len, parsed_float, putithere)
 #else
 	  /* Scan it into a double, then assign it to the long double.
 	     This at least wins with values representable in the range
-	     of doubles. */
+	     of doubles.  */
 	  double temp;
 	  sscanf (p, "%lg", &temp);
 	  putithere->typed_val_float.dval = temp;
@@ -1065,7 +1066,7 @@ parse_number (p, len, parsed_float, putithere)
       return FLOAT;
     }
 
-  /* Handle base-switching prefixes 0x, 0t, 0d, 0 */
+  /* Handle base-switching prefixes 0x, 0t, 0d, and 0.  */
   if (p[0] == '0')
     switch (p[1])
       {
@@ -1128,20 +1129,20 @@ parse_number (p, len, parsed_float, putithere)
 	      found_suffix = 1;
 	    }
 	  else
-	    return ERROR;	/* Char not a digit */
+	    return ERROR;	/* Char not a digit.  */
 	}
       if (i >= base)
-	return ERROR;		/* Invalid digit in this base */
+	return ERROR;		/* Invalid digit in this base.  */
 
-      /* Portably test for overflow (only works for nonzero values, so make
-	 a second check for zero).  FIXME: Can't we just make n and prevn
-	 unsigned and avoid this?  */
+      /* Portably test for overflow (only works for nonzero values, so
+	 make a second check for zero).  FIXME: Can't we just make n
+	 and prevn unsigned and avoid this?  */
       if (c != 'l' && c != 'u' && (prevn >= n) && n != 0)
-	unsigned_p = 1;		/* Try something unsigned */
+	unsigned_p = 1;		/* Try something unsigned.  */
 
       /* Portably test for unsigned overflow.
-	 FIXME: This check is wrong; for example it doesn't find overflow
-	 on 0x123456789 when LONGEST is 32 bits.  */
+	 FIXME: This check is wrong; for example it doesn't find 
+	 overflow on 0x123456789 when LONGEST is 32 bits.  */
       if (c != 'l' && c != 'u' && n != 0)
 	{	
 	  if ((unsigned_p && (unsigned LONGEST) prevn >= (unsigned LONGEST) n))
@@ -1201,7 +1202,7 @@ parse_number (p, len, parsed_float, putithere)
    putithere->typed_val_int.val = n;
 
    /* If the high bit of the worked out type is set then this number
-      has to be unsigned. */
+      has to be unsigned.  */
 
    if (unsigned_p || (n & high_bit)) 
      {
@@ -1299,9 +1300,9 @@ yylex ()
       goto retry;
 
     case '\'':
-      /* We either have a character constant ('0' or '\177' for example)
-	 or we have a quoted symbol reference ('foo(int,int)' in C++
-	 for example). */
+      /* We either have a character constant ('0' or '\177' for
+	 example) or we have a quoted symbol reference ('foo(int,int)'
+	 in C++ for example).  */
       lexptr++;
       c = *lexptr++;
       if (c == '\\')
@@ -1352,7 +1353,7 @@ yylex ()
     case '.':
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
-	goto symbol;		/* Nope, must be a symbol. */
+	goto symbol;		/* Nope, must be a symbol.  */
       /* FALL THRU into number case.  */
 
     case '0':
@@ -1368,7 +1369,7 @@ yylex ()
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype = FLOAT;
-	/* initialize toktype to anything other than ERROR. */
+	/* Initialize toktype to anything other than ERROR.  */
 	register char *p = tokstart;
 	int hex = input_radix > 10;
 	int local_radix = input_radix;
@@ -1393,14 +1394,15 @@ yylex ()
 
 	    if (!hex && (*p == 'e' || *p == 'E'))
 	      if (got_e)
-		toktype = ERROR;	/* only one 'e' in a float */
+		toktype = ERROR;	/* Only one 'e' in a float.  */
 	      else
 		got_e = 1;
-	    /* This test does not include !hex, because a '.' always indicates
-	       a decimal floating point number regardless of the radix.  */
+	    /* This test does not include !hex, because a '.' always
+	       indicates a decimal floating point number regardless of
+	       the radix.  */
 	    else if (*p == '.')
 	      if (got_dot)
-		toktype = ERROR;	/* only one '.' in a float */
+		toktype = ERROR;	/* Only one '.' in a float.  */
 	      else
 		got_dot = 1;
 	    else if (got_e && (p[-1] == 'e' || p[-1] == 'E') &&
@@ -1408,24 +1410,28 @@ yylex ()
 	      /* This is the sign of the exponent, not the end of the
 		 number.  */
 	      continue;
-	    /* Always take decimal digits; parse_number handles radix error */
+	    /* Always take decimal digits; parse_number handles radix
+               error.  */
 	    else if (*p >= '0' && *p <= '9')
 	      continue;
-	    /* We will take letters only if hex is true, and only 
-	       up to what the input radix would permit.  FSF was content
-	       to rely on parse_number to validate; but it leaks. */
-	    else if (*p >= 'a' && *p <= 'z') {
-	      if (!hex || *p >= ('a' + local_radix - 10))
-		toktype = ERROR;
-	    }
-	    else if (*p >= 'A' && *p <= 'Z') {
-	      if (!hex || *p >= ('A' + local_radix - 10))
-		toktype = ERROR;
-	    }
+	    /* We will take letters only if hex is true, and only up
+	       to what the input radix would permit.  FSF was content
+	       to rely on parse_number to validate; but it leaks.  */
+	    else if (*p >= 'a' && *p <= 'z') 
+	      {
+		if (!hex || *p >= ('a' + local_radix - 10))
+		  toktype = ERROR;
+	      }
+	    else if (*p >= 'A' && *p <= 'Z') 
+	      {
+		if (!hex || *p >= ('A' + local_radix - 10))
+		  toktype = ERROR;
+	      }
 	    else break;
 	  }
 	if (toktype != ERROR)
-	  toktype = parse_number (tokstart, p - tokstart, got_dot|got_e, &yylval);
+	  toktype = parse_number (tokstart, p - tokstart, 
+				  got_dot | got_e, &yylval);
         if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
@@ -1449,7 +1455,7 @@ yylex ()
     case '~':
     case '!':
 #if 0
-    case '@':		/* moved out below */
+    case '@':		/* Moved out below.  */
 #endif
     case '<':
     case '>':
@@ -1473,10 +1479,10 @@ yylex ()
 	      error ("Missing '(' in @selector(...)");
 	    }
 	  tempbufindex = 0;
-	  tokptr++;	/* skip the '(' */
+	  tokptr++;	/* Skip the '('.  */
 	  do {
-	    /* Grow the static temp buffer if necessary, including allocating
-	       the first one on demand. */
+	    /* Grow the static temp buffer if necessary, including
+	       allocating the first one on demand.  */
 	    if (tempbufindex + 1 >= tempbufsize)
 	      {
 		tempbuf = (char *) realloc (tempbuf, tempbufsize += 64);
@@ -1498,7 +1504,8 @@ yylex ()
           lexptr++;
           return tokchr;
         }
-      /* ObjC NextStep NSString constant: fall thru and parse like STRING */
+      /* ObjC NextStep NSString constant: fall thru and parse like
+         STRING.  */
       tokstart++;
 
     case '"':
@@ -1508,16 +1515,17 @@ yylex ()
 	 buffer is null byte terminated *only* for the convenience of
 	 debugging gdb itself and printing the buffer contents when
 	 the buffer contains no embedded nulls.  Gdb does not depend
-	 upon the buffer being null byte terminated, it uses the length
-	 string instead.  This allows gdb to handle C strings (as well
-	 as strings in other languages) with embedded null bytes */
+	 upon the buffer being null byte terminated, it uses the
+	 length string instead.  This allows gdb to handle C strings
+	 (as well as strings in other languages) with embedded null
+	 bytes.  */
 
       tokptr = ++tokstart;
       tempbufindex = 0;
 
       do {
-	/* Grow the static temp buffer if necessary, including allocating
-	   the first one on demand. */
+	/* Grow the static temp buffer if necessary, including
+	   allocating the first one on demand.  */
 	if (tempbufindex + 1 >= tempbufsize)
 	  {
 	    tempbuf = (char *) realloc (tempbuf, tempbufsize += 64);
@@ -1526,7 +1534,7 @@ yylex ()
 	  {
 	  case '\0':
 	  case '"':
-	    /* Do nothing, loop will terminate. */
+	    /* Do nothing, loop will terminate.  */
 	    break;
 	  case '\\':
 	    tokptr++;
@@ -1546,7 +1554,7 @@ yylex ()
 	{
 	  error ("Unterminated string in expression.");
 	}
-      tempbuf[tempbufindex] = '\0';	/* See note above */
+      tempbuf[tempbufindex] = '\0';	/* See note above.  */
       yylval.sval.ptr = tempbuf;
       yylval.sval.length = tempbufindex;
       lexptr = tokptr;
@@ -1626,8 +1634,9 @@ yylex ()
       if (current_language->la_language == language_cplus
 	  && STREQN (tokstart, "this", 4))
 	{
-	  static const char this_name[] =
-				 { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };
+	  static const char this_name[] = {
+	    CPLUS_MARKER, 't', 'h', 'i', 's', '\0' 
+	  };
 
 	  if (lookup_symbol (this_name, expression_context_block,
 			     VAR_NAMESPACE, (int *) NULL,
@@ -1673,9 +1682,9 @@ yylex ()
 			 VAR_NAMESPACE,
 			 need_this,
 			 (struct symtab **) NULL);
-    /* Call lookup_symtab, not lookup_partial_symtab, in case there are
-       no psymtabs (coff, xcoff, or some future change to blow away the
-       psymtabs once symbols are read).  */
+    /* Call lookup_symtab, not lookup_partial_symtab, in case there
+       are no psymtabs (coff, xcoff, or some future change to blow
+       away the psymtabs once symbols are read).  */
     if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK) ||
         lookup_symtab (tmp))
       {
@@ -1686,24 +1695,26 @@ yylex ()
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
 #if 1
-	  /* Despite the following flaw, we need to keep this code enabled.
-	     Because we can get called from check_stub_method, if we don't
-	     handle nested types then it screws many operations in any
-	     program which uses nested types.  */
-	  /* In "A::x", if x is a member function of A and there happens
-	     to be a type (nested or not, since the stabs don't make that
-	     distinction) named x, then this code incorrectly thinks we
-	     are dealing with nested types rather than a member function.  */
+	  /* Despite the following flaw, we need to keep this code
+	     enabled.  Because we can get called from
+	     check_stub_method, if we don't handle nested types then
+	     it screws many operations in any program which uses
+	     nested types.  */
+	  /* In "A::x", if x is a member function of A and there
+	     happens to be a type (nested or not, since the stabs
+	     don't make that distinction) named x, then this code
+	     incorrectly thinks we are dealing with nested types
+	     rather than a member function.  */
 
 	  char *p;
 	  char *namestart;
 	  struct symbol *best_sym;
 
-	  /* Look ahead to detect nested types.  This probably should be
-	     done in the grammar, but trying seemed to introduce a lot
-	     of shift/reduce and reduce/reduce conflicts.  It's possible
-	     that it could be done, though.  Or perhaps a non-grammar, but
-	     less ad hoc, approach would work well.  */
+	  /* Look ahead to detect nested types.  This probably should
+	     be done in the grammar, but trying seemed to introduce a
+	     lot of shift/reduce and reduce/reduce conflicts.  It's
+	     possible that it could be done, though.  Or perhaps a
+	     non-grammar, but less ad hoc, approach would work well.  */
 
 	  /* Since we do not currently have any way of distinguishing
 	     a nested type from a non-nested one (the stabs don't tell
@@ -1732,9 +1743,10 @@ yylex ()
 		  if (p != namestart)
 		    {
 		      struct symbol *cur_sym;
-		      /* As big as the whole rest of the expression, which is
-			 at least big enough.  */
-		      char *ncopy = alloca (strlen (tmp)+strlen (namestart)+3);
+		      /* As big as the whole rest of the expression,
+			 which is at least big enough.  */
+		      char *ncopy = alloca (strlen (tmp) +
+					    strlen (namestart) + 3);
 		      char *tmp1;
 
 		      tmp1 = ncopy;
@@ -1744,7 +1756,8 @@ yylex ()
 		      tmp1 += 2;
 		      memcpy (tmp1, namestart, p - namestart);
 		      tmp1[p - namestart] = '\0';
-		      cur_sym = lookup_symbol (ncopy, expression_context_block,
+		      cur_sym = lookup_symbol (ncopy, 
+					       expression_context_block,
 					       VAR_NAMESPACE, (int *) NULL,
 					       (struct symtab **) NULL);
 		      if (cur_sym)
@@ -1776,14 +1789,17 @@ yylex ()
     if ((yylval.tsym.type = lookup_primitive_typename (tmp)) != 0)
 	return TYPENAME;
 
-    if (!sym) /* see if it's an ObjC classname */
+    /* See if it's an ObjC classname.  */
+    if (!sym)
       {
 	CORE_ADDR Class = lookup_objc_class(tmp);
 	if (Class)
 	  {
 	    extern struct symbol *lookup_struct_typedef();
 	    yylval.class.class = Class;
-	    if ((sym = lookup_struct_typedef (tmp, expression_context_block, 1)))
+	    if ((sym = lookup_struct_typedef (tmp, 
+					      expression_context_block, 
+					      1)))
 	      yylval.class.type = SYMBOL_TYPE (sym);
 	    return CLASSNAME;
 	  }
@@ -1806,7 +1822,7 @@ yylex ()
 	  }
       }
 
-    /* Any other kind of symbol */
+    /* Any other kind of symbol.  */
     yylval.ssym.sym = sym;
     yylval.ssym.is_a_field_of_this = is_a_field_of_this;
     return NAME;
@@ -1820,5 +1836,6 @@ yyerror (msg)
   if (*lexptr == '\0')
     error("A %s near end of expression.",  (msg ? msg : "error"));
   else
-    error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
+    error ("A %s in expression, near `%s'.", (msg ? msg : "error"), 
+	   lexptr);
 }

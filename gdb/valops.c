@@ -48,9 +48,7 @@ extern int overload_debug;
 static int typecmp (int staticp, int varargs, int nargs,
 		    struct field t1[], struct value *t2[]);
 
-static CORE_ADDR find_function_addr (struct value *, struct type **);
 static struct value *value_arg_coerce (struct value *, struct type *, int);
-
 
 static CORE_ADDR value_push (CORE_ADDR, struct value *);
 
@@ -90,7 +88,6 @@ int overload_resolution = 0;
 
 int unwind_on_signal_p = 0;
 
-
 
 /* Find the address of function name NAME in the inferior.  */
 
@@ -1219,7 +1216,7 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 /* Determine a function's address and its return type from its value.
    Calls error() if the function is not valid for calling.  */
 
-static CORE_ADDR
+CORE_ADDR
 find_function_addr (struct value *function, struct type **retval_type)
 {
   register struct type *ftype = check_typedef (VALUE_TYPE (function));
@@ -1882,6 +1879,23 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   if (CALL_DUMMY_P)
     {
+      return hand_function_call (function, nargs, args);
+    }
+  else
+    {
+      error ("Cannot invoke functions on this machine.");
+    }
+}
+
+struct value *
+call_function_by_hand_expecting_type (struct value *function, 
+				      struct type *expect_type,
+                                      int nargs, struct value **args, 
+				      int restore_frame)
+{
+  if (CALL_DUMMY_P)
+    {
+      /* FIXME: Changes to func not implemented yet */
       return hand_function_call (function, nargs, args);
     }
   else
@@ -3303,21 +3317,17 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
   return new_val;
 }
 
-
-
-
-/* C++: return the value of the class instance variable, if one exists.
+/* Return the value of the local variable, if one exists.
    Flag COMPLAIN signals an error if the request is made in an
    inappropriate context.  */
 
 struct value *
-value_of_this (int complain)
+value_of_local (const char *name, int complain)
 {
   struct symbol *func, *sym;
   struct block *b;
   int i;
-  static const char funny_this[] = "this";
-  struct value *this;
+  struct value * ret;
 
   if (selected_frame == 0)
     {
@@ -3331,7 +3341,7 @@ value_of_this (int complain)
   if (!func)
     {
       if (complain)
-	error ("no `this' in nameless context");
+	error ("no %s in nameless context", name);
       else
 	return 0;
     }
@@ -3341,26 +3351,39 @@ value_of_this (int complain)
   if (i <= 0)
     {
       if (complain)
-	error ("no args, no `this'");
+	error ("no args, no %s", name);
       else
 	return 0;
     }
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, funny_this, NULL, VAR_NAMESPACE);
+  sym = lookup_block_symbol (b, name, NULL, VAR_NAMESPACE);
   if (sym == NULL)
     {
       if (complain)
-	error ("current stack frame not in method");
+	error ("current stack frame does not contain a variable named \"%s\"", name);
       else
 	return NULL;
     }
 
-  this = read_var_value (sym, selected_frame);
-  if (this == 0 && complain)
-    error ("`this' argument at unknown address");
-  return this;
+  ret = read_var_value (sym, selected_frame);
+  if (ret == 0 && complain)
+    error ("%s argument unreadable", name);
+  return ret;
+}
+
+/* C++/Objective-C: return the value of the class instance variable,
+   if one exists.  Flag COMPLAIN signals an error if the request is
+   made in an inappropriate context.  */
+
+struct value *
+value_of_this (int complain)
+{
+  if (current_language->la_language == language_objc)
+    return value_of_local ("self", complain);
+  else
+    return value_of_local ("this", complain);
 }
 
 /* Create a slice (sub-string, sub-array) of ARRAY, that is LENGTH elements

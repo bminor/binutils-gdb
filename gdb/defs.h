@@ -208,6 +208,7 @@ enum language
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
     language_cplus,		/* C++ */
+    language_objc,		/* Objective-C */
     language_java,		/* Java */
     /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
@@ -445,6 +446,8 @@ extern void puts_filtered (const char *);
 
 extern void puts_unfiltered (const char *);
 
+extern void puts_filtered_tabular (char *string, int width, int right);
+
 extern void puts_debug (char *prefix, char *string, char *suffix);
 
 extern void vprintf_filtered (const char *, va_list) ATTR_FORMAT (printf, 1, 0);
@@ -530,8 +533,6 @@ extern void print_transfer_performance (struct ui_file *stream,
 /* From top.c */
 
 typedef void initialize_file_ftype (void);
-
-extern char *skip_quoted (char *);
 
 extern char *gdb_readline (char *);
 
