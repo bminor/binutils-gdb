@@ -1880,25 +1880,6 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		      fixp->fx_where = prev_insn_where;
 		    }
 		}
-	      else if (reloc_type > BFD_RELOC_UNUSED)
-		{
-		  char *prev_f;
-		  char temp[2];
-
-		  /* We are in mips16 mode, and we have just created a
-                     variant frag.  We need to extract the old
-                     instruction from the end of the previous frag,
-                     and add it to a new frag.  */
-		  prev_f = prev_insn_frag->fr_literal + prev_insn_where;
-		  memcpy (temp, prev_f, 2);
-		  prev_insn_frag->fr_fix -= 2;
-		  if (prev_insn_frag->fr_type == rs_machine_dependent)
-		    {
-		      assert (prev_insn_where == prev_insn_frag->fr_fix);
-		      memcpy (prev_f, prev_f + 2, 2);
-		    }
-		  memcpy (frag_more (2), temp, 2);
-		}
 	      else
 		{
 		  char *prev_f;
@@ -1909,7 +1890,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		  memcpy (temp, prev_f, 2);
 		  memcpy (prev_f, f, 2);
 		  if (reloc_type != BFD_RELOC_MIPS16_JMP)
-		    memcpy (f, temp, 2);
+		    {
+		      assert (reloc_type == BFD_RELOC_UNUSED);
+		      memcpy (f, temp, 2);
+		    }
 		  else
 		    {
 		      memcpy (f, f + 2, 2);

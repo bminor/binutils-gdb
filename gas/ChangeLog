@@ -1,5 +1,9 @@
 Wed Feb 12 14:36:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (append_insn): Remove useless code which
+	handled swapping a mips16 jump with a mips16 instruction with a
+	reloc.
+
 	* config/tc-mips.c (md_parse_option): When debugging, set
 	mips_optimize to 1, not 0.
 
