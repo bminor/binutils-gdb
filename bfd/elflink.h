@@ -3070,8 +3070,13 @@ elf_link_input_bfd (finfo, input_bfd)
 		    {
 		      /* I suppose the backend ought to fill in the
 			 section of any STT_SECTION symbol against a
-			 processor specific section.  */
-		      if (sec != NULL && bfd_is_abs_section (sec))
+			 processor specific section.  If we have
+			 discarded a section, the output_section will
+			 be the absolute section.  */
+		      if (sec != NULL
+			  && (bfd_is_abs_section (sec)
+			      || (sec->output_section != NULL
+				  && bfd_is_abs_section (sec->output_section))))
 			r_symndx = 0;
 		      else if (sec == NULL || sec->owner == NULL)
 			{

@@ -1,3 +1,9 @@
+Fri Feb  7 12:39:11 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_input_bfd): If we've discarded a section,
+	the output section will be the absolute section; don't print an
+	assertion message for that case when doing a relocateable link.
+
 Thu Feb  6 16:55:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (FN_STUB, CALL_STUB, CALL_FP_STUB): Define.
