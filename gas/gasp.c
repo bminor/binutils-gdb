@@ -1706,7 +1706,7 @@ do_datab (idx, in)
 
 /* .align <size> */
 
-void
+static void
 do_align (idx, in)
      int idx;
      sb *in;
@@ -1842,7 +1842,7 @@ do_form (idx, in)
     "<string>"		-> return string
     xyx<whitespace>     -> return xyz
 */
-int
+static int
 get_any_string (idx, in, out, expand, pretend_quoted)
      int idx;
      sb *in;
@@ -2263,7 +2263,7 @@ free_old_entry (ptr)
 
 /* name: .ASSIGNA <value> */
 
-void
+static void
 do_assigna (idx, in)
      int idx;
      sb *in;
@@ -2291,7 +2291,7 @@ do_assigna (idx, in)
 
 /* name: .ASSIGNC <string> */
 
-void
+static void
 do_assignc (idx, in)
      int idx;
      sb *in;
@@ -3804,7 +3804,7 @@ do_sdatab (idx, in)
 
 }
 
-int
+static int
 new_file (name)
      const char *name;
 {

@@ -5,6 +5,9 @@ Mon Aug 14 14:08:07 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 Mon Aug 14 15:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gasp.c (do_align, get_any_string): Mark as static.
+	(do_assigna, do_assignc, new_file): Likewise.
+
 	* config/tc-m68k.c (s_reg): Rename local op to rop to avoid
 	confusion with macro op.
 
