@@ -805,7 +805,10 @@ c_type_print_base (type, stream, show, level)
 	}
       else
 	{
-	  error ("Invalid type code (%d) in symbol table.", TYPE_CODE (type));
+	  /* At least for dump_symtab, it is important that this not be
+	     an error ().  */
+	  fprintf_filtered (stream, "<invalid type code %d>",
+			    TYPE_CODE (type));
 	}
       break;
     }

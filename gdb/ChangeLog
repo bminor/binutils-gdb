@@ -1,5 +1,10 @@
 Tue Jun 29 09:11:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* dbxread.c (process_one_symbol): If we find a LOC_BLOCK where we
+	don't expect it, change it to LOC_STATIC so at least we don't coredump.
+
+	* c-typeprint.c (c_type_print_base): Don't error() on invalid type.
+
 	* symtab.h (struct symtab, line_charpos): Fix comment.
 	* source.c (identify_source_line): Fix off by one bug with line.
 
