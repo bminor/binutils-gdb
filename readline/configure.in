@@ -15,18 +15,18 @@ links=sysdep.h
 
 case "${host_os}" in
 m88kbcs | sysv*)
-	host_makefile_frag=config/hm-sysv
+	host_makefile_frag=config/mh-sysv
 	;;
 
 aix*)
-	host_makefile_frag=config/hm-sysv
+	host_makefile_frag=config/mh-sysv
 	case "${host_cpu}" in
 	rs6000)	files=sysdep-aix.h
 	esac
 	;;
 
 irix*)
-	host_makefile_frag=config/hm-sysv
+	host_makefile_frag=config/mh-sysv
 	files=sysdep-irix.h
 	;;
 
@@ -37,7 +37,7 @@ esac
 
 case "${host_vendor}" in
 sco* )
-	host_makefile_frag=config/hm-sco
+	host_makefile_frag=config/mh-sco
 	files=sysdep-sco.h
 	;;
 esac
