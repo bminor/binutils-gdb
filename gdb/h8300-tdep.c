@@ -895,7 +895,7 @@ h8300s_register_name (int regno)
   static char *register_names[] = {
     "er0", "er1", "er2", "er3", "er4", "er5", "er6",
     "sp", "", "pc", "cycles", "", "tick", "inst",
-    /* "mach", "macl", */
+    "mach", "macl",
     "ccr", "exr" /* pseudo registers */
   };
   if (regno < 0
@@ -1015,9 +1015,9 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	    {
 	      h8300_print_register (gdbarch, file, frame, E_SBR_REGNUM);
 	      h8300_print_register (gdbarch, file, frame, E_VBR_REGNUM);
-	      h8300_print_register (gdbarch, file, frame, E_MACH_REGNUM);
-	      h8300_print_register (gdbarch, file, frame, E_MACL_REGNUM);
 	    }
+	  h8300_print_register (gdbarch, file, frame, E_MACH_REGNUM);
+	  h8300_print_register (gdbarch, file, frame, E_MACL_REGNUM);
 	  h8300_print_register (gdbarch, file, frame, E_CYCLES_REGNUM);
 	  h8300_print_register (gdbarch, file, frame, E_TICKS_REGNUM);
 	  h8300_print_register (gdbarch, file, frame, E_INSTS_REGNUM);
@@ -1220,7 +1220,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300sxmode = 0;
       h8300smode = 1;
       h8300hmode = 1;
-      set_gdbarch_num_regs (gdbarch, 14);
+      set_gdbarch_num_regs (gdbarch, 16);
       set_gdbarch_num_pseudo_regs (gdbarch, 2);
       set_gdbarch_ecoff_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_dwarf_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);

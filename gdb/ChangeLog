@@ -1,3 +1,10 @@
+2003-06-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c (h8300s_register_name): Enable MACH and MACL
+	registers for H8/300S.
+	(h8300_print_registers_info): Ditto.
+	(h8300_gdbarch_init): Accommodate register count for H8/300S. 
+
 2003-06-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/nm-linux.h (linux_record_stopped_pid): New prototype.
