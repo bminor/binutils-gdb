@@ -30,6 +30,8 @@ README
 TODO
 acconfig.h
 aclocal.m4
+addr2line.1
+addr2line.c
 ar.1
 ar.c
 arlex.l

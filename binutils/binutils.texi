@@ -117,6 +117,9 @@ Discard symbols
 @item c++filt
 Demangle encoded C++ symbols
 
+@item addr2line
+Convert addresses into file names and line numbers
+
 @item nlmconv
 Convert object code into a Netware Loadable Module
 @end table
@@ -132,6 +135,7 @@ Convert object code into a Netware Loadable Module
 * strings::                     List printable strings from files
 * strip::                       Discard symbols
 * c++filt::			Filter to demangle encoded C++ symbols
+* addr2line::			Convert addresses to file and line
 * nlmconv::                     Converts object code into an NLM
 * Selecting The Target System:: How these utilities determine the target.
 * Reporting Bugs::              Reporting Bugs
@@ -1674,6 +1678,82 @@ may in a future release become
 c++filt @var{option} @var{symbol}
 @end example
 @end quotation
+
+@node addr2line
+@chapter addr2line
+
+@kindex addr2line
+@cindex address to file name and line number
+
+@smallexample
+addr2line [ -b @var{bfdname} | --target=@var{bfdname} ]
+          [ -C | --demangle ]
+          [ -e @var{filename} | --exe=@var{filename} ]
+          [ -f | --functions ] [ -s | --basename ]
+          [ -H | --help ] [ -V | --version ]
+          [ addr addr ... ]
+@end smallexample
+
+@code{addr2line} translates program addresses into file names and line
+numbers.  Given an address and an executable, it uses the debugging
+information in the executable to figure out which file name and line
+number are associated with a given address.
+
+The executable to use is specified with the @code{-e} option.  The
+default is @file{a.out}.
+
+@code{addr2line} has two modes of operation.
+
+In the first, hexadecimal addresses are specified on the command line,
+and @code{addr2line} displays the file name and line number for each
+address.
+
+In the second, @code{addr2line} reads hexadecimal addresses from
+standard input, and prints the file name and line number for each
+address on standard output.  In this mode, @code{addr2line} may be used
+in a pipe to convert dynamically chosen addresses.
+
+The format of the output is @samp{FILENAME:LINENO}.  The file name and
+line number for each address is printed on a separate line.  If the
+@code{-f} option is used, then each @samp{FILENAME:LINENO} line is
+preceded by a @samp{FUNCTIONNAME} line which is the name of the function
+containing the address.
+
+If the file name or function name can not be determined,
+@code{addr2line} will print two question marks in their place.  If the
+line number can not be determined, @code{addr2line} will print 0.
+
+The long and short forms of options, shown here as alternatives, are
+equivalent.
+
+@table @code
+@item -b @var{bfdname}
+@itemx --target=@var{bfdname}
+@cindex object code format
+Specify that the object-code format for the object files is
+@var{bfdname}.
+
+@item -C
+@itemx --demangle
+@cindex demangling in objdump
+Decode (@dfn{demangle}) low-level symbol names into user-level names.
+Besides removing any initial underscore prepended by the system, this
+makes C++ function names readable.  @xref{c++filt}, for more information
+on demangling.
+
+@item -e @var{filename}
+@itemx --exe=@var{filename}
+Specify the name of the executable for which addresses should be
+translated.  The default file is @file{a.out}.
+
+@item -f
+@itemx --functions
+Display function names as well as file and line number information.
+
+@item -s
+@itemx --basenames
+Display only the base of each file name.
+@end table
 
 @node nlmconv
 @chapter nlmconv

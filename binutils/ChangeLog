@@ -1,5 +1,17 @@
 Thu Mar 27 16:03:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	addr2line.c contributed by Ulrich Lauther
+	<Ulrich.Lauther@zfe.siemens.de>:
+	* addr2line.c: New file.
+	* Makefile.in: Rebuild dependencies.
+ 	(ADDR2LINE_PROG): New variable.
+	(MANPAGES): Add addr2line.
+	(PROGS): Add $(ADDR2LINE_PROG).
+	(CFILES): Add addr2line.c.
+	($(ADDR2LINE_PROG)): New target.
+	* binutils.texi: Document addr2line.
+	* addr2line.1: New file.
+
 	* version.c (print_version): Update copyright date.
 
 Mon Mar 24 10:52:45 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
