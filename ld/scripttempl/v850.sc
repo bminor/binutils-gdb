@@ -35,8 +35,8 @@ SECTIONS
   .rela.plt      : { *(.rela.plt)		}
   .init          : { *(.init)	} =0
   .plt      : { *(.plt)	}
-  . = 0x100000;
   .zdata    : { *(.zdata) *(.zrodata) *(.zbss*) }
+  . = 0x100000;
   .text      :
   {
     *(.text)

@@ -1,4 +1,9 @@
 start-sanitize-v850
+Wed Oct 23 16:17:22 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* scriptempl/v850.sc (zdata): Make sure this stays
+	in lo-memory.
+
 Tue Oct 22 11:36:47 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scripttempl/v850.sc (__ep): Put it at the start
