@@ -2756,7 +2756,9 @@ default_indirect_link_order (bfd *output_bfd,
     }
 
   /* Get and relocate the section contents.  */
-  sec_size = input_section->size;
+  sec_size = (input_section->rawsize > input_section->size
+	      ? input_section->rawsize
+	      : input_section->size);
   contents = bfd_malloc (sec_size);
   if (contents == NULL && sec_size != 0)
     goto error_return;

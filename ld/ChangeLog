@@ -1,3 +1,8 @@
+2004-06-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_reset_memory_regions): Save last relax pass section
+	size in rawsize.
+
 2004-06-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (print_output_section_statement): Don't print size before

@@ -1,5 +1,20 @@
 2004-06-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-mmix.c (mmix_set_relaxable_size): Save original size in
+	rawsize.
+	(mmix_elf_perform_relocation): Adjust for above change.
+	(mmix_elf_relocate_section): Likewise.
+	(mmix_elf_relax_section): Likewise.  Use output_section->rawsize.
+	(mmix_elf_get_section_contents): Delete.
+	(bfd_elf64_get_section_contents): Delete.
+	(mmix_elf_relocate_section): Zero stub area.
+	* linker.c (default_indirect_link_order): Alloc max of section size
+	and rawsize.
+	* simple.c (bfd_simple_get_relocated_section_contents): Likewise.
+	* section.c (bfd_malloc_and_get_section): Likewise.
+	(struct bfd_section): Update rawsize comment.
+	* bfd-in2.h: Regenerate.
+
 	* reloc16.c (bfd_coff_reloc16_relax_section): Set rawsize.
 
 2004-06-29  Alan Modra  <amodra@bigpond.net.au>

@@ -4235,7 +4235,11 @@ lang_reset_memory_regions (void)
     }
 
   for (o = output_bfd->sections; o != NULL; o = o->next)
-    o->size = 0;
+    {
+      /* Save the last size for possible use by bfd_relax_section.  */
+      o->rawsize = o->size;
+      o->size = 0;
+    }
 }
 
 /* Worker for lang_gc_sections_1.  */

@@ -1290,13 +1290,14 @@ typedef struct bfd_section
      size of <<.bss>>).  */
   bfd_size_type size;
 
-  /* The original size on disk of the section, in octets.  This field
-     is used by the linker relaxation code.  It is currently only set
-     for sections where the linker relaxation scheme doesn't cache
-     altered section and reloc contents (stabs, eh_frame, SEC_MERGE),
-     and thus the original size needs to be kept to read the section
-     multiple times.  If non-zero, rawsize will be used in address
-     checks during relocation and to read section contents.  */
+  /* For input sections, the original size on disk of the section, in
+     octets.  This field is used by the linker relaxation code.  It is
+     currently only set for sections where the linker relaxation scheme
+     doesn't cache altered section and reloc contents (stabs, eh_frame,
+     SEC_MERGE, some coff relaxing targets), and thus the original size
+     needs to be kept to read the section multiple times.
+     For output sections, rawsize holds the section size calculated on
+     a previous linker relaxation pass.  */
   bfd_size_type rawsize;
 
   /* If this section is going to be output, then this value is the

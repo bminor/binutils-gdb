@@ -143,10 +143,11 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
 
   if (! (sec->flags & SEC_RELOC))
     {
+      bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
       bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;
 
       if (outbuf == NULL)
-	contents = bfd_malloc (size);
+	contents = bfd_malloc (amt);
       else
 	contents = outbuf;
 

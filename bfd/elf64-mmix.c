@@ -991,10 +991,7 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	goto pcrel_mmix_reloc_fits;
       else
 	{
-	  bfd_size_type size
-	    = (isec->size
-	       - (mmix_elf_section_data (isec)->pjs.n_pushj_relocs
-		  * MAX_PUSHJ_STUB_SIZE));
+	  bfd_size_type size = isec->rawsize ? isec->rawsize : isec->size;
 
 	  /* We have the bytes at the PUSHJ insn and need to get the
 	     position for the stub.  There's supposed to be room allocated
@@ -1341,15 +1338,19 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  bfd_size_type size
-    = (input_section->size
-       - (mmix_elf_section_data (input_section)->pjs.n_pushj_relocs
-	  * MAX_PUSHJ_STUB_SIZE));
+  bfd_size_type size;
   size_t pjsno = 0;
 
+  size = input_section->rawsize ? input_section->rawsize : input_section->size;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend = relocs + input_section->reloc_count;
+
+  /* Zero the stub area before we start.  */
+  if (input_section->rawsize != 0
+      && input_section->size > input_section->rawsize)
+    memset (contents + input_section->rawsize, 0,
+	    input_section->size - input_section->rawsize);
 
   for (rel = relocs; rel < relend; rel ++)
     {
@@ -2308,6 +2309,7 @@ mmix_set_relaxable_size (abfd, sec, ptr)
   if (mmix_elf_section_data (sec)->pjs.n_pushj_relocs == 0)
     return;
 
+  sec->rawsize = sec->size;
   sec->size += (mmix_elf_section_data (sec)->pjs.n_pushj_relocs
 		* MAX_PUSHJ_STUB_SIZE);
 
@@ -2587,9 +2589,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
   size_t pjsno = 0;
   bfd *bpo_greg_owner;
   Elf_Internal_Sym *isymbuf = NULL;
-  bfd_size_type size = (sec->size
-			- (mmix_elf_section_data (sec)->pjs.n_pushj_relocs
-			   * MAX_PUSHJ_STUB_SIZE));
+  bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;
 
   mmix_elf_section_data (sec)->pjs.stubs_size_sum = 0;
 
@@ -2667,7 +2667,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 				      0,
 				      bfd_arch_bits_per_address (abfd),
 				      /* Output-stub location.  */
-				      sec->output_section->size
+				      sec->output_section->rawsize
 				      + (mmix_elf_section_data (sec
 							       ->output_section)
 					 ->pjs.stubs_size_sum)
@@ -2908,52 +2908,6 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
     free (internal_relocs);
   return FALSE;
 }
-
-/* Because we set size to include the max size of pushj stubs,
-   i.e. larger than the actual section input size (see
-   mmix_set_relaxablesize), we have to take care of that when reading
-   the section.  */
-
-static bfd_boolean
-mmix_elf_get_section_contents (abfd, section, location, offset, count)
-     bfd *abfd;
-     sec_ptr section;
-     void *location;
-     file_ptr offset;
-     bfd_size_type count;
-{
-  bfd_size_type size = (section->size
-			- (mmix_elf_section_data (section)->pjs.n_pushj_relocs
-			   * MAX_PUSHJ_STUB_SIZE));
-
-  if (offset + count > section->size)
-    {
-      abort();
-      bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
-    }
-
-  /* Check bounds against the faked size.  */
-  if (offset + count > size)
-    {
-      /* Clear the part in the faked area.  */
-      memset (location + size - offset, 0, count - (size - offset));
-
-      /* If there's no initial part within the "real" contents, we're
-         done.  */
-      if ((bfd_size_type) offset >= size)
-	return TRUE;
-
-      /* Else adjust the count and fall through to call the generic
-         function.  */
-      count = size - offset;
-    }
-
-  return
-    _bfd_generic_get_section_contents (abfd, section, location, offset,
-				       count);
-}
-
 
 #define ELF_ARCH		bfd_arch_mmix
 #define ELF_MACHINE_CODE 	EM_MMIX
@@ -3002,6 +2956,5 @@ mmix_elf_get_section_contents (abfd, section, location, offset, count)
 #define bfd_elf64_new_section_hook	mmix_elf_new_section_hook
 #define bfd_elf64_bfd_final_link	mmix_elf_final_link
 #define bfd_elf64_bfd_relax_section	mmix_elf_relax_section
-#define bfd_elf64_get_section_contents	mmix_elf_get_section_contents
 
 #include "elf64-target.h"
