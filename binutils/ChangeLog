@@ -1,3 +1,13 @@
+Mon Sep  6 15:39:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (total_bss_size): Removed.
+	(main): Set the bss vma to always follow the data section.  Move
+	symbols into new sections, and adjust values by output_offset.
+	(setup_sections): Don't copy all sections, but instead point all
+	text sections to .text, all data sections to .data, and all bss
+	sections to .bss.
+	(copy_sections): Adjust accordingly.
+
 Thu Sep  2 12:34:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Only build nlmconv if configured for a NetWare target.
