@@ -1,3 +1,7 @@
+Thu Dec 18 16:49:28 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-d10v.c (build_insn): Make `number' a long for 64-bit hosts.
+
 Thu Dec 18 16:42:57 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (cpu_types): 21164pc/pca56 does not have CIX.
