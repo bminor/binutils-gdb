@@ -52,73 +52,59 @@ static const int regmap[] =
 #define SIZEOF_STRUCT_REG (21 * 4)
 
 void
-sh_nbsd_supply_registers (char *regs)
+shnbsd_supply_reg (char *regs, int regno)
 {
-  int regno;
+  int i;
 
-  for (regno = R0_REGNUM; regno <= (R0_REGNUM + 15); regno++)
-    supply_register (regno, regs + regmap[regno - R0_REGNUM]);
-
-  supply_register (PC_REGNUM, regs + (0 * 4));
-  supply_register (SR_REGNUM, regs + (1 * 4));
-  supply_register (PR_REGNUM, regs + (2 * 4));
-  supply_register (MACH_REGNUM, regs + (3 * 4));
-  supply_register (MACL_REGNUM, regs + (4 * 4));
-}
-
-void
-sh_nbsd_supply_register (char *regs, int regno)
-{
-  if (regno == -1)
-    sh_nbsd_supply_registers (regs);
-
-  if (regno == PC_REGNUM)
+  if (regno == PC_REGNUM || regno == -1)
     supply_register (PC_REGNUM, regs + (0 * 4));
-  else if (regno == SR_REGNUM)
+
+  if (regno == SR_REGNUM || regno == -1)
     supply_register (SR_REGNUM, regs + (1 * 4));
-  else if (regno == PR_REGNUM)
+
+  if (regno == PR_REGNUM || regno == -1)
     supply_register (PR_REGNUM, regs + (2 * 4));
-  else if (regno == MACH_REGNUM)
+
+  if (regno == MACH_REGNUM || regno == -1)
     supply_register (MACH_REGNUM, regs + (3 * 4));
-  else if (regno == MACL_REGNUM)
+
+  if (regno == MACL_REGNUM || regno == -1)
     supply_register (MACL_REGNUM, regs + (4 * 4));
-  else if (regno >= R0_REGNUM && regno <= (R0_REGNUM + 15))
-    supply_register (regno, regs + regmap[regno - R0_REGNUM]);
+
+  if ((regno >= R0_REGNUM && regno <= (R0_REGNUM + 15)) || regno == -1)
+    {
+      for (i = R0_REGNUM; i <= (R0_REGNUM + 15); i++)
+	if (regno == i || regno == -1)
+          supply_register (i, regs + regmap[i - R0_REGNUM]);
+    }
 }
 
 void
-sh_nbsd_fill_registers (char *regs)
+shnbsd_fill_reg (char *regs, int regno)
 {
-  int regno;
+  int i;
 
-  for (regno = R0_REGNUM; regno <= (R0_REGNUM + 15); regno++)
-    regcache_collect (regno, regs + regmap[regno - R0_REGNUM]);
-
-  regcache_collect (PC_REGNUM, regs + (0 * 4));
-  regcache_collect (SR_REGNUM, regs + (1 * 4));
-  regcache_collect (PR_REGNUM, regs + (2 * 4));
-  regcache_collect (MACH_REGNUM, regs + (3 * 4));
-  regcache_collect (MACL_REGNUM, regs + (4 * 4));
-}
-
-void
-sh_nbsd_fill_register (char *regs, int regno)
-{
-  if (regno == -1)
-    sh_nbsd_fill_registers (regs);
-
-  if (regno == PC_REGNUM)
+  if (regno == PC_REGNUM || regno == -1)
     regcache_collect (PC_REGNUM, regs + (0 * 4));
-  else if (regno == SR_REGNUM)
+
+  if (regno == SR_REGNUM || regno == -1)
     regcache_collect (SR_REGNUM, regs + (1 * 4));
-  else if (regno == PR_REGNUM)
+
+  if (regno == PR_REGNUM || regno == -1)
     regcache_collect (PR_REGNUM, regs + (2 * 4));
-  else if (regno == MACH_REGNUM)
+
+  if (regno == MACH_REGNUM || regno == -1)
     regcache_collect (MACH_REGNUM, regs + (3 * 4));
-  else if (regno == MACL_REGNUM)
+
+  if (regno == MACL_REGNUM || regno == -1)
     regcache_collect (MACL_REGNUM, regs + (4 * 4));
-  else if (regno >= R0_REGNUM && regno <= (R0_REGNUM + 15))
-    regcache_collect (regno, regs + regmap[regno - R0_REGNUM]);
+
+  if ((regno >= R0_REGNUM && regno <= (R0_REGNUM + 15)) || regno == -1)
+    {
+      for (i = R0_REGNUM; i <= (R0_REGNUM + 15); i++)
+	if (regno == i || regno == -1)
+          regcache_collect (i, regs + regmap[i - R0_REGNUM]);
+    }
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
@@ -130,7 +116,7 @@ sh_nbsd_fill_register (char *regs, int regno)
    debugging).  */
 
 static struct link_map_offsets *
-sh_nbsd_solib_svr4_fetch_link_map_offsets (void)
+shnbsd_solib_svr4_fetch_link_map_offsets (void)
 {
   static struct link_map_offsets lmo;
   static struct link_map_offsets *lmp = NULL;
@@ -177,7 +163,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
 
   /* Integer registers.  */
-  sh_nbsd_supply_registers (core_reg_sect);
+  shnbsd_supply_reg (core_reg_sect, -1);
 }
 
 static void
@@ -190,7 +176,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size != SIZEOF_STRUCT_REG)
 	warning ("Wrong size register set in core file.");
       else
-	sh_nbsd_supply_registers (core_reg_sect);
+	shnbsd_supply_reg (core_reg_sect, -1);
       break;
 
     default:
@@ -199,7 +185,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
     }
 }
 
-static struct core_fns sh_nbsd_core_fns =
+static struct core_fns shnbsd_core_fns =
 {
   bfd_target_unknown_flavour,		/* core_flavour */
   default_check_format,			/* check_format */
@@ -208,7 +194,7 @@ static struct core_fns sh_nbsd_core_fns =
   NULL					/* next */
 };
 
-static struct core_fns sh_nbsd_elfcore_fns =
+static struct core_fns shnbsd_elfcore_fns =
 {
   bfd_target_elf_flavour,		/* core_flavour */
   default_check_format,			/* check_format */
@@ -218,18 +204,18 @@ static struct core_fns sh_nbsd_elfcore_fns =
 };
 
 static void
-sh_nbsd_init_abi (struct gdbarch_info info,
+shnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
-		                   sh_nbsd_solib_svr4_fetch_link_map_offsets);
+		                   shnbsd_solib_svr4_fetch_link_map_offsets);
 }
 
 void
-_initialize_sh_nbsd_tdep (void)
+_initialize_shnbsd_tdep (void)
 {
-  add_core_fns (&sh_nbsd_core_fns);
-  add_core_fns (&sh_nbsd_elfcore_fns);
+  add_core_fns (&shnbsd_core_fns);
+  add_core_fns (&shnbsd_elfcore_fns);
 
-  sh_gdbarch_register_os_abi (SH_OSABI_NETBSD_ELF, sh_nbsd_init_abi);
+  sh_gdbarch_register_os_abi (SH_OSABI_NETBSD_ELF, shnbsd_init_abi);
 }

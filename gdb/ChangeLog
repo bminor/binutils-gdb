@@ -1,5 +1,31 @@
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* shnbsd-nat.c (fetch_inferior_registers): Use shnbsd_supply_reg.
+	(store_inferior_registers): Use shnbsd_fill_reg.
+	* shnbsd-tdep.c (sh_nbsd_supply_registers, 
+	sh_nbsd_supply_register): Collapse into...
+	(shnbsd_supply_reg): ...this.
+	(sh_nbsd_fill_registers, sh_nbsd_fill_register): Collapse into...
+	(shnbsd_fill_reg): ...this.
+	(sh_nbsd_solib_svr4_fetch_link_map_offsets): Rename to...
+	(shnbsd_solib_svr4_fetch_link_map_offsets): ...this.
+	(fetch_core_registers): Use shnbsd_supply_reg.
+	(fetch_elfcore_registers): Use shnbsd_supply_reg.
+	(sh_nbsd_core_fns): Rename to...
+	(shnbsd_core_fns): ...this.
+	(sh_nbsd_elfcore_fns): Rename to...
+	(shnbsd_elfcore_fns): ...this.
+	(sh_nbsd_init_abi): Rename to...
+	(shnbsd_init_abi): ...this.
+	(_initialize_sh_nbsd_tdep): Rename to...
+	(_initialize_shnbsd_tdep): ...this.
+	* shnbsd-tdep.h (sh_nbsd_supply_registers,
+	sh_nbsd_supply_register, sh_nbsd_fill_registers,
+	sh_nbsd_fill_register): Remove prototypes.
+	(shnbsd_supply_reg, shnbsd_fill_reg): Add prototypes.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Remove i387-nat.c.
 	(i387-nat.o): Delete dependency list.
 	(go32-nat.o): Change i387-nat.h to i387-tdep.h.

@@ -46,7 +46,7 @@ fetch_inferior_registers (int regno)
 		  (PTRACE_ARG3_TYPE) &inferior_registers, 0) == -1)
 	perror_with_name ("Couldn't get registers");
 
-      sh_nbsd_supply_register ((char *) &inferior_registers, regno);
+      shnbsd_supply_reg ((char *) &inferior_registers, regno);
 
       if (regno != -1)
 	return;
@@ -64,7 +64,7 @@ store_inferior_registers (int regno)
 		  (PTRACE_ARG3_TYPE) &inferior_registers, 0) == -1)
 	perror_with_name ("Couldn't get registers");
 
-      sh_nbsd_fill_register ((char *) &inferior_registers, regno);
+      shnbsd_fill_reg ((char *) &inferior_registers, regno);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &inferior_registers, 0) == -1)

@@ -22,10 +22,7 @@
 #ifndef SH_NBSD_TDEP_H
 #define SH_NBSD_TDEP_H
 
-void	sh_nbsd_supply_registers (char *);
-void	sh_nbsd_supply_register (char *, int);
-
-void	sh_nbsd_fill_registers (char *);
-void	sh_nbsd_fill_register (char *, int);
+void shnbsd_supply_reg (char *, int);
+void shnbsd_fill_reg (char *, int);
 
 #endif /* SH_NBSD_TDEP_H */
