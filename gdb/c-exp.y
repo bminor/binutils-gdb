@@ -720,21 +720,22 @@ variable:	name_not_typename
 
 
 ptype	:	typebase
-	/* "const" and "volatile" are curently ignored.  A type qualifier
-	   before the type is currently handled in the typebase rule.
-	   The reason for recognizing these here (shift/reduce conflicts)
-	   might be obsolete now that some pointer to member rules have
-	   been deleted.  */
-	|	typebase CONST_KEYWORD
-	|	typebase VOLATILE_KEYWORD
-	|	typebase abs_decl
-		{ $$ = follow_types ($1); }
-	|	typebase CONST_KEYWORD abs_decl
-		{ $$ = follow_types ($1); }
-	|	typebase VOLATILE_KEYWORD abs_decl
+	|	ptype const_or_volatile abs_decl const_or_volatile
 		{ $$ = follow_types ($1); }
 	;
-
+const_and_volatile: 	CONST_KEYWORD VOLATILE_KEYWORD
+	| 		VOLATILE_KEYWORD CONST_KEYWORD
+	;
+const_or_volatile_noopt:  	const_and_volatile 
+			{ push_type (tp_const); push_type (tp_volatile);}
+	| 		CONST_KEYWORD
+			{ push_type (tp_const);}
+	| 		VOLATILE_KEYWORD
+			{ push_type (tp_volatile); }
+	;
+const_or_volatile: const_or_volatile_noopt
+	| 
+	;
 abs_decl:	'*'
 			{ push_type (tp_pointer); $$ = 0; }
 	|	'*' abs_decl
@@ -851,11 +852,8 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = lookup_template_type(copy_name($2), $4,
 						    expression_context_block);
 			}
-	/* "const" and "volatile" are curently ignored.  A type qualifier
-	   after the type is handled in the ptype rule.  I think these could
-	   be too.  */
-	|	CONST_KEYWORD typebase { $$ = $2; }
-	|	VOLATILE_KEYWORD typebase { $$ = $2; }
+	| const_or_volatile_noopt typebase { $$ = follow_types ($2); }
+	| typebase const_or_volatile_noopt { $$ = follow_types ($1); }
 	;
 
 typename:	TYPENAME

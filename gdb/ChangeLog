@@ -106,6 +106,17 @@
 
 	* c-exp.y (typebase): Accept (signed long long) as a type expr.
 
+2001-09-20  Michael Snyder  <msnyder@redhat.com>
+	Changes by Daniel Berlin  <dan@cgsoftware.com>, to support
+	better parsing of const and volatile type expressions.
+	* c-exp.y (const_and_volatile, const_or_volatile_noopt, 
+	const_or_volatile): New non-terminals.
+	(ptype): Use new rule for const_or_volatile.
+	(typebase): Use new rule for const_or_volatile_noopt.
+	* parser-defs.h (enum type_pieces): New values tp_const, tp_volatile.
+	* parse.c (follow_types): Handle tp_const and tp_volatile on the
+	type stack: call make_cv_type to create new const/volatile type.
+
 2001-09-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c (fetch_link_map_offsets): Add comment.
