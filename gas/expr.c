@@ -78,8 +78,8 @@ make_expr_symbol (expressionP)
   if (expressionP->X_op == O_big)
     {
       /* This won't work, because the actual value is stored in
-         generic_floating_point_number or generic_bignum, and we are
-         going to lose it if we haven't already.  */
+	 generic_floating_point_number or generic_bignum, and we are
+	 going to lose it if we haven't already.  */
       if (expressionP->X_add_number > 0)
 	as_bad (_("bignum invalid"));
       else
@@ -329,8 +329,8 @@ integer_constant (radix, expressionP)
       int flt = 0;
 
       /* In MRI mode, the number may have a suffix indicating the
-         radix.  For that matter, it might actually be a floating
-         point constant.  */
+	 radix.  For that matter, it might actually be a floating
+	 point constant.  */
       for (suffix = input_line_pointer; ISALNUM (*suffix); suffix++)
 	{
 	  if (*suffix == 'e' || *suffix == 'E')
@@ -401,7 +401,7 @@ integer_constant (radix, expressionP)
   if (radix == 16 && c == '_')
     {
       /* This is literal of the form 0x333_0_12345678_1.
-         This example is equivalent to 0x00000333000000001234567800000001.  */
+	 This example is equivalent to 0x00000333000000001234567800000001.  */
 
       int num_little_digits = 0;
       int i;
@@ -681,8 +681,8 @@ mri_char_constant (expressionP)
       if (i < SIZE_OF_LARGE_NUMBER - 1)
 	{
 	  /* If there is more than one littlenum, left justify the
-             last one to make it match the earlier ones.  If there is
-             only one, we can just use the value directly.  */
+	     last one to make it match the earlier ones.  If there is
+	     only one, we can just use the value directly.  */
 	  for (; j < CHARS_PER_LITTLENUM; j++)
 	    generic_bignum[i] <<= 8;
 	}
@@ -828,10 +828,10 @@ operand (expressionP)
 	{
 	  char *s;
 
-	  /* Check for a hex constant.  */
+	  /* Check for a hex or float constant.  */
 	  for (s = input_line_pointer; hex_p (*s); s++)
 	    ;
-	  if (*s == 'h' || *s == 'H')
+	  if (*s == 'h' || *s == 'H' || *input_line_pointer == '.')
 	    {
 	      --input_line_pointer;
 	      integer_constant (0, expressionP);
@@ -1079,6 +1079,18 @@ operand (expressionP)
 	    else
 	      expressionP->X_add_number = ! expressionP->X_add_number;
 	  }
+	else if (expressionP->X_op == O_big
+		 && expressionP->X_add_number <= 0
+		 && c == '-'
+		 && (generic_floating_point_number.sign == '+'
+		     || generic_floating_point_number.sign == 'P'))
+	  {
+	    /* Negative flonum (eg, -1.000e0).  */
+	    if (generic_floating_point_number.sign == '+')
+	      generic_floating_point_number.sign = '-';
+	    else
+	      generic_floating_point_number.sign = 'N';
+	  }
 	else if (expressionP->X_op != O_illegal
 		 && expressionP->X_op != O_absent)
 	  {
@@ -1100,7 +1112,7 @@ operand (expressionP)
 #if defined (DOLLAR_DOT) || defined (TC_M68K)
     case '$':
       /* '$' is the program counter when in MRI mode, or when
-         DOLLAR_DOT is defined.  */
+	 DOLLAR_DOT is defined.  */
 #ifndef DOLLAR_DOT
       if (! flag_m68k_mri)
 	goto de_fault;
@@ -1108,7 +1120,7 @@ operand (expressionP)
       if (flag_m68k_mri && hex_p (*input_line_pointer))
 	{
 	  /* In MRI mode, '$' is also used as the prefix for a
-             hexadecimal constant.  */
+	     hexadecimal constant.  */
 	  integer_constant (16, expressionP);
 	  break;
 	}
@@ -1199,7 +1211,7 @@ operand (expressionP)
 	goto de_fault;
 
       /* In MRI mode, this is a floating point constant represented
-         using hexadecimal digits.  */
+	 using hexadecimal digits.  */
 
       ++input_line_pointer;
       integer_constant (16, expressionP);
@@ -1227,9 +1239,9 @@ operand (expressionP)
 
 #ifdef md_parse_name
 	  /* This is a hook for the backend to parse certain names
-             specially in certain contexts.  If a name always has a
-             specific value, it can often be handled by simply
-             entering it in the symbol table.  */
+	     specially in certain contexts.  If a name always has a
+	     specific value, it can often be handled by simply
+	     entering it in the symbol table.  */
 	  if (md_parse_name (name, expressionP, &c))
 	    {
 	      *input_line_pointer = c;
@@ -1775,7 +1787,7 @@ expr (rankarg, resultP)
 	    case O_left_shift:		resultP->X_add_number <<= v; break;
 	    case O_right_shift:
 	      /* We always use unsigned shifts, to avoid relying on
-                 characteristics of the compiler used to compile gas.  */
+		 characteristics of the compiler used to compile gas.  */
 	      resultP->X_add_number =
 		(offsetT) ((valueT) resultP->X_add_number >> (valueT) v);
 	      break;
