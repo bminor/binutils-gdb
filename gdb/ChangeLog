@@ -1,3 +1,8 @@
+Sat May 22 00:39:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior): Clear stop_signal if it should not
+	be passed to the inferior to make "handle <signal> nopass nostop" work.
+
 Sat May 22 00:21:41 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/mips/tm-irix3.h: Clean up, use tm-bigmips.h and redefine
