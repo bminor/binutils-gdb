@@ -45,116 +45,6 @@ if {$hp_cc_compiler} {
     set void void
 }
 
-proc signal_tests_1 {} {
-    global gdb_prompt
-    if [runto_main] then {
-	gdb_test "next" "signal \\(SIGUSR1.*" \
-	    "next over signal call; SIGALRM handler"
-	gdb_test "next" "alarm \\(.*" \
-	    "next over signal call; SIGUSR1 handler"
-
-	# Set up an alarm, wait for it to be come pending then do a
-	# next to see what happens.
-
-	gdb_test "next" "\\+\\+count; /\\* first \\*/" \
-	    "next over 1st alarm"
-	sleep 2
-	gdb_test "next" "alarm .*" \
-	    "next over first count and SIGALRM to 2nd alarm"
-
-	# Now do the same thing but with a breakpoint in the SIGALRM
-	# handler so that we stop there.
-
-	gdb_test "break handler" "Breakpoint \[0-9\]+ .*"
-	gdb_test "next" "\\+\\+count; /\\* second \\*/" \
-	    "next over 2nd alarm"
-	sleep 2
-	gdb_test "next" "Breakpoint.*handler.*" \
-	    "next over second count, but jump to handler"
-	gdb_test "backtrace" \
-	    "#0.*handler.*#1.*signal handler.*#2.* main .*" \
-	    "backtrace for 2nd alarm"
-
-	# Let the signal handler return allowing main to advance to
-	# func1.
-
-	gdb_test "break func1" "Breakpoint \[0-9\]+ .*"
-	gdb_test "break func2" "Breakpoint \[0-9\]+ .*"
-	gdb_test "continue" "Breakpoint.*func1.*" "continue to func1"
-
-	# While still in func1, force a signal, check the backtrace.
-
-	gdb_test "signal SIGUSR1" "Breakpoint.*handler.*"
-	gdb_test "bt" \
-	    "#0  handler .*#1  .signal handler called.*#2  func1 .*\#3 .*main.*" \
-	    "backtrace for SIGUSR1"
-
-	# The problem here is that the breakpoint at func1 will be
-	# inserted, and when the system finishes with the signal
-	# handler it will try to execute there.  For GDB to try to
-	# remember that it was going to step over a breakpoint when a
-	# signal happened, distinguish this case from the case where
-	# func1 is called from the signal handler, etc., seems
-	# exceedingly difficult.  So don't expect this to get fixed
-	# anytime soon.
-
-	setup_xfail "*-*-*"
-	set test "continue to func2"
-	gdb_test_multiple "continue" "$test" {
-	    -re "Breakpoint.*func2.*$gdb_prompt $" {
-		pass "$test"
-	    }
-	    -re "Breakpoint.*func1.*$gdb_prompt $" {
-	    	fail "$test"
-		gdb_test "continue" "Breakpoint.*func2.*" \
-		    "extra continue to func2"
-	    }
-	}
-
-	# In running to func2, the 2rd alarm call will have been set
-	# up, let it be delivered.
-
-	# This doesn't work correctly on platforms with hardware single
-	# step...
-
-	sleep 2
-
-	setup_kfail "i*86-*-*" gdb/1738
-	setup_kfail "x86_64-*-*" gdb/1738
-	setup_kfail "rs6000-*-*" gdb/1738
-	setup_kfail "powerpc-*-*" gdb/1738
-	setup_kfail "sparc-*-*" gdb/1738
-	gdb_test "continue" "Breakpoint.*handler.*" \
-	    "continue to handler for 3rd alarm call"
-
-	setup_kfail "i*86-*-*" gdb/1738
-	setup_kfail "x86_64-*-*" gdb/1738
-	setup_kfail "rs6000-*-*" gdb/1738
-	setup_kfail "powerpc-*-*" gdb/1738
-	setup_kfail "sparc-*-*" gdb/1738
-	gdb_test "backtrace" \
-	    "#0  handler.*#1.*signal handler called.*#2  func2.*#3.*main.*" \
-	    "backtrace for 3rd alarm"
-
-	# If we succeeded a continue will return from the handler to
-	# func2.  GDB now has `forgotten' that it intended to step
-	# over the breakpoint at func2 and will stop at func2.
-
-	setup_xfail "*-*-*"
-	set test "continue to program exit"
-	gdb_test_multiple "continue" "$test" {
-	    -re "Program exited with code 010\\." {
-		pass "$test"
-	    }
-	    -re "Breakpoint.*func2.*$gdb_prompt $" {
-	    	fail "$test"
-		gdb_test "continue" "Program exited with code 010\\." \
-		    "extra continue to program exit"
-	    }
-	}
-    }
-}
-
 gdb_exit
 gdb_start
 
@@ -185,7 +75,6 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
-signal_tests_1
 
 if [runto_main] then {
 
@@ -378,10 +267,10 @@ The program being debugged stopped while in a function called from GDB.*" \
     # the inferior.  (This probably causes the inferior to run away.
     # Be prepared to rerun to main for further testing.)
 
-    gdb_test "signal 5" \
-	"Continuing with signal SIGTRAP.*" \
-	"sent signal 5"
-
+    gdb_test "signal SIGUSR1" "Breakpoint.*handler.*"
+    gdb_test "bt" \
+	"#0  handler .*#1  .signal handler called.*\#2 .*main.*" \
+	"backtrace for SIGUSR1"
 }
 
 return 0

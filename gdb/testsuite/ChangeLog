@@ -1,3 +1,8 @@
+2004-09-08  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/signals.exp (signal_tests_1): Delete.  Merge signal
+	delivery test with duplicate at end of file.
+
 2004-09-06  Mark Kettenis  <kettenis@jive.nl>
 
 	* gdb.base/unload.exp: Link with -dl on *-*-solaris*.
