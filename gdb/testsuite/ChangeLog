@@ -1,3 +1,13 @@
+2000-04-24  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/miscexprs.exp: make sizeof long array test portable.
+
+	* gdb.base/ending-run.exp: After connecting to a remote target,
+	but before running, the target will appear to be in a random
+	location.  Specify both a file and a line for breakpoints.
+	Also, the function that calls main may be called 'init'
+	rather than 'start'.
+
 2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/help.exp: Update output for add-symbol-file command.

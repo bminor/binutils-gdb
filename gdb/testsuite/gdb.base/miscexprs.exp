@@ -258,27 +258,14 @@ gdb_expect {
   }
 
 
-if [istarget "hppa2.0w*-*-*"] then {
-send_gdb "print sizeof(lbig)\n"
+send_gdb "print sizeof(lbig)/sizeof(long)\n"
 gdb_expect {
-    -re ".\[0-9\]* = 7200.*$gdb_prompt $" {
-        pass "print value of sizeof(lbig)"
+    -re ".\[0-9\]* = 900.*$gdb_prompt $" {
+        pass "print value of sizeof(lbig)/sizeof(long)"
       }
-    -re ".*$gdb_prompt $" { fail "print value of sizeof(lbig)" }
-    timeout           { fail "(timeout) print value of sizeof(lbig)" }
+    -re ".*$gdb_prompt $" { fail "print value of sizeof(lbig)/sizeof(long)" }
+    timeout     { fail "(timeout) print value of sizeof(lbig)/sizeof(long)" }
   }
-}
-
-if ![istarget "hppa2.0w*-*-*"] then {
-send_gdb "print sizeof(lbig)\n"
-gdb_expect {
-    -re ".\[0-9\]* = 3600.*$gdb_prompt $" {
-        pass "print value of sizeof(lbig)"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of sizeof(lbig)" }
-    timeout           { fail "(timeout) print value of sizeof(lbig)" }
-  }
-}
 
 send_gdb "print ibig.i\[100\] << 2\n"
 gdb_expect {

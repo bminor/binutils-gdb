@@ -51,12 +51,16 @@ gdb_load ${binfile}
 # first line in the routine, which turns out to correspond
 # to the prolog--that's another bug...)
 #
-gdb_test "b 1" ".*Breakpoint.*line 1.*" "bpt at line before routine"
-gdb_test "b 13" ".*Note.*also.*Breakpoint.*2.*"
+
+gdb_test "b ending-run.c:1" ".*Breakpoint.*ending-run.c, line 1.*" \
+	"bpt at line before routine"
+
+gdb_test "b ending-run.c:13" \
+	".*Note.*also.*Breakpoint 2.*ending-run.c, line 13.*"
 
 # Set up to go to the next-to-last line of the program
 #
-gdb_test "b 31" ".*Breakpoint.*3.*"
+gdb_test "b ending-run.c:31" ".*Breakpoint 3.*ending-run.c, line 31.*"
 
 # Expect to hit the bp at line "1", but symbolize this
 # as line "13".  Then try to clear it--this should work.
@@ -76,11 +80,12 @@ gdb_expect {
 
 # Test some other "clear" combinations
 #
-gdb_test "b 1" ".*Breakpoint.*4.*"
-gdb_test "b 13" ".*Note.*also.*Breakpoint.*5.*"
-gdb_test "cle 13" ".*Deleted breakpoint 5.*" "Only cleared 1 by line"
+gdb_test "b ending-run.c:1" ".*Breakpoint.*4.*"
+gdb_test "b ending-run.c:13" ".*Note.*also.*Breakpoint.*5.*"
+gdb_test "cle ending-run.c:13" \
+	".*Deleted breakpoint 5.*" "Only cleared 1 by line"
 
-send_gdb "inf line 13\n"
+send_gdb "inf line ending-run.c:13\n"
 gdb_expect {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_eight $expect_out(1,string)
@@ -92,12 +97,12 @@ gdb_expect {
     }
 }
 
-send_gdb "inf line 14\n"
+send_gdb "inf line ending-run.c:14\n"
 gdb_expect {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_nine $expect_out(1,string)
-        gdb_test "b 14"       ".*Breakpoint.*7.*"
-        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint.*8.*"
+        gdb_test "b ending-run.c:14" ".*Breakpoint 7.*ending-run.c, line 14.*"
+        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 8.*"
         gdb_test "c" ".*Breakpoint.*7.*callee.*14.*"
         gdb_test "cle" ".*Deleted breakpoints 8 7.*" "Clear 2 by default"
     }
@@ -139,6 +144,10 @@ gdb_expect {
 		gdb_test "n" ".*" ""
 	    }
 	    -re ".*in.*start.*$gdb_prompt $" { 
+		pass "step out of main"
+	    }
+	    -re ".*in.*init.*$gdb_prompt $" { 
+		# This is what happens on sparc64-elf ultra.
 		pass "step out of main"
 	    }
 	    -re ".*in .nope ().*$gdb_prompt $" {
