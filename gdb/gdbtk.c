@@ -86,7 +86,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SIOCSPGRP
 #endif
 
-extern char *source_path;       /* from source.c */
 int gdbtk_load_hash PARAMS ((char *, unsigned long));
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 
@@ -142,6 +141,7 @@ static int gdb_get_tracepoint_info PARAMS ((ClientData, Tcl_Interp *, int, Tcl_O
 static int gdb_actions_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_prompt_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_find_file_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static int gdb_get_tracepoint_list PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static void gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
@@ -999,11 +999,13 @@ gdb_cmd (clientData, interp, argc, argv)
      set result_ptr to NULL so gdbtk_fputs() will not buffer
      all the data until the command is finished. */
 
-  if (strncmp("load ",argv[1],5) == 0) {
-    Tcl_DStringAppend (result_ptr, "", -1);
-    save_ptr = result_ptr;
-    result_ptr = NULL;
-  }
+  if (strncmp ("load ", argv[1], 5) == 0
+      || strncmp ("while ", argv[1], 6) == 0)
+    {
+      Tcl_DStringAppend (result_ptr, "", -1);
+      save_ptr = result_ptr;
+      result_ptr = NULL;
+    }
 
   execute_command (argv[1], 1);
 
@@ -1901,6 +1903,8 @@ gdbtk_init ( argv0 )
                         gdb_prompt_command, NULL, NULL);
   Tcl_CreateObjCommand (interp, "gdb_find_file",
                         gdb_find_file_command, NULL, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_get_tracepoint_list",
+                        gdb_get_tracepoint_list, NULL, NULL);
   
   command_loop_hook = tk_command_loop;
   print_frame_info_listing_hook =
@@ -2397,9 +2401,9 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
     filename = "N/A";
   Tcl_ListObjAppendElement (interp, list,
                             Tcl_NewStringObj (filename, -1));
-  Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (sal.line));
   find_pc_partial_function (tp->address, &funcname, NULL, NULL);
   Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj (funcname, -1));
+  Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (sal.line));
   sprintf (tmp, "0x%08x", tp->address);
   Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj (tmp, -1));
   Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (tp->enabled));
@@ -2596,6 +2600,25 @@ gdb_prompt_command (clientData, interp, objc, objv)
   return TCL_OK;
 }
 
+/* return a list of all tracepoint numbers in interpreter */
+static int
+gdb_get_tracepoint_list (clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+{
+  Tcl_Obj *list;
+  struct tracepoint *tp;
+
+  list = Tcl_NewListObj (0, NULL);
+
+  ALL_TRACEPOINTS (tp)
+    Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (tp->number));
+
+  Tcl_SetObjResult (interp, list);
+  return TCL_OK;
+}
 
 /* This is stolen from source.c */
 #ifdef CRLF_SOURCE_FILES
@@ -2627,8 +2650,7 @@ gdb_find_file_command (clientData, interp, objc, objv)
   Tcl_Obj *CONST objv[];
 {
   char *file, *filename;
-  char *p;
-  int   found;
+  struct symtab *st = NULL;
 
   if (objc != 2)
     {
@@ -2646,24 +2668,19 @@ gdb_find_file_command (clientData, interp, objc, objv)
       return TCL_OK;
     }
 
-  /* Search the path -- do NOT search CWD first -- be consistent with source.c */
-  found = openp (source_path, 0, file, OPEN_MODE, 0, &filename);
-  if (found < 0)
+  /* We really need a symtab for this to work... */
+  st = lookup_symtab (file);
+  if (st != NULL)
     {
-      /* Did not work -- try just the base filename */
-      p = basename (file);
-      if (p != file)
-        found = openp (source_path, 0, p, OPEN_MODE, 0, &filename);
+      filename = symtab_to_filename (st);
+      if (filename != NULL)
+        {
+          Tcl_SetObjResult (interp, Tcl_NewStringObj (filename, -1));
+          return TCL_OK;
+        }
     }
-          
-  if (found >= 0)
-    {
-      Tcl_SetObjResult (interp, Tcl_NewStringObj (filename, -1));
-      close (found);
-    }
-  else
-    Tcl_SetResult (interp, "", TCL_STATIC);
-  
+
+  Tcl_SetResult (interp, "", TCL_STATIC);
   return TCL_OK;
 }
 
