@@ -1,3 +1,18 @@
+Tue Oct 31 12:36:52 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (export_files): Remove.
+	(import_files): Make static.
+	(struct export_symbol_list): Define.
+	(export_symbols): New static variable.
+	(gld${EMULATION_NAME}_parse_args): Handle an initial -b option
+	correctly.  Call read_file for an export file.
+	(gld${EMULATION_NAME}_before_allocation): Call
+	bfd_xcoff_export_symbol for each export symbol, rather than
+	calling read_file for each export file.
+	(gld${EMULATION_NAME}_read_file): For an export file, make the
+	exported symbols undefined, and store them on the export_symbols
+	list.
+
 Sat Oct 28 00:10:03 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_parse_args):

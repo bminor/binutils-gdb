@@ -74,7 +74,7 @@ static unsigned short modtype = ('1' << 8) | 'L';
    permitted).  */
 static int textro;
 
-/* Structure used to hold import or export file list.  */
+/* Structure used to hold import file list.  */
 
 struct filelist
 {
@@ -85,8 +85,18 @@ struct filelist
 /* List of import files.  */
 struct filelist *import_files;
 
-/* List of export files.  */
-struct filelist *export_files;
+/* List of export symbols read from the export files.  */
+
+struct export_symbol_list
+{
+  struct export_symbol_list *next;
+  const char *name;
+  boolean syscall;
+};
+
+static struct export_symbol_list *export_symbols;
+
+/* This routine is called before anything else is done.  */
 
 static void
 gld${EMULATION_NAME}_before_parse()
@@ -105,6 +115,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 {
   int prevoptind = optind;
   int prevopterr = opterr;
+  int indx;
   int longind;
   int optc;
   long val;
@@ -170,14 +181,17 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
      -bnotypchk, -bnox, -bquiet, -bR, -brename, -breorder, -btypchk,
      -bx, -bX, -bxref.  */
 
-  /* If the first option starts with -b, change the first : to an =.
+  /* If the current option starts with -b, change the first : to an =.
      The AIX linker uses : to separate the option from the argument;
      changing it to = lets us treat it as a getopt option.  */
-  if (optind < argc && strncmp (argv[optind], "-b", 2) == 0)
+  indx = optind;
+  if (indx == 0)
+    indx = 1;
+  if (indx < argc && strncmp (argv[indx], "-b", 2) == 0)
     {
       char *s;
 
-      for (s = argv[optind]; *s != '\0'; s++)
+      for (s = argv[indx]; *s != '\0'; s++)
 	{
 	  if (*s == ':')
 	    {
@@ -254,6 +268,9 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case OPTION_EXPORT:
+      gld${EMULATION_NAME}_read_file (optarg, false);
+      break;
+
     case OPTION_IMPORT:
       {
 	struct filelist *n;
@@ -262,10 +279,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 	n = (struct filelist *) xmalloc (sizeof (struct filelist));
 	n->next = NULL;
 	n->name = optarg;
-	if (optc == OPTION_EXPORT)
-	  flpp = &export_files;
-	else
-	  flpp = &import_files;
+	flpp = &import_files;
 	while (*flpp != NULL)
 	  flpp = &(*flpp)->next;
 	*flpp = n;
@@ -367,13 +381,22 @@ static void
 gld${EMULATION_NAME}_before_allocation ()
 {
   struct filelist *fl;
+  struct export_symbol_list *el;
   char *libpath;
 
   /* Handle the import and export files, if any.  */
   for (fl = import_files; fl != NULL; fl = fl->next)
     gld${EMULATION_NAME}_read_file (fl->name, true);
-  for (fl = export_files; fl != NULL; fl = fl->next)
-    gld${EMULATION_NAME}_read_file (fl->name, false);
+  for (el = export_symbols; el != NULL; el = el->next)
+    {
+      struct bfd_link_hash_entry *h;
+
+      h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
+      if (h == NULL)
+	einfo ("%P%F: bfd_link_hash_lookup of export symbol failed: %E\n");
+      if (! bfd_xcoff_export_symbol (output_bfd, &link_info, h, el->syscall))
+	einfo ("%P%F: bfd_xcoff_export_symbol failed: %E\n");
+    }
 
   /* Track down all relocations called for by the linker script (these
      are typically constructor/destructor entries created by
@@ -418,7 +441,9 @@ gld${EMULATION_NAME}_before_allocation ()
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 }
 
-/* Read an import or export file.  */
+/* Read an import or export file.  For an import file, this is called
+   by the before_allocation emulation routine.  For an export file,
+   this is called by the parse_args emulation routine.  */
 
 static void
 gld${EMULATION_NAME}_read_file (filename, import)
@@ -596,27 +621,35 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	    }
 	}
 
-      h = bfd_link_hash_lookup (link_info.hash, symname, false, false, true);
-      if (h == NULL || h->type == bfd_link_hash_new)
+      if (! import)
 	{
-	  /* We can just ignore attempts to import an unreferenced
-	     symbol.  */
-	  if (! import)
-	    einfo ("%X%s:%d: attempt to export undefined symbol %s\n",
-		   filename, lineno, symname);
-	}
-      else if (import)
-	{
-	  if (! bfd_xcoff_import_symbol (output_bfd, &link_info, h, address,
-					 imppath, impfile, impmember))
-	    einfo ("%X%s:%d: failed to import symbol %s: %E\n",
-		   filename, lineno, symname);
+	  struct export_symbol_list *n;
+
+	  ldlang_add_undef (symname);
+	  n = ((struct export_symbol_list *)
+	       xmalloc (sizeof (struct export_symbol_list)));
+	  n->next = export_symbols;
+	  n->name = buystring (symname);
+	  n->syscall = syscall;
+	  export_symbols = n;
 	}
       else
 	{
-	  if (! bfd_xcoff_export_symbol (output_bfd, &link_info, h, syscall))
-	    einfo ("%X%s:%d: failed to export symbol %s: %E\n",
-		   filename, lineno, symname);
+	  h = bfd_link_hash_lookup (link_info.hash, symname, false, false,
+				    true);
+	  if (h == NULL || h->type == bfd_link_hash_new)
+	    {
+	      /* We can just ignore attempts to import an unreferenced
+		 symbol.  */
+	    }
+	  else
+	    {
+	      if (! bfd_xcoff_import_symbol (output_bfd, &link_info, h,
+					     address, imppath, impfile,
+					     impmember))
+		einfo ("%X%s:%d: failed to import symbol %s: %E\n",
+		       filename, lineno, symname);
+	    }
 	}
 
       obstack_free (o, obstack_base (o));
