@@ -1468,14 +1468,6 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
 
-  flags = 0;
-
-  if (new_group)
-    flags |= CREATE_NEW_PROCESS_GROUP;
-
-  if (new_console)
-    flags |= CREATE_NEW_CONSOLE;
-
   if (!useshell || !shell[0])
     {
       flags = DEBUG_ONLY_THIS_PROCESS;
@@ -1484,12 +1476,19 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
     }
   else
     {
-      char *newallargs = alloca (sizeof (" -c 'exec  '") + strlen (exec_file) + strlen (allargs) + 2);
+      char *newallargs = alloca (sizeof (" -c 'exec  '") + strlen (exec_file)
+				 + strlen (allargs) + 2);
       sprintf (newallargs, " -c 'exec %s %s'", exec_file, allargs);
       allargs = newallargs;
       toexec = shell;
       flags = DEBUG_PROCESS;
     }
+
+  if (new_group)
+    flags |= CREATE_NEW_PROCESS_GROUP;
+
+  if (new_console)
+    flags |= CREATE_NEW_CONSOLE;
 
   args = alloca (strlen (toexec) + strlen (allargs) + 2);
   strcpy (args, toexec);
