@@ -134,6 +134,8 @@ SIM_EXTRA_ALL =
 SIM_EXTRA_INSTALL =
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
+# Likewise `distclean'
+SIM_EXTRA_DISTCLEAN =
 
 # Every time a new general purpose source file was added every target's
 # Makefile.in needed to be updated to include the file in SIM_OBJS.
@@ -622,7 +624,7 @@ clean: $(SIM_EXTRA_CLEAN)
 	fi
 	rm -f tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
-distclean mostlyclean maintainer-clean realclean: clean
+distclean mostlyclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status .gdbinit
 	rm -f tconfig.h config.h stamp-h
