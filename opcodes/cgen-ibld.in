@@ -78,7 +78,9 @@ static CGEN_INLINE long extract_1
 static CGEN_INLINE void
 insert_1 (CGEN_CPU_DESC cd,
 	  unsigned long value,
-	  int start,length,word_length,
+	  int start,
+	  int length,
+	  int word_length,
 	  unsigned char *bufp)
 {
   unsigned long x,mask;
@@ -320,7 +322,8 @@ put_insn_int_value (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 static CGEN_INLINE int
 fill_cache (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	    CGEN_EXTRACT_INFO *ex_info,
-	    int offset, bytes,
+	    int offset,
+	    int bytes,
 	    bfd_vma pc)
 {
   /* It's doubtful that the middle part has already been fetched so
@@ -406,7 +409,7 @@ extract_1 (CGEN_CPU_DESC cd,
    necessary.  */
 
 static int
-extract_normal (CGEN_CPU_DESC cd;
+extract_normal (CGEN_CPU_DESC cd,
 #if ! CGEN_INT_INSN_P
 		CGEN_EXTRACT_INFO *ex_info,
 #else
