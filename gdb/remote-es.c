@@ -2042,7 +2042,7 @@ es1800_child_detach (args, from_tty)
 
 /* Define the target subroutine names  */
 
-static struct target_ops es1800_ops =
+struct target_ops es1800_ops =
 {
   "es1800",			/* to_shortname */
 				/* to_longname */
@@ -2089,7 +2089,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 
 /* Define the target subroutine names  */
 
-static struct target_ops es1800_child_ops =
+struct target_ops es1800_child_ops =
 {
   "es1800_process",		/* to_shortname */
   				/* to_longname */

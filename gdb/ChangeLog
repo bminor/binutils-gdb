@@ -1,3 +1,7 @@
+Wed Mar  9 15:23:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote-es.c (es1800_child_ops): Don't declare it static.
+
 Tue Mar  8 11:42:39 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* config/i386/tm-i386v4.h: Give just macro name, not args, to #undef.
