@@ -79,6 +79,9 @@ ldfile_add_library_path (name, cmdline)
 {
   search_dirs_type *new;
 
+  if (!cmdline && config.only_cmd_line_lib_dirs)
+    return;
+
   new = (search_dirs_type *) xmalloc (sizeof (search_dirs_type));
   new->next = NULL;
   new->name = name;

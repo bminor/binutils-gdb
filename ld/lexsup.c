@@ -133,6 +133,7 @@ int parsing_defsym = 0;
 #define OPTION_DISCARD_NONE		(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
 #define OPTION_SPARE_DYNAMIC_TAGS	(OPTION_DISCARD_NONE + 1)
 #define OPTION_NO_DEFINE_COMMON		(OPTION_SPARE_DYNAMIC_TAGS + 1)
+#define OPTION_NOSTDLIB			(OPTION_NO_DEFINE_COMMON + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -330,6 +331,8 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Create an output file even if errors occur"), TWO_DASHES },
   { {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
       '\0', NULL, NULL, NO_HELP },
+  { {"nostdlib", no_argument, NULL, OPTION_NOSTDLIB},
+      '\0', NULL, N_("Only use library directories specified on\n\t\t\t\tthe command line"), ONE_DASH },
   { {"oformat", required_argument, NULL, OPTION_OFORMAT},
       '\0', N_("TARGET"), N_("Specify target of output file"), EXACTLY_TWO_DASHES },
   { {"qmagic", no_argument, NULL, OPTION_IGNORE},
@@ -770,6 +773,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_NOINHIBIT_EXEC:
 	  force_make_executable = true;
+	  break;
+	case OPTION_NOSTDLIB:
+	  config.only_cmd_line_lib_dirs = true;
 	  break;
 	case OPTION_NO_WHOLE_ARCHIVE:
 	  whole_archive = false;

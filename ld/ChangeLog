@@ -1,3 +1,14 @@
+2001-11-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld.texinfo (Options): Document new option, -nostdlib.
+	* lexsup.c (OPTION_NOSTDLIB): New definition.
+	(ld_options): Add entry for "nostdlib".
+	(parse_args): Handle OPTIONS_NOSTDLIB.
+	* ldfile.c (ldfile_add_library_path): Don't add directories
+	to the search path if they weren't specified on the command line
+	and -nostdlib was specified.
+	* ld.h (ld_config_type): New member only_cmd_line_lib_dirs.
+
 2001-10-31  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* lexsup.c (parse_args): Prevent infinite parsing loop when

@@ -1110,6 +1110,12 @@ Normally, the linker will not produce an output file if it encounters
 errors during the link process; it exits without writing an output file
 when it issues any error whatsoever.
 
+@kindex -nostdlib
+@item -nostdlib
+Only search library directories explicitly specified on the
+command line.  Library directories specified in linker scripts
+(including linker scripts specified on the command line) are ignored.
+
 @ifclear SingleFormat
 @kindex --oformat
 @item --oformat @var{output-format}

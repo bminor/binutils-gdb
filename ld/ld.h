@@ -214,6 +214,10 @@ typedef struct {
 
   unsigned int split_by_reloc;
   bfd_size_type split_by_file;
+
+  /* If set, only search library directories explicitly selected
+     on the command line.  */
+  boolean only_cmd_line_lib_dirs;
 } ld_config_type;
 
 extern ld_config_type config;
