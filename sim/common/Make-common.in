@@ -1,5 +1,5 @@
 # Makefile fragment for common parts of all simulators.
-# Copyright (C) 1997 Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 
 # This program is free software; you can redistribute it and/or modify
@@ -195,7 +195,8 @@ CONFIG_CFLAGS = \
 CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
-  -I../../opcodes -I$(srcroot)/opcodes
+  -I../../opcodes -I$(srcroot)/opcodes \
+  -I../../intl -I$(srcroot)/intl
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(CFLAGS)
 BUILD_CFLAGS = -g -O $(CSEARCH)
 
@@ -204,13 +205,16 @@ COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH)
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
 BFD_LIB = ../../bfd/libbfd.a
 OPCODES_LIB = ../../opcodes/libopcodes.a
+INTL_LIB = ../../intl/libintl.a
 CONFIG_LIBS = @LIBS@
-LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
+LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(INTL_LIB) $(LIBIBERTY_LIB) \
 	$(SIM_EXTRA_LIBDEPS)
-EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
+EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(INTL_LIB) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS)
 
 LIB_OBJS = callback.o syscall.o targ-map.o $(SIM_OBJS)
+
+RUNTESTFLAGS =
 
 all: $(SIM_EXTRA_ALL) libsim.a run .gdbinit
 
@@ -533,7 +537,7 @@ installdirs:
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(bindir)
 
 check:
-	cd ../testsuite && $(MAKE) check
+	cd ../testsuite && $(MAKE) check RUNTESTFLAGS="$(RUNTESTFLAGS)"
 
 info:
 clean-info:

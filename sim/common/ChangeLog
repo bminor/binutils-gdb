@@ -1,3 +1,10 @@
+Wed Apr 22 14:14:19 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* Make-common.in (CSEARCH): Add -I to intl directories.
+	(INTL_LIB): Point to libintl.a.
+	(LIBDEPS): Add $(INTL_LIB).
+	(EXTRA_LIBS): Ditto.
+
 start-sanitize-sky
 Tue Apr 21 17:29:48 1998  Jim Lemke  <jlemke@cygnus.com>
 	* sim-base.h: Add configure option --with-sim-funit.
