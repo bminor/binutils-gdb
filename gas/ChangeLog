@@ -1,5 +1,9 @@
 Fri Aug 15 14:00:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (check-DEJAGNU): Don't cd into testsuite until after
+	setting EXPECT and TCL_LIBRARY.
+	* Makefile.in: Rebuild.
+
 	* as.h (enum debug_info_type): Define.
 	(debug_type): Declare.
 	* as.c (debug_type): New global variable.
