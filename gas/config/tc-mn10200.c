@@ -741,6 +741,7 @@ keep_going:
       else
 	{
 	  int reloc, pcrel, reloc_size, offset;
+	  fixS *fixP;
 
 	  reloc = BFD_RELOC_NONE;
 	  /* How big is the reloc?  Remember SPLIT relocs are
@@ -786,9 +787,11 @@ keep_going:
 	  else if (reloc_size == 32 || reloc_size == 24)
 	    reloc_size = 2;
 
-	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, reloc_size,
-		       &fixups[i].exp, pcrel,
-		       ((bfd_reloc_code_real_type) reloc));
+	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
+			      reloc_size, &fixups[i].exp, pcrel,
+			      ((bfd_reloc_code_real_type) reloc));
+	  if (pcrel)
+	    fixP->fx_offset += offset;
 	}
     }
 }

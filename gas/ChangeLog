@@ -1,6 +1,11 @@
+Mon Jan  6 15:19:32 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (md_assemble): Tweak fx_offset for pc-relative
+	relocs.
+
 Fri Jan  3 16:47:08 1997  Jeffrey A Law  (law@cygnus.com)
 
-	* config/tc-hppa.c (struct hppa_fix_struct): Steak fx_r_field's type
+	* config/tc-hppa.c (struct hppa_fix_struct): Tweak fx_r_field's type
 	to avoid warnings with the native HP compiler.
 	(fix_new_hppa): Similarly for the r_type argument.
 	(pa_build_unwind_subspace, hppa_elf_mark_end_of_function): Enclose
