@@ -490,6 +490,7 @@ build_insn (opcode, opers)
 
   /* Start with the raw opcode bits from the opcode table.  */
   insn[0] = opcode->opcode;
+  insn[1] = 0;
 
   /* We are going to insert at least one 32 bit opcode so get the
      frag now.  */

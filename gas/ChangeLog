@@ -1,3 +1,9 @@
+2005-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-openrisc.c (openrisc_relax_frag): Delete unused function.
+	* config/tc-sparc.c (sparc_ip): Make op_exp static to silence warnings.
+	* config/tc-tic80.c (build_insn): Init insn[1] to silence warning.
+
 2005-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention "-mhint.b=[ok|warning|error]".

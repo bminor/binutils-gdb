@@ -2231,7 +2231,7 @@ sparc_ip (str, pinsn)
 	      {
 		char *s1;
 		char *op_arg = NULL;
-		expressionS op_exp;
+		static expressionS op_exp;
 		bfd_reloc_code_real_type old_reloc = the_insn.reloc;
 
 		/* Check for %hi, etc.  */
