@@ -1,17 +1,10 @@
-# This file is a shell script that supplies the information necessary
-# to tailor a template configure script into the configure script
-# appropriate for this directory.  For more information, check any
-# existing configure script.
+dnl Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.3)dnl
+AC_INIT(Makefile.in)
 
-configdirs="arm h8300 z8k h8500 sh w65"
-srctrigger=Makefile.in
-srcname="sim"
-target_dependent=true
-
-# per-host:
-
-
-# per-target:
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
+AC_CANONICAL_SYSTEM
+AC_ARG_PROGRAM
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
@@ -19,21 +12,29 @@ target_dependent=true
 #  convention, else the table becomes a real mess to understand and maintain.
 
 case "${target}" in
-  h8300*-*-*)		sim_target=h8300 ;;
   arm*-*-*)		sim_target=arm ;;
+  h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
-  z8k*-*-*)		sim_target=z8k ;;
   sh*-*-*)		sim_target=sh ;; 
   w65-*-*)		sim_target=w65 ;;
+  z8k*-*-*)		sim_target=z8k ;;
   *)			sim_target=none ;;
 esac
 
 configdirs=${sim_target}
+AC_CONFIG_SUBDIRS($configdirs)
 
-if [ ! -f ${srcdir}/${sim_target}/${sim_target}.mt ] ; then
-target_makefile_frag=
+if test ! -f ${srcdir}/${sim_target}/${sim_target}.mt ; then
+	target_makefile_frag=/dev/null
 else
-target_makefile_frag=${sim_target}/${sim_target}.mt
+	target_makefile_frag=${srcdir}/${sim_target}/${sim_target}.mt
 fi
-# post-target:
 
+frags=
+if test $target_makefile_frag != /dev/null; then
+	frags="$frags $target_makefile_frag"
+fi
+AC_SUBST_FILE(target_makefile_frag)
+AC_SUBST(frags)
+
+AC_OUTPUT(Makefile)

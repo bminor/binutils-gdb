@@ -26,6 +26,7 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 arm
+configure
 configure.in
 h8300
 h8500

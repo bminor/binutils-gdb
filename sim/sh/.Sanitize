@@ -27,6 +27,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+configure
 configure.in
 interp.c
 gencode.c

@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the sim library.
-#    Copyright (C) 1993 Free Software Foundation, Inc.
+#    Copyright (C) 1993, 1995 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -18,14 +18,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-srcdir = .
+VPATH = @srcdir@
+srcdir = @srcdir@
 srcroot = $(srcdir)/..
-prefix = /usr/local
-program_transform_name =
 
-exec_prefix = $(prefix)
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
+tooldir = $(libdir)/$(target_alias)
 
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
@@ -40,17 +45,16 @@ man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = $(prefix)/info
 includedir = $(prefix)/include
-oldincludedir =
-docdir = doc
+docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
+# FIXME: Use autoconf's AC_PROG_INSTALL
 INSTALL = $${srcroot}/../install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
-
 
 AR = ar
 AR_FLAGS = rc
@@ -59,19 +63,22 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
+SUBDIRS = @subdirs@
+
+.NOEXPORT:
 MAKEOVERRIDES=
+
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
-SUBDIRS = " this is set by configire, don't change this "
-
 ALL=all-nothing
 CLEAN=clean-nothing
 DO_INSTALL=install-nothing
 
-#### host and target dependent Makefile fragments come in here.
+#### Makefile fragments come in here.
+# @target_makefile_frag@
 ###
 
 FLAGS_TO_PASS = \
@@ -89,12 +96,8 @@ FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"BISON=$(BISON)"
 
-
-STAGESTUFF = $(TARGETLIB) $(OFILES)
-
-
 all:	$(ALL)
-	
+
 clean:  $(CLEAN)
 
 install: $(DO_INSTALL)
@@ -102,7 +105,7 @@ install: $(DO_INSTALL)
 mostlyclean: clean
 
 distclean realclean: clean
-	rm -f Makefile config.status
+	rm -f Makefile config.cache config.log config.status
 
 info:
 install-info:
@@ -236,12 +239,73 @@ clean-sh: force
 		true ; \
 	fi
 
+TAGS:
+
 ###
+
+### w65
+
+all-w65: force
+	@if [ -f ./w65/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./w65 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-w65: force
+	@if [ -f ./w65/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+		( cd ./w65 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+clean-w65: force
+	@if [ -f ./w65/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./w65 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+
+### arm
+
+all-arm: force
+	@if [ -f ./arm/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./arm ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-arm: force
+	@if [ -f ./arm/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+		( cd ./arm ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+clean-arm: force
+	@if [ -f ./arm/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./arm ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
 
 force:
 
 
 # with the gnu make, this is done automatically.
 
-Makefile: $(srcdir)/Makefile.in $(target_makefile_frag)
+Makefile: Makefile.in config.status @frags@
 	$(SHELL) ./config.status
+
+config.status: configure
+	$(SHELL) ./config.status --recheck

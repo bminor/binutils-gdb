@@ -1,36 +1,32 @@
-# This file is a shell script that supplies the information necessary
-# to tailor a template configure script into the configure script
-# appropriate for this directory.  For more information, check any
-# existing configure script.
+dnl Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.3)dnl
+AC_INIT(Makefile.in)
 
-srctrigger=interp.c
-srcname="shsim"
-
-# per-host:
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
+AC_CANONICAL_SYSTEM
+AC_ARG_PROGRAM
 
 . ${srcdir}/../../bfd/configure.host
 
 # Set up to make a link between the host's include file and "sysdep.h".
 files="../../bfd/hosts/${my_host}.h"
-
-links="sysdep.h"
-
-if [ ! -f ${srcdir}/${files} ] ; then
+if test ! -f ${srcdir}/${files} ; then
 	files=../../bfd/hosts/std-host.h
-	echo "[${srcname} has no specific support for host ${host} -- using std-host]"
+	AC_MSG_WARN(shsim has no specific support for host ${host} -- using std-host)
 fi
+AC_LINK_FILES($files, sysdep.h)
 
-host_makefile_frag=
-if [ -f ${srcdir}/../../bfd/config/${my_host}.mh ] ; then
+if test -f ${srcdir}/../../bfd/config/${my_host}.mh; then
 	host_makefile_frag=../../bfd/config/${my_host}.mh
+else
+	host_makefile_frag=/dev/null
 fi
 
-# per-target:
+frags=
+if test $host_makefile_frag != /dev/null; then
+	frags="$frags $host_makefile_frag"
+fi
+AC_SUBST_FILE(host_makefile_frag)
+AC_SUBST(frags)
 
-
-case "${target}" in
-  sh-*-*)		sim_target=sh ;;
-  shl-*-*)		sim_target=shl ;;
-esac
-
-target_makefile_frag=${sim_target}.mt
+AC_OUTPUT(Makefile)

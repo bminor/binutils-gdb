@@ -1,3 +1,8 @@
+Wed Jul  5 14:32:54 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in, configure.in: converted to autoconf.
+	* configure: New file, generated with autconf 2.4.
+
 Fri Jun 30 16:51:38 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* interp.c (sim_open): If argument supplied, interpret as

@@ -1,5 +1,5 @@
-#    Makefile template for Configure for the h8300sim library.
-#    Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
+#    Makefile template for Configure for the h8300 sim library.
+#    Copyright (C) 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -16,13 +16,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-srcdir = .
+VPATH = @srcdir@
+srcdir = @srcdir@
+srcroot = $(srcdir)/../..
 
-prefix = /usr/local
+prefix = @prefix@
+exec_prefix = @exec_prefix@
 
-exec_prefix = $(prefix)
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
+tooldir = $(libdir)/$(target_alias)
 
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
@@ -37,79 +43,51 @@ man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = $(prefix)/info
 includedir = $(prefix)/include
-oldincludedir =
-docdir = $(srcdir)/doc
+docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+# FIXME: use autoconf's AC_PROG_INSTALL
+INSTALL = $(srcroot)/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 AR = ar
-AR_FLAGS = qc
+AR_FLAGS = rc
 CFLAGS = -g
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
+.NOEXPORT:
+MAKEOVERRIDES=
+
 INCDIR = $(srcdir)/../../include 
-CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I$(srcdir)/../../bfd
+CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I../../bfd -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb
 DEP = mkdep
 
-#### host, target, and site specific Makefile frags come in here.
-
-all:	run 
-
-run:	code.o run.o perifs.o
-	$(CC) -o run code.o perifs.o run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a
- 
-code.c:p1.c p2.c p3.c
-	cat $(VPATH)/p1.c p2.c $(VPATH)/p3.c | cb >code.c
-	indent code.c
-
-p2.c:writecode
-	./writecode >p2.c
-
-
-writecode:writecode.c
-	$(CC) -o writecode -g $(CSEARCH)  $(srcdir)/writecode.c 
-
-run.o: run.c
-perifs.o: perifs.c
-
-#### host and target dependent Makefile fragments come in here.
+#### Makefile fragments come in here.
+# @host_makefile_frag@
 ###
 
-FLAGS_TO_PASS = \
-	"against=$(against)" \
-	"AR=$(AR)" \
-	"AR_FLAGS=$(AR_FLAGS)" \
-	"CC=$(CC)" \
-	"CFLAGS=$(CFLAGS)" \
-	"RANLIB=$(RANLIB)" \
-	"MAKEINFO=$(MAKEINFO)" \
-	"INSTALL=$(INSTALL)" \
-	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"BISON=$(BISON)"
+all:	run
+
+run:	compile.o run.o
+	$(CC) -o run compile.o  run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a
+
+compile.o:compile.c
+run.o:run.c 
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
-
-
-
-.NOEXPORT:
 
 check:
 
 info:
 clean-info:
 install-info:
-
-# HDEPFILES comes from the host config; TDEPFILES from the target config.
-
-
 
 tags etags: TAGS
 
@@ -119,51 +97,35 @@ TAGS: force
 clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
 
-clobber realclean: clean
-	rm -f libbfd.a TAGS
-
-# Mark everything as depending on config.status, since the timestamp on
-# sysdep.h might actually move backwards if we reconfig and relink it
-# to a different hosts/h-xxx.h file.  This will force a recompile anyway.
-RECONFIG = config.status
-
-
-
-# This target should be invoked before building a new release.
-# 'VERSION' file must be present and contain a string of the form "x.y"
-#
-roll:
-	@V=`cat VERSION`		; \
-	MAJ=`sed 's/\..*//' VERSION`	; \
-	MIN=`sed 's/.*\.//' VERSION`	; \
-	V=$$MAJ.`expr $$MIN + 1`	; \
-	rm -f VERSION			; \
-	echo $$V >VERSION		; \
-	echo Version $$V
+distclean mostlyclean realclean: clean
+	rm -f TAGS
+	rm -f config.log config.cache config.status
 
 # Dummy target to force execution of dependent targets.
 #
 force:
 
+# Copy the files into directories where they will be run.
 install:
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	-n=`t='$(program_transform_name)'; echo run | sed -e "" $$t`; \
-	$(INSTALL_PROGRAM) run $(bindir)/$$n; \
-	$(M_INSTALL)
+	srcroot=`cd $(srcroot); pwd`; export srcroot; \
+	$(INSTALL_XFORM) run $(bindir)/run ;  \
+	n=`t='$(program_transform_name)'; echo run | sed -e "" $$t`; \
+	if [ -d $(tooldir) ] ; then \
+	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
+	  rm -f $(tooldir)/bin/run;  \
+	  ln $(bindir)/$$n $(tooldir)/bin/run \
+	   || $(INSTALL_PROGRAM) run $(tooldir)/bin/run; \
+	else true; fi
 
 
-
-Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+Makefile: Makefile.in config.status @frags
 	$(SHELL) ./config.status
+
+config.status: configure
+	$(SHELL) ./config.status --recheck
 
 dep: $(CFILES)
 	mkdep $(CFLAGS) $?
-
 
 # What appears below is generated by a hacked mkdep using gcc -MM.
 
@@ -172,4 +134,3 @@ dep: $(CFILES)
 
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
-

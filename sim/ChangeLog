@@ -1,3 +1,43 @@
+Wed Jul  5 14:32:54 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in, configure.in: converted to autoconf.
+	* configure: New file, generated with autconf 2.4.
+
+Wed May 24 14:48:46 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* Makefile.in: Support ARM.
+	* configure.in: Ditto.
+
+Sun Jan 15 16:53:47 1995  Steve Chamberlain  <sac@splat>
+
+	* Makefile.in: Support W65.
+	* configure.in: Ditto.
+
+Sun Mar 13 09:27:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add TAGS target.
+
+Mon Sep 13 12:47:15 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* Makefile.in (all-z8k, install-z8k, clean-z8k, all-h8300,
+	  install-h8300, clean-h8300, all-h8500, install-h8500,
+	  clean-h8500, all-sh, install-sh, clean-sh): do not echo
+	  recursion lines. 
+
+Wed Jun 30 14:12:05 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
+
+	* Makefile.in: remove endian.h trace from h8500
+
+Sun Jun 13 13:08:58 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in: Add distclean, realclean, and mostlyclean targets.
+
+Fri May 21 11:21:16 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: make all of the all-* target (except all-nothing)
+	depend on endian.h, so that if we're not building a simulator, we
+	don't built endian
+
 Fri May 21 10:55:06 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (check, installcheck): Added dummy targets.
