@@ -10407,6 +10407,52 @@ Indicate a badly formed request.
 @tab
 When @samp{q}@samp{Rcmd} is not recognized.
 
+@item symbol lookup
+@tab @code{qSymbol::}
+@tab
+Notify the target that @value{GDBN} is prepared to serve symbol lookup
+requests.  Accept requests from the target for the values of symbols.
+@item
+@tab
+@tab
+@item
+@tab reply @code{OK}
+@tab
+The target does not need to look up any (more) symbols.
+@item
+@tab reply @code{qSymbol:}@var{sym_name}
+@tab
+The target requests the value of symbol @var{sym_name} (hex encoded).  
+@value{GDBN} may provide the value by using the 
+@code{qSymbol:}@var{sym_value}:@var{sym_name}
+message, described below.
+
+@item symbol value
+@tab @code{qSymbol:}@var{sym_value}:@var{sym_name}
+@tab
+Set the value of SYM_NAME to SYM_VALUE.
+@item
+@tab
+@tab
+@var{sym_name} (hex encoded) is the name of a symbol whose value
+the target has previously requested.
+@item
+@tab
+@tab
+@var{sym_value} (hex) is the value for symbol @var{sym_name}.
+If @value{GDBN} cannot supply a value for @var{sym_name}, then this
+field will be empty.
+@item
+@tab reply @code{OK}
+@tab
+The target does not need to look up any (more) symbols.
+@item
+@tab reply @code{qSymbol:}@var{sym_name}
+@tab
+The target requests the value of a new symbol @var{sym_name} (hex encoded).
+@value{GDBN} will continue to supply the values of symbols (if available),
+until the target ceases to request them.
+
 @end multitable
 
 The following @samp{g}/@samp{G} packets have previously been defined.
