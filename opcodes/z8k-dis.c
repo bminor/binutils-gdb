@@ -209,11 +209,13 @@ z8k_lookup_instr (nibbles, info)
 
   int nibl_index, tabl_index;
   int nibl_matched;
+  int need_fetch = 0;
   unsigned short instr_nibl;
   unsigned short tabl_datum, datum_class, datum_value;
 
   nibl_matched = 0;
   tabl_index = 0;
+  FETCH_DATA (info, 4);
   while (!nibl_matched && z8k_table[tabl_index].name)
     {
       nibl_matched = 1;
@@ -222,8 +224,15 @@ z8k_lookup_instr (nibbles, info)
 	   nibl_index++)
 	{
 	  if ((nibl_index % 4) == 0)
-	    /* Fetch one word at a time.  */
-	    FETCH_DATA (info, nibl_index + 4);
+            {
+              /* Fetch data only if it isn't already there.  */
+              if (nibl_index >= 4 || (nibl_index < 4 && need_fetch))
+                FETCH_DATA (info, nibl_index + 4);   /* Fetch one word at a time.  */
+              if (nibl_index < 4)
+                need_fetch = 0;
+              else
+                need_fetch = 1;
+            }
 	  instr_nibl = nibbles[nibl_index];
 
 	  tabl_datum = z8k_table[tabl_index].byte_info[nibl_index];
@@ -414,14 +423,14 @@ unpack_instr (instr_data, is_segmented, info)
 		  FETCH_DATA (info, nibl_count + 8);
 		  instr_long = (instr_data->words[nibl_count] << 16)
 		    | (instr_data->words[nibl_count + 4]);
-		  instr_data->address = ((instr_word & 0x7f00) << 8)
+		  instr_data->address = ((instr_word & 0x7f00) << 16)
 		    + (instr_long & 0xffff);
 		  nibl_count += 7;
 		  seg_length = 2;
 		}
 	      else
 		{
-		  instr_data->address = ((instr_word & 0x7f00) << 8)
+		  instr_data->address = ((instr_word & 0x7f00) << 16)
 		    + (instr_word & 0x00ff);
 		  nibl_count += 3;
 		}
@@ -484,6 +493,13 @@ unpack_instr (instr_data, is_segmented, info)
     }
 }
 
+static char *intr_names[] = {
+  "all",    /* 0 */
+  "vi",     /* 1 */
+  "nvi",    /* 2 */
+  "none"    /* 3 */
+};
+
 static void
 unparse_instr (instr_data, is_segmented)
      instr_data_s *instr_data;
@@ -536,6 +552,12 @@ unparse_instr (instr_data, is_segmented)
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_IMM:
+          if (datum_value == ARG_IMM2)  /* True with EI/DI instructions only.  */
+            {
+              sprintf (tmp_str, "%s", intr_names[instr_data->interrupts]);
+              strcat (out_str, tmp_str);
+              break;
+            }
 	  sprintf (tmp_str, "#0x%0lx", instr_data->immediate);
 	  strcat (out_str, tmp_str);
 	  break;

@@ -68,23 +68,23 @@ typedef enum {
   O_multiply,
   /* (X_add_symbol / X_op_symbol) + X_add_number.  */
   O_divide,
-  /* X_add_symbol % X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol % X_op_symbol) + X_add_number.  */
   O_modulus,
-  /* X_add_symbol << X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol << X_op_symbol) + X_add_number.  */
   O_left_shift,
-  /* X_add_symbol >> X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol >> X_op_symbol) + X_add_number.  */
   O_right_shift,
-  /* X_add_symbol | X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol | X_op_symbol) + X_add_number.  */
   O_bit_inclusive_or,
-  /* X_add_symbol |~ X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol |~ X_op_symbol) + X_add_number.  */
   O_bit_or_not,
-  /* X_add_symbol ^ X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol ^ X_op_symbol) + X_add_number.  */
   O_bit_exclusive_or,
-  /* X_add_symbol & X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol & X_op_symbol) + X_add_number.  */
   O_bit_and,
-  /* X_add_symbol + X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol + X_op_symbol) + X_add_number.  */
   O_add,
-  /* X_add_symbol - X_op_symbol) + X_add_number.  */
+  /* (X_add_symbol - X_op_symbol) + X_add_number.  */
   O_subtract,
   /* (X_add_symbol == X_op_symbol) + X_add_number.  */
   O_eq,
