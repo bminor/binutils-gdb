@@ -1,33 +1,32 @@
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* Motorola 68000 COFF back-end for BFD.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Diddler.
+This file is part of BFD, the Binary File Descriptor library.
 
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#define M68 1
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "m68kcoff.h"
+#include "coff-m68k.h"
+#include "internalcoff.h"
 #include "libcoff.h"
-
 
 static reloc_howto_type howto_table[] = 
 {
@@ -40,20 +39,24 @@ static reloc_howto_type howto_table[] =
 };
 
 
-/* Turn a howto into a reloc  nunmber */
+/* Turn a howto into a reloc number */
 
 #define SELECT_RELOC(x,howto) { x = howto_table[howto->size +(int)howto->pc_relative*3].type; }
 #define BADMAG(x) M68KBADMAG(x)
-#include "coff-code.h"
+#define M68 1		/* Customize coffcode.h */
+
+#define RTYPE2HOWTO(internal, relocentry) \
+    (internal)->howto = ( howto_table + (relocentry).r_type - R_RELBYTE);
+
+#include "coffcode.h"
 
 
 #define coff_write_armap bsd_write_armap
 
-
 bfd_target m68kcoff_vec =
 {
-  "m68kcoff",		/* name */
-  bfd_target_coff_flavour_enum,
+  "coff-m68k",		/* name */
+  bfd_target_coff_flavour,
   true,				/* data byte order is big */
   true,				/* header byte order is big */
 
@@ -64,7 +67,7 @@ bfd_target m68kcoff_vec =
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-
+  3,				/* minimum section alignment */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
@@ -76,8 +79,4 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
      _bfd_write_archive_contents, bfd_false},
 
      JUMP_TABLE(coff)
-
-  };
-
-
-
+};

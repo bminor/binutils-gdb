@@ -358,6 +358,7 @@ extern bfd_target i386aout_vec;
 extern bfd_target a29kcoff_big_vec;
 extern bfd_target trad_core_vec;
 extern bfd_target rs6000coff_vec;
+extern bfd_target h8300coff_vec;
 
 #ifdef DEFAULT_VECTOR
 extern bfd_target DEFAULT_VECTOR;
@@ -406,6 +407,7 @@ SELECT_VECS,
 #define	I386AOUT_VEC		i386aout_vec
 #define A29KCOFF_BIG_VEC	a29kcoff_big_vec
 #define RS6000COFF_VEC		rs6000coff_vec
+#define H8300COFF_VEC           h8300coff_vec
 #endif
 
 bfd_target *target_vector[] = {
@@ -448,6 +450,9 @@ bfd_target *target_vector[] = {
 #endif
 #endif
 
+#ifdef H300COFF_VEC
+	&h8300coff_vec,
+#endif
 #ifdef M88KBCS_VEC
         &M88KBCS_VEC,
 #endif

@@ -1,3 +1,21 @@
+Tue Nov 26 09:10:55 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* Makefile.in: added coff-h8300
+	* configure.in: now h8 is a coff target
+	* cpu-h8300.c: fix various disassembly problems
+	* libcoff.h: took out some code which has been #0ed for a long
+	time.
+	* targets.c: added h8 coff 
+	* coff-a29k.c, coff-i386.c, coff-i960.c, coff-m68k.c, coff-m88k.c
+	added new macro RTYPE2HOWTO to take a load of #ifdefs out of
+	coffcode.h
+	* coffcode.h: Started to change the way machine dependencies are
+	handled, from the nest of #ifdefs to macros defined in the
+	including coff-<foo>.c
+
+
+
+
 Fri Nov 22 08:11:42 1991  John Gilmore  (gnu at cygnus.com)
 
 	* aoutx.h (some_aout_object_p):  Set the `executable' bit

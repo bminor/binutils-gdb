@@ -27,19 +27,19 @@ structures on disk, and the occasional extra field.
 
 Coff in all its varieties is implimented with a few common files and a
 number of implementation specific files. For example, The 88k bcs coff
-format is implemented in the file @code{m88k-bcs.c}. This file
-@code{#include}s @code{m88k-bcs.h} which defines the external
+format is implemented in the file @code{coff-m88k.c}. This file
+@code{#include}s @code{coff-m88k.h} which defines the external
 structure of the coff format for the 88k, and @code{internalcoff.h}
-which defines the internal structure. @code{m88k-bcs.c} also defines
+which defines the internal structure. @code{coff-m88k.c} also defines
 the relocations used by the 88k format @xref{Relocations}. Then the
 major portion of coff code is included (@code{coffcode.h}) which
 defines the methods used to act upon the types defined in
-@code{m88k-bcs.h} and @code{internalcoff.h}.
+@code{coff-m88k.h} and @code{internalcoff.h}.
 
 The Intel i960 processor version of coff is implemented in
-@code{icoff.c}. This file has the same structure as
-@code{m88k-bcs.c}, except that it includes @code{intel-coff.h} rather
-than @code{m88k-bcs.h}.
+@code{coff-i960.c}. This file has the same structure as
+@code{coff-m88k.c}, except that it includes @code{coff-i960.h} rather
+than @code{coff-m88k.h}.
 
 @subsection Porting To A New Version of Coff
 
@@ -402,8 +402,8 @@ DEFUN(bfd_swap_reloc_in,(abfd, reloc_src, reloc_dst),
   reloc_dst->r_type = bfd_h_get_16(abfd, (bfd_byte *) reloc_src->r_type);
 #endif
 
-#if M88
-  reloc_dst->r_offset = bfd_h_get_16(abfd, (bfd_byte *) reloc_src->r_offset);
+#ifdef SWAP_IN_RELOC_OFFSET
+  reloc_dst->r_offset = SWAP_IN_RELOC_OFFSET(abfd, reloc_src->r_offset);
 #endif
 }
 
@@ -418,10 +418,18 @@ DEFUN(coff_swap_reloc_out,(abfd, src, dst),
   struct external_reloc *reloc_dst = (struct external_reloc *)dst;
   bfd_h_put_32(abfd, reloc_src->r_vaddr, (bfd_byte *) reloc_dst->r_vaddr);
   bfd_h_put_32(abfd, reloc_src->r_symndx, (bfd_byte *) reloc_dst->r_symndx);
-  bfd_h_put_16(abfd, reloc_src->r_type, (bfd_byte *) reloc_dst->r_type);
-#if M88
-  bfd_h_put_16(abfd, reloc_src->r_offset, (bfd_byte *) reloc_dst->r_offset);
+  bfd_h_put_16(abfd, reloc_src->r_type, (bfd_byte *)
+	       reloc_dst->r_type);
+
+#ifdef SWAP_OUT_RELOC_OFFSET
+  SWAP_OUT_RELOC_OFFSET(abfd,
+			reloc_src->r_offset,
+			(bfd_byte *) reloc_dst->r_offset);
 #endif
+#ifdef SWAP_OUT_RELOC_EXTRA
+  SWAP_OUT_RELOC_EXTRA(abfd,reloc_src, reloc_dst);
+#endif
+
   return sizeof(struct external_reloc);
 }
 
@@ -1065,6 +1073,12 @@ machine = 0;
     break;
 #endif
 
+#ifdef H8300MAGIC
+  case H8300MAGIC:
+    arch = bfd_arch_h8300;
+    machine = 0;
+    break;
+#endif
 
   default:			/* Unreadable input file type */
  arch = bfd_arch_obscure;
@@ -1741,30 +1755,90 @@ DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
 {
   FILE *file = (FILE *)filep;
   switch (how) {
-  case bfd_print_symbol_name:
-    fprintf(file, "%s", symbol->name);
-    break;
-  case bfd_print_symbol_more:
-    fprintf(file, "coff %lx %lx", (unsigned long) coffsymbol(symbol)->native,
-	    (unsigned long) coffsymbol(symbol)->lineno);
-    break;
-  case bfd_print_symbol_nm:
-  case bfd_print_symbol_all:
+    case bfd_print_symbol_name:
+      fprintf(file, "%s", symbol->name);
+      break;
+    case bfd_print_symbol_more:
+      fprintf(file, "coff %lx %lx", (unsigned long) coffsymbol(symbol)->native,
+	      (unsigned long) coffsymbol(symbol)->lineno);
+      break;
+    case bfd_print_symbol_nm:
+
+    {
+      CONST char *section_name = symbol->section == (asection *) NULL ?
+       "*abs" : symbol->section->name;
+      bfd_print_symbol_vandf((PTR) file, symbol);
+
+	
+      fprintf(file, " %-5s %s %s %s",
+	      section_name,
+	      coffsymbol(symbol)->native ? "n" : "g",
+	      coffsymbol(symbol)->lineno ? "l" : " ",
+	      symbol->name);
+    }
+
+
+      break;
+    case bfd_print_symbol_all:
+      /* Print out the symbols in a reasonable way */
+    {
+      CONST char *section_name = symbol->section == (asection *) NULL ?
+       "*abs" : symbol->section->name;
+
+
+      if (coffsymbol(symbol)->native) 
       {
-	CONST char *section_name = symbol->section == (asection *) NULL ?
-	  (CONST char *)"*abs" : symbol->section->name;
-	bfd_print_symbol_vandf((PTR) file, symbol);
+	unsigned int aux;
+	combined_entry_type *combined = coffsymbol(symbol)->native;
+	combined_entry_type *root = obj_raw_syments(ignore_abfd);
+	
+fprintf(file,"[%3d]",
+	combined - root);
+	
 
-	fprintf(file, " %-5s %s %s %s",
-		section_name,
-		coffsymbol(symbol)->native ? "n" : "g",
-		coffsymbol(symbol)->lineno ? "l" : " ",
-		symbol->name);
-      }
+	fprintf(file, "(sc %2d)(fl%4x)(ty%3x)(sc%3d) nx(%d) %08x %s",
+		combined->u.syment.n_scnum,
+		combined->u.syment.n_flags,
+		combined->u.syment.n_type,
+		combined->u.syment.n_sclass,
+		combined->u.syment.n_numaux,
+		combined->u.syment.n_value,
+		symbol->name
+		);
+	for (aux = 0; aux < combined->u.syment.n_numaux; aux++) 
+	{
+	  fprintf(file,"\n");
+	  switch (combined->u.syment.n_sclass) {
+	    case C_FILE:
+	      fprintf(file, "File ");
+	      break;
+	    default:
+	      fprintf(file, "AUX tv %x lnno %x size %x",
+		      combined[aux+1].u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
+		      combined[aux+1].u.auxent.x_sym.x_misc.x_lnsz.x_size);
+	      break;
+    
+	    }
 
+	}
+	
 
-    break;
-  }
+    
+
+      } 
+
+      else {
+	  bfd_print_symbol_vandf((PTR) file, symbol);
+	  fprintf(file, " %-5s %s %s %s",
+		  section_name,
+		  coffsymbol(symbol)->native ? "n" : "g",
+		  coffsymbol(symbol)->lineno ? "l" : " ",
+		  symbol->name);
+	}
+
+    }
+	
+    }
 }
 
 #endif /* NO_COFF_SYMBOLS */
@@ -1782,7 +1856,7 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
 
 #ifdef I960ROMAGIC
 
-  case bfd_arch_i960:
+    case bfd_arch_i960:
 
       {
 	unsigned        flags;
@@ -1836,20 +1910,25 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
 #endif
 
 #ifdef MC88MAGIC
-  case bfd_arch_m88k:
-    *magicp = MC88OMAGIC;
-    return true;
-    break;
+    case bfd_arch_m88k:
+      *magicp = MC88OMAGIC;
+      return true;
+      break;
 #endif
-
+#ifdef H8300MAGIC
+    case bfd_arch_h8300:
+      *magicp = H8300MAGIC;
+      return true;
+      break;
+#endif
 #ifdef A29K_MAGIC_BIG
-  case bfd_arch_a29k:
-    if (abfd->xvec->byteorder_big_p)
-    	*magicp = A29K_MAGIC_BIG;
-    else
-    	*magicp = A29K_MAGIC_LITTLE;
-    return true;
-    break;
+    case bfd_arch_a29k:
+      if (abfd->xvec->byteorder_big_p)
+       *magicp = A29K_MAGIC_BIG;
+      else
+       *magicp = A29K_MAGIC_LITTLE;
+      return true;
+      break;
 #endif
 
 #ifdef U802TOCMAGIC
@@ -2665,7 +2744,6 @@ asection       *asect;
 	if (cache_ptr->line_number == 0) {
 	  coff_symbol_type *sym =
 	    (coff_symbol_type *) (dst.l_addr.l_symndx
-				  + obj_symbol_slew(abfd)
 				  + obj_raw_syments(abfd))->u.syment._n._n_n._n_zeroes;
 	  cache_ptr->u.sym = (asymbol *) sym;
 	  sym->lineno = cache_ptr;
@@ -2942,15 +3020,15 @@ DEFUN(coff_get_symtab, (abfd, alocation),
 	/* This nasty code looks at the symbol to decide whether or
 	   not it is descibes a constructor/destructor entry point. It
 	   is structured this way to (hopefully) speed non matches */
-	
-	if (symbase->symbol.name[9] == '$') 
+#if 0	
+	if (0 && symbase->symbol.name[9] == '$') 
 	{
 	    bfd_constructor_entry(abfd, 
 				 (asymbol **)location,
 				  symbase->symbol.name[10] == 'I' ?
 				  "CTOR" : "DTOR");
 	}
-
+#endif
 	*(location++) = symbase++;
 	counter++;
     }
@@ -2999,60 +3077,91 @@ addend field.
 @end itemize
 */
 
+#ifndef CALC_ADDEND
+#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr) 	\
+	    if (ptr && ptr->the_bfd == abfd		\
+		&& ptr->section != (asection *) NULL	\
+		&& ((ptr->flags & BSF_OLD_COMMON)== 0))	\
+	    {						\
+		cache_ptr->addend = -(ptr->section->vma + ptr->value);	\
+	    }						\
+	    else {					\
+		cache_ptr->addend = 0;			\
+	    }			
+#endif
+
 static          boolean
 DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
       bfd            *abfd AND
       sec_ptr         asect AND
       asymbol       **symbols)
 {
-    RELOC   *native_relocs;
-    arelent        *reloc_cache;
-    if (asect->relocation)
-      return true;
-    if (asect->reloc_count == 0)
-     return true;
-    if (asect->flags & SEC_CONSTRUCTOR)
-     return true;
+  RELOC   *native_relocs;
+  arelent        *reloc_cache;
+  arelent        *cache_ptr;
+
+  unsigned int idx;
+  
+  if (asect->relocation)
+   return true;
+  if (asect->reloc_count == 0)
+   return true;
+  if (asect->flags & SEC_CONSTRUCTOR)
+   return true;
 #ifndef NO_COFF_SYMBOLS
-    if (!coff_slurp_symbol_table(abfd))
-     return false;
+  if (!coff_slurp_symbol_table(abfd))
+   return false;
 #endif
-    native_relocs =
-     (RELOC *) buy_and_read(abfd,
-			    asect->rel_filepos,
-			    SEEK_SET,
-			    (size_t) (RELSZ *
-				      asect->reloc_count));
-    reloc_cache = (arelent *)
-     bfd_alloc(abfd, (size_t) (asect->reloc_count * sizeof(arelent)));
+  native_relocs =
+   (RELOC *) buy_and_read(abfd,
+			  asect->rel_filepos,
+			  SEEK_SET,
+			  (size_t) (RELSZ *
+				    asect->reloc_count));
+  reloc_cache = (arelent *)
+   bfd_alloc(abfd, (size_t) (asect->reloc_count * sizeof(arelent)));
 
-    if (reloc_cache == NULL) {
-	bfd_error = no_memory;
-	return false;
-    } {				/* on error */
-	arelent        *cache_ptr;
-	RELOC   *src;
-	for (cache_ptr = reloc_cache,
-	     src = native_relocs;
-	     cache_ptr < reloc_cache + asect->reloc_count;
-	     cache_ptr++,
-	     src++) {
-	    struct internal_reloc dst;
-	    asymbol        *ptr;
-	    bfd_swap_reloc_in(abfd, src, &dst);
+  if (reloc_cache == NULL) {
+      bfd_error = no_memory;
+      return false;
+    } 
 
-	    dst.r_symndx += obj_symbol_slew(abfd);
-	    cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[dst.r_symndx];
+  
+  for (idx = 0; idx < asect->reloc_count; idx ++) 
+  {
+      struct internal_reloc dst;
+      asymbol        *ptr;
+      struct external_reloc  *src;
+
+      cache_ptr = reloc_cache + idx;
+      src = native_relocs + idx;
+
+      bfd_swap_reloc_in(abfd, src, &dst);
+
+
+      if (dst.r_symndx != -1) 
+      {
+	cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[dst.r_symndx];
+      }
+      else 
+      {
+	cache_ptr->sym_ptr_ptr = 0;
+	ptr = 0;
+	goto puke_logic;
+	      
+      }
+	    
 #ifdef A29K
-	    /* AMD has two relocation entries for the 'consth' instruction.
-	     * The first is R_IHIHALF (part 1), the second is R_IHCONST
-	     * (part 2).  The second entry's r_symndx does not contain
-	     * an index to a symbol but rather a value (apparently).
-	     * Also, see the ifdef below for saving the r_symndx value in addend.
-	     */
-	    if (dst.r_type == R_IHCONST)  {
-		ptr = NULL;
-	    } else
+      /* AMD has two relocation entries for the 'consth' instruction.
+       * The first is R_IHIHALF (part 1), the second is R_IHCONST
+       * (part 2).  The second entry's r_symndx does not contain
+       * an index to a symbol but rather a value (apparently).
+       * Also, see the ifdef below for saving the r_symndx value in addend.
+       */
+      if (dst.r_type == R_IHCONST)  {
+	  ptr = NULL;
+	} 
+      else
 #endif
 	     ptr = *(cache_ptr->sym_ptr_ptr);
 	    cache_ptr->address = dst.r_vaddr;
@@ -3064,58 +3173,28 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 	      
 	      Note that symbols which used to be common must be left alone */
 
-	    if (ptr && ptr->the_bfd == abfd
-		&& ptr->section != (asection *) NULL
-		&& ((ptr->flags & BSF_OLD_COMMON)== 0))
-	    {
-#ifndef M88
-		cache_ptr->addend = -(ptr->section->vma + ptr->value);
-#else
-		cache_ptr->addend = 0;
-#endif
+    puke_logic:
+      cache_ptr->address = dst.r_vaddr;
+      /*
+	The symbols definitions that we have read in have been
+	relocated as if their sections started at 0. But the offsets
+	refering to the symbols in the raw data have not been
+	modified, so we have to have a negative addend to compensate.
+	
+	Note that symbols which used to be common must be left alone */
 
-	    }
-	    else {
-		cache_ptr->addend = 0;
-	    }
+      /* Calculate any reloc addend by looking at the symbol */
+      CALC_ADDEND(abfd, ptr, dst, cache_ptr);
 
-	    cache_ptr->address -= asect->vma;
+      cache_ptr->address -= asect->vma;
+      cache_ptr->section = (asection *) NULL;
 
-	    cache_ptr->section = (asection *) NULL;
-
-#ifdef A29K
-	    if (dst.r_type == R_IHCONST) {
-		/* Add in the value which was stored in the symbol index */
-		/* See above comment */
-		cache_ptr->addend += dst.r_symndx;
-		/* Throw away the bogus symbol pointer */
-		cache_ptr->sym_ptr_ptr = 0;
-	    }
-	    cache_ptr->howto = howto_table + dst.r_type;
-#endif
-#if I386
-	    cache_ptr->howto = howto_table + dst.r_type;
-#endif
-#if I960
-	    cache_ptr->howto = howto_table + dst.r_type;
-#endif
-#if M68
-	    cache_ptr->howto = howto_table + dst.r_type - R_RELBYTE;
-#endif
-#if M88
-	    if (dst.r_type >= R_PCR16L && dst.r_type <= R_VRT32) {
-		cache_ptr->howto = howto_table + dst.r_type - R_PCR16L;
-		cache_ptr->addend += dst.r_offset << 16;
-	    }
-	    else {
-		BFD_ASSERT(0);
-	    }
-#endif
-	}
+      /* Fill in the cache_ptr->howto field from dst.r_type */
+      RTYPE2HOWTO(cache_ptr, dst);
     }
 
-    asect->relocation = reloc_cache;
-    return true;
+  asect->relocation = reloc_cache;
+  return true;
 }
 
 

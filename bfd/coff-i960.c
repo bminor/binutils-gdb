@@ -1,34 +1,34 @@
-/* Intel 960 COFF support for BFD.  */
+/* Intel 960 COFF support for BFD.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+This file is part of BFD, the Binary File Descriptor library.
 
-This file is part of BFD, the Binary File Diddler.
-
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
 #define I960 1
 #define BADMAG(x) I960BADMAG(x)
 
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "intel-coff.h"
+#include "coff-i960.h"
+#include "internalcoff.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 
 
@@ -36,7 +36,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BAL	 0x0b000000	/* Template for 'bal' instruction	*/
 #define BAL_MASK 0x00ffffff
 
-static bfd_reloc_status_enum_type 
+static bfd_reloc_status_type 
 optcall_callback(abfd, reloc_entry, symbol_in, data, ignore_input_section)
 bfd *abfd;
 arelent *reloc_entry;
@@ -47,13 +47,13 @@ asection *ignore_input_section;
   /* This item has already been relocated correctly, but we may be
    * able to patch in yet better code - done by digging out the
    * correct info on this symbol */
-  bfd_reloc_status_enum_type result;
+  bfd_reloc_status_type result;
   coff_symbol_type *cs = coffsymbol(symbol_in);
 
   /* So the target symbol has to be of coff type, and the symbol 
      has to have the correct native information within it */
-  if ((cs->symbol.the_bfd->xvec->flavour != bfd_target_coff_flavour_enum)
-      || (cs->native == (struct internal_syment *)NULL)) {
+  if ((cs->symbol.the_bfd->xvec->flavour != bfd_target_coff_flavour)
+      || (cs->native == (combined_entry_type *)NULL)) {
      /* This is interesting, consider the case where we're outputting */
      /* coff from a mix n match input, linking from coff to a symbol */
      /* defined in a bout file will cause this match to be true. Should */
@@ -62,17 +62,17 @@ asection *ignore_input_section;
      result = bfd_reloc_dangerous;
   }
   else  {
-    switch (cs->native->n_sclass) 
+    switch (cs->native->u.syment.n_sclass) 
       {
       case C_LEAFSTAT:
       case C_LEAFEXT:
   	/* This is a call to a leaf procedure, replace instruction with a bal
 	 to the correct location */
 	{
-	  union internal_auxent *aux = (union internal_auxent *)(cs->native+2);
+	  union internal_auxent *aux = &((cs->native+2)->u.auxent);
 	  int word = bfd_get_32(abfd, data + reloc_entry->address);
-	  int olf = (aux->x_bal.x_balntry - cs->native->n_value);
-	  BFD_ASSERT(cs->native->n_numaux==2);
+	  int olf = (aux->x_bal.x_balntry - cs->native->u.syment.n_value);
+	  BFD_ASSERT(cs->native->u.syment.n_numaux==2);
 	  /* We replace the original call instruction with a bal to */
 	  /* the bal entry point - the offset of which is described in the */
 	  /* 2nd auxent of the original symbol. We keep the native sym and */
@@ -85,10 +85,9 @@ asection *ignore_input_section;
 	result = bfd_reloc_ok;
 	break;
       case C_SCALL:
-	{
-	  /* This is a call to a system call, replace with a calls to # */
-	  BFD_ASSERT(0);
-	}
+	/* This is a call to a system call, replace with a calls to # */
+	BFD_ASSERT(0);
+	result = bfd_reloc_ok;
 	break;
       default:
 	result = bfd_reloc_ok;
@@ -141,12 +140,15 @@ static reloc_howto_type howto_table[] =
 
 /* The real code is in coffcode.h */
 
+#define RTYPE2HOWTO(cache_ptr, dst) \
+	    cache_ptr->howto = howto_table + dst.r_type;
+
 #include "coffcode.h"
 
 bfd_target icoff_little_vec =
 {
   "coff-Intel-little",		/* name */
-  bfd_target_coff_flavour_enum,
+  bfd_target_coff_flavour,
   false,			/* data byte order is little */
   false,			/* header byte order is little */
 
@@ -158,6 +160,7 @@ bfd_target icoff_little_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
+     3,				/* minimum alignment power */
   _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
   _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 
@@ -174,7 +177,7 @@ bfd_target icoff_little_vec =
 bfd_target icoff_big_vec =
 {
   "coff-Intel-big",		/* name */
-  bfd_target_coff_flavour_enum,
+  bfd_target_coff_flavour,
   false,			/* data byte order is little */
   true,				/* header byte order is big */
 
@@ -186,6 +189,7 @@ bfd_target icoff_big_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
+  3,				/* minimum alignment power */
 _do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 

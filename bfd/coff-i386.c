@@ -20,13 +20,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#define I386 1
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "i386coff.h"
+#include "coff-i386.h"
 #include "internalcoff.h"
 #include "libcoff.h"
 
@@ -60,6 +58,11 @@ static reloc_howto_type howto_table[] =
 
 #define SELECT_RELOC(x,howto) { x = howto->type; }
 #define BADMAG(x) I386BADMAG(x)
+#define I386 1			/* Customize coffcode.h */
+
+#define RTYPETOHOWTO(cache_ptr, dst) \
+	    cache_ptr->howto = howto_table + dst.r_type;
+
 #include "coffcode.h"
 
 #define coff_write_armap bsd_write_armap
@@ -70,7 +73,7 @@ bfd *a ;
 
 bfd_target i386coff_vec =
 {
-  "i386coff",			/* name */
+  "coff-i386",			/* name */
   bfd_target_coff_flavour,
   false,			/* data byte order is little */
   false,			/* header byte order is little */

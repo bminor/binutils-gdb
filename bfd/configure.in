@@ -3,6 +3,7 @@
 # appropriate for this directory.  For more information, check any
 # existing configure script.
 
+configdirs="doc"
 srctrigger=libbfd.c
 srcname="BFD"
 
@@ -130,7 +131,7 @@ amd)
 
 hitachi)
 	case "${target_cpu}" in
-	h8300) bfd_target=h8300-ieee ;;
+	h8300) bfd_target=h8300-coff ;;
 	*) echo "bad hitachi cpu" ;;
 	esac
 	;;

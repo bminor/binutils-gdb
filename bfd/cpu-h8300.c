@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 #define DEFINE_TABLE 
@@ -96,21 +96,21 @@ FILE *stream)
 
   /* Find the exact opcode/arg combo */
   while (*p) {
-    op_enum_type *nib;
+    op_type *nib;
     unsigned int len = 0;
     q = *p++;
     nib  =q->data.nib;
     while (*nib != E) {
-      op_enum_type looking_for = *nib;
+      op_type looking_for = *nib;
       int thisnib = data[len>>1] ;
       thisnib = (len & 1) ? (thisnib & 0xf) : ((thisnib >> 4) & 0xf);
       if ((int)looking_for & (int)B31) {
 	if (((int)thisnib & 0x8) ==0) goto fail;
-	looking_for = (op_enum_type)((int)looking_for &  ~(int)B31);
+	looking_for = (op_type)((int)looking_for &  ~(int)B31);
       }
       if ((int)looking_for & (int)B30) {
 	if (((int)thisnib & 0x8) !=0) goto fail;
-	looking_for = (op_enum_type)((int)looking_for &  ~(int)B30);
+	looking_for = (op_type)((int)looking_for &  ~(int)B30);
       }
       switch (looking_for) {
       case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: 
@@ -130,7 +130,7 @@ FILE *stream)
 	rdisp = thisnib; 
 	break;
       case KBIT:
-	abs = thisnib == 0x80 ? 2:1;
+	abs = thisnib == 0x8 ? 2:1;
 	break;
       case IMM8:
       case ABS8SRC:
@@ -167,7 +167,7 @@ FILE *stream)
     ;
 
   }
-  fprintf(stream, "%02x %02x        .word\tH'%x,H'%x\n",
+  fprintf(stream, "%02x %02x        .word\tH'%x,H'%x",
 	  data[0], data[1],
 	  data[0], data[1]);
   return 2;
@@ -184,7 +184,7 @@ FILE *stream)
   fprintf(stream, "%s\t",q->name);
   /* Now print out the args */
     {
-      op_enum_type *args = q->args.nib;
+      op_type *args = q->args.nib;
       int hadone = 0;
       while (*args != E) {
 	if (hadone)
@@ -193,7 +193,7 @@ FILE *stream)
 	case IMM16:
 	case IMM8:
 	case IMM3:
-	  fprintf(stream, "#H'%x", (unsigned)abs); break;
+	  fprintf(stream, "#0x%x", (unsigned)abs); break;
 	case RD8:
 	  fprintf(stream, "%s", regnames[rd]); break;
 	case RS8:
@@ -214,14 +214,14 @@ FILE *stream)
 	case ABS16SRC:
 	case ABS16DST:
 	case ABS8DST:
-	  fprintf(stream, "@H'%x", (unsigned)abs); break;
+	  fprintf(stream, "@0x%x", (unsigned)abs); break;
 	case DISP8:
 	  fprintf(stream, ".%s%d (%x)",(char)abs>0 ? "+" :"", (char)abs,
 		  addr + (char)abs);
 	  break;
 	case DISPSRC:
 	case DISPDST:
-	  fprintf(stream, "@(%d,r%d)", abs, rdisp & 0x7); break;
+	  fprintf(stream, "@(0x%x,r%d)", abs, rdisp & 0x7); break;
 	case CCR:
 	  fprintf(stream, "ccr"); break;
 	case KBIT:
@@ -238,25 +238,25 @@ FILE *stream)
 
 
 
-unsigned int DEFUN( print_insn_h8300,(addr, data, file),
+unsigned int DEFUN(print_insn_h8300,(addr, data, file),
 bfd_vma addr AND
-CONST bfd_byte *data AND
+CONST char *data AND
 PTR file)
 {
   static boolean init;
   if (!init) {
     bfd_h8_disassemble_init();
     init= 1;
-
   }
-  return   bfd_h8_disassemble(addr, data, file);
+
+  return   bfd_h8_disassemble(addr, (bfd_byte *)data, file);
 }
 
 /* 
 Relocations for the H8
 
 */
-static bfd_reloc_status_enum_type 
+static bfd_reloc_status_type 
 DEFUN(howto16_callback,(abfd, reloc_entry, symbol_in, data, ignore_input_section),
 bfd *abfd AND
 arelent *reloc_entry AND
@@ -277,7 +277,7 @@ asection *ignore_input_section)
 }
 
 
-static bfd_reloc_status_enum_type 
+static bfd_reloc_status_type 
 DEFUN(howto8_callback,(abfd, reloc_entry, symbol_in, data, ignore_input_section),
 bfd *abfd AND
 arelent *reloc_entry AND
@@ -298,7 +298,7 @@ asection *ignore_input_section)
 }
 
 
-static bfd_reloc_status_enum_type 
+static bfd_reloc_status_type 
 DEFUN(howto8_FFnn_callback,(abfd, reloc_entry, symbol_in, data, ignore_input_section),
 bfd *abfd AND
 arelent *reloc_entry AND
@@ -319,7 +319,7 @@ asection *ignore_input_section)
   return bfd_reloc_ok;
 }
 
-static bfd_reloc_status_enum_type 
+static bfd_reloc_status_type 
 DEFUN(howto8_pcrel_callback,(abfd, reloc_entry, symbol_in, data, ignore_input_section),
 bfd *abfd AND
 arelent *reloc_entry AND
@@ -355,8 +355,8 @@ static reloc_howto_type howto_8_pcrel
 
 static CONST struct reloc_howto_struct *
 DEFUN(local_bfd_reloc_type_lookup,(arch, code),
- bfd_arch_info_struct_type *arch AND
- bfd_reloc_code_enum_type code)
+ CONST struct bfd_arch_info *arch AND
+ bfd_reloc_code_type code)
 {
   switch (code) {
   case BFD_RELOC_16:
@@ -375,7 +375,7 @@ int bfd_default_scan_num_mach();
 
 static boolean 
 DEFUN(h8300_scan,(info, string),
-CONST struct bfd_arch_info_struct *info AND
+CONST struct bfd_arch_info *info AND
 CONST char *string)
 {
   if (strcmp(string,"h8300") == 0) return true;
@@ -384,7 +384,8 @@ CONST char *string)
   if (strcmp(string,"H8/300") == 0) return true;
   return false;
 }
-static bfd_arch_info_struct_type arch_info_struct = 
+
+static bfd_arch_info_type arch_info_struct = 
   {
     16,	/* 16 bits in a word */
     16,	/* 16 bits in an address */
@@ -401,13 +402,8 @@ static bfd_arch_info_struct_type arch_info_struct =
     0,
   };
 
-
-
-
-void DEFUN_VOID(bfd_h8300_arch)
+void
+DEFUN_VOID(bfd_h8300_arch)
 {
   bfd_arch_linkin(&arch_info_struct);
 }
-
-
-

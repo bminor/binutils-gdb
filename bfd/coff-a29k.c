@@ -230,6 +230,19 @@ static reloc_howto_type howto_table[] =
 
 #define BADMAG(x) A29KBADMAG(x)
 
+/* This macro translates an external r_type field into a pointer to an
+   entry in the above table */
+
+
+#define RTYPE2HOWTO(cache_ptr, dst) 				\
+	    if (dst.r_type == R_IHCONST) {			\
+		/* Add in the value which was stored in the symbol index */\
+		cache_ptr->addend += dst.r_symndx; 		\
+		/* Throw away the bogus symbol pointer */ 	\
+		cache_ptr->sym_ptr_ptr = 0; 			\
+	    } 							\
+	    cache_ptr->howto = howto_table + dst.r_type; 	\
+
 #include "coffcode.h"
 
 bfd_target a29kcoff_big_vec =

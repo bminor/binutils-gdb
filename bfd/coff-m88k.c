@@ -81,6 +81,23 @@ static reloc_howto_type howto_table[] =
 };
 
 
+/* Code to swap in the reloc offset */
+#define SWAP_IN_RELOC_OFFSET   bfd_h_get_16
+#define SWAP_OUT_RELOC_OFFSET bfd_h_put_16
+
+
+/* Code to turn an external r_type into a pointer to an entry in the
+   above howto table */
+#define RTYPE2HOWTO(cache_ptr, dst)					\
+	    if (dst.r_type >= R_PCR16L && dst.r_type <= R_VRT32) {	\
+		cache_ptr->howto = howto_table + dst.r_type - R_PCR16L;	\
+		cache_ptr->addend += dst.r_offset << 16;		\
+	    }								\
+	    else {							\
+		BFD_ASSERT(0);						\
+	    }
+
+
 
 #define BADMAG(x) MC88BADMAG(x)
 #include "coffcode.h"
@@ -89,7 +106,7 @@ static reloc_howto_type howto_table[] =
 
 bfd_target m88kbcs_vec =
 {
-  "m88kbcs",			/* name */
+  "coff-m88kbcs",		/* name */
   bfd_target_coff_flavour,
   true,				/* data byte order is big */
   true,				/* header byte order is big */
