@@ -245,6 +245,7 @@ remote-udi.c
 remote-utils.c
 remote-utils.h
 remote-vx.c
+remote-vx29k.c
 remote-z8k.c
 remote.c
 rs6000-nat.c
