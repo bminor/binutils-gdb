@@ -57,7 +57,7 @@ extern struct gdb_interpreter_procs *gdb_interpreter_get_procs (struct
 								*interp);
 extern void *gdb_interpreter_get_data (struct gdb_interpreter *interp);
 
-void clear_interpreter_hooks ();
+extern void clear_interpreter_hooks ();
 
 /* well-known interpreters */
 #define GDB_INTERPRETER_CONSOLE		"console"

@@ -21,39 +21,18 @@
 #ifndef MI_H
 #define MI_H
 /* The mi interpreters. */
-struct ui_file;
-struct breakpoint;
-struct gdb_interpreter;
+
 extern struct gdb_interpreter *mi_interp;
 extern struct gdb_interpreter *mi1_interp;
+extern struct gdb_events mi_event_handlers;
+extern struct ui_file *mi_event_channel;
 
 extern void mi_setup_architecture_data (void);
 extern void mi_register_gdbarch_swap (void);
 
-/* MI's output channels */
-extern struct ui_file *mi_stdout;
-extern struct ui_file *mi_stderr;
-extern struct ui_file *mi_stdlog;
-extern struct ui_file *mi_stdtarg;
-extern struct ui_file *mi_event_channel;
-
-/* Events/Hooks */
 extern void mi_load_progress (const char *section_name,
 			      unsigned long sent_so_far,
 			      unsigned long total_section,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
-extern void mi_interp_frame_changed_hook (int new_frame_number);
-extern void mi_interp_context_hook (int thread_id);
-
-extern void mi_create_breakpoint (int bpnum);
-extern void mi_modify_breakpoint (int bpnum);
-extern void mi_delete_breakpoint (int bpnum);
-extern void mi_create_tracepoint (int bpnum);
-extern void mi_modify_tracepoint (int bpnum);
-extern void mi_delete_tracepoint (int bpnum);
-extern void mi_architecture_changed (void);
-extern void mi_target_changed (void);
-extern void mi_selected_frame_level_changed (int level);
-extern void mi_context_changed (int thread_id);
 #endif /* MI_H */

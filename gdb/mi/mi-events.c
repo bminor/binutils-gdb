@@ -118,3 +118,18 @@ mi_context_changed (int thread_id)
 {
   event_notify ("context-changed,thread=\"%d\"", thread_id);
 }
+
+struct gdb_events mi_event_handlers =
+  {
+    mi_create_breakpoint,
+    mi_delete_breakpoint,
+    mi_modify_breakpoint,
+    mi_create_tracepoint,
+    mi_delete_tracepoint,
+    mi_modify_tracepoint,
+    mi_architecture_changed,
+    mi_target_changed,
+    mi_selected_frame_level_changed,
+    mi_context_changed
+  };
+

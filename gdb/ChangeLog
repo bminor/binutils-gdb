@@ -1,5 +1,9 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* interps.h (clear_interpreter_hooks): Add 'extern' keyword.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* cli/cli-interp.c (_initialize_cli_interp): Call
 	gdb_interpreter_new and gdb_interpreter_add.
 	* top.c (gdb_init): Call gdb_interpreter_lookup.
@@ -13,6 +17,7 @@
 	Update all callers.
 	* interps.h: Ditto.
 	
+
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
 	* interps.h (gdb_interpreter_is_quiet_p): Rename from

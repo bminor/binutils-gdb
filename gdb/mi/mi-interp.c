@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_string.h"
 #include "interps.h"
 #include "event-top.h"
 #include "event-loop.h"
@@ -66,20 +67,6 @@ static void mi1_command_loop (void);
 
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
-
-static struct gdb_events mi_event_handlers =
-  {
-    mi_create_breakpoint,
-    mi_delete_breakpoint,
-    mi_modify_breakpoint,
-    mi_create_tracepoint,
-    mi_delete_tracepoint,
-    mi_modify_tracepoint,
-    mi_architecture_changed,
-    mi_target_changed,
-    mi_selected_frame_level_changed,
-    mi_context_changed
-  };
 
 static int
 mi_interpreter_init (void *data)
