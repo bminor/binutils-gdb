@@ -3,6 +3,7 @@
 #include "simops.h"
 #include "sys/syscall.h"
 #include "bfd.h"
+#include <errno.h>
 
 enum op_types {
   OP_UNKNOWN,
@@ -150,7 +151,7 @@ trace_input (name, type, size)
     case OP_IMM_REG:
     case OP_IMM_REG_CMP:
     case OP_IMM_REG_MOVE:
-      sprintf (buf, "%d,r%d", OP[1], OP[0]);
+      sprintf (buf, "%d,r%d", OP[0], OP[1]);
       break;
 
     case OP_COND_BR:
@@ -166,11 +167,11 @@ trace_input (name, type, size)
       break;
 
     case OP_LOAD32:
-      sprintf (buf, "%d[r%d],r%d", SEXT16 (OP[2]), OP[0], OP[1]);
+      sprintf (buf, "%d[r%d],r%d", SEXT16 (OP[2]) & ~0x1, OP[0], OP[1]);
       break;
 
     case OP_STORE32:
-      sprintf (buf, "r%d,%d[r%d]", OP[1], SEXT16 (OP[2]), OP[0]);
+      sprintf (buf, "r%d,%d[r%d]", OP[1], SEXT16 (OP[2] & ~0x1), OP[0]);
       break;
 
     case OP_JUMP:
@@ -424,7 +425,7 @@ OP_300 ()
   temp = OP[1];
   temp = SEXT7 (temp);
   op2 = temp;
-  result = get_byte (State.mem + State.regs[30] + op2);
+  result = load_mem (State.regs[30] + op2, 1);
   State.regs[OP[0]] = SEXT8 (result);
   trace_output (OP_LOAD16);
 }
@@ -440,7 +441,7 @@ OP_400 ()
   temp = OP[1];
   temp = SEXT7 (temp);
   op2 = temp << 1;
-  result = get_half (State.mem + State.regs[30] + op2);
+  result = load_mem (State.regs[30] + op2, 2);
   State.regs[OP[0]] = SEXT16 (result);
   trace_output (OP_LOAD16);
 }
@@ -456,7 +457,7 @@ OP_500 ()
   temp = OP[1];
   temp = SEXT7 (temp);
   op2 = temp << 2;
-  result = get_word (State.mem + State.regs[30] + op2);
+  result = load_mem (State.regs[30] + op2, 4);
   State.regs[OP[0]] = result;
   trace_output (OP_LOAD16);
 }
@@ -473,7 +474,7 @@ OP_380 ()
   temp = OP[1];
   temp = SEXT7 (temp);
   op1 = temp;
-  put_byte (State.mem + State.regs[30] + op1, op0);
+  store_mem (State.regs[30] + op1, 1, op0);
   trace_output (OP_STORE16);
 }
 
@@ -489,7 +490,7 @@ OP_480 ()
   temp = OP[1];
   temp = SEXT7 (temp);
   op1 = temp << 1;
-  put_half (State.mem + State.regs[30] + op1, op0);
+  store_mem (State.regs[30] + op1, 2, op0);
   trace_output (OP_STORE16);
 }
 
@@ -505,7 +506,7 @@ OP_501 ()
   temp = OP[1];
   temp = SEXT7 (temp);
   op1 = temp << 2;
-  put_word (State.mem + State.regs[30] + op1, op0);
+  store_mem (State.regs[30] + op1, 4, op0);
   trace_output (OP_STORE16);
 }
 
@@ -520,7 +521,7 @@ OP_700 ()
   op0 = State.regs[OP[0]];
   temp = SEXT16 (OP[2]);
   op2 = temp;
-  result = get_byte (State.mem + op0 + op2);
+  result = load_mem (op0 + op2, 1);
   State.regs[OP[1]] = SEXT8 (result);
   trace_output (OP_LOAD32);
 }
@@ -537,7 +538,7 @@ OP_720 ()
   temp = SEXT16 (OP[2]);
   temp &= ~0x1;
   op2 = temp;
-  result = get_half (State.mem + op0 + op2);
+  result = load_mem (op0 + op2, 2);
   State.regs[OP[1]] = SEXT16 (result);
   trace_output (OP_LOAD32);
 }
@@ -554,7 +555,7 @@ OP_10720 ()
   temp = SEXT16 (OP[2]);
   temp &= ~0x1;
   op2 = temp;
-  result = get_word (State.mem + op0 + op2);
+  result = load_mem (op0 + op2, 4);
   State.regs[OP[1]] = result;
   trace_output (OP_LOAD32);
 }
@@ -571,7 +572,7 @@ OP_740 ()
   op1 = State.regs[OP[1]];
   temp = SEXT16 (OP[2]);
   op2 = temp;
-  put_byte (State.mem + op0 + op2, op1);
+  store_mem (op0 + op2, 1, op1);
   trace_output (OP_STORE32);
 }
 
@@ -587,7 +588,7 @@ OP_760 ()
   op1 = State.regs[OP[1]];
   temp = SEXT16 (OP[2] & ~0x1);
   op2 = temp;
-  put_half (State.mem + op0 + op2, op1);
+  store_mem (op0 + op2, 2, op1);
   trace_output (OP_STORE32);
 }
 
@@ -603,7 +604,7 @@ OP_10760 ()
   op1 = State.regs[OP[1]];
   temp = SEXT16 (OP[2] & ~0x1);
   op2 = temp;
-  put_word (State.mem + op0 + op2, op1);
+  store_mem (op0 + op2, 4, op1);
   trace_output (OP_STORE32);
 }
 
@@ -1828,12 +1829,12 @@ OP_7C0 ()
   op1 = OP[1] & 0x7;
   temp = SEXT16 (OP[2]);
   op2 = temp;
-  temp = get_byte (State.mem + op0 + op2);
+  temp = load_mem (op0 + op2, 1);
   State.sregs[5] &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
     State.sregs[5] |= PSW_Z;
   temp |= (1 << op1);
-  put_byte (State.mem + op0 + op2, temp);
+  store_mem (op0 + op2, 1, temp);
   trace_output (OP_BIT);
 }
 
@@ -1849,12 +1850,12 @@ OP_47C0 ()
   op1 = OP[1] & 0x7;
   temp = SEXT16 (OP[2]);
   op2 = temp;
-  temp = get_byte (State.mem + op0 + op2);
+  temp = load_mem (op0 + op2, 1);
   State.sregs[5] &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
     State.sregs[5] |= PSW_Z;
   temp ^= (1 << op1);
-  put_byte (State.mem + op0 + op2, temp);
+  store_mem (op0 + op2, 1, temp);
   trace_output (OP_BIT);
 }
 
@@ -1870,12 +1871,12 @@ OP_87C0 ()
   op1 = OP[1] & 0x7;
   temp = SEXT16 (OP[2]);
   op2 = temp;
-  temp = get_byte (State.mem + op0 + op2);
+  temp = load_mem (op0 + op2, 1);
   State.sregs[5] &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
     State.sregs[5] |= PSW_Z;
   temp &= ~(1 << op1);
-  put_byte (State.mem + op0 + op2, temp);
+  store_mem (op0 + op2, 1, temp);
   trace_output (OP_BIT);
 }
 
@@ -1891,7 +1892,7 @@ OP_C7C0 ()
   op1 = OP[1] & 0x7;
   temp = SEXT16 (OP[2]);
   op2 = temp;
-  temp = get_byte (State.mem + op0 + op2);
+  temp = load_mem (op0 + op2, 1);
   State.sregs[5] &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
     State.sregs[5] |= PSW_Z;
@@ -1939,7 +1940,17 @@ OP_14007E0 ()
 {
   trace_input ("reti", OP_NONE, 0);
   trace_output (OP_NONE);
-  abort ();
+
+  if ((State.sregs[5] & (PSW_NP | PSW_EP)) == PSW_NP)
+    {				/* Only NP is on */
+      PC = State.sregs[2] - 4;	/* FEPC */
+      State.sregs[5] = State.sregs[3];	/* FEPSW */
+    }
+  else
+    {
+      PC = State.sregs[0] - 4;	/* EIPC */
+      State.sregs[5] = State.sregs[1];	/* EIPSW */
+    }
 }
 
 /* trap, not supportd */
@@ -1951,9 +1962,9 @@ OP_10007E0 ()
   trace_input ("trap", OP_TRAP, 0);
   trace_output (OP_TRAP);
 
-  /* Trap 0 is used for simulating low-level I/O */
+  /* Trap 31 is used for simulating OS I/O functions */
 
-  if (OP[0] == 0)
+  if (OP[0] == 31)
     {
       int save_errno = errno;	
       errno = 0;
@@ -1972,8 +1983,7 @@ OP_10007E0 ()
 
 /* Turn a pointer in a register into a pointer into real memory. */
 
-#define MEMPTR(x) ((char *)((x) + State.mem))
-
+#define MEMPTR(x) (map (x))
 
       switch (FUNC)
 	{
@@ -2069,12 +2079,12 @@ OP_10007E0 ()
 	    SLW (buf+28, host_stat.st_mtime);
 	    SLW (buf+36, host_stat.st_ctime);
 	  }
-#endif
 	  break;
 
 	case SYS_chown:
 	  RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
 	  break;
+#endif
 	case SYS_chmod:
 	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
 	  break;
@@ -2089,10 +2099,14 @@ OP_10007E0 ()
       RETERR = errno;
       errno = save_errno;
     }
-  else if (OP[0] == 1 )
-    {
-      char *fstr = State.regs[2] + State.mem;
-      puts (fstr);
+  else
+    {				/* Trap 0 -> 30 */
+      State.sregs[0] = PC + 4;	/* EIPC */
+      State.sregs[1] = State.sregs[5]; /* EIPSW */
+      State.sregs[4] &= 0xffff0000; /* Mask out EICC */
+      State.sregs[4] |= 0x40 + OP[0];	/* EICC */
+      State.sregs[5] |= PSW_EP | PSW_ID; /* Now doing exception processing */
+      PC = ((OP[0] < 0x10) ? 0x40 : 0x50) - 4;
     }
 }
 

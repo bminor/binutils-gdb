@@ -86,6 +86,7 @@ write_opcodes ()
 {
   struct v850_opcode *opcode;
   int i, j;
+  int numops;
   
   /* write out opcode table */
   printf ("#include \"v850_sim.h\"\n");
@@ -111,6 +112,7 @@ write_opcodes ()
       printf ("%d,{",j);
 	  
       j = 0;
+      numops = 0;
       for (i = 0; i < 6; i++)
 	{
 	  int flags = v850_operands[opcode->operands[i]].flags;
@@ -123,9 +125,19 @@ write_opcodes ()
 	      printf ("%d,%d,%d", shift,
 		      v850_operands[opcode->operands[i]].bits,flags);
 	      j = 1;
+	      numops++;
 	    }
 	}
+
+      switch (numops)
+	{
+	case 0:
+	  printf ("0,0,0");
+	case 1:
+	  printf (",0,0,0");
+	}
+
       printf ("}},\n");
     }
-  printf ("{ 0,0,NULL,0,{ }},\n};\n");
+  printf ("{ 0,0,NULL,0,{0,0,0,0,0,0}},\n};\n");
 }

@@ -1,3 +1,15 @@
+Thu Oct 24 10:33:33 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in:  Get rid of srcroot.  Set all INSTALL macros via
+	autoconf.
+	* gencode.c (write_opcodes):  Pad operands field to account for
+	MSVC braindamage.
+	* simops.c:  Include errno.h.  Exclude SYS_chown, since MSVC
+	doesn't support it.  (Why is this here in the first place?!?)
+	* v850_sim.h:  Get rid of 64 bit defs.  Also, get rid of #elif's.
+	Change number of operands in struct simops from 9 to 6.  Define
+	SIGTRAP and SIGQUIT for MSVC.
+
 Tue Oct 15 16:19:51 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* interp.c (MEM_SIZE):  It's now bytes, not a power of 2.
