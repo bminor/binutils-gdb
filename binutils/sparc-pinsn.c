@@ -162,12 +162,12 @@ memcpy(&insn,buffer, sizeof (insn));
 	      && insn.rs1 == insn.rd)
 	    imm_added_to_rs1 = 1;
 
-	  if (index (opcode->args, 'S') != 0)
+	  if (strchr (opcode->args, 'S') != 0)
 	    /* Reject the special case for `set'.
 	       The real `sethi' will match.  */
 	    continue;
 	  if (insn.rs1 != insn.rd
-	      && index (opcode->args, 'r') != 0)
+	      && strchr (opcode->args, 'r') != 0)
 	      /* Can't do simple format if source and dest are different.  */
 	      continue;
 
@@ -557,8 +557,8 @@ compare_opcodes (a, b)
 
   /* Put 1+i before i+1.  */
   {
-    char *p0 = (char *) index(op0->args, '+');
-    char *p1 = (char *) index(op1->args, '+');
+    char *p0 = (char *) strchr(op0->args, '+');
+    char *p1 = (char *) strchr(op1->args, '+');
 
     if (p0 && p1)
       {
