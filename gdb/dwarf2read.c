@@ -158,7 +158,14 @@ struct dwarf2_per_objfile_data
   char *dwarf_ranges_buffer;
   char *dwarf_loc_buffer;
 
+  /* A tree of all the compilation units.  Each member is a pointer
+     to a struct dwarf2_cu.  This will be set if and only if we have
+     encountered a compilation unit with inter-CU references.  */
   splay_tree cu_tree;
+
+  /* A chain of compilation units that are currently read in, so that
+     they can be freed later.  */
+  struct dwarf2_per_cu_data *read_in_chain;
 };
 
 #define dwarf_info_size		dwarf2_per_objfile->dwarf_info_size
@@ -961,6 +968,8 @@ static void clear_per_cu_pointer (void *);
 
 static void free_cached_comp_units (void *);
 
+static void age_cached_comp_units (void *);
+
 static void free_one_cached_comp_unit (struct dwarf2_cu *, struct dwarf2_cu *);
 
 static void set_die_type (struct die_info *, struct type *,
@@ -1311,12 +1320,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
-  /* read_in_chain, unlike every other field in the dwarf2_cu object,
-     is live across the loop.  The function clear_per_cu_pointer will
-     free any allocated compilation units that have not been used in
-     several psymtabs.  Others will remain on the list.  */
-  cu.read_in_chain = NULL;
-  make_cleanup (free_cached_comp_units, &cu);
+  /* Any cached compilation units will be linked by the per-objfile
+     read_in_chain.  Make sure to free them when we're done.  */
+  make_cleanup (free_cached_comp_units, NULL);
 
   /* Since the objects we're extracting from dwarf_info_buffer vary in
      length, only the individual functions to extract them (like
@@ -1352,6 +1358,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       cu.list_in_scope = &file_symbols;
 
       cu.partial_dies = NULL;
+
+      cu.read_in_chain = NULL;
 
       /* Read the abbrevs for this compilation unit into a table */
       saw_ref_addr = dwarf2_read_abbrevs (abfd, &cu);
@@ -5155,8 +5163,8 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu,
   if (per_cu->cu == NULL)
     {
       load_comp_unit (per_cu, cu->objfile);
-      per_cu->cu->read_in_chain = cu->read_in_chain;
-      cu->read_in_chain = per_cu;
+      per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+      dwarf2_per_objfile->read_in_chain = per_cu;
     }
 
   per_cu->cu->last_used = 0;
@@ -8890,18 +8898,19 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
   return this_cu;
 }
 
+/* Helper function for cleaning up the compilation unit cache.  Walk
+   this objfile's read_in_chain.  If AGING, increase the age counter
+   on each compilation unit, and free any that are too old.  Otherwise,
+   if TARGET_CU, free only that compilation unit, removing it from the
+   chain.  Otherwise free all compilation units.  */
+
 static void
-free_comp_units_worker (struct dwarf2_cu *cu, int aging,
-			struct dwarf2_cu *target_cu)
+free_comp_units_worker (struct dwarf2_cu *target_cu, int aging)
 {
-  struct dwarf2_per_cu_data *this_cu, *per_cu, **last_chain;
+  struct dwarf2_per_cu_data *per_cu, **last_chain;
 
-  this_cu = cu->per_cu;
-  if (this_cu == NULL && target_cu == NULL)
-    return;
-
-  per_cu = cu->read_in_chain;
-  last_chain = &cu->read_in_chain;
+  per_cu = dwarf2_per_objfile->read_in_chain;
+  last_chain = &dwarf2_per_objfile->read_in_chain;
   while (per_cu != NULL)
     {
       struct dwarf2_per_cu_data *next_cu;
@@ -8925,32 +8934,40 @@ free_comp_units_worker (struct dwarf2_cu *cu, int aging,
 
       per_cu = next_cu;
     }
-
-  /* This compilation unit is on the stack in dwarf2_build_psymtabs_hard,
-     so we should not xfree it.  Just unlink it.  */
-  if (target_cu == NULL)
-    {
-      cu->per_cu = NULL;
-      this_cu->cu = NULL;
-    }
 }
 
 static void
 clear_per_cu_pointer (void *data)
 {
-  free_comp_units_worker (data, 1, NULL);
+  struct dwarf2_cu *cu = data;
+
+  if (cu->per_cu != NULL)
+    {
+      age_cached_comp_units (NULL);
+
+      /* This compilation unit is on the stack in our caller, so we
+	 should not xfree it.  Just unlink it.  */
+      cu->per_cu->cu = NULL;
+      cu->per_cu = NULL;
+    }
 }
 
 static void
 free_cached_comp_units (void *data)
 {
-  free_comp_units_worker (data, 0, NULL);
+  free_comp_units_worker (NULL, 0);
+}
+
+static void
+age_cached_comp_units (void *data)
+{
+  free_comp_units_worker (NULL, 1);
 }
 
 static void
 free_one_cached_comp_unit (struct dwarf2_cu *cu, struct dwarf2_cu *target_cu)
 {
-  free_comp_units_worker (cu, 0, target_cu);
+  free_comp_units_worker (target_cu, 0);
 }
 
 struct dwarf2_offset_and_type

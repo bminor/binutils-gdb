@@ -1,5 +1,20 @@
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct dwarf2_per_objfile_data): Add comment
+	for cu_tree.  Add read_in_chain.
+	(age_cached_comp_units): New function.
+	(clear_per_cu_pointer): Clear the pointer ourself.  Call
+	age_cached_comp_units.
+	(free_cached_comp_units, free_one_cached_comp_unit): Update call to
+	free_comp_units_worker.
+	(dwarf2_build_psymtabs_hard): Use the per-objfile read_in_chain.
+	(find_partial_die): Likewise.
+	(free_comp_units_worker): Don't try to clear the per_cu pointer
+	for the list head.  Remove now-unused argument.  Use the per-objfile
+	read_in_chain.
+
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (dwarf2_read_abbrevs): Return 1 for DW_FORM_indirect
 	also.
 
