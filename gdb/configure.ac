@@ -1170,10 +1170,11 @@ lose
 
 
 dnl Figure out which of the many generic ser-*.c files the _host_ supports.
-SER_HARDWIRE="ser-unix.o ser-pipe.o ser-tcp.o"
+SER_HARDWIRE="ser-base.o ser-unix.o ser-pipe.o ser-tcp.o"
 case ${host} in
   *go32* ) SER_HARDWIRE=ser-go32.o ;;
   *djgpp* ) SER_HARDWIRE=ser-go32.o ;;
+  *mingw32*) SER_HARDWIRE="ser-base.o ser-tcp.o" ;;
 esac
 AC_SUBST(SER_HARDWIRE)
 
