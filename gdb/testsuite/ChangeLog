@@ -1,3 +1,9 @@
+2004-06-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR testsuite/1679.
+	* gdb.arch/i386-sse.exp: Do not call gdb_suppress_entire_file.
+	Issue an UNSUPPORTED result instead.
+
 2004-06-18  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/charset.exp: Only send a control-C if we see a new
