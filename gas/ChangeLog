@@ -1,3 +1,9 @@
+Sun Feb 23 15:50:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* itbl-ops.c: Add test for itbl_have_entries.
+	* config/tc-mips.c: Remove test for itbl_have_entries.
+	* config/tc-mips.h: Define tc_init_after_args to mips_init_after_args.
+
 Sun Feb 23 18:13:19 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (DISTSTUFF): Remove itbl-parse.y, itbl-lex.l, and

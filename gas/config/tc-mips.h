@@ -25,6 +25,11 @@
 
 #define TC_MIPS
 
+/* Default to big endian.  */
+#ifndef TARGET_BYTES_BIG_ENDIAN
+#define TARGET_BYTES_BIG_ENDIAN		1
+#endif
+
 #define TARGET_ARCH bfd_arch_mips
 
 #define ONLY_STANDARD_ESCAPES
@@ -57,11 +62,6 @@ extern int mips_relax_frag PARAMS ((struct frag *, long));
    embedded PIC code.  */
 #define DIFF_EXPR_OK
 
-/* Default to big endian.  */
-#ifndef TARGET_BYTES_BIG_ENDIAN
-#define TARGET_BYTES_BIG_ENDIAN		1
-#endif
-
 /* The endianness of the target format may change based on command
    line arguments.  */
 #define TARGET_FORMAT mips_target_format()
@@ -77,6 +77,9 @@ struct mips_cl_insn
 };
 
 extern int tc_get_register PARAMS ((int frame));
+
+#define tc_init_after_args() mips_init_after_args()
+extern void mips_init_after_args PARAMS ((void));
 
 #define md_parse_long_option(arg) mips_parse_long_option (arg)
 extern int mips_parse_long_option PARAMS ((const char *));

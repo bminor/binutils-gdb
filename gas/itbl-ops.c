@@ -286,6 +286,9 @@ itbl_init (void)
   e_processor procn;
   e_type type;
 
+  if (!itbl_have_entries)
+	return;
+
   /* Since register names don't have a prefix, put them in the symbol table so
      they can't be used as symbols.  This simplifies argument parsing as
      we can let gas parse registers for us. */
@@ -328,6 +331,9 @@ append_insns_as_macros (void)
   struct ITBL_OPCODE_STRUCT *new_opcodes, *o;
   struct itbl_entry *e, **es;
   int n, id, size, new_size, new_num_opcodes;
+
+  if (!itbl_have_entries)
+	return;
 
   if (!itbl_num_opcodes)	/* no new instructions to add! */
     {
