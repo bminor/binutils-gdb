@@ -202,17 +202,17 @@ extern struct frame_id get_frame_id (struct frame_info *fi);
    meaningful to the frame's high-level debug info.  */
 extern CORE_ADDR get_frame_base_address (struct frame_info *);
 
-/* Assuming that a frame is `normal', return the address of the first
-   local variable, or 0 if the information isn't available.  NOTE:
+/* Assuming that a frame is `normal', return the base-address of the
+   local variables, or 0 if the information isn't available.  NOTE:
    This address is really only meaningful to the frame's high-level
    debug info.  Typically, the argument and locals share a single
    base-address.  */
 extern CORE_ADDR get_frame_locals_address (struct frame_info *);
 
-/* Assuming that a frame is `normal', return the address of the first
-   parameter, or 0 if that information isn't available.  NOTE: This
-   address is really only meaningful to the frame's high-level debug
-   info.  Typically, the argument and locals share a single
+/* Assuming that a frame is `normal', return the base-address of the
+   parameter list, or 0 if that information isn't available.  NOTE:
+   This address is really only meaningful to the frame's high-level
+   debug info.  Typically, the argument and locals share a single
    base-address.  */
 extern CORE_ADDR get_frame_args_address (struct frame_info *);
 

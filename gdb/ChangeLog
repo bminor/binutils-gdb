@@ -1,5 +1,11 @@
 2003-04-01  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (get_frame_locals_address, get_frame_args_address):
+	Refer to the base address, instead of the address of the first
+	local or parameter.
+	
+2003-04-01  Andrew Cagney  <cagney@redhat.com>
+
 	Add frame debug info addresses:
 	* frame-base.c: New file.
 	* frame-base.h: New file.
