@@ -18,6 +18,21 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* This module provides three functions: mipscoff_symfile_init,
+   which initializes to read a symbol file; mipscoff_new_init, which 
+   discards existing cached information when all symbols are being
+   discarded; and mipscoff_symfile_read, which reads a symbol table
+   from a file.
+
+   mipscoff_symfile_read only does the minimum work necessary for letting the
+   user "name" things symbolically; it does not read the entire symtab.
+   Instead, it reads the external and static symbols and puts them in partial
+   symbol tables.  When more extensive information is requested of a
+   file, the corresponding partial symbol table is mutated into a full
+   fledged symbol table by going back and reading the symbols
+   for real.  mipscoff_psymtab_to_symtab() is called indirectly through
+   a pointer in the psymtab to do this.  */
+
 #include <stdio.h>
 #include "param.h"
 #include "obstack.h"
@@ -35,33 +50,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sym.h>
 #endif /* not CMUCS */
 
-/* Since these things are defined differently on various systems I'll
-   (re)define here what I really need in this module.  I only assume the
-   three standard COFF structure definitions: filehdr, aouthdr, scnhdr */
-#define MIPS		/* Kludge to get MIPS version of coff */
-#undef _ETEXT		/* Avoid duplicated define from <syms.h> */
 #include "ecoff.h"
 
 struct coff_exec {
 	struct external_filehdr f;
 	struct external_aouthdr a;
 };
-#undef a_magic
-#undef a_text
-#undef a_data
-#undef a_bss
-#undef a_syms
-#undef a_entry
-#define a_magic	a.magic		/* magic number */
-#define a_text	a.tsize		/* size of text segment */
-#define a_data	a.dsize		/* size of initialized data */
-#define a_bss	a.bsize		/* size of uninitialized data */
-#define a_syms	f.f_nsyms	/* size of symbol table */
-#define a_entry	a.entry		/* entry point */
-
-#undef	N_BADMAG
-#define	N_BADMAG(x) \
-    (((x).a_magic)!=OMAGIC && ((x).a_magic)!=NMAGIC && ((x).a_magic)!=ZMAGIC)
 
 /* Things we import explicitly from other modules */
 
@@ -69,12 +63,8 @@ extern int	     info_verbose;
 extern struct block *block_for_pc();
 extern void	     sort_symtab_syms();
 
-/* Forward declarations */
-
-static void psymtab_to_symtab_1();
-
-/* Macros and extra defs */
-
+/* Various complaints about symbol reading that don't abort the process */
+   
 struct complaint unknown_ext_complaint = 
 	{"unknown external symbol %s", 0, 0};
 
@@ -84,7 +74,24 @@ struct complaint unknown_sym_complaint =
 struct complaint unknown_st_complaint = 
 	{"with type %d", 0, 0};
 
-/* Already parsed symbols are marked specially */
+struct complaint block_overflow_complaint = 
+	{"block containing %s overfilled", 0, 0};
+
+struct complaint basic_type_complaint = 
+	{"cannot map MIPS basic type 0x%x", 0, 0};
+
+struct complaint unknown_type_qual_complaint = 
+	{"unknown type qualifier 0x%x", 0, 0};
+
+struct complaint array_bitsize_complaint = 
+	{"size of array target type not known, assuming %d bits", 0, 0};
+
+struct complaint array_parse_complaint = 
+	{"array type with strange relative symbol", 0, 0};
+
+/* Macros and extra defs */
+
+/* Already-parsed symbols are marked specially */
 
 #define stParsed stType
 
@@ -95,7 +102,7 @@ struct complaint unknown_st_complaint =
 	(((a) == GLEVEL_3) ? ((b) < GLEVEL_3) :			\
 	 ((b) == GLEVEL_3) ? -1 : (int)((b) - (a)))
 
-/* When looking at .o files avoid tripping over bad addresses */
+/* When looking at .o files, avoid tripping over bad addresses */
 
 #define SAFE_TEXT_ADDR 0x400000
 #define SAFE_DATA_ADDR 0x10000000
@@ -107,6 +114,10 @@ struct complaint unknown_st_complaint =
 /* GDB symtable for the current compilation unit */
 
 static struct symtab *cur_stab;
+
+/* MIPS symtab header for the current file */
+
+static HDRR	*cur_hdr;
 
 /* Pointer to current file decriptor record, and its index */
 
@@ -144,8 +155,7 @@ static struct type *builtin_type_enum;
 static struct type *builtin_type_range;
 static struct type *builtin_type_set;
 
-
-/* Forward decls */
+/* Forward declarations */
 
 static struct symbol	*new_symbol();
 static struct type	*new_type();
@@ -168,8 +178,13 @@ static struct partial_symtab *new_psymtab();
 static struct partial_symtab *parse_fdr();
 static int compare_psymbols();
 
+static void psymtab_to_symtab_1();
+static void add_block();
+static void add_symbol();
+static int  add_line();
 static void reorder_symtabs();
 static void reorder_psymtabs();
+static void shrink_linetable();
 
 /* Things we export to other modules */
 
@@ -177,22 +192,6 @@ static void reorder_psymtabs();
 /* FIXME:  Nothing really seems to use this.  Why is it here? */
 
 CORE_ADDR sigtramp_address, sigtramp_end;
-
-
-/* Functions that we really export */
-
-/* THIS DESCRIPTION IS OBSOLETE POST-BFD; FIXME! */
-/* Basically, this module must provide two functions: symbol_file_command()
-   which loads the symbol table from a file, and add_file_command() which
-   adds more symbols to the symbol table (incrementally).
-
-   These two functions only do the minimum work necessary for letting the
-   user "name" things symbolically, they do not read the entire symtab.
-   Instead, they read in the external and static symbols and put them in partial
-   symbol tables.  When more extensive information is requested of a
-   file the corresponding partial symbol table is mutated into a full
-   fledged symbol table by going back and reading the relative symbols
-   for real.  mipscoff_psymtab_to_symtab() is the function that does this */
 
 /* The entry point (starting address) of the file, if it is an executable.  */
 
@@ -204,6 +203,10 @@ extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 void
 mipscoff_new_init()
 {
+  /* If we have a file symbol header lying around, blow it away.  */
+  if (cur_hdr)
+    free ((char *)cur_hdr);
+  cur_hdr = 0;
 }
 
 void
@@ -212,6 +215,7 @@ mipscoff_symfile_init (sf)
 {
   bfd *abfd = sf->sym_bfd;
   sf->sym_private = NULL;
+
   /* Save startup file's range of PC addresses to help blockframe.c
      decide where the bottom of the stack is.  */
   if (bfd_get_file_flags (abfd) & EXEC_P)
@@ -242,51 +246,14 @@ mipscoff_symfile_read(sf, addr, mainline)
   char *name = bfd_get_filename (abfd);
   int desc;
   register int val;
-  int num_symbols;
   int symtab_offset;
   int stringtab_offset;
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
    desc = fileno ((FILE *)(abfd->iostream));	/* Raw file descriptor */
-   num_symbols = bfd_get_symcount (abfd);	/* How many syms */
-/*   symtab_offset = obj_sym_filepos (abfd);	* Symbol table file offset */
-/*   stringtab_offset = symtab_offset + num_symbols * SYMESZ;  * String tab */
 /* End of warning */
 
-#ifdef TDESC
-  debug_info = text_hdr.s_relptr;
-  if (tdesc_handle)
-    {
-       dc_terminate (tdesc_handle);
-       tdesc_handle = 0;
-    }
-#endif
-
-#if 0
-  /* Read the line number table, all at once.  */
-  info->min_lineno_offset = 0;
-  info->max_lineno_offset = 0;
-  bfd_map_over_sections (abfd, find_linenos, info);
-
-  val = init_lineno (desc, info->min_lineno_offset, 
-		     info->max_lineno_offset - info->min_lineno_offset);
-  if (val < 0)
-    error ("\"%s\": error reading line numbers\n", name);
-
-  /* Now read the string table, all at once.  */
-
-  val = init_stringtab (desc, stringtab_offset);
-  if (val < 0)
-    {
-      free_all_symtabs ();		/* FIXME blows whole symtab */
-      printf ("\"%s\": can't get string table", name);
-      fflush (stdout);
-      return;
-    }
-  make_cleanup (free_stringtab, 0);
-#endif
-
-  /* Position to read the symbol table.  Do not read it all at once. */
+  /* Position to read the symbol table.  */
   val = lseek (desc, (long)symtab_offset, 0);
   if (val < 0)
     perror_with_name (name);
@@ -299,20 +266,9 @@ mipscoff_symfile_read(sf, addr, mainline)
 
   read_mips_symtab(abfd, desc);
 
-/*  patch_opaque_types ();*/
-
-  /* Sort symbols alphabetically within each block.  */
-
-  sort_all_symtab_syms ();
-
   /* Go over the misc symbol bunches and install them in vector.  */
 
-  condense_misc_bunches (0);
-}
-  
-void
-mipscoff_symfile_discard()
-{
+  condense_misc_bunches (!mainline);
 }
   
 /* Exported procedure: Allocate zeroed memory */
@@ -330,10 +286,7 @@ char *xzalloc(size)
    most of the work to an ancillary procedure, and sorts
    and reorders the symtab list at the end */
 
-/* Forward decls */
-static HDRR	*cur_hdr;	/* MIPS symtab header for the current file */
-
-void
+static void
 mipscoff_psymtab_to_symtab(pst)
 	struct partial_symtab *pst;
 {
@@ -351,11 +304,10 @@ mipscoff_psymtab_to_symtab(pst)
 	/* FIXME, we should use private data that is a proper pointer. */
 	cur_hdr = (HDRR *) pst->ldsymlen;
 
-	psymtab_to_symtab_1(pst);
+	psymtab_to_symtab_1(pst, pst->filename);
 
 	reorder_symtabs();
 
-	/* Finish up the debug error message.  */
 	if (info_verbose)
 		printf_filtered("done.\n");
 }
@@ -561,8 +513,9 @@ fixup_symtab( hdr, data, f_ptr)
 
 /* Find a file descriptor given its index RF relative to a file CF */
 
-static
-FDR *get_rfd( cf, rf)
+static FDR *
+get_rfd (cf, rf)
+	int cf, rf;
 {
 	register FDR   *f;
 
@@ -576,8 +529,8 @@ FDR *get_rfd( cf, rf)
 
 /* Return a safer print NAME for a file descriptor */
 
-static
-char *fdr_name(name)
+static char *
+fdr_name(name)
 	char *name;
 {
 	if (name == (char *) -1)
@@ -601,8 +554,7 @@ read_mips_symtab (abfd, desc)
 
 	read_the_mips_symtab(abfd, desc, &end_of_text_seg);
 
-	parse_partial_symbols(cur_hdr, end_of_text_seg);
-	cur_hdr = 0;
+	parse_partial_symbols(end_of_text_seg);
 
 	/*
 	 * Check to make sure file was compiled with -g.
@@ -614,17 +566,9 @@ read_mips_symtab (abfd, desc)
 		printf("\nYou should compile with -g2 or -g3 for best debugging support.\n");
 		fflush(stdout);
 	}
-
-	/*
-	 * Dont allow char * to have a typename (else would get
-	 * caddr_t.)  
-	 */
-	TYPE_NAME(lookup_pointer_type(builtin_type_char)) = 0;
 }
-
 
 /* Local utilities */
-
 
 /* Map of FDR indexes to partial symtabs */
 
@@ -804,7 +748,7 @@ lookup_numargs(adr)
 
 /* Release storage when done with this file */
 
-static
+static void
 free_numargs()
 {
 	struct numarg  *n = numargs_list, *m;
@@ -824,7 +768,7 @@ free_numargs()
    For blocks, procedures and types we open a new lexical context.
    This is basically just a big switch on the symbol's type */
 
-static
+static void
 parse_symbol(sh, ax)
 	SYMR *sh;
 	AUXU *ax;
@@ -843,7 +787,7 @@ parse_symbol(sh, ax)
 	    case stNil:
 		break;
 
-	    case stGlobal:	/* external symbol, goes into the primary block */
+	    case stGlobal:	/* external symbol, goes into global block */
 		class = LOC_STATIC;
 		b = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),
 				      GLOBAL_BLOCK);
@@ -851,14 +795,14 @@ parse_symbol(sh, ax)
 		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
 		goto data;
 
-	    case stStatic:	/* static data, goes into the current block. */
+	    case stStatic:	/* static data, goes into current block. */
 		class = LOC_STATIC;
 		b = top_stack->cur_block;
 		s = new_symbol(sh->iss);
 		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
 		goto data;
 
-	    case stLocal:	/* local variable, goes into the current block */
+	    case stLocal:	/* local variable, goes into current block */
 		if (sh->sc == scRegister) {
 			class = LOC_REGISTER;
 			if (sh->value > 31)
@@ -883,7 +827,7 @@ data:		/* Common code for symbols describing data */
 		/* Value of a data symbol is its memory address */
 		break;
 
-	    case stParam:	/* argument to procedure, goes into current block */
+	    case stParam:	/* arg to procedure, goes into current block */
 		max_gdbinfo++;
 		top_stack->numargs++;
 		s = new_symbol(sh->iss);
@@ -899,7 +843,7 @@ data:		/* Common code for symbols describing data */
 		add_symbol(s, top_stack->cur_block);
 		break;
 
-	    case stLabel:	/* label, we do make a symbol for it */
+	    case stLabel:	/* label, goes into current block */
 		s = new_symbol(sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;	/* so that it can be used */
 		SYMBOL_CLASS(s) = LOC_LABEL;		/* but not misused */
@@ -908,8 +852,8 @@ data:		/* Common code for symbols describing data */
 		add_symbol(s, top_stack->cur_block);
 		break;
 
-	    case stProc:	/* Procedure */
-	    case stStaticProc:	/* Static procedure */
+	    case stProc:	/* Procedure, goes into current block? FIXME */
+	    case stStaticProc:	/* Static procedure, goes into current block */
 		s = new_symbol(sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
 		SYMBOL_CLASS(s) = LOC_BLOCK;
@@ -1113,7 +1057,7 @@ static struct type *parse_type(ax, sh, bs)
 	/* Use aux as a type information record, map its basic type */
 	t = &ax->ti;
 	if (t->bt > 26 || t->bt == btPicture) {
-		printf_filtered("Internal: cannot map MIPS basic type x%x\n", t->bt);
+		complain (&basic_type_complaint, t->bt);
 		return builtin_type_int;
 	}
 	if (map_bt[t->bt])
@@ -1249,72 +1193,97 @@ again:	PARSE_TQ(tq0);
    the symbol SX we are currently analyzing.
    Returns the number of aux symbols we parsed. */
 
-static
+static int
 upgrade_type(tpp, tq, ax, sh)
 	struct type   **tpp;
 	AUXU	       *ax;
 	SYMR	       *sh;
 {
-	int             off = 0;
-	int             ret = 0;
+	int             off;
 	struct type    *t;
 
-	if (tq == tqPtr) {
-		t = lookup_pointer_type (*tpp);
-	} else if (tq == tqProc) {
-		t = lookup_function_type (*tpp);
-	} else if (tq == tqArray) {
-		int             rf, id;
-		FDR            *fh;
-		struct field   *f;
-		SYMR            ss;
+	/* Used in array processing */
+	int             rf, id;
+	FDR            *fh;
+	struct field   *f;
+	SYMR            ss;
+	int		lower, upper;
 
+	switch (tq) {
+	case tqPtr:
+		t = lookup_pointer_type (*tpp);
+		*tpp = t;
+		return 0;
+
+	case tqProc:
+		t = lookup_function_type (*tpp);
+		*tpp = t;
+		return 0;
+
+	case tqArray:
+		off = 0;
 		t = make_type(TYPE_CODE_ARRAY, 0, 0, 0);
 		TYPE_TARGET_TYPE(t) = *tpp;
 
-		/* Pointer to domain type (type of index) */
+		/* Determine and record the domain type (type of index) */
 		id = ax->rndx.index;
-		if ((rf = ax->rndx.rfd) == 0xfff)
-			rf = (++ax)->isym, off++;
-
+		rf = ax->rndx.rfd;
+		if (rf == 0xfff) {
+			rf = (++ax)->isym;
+			off++;
+		}
 		fh = get_rfd(cur_fd, rf);
-		f = new_field(t, 0);
+		f = new_field(t, (char *)0);
 		bzero(&ss, sizeof ss);
 /* XXX */	f->type = parse_type(fh->iauxBase + id * sizeof(AUXU),
 				     &ss, &f->bitsize);
 
+		if (off == 0) {
 		/*
 		 * This seems to be a pointer to the end of the Block defining
 		 * the type.  Why it is here is magic for me, and I have no
 		 * good use for it anyways.
 		 */
-		if (off == 0) {
+			/* This used to occur because cross_ref returned
+			   the wrong result (ax pointed wrong).  FIXME,
+			   delete this code in a while.  -- gnu@cygnus jul91 */
+			complain (&array_parse_complaint, 0);
 			off++;
 			id = (++ax)->rndx.index;
 			if ((rf = ax->rndx.rfd) == 0xfff)
 				rf = (++ax)->isym, off++;
 		}
-		f->bitpos = (++ax)->dnLow;	/* ?? */
-		f->bitsize = (++ax)->dnHigh;	/* ?? */
-		rf = (++ax)->width - 1;	/* bit alignment */
-		id = TYPE_LENGTH(TYPE_TARGET_TYPE(t)) << 3; /* bitsize */
+		lower = (++ax)->dnLow;
+		upper = (++ax)->dnHigh;
+		rf = (++ax)->width;	/* bit size of array element */
 
+		/* Check whether supplied array element bit size matches
+		   the known size of the element type.  If this complaint
+		   ends up not happening, we can remove this code.  It's
+		   here because we aren't sure we understand this *&%&$
+		   symbol format.  */
+		id = TYPE_LENGTH(TYPE_TARGET_TYPE(t)) << 3; /* bitsize */
 		if (id == 0) {
 			/* Most likely an undefined type */
-			id = rf + 1;
+			id = rf;
 			TYPE_LENGTH(TYPE_TARGET_TYPE(t)) = id >> 3;
 		}
-		TYPE_LENGTH(t) = (f->bitsize < 0) ? 0 :
-			(f->bitsize - f->bitpos + 1) * (id >> 3);
-		ret = 4 + off;
-	} else {
-		if (tq != tqVol)
-			printf_filtered("Internal: unknown type qualifier %x\n", tq);
-		return ret;
-	}
+		if (id != rf)
+			complain (&array_bitsize_complaint, rf);
 
-	*tpp = t;
-	return ret;
+		TYPE_LENGTH(t) = (upper < 0) ? 0 :
+			(upper - lower + 1) * (rf >> 3);
+		*tpp = t;
+		return 4 + off;
+
+	case tqVol:
+		/* Volatile -- currently ignored */
+		return 0;
+
+	default:
+		complain (&unknown_type_qual_complaint, tq);
+		return 0;
+	}
 }
 
 
@@ -1412,14 +1381,14 @@ parse_external(es, skip_procedures)
 		char *what;
 		switch (es->asym.st) {
 		case stStaticProc:
-		case stProc:	what = "Procedure"; n_undef_procs++;  break;
-		case stGlobal:	what = "Variable";  n_undef_vars++;   break;
-		case stLabel:	what = "Label";     n_undef_labels++; break;
-		default :	what = "Symbol";                      break;
+		case stProc:	what = "procedure"; n_undef_procs++;  break;
+		case stGlobal:	what = "variable";  n_undef_vars++;   break;
+		case stLabel:	what = "label";     n_undef_labels++; break;
+		default :	what = "symbol";                      break;
 		}
 		n_undef_symbols++;
 		if (info_verbose)
-			printf_filtered("Warning: %s %s is undefined (in %s)\n", what,
+			printf_filtered("Warning: %s `%s' is undefined (in %s)\n", what,
 				es->asym.iss, fdr_name(cur_fdr->rss));
 		return;
 	}
@@ -1457,7 +1426,7 @@ parse_lines(fh, lt)
 	FDR *fh;
 	struct linetable *lt;
 {
-	char *base = (char*)fh->cbLineOffset;
+	unsigned char *base = (unsigned char*)fh->cbLineOffset;
 	int i, j, k;
 	int delta, count, lineno = 0;
 	PDR *pr;
@@ -1491,14 +1460,16 @@ parse_lines(fh, lt)
 		 */
 		if (pr->iline >= halt) continue;
 
-		base = (char*)pr->cbLineOffset;
+		base = (unsigned char*)pr->cbLineOffset;
 		l = pr->adr >> 2;	/* in words */
 		halt += (pr->adr >> 2) - pr->iline;
 		for (lineno = pr->lnLow; l < halt;) {
 			count = *base & 0x0f;
 			delta = *base++ >> 4;
+			if (delta >= 8)
+				delta -= 16;
 			if (delta == -8) {
-				delta = (base[0] << 8) | (base[1] & 0xff);
+				delta = (base[0] << 8) | base[1];
 				base += 2;
 			}
 			lineno += delta;/* first delta is 0 */
@@ -1549,16 +1520,17 @@ parse_one_file(fh, f_idx, bound)
 /* Master parsing procedure for first-pass reading of file symbols
    into a partial_symtab.
 
-   Parses the symtab described by the symbolic header HDR.
+   Parses the symtab described by the global symbolic header CUR_HDR.
    END_OF_TEXT_SEG gives the address just after the text segment for
    the symtab we are reading.  */
 
 static
-parse_partial_symbols(hdr, end_of_text_seg)
-	HDRR *hdr;
+parse_partial_symbols(end_of_text_seg)
+	int end_of_text_seg;
 {
 	int             f_idx, s_idx, h_max, stat_idx;
 	CORE_ADDR	dummy, *prevhigh;
+	HDRR		*hdr;
 	/* Running pointers */
 	FDR		*fh;
 	RFDT		*rh;
@@ -1575,7 +1547,7 @@ parse_partial_symbols(hdr, end_of_text_seg)
 	 * look at. (XXX)
 	 */
 
-	cur_hdr = hdr;
+	hdr = cur_hdr;
 	max_gdbinfo = 0;
 	max_glevel = MIN_GLEVEL;
 
@@ -1776,6 +1748,12 @@ parse_partial_symbols(hdr, end_of_text_seg)
 	   dependent file it will cause loading of foo.c as well, so
 	   everything will be fine at the end.  */
 
+	/* First, sort the psymtabs by their textlow addresses.  */
+	reorder_psymtabs();
+
+	/* Now, rip through and fill in "texthigh" from the textlow
+	   of the following psymtab.  Slimy but it might work.
+	   Sort the global psymbols while we're at it.  */
 	prevhigh = &dummy;
 	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
 		struct partial_symtab *pst = fdr_to_pst[f_idx].pst;
@@ -1793,7 +1771,6 @@ parse_partial_symbols(hdr, end_of_text_seg)
 	*prevhigh = end_of_text_seg;
 	hdr->cbDnOffset = end_of_text_seg;
 
-	reorder_psymtabs();
 	free(&fdr_to_pst[-1]);
 	fdr_to_pst = 0;
 }
@@ -1855,12 +1832,12 @@ parse_fdr(f_idx, lev)
 	pst->number_of_dependencies = fh->crfd - s_id0;
 	pst->dependencies = (struct partial_symtab **)
 		obstack_alloc (psymbol_obstack,
-		               pst->number_of_dependencies * sizeof(char*));
+				 pst->number_of_dependencies *
+				   sizeof (struct partial_symtab *));
 	for (s_idx = s_id0; s_idx < fh->crfd; s_idx++) {
 		RFDT *rh = (RFDT *) (fh->rfdBase) + s_idx;
 
 		pst->dependencies[s_idx-s_id0] = parse_fdr(*rh, lev+1);
-
 	}
 
 	return pst;
@@ -1869,11 +1846,14 @@ parse_fdr(f_idx, lev)
 
 /* Ancillary function to psymtab_to_symtab().  Does all the work
    for turning the partial symtab PST into a symtab, recurring
-   first on all dependent psymtabs */
+   first on all dependent psymtabs.  The argument FILENAME is
+   only passed so we can see in debug stack traces what file
+   is being read. */
 
 static void
-psymtab_to_symtab_1(pst)
+psymtab_to_symtab_1(pst, filename)
 	struct partial_symtab *pst;
+	char *filename;
 {
 	int             i, f_max;
 	struct symtab  *st;
@@ -1891,6 +1871,7 @@ psymtab_to_symtab_1(pst)
 	}
 
 	/* How many symbols will we need */
+	/* FIXME, this does not count enum values. */
 	f_max = pst->n_global_syms + pst->n_static_syms;
 	if (pst->ldsymoff == -1) {
 		fh = 0;
@@ -1901,17 +1882,27 @@ psymtab_to_symtab_1(pst)
 		st = new_symtab(pst->filename, 2 * f_max, 2 * fh->cline);
 	}
 
-	/*
-	 * Read in all partial symbtabs on which this one is dependent.
-	 * NOTE that we do have circular dependencies, sigh. 
-	 */
+	/* Read in all partial symbtabs on which this one is dependent.
+	   NOTE that we do have circular dependencies, sigh.  We solved
+	   that by setting pst->readin before this point.  */
+
 	for (i = 0; i < pst->number_of_dependencies; i++)
 		if (!pst->dependencies[i]->readin) {
-			/*
-			 * DO NOT inform about additional files that need to
-			 * be read in, it would only annoy the user.
-			 */
-			psymtab_to_symtab_1(pst->dependencies[i]);
+			/* Inform about additional files to be read in.  */
+			if (info_verbose)
+			  {
+			    fputs_filtered (" ", stdout);
+			    wrap_here ("");
+			    fputs_filtered ("and ", stdout);
+			    wrap_here ("");
+			    printf_filtered ("%s...",
+					     pst->dependencies[i]->filename);
+			    wrap_here ("");		/* Flush output */
+			    fflush (stdout);
+			  }
+			/* We only pass the filename for debug purposes */
+			psymtab_to_symtab_1(pst->dependencies[i], 
+				pst->dependencies[i]->filename);
 		}
 
 	/* Now read the symbols for this symtab */
@@ -1929,7 +1920,7 @@ psymtab_to_symtab_1(pst)
 	BLOCK_START(top_stack->cur_block) = fh ? fh->adr : 0;
 	BLOCK_END(top_stack->cur_block) = 0;
 	top_stack->blocktype = stFile;
-	top_stack->maxsyms = f_max;
+	top_stack->maxsyms = 2*f_max;
 	top_stack->cur_type = 0;
 	top_stack->procadr = 0;
 	top_stack->numargs = 0;
@@ -2032,7 +2023,9 @@ cross_ref(rn, tpp, pname)
 				add_pending(fh, sh, *tpp);
 		}
 	}
-	return (rn->rfd == 0xfff);
+
+	/* We used one auxent normally, two if we got a "next one" rf. */
+	return (rn->rfd == 0xfff? 2: 1);
 }
 
 
@@ -2067,23 +2060,44 @@ mylookup_symbol (name, block, namespace, class)
 }
 
 
-/* Add a new symbol S to a block B */
+/* Add a new symbol S to a block B.
+   Infrequently, we will need to reallocate the block to make it bigger.
+   We only detect this case when adding to top_stack->cur_block, since
+   that's the only time we know how big the block is.  FIXME.  */
 
-static
+static void
 add_symbol(s,b)
 	struct symbol *s;
 	struct block *b;
 {
-	BLOCK_SYM(b,BLOCK_NSYMS(b)++) = s;
+	int nsyms = BLOCK_NSYMS(b)++;
+	struct block *origb;
+	struct parse_stack *stackp;
+
 	if (b == top_stack->cur_block &&
-	    BLOCK_NSYMS(b) > top_stack->maxsyms)
-		printf_filtered("Internal: block at @%x overfilled (by %d)\n",
-			b, BLOCK_NSYMS(b) - top_stack->maxsyms);
+	    nsyms >= top_stack->maxsyms) {
+		complain (&block_overflow_complaint, s->name);
+		/* In this case shrink_block is actually grow_block, since
+		   BLOCK_NSYMS(b) is larger than its current size.  */
+		origb = b;
+		b = shrink_block (top_stack->cur_block, top_stack->cur_st);
+
+		/* Now run through the stack replacing pointers to the
+		   original block.  shrink_block has already done this
+		   for the blockvector and BLOCK_FUNCTION.  */
+		for (stackp = top_stack; stackp; stackp = stackp->next) {
+			if (stackp->cur_block == origb) {
+				stackp->cur_block = b;
+				stackp->maxsyms = BLOCK_NSYMS (b);
+			}
+		}
+	}
+	BLOCK_SYM(b,nsyms) = s;
 }
 
 /* Add a new block B to a symtab S */
 
-static
+static void
 add_block(b,s)
 	struct block *b;
 	struct symtab *s;
@@ -2102,10 +2116,12 @@ add_block(b,s)
    MIPS' linenumber encoding might need more than one byte
    to describe it, LAST is used to detect these continuation lines */
 
-static 
+static int
 add_line(lt, lineno, adr, last)
 	struct linetable *lt;
+	int lineno;
 	CORE_ADDR adr;
+	int last;
 {
 	if (last == 0)
 		last = -2;	/* make sure we record first line */
@@ -2391,7 +2407,8 @@ struct linetable *new_linetable(size)
 /* Oops, too big. Shrink it.  This was important with the 2.4 linetables,
    I am not so sure about the 3.4 ones */
 
-static shrink_linetable(s)
+static void
+shrink_linetable(s)
 	struct symtab *s;
 {
 	struct linetable *l = new_linetable(LINETABLE(s)->nitems);
@@ -2405,7 +2422,8 @@ static shrink_linetable(s)
 /* Allocate and zero a new blockvector of NBLOCKS blocks. */
 
 static
-struct blockvector *new_bvect(nblocks)
+struct blockvector *
+new_bvect(nblocks)
 {
 	struct blockvector *bv;
 	int size;
@@ -2421,7 +2439,8 @@ struct blockvector *new_bvect(nblocks)
 /* Allocate and zero a new block of MAXSYMS symbols */
 
 static
-struct block *new_block(maxsyms)
+struct block *
+new_block(maxsyms)
 {
 	int size = sizeof(struct block) + (maxsyms-1) * sizeof(struct symbol *);
 	struct block *b = (struct block *)xzalloc(size);
@@ -2429,7 +2448,8 @@ struct block *new_block(maxsyms)
 	return b;
 }
 
-/* Ooops, too big. Shrink block B in symtab S to its minimal size */
+/* Ooops, too big. Shrink block B in symtab S to its minimal size.
+   Shrink_block can also be used by add_symbol to grow a block.  */
 
 static struct block *
 shrink_block(b, s)
@@ -2440,23 +2460,20 @@ shrink_block(b, s)
 	struct blockvector *bv = BLOCKVECTOR(s);
 	int i;
 
-	/* Just get a new one, copy, and fix references to the old one */
+	/* Just reallocate it and fix references to the old one */
 
-	new = (struct block *)xmalloc(sizeof(struct block) +
+	new = (struct block *) xrealloc ((char *)b, sizeof(struct block) +
 	  	(BLOCK_NSYMS(b)-1) * sizeof(struct symbol *));
-
-	bcopy(b, new, sizeof(*new) + (BLOCK_NSYMS(b) - 1) * sizeof(struct symbol*));
 
 	/* Should chase pointers to old one.  Fortunately, that`s just
 	   the block`s function and inferior blocks */
-	if (BLOCK_FUNCTION(b) && SYMBOL_BLOCK_VALUE(BLOCK_FUNCTION(b)) == b)
-		SYMBOL_BLOCK_VALUE(BLOCK_FUNCTION(b)) = new;
+	if (BLOCK_FUNCTION(new) && SYMBOL_BLOCK_VALUE(BLOCK_FUNCTION(new)) == b)
+		SYMBOL_BLOCK_VALUE(BLOCK_FUNCTION(new)) = new;
 	for (i = 0; i < BLOCKVECTOR_NBLOCKS(bv); i++)
 		if (BLOCKVECTOR_BLOCK(bv,i) == b)
 			BLOCKVECTOR_BLOCK(bv,i) = new;
 		else if (BLOCK_SUPERBLOCK(BLOCKVECTOR_BLOCK(bv,i)) == b)
 			BLOCK_SUPERBLOCK(BLOCKVECTOR_BLOCK(bv,i)) = new;
-	free(b);
 	return new;
 }
 
@@ -2515,7 +2532,8 @@ make_type(code, length, uns, name)
 /* Allocate a new field named NAME to the type TYPE */
 
 static
-struct field *new_field(type,name)
+struct field *
+new_field(type,name)
 	struct type *type;
 	char *name;
 {
@@ -2526,11 +2544,11 @@ struct field *new_field(type,name)
 		TYPE_FIELDS(type) = (struct field*)xrealloc(TYPE_FIELDS(type),
 			(TYPE_NFIELDS(type)+1) * sizeof(struct field));
 	else
-		TYPE_FIELDS(type) = (struct field*)xzalloc(2*sizeof(struct field));
-	f = &(TYPE_FIELD(type,TYPE_NFIELDS(type)++));
+		TYPE_FIELDS(type) = (struct field*)xzalloc(sizeof(struct field));
+	f = &(TYPE_FIELD(type,TYPE_NFIELDS(type)));
+	TYPE_NFIELDS(type)++;
 	bzero(f, sizeof(struct field));
-	if (name)
-		f->name = name;
+	f->name = name;		/* Whether or not NAME is zero, this works. */
 	return f;
 }
 
@@ -2726,20 +2744,16 @@ fixup_sigtramp()
 
 	BLOCK_SYM(b,BLOCK_NSYMS(b)++) = s;
 }
-
 
 /* Initialization */
 
 static struct sym_fns ecoff_sym_fns = {"ecoff", 5,
 		mipscoff_new_init, mipscoff_symfile_init,
-		mipscoff_symfile_read, mipscoff_symfile_discard};
+		mipscoff_symfile_read};
 
 _initialize_mipsread ()
 {
 	add_symtab_fns (&ecoff_sym_fns);
-
-	bzero (&global_psymbols, sizeof (global_psymbols));
-	bzero (&static_psymbols, sizeof (static_psymbols));
 
 	/* Missing basic types */
 	builtin_type_string = make_type(TYPE_CODE_PASCAL_ARRAY,
