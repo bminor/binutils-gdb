@@ -1,3 +1,12 @@
+2003-07-22  Salvador Eduardo Tropea <set@computer.org>
+
+	* objdump.c: New command line option --debugging-tags.
+	* doc/binutils.texi: Document new command line option.
+	* prdbg.c: Code to print the debug info as tags compatible 
+	with ctags.
+	* budbg.h: Adjust prototype.
+	* NEWS: Mention new switch
+        
 2003-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (main) :Accept multiple -M switch.

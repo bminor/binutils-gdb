@@ -1,5 +1,8 @@
 -*- text -*-
 
+* objdump now accepts --debugging-tags to print the debug information in a
+  format compatible with ctags tool.
+
 * objcopy and strip now accept --only-keep-debug to create a file containing
   those sections that would be stripped out by --strip-debug.  The idea is that
   this can be used in conjunction with the --add-gnu-debuglink switch to create

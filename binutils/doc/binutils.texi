@@ -1435,6 +1435,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-f}|@option{--file-headers}]
         [@option{--file-start-context}]
         [@option{-g}|@option{--debugging}]
+        [@option{-e}|@option{--debugging-tags}]
         [@option{-h}|@option{--section-headers}|@option{--headers}]
         [@option{-i}|@option{--info}]
         [@option{-j} @var{section}|@option{--section=}@var{section}]
@@ -1480,7 +1481,7 @@ object files.
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.  At least one option from the list
-@option{-a,-d,-D,-f,-g,-G,-h,-H,-p,-r,-R,-S,-t,-T,-V,-x} must be given. 
+@option{-a,-d,-D,-e,-f,-g,-G,-h,-H,-p,-r,-R,-S,-t,-T,-V,-x} must be given.
 
 @table @env
 @item -a
@@ -1535,6 +1536,11 @@ information stored in the file and print it out using a C like syntax.
 Only certain types of debugging information have been implemented.
 Some other types are supported by @command{readelf -w}.
 @xref{readelf}.
+
+@item -e
+@itemx --debugging-tags
+Like @option{-g}, but the information is generated in a format compatible
+with ctags tool.
 
 @item -d
 @itemx --disassemble

@@ -74,6 +74,7 @@ static int wide_output;			/* -w */
 static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
 static int dump_debugging;		/* --debugging */
+static int dump_debugging_tags;		/* --debugging-tags */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
 
@@ -208,6 +209,7 @@ usage (stream, status)
   -S, --source             Intermix source code with disassembly\n\
   -s, --full-contents      Display the full contents of all sections requested\n\
   -g, --debugging          Display debug information in object file\n\
+  -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
@@ -266,6 +268,7 @@ static struct option long_options[]=
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
   {"debugging", no_argument, NULL, 'g'},
+  {"debugging-tags", no_argument, NULL, 'e'},
   {"demangle", optional_argument, NULL, 'C'},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
@@ -2068,15 +2071,17 @@ dump_bfd (abfd)
 	}
     }
 
-  printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
-	  abfd->xvec->name);
+  if (! dump_debugging_tags)
+    printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
+	    abfd->xvec->name);
   if (dump_ar_hdrs)
     print_arelt_descr (stdout, abfd, TRUE);
   if (dump_file_header)
     dump_bfd_header (abfd);
   if (dump_private_headers)
     dump_bfd_private_header (abfd);
-  putchar ('\n');
+  if (! dump_debugging_tags)
+    putchar ('\n');
   if (dump_section_headers)
     dump_headers (abfd);
 
@@ -2106,7 +2111,8 @@ dump_bfd (abfd)
       dhandle = read_debugging_info (abfd, syms, symcount);
       if (dhandle != NULL)
 	{
-	  if (! print_debugging_info (stdout, dhandle))
+	  if (! print_debugging_info (stdout, dhandle, abfd, syms, demangle,
+	      dump_debugging_tags ? TRUE : FALSE))
 	    {
 	      non_fatal (_("%s: printing debugging information failed"),
 			 bfd_get_filename (abfd));
@@ -2648,7 +2654,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSj:wE:zgG",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSj:wE:zgeG",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -2783,6 +2789,12 @@ main (argc, argv)
 	  break;
 	case 'g':
 	  dump_debugging = 1;
+	  seenflag = TRUE;
+	  break;
+	case 'e':
+	  dump_debugging = 1;
+	  dump_debugging_tags = 1;
+	  do_demangle = TRUE;
 	  seenflag = TRUE;
 	  break;
 	case 'G':
