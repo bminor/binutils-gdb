@@ -20,9 +20,9 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-M32R_OBJS = m32r.o cpu.o decode.o extract.o sem.o model.o mloop.o
+M32R_OBJS = m32r.o cpu.o decode.o sem.o model.o mloop.o
 # start-sanitize-m32rx
-M32RX_OBJS = m32rx.o cpux.o decodex.o extractx.o modelx.o mloopx.o
+M32RX_OBJS = m32rx.o cpux.o decodex.o modelx.o mloopx.o
 # end-sanitize-m32rx
 
 CONFIG_DEVICES = dv-sockser.o
@@ -47,11 +47,8 @@ SIM_OBJS = \
 
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \
-	$(srcdir)/../common/cgen-types.h \
-	$(srcdir)/../common/cgen-sim.h \
-	$(srcdir)/../common/cgen-trace.h \
-	arch.h cpuall.h m32r-sim.h cpu-opc.h \
-	$(srcdir)/../../include/opcode/cgen.h
+	$(CGEN_INCLUDE_DEPS) \
+	arch.h cpuall.h m32r-sim.h cpu-opc.h
 
 SIM_EXTRA_CFLAGS =
 
@@ -65,70 +62,67 @@ NL_TARGET = -DNL_TARGET_m32r
 
 arch = m32r
 
-MAIN_INCLUDE_DEPS = \
-	sim-main.h \
-	$(srcdir)/../common/sim-config.h \
-	$(srcdir)/../common/sim-base.h \
-	$(srcdir)/../common/sim-basics.h \
-	$(srcdir)/../common/sim-module.h \
-	$(srcdir)/../common/sim-trace.h \
-	$(srcdir)/../common/sim-profile.h \
-	tconfig.h
-INCLUDE_DEPS = $(MAIN_INCLUDE_DEPS) $(SIM_EXTRA_DEPS)
-OPS_INCLUDE_DEPS = \
-	$(srcdir)/../common/cgen-mem.h \
-	$(srcdir)/../common/cgen-ops.h
+sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h
 
-sim-if.o: sim-if.c $(INCLUDE_DEPS) $(srcdir)/../common/sim-core.h
+arch.o: arch.c $(SIM_MAIN_DEPS)
 
-arch.o: arch.c $(INCLUDE_DEPS)
-
-devices.o: devices.c $(INCLUDE_DEPS)
+traps.o: traps.c targ-vals.h $(SIM_MAIN_DEPS)
+devices.o: devices.c $(SIM_MAIN_DEPS)
 
 # M32R objs
 
-m32r.o: m32r.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h decode.h
+M32RBF_INCLUDE_DEPS = \
+	$(CGEN_MAIN_CPU_DEPS) \
+	cpu.h decode.h eng.h
+
+m32r.o: m32r.c $(M32RBF_INCLUDE_DEPS)
 
 # FIXME: Use of `mono' is wip.
-mloop.c: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	rm -f mloop.c
-	$(SHELL) $(srcdir)/../common/genmloop.sh $(SHELL) \
+mloop.c eng.h: stamp-mloop
+stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
+	$(SHELL) $(srccom)/genmloop.sh \
 		-mono -fast -pbb -switch sem-switch.c \
-		m32rbf $(srcdir)/mloop.in \
-		| sed -e 's/@cpu@/m32rbf/' -e 's/@CPU@/M32RBF/' >mloop.c
-mloop.o: mloop.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) stamp-cpu
+		-cpu m32rbf -infile $(srcdir)/mloop.in
+	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
+	$(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
+	touch stamp-mloop
+mloop.o: mloop.c sem-switch.c $(M32RBF_INCLUDE_DEPS)
 
-cpu.o: cpu.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
-decode.o: decode.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h decode.h
-extract.o: extract.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h decode.h
-sem.o: sem.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h decode.h
-model.o: model.c $(INCLUDE_DEPS) cpu.h decode.h
+cpu.o: cpu.c $(M32RBF_INCLUDE_DEPS)
+decode.o: decode.c $(M32RBF_INCLUDE_DEPS)
+sem.o: sem.c $(M32RBF_INCLUDE_DEPS)
+model.o: model.c $(M32RBF_INCLUDE_DEPS)
 
 # start-sanitize-m32rx
 # M32RX objs
 
-m32rx.o: m32rx.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h decodex.h
+M32RXF_INCLUDE_DEPS = \
+	$(CGEN_MAIN_CPU_DEPS) \
+	cpux.h decodex.h engx.h
+
+m32rx.o: m32rx.c $(M32RXF_INCLUDE_DEPS)
 
 # FIXME: Use of `mono' is wip.
-mloopx.c: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
-	rm -f mloopx.c
-	$(SHELL) $(srcdir)/../common/genmloop.sh $(SHELL) \
+mloopx.c engx.h: stamp-xmloop
+stamp-xmloop: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
+	$(SHELL) $(srccom)/genmloop.sh \
 		-mono -no-fast -pbb -parallel -switch semx-switch.c \
-		m32rxf $(srcdir)/mloopx.in \
-		| sed -e 's/@cpu@/m32rxf/' -e 's/@CPU@/M32RXF/' >mloopx.c
-mloopx.o: mloopx.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) stamp-xcpu
+		-cpu m32rxf -infile $(srcdir)/mloopx.in
+	$(SHELL) $(srcroot)/move-if-change eng.hin engx.h
+	$(SHELL) $(srcroot)/move-if-change mloop.cin mloopx.c
+	touch stamp-xmloop
+mloopx.o: mloopx.c semx-switch.c $(M32RXF_INCLUDE_DEPS)
 
-cpux.o: cpux.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h decodex.h
-decodex.o: decodex.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h decodex.h
-extractx.o: extractx.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h decodex.h
-#semx.o: semx.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h decodex.h
-modelx.o: modelx.c $(INCLUDE_DEPS) cpux.h decodex.h
+cpux.o: cpux.c $(M32RXF_INCLUDE_DEPS)
+decodex.o: decodex.c $(M32RXF_INCLUDE_DEPS)
+semx.o: semx.c $(M32RXF_INCLUDE_DEPS)
+modelx.o: modelx.c $(M32RXF_INCLUDE_DEPS)
 # end-sanitize-m32rx
 
 m32r-clean:
-	rm -f mloop.c stamp-arch stamp-cpu
+	rm -f mloop.c stamp-arch stamp-cpu stamp-mloop
 # start-sanitize-m32rx
-	rm -f mloopx.c stamp-xcpu
+	rm -f mloopx.c stamp-xcpu stamp-xmloop
 # end-sanitize-m32rx
 	rm -f tmp-*
 
@@ -138,25 +132,27 @@ CGEN_MAINT = ; @true
 # The following line is commented in or out depending upon --enable-cgen-maint.
 @CGEN_MAINT@CGEN_MAINT =
 
-stamp-arch: $(CGEN_MAIN_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS)
+stamp-arch: $(CGEN_MAIN_SCM) $(CGEN_ARCH_SCM) $(srccgen)/m32r.cpu
+	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 	@true
 
 stamp-cpu: $(CGEN_MAIN_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=m32rbf mach=m32r SUFFIX= FLAGS="with-scache,with-profile fn" EXTRAFILES="$(CGEN_CPU_EXTR) $(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	  cpu=m32rbf mach=m32r SUFFIX= \
+	  FLAGS="with-scache,with-profile fn" \
+	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
 	touch stamp-cpu
-cpu.h extract.c sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
+cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
 	@true
 # end-sanitize-cygnus
 
 # start-sanitize-m32rx
 stamp-xcpu: $(CGEN_MAIN_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=m32rxf mach=m32rx SUFFIX=x FLAGS="with-scache,with-profile fn" EXTRAFILES="$(CGEN_CPU_EXTR) $(CGEN_CPU_SEMSW)"
+	  cpu=m32rxf mach=m32rx SUFFIX=x FLAGS="with-scache,with-profile fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
 	touch stamp-xcpu
-cpux.h extractx.c semx-switch.c modelx.c decodex.c decodex.h: $(CGEN_MAINT) stamp-xcpu
+cpux.h semx-switch.c modelx.c decodex.c decodex.h: $(CGEN_MAINT) stamp-xcpu
 	@true
 # end-sanitize-m32rx

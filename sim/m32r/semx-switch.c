@@ -397,7 +397,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB
+#if WITH_SCACHE_PBB_M32RXF
     m32rxf_pbb_after (current_cpu, sem_arg);
 #endif
   }
@@ -416,7 +416,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB
+#if WITH_SCACHE_PBB_M32RXF
     m32rxf_pbb_before (current_cpu, sem_arg);
 #endif
   }
@@ -435,7 +435,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB
+#if WITH_SCACHE_PBB_M32RXF
 #ifdef DEFINE_SWITCH
     vpc = m32rxf_pbb_cti_chain (current_cpu, sem_arg,
 			       pbb_br_npc_ptr, pbb_br_npc);
@@ -463,7 +463,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB
+#if WITH_SCACHE_PBB_M32RXF
     vpc = m32rxf_pbb_chain (current_cpu, sem_arg);
 #ifdef DEFINE_SWITCH
     BREAK (sem);
@@ -485,7 +485,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB
+#if WITH_SCACHE_PBB_M32RXF
 #ifdef DEFINE_SWITCH
     /* In the switch case FAST_P is a constant, allowing several optimizations
        in any called inline functions.  */
@@ -778,7 +778,7 @@ if (CPU (h_cond)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -803,7 +803,7 @@ if (CPU (h_cond)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -828,7 +828,7 @@ if (EQSI (* FLD (i_src1), * FLD (i_src2))) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -853,7 +853,7 @@ if (EQSI (* FLD (i_src2), 0)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -878,7 +878,7 @@ if (GESI (* FLD (i_src2), 0)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -903,7 +903,7 @@ if (GTSI (* FLD (i_src2), 0)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -928,7 +928,7 @@ if (LESI (* FLD (i_src2), 0)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -953,7 +953,7 @@ if (LTSI (* FLD (i_src2), 0)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -978,7 +978,7 @@ if (NESI (* FLD (i_src2), 0)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1006,7 +1006,7 @@ do {
   }
 } while (0);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1034,7 +1034,7 @@ do {
   }
 } while (0);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1067,7 +1067,7 @@ do {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1100,7 +1100,7 @@ do {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1125,7 +1125,7 @@ if (NOTBI (CPU (h_cond))) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1150,7 +1150,7 @@ if (NOTBI (CPU (h_cond))) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1175,7 +1175,7 @@ if (NESI (* FLD (i_src1), * FLD (i_src2))) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1196,7 +1196,7 @@ if (NESI (* FLD (i_src1), * FLD (i_src2))) {
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1217,7 +1217,7 @@ if (NESI (* FLD (i_src1), * FLD (i_src2))) {
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1250,7 +1250,7 @@ do {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1283,7 +1283,7 @@ do {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1537,7 +1537,7 @@ if (CPU (h_cond)) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1562,7 +1562,7 @@ if (NOTBI (CPU (h_cond))) {
 }
 
   abuf->written = written;
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1593,7 +1593,7 @@ do {
   }
 } while (0);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1614,7 +1614,7 @@ do {
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -1629,7 +1629,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = GETMEMSI (current_cpu, * FLD (i_sr));
+    SI opval = GETMEMSI (current_cpu, pc, * FLD (i_sr));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1648,7 +1648,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = GETMEMSI (current_cpu, ADDSI (* FLD (i_sr), FLD (f_simm16)));
+    SI opval = GETMEMSI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16)));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1667,7 +1667,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = EXTQISI (GETMEMQI (current_cpu, * FLD (i_sr)));
+    SI opval = EXTQISI (GETMEMQI (current_cpu, pc, * FLD (i_sr)));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1686,7 +1686,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = EXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (i_sr), FLD (f_simm16))));
+    SI opval = EXTQISI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1705,7 +1705,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = EXTHISI (GETMEMHI (current_cpu, * FLD (i_sr)));
+    SI opval = EXTHISI (GETMEMHI (current_cpu, pc, * FLD (i_sr)));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1724,7 +1724,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = EXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (i_sr), FLD (f_simm16))));
+    SI opval = EXTHISI (GETMEMHI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1743,7 +1743,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = ZEXTQISI (GETMEMQI (current_cpu, * FLD (i_sr)));
+    SI opval = ZEXTQISI (GETMEMQI (current_cpu, pc, * FLD (i_sr)));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1762,7 +1762,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = ZEXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (i_sr), FLD (f_simm16))));
+    SI opval = ZEXTQISI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1781,7 +1781,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = ZEXTHISI (GETMEMHI (current_cpu, * FLD (i_sr)));
+    SI opval = ZEXTHISI (GETMEMHI (current_cpu, pc, * FLD (i_sr)));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1800,7 +1800,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = ZEXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (i_sr), FLD (f_simm16))));
+    SI opval = ZEXTHISI (GETMEMHI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -1820,7 +1820,7 @@ do {
 
 do {
   SI temp1;SI temp0;
-  temp0 = GETMEMSI (current_cpu, * FLD (i_sr));
+  temp0 = GETMEMSI (current_cpu, pc, * FLD (i_sr));
   temp1 = ADDSI (* FLD (i_sr), 4);
   {
     SI opval = temp0;
@@ -1911,7 +1911,7 @@ do {
     TRACE_RESULT (current_cpu, abuf, "lock-0", 'x', opval);
   }
   {
-    SI opval = GETMEMSI (current_cpu, * FLD (i_sr));
+    SI opval = GETMEMSI (current_cpu, pc, * FLD (i_sr));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -2378,7 +2378,7 @@ do {
   }
 } while (0);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -2584,7 +2584,7 @@ do {
 
   {
     SI opval = * FLD (i_src1);
-    SETMEMSI (current_cpu, * FLD (i_src2), opval);
+    SETMEMSI (current_cpu, pc, * FLD (i_src2), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 
@@ -2603,7 +2603,7 @@ do {
 
   {
     SI opval = * FLD (i_src1);
-    SETMEMSI (current_cpu, ADDSI (* FLD (i_src2), FLD (f_simm16)), opval);
+    SETMEMSI (current_cpu, pc, ADDSI (* FLD (i_src2), FLD (f_simm16)), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 
@@ -2622,7 +2622,7 @@ do {
 
   {
     QI opval = * FLD (i_src1);
-    SETMEMQI (current_cpu, * FLD (i_src2), opval);
+    SETMEMQI (current_cpu, pc, * FLD (i_src2), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 
@@ -2641,7 +2641,7 @@ do {
 
   {
     QI opval = * FLD (i_src1);
-    SETMEMQI (current_cpu, ADDSI (* FLD (i_src2), FLD (f_simm16)), opval);
+    SETMEMQI (current_cpu, pc, ADDSI (* FLD (i_src2), FLD (f_simm16)), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 
@@ -2660,7 +2660,7 @@ do {
 
   {
     HI opval = * FLD (i_src1);
-    SETMEMHI (current_cpu, * FLD (i_src2), opval);
+    SETMEMHI (current_cpu, pc, * FLD (i_src2), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 
@@ -2679,7 +2679,7 @@ do {
 
   {
     HI opval = * FLD (i_src1);
-    SETMEMHI (current_cpu, ADDSI (* FLD (i_src2), FLD (f_simm16)), opval);
+    SETMEMHI (current_cpu, pc, ADDSI (* FLD (i_src2), FLD (f_simm16)), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 
@@ -2701,7 +2701,7 @@ do {
   tmp_new_src2 = ADDSI (* FLD (i_src2), 4);
   {
     SI opval = * FLD (i_src1);
-    SETMEMSI (current_cpu, tmp_new_src2, opval);
+    SETMEMSI (current_cpu, pc, tmp_new_src2, opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
   {
@@ -2729,7 +2729,7 @@ do {
   tmp_new_src2 = SUBSI (* FLD (i_src2), 4);
   {
     SI opval = * FLD (i_src1);
-    SETMEMSI (current_cpu, tmp_new_src2, opval);
+    SETMEMSI (current_cpu, pc, tmp_new_src2, opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
   {
@@ -2863,7 +2863,7 @@ do {
   }
 } while (0);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -2881,7 +2881,7 @@ do {
 if (CPU (h_lock)) {
   {
     SI opval = * FLD (i_src1);
-    SETMEMSI (current_cpu, * FLD (i_src2), opval);
+    SETMEMSI (current_cpu, pc, * FLD (i_src2), opval);
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
@@ -3083,7 +3083,7 @@ if (CPU (h_cond)) {
 SEM_SKIP_INSN (current_cpu, 1);
 }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -3102,7 +3102,7 @@ if (NOTBI (CPU (h_cond))) {
 SEM_SKIP_INSN (current_cpu, 1);
 }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef FLD
 }
   NEXT (vpc);
@@ -3436,7 +3436,7 @@ if (CPU (h_cond)) {
       SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
     }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3484,7 +3484,7 @@ do {
   CPU (h_gr[((UINT) 14)]) = OPRND (h_gr_14);
   SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3543,7 +3543,7 @@ do {
       SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
     }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3590,7 +3590,7 @@ if (NOTBI (CPU (h_cond))) {
       SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
     }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3630,7 +3630,7 @@ if (NOTBI (CPU (h_cond))) {
 
   SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3689,7 +3689,7 @@ do {
       SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
     }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3888,7 +3888,7 @@ if (CPU (h_cond)) {
       SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
     }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3935,7 +3935,7 @@ if (NOTBI (CPU (h_cond))) {
       SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
     }
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -3986,7 +3986,7 @@ do {
   CPU (h_gr[((UINT) 14)]) = OPRND (h_gr_14);
   SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -4026,7 +4026,7 @@ do {
 
   SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -4043,7 +4043,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = GETMEMSI (current_cpu, * FLD (i_sr));
+    SI opval = GETMEMSI (current_cpu, pc, * FLD (i_sr));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4081,7 +4081,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = EXTQISI (GETMEMQI (current_cpu, * FLD (i_sr)));
+    SI opval = EXTQISI (GETMEMQI (current_cpu, pc, * FLD (i_sr)));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4119,7 +4119,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = EXTHISI (GETMEMHI (current_cpu, * FLD (i_sr)));
+    SI opval = EXTHISI (GETMEMHI (current_cpu, pc, * FLD (i_sr)));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4157,7 +4157,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = ZEXTQISI (GETMEMQI (current_cpu, * FLD (i_sr)));
+    SI opval = ZEXTQISI (GETMEMQI (current_cpu, pc, * FLD (i_sr)));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4195,7 +4195,7 @@ do {
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = ZEXTHISI (GETMEMHI (current_cpu, * FLD (i_sr)));
+    SI opval = ZEXTHISI (GETMEMHI (current_cpu, pc, * FLD (i_sr)));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4234,7 +4234,7 @@ do {
 
 do {
   SI temp1;SI temp0;
-  temp0 = GETMEMSI (current_cpu, * FLD (i_sr));
+  temp0 = GETMEMSI (current_cpu, pc, * FLD (i_sr));
   temp1 = ADDSI (* FLD (i_sr), 4);
   {
     SI opval = temp0;
@@ -4326,7 +4326,7 @@ do {
     TRACE_RESULT (current_cpu, abuf, "lock-0", 'x', opval);
   }
   {
-    SI opval = GETMEMSI (current_cpu, * FLD (i_sr));
+    SI opval = GETMEMSI (current_cpu, pc, * FLD (i_sr));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -5250,7 +5250,7 @@ do {
   m32rxf_h_psw_set (current_cpu, OPRND (h_psw_0));
   CPU (h_bpsw) = OPRND (h_bpsw_0);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -5516,7 +5516,7 @@ do {
   PCADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  SETMEMSI (current_cpu, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
+  SETMEMSI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
 
 #undef OPRND
 #undef FLD
@@ -5555,7 +5555,7 @@ do {
   PCADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  SETMEMQI (current_cpu, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
+  SETMEMQI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
 
 #undef OPRND
 #undef FLD
@@ -5594,7 +5594,7 @@ do {
   PCADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  SETMEMHI (current_cpu, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
+  SETMEMHI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
 
 #undef OPRND
 #undef FLD
@@ -5642,7 +5642,7 @@ do {
   PCADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  SETMEMSI (current_cpu, OPRND (h_memory_new_src2_idx), OPRND (h_memory_new_src2));
+  SETMEMSI (current_cpu, pc, OPRND (h_memory_new_src2_idx), OPRND (h_memory_new_src2));
   * FLD (i_src2) = OPRND (src2);
 
 #undef OPRND
@@ -5691,7 +5691,7 @@ do {
   PCADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  SETMEMSI (current_cpu, OPRND (h_memory_new_src2_idx), OPRND (h_memory_new_src2));
+  SETMEMSI (current_cpu, pc, OPRND (h_memory_new_src2_idx), OPRND (h_memory_new_src2));
   * FLD (i_src2) = OPRND (src2);
 
 #undef OPRND
@@ -5901,7 +5901,7 @@ do {
   m32rxf_h_psw_set (current_cpu, OPRND (h_psw_0));
   SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -5952,7 +5952,7 @@ if (CPU (h_lock)) {
 
   if (written & (1 << 3))
     {
-      SETMEMSI (current_cpu, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
+      SETMEMSI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
     }
   CPU (h_lock) = OPRND (h_lock_0);
 
@@ -6220,7 +6220,7 @@ SEM_SKIP_INSN (current_cpu, 1);
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }
@@ -6257,7 +6257,7 @@ SEM_SKIP_INSN (current_cpu, 1);
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
 
-  SEM_BRANCH_FINI
+  SEM_BRANCH_FINI (vpc);
 #undef OPRND
 #undef FLD
 }

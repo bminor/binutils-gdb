@@ -1,3 +1,46 @@
+1999-01-05  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (MAIN_INCLUDE_DEPS): Delete.
+	(INCLUDE_DEPS,OPS_INCLUDE_DEPS): Delete.
+	(sim-if.o): Use SIM_MAIN_DEPS.
+	(arch.o,traps.o,devices.o): Ditto.
+	(M32RBF_INCLUDE_DEPS): Use CGEN_MAIN_CPU_DEPS.
+	(m32r.o,mloop.o,cpu.o,decode.o,sem.o,model.o): Simplify dependencies.
+start-sanitize-m32rx
+	(m32rx.o,mloopx.o,cpux.o,decodex.o,semx.o,modelx.o): Ditto.
+end-sanitize-m32rx
+	(stamp-arch): Pass mach=all to cgen-arch.
+	* cpu.c,cpu.h,decode.c,model.c,sem-switch.c,sem.c: Regenerate.
+	* m32r-sim.h (fr30bf_h_cr_[gs]et_handler): Declare.
+	([GS]ET_H_CR): Define.
+	(fr30bf_h_psw_[gs]et_handler): Declare.
+	([GS]ET_H_PSW): Define.
+	(fr30bf_h_accum_[gs]et_handler): Declare.
+	([GS]ET_H_ACCUM): Define.
+start-sanitize-m32rx
+	(fr30xf_h_{cr,psw,accum}_[gs]et_handler): Declare.
+	(fr30bf_h_accums_[gs]et_handler): Declare.
+	([GS]ET_H_ACCUMS): Define.
+end-sanitize-m32rx
+	* sim-if.c (sim_open): Model probing code moved to sim-model.c.
+	* m32r.c (WANT_CPU): Define as m32rbf.
+	(all register access fns): Rename to ..._handler.
+start-sanitize-m32rx
+	* cpux.c,cpux.h,decodex.c,modelx.c,semx.c: Regenerate.
+	* m32rx.c (WANT_CPU): Define as m32rxf.
+	(all register access fns): Rename to ..._handler.
+end-sanitize-m32rx
+
+1998-12-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* configure.in: --enable-cgen-maint support moved to common/aclocal.m4.
+	(SIM_AC_OPTION_ALIGNMENT): Make strict.
+	* configure: Regenerate.
+
+	* sem-switch.c,sem.c,semx-switch.c: Regenerate.
+	* sim-main.h (SIM_ENGINE_HALT_HOOK,SIM_ENGINE_RESTART_HOOK): Define.
+	* traps.c (m32r_core_signal): Handle --environment=operating.
+
 1998-12-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* cpu.h,decode.c,sem-switch.c,sem.c: Regenerate.

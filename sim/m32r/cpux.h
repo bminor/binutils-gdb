@@ -46,26 +46,18 @@ typedef struct {
 #define SET_H_GR(a1, x) (CPU (h_gr)[a1] = (x))
   /* control registers */
   USI h_cr[16];
-#define GET_H_CR(a1) CPU (h_cr)[a1]
-#define SET_H_CR(a1, x) (CPU (h_cr)[a1] = (x))
   /* accumulator */
   DI h_accum;
-#define GET_H_ACCUM() CPU (h_accum)
-#define SET_H_ACCUM(x) (CPU (h_accum) = (x))
 /* start-sanitize-m32rx */
   /* accumulators */
   DI h_accums[2];
 /* end-sanitize-m32rx */
-#define GET_H_ACCUMS(a1) CPU (h_accums)[a1]
-#define SET_H_ACCUMS(a1, x) (CPU (h_accums)[a1] = (x))
   /* condition bit */
   BI h_cond;
 #define GET_H_COND() CPU (h_cond)
 #define SET_H_COND(x) (CPU (h_cond) = (x))
   /* psw part of psw */
   UQI h_psw;
-#define GET_H_PSW() CPU (h_psw)
-#define SET_H_PSW(x) (CPU (h_psw) = (x))
   /* backup psw */
   UQI h_bpsw;
 #define GET_H_BPSW() CPU (h_bpsw)
@@ -123,6 +115,9 @@ struct argbuf {
   union sem semantic;
   int written;
   union {
+    struct { /* empty format for unspecified field list */
+      int empty;
+    } fmt_empty;
     struct { /* e.g. add $dr,$sr */
       SI * i_dr;
       SI * i_sr;
@@ -131,29 +126,29 @@ struct argbuf {
       unsigned char out_dr;
     } fmt_add;
     struct { /* e.g. add3 $dr,$sr,$hash$slo16 */
+      INT f_simm16;
       SI * i_sr;
-      HI f_simm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_add3;
     struct { /* e.g. and3 $dr,$sr,$uimm16 */
+      UINT f_uimm16;
       SI * i_sr;
-      USI f_uimm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_and3;
     struct { /* e.g. or3 $dr,$sr,$hash$ulo16 */
+      UINT f_uimm16;
       SI * i_sr;
-      UHI f_uimm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_or3;
     struct { /* e.g. addi $dr,$simm8 */
+      INT f_simm8;
       SI * i_dr;
-      SI f_simm8;
       unsigned char in_dr;
       unsigned char out_dr;
     } fmt_addi;
@@ -165,8 +160,8 @@ struct argbuf {
       unsigned char out_dr;
     } fmt_addv;
     struct { /* e.g. addv3 $dr,$sr,$simm16 */
+      INT f_simm16;
       SI * i_sr;
-      SI f_simm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
@@ -185,8 +180,8 @@ struct argbuf {
       unsigned char in_src2;
     } fmt_cmp;
     struct { /* e.g. cmpi $src2,$simm16 */
+      INT f_simm16;
       SI * i_src2;
-      SI f_simm16;
       unsigned char in_src2;
     } fmt_cmpi;
     struct { /* e.g. cmpz $src2 */
@@ -207,8 +202,8 @@ struct argbuf {
       unsigned char out_dr;
     } fmt_ld;
     struct { /* e.g. ld $dr,@($slo16,$sr) */
+      INT f_simm16;
       SI * i_sr;
-      HI f_simm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
@@ -220,8 +215,8 @@ struct argbuf {
       unsigned char out_dr;
     } fmt_ldb;
     struct { /* e.g. ldb $dr,@($slo16,$sr) */
+      INT f_simm16;
       SI * i_sr;
-      HI f_simm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
@@ -233,8 +228,8 @@ struct argbuf {
       unsigned char out_dr;
     } fmt_ldh;
     struct { /* e.g. ldh $dr,@($slo16,$sr) */
+      INT f_simm16;
       SI * i_sr;
-      HI f_simm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
@@ -247,17 +242,17 @@ struct argbuf {
       unsigned char out_sr;
     } fmt_ld_plus;
     struct { /* e.g. ld24 $dr,$uimm24 */
-      ADDR f_uimm24;
+      ADDR i_uimm24;
       SI * i_dr;
       unsigned char out_dr;
     } fmt_ld24;
     struct { /* e.g. ldi8 $dr,$simm8 */
-      SI f_simm8;
+      INT f_simm8;
       SI * i_dr;
       unsigned char out_dr;
     } fmt_ldi8;
     struct { /* e.g. ldi16 $dr,$hash$slo16 */
-      HI f_simm16;
+      INT f_simm16;
       SI * i_dr;
       unsigned char out_dr;
     } fmt_ldi16;
@@ -275,9 +270,9 @@ struct argbuf {
       unsigned char in_src2;
     } fmt_machi_a;
     struct { /* e.g. mulhi $src1,$src2,$acc */
+      UINT f_acc;
       SI * i_src1;
       SI * i_src2;
-      UINT f_acc;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_mulhi_a;
@@ -303,8 +298,8 @@ struct argbuf {
       unsigned char in_src1;
     } fmt_mvtachi_a;
     struct { /* e.g. mvtc $sr,$dcr */
-      SI * i_sr;
       UINT f_r1;
+      SI * i_sr;
       unsigned char in_sr;
     } fmt_mvtc;
     struct { /* e.g. nop */
@@ -312,24 +307,24 @@ struct argbuf {
     } fmt_nop;
     struct { /* e.g. rac $accd,$accs,$imm1 */
       UINT f_accs;
-      USI f_imm1;
+      SI f_imm1;
       UINT f_accd;
     } fmt_rac_dsi;
     struct { /* e.g. seth $dr,$hash$hi16 */
-      UHI f_hi16;
+      UINT f_hi16;
       SI * i_dr;
       unsigned char out_dr;
     } fmt_seth;
     struct { /* e.g. sll3 $dr,$sr,$simm16 */
+      INT f_simm16;
       SI * i_sr;
-      SI f_simm16;
       SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_sll3;
     struct { /* e.g. slli $dr,$uimm5 */
+      UINT f_uimm5;
       SI * i_dr;
-      USI f_uimm5;
       unsigned char in_dr;
       unsigned char out_dr;
     } fmt_slli;
@@ -340,8 +335,8 @@ struct argbuf {
       unsigned char in_src1;
     } fmt_st;
     struct { /* e.g. st $src1,@($slo16,$src2) */
+      INT f_simm16;
       SI * i_src2;
-      HI f_simm16;
       SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
@@ -353,8 +348,8 @@ struct argbuf {
       unsigned char in_src1;
     } fmt_stb;
     struct { /* e.g. stb $src1,@($slo16,$src2) */
+      INT f_simm16;
       SI * i_src2;
-      HI f_simm16;
       SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
@@ -366,8 +361,8 @@ struct argbuf {
       unsigned char in_src1;
     } fmt_sth;
     struct { /* e.g. sth $src1,@($slo16,$src2) */
+      INT f_simm16;
       SI * i_src2;
-      HI f_simm16;
       SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
@@ -422,44 +417,44 @@ struct argbuf {
   struct {
     union {
     struct { /* e.g. bc.s $disp8 */
-      IADDR f_disp8;
+      IADDR i_disp8;
     } fmt_bc8;
     struct { /* e.g. bc.l $disp24 */
-      IADDR f_disp24;
+      IADDR i_disp24;
     } fmt_bc24;
     struct { /* e.g. beq $src1,$src2,$disp16 */
       SI * i_src1;
       SI * i_src2;
-      IADDR f_disp16;
+      IADDR i_disp16;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_beq;
     struct { /* e.g. beqz $src2,$disp16 */
       SI * i_src2;
-      IADDR f_disp16;
+      IADDR i_disp16;
       unsigned char in_src2;
     } fmt_beqz;
     struct { /* e.g. bl.s $disp8 */
-      IADDR f_disp8;
+      IADDR i_disp8;
       unsigned char out_h_gr_14;
     } fmt_bl8;
     struct { /* e.g. bl.l $disp24 */
-      IADDR f_disp24;
+      IADDR i_disp24;
       unsigned char out_h_gr_14;
     } fmt_bl24;
     struct { /* e.g. bcl.s $disp8 */
-      IADDR f_disp8;
+      IADDR i_disp8;
       unsigned char out_h_gr_14;
     } fmt_bcl8;
     struct { /* e.g. bcl.l $disp24 */
-      IADDR f_disp24;
+      IADDR i_disp24;
       unsigned char out_h_gr_14;
     } fmt_bcl24;
     struct { /* e.g. bra.s $disp8 */
-      IADDR f_disp8;
+      IADDR i_disp8;
     } fmt_bra8;
     struct { /* e.g. bra.l $disp24 */
-      IADDR f_disp24;
+      IADDR i_disp24;
     } fmt_bra24;
     struct { /* e.g. jc $sr */
       SI * i_sr;
@@ -478,17 +473,17 @@ struct argbuf {
       int empty;
     } fmt_rte;
     struct { /* e.g. trap $uimm4 */
-      USI f_uimm4;
+      UINT f_uimm4;
     } fmt_trap;
     struct { /* e.g. sc */
       int empty;
     } fmt_sc;
     } fields;
-#if WITH_SCACHE_PBB_M32RXF
+#if WITH_SCACHE_PBB
     SEM_PC addr_cache;
 #endif
   } cti;
-#if WITH_SCACHE_PBB_M32RXF
+#if WITH_SCACHE_PBB
     /* Writeback handler.  */
     struct {
       /* Pointer to argbuf entry for insn whose results need writing back.  */
@@ -526,6 +521,12 @@ struct scache {
 
 /* Macros to simplify extraction, reading and semantic code.
    These define and assign the local vars that contain the insn's fields.  */
+
+#define EXTRACT_FMT_EMPTY_VARS \
+  /* Instruction fields.  */ \
+  unsigned int length;
+#define EXTRACT_FMT_EMPTY_CODE \
+  length = 0; \
 
 #define EXTRACT_FMT_ADD_VARS \
   /* Instruction fields.  */ \
@@ -649,7 +650,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp8; \
+  SI f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BC8_CODE \
   length = 2; \
@@ -661,7 +662,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp24; \
+  SI f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BC24_CODE \
   length = 4; \
@@ -675,7 +676,7 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  INT f_disp16; \
+  SI f_disp16; \
   unsigned int length;
 #define EXTRACT_FMT_BEQ_CODE \
   length = 4; \
@@ -691,7 +692,7 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  INT f_disp16; \
+  SI f_disp16; \
   unsigned int length;
 #define EXTRACT_FMT_BEQZ_CODE \
   length = 4; \
@@ -705,7 +706,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp8; \
+  SI f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BL8_CODE \
   length = 2; \
@@ -717,7 +718,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp24; \
+  SI f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BL24_CODE \
   length = 4; \
@@ -729,7 +730,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp8; \
+  SI f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BCL8_CODE \
   length = 2; \
@@ -741,7 +742,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp24; \
+  SI f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BCL24_CODE \
   length = 4; \
@@ -753,7 +754,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp8; \
+  SI f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BRA8_CODE \
   length = 2; \
@@ -765,7 +766,7 @@ struct scache {
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  INT f_disp24; \
+  SI f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BRA24_CODE \
   length = 4; \
@@ -1161,7 +1162,7 @@ struct scache {
   UINT f_op2; \
   UINT f_accs; \
   UINT f_bit14; \
-  UINT f_imm1; \
+  SI f_imm1; \
   unsigned int length;
 #define EXTRACT_FMT_RAC_DSI_CODE \
   length = 2; \
@@ -1471,6 +1472,9 @@ struct scache {
 
 struct parexec {
   union {
+    struct { /* empty format for unspecified field list */
+      int empty;
+    } fmt_empty;
     struct { /* e.g. add $dr,$sr */
       SI dr;
     } fmt_add;

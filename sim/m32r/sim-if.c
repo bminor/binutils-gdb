@@ -17,12 +17,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sim-main.h"
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 #include "sim-options.h"
 #include "libiberty.h"
 #include "bfd.h"
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 static void free_state (SIM_DESC);
 static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
@@ -51,8 +59,8 @@ sim_open (kind, callback, abfd, argv)
      struct _bfd *abfd;
      char **argv;
 {
-  char c;
   SIM_DESC sd = sim_state_alloc (kind, callback);
+  char c;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1, cgen_cpu_max_extra_bytes ()) != SIM_RC_OK)
@@ -75,6 +83,14 @@ sim_open (kind, callback, abfd, argv)
       free_state (sd);
       return 0;
     }
+
+#ifdef HAVE_DV_SOCKSER /* FIXME: was done differently before */
+  if (dv_sockser_install (sd) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+#endif
 
 #if 0 /* FIXME: 'twould be nice if we could do this */
   /* These options override any module options.
@@ -110,7 +126,7 @@ sim_open (kind, callback, abfd, argv)
   /* Allocate core managed memory if none specified by user.
      Use address 4 here in case the user wanted address 0 unmapped.  */
   if (sim_core_read_buffer (sd, NULL, read_map, &c, 4, 1) == 0)
-    sim_do_commandf (sd, "memory region 0,0x%lx", M32R_DEFAULT_MEM_SIZE);
+    sim_do_commandf (sd, "memory region 0,0x%x", M32R_DEFAULT_MEM_SIZE);
 
   /* check for/establish the reference program image */
   if (sim_analyze_program (sd,
@@ -122,47 +138,6 @@ sim_open (kind, callback, abfd, argv)
       free_state (sd);
       return 0;
     }
-
-  /* If both cpu model and state architecture are set, ensure they're
-     compatible.  If only one is set, set the other.  If neither are set,
-     use the default model.  STATE_ARCHITECTURE is the bfd_arch_info data
-     for the selected "mach" (bfd terminology).  */
-  {
-    SIM_CPU *cpu = STATE_CPU (sd, 0);
-
-    if (! STATE_ARCHITECTURE (sd)
-	/* Only check cpu 0.  STATE_ARCHITECTURE is for that one only.  */
-	&& ! CPU_MACH (cpu))
-      {
-	/* Set the default model.  */
-	const MODEL *model = sim_model_lookup (WITH_DEFAULT_MODEL);
-	sim_model_set (sd, NULL, model);
-      }
-    if (STATE_ARCHITECTURE (sd)
-	&& CPU_MACH (cpu))
-      {
-	if (strcmp (STATE_ARCHITECTURE (sd)->printable_name,
-		    MACH_NAME (CPU_MACH (cpu))) != 0)
-	  {
-	    sim_io_eprintf (sd, "invalid model `%s' for `%s'\n",
-			    MODEL_NAME (CPU_MODEL (cpu)),
-			    STATE_ARCHITECTURE (sd)->printable_name);
-	    free_state (sd);
-	    return 0;
-	  }
-      }
-    else if (STATE_ARCHITECTURE (sd))
-      {
-	/* Use the default model for the selected machine.
-	   The default model is the first one in the list.  */
-	const MACH *mach = sim_mach_lookup (STATE_ARCHITECTURE (sd)->printable_name);
-	sim_model_set (sd, NULL, MACH_MODELS (mach));
-      }
-    else
-      {
-        STATE_ARCHITECTURE (sd) = bfd_scan_arch (MACH_NAME (CPU_MACH (cpu)));
-      }
-  }
 
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
