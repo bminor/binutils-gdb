@@ -50,6 +50,7 @@
 #include "sim-regno.h"
 
 static void set_reg_offset (CORE_ADDR *saved_regs, int regnum, CORE_ADDR off);
+static struct type *mips_register_type (struct gdbarch *gdbarch, int regnum);
 
 /* A useful bit in the CP0 status register (PS_REGNUM).  */
 /* This bit is set if we are emulating 32-bit FPRs on a 64-bit chip.  */
@@ -670,7 +671,7 @@ mips_register_raw_size (int regnum)
       /* For the moment map [NUM_REGS .. 2*NUM_REGS) onto the same raw
 	 registers, but always return the virtual size.  */
       int rawnum = regnum % NUM_REGS;
-      return TYPE_LENGTH (MIPS_REGISTER_TYPE (rawnum));
+      return TYPE_LENGTH (gdbarch_register_type (current_gdbarch, rawnum));
     }
   else
     internal_error (__FILE__, __LINE__, "Register %d out of range", regnum);
@@ -700,7 +701,8 @@ mips_register_byte (int regnum)
       /* Add space for all the proceeding registers based on their
          real size.  */
       for (reg = NUM_REGS; reg < regnum; reg++)
-	byte += TYPE_LENGTH (MIPS_REGISTER_TYPE ((reg % NUM_REGS)));
+	byte += TYPE_LENGTH (gdbarch_register_type (current_gdbarch,
+                                                    (reg % NUM_REGS)));
       return byte;
     }
   else
