@@ -1,3 +1,11 @@
+2003-05-02  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf_x86_64_copy_indirect_symbol): Don't copy
+	ELF_LINK_NON_GOT_REF for weakdefs when symbol already adjusted.
+	(ELIMINATE_COPY_RELOCS): Define as one.  Use throughout.
+	(elf_x86_64_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+
 2003-05-02  Charles Lepple <clepple@ghz.cc>
 	    Nick Clifton <nickc@redhat.com>
 
