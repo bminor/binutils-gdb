@@ -156,9 +156,6 @@
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
 
-/* Define if gnu-regex.c included with GDB should be used. */
-#undef USE_INCLUDED_REGEX
-
 /* BFD's default architecture. */
 #undef DEFAULT_BFD_ARCH
 

@@ -169,9 +169,6 @@
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
 
-/* Define if gnu-regex.c included with GDB should be used. */
-#undef USE_INCLUDED_REGEX
-
 /* BFD's default architecture. */
 #undef DEFAULT_BFD_ARCH
 
@@ -430,6 +427,9 @@
 
 /* Define if sigsetjmp is available.  */
 #undef HAVE_SIGSETJMP
+
+/* Define to 1 if the regex included in libiberty should be used. */
+#undef USE_INCLUDED_REGEX
 
 /* Define if malloc is not declared in system header files. */
 #undef NEED_DECLARATION_MALLOC

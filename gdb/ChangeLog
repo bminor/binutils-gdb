@@ -1,5 +1,14 @@
 2003-01-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Rewrite check for GNU regex and the
+	--without-included regex option, and move it into the "Checks for
+	library functions" section.  This makes us use the system regex
+	again by default on systems with version 2 of the GNU C library.
+	This was apparently broken.
+	* gdb_regex.h [!USE_INCLUDED_REGEX] (_REGEX_RE_COMP): Define.
+	* acconfig.h (USE_INCLUDED_REGEX): Remove.
+	* config.in, configure: Regenerated.
+
 	* configure.in: Move code that provides the --enable-tui option
 	before the "Checks for libraries" section.  Polish the code
 	somewhat and set need_curses to yes if we build the TUI.  Rewrite
