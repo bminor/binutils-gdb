@@ -4525,51 +4525,53 @@ copy_private_bfd_data (ibfd, obfd)
   maxpagesize = get_elf_backend_data (obfd)->maxpagesize;
 
   /* Returns the end address of the segment + 1.  */
-#define SEGMENT_END(segment, start) 			\
-  (start + (segment->p_memsz > segment->p_filesz 	\
-   ? segment->p_memsz : segment->p_filesz))
+#define SEGMENT_END(segment, start)					\
+  (start + (segment->p_memsz > segment->p_filesz			\
+	    ? segment->p_memsz : segment->p_filesz))
 
   /* Returns true if the given section is contained within
      the given segment.  VMA addresses are compared.  */
-#define IS_CONTAINED_BY_VMA(section, segment)		\
-  (section->vma >= segment->p_vaddr			\
-   && (section->vma + section->_raw_size)		\
-   <= (SEGMENT_END (segment, segment->p_vaddr)))
+#define IS_CONTAINED_BY_VMA(section, segment)				\
+  (section->vma >= segment->p_vaddr					\
+   && (section->vma + section->_raw_size				\
+       <= (SEGMENT_END (segment, segment->p_vaddr))))
 
   /* Returns true if the given section is contained within
      the given segment.  LMA addresses are compared.  */
-#define IS_CONTAINED_BY_LMA(section, segment, base)	\
-    (section->lma >= base				\
-     && (section->lma + section->_raw_size)		\
-     <= SEGMENT_END (segment, base))
+#define IS_CONTAINED_BY_LMA(section, segment, base)			\
+  (section->lma >= base							\
+   && (section->lma + section->_raw_size				\
+       <= SEGMENT_END (segment, base)))
 
   /* Returns true if the given section is contained within the
      given segment.  Filepos addresses are compared in an elf
      backend function. */
-#define IS_CONTAINED_BY_FILEPOS(sec, seg, bed)		\
-  (bed->is_contained_by_filepos		  		\
+#define IS_CONTAINED_BY_FILEPOS(sec, seg, bed)				\
+  (bed->is_contained_by_filepos						\
    && (*bed->is_contained_by_filepos) (sec, seg))
 
   /* Special case: corefile "NOTE" section containing regs, prpsinfo etc.  */
-#define IS_COREFILE_NOTE(p, s)                          \
-	    (p->p_type == PT_NOTE                       \
-	     && bfd_get_format (ibfd) == bfd_core       \
-	     && s->vma == 0 && s->lma == 0              \
-	     && (bfd_vma) s->filepos >= p->p_offset     \
-	     && (bfd_vma) s->filepos + s->_raw_size     \
-	     <= p->p_offset + p->p_filesz)
+#define IS_COREFILE_NOTE(p, s)						\
+  (p->p_type == PT_NOTE							\
+   && bfd_get_format (ibfd) == bfd_core					\
+   && s->vma == 0 && s->lma == 0					\
+   && (bfd_vma) s->filepos >= p->p_offset				\
+   && ((bfd_vma) s->filepos + s->_raw_size				\
+       <= p->p_offset + p->p_filesz))
 
   /* The complicated case when p_vaddr is 0 is to handle the Solaris
      linker, which generates a PT_INTERP section with p_vaddr and
      p_memsz set to 0.  */
-#define IS_SOLARIS_PT_INTERP(p, s)			\
-	    (   p->p_vaddr == 0				\
-	     && p->p_filesz > 0				\
-	     && (s->flags & SEC_HAS_CONTENTS) != 0	\
-	     && s->_raw_size > 0			\
-	     && (bfd_vma) s->filepos >= p->p_offset	\
-	     && ((bfd_vma) s->filepos + s->_raw_size	\
-		     <= p->p_offset + p->p_filesz))
+#define IS_SOLARIS_PT_INTERP(p, s)					\
+  (p->p_vaddr == 0							\
+   && p->p_paddr == 0							\
+   && p->p_memsz == 0							\
+   && p->p_filesz > 0							\
+   && (s->flags & SEC_HAS_CONTENTS) != 0				\
+   && s->_raw_size > 0							\
+   && (bfd_vma) s->filepos >= p->p_offset				\
+   && ((bfd_vma) s->filepos + s->_raw_size				\
+       <= p->p_offset + p->p_filesz))
 
   /* Decide if the given section should be included in the given segment.
      A section will be included if:
@@ -4579,10 +4581,9 @@ copy_private_bfd_data (ibfd, obfd)
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.  */
 #define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
-  (((((segment->p_paddr							\
-       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
-       : IS_CONTAINED_BY_VMA (section, segment))			\
-      || IS_SOLARIS_PT_INTERP (segment, section))			\
+  ((((segment->p_paddr							\
+      ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
+      : IS_CONTAINED_BY_VMA (section, segment))				\
      && (section->flags & SEC_ALLOC) != 0)				\
     || IS_COREFILE_NOTE (segment, section)				\
     || (IS_CONTAINED_BY_FILEPOS (section, segment, bed)			\
@@ -4591,12 +4592,13 @@ copy_private_bfd_data (ibfd, obfd)
    && ! section->segment_mark)
 
   /* Returns true iff seg1 starts after the end of seg2.  */
-#define SEGMENT_AFTER_SEGMENT(seg1, seg2)		\
-    (seg1->p_vaddr >= SEGMENT_END (seg2, seg2->p_vaddr))
+#define SEGMENT_AFTER_SEGMENT(seg1, seg2)				\
+  (seg1->p_vaddr >= SEGMENT_END (seg2, seg2->p_vaddr))
 
   /* Returns true iff seg1 and seg2 overlap.  */
-#define SEGMENT_OVERLAPS(seg1, seg2)			\
-  (!(SEGMENT_AFTER_SEGMENT (seg1, seg2) || SEGMENT_AFTER_SEGMENT (seg2, seg1)))
+#define SEGMENT_OVERLAPS(seg1, seg2)					\
+  (!(SEGMENT_AFTER_SEGMENT (seg1, seg2)					\
+     || SEGMENT_AFTER_SEGMENT (seg2, seg1)))
 
   /* Initialise the segment mark field.  */
   for (section = ibfd->sections; section != NULL; section = section->next)
@@ -4605,13 +4607,23 @@ copy_private_bfd_data (ibfd, obfd)
   /* Scan through the segments specified in the program header
      of the input BFD.  For this first scan we look for overlaps
      in the loadable segments.  These can be created by weird
-     parameters to objcopy.  */
+     parameters to objcopy.  Also, fix some solaris weirdness.  */
   for (i = 0, segment = elf_tdata (ibfd)->phdr;
        i < num_segments;
        i++, segment++)
     {
       unsigned int j;
       Elf_Internal_Phdr *segment2;
+
+      if (segment->p_type == PT_INTERP)
+	for (section = ibfd->sections; section; section = section->next)
+	  if (IS_SOLARIS_PT_INTERP (segment, section))
+	    {
+	      /* Mininal change so that the normal section to segment
+		 assigment code will work.  */
+	      segment->p_vaddr = section->vma;
+	      break;
+	    }
 
       if (segment->p_type != PT_LOAD)
 	continue;

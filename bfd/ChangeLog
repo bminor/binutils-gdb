@@ -1,3 +1,11 @@
+2002-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c: Formatting.
+	(IS_SOLARIS_PT_INTERP): Add p_paddr and p_memsz checks.
+	(INCLUDE_SECTION_IN_SEGMENT): Remove IS_SOLARIS_PT_INTERP.
+	(copy_private_bfd_data): Set p_vaddr on broken Solaris PT_INTERP
+	segments.
+
 2002-07-07  Mark Mitchell  <mark@codesourcery.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 
