@@ -1,3 +1,11 @@
+2003-06-23  Andrew Cagney  <cagney@redhat.com>
+
+	* rs6000-tdep.c (rs6000_register_virtual_type): Add explict cases
+	for 0 "int0" and 4 "int32" sized registers.
+	* gdbtypes.c (builtin_type_int0): Define.
+	(build_gdbtypes): Initialize builtin_type_int0.
+	* gdbtypes.h (builtin_type_int0): Declare.
+
 2003-06-23  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-tdep.c (m68hc11_gdbarch_init): Clear gdb_arch_char_signed
