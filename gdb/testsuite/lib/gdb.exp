@@ -97,7 +97,7 @@ proc gdb_unload {} {
     global GDB
     global gdb_prompt
     send_gdb "file\n"
-    gdb_expect {
+    gdb_expect 60 {
 	-re "No exec file now\[^\r\n\]*\[\r\n\]" { exp_continue }
 	-re "No symbol file now\[^\r\n\]*\[\r\n\]" { exp_continue }
 	-re "A program is being debugged already..*Kill it.*y or n. $"\
@@ -127,7 +127,7 @@ proc delete_breakpoints {} {
     global gdb_prompt
 
     send_gdb "delete breakpoints\n"
-    gdb_expect {
+    gdb_expect 30 {
 	 -re "Delete all breakpoints.*y or n.*$" {
 	    send_gdb "y\n";
 	    exp_continue
@@ -137,7 +137,7 @@ proc delete_breakpoints {} {
 	 timeout { perror "Delete all breakpoints in delete_breakpoints (timeout)" ; return }
     }
     send_gdb "info breakpoints\n"
-    gdb_expect {
+    gdb_expect 30 {
 	 -re "No breakpoints or watchpoints..*$gdb_prompt $" {}
 	 -re "$gdb_prompt $" { perror "breakpoints not deleted" ; return }
 	 -re "Delete all breakpoints.*or n.*$" {
@@ -161,7 +161,7 @@ proc gdb_run_cmd {args} {
 
     if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
-	gdb_expect {
+	gdb_expect 30 {
 	    -re "$gdb_prompt $" { }
 	    default {
 		perror "gdb_init_command for target failed";
@@ -177,7 +177,7 @@ proc gdb_run_cmd {args} {
 	    set start "start";
 	}
 	send_gdb  "jump *$start\n"
-	gdb_expect {
+	gdb_expect 30 {
 	    -re "Continuing at \[^\r\n\]*\[\r\n\]" {
 		if ![target_info exists gdb_stub] {
 		    return;
@@ -204,7 +204,7 @@ proc gdb_run_cmd {args} {
 	    timeout { perror "Jump to start() failed (timeout)"; return }
 	}
 	if [target_info exists gdb_stub] {
-	    gdb_expect {
+	    gdb_expect 60 {
 		-re "$gdb_prompt $" {
 		    send_gdb "continue\n"
 		}
@@ -214,7 +214,7 @@ proc gdb_run_cmd {args} {
     }
     send_gdb "run $args\n"
 # This doesn't work quite right yet.
-    gdb_expect {
+    gdb_expect 60 {
 	-re "The program .* has been started already.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
@@ -229,7 +229,7 @@ proc gdb_breakpoint { function } {
 
     send_gdb "break $function\n"
     # The first two regexps are what we get with -g, the third is without -g.
-    gdb_expect {
+    gdb_expect 30 {
 	-re "Breakpoint \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "Breakpoint \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "Breakpoint \[0-9\]* at .*$gdb_prompt $" {}
@@ -259,7 +259,7 @@ proc runto { function } {
     
     # the "at foo.c:36" output we get with -g.
     # the "in func" output we get without -g.
-    gdb_expect {
+    gdb_expect 30 {
 	-re "Break.* at .*:$decimal.*$gdb_prompt $" {
 	    return 1
 	}
@@ -296,7 +296,7 @@ proc runto_main {} {
 
     send_gdb "step\n"
     # if use stubs step out of the breakpoint() function.
-    gdb_expect {
+    gdb_expect 120 {
 	-re "main.* at .*$gdb_prompt $" {}
 	-re "_start.*$gdb_prompt $" {}
 	timeout { fail "single step at breakpoint() (timeout)" ; return 0 }
@@ -361,7 +361,7 @@ proc gdb_test { args } {
 	}
     }
 
-    gdb_expect {
+    gdb_expect 600 {
 	 -re "Ending remote debugging.*$gdb_prompt$" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
@@ -461,6 +461,7 @@ proc test_print_reject { args } {
 	send_user "Looking to match \"$expectthis\"\n"
     }
     send_gdb "$sendthis\n"
+    #FIXME: Should add timeout as parameter.
     gdb_expect {
 	-re "A .* in expression.*\\.*$gdb_prompt $" {
 	    pass "reject $sendthis"
@@ -558,13 +559,13 @@ proc gdb_reinitialize_dir { subdir } {
 	return "";
     }
     send_gdb "dir\n"
-    gdb_expect {
+    gdb_expect 60 {
 	-re "Reinitialize source path to empty.*y or n. " {
 	    send_gdb "y\n"
-	    gdb_expect {
+	    gdb_expect 60 {
 		-re "Source directories searched.*$gdb_prompt $" {
 		    send_gdb "dir $subdir\n"
-		    gdb_expect {
+		    gdb_expect 60 {
 			-re "Source directories searched.*$gdb_prompt $" {
 			    verbose "Dir set to $subdir"
 			}
@@ -601,13 +602,9 @@ proc default_gdb_exit {} {
 
     verbose "Quitting $GDB $GDBFLAGS"
 
-    # This used to be 1 for unix-gdb.exp
-    set timeout 5
-    verbose "Timeout is now $timeout seconds" 2
-
     if [is_remote host] {
 	send_gdb "quit\n";
-	gdb_expect {
+	gdb_expect 10 {
 	     -re "and kill it.*y or n. " {
 		send_gdb "y\n";
 		exp_continue;
@@ -641,7 +638,7 @@ proc gdb_file_cmd { arg } {
     }
 
     send_gdb "file $arg\n"
-    gdb_expect {
+    gdb_expect 120 {
         -re "Reading symbols from.*done.*$gdb_prompt $" {
             verbose "\t\tLoaded $arg into the $GDB"
             return 0
@@ -657,7 +654,7 @@ proc gdb_file_cmd { arg } {
         }
         -re "Load new symbol table from \".*\".*y or n. $" {
             send_gdb "y\n"
-            gdb_expect {
+            gdb_expect 120 {
                 -re "Reading symbols from.*done.*$gdb_prompt $" {
                     verbose "\t\tLoaded $arg with new symbol table into $GDB"
                     return 0
@@ -713,8 +710,6 @@ proc default_gdb_start { } {
 	return 0;
     }
 
-    set oldtimeout $timeout
-    set timeout [expr "$timeout + 180"]
     if [is_remote host] {
 	set res [remote_spawn host "$GDB -nw $GDBFLAGS --command gdbinit"];
     } else {
@@ -729,30 +724,25 @@ proc default_gdb_start { } {
 	perror "Spawning $GDB failed."
 	return 1;
     }
-    set timeout 10
-    gdb_expect {
+    gdb_expect 360 {
 	-re "\[\r\n\]$gdb_prompt $" {
 	    verbose "GDB initialized."
 	}
 	-re "$gdb_prompt $"	{
 	    perror "GDB never initialized."
-	    set timeout $oldtimeout
-	    verbose "Timeout restored to $timeout seconds" 2
 	    return -1
 	}
 	timeout	{
-	    perror "(timeout) GDB never initialized after $timeout seconds."
+	    perror "(timeout) GDB never initialized after 10 seconds."
 	    remote_close host;
 	    return -1
 	}
     }
-    set timeout $oldtimeout
-    verbose "Timeout restored to $timeout seconds" 2
     set gdb_spawn_id -1;
     # force the height to "unlimited", so no pagers get used
 
     send_gdb "set height 0\n"
-    gdb_expect {
+    gdb_expect 10 {
 	-re "$gdb_prompt $" { 
 	    verbose "Setting height to 0." 2
 	}
@@ -762,7 +752,7 @@ proc default_gdb_start { } {
     }
     # force the width to "unlimited", so no wraparound occurs
     send_gdb "set width 0\n"
-    gdb_expect {
+    gdb_expect 10 {
 	-re "$gdb_prompt $" {
 	    verbose "Setting width to 0." 2
 	}
@@ -771,18 +761,6 @@ proc default_gdb_start { } {
 	}
     }
     return 0;
-}
-
-#
-# FIXME: this is a copy of the new library procedure, but it's here too
-# till the new dejagnu gets installed everywhere. I'd hate to break the
-# gdb testsuite.
-#
-global argv0
-if ![info exists argv0] then {
-    proc exp_continue { } {
-	continue -expect
-    }
 }
 
 # * For crosses, the CHILL runtime doesn't build because it can't find
@@ -856,28 +834,36 @@ proc send_gdb { string } {
 #
 
 proc gdb_expect { args } {
-    upvar timeout timeout
-    if [target_info exists gdb,timeout] {
-	if [info exists timeout] {
-	    if { $timeout < [target_info gdb,timeout] } {
-		set gtimeout [target_info gdb,timeout];
+    if { [llength $args] == 2  && [lindex $args 0] != "-re" } {
+	set gtimeout [lindex $args 0];
+	set expcode [list [lindex $args 1]];
+    } else {
+	upvar timeout timeout;
+
+	set expcode $args;
+	if [target_info exists gdb,timeout] {
+	    if [info exists timeout] {
+		if { $timeout < [target_info gdb,timeout] } {
+		    set gtimeout [target_info gdb,timeout];
+		} else {
+		    set gtimeout $timeout;
+		}
 	    } else {
-		set gtimeout $timeout;
+		set gtimeout [target_info gdb,timeout];
 	    }
-	} else {
-	    set gtimeout [target_info gdb,timeout];
+	}
+
+	if ![info exists gtimeout] {
+	    global timeout;
+	    if [info exists timeout] {
+		set gtimeout $timeout;
+	    } else {
+		# Eeeeew.
+		set gtimeout 60;
+	    }
 	}
     }
-    if ![info exists gtimeout] {
-	global timeout;
-	if [info exists timeout] {
-	    set gtimeout $timeout;
-	} else {
-	    # Eeeeew.
-	    set gtimeout 60;
-	}
-    }
-    set code [catch {uplevel remote_expect host $gtimeout $args} string];
+    set code [catch {uplevel remote_expect host $gtimeout $expcode} string];
 
     if {$code == 1} {
         global errorInfo errorCode;
@@ -902,10 +888,12 @@ proc gdb_suppress_tests { args } {
 
     incr suppress_flag;
 
-    if { [llength $args] > 0 } {
-	warning "[lindex $args 0]\n";
-    } else {
-	warning "Because of previous failure, all subsequent tests in this group will automatically fail.\n";
+    if { $suppress_flag == 1 } {
+	if { [llength $args] > 0 } {
+	    warning "[lindex $args 0]\n";
+	} else {
+	    warning "Because of previous failure, all subsequent tests in this group will automatically fail.\n";
+	}
     }
 }
 

@@ -2,6 +2,9 @@ Wed Jun 18 11:11:39 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_init): Pass our arguments to default_gdb_init
  	properly.
+	(gdb_expect): Add optional timeout parameter, and add timeout
+	value to various calls.
+	(gdb_suppress_tests): Only give one warning message per group.
 
 Tue Jun 17 13:10:10 1997  Bob Manson  <manson@charmed.cygnus.com>
 
