@@ -383,9 +383,10 @@ struct elf_backend_data
     PARAMS ((bfd *, struct bfd_link_info *));
 
   /* A function to do any final processing needed for the ELF file
-     before writing it out.  */
+     before writing it out.  The LINKER argument is true if this BFD
+     was created by the ELF backend linker.  */
   void (*elf_backend_final_write_processing)
-    PARAMS ((bfd *, struct bfd_link_info *));
+    PARAMS ((bfd *, boolean linker));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
@@ -460,6 +461,10 @@ struct elf_obj_tdata
   void *prpsinfo;		/* The raw /proc prpsinfo structure */
   bfd_vma gp;			/* The gp value (MIPS only, for now) */
   int gp_size;			/* The gp size (MIPS only, for now) */
+
+  /* This is set to true if the object was created by the backend
+     linker.  */
+  boolean linker;
 
   /* A mapping from external symbols to entries in the linker hash
      table, used when linking.  This is indexed by the symbol index
