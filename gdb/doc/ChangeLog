@@ -1,3 +1,7 @@
+2003-09-22  Michael Chastain  <mec@shout.net>
+
+	* gdbint.texinfo (Testsuite Organization): Change gdb.c++ to gdb.cp.
+
 2003-09-21  Anthony Green  <green@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Fix typos.

@@ -6390,7 +6390,7 @@ for prototypes).
 
 @item gdb.@var{lang}
 Language-specific tests for any language @var{lang} besides C.  Examples are
-@file{gdb.c++} and @file{gdb.java}.
+@file{gdb.cp} and @file{gdb.java}.
 
 @item gdb.@var{platform}
 Non-portable tests.  The tests are specific to a specific configuration
