@@ -1,3 +1,8 @@
+Wed Jul 21 20:34:34 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* opncls.c (bfd_create): Don't use C++ keyword "template" as a C
+	variable name.
+
 Tue Jul 20 15:02:23 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* coff-m68k.c (m68k_howto2rtype):  Make arg CONST to match callers.

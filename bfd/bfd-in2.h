@@ -441,7 +441,7 @@ bfd_size_type
 bfd_alloc_size PARAMS ((bfd *abfd));
 
 bfd *
-bfd_create PARAMS ((CONST char *filename, bfd *template));
+bfd_create PARAMS ((CONST char *filename, bfd *templ));
 
 
  /* Byte swapping macros for user section data.  */
