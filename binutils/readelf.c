@@ -145,6 +145,7 @@ int do_syms;
 int do_reloc;
 int do_sections;
 int do_section_groups;
+int do_full_section_name;
 int do_segments;
 int do_unwind;
 int do_using_dynamic;
@@ -2587,6 +2588,7 @@ struct option options[] =
   {"sections",	       no_argument, 0, 'S'},
   {"section-headers",  no_argument, 0, 'S'},
   {"section-groups",   no_argument, 0, 'g'},
+  {"full-section-name",no_argument, 0, 'N'},
   {"symbols",	       no_argument, 0, 's'},
   {"syms",	       no_argument, 0, 's'},
   {"relocs",	       no_argument, 0, 'r'},
@@ -2621,6 +2623,8 @@ usage (void)
   -S --section-headers   Display the sections' header\n\
      --sections          An alias for --section-headers\n\
   -g --section-groups    Display the section groups\n\
+  -N --full-section-name\n\
+                         Display the full section name\n\
   -e --headers           Equivalent to: -h -l -S\n\
   -s --syms              Display the symbol table\n\
       --symbols          An alias for --syms\n\
@@ -2693,7 +2697,7 @@ parse_args (int argc, char **argv)
     usage ();
 
   while ((c = getopt_long
-	  (argc, argv, "ersuahnldSDAIgw::x:i:vVWH", options, NULL)) != EOF)
+	  (argc, argv, "ersuahnldSDAINgw::x:i:vVWH", options, NULL)) != EOF)
     {
       char *cp;
       int section;
@@ -2723,6 +2727,9 @@ parse_args (int argc, char **argv)
 	  break;
 	case 'g':
 	  do_section_groups++;
+	  break;
+	case 'N':
+	  do_full_section_name++;
 	  break;
 	case 'e':
 	  do_header++;
@@ -3847,25 +3854,60 @@ process_section_headers (FILE *file)
     printf (_("\nSection Header:\n"));
 
   if (is_32bit_elf)
-    printf
-      (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
+    {
+      if (do_full_section_name)
+	{
+	  printf (_("  [Nr] Name\n"));
+	  printf (_("       Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
+	}
+      else
+	printf
+	  (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
+    }
   else if (do_wide)
-    printf
-      (_("  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n"));
+    {
+      if (do_full_section_name)
+	{
+	  printf (_("  [Nr] Name\n"));
+	  printf (_("       Type            Address          Off    Size   ES Flg Lk Inf Al\n"));
+	}
+      else
+	printf
+	  (_("  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n"));
+    }
   else
     {
-      printf (_("  [Nr] Name              Type             Address           Offset\n"));
-      printf (_("       Size              EntSize          Flags  Link  Info  Align\n"));
+      if (do_full_section_name)
+	{
+	  printf (_("  [Nr] Name\n"));
+	  printf (_("       Flags             Type             Address           Offset\n"));
+	  printf (_("       Size              EntSize          Link     Info     Align\n"));
+	}
+      else
+	{
+	  printf (_("  [Nr] Name              Type             Address           Offset\n"));
+	  printf (_("       Size              EntSize          Flags  Link  Info  Align\n"));
+	}
     }
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
        i++, section++)
     {
-      printf ("  [%2u] %-17.17s %-15.15s ",
-	      SECTION_HEADER_NUM (i),
-	      SECTION_NAME (section),
-	      get_section_type_name (section->sh_type));
+      if (do_full_section_name)
+	{
+	  printf ("  [%2u] %s\n",
+		  SECTION_HEADER_NUM (i),
+		  SECTION_NAME (section));
+	  if (is_32bit_elf || do_wide)
+	    printf ("       %-15.15s ",
+		    get_section_type_name (section->sh_type));
+	}
+      else
+	printf ("  [%2u] %-17.17s %-15.15s ",
+		SECTION_HEADER_NUM (i),
+		SECTION_NAME (section),
+		get_section_type_name (section->sh_type));
 
       if (is_32bit_elf)
 	{
@@ -3924,6 +3966,30 @@ process_section_headers (FILE *file)
 	      print_vma (section->sh_addralign, DEC);
 	      putchar ('\n');
 	    }
+	}
+      else if (do_full_section_name)
+	{
+	  printf ("       %-15.15s   %-15.15s ",
+		  get_elf_section_flags (section->sh_flags),
+		  get_section_type_name (section->sh_type));
+	  putchar (' ');
+	  print_vma (section->sh_addr, LONG_HEX);
+	  if ((long) section->sh_offset == section->sh_offset)
+	    printf ("  %8.8lx", (unsigned long) section->sh_offset);
+	  else
+	    {
+	      printf ("  ");
+	      print_vma (section->sh_offset, LONG_HEX);
+	    }
+	  printf ("\n       ");
+	  print_vma (section->sh_size, LONG_HEX);
+	  printf ("  ");
+	  print_vma (section->sh_entsize, LONG_HEX);
+
+	  printf ("   %2ld      %3lu        %ld\n",
+		  (unsigned long) section->sh_link,
+		  (unsigned long) section->sh_info,
+		  (unsigned long) section->sh_addralign);
 	}
       else
 	{
