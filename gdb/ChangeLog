@@ -1,3 +1,9 @@
+Mon Aug 21 00:45:17 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Makefile.in (install): Remove "brokensed" hack, unnecessary now
+	that we're using autoconf.
+	(uninstall): Likewise.
+
 Sat Aug 19 17:20:22 1995  Michael Tiemann  <tiemann@axon.cygnus.com>
 
 	* gdbtk.tcl: ENABLE comes back as "1" or "0", not "enable" or
