@@ -1,5 +1,18 @@
 2003-06-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (UNWIND_SP): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.c (frame_sp_unwind): New function.
+	(get_frame_sp): New function.
+	* frame.h (get_frame_sp, frame_sp_unwind): Declare.
+	* regcache.c (read_sp): Rewrite, try each of TARGET_READ_SP,
+	gdbarch_unwind_sp and SP_REGNUM when looking for the SP register
+	value.
+	* d10v-tdep.c (d10v_unwind_sp): Replace d10v_read_sp.
+	(d10v_gdbarch_init): Set unwind_sp instead of read_sp.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
 	Deprecate BIG_REMOTE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT and
 	REMOTE_BREAKPOINT.
 	* remote.c: Update.

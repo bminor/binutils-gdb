@@ -1351,8 +1351,11 @@ read_sp (void)
 {
   if (TARGET_READ_SP_P ())
     return TARGET_READ_SP ();
-  /* Else return SP from get_current_frame.  */
+  else if (gdbarch_unwind_sp_p (current_gdbarch))
+    return get_frame_sp (get_current_frame ());
   else if (SP_REGNUM >= 0)
+    /* Try SP_REGNUM last: this makes all sorts of [wrong] assumptions
+       about the architecture so put it at the end.  */
     return read_register (SP_REGNUM);
   internal_error (__FILE__, __LINE__, "read_sp: Unable to find SP");
 }

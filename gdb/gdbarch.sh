@@ -431,6 +431,7 @@ f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generi
 # This is simply not needed.  See value_of_builtin_frame_fp_reg and
 # call_function_by_hand.
 F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
+# UNWIND_SP is a direct replacement for TARGET_READ_SP.
 F:2:TARGET_READ_SP:CORE_ADDR:read_sp:void
 # The dummy call frame SP should be set by push_dummy_call.
 F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
@@ -452,6 +453,7 @@ v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
+# SP_REGNUM will hopefully be replaced by UNWIND_SP.
 v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
 # This is simply not needed.  See value_of_builtin_frame_fp_reg and
 # call_function_by_hand.
@@ -609,6 +611,7 @@ F:2:DEPRECATED_FRAME_CHAIN_VALID:int:deprecated_frame_chain_valid:CORE_ADDR chai
 # interfaces they have very different underlying implementations.
 F:2:DEPRECATED_FRAME_SAVED_PC:CORE_ADDR:deprecated_frame_saved_pc:struct frame_info *fi:fi::0:0
 M::UNWIND_PC:CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame:
+M::UNWIND_SP:CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame:
 f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:get_frame_base::0
 f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:get_frame_base::0
 F::DEPRECATED_SAVED_PC_AFTER_CALL:CORE_ADDR:deprecated_saved_pc_after_call:struct frame_info *frame:frame

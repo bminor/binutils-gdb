@@ -166,6 +166,13 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
    This replaced: frame->pc; */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
+/* The frame's inner-most bound.  AKA the stack-pointer.  Confusingly
+   known as top-of-stack.  */
+
+extern CORE_ADDR get_frame_sp (struct frame_info *);
+extern CORE_ADDR frame_sp_unwind (struct frame_info *);
+
+
 /* Following on from the `resume' address.  Return the entry point
    address of the function containing that resume address, or zero if
    that function isn't known.  */

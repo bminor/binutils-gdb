@@ -102,8 +102,6 @@ a0_regnum (struct gdbarch *gdbarch)
 
 extern void _initialize_d10v_tdep (void);
 
-static CORE_ADDR d10v_read_sp (void);
-
 static void d10v_eva_prepare_to_trace (void);
 
 static void d10v_eva_get_trace_data (void);
@@ -902,9 +900,11 @@ d10v_write_pc (CORE_ADDR val, ptid_t ptid)
 }
 
 static CORE_ADDR
-d10v_read_sp (void)
+d10v_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return (d10v_make_daddr (read_register (D10V_SP_REGNUM)));
+  ULONGEST sp;
+  frame_unwind_unsigned_register (next_frame, D10V_SP_REGNUM, &sp);
+  return d10v_make_daddr (sp);
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse
@@ -1528,7 +1528,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, d10v_read_pc);
   set_gdbarch_write_pc (gdbarch, d10v_write_pc);
-  set_gdbarch_read_sp (gdbarch, d10v_read_sp);
+  set_gdbarch_unwind_sp (gdbarch, d10v_unwind_sp);
 
   set_gdbarch_num_regs (gdbarch, d10v_num_regs);
   set_gdbarch_sp_regnum (gdbarch, D10V_SP_REGNUM);

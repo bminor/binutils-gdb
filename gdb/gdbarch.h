@@ -371,6 +371,8 @@ extern void set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch, gdba
 #define DEPRECATED_TARGET_READ_FP() (gdbarch_deprecated_target_read_fp (current_gdbarch))
 #endif
 
+/* UNWIND_SP is a direct replacement for TARGET_READ_SP. */
+
 #if defined (TARGET_READ_SP)
 /* Legacy for systems yet to multi-arch TARGET_READ_SP */
 #if !defined (TARGET_READ_SP_P)
@@ -504,7 +506,8 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
-   all (-1). */
+   all (-1).
+   SP_REGNUM will hopefully be replaced by UNWIND_SP. */
 
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (SP_REGNUM)
@@ -2256,6 +2259,12 @@ extern int gdbarch_unwind_pc_p (struct gdbarch *gdbarch);
 typedef CORE_ADDR (gdbarch_unwind_pc_ftype) (struct gdbarch *gdbarch, struct frame_info *next_frame);
 extern CORE_ADDR gdbarch_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame);
 extern void set_gdbarch_unwind_pc (struct gdbarch *gdbarch, gdbarch_unwind_pc_ftype *unwind_pc);
+
+extern int gdbarch_unwind_sp_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_unwind_sp_ftype) (struct gdbarch *gdbarch, struct frame_info *next_frame);
+extern CORE_ADDR gdbarch_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame);
+extern void set_gdbarch_unwind_sp (struct gdbarch *gdbarch, gdbarch_unwind_sp_ftype *unwind_sp);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FRAME_ARGS_ADDRESS)
