@@ -1,5 +1,5 @@
 #   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1997, 1998, 1999, 2000,
-#   2001 Free Software Foundation, Inc.
+#   2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -443,6 +443,11 @@ proc deprecated_command_test {} {
 proc bp_deleted_in_command_test {} {
     global gdb_prompt
     
+    if [target_info exists noargs] { 
+        verbose "Skipping bp_deleted_in_command_test because of noargs."
+        return
+    }
+
     gdb_test "set args 1" "" "set args in bp_deleted_in_command_test"
     delete_breakpoints
 
@@ -504,6 +509,11 @@ proc bp_deleted_in_command_test {} {
 proc temporary_breakpoint_commands {} {
     global gdb_prompt
     
+    if [target_info exists noargs] { 
+        verbose "Skipping temporary_breakpoint_commands because of noargs."
+        return
+    }
+
     gdb_test "set args 1" "" "set args in temporary_breakpoint_commands"
     delete_breakpoints
 
