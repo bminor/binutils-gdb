@@ -1,3 +1,14 @@
+Thu Nov 30 11:17:33 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* coff-m88k.c (howto_table): Reformatted for easier reading;
+	special_function now points to new function m88k_special_reloc.
+	(howto_hvrt16): Function previously used for handling HVRT16 relocs
+	removed.
+	(rtype2howto): Do not add reloc's r_offset to the addend, this will
+	be done correctly by m88k_special_reloc.
+	(reloc_processing): New function to be used by RELOC_PROCESSING.
+	(RELOC_PROCESSING): Define to call reloc_processing.
+
 Wed Nov 29 12:42:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (pe_print_idata): Call malloc rather than xmalloc.
