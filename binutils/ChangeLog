@@ -1,3 +1,9 @@
+2000-07-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* objdump.c (usage): Make output of `objdump --help' more
+	consistent with the rest of the GNU world.  Add a line describing
+	the purpose of the program.
+
 2000-07-10  David Huggins-Daines  <dhd@linuxcare.com>
 
 	* stabs.c (parse_stab_range_type): Cast to proper type to fix
