@@ -323,7 +323,7 @@ tic4x_gen_to_words (flonum, words, precision)
   unsigned int rbit;            /* Round bit. */
   int shift;			/* Shift count.  */
 
-  /* NOTE: Svein Seldal <Svein.Seldal@solidas.com>
+  /* NOTE: Svein Seldal <Svein@dev.seldal.com>
      The code in this function is altered slightly to support floats
      with 31-bits mantissas, thus the documentation below may be a
      little bit inaccurate.

@@ -1,3 +1,8 @@
+2005-02-27  Svein E. Seldal  <svein@dev.seldal.com>
+
+	* config/tc-tic4x.c (tic4x_gen_to_words): Changed mail
+	address for myself.
+
 2005-02-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* cgen.c: Warning fixes.
