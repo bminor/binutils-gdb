@@ -636,8 +636,9 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	  else
 	    {
 	      if (info->shared
-		  && (cie.fde_encoding & 0xf0) == DW_EH_PE_absptr
-		  && cie.make_relative == 0)
+		  && (((cie.fde_encoding & 0xf0) == DW_EH_PE_absptr
+		       && cie.make_relative == 0)
+		      || (cie.fde_encoding & 0xf0) == DW_EH_PE_aligned))
 		{
 		  /* If shared library uses absolute pointers
 		     which we cannot turn into PC relative,
@@ -1026,7 +1027,7 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 		  }
 	    }
 	}
-      else
+      else if (sec_info->entry[i].size > 4)
 	{
 	  /* FDE */
 	  bfd_vma value = 0, address;
@@ -1099,6 +1100,9 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 		}
 	    }
 	}
+      else
+	/* Terminating FDE must be at the end of .eh_frame section only.  */
+	BFD_ASSERT (i == sec_info->count - 1);
 
       BFD_ASSERT (p == contents + sec_info->entry[i].new_offset);
       memmove (p, contents + sec_info->entry[i].offset,

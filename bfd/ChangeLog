@@ -1,3 +1,9 @@
+2002-04-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't build
+	search table if some FDE is DW_EH_PE_aligned encoded either.
+	(_bfd_elf_write_section_eh_frame): Handle terminating FDE specially.
+
 2002-04-22  Richard Smith  <richard@ex-parrot.com>
 	    Jakub Jelinek  <jakub@redhat.com>
 
