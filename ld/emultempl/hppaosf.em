@@ -2,7 +2,7 @@
 # It does some substitutions.
 cat >em_${EMULATION_NAME}.c <<EOF
 /* An emulation for HP PA-RISC OSF/1 linkers.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1993 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-
+#include "bfdlink.h"
 
 #include "ld.h"
 #include "config.h"
@@ -32,22 +32,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldmisc.h"
-
-extern  boolean lang_float_flag;
-
-
-extern enum bfd_architecture ldfile_output_architecture;
-extern unsigned long ldfile_output_machine;
-extern char *ldfile_output_machine_name;
-
-extern bfd *output_bfd;
+#include "ldmain.h"
+#include "ldctor.h"
 
 static void hppaosf_before_parse()
 {
-  extern char *lprefix;
-  extern unsigned int lprefix_len;
-  lprefix = "L$";
-  lprefix_len = 2;
+  link_info.lprefix = "L$";
+  link_info.lprefix_len = 2;
 
   ldfile_output_architecture = bfd_arch_hppa;
 }
@@ -55,10 +46,6 @@ static void hppaosf_before_parse()
 static lang_input_statement_type *stub_file = 0;
 
 static lang_input_section_type *stub_input_section = NULL;
-
-extern lang_statement_list_type *stat_ptr;
-/* List of statements needed to handle constructors */
-extern lang_statement_list_type constructor_list;
 
 static void
 hppaosf_search_for_padding_statements(s,prev)
@@ -112,9 +99,8 @@ static void
 hppaosf_finish()
 {
   extern asymbol *hppa_look_for_stubs_in_section();
-  extern ld_config_type config;
 
-  if (config.relocateable_output == false)
+  if (link_info.relocateable == false)
     {
       /* check for needed stubs */
       LANG_FOR_EACH_INPUT_SECTION
@@ -128,7 +114,8 @@ hppaosf_finish()
 							    output_bfd,
 							    section,
 							    statement->asymbols,
-							    &new_sym_cnt);
+							    &new_sym_cnt,
+							    &link_info);
 
 	    if ( (new_sym_cnt > 0) && syms )
 	      {
@@ -245,13 +232,11 @@ $s/$/n}"/
 
 cat >>em_${EMULATION_NAME}.c <<EOF
 {			     
-  extern ld_config_type config;
-
   *isfile = 0;
 
-  if (config.relocateable_output == true && config.build_constructors == true)
+  if (link_info.relocateable == true && config.build_constructors == true)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xu`;
-  else if (config.relocateable_output == true)
+  else if (link_info.relocateable == true)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xr`;
   else if (!config.text_read_only)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xbn`;
@@ -267,13 +252,11 @@ else
 
 cat >>em_${EMULATION_NAME}.c <<EOF
 {			     
-  extern ld_config_type config;
-
   *isfile = 1;
 
-  if (config.relocateable_output == true && config.build_constructors == true)
+  if (link_info.relocateable == true && config.build_constructors == true)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (config.relocateable_output == true)
+  else if (link_info.relocateable == true)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

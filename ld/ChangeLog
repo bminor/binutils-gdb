@@ -1,3 +1,110 @@
+Thu Dec 30 13:01:43 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	A major rewrite to move the bulk of the linker into BFD so that
+	more efficient backend code can be written for specific object
+	files.
+	* lderror.c, lderror.h, ldindr.c, ldindr.h, ldsym.c, ldsym.h,
+	ldwarn.c, ldwarn.h, relax.c, relax.h: Removed.
+	* ldctor.c, ldctor.h: Complete rewrite.
+	* ldwrite.c, ldwrite.h: Complete rewrite.
+	* ld.h (strip_symbols_type, strip_symbols): Removed.  Use
+	link_info.strip instead.  Changed all uses.
+	(discard_locals_type, discard_locals): Removed.  Use
+	link_info.discard instead.  Changed all uses.
+	(ld_config_type): Removed relocateable_output field; use
+	link_info.relocateable instead; changed all uses.  Added stats
+	field.
+	(set_asymbol_chain, get_asymbol_chain, get_loader_symbol,
+	set_loader_symbol): Removed.
+	* ldexp.h (node_class): Added etree_rel.
+	(etree_type): Added rel field.
+	* ldexp.c (exp_print_token): Bracketed table initialization.
+	(exp_relop): New function.
+	(fold_name): Use linker hash table rather than ldsym functions.
+	(exp_fold_tree): Likewise.  Also, handle etree_rel case.
+	(exp_print_tree): Handle etree_rel.
+	* ldgram.y (strip_symbols, discard_locals): Removed.
+	(OPTION_stats, OPTION_no_keep_memory): New tokens.  Handle them.
+	(REL): New token.  Does not appear in grammar, but needed for
+	expression code.
+	(file): Don't call lang_final; it's called by main anyhow.
+	* ldlex.l: Accept -stats and -no-keep-memory options.
+	* ldlang.h (fill_type): Make unsigned int, not unsigned short.
+	* ldlang.c: Consistently use fill_type for fill argument.
+	(lang_init_script_file, script_file): Removed.
+	(create_object_symbols): Removed.  Use
+	link_info.create_object_symbols_section instead.  Changed all
+	uses.
+	(lang_add_keepsyms_file): Removed.
+	(lookup_name): Call bfd_link_add_symbols instead of
+	ldmain_open_file_read_symbol.
+	(wild): Don't iterate over script_file.
+	(open_output): Create link hash table.
+	(lang_place_undefineds): Rewrote.
+	(lang_size_sections): Handle relaxing (doesn't work yet).
+	(lang_relocate_globals): Removed.
+	(lang_finish): Use link hash table rather than ldsym functions.
+	(lang_common): Rewrote.
+	(lang_one_common): New function.
+	(ldlang_add_file): Add file to link_info.input_bfds list.  Set
+	usrdata.
+	(create_symbol): Removed.
+	(lang_process): Don't call lang_init_script_file.  Call
+	ldctor_build_sets rather than find_constructors.  Don't call
+	lang_relocate_globals.
+	(lang_abs_symbol_at_beginning_of): Rewrote.
+	(lang_abs_symbol_at_end_of): Rewrote.
+	* ldmain.c (had_y): Removed.
+	(lprefix, lprefix_len): Removed; use link_info fields instead.
+	Changed all uses.
+	(multiple_def_count, commons_pending, undefined_global_sym_count,
+	total_symbols_seen, total_files_seen): Removed.
+	(link_callbacks, link_info): New variables.
+	(main): Initialize link_info.  Don't call init_bfd_error_vector or
+	ldsym_init.  Don't set now unused variables.  Handle -stats.
+	(get_emulation): Removed obsolete and nonfunctional GNU960 code.
+	(add_ysym): Rewrote.
+	(read_entry_symbols, refize, enter_global_ref, enter_file_symbols,
+	search_library, gnu960_check_format, decode_library_subfile,
+	linear_library, symdef_library, clear_syms, subfile_wanted_p):
+	Removed.
+	(add_keepsyms_file, add_archive_element, multiple_definition,
+	multiple_common, add_to_set, warning_callback, undefined_symbol,
+	reloc_overflow, reloc_dangerous, unattached_reloc, notice_ysym):
+	New functions.
+	* ldmisc.c (vfinfo): Accept a string for %T, not a symbol.  Don't
+	require symbols for %C; look them up instead.
+	* emultempl/hppaosf.em: Pass link_info to
+	hppa_look_for_stubs_in_section.
+	* Makefile.in: Rebuilt dependencies.
+	(CFILES): Removed lderror.c, ldindr.c, ldsym.c, ldwarn.c, and
+	relax.c.
+	(HFILES): Removed lderror.h, ldindr.h, ldsym.h, ldwarn.h, and
+	relax.h.
+	(EMULATION_OFILES): Depend on bfdlink.h, ldmain.h, ldexp.h,
+	ldlang.h and ldctor.h.
+
+	* Makefile.in (ldlex.c): Don't depend on ldgram.h.  Remove
+	declarations of free and malloc from flex output.  Change malloc
+	to ldmalloc in flex output.
+
+Thu Dec 16 21:19:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* ldmain.c (lprefix): Change default from a char to a string
+	with only one character.
+	(lprefix_len): Set default to one.
+
+	* ldmain.h (lprefix_len): Declare.
+
+	* ldsym.c (write_file_locals): Use strncmp rather than a character
+	comparison for lprefix.
+
+	* emultmpl/m88kbcs.em (before_parse): Set lprefix and lprefix_len
+	correctly.
+
+	* emultmpl/hppaosf.em: Include ldexp.h.
+	(before_parse): Set lprefix and lprefix_len correctly.
+
 Tue Dec 14 17:19:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlex.h: Don't declare yywrap if it is a macro.

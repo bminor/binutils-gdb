@@ -1,5 +1,5 @@
 /* A YACC grammer to parse a superset of the AT&T linker scripting languaue.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1993 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
 This file is part of GNU ld.
@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 #include "ld.h"    
 #include "ldexp.h"
 #include "ldver.h"
@@ -34,7 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldemul.h"
 #include "ldfile.h"
 #include "ldmisc.h"
-#include "ldsym.h"
 #include "ldmain.h"
 #include "mri.h"
 #include "ldlex.h"
@@ -42,8 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define YYDEBUG 1
 
 static int typebits;
-strip_symbols_type strip_symbols=STRIP_NONE;
-discard_locals_type discard_locals=DISCARD_NONE;
 
 static char *dirlist_ptr;
 
@@ -133,7 +131,7 @@ static int error_index;
 %token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
 %token OPTION_RETAIN_SYMBOLS_FILE ALIGNMOD AT
 %token OPTION_Qy OPTION_Y OPTION_dn OPTION_call_shared OPTION_non_shared
-%token OPTION_Oval
+%token OPTION_Oval OPTION_stats OPTION_no_keep_memory
 %token <name> OPTION_YP
 
 %type <token> assign_op 
@@ -142,11 +140,11 @@ static int error_index;
 
 
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
-%token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE
+%token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
 
 %%
 
-file:	command_line  { lang_final(); };
+file:	command_line
 
 
 filename:  NAME;
@@ -206,23 +204,28 @@ command_line_option:
 			config.magic_demand_paged = false;
 	                }
         |       OPTION_s {
-	  		strip_symbols = STRIP_ALL;
+	  		link_info.strip = strip_all;
 			}
 	|	OPTION_S {
-			strip_symbols = STRIP_DEBUGGER;
+			link_info.strip = strip_debugger;
 			}
+	|	OPTION_stats {
+	  		config.stats = true;
+		}
+	|	OPTION_no_keep_memory {
+			link_info.keep_memory = false;
+		}
         |       OPTION_u NAME {
 			ldlang_add_undef($2);
 	      	}
-	    
 	|	OPTION_r {
-			config.relocateable_output = true;
+			link_info.relocateable = true;
 			config.build_constructors = false;
 			config.magic_demand_paged = false;
  			config.text_read_only = false;
 			}
         |       OPTION_Ur {
-			config.relocateable_output = true;
+			link_info.relocateable = true;
 			config.build_constructors = true;
 			config.magic_demand_paged = false;
  			config.text_read_only = false;
@@ -235,10 +238,10 @@ command_line_option:
 			{ lang_add_entry($2); 
 			}
 	|	OPTION_X {
-			discard_locals = DISCARD_L;
+			link_info.discard = discard_l;
 		}
 	|	OPTION_x {
-			discard_locals = DISCARD_ALL;
+			link_info.discard = discard_all;
 		}
 
 	| 	OPTION_noinhibit_exec
@@ -343,7 +346,7 @@ command_line_option:
 			lang_add_assignment(exp_assop($4,$3,$5));
 			}
 	|	OPTION_RETAIN_SYMBOLS_FILE filename
-		{ lang_add_keepsyms_file ($2); }
+		{ add_keepsyms_file ($2); }
 	|	OPTION_EB
 		{
 		  /* FIXME: This is currently ignored.  It means
@@ -380,21 +383,20 @@ command_line_option:
 		    einfo ("%P%F: unknown -Y option -- %s\n", $2);
 		  else
 		    {
-		      char *p = "";
+		      char *p;
 		      dirlist_ptr = $2;
 		    set_default_dirlist:
-		      while (p != 0)
+		      while (1)
 			{
 			  p = strchr (dirlist_ptr, ':');
-			  if (p)
+			  if (p != NULL)
 			    *p = 0;
 			  if (*dirlist_ptr)
 			    ldfile_add_library_path (dirlist_ptr);
-			  if (p)
-			    {
-			      *p = ':';
-			      dirlist_ptr = p + 1;
-			    }
+			  if (p == NULL)
+			    break;
+			  *p = ':';
+			  dirlist_ptr = p + 1;
 			}
 		    }
 		}
@@ -463,11 +465,11 @@ mri_script_command:
 	|	ALIAS NAME ',' NAME
 			{ mri_alias($2,$4,0);}
 	|	ALIAS NAME ',' INT
-			{ mri_alias($2,0,$4);}
+			{ mri_alias($2,0,(int) $4);}
 	|	BASE     exp
 			{ mri_base($2); }
         |       TRUNCATE INT
-		{  mri_truncate($2); }
+		{  mri_truncate((unsigned int) $2); }
         |
 	;
 
@@ -609,7 +611,7 @@ statement:
 	| input_section_spec
         | length '(' exp ')'
         	        {
-			lang_add_data($1,$3);
+			lang_add_data((int) $1,$3);
 			}
   
 	| FILL '(' exp ')'
@@ -782,7 +784,7 @@ exp	:
 	|	'(' exp ')'
 			{ $$ = $2; }
 	|	NEXT '(' exp ')' %prec UNARY
-			{ $$ = exp_unop($1,$3); }
+			{ $$ = exp_unop((int) $1,$3); }
 	|	'!' exp %prec UNARY
 			{ $$ = exp_unop('!', $2); }
 	|	'+' exp %prec UNARY

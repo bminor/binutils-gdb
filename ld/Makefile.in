@@ -1,5 +1,5 @@
 # Makefile for the GNU linker ld (version 2)
-# Copyright (C) 1989-1993 Free Software Foundation, Inc.
+# Copyright (C) 1989,1990,1991,1992,1993 Free Software Foundation, Inc.
 
 # This file is part of GNU ld..
 
@@ -47,8 +47,6 @@ docdir = $(datadir)/doc
 # directives need to be different for native and cross linkers.
 scriptdir = $(tooldir)/lib
 
-gcclibdir = $(libdir)/gcc/$(target_alias)
-
 SHELL = /bin/sh
 
 INSTALL = `cd $(srcdir); pwd`/../install.sh -c
@@ -67,9 +65,6 @@ CC_FOR_BUILD=$(CC)
 BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
 
-#version=/`./../gcc/gcc -dumpversion`
-version=
-
 # Seach path to override the default search path for -lfoo libraries.
 # If LIB_PATH is empty, the ones in the script (if any) are left alone.
 # (The default is usually /lib:usr/lib:/usr/local/lib, unless building
@@ -86,6 +81,7 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
 INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR)
+DEP = mkdep
 
 # What version of the manual to build
 DOCVER = gen
@@ -136,7 +132,13 @@ RUNTEST_CXX = `if [ -f ../gcc/xgcc ] ; then \
 RUNTEST_CXX = $(CXX)
 RUNTEST_CXXFLAGS = $(CXXFLAGS)
 
-all:
+# go directly to ld.new in case this ld isn't capable of
+# linking native object on this host.  It can be renamed on
+# install.
+LD_PROG	= ld.new
+
+all: $(LD_PROG)
+.PHONY: all
 
 ### Host, target, and site specific Makefile fragments come in here.
 ####
@@ -150,16 +152,13 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 # Suppress smart makes who think they know how to automake Yacc files
 .y.c:
 
+# This rule is used for the check-cdtest target.
 .cc.o:
 	$(CXX) -c -I$(srcdir) $(CXXFLAGS) $(CFLAGS) $<
 
+ALL_CFLAGS=$(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
 .c.o:
-	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS) $<
-
-# go directly to ld.new in case this ld isn't capable of
-# linking native object on this host.  It can be renamed on
-# install.
-LD_PROG	= ld.new
+	$(CC) -c $(ALL_CFLAGS) $<
 
 # for self hosting
 BFDLIB = ../bfd/libbfd.a
@@ -172,42 +171,33 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500.o \
 	em_hppaosf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
-	em_i386lynx.o em_m68klynx.o em_sparclynx.o \
+	em_i386lynx.o em_m68klynx.o em_sparclynx.o em_coff_sparc.o \
 	$(OTHER_EMULATIONS)
 
 # This is now set by configure.in.
 #EMULATION_OFILES=${ALL_EMULATIONS}
 
-OFILES= ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o ldindr.o \
-	ldwarn.o ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o ldsym.o \
-	ldfile.o relax.o  lderror.o ${EMULATION_OFILES}
+CFILES= ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
+	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
+	mri.c
 
-HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
-	ldsym.h ldctor.h ldlang.h ldexp.h \
-	ldlex.h ldwrite.h ldver.h ldemul.h ldfile.h ldgram.h ld.h
+HFILES=	config.h ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
+	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
+	ldwrite.h mri.h
 
-MANSOURCES=ld.tex
+GENERATED_CFILES= ldgram.c ldlex.c
+GENERATED_HFILES= ldgram.h ldemul-list.h
 
-LDCSOURCES=ldlang.c lexsup.c ldctor.c mri.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
-	em_gld.c em_sun3.c em_go32.c em_m88k.c em_ebmon29k.c em_hppaosf.c \
-	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
-	relax.c lderror.c
+OFILES= ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
+	ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o \
+	ldfile.o ${EMULATION_OFILES}
 
-GENERATED_SOURCES=ldgram.c ldlex.c em_*.c ldemul-list.h
-GENERATED_HEADERS=ldgram.h ldemul-list.h
+LINTSOURCES= $(CFILES) $(GENERATED_CFILES) em_*.c
 
-LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l ldgram.h
-
-BFDSOURCES=../../bfd/common/*.c
-
-SOURCES= $(LDSOURCES) $(BFDSOURCES)
-LINTSOURCES=   $(LDCSOURCES) $(BFDSOURCES) $(GENERATED_SOURCES)
-
-STAGESTUFF = *.o ldscripts/* $(GENERATED_SOURCES) $(GENERATED_HEADERS)
-
-all: $(LD_PROG)
+STAGESTUFF = *.o ldscripts/* em_*.c $(GENERATED_CFILES) $(GENERATED_HFILES)
 
 info: ld.info
+.PHONY: info
 
 ldgram.h ldgram.c: ldgram.y
 	$(BISON) $(BISONFLAGS) -d $(srcdir)/ldgram.y
@@ -215,23 +205,15 @@ ldgram.h ldgram.c: ldgram.y
 	mv -f y.tab.h ldgram.h
 
 # EMUL is the name of a file in the emulparams subdir, without the .sh.
-DEF_EMUL = ` if [ -z "$(EMUL)" ] ; then \
-	       echo "you must set a default emulation" 1>&2 ; \
-	       exit 1 ; \
-	     else \
-	       echo -DDEFAULT_EMULATION='"$(EMUL)"' ; \
-             fi`
+ldmain.o: ldmain.c config.status
+	if [ -z "$(EMUL)" ] ; then \
+	  echo "you must set a default emulation" 1>&2 ; \
+	  exit 1 ; \
+	else \
+	  $(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) -DDEFAULT_EMULATION='"$(EMUL)"' -DSCRIPTDIR='"$(scriptdir)"' $(CFLAGS) $< ; \
+	fi
 
-ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h config.h ld.h \
-  ldmain.h ldmisc.h ldwrite.h ./ldgram.h \
-  ldsym.h ldlang.h ldemul.h ldlex.h \
-  ldfile.h ldindr.h ldwarn.h ldctor.h \
-  lderror.h 
-	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(DEF_EMUL) -DSCRIPTDIR='"$(scriptdir)"' $(CFLAGS) $<
-
-ldemul-list.h: Makefile
+ldemul-list.h: config.status
 	(echo "/* This file is automatically generated.  DO NOT EDIT! */";\
 	for f in `echo " " ${EMULATION_OFILES} "" \
 	 | sed -e 's/em_/ld/g' -e 's/ ld/ /g' -e 's/[.]o//g'`; do \
@@ -243,11 +225,17 @@ ldemul-list.h: Makefile
 	 | sed -e 's/em_/ld/g' -e 's/ ld/ /g' -e 's/[.]o//g'`; do \
 	    echo "  &ld_$${f}_emulation, \\"; \
 	done;\
-	echo "  0") >ldemul-list.h
+	echo "  0") >ldemul-tmp.h
+	mv ldemul-tmp.h ldemul-list.h
 
-ldlex.c: ldlex.l ldgram.h
+ldlex.c: ldlex.l
 	$(LEX) -I -Cem $(srcdir)/ldlex.l
-	mv lex.yy.c ldlex.c
+	-sed -e '/^int.*free();/d' \
+	     -e '/^char.*malloc();/d' \
+	     -e 's/malloc/ldmalloc/g' \
+	  < lex.yy.c > ldlex.c.new
+	-rm lex.yy.c
+	mv ldlex.c.new ./ldlex.c
 
 # These all start with em_ so 'make clean' can find them.
 
@@ -365,98 +353,17 @@ em_elf32mipb.c: $(srcdir)/emulparams/elf32mipb.sh \
 em_alpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha
+em_coff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} coff_sparc
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(LOADLIBES)
 
 # The generated emulation files mostly have the same dependencies.
-$(EMULATION_OFILES): ../bfd/bfd.h ../bfd/sysdep.h ld.h ldemul.h \
-  ldfile.h ldmisc.h config.h
+$(EMULATION_OFILES): ../bfd/bfd.h ../bfd/sysdep.h $(INCDIR)/bfdlink.h \
+  ld.h ldmain.h ldemul.h ldfile.h ldmisc.h ldexp.h ldlang.h config.h ldctor.h
 
-# This list of dependencies was generated by doing a make with gcc -MM
-# saving the output in a file and removing the gcc commands
-# changing "../../devo/ld/../bfd" to "$(BFDDIR)"
-# removing "../../devo/ld/"
-# changing "../include" to "$(INCDIR)"
-
-ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
-  ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h $(INCDIR)/fopen-same.h \
-  ld.h ldexp.h ldver.h ldlang.h \
-  ldemul.h ldfile.h ldmisc.h mri.h 
-ldlex.o: ldlex.c ../bfd/bfd.h $(INCDIR)/obstack.h ./ldgram.h 
-lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ldlex.h ld.h \
-  ldexp.h ./ldgram.h ldmisc.h 
-ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ld.h ldmain.h \
-  ldsym.h ./ldgram.h ldwarn.h ldlang.h \
-  ldexp.h ldemul.h ldlex.h ldmisc.h \
-  ldindr.h ldctor.h 
-mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ld.h ldlang.h \
-  mri.h ./ldgram.h ldexp.h 
-ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ld.h ldlang.h \
-  ldsym.h ldmisc.h ldexp.h ./ldgram.h 
-ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h config.h ld.h \
-  ldmain.h ldmisc.h ldwrite.h ./ldgram.h \
-  ldsym.h ldlang.h ldemul.h ldlex.h \
-  ldfile.h ldindr.h ldwarn.h ldctor.h \
-  lderror.h 
-ldindr.o: ldindr.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ld.h ldsym.h \
-  ldmisc.h 
-ldwarn.o: ldwarn.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ldsym.h ldwarn.h \
-  ldmisc.h 
-ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ldlang.h ld.h \
-  ldwrite.h ldmisc.h ldsym.h ./ldgram.h \
-  relax.h 
-ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ld.h ldmain.h \
-  ldmisc.h ldexp.h ./ldgram.h ldsym.h \
-  ldlang.h 
-ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h config.h ld.h \
-  ldemul.h ldmisc.h ./ldemul-list.h 
-ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ldver.h ldemul.h 
-ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ld.h ldmisc.h \
-  ldlang.h ldlex.h 
-ldsym.o: ldsym.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ld.h ldsym.h \
-  ldmisc.h ldlang.h 
-ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h ldmisc.h ldlang.h \
-  ldfile.h 
-relax.o: relax.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/seclet.h $(INCDIR)/coff/internal.h \
-  ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h $(INCDIR)/fopen-same.h \
-  ldlang.h ld.h ldwrite.h ldmisc.h \
-  ldsym.h ./ldgram.h relax.h 
-lderror.o: lderror.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h $(BFDDIR)/seclet.h ld.h \
-  ldmisc.h 
-
-# CYGNUS LOCAL targets.
 # These targets are for the dejagnu testsuites. The file site.exp 
 # contains global variables that all the testsuites will use.
 # There is a current debate as to how and where to generate test
@@ -515,6 +422,7 @@ check: ld.new site.exp
 	CXX="$(RUNTEST_CXX)" CXXFLAGS="$(RUNTEST_CXXFLAGS)"
 
 installcheck:
+.PHONY: check installcheck
 
 # Rules for testing by relinking ld itself.
 
@@ -535,6 +443,8 @@ ld3: ld2
 bootstrap: ld3
 	cmp ld2 ld3
 
+.PHONY: bootstrap
+
 # A test program for C++ constructors and destructors.
 
 cdtest: cdtest-main.o cdtest-func.o cdtest-foo.o ld.new
@@ -544,6 +454,9 @@ cdtest: cdtest-main.o cdtest-func.o cdtest-foo.o ld.new
 check-cdtest: cdtest $(srcdir)/cdtest.exp
 	./cdtest >cdtest.out
 	diff $(srcdir)/cdtest.exp cdtest.out
+
+.PHONY: check-cdtest
+
 # END OF CHECK TARGETS
 
 # DOCUMENTATION TARGETS
@@ -558,7 +471,7 @@ configdoc.texi:	${DOCVER}-doc.texi
 # TeX output
 dvi: ld.dvi
 ld.dvi: $(srcdir)/ld.texinfo $(srcdir)/configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
-	$(TEXI2DVI) -I$(BFDDIR)/doc $(srcdir)/ld.texinfo
+	TEXINPUTS=$(BFDDIR)/doc:$$TEXINPUTS $(TEXI2DVI) $(srcdir)/ld.texinfo
 
 ldint.dvi: $(srcdir)/ldint.texinfo
 	$(TEXI2DVI) $(srcdir)/ldint.texinfo
@@ -569,6 +482,8 @@ ld.info: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
 
 ldint.info: $(srcdir)/ldint.texinfo
 	$(MAKEINFO) -o ldint.info $(srcdir)/ldint.texinfo
+
+.PHONY: dvi
 
 #separate targets for "ms", "me", and "mm" forms of roff doc
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.
@@ -679,6 +594,8 @@ de-stage3: force
 	-rm ld
 	-rmdir stage3
 
+.PHONY: stage1 stage2 stage3 comparison de-stage1 de-stage2 de-stage3
+
 # Stuff that should be included in a distribution:
 LDDISTSTUFF=ldgram.c ldgram.h ldlex.c
 diststuff: $(LDDISTSTUFF)
@@ -695,7 +612,9 @@ distclean:
 realclean: clean distclean
 	-rm -f $(LDDISTSTUFF)
 
-lintlog:$(SOURCES) Makefile
+.PHONY: diststuff mostlyclean clean distclean realclean
+
+lintlog:$(LINTSOURCES) Makefile
 	$(LINT) -abhxzn  $(LINTFLAGS)  $(LINTSOURCES) \
 | grep -v "pointer casts may be troublesome" \
 | grep -v "possible pointer alignment problem" \
@@ -711,7 +630,6 @@ TAGS:
 	etags -t $(srcdir)/*.[chly] *.[chly]
 
 
-.PHONY: install
 install: 
 	$(INSTALL_XFORM) ld.new $(bindir)/ld
 	$(INSTALL_XFORM1) $(srcdir)/ld.1 $(man1dir)/ld.1
@@ -731,69 +649,97 @@ install-info:
 clean-info:
 	-rm -rf *.info*
 
-#-----------------------------------------------------------------------------
-#		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
-#
-# 'VERSION' file must be present and contain a string of the form "x.y"
-#-----------------------------------------------------------------------------
+.PHONY: install install-info clean-info
 
-ver960.c: FORCE
-	rm -f ver960.c
-	echo "char ${TARG}_ver[]= \"${TARG} `cat VERSION`, `date`\";" > ver960.c
+# Targets to rebuild dependencies in this Makefile.
+# Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
+.dep: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES)
+	rm -f .dep1
+	$(MAKE) DEP=$(DEP) .dep1
+	sed -f dep.sed <.dep1 >.dep
 
+# This rule really wants a mkdep that runs "gcc -MM".
+.dep1: $(CFILES) $(GENERATED_CFILES)
+	rm -f .dep2
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
+	$(DEP) -f .dep2 $(ALL_CFLAGS) $?
+	$(srcdir)/../move-if-change .dep2 .dep1
 
-# This target should be invoked before building a new release.
-# 'VERSION' file must be present and contain a string of the form "x.y"
-#
-roll:
-	@V=`cat VERSION`		; \
-	MAJ=`sed 's/\..*//' VERSION`	; \
-	MIN=`sed 's/.*\.//' VERSION`	; \
-	V=$$MAJ.`expr $$MIN + 1`	; \
-	rm -f VERSION			; \
-	echo $$V >VERSION		; \
-	echo Version $$V
+dep.sed: dep-in.sed config.status
+	sed <$(srcdir)/dep-in.sed >dep.sed	\
+		-e 's!@INCDIR@!$(INCDIR)!'	\
+		-e 's!@srcdir@!$(srcdir)!'
 
+dep: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
+	cat .dep >> tmp-Makefile
+	$(srcdir)/../move-if-change tmp-Makefile Makefile
 
-dep: $(LDSOURCES)
-	mkdep $(CFLAGS) $?
+dep-in: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
+	cat .dep >> tmp-Makefile.in
+	$(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
+
+.PHONY: dep dep-in
 
 # Dummy target to force execution of dependent targets.
 #
 force:
 
-# Target to uncomment host-specific lines in this makefile.  Such lines must
-# have the following string beginning in column 1: #__<hostname>__#
-# Original Makefile is backed up as 'Makefile.old'.
-#
-# Invoke with:  make make HOST=xxx
-#
-make:
-	-@if test $(HOST)x = x ; then \
-		echo 'Specify "make make HOST=???"'; \
-		exit 1; \
-	fi ; \
-	grep -s "^#The next line was generated by 'make make'" Makefile; \
-	if test $$? = 0 ; then	\
-		echo "Makefile has already been processed with 'make make'";\
-		exit 1; \
-	fi ; \
-	mv -f Makefile Makefile.old; \
-	echo "#The next line was generated by 'make make'"	 >Makefile ; \
-	echo "HOST=$(HOST)"					>>Makefile ; \
-	echo							>>Makefile ; \
-	sed "s/^#__$(HOST)__#//" < Makefile.old			>>Makefile
-
-#
+.PHONY: force
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
 
-### mode:fundamental ***
-### Local Variables: ***
-### page-delimiter: "^#" ***
-### End: ***
-### end of file
+# What appears below is generated by a hacked mkdep using gcc -MM.
 
+# DO NOT DELETE THIS LINE -- mkdep uses it.
+# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
+
+ldctor.o : ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bfdlink.h ld.h ldexp.h ldlang.h ldmisc.h \
+  ldgram.h ldctor.h
+ldemul.o : ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  config.h ld.h ldemul.h ldmisc.h ldfile.h ldmain.h ldemul-list.h
+ldexp.o : ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
+  ldgram.h ldlang.h
+ldfile.o : ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldlex.h
+ldlang.o : ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bfdlink.h ld.h ldmain.h ldgram.h ldexp.h \
+  ldlang.h ldemul.h ldlex.h ldmisc.h ldctor.h ldfile.h
+ldmain.o : ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bfdlink.h config.h ld.h ldmain.h ldmisc.h \
+  ldwrite.h ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h \
+  ldfile.h ldctor.h
+ldmisc.o : ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  ld.h ldmisc.h ldexp.h ldlang.h ldlex.h ldmain.h ldfile.h
+ldver.o : ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  ld.h ldver.h ldemul.h ldmain.h
+ldwrite.o : ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bfdlink.h ld.h ldexp.h ldlang.h ldwrite.h \
+  ldmisc.h ldgram.h ldmain.h
+lexsup.o : lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  ldlex.h ld.h ldexp.h ldgram.h ldmisc.h
+mri.o : mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
+  ../bfd/sysdep.h $(INCDIR)/fopen-same.h ld.h ldexp.h \
+  ldlang.h ldmisc.h mri.h ldgram.h
+ldgram.o : ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldemul.h \
+  ldfile.h ldmisc.h ldmain.h mri.h ldlex.h
+ldlex.o : ldlex.c ../bfd/bfd.h $(INCDIR)/obstack.h \
+  ld.h ldgram.h ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
