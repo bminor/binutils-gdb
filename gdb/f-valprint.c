@@ -455,10 +455,13 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	 and for straight literals (i.e. of the form 'hello world'), 
 	 valaddr points a ptr to VALUE_LITERAL_DATA(value). */
       
-      /* First dereference valaddr.  */ 
-      
-      straddr = * (CORE_ADDR *) valaddr; 
-      
+      /* First dereference valaddr.  This relies on valaddr pointing to the
+	 aligner union of a struct value (so we are now fetching the
+	 literal_data pointer from that union).  FIXME: Is this always
+	 true.  */
+
+      straddr = * (char **) valaddr; 
+
       if (straddr)
 	{
 	  len = TYPE_LENGTH (type); 

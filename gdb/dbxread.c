@@ -898,6 +898,7 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
   long dynrel_count;
   arelent **dynrels;
   CORE_ADDR sym_value;
+  char *name;
 
   /* Check that the symbol file has dynamic symbols that we know about.
      bfd_arch_unknown can happen if we are reading a sun3 symbol file
@@ -960,8 +961,12 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 	  if (sym->flags & BSF_GLOBAL)
 	    type |= N_EXT;
 
-	  record_minimal_symbol ((char *) bfd_asymbol_name (sym), sym_value,
-				 type, objfile);
+	  name = (char *) bfd_asymbol_name (sym);
+	  record_minimal_symbol
+	    (obsavestring (name, strlen (name), &objfile -> symbol_obstack),
+	     sym_value,
+	     type,
+	     objfile);
 	}
     }
 
@@ -1013,10 +1018,12 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 	  continue;
 	}
 
-      prim_record_minimal_symbol (bfd_asymbol_name (*rel->sym_ptr_ptr),
-				  address,
-				  mst_solib_trampoline,
-				  objfile);
+      name = bfd_asymbol_name (*rel->sym_ptr_ptr);
+      prim_record_minimal_symbol
+	(obsavestring (name, strlen (name), &objfile -> symbol_obstack),
+	 address,
+	 mst_solib_trampoline,
+	 objfile);
     }
 
   do_cleanups (back_to);

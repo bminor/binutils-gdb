@@ -1,3 +1,16 @@
+Wed Sep 14 14:26:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c (read_xcoff_symtab): Fix obsolete comment about
+	mst_solib_trampoline.
+
+	* f-valprint.c (f_val_print): Change cast of valaddr from
+	CORE_ADDR * to char **, since that is how it is used.
+
+	* dbxread.c (read_dbx_dynamic_symtab): Save copy of symbol names
+	using obsavestring, and pass that to prim_record_minimal_symbol.
+	Having the objfile point to bfd_asymbol_name directly doesn't work
+	if we save and restore a mapped symbol file.
+
 Wed Sep 14 00:55:26 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl:  Add ref counts to breakpoint tags.

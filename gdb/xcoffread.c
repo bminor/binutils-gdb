@@ -1373,9 +1373,12 @@ function_entry_point:
 	       breakpoints, using malloc, etc). On the other side, this is
 	       consistient with gdb's behaviour on a SUN platform. */
 
-	    /* Trying to prefer *real* function entry over its trampoline,
-	       by assigning `mst_solib_trampoline' type to trampoline entries
-	       fails.  Gdb treats those entries as chars. FIXME. */
+	    /* FIXME: I think this code is using "<trampoline>" instead of
+	       the real name because there didn't used to be a way to prefer
+	       mst_text symbols over mst_solib_trampoline symbols (in fact,
+	       it was using mst_unknown because mst_solib_trampoline didn't
+	       exist yet).  Using the real name would cause better output
+	       from print_address.   */
 
 	    /* Recording this entry is necessary. Single stepping relies on
 	       this vector to get an idea about function address boundaries. */
@@ -1386,7 +1389,7 @@ function_entry_point:
 #else
 
 	    /* record trampoline code entries as mst_solib_trampoline symbol.
-	       When we lookup mst symbols, we will choose mst_text over
+	       When we lookup minimal symbols, we will choose mst_text over
 	       mst_solib_trampoline. */
 
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value,
