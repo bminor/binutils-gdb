@@ -368,7 +368,7 @@ elfNN_ia64_reloc (abfd, reloc, sym, data, input_section,
 
 #define IA64_HOWTO(TYPE, NAME, SIZE, PCREL, IN)			\
   HOWTO (TYPE, 0, SIZE, 0, PCREL, 0, complain_overflow_signed,	\
-	 elfNN_ia64_reloc, NAME, FALSE, 0, 0, IN)
+	 elfNN_ia64_reloc, NAME, FALSE, 0, -1LL, IN)
 
 /* This table has to be sorted according to increasing number of the
    TYPE field.  */
