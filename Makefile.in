@@ -713,8 +713,9 @@ $(ALL_MODULES) all-glob all-gui all-libproc:
 	  true; \
 	fi
 
-# This rule is used to check the modules which use FLAGS_TO_PASS.  To
-# build a target check-X means to cd to X and make all.
+# These rules are used to check the modules which use FLAGS_TO_PASS.
+# To build a target check-X means to cd to X and make check.  Some
+# modules are only tested in a native toolchain.
 
 .PHONY: $(CHECK_MODULES) $(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 $(NATIVE_CHECK_MODULES):
