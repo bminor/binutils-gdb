@@ -672,6 +672,7 @@ keep_going:
       free (so_list_head);
       so_list_head = temp->next;
     }
+  clear_symtab_users ();
 }
 
 /* Return the GOT value for the shared library in which ADDR belongs.  If

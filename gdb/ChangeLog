@@ -1,3 +1,16 @@
+Wed Feb 28 13:32:05 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* somsolib.c (som_solib_create_inferior_hook): Before returning
+	call clear_symtab_users.
+
+Tue Feb 27 00:04:46 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* remote-e7000.c (e7000_open):  Delete all breakpoints when
+	connecting to e7000.  Change connect message to allow use of
+	monitor.exp in test suite.
+	* (e7000_load):  Print transfer rate of download.
+	* symfile.c (generic_load):  Print transfer rate of download.
+
 Sun Feb 25 13:58:33 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in (mips*-*-vxworks*): New config.
