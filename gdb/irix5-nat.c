@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <setjmp.h>		/* For JB_XXX.  */
 
 static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, unsigned int));
+fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
 
 /* Size of elements in jmpbuf */
 
@@ -167,7 +167,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
      int which;			/* Unused */
-     unsigned int reg_addr;	/* Unused */
+     CORE_ADDR reg_addr;	/* Unused */
 {
   if (core_reg_size != REGISTER_BYTES)
     {

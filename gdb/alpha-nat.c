@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #include <sys/user.h>
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, unsigned));
+static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
 
 /* Size of elements in jmpbuf */
 
@@ -85,7 +85,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
      int which;
-     unsigned reg_addr;
+     CORE_ADDR reg_addr;
 {
   register int regno;
   register int addr;
@@ -143,10 +143,10 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 
 /* Return the ptrace ``address'' of register REGNO. */
 
-unsigned int
+CORE_ADDR
 register_addr (regno, blockend)
      int regno;
-     int blockend;
+     CORE_ADDR blockend;
 {
   return REGISTER_PTRACE_ADDR (regno);
 }

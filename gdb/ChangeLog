@@ -1,3 +1,30 @@
+Sun Sep  8 15:26:27 1996  Fred Fish  <fnf@cygnus.com>
+
+	* alpha-nat.c (fetch_core_registers): Match Sep 4 gdbcore.h prototype
+	change for core_read_registers in struct core_fns.
+	* core-regset.c (fetch_core_registers): Ditto & add prototype.
+	* core-sol2.c (fetch_core_registers): Ditto & add prototype.
+	* i386aix-nat.c (fetch_core_registers): Ditto & add prototype.
+	* i386b-nat.c (fetch_core_registers): Ditto.
+	* i386mach-nat.c (fetch_core_registers): Ditto & add prototype.
+	* irix4-nat.c (fetch_core_registers): Ditto.
+	* irix5-nat.c (fetch_core_registers): Ditto.
+	* lynx-nat.c (fetch_core_registers): Ditto & add prototype.
+	* m68knbsd-nat.c (fetch_core_registers): Ditto.
+	* mips-nat.c (fetch_core_registers): Ditto & add prototype.
+	* rs6000-nat.c (fetch_core_registers): Ditto.
+	* sparc-nat.c (fetch_core_registers): Ditto.
+	* sun3-nat.c (fetch_core_registers): Ditto & add prototype.
+	* ultra3-nat.c (fetch_core_registers): Ditto & add prototype.
+
+	* alpha-nat.c (register_addr): Match Sep 4 gdbcore.h prototype change.
+	* delta68-nat.c (register_addr): Ditto.
+	* gdbserver/low-linux.c (register_addr): Ditto.
+	* gdbserver/low-hppabsd.c (register_addr): Ditto.
+	* i386m3-nat.c (register_addr): Ditto.
+	* mips-nat.c (register_addr): Ditto.
+	* ultra3-nat.c (register_addr): Ditto.
+
 Sun Sep  8 15:14:00 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* blockframe.c (inside_main_func):  Cleanup slightly.  Move

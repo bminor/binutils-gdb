@@ -52,9 +52,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/core.h>
 #endif
 
-static void fetch_core_registers PARAMS ((char *core_reg_sect,
-					  unsigned core_reg_size, int which,
-					  CORE_ADDR reg_addr));
+static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
 
 /* Extract the register values out of the core file and store
    them where `read_register' will find them.

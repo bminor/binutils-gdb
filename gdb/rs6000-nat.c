@@ -67,7 +67,7 @@ static void
 vmap_symtab PARAMS ((struct vmap *));
 
 static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, unsigned int));
+fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
 
 static void
 exec_one_dummy_insn PARAMS ((void));
@@ -283,7 +283,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
      int which;
-     unsigned int reg_addr;	/* Unused in this version */
+     CORE_ADDR reg_addr;	/* Unused in this version */
 {
   /* fetch GPRs and special registers from the first register section
      in core bfd. */

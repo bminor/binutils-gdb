@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	FP_REGS		4
 
 static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, unsigned int));
+fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
 
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,
@@ -247,7 +247,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
   char *core_reg_sect;
   unsigned core_reg_size;
   int which;
-  unsigned int ignore;	/* reg addr, unused in this version */
+  CORE_ADDR ignore;	/* reg addr, unused in this version */
 {
 
   if (which == 0) {
