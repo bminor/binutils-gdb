@@ -1,65 +1,207 @@
 
-			PSIM
+		PSIM - model of a PowerPC platform
 
-Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>.
 
-This directory contains the program PSIM that models the PowerPC (tm -
-IBM) architecture.  It can be run either standalone (psim or run) or
-used as part of GDB.
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
-
-KNOWN FEATURES:
-
-
-SMP: It is possible to configure this simulator so that it implements
-a restricted model of a Symetric Multi-Processor architecture.  It is
-important to note that the SMP model has limitations.  In particular,
-the PowerPC's load word and reserve (etc) instructions do not model
-the behavour defined in the Architecture manual.  People intending to
-use this feature should read the code implementing those instructions.
-
-ENDIAN SUPORT: Pure big, pure little and PowerPC little endian (xor
-endian) models are suported.
-
-UIEA, VEA and OEA: The PowerPC architecture defines three levels of
-the PowerPC architecture.  This simulator, to a reasonable degree, is
-capable of modeling all three.  That is the User Instruction Set
-Architecture, the Virtual Environment Architecture and finally the
-Operating Environment Architecture.
-
-HARDWARE DEVICE TREE: In the OEA, the model of the target machines
-hardware is built from a tree of devices (bit like Open Boot).
-Included in this is the ability to model bus hierachies and
-runtime-configurable devices (eg PCI).
-
-OS EMULATION: Suport for os/firmware emulations (system or rom-calls)
-is included.  At present limited implemtations of two emulations are
-included:NetBSD (UEA model) and OpenBoot (OEA model).
-
-PEDANTIC VEA MEMORY MODEL: In VEA/UEA NetBSD simulations, this model
-implements the break (brk, sbrk) system calls.  Further, the user
-model has very strict memory access controls.  User programs can not
-assume that they can stray off the end of valid memory areas.  This
-model defines valid memory addresses in strict accordance to the
-executable and does not page allign their values.  At first this was a
-bug but since then has turned up several problems in user code so it
-is now described as a feature.
-
-PERFORMANCE MONITORING: This simulation is able to monitor things such
-as cpu/io read/writes and register allocation.
-
-PERFORMANCE: In its default configuration PSIM is configured so that
-it will compile fast and run slow.  Through the enabling of more
-agressive compile options (and the disabling of unwanted features) the
-build can be changed to compile slow and run fast.
-
-FLOATING POINT: Preliminary suport for floating point is included.
-Real kernels don't need floating point.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-BUILDING PSIM:
+This directory contains the program PSIM that implements a model of a
+PowerPC platform.  PSIM can either be built standalone or as part of
+the debugger GDB.
 
-To build PSIM you will need the following:
+
+What is PSIM?
+
+	PSIM is an ANSI C program that models a PowerPC platform.
+	The platform it implements can vary from:
+
+		o	A user program environment (UEA) complete
+			with emulated system calls
+
+	to
+
+		o	A hardware platform with several processors
+			interacting with each other and modeled hardware.
+
+
+What motivated PSIM?
+
+	As an idea, psim was first discussed seriously during mid
+	1994.  At that time its main objectives were:
+
+
+		o	good performance
+
+			Many simulators loose out by only providing
+			a binary interface to the internals.  This
+			inteface eventually becomming a bottle neck
+			in the simulators performance.
+
+			It was intended that PSIM would avoid this
+			problem by giving the user access to the
+			full source code.
+
+			Further, by exploiting the power of modern
+			compilers it was hoped that PSIM would achieve
+			good performance with out having to compromize
+			its internal design.
+
+
+		o	practical portability
+
+			Rather than try to be portable to every
+			C compiler on every platform, it was decided
+			that PSIM would restrict its self to suporting
+			ANSI compilers that included the extension
+			of a long long type.
+
+			GCC is one such compiler, consequenly PSIM
+			should be portable to any machine running GCC.
+
+
+		o	flexability in its design
+
+			PSIM should allow the user to select the
+			features required and customize the build
+			accordingly.  By having the source code,
+			the compler is able to eliminate any un
+			used features of the simulator.
+
+			After all, let the compiler do the work.
+
+
+		o	SMP
+
+			A model that allowed the simulation of
+			SMP platforms with out the large overhead
+			often encountered with such models.
+
+
+	PSIM achieves each of these objectives.
+
+
+Who would be interested in PSIM?
+
+	o	the curious
+
+		Using psim, gdb, gcc and binutils the curious
+		user can contruct an environment that allows
+		them to play with PowerPC user programs with out
+		the need for real hardware.
+
+
+	o	the analyst
+
+		PSIM includes many (contributed) monitoring
+		features which (unlike many other simulators)
+		do not come with a great penalty in performance.
+
+		Thus the performance analyst is able to use
+		this simulator to model the inpact of changes
+		to the system they are analysing.  Be that
+		system a compiler or real hardware platform.
+
+		If PSIM doesn't monitor a components of interest,
+		the source code is freely available, and hence
+		there is no hinderance to changing things
+		to meet a specific analysts needs.
+
+
+	o	the serious SW developer
+
+		PSIM models all three levels of the PowerPC
+		Architecture: UEA, VEA and OEA.  Further,
+		the internal design is such that PSIM can
+		be extended to suport additional
+		development requirements.  Such requirements
+		might include (for the UEA) a new Operating
+		System emulation through to (for the OEA)
+		a model of a different hardware platform.
+
+
+What features does PSIM have?
+
+
+	Monitoring and modeling
+
+		PSIM includes (thanks to Michael Meissner)
+		a detailed model of the various PowerPC
+		implementations schedulers.
+
+
+	SMP
+		
+		The PowerPC ISA defines SMP synchronizing instructions
+		this simulator models a limited subset of their
+		behavor.  Consequently, if you limit code to the
+		use the modeled behavour, PSIM can be used to
+		model SMP PowerPC platforms.
+
+		People intending to use this system should study
+		the code implementing the lwarx etc instructions.
+		
+	ENDIAN SUPORT
+
+		PSIM implements all of Big-endian, little-endian
+		and PowerPC little endian (XOR endian).
+
+	ISA models
+
+		PSIM includes a model of UEA, VEA and OEA.  This
+		inclues the time base registers (VEA) and HTAB
+		and BATS (OEA).
+
+		In addition, a preliminary model of the 64 bit
+		PowerPC architecture is included.
+
+	Hardware
+
+		PSIM's internals are based around the concept
+		of a Device Tree.  This tree intentionaly
+		resembles that of the Device Tree found in
+		OpenBoot firmware.  Psim is flexable enough
+		to allow the user to fully configure the
+		actual hardware model from a device tree
+		specification taken from a file.
+
+		PSIM also contains several built in device
+		trees.
+		
+	Emulation
+
+		PSIM is able (UEA) to emulate UNIX calls
+		based on NetBSD abi through to (preliminary)
+		the ROM rom calls found in common firmware
+		(OpenBoot and BUGAPI).
+
+	floating point
+
+		Preliminary suport for floating point is included.
+		Real kernels don't need floating point.
+
+
+Can PSIM model a CHRP a.k.a. PowerPC Platform machine?
+
+	No. but that is now one of its main objectives. (Did you notice
+	it was written PowerPC Platform instead of PowerPC platform?).
+
+
+How do I build PSIM?
+
+	To build PSIM you will need the following:
 
 	gdb-4.15.tar.gz		From your favorite GNU ftp site.
 				I've also tested psim-951016 with
@@ -93,14 +235,12 @@ To build PSIM you will need the following:
 				empty files.
 
 
-Since PSIM is still being developed, from time to time, further psim
-snap shots are occasionally made available.  These snapshots may or
-may not work with GDB-4.15.  Several of the more significant snap
-shots are:
+	Since PSIM is still being developed, from time to time, to meet
+	a specific analysts needsfurther psim snap shots are occasionally
+	made available.  These snapshots may or may not work with GDB-4.15.
+	Several of the more recent snapshots are:
 
-	ftp://ftp.ci.com.au/pub/clayton/psim-951215.tar.gz
-
-				A dangerous snap shot
+	ftp://ftp.ci.com.au/pub/clayton/psim-951218.tar.gz
 
 				Hopefully merges in Michael stuff
 				with mine,  adds multiple emulations
@@ -118,9 +258,18 @@ shots are:
 				PowerPC's register and bus architectures.
 
 
-Procedure:
+	ftp://ftp.ci.com.au/pub/clayton/psim-test-951218.tar.gz
 
-0.	A starting point
+				Prebuilt test programs for PSIM.
+				Includes examples of UEA, VEA and
+				OEA code.
+				Requires gcc-2.7.2 and binutils-2.6
+				to rebuild.
+
+
+	Procedure:
+
+	0.	A starting point
 
 		$ ls -1
 		gdb-4.15+psim-951016.diff.gz
@@ -129,13 +278,13 @@ Procedure:
 		psim-test-951016.tar.gz
 
 
-1.	Unpack gdb
+	1.	Unpack gdb
 
 		$ gunzip < gdb-4.15.tar.gz | tar xf -
 
 
-2.	Change to the gdb directory, apply the psim patches and unpack
-	the psim files.
+	2.	Change to the gdb directory, apply the psim patches and unpack
+		the psim files.
 
 		$ cd gdb-4.15
 
@@ -146,63 +295,64 @@ Procedure:
 		$ gunzip < ../gdb-4.15+psim-951016.tar.gz | tar xvf -
 
 
-3.	Configure gdb
+	3.	Configure gdb
 
 		$ more gdb/README
 
-	then something like (I assume SH):
+		then something like (I assume SH):
 
 		$ CC=gcc ./configure --target=powerpc-unknown-eabisim
 
-	eabisim is needed as by default (because PSIM needs GCC) the
-	simulator is not built.
+		eabisim is needed as by default (because PSIM needs GCC) the
+		simulator is not built.
 
 
-4.	Build
+	4.	Build
 
 		$ make CC=gcc
 
-	alternativly, if you are short on disk space or just want the
-	simulator built:
+		alternativly, if you are short on disk space or just want the
+		simulator built:
 
 		$ ( cd libiberty && make CC=gcc )
 		$ ( cd bfd && make CC=gcc )
 		$ ( cd sim/ppc && make CC=gcc )
 
 
-5.	Install
+	5.	Install
 
 		$ make CC=gcc install
 
-	or just
+		or just
 
 		$ cp gdb/gdb ~/bin/powerpc-unknown-eabisim-gdb
 		$ cp sim/ppc/run ~/bin/powerpc-unknown-eabisim-run
 
 
-USING THE SIMULATOR:
+How do I use the simulator?
 
-(I assume that you've unpacked the psim-test archive).
 
-1.	As a standalone program
+	(I assume that you've unpacked the psim-test archive).
 
-	Print out the users environment:
+	1.	As a standalone program
+
+		Print out the users environment:
 
 		$ powerpc-unknown-eabisim-run envp
 
-	Print out the arguments:
+		Print out the arguments:
 
 		$ powerpc-unknown-eabisim-run argv a b c
 
-	Check that sbrk works:
+		Check that sbrk works:
 
 		$ powerpc-unknown-eabisim-run break
 
 
-2.	Example of running GDB:	
+	2.	Example of running GDB:	
 
-	The main thing to note is that before you can run the simulator
-	you must enable it.  The example below illustrates this:
+		The main thing to note is that before you can run the simulator
+		you must enable it.  The example below illustrates this:
 
 		$ powerpc-unknown-eabisim-gdb envp
 		(gdb) target sim
@@ -214,55 +364,59 @@ USING THE SIMULATOR:
 		.
 
 
-BUGS AND PROBLEMS:
+Where do I send bugs or report problems?
 
-There is a mailing list (subscribe through majordomo@ci.com.au) (that
-is almost never used) at:
+	There is a mailing list (subscribe through majordomo@ci.com.au) (that
+	is almost never used) at:
 
 	powerpc-psim@ci.com.au
 
-If I get the ftp archive updated I post a note to that mailing list.
-In addition your welcome to send bugs or problems either to me or to
-that e-mail list.
+	If I get the ftp archive updated I post a note to that mailing list.
+	In addition your welcome to send bugs or problems either to me or to
+	that e-mail list.
 
 
-KNOWN PROBLEMS:
+Are there any known problems?
 
-See the ChangeLog file looking for lines taged with the word FIXME.
+	See the ChangeLog file looking for lines taged with the word FIXME.
 
-COREFILE.C: The implementation of corefile.c (defined by corefile.h) isn't the
-best.  It is intended to be functionaly correct rather than fast.
+	COREFILE.C: The implementation of corefile.c (defined by
+	corefile.h) isn't the best.  It is intended to be functionaly
+	correct rather than fast.  One option being considered
+	is to add a data cache to reduce the overhead of the most
+	common case of data read/writes.
 
-HTAB (page) code for OEA model untested.  Some of the vm code
-instructions unimplemented.
+	HTAB (page) code for OEA model untested.  Some of the vm code
+	instructions unimplemented.
 
-Lacks PowerOpen (a.k.a. XCOFF a.k.a. AIX) and NT startups.  The
-PowerOpen worked until I added the ELF one.
+	Lacks PowerOpen (a.k.a. XCOFF a.k.a. AIX) and NT startups.  The
+	PowerOpen worked until I added the ELF one.
 
-Missing VEA system calls.
+	Missing VEA system calls.
 
-Missing or commented out instructions.
+	Missing or commented out instructions.
 
-64bit target untested.
+	64bit target untested.
 
-64bit host broken.  For instance use of scanf "%x", &long long.
+	64bit host broken.  For instance use of scanf "%x", &long long.
 
-Event code for pending events from within signal handlers not
-finished/tested.
+	Event code for pending events from within signal handlers not
+	finished/tested.
 
-Better and more devices.
+	Better and more devices.
 
-PORTABILITY (Notes taken from Michael Meissner): Heavy use of the ##
-operator - fix using the clasic X/**/Y hack; Use of the signed
-keyword.  In particular, signed char has no analogue in classic C
-(though most implementations of classic C use signed chars); Use of
-long long which restricts the target compiler to be GCC.
+	PORTABILITY (Notes taken from Michael Meissner): Heavy use of the ##
+	operator - fix using the clasic X/**/Y hack; Use of the signed
+	keyword.  In particular, signed char has no analogue in classic C
+	(though most implementations of classic C use signed chars); Use of
+	long long which restricts the target compiler to be GCC.
 
 
-THANKS:
+Who helped?
 
-Thanks go to the following who each helped in some way.
+	Thanks go to the following who each helped in some way.
 
 	Allen Briggs, Bett Koch, David Edelsohn, Gordon Irlam,
 	Michael Meissner, Bob Mercier, Richard Perini,
 	Richard Stallman, Mitchele Walker
+

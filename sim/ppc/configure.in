@@ -126,7 +126,7 @@ AC_ARG_ENABLE(sim-inline,
 [  --enable-sim-inline=inlines		Specify which functions should be inlined.],
 [sim_inline=""
 case "$enableval" in
-  no)		sim_inline="-DDEFAULT_INLINE=0 -DINLINE=";;
+  no)		sim_inline="-DDEFAULT_INLINE=0";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
   yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
   1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
@@ -320,15 +320,15 @@ fi],[sim_float=""])dnl
 AC_ARG_ENABLE(sim-monitor,
 [  --enable-sim-monitor=mon		Specify whether to enable monitoring events.],
 [case "${enableval}" in
-  yes)		sim_mon="-DWITH_MON='MONITOR_INSTRUCTION_ISSUE | MONITOR_LOAD_STORE_UNIT'";;
-  no)		sim_mon="-DWITH_MON=0";;
-  instruction)	sim_mon="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
-  memory)	sim_mon="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
+  yes)		sim_monitor="-DWITH_MON='MONITOR_INSTRUCTION_ISSUE | MONITOR_LOAD_STORE_UNIT'";;
+  no)		sim_monitor="-DWITH_MON=0";;
+  instruction)	sim_monitor="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
+  memory)	sim_monitor="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
   *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-mon"); sim_env="";;
 esac
-if test x"$silent" != x"yes" && test x"$sim_mon" != x""; then
-  echo "Setting monitor flags = $sim_mon" 6>&1
-fi],[sim_mon=""])dnl
+if test x"$silent" != x"yes" && test x"$sim_monitor" != x""; then
+  echo "Setting monitor flags = $sim_monitor" 6>&1
+fi],[sim_monitor=""])dnl
 
 AC_ARG_ENABLE(sim-model,
 [  --enable-sim-model=which		Specify PowerPC to model.],
