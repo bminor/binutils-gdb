@@ -1,3 +1,11 @@
+2005-02-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (FRVFDPIC_SYM_LOCAL): Remove special handling for
+	*ABS*/*UND* sections.
+	(elf32_frv_relocate_section): Move zero-addend-required error...
+	(_frv_emit_got_relocs_plt_entries): ... here.  Report error for
+	missing needed TLS section.
+
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* aoutx.h (NAME(aout,find_nearest_line)): Correct case for N_SO

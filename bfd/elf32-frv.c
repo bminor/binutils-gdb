@@ -1,5 +1,5 @@
 /* FRV-specific support for 32-bit ELF.
-   Copyright 2002, 2003, 2004  Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005  Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1019,15 +1019,7 @@ frvfdpic_elf_link_hash_table_create (bfd *abfd)
    its function descriptor must be assigned by the dynamic linker.  */
 #define FRVFDPIC_SYM_LOCAL(INFO, H) \
   (_bfd_elf_symbol_refs_local_p ((H), (INFO), 1) \
-   || ! elf_hash_table (INFO)->dynamic_sections_created \
-   /* These two additional alternatives are needed for TLS
-      relocations, that use *ABS*+offset relocations to refer to the
-      TLS section of the local module.  FIXME: At some point during
-      linking, the definition section ceases to be regarded as the
-      absolute section, and starts being regarded as the undefined
-      section.  */ \
-   || bfd_is_abs_section ((H)->root.u.def.section) \
-   || bfd_is_und_section ((H)->root.u.def.section))
+   || ! elf_hash_table (INFO)->dynamic_sections_created)
 #define FRVFDPIC_FUNCDESC_LOCAL(INFO, H) \
   ((H)->dynindx == -1 || ! elf_hash_table (INFO)->dynamic_sections_created)
 
@@ -1525,7 +1517,14 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	      idx = dynindx;
 	      ad = addend;
 	      if (ad)
-		return FALSE;
+		{
+		  (*info->callbacks->reloc_dangerous)
+		    (info, _("relocation requires zero addend"),
+		     elf_hash_table (info)->dynobj,
+		     frvfdpic_got_section (info),
+		     entry->fdgot_entry);
+		  return FALSE;
+		}
 	    }
 	  else
 	    {
@@ -1667,7 +1666,14 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       else if (entry->lazyplt)
 	{
 	  if (ad)
-	    return FALSE;
+	    {
+	      (*info->callbacks->reloc_dangerous)
+		(info, _("relocation requires zero addend"),
+		 elf_hash_table (info)->dynobj,
+		 frvfdpic_got_section (info),
+		 entry->fd_entry);
+	      return FALSE;
+	    }
 
 	  fd_lazy_rel_offset = ofst;
 
@@ -1844,6 +1850,13 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	      && (bfd_is_abs_section (sec)
 		  || bfd_is_und_section (sec)))
 	    {
+	      if (! elf_hash_table (info)->tls_sec)
+		{
+		  (*info->callbacks->undefined_symbol)
+		    (info, "TLS section", elf_hash_table (info)->dynobj,
+		     frvfdpic_got_section (info), entry->tlsoff_entry, TRUE);
+		  return FALSE;
+		}
 	      idx = elf_section_data (elf_hash_table (info)->tls_sec)->dynindx;
 	      ad += FRVFDPIC_TLS_BIAS;
 	    }
@@ -1951,6 +1964,13 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	      && (bfd_is_abs_section (sec)
 		  || bfd_is_und_section (sec)))
 	    {
+	      if (! elf_hash_table (info)->tls_sec)
+		{
+		  (*info->callbacks->undefined_symbol)
+		    (info, "TLS section", elf_hash_table (info)->dynobj,
+		     frvfdpic_got_section (info), entry->tlsdesc_entry, TRUE);
+		  return FALSE;
+		}
 	      idx = elf_section_data (elf_hash_table (info)->tls_sec)->dynindx;
 	      ad += FRVFDPIC_TLS_BIAS;
 	    }
@@ -2878,10 +2898,9 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 						      rel->r_addend))
 	    {
 	      (*_bfd_error_handler)
-		(_("%B: relocation at `%A+0x%x' references symbol `%s' with nonzero addend"),
-		 input_bfd, input_section, rel->r_offset, name);
+		(_("%B(%A+0x%x): relocation to `%s+%x' may have caused the error above"),
+		 input_bfd, input_section, rel->r_offset, name, rel->r_addend);
 	      return FALSE;
-
 	    }
 
 	  break;
