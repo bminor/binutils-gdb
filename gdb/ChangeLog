@@ -1,3 +1,9 @@
+Sun Apr 28 12:10:35 1996  Fred Fish  <fnf@cygnus.com>
+
+	* symfile.h (psymbol_allocation_list):  Expand comments which
+	describe the psymbol allocation list and how each field is
+	used.
+
 Sun Apr 28 03:44:30 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* breakpoint.c (delete_breakpoint):  Fix bpt->val, bpt->exp
