@@ -68,7 +68,7 @@ clean:
 	rm -f $(PROTOS) *.p *.ip *.h bfd.?? $(DOCFILES) bfd.dvi bfd.ps *~* *# bfd.??? 
 
 bfd.info: $(DOCFILES) bfd.texinfo
-	makeinfo +no-validate bfd.texinfo
+	makeinfo bfd.texinfo
 
 bfd.dvi: $(DOCFILES) bfd.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
