@@ -67,6 +67,7 @@ SFILES_DOC = $(SFILES_LOCAL) \
 all install:
 
 info: gdb.info gdbint.info stabs.info
+dvi: gdb.dvi refcard.dvi gdbint.dvi
 all-doc: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
 
 install-info: info
