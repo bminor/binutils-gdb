@@ -1,3 +1,7 @@
+Tue Sep 23 11:24:13 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in (ALLCONFIG): Remove, inaccurate and never used.
+
 Tue Sep 23 00:08:18 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-tdep.c (mips_push_arguments):  Tweak alignment of register
