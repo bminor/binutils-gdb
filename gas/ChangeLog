@@ -1,3 +1,8 @@
+Wed Apr  8 16:16:11 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* symbols.c (print_binary): New function.
+	(print_expr_1): Call it.
+
 start-sanitize-sky
 Tue Apr  7 12:21:39 1998  Doug Evans  <devans@canuck.cygnus.com>
 

@@ -1,5 +1,5 @@
 /* symbols.c -symbol table-
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -55,6 +55,8 @@ struct obstack notes;
 static void fb_label_init PARAMS ((void));
 static long dollar_label_instance PARAMS ((long));
 static long fb_label_instance PARAMS ((long));
+
+static void print_binary PARAMS ((FILE *, const char *, expressionS *));
 
 /* symbol_new()
   
@@ -921,7 +923,13 @@ resolve_symbol_value (symp, finalize)
   if (finalize)
     {
       S_SET_VALUE (symp, final_val);
-      S_SET_SEGMENT (symp, final_seg);
+
+#if defined (OBJ_AOUT) && ! defined (BFD_ASSEMBLER)
+      /* The old a.out backend does not handle S_SET_SEGMENT correctly
+         for a stab symbol, so we use this bad hack.  */
+      if (final_seg != S_GET_SEGMENT (symp))
+#endif
+	S_SET_SEGMENT (symp, final_seg);
     }
 
 exit_dont_set_value:
@@ -950,7 +958,7 @@ exit_dont_set_value:
 static long *dollar_labels;
 static long *dollar_label_instances;
 static char *dollar_label_defines;
-static long dollar_label_count;
+static unsigned long dollar_label_count;
 static unsigned long dollar_label_max;
 
 int 
@@ -1280,7 +1288,7 @@ decode_local_label_name (s)
   if (s[0] != 'L')
     return s;
 
-  for (label_number = 0, p = s + 1; isdigit (*p); ++p)
+  for (label_number = 0, p = s + 1; isdigit ((unsigned char) *p); ++p)
     label_number = (10 * label_number) + *p - '0';
 
   if (*p == 1)
@@ -1290,7 +1298,7 @@ decode_local_label_name (s)
   else
     return s;
 
-  for (instance_number = 0, p++; isdigit (*p); ++p)
+  for (instance_number = 0, p++; isdigit ((unsigned char) *p); ++p)
     instance_number = (10 * instance_number) + *p - '0';
 
   symbol_decode = obstack_alloc (&notes, strlen (message_format) + 30);
@@ -1614,6 +1622,21 @@ print_symbol_value (sym)
   fprintf (stderr, "\n");
 }
 
+static void
+print_binary (file, name, exp)
+     FILE *file;
+     const char * name;
+     expressionS *exp;
+{
+  indent_level++;
+  fprintf (file, "%s\n%*s<", name, indent_level * 4, "");
+  print_symbol_value_1 (file, exp->X_add_symbol);
+  fprintf (file, ">\n%*s<", indent_level * 4, "");
+  print_symbol_value_1 (file, exp->X_op_symbol);
+  fprintf (file, ">");
+  indent_level--;
+}
+
 void
 print_expr_1 (file, exp)
      FILE *file;
@@ -1658,52 +1681,52 @@ print_expr_1 (file, exp)
       fprintf (file, "bit_not");
       break;
     case O_multiply:
-      fprintf (file, "multiply");
+      print_binary (file, "multiply", exp);
       break;
     case O_divide:
-      fprintf (file, "divide");
+      print_binary (file, "divide", exp);
       break;
     case O_modulus:
-      fprintf (file, "modulus");
+      print_binary (file, "modulus", exp);
       break;
     case O_left_shift:
-      fprintf (file, "lshift");
+      print_binary (file, "lshift", exp);
       break;
     case O_right_shift:
-      fprintf (file, "rshift");
+      print_binary (file, "rshift", exp);
       break;
     case O_bit_inclusive_or:
-      fprintf (file, "bit_ior");
+      print_binary (file, "bit_ior", exp);
       break;
     case O_bit_exclusive_or:
-      fprintf (file, "bit_xor");
+      print_binary (file, "bit_xor", exp);
       break;
     case O_bit_and:
-      fprintf (file, "bit_and");
+      print_binary (file, "bit_and", exp);
       break;
     case O_eq:
-      fprintf (file, "eq");
+      print_binary (file, "eq", exp);
       break;
     case O_ne:
-      fprintf (file, "ne");
+      print_binary (file, "ne", exp);
       break;
     case O_lt:
-      fprintf (file, "lt");
+      print_binary (file, "lt", exp);
       break;
     case O_le:
-      fprintf (file, "le");
+      print_binary (file, "le", exp);
       break;
     case O_ge:
-      fprintf (file, "ge");
+      print_binary (file, "ge", exp);
       break;
     case O_gt:
-      fprintf (file, "gt");
+      print_binary (file, "gt", exp);
       break;
     case O_logical_and:
-      fprintf (file, "logical_and");
+      print_binary (file, "logical_and", exp);
       break;
     case O_logical_or:
-      fprintf (file, "logical_or");
+      print_binary (file, "logical_or", exp);
       break;
     case O_add:
       indent_level++;
