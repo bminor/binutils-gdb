@@ -20,8 +20,6 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 /* executable_object_p is gone -- you can check the bfd flags and call
    access() yourself */
 
@@ -41,20 +39,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #define BFD_VERSION "1.9"
+
 /* forward declaration */
 typedef struct _bfd_struct bfd;
 
+/* General rules: functions which are boolean return true on success
+   and false on failure (unless they're a predicate).   -- bfd.doc */
 /* I'm sure this is going to break something and someone is going to
    force me to change it. */
 typedef enum boolean {false, true} boolean;
-/* FIXME-SOON: I hate it when types are invented for things that
-   already have types.  In this case, zero and non-zero are so common
-   that true vs false makes me stop and read code each time I want to
-   know if they mean true there was an error or true the function did
-   something. I can't fix this particularly quickly, so I'll just
-   skirt the issue for now.  This WILL change soon. */
-#define BFD_SUCCESS (true)
-#define BFD_FAILURE (false)
 
 /* Try to avoid breaking stuff */
 typedef  long int file_ptr;
