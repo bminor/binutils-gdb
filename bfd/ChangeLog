@@ -1,5 +1,10 @@
 Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_count_spaces): New function.
+	(som_count_subspaces): New function.
+	(compare_syms): New function.
+	(som_compute_checksum): New function.
+
 	* som.c (hppa_som_gen_reloc_type): New function.
 	(som_bfd_reloc_type_lookup): New function.
 

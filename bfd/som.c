@@ -149,6 +149,10 @@ static unsigned char * som_reloc_skip PARAMS ((bfd *, unsigned int,
 static unsigned char * som_reloc_addend PARAMS ((bfd *, int, unsigned char *,
 					         unsigned int *,
 						 struct reloc_queue *));
+static unsigned long som_count_spaces PARAMS ((bfd *));
+static unsigned long som_count_subspaces PARAMS ((bfd *));
+static int compare_syms PARAMS ((asymbol **, asymbol **));
+static unsigned long som_compute_checksum PARAMS ((bfd *));
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -1159,6 +1163,85 @@ som_mkobject (abfd)
       return false;
     }
   return true;
+}
+
+/* Count and return the number of spaces attached to the given BFD.  */
+
+static unsigned long
+som_count_spaces (abfd)
+     bfd *abfd;
+{
+  int count = 0;
+  asection *section;
+
+  for (section = abfd->sections; section != NULL; section = section->next)
+    count += som_section_data (section)->is_space;
+
+  return count;
+}
+
+/* Count the number of subspaces attached to the given BFD.  */
+
+static unsigned long
+som_count_subspaces (abfd)
+     bfd *abfd;
+{
+  int count = 0;
+  asection *section;
+
+  for (section = abfd->sections; section != NULL; section = section->next)
+    count += som_section_data (section)->is_subspace;
+
+  return count;
+}
+
+/* Return -1, 0, 1 indicating the relative ordering of sym1 and sym2.
+
+   We desire symbols to be ordered starting with the symbol with the
+   highest relocation count down to the symbol with the lowest relocation
+   count.  Doing so compacts the relocation stream.  */
+
+static int
+compare_syms (sym1, sym2)
+     asymbol **sym1;
+     asymbol **sym2;
+
+{
+  unsigned int count1, count2;
+  
+  /* Get relocation count for each symbol.  Note that the count
+     is stored in the udata pointer for section symbols!  */
+  if ((*sym1)->flags & BSF_SECTION_SYM)
+    count1 = (int)(*sym1)->udata;
+  else
+    count1 = (*som_symbol_data ((*sym1)))->reloc_count;
+
+  if ((*sym2)->flags & BSF_SECTION_SYM)
+    count2 = (int)(*sym2)->udata;
+  else
+    count2 = (*som_symbol_data ((*sym2)))->reloc_count;
+
+  /* Return the appropriate value.  */
+  if (count1 < count2)
+    return 1;
+  else if (count1 > count2)
+    return -1;
+  return 0;
+}
+
+static unsigned long
+som_compute_checksum (abfd)
+     bfd *abfd;
+{
+  unsigned long checksum, count, i;
+  unsigned long *buffer = (unsigned long *) obj_som_file_hdr (abfd);
+
+  checksum = 0;
+  count = sizeof (struct header) / sizeof (unsigned long);
+  for (i = 0; i < count; i++)
+    checksum ^= *(buffer + i);
+
+  return checksum;
 }
 
 boolean
