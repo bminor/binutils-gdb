@@ -1,3 +1,16 @@
+Tue Nov 10 14:31:01 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elf32-d10v.c (reloc_type):  Add R_D10V_GNU_VTINHERIT and
+        R_D10V_GNU_VTENTRY relocs.
+        (elf_d10v_howto_table):  Likewise.
+        (d10v_reloc_map d10v_reloc_map):  Likewise.
+        (elf32_d10v_gc_mark_hook):  New.
+        (elf32_d10v_gc_sweep_hook):  New.
+        (elf32_d10v_check_relocs):  New.
+        (elf32_d10v_relocate_section):  New.
+        (elf_backend_relocate_section):  Define.
+        (elf_backend_can_gc_sections):  Define.
+
 Sat Nov  7 18:07:51 1998  Peter Schauer  <peter.schauer@regent.e-technik.tu-muenchen.de>
 
 	* Makefile.am (BFD32_BACKENDS): Move vms files here...
