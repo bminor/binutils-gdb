@@ -293,7 +293,7 @@ handlers.")
 	 (or (and gdb-buffer-instance
 		  (eq gdb-buffer-type 'gud)
 		  (car blist))
-	     (gdb-find-first-gdb-instance (cdr blist))))))
+	     (gdb-goto-first-gdb-instance (cdr blist))))))
 
 (defun buffer-gdb-instance (buf)
   (save-excursion
@@ -803,12 +803,15 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
 (defun gdb-rules-name-maker (rules) (car (cdr rules)))
 
 (defun gdb-look-for-tagged-buffer (instance key bufs)
-  (and bufs
-       (set-buffer (car bufs))
-       (or (and (eq gdb-buffer-instance instance)
-		(eq gdb-buffer-type key)
-		(car bufs))
-	   (gdb-look-for-tagged-buffer instance key (cdr bufs)))))
+  (let ((retval nil))
+    (while (and (not retval) bufs)
+      (set-buffer (car bufs))
+      (if (and (eq gdb-buffer-instance instance)
+	       (eq gdb-buffer-type key))
+	  (setq retval (car bufs)))
+      (setq bufs (cdr bufs))
+      )
+    retval))
 
 (defun gdb-instance-buffer-p (buf)
   (save-excursion
@@ -1829,21 +1832,21 @@ Link exprs of the form:
 
 ;;; gud.el ends here
 
-(defun toggle-bp-this-line ()
+(defun gdb-toggle-bp-this-line ()
   (interactive)
   (save-excursion
-    (let (bp-num bp-state)
-      (beginning-of-line 1)
-      (if (not (looking-at "\\([0-9]*\\)\\s-*\\S-*\\s-*\\S-*\\s-*\\(.\\)"))
-	  (error "Not recognized as breakpoint line (demo foo).")
-	(process-send-string
-	 gdb-buffer-process!!!
-	 (concat
-	  (if (eq ?y (char-after (match-beginning 2)))
-	      "server disable "
-	    "server enable ")
-	  (buffer-substring (match-beginning 0)
-			    (match-end 1))
-	  "\n"))))))
-
-
+    (beginning-of-line 1)
+    (if (not (looking-at "\\([0-9]*\\)\\s-*\\S-*\\s-*\\S-*\\s-*\\(.\\)"))
+	(error "Not recognized as breakpoint line (demo foo).")
+      (gdb-instance-enqueue-idle-input
+       gdb-buffer-instance
+       (list
+	(concat
+	 (if (eq ?y (char-after (match-beginning 2)))
+	     "server disable "
+	   "server enable ")
+	 (buffer-substring (match-beginning 0)
+			   (match-end 1))
+	 "\n")
+	'(lambda () nil)))
+      )))
