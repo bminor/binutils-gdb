@@ -158,6 +158,8 @@ field3 = 0x77888877\}" "print struct constant"
 	setup_xfail "*-*-*"
 	gdb_test "whatis intp_var" "type = intp" "whatis intp_var"
 
+	# xcoffread.c doesn't understand common blocks at all
+	setup_xfail "rs6*-*-aix*"
 	gdb_test "p common0var0" "= 42"
 	# GDB seems to only understand common blocks local to a function.
 	# These variables never get relocated to be relative to the common 

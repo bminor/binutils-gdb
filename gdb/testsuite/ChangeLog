@@ -2,6 +2,7 @@ Mon Jun 28 09:15:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.stabs/wierd{.def,-aout.S,-xcoff.S}: Use new macros
 	{BEGIN,END}_COMMON for common block instead of STAB.
+	* gdb.stabs/wierd.exp: Add xfail for rs6000.
 
 	* gdb.stabs/wierd.def: Make value of N_GSYM's 0.
 	intp_var should be N_GSYM not N_LSYM.
