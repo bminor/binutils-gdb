@@ -1,3 +1,10 @@
+2004-09-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Require 1.9.
+	(bfd.info): Rename the target to ...
+	($(srcdir)/bfd.info): This.
+	* Makefile.in: Regenerated.
+
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
