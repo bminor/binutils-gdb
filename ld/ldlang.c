@@ -814,7 +814,7 @@ init_os (s)
     return;
 
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
-    einfo (_("%P%F: Illegal use of `%s' section"), DISCARD_SECTION_NAME);
+    einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
   new = ((section_userdata_type *)
 	 stat_alloc (sizeof (section_userdata_type)));
@@ -3522,7 +3522,7 @@ lang_check ()
 	}
       else if (link_info.relocateable
 	       && bfd_get_flavour (input_bfd) != bfd_get_flavour (output_bfd))
-	einfo (_("%P%F: Relocatable linking from format %s (%B) to format %s (%B) is not supported"),
+	einfo (_("%P%F: Relocatable linking from format %s (%B) to format %s (%B) is not supported\n"),
 	       bfd_get_target (input_bfd), input_bfd,
 	       bfd_get_target (output_bfd), output_bfd);
       else if (bfd_count_sections (input_bfd))
@@ -5103,7 +5103,7 @@ lang_do_version_exports_section ()
       len = bfd_section_size (is->the_bfd, sec);
       contents = xmalloc (len);
       if (!bfd_get_section_contents (is->the_bfd, sec, contents, 0, len))
-	einfo (_("%X%P: unable to read .exports section contents"), sec);
+	einfo (_("%X%P: unable to read .exports section contents\n"), sec);
 
       p = contents;
       while (p < contents + len)
