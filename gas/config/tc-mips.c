@@ -146,9 +146,6 @@ struct mips_cl_insn
   /* The relocs associated with the instruction, if any.  */
   fixS *fixp[3];
 
-  /* The reloc types associated with the instruction.  */
-  bfd_reloc_code_real_type reloc_type[3];
-
   /* True if this entry describes a real instruction.  */
   unsigned int valid_p : 1;
 
@@ -161,6 +158,9 @@ struct mips_cl_insn
 
   /* True for extended mips16 instructions.  */
   unsigned int extended_p : 1;
+
+  /* True for mips16 instructions that jump to an absolute address.  */
+  unsigned int mips16_absolute_jump_p : 1;
 };
 
 /* The ABI to use.  */
@@ -2076,8 +2076,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 					 mips16_small, mips16_ext,
 					 (prev_pinfo
 					  & INSN_UNCOND_BRANCH_DELAY),
-					 (*history[0].reloc_type
-					  == BFD_RELOC_MIPS16_JMP)),
+					 history[0].mips16_absolute_jump_p),
 		    make_expr_symbol (address_expr), 0, NULL);
     }
   else if (mips_opts.mips16
@@ -2714,9 +2713,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  history[0].fixp[0] = NULL;
 	  history[0].fixp[1] = NULL;
 	  history[0].fixp[2] = NULL;
-	  history[0].reloc_type[0] = BFD_RELOC_UNUSED;
-	  history[0].reloc_type[1] = BFD_RELOC_UNUSED;
-	  history[0].reloc_type[2] = BFD_RELOC_UNUSED;
+	  history[0].mips16_absolute_jump_p = 0;
 	  history[0].extended_p = 0;
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
@@ -2735,9 +2732,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  history[0].fixp[0] = NULL;
 	  history[0].fixp[1] = NULL;
 	  history[0].fixp[2] = NULL;
-	  history[0].reloc_type[0] = BFD_RELOC_UNUSED;
-	  history[0].reloc_type[1] = BFD_RELOC_UNUSED;
-	  history[0].reloc_type[2] = BFD_RELOC_UNUSED;
+	  history[0].mips16_absolute_jump_p = 0;
 	  history[0].extended_p = 0;
 	  history[0].delay_slot_p = 1;
 	}
@@ -2766,9 +2761,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  history[0].fixp[0] = fixp[0];
 	  history[0].fixp[1] = fixp[1];
 	  history[0].fixp[2] = fixp[2];
-	  history[0].reloc_type[0] = reloc_type[0];
-	  history[0].reloc_type[1] = reloc_type[1];
-	  history[0].reloc_type[2] = reloc_type[2];
+	  history[0].mips16_absolute_jump_p = (reloc_type[0]
+					       == BFD_RELOC_MIPS16_JMP);
 	  if (mips_opts.mips16)
 	    history[0].extended_p = (ip->use_extend
 				     || *reloc_type > BFD_RELOC_UNUSED);
@@ -2793,9 +2787,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       history[0].use_extend = ip->use_extend;
       history[0].extend = ip->extend;
       history[0].insn_opcode = ip->insn_opcode;
-      history[0].reloc_type[0] = reloc_type[0];
-      history[0].reloc_type[1] = reloc_type[1];
-      history[0].reloc_type[2] = reloc_type[2];
+      history[0].mips16_absolute_jump_p = (reloc_type[0]
+					   == BFD_RELOC_MIPS16_JMP);
       history[1].noreorder_p = history[0].noreorder_p;
       history[0].noreorder_p = 1;
     }
@@ -2824,9 +2817,7 @@ mips_no_prev_insn (int preserve)
   history[0].delay_slot_p = 0;
   history[0].noreorder_p = 0;
   history[0].extended_p = 0;
-  history[0].reloc_type[0] = BFD_RELOC_UNUSED;
-  history[0].reloc_type[1] = BFD_RELOC_UNUSED;
-  history[0].reloc_type[2] = BFD_RELOC_UNUSED;
+  history[0].mips16_absolute_jump_p = 0;
   history[1].noreorder_p = 0;
   mips_clear_insn_labels ();
 }
