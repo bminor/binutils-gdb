@@ -1899,7 +1899,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      break;
 
 	    case BFD_RELOC_16_PCREL:
-	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
+	      ip->insn_opcode |= address_expr->X_add_number & 0xffff;
 	      break;
 
 	    case BFD_RELOC_16_PCREL_S2:
