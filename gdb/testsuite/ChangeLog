@@ -1,3 +1,11 @@
+Thu Feb  6 12:46:14 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/break.exp: Check for gdb,noresults before testing
+	exit status and/or results from the target.
+	* gdb.base/watchpoint.exp, gdb.base/langs.exp: Likewise.
+	* lib/gdb.exp: Remove old (now bogus) initialization of
+	noinferior, noargs, noresults and nosignals.
+
 Tue Feb  4 21:52:17 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/sh.exp: New file.

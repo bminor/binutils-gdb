@@ -60,22 +60,6 @@ if ![info exists prompt] then {
     set gdb_prompt "\[(\]gdb\[)\]"
 }
 
-if ![info exists noargs] then {
-    set noargs 0
-}
-
-if ![info exists nosignals] then {
-    set nosignals 0
-}
-
-if ![info exists noinferiorio] then {
-    set noinferiorio 0
-}
-
-if ![info exists noresults] then {
-    set noresults 0
-}
-
 #
 # gdb_version -- extract and print the version number of GDB
 #
