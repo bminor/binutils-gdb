@@ -113,7 +113,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 				   attached process. */
       set_sigio_trap ();
 
-      pid = ptrace_wait (inferior_ptid, &status);
+      pid = wait (&status);
 
       save_errno = errno;
 

@@ -522,12 +522,12 @@ kill_inferior (void)
       || last.kind == TARGET_WAITKIND_VFORKED)
     {
       ptrace (PT_KILL, last.value.related_pid, 0, 0);
-      ptrace_wait (null_ptid, &status);
+      wait (&status);
     }
 
   /* Kill the current process.  */
   ptrace (PT_KILL, pid, 0, 0);
-  ret = ptrace_wait (null_ptid, &status);
+  ret = wait (&status);
 
   /* We might get a SIGCHLD instead of an exit status.  This is
      aggravated by the first kill above - a child has just died.  */
@@ -535,7 +535,7 @@ kill_inferior (void)
   while (ret == pid && WIFSTOPPED (status))
     {
       ptrace (PT_KILL, pid, 0, 0);
-      ret = ptrace_wait (null_ptid, &status);
+      ret = wait (&status);
     }
 
   target_mourn_inferior ();
