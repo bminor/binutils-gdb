@@ -1,3 +1,11 @@
+2000-04-13  Geoff Keating  <geoffk@cygnus.com>
+
+	* scripttempl/elf.sc: Add support for .sbss2 and .sdata2 sections.
+	Add new BSS_PLT variable for when .plt need not be contained in
+	the file.  Move _etext so that it is also after .fini, and provide
+	both etext and _etext with a leading underscore.  Mark the start
+	and end of .sbss.
+
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/elf32.em (struct orphan_save): New.

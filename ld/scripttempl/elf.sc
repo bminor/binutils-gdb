@@ -21,6 +21,7 @@
 #	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
 #		.bss section besides __bss_start.
 #	DATA_PLT - .plt should be in data segment, not text segment.
+#	BSS_PLT - .plt should be in bss segment
 #	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
 #	EMBEDDED - whether this is for an embedded system. 
 #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
@@ -47,6 +48,8 @@ INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 DYNAMIC=".dynamic     ${RELOCATING-0} : { *(.dynamic) }"
 RODATA=".rodata ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r*)} }"
+SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) }"
+SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) }"
 CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}
@@ -121,8 +124,6 @@ SECTIONS
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
 
-  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
-  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.text    ${RELOCATING-0} :
     {
       *(.rel.text)
@@ -135,6 +136,8 @@ SECTIONS
       ${RELOCATING+*(.rela.text.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.t*)}
     }
+  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
+  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
   .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
   .rel.rodata  ${RELOCATING-0} :
@@ -183,20 +186,19 @@ SECTIONS
     }
   .rel.sbss    ${RELOCATING-0} : { *(.rel.sbss)		}
   .rela.sbss   ${RELOCATING-0} : { *(.rela.sbss)	}
+  .rel.sdata2  ${RELOCATING-0} : { *(.rel.sdata2)	}
+  .rela.sdata2 ${RELOCATING-0} : { *(.rela.sdata2)	}
+  .rel.sbss2   ${RELOCATING-0} : { *(.rel.sbss2)	}
+  .rela.sbss2  ${RELOCATING-0} : { *(.rela.sbss2)	}
   .rel.bss     ${RELOCATING-0} : { *(.rel.bss)		}
   .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
   ${OTHER_PLT_RELOC_SECTIONS}
 
-  .init        ${RELOCATING-0} : 
-  { 
-    ${INIT_START}
-    KEEP (*(.init))
-    ${INIT_END}
-  } =${NOP-0}
-
-  ${DATA_PLT-${PLT}}
+  ${DATA_PLT-${BSS_PLT-${PLT}}}
+  /* .text should be before .init and so on, so that -Ttext=0x1234
+     will work.  */
   .text    ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
@@ -208,16 +210,25 @@ SECTIONS
     ${RELOCATING+*(.gnu.linkonce.t*)}
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } =${NOP-0}
-  ${RELOCATING+_etext = .;}
-  ${RELOCATING+PROVIDE (etext = .);}
+  .init        ${RELOCATING-0} : 
+  { 
+    ${INIT_START}
+    KEEP (*(.init))
+    ${INIT_END}
+  } =${NOP-0}
   .fini    ${RELOCATING-0} :
   {
     ${FINI_START}
     KEEP (*(.fini))
     ${FINI_END}
   } =${NOP-0}
+  ${RELOCATING+PROVIDE (__etext = .);}
+  ${RELOCATING+PROVIDE (_etext = .);}
+  ${RELOCATING+PROVIDE (etext = .);}
   ${WRITABLE_RODATA-${RODATA}}
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
+  ${CREATE_SHLIB-${SDATA2}}
+  ${CREATE_SHLIB-${SBSS2}}
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
   /* Adjust the address for the data segment.  We want to adjust up to
@@ -242,7 +253,9 @@ SECTIONS
   ${RELOCATING+${DTOR}}
   ${DATA_PLT+${PLT}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
-  .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
+  .got		${RELOCATING-0} : { *(.got.plt) *(.got) }
+  ${CREATE_SHLIB+${SDATA2}}
+  ${CREATE_SHLIB+${SBSS2}}
   ${TEXT_DYNAMIC-${DYNAMIC}}
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
@@ -261,11 +274,16 @@ SECTIONS
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   .sbss    ${RELOCATING-0} :
   {
+    ${RELOCATING+PROVIDE (__sbss_start = .);}
+    ${RELOCATING+PROVIDE (___sbss_start = .);}
     *(.dynsbss)
     *(.sbss)
     ${RELOCATING+*(.sbss.*)}
     *(.scommon)
+    ${RELOCATING+PROVIDE (__sbss_end = .);}
+    ${RELOCATING+PROVIDE (___sbss_end = .);}
   }
+  ${BSS_PLT+${PLT}}
   .bss     ${RELOCATING-0} :
   {
    *(.dynbss)
