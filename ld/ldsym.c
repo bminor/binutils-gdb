@@ -103,7 +103,7 @@ DEFUN(ldsym_get,(key),
   bp->sdefs_chain = (asymbol **)NULL;
   bp->scoms_chain = (asymbol **)NULL;
   bp->name = buystring(key);
-
+  bp->flags = 0;
   /* Add the entry to the bucket.  */
 
   bp->link = global_symbol_hash_table[hashval];

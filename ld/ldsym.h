@@ -44,6 +44,17 @@ typedef struct user_symbol_struct
    */
   asymbol **scoms_chain;
 
+  
+
+
+
+  /* If this symbol is a constructor */
+#define SYM_CONSTRUCTOR 1
+  /* If this symbol is a warning symbol */
+#define SYM_WARNING 2
+  /* IF this is an alias for another symbol */
+#define SYM_INDIRECT 4
+  int flags;
 } ldsym_type;
 
 

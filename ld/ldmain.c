@@ -101,6 +101,10 @@ boolean write_map;
 
 
 int unix_relocate;
+#ifdef GNU960
+/* Indicates whether output file will be b.out (default) or coff */
+enum target_flavour_enum output_flavor = BFD_BOUT_FORMAT;
+#endif
 
 
 
@@ -139,10 +143,22 @@ main (argc, argv)
   output_filename = "a.out";
 
 #ifdef GNU960
-  check_v960( argc, argv );
+   {
+     int i;
+ 
+     check_v960( argc, argv );
+     emulation = GLD960_EMULATION_NAME;
+     for ( i = 1; i < argc; i++ ){
+       if ( !strcmp(argv[i],"-Fcoff") ){
+ 	emulation = LNK960_EMULATION_NAME;
+ 	output_flavor = BFD_COFF_FORMAT;
+ 	break;
+       }
+     }
+   }
+#else
+   emulation =  (char *) getenv(EMULATION_ENVIRON); 
 #endif
-
-  emulation =  (char *) getenv(EMULATION_ENVIRON); 
 
   /* Initialize the data about options.  */
 
@@ -168,17 +184,13 @@ main (argc, argv)
 
   config.magic_demand_paged = true ;
   config.make_executable = true;
-
-#ifdef GNU960
-  ldemul_choose_mode(LNK960_EMULATION_NAME);
-#else
   if (emulation == (char *)NULL) {
     emulation= DEFAULT_EMULATION;
   }
 
 
   ldemul_choose_mode(emulation);
-#endif
+
 
   default_target =  ldemul_choose_target();
 
@@ -239,7 +251,7 @@ Q_read_entry_symbols (desc, entry)
      struct lang_input_statement_struct *entry;
 {
   if (entry->asymbols == (asymbol **)NULL) {
-    size_t table_size = get_symtab_upper_bound(desc);
+    bfd_size_type table_size = get_symtab_upper_bound(desc);
     entry->asymbols = (asymbol **)ldmalloc(table_size);
 
     entry->symbol_count =  bfd_canonicalize_symtab(desc, entry->asymbols) ;
@@ -300,95 +312,102 @@ Q_enter_global_ref (nlist_p)
 
   ASSERT(sym->udata == 0);
 
-  /* Just place onto correct chain */
-  if (flag_is_common(this_symbol_flags)) {
-    /* If we have a definition of this symbol already then
-     * this common turns into a reference. Also we only
-     * ever point to the largest common, so if we
-     * have a common, but it's bigger that the new symbol
-     * the turn this into a reference too.
-     */
-    if (sp->sdefs_chain)  
-      {
-	/* This is a common symbol, but we already have a definition
-	   for it, so just link it into the ref chain as if
-	   it were a reference
-	   */
-	refize(sp, nlist_p);
+  if (flag_is_constructor(this_symbol_flags))  {
+    /* Just remeber the name, do it once per name by placing it as if
+       it were a zero sized common. The next ref */
+      ldlang_add_constructor(sp);
+
+  }
+  else {  
+    if (flag_is_common(this_symbol_flags)) {
+      /* If we have a definition of this symbol already then
+       * this common turns into a reference. Also we only
+       * ever point to the largest common, so if we
+       * have a common, but it's bigger that the new symbol
+       * the turn this into a reference too.
+       */
+      if (sp->sdefs_chain)  
+	  {
+	    /* This is a common symbol, but we already have a definition
+	       for it, so just link it into the ref chain as if
+	       it were a reference
+	       */
+	    refize(sp, nlist_p);
+	  }
+      else  if (sp->scoms_chain) {
+	/* If we have a previous common, keep only the biggest */
+	if ( (*(sp->scoms_chain))->value > sym->value) {
+	  /* other common is bigger, throw this one away */
+	  refize(sp, nlist_p);
+	}
+	else if (sp->scoms_chain != nlist_p) {
+	  /* other common is smaller, throw that away */
+	  refize(sp, sp->scoms_chain);
+	  sp->scoms_chain = nlist_p;
+	}
       }
-    else  if (sp->scoms_chain) {
-      /* If we have a previous common, keep only the biggest */
-      if ( (*(sp->scoms_chain))->value > sym->value) {
-	/* other common is bigger, throw this one away */
-	refize(sp, nlist_p);
-      }
-      else if (sp->scoms_chain != nlist_p) {
-	/* other common is smaller, throw that away */
-	refize(sp, sp->scoms_chain);
+      else {
+	/* This is the first time we've seen a common, so
+	 * remember it - if it was undefined before, we know it's defined now
+	 */
+	if (sp->srefs_chain)
+	  undefined_global_sym_count--;
+
+	commons_pending++;
 	sp->scoms_chain = nlist_p;
       }
     }
-    else {
-      /* This is the first time we've seen a common, so
-       * remember it - if it was undefined before, we know it's defined now
-       */
-      if (sp->srefs_chain)
-	undefined_global_sym_count--;
 
-      commons_pending++;
-      sp->scoms_chain = nlist_p;
-    }
-  }
-
-  else if (flag_is_defined(this_symbol_flags)) {
-    /* This is the definition of a symbol, add to def chain */
-    if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section) {
-      /* Multiple definition */
-      asymbol *sy = *(sp->sdefs_chain);
-      lang_input_statement_type *stat = (lang_input_statement_type *) sy->the_bfd->usrdata;
-      lang_input_statement_type *stat1 = (lang_input_statement_type *) sym->the_bfd->usrdata;
-      asymbol ** stat1_symbols  = stat1 ? stat1->asymbols: 0;
-      asymbol ** stat_symbols = stat ? stat->asymbols:0;
+    else if (flag_is_defined(this_symbol_flags)) {
+      /* This is the definition of a symbol, add to def chain */
+      if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section) {
+	/* Multiple definition */
+	asymbol *sy = *(sp->sdefs_chain);
+	lang_input_statement_type *stat = (lang_input_statement_type *) sy->the_bfd->usrdata;
+	lang_input_statement_type *stat1 = (lang_input_statement_type *) sym->the_bfd->usrdata;
+	asymbol ** stat1_symbols  = stat1 ? stat1->asymbols: 0;
+	asymbol ** stat_symbols = stat ? stat->asymbols:0;
       
-      multiple_def_count++;
-      info("%C: multiple definition of `%T'\n",
-	   sym->the_bfd,
-	   sym->section,
-	   stat1_symbols,
-	   sym->value,
-	   sym);
+	multiple_def_count++;
+	info("%C: multiple definition of `%T'\n",
+	     sym->the_bfd,
+	     sym->section,
+	     stat1_symbols,
+	     sym->value,
+	     sym);
 	   
-      info("%C: first seen here\n",
-	   sy->the_bfd,
-	   sy->section,
-	   stat_symbols,
-	   sy->value);
+	info("%C: first seen here\n",
+	     sy->the_bfd,
+	     sy->section,
+	     stat_symbols,
+	     sy->value);
+      }
+      else {
+	sym->udata =(PTR)( sp->sdefs_chain);
+	sp->sdefs_chain = nlist_p;
+      }
+      /* A definition overrides a common symbol */
+      if (sp->scoms_chain) {
+	refize(sp, sp->scoms_chain);
+	sp->scoms_chain = 0;
+	commons_pending--;
+      }
+      else if (sp->srefs_chain) {
+	/* If previously was undefined, then remember as defined */
+	undefined_global_sym_count--;
+      }
     }
     else {
-      sym->udata =(PTR)( sp->sdefs_chain);
-      sp->sdefs_chain = nlist_p;
-    }
-    /* A definition overrides a common symbol */
-    if (sp->scoms_chain) {
-      refize(sp, sp->scoms_chain);
-      sp->scoms_chain = 0;
-      commons_pending--;
-    }
-    else if (sp->srefs_chain) {
-      /* If previously was undefined, then remember as defined */
-      undefined_global_sym_count--;
-    }
-  }
-  else {
-    if (sp->scoms_chain == (asymbol **)NULL 
-	&& sp->srefs_chain == (asymbol **)NULL 
-	&& sp->sdefs_chain == (asymbol **)NULL) {
-      /* And it's the first time we've seen it */
-      undefined_global_sym_count++;
+      if (sp->scoms_chain == (asymbol **)NULL 
+	  && sp->srefs_chain == (asymbol **)NULL 
+	  && sp->sdefs_chain == (asymbol **)NULL) {
+	/* And it's the first time we've seen it */
+	undefined_global_sym_count++;
 
-    }
+      }
 
-    refize(sp, nlist_p);
+      refize(sp, nlist_p);
+    }
   }
 
   ASSERT(sp->sdefs_chain == 0 || sp->scoms_chain == 0);
@@ -418,10 +437,17 @@ lang_input_statement_type *entry;
     {
       asymbol *p = *q;
 
-      if (flag_is_undefined_or_global_or_common(p->flags))
+      if (flag_is_undefined_or_global_or_common_or_constructor(p->flags))
 	{
 	  Q_enter_global_ref(q);
 	}
+      if (p->flags & BSF_INDIRECT) {
+	add_indirect(q);
+      }
+
+      if (p->flags & BSF_WARNING) {
+	add_warning(p);
+      }
       ASSERT(p->flags != 0);
     }
 }
@@ -463,9 +489,12 @@ bfd_format format;
 {
   boolean retval;
 
-  if ((bfd_check_format(abfd,format) == true) && BFD_COFF_FILE_P(abfd)) {
-	return true;
+  if ((bfd_check_format(abfd,format) == true)
+      &&  (abfd->xvec->flavour == output_flavor) ){
+    return true;
   }
+
+
   return false;
 }
 #endif
@@ -525,7 +554,7 @@ decode_library_subfile (library_entry, subfile_offset)
      bfd *subfile_offset;
 {
   register struct lang_input_statement_struct *subentry;
-  subentry = (struct lang_input_statement_struct *) ldmalloc (sizeof (struct lang_input_statement_struct));
+  subentry = (struct lang_input_statement_struct *) ldmalloc ((bfd_size_type)(sizeof (struct lang_input_statement_struct)));
   subentry->filename = subfile_offset -> filename;
   subentry->local_sym_name  = subfile_offset->filename;
   subentry->asymbols = 0;

@@ -29,7 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmain.h"
 #include "ldsym.h"
 #include "ldgram.h"
-
+#include "ldwarn.h"
 #include "ldlang.h"
 #include "ldexp.h"
 #include "ldemul.h"
@@ -44,6 +44,14 @@ PROTO(static void, print_statement,(lang_statement_union_type *,
 /* LOCALS */
 static CONST  char *startup_file;
 static lang_statement_list_type input_file_chain;
+
+/* Points to the last statement in the .data section, so we can add
+   stuff to the data section without pain */
+static lang_statement_list_type end_of_data_section_statement_list;
+
+/* List of statements needed to handle consxtructors */
+static lang_statement_list_type constructor_list;
+
 static boolean placed_commons = false;
 static lang_output_section_statement_type *default_common_section;
 static boolean map_option_f;
@@ -97,6 +105,8 @@ extern boolean write_map;
 
 #define outside_symbol_address(q) ((q)->value +   outside_section_address(q->section))
 
+static void EXFUN(lang_add_data,( int type ,   union etree_union *exp));
+
 static void 
 DEFUN(print_size,(value),
       size_t value)
@@ -139,6 +149,9 @@ DEFUN(lang_for_each_statement_worker,(func,  s),
 	func(s);
 
 	switch (s->header.type) {
+	case lang_constructors_statement_enum:
+	  lang_for_each_statement_worker(func, constructor_list.head);
+	  break;
 	case lang_output_section_statement_enum:
 	  lang_for_each_statement_worker
 	    (func, 
@@ -839,13 +852,19 @@ DEFUN(map_input_to_output_sections,(s, target, output_section_statement),
   for (; s != (lang_statement_union_type *)NULL ; s = s->next) 
     {
       switch (s->header.type) {
+
+
       case lang_wild_statement_enum:
  	wild(&s->wild_statement, s->wild_statement.section_name,
 	     s->wild_statement.filename, target,
 	     output_section_statement);
 
 	break;
-
+      case lang_constructors_statement_enum:
+	map_input_to_output_sections(constructor_list.head,
+				     target,
+				     output_section_statement);
+	break;
       case lang_output_section_statement_enum:
 	map_input_to_output_sections(s->output_section_statement.children.head,
 			target,
@@ -1135,6 +1154,11 @@ DEFUN(print_statement,(s, os),
 {
   while (s) {
     switch (s->header.type) {
+    case lang_constructors_statement_enum:
+      printf("constructors:\n");
+print_statement(constructor_list.head, os);
+break;	
+
     case lang_wild_statement_enum:
       print_wild_statement(&s->wild_statement, os);
       break;
@@ -1297,6 +1321,8 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
   for (; s != (lang_statement_union_type *)NULL ; s = s->next) 
       {
 	switch (s->header.type) {
+
+	  
 	case lang_output_section_statement_enum:
 	    {
 	      bfd_vma after;
@@ -1355,7 +1381,14 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
 	    }
 
 	  break;
-
+	case lang_constructors_statement_enum:
+	    dot = lang_size_sections(constructor_list.head,
+				      output_section_statement,
+				      &s->wild_statement.children.head,
+				      fill,
+				      dot);
+	    break;
+				      
 	case lang_data_statement_enum: 
 	    {
 	      unsigned int size;
@@ -1464,6 +1497,13 @@ DEFUN(lang_do_assignments,(s, output_section_statement, fill, dot),
   for (; s != (lang_statement_union_type *)NULL ; s = s->next) 
     {
       switch (s->header.type) {
+      case lang_constructors_statement_enum:
+	dot = lang_do_assignments(constructor_list.head,
+			    output_section_statement,
+			    fill,
+			    dot);
+	break;
+
       case lang_output_section_statement_enum:
 	{
 	  lang_output_section_statement_type *os =
@@ -1576,7 +1616,15 @@ DEFUN_VOID(lang_relocate_globals)
     }
     if (it != (asymbol *)NULL)
 	{
-	  asymbol **ptr= lgs->srefs_chain;
+	  asymbol **ptr = lgs->srefs_chain;;
+	  if (lgs->flags & SYM_WARNING) 
+	      {
+		produce_warnings(lgs, it);
+	      }
+	  if (lgs->flags & SYM_INDIRECT)
+	      {
+		do_indirect(lgs);
+	      }
 
 	  while (ptr != (asymbol **)NULL) {
 	    asymbol *ref = *ptr;
@@ -1938,7 +1986,8 @@ DEFUN(lang_enter_output_section_statement,
     os =
       lang_output_section_statement_lookup(output_section_statement_name);
 
-
+  
+  
   /* Add this statement to tree */
   /*  add_statement(lang_output_section_statement_enum,
       output_section_statement);*/
@@ -1989,7 +2038,88 @@ DEFUN(create_symbol,(name, flags, section),
   return def;
 }
 
+/* run through the symbol table, find all the symbols which are
+   constructors and for each one, create statements to do something
+   like..
 
+   for 
+   __CTOR_LIST__, foo
+
+   __CTOR_LIST__ = . ;
+   LONG(__CTOR_LIST_END - . / 4 - 2)
+   *(foo)
+   __CTOR_LIST_END= .
+
+   Put these statements onto a special list.
+
+*/
+
+typedef struct constructor_list 
+{
+ldsym_type *sym;
+  struct constructor_list *next;
+}  constructor_list_type;
+   
+static constructor_list_type *constructor_name_list;
+
+void
+DEFUN(ldlang_add_constructor,(name),
+ldsym_type *name)
+{
+
+  constructor_list_type *next   = constructor_name_list;
+
+  if (name->flags & SYM_CONSTRUCTOR) return;
+
+  next = (constructor_list_type *)  ldmalloc(sizeof(constructor_list_type));
+  next->next= constructor_name_list;
+  next->sym= name;
+  name->flags |= SYM_CONSTRUCTOR;
+  constructor_name_list = next;
+}
+
+void
+DEFUN_VOID(find_constructors)
+{
+  lang_statement_list_type *old = stat_ptr;
+  constructor_list_type *p = constructor_name_list;
+  stat_ptr = & constructor_list;
+  lang_list_init(stat_ptr);
+  while (p != (constructor_list_type *)NULL) 
+      {
+	/* Have we already done this one ? */
+	CONST char *name = p->sym->name;
+	int len = strlen(name);
+	char *end = ldmalloc(len+3);
+	strcpy(end, name);
+	strcat(end,"$e");
+
+	lang_add_assignment
+	  ( exp_assop('=',name, exp_nameop(NAME,".")));
+
+	lang_add_data
+	  (LONG, exp_binop('-',
+			   exp_binop ( '/',
+				      exp_binop ( '-',
+						 exp_nameop(NAME, end),
+						 exp_nameop(NAME,".")),
+				      exp_intop(4)),
+
+			   exp_intop(2)));
+
+				      
+	lang_add_wild(name, (char *)NULL);
+	lang_add_data(LONG, exp_intop(0));
+	lang_add_assignment
+	  (exp_assop('=', end, exp_nameop(NAME,".")));
+p = p->next;		    
+      }
+
+
+
+
+  stat_ptr = old;
+}
 void
 DEFUN_VOID(lang_process)
 {               
@@ -2016,11 +2146,14 @@ DEFUN_VOID(lang_process)
 
   common_section.userdata = (PTR)&common_section_userdata;
 
+
   /* Run through the contours of the script and attatch input sections
      to the correct output sections 
      */
+  find_constructors();
   map_input_to_output_sections(statement_list.head, (char *)NULL, 
 			       ( lang_output_section_statement_type *)NULL);
+
 
   /* Find any sections not attatched explicitly and handle them */
   lang_place_orphans();
@@ -2189,6 +2322,13 @@ DEFUN(lang_leave_output_section_statement,(fill, memspec),
   current_section->fill = fill;
   current_section->region = lang_memory_region_lookup(memspec);
   stat_ptr = &statement_list;
+
+  /* We remember if we are closing a .data section, since we use it to
+     store constructors in */
+  if (strcmp(current_section->name, ".data") ==0) {
+   end_of_data_section_statement_list = statement_list;
+
+  }
 }
 /*
  Create an absolute symbol with the given name with the value of the

@@ -19,4 +19,6 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
-PROTOX(void, ldwarn,(void));
+
+void EXFUN(add_warning,(asymbol *));
+CONST char * EXFUN(fetch_warning,(asymbol *));
