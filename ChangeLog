@@ -1,3 +1,8 @@
+Fri Jan 12 15:25:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Make sure that ${CC} can be used to compile an
+	executable.
+
 Sat Jan  6 07:23:33 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* Makefile.in (all-gdb): Depend on $(GDB_TK).

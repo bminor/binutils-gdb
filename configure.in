@@ -672,6 +672,22 @@ fi
 
 # post-target:
 
+# Make sure that the compiler is able to generate an executable.  If it
+# can't, we are probably in trouble.  We don't care whether we can run the
+# executable--we might be using a cross compiler--we only care whether it
+# can be created.  At this point the main configure script has set CC.
+echo "int main () { return 0; }" > conftest.c
+${CC} -o conftest ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} conftest.c
+if [ $? = 0 ] && [ -s conftest ]; then
+  :
+else
+  echo 1>&2 "*** The command '${CC} -o conftest ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} conftest.c' failed."
+  echo 1>&2 "*** You must set the environment variable CC to a working compiler."
+  rm -f conftest*
+  exit 1
+fi
+rm -f conftest*
+
 # Record target_configdirs and the configure arguments in Makefile.
 target_configdirs=`echo "${target_configdirs}" | sed -e 's/target-//g'`
 targargs=`echo "${arguments}" | \
