@@ -1,3 +1,15 @@
+Sat Aug  7 05:28:03 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* elfcode.h (elf_object_p):  Add comment about what this function
+	does and to watch out for side effects.  Add FIXME for memory leaks.
+	Fix comment about checking for matching byte order.  Preserve
+	pointer to old tdata (if any), and restore it if we don't match
+	file with target vector.  If we are going to use goto's, use them
+	consistently and maintainably.
+	* nlmcode.h (nlm_object_p):  Expand comments about leaked memory
+	to note that the problem is even more serious than just leaked
+	memory.  Replace goto with more traditional return.
+
 Fri Aug  6 12:00:03 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	Fix incorrect or useless makefile variable definitions:
