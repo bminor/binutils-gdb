@@ -1,7 +1,7 @@
 /* Main header file for the bfd library -- portable access to object files.
    ==> The bfd.h file is generated from bfd-in.h and various .c files; if you
    ==> change it, your changes will probably be lost.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.

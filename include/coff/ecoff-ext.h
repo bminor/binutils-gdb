@@ -1,5 +1,5 @@
 /* MIPS `ECOFF' symbol table external format.
-   Copyright 1992 Free Software Foundation.
+   Copyright 1992, 1993 Free Software Foundation.
    Contributed by Cygnus Support.  Written by John Gilmore.
 
 This file is part of GDB.
