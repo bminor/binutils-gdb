@@ -2900,7 +2900,7 @@ in_solib_call_trampoline (CORE_ADDR pc, char *name)
        instructions long. */
     insn = read_memory_integer (pc, 4);
 
-    /* Find out where we we think we are within the stub.  */
+    /* Find out where we think we are within the stub.  */
     if ((insn & 0xffffc00e) == 0x53610000)
       addr = pc;
     else if ((insn & 0xffffffff) == 0xe820d000)
