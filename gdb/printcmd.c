@@ -519,14 +519,22 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   struct minimal_symbol *msymbol;
   struct symbol *symbol;
   struct symtab *symtab = 0;
-  CORE_ADDR name_location;
+  CORE_ADDR name_location = 0;
   char *name;
 
   /* First try to find the address in the symbol table, then
      in the minsyms.  Take the closest one.  */
 
-  symbol = fast_symbolic_addr? 0: 
-	   find_addr_symbol (addr, &symtab, &name_location);
+  if (fast_symbolic_addr)
+    {
+      /* This is defective in the sense that it only finds text symbols.  */
+      symbol = find_pc_function (addr);
+      if (symbol)
+	name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
+    }
+  else
+    find_addr_symbol (addr, &symtab, &name_location);
+
   if (symbol)
     {
       if (do_demangle)
@@ -538,7 +546,7 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   msymbol = lookup_minimal_symbol_by_pc (addr);
   if (msymbol != NULL)
     {
-      if (SYMBOL_VALUE_ADDRESS (msymbol) > name_location)
+      if (SYMBOL_VALUE_ADDRESS (msymbol) > name_location || symbol == NULL)
 	{
 	  /* The msymbol is closer to the address than the symbol;
 	     use the msymbol instead.  */
@@ -551,6 +559,8 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
 	    name = SYMBOL_LINKAGE_NAME (msymbol);
 	}
     }
+  if (symbol == NULL && msymbol == NULL)
+    return;
 
   /* If the nearest symbol is too far away, don't print anything symbolic.  */
 

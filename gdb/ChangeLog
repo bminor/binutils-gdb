@@ -1,3 +1,8 @@
+Thu Jan 20 15:04:24 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* printcmd.c (print_address_symbolic):  Unconditionally use msymbol
+	if we did not find a symbol.
+
 Fri Jan 21 08:20:18 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* infptrace.c (child_xfer_memory): Only use if CHILD_XFER_MEMORY
