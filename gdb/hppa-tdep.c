@@ -446,6 +446,7 @@ read_unwind_info (objfile)
 	     Stuff away the stub type into "reserved" fields.  */
 	  ui->table[index].region_start = bfd_get_32 (objfile->obfd,
 						      (bfd_byte *) buf);
+	  ui->table[index].region_start += text_offset;
 	  buf += 4;
 	  ui->table[index].stub_type = bfd_get_8 (objfile->obfd,
 						  (bfd_byte *) buf);
