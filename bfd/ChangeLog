@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Wed Feb 26 15:19:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* elf32-d30v.c (bfd_elf_d30v_reloc): Add code to do 32-bit
+	relocations.
+
+end-sanitize-d30v	
 Wed Feb 26 13:33:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_input_bfd): Don't skip symbols from sections
