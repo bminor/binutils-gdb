@@ -1,3 +1,9 @@
+Thu Mar 16 11:38:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/dgux.mh (HOSTING_EMU): Use -m rather than trying to set
+	LDEMULATION.
+	* config/hppaelf.mh (HOSTING_EMU): Likewise.
+
 Tue Mar 14 12:28:03 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Set force_maj
