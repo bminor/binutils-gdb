@@ -1,3 +1,8 @@
+2005-02-22  Catherine Moore  <clm@cm00re.com>
+
+	* read.c (read_a_source_file): Reinstate TC_EQUAL_IN_INSN test.
+	* doc/internals.texi (TC_EQUAL_IN_INSN): Reinstate.
+
 2005-02-22  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (struct proc): Change isym to

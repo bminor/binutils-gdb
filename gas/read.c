@@ -729,9 +729,13 @@ read_a_source_file (char *name)
 		  /* Input_line_pointer->after ':'.  */
 		  SKIP_WHITESPACE ();
 		}
-	      else if (c == '='
-		       || ((c == ' ' || c == '\t')
-			   && input_line_pointer[1] == '='))
+              else if ((c == '='
+                       || ((c == ' ' || c == '\t')
+                            && input_line_pointer[1] == '='))
+#ifdef TC_EQUAL_IN_INSN
+                           && !TC_EQUAL_IN_INSN (c, s)
+#endif
+                           )
 		{
 		  equals (s, 1);
 		  demand_empty_rest_of_line ();
