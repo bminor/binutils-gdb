@@ -1,3 +1,12 @@
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.am: Run dep-am.
+	(BFD32_LIBS): Add simple.lo.
+	(BFD32_LIBS_CFILES): Add simple.c.
+	* Makefile.in: Regenerated.
+	* bfd-in2.h: Regenerated.
+	* simple.c: New file.
+
 2002-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-arm.c (record_arm_to_thumb_glue): Avoid type-punned pointers.
