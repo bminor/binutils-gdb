@@ -17,4 +17,7 @@ Text:
 Name for assembler; individual configs may override
 _define__(<_AS__>,<as>)
 
+"Machine Dependent" nodename
+_define__(<_MACH_DEP__>,<Machine Dependent>)
+
 _divert__<>
