@@ -50,6 +50,7 @@
 #include "gdbcmd.h"
 #include "language.h"		/* for local_hex_string() */
 #include "ppc-tdep.h"
+#include "gdb_string.h"
 
 #include <procinfo.h>
 #include <sys/types.h>
