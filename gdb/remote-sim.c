@@ -129,7 +129,9 @@ dump_mem (char *buf, int len)
 	  long l[2];
 	  memcpy (l, buf, len);
 	  printf_filtered ("\t0x%lx", l[0]);
-	  printf_filtered (len == 8 ? " 0x%x\n" : "\n", l[1]);
+	  if (len == 8)
+	    printf_filtered (" 0x%lx", l[1]);
+	  printf_filtered ("\n");
 	}
       else
 	{

@@ -1,3 +1,8 @@
+2001-02-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote-sim.c (dump_mem): Cleanup printf format argument.
+	* MAINTAINERS: Update, mn10300-elf now builds.
+
 2001-02-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* event-top.c: Remove duplicate #include <signal.h>.

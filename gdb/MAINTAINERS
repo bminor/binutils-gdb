@@ -112,7 +112,7 @@ maintainer works with the native maintainer when resolving API issues.
 	mn10200		(--target=mn10200-elf broken)
 			Maintenance only
 
-	mn10300		(--target=mn10300-elf broken)
+	mn10300		--target=mn10300-elf ,-Werror
 			Andrew Cagney		cagney@cygnus.com
 
 	ns32k		(--target=ns32k-netbsd broken)
