@@ -1,3 +1,9 @@
+Thu Nov 14 19:49:10 1991  Per Bothner  (bothner at cygnus.com)
+
+	* aoutx.h (NAME(aout,print_symbol)):  Fix thinko.
+	* syms.c (bfd_stab_names):  Turn on new GNU_EXTRA_STABS macro
+	to include names of N_SETT etc.
+
 Thu Nov 14 19:11:13 1991  Fred Fish  (fnf at cygnus.com)
 
     	* elf.c:  Add minimal support for ELF symbol tables.  Generates
