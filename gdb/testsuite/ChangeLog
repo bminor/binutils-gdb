@@ -1,3 +1,8 @@
+2002-01-07  Fred Fish  <fnf@redhat.com>
+
+	* gdb.c++/derivation.exp: Remove gcc xfails for g_instance.afoo,
+	g_instance.bfoo, and g_instance.cfoo.
+
 Mon Jan  7 12:22:18 2002  Jeffrey A Law  (law@redhat.com)
 
  	* gdb.base/break.c (multi_line_if_conditional): New function.
