@@ -1,3 +1,50 @@
+Fri Feb  4 23:55:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add basic support for writing RS/6000 XCOFF files.
+	* coff-rs6000.c (dummy_reloc): Removed.
+	(rs6000coff_howto_table): Defined XCOFF relocs.
+	(RTYPE2HOWTO): Defined to use rs6000coff_rtype2howto.
+	(rs6000coff_rtype2howto): New function.
+	(coff_bfd_reloc_type_lookup): Defined to use
+	rs6000coff_reloc_type_lookup. 
+	(rs6000coff_reloc_type_lookup): New function.
+	(SELECT_RELOC): Defined to set r_type and r_size fields.
+	(COFF_LONG_FILENAMES): Defined.
+	* coffcode.h (combined_entry_type): Changed fix_tag and fix_end
+	fields to bitfields.  Added fields fix_value and fix_scnlen.
+	(sec_to_styp_flags): If STYP_DEBUG is defined, use it rather than
+	STYP_INFO for the type of a section named .debug.
+	(coff_add_missing_symbols): Don't define if RS6000COFF_C.
+	(coff_write_object_contents): If RS6000COFF_C, don't call
+	coff_add_missing_symbols.
+	(coff_slurp_symbol_table): If RS6000COFF_C, then if the last aux
+	entry has type STY_LD change the x_scnlen into a pointer to a
+	symbol and set fix_scnlen.  Also, for a C_BSTAT symbol, change the
+	value into a pointer to a symbol and set fix_value.
+	* libcoff.h: Rebuilt.
+	* coffgen.c (coff_mangle_symbols): Reindent.  If fix_value is set,
+	get the symbol offset. Likewise for fix_scnlen.
+	(string_size): Change type to bfd_size_type.
+	(debug_string_size, debug_string_section): New static variables.
+	(coff_fix_symbol_name): If bfd_coff_symname_in_debug returns true,
+	write the symbol name into the .debug section; assume that the
+	section has already been created with the right size.
+	(coff_write_symbols): Initialize debug_string_size to 0.  If
+	bfd_coff_symname_in_debug returns true, don't put symbol name in
+	usual string table.  After writing out all symbols, if
+	debug_string_size is not 0, check that it matches the size of the
+	.debug section.
+	(coff_get_normalized_symtab): Clear new fix_value and fix_scnlen
+	fields.  If the string offset is 0, always use an empty string as
+	the name.
+	(coff_make_empty_symbol): Zero out the symbol structure.
+	* reloc.c (bfd_perform_relocation): Work around one gross hack
+	with another: actually look at the target name to avoid the broken
+	COFF check.
+	(bfd_reloc_code_real_type): Add BFD_RELOC_PPC_B26,
+	BFD_RELOC_PPC_BA26 and BFD_RELOC_PPC_TOC16.
+	* bfd-in2.h: Rebuilt.
+
 Fri Feb  4 17:28:32 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* libbfd.c (bfd_zmalloc): Call bfd_xmalloc instead of malloc.
