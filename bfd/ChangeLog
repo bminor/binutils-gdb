@@ -1,3 +1,8 @@
+2000-10-25  Chris Demetriou  <cgd@sibyte.com>
+
+	* ieee.c (ieee_archive_p): Plug one of many possible
+	memory leaks in error handling.
+
 2000-10-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data,
