@@ -1,5 +1,51 @@
 Thu Feb  5 13:16:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* d10v-tdep.c (d10v_extract_return_value): For function pointers
+	translate address to IMAP area.
+
+	* config/d10v/tm-d10v.h (EXTRA_FRAME_INFO): Delete dummy from
+ 	struct.
+	(POP_FRAME): Point at generic_pop_current_frame.
+	
+	* d10v-tdep.c (d10v_pop_frame): Delete code handling dummy frames,
+ 	handled earlier.
+	(d10v_push_return_address): New function.
+	(d10v_pop_dummy_frame): Delete.
+	(d10v_fix_call_dummy): Delete.
+	(d10v_call_dummy_address): Delete.
+
+	* d10v-tdep.c (d10v_init_extra_frame_info): Clear dummy and
+ 	frameless.
+
+	* d10v-tdep.c (d10v_push_arguments): Keep stack word aligned.
+
+	* config/d10v/tm-d10v.h (EXTRACT_STRUCT_VALUE_ADDRESS): Extract
+ 	address of structure from first ARG1_REGNUM.
+
+	* d10v-tdep.c (d10v_push_arguments): Force 4 byte args into
+ 	even-odd register pair.  Store 1 and 2 byte args in registers.
+
+	* valops.c (value_fetch_lazy): Ensure that a D10V function pointer
+ 	is fetched in the correct byte order.
+	(value_at): Ditto. Also ensure data pointers are mapped to data
+ 	segment.
+
+	* config/d10v/tm-d10v.h (D10V_DADDR_P, D10V_IADDR_P): 
+
+	* d10v-tdep.c: Replace 2 with REGISTER_RAW_SIZE.
+	(d10v_pop_frame): Replace R13 with LR_REGNUM.
+	(d10v_push_arguments): Replace R2 with ARG1_REGNUM.
+	(d10v_push_arguments): Replace 6 with ARGN_REGNUM.
+	(d10v_extract_return_value): Access return value with RET1_REGNUM.
+
+	* config/d10v/tm-d10v.h (ARG1_REGNUM, ARGN_REGNUM, RET1_REGNUM):
+ 	Define.
+	(STORE_RETURN_VALUE): Specify return register using RET1_REGNUM.
+	(STORE_STRUCT_RETURN): Specify ARG1_REGNUM as the struct ptr
+ 	location.
+	
+Thu Feb  5 13:16:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
 	* blockframe.c (generic_pop_dummy_frame): Flush the frame, no
  	longer valid.
 

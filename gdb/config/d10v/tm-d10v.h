@@ -143,29 +143,38 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define D10V_MAKE_DADDR(x) ( (x) & 0x3000000 ? (x) : ((x) | DMEM_START))
 #define D10V_MAKE_IADDR(x) ( (x) & 0x3000000 ? (x) : (((x) << 2) | IMEM_START))
 
+#define D10V_DADDR_P(x) ( ((x) & 0x3000000) == DMEM_START)
+#define D10V_IADDR_P(x) ( ((x) & 0x3000000) == IMEM_START))
+
+#define ARG1_REGNUM R0_REGNUM
+#define ARGN_REGNUM 3
+#define RET1_REGNUM R0_REGNUM
+
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
 
-   We store structs through a pointer passed in R2 */
+   We store structs through a pointer passed in the first Argument
+   register. */
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
-    { write_register (2, (ADDR));  }
+    { write_register (ARG1_REGNUM, (ADDR));  }
 
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  
 
-   Things always get returned in R2/R3 */
+   Things always get returned in RET1_REGNUM, RET2_REGNUM, ... */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (REGISTER_BYTE(2), VALBUF, TYPE_LENGTH (TYPE))
+  write_register_bytes (REGISTER_BYTE(RET1_REGNUM), VALBUF, TYPE_LENGTH (TYPE))
 
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+     (extract_address ((REGBUF) + REGISTER_BYTE (ARG1_REGNUM), REGISTER_RAW_SIZE (ARG1_REGNUM)) | DMEM_START)
 
 
 /* Define other aspects of the stack frame. 
@@ -174,7 +183,6 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 #define EXTRA_FRAME_INFO \
     CORE_ADDR return_pc; \
-    CORE_ADDR dummy; \
     int frameless; \
     int size;
 
@@ -226,33 +234,40 @@ extern void d10v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info
 extern void d10v_frame_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
 
 #define NAMES_HAVE_UNDERSCORE
-      
-/* 
-DUMMY FRAMES.  Need these to support inferior function calls.  They work
-like this on D10V:  First we set a breakpoint at 0 or __start.  Then we push
-all the registers onto the stack.  Then put the function arguments in the proper
-registers and set r13 to our breakpoint address.  Finally call the function directly.
-When it hits the breakpoint, clear the break point and pop the old register contents
-off the stack.
-*/
 
-#define CALL_DUMMY		{ 0 }  
-#define PUSH_DUMMY_FRAME
-#define CALL_DUMMY_START_OFFSET	0	
-#define CALL_DUMMY_LOCATION	AT_ENTRY_POINT
+
+/* DUMMY FRAMES.  Need these to support inferior function calls.  They
+   work like this on D10V: First we set a breakpoint at 0 or __start.
+   Then we push all the registers onto the stack.  Then put the
+   function arguments in the proper registers and set r13 to our
+   breakpoint address.  Finally, the PC is set to the start of the
+   function being called (no JSR/BSR insn).  When it hits the
+   breakpoint, clear the break point and pop the old register contents
+   off the stack.  */
+
+extern void d10v_pop_frame PARAMS ((struct frame_info *frame));
+#define POP_FRAME generic_pop_current_frame (d10v_pop_frame)
+
+#define USE_GENERIC_DUMMY_FRAMES
+#define CALL_DUMMY                   {0}
+#define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+#define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
+#define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP)
+#define CALL_DUMMY_ADDRESS()         entry_point_address ()
+extern CORE_ADDR d10v_push_return_address PARAMS ((CORE_ADDR pc, CORE_ADDR sp));
+#define PUSH_RETURN_ADDRESS(PC, SP)  d10v_push_return_address (PC, SP)
 
-extern CORE_ADDR d10v_call_dummy_address PARAMS ((void));
-#define CALL_DUMMY_ADDRESS() d10v_call_dummy_address()
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
+/* #define PC_IN_CALL_DUMMY(pc, sp, frame_address) ( pc == IMEM_START + 4 ) */
 
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
-sp = d10v_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
+#define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address)	( pc == IMEM_START + 4 )
+/* override the default get_saved_register function with one that
+   takes account of generic CALL_DUMMY frames */
+#define GET_SAVED_REGISTER
+#define get_saved_register generic_get_saved_register
 
-extern CORE_ADDR d10v_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
-					   int, struct value **,
-					   struct type *, int));
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
     sp = d10v_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
 extern CORE_ADDR d10v_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
@@ -267,11 +282,6 @@ d10v_extract_return_value(TYPE, REGBUF, VALBUF)
   extern void
 d10v_extract_return_value PARAMS ((struct type *, char *, char *));
 
-
-/* Discard from the stack the innermost frame,
-   restoring all saved registers.  */
-#define POP_FRAME d10v_pop_frame();
-extern void d10v_pop_frame PARAMS((void));
 
 #define REGISTER_SIZE 2
 

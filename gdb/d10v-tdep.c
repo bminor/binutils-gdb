@@ -35,27 +35,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 					 struct frame_saved_regs *fsr));
-static void d10v_pop_dummy_frame PARAMS ((struct frame_info *fi));
 
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 
 void
-d10v_pop_frame ()
+d10v_pop_frame (frame)
+     struct frame_info *frame;
 {
-  struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
   int regnum;
   struct frame_saved_regs fsr;
   char raw_buffer[8];
 
   fp = FRAME_FP (frame);
-  if (frame->dummy)
-    {
-      d10v_pop_dummy_frame(frame);
-      return;
-    }
-
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   get_frame_saved_regs (frame, &fsr);
@@ -65,23 +58,23 @@ d10v_pop_frame ()
     {
       if (fsr.regs[regnum])
 	{
-	  read_memory (fsr.regs[regnum], raw_buffer, 8);
-	  write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, 8);
+	  read_memory (fsr.regs[regnum], raw_buffer,  REGISTER_RAW_SIZE(regnum));
+	  write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,  REGISTER_RAW_SIZE(regnum));
 	}
     }
   for (regnum = 0; regnum < SP_REGNUM; regnum++)
     {
       if (fsr.regs[regnum])
 	{
-	  write_register (regnum, read_memory_unsigned_integer (fsr.regs[regnum], 2));
+	  write_register (regnum, read_memory_unsigned_integer (fsr.regs[regnum], REGISTER_RAW_SIZE(regnum)));
 	}
     }
   if (fsr.regs[PSW_REGNUM])
     {
-      write_register (PSW_REGNUM, read_memory_unsigned_integer (fsr.regs[PSW_REGNUM], 2));
+      write_register (PSW_REGNUM, read_memory_unsigned_integer (fsr.regs[PSW_REGNUM], REGISTER_RAW_SIZE(PSW_REGNUM)));
     }
 
-  write_register (PC_REGNUM, read_register(13));
+  write_register (PC_REGNUM, read_register (LR_REGNUM));
   write_register (SP_REGNUM, fp + frame->size);
   target_store_registers (-1);
   flush_cached_frames ();
@@ -210,10 +203,10 @@ d10v_frame_chain (frame)
       return fsr.regs[SP_REGNUM];
     }
 
-  if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2))
+  if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM], REGISTER_RAW_SIZE(FP_REGNUM)))
     return (CORE_ADDR)0;
 
-  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2)| DMEM_START;
+  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM], REGISTER_RAW_SIZE(FP_REGNUM))| DMEM_START;
 }  
 
 static int next_addr, uses_frame;
@@ -369,7 +362,7 @@ d10v_frame_find_saved_regs (fi, fsr)
       }
 
   if (fsr->regs[LR_REGNUM])
-    fi->return_pc = (read_memory_unsigned_integer(fsr->regs[LR_REGNUM],2) << 2) | IMEM_START;
+    fi->return_pc = (read_memory_unsigned_integer(fsr->regs[LR_REGNUM], REGISTER_RAW_SIZE(LR_REGNUM)) << 2) | IMEM_START;
   else
     fi->return_pc = (read_register(LR_REGNUM) << 2) | IMEM_START;
   
@@ -394,8 +387,21 @@ d10v_init_extra_frame_info (fromleaf, fi)
      int fromleaf;
      struct frame_info *fi;
 {
-  struct frame_saved_regs dummy;
-  d10v_frame_find_saved_regs (fi, &dummy);
+  fi->frameless = 0;
+  fi->size = 0;
+  fi->return_pc = 0;
+
+  /* The call dummy doesn't save any registers on the stack, so we can
+     return now.  */
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    {
+      return;
+    }
+  else
+    {
+      struct frame_saved_regs dummy;
+      d10v_frame_find_saved_regs (fi, &dummy);
+    }
 }
 
 static void
@@ -458,13 +464,15 @@ CORE_ADDR
 d10v_read_pc (pid)
      int pid;
 {
-  int save_pid, retval;
+  int save_pid;
+  CORE_ADDR retval;
 
   save_pid = inferior_pid;
   inferior_pid = pid;
   retval = (int)read_register (PC_REGNUM);
   inferior_pid = save_pid;
-  return d10v_xlate_addr(retval << 2);
+  retval = d10v_xlate_addr(retval << 2);
+  return retval;
 }
 
 void
@@ -506,51 +514,19 @@ d10v_read_fp ()
   return (read_register(FP_REGNUM) | DMEM_START);
 }
 
+/* Function: push_return_address (pc)
+   Set up the return address for the inferior function call.
+   Needed for targets where we don't actually execute a JSR/BSR instruction */
+ 
 CORE_ADDR
-d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
-     char *dummyname;
-     CORE_ADDR start_sp;
-     CORE_ADDR fun;
-     int nargs;
-     value_ptr *args;
-     struct type *type;
-     int gcc_p;
+d10v_push_return_address (pc, sp)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
 {
-  int regnum;
-  CORE_ADDR sp;
-  char buffer[MAX_REGISTER_RAW_SIZE];
-  struct frame_info *frame = get_current_frame ();
-  frame->dummy = start_sp;
-  start_sp |= DMEM_START;
-
-  sp = start_sp;
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      sp -= REGISTER_RAW_SIZE(regnum);
-      store_address (buffer, REGISTER_RAW_SIZE(regnum), read_register(regnum));
-      write_memory (sp, buffer, REGISTER_RAW_SIZE(regnum));
-    }
-  write_register (SP_REGNUM, (LONGEST)(sp & 0xffff)); 
-  /* now we need to load LR with the return address */
-  write_register (LR_REGNUM, (LONGEST)(d10v_call_dummy_address() & 0xffff) >> 2);  
+  write_register (LR_REGNUM, (CALL_DUMMY_ADDRESS () & 0xffff) >> 2);
   return sp;
 }
-
-static void
-d10v_pop_dummy_frame (fi)
-     struct frame_info *fi;
-{
-  CORE_ADDR sp = fi->dummy;
-  int regnum;
-
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      sp -= REGISTER_RAW_SIZE(regnum);
-      write_register(regnum, read_memory_unsigned_integer (sp, REGISTER_RAW_SIZE(regnum)));
-    }
-  flush_cached_frames (); /* needed? */
-}
-
+ 
 
 CORE_ADDR
 d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
@@ -560,12 +536,16 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int struct_return;
      CORE_ADDR struct_addr;
 {
-  int i, len, index=0, regnum=2;
+  int i, len;
+  int index;
+  int regnum = ARG1_REGNUM;
   char buffer[4], *contents;
   LONGEST val;
   CORE_ADDR ptrs[10];
 
-  /* Pass 1. Put all large args on stack */
+
+  /* Pass 1. Put all large args on stack, pass pointers */
+  index = 0;
   for (i = 0; i < nargs; i++)
     {
       value_ptr arg = args[i];
@@ -574,15 +554,15 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       contents = VALUE_CONTENTS(arg);
       if (len > 4)
 	{
-	  /* put on stack and pass pointers */
-	  sp -= len;
+	  /* put on word aligned stack and pass pointers */
+	  sp = (sp - len) & ~1;
 	  write_memory (sp, contents, len);
 	  ptrs[index++] = sp;
 	}
     }
 
+  /* Pass 2. Fill in registers and arg lists */
   index = 0;
-
   for (i = 0; i < nargs; i++)
     {
       value_ptr arg = args[i];
@@ -590,8 +570,8 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       len = TYPE_LENGTH (arg_type);
       if (len > 4)
 	{
-	  /* use a pointer to previously saved data */
-	  if (regnum < 6)
+	  /* pass pointer to previously saved data */
+	  if (regnum <= ARGN_REGNUM)
 	    write_register (regnum++, ptrs[index++]);
 	  else
 	    {
@@ -603,6 +583,7 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	}
       else
 	{
+	  int even_regnum = (regnum + 1) & ~1;
 	  contents = VALUE_CONTENTS(arg);
 	  val = extract_signed_integer (contents, len);
 	  /*	  printf("push: type=%d len=%d val=0x%x\n",arg_type->code,len,val);  */
@@ -622,17 +603,35 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		}
 	    }
 	  
-	  if (regnum < 6 )
+	  if (regnum <= ARGN_REGNUM && len == 1)
 	    {
-	      if (len == 4)
-		write_register (regnum++, val>>16);
+	      write_register (regnum++, val & 0xff);
+	    }
+	  if (regnum <= ARGN_REGNUM && len == 2)
+	    {
+	      write_register (regnum++, val & 0xffff);
+	    }
+	  else if (even_regnum <= ARGN_REGNUM - 1 && len == 3)
+	    {
+	      /* next even reg and space for two */
+	      /* TARGET_BYTE_ORDER == BIG_ENDIAN */
+	      regnum = even_regnum;
+	      write_register (regnum++, (val >> 8) & 0xffff);
+	      write_register (regnum++, (val & 0xff) << 8);
+	    }
+	  else if (even_regnum <= ARGN_REGNUM - 1 && len == 4)
+	    {
+	      /* next even reg and space for two */
+	      /* TARGET_BYTE_ORDER == BIG_ENDIAN */
+	      regnum = even_regnum;
+	      write_register (regnum++, (val >> 16) & 0xffff);
 	      write_register (regnum++, val & 0xffff);
 	    }
 	  else
 	    {
-	      sp -= len;
-	      store_address (buffer, len, val);
-	      write_memory (sp, buffer, len);
+	      regnum = ARGN_REGNUM + 1;
+	      sp = (sp - len) & ~1;
+	      write_memory (sp, contents, len);
 	    }
 	}
     }
@@ -640,58 +639,45 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 }
 
 
-/* pick an out-of-the-way place to set the return value */
-/* for an inferior function call.  The link register is set to this  */
-/* value and a momentary breakpoint is set there.  When the breakpoint */
-/* is hit, the dummy frame is popped and the previous environment is */
-/* restored. */
-
-CORE_ADDR
-d10v_call_dummy_address ()
-{
-  CORE_ADDR entry;
-  struct minimal_symbol *sym;
-
-  entry = entry_point_address ();
-
-  if (entry != 0)
-    return entry;
-
-  sym = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
-
-  if (!sym || MSYMBOL_TYPE (sym) != mst_text)
-    return 0;
-  else
-    return SYMBOL_VALUE_ADDRESS (sym);
-}
-
 /* Given a return value in `regbuf' with a type `valtype', 
    extract and copy its value into `valbuf'.  */
 
 void
-d10v_extract_return_value (valtype, regbuf, valbuf)
-     struct type *valtype;
+d10v_extract_return_value (type, regbuf, valbuf)
+     struct type *type;
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
   int len;
-  /*    printf("RET: VALTYPE=%d len=%d r2=0x%x\n",valtype->code, TYPE_LENGTH (valtype), (int)*(short *)(regbuf+REGISTER_BYTE(2)));  */
-  if (valtype->code == TYPE_CODE_PTR)
+  /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n",type->code, TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */
+  if (TYPE_CODE (type) == TYPE_CODE_PTR
+      && TYPE_TARGET_TYPE (type)
+      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
     {
+      /* pointer to function */
+      int num;
       short snum;
-      snum =  (short)extract_address (regbuf + REGISTER_BYTE (2), 2);
+      snum = extract_address (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
+      store_address ( valbuf, 4, D10V_MAKE_IADDR(snum));
+    }
+  else if (TYPE_CODE(type) == TYPE_CODE_PTR)
+    {
+      /* pointer to data */
+      int num;
+      short snum;
+      snum = extract_address (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
       store_address ( valbuf, 4, D10V_MAKE_DADDR(snum));
     }
   else
     {
-      len = TYPE_LENGTH (valtype);
+      len = TYPE_LENGTH (type);
       if (len == 1)
 	{
-	  unsigned short c = extract_unsigned_integer (regbuf + REGISTER_BYTE (2), 2);
+	  unsigned short c = extract_unsigned_integer (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
 	  store_unsigned_integer (valbuf, 1, c);
 	}
       else
-	memcpy (valbuf, regbuf + REGISTER_BYTE (2), len);
+	memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM), len);
     }
 }
 
