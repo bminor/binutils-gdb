@@ -1,3 +1,63 @@
+Sat Sep 30 23:03:31 1995  Jeff Law  (law@hurl.cygnus.com)
+
+	* config/tc-hppa.c (hppa_fix_adjustable): DP relative relocs
+	are not adjustable in SOM to avoid confusing the optimizing
+	linker.
+
+Fri Sep 29 15:18:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add some support for i960 MRI compatibility mode.
+	* config/tc-i960.c (md_pseudo_table): Add endian.
+	(get_args): Don't discard a space between alphanumeric characters.
+	(get_cdisp): Change text_section to now_seg.
+	(s_endian): New static function.
+	* config/tc-i960.h (MRI_MODE_NEEDS_PSEUDO_DOT): Define.
+	* expr.h (operatorT): Add O_logical_not, O_logical_and, and
+	O_logical_or.
+	* expr.c (operand): Treat '!' as logical not operator.  If
+	TC_I960, in MRI mode permit `sizeof secname' and `startof
+	secname'.
+	(op_rank): Bump values by 2 to make room for && and ||.  Add
+	entries for !, &&, and ||.
+	(expr_begin): Only do MRI changes if TC_M68K.
+	(operator): Recognize || and &&.
+	(expr): Handle new operatorT values.
+	* symbols.c (resolve_symbol_value): Handle new operatorT values.
+	(print_expr_1): Likewise.
+	* read.c (potable): Add debug, err, irep, irepc, print, purgem,
+	and rep.
+	(read_a_source_file): Handle MRI_MODE_NEEDS_PSEUDO_DOT.
+	(mri_comment_field): Only handle weird comments if TC_M68K.
+	(s_err): New function.
+	(s_org): Only punt in MRI mode if TC_M68K.
+	(s_mri_sect): Write TC_I960 version.
+	(s_print, s_purgem): New functions.
+	* read.h (s_err, s_print, s_purgem): Declare.
+	* cond.c (s_ifeqs): Implement.
+	(ignore_input): Handle MRI_MODE_NEEDS_PSEUDO_DOT.
+	* macro.c (macro_strip_at): New static variable.
+	(macro_init): Add strip_at parameter.
+	(do_formals): If macro_strip_at, change NARG to $NARG.
+	(define_macro): Skip a comma after the macro name.
+	(get_apost_token): Skip character if macro_strip_at, even if
+	macro_mri.
+	(macro_expand_body): If macro_strip_at, don't recognize parameters
+	in strings unless they are preceded by an '@'.  If macro_strip_at,
+	pass '@' as strip character to sub_actual.  If macro_strip_at,
+	strip '@' characters.
+	(macro_expand): If macro_strip_at, change NARG to $NARG.
+	(delete_macro): New function.
+	(expand_irp): Skip leading and trailing '"' characters if irpc.
+	* macro.h (macro_init): Mention new strip_at parameter.
+	(delete_macro): Declare.
+	* as.c (main): If TC_I960, pass flag_mri to macro_init as
+	strip_at; otherwise, pass 0.
+	* gasp.c (process_pseudo_op): Pass 0 to macro_init as strip_at.
+	(main): Likewise.
+	* doc/as.texinfo: Document i960 MRI mode.
+
+	* as.c (show_usage): Mention --defsym.
+
 Thu Sep 28 19:25:04 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Translate "powerpc" into "ppc", remove gen of
