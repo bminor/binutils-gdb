@@ -1,3 +1,10 @@
+Thu Oct 13 11:24:33 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* scripttempl/aout.sc: Set _etext and __etext to ., not
+	${DATA_ALIGNMENT}.  This is compatible with SunOS, and, with luck,
+	will not break any other system.  From Eric Valette
+	<ev@chorus.fr>.
+
 Wed Oct 12 16:22:58 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* lexsup.c (parse_args): Change -V to be a synonym for -v.  Add
