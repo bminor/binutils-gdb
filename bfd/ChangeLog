@@ -1,3 +1,8 @@
+Fri Jan 10 17:44:53 1992  Fred Fish  (fnf at cygnus.com)
+
+	* hosts/h-amix.h hosts/h-i386v4.h:  Change abort() to a function
+	returning void.
+
 Fri Jan 10 14:33:32 1992  Per Bothner  (bothner at cygnus.com)
 
 	* aoutx.h (NAME(aout,find_nearest_line)):  Recognize N_SOL
