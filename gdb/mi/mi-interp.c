@@ -49,6 +49,7 @@ static int mi_interpreter_resume (void *data);
 static int mi_interpreter_do_one_event (void *data);
 static int mi_interpreter_suspend (void *data);
 static int mi_interpreter_delete (void *data);
+static int mi_interpreter_exec (void *data, char *command);
 static int mi_interpreter_prompt (void *data, char *new_prompt);
 
 static void mi_execute_command_wrapper (char *cmd);
@@ -170,6 +171,13 @@ mi_interpreter_suspend (void *data)
 static int
 mi_interpreter_delete (void *data)
 {
+  return 1;
+}
+
+static int
+mi_interpreter_exec (void *data, char *command)
+{
+  mi_execute_command_wrapper (command);
   return 1;
 }
 
@@ -425,7 +433,7 @@ _initialize_mi_interp (void)
       NULL,			/* do_one_event_proc */
       mi_interpreter_suspend,	/* suspend_proc */
       mi_interpreter_delete,	/* delete_proc */
-      NULL,			/* exec_proc */
+      mi_interpreter_exec,	/* exec_proc */
       mi_interpreter_prompt	/* prompt_proc */
     };
 
