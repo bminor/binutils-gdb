@@ -1,3 +1,8 @@
+2001-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* Makefile.am: Update dependencies with "make dep-am".
+	* Makefile.in: Regenerate.
+
 2001-09-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* arc-dis.c: Formatting fixes.
