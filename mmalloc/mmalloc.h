@@ -1,7 +1,7 @@
 #ifndef MMALLOC_H
 #define MMALLOC_H 1
 
-#ifdef STDC_HEADERS
+#ifdef HAVE_STDDEF_H
 #include <stddef.h>
 #endif
 

@@ -1,3 +1,8 @@
+Sun Nov  5 00:14:13 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in: add check for stddef.h
+	* mmalloc.h: include stddef.h if HAVE_STDDEF_H is defined.
+
 Sat Nov  4 19:10:13 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in: add AC_HEADER_STDC check.
