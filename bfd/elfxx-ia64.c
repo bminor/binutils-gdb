@@ -312,7 +312,7 @@ static boolean elfNN_ia64_hpux_vec
 static void elfNN_hpux_post_process_headers
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
 boolean elfNN_hpux_backend_section_from_bfd_section
-  PARAMS ((bfd *abfd, ElfNN_Internal_Shdr *hdr, asection *sec, int *retval));
+  PARAMS ((bfd *abfd, asection *sec, int *retval));
 
 /* ia64-specific relocation */
 
@@ -4481,9 +4481,8 @@ elfNN_hpux_post_process_headers (abfd, info)
 }
 
 boolean
-elfNN_hpux_backend_section_from_bfd_section (abfd, hdr, sec, retval)
+elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 	bfd *abfd ATTRIBUTE_UNUSED;
-	Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
 	asection *sec;
 	int *retval;
 {

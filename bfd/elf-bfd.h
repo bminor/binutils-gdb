@@ -493,7 +493,7 @@ struct elf_backend_data
      section, *RETVAL should be left unchanged.  If it is not a normal
      ELF section *RETVAL should be set to the SHN_xxxx index.  */
   boolean (*elf_backend_section_from_bfd_section)
-    PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *retval));
+    PARAMS ((bfd *, asection *, int *retval));
 
   /* If this field is not NULL, it is called by the add_symbols phase
      of a link just before adding a symbol to the global linker hash
@@ -1541,7 +1541,7 @@ extern boolean _bfd_mips_elf_section_from_shdr
 extern boolean _bfd_mips_elf_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 extern boolean _bfd_mips_elf_section_from_bfd_section
-  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *, int *));
+  PARAMS ((bfd *, asection *, int *));
 extern boolean _bfd_mips_elf_section_processing
   PARAMS ((bfd *, Elf_Internal_Shdr *));
 extern void _bfd_mips_elf_symbol_processing

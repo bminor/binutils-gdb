@@ -3585,9 +3585,8 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
    the .scommon section.  */
 
 boolean
-_bfd_mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
+_bfd_mips_elf_section_from_bfd_section (abfd, sec, retval)
      bfd *abfd ATTRIBUTE_UNUSED;
-     Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
      asection *sec;
      int *retval;
 {

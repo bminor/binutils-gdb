@@ -1,3 +1,17 @@
+2002-01-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (elf_backend_data <elf_backend_section_from_bfd_section>):
+	Remove "Elf_Internal_Shdr *" param.
+	(_bfd_mips_elf_section_from_bfd_section): Ditto.
+	* elf32-mips.c (_bfd_mips_elf_section_from_bfd_section): Ditto.
+	* elf32-m32r.c (_bfd_m32r_elf_section_from_bfd_section): Ditto.
+	* elf32-v850.c (v850_elf_section_from_bfd_section): Ditto.
+	* elf64-mmix.c (mmix_elf_section_from_bfd_section): Ditto.
+	* elfxx-ia64.c (elfNN_hpux_backend_section_from_bfd_section): Ditto.
+	* elf.c (_bfd_elf_section_from_bfd_section): Allow backend
+	function to override special sections.  Remove hdr arg from
+	backend call, and don't loop.
+
 2002-01-16  Eric Christopher  <echristo@redhat.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Set require_jalxp

@@ -69,7 +69,7 @@ static boolean v850_elf_merge_private_bfd_data
 static boolean v850_elf_print_private_bfd_data
   PARAMS ((bfd *, PTR));
 static boolean v850_elf_section_from_bfd_section
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
+  PARAMS ((bfd *, asection *, int *));
 static void v850_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 static boolean v850_elf_add_symbol_hook
@@ -1930,9 +1930,8 @@ static asymbol * v850_elf_zcom_symbol_ptr;
    corresponding ELF section index.  */
 
 static boolean
-v850_elf_section_from_bfd_section (abfd, hdr, sec, retval)
+v850_elf_section_from_bfd_section (abfd, sec, retval)
      bfd *                 abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr * hdr ATTRIBUTE_UNUSED;
      asection *            sec;
      int *                 retval;
 {

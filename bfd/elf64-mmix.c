@@ -77,7 +77,7 @@ static bfd_reloc_status_type mmix_elf_perform_relocation
   PARAMS ((asection *, reloc_howto_type *, PTR, bfd_vma, bfd_vma));
 
 static boolean mmix_elf_section_from_bfd_section
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, asection *, int *));
+  PARAMS ((bfd *, asection *, int *));
 
 static boolean mmix_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
@@ -1557,9 +1557,8 @@ mmix_elf_symbol_processing (abfd, asym)
    index.  */
 
 static boolean
-mmix_elf_section_from_bfd_section (abfd, hdr, sec, retval)
+mmix_elf_section_from_bfd_section (abfd, sec, retval)
      bfd *                 abfd ATTRIBUTE_UNUSED;
-     Elf64_Internal_Shdr * hdr ATTRIBUTE_UNUSED;
      asection *            sec;
      int *                 retval;
 {

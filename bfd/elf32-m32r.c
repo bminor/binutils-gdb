@@ -45,7 +45,7 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
 static void m32r_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
 boolean _bfd_m32r_elf_section_from_bfd_section
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
+  PARAMS ((bfd *, asection *, int *));
 void _bfd_m32r_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 static boolean m32r_elf_add_symbol_hook
@@ -765,9 +765,8 @@ m32r_info_to_howto_rel (abfd, cache_ptr, dst)
    index.  */
 
 boolean
-_bfd_m32r_elf_section_from_bfd_section (abfd, hdr, sec, retval)
+_bfd_m32r_elf_section_from_bfd_section (abfd, sec, retval)
      bfd *abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
      asection *sec;
      int *retval;
 {

@@ -4050,50 +4050,47 @@ _bfd_elf_section_from_bfd_section (abfd, asect)
      bfd *abfd;
      struct sec *asect;
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  Elf_Internal_Shdr **i_shdrp = elf_elfsections (abfd);
+  struct elf_backend_data *bed;
   int index;
-  Elf_Internal_Shdr *hdr;
-  int maxindex = elf_numsections (abfd);
 
   if (elf_section_data (asect) != NULL
       && elf_section_data (asect)->this_idx != 0)
     return elf_section_data (asect)->this_idx;
 
   if (bfd_is_abs_section (asect))
-    return SHN_ABS;
-  if (bfd_is_com_section (asect))
-    return SHN_COMMON;
-  if (bfd_is_und_section (asect))
-    return SHN_UNDEF;
-
-  for (index = 1; index < maxindex; index++)
+    index = SHN_ABS;
+  else if (bfd_is_com_section (asect))
+    index = SHN_COMMON;
+  else if (bfd_is_und_section (asect))
+    index = SHN_UNDEF;
+  else
     {
-      hdr = i_shdrp[index];
-      if (hdr != NULL && hdr->bfd_section == asect)
-	return index;
+      Elf_Internal_Shdr **i_shdrp = elf_elfsections (abfd);
+      int maxindex = elf_numsections (abfd);
+
+      for (index = 1; index < maxindex; index++)
+	{
+	  Elf_Internal_Shdr *hdr = i_shdrp[index];
+
+	  if (hdr != NULL && hdr->bfd_section == asect)
+	    return index;
+	}
+      index = -1;
     }
 
+  bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_section_from_bfd_section)
     {
-      for (index = 0; index < maxindex; index++)
-	{
-	  int retval;
+      int retval = index;
 
-	  hdr = i_shdrp[index];
-	  if (hdr == NULL)
-	    continue;
-
-	  retval = index;
-	  if ((*bed->elf_backend_section_from_bfd_section)
-	      (abfd, hdr, asect, &retval))
-	    return retval;
-	}
+      if ((*bed->elf_backend_section_from_bfd_section) (abfd, asect, &retval))
+	return retval;
     }
 
-  bfd_set_error (bfd_error_nonrepresentable_section);
+  if (index == -1)
+    bfd_set_error (bfd_error_nonrepresentable_section);
 
-  return SHN_BAD;
+  return index;
 }
 
 /* Given a BFD symbol, return the index in the ELF symbol table, or -1
