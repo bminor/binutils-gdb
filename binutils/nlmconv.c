@@ -56,7 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* If strerror is just a macro, we want to use the one from libiberty
    since it will handle undefined values.  */
 #undef strerror
-extern char *strerror ();
+extern char *strerror PARAMS ((int));
 
 #ifndef localtime
 extern struct tm *localtime ();
@@ -1129,7 +1129,7 @@ static const char *
 select_output_format (arch, mach, bigendian)
      enum bfd_architecture arch;
      unsigned long mach;
-     boolean bigendian;
+     boolean bigendian ATTRIBUTE_UNUSED;
 {
   switch (arch)
     {
@@ -1162,7 +1162,7 @@ select_output_format (arch, mach, bigendian)
 
 static void
 setup_sections (inbfd, insec, data_ptr)
-     bfd *inbfd;
+     bfd *inbfd ATTRIBUTE_UNUSED;
      asection *insec;
      PTR data_ptr;
 {
@@ -1386,12 +1386,12 @@ mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 static void
 default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 		       contents_size)
-     bfd *outbfd;
+     bfd *outbfd ATTRIBUTE_UNUSED;
      asection *insec;
      arelent ***relocs_ptr;
      long *reloc_count_ptr;
-     char *contents;
-     bfd_size_type contents_size;
+     char *contents ATTRIBUTE_UNUSED;
+     bfd_size_type contents_size ATTRIBUTE_UNUSED;
 {
   if (insec->output_offset != 0)
     {
@@ -1595,8 +1595,8 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      asection *insec;
      register arelent ***relocs_ptr;
      long *reloc_count_ptr;
-     char *contents;
-     bfd_size_type contents_size;
+     char *contents ATTRIBUTE_UNUSED;
+     bfd_size_type contents_size ATTRIBUTE_UNUSED;
 {
   long old_reloc_count;
   arelent **old_relocs;
@@ -1728,7 +1728,7 @@ static bfd_size_type powerpc_initial_got_size;
 static void
 powerpc_build_stubs (inbfd, outbfd, symbols_ptr, symcount_ptr)
      bfd *inbfd;
-     bfd *outbfd;
+     bfd *outbfd ATTRIBUTE_UNUSED;
      asymbol ***symbols_ptr;
      long *symcount_ptr;
 {
@@ -1917,7 +1917,7 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      register arelent ***relocs_ptr;
      long *reloc_count_ptr;
      char *contents;
-     bfd_size_type contents_size;
+     bfd_size_type contents_size ATTRIBUTE_UNUSED;
 {
   reloc_howto_type *toc_howto;
   long reloc_count;

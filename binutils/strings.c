@@ -136,6 +136,8 @@ static void print_strings PARAMS ((const char *filename, FILE *stream,
 				  file_ptr address, int stop_point,
 				  int magiccount, char *magic));
 static void usage PARAMS ((FILE *stream, int status));
+static long get_char PARAMS ((FILE *stream, file_ptr *address,
+			      int *magiccount, char **magic));
 
 int
 main (argc, argv)

@@ -1,3 +1,10 @@
+2001-09-24  Andreas Jaeger  <aj@suse.de>
+
+	* nlmconv.c: Fix warnings about unused attributes and function
+	prototypes.
+
+	* strings.c: Add prototype for get_char.
+
 2000-09-19  H.J. Lu  <hjl@gnu.org>
 
 	* doc/Makefile.am ($(DEMANGLER_NAME).1): Try cxxfilt.man and
