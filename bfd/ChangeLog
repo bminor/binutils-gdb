@@ -1,3 +1,9 @@
+2003-09-18  Andreas Schwab  <schwab@suse.de>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Use
+	_bfd_generic_link_hash_table_create instead of
+	bfd_link_hash_table_create.
+
 2003-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add top_id.
