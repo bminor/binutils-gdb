@@ -1,1 +1,44 @@
+GDB Internals documentation
 
+This needs to be wrapped in texinfo stuff...
+
+Cleanups
+
+Cleanups are a structured way to deal with things that need to be done
+later.  When your code does something (like malloc some memory, or open
+a file) that needs to be undone later (e.g. free the memory or close
+the file), it can make a cleanup.  The cleanup will be done at some
+future point:  when the command is finished, when an error occurs, or
+when your code decides it's time to do cleanups.
+
+You can also discard cleanups, that is, throw them away without doing
+what they say.  This is only done if you ask that it be done.
+
+Syntax:
+
+	old_chain = make_cleanup (function, arg);
+
+This makes a cleanup which will cause FUNCTION to be called with ARG
+(a char *) later.  The result, OLD_CHAIN, is a handle that can be
+passed to do_cleanups or discard_cleanups later.  Unless you are
+going to call do_cleanups or discard_cleanups yourself,
+you can ignore the result from make_cleanup.
+
+	do_cleanups (old_chain);
+
+Performs all cleanups done since make_cleanup returned OLD_CHAIN.
+E.g.:   make_cleanup (a, 0); old = make_cleanup (b, 0); do_cleanups (old);
+will call b() but will not call a().  The cleanup that calls a() will remain
+in the cleanup chain, and will be done later unless otherwise discarded.
+
+	discard_cleanups (old_chain);
+
+Same as do_cleanups except that it just removes the cleanups from the
+chain and does not call the specified functions.
+
+
+Some functions, e.g. fputs_filtered() or error(), specify that they
+"should not be called when cleanups are not in place".  This means
+that any actions you need to reverse in the case of an error or
+interruption must be on the cleanup chain before you call these functions,
+since they might never return to your code (they "longjmp" instead).
