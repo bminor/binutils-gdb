@@ -1,3 +1,17 @@
+Tue Nov 21 14:08:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Strip --host and --target options from
+	CONFIG_ARGUMENTS, and always configure for --host only.  Add
+	--with-cross-host option when building with a cross-compiler.
+	* configure: Canonicalize the arguments put into config.status by
+	always using `=' for an option with an argument.  Pass a presumed
+	--host or --target explicitly.
+
+Fri Nov 17 17:50:30 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config.sub: Merge -macos*, -magic*, -pe*, and -win32 cases
+	into general OS recognition case.
+
 Fri Nov 17 17:42:25 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in (target_configdirs): add target-winsup only

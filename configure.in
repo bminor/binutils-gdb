@@ -654,9 +654,21 @@ fi
 # Record target_configdirs and the configure arguments in Makefile.
 target_configdirs=`echo "${target_configdirs}" | sed -e 's/target-//g'`
 targargs=`echo "${arguments}" | \
-	sed -e 's/--*norecursion//' \
-	    -e 's/--*cache[a-z-]*=[^ 	]*//' \
-	    -e 's/--*cache[a-z-]*[ 	][ 	]*[^ 	]*//'`
+	sed -e 's/--norecursion//' \
+	    -e 's/--cache[a-z-]*=[^ 	]*//' \
+	    -e 's/--ho[a-z-]*=[^ 	]*//' \
+	    -e 's/--ta[a-z-]*=[^ 	]*//'`
+
+# Passing a --with-cross-host argument lets the target libraries know
+# whether they are being built with a cross-compiler or being built
+# native.  However, it would be better to use other mechanisms to make the
+# sorts of decisions they want to make on this basis.  Please consider
+# this option to be deprecated.  FIXME.
+if [ x${is_cross_compiler} = xyes ]; then
+  targargs="--with-cross-host=${host_alias} $[targargs}"
+fi
+
+targargs="--host=${target_alias} ${targargs}"
 sed -e "s:^TARGET_CONFIGDIRS[ 	]*=.*$:TARGET_CONFIGDIRS = ${target_configdirs}:" \
     -e "s%^CONFIG_ARGUMENTS[ 	]*=.*$%CONFIG_ARGUMENTS = ${targargs}%" \
     -e "s%^TARGET_SUBDIR[ 	]*=.*$%TARGET_SUBDIR = ${target_subdir}%" \

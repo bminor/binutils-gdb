@@ -45,7 +45,7 @@ symbolic_link='ln -s'
 
 Makefile=Makefile
 Makefile_in=Makefile.in
-arguments=$*
+arguments=
 build_alias=
 cache_file=
 cache_file_option=
@@ -137,12 +137,17 @@ do
 	case $option in
 	--*=*)
 		optarg=`echo $option | sed -e 's/^[^=]*=//'`
+		arguments="$arguments $option"
 		;;
 # These options have mandatory values.  Since we didn't find an = sign,
 # the value must be in the next argument
 	--b* | --cache* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm* | --x-*)
 		optarg=$1
 		shift
+		arguments="$arguments $option=$optarg"
+		;;
+	--*)
+		arguments="$arguments $option"
 		;;
 	esac
 
@@ -353,6 +358,8 @@ case "${fatal}" in
 			;;
 		*)
 			host_alias=$undefs
+			arguments="--host=$host_alias $arguments"
+			undefs=NOUNDEFS
 			;;
 		esac
 	esac
@@ -367,6 +374,7 @@ case "${fatal}" in
 			;;
 		*)
 			target_alias=$undefs
+			arguments="--target=$target_alias $arguments"
 			;;
 		esac
 	esac
@@ -440,7 +448,18 @@ case "${srcdir}" in
                 fi
         fi
         ;;
-*) ;;
+*)
+	# Set srcdir to "." if that's what it is.
+	# This is important for multilib support.
+	if [ ! -d ${srcdir} ] ; then
+		echo "Invalid source directory ${srcdir}" >&2
+		exit 1
+	fi
+	pwd=`pwd`
+	srcpwd=`cd ${srcdir} ; pwd`
+	if [ "${pwd}" = "${srcpwd}" ] ; then
+		srcdir=.
+	fi
 esac
 
 ### warn about some conflicting configurations.
@@ -670,8 +689,8 @@ if [ "${build}" != "${host}" ]; then
 
   tools="AR AR_FOR_TARGET AS AS_FOR_TARGET BISON CC_FOR_BUILD"
   tools="${tools} CC_FOR_TARGET CXX_FOR_TARGET HOST_PREFIX"
-  tools="${tools} HOST_PREFIX_1 LEX MAKEINFO NM NM_FOR_TARGET"
-  tools="${tools} RANLIB RANLIB_FOR_TARGET"
+  tools="${tools} HOST_PREFIX_1 LD LD_FOR_TARGET LEX MAKEINFO NM"
+  tools="${tools} NM_FOR_TARGET RANLIB RANLIB_FOR_TARGET"
 
   for var in ${tools}; do
     if [ -z "`eval 'echo $'"${var}"`" -a -r Makefile ]; then
@@ -700,6 +719,8 @@ s/\\\n//g
   CXX_FOR_TARGET=${CXX_FOR_TARGET-${target_alias}-gcc}
   HOST_PREFIX=${build_alias}-
   HOST_PREFIX_1=${build_alias}-
+  LD=${LD-${host_alias}-ld}
+  LD_FOR_TARGET=${LD_FOR_TARGET-${target_alias}-ld}
   MAKEINFO=${MAKEINFO-makeinfo}
   NM=${NM-${host_alias}-nm}
   NM_FOR_TARGET=${NM_FOR_TARGET-${target_alias}-nm}
@@ -748,6 +769,7 @@ s/\\\n//g
   export AS
   export AR
   export CC_FOR_BUILD
+  export LD
   export NM
   export RANLIB
 else
@@ -757,7 +779,7 @@ else
     for dir in $PATH; do
       test -z "$dir" && dir=.
       if test -f $dir/gcc; then
-	CC="gcc"
+	CC="gcc -O2"
 	break
       fi
     done
@@ -765,7 +787,7 @@ else
     CC=${CC-cc}
   fi
 
-  CXX=${CXX-"g++ -O"}
+  CXX=${CXX-"gcc"}
 fi
 
 export CC
