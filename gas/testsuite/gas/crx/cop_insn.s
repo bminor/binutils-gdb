@@ -26,7 +26,7 @@ ldcr $1, r3, c8
 
 	.global stcr
 stcr:
-stcr $2, r4, c11
+stcr $2, c11, r4
 
 	.global ldcsr
 ldcsr:
@@ -34,7 +34,7 @@ ldcsr $4, r6, cs12
 
 	.global stcsr
 stcsr:
-stcsr $7, r13, cs13
+stcsr $7, cs10, r13
 
 	.global loadmcr
 loadmcr:

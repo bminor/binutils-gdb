@@ -22,13 +22,13 @@ Disassembly of section .text:
   10:	11 30 38 34 	ldcr	\$0x1, r3, c8
 
 00000014 <stcr>:
-  14:	12 30 4b 35 	stcr	\$0x2, r4, c11
+  14:	12 30 b4 35 	stcr	\$0x2, c11, r4
 
 00000018 <ldcsr>:
   18:	14 30 6c 36 	ldcsr	\$0x4, r6, cs12
 
 0000001c <stcsr>:
-  1c:	17 30 dd 37 	stcsr	\$0x7, r13, cs13
+  1c:	17 30 ad 37 	stcsr	\$0x7, cs10, r13
 
 00000020 <loadmcr>:
   20:	13 31 01 30 	loadmcr	\$0x3, r1, {c2,c3,c5}
