@@ -1,5 +1,7 @@
 2004-01-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-sol2-nat.c: Add missing '\'.
+
 	* sparc-tdep.c (sparc32_return_value): New function.
 	 (sparc32_use_struct_convention, sparc32_return_value_on_stack):
 	Remove functions.

@@ -48,7 +48,7 @@
    Note that a 32-bit GDB won't be able to debug a 64-bit target
    process using /proc on Solaris.  */
 
-#if (defined (__arch64__) ||
+#if (defined (__arch64__) || \
      (defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)))
 
 #include "sparc64-tdep.h"
