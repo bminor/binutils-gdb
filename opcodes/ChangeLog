@@ -1,3 +1,12 @@
+Wed Sep 30 10:17:50 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* d10v-opc.c: Treat TRAP as if it were a branch type instruction.
+
+Mon Sep 28 14:35:43 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* d10v-dis.c (print_operand): If num is nonzero, then
+	add OPERAND_ACC1, not OPERAND_ACC0.
+
 Thu Sep 24 09:20:03 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c: Add FLAG_JSR attribute to DBT, REIT, RTD, and TRAP
