@@ -1,5 +1,11 @@
 2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (insert_catchpoint): New function.
+	(insert_breakpoints): Use catch_exceptions to call
+	insert_catchpoint.  Disable catchpoints if they fail to insert.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* symfile.c (reread_symbols): Clear sym_private.
 
 2003-06-17  Andrew Cagney  <cagney@redhat.com>

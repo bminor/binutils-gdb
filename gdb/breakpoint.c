@@ -703,6 +703,35 @@ read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
 }
 
 
+/* A wrapper function for inserting catchpoints.  */
+int
+insert_catchpoint (struct ui_out *uo, void *args)
+{
+  struct breakpoint *b = (struct breakpoint *) args;
+  int val = -1;
+
+  switch (b->type)
+    {
+    case bp_catch_fork:
+      val = target_insert_fork_catchpoint (PIDGET (inferior_ptid));
+      break;
+    case bp_catch_vfork:
+      val = target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+      break;
+    case bp_catch_exec:
+      val = target_insert_exec_catchpoint (PIDGET (inferior_ptid));
+      break;
+    default:
+      warning ("Internal error, %s line %d.", __FILE__, __LINE__);
+      break;
+    }
+
+  if (val < 0)
+    throw_exception (RETURN_ERROR);
+
+  return 0;
+}
+
 /* insert_breakpoints is used when starting or continuing the program.
    remove_breakpoints is used when the program stops.
    Both return zero if successful,
@@ -1054,32 +1083,15 @@ insert_breakpoints (void)
 	     && !b->inserted
 	     && !b->duplicate)
       {
-	val = -1;
-	switch (b->type)
-	  {
-	  case bp_catch_fork:
-	    val = target_insert_fork_catchpoint (PIDGET (inferior_ptid));
-	    break;
-	  case bp_catch_vfork:
-	    val = target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
-	    break;
-	  case bp_catch_exec:
-	    val = target_insert_exec_catchpoint (PIDGET (inferior_ptid));
-	    break;
-	  default:
-	    warning ("Internal error, %s line %d.", __FILE__, __LINE__);
-	    break;
-	  }
+	char prefix[64];
+
+	sprintf (prefix, "warning: inserting catchpoint %d: ", b->number);
+	val = catch_exceptions (uiout, insert_catchpoint, b, prefix,
+				RETURN_MASK_ERROR);
 	if (val < 0)
-	  {
-	    fprintf_unfiltered (tmp_error_stream, 
-				"Cannot insert catchpoint %d.", b->number);
-	  }
+	  b->enable_state = bp_disabled;
 	else
 	  b->inserted = 1;
-
-	if (val)
-	  return_val = val;	/* remember failure */
       }
   }
   
