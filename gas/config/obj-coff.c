@@ -501,7 +501,7 @@ obj_coff_ln (appline)
 
 static void
 obj_coff_def (what)
-     int what;
+     int what ATTRIBUTE_UNUSED;
 {
   char name_end;		/* Char after the end of name */
   char *symbol_name;		/* Name of the debug symbol */
@@ -548,7 +548,7 @@ unsigned int dim_index;
 
 static void
 obj_coff_endef (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *symbolP;
 
@@ -728,7 +728,7 @@ obj_coff_endef (ignore)
 
 static void
 obj_coff_dim (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int dim_index;
 
@@ -768,7 +768,7 @@ obj_coff_dim (ignore)
 
 static void
 obj_coff_line (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int this_base;
 
@@ -801,7 +801,7 @@ obj_coff_line (ignore)
 
 static void
 obj_coff_size (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -817,7 +817,7 @@ obj_coff_size (ignore)
 
 static void
 obj_coff_scl (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -832,7 +832,7 @@ obj_coff_scl (ignore)
 
 static void
 obj_coff_tag (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *symbol_name;
   char name_end;
@@ -869,7 +869,7 @@ obj_coff_tag (ignore)
 
 static void
 obj_coff_type (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -891,7 +891,7 @@ obj_coff_type (ignore)
 
 static void
 obj_coff_val (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1138,9 +1138,9 @@ coff_frob_symbol (symp, punt)
 
 void
 coff_adjust_section_syms (abfd, sec, x)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
-     PTR x;
+     PTR x ATTRIBUTE_UNUSED;
 {
   symbolS *secsym;
   segment_info_type *seginfo = seg_info (sec);
@@ -1204,7 +1204,7 @@ coff_frob_file_after_relocs ()
 
 void
 obj_coff_section (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* Strip out the section name */
   char *section_name;
@@ -4440,7 +4440,7 @@ coff_pop_insert ()
 
 static int
 coff_sec_sym_ok_for_reloc (sec)
-     asection *sec;
+     asection *sec ATTRIBUTE_UNUSED;
 {
   return 0;
 }
