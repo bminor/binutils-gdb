@@ -72,6 +72,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 	run_dump_test "mapping"
 	gas_test "bignum1.s" "" $stdoptlist "bignums"
 	run_dump_test "unwind"
+
+	run_dump_test "tls"
     }
 
     if {! [istarget arm*-*-aout] && ![istarget arm-*-pe]} then {
