@@ -385,6 +385,9 @@ frame_map_name_to_regnum (const char *name, int len)
 {
   int i;
 
+  if (len < 0)
+    len = strlen (name);
+
   /* Search register name space. */
   for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
     if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))

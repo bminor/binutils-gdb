@@ -1,3 +1,15 @@
+2003-02-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h: Note that namelen can be negative.
+	* frame.c (frame_map_name_to_regnum): When LEN is negative, use
+	NAME's length.
+
+	* NEWS: Mention that the d10v's `regs' command is deprecated.
+	* d10v-tdep.c (d10v_gdbarch_init): Set print_registers_info.
+	(d10v_print_registers_info): New function.
+	(show_regs): Call d10v_print_registers_info.
+	(_initialize_d10v_tdep): Mark "show regs" command as deprecated.
+
 2003-02-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* stack.c (print_frame_info): Restore call to annotate_frame_begin

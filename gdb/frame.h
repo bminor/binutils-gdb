@@ -291,9 +291,10 @@ extern void frame_read_unsigned_register (struct frame_info *frame,
 
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
-   includes builtin registers.  */
+   includes builtin registers.  If NAMELEN is negative, use the NAME's
+   length when doing the comparison.  */
 
-extern int frame_map_name_to_regnum (const char *name, int strlen);
+extern int frame_map_name_to_regnum (const char *name, int namelen);
 extern const char *frame_map_regnum_to_name (int regnum);
 
 /* Unwind the PC.  Strictly speaking return the resume address of the

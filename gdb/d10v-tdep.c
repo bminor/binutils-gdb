@@ -819,65 +819,90 @@ d10v_frame_unwind_cache (struct frame_info *fi,
 }
 
 static void
-show_regs (char *args, int from_tty)
+d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
+			   struct frame_info *frame, int regnum, int all)
 {
-  int a;
-  printf_filtered ("PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
-		   (long) read_register (PC_REGNUM),
-		   (long) d10v_make_iaddr (read_register (PC_REGNUM)),
-		   (long) read_register (PSW_REGNUM),
-		   (long) read_register (24),
-		   (long) read_register (25),
-		   (long) read_register (23));
-  printf_filtered ("R0-R7  %04lx %04lx %04lx %04lx %04lx %04lx %04lx %04lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
-  printf_filtered ("R8-R15 %04lx %04lx %04lx %04lx %04lx %04lx %04lx %04lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
-  for (a = 0; a < NR_IMAP_REGS; a++)
+  if (regnum >= 0)
     {
-      if (a > 0)
-	printf_filtered ("    ");
-      printf_filtered ("IMAP%d %04lx", a, d10v_imap_register (a));
+      default_print_registers_info (gdbarch, file, frame, regnum, all);
+      return;
     }
-  if (NR_DMAP_REGS == 1)
-    printf_filtered ("    DMAP %04lx\n", d10v_dmap_register (2));
-  else
-    {
-      for (a = 0; a < NR_DMAP_REGS; a++)
-	{
-	  printf_filtered ("    DMAP%d %04lx", a, d10v_dmap_register (a));
-	}
-      printf_filtered ("\n");
-    }
-  printf_filtered ("A0-A%d", NR_A_REGS - 1);
+
   {
-    char *num = alloca (max_register_size (current_gdbarch));
+    ULONGEST pc, psw, rpt_s, rpt_e, rpt_c;
+    frame_read_unsigned_register (frame, PC_REGNUM, &pc);
+    frame_read_unsigned_register (frame, PSW_REGNUM, &psw);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_s", -1), &rpt_s);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_e", -1), &rpt_e);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_c", -1), &rpt_c);
+    fprintf_filtered (file, "PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
+		     (long) pc, (long) d10v_make_iaddr (pc), (long) psw,
+		     (long) rpt_s, (long) rpt_e, (long) rpt_c);
+  }
+
+  {
+    int group;
+    for (group = 0; group < 16; group += 8)
+      {
+	int r;
+	fprintf_filtered (file, "R%d-R%-2d", group, group + 7);
+	for (r = group; r < group + 8; r++)
+	  {
+	    ULONGEST tmp;
+	    frame_read_unsigned_register (frame, r, &tmp);
+	    fprintf_filtered (file, " %04lx", (long) tmp);
+	  }
+	fprintf_filtered (file, "\n");
+      }
+  }
+
+  /* Note: The IMAP/DMAP registers don't participate in function
+     calls.  Don't bother trying to unwind them.  */
+
+  {
+    int a;
+    for (a = 0; a < NR_IMAP_REGS; a++)
+      {
+	if (a > 0)
+	  fprintf_filtered (file, "    ");
+	fprintf_filtered (file, "IMAP%d %04lx", a, d10v_imap_register (a));
+      }
+    if (NR_DMAP_REGS == 1)
+      /* Registers DMAP0 and DMAP1 are constant.  Just return dmap2.  */
+      fprintf_filtered (file, "    DMAP %04lx\n", d10v_dmap_register (2));
+    else
+      {
+	for (a = 0; a < NR_DMAP_REGS; a++)
+	  {
+	    fprintf_filtered (file, "    DMAP%d %04lx", a, d10v_dmap_register (a));
+	  }
+	fprintf_filtered (file, "\n");
+      }
+  }
+
+  {
+    char *num = alloca (max_register_size (gdbarch));
+    int a;
+    fprintf_filtered (file, "A0-A%d", NR_A_REGS - 1);
     for (a = A0_REGNUM; a < A0_REGNUM + NR_A_REGS; a++)
       {
 	int i;
-	printf_filtered ("  ");
-	deprecated_read_register_gen (a, (char *) &num);
+	fprintf_filtered (file, "  ");
+	frame_register_read (frame, a, num);
 	for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
 	  {
-	    printf_filtered ("%02x", (num[i] & 0xff));
+	    fprintf_filtered (file, "%02x", (num[i] & 0xff));
 	  }
       }
   }
-  printf_filtered ("\n");
+  fprintf_filtered (file, "\n");
+}
+
+static void
+show_regs (char *args, int from_tty)
+{
+  d10v_print_registers_info (current_gdbarch, gdb_stdout,
+			     get_current_frame (), -1, 1);
 }
 
 static CORE_ADDR
@@ -1701,6 +1726,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_sim_regno (gdbarch, d10v_register_sim_regno);
   set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
 
+  set_gdbarch_print_registers_info (gdbarch, d10v_print_registers_info);
+
   frame_unwind_append_predicate (gdbarch, d10v_frame_p);
 
   return gdbarch;
@@ -1720,7 +1747,8 @@ _initialize_d10v_tdep (void)
   target_resume_hook = d10v_eva_prepare_to_trace;
   target_wait_loop_hook = d10v_eva_get_trace_data;
 
-  add_com ("regs", class_vars, show_regs, "Print all registers");
+  deprecate_cmd (add_com ("regs", class_vars, show_regs, "Print all registers"),
+		 "info registers");
 
   add_com ("itrace", class_support, trace_command,
 	   "Enable tracing of instruction execution.");
