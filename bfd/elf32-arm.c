@@ -5710,6 +5710,55 @@ elf32_arm_swap_symbol_out (bfd *abfd,
   bfd_elf32_swap_symbol_out (abfd, src, cdst, shndx);
 }
 
+/* Add the PT_ARM_EXIDX program header.  */
+
+static bfd_boolean
+elf32_arm_modify_segment_map (bfd *abfd, 
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  struct elf_segment_map *m;
+  asection *sec;
+
+  sec = bfd_get_section_by_name (abfd, ".ARM.exidx");
+  if (sec != NULL && (sec->flags & SEC_LOAD) != 0)
+    {
+      /* If there is already a PT_ARM_EXIDX header, then we do not
+	 want to add another one.  This situation arises when running
+	 "strip"; the input binary already has the header.  */
+      m = elf_tdata (abfd)->segment_map;
+      while (m && m->p_type != PT_ARM_EXIDX)
+	m = m->next;
+      if (!m)
+	{
+	  m = bfd_zalloc (abfd, sizeof (struct elf_segment_map));
+	  if (m == NULL)
+	    return FALSE;
+	  m->p_type = PT_ARM_EXIDX;
+	  m->count = 1;
+	  m->sections[0] = sec;
+
+	  m->next = elf_tdata (abfd)->segment_map;
+	  elf_tdata (abfd)->segment_map = m;
+	}
+    }
+
+  return TRUE;
+}
+
+/* We may add a PT_ARM_EXIDX program header.  */
+
+static int
+elf32_arm_additional_program_headers (bfd *abfd)
+{
+  asection *sec;
+
+  sec = bfd_get_section_by_name (abfd, ".ARM.exidx");
+  if (sec != NULL && (sec->flags & SEC_LOAD) != 0)
+    return 1;
+  else
+    return 0;
+}
+
 /* We use this to override swap_symbol_in and swap_symbol_out.  */
 const struct elf_size_info elf32_arm_size_info = {
   sizeof (Elf32_External_Ehdr),
@@ -5780,6 +5829,9 @@ const struct elf_size_info elf32_arm_size_info = {
 #define elf_backend_copy_indirect_symbol        elf32_arm_copy_indirect_symbol
 #define elf_backend_symbol_processing		elf32_arm_symbol_processing
 #define elf_backend_size_info			elf32_arm_size_info
+#define elf_backend_modify_segment_map		elf32_arm_modify_segment_map
+#define elf_backend_additional_program_headers \
+  elf32_arm_additional_program_headers
 
 #define elf_backend_can_refcount    1
 #define elf_backend_can_gc_sections 1
@@ -5914,8 +5966,7 @@ elf32_arm_symbian_begin_write_processing (bfd *abfd,
 
 static bfd_boolean
 elf32_arm_symbian_modify_segment_map (bfd *abfd, 
-				      struct bfd_link_info *info 
-				        ATTRIBUTE_UNUSED)
+				      struct bfd_link_info *info)
 {
   struct elf_segment_map *m;
   asection *dynsec;
@@ -5932,7 +5983,8 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
       elf_tdata (abfd)->segment_map = m;
     }
 
-  return TRUE;
+  /* Also call the generic arm routine.  */
+  return elf32_arm_modify_segment_map (abfd, info);
 }
 
 #undef elf32_bed
