@@ -1,3 +1,7 @@
+Tue Jul 28 18:14:07 1998  Stan Cox  <scox@equinox.cygnus.com>
+
+	* sparc.h: (R_SPARC_REV32): Added for little endian data e.g. sparc 86x.
+
 Fri Jul 24 11:22:06 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300.h: Add R_MN10300_24 relocation.
