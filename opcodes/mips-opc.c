@@ -313,6 +313,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"cfc1",    "t,S",	0x44400000, 0xffe007ff,	LCD|WR_t|RD_C1|FP_S,	I1	},
 {"cfc2",    "t,G",	0x48400000, 0xffe007ff,	LCD|WR_t|RD_C2,	I1	},
 {"cfc3",    "t,G",	0x4c400000, 0xffe007ff,	LCD|WR_t|RD_C3,	I1	},
+  /* start-sanitize-vr4320 */
+{"clz",    "d,s",	0x00000035, 0xfc1f07ff, WR_d|RD_s,	N4	},
+  /* end-sanitize-vr4320 */
 {"ctc0",    "t,G",	0x40c00000, 0xffe007ff,	COD|RD_t|WR_CC,	I1	},
 {"ctc1",    "t,G",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC|FP_S,	I1	},
 {"ctc1",    "t,S",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC|FP_S,	I1	},
@@ -338,6 +341,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* start-sanitize-vr5400 */
 {"dbreak",  "",		0x7000003f, 0xffffffff,	0,	N5	},
   /* end-sanitize-vr5400 */
+  /* start-sanitize-vr4320 */
+{"dclz",    "d,s",	0x0000003D, 0xfc1f07ff, WR_d|RD_s,	N4	},
+  /* end-sanitize-vr4320 */
 /* dctr and dctw are used on the r5000.  */
 {"dctr",    "o(b)",	0xbc050000, 0xfc1f0000, RD_b,	I3	},
 {"dctw",    "o(b)",	0xbc090000, 0xfc1f0000, RD_b,	I3	},

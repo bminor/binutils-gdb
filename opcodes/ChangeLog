@@ -1,4 +1,8 @@
 start-sanitize-vr4320
+Tue Mar 10 15:57:23 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c ("clz","dclz"): Added the 4320 versions.
+
 Mon Mar  9 15:22:06 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips-opc.c ("macc*","mul*"): Added the 4320 versions
