@@ -1,3 +1,8 @@
+Wed Sep 27 11:33:38 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Remove Sep 26 changes to this
+	function, keeping other Sep. 26 changes.
+
 Wed Sep 27 10:29:13 1995  Kim Knuttila  <krk@nellie>
 
 	* configure (emulations): Added support for ppcle-*-[pe|winnt]

@@ -3681,8 +3681,6 @@ md_apply_fix3 (fixp, valuep, seg)
      segT seg;
 {
   valueT value;
-  char *where;
-  unsigned long insn;
 
   /* FIXME FIXME FIXME: The value we are passed in *valuep includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
@@ -3722,6 +3720,8 @@ md_apply_fix3 (fixp, valuep, seg)
     {
       int opindex;
       const struct powerpc_operand *operand;
+      char *where;
+      unsigned long insn;
 
       opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
 
@@ -3819,13 +3819,42 @@ md_apply_fix3 (fixp, valuep, seg)
 #endif
       switch (fixp->fx_r_type)
 	{
-	case BFD_RELOC_32:	/* fixup errant PC relative relocations */
+	case BFD_RELOC_32:
 	case BFD_RELOC_CTOR:
 	  if (fixp->fx_pcrel)
 	    {
 	      fixp->fx_r_type = BFD_RELOC_32_PCREL;
 	      value += fixp->fx_frag->fr_address + fixp->fx_where;
-	    }
+	    }			/* fall through */
+
+	case BFD_RELOC_32_PCREL:
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      value, 4);
+	  break;
+
+	case BFD_RELOC_LO16:
+	case BFD_RELOC_HI16:
+	case BFD_RELOC_HI16_S:
+	case BFD_RELOC_PPC_TOC16:
+	case BFD_RELOC_16:
+	case BFD_RELOC_GPREL16:
+	  if (fixp->fx_pcrel)
+	    abort ();
+
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      value, 2);
+	  break;
+
+	case BFD_RELOC_8:
+	  if (fixp->fx_pcrel)
+	    abort ();
+
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      value, 1);
+	  break;
+
+	default:
+	  abort ();
 	}
     }
 
