@@ -1,3 +1,44 @@
+Wed Apr  2 18:51:20 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gen-support.c (gen_support_c): sim-state.h renamed to sim-main.h.
+	* gen-idecode.c (gen_idecode_c): Likewise.
+	* igen.c (gen_semantics_c): Likewise.
+
+Mon Mar 24 10:10:08 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* gen-icache.c (print_icache_body): No longer define cpu/sd,
+ 	support.h now defines CPU/SD globally.
+
+	* gen-model.c (gen_model_h): Ditto.
+
+	* gen-idecode.c (print_idecode_issue_function_body): Ditto.
+	(print_jump): Ditto.
+	(print_jump_until_stop_body): Ditto.
+	(print_idecode_validate): Ditto.
+
+	* gen-icache.c (print_icache_body): Ditto.
+
+	* gen-semantics.c (print_semantic_body): Ditto.
+
+	* igen.c (print_semantic_function_formal): Rename cpu to sim_cpu,
+ 	processor to cpu.
+	(print_icache_function_formal): Ditto.
+
+	* gen-support.c (print_support_function_name): Include sd/cpu arg
+ 	in support function argument list.
+	(support_c_function): Generate code to cpu/sd from sd/cpu.
+	(gen_support_h): Define _SD the argument prefix for all support
+ 	functions.  Define SD/CPU to determine sd/cpu from value of _SD
+	macro.
+
+Tue Mar 18 15:52:24 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* gen-support.c (gen_support_c): Update for renaming of engine to
+ 	sim-state.
+	
+	* igen.c: Ditto.
+	* gen-idecode.c (gen_idecode_c): Ditto.
+
 Mon Mar 17 15:17:07 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* ld-decode.c (load_decode_table): Rename slash to reserved.
