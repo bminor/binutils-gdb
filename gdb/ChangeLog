@@ -1,3 +1,14 @@
+Wed Nov 29 16:39:50 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* monitor.c (monitor_debug): New function to print monitor debug
+	output in printable fashion.
+	(monitor_printf{,_noecho}): Call monitor_debug instead of
+	fputs_unfiltered.
+
+	* srec.c (load_srec): When printing srec debug information, do not
+	print the carriage return directly, instead print \\r followed by
+	a newline.
+
 Tue Nov 28 15:25:28 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (target_subdir): Define.

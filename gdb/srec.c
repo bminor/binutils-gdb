@@ -79,7 +79,7 @@ load_srec (desc, file, maxrecsize, flags, hashmark)
 				  flags);
 
 	    if (remote_debug)
-	      fprintf_unfiltered (gdb_stderr, "%.*s", reclen, srec);
+	      fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
 	    SERIAL_WRITE (desc, srec, reclen);
 
 	    if (hashmark)
@@ -102,10 +102,10 @@ load_srec (desc, file, maxrecsize, flags, hashmark)
   make_srec (srec, abfd->start_address, NULL, NULL, 0, &reclen, flags);
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stderr, "%.*s", reclen, srec);
+    fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
   SERIAL_WRITE (desc, srec, reclen);
 
-  SERIAL_WRITE (desc, "\r\r", 2); /* Some monitors need these to wake up */
+  SERIAL_WRITE (desc, "\r\r", 3); /* Some monitors need these to wake up */
 
   SERIAL_FLUSH_INPUT (desc);
 }

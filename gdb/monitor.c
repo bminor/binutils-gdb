@@ -1,6 +1,8 @@
 /* Remote debugging interface for boot monitors, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1995 Free Software Foundation, Inc.
-   Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
+   Copyright 1990, 1991, 1992, 1993, 1995
+   Free Software Foundation, Inc.
+   Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
+   Resurrected from the ashes by Stu Grossman.
 
 This file is part of GDB.
 
@@ -38,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <varargs.h>
 #endif
 #include <signal.h>
+#include <ctype.h>
 #include "gdb_string.h"
 #include <sys/types.h>
 #include "command.h"
@@ -45,17 +48,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "monitor.h"
 #include "gdbcmd.h"
 #include "inferior.h"
-#include "regex.h"
+#include "gnu-regex.h"
 #include "dcache.h"
+#include "srec.h"
 
 static int readchar PARAMS ((int timeout));
 
 static void monitor_command PARAMS ((char *args, int fromtty));
-static void monitor_load_srec PARAMS ((char *args));
-
-static int monitor_make_srec PARAMS ((char *buffer, int type,
-				      CORE_ADDR memaddr,
-				      unsigned char *myaddr, int len));
 
 static void monitor_fetch_register PARAMS ((int regno));
 static void monitor_store_register PARAMS ((int regno));
@@ -80,6 +79,7 @@ static void monitor_kill PARAMS ((void));
 static void monitor_load PARAMS ((char *file, int from_tty));
 static void monitor_mourn_inferior PARAMS ((void));
 static void monitor_stop PARAMS ((void));
+static void monitor_debug PARAMS ((char *string));
 
 static int monitor_read_memory PARAMS ((CORE_ADDR addr, char *myaddr,int len));
 static int monitor_write_memory PARAMS ((CORE_ADDR addr, char *myaddr,int len));
@@ -116,6 +116,39 @@ static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 
 static DCACHE *remote_dcache;
 
+/* monitor_debug is like fputs_unfiltered, except it prints special
+   characters in printable fashion.  */
+
+static void
+monitor_debug (string)
+     char *string;
+{
+  int ch;
+
+  while ((ch = *string++) != '\0')
+    {
+      switch (ch) {
+      default:
+	if (isprint (ch))
+	  fputc_unfiltered (ch, gdb_stderr);
+
+	else
+	  fprintf_unfiltered (gdb_stderr, "\\%03o", ch);
+
+	break;
+
+      case '\\': fputs_unfiltered ("\\\\",  gdb_stderr);	break;	
+      case '\b': fputs_unfiltered ("\\b",   gdb_stderr);	break;	
+      case '\f': fputs_unfiltered ("\\f",   gdb_stderr);	break;	
+      case '\n': fputs_unfiltered ("\\n\n", gdb_stderr);	break;	
+      case '\r': fputs_unfiltered ("\\r\n", gdb_stderr);	break;	
+      case '\t': fputs_unfiltered ("\\t",   gdb_stderr);	break;	
+      case '\v': fputs_unfiltered ("\\v",   gdb_stderr);	break;	
+      }
+    }
+}
+
+
 /* monitor_printf_noecho -- Send data to monitor, but don't expect an echo.
    Works just like printf.  */
 
@@ -142,7 +175,7 @@ monitor_printf_noecho (va_alist)
   vsprintf (sndbuf, pattern, args);
 
   if (remote_debug > 0)
-    fputs_unfiltered (sndbuf, gdb_stderr);
+    monitor_debug (sndbuf);
 
   len = strlen (sndbuf);
 
@@ -180,7 +213,7 @@ monitor_printf (va_alist)
   vsprintf (sndbuf, pattern, args);
 
   if (remote_debug > 0)
-    fputs_unfiltered (sndbuf, gdb_stderr);
+    monitor_debug (sndbuf);
 
   len = strlen (sndbuf);
 
@@ -1308,7 +1341,15 @@ monitor_load (file, from_tty)
   if (current_monitor->load_routine)
     current_monitor->load_routine (monitor_desc, file, hashmark);
   else
-    monitor_load_srec (file);
+    {				/* The default is ascii S-records */
+      monitor_printf (LOAD_CMD);	/* tell the monitor to load */
+      if (current_monitor->loadresp)
+	monitor_expect (current_monitor->loadresp, NULL, 0);
+
+      load_srec (monitor_desc, file, 32, SREC_ALL, hashmark);
+
+      monitor_expect_prompt (NULL, 0);
+    }
 
 /* Finally, make the PC point at the start address */
 
@@ -1359,213 +1400,6 @@ monitor_command (args, from_tty)
   resp_len = monitor_expect_prompt (buf, sizeof buf);
 
   fputs_unfiltered (buf, gdb_stdout); /* Output the response */
-}
-
-/*  Download a binary file by converting it to S records. */
-
-static void
-monitor_load_srec (args)
-     char *args;
-{
-  bfd *abfd;
-  asection *s;
-  char *buffer, srec[1024];
-  int i;
-  int srec_frame = 32;
-  int reclen;
-
-  buffer = alloca (srec_frame * 2 + 256);
-
-  abfd = bfd_openr (args, 0);
-  if (!abfd)
-    {
-      printf_filtered ("Unable to open file %s\n", args);
-      return;
-    }
-
-  if (bfd_check_format (abfd, bfd_object) == 0)
-    {
-      printf_filtered ("File is not an object file\n");
-      return;
-    }
-  
-  monitor_printf (LOAD_CMD);	/* tell the monitor to load */
-  if (current_monitor->loadresp)
-    monitor_expect (current_monitor->loadresp, NULL, 0);
-
-  for (s = abfd->sections; s; s = s->next)
-    {
-      if (s->flags & SEC_LOAD)
-	{
-	  int numbytes;
-
-	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
-			   s->vma + s->_raw_size);
-	  gdb_flush (gdb_stdout);
-
-	  for (i = 0; i < s->_raw_size; i += numbytes)
-	    {
-	      numbytes = min (srec_frame, s->_raw_size - i);
-
-	      bfd_get_section_contents (abfd, s, buffer, i, numbytes);
-
-	      reclen = monitor_make_srec (srec, 'd', s->vma + i, buffer, numbytes);
-
-	      monitor_printf_noecho ("%.*s\r", reclen, srec);
-
-	      if (hashmark)
-		{
-		  putchar_unfiltered ('#');
-		  gdb_flush (gdb_stdout);
-		}
-	    } /* Per-packet (or S-record) loop */
-
-	  putchar_unfiltered ('\n');
-	} /* Loadable sections */
-    }
-  if (hashmark) 
-    putchar_unfiltered ('\n');
-  
-  /* Write a type 7 terminator record. no data for a type 7, and there
-     is no data, so len is 0.  */
-
-  reclen = monitor_make_srec (srec, 't', abfd->start_address, NULL, 0);
-
-  monitor_printf_noecho ("%.*s\r", reclen, srec);
-
-  monitor_printf_noecho ("\r\r"); /* Some monitors need these to wake up */
-
-  monitor_expect_prompt (NULL, 0);
-
-  SERIAL_FLUSH_INPUT (monitor_desc);
-}
-
-/*
- * monitor_make_srec -- make an srecord. This writes each line, one at a
- *	time, each with it's own header and trailer line.
- *	An srecord looks like this:
- *
- * byte count-+     address
- * start ---+ |        |       data        +- checksum
- *	    | |        |                   |
- *	  S01000006F6B692D746573742E73726563E4
- *	  S315000448600000000000000000FC00005900000000E9
- *	  S31A0004000023C1400037DE00F023604000377B009020825000348D
- *	  S30B0004485A0000000000004E
- *	  S70500040000F6
- *
- *	S<type><length><address><data><checksum>
- *
- *      Where
- *      - length
- *        is the number of bytes following upto the checksum. Note that
- *        this is not the number of chars following, since it takes two
- *        chars to represent a byte.
- *      - type
- *        is one of:
- *        0) header record
- *        1) two byte address data record
- *        2) three byte address data record
- *        3) four byte address data record
- *        7) four byte address termination record
- *        8) three byte address termination record
- *        9) two byte address termination record
- *       
- *      - address
- *        is the start address of the data following, or in the case of
- *        a termination record, the start address of the image
- *      - data
- *        is the data.
- *      - checksum
- *	  is the sum of all the raw byte data in the record, from the length
- *        upwards, modulo 256 and subtracted from 255.
- *
- * This routine returns the length of the S-record.
- *
- */
-
-static int
-monitor_make_srec (buffer, type, memaddr, myaddr, len)
-     char *buffer;
-     int type;
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
-{
-  unsigned char checksum;
-  int i;
-  char *buf;
-  static char hextab[] = "0123456789ABCDEF";
-  static char data_code_table[] = { 0,0,1,2,3};
-  static char term_code_table[] = { 0,0,9,8,7};
-  int addr_size; /* Number of bytes in the record */
-  int type_code;
-  buf = buffer;
-
-  checksum = 0;
-  
-  addr_size = 2;
-  if (memaddr > 0xffffff)
-    addr_size = 4;
-  else if (memaddr > 0xffff)
-    addr_size = 3;
-  else
-    addr_size = 2;
-
-  switch (type)
-    {
-    case 't':
-      type_code = term_code_table[addr_size];
-      break;
-    case 'd':
-      type_code = data_code_table[addr_size];
-      break;
-    default:
-      abort();
-    }
-  /* Create the header for the srec. addr_size is the number of bytes in the address,
-     and 1 is the number of bytes in the count.  */
-
-  switch (addr_size) 
-    {
-    case 4:
-      sprintf (buf, "S%d%02X%08X", type_code, len + addr_size + 1, memaddr);
-      buf += 12;
-      break;
-    case 3:
-      sprintf (buf, "S%d%02X%06X", type_code, len + addr_size + 1, memaddr);
-      buf += 10;
-      break;
-    case 2:
-      sprintf (buf, "S%d%02X%04X", type_code, len + addr_size + 1, memaddr);
-      buf += 8;
-      break;
-    }
-
-/* Note that the checksum is calculated on the raw data, not the hexified
-   data.  It includes the length, address and the data portions of the
-   packet.  */
-
-  checksum += (len + addr_size + 1		/* Packet length */
-	       + (memaddr & 0xff)		/* Address... */
-	       + ((memaddr >>  8) & 0xff)
-	       + ((memaddr >> 16) & 0xff)
-	       + ((memaddr >> 24) & 0xff));
-  
-  /* build the srecord */
-  for (i = 0; i < len; i++)
-    {
-      *buf++ = hextab [myaddr[i] >> 4];
-      *buf++ = hextab [myaddr[i] & 0xf];
-      checksum += myaddr[i];
-    }
-
-  checksum = ~checksum;
-
-  *buf++ = hextab[checksum >> 4];
-  *buf++ = hextab[checksum & 0xf];
-
-  return buf - buffer;
 }
 
 /* Convert hex digit A to a number.  */
