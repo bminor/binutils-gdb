@@ -2,6 +2,9 @@ Thu Jul  4 12:01:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Released binutils 2.7.
 
+	* bb_exit_func.c: Rename from __bb_exit_func.c, so that it can be
+	stored on a System V file system.
+
 Thu Jun 27 11:36:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_ISC_POSIX.
