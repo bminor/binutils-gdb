@@ -134,64 +134,62 @@ union inst
 };
 
 static LONG saved_inst;
-static char *saved_inst_pc = 0;
+static LONG *saved_inst_pc = 0;
 static LONG saved_target_inst;
-static char *saved_target_inst_pc = 0;
+static LONG *saved_target_inst_pc = 0;
 
 void
 set_step_traps (frame)
      struct StackFrame *frame;
 {
   union inst inst;
-  char *target;
+  LONG *target;
   int opcode;
   int ra, rb;
-  char *pc = (char *)frame->ExceptionPC;
+  LONG *pc = (LONG *)frame->ExceptionPC;
 
-  inst.l = *(LONG *)pc;
+  inst.l = *pc++;
 
   opcode = inst.inst.variant.b.opcode;
+
+  target = pc;
 
   switch (opcode)
     {
     case 18:			/* Unconditional branch */
-      target = (char *)(inst.inst.variant.b.li << 2);
 
-      if (!inst.inst.variant.b.aa) /* Relative? */
-	target += (long)pc;
+      if (inst.inst.variant.b.aa) /* Absolute? */
+	target = 0;
+      target += inst.inst.variant.b.li;
 
       break;
     case 16:			/* Conditional branch */
-      target = (char *)(inst.inst.variant.bc.bd << 2);
 
-      if (!inst.inst.variant.bc.aa) /* Relative? */
-	target += (long)pc;
+      if (!inst.inst.variant.bc.aa) /* Absolute? */
+	target = 0;
+      target += inst.inst.variant.bc.bd;
 
       break;
     case 19:			/* Cond. branch via ctr or lr reg */
       switch (inst.inst.variant.bclr.type)
 	{
 	case 528:		/* ctr */
-	  target = (char *)frame->ExceptionState.u.SpecialRegistersEnumerated.CsavedCTR;
+	  target = (LONG *)frame->ExceptionState.u.SpecialRegistersEnumerated.CsavedCTR;
 	  break;
 	case 16:		/* lr */
-	  target = (char *)frame->ExceptionState.u.SpecialRegistersEnumerated.CsavedLR;
+	  target = (LONG *)frame->ExceptionState.u.SpecialRegistersEnumerated.CsavedLR;
 	  break;
-	default:
-	  target = pc;
 	}
       break;
-    default:
-      target = pc;
     }
 
-  saved_inst = *(LONG *)pc;
+  saved_inst = *pc;
   mem_write (pc, breakpoint_insn, BREAKPOINT_SIZE);
   saved_inst_pc = pc;
 
   if (target != pc)
     {
-      saved_target_inst = *(LONG *)target;
+      saved_target_inst = *target;
       mem_write (target, breakpoint_insn, BREAKPOINT_SIZE);
       saved_target_inst_pc = target;
     }
@@ -206,7 +204,7 @@ clear_step_traps (frame)
      struct StackFrame *frame;
 {
   int retcode;
-  char *pc = (char *)frame->ExceptionPC;
+  LONG *pc = (LONG *)frame->ExceptionPC;
 
   if (saved_inst_pc == pc || saved_target_inst_pc == pc)
     retcode = 1;
@@ -255,6 +253,7 @@ do_status (ptr, frame)
   *ptr = '\000';
 }
 
+#if 0
 /*
  * strtol : convert a string to long.
  *
@@ -404,6 +403,7 @@ strtoul(s, ptr, base)
     *ptr = (char *) ((did_conversion) ? (char *)s : (char *)start);
   return negate ? -total : total;
 }
+#endif
 
 void _exit (int foo) __attribute__ ((noreturn));
 

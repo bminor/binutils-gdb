@@ -1,6 +1,7 @@
 description "GDB debugger stub"
 version 1,2,0
 #debug
+module clib
 screenname "System Console"
 input gdbserve.O
 output gdbserve.nlm

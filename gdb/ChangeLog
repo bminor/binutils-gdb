@@ -1,4 +1,11 @@
+Tue Aug 23 16:54:16 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* nlm/ppc.c (set_step_traps clear_step_traps):  Cleanups.
+	* nlm/gdbserve.def:  Autoload clib.
+
 Tue Aug 23 12:05:19 1994  Jim Kingdon  (kingdon@cygnus.com)
+
+	* breakpoint.c (condition_command): Call breakpoints_changed.
 
 	* gdbtypes.h: Declare f77_create_literal_string_type and
 	f77_create_literal_complex_type.
