@@ -1,3 +1,17 @@
+Mon Aug 12 18:42:37 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Test whether /dev/zero works on the system, and if
+	it does, define HAVE_DEVZERO.
+	* configure: Regenerate.
+
+	* emul_generic.c (emul_add_tree_hardware): Do not add /iobus/disk
+	if we don't have a working /dev/zero on the system.
+
+	* emul_bugapi.c (emul_bugapi_init): If HAVE_DEVZERO is not
+	defined, don't add disk support.
+	(emul_bugapi_do_diskio): Ditto.
+	(emul_bugapi_instruction_call): Ditto.
+
 Wed Aug  7 14:34:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* emul_unix.c (HAVE_TCGETATTR): If HAVE_TERMIOS_STRUCTURE is not
