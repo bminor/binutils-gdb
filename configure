@@ -114,6 +114,7 @@ do
 		;;
 	-recurring | +recurring | +recurrin | +recurri | +recurr | +recur | +recu | +rec | +re)
 		recurring=true
+		arguments=`echo ${arguments} | sed "s:${arg}::"`
 		;;
 	-rm | +rm)
 		removing=${arg}
@@ -325,7 +326,6 @@ for host in ${hosts} ; do
 
 		. ${tmpfile}.tgt
 
-		# Temporarily, we support only direct subdir builds.
 		hostsubdir=H-${host_alias}
 		targetsubdir=T-${target_alias}
 
@@ -610,7 +610,7 @@ for host in ${hosts} ; do
 					cd ${configdir} 
 
 					if (${progname} +recurring ${host_alias} +target=${target_alias} \
-						${verbose} ${subdirs} ${removing} +destdir=${destdir} \
+						${verbose} ${subdirs} ${removing} +ddestdir=${ddestdir} +idestdir=${idestdir} \
 						`if [ -n "${objdir}" ] ; then echo +objdir=${objdir}/${configdir} ; fi` \
 						${tmpdiroption}) ; then
 						true
@@ -667,7 +667,16 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.65  1991/11/01 00:25:28  rich
+# Revision 1.68  1991/11/09 11:34:52  rich
+# correct a comment
+#
+# Revision 1.67  1991/11/06  22:28:08  rich
+# pass +idestdir and +ddestdir
+#
+# Revision 1.66  1991/11/05  04:02:14  rich
+# don't allow +recurring to reach config.status
+#
+# Revision 1.65  1991/11/01  00:25:28  rich
 # new install theme
 #
 # Revision 1.64  1991/10/30  06:55:25  rich
