@@ -820,9 +820,9 @@ sparc_ip (str)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "icc", 3) == 0)
+	      if (strncmp (s, "%icc", 4) == 0)
 		{
-		  s += 3;
+		  s += 4;
 		  continue;
 		}
 	      break;
@@ -832,9 +832,9 @@ sparc_ip (str)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "xcc", 3) == 0)
+	      if (strncmp (s, "%xcc", 4) == 0)
 		{
-		  s += 3;
+		  s += 4;
 		  continue;
 		}
 	      break;
@@ -844,9 +844,9 @@ sparc_ip (str)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "fcc0", 4) == 0)
+	      if (strncmp (s, "%fcc0", 5) == 0)
 		{
-		  s += 4;
+		  s += 5;
 		  continue;
 		}
 	      break;
@@ -856,9 +856,9 @@ sparc_ip (str)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "fcc1", 4) == 0)
+	      if (strncmp (s, "%fcc1", 5) == 0)
 		{
-		  s += 4;
+		  s += 5;
 		  continue;
 		}
 	      break;
@@ -868,9 +868,9 @@ sparc_ip (str)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "fcc2", 4) == 0)
+	      if (strncmp (s, "%fcc2", 5) == 0)
 		{
-		  s += 4;
+		  s += 5;
 		  continue;
 		}
 	      break;
@@ -880,9 +880,9 @@ sparc_ip (str)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "fcc3", 4) == 0)
+	      if (strncmp (s, "%fcc3", 5) == 0)
 		{
-		  s += 4;
+		  s += 5;
 		  continue;
 		}
 	      break;
