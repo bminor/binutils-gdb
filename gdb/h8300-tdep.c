@@ -141,7 +141,7 @@ h8300_skip_prologue (CORE_ADDR start_pc)
 }
 
 int
-gdb_print_insn_h8300 (bfd_vma memaddr, disassemble_info *info)
+gdb_print_insn_h8300 (bfd_vma memaddr, disassemble_info * info)
 {
   if (h8300smode)
     return print_insn_h8300s (memaddr, info);
@@ -226,7 +226,7 @@ h8300_frame_find_saved_regs (struct frame_info *fi,
    of the instruction. */
 
 CORE_ADDR
-NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, INSN_WORD *pword1)
+NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, INSN_WORD * pword1)
 {
   char buf[2];
   if (addr < lim + 8)
@@ -389,14 +389,16 @@ examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
   /* Locals are always reffed based from the fp */
   fi->locals_pointer = after_prolog_fp;
   /* The PC is at a known place */
-  fi->from_pc = read_memory_unsigned_integer (after_prolog_fp + BINWORD, BINWORD);
+  fi->from_pc =
+    read_memory_unsigned_integer (after_prolog_fp + BINWORD, BINWORD);
 
   /* Rememeber any others too */
   in_frame[PC_REGNUM] = 0;
 
   if (have_fp)
     /* We keep the old FP in the SP spot */
-    fsr->regs[SP_REGNUM] = read_memory_unsigned_integer (fsr->regs[6], BINWORD);
+    fsr->regs[SP_REGNUM] =
+      read_memory_unsigned_integer (fsr->regs[6], BINWORD);
   else
     fsr->regs[SP_REGNUM] = after_prolog_fp + auto_depth;
 
@@ -530,8 +532,7 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   sp = sp & ~stack_align;
 
   /* Now make sure there's space on the stack */
-  for (argnum = 0, stack_alloc = 0;
-       argnum < nargs; argnum++)
+  for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
     stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + stack_align)
 		    & ~stack_align);
   sp -= stack_alloc;		/* make room on stack for args */
@@ -562,8 +563,9 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       else
 	val = (char *) VALUE_CONTENTS (args[argnum]);
 
-      if (len > (ARGLAST_REGNUM + 1 - argreg) * REGISTER_RAW_SIZE (ARG0_REGNUM) ||
-	  (len > wordsize && (len & stack_align) != 0))
+      if (len >
+	  (ARGLAST_REGNUM + 1 - argreg) * REGISTER_RAW_SIZE (ARG0_REGNUM)
+	  || (len > wordsize && (len & stack_align) != 0))
 	{			/* passed on the stack */
 	  write_memory (sp + stack_offset, val,
 			len < wordsize ? wordsize : len);
@@ -572,7 +574,8 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       /* NOTE WELL!!!!!  This is not an "else if" clause!!!
          That's because some *&^%$ things get passed on the stack
          AND in the registers!   */
-      if (len <= (ARGLAST_REGNUM + 1 - argreg) * REGISTER_RAW_SIZE (ARG0_REGNUM))
+      if (len <=
+	  (ARGLAST_REGNUM + 1 - argreg) * REGISTER_RAW_SIZE (ARG0_REGNUM))
 	while (len > 0)
 	  {			/* there's room in registers */
 	    regval = extract_address (val, wordsize);
@@ -804,8 +807,7 @@ _initialize_h8300m (void)
 {
   add_prefix_cmd ("machine", no_class, set_machine,
 		  "set the machine type",
-		  &setmemorylist, "set machine ", 0,
-		  &setlist);
+		  &setmemorylist, "set machine ", 0, &setlist);
 
   add_cmd ("h8300", class_support, h8300_command,
 	   "Set machine to be H8/300.", &setmemorylist);
