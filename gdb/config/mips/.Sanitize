@@ -49,6 +49,12 @@ else
 	lose_these_too="tm-r5900.h r5900.mt ${lose_these_too}"
 fi
 
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	keep_these_too="tm-txvu.h txvu.mt ${keep_these_too}"
+else
+	lose_these_too="tm-txvu.h txvu.mt ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
