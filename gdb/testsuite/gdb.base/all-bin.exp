@@ -189,10 +189,18 @@ send_gdb "print v_int+v_double\n"
 gdb_expect {
     -re ".*206.56565.*$gdb_prompt $" {
         pass "print value of v_int+v_double"
-      }
+    }
+    -re ".*206.565643.*$gdb_prompt $" {
+	# D10V has 4-byte doubles
+	if [istarget "d10v*-*"] then {
+	    pass "print value of v_int+v_double (D10V)"
+	} else {
+	    fail "print value of v_int+v_double (precision)"
+	}
+    }
     -re ".*$gdb_prompt $" { fail "print value of v_int+v_double" }
-    timeout           { fail "(timeout) print value of v_int+" }    
-  }
+    timeout     { fail "(timeout) print value of v_int+v_double" }
+}
 
 
 #

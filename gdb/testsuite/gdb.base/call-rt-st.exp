@@ -175,8 +175,14 @@ if ![gdb_skip_stdio_test "print print_one_large_struct(...)"] {
 
 if {![gdb_skip_float_test "print print_one_double(*d1)"] && \
         ![gdb_skip_stdio_test "print print_one_double(*d1)"] } {
-    print_struct_call "print_one_double(*d1)" \
-            ".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+.\[0-9\]+ = \\{double1 = 1\\.11111\\}"
+    if [istarget "d10v*-*"] then {
+	# D10V has 4-byte doubles
+	print_struct_call "print_one_double(*d1)" \
+		".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+.\[0-9\]+ = \\{double1 = 1\\.11110997\\}"
+    } else {
+	print_struct_call "print_one_double(*d1)" \
+		".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+.\[0-9\]+ = \\{double1 = 1\\.11111\\}"
+    }
 }
 
 if {![gdb_skip_float_test "print print_two_floats(*f3)"] && \

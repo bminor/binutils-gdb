@@ -1,3 +1,8 @@
+2002-05-23  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/all-bin.exp: Allow for reduced floating point precision.
+	* gdb.base/call-rt-st.exp: Ditto.
+
 2002-05-19  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/inherit.exp: Accept "VTT for ..." in output strings.
