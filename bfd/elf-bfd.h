@@ -902,6 +902,13 @@ struct elf_backend_data
      (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
       int (*target_read_memory) (bfd_vma vma, char *myaddr, int len));
 
+  /* This function is used by `_bfd_elf_get_synthetic_symtab';
+     see elf.c.  */
+  bfd_vma (*plt_sym_val) (bfd_vma, const asection *, const arelent *);
+
+  /* Name of the PLT relocation section.  */
+  const char *relplt_name;
+
   /* Alternate EM_xxxx machine codes for this backend.  */
   int elf_machine_alt1;
   int elf_machine_alt2;
@@ -1385,6 +1392,8 @@ extern long _bfd_elf_get_dynamic_symtab_upper_bound
   (bfd *);
 extern long _bfd_elf_canonicalize_dynamic_symtab
   (bfd *, asymbol **);
+extern long _bfd_elf_get_synthetic_symtab
+  (bfd *, asymbol **, asymbol **);
 extern long _bfd_elf_get_reloc_upper_bound
   (bfd *, sec_ptr);
 extern long _bfd_elf_canonicalize_reloc

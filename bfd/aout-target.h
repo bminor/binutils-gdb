@@ -584,6 +584,10 @@ MY_bfd_final_link (abfd, info)
 #define MY_canonicalize_dynamic_symtab \
   _bfd_nodynamic_canonicalize_dynamic_symtab
 #endif
+#ifndef MY_get_synthetic_symtab
+#define MY_get_synthetic_symtab \
+  _bfd_nodynamic_get_synthetic_symtab
+#endif
 #ifndef MY_get_dynamic_reloc_upper_bound
 #define MY_get_dynamic_reloc_upper_bound \
   _bfd_nodynamic_get_dynamic_reloc_upper_bound

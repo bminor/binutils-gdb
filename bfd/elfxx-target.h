@@ -34,6 +34,8 @@
 
 #define bfd_elfNN_canonicalize_dynamic_symtab \
   _bfd_elf_canonicalize_dynamic_symtab
+#define bfd_elfNN_get_synthetic_symtab \
+  _bfd_elf_get_synthetic_symtab
 #ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
 #endif
@@ -443,6 +445,13 @@
 #define elf_backend_rela_normal 0
 #endif
 
+#ifndef elf_backend_plt_sym_val
+#define elf_backend_plt_sym_val NULL
+#endif
+#ifndef elf_backend_relplt_name
+#define elf_backend_relplt_name NULL
+#endif
+
 #ifndef ELF_MACHINE_ALT1
 #define ELF_MACHINE_ALT1 0
 #endif
@@ -524,6 +533,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
   elf_backend_bfd_from_remote_memory,
+  elf_backend_plt_sym_val,
+  elf_backend_relplt_name,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,

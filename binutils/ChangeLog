@@ -1,3 +1,12 @@
+2004-04-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* objdump.c (synthsyms, synthcount): New variables.
+	(disassemble_data): Use dynsyms for stripped binaries or libraries.
+	Add synthetized symbols.
+	(dump_bfd): For disassemble, initialize dynsyms always and
+	also synthsyms.  Free synthsyms and clear {sym,dynsym,synth}count
+	before returning.
+
 2004-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* strings.c (print_strings): Cast file_off to unsigned long in

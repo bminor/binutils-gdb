@@ -3432,6 +3432,17 @@ elf32_sparc_reloc_type_class (rela)
       return reloc_class_normal;
     }
 }
+
+/* Return address for Ith PLT stub in section PLT, for relocation REL
+   or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+elf32_sparc_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED,
+			 const asection *plt ATTRIBUTE_UNUSED,
+			 const arelent *rel)
+{
+  return rel->address;
+}
 
 #define TARGET_BIG_SYM	bfd_elf32_sparc_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
@@ -3470,6 +3481,7 @@ elf32_sparc_reloc_type_class (rela)
 #define elf_backend_gc_sweep_hook       elf32_sparc_gc_sweep_hook
 #define elf_backend_grok_psinfo		elf32_sparc_grok_psinfo
 #define elf_backend_reloc_type_class	elf32_sparc_reloc_type_class
+#define elf_backend_plt_sym_val		elf32_sparc_plt_sym_val
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1

@@ -1,3 +1,45 @@
+2004-04-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* bfd.c (bfd_get_synthetic_symtab): Define.
+	* targets.c (BFD_JUMP_TABLE_DYNAMIC): Add
+	NAME##_get_synthetic_symtab.
+	(struct bfd_target): Add _bfd_get_synthetic_symtab.
+	* libbfd-in.h (_bfd_nodynamic_get_synthetic_symtab): Define.
+	* elf-bfd.h (struct elf_backend_data): Add plt_sym_val and
+	relplt_name fields.
+	(_bfd_elf_get_synthetic_symtab): New prototype.
+	* elfcode.h (elf_get_synthetic_symtab): Define.
+	* elf.c (_bfd_elf_get_synthetic_symtab): New function.
+	* elfxx-target.h (bfd_elfNN_get_synthetic_symtab): Define.
+	(elf_backend_plt_sym_val, elf_backend_relplt_name): Define.
+	(elfNN_bed): Add elf_backend_plt_sym_val and elf_backend_relplt_name.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+	* elf32-i386.c (elf_i386_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+	* elf64-x86-64.c (elf64_x86_64_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+	* elf32-s390.c (elf_s390_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+	* elf64-s390.c (elf_s390_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+	* elf32-sparc (elf32_sparc_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+	* elf64-sparc.c (sparc64_elf_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+	* elf32-ppc.c (ppc_elf_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+	* aout-target.h (MY_get_synthetic_symtab): Define.
+	* aout-tic30.c (MY_get_synthetic_symtab): Define.
+	* coff-rs6000.c (rs6000coff_vec): Add
+	_bfd_nodynamic_get_synthetic_symtab.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Add
+	_bfd_nodynamic_get_synthetic_symtab.
+	(aix5coff64_vec): Likewise.
+	* sunos.c (MY_get_synthetic_symtab): Define.
+	* vms.c (vms_get_synthetic_symtab): Define.
+
 2004-04-22  Nick Clifton  <nickc@redhat.com>
 
 	* bfd.c (bfd_archive_filename): Return NULL on NULL input.

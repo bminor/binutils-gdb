@@ -3248,6 +3248,17 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
+/* Return address for Ith PLT stub in section PLT, for relocation REL
+   or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+elf_i386_plt_sym_val (bfd_vma i, const asection *plt,
+		      const arelent *rel ATTRIBUTE_UNUSED)
+{
+  return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
+}
+
+
 #define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
@@ -3285,6 +3296,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_reloc_type_class	      elf_i386_reloc_type_class
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
+#define elf_backend_plt_sym_val		      elf_i386_plt_sym_val
 
 #include "elf32-target.h"
 

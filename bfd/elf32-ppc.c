@@ -6128,6 +6128,17 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   apuinfo_list_finish ();
 }
 
+/* Return address for Ith PLT stub in section PLT, for relocation REL
+   or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+ppc_elf_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED,
+		     const asection *plt ATTRIBUTE_UNUSED,
+		     const arelent *rel)
+{
+  return rel->address;
+}
+
 /* Add extra PPC sections -- Note, for now, make .sbss2 and
    .PPC.EMB.sbss0 a normal section, and not a bss section so
    that the linker doesn't crater when trying to make more than
@@ -6205,5 +6216,6 @@ static struct bfd_elf_special_section const ppc_elf_special_sections[]=
 #define elf_backend_final_write_processing	ppc_elf_final_write_processing
 #define elf_backend_write_section		ppc_elf_write_section
 #define elf_backend_special_sections		ppc_elf_special_sections
+#define elf_backend_plt_sym_val			ppc_elf_plt_sym_val
 
 #include "elf32-target.h"

@@ -154,6 +154,7 @@ static long vms_get_dynamic_symtab_upper_bound
   PARAMS ((bfd *abfd));
 static long vms_canonicalize_dynamic_symtab
   PARAMS ((bfd *abfd, asymbol **symbols));
+#define vms_get_synthetic_symtab _bfd_nodynamic_get_synthetic_symtab
 static long vms_get_dynamic_reloc_upper_bound
   PARAMS ((bfd *abfd));
 static long vms_canonicalize_dynamic_reloc

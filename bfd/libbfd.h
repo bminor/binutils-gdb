@@ -383,6 +383,8 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nodynamic_get_dynamic_symtab_upper_bound _bfd_n1
 #define _bfd_nodynamic_canonicalize_dynamic_symtab \
   ((long (*) (bfd *, asymbol **)) _bfd_n1)
+#define _bfd_nodynamic_get_synthetic_symtab \
+  ((long (*) (bfd *, asymbol **, asymbol **)) _bfd_n1)
 #define _bfd_nodynamic_get_dynamic_reloc_upper_bound _bfd_n1
 #define _bfd_nodynamic_canonicalize_dynamic_reloc \
   ((long (*) (bfd *, arelent **, asymbol **)) _bfd_n1)

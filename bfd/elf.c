@@ -7513,3 +7513,79 @@ bfd_elf_bfd_from_remote_memory
   return (*get_elf_backend_data (templ)->elf_backend_bfd_from_remote_memory)
     (templ, ehdr_vma, loadbasep, target_read_memory);
 }
+
+long
+_bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **dynsyms, asymbol **ret)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  asection *relplt;
+  asymbol *s;
+  const char *relplt_name;
+  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+  arelent *p;
+  long count, i, n;
+  size_t size;
+  Elf_Internal_Shdr *hdr;
+  char *names;
+  asection *plt;
+
+  *ret = NULL;
+  if (!bed->plt_sym_val)
+    return 0;
+
+  relplt_name = bed->relplt_name;
+  if (relplt_name == NULL)
+    relplt_name = bed->default_use_rela_p ? ".rela.plt" : ".rel.plt";
+  relplt = bfd_get_section_by_name (abfd, relplt_name);
+  if (relplt == NULL)
+    return 0;
+
+  hdr = &elf_section_data (relplt)->this_hdr;
+  if (hdr->sh_link != elf_dynsymtab (abfd)
+      || (hdr->sh_type != SHT_REL && hdr->sh_type != SHT_RELA))
+    return 0;
+
+  plt = bfd_get_section_by_name (abfd, ".plt");
+  if (plt == NULL)
+    return 0;
+
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
+    return -1;
+
+  count = relplt->_raw_size / hdr->sh_entsize;
+  size = count * sizeof (asymbol);
+  p = relplt->relocation;
+  for (i = 0; i < count; i++, s++, p++)
+    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+
+  s = *ret = bfd_malloc (size);
+  if (s == NULL)
+    return -1;
+
+  names = (char *) (s + count);
+  p = relplt->relocation;
+  n = 0;
+  for (i = 0; i < count; i++, s++, p++)
+    {
+      size_t len;
+      bfd_vma addr;
+
+      addr = bed->plt_sym_val (i, plt, p);
+      if (addr == (bfd_vma) -1)
+	continue;
+
+      *s = **p->sym_ptr_ptr;
+      s->section = plt;
+      s->value = addr - plt->vma;
+      s->name = names;
+      len = strlen ((*p->sym_ptr_ptr)->name);
+      memcpy (names, (*p->sym_ptr_ptr)->name, len);
+      names += len;
+      memcpy (names, "@plt", sizeof ("@plt"));
+      names += sizeof ("@plt");
+      ++n;
+    }
+
+  return n;
+}

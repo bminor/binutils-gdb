@@ -450,6 +450,7 @@ BFD_JUMP_TABLE macros.
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME) \
 .  NAME##_get_dynamic_symtab_upper_bound, \
 .  NAME##_canonicalize_dynamic_symtab, \
+.  NAME##_get_synthetic_symtab, \
 .  NAME##_get_dynamic_reloc_upper_bound, \
 .  NAME##_canonicalize_dynamic_reloc
 .
@@ -458,6 +459,9 @@ BFD_JUMP_TABLE macros.
 .  {* Read in the dynamic symbols.  *}
 .  long        (*_bfd_canonicalize_dynamic_symtab)
 .    (bfd *, struct bfd_symbol **);
+.  {* Create synthetized symbols.  *}
+.  long        (*_bfd_get_synthetic_symtab)
+.    (bfd *, struct bfd_symbol **, struct bfd_symbol **);
 .  {* Get the amount of memory required to hold the dynamic relocs.  *}
 .  long        (*_bfd_get_dynamic_reloc_upper_bound) (bfd *);
 .  {* Read in the dynamic relocs.  *}

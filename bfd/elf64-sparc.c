@@ -3107,6 +3107,24 @@ sparc64_elf_object_p (abfd)
   return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, mach);
 }
 
+/* Return address for Ith PLT stub in section PLT, for relocation REL
+   or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+sparc64_elf_plt_sym_val (bfd_vma i, const asection *plt,
+			 const arelent *rel)
+{
+  bfd_vma j;
+
+  i += PLT_HEADER_SIZE / PLT_ENTRY_SIZE;
+  if (i < LARGE_PLT_THRESHOLD)
+    return plt->vma + i * PLT_ENTRY_SIZE;
+
+  j = (i - LARGE_PLT_THRESHOLD) % 160;
+  i -= j;
+  return plt->vma + i * PLT_ENTRY_SIZE + j * 4 * 6;
+}
+
 /* Relocations in the 64 bit SPARC ELF ABI are more complex than in
    standard ELF, because R_SPARC_OLO10 has secondary addend in
    ELF64_R_TYPE_DATA field.  This structure is used to redirect the
@@ -3206,6 +3224,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_merge_private_bfd_data
 #define elf_backend_fake_sections \
   sparc64_elf_fake_sections
+#define elf_backend_plt_sym_val	\
+  sparc64_elf_plt_sym_val
 
 #define elf_backend_size_info \
   sparc64_elf_size_info
