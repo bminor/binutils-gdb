@@ -3595,7 +3595,7 @@ co_proc_number (str)
 	}
       else
 	{
-	  inst.error = _("bad or missing co-processor number");
+	  inst.error = all_reg_maps[REG_TYPE_CP].expected;
 	  return FAIL;
 	}
     }
@@ -3650,7 +3650,7 @@ cp_reg_required_here (str, where)
 
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  inst.error = _("co-processor register expected");
+  inst.error = all_reg_maps[REG_TYPE_CN].expected;
 
   /* Restore the start point.  */
   *str = start;
@@ -3673,7 +3673,7 @@ fp_reg_required_here (str, where)
 
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  inst.error = _("floating point register expected");
+  inst.error = all_reg_maps[REG_TYPE_FN].expected;
 
   /* Restore the start point.  */
   *str = start;
@@ -11439,7 +11439,7 @@ create_register_alias (newname, p)
       char *copy_of_str;
       char *r;
 
-#ifdef IGNORE_OPCODE_CASE
+#ifndef IGNORE_OPCODE_CASE
       newname = original_case_string;
 #endif
       copy_of_str = newname;

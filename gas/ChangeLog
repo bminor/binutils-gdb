@@ -1,3 +1,12 @@
+2004-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (create_register_alias): Fix typo checking for
+	case sensitive register aliases.
+	(co_proc_number): Use error message string in all_reg_maps[]
+	array.
+	(cp_reg_required_here): Likewise.
+	(fp_reg_required_here): Likewise.
+
 2004-04-29  Brian Ford  <ford@vss.fsi.com>
 
 	* dwarf2dbg.c (dwarf2_finish): Add SEC_DEBUGGING to section flags.
