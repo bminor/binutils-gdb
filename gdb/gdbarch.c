@@ -263,7 +263,6 @@ struct gdbarch
   gdbarch_software_single_step_ftype *software_single_step;
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
-  gdbarch_bfd_entry_point_ftype *bfd_entry_point;
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
   gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp;
@@ -430,7 +429,6 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  generic_bfd_entry_point,
   0,
   0,
   0,
@@ -557,7 +555,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->smash_text_address = core_addr_identity;
   current_gdbarch->print_insn = legacy_print_insn;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
-  current_gdbarch->bfd_entry_point = generic_bfd_entry_point;
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
   current_gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
   current_gdbarch->pc_in_sigtramp = legacy_pc_in_sigtramp;
@@ -748,7 +745,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of software_single_step, has predicate */
   /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
-  /* Skip verify of bfd_entry_point, invalid_p == 0 */
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of pc_in_sigtramp, invalid_p == 0 */
@@ -790,10 +786,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\n",
                       GDB_MULTI_ARCH);
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: bfd_entry_point = 0x%08lx\n",
-                        (long) current_gdbarch->bfd_entry_point);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: gdbarch_frame_align_p() = %d\n",
@@ -5338,25 +5330,6 @@ set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch,
                                   gdbarch_skip_trampoline_code_ftype skip_trampoline_code)
 {
   gdbarch->skip_trampoline_code = skip_trampoline_code;
-}
-
-CORE_ADDR
-gdbarch_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->bfd_entry_point == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_bfd_entry_point invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_bfd_entry_point called\n");
-  return gdbarch->bfd_entry_point (gdbarch, abfd);
-}
-
-void
-set_gdbarch_bfd_entry_point (struct gdbarch *gdbarch,
-                             gdbarch_bfd_entry_point_ftype bfd_entry_point)
-{
-  gdbarch->bfd_entry_point = bfd_entry_point;
 }
 
 int

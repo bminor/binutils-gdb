@@ -7,13 +7,6 @@
 
 2003-06-11  Jim Blandy  <jimb@redhat.com>
 
-	* gdbarch.sh (gdbarch_bfd_entry_point): New gdbarch method.
-	* arch-utils.c (generic_bfd_entry_point): New function.
-	* arch-utils.h (generic_bfd_entry_point): New declaration.
-	* gdbarch.c, gdbarch.h: Regenerated.
-	* solib-svr4.c (enable_break): Call it, instead of accessing
-	tmp_bfd->start_address directly.
-
 	* solib-svr4.c (solib_break_names): Recognize the 64-bit PowerPC
 	Linux entry point symbols for _dl_debug_state, too.
 

@@ -2831,15 +2831,6 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
 #endif
 #endif
 
-/* The actual code address at which ABFD would begin execution.  Note
-   that on some architectures (like 64-bit PowerPC Linux),
-   bfd_get_start_address actually points to a function descriptor, not
-   the start function's entry point itself. */
-
-typedef CORE_ADDR (gdbarch_bfd_entry_point_ftype) (struct gdbarch *gdbarch, bfd *abfd);
-extern CORE_ADDR gdbarch_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd);
-extern void set_gdbarch_bfd_entry_point (struct gdbarch *gdbarch, gdbarch_bfd_entry_point_ftype *bfd_entry_point);
-
 /* For SVR4 shared libraries, each call goes through a small piece of
    trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
    to nonzero if we are currently stopped in one of these. */
