@@ -390,6 +390,7 @@ BFD64_BACKENDS = \
 	coff-ia64.lo \
 	demo64.lo \
 	elf64-alpha.lo \
+	elf64-hppa.lo \
 	elf64-ia64.lo \
 	elf64-gen.lo \
 	elf64-mips.lo \
@@ -404,6 +405,7 @@ BFD64_BACKENDS_CFILES = \
 	coff-ia64.c \
 	demo64.c \
 	elf64-alpha.c \
+	elf64-hppa.c \
 	elf64-ia64.c \
 	elf64-gen.c \
 	elf64-mips.c \
@@ -658,6 +660,10 @@ config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
 	$(SHELL) ./config.status --recheck
 
 
+elf64-hppa.lo: elf64-hppa.c elf64-hppa.h elf-bfd.h  \
+  $(INCDIR)/elf/hppa.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/reloc-macros.h \
+  elf64-target.h
 cpu-ia64.lo: cpu-ia64.c cpu-ia64-opc.c $(srcdir)/../opcodes/ia64-opc.h
 elf64-ia64.lo: elf64-ia64.c elf-bfd.h $(INCDIR)/opcode/ia64.h \
   $(INCDIR)/elf/ia64.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
