@@ -1,3 +1,9 @@
+2002-02-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Do not insist on
+        non-zero physical addresses when adjusting the LMAs of new
+        sections.
+
 2002-02-12  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* elf-hppa.h (elf_hppa_reloc_final_type): New function stripped

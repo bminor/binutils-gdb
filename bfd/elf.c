@@ -652,10 +652,15 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 		 offset plus size lies within the segment's memory
 		 span and, if the section is loaded, the extent of the
 		 loaded data lies within the extent of the segment.  
-		 If the p_paddr field is not set, we don't alter the 
-		 LMA.  */
+
+		 Note - we used to check the p_paddr field as well, and
+		 refuse to set the LMA if it was 0.  This is wrong
+		 though as a perfectly valid, initialised segment can
+		 have a p_paddr of zero.  Some architectures, eg ARM,
+	         place special significance one the address 0 and
+	         executables need to be able to have a segment which
+	         covers this address.  */
 	      if (phdr->p_type == PT_LOAD
-		  && phdr->p_paddr
 		  && (bfd_vma) hdr->sh_offset >= phdr->p_offset
 		  && (hdr->sh_offset + hdr->sh_size
 		      <= phdr->p_offset + phdr->p_memsz)
