@@ -40,6 +40,7 @@ decstation
 hp300bsd
 hp300hpux
 i386sco
+i386aout
 i386v
 i386v-g
 i386v32
