@@ -1666,6 +1666,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	  offset_item =
 	    array_size_array[i] * offset_item + subscript_array[i];
 
+	/* Construct a value node with the value of the offset */
+
+	arg2 = value_from_longest (builtin_type_f_integer, offset_item);
+
 	/* Let us now play a dirty trick: we will take arg1 
 	   which is a value node pointing to the topmost level
 	   of the multidimensional array-set and pretend
@@ -1674,15 +1678,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	   returns the correct type value */
 
 	VALUE_TYPE (arg1) = tmp_type;
-
-	f77_get_dynamic_lowerbound (tmp_type, &lower);
-
-	/* Construct a value node with the value of the offset */
-	/* lower will get subtracted off in value_subscript, hence add it here */
-
-	arg2 = value_from_longest (builtin_type_f_integer, offset_item + lower);
-
-	return value_subscript(arg1, arg2);
+	return value_ind (value_add (value_coerce_array (arg1), arg2));
       }
 
     case BINOP_LOGICAL_AND:
