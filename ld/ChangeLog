@@ -1,3 +1,8 @@
+2004-05-07  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* ldlang.c (print_padding_statement): Cast size_t to bfd_vma
+	before printing it with %W.
+
 2004-05-07  Brian Ford  <ford@vss.fsi.com>
             DJ Delorie  <dj@redhat.com>
 

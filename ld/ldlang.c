@@ -2490,7 +2490,7 @@ print_padding_statement (lang_padding_statement_type *s)
   addr = s->output_offset;
   if (s->output_section != NULL)
     addr += s->output_section->vma;
-  minfo ("0x%V %W ", addr, s->size);
+  minfo ("0x%V %W ", addr, (bfd_vma) s->size);
 
   if (s->fill->size != 0)
     {
