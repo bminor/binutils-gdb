@@ -1,3 +1,8 @@
+2000-05-11  Thomas de Lellis  <tdel@windriver.com>
+
+        * arm-opc.c: Disassembly of thumb ldsb/ldsh
+        instructions changed to ldrsb/ldrsh.
+	
 2000-05-11  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* mips-dis.c (print_insn_arg): Don't mask top 32 bits of 64-bit

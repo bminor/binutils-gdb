@@ -213,7 +213,7 @@ static struct thumb_opcode thumb_opcodes[] =
   /* format 8 */
   {0x5200, 0xFE00, "strh\t%0-2r, [%3-5r, %6-8r]"},
   {0x5A00, 0xFE00, "ldrh\t%0-2r, [%3-5r, %6-8r]"},
-  {0x5600, 0xF600, "lds%11?hb\t%0-2r, [%3-5r, %6-8r]"},
+  {0x5600, 0xF600, "ldrs%11?hb\t%0-2r, [%3-5r, %6-8r]"},
   /* format 7 */
   {0x5000, 0xFA00, "str%10'b\t%0-2r, [%3-5r, %6-8r]"},
   {0x5800, 0xFA00, "ldr%10'b\t%0-2r, [%3-5r, %6-8r]"},
