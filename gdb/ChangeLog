@@ -1,3 +1,19 @@
+2001-04-02  J.T. Conklin  <jtc@redback.com>
+
+	* remote.c (remote_protocol_e, remote_protocol_E): Define.
+	(set_remote_protocol_e_packet_cmd)
+	(set_remote_protocol_E_packet_cmd)
+	(show_remote_protocol_e_packet_command)
+	(show_remote_protocol_E_packet_command): New functions.
+	(init_all_packet_configs): Initialize remote_protocol_e and
+	remote_protocol_E.
+	(remote_resume, remote_async_resume): Support e/E command
+	packets.
+	(show_remote_cmd): Show state of remote_protocol_e and 
+	remote_protocol_E.
+	(_initialize_remote): Add "set remote step-over-range-packet" 
+	and "set remote step-over-range-w-signal-packet" to CLI.
+
 2001-04-01  Andrew Cagney  <ac131313@redhat.com>
 
 	Obsolete ns32k-*-mach3*, ns32k-umax-*, ns32k-utek-sysv* and

@@ -663,6 +663,40 @@ packet_ok (const char *buf, struct packet_config *config)
     }
 }
 
+/* Should we try the 'e' (step over range) request? */
+static struct packet_config remote_protocol_e;
+
+static void
+set_remote_protocol_e_packet_cmd (char *args, int from_tty,
+				  struct cmd_list_element *c)
+{
+  update_packet_config (&remote_protocol_e);
+}
+
+static void
+show_remote_protocol_e_packet_cmd (char *args, int from_tty)
+{
+  show_packet_config_cmd (&remote_protocol_e);
+}
+  
+
+/* Should we try the 'E' (step over range / w signal #) request? */
+static struct packet_config remote_protocol_E;
+
+static void
+set_remote_protocol_E_packet_cmd (char *args, int from_tty,
+				  struct cmd_list_element *c)
+{
+  update_packet_config (&remote_protocol_E);
+}
+
+static void
+show_remote_protocol_E_packet_cmd (char *args, int from_tty)
+{
+  show_packet_config_cmd (&remote_protocol_E);
+}
+  
+
 /* Should we try the 'P' (set register) request?  */
 
 static struct packet_config remote_protocol_P;
@@ -2031,6 +2065,8 @@ static void
 init_all_packet_configs (void)
 {
   int i;
+  update_packet_config (&remote_protocol_e);
+  update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     update_packet_config (&remote_protocol_Z[i]);
@@ -2294,6 +2330,7 @@ static void
 remote_resume (int pid, int step, enum target_signal siggnal)
 {
   char *buf = alloca (PBUFSIZ);
+  char *p;
 
   if (pid == -1)
     set_thread (0, 0);		/* run any thread */
@@ -2308,11 +2345,66 @@ remote_resume (int pid, int step, enum target_signal siggnal)
   if (target_resume_hook)
     (*target_resume_hook) ();
 
+
+  /* The s/S/c/C packets do not return status.  So if the target does
+     not support the S or C packets, the debug agent returns an empty
+     string which is detected in remote_wait().  This protocol defect
+     is fixed in the e/E packets. */
+
+  if (step && step_range_end)
+    {
+      /* If the target does not support the 'E' packet, we try the 'S'
+	 packet.  Ideally we would fall back to the 'e' packet if that
+	 too is not supported.  But that would require another copy of
+	 the code to issue the 'e' packet (and fall back to 's' if not
+	 supported) in remote_wait().  */
+      
+      if (siggnal != TARGET_SIGNAL_0)
+	{
+	  if (remote_protocol_E.support != PACKET_DISABLE)
+	    {
+	      p = buf;
+	      *p++ = 'E';
+	      *p++ = tohex (((int) siggnal >> 4) & 0xf);
+	      *p++ = tohex (((int) siggnal) & 0xf);
+	      *p++ = ',';
+	      p += hexnumstr (p, (ULONGEST) step_range_start);
+	      *p++ = ',';
+	      p += hexnumstr (p, (ULONGEST) step_range_end);
+	      *p++ = 0;
+
+	      putpkt (buf);
+	      getpkt (buf, PBUFSIZ, 0);
+
+	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
+		return;
+	    }
+	}
+      else
+	{
+	  if (remote_protocol_e.support != PACKET_DISABLE)
+	    {
+	      p = buf;
+	      *p++ = 'e';
+	      p += hexnumstr (p, (ULONGEST) step_range_start);
+	      *p++ = ',';
+	      p += hexnumstr (p, (ULONGEST) step_range_end);
+	      *p++ = 0;
+
+	      putpkt (buf);
+	      getpkt (buf, PBUFSIZ, 0);
+
+	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
+		return;
+	    }
+	}
+    }
+
   if (siggnal != TARGET_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
       buf[1] = tohex (((int) siggnal >> 4) & 0xf);
-      buf[2] = tohex ((int) siggnal & 0xf);
+      buf[2] = tohex (((int) siggnal) & 0xf);
       buf[3] = '\0';
     }
   else
@@ -2326,6 +2418,7 @@ static void
 remote_async_resume (int pid, int step, enum target_signal siggnal)
 {
   char *buf = alloca (PBUFSIZ);
+  char *p;
 
   if (pid == -1)
     set_thread (0, 0);		/* run any thread */
@@ -2340,6 +2433,60 @@ remote_async_resume (int pid, int step, enum target_signal siggnal)
   if (target_resume_hook)
     (*target_resume_hook) ();
 
+  /* The s/S/c/C packets do not return status.  So if the target does
+     not support the S or C packets, the debug agent returns an empty
+     string which is detected in remote_wait().  This protocol defect
+     is fixed in the e/E packets. */
+
+  if (step && step_range_end)
+    {
+      /* If the target does not support the 'E' packet, we try the 'S'
+	 packet.  Ideally we would fall back to the 'e' packet if that
+	 too is not supported.  But that would require another copy of
+	 the code to issue the 'e' packet (and fall back to 's' if not
+	 supported) in remote_wait().  */
+      
+      if (siggnal != TARGET_SIGNAL_0)
+	{
+	  if (remote_protocol_E.support != PACKET_DISABLE)
+	    {
+	      p = buf;
+	      *p++ = 'E';
+	      *p++ = tohex (((int) siggnal >> 4) & 0xf);
+	      *p++ = tohex (((int) siggnal) & 0xf);
+	      *p++ = ',';
+	      p += hexnumstr (p, (ULONGEST) step_range_start);
+	      *p++ = ',';
+	      p += hexnumstr (p, (ULONGEST) step_range_end);
+	      *p++ = 0;
+
+	      putpkt (buf);
+	      getpkt (buf, PBUFSIZ, 0);
+
+	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
+		goto register_event_loop;
+	    }
+	}
+      else
+	{
+	  if (remote_protocol_e.support != PACKET_DISABLE)
+	    {
+	      p = buf;
+	      *p++ = 'e';
+	      p += hexnumstr (p, (ULONGEST) step_range_start);
+	      *p++ = ',';
+	      p += hexnumstr (p, (ULONGEST) step_range_end);
+	      *p++ = 0;
+
+	      putpkt (buf);
+	      getpkt (buf, PBUFSIZ, 0);
+
+	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
+		goto register_event_loop;
+	    }
+	}
+    }
+
   if (siggnal != TARGET_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
@@ -2349,7 +2496,10 @@ remote_async_resume (int pid, int step, enum target_signal siggnal)
     }
   else
     strcpy (buf, step ? "s" : "c");
+  
+  putpkt (buf);
 
+register_event_loop:
   /* We are about to start executing the inferior, let's register it
      with the event loop. NOTE: this is the one place where all the
      execution commands end up. We could alternatively do this in each
@@ -2366,7 +2516,6 @@ remote_async_resume (int pid, int step, enum target_signal siggnal)
      this information already found in the continuation block?  */
   if (target_is_async_p ())
     target_executing = 1;
-  putpkt (buf);
 }
 
 
@@ -5504,7 +5653,10 @@ set_remote_cmd (char *args, int from_tty)
 static void
 show_remote_cmd (char *args, int from_tty)
 {
+  
   show_remote_protocol_Z_packet_cmd (args, from_tty);
+  show_remote_protocol_e_packet_cmd (args, from_tty);
+  show_remote_protocol_E_packet_cmd (args, from_tty);
   show_remote_protocol_P_packet_cmd (args, from_tty);
   show_remote_protocol_binary_download_cmd (args, from_tty);
 }
@@ -5648,6 +5800,20 @@ in a memory packet.\n",
 
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
+
+  add_packet_config_cmd (&remote_protocol_e,
+			 "e", "step-over-range",
+			 set_remote_protocol_e_packet_cmd,
+			 show_remote_protocol_e_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_E,
+			 "E", "step-over-range-w-signal",
+			 set_remote_protocol_E_packet_cmd,
+			 show_remote_protocol_E_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
 
   add_packet_config_cmd (&remote_protocol_P,
 			 "P", "set-register",
