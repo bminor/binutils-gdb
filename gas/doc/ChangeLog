@@ -1,3 +1,7 @@
+Fri Mar 13 15:46:45 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: use $(MAKEINFO) not makeinfo.
+
 Sat Mar  7 00:06:25 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: commented out line for building as-all.texinfo.
