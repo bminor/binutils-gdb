@@ -501,7 +501,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      if (r_symndx >= symtab_hdr->sh_size / symtab_hdr->sh_entsize)
+      if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  if (abfd->my_archive)
 	    (*_bfd_error_handler) (_("%s(%s): bad symbol index: %d"),

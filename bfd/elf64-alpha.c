@@ -2831,7 +2831,7 @@ elf64_alpha_can_merge_gots (a, b)
       Elf_Internal_Shdr *symtab_hdr = &elf_tdata (bsub)->symtab_hdr;
       int i, n;
 
-      n = symtab_hdr->sh_size / symtab_hdr->sh_entsize - symtab_hdr->sh_info;
+      n = NUM_SHDR_ENTRIES (symtab_hdr) - symtab_hdr->sh_info;
       for (i = 0; i < n; ++i)
 	{
 	  struct alpha_elf_got_entry *ae, *be;
@@ -2903,7 +2903,7 @@ elf64_alpha_merge_gots (a, b)
       hashes = alpha_elf_sym_hashes (bsub);
       symtab_hdr = &elf_tdata (bsub)->symtab_hdr;
 
-      n = symtab_hdr->sh_size / symtab_hdr->sh_entsize - symtab_hdr->sh_info;
+      n = NUM_SHDR_ENTRIES (symtab_hdr) - symtab_hdr->sh_info;
       for (i = 0; i < n; ++i)
         {
 	  struct alpha_elf_got_entry *ae, *be, **pbe, **start;

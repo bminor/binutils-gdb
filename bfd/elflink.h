@@ -2465,7 +2465,7 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
       Elf_Internal_Rel *irel;
 
       erel = (Elf_External_Rel *) external_relocs;
-      erelend = erel + shdr->sh_size / shdr->sh_entsize;
+      erelend = erel + NUM_SHDR_ENTRIES (shdr);
       irela = internal_relocs;
       irel = bfd_alloc (abfd, (bed->s->int_rels_per_ext_rel
 			       * sizeof (Elf_Internal_Rel)));
@@ -2495,7 +2495,7 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
       BFD_ASSERT (shdr->sh_entsize == sizeof (Elf_External_Rela));
 
       erela = (Elf_External_Rela *) external_relocs;
-      erelaend = erela + shdr->sh_size / shdr->sh_entsize;
+      erelaend = erela + NUM_SHDR_ENTRIES (shdr);
       irela = internal_relocs;
       for (; erela < erelaend; erela++, irela += bed->s->int_rels_per_ext_rel)
 	{
@@ -2575,7 +2575,7 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
       (abfd,
        elf_section_data (o)->rel_hdr2,
        ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
-       internal_relocs + (rel_hdr->sh_size / rel_hdr->sh_entsize
+       internal_relocs + (NUM_SHDR_ENTRIES (rel_hdr)
 			  * bed->s->int_rels_per_ext_rel)))
     goto error_return;
 
@@ -4413,11 +4413,9 @@ elf_bfd_final_link (abfd, info)
 		  rel_count2 = &esdo->rel_count;
 		}
 
-	      *rel_count += (esdi->rel_hdr.sh_size
-			     / esdi->rel_hdr.sh_entsize);
+	      *rel_count += NUM_SHDR_ENTRIES (& esdi->rel_hdr);
 	      if (esdi->rel_hdr2)
-		*rel_count2 += (esdi->rel_hdr2->sh_size
-				/ esdi->rel_hdr2->sh_entsize);
+		*rel_count2 += NUM_SHDR_ENTRIES (esdi->rel_hdr2);
 	    }
 	}
 
@@ -5442,7 +5440,7 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
 
   bed = get_elf_backend_data (output_bfd);
   irela = internal_relocs;
-  irelaend = irela + input_rel_hdr->sh_size / input_rel_hdr->sh_entsize;
+  irelaend = irela + NUM_SHDR_ENTRIES (input_rel_hdr);
   if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
     {
       Elf_External_Rel *erel;
@@ -5477,7 +5475,7 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
 
   /* Bump the counter, so that we know where to add the next set of
      relocations.  */
-  *rel_countp += input_rel_hdr->sh_size / input_rel_hdr->sh_entsize;
+  *rel_countp += NUM_SHDR_ENTRIES (input_rel_hdr);
 }
 
 /* Link an input file into the linker output file.  This function
@@ -5939,8 +5937,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	      elf_link_output_relocs (output_bfd, o,
 				      input_rel_hdr,
 				      internal_relocs);
-	      internal_relocs
-		+= input_rel_hdr->sh_size / input_rel_hdr->sh_entsize;
+	      internal_relocs += NUM_SHDR_ENTRIES (input_rel_hdr);
 	      input_rel_hdr = elf_section_data (o)->rel_hdr2;
 	      if (input_rel_hdr)
 		elf_link_output_relocs (output_bfd, o,

@@ -27,6 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/external.h"
 #include "bfdlink.h"
 
+/* The number of entries in a section is its size divided by the size
+   of a single entry.  This is normally only applicaable to reloc and
+   symbol table sections.  */
+#define NUM_SHDR_ENTRIES(shdr) ((shdr)->sh_size / (shdr)->sh_entsize)
+
 /* If size isn't specified as 64 or 32, NAME macro should fail.  */
 #ifndef NAME
 #if ARCH_SIZE==64

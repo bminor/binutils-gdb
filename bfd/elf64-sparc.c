@@ -396,7 +396,7 @@ sparc64_elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
 	return true;
 
       rel_hdr = &d->this_hdr;
-      asect->reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
+      asect->reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
       rel_hdr2 = NULL;
     }
 
@@ -996,8 +996,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
   srelgot = NULL;
   sreloc = NULL;
 
-  rel_end = relocs + elf_section_data (sec)->rel_hdr.sh_size
-		     / elf_section_data (sec)->rel_hdr.sh_entsize;
+  rel_end = relocs + NUM_SHDR_ENTRIES (& elf_section_data (sec)->rel_hdr);
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned long r_symndx;
@@ -1903,8 +1902,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   sgot = splt = sreloc = NULL;
 
   rel = relocs;
-  relend = relocs + elf_section_data (input_section)->rel_hdr.sh_size
-		    / elf_section_data (input_section)->rel_hdr.sh_entsize;
+  relend = relocs + NUM_SHDR_ENTIRES (& elf_section_data (input_section)->rel_hdr);
   for (; rel < relend; rel++)
     {
       int r_type;

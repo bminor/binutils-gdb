@@ -1,3 +1,19 @@
+2001-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf-bfd.h (NUM_SHDR_ENTRIES): New macro: compute the number
+	of entries in a structured section.
+        * elf.c: Use new macro.
+        * elf32-i386.c: Use new macro.
+        * elf32-mips.c: Use new macro.
+        * elf64-alpha.c: Use new macro.
+        * elf64-sparc.c: Use new macro.
+        * elfcode.h: Use new macro.
+        * elflink.h: Use new macro.
+
+2001-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* bfdint.texi: Replace -oformat with --oformat.
+
 2001-05-21  Andreas Jaeger  <aj@suse.de>
 
 	* dwarf2.c (decode_line_info): Fix error message.

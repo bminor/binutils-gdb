@@ -1373,11 +1373,9 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
 	return true;
 
       rel_hdr = &d->rel_hdr;
-      reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
+      reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
       rel_hdr2 = d->rel_hdr2;
-      reloc_count2 = (rel_hdr2
-		      ? (rel_hdr2->sh_size / rel_hdr2->sh_entsize)
-		      : 0);
+      reloc_count2 = (rel_hdr2 ? NUM_SHDR_ENTRIES (rel_hdr2) : 0);
 
       BFD_ASSERT (asect->reloc_count == reloc_count + reloc_count2);
       BFD_ASSERT (asect->rel_filepos == rel_hdr->sh_offset
@@ -1394,7 +1392,7 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
 	return true;
 
       rel_hdr = &d->this_hdr;
-      reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
+      reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
       rel_hdr2 = NULL;
       reloc_count2 = 0;
     }

@@ -3071,7 +3071,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
 
 boolean
 _bfd_mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
      asection *sec;
      int *retval;
@@ -6822,8 +6822,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     REL_HDR is read before its REL_HDR2.  */
 	  rel_hdr = &elf_section_data (input_section)->rel_hdr;
 	  if ((size_t) (rel - relocs)
-	      >= (rel_hdr->sh_size / rel_hdr->sh_entsize
-		  * bed->s->int_rels_per_ext_rel))
+	      >= (NUM_SHDR_ENTRIES (rel_hdr) * bed->s->int_rels_per_ext_rel))
 	    rel_hdr = elf_section_data (input_section)->rel_hdr2;
 	  if (rel_hdr->sh_entsize == MIPS_ELF_REL_SIZE (input_bfd))
 	    {
@@ -7592,7 +7591,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	      asection **n;
 
 	      if (elf_bad_symtab (abfd))
-		symcount = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
+		symcount = NUM_SHDR_ENTRIES (symtab_hdr);
 	      else
 		symcount = symtab_hdr->sh_info;
 	      n = (asection **) bfd_zalloc (abfd,
@@ -7707,7 +7706,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 
       if (r_symndx < extsymoff)
 	h = NULL;
-      else if (r_symndx >= extsymoff + (symtab_hdr->sh_size / symtab_hdr->sh_entsize))
+      else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  (*_bfd_error_handler)
 	    (_("Malformed reloc detected for section %s"), name);
