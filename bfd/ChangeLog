@@ -1,3 +1,8 @@
+2003-10-12  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf64-sh64.c (sh_elf64_relocate_section): Tidy up for the
+	renumbering of some relocation numbers.
+
 2003-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-sh.c: Move definition of MAP and guard more code with

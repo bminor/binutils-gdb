@@ -1532,8 +1532,10 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC
 	      && r_type <= (int) R_SH_LAST_INVALID_RELOC)
 	  || (r_type >= (int) R_SH_DIR8WPN
-	      && r_type <= (int) R_SH_LAST_INVALID_RELOC_2)
-	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC_3
+	      && r_type <= (int) R_SH_LAST_INVALID_RELOC)
+	  || (r_type >= (int) R_SH_GNU_VTINHERIT
+	      && r_type <= (int) R_SH_PSHL)
+	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC_2
 	      && r_type <= R_SH_GOTPLT32)
 	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC_4
 	      && r_type <= (int) R_SH_LAST_INVALID_RELOC_4))
