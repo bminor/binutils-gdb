@@ -85,10 +85,14 @@ SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb)
 # Select the floating hardware support of the target
 #
 mips_fpu=HARDWARE_FLOATING_POINT
+mips_fpu_bitsize=
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        mips_fpu=SOFT_FLOATING_POINT ;;
 # end-sanitize-tx19
+  mipstx39*-*-*)	mips_fpu=HARD_FLOATING_POINT
+			mips_fpu_bitsize=32
+			;;
 # start-sanitize-r5900
   mips64r59*-*-*)       mips_fpu=HARD_FLOATING_POINT ;;
 # end-sanitize-r5900
@@ -97,7 +101,7 @@ case "${target}" in
   mips*-*-*)            mips_fpu=HARD_FLOATING_POINT ;;
   *)                    mips_fpu=HARD_FLOATING_POINT ;;
 esac
-SIM_AC_OPTION_FLOAT($mips_fpu)
+SIM_AC_OPTION_FLOAT($mips_fpu,$mips_fpu_bitsize)
 
 
 
@@ -117,7 +121,7 @@ SIM_AC_OPTION_SMP($mips_smp)
 #
 # Select the IGEN architecture
 #
-sim_use_gen=NO
+sim_use_gen=IGEN
 sim_igen_machine="-M mipsIV"
 sim_m16_machine="-M mips16"
 sim_igen_filter="32,64,f"
@@ -125,12 +129,19 @@ sim_m16_filter="16"
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)	sim_default_gen=M16
+			#sim_use_gen=M16
+			sim_use_gen=NO
 			sim_igen_machine="-M tx19"
 			sim_m16_machine="-M tx19"
 			sim_igen_filter="32"
 			sim_m16_filter="16"
 			;;
 # end-sanitize-tx19
+  mipstx39*-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
+			sim_igen_filter="32,f"
+			sim_igen_machine="-M r3900"
+			;;
 # start-sanitize-r5900
   mips64r59*-*-*)	sim_default_gen=IGEN
 			sim_use_gen=IGEN
@@ -157,6 +168,7 @@ case "${target}" in
   mips16*-*-*)		sim_default_gen=M16
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
+			sim_use_igen=NO
 			;;
   mips*-*-*)		sim_default_gen=IGEN
 			sim_igen_filter="32,f"

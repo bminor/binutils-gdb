@@ -339,7 +339,6 @@ sim_open (kind, cb, abfd, argv)
      registers: */
   {
     int rn;
-<<<<<<< interp.c
     for (rn = 0; (rn < (LAST_EMBED_REGNUM + 1)); rn++)
       {
 	if (rn < 32)
@@ -353,20 +352,6 @@ sim_open (kind, cb, abfd, argv)
 	else
 	  cpu->register_widths[rn] = 0;
       }
-=======
-    for (rn = 0; (rn < (LAST_EMBED_REGNUM + 1)); rn++) {
-      if (rn < 32)
-       cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
-      else if ((rn >= FGRIDX) && (rn < (FGRIDX + 32)))
-       cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
-      else if ((rn >= 33) && (rn <= 37))
-       cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
-      else if ((rn == SRIDX) || (rn == FCR0IDX) || (rn == FCR31IDX) || ((rn >= 72) && (rn <= 89)))
-       cpu->register_widths[rn] = 32;
-      else
-       cpu->register_widths[rn] = 0;
-    }
->>>>>>> 1.94
     /* start-sanitize-r5900 */
 
     /* set the 5900 "upper" registers to 64 bits */
@@ -1569,6 +1554,29 @@ ifetch32 (SIM_DESC sd,
   unsigned64 value;
   address_word paddr;
   unsigned32 instruction;
+  unsigned byte;
+  int cca;
+  AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &cca, isTARGET, isREAL);
+  paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
+  LoadMemory (&value, NULL, cca, AccessLength_WORD, paddr, vaddr, isINSTRUCTION, isREAL);
+  byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
+  instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
+  return instruction;
+}
+
+
+unsigned16
+ifetch16 (SIM_DESC sd,
+	  sim_cpu *cpu,
+	  address_word cia,
+	  address_word vaddr)
+{
+  /* Copy the action of the LW instruction */
+  address_word reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
+  address_word bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
+  unsigned64 value;
+  address_word paddr;
+  unsigned16 instruction;
   unsigned byte;
   int cca;
   AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &cca, isTARGET, isREAL);

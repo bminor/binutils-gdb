@@ -1,3 +1,44 @@
+Tue Feb  3 11:36:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (ifetch16): New function.
+
+	* sim-main.h (IMEM32): Rename IMEM.
+	(IMEM16_IMMED): Define.
+	(IMEM16): Define.
+	(DELAY_SLOT): Update.
+	
+	* m16run.c (sim_engine_run): New file.
+	
+	* m16.igen: All instructions except LB.
+	(LB): Call do_load_byte.
+	* mips.igen (do_load_byte): New function.
+	(LB): Call do_load_byte.
+
+	* mips.igen: Move spec for insn bit size and high bit from here.
+	* Makefile.in (tmp-igen, tmp-m16): To here.
+
+	* m16.dc: New file, decode mips16 instructions.
+
+	* Makefile.in (SIM_NO_ALL): Define.
+	(tmp-m16): Generate both 16 bit and 32 bit simulator engines.
+
+start-sanitize-tx19
+	* m16.igen: Mark all mips16 insns as being part of the tx19 insn
+ 	set.
+
+end-sanitize-tx19
+Tue Feb  3 11:28:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (mips_fpu_bitsize): For tx39, restrict floating
+ 	point unit to 32 bit registers.
+	* configure: Re-generate.
+
+Sun Feb  1 15:47:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (sim_use_gen): Make IGEN the default simulator
+ 	generator for generic 32 and 64 bit mips targets.
+	* configure: Re-generate.
+
 Sun Feb  1 16:52:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (SizeFGR): Determine from floating-point and not gpr

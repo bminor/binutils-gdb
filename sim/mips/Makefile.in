@@ -15,41 +15,31 @@ SIM_IGEN_OBJ = \
 	idecode.o \
 	icache.o \
 	engine.o \
-	irun.o
+	irun.o \
 
 SIM_M16_OBJ = \
-	$(SIM_IGEN_OBJ) = \
 	m16_support.o \
-	m16_itable.o \
 	m16_semantics.o \
 	m16_idecode.o \
 	m16_icache.o \
-	m16_engine.o \
-	m16_irun.o
+	\
+	m32_support.o \
+	m32_semantics.o \
+	m32_idecode.o \
+	m32_icache.o \
+	\
+	itable.o \
+	m16run.o \
 
 SIM_OBJS = \
 	$(SIM_@sim_gen@_OBJ) \
+	$(SIM_NEW_COMMON_OBJS) \
 	interp.o \
-	sim-bits.o \
-	sim-load.o \
-	sim-utils.o \
 	sim-hload.o \
-	sim-io.o \
-	sim-config.o \
-	sim-endian.o \
 	sim-engine.o \
-	sim-memopt.o \
 	sim-stop.o \
 	sim-resume.o \
 	sim-reason.o \
-	sim-events.o \
-	sim-module.o \
-	sim-trace.o \
-	sim-options.o \
-	sim-profile.o \
-	sim-core.o \
-	sim-watch.o
-
 
 
 # List of flags to always pass to $(CC).
@@ -77,7 +67,16 @@ SIM_RUN_OBJS = nrun.o
 
 ## COMMON_POST_CONFIG_FRAG
 
-interp.o: $(srcdir)/interp.c config.h sim-main.h oengine.c
+SIM_NO_INTERP = oengine.c
+interp.o: $(srcdir)/interp.c config.h sim-main.h $(SIM_@sim_gen@_INTERP)
+
+
+
+#
+# Old deprecated generator
+#
+
+SIM_NO_ALL = oengine.c
 
 oengine.c: gencode
 	./gencode @SIMCONF@ > tmp-oengine
@@ -95,18 +94,21 @@ getopt1.o: $(srcdir)/../../libiberty/getopt1.c
 	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/../../libiberty/getopt1.c
 
 
+
 ../igen/igen:
 	cd ../igen && $(MAKE)
 
 IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
 IGEN_INSN=$(srcdir)/mips.igen
 IGEN_DC=$(srcdir)/mips.dc
+M16_DC=$(srcdir)/m16.dc
 IGEN_INCLUDE=\
 	$(start-sanitize-r5900) \
 	$(srcdir)/r5900.igen \
 	$(end-sanitize-r5900) \
 	$(start-sanitize-vr5400) \
 	$(srcdir)/vr5400.igen \
+	$(srcdir)/mdmx.igen \
 	$(end-sanitize-vr5400) \
 	$(srcdir)/m16.igen
 
@@ -145,6 +147,9 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-Wnodiscard \
 		@sim_igen_flags@ \
 		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-B 32 \
+		-H 31 \
 		-i $(IGEN_INSN) \
 		-o $(IGEN_DC) \
 		-x \
@@ -188,7 +193,7 @@ itable.o: sim-main.h $(SIM_EXTRA_DEPS)
 
 
 
-SIM_M16_ALL = tmp-igen $(SIM_M16_ALL) 
+SIM_M16_ALL = tmp-m16
 
 BUILT_SRC_FROM_M16 = \
 	m16_icache.h \
@@ -201,11 +206,20 @@ BUILT_SRC_FROM_M16 = \
 	m16_model.c \
 	m16_support.h \
 	m16_support.c \
-	m16_itable.h \
-	m16_itable.c \
-	m16_engine.h \
-	m16_engine.c \
-	m16_irun.c
+	\
+	m32_icache.h \
+	m32_icache.c \
+	m32_idecode.h \
+	m32_idecode.c \
+	m32_semantics.h \
+	m32_semantics.c \
+	m32_model.h \
+	m32_model.c \
+	m32_support.h \
+	m32_support.c \
+	\
+	itable.h \
+	itable.c \
 
 $(BUILT_SRC_FROM_M16): tmp-m16
 
@@ -221,11 +235,14 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		-F 16 \
-		-M mips16 \
+		@sim_m16_flags@ \
 		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-B 16 \
+		-H 15 \
 		-i $(IGEN_INSN) \
-		-o $(IGEN_DC) \
+		-o $(M16_DC) \
+		-P m16_ \
 		-x \
 		-n m16_icache.h    -hc tmp-icache.h \
 		-n m16_icache.c    -c  tmp-icache.c \
@@ -237,11 +254,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-n m16_model.c     -m  tmp-model.c \
 		-n m16_support.h   -hf tmp-support.h \
 		-n m16_support.c   -f  tmp-support.c \
-		-n m16_itable.h    -ht tmp-itable.h \
-		-n m16_itable.c    -t  tmp-itable.c \
-		-n m16_engine.h    -he tmp-engine.h \
-		-n m16_engine.c    -e  tmp-engine.c \
-		-n m16_irun.c      -r  tmp-irun.c
+		#
 	$(srcdir)/../../move-if-change tmp-icache.h m16_icache.h
 	$(srcdir)/../../move-if-change tmp-icache.c m16_icache.c
 	$(srcdir)/../../move-if-change tmp-idecode.h m16_idecode.h
@@ -252,11 +265,56 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	$(srcdir)/../../move-if-change tmp-model.c m16_model.c
 	$(srcdir)/../../move-if-change tmp-support.h m16_support.h
 	$(srcdir)/../../move-if-change tmp-support.c m16_support.c
-	$(srcdir)/../../move-if-change tmp-itable.h m16_itable.h
-	$(srcdir)/../../move-if-change tmp-itable.c m16_itable.c
-	$(srcdir)/../../move-if-change tmp-engine.h m16_engine.h
-	$(srcdir)/../../move-if-change tmp-engine.c m16_engine.c
-	$(srcdir)/../../move-if-change tmp-irun.c m16_irun.c
+	../igen/igen \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		@sim_igen_flags@ \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-B 32 \
+		-H 31 \
+		-i $(IGEN_INSN) \
+		-o $(IGEN_DC) \
+		-P m32_ \
+		-x \
+		-n m32_icache.h    -hc tmp-icache.h \
+		-n m32_icache.c    -c  tmp-icache.c \
+		-n m32_semantics.h -hs tmp-semantics.h \
+		-n m32_semantics.c -s  tmp-semantics.c \
+		-n m32_idecode.h   -hd tmp-idecode.h \
+		-n m32_idecode.c   -d  tmp-idecode.c \
+		-n m32_model.h     -hm tmp-model.h \
+		-n m32_model.c     -m  tmp-model.c \
+		-n m32_support.h   -hf tmp-support.h \
+		-n m32_support.c   -f  tmp-support.c \
+		#
+	$(srcdir)/../../move-if-change tmp-icache.h m32_icache.h
+	$(srcdir)/../../move-if-change tmp-icache.c m32_icache.c
+	$(srcdir)/../../move-if-change tmp-idecode.h m32_idecode.h
+	$(srcdir)/../../move-if-change tmp-idecode.c m32_idecode.c
+	$(srcdir)/../../move-if-change tmp-semantics.h m32_semantics.h
+	$(srcdir)/../../move-if-change tmp-semantics.c m32_semantics.c
+	$(srcdir)/../../move-if-change tmp-model.h m32_model.h
+	$(srcdir)/../../move-if-change tmp-model.c m32_model.c
+	$(srcdir)/../../move-if-change tmp-support.h m32_support.h
+	$(srcdir)/../../move-if-change tmp-support.c m32_support.c
+	../igen/igen \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		-Wnowidth \
+		@sim_igen_flags@ @sim_m16_flags@ \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-i $(IGEN_INSN) \
+		-n itable.h    -ht tmp-itable.h \
+		-n itable.c    -t  tmp-itable.c \
+		#
+	$(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(srcdir)/../../move-if-change tmp-itable.c itable.c
 	touch tmp-m16
 
 
