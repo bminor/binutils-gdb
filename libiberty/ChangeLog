@@ -1,3 +1,8 @@
+2001-11-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Cope with missing makeinfo.
+	* configure: Regenerate.
+
 2001-10-22  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* hex.c (hex_init): Provide empty stub.
@@ -134,11 +139,6 @@
 	* alloca.c (libiberty_optr, libiberty_nptr, libiberty_len):
 	Define.
 
-2001-09-17  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
-
-	* alloca.c (libiberty_optr, libiberty_nptr, libiberty_len):
-	Define.
-
 2001-09-04  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* asprintf.c: Don't define USE_STDARG.  Use VPARAMS, VA_OPEN,
@@ -165,10 +165,10 @@
 
 2001-08-22  Matt Kraai  <kraai@alumni.carnegiemellon.edu>
 
-	* fibheap.c (fibheap_init, fibnode_init): Remove.
-	(fibheap_new, fibnode_new): Use xcalloc to allocate and
-	initialize memory.
-	(fibheap_insert): Remove check for node allocation failure.
+ 	* fibheap.c (fibheap_init, fibnode_init): Remove.
+ 	(fibheap_new, fibnode_new): Use xcalloc to allocate and
+ 	initialize memory.
+ 	(fibheap_insert): Remove check for node allocation failure.
 
 2001-08-21  Richard Henderson  <rth@redhat.com>
 
@@ -182,14 +182,6 @@ Tue Aug 21 12:35:04 2001  Christopher Faylor <cgf@cygnus.com>
 	hosting on cygwin.
 	* configure: Regenerate.
 
-2001-08-20  Daniel Berlin  <dan@cgsoftware.com>
-
-	* fibheap.c: New file. Fibonacci heap.
-
-	* Makefile.in (CFILES): Add fibheap.c.
-	(REQUIRED_OFILES): Add fibheap.o.
-	(fibheap.o): Add dependencies for fibheap.o.
-
 2001-08-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* floatformat.c (floatformat_m88110_ext): Remove #ifdef
@@ -198,6 +190,14 @@ Tue Aug 21 12:35:04 2001  Christopher Faylor <cgf@cygnus.com>
 	(floatformat_ia64_spill_big, floatformat_ia64_quad_big)
 	(floatformat_arm_ext_big, floatformat_arm_ext_littlebyte_bigword)
 	(floatformat_m88110_harris_ext): New float formats.
+
+2001-08-20  Daniel Berlin  <dan@cgsoftware.com>
+
+	* fibheap.c: New file. Fibonacci heap.
+
+	* Makefile.in (CFILES): Add fibheap.c.
+	(REQUIRED_OFILES): Add fibheap.o.
+	(fibheap.o): Add dependencies for fibheap.o.
 
 2001-08-17  Christopher Faylor <cgf@cygnus.com>
 
