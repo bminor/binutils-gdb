@@ -1193,6 +1193,14 @@ display_target_list ()
       bfd_target *p = bfd_target_vector[t];
       bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
 
+      /* It *is* possible that bfd_openw might fail; avoid the
+	 tragic consequences that would otherwise ensue. */
+      if (abfd == NULL)
+	{
+	  fprintf (stderr, "%s: ", program_name);
+	  bfd_perror (_DUMMY_NAME_);
+	  return;
+	}
       bfd_set_format (abfd, bfd_object);
       printf ("%s\n (header %s, data %s)\n", p->name,
 	      p->header_byteorder_big_p ? "big endian" : "little endian",
@@ -1231,6 +1239,13 @@ display_info_table (first, last)
 	    bfd_target *p = bfd_target_vector[t];
 	    bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
 
+	    /* Just in case the open failed somehow. */
+	    if (abfd == NULL)
+	      {
+		fprintf (stderr, "%s: ", program_name);
+		bfd_perror (_DUMMY_NAME_);
+		return;
+	      }
 	    bfd_set_format (abfd, bfd_object);
 	    if (bfd_set_arch_mach (abfd, a, 0))
 	      printf ("%s ", p->name);
