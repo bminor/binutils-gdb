@@ -79,8 +79,8 @@ enum cpu_type
 #define A_REGNUM        5
 #define B_REGNUM        6
 #define PSW_REGNUM 	7
-#define Z_REGNUM        8
-#define PAGE_REGNUM     9
+#define PAGE_REGNUM     8
+#define Z_REGNUM        9
 
 typedef struct m6811_regs {
     unsigned short      d;
