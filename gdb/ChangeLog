@@ -3,6 +3,10 @@
 	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Change
 	TRAP_HWBKPT constant to match that in the kernel headers for
 	Linux/IA-64.
+
+	* config/ia64/linux.mh (NATDEPFILES): Remove core-regset.o
+	from list.
+
 2001-03-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c: Include "gdb_assert.h".
