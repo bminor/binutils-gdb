@@ -82,7 +82,8 @@ gld${EMULATION_NAME}_before_parse()
 static void
 gld${EMULATION_NAME}_create_output_section_statements ()
 {
-  lang_for_each_input_file (gld${EMULATION_NAME}_find_so);
+  if (config.dynamic_link)
+    lang_for_each_input_file (gld${EMULATION_NAME}_find_so);
 }
 
 /* Search the directory for a .so file for each library search.  */
