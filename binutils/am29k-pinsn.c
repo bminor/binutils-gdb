@@ -147,7 +147,7 @@ print_insn_a29k (memaddr, buffer, stream)
   /* The four bytes of the instruction.  */
   unsigned char insn24, insn16, insn8, insn0;
 
-  struct am29k_opcode *opcode;
+  CONST struct am29k_opcode *opcode;
 
 #ifdef GDB
   read_memory (memaddr, &insn[0], 4);
