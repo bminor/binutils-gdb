@@ -1,3 +1,8 @@
+2000-11-09  Kazu Hirata  <kazu@hxi.com>
+
+	* archive.c: Fix formatting.
+	* archures.c: Likewise.
+
 2000-11-07  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (elf64_ia64_final_link): New local unwind_output_sec.

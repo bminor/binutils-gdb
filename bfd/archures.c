@@ -239,11 +239,9 @@ DESCRIPTION
 .  bfd_arch_cris,      {* Axis CRIS *}
 .  bfd_arch_last
 .  };
-
 */
 
 /*
-
 SUBSECTION
 	bfd_arch_info
 
@@ -315,8 +313,7 @@ extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
 
-static const bfd_arch_info_type * const bfd_archures_list[] =
-{
+static const bfd_arch_info_type * const bfd_archures_list[] = {
 #ifdef SELECT_ARCHITECTURES
   SELECT_ARCHITECTURES,
 #else
@@ -394,7 +391,6 @@ DESCRIPTION
 	Figure out if BFD supports any cpu which could be described with
 	the name @var{string}.  Return a pointer to an <<arch_info>>
 	structure if a machine is found, otherwise NULL.
-
 */
 
 const bfd_arch_info_type *
@@ -403,7 +399,7 @@ bfd_scan_arch (string)
 {
   const bfd_arch_info_type * const *app, *ap;
 
-  /* Look through all the installed architectures */
+  /* Look through all the installed architectures.  */
   for (app = bfd_archures_list; *app != NULL; app++)
     {
       for (ap = *app; ap != NULL; ap = ap->next)
@@ -426,7 +422,6 @@ SYNOPSIS
 DESCRIPTION
 	Return a freshly malloced NULL-terminated vector of the names
 	of all the valid BFD architectures.  Do not modify the names.
-
 */
 
 const char **
@@ -437,7 +432,7 @@ bfd_arch_list ()
   const char **name_list;
   const bfd_arch_info_type * const *app;
 
-  /* Determine the number of architectures */
+  /* Determine the number of architectures.  */
   vec_length = 0;
   for (app = bfd_archures_list; *app != NULL; app++)
     {
@@ -453,7 +448,7 @@ bfd_arch_list ()
   if (name_list == NULL)
     return NULL;
 
-  /* Point the list at each of the names */
+  /* Point the list at each of the names.  */
   name_ptr = name_list;
   for (app = bfd_archures_list; *app != NULL; app++)
     {
@@ -494,9 +489,9 @@ bfd_arch_get_compatible (abfd, bbfd)
   /* If either architecture is unknown, then all we can do is assume
      the user knows what he's doing.  */
   if (abfd->arch_info->arch == bfd_arch_unknown)
-  	return bbfd->arch_info;
+    return bbfd->arch_info;
   if (bbfd->arch_info->arch == bfd_arch_unknown)
-  	return abfd->arch_info;
+    return abfd->arch_info;
 
   /* Otherwise architecture-specific code has to decide.  */
   return abfd->arch_info->compatible (abfd->arch_info, bbfd->arch_info);
@@ -514,15 +509,13 @@ DESCRIPTION
 	architecture of the file.
 
 .extern const bfd_arch_info_type bfd_default_arch_struct;
-
 */
 
-const bfd_arch_info_type bfd_default_arch_struct =
-{
-    32,32,8,bfd_arch_unknown,0,"unknown","unknown",2,true,
-    bfd_default_compatible,
-    bfd_default_scan,
-    0,
+const bfd_arch_info_type bfd_default_arch_struct = {
+  32, 32, 8, bfd_arch_unknown, 0, "unknown", "unknown", 2, true,
+  bfd_default_compatible,
+  bfd_default_scan,
+  0,
 };
 
 /*
@@ -597,14 +590,13 @@ SYNOPSIS
 DESCRIPTION
 	Return the enumerated type which describes the BFD @var{abfd}'s
 	architecture.
-
 */
 
 enum bfd_architecture
 bfd_get_arch (abfd)
      bfd *abfd;
 {
-    return abfd->arch_info->arch;
+  return abfd->arch_info->arch;
 }
 
 /*
@@ -623,7 +615,7 @@ unsigned long
 bfd_get_mach (abfd)
      bfd *abfd;
 {
-    return abfd->arch_info->mach;
+  return abfd->arch_info->mach;
 }
 
 /*
@@ -636,7 +628,6 @@ SYNOPSIS
 DESCRIPTION
 	Return the number of bits in one of the BFD @var{abfd}'s
 	architecture's bytes.
-
 */
 
 unsigned int
@@ -679,7 +670,7 @@ DESCRIPTION
 */
 
 const bfd_arch_info_type *
-bfd_default_compatible (a,b)
+bfd_default_compatible (a, b)
      const bfd_arch_info_type *a;
      const bfd_arch_info_type *b;
 {
@@ -719,17 +710,17 @@ bfd_default_scan (info, string)
   const char *printable_name_colon;
 
   /* Exact match of the architecture name (ARCH_NAME) and also the
-     default architecture? */
+     default architecture?  */
   if (strcasecmp (string, info->arch_name) == 0
       && info->the_default)
     return true;
 
-  /* Exact match of the machine name (PRINTABLE_NAME)? */
+  /* Exact match of the machine name (PRINTABLE_NAME)?  */
   if (strcasecmp (string, info->printable_name) == 0)
     return true;
 
   /* Given that printable_name contains no colon, attempt to match:
-     ARCH_NAME [ ":" ] PRINTABLE_NAME? */
+     ARCH_NAME [ ":" ] PRINTABLE_NAME?  */
   printable_name_colon = strchr (info->printable_name, ':');
   if (printable_name_colon == NULL)
     {
@@ -752,7 +743,7 @@ bfd_default_scan (info, string)
     }
 
   /* Given that PRINTABLE_NAME has the form: <arch> ":" <mach>;
-     Attempt to match: <arch> <mach>? */
+     Attempt to match: <arch> <mach>?  */
   if (printable_name_colon != NULL)
     {
       int colon_index = printable_name_colon - info->printable_name;
@@ -766,36 +757,37 @@ bfd_default_scan (info, string)
      attempt to match just <mach>, it could be ambigious.  This test
      is left until later.  */
 
-  /* NOTE: The below is retained for compatibility only. Please do not
-     add to this code */
+  /* NOTE: The below is retained for compatibility only.  Please do
+     not add to this code.  */
 
   /* See how much of the supplied string matches with the
      architecture, eg the string m68k:68020 would match the 68k entry
-     up to the :, then we get left with the machine number */
+     up to the :, then we get left with the machine number.  */
 
   for (ptr_src = string, ptr_tst = info->arch_name;
        *ptr_src && *ptr_tst;
        ptr_src++, ptr_tst++)
     {
-      if (*ptr_src != *ptr_tst) break;
+      if (*ptr_src != *ptr_tst)
+	break;
     }
 
   /* Chewed up as much of the architecture as will match, skip any
-     colons */
+     colons.  */
   if (*ptr_src == ':')
     ptr_src++;
 
   if (*ptr_src == 0)
     {
-      /* nothing more, then only keep this one if it is the default
-	 machine for this architecture */
+      /* Nothing more, then only keep this one if it is the default
+	 machine for this architecture.  */
       return info->the_default;
     }
 
   number = 0;
   while (isdigit ((unsigned char) *ptr_src))
     {
-      number = number * 10 + *ptr_src  - '0';
+      number = number * 10 + *ptr_src - '0';
       ptr_src++;
     }
 
@@ -973,11 +965,11 @@ bfd_printable_arch_mach (arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-    const bfd_arch_info_type * ap = bfd_lookup_arch (arch, machine);
+  const bfd_arch_info_type *ap = bfd_lookup_arch (arch, machine);
 
-    if (ap)
-      return ap->printable_name;
-    return "UNKNOWN!";
+  if (ap)
+    return ap->printable_name;
+  return "UNKNOWN!";
 }
 
 /*
@@ -991,15 +983,14 @@ DESCRIPTION
 	Return the number of octets (8-bit quantities) per target byte
         (minimum addressable unit).  In most cases, this will be one, but some
         DSP targets have 16, 32, or even 48 bits per byte.
-
 */
 
 unsigned int
 bfd_octets_per_byte (abfd)
-     bfd * abfd;
+     bfd *abfd;
 {
-    return bfd_arch_mach_octets_per_byte (bfd_get_arch (abfd),
-                                          bfd_get_mach (abfd));
+  return bfd_arch_mach_octets_per_byte (bfd_get_arch (abfd),
+					bfd_get_mach (abfd));
 }
 
 /*
@@ -1019,12 +1010,12 @@ DESCRIPTION
 
 unsigned int
 bfd_arch_mach_octets_per_byte (arch, mach)
-    enum bfd_architecture arch;
-    unsigned long mach;
+     enum bfd_architecture arch;
+     unsigned long mach;
 {
-    const bfd_arch_info_type * ap = bfd_lookup_arch (arch, mach);
+  const bfd_arch_info_type *ap = bfd_lookup_arch (arch, mach);
 
-    if (ap)
-      return ap->bits_per_byte / 8;
-    return 1;
+  if (ap)
+    return ap->bits_per_byte / 8;
+  return 1;
 }
