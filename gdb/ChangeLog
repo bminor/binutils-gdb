@@ -1,3 +1,9 @@
+Mon Nov 24 14:17:02 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* infcmd.c: export registers_info, for use by other modules.
+	* printcmd.c: export output_command, for use by other modules.
+	* stack.c: export locals_info and args_info, for use by other modules.
+
 Mon Nov 24 08:59:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* valprint.c (print_longest): When CC has long long but printf
