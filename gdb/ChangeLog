@@ -1,5 +1,11 @@
 Thu Jul 15 08:34:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* hppa-tdep.c (pc_in_linker_stub): New function.
+	(find_proc_framesize): Return 0 for linker stubs.
+	(rp_saved): Tell the caller where rp is saved.
+	(frame_chain_valid): Return 1 for linker stubs.
+	(frame_saved_pc): Use return value from rp_saved.
+
 	* stack.c (print_frame_info): When checking PC_IN_CALL_DUMMY,
 	pass the sp relative to the frame in question, not the sp in the
 	innermost frame.

@@ -296,6 +296,62 @@ find_unwind_entry(pc)
   return NULL;
 }
 
+/* Called when no unwind descriptor was found for PC.  Returns 1 if it
+   appears that PC is in a linker stub.  */
+static int pc_in_linker_stub PARAMS ((CORE_ADDR));
+
+static int
+pc_in_linker_stub (pc)
+     CORE_ADDR pc;
+{
+
+  int found_magic_instruction = 0;
+  int i;
+
+  /* Maximum known linker stub size is 4 instructions.  Search forward
+     from the given PC, then backward.  */
+  for (i = 0; i < 4; i++)
+    {
+      /* If we hit something with an unwind, stop searching this direction.  
+
+      if (find_unwind_entry (pc + i * 4) != 0)
+	break;
+
+      /* Check for ldsid (rp),r1 which is the magic instruction for a 
+	 return from a cross-space function call.  */
+      if (read_memory_integer (pc + i * 4, 4) == 0x004010a1)
+	{
+	  found_magic_instruction = 1;
+	  break;
+	}
+      /* Add code to handle long call/branch and argument relocation stubs
+	 here.  */
+    }
+
+  if (found_magic_instruction != 0)
+    return 1;
+
+  /* Now look backward.  */
+  for (i = 0; i < 4; i++)
+    {
+      /* If we hit something with an unwind, stop searching this direction.  
+
+      if (find_unwind_entry (pc - i * 4) != 0)
+	break;
+
+      /* Check for ldsid (rp),r1 which is the magic instruction for a 
+	 return from a cross-space function call.  */
+      if (read_memory_integer (pc - i * 4, 4) == 0x004010a1)
+	{
+	  found_magic_instruction = 1;
+	  break;
+	}
+      /* Add code to handle long call/branch and argument relocation stubs
+	 here.  */
+    }
+  return found_magic_instruction;
+}
+
 static int
 find_return_regnum(pc)
      CORE_ADDR pc;
@@ -313,6 +369,7 @@ find_return_regnum(pc)
   return RP_REGNUM;
 }
 
+/* Return size of frame, or -1 if we should use a frame pointer.  */
 int
 find_proc_framesize(pc)
      CORE_ADDR pc;
@@ -325,7 +382,13 @@ find_proc_framesize(pc)
   u = find_unwind_entry (pc);
 
   if (!u)
-    return -1;
+    {
+      if (pc_in_linker_stub (pc))
+	/* Linker stubs have a zero size frame.  */
+	return 0;
+      else
+	return -1;
+    }
 
   if (u->Save_SP)
     /* If this bit is set, it means there is a frame pointer and we should
@@ -335,18 +398,28 @@ find_proc_framesize(pc)
   return u->Total_frame_size << 3;
 }
 
-int
-rp_saved(pc)
+/* Return offset from sp at which rp is saved, or 0 if not saved.  */
+static int rp_saved PARAMS ((CORE_ADDR));
+
+static int
+rp_saved (pc)
+     CORE_ADDR pc;
 {
   struct unwind_table_entry *u;
 
   u = find_unwind_entry (pc);
 
   if (!u)
-    return 0;
+    {
+      if (pc_in_linker_stub (pc))
+	/* This is the so-called RP'.  */
+	return -24;
+      else
+	return 0;
+    }
 
   if (u->Save_RP)
-    return 1;
+    return -20;
   else
     return 0;
 }
@@ -396,10 +469,15 @@ frame_saved_pc (frame)
 
       return read_register (ret_regnum) & ~0x3;
     }
-  else if (rp_saved (pc))
-    return read_memory_integer (frame->frame - 20, 4) & ~0x3;
   else
-    return read_register (RP_REGNUM) & ~0x3;
+    {
+      int rp_offset = rp_saved (pc);
+
+      if (rp_offset == 0)
+	return read_register (RP_REGNUM) & ~0x3;
+      else
+	return read_memory_integer (frame->frame - rp_offset, 4) & ~0x3;
+    }
 }
 
 /* We need to correct the PC and the FP for the outermost frame when we are
@@ -470,10 +548,19 @@ frame_chain_valid (chain, thisframe)
 
       u = find_unwind_entry (thisframe->pc);
 
-      if (u && (u->Save_SP || u->Total_frame_size))
-	return 1;
-      else
+      if (u == NULL)
+	/* FIXME, we should probably fall back to some other technique,
+	   if we want to deal gracefully with stripped executables or others
+	   without unwind info.  */
 	return 0;
+
+      if (u->Save_SP || u->Total_frame_size)
+	return 1;
+
+      if (pc_in_linker_stub (thisframe->pc))
+	return 1;
+
+      return 0;
     }
   else
     {
