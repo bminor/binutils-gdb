@@ -1,5 +1,12 @@
 2003-12-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcbsd-nat.c: Remove file.
+	* sparcbsd-nat.h: Remove file.
+	* Makefile.in (ALLDEPFILES): Remove sparcbsd-nat.c
+	(sparcbsd-nat.o): Remove dependency.
+
+2003-12-26  Mark Kettenis  <kettenis@gnu.org>
+
 	* sparc64-nat.c (sparc64_gregset_supplies_p): Return non-zero if
 	REGNUM is SPARC64_FPRS_REGNUM.
 	* sparc64-tdep.c (sparc64_supply_gregset): Deal with
