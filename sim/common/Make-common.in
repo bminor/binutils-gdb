@@ -346,7 +346,7 @@ MAKEOVERRIDES=
 tags etags: TAGS
 
 TAGS: force
-	etags *.c *.h
+	etags --regex '/^\/[*] TAGS: .*/' *.c *.h
 
 clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
