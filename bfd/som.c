@@ -191,7 +191,14 @@ static const reloc_howto_type * som_bfd_reloc_type_lookup
 	PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
 static char som_section_type PARAMS ((const char *));
 static int som_decode_symclass PARAMS ((asymbol *));
+static boolean som_bfd_count_ar_symbols PARAMS ((bfd *, struct lst_header *,
+						 symindex *));
 
+static boolean som_bfd_fill_in_ar_symbols PARAMS ((bfd *, struct lst_header *,
+						   carsym **syms));
+static boolean som_slurp_armap PARAMS ((bfd *));
+static boolean som_write_armap PARAMS ((bfd *));
+static boolean som_slurp_extended_name_table PARAMS ((bfd *));
 
 /* Map SOM section names to POSIX/BSD single-character symbol types.
 
@@ -4190,18 +4197,381 @@ som_get_symbol_info (ignore_abfd, symbol, ret)
   ret->name = symbol->name;
 }
 
+/* Count the number of symbols in the archive symbol table.  Necessary
+   so that we can allocate space for all the carsyms at once.  */
+
+static boolean
+som_bfd_count_ar_symbols (abfd, lst_header, count)
+     bfd *abfd;
+     struct lst_header *lst_header;
+     symindex *count;
+{
+  unsigned int i;
+  unsigned int hash_table[lst_header->hash_size];
+  file_ptr lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
+
+  /* Don't forget to initialize the counter!  */
+  *count = 0;
+
+  /* Read in the hash table.  The has table is an array of 32bit file offsets
+     which point to the hash chains.  */
+  if (bfd_read ((PTR) hash_table, lst_header->hash_size, 4, abfd)
+      != lst_header->hash_size * 4)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Walk each chain counting the number of symbols found on that particular
+     chain.  */
+  for (i = 0; i < lst_header->hash_size; i++)
+    {
+      struct lst_symbol_record lst_symbol;
+
+      /* An empty chain has zero as it's file offset.  */
+      if (hash_table[i] == 0)
+	continue;
+
+      /* Seek to the first symbol in this hash chain.  */
+      if (bfd_seek (abfd, lst_filepos + hash_table[i], SEEK_SET) < 0)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      /* Read in this symbol and update the counter.  */
+      if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
+	  != sizeof (lst_symbol))
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+      (*count)++;
+
+      /* Now iterate through the rest of the symbols on this chain.  */
+      while (lst_symbol.next_entry)
+	{
+
+	  /* Seek to the next symbol.  */
+	  if (bfd_seek (abfd, lst_filepos + lst_symbol.next_entry, SEEK_SET)
+	      < 0)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+
+	  /* Read the symbol in and update the counter.  */
+	  if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
+	      != sizeof (lst_symbol))
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+	  (*count)++;
+	}
+    }
+  return true;
+}
+
+/* Fill in the canonical archive symbols (SYMS) from the archive described
+   by ABFD and LST_HEADER.  */
+
+static boolean
+som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
+     bfd *abfd;
+     struct lst_header *lst_header;
+     carsym **syms;
+{
+  unsigned int i, len;
+  carsym *set = syms[0];
+  unsigned int hash_table[lst_header->hash_size];
+  struct som_entry som_dict[lst_header->module_count];
+  file_ptr lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
+
+  /* Read in the hash table.  The has table is an array of 32bit file offsets
+     which point to the hash chains.  */
+  if (bfd_read ((PTR) hash_table, lst_header->hash_size, 4, abfd)
+      != lst_header->hash_size * 4)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Seek to and read in the SOM dictionary.  We will need this to fill
+     in the carsym's filepos field.  */
+  if (bfd_seek (abfd, lst_filepos + lst_header->dir_loc, SEEK_SET) < 0)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  if (bfd_read ((PTR) som_dict, lst_header->module_count, 
+		sizeof (struct som_entry), abfd)
+      != lst_header->module_count * sizeof (struct som_entry))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Walk each chain filling in the carsyms as we go along.  */
+  for (i = 0; i < lst_header->hash_size; i++)
+    {
+      struct lst_symbol_record lst_symbol;
+
+      /* An empty chain has zero as it's file offset.  */
+      if (hash_table[i] == 0)
+	continue;
+
+      /* Seek to and read the first symbol on the chain.  */
+      if (bfd_seek (abfd, lst_filepos + hash_table[i], SEEK_SET) < 0)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
+	  != sizeof (lst_symbol))
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      /* Get the name of the symbol, first get the length which is stored
+	 as a 32bit integer just before the symbol.
+
+	 One might ask why we don't just read in the entire string table
+	 and index into it.  Well, according to the SOM ABI the string
+	 index can point *anywhere* in the archive to save space, so just
+	 using the string table would not be safe.  */
+      if (bfd_seek (abfd, lst_filepos + lst_header->string_loc
+			    + lst_symbol.name.n_strx - 4, SEEK_SET) < 0)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      if (bfd_read (&len, 1, 4, abfd) != 4)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      /* Allocate space for the name and null terminate it too.  */
+      set->name = bfd_zalloc (abfd, len + 1);
+      if (!set->name)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+      if (bfd_read (set->name, 1, len, abfd) != len)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+      set->name[len] = 0;
+
+      /* Fill in the file offset.  Note that the "location" field points
+	 to the SOM itself, not the ar_hdr in front of it.  */
+      set->file_offset = som_dict[lst_symbol.som_index].location
+			  - sizeof (struct ar_hdr);
+
+      /* Go to the next symbol.  */
+      set++;
+
+      /* Iterate through the rest of the chain.  */
+      while (lst_symbol.next_entry)
+	{
+	  /* Seek to the next symbol and read it in.  */
+	  if (bfd_seek (abfd, lst_filepos + lst_symbol.next_entry, SEEK_SET)
+	      < 0)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+
+	  if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
+	      != sizeof (lst_symbol))
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+
+	  /* Seek to the name length & string and read them in.  */
+	  if (bfd_seek (abfd, lst_filepos + lst_header->string_loc 
+				+ lst_symbol.name.n_strx - 4, SEEK_SET) < 0)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+
+	  if (bfd_read (&len, 1, 4, abfd) != 4)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+
+	  /* Allocate space for the name and null terminate it too.  */
+	  set->name = bfd_zalloc (abfd, len + 1);
+	  if (!set->name)
+	    {
+	      bfd_error = no_memory;
+	      return false;
+	    }
+	  if (bfd_read (set->name, 1, len, abfd) != len)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+	  set->name[len] = 0;
+
+	  /* Fill in the file offset.  Note that the "location" field points
+	     to the SOM itself, not the ar_hdr in front of it.  */
+	  set->file_offset = som_dict[lst_symbol.som_index].location
+			       - sizeof (struct ar_hdr);
+
+	  /* Go on to the next symbol.  */
+	  set++;
+	}
+    }
+  /* If we haven't died by now, then we successfully read the entire 
+     archive symbol table.  */
+  return true;
+}
+
+/* Read in the LST from the archive.  */
+static boolean
+som_slurp_armap (abfd)
+     bfd *abfd;
+{
+  struct lst_header lst_header;
+  struct ar_hdr ar_header;
+  unsigned int parsed_size;
+  struct artdata *ardata = bfd_ardata (abfd);
+  char nextname[17];
+  int i = bfd_read ((PTR) nextname, 1, 16, abfd);
+
+  /* Special cases.  */
+  if (i == 0)
+    return true;
+  if (i != 16)
+    return false;
+
+  if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) < 0)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* For archives without .o files there is no symbol table.  */
+  if (strncmp (nextname, "/               ", 16))
+    {
+      bfd_has_map (abfd) = false;
+      return true;
+    }
+
+  /* Read in and sanity check the archive header.  */
+  if (bfd_read ((PTR) &ar_header, 1, sizeof (struct ar_hdr), abfd)
+      != sizeof (struct ar_hdr))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  if (strncmp (ar_header.ar_fmag, ARFMAG, 2))
+    {
+      bfd_error = malformed_archive;
+      return NULL;
+    }
+
+  /* How big is the archive symbol table entry?  */
+  errno = 0;
+  parsed_size = strtol (ar_header.ar_size, NULL, 10);
+  if (errno != 0)
+    {
+      bfd_error = malformed_archive;
+      return NULL;
+    }
+
+  /* Save off the file offset of the first real user data.  */
+  ardata->first_file_filepos = bfd_tell (abfd) + parsed_size;
+
+  /* Read in the library symbol table.  We'll make heavy use of this
+     in just a minute.  */
+  if (bfd_read ((PTR) & lst_header, 1, sizeof (struct lst_header), abfd)
+      != sizeof (struct lst_header))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Sanity check.  */
+  if (lst_header.a_magic != LIBMAGIC)
+    {
+      bfd_error = malformed_archive;
+      return NULL;
+    }
+
+  /* Count the number of symbols in the library symbol table.  */
+  if (som_bfd_count_ar_symbols (abfd, &lst_header, &ardata->symdef_count)
+      == false)
+    return false;
+
+  /* Get back to the start of the library symbol table.  */
+  if (bfd_seek (abfd, ardata->first_file_filepos - parsed_size 
+			+ sizeof (struct lst_header), SEEK_SET) < 0)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Initializae the cache and allocate space for the library symbols.  */
+  ardata->cache = 0;
+  ardata->symdefs = (carsym *) bfd_alloc (abfd,
+					  (ardata->symdef_count
+					   * sizeof (carsym)));
+  if (!ardata->symdefs)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
+
+  /* Now fill in the canonical archive symbols.  */
+  if (som_bfd_fill_in_ar_symbols (abfd, &lst_header, &ardata->symdefs)
+      == false)
+    return false;
+
+  /* Notify the generic archive code that we have a symbol map.  */
+  bfd_has_map (abfd) = true;
+  return true;
+}
+
+/* Write out the LST for the archive.  Not supported yet.  */
+static boolean
+som_write_armap (abfd)
+     bfd *abfd;
+{
+  return false;
+}
+
+/* Apparently the extened names are never used, even though they appear
+   in the SOM ABI.  Hmmm.  */
+static boolean
+som_slurp_extended_name_table (abfd)
+     bfd *abfd;
+{
+  bfd_ardata (abfd)->extended_names = NULL;
+  return true;
+}
+
 /* End of miscellaneous support functions. */
 
 #define som_bfd_debug_info_start        bfd_void
 #define som_bfd_debug_info_end          bfd_void
 #define som_bfd_debug_info_accumulate   (PROTO(void,(*),(bfd*, struct sec *))) bfd_void
 
-#define som_openr_next_archived_file    bfd_generic_openr_next_archived_file
-#define som_generic_stat_arch_elt       bfd_generic_stat_arch_elt
-#define som_slurp_armap                  bfd_false
-#define som_slurp_extended_name_table    _bfd_slurp_extended_name_table
-#define som_truncate_arname              (void (*)())bfd_nullvoidptr
-#define som_write_armap                  0
+#define som_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define som_generic_stat_arch_elt	bfd_generic_stat_arch_elt
+#define som_truncate_arname		bfd_bsd_truncate_arname
 
 #define som_get_lineno                   (struct lineno_cache_entry *(*)())bfd_nullvoidptr
 #define	som_close_and_cleanup	           bfd_generic_close_and_cleanup

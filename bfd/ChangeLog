@@ -1,5 +1,9 @@
 Sun Feb 13 14:30:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_bfd_count_ar_symbols): New helper function.
+	(som_bfd_fill_in_ar_symbols): New helper function.
+	(som_slurp_armap): New function to read a SOM LST.
+
 	* som.h: Include <lst.h> and <ar.h>.
 
 Sat Feb 12 22:34:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
