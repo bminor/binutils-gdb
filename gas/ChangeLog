@@ -1,3 +1,8 @@
+Thu Sep 24 12:42:32 1992  Brendan Kehoe  (brendan@rtl.cygnus.com)
+
+	* listing.c (debugging_pseudo): Add stabs and stabn as things to
+	ignore.
+
 Tue Sep 15 17:25:05 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* Makefile.in (as.new): Remove dependence on LOCAL_LOADLIBES.
