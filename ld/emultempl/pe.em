@@ -1362,14 +1362,6 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 		  exp_assop ('=', "__image_base__", exp_intop (pe.ImageBase));
 	    }
 
-#if 0
-	  /* Not sure if these *should* be set.  */
-	  if (pe_def_file->version_major != -1)
-	    {
-	      pe.MajorImageVersion = pe_def_file->version_major;
-	      pe.MinorImageVersion = pe_def_file->version_minor;
-	    }
-#endif
 	  if (pe_def_file->stack_reserve != -1
 	      && ! saw_option ("__size_of_stack_reserve__"))
 	    {

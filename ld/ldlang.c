@@ -553,20 +553,6 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
 	return p;
       }
 
-#if 0
-  /* This code used to always use the first region in the list as the
-     default region.  I changed it to instead use a region
-     encompassing all of memory as the default region.  This permits
-     NOLOAD sections to work reasonably without requiring a region.
-     People should specify what region they mean, if they really want
-     a region.  */
-  if (strcmp (name, DEFAULT_MEMORY_REGION) == 0)
-    {
-      if (lang_memory_region_list != NULL)
-	return lang_memory_region_list;
-    }
-#endif
-
   if (!create && strcmp (name, DEFAULT_MEMORY_REGION))
     einfo (_("%P:%S: warning: memory region %s not declared\n"), name);
 
@@ -2157,10 +2143,6 @@ open_output (const char *name)
 
   delete_output_file_on_failure = TRUE;
 
-#if 0
-  output->flags |= D_PAGED;
-#endif
-
   if (! bfd_set_format (output, bfd_object))
     einfo (_("%P%F:%s: can not make object file: %E\n"), name);
   if (! bfd_set_arch_mach (output,
@@ -2306,31 +2288,6 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	  break;
 	}
     }
-}
-
-/* If there are [COMMONS] statements, put a wild one into the bss
-   section.  */
-
-static void
-lang_reasonable_defaults (void)
-{
-#if 0
-  lang_output_section_statement_lookup (".text");
-  lang_output_section_statement_lookup (".data");
-
-  default_common_section = lang_output_section_statement_lookup (".bss");
-
-  if (!placed_commons)
-    {
-      lang_wild_statement_type *new =
-      new_stat (lang_wild_statement,
-		&default_common_section->children);
-
-      new->section_name = "COMMON";
-      new->filename = NULL;
-      lang_list_init (&new->children);
-    }
-#endif
 }
 
 /* Add a symbol to a hash of symbols used in DEFINED (NAME) expressions.  */
@@ -3987,9 +3944,6 @@ lang_do_assignments_1
 	case lang_object_symbols_statement_enum:
 	case lang_output_statement_enum:
 	case lang_target_statement_enum:
-#if 0
-	case lang_common_statement_enum:
-#endif
 	  break;
 	case lang_data_statement_enum:
 	  {
@@ -4455,13 +4409,6 @@ lang_place_orphans (void)
 		    {
 		      if (default_common_section == NULL)
 			{
-#if 0
-			  /* This message happens when using the
-			     svr3.ifile linker script, so I have
-			     disabled it.  */
-			  info_msg (_("%P: no [COMMON] command,"
-				      " defaulting to .bss\n"));
-#endif
 			  default_common_section =
 			    lang_output_section_statement_lookup (".bss");
 
@@ -4630,11 +4577,6 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
     lang_output_section_statement_lookup_1 (output_section_statement_name,
 					    constraint);
 
-  /* Add this statement to tree.  */
-#if 0
-  add_statement (lang_output_section_statement_enum,
-		 output_section_statement);
-#endif
   /* Make next things chain into subchain of this.  */
 
   if (os->addr_tree == NULL)
@@ -4779,7 +4721,6 @@ lang_gc_sections (void)
 void
 lang_process (void)
 {
-  lang_reasonable_defaults ();
   current_target = default_target;
 
   /* Open the output file.  */

@@ -279,9 +279,6 @@ typedef struct lang_input_statement_struct
 
   bfd_boolean loaded;
 
-#if 0
-  unsigned int globals_in_this_file;
-#endif
   const char *target;
   bfd_boolean real;
 } lang_input_statement_type;

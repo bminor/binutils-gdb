@@ -873,16 +873,6 @@ xtensa_colocate_literals (reloc_deps_graph *deps,
   if (deps->count == 0)
     return;
 
-#if 0
-  ld_assign_relative_paged_dot (0x100000, statement, deps,
-				xtensa_use_literal_pages);
-
-  if (!ld_local_file_relocations_fit (statement, deps))
-    fprintf (stderr, "initial relocation placement does not fit\n");
-
-  lang_for_each_statement_worker (xtensa_ldlang_clear_addresses, statement);
-#endif
-
   iter_stack_create (stack_p, statement);
 
   while (!iter_stack_empty (stack_p))

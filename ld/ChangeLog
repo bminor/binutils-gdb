@@ -1,3 +1,27 @@
+2005-01-21  Ben Elliston  <bje@au.ibm.com>
+
+	* ldlang.c (lang_reasonable_defaults): Remove.
+	(lang_process): Don't call lang_reasonable_defaults.
+
+	* ldexp.c (exp_assop): Remove #if 0'd code.
+	(exp_print_tree): Likewise.
+	* ldlang.c (lang_memory_region_lookup): Likewise.
+	(open_output): Likewise.
+	(lang_do_assignments_1): Likewise.
+	(lang_place_orphans): Likewise.
+	(lang_enter_output_section_statement): Likewise.
+	(lang_reasonable_defaults): Likewise.
+	* ldlang.h (struct lang_input_statement_struct): Likewise.
+	* mri.c (mri_draw_tree): Likewise.
+	(mri_load): Likewise.
+	* pe-dll.c (generate_reloc): Likewise.
+	(make_import_fixup_entry): Likewise.
+	(pe_as16): Likewise.
+	* emultempl/beos.em (set_pe_subsystem): Likewise.
+	* emultempl/hppaelf.em (hppaelf_after_parse): Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/xtensaelf.em (xtensa_colocate_literals): Likewise.
+
 2005-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add earmelfb_linux_eabi.o.

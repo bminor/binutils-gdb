@@ -1178,9 +1178,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  free (relocs);
 	  /* Warning: the allocated symbols are remembered in BFD and
 	     reused later, so don't free them!  */
-#if 0
-	  free (symbol);
-#endif
 	}
     }
 
@@ -2037,9 +2034,6 @@ make_import_fixup_entry (const char *name,
   symtab = xmalloc (6 * sizeof (asymbol *));
   id3 = quick_section (abfd, ".idata$3", SEC_HAS_CONTENTS, 2);
 
-#if 0
-  quick_symbol (abfd, U ("_head_"), dll_symname, "", id2, BSF_GLOBAL, 0);
-#endif
   quick_symbol (abfd, U ("_nm_thnk_"), name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), dll_symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
@@ -2417,18 +2411,6 @@ pe_get32 (bfd *abfd, int where)
   bfd_bread (b, (bfd_size_type) 4, abfd);
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }
-
-#if 0 /* This is not currently used.  */
-
-static unsigned int
-pe_as16 (void *ptr)
-{
-  unsigned char *b = ptr;
-
-  return b[0] + (b[1] << 8);
-}
-
-#endif
 
 static unsigned int
 pe_as32 (void *ptr)

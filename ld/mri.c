@@ -120,19 +120,6 @@ mri_draw_tree (void)
   if (done_tree)
     return;
 
-#if 0   /* We don't bother with memory regions.  */
-  /* Create the regions.  */
-  {
-    lang_memory_region_type *r;
-
-    r = lang_memory_region_lookup("long");
-    r->current = r->origin = exp_get_vma (base, (bfd_vma)0, "origin",
-					  lang_first_phase_enum);
-    r->length = (bfd_size_type) exp_get_vma (0, ~(bfd_vma) 0, "length",
-					     lang_first_phase_enum);
-  }
-#endif
-
   /* Now build the statements for the ldlang machine.  */
 
   /* Attach the addresses of any which have addresses,
@@ -255,9 +242,6 @@ mri_load (const char *name)
 {
   base = 0;
   lang_add_input_file (name, lang_input_file_is_file_enum, NULL);
-#if 0
-  lang_leave_output_section_statement (0, "*default*");
-#endif
 }
 
 void

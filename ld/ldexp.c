@@ -935,10 +935,6 @@ exp_assop (int code, const char *dst, etree_type *src)
   value.assign.dst = dst;
   value.assign.type.node_class = etree_assign;
 
-#if 0
-  if (exp_fold_tree_no_dot (&value, &result))
-    return exp_intop (result);
-#endif
   new = stat_alloc (sizeof (new->assign));
   memcpy (new, &value, sizeof (new->assign));
   return new;
@@ -997,13 +993,6 @@ exp_print_tree (etree_type *tree)
       minfo ("%s+0x%v", tree->rel.section->name, tree->rel.value);
       return;
     case etree_assign:
-#if 0
-      if (tree->assign.dst->sdefs != NULL)
-	fprintf (config.map_file, "%s (%x) ", tree->assign.dst->name,
-		 tree->assign.dst->sdefs->value);
-      else
-	fprintf (config.map_file, "%s (UNDEFINED)", tree->assign.dst->name);
-#endif
       fprintf (config.map_file, "%s", tree->assign.dst);
       exp_print_token (tree->type.node_code, TRUE);
       exp_print_tree (tree->assign.src);

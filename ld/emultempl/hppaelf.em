@@ -52,12 +52,12 @@ hppaelf_after_parse (void)
 {
   if (link_info.relocatable)
     lang_add_unique (".text");
-#if 0 /* Enable this once we split millicode stuff from libgcc.  */
-  else
-    lang_add_input_file ("milli",
-			 lang_input_file_is_l_enum,
-			 NULL);
-#endif
+
+  /* Enable this once we split millicode stuff from libgcc:
+     lang_add_input_file ("milli",
+     			  lang_input_file_is_l_enum,
+			  NULL);
+  */
 }
 
 /* This is called before the input files are opened.  We create a new
