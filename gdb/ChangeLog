@@ -1,3 +1,8 @@
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* symfile.c (reread_symbols): Clear objfile->cp_namespace_symtab.
+	Fix for PR symtab/1534.
+
 2004-01-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS (New native configurations): Mention OpenBSD/sparc and
