@@ -131,20 +131,20 @@ single_step (ignore)
     }
 }
 
-#define	FRAME_SAVED_L0	0		/* Byte offset from SP */
-#define	FRAME_SAVED_I0	32		/* Byte offset from SP */
+#define	FRAME_SAVED_L0	0			    /* Byte offset from SP */
+#define	FRAME_SAVED_I0	(8 * REGISTER_RAW_SIZE (0)) /* Byte offset from SP */
 
 CORE_ADDR
 sparc_frame_chain (thisframe)
      FRAME thisframe;
 {
-  CORE_ADDR retval;
+  REGISTER_TYPE retval;
   int err;
   CORE_ADDR addr;
 
   addr = thisframe->frame + FRAME_SAVED_I0 +
-	 REGISTER_RAW_SIZE(FP_REGNUM) * (FP_REGNUM - I0_REGNUM);
-  err = target_read_memory (addr, (char *) &retval, sizeof (CORE_ADDR));
+	 REGISTER_RAW_SIZE (FP_REGNUM) * (FP_REGNUM - I0_REGNUM);
+  err = target_read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
   if (err)
     return 0;
   SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
@@ -166,19 +166,22 @@ CORE_ADDR
 frame_saved_pc (frame)
      FRAME frame;
 {
-  CORE_ADDR prev_pc;
+  REGISTER_TYPE retval;
+  CORE_ADDR addr,prev_pc;
 
   if (get_current_frame () == frame)  /* FIXME, debug check. Remove >=gdb-4.6 */
     {
       if (read_register (SP_REGNUM) != frame->bottom) abort();
     }
 
-  read_memory ((CORE_ADDR) (frame->bottom + FRAME_SAVED_I0 +
-		    REGISTER_RAW_SIZE(I7_REGNUM) * (I7_REGNUM - I0_REGNUM)),
-	       (char *) &prev_pc,
-	       sizeof (CORE_ADDR));
+  addr = (frame->bottom + FRAME_SAVED_I0 +
+	  REGISTER_RAW_SIZE (I7_REGNUM) * (I7_REGNUM - I0_REGNUM));
+  read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
+  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 
-  SWAP_TARGET_AND_HOST (&prev_pc, sizeof (prev_pc));
+  /* CORE_ADDR isn't always the same size as REGISTER_TYPE, so convert.  */
+
+  prev_pc = (CORE_ADDR) retval;
   return PC_ADJUST (prev_pc);
 }
 
@@ -238,6 +241,18 @@ setup_arbitrary_frame (argc, argv)
 static unsigned int save_insn_opcodes[] = {
   0x03000000, 0x82007ee0, 0x9de38001, 0x03000000,
   0x82007ee0, 0x91d02001, 0x01000000 };
+
+/* FIXME:
+The person who wrote function calls on the SPARC didn't understand the
+SPARC stack.  There is no need to call into the inferior to run a save
+instruction and then do it again for a restore instruction.  Save and
+restore amount to add-to-SP and move-to-SP when all has been said and
+done.  You simply modify the stack in memory to look like a function
+has been called -- the same way any other architecture does it.
+
+That would fix the sparc xfail in testsuite/gdb.t06/signals.exp, make
+function calls much faster, and would clean up some very poor code.  */
+
 
 /* Neither do_save_insn or do_restore_insn save stack configuration
    (current_frame, etc),
@@ -849,7 +864,7 @@ in_solib_trampoline(pc, name)
      CORE_ADDR pc;
      char *name;
 {
-  sec_ptr s;
+  struct obj_section *s;
   int retval = 0;
   
   s = find_pc_section(pc);
