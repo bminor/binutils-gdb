@@ -26,12 +26,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    one for little-endian machines.   */
 
 /* Archives are generic or unimplemented.  */
+#ifndef elf_slurp_armap
 #define elf_slurp_armap			bfd_slurp_coff_armap
+#endif
 #define elf_slurp_extended_name_table	_bfd_slurp_extended_name_table
 #define elf_truncate_arname		bfd_dont_truncate_arname
 #define elf_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define elf_generic_stat_arch_elt	bfd_generic_stat_arch_elt
+#ifndef elf_write_armap
 #define	elf_write_armap			coff_write_armap
+#endif
 
 /* Ordinary section reading and writing */
 #define elf_new_section_hook		_bfd_dummy_new_section_hook
