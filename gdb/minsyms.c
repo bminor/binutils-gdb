@@ -183,7 +183,9 @@ lookup_minimal_symbol (name, objf)
    equal to PC.  Returns a pointer to the minimal symbol if such a symbol
    is found, or NULL if PC is not in a suitable range.  Note that we need
    to look through ALL the minimal symbol tables before deciding on the
-   symbol that comes closest to the specified PC. */
+   symbol that comes closest to the specified PC.  This is because objfiles
+   can overlap, for example objfile A has .text at 0x100 and .data at 0x40000
+   and objfile B has .text at 0x234 and .data at 0x40048.  */
 
 struct minimal_symbol *
 lookup_minimal_symbol_by_pc (pc)
