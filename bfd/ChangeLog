@@ -1,3 +1,20 @@
+Mon Jan 22 18:45:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elflink.h (elf_finish_pointer_linker_section): Don't allocate
+	memory here for contents.
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Bump up _SDA_BASE_ and
+	_SDA2_BASE_ by 32768.
+	(ppc_elf_size_dynamic_sections): #if out PLT code which we haven't
+	started using.  Allocate contents for .sdata and .sdata2 sections
+	also.
+	(ppc_elf_check_relocs): Use bfd_get_section_name in debug message,
+	rather than _name.
+	(ppc_elf_finish_dynamic_symbol): Remove code that attempted to
+	size _SDA{,2}_BASE_.
+	(ppc_elf_relocate_section): Change how sdata{,2} relocations are
+	done.
+
 Mon Jan 22 08:52:04 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* elflink.h (elf_finish_pointer_linker_section): Fix typo.

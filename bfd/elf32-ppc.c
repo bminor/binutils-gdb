@@ -1270,6 +1270,7 @@ ppc_elf_create_linker_section (abfd, info, which)
 	  defaults.rel_name	  = ".rela.sdata";
 	  defaults.bss_name	  = ".sbss";
 	  defaults.sym_name	  = "_SDA_BASE_";
+	  defaults.sym_offset	  = 32768;
 	  break;
 
 	case LINKER_SECTION_SDATA2:	/* .sdata2/.sbss2 section */
@@ -1277,6 +1278,7 @@ ppc_elf_create_linker_section (abfd, info, which)
 	  defaults.rel_name	  = ".rela.sdata2";
 	  defaults.bss_name	  = ".sbss2";
 	  defaults.sym_name	  = "_SDA2_BASE_";
+	  defaults.sym_offset	  = 32768;
 	  break;
 	}
 
@@ -1399,6 +1401,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 
       strip = false;
 
+#if 0
       if (strncmp (name, ".rela", 5) == 0)
 	{
 	  if (s->_raw_size == 0)
@@ -1433,8 +1436,12 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strcmp (name, ".plt") != 0
-	       && strcmp (name, ".got") != 0)
+      else
+#endif
+	if (strcmp (name, ".plt") != 0
+	    && strcmp (name, ".got") != 0
+	    && strcmp (name, ".sdata") != 0
+	    && strcmp (name, ".sdata2") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -1549,7 +1556,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
     return true;
 
 #ifdef DEBUG
-  fprintf (stderr, "ppc_elf_check_relocs called for section %s\n", sec->name);
+  fprintf (stderr, "ppc_elf_check_relocs called for section %s\n",
+	   bfd_get_section_name (abfd, sec));
 #endif
 
   /* Create the linker generated sections all the time so that the special
@@ -1755,8 +1763,6 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
      Elf_Internal_Sym *sym;
 {
   bfd *dynobj;
-  elf_linker_section_t *sdata;
-  elf_linker_section_t *sdata2;
 
 #ifdef DEBUG
   fprintf (stderr, "ppc_elf_finish_dynamic_symbol called for %s\n", h->root.root.string);
@@ -1764,8 +1770,6 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
-  sdata = elf_linker_section (dynobj, LINKER_SECTION_SDATA);
-  sdata2 = elf_linker_section (dynobj, LINKER_SECTION_SDATA2);
 
   if (h->plt_offset != (bfd_vma) -1)
     {
@@ -1842,45 +1846,6 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
       || strcmp (h->root.root.string, "_PROCEDURE_LINKAGE_TABLE_") == 0)
     sym->st_shndx = SHN_ABS;
-
-  /* If .sdata is larger than 32767, bump up _SDA_BASE_ by 32768 so that
-     we put off getting relocation overflows until it is > 65k.  Do the
-     same for .sdata2 and _SDA2_BASE_.  */
-  if (sdata && sdata->sym_hash == h
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) == 0)
-    {
-      bfd_vma size = 0;
-      asection *s = bfd_get_section_by_name (output_bfd, ".sdata");
-      if (s)
-	size = s->_raw_size;
-
-      s = bfd_get_section_by_name (output_bfd, ".sbss");
-      if (s)
-	size += s->_raw_size;
-
-      if (size > 32767)
-	h->root.u.def.value += 32768;
-
-      h->elf_link_hash_flags |= ELF_LINK_HASH_DYNAMIC_ADJUSTED;
-    }
-
-  if (sdata2 && sdata2->sym_hash == h
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) == 0)
-    {
-      bfd_vma size = 0;
-      asection *s = bfd_get_section_by_name (output_bfd, ".sdata2");
-      if (s)
-	size = s->_raw_size;
-
-      s = bfd_get_section_by_name (output_bfd, ".sbss2");
-      if (s)
-	size += s->_raw_size;
-
-      if (size > 32767)
-	h->root.u.def.value += 32768;
-
-      h->elf_link_hash_flags |= ELF_LINK_HASH_DYNAMIC_ADJUSTED;
-    }
 
   return true;
 }
@@ -2274,10 +2239,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      ret = false;
 	      continue;
 	    }
-	  relocation = (sdata->sym_hash->root.u.def.value
-			+ sdata->sym_hash->root.u.def.section->output_section->vma
-			- relocation);
+	  addend -= sdata->sym_hash->root.u.def.value;
+	  relocation = sdata->sym_hash->root.u.def.section->output_section->vma - relocation;
 	  break;
+
 
 	/* relocate against _SDA2_BASE_ */
 	case (int)R_PPC_EMB_SDA2REL:
@@ -2294,9 +2259,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      ret = false;
 	      continue;
 	    }
-	  relocation = (sdata2->sym_hash->root.u.def.value
-			+ sdata2->sym_hash->root.u.def.section->output_section->vma
-			- relocation);
+	  addend -= sdata2->sym_hash->root.u.def.value;
+	  relocation = sdata2->sym_hash->root.u.def.section->output_section->vma - relocation;
 	  break;
 
 
@@ -2311,17 +2275,15 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (strcmp (name, ".sdata") == 0 || strcmp (name, ".sbss") == 0)
 	      {
 		reg = 13;
-		relocation = (sdata->sym_hash->root.u.def.value
-			      + sdata->sym_hash->root.u.def.section->output_section->vma
-			      - relocation);
+		addend -= sdata->sym_hash->root.u.def.value;
+		relocation = sdata->sym_hash->root.u.def.section->output_section->vma - relocation;
 	      }
 
 	    else if (strcmp (name, ".sdata2") == 0 || strcmp (name, ".sbss2") == 0)
 	      {
 		reg = 2;
-		relocation = (sdata2->sym_hash->root.u.def.value
-			      + sdata2->sym_hash->root.u.def.section->output_section->vma
-			      - relocation);
+		addend -= sdata2->sym_hash->root.u.def.value;
+		relocation = sdata2->sym_hash->root.u.def.section->output_section->vma - relocation;
 	      }
 
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0 || strcmp (name, ".PPC.EMB.sbss0") == 0)

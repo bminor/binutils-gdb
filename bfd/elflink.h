@@ -3208,7 +3208,7 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
       if (info->shared)
 	{
 	  /* If we are generating a shared object, we need to
-	     output a R_PPC_RELATIVE reloc so that the
+	     output a R_<xxx>_RELATIVE reloc so that the
 	     dynamic linker can adjust this GOT entry.  */
 	  BFD_ASSERT (lsect->rel_section != NULL);
 	  lsect->rel_section->_raw_size += sizeof (Elf_External_Rela);
@@ -3275,10 +3275,6 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, reloca
   elf_linker_section_pointers_t *linker_section_ptr;
 
   BFD_ASSERT (lsect != NULL);
-
-  if (!lsect->section->contents)
-    lsect->section->contents = (unsigned char *) bfd_zalloc (output_bfd,
-							     lsect->section->_raw_size);
 
   if (h != NULL)		/* global symbol */
     {
