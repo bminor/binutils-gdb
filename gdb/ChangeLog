@@ -1,3 +1,21 @@
+2004-01-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt: Add back sparc-*-vxworks*.
+	* remote-vxsparc.c: Remove all includes except for "defs.h",
+	"regcache.h", "vx-share/ptrace.h" and "vx-share/regPacket.h".
+	Include "sparc-tdep.h".
+	(SPARC_R_G1): New define.
+	(vxsparc_gregset): New variable.
+	(ext_format_sparc): Remove extern declaration.
+	(vx_read_register): Rewrite to use sparc32_supply_gregset and
+	sparc32_supply_fpregset.
+	(vx_write_register): Rewrite to use sparc32_collect_gregset,
+	sparc_collect_rwindow and sparc32_collect_fpregset.
+	* config/sparc/tm-vxworks.h: New file, based on recently removed
+	tm-vxsparc.h.
+	* config/sparc/vxworks.mt: New file, based on recently removed
+	vxworks.mt.
+	
 2004-01-03  J. Brobecker  <brobecker@gnat.com>
 
 	* infrun.c (handle_step_into_function): New function.
