@@ -2642,8 +2642,7 @@ do_adr (str, flags)
      unsigned long flags;
 {
   /* This is a pseudo-op of the form "adr rd, label" to be converted
-     into a relative address of the form "add rd, pc, #label-.-8" */
-
+     into a relative address of the form "add rd, pc, #label-.-8".  */
   skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL
@@ -2654,10 +2653,11 @@ do_adr (str, flags)
 	inst.error = BAD_ARGS;
       return;
     }
+  
   /* Frag hacking will turn this into a sub instruction if the offset turns
      out to be negative.  */
   inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
-  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust */
+  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
   inst.reloc.pc_rel = 1;
   inst.instruction |= flags;
   end_of_line (str);
@@ -4905,11 +4905,15 @@ static void
 do_t_adr (str)
      char * str;
 {
+  int reg;
+
   /* This is a pseudo-op of the form "adr rd, label" to be converted
-     into a relative address of the form "add rd, pc, #label-.-4" */
+     into a relative address of the form "add rd, pc, #label-.-4".  */
   skip_whitespace (str);
 
-  if (reg_required_here (&str, 4) == FAIL  /* Store Rd in temporary location inside instruction.  */
+  /* Store Rd in temporary location inside instruction.  */
+  if ((reg = reg_required_here (&str, 4)) == FAIL
+      || (reg > 7)  /* For Thumb reg must be r0..r7.  */
       || skip_past_comma (&str) == FAIL
       || my_get_expression (&inst.reloc.exp, &str))
     {
@@ -4919,9 +4923,10 @@ do_t_adr (str)
     }
 
   inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
-  inst.reloc.exp.X_add_number -= 4; /* PC relative adjust */
+  inst.reloc.exp.X_add_number -= 4; /* PC relative adjust.  */
   inst.reloc.pc_rel = 1;
-  inst.instruction |= REG_PC; /* Rd is already placed into the instruction */
+  inst.instruction |= REG_PC; /* Rd is already placed into the instruction.  */
+  
   end_of_line (str);
 }
 

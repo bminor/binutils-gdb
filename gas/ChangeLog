@@ -1,3 +1,11 @@
+2000-03-17 Thomas de Lellis <tdel@windriver.com>
+
+        * config/tc-arm.c (do_t_adr): Flag "adr Rd,label"
+        instruction operand bad if Rd > 7 when generating
+        thumb instructions. Prevents for example,
+        "adr r12,label" from silently failing and generating
+        the wrong instruction.
+        
 2000-03-17  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_apply_fix3): Handle same-section relocations
