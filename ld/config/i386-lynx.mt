@@ -1,0 +1,2 @@
+EMUL=i386lynx
+OTHER_EMULATIONS=em_i386lynx.o

@@ -42,8 +42,10 @@ i386aout.sh
 i386bsd.sh
 i386coff.sh
 i386linux.sh
+i386lynx.sh
 lnk960.sh
 m68kcoff.sh
+m68klynx.sh
 m88kbcs.sh
 mipsbig.sh
 mipsbsd.sh
