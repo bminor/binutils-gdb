@@ -1,5 +1,8 @@
 Fri Aug 14 15:34:29 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am: Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
 	* ldgram.y: Include "ldctor.h".
 	(statement): Accept SORT around CONSTRUCTORS.
 	* ldctor.c: Include <ctype.h>.

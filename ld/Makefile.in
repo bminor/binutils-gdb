@@ -171,9 +171,11 @@ ALL_EMULATIONS = \
 	eaixrs6.o \
 	ealpha.o \
 	earcelf.o \
+	earmelf.o \
 	earmaoutb.o \
 	earmaoutl.o \
 	earmcoff.o \
+	earmelf.o \
 	earmpe.o \
 	ecoff_sparc.o \
 	ed10velf.o \
@@ -888,6 +890,9 @@ ealpha.c: $(srcdir)/emulparams/alpha.sh \
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"
+earmelf.c: $(srcdir)/emulparams/armelf.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armelf "$(tdir_armelf)"
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutb "$(tdir_armaoutb)"
@@ -1301,7 +1306,7 @@ ld.info: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 
 ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
-	  MAKEINFO='$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc' $(TEXI2DVI) $(srcdir)/ld.texinfo
+	  MAKEINFO="$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc" $(TEXI2DVI) $(srcdir)/ld.texinfo
 
 # We want to reconfigure if configure.host or configure.tgt changes.
 config.status: $(srcdir)/configure $(srcdir)/configure.host $(srcdir)/configure.tgt
@@ -1319,9 +1324,9 @@ install-exec-local: ld-new$(EXEEXT)
 	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
-	rm -f $(tooldir)/bin/ld$(EXEEXT)
 	n=`echo ld | sed '$(transform)'`; \
 	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/ld$(EXEEXT)" ]; then \
+	  rm -f $(tooldir)/bin/ld$(EXEEXT); \
 	  ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
 	  || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(tooldir)/bin/ld$(EXEEXT); \
 	fi
@@ -1425,7 +1430,7 @@ ldcref.o: ldcref.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   ld.h ldexp.h ldver.h ldlang.h ldemul.h ldfile.h ldmisc.h \
-  ldmain.h mri.h ldlex.h
+  ldmain.h mri.h ldctor.h ldlex.h
 ldlex.o: ldlex.c ../bfd/bfd.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   ld.h ldgram.h ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h \
   ldmain.h
