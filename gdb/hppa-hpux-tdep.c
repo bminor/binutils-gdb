@@ -505,6 +505,29 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
     }
 }
 
+void
+hppa_skip_permanent_breakpoint (void)
+{
+  /* To step over a breakpoint instruction on the PA takes some
+     fiddling with the instruction address queue.
+
+     When we stop at a breakpoint, the IA queue front (the instruction
+     we're executing now) points at the breakpoint instruction, and
+     the IA queue back (the next instruction to execute) points to
+     whatever instruction we would execute after the breakpoint, if it
+     were an ordinary instruction.  This is the case even if the
+     breakpoint is in the delay slot of a branch instruction.
+
+     Clearly, to step past the breakpoint, we need to set the queue
+     front to the back.  But what do we put in the back?  What
+     instruction comes after that one?  Because of the branch delay
+     slot, the next insn is always at the back + 4.  */
+  write_register (HPPA_PCOQ_HEAD_REGNUM, read_register (HPPA_PCOQ_TAIL_REGNUM));
+  write_register (HPPA_PCSQ_HEAD_REGNUM, read_register (HPPA_PCSQ_TAIL_REGNUM));
+
+  write_register (HPPA_PCOQ_TAIL_REGNUM, read_register (HPPA_PCOQ_TAIL_REGNUM) + 4);
+  /* We can leave the tail's space the same, since there's no jump.  */
+}
 
 /* Exception handling support for the HP-UX ANSI C++ compiler.
    The compiler (aCC) provides a callback for exception events;

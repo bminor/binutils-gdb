@@ -41,5 +41,9 @@ struct frame_info;
 #define CHILD_ENABLE_EXCEPTION_CALLBACK
 #define CHILD_GET_CURRENT_EXCEPTION_EVENT
 
+/* Here's how to step off a permanent breakpoint.  */
+#define SKIP_PERMANENT_BREAKPOINT (hppa_skip_permanent_breakpoint)
+extern void hppa_skip_permanent_breakpoint (void);
+
 /* Mostly it's common to all HPPA's.  */
 #include "pa/tm-hppa.h"

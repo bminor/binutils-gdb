@@ -35,10 +35,6 @@ extern int hppa_instruction_nullified (void);
 #define INSTRUCTION_NULLIFIED hppa_instruction_nullified ()
 #endif
 
-/* Here's how to step off a permanent breakpoint.  */
-#define SKIP_PERMANENT_BREAKPOINT (hppa_skip_permanent_breakpoint)
-extern void hppa_skip_permanent_breakpoint (void);
-
 /* On HP-UX, certain system routines (millicode) have names beginning
    with $ or $$, e.g. $$dyncall, which handles inter-space procedure
    calls on PA-RISC.  Tell the expression parser to check for those

@@ -1,3 +1,10 @@
+2004-11-12  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_skip_permanent_breakpoint): Move definition ...
+	* hppa-hpux-tdep.c (hppa_skip_permanent_breakpoint): ... to here.
+	* config/pa/tm-hppa.h (SKIP_PERMANENT_BREAKPOINT): Move definition ...
+	* config/pa/tm-hppah.h (SKIP_PERMANENT_BREAKPOINT): ... to here.
+
 2004-11-12  Mark Kettenis  <kettenis@jive.nl>
 
 	* tui/tui-io.c: Don't include "terminal.h".
