@@ -1,3 +1,7 @@
+2004-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Revert 2004-09-09 change.
+
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-dis.c (state_names): Delete.
