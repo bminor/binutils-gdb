@@ -1,23 +1,23 @@
 %{ /* deffilep.y - parser for .def files */
 
-/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001, 2002
+/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2003
      Free Software Foundation, Inc.
 
-This file is part of GNU Binutils.
+     This file is part of GNU Binutils.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+     This program is free software; you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation; either version 2 of the License, or
+     (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include "libiberty.h"
@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    yacc generated parsers in ld.  Note that these are only the variables
    produced by yacc.  If other parser generators (bison, byacc, etc) produce
    additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list. */
+   generators need to be fixed instead of adding those names to this list.  */
 
 #define	yymaxdepth def_maxdepth
 #define	yyparse	def_parse
@@ -66,8 +66,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	yy_yyv	def_yyv
 #define	yyval	def_val
 #define	yylloc	def_lloc
-#define yyreds	def_reds		/* With YYDEBUG defined */
-#define yytoks	def_toks		/* With YYDEBUG defined */
+#define yyreds	def_reds		/* With YYDEBUG defined.  */
+#define yytoks	def_toks		/* With YYDEBUG defined.  */
 #define yylhs	def_yylhs
 #define yylen	def_yylen
 #define yydefred def_yydefred
@@ -81,8 +81,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static void def_description PARAMS ((const char *));
 static void def_exports PARAMS ((const char *, const char *, int, int));
 static void def_heapsize PARAMS ((int, int));
-static void def_import
-  PARAMS ((const char *, const char *, const char *, const char *, int));
+static void def_import PARAMS ((const char *, const char *, const char *, const char *, int));
 static void def_library PARAMS ((const char *, int));
 static def_file_module *def_stash_module PARAMS ((def_file *, const char *));
 static void def_name PARAMS ((const char *, int));
@@ -326,6 +325,7 @@ def_file_free (def)
      def_file *def;
 {
   int i;
+
   if (!def)
     return;
   if (def->name)
@@ -388,6 +388,7 @@ def_file_print (file, def)
      def_file *def;
 {
   int i;
+
   fprintf (file, ">>>> def_file at 0x%08x\n", def);
   if (def->name)
     fprintf (file, "  name: %s\n", def->name ? def->name : "(unspecified)");
@@ -409,6 +410,7 @@ def_file_print (file, def)
   if (def->num_section_defs > 0)
     {
       fprintf (file, "  section defs:\n");
+
       for (i = 0; i < def->num_section_defs; i++)
 	{
 	  fprintf (file, "    name: `%s', class: `%s', flags:",
@@ -428,6 +430,7 @@ def_file_print (file, def)
   if (def->num_exports > 0)
     {
       fprintf (file, "  exports:\n");
+
       for (i = 0; i < def->num_exports; i++)
 	{
 	  fprintf (file, "    name: `%s', int: `%s', ordinal: %d, flags:",
@@ -448,6 +451,7 @@ def_file_print (file, def)
   if (def->num_imports > 0)
     {
       fprintf (file, "  imports:\n");
+
       for (i = 0; i < def->num_imports; i++)
 	{
 	  fprintf (file, "    int: %s, from: `%s', name: `%s', ordinal: %d\n",
@@ -457,8 +461,10 @@ def_file_print (file, def)
 		   def->imports[i].ordinal);
 	}
     }
+
   if (def->version_major != -1)
     fprintf (file, "  version: %d.%d\n", def->version_major, def->version_minor);
+
   fprintf (file, "<<<< def_file at 0x%08x\n", def);
 }
 #endif
@@ -472,13 +478,16 @@ def_file_add_export (def, external_name, internal_name, ordinal)
 {
   def_file_export *e;
   int max_exports = ROUND_UP(def->num_exports, 32);
+
   if (def->num_exports >= max_exports)
     {
-      max_exports = ROUND_UP(def->num_exports+1, 32);
+      max_exports = ROUND_UP(def->num_exports + 1, 32);
       if (def->exports)
-	def->exports = (def_file_export *) xrealloc (def->exports, max_exports * sizeof (def_file_export));
+	def->exports = (def_file_export *)
+	  xrealloc (def->exports, max_exports * sizeof (def_file_export));
       else
-	def->exports = (def_file_export *) xmalloc (max_exports * sizeof (def_file_export));
+	def->exports = (def_file_export *)
+	  xmalloc (max_exports * sizeof (def_file_export));
     }
   e = def->exports + def->num_exports;
   memset (e, 0, sizeof (def_file_export));
@@ -493,14 +502,28 @@ def_file_add_export (def, external_name, internal_name, ordinal)
   return e;
 }
 
+def_file_module *
+def_get_module (def, name)
+     def_file *def;
+     const char *name;
+{
+  def_file_module *s;
+
+  for (s = def->modules; s; s = s->next)
+    if (strcmp (s->name, name) == 0)
+      return s;
+
+  return (def_file_module *) 0;
+}
+
 static def_file_module *
 def_stash_module (def, name)
      def_file *def;
      const char *name;
 {
   def_file_module *s;
-  for (s=def->modules; s; s=s->next)
-    if (strcmp (s->name, name) == 0)
+
+  if ((s = def_get_module (def, name)) != (def_file_module *) 0)
       return s;
   s = (def_file_module *) xmalloc (sizeof (def_file_module) + strlen (name));
   s->next = def->modules;
@@ -520,13 +543,17 @@ def_file_add_import (def, name, module, ordinal, internal_name)
 {
   def_file_import *i;
   int max_imports = ROUND_UP(def->num_imports, 16);
+
   if (def->num_imports >= max_imports)
     {
       max_imports = ROUND_UP(def->num_imports+1, 16);
+
       if (def->imports)
-	def->imports = (def_file_import *) xrealloc (def->imports, max_imports * sizeof (def_file_import));
+	def->imports = (def_file_import *)
+	  xrealloc (def->imports, max_imports * sizeof (def_file_import));
       else
-	def->imports = (def_file_import *) xmalloc (max_imports * sizeof (def_file_import));
+	def->imports = (def_file_import *)
+	  xmalloc (max_imports * sizeof (def_file_import));
     }
   i = def->imports + def->num_imports;
   memset (i, 0, sizeof (def_file_import));
@@ -540,6 +567,7 @@ def_file_add_import (def, name, module, ordinal, internal_name)
   else
     i->internal_name = i->name;
   def->num_imports++;
+
   return i;
 }
 
@@ -574,13 +602,16 @@ def_file_add_directive (my_def, param, len)
     {
       while (param < pend && ISSPACE (*param))
 	param++;
+
       for (tend = param + 1;
 	   tend < pend && !(ISSPACE (tend[-1]) && *tend == '-');
-	   tend++);
+	   tend++)
+	;
 
       for (i = 0; diropts[i].param; i++)
 	{
 	  int len = strlen (diropts[i].param);
+
 	  if (tend - param >= len
 	      && strncmp (param, diropts[i].param, len) == 0
 	      && (param[len] == ':' || param[len] == ' '))
@@ -595,11 +626,10 @@ def_file_add_directive (my_def, param, len)
 	}
 
       if (!diropts[i].param)
-	{
-	  /* xgettext:c-format */
-	  einfo (_("Warning: .drectve `%.*s' unrecognized\n"),
-		 tend - param, param);
-	}
+	/* xgettext:c-format */
+	einfo (_("Warning: .drectve `%.*s' unrecognized\n"),
+	       tend - param, param);
+
       lex_parse_string = 0;
       param = tend;
     }
@@ -607,9 +637,7 @@ def_file_add_directive (my_def, param, len)
   def = save_def;
 }
 
-/*****************************************************************************
- Parser Callbacks
- *****************************************************************************/
+/* Parser Callbacks.  */
 
 static void
 def_name (name, base)
@@ -640,6 +668,7 @@ def_description (text)
      const char *text;
 {
   int len = def->description ? strlen (def->description) : 0;
+
   len += strlen (text) + 1;
   if (def->description)
     {
@@ -678,9 +707,11 @@ def_section (name, attr)
 {
   def_file_section *s;
   int max_sections = ROUND_UP(def->num_section_defs, 4);
+
   if (def->num_section_defs >= max_sections)
     {
       max_sections = ROUND_UP(def->num_section_defs+1, 4);
+
       if (def->section_defs)
 	def->section_defs = (def_file_section *) xrealloc (def->section_defs, max_sections * sizeof (def_file_import));
       else
@@ -707,6 +738,7 @@ def_section_alt (name, attr)
      const char *attr;
 {
   int aval = 0;
+
   for (; *attr; attr++)
     {
       switch (*attr)
@@ -794,6 +826,7 @@ def_directive (str)
      char *str;
 {
   struct directive *d = (struct directive *) xmalloc (sizeof (struct directive));
+
   d->next = directives;
   directives = d;
   d->name = xstrdup (str);
@@ -810,14 +843,12 @@ def_error (err)
 }
 
 
-/*****************************************************************************
- Lexical Scanner
- *****************************************************************************/
+/* Lexical Scanner.  */
 
 #undef TRACE
 #define TRACE 0
 
-/* Never freed, but always reused as needed, so no real leak */
+/* Never freed, but always reused as needed, so no real leak.  */
 static char *buffer = 0;
 static int buflen = 0;
 static int bufptr = 0;
@@ -828,14 +859,14 @@ put_buf (c)
 {
   if (bufptr == buflen)
     {
-      buflen += 50;		/* overly reasonable, eh? */
+      buflen += 50;		/* overly reasonable, eh?  */
       if (buffer)
 	buffer = (char *) xrealloc (buffer, buflen + 1);
       else
 	buffer = (char *) xmalloc (buflen + 1);
     }
   buffer[bufptr++] = c;
-  buffer[bufptr] = 0;		/* not optimal, but very convenient */
+  buffer[bufptr] = 0;		/* not optimal, but very convenient.  */
 }
 
 static struct
@@ -877,6 +908,7 @@ static int
 def_getc ()
 {
   int rv;
+
   if (lex_parse_string)
     {
       if (lex_parse_string >= lex_parse_string_end)
@@ -923,7 +955,7 @@ def_lex ()
 
   c = def_getc ();
 
-  /* trim leading whitespace */
+  /* Trim leading whitespace.  */
   while (c != EOF && (c == ' ' || c == '\t') && saw_newline)
     c = def_getc ();
 
@@ -946,7 +978,8 @@ def_lex ()
 	return def_lex ();
       return 0;
     }
-  /* must be something else */
+
+  /* Must be something else.  */
   saw_newline = 0;
 
   if (ISDIGIT (c))
@@ -1017,6 +1050,7 @@ def_lex ()
       q = c;
       c = def_getc ();
       bufptr = 0;
+
       while (c != EOF && c != q)
 	{
 	  put_buf (c);

@@ -1,3 +1,11 @@
+2003-01-28  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	* deffilep.y (def_get_module): New function: locate an already
+	added module.
+	* deffile.h (def_get_module): New prototype.
+	* pe-dll.c (pe_implied_import_dll): Add code to	prevent importing
+	a dll multiple times.
+
 2003-01-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/sh64elf.em: Include elf32-sh64.h.

@@ -2018,8 +2018,8 @@ make_import_fixup_mark (rel)
      overflowing this buffer...  */
     {
       free (fixup_name);
-      /* New buffer size is length of symbol, plus 25, but then
-	 rounded up to the nearest multiple of 128.  */
+      /* New buffer size is length of symbol, plus 25, but
+	 then rounded up to the nearest multiple of 128.  */
       buffer_len = ((strlen (sym->name) + 25) + 127) & ~127;
       fixup_name = (char *) xmalloc (buffer_len);
     }
@@ -2153,7 +2153,7 @@ make_runtime_pseudo_reloc (name, fixup_name, addend, parent)
 }
 
 /*	.section	.rdata
- 	.rva		__pei386_runtime_relocator */
+ 	.rva		__pei386_runtime_relocator  */
 
 static bfd *
 pe_create_runtime_relocator_reference (parent)
@@ -2608,6 +2608,16 @@ pe_implied_import_dll (filename)
   /* Use internal dll name instead of filename
      to enable symbolic dll linking.  */
   dll_name = pe_as32 (expdata + 12) + erva;
+
+  /* Check to see if the dll has already been added to
+     the definition list and if so return without error.
+     This avoids multiple symbol definitions.  */
+  if (def_get_module (pe_def_file, dll_name))
+    {
+      if (pe_dll_extra_pe_debug)
+	printf ("%s is already loaded\n", dll_name);
+      return TRUE;
+    }
 
   /* Iterate through the list of symbols.  */
   for (i = 0; i < nexp; i++)

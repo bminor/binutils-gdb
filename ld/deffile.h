@@ -1,5 +1,5 @@
 /* deffile.h - header for .DEF file parser
-   Copyright 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
    Written by DJ Delorie dj@cygnus.com
 
    This file is part of GLD, the Gnu Linker.
@@ -100,6 +100,8 @@ extern def_file_import * def_file_add_import
   PARAMS ((def_file *, const char *, const char *, int, const char *));
 extern void def_file_add_directive
   PARAMS ((def_file *, const char *, int));
+extern def_file_module *def_get_module
+  PARAMS ((def_file *, const char *));
 #ifdef DEF_FILE_PRINT
 extern void def_file_print
   PARAMS ((FILE *, def_file *));
