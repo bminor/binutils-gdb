@@ -985,10 +985,10 @@ xcoff_next_symbol_text ()
     {"Unexpected symbol continuation", 0, 0};
 
   bfd_coff_swap_sym_in (current_objfile->obfd, raw_symbol, &symbol);
-  if (symbol->n_zeroes)
+  if (symbol.n_zeroes)
     complain (&msg);
-  else if (symbol->n_sclass & 0x80)
-    return debugsec + symbol->n_offset;
+  else if (symbol.n_sclass & 0x80)
+    return debugsec + symbol.n_offset;
   else
     complain (&msg);
   raw_symbol += coff_data (current_objfile->obfd)->local_symesz;
