@@ -143,7 +143,7 @@ extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bi
 
 /* The ABI default bit-size and format for "float", "double", and "long
    double".  These bit/format pairs should eventually be combined into
-   a single object. */
+   a single object.  For the moment, just initialize them as a pair. */
 
 extern int gdbarch_float_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_float_bit (struct gdbarch *gdbarch, int float_bit);

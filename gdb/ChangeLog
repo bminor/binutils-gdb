@@ -1,5 +1,9 @@
 2004-08-08  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh: Delete "fmt" and "attrib" fields.  Always use %s to
+	print.  Improve script's error messages.
+	* gdbarch.h: Re-generate.
+
 	* gdbarch.sh (pformat): New function.
 	(float_format, double_format, long_double_format): List with bit
 	members.  Use pformat when printing.
