@@ -1,5 +1,6 @@
 srcdir = .
 prefix = /usr/local
+program_transform_name =
 
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
@@ -15,12 +16,75 @@ GDB = gdb
 RUNTEST = runtest
 RUNTESTFLAGS = 
 
-FLAGS_TO_PASS = \
-	"CC=$(CC)" \
-	"CFLAGS=$(CFLAGS)" \
-	"GDB=$(GDB)" \
-	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+RUNTEST_FOR_TARGET = ` \
+  if [ -f $${rootme}/../..dejagnu/site.exp ] ; then \
+    echo $${rootme}/../../dejagnu/runtest ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(RUNTEST); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+CC_FOR_TARGET = ` \
+  if [ -f $${rootme}/../../gcc/Makefile ] ; then \
+    echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+CXX = gcc
+CXX_FOR_TARGET = ` \
+  if [ -f $${rootme}/../../gcc/Makefile ] ; then \
+    echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CXX); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+CHILLFLAGS = $(CFLAGS)
+CHILL = gcc
+CHILL_FOR_TARGET = ` \
+  if [ -f $${rootme}/../../gcc/Makefile ] ; then \
+    echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -L$${rootme}/../../chillrt/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+CHILL_LIB = -lchill
+
+TARGET_FLAGS_TO_PASS = \
+        "prefix=$(prefix)" \
+        "exec_prefix=$(exec_prefix)" \
+        "against=$(against)" \
+        'CC=$$(CC_FOR_TARGET)' \
+        "CC_FOR_TARGET=$(CC_FOR_TARGET)" \
+        "CFLAGS=$(CFLAGS)" \
+        "CHILLFLAGS=$(CHILLFLAGS)" \
+        'CHILL=$$(CHILL_FOR_TARGET)' \
+        "CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
+        "CHILL_LIB=$(CHILL_LIB)" \
+        'CXX=$$(CXX_FOR_TARGET)' \
+        "CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
+        "CXXFLAGS=$(CXXFLAGS)" \
+        "MAKEINFO=$(MAKEINFO)" \
+        "INSTALL=$(INSTALL)" \
+        "INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+        "INSTALL_DATA=$(INSTALL_DATA)" \
+        "RUNTEST=$(RUNTEST)" \
+        "RUNTESTFLAGS=$(RUNTESTFLAGS)" \
+        "BISON=$(BISON)"
 
 #### host, target, and site specific Makefile frags come in here.
 
@@ -47,7 +111,7 @@ subdir_do: force
 		if (rootme=`pwd`/ ; export rootme ; \
 		    rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
 		    cd ./$$i; \
-		    $(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
+		    $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
 		else exit 1 ; fi ; \
 	    else true ; fi ; \
 	done
@@ -61,7 +125,7 @@ subdirs:
 		if [ -d $$dir ]; then \
 			(rootme=`pwd`/ ; export rootme ; \
 			 rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
-			 cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
+			 cd $$dir; $(MAKE) $(TARGET_FLAGS_TO_PASS)); \
 		fi; \
 	done
 
