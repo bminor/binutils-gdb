@@ -335,7 +335,7 @@ print_longest (struct ui_file *stream, int format, int use_local,
 			val_long);
       break;
     case 'u':
-      fprintf_filtered (stream, "%llu", val_long);
+      fprintf_filtered (stream, "%llu", (long long) val_long);
       break;
     case 'x':
       fprintf_filtered (stream,

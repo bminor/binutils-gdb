@@ -1,3 +1,13 @@
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* findvar.c (extract_signed_integer): Cast printf argument
+	to suppress format warning.
+	(extract_unsigned_integer): Likewise.
+	* infcmd.c (registers_info): Likewise.
+	* top.c (get_prompt_1): Likewise.
+	* valops.c (value_assign): Likewise.
+	* valprint.c (print_decimal): Likewise.
+
 2002-04-22  H.J. Lu  (hjl@gnu.org)
 
 	* c-exp.y (typebase): Support

@@ -57,7 +57,7 @@ extract_signed_integer (void *addr, int len)
   if (len > (int) sizeof (LONGEST))
     error ("\
 That operation is not available on integers of more than %d bytes.",
-	   sizeof (LONGEST));
+	   (int) sizeof (LONGEST));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
@@ -91,7 +91,7 @@ extract_unsigned_integer (void *addr, int len)
   if (len > (int) sizeof (ULONGEST))
     error ("\
 That operation is not available on integers of more than %d bytes.",
-	   sizeof (ULONGEST));
+	   (int) sizeof (ULONGEST));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */

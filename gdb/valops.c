@@ -607,7 +607,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	    if (changed_len > (int) sizeof (LONGEST))
 	      error ("Can't handle bitfields which don't fit in a %d bit word.",
-		     sizeof (LONGEST) * HOST_CHAR_BIT);
+		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	    read_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 			 buffer, changed_len);
@@ -644,7 +644,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	  if (len > (int) sizeof (LONGEST))
 	    error ("Can't handle bitfields in registers larger than %d bits.",
-		   sizeof (LONGEST) * HOST_CHAR_BIT);
+		   (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	  if (VALUE_BITPOS (toval) + VALUE_BITSIZE (toval)
 	      > len * HOST_CHAR_BIT)

@@ -1681,7 +1681,7 @@ registers_info (char *addr_exp, int fpregs)
       if (*addr_exp >= '0' && *addr_exp <= '9')
 	regnum = atoi (addr_exp);	/* Take a number */
       if (regnum >= numregs)	/* Bad name, or bad number */
-	error ("%.*s: invalid register", end - addr_exp, addr_exp);
+	error ("%.*s: invalid register", (int) (end - addr_exp), addr_exp);
 
     found:
       DO_REGISTERS_INFO (regnum, fpregs);

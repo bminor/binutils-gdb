@@ -1435,7 +1435,7 @@ get_prompt_1 (void *data)
 
 		  if (*promptp != gdb_prompt_escape)
 		    error ("Syntax error at prompt position %d",
-			   promptp - local_prompt);
+			   (int) (promptp - local_prompt));
 		  else
 		    {
 		      promptp++;	/* skip second escape char */
@@ -1581,7 +1581,7 @@ get_prompt_1 (void *data)
 		  break;	/* void type -- no output */
 		default:
 		  error ("bad data type at prompt position %d",
-			 promptp - local_prompt);
+			 (int) (promptp - local_prompt));
 		  break;
 		}
 	      outp += strlen (outp);
