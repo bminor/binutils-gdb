@@ -116,7 +116,7 @@ case $basic_machine in
 	# Some are omitted here because they have special meanings below.
 	tahoe | i[34]86 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
-		| alpha | we32k \
+		| alpha | we32k | sparc \
 		| m680[01234]0 | m683?2 | z8k | v70)	# CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
@@ -605,9 +605,6 @@ case $basic_machine in
 		;;
 	we32k)
 		basic_machine=we32k-att
-		;;
-	sparc)
-		basic_machine=sparc-sun
 		;;
 	*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2

@@ -1,5 +1,12 @@
 Fri Nov  6 23:10:37 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
+	* config.sub: remove 'sparc'-->'sparc-sun' default transformation,
+	add 'sparc' to list of recognized cpus.  This needed to make
+	'sparc-aout' expand to 'sparc-unknown-aout' instead of 'sparc-sun-aout'
+
+	* configure.in: remove most references to gdbtest, regularize
+	target based program removal
+
 	* test-build.mk: import from p3 tree (many fixes and changes)
 
 Fri Nov  6 20:59:00 1992  david d `zoo' zuhn  (zoo@cygnus.com)
