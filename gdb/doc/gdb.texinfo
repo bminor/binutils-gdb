@@ -4811,6 +4811,18 @@ virtual function table.  This is the default setting.
 @item show print object
 Show whether actual, or declared, object types are displayed.
 
+@kindex set print static-members
+@item set print static-members
+@itemx set print static-members on
+Print static members when displaying a C++ object.  The default is on.
+
+@item set print static-members off
+Do not print static members when displaying a C++ object.
+
+@kindex show print static-members
+@item show print static-members
+Show whether C++ static members are printed, or not.
+
 @kindex set print vtbl
 @item set print vtbl
 @itemx set print vtbl on
