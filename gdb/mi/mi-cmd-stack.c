@@ -309,8 +309,5 @@ mi_cmd_stack_select_frame (char *command, char **argv, int argc)
   else
     select_frame_command_wrapper (argv[0], 1 /* not used */ );
 
-  if (frame_relative_level (selected_frame) != current_level)
-    selected_frame_level_changed_event (frame_relative_level (selected_frame));
-
   return MI_CMD_DONE;
 }
