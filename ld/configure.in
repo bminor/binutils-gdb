@@ -65,7 +65,7 @@ fi
 AC_PROG_CC
 AC_PROG_INSTALL
 
-ALL_LINGUAS="fr sv tr es"
+ALL_LINGUAS="fr sv tr es da"
 CY_GNU_GETTEXT
 
 AC_EXEEXT

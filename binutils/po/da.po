@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.12.91\n"
 "POT-Creation-Date: 2002-07-23 15:55-0400\n"
-"PO-Revision-Date: 2002-09-07 19:55+0200\n"
+"PO-Revision-Date: 2002-11-09 19:55+0100\n"
 "Last-Translator: Keld Simonsen <keld@dkuug.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -123,11 +123,11 @@ msgstr "  [N]          - brug forekomst [nummer] af navn\n"
 
 #: ar.c:271
 msgid "  [f]          - truncate inserted file names\n"
-msgstr "  [f]          - afkort indsættede filnavne\n"
+msgstr "  [f]          - afkort indsatte filnavne\n"
 
 #: ar.c:272
 msgid "  [P]          - use full path names when matching\n"
-msgstr "  [P]          - brug fuldstændiga søgestien ved sammenligninger\n"
+msgstr "  [P]          - brug fuldstændig søgestien ved sammenligninger\n"
 
 #: ar.c:273
 msgid "  [o]          - preserve original dates\n"
@@ -147,11 +147,11 @@ msgstr "  [c]          - advar ikke om biblioteket skal oprettes\n"
 
 #: ar.c:277
 msgid "  [s]          - create an archive index (cf. ranlib)\n"
-msgstr "  [s]          - opret et index over arkivet (jfr. ranlib)\n"
+msgstr "  [s]          - opret et indeks over arkivet (jfr. ranlib)\n"
 
 #: ar.c:278
 msgid "  [S]          - do not build a symbol table\n"
-msgstr "  [S]          - opret intet index over arkivet\n"
+msgstr "  [S]          - opret intet indeks over arkivet\n"
 
 #: ar.c:279
 msgid "  [v]          - be verbose\n"
@@ -187,11 +187,11 @@ msgstr "to forskellige kommandoflag blev angivet"
 #: ar.c:587
 #, c-format
 msgid "illegal option -- %c"
-msgstr "utilladt flag -- %c"
+msgstr "ikke tilladt flag -- %c"
 
 #: ar.c:619
 msgid "no operation specified"
-msgstr "ingen kommandoflag belv angivet"
+msgstr "ingen kommandoflag blev angivet"
 
 #: ar.c:622
 msgid "`u' is only meaningful with the `r' option."
@@ -256,11 +256,11 @@ msgstr "Intet medlem hedder \"%s\"\n"
 msgid "no entry %s in archive %s!"
 msgstr "ingen %s i arkiv %s!"
 
-# archive map virker være vad indexet kaldes i kildekodeen
+# archive map virker være vad indekset kaldes i kildekodeen
 #: ar.c:1422
 #, c-format
 msgid "%s: no archive map to update"
-msgstr "%s: intet index at opdatere"
+msgstr "%s: intet indeks at opdatere"
 
 #: arsup.c:86
 #, c-format
@@ -388,7 +388,7 @@ msgstr ""
 
 #: coffdump.c:541 srconv.c:2052 sysdump.c:831
 msgid "no input file specified"
-msgstr "ingen inddatafil gavs"
+msgstr "ingen inddatafil angaves"
 
 #: debug.c:653
 msgid "debug_add_to_current_namespace: no current file"
@@ -428,7 +428,7 @@ msgstr "debug_end_block: forsøg gjordes på at afslutte øverste blok"
 
 #: debug.c:992
 msgid "debug_record_line: no current unit"
-msgstr "debug_record_line: ingen aktuel kompileringsenhed"
+msgstr "debug_record_line: ingen aktuel oversættelsesenhed"
 
 #. FIXME
 #: debug.c:1046
@@ -478,7 +478,7 @@ msgstr "Advarsel: ændrer datatypens størrelse fra %d til %d\n"
 
 #: debug.c:2083
 msgid "debug_find_named_type: no current compilation unit"
-msgstr "debug_find_named_type: ingen aktuel kompileringsenhed"
+msgstr "debug_find_named_type: ingen aktuel oversættelsesenhed"
 
 #: debug.c:2190
 #, c-format
@@ -708,15 +708,15 @@ msgid "      --export-all-symbols   Export all symbols to .def\n"
 msgstr "      --export-all-symbols   Eksportér alle symboler til .def\n"
 
 #  Føljende streng har den beskrivende delen indenteret to tegn
-#  extra i den engelska texten til at to flag er for langa. I den
+#  extra i den engelska texten til at to flag er for lange. I den
 #  svenska oversættelsen er de indenterede tre tegn extra til at
 #  den ena flaget blev yderligere et tegn for lang.
 #: dlltool.c:3141
 msgid "      --no-export-all-symbols  Only export listed symbols\n"
-msgstr "      --no-export-all-symbols   Exportér kun listede symboler\n"
+msgstr "      --no-export-all-symbols   Eksportér kun listede symboler\n"
 
 #  Føljende streng har den beskrivende delen indenteret to tegn
-#  extra i den engelska texten til at to flag er for langa. I den
+#  extra i den engelska texten til at to flag er for lange. I den
 #  svenska oversættelsen er de indenterede tre tegn extra til at
 #  den ena flaget blev yderligere et tegn for lang.
 #: dlltool.c:3142
@@ -769,7 +769,7 @@ msgstr "   -n --no-delete            Behold temp.-filer (repetér for øget antal)
 
 #: dlltool.c:3154
 msgid "   -v --verbose              Be verbose.\n"
-msgstr "   -v --verbose              Beskriv udførligt.\n"
+msgstr "   -v --verbose              Beskriv udførligt\n"
 
 #: dlltool.c:3155
 msgid "   -V --version              Display the program version.\n"
@@ -787,7 +787,7 @@ msgstr "   -M --mcore-elf <udnavn>   Behandl mcore-elf-objektfiler til <udnavn>.
 msgid "   -L --linker <name>        Use <name> as the linker.\n"
 msgstr "   -L --linker <navn>        Brug <navn> som lænker.\n"
 
-#  Justeringen bliver fejl hær for flaget er for lang.
+#  Justeringen bliver fejl hér for flaget er for lang.
 #: dlltool.c:3160
 msgid "   -F --linker-flags <flags> Pass <flags> to the linker.\n"
 msgstr "   -F --linker-flags <flag> Send <flag> til lænkeren.\n"
@@ -893,7 +893,7 @@ msgstr "   --target <maskine>     i386-cygwin32 eller i386-mingw32\n"
 
 #: dllwrap.c:508
 msgid "   --dry-run              Show what needs to be run\n"
-msgstr "   --dry-run              Gør intet andet end at vise hvad som bliver køret\n"
+msgstr "   --dry-run              Gør intet andet end at vise hvad som bliver kørt\n"
 
 #: dllwrap.c:509
 msgid "   --mno-cygwin           Create Mingw DLL\n"
@@ -905,11 +905,11 @@ msgstr "  Flag som sendes til DLLTOOL:\n"
 
 #: dllwrap.c:511
 msgid "   --machine <machine>\n"
-msgstr "   --machine <maskin>\n"
+msgstr "   --machine <maskine>\n"
 
 #: dllwrap.c:512
 msgid "   --output-exp <outname> Generate export file.\n"
-msgstr "   --output-exp <udnavn>  Generér exportfil.\n"
+msgstr "   --output-exp <udnavn>  Generér eksportfil.\n"
 
 #: dllwrap.c:513
 msgid "   --output-lib <outname> Generate input library.\n"
@@ -933,11 +933,11 @@ msgstr "   --output-def <deffil>  Navngiv .def-uddatafilen\n"
 
 #: dllwrap.c:518
 msgid "   --export-all-symbols     Export all symbols to .def\n"
-msgstr "   --export-all-symbols     Exportér alle symboler til .def\n"
+msgstr "   --export-all-symbols     Eksporter alle symboler til .def\n"
 
 #: dllwrap.c:519
 msgid "   --no-export-all-symbols  Only export .drectve symbols\n"
-msgstr "   --no-export-all-symbols  Exportér kun .drectve-symboler\n"
+msgstr "   --no-export-all-symbols  Eksporter kun .drectve-symboler\n"
 
 #: dllwrap.c:520
 msgid "   --exclude-symbols <list> Exclude <list> from .def\n"
@@ -1000,7 +1000,7 @@ msgstr ""
 #: dllwrap.c:992
 #, c-format
 msgid "DLLTOOL name    : %s\n"
-msgstr "DLLVERKTYG navn   : %s\n"
+msgstr "DLLVÆRKTØJ navn   : %s\n"
 
 # Indenteringen er øged til at oversættelsen skal få plads fremfor
 # kolonet på alle 4 strenge.
@@ -1108,11 +1108,11 @@ msgstr "underløb i stakken"
 
 #: ieee.c:1381 ieee.c:1453 ieee.c:2152
 msgid "illegal variable index"
-msgstr "utilladt variabelindex"
+msgstr "ikke tilladt variabelindeks"
 
 #: ieee.c:1431
 msgid "illegal type index"
-msgstr "utilladt typeindex"
+msgstr "ikke tilladt typeindeks"
 
 #: ieee.c:1441 ieee.c:1478
 msgid "unknown TY code"
@@ -1131,7 +1131,7 @@ msgstr "Pascal-filnavn understøttes ikke"
 #: ieee.c:1919
 #, fuzzy
 msgid "unsupported qualifier"
-msgstr "bestæmningen understøttes ikke"
+msgstr "bestemmelsen understøttes ikke"
 
 #: ieee.c:2190
 msgid "undefined variable in ATN"
@@ -1177,7 +1177,7 @@ msgstr "uunderstøttet C++-objekttype"
 
 #: ieee.c:2695
 msgid "C++ base class not defined"
-msgstr "udefineret C++-baseklass"
+msgstr "udefineret C++-baseklasse"
 
 #: ieee.c:2707 ieee.c:2812
 msgid "C++ object has no fields"
@@ -1207,7 +1207,7 @@ msgstr "fejlagtig type på C++-metodefunktion"
 
 #: ieee.c:3010
 msgid "no type information for C++ method function"
-msgstr "ingen typinformation om C++-metodefunktion"
+msgstr "ingen typeinformation om C++-metodefunktion"
 
 #: ieee.c:3049
 msgid "C++ static virtual method"
@@ -1219,7 +1219,7 @@ msgstr "ukendt C++-objektoversigtsspec"
 
 #: ieee.c:3183
 msgid "undefined C++ vtable"
-msgstr "udefineret C++-v-tabell"
+msgstr "udefineret C++-v-tabel"
 
 #: ieee.c:3254
 msgid "C++ default values not in a function"
@@ -1324,7 +1324,7 @@ msgstr "sæt .data-størrelse"
 #: nlmconv.c:635
 #, c-format
 msgid "warning: symbol %s imported but not in import list"
-msgstr "advarsel: symbol %s importeredes men findes ikke i importlisten"
+msgstr "advarsel: symbol %s importeredes, men findes ikke i importlisten"
 
 #: nlmconv.c:655
 msgid "set start address"
@@ -1412,7 +1412,7 @@ msgstr ""
 #: nlmconv.c:1151
 #, c-format
 msgid "support not compiled in for %s"
-msgstr "ikke kompileret med understøttelse for %s"
+msgstr "ikke oversat med understøttelse for %s"
 
 #: nlmconv.c:1191
 msgid "make section"
@@ -1449,12 +1449,12 @@ msgstr "skriver stub"
 #: nlmconv.c:1975
 #, c-format
 msgid "unresolved PC relative reloc against %s"
-msgstr "uløst PC-relativ relokalisering mod %s"
+msgstr "uløst PC-relativ relokering mod %s"
 
 #: nlmconv.c:2039
 #, c-format
 msgid "overflow when adjusting relocation against %s"
-msgstr "overløb ved justeringen af relokalisering mod %s"
+msgstr "overløb ved justeringen af relokering mod %s"
 
 #: nlmconv.c:2156
 #, c-format
@@ -1514,15 +1514,15 @@ msgstr ""
 "\n"
 "  -a, --debug-syms       Vis kun fejlsøgningssymboler\n"
 "  -A, --print-file-name  Skriv navnet på inddatafilen for hvert symbol\n"
-"  -B                     Samma som --format=bsd\n"
-"  -C, --demangle[=STIL]  Avkoda lavniveausymbolnavn til brugerniveaunavn\n"
+"  -B                     Samme som --format=bsd\n"
+"  -C, --demangle[=STIL]  Afkod lavniveausymbolnavn til brugerniveaunavn\n"
 "                          STIL kan være \"auto\" (det forvalgte), \"gnu\",\n"
 "                          \"lucid\", \"arm\", \"hp\", \"edg\" eller \"gnu-new-abi\"\n"
-"      --no-demangle      Avkoda ikke lavniveausymbolnavn\n"
+"      --no-demangle      Afkod ikke lavniveausymbolnavn\n"
 "  -D, --dynamic          Vis dynamiske symboler i stedet for normale symboler\n"
 "      --defined-only     Vis kun definerede symboler\n"
 "  -e                     (ignoreres)\n"
-"  -f, --format=FORMAT    Brug FORMAT som uddataformat.  FORMAT kan vara\n"
+"  -f, --format=FORMAT    Brug FORMAT som uddataformat.  FORMAT kan være\n"
 "                           \"bsd\", \"sysv\" eller \"posix\".  Forvalet er \"bsd\"\n"
 "  -g, --extern-only      Vis kun externe symboler\n"
 "  -h, --help             Vis denne hjælpen\n"
@@ -1530,10 +1530,10 @@ msgstr ""
 "                           filnavn og linjenummer for hvert symbol\n"
 "  -n, --numeric-sort     Sortere symboler numerisk efter adress\n"
 "  -o                     Samma som -A\n"
-"  -p, --no-sort          Sortere ikke symbolerna\n"
-"  -P, --portability      Samma som --format=posix\n"
+"  -p, --no-sort          Sortere ikke symbolerne\n"
+"  -P, --portability      Samme som --format=posix\n"
 "  -r, --reverse-sort     Sortere åt andre hållet\n"
-"  -s, --print-armap      Ta med index for symboler i arkivmedlemmer\n"
+"  -s, --print-armap      Ta med indeks for symboler i arkivmedlemmer\n"
 "      --size-sort        Sortere symboler efter størrelse\n"
 "  -t, --radix=BAS        Skriv tal i talbasen BAS\n"
 "      --target=BFD-NAVN  Specificere målobjektets format som BFD-NAVN\n"
@@ -1657,7 +1657,7 @@ msgid ""
 "Archive index:\n"
 msgstr ""
 "\n"
-"Arkivindex:\n"
+"Arkivindeks:\n"
 
 #: objcopy.c:363 srconv.c:1952
 #, fuzzy, c-format
@@ -1732,15 +1732,15 @@ msgid ""
 msgstr ""
 "  -I --input-target <bfd-navn>    Antag inddatafilens format er <bfd-navn>\n"
 "  -O --output-target <bfd-navn>   Opret uddatafilen i formatet <bfd-navn>\n"
-"  -B --binary-architecture <ark>  Vælg arkitektur for udfil når inddata er binår\n"
+"  -B --binary-architecture <ark>  Vælg arkitektur for udfil når inddata er binær\n"
 "  -F --target <bfd-navn>          Sætt både in- og udformatet til <bfd-navn>\n"
 "     --debugging                  Konvertere fejlsøgningsinfo, om muligt\n"
 "  -p --preserve-dates             Kopiér ændrings/adgangtider til uddatan\n"
 "  -j --only-section <navn>        Kopiér kun sektion <navn> til uddatan\n"
 "  -R --remove-section <navn>      Fjern sektion <navn> fra uddatan\n"
-"  -S --strip-all                  Fjern all symbol- og relokaliseringsinfo\n"
+"  -S --strip-all                  Fjern all symbol- og relokeringsinfo\n"
 "  -g --strip-debug                Fjern alle fejlsøgningssymboler\n"
-"     --strip-unneeded             Fjern symboler onødiga for relokalisering\n"
+"     --strip-unneeded             Fjern symboler onødiga for relokering\n"
 "  -N --strip-symbol <navn>        Kopiér ikke symbol <navn>\n"
 "  -K --keep-symbol <navn>         Kopiér kun symbol <navn>\n"
 "  -L --localize-symbol <navn>     Markere symbol <navn> som lokal\n"
@@ -1780,7 +1780,7 @@ msgstr ""
 "     --localize-symbols <fil>     -L for alle symboler som listes i <fil>\n"
 "     --keep-global-symbols <fil>  -G for alle symboler som listes i <fil>\n"
 "     --weaken-symbols <fil>       -W for alle symboler som listes i <fil>\n"
-"     --alt-machine-code <index>   Brug alternativ maskinkode for uddata\n"
+"     --alt-machine-code <indeks>   Brug alternativ maskinkode for uddata\n"
 "  -v --verbose                    Lista alle forændrede objektfiler\n"
 "  -V --version                    Vis programmets versionsinformation\n"
 "  -h --help                       Vis denne hjælp\n"
@@ -1816,12 +1816,12 @@ msgid ""
 msgstr ""
 "  -I --input-target <bfd-navn>     Antag inddatafilens format er <bfd-navn>\n"
 "  -O --output-target <bfd-navn>    Opret uddatafilen i formatet <bfd-navn>\n"
-"  -F --target <bfd-navn>           Sætt både in- og udformatet til <bfd-navn>\n"
-"  -p --preserve-dates              Kopiér ændrings/adgangtider til uddatan\n"
-"  -R --remove-section <navn>       Fjern sektion <navn> fra uddatan\n"
-"  -s --strip-all                   Fjern all symbol- og relokaliseringsinfo\n"
+"  -F --target <bfd-navn>           Sæt både in- og udformatet til <bfd-navn>\n"
+"  -p --preserve-dates              Kopiér ændrings/adgangtider til uddata\n"
+"  -R --remove-section <navn>       Fjern sektion <navn> fra uddata\n"
+"  -s --strip-all                   Fjern alle symbol- og relokeringsinfo\n"
 "  -g -S --strip-debug              Fjern alle fejlsøgningssymboler\n"
-"     --strip-unneeded              Fjern symboler onødiga for relokaliseringen\n"
+"     --strip-unneeded              Fjern symboler unødige for relokeringen\n"
 "  -N --strip-symbol <navn>         Kopiér ikke symbol <navn>\n"
 "  -K --keep-symbol <navn>          Kopiér kun symbol <navn>\n"
 "  -x --discard-all                 Fjern alle ikke-globale symboler\n"
@@ -1829,7 +1829,7 @@ msgstr ""
 "  -v --verbose                     Lista alle forændrede objektfiler\n"
 "  -V --version                     Vis programmets versionsinformation\n"
 "  -h --help                        Vis denne hjælp\n"
-"  -o <fil>                         gem den udrensade uddatan i <fil>\n"
+"  -o <fil>                         gem den udrensede uddata i <fil>\n"
 
 #: objcopy.c:506
 #, c-format
@@ -1994,7 +1994,7 @@ msgstr "Advarsel: afkorter udfyldningsværdien fra 0x%s til 0x%x"
 
 #: objcopy.c:2531
 msgid "alternate machine code index must be positive"
-msgstr "index for alternativ maskinkode skal være positivt"
+msgstr "indeks for alternativ maskinkode skal være positivt"
 
 #: objcopy.c:2550
 msgid "byte number must be less than interleave"
@@ -2073,8 +2073,8 @@ msgstr ""
 "  -G, --stabs              Vis (ubehandlet) eventuell STABS-info fra filen\n"
 "  -t, --syms               Vis indeholdet i symboltabellen(erna)\n"
 "  -T, --dynamic-syms       Vis indeholdet i tabellen med dynamiske symboler\n"
-"  -r, --reloc              Vis relokaliseringsposterne i filen\n"
-"  -R, --dynamic-reloc      Vis de dynamiske relokaliseringsposterne i filen\n"
+"  -r, --reloc              Vis relokeringsposterne i filen\n"
+"  -R, --dynamic-reloc      Vis de dynamiske relokeringsposterne i filen\n"
 "  -V, --version            Vis programmets versionsinformation\n"
 "  -i, --info               Lista de objektformat og arkitekturer som håndteres\n"
 "  -H, --help               Vis denne hjælp\n"
@@ -2085,7 +2085,7 @@ msgid ""
 " The following switches are optional:\n"
 msgstr ""
 "\n"
-" Føljende flag er frivillige:\n"
+" Følgende flag er frivillige:\n"
 
 #: objdump.c:191
 msgid ""
@@ -2112,11 +2112,11 @@ msgstr ""
 "  -b, --target=BFDNAVN           Specificér at målobjektets format er BFDNAVN\n"
 "  -m, --architecture=MASKINE     Specificér at målarkitekturen er MASKINE\n"
 "  -j, --section=NAVN             Vis kun information om sektion NAVN\n"
-"  -M, --disassembler-options=FLG Videresend FLG til disassemblereren\n"
+"  -M, --disassembler-options=FLG Videresend FLG til disassembleren\n"
 "  -EB --endian=big               Antag big endian-format ved disassemblering\n"
 "  -EL --endian=little            Antag little endian-format ved disassemblering\n"
 "      --file-start-context       Medtag omgivelsen i begyndelsen af filen (med -S)\n"
-"  -l, --line-numbers             Medtag linjenummre og filnavne i uddata\n"
+"  -l, --line-numbers             Medtag linjenumre og filnavne i uddata\n"
 "  -C, --demangle[=STIL]          Afkod kodede symbolnavne\n"
 "                                  STIL, hvis givet, kan være: \"auto\", \"gnu\",\n"
 "                                  \"lucid\", \"arm\", \"hp\", \"edg\", \"gnu-new-abi\"\n"
@@ -2311,7 +2311,7 @@ msgstr "%s: Advarsel: "
 #: readelf.c:361
 #, c-format
 msgid "Unable to seek to %x for %s\n"
-msgstr "Kan ikke opsøge %2$s på %1$x\n"
+msgstr "Kan ikke søge til %x for %s\n"
 
 #: readelf.c:372
 #, c-format
@@ -2334,62 +2334,54 @@ msgstr "Ved ikke hvordan man relokaliserer på denne maskinarkitektur\n"
 
 #: readelf.c:697 readelf.c:726 readelf.c:772 readelf.c:799
 msgid "relocs"
-msgstr "relokaliseringer"
+msgstr "relokeringer"
 
 #: readelf.c:708 readelf.c:737 readelf.c:782 readelf.c:809
 msgid "out of memory parsing relocs"
-msgstr "slut på hukommelse ved tolkning af relokaliseringer"
+msgstr "slut på hukommelse ved tolkning af relokeringer"
 
 #: readelf.c:861
-#, fuzzy
 msgid " Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"
 msgstr " Offset     Info    Type                Symbolværdi Symbolnavn + Tillæg\n"
 
 #: readelf.c:863
-#, fuzzy
 msgid " Offset     Info    Type            Sym.Value  Sym. Name + Addend\n"
-msgstr " Offset     Info    Type             Symbolværdi     Symbolnavn             Tillægg\n"
+msgstr " Offset     Info    Type             Symbolværdi  Symbolnavn + Tillæg\n"
 
 #: readelf.c:868
-#, fuzzy
 msgid " Offset     Info    Type                Sym. Value  Symbol's Name\n"
-msgstr " Offset     Info    Type             Symbolværdi     Symbolnavn\n"
+msgstr " Offset     Info    Type                Symbolværdi Symbolnavn\n"
 
 #: readelf.c:870
-#, fuzzy
 msgid " Offset     Info    Type            Sym.Value  Sym. Name\n"
-msgstr " Offset     Info    Type             Symbolværdi     Symbolnavn\n"
+msgstr " Offset     Info    Type            Symbolværdi Symbolnavn\n"
 
 #: readelf.c:878
-#, fuzzy
 msgid "    Offset             Info            Type               Symbol's Value  Symbol's Name + Addend\n"
-msgstr "    Offset             Info            Type                Symbolværdi      Symbolnavn\n"
+msgstr "    Offset             Info            Type                Symbolværdi    Symbolnavn + Tillæg\n"
 
 #: readelf.c:880
-#, fuzzy
 msgid "  Offset          Info           Type           Sym. Value    Sym. Name + Addend\n"
-msgstr "    Offset             Info            Type                Symbolværdi      Symbolnavn              Tillægg\n"
+msgstr "  Offset          Info           Type           Symbolværdi   Symbolnavn+ Tillæg\n"
 
 #: readelf.c:885
-#, fuzzy
 msgid "    Offset             Info            Type               Symbol's Value  Symbol's Name\n"
-msgstr "    Offset             Info            Type                Symbolværdi      Symbolnavn\n"
+msgstr "    Offset             Info            Type               Symbolværdi     Symbolnavn\n"
 
 #: readelf.c:887
-#, fuzzy
 msgid "  Offset          Info           Type           Sym. Value    Sym. Name\n"
-msgstr "    Offset             Info            Type                Symbolværdi      Symbolnavn\n"
+msgstr "  Offset          Info           Type           Symbolværdi   Symbolnavn\n"
 
 #: readelf.c:1134 readelf.c:1136 readelf.c:1184 readelf.c:1186 readelf.c:1195
 #: readelf.c:1197
-#, fuzzy, c-format
+#, c-format
 msgid "unrecognized: %-7lx"
 msgstr "ukendt: %-7lx"
 
 #: readelf.c:1158
 #, c-format
 msgid "<string table index %3ld>"
-msgstr "<strengtabellsindex  %3ld>"
+msgstr "<strengtabelsindeks  %3ld>"
 
 #: readelf.c:1423
 #, c-format
@@ -2412,11 +2404,11 @@ msgstr "NONE (ingen)"
 
 #: readelf.c:1460
 msgid "REL (Relocatable file)"
-msgstr "REL (relokaliseringsbar fil)"
+msgstr "REL (relokérbar fil)"
 
 #: readelf.c:1461
 msgid "EXEC (Executable file)"
-msgstr "EXEC (exekverbar fil)"
+msgstr "EXEC (eksekverbar fil)"
 
 #: readelf.c:1462
 msgid "DYN (Shared object file)"
@@ -2601,7 +2593,7 @@ msgid ""
 " (bytes into file)\n"
 "  Start of section headers:          "
 msgstr ""
-" (byte in i filen)\n"
+" (byte inde i filen)\n"
 "  Start for sektionshoveder:         "
 
 #: readelf.c:2650
@@ -2641,7 +2633,7 @@ msgstr "  Antal sektionshoveder:             %ld"
 #: readelf.c:2668
 #, c-format
 msgid "  Section header string table index: %ld"
-msgstr "  Sektionshovedets strengtabelsndx:  %ld"
+msgstr "  Sektionshovedets strengtabelsindeks: %ld"
 
 #: readelf.c:2702 readelf.c:2738
 msgid "program headers"
@@ -2685,13 +2677,12 @@ msgstr "Slut på hukommelse\n"
 
 #  BUGG: plural-s
 #: readelf.c:2810 readelf.c:2812
-#, fuzzy
 msgid ""
 "\n"
 "Program Headers:\n"
 msgstr ""
 "\n"
-"Programhoved%0.s:\n"
+"Programhoveder:\n"
 
 #: readelf.c:2816
 msgid "  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"
@@ -2699,7 +2690,7 @@ msgstr "  Type           Offset   VirtAdr    FysAdr     FilSt   HukommelseSt Flg
 
 #: readelf.c:2819
 msgid "  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align\n"
-msgstr "  Type            Offset   VirtAdr           FysAdr             FilStrl  HukommelseSt  Flg Just\n"
+msgstr "  Type           Offset   VirtAdr            FysAdr             FilStrl  HukommelseSt  Flg Just\n"
 
 #: readelf.c:2823
 msgid "  Type           Offset             VirtAddr           PhysAddr\n"
@@ -2785,23 +2776,21 @@ msgstr "Filen indeholder flere symtab-shndx-tabeller\n"
 
 #  BUGG: plural-s
 #: readelf.c:3390
-#, fuzzy
 msgid ""
 "\n"
 "Section Headers:\n"
 msgstr ""
 "\n"
-"Sektionshoved%0.s:\n"
+"Sektionshoveder:\n"
 
 #  BUGG: plural-s
 #: readelf.c:3392
-#, fuzzy
 msgid ""
 "\n"
 "Section Header:\n"
 msgstr ""
 "\n"
-"Sektionshoved%0.s:\n"
+"Sektionshoved:\n"
 
 #: readelf.c:3396
 msgid "  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"
@@ -2826,7 +2815,7 @@ msgid ""
 "  I (info), L (link order), G (group), x (unknown)\n"
 "  O (extra OS processing required) o (OS specific), p (processor specific)\n"
 msgstr ""
-"Nøgle til flagna:\n"
+"Nøgle til flagene:\n"
 "  W (skriv), A (allokér), X (eksekvér), M (flet), S (strenge)\n"
 "  I (info), L (lænkerorden), G (gruppe), x (ukendt)\n"
 "  O (ekstra OS-behandling kræves) o (OS-specifik), p (processor-specifik)\n"
@@ -2838,7 +2827,7 @@ msgid ""
 "Relocation section at offset 0x%lx contains %ld bytes:\n"
 msgstr ""
 "\n"
-"Relokaliseringssektionen på offset 0x%lx indeholder %ld byte:\n"
+"Relokeringssektionen på offset 0x%lx indeholder %ld byte:\n"
 
 #: readelf.c:3566
 msgid ""
@@ -2846,7 +2835,7 @@ msgid ""
 "There are no dynamic relocations in this file.\n"
 msgstr ""
 "\n"
-"Der findes ingen dynamiske relokaliseringer i denne fil.\n"
+"Der findes ingen dynamiske relokeringer i denne fil.\n"
 
 #: readelf.c:3593
 msgid ""
@@ -2854,7 +2843,7 @@ msgid ""
 "Relocation section "
 msgstr ""
 "\n"
-"Relokaliseringssektion "
+"Relokeringssektion "
 
 #: readelf.c:3598 readelf.c:4031 readelf.c:4045
 #, c-format
@@ -2872,7 +2861,7 @@ msgid ""
 "There are no relocations in this file.\n"
 msgstr ""
 "\n"
-"Der findes ingen relokaliseringer i denne fil.\n"
+"Der findes ingen relokeringer i denne fil.\n"
 
 #: readelf.c:3834
 msgid "unwind table"
@@ -2886,7 +2875,7 @@ msgstr "Hopper over uventet symboltype %u\n"
 #: readelf.c:3905
 #, c-format
 msgid "Skipping unexpected relocation type %s\n"
-msgstr "Hopper over uventet relokaliseringstype %s\n"
+msgstr "Hopper over uventet relokeringstype %s\n"
 
 #: readelf.c:3950 readelf.c:3975
 msgid ""
@@ -2896,7 +2885,7 @@ msgstr ""
 "\n"
 "Der findes ingen tilbagerulningssektioner i denne fil.\n"
 
-#  BUGG: Fortsættelsen er ikke markeret for oversættning i koden og indeholder '-citattegn.
+#  BUG: Fortsættelsen er ikke markeret for oversættelse i koden og indeholder '-citattegn.
 #: readelf.c:4026
 msgid ""
 "\n"
@@ -2984,7 +2973,7 @@ msgstr "Afhængighedskontrolsbibliotek"
 
 #: readelf.c:4533
 msgid "Audit library"
-msgstr "Kontrolsbibliotek"
+msgstr "Kontrolbibliotek"
 
 #: readelf.c:4551 readelf.c:4577 readelf.c:4603
 msgid "Flags:"
@@ -3053,7 +3042,7 @@ msgstr "  %#06x: Rev: %d  Flag: %s"
 #: readelf.c:4954
 #, c-format
 msgid "  Index: %d  Cnt: %d  "
-msgstr "  Index: %d  Ant: %d  "
+msgstr "  Indeks: %d  Ant: %d  "
 
 #: readelf.c:4965
 #, c-format
@@ -3063,17 +3052,17 @@ msgstr "Navn: %s\n"
 #: readelf.c:4967
 #, c-format
 msgid "Name index: %ld\n"
-msgstr "Navnindex: %ld\n"
+msgstr "Navneindeks: %ld\n"
 
 #: readelf.c:4982
 #, c-format
 msgid "  %#06x: Parent %d: %s\n"
-msgstr "  %#06x: Forældrer %d: %s\n"
+msgstr "  %#06x: Forælder %d: %s\n"
 
 #: readelf.c:4985
 #, c-format
 msgid "  %#06x: Parent %d, name index: %ld\n"
-msgstr "  %#06x: Forældrer %d, navneindex: %ld\n"
+msgstr "  %#06x: Forælder %d, navneindeks: %ld\n"
 
 #: readelf.c:5004
 #, c-format
@@ -3091,7 +3080,7 @@ msgstr " Adr: 0x"
 #: readelf.c:5009
 #, c-format
 msgid "  Offset: %#08lx  Link to section: %ld (%s)\n"
-msgstr "  Offset: %#08lx  Lænk til sektion: %ld (%s)\n"
+msgstr "  Offset: %#08lx  Lænke til sektion: %ld (%s)\n"
 
 #: readelf.c:5015
 msgid "version need section"
@@ -3125,7 +3114,7 @@ msgstr "  %#06x: Navn: %s"
 #: readelf.c:5065
 #, c-format
 msgid "  %#06x: Name index: %lx"
-msgstr "  %#06x: Navneindex: %lx"
+msgstr "  %#06x: Navneindeks: %lx"
 
 #: readelf.c:5068
 #, c-format
@@ -3199,7 +3188,7 @@ msgstr "Mislykkedes at indlæse antal spande\n"
 
 #: readelf.c:5474
 msgid "Failed to read in number of chains\n"
-msgstr "Mislykkedes at indlæse antalet kæder\n"
+msgstr "Mislykkedes at indlæse antal kæder\n"
 
 #: readelf.c:5494
 msgid ""
@@ -3211,11 +3200,11 @@ msgstr ""
 
 #: readelf.c:5496
 msgid "  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"
-msgstr "  Nr  Spa:    Værdi  Strl   Type    Bind Synl     Idx Navn\n"
+msgstr "  Nr  Spd:    Værdi  Strl   Type    Bind Synl     Idx Navn\n"
 
 #: readelf.c:5498
 msgid "  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"
-msgstr "  Nr  Spa:    Værdi          Strl   Type    Bind Synl     Idx Navn\n"
+msgstr "  Nr  Spd:    Værdi          Strl   Type   Bind Synl     Idx Navn\n"
 
 #: readelf.c:5543
 #, c-format
@@ -3228,11 +3217,11 @@ msgstr ""
 
 #: readelf.c:5547
 msgid "   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"
-msgstr "    Nr:    Værdi  Strl Type     Bind   Synl     Idx Navn\n"
+msgstr "    Nr:    Værdi  Strl Type    Bind   Synl     Idx Navn\n"
 
 #: readelf.c:5549
 msgid "   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"
-msgstr "    Nr:    Værdi          Strl Type     Bind   Synl     Idx Navn\n"
+msgstr "   Nr:     Værdi          Strl Type    Bind   Synl     Idx Navn\n"
 
 #: readelf.c:5595
 msgid "version data"
@@ -3283,7 +3272,7 @@ msgstr ""
 
 #: readelf.c:5812
 msgid " Num: Name                           BoundTo     Flags\n"
-msgstr "  Nr: Navn                           Bind til   Flag\n"
+msgstr " Nr: Navn                            Bind til    Flag\n"
 
 #: readelf.c:5864
 #, c-format
@@ -3397,7 +3386,7 @@ msgstr "Kun DWARF version 2's linjeinfo understøttes i øjeblikket.\n"
 #: readelf.c:6152
 #, c-format
 msgid "  Length:                      %ld\n"
-msgstr "  længde:                      %ld\n"
+msgstr "  Længde:                      %ld\n"
 
 #: readelf.c:6153
 #, c-format
@@ -3407,14 +3396,14 @@ msgstr "  DWARF version:               %d\n"
 #: readelf.c:6154
 #, c-format
 msgid "  Prologue Length:             %d\n"
-msgstr "  prologlængde:                %d\n"
+msgstr "  Prologlængde:                %d\n"
 
 #: readelf.c:6155
 #, c-format
 msgid "  Minimum Instruction Length:  %d\n"
-msgstr "  min.-instruktionslængde:      %d\n"
+msgstr "  Min.-instruktionslængde:      %d\n"
 
-#  BUGG: Ska det ikke være `' på engelska?
+#  BUG: Ska det ikke være `' på engelsk?
 #: readelf.c:6156
 #, c-format
 msgid "  Initial value of 'is_stmt':  %d\n"
@@ -3595,22 +3584,22 @@ msgstr "Kun DWARF 2 pub.-navn understøttes i øjeblikket\n"
 #: readelf.c:6401
 #, c-format
 msgid "  Length:                              %ld\n"
-msgstr "  længde:                              %ld\n"
+msgstr "  Længde:                              %ld\n"
 
 #: readelf.c:6403
 #, c-format
 msgid "  Version:                             %d\n"
-msgstr "  version:                             %d\n"
+msgstr "  Version:                             %d\n"
 
 #: readelf.c:6405
 #, c-format
 msgid "  Offset into .debug_info section:     %ld\n"
-msgstr "  offset i .debug_info-sektionen:      %ld\n"
+msgstr "  Offset i .debug_info-sektionen:      %ld\n"
 
 #: readelf.c:6407
 #, c-format
 msgid "  Size of area in .debug_info section: %ld\n"
-msgstr "  strl. på omr. i .debug_info-sekt.:  %ld\n"
+msgstr "  Strl. på omr. i .debug_info-sekt.:  %ld\n"
 
 #: readelf.c:6410
 msgid ""
@@ -3688,11 +3677,11 @@ msgstr " %lu byte-blok: "
 
 #: readelf.c:7265
 msgid "(User defined location op)"
-msgstr "(brugerdefineret plads-op)"
+msgstr "(Brugerdefineret plads-op)"
 
 #: readelf.c:7267
 msgid "(Unknown location op)"
-msgstr "(ukendt plads-op)"
+msgstr "(Ukendt plads-op)"
 
 #: readelf.c:7305
 #, fuzzy
@@ -3733,7 +3722,7 @@ msgstr "<ingen .debug_str-sektion>"
 
 #: readelf.c:7434
 msgid "<offset is too big>"
-msgstr "<offsetten er for stor>"
+msgstr "<offsettet er for stor>"
 
 #: readelf.c:7454
 msgid ""
@@ -3757,7 +3746,7 @@ msgid " (indirect string, offset: 0x%lx): "
 msgstr " (indirekte streng, offset: 0x%lx): "
 
 #: readelf.c:7638
-#, fuzzy, c-format
+#, c-format
 msgid "Unrecognized form: %d\n"
 msgstr "Ukendt formular: %d\n"
 
@@ -3771,7 +3760,7 @@ msgstr "(inlined)"
 
 #: readelf.c:7653
 msgid "(declared as inline but ignored)"
-msgstr "(deklareret som inline men ignoreret)"
+msgstr "(deklareret som inline, men ignoreret)"
 
 #: readelf.c:7654
 msgid "(declared as inline and inlined)"
@@ -3798,27 +3787,27 @@ msgstr "64-bit DWARF-fejlsøgningsinfo understøttes ikke endnu.\n"
 #: readelf.c:7919
 #, c-format
 msgid "  Compilation Unit @ %lx:\n"
-msgstr "  Kompileringsenhed @ %lx:\n"
+msgstr "  Oversættelsesenhed @ %lx:\n"
 
 #: readelf.c:7920
 #, c-format
 msgid "   Length:        %ld\n"
-msgstr "   længd:         %ld\n"
+msgstr "   Længde:        %ld\n"
 
 #: readelf.c:7921
 #, c-format
 msgid "   Version:       %d\n"
-msgstr "   version:       %d\n"
+msgstr "   Version:       %d\n"
 
 #: readelf.c:7922
 #, c-format
 msgid "   Abbrev Offset: %ld\n"
-msgstr "   fork.-offset:  %ld\n"
+msgstr "   Fork.-offset:  %ld\n"
 
 #: readelf.c:7923
 #, c-format
 msgid "   Pointer Size:  %d\n"
-msgstr "   pekarstørrelse:  %d\n"
+msgstr "   Pegerstørrelse:  %d\n"
 
 #: readelf.c:7927
 msgid "Only version 2 DWARF debug information is currently supported.\n"
@@ -3843,37 +3832,39 @@ msgid " <%d><%lx>: Abbrev Number: %lu (%s)\n"
 msgstr " <%d><%lx>: Fork.-nummer: %lu (%s)\n"
 
 #: readelf.c:8050
+#, fuzzy
 msgid "64-bit DWARF aranges are not supported yet.\n"
-msgstr "64-bit DWARF-a-interval understøttes ikke endnu.\n"
+msgstr "64-bit DWARF-a-intervaller understøttes ikke endnu.\n"
 
 #: readelf.c:8056
+#, fuzzy
 msgid "Only DWARF 2 aranges are currently supported.\n"
-msgstr "Kun DWARF2's a-interval understøttes i øjeblikket.\n"
+msgstr "Kun DWARF2's a-intervaller understøttes i øjeblikket.\n"
 
 #: readelf.c:8060
 #, c-format
 msgid "  Length:                   %ld\n"
-msgstr "  længde:                   %ld\n"
+msgstr "  Længde:                   %ld\n"
 
 #: readelf.c:8061
 #, c-format
 msgid "  Version:                  %d\n"
-msgstr "  version:                  %d\n"
+msgstr "  Version:                  %d\n"
 
 #: readelf.c:8062
 #, c-format
 msgid "  Offset into .debug_info:  %lx\n"
-msgstr "  offset i .debug_info:     %lx\n"
+msgstr "  Offset i .debug_info:     %lx\n"
 
 #: readelf.c:8063
 #, c-format
 msgid "  Pointer Size:             %d\n"
-msgstr "  pegerstørrelse:           %d\n"
+msgstr "  Pegerstørrelse:           %d\n"
 
 #: readelf.c:8064
 #, c-format
 msgid "  Segment Size:             %d\n"
-msgstr "  segmentstørrelse:         %d\n"
+msgstr "  Segmentstørrelse:         %d\n"
 
 #: readelf.c:8066
 msgid ""
@@ -3881,7 +3872,7 @@ msgid ""
 "    Address  Length\n"
 msgstr ""
 "\n"
-"    adresselængde\n"
+"    Adresselængde\n"
 
 #: readelf.c:8248
 #, c-format
@@ -3940,7 +3931,7 @@ msgstr ""
 #: readelf.c:9331
 #, fuzzy
 msgid "conflict list found without a dynamic symbol table"
-msgstr "konfliktliste uden tabell"
+msgstr "konfliktliste uden tabel"
 
 #: readelf.c:9349 readelf.c:9365
 msgid "conflict"
@@ -3957,7 +3948,7 @@ msgstr ""
 
 #: readelf.c:9377
 msgid "  Num:    Index       Value  Name"
-msgstr "  Num:    Index       Værdi  Navn"
+msgstr "  Num:    Indeks      Værdi  Navn"
 
 #: readelf.c:9426
 #, fuzzy
@@ -4013,7 +4004,7 @@ msgstr "NT_LWPSTATUS (lwpstatus_t-struktur)"
 msgid "NT_LWPSINFO (lwpsinfo_t structure)"
 msgstr "NT_LWPSINFO (lwpsinfo_t-struktur)"
 
-#  BUGG: Stavfejl i originalet (str>uc<ture)
+#  BUG: Stavfejl i originalet (str>uc<ture)
 #: readelf.c:9494
 #, fuzzy
 msgid "NT_WIN32PSTATUS (win32_pstatus structure)"
@@ -4027,7 +4018,7 @@ msgstr "Ukendt kommentartype: (0x%08x)"
 #. NetBSD core "procinfo" structure.
 #: readelf.c:9510
 msgid "NetBSD procinfo structure"
-msgstr "NetBSD processinfo-struktur"
+msgstr "NetBSD procesinfo-struktur"
 
 #  FIXME
 #: readelf.c:9537 readelf.c:9551
@@ -4060,7 +4051,7 @@ msgstr ""
 
 #: readelf.c:9621
 msgid "  Owner\t\tData size\tDescription\n"
-msgstr "  Ægare\t\tData-størrelse\tBeskrivelse\n"
+msgstr "  Ejer\t\tData-størrelse\tBeskrivelse\n"
 
 #: readelf.c:9640
 #, c-format
@@ -4189,7 +4180,7 @@ msgstr "dialogkontrol"
 
 #: resbin.c:582
 msgid "dialogex control"
-msgstr "dioalog-ext.kontrol"
+msgstr "dialog-ext.kontrol"
 
 #: resbin.c:611
 msgid "dialog control end"
@@ -4221,7 +4212,7 @@ msgstr "skrifttypeskatalogsenhedsnavn"
 
 #: resbin.c:744
 msgid "fontdir face name"
-msgstr "skrifttypeskatalogsskrifttypesnavn"
+msgstr "skrifttypekatalogsskrifttypenavn"
 
 #: resbin.c:787
 msgid "accelerator"
@@ -4229,12 +4220,12 @@ msgstr "accelerator"
 
 #: resbin.c:851
 msgid "group cursor header"
-msgstr "gruppemarkørshoved"
+msgstr "gruppemarkørhoved"
 
 #: resbin.c:855
 #, c-format
 msgid "unexpected group cursor type %d"
-msgstr "uventet gruppemarkørstype %d"
+msgstr "uventet gruppemarkørtype %d"
 
 #: resbin.c:870
 msgid "group cursor"
@@ -4242,12 +4233,12 @@ msgstr "gruppemarkør"
 
 #: resbin.c:909
 msgid "group icon header"
-msgstr "gruppeikonshoved"
+msgstr "gruppeikonhoved"
 
 #: resbin.c:913
 #, c-format
 msgid "unexpected group icon type %d"
-msgstr "uventet gruppeikonstype %d"
+msgstr "uventet gruppeikontype %d"
 
 #: resbin.c:928
 msgid "group icon"
@@ -4340,7 +4331,7 @@ msgstr "kan ikke læse resursesektionen"
 #: rescoff.c:178
 #, c-format
 msgid "%s: %s: address out of bounds"
-msgstr "%s: %s: adresse udenfor område"
+msgstr "%s: %s: adresse uden for område"
 
 #: rescoff.c:197
 msgid "directory"
@@ -4372,7 +4363,7 @@ msgstr "ID-underkatalog"
 
 #: rescoff.c:302
 msgid "ID resource"
-msgstr "ID-resurs"
+msgstr "ID-resurse"
 
 #: rescoff.c:328
 msgid "resource type unknown"
@@ -4401,7 +4392,7 @@ msgstr "kan ikke finde BFD_RELOC_RVA-relokeringstype"
 #: resrc.c:240 resrc.c:312
 #, c-format
 msgid "can't open temporary file `%s': %s"
-msgstr "kan ikke åbne temporærfil \"%s\": %s"
+msgstr "kan ikke åbne temporær fil \"%s\": %s"
 
 #: resrc.c:246
 #, c-format
@@ -4421,7 +4412,7 @@ msgstr "kan ikke eksekvere \"%s\": %s"
 #: resrc.c:317
 #, c-format
 msgid "Using temporary file `%s' to read preprocessor output\n"
-msgstr "Udnytter temporærfil \"%s\" til at læse præprocessoruddata\n"
+msgstr "Udnytter temporær fil \"%s\" til at læse præprocessoruddata\n"
 
 #: resrc.c:324
 #, c-format
@@ -4430,7 +4421,7 @@ msgstr "kan ikke kalde popen \"%s\": %s"
 
 #: resrc.c:326
 msgid "Using popen to read preprocessor output\n"
-msgstr "Bruger popen til at læse uddata fra præprocessorn\n"
+msgstr "Bruger popen til at læse uddata fra præprocessoren\n"
 
 #: resrc.c:369
 #, c-format
@@ -4474,7 +4465,7 @@ msgstr "%s: fseek til %lu mislykkedes: %s"
 
 #: resrc.c:872
 msgid "help ID requires DIALOGEX"
-msgstr "hjælp-ID kræver DIALOGEX"
+msgstr "hjælpe-ID kræver DIALOGEX"
 
 #: resrc.c:874
 msgid "control data requires DIALOGEX"
@@ -4483,12 +4474,12 @@ msgstr "kontroldata kræver DIALOGEX"
 #: resrc.c:1017
 #, c-format
 msgid "icon file `%s' does not contain icon data"
-msgstr "ikon-fil \"%s\" indeholder ikke ikonddata"
+msgstr "ikon-fil \"%s\" indeholder ikke ikondata"
 
 #: resrc.c:1536
 #, c-format
 msgid "can't open `%s' for output: %s"
-msgstr "kan ikke åbne \"%s\" for udskivning: %s"
+msgstr "kan ikke åbne \"%s\" for udskrivning: %s"
 
 #: size.c:86
 msgid " Displays the sizes of sections inside binary files\n"
@@ -4579,7 +4570,7 @@ msgstr "ukendt krydsreferencetype"
 #. about dealing with it rather than just calling error_type?
 #: stabs.c:1851
 msgid "missing index type"
-msgstr "manglende indextype"
+msgstr "manglende indekstype"
 
 #: stabs.c:2178
 msgid "unknown virtual character for baseclass"
@@ -4619,12 +4610,12 @@ msgstr "Udefineret N_EXCL"
 #: stabs.c:3371
 #, c-format
 msgid "Type file number %d out of range\n"
-msgstr "Typens filnummer %d udenfor sit interval\n"
+msgstr "Typens filnummer %d uden for sit interval\n"
 
 #: stabs.c:3376
 #, c-format
 msgid "Type index number %d out of range\n"
-msgstr "Typens indexnummer %d udenfor sit interval\n"
+msgstr "Typens indeksnummer %d uden for sit interval\n"
 
 #: stabs.c:3463
 #, c-format
@@ -4688,9 +4679,8 @@ msgid "cannot open input file %s"
 msgstr "kan ikke åbne inddatafil %s"
 
 #: version.c:35
-#, fuzzy
 msgid "Copyright 2002 Free Software Foundation, Inc.\n"
-msgstr "Copyright 2001 Free Software Foundation, Inc.\n"
+msgstr "Copyright 2002 Free Software Foundation, Inc.\n"
 
 #: version.c:36
 msgid ""
@@ -4698,7 +4688,7 @@ msgid ""
 "the GNU General Public License.  This program has absolutely no warranty.\n"
 msgstr ""
 "Dette program er frit programmel; du kan distribuere det videre under betingelserne\n"
-"i GNU General Public License.  Dette program har ingen som helst garantier.\n"
+"i GNU General Public License. Dette program har ingen som helst garantier.\n"
 
 #: windres.c:239
 #, c-format
@@ -4707,11 +4697,11 @@ msgstr "kan ikke åbne %s \"%s\": %s"
 
 #: windres.c:418
 msgid ": expected to be a directory\n"
-msgstr ": forventedes være et katalog\n"
+msgstr ": forventedes at være et katalog\n"
 
 #: windres.c:430
 msgid ": expected to be a leaf\n"
-msgstr ": forventedes være et blad\n"
+msgstr ": forventedes at være et blad\n"
 
 #: windres.c:439
 #, c-format
@@ -4730,7 +4720,7 @@ msgstr "ukendt formattype \"%s\""
 #: windres.c:603
 #, c-format
 msgid "%s: supported formats:"
-msgstr "%s: format som håndteres:"
+msgstr "%s: formater som håndteres:"
 
 #. Otherwise, we give up.
 #: windres.c:688
@@ -4741,7 +4731,7 @@ msgstr "kan ikke bestemme \"%s\"'s filtype; brug flag -I"
 #: windres.c:702
 #, fuzzy, c-format
 msgid "Usage: %s [option(s)] [input-file] [output-file]\n"
-msgstr "Brug: %s [flag] [in-fil] [ut-fil]\n"
+msgstr "Brug: %s [flag] [in-fil] [ud-fil]\n"
 
 #: windres.c:704
 #, fuzzy
@@ -4762,22 +4752,22 @@ msgid ""
 "     --no-use-temp-file        Use popen (default)\n"
 msgstr ""
 "Flag:\n"
-"  -i FIL, --input FIL         Navnge inddatafilen\n"
-"  -o FIL, --output FIL        Navnge uddatafilen\n"
+"  -i FIL, --input FIL         Navngiv inddatafilen\n"
+"  -o FIL, --output FIL        Navngiv uddatafilen\n"
 "  -I FORMAT, --input-format FORMAT\n"
-"                              Specificere inddataformatet\n"
+"                              Specificér inddataformatet\n"
 "  -O FORMAT, --output-format FORMAT\n"
-"                              Specificere uddataformatet\n"
-"  -F MÅL, --target MÅL        Specificere COFF-målet\n"
-"  --preprocessor PROGRAM      Program at bruge som preprocessor på rc-filen\n"
-"  --include-dir KATALOG       Inkludere katalog når rc-filen preprocessas\n"
-"  -DSYM[=VÆRDE], --define SYM[=VÆRDE]\n"
-"                              Definere SYM når rc-filen preporocessas\n"
-"  -v                          Utforlig - beretter vad den gør\n"
-"  --language SPROG            Sætt sproget når rc-filen læses\n"
+"                              Specificér uddataformatet\n"
+"  -F MÅL, --target MÅL        Specificér COFF-målet\n"
+"  --preprocessor PROGRAM      Program at bruge som præprocessor på rc-filen\n"
+"  --include-dir KATALOG       Inkludér katalog når rc-filen præprocesses\n"
+"  -DSYM[=VÆRDI], --define SYM[=VÆRDI]\n"
+"                              Definér SYM når rc-filen præprocesses\n"
+"  -v                          Udførlig - beretter vad den gør\n"
+"  --language SPROG            Sæt sproget når rc-filen læses\n"
 "  --use-temp-file             Brug en tem.fil i stedet for popen ved læsning\n"
-"                              af uddata fra preprocessorn\n"
-"  --no-use-temp-file          Brug popen (forval)\n"
+"                              af uddata fra præprocessoren\n"
+"  --no-use-temp-file          Brug popen (standard)\n"
 
 #: windres.c:719
 msgid "     --yydebug                 Turn on parser debugging\n"
@@ -4798,7 +4788,7 @@ msgid ""
 "No input-file is stdin, default rc.  No output-file is stdout, default rc.\n"
 msgstr ""
 "FORMAT er én af rc, res eller coff, og afledes fra filnavnsendelsen\n"
-"hvis det ikke specificeres. Et enketl filnavn er en inddatafil.  Ingen\n"
+"hvis det ikke specificeres. Et enkelt filnavn er en inddatafil.  Ingen\n"
 "inddatafil betyder standard-ind, med format rc. Ingen uddatafil betyder\n"
 "standard-ud, med format rc.\n"
 

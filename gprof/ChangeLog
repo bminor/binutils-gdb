@@ -1,3 +1,9 @@
+2002-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add da.
+	* configure: Regenerate.
+	* po/da.po: New Danish translation.
+
 2002-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* gprof.c (main): Turn off default excluded functions in FLAT

@@ -1,3 +1,7 @@
+2002-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2002-11-12  Klee Dienes  <kdienes@apple.com>
 
 	* rddbg.c (read_section_stabs_debugging_info): Also recognize
@@ -14,7 +18,7 @@
 
 2002-11-07  Nick Clifton  <nickc@redhat.com>
 
-	* configure.in (LINGUAS): Add 'da'.
+	* configure.in (ALL_LINGUAS): Add 'da'.
 	* configure: Regenerate.
 	* po/da.po: New Danish translation.
 
