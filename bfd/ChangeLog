@@ -1,3 +1,8 @@
+Wed Oct 25 23:10:39 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.bfd (powerpc{,le}-{elf,sysv4,eabi,solaris2}): Remove MAC
+	format for now.
+
 Wed Oct 25 16:19:27 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_slurp_string_table): Allocate the strings with malloc
