@@ -176,37 +176,43 @@ de-stage3: force
 ######################################################################
 # DOCUMENTATION TARGETS
 # TeX output
-binutils.dvi: binutils.texinfo
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex binutils.texinfo
+binutils.dvi: $(srcdir)/binutils.texi
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/binutils.texi
 	texindex binutils.??
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex binutils.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/binutils.texi
 
 # info file for online browsing
-binutils.info: binutils.texinfo
-	makeinfo binutils.texinfo
+binutils.info: $(srcdir)/binutils.texi
+	makeinfo -o binutils.info $(srcdir)/binutils.texi
 
 #   different targets for -ms, -mm, -me
 #   (we don't use a variable because we don't trust all makes to handle
 #   a var in the target name right).
 # roff output (-ms)
-binutils.ms: binutils.texinfo
+binutils.ms: $(srcdir)/binutils.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
-		binutils.texinfo | \
+		-e 's/{.*,,/{/' \
+		$(srcdir)/binutils.texi | \
 	texi2roff -ms >binutils.ms 
 
 # roff output (-mm)
-binutils.mm: binutils.texinfo
+binutils.mm: $(srcdir)/binutils.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
-		binutils.texinfo | \
-	texi2roff -mm >binutils.mm 
+		-e 's/{.*,,/{/' \
+		-e '/@noindent/d' \
+		$(srcdir)/binutils.texi | \
+	texi2roff -mm | \
+	sed -e 's/---/\\(em/g' \
+		>binutils.mm
 
 # roff output (-me)
-binutils.me: binutils.texinfo
+binutils.me: $(srcdir)/binutils.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
-		binutils.texinfo | \
+		-e 's/{.*,,/{/' \
+		$(srcdir)/binutils.texi | \
 	texi2roff -me >binutils.me 
 
 
