@@ -1,3 +1,10 @@
+Thu Sep  9 04:59:03 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mipsread.c (cross_ref):  Allow SGI extended symbol types as cross
+	reference targets.
+	* symmisc.c (print_symbol):  Use TYP_TAG_NAME not TYPE_NAME to avoid
+	printing of identities.
+
 Wed Sep  8 19:18:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c (breakpoint_1): Deal with step resume breakpoint.
