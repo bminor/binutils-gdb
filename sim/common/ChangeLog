@@ -1,3 +1,7 @@
+Thu Jun  5 13:48:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* nrun.c (main): Verify the structure returned before using it.
+
 Wed Jun  4 11:44:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-config.h (WITH_ENGINE): Enable the sim-engine module by
