@@ -27,9 +27,11 @@
 #include "libiberty.h"
 #include "windres.h"
 
-/* The current language.  The default is U.S. English.  */
+#include <ctype.h>
 
-static unsigned short language = 0x409;
+/* The current language.  */
+
+static unsigned short language;
 
 /* The resource information during a sub statement.  */
 
@@ -60,7 +62,12 @@ static unsigned long class;
   struct accelerator *pacc;
   struct dialog_control *dialog_control;
   struct menuitem *menuitem;
-  struct rcdata_data *rcdata;
+  struct
+  {
+    struct rcdata_item *first;
+    struct rcdata_item *last;
+  } rcdata;
+  struct rcdata_item *rcdata_item;
   struct stringtable_data *stringtable;
   struct fixed_versioninfo *fixver;
   struct ver_info *verinfo;
@@ -81,7 +88,12 @@ static unsigned long class;
   } i;
   unsigned long il;
   unsigned short is;
-  char *s;
+  const char *s;
+  struct
+  {
+    unsigned long length;
+    const char *s;
+  } ss;
 };
 
 %token BEG END
@@ -109,12 +121,14 @@ static unsigned long class;
 %token NOT
 %token <s> QUOTEDSTRING STRING
 %token <i> NUMBER
+%token <ss> SIZEDSTRING
 
 %type <pacc> acc_entries
 %type <acc> acc_entry acc_event
 %type <dialog_control> control control_params
 %type <menuitem> menuitems menuitem menuexitems menuexitem
-%type <rcdata> optrcdata_data rcdata_data opt_control_data
+%type <rcdata> optrcdata_data optrcdata_data_int rcdata_data
+%type <rcdata_item> opt_control_data
 %type <fixver> fixedverinfo
 %type <verinfo> verblocks
 %type <verstring> vervals
@@ -139,20 +153,27 @@ static unsigned long class;
 
 input:
 	  /* empty */
-	| input accelerator
-	| input bitmap
-	| input cursor
-	| input dialog
-	| input font
-	| input icon
-	| input language
-	| input menu
-	| input menuex
-	| input messagetable
-	| input rcdata
-	| input stringtable
-	| input user
-	| input versioninfo
+	| input newcmd accelerator
+	| input newcmd bitmap
+	| input newcmd cursor
+	| input newcmd dialog
+	| input newcmd font
+	| input newcmd icon
+	| input newcmd language
+	| input newcmd menu
+	| input newcmd menuex
+	| input newcmd messagetable
+	| input newcmd rcdata
+	| input newcmd stringtable
+	| input newcmd user
+	| input newcmd versioninfo
+	;
+
+newcmd:
+	  /* empty */
+	  {
+	    rcparse_discard_strings ();
+	  }
 	;
 
 /* Accelerator resources.  */
@@ -173,7 +194,7 @@ acc_entries:
 	  {
 	    struct accelerator *a;
 
-	    a = (struct accelerator *) xmalloc (sizeof *a);
+	    a = (struct accelerator *) res_alloc (sizeof *a);
 	    *a = $2;
 	    if ($1 == NULL)
 	      $$ = a;
@@ -206,7 +227,7 @@ acc_entry:
 acc_event:
 	  QUOTEDSTRING
 	  {
-	    char *s = $1;
+	    const char *s = $1;
 
 	    $$.id = 0;
 	    if (*s != '^')
@@ -219,7 +240,6 @@ acc_event:
 	    $$.key = *s;
 	    if (s[1] != '\0')
 	      rcparse_warning ("accelerator should only be one character");
-	    free (s);
 	  }
 	| posnumexpr
 	  {
@@ -274,7 +294,6 @@ bitmap:
 	  id BITMAP memflags_move file_name
 	  {
 	    define_bitmap ($1, &$3, $4);
-	    free ($4);
 	  }
 	;
 
@@ -284,7 +303,6 @@ cursor:
 	  id CURSOR memflags_move_discard file_name
 	  {
 	    define_cursor ($1, &$3, $4);
-	    free ($4);
 	  }
 	;
 
@@ -322,7 +340,7 @@ dialog:
 	      dialog.exstyle = $4;
 	      dialog.font = NULL;
 	      dialog.ex = ((struct dialog_ex *)
-			   xmalloc (sizeof (struct dialog_ex)));
+			   res_alloc (sizeof (struct dialog_ex)));
 	      memset (dialog.ex, 0, sizeof (struct dialog_ex));
 	      dialog.controls = NULL;
 	      sub_res_info = $3;
@@ -343,7 +361,7 @@ dialog:
 	      dialog.exstyle = $4;
 	      dialog.font = NULL;
 	      dialog.ex = ((struct dialog_ex *)
-			   xmalloc (sizeof (struct dialog_ex)));
+			   res_alloc (sizeof (struct dialog_ex)));
 	      memset (dialog.ex, 0, sizeof (struct dialog_ex));
 	      dialog.ex->help = $9;
 	      dialog.controls = NULL;
@@ -370,7 +388,7 @@ styles:
 	  /* empty */
 	| styles CAPTION QUOTEDSTRING
 	  {
-	    dialog.caption = $3;
+	    unicode_from_ascii ((int *) NULL, &dialog.caption, $3);
 	  }
 	| styles CLASS id
 	  {
@@ -389,12 +407,12 @@ styles:
 	| styles FONT numexpr ',' QUOTEDSTRING
 	  {
 	    dialog.pointsize = $3;
-	    dialog.font = $5;
+	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
 	  }
 	| styles FONT numexpr ',' QUOTEDSTRING cnumexpr cnumexpr
 	  {
 	    dialog.pointsize = $3;
-	    dialog.font = $5;
+	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
 	    if (dialog.ex == NULL)
 	      rcparse_warning ("extended FONT requires DIALOGEX");
 	    else
@@ -766,7 +784,7 @@ opt_control_data:
 	  }
 	| BEG optrcdata_data END
 	  {
-	    $$ = $2;
+	    $$ = $2.first;
 	  }
 	;
 
@@ -796,7 +814,6 @@ font:
 	  id FONT memflags_move_discard file_name
 	  {
 	    define_font ($1, &$3, $4);
-	    free ($4);
 	  }
 	;
 
@@ -806,7 +823,6 @@ icon:
 	  id ICON memflags_move_discard file_name
 	  {
 	    define_icon ($1, &$3, $4);
-	    free ($4);
 	  }
 	;
 
@@ -975,7 +991,6 @@ messagetable:
 	  id MESSAGETABLE memflags_move file_name
 	  {
 	    define_messagetable ($1, &$3, $4);
-	    free ($4);
 	  }
 	;
 
@@ -984,14 +999,29 @@ messagetable:
 rcdata:
 	  id RCDATA suboptions BEG optrcdata_data END
 	  {
-	    define_rcdata ($1, &$3, $5);
+	    define_rcdata ($1, &$3, $5.first);
 	  }
 	;
 
+/* We use a different lexing algorithm, because rcdata strings may
+   contain embedded null bytes, and we need to know the length to use.  */
+
 optrcdata_data:
+	  {
+	    rcparse_rcdata ();
+	  }
+	  optrcdata_data_int
+	  {
+	    rcparse_normal ();
+	    $$ = $2;
+	  }
+	;
+
+optrcdata_data_int:
 	  /* empty */
 	  {
-	    $$ = NULL;
+	    $$.first = NULL;
+	    $$.last = NULL;
 	  }
 	| rcdata_data
 	  {
@@ -1000,21 +1030,39 @@ optrcdata_data:
 	;
 
 rcdata_data:
-	  QUOTEDSTRING
+	  SIZEDSTRING
 	  {
-	    $$ = append_rcdata_string (NULL, $1);
+	    struct rcdata_item *ri;
+
+	    ri = define_rcdata_string ($1.s, $1.length);
+	    $$.first = ri;
+	    $$.last = ri;
 	  }
 	| sizednumexpr
 	  {
-	    $$ = append_rcdata_number (NULL, $1.val, $1.dword);
+	    struct rcdata_item *ri;
+
+	    ri = define_rcdata_number ($1.val, $1.dword);
+	    $$.first = ri;
+	    $$.last = ri;
 	  }
-	| rcdata_data ',' QUOTEDSTRING
+	| rcdata_data ',' SIZEDSTRING
 	  {
-	    $$ = append_rcdata_string ($1, $3);
+	    struct rcdata_item *ri;
+
+	    ri = define_rcdata_string ($3.s, $3.length);
+	    $$.first = $1.first;
+	    $1.last->next = ri;
+	    $$.last = ri;
 	  }
 	| rcdata_data ',' sizednumexpr
 	  {
-	    $$ = append_rcdata_number ($1, $3.val, $3.dword);
+	    struct rcdata_item *ri;
+
+	    ri = define_rcdata_number ($3.val, $3.dword);
+	    $$.first = $1.first;
+	    $1.last->next = ri;
+	    $$.last = ri;
 	  }
 	;
 
@@ -1042,14 +1090,13 @@ string_data:
    file_name case to keep the parser happy.  */
 
 user:
-	  id id suboptions BEG rcdata_data END
+	  id id suboptions BEG optrcdata_data END
 	  {
-	    define_user_data ($1, $2, &$3, $5);
+	    define_user_data ($1, $2, &$3, $5.first);
 	  }
 	| id id suboptions file_name
 	  {
 	    define_user_file ($1, $2, &$3, $4);
-	    free ($4);
 	  }
 	;
 
@@ -1066,7 +1113,7 @@ fixedverinfo:
 	  /* empty */
 	  {
 	    $$ = ((struct fixed_versioninfo *)
-		  xmalloc (sizeof (struct fixed_versioninfo)));
+		  res_alloc (sizeof (struct fixed_versioninfo)));
 	    memset ($$, 0, sizeof (struct fixed_versioninfo));
 	  }
 	| fixedverinfo FILEVERSION numexpr cnumexpr cnumexpr cnumexpr
@@ -1161,8 +1208,15 @@ id:
 	  }
 	| STRING
 	  {
-	    res_string_to_id (&$$, $1);
-	    free ($1);
+	    char *copy, *s;
+
+	    /* It seems that resource ID's are forced to upper case.  */
+	    copy = xstrdup ($1);
+	    for (s = copy; *s != '\0'; s++)
+	      if (islower (*s))
+		*s = toupper (*s);
+	    res_string_to_id (&$$, copy);
+	    free (copy);
 	  }
 	;
 

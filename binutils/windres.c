@@ -39,6 +39,7 @@
 #include "getopt.h"
 #include "bucomm.h"
 #include "libiberty.h"
+#include "obstack.h"
 #include "windres.h"
 
 #include <assert.h>
@@ -127,9 +128,62 @@ static const struct option long_options[] =
 
 /* Static functions.  */
 
+static void res_init PARAMS ((void));
+static int extended_menuitems PARAMS ((const struct menuitem *));
 static enum res_format format_from_name PARAMS ((const char *));
 static enum res_format format_from_filename PARAMS ((const char *, int));
 static void usage PARAMS ((FILE *, int));
+static int cmp_res_entry PARAMS ((const PTR, const PTR));
+static struct res_directory *sort_resources PARAMS ((struct res_directory *));
+
+/* When we are building a resource tree, we allocate everything onto
+   an obstack, so that we can free it all at once if we want.  */
+
+#define obstack_chunk_alloc xmalloc
+#define obstack_chunk_free free
+
+/* The resource building obstack.  */
+
+static struct obstack res_obstack;
+
+/* Initialize the resource building obstack.  */
+
+static void
+res_init ()
+{
+  obstack_init (&res_obstack);
+}
+
+/* Allocate space on the resource building obstack.  */
+
+PTR
+res_alloc (bytes)
+     size_t bytes;
+{
+  return (PTR) obstack_alloc (&res_obstack, bytes);
+}
+
+/* We also use an obstack to save memory used while writing out a set
+   of resources.  */
+
+static struct obstack reswr_obstack;
+
+/* Initialize the resource writing obstack.  */
+
+static void
+reswr_init ()
+{
+  obstack_init (&reswr_obstack);
+}
+
+/* Allocate space on the resource writing obstack.  */
+
+PTR
+reswr_alloc (bytes)
+     size_t bytes;
+{
+  return (PTR) obstack_alloc (&reswr_obstack, bytes);
+}
 
 /* Open a file using the include directory search list.  */
 
@@ -183,8 +237,8 @@ open_file_search (filename, mode, errmsg, real_filename)
 
 void
 unicode_from_ascii (length, unicode, ascii)
-     unsigned short *length;
-     unsigned short **unicode;
+     int *length;
+     unichar **unicode;
      const char *ascii;
 {
   int len;
@@ -194,13 +248,9 @@ unicode_from_ascii (length, unicode, ascii)
   len = strlen (ascii);
 
   if (length != NULL)
-    {
-      if (len > 0xffff)
-	fatal ("string too long (%d chars > 0xffff)", len);
-      *length = len;
-    }
+    *length = len;
 
-  *unicode = (unsigned short *) xmalloc ((len + 1) * sizeof (unsigned short));
+  *unicode = ((unichar *) res_alloc ((len + 1) * sizeof (unichar)));
 
   for (s = ascii, w = *unicode; *s != '\0'; s++, w++)
     *w = *s & 0xff;
@@ -214,12 +264,12 @@ unicode_from_ascii (length, unicode, ascii)
 void
 unicode_print (e, unicode, length)
      FILE *e;
-     const unsigned short *unicode;
+     const unichar *unicode;
      int length;
 {
   while (1)
     {
-      unsigned short ch;
+      unichar ch;
 
       if (length == 0)
 	return;
@@ -228,7 +278,7 @@ unicode_print (e, unicode, length)
 
       ch = *unicode;
 
-      if (ch == 0)
+      if (ch == 0 && length < 0)
 	return;
 
       ++unicode;
@@ -264,7 +314,7 @@ res_id_cmp (a, b)
     }
   else
     {
-      unsigned short *as, *ase, *bs, *bse;
+      unichar *as, *ase, *bs, *bse;
 
       if (! b.named)
 	return -1;
@@ -368,7 +418,8 @@ define_resource (resources, cids, ids, dupok)
 
       if (*resources == NULL)
 	{
-	  *resources = (struct res_directory *) xmalloc (sizeof **resources);
+	  *resources = ((struct res_directory *)
+			res_alloc (sizeof **resources));
 	  (*resources)->characteristics = 0;
 	  (*resources)->time = 0;
 	  (*resources)->major = 0;
@@ -384,7 +435,7 @@ define_resource (resources, cids, ids, dupok)
 	re = *pp;
       else
 	{
-	  re = (struct res_entry *) xmalloc (sizeof *re);
+	  re = (struct res_entry *) res_alloc (sizeof *re);
 	  re->next = NULL;
 	  re->id = ids[i];
 	  if ((i + 1) < cids)
@@ -433,7 +484,8 @@ define_resource (resources, cids, ids, dupok)
       fprintf (stderr, ": duplicate value\n");
     }
 
-  re->u.res = (struct res_resource *) xmalloc (sizeof (struct res_resource));
+  re->u.res = ((struct res_resource *)
+	       res_alloc (sizeof (struct res_resource)));
 
   re->u.res->type = RES_TYPE_UNINITIALIZED;
   memset (&re->u.res->res_info, 0, sizeof (struct res_res_info));
@@ -462,6 +514,62 @@ define_standard_resource (resources, type, name, language, dupok)
   a[2].u.id = language;
   return define_resource (resources, 3, a, dupok);
 }
+
+/* Comparison routine for resource sorting.  */
+
+static int
+cmp_res_entry (p1, p2)
+     const PTR p1;
+     const PTR p2;
+{
+  const struct res_entry **re1, **re2;
+
+  re1 = (const struct res_entry **) p1;
+  re2 = (const struct res_entry **) p2;
+  return res_id_cmp ((*re1)->id, (*re2)->id);
+}
+
+/* Sort the resources.  */
+
+static struct res_directory *
+sort_resources (resdir)
+     struct res_directory *resdir;
+{
+  int c, i;
+  struct res_entry *re;
+  struct res_entry **a;
+
+  if (resdir->entries == NULL)
+    return resdir;
+
+  c = 0;
+  for (re = resdir->entries; re != NULL; re = re->next)
+    ++c;
+
+  /* This is a recursive routine, so using xmalloc is probably better
+     than alloca.  */
+  a = (struct res_entry **) xmalloc (c * sizeof (struct res_entry *));
+
+  for (i = 0, re = resdir->entries; re != NULL; re = re->next, i++)
+    a[i] = re;
+
+  qsort (a, c, sizeof (struct res_entry *), cmp_res_entry);
+
+  resdir->entries = a[0];
+  for (i = 0; i < c - 1; i++)
+    a[i]->next = a[i + 1];
+  a[i]->next = NULL;
+
+  free (a);
+
+  /* Now sort the subdirectories.  */
+
+  for (re = resdir->entries; re != NULL; re = re->next)
+    if (re->subdir)
+      re->u.dir = sort_resources (re->u.dir);
+
+  return resdir;
+}
 
 /* Return whether the dialog resource DIALOG is a DIALOG or a
    DIALOGEX.  */
@@ -485,7 +593,14 @@ extended_dialog (dialog)
 /* Return whether MENUITEMS are a MENU or a MENUEX.  */
 
 int
-extended_menu (menuitems)
+extended_menu (menu)
+     const struct menu *menu;
+{
+  return extended_menuitems (menu->items);
+}
+
+static int
+extended_menuitems (menuitems)
      const struct menuitem *menuitems;
 {
   const struct menuitem *mi;
@@ -507,7 +622,7 @@ extended_menu (menuitems)
 	return 1;
       if (mi->popup != NULL)
 	{
-	  if (extended_menu (mi->popup))
+	  if (extended_menuitems (mi->popup))
 	    return 1;
 	}
     }
@@ -685,6 +800,8 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
+  res_init ();
+
   input_filename = NULL;
   output_filename = NULL;
   input_format = RES_FORMAT_UNKNOWN;
@@ -843,7 +960,14 @@ main (argc, argv)
       break;
     }
 
+  /* Sort the resources.  This is required for COFF, convenient for
+     rc, and unimportant for res.  */
+
+  resources = sort_resources (resources);
+
   /* Write the output file.  */
+
+  reswr_init ();
 
   switch (output_format)
     {
@@ -878,13 +1002,4 @@ write_res_file (filename, resources)
      const struct res_directory *resources;
 {
   fatal ("write_res_file unimplemented");
-}
-
-void
-write_coff_file (filename, target, resources)
-     const char *filename;
-     const char *target;
-     const struct res_directory *resources;
-{
-  fatal ("write_coff_file unimplemented");
 }

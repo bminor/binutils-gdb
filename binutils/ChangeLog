@@ -1,3 +1,12 @@
+Wed Jun 25 20:57:06 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* resbin.c: New file.
+	* rclex.l, rcparse.y, rescoff.c, resrc.c, windres.c, windres.h:
+	Numerous fixes and improvements.
+	* Makefile.in: Rebuild dependencies.
+ 	(CFILES): Add resbin.c.
+	(WINDRES_OBJS): Add resbin.o.
+
 Sun Jun 22 17:29:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	First stab at Windows resource compiler:

@@ -32,8 +32,26 @@
 #include <ctype.h>
 #include <assert.h>
 
+/* Whether we are in rcdata mode, in which we returns the lengths of
+   strings.  */
+
+static int rcdata_mode;
+
+/* List of allocated strings.  */
+
+struct alloc_string
+{
+  struct alloc_string *next;
+  char *s;
+};
+
+static struct alloc_string *strings;
+
+/* Local functions.  */
+
 static void cpp_line PARAMS ((const char *));
-static char *handle_quotes PARAMS ((const char *));
+static char *handle_quotes PARAMS ((const char *, unsigned long *));
+static char *get_string PARAMS ((int));
 
 %}
 
@@ -133,9 +151,12 @@ static char *handle_quotes PARAMS ((const char *));
 			    return BLOCKVARFILEINFO;
 			  else
 			    {
-			      yylval.s = (char *) xmalloc (send - s + 1);
-			      strncpy (yylval.s, s, send - s);
-			      yylval.s[send - s] = '\0';
+			      char *r;
+
+			      r = get_string (send - s + 1);
+			      strncpy (r, s, send - s);
+			      r[send - s] = '\0';
+			      yylval.s = r;
 			      return BLOCK;
 			    }
 			}
@@ -157,12 +178,29 @@ static char *handle_quotes PARAMS ((const char *));
 			}
 
 ("\""[^\"\n]*"\""[ \t]*)+ {
-			  yylval.s = handle_quotes (yytext);
-			  return QUOTEDSTRING;
+			  char *s;
+			  unsigned long length;
+
+			  s = handle_quotes (yytext, &length);
+			  if (! rcdata_mode)
+			    {
+			      yylval.s = s;
+			      return QUOTEDSTRING;
+			    }
+			  else
+			    {
+			      yylval.ss.length = length;
+			      yylval.ss.s = s;
+			      return SIZEDSTRING;
+			    }
 			}
 
 [A-Za-z][^ \t\r\n]*	{
-			  yylval.s = xstrdup (yytext);
+			  char *s;
+
+			  s = get_string (strlen (yytext) + 1);
+			  strcpy (s, yytext);
+			  yylval.s = s;
 			  return STRING;
 			}
 
@@ -224,14 +262,15 @@ cpp_line (s)
    merged separated by whitespace are merged, as in C.  */
 
 static char *
-handle_quotes (input)
+handle_quotes (input, len)
      const char *input;
+     unsigned long *len;
 {
   char *ret, *s;
   const char *t;
   int ch;
 
-  ret = (char *) xmalloc (strlen (input) + 1);
+  ret = get_string (strlen (input) + 1);
 
   s = ret;
   t = input;
@@ -316,5 +355,62 @@ handle_quotes (input)
 
   *s = '\0';
 
+  *len = s - ret;
+
   return ret;
+}
+
+/* Allocate a string of a given length.  */
+
+static char *
+get_string (len)
+     int len;
+{
+  struct alloc_string *as;
+
+  as = (struct alloc_string *) xmalloc (sizeof *as);
+  as->s = xmalloc (len);
+
+  as->next = strings;
+  strings = as->next;
+
+  return as->s;
+}
+
+/* Discard all the strings we have allocated.  The parser calls this
+   when it no longer needs them.  */
+
+void
+rcparse_discard_strings ()
+{
+  struct alloc_string *as;
+
+  as = strings;
+  while (as != NULL)
+    {
+      struct alloc_string *n;
+
+      free (as->s);
+      n = as->next;
+      free (as);
+      as = n;
+    }
+
+  strings = NULL;
+}
+
+/* Enter rcdata mode.  */
+
+void
+rcparse_rcdata ()
+{
+  rcdata_mode = 1;
+}
+
+/* Go back to normal mode from rcdata mode.  */
+
+void
+rcparse_normal ()
+{
+  rcdata_mode = 0;
 }

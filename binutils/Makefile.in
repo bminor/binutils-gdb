@@ -138,7 +138,7 @@ CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	maybe-strip.c nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
 	stabs.c strings.c sysdump.c version.c wrstabs.c \
-	windres.c resrc.c rescoff.c
+	windres.c resrc.c rescoff.c resbin.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
@@ -409,7 +409,7 @@ nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_DEPS)
 	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
 
-WINDRES_OBJS = windres.o resrc.o rescoff.o rcparse.o rclex.o
+WINDRES_OBJS = windres.o resrc.o rescoff.o resbin.o rcparse.o rclex.o
 
 $(WINDRES_PROG): $(WINDRES_OBJS) $(ADDL_DEPS)
 	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(WINDRES_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
@@ -762,7 +762,7 @@ wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/aout/stab.def
 windres.o: windres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/getopt.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h windres.h
+  $(INCDIR)/libiberty.h $(INCDIR)/obstack.h windres.h
 resrc.o: resrc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h
@@ -770,6 +770,9 @@ rescoff.o: rescoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h
+resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  windres.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
