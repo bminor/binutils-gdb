@@ -1,4 +1,4 @@
-This is bfd.info, produced by makeinfo version 4.0f from bfd.texinfo.
+This is bfd.info, produced by makeinfo version 4.1 from bfd.texinfo.
 
 START-INFO-DIR-ENTRY
 * Bfd: (bfd).                   The Binary File Descriptor library.
@@ -14,6 +14,95 @@ END-INFO-DIR-ENTRY
    with no Invariant Sections, with no Front-Cover Texts, and with no
     Back-Cover Texts.  A copy of the license is included in the
 section entitled "GNU Free Documentation License".
+
+
+File: bfd.info,  Node: File Caching,  Next: Linker Functions,  Prev: Internal,  Up: BFD front end
+
+File caching
+============
+
+   The file caching mechanism is embedded within BFD and allows the
+application to open as many BFDs as it wants without regard to the
+underlying operating system's file descriptor limit (often as low as 20
+open files).  The module in `cache.c' maintains a least recently used
+list of `BFD_CACHE_MAX_OPEN' files, and exports the name
+`bfd_cache_lookup', which runs around and makes sure that the required
+BFD is open. If not, then it chooses a file to close, closes it and
+opens the one wanted, returning its file handle.
+
+`BFD_CACHE_MAX_OPEN macro'
+..........................
+
+   *Description*
+The maximum number of files which the cache will keep open at one time.
+     #define BFD_CACHE_MAX_OPEN 10
+
+`bfd_last_cache'
+................
+
+   *Synopsis*
+     extern bfd *bfd_last_cache;
+   *Description*
+Zero, or a pointer to the topmost BFD on the chain.  This is used by
+the `bfd_cache_lookup' macro in `libbfd.h' to determine when it can
+avoid a function call.
+
+`bfd_cache_lookup'
+..................
+
+   *Description*
+Check to see if the required BFD is the same as the last one looked up.
+If so, then it can use the stream in the BFD with impunity, since it
+can't have changed since the last lookup; otherwise, it has to perform
+the complicated lookup function.
+     #define bfd_cache_lookup(x) \
+         ((x)==bfd_last_cache? \
+           (FILE*) (bfd_last_cache->iostream): \
+            bfd_cache_lookup_worker(x))
+
+`bfd_cache_init'
+................
+
+   *Synopsis*
+     boolean bfd_cache_init (bfd *abfd);
+   *Description*
+Add a newly opened BFD to the cache.
+
+`bfd_cache_close'
+.................
+
+   *Synopsis*
+     boolean bfd_cache_close (bfd *abfd);
+   *Description*
+Remove the BFD ABFD from the cache. If the attached file is open, then
+close it too.
+
+   *Returns*
+`false' is returned if closing the file fails, `true' is returned if
+all is well.
+
+`bfd_open_file'
+...............
+
+   *Synopsis*
+     FILE* bfd_open_file(bfd *abfd);
+   *Description*
+Call the OS to open a file for ABFD.  Return the `FILE *' (possibly
+`NULL') that results from this operation.  Set up the BFD so that
+future accesses know the file is open. If the `FILE *' returned is
+`NULL', then it won't have been put in the cache, so it won't have to
+be removed from it.
+
+`bfd_cache_lookup_worker'
+.........................
+
+   *Synopsis*
+     FILE *bfd_cache_lookup_worker(bfd *abfd);
+   *Description*
+Called when the macro `bfd_cache_lookup' fails to find a quick answer.
+Find a file descriptor for ABFD.  If necessary, it open it.  If there
+are already more than `BFD_CACHE_MAX_OPEN' files open, it tries to
+close one first, to avoid running out of file descriptors.
 
 
 File: bfd.info,  Node: Linker Functions,  Next: Hash Tables,  Prev: File Caching,  Up: BFD front end
