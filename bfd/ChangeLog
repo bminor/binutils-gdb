@@ -1,3 +1,8 @@
+Thu Jul 23 13:33:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* elf64-mips.c (mips_elf64_reloc_type): #if 0 out more relocations
+	as they are defined in elf/mips.h now.
+
 Thu Jul 23 11:29:43 1998  Jeffrey A Law  (law@cygnus.com)
 
 start-sanitize-am33

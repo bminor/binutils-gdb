@@ -100,7 +100,6 @@ enum mips_elf64_reloc_type
   R_MIPS_CALL16 = 11,
   R_MIPS_CALL = 11,
   R_MIPS_GPREL32 = 12,
-#endif
   R_MIPS_SHIFT5 = 16,
   R_MIPS_SHIFT6 = 17,
   R_MIPS_64 = 18,
@@ -117,6 +116,7 @@ enum mips_elf64_reloc_type
   R_MIPS_HIGHEST = 29,
   R_MIPS_CALL_HI16 = 30,
   R_MIPS_CALL_LO16 = 31,
+#endif
   R_MIPS_SCN_DISP = 32,
   R_MIPS_REL16 = 33,
   R_MIPS_ADD_IMMEDIATE = 34,
