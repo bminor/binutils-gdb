@@ -1,11 +1,6 @@
 2003-06-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Deprecate
-	SAVE_DUMMY_FRAME_TOS.  Update description of "unwind_dummy_id".
-
-2003-06-13  Andrew Cagney  <cagney@redhat.com>
-
-	* gdbint.texinfo (Target Architecture Definition): Deprecate
 	REMOTE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT, and
 	BIG_REMOTE_BREAKPOINT.  Cross reference BREAKPOINT_FROM_PC.
 
