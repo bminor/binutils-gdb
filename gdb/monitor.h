@@ -167,5 +167,8 @@ extern struct monitor_ops        *current_monitor;
 #define MEM_DIS_CMD		(current_monitor->getmem)
 #define REG_DELIM               (current_monitor->regset.delim)
 
-extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops, int from_tty));
-extern char *monitor_supply_register PARAMS ((int regno, char *valstr));
+extern void init_monitor_ops PARAMS ((struct target_ops *));
+
+extern void monitor_open PARAMS ((char *, struct monitor_ops *, int));
+
+extern char *monitor_supply_register PARAMS ((int, char *));

@@ -1,7 +1,5 @@
-/* Remote target glue for the rom68k ROM monitor. This was running on a
-Motorola IDP board.
-
-   Copyright 1988, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+/* Remote target glue for the ROM68K ROM monitor.
+   Copyright 1988, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "monitor.h"
 #include "serial.h"
 
-static void rom68k_open PARAMS ((char *args, int from_tty));
+static void rom68k_open PARAMS ((char *, int));
 
 static void
 rom68k_supply_register (regname, regnamelen, val, vallen)
@@ -41,58 +39,59 @@ rom68k_supply_register (regname, regnamelen, val, vallen)
   regno = -1;
 
   if (regnamelen == 2)
-    switch (regname[0])
-      {
-      case 'S':
-	if (regname[1] == 'R')
-	  regno = PS_REGNUM;
-	break;
-      case 'P':
-	if (regname[1] == 'C')
-	  regno = PC_REGNUM;
-	break;
-      case 'D':
-	if (regname[1] != 'R')
+    {
+      switch (regname[0])
+	{
+	case 'S':
+	  if (regname[1] == 'R')
+	    regno = PS_REGNUM;
 	  break;
-	regno = D0_REGNUM;
-	numregs = 8;
-	break;
-      case 'A':
-	if (regname[1] != 'R')
+	case 'P':
+	  if (regname[1] == 'C')
+	    regno = PC_REGNUM;
 	  break;
-	regno = A0_REGNUM;
-	numregs = 7;
-	break;
-      }
+	case 'D':
+	  if (regname[1] != 'R')
+	    break;
+	  regno = D0_REGNUM;
+	  numregs = 8;
+	  break;
+	case 'A':
+	  if (regname[1] != 'R')
+	    break;
+	  regno = A0_REGNUM;
+	  numregs = 7;
+	  break;
+	}
+    }
   else if (regnamelen == 3)
-    switch (regname[0])
-      {
-      case 'I':
-	if (regname[1] == 'S' && regname[2] == 'P')
-	  regno = SP_REGNUM;
-      }
+    {
+      switch (regname[0])
+	{
+	case 'I':
+	  if (regname[1] == 'S' && regname[2] == 'P')
+	    regno = SP_REGNUM;
+	}
+    }
 
   if (regno >= 0)
     while (numregs-- > 0)
       val = monitor_supply_register (regno++, val);
 }
 
-/*
- * this array of registers need to match the indexes used by GDB. The
- * whole reason this exists is cause the various ROM monitors use
- * different strings than GDB does, and doesn't support all the
- * registers either. So, typing "info reg sp" becomes a "r30".
- */
+/* This array of registers need to match the indexes used by GDB.
+   This exists because the various ROM monitors use different strings
+   than does GDB, and don't necessarily support all the registers
+   either. So, typing "info reg sp" becomes a "r30".  */
+
 static char *rom68k_regnames[NUM_REGS] = {
   "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7",
   "A0", "A1", "A2", "A3", "A4", "A5", "A6", "ISP",
   "SR", "PC" };
 
-/*
- * Define the monitor command strings. Since these are passed directly
- * through to a printf style function, we need can include formatting
- * strings. We also need a CR or LF on the end.
- */
+/* Define the monitor command strings. Since these are passed directly
+   through to a printf style function, we may include formatting
+   strings. We also need a CR or LF on the end.  */
 
 static struct target_ops rom68k_ops;
 
@@ -158,10 +157,10 @@ static struct monitor_ops rom68k_cmds =
   SERIAL_1_STOPBITS,		/* number of stop bits */
   rom68k_regnames,		/* registers names */
   MONITOR_OPS_MAGIC		/* magic */
-  };
+};
 
-void
-rom68k_open(args, from_tty)
+static void
+rom68k_open (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -181,6 +180,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
 
   add_target (&rom68k_ops);
 
-  /* this is the default, since it's the only baud rate supported by the hardware */
+  /* This is the default, since it's the only baud rate supported by
+     the hardware.  */
   baud_rate = 9600;
 }
