@@ -1,3 +1,18 @@
+2002-11-22  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (psapi_get_dll_name): Fix a compiler warning.
+	(struct so_stuff): Add end_addr field.
+	(register_loaded_dll): Calculate and store end address of loaded dll.
+	(solib_address): New function.
+	(child_solib_loaded_library_pathname): Pass carefully constructed
+	section info to safe_symbol_file_add rather than ignoring it.
+	(get_child_debug_event): Call re_enable_breakpoints_in_shlibs when a
+	DLL is loaded.
+	(do_initial_child_stuff): Call disable_breakpoints_in_shlibs.
+	(child_create_inferior): Fix a compiler warning.
+	* config/i386/tm-cygwin.h (PC_SOLIB): Define new macro.
+	(solib_address): Declare new function.
+
 2002-11-22  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.c (m68k_register_virtual_type): Return int for SR, FPC
