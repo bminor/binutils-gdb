@@ -24,3 +24,9 @@ Disassembly of section .text:
   4a:	c0 10 00 00 00 00 [ 	]*larl	%r1,4a <foo\+0x4a>
 [ 	]*4c: R_390_GOTPLTENT	test_R_390_GOTPLTENT\+0x2
 
+.* <bar>:
+  50:	c0 e5 00 00 00 00 [ 	]*brasl	%r14,50 <bar>
+[ 	]*52: R_390_PLT32DBL	foo\+0x2
+[ 	]*...
+[ 	]*56: R_390_PLT64	foo\+0x6
+  5e:	07 07 [ 	]*bcr	0,%r7

@@ -1,4 +1,5 @@
-.text
+	.text
+	.globl foo
 foo:
 	mvc	0(test_R_390_8,%r1),0(%r2)
 	l	%r0,test_R_390_12(%r1,%r2)
@@ -19,3 +20,7 @@ foo:
 	l	%r0,test_R_390_GOTPLT12@GOTPLT(%r1,%r2)
 	lhi	%r0,test_R_390_GOTPLT16@GOTPLT
 	.long	test_R_390_GOTPLT32@GOTPLT
+
+bar:
+	bras	%r14,foo@PLT
+	.long	foo@PLT-bar

@@ -42,4 +42,10 @@ Disassembly of section .text:
 [ 	]*48: R_390_GOTPLT16	test_R_390_GOTPLT16
   4a:	00 00 00 00 [ 	]*.long	0x00000000
 [ 	]*4a: R_390_GOTPLT32	test_R_390_GOTPLT32
-  4e:	07 07 [ 	]*bcr	0,%r7
+
+.* <bar>:
+  4e:	a7 e5 00 00 [ 	]*bras	%r14,4e <bar>
+[ 	]*50: R_390_PLT16DBL	foo\+0x2
+  52:	00 00 00 00 [ 	]*.long	0x00000000
+[ 	]*52: R_390_PLT32	foo\+0x4
+  56:	07 07 [ 	]*bcr	0,%r7

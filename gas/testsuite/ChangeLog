@@ -1,3 +1,11 @@
+2003-01-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* gas/s390/reloc.s: Add test for PLT reloc against locally defined
+	but global function.
+	* gas/s390/reloc.d: Likewise.
+	* gas/s390/reloc64.s: Likewise.
+	* gas/s390/reloc64.d: Likewise.
+
 2003-01-21  Adrian Bunk <bunk@fs.tum.de>
 
 	* gas/sparc/sparc.exp (sparc_elf_setup): All NetBSD ELF targets

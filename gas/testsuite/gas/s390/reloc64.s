@@ -1,4 +1,5 @@
-.text
+	.text
+	.globl foo
 foo:
 	brasl	%r14,test_R_390_PC32DBL
 	brasl	%r14,test_R_390_PLT32DBL
@@ -11,3 +12,7 @@ foo:
 	.quad	test_R_390_PLTOFF64@PLTOFF
 	.quad	test_R_390_GOTPLT64@GOTPLT
 	larl	%r1,test_R_390_GOTPLTENT@GOTPLT
+
+bar:
+	brasl	%r14,foo@PLT
+	.quad	foo@PLT-bar
