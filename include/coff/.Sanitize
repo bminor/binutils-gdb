@@ -39,6 +39,7 @@ m88k.h
 mips.h
 rs6000.h
 sh.h
+sparc.h
 sym.h
 symconst.h
 we32k.h
