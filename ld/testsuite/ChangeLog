@@ -1,3 +1,8 @@
+2003-10-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexetoc.d: Correct.
+	* ld-powerpc/tlstoc.d: Correct.
+
 2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/greg-14.d, ld-mmix/greg-5.d, ld-mmix/pushja1b.d,

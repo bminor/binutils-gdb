@@ -18,15 +18,15 @@ Disassembly of section \.text:
 .*	4e 80 04 20 	bctr
 
 .* <_start>:
-.*	e8 62 80 08 	ld	r3,-32760\(r2\)
-.*	60 00 00 00 	nop
-.*	7c 63 6a 14 	add	r3,r3,r13
+.*	38 62 80 08 	addi	r3,r2,-32760
+.*	4b ff ff e1 	bl	.*
+.*	e8 41 00 28 	ld	r2,40\(r1\)
 .*	38 62 80 18 	addi	r3,r2,-32744
 .*	4b ff ff d5 	bl	.*
 .*	e8 41 00 28 	ld	r2,40\(r1\)
 .*	3c 6d 00 00 	addis	r3,r13,0
 .*	60 00 00 00 	nop
-.*	38 63 91 90 	addi	r3,r3,-28272
+.*	38 63 90 38 	addi	r3,r3,-28616
 .*	3c 6d 00 00 	addis	r3,r13,0
 .*	60 00 00 00 	nop
 .*	38 63 10 00 	addi	r3,r3,4096
@@ -36,7 +36,7 @@ Disassembly of section \.text:
 .*	e9 22 80 48 	ld	r9,-32696\(r2\)
 .*	7d 49 18 2a 	ldx	r10,r9,r3
 .*	3d 2d 00 00 	addis	r9,r13,0
-.*	a1 49 91 d8 	lhz	r10,-28200\(r9\)
+.*	a1 49 90 58 	lhz	r10,-28584\(r9\)
 .*	89 4d 90 60 	lbz	r10,-28576\(r13\)
 .*	3d 2d 00 00 	addis	r9,r13,0
 .*	99 49 90 68 	stb	r10,-28568\(r9\)
