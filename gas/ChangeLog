@@ -1,3 +1,7 @@
+2001-11-09  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* config/tc-avr.c (mcu_types): Update for new devices.
+
 2001-11-02  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* doc/Makefile.am (POD2MAN): Use 'GNU Development Tools' for
