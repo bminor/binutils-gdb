@@ -752,10 +752,6 @@ coff_symfile_read (sf, addr, mainline)
   /* Go over the misc symbol bunches and install them in vector.  */
 
   condense_misc_bunches (!mainline);
-
-  /* Make a default for file to list.  */
-
-  select_source_symtab (0);	/* FIXME, this might be too slow, see dbxread */
 }
 
 static void

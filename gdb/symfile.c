@@ -347,15 +347,16 @@ sort_misc_function_vector ()
    have different levels of "completeness", we may have duplicates
    that have one entry with type "mf_unknown" and the other with a
    known type.  So if the one we are leaving alone has type mf_unknown,
-   overwrite it's type with the type from the one we are compacting out.
-*/
-
+   overwrite its type with the type from the one we are compacting out.  */
 
 static void
 compact_misc_function_vector ()
 {
   struct misc_function *copyfrom;
   struct misc_function *copyto;
+
+  if (misc_function_count == 0)
+    return;
 
   copyfrom = copyto = misc_function_vector;
   while (copyfrom < misc_function_vector + misc_function_count - 1)
