@@ -1,3 +1,10 @@
+2003-10-17  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* config/tc-arm.c (do_iwmmxt_byte_addr): Reject control
+	registers.
+	(do_iwmmxt_word_addr): With a control register, reject conditional
+	execution and reject a non-word size.
+
 2003-10-16  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* configure.in: Set em=linux for ppc-*-linux-gnu* target.

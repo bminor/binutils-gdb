@@ -4890,6 +4890,7 @@ do_iwmmxt_byte_addr (str)
 
   if (wc_register (reg))
     {
+      as_bad (_("non-word size not supported with control register"));
       inst.instruction |=  0xf0000100;
       inst.instruction &= ~0x00400000;
     }
@@ -5065,6 +5066,10 @@ do_iwmmxt_word_addr (str)
 
   if (wc_register (reg))
     {
+      if ((inst.instruction & COND_MASK) != COND_ALWAYS)
+	as_bad (_("conditional execution not supported with control register"));
+      if (op != 2)
+	as_bad (_("non-word size not supported with control register"));
       inst.instruction |=  0xf0000100;
       inst.instruction &= ~0x00400000;
     }
