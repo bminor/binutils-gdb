@@ -36,6 +36,7 @@ aout32.c
 aout64.c
 aoutf1.h
 aoutx.h
+aout-target.h
 archive.c
 archures.c
 bfd-in.h
@@ -116,7 +117,15 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.28  1991/11/04 00:37:06  steve
+# Revision 1.29  1991/11/17 21:38:05  bothner
+# 	* targets.c:  Make the default target_vector contain
+# 	just &DEFAULT_VECTOR.  This makes executables a lot smaller.
+# 	Old behavior can be gotten by defining ALL_TARGETS.
+# 	* aoutf1.h, demo64.c, i386aout.c, newsos3.c, sunos.c:
+# 	Factored out common code into new file aout-target.h.
+# 	Saves a lot of duplicate code for a.out variants.
+#
+# Revision 1.28  1991/11/04  00:37:06  steve
 # Added ctor.c (I remembered this time)
 #
 # Revision 1.27  1991/10/25  10:17:41  gnu
