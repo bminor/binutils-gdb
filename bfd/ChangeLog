@@ -1,3 +1,8 @@
+Wed Jun 11 20:17:03 1997  Fred Fish  <fnf@cygnus.com>
+
+	* coffgen.c (_bfd_coff_is_local_label_name): Return proper boolean
+	(enum) type.
+
 Wed Jun 11 00:00:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_output_extsym): Call finish_dynamic_symbol
