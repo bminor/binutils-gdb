@@ -7001,6 +7001,7 @@ for execution as a unit: user-defined commands and command files.
 
 @menu
 * Define::                      User-Defined Commands
+* Hooks::			User-Defined Command Hooks
 * Command Files::               Command Files
 * Output::                      Commands for Controlled Output
 @end menu
@@ -7057,6 +7058,47 @@ Commands that would ask for confirmation if used interactively proceed
 without asking when used inside a user-defined command.  Many _GDBN__ commands
 that normally print messages to say what they are doing omit the messages
 when used in a user-defined command.
+
+@node Hooks
+@section User-Defined Command Hooks
+@cindex command files
+
+You may define @emph{hooks}, which are a special kind of user-defined
+command.  Whenever you run the command @samp{foo}, if the user-defined
+command @samp{hook-foo} exists, it is executed (with no arguments)
+before that command.
+
+In addition, a pseudo-command, @samp{stop} exists.  Hooking this command
+will cause your hook to be executed every time execution stops in the
+inferior program, before breakpoint commands are run, displays are
+printed, or the stack frame is printed.
+
+For example, to cause @code{SIGALRM} signals to be ignored while
+single-stepping, but cause them to be resumed during normal execution,
+you could do:
+
+@example
+define hook-stop
+handle SIGALRM nopass
+end
+
+define hook-run
+handle SIGALRM pass
+end
+
+define hook-continue
+handle SIGLARM pass
+end
+@end example
+
+Any single-word command in GDB can be hooked.  Aliases for other commands
+cannot be hooked (you should hook the basic command name, e.g. @code{backtrace}
+rather than @code{bt}).  If an error occurs during the execution of your
+hook, execution of GDB commands stops and you are returned to the GDB
+prompt (before the command that you actually typed had a chance to run).
+
+If you try to define a hook which doesn't match any known command, you
+will get a warning from the @code{define} command.
 
 @node Command Files
 @section Command Files
