@@ -1,3 +1,8 @@
+Mon Jul 13 13:06:54 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_slurp_external_symbols): Handle call optimization
+	information ATN records.
+
 Fri Jul 10 16:31:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_slurp_external_symbols): Select an appropriate
