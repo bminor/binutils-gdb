@@ -734,6 +734,8 @@ static unsigned long read_unsigned_leb128 (bfd *, char *, unsigned int *);
 
 static long read_signed_leb128 (bfd *, char *, unsigned int *);
 
+static char *skip_leb128 (bfd *, char *);
+
 static void set_cu_language (unsigned int, struct dwarf2_cu *);
 
 static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
@@ -1755,6 +1757,139 @@ add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
   return info_ptr;
 }
 
+static struct abbrev_info *
+peek_die_abbrev (char *info_ptr, int *bytes_read, struct dwarf2_cu *cu)
+{
+  bfd *abfd = cu->objfile->obfd;
+  unsigned int abbrev_number;
+  struct abbrev_info *abbrev;
+
+  abbrev_number = read_unsigned_leb128 (abfd, info_ptr, bytes_read);
+
+  if (abbrev_number == 0)
+    return NULL;
+
+  abbrev = dwarf2_lookup_abbrev (abbrev_number, cu);
+  if (!abbrev)
+    {
+      error ("Dwarf Error: Could not find abbrev number %d [in module %s]", abbrev_number,
+		      bfd_get_filename (abfd));
+    }
+
+  return abbrev;
+}
+
+static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
+			   struct dwarf2_cu *cu);
+
+static char *
+skip_children (char *info_ptr, struct dwarf2_cu *cu)
+{
+  struct abbrev_info *abbrev;
+  unsigned int bytes_read;
+
+  /* Skip a series of DIEs (and their children) starting at INFO_PTR.
+     Continue until we run into one without a tag; return whatever
+     follows it.  */
+
+  while (1)
+    {
+      abbrev = peek_die_abbrev (info_ptr, &bytes_read, cu);
+      if (abbrev == NULL)
+	return info_ptr + bytes_read;
+      else
+	info_ptr = skip_one_die (info_ptr + bytes_read, abbrev, cu);
+    }
+}
+
+
+static char *
+skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
+	      struct dwarf2_cu *cu)
+{
+  unsigned int bytes_read;
+  struct attribute attr;
+  bfd *abfd = cu->objfile->obfd;
+  unsigned int form, i;
+
+  for (i = 0; i < abbrev->num_attrs; i++)
+    {
+      if (abbrev->attrs[i].name == DW_AT_sibling)
+	{
+	  read_attribute (&attr, &abbrev->attrs[i],
+			  abfd, info_ptr, cu);
+	  if (attr.form == DW_FORM_ref_addr)
+	    complaint (&symfile_complaints, "ignoring absolute DW_AT_sibling");
+	  else
+	    return dwarf_info_buffer + dwarf2_get_ref_die_offset (&attr, cu);
+	}
+      form = abbrev->attrs[i].form;
+    top:
+      switch (form)
+	{
+	case DW_FORM_addr:
+	case DW_FORM_ref_addr:
+	  info_ptr += cu->header.addr_size;
+	  break;
+	case DW_FORM_block2:
+	  info_ptr += 2 + read_2_bytes (abfd, info_ptr);
+	  break;
+	case DW_FORM_block4:
+	  info_ptr += 4 + read_4_bytes (abfd, info_ptr);
+	  break;
+	case DW_FORM_data2:
+	case DW_FORM_ref2:
+	  info_ptr += 2;
+	  break;
+	case DW_FORM_data4:
+	case DW_FORM_ref4:
+	  info_ptr += 4;
+	  break;
+	case DW_FORM_data8:
+	case DW_FORM_ref8:
+	  info_ptr += 8;
+	  break;
+	case DW_FORM_string:
+	  read_string (abfd, info_ptr, &bytes_read);
+	  info_ptr += bytes_read;
+	  break;
+	case DW_FORM_strp:
+	  info_ptr += cu->header.offset_size;
+	  break;
+	case DW_FORM_block:
+	  info_ptr += read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+	  info_ptr += bytes_read;
+	  break;
+	case DW_FORM_block1:
+	  info_ptr += 1 + read_1_byte (abfd, info_ptr);
+	  break;
+	case DW_FORM_data1:
+	case DW_FORM_ref1:
+	case DW_FORM_flag:
+	  info_ptr += 1;
+	  break;
+	case DW_FORM_sdata:
+	case DW_FORM_udata:
+	case DW_FORM_ref_udata:
+	  info_ptr = skip_leb128 (abfd, info_ptr);
+	  break;
+	case DW_FORM_indirect:
+	  form = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+	  info_ptr += bytes_read;
+	  goto top;
+	default:
+	  error ("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]",
+		 dwarf_form_name (form),
+		 bfd_get_filename (abfd));
+	}
+    }
+
+  if (abbrev->has_children)
+    return skip_children (info_ptr, cu);
+  else
+    return info_ptr;
+}
+
 /* Locate ORIG_PDI's sibling; INFO_PTR should point to the next DIE
    after ORIG_PDI.  */
 
@@ -1762,31 +1897,19 @@ static char *
 locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,
 		    bfd *abfd, struct dwarf2_cu *cu)
 {
-  /* Do we know the sibling already?  */
-  
-  if (orig_pdi->sibling)
-    return orig_pdi->sibling;
-
   /* Are there any children to deal with?  */
 
   if (!orig_pdi->has_children)
     return info_ptr;
 
-  /* Okay, we don't know the sibling, but we have children that we
-     want to skip.  So read children until we run into one without a
-     tag; return whatever follows it.  */
+  /* Do we know the sibling already?  */
+  
+  if (orig_pdi->sibling)
+    return orig_pdi->sibling;
 
-  while (1)
-    {
-      struct partial_die_info pdi;
+  /* Skip the children the long way.  */
 
-      info_ptr = load_partial_die (&pdi, abfd, info_ptr, cu);
-
-      if (pdi.tag == 0)
-	return info_ptr;
-      else
-	info_ptr = locate_pdi_sibling (&pdi, info_ptr, abfd, cu);
-    }
+  return skip_children (info_ptr, cu);
 }
 
 /* Expand this partial symbol table into a full symbol table.  */
@@ -4353,6 +4476,8 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 {
   struct partial_die_info *part_die;
   struct partial_die_info *parent_die, *last_die;
+  struct abbrev_info *abbrev;
+  unsigned int bytes_read;
 
   /* FIXME: Obviously we need a nesting level passed in for incremental use.  */
   int nesting_level = 1;
@@ -4368,32 +4493,36 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 
   while (1)
     {
-      //      fprintf_unfiltered (gdb_stderr, "Loading DIE %x\n", info_ptr - dwarf_info_buffer);
-      info_ptr = load_partial_die (part_die, abfd, info_ptr, cu);
+      abbrev = peek_die_abbrev (info_ptr, &bytes_read, cu);
 
-      if (part_die->tag == 0)
+      if (abbrev == NULL)
 	{
 	  if (--nesting_level == 0)
 	    {
 	      xfree (part_die);
 	      return;
 	    }
+	  info_ptr += bytes_read;
 	  last_die = parent_die;
 	  parent_die = parent_die->die_parent;
 	  continue;
 	}
 
       /* Check whether this DIE is interesting enough to save.  */
-      if (!is_type_tag (part_die->tag)
-	  && part_die->tag != DW_TAG_enumerator
-	  && part_die->tag != DW_TAG_subprogram
-	  && part_die->tag != DW_TAG_variable
-	  && part_die->tag != DW_TAG_namespace)
+      if (!is_type_tag (abbrev->tag)
+	  && abbrev->tag != DW_TAG_enumerator
+	  && abbrev->tag != DW_TAG_subprogram
+	  && abbrev->tag != DW_TAG_variable
+	  && abbrev->tag != DW_TAG_namespace)
 	{
+	  // printf ("Wasted DIE\n");
 	  /* Otherwise we skip to the next sibling, if any.  */
-	  info_ptr = locate_pdi_sibling (part_die, info_ptr, abfd, cu);
+	  info_ptr = skip_one_die (info_ptr + bytes_read, abbrev, cu);
 	  continue;
 	}
+
+      //      fprintf_unfiltered (gdb_stderr, "Loading DIE %x\n", info_ptr - dwarf_info_buffer);
+      info_ptr = load_partial_die (part_die, abfd, info_ptr, cu);
 
       /* We'll save this DIE so link it in.  */
       part_die->die_parent = parent_die;
@@ -5098,6 +5227,20 @@ read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
     }
   *bytes_read_ptr = num_read;
   return result;
+}
+
+static char *
+skip_leb128 (bfd *abfd, char *buf)
+{
+  int byte;
+
+  while (1)
+    {
+      byte = bfd_get_8 (abfd, (bfd_byte *) buf);
+      buf++;
+      if ((byte & 128) == 0)
+	return buf;
+    }
 }
 
 static void
