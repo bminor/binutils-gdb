@@ -1,3 +1,15 @@
+Thu Nov  5 03:37:15 1992  John Gilmore  (gnu@cygnus.com)
+
+	Clean up some old BFD ansification macros.
+
+	* arsup.h, bucomm.h, objdump.h:  Remove EXFUN from binutils.
+	It still remains as a local macro in gmalloc.c, which is derived
+	from some other copy of GNU Malloc somewhere (FIXME).
+
+	* ar.c, objdump.c, size.c:  Replace EXFUN with PROTO.  Make static
+	fns really static.
+	* arsup.h:  Declare extract_files.
+
 Mon Nov  2 12:42:11 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ar.c (extract_file): instead of checking USG: if POSIX_UTIME,

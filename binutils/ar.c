@@ -1,5 +1,5 @@
 /* ar.c - Archive modify and extract.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -46,17 +46,28 @@ extern int errno;
 #endif
 #define BUFSIZE 8192
 
+/* Forward declarations */
 
+static void
+print_contents PARAMS ((bfd * member));
 
+static void
+delete_members PARAMS ((char **files_to_delete));
 
-PROTO(void, print_contents, (bfd * member));
-PROTO(void, extract_file, (bfd * abfd));
-PROTO(void, delete_members, (char **files_to_delete));
-PROTO(void, do_quick_append, (char *archive_filename, char **files_to_append));
-PROTO(void, move_members, (char **files_to_move));
-PROTO(void, replace_members, (char **files_to_replace));
-PROTO(void, print_descr, (bfd * abfd));
-PROTO(void, ranlib_only, (char *archname));
+static void
+do_quick_append PARAMS ((char *archive_filename, char **files_to_append));
+
+static void
+move_members PARAMS ((char **files_to_move));
+
+static void
+replace_members PARAMS ((char **files_to_replace));
+
+static void
+print_descr PARAMS ((bfd * abfd));
+
+static void
+ranlib_only PARAMS ((char *archname));
 
 /** Globals and flags */
 
@@ -481,7 +492,7 @@ open_inarch(archive_filename)
 
 
 
-void
+static void
 print_contents(abfd)
     bfd            *abfd;
 {
@@ -612,7 +623,7 @@ extract_file(abfd)
 
 PROTO(struct ar_hdr *, bfd_special_undocumented_glue, (bfd *abfd, char *filename));
 
-void
+static void
 do_quick_append(archive_filename, files_to_append)
     char           *archive_filename;
     char          **files_to_append;
@@ -772,7 +783,7 @@ get_pos_bfd(contents, default_pos)
 }
 
 
-void
+static void
 delete_members(files_to_delete)
     char          **files_to_delete;
 {
@@ -825,7 +836,7 @@ next_file:;
 
 /* Reposition existing members within an archive */
 
-void
+static void
 move_members(files_to_move)
     char          **files_to_move;
 {
@@ -870,7 +881,7 @@ next_file:;
 
 /* Ought to default to replacing in place, but this is existing practice! */
 
-void
+static void
 replace_members(files_to_move)
     char          **files_to_move;
 {
@@ -968,7 +979,7 @@ next_file:;
     write_archive();
 }
 
-void
+static void
 ranlib_only(archname)
     char           *archname;
 {
@@ -982,7 +993,7 @@ ranlib_only(archname)
 
 /* Things which are interesting to map over all or some of the files: */
 
-void
+static void
 print_descr(abfd)
     bfd            *abfd;
 {
