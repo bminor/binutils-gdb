@@ -1,3 +1,10 @@
+Tue Sep 12 18:03:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (DO_X): Change do-realclean to do-maintainer-clean.
+	(local-maintainer-clean): New target.
+	(maintainer-clean): New target.
+	(realclean): Just depend upon maintainer-clean.
+
 Fri Sep  8 17:11:14 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in (noconfigdirs): Disable gdb on m68k-*-netbsd*.
