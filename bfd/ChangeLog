@@ -1,3 +1,36 @@
+Fri Apr 18 11:42:55 1997  Niklas Hallqvist  <niklas@appli.se>
+
+	* coff-alpha.c (bsd_alpha_howto_table): Cloned from alpha_howto_table
+	but with an added LITERALSLEAZY entry.
+	(alpha_adjust_reloc_in): Add handling of LITERALSLEAZY relocs.  Use
+	info on the howto_table gotten from the ecoff_backend data.
+	(alpha_ecoff_get_relocated_section_contents): Ditto.
+	(alpha_bfd_reloc_type_lookup): Ditto.
+	(alpha_relocate_section): Ditto.  Also remove an assertion
+	causing failures on *BSD/alpha systems.
+	(alpha_ecoff_backend_data): Addition of fields to handle different
+	howto tables as well as a has_literalseazy flag.
+	(bsd_alpha_ecoff_backend_data): New backend data structure for *BSD.
+	(bsd_ecoffalpha_little_vec): Define.
+	* coff-mips.c (MIPS_HOWTO_COUNT): Removed, it's unused.
+	(mips_adjust_reloc_in): Use new ecoff_backend data to get at the howto
+	table.
+	(mips_bfd_reloc_type_lookup): Ditto.
+	(mips_relocate_section): Ditto.
+	(mips_ecoff_backend_data): Addition of fields to handle different
+	howto tables as well as a has_literalseazy flag.
+	* config.bfd: (alpha-*-openbsd*): New target.
+	* configure.in (alpha*-*-openbsd*): New target.
+	(bsd_ecoffalpha_little_vec): New vector for *BSD/Alpha ECOFF.
+	* ecoff.c (_bfd_ecoff_set_arch_mach_hook): Handle new magic.
+	(ecoff_get_magic): Ditto.
+	* libecoff.h (ecoff_backend_data): Addition of fields to handle
+	different howto tables as well as a has_literalseazy flag.
+	* reloc.c: BFD_RELOC_ALPHA_LITERALSLEAZY): New reloc.
+	* targets.c (bsd_ecoffalpha_little_vec): Declare.
+	(bfd_target_vector): Include the bsd_ecoffalpha_little_vec target.
+	* configure, bfd-in2.h, libbfd.h: Rebuild.
+
 Thu Apr 17 13:46:56 1997  Per Fogelstrom  <pefo@openbsd.org>
 
 	* configure.host (mips*-*-openbsd*): New host.
