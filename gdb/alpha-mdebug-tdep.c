@@ -45,7 +45,7 @@
    |  |localoff	|  Copies of 1st .. 6th		|
    |  |  |  |	|  argument if necessary.	|
    |  |  |  v	|				|
-   |  |  |  ---	|-------------------------------|<-- FRAME_LOCALS_ADDRESS
+   |  |  |  ---	|-------------------------------|<-- LOCALS_ADDRESS
    |  |  |      |				|
    |  |  |      |  Locals and temporaries.	|
    |  |  |      |				|

@@ -441,9 +441,9 @@ extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.  */
-#define FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
+#define DEPRECATED_FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
 
-#define FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */

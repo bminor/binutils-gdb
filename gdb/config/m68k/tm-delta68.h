@@ -105,5 +105,5 @@ extern CORE_ADDR delta68_frame_saved_pc (struct frame_info *fi);
 #define DEPRECATED_FRAME_SAVED_PC(fi) delta68_frame_saved_pc (fi)
 
 extern CORE_ADDR delta68_frame_args_address (struct frame_info *fi);
-#undef FRAME_ARGS_ADDRESS
-#define FRAME_ARGS_ADDRESS(fi) delta68_frame_args_address (fi)
+#undef DEPRECATED_FRAME_ARGS_ADDRESS
+#define DEPRECATED_FRAME_ARGS_ADDRESS(fi) delta68_frame_args_address (fi)

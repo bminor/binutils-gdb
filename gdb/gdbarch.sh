@@ -631,8 +631,12 @@ F:2:DEPRECATED_FRAME_CHAIN_VALID:int:deprecated_frame_chain_valid:CORE_ADDR chai
 F:2:DEPRECATED_FRAME_SAVED_PC:CORE_ADDR:deprecated_frame_saved_pc:struct frame_info *fi:fi::0:0
 M::UNWIND_PC:CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame:
 M::UNWIND_SP:CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame:
-f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:get_frame_base::0
-f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:get_frame_base::0
+# DEPRECATED_FRAME_ARGS_ADDRESS as been replaced by the per-frame
+# frame-base.  Enable frame-base before frame-unwind.
+F::DEPRECATED_FRAME_ARGS_ADDRESS:CORE_ADDR:deprecated_frame_args_address:struct frame_info *fi:fi::get_frame_base:get_frame_base
+# DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
+# frame-base.  Enable frame-base before frame-unwind.
+F::DEPRECATED_FRAME_LOCALS_ADDRESS:CORE_ADDR:deprecated_frame_locals_address:struct frame_info *fi:fi::get_frame_base:get_frame_base
 F::DEPRECATED_SAVED_PC_AFTER_CALL:CORE_ADDR:deprecated_saved_pc_after_call:struct frame_info *frame:frame
 F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 #

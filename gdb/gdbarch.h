@@ -2330,34 +2330,80 @@ typedef CORE_ADDR (gdbarch_unwind_sp_ftype) (struct gdbarch *gdbarch, struct fra
 extern CORE_ADDR gdbarch_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame);
 extern void set_gdbarch_unwind_sp (struct gdbarch *gdbarch, gdbarch_unwind_sp_ftype *unwind_sp);
 
+/* DEPRECATED_FRAME_ARGS_ADDRESS as been replaced by the per-frame
+   frame-base.  Enable frame-base before frame-unwind. */
+
+#if defined (DEPRECATED_FRAME_ARGS_ADDRESS)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAME_ARGS_ADDRESS */
+#if !defined (DEPRECATED_FRAME_ARGS_ADDRESS_P)
+#define DEPRECATED_FRAME_ARGS_ADDRESS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_ARGS_ADDRESS_P)
+#define DEPRECATED_FRAME_ARGS_ADDRESS_P() (0)
+#endif
+
+extern int gdbarch_deprecated_frame_args_address_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_ARGS_ADDRESS_P)
+#error "Non multi-arch definition of DEPRECATED_FRAME_ARGS_ADDRESS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_ARGS_ADDRESS_P)
+#define DEPRECATED_FRAME_ARGS_ADDRESS_P() (gdbarch_deprecated_frame_args_address_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_ARGS_ADDRESS)
-#define FRAME_ARGS_ADDRESS(fi) (get_frame_base (fi))
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_ARGS_ADDRESS)
+#define DEPRECATED_FRAME_ARGS_ADDRESS(fi) (get_frame_base (fi))
 #endif
 
-typedef CORE_ADDR (gdbarch_frame_args_address_ftype) (struct frame_info *fi);
-extern CORE_ADDR gdbarch_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi);
-extern void set_gdbarch_frame_args_address (struct gdbarch *gdbarch, gdbarch_frame_args_address_ftype *frame_args_address);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_ARGS_ADDRESS)
-#error "Non multi-arch definition of FRAME_ARGS_ADDRESS"
+typedef CORE_ADDR (gdbarch_deprecated_frame_args_address_ftype) (struct frame_info *fi);
+extern CORE_ADDR gdbarch_deprecated_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi);
+extern void set_gdbarch_deprecated_frame_args_address (struct gdbarch *gdbarch, gdbarch_deprecated_frame_args_address_ftype *deprecated_frame_args_address);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_ARGS_ADDRESS)
+#error "Non multi-arch definition of DEPRECATED_FRAME_ARGS_ADDRESS"
 #endif
-#if !defined (FRAME_ARGS_ADDRESS)
-#define FRAME_ARGS_ADDRESS(fi) (gdbarch_frame_args_address (current_gdbarch, fi))
+#if !defined (DEPRECATED_FRAME_ARGS_ADDRESS)
+#define DEPRECATED_FRAME_ARGS_ADDRESS(fi) (gdbarch_deprecated_frame_args_address (current_gdbarch, fi))
+#endif
+
+/* DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
+   frame-base.  Enable frame-base before frame-unwind. */
+
+#if defined (DEPRECATED_FRAME_LOCALS_ADDRESS)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAME_LOCALS_ADDRESS */
+#if !defined (DEPRECATED_FRAME_LOCALS_ADDRESS_P)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_LOCALS_ADDRESS_P)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS_P() (0)
+#endif
+
+extern int gdbarch_deprecated_frame_locals_address_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_LOCALS_ADDRESS_P)
+#error "Non multi-arch definition of DEPRECATED_FRAME_LOCALS_ADDRESS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_LOCALS_ADDRESS_P)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS_P() (gdbarch_deprecated_frame_locals_address_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_LOCALS_ADDRESS)
-#define FRAME_LOCALS_ADDRESS(fi) (get_frame_base (fi))
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_LOCALS_ADDRESS)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) (get_frame_base (fi))
 #endif
 
-typedef CORE_ADDR (gdbarch_frame_locals_address_ftype) (struct frame_info *fi);
-extern CORE_ADDR gdbarch_frame_locals_address (struct gdbarch *gdbarch, struct frame_info *fi);
-extern void set_gdbarch_frame_locals_address (struct gdbarch *gdbarch, gdbarch_frame_locals_address_ftype *frame_locals_address);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_LOCALS_ADDRESS)
-#error "Non multi-arch definition of FRAME_LOCALS_ADDRESS"
+typedef CORE_ADDR (gdbarch_deprecated_frame_locals_address_ftype) (struct frame_info *fi);
+extern CORE_ADDR gdbarch_deprecated_frame_locals_address (struct gdbarch *gdbarch, struct frame_info *fi);
+extern void set_gdbarch_deprecated_frame_locals_address (struct gdbarch *gdbarch, gdbarch_deprecated_frame_locals_address_ftype *deprecated_frame_locals_address);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_LOCALS_ADDRESS)
+#error "Non multi-arch definition of DEPRECATED_FRAME_LOCALS_ADDRESS"
 #endif
-#if !defined (FRAME_LOCALS_ADDRESS)
-#define FRAME_LOCALS_ADDRESS(fi) (gdbarch_frame_locals_address (current_gdbarch, fi))
+#if !defined (DEPRECATED_FRAME_LOCALS_ADDRESS)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) (gdbarch_deprecated_frame_locals_address (current_gdbarch, fi))
 #endif
 
 #if defined (DEPRECATED_SAVED_PC_AFTER_CALL)

@@ -2999,8 +2999,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 	rs6000_convert_from_func_ptr_addr);
     }
-  set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, rs6000_frame_args_address);
+  set_gdbarch_deprecated_frame_locals_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
 
   /* Helpers for function argument information.  */
