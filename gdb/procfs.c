@@ -2876,9 +2876,7 @@ proc_update_threads (procinfo *pi)
   if ((nlwp = proc_get_nthreads (pi)) <= 1)
     return 1;	/* Process is not multi-threaded; nothing to do.  */
 
-  if ((prstatus = (gdb_prstatus_t *) 
-       malloc (sizeof (gdb_prstatus_t) * (nlwp + 1))) == 0)
-    perror_with_name ("procfs: malloc failed in update_threads");
+  prstatus = xmalloc (sizeof (gdb_prstatus_t) * (nlwp + 1));
 
   old_chain = make_cleanup (xfree, prstatus);
   if (ioctl (pi->ctl_fd, PIOCLSTATUS, prstatus) < 0)
@@ -2984,8 +2982,7 @@ proc_update_threads (procinfo *pi)
   if (nthreads < 2)
     return 0;		/* nothing to do for 1 or fewer threads */
 
-  if ((threads = malloc (nthreads * sizeof (tid_t))) == NULL)
-    proc_error (pi, "update_threads, malloc", __LINE__);
+  threads = xmalloc (nthreads * sizeof (tid_t));
   
   if (ioctl (pi->ctl_fd, PIOCTLIST, threads) < 0)
     proc_error (pi, "procfs: update_threads (PIOCTLIST)", __LINE__);

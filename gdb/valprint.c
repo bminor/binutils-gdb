@@ -838,9 +838,7 @@ print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
    * as the base 16 number, which is 2 digits per byte.
    */
   decimal_len = len * 2 * 2;
-  digits = (unsigned char *) malloc (decimal_len);
-  if (digits == NULL)
-    error ("Can't allocate memory for conversion to decimal.");
+  digits = xmalloc (decimal_len);
 
   for (i = 0; i < decimal_len; i++)
     {

@@ -118,7 +118,7 @@ hpread_call_pxdb (char *file_name)
 
   if (file_exists (PXDB_SVR4))
     {
-      p = malloc (strlen (PXDB_SVR4) + strlen (file_name) + 2);
+      p = xmalloc (strlen (PXDB_SVR4) + strlen (file_name) + 2);
       strcpy (p, PXDB_SVR4);
       strcat (p, " ");
       strcat (p, file_name);
@@ -946,7 +946,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 					  static_syms);
 
 	      /* Set up to only enter each class referenced in this module once.  */
-	      class_entered = malloc (B_BYTES (pxdb_header_p->cd_entries));
+	      class_entered = xmalloc (B_BYTES (pxdb_header_p->cd_entries));
 	      B_CLRALL (class_entered, pxdb_header_p->cd_entries);
 
 	      /* Scan the procedure descriptors for procedures in the current
@@ -1174,7 +1174,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 					  static_syms);
 
 	      /* Set up to only enter each class referenced in this module once.  */
-	      class_entered = malloc (B_BYTES (pxdb_header_p->cd_entries));
+	      class_entered = xmalloc (B_BYTES (pxdb_header_p->cd_entries));
 	      B_CLRALL (class_entered, pxdb_header_p->cd_entries);
 
 	      /* Scan the procedure descriptors for procedures in the current

@@ -1,5 +1,23 @@
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h (malloc): Move declaration from here.
+	* utils.c (malloc): To here.
+	* config/pa/xm-hppah.h (malloc): Delete declaration.
+
+	* gnu-nat.c (make_proc): Use xmalloc instead of malloc.
+	* hp-psymtab-read.c (hpread_call_pxdb): Ditto.
+	(hpread_quick_traverse): Ditto.
+	* infttrace.c (create_thread_info): Ditto.
+	(kill_inferior): Ditto.
+	* gnu-nat.c (make_inf): Ditto, and don't check return value.
+	* procfs.c (proc_update_threads): Ditto.
+	* valprint.c (print_decimal_chars): Ditto.
+	* gdbtypes.c (cfront_mangle_name): Use xasprintf instead of
+	malloc and sprintf.
+	* remote-rdp.c (rdp_set_command_line): Ditto.
+
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* defs.h (realloc): Move declaration from here.
 	* utils.c (realloc): To here.
 	* config/pa/xm-hppah.h (realloc): Delete declaration.

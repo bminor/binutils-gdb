@@ -602,7 +602,7 @@ create_thread_info (int pid, lwpid_t tid)
   thread_info *p;
   int thread_count_of_pid;
 
-  new_p = malloc (sizeof (thread_info));
+  new_p = xmalloc (sizeof (thread_info));
   new_p->pid = pid;
   new_p->tid = tid;
   new_p->have_signal = 0;
@@ -3830,8 +3830,8 @@ kill_inferior (void)
      zaps the target vector.
    */
 
-  paranoia = (thread_info **) malloc (thread_head.count *
-				      sizeof (thread_info *));
+  paranoia = (thread_info **) xmalloc (thread_head.count *
+				       sizeof (thread_info *));
   para_count = 0;
 
   t = thread_head.head;

@@ -539,7 +539,7 @@ make_proc (struct inf *inf, mach_port_t port, int tid)
 {
   error_t err;
   mach_port_t prev_port = MACH_PORT_NULL;
-  struct proc *proc = malloc (sizeof (struct proc));
+  struct proc *proc = xmalloc (sizeof (struct proc));
 
   proc->port = port;
   proc->tid = tid;
@@ -636,10 +636,7 @@ _proc_free (struct proc *proc)
 struct inf *
 make_inf (void)
 {
-  struct inf *inf = malloc (sizeof (struct inf));
-
-  if (!inf)
-    return 0;
+  struct inf *inf = xmalloc (sizeof (struct inf));
 
   inf->task = 0;
   inf->threads = 0;

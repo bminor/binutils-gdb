@@ -945,14 +945,6 @@ extern int fclose (FILE *);
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 #endif
 
-#ifndef MALLOC_INCOMPATIBLE
-
-#ifdef NEED_DECLARATION_MALLOC
-extern PTR malloc ();
-#endif
-
-#endif /* MALLOC_INCOMPATIBLE */
-
 /* Various possibilities for alloca.  */
 #ifndef alloca
 #ifdef __GNUC__

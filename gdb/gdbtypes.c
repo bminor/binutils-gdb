@@ -1350,8 +1350,7 @@ cfront_mangle_name (struct type *type, int i, int j)
 	  }
       ADD_EXTRA ('\0')
 	printf ("add_mangled_type: %s\n", extras.str);	/* FIXME */
-      arm_mangled_name = malloc (strlen (mangled_name) + extras.len);
-      sprintf (arm_mangled_name, "%s%s", mangled_name, extras.str);
+      xasprintf (&arm_mangled_name, "%s%s", mangled_name, extras.str);
       xfree (mangled_name);
       mangled_name = arm_mangled_name;
     }

@@ -699,13 +699,7 @@ rdp_set_command_line (char *command, char *args)
   if (commandline != NULL)
     xfree (commandline);
 
-  commandline = malloc (strlen (command) + strlen (args) + 2);
-  if (commandline != NULL)
-    {
-      strcpy (commandline, command);
-      strcat (commandline, " ");
-      strcat (commandline, args);
-    }
+  xasprintf (&commandline, %s %s", command, args);
 }
 
 static void
