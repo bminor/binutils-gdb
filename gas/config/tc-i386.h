@@ -118,7 +118,21 @@ extern const char *i386_target_format PARAMS ((void));
 extern short tc_coff_fix2rtype PARAMS ((struct fix *));
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
+
+#ifdef TE_GO32
+/* DJGPP now expects some sections to be 2**4 aligned.  */
+#define SUB_SEGMENT_ALIGN(SEG)						\
+  ((strcmp (obj_segment_name (SEG), ".text") == 0			\
+    || strcmp (obj_segment_name (SEG), ".data") == 0			\
+    || strncmp (obj_segment_name (SEG), ".gnu.linkonce.t", 15) == 0	\
+    || strncmp (obj_segment_name (SEG), ".gnu.linkonce.d", 15) == 0	\
+    || strncmp (obj_segment_name (SEG), ".gnu.linkonce.r", 15) == 0)	\
+   ? 4									\
+   : 2)
+#else
 #define SUB_SEGMENT_ALIGN(SEG) 2
+#endif
+
 #define TC_RVA_RELOC 7
 /* Need this for PIC relocations */
 #define NEED_FX_R_TYPE

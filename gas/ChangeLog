@@ -1,7 +1,13 @@
+1999-08-09  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-i386.h (SUB_SEGMENT_ALIGN): If TE_GO32, return 4 for
+	certain sections, to match BFD changes.
+
 1999-08-08  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* Makefile.am (noinst_SCRIPTS): Change .gdbinit to $(GDBINIT).
 	(EXTRA_SCRIPTS): Define to keep automake happy.
+	* Makefile.in: Rebuild.
 
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
