@@ -683,6 +683,9 @@ write_relocs (abfd, sec, xxx)
 	{
 	case bfd_reloc_ok:
 	  break;
+	case bfd_reloc_overflow:
+	  as_bad_where (fixp->fx_file, fixp->fx_line, "relocation overflow");
+	  break;
 	default:
 	  as_fatal ("bad return from bfd_perform_relocation");
 	}
@@ -2072,28 +2075,31 @@ fixup_segment (fixP, this_segment_type)
       if (!fixP->fx_bit_fixP && size > 0)
 	{
 	  valueT mask = 0;
-	  /* set all bits to one */
-	  mask--;
-	  /* Technically, combining these produces an undefined result
-	     if size is sizeof (valueT), though I think these two
-	     half-way operations should both be defined.  And the
-	     compiler should be able to combine them if it's valid on
-	     the host architecture.  */
-	  mask <<= size * 4;
-	  mask <<= size * 4;
-	  if ((add_number & mask) != 0
-	      && (add_number & mask) != mask)
+	  if (size < sizeof (mask))
 	    {
-	      char buf[50], buf2[50];
-	      sprint_value (buf, fragP->fr_address + where);
-	      if (add_number > 1000)
-		sprint_value (buf2, add_number);
-	      else
-		sprintf (buf2, "%ld", (long) add_number);
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    "Value of %s too large for field of %d bytes at %s",
-			    buf2, size, buf);
-	    }			/* generic error checking */
+	      /* set all bits to one */
+	      mask--;
+	      /* Technically, combining these produces an undefined result
+		 if size is sizeof (valueT), though I think these two
+		 half-way operations should both be defined.  And the
+		 compiler should be able to combine them if it's valid on
+		 the host architecture.  */
+	      mask <<= size * 4;
+	      mask <<= size * 4;
+	      if ((add_number & mask) != 0
+		  && (add_number & mask) != mask)
+		{
+		  char buf[50], buf2[50];
+		  sprint_value (buf, fragP->fr_address + where);
+		  if (add_number > 1000)
+		    sprint_value (buf2, add_number);
+		  else
+		    sprintf (buf2, "%ld", (long) add_number);
+		  as_bad_where (fixP->fx_file, fixP->fx_line,
+				"Value of %s too large for field of %d bytes at %s",
+				buf2, size, buf);
+		} /* generic error checking */
+	    }
 #ifdef WARN_SIGNED_OVERFLOW_WORD
 	  /* Warn if a .word value is too large when treated as a signed
 	     number.  We already know it is not too negative.  This is to
