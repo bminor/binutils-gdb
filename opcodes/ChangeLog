@@ -1,4 +1,9 @@
 start-sanitize-v850
+Thu Aug 29 11:10:46 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (v850_opcodes): Fix opcode specs for
+	sld.w, sst.b, sst.h, sst.w, and nop.
+
 Wed Aug 28 15:55:43 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (v850_opcodes): Add null opcode to mark the

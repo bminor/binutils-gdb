@@ -139,10 +139,10 @@ const struct v850_opcode v850_opcodes[] = {
 /* load/store instructions */
 { "sld.b",	one(0x0300),		one(0x0780),	IF4A, 2 },
 { "sld.h",	one(0x0400),		one(0x0780),	IF4A, 2 },
-{ "sld.w",	one(0x0500),		one(0x0780),	IF4A, 2 },
-{ "sst.b",	OP(0x00),		OP_MASK,	IF4B, 2 },
-{ "sst.h",	OP(0x00),		OP_MASK,	IF4D, 2 },
-{ "sst.w",	OP(0x00),		OP_MASK,	IF4D, 2 },
+{ "sld.w",	one(0x0500),		one(0x0781),	IF4A, 2 },
+{ "sst.b",	one(0x0380),		one(0x0780),	IF4B, 2 },
+{ "sst.h",	one(0x0480),		one(0x0780),	IF4D, 2 },
+{ "sst.w",	one(0x0501),		one(0x0781),	IF4D, 2 },
 
 { "ld.b",	two(0x0700,0x0000),	two (0x07e0,0x0000),	IF7A, 4 },
 { "ld.h",	two(0x0720,0x0000),	two (0x07e0,0x0001),	IF7A, 4 },
@@ -236,7 +236,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "trap",	two(0x07e0,0x0100),	two(0xffe0,0xffff),	{I5U}, 4 },
 { "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{R2,SR1}, 4 },
 { "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	{SR1,R2}, 4 },
-{ "nop",	one(0x00),		one(0xff),		{0}, 2 },
+{ "nop",	one(0x00),		one(0xffff),		{0}, 2 },
 { 0, 0, 0, {0}, 0 },
 
 } ;
