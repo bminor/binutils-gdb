@@ -1,3 +1,9 @@
+2001-07-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Only invoke AC_FUNC_SETPGRP if not cross-compiling.
+	Check for SETPGRP_VOID separately if cross-compiling and ISO C
+	headers are available.
+
 2001-07-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386sol2.h (STAB_REG_TO_REGNUM): Redefine to call
