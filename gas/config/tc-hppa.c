@@ -547,7 +547,7 @@ static int need_pa11_opcode PARAMS ((void));
 static int pa_parse_number PARAMS ((char **, int));
 static label_symbol_struct *pa_get_label PARAMS ((void));
 #ifdef OBJ_SOM
-static int log2 PARAMS ((int));
+static int exact_log2 PARAMS ((int));
 static void pa_compiler PARAMS ((int));
 static void pa_align PARAMS ((int));
 static void pa_space PARAMS ((int));
@@ -574,7 +574,6 @@ static ssd_chain_struct *pa_subsegment_to_subspace PARAMS ((asection *,
 static sd_chain_struct *pa_find_space_by_number PARAMS ((int));
 static unsigned int pa_subspace_start PARAMS ((sd_chain_struct *, int));
 static sd_chain_struct *pa_parse_space_stmt PARAMS ((char *, int));
-static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static void pa_spaces_begin PARAMS ((void));
 #endif
 static void pa_ip PARAMS ((char *));
@@ -5928,8 +5927,8 @@ pa_align (bytes)
 
   /* If bytes is a power of 2, then update the current subspace's
      alignment if necessary.  */
-  if (log2 (bytes) != -1)
-    record_alignment (current_subspace->ssd_seg, log2 (bytes));
+  if (exact_log2 (bytes) != -1)
+    record_alignment (current_subspace->ssd_seg, exact_log2 (bytes));
 }
 #endif
 
@@ -7150,7 +7149,7 @@ pa_procend (unused)
    return log2 (VALUE).  Else return -1.  */
 
 static int
-log2 (value)
+exact_log2 (value)
      int value;
 {
   int shift = 0;
@@ -7554,7 +7553,7 @@ pa_subspace (create_new)
 		  *input_line_pointer = c;
 		  input_line_pointer++;
 		  alignment = get_absolute_expression ();
-		  if (log2 (alignment) == -1)
+		  if (exact_log2 (alignment) == -1)
 		    {
 		      as_bad (_("Alignment must be a power of 2"));
 		      alignment = 1;
@@ -7660,7 +7659,7 @@ pa_subspace (create_new)
       bfd_set_section_flags (stdoutput, section, applicable);
 
       /* Record any alignment request for this section.  */
-      record_alignment (section, log2 (alignment));
+      record_alignment (section, exact_log2 (alignment));
 
       /* Set the starting offset for this section.  */
       bfd_set_section_vma (stdoutput, section,
@@ -7823,7 +7822,7 @@ create_new_space (name, spnum, loadable, defined, private,
 		  sort, seg, user_defined)
      char *name;
      int spnum;
-     int loadable;
+     int loadable ATTRIBUTE_UNUSED;
      int defined;
      int private;
      int sort;
@@ -7908,11 +7907,14 @@ create_new_subspace (space, name, loadable, code_only, comdat, common,
 		     alignment, quadrant, seg)
      sd_chain_struct *space;
      char *name;
-     int loadable, code_only, comdat, common, dup_common, is_zero;
+     int loadable ATTRIBUTE_UNUSED;
+     int code_only ATTRIBUTE_UNUSED;
+     int comdat, common, dup_common;
+     int is_zero ATTRIBUTE_UNUSED;
      int sort;
      int access;
-     int space_index;
-     int alignment;
+     int space_index ATTRIBUTE_UNUSED;
+     int alignment ATTRIBUTE_UNUSED;
      int quadrant;
      asection *seg;
 {
@@ -8158,16 +8160,6 @@ pa_subspace_start (space, quadrant)
   else
     return 0;
   return 0;
-}
-
-/* FIXME.  Needs documentation.  */
-static int
-pa_next_subseg (space)
-     sd_chain_struct *space;
-{
-
-  space->sd_last_subseg++;
-  return space->sd_last_subseg;
 }
 #endif
 

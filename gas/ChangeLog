@@ -1,5 +1,10 @@
 2004-06-10  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* config/tc-hppa.c (log2): Rename to exact_log2.
+	(pa_next_subseg): Delete unused function.
+	(create_new_space): Mark unused arguments with ATTRIBUTE_UNUSED.
+	(create_new_subspace): Likewise.
+
 	Bug gas/213
 	* config/tc-hppa.c (hppa_fix_adjustable): Allow reduction of fake
 	labels.  Fix warning.
