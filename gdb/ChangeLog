@@ -1,5 +1,17 @@
 2000-12-20  Fernando Nasser  <fnasser@redhat.com>
 
+	* Makefile.in (UIOUT_CFLAGS): New macro. CFLAGS needed for uiout code
+	to be compiled.  Defines UI_OUT.
+	(SUBDIR_MI_CFLAGS): Defines MI_OUT, not UI_OUT.
+	(INTERNAL_WARN_CFLAGS): Also include UIOUT_CFLAGS.
+	* configure.in (UIOUT_CFLAGS): New configuration variable.
+	(--with-uiout): New configuration option.  Causes uiout code to
+	be compiled, instead of the old *printf one.
+	* configure: Regenerate.
+	* top.c (print_gdb_version): Test for and print MI_OUT, not UI_OUT.
+
+2000-12-20  Fernando Nasser  <fnasser@redhat.com>
+
 	* complaints.c (complain): Call warning_hook if defined, instead of
 	writting to gdb_stderr.
 	(clear_complaints): Do not write anything to gdb_stderr if warning_hook

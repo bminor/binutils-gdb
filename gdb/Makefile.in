@@ -106,6 +106,9 @@ LIBIBERTY = ../libiberty/libiberty.a
 MMALLOC = @MMALLOC@
 MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
 
+# Configured by the --with-uiout option to configure.
+UIOUT_CFLAGS = @UIOUT_CFLAGS@
+
 # We are using our own version of REGEX now to be consistent across
 # machines.
 REGEX = @REGEX@
@@ -169,7 +172,7 @@ SUBDIR_MI_INITS = \
 	mi/mi-cmds.c mi/mi-parse.c mi/mi-main.c mi/mi-out.c
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
-	-DUI_OUT=1
+	-DMI_OUT=1
 SUBDIR_MI_ALL=
 SUBDIR_MI_CLEAN=
 SUBDIR_MI_INSTALL=
@@ -318,7 +321,7 @@ INTERNAL_WARN_CFLAGS = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(ENABLE_CFLAGS) \
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(UIOUT_CFLAGS) \
 	$(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 

@@ -525,6 +525,29 @@ case ${enable_gdbmi} in
     ;;
 esac
 
+# Configure UI_OUT by default (before 5.2 it can be disabled)
+# It must be configured if gdbmi is configured
+
+UIOUT_CFLAGS=
+AC_SUBST(UIOUT_CFLAGS)
+
+AC_ARG_WITH(uiout,
+[  --with-uiout          Use new uiout functions intead of *printf's],
+[case "${withval}" in
+  yes)  want_uiout=true ;;
+  no)   if test $enable_gdbmi = yes; then
+          AC_MSG_ERROR(uiout is needed for MI and cannot be disabled)
+        else
+           want_uiout=false
+        fi ;;
+  *)    AC_MSG_ERROR(bad value ${withval} for GDB with-uiout option) ;;
+esac],
+[want_uiout=true])dnl
+
+if test $want_uiout = true; then
+   UIOUT_CFLAGS="-DUI_OUT=1"
+fi
+
 AC_ARG_ENABLE(tui,
 [  --enable-tui            Enable full-screen terminal user interface],
 [
