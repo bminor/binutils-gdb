@@ -43,15 +43,18 @@ struct frame_info;
 
 struct frame_id
 {
-  /* The frame's address.  This should be constant through out the
-     lifetime of a frame.  */
+  /* The frame's stack address.  This shall be constant through out
+     the lifetime of a frame.  Since the frame's lifetime includes the
+     prologue, and the value needs to always fall on or within the
+     bounds of the frame, this stack value is best pointed at the
+     inner-most address of the previous frame.  */
   /* NOTE: cagney/2002-11-16: The ia64 has two stacks and hence two
      frame bases.  This will need to be expanded to accomodate that.  */
-  CORE_ADDR base;
-  /* The frame's current PC.  While the PC within the function may
-     change, the function that contains the PC does not.  Should this
-     instead be the frame's function?  */
-  CORE_ADDR pc;
+  CORE_ADDR stack_addr;
+  /* The frame's function address.  This shall be constant through out
+     the lifetime of the frame.  While the PC within the function may
+     change, the function that contains the PC does not.  */
+  CORE_ADDR func_addr;
 };
 
 /* Methods for constructing and comparing Frame IDs.
@@ -65,12 +68,11 @@ struct frame_id
 /* For convenience.  All fields are zero.  */
 extern const struct frame_id null_frame_id;
 
-/* Construct a frame ID.  The second parameter isn't yet well defined.
-   It might be the containing function, or the resume PC (see comment
-   above in `struct frame_id')?  A func/pc of zero indicates a
-   wildcard (i.e., do not use func in frame ID comparisons).  */
-extern struct frame_id frame_id_build (CORE_ADDR base,
-				       CORE_ADDR func_or_pc);
+/* Construct a frame ID.  The first parameter is the frame's stack
+   address, and the second the frame's function (or zero, to indicate
+   a wild card).  */
+extern struct frame_id frame_id_build (CORE_ADDR stack_addr,
+				       CORE_ADDR func_addr);
 
 /* Returns non-zero when L is a valid frame (a valid frame has a
    non-zero .base).  */
@@ -309,6 +311,13 @@ extern const char *frame_map_regnum_to_name (int regnum);
 
 extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
 
+/* Unwind/return the frame's function, or 0 if the frame's function is
+   unknown.  This is a wrapper to get_pc_function_start of
+   frame_pc_unwind.  */
+extern CORE_ADDR frame_func_unwind (struct frame_info *frame);
+extern CORE_ADDR get_frame_func (struct frame_info *frame);
+
+
 /* Discard the specified frame.  Restoring the registers to the state
    of the caller.  */
 extern void frame_pop (struct frame_info *frame);
@@ -344,17 +353,6 @@ struct frame_saved_regs
 
 struct frame_info
   {
-    /* Nominal address of the frame described.  See comments at
-       get_frame_base() about what this means outside the *FRAME*
-       macros; in the *FRAME* macros, it can mean whatever makes most
-       sense for this machine.  */
-    CORE_ADDR frame;
-
-    /* Address at which execution is occurring in this frame.
-       For the innermost frame, it's the current pc.
-       For other frames, it is a pc saved in the next frame.  */
-    CORE_ADDR pc;
-
     /* Level of this frame.  The inner-most (youngest) frame is at
        level 0.  As you move towards the outer-most (oldest) frame,
        the level increases.  This is a cached value.  It could just as
@@ -407,6 +405,13 @@ struct frame_info
     /* Cached copy of the previous frame's resume address.  */
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
+
+    /* Cached copy of the previous frame's function.  */
+    struct
+    {
+      int p;
+      CORE_ADDR cache;
+    } func;
 
     /* This frame's ID.  Note that the frame's ID, base and PC contain
        redundant information.  */

@@ -3418,7 +3418,7 @@ print_one_breakpoint (struct breakpoint *b,
       ui_out_text (uiout, "\tstop only in stack frame at ");
       /* FIXME: cagney/2002-12-01: Shouldn't be poeking around inside
          the frame ID.  */
-      ui_out_field_core_addr (uiout, "frame", b->frame_id.base);
+      ui_out_field_core_addr (uiout, "frame", b->frame_id.stack_addr);
       ui_out_text (uiout, "\n");
     }
   

@@ -1,3 +1,52 @@
+2003-04-03  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (frame_id_eq): Update.  Compare function addresses.
+	(get_frame_func): New function.
+	(frame_func_unwind): New function.
+	(legacy_get_prev_frame): Move linking of prev to next to the start
+	of the function.
+	(frame_id_p): Update.
+	(get_frame_id): Return the frame's "id".  Do not set "frame".
+	(frame_id_build): Update.
+	(frame_id_inner): Update.
+	(create_sentinel_frame): Do not set the "pc".
+	(select_frame): Use get_frame_pc.
+	(legacy_saved_regs_this_id): Use frame_id_build.
+	(create_new_frame): Set the frame's ID.  Store the PC in the
+	sentinel frame's PC unwind cache.
+	(legacy_get_prev_frame): Do not set "pc" or "frame".  Instead use
+	frame_pc_unwind, frame_id_build, deprecated_update_frame_pc_hack,
+	and deprecated_update_frame_base_hack.
+	(get_prev_frame): Do not set "pc" or "frame", instead use
+	frame_pc_unwind.
+	(get_frame_pc): Use frame_pc_unwind.
+	(find_frame_sal): Use get_frame_pc.
+	(get_frame_base): Return the frame ID's stack address.
+	(deprecated_update_frame_base_hack): Set the frame ID's stack
+	address.
+	(frame_id_eq, frame_id_p, frame_id_inner, get_frame_id): Add debug
+	print statements.
+
+	* d10v-tdep.c (d10v_frame_unwind_cache): Use frame_func_unwind.
+	(d10v_frame_this_id): Get the frame's function.
+	(d10v_frame_this_id): Use frame_id_eq.
+	(d10v_unwind_dummy_id): Use frame_id_build.
+
+	* stack.c (print_frame_info): Use get_frame_pc.
+
+	* dummy-frame.c (dummy_frame_this_id): Use frame_id_build.  Update
+	parameter to find_dummy_frame.
+
+	* breakpoint.c (print_one_breakpoint): Update.
+
+	* frame.h (struct frame_id): Rename "base" to "stack_addr",
+	replace "pc" with "func_addr".
+	(frame_id_build): Update parameter names and comment.
+	(struct frame_info): Delete "frame" and "pc" fields.
+	(frame_func_unwind): Declare.
+	(get_frame_func): Declare.
+	(struct frame_info): Add field "func".
+
 2003-04-02  Bob Rossi  <bob_rossi@cox.net>
 
 	* Makefile.in (SUBDIR_MI_OBS): Add "mi-cmd-file.o".
