@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "bfd.h"
 #include <time.h> /* For time_t in libbfd.h.  */
+#include <sys/types.h> /* For time_t, if not in time.h.  */
 #include "libbfd.h"		/* For bfd_elf_find_section */
 #include "libelf.h"
 #include "symtab.h"

@@ -29,7 +29,7 @@ Tue Sep 14 12:21:49 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 Tue Sep 14 09:12:17 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* paread.c, coffread.c, elfread.c, dwarfread.c:
-	Include <time.h> before libbfd.h.
+	Include <time.h> and <sys/types.h> before libbfd.h.
 
 	* paread.c: Define BYTES_IN_WORD before including aout/aout64.h.
 
