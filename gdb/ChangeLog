@@ -1,5 +1,8 @@
 Fri Aug 13 14:37:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* Makefile.in (remote-bug.o): new rule.
+	  (ALLDEPFILES): added remote-bug.c
+
 	* remote-hms.c (hms_wait): use -1 for timeout's which means block
 	  forever rather than 99999.
 
