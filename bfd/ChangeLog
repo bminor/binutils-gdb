@@ -1,3 +1,10 @@
+2003-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add top_id.
+	(ppc64_elf_setup_section_lists): Set it.
+	(ppc64_elf_relocate_section): Check sym section id against top_id.
+	(ppc_build_one_stub): Comment on top_id.
+
 2003-06-20  Ralf Corsepius  <corsepiu@faw.uni-ulm.de>
 
 	* config.bfd: Add tic4x-*-rtems*.

@@ -2708,6 +2708,9 @@ struct ppc_link_hash_table
   /* Temp used when calculating TOC pointers.  */
   bfd_vma toc_curr;
 
+  /* Highest input section id.  */
+  int top_id;
+
   /* Highest output section index.  */
   int top_index;
 
@@ -6114,7 +6117,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  /* Point the symbol at the stub.  There may be multiple stubs,
 	     we don't really care;  The main thing is to make this sym
-	     defined somewhere.  */
+	     defined somewhere.  Maybe defining the symbol in the stub
+	     section is a silly idea.  If we didn't do this, htab->top_id
+	     could disappear.  */
 	  stub_entry->h->oh->root.type = bfd_link_hash_defined;
 	  stub_entry->h->oh->root.u.def.section = stub_entry->stub_sec;
 	  stub_entry->h->oh->root.u.def.value = stub_entry->stub_offset;
@@ -6285,6 +6290,7 @@ ppc64_elf_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
 	}
     }
 
+  htab->top_id = top_id;
   amt = sizeof (struct map_stub) * (top_id + 1);
   htab->stub_group = bfd_zmalloc (amt);
   if (htab->stub_group == NULL)
@@ -8314,6 +8320,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if ((relocation + addend - from + max_br_offset >= 2 * max_br_offset
 	       || (sec != NULL
 		   && sec->output_section != NULL
+		   && sec->id <= htab->top_id
 		   && (htab->stub_group[sec->id].toc_off
 		       != htab->stub_group[input_section->id].toc_off)))
 	      && (stub_entry = ppc_get_stub_entry (input_section, sec, h,
