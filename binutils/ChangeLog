@@ -1,5 +1,17 @@
 2003-03-24  Elias Athanasopoulos  <elathan@phys.uoa.gr>
 
+	* objcopy (OPTION_FORMATS_INFO): Define.
+	(strip_options): Add "info"/OPTION_FORMATS_INFO option.
+	(copy_options): Likewise.
+	(strip_usage): Add "--info" to usage.
+	(copy_usage): Likewise.
+	(strip_main): Declare formats_info. Iniatilize it to FALSE.
+	Handle "info".
+	(copy_main). Likewise.
+	* doc/binutils.texi. Document the "--info" option for
+	objcopy/strip.
+	* NEWS: Mention the new command line switch.
+
 	* objdump.c (endian_string): Move to bucomm.c.
 	(display_info): Likewise.
 	(display_target_list): Likewise.

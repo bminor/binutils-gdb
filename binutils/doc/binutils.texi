@@ -970,7 +970,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--prefix-alloc-sections=}@var{string}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]  
-        [@option{--help}]
+        [@option{--help}] [@option{--info}]
         @var{infile} [@var{outfile}]
 @c man end
 @end smallexample
@@ -1348,6 +1348,9 @@ archives, @samp{objcopy -V} lists all members of the archive.
 
 @item --help
 Show a summary of the options to @command{objcopy}.
+
+@item --info
+Display a list showing all architectures and object formats available.
 @end table
 
 @c man end
@@ -2051,7 +2054,8 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname} ]
       [@option{-x}|@option{--discard-all} ] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname} ]
       [@option{-o} @var{file} ] [@option{-p}|@option{--preserve-dates}]
-      [@option{-v} |@option{--verbose}]  [@option{-V}|@option{--version}] [@option{--help}]
+      [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
+      [@option{--help}] [@option{--info}]
       @var{objfile}@dots{}
 @c man end
 @end smallexample
@@ -2078,6 +2082,9 @@ code format @var{bfdname}, and rewrite it in the same format.
 
 @item --help
 Show a summary of the options to @command{strip} and exit.
+
+@item --info
+Display a list showing all architectures and object formats available.
 
 @item -I @var{bfdname}
 @itemx --input-target=@var{bfdname}

@@ -275,6 +275,7 @@ static char *prefix_alloc_sections_string = 0;
 #define OPTION_PREFIX_SYMBOLS (OPTION_ALT_MACH_CODE + 1)
 #define OPTION_PREFIX_SECTIONS (OPTION_PREFIX_SYMBOLS + 1)
 #define OPTION_PREFIX_ALLOC_SECTIONS (OPTION_PREFIX_SECTIONS + 1)
+#define OPTION_FORMATS_INFO (OPTION_PREFIX_ALLOC_SECTIONS + 1)
 
 /* Options to handle if running as "strip".  */
 
@@ -284,6 +285,7 @@ static struct option strip_options[] =
   {"discard-locals", no_argument, 0, 'X'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"help", no_argument, 0, 'h'},
+  {"info", no_argument, 0, OPTION_FORMATS_INFO},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"keep-symbol", required_argument, 0, 'K'},
@@ -327,6 +329,7 @@ static struct option copy_options[] =
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"help", no_argument, 0, 'h'},
+  {"info", no_argument, 0, OPTION_FORMATS_INFO},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"interleave", required_argument, 0, 'i'},
@@ -457,6 +460,7 @@ copy_usage (stream, exit_status)
   -v --verbose                     List all object files modified\n\
   -V --version                     Display this program's version number\n\
   -h --help                        Display this output\n\
+     --info                        List object formats & architectures supported\n\
 "));
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
@@ -488,6 +492,7 @@ strip_usage (stream, exit_status)
   -v --verbose                     List all object files modified\n\
   -V --version                     Display this program's version number\n\
   -h --help                        Display this output\n\
+     --info                        List object formats & architectures supported\n\
   -o <file>                        Place stripped output into <file>\n\
 "));
 
@@ -2081,9 +2086,12 @@ strip_main (argc, argv)
      int argc;
      char *argv[];
 {
-  char *input_target = NULL, *output_target = NULL;
+  char *input_target = NULL;
+  char *output_target = NULL;
   bfd_boolean show_version = FALSE;
-  int c, i;
+  bfd_boolean formats_info = FALSE;
+  int c;
+  int i;
   struct section_list *p;
   char *output_file = NULL;
 
@@ -2141,6 +2149,9 @@ strip_main (argc, argv)
 	case 'V':
 	  show_version = TRUE;
 	  break;
+	case OPTION_FORMATS_INFO:
+	  formats_info = TRUE;
+	  break;
 	case 0:
 	  /* We've been given a long option.  */
 	  break;
@@ -2152,6 +2163,12 @@ strip_main (argc, argv)
 	}
     }
 
+ if (formats_info)
+   {
+     display_info ();
+     return 0;
+   }
+ 
   if (show_version)
     print_version ("strip");
 
@@ -2214,10 +2231,13 @@ copy_main (argc, argv)
      char *argv[];
 {
   char * binary_architecture = NULL;
-  char *input_filename = NULL, *output_filename = NULL;
-  char *input_target = NULL, *output_target = NULL;
+  char *input_filename = NULL;
+  char *output_filename = NULL;
+  char *input_target = NULL;
+  char *output_target = NULL;
   bfd_boolean show_version = FALSE;
   bfd_boolean change_warn = TRUE;
+  bfd_boolean formats_info = FALSE;
   int c;
   struct section_list *p;
   struct stat statbuf;
@@ -2323,6 +2343,10 @@ copy_main (argc, argv)
 
 	case 'V':
 	  show_version = TRUE;
+	  break;
+
+	case OPTION_FORMATS_INFO:
+	  formats_info = TRUE;
 	  break;
 
 	case OPTION_WEAKEN:
@@ -2659,6 +2683,12 @@ copy_main (argc, argv)
 	}
     }
 
+  if (formats_info)
+    {
+      display_info ();
+      return 0;
+    }
+ 
   if (show_version)
     print_version ("objcopy");
 
@@ -2705,7 +2735,6 @@ copy_main (argc, argv)
 
   /* If there is no destination file then create a temp and rename
      the result into the input.  */
-
   if (output_filename == (char *) NULL)
     {
       char *tmpname = make_tempname (input_filename);

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added --info switch to objcopy and strip.
+
 * Support for Vitesse IQ2000 added by Red Hat.
 
 * Added 'S' encoding to strings to allow the display of 8-bit characters.
