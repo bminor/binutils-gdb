@@ -7,6 +7,14 @@ Thu May 14 23:10:48 1998  Mark Alexander  <marka@cygnus.com>
 	* (dispatch_instruction): Add emulation of SDIV, SDIVCC, UDIV,
 	and UDIVCC.
 	
+Wed May 13 14:59:54 1998  Mark Alexander  <marka@cygnus.com>
+
+	* erc32.c (close_port): Don't close stdin; it kills GDB.
+	(byte_swap_words): New function.
+	* sis.h: (byte_swap_words): Declare.
+	* interf.c (run_sim): Always fetch instructions as big-endian.
+	* sis.c (run_sim): Ditto.
+
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure: Regenerated to track ../common/aclocal.m4 changes.
