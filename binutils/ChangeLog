@@ -1,3 +1,7 @@
+Fri Mar 19 14:40:08 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* objdump.c (disassemble_data): Add H8500.
+
 Fri Mar 19 10:56:51 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* objdump.c (usage): Mention long options.
