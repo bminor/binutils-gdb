@@ -30,6 +30,7 @@
 #include <machine/reg.h>
 
 #include "m68k-tdep.h"
+#include "inf-ptrace.h"
 
 static int
 m68kbsd_gregset_supplies_p (int regnum)
@@ -226,8 +227,8 @@ _initialize_m68kbsd_nat (void)
   struct target_ops *t;
 
   t = inf_ptrace_target ();
-  t->to_fetch_registers = vaxbsd_fetch_inferior_registers;
-  t->to_store_registers = vaxbsd_store_inferior_registers;
+  t->to_fetch_registers = m68kbsd_fetch_inferior_registers;
+  t->to_store_registers = m68kbsd_store_inferior_registers;
   add_target (t);
 
   /* Support debugging kernel virtual memory images.  */

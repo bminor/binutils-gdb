@@ -1,3 +1,9 @@
+2004-11-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68kbsd-nat.c: Include "inf-ptrace.h".
+	(_initialize_m68kbsd_nat): Fix pasto.
+	* Makefile.in (m68kbsd-nat.o): Update dependencies.
+
 2004-11-08  Randolph Chung  <tausq@debian.org>
 
 	* infrun.c (debug_infrun): New variable.
