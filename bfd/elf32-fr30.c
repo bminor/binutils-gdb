@@ -359,6 +359,7 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
 {
   bfd_reloc_status_type r = bfd_reloc_ok;
   bfd_vma               x;
+  bfd_signed_vma	srel;
   
   switch (howto->type)
     {
@@ -383,37 +384,36 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
     case R_FR30_9_PCREL:
       contents   += rel->r_offset + 1;
       relocation += rel->r_addend;
-      relocation -= (input_section->output_section->vma +
+      srel = (bfd_signed_vma) relocation;
+      srel -= (input_section->output_section->vma +
 		     input_section->output_offset);
       
-      if (relocation & 1)
+      if (srel & 1)
 	return bfd_reloc_outofrange;
-      if (relocation > ((1 << 8) - 1) || (relocation < - (1 << 8)))
+      if (srel > ((1 << 8) - 1) || (srel < - (1 << 8)))
 	return bfd_reloc_overflow;
       
-      bfd_put_8 (input_bfd, relocation >> 1, contents);
+      bfd_put_8 (input_bfd, srel >> 1, contents);
       break;
 
     case R_FR30_12_PCREL:
       contents   += rel->r_offset;
       relocation += rel->r_addend;
-      relocation -= (input_section->output_section->vma +
+      srel = (bfd_signed_vma) relocation;
+      srel -= (input_section->output_section->vma +
 		     input_section->output_offset);
       
-      if (relocation & 1)
+      if (srel & 1)
 	return bfd_reloc_outofrange;
-      if (relocation > ((1 << 11) - 1) || (relocation < - (1 << 11)))
-	return bfd_reloc_overflow;
+      if (srel > ((1 << 11) - 1) || (srel < - (1 << 11)))
+	  return bfd_reloc_overflow;
       
       x = bfd_get_16 (input_bfd, contents);
-      x = (x & 0xf800) | ((relocation >> 1) & 0x7ff);
+      x = (x & 0xf800) | ((srel >> 1) & 0x7ff);
       bfd_put_16 (input_bfd, x, contents);
       break;
 
     default:
-fprintf (stderr, " type: %d offset: %x, before: %x\n",
-	 howto->type, rel->r_offset, bfd_get_32 (input_bfd, contents + rel->r_offset));
- 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
 				    relocation, rel->r_addend);
@@ -477,8 +477,6 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
 
-fprintf (stderr, "Relocate section: %s\n", bfd_section_name (input_bfd, input_section));
-  
   for (rel = relocs; rel < relend; rel ++)
     {
       reloc_howto_type *           howto;
@@ -529,7 +527,7 @@ fprintf (stderr, "Relocate section: %s\n", bfd_section_name (input_bfd, input_se
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
-#if 1
+#if 0
 	  fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
 		   sec->name, name, sym->st_name,
 		   sec->output_section->vma, sec->output_offset,
@@ -553,7 +551,7 @@ fprintf (stderr, "Relocate section: %s\n", bfd_section_name (input_bfd, input_se
 	      relocation = (h->root.u.def.value
 			    + sec->output_section->vma
 			    + sec->output_offset);
-#if 1
+#if 0
 	      fprintf (stderr,
 		       "defined: sec: %s, name: %s, value: %x + %x + %x gives: %x\n",
 		       sec->name, name, h->root.u.def.value,
@@ -562,7 +560,7 @@ fprintf (stderr, "Relocate section: %s\n", bfd_section_name (input_bfd, input_se
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    {
-#if 1
+#if 0
 	      fprintf (stderr, "undefined: sec: %s, name: %s\n",
 		       sec->name, name);
 #endif
@@ -574,7 +572,7 @@ fprintf (stderr, "Relocate section: %s\n", bfd_section_name (input_bfd, input_se
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset)))
 		return false;
-#if 1
+#if 0
 	      fprintf (stderr, "unknown: name: %s\n", name);
 #endif
 	      relocation = 0;

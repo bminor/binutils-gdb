@@ -1,3 +1,8 @@
+1998-12-07  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-fr30.c (fr30_final_link_relocate): Using signed
+	relocations for signed values.
+
 Sun Dec  6 16:30:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mipsbsd.c (MY(set_arch_mach)): Make static.
