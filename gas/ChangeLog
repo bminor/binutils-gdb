@@ -1,3 +1,15 @@
+Sun Nov 12 21:14:56 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_ip): Fix off-by-2 bug in length check for
+	conditional branches.
+	(md_apply_fix): Likewise.
+
+Thu Nov  9 16:14:01 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-a29k.c (md_apply_fix): Warn if an attempt is made to
+	generate a reloc which the linker will not handle correctly.  Fix
+	overflow checking--R_IREL is 18 bits, not 17.
+
 Wed Nov  8 19:59:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (fixup_segment): Don't subtract md_pcrel_from
