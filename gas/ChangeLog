@@ -1,3 +1,11 @@
+2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.in (em): Set to irix on all Irix systems.
+	* configure: Rebuilt.
+	* config/te-irix.h: New file.
+	* config/tc-mips.c (mips_dwarf2_format): Use TE_IRIX to decide
+	whether to use Irix-specific 64-bit format.
+
 2003-01-27  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (s390_elf_cons): Avoid designated initializers.

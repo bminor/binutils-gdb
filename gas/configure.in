@@ -361,9 +361,9 @@ changequote([,])dnl
       mips-*-osf*)			fmt=ecoff endian=little ;;
       mips-*-ecoff*)			fmt=ecoff ;;
       mips-*-pe*)			fmt=coff endian=little em=pe ;;
-      mips-*-irix6*)			fmt=elf ;;
-      mips-*-irix5*)			fmt=elf ;;
-      mips-*-irix*)			fmt=ecoff ;;
+      mips-*-irix6*)			fmt=elf em=irix ;;
+      mips-*-irix5*)			fmt=elf em=irix ;;
+      mips-*-irix*)			fmt=ecoff em=irix ;;
       mips-*-lnews*)			fmt=ecoff em=lnews ;;
       mips-*-riscos*)			fmt=ecoff ;;
       mips*-*-linux*)			fmt=elf em=tmips ;;

@@ -14788,7 +14788,13 @@ enum dwarf2_format
 mips_dwarf2_format ()
 {
   if (mips_abi == N64_ABI)
-    return dwarf2_format_64bit_irix;
+    {
+#ifdef TE_IRIX
+      return dwarf2_format_64bit_irix;
+#else
+      return dwarf2_format_64bit;
+#endif
+    }
   else
     return dwarf2_format_32bit;
 }
