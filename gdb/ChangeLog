@@ -1,3 +1,10 @@
+2000-05-31  Mark Kettenis  <kettenis@gnu.org>
+
+	Add support for FreeBSD/Alpha.
+	* alphabsd-nat.c, config/alpha/fbsd.mh, config/alpha/fbsd.mt,
+	config/alpha/nm-fbsd.h, config/alpha/tm-fbsd.h,
+	config/alpha/xm-fbsd.h: New files.
+
 2000-05-31  Pierre Muller  <muller@sourceware.cygnus.com>
 
 	* MAINTAINERS: Add myself to "Write After Approval" list.
