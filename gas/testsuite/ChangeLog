@@ -1,3 +1,19 @@
+Thu Aug 30 21:58:48 2001  J"orn Rennecke <amylaar@redhat.com>
+
+	* gas/h8300/h8300.exp (do_h8300_cbranch): Remove invocation.
+	(do_h8300_branch, do_h8300h_cbranch, do_h8300h_branch): Likewise.
+	(do_h8300s_cbranch, do_h8300s_branch, ffxx1): Likwise.
+	* gas/h8300/h8300-coff.exp, gas/h8300/h8300-elf.exp: New files.
+	* gas/h8300/branch-elf.s, gas/h8300/branchh-elf.s: Likewise.
+	* gas/h8300/branchs-elf.s, gas/h8300/ffxx1-elf.d: Likewise.
+	* gas/h8300/ffxx1-elf.s: Likewise.
+	* gas/h8300/branch.s, gas/h8300/branchh.s: Move to:
+	* gas/h8300/branch-coff.s, gas/h8300/branchh-coff.s
+	* gas/h8300/branchs.s, gas/h8300/ffxx1.d: Move to:
+	* gas/h8300/branchs-coff.s, gas/h8300/ffxx1-coff.d .
+	* gas/h8300/ffxx1.s: Move to:
+	* gas/h8300/ffxx1-coff.s .
+
 Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* lib/gas-defs.exp: (regexp_diff) At verbosity 3, also show
