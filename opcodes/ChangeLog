@@ -1,3 +1,22 @@
+Thu Jan 26 18:32:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ppc-opc.c: Changes based on patch from David Edelsohn
+	<edelsohn@npac.syr.edu>.
+	(powerpc_operands): Add operands SPRBAT and SPRG. Split TBR out of
+	SPR.
+	(FXM_MASK): Define.
+	(insert_tbr): New static function.
+	(extract_tbr): New static function.
+	(XFXFXM_MASK, XFXM): Define.
+	(XSPRBAT_MASK, XSPRG_MASK): Define.
+	(powerpc_opcodes): Add instructions to access special registers by
+	name.  Add mtcr and mftbu.
+
+Tue Jan 17 10:56:43 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* mips-opc.c (P3): Define.
+	(mips_opcodes): Add mad and madu.
+
 Sun Jan 15 16:32:59 1995  Steve Chamberlain  <sac@splat>
 
 	* configure.in: Add W65 support.
