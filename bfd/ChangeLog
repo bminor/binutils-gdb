@@ -1,3 +1,13 @@
+2001-08-27  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-mips.c (_bfd_mips_elf_hide_symbol): Add prototype.
+	(_bfd_mips_elf_copy_indirect_symbol): Likewise.
+	(_bfd_elf32_mips_grok_prstatus): Likewise.
+	(_bfd_elf32_mips_grok_psinfo): Likewise.
+	(_bfd_mips_elf_hide_symbol): Make it static and cast to
+	`struct mips_elf_link_hash_entry *'.
+	(_bfd_mips_elf_copy_indirect_symbol): Make it static.
+
 2001-08-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* mipsbsd.c: Add missing prototypes.

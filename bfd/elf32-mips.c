@@ -210,6 +210,15 @@ static boolean mips_elf_stub_section_p
   PARAMS ((bfd *, asection *));
 static int sort_dynamic_relocs
   PARAMS ((const void *, const void *));
+static void _bfd_mips_elf_hide_symbol
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static void _bfd_mips_elf_copy_indirect_symbol
+  PARAMS ((struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
+static boolean _bfd_elf32_mips_grok_prstatus
+  PARAMS ((bfd *, Elf_Internal_Note *));
+static boolean _bfd_elf32_mips_grok_psinfo
+  PARAMS ((bfd *, Elf_Internal_Note *));
 
 extern const bfd_target bfd_elf32_tradbigmips_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_vec;
@@ -3999,14 +4008,16 @@ mips_elf_link_hash_newfunc (entry, table, string)
   return (struct bfd_hash_entry *) ret;
 }
 
-void
-_bfd_mips_elf_hide_symbol (info, h)
+static void
+_bfd_mips_elf_hide_symbol (info, entry)
      struct bfd_link_info *info;
-     struct mips_elf_link_hash_entry *h;
+     struct elf_link_hash_entry *entry;
 {
   bfd *dynobj;
   asection *got;
   struct mips_got_info *g;
+  struct mips_elf_link_hash_entry *h;
+  h = (struct mips_elf_link_hash_entry *) entry;
   dynobj = elf_hash_table (info)->dynobj;
   got = bfd_get_section_by_name (dynobj, ".got");
   g = (struct mips_got_info *) elf_section_data (got)->tdata;
@@ -8065,7 +8076,7 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
    hiding the old indirect symbol.  Process additional relocation
    information.  */
 
-void
+static void
 _bfd_mips_elf_copy_indirect_symbol (dir, ind)
      struct elf_link_hash_entry *dir, *ind;
 {
@@ -9170,7 +9181,8 @@ _bfd_elf32_mips_grok_prstatus (abfd, note)
 					  raw_size, note->descpos + offset);
 }
 
-static boolean _bfd_elf32_mips_grok_psinfo (abfd, note)
+static boolean
+_bfd_elf32_mips_grok_psinfo (abfd, note)
      bfd *abfd;
      Elf_Internal_Note *note;
 {
