@@ -41,6 +41,37 @@ case "${host}" in
   HOSTING_LIBS='-L`dirname \`${CC} --print-file-name=libc.so\`` '"$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
   ;;
 
+*-*-netbsd*)
+  # Different versions of NetBSD with the ELF object format use different
+  # sets of start/end files.
+  HOSTING_CRT0='-dynamic-linker /usr/libexec/ld.elf_so /usr/lib/crt0.o'
+  if [ -f `${CC} --print-file-name=crti.o` ]; then
+    # Support for GCC's crtstuff present.
+    HOSTING_CRT0="$HOSTING_CRT0 `${CC} --print-file-name=crti.o`"
+    if [ -f ../gcc/crtbegin.o ]; then
+      HOSTING_CRT0="$HOSTING_CRT0 ../gcc/crtbegin.o"
+    else
+      HOSTING_CRT0="$HOSTING_CRT0 `${CC} --print-file-name=crtbegin.o`"
+    fi
+  else
+    # Support for GCC's crtstuff not present.
+    HOSTING_CRT0="$HOSTING_CRT0 `${CC} --print-file-name=crtbegin.o`"
+  fi
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi`'
+  if [ -f `${CC} --print-file-name=crtn.o` ]; then
+    # Support for GCC's crtstuff present.
+    if [ -f ../gcc/crtbegin.o ]; then
+      HOSTING_LIBS="$HOSTING_LIBS ../gcc/crtend.o"
+    else
+      HOSTING_LIBS="$HOSTING_LIBS `${CC} --print-file-name=crtend.o`"
+    fi
+    HOSTING_LIBS="$HOSTING_LIBS `${CC} --print-file-name=crtn.o`"
+  else
+    # Support for GCC's crtstuff not present.
+    HOSTING_LIBS="$HOSTING_LIBS `${CC} --print-file-name=crtend.o`"
+  fi
+  ;;
+
 esac
 
 #
@@ -53,10 +84,6 @@ case "${host}" in
   # No further tweaking needed
   ;;
 
-alpha*-*-netbsd*)
-  HOSTING_CRT0=/usr/lib/crt0.o
-  ;;
-
 arm*-*-linux-gnu*)
   HOSTING_CRT0='-p '`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]*\*,ld-linux,g"`
   ;;
@@ -67,7 +94,7 @@ hppa*64*-*-hpux11*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else if test "$GCC" = yes; then ${CC} --print-libgcc-file-name; else gcc --print-libgcc-file-name; fi fi` -lc /usr/lib/pa20_64/milli.a'
   ;;
 
-i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[12] | i[3-7]86-*-freebsd[12]\.* | i[3-7]86-*-freebsd*aout* | i[3-7]86-*-netbsd*)
+i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[12] | i[3-7]86-*-freebsd[12]\.* | i[3-7]86-*-freebsd*aout*)
   HOSTING_CRT0=/usr/lib/crt0.o
   ;;
 
@@ -216,9 +243,6 @@ x86_64-*-linux-gnu*)
   ;;
 
 *-*-netbsd*)
-  # NetBSD typically does not use the GCC crtstuff, so ignore it.
-  HOSTING_CRT0='-dynamic-linker /usr/libexec/ld.elf_so /usr/lib/crt0.o /usr/lib/crtbegin.o'
-  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` /usr/lib/crtend.o'
   ;;
 
 alpha*-*-*)

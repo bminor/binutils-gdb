@@ -1,3 +1,10 @@
+2003-05-29  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.host (*-*-netbsd*): Set HOSTING_CRT0 and HOSTING_LIBS
+	correctly for more recent versions of NetBSD.
+	(alpha*-*-netbsd*): Remove.
+	(i[3-7]86-*-netbsd*): Remove.
+
 2003-05-29  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em: Include "safe-ctype.h" instead of <ctype.h>.
