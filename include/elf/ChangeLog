@@ -1,3 +1,21 @@
+Thu Oct 23 00:42:04 1997  Richard Henderson  <rth@dot.cygnus.com>
+
+	* sparc.h (DT_SPARC_REGISTER): New macro.
+	(DT_SPARC_PLTFMT): In support of old sparc64-linux .plts; will
+	go away soon.
+
+Tue Sep 30 13:26:58 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc.h (EF_SPARC_HAL_R1, EF_SPARC_EXT_MASK): New macros.
+	(EF_SPARCV9_{MM,TSO,PSO,RMO}): New macros.
+	(SHN_BEFORE,SHN_AFTER): New macros.
+	(SHF_EXCLUDE,SHF_ORDERED): New macros.
+	(STT_REGISTER): New macro.
+	(R_SPARC_GLOB_JMP): Deleted, but slot reserved.
+	(R_SPARC_{DISP64,PLT64,HIX22,LOX10}): New relocations.
+	(R_SPARC_{H44,M44,L44,REGISTER}): New relocations.
+	(ELF64_R_TYPE_{DATA,ID,INFO}): New macros.
+
 start-sanitize-v850e
 Wed Sep 17 16:41:42 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -20,10 +38,8 @@ Tue Sep  2 17:41:05 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
 	* common.h: Remove magic number for V850E.
-end-sanitize-v850e
-start-sanitize-v850eq
 	* common.h: Remove magic number for V850EQ.
-end-sanitize-v850eq
+end-sanitize-v850e
 
 	* v850.h: Add new flags for e_flags field in elf header.
 
@@ -31,9 +47,7 @@ start-sanitize-v850e
 Mon Aug 25 16:06:47 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* common.h (EM_CYGNUS_V850E): backend magic number for v850e.
-start-sanitize-v850eq
 	* common.h (EM_CYGNUS_V850EQ): backend magic number for v850eq.
-end-sanitize-v850eq
 end-sanitize-v850e
 
 Mon Aug 18 11:05:23 1997  Nick Clifton  <nickc@cygnus.com>
