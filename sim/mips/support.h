@@ -46,6 +46,8 @@ typedef unsigned long long uword64;
 #define WORD64HI(t)     (unsigned int)(((uword64)(t))>>32)
 #define SET64LO(t)      (((uword64)(t))&0xFFFFFFFF)
 #define SET64HI(t)	(((uword64)(t))<<32)
+#define WORD64(h,l)     ((word64)((SET64HI(h)|SET64LO(l))))
+#define UWORD64(h,l)     (SET64HI(h)|SET64LO(l))
 
 /* Sign-extend the given value (e) as a value (b) bits long. We cannot
    assume the HI32bits of the operand are zero, so we must perform a
@@ -84,6 +86,7 @@ typedef struct uword64 {
 #define WORD64HI(t)     (unsigned int)(t.hi)
 #define SET64LO(t)      (..TODO..) /* need structure into which value will be placed */
 #define SET64HI(t)      (..TODO..) /* need structure into which value will be placed */
+#define WORD64(h,l)     (SET64HI(h)|SET64LO(l))
 
 /* TODO: Update these to manipulate the split structure values */
 #define SIGNEXTEND(e,b)         /* TODO */

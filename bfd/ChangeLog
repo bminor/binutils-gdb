@@ -1,3 +1,9 @@
+start-sanitize-r5900
+        Fri Feb  7 16:20:17 1997  Gavin Koch   <gavin@cygnus.com>
+        
+        * config.bfd: add r5900
+        
+end-sanitize-r5900        
 Fri Feb  7 12:39:11 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_input_bfd): If we've discarded a section,

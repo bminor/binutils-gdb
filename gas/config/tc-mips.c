@@ -148,6 +148,11 @@ static int mips_4010 = -1;
 /* Whether the 4100 MADD16 and DMADD16 are permitted. */
 static int mips_4100 = -1;
 
+/* start-sanitize-r5900 */
+/* Whether Toshiba r5900 instructions are permitted. */
+static int mips_5900 = -1;
+/* end-sanitize-r5900 */
+
 /* Whether the processor uses hardware interlocks, and thus does not
    require nops to be inserted.  */
 static int interlocks = -1;
@@ -780,6 +785,18 @@ md_begin ()
 	  if (mips_cpu == -1)
 	    mips_cpu = 5000;
 	}
+      /* start-sanitize-r5900 */
+      else if (strcmp (cpu, "r5900") == 0
+	       || strcmp (cpu, "mips64vr5900") == 0
+               || strcmp (cpu, "mips64vr5900el") == 0)
+	{
+	  mips_isa = 3;
+	  if (mips_cpu == -1)
+	    mips_cpu = 5900;
+          if (mips_5900 = -1)
+            mips_5900 = 1;
+	}
+      /* end-sanitize-r5900 */
       else if (strcmp (cpu, "r8000") == 0
 	       || strcmp (cpu, "mips4") == 0)
 	{
@@ -826,6 +843,11 @@ md_begin ()
 
   if (mips_4100 < 0)
     mips_4100 = 0;
+
+  /* start-sanitize-r5900 */
+  if (mips_5900 < 0)
+    mips_5900 = 0;
+  /* end-sanitize-r5900 */
 
   if (mips_4010 || mips_4100 || mips_cpu == 4300)
     interlocks = 1;
@@ -2111,7 +2133,12 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4010
 	     && ! mips_4010)
 	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4100
-	     && ! mips_4100))
+	     && ! mips_4100)
+	 /* start-sanitize-r5900 */
+         || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_5900
+	     && ! mips_5900)
+         /* end-sanitize-r5900 */
+         )
     {
       ++insn.insn_mo;
       assert (insn.insn_mo->name);
@@ -6110,7 +6137,12 @@ mips_ip (str, ip)
 	  || ((insn->pinfo & INSN_ISA) == INSN_4010
 	      && ! mips_4010)
 	  || ((insn->pinfo & INSN_ISA) == INSN_4100
-	      && ! mips_4100))
+	      && ! mips_4100)
+          /* start-sanitize-r5900 */
+	  || ((insn->pinfo & INSN_ISA) == INSN_5900
+	      && ! mips_5900)
+          /* end-sanitize-r5900 */
+          )
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
@@ -7708,6 +7740,12 @@ struct option md_longopts[] = {
   {"mips16", no_argument, NULL, OPTION_MIPS16},
 #define OPTION_NO_MIPS16 (OPTION_MD_BASE + 23)
   {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
+  /* start-sanitize-5900 */
+#define OPTION_M5900 (OPTION_MD_BASE + 24)
+  {"m5900", no_argument, NULL, OPTION_M5900},
+#define OPTION_NO_M5900 (OPTION_MD_BASE + 25)
+  {"no-m5900", no_argument, NULL, OPTION_NO_M5900},
+  /* end-sanitize-5900 */
 
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
@@ -7877,6 +7915,10 @@ md_parse_option (c, arg)
 		    || strcmp (p, "5k") == 0
 		    || strcmp (p, "5K") == 0)
 		  mips_cpu = 5000;
+                /* start-sanitize-r5900 */
+                else if (strcmp (p, "5900") == 0)
+                  mips_cpu = 5900;
+                /* end-sanitize-r5900 */
 		break;
 
 	      case '6':
@@ -7937,6 +7979,16 @@ md_parse_option (c, arg)
     case OPTION_NO_M4100:
       mips_4100 = 0;
       break;
+
+      /* start-sanitize-r5900 */
+    case OPTION_M5900:
+      mips_5900 = 1;
+      break;
+
+    case OPTION_NO_M5900:
+      mips_5900 = 0;
+      break;
+      /* end-sanitize-r5900 */
 
     case OPTION_MIPS16:
       mips16 = 1;

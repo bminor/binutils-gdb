@@ -1,3 +1,8 @@
+start-sanitize-r5900
+        Fri Feb  7 16:39:29 1997  Gavin Koch  <gavin@cygnus.com>
+        
+        * config.sub, configure.in: add r5900
+end-sanitize-r5900        
 Sat Feb  8 20:36:49 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* Makefile.in (all-itcl): The rule is all-itcl, not all-tcl.

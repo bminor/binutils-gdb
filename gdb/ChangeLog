@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Fri Feb 07 09:04:37 1997  Gavin Koch  <gavin@cygnus.com>
+        
+        * configure.tgt: added r5900.
+        
+end-sanitize-r5900
 Mon Feb 10 18:35:55 1997  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c (non_heuristic_proc_desc): New function.

@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Fri Feb  7 13:16:53 1997  Gavin Koch  <gavin@cygnus.com>
+        
+        * configure.tgt: add r5900.
+        
+end-sanitize-r5900
 start-sanitize-tic80
 Sun Feb  9 18:09:13 1997  Fred Fish  <fnf@cygnus.com>
 
