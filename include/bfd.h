@@ -1142,6 +1142,10 @@ typedef struct symbol_cache_entry
 	   meaning. */
 #define BSF_DEBUGGING	0x40
 
+	 /* The symbol denotes a function entry point.  Used in ELF,
+	   perhaps others someday.  */
+#define BSF_FUNCTION    0x080
+
 	 /* Used by the linker. */
 #define BSF_KEEP        0x10000
 #define BSF_KEEP_G      0x80000
