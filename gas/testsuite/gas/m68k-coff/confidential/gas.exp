@@ -1,3 +1,0 @@
-if [istarget m68*-*-coff] then {
-    gas_test "p2411.s" "" $stdoptlist "PR 2411"
-}
