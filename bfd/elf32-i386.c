@@ -2066,6 +2066,44 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
+/* Set the correct type for an x86 ELF section.  We do this by the
+   section name, which is a hack, but ought to work.  */
+
+static boolean
+elf_i386_fake_sections (abfd, hdr, sec)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     Elf32_Internal_Shdr *hdr;
+     asection *sec;
+{
+  register const char *name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  if (strcmp (name, ".reloc") == 0)
+    /*
+     * This is an ugly, but unfortunately necessary hack that is
+     * needed when producing EFI binaries on x86. It tells
+     * elf.c:elf_fake_sections() not to consider ".reloc" as a section
+     * containing ELF relocation info.  We need this hack in order to
+     * be able to generate ELF binaries that can be translated into
+     * EFI applications (which are essentially COFF objects).  Those
+     * files contain a COFF ".reloc" section inside an ELFNN object,
+     * which would normally cause BFD to segfault because it would
+     * attempt to interpret this section as containing relocation
+     * entries for section "oc".  With this hack enabled, ".reloc"
+     * will be treated as a normal data section, which will avoid the
+     * segfault.  However, you won't be able to create an ELFNN binary
+     * with a section named "oc" that needs relocations, but that's
+     * the kind of ugly side-effects you get when detecting section
+     * types based on their names...  In practice, this limitation is
+     * unlikely to bite.
+     */
+    hdr->sh_type = SHT_PROGBITS;
+
+  return true;
+}
+
+
 #define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
@@ -2096,5 +2134,6 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_gc_sweep_hook	      elf_i386_gc_sweep_hook
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
+#define elf_backend_fake_sections 	      elf_i386_fake_sections
 
 #include "elf32-target.h"
