@@ -1,5 +1,10 @@
 Mon Apr  4 12:39:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-ppc.c (ppc_insert_operand): Check PPC_OPERAND_SIGNED
+	flag rather than signedp field.  Only permit extended range if
+	PPC_OPERAND_SIGNOPT flag is set and assembling in 32 bit mode.
+	Based on patch from David Edelsohn (edelsohn@npac.syr.edu).
+
 	* config/tc-ppc.c (ppc_size): New static variable.
 	(ppc_arch): Check for PPC_OPCODE_PPC before PPC_OPCODE_POWER.
 	(md_begin): If an instruction has a size specific flag set, only
