@@ -1,10 +1,14 @@
+2002-07-24  Nick Clifton  <nickc@redhat.com>
+	
+	* po/es.po: Updated Spanish translation.
+
 2002-07-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* po/binutils.pot: Regenerated.
 
 2002-07-23  Nick Clifton  <nickc@redhat.com>
 
-	* po/fr.po: New French translation.
+	* po/fr.po: Updated French translation.
 
 2002-07-23  Eric S. Raymond  <esr@golux.thyrsus.com>
 

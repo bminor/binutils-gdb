@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.12.1\n"
 "POT-Creation-Date: 2002-02-08 03:22-0200\n"
-"PO-Revision-Date: 2002-07-23 00:11+0200\n"
+"PO-Revision-Date: 2002-07-23 23:47+0200\n"
 "Last-Translator: Christian Rose <menthos@menthos.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -565,24 +565,35 @@ msgstr ""
 "\n"
 "      Typ: %s"
 
-#: elf-hppa.h:1366 elf-hppa.h:1399 elf32-ppc.c:3062 elf32-sh.c:4286 elf64-sh64.c:1640 elf64-x86-64.c:1275
+#: elf-hppa.h:1366 elf-hppa.h:1399 elf32-ppc.c:3062 elf32-sh.c:4286
+#: elf64-sh64.c:1640 elf64-x86-64.c:1275
 #, c-format
 msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
 msgstr "%s: varning: olöslig omlokalisering mot symbolen \"%s\" från sektionen %s"
 
-#: elf-m10200.c:463 elf-m10300.c:673 elf32-arm.h:2074 elf32-avr.c:835 elf32-cris.c:1406 elf32-d10v.c:482 elf32-fr30.c:653 elf32-h8300.c:547 elf32-i860.c:1048 elf32-m32r.c:1280 elf32-openrisc.c:455 elf32-v850.c:1691 elf32-xstormy16.c:976 elf64-mmix.c:1302
+#: elf-m10200.c:463 elf-m10300.c:673 elf32-arm.h:2074 elf32-avr.c:835
+#: elf32-cris.c:1406 elf32-d10v.c:482 elf32-fr30.c:653 elf32-h8300.c:547
+#: elf32-i860.c:1048 elf32-m32r.c:1280 elf32-openrisc.c:455 elf32-v850.c:1691
+#: elf32-xstormy16.c:976 elf64-mmix.c:1302
 msgid "internal error: out of range error"
 msgstr "internt fel: utanför intervallet"
 
-#: elf-m10200.c:467 elf-m10300.c:677 elf32-arm.h:2078 elf32-avr.c:839 elf32-cris.c:1410 elf32-d10v.c:486 elf32-fr30.c:657 elf32-h8300.c:551 elf32-i860.c:1052 elf32-m32r.c:1284 elf32-mips.c:7600 elf32-openrisc.c:459 elf32-v850.c:1695 elf32-xstormy16.c:980 elf64-mips.c:4464 elf64-mmix.c:1306
+#: elf-m10200.c:467 elf-m10300.c:677 elf32-arm.h:2078 elf32-avr.c:839
+#: elf32-cris.c:1410 elf32-d10v.c:486 elf32-fr30.c:657 elf32-h8300.c:551
+#: elf32-i860.c:1052 elf32-m32r.c:1284 elf32-mips.c:7600 elf32-openrisc.c:459
+#: elf32-v850.c:1695 elf32-xstormy16.c:980 elf64-mips.c:4464 elf64-mmix.c:1306
 msgid "internal error: unsupported relocation error"
 msgstr "internt fel: omlokaliseringen stöds inte"
 
-#: elf-m10200.c:471 elf-m10300.c:681 elf32-arm.h:2082 elf32-d10v.c:490 elf32-h8300.c:555 elf32-m32r.c:1288
+#: elf-m10200.c:471 elf-m10300.c:681 elf32-arm.h:2082 elf32-d10v.c:490
+#: elf32-h8300.c:555 elf32-m32r.c:1288
 msgid "internal error: dangerous error"
 msgstr "internt fel: farligt fel"
 
-#: elf-m10200.c:475 elf-m10300.c:685 elf32-arm.h:2086 elf32-avr.c:847 elf32-cris.c:1418 elf32-d10v.c:494 elf32-fr30.c:665 elf32-h8300.c:559 elf32-i860.c:1060 elf32-m32r.c:1292 elf32-openrisc.c:467 elf32-v850.c:1715 elf32-xstormy16.c:988 elf64-mmix.c:1314
+#: elf-m10200.c:475 elf-m10300.c:685 elf32-arm.h:2086 elf32-avr.c:847
+#: elf32-cris.c:1418 elf32-d10v.c:494 elf32-fr30.c:665 elf32-h8300.c:559
+#: elf32-i860.c:1060 elf32-m32r.c:1292 elf32-openrisc.c:467 elf32-v850.c:1715
+#: elf32-xstormy16.c:988 elf64-mmix.c:1314
 msgid "internal error: unknown error"
 msgstr "internt fel: okänt fel"
 
@@ -706,7 +717,7 @@ msgstr "Varning: Stänger av samverkandeflaggan i %s eftersom icke-samverkande ko
 #: elf32-arm.h:2261
 #, c-format
 msgid "ERROR: %s is compiled for EABI version %d, whereas %s is compiled for version %d"
-msgstr "FEL: %s kompilerades för EABI version %d, medan %s kompilerades för version %d"
+msgstr "FEL: %s är kompilerad för EABI version %d, medan %s är kompilerad för version %d"
 
 #: elf32-arm.h:2275
 #, c-format
@@ -804,7 +815,9 @@ msgstr " [har startpunkt]"
 msgid "<Unrecognised flag bits set>"
 msgstr "<Okända flaggbitar satta>"
 
-#: elf32-avr.c:843 elf32-cris.c:1414 elf32-fr30.c:661 elf32-i860.c:1056 elf32-openrisc.c:463 elf32-v850.c:1699 elf32-xstormy16.c:984 elf64-mmix.c:1310
+#: elf32-avr.c:843 elf32-cris.c:1414 elf32-fr30.c:661 elf32-i860.c:1056
+#: elf32-openrisc.c:463 elf32-v850.c:1699 elf32-xstormy16.c:984
+#: elf64-mmix.c:1310
 msgid "internal error: dangerous relocation"
 msgstr "internt fel: farlig omlokalisering"
 
@@ -1216,12 +1229,12 @@ msgstr "%s: 0x%lx: ödesdigert: ojusterat grenmål för omlokalisering för förenkli
 #: elf32-sh64.c:211 elf64-sh64.c:2391
 #, c-format
 msgid "%s: compiled as 32-bit object and %s is 64-bit"
-msgstr "%s: kompilerat som ett 32-bitarsobjekt och %s är 64-bitars"
+msgstr "%s: kompilerat som 32-bitarsobjekt och %s är 64-bitars"
 
 #: elf32-sh64.c:214 elf64-sh64.c:2394
 #, c-format
 msgid "%s: compiled as 64-bit object and %s is 32-bit"
-msgstr "%s: kompilerat som ett 64-bitarsobjekt och %s är 32-bitars"
+msgstr "%s: kompilerat som 64-bitarsobjekt och %s är 32-bitars"
 
 #: elf32-sh64.c:216 elf64-sh64.c:2396
 #, c-format
@@ -1545,7 +1558,8 @@ msgstr "Utdatafilen kräver delade biblioteket \"%s\"\n"
 msgid "Output file requires shared library `%s.so.%s'\n"
 msgstr "Utdatafilen kräver delade biblioteket \"%s.so.%s\"\n"
 
-#: i386linux.c:653 i386linux.c:703 m68klinux.c:660 m68klinux.c:708 sparclinux.c:655 sparclinux.c:705
+#: i386linux.c:653 i386linux.c:703 m68klinux.c:660 m68klinux.c:708
+#: sparclinux.c:655 sparclinux.c:705
 #, c-format
 msgid "Symbol %s not defined for fixups\n"
 msgstr "Symbolen %s är inte definierad för fixar\n"
@@ -2003,7 +2017,8 @@ msgstr "%s: ingen symbol \"%s\""
 #. rotate
 #. Redefine symbol to current location.
 #. Define a literal.
-#: vms-tir.c:581 vms-tir.c:693 vms-tir.c:803 vms-tir.c:821 vms-tir.c:829 vms-tir.c:838 vms-tir.c:1563
+#: vms-tir.c:581 vms-tir.c:693 vms-tir.c:803 vms-tir.c:821 vms-tir.c:829
+#: vms-tir.c:838 vms-tir.c:1563
 #, c-format
 msgid "%s: not supported"
 msgstr "%s: stöds inte"
@@ -2061,7 +2076,8 @@ msgstr "stack-literal är inte helt implementerat"
 msgid "stack-local-symbol-entry-point-mask not fully implemented"
 msgstr "stack-local-symbol-entry-point-mask är inte helt implementerat"
 
-#: vms-tir.c:1510 vms-tir.c:1522 vms-tir.c:1534 vms-tir.c:1546 vms-tir.c:1611 vms-tir.c:1619 vms-tir.c:1627
+#: vms-tir.c:1510 vms-tir.c:1522 vms-tir.c:1534 vms-tir.c:1546 vms-tir.c:1611
+#: vms-tir.c:1619 vms-tir.c:1627
 #, c-format
 msgid "%s: not fully implemented"
 msgstr "%s: inte helt implementerat"

@@ -1,10 +1,15 @@
+2002-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+	* po/es.po: Updated Spanish translation.
+
 2002-07-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* po/gprof.pot: Regenerated.
 
 2002-07-23  Nick Clifton  <nickc@redhat.com>
 
-	* po/ld.po: New French translation.
+	* po/ld.po: Updated French translation.
 	* po/id.po: New Indonesian translation.
 	* configure.in (LINGUAS): Add id.
 	* configure: Regenerate.
