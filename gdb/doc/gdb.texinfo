@@ -849,7 +849,7 @@ Attaching remote machine across net... Success!
 _GDBN__ will then attempt to read the symbol tables of any object
 modules loaded into the VxWorks target since it was last booted.
 _GDBN__ locates these files by searching the directories listed in the
-command search path (@pxref{Command Path}); if it fails to find an
+command search path (@pxref{Environment}); if it fails to find an
 object file, it will display a message such as:
 
 @smallexample
@@ -1055,8 +1055,9 @@ and @samp{show} to inquire about the state of your program, or the state
 of _GDBN__ itself.  Both commands support many ``sub-commands'', or
 topics of inquiry; this manual introduces each of them in the
 appropriate context.  The listings under ``@code{info}'' and under
-``@code{show}'' in the Index point to all the sub-commands
-(@pxref{Index}).
+``@code{show}'' in the Index point to all the sub-commands.
+@c FIXME: @pxref{Index} used to be here, but even though it shows up in
+@c FIXME...the 'aux' file with a pageno the xref can't find it.  
 
 @table @code
 @kindex info
