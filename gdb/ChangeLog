@@ -1,3 +1,9 @@
+2003-10-03  Andrew Cagney  <cagney@redhat.com>
+
+	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): Only
+	convert a descriptor to a function when it's in the ".opd"
+	section.
+
 2003-10-03  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (sh_push_dummy_call_fpu): Initialize flt_argreg and

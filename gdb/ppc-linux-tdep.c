@@ -925,8 +925,10 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
    find_function_addr uses this function to get the function address
    from a function pointer.  */
 
-/* Return real function address if ADDR (a function pointer) is in the data
-   space and is therefore a special function pointer.  */
+/* If ADDR points at what is clearly a function descriptor, transform
+   it into the address of the corresponding function.  Be
+   conservative, otherwize GDB will do the transformation on any
+   random addresses such as occures when there is no symbol table.  */
 
 static CORE_ADDR
 ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
@@ -934,12 +936,12 @@ ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
   struct obj_section *s;
 
   s = find_pc_section (addr);
-  if (s && s->the_bfd_section->flags & SEC_CODE)
-    return addr;
 
-  /* ADDR is in the data space, so it's a pointer to a descriptor, not
-     the entry point.  */
-  return ppc64_desc_entry_point (addr);
+  /* Check if ADDR points to a function descriptor.  */
+  if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
+    return read_memory_unsigned_integer (addr, 8);
+
+  return addr;
 }
 
 
