@@ -1,3 +1,8 @@
+Tue Sep  7 14:20:43 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (AUX_GET_ANY, AUX_PUT_ANY): Changed to reflect further
+	change in bfd swapping routine names.
+
 Tue Sep  7 10:15:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* ecoff.h (AUX_GET_ANY): Change name of _do_getb32 to reflect bfd
