@@ -1,7 +1,8 @@
 start-sanitize-sky
-Fri Jan 23 16:44:19 1998  Doug Evans  <devans@seba.cygnus.com>
+Fri Jan 23 18:41:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 
-	* config/tc-txvu.c (assemble_insn): Delete test for !isalpha
+	* config/tc-txvu.c (assemble_insn): Initialize errmsg = NULL
+	before calling insert routine.	Delete test for !isalpha
 	after parsing mnemonic.  ASCII operand chars are case insensitive.
 
 Thu Jan 22 20:30:24 1998  Doug Evans  <devans@seba.cygnus.com>
