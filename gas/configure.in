@@ -619,11 +619,13 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 ])
 
 HLDFLAGS=
+RPATH_ENVVAR=LD_LIBRARY_PATH
 # If we have shared libraries, try to set rpath reasonably.
 if test "${shared}" = "true"; then
   case "${host}" in
   *-*-hpux*)
     HLDFLAGS='-Wl,+s,+b,$(libdir)'
+    RPATH_ENVVAR=SHLIB_PATH
     ;;
   *-*-irix5*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
@@ -659,6 +661,7 @@ case "${host}" in
     ;;
 esac
 AC_SUBST(HLDFLAGS)
+AC_SUBST(RPATH_ENVVAR)
 
 dnl This must come last.
 AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in)

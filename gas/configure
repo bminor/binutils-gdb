@@ -2118,11 +2118,13 @@ EOF
 
 
 HLDFLAGS=
+RPATH_ENVVAR=LD_LIBRARY_PATH
 # If we have shared libraries, try to set rpath reasonably.
 if test "${shared}" = "true"; then
   case "${host}" in
   *-*-hpux*)
     HLDFLAGS='-Wl,+s,+b,$(libdir)'
+    RPATH_ENVVAR=SHLIB_PATH
     ;;
   *-*-irix5*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
@@ -2157,6 +2159,7 @@ case "${host}" in
     rm -f conftest.t conftest.c conftest
     ;;
 esac
+
 
 
 trap '' 1 2 15
@@ -2308,6 +2311,7 @@ s%@INSTALL_DATA@%$INSTALL_DATA%g
 s%@CPP@%$CPP%g
 s%@ALLOCA@%$ALLOCA%g
 s%@HLDFLAGS@%$HLDFLAGS%g
+s%@RPATH_ENVVAR@%$RPATH_ENVVAR%g
 
 CEOF
 EOF
