@@ -1318,7 +1318,7 @@ button .files -text Files -command files_command
 proc build_framework {win {title GDBtk} {label {}}} {
 
 	toplevel ${win}
-	wm title .src $title
+	wm title ${win} $title
 	wm minsize ${win} 1 1
 
 	frame ${win}.menubar

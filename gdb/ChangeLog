@@ -1,5 +1,7 @@
 Mon Nov 28 09:17:20 1994  Stu Grossman  (grossman@cygnus.com)
 
+	* gdbtk.tcl (build_framework):  Fix bug with setting window titles.
+
 	* gdbtk.tcl (build_framework):  Add "Report bug" to help menu.
 
 	* gdbtk.tcl:  Re-arrange windows using new, consistent layout. Clean
