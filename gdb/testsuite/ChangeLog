@@ -1,3 +1,13 @@
+Wed Dec 21 12:51:37 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* gdb.base/list.exp (test_forward_search): Set timeout higher
+	when we'll be getting lots of output from gdb.
+
+	* gdb.base/a1-selftest.exp: Move code that was inside expect -re
+	"init_malloc" to after the expect statement.  Run it if that
+	regexp is taken, but also for two others which happen if source
+	cannot be found.
+
 Tue Dec 20 12:35:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/printcmds.exp: New test, for printing register before
