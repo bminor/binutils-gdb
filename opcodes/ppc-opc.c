@@ -3688,7 +3688,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "tlbsx.",  XRC(31,914,1), X_MASK, 	PPC403,		{ RT, RA, RB } },
 
 { "tlbsx",   XRC(31,914,0), X_MASK,	BOOKE,		{ RA, RB } },
+{ "tlbsx.",  XRC(31,914,1), X_MASK,	BOOKE,		{ RA, RB } },
 { "tlbsxe",  XRC(31,915,0), X_MASK,	BOOKE,		{ RA, RB } },
+{ "tlbsxe.", XRC(31,915,1), X_MASK,	BOOKE,		{ RA, RB } },
 
 { "slbmfee", X(31,915), XRA_MASK,	PPC64,		{ RT, RB } },
 
