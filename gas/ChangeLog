@@ -1,5 +1,14 @@
 Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (pa_parse_space_stmt): If needed, call
+	obj_set_section_attributes to pass space attributes to the 
+	BFD backend.
+	(create_new_space): Likewise.
+	(create_new_subspace): Likewise for subspace attributes using 
+	obj_set_subsection_attributes.
+	(update_subspace): Likewise for subspace attributes using
+	obj_set_subsection_attributes.
+
 	* config/tc-hppa.c (pa_parse_space_stmt): Get segment and sort key
 	for $TEXT$ and $PRIVATE$ from the default space structure.
 

@@ -5192,6 +5192,11 @@ pa_parse_space_stmt (space_name, create_flag)
       SPACE_SORT (space) = sort & 0xff;
       space->sd_seg = seg;
     }
+
+#ifdef obj_set_section_attributes
+  obj_set_section_attributes (seg, defined, private, sort, spnum);
+#endif
+
   return space;
 }
 
@@ -5721,6 +5726,14 @@ create_new_space (name, spnum, loadable, defined, private,
 	space_dict_last = chain_entry;
     }
 
+  /* This is here to catch predefined spaces which do not get
+     modified by the user's input.  Another call is found at
+     the bottom of pa_parse_space_stmt to handle cases where
+     the user modifies a predefined space.  */
+#ifdef obj_set_section_attributes
+  obj_set_section_attributes (seg, defined, private, sort, spnum);
+#endif
+
   return chain_entry;
 }
 
@@ -5808,6 +5821,11 @@ create_new_subspace (space, name, loadable, code_only, common,
 	}
     }
 
+#ifdef obj_set_subsection_attributes
+  obj_set_subsection_attributes (seg, space->sd_seg, access, 
+				 sort, quadrant);
+#endif
+
   return chain_entry;
 
 }
@@ -5848,6 +5866,11 @@ update_subspace (name, loadable, code_only, common, dup_common, sort,
     }
   else
     chain_entry = NULL;
+
+#ifdef obj_set_subsection_attributes
+  obj_set_subsection_attributes (subseg, space->sd_seg, access, 
+				 sort, quadrant);
+#endif
 
   return chain_entry;
 
