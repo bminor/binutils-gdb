@@ -1,3 +1,8 @@
+Thu Jul 21 10:25:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/mh-alphaosf, config/mh-apollo68v, config/mh-delta88:
+	Remove; obsolete.
+
 Sat Jul 16 22:34:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* objdump.c (slurp_dynamic_symtab): Try to get the dynamic symbols
