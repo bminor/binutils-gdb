@@ -1,7 +1,7 @@
 Thu Jan 26 18:32:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c: Changes based on patch from David Edelsohn
-	<edelsohn@npac.syr.edu>.
+	<edelsohn@mhpcc.edu>.
 	(powerpc_operands): Add operands SPRBAT and SPRG. Split TBR out of
 	SPR.
 	(FXM_MASK): Define.
