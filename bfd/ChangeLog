@@ -1,3 +1,13 @@
+Wed Aug  3 10:34:37 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* i386linux.c (linux_add_one_symbol): Only handle
+	SHARABLE_CONFLICTS specially if BSF_CONSTRUCTOR is set.  Set hashp
+	for a GOT or PLT symbol.  Set jump field of fixup for a PLT symbol.
+	(linux_tally_symbols): Check section of real symbol.  When looking
+	for a builtin fixup, check builtin and jump flags.  Create no more
+	than one fixup, and always create one if the real symbol is in the
+	absolute section.  Only strip absolute symbols.
+
 Wed Aug  3 05:08:24 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* coffcode.h (coff_write_object_contents): set internal_a.magic to
