@@ -1,3 +1,7 @@
+Tue Aug  3 15:19:09 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* nlm_slurp_symbol_table: Don't use '&' on arrays.
+
 Tue Aug  3 11:06:28 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ecoff.c: New file for generic ECOFF functions.
