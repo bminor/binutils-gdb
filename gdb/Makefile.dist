@@ -16,8 +16,14 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
+#### host and target dependent Makefile fragments come in here.
+##
+
+srcdir = .
+destdir = /usr/local
+
 # Place to install binaries. 
-bindir=/usr/local/bin
+bindir=$(destdir)/bin
 
 # System V: If you compile gdb with a compiler which uses the coff
 # encapsulation feature (this is a function of the compiler used, NOT
@@ -278,16 +284,22 @@ rapp: $(RAPP_OBS)
 	${srcdir}/munch ${RAPP_OBS} > rapp_init.c
 	${CC-LD} $(LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
 	
-Makefiles= Makefile.sdir $(M_MAKEFILE) \
-	${srcdir}/alldeps.mak ${srcdir}/Makefile.dist
+Makefiles= ${srcdir}/alldeps.mak ${srcdir}/Makefile.dist
 
-MAKE_MAKEFILE= echo "M_MAKEFILE=$(M_MAKEFILE)" | \
-	cat - ${Makefiles} ${srcdir}/depend >Makefile
+MAKE_MAKEFILE_IN= cat ${Makefiles} ${srcdir}/depend > $(srcdir)/Makefile.in
 
-Makefile: $(Makefiles)
-	$(MAKE_MAKEFILE)
+$(srcdir)/Makefile.in: $(Makefiles)
+	$(MAKE_MAKEFILE_IN)
 
-alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
+# with the gnu make, this is done automatically.
+
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
+	(cd $(srcdir) ; \
+		./configure +destdir=$(destdir) +norecurse \
+		 `if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		$(host) +target=$(target))
+
+$(srcdir)/alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
 	for i in `ls -d ${srcdir}/tconfig/*[0-9A-Za-z] \
           ${srcdir}/xconfig/*[0-9A-Za-z] | grep -v RCS` ; do \
@@ -332,6 +344,7 @@ alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	    NR == 0 {printf $$0;} \
 	    NR != 0 {printf "\\\n" $$0} \
 	    END {printf "\n\n"}' >>alldeps.mak;
+	if [ "$(srcdir)" != "." ] ; then mv alldeps.mak $(srcdir) ; fi
 	rm -f alldeps.tmp alldeps2.tmp allparam.tmp allconfig.tmp
 
 # The sed script makes everything which depends on {x,t}m.h depend on
@@ -352,8 +365,8 @@ depend: $(SOURCES) Makefile.dist
 	  -e 's; $(INCLUDE_DIR)/; $(INCLUDE_DEP)/;g'  \
 	  -e 's; [a-z0-9./]*bfd/; $(BFD_DEP)/;g'  \
 	  -e 's; \./; $${srcdir}/;g'  \
-	  >depend
-	$(MAKE_MAKEFILE)
+	  >$(srcdir)/depend
+	$(MAKE_MAKEFILE_IN)
 	rm depend.tmp
 
 config.status:

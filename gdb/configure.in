@@ -1,3 +1,51 @@
+srcname="GDB"
+srctrigger=main.c
+
+if [ -z "${template}" ] ; then
+	make -f Makefile.dist Makefile.in
+fi
+
 # per-host:
 
+if [ ! -f xconfig/${host} ]; then
+	echo "No such host ${host}"
+	exit 1
+fi
+
+targetfile=`awk '
+  $1 == "XM_FILE=" { print $2 }' <xconfig/$host`
+if [ "${targetfile}" = "/" ] ; then
+	targetfile=/dev/null
+fi
+
 # per-target:
+
+if [ ! -f tconfig/${target} ]; then
+	echo "No such target ${target}"
+	exit 1
+fi
+
+if [ -z "${removing}" ] ; then
+	cat xconfig/${host} tconfig/${target} | awk '$1 == "#msg" {
+		print substr($0,6)}'
+fi
+
+hostfile=`awk '
+  $1 == "TM_FILE=" { print $2 }' <tconfig/$target`
+if [ "${hostfile}" = "/" ] ; then
+	hostfile=/dev/null
+fi
+
+if [ ! -d readline ]; then
+      mkdir readline
+      # This could be a symlink, but getting the name right (because
+      # srcdir can be either relative or absolute) would be hairy.
+      cp ${srcdir}/readline/Makefile readline
+fi
+
+host_makefile_frag=xconfig/${host}
+target_makefile_frag=tconfig/${target}
+
+files="${hostfile} ${targetfile}"
+links="xm.h tm.h"
+
