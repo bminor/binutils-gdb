@@ -1,3 +1,8 @@
+Tue Jun  4 10:14:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/ppc-sol.mt (TDEFINES): Don't turn on -mregnames by
+	default.
+
 Mon Jun  3 11:34:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_ip): Don't call as_warn if we are setting
