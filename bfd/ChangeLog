@@ -1,5 +1,8 @@
 Thu Jul 18 15:39:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config.bfd (sparc-*-sysv4*): Don't build sunos_big_vec.  From
+	Andrew Gierth <ANDREWG@microlise.co.uk>.
+
 	* configure.host: Set INSTALL_SHLIB.
 	* configure.in: Call AC_SUBST (INSTALL_SHLIB).
 	* configure: Rebuild.
