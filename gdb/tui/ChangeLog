@@ -1,3 +1,8 @@
+2002-10-25  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/478
+	* tuiIO.c (tui_initialize_io): Use setvbuf since this is portable.
+
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	* tui-hooks.c (selected_frame_level_changed_hook): Use the one
