@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 %{
 /*
@@ -38,6 +38,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmain.h"
 #include "mri.h"
 #include "ldlex.h"
+
+#ifndef YYDEBUG
+#define YYDEBUG 1
+#endif
 
 static int typebits;
 
@@ -70,7 +74,7 @@ static int error_index;
 %type <integer> fill_opt
 %type <name> memspec_opt
 %token <integer> INT  
-%token <name> NAME
+%token <name> NAME LNAME
 %type  <integer> length
 
 %right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ   ANDEQ OREQ 
@@ -98,7 +102,7 @@ static int error_index;
 %token INCLUDE
 %token MEMORY DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
-%token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY
+%token NAME LNAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> SIZEOF NEXT ADDR
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT
 %token ORIGIN FILL
@@ -108,7 +112,7 @@ static int error_index;
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
-%token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM
+%token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM CASE EXTERN START
 
 %%
 
@@ -157,15 +161,15 @@ mri_script_command:
 			}
         |       ORDER ordernamelist
 	|       ENDWORD 
-        |       PUBLIC NAME '=' exp 
+        |       PUBLIC NAME '=' exp
  			{ mri_public($2, $4); }
-        |       PUBLIC NAME ',' exp 
+        |       PUBLIC NAME ',' exp
  			{ mri_public($2, $4); }
         |       PUBLIC NAME  exp 
  			{ mri_public($2, $3); }
 	| 	FORMAT NAME
 			{ mri_format($2); }
-	|	SECT NAME ',' exp 
+	|	SECT NAME ',' exp
 			{ mri_output_section($2, $4);}
 	|	SECT NAME  exp
 			{ mri_output_section($2, $3);}
@@ -187,6 +191,12 @@ mri_script_command:
 			{ mri_base($2); }
         |       TRUNCATE INT
 		{  mri_truncate((unsigned int) $2); }
+	|	CASE casesymlist
+	|	EXTERN extern_name_list
+	|	INCLUDE filename
+		{ ldfile_open_command_file ($2); } mri_script_lines END
+	|	START NAME
+		{ lang_add_entry ($2, 0); }
         |
 	;
 
@@ -207,6 +217,19 @@ mri_abs_name_list:
  			{ mri_only_load($1); }
 	|	mri_abs_name_list ','  NAME
  			{ mri_only_load($3); }
+	;
+
+casesymlist:
+	  /* empty */
+	| NAME
+	| casesymlist ',' NAME
+	;
+
+extern_name_list:
+	  NAME
+			{ ldlang_add_undef ($1); }
+	| extern_name_list ',' NAME
+			{ ldlang_add_undef ($3); }
 	;
 
 script_file:
@@ -243,7 +266,10 @@ ifile_p1:
 	|	OUTPUT '(' filename ')'
 		{ lang_add_output($3, 1); }
         |	OUTPUT_FORMAT '(' NAME ')'
-		  { lang_add_output_format($3, 1); }
+		  { lang_add_output_format ($3, (char *) NULL,
+					    (char *) NULL, 1); }
+	|	OUTPUT_FORMAT '(' NAME ',' NAME ',' NAME ')'
+		  { lang_add_output_format ($3, $5, $7, 1); }
         |	OUTPUT_ARCH '(' NAME ')'
 		  { ldfile_set_output_arch($3); }
 	|	FORCE_COMMON_ALLOCATION
@@ -268,6 +294,15 @@ input_list:
 				 (char *)NULL); }
 	|	input_list NAME
 		{ lang_add_input_file($2,lang_input_file_is_search_file_enum,
+				 (char *)NULL); }
+	|	LNAME
+		{ lang_add_input_file($1,lang_input_file_is_l_enum,
+				 (char *)NULL); }
+	|	input_list ',' LNAME
+		{ lang_add_input_file($3,lang_input_file_is_l_enum,
+				 (char *)NULL); }
+	|	input_list LNAME
+		{ lang_add_input_file($2,lang_input_file_is_l_enum,
 				 (char *)NULL); }
 	;
 

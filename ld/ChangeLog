@@ -1,3 +1,16 @@
+Tue Aug 15 17:31:16 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y (YYDEBUG): If not defined, define as 1.
+	(CASE, EXTERN, START): New tokens.
+	(mri_script_command): Handle CASE, EXTERN, INCLUDE, START.
+	(casesymlist): New nonterminal.
+	(extern_name_list): New nonterminal.
+	* ldlex.l: Accept lower case trailing base specifiers.  Don't
+	ignore the first digit when the base is a suffix.  Accept many
+	EXPRESSION state tokens in MRI state.  Support MRI continuation
+	lines and MRI semicolon comments.  Accept all MRI keywords in
+	lower case.  Add CASE, EXTERN, and START MRI keywords.
+
 Tue Aug  8 19:14:58 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Use xmalloc
