@@ -1,3 +1,12 @@
+Sat Sep 23 01:22:23 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* rs6000-core.c (rs6000coff_core_p):  Don't check the core file
+	size for full core dumps. Copy core file header to private data.
+	(rs6000coff_core_file_failing_command,
+	rs6000coff_core_file_failing_signal):  New functions to extract
+	the file name and terminating signal from the core file.
+	* coff-rs6000.c:  Use them.
+
 Fri Sep 22 17:44:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	Change arch info to be const, initialized at compile time.
