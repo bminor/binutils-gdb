@@ -1,3 +1,7 @@
+Fri Oct 29 08:11:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Add idea for "disassemble" with source.
+
 Fri Oct 29 00:41:01 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.11.1 after release and cvs

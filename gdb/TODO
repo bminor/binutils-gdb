@@ -335,3 +335,6 @@ incremental symbol table reloading.
 Get all the remote systems (where the protocol allows it) to be able to
 stop the remote system when the GDB user types ^C (like remote.c
 does).  For ebmon, use ^Ak.
+
+Possible feature: A version of the "disassemble" command which shows
+both source and assembly code.
