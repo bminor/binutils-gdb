@@ -138,7 +138,9 @@ static void s_common PARAMS ((int));
 static void s_empty PARAMS ((int));
 static void s_uacons PARAMS ((int));
 static void s_ncons PARAMS ((int));
+#ifdef OBJ_ELF
 static void s_register PARAMS ((int));
+#endif
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -2891,7 +2893,7 @@ void
 md_apply_fix3 (fixP, valP, segment)
      fixS *fixP;
      valueT *valP;
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   offsetT val = * (offsetT *) valP;
@@ -3246,7 +3248,7 @@ md_apply_fix3 (fixP, valP, segment)
 
 arelent **
 tc_gen_reloc (section, fixp)
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   static arelent *relocs[3];

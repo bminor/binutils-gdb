@@ -1,5 +1,8 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-sparc.c (s_register): Only declare #ifdef OBJ_ELF.
+	(md_apply_fix3 <segment>): Add ATTRIBUTE_UNUSED.
+	(tc_gen_reloc <section>): Likewise.
 	* config/tc-tic30.c: #include stdarg.h or varargs.h.
 	(debug): Rewrite using VA_* macros.
 	(md_estimate_size_before_relax): Add ATTRIBUTE_UNUSED to args.
