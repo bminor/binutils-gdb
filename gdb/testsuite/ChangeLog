@@ -1,3 +1,9 @@
+2004-08-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* ChangeLog: Prefix Local Variables with semi-colons and indent
+	the reference to older ChangeLog files, to fix fontification in
+	Emacs.
+
 2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.mi/mi-break.exp: Use gdb_get_line_number.
@@ -12656,14 +12662,14 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 	will allow them to work with the new version of dejagnu will be
 	made in a future update.
 
-For additional changes see gdb.mi/ChangeLog-1999-2003.
+ For additional changes see gdb.mi/ChangeLog-1999-2003.
 
-Local Variables:
-mode: change-log
-left-margin: 8
-fill-column: 74
-version-control: never
-End:
+;; Local Variables:
+;; mode: change-log
+;; left-margin: 8
+;; fill-column: 74
+;; version-control: never
+;; End:
 
     Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
     2003, 2004 Free Software Foundation, Inc.
