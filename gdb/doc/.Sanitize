@@ -33,6 +33,7 @@ Makefile.in
 a4rc.sed
 all-cfg.texi
 configure.in
+libgdb.texinfo
 gdb.texinfo
 gdbint.texinfo
 h8-cfg.texi
