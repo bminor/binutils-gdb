@@ -1,3 +1,15 @@
+Wed Feb 21 11:59:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (all): Simplify.
+	(clean, mostlyclean): SUBDIRS may contain whitespace; fix the loop
+	as in the all target.
+	(distclean, maintainer-clean, realclean): Likewise.
+	(install): Likewise.
+
+Thu Feb 15 18:37:00 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (all): Remove extra '\' char from shell script.
+
 Wed Feb 14 16:43:59 1996  Mike Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (all): Avoid a for loop with zero elements, even if

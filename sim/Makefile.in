@@ -98,51 +98,49 @@ FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
 all:
-	@if [ x"${SUBDIRS}" != x ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		for dir in . ${SUBDIRS}; do \
-			if [ "$$dir" = "." ]; then \
-				true; \\
-			elif [ -d $$dir ]; then \
-				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
-			else true; fi; \
-		done ; \
-	else true; fi
+	@rootme=`pwd` ; export rootme ; \
+	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	for dir in . ${SUBDIRS}; do \
+		if [ "$$dir" = "." ]; then \
+			true; \
+		elif [ -d $$dir ]; then \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
+		else true; fi; \
+	done
 
 clean mostlyclean: 
-	@if [ x"${SUBDIRS}" != x ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		for dir in ${SUBDIRS}; do \
-			if [ -d $$dir ]; then \
-				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
-			else true; fi; \
-		done ; \
-	else true; fi
+	@rootme=`pwd` ; export rootme ; \
+	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	for dir in . ${SUBDIRS}; do \
+		if [ "$$dir" = "." ]; then \
+			true; \
+		elif [ -d $$dir ]; then \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+		else true; fi; \
+	done
 
 distclean maintainer-clean realclean:
-	@if [ x"${SUBDIRS}" != x ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		for dir in ${SUBDIRS}; do \
-			if [ -d $$dir ]; then \
-				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
-			else true; fi; \
-		done ; \
-	else true; fi
+	@rootme=`pwd` ; export rootme ; \
+	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	for dir in . ${SUBDIRS}; do \
+		if [ "$$dir" = "." ]; then \
+			true; \
+		elif [ -d $$dir ]; then \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+		else true; fi; \
+	done
 	rm -f Makefile config.cache config.log config.status
 
 install:
-	@if [ x${SUBDIRS} != x ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		for dir in ${SUBDIRS}; do \
-			if [ -d $$dir ]; then \
-				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
-			else true; fi; \
-		done; \
-	else true; fi
+	@rootme=`pwd` ; export rootme ; \
+	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	for dir in . ${SUBDIRS}; do \
+		if [ "$$dir" = "." ]; then \
+			true;
+		elif [ -d $$dir ]; then \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
+		else true; fi; \
+	done
 
 info:
 install-info:
