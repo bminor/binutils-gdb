@@ -383,12 +383,20 @@ print_insn_mips16 (memaddr, info)
 	  return -1;
 	}
 
-      length += 2;
-
       if (info->endian == BFD_ENDIAN_BIG)
 	insn = bfd_getb16 (buffer);
       else
 	insn = bfd_getl16 (buffer);
+
+      /* Check for an extend opcode followed by an extend opcode.  */
+      if ((insn & 0xf800) == 0xf000)
+	{
+	  (*info->fprintf_func) (info->stream, "extend 0x%x",
+				 (unsigned int) extend);
+	  return length;
+	}
+
+      length += 2;
     }
 
   /* FIXME: Should probably use a hash table on the major opcode here.  */
@@ -403,8 +411,12 @@ print_insn_mips16 (memaddr, info)
 	  if (strchr (op->args, 'a') != NULL)
 	    {
 	      if (use_extend)
-		(*info->fprintf_func) (info->stream, "extend 0x%x",
-				       (unsigned int) extend);
+		{
+		  (*info->fprintf_func) (info->stream, "extend 0x%x",
+					 (unsigned int) extend);
+		  return length - 2;
+		}
+
 	      use_extend = false;
 
 	      memaddr += 2;
@@ -422,7 +434,9 @@ print_insn_mips16 (memaddr, info)
 		}
 	    }
 
-	  (*info->fprintf_func) (info->stream, "%s ", op->name);
+	  (*info->fprintf_func) (info->stream, "%s", op->name);
+	  if (op->args[0] != '\0')
+	    (*info->fprintf_func) (info->stream, "\t");
 
 	  for (s = op->args; *s != '\0'; s++)
 	    {
@@ -715,11 +729,51 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	  (*info->fprintf_func) (info->stream, "%d", immed);
 	else
 	  {
+	    bfd_vma baseaddr;
 	    bfd_vma val;
 
 	    if (branch)
-	      immed *= 2;
-	    val = ((memaddr + 2) & ~ ((1 << shift) - 1)) + immed;
+	      {
+		immed *= 2;
+		baseaddr = memaddr + 2;
+	      }
+	    else if (use_extend)
+	      baseaddr = memaddr;
+	    else
+	      {
+		int status;
+		bfd_byte buffer[2];
+
+		baseaddr = memaddr;
+
+		/* If this instruction is in the delay slot of a jr
+                   instruction, the base address is the address of the
+                   jr instruction.  If it is in the delay slot of jalr
+                   instruction, the base address is the address of the
+                   jalr instruction.  This test is unreliable: we have
+                   no way of knowing whether the previous word is
+                   instruction or data.  */
+		status = (*info->read_memory_func) (memaddr - 4, buffer, 2,
+						    info);
+		if (status == 0
+		    && (((info->endian == BFD_ENDIAN_BIG
+			  ? bfd_getb16 (buffer)
+			  : bfd_getl16 (buffer))
+			 & 0xf800) == 0x1800))
+		  baseaddr = memaddr - 4;
+		else
+		  {
+		    status = (*info->read_memory_func) (memaddr - 2, buffer,
+							2, info);
+		    if (status == 0
+			&& (((info->endian == BFD_ENDIAN_BIG
+			      ? bfd_getb16 (buffer)
+			      : bfd_getl16 (buffer))
+			     & 0xf81f) == 0xe800))
+		      baseaddr = memaddr - 2;
+		  }
+	      }
+	    val = (baseaddr & ~ ((1 << shift) - 1)) + immed;
 	    (*info->print_address_func) (val, info);
 	  }
       }

@@ -1,3 +1,8 @@
+Tue Jan 28 15:57:34 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (print_insn_mips16): Better handling of an extend
+ 	opcode followed by an instruction which can not be extended.
+
 Fri Jan 24 12:08:21 1997  J.T. Conklin  <jtc@cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Changed operand specifier for the
