@@ -1,3 +1,17 @@
+1998-12-04  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/fr30.sh (TEXT_START_ADDR): Change TEXT_START_ADDR
+	from 0x100000 to 0x10000 so that it fits in 20 bits.
+
+Sat Nov 28 22:32:20 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldemul.h (ldemul_recognized_file): Declare.
+
+Sat Nov 28 22:30:55 1998  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* ldlang.c (lang_add_wild): Don't pretend that there is an input
+	file if the filename is a wildcard pattern.
+
 1998-11-25  DJ Delorie  <dj@cygnus.com>
 
 	* ldemul.h (ld_emulation_xfer_struct): new hook "recognized_file"
@@ -15,7 +29,6 @@ start-sanitize-vr4xxx
 1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* configure.tgt: Handle mips64*vr4xxx.
-
 
 end-sanitize-vr4xxx
 1998-11-23  DJ Delorie  <dj@cygnus.com>
