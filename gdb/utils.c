@@ -2551,7 +2551,11 @@ gdb_realpath (const char *filename)
   char *rp = realpath (filename, buf);
   return xstrdup (rp ? rp : filename);
 #elif defined(HAVE_CANONICALIZE_FILE_NAME)
-  return canonicalize_file_name (filename);
+  char *rp = canonicalize_file_name (filename);
+  if (rp == NULL)
+    return xstrdup (filename);
+  else
+    return rp;
 #else
   return xstrdup (filename);
 #endif

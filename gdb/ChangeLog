@@ -1,3 +1,10 @@
+2002-03-27  Andrew Cagney  <ac131313@redhat.com>
+
+	From veksler at il.ibm.com:
+	* utils.c (gdb_realpath): If canonicalize_file_name fails, return
+	the xstrduped original path.
+	Fix PR gdb/417.
+
 2002-03-27  Michael Snyder  <msnyder@redhat.com>
 
 	* breakpoint.c (_initialize_breakpoint): Clean up help string.
