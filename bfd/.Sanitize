@@ -302,7 +302,7 @@ Things-to-lose:
 
 Do-last:
 
-arc_files="ChangeLog ChangeLog.2 Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
+arc_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
@@ -330,7 +330,7 @@ else
 	done
 fi
 
-d30v_files="ChangeLog ChangeLog.2 Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
+d30v_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	for i in $d30v_files ; do
 		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
@@ -358,7 +358,7 @@ else
 	done
 fi
 
-v850_files="ChangeLog ChangeLog.2 Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
+v850_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
@@ -414,7 +414,7 @@ else
 	done
 fi
 
-tic80_files="ChangeLog Makefile.in archures.c bfd-in2.h config.bfd configure configure.in targets.c coffcode.h coffswap.h"
+tic80_files="ChangeLog Makefile.in Makefile.am archures.c bfd-in2.h config.bfd configure configure.in targets.c coffcode.h coffswap.h"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
