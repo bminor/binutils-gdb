@@ -25,31 +25,31 @@ Do-first:
 
 Things-to-keep:
 
-h-amix.h
-h-apollo68v.h
-h-decstation.h
-h-dgux.h
-h-delta88.h
-h-dose.h
-h-go32.h
-h-harris.h
-h-hp300bsd.h
-h-hp9000.h
-h-i386mach.h
-h-i386v.h
-h-i386v4.h
-h-irix3.h
-h-news.h
-h-rs6000.h
-h-rtbsd.h
-h-sparc-ll.h
-h-sparc.h
-h-stratus.h
-h-sun3.h
-h-tahoe.h
-h-ultra3.h
-h-vaxbsd.h
-h-vaxult.h
+amix.h
+apollo68v.h
+decstation.h
+dgux.h
+delta88.h
+dose.h
+go32.h
+harris.h
+hp300bsd.h
+hp9000.h
+i386mach.h
+i386v.h
+i386v4.h
+irix3.h
+news.h
+rs6000.h
+rtbsd.h
+sparc-ll.h
+sparc.h
+stratus.h
+sun3.h
+tahoe.h
+ultra3.h
+vaxbsd.h
+vaxult.h
 
 Do-last:
 
