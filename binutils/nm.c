@@ -152,7 +152,7 @@ print_symbol_filename_posix PARAMS ((bfd * archive_bfd, bfd * abfd));
 
 
 static void
-print_value PARAMS ((bfd_vma));
+print_value PARAMS ((bfd *, bfd_vma));
 
 static void
 print_symbol_info_bsd PARAMS ((symbol_info * info, bfd * abfd));
@@ -1437,7 +1437,8 @@ print_symbol_filename_posix (archive_bfd, abfd)
 /* Print a symbol value.  */
 
 static void
-print_value (val)
+print_value (abfd, val)
+     bfd *abfd;
      bfd_vma val;
 {
 #if ! defined (BFD64) || BFD_HOST_64BIT_LONG
@@ -1445,7 +1446,7 @@ print_value (val)
 #else
   /* We have a 64 bit value to print, but the host is only 32 bit.  */
   if (print_radix == 16)
-    fprintf_vma (stdout, val);
+    bfd_fprintf_vma (abfd, stdout, val);
   else
     {
       char buf[30];
@@ -1480,7 +1481,7 @@ print_symbol_info_bsd (info, abfd)
       printf ("        ");
     }
   else
-    print_value (info->value);
+    print_value (abfd, info->value);
   printf (" %c", info->type);
   if (info->type == '-')
     {
@@ -1503,7 +1504,7 @@ print_symbol_info_sysv (info, abfd)
   if (bfd_is_undefined_symclass (info->type))
     printf ("        ");	/* Value */
   else
-    print_value (info->value);
+    print_value (abfd, info->value);
   printf ("|   %c  |", info->type);	/* Class */
   if (info->type == '-')
     {
@@ -1526,7 +1527,7 @@ print_symbol_info_posix (info, abfd)
   if (bfd_is_undefined_symclass (info->type))
     printf ("        ");
   else
-    print_value (info->value);
+    print_value (abfd, info->value);
   /* POSIX.2 wants the symbol size printed here, when applicable;
      BFD currently doesn't provide it, so we take the easy way out by
      considering it to never be applicable.  */

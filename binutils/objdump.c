@@ -284,9 +284,9 @@ dump_section_header (abfd, section, ignored)
   printf ("%3d %-13s %08lx  ", section->index,
 	  bfd_get_section_name (abfd, section),
 	  (unsigned long) bfd_section_size (abfd, section) / opb);
-  printf_vma (bfd_get_section_vma (abfd, section));
+  bfd_printf_vma (abfd, bfd_get_section_vma (abfd, section));
   printf ("  ");
-  printf_vma (section->lma);
+  bfd_printf_vma (abfd, section->lma);
   printf ("  %08lx  2**%u", section->filepos,
 	  bfd_get_section_alignment (abfd, section));
   if (! wide_output)
@@ -608,8 +608,10 @@ objdump_print_value (vma, info, skip_zeroes)
 {
   char buf[30];
   char *p;
+  struct objdump_disasm_info *aux
+    = (struct objdump_disasm_info *) info->application_data;
 
-  sprintf_vma (buf, vma);
+  bfd_sprintf_vma (aux->abfd, buf, vma);
   if (! skip_zeroes)
     p = buf;
   else
@@ -1219,8 +1221,10 @@ disassemble_bytes (info, disassemble_fn, insns, data,
       char buf[30];
       char *s;
 
-      sprintf_vma (buf, section->vma + 
-                   bfd_section_size (section->owner, section) / opb);
+      bfd_sprintf_vma
+	(aux->abfd, buf,
+	 (section->vma
+	  + bfd_section_size (section->owner, section) / opb));
       s = buf;
       while (s[0] == '0' && s[1] == '0' && s[2] == '0' && s[3] == '0'
 	     && s[4] == '0')
@@ -1282,7 +1286,7 @@ disassemble_bytes (info, disassemble_fn, insns, data,
 	    {
 	      char *s;
 
-	      sprintf_vma (buf, section->vma + addr_offset);
+	      bfd_sprintf_vma (aux->abfd, buf, section->vma + addr_offset);
 	      for (s = buf + skip_addr_chars; *s == '0'; s++)
 		*s = ' ';
 	      if (*s == '\0')
@@ -1419,7 +1423,7 @@ disassemble_bytes (info, disassemble_fn, insns, data,
 		  putchar ('\n');
 		  j = addr_offset * opb + pb;
 
-		  sprintf_vma (buf, section->vma + j / opb);
+		  bfd_sprintf_vma (aux->abfd, buf, section->vma + j / opb);
 		  for (s = buf + skip_addr_chars; *s == '0'; s++)
 		    *s = ' ';
 		  if (*s == '\0')
@@ -1946,7 +1950,7 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
       else
 	printf ("%-6d", type);
       printf (" %-6d %-6d ", other, desc);
-      printf_vma (value);
+      bfd_printf_vma (abfd, value);
       printf (" %-6lu", strx);
 
       /* Symbols with type == 0 (N_UNDF) specify the length of the
@@ -2030,7 +2034,7 @@ dump_bfd_header (abfd)
   PF (D_PAGED, "D_PAGED");
   PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
   printf (_("\nstart address 0x"));
-  printf_vma (abfd->start_address);
+  bfd_printf_vma (abfd, abfd->start_address);
   printf ("\n");
 }
 
@@ -2479,7 +2483,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
     if (width == 0)
       {
 	char buf[30];
-	sprintf_vma (buf, (bfd_vma) -1);
+	bfd_sprintf_vma (abfd, buf, (bfd_vma) -1);
 	width = strlen (buf) - 7;
       }
     printf ("OFFSET %*s TYPE %*s VALUE \n", width, "", 12, "");
@@ -2547,7 +2551,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 	}
       if (sym_name)
 	{
-	  printf_vma (q->address);
+	  bfd_printf_vma (abfd, q->address);
 	  if (q->howto->name)
 	    printf (" %-16s  ", q->howto->name);
 	  else
@@ -2559,7 +2563,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 	{
 	  if (section_name == (CONST char *) NULL)
 	    section_name = "*unknown*";
-	  printf_vma (q->address);
+	  bfd_printf_vma (abfd, q->address);
 	  printf (" %-16s  [%s]",
 		  q->howto->name,
 		  section_name);
@@ -2567,7 +2571,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
       if (q->addend)
 	{
 	  printf ("+0x");
-	  printf_vma (q->addend);
+	  bfd_printf_vma (abfd, q->addend);
 	}
       printf ("\n");
     }

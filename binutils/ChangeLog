@@ -1,3 +1,20 @@
+2001-08-10  H.J. Lu  <hjl@gnu.org>
+
+	* nm.c (print_value): Add one arg, bfd *.
+	(print_value): Replace fprintf_vma with bfd_fprintf_vma.
+	(print_symbol_info_bsd): Also pass `abfd' to print_value ().
+	(print_symbol_info_sysv): Likewise.
+	(print_symbol_info_posix): Likewise.
+
+	* objdump.c (dump_section_header): Replace printf_vma with
+	bfd_printf_vma.
+	(print_section_stabs): Likewise.
+	(dump_bfd_header): Likewise.
+	(objdump_print_value): Replace sprintf_vma with
+	bfd_sprintf_vma.
+	(disassemble_bytes): Likewise.
+	(dump_reloc_set): Likewise.
+
 2001-08-10  Andreas Jaeger  <aj@suse.de>
 
 	* configure.in: Add -Wstrict-prototypes and -Wmissing-prototypes
