@@ -1,3 +1,14 @@
+2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elf64-mmix.c (mmix_dump_bpo_gregs): New function.
+	(mmix_elf_check_common_relocs) <case R_MMIX_BASE_PLUS_OFFSET>:
+	Call bfd_get_section_by_name only once.  Initialize
+	bpodata->n_bpo_relocs_this_section.
+	(_bfd_mmix_prepare_linker_allocated_gregs): Remove comment
+	referring to DSOs.
+	(bpo_reloc_request_sort_fn): Don't use difference of values as
+	return-value.
+
 2002-02-02  David O'Brien  <obrien@FreeBSD>
 
 	* configure.in: Tweak the FreeBSD 4.x recognition more.  Only treat

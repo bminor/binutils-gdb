@@ -182,6 +182,10 @@ extern boolean mmix_elf_final_link PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void mmix_elf_symbol_processing PARAMS ((bfd *, asymbol *));
 
+/* Only intended to be called from a debugger.  */
+extern void mmix_dump_bpo_gregs
+  PARAMS ((struct bfd_link_info *, bfd_error_handler_type));
+
 /* Watch out: this currently needs to have elements with the same index as
    their R_MMIX_ number.  */
 static reloc_howto_type elf_mmix_howto_table[] =
@@ -1666,9 +1670,11 @@ mmix_elf_check_common_relocs  (abfd, info, sec, relocs)
 	      info->base_file = (PTR) bpo_greg_owner;
 	    }
 
-	  allocated_gregs_section
-	    = bfd_get_section_by_name (bpo_greg_owner,
-				       MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+	  if (allocated_gregs_section == NULL)
+	    allocated_gregs_section
+	      = bfd_get_section_by_name (bpo_greg_owner,
+					 MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+
 	  if (allocated_gregs_section == NULL)
 	    {
 	      allocated_gregs_section
@@ -1716,6 +1722,7 @@ mmix_elf_check_common_relocs  (abfd, info, sec, relocs)
 		= gregdata->n_max_bpo_relocs;
 	      bpodata->bpo_greg_section
 		= allocated_gregs_section;
+	      bpodata->n_bpo_relocs_this_section = 0;
 	    }
 
 	  bpodata->n_bpo_relocs_this_section++;
@@ -2075,9 +2082,6 @@ _bfd_mmix_prepare_linker_allocated_gregs (abfd, info)
     = bfd_get_section_by_name (bpo_greg_owner,
 			       MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
 
-  /* This can't happen without DSO handling.  When DSOs are handled
-     without any R_MMIX_BASE_PLUS_OFFSET seen, there will be no such
-     section.  */
   if (bpo_gregs_section == NULL)
     return true;
 
@@ -2201,12 +2205,71 @@ bpo_reloc_request_sort_fn (p1, p2)
   if (r1->valid != r2->valid)
     return r2->valid - r1->valid;
 
-  /* Then sort on value.  */
+  /* Then sort on value.  Don't simplify and return just the difference of
+     the values: the upper bits of the 64-bit value would be truncated on
+     a host with 32-bit ints.  */
   if (r1->value != r2->value)
-    return r1->value - r2->value;
+    return r1->value > r2->value ? 1 : -1;
 
   /* As a last re-sort, use the address so we get a stable sort.  */
   return r1 > r2 ? 1 : (r1 < r2 ? -1 : 0);
+}
+
+/* For debug use only.  Dumps the global register allocations resulting
+   from base-plus-offset relocs.  */
+
+void
+mmix_dump_bpo_gregs (link_info, pf)
+     struct bfd_link_info *link_info;
+     bfd_error_handler_type pf;
+{
+  bfd *bpo_greg_owner;
+  asection *bpo_gregs_section;
+  struct bpo_greg_section_info *gregdata;
+  unsigned int i;
+
+  if (link_info == NULL || link_info->base_file == NULL)
+    return;
+
+  bpo_greg_owner = (bfd *) link_info->base_file;
+
+  bpo_gregs_section
+    = bfd_get_section_by_name (bpo_greg_owner,
+			       MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+
+  if (bpo_gregs_section == NULL)
+    return;
+
+  gregdata = (struct bpo_greg_section_info *)
+    elf_section_data (bpo_gregs_section)->tdata;
+  if (gregdata == NULL)
+    return;
+
+  if (pf == NULL)
+    pf = _bfd_error_handler;
+
+  /* These format strings are not translated.  They are for debug purposes
+     only and never displayed to an end user.  Should they escape, we
+     surely want them in original.  */
+  (*pf) (" n_bpo_relocs: %u\n n_max_bpo_relocs: %u\n n_remain...round: %u\n\
+ n_allocated_bpo_gregs: %u\n", gregdata->n_bpo_relocs,
+     gregdata->n_max_bpo_relocs,
+     gregdata->n_remaining_bpo_relocs_this_relaxation_round,
+     gregdata->n_allocated_bpo_gregs);
+
+  if (gregdata->reloc_request)
+    for (i = 0; i < gregdata->n_max_bpo_relocs; i++)
+      (*pf) ("%4u (%4u)/%4u#%u: 0x%08lx%08lx  r: %3u o: %3u\n",
+	     i,
+	     gregdata->bpo_reloc_indexes != NULL
+	     ? gregdata->bpo_reloc_indexes[i] : -1,
+	     gregdata->reloc_request[i].bpo_reloc_no,
+	     gregdata->reloc_request[i].valid,
+
+	     (unsigned long) (gregdata->reloc_request[i].value >> 32),
+	     (unsigned long) gregdata->reloc_request[i].value,
+	     gregdata->reloc_request[i].regindex,
+	     gregdata->reloc_request[i].offset);
 }
 
 /* This links all R_MMIX_BASE_PLUS_OFFSET relocs into a special array, and
