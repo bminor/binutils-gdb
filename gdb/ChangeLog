@@ -1,3 +1,16 @@
+2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.c (finish_cv_type): New function.
+	(check_typedef): Remove ``register'' keyword from argument. 
+	Preserve const and volatile attributes across filling in
+	opaque types.
+	* gdbtypes.h (finish_cv_type): Add prototype.
+
+	* hp-symtab-read.c (hpread_read_struct_type): Call finish_cv_type.
+	* stabsread.c (read_struct_type): Likewise.
+	* dwarf2read.c (read_structure_scope): Likewise.  Remove redundant
+	assignment to die->type.
+
 2001-12-07  Jim Blandy  <jimb@redhat.com>
 
 	* printcmd.c (print_scalar_formatted): Compare the length of the

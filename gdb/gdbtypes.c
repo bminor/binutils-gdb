@@ -36,6 +36,7 @@
 #include "gdbcmd.h"
 #include "wrapper.h"
 #include "cp-abi.h"
+#include "gdb_assert.h"
 
 /* These variables point to the objects
    representing the predefined C data types.  */
@@ -469,8 +470,51 @@ make_cv_type (int cnst, int voltl, struct type *type, struct type **typeptr)
   return ntype;
 }
 
+/* When reading in a class type, we may have created references to
+   cv-qualified versions of the type (in method arguments, for
+   instance).  Update everything on the cv ring from the primary
+   type TYPE.
 
+   The only reason we do not need to do the same thing for address
+   spaces is that type readers do not create address space qualified
+   types.  */
+void
+finish_cv_type (struct type *type)
+{
+  struct type *ntype, *cv_type, *ptr_type, *ref_type;
+  int cv_flags;
 
+  gdb_assert (!TYPE_CONST (type) && !TYPE_VOLATILE (type));
+
+  ntype = type;
+  while ((ntype = TYPE_CV_TYPE (ntype)) != type)
+    {
+      /* Save cv_flags.  */
+      cv_flags = TYPE_FLAGS (ntype) & (TYPE_FLAG_VOLATILE | TYPE_FLAG_CONST);
+
+      /* If any reference or pointer types were created, save them too.  */
+      ptr_type = TYPE_POINTER_TYPE (ntype);
+      ref_type = TYPE_REFERENCE_TYPE (ntype);
+
+      /* Don't disturb the CV chain.  */
+      cv_type = TYPE_CV_TYPE (ntype);
+
+      /* Verify that we haven't added any address-space qualified types,
+	 for the future.  */
+      gdb_assert (ntype == TYPE_AS_TYPE (ntype));
+
+      /* Copy original type */
+      memcpy ((char *) ntype, (char *) type, sizeof (struct type));
+
+      /* Restore everything.  */
+      TYPE_POINTER_TYPE (ntype) = ptr_type;
+      TYPE_REFERENCE_TYPE (ntype) = ref_type;
+      TYPE_CV_TYPE (ntype) = cv_type;
+      TYPE_FLAGS (ntype) = TYPE_FLAGS (ntype) | cv_flags;
+
+      TYPE_AS_TYPE (ntype) = ntype;
+    }
+}
 
 /* Implement direct support for MEMBER_TYPE in GNU C++.
    May need to construct such a type if this is the first use.
@@ -1144,9 +1188,11 @@ struct complaint stub_noname_complaint =
 {"stub type has NULL name", 0, 0};
 
 struct type *
-check_typedef (register struct type *type)
+check_typedef (struct type *type)
 {
   struct type *orig_type = type;
+  int is_const, is_volatile;
+
   while (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {
       if (!TYPE_TARGET_TYPE (type))
@@ -1179,6 +1225,9 @@ check_typedef (register struct type *type)
       type = TYPE_TARGET_TYPE (type);
     }
 
+  is_const = TYPE_CONST (type);
+  is_volatile = TYPE_VOLATILE (type);
+
   /* If this is a struct/class/union with no fields, then check whether a
      full definition exists somewhere else.  This is for systems where a
      type definition with no fields is issued for such types, instead of
@@ -1195,9 +1244,7 @@ check_typedef (register struct type *type)
 	}
       newtype = lookup_transparent_type (name);
       if (newtype)
-	{
-	  memcpy ((char *) type, (char *) newtype, sizeof (struct type));
-	}
+	make_cv_type (is_const, is_volatile, newtype, &type);
     }
   /* Otherwise, rely on the stub flag being set for opaque/stubbed types */
   else if ((TYPE_FLAGS (type) & TYPE_FLAG_STUB) && !currently_reading_symtab)
@@ -1215,9 +1262,7 @@ check_typedef (register struct type *type)
 	}
       sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, (struct symtab **) NULL);
       if (sym)
-	{
-	  memcpy ((char *) type, (char *) SYMBOL_TYPE (sym), sizeof (struct type));
-	}
+	make_cv_type (is_const, is_volatile, SYMBOL_TYPE (sym), &type);
     }
 
   if (TYPE_FLAGS (type) & TYPE_FLAG_TARGET_STUB)

@@ -1037,6 +1037,8 @@ extern struct type *make_reference_type (struct type *, struct type **);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
 
+extern void finish_cv_type (struct type *);
+
 extern int address_space_name_to_int (char *);
 
 extern char *address_space_int_to_name (int);
