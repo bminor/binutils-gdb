@@ -657,6 +657,7 @@ b_out_set_arch_mach (abfd, arch, machine)
     case bfd_mach_i960_xa:
     case bfd_mach_i960_ca:
     case bfd_mach_i960_ka_sa:
+    case 0:
       return true;
     default:
       return false;
@@ -670,7 +671,7 @@ DEFUN(b_out_sizeof_headers,(abfd, exec),
       bfd *abfd AND
       boolean exec)
 {
-return sizeof(struct internal_exec);
+  return sizeof(struct internal_exec);
 }
 
 
