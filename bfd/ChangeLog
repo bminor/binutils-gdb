@@ -1,3 +1,9 @@
+2000-05-31  Ulrich Drepper  <drepper@redhat.com>
+
+	* elf.c (_bfd_elf_slurp_version_tables): Correct reading of version
+	definitions.  We must not assume they are sorted in the file
+	according to their index numbers.
+
 2000-05-31  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf-hppa.h: (elf_hppa_final_link_relocate): Use e_rsel field
