@@ -1,3 +1,14 @@
+Mon Dec  1 16:12:05 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-srec/srec.exp: Add expected failures of tests 1 and 2 for ARM
+	coff targets.
+
+Wed Nov 12 14:18:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-cdtest/cdtest-foo.h (class Foo): Declare len to be int to
+	avoid compiler warning.
+	* ld-srec/sr3.cc (class Foo): Likewise.
+
 Mon Nov 10 14:25:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lib/ld-lib.exp (default_ld_simple_link): Permit the linker to
