@@ -1,4 +1,12 @@
+Wed Jun 22 10:52:47 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* aoutx.h (aout_link_check_ar_symbols): Just skip N_STAB and N_FN
+        symbols; don't look them up in the hash table.  From
+        ralphc@pyramid.com (Ralph Campbell).
+
 Tue Jun 21 11:47:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* coff-go32.c (go32coff_archive_p): Remove unused function.
 
 	* section.c (bfd_abs_section): Make const.
 	(bfd_abs_section_ptr, bfd_is_abs_section): Define.

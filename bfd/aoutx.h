@@ -1207,7 +1207,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	  break;
 	default:
 	case N_ABS:
-	  sec = &bfd_abs_section;
+	  sec = bfd_abs_section_ptr;
 	  break;
 	}
 
@@ -1228,7 +1228,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
     {
     default:
     case N_ABS: case N_ABS | N_EXT:
-      cache_ptr->symbol.section = &bfd_abs_section;
+      cache_ptr->symbol.section = bfd_abs_section_ptr;
       cache_ptr->symbol.flags = visible;
       break;
 
@@ -1237,12 +1237,12 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	{
 	  /* This is a common symbol.  */
 	  cache_ptr->symbol.flags = BSF_GLOBAL;
-	  cache_ptr->symbol.section = &bfd_com_section;
+	  cache_ptr->symbol.section = bfd_com_section_ptr;
 	}
       else
 	{
 	  cache_ptr->symbol.flags = 0;
-	  cache_ptr->symbol.section = &bfd_und_section;
+	  cache_ptr->symbol.section = bfd_und_section_ptr;
 	}
       break;
 
@@ -1319,7 +1319,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	switch (cache_ptr->type & N_TYPE)
 	  {
 	  case N_SETA:
-	    into_section = &bfd_abs_section;
+	    into_section = bfd_abs_section_ptr;
 	    cache_ptr->type = N_ABS;
 	    break;
 	  case N_SETT:
@@ -1378,7 +1378,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	abort ();
       cache_ptr->symbol.value = (bfd_vma) (cache_ptr + 1);
 
-      cache_ptr->symbol.section = &bfd_abs_section;
+      cache_ptr->symbol.section = bfd_abs_section_ptr;
 
       break;
 
@@ -1396,17 +1396,17 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	abort ();
       cache_ptr->symbol.value = (bfd_vma) (cache_ptr + 1);
 
-      cache_ptr->symbol.section = &bfd_ind_section;
+      cache_ptr->symbol.section = bfd_ind_section_ptr;
 
       break;
 
     case N_WEAKU:
-      cache_ptr->symbol.section = &bfd_und_section;
+      cache_ptr->symbol.section = bfd_und_section_ptr;
       cache_ptr->symbol.flags = BSF_WEAK;
       break;
 
     case N_WEAKA:
-      cache_ptr->symbol.section = &bfd_abs_section;
+      cache_ptr->symbol.section = bfd_abs_section_ptr;
       cache_ptr->symbol.flags = BSF_WEAK;
       break;
 
@@ -1446,7 +1446,7 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
      to another.  */
   sym_pointer->e_type[0] &= ~N_TYPE;
 
-  if (bfd_get_section (cache_ptr) == &bfd_abs_section)
+  if (bfd_is_abs_section (bfd_get_section (cache_ptr)))
     sym_pointer->e_type[0] |= N_ABS;
   else if (bfd_get_section (cache_ptr) == obj_textsec (abfd)
 	   || (bfd_get_section (cache_ptr)->output_section
@@ -1460,10 +1460,6 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
 	   || (bfd_get_section (cache_ptr)->output_section
 	       == obj_bsssec (abfd)))
     sym_pointer->e_type[0] |= N_BSS;
-  else if (bfd_get_section (cache_ptr) == &bfd_und_section)
-    sym_pointer->e_type[0] = N_UNDF | N_EXT;
-  else if (bfd_get_section (cache_ptr) == &bfd_ind_section)
-    sym_pointer->e_type[0] = N_INDR;
   else if (bfd_get_section (cache_ptr) == NULL)
     {
       /* Protect the bfd_is_com_section call.  This case occurs, e.g.,
@@ -1471,6 +1467,10 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
       bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
     }
+  else if (bfd_is_und_section (bfd_get_section (cache_ptr)))
+    sym_pointer->e_type[0] = N_UNDF | N_EXT;
+  else if (bfd_is_ind_section (bfd_get_section (cache_ptr)))
+    sym_pointer->e_type[0] = N_INDR;
   else if (bfd_is_com_section (bfd_get_section (cache_ptr)))
     sym_pointer->e_type[0] = N_UNDF | N_EXT;
   else
@@ -1980,10 +1980,10 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
 
 
   if (bfd_is_com_section (output_section)
-      || output_section == &bfd_abs_section
-      || output_section == &bfd_und_section)
+      || bfd_is_abs_section (output_section)
+      || bfd_is_und_section (output_section))
     {
-      if (bfd_abs_section.symbol == sym)
+      if (bfd_abs_section_ptr->symbol == sym)
       {
 	/* Whoops, looked like an abs symbol, but is really an offset
 	   from the abs section */
@@ -2062,10 +2062,10 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
      check for that here.  */
 
   if (bfd_is_com_section (output_section)
-      || output_section == &bfd_abs_section
-      || output_section == &bfd_und_section)
+      || bfd_is_abs_section (output_section)
+      || bfd_is_und_section (output_section))
   {
-    if (bfd_abs_section.symbol == sym)
+    if (bfd_abs_section_ptr->symbol == sym)
     {
       /* Whoops, looked like an abs symbol, but is really an offset
 	 from the abs section */
@@ -2141,7 +2141,7 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
     default:								\
     case N_ABS:								\
     case N_ABS | N_EXT:							\
-     cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;	\
+     cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
       cache_ptr->addend = ad;						\
       break;								\
     }									\
@@ -2891,7 +2891,9 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
       /* Ignore symbols that are not externally visible.  This is an
 	 optimization only, as we check the type more thoroughly
 	 below.  */
-      if ((type & N_EXT) == 0
+      if (((type & N_EXT) == 0
+	   || (type & N_STAB) != 0
+	   || type == N_FN)
 	  && type != N_WEAKA
 	  && type != N_WEAKT
 	  && type != N_WEAKD
@@ -3110,14 +3112,14 @@ aout_link_add_symbols (abfd, info)
 	case N_UNDF | N_EXT:
 	  if (value == 0)
 	    {
-	      section = &bfd_und_section;
+	      section = bfd_und_section_ptr;
 	      flags = 0;
 	    }
 	  else
-	    section = &bfd_com_section;
+	    section = bfd_com_section_ptr;
 	  break;
 	case N_ABS | N_EXT:
-	  section = &bfd_abs_section;
+	  section = bfd_abs_section_ptr;
 	  break;
 	case N_TEXT | N_EXT:
 	  section = obj_textsec (abfd);
@@ -3140,14 +3142,14 @@ aout_link_add_symbols (abfd, info)
 	  BFD_ASSERT (p + 1 < pend);
 	  ++p;
 	  string = strings + GET_WORD (abfd, p->e_strx);
-	  section = &bfd_ind_section;
+	  section = bfd_ind_section_ptr;
 	  flags |= BSF_INDIRECT;
 	  break;
 	case N_COMM | N_EXT:
-	  section = &bfd_com_section;
+	  section = bfd_com_section_ptr;
 	  break;
 	case N_SETA: case N_SETA | N_EXT:
-	  section = &bfd_abs_section;
+	  section = bfd_abs_section_ptr;
 	  flags |= BSF_CONSTRUCTOR;
 	  break;
 	case N_SETT: case N_SETT | N_EXT:
@@ -3172,15 +3174,15 @@ aout_link_add_symbols (abfd, info)
 	  ++p;
 	  string = name;
 	  name = strings + GET_WORD (abfd, p->e_strx);
-	  section = &bfd_und_section;
+	  section = bfd_und_section_ptr;
 	  flags |= BSF_WARNING;
 	  break;
 	case N_WEAKU:
-	  section = &bfd_und_section;
+	  section = bfd_und_section_ptr;
 	  flags = BSF_WEAK;
 	  break;
 	case N_WEAKA:
-	  section = &bfd_abs_section;
+	  section = bfd_abs_section_ptr;
 	  flags = BSF_WEAK;
 	  break;
 	case N_WEAKT:
@@ -3697,7 +3699,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	    symsec = obj_bsssec (input_bfd);
 	  else if ((type & N_TYPE) == N_ABS
 		   || type == N_WEAKA)
-	    symsec = &bfd_abs_section;
+	    symsec = bfd_abs_section_ptr;
 	  else if (((type & N_TYPE) == N_INDR
 		    && (hresolve == (struct aout_link_hash_entry *) NULL
 			|| (hresolve->root.type != bfd_link_hash_defined
@@ -3741,7 +3743,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 		     into a defined symbol.  */
 		  input_section = hresolve->root.u.def.section;
 		  output_section = input_section->output_section;
-		  BFD_ASSERT (output_section == &bfd_abs_section
+		  BFD_ASSERT (bfd_is_abs_section (output_section)
 			      || output_section->owner == output_bfd);
 		  val = (hresolve->root.u.def.value
 			 + bfd_get_section_vma (output_bfd, output_section)
@@ -3924,7 +3926,7 @@ aout_link_write_other_symbol (h, data)
 	asection *sec;
 
 	sec = h->root.u.def.section->output_section;
-	BFD_ASSERT (sec == &bfd_abs_section
+	BFD_ASSERT (bfd_is_abs_section (sec)
 		    || sec->owner == output_bfd);
 	if (sec == obj_textsec (output_bfd))
 	  type = N_TEXT | N_EXT;
@@ -4101,7 +4103,7 @@ aout_reloc_index_to_section (abfd, indx)
       return obj_bsssec (abfd);
     case N_ABS:
     case N_UNDF:
-      return &bfd_abs_section;
+      return bfd_abs_section_ptr;
     default:
       abort ();
     }
@@ -4744,7 +4746,7 @@ aout_link_reloc_link_order (finfo, o, p)
   if (p->type == bfd_section_reloc_link_order)
     {
       r_extern = 0;
-      if (pr->u.section == &bfd_abs_section)
+      if (bfd_is_abs_section (pr->u.section))
 	r_index = N_ABS | N_EXT;
       else
 	{
