@@ -1,3 +1,10 @@
+Tue Sep 16 10:01:00 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c: Added tx39 insns sdbbp, rfe, and deret.
+start-sanitize-tx19
+	* mips16-opc.c: Added mips16 sdbbp.
+end-sanitize-tx19
+
 Mon Sep 15 18:31:52 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c: Initialise processors field of v850_opcode structure.
