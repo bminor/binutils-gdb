@@ -636,15 +636,27 @@ elf_hppa_fake_sections (abfd, hdr, sec)
 
   if (strcmp (name, ".PARISC.unwind") == 0)
     {
+      int indx;
       asection *sec;
       hdr->sh_type = SHT_LOPROC + 1;
       /* ?!? How are unwinds supposed to work for symbols in arbitrary
 	 sections?  Or what if we have multiple .text sections in a single
-	 .o file?  HP really messed up on this one.  */
-      sec = bfd_get_section_by_name (abfd, ".text");
-      if (sec != NULL)
-	hdr->sh_info = elf_section_data (sec)->this_idx;
+	 .o file?  HP really messed up on this one. 
 
+	 Ugh.  We can not use elf_section_data (sec)->this_idx at this
+	 point because it is not initialized yet.
+
+	 So we (gasp) recompute it here.  Hopefully nobody ever changes the
+	 way sections are numbered in elf.c!  */
+      for (sec = abfd->sections, indx = 1; sec; sec = sec->next, indx++)
+	{
+	  if (sec->name && strcmp (sec->name, ".text") == 0)
+	    {
+	      hdr->sh_info = indx;
+	      break;
+	    }
+	}
+      
       /* I have no idea if this is really necessary or what it means.  */
       hdr->sh_entsize = 4;
     }
