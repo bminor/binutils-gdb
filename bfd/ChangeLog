@@ -1,3 +1,17 @@
+Thu Sep  3 09:05:37 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* bout.c, cpu-z8k.c:  Use enums when initializing structs to keep
+	braindamaged HP/Apollo compiler happy.
+
+Wed Sep  2 02:53:29 1992  John Gilmore  (gnu@cygnus.com)
+
+	* format.c:  Fix description of search for matching target.
+	* aoutx.h (some_aout_object_p):  Set SEC_CODE and SEC_DATA.
+	* targets.c:  Update description of search for matching target.
+	* Makefile.in (do_clean, clean):  Fix infant mortality typo.
+	(docdir):  Set to ./doc, not ${srcdir}/doc, which has no makefile.
+	(z8k and we32k files):  `*.o: *.c': avoid Sun Make bug.
+
 Wed Sep  2 00:26:32 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in:  Added mostlyclean/clean/distclean rules.
