@@ -81,8 +81,7 @@ print_subexp (exp, pos, stream, prec)
 		    (enum precedence) ((int) myprec + assoc));
       fputs_filtered (" :: ", stream);
       nargs = longest_to_int (exp->elts[pc + 2].longconst);
-      (*pos) += 2 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
-
+      (*pos) += 2 + BYTES_TO_EXP_ELEM (nargs + 1);
       fputs_filtered (&exp->elts[pc + 3].string, stream);
       return;
 
@@ -146,13 +145,20 @@ print_subexp (exp, pos, stream, prec)
 
     case OP_STRING:
       nargs = longest_to_int (exp -> elts[pc + 1].longconst);
-      (*pos) += 3 + (nargs + sizeof (union exp_element))
-	/ sizeof (union exp_element);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
       /* LA_PRINT_STRING will print using the current repeat count threshold.
 	 If necessary, we can temporarily set it to zero, or pass it as an
 	 additional parameter to LA_PRINT_STRING.  -fnf */
       LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 0);
       return;
+
+    case OP_BITSTRING:
+      error ("support for OP_BITSTRING unimplemented");
+      break;
+
+    case OP_ARRAY:
+      error ("support for OP_ARRAY unimplemented");
+      break;
 
     case TERNOP_COND:
       if ((int) prec > (int) PREC_COMMA)
@@ -172,7 +178,7 @@ print_subexp (exp, pos, stream, prec)
 
     case STRUCTOP_STRUCT:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered (".", stream);
       fputs_filtered (&exp->elts[pc + 2].string, stream);
@@ -181,7 +187,7 @@ print_subexp (exp, pos, stream, prec)
     /* Will not occur for Modula-2 */
     case STRUCTOP_PTR:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered ("->", stream);
       fputs_filtered (&exp->elts[pc + 2].string, stream);
@@ -487,6 +493,8 @@ dump_expression (exp, stream, note)
 	  case OP_INTERNALVAR: opcode_name = "OP_INTERNALVAR"; break;
 	  case OP_FUNCALL: opcode_name = "OP_FUNCALL"; break;
 	  case OP_STRING: opcode_name = "OP_STRING"; break;
+	  case OP_BITSTRING: opcode_name = "OP_BITSTRING"; break;
+	  case OP_ARRAY: opcode_name = "OP_ARRAY"; break;
 	  case UNOP_CAST: opcode_name = "UNOP_CAST"; break;
 	  case UNOP_MEMVAL: opcode_name = "UNOP_MEMVAL"; break;
 	  case UNOP_NEG: opcode_name = "UNOP_NEG"; break;

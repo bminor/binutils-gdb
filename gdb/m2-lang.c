@@ -224,7 +224,7 @@ m2_create_fundamental_type (objfile, typeid)
 			  TYPE_FLAG_UNSIGNED, "boolean", objfile);
 	break;
       case FT_STRING:
-	type = init_type (TYPE_CODE_PASCAL_ARRAY,
+	type = init_type (TYPE_CODE_STRING,
 			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 			  0, "string", objfile);
 	break;

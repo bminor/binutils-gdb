@@ -89,12 +89,13 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      int recurse;
      enum val_prettyprint pretty;
 {
-  register unsigned int i;
+  register unsigned int i = 0;		/* Number of characters printed */
   unsigned len;
   struct type *elttype;
   unsigned eltlen;
   LONGEST val;
   unsigned char c;
+  CORE_ADDR addr;
 
   switch (TYPE_CODE (type))
     {
@@ -108,15 +109,19 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
-	  fprintf_filtered (stream, "{");
 	  /* For an array of chars, print with string syntax.  */
 	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
-	      && (format == 0 || format == 's') )
+	      && (format == 0 || format == 's'))
 	    {
+	      if (addressprint && format != 's')
+		{
+		  fprintf_filtered (stream, "0x%x ", address);
+		}
 	      LA_PRINT_STRING (stream, valaddr, len, 0);
 	    }
 	  else
 	    {
+	      fprintf_filtered (stream, "{");
 	      /* If this is a virtual function table, print the 0th
 		 entry specially, and the rest of the members normally.  */
 	      if (cp_is_vtbl_ptr_type (elttype))
@@ -130,12 +135,13 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		}
 	      val_print_array_elements (type, valaddr, address, stream,
 					format, deref_ref, recurse, pretty, i);
+	      fprintf_filtered (stream, "}");
 	    }
-	  fprintf_filtered (stream, "}");
 	  break;
 	}
       /* Array of unspecified length: treat like pointer to first elt.  */
       valaddr = (char *) &address;
+      /* FALL THROUGH */
 
     case TYPE_CODE_PTR:
       if (format && format != 's')
@@ -155,7 +161,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       else
 	{
-	  CORE_ADDR addr = unpack_pointer (type, valaddr);
+	  addr = unpack_pointer (type, valaddr);
 	  elttype = TYPE_TARGET_TYPE (type);
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
@@ -173,16 +179,12 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
-	  i = 0;		/* Number of characters printed.  */
-	  if (TYPE_LENGTH (elttype) == 1 &&
-	      TYPE_CODE (elttype) == TYPE_CODE_INT &&
-	      (format == 0 || format == 's') &&
-	      addr != 0 &&
-	      /* If print_max is UINT_MAX, the alloca below will fail.
-	         In that case don't try to print the string.  */
-	      print_max < UINT_MAX)
+	  if (TYPE_LENGTH (elttype) == 1
+	      && TYPE_CODE (elttype) == TYPE_CODE_INT
+	      && (format == 0 || format == 's')
+	      && addr != 0)
 	    {
-	      i = val_print_string (addr, stream);
+	      i = val_print_string (addr, 0, stream);
 	    }
 	  else if (cp_is_vtbl_member(type))
   	    {

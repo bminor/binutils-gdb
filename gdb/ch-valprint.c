@@ -172,6 +172,26 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       return (i + (print_max && i != print_max));
       break;
 
+    case TYPE_CODE_STRING:
+      if (format && format != 's')
+	{
+	  print_scalar_formatted (valaddr, type, format, 0, stream);
+	  break;
+	}
+      addr = unpack_pointer (lookup_pointer_type (builtin_type_char), valaddr);
+      if (addressprint && format != 's')
+	{
+	  fprintf_filtered (stream, "0x%x", addr);
+	}
+      if (addr != 0)
+	{
+	  i = val_print_string (addr, TYPE_LENGTH (type), stream);
+	}
+      /* Return number of characters printed, plus one for the terminating
+	 null if we have "reached the end".  */
+      return (i + (print_max && i != print_max));
+      break;
+
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
     case TYPE_CODE_UNION:

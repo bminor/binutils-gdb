@@ -195,6 +195,10 @@ struct complaint pdr_static_symbol_complaint =
 
 /* Things that really are local to this module */
 
+/* Remember what we deduced to be the source language of this psymtab. */
+
+static enum language psymtab_language = language_unknown;
+
 /* MIPS symtab header for the current file */
 
 static HDRR	*cur_hdr;
@@ -1477,7 +1481,7 @@ parse_type(ax, bs, bigend)
 		    complain (&bad_tag_guess_complaint, name);
 		    TYPE_CODE(tp) = type_code;
 		}
-		if (TYPE_NAME(tp) == NULL || strcmp(TYPE_NAME(tp), name) != 0)
+		if (TYPE_NAME(tp) == NULL || !STREQ (TYPE_NAME(tp), name))
 		    TYPE_NAME(tp) = obsavestring(name, strlen(name),
 						 &current_objfile -> type_obstack);
 	}
@@ -1862,6 +1866,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
     struct partial_symtab **dependency_list;
     int dependencies_used, dependencies_allocated;
     struct cleanup *old_chain;
+    char *name;
 
     extern_tab = (EXTR**)obstack_alloc (&objfile->psymbol_obstack,
 					sizeof(EXTR *) * hdr->iextMax);
@@ -1941,9 +1946,8 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		ms_type = mst_unknown;
 		complain (&unknown_ext_complaint, esh->asym.iss);
 	}
-	prim_record_minimal_symbol ((char *)esh->asym.iss,
-				    esh->asym.value,
-				    ms_type);
+	name = (char *)esh->asym.iss;
+	prim_record_minimal_symbol (name, esh->asym.value, ms_type);
     }
 
     /* Pass 3 over files, over local syms: fill in static symbols */
@@ -1984,8 +1988,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	   (It is the second symbol because the first symbol is
 	   the stFile used to signal the start of a file). */
 	if (fh->csym >= 2
-	    && strcmp((char *)(((SYMR *)fh->isymBase)[1].iss),
-		      stabs_symbol) == 0) {
+	    && STREQ((char *)(((SYMR *)fh->isymBase)[1].iss), stabs_symbol)) {
 	    processing_gcc_compilation = 2;
 	    for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++) {
 		int type_code;
@@ -2047,7 +2050,8 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		  case stStaticProc:		/* Function */
 		    ADD_PSYMBOL_TO_LIST(name, strlen(name),
 					VAR_NAMESPACE, LOC_BLOCK,
-					objfile->static_psymbols, sh->value);
+					objfile->static_psymbols, sh->value,
+					psymtab_language, objfile);
 		    /* Skip over procedure to next one. */
 		    if (sh->index >= hdr->iauxMax)
 		      {
@@ -2096,7 +2100,9 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		    if (sh->sc == scInfo) {
 			ADD_PSYMBOL_TO_LIST(name, strlen(name),
 					    STRUCT_NAMESPACE, LOC_TYPEDEF,
-					    objfile->static_psymbols, sh->value);
+					    objfile->static_psymbols,
+					    sh->value,
+					    psymtab_language, objfile);
 		    }
 		    /* Skip over the block */
 		    cur_sdx = sh->index;
@@ -2124,7 +2130,8 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		/* Use this gdb symbol */
 		ADD_PSYMBOL_TO_LIST(name, strlen(name),
 				    VAR_NAMESPACE, class,
-				    objfile->static_psymbols, sh->value);
+				    objfile->static_psymbols, sh->value,
+				    psymtab_language, objfile);
 	      skip:
 		cur_sdx++;		/* Go to next file symbol */
 	    }
@@ -2357,8 +2364,7 @@ psymtab_to_symtab_1(pst, filename)
 
     /* See comment in parse_partial_symbols about the @stabs sentinel. */
     if (fh && fh->csym >= 2
-	    && strcmp((char *)(((SYMR *)fh->isymBase)[1].iss), stabs_symbol)
-	        == 0) {
+	    && STREQ((char *)(((SYMR *)fh->isymBase)[1].iss), stabs_symbol)) {
 
 	/*
 	 * This symbol table contains stabs-in-ecoff entries.
@@ -2633,7 +2639,7 @@ mylookup_symbol (name, block, namespace, class)
 		if (SYMBOL_NAME(sym)[0] == inc
 		    && SYMBOL_NAMESPACE(sym) == namespace
 		    && SYMBOL_CLASS(sym) == class
-		    && !strcmp(SYMBOL_NAME(sym), name))
+		    && STREQ(SYMBOL_NAME(sym), name))
 			return sym;
 		bot++;
 	}
@@ -2660,7 +2666,7 @@ add_symbol(s,b)
 
 	if (b == top_stack->cur_block &&
 	    nsyms >= top_stack->maxsyms) {
-		complain (&block_overflow_complaint, s->name);
+		complain (&block_overflow_complaint, SYMBOL_NAME (s));
 		/* In this case shrink_block is actually grow_block, since
 		   BLOCK_NSYMS(b) is larger than its current size.  */
 		origb = b;
@@ -3106,7 +3112,7 @@ _initialize_mipsread ()
 	/* Missing basic types */
 
 	builtin_type_string =
-	    init_type(TYPE_CODE_PASCAL_ARRAY,
+	    init_type(TYPE_CODE_STRING,
 		      TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 		      0, "string",
 		      (struct objfile *) NULL);

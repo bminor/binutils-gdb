@@ -232,7 +232,7 @@ print_type_scalar (type, val, stream)
     case TYPE_CODE_VOID:
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
-    case TYPE_CODE_PASCAL_ARRAY:
+    case TYPE_CODE_STRING:
     case TYPE_CODE_ERROR:
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_METHOD:

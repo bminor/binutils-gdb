@@ -701,8 +701,7 @@ unpack_long (type, valaddr)
     }
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
-  else if (code == TYPE_CODE_PTR
-	   || code == TYPE_CODE_REF)
+  else if (code == TYPE_CODE_PTR || code == TYPE_CODE_REF)
     {
       if (len == sizeof(long))
       {

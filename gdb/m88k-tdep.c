@@ -626,7 +626,7 @@ pushed_size (prev_words, v)
       case TYPE_CODE_FUNC:		/* Function type */
       case TYPE_CODE_SET:		/* Pascal sets */
       case TYPE_CODE_RANGE:		/* Range (integers within bounds) */
-      case TYPE_CODE_PASCAL_ARRAY:	/* Array with explicit type of index */
+      case TYPE_CODE_STRING:		/* String type */
       case TYPE_CODE_MEMBER:		/* Member type */
       case TYPE_CODE_METHOD:		/* Method type */
 	/* Don't know how to pass these yet.  */

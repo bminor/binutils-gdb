@@ -423,6 +423,13 @@ length_of_subexp (expr, endpos)
       oplen = 4 + BYTES_TO_EXP_ELEM (oplen);
       break;
 
+    case OP_ARRAY:
+      oplen = 4;
+      args = longest_to_int (expr->elts[endpos - 2].longconst);
+      args -= longest_to_int (expr->elts[endpos - 3].longconst);
+      args += 1;
+      break;
+
     case TERNOP_COND:
       args = 3;
       break;
@@ -542,6 +549,13 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
       oplen = (oplen + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
       oplen = 4 + BYTES_TO_EXP_ELEM (oplen);
+      break;
+
+    case OP_ARRAY:
+      oplen = 4;
+      args = longest_to_int (inexpr->elts[inend - 2].longconst);
+      args -= longest_to_int (inexpr->elts[inend - 3].longconst);
+      args += 1;
       break;
 
     case TERNOP_COND:

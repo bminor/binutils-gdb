@@ -1367,6 +1367,12 @@ match_string_literal ()
    Note that more than a single character, enclosed in single quotes, is
    a string literal.
 
+   Also note that the control sequence form is not in GNU Chill since it
+   is ambiguous with the string literal form using single quotes.  I.E.
+   is '^(7)' a character literal or a string literal.  In theory it it
+   possible to tell by context, but GNU Chill doesn't accept the control
+   sequence form, so neither do we (for now the code is disabled).
+
    Returns CHARACTER_LITERAL if a match is found.
    */
 
@@ -1397,6 +1403,7 @@ match_character_literal ()
       
       if ((*tokptr == '^') && (*(tokptr + 1) == '('))
 	{
+	  return (0);  /* Disable, see note above. */
 	  /* Match and decode a control sequence.  Return zero if we don't
 	     find a valid integer literal, or if the next unconsumed character
 	     after the integer literal is not the trailing ')'.

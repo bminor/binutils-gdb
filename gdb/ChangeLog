@@ -1,3 +1,62 @@
+Fri Jan 15 20:26:50 1993  Fred Fish  (fnf@cygnus.com)
+
+	* c-exp.y (exp:STRING):  Convert C strings into array-of-char
+	constants with an explicit null byte terminator.  OP_STRING is
+	now used for real string types.
+	* c-lang.c (builtin_type_*):  Move declarations to lang.c since
+	they are used by all languages.
+	* c-lang.c (_initialize_c_language):  Move initializations of 
+	builtin_type_* to lang.c.
+	* c-typeprint.c (c_type_print_varspec_prefix,
+	c_type_print_varspec_suffix):  TYPE_CODE_PASCAL_ARRAY renamed
+	to TYPE_CODE_STRING.
+	* c-valprint.c (c_val_print):  Change the way character arrays
+	are printed as strings to be consistent with the way strings
+	are printed when pointer-to-char types are dereferenced.
+	Remove test of print_max before calling val_print_string, which
+	now does it's own test.
+	* eval.c (evaluate_subexp):  Add case for OP_ARRAY.
+	* expprint.c (print_subexp, dump_expression):  Add case for OP_ARRAY.
+	* expression.h (enum exp_opcode):  Add OP_ARRAY and document.
+	* gdbtypes.c (builtin_type_*):  Add declarations moved from
+	c-lang.c.
+	* gdbtypes.c (create_string_type):  New function to create real
+	string types.
+	* gdbtypes.c (recursive_dump_type):  TYPE_CODE_PASCAL_ARRAY
+	renamed to TYPE_CODE_STRING.
+	* gdbtypes.c (_initialize_gdbtypes):  Add initializations of
+	builtin_type_* types moved from c-lang.c.
+	* gdbtypes.h (enum type_code):  TYPE_CODE_PASCAL_ARRAY renamed
+	to TYPE_CODE_STRING.
+	* gdbtypes.h (builtin_type_string):  Add extern declaration.
+	* gdbtypes.h (create_string_type):  Add prototype.
+	* m2-lang.c (m2_create_fundamental_type):  TYPE_CODE_PASCAL_ARRAY
+	renamed to TYPE_CODE_STRING.
+	* m88k-tdep.c (pushed_size):  TYPE_CODE_PASCAL_ARRAY renamed to
+	TYPE_CODE_STRING.
+	* mipsread.c (_initialize_mipsread):  TYPE_CODE_PASCAL_ARRAY
+	renamed to TYPE_CODE_STRING.
+	* parse.c (length_of_subexp, prefixify_subexp):  Add case for
+	OP_ARRAY.
+	* printcmd.c (print_formatted):  Recognize TYPE_CODE_STRING.
+	* typeprint.c (print_type_scalar):  TYPE_CODE_PASCAL_ARRAY renamed
+	to TYPE_CODE_STRING.
+	* valops.c (allocate_space_in_inferior):  New function and
+	prototype, using code ripped out of value_string.
+	* valops.c (value_string):  Rewritten to use new function
+	allocate_space_in_inferior, but temporarily disabled until some
+	other support is in place.
+	* valops.c (value_array):  New function to create array constants.
+	* valprint.c (val_print_string):  Add comment to document use, 
+	complete rewrite to fix several small buglets.
+	* value.h (value_array):  Add prototype.
+	* value.h (val_print_string):  Change prototype to match rewrite.
+	**** start-sanitize-chill ****
+	* ch-valprint.c (chill_val_print):  Add case for TYPE_CODE_STRING.
+	* ch-exp.y (match_character_literal):  Disable recognition of 
+	control sequence form of character literals and document why.
+	**** end-sanitize-chill ****
+
 Thu Jan 14 15:48:12 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* nindy-share/nindy.c:  Add comments to #endif's to clarify

@@ -81,7 +81,7 @@ enum type_code
   TYPE_CODE_VOID,		/* Void type (values zero length) */
   TYPE_CODE_SET,		/* Pascal sets */
   TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
-  TYPE_CODE_PASCAL_ARRAY,	/* Array with explicit type of index */
+  TYPE_CODE_STRING,		/* String types, distinct from array of char */
   TYPE_CODE_ERROR,              /* Unknown type */
 
   /* C++ */
@@ -484,6 +484,7 @@ extern struct type *builtin_type_double;
 extern struct type *builtin_type_long_double;
 extern struct type *builtin_type_complex;
 extern struct type *builtin_type_double_complex;
+extern struct type *builtin_type_string;
 
 /* This type represents a type that was unrecognized in symbol
    read-in.  */
@@ -597,6 +598,9 @@ create_range_type PARAMS ((struct type *, struct type *, int, int));
 
 extern struct type *
 create_array_type PARAMS ((struct type *, struct type *, struct type *));
+
+extern struct type *
+create_string_type PARAMS ((struct type *, struct type *));
 
 extern struct type *
 lookup_unsigned_typename PARAMS ((char *));

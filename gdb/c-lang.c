@@ -363,27 +363,6 @@ static const struct op_print c_op_print_tab[] =
     {NULL, 0, 0, 0}
 };
 
-/* These variables point to the objects
-   representing the predefined C data types.  */
-
-struct type *builtin_type_void;
-struct type *builtin_type_char;
-struct type *builtin_type_short;
-struct type *builtin_type_int;
-struct type *builtin_type_long;
-struct type *builtin_type_long_long;
-struct type *builtin_type_signed_char;
-struct type *builtin_type_unsigned_char;
-struct type *builtin_type_unsigned_short;
-struct type *builtin_type_unsigned_int;
-struct type *builtin_type_unsigned_long;
-struct type *builtin_type_unsigned_long_long;
-struct type *builtin_type_float;
-struct type *builtin_type_double;
-struct type *builtin_type_long_double;
-struct type *builtin_type_complex;
-struct type *builtin_type_double_complex;
-
 struct type ** const (c_builtin_types[]) = 
 {
   &builtin_type_int,
@@ -457,75 +436,6 @@ const struct language_defn cplus_language_defn = {
 void
 _initialize_c_language ()
 {
-  builtin_type_void =
-    init_type (TYPE_CODE_VOID, 1,
-	       0,
-	       "void", (struct objfile *) NULL);
-  builtin_type_char =
-    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "char", (struct objfile *) NULL);
-  builtin_type_signed_char =
-    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_SIGNED,
-	       "signed char", (struct objfile *) NULL);
-  builtin_type_unsigned_char =
-    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned char", (struct objfile *) NULL);
-  builtin_type_short =
-    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "short", (struct objfile *) NULL);
-  builtin_type_unsigned_short =
-    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned short", (struct objfile *) NULL);
-  builtin_type_int =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "int", (struct objfile *) NULL);
-  builtin_type_unsigned_int =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned int", (struct objfile *) NULL);
-  builtin_type_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long", (struct objfile *) NULL);
-  builtin_type_unsigned_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long", (struct objfile *) NULL);
-  builtin_type_long_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long long", (struct objfile *) NULL);
-  builtin_type_unsigned_long_long = 
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long long", (struct objfile *) NULL);
-  builtin_type_float =
-    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "float", (struct objfile *) NULL);
-  builtin_type_double =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "double", (struct objfile *) NULL);
-  builtin_type_long_double =
-    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long double", (struct objfile *) NULL);
-  builtin_type_complex =
-    init_type (TYPE_CODE_FLT, TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "complex", (struct objfile *) NULL);
-  builtin_type_double_complex =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "double complex", (struct objfile *) NULL);
-
   add_language (&c_language_defn);
   add_language (&cplus_language_defn);
 }

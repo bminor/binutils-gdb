@@ -32,6 +32,28 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "demangle.h"
 #include "complaints.h"
 
+/* These variables point to the objects
+   representing the predefined C data types.  */
+
+struct type *builtin_type_void;
+struct type *builtin_type_char;
+struct type *builtin_type_short;
+struct type *builtin_type_int;
+struct type *builtin_type_long;
+struct type *builtin_type_long_long;
+struct type *builtin_type_signed_char;
+struct type *builtin_type_unsigned_char;
+struct type *builtin_type_unsigned_short;
+struct type *builtin_type_unsigned_int;
+struct type *builtin_type_unsigned_long;
+struct type *builtin_type_unsigned_long_long;
+struct type *builtin_type_float;
+struct type *builtin_type_double;
+struct type *builtin_type_long_double;
+struct type *builtin_type_complex;
+struct type *builtin_type_double_complex;
+struct type *builtin_type_string;
+
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
    in that objfile's type_obstack. */
@@ -370,6 +392,26 @@ create_array_type (result_type, element_type, range_type)
   return (result_type);
 }
 
+/* Create a string type using either a blank type supplied in RESULT_TYPE,
+   or creating a new type.  String types are similar enough to array of
+   char types that we can use create_array_type to build the basic type
+   and then bash it into a string type.
+
+   For fixed length strings, the range type contains 0 as the lower
+   bound and the length of the string minus one as the upper bound.
+
+   FIXME:  Maybe we should check the TYPE_CODE of RESULT_TYPE to make
+   sure it is TYPE_CODE_UNDEF before we bash it into a string type? */
+
+struct type *
+create_string_type (result_type, range_type)
+     struct type *result_type;
+     struct type *range_type;
+{
+  result_type = create_array_type (result_type, builtin_type_char, range_type);
+  TYPE_CODE (result_type) = TYPE_CODE_STRING;
+  return (result_type);
+}
 
 /* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
    A MEMBER is a wierd thing -- it amounts to a typed offset into
@@ -1188,8 +1230,8 @@ recursive_dump_type (type, spaces)
       case TYPE_CODE_RANGE:
 	printf_filtered ("(TYPE_CODE_RANGE)");
 	break;
-      case TYPE_CODE_PASCAL_ARRAY:
-	printf_filtered ("(TYPE_CODE_PASCAL_ARRAY)");
+      case TYPE_CODE_STRING:
+	printf_filtered ("(TYPE_CODE_STRING)");
 	break;
       case TYPE_CODE_ERROR:
 	printf_filtered ("(TYPE_CODE_ERROR)");
@@ -1297,3 +1339,80 @@ recursive_dump_type (type, spaces)
 }
 
 #endif	/* MAINTENANCE_CMDS */
+
+void
+_initialize_gdbtypes ()
+{
+  builtin_type_void =
+    init_type (TYPE_CODE_VOID, 1,
+	       0,
+	       "void", (struct objfile *) NULL);
+  builtin_type_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "char", (struct objfile *) NULL);
+  builtin_type_signed_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_SIGNED,
+	       "signed char", (struct objfile *) NULL);
+  builtin_type_unsigned_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned char", (struct objfile *) NULL);
+  builtin_type_short =
+    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "short", (struct objfile *) NULL);
+  builtin_type_unsigned_short =
+    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned short", (struct objfile *) NULL);
+  builtin_type_int =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "int", (struct objfile *) NULL);
+  builtin_type_unsigned_int =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned int", (struct objfile *) NULL);
+  builtin_type_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "long", (struct objfile *) NULL);
+  builtin_type_unsigned_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned long", (struct objfile *) NULL);
+  builtin_type_long_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "long long", (struct objfile *) NULL);
+  builtin_type_unsigned_long_long = 
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned long long", (struct objfile *) NULL);
+  builtin_type_float =
+    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "float", (struct objfile *) NULL);
+  builtin_type_double =
+    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "double", (struct objfile *) NULL);
+  builtin_type_long_double =
+    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "long double", (struct objfile *) NULL);
+  builtin_type_complex =
+    init_type (TYPE_CODE_FLT, TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "complex", (struct objfile *) NULL);
+  builtin_type_double_complex =
+    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "double complex", (struct objfile *) NULL);
+  builtin_type_string =
+    init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "string", (struct objfile *) NULL);
+}

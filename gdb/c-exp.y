@@ -480,9 +480,27 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 	;
 
 exp	:	STRING
-			{ write_exp_elt_opcode (OP_STRING);
-			  write_exp_string ($1);
-			  write_exp_elt_opcode (OP_STRING); }
+			{ /* C strings are converted into array constants with
+			     an explicit null byte added at the end.  Thus
+			     the array upper bound is the string length.
+			     There is no such thing in C as a completely empty
+			     string. */
+			  char *sp = $1.ptr; int count = $1.length;
+			  while (count-- > 0)
+			    {
+			      write_exp_elt_opcode (OP_LONG);
+			      write_exp_elt_type (builtin_type_char);
+			      write_exp_elt_longcst ((LONGEST)(*sp++));
+			      write_exp_elt_opcode (OP_LONG);
+			    }
+			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_char);
+			  write_exp_elt_longcst ((LONGEST)'\0');
+			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_opcode (OP_ARRAY);
+			  write_exp_elt_longcst ((LONGEST) 0);
+			  write_exp_elt_longcst ((LONGEST) ($1.length));
+			  write_exp_elt_opcode (OP_ARRAY); }
 	;
 
 /* C++.  */
