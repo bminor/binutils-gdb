@@ -7,7 +7,7 @@ else
 fi
 cat >e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -59,15 +59,7 @@ extern const char *output_filename;
 static void
 gld_${EMULATION_NAME}_before_parse (void)
 {
-  const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
-  if (arch)
-    {
-      ldfile_output_architecture = arch->arch;
-      ldfile_output_machine = arch->mach;
-      ldfile_output_machine_name = arch->printable_name;
-    }
-  else
-    ldfile_output_architecture = bfd_arch_${ARCH};
+  ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   output_filename = "a.exe";
 }
 

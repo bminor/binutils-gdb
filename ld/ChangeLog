@@ -1,3 +1,24 @@
+2004-01-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldfile.c (ldfile_set_output_arch): Add defarch param.
+	* ldfile.h (ldfile_set_output_arch): Ditto.
+	* emultempl/aix.em (gld${EMULATION_NAME}_before_parse): Use
+	ldfile_set_output_arch.
+	* emultempl/beos.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/linux.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/mipsecoff.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/pe.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* ldgram.y: Adjust ldfile_set_output_arch call.
+	* emultempl/armcoff.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/armelf_oabi.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/generic.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/gld960c.em (gld960_set_output_arch): Ditto.
+	* emultempl/m68kcoff.em (gld${EMULATION_NAME}_before_parse): Ditto.
+	* emultempl/ticoff.em (gld${EMULATION_NAME}_before_parse): Ditto.
+
 2004-01-02  Bernardo Innocenti  <bernie@develer.com>
 
 	* configure.tgt: Add m68k-uClinux target.

@@ -1,6 +1,6 @@
 /* Linker file opening and searching.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -81,7 +81,7 @@ is_sysrooted_pathname (const char *name, bfd_boolean notsame)
 
   if (! realname)
     return FALSE;
-  
+
   len = strlen (realname);
 
   if (((! notsame && len == ld_canon_sysroot_len)
@@ -246,7 +246,7 @@ ldfile_try_open_bfd (const char *attempt,
 			  if (yylval.bigint.str)
 			    free (yylval.bigint.str);
 			  break;
-		        }
+			}
 		      token = yylex ();
 		    }
 		  ldlex_popstate ();
@@ -579,7 +579,7 @@ ldfile_add_arch (const char *in_name)
 /* Set the output architecture.  */
 
 void
-ldfile_set_output_arch (const char *string)
+ldfile_set_output_arch (const char *string, enum bfd_architecture defarch)
 {
   const bfd_arch_info_type *arch = bfd_scan_arch (string);
 
@@ -589,8 +589,8 @@ ldfile_set_output_arch (const char *string)
       ldfile_output_machine = arch->mach;
       ldfile_output_machine_name = arch->printable_name;
     }
+  else if (defarch != bfd_arch_unknown)
+    ldfile_output_architecture = defarch;
   else
-    {
-      einfo (_("%P%F: cannot represent machine `%s'\n"), string);
-    }
+    einfo (_("%P%F: cannot represent machine `%s'\n"), string);
 }

@@ -328,7 +328,7 @@ ifile_p1:
 	|	OUTPUT_FORMAT '(' NAME ',' NAME ',' NAME ')'
 		  { lang_add_output_format ($3, $5, $7, 1); }
         |	OUTPUT_ARCH '(' NAME ')'
-		  { ldfile_set_output_arch($3); }
+		  { ldfile_set_output_arch ($3, bfd_arch_unknown); }
 	|	FORCE_COMMON_ALLOCATION
 		{ command_line.force_common_definition = TRUE ; }
 	|	INHIBIT_COMMON_ALLOCATION

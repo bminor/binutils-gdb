@@ -3,7 +3,7 @@
 (echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* For TI COFF */
-/* Need to determine load and run pages for output sections */ 
-  
+/* Need to determine load and run pages for output sections */
+
 #define TARGET_IS_${EMULATION_NAME}
 
 #include "bfd.h"
@@ -63,7 +63,7 @@ static void
 gld_${EMULATION_NAME}_list_options (FILE * file)
 {
   fprintf (file, _("  --format 0|1|2         Specify which COFF version to use\n"));
-}				  
+}
 
 static bfd_boolean
 gld${EMULATION_NAME}_handle_option (int optc)
@@ -80,7 +80,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
         static char buf[] = "coffX-${OUTPUT_FORMAT_TEMPLATE}";
         coff_version = *optarg - '0';
         buf[4] = *optarg;
-	lang_add_output_format (buf, NULL, NULL, 0);	
+	lang_add_output_format (buf, NULL, NULL, 0);
       }
       else
         {
@@ -95,7 +95,7 @@ static void
 gld_${EMULATION_NAME}_before_parse(void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
-  ldfile_set_output_arch ("`echo ${ARCH}`");
+  ldfile_set_output_arch ("`echo ${ARCH}`", bfd_arch_unknown);
 #endif /* not TARGET_ */
 }
 
@@ -113,7 +113,7 @@ s/$/\\n\\/
 $s/$/n"/
 '
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 0;
   if (link_info.relocatable && config.build_constructors)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xu`;
@@ -132,7 +132,7 @@ else
 # Scripts read from the filesystem.
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 1;
 
   if (link_info.relocatable && config.build_constructors)
@@ -151,7 +151,7 @@ EOF
 fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
+struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   gld_${EMULATION_NAME}_before_parse,
   syslib_default,

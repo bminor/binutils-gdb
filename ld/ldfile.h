@@ -1,5 +1,5 @@
 /* ldfile.h -
-   Copyright 1991, 1992, 1993, 1994, 1995, 2000, 2002, 2003
+   Copyright 1991, 1992, 1993, 1994, 1995, 2000, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -57,7 +57,7 @@ extern bfd_boolean ldfile_try_open_bfd
 extern FILE *ldfile_find_command_file
   (const char *name, const char *extend);
 extern void ldfile_set_output_arch
-  (const char *);
+  (const char *, enum bfd_architecture);
 extern bfd_boolean ldfile_open_file_search
   (const char *arch, struct lang_input_statement_struct *,
    const char *lib, const char *suffix);
