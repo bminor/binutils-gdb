@@ -1,3 +1,7 @@
+2001-05-24  H.J. Lu  <hjl@gnu.org>
+
+	* ld-scripts/phdrs.exp: Add sparc64 to 64 bit platform.
+
 2001-05-18  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp: Revert the last change.
