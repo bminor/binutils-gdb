@@ -1,3 +1,12 @@
+Mon Jun 27 16:41:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure: Check ${exec_prefixoption}, not ${exec_prefix}, to
+	see whether --exec-prefix was used.
+
+Sun Jun 26 21:15:54 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* README:  Explicitly mention libg++/README.  (Zoo's idea.)
+
 Tue Jun 21 12:45:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Add all-librx target similar to all-libproc.
@@ -2500,5 +2509,8 @@ Fri Nov 22 07:38:11 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 
 Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
 version-control: never
 End:
