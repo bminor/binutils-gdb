@@ -20,7 +20,7 @@ foo:
 	.EXIT
 	.PROCEND
 	.SPACE $TEXT$
-	.SUBSPA $LIT$
+	.SUBSPA $CODE$
 
 	.align 4
 LC$0000:
