@@ -52,6 +52,9 @@ switch -glob -- [istarget] {
     "d10v-*-*" {
         set asm-arch d10v
     }
+    "frv-*-*" {
+	set asm-arch frv
+    }
     "s390-*-*" {
         set asm-arch s390
     }

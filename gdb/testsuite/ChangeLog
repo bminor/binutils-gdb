@@ -1,3 +1,8 @@
+2003-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.asm/frv.inc: New file.
+	* gdb.asm/asm-source.exp: Add frv-*-* as a supported target.
+
 2003-12-09  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/break.c (marker1, marker2, marker3, marker4): Move
