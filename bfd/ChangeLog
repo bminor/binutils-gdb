@@ -1,3 +1,10 @@
+Fri May 24 18:56:52 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* i386coff.c: created.
+	* coffcode.h: added support for 386. 
+	* Makefile.in: added support for 386. 
+	* ../include/i386coff.h: created
+
 Wed May 22 07:26:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* libbfd.c: Changed #ifdef __GNUC__ to #ifdef HOST_64_BIT, Added
