@@ -1,3 +1,7 @@
+2005-01-31  Andrew Cagney  <cagney@gnu.org>
+
+	* configure: Regenerate to track ../gettext.m4.
+
 2005-01-31  Nick Clifton  <nickc@redhat.com>
 
 	* version.c (print_version): Bump the copyright date to 2005.

@@ -7216,11 +7216,6 @@ echo "${ECHO_T}$USE_NLS" >&6
     USE_INCLUDED_LIBINTL=no
 
         if test "$USE_NLS" = "yes"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define ENABLE_NLS 1
-_ACEOF
-
       echo "$as_me:$LINENO: checking whether included gettext is requested" >&5
 echo $ECHO_N "checking whether included gettext is requested... $ECHO_C" >&6
 
@@ -8010,6 +8005,13 @@ echo "${ECHO_T}found xgettext programs is not GNU xgettext; ignore it" >&6
 
 
 
+    if test "x$CATOBJEXT" != "x"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_NLS 1
+_ACEOF
+
+    fi
 
 
    if test "x$CATOBJEXT" != "x"; then
