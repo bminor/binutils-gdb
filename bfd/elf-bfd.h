@@ -417,8 +417,7 @@ enum elf_reloc_type_class {
 struct elf_reloc_cookie
 {
   Elf_Internal_Rela *rels, *rel, *relend;
-  PTR locsyms;
-  PTR locsym_shndx;
+  Elf_Internal_Sym *locsyms;
   bfd *abfd;
   size_t locsymcount;
   size_t extsymoff;
@@ -1216,6 +1215,9 @@ extern char *bfd_elf_string_from_elf_section
   PARAMS ((bfd *, unsigned, unsigned));
 extern char *bfd_elf_get_str_section
   PARAMS ((bfd *, unsigned));
+extern Elf_Internal_Sym *bfd_elf_get_elf_syms
+  PARAMS ((bfd *, Elf_Internal_Shdr *, size_t, size_t,
+	   Elf_Internal_Sym *, PTR, Elf_External_Sym_Shndx *));
 
 extern boolean _bfd_elf_copy_private_bfd_data
   PARAMS ((bfd *, bfd *));

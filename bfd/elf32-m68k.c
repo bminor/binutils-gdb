@@ -2111,12 +2111,8 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
      char **errmsg;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Shdr *shndx_hdr;
-  Elf32_External_Sym *extsyms;
-  Elf32_External_Sym *free_extsyms = NULL;
-  Elf_External_Sym_Shndx *shndx_buf = NULL;
-  Elf_Internal_Rela *internal_relocs;
-  Elf_Internal_Rela *free_relocs = NULL;
+  Elf_Internal_Sym *isymbuf = NULL;
+  Elf_Internal_Rela *internal_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *p;
   bfd_size_type amt;
@@ -2129,40 +2125,6 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
     return true;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  /* Read this BFD's symbols if we haven't done so already, or get the cached
-     copy if it exists.  */
-  if (symtab_hdr->contents != NULL)
-    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
-  else
-    {
-      /* Go get them off disk.  */
-      amt = symtab_hdr->sh_info * sizeof (Elf32_External_Sym);
-      if (info->keep_memory)
-	extsyms = (Elf32_External_Sym *) bfd_alloc (abfd, amt);
-      else
-	extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
-      if (extsyms == NULL)
-	goto error_return;
-      if (! info->keep_memory)
-	free_extsyms = extsyms;
-      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread (extsyms, amt, abfd) != amt)
-	goto error_return;
-      if (info->keep_memory)
-	symtab_hdr->contents = (unsigned char *) extsyms;
-    }
-
-  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-  if (shndx_hdr->sh_size != 0)
-    {
-      amt = symtab_hdr->sh_info * sizeof (Elf_External_Sym_Shndx);
-      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-      if (shndx_buf == NULL)
-	goto error_return;
-      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
-	goto error_return;
-    }
 
   /* Get a copy of the native relocations.  */
   internal_relocs = (_bfd_elf32_link_read_relocs
@@ -2170,8 +2132,6 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 		      info->keep_memory));
   if (internal_relocs == NULL)
     goto error_return;
-  if (! info->keep_memory)
-    free_relocs = internal_relocs;
 
   amt = (bfd_size_type) datasec->reloc_count * 12;
   relsec->contents = (bfd_byte *) bfd_alloc (abfd, amt);
@@ -2202,17 +2162,23 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
       /* Get the target section referred to by the reloc.  */
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
-	  Elf32_External_Sym *esym;
-	  Elf_External_Sym_Shndx *shndx;
-	  Elf_Internal_Sym isym;
-
 	  /* A local symbol.  */
-	  esym = extsyms + ELF32_R_SYM (irel->r_info);
-	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
-	  bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
-				    &isym);
+	  Elf_Internal_Sym *isym;
 
-	  targetsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+	  /* Read this BFD's local symbols if we haven't done so already.  */
+	  if (isymbuf == NULL)
+	    {
+	      isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	      if (isymbuf == NULL)
+		isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						symtab_hdr->sh_info, 0,
+						NULL, NULL, NULL);
+	      if (isymbuf == NULL)
+		goto error_return;
+	    }
+
+	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
+	  targetsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	}
       else
 	{
@@ -2236,21 +2202,19 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 	strncpy (p + 4, targetsec->output_section->name, 8);
     }
 
-  if (shndx_buf != NULL)
-    free (shndx_buf);
-  if (free_extsyms != NULL)
-    free (free_extsyms);
-  if (free_relocs != NULL)
-    free (free_relocs);
+  if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
+    free (isymbuf);
+  if (internal_relocs != NULL
+      && elf_section_data (datasec)->relocs != internal_relocs)
+    free (internal_relocs);
   return true;
 
 error_return:
-  if (shndx_buf != NULL)
-    free (shndx_buf);
-  if (free_extsyms != NULL)
-    free (free_extsyms);
-  if (free_relocs != NULL)
-    free (free_relocs);
+  if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
+    free (isymbuf);
+  if (internal_relocs != NULL
+      && elf_section_data (datasec)->relocs != internal_relocs)
+    free (internal_relocs);
   return false;
 }
 

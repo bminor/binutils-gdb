@@ -2770,69 +2770,26 @@ get_local_syms (output_bfd, input_bfd, info)
        input_bfd = input_bfd->link_next, bfd_indx++)
     {
       Elf_Internal_Shdr *symtab_hdr;
-      Elf_Internal_Shdr *shndx_hdr;
-      Elf_Internal_Sym *isym;
-      Elf32_External_Sym *ext_syms, *esym, *end_sy;
-      Elf_External_Sym_Shndx *shndx_buf, *shndx;
-      bfd_size_type sec_size;
 
       /* We'll need the symbol table in a second.  */
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
       if (symtab_hdr->sh_info == 0)
 	continue;
 
-      /* We need an array of the local symbols attached to the input bfd.
-	 Unfortunately, we're going to have to read & swap them in.  */
-      sec_size = symtab_hdr->sh_info;
-      sec_size *= sizeof (Elf_Internal_Sym);
-      local_syms = (Elf_Internal_Sym *) bfd_malloc (sec_size);
+      /* We need an array of the local symbols attached to the input bfd.  */
+      local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+      if (local_syms == NULL)
+	{
+	  local_syms = bfd_elf_get_elf_syms (input_bfd, symtab_hdr,
+					     symtab_hdr->sh_info, 0,
+					     NULL, NULL, NULL);
+	  /* Cache them for elf_link_input_bfd.  */
+	  symtab_hdr->contents = (unsigned char *) local_syms;
+	}
       if (local_syms == NULL)
 	return -1;
 
       all_local_syms[bfd_indx] = local_syms;
-      sec_size = symtab_hdr->sh_info;
-      sec_size *= sizeof (Elf32_External_Sym);
-      ext_syms = (Elf32_External_Sym *) bfd_malloc (sec_size);
-      if (ext_syms == NULL)
-	return -1;
-
-      if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread ((PTR) ext_syms, sec_size, input_bfd) != sec_size)
-	{
-	error_ret_free_ext_syms:
-	  free (ext_syms);
-	  return -1;
-	}
-
-      shndx_buf = NULL;
-      shndx_hdr = &elf_tdata (input_bfd)->symtab_shndx_hdr;
-      if (shndx_hdr->sh_size != 0)
-	{
-	  sec_size = symtab_hdr->sh_info;
-	  sec_size *= sizeof (Elf_External_Sym_Shndx);
-	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (sec_size);
-	  if (shndx_buf == NULL)
-	    goto error_ret_free_ext_syms;
-
-	  if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) shndx_buf, sec_size, input_bfd) != sec_size)
-	    {
-	      free (shndx_buf);
-	      goto error_ret_free_ext_syms;
-	    }
-	}
-
-      /* Swap the local symbols in.  */
-      for (esym = ext_syms, end_sy = esym + symtab_hdr->sh_info,
-	     isym = local_syms, shndx = shndx_buf;
-	   esym < end_sy;
-	   esym++, isym++, shndx = (shndx ? shndx + 1 : NULL))
-	bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
-				  (const PTR) shndx, isym);
-
-      /* Now we can free the external symbols.  */
-      free (shndx_buf);
-      free (ext_syms);
 
       if (info->shared && htab->multi_subspace)
 	{
@@ -2927,7 +2884,6 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
   bfd_size_type stub_group_size;
   boolean stubs_always_before_branch;
   boolean stub_changed;
-  boolean ret = 0;
   struct elf32_hppa_link_hash_table *htab = hppa_link_hash_table (info);
 
   /* Stash our params away.  */
@@ -3186,15 +3142,12 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
       stub_changed = false;
     }
 
-  ret = true;
+  free (htab->all_local_syms);
+  return true;
 
  error_ret_free_local:
-  while (htab->bfd_count-- > 0)
-    if (htab->all_local_syms[htab->bfd_count])
-      free (htab->all_local_syms[htab->bfd_count]);
   free (htab->all_local_syms);
-
-  return ret;
+  return false;
 }
 
 /* For a final link, this function is called after we have sized the

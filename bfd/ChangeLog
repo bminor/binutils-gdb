@@ -1,3 +1,70 @@
+2002-07-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_reloc_cookie): Remove locsym_shndx,
+	change type of locsyms.
+	(bfd_elf_get_elf_syms): Declare.
+	* elf.c (bfd_elf_get_elf_syms): New function.
+	(group_signature): Use bfd_elf_get_elf_syms.
+	(bfd_section_from_r_symndx): Likewise.
+	* elfcode.h (elf_slurp_symbol_table): Likewise.
+	* elflink.h (elf_link_is_defined_archive_symbol): Likewise.
+	(elf_link_add_object_symbols): Likewise.  Reorganise to increase
+	locality of various data structures.  Properly free internal relocs.
+	(elf_bfd_final_link): Properly free internal relocs.
+	(elf_link_check_versioned_symbol): Use bfd_elf_get_elf_syms.
+	(elf_link_input_bfd): Likewise.
+	(elf_gc_mark): Likewise.  Properly free internal relocs.
+	(elf_gc_sweep): Properly free internal relocs.
+	(elf_reloc_symbol_deleted_p): No need to swap syms in.
+	(elf_bfd_discard_info): Use bfd_elf_get_elf_syms.  Properly free
+	internal relocs.
+	* elf-m10200.c (mn10200_elf_relax_section): Use bfd_elf_get_elf_syms.
+	Properly free possibly cached info.
+	(mn10200_elf_relax_delete_bytes): Remove symbol swapping code.
+	(mn10200_elf_symbol_address_p): Pass in internal syms.  Remove
+	symbol swapping code.
+	(mn10200_elf_get_relocated_section_contents): Use bfd_elf_get_elf_syms.
+	Properly free possibly cached info.
+	* elf-m10300.c (mn10300_elf_relax_section): As above for elf-m10200.c.
+	(mn10300_elf_relax_delete_bytes): Likewise.
+	(mn10300_elf_symbol_address_p): Likewise.
+	(mn10300_elf_get_relocated_section_contents): Likewise.
+	* elf32-h8300.c (elf32_h8_relax_section): As above for elf-m10200.c.
+	(elf32_h8_relax_delete_bytes): Likewise.
+	(elf32_h8_symbol_address_p): Likewise.
+	(elf32_h8_get_relocated_section_contents): Likewise.
+	* elf32-m32r.c (m32r_elf_relax_section): As above for elf-m10200.c.
+	(m32r_elf_relax_delete_bytes): Likewise.
+	(m32r_elf_get_relocated_section_contents): Likewise.
+	* elf32-sh.c (sh_elf_reloc_loop): Free section contents using
+	elf_section_data to determine whether cached.
+	(sh_elf_relax_section): As above for elf-m10200.c.
+	(sh_elf_relax_delete_bytes): Likewise.
+	(sh_elf_get_relocated_section_contents): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relax_section): As above.
+	* elf64-alpha.c (elf64_alpha_relax_section): As above.  Also delay
+	reading of local syms.
+	* elf64-mmix.c (mmix_elf_relax_section): Likewise.
+	* elf64-sh64.c (sh_elf64_get_relocated_section_contents): As above.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): As above.
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Properly free internal
+	relocs.
+	* elf32-arm.h (bfd_elf32_arm_process_before_allocation): Properly
+	free internal relocs and section contents.  Don't read symbols.
+	* elf32-hppa.c (get_local_syms): Use bfd_elf_get_elf_syms.
+	(elf32_hppa_size_stubs): Don't free local syms.
+	* elf32-m68k.c (bfd_m68k_elf32_create_embedded_relocs): Delay
+	reading of local syms.  Use bfd_elf_get_elf_syms.  Properly free
+	possibly cached info.
+	* elf32-mips.c (bfd_mips_elf32_create_embedded_relocs): Likewise.
+	* elf64-hppa.c (elf64_hppa_check_relocs): Use bfd_elf_get_elf_syms.
+	* elf64-ppc.c (struct ppc_link_hash_table): Delete bfd_count and
+	all_local_syms.
+	(get_local_syms): Delete function.
+	(edit_opd): Use bfd_elf_get_elf_syms.  Free on error exit.  Cache
+	on exit.
+	(ppc64_elf_size_stubs): Use bfd_elf_get_elf_syms.  Free/cache on exit.
+
 2002-07-05  Jim Wilson  <wilson@redhat.com>
 
 	* syms.c (decode_section_type): New.

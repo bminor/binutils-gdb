@@ -352,6 +352,107 @@ bfd_elf_string_from_elf_section (abfd, shindex, strindex)
   return ((char *) hdr->contents) + strindex;
 }
 
+/* Read and convert symbols to internal format.
+   SYMCOUNT specifies the number of symbols to read, starting from
+   symbol SYMOFFSET.  If any of INTSYM_BUF, EXTSYM_BUF or EXTSHNDX_BUF
+   are non-NULL, they are used to store the internal symbols, external
+   symbols, and symbol section index extensions, respectively.  */
+
+Elf_Internal_Sym *
+bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, symoffset,
+		      intsym_buf, extsym_buf, extshndx_buf)
+     bfd *ibfd;
+     Elf_Internal_Shdr *symtab_hdr;
+     size_t symcount;
+     size_t symoffset;
+     Elf_Internal_Sym *intsym_buf;
+     PTR extsym_buf;
+     Elf_External_Sym_Shndx *extshndx_buf;
+{
+  Elf_Internal_Shdr *shndx_hdr;
+  PTR alloc_ext;
+  const PTR esym;
+  Elf_External_Sym_Shndx *alloc_extshndx;
+  Elf_External_Sym_Shndx *shndx;
+  Elf_Internal_Sym *isym;
+  Elf_Internal_Sym *isymend;
+  struct elf_backend_data *bed;
+  size_t extsym_size;
+  bfd_size_type amt;
+  file_ptr pos;
+
+  if (symcount == 0)
+    return intsym_buf;
+
+  /* Normal syms might have section extension entries.  */
+  shndx_hdr = NULL;
+  if (symtab_hdr == &elf_tdata (ibfd)->symtab_hdr)
+    shndx_hdr = &elf_tdata (ibfd)->symtab_shndx_hdr;
+
+  /* Read the symbols.  */
+  alloc_ext = NULL;
+  alloc_extshndx = NULL;
+  bed = get_elf_backend_data (ibfd);
+  extsym_size = bed->s->sizeof_sym;
+  amt = symcount * extsym_size;
+  pos = symtab_hdr->sh_offset + symoffset * extsym_size;
+  if (extsym_buf == NULL)
+    {
+      alloc_ext = bfd_malloc (amt);
+      extsym_buf = alloc_ext;
+    }
+  if (extsym_buf == NULL
+      || bfd_seek (ibfd, pos, SEEK_SET) != 0
+      || bfd_bread (extsym_buf, amt, ibfd) != amt)
+    {
+      intsym_buf = NULL;
+      goto out;
+    }
+
+  if (shndx_hdr == NULL || shndx_hdr->sh_size == 0)
+    extshndx_buf = NULL;
+  else
+    {
+      amt = symcount * sizeof (Elf_External_Sym_Shndx);
+      pos = shndx_hdr->sh_offset + symoffset * sizeof (Elf_External_Sym_Shndx);
+      if (extshndx_buf == NULL)
+	{
+	  alloc_extshndx = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	  extshndx_buf = alloc_extshndx;
+	}
+      if (extshndx_buf == NULL
+	  || bfd_seek (ibfd, pos, SEEK_SET) != 0
+	  || bfd_bread (extshndx_buf, amt, ibfd) != amt)
+	{
+	  intsym_buf = NULL;
+	  goto out;
+	}
+    }
+
+  if (intsym_buf == NULL)
+    {
+      bfd_size_type amt = symcount * sizeof (Elf_Internal_Sym);
+      intsym_buf = (Elf_Internal_Sym *) bfd_malloc (amt);
+      if (intsym_buf == NULL)
+	goto out;
+    }
+
+  /* Convert the symbols to internal form.  */
+  isymend = intsym_buf + symcount;
+  for (esym = extsym_buf, isym = intsym_buf, shndx = extshndx_buf;
+       isym < isymend;
+       esym += extsym_size, isym++, shndx = shndx != NULL ? shndx + 1 : NULL)
+    (*bed->s->swap_symbol_in) (ibfd, esym, (const PTR) shndx, isym);
+
+ out:
+  if (alloc_ext != NULL)
+    free (alloc_ext);
+  if (alloc_extshndx != NULL)
+    free (alloc_extshndx);
+
+  return intsym_buf;
+}
+
 /* Elf_Internal_Shdr->contents is an array of these for SHT_GROUP
    sections.  The first element is the flags, the rest are section
    pointers.  */
@@ -369,11 +470,7 @@ group_signature (abfd, ghdr)
      bfd *abfd;
      Elf_Internal_Shdr *ghdr;
 {
-  struct elf_backend_data *bed;
-  file_ptr pos;
-  bfd_size_type amt;
   Elf_Internal_Shdr *hdr;
-  Elf_Internal_Shdr *shndx_hdr;
   unsigned char esym[sizeof (Elf64_External_Sym)];
   Elf_External_Sym_Shndx eshndx;
   Elf_Internal_Sym isym;
@@ -386,28 +483,9 @@ group_signature (abfd, ghdr)
 
   /* Go read the symbol.  */
   hdr = &elf_tdata (abfd)->symtab_hdr;
-  bed = get_elf_backend_data (abfd);
-  amt = bed->s->sizeof_sym;
-  pos = hdr->sh_offset + ghdr->sh_info * amt;
-  if (bfd_seek (abfd, pos, SEEK_SET) != 0
-      || bfd_bread (esym, amt, abfd) != amt)
+  if (bfd_elf_get_elf_syms (abfd, hdr, 1, ghdr->sh_info,
+			    &isym, esym, &eshndx) == NULL)
     return NULL;
-
-  /* And possibly the symbol section index extension.  */
-  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-  if (elf_elfsections (abfd) != NULL
-      && elf_elfsections (abfd)[shndx_hdr->sh_link] == hdr)
-    {
-      amt = sizeof (Elf_External_Sym_Shndx);
-      pos = shndx_hdr->sh_offset + ghdr->sh_info * amt;
-      if (bfd_seek (abfd, pos, SEEK_SET) != 0
-	  || bfd_bread ((PTR) &eshndx, amt, abfd) != amt)
-	return NULL;
-    }
-
-  /* Convert to internal format.  */
-  (*bed->s->swap_symbol_in) (abfd, (const PTR *) &esym, (const PTR *) &eshndx,
-			     &isym);
 
   /* Look up the symbol name.  */
   iname = isym.st_name;
@@ -1976,50 +2054,19 @@ bfd_section_from_r_symndx (abfd, cache, sec, r_symndx)
      asection *sec;
      unsigned long r_symndx;
 {
-  unsigned char esym_shndx[4];
-  unsigned int isym_shndx;
   Elf_Internal_Shdr *symtab_hdr;
-  file_ptr pos;
-  bfd_size_type amt;
+  unsigned char esym[sizeof (Elf64_External_Sym)];
+  Elf_External_Sym_Shndx eshndx;
+  Elf_Internal_Sym isym;
   unsigned int ent = r_symndx % LOCAL_SYM_CACHE_SIZE;
 
   if (cache->abfd == abfd && cache->indx[ent] == r_symndx)
     return cache->sec[ent];
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  pos = symtab_hdr->sh_offset;
-  if (get_elf_backend_data (abfd)->s->sizeof_sym
-      == sizeof (Elf64_External_Sym))
-    {
-      pos += r_symndx * sizeof (Elf64_External_Sym);
-      pos += offsetof (Elf64_External_Sym, st_shndx);
-      amt = sizeof (((Elf64_External_Sym *) 0)->st_shndx);
-    }
-  else
-    {
-      pos += r_symndx * sizeof (Elf32_External_Sym);
-      pos += offsetof (Elf32_External_Sym, st_shndx);
-      amt = sizeof (((Elf32_External_Sym *) 0)->st_shndx);
-    }
-  if (bfd_seek (abfd, pos, SEEK_SET) != 0
-      || bfd_bread ((PTR) esym_shndx, amt, abfd) != amt)
+  if (bfd_elf_get_elf_syms (abfd, symtab_hdr, 1, r_symndx,
+			    &isym, esym, &eshndx) == NULL)
     return NULL;
-  isym_shndx = H_GET_16 (abfd, esym_shndx);
-
-  if (isym_shndx == SHN_XINDEX)
-    {
-      Elf_Internal_Shdr *shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-      if (shndx_hdr->sh_size != 0)
-	{
-	  pos = shndx_hdr->sh_offset;
-	  pos += r_symndx * sizeof (Elf_External_Sym_Shndx);
-	  amt = sizeof (Elf_External_Sym_Shndx);
-	  if (bfd_seek (abfd, pos, SEEK_SET) != 0
-	      || bfd_bread ((PTR) esym_shndx, amt, abfd) != amt)
-	    return NULL;
-	  isym_shndx = H_GET_32 (abfd, esym_shndx);
-	}
-    }
 
   if (cache->abfd != abfd)
     {
@@ -2028,10 +2075,10 @@ bfd_section_from_r_symndx (abfd, cache, sec, r_symndx)
     }
   cache->indx[ent] = r_symndx;
   cache->sec[ent] = sec;
-  if (isym_shndx < SHN_LORESERVE || isym_shndx > SHN_HIRESERVE)
+  if (isym.st_shndx < SHN_LORESERVE || isym.st_shndx > SHN_HIRESERVE)
     {
       asection *s;
-      s = bfd_section_from_elf_index (abfd, isym_shndx);
+      s = bfd_section_from_elf_index (abfd, isym.st_shndx);
       if (s != NULL)
 	cache->sec[ent] = s;
     }

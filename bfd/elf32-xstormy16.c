@@ -586,88 +586,51 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 			  &relax_plt_data);
 
   /* Likewise for local symbols, though that's somewhat less convenient
-     as we have walk the list of input bfds and swap in symbol data.  */
+     as we have to walk the list of input bfds and swap in symbol data.  */
   for (ibfd = info->input_bfds; ibfd ; ibfd = ibfd->link_next)
     {
       bfd_vma *local_plt_offsets = elf_local_got_offsets (ibfd);
       Elf_Internal_Shdr *symtab_hdr;
-      Elf_Internal_Shdr *shndx_hdr;
-      Elf32_External_Sym *extsyms;
-      Elf_External_Sym_Shndx *shndx_buf;
+      Elf_Internal_Sym *isymbuf = NULL;
       unsigned int idx;
 
       if (! local_plt_offsets)
 	continue;
 
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
-      shndx_hdr = &elf_tdata (ibfd)->symtab_shndx_hdr;
-
-      if (symtab_hdr->contents != NULL)
-	extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
-      else
+      if (symtab_hdr->sh_info != 0)
 	{
-	  bfd_size_type amt;
-
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf32_External_Sym);
-	  extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
-	  if (extsyms == NULL)
+	  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (isymbuf == NULL)
+	    isymbuf = bfd_elf_get_elf_syms (ibfd, symtab_hdr,
+					    symtab_hdr->sh_info, 0,
+					    NULL, NULL, NULL);
+	  if (isymbuf == NULL)
 	    return false;
-	  if (bfd_seek (ibfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) extsyms, amt, ibfd) != amt)
-	    {
-	    error_ret_free_extsyms:
-	      free (extsyms);
-	      return false;
-	    }
-	}
-
-      shndx_buf = NULL;
-      if (shndx_hdr->sh_size != 0)
-	{
-	  bfd_size_type amt;
-
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf_External_Sym_Shndx);
-	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-	  if (shndx_buf == NULL)
-	    goto error_ret_free_extsyms;
-	  if (bfd_seek (ibfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) shndx_buf, amt, ibfd) != amt)
-	    {
-	      free (shndx_buf);
-	      goto error_ret_free_extsyms;
-	    }
-	  shndx_hdr->contents = (bfd_byte *) shndx_buf;
 	}
 
       for (idx = 0; idx < symtab_hdr->sh_info; ++idx)
 	{
-	  Elf_External_Sym_Shndx *shndx;
-	  Elf_Internal_Sym isym;
+	  Elf_Internal_Sym *isym;
 	  asection *tsec;
 	  bfd_vma address;
 
 	  if (local_plt_offsets[idx] == (bfd_vma) -1)
 	    continue;
 
-	  shndx = shndx_buf;
-	  if (shndx != NULL)
-	    shndx += idx;
-	  bfd_elf32_swap_symbol_in (ibfd, (const PTR) (extsyms + idx),
-				    (const PTR) shndx, &isym);
-	  if (isym.st_shndx == SHN_UNDEF)
+	  isym = &isymbuf[idx];
+	  if (isym->st_shndx == SHN_UNDEF)
 	    continue;
-	  else if (isym.st_shndx == SHN_ABS)
+	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
-	  else if (isym.st_shndx == SHN_COMMON)
+	  else if (isym->st_shndx == SHN_COMMON)
 	    tsec = bfd_com_section_ptr;
 	  else
-	    tsec = bfd_section_from_elf_index (ibfd, isym.st_shndx);
+	    tsec = bfd_section_from_elf_index (ibfd, isym->st_shndx);
 
 	  address = (tsec->output_section->vma
 		     + tsec->output_offset
-		     + isym.st_value);
+		     + isym->st_value);
 	  if (address <= 0xffff)
 	    {
 	      local_plt_offsets[idx] = -1;
@@ -676,11 +639,17 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 	    }
 	}
 
-      if (shndx_buf != NULL)
-	free (shndx_buf);
-
-      if ((Elf32_External_Sym *) symtab_hdr->contents != extsyms)
-        free (extsyms);
+      if (isymbuf != NULL
+	  && symtab_hdr->contents != (unsigned char *) isymbuf)
+	{
+	  if (! info->keep_memory)
+	    free (isymbuf);
+	  else
+	    {
+	      /* Cache the symbols for elf_link_input_bfd.  */
+	      symtab_hdr->contents = (unsigned char *) isymbuf;
+	    }
+	}
     }
 
   /* If we changed anything, walk the symbols again to reallocate

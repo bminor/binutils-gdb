@@ -1133,10 +1133,12 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
   unsigned long symcount;	/* Number of external ELF symbols */
   elf_symbol_type *sym;		/* Pointer to current bfd symbol */
   elf_symbol_type *symbase;	/* Buffer for generated bfd symbols */
-  Elf_Internal_Sym i_sym;
-  Elf_External_Sym *x_symp = NULL;
-  Elf_External_Sym_Shndx *x_shndx = NULL;
-  Elf_External_Versym *x_versymp = NULL;
+  Elf_Internal_Sym *isym;
+  Elf_Internal_Sym *isymend;
+  Elf_Internal_Sym *isymbuf = NULL;
+  Elf_External_Versym *xver;
+  Elf_External_Versym *xverbuf = NULL;
+  struct elf_backend_data *ebd;
   bfd_size_type amt;
 
   /* Read each raw ELF symbol, converting from external ELF form to
@@ -1151,24 +1153,8 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 
   if (! dynamic)
     {
-      Elf_Internal_Shdr *shndx_hdr;
-
       hdr = &elf_tdata (abfd)->symtab_hdr;
-      shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
       verhdr = NULL;
-
-      /* If we have a SHT_SYMTAB_SHNDX section for the symbol table,
-	 read the raw contents.  */
-      if (elf_elfsections (abfd) != NULL
-	  && elf_elfsections (abfd)[shndx_hdr->sh_link] == hdr)
-	{
-	  amt = shndx_hdr->sh_size;
-	  x_shndx = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-	  if (x_shndx == NULL
-	      || bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) x_shndx, amt, abfd) != amt)
-	    goto error_return;
-	}
     }
   else
     {
@@ -1187,39 +1173,24 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	}
     }
 
-  if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0)
-    goto error_return;
-
+  ebd = get_elf_backend_data (abfd);
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
-
   if (symcount == 0)
     sym = symbase = NULL;
   else
     {
-      unsigned long i;
-
-      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0)
-	goto error_return;
+      isymbuf = bfd_elf_get_elf_syms (abfd, hdr, symcount, 0,
+				      NULL, NULL, NULL);
+      if (isymbuf == NULL)
+	return -1;
 
       amt = symcount;
       amt *= sizeof (elf_symbol_type);
       symbase = (elf_symbol_type *) bfd_zalloc (abfd, amt);
       if (symbase == (elf_symbol_type *) NULL)
 	goto error_return;
-      sym = symbase;
-
-      /* Temporarily allocate room for the raw ELF symbols.  */
-      amt = symcount;
-      amt *= sizeof (Elf_External_Sym);
-      x_symp = (Elf_External_Sym *) bfd_malloc (amt);
-      if (x_symp == NULL)
-	goto error_return;
-
-      if (bfd_bread ((PTR) x_symp, amt, abfd) != amt)
-	goto error_return;
 
       /* Read the raw ELF version symbol information.  */
-
       if (verhdr != NULL
 	  && verhdr->sh_size / sizeof (Elf_External_Versym) != symcount)
 	{
@@ -1239,42 +1210,40 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	  if (bfd_seek (abfd, verhdr->sh_offset, SEEK_SET) != 0)
 	    goto error_return;
 
-	  x_versymp = (Elf_External_Versym *) bfd_malloc (verhdr->sh_size);
-	  if (x_versymp == NULL && verhdr->sh_size != 0)
+	  xverbuf = (Elf_External_Versym *) bfd_malloc (verhdr->sh_size);
+	  if (xverbuf == NULL && verhdr->sh_size != 0)
 	    goto error_return;
 
-	  if (bfd_bread ((PTR) x_versymp, verhdr->sh_size, abfd)
+	  if (bfd_bread ((PTR) xverbuf, verhdr->sh_size, abfd)
 	      != verhdr->sh_size)
 	    goto error_return;
 	}
 
       /* Skip first symbol, which is a null dummy.  */
-      for (i = 1; i < symcount; i++)
+      xver = xverbuf;
+      if (xver != NULL)
+	++xver;
+      isymend = isymbuf + symcount;
+      for (isym = isymbuf + 1, sym = symbase; isym < isymend; isym++, sym++)
 	{
-	  elf_swap_symbol_in (abfd, (const PTR) (x_symp + i),
-			      (const PTR) (x_shndx + (x_shndx ? i : 0)),
-			      &i_sym);
-	  memcpy (&sym->internal_elf_sym, &i_sym, sizeof (Elf_Internal_Sym));
-#ifdef ELF_KEEP_EXTSYM
-	  memcpy (&sym->native_elf_sym, x_symp + i, sizeof (Elf_External_Sym));
-#endif
+	  memcpy (&sym->internal_elf_sym, isym, sizeof (Elf_Internal_Sym));
 	  sym->symbol.the_bfd = abfd;
 
 	  sym->symbol.name = bfd_elf_string_from_elf_section (abfd,
 							      hdr->sh_link,
-							      i_sym.st_name);
+							      isym->st_name);
 
-	  sym->symbol.value = i_sym.st_value;
+	  sym->symbol.value = isym->st_value;
 
-	  if (i_sym.st_shndx == SHN_UNDEF)
+	  if (isym->st_shndx == SHN_UNDEF)
 	    {
 	      sym->symbol.section = bfd_und_section_ptr;
 	    }
-	  else if (i_sym.st_shndx < SHN_LORESERVE
-		   || i_sym.st_shndx > SHN_HIRESERVE)
+	  else if (isym->st_shndx < SHN_LORESERVE
+		   || isym->st_shndx > SHN_HIRESERVE)
 	    {
 	      sym->symbol.section = section_from_elf_index (abfd,
-							    i_sym.st_shndx);
+							    isym->st_shndx);
 	      if (sym->symbol.section == NULL)
 		{
 		  /* This symbol is in a section for which we did not
@@ -1283,18 +1252,18 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 		  sym->symbol.section = bfd_abs_section_ptr;
 		}
 	    }
-	  else if (i_sym.st_shndx == SHN_ABS)
+	  else if (isym->st_shndx == SHN_ABS)
 	    {
 	      sym->symbol.section = bfd_abs_section_ptr;
 	    }
-	  else if (i_sym.st_shndx == SHN_COMMON)
+	  else if (isym->st_shndx == SHN_COMMON)
 	    {
 	      sym->symbol.section = bfd_com_section_ptr;
 	      /* Elf puts the alignment into the `value' field, and
 		 the size into the `size' field.  BFD wants to see the
 		 size in the value field, and doesn't care (at the
 		 moment) about the alignment.  */
-	      sym->symbol.value = i_sym.st_size;
+	      sym->symbol.value = isym->st_size;
 	    }
 	  else
 	    sym->symbol.section = bfd_abs_section_ptr;
@@ -1304,14 +1273,13 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
 	    sym->symbol.value -= sym->symbol.section->vma;
 
-	  switch (ELF_ST_BIND (i_sym.st_info))
+	  switch (ELF_ST_BIND (isym->st_info))
 	    {
 	    case STB_LOCAL:
 	      sym->symbol.flags |= BSF_LOCAL;
 	      break;
 	    case STB_GLOBAL:
-	      if (i_sym.st_shndx != SHN_UNDEF
-		  && i_sym.st_shndx != SHN_COMMON)
+	      if (isym->st_shndx != SHN_UNDEF && isym->st_shndx != SHN_COMMON)
 		sym->symbol.flags |= BSF_GLOBAL;
 	      break;
 	    case STB_WEAK:
@@ -1319,7 +1287,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	      break;
 	    }
 
-	  switch (ELF_ST_TYPE (i_sym.st_info))
+	  switch (ELF_ST_TYPE (isym->st_info))
 	    {
 	    case STT_SECTION:
 	      sym->symbol.flags |= BSF_SECTION_SYM | BSF_DEBUGGING;
@@ -1338,31 +1306,24 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	  if (dynamic)
 	    sym->symbol.flags |= BSF_DYNAMIC;
 
-	  if (x_versymp != NULL)
+	  if (xver != NULL)
 	    {
 	      Elf_Internal_Versym iversym;
 
-	      _bfd_elf_swap_versym_in (abfd, x_versymp + i, &iversym);
+	      _bfd_elf_swap_versym_in (abfd, xver, &iversym);
 	      sym->version = iversym.vs_vers;
+	      xver++;
 	    }
 
 	  /* Do some backend-specific processing on this symbol.  */
-	  {
-	    struct elf_backend_data *ebd = get_elf_backend_data (abfd);
-	    if (ebd->elf_backend_symbol_processing)
-	      (*ebd->elf_backend_symbol_processing) (abfd, &sym->symbol);
-	  }
-
-	  sym++;
+	  if (ebd->elf_backend_symbol_processing)
+	    (*ebd->elf_backend_symbol_processing) (abfd, &sym->symbol);
 	}
     }
 
   /* Do some backend-specific processing on this symbol table.  */
-  {
-    struct elf_backend_data *ebd = get_elf_backend_data (abfd);
-    if (ebd->elf_backend_symbol_table_processing)
-      (*ebd->elf_backend_symbol_table_processing) (abfd, symbase, symcount);
-  }
+  if (ebd->elf_backend_symbol_table_processing)
+    (*ebd->elf_backend_symbol_table_processing) (abfd, symbase, symcount);
 
   /* We rely on the zalloc to clear out the final symbol entry.  */
 
@@ -1382,21 +1343,17 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
       *symptrs = 0;		/* Final null pointer */
     }
 
-  if (x_shndx != NULL)
-    free (x_shndx);
-  if (x_versymp != NULL)
-    free (x_versymp);
-  if (x_symp != NULL)
-    free (x_symp);
+  if (xverbuf != NULL)
+    free (xverbuf);
+  if (isymbuf != NULL && hdr->contents != (unsigned char *) isymbuf)
+    free (isymbuf);
   return symcount;
 
 error_return:
-  if (x_shndx != NULL)
-    free (x_shndx);
-  if (x_versymp != NULL)
-    free (x_versymp);
-  if (x_symp != NULL)
-    free (x_symp);
+  if (xverbuf != NULL)
+    free (xverbuf);
+  if (isymbuf != NULL && hdr->contents != (unsigned char *) isymbuf)
+    free (isymbuf);
   return -1;
 }
 

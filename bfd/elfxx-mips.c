@@ -4122,7 +4122,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 		    && ELF_R_TYPE (abfd, r->r_info) != R_MIPS16_26)
 		  break;
 
-	      if (! info->keep_memory)
+	      if (elf_section_data (o)->relocs != sec_relocs)
 		free (sec_relocs);
 
 	      if (r < rend)

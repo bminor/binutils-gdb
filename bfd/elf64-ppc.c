@@ -2036,10 +2036,8 @@ struct ppc_link_hash_table
   } *stub_group;
 
   /* Assorted information used by ppc64_elf_size_stubs.  */
-  unsigned int bfd_count;
   int top_index;
   asection **input_list;
-  Elf_Internal_Sym **all_local_syms;
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
@@ -2134,8 +2132,6 @@ static boolean ppc_size_one_stub
   PARAMS ((struct bfd_hash_entry *, PTR));
 static void group_sections
   PARAMS ((struct ppc_link_hash_table *, bfd_size_type, boolean));
-static boolean get_local_syms
-  PARAMS ((bfd *, struct ppc_link_hash_table *));
 static boolean ppc64_elf_fake_sections
   PARAMS ((bfd *, Elf64_Internal_Shdr *, asection *));
 static boolean ppc64_elf_relocate_section
@@ -2295,7 +2291,6 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->add_stub_section = NULL;
   htab->layout_sections_again = NULL;
   htab->stub_group = NULL;
-  htab->all_local_syms = NULL;
   htab->sgot = NULL;
   htab->srelgot = NULL;
   htab->splt = NULL;
@@ -3689,7 +3684,6 @@ edit_opd (obfd, info)
 {
   bfd *ibfd;
   unsigned int bfd_indx;
-  struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
   for (bfd_indx = 0, ibfd = info->input_bfds;
        ibfd != NULL;
@@ -3698,6 +3692,7 @@ edit_opd (obfd, info)
       asection *sec;
       Elf_Internal_Rela *relstart, *rel, *relend;
       Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Sym *local_syms;
       struct elf_link_hash_entry **sym_hashes;
       bfd_vma offset;
       long *adjust;
@@ -3718,6 +3713,7 @@ edit_opd (obfd, info)
       if ((sec->flags & SEC_RELOC) == 0 || sec->reloc_count == 0)
 	continue;
 
+      local_syms = NULL;
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       sym_hashes = elf_sym_hashes (ibfd);
 
@@ -3793,7 +3789,17 @@ edit_opd (obfd, info)
 	    }
 	  else
 	    {
-	      sym = htab->all_local_syms[bfd_indx] + r_symndx;
+	      if (local_syms == NULL)
+		{
+		  local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+		  if (local_syms == NULL)
+		    local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr,
+						       symtab_hdr->sh_info, 0,
+						       NULL, NULL, NULL);
+		  if (local_syms == NULL)
+		    goto error_free_rel;
+		}
+	      sym = local_syms + r_symndx;
 	      if ((sym->st_shndx != SHN_UNDEF
 		   && sym->st_shndx < SHN_LORESERVE)
 		  || sym->st_shndx > SHN_HIRESERVE)
@@ -3833,11 +3839,18 @@ edit_opd (obfd, info)
 	  if ((sec->flags & SEC_IN_MEMORY) == 0)
 	    {
 	      bfd_byte *loc = bfd_alloc (ibfd, sec->_raw_size);
-	      if (loc == NULL)
-		return false;
-	      if (! bfd_get_section_contents (ibfd, sec, loc, (bfd_vma) 0,
-					      sec->_raw_size))
-		return false;
+	      if (loc == NULL
+		  || !bfd_get_section_contents (ibfd, sec, loc, (bfd_vma) 0,
+						sec->_raw_size))
+		{
+		  if (local_syms != NULL
+		      && symtab_hdr->contents != (unsigned char *) local_syms)
+		    free (local_syms);
+		error_free_rel:
+		  if (elf_section_data (sec)->relocs != relstart)
+		    free (relstart);
+		  return false;
+		}
 	      sec->contents = loc;
 	      sec->flags |= (SEC_IN_MEMORY | SEC_HAS_CONTENTS);
 	    }
@@ -3874,7 +3887,7 @@ edit_opd (obfd, info)
 		    }
 		  else
 		    {
-		      sym = htab->all_local_syms[bfd_indx] + r_symndx;
+		      sym = local_syms + r_symndx;
 		      if ((sym->st_shndx != SHN_UNDEF
 			   && sym->st_shndx < SHN_LORESERVE)
 			  || sym->st_shndx > SHN_HIRESERVE)
@@ -3903,13 +3916,12 @@ edit_opd (obfd, info)
 			}
 		      else
 			{
-			  /* Local syms are a bit tricky.  Other parts
-			     of the linker re-read them so it's not
-			     possible to tweak local sym values.  In
-			     any case, we'd need to look through the
-			     local syms for the function descriptor
-			     sym which we don't have at the moment.
-			     So keep an array of adjustments.  */
+			  /* Local syms are a bit tricky.  We could
+			     tweak them as they can be cached, but
+			     we'd need to look through the local syms
+			     for the function descriptor sym which we
+			     don't have at the moment.  So keep an
+			     array of adjustments.  */ 
 			  adjust[(rel->r_offset + wptr - rptr) / 24]
 			    = wptr - rptr;
 			}
@@ -3937,8 +3949,17 @@ edit_opd (obfd, info)
 	  sec->_cooked_size = wptr - sec->contents;
 	  sec->reloc_count = write_rel - relstart;
 	}
-      else if (elf_section_data (sec)->relocs == NULL)
+      else if (elf_section_data (sec)->relocs != relstart)
 	free (relstart);
+
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (!info->keep_memory)
+	    free (local_syms);
+	  else
+	    symtab_hdr->contents = (unsigned char *) local_syms;
+	}
     }
 
   return true;
@@ -4241,9 +4262,6 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	    *local_got = (bfd_vma) -1;
 	}
     }
-
-  if (!get_local_syms (info->input_bfds, htab))
-    return false;
 
   if (!edit_opd (output_bfd, info))
     return false;
@@ -4890,110 +4908,6 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 #undef PREV_SEC
 }
 
-/* Read in all local syms for all input bfds.  */
-
-static boolean
-get_local_syms (input_bfd, htab)
-     bfd *input_bfd;
-     struct ppc_link_hash_table *htab;
-{
-  unsigned int bfd_indx;
-  bfd *ibfd;
-  Elf_Internal_Sym *local_syms, **all_local_syms;
-  bfd_size_type amt;
-
-  if (htab->all_local_syms != NULL)
-    return true;
-
-  /* We want to read in symbol extension records only once.  To do this
-     we need to read in the local symbols in parallel and save them for
-     later use; so hold pointers to the local symbols in an array.  */
-  for (ibfd = input_bfd, bfd_indx = 0; ibfd != NULL; ibfd = ibfd->link_next)
-    bfd_indx += 1;
-  htab->bfd_count = bfd_indx;
-  amt = sizeof (Elf_Internal_Sym *) * bfd_indx;
-  all_local_syms = (Elf_Internal_Sym **) bfd_zmalloc (amt);
-  htab->all_local_syms = all_local_syms;
-  if (all_local_syms == NULL)
-    return false;
-
-  /* Walk over all the input BFDs, swapping in local symbols.  */
-  for (bfd_indx = 0;
-       input_bfd != NULL;
-       input_bfd = input_bfd->link_next, bfd_indx++)
-    {
-      Elf_Internal_Shdr *symtab_hdr;
-      Elf_Internal_Shdr *shndx_hdr;
-      Elf_Internal_Sym *isym;
-      Elf64_External_Sym *ext_syms, *esym, *end_sy;
-      Elf_External_Sym_Shndx *shndx_buf, *shndx;
-      bfd_size_type sec_size;
-
-      if (bfd_get_flavour (input_bfd) != bfd_target_elf_flavour)
-	continue;
-
-      /* We'll need the symbol table in a second.  */
-      symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-      if (symtab_hdr->sh_info == 0)
-	continue;
-
-      /* We need an array of the local symbols attached to the input bfd.
-	 Unfortunately, we're going to have to read & swap them in.  */
-      sec_size = symtab_hdr->sh_info;
-      sec_size *= sizeof (Elf_Internal_Sym);
-      local_syms = (Elf_Internal_Sym *) bfd_malloc (sec_size);
-      if (local_syms == NULL)
-	return false;
-
-      all_local_syms[bfd_indx] = local_syms;
-      sec_size = symtab_hdr->sh_info;
-      sec_size *= sizeof (Elf64_External_Sym);
-      ext_syms = (Elf64_External_Sym *) bfd_malloc (sec_size);
-      if (ext_syms == NULL)
-	return false;
-
-      if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread ((PTR) ext_syms, sec_size, input_bfd) != sec_size)
-	{
-	error_ret_free_ext_syms:
-	  free (ext_syms);
-	  return false;
-	}
-
-      shndx_buf = NULL;
-      shndx_hdr = &elf_tdata (input_bfd)->symtab_shndx_hdr;
-      if (shndx_hdr->sh_size != 0)
-	{
-	  sec_size = symtab_hdr->sh_info;
-	  sec_size *= sizeof (Elf_External_Sym_Shndx);
-	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (sec_size);
-	  if (shndx_buf == NULL)
-	    goto error_ret_free_ext_syms;
-
-	  if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) shndx_buf, sec_size, input_bfd) != sec_size)
-	    {
-	      free (shndx_buf);
-	      goto error_ret_free_ext_syms;
-	    }
-	}
-
-      /* Swap the local symbols in.  */
-      for (esym = ext_syms, end_sy = esym + symtab_hdr->sh_info,
-	     isym = local_syms, shndx = shndx_buf;
-	   esym < end_sy;
-	   esym++, isym++, shndx = (shndx ? shndx + 1 : NULL))
-	bfd_elf64_swap_symbol_in (input_bfd, (const PTR) esym,
-				  (const PTR) shndx, isym);
-
-      /* Now we can free the external symbols.  */
-      free (shndx_buf);
-      free (ext_syms);
-    }
-
-  return true;
-}
-
 /* Determine and set the size of the stub section for a final link.
 
    The basic idea here is to examine all the relocations looking for
@@ -5012,7 +4926,6 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 {
   bfd_size_type stub_group_size;
   boolean stubs_always_before_branch;
-  boolean ret = false;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
   /* Stash our params away.  */
@@ -5034,13 +4947,6 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 
   group_sections (htab, stub_group_size, stubs_always_before_branch);
 
-  if (! get_local_syms (info->input_bfds, htab))
-    {
-      if (htab->all_local_syms)
-	goto error_ret_free_local;
-      return false;
-    }
-
   while (1)
     {
       bfd *input_bfd;
@@ -5057,14 +4963,12 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
-	  Elf_Internal_Sym *local_syms;
+	  Elf_Internal_Sym *local_syms = NULL;
 
 	  /* We'll need the symbol table in a second.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 	  if (symtab_hdr->sh_info == 0)
 	    continue;
-
-	  local_syms = htab->all_local_syms[bfd_indx];
 
 	  /* Walk over each section attached to the input bfd.  */
 	  for (section = input_bfd->sections;
@@ -5114,10 +5018,7 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		  if (r_type >= (unsigned int) R_PPC_max)
 		    {
 		      bfd_set_error (bfd_error_bad_value);
-		    error_ret_free_internal:
-		      if (elf_section_data (section)->relocs == NULL)
-			free (internal_relocs);
-		      goto error_ret_free_local;
+		      goto error_ret_free_internal;
 		    }
 
 		  /* Only look for stubs on branch instructions.  */
@@ -5139,6 +5040,18 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		      Elf_Internal_Sym *sym;
 		      Elf_Internal_Shdr *hdr;
 
+		      if (local_syms == NULL)
+			{
+			  local_syms
+			    = (Elf_Internal_Sym *) symtab_hdr->contents;
+			  if (local_syms == NULL)
+			    local_syms
+			      = bfd_elf_get_elf_syms (input_bfd, symtab_hdr,
+						      symtab_hdr->sh_info, 0,
+						      NULL, NULL, NULL);
+			  if (local_syms == NULL)
+			    goto error_ret_free_internal;
+			}
 		      sym = local_syms + r_indx;
 		      hdr = elf_elfsections (input_bfd)[sym->st_shndx];
 		      sym_sec = hdr->bfd_section;
@@ -5210,7 +5123,15 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		  if (stub_entry == NULL)
 		    {
 		      free (stub_name);
-		      goto error_ret_free_internal;
+		    error_ret_free_internal:
+		      if (elf_section_data (section)->relocs == NULL)
+			free (internal_relocs);
+		    error_ret_free_local:
+		      if (local_syms != NULL
+			  && (symtab_hdr->contents
+			      != (unsigned char *) local_syms))
+			free (local_syms);
+		      return false;
 		    }
 
 		  stub_entry->target_value = sym_value;
@@ -5221,8 +5142,17 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		}
 
 	      /* We're done with the internal relocs, free them.  */
-	      if (elf_section_data (section)->relocs == NULL)
+	      if (elf_section_data (section)->relocs != internal_relocs)
 		free (internal_relocs);
+	    }
+
+	  if (local_syms != NULL
+	      && symtab_hdr->contents != (unsigned char *) local_syms)
+	    {
+	      if (!info->keep_memory)
+		free (local_syms);
+	      else
+		symtab_hdr->contents = (unsigned char *) local_syms;
 	    }
 	}
 
@@ -5252,15 +5182,7 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
      the dynamic symbol table is corrupted since the section symbol
      for the stripped section isn't written.  */
 
-  ret = true;
-
- error_ret_free_local:
-  while (htab->bfd_count-- > 0)
-    if (htab->all_local_syms[htab->bfd_count])
-      free (htab->all_local_syms[htab->bfd_count]);
-  free (htab->all_local_syms);
-
-  return ret;
+  return true;
 }
 
 /* Called after we have determined section placement.  If sections

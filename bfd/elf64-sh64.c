@@ -2144,15 +2144,11 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
      asymbol **symbols;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Shdr *shndx_hdr;
   asection *input_section = link_order->u.indirect.section;
   bfd *input_bfd = input_section->owner;
   asection **sections = NULL;
   Elf_Internal_Rela *internal_relocs = NULL;
-  Elf64_External_Sym *external_syms = NULL;
-  Elf_External_Sym_Shndx *shndx_buf = NULL;
-  Elf_External_Sym_Shndx *shndx;
-  Elf_Internal_Sym *internal_syms = NULL;
+  Elf_Internal_Sym *isymbuf = NULL;
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
@@ -2164,7 +2160,6 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 						       symbols);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  shndx_hdr  = &elf_tdata (input_bfd)->symtab_shndx_hdr;
 
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
 	  input_section->_raw_size);
@@ -2173,37 +2168,18 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
       && input_section->reloc_count > 0)
     {
       Elf_Internal_Sym *isymp;
+      Elf_Internal_Sym *isymend;
       asection **secpp;
-      Elf64_External_Sym *esym, *esymend;
-      bfd_size_type amt;
 
-      if (symtab_hdr->contents != NULL)
-	external_syms = (Elf64_External_Sym *) symtab_hdr->contents;
-      else
+      /* Read this BFD's local symbols.  */
+      if (symtab_hdr->sh_info != 0)
 	{
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf64_External_Sym);
-
-	  external_syms = (Elf64_External_Sym *) bfd_malloc (amt);
-	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
-	    goto error_return;
-
-	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_bread ((PTR) external_syms, amt, input_bfd) != amt))
-	    goto error_return;
-	}
-
-      if (symtab_hdr->sh_info != 0 && shndx_hdr->sh_size != 0)
-	{
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf_External_Sym_Shndx);
-
-	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-	  if (shndx_buf == NULL)
-	    goto error_return;
-
-	  if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) shndx_buf, amt, input_bfd) != amt)
+	  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (isymbuf == NULL)
+	    isymbuf = bfd_elf_get_elf_syms (input_bfd, symtab_hdr,
+					    symtab_hdr->sh_info, 0,
+					    NULL, NULL, NULL);
+	  if (isymbuf == NULL)
 	    goto error_return;
 	}
 
@@ -2213,29 +2189,16 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
       if (internal_relocs == NULL)
 	goto error_return;
 
-      internal_syms = ((Elf_Internal_Sym *)
-		       bfd_malloc (symtab_hdr->sh_info
-				   * sizeof (Elf_Internal_Sym)));
-      if (internal_syms == NULL && symtab_hdr->sh_info > 0)
-	goto error_return;
-
       sections = (asection **) bfd_malloc (symtab_hdr->sh_info
 					   * sizeof (asection *));
       if (sections == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;
 
-      isymp = internal_syms;
       secpp = sections;
-      esym = external_syms;
-      esymend = esym + symtab_hdr->sh_info;
-      shndx = shndx_buf;
-      for (; esym < esymend;
-	   ++esym, ++isymp, ++secpp, shndx = (shndx ? shndx + 1 : NULL))
+      isymend = isymbuf + symtab_hdr->sh_info;
+      for (isymp = isymbuf; isymp < isymend; ++isymp, ++secpp)
 	{
 	  asection *isec;
-
-	  bfd_elf64_swap_symbol_in (input_bfd, (const PTR) esym,
-				    (const PTR) shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;
@@ -2256,35 +2219,29 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 
       if (! sh_elf64_relocate_section (output_bfd, link_info, input_bfd,
 				       input_section, data, internal_relocs,
-				       internal_syms, sections))
+				       isymbuf, sections))
 	goto error_return;
 
       if (sections != NULL)
 	free (sections);
-      sections = NULL;
-      if (internal_syms != NULL)
-	free (internal_syms);
-      internal_syms = NULL;
-      if (external_syms != NULL && symtab_hdr->contents == NULL)
-	free (external_syms);
-      external_syms = NULL;
       if (internal_relocs != elf_section_data (input_section)->relocs)
 	free (internal_relocs);
-      internal_relocs = NULL;
+      if (isymbuf != NULL
+	  && (unsigned char *) isymbuf != symtab_hdr->contents)
+	free (isymbuf);
     }
 
   return data;
 
  error_return:
+  if (sections != NULL)
+    free (sections);
   if (internal_relocs != NULL
       && internal_relocs != elf_section_data (input_section)->relocs)
     free (internal_relocs);
-  if (external_syms != NULL && symtab_hdr->contents == NULL)
-    free (external_syms);
-  if (internal_syms != NULL)
-    free (internal_syms);
-  if (sections != NULL)
-    free (sections);
+  if (isymbuf != NULL
+      && (unsigned char *) isymbuf != symtab_hdr->contents)
+    free (isymbuf);
   return NULL;
 }
 
