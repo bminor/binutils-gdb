@@ -1,5 +1,10 @@
+Fri Oct  4 19:08:09 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* binutils.texinfo: add new file (rudimentary docn)
+
 Mon Sep 30 12:30:39 1991  Per Bothner  (bothner at cygnus.com)
 
+	* config/hmake-news: Add new file (for Sony NEWSOS3).
 	* bucomm.c (fatal):  Conditionally compile fatal() depending on
 	MISSING_VFPRINTF, and don't confuse the issue with NO_VARARGS.
 	* objdump.c (dump_headers):  Trivial output format change.
