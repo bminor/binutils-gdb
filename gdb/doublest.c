@@ -104,10 +104,10 @@ get_field (unsigned char *data, enum floatformat_byteorders order,
    FROM is the address of the extended float.
    Store the DOUBLEST in *TO.  */
 
-void
-floatformat_to_doublest (const struct floatformat *fmt,
-			 const void *from,
-			 DOUBLEST *to)
+static void
+convert_floatformat_to_doublest (const struct floatformat *fmt,
+				 const void *from,
+				 DOUBLEST *to)
 {
   unsigned char *ufrom = (unsigned char *) from;
   DOUBLEST dto;
@@ -325,10 +325,10 @@ ldfrexp (long double value, int *eptr)
    and store where TO points.  Neither FROM nor TO have any alignment
    restrictions.  */
 
-void
-floatformat_from_doublest (CONST struct floatformat *fmt,
-			   const DOUBLEST *from,
-			   void *to)
+static void
+convert_doublest_to_floatformat (CONST struct floatformat *fmt,
+				 const DOUBLEST *from,
+				 void *to)
 {
   DOUBLEST dfrom;
   int exponent;
@@ -533,60 +533,102 @@ floatformat_mantissa (const struct floatformat *fmt, char *val)
 
 
 
-/* Extract a floating-point number from a target-order byte-stream at ADDR.
-   Returns the value as type DOUBLEST.
+/* Convert TO/FROM target to the hosts DOUBLEST floating-point format.
 
-   If the host and target formats agree, we just copy the raw data into the
-   appropriate type of variable and return, letting the host increase precision
-   as necessary.  Otherwise, we call the conversion routine and let it do the
-   dirty work.  */
+   If the host and target formats agree, we just copy the raw data
+   into the appropriate type of variable and return, letting the host
+   increase precision as necessary.  Otherwise, we call the conversion
+   routine and let it do the dirty work.  */
+
+#ifndef HOST_FLOAT_FORMAT
+#define HOST_FLOAT_FORMAT 0
+#endif
+#ifndef HOST_DOUBLE_FORMAT
+#define HOST_DOUBLE_FORMAT 0
+#endif
+#ifndef HOST_LONG_DOUBLE_FORMAT
+#define HOST_LONG_DOUBLE_FORMAT 0
+#endif
+
+static const struct floatformat *host_float_format = HOST_FLOAT_FORMAT;
+static const struct floatformat *host_double_format = HOST_DOUBLE_FORMAT;
+static const struct floatformat *host_long_double_format = HOST_LONG_DOUBLE_FORMAT;
+
+void
+floatformat_to_doublest (const struct floatformat *fmt,
+			 const void *in, DOUBLEST *out)
+{
+  gdb_assert (fmt != NULL);
+  if (fmt == host_float_format)
+    {
+      float val;
+      memcpy (&val, in, sizeof (val));
+      *out = val;
+    }
+  else if (fmt == host_double_format)
+    {
+      double val;
+      memcpy (&val, in, sizeof (val));
+      *out = val;
+    }
+  else if (fmt == host_long_double_format)
+    {
+      long double val;
+      memcpy (&val, in, sizeof (val));
+      *out = val;
+    }
+  else
+    convert_floatformat_to_doublest (fmt, in, out);
+}
+
+void
+floatformat_from_doublest (const struct floatformat *fmt,
+			   const DOUBLEST *in, void *out)
+{
+  gdb_assert (fmt != NULL);
+  if (fmt == host_float_format)
+    {
+      float val = *in;
+      memcpy (out, &val, sizeof (val));
+    }
+  else if (fmt == host_double_format)
+    {
+      double val = *in;
+      memcpy (out, &val, sizeof (val));
+    }
+  else if (fmt == host_long_double_format)
+    {
+      long double val = *in;
+      memcpy (out, &val, sizeof (val));
+    }
+  else
+    convert_doublest_to_floatformat (fmt, in, out);
+}
+
+
+/* Extract/store a floating-point number from a target-order
+   byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
 
 DOUBLEST
 extract_floating (const void *addr, int len)
 {
   DOUBLEST dretval;
-
   if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
     {
-      if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
-	{
-	  float retval;
-
-	  memcpy (&retval, addr, sizeof (retval));
-	  return retval;
-	}
-      else
-	floatformat_to_doublest (TARGET_FLOAT_FORMAT, addr, &dretval);
+      floatformat_to_doublest (TARGET_FLOAT_FORMAT, addr, &dretval);
     }
   else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
     {
-      if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
-	{
-	  double retval;
-
-	  memcpy (&retval, addr, sizeof (retval));
-	  return retval;
-	}
-      else
-	floatformat_to_doublest (TARGET_DOUBLE_FORMAT, addr, &dretval);
+      floatformat_to_doublest (TARGET_DOUBLE_FORMAT, addr, &dretval);
     }
   else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
     {
-      if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
-	{
-	  DOUBLEST retval;
-
-	  memcpy (&retval, addr, sizeof (retval));
-	  return retval;
-	}
-      else
-	floatformat_to_doublest (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
+      floatformat_to_doublest (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
     }
   else
     {
       error ("Can't deal with a floating point number of %d bytes.", len);
     }
-
   return dretval;
 }
 
@@ -595,32 +637,15 @@ store_floating (void *addr, int len, DOUBLEST val)
 {
   if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
     {
-      if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
-	{
-	  float floatval = val;
-
-	  memcpy (addr, &floatval, sizeof (floatval));
-	}
-      else
-	floatformat_from_doublest (TARGET_FLOAT_FORMAT, &val, addr);
+      floatformat_from_doublest (TARGET_FLOAT_FORMAT, &val, addr);
     }
   else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
     {
-      if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
-	{
-	  double doubleval = val;
-
-	  memcpy (addr, &doubleval, sizeof (doubleval));
-	}
-      else
-	floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &val, addr);
+      floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &val, addr);
     }
   else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
     {
-      if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
-	memcpy (addr, &val, sizeof (val));
-      else
-	floatformat_from_doublest (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
+      floatformat_from_doublest (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
     }
   else
     {

@@ -1,5 +1,19 @@
 2001-08-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* doublest.c (convert_doublest_to_floatformat): Rename
+	floatformat_from_doublest.  Make static.
+	(convert_floatformat_to_doublest): Rename floatformat_to_doublest.
+	Make static.
+	(floatformat_to_doublest): New function.
+	(floatformat_from_doublest): New function.
+	(host_float_format, host_double_format, host_long_double_format):
+	New static variables.
+	(store_floating, extract_floating): Always use
+	floatformat_to_doublest and floatformat_from_doublest.
+	* doublest.h (HOST_LONG_DOUBLE_FORMAT): Delete macro.
+
+2001-08-11  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/mn10300/tm-mn10300.h (INIT_FRAME_PC): Delete.
 	* mn10300-tdep.c (mn10300_gdbarch_init): Initialize init_frame_pc.
 

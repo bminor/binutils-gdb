@@ -53,10 +53,6 @@ extern const struct floatformat floatformat_unknown;
 #endif
 #endif
 
-#ifndef HOST_LONG_DOUBLE_FORMAT
-#define HOST_LONG_DOUBLE_FORMAT &floatformat_unknown
-#endif
-
 /* Use `long double' if the host compiler supports it.  (Note that this is not
    necessarily any longer than `double'.  On SunOS/gcc, it's the same as
    double.)  This is necessary because GDB internally converts all floating
