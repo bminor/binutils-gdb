@@ -1,5 +1,13 @@
 Fri Sep 11 18:28:28 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
+	* doc/gdb.texinfo, doc/gdbinv-m.m4.in, doc/gdbinv-s.m4.in: first
+	pass at doc for two new remote targets---29K using UDI, and Tandem
+	ST2000 using STDBUG.
+
+	* doc/all.m4, doc/none.m4: new m4 switch, _ST2000__
+
+	* doc/all.m4: turn on H8/300 stuff for generic manual
+
 	* doc/gdbinv-s.m4.in: remove text on special procedures to continue 
 	after explicit call to breakpoint() in serial stubs.
 
