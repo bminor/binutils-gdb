@@ -1,3 +1,13 @@
+start-sanitize-sky
+Fri Feb 20 18:02:20 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-dis.c (print_gif): Complete.
+	* dvp-opc.c (gif_operands,gif_opcodes): Complete.
+	(state_gif_{nregs,regs,nloop}): New static locals.
+	(*_gif_*): Complete.
+	(dvp_opcode_init_{parse,print}): Init gif state locals.
+
+end-sanitize-sky
 start-sanitize-r5900
 Fri Feb 20 01:23:16 1998  Jeffrey A Law  (law@cygnus.com)
 
