@@ -1627,6 +1627,7 @@ yylex ()
   }
 }
 
+/* ARGSUSED */
 static void
 yyerror (msg)
      char *msg;
