@@ -1,3 +1,10 @@
+2002-08-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Use deprecated version of
+	store_return_value.
+	(e500_extract_return_value): Change type of valbuf pointer to
+	void.
+
 2002-08-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* PROBLEMS: Clarify problems with FreeBSD's compiler and suggest

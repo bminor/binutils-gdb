@@ -1250,7 +1250,7 @@ ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 /* Extract a function return value of type TYPE from raw register array
    REGBUF, and copy that return value into VALBUF in virtual format.  */
 static void
-e500_extract_return_value (struct type *valtype, struct regcache *regbuf, char *valbuf)
+e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *valbuf)
 {
   int offset = 0;
   int vallen = TYPE_LENGTH (valtype);
@@ -2759,7 +2759,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp_regnum (gdbarch, 1);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       rs6000_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
 
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
@@ -2794,7 +2794,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
         set_gdbarch_extract_return_value (gdbarch, e500_extract_return_value);
-        set_gdbarch_store_return_value (gdbarch, e500_store_return_value);
+        set_gdbarch_deprecated_store_return_value (gdbarch, e500_store_return_value);
 	break;
       default:
 	tdep->ppc_vr0_regnum = -1;
