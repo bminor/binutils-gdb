@@ -1,5 +1,9 @@
 2003-11-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* cpu-iq2000.c (arch_info_struct): Warning fix.
+
+2003-11-05  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-hppa.c (ELIMINATE_COPY_RELOCS): Define.
 	(elf32_hppa_copy_indirect_symbol): Don't copy NON_GOT_REF on
 	weakdefs.
