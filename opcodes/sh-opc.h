@@ -28,7 +28,7 @@ typedef enum {
 	PCRELIMM_8BY4,
 	IMM_8,
 	IMM_8BY2,
-	IMM_8BY4,
+	IMM_8BY4
 } sh_nibble_type;
 typedef enum {
 	A_END,
@@ -56,7 +56,7 @@ typedef enum {
 	A_REG_M,
 	A_REG_N,
 	A_SR,
-	A_VBR,
+	A_VBR
 } sh_arg_type;
 typedef struct {
 char *name;
@@ -264,10 +264,11 @@ sh_opcode_info sh_table[]={
 
 /* 0000000000011000 sett                */{"sett",{0},{HEX_0,HEX_0,HEX_1,HEX_8}},
 
+/* start-sanitize-sh3 */
 /* 0100nnnnmmmm1100 shad <REG_M>,<REG_N>*/{"shad",{ A_REG_M,A_REG_N},{HEX_4,REG_N,REG_M,HEX_C}},
 
 /* 0100nnnnmmmm1101 shld <REG_M>,<REG_N>*/{"shld",{ A_REG_M,A_REG_N},{HEX_4,REG_N,REG_M,HEX_D}},
-
+/* end-sanitize-sh3 */
 /* 0100nnnn00100000 shal <REG_N>        */{"shal",{A_REG_N},{HEX_4,REG_N,HEX_2,HEX_0}},
 
 /* 0100nnnn00100001 shar <REG_N>        */{"shar",{A_REG_N},{HEX_4,REG_N,HEX_2,HEX_1}},
@@ -351,5 +352,7 @@ sh_opcode_info sh_table[]={
 /* 0011nnnnmmmm0101 dmulu.l <REG_M>,<REG_N>*/{"dmulu.l",{ A_REG_M,A_REG_N},{HEX_3,REG_N,REG_M,HEX_5}},
 
 /* 0000nnnnmmmm1111 mac.l @<REG_M>+,@<REG_N>+*/{"mac.l",{A_INC_M,A_INC_N},{HEX_0,REG_N,REG_M,HEX_F}},
+/* 0000nnnn00100011 braf <REG_N>       */{"braf",{A_REG_N},{HEX_0,REG_N,HEX_2,HEX_3}},
+/* 0000nnnn00000011 bsrf <REG_N>       */{"bsrf",{A_REG_N},{HEX_0,REG_N,HEX_0,HEX_3}},
 0};
 #endif

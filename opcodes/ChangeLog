@@ -1,6 +1,29 @@
+Wed May 24 14:16:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* sh-opc.h: Added bsrf and braf.
+
+Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)	
+
+	* arm-opc.h (arm_opcodes): Add 64-bit multiply patterns.  Delete
+	bogus [ls]fm{ea,fd} patterns.
+
+	* arm-opc.h (arm_opcodes): Correct typos in stm, ldm, std, and ldc.
+	* arm-dis.c (print_insn_arm): Make GIVEN a parameter, don't try and
+	initialize it from memory.  Make function static.
+	(print_insn_{big,little}_arm): New functions.
+	* disassemble.c (disassembler, case bfd_arch_arm): Disassemble for
+	the correct endianness.
+
+start-sanitize-arc
+Sat Apr 29 23:20:05 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* arc-opc.c (arc_opcodes): Add ARC_OPCODE_CONDITIONAL_BRANCH flag.
+	(arc_suffixes): Use ARC_DELAY_{NONE,NORMAL,JUMP}.
+end-sanitize-arc
+
 Mon Apr 24 14:18:05 1995  Jason Molenda   (crash@phydeaux.cygnus.com>
 
-	* sh-opc.c (sh_nibble_type, sh_arg_type): remove trailing , from
+	* sh-opc.h (sh_nibble_type, sh_arg_type): remove trailing , from
 	enum list.
 
 Wed Apr 19 14:07:03 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
