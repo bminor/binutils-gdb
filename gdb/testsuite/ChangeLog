@@ -1,3 +1,10 @@
+Sat Mar 25 01:16:10 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/list.exp:  Add expect patterns for output from
+	SunPRO compiled executables.
+	* gdb.base/whatis.exp:  Allow leading `signed' for all v_signed_*
+	types.
+
 Fri Mar 24 06:11:05 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/break.exp (test_next_with_recursion): Accept any line

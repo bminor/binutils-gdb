@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1995 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -496,6 +496,7 @@ proc test_list_function {} {
 
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
+    # SunPRO cc is the second case below, it's also correct.
     setup_xfail "rs6000-*-*" 1804
     setup_xfail "a29k-*-udi"
     send "list main\n"
@@ -503,11 +504,15 @@ proc test_list_function {} {
 	-re "1\[ \t\]+#include .*8\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
 	    pass "list function in source file 1"
 	}
+	-re "2\[ \t\]+.*11\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
+	    pass "list function in source file 1"
+	}
 	-re ".*$prompt $" { fail "list main" ; return }
 	timeout { fail "list main" ; return }
     }
 
     # Ultrix gdb takes the second case below; it's also correct.
+    # SunPRO cc is the third case.
     send "list bar\n"
     expect {
 	-re "1\[ \t\]+void.*8\[ \t\]+\}\r\n$prompt $" {
@@ -516,12 +521,16 @@ proc test_list_function {} {
 	-re "1\[ \t\]+void.*7\[ \t\]*long_line ..;\r\n$prompt $" {
 	    pass "list function in source file 2"
 	}
+	-re "1\[ \t\]+void.*7\[ \t\]*long_line ..;.*9\[ \t\]*\r\n$prompt $" {
+	    pass "list function in source file 2"
+	}
 	-re ".*$prompt $" { fail "list bar" ; return }
 	timeout { fail "list bar" ; return }
     }
 
     # Test "list function" for C include file
     # Ultrix gdb is the second case, still correct.
+    # SunPRO cc is the third case.
     # FIXME This fails on DWARF
     setup_xfail "*-*-sysv4*"
     send "list foo\n"
@@ -530,6 +539,9 @@ proc test_list_function {} {
 	    pass "list function in include file"
 	}
 	-re "1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$prompt $" {
+	    pass "list function in include file"
+	}
+	-re "3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$prompt $" {
 	    pass "list function in include file"
 	}
 	-re ".*main \[)(\]+.*$prompt $" {
@@ -694,12 +706,16 @@ proc test_list_filename_and_function {} {
 
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
+    # SunPRO cc is the second case below, it's also correct.
     setup_xfail "rs6000-*-*" 1804
     setup_xfail "a29k-*-udi"
     send "list list0.c:main\n"
     expect {
 	-re "1\[ \t\]+#include .*8\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
 	    incr testcnt
+	}
+	-re "2\[ \t\]+.*11\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
+	    pass "list function in source file 1"
 	}
 	-re ".*$prompt $" { fail "list list0.c:main" }
 	timeout { fail "list list0.c:main (timeout)" }
@@ -726,6 +742,7 @@ proc test_list_filename_and_function {} {
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
     # Ultrix gdb is the second case, one line different but still correct.
+    # SunPRO cc is the third case.
     # FIXME This fails on DWARF
     setup_xfail "rs6000-*-*" 1804
     setup_xfail "*-*-sysv4*"
@@ -737,6 +754,9 @@ proc test_list_filename_and_function {} {
 	    incr testcnt
 	}
 	-re "1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$prompt $" {
+	    incr testcnt
+	}
+	-re "3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$prompt $" {
 	    incr testcnt
 	}
 	-re "No source file named list0.h.\r\n$prompt $" {
@@ -849,19 +869,28 @@ proc test_list_filename_and_function {} {
 }
 
 proc test_forward_search {} {
-	gdb_test "set listsize 2" ""
-	gdb_test "list long_line" "20\[ \t\]+long_line "
+	global timeout
+
+	gdb_test "set listsize 4" ""
+	# On SunOS4, this gives us lines 19-22.  On AIX, it gives us
+	# lines 20-23.  This depends on whether the line number of a function
+	# is considered to be the openbrace or the first statement--either one
+	# is acceptable.
+	gdb_test "list long_line" "20\[ \t\]+long_line .*"
 
 	gdb_test "search 4321" " not found"
 
-	gdb_test "search 6789" "22\[ \t\]+oof .6789.;"
+	gdb_test "search 6789" "24\[ \t\]+oof .6789.;"
 
 	# We could look at the result of this, but dejagnu seems to
 	# fail, perhaps because expect's buffers are too small.
 	# In any case, we just want GDB to not crash if the line
 	# being searched is extremely long.
 
+	set oldtimeout $timeout
+	set timeout 30
 	gdb_test "search 1234" ""
+	set timeout $oldtimeout
 }
 
 # Start with a fresh gdb.
