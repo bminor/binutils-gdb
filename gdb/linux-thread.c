@@ -1129,7 +1129,7 @@ linuxthreads_attach (args, from_tty)
   linuxthreads_breakpoints_inserted = 1;
   linuxthreads_breakpoint_last = -1;
   linuxthreads_wait_last = -1;
-  WSETSTOP (linux_exit_status, 0);
+  WSETSTOP (linuxthreads_exit_status, 0);
 
   child_ops.to_attach (args, from_tty);
 
@@ -1189,7 +1189,7 @@ linuxthreads_detach (args, from_tty)
 	  linuxthreads_find_trap (inferior_pid, 1);
 
 	  linuxthreads_wait_last = -1;
-	  WSETSTOP (linux_exit_status, 0);
+	  WSETSTOP (linuxthreads_exit_status, 0);
 	}
 
       linuxthreads_inferior_pid = 0;
@@ -1601,7 +1601,7 @@ Use the \"file\" or \"exec-file\" command.");
   linuxthreads_breakpoints_inserted = 1;
   linuxthreads_breakpoint_last = -1;
   linuxthreads_wait_last = -1;
-  WSETSTOP (linux_exit_status, 0);
+  WSETSTOP (linuxthreads_exit_status, 0);
   
   if (linuxthreads_max)
     linuxthreads_attach_pending = 1;
