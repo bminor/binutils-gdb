@@ -1,5 +1,6 @@
 	@ test ADRL pseudo-op
 .text
+foo:	
 .align 0
 1:
         .space 8192
