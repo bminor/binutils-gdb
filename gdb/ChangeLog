@@ -1,3 +1,10 @@
+2000-04-07  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* sol-thread.c (gdb_ps_addr_t):  New typedef, depends on definition
+	of PROC_SERVICE_IS_OLD.
+	(ps_pglobal_lookup, ps_pdread, ps_pdwrite, ps_ptread, ps_ptwrite,
+	rw_common):  Change argument type from psaddr_t to gdb_ps_addr_t.
+
 Fri Apr  7 17:18:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (CFLAGS): Set using configure.
