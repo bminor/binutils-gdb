@@ -1,3 +1,8 @@
+2000-03-23  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From David Whedon <dwhedon@gordian.com>
+        * gdb.base/commands.exp : Added command deprecator tests.
+
 2000-03-22  Daniel Berlin   <dan@cgsoftware.com>
 
        * gdb.base/help.exp: Added test for new apropos command.
