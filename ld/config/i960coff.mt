@@ -1,0 +1,1 @@
+EMUL=gld960coff
