@@ -1,3 +1,7 @@
+2004-03-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-sh.c: Remove trailing whitespace.
+
 2004-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* doc/c-cris.texi (CRIS-Opts): Document --no-mul-bug-abort,
@@ -218,7 +222,7 @@
 	Fix accumulator registers move opcodes.
 
 2004-02-13  Hannes Reinecke  <hare@suse.de>
-            Jakub Jelinek  <jakub@redhat.com>
+	    Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf2dbg.c (get_filenum): Do not read beyond allocated memory.
 

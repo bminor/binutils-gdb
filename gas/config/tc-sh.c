@@ -1632,7 +1632,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AS_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1640,7 +1640,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AS_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1648,7 +1648,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AS_PMOD_N:
 	      if (user->type != AX_PMOD_N)
 		goto fail;
@@ -1656,7 +1656,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AX_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1664,7 +1664,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AX_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1672,7 +1672,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AX_PMOD_N:
 	      if (user->type != AX_PMOD_N)
 		goto fail;
@@ -1680,7 +1680,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AXY_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1689,7 +1689,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AXY_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1698,7 +1698,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AXY_PMOD_N:
 	      if (user->type != AX_PMOD_N)
 		goto fail;
@@ -1707,7 +1707,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AY_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1715,7 +1715,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AY_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1723,7 +1723,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AY_PMOD_N:
 	      if (user->type != AY_PMOD_N)
 		goto fail;
@@ -1740,7 +1740,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AYX_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1749,7 +1749,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AYX_PMOD_N:
 	      if (user->type != AY_PMOD_N)
 		goto fail;
@@ -3024,7 +3024,7 @@ SH options:\n\
 -isa=[sh4\n\
     | sh4-nofpu		sh4 with fpu disabled\n\
     | sh4-nommu-nofpu   sh4 with no MMU or FPU\n\
-    | sh4a\n\ 
+    | sh4a\n\
     | dsp               same as '-dsp'\n\
     | fp\n\
     | any]		use most appropriate isa\n"));
