@@ -130,7 +130,7 @@ struct type
 
   /* For a pointer type, describes the type of object pointed to.
      For an array type, describes the type of the elements.
-     For a function or method type, describes the type of the value.
+     For a function or method type, describes the type of the return value.
      For a range type, describes the type of the full range.
      Unused otherwise.  */
 

@@ -22,6 +22,6 @@ XM_FILE= xm-rs6000.h
 XM_CFLAGS = -bnodelcsect
 
 # Because of shared libraries, we risk ending up with *two*
-# versions of malloc if we use GNU malloc ...
-GNU_MALLOC =
-MALLOC_CFLAGS = -DNO_MALLOC_CHECK
+# incompatible versions of malloc if we use GNU malloc ...
+MMALLOC_LIB = 
+MMALLOC_DISABLE = -DNO_MMALLOC

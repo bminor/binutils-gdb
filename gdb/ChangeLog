@@ -1,3 +1,11 @@
+Tue Mar 24 13:26:25 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* config/rs6000.mh:  Update (for Fred's new mmalloc)
+	flags to disable use of GNU malloc/mmalloc.
+	* munch:  Change SYSV rule to allow .text before the label,
+	as well as after, to work for AIX.
+	* gdbtypes.h:  Minor clarifiction.
+
 Tue Mar 24 07:26:19 1992  Michael Tiemann  (tiemann@cygnus.com)
 
 	* buildsym.c (read_struct_type): Handle cretinous dbx symbol name
