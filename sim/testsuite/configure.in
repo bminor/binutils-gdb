@@ -24,7 +24,7 @@ fi
 # add any extra subdirectories
 case $target in
   # start-sanitize-sky
-  mips64r5900-sky-elf) configdirs="${configdirs} sky" ;;
+  mips64r5900-sky-elf) configdirs="${configdirs}" ;;
   # end-sanitize-sky
   *) ;;
 esac

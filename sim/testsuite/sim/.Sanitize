@@ -21,6 +21,13 @@ Do-first:
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
+sky_files="sky"
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+        keep_these_too="${sky_files} ${keep_these_too}"
+else
+        lose_these_too="${sky_files} ${lose_these_too}"
+fi
+
 Things-to-keep:
 
 m32r
