@@ -1,3 +1,8 @@
+Tue Jan 18 16:18:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* scripttempl/m88kbcs.sc: Don't use CREATE_OBJECT_SYMBOLS, that's
+	for a.out.
+
 Fri Jan 14 12:37:16 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	Motorola Delta sysV68 support from phdm@info.ucl.ac.BE (Philippe
