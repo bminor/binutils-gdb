@@ -18,58 +18,11 @@ You should have received a copy of the GNU General Public License
 along with the binutils; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$
-   $Log$
-   Revision 1.8  1991/06/14 22:54:48  steve
-   *** empty log message ***
+/* $Id$ */
 
- * Revision 1.6  1991/05/23  03:49:10  rich
- * new sparc-opcode, new pinsn.
- *
- * Revision 1.5  1991/05/22  01:40:35  rich
- * Oops.
- *
- * Revision 1.4  1991/05/22  01:17:48  rich
- * v9 stuff.
- *
- * Revision 1.3  1991/05/19  08:00:57  rich
- * Updated to relect a gdb change in sparc-opcode.h.
- *
- * Revision 1.2  1991/04/18  21:14:21  steve
- * Send the right # of args to an fprintf
- *
- * Revision 1.1.1.1  1991/03/21  21:26:56  gumby
- * Back from Intel with Steve
- *
- * Revision 1.1  1991/03/21  21:26:55  gumby
- * Initial revision
- *
- * Revision 1.1  1991/03/13  00:34:40  chrisb
- * Initial revision
- *
- * Revision 1.3  1991/03/09  04:36:31  rich
- *  Modified Files:
- *  	sparc-pinsn.c ostrip.c objdump.c m68k-pinsn.c i960-pinsn.c
- *  	binutils.h
- *
- * Pulled sysdep.h out of bfd.h.
- *
- * Revision 1.2  1991/03/08  21:54:53  rich
- *  Modified Files:
- *  	Makefile ar.c binutils.h bucomm.c copy.c cplus-dem.c getopt.c
- *  	i960-pinsn.c m68k-pinsn.c nm.c objdump.c sparc-opcode.h
- *  	sparc-pinsn.c strip.c
- *
- * Verifying Portland tree with steve's last changes.  Also, some partial
- * porting.
- *
- * Revision 1.1  1991/02/22  16:48:04  sac
- * Initial revision
- *
-*/
+#include "bfd.h"
 #include "sysdep.h"
 #include <stdio.h>
-#include "bfd.h"
 #include "sparc-opcode.h"
 
 extern int fputs();

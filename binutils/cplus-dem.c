@@ -46,6 +46,7 @@
 #if 0				/* Should really be part of BFD */
 #define nounderscore 1		/* define this is names don't start with _ */
 #endif
+#include "bfd.h"
 #include "sysdep.h"
 
 #include <ctype.h>

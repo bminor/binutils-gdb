@@ -1,8 +1,7 @@
 /*** copy.c -- copy object file from input to output, optionally
      massaging it */
-#include <sysdep.h>
 #include "bfd.h"
-
+#include "sysdep.h"
 
 asymbol       **sympp;
 char           *input_target = NULL;

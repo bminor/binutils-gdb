@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.2  1991/06/14 22:54:44  steve
-   *** empty log message ***
+   Revision 1.3  1991/10/11 11:22:00  gnu
+   Include bfd.h before sysdep.h, so ansidecl and PROTO() get defined first.
 
+ * Revision 1.2  1991/06/14  22:54:44  steve
+ * *** empty log message ***
+ *
  * Revision 1.1.1.1  1991/03/21  21:26:46  gumby
  * Back from Intel with Steve
  *
@@ -55,10 +58,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * Initial revision
  *
 */
+#include "bfd.h"
 #include "sysdep.h"
 #include <stdio.h>
-
-#include "bfd.h"
 #include "m68k-opcode.h"
 
 extern int fputs();

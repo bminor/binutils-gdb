@@ -18,13 +18,9 @@
 /* BUGS: When there's not enough memory, this should do the copy
    in pieces rather than just fail as it does now */
 
-#include "sysdep.h"
 #include "bfd.h"
-
+#include "sysdep.h"
 #include "getopt.h"
-
-
-
 #include <signal.h>
 
 /* Various program options */
