@@ -1,3 +1,16 @@
+Fri Dec 29 07:56:11 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (EXTRA_GCC_FLAGS): If any of the make variables
+	LANGUAGES, BOOT_CFLAGS, STMP_FIXPROTO, LIMITS_H_TEST,
+	LIBGCC1_TEST, LIBGCC2_CFLAGS, LIBGCC2_INCLUDES, and ENQUIRE are
+	non-empty, pass them on to the 	GCC make.
+	(all-bootstrap): New rule that is like all-gcc, except it executes
+	the GCC bootstrap rule instead of the GCC all rule.
+
+Wed Dec 27 15:51:48 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config-ml.in (ml_realsrcdir): New, to account for ${subdir}.
+
 Tue Dec 26 11:45:31 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.guess (AViiON:dgux:*:*): Update from FSF to add pentium
