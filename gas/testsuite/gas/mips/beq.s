@@ -26,5 +26,5 @@ text_label:
 	b	external_label
 	bal	external_label
 
-# Round to a 16 byte boundary, for ease in testing multiple targets.
-	nop
+# Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
+	.space	8

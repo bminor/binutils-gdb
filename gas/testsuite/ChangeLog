@@ -1,3 +1,16 @@
+2001-10-23  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/beq.s: Add zero words at end of instructions so
+	that objdump will print "..." when disassembling.
+	* gas/mips/beq.d: Update for disassembler changes which force
+	branch delay-slot nops to be printed.
+	* gas/mips/bge.d: Ditto.
+	* gas/mips/bgeu.d: Ditto.
+	* gas/mips/blt.d: Ditto.
+	* gas/mips/bltu.d: Ditto.
+	* gas/mips/jal-svr4pic.d: Ditto.
+	* gas/mips/jal-xgot.d: Ditto.
+
 2001-10-20  H.J. Lu  <hjl@gnu.org>
 
 	* gas/elf/ehopt0.s: Lose ",@progbits".

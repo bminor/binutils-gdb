@@ -155,10 +155,9 @@ print_insn_arg (d, l, pc, info)
       break;
 
     case 'a':
-      (*info->print_address_func)
-	((((pc + 4) & ~(bfd_vma) 0x0fffffff)
-	  | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
-	 info);
+      info->target = (((pc + 4) & ~(bfd_vma) 0x0fffffff)
+		      | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2));
+      (*info->print_address_func) (info->target, info);
       break;
 
     case 'p':
@@ -166,9 +165,8 @@ print_insn_arg (d, l, pc, info)
       delta = (l >> OP_SH_DELTA) & OP_MASK_DELTA;
       if (delta & 0x8000)
 	delta |= ~0xffff;
-      (*info->print_address_func)
-	((delta << 2) + pc + INSNLEN,
-	 info);
+      info->target = (delta << 2) + pc + INSNLEN;
+      (*info->print_address_func) (info->target, info);
       break;
 
     case 'd':
@@ -457,6 +455,12 @@ print_insn_mips (memaddr, word, info)
 
   info->bytes_per_chunk = INSNLEN;
   info->display_endian = info->endian;
+  info->insn_info_valid = 1;
+  info->branch_delay_insns = 0;
+  info->data_size = 0;      
+  info->insn_type = dis_nonbranch;
+  info->target = 0;
+  info->target2 = 0;
 
   op = mips_hash[(word >> OP_SH_OP) & OP_MASK_OP];
   if (op != NULL)
@@ -469,6 +473,28 @@ print_insn_mips (memaddr, word, info)
 
 	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor))
 		continue;
+
+	      /* Figure out instruction type and branch delay information.  */
+	      if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
+	        {
+		  if ((info->insn_type & INSN_WRITE_GPR_31) != 0)
+		    info->insn_type = dis_jsr;
+		  else
+		    info->insn_type = dis_branch;
+		  info->branch_delay_insns = 1;
+		}
+	      else if ((op->pinfo & (INSN_COND_BRANCH_DELAY
+				     | INSN_COND_BRANCH_LIKELY)) != 0)
+		{
+		  if ((info->insn_type & INSN_WRITE_GPR_31) != 0)
+		    info->insn_type = dis_condjsr;
+		  else
+		    info->insn_type = dis_condbranch;
+		  info->branch_delay_insns = 1;
+		}
+	      else if ((op->pinfo & (INSN_STORE_MEMORY
+				     | INSN_LOAD_MEMORY_DELAY)) != 0)
+		info->insn_type = dis_dref;
 
 	      (*info->fprintf_func) (info->stream, "%s", op->name);
 
@@ -486,6 +512,7 @@ print_insn_mips (memaddr, word, info)
     }
 
   /* Handle undefined instructions.  */
+  info->insn_type = dis_noninsn;
   (*info->fprintf_func) (info->stream, "0x%x", word);
   return INSNLEN;
 }
@@ -1006,7 +1033,6 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	else
 	  {
 	    bfd_vma baseaddr;
-	    bfd_vma val;
 
 	    if (branch)
 	      {
@@ -1049,9 +1075,8 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 		      baseaddr = memaddr - 2;
 		  }
 	      }
-	    val = (baseaddr & ~((1 << shift) - 1)) + immed;
-	    (*info->print_address_func) (val, info);
-	    info->target = val;
+	    info->target = (baseaddr & ~((1 << shift) - 1)) + immed;
+	    (*info->print_address_func) (info->target, info);
 	  }
       }
       break;
@@ -1060,9 +1085,9 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
       if (! use_extend)
 	extend = 0;
       l = ((l & 0x1f) << 23) | ((l & 0x3e0) << 13) | (extend << 2);
-      (*info->print_address_func) (((memaddr + 4) & 0xf0000000) | l, info);
+      info->target = ((memaddr + 4) & ~(bfd_vma) 0x0fffffff) | l;
+      (*info->print_address_func) (info->target, info);
       info->insn_type = dis_jsr;
-      info->target = ((memaddr + 4) & 0xf0000000) | l;
       info->branch_delay_insns = 1;
       break;
 

@@ -66,4 +66,5 @@ Disassembly of section .text:
 0+00d8 <[^>]*> slt	at,a1,a0
 0+00dc <[^>]*> bnezl	at,000000dc <text_label\+0xdc>
 [ 	]*dc: R_MIPS_PC16	external_label
+0+00e0 <[^>]*> nop
 	...

@@ -43,4 +43,5 @@ Disassembly of section .text:
 0+006c <[^>]*> nop
 0+0070 <[^>]*> lw	gp,0\(sp\)
 0+0074 <[^>]*> b	0+0000 <text_label>
+0+0078 <[^>]*> nop
 	...

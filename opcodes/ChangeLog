@@ -1,3 +1,16 @@
+2001-10-23  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Mark "bgezall" and
+	"bltzall" as writing GPR 31 (since they do).
+
+	* mips-dis.c (print_insn_arg): Calculate info->target
+	where appropriate.
+	(print_insn_mips): Fill in instruction info.
+	(print_mips16_insn_arg): Remove unneded variable 'val'.
+	Removed duplicated instruction target calculations,
+	calculate once and print that result.  Use same idiom for
+	masking the jump segment bits as is used in print_insn_arg.
+
 2001-10-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (CT): Make it an optional operand.
