@@ -180,7 +180,7 @@ static reloc_howto_type cris_elf_howto_table [] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_CRIS_16",		/* name */
+	 "R_CRIS_16_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
@@ -195,7 +195,7 @@ static reloc_howto_type cris_elf_howto_table [] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_CRIS_32",		/* name */
+	 "R_CRIS_32_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -1957,28 +1957,9 @@ elf_cris_adjust_gotplt_to_got (h, p)
 
       h->gotplt_refcount = -1;
 
-      /* We always have a .got section when there are dynamic
-	 relocs.  */
-      BFD_ASSERT (sgot != NULL /* Surely have .got section.  */);
-
-      /* We might have had a PLT but with no GOT entry and
-	 further no GOT reloc section at all needed before.
-	 Add it.  */
-      if (srelgot == NULL)
-	{
-	  srelgot = bfd_make_section (dynobj, ".rela.got");
-
-	  if (srelgot == NULL
-	      || !bfd_set_section_flags (dynobj, srelgot,
-					 (SEC_ALLOC
-					  | SEC_LOAD
-					  | SEC_HAS_CONTENTS
-					  | SEC_IN_MEMORY
-					  | SEC_LINKER_CREATED
-					  | SEC_READONLY))
-	      || !bfd_set_section_alignment (dynobj, srelgot, 2))
-	    return false;
-	}
+      /* We always have a .got and a .rela.got section if there were
+	 GOTPLT relocs in input.  */
+      BFD_ASSERT (sgot != NULL && srelgot != NULL);
 
       /* Allocate space in the .got section.  */
       sgot->_raw_size += 4;
@@ -2368,8 +2349,38 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	 specific GOT entry).  */
       switch (r_type)
 	{
+	  /* For R_CRIS_16_GOTPLT and R_CRIS_32_GOTPLT, we need a GOT
+	     entry only for local symbols.  Unfortunately, we don't know
+	     until later on if there's a version script that forces the
+	     symbol local.  We must have the .rela.got section in place
+	     before we know if the symbol looks global now, so we need
+	     to treat the reloc just like for R_CRIS_16_GOT and
+	     R_CRIS_32_GOT.  */
+	case R_CRIS_16_GOTPLT:
+	case R_CRIS_32_GOTPLT:
 	case R_CRIS_16_GOT:
 	case R_CRIS_32_GOT:
+	  if (srelgot == NULL
+	      && (h != NULL || info->shared))
+	    {
+	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+	      if (srelgot == NULL)
+		{
+		  srelgot = bfd_make_section (dynobj, ".rela.got");
+		  if (srelgot == NULL
+		      || !bfd_set_section_flags (dynobj, srelgot,
+						 (SEC_ALLOC
+						  | SEC_LOAD
+						  | SEC_HAS_CONTENTS
+						  | SEC_IN_MEMORY
+						  | SEC_LINKER_CREATED
+						  | SEC_READONLY))
+		      || !bfd_set_section_alignment (dynobj, srelgot, 2))
+		    return false;
+		}
+	    }
+	  /* Fall through.  */
+
 	case R_CRIS_32_GOTREL:
 	case R_CRIS_32_PLT_GOTREL:
 	  if (sgot == NULL)
@@ -2416,27 +2427,6 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	case R_CRIS_16_GOT:
 	case R_CRIS_32_GOT:
 	  /* This symbol requires a global offset table entry.  */
-
-	  if (srelgot == NULL
-	      && (h != NULL || info->shared))
-	    {
-	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-	      if (srelgot == NULL)
-		{
-		  srelgot = bfd_make_section (dynobj, ".rela.got");
-		  if (srelgot == NULL
-		      || !bfd_set_section_flags (dynobj, srelgot,
-						 (SEC_ALLOC
-						  | SEC_LOAD
-						  | SEC_HAS_CONTENTS
-						  | SEC_IN_MEMORY
-						  | SEC_LINKER_CREATED
-						  | SEC_READONLY))
-		      || !bfd_set_section_alignment (dynobj, srelgot, 2))
-		    return false;
-		}
-	    }
-
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount == 0)

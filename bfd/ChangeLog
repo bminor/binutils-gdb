@@ -1,3 +1,12 @@
+2002-04-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_howto_table) <R_CRIS_16_PCREL,
+	R_CRIS_32_PCREL>: Fix typo in name.
+	(cris_elf_check_relocs): Always create .rela.got here when
+	R_CRIS_16_GOTPLT or R_CRIS_32_GOTPLT is seen.
+	(elf_cris_adjust_gotplt_to_got): Don't create .rela.got here;
+	assume it's created.
+
 2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* aout-adobe.c (aout_32_bfd_link_hash_table_free): Define.
