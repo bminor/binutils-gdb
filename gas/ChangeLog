@@ -1,3 +1,31 @@
+2002-05-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (mips_emit_delays): Replace magic constant for RA
+	by the define. Remove superfluous check of mips_opts.mips16.
+	(append_insn): Likewise. Canonicalize variable increments.
+	(macro_build): Canonicalize variable increments.
+	(macro_build_lui): Likewise.
+	(load_register): Likewise.
+	(load_address): Move pointer initialization.
+	(macro): Move pointer to a more local scope. Canonicalize variable
+	increments. Better comments. Replace magic constant for RA by the
+	define.
+	(macro2): Replace magic constant for RA by the define. Canonicalize
+	variable increments.
+	(mips_ip): Canonicalize variable increments.
+	(mips16_ip): Replace magic constant for RA by the define.
+	(my_getSmallParser): Canonicalize variable increments/decrements.
+	(my_getPercentOp): Likewise.
+	(my_getSmallExpression): Likewise.
+	(s_align): Likewise.
+	(s_mipsset): Likewise.
+	(s_cpsetup): Likewise.
+	(s_insn): Remove superfluous check of mips_opts.mips16.
+	(s_mips_stab): Likewise.
+	(mips_handle_align): Canonicalize variable increments.
+	(s_mips_ent): Likewise.
+	(s_mips_end): Add comment.
+
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in: Use ns32k-*-netbsd* instead of ns32k-pc532-netbsd*.

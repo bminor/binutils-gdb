@@ -1656,8 +1656,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
   int nops = 0;
 
   /* Mark instruction labels in mips16 mode.  */
-  if (mips_opts.mips16)
-    mips16_mark_labels ();
+  mips16_mark_labels ();
 
   prev_pinfo = prev_insn.insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
@@ -1815,7 +1814,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
                                     MIPS_GR_REG))
 
 	{
-	  nops += 1;
+	  ++nops;
 	}
 
       else if (prev_pinfo & INSN_READ_LO)
@@ -1841,7 +1840,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  else if (mips_opts.mips16
 		   && (mips_optimize == 0
 		       || (pinfo & MIPS16_INSN_BRANCH)))
-	    nops += 1;
+	    ++nops;
 	}
       else if (prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	{
@@ -1863,7 +1862,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  else if (mips_opts.mips16
 		   && (mips_optimize == 0
 		       || (pinfo & MIPS16_INSN_BRANCH)))
-	    nops += 1;
+	    ++nops;
 	}
 
       /* If the previous instruction was in a noreorder section, then
@@ -1950,7 +1949,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      val = (valueT) frag_now_fix ();
 	      /* mips16 text labels are stored as odd.  */
 	      if (mips_opts.mips16)
-		val += 1;
+		++val;
 	      S_SET_VALUE (l->label, val);
 	    }
 
@@ -2248,7 +2247,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       if (pinfo & INSN_READ_GPR_S)
 	mips_gprmask |= 1 << ((ip->insn_opcode >> OP_SH_RS) & OP_MASK_RS);
       if (pinfo & INSN_WRITE_GPR_31)
-	mips_gprmask |= 1 << 31;
+	mips_gprmask |= 1 << RA;
       if (pinfo & INSN_WRITE_FPR_D)
 	mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FD) & OP_MASK_FD);
       if ((pinfo & (INSN_WRITE_FPR_S | INSN_READ_FPR_S)) != 0)
@@ -2441,7 +2440,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		      || ((pinfo & INSN_WRITE_GPR_31)
 			  && (((prev_insn.insn_opcode >> OP_SH_RT)
 			       & OP_MASK_RT)
-			      == 31))))
+			      == RA))))
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_D)
 		  && (((pinfo & INSN_WRITE_GPR_D)
@@ -2450,7 +2449,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		      || ((pinfo & INSN_WRITE_GPR_31)
 			  && (((prev_insn.insn_opcode >> OP_SH_RD)
 			       & OP_MASK_RD)
-			      == 31))))
+			      == RA))))
 	      || (mips_opts.mips16
 		  && (pinfo & MIPS16_INSN_WRITE_31)
 		  && ((prev_pinfo & MIPS16_INSN_WRITE_31)
@@ -2468,7 +2467,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 				    MIPS_GR_REG))
 	      || (! mips_opts.mips16
 		  && (pinfo & INSN_WRITE_GPR_31)
-		  && insn_uses_reg (&prev_insn, 31, MIPS_GR_REG))
+		  && insn_uses_reg (&prev_insn, RA, MIPS_GR_REG))
 	      || (mips_opts.mips16
 		  && (pinfo & MIPS16_INSN_WRITE_31)
 		  && insn_uses_reg (&prev_insn, RA, MIPS_GR_REG))
@@ -2826,14 +2825,14 @@ mips_emit_delays (insns)
 	      val = (valueT) frag_now_fix ();
 	      /* mips16 text labels are stored as odd.  */
 	      if (mips_opts.mips16)
-		val += 1;
+		++val;
 	      S_SET_VALUE (l->label, val);
 	    }
 	}
     }
 
   /* Mark instruction labels in mips16 mode.  */
-  if (mips_opts.mips16 && insns)
+  if (insns)
     mips16_mark_labels ();
 
   mips_no_prev_insn (insns);
@@ -2894,7 +2893,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
     as_warn (_("Macro instruction expanded into multiple instructions in a branch delay slot"));
 
   if (place == NULL)
-    *counter += 1;		/* bump instruction counter */
+    ++*counter;		/* bump instruction counter */
 
   if (mips_opts.mips16)
     {
@@ -3254,7 +3253,7 @@ macro_build_lui (place, counter, ep, regnum)
     as_warn (_("Macro instruction expanded into multiple instructions"));
 
   if (place == NULL)
-    *counter += 1;		/* bump instruction counter */
+    ++*counter;		/* bump instruction counter */
 
   insn.insn_mo = (struct mips_opcode *) hash_find (op_hash, name);
   assert (insn.insn_mo);
@@ -3548,7 +3547,7 @@ load_register (counter, reg, ep, dbl)
 			   (shift >= 32) ? shift - 32 : shift);
 	      return;
 	    }
-	  shift++;
+	  ++shift;
 	}
       while (shift <= (64 - 16));
 
@@ -3668,7 +3667,7 @@ load_address (counter, reg, ep, dbl, used_at)
      int dbl;
      int *used_at;
 {
-  char *p;
+  char *p = NULL;
 
   if (ep->X_op != O_constant
       && ep->X_op != O_symbol)
@@ -3711,8 +3710,6 @@ load_address (counter, reg, ep, dbl, used_at)
        */
       if (dbl)
 	{
-	  p = NULL;
-
 	  /* We don't do GP optimization for now because RELAX_ENCODE can't
 	     hold the data for such large chunks.  */
 
@@ -3750,7 +3747,6 @@ load_address (counter, reg, ep, dbl, used_at)
 	}
       else
 	{
-	  p = NULL;
 	  if ((valueT) ep->X_add_number <= MAX_GPREL_OFFSET
 	      && ! nopic_need_relax (ep->X_add_symbol, 1))
 	    {
@@ -3925,7 +3921,6 @@ macro (ip)
   offsetT maxnum;
   int off;
   bfd_reloc_code_real_type r;
-  char *p;
   int hold_mips_optimize;
 
   assert (! mips_opts.mips16);
@@ -4119,7 +4114,7 @@ macro (ip)
 	}
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
-      imm_expr.X_add_number++;
+      ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BGE_I:
     case M_BGEL_I:
@@ -4188,7 +4183,7 @@ macro (ip)
 	goto do_false;
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
-      imm_expr.X_add_number++;
+      ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BGEU_I:
     case M_BGEUL_I:
@@ -4283,7 +4278,7 @@ macro (ip)
 	goto do_true;
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
-      imm_expr.X_add_number++;
+      ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BLT_I:
     case M_BLTL_I:
@@ -4333,7 +4328,7 @@ macro (ip)
 	goto do_true;
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
-      imm_expr.X_add_number++;
+      ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BLTU_I:
     case M_BLTUL_I:
@@ -4704,7 +4699,7 @@ macro (ip)
 	      dsll	$tempreg,16
 	      daddiu	$tempreg,<sym>		(BFD_RELOC_LO16)
 	  */
-	  p = NULL;
+	  char *p = NULL;
 	  if (HAVE_64BIT_ADDRESSES)
 	    {
 	      /* We don't do GP optimization for now because RELAX_ENCODE can't
@@ -4805,6 +4800,7 @@ macro (ip)
 	  if (expr1.X_add_number == 0)
 	    {
 	      int off;
+	      char *p;
 
 	      if (breg == 0)
 		off = 0;
@@ -4894,6 +4890,7 @@ macro (ip)
       else if (mips_pic == SVR4_PIC)
 	{
 	  int gpdel;
+	  char *p;
 	  int lui_reloc_type = (int) BFD_RELOC_MIPS_GOT_HI16;
 	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT_LO16;
 
@@ -5199,11 +5196,13 @@ macro (ip)
 	macro_build ((char *) NULL, &icnt, &offset_expr, "jal", "a");
       else if (mips_pic == SVR4_PIC)
 	{
+	  char *p;
+
 	  /* If this is a reference to an external symbol, and we are
 	     using a small GOT, we want
 	       lw	$25,<sym>($gp)		(BFD_RELOC_MIPS_CALL16)
 	       nop
-	       jalr	$25
+	       jalr	$ra,$25
 	       nop
 	       lw	$gp,cprestore($sp)
 	     The cprestore value is set using the .cprestore
@@ -5212,14 +5211,14 @@ macro (ip)
 	       addu	$25,$25,$gp
 	       lw	$25,<sym>($25)		(BFD_RELOC_MIPS_CALL_LO16)
 	       nop
-	       jalr	$25
+	       jalr	$ra,$25
 	       nop
 	       lw	$gp,cprestore($sp)
 	     If the symbol is not external, we want
 	       lw	$25,<sym>($gp)		(BFD_RELOC_MIPS_GOT16)
 	       nop
 	       addiu	$25,$25,<sym>		(BFD_RELOC_LO16)
-	       jalr	$25
+	       jalr	$ra,$25
 	       nop
 	       lw $gp,cprestore($sp) */
 	  frag_grow (40);
@@ -5543,6 +5542,8 @@ macro (ip)
       if (mips_pic == NO_PIC
 	  || offset_expr.X_op == O_constant)
 	{
+	  char *p;
+
 	  /* If this is a reference to a GP relative symbol, and there
 	     is no base register, we want
 	       <op>	$treg,<sym>($gp)	(BFD_RELOC_GPREL16)
@@ -5708,6 +5709,8 @@ macro (ip)
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
 	{
+	  char *p;
+
 	  /* If this is a reference to an external symbol, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)
 	       nop
@@ -5750,6 +5753,7 @@ macro (ip)
       else if (mips_pic == SVR4_PIC)
 	{
 	  int gpdel;
+	  char *p;
 
 	  /* If this is a reference to an external symbol, we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
@@ -5945,7 +5949,7 @@ macro (ip)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lw", "t,o(b)",
 		       treg, (int) BFD_RELOC_LO16, AT);
-	  if (treg != 31)
+	  if (treg != RA)
 	    {
 	      /* FIXME: How in the world do we deal with the possible
 		 overflow here?  */
@@ -6162,6 +6166,8 @@ macro (ip)
       if (mips_pic == NO_PIC
 	  || offset_expr.X_op == O_constant)
 	{
+	  char *p;
+
 	  /* If this is a reference to a GP relative symbol, we want
 	       <op>	$treg,<sym>($gp)	(BFD_RELOC_GPREL16)
 	       <op>	$treg+1,<sym>+4($gp)	(BFD_RELOC_GPREL16)
@@ -6329,6 +6335,7 @@ macro (ip)
       else if (mips_pic == SVR4_PIC)
 	{
 	  int gpdel, off;
+	  char *p;
 
 	  /* If this is a reference to an external symbol, we want
 	       lui	$at,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
@@ -6629,7 +6636,7 @@ macro2 (ip)
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "d",
 		   dreg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		   dbl ? "dsra32" : "sra", "d,w,<", dreg, dreg, 31);
+		   dbl ? "dsra32" : "sra", "d,w,<", dreg, dreg, RA);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mfhi", "d",
 		   AT);
       if (mips_trap)
@@ -7137,9 +7144,9 @@ macro2 (ip)
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "cfc1", "t,G",
-		   treg, 31);
+		   treg, RA);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "cfc1", "t,G",
-		   treg, 31);
+		   treg, RA);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
       expr1.X_add_number = 3;
       macro_build ((char *) NULL, &icnt, &expr1, "ori", "t,r,i", AT, treg,
@@ -7148,12 +7155,12 @@ macro2 (ip)
       macro_build ((char *) NULL, &icnt, &expr1, "xori", "t,r,i", AT, AT,
 		     (int) BFD_RELOC_LO16);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "ctc1", "t,G",
-		   AT, 31);
+		   AT, RA);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 	      mask == M_TRUNCWD ? "cvt.w.d" : "cvt.w.s", "D,S", dreg, sreg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "ctc1", "t,G",
-		   treg, 31);
+		   treg, RA);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
       --mips_opts.noreorder;
       break;
@@ -7168,13 +7175,13 @@ macro2 (ip)
 	as_bad (_("operand overflow"));
       /* avoid load delay */
       if (! target_big_endian)
-	offset_expr.X_add_number += 1;
+	++offset_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       if (! target_big_endian)
-	offset_expr.X_add_number -= 1;
+	--offset_expr.X_add_number;
       else
-	offset_expr.X_add_number += 1;
+	++offset_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &offset_expr, "lbu", "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, breg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
@@ -7266,15 +7273,15 @@ macro2 (ip)
       if (offset_expr.X_add_number >= 0x7fff)
 	as_bad (_("operand overflow"));
       if (target_big_endian)
-	offset_expr.X_add_number += 1;
+	++offset_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &offset_expr, "sb", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl", "d,w,<",
 		   AT, treg, 8);
       if (target_big_endian)
-	offset_expr.X_add_number -= 1;
+	--offset_expr.X_add_number;
       else
-	offset_expr.X_add_number += 1;
+	++offset_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &offset_expr, "sb", "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, breg);
       break;
@@ -8105,14 +8112,14 @@ mips_ip (str, ip)
 		    as_warn (_("Used $at without \".set noat\""));
 		  c = *args;
 		  if (*s == ' ')
-		    s++;
+		    ++s;
 		  if (args[1] != *s)
 		    {
 		      if (c == 'r' || c == 'v' || c == 'w')
 			{
 			  regno = lastregno;
 			  s = s_reset;
-			  args++;
+			  ++args;
 			}
 		    }
 		  /* 'z' only matches $0.  */
@@ -8215,14 +8222,14 @@ mips_ip (str, ip)
 
 		  c = *args;
 		  if (*s == ' ')
-		    s++;
+		    ++s;
 		  if (args[1] != *s)
 		    {
 		      if (c == 'V' || c == 'W')
 			{
 			  regno = lastregno;
 			  s = s_reset;
-			  args++;
+			  ++args;
 			}
 		    }
 		  switch (c)
@@ -8955,7 +8962,7 @@ mips16_ip (str, ip)
 		    {
 		      regno = mips16_to_32_reg_map[lastregno];
 		      s = s_reset;
-		      args++;
+		      ++args;
 		    }
 		}
 
@@ -9223,7 +9230,7 @@ mips16_ip (str, ip)
 		      mask |= (reg2 - 3) << 3;
 		    else if (reg1 == 16 && reg2 >= 16 && reg2 <= 17)
 		      mask |= (reg2 - 15) << 1;
-		    else if (reg1 == 31 && reg2 == 31)
+		    else if (reg1 == RA && reg2 == RA)
 		      mask |= 1;
 		    else
 		      {
@@ -9532,9 +9539,9 @@ my_getSmallParser (str, len, nestlevel)
 	for (s = *str + 1; *s && pcnt; s++, (*len)++)
 	  {
 	    if (*s == '(')
-	      pcnt++;
+	      ++pcnt;
 	    else if (*s == ')')
-	      pcnt--;
+	      --pcnt;
 	  }
       }
     }
@@ -9573,7 +9580,7 @@ my_getPercentOp (str, len, nestlevel)
 	    return S_EX_NONE;
 
 	  *len = strlen (percent_op[i].str);
-	  (*nestlevel)++;
+	  ++(*nestlevel);
 	  return type;
 	}
     }
@@ -9630,9 +9637,9 @@ my_getSmallExpression (ep, str)
 	  for (end = strchr (s, '(') + 1; *end && pcnt; end++)
 	    {
 	      if (*end == '(')
-		pcnt++;
+		++pcnt;
 	      else if (*end == ')')
-		pcnt--;
+		--pcnt;
 	    }
 
 	  memset (s, ' ', end - s);
@@ -11077,7 +11084,7 @@ s_align (x)
     }
   if (*input_line_pointer == ',')
     {
-      input_line_pointer++;
+      ++input_line_pointer;
       temp_fill = get_absolute_expression ();
     }
   else
@@ -11342,7 +11349,7 @@ s_mipsset (x)
   char *name = input_line_pointer, ch;
 
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
-    input_line_pointer++;
+    ++input_line_pointer;
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
 
@@ -11625,11 +11632,11 @@ s_cpsetup (ignore)
       return;
     }
   else
-    input_line_pointer++;
+    ++input_line_pointer;
   SKIP_WHITESPACE ();
   sym = input_line_pointer;
   while (ISALNUM (*input_line_pointer))
-    input_line_pointer++;
+    ++input_line_pointer;
   *input_line_pointer = 0;
 
   ex_sym.X_op = O_symbol;
@@ -11854,8 +11861,7 @@ static void
 s_insn (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  if (mips_opts.mips16)
-    mips16_mark_labels ();
+  mips16_mark_labels ();
 
   demand_empty_rest_of_line ();
 }
@@ -11870,7 +11876,7 @@ static void
 s_mips_stab (type)
      int type;
 {
-  if (type == 'n' && mips_opts.mips16)
+  if (type == 'n')
     mips16_mark_labels ();
 
   s_stab (type);
@@ -12954,7 +12960,7 @@ mips_handle_align (fragp)
       if (bytes & 1)
 	{
 	  *p++ = 0;
-	  fragp->fr_fix += 1;
+	  fragp->fr_fix++;
 	}
 
       memcpy (p, (target_big_endian ? be_nop : le_nop), 2);
@@ -13126,7 +13132,7 @@ s_mips_end (x)
 
     subseg_set (saved_seg, saved_subseg);
   }
-#endif
+#endif /* MIPS_STABS_ELF */
 
   cur_proc_ptr = NULL;
 }
@@ -13142,7 +13148,7 @@ s_mips_ent (aent)
 
   symbolP = get_symbol ();
   if (*input_line_pointer == ',')
-    input_line_pointer++;
+    ++input_line_pointer;
   SKIP_WHITESPACE ();
   if (ISDIGIT (*input_line_pointer)
       || *input_line_pointer == '-')
@@ -13179,7 +13185,7 @@ s_mips_ent (aent)
 
       symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 
-      numprocs++;
+      ++numprocs;
     }
 
   demand_empty_rest_of_line ();
