@@ -146,9 +146,6 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 		fi
 	done
 else
-    if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-      true
-    else
 	for i in $v850e_files ; do
 		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
@@ -165,7 +162,6 @@ else
 			mv new $i
 		fi
 	done
-    fi
 fi
 
 

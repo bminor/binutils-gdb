@@ -76,7 +76,7 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Keeping v850eq stuff in $i
+				echo Keeping v850e stuff in $i
 			fi
 		fi
 	done

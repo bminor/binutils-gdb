@@ -22,20 +22,6 @@ Do-first:
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="c-v850.texi"
-else
- if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	keep_these_too="c-v850.texi"
- else
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	keep_these_too="c-v850.texi"
-  else
-	lose_these_too="c-v850.texi"
-  fi
- fi
-fi
-
 Things-to-keep:
 
 Makefile.am
@@ -56,6 +42,7 @@ c-mips.texi
 c-ns32k.texi
 c-sh.texi
 c-sparc.texi
+c-v850.texi
 c-vax.texi
 c-z8k.texi
 gasp.texi
@@ -66,45 +53,8 @@ Things-to-lose:
 
 Do-last:
 
-v850_files="all.texi as.texinfo"
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	for i in $v850_files ; do
-		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850 stuff in $i
-			fi
-		fi
-	done
-else
-  if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-    true
-  else
-    if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-      true
-    else
-	for i in $v850_files ; do
-		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-    fi
-  fi
-fi
-
 v850e_files="c-v850.texi"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
 	for i in $v850e_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
@@ -112,14 +62,14 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 			fi
 		fi
 	done
-  else
+else
 	for i in $v850e_files ; do
-		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
+		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
+				echo Removing traces of \"v850e\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end-\sanitize\-v850eq/d' < $i > new
+			sed '/start\-sanitize\-v850e/,/end-\sanitize\-v850e/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
@@ -129,7 +79,6 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 			mv new $i
 		fi
 	done
-  fi
 fi
 
 # Don't try to clean directories here, as the 'mv' command will fail.
