@@ -302,25 +302,27 @@ lookup_minimal_symbol_solib_trampoline (name, sfile, objf)
 }
 
 
-/* Search through the minimal symbol table for each objfile and find the
-   symbol whose address is the largest address that is still less than or
-   equal to PC.  Returns a pointer to the minimal symbol if such a symbol
-   is found, or NULL if PC is not in a suitable range.  Note that we need
-   to look through ALL the minimal symbol tables before deciding on the
-   symbol that comes closest to the specified PC.  This is because objfiles
-   can overlap, for example objfile A has .text at 0x100 and .data at 0x40000
-   and objfile B has .text at 0x234 and .data at 0x40048.  */
+/* Search through the minimal symbol table for each objfile and find
+   the symbol whose address is the largest address that is still less
+   than or equal to PC, and matches SECTION (if non-null).  Returns a
+   pointer to the minimal symbol if such a symbol is found, or NULL if
+   PC is not in a suitable range.  Note that we need to look through
+   ALL the minimal symbol tables before deciding on the symbol that
+   comes closest to the specified PC.  This is because objfiles can
+   overlap, for example objfile A has .text at 0x100 and .data at
+   0x40000 and objfile B has .text at 0x234 and .data at 0x40048.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_by_pc (pc)
-     register CORE_ADDR pc;
+lookup_minimal_symbol_by_pc_section (pc, section)
+     CORE_ADDR pc;
+     asection *section;
 {
-  register int lo;
-  register int hi;
-  register int new;
-  register struct objfile *objfile;
-  register struct minimal_symbol *msymbol;
-  register struct minimal_symbol *best_symbol = NULL;
+  int lo;
+  int hi;
+  int new;
+  struct objfile *objfile;
+  struct minimal_symbol *msymbol;
+  struct minimal_symbol *best_symbol = NULL;
 
   /* pc has to be in a known section. This ensures that anything beyond
      the end of the last segment doesn't appear to be part of the last
@@ -361,7 +363,7 @@ lookup_minimal_symbol_by_pc (pc)
 
 	     Warning: this code is trickier than it would appear at first. */
 
-	  /* Should also requires that pc is <= end of objfile.  FIXME! */
+	  /* Should also require that pc is <= end of objfile.  FIXME! */
 	  if (pc >= SYMBOL_VALUE_ADDRESS (&msymbol[lo]))
 	    {
 	      while (SYMBOL_VALUE_ADDRESS (&msymbol[hi]) > pc)
@@ -405,6 +407,13 @@ lookup_minimal_symbol_by_pc (pc)
 		     && msymbol[hi].type == mst_abs)
 		--hi;
 
+	      /* If "section" specified, skip any symbol from wrong section */
+	      /* This is the new code that distinguishes it from the old function */
+	      if (section)
+		while (hi >= 0
+		       && SYMBOL_BFD_SECTION (&msymbol[hi]) != section)
+		  --hi;
+
 	      if (hi >= 0
 		  && ((best_symbol == NULL) ||
 		      (SYMBOL_VALUE_ADDRESS (best_symbol) < 
@@ -416,6 +425,16 @@ lookup_minimal_symbol_by_pc (pc)
 	}
     }
   return (best_symbol);
+}
+
+/* Backward compatibility: search through the minimal symbol table 
+   for a matching PC (no section given) */
+
+struct minimal_symbol *
+lookup_minimal_symbol_by_pc (pc)
+     CORE_ADDR pc;
+{
+  return lookup_minimal_symbol_by_pc_section (pc, find_pc_mapped_section (pc));
 }
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING

@@ -1,3 +1,56 @@
+Thu Apr  3 15:10:30 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* blockframe.c: blockvector_for_pc_sect(), block_for_pc_sect(), 
+	find_pc_sect_function(), find_pc_sect_partial_function(): new 
+	functions for debugging overlays; pc without section is ambiguous.
+	* breakpoint.[ch]: add section pointer to breakpoint struct;
+	add section argument to check_duplicates(); check section as well
+	as pc in [breakpoint_here_p(), breakpoint_inserted_here_p(),
+	breakpoint_thread_match(), bpstat_stop_status()];  
+	add section argument to describe_other_breakpoints(); 
+	use INIT_SAL() macro to zero-out new sal structures; 
+	make resolve_sal_pc() fix up the sal's section as well as its pc; 
+	match on section + pc in clear_command() and delete_breakpoint(); 
+	account for overlay sections in insert_breakpoints(), 
+	remove_breakpoint() and breakpoint_re_set_one();
+	all this to support overlays where a PC is not unique.
+	* exec.c: change xfer_memory() to handle overlay sections.
+	* findvar.c: change read_var_value() to handle overlay sections.
+	* frame.h: declaration for block_for_pc_sect() [blockframe.c].
+	* infcmd.c: jump_command() warns against jumping into an overlay
+	that's not in memory.  Also use INIT_SAL() to initialize sals.
+	* infrun.c: wait_for_inferior() sets a flag to invalidate cached
+	overlay state information; Also use INIT_SAL() to init sals.
+	* m32r-rom.c: modify load routines to use LMA instead of VMA.
+	* m32r-stub.c: mask exit value down to 8 bits; screen out any
+	memory read/writes in the range 600000 to a00000, and ff680000
+	to ff800000 (hangs because nothing is mapped there); fix strcpy().
+	* maint.c: maintenance command "translate-address" supports overlays.
+	* minsyms.c: lookup_minimal_symbol_by_pc_sect() supports overlays.
+	* objfiles.[ch]: add ovly_mapped field to the obj_section struct;
+	this constitutes gdb's internal overlay mapping table.  Add macro
+	ALL_OBJSECTIONS() to loop thru the obj_structs and look at overlays.
+	Add function find_pc_sect_section().
+	* printcmd.c: modify print_address_symbolic() with overlay smarts;
+	modify address_info() with overlay smarts; add function sym_info() 
+	to support the INFO SYMBOL command (translate address to symbol(s));
+	modify disassemble_command() to work on unmapped overlays.
+	* source.c: use INIT_SAL() to initialize sals.
+	* symfile.[ch]: change generic_load() to use section's LMA address
+	instead of VMA address, for overlay sections.
+	Add numerous functions for finding a PC's section / overlay, 
+	translating between VMA and LMA address ranges, determining if an
+	overlay section is mapped, etc.  Add several user commands for
+	overlay debugging.  Add support for a "generic" form of automatically
+	reading overlay mapping info from the inferior (based on the default
+	(simple) overlay manager which Cygnus provides as an example).
+	* symtab.[ch]: add functions find_pc_sect_symtab(), 
+	find_pc_sect_psymtab(), find_pc_sect_psymbol(), find_pc_sect_line()
+	for lookup; modify lookup_symbol and decode_line_1() to use them;
+	modify find_function_start_sal() to account for overlay sections;
+	add macro INIT_SAL() for initializing struct symtab_and_line.
+	* target.c: fix a comment in the declaration of target_ops.
+
 Thu Apr  3 10:31:12 1997  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c (mips_in_call_stub, mips_in_return_stub,

@@ -294,7 +294,11 @@ maintenance_translate_address (arg, from_tty)
   CORE_ADDR address;
   asection *sect;
   char *p;
-  struct symbol *sym;
+  struct minimal_symbol *sym;
+  struct objfile *objfile;
+
+  if (arg == NULL || *arg == 0)
+    error ("requires argument (address or section + address)");
 
   sect = NULL;
   p = arg;
@@ -308,17 +312,31 @@ maintenance_translate_address (arg, from_tty)
       *p++ = '\000';
       while (isspace (*p)) p++;	/* Skip whitespace */
 
-      sect = bfd_get_section_by_name (exec_bfd, arg);
+      ALL_OBJFILES (objfile)
+	if (sect = bfd_get_section_by_name (objfile->obfd, arg))
+	  break;
+
       if (!sect)
 	error ("Unknown section %s.", arg);
     }
 
   address = parse_and_eval_address (p);
 
-  return;
-/*  sym = find_pc_function_section (address, sect);*/
+  if (sect)
+    sym = lookup_minimal_symbol_by_pc_section (address, sect);
+  else
+    sym = lookup_minimal_symbol_by_pc (address);
 
-  printf_unfiltered ("%s+%u\n", SYMBOL_SOURCE_NAME (sym), address - SYMBOL_VALUE_ADDRESS (sym));
+  if (sym)
+    printf_filtered ("%s+%u\n", 
+		     SYMBOL_SOURCE_NAME (sym), 
+		     address - SYMBOL_VALUE_ADDRESS (sym));
+  else if (sect)
+    printf_filtered ("no symbol at %s:0x%08x\n", sect->name, address);
+  else
+    printf_filtered ("no symbol at 0x%08x\n", address);
+
+  return;
 }
 
 #endif	/* MAINTENANCE_CMDS */

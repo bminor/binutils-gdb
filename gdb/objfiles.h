@@ -154,6 +154,9 @@ struct obj_section {
 
   /* Objfile this section is part of.  */
   struct objfile *objfile;
+
+  /* True if this "overlay section" is mapped into an "overlay region". */
+  int ovly_mapped;
 };
 
 /* The "objstats" structure provides a place for gdb to record some
@@ -454,6 +457,9 @@ have_minimal_symbols PARAMS ((void));
 extern struct obj_section *
 find_pc_section PARAMS((CORE_ADDR pc));
 
+extern struct obj_section *
+find_pc_sect_section PARAMS((CORE_ADDR pc, asection *section));
+
 extern int
 in_plt_section PARAMS ((CORE_ADDR, char *));
 
@@ -501,5 +507,12 @@ in_plt_section PARAMS ((CORE_ADDR, char *));
   ALL_OBJFILES (objfile)	 \
     if ((objfile)->msymbols)	 \
       ALL_OBJFILE_MSYMBOLS (objfile, m)
+
+#define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
+  for (osect = objfile->sections; osect < objfile->sections_end; osect++)
+
+#define ALL_OBJSECTIONS(objfile, osect)		\
+  ALL_OBJFILES (objfile)			\
+    ALL_OBJFILE_OSECTIONS (objfile, osect)
 
 #endif	/* !defined (OBJFILES_H) */

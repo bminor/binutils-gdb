@@ -85,6 +85,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
   section.offset = 0;
   section.objfile = objfile;
   section.the_bfd_section = asect;
+  section.ovly_mapped = 0;
   section.addr = bfd_section_vma (abfd, asect);
   section.endaddr = section.addr + bfd_section_size (abfd, asect);
   obstack_grow (&objfile->psymbol_obstack, (char *) &section, sizeof(section));
@@ -472,9 +473,9 @@ objfile_relocate (objfile, new_offsets)
      struct objfile *objfile;
      struct section_offsets *new_offsets;
 {
-  struct section_offsets *delta = (struct section_offsets *) alloca
-    (sizeof (struct section_offsets)
-     + objfile->num_sections * sizeof (delta->offsets));
+  struct section_offsets *delta = (struct section_offsets *) 
+    alloca (sizeof (struct section_offsets)
+	    + objfile->num_sections * sizeof (delta->offsets));
 
   {
     int i;
@@ -520,7 +521,7 @@ objfile_relocate (objfile, new_offsets)
 	    
 	    b = BLOCKVECTOR_BLOCK (bv, i);
 	    BLOCK_START (b) += ANOFFSET (delta, s->block_line_section);
-	    BLOCK_END (b) += ANOFFSET (delta, s->block_line_section);
+	    BLOCK_END (b)   += ANOFFSET (delta, s->block_line_section);
 
 	    for (j = 0; j < BLOCK_NSYMS (b); ++j)
 	      {
@@ -533,7 +534,7 @@ objfile_relocate (objfile, new_offsets)
 		     || SYMBOL_CLASS (sym) == LOC_STATIC)
 		    && SYMBOL_SECTION (sym) >= 0)
 		  {
-		    SYMBOL_VALUE_ADDRESS (sym) +=
+		    SYMBOL_VALUE_ADDRESS (sym) += 
 		      ANOFFSET (delta, SYMBOL_SECTION (sym));
 		  }
 #ifdef MIPS_EFI_SYMBOL_NAME
@@ -543,7 +544,8 @@ objfile_relocate (objfile, new_offsets)
 		  if (SYMBOL_CLASS (sym) == LOC_CONST
 		      && SYMBOL_NAMESPACE (sym) == LABEL_NAMESPACE
 		      && STRCMP (SYMBOL_NAME (sym), MIPS_EFI_SYMBOL_NAME) == 0)
-		ecoff_relocate_efi (sym, ANOFFSET (delta, s->block_line_section));
+		ecoff_relocate_efi (sym, ANOFFSET (delta, 
+						   s->block_line_section));
 #endif
 	      }
 	  }
@@ -567,12 +569,14 @@ objfile_relocate (objfile, new_offsets)
 	 psym < objfile->global_psymbols.next;
 	 psym++)
       if (SYMBOL_SECTION (*psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta, SYMBOL_SECTION (*psym));
+	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta, 
+						  SYMBOL_SECTION (*psym));
     for (psym = objfile->static_psymbols.list;
 	 psym < objfile->static_psymbols.next;
 	 psym++)
       if (SYMBOL_SECTION (*psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta, SYMBOL_SECTION (*psym));
+	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta, 
+						  SYMBOL_SECTION (*psym));
   }
 
   {
@@ -606,17 +610,17 @@ objfile_relocate (objfile, new_offsets)
 
 	if (flags & SEC_CODE)
 	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_TEXT);
+	    s->addr    += ANOFFSET (delta, SECT_OFF_TEXT);
 	    s->endaddr += ANOFFSET (delta, SECT_OFF_TEXT);
 	  }
 	else if (flags & (SEC_DATA | SEC_LOAD))
 	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_DATA);
+	    s->addr    += ANOFFSET (delta, SECT_OFF_DATA);
 	    s->endaddr += ANOFFSET (delta, SECT_OFF_DATA);
 	  }
 	else if (flags & SEC_ALLOC)
 	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_BSS);
+	    s->addr    += ANOFFSET (delta, SECT_OFF_BSS);
 	    s->endaddr += ANOFFSET (delta, SECT_OFF_BSS);
 	  }
       }
@@ -627,19 +631,19 @@ objfile_relocate (objfile, new_offsets)
 
   if (objfile->ei.entry_func_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.entry_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.entry_func_lowpc  += ANOFFSET (delta, SECT_OFF_TEXT);
       objfile->ei.entry_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
     }
 
   if (objfile->ei.entry_file_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.entry_file_lowpc  += ANOFFSET (delta, SECT_OFF_TEXT);
       objfile->ei.entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
     }
 
   if (objfile->ei.main_func_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.main_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.main_func_lowpc  += ANOFFSET (delta, SECT_OFF_TEXT);
       objfile->ei.main_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
     }
 }
@@ -870,23 +874,39 @@ map_to_file (fd)
 
 #endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
 
-/* Returns a section whose range includes PC or NULL if none found. */
+/* Returns a section whose range includes PC and SECTION, 
+   or NULL if none found.  Note the distinction between the return type, 
+   struct obj_section (which is defined in gdb), and the input type
+   struct sec (which is a bfd-defined data type).  The obj_section
+   contains a pointer to the bfd struct sec section.  */
 
 struct obj_section *
-find_pc_section(pc)
+find_pc_sect_section (pc, section)
      CORE_ADDR pc;
+     struct sec *section;
 {
   struct obj_section *s;
   struct objfile *objfile;
   
   ALL_OBJFILES (objfile)
     for (s = objfile->sections; s < objfile->sections_end; ++s)
-      if (s->addr <= pc
-	  && pc < s->endaddr)
+      if ((section == 0 || section == s->the_bfd_section) && 
+	  s->addr <= pc && pc < s->endaddr)
 	return(s);
 
   return(NULL);
 }
+
+/* Returns a section whose range includes PC or NULL if none found. 
+   Backward compatibility, no section.  */
+
+struct obj_section *
+find_pc_section(pc)
+     CORE_ADDR pc;
+{
+  return find_pc_sect_section (pc, find_pc_mapped_section (pc));
+}
+  
 
 /* In SVR4, we recognize a trampoline by it's section name. 
    That is, if the pc is in a section named ".plt" then we are in
