@@ -237,7 +237,7 @@ Things-to-lose:
 
 Do-last:
 
-i960xl_files="ChangeLog archures.c bfd-in2.h cpu-i960.c coffcode.h"
+i960xl_files="ChangeLog ChangeLog.2 archures.c bfd-in2.h cpu-i960.c coffcode.h"
 if ( echo $* | grep keep\-i960xl > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
 		echo Keeping i960xl stuff in $i960xl_files.
@@ -258,7 +258,7 @@ else
 	done
 fi
 
-rce_files="ChangeLog Makefile.in archures.c bfd-in2.h config.bfd configure.in configure targets.c aoutx.h libaout.h"
+rce_files="ChangeLog ChangeLog.2 Makefile.in archures.c bfd-in2.h config.bfd configure.in configure targets.c aoutx.h libaout.h"
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
 		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
@@ -286,7 +286,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
+arc_files="ChangeLog ChangeLog.2 Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
