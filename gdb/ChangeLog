@@ -5,6 +5,8 @@ Mon Apr  6 17:25:45 1992  Per Bothner  (bothner@cygnus.com)
 
 Mon Apr  6 15:25:03 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* mipsread.c:  Fix more declarations.
+
 	* mipsread.c:  Fix many invocations of complain.  Use enum
 	type_code where appropriate.
 

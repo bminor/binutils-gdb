@@ -259,7 +259,7 @@ static void
 sort_blocks PARAMS ((struct symtab *));
 
 static int
-compare_blocks PARAMS ((struct block **, struct block **));
+compare_blocks PARAMS ((const void *, const void *));
 
 static struct partial_symtab *
 new_psymtab PARAMS ((char *, struct objfile *));
@@ -2610,10 +2610,12 @@ add_line(lt, lineno, adr, last)
 /* Blocks with a smaller low bound should come first */
 
 static int
-compare_blocks(b1, b2)
-	struct block **b1, **b2;
+compare_blocks(arg1, arg2)
+     const void *arg1, *arg2;
 {
 	register int addr_diff;
+	struct block **b1 = (struct block **) arg1;
+	struct block **b2 = (struct block **) arg2;
 
 	addr_diff = (BLOCK_START((*b1))) - (BLOCK_START((*b2)));
 	if (addr_diff == 0)
