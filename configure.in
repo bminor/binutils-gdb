@@ -529,7 +529,7 @@ case "${host}" in
 	i[3456]86-*-mingw32*)
 	  configdirs="$configdirs dosrel" ;;
 	*-cygwin*)
-	  configdirs="$configdirs dosrel" ;;
+	  configdirs="$configdirs libtermcap dosrel" ;;
 esac
 
 # Remove more programs from consideration, based on the host or 

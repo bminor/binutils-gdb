@@ -7,3 +7,9 @@ CXXFLAGS=-O2
 # built without debugging information
 
 LIBGCC2_DEBUG_CFLAGS=
+EXTRA_TARGET_HOST_ALL_MODULES=all-libtermcap
+EXTRA_TARGET_HOST_INSTALL_MODULES=install-libtermcap
+
+all-gdb: all-libtermcap
+
+install-gdb: install-libtermcap
