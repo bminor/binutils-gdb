@@ -1,3 +1,8 @@
+2002-10-17  Denis Chertykov  <denisc@overta.ru>
+
+	* elf32-ip2k.c (ELF_MACHINE_ALT1): Define alternate machine code
+	for ip2k port.
+
 2002-10-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfxx-target.h (USE_REL): Don't define as 1.
