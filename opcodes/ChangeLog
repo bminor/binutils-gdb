@@ -1,3 +1,8 @@
+2003-12-14  Mark Mitchell  <mark@codesourcery.com>
+
+	* arm-opc.h (arm_opcodes): Put V6 instructions before XScale
+	instructions.
+
 2003-12-13  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmix-opc.c (mmix_opcodes): Use GO_INSN_BYTE, PUSHGO_INSN_BYTE,
