@@ -1,5 +1,15 @@
 Mon Dec 20 10:37:48 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* write.c (adjust_reloc_syms) [RELOC_REQUIRES_SYMBOL]: If no
+	symbol is present (i.e., relocation against absolute), create a
+	phony local symbol, and use it in the reloc.
+	(fixup_segment): When adjusting a reloc with an absolute symbol,
+	have TC_FORCE_RELOCATION control clearing add_symbolP too.
+	* config/tc-sparc.h (RELOC_REQUIRES_SYMBOL): Define, for OBJ_COFF.
+
+	* symbols.c (S_IS_EXTERNAL, S_IS_LOCAL): Don't use both BSF_EXPORT
+	and BSF_GLOBAL, since they're the same.
+
 	* as.c (main): Only invoke md_end if it's defined as a macro.
 	* tc.h (md_end): Don't declare it.
 	* config/tc-*.[ch] (md_end): Deleted, in cases where it doesn't do
