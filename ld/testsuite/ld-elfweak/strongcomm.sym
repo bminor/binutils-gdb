@@ -1,0 +1,2 @@
+[0-9a-f]*[ 	]+g[ 	]+O[ 	]+.bss[	]+[0-9a-f]*[ 	]+deallocate_foo
+[0-9a-f]*[ 	]+g[ 	]+F[ 	]+.text[	]+[0-9a-f]*[ 	]+foo

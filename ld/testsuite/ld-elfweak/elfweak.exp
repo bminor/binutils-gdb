@@ -266,7 +266,7 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 
 }
 
-proc build_lib {test libname obj1 obj2 dynsymexp} {
+proc build_lib {test libname objs dynsymexp} {
     global ld
     global objdump
     global tmpdir
@@ -274,7 +274,12 @@ proc build_lib {test libname obj1 obj2 dynsymexp} {
     global srcdir
     global subdir
 
-    if {![ld_simple_link $ld $tmpdir/$libname.so "$shared $tmpdir/$obj1 $tmpdir/$obj2"]} {
+    set files ""
+    foreach obj $objs {
+      set files "$files $tmpdir/$obj"
+    }
+
+    if {![ld_link $ld $tmpdir/$libname.so "$shared $files"]} {
 	fail $test
 	return
     }
@@ -286,7 +291,7 @@ proc build_lib {test libname obj1 obj2 dynsymexp} {
     pass $test
 }
 
-proc build_exec { test execname obj1 obj2 flags dat dynsymexp symexp} {
+proc build_exec { test execname objs flags dat dynsymexp symexp} {
     global ld
     global objdump
     global tmpdir
@@ -295,7 +300,12 @@ proc build_exec { test execname obj1 obj2 flags dat dynsymexp symexp} {
     global subdir
     global exec_output
 
-    if {![ld_link $ld $tmpdir/$execname "$flags $tmpdir/$obj1 $tmpdir/$obj2"]} {
+    set files ""
+    foreach obj $objs {
+      set files "$files $tmpdir/$obj"
+    }
+
+    if {![ld_link $ld $tmpdir/$execname "$flags $files"]} {
 	fail "$test"
 	return
     }
@@ -379,16 +389,83 @@ if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c $tmpdir/main.o] {
     return
 }
 
-if {![ld_simple_link $ld $tmpdir/libbar.so "$shared $tmpdir/bar.o"]} {
+if {![ld_link $ld $tmpdir/libbar.so "$shared $tmpdir/bar.o"]} {
     fail "ELF weak"
     return
 }
 
-build_lib "ELF DSO weak first" libfoo foo.o bar.o dso.dsym
-build_lib "ELF DSO weak last" libfoo bar.o foo.o dso.dsym
-build_lib "ELF DSO weak first DSO" libfoo foo.o libbar.so dsow.dsym
-build_lib "ELF DSO weak last DSO" libfoo libbar.so foo.o dsow.dsym
-build_exec "ELF weak first" foo main.o bar.o "" strong "" strong.sym
-build_exec "ELF weak last" foo bar.o main.o "" strong "" strong.sym
-build_exec "ELF weak first DSO" foo main.o libbar.so "-rpath ." weak weak.dsym ""
-build_exec "ELF weak last DSO" foo libbar.so main.o "-rpath ." weak weak.dsym ""
+if ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/foo1a.c $tmpdir/foo1a.o] {
+    unresolved "ELF weak"
+    return
+}
+
+if ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/foo1b.c $tmpdir/foo1b.o] {
+    unresolved "ELF weak"
+    return
+}
+
+if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/bar1a.c $tmpdir/bar1a.o] {
+    unresolved "ELF weak"
+    return
+}
+
+if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/bar1b.c $tmpdir/bar1b.o] {
+    unresolved "ELF weak"
+    return
+}
+
+if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/bar1c.c $tmpdir/bar1c.o] {
+    unresolved "ELF weak"
+    return
+}
+
+if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main1.c $tmpdir/main1.o] {
+    unresolved "ELF weak"
+    return
+}
+
+if {![ld_link $ld $tmpdir/libfoo1a.so "$shared $tmpdir/foo1a.o"]} {
+    fail "ELF weak"
+    return
+}
+
+if {![ld_link $ld $tmpdir/libfoo1b.so "$shared $tmpdir/foo1b.o"]} {
+    fail "ELF weak"
+    return
+}
+
+build_lib "ELF DSO weak func first" libfoo "foo.o bar.o" dso.dsym
+build_lib "ELF DSO weak func last" libfoo "bar.o foo.o" dso.dsym
+setup_xfail "*-*-*"
+build_lib "ELF DSO weak func first DSO" libfoo "foo.o libbar.so" dsow.dsym
+setup_xfail "*-*-*"
+build_lib "ELF DSO weak func last DSO" libfoo "libbar.so foo.o" dsow.dsym
+build_exec "ELF weak func first" foo "main.o bar.o" "" strong "" strong.sym
+build_exec "ELF weak func last" foo "bar.o main.o" "" strong "" strong.sym
+setup_xfail "*-*-*"
+build_exec "ELF weak func first DSO" foo "main.o libbar.so" "-rpath ." weak weak.dsym ""
+setup_xfail "*-*-*"
+build_exec "ELF weak func last DSO" foo "libbar.so main.o" "-rpath ." weak weak.dsym ""
+
+build_lib "ELF DSO weak data first" libfoo "bar1a.o foo1a.o" dsodata.dsym
+build_lib "ELF DSO weak data last" libfoo "foo1a.o bar1a.o" dsodata.dsym
+setup_xfail "*-*-*"
+build_lib "ELF DSO weak data first DSO" libfoo "bar1a.o libfoo1a.so" dsowdata.dsym
+setup_xfail "*-*-*"
+build_lib "ELF DSO weak data last DSO" libfoo "libfoo1a.so bar1a.o" dsowdata.dsym
+setup_xfail "*-*-*"
+build_lib "ELF DSO weak data first DSO common" libfoo "bar1a.o libfoo1b.so" dsowdata.dsym
+setup_xfail "*-*-*"
+build_lib "ELF DSO weak data last DSO common" libfoo "libfoo1b.so bar1a.o" dsowdata.dsym
+build_exec "ELF weak data first" foo "main1.o bar1a.o foo1a.o" "" strongdata "" strongdata.sym
+build_exec "ELF weak data last" foo "foo1a.o main1.o bar1a.o" "" strongdata "" strongdata.sym
+build_exec "ELF weak data first common" foo "main1.o bar1a.o foo1b.o" "" strongdata "" strongcomm.sym
+build_exec "ELF weak data last common" foo "foo1b.o main1.o bar1a.o" "" strongdata "" strongcomm.sym
+setup_xfail "*-*-*"
+build_exec "ELF weak data first DSO" foo "main1.o bar1a.o libfoo1a.so" "-rpath ." weakdata weakdata.dsym ""
+setup_xfail "*-*-*"
+build_exec "ELF weak data last DSO" foo "libfoo1a.so main1.o bar1a.o" "-rpath ." weakdata weakdata.dsym ""
+setup_xfail "*-*-*"
+build_exec "ELF weak data first DSO common" foo "main1.o bar1a.o libfoo1b.so" "-rpath ." weakdata weakdata.dsym ""
+setup_xfail "*-*-*"
+build_exec "ELF weak data last DSO common" foo "libfoo1b.so main1.o bar1a.o" "-rpath ." weakdata weakdata.dsym ""

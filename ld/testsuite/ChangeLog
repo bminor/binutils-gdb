@@ -1,3 +1,27 @@
+2001-09-11  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfweak/elfweak.exp (build_lib): Take a list of object
+	files.
+	(build_exec): Likewise.
+	Add more tests and make some xfail.
+
+	* ld-elfweak/dso.dsym: Support symbol versioning.
+	* ld-elfweak/dsow.dsym: Likewise.
+
+	* ld-elfweak/main1.c: New.
+	* ld-elfweak/bar1a.c: Likewise.
+	* ld-elfweak/bar1b.c: Likewise.
+	* ld-elfweak/bar1c.c: Likewise.
+	* ld-elfweak/foo1a.c: Likewise.
+	* ld-elfweak/foo1b.c: Likewise.
+	* ld-elfweak/dsodata.dsym: Likewise.
+	* ld-elfweak/dsowdata.dsym: Likewise.
+	* ld-elfweak/weakdata.dsym: Likewise.
+	* ld-elfweak/strongcomm.sym: Likewise.
+	* ld-elfweak/strongdata.sym: Likewise.
+	* ld-elfweak/weakdata.dat: Likewise.
+	* ld-elfweak/strongdata.dat: Likewise.
+
 2001-09-10  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfweak/elfweak.exp: New.
