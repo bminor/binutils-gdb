@@ -380,3 +380,41 @@ DEFUN_VOID(ar_list)
     }
   }
 }
+
+
+void
+DEFUN(ar_extract,(list),
+      struct list *list)
+{
+  if (!obfd) 
+  {
+
+    fprintf(stderr, "%s: no open  archive\n", program_name);
+    maybequit();
+  }
+  else 
+  {
+    while (list) {
+      /* Find this name in the archive */
+      bfd *member = obfd->archive_head;
+      int found = 0;
+      while (member && !found) 
+      {
+	if (strcmp(member->filename, list->name) == 0) 
+	{
+	  extract_file(member);
+	  found = 1;
+	  }
+
+	member = member->next;
+      }
+      if (!found)  {
+	bfd *abfd = bfd_openr(list->name, 0);
+	fprintf(stderr,"%s: can't find module file %s\n", program_name,
+		list->name);
+
+      }
+      list = list->next;
+    }
+  }
+}
