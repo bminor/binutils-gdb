@@ -1,5 +1,8 @@
 Thu Aug 31 11:49:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd-in.h: Add extern "C" if __cplusplus.
+	* bfd-in2.h: Rebuild.
+
 	* coff-mips.c (mips_relocate_section): Don't convert a reloc
 	against an absolute symbol into a reloc against a section.
 

@@ -44,6 +44,10 @@ here.  */
 #ifndef __BFD_H_SEEN__
 #define __BFD_H_SEEN__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "ansidecl.h"
 #include "obstack.h"
 
@@ -497,7 +501,6 @@ typedef struct _bfd_link_pe_info
 /* END OF PE STUFF */
 
 
-extern bfd_link_pe_info pe_info;
 
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
@@ -1419,6 +1422,7 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_32_BASEREL,
   BFD_RELOC_16_BASEREL,
   BFD_RELOC_8_BASEREL,
+  BFD_RELOC_RVA,
 
 /* Absolute 8-bit relocation, but used to form an address like 0xFFnn. */
   BFD_RELOC_8_FFnn,
@@ -1629,7 +1633,6 @@ stored in the instruction.  The high 24 bits are installed in bits 23
 through 0. */
   BFD_RELOC_ARC_B26,
 /* end-sanitize-arc */
-
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
@@ -2399,4 +2402,7 @@ bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 CONST char *
 bfd_format_string PARAMS ((bfd_format format));
 
+#ifdef __cplusplus
+}
+#endif
 #endif
