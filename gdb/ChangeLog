@@ -1,5 +1,17 @@
 2004-11-21  Daniel Jacobowitz  <dan@debian.org>
 
+	* linux-nat.c (my_waitpid): New function.
+	(linux_test_for_tracefork): Make more robust and verbose.  Take
+	an ORIGINAL_PID argument and test for PTRACE_SETOPTIONS first.
+	(linux_supports_tracefork, linux_supports_tracevforkdone): Take a PID
+	argument.  Update calls to linux_test_for_tracefork.
+	(linux_enable_event_reporting, child_follow_fork)
+	(child_insert_fork_catchpoint, child_insert_vfork_catchpoint)
+	(child_insert_exec_catchpoint): Update calls to
+	linux_supports_tracefork and linux_supports_tracevforkdone.
+
+2004-11-21  Daniel Jacobowitz  <dan@debian.org>
+
 	* valarith.c (value_subscript): Copy VALUE_FRAME_ID.
 	(value_subscripted_rvalue): Likewise.
 	* valops.c (search_struct_field, value_slice): Likewise.
