@@ -1,3 +1,11 @@
+2003-01-02  Nick Kelsey  <nickk@ubicom.com>
+
+	* elf32-ip2k.c: Re-work of linker relaxation code for the ip2k to
+	fix internal errors, fix bad code generation, fix incorrect stabs
+	information, and improve ability to eliminate redundant page
+	instructions. Added code to ip2k_final_link_relocate to self-verify
+	the linker relaxation.  Fix formatting problems.
+
 2002-12-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* aoutx.h (NAME(aout,machine_type)): Add bfd_mach_mipsisa32r2 case.
