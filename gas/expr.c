@@ -1022,7 +1022,7 @@ operand (expressionS *expressionP)
 
     case '+':
       /* Do not accept ++e as +(+e) */
-      if (input_line_pointer[1] == '+')
+      if (*input_line_pointer == '+')
 	goto target_op;
       (void) operand (expressionP);
       break;
@@ -1042,7 +1042,7 @@ operand (expressionS *expressionP)
     case '-':
       {
         /* Do not accept --e as -(-e) */
-	if (c == '-' && input_line_pointer[1] == '-')
+	if (c == '-' && *input_line_pointer == '-')
 	  goto target_op;
 	
 	operand (expressionP);
