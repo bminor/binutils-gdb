@@ -1,5 +1,8 @@
 2004-06-10  Andrew Cagney  <cagney@gnu.org>
 
+	* avr-tdep.c (avr_gdbarch_init): Do not set use_struct_convention
+	to generic_use_struct_convention, the default value.
+
 	* mn10300-tdep.c (mn10300_type_align): Call internal_error instead
 	of abort.
 
