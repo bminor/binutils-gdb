@@ -348,10 +348,10 @@ static void add_abbrev_attr
   PARAMS ((unsigned long, unsigned long));
 static unsigned char *read_and_display_attr
   PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
-	   unsigned long));
+	   unsigned long, unsigned long, int));
 static unsigned char *read_and_display_attr_value
   PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
-	   unsigned long));
+	   unsigned long, unsigned long, int));
 static unsigned char *display_block
   PARAMS ((unsigned char *, unsigned long));
 static void decode_location_expression
@@ -407,7 +407,7 @@ typedef int Elf32_Word;
 
 #define SECTION_HEADER(I) (section_headers + SECTION_HEADER_INDEX (I))
 
-#define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order! */
+#define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
 
 #define BYTE_GET(field)	byte_get (field, sizeof (field))
 
@@ -944,6 +944,7 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
 }
 
 /* Display the contents of the relocation data found at the specified offset.  */
+
 static int
 dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
      FILE *file;
@@ -2881,6 +2882,7 @@ get_osabi_name (osabi)
 }
 
 /* Decode the data held in 'elf_header'.  */
+
 static int
 process_file_header ()
 {
@@ -6420,31 +6422,42 @@ display_debug_lines (section, start, file)
      unsigned char * start;
      FILE *file ATTRIBUTE_UNUSED;
 {
-  DWARF2_External_LineInfo *external;
+  unsigned char *hdrptr;
   DWARF2_Internal_LineInfo info;
   unsigned char *standard_opcodes;
   unsigned char *data = start;
   unsigned char *end = start + section->sh_size;
   unsigned char *end_of_sequence;
   int i;
+  int offset_size;
+  int initial_length_size;
 
   printf (_("\nDump of debug contents of section %s:\n\n"),
 	  SECTION_NAME (section));
 
   while (data < end)
     {
-      external = (DWARF2_External_LineInfo *) data;
+      hdrptr = data;
 
       /* Check the length of the block.  */
-      info.li_length = BYTE_GET (external->li_length);
+      info.li_length = byte_get (hdrptr, 4);
+      hdrptr += 4;
 
       if (info.li_length == 0xffffffff)
 	{
-	  warn (_("64-bit DWARF line info is not supported yet.\n"));
-	  break;
+	  /* This section is 64-bit DWARF 3.  */
+	  info.li_length = byte_get (hdrptr, 8);
+	  hdrptr += 8;
+	  offset_size = 8;
+	  initial_length_size = 12;
+	}
+      else
+	{
+	  offset_size = 4;
+	  initial_length_size = 4;
 	}
 
-      if (info.li_length + sizeof (external->li_length) > section->sh_size)
+      if (info.li_length + initial_length_size > section->sh_size)
 	{
 	  warn
 	    (_("The line info appears to be corrupt - the section is too small\n"));
@@ -6452,19 +6465,26 @@ display_debug_lines (section, start, file)
 	}
 
       /* Check its version number.  */
-      info.li_version = BYTE_GET (external->li_version);
-      if (info.li_version != 2)
+      info.li_version = byte_get (hdrptr, 2);
+      hdrptr += 2;
+      if (info.li_version != 2 && info.li_version != 3)
 	{
-	  warn (_("Only DWARF version 2 line info is currently supported.\n"));
+	  warn (_("Only DWARF version 2 and 3 line info is currently supported.\n"));
 	  return 0;
 	}
 
-      info.li_prologue_length = BYTE_GET (external->li_prologue_length);
-      info.li_min_insn_length = BYTE_GET (external->li_min_insn_length);
-      info.li_default_is_stmt = BYTE_GET (external->li_default_is_stmt);
-      info.li_line_base       = BYTE_GET (external->li_line_base);
-      info.li_line_range      = BYTE_GET (external->li_line_range);
-      info.li_opcode_base     = BYTE_GET (external->li_opcode_base);
+      info.li_prologue_length = byte_get (hdrptr, offset_size);
+      hdrptr += offset_size;
+      info.li_min_insn_length = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_default_is_stmt = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_line_base = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_line_range = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_opcode_base = byte_get (hdrptr, 1);
+      hdrptr++;
 
       /* Sign extend the line base field.  */
       info.li_line_base <<= 24;
@@ -6479,12 +6499,12 @@ display_debug_lines (section, start, file)
       printf (_("  Line Range:                  %d\n"), info.li_line_range);
       printf (_("  Opcode Base:                 %d\n"), info.li_opcode_base);
 
-      end_of_sequence = data + info.li_length + sizeof (external->li_length);
+      end_of_sequence = data + info.li_length + initial_length_size;
 
       reset_state_machine (info.li_default_is_stmt);
 
       /* Display the contents of the Opcodes table.  */
-      standard_opcodes = data + sizeof (*external);
+      standard_opcodes = hdrptr;
 
       printf (_("\n Opcodes:\n"));
 
@@ -6677,7 +6697,6 @@ display_debug_pubnames (section, start, file)
      unsigned char *start;
      FILE *file ATTRIBUTE_UNUSED;
 {
-  DWARF2_External_PubNames *external;
   DWARF2_Internal_PubNames pubnames;
   unsigned char *end;
 
@@ -6689,30 +6708,41 @@ display_debug_pubnames (section, start, file)
     {
       unsigned char *data;
       unsigned long offset;
+      int offset_size, initial_length_size;
 
-      external = (DWARF2_External_PubNames *) start;
+      data = start;
 
-      pubnames.pn_length  = BYTE_GET (external->pn_length);
-      pubnames.pn_version = BYTE_GET (external->pn_version);
-      pubnames.pn_offset  = BYTE_GET (external->pn_offset);
-      pubnames.pn_size    = BYTE_GET (external->pn_size);
-
-      data   = start + sizeof (*external);
-      start += pubnames.pn_length + sizeof (external->pn_length);
-
+      pubnames.pn_length = byte_get (data, 4);
+      data += 4;
       if (pubnames.pn_length == 0xffffffff)
 	{
-	  warn (_("64-bit DWARF pubnames are not supported yet.\n"));
-	  break;
+	  pubnames.pn_length = byte_get (data, 8);
+	  data += 8;
+	  offset_size = 8;
+	  initial_length_size = 12;
+	}
+      else
+	{
+	  offset_size = 4;
+	  initial_length_size = 4;
 	}
 
-      if (pubnames.pn_version != 2)
+      pubnames.pn_version = byte_get (data, 2);
+      data += 2;
+      pubnames.pn_offset = byte_get (data, offset_size);
+      data += offset_size;
+      pubnames.pn_size = byte_get (data, offset_size);
+      data += offset_size;
+
+      start += pubnames.pn_length + initial_length_size;
+
+      if (pubnames.pn_version != 2 && pubnames.pn_version != 3)
 	{
 	  static int warned = 0;
 
 	  if (! warned)
 	    {
-	      warn (_("Only DWARF 2 pubnames are currently supported\n"));
+	      warn (_("Only DWARF 2 and 3 pubnames are currently supported\n"));
 	      warned = 1;
 	    }
 
@@ -6732,11 +6762,11 @@ display_debug_pubnames (section, start, file)
 
       do
 	{
-	  offset = byte_get (data, 4);
+	  offset = byte_get (data, offset_size);
 
 	  if (offset != 0)
 	    {
-	      data += 4;
+	      data += offset_size;
 	      printf ("    %ld\t\t%s\n", offset, data);
 	      data += strlen ((char *) data) + 1;
 	    }
@@ -7836,12 +7866,15 @@ display_debug_str (section, start, file)
 }
 
 static unsigned char *
-read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
+read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size,
+                             offset_size, dwarf_version)
      unsigned long attribute;
      unsigned long form;
      unsigned char *data;
      unsigned long cu_offset;
      unsigned long pointer_size;
+     unsigned long offset_size;
+     int dwarf_version;
 {
   unsigned long uvalue = 0;
   unsigned char *block_start = NULL;
@@ -7853,14 +7886,30 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       break;
 
     case DW_FORM_ref_addr:
+      if (dwarf_version == 2)
+	{
+	  uvalue = byte_get (data, pointer_size);
+	  data += pointer_size;
+	}
+      else if (dwarf_version == 3)
+	{
+	  uvalue = byte_get (data, offset_size);
+	  data += offset_size;
+	}
+      else
+        {
+	  error (_("Internal error: DWARF version is not 2 or 3.\n"));
+	}
+      break;
+
     case DW_FORM_addr:
       uvalue = byte_get (data, pointer_size);
       data += pointer_size;
       break;
 
     case DW_FORM_strp:
-      uvalue = byte_get (data, /* offset_size */ 4);
-      data += /* offset_size */ 4;
+      uvalue = byte_get (data, offset_size);
+      data += offset_size;
       break;
 
     case DW_FORM_ref1:
@@ -7897,7 +7946,8 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       data += bytes_read;
       printf (" %s", get_FORM_name (form));
       return read_and_display_attr_value (attribute, form, data, cu_offset,
-					  pointer_size);
+					  pointer_size, offset_size,
+					  dwarf_version);
     }
 
   switch (form)
@@ -8137,7 +8187,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 	  decode_location_expression (block_start, pointer_size, uvalue);
 	  printf (")");
 	}
-      else if (form == DW_FORM_data4)
+      else if (form == DW_FORM_data4 || form == DW_FORM_data8)
 	{
 	  printf ("(");
 	  printf ("location list");
@@ -8153,16 +8203,19 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 }
 
 static unsigned char *
-read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
+read_and_display_attr (attribute, form, data, cu_offset, pointer_size,
+                       offset_size, dwarf_version)
      unsigned long attribute;
      unsigned long form;
      unsigned char *data;
      unsigned long cu_offset;
      unsigned long pointer_size;
+     unsigned long offset_size;
+     int dwarf_version;
 {
   printf ("     %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
-				      pointer_size);
+				      pointer_size, offset_size, dwarf_version);
   printf ("\n");
   return data;
 }
@@ -8183,26 +8236,44 @@ display_debug_info (section, start, file)
 
   while (start < end)
     {
-      DWARF2_External_CompUnit *external;
       DWARF2_Internal_CompUnit compunit;
       Elf_Internal_Shdr *relsec;
+      unsigned char *hdrptr;
+      unsigned char *cu_abbrev_offset_ptr;
       unsigned char *tags;
       unsigned int i;
       int level;
       unsigned long cu_offset;
+      int offset_size;
+      int initial_length_size;
 
-      external = (DWARF2_External_CompUnit *) start;
+      hdrptr = start;
 
-      compunit.cu_length        = BYTE_GET (external->cu_length);
-      compunit.cu_version       = BYTE_GET (external->cu_version);
-      compunit.cu_abbrev_offset = BYTE_GET (external->cu_abbrev_offset);
-      compunit.cu_pointer_size  = BYTE_GET (external->cu_pointer_size);
+      compunit.cu_length = byte_get (hdrptr, 4);
+      hdrptr += 4;
 
       if (compunit.cu_length == 0xffffffff)
 	{
-	  warn (_("64-bit DWARF debug info is not supported yet.\n"));
-	  break;
+	  compunit.cu_length = byte_get (hdrptr, 8);
+	  hdrptr += 8;
+	  offset_size = 8;
+	  initial_length_size = 12;
 	}
+      else
+	{
+	  offset_size = 4;
+	  initial_length_size = 4;
+	}
+
+      compunit.cu_version = byte_get (hdrptr, 2);
+      hdrptr += 2;
+
+      cu_abbrev_offset_ptr = hdrptr;
+      compunit.cu_abbrev_offset = byte_get (hdrptr, offset_size);
+      hdrptr += offset_size;
+
+      compunit.cu_pointer_size = byte_get (hdrptr, 1);
+      hdrptr += 1;
 
       /* Check for RELA relocations in the
 	 abbrev_offset address, and apply them.  */
@@ -8231,8 +8302,7 @@ display_debug_info (section, start, file)
 	  for (rp = rela; rp < rela + nrelas; ++rp)
 	    {
 	      if (rp->r_offset
-		  != (bfd_vma) ((unsigned char *) &external->cu_abbrev_offset
-				- section_begin))
+		  != (bfd_vma) (cu_abbrev_offset_ptr - section_begin))
 		continue;
 
 	      if (is_32bit_elf)
@@ -8268,9 +8338,9 @@ display_debug_info (section, start, file)
 	  break;
 	}
 
-      tags = start + sizeof (*external);
+      tags = hdrptr;
       cu_offset = start - section_begin;
-      start += compunit.cu_length + sizeof (external->cu_length);
+      start += compunit.cu_length + initial_length_size;
 
       printf (_("  Compilation Unit @ %lx:\n"), cu_offset);
       printf (_("   Length:        %ld\n"), compunit.cu_length);
@@ -8278,9 +8348,9 @@ display_debug_info (section, start, file)
       printf (_("   Abbrev Offset: %ld\n"), compunit.cu_abbrev_offset);
       printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
 
-      if (compunit.cu_version != 2)
+      if (compunit.cu_version != 2 && compunit.cu_version != 3)
 	{
-	  warn (_("Only version 2 DWARF debug information is currently supported.\n"));
+	  warn (_("Only version 2 and 3 DWARF debug information is currently supported.\n"));
 	  continue;
 	}
 
@@ -8358,7 +8428,9 @@ display_debug_info (section, start, file)
 	    tags = read_and_display_attr (attr->attribute,
 					  attr->form,
 					  tags, cu_offset,
-					  compunit.cu_pointer_size);
+					  compunit.cu_pointer_size,
+					  offset_size,
+					  compunit.cu_version);
 
 	  if (entry->children)
 	    ++level;
@@ -8385,30 +8457,48 @@ display_debug_aranges (section, start, file)
 
   while (start < end)
     {
-      DWARF2_External_ARange *external;
+      unsigned char *hdrptr;
       DWARF2_Internal_ARange arange;
       unsigned char *ranges;
       unsigned long length;
       unsigned long address;
       int excess;
+      int offset_size;
+      int initial_length_size;
 
-      external = (DWARF2_External_ARange *) start;
+      hdrptr = start;
 
-      arange.ar_length       = BYTE_GET (external->ar_length);
-      arange.ar_version      = BYTE_GET (external->ar_version);
-      arange.ar_info_offset  = BYTE_GET (external->ar_info_offset);
-      arange.ar_pointer_size = BYTE_GET (external->ar_pointer_size);
-      arange.ar_segment_size = BYTE_GET (external->ar_segment_size);
+      arange.ar_length = byte_get (hdrptr, 4);
+      hdrptr += 4;
 
       if (arange.ar_length == 0xffffffff)
 	{
-	  warn (_("64-bit DWARF aranges are not supported yet.\n"));
-	  break;
+	  arange.ar_length = byte_get (hdrptr, 8);
+	  hdrptr += 8;
+	  offset_size = 8;
+	  initial_length_size = 12;
+	}
+      else
+        {
+	  offset_size = 4;
+	  initial_length_size = 4;
 	}
 
-      if (arange.ar_version != 2)
+      arange.ar_version = byte_get (hdrptr, 2);
+      hdrptr += 2;
+
+      arange.ar_info_offset = byte_get (hdrptr, offset_size);
+      hdrptr += offset_size;
+
+      arange.ar_pointer_size = byte_get (hdrptr, 1);
+      hdrptr += 1;
+
+      arange.ar_segment_size = byte_get (hdrptr, 1);
+      hdrptr += 1;
+
+      if (arange.ar_version != 2 && arange.ar_version != 3)
 	{
-	  warn (_("Only DWARF 2 aranges are currently supported.\n"));
+	  warn (_("Only DWARF 2 and 3 aranges are currently supported.\n"));
 	  break;
 	}
 
@@ -8420,10 +8510,10 @@ display_debug_aranges (section, start, file)
 
       printf (_("\n    Address  Length\n"));
 
-      ranges = start + sizeof (*external);
+      ranges = hdrptr;
 
       /* Must pad to an alignment boundary that is twice the pointer size.  */
-      excess = sizeof (*external) % (2 * arange.ar_pointer_size);
+      excess = (hdrptr - start) % (2 * arange.ar_pointer_size);
       if (excess)
 	ranges += (2 * arange.ar_pointer_size) - excess;
 
@@ -8444,7 +8534,7 @@ display_debug_aranges (section, start, file)
 	  printf ("    %8.8lx %lu\n", address, length);
 	}
 
-      start += arange.ar_length + sizeof (external->ar_length);
+      start += arange.ar_length + initial_length_size;
     }
 
   printf ("\n");
@@ -8614,6 +8704,8 @@ display_debug_frames (section, start, file)
       unsigned char *augmentation_data = NULL;
       unsigned long augmentation_data_len = 0;
       int encoded_ptr_size = addr_size;
+      int offset_size;
+      int initial_length_size;
 
       saved_start = start;
       length = byte_get (start, 4); start += 4;
@@ -8627,12 +8719,19 @@ display_debug_frames (section, start, file)
 
       if (length == 0xffffffff)
 	{
-	  warn (_("64-bit DWARF format frames are not supported yet.\n"));
-	  break;
+	  length = byte_get (start, 8);
+	  start += 8;
+	  offset_size = 8;
+	  initial_length_size = 12;
+	}
+      else
+	{
+	  offset_size = 4;
+	  initial_length_size = 4;
 	}
 
-      block_end = saved_start + length + 4;
-      cie_id = byte_get (start, 4); start += 4;
+      block_end = saved_start + length + initial_length_size;
+      cie_id = byte_get (start, offset_size); start += offset_size;
 
       if (is_eh ? (cie_id == 0) : (cie_id == DW_CIE_ID))
 	{
@@ -9195,11 +9294,41 @@ prescan_debug_info (section, start, file)
      unsigned char *start;
      FILE *file ATTRIBUTE_UNUSED;
 {
-  DWARF2_External_CompUnit *external;
+  unsigned long length;
 
-  external = (DWARF2_External_CompUnit *) start;
+  /* Read the first 4 bytes.  For a 32-bit DWARF section, this will
+     be the length.  For a 64-bit DWARF section, it'll be the escape
+     code 0xffffffff followed by an 8 byte length.  For the purposes
+     of this prescan, we don't care about the actual length, but the
+     presence of the escape bytes does affect the location of the byte
+     which describes the address size.  */
+  length = byte_get (start, 4);
 
-  debug_line_pointer_size = BYTE_GET (external->cu_pointer_size);
+  if (length == 0xffffffff)
+    {
+      /* For 64-bit DWARF, the 1-byte address_size field is 22 bytes
+         from the start of the section.  This is computed as follows:
+
+	    unit_length:         12 bytes
+	    version:              2 bytes
+	    debug_abbrev_offset:  8 bytes
+	    -----------------------------
+	    Total:               22 bytes  */
+
+      debug_line_pointer_size = byte_get (start + 22, 1);
+    }
+  else
+    {
+      /* For 32-bit DWARF, the 1-byte address_size field is 10 bytes from
+         the start of the section:
+	    unit_length:          4 bytes
+	    version:              2 bytes
+	    debug_abbrev_offset:  4 bytes
+	    -----------------------------
+	    Total:               10 bytes  */
+
+      debug_line_pointer_size = byte_get (start + 10, 1);
+    }
   return 0;
 }
 
