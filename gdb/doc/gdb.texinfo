@@ -1718,10 +1718,10 @@ breakpoint settings).
 @kindex /proc
 @cindex process image
 Some operating systems provide a facility called @samp{/proc} that can
-be used to examine the image of a running process as a file.  If _GDBN__
-is configured for an operating system with this facility, the command
-@code{info proc} is available to report on several kinds of information
-about the process running your program.
+be used to examine the image of a running process using file-system
+subroutines.  If _GDBN__ is configured for an operating system with this
+facility, the command @code{info proc} is available to report on several
+kinds of information about the process running your program.
 
 @table @code
 @item info proc
@@ -1748,6 +1748,9 @@ the id of its parent, the process group id, and the session id.
 General information on the state of the process.  If the process is
 stopped, this report includes the reason for stopping, and any signal
 received.
+
+@item info proc all
+Show all the above information about the process.
 @end table
 
 @node Stopping, Stack, Running, Top
