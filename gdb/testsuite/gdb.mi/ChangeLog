@@ -1,3 +1,13 @@
+2002-09-24  Keith Seitz  <keiths@redhat.com>
+
+	* configure.in: Add config header.
+	Check for pthread.h.
+	* configure: Regenerate.
+	* config.in: New file.
+	* pthreads.c: New file.
+	* mi-pthreads.exp: New file to test thread functionality.
+	* gdb669.exp: New file.
+
 2002-09-17  Keith Seitz  <keiths@redhat.com>
 
 	* mi-var-cmd.exp: Add tests to check when varobj pinned to a
