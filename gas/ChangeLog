@@ -1,3 +1,8 @@
+Fri Sep  1 08:20:19 1995  James G. Smith  <jsmith@beauty.cygnus.com>
+
+        * config/tc-mips.c (md_parse_option, md_begin, md_show_usage):
+	Add support for "-mcpu=vr4300" as processor identifier.
+
 Thu Aug 31 16:41:06 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* write.c (fixup_segment): Remove change of 29th.
