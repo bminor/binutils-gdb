@@ -1,3 +1,22 @@
+2002-03-27  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_skip_prologue): Rewritten from scratch.
+	* x86-64-tdep.h (X86_64_NUM_REGS, X86_64_NUM_GREGS): Delete #defines.
+	(x86_64_num_regs, x86_64_num_gregs): Added extern variables.
+	* x86-64-linux-nat.c (x86_64_regmap): Swapped RBX <> RDX, added DS, ES, FS, GS.
+	(x86_64_linux_dr_get_status, supply_gregset),
+	(fill_gregset): Changed X86_64_NUM_GREGS to x86_64_num_gregs.
+	* x86-64-tdep.c (x86_64_register_raw_size_table): Delete.
+	(x86_64_register_info_table): Add.
+	(X86_64_NUM_REGS, X86_64_NUM_GREGS): Add.
+	(x86_64_register_raw_size, x86_64_register_virtual_type),
+	(x86_64_register_name, _initialize_x86_64_tdep): Changed to reflect new
+	general x86_64_register_info_table.
+	(i386_gdbarch_init): gdbarch_register_bytes is now set
+	dynamicaly during initialization.
+	* regformats/reg-x86-64.dat: Synced with changes to registers above.
+	* gdbserver/linux-x86-64-low.c: Ditto.
+	
 2002-03-27  Andreas Jaeger  <aj@suse.de>
 
 	* dwarf2cfi.c: Give credit to Daniel Berlin, reformat copyright
