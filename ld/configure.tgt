@@ -307,7 +307,7 @@ sh64-*-netbsd*)
 			targ_emul=shelf64_nbsd
 			targ_extra_emuls="shlelf64_nbsd shelf32_nbsd shlelf32_nbsd shelf_nbsd shlelf_nbsd"
 			;;
-sh*le-*-netbsdelf*)
+sh*l*-*-netbsdelf*)
 			targ_emul=shlelf_nbsd
 			targ_extra_emuls=shelf_nbsd
 			;;

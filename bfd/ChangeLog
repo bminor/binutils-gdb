@@ -1,3 +1,8 @@
+2003-05-21  Marcus Comstedt  <marcus@mc.pp.se>
+
+	* config.bfd: Check for a target triplet of shl-...-netbsdelf as
+	well as shle-...-netbsdelf.  Remove duplicate entry.
+
 2003-05-21  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-xstormy16.c (xstormy16_elf_howto_table): Fix dst_mask
