@@ -1,3 +1,7 @@
+2005-02-17  Paul Brook  <paul@codesourcery.com>
+
+	* scripttempl/armbpabi.sc: Add dummy name to version block.
+
 2005-02-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (new_abs): Init new.str.

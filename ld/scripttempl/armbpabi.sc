@@ -142,7 +142,9 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
 	
 VERSION
 { 
-  { 
+  /* Give these a dummy version to work around linker lameness.
+     The name used shouldn't matter as these are all local symbols.  */
+  __GNU { 
     local: 
       Image\$\$ER_RO\$\$Base;
       Image\$\$ER_RO\$\$Limit;
