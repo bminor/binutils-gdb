@@ -1,3 +1,7 @@
+Fri Feb 18 08:56:35 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add search.o rule for Sun make.
+
 Wed Feb 16 16:35:49 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* rltty.c:  #if out some code if __GO32__.

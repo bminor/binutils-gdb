@@ -142,12 +142,6 @@ subdir_do: force
 		else true ; fi ; \
 	done
 
-history.info: $(srcdir)/history.texi
-	$(MAKEINFO) -o history.info $(srcdir)/history.texi
-
-readline.info: $(srcdir)/readline.texi $(srcdir)/inc-read.texi
-	$(MAKEINFO) -o readline.info $(srcdir)/readline.texi
-
 libreadline.a: $(OBJECTS)
 	$(RM) -f libreadline.a
 	$(AR) $(AR_FLAGS) libreadline.a $(OBJECTS)
@@ -157,6 +151,7 @@ readline.o:	readline.h chardefs.h  keymaps.h history.h readline.c vi_mode.c
 history.o:	history.c history.h
 funmap.o:	readline.h
 keymaps.o:	emacs_keymap.c vi_keymap.c keymaps.h chardefs.h keymaps.c
+search.o: 	search.c
 
 tilde.o:	$(srcdir)/../glob/tilde.c
 	$(CC) -c $(CFLAGS) $(H_CFLAGS) $(DEBUG_FLAGS) $(USG) -I. $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES) $(srcdir)/../glob/tilde.c
