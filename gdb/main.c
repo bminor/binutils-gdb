@@ -1,7 +1,8 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -54,9 +55,9 @@ int display_space;
    processes UI events asynchronously. */
 int event_loop_p = 1;
 
-/* Has an interpreter been specified and if so, which.
-   This will be used as a set command variable, so it should
-   always be malloc'ed - since do_setshow_command will free it. */
+/* The selected interpreter.  This will be used as a set command
+   variable, so it should always be malloc'ed - since
+   do_setshow_command will free it. */
 char *interpreter_p;
 
 /* Whether this is the command line version or not */

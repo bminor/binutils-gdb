@@ -84,23 +84,18 @@ char *mi_error_message;
 static char *old_regs;
 
 extern void _initialize_mi_main (void);
-void mi_execute_command (char *cmd, int from_tty);
 static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
 
 static void mi_execute_cli_command (const char *cli, char *args);
 static enum mi_cmd_result mi_execute_async_cli_command (char *mi, char *args, int from_tty);
 
-void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
+static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
 
 static int register_changed_p (int regnum);
 static int get_register (int regnum, int format);
-void mi_load_progress (const char *section_name,
-		       unsigned long sent_so_far,
-		       unsigned long total_section,
-		       unsigned long total_sent,
-		       unsigned long grand_total);
 
-/* A helper function which will set mi_error_message to error_last_message. */
+/* A helper function which will set mi_error_message to
+   error_last_message.  */
 void
 mi_error_last_message (void)
 {
@@ -1411,7 +1406,6 @@ mi_load_progress (const char *section_name,
   int new_section;
 
   if (!current_interp_named_p (INTERP_MI)
-      && !current_interp_named_p (INTERP_MI2)
       && !current_interp_named_p (INTERP_MI1))
     return;
 
@@ -1480,7 +1474,7 @@ mi_setup_architecture_data (void)
 }
 
 void
-mi_register_gdbarch_swap (void)
+_initialize_mi_main (void)
 {
   register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
   register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);

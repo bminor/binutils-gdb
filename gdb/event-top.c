@@ -251,8 +251,8 @@ display_gdb_prompt (char *new_prompt)
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
 
-  /* Each interpreter has its own rules on wether or not display the
-     command prompt. */
+  /* Each interpreter has its own rules on displaying the command
+     prompt.  */
   if (!current_interp_display_prompt_p ())
     return;
 

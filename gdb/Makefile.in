@@ -745,10 +745,10 @@ cli_utils_h = $(srcdir)/cli/cli-utils.h
 # gdb/mi/ headers
 #
 
-mi_h = $(srcdir)/mi/mi.h
 mi_cmds_h = $(srcdir)/mi/mi-cmds.h
 mi_console_h = $(srcdir)/mi/mi-console.h
 mi_getopt_h = $(srcdir)/mi/mi-getopt.h
+mi_main_h = $(srcdir)/mi/mi-main.h
 mi_out_h = $(srcdir)/mi/mi-out.h
 mi_parse_h = $(srcdir)/mi/mi-parse.h
 
@@ -2513,13 +2513,13 @@ mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(defs_h) $(mi_getopt_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-getopt.c
 mi-interp.o: $(srcdir)/mi/mi-interp.c $(defs_h) $(gdb_string_h) $(interps_h) \
 	$(event_top_h) $(event_loop_h) $(inferior_h) $(ui_out_h) $(top_h) \
-	$(mi_h) $(mi_cmds_h) $(mi_out_h) $(mi_console_h)
+	$(mi_main_h) $(mi_cmds_h) $(mi_out_h) $(mi_console_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-interp.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) $(mi_parse_h) \
 	$(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) \
 	$(event_loop_h) $(event_top_h) $(gdbcore_h) $(value_h) $(regcache_h) \
-	$(gdb_h) $(frame_h)
+	$(gdb_h) $(frame_h) $(mi_main_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

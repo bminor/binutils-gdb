@@ -1,5 +1,6 @@
-/* MI Interpreter Definitions and Commands
-   Copyright 2002 Free Software Foundation, Inc.
+/* MI Interpreter Definitions and Commands for GDB, the GNU debugger.
+
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +28,7 @@
 #include "ui-out.h"
 #include "top.h"
 
-#include "mi.h"
+#include "mi-main.h"
 #include "mi-cmds.h"
 #include "mi-out.h"
 #include "mi-console.h"
@@ -98,7 +99,6 @@ mi_interpreter_resume (void *data)
   /* As per hack note in mi_interpreter_init, swap in the output channels... */
 
   gdb_setup_readline ();
-  mi_register_gdbarch_swap ();
 
   if (event_loop_p)
     {

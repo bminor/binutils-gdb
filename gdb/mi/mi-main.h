@@ -1,5 +1,6 @@
-/* MI Internal Functions
-   Copyright 2002 Free Software Foundation, Inc.
+/* MI Internal Functions for GDB, the GNU debugger.
+
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,20 +19,15 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef MI_H
-#define MI_H
-/* The mi interpreters. */
-
-extern struct interp *mi_interp;
-extern struct interp *mi1_interp;
-extern struct ui_file *mi_event_channel;
+#ifndef MI_MAIN_H
+#define MI_MAIN_H
 
 extern void mi_setup_architecture_data (void);
-extern void mi_register_gdbarch_swap (void);
 
 extern void mi_load_progress (const char *section_name,
 			      unsigned long sent_so_far,
 			      unsigned long total_section,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
-#endif /* MI_H */
+#endif
+

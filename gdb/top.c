@@ -63,7 +63,6 @@
 #include <ctype.h>
 #include "ui-out.h"
 #include "cli-out.h"
-#include "interps.h"
 
 /* Default command line prompt.  This is overriden in some configs. */
 
@@ -2125,5 +2124,4 @@ gdb_init (char *argv0)
      it wants GDB to revert to the CLI, it should clear init_ui_hook. */
   if (init_ui_hook)
     init_ui_hook (argv0);
-
 }

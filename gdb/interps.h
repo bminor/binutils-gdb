@@ -1,5 +1,7 @@
-/* Manages interpreters for gdb.
-   Copyright 2000,2002 Free Software Foundation, Inc.
+/* Manages interpreters for GDB, the GNU debugger.
+
+   Copyright 2000, 2002, 2003 Free Software Foundation, Inc.
+
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 
    This file is part of GDB.

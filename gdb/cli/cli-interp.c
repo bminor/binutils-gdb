@@ -1,5 +1,6 @@
-/* CLI Definitions for GDB
-   Copyright 2002 Free Software Foundation, Inc.
+/* CLI Definitions for GDB, the GNU debugger.
+
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
