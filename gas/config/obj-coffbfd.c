@@ -227,7 +227,7 @@ seg_info_type seg_info_off_by_4[N_SEG] =
 #define SEG_INFO_FROM_SEG_NUMBER(x) (seg_info_off_by_4[(x)])
 
 
-static relax_addressT 
+ relax_addressT 
 DEFUN(relax_align,(address, alignment),
 register relax_addressT address AND
 register long alignment )
@@ -348,8 +348,8 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
 	/* Only output some of the relocations */
 	if (TC_COUNT_RELOC(fix_ptr))
 	{
-#ifdef TC_RELOC_MANGLE(fix_ptr, &intr)
-	  TC_RELOC_MANGLE(fix_ptr, &intr);
+#ifdef TC_RELOC_MANGLE
+	  TC_RELOC_MANGLE(fix_ptr, &intr, base);
 		
 #else
 	  symbolS *dot;
@@ -904,8 +904,7 @@ DEFUN_VOID(obj_coff_endef)
     if (SF_GET_FUNCTION(def_symbol_in_progress)) {
 	    know(sizeof(def_symbol_in_progress) <= sizeof(long));
 	    function_lineoff 
-	     = c_line_new((long)
-			  def_symbol_in_progress,0, 0, &zero_address_frag);
+	     = c_line_new(def_symbol_in_progress,0, 0, &zero_address_frag);
 
 
 
@@ -1732,6 +1731,7 @@ DEFUN_VOID(obj_coff_section)
     }
   
     change_to_section(section_name, len,exp);
+*section_name_end = c;    
   
 }
 
