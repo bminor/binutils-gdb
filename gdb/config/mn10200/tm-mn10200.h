@@ -122,7 +122,7 @@ extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
 
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
   { \
-    if (TYPE_LENGTH (TYPE) > 4) \
+    if (TYPE_LENGTH (TYPE) > 8) \
       abort (); \
     else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
       { \
@@ -141,7 +141,7 @@ extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
 
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
   { \
-    if (TYPE_LENGTH (TYPE) > 4) \
+    if (TYPE_LENGTH (TYPE) > 8) \
       abort (); \
     else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
       { \
@@ -171,7 +171,6 @@ extern void mn10200_pop_frame PARAMS ((struct frame_info *));
 
 #define USE_GENERIC_DUMMY_FRAMES
 #define CALL_DUMMY                   {0}
-#undef CALL_DUMMY /* for now, no function calls */
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
@@ -191,8 +190,11 @@ mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
+#define REG_STRUCT_HAS_ADDR(gcc_p,type) \
+  (TYPE_LENGTH (type) > 8)
+
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
-  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 4)
+  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 8)
 
 /* Override the default get_saved_register function with
    one that takes account of generic CALL_DUMMY frames.  */

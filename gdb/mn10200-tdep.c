@@ -530,15 +530,15 @@ mn10200_push_arguments (nargs, args, sp, struct_return, struct_addr)
   int stack_offset = 0;
 
   /* This should be a nop, but align the stack just in case something
-     went wrong.  */
-  sp &= ~3;
+     went wrong.  Stacks are two byte aligned on the mn10200.  */
+  sp &= ~1;
 
   /* Now make space on the stack for the args.
 
      XXX This doesn't appear to handle pass-by-invisible reference
      arguments.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
+    len += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 1) & ~1);
 
   /* Allocate stack space.  */
   sp -= len;
@@ -567,11 +567,11 @@ mn10200_push_arguments (nargs, args, sp, struct_return, struct_addr)
       while (len > 0)
 	{
 	  /* XXX This looks wrong; we can have one and two byte args.  */
-	  write_memory (sp + stack_offset, val, 4);
+	  write_memory (sp + stack_offset, val, 2);
 
-	  len -= 4;
-	  val += 4;
-	  stack_offset += 4;
+	  len -= 2;
+	  val += 2;
+	  stack_offset += 2;
 	}
       args++;
     }
@@ -588,8 +588,11 @@ mn10200_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
+  unsigned char buf[4];
 
-  return sp;
+  store_unsigned_integer (buf, 4, CALL_DUMMY_ADDRESS ());
+  write_memory (sp - 4, buf, 4);
+  return sp - 4;
 }
  
 /* Function: frame_saved_pc 
