@@ -83,6 +83,10 @@ extern int m68hc11_parse_long_option PARAMS ((char *));
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 1
 
+/* Use 32-bit address to represent a symbol address so that we can
+   represent them with their page number.  */
+#define DWARF2_ADDR_SIZE(bfd) 4
+
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
