@@ -1,3 +1,9 @@
+Thu Dec 31 15:26:13 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* corelow.c (core_ops): Don't initialize statically.
+	(init_core_ops): New function, fills in core_ops.
+	(_initialize_corelow): Use it.
+
 Thu Dec 31 16:54:30 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by

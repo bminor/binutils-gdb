@@ -57,9 +57,15 @@ static void add_to_thread_list PARAMS ((bfd *, asection *, PTR));
 
 static int ignore PARAMS ((CORE_ADDR, char *));
 
-static char * core_file_to_sym_file PARAMS ((char *));
+static char *core_file_to_sym_file PARAMS ((char *));
+
+static int core_file_thread_alive PARAMS ((int tid));
+
+static void init_core_ops PARAMS ((void));
 
 void _initialize_corelow PARAMS ((void));
+
+struct target_ops core_ops;
 
 /* Link a new core_fns into the global core_file_fns list.  Called on gdb
    startup by the _initialize routine in each core file register reader, to
@@ -456,75 +462,36 @@ core_file_thread_alive (tid)
   return 1;
 }
 
+/* Fill in core_ops with its defined operations and properties.  */
 
-struct target_ops core_ops = {
-  "core",			/* to_shortname */
-  "Local core dump file",	/* to_longname */
-  "Use a core file as a target.  Specify the filename of the core file.", /* to_doc */
-  core_open,			/* to_open */
-  core_close,			/* to_close */
-  find_default_attach,		/* to_attach */
-  NULL,                         /* to_post_attach */
-  find_default_require_attach,	/* to_require_attach */
-  core_detach,			/* to_detach */
-  find_default_require_detach,	/* to_require_detach */
-  0,				/* to_resume */
-  0,				/* to_wait */
-  NULL,				/* to_post_wait */
-  get_core_registers,		/* to_fetch_registers */
-  0,				/* to_store_registers */
-  0,				/* to_prepare_to_store */
-  xfer_memory,			/* to_xfer_memory */
-  core_files_info,		/* to_files_info */
-  ignore,			/* to_insert_breakpoint */
-  ignore,			/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,				/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  0,				/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
-  find_default_create_inferior,	/* to_create_inferior */
-  NULL,                         /* to_post_startup_inferior */
-  NULL,                         /* to_acknowledge_created_inferior */
-  find_default_clone_and_follow_inferior,       /* to_clone_and_follow_inferior */
-  NULL,                         /* to_post_follow_inferior_by_clone */
-  NULL,                         /* to_insert_fork_catchpoint */
-  NULL,                         /* to_remove_fork_catchpoint */
-  NULL,                         /* to_insert_vfork_catchpoint */
-  NULL,                         /* to_remove_vfork_catchpoint */
-  NULL,                         /* to_has_forked */
-  NULL,                         /* to_has_vforked */
-  NULL,                         /* to_can_follow_vfork_prior_to_exec */
-  NULL,                         /* to_post_follow_vfork */
-  NULL,                         /* to_insert_exec_catchpoint */
-  NULL,                         /* to_remove_exec_catchpoint */
-  NULL,                         /* to_has_execd */
-  NULL,                         /* to_reported_exec_events_per_exec_call */
-  NULL,                         /* to_has_syscall_event */
-  NULL,                         /* to_has_exited */
-  0,				/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  core_file_thread_alive,	/* to_thread_alive */
-  0,				/* to_stop */
-  NULL,                         /* to_enable_exception_callback */
-  NULL,                         /* to_get_current_exception_event */
-  NULL,                         /* to_pid_to_exec_file */
-  core_file_to_sym_file,        /* to_core_file_to_sym_file */
-  core_stratum,			/* to_stratum */
-  0,				/* to_next */
-  0,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  0,				/* to_has_execution */
-  0,				/* to_sections */
-  0,				/* to_sections_end */
-  OPS_MAGIC,			/* to_magic */
-};
+static void
+init_core_ops ()
+{
+  core_ops.to_shortname = "core";
+  core_ops.to_longname = "Local core dump file";
+  core_ops.to_doc =
+    "Use a core file as a target.  Specify the filename of the core file.";
+  core_ops.to_open = core_open;
+  core_ops.to_close = core_close;
+  core_ops.to_attach = find_default_attach;
+  core_ops.to_require_attach = find_default_require_attach;
+  core_ops.to_detach = core_detach;
+  core_ops.to_require_detach = find_default_require_detach;
+  core_ops.to_fetch_registers = get_core_registers;
+  core_ops.to_xfer_memory = xfer_memory;
+  core_ops.to_files_info = core_files_info;
+  core_ops.to_insert_breakpoint = ignore;
+  core_ops.to_remove_breakpoint = ignore;
+  core_ops.to_create_inferior = find_default_create_inferior;
+  core_ops.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
+  core_ops.to_thread_alive = core_file_thread_alive;
+  core_ops.to_core_file_to_sym_file = core_file_to_sym_file;
+  core_ops.to_stratum = core_stratum;
+  core_ops.to_has_memory = 1;
+  core_ops.to_has_stack = 1;
+  core_ops.to_has_registers = 1;
+  core_ops.to_magic = OPS_MAGIC;	
+}
 
 /* non-zero if we should not do the add_target call in
    _initialize_corelow; not initialized (i.e., bss) so that
@@ -537,6 +504,8 @@ int coreops_suppress_target;
 void
 _initialize_corelow ()
 {
+  init_core_ops ();
+
   if (!coreops_suppress_target)
     add_target (&core_ops);
 }
