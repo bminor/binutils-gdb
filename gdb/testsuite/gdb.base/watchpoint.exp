@@ -394,7 +394,6 @@ proc test_stepping {} {
 	clear_xfail "sparc-*-*"
 	clear_xfail "hppa*-*-*bsd*"
 	# It works with the generic inferior function calling code too.
-	# OBSOLETE clear_xfail "mn10200*-*-*"
 	clear_xfail "mn10300*-*-*"
 	# The following architectures define CALL_DUMMY_HAS_COMPLETED.
 	clear_xfail "hppa*-*-*hpux*"

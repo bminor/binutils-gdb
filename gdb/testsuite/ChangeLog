@@ -1,3 +1,8 @@
+2003-10-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/watchpoint.exp: Delete obsolete clear_xfail.
+	* gdb.disasm/mn10200.exp: Delete obsolete file.
+
 2003-09-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ChangeLog: Correct an entry command.exp -> commands.exp.
