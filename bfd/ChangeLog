@@ -1,3 +1,8 @@
+2001-11-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* po/Make-in (distclean): Don't delete SRC-POTFILES.in or
+	BLD-POTFILES.in.  Work around bug in BFD's distclean.
+
 2001-10-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure, op/SRC-POTFILES.in, po/bfd.pot: Regenerate.

@@ -203,9 +203,15 @@ mostlyclean:
 
 clean: mostlyclean
 
+# FIXME: cagney/2001-11-18: When configuring / building in the source
+# directory, the rule below would delete SRC-POTFILES.in and
+# BLD-POTFILES.in from that source directory.  While a make rebuilds
+# these files it also puts them in the source directory and that can
+# be read-only.
+
 distclean: clean
 	rm -f Makefile Makefile.in *.mo *.msg *.cat *.cat.m
-	rm -f SRC-POTFILES BLD-POTFILES SRC-POTFILES.in	BLD-POTFILES.in
+	rm -f SRC-POTFILES BLD-POTFILES
 
 maintainer-clean: distclean
 	@echo "This command is intended for maintainers to use;"
