@@ -1,6 +1,3 @@
-
-# CYGNUS LOCAL entire file
-
 ARCH=mcore
 SCRIPT_NAME=mcorepe
 OUTPUT_FORMAT="pei-mcore-big"

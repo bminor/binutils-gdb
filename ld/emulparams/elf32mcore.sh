@@ -1,6 +1,3 @@
-
-# CYGNUS LOCAL entire file
-
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-mcore-big"
 BIG_OUTPUT_FORMAT="elf32-mcore-big"

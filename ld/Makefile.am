@@ -130,6 +130,7 @@ ALL_EMULATIONS = \
 	egld960.o \
 	egld960coff.o \
 	eelf32fr30.o \
+	eelf32mcore.o \
 	ego32.o \
 	eh8300.o \
 	eh8300h.o \
@@ -166,6 +167,7 @@ ALL_EMULATIONS = \
 	em68knbsd.o \
 	em68kpsos.o \
 	em88kbcs.o \
+	emcorepe.o \
 	emipsbig.o \
 	emipsbsd.o \
 	emipsidt.o \
@@ -323,6 +325,9 @@ eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
 eelf32fr30.c: $(srcdir)/emulparams/elf32fr30.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32fr30 "$(tdir_fr30)"
+eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32mcore "$(tdir_mcore)"
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"
@@ -485,6 +490,9 @@ em68kpsos.c:	$(srcdir)/emulparams/m68kpsos.sh \
 em88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m88kbcs.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m88kbcs "$(tdir_m88kbcs)"
+emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
+  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} mcorepe "$(tdir_mcorepe)"
 emipsbig.c:  $(srcdir)/emulparams/mipsbig.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsbig
