@@ -523,18 +523,18 @@ section_symbol (segT sec)
     }
   else
     {
+      segT seg;
       s = symbol_find_base (sec->symbol->name, 0);
       /* We have to make sure it is the right symbol when we
 	 have multiple sections with the same section name.  */
-      if (s == NULL || S_GET_SEGMENT (s) != sec)
+      if (s == NULL
+	  || ((seg = S_GET_SEGMENT (s)) != sec
+	      && seg != undefined_section))
 	s = symbol_new (sec->symbol->name, sec, 0, &zero_address_frag);
-      else
+      else if (seg == undefined_section)
 	{
-	  if (S_GET_SEGMENT (s) == undefined_section)
-	    {
-	      S_SET_SEGMENT (s, sec);
-	      symbol_set_frag (s, &zero_address_frag);
-	    }
+	  S_SET_SEGMENT (s, sec);
+	  symbol_set_frag (s, &zero_address_frag);
 	}
     }
 

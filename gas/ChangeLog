@@ -1,3 +1,9 @@
+2004-07-19  Christopher Faylor  <cgf@timesys.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* subsegs.c (section_symbol): Don't create a new segment when
+	existing segment is undefined.
+
 2004-07-16  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/tc-arm.c: Include include/opcode/arm.h.
