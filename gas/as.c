@@ -387,7 +387,7 @@ main (argc, argv)
       char *lim = (char *) sbrk (0);
       long run_time = get_run_time () - start_time;
 
-      fprintf (stderr, "%s: total time in assembly: %d.%06d\n",
+      fprintf (stderr, "%s: total time in assembly: %ld.%06ld\n",
 	       myname, run_time / 1000000, run_time % 1000000);
       fprintf (stderr, "%s: data size %ld\n",
 	       myname, (long) (lim - (char *) &environ));

@@ -1,5 +1,7 @@
 Thu Jan 27 16:43:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* as.c (main): Print long values using %ld.
+
 	* messages.c (as_warn_internal): New static function.
 	(as_warn, 3 versions): Use as_warn_internal.
 	(as_warn_where, 3 versions): New function.
