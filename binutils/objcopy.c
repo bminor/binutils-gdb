@@ -1138,9 +1138,19 @@ copy_object (bfd *ibfd, bfd *obfd)
   if (!bfd_set_arch_mach (obfd, iarch, imach)
       && (ibfd->target_defaulted
 	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
-    non_fatal (_("Warning: Output file cannot represent architecture %s"),
-	       bfd_printable_arch_mach (bfd_get_arch (ibfd),
-					bfd_get_mach (ibfd)));
+    {
+      if (bfd_get_arch (ibfd) == bfd_arch_unknown)
+	fatal (_("Unable to recognise the format of the input file %s"),
+	       bfd_get_filename (ibfd));
+      else
+	{
+	  non_fatal (_("Warning: Output file cannot represent architecture %s"),
+		     bfd_printable_arch_mach (bfd_get_arch (ibfd),
+					      bfd_get_mach (ibfd)));
+	  status = 1;
+	  return;
+	}
+    }
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     RETURN_NONFATAL (bfd_get_filename (ibfd));

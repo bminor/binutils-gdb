@@ -1,3 +1,9 @@
+2003-12-04  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_object): Do not copy the object if the
+	output file's format cannot be set to that of the input file.
+	If the input file's format is unknown, fail.
+
 2003-11-28  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* cxxfilt.c (usage): Mention new -p/--no-params options.
