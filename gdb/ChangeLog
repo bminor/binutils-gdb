@@ -1,3 +1,8 @@
+Mon Jun  3 11:48:29 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* source.c (find_source_lines): Check the time on the symtab's bfd if
+	it exists, else check the time on the exec_bfd.
+
 Thu May 30 09:43:17 1996  Mark Alexander <marka@cygnus.com>
 
 	* dsrec.c (make_srec):  Fix calculation of address size
