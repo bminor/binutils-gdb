@@ -1,5 +1,10 @@
 -*- text -*-
 
+* dlltool has a switch "--ext-prefix-alias <prefix>" to generate additional
+  import and export symbols with <preifx> prepended to them.
+
+Changes in 2.15:
+
 * objcopy and strip can now take wildcard patterns in symbol names specified on
   the command line provided that the --wildcard switch is used to enable them.
 

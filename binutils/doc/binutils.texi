@@ -1,6 +1,6 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename binutils.info
-@c Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+@c Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 @include config.texi
 
@@ -30,7 +30,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000,
-2001, 2002, 2003 Free Software Foundation, Inc.
+2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -55,7 +55,7 @@ notice identical to this one except for the removal of this paragraph
 @c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
 @c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001,
-@c 2002, 2003 Free Software Foundation, Inc.
+@c 2002, 2003, 2004 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c Free Documentation License.
@@ -81,7 +81,7 @@ notice identical to this one except for the removal of this paragraph
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998, 2000, 2001,
-2002, 2003 Free Software Foundation, Inc.
+2002, 2003, 2004 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -2866,6 +2866,7 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-D}|@option{--dllname} @var{name}] [@option{-m}|@option{--machine} @var{machine}]
         [@option{-a}|@option{--add-indirect}] [@option{-U}|@option{--add-underscore}] [@option{-k}|@option{--kill-at}]
         [@option{-A}|@option{--add-stdcall-alias}]
+        [@option{-p}|@option{--ext-prefix-alias} @var{prefix}]
         [@option{-x}|@option{--no-idata4}] [@option{-c}|@option{--no-idata5}] [@option{-i}|@option{--interwork}]
         [@option{-n}|@option{--nodelete}] [@option{-t}|@option{--temp-prefix} @var{prefix}]
         [@option{-v}|@option{--verbose}] 
@@ -3054,6 +3055,12 @@ function in a DLL, other than by name.
 Specifies that when @command{dlltool} is creating the exports file it
 should add aliases for stdcall symbols without @samp{@@ <number>}
 in addition to the symbols with @samp{@@ <number>}.
+
+@item -p
+@itemx --ext-prefix-alias @var{prefix}
+Causes @command{dlltool} to create external aliases for all DLL
+imports with the specified prefix.  The aliases are created for both
+external and import symbols with no leading underscore.
 
 @item -x
 @itemx --no-idata4

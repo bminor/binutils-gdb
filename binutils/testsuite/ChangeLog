@@ -1,3 +1,8 @@
+2004-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/dlltool.exp: Check that the -p switch is not
+	rejected.
+
 2004-07-09  Andreas Schwab  <schwab@suse.de>
 
 	* binutils-all/m68k/movem.s: New file.

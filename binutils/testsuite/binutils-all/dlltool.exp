@@ -45,3 +45,15 @@ if ![string match "" $err] then {
 }
 
 pass "dlltool (fastcall export)"
+
+verbose "$DLLTOOL -p foo -d $srcdir/$subdir/fastcall.def" 1
+catch "exec $DLLTOOL -p foo -d $srcdir/$subdir/fastcall.def" err
+
+if ![string match "" $err] then {
+    send_log "$err\n"
+    verbose "$err" 1
+    fail "dlltool (aliased export)"
+    continue
+}
+
+pass "dlltool (aliased export)"

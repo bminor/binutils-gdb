@@ -382,6 +382,7 @@ extern char * program_name;
 static int machine;
 static int killat;
 static int add_stdcall_alias;
+static const char *ext_prefix_alias;
 static int verbose;
 static FILE *output_def;
 static FILE *base_file;
@@ -2247,6 +2248,7 @@ make_one_lib_file (export_type *exp, int i)
       asymbol *  exp_label;
       asymbol *  iname = 0;
       asymbol *  iname2;
+      asymbol *  iname2_pre = 0;
       asymbol *  iname_lab;
       asymbol ** iname_lab_pp;
       asymbol ** iname_pp;
@@ -2260,7 +2262,6 @@ make_one_lib_file (export_type *exp, int i)
 #endif
       asymbol *  ptrs[NSECS + 4 + EXTRA + 1];
       flagword   applicable;
-
       char *     outname = xmalloc (strlen (TMP_STUB) + 10);
       int        oidx = 0;
 
@@ -2290,6 +2291,7 @@ make_one_lib_file (export_type *exp, int i)
       for (i = 0; i < NSECS; i++)
 	{
 	  sinfo *si = secdata + i;
+
 	  if (si->id != i)
 	    abort();
 	  si->sec = bfd_make_section_old_way (abfd, si->name);
@@ -2336,6 +2338,23 @@ make_one_lib_file (export_type *exp, int i)
 	    bfd_coff_set_symbol_class (abfd, exp_label, C_THUMBEXTFUNC);
 #endif
 	  ptrs[oidx++] = exp_label;
+
+	  if (ext_prefix_alias)
+	    {
+	      asymbol *  exp_label_pre;
+
+	      exp_label_pre = bfd_make_empty_symbol (abfd);
+	      exp_label_pre->name
+		= make_imp_label (ext_prefix_alias, exp->name);
+	      exp_label_pre->section = exp_label->section;
+	      exp_label_pre->flags = exp_label->flags;
+	      exp_label_pre->value = exp_label->value;
+#ifdef DLLTOOL_ARM
+	      if (machine == MTHUMB)
+		bfd_coff_set_symbol_class (abfd, exp_label, C_THUMBEXTFUNC);
+#endif
+	      ptrs[oidx++] = exp_label_pre;
+	    }
 	}
 
       /* Generate imp symbols with one underscore for Microsoft
@@ -2356,10 +2375,23 @@ make_one_lib_file (export_type *exp, int i)
       iname2->flags = BSF_GLOBAL;
       iname2->value = 0;
 
-      iname_lab = bfd_make_empty_symbol(abfd);
+      if (ext_prefix_alias)
+	{
+	  char *pre_name;
+
+	  iname2_pre = bfd_make_empty_symbol (abfd);
+	  pre_name = xmalloc (strlen (ext_prefix_alias) + 7);
+	  sprintf(pre_name, "__imp_%s", ext_prefix_alias);
+	  iname2_pre->name = make_imp_label (pre_name, exp->name);
+	  iname2_pre->section = iname2->section;
+	  iname2_pre->flags = iname2->flags;
+	  iname2_pre->value = iname2->value;
+	}
+
+      iname_lab = bfd_make_empty_symbol (abfd);
 
       iname_lab->name = head_label;
-      iname_lab->section = (asection *)&bfd_und_section;
+      iname_lab->section = (asection *) &bfd_und_section;
       iname_lab->flags = 0;
       iname_lab->value = 0;
 
@@ -2367,6 +2399,8 @@ make_one_lib_file (export_type *exp, int i)
       if (create_compat_implib)
 	ptrs[oidx++] = iname;
       ptrs[oidx++] = iname2;
+      if (ext_prefix_alias)
+	ptrs[oidx++] = iname2_pre;
 
       iname_lab_pp = ptrs + oidx;
       ptrs[oidx++] = iname_lab;
@@ -3129,6 +3163,7 @@ usage (FILE *file, int status)
   fprintf (file, _("   -U --add-underscore       Add underscores to symbols in interface library.\n"));
   fprintf (file, _("   -k --kill-at              Kill @<n> from exported names.\n"));
   fprintf (file, _("   -A --add-stdcall-alias    Add aliases without @<n>.\n"));
+  fprintf (file, _("   -p --ext-prefix-alias <prefix> Add aliases with <prefix>.\n"));
   fprintf (file, _("   -S --as <name>            Use <name> for assembler.\n"));
   fprintf (file, _("   -f --as-flags <flags>     Pass <flags> to the assembler.\n"));
   fprintf (file, _("   -C --compat-implib        Create backward compatible import library.\n"));
@@ -3168,6 +3203,7 @@ static const struct option long_options[] =
   {"add-underscore", no_argument, NULL, 'U'},
   {"kill-at", no_argument, NULL, 'k'},
   {"add-stdcall-alias", no_argument, NULL, 'A'},
+  {"ext-prefix-alias", required_argument, NULL, 'p'},
   {"verbose", no_argument, NULL, 'v'},
   {"version", no_argument, NULL, 'V'},
   {"help", no_argument, NULL, 'h'},
@@ -3204,9 +3240,9 @@ main (int ac, char **av)
 
   while ((c = getopt_long (ac, av,
 #ifdef DLLTOOL_MCORE_ELF
-			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVHhM:L:F:",
+			   "m:e:l:aD:d:z:b:xp:cCuUkAS:f:nvVHhM:L:F:",
 #else
-			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVHh",
+			   "m:e:l:aD:d:z:b:xp:cCuUkAS:f:nvVHh",
 #endif
 			   long_options, 0))
 	 != EOF)
@@ -3280,6 +3316,9 @@ main (int ac, char **av)
 	  break;
 	case 'A':
 	  add_stdcall_alias = 1;
+	  break;
+	case 'p':
+	  ext_prefix_alias = optarg;
 	  break;
 	case 'd':
 	  def_file = optarg;
