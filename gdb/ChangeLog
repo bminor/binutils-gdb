@@ -1,3 +1,11 @@
+Fri Sep 20 15:46:00 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* doc/Makefile: generate aux version-no file doc/gdbVN.m4
+	from main Makefile.in version definition
+	doc/gdb.texinfo: use version recorded in doc/gdbVN.m4 for current
+	GDB version no refs 
+	Makefile.in (setup-to-dist): generate doc/gdbVN.m4 
+
 Fri Sep 20 15:00:57 1991  Per Bothner  (bothner at cygnus.com)
 
 	* mcheck.c: Add __ONEFILE kludge to allow compilation by non-ANSI

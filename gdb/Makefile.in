@@ -446,7 +446,23 @@ TAGS: ${TAGFILES}
 	$(srcdir)/createtags $(TM_FILE) ${XM_FILE} $(DEPFILES) ${TAGFILES}
 tags: TAGS
 
+# Making distributions of GDB and friends.
+
+# Make a directory `proto-gdb.dir' that contains an image of the GDB
+# directory of the distribution, built up with symlinks.
+make-proto-gdb.dir: force_update 
+	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
+	$(MAKE) $(MFLAGS) -f Makefile    make-proto-gdb-1
+
+# Make a tar file containing the GDB directory of the distribution.
 gdb.tar.Z: force_update
+	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
+	$(MAKE) $(MFLAGS) -f Makefile.in gdb-$(VERSION).tar.Z
+
+# Set up the GDB directory for distribution, by building all files that
+# are products of other files.
+setup-to-dist: force_update
+	./configure -template=./configure
 	./configure none
 	rm -f alldeps.mak
 	$(MAKE) $(MFLAGS) alldeps.mak
@@ -454,30 +470,39 @@ gdb.tar.Z: force_update
 	rm -f depend
 	$(MAKE) $(MFLAGS) depend
 	./configure none
-	(cd doc; $(MAKE) $(MFLAGS) rdl-apps.texi)
+	(cd doc; $(MAKE) $(MFLAGS) rdl-apps.texi gdbVN.m4)
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps
-	$(MAKE) $(MFLAGS) gdb-$(VERSION).tar.Z
 
-gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS} gdb.info
-	rm -f gdb.tar gdb-$(VERSION).tar.Z; rm -rf $(DIST)
-	mkdir $(DIST)
-	cd $(DIST) ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
-	cd $(DIST) ; ln -s ../${INFOFILES} .
-	cd $(DIST); for i in ${TARDIRS}; do \
+# Build a tar file from a proto-gdb.dir.
+gdb-$(VERSION).tar.Z: force_update
+	rm -f gdb.tar gdb-$(VERSION).tar.Z
+	$(MAKE) $(MFLAGS) -f Makefile    make-proto-gdb-1
+	ln -s proto-gdb.dir $(DIST)
+	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
+	rm -rf $(DIST) proto-gdb.dir
+
+# Build a proto-gdb.dir after GDB has been set up for distribution.
+# This stuff must be run in `Makefile', not `Makefile.in`; we use the makefile
+# built in the setup-to-dist process, since it defines things like ALLCONFIG
+# and ALLDEPFILES, that we need.
+make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
+	rm -rf proto-gdb.dir
+	mkdir proto-gdb.dir
+	cd proto-gdb.dir ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
+	cd proto-gdb.dir ; ln -s ../${INFOFILES} .
+	cd proto-gdb.dir ; for i in ${TARDIRS}; do \
 	  (mkdir $$i; cd $$i; \
 	  ln -s ../../$$i/* .; \
 	  rm -rf SCCS CVS.adm RCS); done
-	mkdir $(DIST)/xconfig ${DIST}/tconfig
-	cd $(DIST)/tconfig ; \
+	mkdir proto-gdb.dir/xconfig proto-gdb.dir/tconfig
+	cd proto-gdb.dir/tconfig ; \
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
-	mkdir $(DIST)/vx-share $(DIST)/nindy-share
-	cd $(DIST)/tconfig ; \
+	mkdir proto-gdb.dir/vx-share proto-gdb.dir/nindy-share
+	cd proto-gdb.dir/tconfig ; \
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
 	chmod og=u `find . -print`
-	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
-	rm -rf $(DIST)
 
 clean:
 	rm -f ${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES}
