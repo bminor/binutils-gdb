@@ -73,7 +73,7 @@ if ![string match "" $got] then {
     setup_xfail "sh-*-coff" "sh-*-hms" 
     setup_xfail "m68*-*-hpux*" "m68*-*-sunos*" "m68*-*-coff" "m68*-*-vxworks*"
     setup_xfail "m68*-ericsson-ose" "m68k*-motorola-sysv*"
-    setup_xfail "i*86-*-linuxaout*" "i*86-*-aout*"
+    setup_xfail "i*86-*-aout*"
     setup_xfail "i*86-*-sysv3" "i*86-*-isc*" "i*86-*-sco*" "i*86-*-coff"
     setup_xfail "i*86-*-aix*" "i*86-*-go32*" "i*86-*-msdos*"
     setup_xfail "a29k-*-udi" "a29k-*-coff" "a29k-*-vxworks*"

@@ -1,3 +1,9 @@
+2001-05-25  Alan Modra  <amodra@one.net.au>
+
+	* binutils-all/readelf.exp: Replace linuxoldld with linux*oldld
+	and linuxaout with linux*aout.
+	* binutils-all/objcopy.exp: Remove xfail for linuxaout.
+
 2001-05-24  H.J. Lu  <hjl@gnu.org>
 
 	* binutils-all/objdump.exp (cpus_expected): Add s390.

@@ -1,3 +1,8 @@
+2001-05-25  Alan Modra  <amodra@one.net.au>
+
+	* ld-elfvers/vers.exp: Replace linuxoldld with linux*oldld and
+	linuxaout with linux*aout.
+
 2001-05-24  H.J. Lu  <hjl@gnu.org>
 
 	* ld-scripts/phdrs.exp: Add sparc64 to 64 bit platform.

@@ -1,3 +1,8 @@
+2001-05-25  Alan Modra  <amodra@one.net.au>
+
+	* configure.host: Replace linuxoldld with linux*oldld.
+	* configure.tgt: Likewise.
+
 2001-05-24  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/stringify.sed: Removed again.

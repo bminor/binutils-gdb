@@ -44,9 +44,9 @@ if { ![istarget i?86-*-sysv4*] \
     return
 }
 
-if { [istarget i?86-*-linuxaout*] \
-     || [istarget i?86-*-linuxoldld*] \
-     || [istarget m68k-*-linuxaout*] } {
+if { [istarget i?86-*-linux*aout*] \
+     || [istarget i?86-*-linux*oldld*] \
+     || [istarget m68k-*-linux*aout*] } {
     return
 }
 

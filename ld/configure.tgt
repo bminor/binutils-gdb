@@ -134,7 +134,7 @@ i[3456]86-*-linux*aout*)	targ_emul=i386linux
 			targ_extra_emuls=elf_i386
 			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/aout//'`
 			;;
-i[3456]86-*-linuxoldld)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
+i[3456]86-*-linux*oldld)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
 i[3456]86-*-linux-gnu*)	targ_emul=elf_i386
 			targ_extra_emuls=i386linux
 			tdir_i386linux=${targ_alias}aout
