@@ -1,5 +1,7 @@
 Thu Oct 24 23:06:40 1991  Fred Fish  (fnf at cygnus.com)
 
+	* utils.c:  Remove local BSD/USG hacks that are now in libiberty.
+
 	* dwarfread.c:  Remove prototype for dwarfwarn.  Does not work
 	with <varargs.h>.
 
