@@ -16,9 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "dis-asm.h"
-#include "ieee-float.h"
-
-extern CONST struct ext_format ext_format_68881;
+#include "floatformat.h"
 
 /* Opcode/m68k.h is a massive table.  As a kludge, break it up into
    two pieces.  This makes nonportable C -- FIXME -- it assumes that
@@ -46,16 +44,9 @@ print_base PARAMS ((int, int, disassemble_info*));
 static unsigned char *
 print_indexed PARAMS ((int, unsigned char *, bfd_vma, disassemble_info *));
 
-static unsigned char *
+static int
 print_insn_arg PARAMS ((char *, unsigned char *, unsigned char *, bfd_vma,
 			disassemble_info *));
-
-/* Sign-extend an (unsigned char). */
-#if __STDC__ == 1
-#define COERCE_SIGNED_CHAR(ch) ((signed char)(ch))
-#else
-#define COERCE_SIGNED_CHAR(ch) ((int)(((ch) ^ 0x80) & 0xFF) - 128)
-#endif
 
 CONST char * CONST fpcr_names[] = {
   "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
@@ -65,24 +56,27 @@ static char *reg_names[] = {
   "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "a0",
   "a1", "a2", "a3", "a4", "a5", "fp", "sp", "ps", "pc"};
 
-/* Define accessors for 68K's 1, 2, and 4-byte signed quantities.
-   The _SHIFT values move the quantity to the high order end of an
-   `int' value, so it will sign-extend.  Probably a few more casts
-   are needed to make it compile without warnings on finicky systems.  */
-#define	BITS_PER_BYTE	8
-#define	WORD_SHIFT (BITS_PER_BYTE * ((sizeof (int)) - 2))
-#define	LONG_SHIFT (BITS_PER_BYTE * ((sizeof (int)) - 4))
+/* Sign-extend an (unsigned char). */
+#if __STDC__ == 1
+#define COERCE_SIGNED_CHAR(ch) ((signed char)(ch))
+#else
+#define COERCE_SIGNED_CHAR(ch) ((int)(((ch) ^ 0x80) & 0xFF) - 128)
+#endif
 
+/* Get a 1 byte signed integer.  */
 #define NEXTBYTE(p)  (p += 2, FETCH_DATA (info, p), COERCE_SIGNED_CHAR(p[-1]))
 
+/* Get a 2 byte signed integer.  */
+#define COERCE16(x) ((int) (((x) ^ 0x8000) - 0x8000))
 #define NEXTWORD(p)  \
   (p += 2, FETCH_DATA (info, p), \
-   (((int)((p[-2] << 8) + p[-1])) << WORD_SHIFT) >> WORD_SHIFT)
+   COERCE16 ((p[-2] << 8) + p[-1]))
 
+/* Get a 4 byte signed integer.  */
+#define COERCE32(x) ((int) (((x) ^ 0x80000000) - 0x80000000))
 #define NEXTLONG(p)  \
   (p += 4, FETCH_DATA (info, p), \
-   (((int)((((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1])) \
-				   << LONG_SHIFT) >> LONG_SHIFT)
+   (COERCE32 ((((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1])))
 
 /* NEXTSINGLE and NEXTDOUBLE handle alignment problems, but not
  * byte-swapping or other float format differences.  FIXME! */
@@ -161,18 +155,36 @@ fetch_data (info, addr)
   return 1;
 }
 
-static void
-m68k_opcode_error(info, code, place)
+/* This function is used to print to the bit-bucket. */
+static int
+#ifdef __STDC__
+dummy_printer (FILE * file, const char * format, ...)
+#else
+dummy_printer (file) FILE *file;
+#endif
+ { return 0; }
+
+void
+dummy_print_address (vma, info)
+     bfd_vma vma;
      struct disassemble_info *info;
-     int code, place;
 {
-  (*info->fprintf_func)(info->stream,
-			"<internal error in opcode table: \"%c%c\">",
-			code, place);
+}
+
+static const struct m68k_opcode *
+opcode (idx)
+     int idx;
+{
+#ifdef __GNUC__
+  const int max = sizeof (m68k_opcodes) / sizeof (m68k_opcodes[0]);
+  if (idx >= max)
+    return &m68k_opcodes_2[idx - max];
+#endif
+  return &m68k_opcodes[idx];
 }
 
 /* Print the m68k instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
+   on INFO->STREAM.  Returns length of the instruction, in bytes.  */
 
 int
 print_insn_m68k (memaddr, info)
@@ -181,11 +193,15 @@ print_insn_m68k (memaddr, info)
 {
   register int i;
   register unsigned char *p;
+  unsigned char *save_p;
   register char *d;
   register unsigned long bestmask;
-  int best;
+  const struct m68k_opcode *best = 0;
   struct private priv;
   bfd_byte *buffer = priv.the_buffer;
+  fprintf_ftype save_printer = info->fprintf_func;
+  void (*save_print_address) PARAMS((bfd_vma, struct disassemble_info*))
+    = info->print_address_func;
 
   info->private_data = (PTR) &priv;
   priv.max_fetched = priv.the_buffer;
@@ -195,12 +211,16 @@ print_insn_m68k (memaddr, info)
     return -1;
 
   bestmask = 0;
-  best = -1;
   FETCH_DATA (info, buffer + 2);
   for (i = 0; i < numopcodes; i++)
     {
-      register unsigned long opcode = m68k_opcodes[i].opcode;
-      register unsigned long match = m68k_opcodes[i].match;
+      const struct m68k_opcode *opc = opcode (i);
+      unsigned long opcode = opc->opcode;
+      unsigned long match = opc->match;
+
+      if (opc->flags & F_ALIAS)
+	continue;
+
       if (((0xff & buffer[0] & (match >> 24)) == (0xff & (opcode >> 24)))
 	  && ((0xff & buffer[1] & (match >> 16)) == (0xff & (opcode >> 16)))
 	  /* Only fetch the next two bytes if we need to.  */
@@ -214,7 +234,7 @@ print_insn_m68k (memaddr, info)
 	  /* Don't use for printout the variants of divul and divsl
 	     that have the same register number in two places.
 	     The more general variants will match instead.  */
-	  for (d = m68k_opcodes[i].args; *d; d += 2)
+	  for (d = opc->args; *d; d += 2)
 	    if (d[1] == 'D')
 	      break;
 
@@ -222,27 +242,20 @@ print_insn_m68k (memaddr, info)
 	     point coprocessor instructions which use the same
 	     register number in two places, as above. */
 	  if (*d == 0)
-	    for (d = m68k_opcodes[i].args; *d; d += 2)
+	    for (d = opc->args; *d; d += 2)
 	      if (d[1] == 't')
 		break;
 
 	  if (*d == 0 && match > bestmask)
 	    {
-	      best = i;
+	      best = opc;
 	      bestmask = match;
 	    }
 	}
     }
 
-  /* Handle undefined instructions.  */
-  if (best < 0)
-    {
-      (*info->fprintf_func) (info->stream, "0%o",
-			     (buffer[0] << 8) + buffer[1]);
-      return 2;
-    }
-
-  (*info->fprintf_func) (info->stream, "%s", m68k_opcodes[best].name);
+  if (best == 0)
+    goto invalid;
 
   /* Point at first word of argument data,
      and at descriptor for first argument.  */
@@ -252,7 +265,7 @@ print_insn_m68k (memaddr, info)
      The only place this is stored in the opcode table is
      in the arguments--look for arguments which specify fields in the 2nd
      or 3rd words of the instruction.  */
-  for (d = m68k_opcodes[best].args; *d; d += 2)
+  for (d = best->args; *d; d += 2)
     {
       /* I don't think it is necessary to be checking d[0] here; I suspect
 	 all this could be moved to the case statement below.  */
@@ -273,6 +286,7 @@ print_insn_m68k (memaddr, info)
 	case '7':
 	case '8':
 	case '9':
+	case 'i':
 	  if (p - buffer < 4)
 	    p = buffer + 4;
 	  break;
@@ -293,31 +307,75 @@ print_insn_m68k (memaddr, info)
   
   FETCH_DATA (info, p);
   
-  d = m68k_opcodes[best].args;
+  d = best->args;
+
+  /* We can the operands twice.  The first time we don't print anything,
+     but look for errors. */
+
+  save_p = p;
+  info->print_address_func = dummy_print_address;
+  info->fprintf_func = (fprintf_ftype)dummy_printer;
+  for ( ; *d; d += 2)
+    {
+      int eaten = print_insn_arg (d, buffer, p, memaddr + p - buffer, info);
+      if (eaten >= 0)
+	p += eaten;
+      else if (eaten == -1)
+	goto invalid;
+      else
+	{
+	  (*info->fprintf_func)(info->stream,
+				"<internal error in opcode table: %s %s>\n",
+				best->name,
+				best->args);
+	  goto invalid;
+	}
+
+    }
+  p = save_p;
+  info->fprintf_func = save_printer;
+  info->print_address_func = save_print_address;
+
+  d = best->args;
+
+  (*info->fprintf_func) (info->stream, "%s", best->name);
 
   if (*d)
     (*info->fprintf_func) (info->stream, " ");
 
   while (*d)
     {
-      p = print_insn_arg (d, buffer, p, memaddr + p - buffer, info);
+      p += print_insn_arg (d, buffer, p, memaddr + p - buffer, info);
       d += 2;
       if (*d && *(d - 2) != 'I' && *d != 'k')
 	(*info->fprintf_func) (info->stream, ",");
     }
   return p - buffer;
+
+ invalid:
+  /* Handle undefined instructions.  */
+  info->fprintf_func = save_printer;
+  info->print_address_func = save_print_address;
+  (*info->fprintf_func) (info->stream, "0%o",
+			 (buffer[0] << 8) + buffer[1]);
+  return 2;
 }
 
-static unsigned char *
-print_insn_arg (d, buffer, p, addr, info)
+/* Returns number of bytes "eaten" by the operand, or
+   return -1 if an invalid operand was found, or -2 if
+   an opcode tabe error was found. */
+
+static int
+print_insn_arg (d, buffer, p0, addr, info)
      char *d;
      unsigned char *buffer;
-     register unsigned char *p;
+     unsigned char *p0;
      bfd_vma addr;		/* PC for this arg to be relative to */
      disassemble_info *info;
 {
   register int val = 0;
   register int place = d[1];
+  register unsigned char *p = p0;
   int regno;
   register CONST char *regname;
   register unsigned char *p1;
@@ -368,14 +426,14 @@ print_insn_arg (d, buffer, p, addr, info)
 	static struct { char *name; int value; } names[]
 	  = {{"sfc", 0x000}, {"dfc", 0x001}, {"cacr", 0x002},
 	     {"tc",  0x003}, {"itt0",0x004}, {"itt1", 0x005},
-             {"dtt0",0x006}, {"dtt1",0x007},
+             {"dtt0",0x006}, {"dtt1",0x007}, {"buscr",0x008},
 	     {"usp", 0x800}, {"vbr", 0x801}, {"caar", 0x802},
 	     {"msp", 0x803}, {"isp", 0x804},
 
 	     /* Should we be calling this psr like we do in case 'Y'?  */
 	     {"mmusr",0x805},
 
-             {"urp", 0x806}, {"srp", 0x807}};
+             {"urp", 0x806}, {"srp", 0x807}, {"pcr", 0x808}};
 
 	val = fetch_arg (buffer, place, 12, info);
 	for (regno = sizeof names / sizeof names[0] - 1; regno >= 0; regno--)
@@ -471,7 +529,7 @@ print_insn_arg (d, buffer, p, addr, info)
 	  (*info->fprintf_func) (info->stream, "{#%d}", val);
 	}
       else
-	m68k_opcode_error (info, *d, place);
+	return -2;
       break;
 
     case '#':
@@ -492,7 +550,7 @@ print_insn_arg (d, buffer, p, addr, info)
       else if (place == 'l')
 	val = NEXTLONG (p1);
       else
-	m68k_opcode_error (info, *d, place);
+	return -2;
       (*info->fprintf_func) (info->stream, "#%d", val);
       break;
 
@@ -521,7 +579,7 @@ print_insn_arg (d, buffer, p, addr, info)
 	    val = NEXTWORD (p);
 	}
       else
-	m68k_opcode_error (info, *d, place);
+	return -2;
 
       (*info->print_address_func) (addr + val, info);
       break;
@@ -544,8 +602,6 @@ print_insn_arg (d, buffer, p, addr, info)
       
       if (val != 1)				/* Unusual coprocessor ID? */
 	(*info->fprintf_func) (info->stream, "(cpid=%d) ", val);
-      if (place == 'i')
-	p += 2;			     /* Skip coprocessor extended operands */
       break;
 
     case '*':
@@ -655,8 +711,9 @@ print_insn_arg (d, buffer, p, addr, info)
 		  break;
 
 		case 'x':
-		  ieee_extended_to_double (&ext_format_68881,
-					   (char *)p, &flval);
+		  FETCH_DATA (info, p + 12);
+		  floatformat_to_double (&floatformat_m68881_ext,
+					 (char *) p, &flval);
 		  p += 12;
 		  break;
 
@@ -665,7 +722,7 @@ print_insn_arg (d, buffer, p, addr, info)
 		  break;
 
 		default:
-		  m68k_opcode_error (info, *d, place);
+		  return -1;
 	      }
 	      if ( flt_p )	/* Print a float? */
 		(*info->fprintf_func) (info->stream, "#%g", flval);
@@ -674,9 +731,7 @@ print_insn_arg (d, buffer, p, addr, info)
 	      break;
 
 	    default:
-	      (*info->fprintf_func) (info->stream,
-				     "<invalid address mode 0%o>",
-				     (unsigned) val);
+	      return -1;
 	    }
 	}
       break;
@@ -758,7 +813,7 @@ print_insn_arg (d, buffer, p, addr, info)
 		}
 	  }
 	else
-	  goto de_fault;
+	  return -2;
       break;
 
     case 'X':
@@ -825,11 +880,11 @@ print_insn_arg (d, buffer, p, addr, info)
       }
       break;
 
-    default:  de_fault:
-      m68k_opcode_error (info, *d, ' ');
+    default:
+      return -2;
     }
 
-  return (unsigned char *) p;
+  return p - p0;
 }
 
 /* Fetch BITS bits from a position in the instruction specified by CODE.

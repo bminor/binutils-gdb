@@ -1,3 +1,11 @@
+Wed Mar  8 02:54:05 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* m68k-dis.c (opcode): New function.  Returns address of opcode
+	table entry given index, even if the opcode table was split to
+	work around gcc bugs.
+	(print_insn_m68k): Call opcode instead of referencing m68k_opcodes
+	directly.
+
 start-sanitize-arc
 Tue Mar  7 21:14:14 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
