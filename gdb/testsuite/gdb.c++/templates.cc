@@ -283,10 +283,10 @@ void h(long double = 4.33e33)
 { }
 #endif
 */
-void printf(const char *format, ... )
-{
-    // elipsis
-}
+
+
+
+
 
 class T1 {
 public:
