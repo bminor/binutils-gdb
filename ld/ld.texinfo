@@ -3410,6 +3410,39 @@ followed by a 1000 byte gap.  Then the @samp{.text} section from
 @samp{.text} section from @file{file3}.  The notation @samp{= 0x1234}
 specifies what data to write in the gaps (@pxref{Output Section Fill}).
 
+@cindex dot inside sections
+Note: @code{.} actually refers to the byte offset from the start of the
+current containing object.  Normally this is the @code{SECTIONS}
+statement, whoes start address is 0, hence @code{.} can be used as an
+absolute address.  If @code{.} is used inside a section description
+however, it refers to the byte offset from the start of that section,
+not an absolute address.  Thus in a script like this:
+
+@smallexample
+SECTIONS
+@{
+    . = 0x100
+    .text: @{
+      *(.text)
+      . = 0x200
+    @}
+    . = 0x500
+    .data: @{
+      *(.data)
+      . += 0x600
+    @}
+@}
+@end smallexample
+
+The @samp{.text} section will be assigned a starting address of 0x100
+and a size of exactly 0x200 bytes, even if there is not enough data in
+the @samp{.text} input sections to fill this area.  (If there is too
+much data, an error will be produced because this would be an attempt to
+move @code{.} backwards).  The @samp{.data} section will start at 0x500
+and it will have an extra 0x600 bytes worth of space after the end of
+the values from the @samp{.data} input sections and before the end of
+the @samp{.data} output section itself.
+
 @need 2000
 @node Operators
 @subsection Operators

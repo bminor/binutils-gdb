@@ -1,3 +1,8 @@
+1999-06-22  Nick Clifton  <nickc@cygnus.com>
+
+	* ld.texinfo (Location Counter): Describe behaviour of
+	location counter inside section statements.
+
 1999-06-20  Mark Mitchell  <mark@codesourcery.com>
 
 	* scripttempl/elf.sc (WRITABLE_RODATA): New variable for
