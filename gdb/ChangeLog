@@ -1,3 +1,9 @@
+1999-02-10  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * demangle.c: Fix comments to mention "set demangle-style"
+        instead of "set demangle".
+        Run through indent to fix minor indenting problems.
+
 Wed Feb 10 17:53:09 1999  Bob Manson  <manson@charmed.cygnus.com>
 
 	* i386-tdep.c (gdb_print_insn_i386): Add missing returns.
