@@ -1,3 +1,7 @@
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* TODO: Delete all thread items.  The thread code was overhauled.
+
 2001-07-04  Elena Zannoni  <ezannoni@redhat.com>
 
 	* memattr.c (create_mem_region): Move n to next memory region,

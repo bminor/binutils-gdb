@@ -182,11 +182,6 @@ will still occure. sid/component/configure.in mis-configures
 
 --
 
-Thread support.  Right now, as soon as a thread finishes and exits,
-you're hosed.  This problem is reported once a week or so.
-
---
-
 		GDB 5.2 - New features
 		======================
 
@@ -857,58 +852,6 @@ the abstraction layer between the target independent and target code.  One
 way to address this is provide a generic "reset" command and target vector.
 
 http://sources.redhat.com/ml/gdb-patches/2000-10/msg00011.html
-
---
-
-			Thread Support
-			==============
-
---
-
-Generic: lin-thread cannot handle thread exit (Mark Kettenis, Michael
-Snyder) http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00525.html
-
-The thread_db assisted debugging code doesn't handle exiting threads
-properly, at least in combination with glibc 2.1.3 (the framework is
-there, just not the actual code).  There are at least two problems
-that prevent this from working.
-
-As an additional reference point, the pre thread_db code did not work
-either.
-
---
-
-GNU/Linux/x86 and random thread signals (and Solaris/SPARC but not
-Solaris/x86).
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00336.html
-
-Christopher Blizzard writes:
-
-So, I've done some more digging into this and it looks like Jim
-Kingdon has reported this problem in the past:
-
-http://sourceware.cygnus.com/ml/bug-gdb/1999-10/msg00058.html
-
-I can reproduce this problem both with and without Tom's patch.  Has
-anyone seen this before?  Maybe have a solution for it hanging around?
-:)
-
-There's a test case for this documented at:
-
-when debugging threaded applications you get extra SIGTRAPs
-http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=9565
-
-[There should be a GDB testcase - cagney]
-
---
-
-GDB5 TOT on unixware 7
-http://sourceware.cygnus.com/ml/gdb/2000-04/msg00119.html
-
-Robert Lipe writes:
-> I just spun the top of tree of the GDB5 branch on UnixWare 7.  As a
-> practical matter, the current thread support is somewhat more annoying
-> than when GDB was thread-unaware.
 
 --
 
