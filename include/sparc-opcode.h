@@ -7,7 +7,7 @@ This file is part of GAS, the GNU Assembler, and GDB, the GNU disassembler.
 
 GAS/GDB is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS/GDB is distributed in the hope that it will be useful,
@@ -18,6 +18,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with GAS or GDB; see the file COPYING.	If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.	*/
+
+ /* FIXME-someday: perhaps the ,a's and such should be embedded in the
+    instruction's name rather than the args.  This would make gas faster, pinsn
+    slower, but would mess up some macros a bit.  xoxorich. */
 
 #if !defined(__STDC__) && !defined(const)
 #define const
@@ -82,9 +86,10 @@ Kinds of operands:
 	m	alternate space register (asr) in rd
 	M	alternate space register (asr) in rs1
 	h	22 high bits.
+	I	11 bit Immediate. (v9)
 	i	13 bit Immediate.
-	k	14 bit PC relative immediate. (v9)
-	K	21 bit PC relative immediate. (v9)
+	k	2+14 bit PC relative immediate. (v9)
+	G	19 bit PC relative immediate. (v9)
 	l	22 bit PC relative immediate.
 	L	30 bit PC relative immediate.
 	a	Annul.	The annul bit is set.
@@ -94,6 +99,8 @@ Kinds of operands:
 	p	Processor state register.
 	N	Branch predict clear ",pn" (v9)
 	T	Branch predict set ",pt" (v9)
+	z	icc. (v9)
+	Z	xcc. (v9)
 	q	Floating point queue.
 	r	Single register that is both rs1 and rsd.
 	Q	Coprocessor queue.
@@ -101,7 +108,16 @@ Kinds of operands:
 	t	Trap base register.
 	w	Window invalid mask register.
 	y	Y register.
-	Y	amr register. (v9)
+	P	%pc.  (v9)
+	E	%modes.  (v9)
+	W	%tick.	(v9)
+	6	fcc0. (v9)
+	7	fcc1. (v9)
+	8	fcc2. (v9)
+	9	fcc3. (v9)
+
+The following chars are unused: (note: ,[] are used as punctuation)
+[nosuvxBHIJORUVX3450]
 
 */
 
@@ -118,13 +134,14 @@ Kinds of operands:
 #define OP3(x)		(((x)&0x3f) << 19) /* op3 field of format3 insns */
 #define OP(x)		(((x)&0x3) << 30) /* op field of all insns */
 #define OPF(x)		(((x)&0x1ff) << 5) /* opf field of float insns */
-#define F3F(x, y, z)	(OP(x) | OP3(y) | OPF(z)) /* format 3 float insns */
+#define OPF_LOW(x)	OPF((x)&0xf) /* v9 */
+#define F3F(x, y, z)	(OP(x) | OP3(y) | OPF(z)) /* format3 float insns */
 #define F3I(x)		(((x)&0x1) << 13) /* immediate field of format 3 insns */
 #define F2(x, y)	(OP(x) | OP2(y)) /* format 2 insns */
-#define F3(x, y, z)	(OP(x) | OP3(y) | F3I(z)) /* format 3 insns */
+#define F3(x, y, z)	(OP(x) | OP3(y) | F3I(z)) /* format3 insns */
 #define F1(x)		(OP(x))
 #define DISP30(x)	((x)&0x3fffffff)
-#define ASI(x)		(((x)&0xff) << 5) /* asi field of format 3 insns */
+#define ASI(x)		(((x)&0xff) << 5) /* asi field of format3 insns */
 #define RS2(x)		((x)&0x1f) /* rs2 field */
 #define SIMM13(x)	((x)&0x1fff) /* simm13 field */
 #define RD(x)		(((x)&0x1f) << 25) /* destination register field */
@@ -138,29 +155,55 @@ Kinds of operands:
 #define	RS1_G0	RS1(~0)
 #define	RS2_G0	RS2(~0)
 
-#define COND(x)		(((x)&0xf) << 25)
+#define COND(x)		(((x)&0xf)<<25)
+#define MCOND(x)	(((x)>>11)&(0xf<<14))	/* v9 */
 
-#define CONDN	(COND(0x0))
-#define CONDE	(COND(0x1))
-#define CONDLE	(COND(0x2))
-#define CONDL	(COND(0x3))
-#define CONDLEU	(COND(0x4))
-#define CONDCS	(COND(0x5))
-#define CONDNEG	(COND(0x6))
-#define CONDVS	(COND(0x7))
 #define CONDA	(COND(0x8))
-#define CONDNE	(COND(0x9))
+#define CONDCC	(COND(0xd))
+#define CONDCS	(COND(0x5))
+#define CONDE	(COND(0x1))
 #define CONDG	(COND(0xa))
 #define CONDGE	(COND(0xb))
 #define CONDGU	(COND(0xc))
-#define CONDCC	(COND(0xd))
+#define CONDL	(COND(0x3))
+#define CONDLE	(COND(0x2))
+#define CONDLEU	(COND(0x4))
+#define CONDN	(COND(0x0))
+#define CONDNE	(COND(0x9))
+#define CONDNEG	(COND(0x6))
 #define CONDPOS	(COND(0xe))
 #define CONDVC	(COND(0xf))
+#define CONDVS	(COND(0x7))
 
 #define CONDNZ	CONDNE
 #define CONDZ	CONDE
 #define CONDGEU	CONDCC
 #define CONDLU	CONDCS
+
+#define FCONDA		(COND(0x8))
+#define FCONDE		(COND(0x9))
+#define FCONDG		(COND(0x6))
+#define FCONDGE		(COND(0xb))
+#define FCONDL		(COND(0x4))
+#define FCONDLE		(COND(0xd))
+#define FCONDLG		(COND(0x2))
+#define FCONDN		(COND(0x0))
+#define FCONDNE		(COND(0x1))
+#define FCONDO		(COND(0xf))
+#define FCONDU		(COND(0x7))
+#define FCONDUE		(COND(0xa))
+#define FCONDUG		(COND(0x5))
+#define FCONDUGE	(COND(0xc))
+#define FCONDUL		(COND(0x3))
+#define FCONDULE	(COND(0xe))
+
+#define FCONDNZ	FCONDNE
+#define FCONDZ	FCONDE
+
+#define ICC (0)	/* v9 */
+#define XCC (1<<11) /* v9 */
+#define FCC(x)	(((x)&0x3)<<11) /* v9 */
+#define FBFCC(x)	(((x)&0x3)<<19)	/* v9 */
 
 static const struct sparc_opcode sparc_opcodes[] = {
 
@@ -261,9 +304,6 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "lda",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0),		"[1+2]A,d", 0, v6 },
 { "lda",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* lda [rs1+%g0],d */
 
-{ "lduwa",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0),		"[1+2]A,d", F_ALIAS, v9 }, /* lduwa === lda */
-{ "lduwa",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0)|RS2_G0,	"[1]A,d", F_ALIAS, v9 }, /* lda [rs1+%g0],d */
-
 { "ldd",	F3(3, 0x03, 0), F3(~3, ~0x03, ~0)|ASI(~0),	"[1+2],d", 0, v6 },
 { "ldd",	F3(3, 0x03, 0), F3(~3, ~0x03, ~0)|ASI_RS2(~0),	"[1],d", 0, v6 }, /* ldd [rs1+%g0],d */
 { "ldd",	F3(3, 0x03, 1), F3(~3, ~0x03, ~1),		"[1+i],d", 0, v6 },
@@ -282,31 +322,23 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1),		"[i+1],D", 0, v6 },
 { "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1)|RS1_G0,	"[i],D", 0, v6 },
 { "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1)|SIMM13(~0),	"[1],D", 0, v6 }, /* ldd [rs1+0],d */
-{ "ldda",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0),		"[1+2]A,d", 0, v6 },
-{ "ldda",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldda [rs1+%g0],d */
 { "ldsb",	F3(3, 0x09, 0), F3(~3, ~0x09, ~0)|ASI(~0),	"[1+2],d", 0, v6 },
 { "ldsb",	F3(3, 0x09, 0), F3(~3, ~0x09, ~0)|ASI_RS2(~0),	"[1],d", 0, v6 }, /* ldsb [rs1+%g0],d */
 { "ldsb",	F3(3, 0x09, 1), F3(~3, ~0x09, ~1),		"[1+i],d", 0, v6 },
 { "ldsb",	F3(3, 0x09, 1), F3(~3, ~0x09, ~1),		"[i+1],d", 0, v6 },
 { "ldsb",	F3(3, 0x09, 1), F3(~3, ~0x09, ~1)|RS1_G0,	"[i],d", 0, v6 },
 { "ldsb",	F3(3, 0x09, 1), F3(~3, ~0x09, ~1)|SIMM13(~0),	"[1],d", 0, v6 }, /* ldsb [rs1+0],d */
-{ "ldsba",	F3(3, 0x19, 0), F3(~3, ~0x19, ~0),		"[1+2]A,d", 0, v6 },
-{ "ldsba",	F3(3, 0x19, 0), F3(~3, ~0x19, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldsba [rs1+%g0],d */
 { "ldsh",	F3(3, 0x0a, 0), F3(~3, ~0x0a, ~0)|ASI_RS2(~0),	"[1],d", 0, v6 }, /* ldsh [rs1+%g0],d */
 { "ldsh",	F3(3, 0x0a, 0), F3(~3, ~0x0a, ~0)|ASI(~0),	"[1+2],d", 0, v6 },
 { "ldsh",	F3(3, 0x0a, 1), F3(~3, ~0x0a, ~1),		"[1+i],d", 0, v6 },
 { "ldsh",	F3(3, 0x0a, 1), F3(~3, ~0x0a, ~1),		"[i+1],d", 0, v6 },
 { "ldsh",	F3(3, 0x0a, 1), F3(~3, ~0x0a, ~1)|RS1_G0,	"[i],d", 0, v6 },
 { "ldsh",	F3(3, 0x0a, 1), F3(~3, ~0x0a, ~1)|SIMM13(~0),	"[1],d", 0, v6 }, /* ldsh [rs1+0],d */
-{ "ldsha",	F3(3, 0x1a, 0), F3(~3, ~0x1a, ~0),		"[1+2]A,d", 0, v6 },
-{ "ldsha",	F3(3, 0x1a, 0), F3(~3, ~0x1a, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldsha [rs1+%g0],d */
 { "ldstub",	F3(3, 0x0d, 0), F3(~3, ~0x0d, ~0)|ASI(~0),	"[1+2],d", 0, v6 },
 { "ldstub",	F3(3, 0x0d, 0), F3(~3, ~0x0d, ~0)|ASI_RS2(~0),	"[1],d", 0, v6 }, /* ldstub [rs1+%g0],d */
 { "ldstub",	F3(3, 0x0d, 1), F3(~3, ~0x0d, ~1),		"[1+i],d", 0, v6 },
 { "ldstub",	F3(3, 0x0d, 1), F3(~3, ~0x0d, ~1),		"[i+1],d", 0, v6 },
 { "ldstub",	F3(3, 0x0d, 1), F3(~3, ~0x0d, ~1)|RS1_G0,	"[i],d", 0, v6 },
-{ "ldstuba",	F3(3, 0x1b, 0), F3(~3, ~0x1b, ~0),		"[1+2]A,d", 0, v6 },
-{ "ldstuba",	F3(3, 0x1b, 0), F3(~3, ~0x1b, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldstuba [rs1+%g0],d */
 { "ldsw",	F3(3, 0x08, 0), F3(~3, ~0x08, ~0)|ASI(~0),	"[1+2],d", 0, v9 },
 { "ldsw",	F3(3, 0x08, 0), F3(~3, ~0x08, ~0)|ASI_RS2(~0),	"[1],d", 0, v9 }, /* ldsw [rs1+%g0],d */
 { "ldsw",	F3(3, 0x08, 1), F3(~3, ~0x08, ~1),		"[1+i],d", 0, v9 },
@@ -319,28 +351,37 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "ldub",	F3(3, 0x01, 1), F3(~3, ~0x01, ~1),		"[i+1],d", 0, v6 },
 { "ldub",	F3(3, 0x01, 1), F3(~3, ~0x01, ~1)|RS1_G0,	"[i],d", 0, v6 },
 { "ldub",	F3(3, 0x01, 1), F3(~3, ~0x01, ~1)|SIMM13(~0),	"[1],d", 0, v6 }, /* ldub [rs1+0],d */
-{ "lduba",	F3(3, 0x11, 0), F3(~3, ~0x11, ~0),		"[1+2]A,d", 0, v6 },
-{ "lduba",	F3(3, 0x11, 0), F3(~3, ~0x11, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* lduba [rs1+%g0],d */
 { "lduh",	F3(3, 0x02, 0), F3(~3, ~0x02, ~0)|ASI(~0),	"[1+2],d", 0, v6 },
 { "lduh",	F3(3, 0x02, 0), F3(~3, ~0x02, ~0)|ASI_RS2(~0),	"[1],d", 0, v6 }, /* lduh [rs1+%g0],d */
 { "lduh",	F3(3, 0x02, 1), F3(~3, ~0x02, ~1),		"[1+i],d", 0, v6 },
 { "lduh",	F3(3, 0x02, 1), F3(~3, ~0x02, ~1),		"[i+1],d", 0, v6 },
 { "lduh",	F3(3, 0x02, 1), F3(~3, ~0x02, ~1)|RS1_G0,	"[i],d", 0, v6 },
 { "lduh",	F3(3, 0x02, 1), F3(~3, ~0x02, ~1)|SIMM13(~0),	"[1],d", 0, v6 }, /* lduh [rs1+0],d */
-{ "lduha",	F3(3, 0x12, 0), F3(~3, ~0x12, ~0),		"[1+2]A,d", 0, v6 },
-{ "lduha",	F3(3, 0x12, 0), F3(~3, ~0x12, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* lduha [rs1+%g0],d */
 { "ldx",	F3(3, 0x0b, 0), F3(~3, ~0x0b, ~0)|ASI(~0),	"[1+2],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 0), F3(~3, ~0x0b, ~0)|ASI_RS2(~0),	"[1],d", 0, v9 }, /* ldx [rs1+%g0],d */
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1),		"[1+i],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1),		"[i+1],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1)|RS1_G0,	"[i],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1)|SIMM13(~0),	"[1],d", 0, v9 }, /* ldx [rs1+0],d */
-{ "ldxpc",	F3(3, 0x0c, 0), F3(~3, ~0x0c, ~0)|ASI(~0),	"[1+2],d", 0, v9 },
-{ "ldxpc",	F3(3, 0x0c, 0), F3(~3, ~0x0c, ~0)|ASI_RS2(~0),	"[1],d", 0, v9 }, /* ldxpc [rs1+%g0],d */
-{ "ldxpc",	F3(3, 0x0c, 1), F3(~3, ~0x0c, ~1),		"[1+i],d", 0, v9 },
-{ "ldxpc",	F3(3, 0x0c, 1), F3(~3, ~0x0c, ~1),		"[i+1],d", 0, v9 },
-{ "ldxpc",	F3(3, 0x0c, 1), F3(~3, ~0x0c, ~1)|RS1_G0,	"[i],d", 0, v9 },
-{ "ldxpc",	F3(3, 0x0c, 1), F3(~3, ~0x0c, ~1)|SIMM13(~0),	"[1],d", 0, v9 }, /* ldxpc [rs1+0],d */
+
+{ "ldda",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0),		"[1+2]A,d", 0, v6 },
+{ "ldda",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldda [rs1+%g0],d */
+{ "ldsba",	F3(3, 0x19, 0), F3(~3, ~0x19, ~0),		"[1+2]A,d", 0, v6 },
+{ "ldsba",	F3(3, 0x19, 0), F3(~3, ~0x19, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldsba [rs1+%g0],d */
+{ "ldsha",	F3(3, 0x1a, 0), F3(~3, ~0x1a, ~0),		"[1+2]A,d", 0, v6 },
+{ "ldsha",	F3(3, 0x1a, 0), F3(~3, ~0x1a, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldsha [rs1+%g0],d */
+{ "ldstuba",	F3(3, 0x1d, 0), F3(~3, ~0x1d, ~0),		"[1+2]A,d", 0, v6 },
+{ "ldstuba",	F3(3, 0x1d, 0), F3(~3, ~0x1d, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldstuba [rs1+%g0],d */
+{ "ldswa",	F3(3, 0x18, 0), F3(~3, ~0x18, ~0),		"[1+2]A,d", 0, v9 }, /* lduwa === lda */
+{ "ldswa",	F3(3, 0x18, 0), F3(~3, ~0x18, ~0)|RS2_G0,	"[1]A,d", 0, v9 }, /* lda [rs1+%g0],d */
+{ "lduba",	F3(3, 0x11, 0), F3(~3, ~0x11, ~0),		"[1+2]A,d", 0, v6 },
+{ "lduba",	F3(3, 0x11, 0), F3(~3, ~0x11, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* lduba [rs1+%g0],d */
+{ "lduha",	F3(3, 0x12, 0), F3(~3, ~0x12, ~0),		"[1+2]A,d", 0, v6 },
+{ "lduha",	F3(3, 0x12, 0), F3(~3, ~0x12, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* lduha [rs1+%g0],d */
+{ "lduwa",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0),		"[1+2]A,d", F_ALIAS, v9 }, /* lduwa === lda */
+{ "lduwa",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0)|RS2_G0,	"[1]A,d", F_ALIAS, v9 }, /* lda [rs1+%g0],d */
+{ "ldxa",	F3(3, 0x1b, 0), F3(~3, ~0x1b, ~0),		"[1+2]A,d", 0, v9 }, /* lduwa === lda */
+{ "ldxa",	F3(3, 0x1b, 0), F3(~3, ~0x1b, ~0)|RS2_G0,	"[1]A,d", 0, v9 }, /* lda [rs1+%g0],d */
 
 { "st",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI(~0),		"d,[1+2]", 0, v6 },
 { "st",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI_RS2(~0),		"d,[1]", 0, v6 }, /* st d,[rs1+%g0] */
@@ -573,12 +614,15 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "stuha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0),		"d,[1+2]A", F_ALIAS, v9 },
 { "stuha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* stha d,[rs1+%g0] */
 
-{ "stx",	F3(3, 0x1b, 0), F3(~3, ~0x1b, ~0)|ASI(~0),	"d,[1+2]", 0, v9 },
-{ "stx",	F3(3, 0x1b, 0), F3(~3, ~0x1b, ~0)|ASI_RS2(~0),	"d,[1]", 0, v9 }, /* stx d,[rs1+%g0] */
-{ "stx",	F3(3, 0x1b, 1), F3(~3, ~0x1b, ~1),		"d,[1+i]", 0, v9 },
-{ "stx",	F3(3, 0x1b, 1), F3(~3, ~0x1b, ~1),		"d,[i+1]", 0, v9 },
-{ "stx",	F3(3, 0x1b, 1), F3(~3, ~0x1b, ~1)|RS1_G0,	"d,[i]", 0, v9 },
-{ "stx",	F3(3, 0x1b, 1), F3(~3, ~0x1b, ~1)|SIMM13(~0),	"d,[1]", 0, v9 }, /* stx d,[rs1+0] */
+{ "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI(~0),	"d,[1+2]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI_RS2(~0),	"d,[1]", 0, v9 }, /* stx d,[rs1+%g0] */
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1),		"d,[1+i]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1),		"d,[i+1]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|RS1_G0,	"d,[i]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|SIMM13(~0),	"d,[1]", 0, v9 }, /* stx d,[rs1+0] */
+
+{ "stxa",	F3(3, 0x1e, 0), F3(~3, ~0x1e, ~0),		"d,[1+2]A", 0, v9 },
+{ "stxa",	F3(3, 0x1e, 0), F3(~3, ~0x1e, ~0)|RS2(~0),	"d,[1]A", 0, v9 }, /* stha d,[rs1+%g0] */
 
 { "swap",	F3(3, 0x0f, 0), F3(~3, ~0x0f, ~0)|ASI(~0),	"[1+2],d", 0, v7 },
 { "swap",	F3(3, 0x0f, 0), F3(~3, ~0x0f, ~0)|ASI_RS2(~0),	"[1],d", 0, v7 }, /* swap [rs1+%g0],d */
@@ -617,26 +661,27 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1),		"i+1,d", F_DELAYED, v6 },
 { "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RS1_G0,	"i,d", F_DELAYED, v6 },
 
-{ "sll",	F3(2, 0x25, 0), F3(~2, ~0x25, ~0)|ASI(~0),	"1,2,d", 0, v6 },
-{ "sll",	F3(2, 0x25, 1), F3(~2, ~0x25, ~1),		"1,i,d", 0, v6 },
-{ "sra",	F3(2, 0x27, 0), F3(~2, ~0x27, ~0)|ASI(~0),	"1,2,d", 0, v6 },
-{ "sra",	F3(2, 0x27, 1), F3(~2, ~0x27, ~1),		"1,i,d", 0, v6 },
-{ "srl",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|ASI(~0),	"1,2,d", 0, v6 },
-{ "srl",	F3(2, 0x26, 1), F3(~2, ~0x26, ~1),		"1,i,d", 0, v6 },
+ /* The 1<<12 is a long story.  It is necessary.  For more info, please contact rich@cygnus.com */
+{ "sll",	F3(2, 0x25, 0), F3(~2, ~0x25, ~0)|(1<<12)|ASI(~0),	"1,2,d", 0, v6 },
+{ "sll",	F3(2, 0x25, 1), F3(~2, ~0x25, ~1)|(1<<12),		"1,i,d", 0, v6 },
+{ "sra",	F3(2, 0x27, 0), F3(~2, ~0x27, ~0)|(1<<12)|ASI(~0),	"1,2,d", 0, v6 },
+{ "sra",	F3(2, 0x27, 1), F3(~2, ~0x27, ~1)|(1<<12),		"1,i,d", 0, v6 },
+{ "srl",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|(1<<12)|ASI(~0),	"1,2,d", 0, v6 },
+{ "srl",	F3(2, 0x26, 1), F3(~2, ~0x26, ~1)|(1<<12),		"1,i,d", 0, v6 },
 
-{ "sllw",	F3(2, 0x25, 0), F3(~2, ~0x25, ~0)|ASI(~0),	"1,2,d", F_ALIAS, v9 },	/* sllw === sll */
-{ "sllw",	F3(2, 0x25, 1), F3(~2, ~0x25, ~1),		"1,i,d", F_ALIAS, v9 },
-{ "sraw",	F3(2, 0x27, 0), F3(~2, ~0x27, ~0)|ASI(~0),	"1,2,d", F_ALIAS, v9 },	/* sraw === sra */
-{ "sraw",	F3(2, 0x27, 1), F3(~2, ~0x27, ~1),		"1,i,d", F_ALIAS, v9 },
-{ "srlw",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|ASI(~0),	"1,2,d", F_ALIAS, v9 },	/* srlw === srl */
-{ "srlw",	F3(2, 0x26, 1), F3(~2, ~0x26, ~1),		"1,i,d", F_ALIAS, v9 },
+{ "sllw",	F3(2, 0x25, 0), F3(~2, ~0x25, ~0)|(1<<12)|ASI(~0),	"1,2,d", F_ALIAS, v9 },	/* sllw === sll */
+{ "sllw",	F3(2, 0x25, 1), F3(~2, ~0x25, ~1)|(1<<12),		"1,i,d", F_ALIAS, v9 },
+{ "sraw",	F3(2, 0x27, 0), F3(~2, ~0x27, ~0)|(1<<12)|ASI(~0),	"1,2,d", F_ALIAS, v9 },	/* sraw === sra */
+{ "sraw",	F3(2, 0x27, 1), F3(~2, ~0x27, ~1)|(1<<12),		"1,i,d", F_ALIAS, v9 },
+{ "srlw",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|(1<<12)|ASI(~0),	"1,2,d", F_ALIAS, v9 },	/* srlw === srl */
+{ "srlw",	F3(2, 0x26, 1), F3(~2, ~0x26, ~1)|(1<<12),		"1,i,d", F_ALIAS, v9 },
 
-{ "sllx",	F3(2, 0x2d, 0), F3(~2, ~0x2d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "sllx",	F3(2, 0x2d, 1), F3(~2, ~0x2d, ~1),		"1,i,d", 0, v9 },
-{ "srax",	F3(2, 0x2f, 0), F3(~2, ~0x2f, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "srax",	F3(2, 0x2f, 1), F3(~2, ~0x2f, ~1),		"1,i,d", 0, v9 },
-{ "srlx",	F3(2, 0x2e, 0), F3(~2, ~0x2e, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "srlx",	F3(2, 0x2e, 1), F3(~2, ~0x2e, ~1),		"1,i,d", 0, v9 },
+{ "sllx",	F3(2, 0x25, 0)|(1<<12), F3(~2, ~0x25, ~0)|(ASI(~0)^(1<<12)),	"1,2,d", 0, v9 },
+{ "sllx",	F3(2, 0x25, 1)|(1<<12), F3(~2, ~0x25, ~1),		"1,i,d", 0, v9 },
+{ "srax",	F3(2, 0x27, 0)|(1<<12), F3(~2, ~0x27, ~0)|(ASI(~0)^(1<<12)),	"1,2,d", 0, v9 },
+{ "srax",	F3(2, 0x27, 1)|(1<<12), F3(~2, ~0x27, ~1),		"1,i,d", 0, v9 },
+{ "srlx",	F3(2, 0x26, 0)|(1<<12), F3(~2, ~0x26, ~0)|(ASI(~0)^(1<<12)),	"1,2,d", 0, v9 },
+{ "srlx",	F3(2, 0x26, 1)|(1<<12), F3(~2, ~0x26, ~1),		"1,i,d", 0, v9 },
 
 { "mulscc",	F3(2, 0x24, 0), F3(~2, ~0x24, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "mulscc",	F3(2, 0x24, 1), F3(~2, ~0x24, ~1),		"1,i,d", 0, v6 },
@@ -680,10 +725,8 @@ static const struct sparc_opcode sparc_opcodes[] = {
 
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|ASI(~0),		"1,2,m", 0, v8 }, /* wr r,r,%asrX */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|ASI(~0),	"1,2,y", 0, v6 }, /* wr r,r,%y */
-{ "wr",	F3(2, 0x30, 0)|RD(0xe),	F3(~2, ~0x30, ~0)|RD(~0xe)|ASI(~0),	"1,2,Y", 0, v9 }, /* wr r,r,%amr */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1),			"1,i,m", 0, v8 }, /* wr r,i,%asrX */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1)|RD_G0,		"1,i,y", 0, v6 }, /* wr r,i,%y */
-{ "wr",	F3(2, 0x30, 1)|RD(0xe), F3(~2, ~0x30, ~1)|RD(~0xe),		"1,i,Y", 0, v9 }, /* wr r,i,%amr */
 { "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|ASI(~0),	"1,2,p", 0, v6 }, /* wr r,r,%psr */
 { "wr",	F3(2, 0x31, 1),		F3(~2, ~0x31, ~1)|RD_G0,		"1,i,p", 0, v6 }, /* wr r,i,%psr */
 { "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|ASI(~0),	"1,2,w", 0, v6 }, /* wr r,r,%wim */
@@ -691,12 +734,27 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", 0, v6 }, /* wr r,r,%tbr */
 { "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", 0, v6 }, /* wr r,i,%tbr */
 
+{ "wr", F3(2, 0x30, 0)|RD(0), F3(~2, ~0x30, ~0)|RD(~0)|ASI(~0), "1,2,y", 0, v9 },
+{ "wr", F3(2, 0x30, 1)|RD(0), F3(~2, ~0x30, ~1)|RD(~0),		"1,i,y", 0, v9 },
+{ "wr", F3(2, 0x30, 0)|RD(1), F3(~2, ~0x30, ~0)|RD(~1)|ASI(~0), "1,2,E", 0, v9 },
+{ "wr", F3(2, 0x30, 1)|RD(1), F3(~2, ~0x30, ~1)|RD(~1),		"1,i,E", 0, v9 },
+{ "wr", F3(2, 0x30, 0)|RD(4), F3(~2, ~0x30, ~0)|RD(~4)|ASI(~0), "1,2,p", 0, v9 },
+{ "wr", F3(2, 0x30, 1)|RD(4), F3(~2, ~0x30, ~1)|RD(~4),		"1,i,p", 0, v9 },
+{ "wr", F3(2, 0x30, 0)|RD(5), F3(~2, ~0x30, ~0)|RD(~5)|ASI(~0), "1,2,w", 0, v9 },
+{ "wr", F3(2, 0x30, 1)|RD(5), F3(~2, ~0x30, ~1)|RD(~5),		"1,i,w", 0, v9 },
+
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", 0, v8 }, /* rd %asr1,r */
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),	"y,d", 0, v6 }, /* rd %y,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(0xe),	F3(~2, ~0x28, ~0)|RS1(0x1)|SIMM13(~0),	"Y,d", 0, v9 }, /* rd %amr,r */
+{ "rd",	F3(2, 0x28, 0)|RS1(1),		F3(~2, ~0x28, ~0)|RS1(~1)|SIMM13(~0),	"E,d", 0, v9 }, /* rd %modes,r */
+{ "rd",	F3(2, 0x28, 0)|RS1(2),		F3(~2, ~0x28, ~0)|RS1(~2)|SIMM13(~0),	"P,d", 0, v9 }, /* rd %pc,r */
+{ "rd",	F3(2, 0x28, 0)|RS1(3),		F3(~2, ~0x28, ~0)|RS1(~3)|SIMM13(~0),	"W,d", 0, v9 }, /* rd %tick,r */
+{ "rd",	F3(2, 0x28, 0)|RS1(4),		F3(~2, ~0x28, ~0)|RS1(~4)|SIMM13(~0),	"p,d", 0, v9 }, /* rd %psr,r */
+{ "rd",	F3(2, 0x28, 0)|RS1(5),		F3(~2, ~0x28, ~0)|RS1(~5)|SIMM13(~0),	"w,d", 0, v9 }, /* rd %wim,r */
+{ "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", 0, v6 }, /* rd %tbr,r */
+
+ /* FIXME-now: the v9 (ie, delta 2.02) definitions of these conflict with the older ones.  These are the older ones. */
 { "rd",	F3(2, 0x29, 0),			F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),	"p,d", 0, v6 }, /* rd %psr,r */
 { "rd",	F3(2, 0x2a, 0),			F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", 0, v6 }, /* rd %wim,r */
-{ "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", 0, v6 }, /* rd %tbr,r */
 
 { "mov",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|ASI(~0),		"1,2,m", F_ALIAS, v8 }, /* wr r,r,%asrX */
 { "mov",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|ASI(~0),	"1,2,y", F_ALIAS, v6 }, /* wr r,r,%y */
@@ -801,6 +859,8 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"1,i,d", 0, v6 },
 { "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"i,1,d", 0, v6 },
 
+{ "mulx",	F3(2, 0x09, 0), F3(~2, ~0x09, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "mulx",	F3(2, 0x09, 1), F3(~2, ~0x09, ~1),		"1,i,d", 0, v9 },
 { "smul",	F3(2, 0x0b, 0), F3(~2, ~0x0b, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "smul",	F3(2, 0x0b, 1), F3(~2, ~0x0b, ~1),		"1,i,d", 0, v8 },
 { "smul",	F3(2, 0x0b, 1), F3(~2, ~0x0b, ~1),		"i,1,d", 0, v8 },
@@ -813,6 +873,8 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "umulcc",	F3(2, 0x1a, 0), F3(~2, ~0x1a, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "umulcc",	F3(2, 0x1a, 1), F3(~2, ~0x1a, ~1),		"1,i,d", 0, v8 },
 { "umulcc",	F3(2, 0x1a, 1), F3(~2, ~0x1a, ~1),		"i,1,d", 0, v8 },
+{ "umulxcc",	F3(2, 0x19, 0), F3(~2, ~0x19, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "umulxcc",	F3(2, 0x19, 1), F3(~2, ~0x19, ~1),		"1,i,d", 0, v9 },
 
 { "sdiv",	F3(2, 0x0f, 0), F3(~2, ~0x0f, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "sdiv",	F3(2, 0x0f, 1), F3(~2, ~0x0f, ~1),		"1,i,d", 0, v8 },
@@ -820,12 +882,16 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "sdivcc",	F3(2, 0x1f, 0), F3(~2, ~0x1f, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "sdivcc",	F3(2, 0x1f, 1), F3(~2, ~0x1f, ~1),		"1,i,d", 0, v8 },
 { "sdivcc",	F3(2, 0x1f, 1), F3(~2, ~0x1f, ~1),		"i,1,d", 0, v8 },
+{ "sdivx",	F3(2, 0x0d, 0), F3(~2, ~0x0d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "sdivx",	F3(2, 0x0d, 1), F3(~2, ~0x0d, ~1),		"1,i,d", 0, v9 },
 { "udiv",	F3(2, 0x0e, 0), F3(~2, ~0x0e, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "udiv",	F3(2, 0x0e, 1), F3(~2, ~0x0e, ~1),		"1,i,d", 0, v8 },
 { "udiv",	F3(2, 0x0e, 1), F3(~2, ~0x0e, ~1),		"i,1,d", 0, v8 },
 { "udivcc",	F3(2, 0x1e, 0), F3(~2, ~0x1e, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "udivcc",	F3(2, 0x1e, 1), F3(~2, ~0x1e, ~1),		"1,i,d", 0, v8 },
 { "udivcc",	F3(2, 0x1e, 1), F3(~2, ~0x1e, ~1),		"i,1,d", 0, v8 },
+{ "udivx",	F3(2, 0x1d, 0), F3(~2, ~0x1d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "udivx",	F3(2, 0x1d, 1), F3(~2, ~0x1d, ~1),		"1,i,d", 0, v9 },
 
 { "call",	F1(0x1), F1(~0x1), "L", F_DELAYED, v6 },
 { "call",	F1(0x1), F1(~0x1), "L,#", F_DELAYED, v6 },
@@ -836,7 +902,7 @@ static const struct sparc_opcode sparc_opcodes[] = {
 
    Because this part of the table was such a mess earlier, I have
    macrofied it so that all the branches and traps are generated from
-   a single-line description of each condition value.  */
+   a single-line description of each condition value.  John Gilmore. */
 
 /* Define branches -- one annulled, one without, etc. */
 #define br(opcode, mask, lose, flags) \
@@ -844,35 +910,39 @@ static const struct sparc_opcode sparc_opcodes[] = {
  { opcode, (mask)      , (lose)|ANNUL, "l",     (flags), v6 }
 
 #define brx(opcode, mask, lose, flags) /* v9 */ \
- { opcode, (mask), (lose)|ANNUL|BPRED, "K",   (flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",NK",   (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",aK", (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,NK", (flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",TK",   (flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,TK", (flags), v9 }
+ { opcode, (mask), (lose)|ANNUL|BPRED, "ZG",   (flags), v9 }, \
+ { opcode, (mask), (lose)|ANNUL|BPRED, ",NZG",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",aZG", (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,NZG", (flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|ANNUL, ",TZG",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose), ",a,TZG", (flags), v9 }, \
+ { opcode, (mask), (lose)|ANNUL|BPRED, "zG",   (flags), v9 }, \
+ { opcode, (mask), (lose)|ANNUL|BPRED, ",NzG",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",azG", (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,NzG", (flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|ANNUL, ",TzG",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose), ",a,TzG", (flags), v9 }
 
 /* Define four traps: reg+reg, reg + immediate, immediate alone, reg alone. */
 #define tr(opcode, mask, lose, flags) \
- { opcode, (mask)|IMMED, (lose)|RS1_G0      , "i", (flags), v6 }, /* %g0 + imm */ \
- { opcode, (mask)|IMMED, (lose)             , "1+i", (flags), v6 }, /* rs1 + imm */ \
- { opcode, (mask)      , (lose)|IMMED       , "1+2", (flags), v6 }, /* rs1 + rs2 */ \
- { opcode, (mask)      , (lose)|IMMED|RS2_G0, "1", (flags), v6 } /* rs1 + %g0 */
-
-#define trx(opcode, mask, lose, flags) /* v9 */ \
- { opcode, (mask)|IMMED, (lose)|(0x3f<<6)|RS1_G0      , "i", (flags), v9 }, /* %g0 + imm */ \
- { opcode, (mask)|IMMED, (lose)|(0x3f<<6)             , "1+i", (flags), v9 }, /* rs1 + imm */ \
- { opcode, (mask)      , (lose)|(0x3f<<6)|IMMED       , "1+2", (flags), v9 }, /* rs1 + rs2 */ \
- { opcode, (mask)      , (lose)|(0x3f<<6)|IMMED|RS2_G0, "1", (flags), v9 } /* rs1 + %g0 */
+ { opcode, (mask)|IMMED, (lose)|RS1_G0,		"i",     (flags), v6 }, /* %g0 + imm */ \
+ { opcode, (mask)|IMMED, (lose),		"1+i",   (flags), v6 }, /* rs1 + imm */ \
+ { opcode, (mask), IMMED|(lose),		"1+2",   (flags), v6 }, /* rs1 + rs2 */ \
+ { opcode, (mask)|(1<<12)|IMMED, (lose)|RS1_G0,	"Z,i",   (flags), v9 }, /* %g0 + imm */ \
+ { opcode, (mask)|(1<<12)|IMMED, (lose),	"Z,1+i", (flags), v9 }, /* rs1 + imm */ \
+ { opcode, (mask)|(1<<12), IMMED|(lose),	"Z,1+2", (flags), v9 }, /* rs1 + rs2 */ \
+ { opcode, (mask)|(1<<12), IMMED|(lose)|RS2_G0,	"Z,1",   (flags), v9 }, /* rs1 + %g0 */ \
+ { opcode, (mask)|IMMED, (1<<12)|(lose)|RS1_G0,	"z,i",   (flags)|F_ALIAS, v9 }, /* %g0 + imm */ \
+ { opcode, (mask)|IMMED, (1<<12)|(lose),	"z,1+i", (flags)|F_ALIAS, v9 }, /* rs1 + imm */ \
+ { opcode, (mask), IMMED|(1<<12)|(lose),	"z,1+2", (flags)|F_ALIAS, v9 }, /* rs1 + rs2 */ \
+ { opcode, (mask), IMMED|(1<<12)|(lose)|RS2_G0,	"z,1",   (flags)|F_ALIAS, v9 }, /* rs1 + %g0 */ \
+ { opcode, (mask), IMMED|(lose)|RS2_G0,		"1",     (flags), v6 } /* rs1 + %g0 */
 
 /* Define both branches and traps based on condition mask */
 #define cond(bop, top, mask, flags) \
   br(bop,  F2(0, 2)|(mask), F2(~0, ~2)|((~mask)&COND(~0)), F_DELAYED|(flags)), \
-  brx(bop, F2(0, 1)|(mask), F2(~0, ~1)|((~mask)&COND(~0)), F_DELAYED|(flags)), /* v9 */ \
+  brx(bop, F2(0, 5)|(mask), F2(~0, ~5)|((~mask)&COND(~0)), F_DELAYED|(flags)), /* v9 */ \
   tr(top,  F3(2, 0x3a, 0)|(mask), F3(~2, ~0x3a, 0)|((~mask)&COND(~0)), (flags))
-
-#define condx(bop, top, mask, flags) /* v9 */ \
-  brx(bop, F2(0, 3)|(mask), F2(~0, ~3)|((~(mask))&COND(~0)), (flags)), /* v9 */ \
-  trx(top, F3(2, 0x3e, 0)|(mask), F3(~2, ~0x3e, 0)|((~(mask))&COND(~0)), (flags)) /* v9 */
 
 /* Define all the conditions, all the branches, all the traps.  */
 
@@ -904,63 +974,616 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 #undef br
 #undef tr
 
-/* v9 */ condx ("bx",	"tx",    CONDA, 0),
-/* v9 */ condx ("bxa",	"txa",   CONDA, F_ALIAS), /* for nothing */
-/* v9 */ condx ("bxcc",	"txcc",  CONDCC, 0),
-/* v9 */ condx ("bxcs",	"txcs",  CONDCS, 0),
-/* v9 */ condx ("bxe",	"txe",   CONDE, 0),
-/* v9 */ condx ("bxg",	"txg",   CONDG, 0),
-/* v9 */ condx ("bxgt",	"txgt",   CONDG, F_ALIAS),
-/* v9 */ condx ("bxge",	"txge",  CONDGE, 0),
-/* v9 */ condx ("bxgeu",	"txgeu", CONDGEU, F_ALIAS), /* for cc */
-/* v9 */ condx ("bxgu",	"txgu",  CONDGU, 0),
-/* v9 */ condx ("bxl",	"txl",   CONDL, 0),
-/* v9 */ condx ("bxlt",	"txlt",   CONDL, F_ALIAS),
-/* v9 */ condx ("bxle",	"txle",  CONDLE, 0),
-/* v9 */ condx ("bxleu",	"txleu", CONDLEU, 0),
-/* v9 */ condx ("bxlu",	"txlu",  CONDLU, F_ALIAS), /* for cs */
-/* v9 */ condx ("bxn",	"txn",   CONDN, 0),
-/* v9 */ condx ("bxne",	"txne",  CONDNE, 0),
-/* v9 */ condx ("bxneg",	"txneg", CONDNEG, 0),
-/* v9 */ condx ("bxnz",	"txnz",  CONDNZ, F_ALIAS), /* for ne */
-/* v9 */ condx ("bxpos",	"txpos", CONDPOS, 0),
-/* v9 */ condx ("bxvc",	"txvc",  CONDVC, 0),
-/* v9 */ condx ("bxvs",	"txvs",  CONDVS, 0),
-/* v9 */ condx ("bxz",	"txz",   CONDZ, F_ALIAS), /* for e */
+#define brr(opcode, mask, lose, flags) /* v9 */ \
+ { opcode, (mask), (lose)|ANNUL|BPRED, "k",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask), (lose)|ANNUL|BPRED, ",Nk", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",ak", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,Nk", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|ANNUL, ",Tk",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose), ",a,Tk", F_DELAYED|(flags), v9 }
 
-#undef condx /* v9 */
-#undef brx /* v9 */
-#undef trx /* v9 */
+#define condr(bop, mask, flags) /* v9 */ \
+  brr(bop, F2(0, 3)|COND(mask), F2(~0, ~3)|COND(~(mask)), (flags)) /* v9 */ \
 
-#define brr(opcode, mask, lose) /* v9 */ \
- { opcode, (mask), (lose)|ANNUL|BPRED, "k",   F_DELAYED, v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",Nk", F_DELAYED, v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",ak", F_DELAYED, v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,Nk", F_DELAYED, v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",Tk",   F_DELAYED, v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,Tk", F_DELAYED, v9 }
-
-#define condr(bop, mask) /* v9 */ \
-  brr(bop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask))) /* v9 */ \
-
-/* v9 */ condr("brneg", 0xb),
-/* v9 */ condr("brneg32", 0x3),
-/* v9 */ condr("brnz", 0x9),
-/* v9 */ condr("brnz32", 0x1),
-/* v9 */ condr("brpos", 0xa),
-/* v9 */ condr("brpos32", 0x2),
-/* v9 */ condr("brz", 0x8),
-/* v9 */ condr("brz32",  0x0),
+/* v9 */ condr("bre", 0x1, 0),
+/* v9 */ condr("brne", 0x0, 0),
+/* v9 */ condr("brneg", 0x3, 0),
+/* v9 */ condr("brnz", 0x0, F_ALIAS),
+/* v9 */ condr("brpos", 0x2, 0),
+/* v9 */ condr("brz", 0x1, F_ALIAS),
 
 #undef condr /* v9 */
 #undef brr /* v9 */
 
+#define mrr(opcode, mask, lose, flags) /* v9 */ \
+ { opcode, (mask), (lose)|ASI(~0), "1,2,d",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask), (lose), "1,i,d", F_DELAYED|(flags), v9 }
+
+#define movr(bop, mask, flags) /* v9 */ \
+  mrr(bop, F3(2, 0x2f, 0)|COND(mask), F3(~2, ~0x2f, ~0)|COND(~(mask))|ASI(~0), (flags)), /* v9 */ \
+  mrr(bop, F3(2, 0x2f, 1)|COND(mask), F3(~2, ~0x2f, ~1)|COND(~(mask)), (flags)) /* v9 */ \
+
+/* v9 */ movr("movre", 0x1, 0),
+/* v9 */ movr("movrne", 0x0, 0),
+/* v9 */ movr("movrneg", 0x3, 0),
+/* v9 */ movr("movrnz", 0x0, F_ALIAS),
+/* v9 */ movr("movrpos", 0x2, 0),
+/* v9 */ movr("movrz", 0x1, F_ALIAS),
+
+#undef movr /* v9 */
+#undef mrr /* v9 */
+
+{ "mova",	F2(2, 0x58)|FCC(0)|MCOND(FCONDA), MCOND(~FCONDA)|IMMED|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "mova",	F2(2, 0x58)|FCC(0)|MCOND(FCONDA)|IMMED, MCOND(~FCONDA)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "mova",	F2(2, 0x58)|FCC(1)|MCOND(FCONDA), IMMED|MCOND(~FCONDA)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "mova",	F2(2, 0x58)|FCC(1)|MCOND(FCONDA)|IMMED, MCOND(~FCONDA)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "mova",	F2(2, 0x58)|FCC(2)|MCOND(FCONDA), IMMED|MCOND(~FCONDA)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "mova",	F2(2, 0x58)|FCC(2)|MCOND(FCONDA)|IMMED, MCOND(~FCONDA)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "mova",	F2(2, 0x58)|FCC(3)|MCOND(FCONDA), IMMED|MCOND(~FCONDA)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "mova",	F2(2, 0x58)|FCC(3)|MCOND(FCONDA)|IMMED, MCOND(~FCONDA)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "mova",	F2(2, 0x59)|MCOND(CONDA)|ICC, F2(~2, ~0x59)|MCOND(~CONDA)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "mova",	F2(2, 0x59)|MCOND(CONDA)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDA)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "mova",	F2(2, 0x59)|MCOND(CONDA)|XCC, F2(~2, ~0x59)|MCOND(~CONDA)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "mova",	F2(2, 0x59)|MCOND(CONDA)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDA)|(1<<12), "Z,I,d", 0, v9 },
+{ "movcc",	F2(2, 0x59)|MCOND(CONDCC)|ICC, F2(~2, ~0x59)|MCOND(~CONDCC)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movcc",	F2(2, 0x59)|MCOND(CONDCC)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCC)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movcc",	F2(2, 0x59)|MCOND(CONDCC)|XCC, F2(~2, ~0x59)|MCOND(~CONDCC)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movcc",	F2(2, 0x59)|MCOND(CONDCC)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCC)|(1<<12), "Z,I,d", 0, v9 },
+{ "movcs",	F2(2, 0x59)|MCOND(CONDCS)|ICC, F2(~2, ~0x59)|MCOND(~CONDCS)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movcs",	F2(2, 0x59)|MCOND(CONDCS)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCS)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movcs",	F2(2, 0x59)|MCOND(CONDCS)|XCC, F2(~2, ~0x59)|MCOND(~CONDCS)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movcs",	F2(2, 0x59)|MCOND(CONDCS)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCS)|(1<<12), "Z,I,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(0)|MCOND(FCONDE), IMMED|MCOND(~FCONDE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(0)|MCOND(FCONDE)|IMMED, MCOND(~FCONDE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(1)|MCOND(FCONDE), IMMED|MCOND(~FCONDE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(1)|MCOND(FCONDE)|IMMED, MCOND(~FCONDE)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(2)|MCOND(FCONDE), IMMED|MCOND(~FCONDE)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(2)|MCOND(FCONDE)|IMMED, MCOND(~FCONDE)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(3)|MCOND(FCONDE), IMMED|MCOND(~FCONDE)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "move",	F2(2, 0x58)|FCC(3)|MCOND(FCONDE)|IMMED, MCOND(~FCONDE)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "move",	F2(2, 0x59)|MCOND(CONDE)|ICC, F2(~2, ~0x59)|MCOND(~CONDE)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "move",	F2(2, 0x59)|MCOND(CONDE)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDE)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "move",	F2(2, 0x59)|MCOND(CONDE)|XCC, F2(~2, ~0x59)|MCOND(~CONDE)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "move",	F2(2, 0x59)|MCOND(CONDE)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDE)|(1<<12), "Z,I,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(0)|MCOND(FCONDG), IMMED|MCOND(~FCONDG)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(0)|MCOND(FCONDG)|IMMED, MCOND(~FCONDG)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(1)|MCOND(FCONDG), IMMED|MCOND(~FCONDG)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(1)|MCOND(FCONDG)|IMMED, MCOND(~FCONDG)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(2)|MCOND(FCONDG), IMMED|MCOND(~FCONDG)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(2)|MCOND(FCONDG)|IMMED, MCOND(~FCONDG)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(3)|MCOND(FCONDG), IMMED|MCOND(~FCONDG)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movg",	F2(2, 0x58)|FCC(3)|MCOND(FCONDG)|IMMED, MCOND(~FCONDG)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movg",	F2(2, 0x59)|MCOND(CONDG)|ICC, F2(~2, ~0x59)|MCOND(~CONDG)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movg",	F2(2, 0x59)|MCOND(CONDG)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDG)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movg",	F2(2, 0x59)|MCOND(CONDG)|XCC, F2(~2, ~0x59)|MCOND(~CONDG)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movg",	F2(2, 0x59)|MCOND(CONDG)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDG)|(1<<12), "Z,I,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(0)|MCOND(FCONDGE), IMMED|MCOND(~FCONDGE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(0)|MCOND(FCONDGE)|IMMED, MCOND(~FCONDGE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(1)|MCOND(FCONDGE), IMMED|MCOND(~FCONDGE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(1)|MCOND(FCONDGE)|IMMED, MCOND(~FCONDGE)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(2)|MCOND(FCONDGE), IMMED|MCOND(~FCONDGE)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(2)|MCOND(FCONDGE)|IMMED, MCOND(~FCONDGE)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(3)|MCOND(FCONDGE), IMMED|MCOND(~FCONDGE)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movge",	F2(2, 0x58)|FCC(3)|MCOND(FCONDGE)|IMMED, MCOND(~FCONDGE)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movge",	F2(2, 0x59)|MCOND(CONDGE)|ICC, F2(~2, ~0x59)|MCOND(~CONDGE)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movge",	F2(2, 0x59)|MCOND(CONDGE)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDGE)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movge",	F2(2, 0x59)|MCOND(CONDGE)|XCC, F2(~2, ~0x59)|MCOND(~CONDGE)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movge",	F2(2, 0x59)|MCOND(CONDGE)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDGE)|(1<<12), "Z,I,d", 0, v9 },
+{ "movgu",	F2(2, 0x59)|MCOND(CONDGU)|ICC, F2(~2, ~0x59)|MCOND(~CONDGU)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movgu",	F2(2, 0x59)|MCOND(CONDGU)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDGU)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movgu",	F2(2, 0x59)|MCOND(CONDGU)|XCC, F2(~2, ~0x59)|MCOND(~CONDGU)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movgu",	F2(2, 0x59)|MCOND(CONDGU)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDGU)|(1<<12), "Z,I,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(0)|MCOND(FCONDL), IMMED|MCOND(~FCONDL)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(0)|MCOND(FCONDL)|IMMED, MCOND(~FCONDL)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(1)|MCOND(FCONDL), IMMED|MCOND(~FCONDL)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(1)|MCOND(FCONDL)|IMMED, MCOND(~FCONDL)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(2)|MCOND(FCONDL), IMMED|MCOND(~FCONDL)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(2)|MCOND(FCONDL)|IMMED, MCOND(~FCONDL)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(3)|MCOND(FCONDL), IMMED|MCOND(~FCONDL)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movl",	F2(2, 0x58)|FCC(3)|MCOND(FCONDL)|IMMED, MCOND(~FCONDL)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movl",	F2(2, 0x59)|MCOND(CONDL)|ICC, F2(~2, ~0x59)|MCOND(~CONDL)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movl",	F2(2, 0x59)|MCOND(CONDL)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDL)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movl",	F2(2, 0x59)|MCOND(CONDL)|XCC, F2(~2, ~0x59)|MCOND(~CONDL)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movl",	F2(2, 0x59)|MCOND(CONDL)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDL)|(1<<12), "Z,I,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(0)|MCOND(FCONDLE), IMMED|MCOND(~FCONDLE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(0)|MCOND(FCONDLE)|IMMED, MCOND(~FCONDLE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(1)|MCOND(FCONDLE), IMMED|MCOND(~FCONDLE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(1)|MCOND(FCONDLE)|IMMED, MCOND(~FCONDLE)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(2)|MCOND(FCONDLE), IMMED|MCOND(~FCONDLE)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(2)|MCOND(FCONDLE)|IMMED, MCOND(~FCONDLE)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(3)|MCOND(FCONDLE), IMMED|MCOND(~FCONDLE)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movle",	F2(2, 0x58)|FCC(3)|MCOND(FCONDLE)|IMMED, MCOND(~FCONDLE)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movle",	F2(2, 0x59)|MCOND(CONDLE)|ICC, F2(~2, ~0x59)|MCOND(~CONDLE)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movle",	F2(2, 0x59)|MCOND(CONDLE)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDLE)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movle",	F2(2, 0x59)|MCOND(CONDLE)|XCC, F2(~2, ~0x59)|MCOND(~CONDLE)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movle",	F2(2, 0x59)|MCOND(CONDLE)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDLE)|(1<<12), "Z,I,d", 0, v9 },
+{ "movleu",	F2(2, 0x59)|MCOND(CONDLEU)|ICC, F2(~2, ~0x59)|MCOND(~CONDLEU)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movleu",	F2(2, 0x59)|MCOND(CONDLEU)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDLEU)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movleu",	F2(2, 0x59)|MCOND(CONDLEU)|XCC, F2(~2, ~0x59)|MCOND(~CONDLEU)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movleu",	F2(2, 0x59)|MCOND(CONDLEU)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDLEU)|(1<<12), "Z,I,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(0)|MCOND(FCONDLG), IMMED|MCOND(~FCONDLG)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(0)|MCOND(FCONDLG)|IMMED, MCOND(~FCONDLG)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(1)|MCOND(FCONDLG), IMMED|MCOND(~FCONDLG)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(1)|MCOND(FCONDLG)|IMMED, MCOND(~FCONDLG)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(2)|MCOND(FCONDLG), IMMED|MCOND(~FCONDLG)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(2)|MCOND(FCONDLG)|IMMED, MCOND(~FCONDLG)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(3)|MCOND(FCONDLG), IMMED|MCOND(~FCONDLG)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movlg",	F2(2, 0x58)|FCC(3)|MCOND(FCONDLG)|IMMED, MCOND(~FCONDLG)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(0)|MCOND(FCONDN), IMMED|MCOND(~FCONDN)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(0)|MCOND(FCONDN)|IMMED, MCOND(~FCONDN)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(1)|MCOND(FCONDN), IMMED|MCOND(~FCONDN)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(1)|MCOND(FCONDN)|IMMED, MCOND(~FCONDN)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(2)|MCOND(FCONDN), IMMED|MCOND(~FCONDN)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(2)|MCOND(FCONDN)|IMMED, MCOND(~FCONDN)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(3)|MCOND(FCONDN), IMMED|MCOND(~FCONDN)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movn",	F2(2, 0x58)|FCC(3)|MCOND(FCONDN)|IMMED, MCOND(~FCONDN)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movn",	F2(2, 0x59)|MCOND(CONDN)|ICC, F2(~2, ~0x59)|MCOND(~CONDN)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movn",	F2(2, 0x59)|MCOND(CONDN)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDN)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movn",	F2(2, 0x59)|MCOND(CONDN)|XCC, F2(~2, ~0x59)|MCOND(~CONDN)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movn",	F2(2, 0x59)|MCOND(CONDN)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDN)|(1<<12), "Z,I,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(0)|MCOND(FCONDNE), IMMED|MCOND(~FCONDNE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(0)|MCOND(FCONDNE)|IMMED, MCOND(~FCONDNE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(1)|MCOND(FCONDNE), IMMED|MCOND(~FCONDNE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(1)|MCOND(FCONDNE)|IMMED, MCOND(~FCONDNE)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(2)|MCOND(FCONDNE), IMMED|MCOND(~FCONDNE)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(2)|MCOND(FCONDNE)|IMMED, MCOND(~FCONDNE)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(3)|MCOND(FCONDNE), IMMED|MCOND(~FCONDNE)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movne",	F2(2, 0x58)|FCC(3)|MCOND(FCONDNE)|IMMED, MCOND(~FCONDNE)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movne",	F2(2, 0x59)|MCOND(CONDNE)|ICC, F2(~2, ~0x59)|MCOND(~CONDNE)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movne",	F2(2, 0x59)|MCOND(CONDNE)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDNE)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movne",	F2(2, 0x59)|MCOND(CONDNE)|XCC, F2(~2, ~0x59)|MCOND(~CONDNE)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movne",	F2(2, 0x59)|MCOND(CONDNE)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDNE)|(1<<12), "Z,I,d", 0, v9 },
+{ "movneg",	F2(2, 0x59)|MCOND(CONDNEG)|ICC, F2(~2, ~0x59)|MCOND(~CONDNEG)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movneg",	F2(2, 0x59)|MCOND(CONDNEG)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDNEG)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movneg",	F2(2, 0x59)|MCOND(CONDNEG)|XCC, F2(~2, ~0x59)|MCOND(~CONDNEG)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movneg",	F2(2, 0x59)|MCOND(CONDNEG)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDNEG)|(1<<12), "Z,I,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(0)|MCOND(FCONDNZ), IMMED|MCOND(~FCONDNZ)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(0)|MCOND(FCONDNZ)|IMMED, MCOND(~FCONDNZ)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(1)|MCOND(FCONDNZ), IMMED|MCOND(~FCONDNZ)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(1)|MCOND(FCONDNZ)|IMMED, MCOND(~FCONDNZ)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(2)|MCOND(FCONDNZ), IMMED|MCOND(~FCONDNZ)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(2)|MCOND(FCONDNZ)|IMMED, MCOND(~FCONDNZ)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(3)|MCOND(FCONDNZ), IMMED|MCOND(~FCONDNZ)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movnz",	F2(2, 0x58)|FCC(3)|MCOND(FCONDNZ)|IMMED, MCOND(~FCONDNZ)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(0)|MCOND(FCONDO), IMMED|MCOND(~FCONDO)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(0)|MCOND(FCONDO)|IMMED, MCOND(~FCONDO)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(1)|MCOND(FCONDO), IMMED|MCOND(~FCONDO)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(1)|MCOND(FCONDO)|IMMED, MCOND(~FCONDO)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(2)|MCOND(FCONDO), IMMED|MCOND(~FCONDO)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(2)|MCOND(FCONDO)|IMMED, MCOND(~FCONDO)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(3)|MCOND(FCONDO), IMMED|MCOND(~FCONDO)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movo",	F2(2, 0x58)|FCC(3)|MCOND(FCONDO)|IMMED, MCOND(~FCONDO)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movpos",	F2(2, 0x59)|MCOND(CONDPOS)|ICC, F2(~2, ~0x59)|MCOND(~CONDPOS)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movpos",	F2(2, 0x59)|MCOND(CONDPOS)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDPOS)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movpos",	F2(2, 0x59)|MCOND(CONDPOS)|XCC, F2(~2, ~0x59)|MCOND(~CONDPOS)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movpos",	F2(2, 0x59)|MCOND(CONDPOS)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDPOS)|(1<<12), "Z,I,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(0)|MCOND(FCONDU), IMMED|MCOND(~FCONDU)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(0)|MCOND(FCONDU)|IMMED, MCOND(~FCONDU)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(1)|MCOND(FCONDU), IMMED|MCOND(~FCONDU)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(1)|MCOND(FCONDU)|IMMED, MCOND(~FCONDU)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(2)|MCOND(FCONDU), IMMED|MCOND(~FCONDU)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(2)|MCOND(FCONDU)|IMMED, MCOND(~FCONDU)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(3)|MCOND(FCONDU), IMMED|MCOND(~FCONDU)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movu",	F2(2, 0x58)|FCC(3)|MCOND(FCONDU)|IMMED, MCOND(~FCONDU)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUE), IMMED|MCOND(~FCONDUE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUE)|IMMED, MCOND(~FCONDUE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUE), IMMED|MCOND(~FCONDUE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUE)|IMMED, MCOND(~FCONDUE)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUE), IMMED|MCOND(~FCONDUE)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUE)|IMMED, MCOND(~FCONDUE)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUE), IMMED|MCOND(~FCONDUE)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movue",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUE)|IMMED, MCOND(~FCONDUE)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUG), IMMED|MCOND(~FCONDUG)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUG)|IMMED, MCOND(~FCONDUG)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUG), IMMED|MCOND(~FCONDUG)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUG)|IMMED, MCOND(~FCONDUG)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUG), IMMED|MCOND(~FCONDUG)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUG)|IMMED, MCOND(~FCONDUG)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUG), IMMED|MCOND(~FCONDUG)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movug",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUG)|IMMED, MCOND(~FCONDUG)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUGE), IMMED|MCOND(~FCONDUGE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUGE)|IMMED, MCOND(~FCONDUGE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUGE), IMMED|MCOND(~FCONDUGE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUGE)|IMMED, MCOND(~FCONDUGE)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUGE), IMMED|MCOND(~FCONDUGE)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUGE)|IMMED, MCOND(~FCONDUGE)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUGE), IMMED|MCOND(~FCONDUGE)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movuge",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUGE)|IMMED, MCOND(~FCONDUGE)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUL), IMMED|MCOND(~FCONDUL)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(0)|MCOND(FCONDUL)|IMMED, MCOND(~FCONDUL)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUL), IMMED|MCOND(~FCONDUL)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(1)|MCOND(FCONDUL)|IMMED, MCOND(~FCONDUL)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUL), IMMED|MCOND(~FCONDUL)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(2)|MCOND(FCONDUL)|IMMED, MCOND(~FCONDUL)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUL), IMMED|MCOND(~FCONDUL)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movul",	F2(2, 0x58)|FCC(3)|MCOND(FCONDUL)|IMMED, MCOND(~FCONDUL)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(0)|MCOND(FCONDULE), IMMED|MCOND(~FCONDULE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(0)|MCOND(FCONDULE)|IMMED, MCOND(~FCONDULE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(1)|MCOND(FCONDULE), IMMED|MCOND(~FCONDULE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(1)|MCOND(FCONDULE)|IMMED, MCOND(~FCONDULE)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(2)|MCOND(FCONDULE), IMMED|MCOND(~FCONDULE)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(2)|MCOND(FCONDULE)|IMMED, MCOND(~FCONDULE)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(3)|MCOND(FCONDULE), IMMED|MCOND(~FCONDULE)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movule",	F2(2, 0x58)|FCC(3)|MCOND(FCONDULE)|IMMED, MCOND(~FCONDULE)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+{ "movvc",	F2(2, 0x59)|MCOND(CONDVC)|ICC, F2(~2, ~0x59)|MCOND(~CONDVC)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movvc",	F2(2, 0x59)|MCOND(CONDVC)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDVC)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movvc",	F2(2, 0x59)|MCOND(CONDVC)|XCC, F2(~2, ~0x59)|MCOND(~CONDVC)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movvc",	F2(2, 0x59)|MCOND(CONDVC)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDVC)|(1<<12), "Z,I,d", 0, v9 },
+{ "movvs",	F2(2, 0x59)|MCOND(CONDVS)|ICC, F2(~2, ~0x59)|MCOND(~CONDVS)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movvs",	F2(2, 0x59)|MCOND(CONDVS)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDVS)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movvs",	F2(2, 0x59)|MCOND(CONDVS)|XCC, F2(~2, ~0x59)|MCOND(~CONDVS)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movvs",	F2(2, 0x59)|MCOND(CONDVS)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDVS)|(1<<12), "Z,I,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(0)|MCOND(FCONDZ), IMMED|MCOND(~FCONDZ)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(0)|MCOND(FCONDZ)|IMMED, MCOND(~FCONDZ)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(1)|MCOND(FCONDZ), IMMED|MCOND(~FCONDZ)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(1)|MCOND(FCONDZ)|IMMED, MCOND(~FCONDZ)|FCC(~1)|F2(~2, ~0x58), "7,I,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(2)|MCOND(FCONDZ), IMMED|MCOND(~FCONDZ)|FCC(~2)|F2(~2, ~0x58), "8,2,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(2)|MCOND(FCONDZ)|IMMED, MCOND(~FCONDZ)|FCC(~2)|F2(~2, ~0x58), "8,I,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(3)|MCOND(FCONDZ), IMMED|MCOND(~FCONDZ)|FCC(~3)|F2(~2, ~0x58), "9,2,d", 0, v9 },
+{ "movz",	F2(2, 0x58)|FCC(3)|MCOND(FCONDZ)|IMMED, MCOND(~FCONDZ)|FCC(~3)|F2(~2, ~0x58), "9,I,d", 0, v9 },
+
+{ "fmovad",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDA),  F3F(~2, ~0x35, ~0x082)|MCOND(~CONDA),	"z,f,g", 0, v9 },
+{ "fmovad",	F3F(2, 0x35, 0x082)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDA),	"6,f,g", 0, v9 },
+{ "fmovad",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDA),  F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDA),	"Z,f,g", 0, v9 },
+{ "fmovad",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDA),	"7,f,g", 0, v9 },
+{ "fmovad",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDA),	"8,f,g", 0, v9 },
+{ "fmovad",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDA),	"9,f,g", 0, v9 },
+{ "fmovaq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDA),  F3F(~2, ~0x35, ~0x083)|MCOND(~CONDA),	"z,f,g", 0, v9 },
+{ "fmovaq",	F3F(2, 0x35, 0x083)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDA),	"6,f,g", 0, v9 },
+{ "fmovaq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDA),  F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDA),	"Z,f,g", 0, v9 },
+{ "fmovaq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDA),	"7,f,g", 0, v9 },
+{ "fmovaq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDA),	"8,f,g", 0, v9 },
+{ "fmovaq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDA),	"9,f,g", 0, v9 },
+{ "fmovas",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDA),  F3F(~2, ~0x35, ~0x081)|MCOND(~CONDA),	"z,f,g", 0, v9 },
+{ "fmovas",	F3F(2, 0x35, 0x081)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDA),	"6,f,g", 0, v9 },
+{ "fmovas",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDA),  F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDA),	"Z,f,g", 0, v9 },
+{ "fmovas",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDA),	"7,f,g", 0, v9 },
+{ "fmovas",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDA),	"8,f,g", 0, v9 },
+{ "fmovas",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDA), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDA),	"9,f,g", 0, v9 },
+{ "fmovccd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDCC), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDCC),	"z,f,g", 0, v9 },
+{ "fmovccd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDCC), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDCC),	"Z,f,g", 0, v9 },
+{ "fmovccq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDCC), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDCC),	"z,f,g", 0, v9 },
+{ "fmovccq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDCC), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDCC),	"Z,f,g", 0, v9 },
+{ "fmovccs",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDCC), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDCC),	"z,f,g", 0, v9 },
+{ "fmovccs",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDCC), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDCC),	"Z,f,g", 0, v9 },
+{ "fmovcsd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDCS), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDCS),	"z,f,g", 0, v9 },
+{ "fmovcsd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDCS), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDCS),	"Z,f,g", 0, v9 },
+{ "fmovcsq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDCS), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDCS),	"z,f,g", 0, v9 },
+{ "fmovcsq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDCS), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDCS),	"Z,f,g", 0, v9 },
+{ "fmovcss",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDCS), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDCS),	"z,f,g", 0, v9 },
+{ "fmovcss",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDCS), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDCS),	"Z,f,g", 0, v9 },
+{ "fmoved",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDE),  F3F(~2, ~0x35, ~0x082)|MCOND(~CONDE),	"z,f,g", 0, v9 },
+{ "fmoved",	F3F(2, 0x35, 0x082)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDE),	"6,f,g", 0, v9 },
+{ "fmoved",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDE),  F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDE),	"Z,f,g", 0, v9 },
+{ "fmoved",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDE),	"7,f,g", 0, v9 },
+{ "fmoved",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDE),	"8,f,g", 0, v9 },
+{ "fmoved",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDE),	"9,f,g", 0, v9 },
+{ "fmoveq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDE),  F3F(~2, ~0x35, ~0x083)|MCOND(~CONDE),	"z,f,g", 0, v9 },
+{ "fmoveq",	F3F(2, 0x35, 0x083)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDE),	"6,f,g", 0, v9 },
+{ "fmoveq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDE),  F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDE),	"Z,f,g", 0, v9 },
+{ "fmoveq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDE),	"7,f,g", 0, v9 },
+{ "fmoveq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDE),	"8,f,g", 0, v9 },
+{ "fmoveq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDE),	"9,f,g", 0, v9 },
+{ "fmoves",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDE),  F3F(~2, ~0x35, ~0x081)|MCOND(~CONDE),	"z,f,g", 0, v9 },
+{ "fmoves",	F3F(2, 0x35, 0x081)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDE),	"6,f,g", 0, v9 },
+{ "fmoves",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDE),  F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDE),	"Z,f,g", 0, v9 },
+{ "fmoves",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDE),	"7,f,g", 0, v9 },
+{ "fmoves",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDE),	"8,f,g", 0, v9 },
+{ "fmoves",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDE), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDE),	"9,f,g", 0, v9 },
+{ "fmovgd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDG),  F3F(~2, ~0x35, ~0x082)|MCOND(~CONDG),	"z,f,g", 0, v9 },
+{ "fmovgd",	F3F(2, 0x35, 0x082)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDG),	"6,f,g", 0, v9 },
+{ "fmovgd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDG),  F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDG),	"Z,f,g", 0, v9 },
+{ "fmovgd",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDG),	"7,f,g", 0, v9 },
+{ "fmovgd",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDG),	"8,f,g", 0, v9 },
+{ "fmovgd",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDG),	"9,f,g", 0, v9 },
+{ "fmovged",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDGE), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDGE),	"z,f,g", 0, v9 },
+{ "fmovged",	F3F(2, 0x35, 0x082)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDGE),	"6,f,g", 0, v9 },
+{ "fmovged",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDGE), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDGE),	"Z,f,g", 0, v9 },
+{ "fmovged",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDGE),	"7,f,g", 0, v9 },
+{ "fmovged",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDGE),	"8,f,g", 0, v9 },
+{ "fmovged",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDGE),	"9,f,g", 0, v9 },
+{ "fmovgeq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDGE), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDGE),	"z,f,g", 0, v9 },
+{ "fmovgeq",	F3F(2, 0x35, 0x083)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDGE),	"6,f,g", 0, v9 },
+{ "fmovgeq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDGE), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDGE),	"Z,f,g", 0, v9 },
+{ "fmovgeq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDGE),	"7,f,g", 0, v9 },
+{ "fmovgeq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDGE),	"8,f,g", 0, v9 },
+{ "fmovgeq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDGE),	"9,f,g", 0, v9 },
+{ "fmovges",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDGE), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDGE),	"z,f,g", 0, v9 },
+{ "fmovges",	F3F(2, 0x35, 0x081)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDGE),	"6,f,g", 0, v9 },
+{ "fmovges",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDGE), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDGE),	"Z,f,g", 0, v9 },
+{ "fmovges",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDGE),	"7,f,g", 0, v9 },
+{ "fmovges",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDGE),	"8,f,g", 0, v9 },
+{ "fmovges",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDGE), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDGE),	"9,f,g", 0, v9 },
+{ "fmovgeud",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDGEU), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDGEU),	"z,f,g", F_ALIAS, v9 },
+{ "fmovgeud",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDGEU), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDGEU),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovgeuq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDGEU), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDGEU),	"z,f,g", F_ALIAS, v9 },
+{ "fmovgeuq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDGEU), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDGEU),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovgeus",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDGEU), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDGEU),	"z,f,g", F_ALIAS, v9 },
+{ "fmovgeus",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDGEU), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDGEU),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovgq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDG),  F3F(~2, ~0x35, ~0x083)|MCOND(~CONDG),	"z,f,g", 0, v9 },
+{ "fmovgq",	F3F(2, 0x35, 0x083)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDG),	"6,f,g", 0, v9 },
+{ "fmovgq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDG),  F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDG),	"Z,f,g", 0, v9 },
+{ "fmovgq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDG),	"7,f,g", 0, v9 },
+{ "fmovgq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDG),	"8,f,g", 0, v9 },
+{ "fmovgq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDG),	"9,f,g", 0, v9 },
+{ "fmovgs",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDG),  F3F(~2, ~0x35, ~0x081)|MCOND(~CONDG),	"z,f,g", 0, v9 },
+{ "fmovgs",	F3F(2, 0x35, 0x081)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDG),	"6,f,g", 0, v9 },
+{ "fmovgs",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDG),  F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDG),	"Z,f,g", 0, v9 },
+{ "fmovgs",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDG),	"7,f,g", 0, v9 },
+{ "fmovgs",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDG),	"8,f,g", 0, v9 },
+{ "fmovgs",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDG), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDG),	"9,f,g", 0, v9 },
+{ "fmovgud",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDGU), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDGU),	"z,f,g", 0, v9 },
+{ "fmovgud",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDGU), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDGU),	"Z,f,g", 0, v9 },
+{ "fmovguq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDGU), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDGU),	"z,f,g", 0, v9 },
+{ "fmovguq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDGU), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDGU),	"Z,f,g", 0, v9 },
+{ "fmovgus",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDGU), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDGU),	"z,f,g", 0, v9 },
+{ "fmovgus",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDGU), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDGU),	"Z,f,g", 0, v9 },
+{ "fmovld",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDL),  F3F(~2, ~0x35, ~0x082)|MCOND(~CONDL),	"z,f,g", 0, v9 },
+{ "fmovld",	F3F(2, 0x35, 0x082)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDL),	"6,f,g", 0, v9 },
+{ "fmovld",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDL),  F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDL),	"Z,f,g", 0, v9 },
+{ "fmovld",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDL),	"7,f,g", 0, v9 },
+{ "fmovld",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDL),	"8,f,g", 0, v9 },
+{ "fmovld",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDL),	"9,f,g", 0, v9 },
+{ "fmovled",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDLE), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDLE),	"z,f,g", 0, v9 },
+{ "fmovled",	F3F(2, 0x35, 0x082)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDLE),	"6,f,g", 0, v9 },
+{ "fmovled",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDLE), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDLE),	"Z,f,g", 0, v9 },
+{ "fmovled",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDLE),	"7,f,g", 0, v9 },
+{ "fmovled",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDLE),	"8,f,g", 0, v9 },
+{ "fmovled",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDLE),	"9,f,g", 0, v9 },
+{ "fmovleq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDLE), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDLE),	"z,f,g", 0, v9 },
+{ "fmovleq",	F3F(2, 0x35, 0x083)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDLE),	"6,f,g", 0, v9 },
+{ "fmovleq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDLE), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDLE),	"Z,f,g", 0, v9 },
+{ "fmovleq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDLE),	"7,f,g", 0, v9 },
+{ "fmovleq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDLE),	"8,f,g", 0, v9 },
+{ "fmovleq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDLE),	"9,f,g", 0, v9 },
+{ "fmovles",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDLE), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDLE),	"z,f,g", 0, v9 },
+{ "fmovles",	F3F(2, 0x35, 0x081)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDLE),	"6,f,g", 0, v9 },
+{ "fmovles",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDLE), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDLE),	"Z,f,g", 0, v9 },
+{ "fmovles",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDLE),	"7,f,g", 0, v9 },
+{ "fmovles",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDLE),	"8,f,g", 0, v9 },
+{ "fmovles",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDLE), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDLE),	"9,f,g", 0, v9 },
+{ "fmovleud",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDLEU), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDLEU),	"z,f,g", 0, v9 },
+{ "fmovleud",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDLEU), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDLEU),	"Z,f,g", 0, v9 },
+{ "fmovleuq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDLEU), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDLEU),	"z,f,g", 0, v9 },
+{ "fmovleuq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDLEU), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDLEU),	"Z,f,g", 0, v9 },
+{ "fmovleus",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDLEU), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDLEU),	"z,f,g", 0, v9 },
+{ "fmovleus",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDLEU), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDLEU),	"Z,f,g", 0, v9 },
+{ "fmovlgd",	F3F(2, 0x35, 0x082)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDLG),	"6,f,g", 0, v9 },
+{ "fmovlgd",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDLG),	"7,f,g", 0, v9 },
+{ "fmovlgd",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDLG),	"8,f,g", 0, v9 },
+{ "fmovlgd",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDLG),	"9,f,g", 0, v9 },
+{ "fmovlgq",	F3F(2, 0x35, 0x083)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDLG),	"6,f,g", 0, v9 },
+{ "fmovlgq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDLG),	"7,f,g", 0, v9 },
+{ "fmovlgq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDLG),	"8,f,g", 0, v9 },
+{ "fmovlgq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDLG),	"9,f,g", 0, v9 },
+{ "fmovlgs",	F3F(2, 0x35, 0x081)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDLG),	"6,f,g", 0, v9 },
+{ "fmovlgs",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDLG),	"7,f,g", 0, v9 },
+{ "fmovlgs",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDLG),	"8,f,g", 0, v9 },
+{ "fmovlgs",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDLG), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDLG),	"9,f,g", 0, v9 },
+{ "fmovlq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDL),  F3F(~2, ~0x35, ~0x083)|MCOND(~CONDL),	"z,f,g", 0, v9 },
+{ "fmovlq",	F3F(2, 0x35, 0x083)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDL),	"6,f,g", 0, v9 },
+{ "fmovlq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDL),  F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDL),	"Z,f,g", 0, v9 },
+{ "fmovlq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDL),	"7,f,g", 0, v9 },
+{ "fmovlq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDL),	"8,f,g", 0, v9 },
+{ "fmovlq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDL),	"9,f,g", 0, v9 },
+{ "fmovls",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDL),  F3F(~2, ~0x35, ~0x081)|MCOND(~CONDL),	"z,f,g", 0, v9 },
+{ "fmovls",	F3F(2, 0x35, 0x081)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDL),	"6,f,g", 0, v9 },
+{ "fmovls",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDL),  F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDL),	"Z,f,g", 0, v9 },
+{ "fmovls",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDL),	"7,f,g", 0, v9 },
+{ "fmovls",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDL),	"8,f,g", 0, v9 },
+{ "fmovls",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDL), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDL),	"9,f,g", 0, v9 },
+{ "fmovlud",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDLU), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDLU),	"z,f,g", F_ALIAS, v9 },
+{ "fmovlud",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDLU), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDLU),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovluq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDLU), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDLU),	"z,f,g", F_ALIAS, v9 },
+{ "fmovluq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDLU), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDLU),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovlus",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDLU), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDLU),	"z,f,g", F_ALIAS, v9 },
+{ "fmovlus",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDLU), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDLU),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovnd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDN),  F3F(~2, ~0x35, ~0x082)|MCOND(~CONDN),	"z,f,g", 0, v9 },
+{ "fmovnd",	F3F(2, 0x35, 0x082)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDN),	"6,f,g", 0, v9 },
+{ "fmovnd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDN),  F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDN),	"Z,f,g", 0, v9 },
+{ "fmovnd",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDN),	"7,f,g", 0, v9 },
+{ "fmovnd",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDN),	"8,f,g", 0, v9 },
+{ "fmovnd",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDN),	"9,f,g", 0, v9 },
+{ "fmovned",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDNE), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDNE),	"z,f,g", 0, v9 },
+{ "fmovned",	F3F(2, 0x35, 0x082)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDNE),	"6,f,g", 0, v9 },
+{ "fmovned",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDNE), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDNE),	"Z,f,g", 0, v9 },
+{ "fmovned",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDNE),	"7,f,g", 0, v9 },
+{ "fmovned",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDNE),	"8,f,g", 0, v9 },
+{ "fmovned",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDNE),	"9,f,g", 0, v9 },
+{ "fmovnegd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDNEG), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDNEG),	"z,f,g", 0, v9 },
+{ "fmovnegd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDNEG), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDNEG),	"Z,f,g", 0, v9 },
+{ "fmovnegq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDNEG), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDNEG),	"z,f,g", 0, v9 },
+{ "fmovnegq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDNEG), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDNEG),	"Z,f,g", 0, v9 },
+{ "fmovnegs",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDNEG), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDNEG),	"z,f,g", 0, v9 },
+{ "fmovnegs",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDNEG), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDNEG),	"Z,f,g", 0, v9 },
+{ "fmovneq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDNE),  F3F(~2, ~0x35, ~0x083)|MCOND(~CONDNE),	"z,f,g", 0, v9 },
+{ "fmovneq",	F3F(2, 0x35, 0x083)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDNE),	"6,f,g", 0, v9 },
+{ "fmovneq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDNE),  F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDNE),	"Z,f,g", 0, v9 },
+{ "fmovneq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDNE),	"7,f,g", 0, v9 },
+{ "fmovneq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDNE),	"8,f,g", 0, v9 },
+{ "fmovneq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDNE),	"9,f,g", 0, v9 },
+{ "fmovnes",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDNE),  F3F(~2, ~0x35, ~0x081)|MCOND(~CONDNE),	"z,f,g", 0, v9 },
+{ "fmovnes",	F3F(2, 0x35, 0x081)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDNE),	"6,f,g", 0, v9 },
+{ "fmovnes",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDNE),  F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDNE),	"Z,f,g", 0, v9 },
+{ "fmovnes",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDNE),	"7,f,g", 0, v9 },
+{ "fmovnes",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDNE),	"8,f,g", 0, v9 },
+{ "fmovnes",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDNE), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDNE),	"9,f,g", 0, v9 },
+{ "fmovnq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDN),  F3F(~2, ~0x35, ~0x083)|MCOND(~CONDN),	"z,f,g", 0, v9 },
+{ "fmovnq",	F3F(2, 0x35, 0x083)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDN),	"6,f,g", 0, v9 },
+{ "fmovnq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDN),  F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDN),	"Z,f,g", 0, v9 },
+{ "fmovnq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDN),	"7,f,g", 0, v9 },
+{ "fmovnq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDN),	"8,f,g", 0, v9 },
+{ "fmovnq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDN),	"9,f,g", 0, v9 },
+{ "fmovns",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDN),  F3F(~2, ~0x35, ~0x081)|MCOND(~CONDN),	"z,f,g", 0, v9 },
+{ "fmovns",	F3F(2, 0x35, 0x081)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDN),	"6,f,g", 0, v9 },
+{ "fmovns",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDN),  F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDN),	"Z,f,g", 0, v9 },
+{ "fmovns",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDN),	"7,f,g", 0, v9 },
+{ "fmovns",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDN),	"8,f,g", 0, v9 },
+{ "fmovns",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDN), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDN),	"9,f,g", 0, v9 },
+{ "fmovnzd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDNZ), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDNZ),	"z,f,g", F_ALIAS, v9 },
+{ "fmovnzd",	F3F(2, 0x35, 0x082)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDNZ),	"6,f,g", F_ALIAS, v9 },
+{ "fmovnzd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDNZ), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDNZ),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovnzd",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDNZ),	"7,f,g", F_ALIAS, v9 },
+{ "fmovnzd",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDNZ),	"8,f,g", F_ALIAS, v9 },
+{ "fmovnzd",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDNZ),	"9,f,g", F_ALIAS, v9 },
+{ "fmovnzq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDNZ), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDNZ),	"z,f,g", F_ALIAS, v9 },
+{ "fmovnzq",	F3F(2, 0x35, 0x083)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDNZ),	"6,f,g", F_ALIAS, v9 },
+{ "fmovnzq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDNZ), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDNZ),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovnzq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDNZ),	"7,f,g", F_ALIAS, v9 },
+{ "fmovnzq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDNZ),	"8,f,g", F_ALIAS, v9 },
+{ "fmovnzq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDNZ),	"9,f,g", F_ALIAS, v9 },
+{ "fmovnzs",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDNZ), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDNZ),	"z,f,g", F_ALIAS, v9 },
+{ "fmovnzs",	F3F(2, 0x35, 0x081)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDNZ),	"6,f,g", F_ALIAS, v9 },
+{ "fmovnzs",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDNZ), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDNZ),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovnzs",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDNZ),	"7,f,g", F_ALIAS, v9 },
+{ "fmovnzs",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDNZ),	"8,f,g", F_ALIAS, v9 },
+{ "fmovnzs",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDNZ), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDNZ),	"9,f,g", F_ALIAS, v9 },
+{ "fmovod",	F3F(2, 0x35, 0x082)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDO),	"6,f,g", 0, v9 },
+{ "fmovod",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDO),	"7,f,g", 0, v9 },
+{ "fmovod",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDO),	"8,f,g", 0, v9 },
+{ "fmovod",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDO),	"9,f,g", 0, v9 },
+{ "fmovoq",	F3F(2, 0x35, 0x083)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDO),	"6,f,g", 0, v9 },
+{ "fmovoq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDO),	"7,f,g", 0, v9 },
+{ "fmovoq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDO),	"8,f,g", 0, v9 },
+{ "fmovoq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDO),	"9,f,g", 0, v9 },
+{ "fmovos",	F3F(2, 0x35, 0x081)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDO),	"6,f,g", 0, v9 },
+{ "fmovos",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDO),	"7,f,g", 0, v9 },
+{ "fmovos",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDO),	"8,f,g", 0, v9 },
+{ "fmovos",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDO), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDO),	"9,f,g", 0, v9 },
+{ "fmovposd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDPOS), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDPOS),	"z,f,g", 0, v9 },
+{ "fmovposd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDPOS), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDPOS),	"Z,f,g", 0, v9 },
+{ "fmovposq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDPOS), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDPOS),	"z,f,g", 0, v9 },
+{ "fmovposq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDPOS), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDPOS),	"Z,f,g", 0, v9 },
+{ "fmovposs",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDPOS), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDPOS),	"z,f,g", 0, v9 },
+{ "fmovposs",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDPOS), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDPOS),	"Z,f,g", 0, v9 },
+{ "fmovud",	F3F(2, 0x35, 0x082)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDU),	"6,f,g", 0, v9 },
+{ "fmovud",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDU),	"7,f,g", 0, v9 },
+{ "fmovud",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDU),	"8,f,g", 0, v9 },
+{ "fmovud",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDU),	"9,f,g", 0, v9 },
+{ "fmovued",	F3F(2, 0x35, 0x082)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDUE),	"6,f,g", 0, v9 },
+{ "fmovued",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDUE),	"7,f,g", 0, v9 },
+{ "fmovued",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDUE),	"8,f,g", 0, v9 },
+{ "fmovued",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDUE),	"9,f,g", 0, v9 },
+{ "fmovueq",	F3F(2, 0x35, 0x083)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDUE),	"6,f,g", 0, v9 },
+{ "fmovueq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDUE),	"7,f,g", 0, v9 },
+{ "fmovueq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDUE),	"8,f,g", 0, v9 },
+{ "fmovueq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDUE),	"9,f,g", 0, v9 },
+{ "fmovues",	F3F(2, 0x35, 0x081)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDUE),	"6,f,g", 0, v9 },
+{ "fmovues",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDUE),	"7,f,g", 0, v9 },
+{ "fmovues",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDUE),	"8,f,g", 0, v9 },
+{ "fmovues",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDUE), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDUE),	"9,f,g", 0, v9 },
+{ "fmovugd",	F3F(2, 0x35, 0x082)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDUG),	"6,f,g", 0, v9 },
+{ "fmovugd",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDUG),	"7,f,g", 0, v9 },
+{ "fmovugd",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDUG),	"8,f,g", 0, v9 },
+{ "fmovugd",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDUG),	"9,f,g", 0, v9 },
+{ "fmovuged",	F3F(2, 0x35, 0x082)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDUGE),	"6,f,g", 0, v9 },
+{ "fmovuged",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDUGE),	"7,f,g", 0, v9 },
+{ "fmovuged",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDUGE),	"8,f,g", 0, v9 },
+{ "fmovuged",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDUGE),	"9,f,g", 0, v9 },
+{ "fmovugeq",	F3F(2, 0x35, 0x083)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDUGE),	"6,f,g", 0, v9 },
+{ "fmovugeq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDUGE),	"7,f,g", 0, v9 },
+{ "fmovugeq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDUGE),	"8,f,g", 0, v9 },
+{ "fmovugeq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDUGE),	"9,f,g", 0, v9 },
+{ "fmovuges",	F3F(2, 0x35, 0x081)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDUGE),	"6,f,g", 0, v9 },
+{ "fmovuges",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDUGE),	"7,f,g", 0, v9 },
+{ "fmovuges",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDUGE),	"8,f,g", 0, v9 },
+{ "fmovuges",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDUGE), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDUGE),	"9,f,g", 0, v9 },
+{ "fmovugq",	F3F(2, 0x35, 0x083)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDUG),	"6,f,g", 0, v9 },
+{ "fmovugq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDUG),	"7,f,g", 0, v9 },
+{ "fmovugq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDUG),	"8,f,g", 0, v9 },
+{ "fmovugq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDUG),	"9,f,g", 0, v9 },
+{ "fmovugs",	F3F(2, 0x35, 0x081)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDUG),	"6,f,g", 0, v9 },
+{ "fmovugs",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDUG),	"7,f,g", 0, v9 },
+{ "fmovugs",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDUG),	"8,f,g", 0, v9 },
+{ "fmovugs",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDUG), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDUG),	"9,f,g", 0, v9 },
+{ "fmovuld",	F3F(2, 0x35, 0x082)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDUL),	"6,f,g", 0, v9 },
+{ "fmovuld",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDUL),	"7,f,g", 0, v9 },
+{ "fmovuld",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDUL),	"8,f,g", 0, v9 },
+{ "fmovuld",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDUL),	"9,f,g", 0, v9 },
+{ "fmovuled",	F3F(2, 0x35, 0x082)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDULE),	"6,f,g", 0, v9 },
+{ "fmovuled",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDULE),	"7,f,g", 0, v9 },
+{ "fmovuled",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDULE),	"8,f,g", 0, v9 },
+{ "fmovuled",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDULE),	"9,f,g", 0, v9 },
+{ "fmovuleq",	F3F(2, 0x35, 0x083)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDULE),	"6,f,g", 0, v9 },
+{ "fmovuleq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDULE),	"7,f,g", 0, v9 },
+{ "fmovuleq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDULE),	"8,f,g", 0, v9 },
+{ "fmovuleq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDULE),	"9,f,g", 0, v9 },
+{ "fmovules",	F3F(2, 0x35, 0x081)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDULE),	"6,f,g", 0, v9 },
+{ "fmovules",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDULE),	"7,f,g", 0, v9 },
+{ "fmovules",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDULE),	"8,f,g", 0, v9 },
+{ "fmovules",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDULE), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDULE),	"9,f,g", 0, v9 },
+{ "fmovulq",	F3F(2, 0x35, 0x083)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDUL),	"6,f,g", 0, v9 },
+{ "fmovulq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDUL),	"7,f,g", 0, v9 },
+{ "fmovulq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDUL),	"8,f,g", 0, v9 },
+{ "fmovulq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDUL),	"9,f,g", 0, v9 },
+{ "fmovuls",	F3F(2, 0x35, 0x081)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDUL),	"6,f,g", 0, v9 },
+{ "fmovuls",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDUL),	"7,f,g", 0, v9 },
+{ "fmovuls",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDUL),	"8,f,g", 0, v9 },
+{ "fmovuls",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDUL), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDUL),	"9,f,g", 0, v9 },
+{ "fmovuq",	F3F(2, 0x35, 0x083)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDU),	"6,f,g", 0, v9 },
+{ "fmovuq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDU),	"7,f,g", 0, v9 },
+{ "fmovuq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDU),	"8,f,g", 0, v9 },
+{ "fmovuq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDU),	"9,f,g", 0, v9 },
+{ "fmovus",	F3F(2, 0x35, 0x081)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDU),	"6,f,g", 0, v9 },
+{ "fmovus",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDU),	"7,f,g", 0, v9 },
+{ "fmovus",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDU),	"8,f,g", 0, v9 },
+{ "fmovus",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDU), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDU),	"9,f,g", 0, v9 },
+{ "fmovvcd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDVC), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDVC),	"z,f,g", 0, v9 },
+{ "fmovvcd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDVC), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDVC),	"Z,f,g", 0, v9 },
+{ "fmovvcq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDVC), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDVC),	"z,f,g", 0, v9 },
+{ "fmovvcq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDVC), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDVC),	"Z,f,g", 0, v9 },
+{ "fmovvcs",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDVC), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDVC),	"z,f,g", 0, v9 },
+{ "fmovvcs",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDVC), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDVC),	"Z,f,g", 0, v9 },
+{ "fmovvsd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDVS), F3F(~2, ~0x35, ~0x082)|MCOND(~CONDVS),	"z,f,g", 0, v9 },
+{ "fmovvsd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDVS), F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDVS),	"Z,f,g", 0, v9 },
+{ "fmovvsq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDVS), F3F(~2, ~0x35, ~0x083)|MCOND(~CONDVS),	"z,f,g", 0, v9 },
+{ "fmovvsq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDVS), F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDVS),	"Z,f,g", 0, v9 },
+{ "fmovvss",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDVS), F3F(~2, ~0x35, ~0x081)|MCOND(~CONDVS),	"z,f,g", 0, v9 },
+{ "fmovvss",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDVS), F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDVS),	"Z,f,g", 0, v9 },
+{ "fmovzd",	F3F(2, 0x35, 0x082)|(1<<18)|MCOND(CONDZ),   F3F(~2, ~0x35, ~0x082)|MCOND(~CONDZ),	"z,f,g", F_ALIAS, v9 },
+{ "fmovzd",	F3F(2, 0x35, 0x082)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x082)|MCOND(~FCONDZ),	"6,f,g", F_ALIAS, v9 },
+{ "fmovzd",	F3F(2, 0x35, 0x0a2)|(1<<18)|MCOND(CONDZ),   F3F(~2, ~0x35, ~0x0a2)|MCOND(~CONDZ),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovzd",	F3F(2, 0x35, 0x0a2)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0a2)|MCOND(~FCONDZ),	"7,f,g", F_ALIAS, v9 },
+{ "fmovzd",	F3F(2, 0x35, 0x0c2)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0c2)|MCOND(~FCONDZ),	"8,f,g", F_ALIAS, v9 },
+{ "fmovzd",	F3F(2, 0x35, 0x0e2)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0e2)|MCOND(~FCONDZ),	"9,f,g", F_ALIAS, v9 },
+{ "fmovzq",	F3F(2, 0x35, 0x083)|(1<<18)|MCOND(CONDZ),   F3F(~2, ~0x35, ~0x083)|MCOND(~CONDZ),	"z,f,g", F_ALIAS, v9 },
+{ "fmovzq",	F3F(2, 0x35, 0x083)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x083)|MCOND(~FCONDZ),	"6,f,g", F_ALIAS, v9 },
+{ "fmovzq",	F3F(2, 0x35, 0x0a3)|(1<<18)|MCOND(CONDZ),   F3F(~2, ~0x35, ~0x0a3)|MCOND(~CONDZ),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovzq",	F3F(2, 0x35, 0x0a3)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0a3)|MCOND(~FCONDZ),	"7,f,g", F_ALIAS, v9 },
+{ "fmovzq",	F3F(2, 0x35, 0x0c3)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0c3)|MCOND(~FCONDZ),	"8,f,g", F_ALIAS, v9 },
+{ "fmovzq",	F3F(2, 0x35, 0x0e3)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0e3)|MCOND(~FCONDZ),	"9,f,g", F_ALIAS, v9 },
+{ "fmovzs",	F3F(2, 0x35, 0x081)|(1<<18)|MCOND(CONDZ),   F3F(~2, ~0x35, ~0x081)|MCOND(~CONDZ),	"z,f,g", F_ALIAS, v9 },
+{ "fmovzs",	F3F(2, 0x35, 0x081)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x081)|MCOND(~FCONDZ),	"6,f,g", F_ALIAS, v9 },
+{ "fmovzs",	F3F(2, 0x35, 0x0a1)|(1<<18)|MCOND(CONDZ),   F3F(~2, ~0x35, ~0x0a1)|MCOND(~CONDZ),	"Z,f,g", F_ALIAS, v9 },
+{ "fmovzs",	F3F(2, 0x35, 0x0a1)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0a1)|MCOND(~FCONDZ),	"7,f,g", F_ALIAS, v9 },
+{ "fmovzs",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDZ),	"8,f,g", F_ALIAS, v9 },
+{ "fmovzs",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDZ), (1<<18)|F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDZ),	"9,f,g", F_ALIAS, v9 },
+
 #define brfc(opcode, mask, lose) \
- { opcode, (mask), (lose)|ANNUL, "l",   F_DELAYED, v6 }, \
+ { opcode, (mask), ANNUL|(lose), "l",   F_DELAYED, v6 }, \
  { opcode, (mask)|ANNUL, (lose), ",al", F_DELAYED, v6 }
+
+#define brfcx(opcode, mask, lose) /* v9 */ \
+ { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), ",N6G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a,N6G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T6G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T6G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), ",N7G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a,N7G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T7G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T7G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), ",N8G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a,N8G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T8G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T8G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N9G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N9G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T9G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T9G", F_DELAYED, v9 }
 
 #define condfc(fop, cop, mask) \
   brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask))), \
+  brfcx(fop, F2(0, 1)|COND(mask), F2(~0, ~1)|COND(~(mask))), /* v9 */ \
   brfc(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask))) \
 
 condfc("fb",	"cb",	 0x8),
@@ -1038,43 +1661,44 @@ condfc("fbule",	"cb013", 0xe),
 { "fpop2",	F3F(2, 0x35, 0), F3F(~2, ~0x35, ~1), "[1+2],d", 0, v6 },
 
 /* float-start */
-{ "fdtoi",	F3F(0x2, 0x34, 0x0d2), F3F(~0x2, ~0x34, ~0x0d2)|RS1_G0, "f,g", 0, v6 },
-{ "fstoi",	F3F(0x2, 0x34, 0x0d1), F3F(~0x2, ~0x34, ~0x0d1)|RS1_G0, "f,g", 0, v6 },
+{ "fdtoi",	F3F(2, 0x34, 0x0d2), F3F(~2, ~0x34, ~0x0d2)|RS1_G0, "f,g", 0, v6 },
+{ "fstoi",	F3F(2, 0x34, 0x0d1), F3F(~2, ~0x34, ~0x0d1)|RS1_G0, "f,g", 0, v6 },
 
  /* all of these conversions are confused and probably wrong. */
-{ "fitod",	F3F(0x2, 0x34, 0x0c8), F3F(~0x2, ~0x34, ~0x0c8)|RS1_G0, "f,g", 0, v6 },
-{ "fitos",	F3F(0x2, 0x34, 0x0c4), F3F(~0x2, ~0x34, ~0x0c4)|RS1_G0, "f,g", 0, v6 },
+{ "fitod",	F3F(2, 0x34, 0x0c8), F3F(~2, ~0x34, ~0x0c8)|RS1_G0, "f,g", 0, v6 },
+{ "fitos",	F3F(2, 0x34, 0x0c4), F3F(~2, ~0x34, ~0x0c4)|RS1_G0, "f,g", 0, v6 },
 
-{ "fitox",	F3F(0x2, 0x34, 0x0cc), F3F(~0x2, ~0x34, ~0x0cc)|RS1_G0, "f,g", 0, v6 }, /* collides in mneumonic with cypress */
+{ "fitox",	F3F(2, 0x34, 0x0cc), F3F(~2, ~0x34, ~0x0cc)|RS1_G0, "f,g", 0, v6 }, /* collides in mneumonic with cypress */
  /* fitox collides in opf between cypress and v8, mneumonic between v6 and cypress */
-{ "fitox",	F3F(0x2, 0x34, 0x0cc), F3F(~0x2, ~0x34, ~0x0cc)|RS1_G0, "f,g", 0, cypress }, /* collides */
-{ "fitoq",	F3F(0x2, 0x34, 0x0cc), F3F(~0x2, ~0x34, ~0x0cc)|RS1_G0, "f,g", 0, v8 }, /* collides in opf with cypress */
+{ "fitox",	F3F(2, 0x34, 0x0cc), F3F(~2, ~0x34, ~0x0cc)|RS1_G0, "f,g", 0, cypress }, /* collides */
+{ "fitoq",	F3F(2, 0x34, 0x0cc), F3F(~2, ~0x34, ~0x0cc)|RS1_G0, "f,g", 0, v8 }, /* collides in opf with cypress */
 
-{ "fxtoq",	F3F(0x2, 0x34, 0x0cf), F3F(~0x2, ~0x34, ~0x0cf)|RS1_G0, "f,g", 0, v9 },
-{ "fxtox",	F3F(0x2, 0x34, 0x0cf), F3F(~0x2, ~0x34, ~0x0cf)|RS1_G0, "f,g", 0, v9 },
+{ "fxtoq",	F3F(2, 0x34, 0x08c), F3F(~2, ~0x34, ~0x08c)|RS1_G0, "f,g", 0, v9 },
 
-{ "fdtoq",	F3F(0x2, 0x34, 0x0ce), F3F(~0x2, ~0x34, ~0x0ce)|RS1_G0, "f,g", 0, v8 },
-{ "fdtos",	F3F(0x2, 0x34, 0x0c6), F3F(~0x2, ~0x34, ~0x0c6)|RS1_G0, "f,g", 0, v6 },
-{ "fqtod",	F3F(0x2, 0x34, 0x0cb), F3F(~0x2, ~0x34, ~0x0cb)|RS1_G0, "f,g", 0, v8 },
-{ "fqtos",	F3F(0x2, 0x34, 0x0c7), F3F(~0x2, ~0x34, ~0x0c7)|RS1_G0, "f,g", 0, v8 },
-{ "fstod",	F3F(0x2, 0x34, 0x0c9), F3F(~0x2, ~0x34, ~0x0c9)|RS1_G0, "f,g", 0, v6 },
-{ "fstoq",	F3F(0x2, 0x34, 0x0cd), F3F(~0x2, ~0x34, ~0x0cd)|RS1_G0, "f,g", 0, v8 },
+{ "fdtoq",	F3F(2, 0x34, 0x0ce), F3F(~2, ~0x34, ~0x0ce)|RS1_G0, "f,g", 0, v8 },
+{ "fdtos",	F3F(2, 0x34, 0x0c6), F3F(~2, ~0x34, ~0x0c6)|RS1_G0, "f,g", 0, v6 },
+{ "fqtod",	F3F(2, 0x34, 0x0cb), F3F(~2, ~0x34, ~0x0cb)|RS1_G0, "f,g", 0, v8 },
+{ "fqtos",	F3F(2, 0x34, 0x0c7), F3F(~2, ~0x34, ~0x0c7)|RS1_G0, "f,g", 0, v8 },
+{ "fstod",	F3F(2, 0x34, 0x0c9), F3F(~2, ~0x34, ~0x0c9)|RS1_G0, "f,g", 0, v6 },
+{ "fstoq",	F3F(2, 0x34, 0x0cd), F3F(~2, ~0x34, ~0x0cd)|RS1_G0, "f,g", 0, v8 },
 
-{ "fxtos",	F3F(2, 0x34, 0x0c7), F3F(~0x2, ~0x34, ~0x0c7)|RS1_G0, "f,g", 0, v7 }, /* these collide on the mneumonic */
-{ "fxtos",	F3F(2, 0x34, 0x0c5), F3F(~2, ~0x34, ~0x0c5)|RS1_G0, "f,g", 0, v9 },
+{ "fqtox",	F3F(2, 0x34, 0x083), F3F(~2, ~0x34, ~0x083)|RS1_G0, "f,g", 0, v9 },
+
+{ "fxtos",	F3F(2, 0x34, 0x0c7), F3F(~2, ~0x34, ~0x0c7)|RS1_G0, "f,g", 0, v7 }, /* these collide on the mneumonic */
+{ "fxtos",	F3F(2, 0x34, 0x084), F3F(~2, ~0x34, ~0x084)|RS1_G0, "f,g", 0, v9 },
 { "fxtos",	F3F(2, 0x34, 0x0c7), F3F(~2, ~0x34, ~0x0c7)|RS1_G0, "f,g", 0, cypress },
 
 { "fdtox",	F3F(2, 0x34, 0x0ce), F3F(~2, ~0x34, ~0x0ce)|RS1_G0, "f,g", 0, cypress }, /* mneumonic collisions */
-{ "fdtox",	F3F(2, 0x34, 0x0d6), F3F(~2, ~0x34, ~0x0d6)|RS1_G0, "f,g", 0, v9 },
+{ "fdtox",	F3F(2, 0x34, 0x082), F3F(~2, ~0x34, ~0x082)|RS1_G0, "f,g", 0, v9 },
 
 { "fstox",	F3F(2, 0x34, 0x0cd), F3F(~2, ~0x34, ~0x0cd)|RS1_G0, "f,g", 0, cypress },
-{ "fstox",	F3F(2, 0x34, 0x0d5), F3F(~2, ~0x34, ~0x0d5)|RS1_G0, "f,g", 0, v9 },
+{ "fstox",	F3F(2, 0x34, 0x081), F3F(~2, ~0x34, ~0x081)|RS1_G0, "f,g", 0, v9 },
 
 { "fqtoi",	F3F(2, 0x34, 0x0d3), F3F(~2, ~0x34, ~0x0d3)|RS1_G0, "f,g", 0, v8 },
 { "fxtoi",	F3F(2, 0x34, 0x0d3), F3F(~2, ~0x34, ~0x0d3)|RS1_G0, "f,g", 0, cypress },
 
 { "fxtod",	F3F(2, 0x34, 0x0cb), F3F(~2, ~0x34, ~0x0cb)|RS1_G0, "f,g", 0, cypress }, /* collide in opf & mneumonic */
-{ "fxtod",	F3F(2, 0x34, 0x0cb), F3F(~2, ~0x34, ~0x0cb)|RS1_G0, "f,g", 0, v9 },
+{ "fxtod",	F3F(2, 0x34, 0x088), F3F(~2, ~0x34, ~0x088)|RS1_G0, "f,g", 0, v9 },
 
 { "fdivd",	F3F(2, 0x34, 0x04e), F3F(~2, ~0x34, ~0x04e), "e,f,g", 0, v6 },
 { "fdivq",	F3F(2, 0x34, 0x04f), F3F(~2, ~0x34, ~0x04f), "e,f,g", 0, v8 },
@@ -1094,28 +1718,17 @@ condfc("fbule",	"cb013", 0xe),
 { "fsqrtx",	F3F(2, 0x34, 0x02b), F3F(~2, ~0x34, ~0x02b)|RS1_G0, "f,g", 0, cypress },
 
 { "fabsd",	F3F(2, 0x34, 0x00a), F3F(~2, ~0x34, ~0x00a)|RS1_G0, "f,g", 0, v9 },
+{ "fabsq",	F3F(2, 0x34, 0x00b), F3F(~2, ~0x34, ~0x00b)|RS1_G0, "f,g", 0, v6 },
 { "fabss",	F3F(2, 0x34, 0x009), F3F(~2, ~0x34, ~0x009)|RS1_G0, "f,g", 0, v6 },
 { "fmovd",	F3F(2, 0x34, 0x002), F3F(~2, ~0x34, ~0x002)|RS1_G0, "f,g", 0, v9 },
+{ "fmovq",	F3F(2, 0x34, 0x003), F3F(~2, ~0x34, ~0x003)|RS1_G0, "f,g", 0, v6 },
 { "fmovs",	F3F(2, 0x34, 0x001), F3F(~2, ~0x34, ~0x001)|RS1_G0, "f,g", 0, v6 },
 { "fnegd",	F3F(2, 0x34, 0x006), F3F(~2, ~0x34, ~0x006)|RS1_G0, "f,g", 0, v9 },
+{ "fnegq",	F3F(2, 0x34, 0x007), F3F(~2, ~0x34, ~0x007)|RS1_G0, "f,g", 0, v6 },
 { "fnegs",	F3F(2, 0x34, 0x005), F3F(~2, ~0x34, ~0x005)|RS1_G0, "f,g", 0, v6 },
 
-{ "fmuladdd",	F3F(3, 0x34, 0x120), F3F(~3, ~0x34, ~0x120), "e,f,j,g", 0, v9 },
-{ "fmuladdq",	F3F(3, 0x34, 0x140), F3F(~3, ~0x34, ~0x140), "e,f,j,g", 0, v9 },
-{ "fmuladds",	F3F(3, 0x34, 0x100), F3F(~3, ~0x34, ~0x100), "e,f,j,g", 0, v9 },
-{ "fmulsubs",	F3F(3, 0x34, 0x180), F3F(~3, ~0x34, ~0x180), "e,f,j,g", 0, v9 },
 
-#ifdef comment /* v9 */
- /* FIXME: the doc says the opcodes here are identical to those for muladd. (v9) */
-{ "fmulsubd",	F3F(3, 0x34, 0x120), F3F(~3, ~0x34, ~0x120), "e,f,j,g", 0, v9 },
-{ "fmulsubq",	F3F(3, 0x34, 0x140), F3F(~3, ~0x34, ~0x140), "e,f,j,g", 0, v9 },
-#endif /* comment v9 */
-
-{ "cbyte",	F3(2, 0x2c, 0), F3(~2, ~0x2c, ~0),	"1,2,d", 0, v9 },
-{ "cbyte",	F3(2, 0x2c, 1), F3(~2, ~0x2c, ~1),	"1,i,d", 0, v9 },
-{ "cbyte",	F3(2, 0x2c, 1), F3(~2, ~0x2c, ~1),	"i,1,d", 0, v9 },
-
-{ "popcc",	F3(2, 0x3f, 0), F3(~2, ~0x3f, ~0),	"1,d", 0, v9 },
+{ "pop",	F3(2, 0x2d, 0), F3(~2, ~0x2d, ~0)|ASI_RS2(~0),	"1,d", 0, v9 },
 
 { "faddd",	F3F(2, 0x34, 0x042), F3F(~2, ~0x34, ~0x042), "e,f,g", 0, v6 },
 { "faddq",	F3F(2, 0x34, 0x043), F3F(~2, ~0x34, ~0x043), "e,f,g", 0, v8 },
@@ -1126,17 +1739,53 @@ condfc("fbule",	"cb013", 0xe),
 { "fsubs",	F3F(2, 0x34, 0x045), F3F(~2, ~0x34, ~0x045), "e,f,g", 0, v6 },
 { "fsubx",	F3F(2, 0x34, 0x047), F3F(~2, ~0x34, ~0x047), "e,f,g", 0, cypress },
 
-{ "fcmpd",	F3F(2, 0x35, 0x052), F3F(~2, ~0x35, ~0x052)|RS1_G0,	"e,f", 0, v6 },
-{ "fcmped",	F3F(2, 0x35, 0x056), F3F(~2, ~0x35, ~0x056)|RS1_G0,	"e,f", 0, v6 },
-{ "fcmpeq",	F3F(2, 0x34, 0x057), F3F(~2, ~0x34, ~0x057),		"e,f,g", 0, v8 },
-{ "fcmpes",	F3F(2, 0x35, 0x055), F3F(~2, ~0x35, ~0x055)|RS1_G0,	"e,f", 0, v6 },
-{ "fcmpex",	F3F(2, 0x35, 0x057), F3F(~2, ~0x35, ~0x057)|RS1_G0,	"e,f", 0, cypress },
-{ "fcmpq",	F3F(2, 0x34, 0x053), F3F(~2, ~0x34, ~0x053),		"e,f,g", 0, v8 },
-{ "fcmps",	F3F(2, 0x35, 0x051), F3F(~2, ~0x35, ~0x051)|RS1_G0,	"e,f", 0, v6 },
-{ "fcmpx",	F3F(2, 0x35, 0x053), F3F(~2, ~0x35, ~0x053)|RS1_G0,	"e,f", 0, cypress },
+#define CMPFCC(x)	(((x)&0x3)<<25)
+
+{ "fcmpd",	          F3F(2, 0x35, 0x052),            F3F(~2, ~0x35, ~0x052)|RS1_G0, "e,f",   0, v6 },
+{ "fcmpd",	CMPFCC(0)|F3F(2, 0x35, 0x052), CMPFCC(~0)|F3F(~2, ~0x35, ~0x052),	 "6,e,f", 0, v9 },
+{ "fcmpd",	CMPFCC(1)|F3F(2, 0x35, 0x052), CMPFCC(~1)|F3F(~2, ~0x35, ~0x052),	 "7,e,f", 0, v9 },
+{ "fcmpd",	CMPFCC(2)|F3F(2, 0x35, 0x052), CMPFCC(~2)|F3F(~2, ~0x35, ~0x052),	 "8,e,f", 0, v9 },
+{ "fcmpd",	CMPFCC(3)|F3F(2, 0x35, 0x052), CMPFCC(~3)|F3F(~2, ~0x35, ~0x052),	 "9,e,f", 0, v9 },
+{ "fcmped",	          F3F(2, 0x35, 0x056),            F3F(~2, ~0x35, ~0x056)|RS1_G0, "e,f",   0, v6 },
+{ "fcmped",	CMPFCC(0)|F3F(2, 0x35, 0x056), CMPFCC(~0)|F3F(~2, ~0x35, ~0x056),	 "6,e,f", 0, v9 },
+{ "fcmped",	CMPFCC(1)|F3F(2, 0x35, 0x056), CMPFCC(~1)|F3F(~2, ~0x35, ~0x056),	 "7,e,f", 0, v9 },
+{ "fcmped",	CMPFCC(2)|F3F(2, 0x35, 0x056), CMPFCC(~2)|F3F(~2, ~0x35, ~0x056),	 "8,e,f", 0, v9 },
+{ "fcmped",	CMPFCC(3)|F3F(2, 0x35, 0x056), CMPFCC(~3)|F3F(~2, ~0x35, ~0x056),	 "9,e,f", 0, v9 },
+{ "fcmpeq",	          F3F(2, 0x34, 0x057),            F3F(~2, ~0x34, ~0x057),	 "e,f,g", 0, v8 },
+{ "fcmpeq",	CMPFCC(0)|F3F(2, 0x35, 0x057), CMPFCC(~0)|F3F(~2, ~0x35, ~0x057),	 "6,e,f", 0, v9 },
+{ "fcmpeq",	CMPFCC(1)|F3F(2, 0x35, 0x057), CMPFCC(~1)|F3F(~2, ~0x35, ~0x057),	 "7,e,f", 0, v9 },
+{ "fcmpeq",	CMPFCC(2)|F3F(2, 0x35, 0x057), CMPFCC(~2)|F3F(~2, ~0x35, ~0x057),	 "8,e,f", 0, v9 },
+{ "fcmpeq",	CMPFCC(3)|F3F(2, 0x35, 0x057), CMPFCC(~3)|F3F(~2, ~0x35, ~0x057),	 "9,e,f", 0, v9 },
+{ "fcmpes",	          F3F(2, 0x35, 0x055),            F3F(~2, ~0x35, ~0x055)|RS1_G0, "e,f",   0, v6 },
+{ "fcmpes",	CMPFCC(0)|F3F(2, 0x35, 0x055), CMPFCC(~0)|F3F(~2, ~0x35, ~0x055),	 "6,e,f", 0, v9 },
+{ "fcmpes",	CMPFCC(1)|F3F(2, 0x35, 0x055), CMPFCC(~1)|F3F(~2, ~0x35, ~0x055),	 "7,e,f", 0, v9 },
+{ "fcmpes",	CMPFCC(2)|F3F(2, 0x35, 0x055), CMPFCC(~2)|F3F(~2, ~0x35, ~0x055),	 "8,e,f", 0, v9 },
+{ "fcmpes",	CMPFCC(3)|F3F(2, 0x35, 0x055), CMPFCC(~3)|F3F(~2, ~0x35, ~0x055),	 "9,e,f", 0, v9 },
+{ "fcmpex",	          F3F(2, 0x35, 0x057),            F3F(~2, ~0x35, ~0x057)|RS1_G0, "e,f",   0, cypress },
+{ "fcmpq",	          F3F(2, 0x34, 0x053),            F3F(~2, ~0x34, ~0x053),	 "e,f,g", 0, v8 },
+{ "fcmpq",	CMPFCC(0)|F3F(2, 0x35, 0x053), CMPFCC(~0)|F3F(~2, ~0x35, ~0x053),	 "6,e,f", 0, v9 },
+{ "fcmpq",	CMPFCC(1)|F3F(2, 0x35, 0x053), CMPFCC(~1)|F3F(~2, ~0x35, ~0x053),	 "7,e,f", 0, v9 },
+{ "fcmpq",	CMPFCC(2)|F3F(2, 0x35, 0x053), CMPFCC(~2)|F3F(~2, ~0x35, ~0x053),	 "8,e,f", 0, v9 },
+{ "fcmpq",	CMPFCC(3)|F3F(2, 0x35, 0x053), CMPFCC(~3)|F3F(~2, ~0x35, ~0x053),	 "9,e,f", 0, v9 },
+{ "fcmps",	          F3F(2, 0x35, 0x051),            F3F(~2, ~0x35, ~0x051)|RS1_G0, "e,f",   0, v6 },
+{ "fcmps",	CMPFCC(0)|F3F(2, 0x35, 0x051), CMPFCC(~0)|F3F(~2, ~0x35, ~0x051),	 "6,e,f", 0, v9 },
+{ "fcmps",	CMPFCC(1)|F3F(2, 0x35, 0x051), CMPFCC(~1)|F3F(~2, ~0x35, ~0x051),	 "7,e,f", 0, v9 },
+{ "fcmps",	CMPFCC(2)|F3F(2, 0x35, 0x051), CMPFCC(~2)|F3F(~2, ~0x35, ~0x051),	 "8,e,f", 0, v9 },
+{ "fcmps",	CMPFCC(3)|F3F(2, 0x35, 0x051), CMPFCC(~3)|F3F(~2, ~0x35, ~0x051),	 "9,e,f", 0, v9 },
+{ "fcmpx",	          F3F(2, 0x35, 0x053),            F3F(~2, ~0x35, ~0x053)|RS1_G0, "e,f",   0, cypress },
 
 { "cpop1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~1), "[1+2],d", 0, v6 },
 { "cpop2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~1), "[1+2],d", 0, v6 },
+    
+{ "casx",	F3(3, 0x0c, 0), F3(~3, ~0x0c, ~0), "[1],2,d", 0, v9 },
+{ "casx",	F3(3, 0x1c, 0), F3(~3, ~0x1c, ~0), "[1]A,2,d", 0, v9 },
+
+{ "fmaddd",	F3(2, 0x35, 0)|OPF_LOW(0xa), F3(~2, ~0x35, ~0)|OPF_LOW(~0xa), "e,f,j,g", 0, v9 },
+{ "fmaddq",	F3(2, 0x35, 0)|OPF_LOW(0xb), F3(~2, ~0x35, ~0)|OPF_LOW(~0xb), "e,f,j,g", 0, v9 },
+{ "fmadds",	F3(2, 0x35, 0)|OPF_LOW(0x9), F3(~2, ~0x35, ~0)|OPF_LOW(~0x9), "e,f,j,g", 0, v9 },
+{ "fmsubd",	F3(2, 0x35, 0)|OPF_LOW(0xe), F3(~2, ~0x35, ~0)|OPF_LOW(~0xe), "e,f,j,g", 0, v9 },
+{ "fmsubq",	F3(2, 0x35, 0)|OPF_LOW(0xf), F3(~2, ~0x35, ~0)|OPF_LOW(~0xf), "e,f,j,g", 0, v9 },
+{ "fmsubs",	F3(2, 0x35, 0)|OPF_LOW(0xd), F3(~2, ~0x35, ~0)|OPF_LOW(~0xd), "e,f,j,g", 0, v9 },
 
 };
 
