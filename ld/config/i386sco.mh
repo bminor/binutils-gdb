@@ -1,0 +1,4 @@
+# For testing, we want to use /lib/crt1.o and /lib/crtn.o so that
+# constructors work properly.
+HOSTING_CRT0=/lib/crt1.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; fi`
+HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`  -lc `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; fi` /lib/crtn.o

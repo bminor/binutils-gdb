@@ -1,3 +1,14 @@
+Wed Aug 11 08:26:11 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/i386sco.mh: New file; copy of i386v.mh to correspond to
+	bfd/configure.host change.
+
+Mon Aug  9 14:25:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* scripttempl/elf.sc: Handle .line and .debug* sections.
+
+	* ldlex.l: Use bfd_scan_vma, not strtoul.
+
 Fri Aug  6 08:57:39 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldexp.c, ldfile.c, ldlang.c, lexsup.c, ldmain.c, ldemul.c:
