@@ -1,3 +1,12 @@
+Mon Nov 30 15:28:09 1998  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* elf32-sh.c (elf/sh.h): Include.
+	sh_reloc_type: Delete.  Changed all references to elf_sh_reloc_type.
+	(sh_elf_howto_tab): Add HOWTO for R_SH_SWITCH8.
+	(sh_reloc_map): Map BFD_RELOC_8_PCREL to R_SH_SWITCH8.
+	(sh_elf_relax_delete_bytes): Handle R_SH_SWITCH8.
+	* Makefile.in: Add dependency of elf32-sh.lo on $(INCDIR)/elf/sh.h.
+
 Fri Nov 27 17:51:38 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elflink.h (compute_bucket_count): Don't allow minsize==0, it
