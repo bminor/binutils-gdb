@@ -28,9 +28,11 @@
    FILENO is the filenumber.  */
 
 #include "ansidecl.h"
-#include <limits.h>
-
 #include "as.h"
+
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 #ifdef BFD_ASSEMBLER
 
