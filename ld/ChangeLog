@@ -1,3 +1,8 @@
+Wed Mar 13 12:40:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* genscripts.sh: Don't use ${9:-xx}, since Ultrix /bin/sh doesn't
+	support it.
+
 Tue Mar 12 12:43:59 1996  David Mosberger-Tang  <davidm@koala.azstarnet.com>
 
 	* ld.h (ld_config_type): Add warn_multiple_gp field.
