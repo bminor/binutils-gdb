@@ -1548,8 +1548,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 {
   int i;
   const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  char raw_buffer[MAX_REGISTER_SIZE];
-  char virtual_buffer[MAX_REGISTER_SIZE];
+  char buffer[MAX_REGISTER_SIZE];
 
   if (DEPRECATED_DO_REGISTERS_INFO_P ())
     {
@@ -1589,26 +1588,10 @@ default_print_registers_info (struct gdbarch *gdbarch,
       print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), file);
 
       /* Get the data in raw format.  */
-      if (! frame_register_read (frame, i, raw_buffer))
+      if (! frame_register_read (frame, i, buffer))
 	{
 	  fprintf_filtered (file, "*value not available*\n");
 	  continue;
-	}
-
-      /* FIXME: cagney/2002-08-03: This code shouldn't be necessary.
-         The function frame_register_read() should have returned the
-         pre-cooked register so no conversion is necessary.  */
-      /* Convert raw data to virtual format if necessary.  */
-      if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
-	  && DEPRECATED_REGISTER_CONVERTIBLE (i))
-	{
-	  DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (i, register_type (current_gdbarch, i),
-				       raw_buffer, virtual_buffer);
-	}
-      else
-	{
-	  memcpy (virtual_buffer, raw_buffer,
-		  DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
 	}
 
       /* If virtual format is floating, print it that way, and in raw
@@ -1617,7 +1600,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	{
 	  int j;
 
-	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), buffer, 0, 0,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
@@ -1628,21 +1611,21 @@ default_print_registers_info (struct gdbarch *gdbarch,
 		idx = j;
 	      else
 		idx = DEPRECATED_REGISTER_RAW_SIZE (i) - 1 - j;
-	      fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
+	      fprintf_filtered (file, "%02x", (unsigned char) buffer[idx]);
 	    }
 	  fprintf_filtered (file, ")");
 	}
       else
 	{
 	  /* Print the register in hex.  */
-	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), buffer, 0, 0,
 		     file, 'x', 1, 0, Val_pretty_default);
           /* If not a vector register, print it also according to its
              natural format.  */
 	  if (TYPE_VECTOR (register_type (current_gdbarch, i)) == 0)
 	    {
 	      fprintf_filtered (file, "\t");
-	      val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
+	      val_print (register_type (current_gdbarch, i), buffer, 0, 0,
 			 file, 0, 1, 0, Val_pretty_default);
 	    }
 	}

@@ -1049,60 +1049,6 @@ extern void set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, 
 #define DEPRECATED_GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (gdbarch_deprecated_get_saved_register (current_gdbarch, raw_buffer, optimized, addrp, frame, regnum, lval))
 #endif
 
-/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
-   For raw <-> cooked register conversions, replaced by pseudo registers. */
-
-#if defined (DEPRECATED_REGISTER_CONVERTIBLE)
-/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_CONVERTIBLE */
-#if !defined (DEPRECATED_REGISTER_CONVERTIBLE_P)
-#define DEPRECATED_REGISTER_CONVERTIBLE_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_register_convertible_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERTIBLE_P)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERTIBLE"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_CONVERTIBLE_P)
-#define DEPRECATED_REGISTER_CONVERTIBLE_P() (gdbarch_deprecated_register_convertible_p (current_gdbarch))
-#endif
-
-typedef int (gdbarch_deprecated_register_convertible_ftype) (int nr);
-extern int gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, int nr);
-extern void set_gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, gdbarch_deprecated_register_convertible_ftype *deprecated_register_convertible);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERTIBLE)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERTIBLE"
-#endif
-#if !defined (DEPRECATED_REGISTER_CONVERTIBLE)
-#define DEPRECATED_REGISTER_CONVERTIBLE(nr) (gdbarch_deprecated_register_convertible (current_gdbarch, nr))
-#endif
-
-/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
-   For raw <-> cooked register conversions, replaced by pseudo registers. */
-
-typedef void (gdbarch_deprecated_register_convert_to_virtual_ftype) (int regnum, struct type *type, char *from, char *to);
-extern void gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
-extern void set_gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch, gdbarch_deprecated_register_convert_to_virtual_ftype *deprecated_register_convert_to_virtual);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL"
-#endif
-#if !defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
-#define DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (gdbarch_deprecated_register_convert_to_virtual (current_gdbarch, regnum, type, from, to))
-#endif
-
-/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
-   For raw <-> cooked register conversions, replaced by pseudo registers. */
-
-typedef void (gdbarch_deprecated_register_convert_to_raw_ftype) (struct type *type, int regnum, const char *from, char *to);
-extern void gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, const char *from, char *to);
-extern void set_gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch, gdbarch_deprecated_register_convert_to_raw_ftype *deprecated_register_convert_to_raw);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERT_TO_RAW"
-#endif
-#if !defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
-#define DEPRECATED_REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (gdbarch_deprecated_register_convert_to_raw (current_gdbarch, type, regnum, from, to))
-#endif
-
 typedef int (gdbarch_convert_register_p_ftype) (int regnum, struct type *type);
 extern int gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type);
 extern void set_gdbarch_convert_register_p (struct gdbarch *gdbarch, gdbarch_convert_register_p_ftype *convert_register_p);

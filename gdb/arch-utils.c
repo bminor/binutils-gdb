@@ -301,28 +301,21 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 int
 legacy_convert_register_p (int regnum, struct type *type)
 {
-  return (DEPRECATED_REGISTER_CONVERTIBLE_P ()
-	  && DEPRECATED_REGISTER_CONVERTIBLE (regnum));
+  return 0;
 }
 
 void
 legacy_register_to_value (struct frame_info *frame, int regnum,
 			  struct type *type, void *to)
 {
-  char from[MAX_REGISTER_SIZE];
-  get_frame_register (frame, regnum, from);
-  DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
+  internal_error (__FILE__, __LINE__, "legacy_register_to_value called");
 }
 
 void
 legacy_value_to_register (struct frame_info *frame, int regnum,
 			  struct type *type, const void *tmp)
 {
-  char to[MAX_REGISTER_SIZE];
-  char *from = alloca (TYPE_LENGTH (type));
-  memcpy (from, from, TYPE_LENGTH (type));
-  DEPRECATED_REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
-  put_frame_register (frame, regnum, to);
+  internal_error (__FILE__, __LINE__, "legacy_value_to_register called");
 }
 
 int

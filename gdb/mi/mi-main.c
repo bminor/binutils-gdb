@@ -497,8 +497,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 static int
 get_register (int regnum, int format)
 {
-  char raw_buffer[MAX_REGISTER_SIZE];
-  char virtual_buffer[MAX_REGISTER_SIZE];
+  char buffer[MAX_REGISTER_SIZE];
   int optim;
   int realnum;
   CORE_ADDR addr;
@@ -511,25 +510,13 @@ get_register (int regnum, int format)
     format = 0;
 
   frame_register (deprecated_selected_frame, regnum, &optim, &lval, &addr,
-		  &realnum, raw_buffer);
+		  &realnum, buffer);
 
   if (optim)
     {
       mi_error_message = xstrprintf ("Optimized out");
       return -1;
     }
-
-  /* Convert raw data to virtual format if necessary.  */
-
-  if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
-      && DEPRECATED_REGISTER_CONVERTIBLE (regnum))
-    {
-      DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum,
-				   register_type (current_gdbarch, regnum),
-				   raw_buffer, virtual_buffer);
-    }
-  else
-    memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 
   if (format == 'r')
     {
@@ -542,7 +529,7 @@ get_register (int regnum, int format)
 	{
 	  int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
 	  : DEPRECATED_REGISTER_RAW_SIZE (regnum) - 1 - j;
-	  sprintf (ptr, "%02x", (unsigned char) raw_buffer[idx]);
+	  sprintf (ptr, "%02x", (unsigned char) buffer[idx]);
 	  ptr += 2;
 	}
       ui_out_field_string (uiout, "value", buf);
@@ -550,7 +537,7 @@ get_register (int regnum, int format)
     }
   else
     {
-      val_print (register_type (current_gdbarch, regnum), virtual_buffer, 0, 0,
+      val_print (register_type (current_gdbarch, regnum), buffer, 0, 0,
 		 stb->stream, format, 1, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);

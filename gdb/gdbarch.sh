@@ -550,16 +550,6 @@ F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, st
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 F:2:DEPRECATED_GET_SAVED_REGISTER:void:deprecated_get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
-# For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
-# For raw <-> cooked register conversions, replaced by pseudo registers.
-F::DEPRECATED_REGISTER_CONVERTIBLE:int:deprecated_register_convertible:int nr:nr
-# For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
-# For raw <-> cooked register conversions, replaced by pseudo registers.
-f:2:DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL:void:deprecated_register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0
-# For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
-# For raw <-> cooked register conversions, replaced by pseudo registers.
-f:2:DEPRECATED_REGISTER_CONVERT_TO_RAW:void:deprecated_register_convert_to_raw:struct type *type, int regnum, const char *from, char *to:type, regnum, from, to:::0::0
-#
 f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum, struct type *type:regnum, type::0:legacy_convert_register_p::0
 f:1:REGISTER_TO_VALUE:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, void *buf:frame, regnum, type, buf::0:legacy_register_to_value::0
 f:1:VALUE_TO_REGISTER:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const void *buf:frame, regnum, type, buf::0:legacy_value_to_register::0
