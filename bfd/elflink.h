@@ -6230,20 +6230,44 @@ elf_link_sec_merge_syms (h, data)
 
 /* For DSOs loaded in via a DT_NEEDED entry, emulate ld.so in
    allowing an unsatisfied unversioned symbol in the DSO to match a
-   versioned symbol that would normally require an explicit version.  */
+   versioned symbol that would normally require an explicit version.
+   We also handle the case that a DSO references a hidden symbol
+   which may be satisfied by a versioned symbol in another DSO.  */
 
 static bfd_boolean
 elf_link_check_versioned_symbol (info, h)
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
 {
-  bfd *undef_bfd = h->root.u.undef.abfd;
+  bfd *abfd;
   struct elf_link_loaded_list *loaded;
 
-  if ((undef_bfd->flags & DYNAMIC) == 0
-      || info->hash->creator->flavour != bfd_target_elf_flavour
-      || elf_dt_soname (undef_bfd) == NULL)
+  if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return FALSE;
+
+  switch (h->root.type)
+    {
+    default:
+      abfd = NULL;
+      break;
+
+    case bfd_link_hash_undefined:
+    case bfd_link_hash_undefweak:
+      abfd = h->root.u.undef.abfd;
+      if ((abfd->flags & DYNAMIC) == 0 || elf_dt_soname (abfd) == NULL)
+	return FALSE;
+      break;
+
+    case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
+      abfd = h->root.u.def.section->owner;
+      break;
+
+    case bfd_link_hash_common:
+      abfd = h->root.u.c.p->section->owner;
+      break;
+    }
+  BFD_ASSERT (abfd != NULL);
 
   for (loaded = elf_hash_table (info)->loaded;
        loaded != NULL;
@@ -6264,7 +6288,7 @@ elf_link_check_versioned_symbol (info, h)
       input = loaded->abfd;
 
       /* We check each DSO for a possible hidden versioned definition.  */
-      if (input == undef_bfd
+      if (input == abfd
 	  || (input->flags & DYNAMIC) == 0
 	  || elf_dynversym (input) == 0)
 	continue;
@@ -6416,7 +6440,8 @@ elf_link_output_extsym (h, data)
       && (h->elf_link_hash_flags
 	  & (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC
 	     | ELF_LINK_DYNAMIC_DEF | ELF_LINK_DYNAMIC_WEAK))
-	 == (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC))
+	 == (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC)
+      && ! elf_link_check_versioned_symbol (finfo->info, h))
     {
       (*_bfd_error_handler)
 	(_("%s: %s symbol `%s' in %s is referenced by DSO"),

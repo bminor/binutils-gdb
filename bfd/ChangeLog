@@ -1,3 +1,11 @@
+2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elflink.h (elf_link_check_versioned_symbol): Also handle the
+	case that a DSO references a hidden symbol which may be
+	satisfied by a versioned symbol in another DSO.
+	(elf_link_output_extsym): Check versioned definition for hidden
+	symbol referenced by a DSO.
+
 2003-05-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-xstormy16.c (xstormy16_elf_howto_table): Reset
