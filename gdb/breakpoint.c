@@ -794,7 +794,8 @@ print_it_normal (bs)
       printf_filtered ("\n");
       value_free (bs->old_val);
       bs->old_val = NULL;
-      return 0;
+      /* More than one watchpoint may have been triggered.  */
+      return -1;
     }
   /* We can't deal with it.  Maybe another member of the bpstat chain can.  */
   return -1;
@@ -3172,8 +3173,7 @@ May be abbreviated to simply \"enable\".\n",
 
   add_cmd ("once", no_class, enable_once_command,
 	   "Enable breakpoints for one hit.  Give breakpoint numbers.\n\
-If a breakpoint is hit while enabled in this fashion, it becomes disabled.\n\
-See the \"tbreak\" command which sets a breakpoint and enables it once.",
+If a breakpoint is hit while enabled in this fashion, it becomes disabled.",
 	   &enablebreaklist);
 
   add_cmd ("delete", no_class, enable_delete_command,
@@ -3188,8 +3188,7 @@ If a breakpoint is hit while enabled in this fashion, it is deleted.",
 
   add_cmd ("once", no_class, enable_once_command,
 	   "Enable breakpoints for one hit.  Give breakpoint numbers.\n\
-If a breakpoint is hit while enabled in this fashion, it becomes disabled.\n\
-See the \"tbreak\" command which sets a breakpoint and enables it once.",
+If a breakpoint is hit while enabled in this fashion, it becomes disabled.",
 	   &enablelist);
 
   add_prefix_cmd ("disable", class_breakpoint, disable_command,

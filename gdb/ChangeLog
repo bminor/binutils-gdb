@@ -1,3 +1,8 @@
+Wed Mar 30 09:15:42 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* breakpoint.c (print_it_normal): Allow GDB to notify the user
+	about more than one watchpoint being triggered.
+
 Wed Mar 30 08:24:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m68k/tm-dpx2.h: Include tm-m68k.h not nonexistent tm-68k.h.
