@@ -60,15 +60,17 @@ const relax_typeS md_relax_table[] = {
   {0x1fffff, -0x200000, 6, 0},
 };
 
+/* start-sanitize-v850e */
+static boolean support_v850e = false;
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+static boolean support_v850eq = false;
+/* end-sanitize-v850eq */
+
 /* local functions */
 static unsigned long v850_insert_operand
   PARAMS ((unsigned long insn, const struct v850_operand *operand,
 	   offsetT val, char *file, unsigned int line));
-static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
-static boolean register_name PARAMS ((expressionS *expressionP));
-static boolean system_register_name PARAMS ((expressionS *expressionP));
-static boolean cc_name PARAMS ((expressionS *expressionP));
-static bfd_reloc_code_real_type v850_reloc_prefix PARAMS ((void));
 
 
 /* fixups */
@@ -82,12 +84,6 @@ struct v850_fixup
 struct v850_fixup fixups[MAX_INSN_FIXUPS];
 static int fc;
 
-const char *md_shortopts = "";
-struct option md_longopts[] = {
-  {NULL, no_argument, NULL, 0}
-};
-size_t md_longopts_size = sizeof(md_longopts); 
-
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -349,19 +345,141 @@ cc_name (expressionP)
     }
 }
 
+/* start-sanitize-v850e */
+/* Summary of parse_register_list ().
+ *
+ * in: Input_line_pointer  points to 1st char of a list of registers.
+ *     insn                is the partially constructed instruction.
+ *     operand             is the operand being inserted.
+ *
+ * out: True if the parse completed successfully, False otherwise.
+ *      If the parse completes the correct bit fields in the
+ *      instruction will be filled in.
+ */
+static boolean
+parse_register_list
+(
+  unsigned long *             insn,
+  const struct v850_operand * operand
+)
+{
+  static int  type1_regs[ 32 ] = { 30,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 31, 29, 28, 23, 22, 21, 20, 27, 26, 25, 24 };
+/* start-sanitize-v850eq */
+  static int  type2_regs[ 32 ] = { 19, 18, 17, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 31, 29, 28, 23, 22, 21, 20, 27, 26, 25, 24 };
+  static int  type3_regs[ 32 ] = {  3,  2,  1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 15, 13, 12,  7,  6,  5,  4, 11, 10,  9,  8 };
+/* end-sanitize-v850eq */
+  int *       regs;
+
+  /* Select a register array to parse. */
+  switch (operand->shift)
+    {
+    case 0xffe00001: regs = type1_regs; break;
+/* start-sanitize-v850eq */
+    case 0xfff8000f: regs = type2_regs; break;
+    case 0xfff8001f: regs = type3_regs; break;
+/* end-sanitize-v850eq */
+    default:
+      fprintf (stderr, "unknown operand shift: %x\n", operand->shift );		    
+      return false;
+    }
+
+  /* Parse the register list until a terminator (comma or new-line) is found.  */
+  for (;;)
+    {
+      expressionS exp;
+      int         i;
+
+      if (register_name (& exp))
+	{
+	  /* Locate the given register in the list, and if it is there, insert the corresponding bit into the instruction.  */
+	  for (i = 0; i < 32; i++)
+	    {
+	      if (regs[ i ] == exp.X_add_number)
+		{
+		  * insn |= (1 << i);
+		  break;
+		}
+	    }
+
+	  if (i == 32)
+	    {
+	      as_bad( "unable to insert register r%d into list\n", exp.X_add_number );
+	      return false;
+	    }
+	}
+      else if (system_register_name (& exp))
+	{
+	  if (regs == type1_regs)
+	    {
+	      as_bad ("system registers cannot be included in this register list" );
+	      return false;
+	    }
+	  else if (exp.X_add_number == 5)
+	    {
+	      if (regs == type2_regs)
+		as_bad ("PSW cannot be included in this register list" );
+	      else
+		* insn |= 0x8;
+	    }
+	  else
+	    * insn |= 0x80000;
+	}
+      else
+	break;
+
+      /* Skip white space.  */
+      while (* input_line_pointer == ' ' || * input_line_pointer == '\t')
+	++ input_line_pointer;
+    }
+
+  return true;
+}
+/* end-sanitize-v850e */
+
+CONST char * md_shortopts = "m:";
+
+struct option md_longopts[] =
+{
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof md_longopts; 
+
+
 void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, "V850 options:\n\
-none yet\n");
+  fprintf (stream, "V850 options:\n");
+/* start-sanitize-v850e */
+  fprintf (stream, "  -mcpu=v850e    target the V850E processor\n");
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+  fprintf (stream, "  -mcpu=v850eq   target the V850E processor with Quantum's extensions\n");
+/* end-sanitize-v850eq */
 } 
 
 int
 md_parse_option (c, arg)
-     int c;
-     char *arg;
+     int    c;
+     char * arg;
 {
+/* start-sanitize-v850e */
+  if ((c == 'm') && arg != NULL && (strcmp (arg, "cpu=v850e") == 0))
+    {
+      support_v850e = true;
+      return 1;
+    }
+/* end-sanitize-v850e */
+
+/* start-sanitize-v850eq */
+  if ((c == 'm') && arg != NULL && (strcmp (arg, "cpu=v850eq") == 0))
+    {
+      support_v850e = true;
+      support_v850eq = true;
+      return 1;
+    }
+/* end-sanitize-v850eq */
+
   return 0;
 }
 
@@ -487,7 +605,7 @@ md_begin ()
 }
 
 static bfd_reloc_code_real_type
-v850_reloc_prefix()
+v850_reloc_prefix ()
 {
   if (strncmp(input_line_pointer, "hi0(", 4) == 0)
     {
@@ -563,22 +681,30 @@ v850_reloc_prefix()
 
 void
 md_assemble (str) 
-     char *str;
+     char * str;
 {
-  char *s;
-  struct v850_opcode *opcode;
-  struct v850_opcode *next_opcode;
-  const unsigned char *opindex_ptr;
-  int next_opindex, relaxable;
-  unsigned long insn, insn_size;
-  char *f;
-  int i;
-  int match;
-  bfd_reloc_code_real_type reloc;
+  char *                    s;
+  char *                    start_of_operands;
+  struct v850_opcode *      opcode;
+  struct v850_opcode *      next_opcode;
+  const unsigned char *     opindex_ptr;
+  int                       next_opindex;
+  int                       relaxable;
+  unsigned long             insn;
+  unsigned long             insn_size;
+  char *                    f;
+  int                       i;
+  int                       match;
+  bfd_reloc_code_real_type  reloc;
+  boolean                   extra_data_after_insn = false;
+  unsigned                  extra_data_len;
+  unsigned long             extra_data;
+  
 
   /* Get the opcode.  */
   for (s = str; *s != '\0' && ! isspace (*s); s++)
-    ;
+    continue;
+  
   if (*s != '\0')
     *s++ = '\0';
 
@@ -587,6 +713,7 @@ md_assemble (str)
   if (opcode == NULL)
     {
       as_bad ("Unrecognized opcode: `%s'", str);
+      ignore_rest_of_line ();
       return;
     }
 
@@ -594,22 +721,42 @@ md_assemble (str)
   while (isspace (*str))
     ++str;
 
-  input_line_pointer = str;
+  start_of_operands = str;
 
-  for(;;)
+  for (;;)
     {
-      const char *errmsg = NULL;
+      const char * errmsg = NULL;
 
       relaxable = 0;
       fc = 0;
       match = 0;
       next_opindex = 0;
       insn = opcode->opcode;
+      extra_data_after_insn = false;
+
+      input_line_pointer = str = start_of_operands;
+
+/* start-sanitize-v850e */
+      if ((opcode->flags & V850E_INSTRUCTION) && ! support_v850e)
+	{
+	  errmsg = "V850E instructions not allowed";
+	  goto error;
+	}
+/* end-sanitize-v850e */
+      
+/* start-sanitize-v850eq */
+      if ((opcode->flags & V850EQ_INSTRUCTION) && ! support_v850eq)
+	{
+	  errmsg = "V850EQ instructions not allowed";
+	  goto error;
+	}
+/* end-sanitize-v850eq */
+      
       for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
 	{
-	  const struct v850_operand *operand;
-	  char *hold;
-	  expressionS ex;
+	  const struct v850_operand * operand;
+	  char *                      hold;
+	  expressionS                 ex;
 
 	  if (next_opindex == 0)
 	    {
@@ -632,12 +779,13 @@ md_assemble (str)
 	  /* Gather the operand. */
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
-
+	  
+// fprintf (stderr, "operand: %s   index = %d, opcode = %s\n", input_line_pointer, opindex_ptr - opcode->operands, opcode->name );
 
 	  /* lo(), hi(), hi0(), etc... */
 	  if ((reloc = v850_reloc_prefix()) != BFD_RELOC_UNUSED)
 	    {
-	      expression(&ex);
+	      expression (& ex);
 
 	      if (ex.X_op == O_constant)
 		{
@@ -702,26 +850,27 @@ md_assemble (str)
 	    }
 	  else
 	    {
+	      errmsg = NULL;
+	      
 	      if ((operand->flags & V850_OPERAND_REG) != 0) 
 		{
-		  if (!register_name(&ex))
+		  if (!register_name (& ex))
 		    {
 		      errmsg = "invalid register name";
-		      goto error;
 		    }
 		}
 	      else if ((operand->flags & V850_OPERAND_SRG) != 0) 
 		{
-		  if (!system_register_name(&ex))
+		  if (!system_register_name (& ex))
 		    {
 		      errmsg = "invalid system register name";
-		      goto error;
 		    }
 		}
 	      else if ((operand->flags & V850_OPERAND_EP) != 0)
 		{
-		  char *start = input_line_pointer;
-		  char c = get_symbol_end ();
+		  char * start = input_line_pointer;
+		  char   c     = get_symbol_end ();
+		  
 		  if (strcmp (start, "ep") != 0 && strcmp (start, "r30") != 0)
 		    {
 		      /* Put things back the way we found them.  */
@@ -730,6 +879,7 @@ md_assemble (str)
 		      errmsg = "expected EP register";
 		      goto error;
 		    }
+		  
 		  *input_line_pointer = c;
 		  str = input_line_pointer;
 		  input_line_pointer = hold;
@@ -740,35 +890,92 @@ md_assemble (str)
 		}
 	      else if ((operand->flags & V850_OPERAND_CC) != 0) 
 		{
-		  if (!cc_name(&ex))
+		  if (!cc_name (& ex))
 		    {
 		      errmsg = "invalid condition code name";
-		      goto error;
 		    }
+		}
+	      else if (operand->flags & V850E_PUSH_POP) 
+		{
+		  if (! parse_register_list (& insn, operand))
+		    {
+		      errmsg = "invalid register list";
+		    }
+		  
+		  /* The parse_register_list() function has already done everything, so fake a dummy expression.  */
+		  ex.X_op         = O_constant;
+		  ex.X_add_number = 0;
+		}
+	      else if (operand->flags & V850E_IMMEDIATE16) 
+		{
+		  expression (& ex);
+
+		  if (ex.X_op != O_constant)
+		    errmsg = "constant expression expected";
+		  else if (ex.X_add_number & 0xffff0000)
+		    {
+		      if (ex.X_add_number & 0xffff)
+			errmsg = "constant too big to fit into instruction";
+		      else if ((insn & 0x001fffc0) == 0x00130780)
+			ex.X_add_number >>= 16;
+		      else
+			errmsg = "constant too big to fit into instruction";
+		    }
+		  
+		  extra_data_after_insn = true;
+		  extra_data_len        = 2;
+		  extra_data            = ex.X_add_number;
+		  ex.X_add_number       = 0;
+		}
+	      else if (operand->flags & V850E_IMMEDIATE32) 
+		{
+		  expression (& ex);
+		  
+		  if (ex.X_op != O_constant)
+		    errmsg = "constant expression expected";
+		  
+		  extra_data_after_insn = true;
+		  extra_data_len        = 4;
+		  extra_data            = ex.X_add_number;
+		  ex.X_add_number       = 0;
 		}
 	      else if (register_name (&ex)
 		       && (operand->flags & V850_OPERAND_REG) == 0)
 		{
 		  errmsg = "syntax error: register not expected";
-		  goto error;
 		}
 	      else if (system_register_name (&ex)
 		       && (operand->flags & V850_OPERAND_SRG) == 0)
 		{
 		  errmsg = "syntax error: system register not expected";
-		  goto error;
 		}
 	      else if (cc_name (&ex)
 		       && (operand->flags & V850_OPERAND_CC) == 0)
 		{
 		  errmsg = "syntax error: condition code not expected";
-		  goto error;
 		}
 	      else
 		{
-		  expression(&ex);
+		  expression (& ex);
+/* start-sanitize-v850e */
+		  /* Special case:
+		     If we are assembling a MOV instruction (or a CALLT.... :-)
+		     and the immediate value does not fit into the bits available
+		     and we are supporting V850e instructions
+		     then create a fake error so that the next MOV instruction
+		      will be selected.  This one has a 32 bit immediate field.  */
+
+		  if (((insn & 0x07e0) == 0x0200)
+		      && ex.X_op == O_constant
+		      && (ex.X_add_number < (- (1 << (operand->bits - 1))) || ex.X_add_number > ((1 << operand->bits) - 1))
+		      && support_v850e)
+		    errmsg = "use bigger instruction";
+/* end-sanitize-v850e */
 		}
 
+	      if (errmsg)
+		goto error;
+		  
 	      switch (ex.X_op) 
 		{
 		case O_illegal:
@@ -783,7 +990,13 @@ md_assemble (str)
 		      errmsg = "invalid operand";
 		      goto error;
 		    }
-		
+#if 0
+		  if (ex.X_add_number == 0
+		      && (operand->shift == 11))
+		    {
+		      as_warn ("register 0 being used as destination of instruction" );
+		    }
+#endif	  
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
 					      (char *) NULL, 0);
 		  break;
@@ -803,7 +1016,6 @@ md_assemble (str)
 		  ++fc;
 		  break;
 		}
-
 	    }
 
 	  str = input_line_pointer;
@@ -826,6 +1038,7 @@ md_assemble (str)
 	    }
 	  
 	  as_bad ("%s", errmsg);
+	  ignore_rest_of_line ();
 	  return;
         }
       break;
@@ -853,17 +1066,28 @@ md_assemble (str)
       md_number_to_chars (f + 2, 0, 4);
       fc = 0;
     }
-  else if ((insn & 0x0600) == 0x0600)
+  else 
     {
-      insn_size = 4;
+      if ((insn & 0x0600) == 0x0600)
+	insn_size = 4;
+      else
+	insn_size = 2;
+
+      /* Special case: 32 bit MOV */
+      if ((insn & 0xffe0) == 0x0620)
+	insn_size = 2;
+      
       f = frag_more (insn_size);
+      
       md_number_to_chars (f, insn, insn_size);
-    }
-  else
-    {
-      insn_size = 2;
-      f = frag_more (insn_size);
-      md_number_to_chars (f, insn, insn_size);
+
+      if (extra_data_after_insn)
+	{
+	  f = frag_more (extra_data_len);
+	  md_number_to_chars (f, extra_data, extra_data_len);
+
+	  extra_data_after_insn = false;
+	}
     }
 
   /* Create any fixups.  At this point we do not use a
@@ -1072,7 +1296,7 @@ md_apply_fix3 (fixp, valuep, seg)
 static unsigned long
 v850_insert_operand (insn, operand, val, file, line)
      unsigned long insn;
-     const struct v850_operand *operand;
+     const struct v850_operand * operand;
      offsetT val;
      char *file;
      unsigned int line;
@@ -1084,7 +1308,7 @@ v850_insert_operand (insn, operand, val, file, line)
 
       if ((operand->flags & V850_OPERAND_SIGNED) != 0)
         {
-            max = (1 << (operand->bits - 1)) - 1;
+	  max = (1 << (operand->bits - 1)) - 1;
           min = - (1 << (operand->bits - 1));
         }
       else
@@ -1095,10 +1319,9 @@ v850_insert_operand (insn, operand, val, file, line)
 
       test = val;
 
-
       if (test < (offsetT) min || test > (offsetT) max)
         {
-          const char *err =
+          const char * err =
             "operand out of range (%s not between %ld and %ld)";
           char buf[100];
 
@@ -1112,8 +1335,9 @@ v850_insert_operand (insn, operand, val, file, line)
 
   if (operand->insert)
     {
-      const char *message = NULL;
-      insn = (*operand->insert) (insn, val, &message);
+      const char * message = NULL;
+      
+      insn = (*operand->insert) (insn, val, & message);
       if (message != NULL)
 	{
 	  if (file == (char *) NULL)
@@ -1124,6 +1348,7 @@ v850_insert_operand (insn, operand, val, file, line)
     }
   else
     insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
+  
   return insn;
 }
 
