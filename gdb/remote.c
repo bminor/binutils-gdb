@@ -55,6 +55,8 @@
 
 #include "gdbcore.h" /* for exec_bfd */
 
+#include "fileio.h"
+
 /* Prototypes for local functions */
 static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
@@ -66,10 +68,6 @@ static void async_remote_interrupt (gdb_client_data);
 void async_remote_interrupt_twice (gdb_client_data);
 
 static void build_remote_gdbarch_data (void);
-
-static int remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len);
-
-static int remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
 static void remote_files_info (struct target_ops *ignore);
 
@@ -2945,6 +2943,9 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	case 'E':		/* Error of some sort */
 	  warning ("Remote failure reply: %s", buf);
 	  continue;
+	case 'F':		/* File-I/O request */
+	  remote_fileio_request (buf);
+	  continue;
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
 	    int i;
@@ -3195,6 +3196,9 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	{
 	case 'E':		/* Error of some sort */
 	  warning ("Remote failure reply: %s", buf);
+	  continue;
+	case 'F':		/* File-I/O request */
+	  remote_fileio_request (buf);
 	  continue;
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
@@ -3750,7 +3754,7 @@ check_binary_download (CORE_ADDR addr)
    Returns number of bytes transferred, or 0 (setting errno) for
    error.  Only transfer a single packet. */
 
-static int
+int
 remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned char *buf;
@@ -3894,7 +3898,7 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    caller and its callers caller ;-) already contains code for
    handling partial reads. */
 
-static int
+int
 remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   char *buf;
@@ -6268,4 +6272,7 @@ Set use of remote protocol `Z' packets",
 				set_remote_protocol_Z_packet_cmd,
 				show_remote_protocol_Z_packet_cmd,
 				&remote_set_cmdlist, &remote_show_cmdlist);
+
+  /* Eventually initialize fileio.  See fileio.c */
+  initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);
 }

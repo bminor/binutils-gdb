@@ -1,3 +1,35 @@
+2003-05-21  Andrew Cagney  <cagney@redhat.com>
+
+	* fileio.c: Include "gdb_wait.h".
+	
+	2003-03-10  Corinna Vinschen  <vinschen@redhat.com>
+        * fileio.c: New file implementing the remote File-I/O protocol.
+	* fileio.h: New header file defining remote File-I/O interface.
+        * remote.c (remote_write_bytes, remote_read_bytes): Remove
+	static storage class.
+	(remote_wait, remote_async_wait): Call remote_fileio_request() on
+        'F' packet.
+        (_initialize_remote): Call initialize_remote_fileio().
+	* remote.h: Declare remote_write_bytes() and remote_read_bytes().
+
+	2002-11-21  Martin M. Hunt  <hunt@redhat.com>
+	* Makefile.in (REMOTE_OBS): Add fileio.o
+	(SFILES): Add fileio.c.
+	Add dependencies for building fileio.o.  Add fileio.h to
+	dependencies for building remote.o.
+        * defs.h: Declare gdb_stdin, gdb_stdtargerr and gdb_stdtargin.
+        * main.c: New ui_file gdb_stdin, gdb_stdtargerr and gdb_stdtargin.
+        (captured_main): Initialize new ui_files.
+        * ui-file.c: Add read and fgets input functions.
+        (ui_file_new): set ui_file_fputs and ui_file_read to null functions.
+        (null_file_read): New function.
+        (ui_file_read): New function.
+        (set_ui_file_read): New function.
+        (stdio_file_read): New function.
+        * ui-file.h: New type ui_file_read_ftype.
+        (set_ui_file_read): Declare.
+        (ui_file_read): Declare.
+
 2003-05-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-nat.c (REGISTER_PTRACE_ADDR): Convert macro to function
