@@ -1,7 +1,7 @@
-2004-03-01  Andrew Cagney  <cagney@redhat.com>
+2004-03-01  GDB Administrator  <gdbadmin@sourceware.org>
 
 	GDB 6.1 branch created.
-	* version.in: Bump to version 6.0.90_0000-00-00-cvs.
+	* version.in: Bump to version 6.0.90.
 
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
