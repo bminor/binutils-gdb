@@ -229,8 +229,9 @@ set_bit_port (struct hw *me, sim_cpu *cpu, int port, int mask, int value)
 
 */
 
-#define SPI_START_BIT  0
-#define SPI_MIDDLE_BIT 1
+#define SPI_START_BYTE 0
+#define SPI_START_BIT  1
+#define SPI_MIDDLE_BIT 2
 
 void
 m68hc11spi_clock (struct hw *me, void *data)
@@ -260,15 +261,27 @@ m68hc11spi_clock (struct hw *me, void *data)
       controller->tx_bit--;
       controller->mode = SPI_MIDDLE_BIT;
     }
-  else
+  else if (controller->mode == SPI_MIDDLE_BIT)
     {
       controller->mode = SPI_START_BIT;
     }
 
-  /* Change the SPI clock at each event on bit 4 of port D.  */
-  controller->clk_pin = ~controller->clk_pin;
-  set_bit_port (me, cpu, M6811_PORTD, (1 << 4), controller->clk_pin);
+  if (controller->mode == SPI_START_BYTE)
+    {
+      /* Start a new SPI transfer.  */
       
+      /* TBD: clear SS output.  */
+      controller->mode = SPI_START_BIT;
+      controller->tx_bit = 7;
+      set_bit_port (me, cpu, M6811_PORTD, (1 << 4), ~controller->clk_pin);
+    }
+  else
+    {
+      /* Change the SPI clock at each event on bit 4 of port D.  */
+      controller->clk_pin = ~controller->clk_pin;
+      set_bit_port (me, cpu, M6811_PORTD, (1 << 4), controller->clk_pin);
+    }
+  
   /* Transmit is now complete for this byte.  */
   if (controller->mode == SPI_START_BIT && controller->tx_bit < 0)
     {
@@ -339,6 +352,8 @@ m68hc11spi_info (struct hw *me)
     {
       signed64 t;
 
+      sim_io_printf (sd, "  SPI has %d bits to send\n",
+                     controller->tx_bit + 1);
       t = hw_event_remain_time (me, controller->spi_event);
       sim_io_printf (sd, "  SPI operation finished in %ld cycles\n",
 		     (long) t);
@@ -389,6 +404,7 @@ m68hc11spi_io_read_buffer (struct hw *me,
         {
           cpu->ios[M6811_SPSR] &= ~controller->rx_clear_scsr;
           controller->rx_clear_scsr = 0;
+          interrupts_update_pending (&cpu->cpu_interrupts);
         }
       val = controller->rx_char;
       break;
@@ -466,6 +482,13 @@ m68hc11spi_io_write_buffer (struct hw *me,
           return 0;
         }
 
+      if (controller->rx_clear_scsr)
+        {
+          cpu->ios[M6811_SPSR] &= ~controller->rx_clear_scsr;
+          controller->rx_clear_scsr = 0;
+          interrupts_update_pending (&cpu->cpu_interrupts);
+        }
+
       /* If transfer is taking place, a write to SPDR
          generates a collision.  */
       if (controller->spi_event)
@@ -479,8 +502,7 @@ m68hc11spi_io_write_buffer (struct hw *me,
 
       /* Prepare to send a byte.  */
       controller->tx_char = val;
-      controller->tx_bit = 7;
-      controller->mode   = 0;
+      controller->mode   = SPI_START_BYTE;
 
       /* Toggle clock pin internal value when CPHA is 0 so that
          it will really change in the middle of a bit.  */
