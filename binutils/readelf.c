@@ -442,27 +442,39 @@ print_vma (vma, mode)
 	  break;
 
 	case DEC:
+#if BFD_HOST_64BIT_LONG
+	  printf ("%ld", vma);
+#else
 	  if (_bfd_int64_high (vma))
 	    /* ugg */
 	    printf ("++%ld", _bfd_int64_low (vma));
 	  else
 	    printf ("%ld", _bfd_int64_low (vma));
+#endif	  
 	  break;
 
 	case DEC_5:
+#if BFD_HOST_64BIT_LONG
+	  printf ("%5ld", vma);
+#else
 	  if (_bfd_int64_high (vma))
 	    /* ugg */
 	    printf ("++%ld", _bfd_int64_low (vma));
 	  else
 	    printf ("%5ld", _bfd_int64_low (vma));
+#endif	  
 	  break;
 	  
 	case UNSIGNED:
+#if BFD_HOST_64BIT_LONG
+	  printf ("%lu", vma);
+#else	  
 	  if (_bfd_int64_high (vma))
 	    /* ugg */
 	    printf ("++%lu", _bfd_int64_low (vma));
 	  else
 	    printf ("%lu", _bfd_int64_low (vma));
+#endif
 	  break;
 	}
     }
