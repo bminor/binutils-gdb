@@ -151,7 +151,7 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 #define S_IS_LOCAL(s)		(S_GET_NAME(s) && \
 				 !S_IS_DEBUG(s) && \
 				 (S_GET_NAME(s)[0] == '\001' || \
-				  (S_LOCAL_NAME(s) && !flagseen['L'])))
+				  (S_LOCAL_NAME(s) && !flag_keep_locals)))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.n_type & N_EXT)
 /* True if the symbol has been generated because of a .stabd directive */
