@@ -16,7 +16,7 @@ changequote([,])dnl
 sparc-*-*)	MY_TARGET=sparc ;;
 tahoe-*-*)	MY_TARGET=tahoe ;;
 vax-*-*)	MY_TARGET=vax ;;
-ns532-*-*|*-pc532-*)	MY_TARGET=ns532;;
+ns32k-*-*)	MY_TARGET=ns532;;
 *-*-*)		MY_TARGET=dummy ;;
 esac
 

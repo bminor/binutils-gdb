@@ -34,13 +34,9 @@
  */
 
 /*
- * dummy.h -- This file should be used when a processor is not yet supported.
+ *        offset (in bytes) of the code from the entry address of a routine.
+ *  (see asgnsamples for use and explanation.)
  */
-
-    /*
-     *        offset (in bytes) of the code from the entry address of a routine.
-     *  (see asgnsamples for use and explanation.)
-     */
 #ifdef MACH
 #include <machine/mach_param.h>
 #define hertz() (HZ)

@@ -39,7 +39,7 @@ for targ in $target $canon_targets
 do
 
 case "${targ}" in
-
+  arm-*-pe)		ld_target=arm-pe ;;
 # start-sanitize-arc
   arc-*-elf*)		ld_target=arc-elf ;;
 # end-sanitize-arc
@@ -75,6 +75,7 @@ case "${targ}" in
   i[345]86-*-bsdi*)	ld_target=i386-bsd ;;
   i[345]86-*-aout)	ld_target=i386-aout ;;
   i[345]86-*-linuxaout*) ld_target=i386-laout ;;
+  i[345]86-*-linuxoldld) ld_target=i386-laout ;;
   i[345]86-*-linux*)	ld_target=i386-linux ;;
   i[345]86-*-sysv4*)	ld_target=i386-elf ;;
   i[345]86-*-unixware)	ld_target=i386-elf ;;
@@ -83,15 +84,21 @@ case "${targ}" in
   i[345]86-*-elf*)	ld_target=i386-elf ;;
   i[345]86-*-sysv*)	ld_target=i386-coff ;;
   i[345]86-*-mach*)	ld_target=i386-mach ;;
-  i[345]86-*-gnuelf*)	ld_target=i386-gelf ;;
-  i[345]86-*-gnu*)	ld_target=i386-gnu ;;
+  i[345]86-*-gnu*)	ld_target=i386-gelf ;;
+  i[345]86-*-msdos*)	ld_target=i386-msdos ;;
+  i[345]86-*-moss*)	ld_target=i386-moss ;;
+  i[345]86-*-winnt)	ld_target=i386-pe ;;
+  i[345]86-*-pe)	ld_target=i386-pe ;;
+  i[345]86-*-win32)	ld_target=i386-pe ;;
   m8*-*-*)		ld_target=m88k-bcs ;;
   a29k-*-udi)		ld_target=sa29200 ;;
   a29k-*-ebmon)		ld_target=ebmon29k ;;
   a29k-*-*)		ld_target=coff-a29k ;;
 #  arm-*-riscix*)	ld_target=riscix ;;
+  arm-*-aout | armel-*-aout)
+			ld_target=arml-aout ;;
+  armeb-*-aout)		ld_target=armb-aout ;;
   h8300-*-hms)		ld_target=coff-h8300 ;;
-  h8300h-*-hms)		ld_target=cf-h8300h ;;
   h8500-*-hms)		ld_target=coff-h8500 ;;
   sh-*-*)		ld_target=coff-sh ;;
 # start-sanitize-rce
@@ -117,13 +124,17 @@ case "${targ}" in
   mips*el-*-ecoff*)	ld_target=mipsl-idt ;;
   mips*-*-ecoff*)	ld_target=mips-idt ;;
   mips*-dec-bsd*)	ld_target=mipsbsd ;;
+# CYGNUS LOCAL jsmith
+  mips*vr4300el-*-elf*)	ld_target=mips-vr4300el ;;
+  mips*vr4300-*-elf*)	ld_target=mips-vr4300 ;;
+# END CYGNUS LOCAL
   mips*el-*-elf*)	ld_target=mipsl-elf32 ;;
   mips*-*-elf*)		ld_target=mipsb-elf32 ;;
   alpha-*-osf*)		ld_target=alpha ;;
   alpha-*-netware*)	ld_target=alpha ;;
-  z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
-  ns32k-pc532-mach)	ld_target=pc532mach ;;
-  ns32k-pc532-netbsd*)  ld_target=ns32k-nbsd ;;
+  z8k-*-coff) 		ld_target=z8k-coff ;;
+  ns32k-pc532-mach* | ns32k-pc532-ux*)	ld_target=pc532mach ;;
+  ns32k-pc532-netbsd* | ns32k-pc532-lites*)  ld_target=ns32k-nbsd ;;
   powerpc-*-elf* | powerpc-*-eabi*)	ld_target=ppc-elf32 ;;
   powerpcle-*-elf* | powerpcle-*-eabi*)	ld_target=ppcle-elf32 ;;
   powerpc-*-netware*)	ld_target=ppc-nw ;;

@@ -603,7 +603,7 @@ i[345]86-*-*)	MY_TARGET=i386 ;;
 sparc-*-*)	MY_TARGET=sparc ;;
 tahoe-*-*)	MY_TARGET=tahoe ;;
 vax-*-*)	MY_TARGET=vax ;;
-ns532-*-*|*-pc532-*)	MY_TARGET=ns532;;
+ns32k-*-*|*-pc532-*)	MY_TARGET=ns532;;
 *-*-*)		MY_TARGET=dummy ;;
 esac
 

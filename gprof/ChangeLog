@@ -1,3 +1,11 @@
+Fri Aug 25 15:30:05 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	NS32K changes from Ian Dall:
+	* configure.in: Use ns32k, not ns532.
+	* ns532.c: Include symtab.h.
+	(find_call): Renamed from findcall.  Print a message.
+	* ns532.h: Remove dummy.h comments.
+
 Tue Aug 22 10:00:45 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* Makefile.in (install): Remove "brokensed" hack, unnecessary now

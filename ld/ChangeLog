@@ -1,3 +1,12 @@
+Tue Sep  5 14:55:24 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Treat ns32k-pc532-ux* like ns32k-pc532-mach*, and
+	ns32k-pc532-lites* like ns32k-pc532-netbsd*.  From Ian Dall.
+
+Fri Sep  1 22:29:52 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* scripttempl/pe.sc: Fix typo in spelling of .ctors/.dtors.
+
 Fri Sep  1 13:13:29 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (warning_callback): Add abfd, section, and address
