@@ -1,3 +1,8 @@
+Sun Feb 20 16:06:54 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
+
+	* linker.c (_bfd_generic_link_add_archive_symbols): Consider
+	symbols in the order they appear in the archive map.
+
 Sat Feb 19 03:17:32 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* coff-alpha.c (reloc_nil):  Add forward declaration, add missing
