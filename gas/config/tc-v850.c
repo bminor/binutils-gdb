@@ -1952,13 +1952,13 @@ md_assemble (str)
 		{
 		  expression (&ex);
 		  /* Special case:
-		     If we are assembling a MOV instruction (or a CALLT.... :-)
-		     and the immediate value does not fit into the bits
-		     available then create a fake error so that the next MOV
-		     instruction will be selected.  This one has a 32 bit
-		     immediate field.  */
+		     If we are assembling a MOV instruction and the immediate
+		     value does not fit into the bits available then create a
+		     fake error so that the next MOV instruction will be
+		     selected.  This one has a 32 bit immediate field.  */
 
 		  if (((insn & 0x07e0) == 0x0200)
+		      && operand->bits == 5 /* Do not match the CALLT instruction.  */
 		      && ex.X_op == O_constant
 		      && (ex.X_add_number < (-(1 << (operand->bits - 1)))
 			  || ex.X_add_number > ((1 << (operand->bits - 1)) - 1)))
