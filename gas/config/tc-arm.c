@@ -88,7 +88,8 @@
 #define FPU_DEFAULT FPU_ALL
 #endif
 
-#define streq(a,b)  (strcmp (a, b) == 0)
+#define streq(a, b)           (strcmp (a, b) == 0)
+#define skip_whitespace(str)  while (* (str) == ' ') ++ (str)
 
 static unsigned long	cpu_variant = CPU_DEFAULT | FPU_DEFAULT;
 static int target_oabi = 0;
@@ -415,53 +416,50 @@ static CONST struct asm_psr psrs[] =
 
 /* Functions called by parser */
 /* ARM instructions */
-static void do_arit		PARAMS ((char *operands, unsigned long flags));
-static void do_cmp		PARAMS ((char *operands, unsigned long flags));
-static void do_mov		PARAMS ((char *operands, unsigned long flags));
-static void do_ldst		PARAMS ((char *operands, unsigned long flags));
-static void do_ldmstm		PARAMS ((char *operands, unsigned long flags));
-static void do_branch		PARAMS ((char *operands, unsigned long flags));
-static void do_swi		PARAMS ((char *operands, unsigned long flags));
-/* Pseudo Op codes */
-static void do_adr		PARAMS ((char *operands, unsigned long flags));
-static void do_adrl		PARAMS ((char * operands, unsigned long flags));
-static void do_nop		PARAMS ((char *operands, unsigned long flags));
-/* ARM 2 */
-static void do_mul		PARAMS ((char *operands, unsigned long flags));
-static void do_mla		PARAMS ((char *operands, unsigned long flags));
-/* ARM 3 */
-static void do_swap		PARAMS ((char *operands, unsigned long flags));
-/* ARM 6 */
-static void do_msr		PARAMS ((char *operands, unsigned long flags));
-static void do_mrs		PARAMS ((char *operands, unsigned long flags));
-/* ARM 7M */
-static void do_mull		PARAMS ((char *operands, unsigned long flags));
-/* ARM THUMB */
-static void do_bx               PARAMS ((char *operands, unsigned long flags));
+static void do_arit		PARAMS ((char *, unsigned long));
+static void do_cmp		PARAMS ((char *, unsigned long));
+static void do_mov		PARAMS ((char *, unsigned long));
+static void do_ldst		PARAMS ((char *, unsigned long));
+static void do_ldmstm		PARAMS ((char *, unsigned long));
+static void do_branch		PARAMS ((char *, unsigned long));
+static void do_swi		PARAMS ((char *, unsigned long));
+/* Pseudo Op codes */			       		      
+static void do_adr		PARAMS ((char *, unsigned long));
+static void do_adrl		PARAMS ((char *, unsigned long));
+static void do_nop		PARAMS ((char *, unsigned long));
+/* ARM 2 */				       		      
+static void do_mul		PARAMS ((char *, unsigned long));
+static void do_mla		PARAMS ((char *, unsigned long));
+/* ARM 3 */				       		      
+static void do_swap		PARAMS ((char *, unsigned long));
+/* ARM 6 */				       		      
+static void do_msr		PARAMS ((char *, unsigned long));
+static void do_mrs		PARAMS ((char *, unsigned long));
+/* ARM 7M */				       		      
+static void do_mull		PARAMS ((char *, unsigned long));
+/* ARM THUMB */				       		      
+static void do_bx               PARAMS ((char *, unsigned long));
+					       		      
+/* Coprocessor Instructions */		       		      
+static void do_cdp		PARAMS ((char *, unsigned long));
+static void do_lstc		PARAMS ((char *, unsigned long));
+static void do_co_reg		PARAMS ((char *, unsigned long));
+static void do_fp_ctrl		PARAMS ((char *, unsigned long));
+static void do_fp_ldst		PARAMS ((char *, unsigned long));
+static void do_fp_ldmstm	PARAMS ((char *, unsigned long));
+static void do_fp_dyadic	PARAMS ((char *, unsigned long));
+static void do_fp_monadic	PARAMS ((char *, unsigned long));
+static void do_fp_cmp		PARAMS ((char *, unsigned long));
+static void do_fp_from_reg	PARAMS ((char *, unsigned long));
+static void do_fp_to_reg	PARAMS ((char *, unsigned long));
 
-/* Coprocessor Instructions */
-static void do_cdp		PARAMS ((char *operands, unsigned long flags));
-static void do_lstc		PARAMS ((char *operands, unsigned long flags));
-static void do_co_reg		PARAMS ((char *operands, unsigned long flags));
-static void do_fp_ctrl		PARAMS ((char *operands, unsigned long flags));
-static void do_fp_ldst		PARAMS ((char *operands, unsigned long flags));
-static void do_fp_ldmstm	PARAMS ((char *operands, unsigned long flags));
-static void do_fp_dyadic	PARAMS ((char *operands, unsigned long flags));
-static void do_fp_monadic	PARAMS ((char *operands, unsigned long flags));
-static void do_fp_cmp		PARAMS ((char *operands, unsigned long flags));
-static void do_fp_from_reg	PARAMS ((char *operands, unsigned long flags));
-static void do_fp_to_reg	PARAMS ((char *operands, unsigned long flags));
-
-static void fix_new_arm		PARAMS ((fragS *frag, int where, 
-					 short int size, expressionS *exp,
-					 int pc_rel, int reloc));
-static int arm_reg_parse	PARAMS ((char **ccp));
-static int arm_psr_parse	PARAMS ((char **ccp));
-static void symbol_locate	PARAMS ((symbolS *, CONST char *, segT,
-					 valueT, fragS *));
+static void fix_new_arm		PARAMS ((fragS *, int, short, expressionS *, int, int));
+static int arm_reg_parse	PARAMS ((char **));
+static int arm_psr_parse	PARAMS ((char **));
+static void symbol_locate	PARAMS ((symbolS *, CONST char *, segT, valueT, fragS *));
 static int add_to_lit_pool	PARAMS ((void));
-static unsigned validate_immediate	PARAMS ((unsigned));
-static unsigned validate_immediate_twopart	PARAMS ((unsigned int, unsigned int *));
+static unsigned validate_immediate PARAMS ((unsigned));
+static unsigned validate_immediate_twopart PARAMS ((unsigned int, unsigned int *));
 static int validate_offset_imm	PARAMS ((int, int));
 static void opcode_select	PARAMS ((int));
 static void end_of_line		PARAMS ((char *));
@@ -476,8 +474,7 @@ static int cp_address_required_here	PARAMS ((char **));
 static int my_get_float_expression	PARAMS ((char **));
 static int skip_past_comma	PARAMS ((char **));
 static int walk_no_bignums	PARAMS ((symbolS *));
-static int negate_data_op	PARAMS ((unsigned long *,
-					 unsigned long));
+static int negate_data_op	PARAMS ((unsigned long *, unsigned long));
 static int data_op2		PARAMS ((char **));
 static int fp_op2		PARAMS ((char **));
 static long reg_list		PARAMS ((char **));
@@ -664,30 +661,30 @@ static CONST struct asm_opcode insns[] =
 #define OPCODE_BIC	14
 #define OPCODE_MVN	15
 
-static void do_t_nop		PARAMS ((char *operands));
-static void do_t_arit		PARAMS ((char *operands));
-static void do_t_add		PARAMS ((char *operands));
-static void do_t_asr		PARAMS ((char *operands));
-static void do_t_branch9	PARAMS ((char *operands));
-static void do_t_branch12	PARAMS ((char *operands));
-static void do_t_branch23	PARAMS ((char *operands));
-static void do_t_bx		PARAMS ((char *operands));
-static void do_t_compare	PARAMS ((char *operands));
-static void do_t_ldmstm		PARAMS ((char *operands));
-static void do_t_ldr		PARAMS ((char *operands));
-static void do_t_ldrb		PARAMS ((char *operands));
-static void do_t_ldrh		PARAMS ((char *operands));
-static void do_t_lds		PARAMS ((char *operands));
-static void do_t_lsl		PARAMS ((char *operands));
-static void do_t_lsr		PARAMS ((char *operands));
-static void do_t_mov		PARAMS ((char *operands));
-static void do_t_push_pop	PARAMS ((char *operands));
-static void do_t_str		PARAMS ((char *operands));
-static void do_t_strb		PARAMS ((char *operands));
-static void do_t_strh		PARAMS ((char *operands));
-static void do_t_sub		PARAMS ((char *operands));
-static void do_t_swi		PARAMS ((char *operands));
-static void do_t_adr		PARAMS ((char *operands));
+static void do_t_nop		PARAMS ((char *));
+static void do_t_arit		PARAMS ((char *));
+static void do_t_add		PARAMS ((char *));
+static void do_t_asr		PARAMS ((char *));
+static void do_t_branch9	PARAMS ((char *));
+static void do_t_branch12	PARAMS ((char *));
+static void do_t_branch23	PARAMS ((char *));
+static void do_t_bx		PARAMS ((char *));
+static void do_t_compare	PARAMS ((char *));
+static void do_t_ldmstm		PARAMS ((char *));
+static void do_t_ldr		PARAMS ((char *));
+static void do_t_ldrb		PARAMS ((char *));
+static void do_t_ldrh		PARAMS ((char *));
+static void do_t_lds		PARAMS ((char *));
+static void do_t_lsl		PARAMS ((char *));
+static void do_t_lsr		PARAMS ((char *));
+static void do_t_mov		PARAMS ((char *));
+static void do_t_push_pop	PARAMS ((char *));
+static void do_t_str		PARAMS ((char *));
+static void do_t_strb		PARAMS ((char *));
+static void do_t_strh		PARAMS ((char *));
+static void do_t_sub		PARAMS ((char *));
+static void do_t_swi		PARAMS ((char *));
+static void do_t_adr		PARAMS ((char *));
 
 #define T_OPCODE_MUL 0x4340
 #define T_OPCODE_TST 0x4200
@@ -1359,7 +1356,7 @@ s_thumb_set (equiv)
   
   demand_empty_rest_of_line ();
 
-  /* XXX now we come to the Thumb specific bit of code.  */
+  /* XXX Now we come to the Thumb specific bit of code.  */
   
   THUMB_SET_FUNC (symbolP, 1);
   ARM_SET_THUMB (symbolP, 1);
@@ -1477,10 +1474,9 @@ static void
 end_of_line (str)
      char * str;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
-  if (*str != '\0')
+  if (* str != '\0')
     inst.error = _("Garbage following instruction");
 }
 
@@ -1528,7 +1524,7 @@ reg_required_here (str, shift)
   *str = start;
   
   /* In the few cases where we might be able to accept something else
-     this error can be overridden */
+     this error can be overridden.  */
   sprintf (buff, _("Register expected, not '%.100s'"), start);
   inst.error = buff;
 
@@ -1554,7 +1550,7 @@ psr_required_here (str, cpsr, spsr)
     }
 
   /* In the few cases where we might be able to accept something else
-     this error can be overridden */
+     this error can be overridden.  */
   inst.error = _("<psr(f)> expected");
 
   /* Restore the start point.  */
@@ -1564,12 +1560,11 @@ psr_required_here (str, cpsr, spsr)
 
 static int
 co_proc_number (str)
-     char **str;
+     char ** str;
 {
   int processor, pchar;
 
-  while (**str == ' ')
-    (*str)++;
+  skip_whitespace (* str);
 
   /* The data sheet seems to imply that just a number on its own is valid
      here, but the RISC iX assembler seems to accept a prefix 'p'.  We will
@@ -1609,8 +1604,7 @@ cp_opc_expr (str, where, length)
 {
   expressionS expr;
 
-  while (**str == ' ')
-    (*str)++;
+  skip_whitespace (* str);
 
   memset (&expr, '\0', sizeof (expr));
 
@@ -1648,10 +1642,10 @@ cp_reg_required_here (str, where)
     }
 
   /* In the few cases where we might be able to accept something else
-     this error can be overridden */
+     this error can be overridden.  */
   inst.error = _("Co-processor register expected");
 
-  /* Restore the start point */
+  /* Restore the start point.  */
   *str = start;
   return FAIL;
 }
@@ -1672,10 +1666,10 @@ fp_reg_required_here (str, where)
     }
 
   /* In the few cases where we might be able to accept something else
-     this error can be overridden */
+     this error can be overridden.  */
   inst.error = _("Floating point register expected");
 
-  /* Restore the start point */
+  /* Restore the start point.  */
   *str = start;
   return FAIL;
 }
@@ -1686,8 +1680,7 @@ cp_address_offset (str)
 {
   int offset;
 
-  while (**str == ' ')
-    (*str)++;
+  skip_whitespace (* str);
 
   if (! is_immediate_prefix (**str))
     {
@@ -1742,14 +1735,12 @@ cp_address_required_here (str)
       int reg;
 
       p++;
-      while (*p == ' ')
-	p++;
+      skip_whitespace (p);
 
       if ((reg = reg_required_here (& p, 16)) == FAIL)
 	return FAIL;
 
-      while (*p == ' ')
-	p++;
+      skip_whitespace (p);
 
       if (*p == ']')
 	{
@@ -1787,8 +1778,7 @@ cp_address_required_here (str)
 	  if (cp_address_offset (& p) == FAIL)
 	    return FAIL;
 
-	  while (*p == ' ')
-	    p++;
+	  skip_whitespace (p);
 
 	  if (*p++ != ']')
 	    {
@@ -1796,8 +1786,7 @@ cp_address_required_here (str)
 	      return FAIL;
 	    }
 
-	  while (*p == ' ')
-	    p++;
+	  skip_whitespace (p);
 
 	  if (*p == '!')
 	    {
@@ -1834,8 +1823,8 @@ do_nop (str, flags)
      char * str;
      unsigned long flags;
 {
-  /* Do nothing really */
-  inst.instruction |= flags; /* This is pointless */
+  /* Do nothing really.  */
+  inst.instruction |= flags; /* This is pointless.  */
   end_of_line (str);
   return;
 }
@@ -1845,9 +1834,8 @@ do_mrs (str, flags)
      char *str;
      unsigned long flags;
 {
-  /* Only one syntax */
-  while (*str == ' ')
-    str++;
+  /* Only one syntax.  */
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL)
     {
@@ -1867,7 +1855,7 @@ do_mrs (str, flags)
   return;
 }
 
-/* Three possible forms: "<psr>, Rm", "<psrf>, Rm", "<psrf>, #expression" */
+/* Three possible forms: "<psr>, Rm", "<psrf>, Rm", "<psrf>, #expression".  */
 static void
 do_msr (str, flags)
      char * str;
@@ -1875,8 +1863,7 @@ do_msr (str, flags)
 {
   int reg;
 
-  while (*str == ' ')
-    str ++;
+  skip_whitespace (str);
 
   if (psr_required_here (&str, CPSR_ALL, SPSR_ALL) == SUCCESS)
     {
@@ -1912,7 +1899,7 @@ do_msr (str, flags)
       
       if ((reg = reg_required_here (& str, 0)) != FAIL)
 	;
-      /* Immediate expression */
+      /* Immediate expression.  */
       else if (is_immediate_prefix (* str))
 	{
 	  str ++;
@@ -1969,9 +1956,8 @@ do_mull (str, flags)
 {
   int rdlo, rdhi, rm, rs;
 
-  /* only one format "rdlo, rdhi, rm, rs" */
-  while (*str == ' ')
-    str++;
+  /* Only one format "rdlo, rdhi, rm, rs" */
+  skip_whitespace (str);
 
   if ((rdlo = reg_required_here (&str, 12)) == FAIL)
     {
@@ -2022,9 +2008,8 @@ do_mul (str, flags)
 {
   int rd, rm;
   
-  /* only one format "rd, rm, rs" */
-  while (*str == ' ')
-    str++;
+  /* Only one format "rd, rm, rs" */
+  skip_whitespace (str);
 
   if ((rd = reg_required_here (&str, 16)) == FAIL)
     {
@@ -2079,9 +2064,8 @@ do_mla (str, flags)
 {
   int rd, rm;
 
-  /* only one format "rd, rm, rs, rn" */
-  while (*str == ' ')
-    str++;
+  /* Only one format "rd, rm, rs, rn" */
+  skip_whitespace (str);
 
   if ((rd = reg_required_here (&str, 16)) == FAIL)
     {
@@ -2275,8 +2259,7 @@ decode_shift (str, unrestrict)
   char * p;
   char   c;
     
-  while (**str == ' ')
-    (*str)++;
+  skip_whitespace (* str);
     
   for (p = *str; isalpha (*p); p++)
     ;
@@ -2301,9 +2284,8 @@ decode_shift (str, unrestrict)
 	  return SUCCESS;
 	}
 
-      while (*p == ' ')
-	p++;
-
+      skip_whitespace (p);
+      
       if (unrestrict && reg_required_here (&p, 8) != FAIL)
 	{
 	  inst.instruction |= shft->value | SHIFT_BY_REG;
@@ -2461,16 +2443,14 @@ data_op2 (str)
   int value;
   expressionS expr;
 
-  while (**str == ' ')
-    (*str)++;
+  skip_whitespace (* str);
     
   if (reg_required_here (str, 0) != FAIL)
     {
       if (skip_past_comma (str) == SUCCESS)
-	{
-	  /* Shift operation on register */
-	  return decode_shift (str, NO_SHIFT_RESTRICT);
-	}
+	/* Shift operation on register.  */
+	return decode_shift (str, NO_SHIFT_RESTRICT);
+
       return SUCCESS;
     }
   else
@@ -2480,6 +2460,7 @@ data_op2 (str)
 	{
 	  (*str)++;
 	  inst.error = NULL;
+	  
 	  if (my_get_expression (&inst.reloc.exp, str))
 	    return FAIL;
 
@@ -2549,8 +2530,7 @@ static int
 fp_op2 (str)
      char ** str;
 {
-  while (**str == ' ')
-    (*str)++;
+  skip_whitespace (* str);
 
   if (fp_reg_required_here (str, 0) != FAIL)
     return SUCCESS;
@@ -2562,8 +2542,8 @@ fp_op2 (str)
 	  int i;
 
 	  inst.error = NULL;
-	  while (**str == ' ')
-	    (*str)++;
+	  
+	  skip_whitespace (* str);
 
 	  /* First try and match exact strings, this is to guarantee that
 	     some formats will work even for cross assembly */
@@ -2607,8 +2587,7 @@ do_arit (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL
       || skip_past_comma (&str) == FAIL
@@ -2634,8 +2613,7 @@ do_adr (str, flags)
   /* This is a pseudo-op of the form "adr rd, label" to be converted
      into a relative address of the form "add rd, pc, #label-.-8" */
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL
       || skip_past_comma (&str) == FAIL
@@ -2665,8 +2643,7 @@ do_adrl (str, flags)
      	add rd, pc, #low(label-.-8)"
      	add rd, rd, #high(label-.-8)"   */
 
-  while (* str == ' ')
-    str ++;
+  skip_whitespace (str);
 
   if (reg_required_here (& str, 12) == FAIL
       || skip_past_comma (& str) == FAIL
@@ -2695,8 +2672,7 @@ do_cmp (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 16) == FAIL)
     {
@@ -2726,8 +2702,7 @@ do_mov (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL)
     {
@@ -2853,8 +2828,7 @@ do_ldst (str, flags)
       flags = 0;
     }
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
     
   if ((conflict_reg = reg_required_here (& str, 12)) == FAIL)
     {
@@ -2874,8 +2848,8 @@ do_ldst (str, flags)
       int reg;
 
       str++;
-      while (*str == ' ')
-	str++;
+      
+      skip_whitespace (str);
 
       if ((reg = reg_required_here (&str, 16)) == FAIL)
 	return;
@@ -2884,8 +2858,7 @@ do_ldst (str, flags)
 		       && (inst.instruction & LOAD_BIT))
 		      ? 1 : 0);
 
-      while (*str == ' ')
-	str++;
+      skip_whitespace (str);
 
       if (*str == ']')
 	{
@@ -2904,8 +2877,7 @@ do_ldst (str, flags)
               if (halfword)
                 inst.instruction |= HWOFFSET_IMM;
 
-              while (*str == ' ')
-               str++;
+              skip_whitespace (str);
 
               if (*str == '!')
                {
@@ -2933,8 +2905,7 @@ do_ldst (str, flags)
 	  if (ldst_extend (&str, halfword) == FAIL)
 	    return;
 
-	  while (*str == ' ')
-	    str++;
+	  skip_whitespace (str);
 
 	  if (*str++ != ']')
 	    {
@@ -2942,8 +2913,7 @@ do_ldst (str, flags)
 	      return;
 	    }
 
-	  while (*str == ' ')
-	    str++;
+	  skip_whitespace (str);
 
 	  if (*str == '!')
 	    {
@@ -2959,8 +2929,7 @@ do_ldst (str, flags)
       /* Parse an "ldr Rd, =expr" instruction; this is another pseudo op */
       str++;
 
-      while (*str == ' ')
-	str++;
+      skip_whitespace (str);
 
       if (my_get_expression (&inst.reloc.exp, &str))
 	return;
@@ -3054,8 +3023,7 @@ reg_list (strp)
 	    {
 	      int reg;
 	    
-	      while (*str == ' ')
-		str++;
+	      skip_whitespace (str);
 
 	      if ((reg = reg_required_here (& str, -1)) == FAIL)
 		return FAIL;
@@ -3093,8 +3061,7 @@ reg_list (strp)
 	    } while (skip_past_comma (&str) != FAIL
 		     || (in_range = 1, *str++ == '-'));
 	  str--;
-	  while (*str == ' ')
-	    str++;
+	  skip_whitespace (str);
 
 	  if (*str++ != '}')
 	    {
@@ -3145,8 +3112,7 @@ reg_list (strp)
 	    }
 	}
 
-      while (*str == ' ')
-	str++;
+      skip_whitespace (str);
 
       if (*str == '|' || *str == '+')
 	{
@@ -3167,8 +3133,7 @@ do_ldmstm (str, flags)
   int base_reg;
   long range;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((base_reg = reg_required_here (&str, 16)) == FAIL)
     return;
@@ -3179,8 +3144,8 @@ do_ldmstm (str, flags)
       return;
     }
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
+
   if (*str == '!')
     {
       flags |= WRITE_BACK;
@@ -3211,8 +3176,7 @@ do_swi (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
   
   /* Allow optional leading '#'.  */
   if (is_immediate_prefix (*str))
@@ -3237,8 +3201,7 @@ do_swap (str, flags)
 {
   int reg;
   
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((reg = reg_required_here (&str, 12)) == FAIL)
     return;
@@ -3270,8 +3233,7 @@ do_swap (str, flags)
       return;
     }
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((reg = reg_required_here (&str, 16)) == FAIL)
     return;
@@ -3282,8 +3244,7 @@ do_swap (str, flags)
       return;
     }
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (*str++ != ']')
     {
@@ -3349,8 +3310,7 @@ do_bx (str, flags)
 {
   int reg;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((reg = reg_required_here (&str, 0)) == FAIL)
     return;
@@ -3369,8 +3329,7 @@ do_cdp (str, flags)
 {
   /* Co-processor data operation.
      Format: CDP{cond} CP#,<expr>,CRd,CRn,CRm{,<expr>}  */
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (co_proc_number (&str) == FAIL)
     {
@@ -3433,8 +3392,7 @@ do_lstc (str, flags)
   /* Co-processor register load/store.
      Format: <LDC|STC{cond}[L] CP#,CRd,<address>  */
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (co_proc_number (&str) == FAIL)
     {
@@ -3472,8 +3430,7 @@ do_co_reg (str, flags)
   /* Co-processor register transfer.
      Format: <MCR|MRC>{cond} CP#,<expr1>,Rd,CRn,CRm{,<expr2>}  */
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (co_proc_number (&str) == FAIL)
     {
@@ -3536,8 +3493,7 @@ do_fp_ctrl (str, flags)
   /* FP control registers.
      Format: <WFS|RFS|WFC|RFC>{cond} Rn  */
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL)
     {
@@ -3555,8 +3511,7 @@ do_fp_ldst (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   switch (inst.suffix)
     {
@@ -3600,8 +3555,7 @@ do_fp_ldmstm (str, flags)
 {
   int num_regs;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
@@ -3669,14 +3623,12 @@ do_fp_ldmstm (str, flags)
 	}
 
       str++;
-      while (*str == ' ')
-	str++;
+      skip_whitespace (str);
 
       if ((reg = reg_required_here (&str, 16)) == FAIL)
 	return;
 
-      while (*str == ' ')
-	str++;
+      skip_whitespace (str);
 
       if (*str != ']')
 	{
@@ -3740,8 +3692,7 @@ do_fp_dyadic (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   switch (inst.suffix)
     {
@@ -3790,8 +3741,7 @@ do_fp_monadic (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   switch (inst.suffix)
     {
@@ -3832,8 +3782,7 @@ do_fp_cmp (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (fp_reg_required_here (&str, 16) == FAIL)
     {
@@ -3860,8 +3809,7 @@ do_fp_from_reg (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   switch (inst.suffix)
     {
@@ -3902,8 +3850,7 @@ do_fp_to_reg (str, flags)
      char *        str;
      unsigned long flags;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL)
     return;
@@ -3972,8 +3919,7 @@ thumb_add_sub (str, subtract)
 {
   int Rd, Rs, Rn = FAIL;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((Rd = thumb_reg (&str, THUMB_REG_ANY)) == FAIL
       || skip_past_comma (&str) == FAIL)
@@ -4140,8 +4086,7 @@ thumb_shift (str, shift)
 {
   int Rd, Rs, Rn = FAIL;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((Rd = thumb_reg (&str, THUMB_REG_LO)) == FAIL
       || skip_past_comma (&str) == FAIL)
@@ -4250,8 +4195,7 @@ thumb_mov_compare (str, move)
 {
   int Rd, Rs = FAIL;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((Rd = thumb_reg (&str, THUMB_REG_ANY)) == FAIL
       || skip_past_comma (&str) == FAIL)
@@ -4340,8 +4284,7 @@ thumb_load_store (str, load_store, size)
 {
   int Rd, Rb, Ro = FAIL;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((Rd = thumb_reg (&str, THUMB_REG_LO)) == FAIL
       || skip_past_comma (&str) == FAIL)
@@ -4386,8 +4329,7 @@ thumb_load_store (str, load_store, size)
       /* Parse an "ldr Rd, =expr" instruction; this is another pseudo op */
       str++;
 
-      while (*str == ' ')
-	str++;
+      skip_whitespace (str);
 
       if (my_get_expression (& inst.reloc.exp, & str))
 	return;
@@ -4551,8 +4493,7 @@ do_t_arit (str)
 {
   int Rd, Rs, Rn;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((Rd = thumb_reg (&str, THUMB_REG_LO)) == FAIL)
     return;
@@ -4644,7 +4585,7 @@ find_real_start (symbolP)
   const char * name = S_GET_NAME (symbolP);
   symbolS *    new_target;
 
-  /* This definitonmust agree with the one in gcc/config/arm/thumb.c */
+  /* This definiton must agree with the one in gcc/config/arm/thumb.c */
 #define STUB_NAME ".real_start_of"
 
   if (name == NULL)
@@ -4677,8 +4618,9 @@ static void
 do_t_branch23 (str)
      char * str;
 {
-  if (my_get_expression (&inst.reloc.exp, &str))
+  if (my_get_expression (& inst.reloc.exp, & str))
     return;
+  
   inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BRANCH23;
   inst.reloc.pc_rel = 1;
   end_of_line (str);
@@ -4700,8 +4642,7 @@ do_t_bx (str)
 {
   int reg;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((reg = thumb_reg (&str, THUMB_REG_ANY)) == FAIL)
     return;
@@ -4730,8 +4671,7 @@ do_t_ldmstm (str)
   int Rb;
   long range;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((Rb = thumb_reg (&str, THUMB_REG_LO)) == FAIL)
     return;
@@ -4794,8 +4734,7 @@ do_t_lds (str)
 {
   int Rd, Rb, Ro;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((Rd = thumb_reg (&str, THUMB_REG_LO)) == FAIL
       || skip_past_comma (&str) == FAIL
@@ -4841,8 +4780,7 @@ do_t_push_pop (str)
 {
   long range;
 
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if ((range = reg_list (&str)) == FAIL)
     {
@@ -4912,8 +4850,7 @@ static void
 do_t_swi (str)
      char * str;
 {
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (my_get_expression (&inst.reloc.exp, &str))
     return;
@@ -4929,8 +4866,7 @@ do_t_adr (str)
 {
   /* This is a pseudo-op of the form "adr rd, label" to be converted
      into a relative address of the form "add rd, pc, #label-.-4" */
-  while (*str == ' ')
-    str++;
+  skip_whitespace (str);
 
   if (reg_required_here (&str, 4) == FAIL  /* Store Rd in temporary location inside instruction.  */
       || skip_past_comma (&str) == FAIL
@@ -5066,7 +5002,7 @@ md_begin ()
 	break;
       }
 
-    /* Catch special cases */
+    /* Catch special cases.  */
     if (cpu_variant != (FPU_DEFAULT | CPU_DEFAULT))
       {
 	if (cpu_variant & (ARM_EXT_V5 & ARM_THUMB))
@@ -5090,8 +5026,7 @@ md_begin ()
    This knows about the endian-ness of the target machine and does
    THE RIGHT THING, whatever it is.  Possible values for n are 1 (byte)
    2 (short) and 4 (long)  Floating numbers are put out as a series of
-   LITTLENUMS (shorts, here at least)
-   */
+   LITTLENUMS (shorts, here at least).  */
 void
 md_number_to_chars (buf, val, n)
      char * buf;
@@ -5230,7 +5165,7 @@ md_pcrel_from (fixP)
     {
       /* PC relative addressing on the Thumb is slightly odd
 	 as the bottom two bits of the PC are forced to zero
-	 for the calculation */
+	 for the calculation.  */
       return (fixP->fx_where + fixP->fx_frag->fr_address) & ~3;
     }
 
@@ -5392,7 +5327,7 @@ md_apply_fix3 (fixP, val, seg)
 	}
     }
 
-  fixP->fx_addnumber = value;	/* Remember value for emit_reloc */
+  fixP->fx_addnumber = value;	/* Remember value for emit_reloc.  */
 
   switch (fixP->fx_r_type)
     {
@@ -5619,6 +5554,9 @@ md_apply_fix3 (fixP, val, seg)
         diff = ((newval & 0x7ff) << 12) | ((newval2 & 0x7ff) << 1);
         if (diff & 0x400000)
 	  diff |= ~0x3fffff;
+#ifdef OBJ_ELF
+	value = fixP->fx_offset;
+#endif
         value += diff;
         if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -5971,7 +5909,7 @@ tc_gen_reloc (section, fixp)
 	  case BFD_RELOC_ARM_THUMB_SHIFT:  type = "THUMB_SHIFT";  break;
 	  case BFD_RELOC_ARM_THUMB_IMM:    type = "THUMB_IMM";    break;
 	  case BFD_RELOC_ARM_THUMB_OFFSET: type = "THUMB_OFFSET"; break;
-	  default:                         type = "<unknown>";    break;
+	  default:                         type = _("<unknown>"); break;
 	  }
 	as_bad_where (fixp->fx_file, fixp->fx_line,
 		      _("Can not represent %s relocation in this object file format (%d)"),
@@ -6029,6 +5967,7 @@ output_inst PARAMS ((void))
     }
 
   to = frag_more (inst.size);
+  
   if (thumb_mode && (inst.size > THUMB_SIZE))
     {
       assert (inst.size == (2 * THUMB_SIZE));
@@ -6077,8 +6016,7 @@ md_assemble (str)
   memset (&inst, '\0', sizeof (inst));
   inst.reloc.type = BFD_RELOC_NONE;
 
-  if (*str == ' ')
-    str++;			/* Skip leading white space */
+  skip_whitespace (str);
   
   /* Scan up to the end of the op-code, which must end in white space or
      end of string.  */
@@ -6118,7 +6056,7 @@ md_assemble (str)
       /* p now points to the end of the opcode, probably white space, but we
 	 have to break the opcode up in case it contains condionals and flags;
 	 keep trying with progressively smaller basic instructions until one
-	 matches, or we run out of opcode. */
+	 matches, or we run out of opcode.  */
       q = (p - str > LONGEST_INST) ? str + LONGEST_INST : p;
       for (; q != str; q--)
 	{
@@ -6132,12 +6070,12 @@ md_assemble (str)
 	      unsigned long flag_bits = 0;
 	      char * r;
 
-	      /* Check that this instruction is supported for this CPU */
+	      /* Check that this instruction is supported for this CPU.  */
 	      if ((opcode->variants & cpu_variant) == 0)
 		goto try_shorter;
 
 	      inst.instruction = opcode->value;
-	      if (q == p)		/* Just a simple opcode */
+	      if (q == p)		/* Just a simple opcode.  */
 		{
 		  if (opcode->comp_suffix != 0)
 		    as_bad (_("Opcode `%s' must have suffix from <%s>\n"), str,
@@ -6151,7 +6089,7 @@ md_assemble (str)
 		  return;
 		}
 
-	      /* Now check for a conditional */
+	      /* Now check for a conditional.  */
 	      r = q;
 	      if (p - r >= 2)
 		{
@@ -6176,8 +6114,8 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 	      else
 		inst.instruction |= COND_ALWAYS;
 
-	      /* if there is a compulsory suffix, it should come here, before
-		 any optional flags. */
+	      /* If there is a compulsory suffix, it should come here, before
+		 any optional flags.  */
 	      if (opcode->comp_suffix)
 		{
 		  CONST char *s = opcode->comp_suffix;
@@ -6242,11 +6180,9 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
     }
 
   /* It wasn't an instruction, but it might be a register alias of the form
-     alias .req reg
-     */
+     alias .req reg */
   q = p;
-  while (*q == ' ')
-    q++;
+  skip_whitespace (q);
 
   c = *p;
   *p = '\0';
@@ -6258,8 +6194,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
       char * r;
       
       q += 4;
-      while (*q == ' ')
-	q++;
+      skip_whitespace (q);
 
       for (r = q; *r != '\0'; r++)
 	if (*r == ' ')
@@ -6292,7 +6227,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 	      if (reg != regnum)
 		as_warn (_("ignoring redefinition of register alias '%s'"), copy_of_str );
 	      
-	      /* Do not warn abpout redefinitions to the same alias.  */
+	      /* Do not warn about redefinitions to the same alias.  */
 	    }
 	  else
 	    as_warn (_("ignoring redefinition of register alias '%s' to non-existant register '%s'"),
@@ -6788,17 +6723,17 @@ cons_fix_new_arm (frag, where, size, exp)
 }
 
 /* A good place to do this, although this was probably not intended
- * for this kind of use.  We need to dump the literal pool before
- * references are made to a null symbol pointer.  */
+   for this kind of use.  We need to dump the literal pool before
+   references are made to a null symbol pointer.  */
 void
 arm_cleanup ()
 {
-  if (current_poolP != NULL)
-    {
-      subseg_set (text_section, 0); /* Put it at the end of text section */
-      s_ltorg (0);
-      listing_prev_line ();
-    }
+  if (current_poolP == NULL)
+    return;
+  
+  subseg_set (text_section, 0); /* Put it at the end of text section.  */
+  s_ltorg (0);
+  listing_prev_line ();
 }
 
 void
@@ -6920,9 +6855,7 @@ arm_canonicalize_symbol_name (name)
 
   if (thumb_mode && (len = strlen (name)) > 5
       && streq (name + len - 5, "/data"))
-    {
-      *(name + len - 5) = 0;
-    }
+    *(name + len - 5) = 0;
 
   return name;
 }
@@ -6965,7 +6898,6 @@ boolean
 arm_fix_adjustable (fixP)
    fixS * fixP;
 {
-
   if (fixP->fx_addsy == NULL)
     return 1;
   
@@ -7017,7 +6949,8 @@ arm_force_relocation (fixp)
 {
   if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)    
+      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)    
     return 1;
   
   return 0;
