@@ -1,3 +1,15 @@
+Sun Apr 23 16:45:45 2000  Denis Chertykov  <denisc@overta.ru>
+
+	* config/tc-avr.c: New AVR_ISA_ defined.
+	(md_assemble): Handle opcodes with optional operands (lpm,elpm). 
+	(avr_operand): Handle 'a', 'v' and 'z' constraint letters needed
+	for `fmul', `movw' and `lpm R,Z' instructions. 
+	(avr_operands): Warn if current opcode is a two-word instruction
+	and previous opcode was cpse/sbic/sbis/sbrc/sbrs. 
+	(avr_opcodes): New commands added.
+	(REGISTER_P): Check 'a' and 'v' constraint letters.
+	(mcu_types): New MCU added.
+
 2000-05-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in: Set bfd_gas=yes on i386-*-pe and i386-*-nt* to

@@ -29,11 +29,28 @@ const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "$";
 
-#define AVR_ISA_1200      1
-#define AVR_ISA_2xxx      3
-#define AVR_ISA_MEGA_x03  0x17
-#define AVR_ISA_MEGA      0x10
-#define AVR_ISA_MEGA_161  0x1b
+#define AVR_ISA_1200  0x0001 /* in the beginning there was ... */
+#define AVR_ISA_LPM   0x0002 /* device has LPM */
+#define AVR_ISA_LPMX  0x0004 /* device has LPM Rd,Z[+] */
+#define AVR_ISA_SRAM  0x0008 /* device has SRAM (LD, ST, PUSH, POP, ...) */
+#define AVR_ISA_WRAP  0x0010 /* device has exactly 8K program memory */
+#define AVR_ISA_MEGA  0x0020 /* device has >8K program memory (JMP, CALL) */
+#define AVR_ISA_MUL   0x0040 /* device has new core (MUL, MOVW, ...) */
+#define AVR_ISA_ELPM  0x0080 /* device has >64K program memory (ELPM) */
+#define AVR_ISA_ELPMX 0x0100 /* device has ELPM Rd,Z[+] (none yet) */
+#define AVR_ISA_SPM   0x0200 /* device can program itself (<=64K) */
+#define AVR_ISA_ESPM  0x0400 /* device can program itself (>64K, none yet) */
+#define AVR_ISA_EIND  0x0800 /* device has >128K program memory (none yet) */
+
+#define AVR_ISA_TINY1 (AVR_ISA_1200 | AVR_ISA_LPM)
+#define AVR_ISA_2xxx (AVR_ISA_TINY1 | AVR_ISA_SRAM)
+#define AVR_ISA_85xx (AVR_ISA_2xxx | AVR_ISA_WRAP)
+#define AVR_ISA_M603 (AVR_ISA_2xxx | AVR_ISA_MEGA)
+#define AVR_ISA_M103 (AVR_ISA_M603 | AVR_ISA_ELPM)
+#define AVR_ISA_M161 (AVR_ISA_M603 | AVR_ISA_MUL | AVR_ISA_LPMX | AVR_ISA_SPM)
+#define AVR_ISA_94K  (AVR_ISA_M603 | AVR_ISA_MUL | AVR_ISA_LPMX)
+
+#define AVR_ISA_ALL   0xFFFF
 
 const char *md_shortopts = "m:";
 struct mcu_type_s
@@ -45,11 +62,16 @@ struct mcu_type_s
 
 static struct mcu_type_s mcu_types[] =
 {
-  {"avr1",      AVR_ISA_1200,     bfd_mach_avr1},
-  {"avr2",      AVR_ISA_2xxx,     bfd_mach_avr2},
-  {"avr3",      AVR_ISA_MEGA_x03, bfd_mach_avr3},
-  {"avr4",      AVR_ISA_MEGA_161, bfd_mach_avr4},
+  {"avr1",      AVR_ISA_TINY1,    bfd_mach_avr1},
+  {"avr2",      AVR_ISA_85xx,     bfd_mach_avr2},
+  {"avr3",      AVR_ISA_M103,     bfd_mach_avr3},
+  {"avr4",      AVR_ISA_ALL,      bfd_mach_avr4},
   {"at90s1200", AVR_ISA_1200,     bfd_mach_avr1},
+  {"attiny10",  AVR_ISA_TINY1,    bfd_mach_avr1},
+  {"attiny11",  AVR_ISA_TINY1,    bfd_mach_avr1},
+  {"attiny12",  AVR_ISA_TINY1,    bfd_mach_avr1},
+  {"attiny15",  AVR_ISA_TINY1,    bfd_mach_avr1},
+  {"attiny28",  AVR_ISA_TINY1,    bfd_mach_avr1},
   {"at90s2313", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s2323", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s2333", AVR_ISA_2xxx,     bfd_mach_avr2},
@@ -58,11 +80,15 @@ static struct mcu_type_s mcu_types[] =
   {"at90s4433", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s4414", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s4434", AVR_ISA_2xxx,     bfd_mach_avr2},
-  {"at90s8515", AVR_ISA_2xxx,     bfd_mach_avr2},
-  {"at90s8535", AVR_ISA_2xxx,     bfd_mach_avr2},
-  {"atmega603", AVR_ISA_MEGA_x03, bfd_mach_avr3},
-  {"atmega103", AVR_ISA_MEGA_x03, bfd_mach_avr3},
-  {"atmega161", AVR_ISA_MEGA_161, bfd_mach_avr4},
+  {"at90s8515", AVR_ISA_85xx,     bfd_mach_avr2},
+  {"at90s8535", AVR_ISA_85xx,     bfd_mach_avr2},
+  {"at90c8534", AVR_ISA_85xx,     bfd_mach_avr2},
+  {"atmega603", AVR_ISA_M603,     bfd_mach_avr3},
+  {"atmega103", AVR_ISA_M103,     bfd_mach_avr3},
+  {"atmega161", AVR_ISA_M161,     bfd_mach_avr4},
+  {"at94k10",   AVR_ISA_94K,      bfd_mach_avr4},
+  {"at94k20",   AVR_ISA_94K,      bfd_mach_avr4},
+  {"at94k40",   AVR_ISA_94K,      bfd_mach_avr4},
   {NULL, 0, 0}
 };
 
@@ -83,7 +109,11 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 #define LDI_IMMEDIATE(x) (((x) & 0xf) | (((x) << 4) & 0xf00))
-#define REGISTER_P(x) ((x) == 'r' || (x) == 'd' || (x) == 'w')
+#define REGISTER_P(x) ((x) == 'r'		\
+		       || (x) == 'd'		\
+		       || (x) == 'w'		\
+		       || (x) == 'a'		\
+		       || (x) == 'v')
 
 struct avr_opcodes_s
 {
@@ -105,24 +135,29 @@ static char *parse_exp (char *s, expressionS * op);
 static bfd_reloc_code_real_type avr_ldi_expression (expressionS *exp);
 long md_pcrel_from_section PARAMS ((fixS *, segT));
 
+
 /* constraint letters
    r - any register
    d - `ldi' register (r16-r31)
+   v - `movw' even register (r0, r2, ..., r28, r30)
+   a - `fmul' register (r16-r23)
+   w - `adiw' register (r24,r26,r28,r30)
+   e - pointer registers (X,Y,Z)
+   b - base pointer register and displacement ([YZ]+disp)
+   z - Z pointer register (for [e]lpm Rd,Z[+])
    M - immediate value from 0 to 255
    n - immediate value from 0 to 255 ( n = ~M ). Relocation impossible
-   w - `adiw' register (r24,r26,r28,r30)
    s - immediate value from 0 to 7
    P - Port address value from 0 to 64. (in, out)
    p - Port address value from 0 to 32. (cbi, sbi, sbic, sbis)
    K - immediate value from 0 to 64 (used in `adiw', `sbiw')
-   e - pointer regegisters (X,Y,Z)
-   b - base pointer register and displacement ([YZ]+disp)
    i - immediate value
    l - signed pc relative offset from -64 to 63
    L - signed pc relative offset from -2048 to 2047
    h - absolut code address (call, jmp)
    S - immediate value from 0 to 7 (S = s << 4)
 */
+
 struct avr_opcodes_s avr_opcodes[] =
 {
   {"adc",  "r,r", "000111rdddddrrrr", 1, AVR_ISA_1200, 0x1c00},
@@ -133,7 +168,7 @@ struct avr_opcodes_s avr_opcodes[] =
   {"cpse", "r,r", "000100rdddddrrrr", 1, AVR_ISA_1200, 0x1000},
   {"eor",  "r,r", "001001rdddddrrrr", 1, AVR_ISA_1200, 0x2400},
   {"mov",  "r,r", "001011rdddddrrrr", 1, AVR_ISA_1200, 0x2c00},
-  {"mul",  "r,r", "100111rdddddrrrr", 1, AVR_ISA_MEGA_161, 0x9c00},
+  {"mul",  "r,r", "100111rdddddrrrr", 1, AVR_ISA_MUL,  0x9c00},
   {"or",   "r,r", "001010rdddddrrrr", 1, AVR_ISA_1200, 0x2800},
   {"sbc",  "r,r", "000010rdddddrrrr", 1, AVR_ISA_1200, 0x0800},
   {"sub",  "r,r", "000110rdddddrrrr", 1, AVR_ISA_1200, 0x1800},
@@ -230,7 +265,7 @@ struct avr_opcodes_s avr_opcodes[] =
   {"clz",  "", 	  "1001010010011000", 1, AVR_ISA_1200, 0x9498},
   {"icall","", 	  "1001010100001001", 1, AVR_ISA_2xxx, 0x9509},
   {"ijmp", "", 	  "1001010000001001", 1, AVR_ISA_2xxx, 0x9409},
-  {"lpm",  "", 	  "1001010111001000", 1, AVR_ISA_2xxx, 0x95c8},
+  {"lpm",  "", 	  "1001010111001000", 1, AVR_ISA_TINY1,0x95c8},
   {"nop",  "", 	  "0000000000000000", 1, AVR_ISA_1200, 0x0000},
   {"ret",  "", 	  "1001010100001000", 1, AVR_ISA_1200, 0x9508},
   {"reti", "", 	  "1001010100011000", 1, AVR_ISA_1200, 0x9518},
@@ -244,7 +279,22 @@ struct avr_opcodes_s avr_opcodes[] =
   {"sez",  "", 	  "1001010000011000", 1, AVR_ISA_1200, 0x9418},
   {"sleep","", 	  "1001010110001000", 1, AVR_ISA_1200, 0x9588},
   {"wdr",  "", 	  "1001010110101000", 1, AVR_ISA_1200, 0x95a8},
-  {"elpm", "", 	  "1001010111011000", 1, AVR_ISA_MEGA_x03, 0x95d8},
+  {"elpm", "", 	  "1001010111011000", 1, AVR_ISA_ELPM, 0x95d8},
+  {"spm", "",     "1001010111101000", 1, AVR_ISA_SPM,  0x95e8},
+  {"movw", "v,v", "00000001ddddrrrr", 1, AVR_ISA_MUL,  0x0100},
+  {"muls", "d,d", "00000010ddddrrrr", 1, AVR_ISA_MUL,  0x0200},
+  {"mulsu","a,a", "000000110ddd0rrr", 1, AVR_ISA_MUL,  0x0300},
+  {"fmul", "a,a", "000000110ddd1rrr", 1, AVR_ISA_MUL,  0x0308},
+  {"fmuls","a,a", "000000111ddd0rrr", 1, AVR_ISA_MUL,  0x0380},
+  {"fmulsu","a,a","000000111ddd1rrr", 1, AVR_ISA_MUL,  0x0388},
+  {"lpmx", "r,z", "1001000ddddd010+", 1, AVR_ISA_LPMX, 0x9004},
+  /* these are for devices that don't exists yet */
+  /* >64K program memory, new core */
+  {"elpmx","r,z", "1001000ddddd011+", 1, AVR_ISA_ELPMX,0x9006},
+  {"espm", "", 	  "1001010111111000", 1, AVR_ISA_ESPM, 0x95f8},
+  /* >128K program memory (PC = EIND:Z) */
+  {"eicall", "",  "1001010100011001", 1, AVR_ISA_EIND, 0x9519},
+  {"eijmp", "",   "1001010000011001", 1, AVR_ISA_EIND, 0x9419},
   {NULL, NULL, NULL, 0, 0, 0}
 };
 
@@ -387,8 +437,8 @@ md_parse_option (c, arg)
 }
 
 symbolS *
-md_undefined_symbol (name)
-  char *name;
+md_undefined_symbol(name)
+     char *name;
 {
   return 0;
 }
@@ -464,9 +514,16 @@ md_begin ()
   for (i = 0; i < sizeof (exp_mod) / sizeof (exp_mod[0]); ++i)
     hash_insert (avr_mod_hash, EXP_MOD_NAME(i), (void*)(i+10));
 
+  /* Construct symbols for each register */
+  /* FIXME: register names are in the same namespace as labels.
+     This means that C functions or global variables with the same
+     name as a register will cause assembler errors, even though
+     such names (r0-r31) are perfectly valid in C.  I'd suggest to
+     put '%' or "." in front of register names both here and in avr-gcc.  */
+
   for (i = 0; i < 32; i++)
     {
-      char buf[5];
+      char buf[10];
 
       sprintf (buf, "r%d", i);
       symbol_table_insert (symbol_new (buf, reg_section, i,
@@ -475,7 +532,7 @@ md_begin ()
       symbol_table_insert (symbol_new (buf, reg_section, i,
 				       &zero_address_frag));
     }
-
+  
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
 }
 
@@ -490,6 +547,7 @@ avr_operands (opcode, line)
   char *frag = frag_more (opcode->insn_size * 2);
   char *str = *line;
   int where = frag - frag_now->fr_literal;
+  static unsigned int prev = 0;  /* previous opcode */
 
   /* Opcode have operands.  */
   if (*op)
@@ -537,14 +595,29 @@ avr_operands (opcode, line)
 	reg1 <<= 4;
       bin |= reg1 | reg2;
     }
+
+  /* detect undefined combinations (like lpm r31,Z+) */
+    if (((bin & 0xFDEF) == 0x91AD) || ((bin & 0xFDEF) == 0x91AE) ||
+	((bin & 0xFDEF) == 0x91C9) || ((bin & 0xFDEF) == 0x91CA) ||
+	((bin & 0xFDEF) == 0x91E1) || ((bin & 0xFDEF) == 0x91E2) ||
+	((bin & 0xFFED) == 0x91E5))
+      as_warn( _("undefined combination of operands"));
+    
   if (opcode->insn_size == 2)
     {
+      /* warn if previous opcode was cpse/sbic/sbis/sbrc/sbrs
+	 (AVR core bug)  */
+      if ((prev & 0xFC00) == 0x1000
+	  || (prev & 0xFD00) == 0x9900
+	  || (prev & 0xFC08) == 0xFC00)
+	as_warn (_("skipping two-word instruction"));
+      
       bfd_putl32 ((bfd_vma)bin, frag);
     }
   else
-    {
-      bfd_putl16 ((bfd_vma)bin, frag);
-    }
+    bfd_putl16 ((bfd_vma)bin, frag);
+
+  prev = bin;
   *line = str;
   return bin;
 }
@@ -585,30 +658,62 @@ avr_operand (opcode, where, op, line)
     case 'w':
     case 'd':
     case 'r':
+    case 'a':
+    case 'v':
       {
 	char r_name[256];
+	op_mask = -1;
+
 	str = extract_word (str, r_name, sizeof (r_name));
-	parse_exp (r_name, &op_expr);
-	if (op_expr.X_op == O_register)
+	if (r_name[0] == 'r' || r_name[0] == 'R')
 	  {
-	    op_mask = op_expr.X_add_number;
-	    if (op_mask <= 31)
+	    if (isdigit(r_name[1]))
 	      {
-		if (*op == 'd')
-		  {
-		    if (op_mask < 16)
-		      as_bad (_ ("register number above 15 required"));
-		    op_mask -= 16;
-		  }
-		if (*op == 'w')
-		  {
-		    op_mask -= 24;
-		    if (op_mask & 1 || op_mask > 6)
-		      as_bad (_ ("register r24,r26,r28 or r30 required"));
-		    op_mask >>= 1;
-		  }
+		if (r_name[2] == '\0')
+		  op_mask = r_name[1] - '0';
+		else if (r_name[1] != '0'
+			 && isdigit(r_name[2])
+			 && r_name[3] == '\0')
+		  op_mask = (r_name[1] - '0') * 10 + r_name[2] - '0';
+	      }
+	  }
+	else
+	  {
+	    parse_exp (r_name, &op_expr);
+	    if (op_expr.X_op == O_register)
+	      op_mask = op_expr.X_add_number;
+	  }
+	
+	if (op_mask <= 31 && op_mask >= 0)
+	  {
+	    switch (*op)
+	      {
+	      case 'a':
+		if (op_mask < 16 || op_mask > 23)
+		  as_bad (_ ("register r16-r23 required"));
+		op_mask -= 16;
+		break;
+
+	      case 'd':
+		if (op_mask < 16)
+		  as_bad (_ ("register number above 15 required"));
+		op_mask -= 16;
+		break;
+		
+	      case 'v':
+		if (op_mask & 1)
+		  as_bad (_ ("even register number required"));
+		op_mask >>= 1;
+		break;
+		
+	      case 'w':
+		op_mask -= 24;
+		if (op_mask & 1 || op_mask > 6)
+		  as_bad (_ ("register r24,r26,r28 or r30 required"));
+		op_mask >>= 1;
 		break;
 	      }
+	    break;
 	  }
 	as_bad (_ ("register required"));
       }
@@ -637,6 +742,23 @@ avr_operand (opcode, where, op, line)
 	    if (op_mask & 2)
 	      as_bad (_ ("cannot both predecrement and postincrement"));
 	    op_mask |= 0x1001;
+	  }
+      }
+      break;
+
+    case 'z':
+      {
+	if (*str == '-')
+	  as_bad (_ ("can't predecrement"));
+
+	if (! (*str == 'z' || *str == 'Z'))
+	  as_bad (_ ("pointer register Z required"));
+
+	str = skip_space (str + 1);
+	if (*str == '+')
+	  {
+	    ++str;
+	    op_mask |= 1;
 	  }
       }
       break;
@@ -877,11 +999,10 @@ md_apply_fix3 (fixp, valuep, seg)
 	  /* Instruction addresses are always right-shifted by 1.  */
 	  value >>= 1;
 	  --value;			/* Correct PC.  */
-	  /* XXX AT90S8515 must have WRAP here.  */
 
 	  if (value < -2048 || value > 2047)
 	    {
-	      if (avr_mcu->mach == bfd_mach_avr2)
+	      if (avr_mcu->isa & AVR_ISA_WRAP)
 		{
 		  if (value > 2047)
 		    value -= 4096;
@@ -1076,6 +1197,22 @@ md_assemble (str)
       return;
     }
 
+  /* Special case for opcodes with optional operands (lpm, elpm) -
+     version with operands is listed in avr_opcodes[] with "x" suffix.  */
+  
+  if (*str && !(*opcode->constraints))
+    {
+      struct avr_opcodes_s *opc1;
+
+      /* known opcode, so strlen(op) <= 6 and strcat() should be safe */
+      strcat(op, "x");
+      opc1 = (struct avr_opcodes_s *) hash_find (avr_hash, op);
+
+      /* if unknown, just forget it and use the original opcode */
+      if (opc1)
+	opcode = opc1;
+    }
+
   if ((opcode->isa & avr_mcu->isa) != opcode->isa)
     as_bad (_ ("illegal opcode %s for mcu %s"), opcode->name, avr_mcu->name);
 
@@ -1084,7 +1221,7 @@ md_assemble (str)
   {
     char *t = input_line_pointer;
     avr_operands (opcode, &str);
-    if (*str)
+    if (*skip_space (str))
       as_bad (_ ("garbage at end of line"));
     input_line_pointer = t;
   }
