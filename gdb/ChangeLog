@@ -1,3 +1,11 @@
+Thu Apr  9 13:35:00 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik).
+	* buildsym.c  (#ifdef RS6000_TARGET):  Don't create unnecessary
+	symbols for nameless types.  And, handle `R' (register parameter
+	type) for AIX.  (an extension to existing stabstring grammar).
+	* rs6000-xdep.c:  Fix typo (= should have been ==).
+
 Thu Apr  9 12:10:06 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in:  version=4.4.88, add xm-vax.h to HFILES.

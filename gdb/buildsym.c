@@ -1253,7 +1253,7 @@ define_symbol (valu, string, desc, type, objfile)
 
 #ifdef IBM6000_TARGET
   else if (deftype == 'R')
-      SYMBOL_TYPE (sym) = read_type (&p);
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
 #endif
 
   else
