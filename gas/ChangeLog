@@ -1,5 +1,22 @@
 Wed Feb  7 14:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (potable): Add balignw, balignl, p2alignw, and p2alignl.
+	(do_align): Take new len parameter.  Change all callers.  Pass it
+	to md_do_align.
+	(s_align_bytes): Arg now indicates the length of the fill pattern.
+	(s_align_ptwo): Likewise.
+	* config/obj-coff.c (write_object_file): Pass length to
+	md_do_align.
+	* config/tc-i386.h (md_do_align): Take new len parameter.
+	* config/tc-m88k.h (md_do_align): Likewise.
+	* config/tc-m88k.c (m88k_do_align): Likewise.
+	* config/tc-sh.h (md_do_align): Likewise.
+	* config/tc-sh.c (sh_do_align): Likewise.
+	* doc/as.texinfo: Document new pseudo-ops.
+
+	* config/obj-coff.c (fixup_mdeps): Divide offset by fr_var, as is
+	done in cvt_frag_to_fill.
+
 	* config/tc-sh.h (sh_do_align): Declare.
 	(md_do_align): Define.
 	* config/tc-sh.c (sh_do_align): New function.

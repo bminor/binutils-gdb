@@ -202,7 +202,7 @@ symbolS *mri_common_symbol;
 static int mri_pending_align;
 
 static int scrub_from_string PARAMS ((char **));
-static void do_align PARAMS ((int, char *));
+static void do_align PARAMS ((int, char *, int));
 static int hex_float PARAMS ((int, char *));
 static void do_org PARAMS ((segT, expressionS *, int));
 char *demand_copy_string PARAMS ((int *lenP));
@@ -246,6 +246,8 @@ static const pseudo_typeS potable[] =
   {"ascii", stringer, 0},
   {"asciz", stringer, 1},
   {"balign", s_align_bytes, 0},
+  {"balignw", s_align_bytes, 2},
+  {"balignl", s_align_bytes, 4},
 /* block */
   {"byte", cons, 1},
   {"comm", s_comm, 0},
@@ -339,6 +341,8 @@ static const pseudo_typeS potable[] =
   {"offset", s_struct, 0},
   {"org", s_org, 0},
   {"p2align", s_align_ptwo, 0},
+  {"p2alignw", s_align_ptwo, 2},
+  {"p2alignl", s_align_ptwo, 4},
   {"page", listing_eject, 0},
   {"plen", listing_psize, 0},
   {"print", s_print, 0},
@@ -687,7 +691,7 @@ read_a_source_file (name)
 				    || (pop->poc_handler == s_space
 					&& pop->poc_val == 1))))
 			{
-			  do_align (1, (char *) NULL);
+			  do_align (1, (char *) NULL, 0);
 			  mri_pending_align = 0;
 			}
 
@@ -724,7 +728,7 @@ read_a_source_file (name)
 
 		      if (mri_pending_align)
 			{
-			  do_align (1, (char *) NULL);
+			  do_align (1, (char *) NULL, 0);
 			  mri_pending_align = 0;
 			}
 
@@ -1039,12 +1043,13 @@ s_abort (ignore)
 
 /* Guts of .align directive.  */
 static void 
-do_align (n, fill)
+do_align (n, fill, len)
      int n;
      char *fill;
+     int len;
 {
 #ifdef md_do_align
-  md_do_align (n, fill, just_record_alignment);
+  md_do_align (n, fill, len, just_record_alignment);
 #endif
   if (!fill)
     {
@@ -1060,10 +1065,17 @@ do_align (n, fill)
 	{
 	  fill = &zero;
 	}
+      len = 1;
     }
+
   /* Only make a frag if we HAVE to. . . */
   if (n && !need_pass_2)
-    frag_align (n, *fill);
+    {
+      if (len <= 1)
+	frag_align (n, *fill);
+      else
+	frag_align_pattern (n, fill, len);
+    }
 
 #ifdef md_do_align
  just_record_alignment:
@@ -1110,12 +1122,33 @@ s_align_bytes (arg)
   temp = i;
   if (*input_line_pointer == ',')
     {
+      offsetT fillval;
+
       input_line_pointer++;
-      temp_fill = get_absolute_expression ();
-      do_align (temp, &temp_fill);
+      fillval = get_absolute_expression ();
+      if (arg == 0)
+	arg = 1;
+      if (arg <= 1)
+	{
+	  temp_fill = fillval;
+	  do_align (temp, &temp_fill, arg);
+	}
+      else
+	{
+	  char ab[16];
+
+	  if (arg > sizeof ab)
+	    abort ();
+	  md_number_to_chars (ab, fillval, arg);
+	  do_align (temp, ab, arg);
+	}
     }
   else
-    do_align (temp, (char *) 0);
+    {
+      if (arg > 0)
+	as_warn ("expected fill pattern missing");
+      do_align (temp, (char *) NULL, 0);
+    }
 
   if (flag_mri)
     mri_comment_end (stop, stopc);
@@ -1125,8 +1158,8 @@ s_align_bytes (arg)
 
 /* For machines where ".align 4" means align to 2**4 boundary. */
 void 
-s_align_ptwo (ignore)
-     int ignore;
+s_align_ptwo (arg)
+     int arg;
 {
   register int temp;
   char temp_fill;
@@ -1147,12 +1180,33 @@ s_align_ptwo (ignore)
     }
   if (*input_line_pointer == ',')
     {
+      offsetT fillval;
+
       input_line_pointer++;
-      temp_fill = get_absolute_expression ();
-      do_align (temp, &temp_fill);
+      fillval = get_absolute_expression ();
+      if (arg == 0)
+	arg = 1;
+      if (arg <= 1)
+	{
+	  temp_fill = fillval;
+	  do_align (temp, &temp_fill, arg);
+	}
+      else
+	{
+	  char ab[16];
+
+	  if (arg > sizeof ab)
+	    abort ();
+	  md_number_to_chars (ab, fillval, arg);
+	  do_align (temp, ab, arg);
+	}
     }
   else
-    do_align (temp, (char *) 0);
+    {
+      if (arg > 0)
+	as_warn ("expected fill pattern missing");
+      do_align (temp, (char *) NULL, 0);
+    }
 
   if (flag_mri)
     mri_comment_end (stop, stopc);

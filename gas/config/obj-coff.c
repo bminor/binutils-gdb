@@ -1672,8 +1672,9 @@ do_relocs_for (abfd, h, file_cursor)
 		      intr.r_offset = 0;
 #endif
 
-		      while (S_GET_SEGMENT (symbol_ptr) == undefined_section
-			     && symbol_ptr->sy_value.X_op == O_symbol)
+		      while (symbol_ptr->sy_value.X_op == O_symbol
+			     && (! S_IS_DEFINED (symbol_ptr)
+				 || S_IS_COMMON (symbol_ptr)))
 			symbol_ptr = symbol_ptr->sy_value.X_add_symbol;
 
 		      /* Turn the segment of the symbol into an offset.  */
@@ -2700,6 +2701,13 @@ yank_symbols ()
 	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
 
 	}
+      else if (symbolP->sy_value.X_op == O_symbol
+	       && (! S_IS_DEFINED (symbolP) || S_IS_COMMON (symbolP)))
+	{
+	  /* Skip symbols which were equated to undefined or common
+	     symbols.  */
+	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
+	}
       else if (!S_IS_DEFINED (symbolP)
 	       && !S_IS_DEBUG (symbolP)
 	       && !SF_GET_STATICS (symbolP) &&
@@ -3039,7 +3047,7 @@ write_object_file ()
 #ifdef md_do_align
       {
 	static char nop = NOP_OPCODE;
-	md_do_align (SUB_SEGMENT_ALIGN (now_seg), &nop, alignment_done);
+	md_do_align (SUB_SEGMENT_ALIGN (now_seg), &nop, 1, alignment_done);
       }
 #endif
       frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
@@ -3656,7 +3664,8 @@ fixup_mdeps (frags, h, this_segment)
 #endif
 	  frags->fr_type = rs_fill;
 	  frags->fr_offset =
-	    (frags->fr_next->fr_address - frags->fr_address - frags->fr_fix);
+	    ((frags->fr_next->fr_address - frags->fr_address - frags->fr_fix)
+	     / frags->fr_var);
 	  break;
 	case rs_machine_dependent:
 	  md_convert_frag (h, this_segment, frags);

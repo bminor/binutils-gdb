@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (c) 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+@c  Copyright (c) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -82,7 +82,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU Assembler "@value{AS}".
 
-Copyright (C) 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -106,7 +106,7 @@ into another language, under the above conditions for modified versions.
 
 @titlepage
 @title Using @value{AS}
-@subtitle The GNU Assembler
+@subtitle The @sc{gnu} Assembler
 @ifclear GENERIC
 @subtitle for the @value{TARGET} family
 @end ifclear
@@ -116,7 +116,7 @@ into another language, under the above conditions for modified versions.
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
 Company of Australia for loaning Dean Elsner to write the
-first (Vax) version of @code{as} for Project GNU.
+first (Vax) version of @code{as} for Project @sc{gnu}.
 The proprietors, management and staff of TNCCA thank FSF for
 distracting the boss while they got some work
 done.
@@ -126,7 +126,7 @@ done.
 @tex
 {\parskip=0pt
 \hfill {\it Using {\tt @value{AS}}}\par
-\hfill Edited by Roland Pesch for Cygnus Support\par
+\hfill Edited by Cygnus Support\par
 }
 %"boxit" macro for figures:
 %Modified from Knuth's ``boxit'' macro from TeXbook (answer to exercise 21.3)
@@ -137,7 +137,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -194,10 +194,10 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
-@value{AS} [ -a[dhlns][=file] ] [ -D ] [ -f ] [ --help ]
- [ -I @var{dir} ] [ -J ] [ -K ] [ -L ] [ -o @var{objfile} ]
- [ -R ] [ --statistics ] [ -v ] [ -version ] [ --version ]
- [ -W ] [ -w ] [ -x ] [ -Z ]
+@value{AS} [ -a[dhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
+ [ -f ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
+ [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ] [ -version ]
+ [ --version ] [ -W ] [ -w ] [ -x ] [ -Z ]
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
@@ -213,7 +213,9 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c HPPA has no machine-dependent assembler options (yet).
 @end ifset
 @ifset SPARC
- [ -Av6 | -Av7 | -Av8 | -Av9 | -Asparclite | -bump ]
+@c The order here is important.  See c-sparc.texi.
+ [ -Av6 | -Av7 | -Av8 | -Asparclite | -Av9 | -Av9a ]
+ [ -xarch=v8plus | -xarch=v8plusa ] [ -bump ]
 @end ifset
 @ifset Z8000
 @c Z8000 has no machine-dependent assembler options
@@ -267,6 +269,11 @@ listings turned on.
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
 other assemblers.
+
+@item --defsym @var{sym}=@var{value}
+Define the symbol @var{sym} to be @var{value} before assembling the input file.
+@var{value} must be an integer constant.  As in C, a leading @samp{0x}
+indicates a hexadecimal value, and a leading @samp{0} indicates an octal value.
 
 @item -f
 ``fast''---skip whitespace and comment preprocessing (assume source is
@@ -396,8 +403,12 @@ The following options are available when @code{@value{AS}} is configured
 for the SPARC architecture:
 
 @table @code
-@item -Av6 | -Av7 | -Av8 | -Av9 | -Asparclite
+@item -Av6 | -Av7 | -Av8 | -Asparclite | -Av9 | -Av9a
 Explicitly select a variant of the SPARC architecture.
+
+@item -xarch=v8plus | -xarch=v8plusa
+For compatibility with the Solaris v9 assembler.  These options are
+equivalent to -Av9 and -Av9a, respectively.
 
 @item -bump
 Warn when the assembler switches to another architecture.
@@ -473,6 +484,7 @@ more processors.
 @code{@value{AS}} ignores this option.  It is accepted for compatibility with
 the native tools.
 
+@need 900
 @item --trap
 @itemx --no-trap
 @itemx --break
@@ -543,7 +555,7 @@ For information on the Z8000 machine instruction set, see @cite{Z8000 CPU Techni
 @end ifset
 @end ifclear
 
-@c I think this is premature---pesch@cygnus.com, 17jan1991
+@c I think this is premature---doc@cygnus.com, 17jan1991
 @ignore
 Throughout this manual, we assume that you are running @dfn{GNU},
 the portable operating system from the @dfn{Free Software
@@ -674,7 +686,7 @@ be in one or more files; how the source is partitioned into files
 doesn't change the meaning of the source.
 
 @c I added "con" prefix to "catenation" just to prove I can overcome my
-@c APL training...   pesch@cygnus.com
+@c APL training...   doc@cygnus.com
 The source program is a concatenation of the text in all the files, in the
 order specified.
 
@@ -749,7 +761,7 @@ the assembled program into a runnable file, and (optionally) symbolic
 information for the debugger.
 
 @c link above to some info file(s) like the description of a.out.
-@c don't forget to describe GNU info as well as Unix lossage.
+@c don't forget to describe @sc{gnu} info as well as Unix lossage.
 
 @node Errors
 @section Error and Warning Messages
@@ -988,10 +1000,11 @@ On the ARC local labels begin with @samp{.L}.
 @cindex MRI compatibility mode
 The @code{-M} or @code{--mri} option selects MRI compatibility mode.  This
 changes the syntax and pseudo-op handling of @code{@value{AS}} to make it
-compatible with the @code{ASM68K} assembler from Microtec Research.  The exact
-nature of the MRI syntax will not be documented here; see the MRI manuals for
-more information.  The purpose of this option is to permit assembling existing
-MRI assembler code using @code{@value{AS}}.
+compatible with the @code{ASM68K} or the @code{ASM960} (depending upon the
+configured target) assembler from Microtec Research.  The exact nature of the
+MRI syntax will not be documented here; see the MRI manuals for more
+information.  The purpose of this option is to permit assembling existing MRI
+assembler code using @code{@value{AS}}.
 
 The MRI compatibility is not complete.  Certain operations of the MRI assembler
 depend upon its object file format, and can not be supported using other object
@@ -1001,7 +1014,7 @@ individually.  These are:
 @itemize @bullet
 @item global symbols in common section
 
-The MRI assembler supports common sections which are merged by the linker.
+The m68k MRI assembler supports common sections which are merged by the linker.
 Other object file formats do not support this.  @code{@value{AS}} handles
 common sections by treating them as a single common symbol.  It permits local
 symbols to be defined within a common section, but it can not support global
@@ -1009,7 +1022,7 @@ symbols, since it has no way to describe them.
 
 @item complex relocations
 
-The MRI assembler supports relocations against a negated section address, and
+The MRI assemblers support relocations against a negated section address, and
 relocations which combine the start addresses of two or more sections.  These
 are not support by other object file formats.
 
@@ -1020,17 +1033,17 @@ This is not supported by other object file formats.  The start address may
 instead be specified using the @code{-e} option to the linker, or in a linker
 script.
 
-@item @code{IDNT} and @code{NAME} pseudo-ops
+@item @code{IDNT}, @code{.ident} and @code{NAME} pseudo-ops
 
-The MRI @code{IDNT} and @code{NAME} pseudo-ops assign a module name to the
-output file.  This is not supported by other object file formats.
+The MRI @code{IDNT}, @code{.ident} and @code{NAME} pseudo-ops assign a module
+name to the output file.  This is not supported by other object file formats.
 
 @item @code{ORG} pseudo-op
 
-The MRI @code{ORG} pseudo-op begins an absolute section at a given address.
-This differs from the usual @code{@value{AS}} @code{.org} pseudo-op, which
-changes the location within the current section.  Absolute sections are not
-supported by other object file formats.  The address of a section may be
+The m68k MRI @code{ORG} pseudo-op begins an absolute section at a given
+address.  This differs from the usual @code{@value{AS}} @code{.org} pseudo-op,
+which changes the location within the current section.  Absolute sections are
+not supported by other object file formats.  The address of a section may be
 assigned within a linker script.
 @end itemize
 
@@ -1051,38 +1064,62 @@ and @code{DCB.P} pseudo-ops are not supported.
 
 @item @code{FEQU} pseudo-op
 
-The @code{FEQU} pseudo-op is not supported.
+The m68k @code{FEQU} pseudo-op is not supported.
 
 @item @code{NOOBJ} pseudo-op
 
-The @code{NOOBJ} pseudo-op is not supported.
+The m68k @code{NOOBJ} pseudo-op is not supported.
 
 @item @code{OPT} branch control options
 
-The @code{OPT} branch control options---@code{B}, @code{BRS}, @code{BRB},
+The m68k @code{OPT} branch control options---@code{B}, @code{BRS}, @code{BRB},
 @code{BRL}, and @code{BRW}---are ignored.  @code{@value{AS}} automatically
 relaxes all branches, whether forward or backward, to an appropriate size, so
 these options serve no purpose.
 
 @item @code{OPT} list control options
 
-The following @code{OPT} list control options are ignored: @code{C},
+The following m68k @code{OPT} list control options are ignored: @code{C},
 @code{CEX}, @code{CL}, @code{CRE}, @code{E}, @code{G}, @code{I}, @code{M},
 @code{MEX}, @code{MC}, @code{MD}, @code{X}.
 
 @item other @code{OPT} options
 
-The following @code{OPT} options are ignored: @code{NEST}, @code{O},
+The following m68k @code{OPT} options are ignored: @code{NEST}, @code{O},
 @code{OLD}, @code{OP}, @code{P}, @code{PCO}, @code{PCR}, @code{PCS}, @code{R}.
 
 @item @code{OPT} @code{D} option is default
 
-The @code{OPT} @code{D} option is the default, unlike the MRI assembler.
+The m68k @code{OPT} @code{D} option is the default, unlike the MRI assembler.
 @code{OPT NOD} may be used to turn it off.
 
 @item @code{XREF} pseudo-op.
 
-The @code{XREF} pseudo-op is ignored.
+The m68k @code{XREF} pseudo-op is ignored.
+
+@item @code{.debug} pseudo-op
+
+The i960 @code{.debug} pseudo-op is not supported.
+
+@item @code{.extended} pseudo-op
+
+The i960 @code{.extended} pseudo-op is not supported.
+
+@item @code{.list} pseudo-op.
+
+The various options of the i960 @code{.list} pseudo-op are not supported.
+
+@item @code{.optimize} pseudo-op
+
+The i960 @code{.optimize} pseudo-op is not supported.
+
+@item @code{.output} pseudo-op
+
+The i960 @code{.output} pseudo-op is not supported.
+
+@item @code{.setreal} pseudo-op
+
+The i960 @code{.setreal} pseudo-op is not supported.
 
 @end itemize
 
@@ -1459,7 +1496,7 @@ An empty statement is allowed, and may include whitespace.  It is ignored.
 @cindex instructions and directives
 @cindex directives and instructions
 @c "key symbol" is not used elsewhere in the document; seems pedantic to
-@c @defn{} it in that case, as was done previously...  pesch@cygnus.com,
+@c @defn{} it in that case, as was done previously...  doc@cygnus.com,
 @c 13feb91.
 A statement begins with zero or more labels, optionally followed by a
 key symbol which determines what kind of statement it is.  The key
@@ -1550,39 +1587,39 @@ escape character).  The complete list of escapes follows.
 @c      @item \a
 @c      Mnemonic for ACKnowledge; for ASCII this is octal code 007.
 @c
-@item \b
 @cindex @code{\b} (backspace character)
 @cindex backspace (@code{\b})
+@item \b
 Mnemonic for backspace; for ASCII this is octal code 010.
 
 @c      @item \e
 @c      Mnemonic for EOText; for ASCII this is octal code 004.
 @c
-@item \f
 @cindex @code{\f} (formfeed character)
 @cindex formfeed (@code{\f})
+@item \f
 Mnemonic for FormFeed; for ASCII this is octal code 014.
 
-@item \n
 @cindex @code{\n} (newline character)
 @cindex newline (@code{\n})
+@item \n
 Mnemonic for newline; for ASCII this is octal code 012.
 
 @c      @item \p
 @c      Mnemonic for prefix; for ASCII this is octal code 033, usually known as @code{escape}.
 @c
-@item \r
 @cindex @code{\r} (carriage return character)
 @cindex carriage return (@code{\r})
+@item \r
 Mnemonic for carriage-Return; for ASCII this is octal code 015.
 
 @c      @item \s
 @c      Mnemonic for space; for ASCII this is octal code 040.  Included for compliance with
 @c      other assemblers.
 @c
-@item \t
 @cindex @code{\t} (tab)
 @cindex tab (@code{\t})
+@item \t
 Mnemonic for horizontal Tab; for ASCII this is octal code 011.
 
 @c      @item \v
@@ -1590,24 +1627,24 @@ Mnemonic for horizontal Tab; for ASCII this is octal code 011.
 @c      @item \x @var{digit} @var{digit} @var{digit}
 @c      A hexadecimal character code.  The numeric code is 3 hexadecimal digits.
 @c
-@item \ @var{digit} @var{digit} @var{digit}
 @cindex @code{\@var{ddd}} (octal character code)
 @cindex octal character code (@code{\@var{ddd}})
+@item \ @var{digit} @var{digit} @var{digit}
 An octal character code.  The numeric code is 3 octal digits.
 For compatibility with other Unix systems, 8 and 9 are accepted as digits:
 for example, @code{\008} has the value 010, and @code{\009} the value 011.
 
 @ifset HPPA
-@item \@code{x} @var{hex-digit} @var{hex-digit}
 @cindex @code{\@var{xdd}} (hex character code)
 @cindex hex character code (@code{\@var{xdd}})
+@item \@code{x} @var{hex-digit} @var{hex-digit}
 A hex character code.  The numeric code is 2 hexadecimal digits.  Either
 upper or lower case @code{x} works.
 @end ifset
 
-@item \\
 @cindex @code{\\} (@samp{\} character)
 @cindex backslash (@code{\\})
+@item \\
 Represents one @samp{\} character.
 
 @c      @item \'
@@ -1616,9 +1653,9 @@ Represents one @samp{\} character.
 @c      (@xref{Characters,,Character Constants}.) to represent
 @c      a @samp{'}.
 @c
-@item \"
 @cindex @code{\"} (doublequote character)
 @cindex doublequote (@code{\"})
+@item \"
 Represents one @samp{"} character.  Needed in strings to represent
 this character, because an unescaped @samp{"} would end the string.
 
@@ -2136,13 +2173,13 @@ value of every expression in your assembly language program to be a
 section-relative address.
 
 @table @b
-@item ASSEMBLER-INTERNAL-LOGIC-ERROR!
 @cindex assembler internal logic error
+@item ASSEMBLER-INTERNAL-LOGIC-ERROR!
 An internal assembler logic error has been found.  This means there is a
 bug in the assembler.
 
-@item expr section
 @cindex expr (internal section)
+@item expr section
 The assembler stores complex expression internally as combinations of
 symbols.  When it needs to represent an expression as a symbol, it puts
 it in the expr section.
@@ -2779,18 +2816,18 @@ Intermediate precedence
 Lowest Precedence
 
 @table @code
-@item +
 @cindex addition, permitted arguments
 @cindex plus, permitted arguments
 @cindex arguments for addition
+@item +
 @dfn{Addition}.  If either argument is absolute, the result has the section of
 the other argument.  You may not add together arguments from different
 sections.
 
-@item -
 @cindex subtraction, permitted arguments
 @cindex minus, permitted arguments
 @cindex arguments for subtraction
+@item -
 @dfn{Subtraction}.  If the right argument is absolute, the
 result has the section of the left argument.
 If both arguments are in the same section, the result is absolute.
@@ -2967,7 +3004,8 @@ the padding bytes.  It (and the comma) may be omitted.  If it is
 omitted, the padding bytes are zero.
 
 The way the required alignment is specified varies from system to system.
-For the a29k, HPPA, m86k, m88k, w65, sparc, and i386 using ELF format,
+For the a29k, hppa, m86k, m88k, w65, sparc, and Hitachi SH, and i386 using ELF
+format,
 the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
 the location counter until it is a multiple of 8.  If the location counter
@@ -3022,7 +3060,7 @@ trailing zero byte) into consecutive addresses.
 a zero byte.  The ``z'' in @samp{.asciz} stands for ``zero''.
 
 @node Balign
-@section @code{.balign @var{abs-expr} , @var{abs-expr}}
+@section @code{.balign[wl] @var{abs-expr} , @var{abs-expr}}
 
 @cindex padding the location counter given number of bytes
 @cindex @code{balign} directive
@@ -3035,6 +3073,17 @@ is already a multiple of 8, no change is needed.
 The second expression (also absolute) gives the value to be stored in
 the padding bytes.  It (and the comma) may be omitted.  If it is
 omitted, the padding bytes are zero.
+
+@cindex @code{balignw} directive
+@cindex @code{balignl} directive
+The @code{.balignw} and @code{.balignl} directives are variants of the
+@code{.balign} directive.  The @code{.balignw} directive treats the fill
+pattern as a two byte word value.  The @code{.balignl} directives treats the
+fill pattern as a four byte longword value.  For example, @code{.balignw
+4,0x368d} will align to a multiple of 4.  If it skips two bytes, they will be
+filled in with the value 0x368d (the exact placement of the bytes depends upon
+the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
+undefined.
 
 @node Byte
 @section @code{.byte @var{expressions}}
@@ -3343,21 +3392,21 @@ alternative condition, flagged by @code{.else} (@pxref{Else,,@code{.else}}.
 
 The following variants of @code{.if} are also supported:
 @table @code
-@item .ifdef @var{symbol}
 @cindex @code{ifdef} directive
+@item .ifdef @var{symbol}
 Assembles the following section of code if the specified @var{symbol}
 has been defined.
 
 @ignore
-@item .ifeqs
 @cindex @code{ifeqs} directive
+@item .ifeqs
 Not yet implemented.
 @end ignore
 
-@item .ifndef @var{symbol}
-@itemx ifnotdef @var{symbol}
 @cindex @code{ifndef} directive
 @cindex @code{ifnotdef} directive
+@item .ifndef @var{symbol}
+@itemx ifnotdef @var{symbol}
 Assembles the following section of code if the specified @var{symbol}
 has not been defined.  Both spelling variants are equivalent.
 
@@ -3723,7 +3772,7 @@ backwards.
 
 @c double negative used below "not undefined" because this is a specific
 @c reference to "undefined" (as SEG_UNKNOWN is called in this manual)
-@c section. pesch@cygnus.com 18feb91
+@c section. doc@cygnus.com 18feb91
 Because @code{@value{AS}} tries to assemble programs in one pass, @var{new-lc}
 may not be undefined.  If you really detest this restriction we eagerly await
 a chance to share your improved assembler.
@@ -3738,7 +3787,7 @@ absolute expression.  If the comma and @var{fill} are omitted,
 @var{fill} defaults to zero.
 
 @node P2align
-@section @code{.p2align @var{abs-expr} , @var{abs-expr}}
+@section @code{.p2align[wl] @var{abs-expr} , @var{abs-expr}}
 
 @cindex padding the location counter given a power of two
 @cindex @code{p2align} directive
@@ -3752,6 +3801,17 @@ multiple of 8, no change is needed.
 The second expression (also absolute) gives the value to be stored in
 the padding bytes.  It (and the comma) may be omitted.  If it is
 omitted, the padding bytes are zero.
+
+@cindex @code{p2alignw} directive
+@cindex @code{p2alignl} directive
+The @code{.p2alignw} and @code{.p2alignl} directives are variants of the
+@code{.p2align} directive.  The @code{.p2alignw} directive treats the fill
+pattern as a two byte word value.  The @code{.p2alignl} directives treats the
+fill pattern as a four byte longword value.  For example, @code{.p2alignw
+2,0x368d} will align to a multiple of 4.  If it skips two bytes, they will be
+filled in with the value 0x368d (the exact placement of the bytes depends upon
+the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
+undefined.
 
 @node Psize
 @section @code{.psize @var{lines} , @var{columns}}
@@ -4034,12 +4094,12 @@ relocatably.  When your program is linked, the value of this symbol
 is the address of the location counter when the @code{.stabd} was
 assembled.
 
-@item .stabn @var{type} , @var{other} , @var{desc} , @var{value}
 @cindex @code{stabn} directive
+@item .stabn @var{type} , @var{other} , @var{desc} , @var{value}
 The name of the symbol is set to the empty string @code{""}.
 
-@item .stabs @var{string} ,  @var{type} , @var{other} , @var{desc} , @var{value}
 @cindex @code{stabs} directive
+@item .stabs @var{string} ,  @var{type} , @var{other} , @var{desc} , @var{value}
 All five fields are specified.
 @end table
 @end ifset
@@ -4408,32 +4468,9 @@ family.
 @include c-m68k.texi
 @end ifset
 
-@ignore
-@c FIXME!  Stop ignoring when filled in.
-@node 32x32
-@chapter 32x32
-
-@section Options
-The 32x32 version of @code{@value{AS}} accepts a @samp{-m32032} option to
-specify thiat it is compiling for a 32032 processor, or a
-@samp{-m32532} to specify that it is compiling for a 32532 option.
-The default (if neither is specified) is chosen when the assembler
-is compiled.
-
-@section Syntax
-I don't know anything about the 32x32 syntax assembled by
-@code{@value{AS}}.  Someone who undersands the processor (I've never seen
-one) and the possible syntaxes should write this section.
-
-@section Floating Point
-The 32x32 uses @sc{ieee} floating point numbers, but @code{@value{AS}}
-only creates single or double precision values.  I don't know if the
-32x32 understands extended precision numbers.
-
-@section 32x32 Machine Directives
-The 32x32 has no machine dependent directives.
-
-@end ignore
+@ifset NS32K
+@include c-ns32k.texi
+@end ifset
 
 @ifset SPARC
 @include c-sparc.texi
@@ -4461,8 +4498,9 @@ The 32x32 has no machine dependent directives.
 
 If you have contributed to @code{@value{AS}} and your name isn't listed here,
 it is not meant as a slight.  We just don't know about it.  Send mail to the
-maintainer, and we'll correct the situation.  Currently (January 1994), the
-maintainer is Ken Raeburn (email address @code{raeburn@@cygnus.com}).
+maintainer, and we'll correct the situation.  Currently 
+@c (January 1994), 
+the maintainer is Ken Raeburn (email address @code{raeburn@@cygnus.com}).
 
 Dean Elsner wrote the original @sc{gnu} assembler for the VAX.@footnote{Any
 more details?}

@@ -1,6 +1,6 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
 
-   Copyright (C) 1993, 1994, 1995 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 1996 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1697,11 +1697,12 @@ tc_coff_sizemachdep (frag)
 /* When we align the .text section, insert the correct NOP pattern.  */
 
 int
-sh_do_align (n, fill)
+sh_do_align (n, fill, len)
      int n;
      const char *fill;
+     int len;
 {
-  if ((fill == NULL || *fill == 0)
+  if ((fill == NULL || (*fill == 0 && len == 1))
       && (now_seg == text_section
 #ifdef BFD_ASSEMBLER
 	  || (now_seg->flags & SEC_CODE) != 0
