@@ -176,7 +176,7 @@ no_shared_libraries (char *ignored, int from_tty)
 }
 
 void
-_initialize_solib (void)
+_initialize_xcoffsolib (void)
 {
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");

@@ -1,3 +1,10 @@
+2002-02-09  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* xcoffsolib.c (_initialize_xcoffsolib): Renamed from
+	_initialize_solib.  Fixes name clash with solib.c:_initialize_solib,
+	now _initialize_xcoffsolib gets called again and overrides the
+	commands from solib.c in a native configuration.
+
 2002-02-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* doublest.c (store_typed_floating): Don't try to return a value.
