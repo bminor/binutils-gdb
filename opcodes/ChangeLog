@@ -1,3 +1,20 @@
+2004-05-24  Peter Barada  <peter@the-baradas.com>
+
+	* m68k-dis.c(print_insn_m68k): Strip body of diassembly out
+        into new match_insn_m68k function.  Loop over canidate
+        matches and select first that completely matches.
+	* m68k-dis.c(print_insn_arg): Fix 'g' case to only extract 1 bit.
+	* m68k-dis.c(print_insn_arg): Call new function m68k_valid_ea
+        to verify addressing for MAC/EMAC. 
+	* m68k-dis.c(print_insn_arg): Use reg_half_names for MAC/EMAC
+	reigster halves since 'fpu' and 'spl' look misleading.
+	* m68k-dis.c(fetch_arg): Fix 'G', 'H', 'I', 'f', 'M', 'N' cases.
+	* m68k-opc.c: Rearragne mac/emac cases to use longest for
+	first, tighten up match masks.
+	* m68k-opc.c: Add 'size' field to struct m68k_opcode.  Produce
+	'size' from special case code in print_insn_m68k to
+	determine decode size of insns.
+
 2004-05-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (insert_fxm): Enable two operand mfcr when -many as

@@ -1,5 +1,5 @@
 /* m68k.y -- bison grammar for m68k operand parsing
-   Copyright 1995, 1996, 1997, 1998, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 2001, 2004 Free Software Foundation, Inc.
    Written by Ken Raeburn and Ian Lance Taylor, Cygnus Support
 
    This file is part of GAS, the GNU Assembler.
@@ -35,7 +35,7 @@
    etc), as well as gratuitously global symbol names If other parser
    generators (bison, byacc, etc) produce additional global names that
    conflict at link time, then those parser generators need to be
-   fixed instead of adding those names to this list. */
+   fixed instead of adding those names to this list.  */
 
 #define	yymaxdepth m68k_maxdepth
 #define	yyparse	m68k_parse
@@ -122,7 +122,10 @@ operand:
 		{
 		  op->trailing_ampersand = $2;
 		}
-	| mit_operand
+	| mit_operand optional_ampersand
+		{
+		  op->trailing_ampersand = $2;
+		}
 	;
 
 /* A trailing ampersand(for MAC/EMAC mask addressing).  */
@@ -793,8 +796,8 @@ yylex ()
     case '-':
       /* A '-' can only appear in -(ar), rn-rn, or ar@-.  If it
          appears anywhere else, it must be a unary minus on an
-         expression.  */
-      if (str[1] == '\0')
+         expression, unless it it trailed by a '&'(see mac load insn).  */
+      if (str[1] == '\0' || (str[1] == '&' && str[2] == '\0'))
 	return *str++;
       s = str + 1;
       if (*s == '(')

@@ -1,3 +1,12 @@
+2004-05-24  Peter Barada  <peter@the-baradas.com>
+
+	* config/m68k-parse.y(operand): Allow for MAC/EMAC mask
+	addressing on MIT style operands.
+	* config/m68k-parse.y(yylex): Allow '-&' for predecrement
+	w/mask addressing.
+	* config/tc-m68k.c(install_operand): Comment 'G' and 'H' type
+	operands.
+
 2004-05-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* expr.c (operand, operator): Don't reject '++' and '--'.

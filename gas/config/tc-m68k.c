@@ -3476,11 +3476,11 @@ install_operand (mode, val)
     case 'f':
       the_ins.opcode[0] |= ((val & 0x3) << 0);
       break;
-    case 'G':
+    case 'G':  /* EMAC accumulator in a EMAC load instruction.  */
       the_ins.opcode[0] |= ((~val & 0x1) << 7);
       the_ins.opcode[1] |= ((val & 0x2) << (4 - 1));
       break;
-    case 'H':
+    case 'H':  /* EMAC accumulator in a EMAC non-load instruction.  */
       the_ins.opcode[0] |= ((val & 0x1) << 7);
       the_ins.opcode[1] |= ((val & 0x2) << (4 - 1));
       break;
