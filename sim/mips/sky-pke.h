@@ -7,10 +7,6 @@
 #include "sky-device.h"
 
 
-/* Debugguing PKE? */
-
-#define PKE_DEBUG 
-
 
 /* External functions */
 
@@ -163,10 +159,11 @@ typedef unsigned_4 quadword[4];
 #define PKE_REG_STAT_PPS_E 1
 #define PKE_REG_STAT_PPS_B 0
 
-#define PKE_REG_STAT_PPS_IDLE 0x00
-#define PKE_REG_STAT_PPS_WAIT 0x01
-#define PKE_REG_STAT_PPS_DECODE 0x02
-#define PKE_REG_STAT_PPS_XFER 0x03
+#define PKE_REG_STAT_PPS_IDLE 0x00 /* ready to execute next instruction */
+#define PKE_REG_STAT_PPS_WAIT 0x01 /* not enough words in FIFO */
+#define PKE_REG_STAT_PPS_DECODE 0x02 /* decoding instruction */
+#define PKE_REG_STAT_PPS_STALL 0x02 /* alias state for FLUSHE stall */
+#define PKE_REG_STAT_PPS_XFER 0x03 /* transferring instruction operands */
 
 /* DBF register */
 #define PKE_REG_DBF_DF_E 0
@@ -364,7 +361,7 @@ struct pke_device
   struct fifo_quadword* fifo;
   int fifo_num_elements; /* no. of quadwords occupied in FIFO */
   int fifo_buffer_size;  /* no. of quadwords of space in FIFO */
-  FILE* fifo_trace_file; /* or 0 for no trace */
+  FILE* fifo_trace_file; /* or 0 for no trace */ /* XXX: tracing not done */
   /* XXX: assumes FIFOs grow indefinately */
 
   /* PC */
