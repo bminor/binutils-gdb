@@ -1057,18 +1057,24 @@ main (int argc, char **argv)
 	sharedhdr.exitProcedureOffset;
       free (data);
     }
-  len = strlen (output_file);
-  if (len > NLM_MODULE_NAME_SIZE - 2)
-    len = NLM_MODULE_NAME_SIZE - 2;
-  nlm_fixed_header (outbfd)->moduleName[0] = len;
 
-  strncpy (nlm_fixed_header (outbfd)->moduleName + 1, output_file,
-	   NLM_MODULE_NAME_SIZE - 2);
-  nlm_fixed_header (outbfd)->moduleName[NLM_MODULE_NAME_SIZE - 1] = '\0';
-  for (modname = nlm_fixed_header (outbfd)->moduleName;
-       *modname != '\0';
-       modname++)
-    *modname = TOUPPER (*modname);
+  {
+    const int    max_len  = NLM_MODULE_NAME_SIZE - 2;
+    const char * filename = lbasename (output_file);
+    
+    len = strlen (filename);
+    if (len > max_len)
+      len = max_len;
+    nlm_fixed_header (outbfd)->moduleName[0] = len;
+
+    strncpy (nlm_fixed_header (outbfd)->moduleName + 1, filename, max_len);
+    nlm_fixed_header (outbfd)->moduleName[max_len + 1] = '\0';
+
+    for (modname = nlm_fixed_header (outbfd)->moduleName;
+	 *modname != '\0';
+	 modname++)
+      *modname = TOUPPER (*modname);
+  }
 
   strncpy (nlm_variable_header (outbfd)->oldThreadName, " LONG",
 	   NLM_OLD_THREAD_NAME_LENGTH);
