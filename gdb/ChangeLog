@@ -1,5 +1,21 @@
 2004-09-29  Andrew Cagney  <cagney@gnu.org>
 
+	* target.h (struct target_ops): Delete field to_post_wait.
+	(target_post_wait): Delete macro.
+	(child_post_wait): Delete declaration.
+	* target.c (update_current_target, update_current_target)
+	(debug_to_post_wait, setup_target_debug): Delete functions and
+	references.
+	* infttrace.c (ptrace_wait): Delete call to target_post_wait.
+	* inftarg.c (child_post_wait): Delete.
+	(init_child_ops): Do not set to_post_wait.
+	* infptrace.c (ptrace_wait): Delete call to target_post_wait.
+	* inf-ptrace.c (inf_ptrace_wait): Delete call to target_post_wait.
+	* inf-child.c (inf_child_post_wait): Delete.
+	(inf_child_target): Do not set to_post_wait.
+	* inf-ptrace.c (inf_ptrace_post_wait): Delete.
+	(inf_ptrace_target): Do not set to_post_wait.
+
 	* wince.c (child_ops): Delete.
 	* win32-nat.c (child_ops): Delete.
 

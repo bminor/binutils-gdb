@@ -2888,9 +2888,6 @@ ptrace_wait (ptid_t ptid, int *status)
       *status = _SIGTRAP;
     }
 
-  target_post_wait (pid_to_ptid (tsp.tts_pid), *status);
-
-
 #ifdef THREAD_DEBUG
   if (debug_on)
     printf ("Done waiting, pid is %d, tid %d\n", real_pid, real_tid);

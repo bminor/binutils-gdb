@@ -53,10 +53,6 @@ static void child_prepare_to_store (void);
 static ptid_t child_wait (ptid_t, struct target_waitstatus *);
 #endif /* CHILD_WAIT */
 
-#if !defined(CHILD_POST_WAIT)
-void child_post_wait (ptid_t, int);
-#endif
-
 static void child_open (char *, int);
 
 static void child_files_info (struct target_ops *);
@@ -158,17 +154,6 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   return pid_to_ptid (pid);
 }
 #endif /* CHILD_WAIT */
-
-#if !defined(CHILD_POST_WAIT)
-void
-child_post_wait (ptid_t ptid, int wait_status)
-{
-  /* This version of Unix doesn't require a meaningful "post wait"
-     operation.
-   */
-}
-#endif
-
 
 #ifndef CHILD_THREAD_ALIVE
 
@@ -605,7 +590,6 @@ init_child_ops (void)
   child_ops.to_detach = child_detach;
   child_ops.to_resume = child_resume;
   child_ops.to_wait = child_wait;
-  child_ops.to_post_wait = child_post_wait;
   child_ops.to_fetch_registers = fetch_inferior_registers;
   child_ops.to_store_registers = store_inferior_registers;
   child_ops.to_prepare_to_store = child_prepare_to_store;

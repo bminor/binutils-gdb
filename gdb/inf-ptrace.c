@@ -256,7 +256,6 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       set_sigio_trap ();
 
       pid = wait (&status);
-      target_post_wait (pid_to_ptid (pid), status);
 
       save_errno = errno;
 
@@ -297,14 +296,6 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   store_waitstatus (ourstatus, status);
   return pid_to_ptid (pid);
-}
-
-void
-inf_ptrace_post_wait (ptid_t ptid, int wait_status)
-{
-  /* This version of Unix doesn't require a meaningful "post wait"
-     operation.
-   */
 }
 
 /* Check to see if the given thread is alive.
@@ -666,7 +657,6 @@ inf_ptrace_target (void)
   t->to_detach = inf_ptrace_detach;
   t->to_resume = inf_ptrace_resume;
   t->to_wait = inf_ptrace_wait;
-  t->to_post_wait = inf_ptrace_post_wait;
   t->to_prepare_to_store = inf_ptrace_prepare_to_store;
   t->to_xfer_memory = inf_ptrace_xfer_memory;
   t->to_xfer_partial = inf_ptrace_xfer_partial;

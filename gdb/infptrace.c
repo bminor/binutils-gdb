@@ -144,7 +144,6 @@ ptrace_wait (ptid_t ptid, int *status)
   int wstate;
 
   wstate = wait (status);
-  target_post_wait (pid_to_ptid (wstate), *status);
   return wstate;
 }
 

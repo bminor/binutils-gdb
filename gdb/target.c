@@ -385,7 +385,6 @@ update_current_target (void)
       INHERIT (to_disconnect, t);
       INHERIT (to_resume, t);
       INHERIT (to_wait, t);
-      INHERIT (to_post_wait, t);
       INHERIT (to_fetch_registers, t);
       INHERIT (to_store_registers, t);
       INHERIT (to_prepare_to_store, t);
@@ -487,9 +486,6 @@ update_current_target (void)
   de_fault (to_wait, 
 	    (ptid_t (*) (ptid_t, struct target_waitstatus *)) 
 	    noprocess);
-  de_fault (to_post_wait, 
-	    (void (*) (ptid_t, int)) 
-	    target_ignore);
   de_fault (to_fetch_registers, 
 	    (void (*) (int)) 
 	    target_ignore);
@@ -1747,15 +1743,6 @@ debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
 }
 
 static void
-debug_to_post_wait (ptid_t ptid, int status)
-{
-  debug_target.to_post_wait (ptid, status);
-
-  fprintf_unfiltered (gdb_stdlog, "target_post_wait (%d, %d)\n",
-		      PIDGET (ptid), status);
-}
-
-static void
 debug_print_register (const char * func, int regno)
 {
   fprintf_unfiltered (gdb_stdlog, "%s ", func);
@@ -2346,7 +2333,6 @@ setup_target_debug (void)
   current_target.to_disconnect = debug_to_disconnect;
   current_target.to_resume = debug_to_resume;
   current_target.to_wait = debug_to_wait;
-  current_target.to_post_wait = debug_to_post_wait;
   current_target.to_fetch_registers = debug_to_fetch_registers;
   current_target.to_store_registers = debug_to_store_registers;
   current_target.to_prepare_to_store = debug_to_prepare_to_store;

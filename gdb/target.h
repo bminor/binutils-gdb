@@ -304,7 +304,6 @@ struct target_ops
     void (*to_disconnect) (char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
-    void (*to_post_wait) (ptid_t, int);
     void (*to_fetch_registers) (int);
     void (*to_store_registers) (int);
     void (*to_prepare_to_store) (void);
@@ -507,19 +506,6 @@ extern void target_disconnect (char *, int);
 #define	target_wait(ptid, status)		\
      (*current_target.to_wait) (ptid, status)
 
-/* The target_wait operation waits for a process event to occur, and
-   thereby stop the process.
-
-   On some targets, certain events may happen in sequences.  gdb's
-   correct response to any single event of such a sequence may require
-   knowledge of what earlier events in the sequence have been seen.
-
-   This operation provides a target-specific hook that allows the
-   necessary bookkeeping to be performed to track such sequences.  */
-
-#define target_post_wait(ptid, status) \
-     (*current_target.to_post_wait) (ptid, status)
-
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
 #define	target_fetch_registers(regno)	\
@@ -577,8 +563,6 @@ extern char *child_core_file_to_sym_file (char *);
 #if defined(CHILD_POST_ATTACH)
 extern void child_post_attach (int);
 #endif
-
-extern void child_post_wait (ptid_t, int);
 
 extern void child_post_startup_inferior (ptid_t);
 
