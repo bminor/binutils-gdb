@@ -1,3 +1,43 @@
+Wed Jun 24 09:20:21 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/objdump.exp: Look for '.data' rather than 'data'
+	when parsing output of objdump -h.
+	* binutils-all/size.exp: Look for '.data' rather than 'data' when
+	parsing output of size -A.
+
+Fri May 29 14:50:24 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Don't xfail the simple objcopy test
+	when cross compiling.
+
+Thu Nov  6 14:32:37 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/utils-lib.exp: Temporary definition of target_assemble and
+ 	default_target_assemble so that testing can work with older
+ 	dejagnu versions.
+
+Wed Sep 24 12:09:15 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* binutils-all/objcopy.exp(strip_executable): Make a new copy of
+ 	the executable being tested.
+
+Mon Sep 15 21:25:20 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* binutils-all/objcopy.exp: Compile the executables to be tested
+ 	on the target with a status wrapper (as necessary).
+
+	* binutils-all/ar.exp: If testing on a remote host, don't bother
+ 	looking on the local host for the program being tested. Use the
+ 	correct filenames on the remote host.
+
+	* binutils-all/nm.exp: Ditto.
+
+	* binutils-all/size.exp: Ditto.
+
+	* binutils-all/objdump.exp: Ditto.
+ 	(cpus_expected): Add the target CPU to the regexp of CPUs to be
+ 	expected, if it's not already there.
+
 Thu Aug 28 09:57:27 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* binutils-all/objdump.exp (cpus_expected): Add arc.
