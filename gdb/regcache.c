@@ -1003,7 +1003,8 @@ supply_register (int regnum, char *val)
      values. */
 
 #ifdef DEPRECATED_CLEAN_UP_REGISTER_VALUE
-  DEPRECATED_CLEAN_UP_REGISTER_VALUE (regnum, register_buffer (regnum));
+  DEPRECATED_CLEAN_UP_REGISTER_VALUE \
+    (regnum, register_buffer (current_regcache, regnum));
 #endif
 }
 

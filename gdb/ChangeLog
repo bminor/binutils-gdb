@@ -1,5 +1,11 @@
 2002-06-27  Andrew Cagney  <ac131313@redhat.com>
 
+	From 2002-06-27 John David Anglin <dave@hiauly1.hia.nrc.ca>:
+	* regcache.c (supply_register): Add missing argument to
+	register_buffer call.
+
+2002-06-27  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (init.c): Drop -e option to grep.  Not necessary and
 	Solaris /bin/grep does not not like it.  From Peter Schauer.
 
