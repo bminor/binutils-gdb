@@ -575,75 +575,10 @@ bug_xfer_memory (memaddr, myaddr, len, write, target)
      int write;
      struct target_ops *target;	/* ignored */
 {
-  register int i;
+  if (len <= 0)
+    return 0;
 
-  /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr;
-
-  /* Round ending address up; get number of longwords that makes.  */
-  register int count;
-
-  /* Allocate buffer of that many longwords.  */
-  register int *buffer;
-
-  addr = memaddr & -sizeof (int);
-  count = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
-
-  buffer = (int *) alloca (count * sizeof (int));
-
-  if (write)
-    {
-      /* Fill start and end extra bytes of buffer with existing memory data.  */
-
-      if (addr != memaddr || len < (int) sizeof (int))
-	{
-	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = gr_fetch_word (addr);
-	}
-
-      if (count > 1)		/* FIXME, avoid if even boundary */
-	{
-	  buffer[count - 1]
-	    = gr_fetch_word (addr + (count - 1) * sizeof (int));
-	}
-
-      /* Copy data to be written over corresponding part of buffer */
-
-      memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
-
-      /* Write the entire buffer.  */
-
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  gr_store_word (addr, buffer[i]);
-	  if (errno)
-	    {
-
-	      return 0;
-	    }
-
-	}
-    }
-  else
-    {
-      /* Read all the longwords */
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  buffer[i] = gr_fetch_word (addr);
-	  if (errno)
-	    {
-	      return 0;
-	    }
-	  QUIT;
-	}
-
-      /* Copy appropriate bytes out of the buffer.  */
-      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
-    }
-
-  return len;
+  return dcache_xfer_memory (gr_get_dcache (), memaddr, myaddr, len, write);
 }
 
 static void

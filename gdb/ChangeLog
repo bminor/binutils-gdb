@@ -1,3 +1,22 @@
+2000-06-19  J.T. Conklin  <jtc@redback.com>
+
+	* remote-nindy.c (nindy_fetch_word, nindy_store_word): Removed
+	(nindy_xfer_inferior_memory): Use dcache_xfer_memory() instead of
+ 	breaking transfer into chunks and using nindy_fetch_word() and
+	nindy_store_word().
+
+	* remote-bug.c (bug_xfer_memory): Use dcache_xfer_memory() instead
+ 	of breaking transfer into chunks and using gr_fetch_word() and
+ 	gr_store_word().
+
+	* remote.c (remote_fetch_word, remote_store_word): Removed.
+
+	* remote-utils.h (gr_fetch_word, gr_store_word): Removed.
+	* remote-utils.c (gr_fetch_word, gr_store_word): Removed.
+
+	* dcache.h (dcache_fetch, dcache_poke, dcache_poke_block): Removed.
+	* dcache.c (dcache_fetch, dcache_poke): Removed.
+
 2000-06-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* defs.h: define language_pascal in language enumeration.
