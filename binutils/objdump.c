@@ -28,7 +28,18 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <ctype.h>
 
+#define	ELF_STAB_DISPLAY	/* This code works, but uses internal
+				   bfd and elf stuff.  Flip this define
+				   off if you need to just use generic
+				   BFD interfaces.  */
 
+#ifdef	ELF_STAB_DISPLAY
+/* Internal headers for the ELF .stab-dump code - sorry.  */
+#define	BYTES_IN_WORD	32
+#include "aout/aout64.h"
+#include "elf/internal.h"
+extern Elf_Internal_Shdr *bfd_elf_find_section();
+#endif	/* ELF_STAB_DISPLAY */
 
 char *xmalloc ();
 
@@ -43,6 +54,7 @@ int dump_symtab;		/* -t */
 int dump_reloc_info;		/* -r */
 int dump_ar_hdrs;		/* -a */
 int with_line_numbers;		/* -l */
+int dump_stab_section_info;	/* -stabs */
 boolean disassemble;		/* -d */
 boolean info;			/* -i */
 char *only;
@@ -82,8 +94,10 @@ static struct option long_options[]=
   {"syms", no_argument, &dump_symtab, 1},
   {"reloc", no_argument, &dump_reloc_info, 1},
   {"header", no_argument, &dump_section_headers, 1},
+#ifdef	ELF_STAB_DISPLAY
+  {"stabs", no_argument, &dump_stab_section_info, 1},
+#endif
   {0, no_argument, 0, 0}};
-
 
 
 static void
@@ -439,7 +453,129 @@ disassemble_data (abfd)
 	}
     }
 }
+
+#ifdef	ELF_STAB_DISPLAY
 
+/* Define a table of stab values and print-strings.  We wish the initializer
+   could be a direct-mapped table, but instead we build one the first
+   time we need it.  */
+
+#define	STAB_STRING_LENGTH	6
+
+char stab_name[256][STAB_STRING_LENGTH];
+
+struct stab_print {
+  int value;
+  char string[STAB_STRING_LENGTH];
+};
+
+struct stab_print stab_print[] = {
+#define __define_stab(NAME, CODE, STRING) {CODE, STRING},
+#include "aout/stab.def"
+#undef __define_stab
+  {0, 0}
+};
+
+/* This is a kludge for dumping the stabs section from an ELF file that
+   uses Sun stabs encoding.  It has to use some hooks into BFD because
+   string table sections are not normally visible to BFD callers.  */
+
+void
+dump_elf_stabs (abfd)
+     bfd *abfd;
+{
+  Elf_Internal_Shdr *stab_hdr, *stabstr_hdr;
+  char *strtab;
+  struct internal_nlist *stabs, *stabs_end;
+  int i, j;
+
+  /* Initialize stab name array if first time.  */
+  if (stab_name[0][0] == 0) 
+    {
+      /* Fill in numeric values for all possible strings.  */
+      for (i = 0; i < 256; i++)
+	{
+	  sprintf (stab_name[i], "%d", i);
+	}
+      for (i = 0; stab_print[i].string[0]; i++)
+	strcpy (stab_name[stab_print[i].value], stab_print[i].string);
+    }
+
+  if (0 != strncmp ("elf", abfd->xvec->name, 3))
+    {
+      fprintf (stderr, "%s: %s is not in ELF format.\n", program_name,
+	       abfd->filename);
+      return;
+    }
+
+  stab_hdr = bfd_elf_find_section (abfd, ".stab");
+  if (0 == stab_hdr)
+    {
+      fprintf (stderr, "%s: %s has no .stab section.\n", program_name,
+	       abfd->filename);
+      return;
+    }
+
+  stabstr_hdr = bfd_elf_find_section (abfd, ".stabstr");
+  if (0 == stabstr_hdr)
+    {
+      fprintf (stderr, "%s: %s has no .stabstr section.\n", program_name,
+	       abfd->filename);
+      return;
+    }
+
+  stabs  = (struct internal_nlist *) xmalloc (stab_hdr   ->sh_size);
+  strtab = (char *)		     xmalloc (stabstr_hdr->sh_size);
+  stabs_end = (struct internal_nlist *) (stab_hdr->sh_size + (char *)stabs);
+  
+  if (bfd_seek (abfd, stab_hdr->sh_offset, L_SET) < 0 ||
+      stab_hdr->sh_size != bfd_read ((PTR)stabs, stab_hdr->sh_size, 1, abfd))
+    {
+      fprintf (stderr, "%s: reading .stab section of %s failed.\n",
+	       program_name,
+	       abfd->filename);
+      return;
+    }
+
+  if (bfd_seek (abfd, stabstr_hdr->sh_offset, L_SET) < 0 ||
+      stabstr_hdr->sh_size != bfd_read ((PTR)strtab, stabstr_hdr->sh_size,
+					1, abfd))
+    {
+      fprintf (stderr, "%s: reading .stabstr section of %s failed.\n",
+	       program_name,
+	       abfd->filename);
+      return;
+    }
+
+#define SWAP_SYMBOL(symp, abfd) \
+  { \
+    (symp)->n_strx = bfd_h_get_32(abfd,			\
+				(unsigned char *)&(symp)->n_strx);	\
+    (symp)->n_desc = bfd_h_get_16 (abfd,			\
+				(unsigned char *)&(symp)->n_desc);  	\
+    (symp)->n_value = bfd_h_get_32 (abfd,			\
+				(unsigned char *)&(symp)->n_value); 	\
+  }
+
+  printf ("Contents of .stab section:\n\n");
+  printf ("Symnum n_type n_othr n_desc n_value  n_strx String\n");
+
+  /* We start the index at -1 because there is a dummy symbol on
+     the front of Sun's stabs-in-elf sections.  */
+  for (i = -1; stabs < stabs_end; stabs++, i++)
+    {
+      SWAP_SYMBOL (stabs, abfd);
+      printf ("\n%-6d %-6s %-6d %-6d %08x %-6d", i,
+	      stab_name [stabs->n_type],
+	      stabs->n_other, stabs->n_desc, stabs->n_value,
+	      stabs->n_strx);
+      if (stabs->n_strx < stabstr_hdr->sh_size)
+	printf (" %s", &strtab[stabs->n_strx]);
+    }
+  printf ("\n\n");
+}
+#endif	/* ELF_STAB_DISPLAY */
+
 void
 display_bfd (abfd)
      bfd *abfd;
@@ -487,6 +623,10 @@ display_bfd (abfd)
     }
   if (dump_symtab)
     dump_symbols (abfd);
+#ifdef	ELF_STAB_DISPLAY
+  if (dump_stab_section_info)
+    dump_elf_stabs (abfd);
+#endif
   if (dump_reloc_info)
     dump_relocs (abfd);
   if (dump_section_contents)
