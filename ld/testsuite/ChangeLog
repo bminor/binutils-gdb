@@ -1,3 +1,9 @@
+2005-03-16  David Heine  <dlheine@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* ld-scripts/empty-orphan.d, ld-scripts/empty-orphan.exp,
+	ld-scripts/empty-orphan.s, ld-scripts/emtpy-orphan.t: New test.
+
 2005-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe32.d: Update.
