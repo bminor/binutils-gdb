@@ -1,3 +1,14 @@
+2001-04-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gprof.texi: Put @c man begin and @c man end indications
+	to generate man page using texi2pod and pod2man.  Added SEEALSO,
+	SYNOPSIS, BUGS, FILES and DESCRIPTION from original gprof.1
+	enclosed in @ifset man condition.
+	* Makefile.am (MANCONF, TEXI2POD, POD2MAN): New variable.
+	Generate gprof.1 from gprof.texi.
+	* gprof.1: Generate from gprof.texi.
+	* Makefile.in: Regenerate.
+
 2001-03-13  David Mosberger  <davidm@hpl.hp.com>
 
 	* hist.c (hist_dimension): Declare as an array of 16 characters.

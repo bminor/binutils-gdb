@@ -49,8 +49,26 @@ po/POTFILES.in: @MAINT@ Makefile
 	for file in $(POTFILES); do echo $$file; done | sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
+MANCONF  = -Dman
+
+TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl
+
+POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
+
 info_TEXINFOS = gprof.texi
 man_MANS = gprof.1
+
+# Build the man page from the texinfo file
+# The sed command removes the no-adjust Nroff command so that
+# the man output looks standard.
+$(srcdir)/gprof.1: $(srcdir)/gprof.texi
+	touch $(srcdir)/gprof.1
+	-$(TEXI2POD) $(MANCONF) -Dgprof < $(srcdir)/gprof.texi > gprof.pod
+	-($(POD2MAN) gprof.pod | \
+		sed -e '/^.if n .na/d' > $(srcdir)/gprof.1.T$$$$ && \
+		mv -f $(srcdir)/gprof.1.T$$$$ $(srcdir)/gprof.1) || \
+		(rm -f $(srcdir)/gprof.1.T$$$$ && exit 1)
+	rm -f gprof.pod
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of DEP1 here so that "$?" later includes all sources.
