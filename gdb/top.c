@@ -290,7 +290,7 @@ void (*deprecated_context_hook) (int id);
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
 
-NORETURN void (*deprecated_error_hook) (void) ATTR_NORETURN;
+void (*deprecated_error_hook) (void);
 
 
 /* One should use catch_errors rather than manipulating these
