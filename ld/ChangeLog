@@ -1,3 +1,11 @@
+Tue Aug 30 11:48:08 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* ld.h (args_type): Add field soname.
+	* lexsup.c (parse_args): Handle -soname argument.
+	* emultempl/elf32.em: In call to bfd_elf32_size_dynamic_sections,
+	pass soname.
+	* ld.texinfo: Document -soname.
+
 Mon Aug 29 15:21:50 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ldlang.c (lang_check): Don't try to set the architecture if the
