@@ -1,5 +1,8 @@
 2002-06-12  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
+	* elflink.h (elf_bfd_final_link): Improve error handling for missing
+	dynamic sections.
+
 	* elf64-hppa.c (allocate_global_data_opd): We don't need an opd entry
 	for a symbol that has no output section.
 	(allocate_dynrel_entries): Correct comment.

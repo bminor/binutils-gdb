@@ -5692,7 +5692,13 @@ elf_bfd_final_link (abfd, info)
 	      name = ".fini_array";
 	    get_size:
 	      o = bfd_get_section_by_name (abfd, name);
-	      BFD_ASSERT (o != NULL);
+	      if (o == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: could not find output section %s"),
+		     bfd_get_filename (abfd), name);
+		  goto error_return;
+		}
 	      if (o->_raw_size == 0)
 		(*_bfd_error_handler)
 		  (_("warning: %s section has zero size"), name);
@@ -5729,7 +5735,13 @@ elf_bfd_final_link (abfd, info)
 	      name = ".gnu.version";
 	    get_vma:
 	      o = bfd_get_section_by_name (abfd, name);
-	      BFD_ASSERT (o != NULL);
+	      if (o == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: could not find output section %s"),
+		     bfd_get_filename (abfd), name);
+		  goto error_return;
+		}
 	      dyn.d_un.d_ptr = o->vma;
 	      elf_swap_dyn_out (dynobj, &dyn, dyncon);
 	      break;
