@@ -24,6 +24,7 @@ Do-first:
 Things-to-keep:
 
 nm-sparclynx.h
+nm-sparcnbsd.h
 nm-sun4os4.h
 sp64.mt
 sp64sim.mt
@@ -40,6 +41,7 @@ tm-sp64sim.h
 tm-sparc.h
 tm-sparclite.h
 tm-sparclynx.h
+tm-sparcnbsd.h
 tm-spc-em.h
 tm-sun4os4.h
 tm-sun4sol2.h
@@ -47,6 +49,7 @@ tm-vxsparc.h
 vxsparc.mt
 xm-sparc.h
 xm-sparclynx.h
+xm-sparcnbsd.h
 xm-sun4os4.h
 xm-sun4sol2.h
 
