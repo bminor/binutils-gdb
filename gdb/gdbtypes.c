@@ -519,6 +519,32 @@ finish_cv_type (struct type *type)
     }
 }
 
+/* Replace the contents of ntype with the type *type.
+
+   This function should not be necessary, but is due to quirks in the stabs
+   reader.  This should go away.  It does not handle the replacement type
+   being cv-qualified; it could be easily fixed to, but it should go away,
+   remember?  */
+void
+replace_type (struct type *ntype, struct type *type)
+{
+  struct type *cv_chain, *as_chain, *ptr, *ref;
+
+  cv_chain = TYPE_CV_TYPE (ntype);
+  as_chain = TYPE_AS_TYPE (ntype);
+  ptr = TYPE_POINTER_TYPE (ntype);
+  ref = TYPE_REFERENCE_TYPE (ntype);
+
+  *ntype = *type;
+
+  TYPE_POINTER_TYPE (ntype) = ptr;
+  TYPE_REFERENCE_TYPE (ntype) = ref;
+  TYPE_CV_TYPE (ntype) = cv_chain;
+  TYPE_AS_TYPE (ntype) = as_chain;
+
+  finish_cv_type (ntype);
+}
+
 /* Implement direct support for MEMBER_TYPE in GNU C++.
    May need to construct such a type if this is the first use.
    The TYPE is the type of the member.  The DOMAIN is the type

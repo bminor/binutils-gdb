@@ -2531,7 +2531,13 @@ again:
 	  }
 	else if (type_size >= 0 || is_string)
 	  {
-	    *type = *xtype;
+	    /* This is the absolute wrong way to construct types.  Every
+	       other debug format has found a way around this problem and
+	       the related problems with unnecessarily stubbed types;
+	       someone motivated should attempt to clean up the issue
+	       here as well.  Once a type pointed to has been created it
+	       should not be modified.  */
+	    replace_type (type, xtype);
 	    TYPE_NAME (type) = NULL;
 	    TYPE_TAG_NAME (type) = NULL;
 	  }
