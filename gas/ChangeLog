@@ -1,3 +1,14 @@
+2004-11-29  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c: Major code cleanup. Remove unused variables and functions,
+	give functions a meaningful name, add comments.
+	(check_range): New function - Replace operand size calculation 
+	with range checking.
+	(assemble_insn): Update Algorithm, improve error issuing.
+	(enum op_err): New - Operand error (for issuing operand error messages).
+	(process_label_constant): Bug fix regarding COP_BRANCH_INS relocation
+	handling.
+
 2004-11-29  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* config/tc-m32r.c (md_pcrel_from_section): Fixed a pcrel relocte
