@@ -1,3 +1,11 @@
+Sun Aug 10 14:51:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (MOSTLYCLEANFILES): Add site.bak, site.exp, stage,
+	stage1, and stage2.
+	(DISTCLEANFILES): Define.
+	* doc/Makefile.am (DISTCLEANFILES): Define.
+	* Makefile.in, doc/Makefile.in: Rebuild.
+
 Wed Aug  6 00:30:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Define TARGET_BYTES_BIG_ENDIAN if endian is set.
