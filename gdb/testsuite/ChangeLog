@@ -1,3 +1,8 @@
+2002-06-11  Jim Blandy  <jimb@redhat.com>
+
+	* macscp.exp, macscp1.c, macscp2.h, macscp3.h, macscp4.h: New
+	tests.
+
 2002-06-06  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/overlays.exp: Record addresses of overlay
