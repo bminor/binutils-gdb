@@ -2106,20 +2106,19 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     singlestepping a trap instruction, and singlestepping thru a
 	     jump to the instruction following a trap instruction. */
 
-	  stop_bpstat = bpstat_stop_status (&stop_pc,
-					    /* Pass TRUE if our reason for stopping is something other
-					       than hitting a breakpoint.  We do this by checking that
-					       1) stepping is going on and 2) we didn't hit a breakpoint
-					       in a signal handler without an intervening stop in
-					       sigtramp, which is detected by a new stack pointer value
-					       below any usual function calling stack adjustments.  */
-					    (currently_stepping (ecs)
-					     && prev_pc !=
-					     stop_pc - DECR_PC_AFTER_BREAK
-					     && !(step_range_end
-						  && INNER_THAN (read_sp (),
-								 (step_sp -
-								  16)))));
+	  stop_bpstat =
+            bpstat_stop_status
+              (&stop_pc,
+               /* Pass TRUE if our reason for stopping is something other
+                  than hitting a breakpoint.  We do this by checking that
+                  1) stepping is going on and 2) we didn't hit a breakpoint
+                  in a signal handler without an intervening stop in
+                  sigtramp, which is detected by a new stack pointer value
+                  below any usual function calling stack adjustments.  */
+               (currently_stepping (ecs)
+                && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
+                && !(step_range_end
+                     && INNER_THAN (read_sp (), (step_sp - 16)))));
 	  /* Following in case break condition called a
 	     function.  */
 	  stop_print_frame = 1;
