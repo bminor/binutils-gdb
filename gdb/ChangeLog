@@ -239,6 +239,16 @@
 
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Remove alphanbsd-nat.c.
+	(alphanbsd-nat.o): Remove dependency list.
+	(alphanbsd-tdep.o): Add $(regcache_h) to dependency list.
+	* alphanbsd-nat.c: Delete.  Contents moved to...
+	* alphanbsd-tdep.c: ...here.
+	(_initialize_alphanbsd_tdep): Register core functions.
+	* config/alpha/nbsd.mh (NATDEPFILES): Remove alphanbsd-nat.o.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add alphabsd-tdep.c.
 	(alphabsd-nat.o): Depend on alphabsd-tdep.h.
 	(alphanbsd-nat.o): Likewise.
