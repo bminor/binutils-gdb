@@ -1,3 +1,7 @@
+Wed Mar 25 10:46:30 1992  John Gilmore  (gnu at cygnus.com)
+
+	* history.c (stifle_history):  Negative arg treated as zero.
+
 Tue Mar 24 23:46:20 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* config/mh-sysv: INSTALL_PROG -> INSTALL.
