@@ -555,12 +555,9 @@ register struct ld_info *ldi; {
 	else {
 	    obj_err:
 		bfd_close(bfd);
-#if 0
-/* FIXME -- bfd doesn't recognize /lib/libc.a as an archive */
 /* FIXME -- should be error */
 		warning("\"%s\": not in executable format: %s."
 		      , ldi->ldinfo_filename, bfd_errmsg(bfd_error));
-#endif
 		return;
 	}
 }
