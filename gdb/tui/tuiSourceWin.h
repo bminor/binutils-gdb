@@ -41,7 +41,6 @@ extern void tuiUpdateSourceWindowAsIs (TuiWinInfoPtr, struct symtab *, TuiLineOr
 				       int);
 extern void tuiUpdateSourceWindowsWithAddr (CORE_ADDR);
 extern void tuiUpdateSourceWindowsWithLine (struct symtab *, int);
-extern void tuiUpdateSourceWindowsFromLocator (void);
 extern void tuiClearSourceContent (TuiWinInfoPtr, int);
 extern void tuiEraseSourceContent (TuiWinInfoPtr, int);
 extern void tuiSetSourceContentNil (TuiWinInfoPtr, char *);
@@ -51,11 +50,8 @@ extern void tuiHorizontalSourceScroll (TuiWinInfoPtr, TuiScrollDirection,
 extern TuiStatus tuiSetExecInfoContent (TuiWinInfoPtr);
 extern void tuiShowExecInfoContent (TuiWinInfoPtr);
 extern void tuiEraseExecInfoContent (TuiWinInfoPtr);
-extern void tuiEraseAllExecInfosContent (void);
 extern void tuiClearExecInfoContent (TuiWinInfoPtr);
-extern void tuiClearAllExecInfosContent (void);
 extern void tuiUpdateExecInfo (TuiWinInfoPtr);
-extern void tuiUpdateAllExecInfos (void);
 
 extern void tuiSetIsExecPointAt (TuiLineOrAddress, TuiWinInfoPtr);
 extern TuiStatus tuiAllocSourceBuffer (TuiWinInfoPtr);

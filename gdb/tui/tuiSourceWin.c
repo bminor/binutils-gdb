@@ -610,21 +610,6 @@ tuiUpdateExecInfo (TuiWinInfoPtr winInfo)
   tuiShowExecInfoContent (winInfo);
 }				/* tuiUpdateExecInfo */
 
-
-				   /*
-				   ** tuiUpdateAllExecInfos()
-				 */
-void
-tuiUpdateAllExecInfos (void)
-{
-  int i;
-
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiUpdateExecInfo ((TuiWinInfoPtr) (sourceWindows ())->list[i]);
-
-  return;
-}				/* tuiUpdateAllExecInfos */
-
 TuiStatus
 tuiAllocSourceBuffer (TuiWinInfoPtr winInfo)
 {

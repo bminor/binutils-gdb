@@ -132,21 +132,10 @@ extern void tui_show_source (const char *file, int line);
 
 extern struct ui_out *tui_out_new (struct ui_file *stream);
 
-/* tuiDataWin.c */
-extern void tui_vCheckDataValues (va_list);
-
-/* tuiIO.c */
-extern void tui_vStartNewLines (va_list);
-
 /* tuiLayout.c */
 extern TuiStatus tui_set_layout (const char *);
 
 /* tuiSourceWin.c */
 extern void tuiUpdateAllExecInfos (void);
-extern void tui_vAllSetHasBreakAt (va_list);
-extern void tui_vUpdateSourceWindowsWithAddr (va_list);
 
-/* tuiStack.c */
-extern void tui_vShowFrameInfo (va_list);
-extern void tui_vUpdateLocatorFilename (va_list);
 #endif /* TUI_H */
