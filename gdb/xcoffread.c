@@ -53,6 +53,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libcoff.h"		/* FIXME, internal data from BFD */
 #include "coff/rs6000.h"	/* FIXME, raw file-format guts of xcoff */
 
+/* For interface with stabsread.c.  */
+#include "stab_gnu.h"
 
 /* Define this if you want gdb to ignore typdef stabs. This was needed for
    one of Transarc, to reduce the size of the symbol table. Types won't be
@@ -1742,16 +1744,12 @@ process_xcoff_symbol (cs, objfile)
 	return sym;
 
     case C_LSYM:
-	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
-	  return NULL;
-	SYMBOL_NAME (sym) = obsavestring (name, pp-name, &objfile -> symbol_obstack);
-	SYMBOL_CLASS (sym) = LOC_LOCAL;
-	pp += 1;
-	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
-        SYMBOL_SECTION (sym) = cs->c_secnum;
-	SYMBOL_DUP (sym, sym2);
-	add_symbol_to_list (sym2, &local_symbols);
-	break;
+      sym = define_symbol (cs->c_value, cs->c_name, 0, N_LSYM, objfile);
+      if (sym != NULL)
+	{
+	  SYMBOL_SECTION (sym) = cs->c_secnum;
+	}
+      return sym;
 
     case C_AUTO:
       SYMBOL_CLASS (sym) = LOC_LOCAL;

@@ -1,3 +1,7 @@
+Fri May 21 09:04:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c (process_xcoff_symbol, case C_LSYM): Use define_symbol.
+
 Wed May 19 12:33:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/i386/linux.mh: Re-enable coredumps now that they should work.
