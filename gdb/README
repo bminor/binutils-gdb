@@ -415,8 +415,7 @@ See the GDB manual (gdb/doc/gdb.texinfo) for information on this.
 Kernel debugging
 =================
 
-   I have't done this myself so I can't really offer any advice.
-Remote debugging over serial lines works fine, but the kernel
+   Remote debugging over serial lines works fine, but the kernel
 debugging code in here has not been tested in years.  Van Jacobson has
 better kernel debugging, but the UC lawyers won't let FSF have it.
 

@@ -1,3 +1,7 @@
+Fri May 12 14:12:17 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* README: Update section on kernel debugging.
+
 Fri May 12 19:13:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips_get_saved_register): New function.  Handle
