@@ -52,6 +52,8 @@ static void kill_or_be_killed (int);
 
 static void default_terminal_info (char *, int);
 
+static int default_region_size_ok_for_hw_watchpoint (int);
+
 static int nosymbol (char *, CORE_ADDR *);
 
 static void tcomplain (void);
@@ -61,6 +63,8 @@ static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
 static int return_zero (void);
 
 static int return_one (void);
+
+static int return_minus_one (void);
 
 void target_ignore (void);
 
@@ -111,6 +115,22 @@ static void debug_to_files_info (struct target_ops *);
 static int debug_to_insert_breakpoint (CORE_ADDR, char *);
 
 static int debug_to_remove_breakpoint (CORE_ADDR, char *);
+
+static int debug_to_can_use_hw_breakpoint (int, int, int);
+
+static int debug_to_insert_hw_breakpoint (CORE_ADDR, char *);
+
+static int debug_to_remove_hw_breakpoint (CORE_ADDR, char *);
+
+static int debug_to_insert_watchpoint (CORE_ADDR, int, int);
+
+static int debug_to_remove_watchpoint (CORE_ADDR, int, int);
+
+static int debug_to_stopped_by_watchpoint (void);
+
+static CORE_ADDR debug_to_stopped_data_address (void);
+
+static int debug_to_region_size_ok_for_hw_watchpoint (int);
 
 static void debug_to_terminal_init (void);
 
@@ -390,6 +410,29 @@ cleanup_target (struct target_ops *t)
 	    memory_insert_breakpoint);
   de_fault (to_remove_breakpoint, 
 	    memory_remove_breakpoint);
+  de_fault (to_can_use_hw_breakpoint,
+	    (int (*) (int, int, int))
+	    return_zero);
+  de_fault (to_insert_hw_breakpoint,
+	    (int (*) (CORE_ADDR, char *))
+	    return_minus_one);
+  de_fault (to_remove_hw_breakpoint,
+	    (int (*) (CORE_ADDR, char *))
+	    return_minus_one);
+  de_fault (to_insert_watchpoint,
+	    (int (*) (CORE_ADDR, int, int))
+	    return_minus_one);
+  de_fault (to_remove_watchpoint,
+	    (int (*) (CORE_ADDR, int, int))
+	    return_minus_one);
+  de_fault (to_stopped_by_watchpoint,
+	    (int (*) (void))
+	    return_zero);
+  de_fault (to_stopped_data_address,
+	    (CORE_ADDR (*) (void))
+	    return_zero);
+  de_fault (to_region_size_ok_for_hw_watchpoint,
+	    default_region_size_ok_for_hw_watchpoint);
   de_fault (to_terminal_init, 
 	    (void (*) (void)) 
 	    target_ignore);
@@ -553,6 +596,14 @@ update_current_target (void)
       INHERIT (to_files_info, t);
       INHERIT (to_insert_breakpoint, t);
       INHERIT (to_remove_breakpoint, t);
+      INHERIT (to_can_use_hw_breakpoint, t);
+      INHERIT (to_insert_hw_breakpoint, t);
+      INHERIT (to_remove_hw_breakpoint, t);
+      INHERIT (to_insert_watchpoint, t);
+      INHERIT (to_remove_watchpoint, t);
+      INHERIT (to_stopped_data_address, t);
+      INHERIT (to_stopped_by_watchpoint, t);
+      INHERIT (to_region_size_ok_for_hw_watchpoint, t);
       INHERIT (to_terminal_init, t);
       INHERIT (to_terminal_inferior, t);
       INHERIT (to_terminal_ours_for_output, t);
@@ -1227,6 +1278,12 @@ find_default_clone_and_follow_inferior (int child_pid, int *followed_child)
 }
 
 static int
+default_region_size_ok_for_hw_watchpoint (int byte_count)
+{
+  return (byte_count <= REGISTER_SIZE);
+}
+
+static int
 return_zero (void)
 {
   return 0;
@@ -1236,6 +1293,12 @@ static int
 return_one (void)
 {
   return 1;
+}
+
+static int
+return_minus_one (void)
+{
+  return -1;
 }
 
 /*
@@ -1774,6 +1837,116 @@ debug_to_remove_breakpoint (CORE_ADDR addr, char *save)
   return retval;
 }
 
+static int
+debug_to_can_use_hw_breakpoint (int type, int cnt, int from_tty)
+{
+  int retval;
+
+  retval = debug_target.to_can_use_hw_breakpoint (type, cnt, from_tty);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_can_use_hw_breakpoint (%ld, %ld, %ld) = %ld\n",
+		      (unsigned long) type,
+		      (unsigned long) cnt,
+		      (unsigned long) from_tty,
+		      (unsigned long) retval);
+  return retval;
+}
+
+static int
+debug_to_region_size_ok_for_hw_watchpoint (int byte_count)
+{
+  CORE_ADDR retval;
+
+  retval = debug_target.to_region_size_ok_for_hw_watchpoint (byte_count);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT (%ld) = 0x%lx\n",
+		      (unsigned long) byte_count,
+		      (unsigned long) retval);
+  return retval;
+}
+
+static int
+debug_to_stopped_by_watchpoint (void)
+{
+  int retval;
+
+  retval = debug_target.to_stopped_by_watchpoint ();
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "STOPPED_BY_WATCHPOINT () = %ld\n",
+		      (unsigned long) retval);
+  return retval;
+}
+
+static CORE_ADDR
+debug_to_stopped_data_address (void)
+{
+  CORE_ADDR retval;
+
+  retval = debug_target.to_stopped_data_address ();
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_stopped_data_address () = 0x%lx\n",
+		      (unsigned long) retval);
+  return retval;
+}
+
+static int
+debug_to_insert_hw_breakpoint (CORE_ADDR addr, char *save)
+{
+  int retval;
+
+  retval = debug_target.to_insert_hw_breakpoint (addr, save);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_insert_hw_breakpoint (0x%lx, xxx) = %ld\n",
+		      (unsigned long) addr,
+		      (unsigned long) retval);
+  return retval;
+}
+
+static int
+debug_to_remove_hw_breakpoint (CORE_ADDR addr, char *save)
+{
+  int retval;
+
+  retval = debug_target.to_remove_hw_breakpoint (addr, save);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_remove_hw_breakpoint (0x%lx, xxx) = %ld\n",
+		      (unsigned long) addr,
+		      (unsigned long) retval);
+  return retval;
+}
+
+static int
+debug_to_insert_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  int retval;
+
+  retval = debug_target.to_insert_watchpoint (addr, len, type);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_insert_watchpoint (0x%lx, %d, %d) = %ld\n",
+		      (unsigned long) addr, len, type, (unsigned long) retval);
+  return retval;
+}
+
+static int
+debug_to_remove_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  int retval;
+
+  retval = debug_target.to_insert_watchpoint (addr, len, type);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_insert_watchpoint (0x%lx, %d, %d) = %ld\n",
+		      (unsigned long) addr, len, type, (unsigned long) retval);
+  return retval;
+}
+
 static void
 debug_to_terminal_init (void)
 {
@@ -2220,6 +2393,14 @@ setup_target_debug (void)
   current_target.to_files_info = debug_to_files_info;
   current_target.to_insert_breakpoint = debug_to_insert_breakpoint;
   current_target.to_remove_breakpoint = debug_to_remove_breakpoint;
+  current_target.to_can_use_hw_breakpoint = debug_to_can_use_hw_breakpoint;
+  current_target.to_insert_hw_breakpoint = debug_to_insert_hw_breakpoint;
+  current_target.to_remove_hw_breakpoint = debug_to_remove_hw_breakpoint;
+  current_target.to_insert_watchpoint = debug_to_insert_watchpoint;
+  current_target.to_remove_watchpoint = debug_to_remove_watchpoint;
+  current_target.to_stopped_by_watchpoint = debug_to_stopped_by_watchpoint;
+  current_target.to_stopped_data_address = debug_to_stopped_data_address;
+  current_target.to_region_size_ok_for_hw_watchpoint = debug_to_region_size_ok_for_hw_watchpoint;
   current_target.to_terminal_init = debug_to_terminal_init;
   current_target.to_terminal_inferior = debug_to_terminal_inferior;
   current_target.to_terminal_ours_for_output = debug_to_terminal_ours_for_output;
