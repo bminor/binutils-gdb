@@ -1,3 +1,25 @@
+2005-01-26  Orjan Friberg  <orjanf@axis.com>
+
+	* cris-tdep.c (enum cris_num_regs, enum cris_regnums)
+	(cris_sigtramp_frame_unwind_cache, cris_register_size): Update for
+	CRISv32.
+	(crisv32_single_step_through_delay, cris_can_use_hardware_watchpoint)
+	(cris_region_ok_for_watchpoint, cris_stopped_data_address)
+	(crisv32_cannot_fetch_register, crisv32_cannot_store_register)
+	(crisv32_register_type, cris_special_register_name)
+	(crisv32_register_name): New functions.
+	(cris_spec_reg_applicable): Recognize more versions.
+	(cris_register_name): Update with call to cris_special_register_name.
+	(find_cris_op): Filter out CRISv32 instructions.  Tweaked comment and
+	warning when unable to find step target.
+	(CRISV10_ELF_NGREG, CRISV32_ELF_NGREG, crisv32_elf_gregset_t): Define.
+	(supply_gregset): Add struct gdbarch_tdep.  Set pseudo-PC register for 
+	CRISv32.
+	(fetch_core_registers): Update for CRISv32.
+	(cris_gdbarch_init): Set pc_regnum, register_type, num_regs,
+	register_name, cannot_store_register, cannot_fetch_register,
+	have_nonsteppable_watchpoint, single_step_through_delay for CRISv32.
+	
 2005-01-26  Nick Roberts  <nickrob@snap.net.nz>
 
 	* interps.c (interpreter_exec_cmd): Use condition,
