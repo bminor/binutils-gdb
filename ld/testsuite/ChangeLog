@@ -1,3 +1,23 @@
+Mon Nov 28 11:24:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ld-bootstrap/bootstrap.exp: Pass cmp output through
+	prune_system_crud.
+	* ld-cdtest/cdtest.exp: Pass diff output through
+	prune_system_crud.
+	* ld-shared/shared.exp: Likewise.
+
+	* config/default.exp: Remove unused and useless proc ld_load.
+
+Sun Oct 30 13:02:34 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* lib/ld.exp (default_ld_compile): Remove the output file before
+	compiling.
+
+	* ld-shared/shared.exp: Move common test code into a procedure.
+	Add tests for compiling the non shared code PIC.
+	* ld-shared/main.c (main): Call main_called, and print the result.
+	* ld-shared/shared.dat: Adjust accordingly.
+
 Thu Oct 27 17:30:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ld-shared: New directory, with new files to test generating ELF

@@ -1,6 +1,5 @@
-#
-# Expect script for LD Regression Tests
-#   Copyright (C) 1993 Free Software Foundation
+# Basic expect script for LD Regression Tests
+#   Copyright (C) 1993,1994 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,14 +15,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-#	$Id$
-#
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
 #
 
 if ![info exists ld] then {
     set ld [findfile $objdir/ld.new $objdir/ld.new [transform ld]]
 }
+
+if ![info exists as] then {
+    set as [findfile $base_dir/../gas/as.new $base_dir/../gas/as.new [transform as]]
+}
+
+if ![info exists nm] then {
+    set nm [findfile $base_dir/../binutils/nm.new $base_dir/../binutils/nm.new [transform nm]]
+}
+
+if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
 
 # load the utility procedures
 load_lib ld.exp
@@ -34,32 +41,6 @@ load_lib ld.exp
 proc ld_version {} {
     global ld
     default_ld_version $ld
-}
-
-#
-# ld_load 
-#	load the program, for now, we just execute it
-#
-proc ld_load { target1 target2 } {
-    global exec_output
-
-    if ![file exists $target1] then {
-	unresolved "$target1 does not exist."
-    }
-
-    if ![file exists $target2] then {
-	unresolved "$target2 does not exist."
-    }
-
-    set status [catch "exec cmp $target1 $target2" exec_output]
-    verbose "### COMPARE $target1 $target2\n"
-    if ![string match "" $exec_output] then {
-	send_log "$exec_output\n"
-	verbose "$exec_output" 1
-	return 1
-    } else {
-	return 0
-    }
 }
 
 #
