@@ -2101,7 +2101,7 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
       static asymbol *asym;
       static combined_entry_type ce;
       static struct coff_symbol_struct csym;
-      static struct _bfd fake_bfd;
+      static struct bfd fake_bfd;
       static bfd_target fake_target;
 
       if (csym.native == NULL)
