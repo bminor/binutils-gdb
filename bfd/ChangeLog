@@ -1,5 +1,9 @@
 Thu Mar 17 11:44:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* reloc.c (bfd_generic_get_relocated_section_contents): Don't fail
+	if malloc (0) fails.  bfd_canonicalize_reloc returning 0 is not a
+	failure indication, it merely means there are no relocs.
+
 	* elfcode.h (NAME(bfd_elf,write_object_contents)): Don't use space
 	after NAME, since SunOS /bin/cc can't handle it.
 
