@@ -1611,9 +1611,9 @@ copy_symbol_attributes (dest, src)
      symbolS *dest, *src;
 {
   if (LOCAL_SYMBOL_CHECK (dest))
-    abort ();
+    dest = local_symbol_convert ((struct local_symbol *) dest);
   if (LOCAL_SYMBOL_CHECK (src))
-    abort ();
+    src = local_symbol_convert ((struct local_symbol *) src);
 
 #ifdef BFD_ASSEMBLER
   /* In an expression, transfer the settings of these flags.
