@@ -43,10 +43,10 @@ extern CORE_ADDR som_solib_get_got_by_pc (CORE_ADDR);
 extern int som_solib_section_offsets (struct objfile *,
 				      struct section_offsets *);
 
-/* Function to be called when the inferior starts up, to discover the names
-   of shared libraries that are dynamically linked, the base addresses to
-   which they are linked, and sufficient information to read in their symbols
-   at a later time. */
+/* Function to be called when the inferior starts up, to discover the
+   names of shared libraries that are dynamically linked, the base
+   addresses to which they are linked, and sufficient information to
+   read in their symbols at a later time.  */
 
 #define SOLIB_CREATE_INFERIOR_HOOK(PID)	som_solib_create_inferior_hook()
 
@@ -57,7 +57,7 @@ extern void som_solib_create_inferior_hook (void);
    (This operation does not remove shared library information from
    the debugger, as CLEAR_SOLIB does.)
  */
-#define SOLIB_REMOVE_INFERIOR_HOOK(PID) som_solib_remove_inferior_hook(PID)
+#define SOLIB_REMOVE_INFERIOR_HOOK(PID) som_solib_remove_inferior_hook (PID)
 
 extern void som_solib_remove_inferior_hook (int);
 
@@ -65,7 +65,7 @@ extern void som_solib_remove_inferior_hook (int);
    the debugger to be notified by the dynamic linker when a specified
    library file (or any library file, if filename is NULL) is loaded.
  */
-#define SOLIB_CREATE_CATCH_LOAD_HOOK(pid,tempflag, filename,cond_string) \
+#define SOLIB_CREATE_CATCH_LOAD_HOOK(pid, tempflag, filename, cond_string) \
    som_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
 
 extern void som_solib_create_catch_load_hook (int, int, char *, char *);
@@ -74,7 +74,7 @@ extern void som_solib_create_catch_load_hook (int, int, char *, char *);
    the debugger to be notified by the dynamic linker when a specified
    library file (or any library file, if filename is NULL) is unloaded.
  */
-#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid,tempflag,filename, cond_string) \
+#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid, tempflag, filename, cond_string) \
    som_solib_create_catch_unload_hook (pid, tempflag, filename, cond_string)
 
 extern void som_solib_create_catch_unload_hook (int, int, char *, char *);
@@ -96,10 +96,11 @@ extern int som_solib_have_load_event (int);
    This function must be used only when SOLIB_HAVE_LOAD_EVENT is TRUE,
    or undefined results are guaranteed.
 
-   This string's contents are only valid immediately after the inferior
-   has stopped in the dynamic linker hook, and becomes invalid as soon
-   as the inferior is continued.  Clients should make a copy of this
-   string if they wish to continue the inferior and then access the string.
+   This string's contents are only valid immediately after the
+   inferior has stopped in the dynamic linker hook, and becomes
+   invalid as soon as the inferior is continued.  Clients should make
+   a copy of this string if they wish to continue the inferior and
+   then access the string.
  */
 #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) \
    som_solib_loaded_library_pathname (pid)
@@ -123,10 +124,11 @@ extern int som_solib_have_unload_event (int);
    This function must be used only when SOLIB_HAVE_UNLOAD_EVENT is TRUE,
    or undefined results are guaranteed.
 
-   This string's contents are only valid immediately after the inferior
-   has stopped in the dynamic linker hook, and becomes invalid as soon
-   as the inferior is continued.  Clients should make a copy of this
-   string if they wish to continue the inferior and then access the string.
+   This string's contents are only valid immediately after the
+   inferior has stopped in the dynamic linker hook, and becomes
+   invalid as soon as the inferior is continued.  Clients should make
+   a copy of this string if they wish to continue the inferior and
+   then access the string.
  */
 #define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) \
    som_solib_unloaded_library_pathname (pid)
@@ -137,9 +139,9 @@ extern char *som_solib_unloaded_library_pathname (int);
    lies within the dynamic linker (such as the event hook, or the dld
    itself).
 
-   This function must be used only when a dynamic linker event has been
-   caught, and the inferior is being stepped out of the hook, or undefined
-   results are guaranteed.
+   This function must be used only when a dynamic linker event has
+   been caught, and the inferior is being stepped out of the hook, or
+   undefined results are guaranteed.
  */
 #define SOLIB_IN_DYNAMIC_LINKER(pid,pc) \
    som_solib_in_dynamic_linker (pid, pc)

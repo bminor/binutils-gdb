@@ -1064,8 +1064,8 @@ keep_going:
    shared library events.  To resume notifications, GDB must call
    som_solib_create_inferior_hook.
 
-   This operation does not remove any knowledge of shared libraries which
-   GDB may already have been notified of.
+   This operation does not remove any knowledge of shared libraries 
+   of which GDB may already have been notified.
  */
 void
 som_solib_remove_inferior_hook (int pid)
@@ -1117,7 +1117,8 @@ void
 som_solib_create_catch_load_hook (int pid, int tempflag, char *filename,
 				  char *cond_string)
 {
-  create_solib_load_event_breakpoint ("__d_trap", tempflag, filename, cond_string);
+  create_solib_load_event_breakpoint ("__d_trap", tempflag, 
+				      filename, cond_string);
 }
 
 /* This function creates a breakpoint on the dynamic linker hook, which
@@ -1135,7 +1136,8 @@ void
 som_solib_create_catch_unload_hook (int pid, int tempflag, char *filename,
 				    char *cond_string)
 {
-  create_solib_unload_event_breakpoint ("__d_trap", tempflag, filename, cond_string);
+  create_solib_unload_event_breakpoint ("__d_trap", tempflag, 
+					filename, cond_string);
 }
 
 int
