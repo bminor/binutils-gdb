@@ -1,3 +1,8 @@
+Wed Mar 25 11:34:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/pe.sc: Only include .idata\$[0-7] in .idata when
+	relocating.
+
 Mon Mar 23 18:54:15 1998  Joel Sherrill  <joel@OARcorp.com>
 
 	* configure.tgt: (sh*-*-rtems*): Switched from ELF to COFF.

@@ -30,6 +30,12 @@ SECTIONS
     *(.gcc_except_table)
   }
 
+  /* The Cygwin32 library uses a section to avoid copying certain data
+     on fork.  This used to be named ".data$nocopy".  The linker used
+     to include this between __data_start__ and __data_end__, but that
+     breaks building the cygwin32 dll.  Instead, we name the section
+     ".data_cygwin_nocopy" and explictly include it after __data_end__. */
+
   .data ${RELOCATING+BLOCK(__section_alignment__)} : 
   {
     ${RELOCATING+__data_start__ = . ;}
@@ -72,14 +78,14 @@ SECTIONS
   {
     /* This cannot currently be handled with grouped sections.
 	See pe.em:sort_sections.  */
-    *(.idata\$2)
-    *(.idata\$3)
+    ${RELOCATING+*(.idata\$2)}
+    ${RELOCATING+*(.idata\$3)}
     ${RELOCATING+ /* These zeroes mark the end of the import list.  */}
     ${RELOCATING+ LONG (0); LONG (0); LONG (0); LONG (0); LONG (0);}
-    *(.idata\$4)
-    *(.idata\$5)
-    *(.idata\$6)
-    *(.idata\$7)
+    ${RELOCATING+*(.idata\$4)}
+    ${RELOCATING+*(.idata\$5)}
+    ${RELOCATING+*(.idata\$6)}
+    ${RELOCATING+*(.idata\$7)}
   }
   .CRT ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
