@@ -709,7 +709,8 @@ simulator_command (args, from_tty)
   /* Note that if the simulator hasn't been opened, gdbsim_desc == NULL
      which is correct (??? assuming of course one wishes to continue to
      allow commands to be sent to unopened simulators, which isn't entirely
-     unreasonable).  */
+     unreasonable).  Simulators should be prepared to deal with any
+     combination of NULL or empty args. */
   sim_do_command (gdbsim_desc, args);
 }
 

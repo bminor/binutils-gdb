@@ -1,3 +1,14 @@
+Sat Mar 22 16:41:35 1997  Fred Fish  <fnf@cygnus.com>
+
+	* remote-sim.c (simulator_command): Add comment about dealing with
+	NULL or empty args.
+start-sanitize-tic80
+	* Makefile.in (tic80-tdep.o): Add target.
+	* configure.tgt: Add tic80 case.
+	* tic80-tdep.c: New file.
+	* config/tic80/{tic80.mt, tm-tic80.h}: New files.
+end-sanitize-tic80
+
 Sat Mar 22 02:48:11 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-exp.y (yylex):  Handle nested template parameter lists.

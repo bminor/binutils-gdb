@@ -253,6 +253,10 @@ sparc64-*-*)		gdb_target=sp64 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
 
+# start-sanitize-tic80
+tic80-*-*)		gdb_target=tic80 ;;
+# end-sanitize-tic80
+
 vax-*-*)		gdb_target=vax ;;
 
 # start-sanitize-v850
