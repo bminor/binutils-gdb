@@ -284,8 +284,8 @@ command interpreter	Fernando Nasser		fnasser@cygnus.com
 gdbtk (c & tcl)		Jim Ingham		jingham@apple.com
 			Fernando Nasser         fnasser@cygnus.com
 			Keith Seitz		keiths@cygnus.com
-libgui (w/foundry, sn)	Syd Polk		spolk@cygnus.com
-			Jim Ingham		jingham@apple.com
+libgui (w/foundry, sn)	Jim Ingham              jingham@apple.com
+			Keith Seitz		keiths@redhat.com
 mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
 			Elena Zannoni           ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com

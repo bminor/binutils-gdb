@@ -1,3 +1,8 @@
+2001-06-07  Keith Seitz  <keiths@redhat.com>
+
+	* MAINTAINTERS: Syd Polk is stepping down from
+	maintaining libgui. I am replacing him.
+
 2001-06-07  Eli Zaretskii  <elis@is.elta.co.il>
 
 	* config/mips/tm-irix6.h: New file.
