@@ -18,7 +18,7 @@
 
 // Verify that the implies relationship caused by the unconditional compare 
 // prevents RAW on r4.  
-(p3)	cmp.eq.unc	p1, p2 = r1, r2		// p1,p2 imply p3
+(p3)	cmp.eq.unc	p1, p2 = r1, r2;;	// p1,p2 imply p3
 (p1)	mov		r4 = 2
 (p3)	br.cond.sptk	L	
 	mov		r4 = 7
@@ -26,7 +26,7 @@
 	
 // An instance of cmp.rel.or should not affect an implies relation.
 (p3)	cmp.eq.unc	p1, p2 = r1, r2		// p1,p2 imply p3
-	cmp.eq.or	p3, p4 = r5, r6		// doesn't affect implies rel
+	cmp.eq.or	p3, p4 = r5, r6;;	// doesn't affect implies rel
 (p1)	mov		r4 = 2
 (p3)	br.cond.sptk	L	
 	mov		r4 = 7

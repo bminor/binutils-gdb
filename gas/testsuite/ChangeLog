@@ -1,3 +1,11 @@
+2000-08-29  Timothy Wall  <twall@cygnus.com>
+
+        * gas/ia64/dv-mutex.s: Add stop to avoid DV error on cmp.eq.
+        * gas/ia64/dv-mutex.d: Update regexp pattern.
+        * gas/ia64/dv-entry-err.s: Add stop to avoid DV error on cmp.eq.
+        * gas/ia64/dv-imply.s: Add stops to avoid DV errors on cmp.REL.
+        Test still fails due to insn opcode pattern changes.
+	
 2000-08-21  H.J. Lu <hjl@gnu.org>
 
 	* gas/all/cofftag.d: Support the strict COFF.

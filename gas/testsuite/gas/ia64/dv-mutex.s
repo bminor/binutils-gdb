@@ -11,7 +11,7 @@ start:
 	rfi
 
 // non-predicated compares generate a mutex
-	cmp.eq	p1, p2 = r1, r2
+	cmp.eq	p1, p2 = r1, r2;;
 (p1)	mov r4 = 2
 (p2)	mov r4 = 4
 	rfi

@@ -13,7 +13,7 @@ Disassembly of section \.text:
   10:	11 00 00 00 01 00 	\[MIB\]       nop\.m 0x0
   16:	00 00 00 02 00 00 	            nop\.i 0x0
   1c:	00 00 20 00       	            rfi;;
-  20:	00 08 04 04 02 78 	\[MII\]       cmp\.eq p1,p2=r1,r2
+  20:	0a 08 04 04 02 78 	\[MMI\]       cmp\.eq p1,p2=r1,r2;;
   26:	40 10 00 00 42 81 	      \(p01\) mov r4=2
   2c:	40 00 00 84       	      \(p02\) mov r4=4
   30:	11 00 00 00 01 00 	\[MIB\]       nop\.m 0x0

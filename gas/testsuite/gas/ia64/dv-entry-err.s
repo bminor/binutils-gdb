@@ -3,10 +3,10 @@
 //			
 .text
 	.explicit
-// RAW on r4 is avoided on both paths
-// RAW on r5 is avoided on path 0 (from top) but not path 1 (from L)
+// WAW on r4 is avoided on both paths
+// WAW on r5 is avoided on path 0 (from top) but not path 1 (from L)
 	cmp.eq	p1, p2 = r1, r2
-	cmp.eq	p3, p4 = r3, r0
+	cmp.eq	p3, p4 = r3, r0;;
 (p1)	mov	r4 = 2
 L:	
 (p2)	mov	r4 = 5
