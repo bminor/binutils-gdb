@@ -1,3 +1,13 @@
+1998-12-30  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips.h (MIPS16_INSN_BRANCH): New.
+
+start-sanitize-vr4xxx
+1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips.h (INSN_4121): New.
+
+end-sanitize-vr4xxx
 start-sanitize-sky
 Wed Dec  9 15:44:14 1998  Doug Evans  <devans@canuck.cygnus.com>
 
