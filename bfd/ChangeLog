@@ -1,5 +1,8 @@
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
+	* opncls.c (bfd_fdopenr): Add parens like the comment says around
+	O_ACCMODE.
+
 	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Don't create
 	.plt entries for DT_INIT and DT_FINI.
 	(elf32_hppa_finish_dynamic_sections): Remove special handling of
