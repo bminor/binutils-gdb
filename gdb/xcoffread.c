@@ -1081,14 +1081,6 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	  /* done with all files, everything from here on is globals */
 	}
 
-      /* if explicitly specified as a function, treat is as one. */
-      if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
-	{
-	  bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-				0, cs->c_naux, &main_aux);
-	  goto function_entry_point;
-	}
-
       if ((cs->c_sclass == C_EXT || cs->c_sclass == C_HIDEXT)
 	  && cs->c_naux == 1)
 	{
@@ -1158,7 +1150,8 @@ read_xcoff_symtab (struct partial_symtab *pst)
 						SECT_OFF_TEXT (objfile));
 		      file_end_addr = file_start_addr + CSECT_LEN (&main_aux);
 
-		      if (cs->c_name && cs->c_name[0] == '.')
+		      if (cs->c_name && (cs->c_name[0] == '.'
+					 || cs->c_name[0] == '@'))
 			{
 			  last_csect_name = cs->c_name;
 			  last_csect_val = cs->c_value;
@@ -1230,6 +1223,16 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	    default:
 	      break;
 	    }
+	}
+
+      /* If explicitly specified as a function, treat is as one.  This check
+	 evaluates to true for @FIX* bigtoc CSECT symbols, so it must occur
+	 after the above CSECT check.  */
+      if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
+	{
+	  bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
+				0, cs->c_naux, &main_aux);
+	  goto function_entry_point;
 	}
 
       switch (cs->c_sclass)
@@ -2243,14 +2246,8 @@ scan_xcoff_symtab (struct objfile *objfile)
 	    else
 	      csect_aux = main_aux[0];
 
-	    /* If symbol name starts with ".$" or "$", ignore it. 
-
-	       A symbol like "@FIX1" introduces a section for -bbigtoc jump
-	       tables, which contain anonymous linker-generated code. 
-	       Ignore those sections to avoid "pc 0x... in read in psymtab,
-	       but not in symtab" warnings from find_pc_sect_symtab.  */
-
-	    if (namestring[0] == '$' || namestring[0] == '@'
+	    /* If symbol name starts with ".$" or "$", ignore it.  */
+	    if (namestring[0] == '$'
 		|| (namestring[0] == '.' && namestring[1] == '$'))
 	      break;
 
@@ -2296,7 +2293,11 @@ scan_xcoff_symtab (struct objfile *objfile)
 			       objfile->static_psymbols.next);
 			  }
 		      }
-		    if (namestring && namestring[0] == '.')
+		    /* Activate the misc_func_recorded mechanism for
+		       compiler- and linker-generated CSECTs like ".strcmp"
+		       and "@FIX1".  */ 
+		    if (namestring && (namestring[0] == '.'
+				       || namestring[0] == '@'))
 		      {
 			last_csect_name = namestring;
 			last_csect_val = symbol.n_value;

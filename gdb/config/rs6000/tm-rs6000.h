@@ -32,6 +32,13 @@
 #undef CPLUS_MARKER
 #define CPLUS_MARKER '.'
 
+/* Return whether PC in function NAME is in code that should be skipped when
+   single-stepping.  */
+
+#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
+  rs6000_in_solib_return_trampoline (pc, name)
+extern int rs6000_in_solib_return_trampoline (CORE_ADDR, char *);
+
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */
 

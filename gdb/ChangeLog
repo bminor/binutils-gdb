@@ -1,3 +1,17 @@
+2001-05-01  Nicholas Duffek  <nsd@redhat.com>
+
+	* config/rs6000/tm-rs6000.h (IN_SOLIB_RETURN_TRAMPOLINE): Define.
+	(rs6000_in_solib_return_trampoline): Declare.
+	* rs6000-tdep.c (rs6000_in_solib_return_trampoline): New
+	function.
+	(rs6000_skip_trampoline_code): Skip bigtoc fixup code.
+	* xcoffread.c (read_xcoff_symtab): Perform the ISFCN function
+	check after the CSECT check rather than before it.  Allocate
+	separate symtabs for CSECTs whose names begin with '@'.
+	(scan_xcoff_symtab): Don't ignore symbols beginning with '@'.
+	Activate the misc_func_recorded mechanism for whose names begin
+	with '@'.
+
 2001-04-30  J.T. Conklin  <jtc@redback.com>
 
 	* ppcnbsd-nat.c (fetch_inferior_registers)
