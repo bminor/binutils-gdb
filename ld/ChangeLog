@@ -1,3 +1,23 @@
+2001-04-05  Steven J. Hill  <sjhill@cotw.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ltsmip.o.
+	(ALL_64_EMULATIONS): Add eelf64btsmip.o and eelf64ltsmip.o.
+	(eelf32ltsmip.c): New target.
+	(eelf64btsmip.c): Likewise.
+	(eelf64ltsmip.c): Likewise.
+	* Makefile.in: Regenerated.
+
+	* configure.tgt (mips*el-*-linux-gnu): Uses traditional MIPS
+	target.
+	(mips*-*-linux-gnu*): Likewise.
+
+	* emulparams/elf32ltsmip.sh: New. Traditional little endian
+	MIPS taget.
+	* emulparams/elf64btsmip.sh: New. Traditional 64bit big endian 
+	target.
+	* emulparams/elf64ltsmip.sh: New. Traditional 64bit little
+	endian target.
+
 2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* emulparams/criself.sh (EXECUTABLE_SYMBOLS): Cannot provide
