@@ -1,5 +1,11 @@
 2003-11-20  Kazu Hirata  <kazu@cs.umass.edu>
 
+	* depend.c: Convert to ISO-C.
+	* dwarf2dbg.c: Likewise.
+	* dwarf2dbg.h: Likewise.
+
+2003-11-20  Kazu Hirata  <kazu@cs.umass.edu>
+
 	* app.c: Convert to ISO-C.
 	* as.h: Likewise.
 	* atof-generic.c: Likewise.
