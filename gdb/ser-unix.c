@@ -21,7 +21,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include <fcntl.h>
 #include <sys/types.h>
+
+/* Note: HAVE_SELECT is not yet defined on all the systems which could
+   define it.  The USE_ALARM_TIMEOUT code seems to work OK, though, so
+   it doesn't really matter.  */
+#if !defined (HAVE_SELECT)
+#if defined (HAVE_TERMIO)
+#define USE_TERMIO_TIMEOUT 1
+#else
+#define USE_ALARM_TIMEOUT 1
+#endif
+#endif
+
+#if defined (HAVE_SELECT)
 #include <sys/time.h>
+#endif
+#ifdef USE_ALARM_TIMEOUT
+#include <signal.h>
+#endif
 
 #if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
 #define HAVE_SGTTY
@@ -114,6 +131,14 @@ hardwire_raw(scb)
 #endif
 }
 
+#ifdef USE_ALARM_TIMEOUT
+/* Called when SIGALRM sent.  */
+static void
+remote_timer ()
+{
+}
+#endif
+
 /* Read a character with user-specified timeout.  TIMEOUT is number of seconds
    to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
    char if successful.  Returns -2 if timeout expired, EOF if line dropped
@@ -124,32 +149,86 @@ hardwire_readchar(scb, timeout)
      serial_t scb;
      int timeout;
 {
-  int numfds;
-  struct timeval tv;
-  fd_set readfds;
-
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;
 
-  FD_ZERO (&readfds);
+#ifdef HAVE_SELECT
+  {
+    int numfds;
+    struct timeval tv;
+    fd_set readfds;
+    
+    FD_ZERO (&readfds);
 
-  tv.tv_sec = timeout;
-  tv.tv_usec = 0;
+    tv.tv_sec = timeout;
+    tv.tv_usec = 0;
 
-  FD_SET(scb->fd, &readfds);
+    FD_SET(scb->fd, &readfds);
 
-  if (timeout >= 0)
-    numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
-  else
-    numfds = select(scb->fd+1, &readfds, 0, 0, 0);
-
-  if (numfds <= 0)
-    if (numfds == 0)
-      return SERIAL_TIMEOUT;
+    if (timeout >= 0)
+      numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
     else
-      return SERIAL_ERROR;	/* Got an error from select */
+      numfds = select(scb->fd+1, &readfds, 0, 0, 0);
 
-  scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+    if (numfds <= 0)
+      if (numfds == 0)
+	return SERIAL_TIMEOUT;
+      else
+	return SERIAL_ERROR;	/* Got an error from select */
+
+    scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+  }
+#endif /* HAVE_SELECT.  */
+
+#ifdef USE_TERMIO_TIMEOUT
+  {
+    struct termio termio;
+
+    if (ioctl (scb->fd, TCGETA, &termio))
+      {
+	fprintf(stderr, "TCGETA failed: %s\n", safe_strerror(errno));
+      }
+
+    termio.c_cc[VTIME] = timeout * 10;
+
+    if (ioctl (scb->fd, TCSETA, &termio))
+      {
+	fprintf(stderr, "TCSETA failed: %s\n", safe_strerror(errno));
+      }
+
+    scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+    if (scb->bufcnt == 0)
+      /* Can this also mean end of file?  Does "end of file" have any
+	 meaning with ICANON clear?  */
+      return SERIAL_TIMEOUT;
+  }
+#endif /* USE_TERMIO_TIMEOUT.  */
+
+#ifdef USE_ALARM_TIMEOUT
+  {
+    void (*old_sigalrm_handler) ();
+    int save_errno;
+#ifndef NO_SIGINTERRUPT
+    /* Cause SIGARLM to make read fail with EINTR.  */
+    if (siginterrupt (SIGALRM, 1) != 0)
+      fprintf (stderr, "siginterrupt failed: %s\n", safe_strerror (errno));
+#endif
+
+    old_sigalrm_handler = (void (*) ()) signal (SIGALRM, remote_timer);
+    if (old_sigalrm_handler == (void (*) ()) -1)
+      fprintf (stderr, "signal failed: %s\n", safe_strerror (errno));
+
+    alarm (timeout);
+    scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+    save_errno = errno;
+    alarm (0);
+    signal (SIGALRM, old_sigalrm_handler);
+    if (scb->bufcnt < 0 && errno == EINTR)
+      {
+	return SERIAL_TIMEOUT;
+      }
+  }
+#endif /* USE_ALARM_TIMEOUT */
 
   if (scb->bufcnt <= 0)
     if (scb->bufcnt == 0)

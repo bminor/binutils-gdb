@@ -1,5 +1,8 @@
 Fri Apr 30 11:05:42 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* ser-unix.c [USE_{TERMIO,ALARM}_TIMEOUT]: New code to deal with
+	systems lacking select().
+
 	* Makefile.in (TAGS): Doc fix.  Deal with empty DEPFILES.
 
 Fri Apr 30 10:06:46 1993  Fred Fish  (fnf@cygnus.com)
