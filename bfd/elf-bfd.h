@@ -243,12 +243,6 @@ struct elf_link_hash_table
   PTR stab_info;
   /* A linked list of local symbols to be added to .dynsym.  */
   struct elf_link_local_dynamic_entry *dynlocal;
-
-  void (*copy_indirect) PARAMS ((struct elf_link_hash_table *,
-				 struct elf_link_hash_entry *,
-				 struct elf_link_hash_entry *));
-  void (*hide_symbol) PARAMS ((struct elf_link_hash_table *,
-			       struct elf_link_hash_entry *));
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -269,16 +263,6 @@ struct elf_link_hash_table
 /* Get the ELF linker hash table from a link_info structure.  */
 
 #define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
-
-/* Call the copy_indirect method.  */
-
-#define elf_link_hash_copy_indirect(TABLE,DIR,IND) \
-  ((*(TABLE)->copy_indirect) ((TABLE), (DIR), (IND)))
-
-/* Call the hide_symbol method.  */
-
-#define elf_link_hash_hide_symbol(TABLE,SYM) \
-  ((*(TABLE)->hide_symbol) ((TABLE), (SYM)))
 
 /* Constant information held for an ELF backend.  */
 
@@ -608,6 +592,16 @@ struct elf_backend_data
     PARAMS ((bfd *, struct bfd_link_info *, PTR,
 	    boolean (*) PARAMS ((PTR, const char *,
              Elf_Internal_Sym *, asection *))));
+
+  /* Copy any information related to dynamic linking from a pre-existing
+     symbol IND to a newly created symbol DIR.  */
+  void (*elf_backend_copy_indirect_symbol)
+    PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+
+  /* Modify any information related to dynamic linking such that the
+     symbol is not exported.  */
+  void (*elf_backend_hide_symbol)
+    PARAMS ((struct elf_link_hash_entry *));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
@@ -973,6 +967,10 @@ extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   PARAMS ((bfd *));
+extern void _bfd_elf_link_hash_copy_indirect
+  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+extern void _bfd_elf_link_hash_hide_symbol
+  PARAMS ((struct elf_link_hash_entry *));
 extern boolean _bfd_elf_link_hash_table_init
   PARAMS ((struct elf_link_hash_table *, bfd *,
 	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,

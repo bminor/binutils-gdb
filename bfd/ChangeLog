@@ -1,3 +1,23 @@
+2000-02-18  Richard Henderson  <rth@cygnus.com>
+
+	* elf-bfd.h (struct elf_link_hash_table): Remove copy_indirect
+	and hide_symbol members.
+	(elf_link_hash_copy_indirect): Remove.
+	(elf_link_hash_hide_symbol): Remove.
+	(struct elf_backend_data): Add elf_backend_copy_indirect_symbol
+	and elf_backend_hide_symbol.
+	(_bfd_elf_link_hash_copy_indirect): Declare.
+	(_bfd_elf_link_hash_hide_symbol): Declare.
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Remove table argument.
+	(_bfd_elf_link_hash_hide_symbol): Likewise.
+	(_bfd_elf_link_hash_table_init): Don't init killed members.
+	* elflink.h (elf_link_add_object_symbols): Use the bed function
+	pointers not elf_link_hash_{copy_indirect,hide_symbol}.
+	(elf_link_assign_sym_version): Likewise.
+	* elfxx-target.h (elf_backend_copy_indirect_symbol): Default.
+	(elf_backend_hide_symbol): Likewise.
+	(elfNN_bed): Update for new members.
+
 2000-02-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-core.c (CORE_DATA_SIZE_FIELD, CORE_COMM_FIELD, SAVE_FIELD,

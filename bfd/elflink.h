@@ -890,9 +890,11 @@ elf_link_add_object_symbols (abfd, info)
   struct elf_link_hash_entry *weaks;
   Elf_External_Sym *esym;
   Elf_External_Sym *esymend;
+  struct elf_backend_data *bed;
 
-  add_symbol_hook = get_elf_backend_data (abfd)->elf_add_symbol_hook;
-  collect = get_elf_backend_data (abfd)->collect;
+  bed = get_elf_backend_data (abfd);
+  add_symbol_hook = bed->elf_add_symbol_hook;
+  collect = bed->collect;
 
   if ((abfd->flags & DYNAMIC) == 0)
     dynamic = false;
@@ -1734,8 +1736,7 @@ elf_link_add_object_symbols (abfd, info)
 				  == 0);
 
 		      ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
-		      elf_link_hash_copy_indirect (elf_hash_table (info),
-						   ht, hi);
+		      (*bed->elf_backend_copy_indirect_symbol) (ht, hi);
 
 		      /* See if the new flags lead us to realize that
 			 the symbol must be dynamic.  */
@@ -1808,8 +1809,7 @@ elf_link_add_object_symbols (abfd, info)
 					  | ELF_LINK_HASH_DEF_REGULAR))
 				      == 0);
 
-			  elf_link_hash_copy_indirect (elf_hash_table (info),
-						       h, hi);
+		          (*bed->elf_backend_copy_indirect_symbol) (h, hi);
 
 			  /* See if the new flags lead us to realize
                              that the symbol must be dynamic.  */
@@ -3600,6 +3600,7 @@ elf_link_assign_sym_version (h, data)
   struct elf_assign_sym_version_info *sinfo =
     (struct elf_assign_sym_version_info *) data;
   struct bfd_link_info *info = sinfo->info;
+  struct elf_backend_data *bed;
   struct elf_info_failed eif;
   char *p;
 
@@ -3618,6 +3619,7 @@ elf_link_assign_sym_version (h, data)
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     return true;
 
+  bed = get_elf_backend_data (sinfo->output_bfd);
   p = strchr (h->root.root.string, ELF_VER_CHR);
   if (p != NULL && h->verinfo.vertree == NULL)
     {
@@ -3685,8 +3687,7 @@ elf_link_assign_sym_version (h, data)
 			      && ! sinfo->export_dynamic)
 			    {
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			      elf_link_hash_hide_symbol (elf_hash_table (info),
-							 h);
+			      (*bed->elf_backend_hide_symbol) (h);
 			      /* FIXME: The name of the symbol has
 				 already been recorded in the dynamic
 				 string table section.  */
@@ -3798,7 +3799,7 @@ elf_link_assign_sym_version (h, data)
 			  && ! sinfo->export_dynamic)
 			{
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			  elf_link_hash_hide_symbol (elf_hash_table (info), h);
+			  (*bed->elf_backend_hide_symbol) (h);
 			  /* FIXME: The name of the symbol has already
 			     been recorded in the dynamic string table
 			     section.  */
@@ -3820,7 +3821,7 @@ elf_link_assign_sym_version (h, data)
 	      && ! sinfo->export_dynamic)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-	      elf_link_hash_hide_symbol (elf_hash_table (info), h);
+	      (*bed->elf_backend_hide_symbol) (h);
 	      /* FIXME: The name of the symbol has already been
 		 recorded in the dynamic string table section.  */
 	    }
