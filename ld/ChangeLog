@@ -1,5 +1,10 @@
 2000-09-07  H.J. Lu  <hjl@gnu.org>
 
+	* configure.in (AC_ISC_POSIX): Put after AC_CANONICAL_SYSTEM.
+	* configure: Rebuild.
+
+2000-09-07  H.J. Lu  <hjl@gnu.org>
+
 	* Makefile.am (lexsup.o): Also depend on $(INCDIR)/demangle.h.
 	* Makefile.in: Rebuild.
 
