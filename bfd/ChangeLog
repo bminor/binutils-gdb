@@ -1,3 +1,11 @@
+Sun Oct 30 18:56:58 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Create DT_INIT
+	and DT_FINI dynamic entries based on the existence of _init and
+	_fini symbols, not on the .init and .fini sections.  This is
+	compatible with some SVR4 linkers.
+	(elf_bfd_final_link): Corresponding change.
+
 Sat Oct 29 12:18:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Don't move a

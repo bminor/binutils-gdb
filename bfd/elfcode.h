@@ -4858,12 +4858,14 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
       /* Add some entries to the .dynamic section.  We fill in some of the
 	 values later, in elf_bfd_final_link, but we must add the entries
 	 now so that we know the final size of the .dynamic section.  */
-      if (bfd_get_section_by_name (output_bfd, ".init") != NULL)
+      if (elf_link_hash_lookup (elf_hash_table (info), "_init", false,
+				false, false) != NULL)
 	{
 	  if (! elf_add_dynamic_entry (info, DT_INIT, 0))
 	    return false;
 	}
-      if (bfd_get_section_by_name (output_bfd, ".fini") != NULL)
+      if (elf_link_hash_lookup (elf_hash_table (info), "_fini", false,
+				false, false) != NULL)
 	{
 	  if (! elf_add_dynamic_entry (info, DT_FINI, 0))
 	    return false;
@@ -5568,12 +5570,35 @@ elf_bfd_final_link (abfd, info)
 	    default:
 	      break;
 
+	      /* SVR4 linkers seem to set DT_INIT and DT_FINI based on
+                 magic _init and _fini symbols.  This is pretty ugly,
+                 but we are compatible.  */
 	    case DT_INIT:
-	      name = ".init";
-	      goto get_vma;
+	      name = "_init";
+	      goto get_sym;
 	    case DT_FINI:
-	      name = ".fini";
-	      goto get_vma;
+	      name = "_fini";
+	    get_sym:
+	      {
+		struct elf_link_hash_entry *h;
+
+		h = elf_link_hash_lookup (elf_hash_table (info), name,
+					  false, false, true);
+		BFD_ASSERT (h != NULL);
+		if (h->root.type == bfd_link_hash_defined)
+		  {
+		    dyn.d_un.d_val = h->root.u.def.value;
+		    o = h->root.u.def.section;
+		    if (o->output_section != NULL)
+		      dyn.d_un.d_val += (o->output_section->vma
+					 + o->output_offset);
+		    else
+		      dyn.d_un.d_val += o->vma;
+		  }
+		elf_swap_dyn_out (dynobj, &dyn, dyncon);
+	      }
+	      break;
+
 	    case DT_HASH:
 	      name = ".hash";
 	      goto get_vma;
@@ -5883,8 +5908,8 @@ elf_link_output_extsym (h, data)
 	  }
 	else
 	  {
-	    BFD_ASSERT (bfd_get_flavour (input_sec->owner)
-			== bfd_target_elf_flavour
+	    BFD_ASSERT ((bfd_get_flavour (input_sec->owner)
+			 == bfd_target_elf_flavour)
 			&& elf_elfheader (input_sec->owner)->e_type == ET_DYN);
 	    sym.st_shndx = SHN_UNDEF;
 	    input_sec = bfd_und_section_ptr;
