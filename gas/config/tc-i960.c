@@ -81,7 +81,6 @@
 #include <ctype.h>
 
 #include "as.h"
-#include "read.h"
 
 #include "obstack.h"
 
@@ -92,9 +91,9 @@ extern struct hash_control *po_hash;
 extern char *next_object_file_charP;
 
 #ifdef OBJ_COFF
-int md_reloc_size = sizeof (struct reloc);
+const int md_reloc_size = sizeof (struct reloc);
 #else /* OBJ_COFF */
-int md_reloc_size = sizeof (struct relocation_info);
+const int md_reloc_size = sizeof (struct relocation_info);
 #endif /* OBJ_COFF */
 
 /***************************
@@ -150,9 +149,9 @@ const char comment_chars[] = "#";
 
 /* Also note that comments started like this one will always work. */
 
-const char line_comment_chars[] = "";
+const char line_comment_chars[1];
 
-const char line_separator_chars[] = "";
+const char line_separator_chars[1];
 
 /* Chars that can be used to separate mant from exp in floating point nums */
 const char EXP_CHARS[] = "eE";
@@ -247,17 +246,20 @@ const pseudo_typeS md_pseudo_table[] =
 #define	D_BIT		0x2000
 
 
-/* Mask for the only mode bit in a MEMA instruction (if set, abase reg is used) */
+/* Mask for the only mode bit in a MEMA instruction (if set, abase reg is
+   used).  */
 #define MEMA_ABASE	0x2000
 
 /* Info from which a MEMA or MEMB format instruction can be generated */
 typedef struct
   {
-    long opcode;		/* (First) 32 bits of instruction */
-    int disp;			/* 0-(none), 12- or, 32-bit displacement needed */
-    char *e;			/* The expression in the source instruction from
-			 *	which the displacement should be determined
-			 */
+    /* (First) 32 bits of instruction */
+    long opcode;
+    /* 0-(none), 12- or, 32-bit displacement needed */
+    int disp;
+    /* The expression in the source instruction from which the
+       displacement should be determined.  */
+    char *e;
   }
 
 memS;
@@ -422,9 +424,9 @@ aregs[] =
 
 
 /* Hash tables */
-static struct hash_control *op_hash = NULL;	/* Opcode mnemonics */
-static struct hash_control *reg_hash = NULL;	/* Register name hash table */
-static struct hash_control *areg_hash = NULL;	/* Abase register hash table */
+static struct hash_control *op_hash;	/* Opcode mnemonics */
+static struct hash_control *reg_hash;	/* Register name hash table */
+static struct hash_control *areg_hash;	/* Abase register hash table */
 
 
 /* Architecture for which we are assembling */
@@ -434,7 +436,7 @@ static struct hash_control *areg_hash = NULL;	/* Abase register hash table */
 #define ARCH_MC		3
 #define ARCH_CA		4
 int architecture = ARCH_ANY;	/* Architecture requested on invocation line */
-int iclasses_seen = 0;		/* OR of instruction classes (I_* constants)
+int iclasses_seen;		/* OR of instruction classes (I_* constants)
 				 *	for which we've actually assembled
 				 *	instructions.
 				 */
@@ -476,7 +478,7 @@ int iclasses_seen = 0;		/* OR of instruction classes (I_* constants)
  *	    list of such tables.
  */
 
-static int br_cnt = 0;		/* Number of branches instrumented so far.
+static int br_cnt;		/* Number of branches instrumented so far.
 				 * Also used to generate unique local labels
 				 * for each instrumented branch
 				 */
@@ -517,10 +519,9 @@ md_begin ()
       as_fatal ("virtual memory exceeded");
     }
 
-  retval = "";			/* For some reason, the base assembler uses an empty
-			 * string for "no error message", instead of a NULL
-			 * pointer.
-			 */
+  /* For some reason, the base assembler uses an empty string for "no
+     error message", instead of a NULL pointer.  */
+  retval = "";
 
   for (oP = i960_opcodes; oP->name && !*retval; oP++)
     {
@@ -570,23 +571,27 @@ void
 md_assemble (textP)
      char *textP;		/* Source text of instruction */
 {
-  char *args[4];		/* Parsed instruction text, containing NO whitespace:
-			 *	arg[0]->opcode mnemonic
-			 *	arg[1-3]->operands, with char constants
-			 *			replaced by decimal numbers
-			 */
+  /* Parsed instruction text, containing NO whitespace:
+   *	arg[0]->opcode mnemonic
+   *	arg[1-3]->operands, with char constants
+   *			replaced by decimal numbers
+   */
+  char *args[4];
+
   int n_ops;			/* Number of instruction operands */
   int callx;
-  struct i960_opcode *oP;
   /* Pointer to instruction description */
-  int branch_predict;
+  struct i960_opcode *oP;
   /* TRUE iff opcode mnemonic included branch-prediction
-	 *	suffix (".f" or ".t")
-	 */
-  long bp_bits;			/* Setting of branch-prediction bit(s) to be OR'd
-			 *	into instruction opcode of CTRL/COBR format
-			 *	instructions.
-			 */
+   *	suffix (".f" or ".t")
+   */
+  int branch_predict;
+  /* Setting of branch-prediction bit(s) to be OR'd
+   *	into instruction opcode of CTRL/COBR format
+   *	instructions.
+   */
+  long bp_bits;
+
   int n;			/* Offset of last character in opcode mnemonic */
 
   static const char bp_error_msg[] = "branch prediction invalid on this opcode";
@@ -619,18 +624,18 @@ md_assemble (textP)
   if (args[0][n - 1] == '.' && (args[0][n] == 't' || args[0][n] == 'f'))
     {
       /* We could check here to see if the target architecture
-		 * supports branch prediction, but why bother?  The bit
-		 * will just be ignored by processors that don't use it.
-		 */
+       * supports branch prediction, but why bother?  The bit
+       * will just be ignored by processors that don't use it.
+       */
       branch_predict = 1;
       bp_bits = (args[0][n] == 't') ? BP_TAKEN : BP_NOT_TAKEN;
       args[0][n - 1] = '\0';	/* Strip suffix from opcode mnemonic */
     }
 
   /* Look up opcode mnemonic in table and check number of operands.
-	 * Check that opcode is legal for the target architecture.
-	 * If all looks good, assemble instruction.
-	 */
+   * Check that opcode is legal for the target architecture.
+   * If all looks good, assemble instruction.
+   */
   oP = (struct i960_opcode *) hash_find (op_hash, args[0]);
   if (!oP || !targ_has_iclass (oP->iclass))
     {
@@ -639,8 +644,8 @@ md_assemble (textP)
     }
   else if (n_ops != oP->num_ops)
     {
-      as_bad ("improper number of operands.  expecting %d, got %d", oP->num_ops, n_ops);
-
+      as_bad ("improper number of operands.  expecting %d, got %d",
+	      oP->num_ops, n_ops);
     }
   else
     {
@@ -712,7 +717,7 @@ md_assemble (textP)
 void
 md_number_to_chars (buf, value, n)
      char *buf;			/* Put output here */
-     long value;		/* The integer to be converted */
+     valueT value;		/* The integer to be converted */
      int n;			/* Number of bytes to output (significant bytes
 		 *	in 'value')
 		 */
@@ -1130,8 +1135,8 @@ int md_long_jump_size = 0;
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr;
-     long to_addr;
+     addressT from_addr;
+     addressT to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1141,7 +1146,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1469,21 +1474,27 @@ get_args (p, args)
  *	    o an address fixup to be done when all symbol values are known, or
  *	    o a varying length code fragment, with address fixup info.  This
  *		will be done for cobr instructions that may have to be relaxed
- *		in to compare/branch instructions (8 bytes) if the final address
- *		displacement is greater than 13 bits.
+ *		in to compare/branch instructions (8 bytes) if the final
+ *		address displacement is greater than 13 bits.
  *
- **************************************************************************** */
+ *****************************************************************************/
 static
 void
 get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
-     char *dispP;		/*->displacement as specified in source instruction */
-     char *ifmtP;		/*->"COBR" or "CTRL" (for use in error message) */
-     long instr;		/* Instruction needing the displacement */
-     int numbits;		/* # bits of displacement (13 for COBR, 24 for CTRL) */
-     int var_frag;		/* 1 if varying length code fragment should be emitted;
-		 *	0 if an address fix should be emitted.
-		 */
-     int callj;			/* 1 if callj relocation should be done; else 0 */
+     /* displacement as specified in source instruction */
+     char *dispP;
+     /* "COBR" or "CTRL" (for use in error message) */
+     char *ifmtP;
+     /* Instruction needing the displacement */
+     long instr;
+     /* # bits of displacement (13 for COBR, 24 for CTRL) */
+     int numbits;
+     /* 1 if varying length code fragment should be emitted;
+      *	0 if an address fix should be emitted.
+      */
+     int var_frag;
+     /* 1 if callj relocation should be done; else 0 */
+     int callj;
 {
   expressionS e;		/* Parsed expression */
   fixS *fixP;			/* Structure describing needed address fix */
@@ -1510,8 +1521,8 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
       else
 	{
 	  /* Set up a new fix structure, so address can be updated
-			 * when all symbol values are known.
-			 */
+	   * when all symbol values are known.
+	   */
 	  outP = emit (instr);
 	  fixP = fix_new (frag_now,
 			  outP - frag_now->fr_literal,
@@ -1525,10 +1536,10 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
 	  fixP->fx_callj = callj;
 
 	  /* We want to modify a bit field when the address is
-			 * known.  But we don't need all the garbage in the
-			 * bit_fix structure.  So we're going to lie and store
-			 * the number of bits affected instead of a pointer.
-			 */
+	   * known.  But we don't need all the garbage in the
+	   * bit_fix structure.  So we're going to lie and store
+	   * the number of bits affected instead of a pointer.
+	   */
 	  fixP->fx_bit_fixP = (bit_fixS *) numbits;
 	}
       break;
@@ -1754,15 +1765,15 @@ mem_fmt (args, oP, callx)
       if (instr.disp == 12)
 	{
 	  /* Displacement is dependent on a symbol, whose value
-			 * may change at link time.  We HAVE to reserve 32 bits.
-			 * Convert already-output opcode to MEMB format.
-			 */
+	   * may change at link time.  We HAVE to reserve 32 bits.
+	   * Convert already-output opcode to MEMB format.
+	   */
 	  mema_to_memb (outP);
 	}
 
       /* Output 0 displacement and set up address fixup for when
-		 * this symbol's value becomes known.
-		 */
+       * this symbol's value becomes known.
+       */
       outP = emit ((long) 0);
       fixP = fix_new (frag_now,
 		      outP - frag_now->fr_literal,
@@ -2025,10 +2036,10 @@ parse_memop (memP, argP, optype)
   int *intP;			/* Pointer to register number */
 
   /* The following table contains the default scale factors for each
-	 * type of memory instruction.  It is accessed using (optype-MEM1)
-	 * as an index -- thus it assumes the 'optype' constants are assigned
-	 * consecutive values, in the order they appear in this table
-	 */
+   * type of memory instruction.  It is accessed using (optype-MEM1)
+   * as an index -- thus it assumes the 'optype' constants are assigned
+   * consecutive values, in the order they appear in this table
+   */
   static int def_scale[] =
   {
     1,				/* MEM1 */
@@ -2492,9 +2503,9 @@ static
 void
 relax_cobr (fragP)
      register fragS *fragP;	/* fragP->fr_opcode is assumed to point to
-			 * the cobr instruction, which comes at the
-			 * end of the code fragment.
-			 */
+				 * the cobr instruction, which comes at the
+				 * end of the code fragment.
+				 */
 {
   int opcode, src1, src2, m1, s2;
   /* Bit fields from cobr instruction */
@@ -2880,15 +2891,18 @@ md_apply_fix (fixP, val)
 	  break;
 	case 1:
 	  md_number_to_disp (place,
-			 fixP->fx_pcrel ? val + fixP->fx_pcrel_adjust : val,
+			     (fixP->fx_pcrel
+			      ? val + fixP->fx_pcrel_adjust
+			      : val),
 			     fixP->fx_size);
 	  break;
 	case 2:		/* fix requested for .long .word etc */
 	  md_number_to_chars (place, val, fixP->fx_size);
 	  break;
 	default:
-	  as_fatal ("Internal error in md_apply_fix() in file \"%s\"", __FILE__);
-	}			/* OVE: maybe one ought to put _imm _disp _chars in one md-func */
+	  as_fatal ("Internal error in md_apply_fix() in file \"%s\"",
+		    __FILE__);
+	}
     }
   else
     {
@@ -2970,10 +2984,10 @@ tc_bout_fix_to_chars (where, fixP, segment_address_in_file)
 
 /* Align an address by rounding it up to the specified boundary.
  */
-long
+valueT
 md_section_align (seg, addr)
      segT seg;
-     long addr;			/* Address to be rounded up */
+     valueT addr;		/* Address to be rounded up */
 {
   return ((addr + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
 }				/* md_section_align() */
@@ -3203,12 +3217,5 @@ i960_handle_align (fragp)
   fixp = fix_new (fragp, fragp->fr_fix, fragp->fr_offset, 0, 0, 0, 0,
 		  (int) fragp->fr_type);
 }
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of tc-i960.c */
