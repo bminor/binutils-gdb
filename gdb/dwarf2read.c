@@ -934,13 +934,17 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
 	}
       if (cu_header.abbrev_offset >= dwarf_abbrev_size)
 	{
-	  error ("Dwarf Error: bad offset in compilation unit header.");
+	  error ("Dwarf Error: bad offset (0x%lx) in compilation unit header (at 0x%lx + 6).",
+		 (long) cu_header.abbrev_offset,
+		 (long) (beg_of_comp_unit - dwarf_info_buffer));
 	  return;
 	}
       if (beg_of_comp_unit + cu_header.length + 4
-	  >= dwarf_info_buffer + dwarf_info_size)
+	  > dwarf_info_buffer + dwarf_info_size)
 	{
-	  error ("Dwarf Error: bad length in compilation unit header.");
+	  error ("Dwarf Error: bad length (0x%lx) in compilation unit header (0x%lx + 0).",
+		 (long) cu_header.length,
+		 (long) (beg_of_comp_unit - dwarf_info_buffer));
 	  return;
 	}
 
