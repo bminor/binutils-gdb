@@ -46,6 +46,7 @@
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "frame.h"
+#include "regcache.h"
 #include "inferior.h"
 #include "target.h"
 #include "tuiLayout.h"
@@ -86,7 +87,7 @@
 ******************************************/
 static TuiStatus _tuiSetRegsContent
   (int, int, struct frame_info *, TuiRegisterDisplayType, int);
-static char *_tuiRegisterName (int);
+static const char *_tuiRegisterName (int);
 static TuiStatus _tuiGetRegisterRawValue (int, char *, struct frame_info *);
 static void _tuiSetRegisterElement
   (int, struct frame_info *, TuiDataElementPtr, int);
@@ -311,7 +312,7 @@ tuiDisplayRegistersFrom (int startElementNo)
       dataWin->detail.dataDisplayInfo.regsContentCount > 0)
     {
       register int i = startElementNo;
-      int j, valueCharsWide, charsWide, itemWinWidth, curY, labelWidth;
+      int j, valueCharsWide, itemWinWidth, curY, labelWidth;
       enum precision_type precision;
 
       precision = (dataWin->detail.dataDisplayInfo.regsDisplayType
@@ -435,8 +436,6 @@ tuiDisplayRegElementAtLine (int startElementNo, int startLineNo)
 int
 tuiDisplayRegistersFromLine (int lineNo, int forceDisplay)
 {
-  int elementNo;
-
   if (dataWin->detail.dataDisplayInfo.regsContentCount > 0)
     {
       int line, elementNo;
@@ -595,7 +594,7 @@ registers.\n",
    ** _tuiRegisterName().
    **        Return the register name.
  */
-static char *
+static const char *
 _tuiRegisterName (int regNum)
 {
   return REGISTER_NAME (regNum);
@@ -622,7 +621,7 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
 {
   struct ui_file *stream;
   struct ui_file *old_stdout;
-  char *name;
+  const char *name;
   struct cleanup *cleanups;
   char *p;
   int pos;
@@ -639,7 +638,8 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
   stream = tui_sfileopen (bufLen);
   gdb_stdout = stream;
   cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
-  do_registers_info (regNum, 0);
+  gdbarch_print_registers_info (current_gdbarch, stream, selected_frame,
+                                regNum, 1);
 
   /* Save formatted output in the buffer.  */
   p = tui_file_get_strbuf (stream);
@@ -700,15 +700,9 @@ static TuiStatus
 _tuiSetSpecialRegsContent (int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
-  int i, endRegNum;
+  int endRegNum;
 
   endRegNum = FP0_REGNUM - 1;
-#if 0
-  endRegNum = (-1);
-  for (i = START_SPECIAL_REGS; (i < NUM_REGS && endRegNum < 0); i++)
-    if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
-      endRegNum = i - 1;
-#endif
   ret = _tuiSetRegsContent (START_SPECIAL_REGS,
 			    endRegNum,
 			    selected_frame,
@@ -727,15 +721,9 @@ static TuiStatus
 _tuiSetGeneralAndSpecialRegsContent (int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
-  int i, endRegNum = (-1);
+  int endRegNum = (-1);
 
   endRegNum = FP0_REGNUM - 1;
-#if 0
-  endRegNum = (-1);
-  for (i = 0; (i < NUM_REGS && endRegNum < 0); i++)
-    if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
-      endRegNum = i - 1;
-#endif
   ret = _tuiSetRegsContent (
 	 0, endRegNum, selected_frame, TUI_SPECIAL_REGS, refreshValuesOnly);
 
@@ -750,15 +738,9 @@ static TuiStatus
 _tuiSetFloatRegsContent (TuiRegisterDisplayType dpyType, int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
-  int i, startRegNum;
+  int startRegNum;
 
   startRegNum = FP0_REGNUM;
-#if 0
-  startRegNum = (-1);
-  for (i = NUM_REGS - 1; (i >= 0 && startRegNum < 0); i--)
-    if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) != TYPE_CODE_FLT)
-      startRegNum = i + 1;
-#endif
   ret = _tuiSetRegsContent (startRegNum,
 			    NUM_REGS - 1,
 			    selected_frame,

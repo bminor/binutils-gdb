@@ -45,12 +45,6 @@
 #include "tuiGeneralWin.h"
 #include "tuiWin.h"
 
-/*
-   ** local support functions
- */
-static void _winResize (void);
-
-
 /***********************
 ** PUBLIC FUNCTIONS
 ***********************/
@@ -124,6 +118,8 @@ boxWin (TuiGenWinInfoPtr winInfo, int highlightFlag)
                tui_border_hline, tui_border_hline,
                tui_border_ulcorner, tui_border_urcorner,
                tui_border_llcorner, tui_border_lrcorner);
+      if (winInfo->title)
+        mvwaddstr (win, 0, 3, winInfo->title);
       wattroff (win, attrs);
     }
 }
@@ -197,43 +193,8 @@ makeWindow (TuiGenWinInfoPtr winInfo, int boxIt)
 	boxWin (winInfo, NO_HILITE);
       winInfo->isVisible = TRUE;
       scrollok (handle, TRUE);
-      tuiRefreshWin (winInfo);
-
-#ifndef FOR_TEST
-      if (			/*!m_WinIsAuxillary(winInfo->type) && */
-	   (winInfo->type != CMD_WIN) &&
-	   (winInfo->content == (OpaquePtr) NULL))
-	{
-	  mvwaddstr (handle, 1, 1, winName (winInfo));
-	  tuiRefreshWin (winInfo);
-	}
-#endif /*FOR_TEST */
     }
-
-  return;
-}				/* makeWindow */
-
-
-/*
-   ** tuiClearWin().
-   **        Clear the window of all contents without calling wclear.
- */
-void
-tuiClearWin (TuiGenWinInfoPtr winInfo)
-{
-  if (m_genWinPtrNotNull (winInfo) && winInfo->handle != (WINDOW *) NULL)
-    {
-      int curRow, curCol;
-
-      for (curRow = 0; (curRow < winInfo->height); curRow++)
-	for (curCol = 0; (curCol < winInfo->width); curCol++)
-	  mvwaddch (winInfo->handle, curRow, curCol, ' ');
-
-      tuiRefreshWin (winInfo);
-    }
-
-  return;
-}				/* tuiClearWin */
+}
 
 
 /*
@@ -258,13 +219,11 @@ makeVisible (TuiGenWinInfoPtr winInfo, int visible)
 	   (winInfo->type != CMD_WIN && !m_winIsAuxillary (winInfo->type)));
 	  winInfo->isVisible = TRUE;
 	}
-      tuiRefreshWin (winInfo);
     }
   else if (!visible &&
 	   winInfo->isVisible && winInfo->handle != (WINDOW *) NULL)
     {
       winInfo->isVisible = FALSE;
-      tuiClearWin (winInfo);
       tuiDelwin (winInfo->handle);
       winInfo->handle = (WINDOW *) NULL;
     }
@@ -296,90 +255,6 @@ makeAllVisible (int visible)
 
   return;
 }				/* makeAllVisible */
-
-
-/*
-   ** scrollWinForward
- */
-void
-scrollWinForward (TuiGenWinInfoPtr winInfo, int numLines)
-{
-  if (winInfo->content != (OpaquePtr) NULL &&
-      winInfo->lastVisibleLine < winInfo->contentSize - 1)
-    {
-      int i, firstLine, newLastLine;
-
-      firstLine = winInfo->lastVisibleLine - winInfo->viewportHeight + 1;
-      if (winInfo->lastVisibleLine + numLines > winInfo->contentSize)
-	newLastLine = winInfo->contentSize - 1;
-      else
-	newLastLine = winInfo->lastVisibleLine + numLines - 1;
-
-      for (i = (newLastLine - winInfo->viewportHeight);
-	   (i <= newLastLine); i++)
-	{
-	  TuiWinElementPtr line;
-	  int lineHeight;
-
-	  line = (TuiWinElementPtr) winInfo->content[i];
-	  if (line->highlight)
-	    wstandout (winInfo->handle);
-	  mvwaddstr (winInfo->handle,
-		     i - (newLastLine - winInfo->viewportHeight),
-		     1,
-		     displayableWinContentOf (winInfo, line));
-	  if (line->highlight)
-	    wstandend (winInfo->handle);
-	  lineHeight = winElementHeight (winInfo, line);
-	  newLastLine += (lineHeight - 1);
-	}
-      winInfo->lastVisibleLine = newLastLine;
-    }
-
-  return;
-}				/* scrollWinForward */
-
-
-/*
-   ** scrollWinBackward
- */
-void
-scrollWinBackward (TuiGenWinInfoPtr winInfo, int numLines)
-{
-  if (winInfo->content != (OpaquePtr) NULL &&
-      (winInfo->lastVisibleLine - winInfo->viewportHeight) > 0)
-    {
-      int i, newLastLine, firstLine;
-
-      firstLine = winInfo->lastVisibleLine - winInfo->viewportHeight + 1;
-      if ((firstLine - numLines) < 0)
-	newLastLine = winInfo->viewportHeight - 1;
-      else
-	newLastLine = winInfo->lastVisibleLine - numLines + 1;
-
-      for (i = newLastLine - winInfo->viewportHeight; (i <= newLastLine); i++)
-	{
-	  TuiWinElementPtr line;
-	  int lineHeight;
-
-	  line = (TuiWinElementPtr) winInfo->content[i];
-	  if (line->highlight)
-	    wstandout (winInfo->handle);
-	  mvwaddstr (winInfo->handle,
-		     i - (newLastLine - winInfo->viewportHeight),
-		     1,
-		     displayableWinContentOf (winInfo, line));
-	  if (line->highlight)
-	    wstandend (winInfo->handle);
-	  lineHeight = winElementHeight (winInfo, line);
-	  newLastLine += (lineHeight - 1);
-	}
-      winInfo->lastVisibleLine = newLastLine;
-    }
-
-  return;
-}				/* scrollWinBackward */
-
 
 /*
    ** refreshAll().

@@ -14248,7 +14248,7 @@ protocol---for example, if there is only one serial port to your target
 machine, you might want your program to do something special if it
 recognizes a packet meant for @value{GDBN}.
 
-In the examples below, @samp{<-} and @samp{->} are used to indicate
+In the examples below, @samp{->} and @samp{<-} are used to indicate
 transmitted and received data respectfully.
 
 @cindex protocol, @value{GDBN} remote serial
@@ -14290,8 +14290,8 @@ the package was received correctly) or @samp{-} (to request
 retransmission):
 
 @smallexample
-<- @code{$}@var{packet-data}@code{#}@var{checksum}
--> @code{+}
+-> @code{$}@var{packet-data}@code{#}@var{checksum}
+<- @code{+}
 @end smallexample
 @noindent
 
@@ -15082,29 +15082,29 @@ Example sequence of a target being re-started.  Notice how the restart
 does not get any direct output:
 
 @smallexample
-<- @code{R00}
--> @code{+}
-@emph{target restarts}
-<- @code{?}
--> @code{+}
--> @code{T001:1234123412341234}
+-> @code{R00}
 <- @code{+}
+@emph{target restarts}
+-> @code{?}
+<- @code{+}
+<- @code{T001:1234123412341234}
+-> @code{+}
 @end smallexample
 
 Example sequence of a target being stepped by a single instruction:
 
 @smallexample
-<- @code{G1445@dots{}}
--> @code{+}
-<- @code{s}
--> @code{+}
+-> @code{G1445@dots{}}
+<- @code{+}
+-> @code{s}
+<- @code{+}
 @emph{time passes}
--> @code{T001:1234123412341234}
-<- @code{+}
-<- @code{g}
+<- @code{T001:1234123412341234}
 -> @code{+}
--> @code{1455@dots{}}
+-> @code{g}
 <- @code{+}
+<- @code{1455@dots{}}
+-> @code{+}
 @end smallexample
 
 @include gpl.texi

@@ -1,5 +1,5 @@
 /* TUI display locator.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -25,20 +25,9 @@
    ** This header file supports
  */
 
-extern void tuiSetLocatorInfo (char *, char *, int, CORE_ADDR,
-			       TuiLocatorElementPtr);
 extern void tuiUpdateLocatorFilename (const char *);
-extern void tuiUpdateLocatorInfoFromFrame
-  (struct frame_info *, TuiLocatorElementPtr);
-extern void tuiUpdateLocatorDisplay (struct frame_info *);
-extern void tuiSetLocatorContent (struct frame_info *);
 extern void tuiShowLocatorContent (void);
-extern void tuiClearLocatorContent (void);
-extern void tuiClearLocatorDisplay (void);
-extern void tuiSwitchFilename (char *);
 extern void tuiShowFrameInfo (struct frame_info *);
-extern void tuiGetLocatorFilename (TuiGenWinInfoPtr, char **);
-
 
 #endif
 /*_TUI_STACK_H*/

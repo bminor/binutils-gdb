@@ -1,3 +1,51 @@
+2002-08-24  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_copy_indirect_symbol): New.
+	(create_got_section, allocate_dynrelocs, readonly_dynrelocs):
+	Likewise.
+	(struct elf_sh_pcrel_relocs_copied): Removed.
+	(struct elf_sh_dyn_relocs): New.
+	(struct elf_sh_link_hash_entry): Replace pcrel_relocs_copied
+	field with dyn_relocs.
+	(struct elf_sh_link_hash_table): Add short-cuts to get dynamic
+	sections and sym_sec.
+	(sh_elf_link_hash_newfunc): Clear dyn_relocs.
+	(sh_elf_link_hash_table_create): Clear shorts-cuts and sym_sec.
+	(sh_elf_create_dynamic_sections): Use create_got_section instead
+	of _bfd_elf_create_got_section.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_create_dynamic_sections): Use short-cuts to the dynamic
+	sections.
+	(sh_elf_adjust_dynamic_symbol, sh_elf_size_dynamic_sections,
+	sh_elf_relocate_section, sh_elf_check_relocs,
+	sh_elf_finish_dynamic_symbol, sh_elf_finish_dynamic_sections):
+	Likewise.
+	(sh_elf_adjust_dynamic_symbol): Handle nocopyreloc. Keep the
+	dynamic relocations and avoiding the copy relocation when we
+	didn't find any dynamic relocations in the section which has
+	contents or is read-only.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): New.
+	(sh_elf_size_dynamic_sections): Don't reset the size of
+	.rela.got section even if dynamic_sections_created flag is off.
+	Don't use sh_elf_discard_copies. Scan all input bfd and use
+	allocate_dynrelocs. Call readonly_dynrelocs to determine
+	whether we need DT_TEXTREL.
+	(sh_elf_adjust_dynamic_symbol): Use plt.refcount to determine
+	whether the symbol was never referred to.
+	(sh_elf_relocate_section): Use WILL_CALL_FINISH_DYNAMIC_SYMBOL.
+	(sh_elf_gc_sweep_hook): Fill with the real sweep function.
+	(sh_elf_check_relocs): Call create_got_section if the short-cut
+	to .got is null. Increment reference counters only instead of
+	allocating space on dynamic sections here. Don't conditionalize
+	uninitialized got.offset value when marking the symbol as a
+	global offset table entry. Keep relocations for symbols satisfied
+	by a dynamic library to avoid copy relocations for the symbol.
+	Set dynobj field of an elf hash table if needed.
+	(sh_elf_finish_dynamic_sections): Handle null section pointer
+	correctly.
+	(elf_backend_copy_indirect_symbol): Defined.
+	(elf_backend_can_refcount): Defined.
+
 2002-08-23  Nick Clifton  <nickc@redhat.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Undo

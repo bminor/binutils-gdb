@@ -237,8 +237,8 @@ tui_enable (void)
       setTermWidthTo (COLS);
       def_prog_mode ();
 
-      tuiSetLocatorContent (0);
-      showLayout (SRC_COMMAND);
+      tuiShowFrameInfo (0);
+      tuiSetLayout (SRC_COMMAND, TUI_UNDEFINED_REGS);
       tuiSetWinFocusTo (srcWin);
       keypad (cmdWin->generic.handle, TRUE);
       wrefresh (cmdWin->generic.handle);
@@ -261,7 +261,11 @@ tui_enable (void)
 
   tui_version = 1;
   tui_active = 1;
+  if (selected_frame)
+     tuiShowFrameInfo (selected_frame);
+
   refresh ();
+  tui_update_gdb_sizes ();
 }
 
 /* Leave the tui mode.
@@ -286,6 +290,7 @@ tui_disable (void)
 
   tui_version = 0;
   tui_active = 0;
+  tui_update_gdb_sizes ();
 }
 
 /* Wrapper on top of free() to ensure that input address
@@ -325,7 +330,7 @@ tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
 }
 
 void
-strcat_to_buf (char *buf, int buflen, char *itemToAdd)
+strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
 {
   if (itemToAdd != (char *) NULL && buf != (char *) NULL)
     {
