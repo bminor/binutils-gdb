@@ -49,7 +49,7 @@
 #define ARM_ELF_OS_ABI_VERSION		0
 
 static reloc_howto_type * find_howto                  PARAMS ((unsigned int));
-static void               elf32_arm_info_to_howto     PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+static void               elf32_arm_info_to_howto     PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static reloc_howto_type * elf32_arm_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 static reloc_howto_type elf32_arm_howto_table[] =
@@ -369,7 +369,7 @@ static void
 elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rela *elf_reloc;
+     Elf_Internal_Rela *elf_reloc;
 {
   unsigned int r_type;
 

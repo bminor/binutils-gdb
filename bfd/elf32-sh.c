@@ -4875,6 +4875,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 	      boolean skip, relocate;
 
 	      /* When generating a shared object, these relocations
@@ -4948,11 +4949,9 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		}
 
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-					 (((Elf32_External_Rela *)
-					   sreloc->contents)
-					  + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* If this reloc is against an external symbol, we do
 		 not want to fiddle with the addend.  Otherwise, we
@@ -5106,6 +5105,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (info->shared)
 		    {
 		      Elf_Internal_Rela outrel;
+		      bfd_byte *loc;
 
 		      if (srelgot == NULL)
 			{
@@ -5119,11 +5119,9 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					 + off);
 		      outrel.r_info = ELF32_R_INFO (0, R_SH_RELATIVE);
 		      outrel.r_addend = relocation;
-		      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-						(((Elf32_External_Rela *)
-						  srelgot->contents)
-						 + srelgot->reloc_count));
-		      ++srelgot->reloc_count;
+		      loc = srelgot->contents;
+		      loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
+		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
 
 #ifdef INCLUDE_SHMEDIA
@@ -5273,6 +5271,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      unsigned short insn;
 	      int indx;
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 
 	      if (ELF32_R_TYPE (rel->r_info) == R_SH_TLS_GD_32)
 		{
@@ -5378,12 +5377,10 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		outrel.r_addend = relocation - dtpoff_base (info);
 	      else
 		outrel.r_addend = 0;
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-					 (((Elf32_External_Rela *)
-					   sreloc->contents)
-					  + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
 
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	      continue;
 	    }
 
@@ -5406,7 +5403,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
           else
 	    {
 	      Elf_Internal_Rela outrel;
-	      Elf32_External_Rela *loc;
+	      bfd_byte *loc;
 	      int dr_type, indx;
 
 	      if (srelgot == NULL)
@@ -5426,8 +5423,8 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		outrel.r_addend = 0;
 	      outrel.r_info = ELF32_R_INFO (indx, dr_type);
-	      loc = (Elf32_External_Rela *) srelgot->contents;
-	      loc += srelgot->reloc_count++;
+	      loc = srelgot->contents;
+	      loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      if (r_type == R_SH_TLS_GD_32)
@@ -5445,9 +5442,8 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      outrel.r_offset += 4;
 		      outrel.r_addend = 0;
 		      srelgot->reloc_count++;
-		      loc++;
-		      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-						loc);
+		      loc += sizeof (Elf32_External_Rela);
+		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
 		}
 
@@ -5578,7 +5574,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      Elf_Internal_Rela outrel;
-	      Elf32_External_Rela *loc;
+	      bfd_byte *loc;
 
 	      srelgot = htab->srelgot;
 	      if (srelgot == NULL)
@@ -5588,8 +5584,8 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				 + sgot->output_offset + off);
 	      outrel.r_addend = 0;
 	      outrel.r_info = ELF32_R_INFO (0, R_SH_TLS_DTPMOD32);
-	      loc = (Elf32_External_Rela *) srelgot->contents;
-	      loc += srelgot->reloc_count++;
+	      loc = srelgot->contents;
+	      loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	      htab->tls_ldm_got.offset |= 1;
 	    }
@@ -5604,6 +5600,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      int indx;
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 
 	      if (sreloc == NULL)
 		{
@@ -5634,12 +5631,10 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		outrel.r_addend = relocation - dtpoff_base (info);
 	      else
 		outrel.r_addend = 0;
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-					 (((Elf32_External_Rela *)
-					   sreloc->contents)
-					  + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
 
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	      continue;
 	    }
 	  else
@@ -5652,6 +5647,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  {
 	    int indx;
 	    Elf_Internal_Rela outrel;
+	    bfd_byte *loc;
 
 	    if (sreloc == NULL)
 	      {
@@ -5682,12 +5678,10 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_addend = relocation - dtpoff_base (info);
 	    else
 	      outrel.r_addend = 0;
-	    bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-				       (((Elf32_External_Rela *)
-					 sreloc->contents)
-					+ sreloc->reloc_count));
-	    ++sreloc->reloc_count;
 
+	    loc = sreloc->contents;
+	    loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	    bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	    continue;
 	  }
 	}
@@ -6877,6 +6871,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma plt_index;
       bfd_vma got_offset;
       Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -6996,9 +6991,8 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 #ifdef GOT_BIAS
       rel.r_addend = GOT_BIAS;
 #endif
-      bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				((Elf32_External_Rela *) srel->contents
-				 + plt_index));
+      loc = srel->contents + plt_index * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -7015,6 +7009,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *sgot;
       asection *srel;
       Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -7050,10 +7045,9 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rel.r_addend = 0;
 	}
 
-      bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				 ((Elf32_External_Rela *) srel->contents
-				  + srel->reloc_count));
-      ++srel->reloc_count;
+      loc = srel->contents;
+      loc += srel->reloc_count++ * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
     }
 
 #ifdef INCLUDE_SHMEDIA
@@ -7066,6 +7060,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	asection *sgot;
 	asection *srel;
 	Elf_Internal_Rela rel;
+	bfd_byte *loc;
 
 	/* This symbol has a datalabel entry in the global offset table.
 	   Set it up.  */
@@ -7102,10 +7097,9 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	    rel.r_addend = 0;
 	  }
 
-	bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				   ((Elf32_External_Rela *) srel->contents
-				    + srel->reloc_count));
-	++srel->reloc_count;
+	loc = srel->contents;
+	loc += srel->reloc_count++ * sizeof (Elf32_External_Rela);
+	bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
       }
   }
 #endif
@@ -7114,6 +7108,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
     {
       asection *s;
       Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
@@ -7130,10 +7125,8 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_SH_COPY);
       rel.r_addend = 0;
-      bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				 ((Elf32_External_Rela *) s->contents
-				  + s->reloc_count));
-      ++s->reloc_count;
+      loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */

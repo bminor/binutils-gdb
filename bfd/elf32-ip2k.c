@@ -35,10 +35,10 @@ struct misc
 
 /* Prototypes.  */
 static reloc_howto_type *    ip2k_reloc_type_lookup               PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void                  ip2k_info_to_howto_rela              PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+static void                  ip2k_info_to_howto_rela              PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static asection *            ip2k_elf_gc_mark_hook                PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *, struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean               ip2k_elf_gc_sweep_hook               PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
-static bfd_vma               symbol_value                         PARAMS ((bfd *, Elf_Internal_Shdr *, Elf32_Internal_Sym *, Elf_Internal_Rela *));
+static bfd_vma               symbol_value                         PARAMS ((bfd *, Elf_Internal_Shdr *, Elf_Internal_Sym *, Elf_Internal_Rela *));
 static void                  adjust_all_relocations               PARAMS ((bfd *, asection *, bfd_vma, bfd_vma, int, int));
 static boolean               ip2k_elf_relax_delete_bytes          PARAMS ((bfd *, asection *, bfd_vma, int));
 static boolean               ip2k_elf_relax_add_bytes             PARAMS ((bfd *, asection *, bfd_vma, const bfd_byte *, int, int));
@@ -256,7 +256,7 @@ static bfd_vma
 symbol_value (abfd, symtab_hdr, isymbuf, irel)
      bfd *abfd;
      Elf_Internal_Shdr *symtab_hdr;
-     Elf32_Internal_Sym *isymbuf;
+     Elf_Internal_Sym *isymbuf;
      Elf_Internal_Rela *irel;   
 {
   if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
@@ -1164,7 +1164,7 @@ adjust_all_relocations (abfd, sec, addr, endaddr, count, noadj)
   unsigned int symcount;
     
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  isymbuf = (Elf32_Internal_Sym *) symtab_hdr->contents;
+  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
 
   shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
 
@@ -1265,7 +1265,7 @@ add_page_insn (abfd, sec, irel, misc)
     return false;
   else
     {
-       Elf32_Internal_Rela * jrel = irel - 1;
+       Elf_Internal_Rela * jrel = irel - 1;
 
        /* Add relocation for PAGE insn added.  */
        if (ELF32_R_TYPE (jrel->r_info) != R_IP2K_NONE)
@@ -1360,7 +1360,7 @@ static void
 ip2k_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr;
-     Elf32_Internal_Rela * dst;
+     Elf_Internal_Rela * dst;
 {
   unsigned int r_type;
 

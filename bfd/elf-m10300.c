@@ -117,7 +117,7 @@ static void elf32_mn10300_link_hash_table_free
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void mn10300_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean mn10300_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -322,7 +322,7 @@ static void
 mn10300_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 

@@ -35,7 +35,7 @@ static void ppc_howto_init
 static reloc_howto_type *ppc64_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void ppc64_elf_info_to_howto
-  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf64_Internal_Rela *dst));
+  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst));
 static bfd_reloc_status_type ppc64_elf_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type ppc64_elf_brtaken_reloc
@@ -1351,7 +1351,7 @@ static void
 ppc64_elf_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf64_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int type;
 
@@ -4471,7 +4471,7 @@ ppc_build_one_stub (gen_entry, in_arg)
 	{
 	  /* Create a reloc for the branch lookup table entry.  */
 	  Elf_Internal_Rela rela;
-	  Elf64_External_Rela *r;
+	  bfd_byte *loc;
 
 	  rela.r_offset = (br_entry->offset
 			   + htab->sbrlt->output_offset
@@ -4479,9 +4479,9 @@ ppc_build_one_stub (gen_entry, in_arg)
 	  rela.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
 	  rela.r_addend = off;
 
-	  r = (Elf64_External_Rela *) htab->srelbrlt->contents;
-	  r += htab->srelbrlt->reloc_count++;
-	  bfd_elf64_swap_reloca_out (htab->srelbrlt->owner, &rela, r);
+	  loc = htab->srelbrlt->contents;
+	  loc += htab->srelbrlt->reloc_count++ * sizeof (Elf64_External_Rela);
+	  bfd_elf64_swap_reloca_out (htab->srelbrlt->owner, &rela, loc);
 	}
 
       off = (br_entry->offset
@@ -5618,7 +5618,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    if (info->shared)
 		      {
 			Elf_Internal_Rela outrel;
-			Elf64_External_Rela *loc;
+			bfd_byte *loc;
 
 			/* We need to generate a R_PPC64_RELATIVE reloc
 			   for the dynamic linker.  */
@@ -5627,8 +5627,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					   + off);
 			outrel.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
 			outrel.r_addend = relocation;
-			loc = (Elf64_External_Rela *) htab->srelgot->contents;
-			loc += htab->srelgot->reloc_count++;
+			loc = htab->srelgot->contents;
+			loc += (htab->srelgot->reloc_count++
+				* sizeof (Elf64_External_Rela));
 			bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 		      }
 
@@ -5763,7 +5764,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      Elf_Internal_Rela outrel;
 	      boolean skip, relocate;
 	      asection *sreloc;
-	      Elf64_External_Rela *loc;
+	      bfd_byte *loc;
 
 	      /* When generating a dynamic object, these relocations
 		 are copied into the output file to be resolved at run
@@ -5853,8 +5854,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (sreloc == NULL)
 		abort ();
 
-	      loc = (Elf64_External_Rela *) sreloc->contents;
-	      loc += sreloc->reloc_count++;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* If this reloc is against an external symbol, it will
@@ -6065,7 +6066,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       && ((struct ppc_link_hash_entry *) h)->is_func_descriptor)
     {
       Elf_Internal_Rela rela;
-      Elf64_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -6084,15 +6085,16 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_JMP_SLOT);
       rela.r_addend = 0;
 
-      loc = (Elf64_External_Rela *) htab->srelplt->contents;
-      loc += (h->plt.offset - PLT_INITIAL_ENTRY_SIZE) / PLT_ENTRY_SIZE;
+      loc = htab->srelplt->contents;
+      loc += ((h->plt.offset - PLT_INITIAL_ENTRY_SIZE) / PLT_ENTRY_SIZE
+	      * sizeof (Elf64_External_Rela));
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if (h->got.offset != (bfd_vma) -1)
     {
       Elf_Internal_Rela rela;
-      Elf64_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -6130,15 +6132,15 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rela.r_addend = 0;
 	}
 
-      loc = (Elf64_External_Rela *) htab->srelgot->contents;
-      loc += htab->srelgot->reloc_count++;
+      loc = htab->srelgot->contents;
+      loc += htab->srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       Elf_Internal_Rela rela;
-      Elf64_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
@@ -6153,8 +6155,8 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_COPY);
       rela.r_addend = 0;
-      loc = (Elf64_External_Rela *) htab->srelbss->contents;
-      loc += htab->srelbss->reloc_count++;
+      loc = htab->srelbss->contents;
+      loc += htab->srelbss->reloc_count++ * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 

@@ -1176,16 +1176,13 @@ sort_dynamic_relocs (arg1, arg2)
      const PTR arg1;
      const PTR arg2;
 {
-  const Elf32_External_Rel *ext_reloc1 = (const Elf32_External_Rel *) arg1;
-  const Elf32_External_Rel *ext_reloc2 = (const Elf32_External_Rel *) arg2;
+  Elf_Internal_Rela int_reloc1;
+  Elf_Internal_Rela int_reloc2;
 
-  Elf_Internal_Rel int_reloc1;
-  Elf_Internal_Rel int_reloc2;
+  bfd_elf32_swap_reloc_in (reldyn_sorting_bfd, arg1, &int_reloc1);
+  bfd_elf32_swap_reloc_in (reldyn_sorting_bfd, arg2, &int_reloc2);
 
-  bfd_elf32_swap_reloc_in (reldyn_sorting_bfd, ext_reloc1, &int_reloc1);
-  bfd_elf32_swap_reloc_in (reldyn_sorting_bfd, ext_reloc2, &int_reloc2);
-
-  return (ELF32_R_SYM (int_reloc1.r_info) - ELF32_R_SYM (int_reloc2.r_info));
+  return ELF32_R_SYM (int_reloc1.r_info) - ELF32_R_SYM (int_reloc2.r_info);
 }
 
 /* This routine is used to write out ECOFF debugging external symbol
@@ -2861,7 +2858,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
      bfd_vma *addendp;
      asection *input_section;
 {
-  Elf_Internal_Rel outrel[3];
+  Elf_Internal_Rela outrel[3];
   boolean skip;
   asection *sreloc;
   bfd *dynobj;
@@ -2917,7 +2914,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
      record.  Note that R_MIPS_NONE == 0, so that this call to memset
      is a way of setting R_TYPE to R_MIPS_NONE.  */
   if (skip)
-    memset (outrel, 0, sizeof (Elf_Internal_Rel) * 3);
+    memset (outrel, 0, sizeof (Elf_Internal_Rela) * 3);
   else
     {
       long indx;
@@ -3001,10 +2998,9 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	  + sreloc->reloc_count * sizeof (Elf64_Mips_External_Rel)));
     }
   else
-    bfd_elf32_swap_reloc_out (output_bfd, &outrel[0],
-			      (((Elf32_External_Rel *)
-				sreloc->contents)
-			       + sreloc->reloc_count));
+    bfd_elf32_swap_reloc_out
+      (output_bfd, &outrel[0],
+       (sreloc->contents + sreloc->reloc_count * sizeof (Elf32_External_Rel)));
 
   /* Record the index of the first relocation referencing H.  This
      information is later emitted in the .msym section.  */
@@ -3577,7 +3573,7 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
 boolean
 _bfd_mips_elf_fake_sections (abfd, hdr, sec)
      bfd *abfd;
-     Elf32_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
      asection *sec;
 {
   register const char *name;

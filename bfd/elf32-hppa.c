@@ -3774,16 +3774,16 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		       In this case it is relative to the base of the
 		       object because the symbol index is zero.  */
 		    Elf_Internal_Rela outrel;
-		    asection *srelgot = htab->srelgot;
-		    Elf32_External_Rela *loc;
+		    bfd_byte *loc;
+		    asection *s = htab->srelgot;
 
 		    outrel.r_offset = (off
 				       + htab->sgot->output_offset
 				       + htab->sgot->output_section->vma);
 		    outrel.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);
 		    outrel.r_addend = relocation;
-		    loc = (Elf32_External_Rela *) srelgot->contents;
-		    loc += srelgot->reloc_count++;
+		    loc = s->contents;
+		    loc += s->reloc_count++ * sizeof (Elf32_External_Rela);
 		    bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 		  }
 		else
@@ -3864,16 +3864,16 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		      /* Output a dynamic IPLT relocation for this
 			 PLT entry.  */
 		      Elf_Internal_Rela outrel;
-		      asection *srelplt = htab->srelplt;
-		      Elf32_External_Rela *loc;
+		      bfd_byte *loc;
+		      asection *s = htab->srelplt;
 
 		      outrel.r_offset = (off
 					 + htab->splt->output_offset
 					 + htab->splt->output_section->vma);
 		      outrel.r_info = ELF32_R_INFO (0, R_PARISC_IPLT);
 		      outrel.r_addend = relocation;
-		      loc = (Elf32_External_Rela *) srelplt->contents;
-		      loc += srelplt->reloc_count++;
+		      loc = s->contents;
+		      loc += s->reloc_count++ * sizeof (Elf32_External_Rela);
 		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
 		  else
@@ -3958,7 +3958,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	      Elf_Internal_Rela outrel;
 	      boolean skip;
 	      asection *sreloc;
-	      Elf32_External_Rela *loc;
+	      bfd_byte *loc;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
@@ -4027,8 +4027,8 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (sreloc == NULL)
 		abort ();
 
-	      loc = (Elf32_External_Rela *) sreloc->contents;
-	      loc += sreloc->reloc_count++;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	    }
 	  break;
@@ -4126,7 +4126,7 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       if (! ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
 	{
 	  Elf_Internal_Rela rel;
-	  Elf32_External_Rela *loc;
+	  bfd_byte *loc;
 
 	  /* Create a dynamic IPLT relocation for this entry.  */
 	  rel.r_offset = (h->plt.offset
@@ -4145,8 +4145,8 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	      rel.r_addend = value;
 	    }
 
-	  loc = (Elf32_External_Rela *) htab->srelplt->contents;
-	  loc += htab->srelplt->reloc_count++;
+	  loc = htab->srelplt->contents;
+	  loc += htab->srelplt->reloc_count++ * sizeof (Elf32_External_Rela);
 	  bfd_elf32_swap_reloca_out (htab->splt->output_section->owner,
 				     &rel, loc);
 	}
@@ -4171,7 +4171,7 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (h->got.offset != (bfd_vma) -1)
     {
       Elf_Internal_Rela rel;
-      Elf32_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -4204,8 +4204,8 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rel.r_addend = 0;
 	}
 
-      loc = (Elf32_External_Rela *) htab->srelgot->contents;
-      loc += htab->srelgot->reloc_count++;
+      loc = htab->srelgot->contents;
+      loc += htab->srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
     }
 
@@ -4213,7 +4213,7 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
     {
       asection *s;
       Elf_Internal_Rela rel;
-      Elf32_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
@@ -4229,7 +4229,7 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + h->root.u.def.section->output_section->vma);
       rel.r_addend = 0;
       rel.r_info = ELF32_R_INFO (h->dynindx, R_PARISC_COPY);
-      loc = (Elf32_External_Rela *) s->contents + s->reloc_count++;
+      loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
     }
 

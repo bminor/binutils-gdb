@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void mn10200_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean mn10200_elf_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
 static boolean mn10200_elf_symbol_address_p
@@ -213,7 +213,7 @@ static void
 mn10200_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 

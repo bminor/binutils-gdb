@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type * xstormy16_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void xstormy16_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static bfd_reloc_status_type xstormy16_elf_24_reloc
   PARAMS ((bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 	   PTR data, asection *input_section, bfd *output_bfd,
@@ -296,7 +296,7 @@ static void
 xstormy16_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr;
-     Elf32_Internal_Rela * dst;
+     Elf_Internal_Rela * dst;
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
 

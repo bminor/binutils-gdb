@@ -41,7 +41,7 @@ static bfd_reloc_status_type elf32_frv_relocate_gprelhi
 static reloc_howto_type *frv_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void frv_info_to_howto_rela 
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean elf32_frv_relocate_section 
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static boolean elf32_frv_add_symbol_hook
@@ -581,7 +581,7 @@ static void
 frv_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr;
-     Elf32_Internal_Rela * dst;
+     Elf_Internal_Rela * dst;
 {
   unsigned int r_type;
 

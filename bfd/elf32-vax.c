@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type *reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void rtype_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static struct bfd_hash_entry *elf_vax_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table *elf_vax_link_hash_table_create
@@ -1693,6 +1693,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 	      boolean skip, relocate;
 
 	      /* When generating a shared object, these relocations
@@ -1811,11 +1812,9 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 		      outrel.r_addend,
 		      bfd_get_section_name (input_bfd, input_section));
 		}
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-					 (((Elf32_External_Rela *)
-					   sreloc->contents)
-					  + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* This reloc will be computed at runtime, so there's no
                  need to do anything now, except for R_VAX_32
@@ -1905,6 +1904,7 @@ elf_vax_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma got_offset;
       bfd_vma addend;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -1955,9 +1955,8 @@ elf_vax_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + got_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_VAX_JMP_SLOT);
       rela.r_addend = addend;
-      bfd_elf32_swap_reloca_out (output_bfd, &rela,
-				 ((Elf32_External_Rela *) srela->contents
-				  + plt_index));
+      loc = srela->contents + plt_index * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -1972,6 +1971,7 @@ elf_vax_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *sgot;
       asection *srela;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -2002,16 +2002,16 @@ elf_vax_finish_dynamic_symbol (output_bfd, info, h, sym)
 					 (sgot->contents
 					  + (h->got.offset & ~1)));
 
-      bfd_elf32_swap_reloca_out (output_bfd, &rela,
-				 ((Elf32_External_Rela *) srela->contents
-				  + srela->reloc_count));
-      ++srela->reloc_count;
+      loc = srela->contents;
+      loc += srela->reloc_count++ * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
@@ -2028,10 +2028,8 @@ elf_vax_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_VAX_COPY);
       rela.r_addend = 0;
-      bfd_elf32_swap_reloca_out (output_bfd, &rela,
-				 ((Elf32_External_Rela *) s->contents
-				  + s->reloc_count));
-      ++s->reloc_count;
+      loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */

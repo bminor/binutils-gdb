@@ -35,9 +35,9 @@
 static reloc_howto_type *v850_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void v850_elf_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void v850_elf_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static bfd_reloc_status_type v850_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean v850_elf_is_local_label_name
@@ -59,7 +59,7 @@ static bfd_reloc_status_type v850_elf_final_link_relocate
 static boolean v850_elf_object_p
   PARAMS ((bfd *));
 static boolean v850_elf_fake_sections
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static void v850_elf_final_write_processing
   PARAMS ((bfd *, boolean));
 static boolean v850_elf_set_private_flags
@@ -589,9 +589,9 @@ v850_elf_reloc_type_lookup (abfd, code)
 
 static void
 v850_elf_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *                 abfd ATTRIBUTE_UNUSED;
-     arelent *             cache_ptr;
-     Elf32_Internal_Rel *  dst;
+     bfd *               abfd ATTRIBUTE_UNUSED;
+     arelent *           cache_ptr;
+     Elf_Internal_Rela * dst;
 {
   unsigned int r_type;
 
@@ -603,9 +603,9 @@ v850_elf_info_to_howto_rel (abfd, cache_ptr, dst)
 /* Set the howto pointer for a V850 ELF reloc (type RELA).  */
 static void
 v850_elf_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd *                 abfd ATTRIBUTE_UNUSED;
-     arelent *             cache_ptr;
-     Elf32_Internal_Rela   *dst;
+     bfd *               abfd ATTRIBUTE_UNUSED;
+     arelent *           cache_ptr;
+     Elf_Internal_Rela * dst;
 {
   unsigned int r_type;
 
@@ -2225,9 +2225,9 @@ v850_elf_section_from_shdr (abfd, hdr, name)
 
 static boolean
 v850_elf_fake_sections (abfd, hdr, sec)
-     bfd *                 abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr * hdr;
-     asection *            sec;
+     bfd *               abfd ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr * hdr;
+     asection *          sec;
 {
   register const char * name;
 

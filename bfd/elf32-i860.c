@@ -34,7 +34,7 @@ static reloc_howto_type *elf32_i860_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
 static void elf32_i860_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static bfd_reloc_status_type elf32_i860_relocate_splitn
   PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
@@ -694,7 +694,7 @@ static void
 elf32_i860_info_to_howto_rela (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf64_Internal_Rela *elf_reloc;
+     Elf_Internal_Rela *elf_reloc;
 {
   bfd_reloc->howto
     = lookup_howto ((unsigned) ELF32_R_TYPE (elf_reloc->r_info));

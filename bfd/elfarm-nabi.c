@@ -583,13 +583,13 @@ static reloc_howto_type elf32_arm_thm_pc9_howto =
 	 true);			/* pcrel_offset */
 
 static void elf32_arm_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static void
 elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd * abfd ATTRIBUTE_UNUSED;
      arelent * bfd_reloc;
-     Elf32_Internal_Rel * elf_reloc;
+     Elf_Internal_Rela * elf_reloc;
 {
   unsigned int r_type;
 

@@ -28,9 +28,9 @@ static bfd_reloc_status_type elf32_i960_relocate
 static reloc_howto_type *elf32_i960_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf32_i960_info_to_howto
-  PARAMS ((bfd *, arelent *cache_ptr, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *cache_ptr, Elf_Internal_Rela *));
 static void elf32_i960_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 #define USE_REL 1
 
@@ -77,7 +77,7 @@ static void
 elf32_i960_info_to_howto (abfd, cache_ptr, dst)
      bfd		*abfd ATTRIBUTE_UNUSED;
      arelent		*cache_ptr ATTRIBUTE_UNUSED;
-     Elf32_Internal_Rela *dst ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -86,7 +86,7 @@ static void
 elf32_i960_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
   enum elf_i960_reloc_type type;
 

@@ -1128,7 +1128,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		      || (h->elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	{
-	  Elf_Internal_Rel outrel;
+	  Elf_Internal_Rela outrel;
+	  bfd_byte *loc;
 	  boolean skip, relocate;
 
 	  if (sreloc == NULL)
@@ -1192,11 +1193,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		}
 	    }
 
-	  bfd_elf32_swap_reloc_out (output_bfd, &outrel,
-				    (((Elf32_External_Rel *)
-				      sreloc->contents)
-				     + sreloc->reloc_count));
-	  ++sreloc->reloc_count;
+	  loc = sreloc->contents;
+	  loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rel);
+	  bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
 
 	  /* If this reloc is against an external symbol, we do not want to
 	     fiddle with the addend.  Otherwise, we need to include the symbol
@@ -1657,7 +1656,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	      if (info->shared)
 		{
 		  asection * srelgot;
-		  Elf_Internal_Rel outrel;
+		  Elf_Internal_Rela outrel;
+		  bfd_byte *loc;
 
 		  srelgot = bfd_get_section_by_name (dynobj, ".rel.got");
 		  BFD_ASSERT (srelgot != NULL);
@@ -1666,11 +1666,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 				     + sgot->output_offset
 				     + off);
 		  outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
-		  bfd_elf32_swap_reloc_out (output_bfd, &outrel,
-					    (((Elf32_External_Rel *)
-					      srelgot->contents)
-					     + srelgot->reloc_count));
-		  ++srelgot->reloc_count;
+		  loc = srelgot->contents;
+		  loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rel);
+		  bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
 		}
 
 	      local_got_offsets[r_symndx] |= 1;
@@ -1863,12 +1861,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_ARM_GNU_VTINHERIT)
         continue;
 
-#if USE_REL
-      elf32_arm_info_to_howto (input_bfd, & bfd_reloc,
-			       (Elf_Internal_Rel *) rel);
-#else
       elf32_arm_info_to_howto (input_bfd, & bfd_reloc, rel);
-#endif
       howto = bfd_reloc.howto;
 
 #if USE_REL
@@ -3321,7 +3314,8 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection * srel;
       bfd_vma plt_index;
       bfd_vma got_offset;
-      Elf_Internal_Rel rel;
+      Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -3371,9 +3365,8 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + sgot->output_offset
 		      + got_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_JUMP_SLOT);
-      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-				((Elf32_External_Rel *) srel->contents
-				 + plt_index));
+      loc = srel->contents + plt_index * sizeof (Elf32_External_Rel);
+      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -3394,7 +3387,8 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
     {
       asection * sgot;
       asection * srel;
-      Elf_Internal_Rel rel;
+      Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -3420,16 +3414,15 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
 	}
 
-      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-				((Elf32_External_Rel *) srel->contents
-				 + srel->reloc_count));
-      ++srel->reloc_count;
+      loc = srel->contents + srel->reloc_count++ * sizeof (Elf32_External_Rel);
+      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection * s;
-      Elf_Internal_Rel rel;
+      Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1
@@ -3444,10 +3437,8 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_COPY);
-      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-				((Elf32_External_Rel *) s->contents
-				 + s->reloc_count));
-      ++s->reloc_count;
+      loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rel);
+      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */

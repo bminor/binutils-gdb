@@ -1788,7 +1788,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
                     {
                       asection *srelgot;
                       Elf_Internal_Rela outrel;
-		      Elf32_External_Rela *loc;
+		      bfd_byte *loc;
 
                       srelgot = htab->srelgot;
 		      if (srelgot == NULL)
@@ -1799,8 +1799,8 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
                                          + off);
                       outrel.r_info = ELF32_R_INFO (0, R_390_RELATIVE);
 		      outrel.r_addend = relocation;
-		      loc = (Elf32_External_Rela *) srelgot->contents;
-		      loc += srelgot->reloc_count++;
+		      loc = srelgot->contents;
+		      loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
                       bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
                     }
 
@@ -1907,7 +1907,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
               Elf_Internal_Rela outrel;
               boolean skip, relocate;
 	      asection *sreloc;
-	      Elf32_External_Rela *loc;
+	      bfd_byte *loc;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
@@ -1954,8 +1954,8 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (sreloc == NULL)
 		abort ();
 
-	      loc = (Elf32_External_Rela *) sreloc->contents;
-	      loc += sreloc->reloc_count++;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
               /* If this reloc is against an external symbol, we do
@@ -2047,7 +2047,7 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma plt_index;
       bfd_vma got_offset;
       Elf_Internal_Rela rela;
-      Elf32_External_Rela *loc;
+      bfd_byte *loc;
       bfd_vma relative_offset;
 
       /* This symbol has an entry in the procedure linkage table.  Set
@@ -2167,7 +2167,7 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + got_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_390_JMP_SLOT);
       rela.r_addend = 0;
-      loc = (Elf32_External_Rela *) htab->srelplt->contents + plt_index;
+      loc = htab->srelplt->contents + plt_index * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
@@ -2184,7 +2184,7 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (h->got.offset != (bfd_vma) -1)
     {
       Elf_Internal_Rela rela;
-      Elf32_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
          up.  */
@@ -2221,15 +2221,15 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
           rela.r_addend = 0;
         }
 
-      loc = (Elf32_External_Rela *) htab->srelgot->contents;
-      loc += htab->srelgot->reloc_count++;
+      loc = htab->srelgot->contents;
+      loc += htab->srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       Elf_Internal_Rela rela;
-      Elf32_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbols needs a copy reloc.  Set it up.  */
 
@@ -2244,8 +2244,8 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_390_COPY);
       rela.r_addend = 0;
-      loc = (Elf32_External_Rela *) htab->srelbss->contents;
-      loc += htab->srelbss->reloc_count++;
+      loc = htab->srelbss->contents;
+      loc += htab->srelbss->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 

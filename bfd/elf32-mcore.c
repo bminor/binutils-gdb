@@ -36,7 +36,7 @@ static void mcore_elf_howto_init
 static reloc_howto_type * mcore_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void mcore_elf_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean mcore_elf_set_private_flags
   PARAMS ((bfd *, flagword));
 static boolean mcore_elf_merge_private_bfd_data
@@ -275,7 +275,7 @@ static void
 mcore_elf_info_to_howto (abfd, cache_ptr, dst)
      bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr;
-     Elf32_Internal_Rela * dst;
+     Elf_Internal_Rela * dst;
 {
   if (! mcore_elf_howto_table [R_MCORE_PCRELIMM8BY4])	/* Initialize howto table if needed */
     mcore_elf_howto_init ();

@@ -6081,17 +6081,6 @@ _bfd_elf_no_info_to_howto (abfd, cache_ptr, dst)
   abort ();
 }
 
-#if 0
-void
-_bfd_elf_no_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
-     arelent *cache_ptr;
-     Elf_Internal_Rel *dst;
-{
-  abort ();
-}
-#endif
-
 /* Try to convert a non-ELF reloc into an ELF one.  */
 
 boolean

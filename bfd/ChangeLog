@@ -1,3 +1,65 @@
+2002-11-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h: Replace occurrences of Elf32_Internal_* and
+	Elf64_Internal_* with Elf_Internal_*.  Replace Elf_Internal_Rel
+	with Elf_Internal_Rela.
+	* elf-hppa.h, elf-m10200.c, elf-m10300.c, elf32-arc.c, elf32-arm.h,
+	elf32-avr.c, elf32-cris.c, elf32-d10v.c, elf32-d30v.c, elf32-dlx.c,
+	elf32-fr30.c, elf32-frv.c, elf32-gen.c, elf32-h8300.c, elf32-hppa.c,
+	elf32-i370.c, elf32-i386.c, elf32-i860.c, elf32-i960.c, elf32-ip2k.c,
+	elf32-m32r.c, elf32-m68hc11.c, elf32-m68hc12.c, elf32-m68k.c,
+	elf32-mcore.c, elf32-mips.c, elf32-openrisc.c, elf32-or32.c,
+	elf32-ppc.c, elf32-s390.c, elf32-sh.c, elf32-v850.c, elf32-vax.c,
+	elf32-xstormy16.c, elf64-alpha.c, elf64-gen.c, elf64-hppa.c,
+	elf64-mips.c, elf64-mmix.c, elf64-ppc.c, elf64-s390.c, elf64-sh64.c,
+	elf64-sparc.c, elf64-x86-64.c, elfarm-nabi.c, elfarm-oabi.c,
+	elfcode.h, elflink.h, elfn32-mips.c, elfxx-ia64.c, elfxx-mips.c: Ditto.
+	* elf-hppa.h (elf_hppa_internal_shdr): Delete.  Use Elf_Internal_Shdr
+	throughout instead.
+	* elf.c (_bfd_elf_no_info_to_howto_rel): Delete.
+	* elfcode.h (elf_swap_reloca_in): Pass source operand as a bfd_byte *.
+	Remove INLINE keyword.
+	(elf_swap_reloc_in): Likewise.  Also clear r_addend.
+	(elf_swap_reloc_out, elf_swap_reloca_out): Pass destination operand
+	as a bfd_byte *.
+	(elf_write_relocs): Consolidate REL and RELA code.
+	(elf_slurp_reloc_table_from_section): Simplify REL code.
+	(NAME(_bfd_elf,size_info)): Populate reloc swap entries.
+	* elf-bfd.h (MAX_INT_RELS_PER_EXT_REL): Define.
+	* elflink.h (elf_link_read_relocs_from_section): Consolidate REL and
+	RELA code.
+	(elf_link_adjust_relocs): Likewise.  Don't malloc space for temp
+	reloc array, use a fixed size of MAX_INT_RELS_PER_EXT_REL.
+	(elf_link_output_relocs): Likewise.
+	(elf_reloc_link_order): Likewise.
+	(elf_finish_pointer_linker_section): Likewise.
+	(struct elf_link_sort_rela): Remove union.
+	(elf_link_sort_cmp1): Update to suit.
+	(elf_link_sort_cmp2): Here too.
+	(elf_link_sort_relocs): Consolidate REL and RELA code.  Fix memory
+	over-allocation for int_rels_per_ext_rel != 1 case.
+	* elf32-arm.h: Update all bfd_elf32_swap_reloc_out calls.
+	* elf32-i386.c: Likewise.
+	* elf32-cris.c: Likewise for bfd_elf32_swap_reloca_out.
+	* elf32-hppa.c, elf32-i370.c, elf32-m68k.c, elf32-ppc.c, elf32-s390.c,
+	elf32-sh.c, elf32-vax.c, elfxx-mips.c: Likewise.
+	* elf64-alpha.c: Likewise for bfd_elf64_swap_reloca_out.
+	* elf64-hppa.c, elf64-mips.c, elf64-ppc.c, elf64-s390.c, elf64-sh64.c,
+	elf64-sparc.c, elf64-x86-64.c: Likewise.
+	* elfxx-ia64.c: Likewise for bfd_elfNN_swap_reloca_out.
+	* elfxx-mips.c (sort_dynamic_relocs): Likewise for
+	bfd_elf32_swap_reloc_in.
+
+	* elf32-arm.h: Update elf32_arm_info_to_howto calls.
+	* elf32-mips.c: Likewise for mips_info_to_howto_rel.
+	(mips_elf64_swap_reloc_in): Zero r_addend.
+	(mips_elf64_be_swap_reloc_in): Likewise.
+	(mips_elf64_slurp_one_reloc_table): Simplify.
+
+	* elf64-alpha.c (alpha_elf_size_info): Populate reloc swap entries.
+	* elf64-hppa.c (hppa64_elf_size_info): Likewise.
+	* elf64-sparc.c (sparc64_elf_size_info): Likewise.
+
 2002-11-28  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_relocate_section): Don't complain about

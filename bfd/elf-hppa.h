@@ -28,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if ARCH_SIZE == 64
 #define ELF_R_TYPE(X)   ELF64_R_TYPE(X)
 #define ELF_R_SYM(X)   ELF64_R_SYM(X)
-#define elf_hppa_internal_shdr Elf64_Internal_Shdr
 #define elf_hppa_reloc_final_type elf64_hppa_reloc_final_type
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
 #define elf_hppa_relocate_section elf64_hppa_relocate_section
@@ -38,7 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if ARCH_SIZE == 32
 #define ELF_R_TYPE(X)   ELF32_R_TYPE(X)
 #define ELF_R_SYM(X)   ELF32_R_SYM(X)
-#define elf_hppa_internal_shdr Elf32_Internal_Shdr
 #define elf_hppa_reloc_final_type elf32_hppa_reloc_final_type
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
 #define elf_hppa_relocate_section elf32_hppa_relocate_section
@@ -50,7 +48,7 @@ static void elf_hppa_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static void elf_hppa_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static reloc_howto_type * elf_hppa_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
@@ -59,7 +57,7 @@ static boolean elf_hppa_is_local_label_name
   PARAMS ((bfd *, const char *));
 
 static boolean elf_hppa_fake_sections
-  PARAMS ((bfd *abfd, elf_hppa_internal_shdr *, asection *));
+  PARAMS ((bfd *abfd, Elf_Internal_Shdr *, asection *));
 
 static void elf_hppa_final_write_processing
   PARAMS ((bfd *, boolean));
@@ -937,7 +935,7 @@ static void
 elf_hppa_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf_Internal_Rel *elf_reloc;
+     Elf_Internal_Rela *elf_reloc;
 {
   BFD_ASSERT (ELF_R_TYPE(elf_reloc->r_info)
 	      < (unsigned int) R_PARISC_UNIMPLEMENTED);
@@ -978,7 +976,7 @@ elf_hppa_is_local_label_name (abfd, name)
 static boolean
 elf_hppa_fake_sections (abfd, hdr, sec)
      bfd *abfd;
-     elf_hppa_internal_shdr *hdr;
+     Elf_Internal_Shdr *hdr;
      asection *sec;
 {
   register const char *name;

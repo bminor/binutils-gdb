@@ -29,7 +29,7 @@ static reloc_howto_type *elf32_h8_reloc_type_lookup
 static void elf32_h8_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void elf32_h8_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static unsigned long elf32_h8_mach
   PARAMS ((flagword));
 static void elf32_h8_final_write_processing
@@ -261,7 +261,7 @@ static void
 elf32_h8_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rela *elf_reloc;
+     Elf_Internal_Rela *elf_reloc;
 {
   unsigned int r;
   unsigned int i;
@@ -280,7 +280,7 @@ static void
 elf32_h8_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rel *elf_reloc ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
 {
   unsigned int r;
 

@@ -28,9 +28,9 @@ int    set_dlx_skip_hi16_flag PARAMS ((int));
 static boolean elf32_dlx_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
 static void elf32_dlx_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void elf32_dlx_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static bfd_reloc_status_type elf32_dlx_relocate16
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type elf32_dlx_relocate26
@@ -632,7 +632,7 @@ static void
 elf32_dlx_info_to_howto (abfd, cache_ptr, dst)
      bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr ATTRIBUTE_UNUSED;
-     Elf32_Internal_Rela * dst ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela * dst ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -641,7 +641,7 @@ static void
 elf32_dlx_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 

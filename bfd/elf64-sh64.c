@@ -1755,6 +1755,7 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 	      boolean skip, relocate;
 
 	      /* When generating a shared object, these relocations
@@ -1825,11 +1826,9 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		}
 
-	      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
-					 (((Elf64_External_Rela *)
-					   sreloc->contents)
-					  + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
+	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* If this reloc is against an external symbol, we do
 		 not want to fiddle with the addend.  Otherwise, we
@@ -1978,22 +1977,21 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  if (info->shared)
 		    {
-		      asection *srelgot;
+		      asection *s;
 		      Elf_Internal_Rela outrel;
+		      bfd_byte *loc;
 
-		      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-		      BFD_ASSERT (srelgot != NULL);
+		      s = bfd_get_section_by_name (dynobj, ".rela.got");
+		      BFD_ASSERT (s != NULL);
 
 		      outrel.r_offset = (sgot->output_section->vma
 					 + sgot->output_offset
 					 + off);
 		      outrel.r_info = ELF64_R_INFO (0, R_SH_RELATIVE64);
 		      outrel.r_addend = relocation;
-		      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
-						(((Elf64_External_Rela *)
-						  srelgot->contents)
-						 + srelgot->reloc_count));
-		      ++srelgot->reloc_count;
+		      loc = s->contents;
+		      loc += s->reloc_count++ * sizeof (Elf64_External_Rela);
+		      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
 
 		  if (rel->r_addend)
@@ -3827,6 +3825,7 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma plt_index;
       bfd_vma got_offset;
       Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -3915,9 +3914,8 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
       rel.r_info = ELF64_R_INFO (h->dynindx, R_SH_JMP_SLOT64);
       rel.r_addend = 0;
       rel.r_addend = GOT_BIAS;
-      bfd_elf64_swap_reloca_out (output_bfd, &rel,
-				((Elf64_External_Rela *) srel->contents
-				 + plt_index));
+      loc = srel->contents + plt_index * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (output_bfd, &rel, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -3932,6 +3930,7 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *sgot;
       asection *srel;
       Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -3965,16 +3964,16 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rel.r_addend = 0;
 	}
 
-      bfd_elf64_swap_reloca_out (output_bfd, &rel,
-				 ((Elf64_External_Rela *) srel->contents
-				  + srel->reloc_count));
-      ++srel->reloc_count;
+      loc = srel->contents;
+      loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (output_bfd, &rel, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
       Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
@@ -3991,10 +3990,9 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF64_R_INFO (h->dynindx, R_SH_COPY64);
       rel.r_addend = 0;
-      bfd_elf64_swap_reloca_out (output_bfd, &rel,
-				 ((Elf64_External_Rela *) s->contents
-				  + s->reloc_count));
-      ++s->reloc_count;
+      loc = s->contents;
+      loc += s->reloc_count++ * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (output_bfd, &rel, loc);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */

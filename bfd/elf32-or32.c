@@ -26,7 +26,7 @@
 #include "libiberty.h"
 
 static reloc_howto_type *     bfd_elf32_bfd_reloc_type_lookup  PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void                   or32_info_to_howto_rel           PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static void                   or32_info_to_howto_rel           PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean                or32_elf_object_p                PARAMS ((bfd *));
 static void                   or32_elf_final_write_processing  PARAMS ((bfd *, boolean));
 static bfd_reloc_status_type  or32_elf_32_reloc                PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
@@ -221,7 +221,7 @@ static void
 or32_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 

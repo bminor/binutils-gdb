@@ -153,7 +153,7 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
 static reloc_howto_type *elf64_x86_64_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf64_x86_64_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean elf64_x86_64_grok_prstatus
   PARAMS ((bfd *, Elf_Internal_Note *));
 static boolean elf64_x86_64_grok_psinfo
@@ -231,7 +231,7 @@ static void
 elf64_x86_64_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf64_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned r_type, i;
 
@@ -2004,14 +2004,14 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  if (info->shared)
 		    {
-		      asection *srelgot;
+		      asection *s;
 		      Elf_Internal_Rela outrel;
-		      Elf64_External_Rela *loc;
+		      bfd_byte *loc;
 
 		      /* We need to generate a R_X86_64_RELATIVE reloc
 			 for the dynamic linker.  */
-		      srelgot = htab->srelgot;
-		      if (srelgot == NULL)
+		      s = htab->srelgot;
+		      if (s == NULL)
 			abort ();
 
 		      outrel.r_offset = (htab->sgot->output_section->vma
@@ -2019,8 +2019,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 					 + off);
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
 		      outrel.r_addend = relocation;
-		      loc = (Elf64_External_Rela *) srelgot->contents;
-		      loc += srelgot->reloc_count++;
+		      loc = s->contents;
+		      loc += s->reloc_count++ * sizeof (Elf64_External_Rela);
 		      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
 
@@ -2099,9 +2099,9 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || h->root.type == bfd_link_hash_undefined)))
 	    {
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 	      boolean skip, relocate;
 	      asection *sreloc;
-	      Elf64_External_Rela *loc;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
@@ -2186,8 +2186,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (sreloc == NULL)
 		abort ();
 
-	      loc = (Elf64_External_Rela *) sreloc->contents;
-	      loc += sreloc->reloc_count++;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* If this reloc is against an external symbol, we do
@@ -2333,7 +2333,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
           else
 	    {
 	      Elf_Internal_Rela outrel;
-	      Elf64_External_Rela *loc;
+	      bfd_byte *loc;
 	      int dr_type, indx;
 
 	      if (htab->srelgot == NULL)
@@ -2354,8 +2354,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		outrel.r_addend = relocation - dtpoff_base (info);
 	      outrel.r_info = ELF64_R_INFO (indx, dr_type);
 
-	      loc = (Elf64_External_Rela *) htab->srelgot->contents;
-	      loc += htab->srelgot->reloc_count++;
+	      loc = htab->srelgot->contents;
+	      loc += htab->srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      if (r_type == R_X86_64_TLSGD)
@@ -2375,9 +2375,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 						    R_X86_64_DTPOFF64);
 		      outrel.r_offset += GOT_ENTRY_SIZE;
 		      htab->srelgot->reloc_count++;
-		      loc++;
-		      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
-						 loc);
+		      loc += sizeof (Elf64_External_Rela);
+		      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
 		}
 
@@ -2473,7 +2472,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      Elf_Internal_Rela outrel;
-	      Elf64_External_Rela *loc;
+	      bfd_byte *loc;
 
 	      if (htab->srelgot == NULL)
 		abort ();
@@ -2487,8 +2486,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 			  htab->sgot->contents + off + GOT_ENTRY_SIZE);
 	      outrel.r_info = ELF64_R_INFO (0, R_X86_64_DTPMOD64);
 	      outrel.r_addend = 0;
-	      loc = (Elf64_External_Rela *) htab->srelgot->contents;
-	      loc += htab->srelgot->reloc_count++;
+	      loc = htab->srelgot->contents;
+	      loc += htab->srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 	      htab->tls_ld_got.offset |= 1;
 	    }
@@ -2589,7 +2588,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma plt_index;
       bfd_vma got_offset;
       Elf_Internal_Rela rela;
-      Elf64_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.	 */
@@ -2649,7 +2648,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + got_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_JUMP_SLOT);
       rela.r_addend = 0;
-      loc = (Elf64_External_Rela *) htab->srelplt->contents + plt_index;
+      loc = htab->srelplt->contents + plt_index * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
@@ -2668,7 +2667,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
       && elf64_x86_64_hash_entry (h)->tls_type != GOT_TLS_IE)
     {
       Elf_Internal_Rela rela;
-      Elf64_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -2706,15 +2705,15 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rela.r_addend = 0;
 	}
 
-      loc = (Elf64_External_Rela *) htab->srelgot->contents;
-      loc += htab->srelgot->reloc_count++;
+      loc = htab->srelgot->contents;
+      loc += htab->srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       Elf_Internal_Rela rela;
-      Elf64_External_Rela *loc;
+      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
@@ -2729,8 +2728,8 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_COPY);
       rela.r_addend = 0;
-      loc = (Elf64_External_Rela *) htab->srelbss->contents;
-      loc += htab->srelbss->reloc_count++;
+      loc = htab->srelbss->contents;
+      loc += htab->srelbss->reloc_count++ * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 

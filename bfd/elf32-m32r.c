@@ -43,7 +43,7 @@ static bfd_reloc_status_type m32r_elf_sda16_reloc
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void m32r_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 boolean _bfd_m32r_elf_section_from_bfd_section
   PARAMS ((bfd *, asection *, int *));
 void _bfd_m32r_elf_symbol_processing
@@ -756,7 +756,7 @@ static void
 m32r_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 

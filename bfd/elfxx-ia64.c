@@ -163,18 +163,18 @@ static reloc_howto_type * lookup_howto
 static reloc_howto_type *elfNN_ia64_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type bfd_code));
 static void elfNN_ia64_info_to_howto
-  PARAMS ((bfd *abfd, arelent *bfd_reloc, ElfNN_Internal_Rela *elf_reloc));
+  PARAMS ((bfd *abfd, arelent *bfd_reloc, Elf_Internal_Rela *elf_reloc));
 static boolean elfNN_ia64_relax_section
   PARAMS((bfd *abfd, asection *sec, struct bfd_link_info *link_info,
 	  boolean *again));
 static boolean is_unwind_section_name
   PARAMS ((bfd *abfd, const char *));
 static boolean elfNN_ia64_section_from_shdr
-  PARAMS ((bfd *, ElfNN_Internal_Shdr *, const char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static boolean elfNN_ia64_section_flags
-  PARAMS ((flagword *, ElfNN_Internal_Shdr *));
+  PARAMS ((flagword *, Elf_Internal_Shdr *));
 static boolean elfNN_ia64_fake_sections
-  PARAMS ((bfd *abfd, ElfNN_Internal_Shdr *hdr, asection *sec));
+  PARAMS ((bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec));
 static void elfNN_ia64_final_write_processing
   PARAMS ((bfd *abfd, boolean linker));
 static boolean elfNN_ia64_add_symbol_hook
@@ -597,7 +597,7 @@ static void
 elfNN_ia64_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     ElfNN_Internal_Rela *elf_reloc;
+     Elf_Internal_Rela *elf_reloc;
 {
   bfd_reloc->howto
     = lookup_howto ((unsigned int) ELFNN_R_TYPE (elf_reloc->r_info));
@@ -1017,7 +1017,7 @@ is_unwind_section_name (abfd, name)
 static boolean
 elfNN_ia64_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
-     ElfNN_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
      const char *name;
 {
   asection *newsect;
@@ -1057,7 +1057,7 @@ elfNN_ia64_section_from_shdr (abfd, hdr, name)
 static boolean
 elfNN_ia64_section_flags (flags, hdr)
      flagword *flags;
-     ElfNN_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
 {
   if (hdr->sh_flags & SHF_IA_64_SHORT)
     *flags |= SEC_SMALL_DATA;
@@ -1071,7 +1071,7 @@ elfNN_ia64_section_flags (flags, hdr)
 static boolean
 elfNN_ia64_fake_sections (abfd, hdr, sec)
      bfd *abfd ATTRIBUTE_UNUSED;
-     ElfNN_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
      asection *sec;
 {
   register const char *name;
@@ -3203,6 +3203,7 @@ elfNN_ia64_install_dyn_reloc (abfd, info, sec, srel, offset, type,
      bfd_vma addend;
 {
   Elf_Internal_Rela outrel;
+  bfd_byte *loc;
 
   BFD_ASSERT (dynindx != -1);
   outrel.r_info = ELFNN_R_INFO (dynindx, type);
@@ -3219,9 +3220,9 @@ elfNN_ia64_install_dyn_reloc (abfd, info, sec, srel, offset, type,
   else
     outrel.r_offset += sec->output_section->vma + sec->output_offset;
 
-  bfd_elfNN_swap_reloca_out (abfd, &outrel,
-			     ((ElfNN_External_Rela *) srel->contents
-			      + srel->reloc_count++));
+  loc = srel->contents;
+  loc += srel->reloc_count++ * sizeof (ElfNN_External_Rela);
+  bfd_elfNN_swap_reloca_out (abfd, &outrel, loc);
   BFD_ASSERT (sizeof (ElfNN_External_Rela) * srel->reloc_count
 	      <= srel->_cooked_size);
 }
@@ -4350,7 +4351,6 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_byte *loc;
       asection *plt_sec;
       bfd_vma plt_addr, pltoff_addr, gp_val, index;
-      ElfNN_External_Rela *rel;
 
       gp_val = _bfd_get_gp_value (output_bfd);
 
@@ -4407,10 +4407,10 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 existing sec->reloc_count to be the base of the array of
 	 PLT relocations.  */
 
-      rel = (ElfNN_External_Rela *)ia64_info->rel_pltoff_sec->contents;
-      rel += ia64_info->rel_pltoff_sec->reloc_count;
-
-      bfd_elfNN_swap_reloca_out (output_bfd, &outrel, rel + index);
+      loc = ia64_info->rel_pltoff_sec->contents;
+      loc += ((ia64_info->rel_pltoff_sec->reloc_count + index)
+	      * sizeof (Elf64_External_Rela));
+      bfd_elfNN_swap_reloca_out (output_bfd, &outrel, loc);
     }
 
   /* Mark some specially defined symbols as absolute.  */

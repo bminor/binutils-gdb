@@ -424,6 +424,9 @@ struct elf_size_info {
   /* The number of internal relocations to allocate per external
      relocation entry.  */
   unsigned char int_rels_per_ext_rel;
+  /* We use some fixed size arrays.  This should be large enough to
+     handle all back-ends.  */
+#define MAX_INT_RELS_PER_EXT_REL 3
 
   unsigned char arch_size, file_align;
   unsigned char elfclass, ev_current;
@@ -446,30 +449,25 @@ struct elf_size_info {
   void (*swap_dyn_out)
     PARAMS ((bfd *, const Elf_Internal_Dyn *, PTR));
 
-  /* This function, if defined, is called to swap in a REL
-     relocation.  If an external relocation corresponds to more than
-     one internal relocation, then all relocations are swapped in at
-     once.  */
+  /* This function is called to swap in a REL relocation.  If an
+     external relocation corresponds to more than one internal
+     relocation, then all relocations are swapped in at once.  */
   void (*swap_reloc_in)
-    PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rel *));
+    PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 
-  /* This function, if defined, is called to swap out a REL
-     relocation.  */
+  /* This function is called to swap out a REL relocation.  */
   void (*swap_reloc_out)
-    PARAMS ((bfd *, const Elf_Internal_Rel *, bfd_byte *));
+    PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
 
-  /* This function, if defined, is called to swap in a RELA
-     relocation.  If an external relocation corresponds to more than
-     one internal relocation, then all relocations are swapped in at
-     once.  */
+  /* This function is called to swap in a RELA relocation.  If an
+     external relocation corresponds to more than one internal
+     relocation, then all relocations are swapped in at once.  */
   void (*swap_reloca_in)
     PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 
-  /* This function, if defined, is called to swap out a RELA
-     relocation.  */
+  /* This function is called to swap out a RELA relocation.  */
   void (*swap_reloca_out)
     PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
-
 };
 
 #define elf_symbol_from(ABFD,S) \
@@ -523,7 +521,7 @@ struct elf_backend_data
   /* A function to translate an ELF REL relocation to a BFD arelent
      structure.  */
   void (*elf_info_to_howto_rel)
-    PARAMS ((bfd *, arelent *, Elf_Internal_Rel *));
+    PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
   /* A function to determine whether a symbol is global when
      partitioning the symbol table into local and global symbols.
@@ -566,28 +564,28 @@ struct elf_backend_data
      type fields for some sections, or to actually write out data for
      unusual sections.  */
   boolean (*elf_backend_section_processing)
-    PARAMS ((bfd *, Elf32_Internal_Shdr *));
+    PARAMS ((bfd *, Elf_Internal_Shdr *));
 
   /* A function to handle unusual section types when creating BFD
      sections from ELF sections.  */
   boolean (*elf_backend_section_from_shdr)
-    PARAMS ((bfd *, Elf32_Internal_Shdr *, const char *));
+    PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
   boolean (*elf_backend_section_flags)
-    PARAMS ((flagword *, Elf32_Internal_Shdr *));
+    PARAMS ((flagword *, Elf_Internal_Shdr *));
 
   /* A function to handle unusual program segment types when creating BFD
      sections from ELF program segments.  */
   boolean (*elf_backend_section_from_phdr)
-    PARAMS ((bfd *, Elf32_Internal_Phdr *, int));
+    PARAMS ((bfd *, Elf_Internal_Phdr *, int));
 
   /* A function to set up the ELF section header for a BFD section in
      preparation for writing it out.  This is where the flags and type
      fields are set for unusual sections.  */
   boolean (*elf_backend_fake_sections)
-    PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+    PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 
   /* A function to get the ELF section index for a BFD section.  If
      this returns true, the section was found.  If it is a normal ELF
@@ -1486,21 +1484,21 @@ extern elf_linker_section_pointers_t *_bfd_elf_find_pointer_linker_section
 
 extern boolean bfd_elf32_create_pointer_linker_section
   PARAMS ((bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, const Elf32_Internal_Rela *));
+	   struct elf_link_hash_entry *, const Elf_Internal_Rela *));
 
 extern bfd_vma bfd_elf32_finish_pointer_linker_section
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, elf_linker_section_t *,
 	   struct elf_link_hash_entry *, bfd_vma,
-	   const Elf32_Internal_Rela *, int));
+	   const Elf_Internal_Rela *, int));
 
 extern boolean bfd_elf64_create_pointer_linker_section
   PARAMS ((bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, const Elf64_Internal_Rela *));
+	   struct elf_link_hash_entry *, const Elf_Internal_Rela *));
 
 extern bfd_vma bfd_elf64_finish_pointer_linker_section
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, elf_linker_section_t *,
 	   struct elf_link_hash_entry *, bfd_vma,
-	   const Elf64_Internal_Rela *, int));
+	   const Elf_Internal_Rela *, int));
 
 extern boolean _bfd_elf_make_linker_section_rela
   PARAMS ((bfd *, elf_linker_section_t *, int));
@@ -1526,13 +1524,13 @@ extern void bfd_elf32_swap_symbol_in
 extern void bfd_elf32_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf32_swap_reloc_in
-  PARAMS ((bfd *, const Elf32_External_Rel *, Elf_Internal_Rel *));
+  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 extern void bfd_elf32_swap_reloc_out
-  PARAMS ((bfd *, const Elf_Internal_Rel *, Elf32_External_Rel *));
+  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
 extern void bfd_elf32_swap_reloca_in
-  PARAMS ((bfd *, const Elf32_External_Rela *, Elf_Internal_Rela *));
+  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 extern void bfd_elf32_swap_reloca_out
-  PARAMS ((bfd *, const Elf_Internal_Rela *, Elf32_External_Rela *));
+  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
 extern void bfd_elf32_swap_phdr_in
   PARAMS ((bfd *, const Elf32_External_Phdr *, Elf_Internal_Phdr *));
 extern void bfd_elf32_swap_phdr_out
@@ -1578,13 +1576,13 @@ extern void bfd_elf64_swap_symbol_in
 extern void bfd_elf64_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf64_swap_reloc_in
-  PARAMS ((bfd *, const Elf64_External_Rel *, Elf_Internal_Rel *));
+  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 extern void bfd_elf64_swap_reloc_out
-  PARAMS ((bfd *, const Elf_Internal_Rel *, Elf64_External_Rel *));
+  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
 extern void bfd_elf64_swap_reloca_in
-  PARAMS ((bfd *, const Elf64_External_Rela *, Elf_Internal_Rela *));
+  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 extern void bfd_elf64_swap_reloca_out
-  PARAMS ((bfd *, const Elf_Internal_Rela *, Elf64_External_Rela *));
+  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
 extern void bfd_elf64_swap_phdr_in
   PARAMS ((bfd *, const Elf64_External_Phdr *, Elf_Internal_Phdr *));
 extern void bfd_elf64_swap_phdr_out

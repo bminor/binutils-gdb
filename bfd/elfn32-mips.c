@@ -77,9 +77,9 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
 static reloc_howto_type *mips_elf_n32_rtype_to_howto
   PARAMS ((unsigned int, boolean));
 static void mips_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void mips_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean mips_elf_sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean mips_elf_n32_object_p PARAMS ((bfd *));
 static boolean elf32_mips_grok_prstatus
@@ -1896,7 +1896,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
     }
 }
 
-/* Given a MIPS Elf32_Internal_Rel, fill in an arelent structure.  */
+/* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
 mips_elf_n32_rtype_to_howto (r_type, rela_p)
@@ -1923,13 +1923,13 @@ mips_elf_n32_rtype_to_howto (r_type, rela_p)
     }
 }
 
-/* Given a MIPS Elf32_Internal_Rel, fill in an arelent structure.  */
+/* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static void
 mips_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 
@@ -1946,13 +1946,13 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
     cache_ptr->addend = elf_gp (abfd);
 }
 
-/* Given a MIPS Elf32_Internal_Rela, fill in an arelent structure.  */
+/* Given a MIPS Elf_Internal_Rela, fill in an arelent structure.  */
 
 static void
 mips_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 

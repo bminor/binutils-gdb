@@ -184,7 +184,7 @@ static boolean elf64_hppa_object_p
   PARAMS ((bfd *));
 
 static boolean elf64_hppa_section_from_shdr
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, const char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 
 static void elf64_hppa_post_process_headers
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -408,7 +408,7 @@ elf64_hppa_object_p (abfd)
 static boolean
 elf64_hppa_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
-     Elf64_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
      const char *name;
 {
   asection *newsect;
@@ -1991,6 +1991,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
     {
       bfd_vma value;
       Elf_Internal_Rela rel;
+      bfd_byte *loc;
 
       BFD_ASSERT (splt != NULL && spltrel != NULL)
 
@@ -2029,11 +2030,9 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       rel.r_info = ELF64_R_INFO (h->dynindx, R_PARISC_IPLT);
       rel.r_addend = 0;
 
-      bfd_elf64_swap_reloca_out (splt->output_section->owner, &rel,
-				 (((Elf64_External_Rela *)
-				   spltrel->contents)
-				  + spltrel->reloc_count));
-      spltrel->reloc_count++;
+      loc = spltrel->contents;
+      loc += spltrel->reloc_count++ * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (splt->output_section->owner, &rel, loc);
     }
 
   /* Initialize an external call stub entry if requested.  */
@@ -2156,7 +2155,8 @@ elf64_hppa_finalize_opd (dyn_h, data)
      had their address taken).  */
   if (info->shared && dyn_h && dyn_h->want_opd)
     {
-      Elf64_Internal_Rela rel;
+      Elf_Internal_Rela rel;
+      bfd_byte *loc;
       int dynindx;
 
       /* We may need to do a relocation against a local symbol, in
@@ -2221,11 +2221,9 @@ elf64_hppa_finalize_opd (dyn_h, data)
       rel.r_addend = 0;
       rel.r_info = ELF64_R_INFO (dynindx, R_PARISC_EPLT);
 
-      bfd_elf64_swap_reloca_out (sopd->output_section->owner, &rel,
-				 (((Elf64_External_Rela *)
-				   sopdrel->contents)
-				  + sopdrel->reloc_count));
-      sopdrel->reloc_count++;
+      loc = sopdrel->contents;
+      loc += sopdrel->reloc_count++ * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (sopd->output_section->owner, &rel, loc);
     }
   return true;
 }
@@ -2291,7 +2289,8 @@ elf64_hppa_finalize_dlt (dyn_h, data)
   if (dyn_h->want_dlt
       && (elf64_hppa_dynamic_symbol_p (dyn_h->h, info) || info->shared))
     {
-      Elf64_Internal_Rela rel;
+      Elf_Internal_Rela rel;
+      bfd_byte *loc;
       int dynindx;
 
       /* We may need to do a relocation against a local symbol, in
@@ -2315,11 +2314,9 @@ elf64_hppa_finalize_dlt (dyn_h, data)
 	  rel.r_info = ELF64_R_INFO (dynindx, R_PARISC_DIR64);
       rel.r_addend = 0;
 
-      bfd_elf64_swap_reloca_out (sdlt->output_section->owner, &rel,
-				 (((Elf64_External_Rela *)
-				   sdltrel->contents)
-				  + sdltrel->reloc_count));
-      sdltrel->reloc_count++;
+      loc = sdltrel->contents;
+      loc += sdltrel->reloc_count++ * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (sdlt->output_section->owner, &rel, loc);
     }
   return true;
 }
@@ -2362,7 +2359,8 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 
       for (rent = dyn_h->reloc_entries; rent; rent = rent->next)
 	{
-	  Elf64_Internal_Rela rel;
+	  Elf_Internal_Rela rel;
+	  bfd_byte *loc;
 
 	  /* Allocate one iff we are building a shared library, the relocation
 	     isn't a R_PARISC_FPTR64, or we don't want an opd entry.  */
@@ -2429,12 +2427,11 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 
 	  rel.r_info = ELF64_R_INFO (dynindx, rent->type);
 
+	  loc = hppa_info->other_rel_sec->contents;
+	  loc += (hppa_info->other_rel_sec->reloc_count++
+		  * sizeof (Elf64_External_Rela));
 	  bfd_elf64_swap_reloca_out (hppa_info->other_rel_sec->output_section->owner,
-				     &rel,
-				     (((Elf64_External_Rela *)
-				      hppa_info->other_rel_sec->contents)
-				      + hppa_info->other_rel_sec->reloc_count));
-	  hppa_info->other_rel_sec->reloc_count++;
+				     &rel, loc);
 	}
     }
 
@@ -2704,10 +2701,10 @@ const struct elf_size_info hppa64_elf_size_info =
   bfd_elf64_slurp_symbol_table,
   bfd_elf64_swap_dyn_in,
   bfd_elf64_swap_dyn_out,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  bfd_elf64_swap_reloc_in,
+  bfd_elf64_swap_reloc_out,
+  bfd_elf64_swap_reloca_in,
+  bfd_elf64_swap_reloca_out
 };
 
 #define TARGET_BIG_SYM			bfd_elf64_hppa_vec

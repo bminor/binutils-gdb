@@ -231,7 +231,7 @@ static reloc_howto_type *i370_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 static void i370_elf_info_to_howto PARAMS ((bfd *abfd, arelent *cache_ptr,
-					    Elf32_Internal_Rela *dst));
+					    Elf_Internal_Rela *dst));
 static boolean i370_elf_set_private_flags PARAMS ((bfd *, flagword));
 
 /* Initialize the i370_elf_howto_table, so that linear accesses can be done.  */
@@ -292,10 +292,10 @@ static boolean i370_elf_create_dynamic_sections PARAMS ((bfd *,
 							 struct bfd_link_info *));
 
 static boolean i370_elf_section_from_shdr PARAMS ((bfd *,
-						   Elf32_Internal_Shdr *,
+						   Elf_Internal_Shdr *,
 						   const char *));
 static boolean i370_elf_fake_sections PARAMS ((bfd *,
-					       Elf32_Internal_Shdr *,
+					       Elf_Internal_Shdr *,
 					       asection *));
 #if 0
 static elf_linker_section_t *i370_elf_create_linker_section
@@ -328,7 +328,7 @@ static void
 i370_elf_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   if (!i370_elf_howto_table[ R_I370_ADDR31 ])	/* Initialize howto table */
     i370_elf_howto_init ();
@@ -402,7 +402,7 @@ i370_elf_merge_private_bfd_data (ibfd, obfd)
 static boolean
 i370_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
-     Elf32_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
      const char *name;
 {
   asection *newsect;
@@ -432,7 +432,7 @@ i370_elf_section_from_shdr (abfd, hdr, name)
 static boolean
 i370_elf_fake_sections (abfd, shdr, asect)
      bfd *abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr *shdr;
+     Elf_Internal_Shdr *shdr;
      asection *asect;
 {
   if ((asect->flags & SEC_EXCLUDE) != 0)
@@ -1388,6 +1388,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && r_symndx != 0)
 	    {
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 	      int skip;
 
 #ifdef DEBUG
@@ -1493,11 +1494,9 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		}
 
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-					 (((Elf32_External_Rela *)
-					   sreloc->contents)
-					  + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* This reloc will be computed at runtime, so there's no
                  need to do anything now, unless this is a RELATIVE

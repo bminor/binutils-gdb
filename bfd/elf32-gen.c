@@ -41,9 +41,9 @@ static reloc_howto_type dummy =
 	 false);		/* pcrel_offset */
 
 static void elf_generic_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void elf_generic_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean elf32_generic_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -51,7 +51,7 @@ static void
 elf_generic_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
 {
   bfd_reloc->howto = &dummy;
 }
@@ -60,7 +60,7 @@ static void
 elf_generic_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rel *elf_reloc ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
 {
   bfd_reloc->howto = &dummy;
 }

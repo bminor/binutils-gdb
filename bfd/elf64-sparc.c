@@ -73,7 +73,7 @@ static boolean sparc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 
 static boolean sparc64_elf_fake_sections
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 
 static const char *sparc64_elf_print_symbol_all
   PARAMS ((bfd *, PTR, asymbol *));
@@ -255,7 +255,7 @@ static void
 sparc64_elf_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf64_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   BFD_ASSERT (ELF64_R_TYPE_ID (dst->r_info) < (unsigned int) R_SPARC_max_std);
   cache_ptr->howto = &sparc64_elf_howto_table[ELF64_R_TYPE_ID (dst->r_info)];
@@ -323,7 +323,7 @@ sparc64_elf_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols, dynamic)
     {
       Elf_Internal_Rela rela;
 
-      bfd_elf64_swap_reloca_in (abfd, (Elf64_External_Rela *) native_relocs, &rela);
+      bfd_elf64_swap_reloca_in (abfd, native_relocs, &rela);
 
       /* The address of an ELF reloc is section relative for an object
 	 file, and absolute for an executable file or shared library.
@@ -626,7 +626,7 @@ sparc64_elf_write_relocs (abfd, sec, data)
 	dst_rela.r_info = ELF64_R_INFO (n, ptr->howto->type);
 
       dst_rela.r_addend = ptr->addend;
-      bfd_elf64_swap_reloca_out (abfd, &dst_rela, src_rela);
+      bfd_elf64_swap_reloca_out (abfd, &dst_rela, (bfd_byte *) src_rela);
       ++src_rela;
     }
 }
@@ -2073,6 +2073,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case R_SPARC_UA16:
 	      {
 		Elf_Internal_Rela outrel;
+		bfd_byte *loc;
 		boolean skip, relocate;
 
 		if (sreloc == NULL)
@@ -2224,11 +2225,9 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      }
 		  }
 
-		bfd_elf64_swap_reloca_out (output_bfd, &outrel,
-					   (((Elf64_External_Rela *)
-					     sreloc->contents)
-					    + sreloc->reloc_count));
-		++sreloc->reloc_count;
+		loc = sreloc->contents;
+		loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
+		bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 
 		/* This reloc will be computed at runtime, so there's no
 		   need to do anything now.  */
@@ -2308,8 +2307,9 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  if (info->shared)
 		    {
-		      asection *srelgot;
+		      asection *s;
 		      Elf_Internal_Rela outrel;
+		      bfd_byte *loc;
 
 		      /* The Solaris 2.7 64-bit linker adds the contents
 			 of the location to the value of the reloc.
@@ -2321,19 +2321,17 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		      /* We need to generate a R_SPARC_RELATIVE reloc
 			 for the dynamic linker.  */
-		      srelgot = bfd_get_section_by_name(dynobj, ".rela.got");
-		      BFD_ASSERT (srelgot != NULL);
+		      s = bfd_get_section_by_name(dynobj, ".rela.got");
+		      BFD_ASSERT (s != NULL);
 
 		      outrel.r_offset = (sgot->output_section->vma
 					 + sgot->output_offset
 					 + off);
 		      outrel.r_info = ELF64_R_INFO (0, R_SPARC_RELATIVE);
 		      outrel.r_addend = relocation;
-		      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
-						 (((Elf64_External_Rela *)
-						   srelgot->contents)
-						  + srelgot->reloc_count));
-		      ++srelgot->reloc_count;
+		      loc = s->contents;
+		      loc += s->reloc_count++ * sizeof (Elf64_External_Rela);
+		      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
 		  else
 		    bfd_put_64 (output_bfd, relocation, sgot->contents + off);
@@ -2647,6 +2645,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *splt;
       asection *srela;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the PLT.  Set it up.  */
 
@@ -2678,9 +2677,9 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 Sun forgot to read their own ABI and copied elf32-sparc behaviour,
 	 thus .plt[4] has corresponding .rela.plt[0] and so on.  */
 
-      bfd_elf64_swap_reloca_out (output_bfd, &rela,
-				 ((Elf64_External_Rela *) srela->contents
-				  + (h->plt.offset - 4)));
+      loc = srela->contents;
+      loc += (h->plt.offset - 4) * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -2702,6 +2701,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *sgot;
       asection *srela;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the GOT.  Set it up.  */
 
@@ -2736,16 +2736,16 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       bfd_put_64 (output_bfd, (bfd_vma) 0,
 		  sgot->contents + (h->got.offset &~ (bfd_vma) 1));
-      bfd_elf64_swap_reloca_out (output_bfd, &rela,
-				 ((Elf64_External_Rela *) srela->contents
-				  + srela->reloc_count));
-      ++srela->reloc_count;
+      loc = srela->contents;
+      loc += srela->reloc_count++ * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbols needs a copy reloc.  Set it up.  */
 
@@ -2760,10 +2760,8 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_SPARC_COPY);
       rela.r_addend = 0;
-      bfd_elf64_swap_reloca_out (output_bfd, &rela,
-				 ((Elf64_External_Rela *) s->contents
-				  + s->reloc_count));
-      ++s->reloc_count;
+      loc = s->contents + s->reloc_count++ * sizeof (Elf64_External_Rela);
+      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   /* Mark some specially defined symbols as absolute.  */
@@ -2993,7 +2991,7 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
 static boolean
 sparc64_elf_fake_sections (abfd, hdr, sec)
      bfd *abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
      asection *sec;
 {
   const char *name;
@@ -3086,10 +3084,10 @@ const struct elf_size_info sparc64_elf_size_info =
   bfd_elf64_slurp_symbol_table,
   bfd_elf64_swap_dyn_in,
   bfd_elf64_swap_dyn_out,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  bfd_elf64_swap_reloc_in,
+  bfd_elf64_swap_reloc_out,
+  bfd_elf64_swap_reloca_in,
+  bfd_elf64_swap_reloca_out
 };
 
 #define TARGET_BIG_SYM	bfd_elf64_sparc_vec

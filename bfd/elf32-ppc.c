@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type *ppc_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void ppc_elf_info_to_howto
-  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf32_Internal_Rela *dst));
+  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst));
 static void ppc_elf_howto_init PARAMS ((void));
 static int ppc_elf_sort_rela PARAMS ((const PTR, const PTR));
 static boolean ppc_elf_relax_section
@@ -56,10 +56,10 @@ static boolean ppc_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 static boolean ppc_elf_section_from_shdr PARAMS ((bfd *,
-						  Elf32_Internal_Shdr *,
+						  Elf_Internal_Shdr *,
 						  const char *));
 static boolean ppc_elf_fake_sections
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 
 static elf_linker_section_t *ppc_elf_create_linker_section
   PARAMS ((bfd *abfd,
@@ -1333,7 +1333,7 @@ static void
 ppc_elf_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
     /* Initialize howto table if needed.  */
@@ -1511,7 +1511,7 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
 static boolean
 ppc_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
-     Elf32_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
      const char *name;
 {
   asection *newsect;
@@ -1537,7 +1537,7 @@ ppc_elf_section_from_shdr (abfd, hdr, name)
 static boolean
 ppc_elf_fake_sections (abfd, shdr, asect)
      bfd *abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr *shdr;
+     Elf_Internal_Shdr *shdr;
      asection *asect;
 {
   if ((asect->flags & SEC_EXCLUDE) != 0)
@@ -2664,6 +2664,7 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *splt;
       asection *srela;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
       bfd_vma reloc_index;
 
 #ifdef DEBUG
@@ -2692,9 +2693,8 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       reloc_index = (h->plt.offset - PLT_INITIAL_ENTRY_SIZE) / PLT_SLOT_SIZE;
       if (reloc_index > PLT_NUM_SINGLE_ENTRIES)
 	reloc_index -= (reloc_index - PLT_NUM_SINGLE_ENTRIES) / 2;
-      bfd_elf32_swap_reloca_out (output_bfd, &rela,
-				 ((Elf32_External_Rela *) srela->contents
-				  + reloc_index));
+      loc = srela->contents + reloc_index * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -2716,6 +2716,7 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *sgot;
       asection *srela;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
          up.  */
@@ -2748,16 +2749,16 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
 
       bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + h->got.offset);
-      bfd_elf32_swap_reloca_out (output_bfd, &rela,
-				 ((Elf32_External_Rela *) srela->contents
-				  + srela->reloc_count));
-      ++srela->reloc_count;
+      loc = srela->contents;
+      loc += srela->reloc_count++ * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
       Elf_Internal_Rela rela;
+      bfd_byte *loc;
 
       /* This symbols needs a copy reloc.  Set it up.  */
 
@@ -2780,10 +2781,8 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_PPC_COPY);
       rela.r_addend = 0;
-      bfd_elf32_swap_reloca_out (output_bfd, &rela,
-				 ((Elf32_External_Rela *) s->contents
-				  + s->reloc_count));
-      ++s->reloc_count;
+      loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
 #ifdef DEBUG
@@ -3181,6 +3180,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (info->shared && r_symndx != 0)
 	    {
 	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
 	      int skip;
 
 #ifdef DEBUG
@@ -3281,11 +3281,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		}
 
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-					 (((Elf32_External_Rela *)
-					   sreloc->contents)
-					  + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      if (skip == -1)
 		continue;
@@ -3401,6 +3399,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      asection *srelgot;
 		      Elf_Internal_Rela outrel;
+		      bfd_byte *loc;
 
 		      /* We need to generate a R_PPC_RELATIVE reloc
 			 for the dynamic linker.  */
@@ -3412,11 +3411,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					 + off);
 		      outrel.r_info = ELF32_R_INFO (0, R_PPC_RELATIVE);
 		      outrel.r_addend = relocation;
-		      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-						 (((Elf32_External_Rela *)
-						   srelgot->contents)
-						  + srelgot->reloc_count));
-		      ++srelgot->reloc_count;
+		      loc = srelgot->contents;
+		      loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
+		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 		      relocation = 0;
 		    }
 

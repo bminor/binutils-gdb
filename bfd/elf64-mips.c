@@ -63,20 +63,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static void mips_elf64_swap_reloc_in
   PARAMS ((bfd *, const Elf64_Mips_External_Rel *,
-	   Elf64_Mips_Internal_Rel *));
+	   Elf64_Mips_Internal_Rela *));
 static void mips_elf64_swap_reloca_in
   PARAMS ((bfd *, const Elf64_Mips_External_Rela *,
 	   Elf64_Mips_Internal_Rela *));
 static void mips_elf64_swap_reloc_out
-  PARAMS ((bfd *, const Elf64_Mips_Internal_Rel *,
+  PARAMS ((bfd *, const Elf64_Mips_Internal_Rela *,
 	   Elf64_Mips_External_Rel *));
 static void mips_elf64_swap_reloca_out
   PARAMS ((bfd *, const Elf64_Mips_Internal_Rela *,
 	   Elf64_Mips_External_Rela *));
 static void mips_elf64_be_swap_reloc_in
-  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rel *));
+  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 static void mips_elf64_be_swap_reloc_out
-  PARAMS ((bfd *, const Elf_Internal_Rel *, bfd_byte *));
+  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
 static void mips_elf64_be_swap_reloca_in
   PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
 static void mips_elf64_be_swap_reloca_out
@@ -86,9 +86,9 @@ static reloc_howto_type *bfd_elf64_bfd_reloc_type_lookup
 static reloc_howto_type *mips_elf64_rtype_to_howto
   PARAMS ((unsigned int, boolean));
 static void mips_elf64_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf64_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void mips_elf64_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static long mips_elf64_get_reloc_upper_bound PARAMS ((bfd *, asection *));
 static boolean mips_elf64_slurp_one_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, const Elf_Internal_Shdr *));
@@ -1218,7 +1218,7 @@ static void
 mips_elf64_swap_reloc_in (abfd, src, dst)
      bfd *abfd;
      const Elf64_Mips_External_Rel *src;
-     Elf64_Mips_Internal_Rel *dst;
+     Elf64_Mips_Internal_Rela *dst;
 {
   dst->r_offset = H_GET_64 (abfd, src->r_offset);
   dst->r_sym = H_GET_32 (abfd, src->r_sym);
@@ -1226,6 +1226,7 @@ mips_elf64_swap_reloc_in (abfd, src, dst)
   dst->r_type3 = H_GET_8 (abfd, src->r_type3);
   dst->r_type2 = H_GET_8 (abfd, src->r_type2);
   dst->r_type = H_GET_8 (abfd, src->r_type);
+  dst->r_addend = 0;
 }
 
 /* Swap in a MIPS 64-bit Rela reloc.  */
@@ -1250,7 +1251,7 @@ mips_elf64_swap_reloca_in (abfd, src, dst)
 static void
 mips_elf64_swap_reloc_out (abfd, src, dst)
      bfd *abfd;
-     const Elf64_Mips_Internal_Rel *src;
+     const Elf64_Mips_Internal_Rela *src;
      Elf64_Mips_External_Rel *dst;
 {
   H_PUT_64 (abfd, src->r_offset, dst->r_offset);
@@ -1284,9 +1285,9 @@ static void
 mips_elf64_be_swap_reloc_in (abfd, src, dst)
      bfd *abfd;
      const bfd_byte *src;
-     Elf_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
-  Elf64_Mips_Internal_Rel mirel;
+  Elf64_Mips_Internal_Rela mirel;
 
   mips_elf64_swap_reloc_in (abfd,
 			    (const Elf64_Mips_External_Rel *) src,
@@ -1294,10 +1295,13 @@ mips_elf64_be_swap_reloc_in (abfd, src, dst)
 
   dst[0].r_offset = mirel.r_offset;
   dst[0].r_info = ELF64_R_INFO (mirel.r_sym, mirel.r_type);
+  dst[0].r_addend = 0;
   dst[1].r_offset = mirel.r_offset;
   dst[1].r_info = ELF64_R_INFO (mirel.r_ssym, mirel.r_type2);
+  dst[1].r_addend = 0;
   dst[2].r_offset = mirel.r_offset;
   dst[2].r_info = ELF64_R_INFO (STN_UNDEF, mirel.r_type3);
+  dst[2].r_addend = 0;
 }
 
 /* Swap in a MIPS 64-bit Rela reloc.  */
@@ -1330,10 +1334,10 @@ mips_elf64_be_swap_reloca_in (abfd, src, dst)
 static void
 mips_elf64_be_swap_reloc_out (abfd, src, dst)
      bfd *abfd;
-     const Elf_Internal_Rel *src;
+     const Elf_Internal_Rela *src;
      bfd_byte *dst;
 {
-  Elf64_Mips_Internal_Rel mirel;
+  Elf64_Mips_Internal_Rela mirel;
 
   mirel.r_offset = src[0].r_offset;
   BFD_ASSERT(src[0].r_offset == src[1].r_offset);
@@ -1947,7 +1951,7 @@ bfd_elf64_bfd_reloc_type_lookup (abfd, code)
     }
 }
 
-/* Given a MIPS Elf64_Internal_Rel, fill in an arelent structure.  */
+/* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
 mips_elf64_rtype_to_howto (r_type, rela_p)
@@ -1980,7 +1984,7 @@ static void
 mips_elf64_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr ATTRIBUTE_UNUSED;
-     Elf64_Internal_Rel *dst ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
 {
   BFD_ASSERT (0);
 }
@@ -1989,7 +1993,7 @@ static void
 mips_elf64_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr ATTRIBUTE_UNUSED;
-     Elf64_Internal_Rela *dst ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
 {
   BFD_ASSERT (0);
 }
@@ -2058,20 +2062,9 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
 				   (Elf64_Mips_External_Rela *) native_relocs,
 				   &rela);
       else
-	{
-	  Elf64_Mips_Internal_Rel rel;
-
-	  mips_elf64_swap_reloc_in (abfd,
-				    (Elf64_Mips_External_Rel *) native_relocs,
-				    &rel);
-	  rela.r_offset = rel.r_offset;
-	  rela.r_sym = rel.r_sym;
-	  rela.r_ssym = rel.r_ssym;
-	  rela.r_type3 = rel.r_type3;
-	  rela.r_type2 = rel.r_type2;
-	  rela.r_type = rel.r_type;
-	  rela.r_addend = 0;
-	}
+	mips_elf64_swap_reloc_in (abfd,
+				  (Elf64_Mips_External_Rel *) native_relocs,
+				  &rela);
 
       /* Each entry represents exactly three actual relocations.  */
 
@@ -2326,7 +2319,7 @@ mips_elf64_write_rel (abfd, sec, rel_hdr, count, data)
   for (idx = 0; idx < sec->reloc_count; idx++, ext_rel++)
     {
       arelent *ptr;
-      Elf64_Mips_Internal_Rel int_rel;
+      Elf64_Mips_Internal_Rela int_rel;
       asymbol *sym;
       int n;
       unsigned int i;

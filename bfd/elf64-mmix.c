@@ -131,7 +131,7 @@ static reloc_howto_type *bfd_elf64_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 static void mmix_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static int mmix_elf_sort_relocs PARAMS ((const PTR, const PTR));
 
@@ -1063,7 +1063,7 @@ static void
 mmix_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf64_Internal_Rela *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 
