@@ -26,6 +26,7 @@ set testfile "${testdir}/fixed_points"
 set srcfile ${srcdir}/${subdir}/${testfile}.adb
 set binfile ${objdir}/${subdir}/${testfile}
 
+file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
   return -1
 }

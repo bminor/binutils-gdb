@@ -1,3 +1,11 @@
+2004-02-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/fixed_points.exp: Create compilation object directory
+	before running the test.
+	* gdb.ada/null_record.exp: Likewise.
+	* gdb.ada/packed_array.exp: Likewise.
+	* gdb.ada/start.exp: Likewise.
+
 2005-02-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/packed_array/pa.adb: New file.
