@@ -1,3 +1,9 @@
+Mon Feb 10 17:20:00 1997  Dawn Perchik  dawn@cygnus.com>
+
+	* gas/mips/itbl: New file.  Instruction Spec for testing --itbl option.
+	* gas/mips/itbl.s: New file.  Assembly with ne2w instructions specified 
+	in itbl.
+
 Fri Feb  7 16:42:53 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gasp/gasp.exp: Use prune_warnings instead of prune_system_crud.

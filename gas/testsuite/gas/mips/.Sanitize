@@ -45,6 +45,8 @@ div.d
 div.s
 dli.d
 dli.s
+itbl
+itbl.s
 jal-empic.d
 jal-svr4pic.d
 jal-svr4pic.s
