@@ -2661,8 +2661,8 @@ do_adr (str, flags)
   inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
   inst.reloc.pc_rel = 1;
   inst.instruction |= flags;
+  
   end_of_line (str);
-  return;
 }
 
 static void
@@ -5370,6 +5370,7 @@ md_apply_fix3 (fixP, val, seg)
 	{
 	  if (target_oabi
 	      && (fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
+		|| fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
 		))
 	    value = 0;
 	  else
@@ -5617,6 +5618,22 @@ md_apply_fix3 (fixP, val, seg)
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
+    case BFD_RELOC_ARM_PCREL_BLX:
+      {
+	offsetT hbit;
+      	newval = md_chars_to_number (buf, INSN_SIZE);
+
+#ifdef OBJ_ELF
+      	if (! target_oabi)
+           value = fixP->fx_offset;
+#endif
+	hbit   = (value >> 1) & 1;
+      	value  = (value >> 2) & 0x00ffffff;
+      	value  = (value + (newval & 0x00ffffff)) & 0x00ffffff;
+      	newval = value | (newval & 0xfe000000) | (hbit << 24);
+      	md_number_to_chars (buf, newval, INSN_SIZE);
+      }
+      break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH9: /* conditional branch */
       newval = md_chars_to_number (buf, THUMB_SIZE);
@@ -5650,6 +5667,7 @@ md_apply_fix3 (fixP, val, seg)
       md_number_to_chars (buf, newval, THUMB_SIZE);
       break;
 
+    case BFD_RELOC_THUMB_PCREL_BLX:
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
       {
         offsetT newval2;
@@ -5956,10 +5974,12 @@ tc_gen_reloc (section, fixp)
 	}
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
+    case BFD_RELOC_ARM_PCREL_BLX:
     case BFD_RELOC_RVA:      
     case BFD_RELOC_THUMB_PCREL_BRANCH9:
     case BFD_RELOC_THUMB_PCREL_BRANCH12:
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
+    case BFD_RELOC_THUMB_PCREL_BLX:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
       code = fixp->fx_r_type;
@@ -6172,10 +6192,12 @@ md_assemble (str)
 	 keep trying with progressively smaller basic instructions until one
 	 matches, or we run out of opcode.  */
       q = (p - str > LONGEST_INST) ? str + LONGEST_INST : p;
+
       for (; q != str; q--)
 	{
 	  c = *q;
 	  *q = '\0';
+
 	  opcode = (CONST struct asm_opcode *) hash_find (arm_ops_hsh, str);
 	  *q = c;
 	  
@@ -7102,6 +7124,8 @@ arm_force_relocation (fixp)
   if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
+      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
       || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)    
     return 1;
   

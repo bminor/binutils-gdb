@@ -1,3 +1,12 @@
+2000-04-07  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_apply_fix3): Treat BFD_RELOC_ARM_PCREL_BLX
+	in the same way as BFD_RELOC_ARM_PCREL_BRANCH, and
+	BFD_RELOC_THUMB_PCREL_BLX lie BFD_RELOC_THUMB_PCREL_BRANCH.
+	(tc_gen_reloc): Accept BFD_RELOC_{ARM|THUMB}_PCREL_BLX.
+	(arm_force_relocation): Force relocations for
+	BFD_RELOC_{ARM|THUMB}_PCREL_BLX as well.
+
 Wed Apr  5 22:26:32 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (get_operands): There's no third operand if the
