@@ -605,6 +605,7 @@ resolve_symbol_value (symp)
 
       symp->sy_resolving = 1;
 
+    reduce:
       switch (symp->sy_value.X_op)
 	{
 	case O_absent:
@@ -620,20 +621,21 @@ resolve_symbol_value (symp)
 	case O_symbol:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 
-#ifdef obj_frob_forward_symbol
-	  /* Some object formats need to forward the segment.  */
-	  obj_frob_forward_symbol (symp);
-#endif
+	  if (S_GET_SEGMENT (symp->sy_value.X_add_symbol) != undefined_section
+	      && S_GET_SEGMENT (symp->sy_value.X_add_symbol) != expr_section)
+	    {
+	      if (symp->sy_value.X_add_number == 0)
+		copy_symbol_attributes (symp, symp->sy_value.X_add_symbol);
 
-	  S_SET_VALUE (symp,
-		       (symp->sy_value.X_add_number
-			+ symp->sy_frag->fr_address
-			+ S_GET_VALUE (symp->sy_value.X_add_symbol)));
-	  if (S_GET_SEGMENT (symp) == expr_section
-	      || S_GET_SEGMENT (symp) == undefined_section)
-	    S_SET_SEGMENT (symp,
-			   S_GET_SEGMENT (symp->sy_value.X_add_symbol));
-
+	      S_SET_VALUE (symp,
+			   (symp->sy_value.X_add_number
+			    + symp->sy_frag->fr_address
+			    + S_GET_VALUE (symp->sy_value.X_add_symbol)));
+	      if (S_GET_SEGMENT (symp) == expr_section
+		  || S_GET_SEGMENT (symp) == undefined_section)
+		S_SET_SEGMENT (symp,
+			       S_GET_SEGMENT (symp->sy_value.X_add_symbol));
+	    }
 	  resolved = symp->sy_value.X_add_symbol->sy_resolved;
 	  break;
 
@@ -654,6 +656,41 @@ resolve_symbol_value (symp)
 	  resolved = symp->sy_value.X_add_symbol->sy_resolved;
 	  break;
 
+	case O_add:
+#if 1
+	  resolve_symbol_value (symp->sy_value.X_add_symbol);
+	  resolve_symbol_value (symp->sy_value.X_op_symbol);
+	  seg_left = S_GET_SEGMENT (symp->sy_value.X_add_symbol);
+	  seg_right = S_GET_SEGMENT (symp->sy_value.X_op_symbol);
+	  /* This case comes up with PIC support.  */
+	  {
+	    symbolS *s_left = symp->sy_value.X_add_symbol;
+	    symbolS *s_right = symp->sy_value.X_op_symbol;
+
+	    if (seg_left == absolute_section)
+	      {
+		symbolS *t;
+		segT ts;
+		t = s_left;
+		s_left = s_right;
+		s_right = t;
+		ts = seg_left;
+		seg_left = seg_right;
+		seg_right = ts;
+	      }
+	    if (seg_right == absolute_section
+		&& s_right->sy_resolved)
+	      {
+		symp->sy_value.X_add_number += S_GET_VALUE (s_right);
+		symp->sy_value.X_op_symbol = 0;
+		symp->sy_value.X_add_symbol = s_left;
+		symp->sy_value.X_op = O_symbol;
+		goto reduce;
+	      }
+	  }
+#endif
+	  /* fall through */
+
 	case O_multiply:
 	case O_divide:
 	case O_modulus:
@@ -663,7 +700,6 @@ resolve_symbol_value (symp)
 	case O_bit_or_not:
 	case O_bit_exclusive_or:
 	case O_bit_and:
-	case O_add:
 	case O_subtract:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 	  resolve_symbol_value (symp->sy_value.X_op_symbol);
@@ -1114,6 +1150,8 @@ valueT
 S_GET_VALUE (s)
      symbolS *s;
 {
+  if (!s->sy_resolved && !s->sy_resolving && s->sy_value.X_op != O_constant)
+    resolve_symbol_value (s);
   if (s->sy_value.X_op != O_constant)
     as_bad ("Attempt to get value of unresolved symbol %s", S_GET_NAME (s));
   return (valueT) s->sy_value.X_add_number;
@@ -1129,6 +1167,22 @@ S_SET_VALUE (s, val)
   s->sy_value.X_op = O_constant;
   s->sy_value.X_add_number = (offsetT) val;
   s->sy_value.X_unsigned = 0;
+}
+
+void
+copy_symbol_attributes (dest, src)
+     symbolS *dest, *src;
+{
+#ifdef BFD_ASSEMBLER
+  /* In an expression, transfer the settings of these flags.
+     The user can override later, of course.  */
+#define COPIED_SYMFLAGS	(BSF_FUNCTION)
+  dest->bsym->flags |= src->bsym->flags & COPIED_SYMFLAGS;
+#endif
+
+#ifdef OBJ_COPY_SYMBOL_ATTRIBUTES
+  OBJ_COPY_SYMBOL_ATTRIBUTES (dest, src);
+#endif
 }
 
 #ifdef BFD_ASSEMBLER
@@ -1279,7 +1333,8 @@ symbol_begin ()
 #endif /* LOCAL_LABELS_FB */
 }
 
-static int indent_level;
+
+int indent_level;
 
 static void
 indent ()
@@ -1298,23 +1353,29 @@ print_symbol_value_1 (file, sym)
   const char *name = S_GET_NAME (sym);
   if (!name || !name[0])
     name = "(unnamed)";
-  fprintf (file, "sym %lx %s frag %lx", sym, name, (long) sym->sy_frag);
+  fprintf (file, "sym %lx %s", sym, name);
+  if (sym->sy_frag != &zero_address_frag)
+    fprintf (file, " frag %lx", (long) sym->sy_frag);
   if (sym->written)
     fprintf (file, " written");
   if (sym->sy_resolved)
     fprintf (file, " resolved");
-  if (sym->sy_resolving)
+  else if (sym->sy_resolving)
     fprintf (file, " resolving");
   if (sym->sy_used_in_reloc)
     fprintf (file, " used-in-reloc");
   if (sym->sy_used)
     fprintf (file, " used");
+  fprintf (file, " %s", segment_name (S_GET_SEGMENT (sym)));
   if (sym->sy_resolved)
     {
-      /* XXX print segment name too */
-      fprintf (file, " value %lx", (long) S_GET_VALUE (sym));
+      segT s = S_GET_SEGMENT (sym);
+
+      if (s != undefined_section
+          && s != expr_section)
+	fprintf (file, " %lx", (long) S_GET_VALUE (sym));
     }
-  else if (indent_level < 8)
+  else if (indent_level < 8 && S_GET_SEGMENT (sym) != undefined_section)
     {
       indent_level++;
       fprintf (file, "\n%*s<", indent_level * 4, "");
@@ -1357,10 +1418,10 @@ print_expr_1 (file, exp)
       print_symbol_value_1 (file, exp->X_add_symbol);
       fprintf (file, ">");
     maybe_print_addnum:
-      indent_level--;
       if (exp->X_add_number)
-	fprintf (file, "\n%*s       %lx", indent_level * 4, "",
+	fprintf (file, "\n%*s%lx", indent_level * 4, "",
 		 (long) exp->X_add_number);
+      indent_level--;
       break;
     case O_register:
       fprintf (file, "register #%d", (int) exp->X_add_number);
