@@ -1,3 +1,7 @@
+2001-11-17  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (mfvrsave, mtvrsave): New instructions.
+
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.
