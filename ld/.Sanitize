@@ -99,6 +99,11 @@ mkscript.c
 news.sh
 relax.c
 relax.h
+st2000.em
+st2000.sc-sh
+st2000.sh
+sa29200.sc-sh
+sa29200.sh
 sun3.sh
 sun4.sh
 vanilla.em
@@ -112,7 +117,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.36  1992/05/01 22:08:40  sac
+# Revision 1.37  1992/05/02 02:08:16  sac
+# New stuff for 29200
+#
+# Revision 1.36  1992/05/01  22:08:40  sac
 # Add mri.h
 #
 # Revision 1.35  1992/04/17  15:59:22  sac

@@ -106,7 +106,7 @@ LIBIBERTY=./../libiberty/libiberty.a
 
 ALL_EMULATIONS=ld__lnk960.o ld__sun3.o ld__i386aout.o \
 	ld__go32.o ld__m88kbcs.o ld__a29k.o ld__news.o ld__hp300bsd.o ld__h8300hms.o ld__ebmon29k.o \
-	ld__sun4.o ld__gld960.o ld__vanilla.o ld__h8300xray.o ld__st2000.o
+	ld__sun4.o ld__gld960.o ld__vanilla.o ld__h8300xray.o ld__st2000.o ld__sa29200.o
 
 EMULATION_OFILES=${ALL_EMULATIONS}
 #EMULATION_OFILES=ld__${EMUL}.o ${OTHER_EMULATIONS}
@@ -200,6 +200,9 @@ ld__i386aout.c: $(srcdir)/i386aout.sh \
 ld__ebmon29k.c: $(srcdir)/ebmon29k.sh \
   $(srcdir)/generic.em $(srcdir)/ebmon29k.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k.sh
+ld__sa29200.c: $(srcdir)/sa29200.sh \
+  $(srcdir)/generic.em $(srcdir)/sa29200.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} sa29200.sh
 ld__a29k.c: $(srcdir)/a29k.sh \
   $(srcdir)/generic.em $(srcdir)/a29k.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} a29k.sh
