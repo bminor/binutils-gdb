@@ -1,3 +1,10 @@
+Wed Dec 17 12:14:11 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Keep track of where we are in the option
+	parsing before calling ldemul_parse_args, so that we don't call it
+	multiple times on the same argument and confuse the getopt
+	internals.
+
 start-sanitize-d30v
 Thu Dec 11 09:00:15 1997  Michael Meissner  <meissner@cygnus.com>
 
