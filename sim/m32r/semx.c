@@ -318,7 +318,7 @@ SEM_FN_NAME (m32rx,addv) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   EXTRACT_FMT_ADDV_CODE
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = ADDSI (OPRND (dr), OPRND (sr));
   temp1 = ADDOFSI (OPRND (dr), OPRND (sr), 0);
   CPU (h_gr[f_r1]) = temp0;
@@ -355,7 +355,7 @@ SEM_FN_NAME (m32rx,addv3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   EXTRACT_FMT_ADDV3_CODE
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = ADDSI (OPRND (sr), OPRND (simm16));
   temp1 = ADDOFSI (OPRND (sr), OPRND (simm16), 0);
   CPU (h_gr[f_r1]) = temp0;
@@ -392,7 +392,7 @@ SEM_FN_NAME (m32rx,addx) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   EXTRACT_FMT_ADDX_CODE
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = ADDCSI (OPRND (dr), OPRND (sr), OPRND (condbit));
   temp1 = ADDCFSI (OPRND (dr), OPRND (sr), OPRND (condbit));
   CPU (h_gr[f_r1]) = temp0;
@@ -1500,7 +1500,7 @@ SEM_FN_NAME (m32rx,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   EXTRACT_FMT_JL_CODE
 
 do {
-  SI temp1;SI temp0;
+  USI temp1;SI temp0;
   temp0 = ADDSI (ANDSI (OPRND (pc), -4), 4);
   temp1 = ANDSI (OPRND (sr), -4);
   CPU (h_gr[14]) = temp0;
@@ -1598,7 +1598,7 @@ SEM_FN_NAME (m32rx,ld_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   EXTRACT_FMT_LD_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_LD_D_CODE
 
-  CPU (h_gr[f_r1]) = OPRND (h_memory_add_WI_sr_slo16);
+  CPU (h_gr[f_r1]) = OPRND (h_memory_add__VM_sr_slo16);
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -1658,7 +1658,7 @@ SEM_FN_NAME (m32rx,ldb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   EXTRACT_FMT_LDB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_LDB_D_CODE
 
-  CPU (h_gr[f_r1]) = EXTQISI (OPRND (h_memory_add_WI_sr_slo16));
+  CPU (h_gr[f_r1]) = EXTQISI (OPRND (h_memory_add__VM_sr_slo16));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -1718,7 +1718,7 @@ SEM_FN_NAME (m32rx,ldh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   EXTRACT_FMT_LDH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_LDH_D_CODE
 
-  CPU (h_gr[f_r1]) = EXTHISI (OPRND (h_memory_add_WI_sr_slo16));
+  CPU (h_gr[f_r1]) = EXTHISI (OPRND (h_memory_add__VM_sr_slo16));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -1778,7 +1778,7 @@ SEM_FN_NAME (m32rx,ldub_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   EXTRACT_FMT_LDB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_LDB_D_CODE
 
-  CPU (h_gr[f_r1]) = ZEXTQISI (OPRND (h_memory_add_WI_sr_slo16));
+  CPU (h_gr[f_r1]) = ZEXTQISI (OPRND (h_memory_add__VM_sr_slo16));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -1838,7 +1838,7 @@ SEM_FN_NAME (m32rx,lduh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   EXTRACT_FMT_LDH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_LDH_D_CODE
 
-  CPU (h_gr[f_r1]) = ZEXTHISI (OPRND (h_memory_add_WI_sr_slo16));
+  CPU (h_gr[f_r1]) = ZEXTHISI (OPRND (h_memory_add__VM_sr_slo16));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -3288,7 +3288,7 @@ SEM_FN_NAME (m32rx,subv) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   EXTRACT_FMT_ADDV_CODE
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = SUBSI (OPRND (dr), OPRND (sr));
   temp1 = SUBOFSI (OPRND (dr), OPRND (sr), 0);
   CPU (h_gr[f_r1]) = temp0;
@@ -3325,7 +3325,7 @@ SEM_FN_NAME (m32rx,subx) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   EXTRACT_FMT_ADDX_CODE
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = SUBCSI (OPRND (dr), OPRND (sr), OPRND (condbit));
   temp1 = SUBCFSI (OPRND (dr), OPRND (sr), OPRND (condbit));
   CPU (h_gr[f_r1]) = temp0;
@@ -3367,7 +3367,7 @@ m32rx_h_cr_set (current_cpu, 6, ADDSI (OPRND (pc), 4));
   TRACE_RESULT (current_cpu, "cr-6", 'x', m32rx_h_cr_get (current_cpu, 6));
 m32rx_h_cr_set (current_cpu, 0, ANDSI (SLLSI (OPRND (h_cr_0), 8), 65408));
   TRACE_RESULT (current_cpu, "cr-0", 'x', m32rx_h_cr_get (current_cpu, 0));
-  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, do_trap (current_cpu, OPRND (uimm4))));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, a_m32r_trap (current_cpu, OPRND (uimm4))));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
@@ -3748,4 +3748,4 @@ SEM_FN_NAME (m32rx,illegal) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   return 0;
 }
 
-#endif /* WITH_SCACHE */
+#endif /* WANT_CPU */

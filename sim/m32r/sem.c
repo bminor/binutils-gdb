@@ -288,7 +288,7 @@ SEM_FN_NAME (m32r,addv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = ADDSI (* FLD (f_r1), * FLD (f_r2));
   temp1 = ADDOFSI (* FLD (f_r1), * FLD (f_r2), 0);
 * FLD (f_r1) = temp0;
@@ -322,7 +322,7 @@ SEM_FN_NAME (m32r,addv3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = ADDSI (* FLD (f_r2), FLD (f_simm16));
   temp1 = ADDOFSI (* FLD (f_r2), FLD (f_simm16), 0);
 * FLD (f_r1) = temp0;
@@ -356,7 +356,7 @@ SEM_FN_NAME (m32r,addx) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = ADDCSI (* FLD (f_r1), * FLD (f_r2), CPU (h_cond));
   temp1 = ADDCFSI (* FLD (f_r1), * FLD (f_r2), CPU (h_cond));
 * FLD (f_r1) = temp0;
@@ -1085,9 +1085,9 @@ SEM_FN_NAME (m32r,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   int taken_p = 0;
 
 do {
-  SI temp1;SI temp0;
+  USI temp1;SI temp0;
   temp0 = ADDSI (ANDSI (CPU (h_pc), -4), 4);
-  temp1 = * FLD (f_r2);
+  temp1 = ANDSI (* FLD (f_r2), -4);
   CPU (h_gr[14]) = temp0;
   TRACE_RESULT (current_cpu, "gr-14", 'x', CPU (h_gr[14]));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, temp1));
@@ -1120,7 +1120,7 @@ SEM_FN_NAME (m32r,jmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
-  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, * FLD (f_r2)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (* FLD (f_r2), -4)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 
@@ -2115,10 +2115,10 @@ SEM_FN_NAME (m32r,rach) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 do {
   DI tmp_tmp1;
   tmp_tmp1 = ANDDI (m32r_h_accum_get (current_cpu), MAKEDI (16777215, 0xffffffff));
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (16383, 0x80000000)), LEDI (tmp_tmp1, MAKEDI (8388607, 0xffffffff)))) {
+if (ANDIF (GEDI (tmp_tmp1, MAKEDI (16383, 0x80000000)), LEDI (tmp_tmp1, MAKEDI (8388607, 0xffffffff)))) {
   tmp_tmp1 = MAKEDI (16383, 0x80000000);
 } else {
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (8388608, 0)), LEDI (tmp_tmp1, MAKEDI (16760832, 0)))) {
+if (ANDIF (GEDI (tmp_tmp1, MAKEDI (8388608, 0)), LEDI (tmp_tmp1, MAKEDI (16760832, 0)))) {
   tmp_tmp1 = MAKEDI (16760832, 0);
 } else {
   tmp_tmp1 = ANDDI (ADDDI (m32r_h_accum_get (current_cpu), MAKEDI (0, 1073741824)), MAKEDI (0xffffffff, 0x80000000));
@@ -2705,7 +2705,7 @@ SEM_FN_NAME (m32r,subv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = SUBSI (* FLD (f_r1), * FLD (f_r2));
   temp1 = SUBOFSI (* FLD (f_r1), * FLD (f_r2), 0);
 * FLD (f_r1) = temp0;
@@ -2739,7 +2739,7 @@ SEM_FN_NAME (m32r,subx) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
-  BI temp1;SI temp0;
+  UBI temp1;SI temp0;
   temp0 = SUBCSI (* FLD (f_r1), * FLD (f_r2), CPU (h_cond));
   temp1 = SUBCFSI (* FLD (f_r1), * FLD (f_r2), CPU (h_cond));
 * FLD (f_r1) = temp0;
@@ -2778,7 +2778,7 @@ m32r_h_cr_set (current_cpu, 6, ADDSI (CPU (h_pc), 4));
   TRACE_RESULT (current_cpu, "cr-6", 'x', m32r_h_cr_get (current_cpu, 6));
 m32r_h_cr_set (current_cpu, 0, ANDSI (SLLSI (m32r_h_cr_get (current_cpu, 0), 8), 65408));
   TRACE_RESULT (current_cpu, "cr-0", 'x', m32r_h_cr_get (current_cpu, 0));
-  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, do_trap (current_cpu, FLD (f_uimm4))));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, a_m32r_trap (current_cpu, FLD (f_uimm4))));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
@@ -2835,4 +2835,4 @@ SEM_FN_NAME (m32r,illegal) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   return 0;
 }
 
-#endif /* WITH_SCACHE */
+#endif /* WANT_CPU */

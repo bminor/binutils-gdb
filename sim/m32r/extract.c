@@ -1176,7 +1176,7 @@ EX_FN_NAME (m32r,fmt_st) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
     }
 #endif
 #undef FLD
@@ -1203,7 +1203,7 @@ EX_FN_NAME (m32r,fmt_st_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
     }
 #endif
 #undef FLD
@@ -1229,7 +1229,7 @@ EX_FN_NAME (m32r,fmt_stb) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
     }
 #endif
 #undef FLD
@@ -1256,7 +1256,7 @@ EX_FN_NAME (m32r,fmt_stb_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
     }
 #endif
 #undef FLD
@@ -1282,7 +1282,7 @@ EX_FN_NAME (m32r,fmt_sth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
     }
 #endif
 #undef FLD
@@ -1309,7 +1309,7 @@ EX_FN_NAME (m32r,fmt_sth_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
     }
 #endif
 #undef FLD
@@ -1335,7 +1335,7 @@ EX_FN_NAME (m32r,fmt_st_plus) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
       abuf->h_gr_set = 0 | (1 << f_r2);
     }
 #endif
@@ -1379,7 +1379,7 @@ EX_FN_NAME (m32r,fmt_unlock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGB
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2) | (1 << f_r1);
     }
 #endif
 #undef FLD
