@@ -1,3 +1,7 @@
+Tue Feb  6 21:52:26 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* pr-8894.exp, pr-8894.ch, pr-8894-grt.ch:  New test case.
+
 Mon Jan 29 00:05:01 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* builtins.ch, builtins.exp: Enhance test case.
