@@ -1,3 +1,12 @@
+2003-04-02  Bob Rossi  <bob_rossi@cox.net>
+
+	* mi-cmd-file.c: New file to implement mi file commands.
+	* mi-getopt.c (mi_valid_noargs): Added mi_valid_noargs to verify 
+        if a set of parameters passed to an MI function has no arguments
+	* mi-getopt.h (mi_valid_noargs): Declare.
+	* mi-cmds.c (mi_cmds): Added -file-list-exec-source-file command.
+	* mi-cmds.h (mi_cmd_file_list_exec_source_file): Declare.
+
 2003-03-27  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbmi.texinfo: Delete file.  Contents moved to

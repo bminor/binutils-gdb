@@ -1,3 +1,8 @@
+2003-04-02  Bob Rossi  <bob_rossi@cox.net>
+
+	* gdb.texinfo (GDB/MI Program Control): Add 
+	'-file-list-exec-source-file'
+
 2003-03-31  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
