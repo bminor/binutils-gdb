@@ -1,3 +1,8 @@
+Fri Oct 11 22:40:46 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Avoid using $< in explicit Make rules (it doesn't
+	work).  Add some lines to avoid Sun Make VPATH bugs.
+
 Fri Oct 11 16:42:22 1991  Per Bothner  (bothner at cygnus.com)
 
 	* news.sc: Add alignment for data segment.

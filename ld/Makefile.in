@@ -153,25 +153,25 @@ ldlex.c: ldlex.l
 
 ldgld.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld/g -e s/"<arch>"/m68k/g \
-	-e s/"<target>"//g -e s/"<TARGET>"//g <$< >$@
+	-e s/"<target>"//g -e s/"<TARGET>"//g <$(srcdir)/ldtemplate >$@
 news.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/news/g -e s/"<arch>"/m68k/g \
-	-e s/"<target>"/news/g -e s/"<TARGET>"/NEWS/g <$< >$@
+	-e s/"<target>"/news/g -e s/"<TARGET>"/NEWS/g <$(srcdir)/ldtemplate >$@
 
 ebmon29k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ebmon29k/g -e s/"<arch>"/a29k/g \
 	-e s/"gld<target>"/ebmon29k/g -e s/"GLD<TARGET>"/EBMON29K/g \
-	-e s/"<ldtarget>.x"/ebmon.x/ <$< >$@
+	-e s/"<ldtarget>.x"/ebmon.x/ <$(srcdir)/ldtemplate >$@
 
 ldgld68k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld68k/g -e s/"<arch>"/m68k/g \
-	-e s/"<target>"/68k/g -e s/"<TARGET>"/68K/g <$< >$@
+	-e s/"<target>"/68k/g -e s/"<TARGET>"/68K/g <$(srcdir)/ldtemplate >$@
 ldglda29k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldglda29k/g -e s/"<arch>"/a29k/g \
-	-e s/"<target>"/29k/g -e s/"<TARGET>"/29K/g <$< >$@
+	-e s/"<target>"/29k/g -e s/"<TARGET>"/29K/g <$(srcdir)/ldtemplate >$@
 ldm88k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldm88k/g -e s/"<arch>"/m88k/g \
-	-e s/"<target>"/m88kbcs/g -e s/"<TARGET>"/M88KBCS/g <$< >$@
+	-e s/"<target>"/m88kbcs/g -e s/"<TARGET>"/M88KBCS/g <$(srcdir)/ldtemplate >$@
 
 # The .c files for these are generated from ldtemplete.
 ldgld.o: ./mkscript ldgld.x ldgld.xr ldgld.xu ldgld.xn
@@ -259,6 +259,10 @@ ldgld960.x :ldgld960.sc
 ldgldm88k.x :ldgldm88k.sc 
 ldm88kUr.x :ldm88kUr.sc 
 ldm88kr.x:ldm88kr.sc
+ldm88k.x:ldm88k.sc
+news.x:news.sc
+h8300hds.x:h8300hds.sc
+h8300hds.o:h8300hds.c
 ldgld68k.x:ldgld68k.sc
 ldglda29k.x :ldglda29k.sc 
 ldglda29kr.x :ldglda29kr.sc 
