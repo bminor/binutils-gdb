@@ -1,3 +1,7 @@
+Tue Mar  1 18:33:59 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* bfd-in2.h: Rebuilt.
+
 Tue Mar  1 13:06:53 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* i386os9k.c: use new functions bfd_set_error and bfd_get_error.
@@ -11,7 +15,6 @@ Mon Feb 28 15:41:01 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* i386os9k.c : new file to handle os9k format bfd.
 	* Makefile.in : Handle new file i386os9k.c
-	* bfd-in2.h : Add bfd_target_os9k_flavour.
 	* targets.c : Add bfd_target_os9k_flavour and i386os9k_vec.
 	* cache.c : Initialize cache_sentinel to 0.
 

@@ -1961,7 +1961,8 @@ enum bfd_flavour {
   bfd_target_oasys_flavour,
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,
-  bfd_target_som_flavour};
+  bfd_target_som_flavour,
+  bfd_target_os9k_flavour};
 
  /* Forward declaration.  */
 typedef struct bfd_link_info _bfd_link_info;
