@@ -9,7 +9,7 @@ rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -1458,7 +1458,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
       && os->bfd_section != NULL
       && ((s->flags ^ os->bfd_section->flags) & (SEC_LOAD | SEC_ALLOC)) == 0)
     {
-      wild_doit (&add_child, s, os, file);
+      lang_add_section (&add_child, s, os, file);
     }
   else
     {
@@ -1562,7 +1562,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 						(etree_type *) NULL,
 						(etree_type *) NULL);
 
-      wild_doit (&add_child, s, os, file);
+      lang_add_section (&add_child, s, os, file);
 
       lang_leave_output_section_statement
 	((bfd_vma) 0, "*default*",

@@ -1012,11 +1012,11 @@ section_already_linked (abfd, sec, data)
 	      break;
 	    }
 
-	  /* Set the output_section field so that wild_doit does not
-	     create a lang_input_section structure for this section.
-	     Since there might be a symbol in the section being
-	     discarded, we must retain a pointer to the section which
-	     we are really going to use.  */
+	  /* Set the output_section field so that lang_add_section
+	     does not create a lang_input_section structure for this
+	     section.  Since there might be a symbol in the section
+	     being discarded, we must retain a pointer to the section
+	     which we are really going to use.  */
 	  sec->output_section = bfd_abs_section_ptr;
 	  sec->kept_section = l->sec;
 
@@ -1098,7 +1098,7 @@ wildcardp (pattern)
    input file which holds SECTION.  */
 
 void
-wild_doit (ptr, section, output, file)
+lang_add_section (ptr, section, output, file)
      lang_statement_list_type *ptr;
      asection *section;
      lang_output_section_statement_type *output;
@@ -1372,18 +1372,18 @@ output_section_callback (ptr, sec, section, file, output)
      of the current list.  */
 
   if (before == NULL)
-    wild_doit (&ptr->children, section,
-	       (lang_output_section_statement_type *) output,
-	       file);
+    lang_add_section (&ptr->children, section,
+		      (lang_output_section_statement_type *) output,
+		      file);
   else
     {
       lang_statement_list_type list;
       lang_statement_union_type **pp;
 
       lang_list_init (&list);
-      wild_doit (&list, section,
-		 (lang_output_section_statement_type *) output,
-		 file);
+      lang_add_section (&list, section,
+			(lang_output_section_statement_type *) output,
+			file);
 
       /* If we are discarding the section, LIST.HEAD will
 	 be NULL.  */
@@ -3739,18 +3739,18 @@ lang_place_orphans ()
 			    lang_output_section_statement_lookup (".bss");
 
 			}
-		      wild_doit (&default_common_section->children, s,
-				 default_common_section, file);
+		      lang_add_section (&default_common_section->children, s,
+					default_common_section, file);
 		    }
 		}
 	      else if (ldemul_place_orphan (file, s))
 		;
 	      else
 		{
-		  lang_output_section_statement_type *os =
-		  lang_output_section_statement_lookup (s->name);
+		  lang_output_section_statement_type *os;
 
-		  wild_doit (&os->children, s, os, file);
+		  os = lang_output_section_statement_lookup (s->name);
+		  lang_add_section (&os->children, s, os, file);
 		}
 	    }
 	}

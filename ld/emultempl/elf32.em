@@ -1085,7 +1085,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	{
 	  /* We already have an output section statement with this
 	     name, and its bfd section, if any, has compatible flags.  */
-	  wild_doit (&os->children, s, os, file);
+	  lang_add_section (&os->children, s, os, file);
 	  return true;
 	}
     }
@@ -1100,7 +1100,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
       && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
       && hold_text.os != NULL)
     {
-      wild_doit (&hold_text.os->children, s, hold_text.os, file);
+      lang_add_section (&hold_text.os->children, s, hold_text.os, file);
       return true;
     }
 
@@ -1205,7 +1205,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 					    (etree_type *) NULL,
 					    (etree_type *) NULL);
 
-  wild_doit (&os->children, s, os, file);
+  lang_add_section (&os->children, s, os, file);
 
   lang_leave_output_section_statement
     ((bfd_vma) 0, "*default*",

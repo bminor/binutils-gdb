@@ -1,3 +1,13 @@
+2001-08-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (wild_doit): Rename to lang_add_section.
+	* ldlang.h: Here too.
+	* mpw-elfmips.c: And here.
+	* emultempl/beos.em: And here.
+	* emultempl/elf32.em: And here.
+	* emultempl/hppaelf.em: And here.
+	* emultempl/pe.em: And here.
+
 2001-08-13  Richard Henderson  <rth@redhat.com>
 
 	* emultempl/needrelax.em: New file.

@@ -605,7 +605,7 @@ gldelf32ebmip_place_orphan (file, s)
   if (hold_use != NULL)
     {
       /* We have already placed a section with this name.  */
-      wild_doit (&hold_use->children, s, hold_use, file);
+      lang_add_section (&hold_use->children, s, hold_use, file);
       return true;
     }
 
@@ -618,7 +618,7 @@ gldelf32ebmip_place_orphan (file, s)
       && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
       && hold_text != NULL)
     {
-      wild_doit (&hold_text->children, s, hold_text, file);
+      lang_add_section (&hold_text->children, s, hold_text, file);
       return true;
     }
 
@@ -693,7 +693,7 @@ gldelf32ebmip_place_orphan (file, s)
 				       (etree_type *) NULL);
 
   os = lang_output_section_statement_lookup (secname);
-  wild_doit (&os->children, s, os, file);
+  lang_add_section (&os->children, s, os, file);
 
   lang_leave_output_section_statement
     ((bfd_vma) 0, "*default*",

@@ -258,7 +258,7 @@ hppaelf_add_stub_section (stub_sec_name, input_section)
 
   info.input_section = input_section;
   lang_list_init (&info.add);
-  wild_doit (&info.add, stub_sec, os, stub_file);
+  lang_add_section (&info.add, stub_sec, os, stub_file);
 
   if (info.add.head == NULL)
     goto err_ret;

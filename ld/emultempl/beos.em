@@ -7,7 +7,8 @@ else
 fi
 cat >e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 2000, 2001
+   Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -813,7 +814,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      The sections still have to be sorted, but that has to wait until
      all such sections have been processed by us.  The sorting is done by
      sort_sections.  */
-  wild_doit (&l->wild_statement.children, s, os, file);
+  lang_add_section (&l->wild_statement.children, s, os, file);
 
   return true;
 }

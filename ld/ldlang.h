@@ -444,7 +444,7 @@ extern bfd_vma lang_size_sections
 	   bfd_vma dot, boolean relax));
 extern void lang_enter_group PARAMS ((void));
 extern void lang_leave_group PARAMS ((void));
-extern void wild_doit
+extern void lang_add_section
   PARAMS ((lang_statement_list_type *ptr, asection *section,
 	   lang_output_section_statement_type *output,
 	   lang_input_statement_type *file));
