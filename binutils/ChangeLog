@@ -1,5 +1,8 @@
 Wed May  6 11:08:53 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* Makefile.in: use bison & flex from ../ if they exist.  Also,
+	  FLEX->LEX.
+
 	* sanity.sh: remove temporary directory when finished.
 
 Tue May  5 12:00:58 1992  Per Bothner  (bothner@rtl.cygnus.com)
