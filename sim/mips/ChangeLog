@@ -1,3 +1,28 @@
+Fri Mar 27 16:19:29 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+start-sanitize-sky
+	* Makefile.in (SIM_SKY_OBJS): Replaced sky-vu[01].o with sky-vu.o.
+
+	* interp.c (sim_{load,store}_register): Use new vu[01]_device
+ 	static to access VU registers.
+	(decode_coproc): Added skeleton of sky COP2 (VU) instruction
+ 	decoding.  Work in progress.
+
+	* mips.igen (LDCzz, SDCzz): Removed *5900 case for this
+ 	overlapping/redundant bit pattern.
+	(LQC2, SQC2): Added *5900 COP2 instruction skeleta.  Work in
+	progress.
+
+	* sim-main.h (status_CU[012]): Added COP[n]-enabled flags for
+ 	status register.
+	
+end-sanitize-sky
+
+	* interp.c (cop_lq, cop_sq): New functions for future 128-bit
+ 	access to coprocessor registers.
+
+	* sim-main.h (COP_LQ, COP_SQ): New macro front-ends for above.
+	
 Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

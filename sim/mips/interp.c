@@ -14,8 +14,7 @@
    MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
    $Revision$
-     $Author$
-       $Date$             
+   $Date$             
 
 NOTEs:
 
@@ -38,6 +37,14 @@ code on the hardware.
 #include "sim-utils.h"
 #include "sim-options.h"
 #include "sim-assert.h"
+
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#include "sky-vu.h"
+#include "sky-vpe.h"
+#include "sky-libvpe.h"
+#endif
+/* end-sanitize-sky */
 
 #include "config.h"
 
@@ -154,6 +161,7 @@ static void ColdReset PARAMS((SIM_DESC sd));
 #define MONITOR_BASE (0xBFC00000)
 #define MONITOR_SIZE (1 << 11)
 #define MEM_SIZE (2 << 20)
+
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
 #undef MEM_SIZE
@@ -672,7 +680,7 @@ sim_store_register (sd,rn,memory,length)
       rn = rn - NUM_R5900_REGS;
 
       if (rn < NUM_VU_INTEGER_REGS)
-	size = write_vu_int_reg (&(vu0_state.regs), rn, memory);
+	size = write_vu_int_reg (& vu0_device.state->regs, rn, memory);
       else if( rn < NUM_VU_REGS )
 	vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] 
 	  = T2H_4( *(unsigned int *) memory );
@@ -680,7 +688,7 @@ sim_store_register (sd,rn,memory,length)
 	rn = rn - NUM_VU_REGS;
 
 	if( rn < NUM_VU_INTEGER_REGS ) 
-	  size = write_vu_int_reg (&(vu1_state.regs), rn, memory);
+	  size = write_vu_int_reg (& vu1_device.state->regs, rn, memory);
 	else if( rn < NUM_VU_REGS )
 	  vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] 
 	    = T2H_4( *(unsigned int *) memory );
@@ -768,7 +776,7 @@ sim_fetch_register (sd,rn,memory,length)
       rn = rn - NUM_R5900_REGS;
 
       if (rn < NUM_VU_INTEGER_REGS)
-	size = read_vu_int_reg (&(vu0_state.regs), rn, memory);
+	size = read_vu_int_reg (& vu0_device.state->regs, rn, memory);
       else if (rn < NUM_VU_REGS)
 	*((unsigned int *) memory) 
 	  = H2T_4( vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] );
@@ -777,7 +785,7 @@ sim_fetch_register (sd,rn,memory,length)
 	  rn = rn - NUM_VU_REGS;
 	
 	  if (rn < NUM_VU_INTEGER_REGS) 
-	    size = read_vu_int_reg (&(vu1_state.regs), rn, memory);
+	    size = read_vu_int_reg (& vu1_device.state->regs, rn, memory);
 	  else if (rn < NUM_VU_REGS)
 	    (*(unsigned int *) memory) 
 	      = H2T_4( vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] );
@@ -3239,6 +3247,33 @@ cop_ld (SIM_DESC sd,
   return;
 }
 
+
+void
+cop_lq (SIM_DESC sd,
+	sim_cpu *cpu,
+	address_word cia,
+	int coproc_num,
+	int coproc_reg,
+	unsigned128 memword)
+{
+  switch (coproc_num)
+    {
+      /* start-sanitize-sky */
+    case 2:
+      /* XXX COP2 */
+      break;
+      /* end-sanitize-sky */
+      
+    default:
+      sim_io_printf(sd,"COP_LQ(%d,%d,??) at PC = 0x%s : TODO (architecture specific)\n",
+		    coproc_num,coproc_reg,pr_addr(cia));
+      break;
+    }
+  
+  return;
+}
+
+
 unsigned int
 cop_sw (SIM_DESC sd,
 	sim_cpu *cpu,
@@ -3297,6 +3332,33 @@ cop_sd (SIM_DESC sd,
 
   return(value);
 }
+
+
+unsigned128
+cop_sq (SIM_DESC sd,
+	sim_cpu *cpu,
+	address_word cia,
+	int coproc_num,
+	int coproc_reg)
+{
+  unsigned128 value = {0, 0};
+  switch (coproc_num)
+    {
+      /* start-sanitize-sky */
+    case 2:
+      /* XXX COP2 */
+      break;
+      /* end-sanitize-sky */
+
+    default:
+      sim_io_printf(sd,"COP_SQ(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",
+		    coproc_num,coproc_reg,pr_addr(cia));
+      break;
+    }
+
+  return(value);
+}
+
 
 void
 decode_coproc (SIM_DESC sd,
@@ -3439,9 +3501,140 @@ decode_coproc (SIM_DESC sd,
     break;
     
     case 2: /* undefined co-processor */
-      sim_io_eprintf(sd,"COP2 instruction 0x%08X at PC = 0x%s : No handler present\n",instruction,pr_addr(cia));
-      break;
-      
+      {
+	int handle = 0;
+
+	/* start-sanitize-sky */
+	/* On the R5900, this refers to a "VU" vector co-processor. */
+
+	int i_25_21 = (instruction >> 21) & 0x1f;
+	int i_20_16 = (instruction >> 16) & 0x1f;
+	int i_15_11 = (instruction >> 11) & 0x1f;
+	int i_15_0 = instruction & 0xffff;
+	int i_10_1 = (instruction >> 1) & 0x3ff;
+	int interlock = instruction & 0x01;
+	unsigned_4 vpe_status = sim_core_read_aligned_4 (cpu, cia, read_map, VPE0_STAT);
+	int vpe_busy = (vpe_status & 0x00000001);
+	/* setup for semantic.c-like actions below */
+	typedef unsigned_4 instruction_word;
+	int CIA = cia;
+	int NIA = cia + 4;
+	sim_cpu* CPU_ = cpu;
+
+	handle = 1;
+
+	/* test COP2 usability */
+	if(! (SR & status_CU2))
+	  {
+	    SignalException(CoProcessorUnusable,instruction);	    
+	    /* NOTREACHED */
+	  }
+
+	/* classify & execute basic COP2 instructions */
+	if(i_25_21 == 0x08 && i_20_16 == 0x00) /* BC2F */
+	  {
+	    address_word offset = EXTEND16(i_15_0) << 2;
+	    if(! vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	  }
+	else if(i_25_21 == 0x08 && i_20_16==0x02) /* BC2FL */
+	  {
+	    address_word offset = EXTEND16(i_15_0) << 2;
+	    if(! vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	    else NULLIFY_NEXT_INSTRUCTION();
+	  }
+	else if(i_25_21 == 0x08 && i_20_16 == 0x01) /* BC2T */
+	  {
+	    address_word offset = EXTEND16(i_15_0) << 2;
+	    if(vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	  }
+	else if(i_25_21 == 0x08 && i_20_16 == 0x03) /* BC2TL */
+	  {
+	    address_word offset = EXTEND16(i_15_0) << 2;
+	    if(vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	    else NULLIFY_NEXT_INSTRUCTION();
+	  }
+	else if((i_25_21 == 0x02 && i_10_1 == 0x000) || /* CFC2 */
+		(i_25_21 == 0x06 && i_10_1 == 0x000)) /* CTC2 */
+	  {
+	    int rt = i_20_16;
+	    int id = i_15_11;
+	    int to_vu = (i_25_21 == 0x06); /* transfer direction */
+	    address_word vu_cr_addr; /* VU control register address */
+
+	    if(interlock)
+	      while(vpe_busy)
+		{
+		  vu0_issue(sd); /* advance one clock cycle */
+		  vpe_status = sim_core_read_aligned_4 (cpu, cia, read_map, VPE0_STAT);
+		  vpe_busy = vpe_status & 0x00000001;
+		}
+
+	    /* compute VU register address */
+	    vu_cr_addr = VU0_MST + (id * 16);
+
+	    /* read or write word */
+	    if(to_vu) /* CTC2 */
+	      {
+		unsigned_4 data = GPR[rt];
+		sim_core_write_aligned_4(cpu, cia, write_map, vu_cr_addr, data);
+	      }
+	    else /* CFC2 */
+	      {
+		unsigned_4 data = sim_core_read_aligned_4(cpu, cia, read_map, vu_cr_addr);
+		GPR[rt] = EXTEND64(data);
+	      }
+	  }
+	else if((i_25_21 == 0x01) || /* QMFC2 */
+		(i_25_21 == 0x05))   /* QMTC2 */
+	  {
+	    int rt = i_20_16;
+	    int id = i_15_11;
+	    int to_vu = (i_25_21 == 0x05); /* transfer direction */
+	    address_word vu_cr_addr; /* VU control register address */
+
+	    if(interlock)
+	      while(vpe_busy)
+		{
+		  vu0_issue(sd); /* advance one clock cycle */
+		  vpe_status = sim_core_read_aligned_4 (cpu, cia, read_map, VPE0_STAT);
+		  vpe_busy = vpe_status & 0x00000001;
+		}
+
+	    /* compute VU register address */
+	    vu_cr_addr = VU0_VF00 + (id * 16);
+
+	    /* read or write word */
+	    if(to_vu) /* CTC2 */
+	      {
+		unsigned_4 data = GPR[rt];
+		sim_core_write_aligned_4(cpu, cia, write_map, vu_cr_addr, data);
+	      }
+	    else /* CFC2 */
+	      {
+		unsigned_4 data = sim_core_read_aligned_4(cpu, cia, read_map, vu_cr_addr);
+		GPR[rt] = EXTEND64(data);
+	      }
+	  }
+	/* other COP2 instructions */
+	else
+	  {
+	    SignalException(ReservedInstruction,instruction); 
+	    /* NOTREACHED */
+	  }
+	
+	/* cleanup for semantic.c-like actions above */
+	PC = NIA;
+
+	/* end-sanitize-sky */
+
+	if(! handle)
+	  {
+	    sim_io_eprintf(sd,"COP2 instruction 0x%08X at PC = 0x%s : No handler present\n",
+			   instruction,pr_addr(cia));
+	  }
+      }
+    break;
+    
     case 1: /* should not occur (FPU co-processor) */
     case 3: /* should not occur (FPU co-processor) */
       SignalException(ReservedInstruction,instruction);
@@ -3450,6 +3643,7 @@ decode_coproc (SIM_DESC sd,
   
   return;
 }
+
 
 /*-- instruction simulation -------------------------------------------------*/
 

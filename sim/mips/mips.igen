@@ -31,10 +31,10 @@
 
 
 // Models known by this simulator
-:model:::mipsI:mipsI:
-:model:::mipsII:mipsII:
-:model:::mipsIII:mipsIII:
-:model:::mipsIV:mipsIV:
+:model:::mipsI:mips3000:
+:model:::mipsII:mips6000:
+:model:::mipsIII:mips4000:
+:model:::mipsIV:mips8000:
 :model:::mips16:mips16:
 // start-sanitize-r5900
 :model:::r5900:mips5900:
@@ -43,6 +43,9 @@
 // start-sanitize-tx19
 :model:::tx19:tx19:
 // end-sanitize-tx19
+// start-sanitize-vr4320
+:model:::vr4320:mips4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 :model:::vr5400:mips5400:
 :model:::mdmx:mdmx:
@@ -79,6 +82,9 @@
 "add r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -100,6 +106,9 @@
 "addi r<RT>, r<RS>, IMMEDIATE"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -121,6 +130,9 @@
 "add r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -140,6 +152,9 @@
 000000,5.RS,5.RT,5.RD,00000,100001:SPECIAL:32::ADDU
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -160,6 +175,9 @@
 "and r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -179,6 +197,9 @@
 "and r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -198,6 +219,9 @@
 "beq r<RS>, r<RT>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -221,6 +245,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -244,6 +271,9 @@
 "bgez r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -265,6 +295,9 @@
 "bgezal r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -289,6 +322,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -317,6 +353,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -340,6 +379,9 @@
 "bgtz r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -363,6 +405,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -388,6 +433,9 @@
 "blez r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -413,6 +461,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -436,6 +487,9 @@
 "bltz r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -457,6 +511,9 @@
 "bltzal r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -483,6 +540,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -509,6 +569,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -534,6 +597,9 @@
 "bne r<RS>, r<RT>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -557,6 +623,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -580,6 +649,9 @@
 "break"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -615,6 +687,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -638,6 +713,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -660,6 +738,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -680,6 +761,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -700,6 +784,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -741,6 +828,9 @@
 *mipsIV:
 *r3900:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -770,6 +860,9 @@
 "div r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -808,6 +901,9 @@
 "divu r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -903,6 +999,9 @@
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 {
   do_dmult (SD_, RS, RT, 0, 1);
 }
@@ -927,6 +1026,9 @@
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 {
   do_dmult (SD_, RS, RT, 0, 0);
 }
@@ -949,6 +1051,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -970,6 +1075,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -991,6 +1099,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1012,6 +1123,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1033,6 +1147,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1054,6 +1171,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1075,6 +1195,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1096,6 +1219,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1117,6 +1243,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1138,6 +1267,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1160,6 +1292,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1179,6 +1314,9 @@
 "j <INSTR_INDEX>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1201,6 +1339,9 @@
 "jal <INSTR_INDEX>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1225,6 +1366,9 @@
 "jalr r<RD>, r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1246,6 +1390,9 @@
 "jr r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1284,6 +1431,9 @@
 "lb r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1330,6 +1480,9 @@
 "lbu r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1374,6 +1527,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1415,12 +1571,12 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -1450,11 +1606,46 @@
 }
 
 
+// start-sanitize-sky
+110110,5.BASE,5.RT,16.OFFSET:NORMAL:64::LQC2
+"lqc2 r<RT>, <OFFSET>(r<BASE>)"
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 0x0f) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned128 qw = U16_8(memval, memval1); /* XXX: check order */
+	    /* XXX: block on VU0 pipeline if necessary */
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_QUADWORD,paddr,vaddr,isDATA,isREAL);
+	    COP_LQ(((instruction >> 26) & 0x3),destreg,qw);;
+	  }
+      }
+  }
+}
+// end-sanitize-sky
+
+
 011010,5.BASE,5.RT,16.OFFSET:NORMAL:64::LDL
 "ldl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1500,6 +1691,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1551,6 +1745,9 @@
 "lh r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1597,6 +1794,9 @@
 "lhu r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1645,6 +1845,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1693,6 +1896,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1733,6 +1939,9 @@
 "lui r<RT>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1752,6 +1961,9 @@
 "lw r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1798,6 +2010,9 @@
 "lwc<ZZ> r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1844,6 +2059,9 @@
 "lwl r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1892,6 +2110,9 @@
 "lwr r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1948,6 +2169,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1994,6 +2218,9 @@
 "mfhi r<RD>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2016,6 +2243,9 @@
 "mflo r<RD>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2038,6 +2268,9 @@
 "movn r<RD>, r<RS>, r<RT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2054,6 +2287,9 @@
 "movz r<RD>, r<RS>, r<RT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2070,6 +2306,9 @@
 "mthi r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2096,6 +2335,9 @@
 "mtlo r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2121,6 +2363,9 @@
 000000,5.RS,5.RT,00000,00000011000:SPECIAL:32::MULT
 "mult r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 {
   signed64 prod;
   CHECKHILO ("Multiplication");
@@ -2129,6 +2374,8 @@
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
 }
+
+
 000000,5.RS,5.RT,5.RD,00000011000:SPECIAL:32::MULT
 "mult r<RD>, r<RS>, r<RT>"
 *vr5000:
@@ -2157,6 +2404,9 @@
 000000,5.RS,5.RT,00000,00000011001:SPECIAL:32::MULTU
 "multu r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 {
   unsigned64 prod;
   CHECKHILO ("Multiplication");
@@ -2194,6 +2444,9 @@
 "nor r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2213,6 +2466,9 @@
 "or r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2232,6 +2488,9 @@
 "ori r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2250,6 +2509,9 @@
 110011,5.RS,nnnnn,16.OFFSET:NORMAL:32::PREF
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2276,6 +2538,9 @@
 "sb r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2323,6 +2588,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2371,6 +2639,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2415,6 +2686,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2458,6 +2732,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2495,11 +2772,50 @@
 }
 
 
+// start-sanitize-sky
+111010,5.BASE,5.RT,16.OFFSET:NORMAL:64::SQC2
+"sqc2 r<RT>, <OFFSET>(r<BASE>)"
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 0x0f) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned128 qw;
+	    unsigned64 memval0 = 0;
+	    unsigned64 memval1 = 0;
+	    qw = COP_SQ(((instruction >> 26) & 0x3),destreg);
+	    memval0 = *A8_16(& qw, 0);
+	    memval1 = *A8_16(& qw, 1);
+	    {
+	      StoreMemory(uncached,AccessLength_WORD,memval0,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+// end-sanitize-sky
+
+
+
 101100,5.BASE,5.RT,16.OFFSET:NORMAL:64::SDL
 "sdl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2545,6 +2861,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2578,6 +2897,9 @@
 "sh r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2626,6 +2948,9 @@
 "sll r<RD>, r<RT>, <SHIFT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2647,6 +2972,9 @@
 "sllv r<RD>, r<RT>, r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2668,6 +2996,9 @@
 "slt r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2687,6 +3018,9 @@
 "slti r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2706,6 +3040,9 @@
 "sltiu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2724,6 +3061,9 @@
 "sltu r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2743,6 +3083,9 @@
 "sra r<RD>, r<RT>, <SHIFT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2764,6 +3107,9 @@
 "srav r<RD>, r<RT>, r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2785,6 +3131,9 @@
 "srl r<RD>, r<RT>, <SHIFT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2806,6 +3155,9 @@
 "srlv r<RD>, r<RT>, r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2827,6 +3179,9 @@
 "sub r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2848,6 +3203,9 @@
 "subu r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2867,6 +3225,9 @@
 "sw r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2912,12 +3273,12 @@
 "swc<ZZ> r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -2957,6 +3318,9 @@
 "swl r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3004,6 +3368,9 @@
 "swr r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3042,6 +3409,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3061,6 +3431,9 @@
 "syscall <CODE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3082,6 +3455,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3104,6 +3480,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3126,6 +3505,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3148,6 +3530,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3170,6 +3555,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3192,6 +3580,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3214,6 +3605,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3236,6 +3630,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3258,6 +3655,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3280,6 +3680,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3302,6 +3705,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3324,6 +3730,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3344,6 +3753,9 @@
 "xor r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3363,6 +3775,9 @@
 "xori r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3452,6 +3867,9 @@
 "abs.%s<FMT> f<FD>, f<FS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3478,6 +3896,9 @@
 "add.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3536,6 +3957,9 @@
 "bc1%s<TF>%s<ND> <CC>, <OFFSET>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3608,6 +4032,9 @@
 "c.%s<COND>.%s<FMT> <CC>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3625,6 +4052,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3654,6 +4084,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3708,6 +4141,9 @@
 "c%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3765,6 +4201,9 @@
 "cvt.d.%s<FMT> f<FD>, f<FS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3791,6 +4230,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3819,6 +4261,9 @@
 "cvt.s.%s<FMT> f<FD>, f<FS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3844,6 +4289,9 @@
 "cvt.w.%s<FMT> f<FD>, f<FS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3869,6 +4317,9 @@
 "div.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3921,6 +4372,9 @@
 "dm%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3956,6 +4410,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3986,6 +4443,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4016,6 +4476,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4043,6 +4506,9 @@
 "ldxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4076,6 +4542,9 @@
 "lwc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4122,6 +4591,9 @@
 "lwxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4165,6 +4637,9 @@
 "madd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4184,6 +4659,9 @@
 "madd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4221,6 +4699,9 @@
 "m%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4241,6 +4722,9 @@
 "mov.%s<FMT> f<FD>, f<FS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4264,6 +4748,9 @@
 "mov%s<TF> r<RD>, r<RS>, <CC>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4281,6 +4768,9 @@
 "mov%s<TF>.%s<FMT> f<FD>, f<FS>, <CC>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4302,6 +4792,9 @@
 010001,10,3.FMT,5.RT,5.FS,5.FD,010011:COP1:32::MOVN.fmt
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4330,6 +4823,9 @@
 "movz.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4352,6 +4848,9 @@
 "msub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4375,6 +4874,9 @@
 "msub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4400,6 +4902,9 @@
 "mul.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4426,6 +4931,9 @@
 "neg.%s<FMT> f<FD>, f<FS>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4452,6 +4960,9 @@
 "nmadd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4472,6 +4983,9 @@
 "nmadd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4492,6 +5006,9 @@
 "nmsub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4512,6 +5029,9 @@
 "nmsub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4531,6 +5051,9 @@
 "prefx <HINT>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4552,6 +5075,9 @@
 *mipsIV:
 "recip.%s<FMT> f<FD>, f<FS>"
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4574,6 +5100,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4604,6 +5133,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4632,6 +5164,9 @@
 *mipsIV:
 "rsqrt.%s<FMT> f<FD>, f<FS>"
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4655,6 +5190,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4678,10 +5216,12 @@
 }
 
 
-
 010011,5.RS,5.RT,vvvvv,00000001001:COP1X:64::SDXC1
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4718,6 +5258,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4743,6 +5286,9 @@
 "sub.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4770,6 +5316,9 @@
 "swc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4815,6 +5364,9 @@
 "swxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4854,6 +5406,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4884,6 +5439,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4919,6 +5477,9 @@
 "bc0f <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4931,6 +5492,9 @@
 "bc0fl <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4952,6 +5516,9 @@
 "bc0tl <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4964,6 +5531,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4993,6 +5563,9 @@
 "di"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5005,6 +5578,9 @@
 "ei"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5018,6 +5594,9 @@
 *mipsIII:
 *mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5030,6 +5609,9 @@
 "mfc0 r<RT>, r<RD> # <REGX>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5044,6 +5626,9 @@
 "mtc0 r<RT>, r<RD> # <REGX>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5059,6 +5644,9 @@
 "tlbp"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5071,6 +5659,9 @@
 "tlbr"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5083,6 +5674,9 @@
 "tlbwi"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5095,6 +5689,9 @@
 "tlbwr"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5104,6 +5701,9 @@
 
 
 :include:16::m16.igen
+// start-sanitize-vr4320
+:include::vr4320:vr4320.igen
+// end-sanitize-vr4320
 // start-sanitize-vr5400
 :include::vr5400:vr5400.igen
 :include:64,f::mdmx.igen

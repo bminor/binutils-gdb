@@ -15,15 +15,10 @@ void pke0_issue(SIM_DESC sd);
 void pke1_attach(SIM_DESC sd);
 void pke1_issue(SIM_DESC sd);
 
+
 /* structs declared below */
 struct pke_fifo;
 struct fifo_quadword;
-
-unsigned_4 pke_fifo_flush(struct pke_fifo*);
-void pke_fifo_reset(struct pke_fifo*);
-struct fifo_quadword* pke_fifo_fit(struct pke_fifo*);
-struct fifo_quadword* pke_fifo_access(struct pke_fifo*, unsigned_4 qwnum);
-void pke_fifo_old(struct pke_fifo*, unsigned_4 qwnum);
 
 
 /* Quadword data type */

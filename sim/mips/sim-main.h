@@ -513,7 +513,8 @@ struct _sim_cpu {
 #ifndef TM_TXVU_H
 
 /* Number of machine registers */
-#define NUM_VU_REGS 152
+#define NUM_VU_REGS 153
+#define NUM_VU_INTEGER_REGS 17
 
 #define NUM_R5900_REGS 128
 
@@ -681,6 +682,11 @@ struct sim_state {
 #define status_TS        (1 << 21)      /* TLB shutdown has occurred */
 #define status_ERL       (1 <<  2)      /* Error level */
 #define status_RP        (1 << 27)      /* Reduced Power mode */
+/* begin-sanitize-r5900 */
+#define status_CU0       (1 << 28)      /* COP0 usable */
+#define status_CU1       (1 << 29)      /* COP1 usable */
+#define status_CU2       (1 << 30)      /* COP2 usable */
+/* begin-sanitize-r5900 */
 
 #define cause_BD        ((unsigned)1 << 31)     /* Exception in branch delay slot */
 
@@ -757,17 +763,23 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 
 void cop_lw  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned int memword));
 void cop_ld  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, uword64 memword));
+void cop_lq  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned128 memword));
 unsigned int cop_sw PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
 uword64 cop_sd PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
+unsigned128 cop_sq PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
 
 #define COP_LW(coproc_num,coproc_reg,memword) \
 cop_lw (SD, CPU, cia, coproc_num, coproc_reg, memword)
 #define COP_LD(coproc_num,coproc_reg,memword) \
 cop_ld (SD, CPU, cia, coproc_num, coproc_reg, memword)
+#define COP_LQ(coproc_num,coproc_reg,memword) \
+cop_lq (SD, CPU, cia, coproc_num, coproc_reg, memword)
 #define COP_SW(coproc_num,coproc_reg) \
 cop_sw (SD, CPU, cia, coproc_num, coproc_reg)
 #define COP_SD(coproc_num,coproc_reg) \
 cop_sd (SD, CPU, cia, coproc_num, coproc_reg)
+#define COP_SQ(coproc_num,coproc_reg) \
+cop_sq (SD, CPU, cia, coproc_num, coproc_reg)
 
 void decode_coproc PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int instruction));
 #define DecodeCoproc(instruction) \

@@ -4,14 +4,15 @@
 #include "config.h"
 
 #include <stdlib.h>
-#include "sky-pke.h"
-#include "sky-dma.h"
+#include "sim-main.h"
 #include "sim-bits.h"
 #include "sim-assert.h"
-#include "sky-vu0.h"
-#include "sky-vu1.h"
+#include "sky-pke.h"
+#include "sky-dma.h"
+#include "sky-vu.h"
 #include "sky-gpuif.h"
 #include "sky-device.h"
+
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -64,6 +65,11 @@ static void pke_code_direct(struct pke_device* me, unsigned_4 pkecode);
 static void pke_code_directhl(struct pke_device* me, unsigned_4 pkecode);
 static void pke_code_unpack(struct pke_device* me, unsigned_4 pkecode);
 static void pke_code_error(struct pke_device* me, unsigned_4 pkecode);
+unsigned_4 pke_fifo_flush(struct pke_fifo*);
+void pke_fifo_reset(struct pke_fifo*);
+struct fifo_quadword* pke_fifo_fit(struct pke_fifo*);
+struct fifo_quadword* pke_fifo_access(struct pke_fifo*, unsigned_4 qwnum);
+void pke_fifo_old(struct pke_fifo*, unsigned_4 qwnum);
 
 
 
