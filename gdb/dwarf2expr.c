@@ -115,7 +115,7 @@ dwarf_expr_eval (struct dwarf_expr_context *ctx, unsigned char *addr,
    by R, and return the new value of BUF.  Verify that it doesn't extend
    past BUF_END.  */
 
-static unsigned char *
+unsigned char *
 read_uleb128 (unsigned char *buf, unsigned char *buf_end, ULONGEST * r)
 {
   unsigned shift = 0;
@@ -141,7 +141,7 @@ read_uleb128 (unsigned char *buf, unsigned char *buf_end, ULONGEST * r)
    by R, and return the new value of BUF.  Verify that it doesn't extend
    past BUF_END.  */
 
-static unsigned char *
+unsigned char *
 read_sleb128 (unsigned char *buf, unsigned char *buf_end, LONGEST * r)
 {
   unsigned shift = 0;

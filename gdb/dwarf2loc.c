@@ -26,6 +26,8 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
+#include "ax.h"
+#include "ax-gdb.h"
 
 #include "elf/dwarf2.h"
 #include "dwarf2expr.h"
@@ -277,11 +279,73 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
   return 1;
 }
 
+
+/* Describe the location of SYMBOL as an agent value in VALUE, generating
+   any necessary bytecode in AX.
+
+   NOTE drow/2003-02-26: This function is extremely minimal, because
+   doing it correctly is extremely complicated and there is no
+   publicly available stub with tracepoint support for me to test
+   against.  When there is one this function should be revisited.  */
+
+void
+locexpr_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
+			    struct axs_value * value)
+{
+  struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+
+  if (dlbaton->size == 0)
+    error ("Symbol \"%s\" has been optimized out.",
+	   SYMBOL_PRINT_NAME (symbol));
+
+  if (dlbaton->size == 1
+      && dlbaton->data[0] >= DW_OP_reg0
+      && dlbaton->data[0] <= DW_OP_reg31)
+    {
+      value->kind = axs_lvalue_register;
+      value->u.reg = dlbaton->data[0] - DW_OP_reg0;
+    }
+  else if (dlbaton->data[0] == DW_OP_regx)
+    {
+      ULONGEST reg;
+      read_uleb128 (dlbaton->data + 1, dlbaton->data + dlbaton->size,
+		    &reg);
+      value->kind = axs_lvalue_register;
+      value->u.reg = reg;
+    }
+  else if (dlbaton->data[0] == DW_OP_fbreg)
+    {
+      /* And this is worse than just minimal; we should honor the frame base
+	 as above.  */
+      int frame_reg;
+      LONGEST frame_offset;
+      unsigned char *buf_end;
+
+      buf_end = read_sleb128 (dlbaton->data + 1, dlbaton->data + dlbaton->size,
+			      &frame_offset);
+      if (buf_end != dlbaton->data + dlbaton->size)
+	error ("Unexpected opcode after DW_OP_fbreg for symbol \"%s\".",
+	       SYMBOL_PRINT_NAME (symbol));
+
+      TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
+      ax_reg (ax, frame_reg);
+      ax_const_l (ax, frame_offset);
+      ax_simple (ax, aop_add);
+
+      ax_const_l (ax, frame_offset);
+      ax_simple (ax, aop_add);
+      value->kind = axs_lvalue_memory;
+    }
+  else
+    error ("Unsupported DWARF opcode in the location of \"%s\".",
+	   SYMBOL_PRINT_NAME (symbol));
+}
+
 /* The set of location functions used with the DWARF-2 expression
    evaluator.  */
 struct location_funcs dwarf2_locexpr_funcs = {
   locexpr_read_variable,
   locexpr_read_needs_frame,
   locexpr_describe_location,
-  NULL
+  locexpr_tracepoint_var_ref
 };

@@ -1,3 +1,13 @@
+2003-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (dwarf2loc.o): Update dependencies.
+	* ax-gdb.c (gen_var_ref): Handle LOC_COMPUTED and LOC_COMPUTED_ARG.
+	* dwarf2expr.c (read_uleb128, read_sleb128): Make non-static.
+	* dwarf2expr.h (read_uleb128, read_sleb128): Add prototypes.
+	* dwarf2loc.c: Include "ax.h" and "ax-gdb.h".
+	(locexpr_tracepoint_var_ref): New function.
+	(dwarf2_locexpr_funcs): Add locexpr_tracepoint_var_ref.
+
 2003-02-28  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (register_size): New function.

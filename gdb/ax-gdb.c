@@ -618,6 +618,11 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       }
       break;
 
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      (*SYMBOL_LOCATION_FUNCS (var)->tracepoint_var_ref) (var, ax, value);
+      break;
+
     case LOC_OPTIMIZED_OUT:
       error ("The variable `%s' has been optimized out.",
 	     SYMBOL_PRINT_NAME (var));
