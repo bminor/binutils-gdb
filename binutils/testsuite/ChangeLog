@@ -1,4 +1,4 @@
-2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
+2002-02-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* binutils-all/objcopy.exp
 	(strip_executable_with_saving_a_symbol): Prune symbol Main in nm
