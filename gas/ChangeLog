@@ -1,9 +1,21 @@
-Mon Feb  7 03:56:05 1994  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+Mon Feb  7 16:07:35 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
-	* atof-generic.c (atof_generic): Calculate maximum number of
-	useful digits in integer arithmetic, to eliminate only source of
-	dependence on floating point support, which doesn't work yet on
-	the Alpha.
+	* configure.in (target alpha-*-osf*): Don't set "dev=yes" any
+	more.
+
+	* config/tc-alpha.c (load_expression): Parenthesize operations in
+	range checking, to avoid precedence questions.
+
+	* config/tc-alpha.c (addr32): New static variable.
+	(md_parse_option): Set it for "-32addr".
+	(load_symbol_address): If addr32 is set, use ldl instead of ldq.
+
+	* atof-generic.c (atof_generic): Calculate maximum_useful_digits
+	and more_than_enough_bits_for_digits in integer arithmetic, to
+	eliminate the only sources of dependence on floating point
+	support, which doesn't work yet on the Alpha.
+
+Mon Feb  7 03:56:05 1994  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* ecoff.c (ecoff_build_debug) [TC_ALPHA]: Specify version stamp as
 	0x30b for Alpha for now, until ".verstamp" is handled.
