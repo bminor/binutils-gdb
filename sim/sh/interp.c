@@ -1411,6 +1411,55 @@ macl (regs, memory, n, m)
   MACH = mach;
 }
 
+float
+fsca_s (int in, double (*f) (double))
+{
+  double rad = ldexp ((in & 0xffff), -15) * 3.141592653589793238462643383;
+  double result = (*f) (rad);
+  double error, upper, lower, frac;
+  int exp;
+
+  /* Search the value with the maximum error that is still within the
+     architectural spec.  */
+  error = ldexp (1., -21);
+  /* compensate for calculation inaccuracy by reducing error.  */
+  error = error - ldexp (1., -50);
+  upper = result + error;
+  frac = frexp (upper, &exp);
+  upper = ldexp (floor (ldexp (frac, 24)), exp - 24);
+  lower = result - error;
+  frac = frexp (lower, &exp);
+  lower = ldexp (ceil (ldexp (frac, 24)), exp - 24);
+  return abs (upper - result) >= abs (lower - result) ? upper : lower;
+}
+
+float
+fsrra_s (float in)
+{
+  double result = 1. / sqrt (in);
+  int exp;
+  double frac, upper, lower, error, eps;
+
+  /* refine result */
+  result = result - (result * result * in - 1) * 0.5 * result;
+  /* Search the value with the maximum error that is still within the
+     architectural spec.  */
+  frac = frexp (result, &exp);
+  frac = ldexp (frac, 24);
+  error = 4.; /* 1 << 24-1-21 */
+  /* use eps to compensate for possible 1 ulp error in our 'exact' result.  */
+  eps = ldexp (1., -29);
+  upper = floor (frac + error - eps);
+  if (upper > 16777216.)
+    upper = floor ((frac + error - eps) * 0.5) * 2.;
+  lower = ceil ((frac - error + eps) * 2) * .5;
+  if (lower > 8388608.)
+    lower = ceil (frac - error + eps);
+  upper = ldexp (upper, exp - 24);
+  lower = ldexp (lower, exp - 24);
+  return upper - result >= result - lower ? upper : lower;
+}
+
 static struct loop_bounds
 get_loop_bounds (rs, re, memory, mem_end, maskw, endianw)
      int rs, re;
