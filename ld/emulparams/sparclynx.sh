@@ -1,6 +1,6 @@
 SCRIPT_NAME=sparccoff
 OUTPUT_FORMAT="coff-sparc-lynx"
-# This is what /lib/init1.o seems to want.
+# This is what LynxOS /lib/init1.o wants.
 ENTRY=_main
 # following are dubious
 PAGE_SIZE=0x1000

@@ -37,6 +37,7 @@ hppaosf.sc
 i386coff.sc
 i960.sc
 m68kcoff.sc
+m68klynx.sc
 m88kbcs.sc
 mips.sc
 mipsbsd.sc
