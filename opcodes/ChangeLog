@@ -1,3 +1,10 @@
+start-sanitize-5900
+Thu Jun 26 16:20:27 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c (mips_builtin_opcodes): Add "pinteh", "pexeh" and
+	"pexew" as synonyms for "pintoh", "pexoh", "pexow".
+
+end-sanitize-5900
 Wed Jun 25 15:25:57 1997  Felix Lee  <flee@cirdan.cygnus.com>
 
 	* ppc-opc.c (extract_nsi): make unsigned expression signed before
