@@ -1,3 +1,11 @@
+2003-03-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64alpha.sh (EXTRA_EM_FILE): Define.
+	(PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_LONGOPTS,
+	PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES,
+	PARSE_AND_LIST_EPILOGUE): Don't define.
+	* emultempl/alphaelf.em: New file.
+
 2003-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldemul.c: Include getopt.h.
