@@ -73,7 +73,7 @@ parse_mem8 (cd, strp, opindex, valuep)
       if (s[1] == '-' && s[2] == '-')
 	return _("Bad register in preincrement");
 
-      while (isalnum (*++s))
+      while (ISALNUM (*++s))
 	;
       if (s[0] == '+' && s[1] == '+' && (s[2] == ')' || s[2] == ','))
 	return _("Bad register in postincrement");

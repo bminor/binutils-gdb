@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "frv-opc.h"
 #include "opintl.h"
 #include "libiberty.h"
+#include "xregex.h"
 
 /* Attributes.  */
 
@@ -1889,21 +1890,21 @@ const CGEN_MAYBE_MULTI_IFLD FRV_F_LABEL24_MULTI_IFIELD [];
 
 const CGEN_MAYBE_MULTI_IFLD FRV_F_U12_MULTI_IFIELD [] =
 {
-    { 0, &(frv_cgen_ifld_table[46]) },
-    { 0, &(frv_cgen_ifld_table[47]) },
-    {0,0}
+    { 0, { (const PTR) &frv_cgen_ifld_table[46] } },
+    { 0, { (const PTR) &frv_cgen_ifld_table[47] } },
+    { 0, { (const PTR) 0 } }
 };
 const CGEN_MAYBE_MULTI_IFLD FRV_F_SPR_MULTI_IFIELD [] =
 {
-    { 0, &(frv_cgen_ifld_table[58]) },
-    { 0, &(frv_cgen_ifld_table[59]) },
-    {0,0}
+    { 0, { (const PTR) &frv_cgen_ifld_table[58] } },
+    { 0, { (const PTR) &frv_cgen_ifld_table[59] } },
+    { 0, { (const PTR) 0 } }
 };
 const CGEN_MAYBE_MULTI_IFLD FRV_F_LABEL24_MULTI_IFIELD [] =
 {
-    { 0, &(frv_cgen_ifld_table[61]) },
-    { 0, &(frv_cgen_ifld_table[62]) },
-    {0,0}
+    { 0, { (const PTR) &frv_cgen_ifld_table[61] } },
+    { 0, { (const PTR) &frv_cgen_ifld_table[62] } },
+    { 0, { (const PTR) 0 } }
 };
 
 /* The operand table.  */
@@ -1923,313 +1924,316 @@ const CGEN_OPERAND frv_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", FRV_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, &(frv_cgen_ifld_table[0]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[0] } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* pack: packing bit */
   { "pack", FRV_OPERAND_PACK, HW_H_PACK, 31, 1,
-    { 0, &(frv_cgen_ifld_table[2]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[2] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* GRi: source register 1 */
   { "GRi", FRV_OPERAND_GRI, HW_H_GR, 17, 6,
-    { 0, &(frv_cgen_ifld_table[8]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* GRj: source register 2 */
   { "GRj", FRV_OPERAND_GRJ, HW_H_GR, 5, 6,
-    { 0, &(frv_cgen_ifld_table[9]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[9] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* GRk: destination register */
   { "GRk", FRV_OPERAND_GRK, HW_H_GR, 30, 6,
-    { 0, &(frv_cgen_ifld_table[10]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[10] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* GRkhi: destination register */
   { "GRkhi", FRV_OPERAND_GRKHI, HW_H_GR_HI, 30, 6,
-    { 0, &(frv_cgen_ifld_table[10]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[10] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* GRklo: destination register */
   { "GRklo", FRV_OPERAND_GRKLO, HW_H_GR_LO, 30, 6,
-    { 0, &(frv_cgen_ifld_table[10]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[10] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* GRdoublek: destination register */
   { "GRdoublek", FRV_OPERAND_GRDOUBLEK, HW_H_GR_DOUBLE, 30, 6,
-    { 0, &(frv_cgen_ifld_table[10]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[10] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ACC40Si: signed accumulator */
   { "ACC40Si", FRV_OPERAND_ACC40SI, HW_H_ACC40S, 17, 6,
-    { 0, &(frv_cgen_ifld_table[19]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[19] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ACC40Ui: unsigned accumulator */
   { "ACC40Ui", FRV_OPERAND_ACC40UI, HW_H_ACC40U, 17, 6,
-    { 0, &(frv_cgen_ifld_table[20]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[20] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ACC40Sk: target accumulator */
   { "ACC40Sk", FRV_OPERAND_ACC40SK, HW_H_ACC40S, 30, 6,
-    { 0, &(frv_cgen_ifld_table[21]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[21] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ACC40Uk: target accumulator */
   { "ACC40Uk", FRV_OPERAND_ACC40UK, HW_H_ACC40U, 30, 6,
-    { 0, &(frv_cgen_ifld_table[22]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[22] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ACCGi: source register */
   { "ACCGi", FRV_OPERAND_ACCGI, HW_H_ACCG, 17, 6,
-    { 0, &(frv_cgen_ifld_table[17]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[17] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ACCGk: target register */
   { "ACCGk", FRV_OPERAND_ACCGK, HW_H_ACCG, 30, 6,
-    { 0, &(frv_cgen_ifld_table[18]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[18] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CPRi: source register */
   { "CPRi", FRV_OPERAND_CPRI, HW_H_CPR, 17, 6,
-    { 0, &(frv_cgen_ifld_table[14]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[14] } }, 
     { 0, { (1<<MACH_FRV) } }  },
 /* CPRj: source register */
   { "CPRj", FRV_OPERAND_CPRJ, HW_H_CPR, 5, 6,
-    { 0, &(frv_cgen_ifld_table[15]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[15] } }, 
     { 0, { (1<<MACH_FRV) } }  },
 /* CPRk: destination register */
   { "CPRk", FRV_OPERAND_CPRK, HW_H_CPR, 30, 6,
-    { 0, &(frv_cgen_ifld_table[16]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[16] } }, 
     { 0, { (1<<MACH_FRV) } }  },
 /* CPRdoublek: destination register */
   { "CPRdoublek", FRV_OPERAND_CPRDOUBLEK, HW_H_CPR_DOUBLE, 30, 6,
-    { 0, &(frv_cgen_ifld_table[16]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[16] } }, 
     { 0, { (1<<MACH_FRV) } }  },
 /* FRinti: source register 1 */
   { "FRinti", FRV_OPERAND_FRINTI, HW_H_FR_INT, 17, 6,
-    { 0, &(frv_cgen_ifld_table[11]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[11] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRintj: source register 2 */
   { "FRintj", FRV_OPERAND_FRINTJ, HW_H_FR_INT, 5, 6,
-    { 0, &(frv_cgen_ifld_table[12]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[12] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRintk: target register */
   { "FRintk", FRV_OPERAND_FRINTK, HW_H_FR_INT, 30, 6,
-    { 0, &(frv_cgen_ifld_table[13]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[13] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRi: source register 1 */
   { "FRi", FRV_OPERAND_FRI, HW_H_FR, 17, 6,
-    { 0, &(frv_cgen_ifld_table[11]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[11] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRj: source register 2 */
   { "FRj", FRV_OPERAND_FRJ, HW_H_FR, 5, 6,
-    { 0, &(frv_cgen_ifld_table[12]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[12] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRk: destination register */
   { "FRk", FRV_OPERAND_FRK, HW_H_FR, 30, 6,
-    { 0, &(frv_cgen_ifld_table[13]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[13] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRkhi: destination register */
   { "FRkhi", FRV_OPERAND_FRKHI, HW_H_FR_HI, 30, 6,
-    { 0, &(frv_cgen_ifld_table[13]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[13] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRklo: destination register */
   { "FRklo", FRV_OPERAND_FRKLO, HW_H_FR_LO, 30, 6,
-    { 0, &(frv_cgen_ifld_table[13]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[13] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRdoublei: source register 1 */
   { "FRdoublei", FRV_OPERAND_FRDOUBLEI, HW_H_FR_DOUBLE, 17, 6,
-    { 0, &(frv_cgen_ifld_table[11]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[11] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRdoublej: source register 2 */
   { "FRdoublej", FRV_OPERAND_FRDOUBLEJ, HW_H_FR_DOUBLE, 5, 6,
-    { 0, &(frv_cgen_ifld_table[12]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[12] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FRdoublek: target register */
   { "FRdoublek", FRV_OPERAND_FRDOUBLEK, HW_H_FR_DOUBLE, 30, 6,
-    { 0, &(frv_cgen_ifld_table[13]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[13] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CRi: source register 1 */
   { "CRi", FRV_OPERAND_CRI, HW_H_CCCR, 14, 3,
-    { 0, &(frv_cgen_ifld_table[23]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[23] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CRj: source register 2 */
   { "CRj", FRV_OPERAND_CRJ, HW_H_CCCR, 2, 3,
-    { 0, &(frv_cgen_ifld_table[24]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[24] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CRj_int: destination register */
   { "CRj_int", FRV_OPERAND_CRJ_INT, HW_H_CCCR, 26, 2,
-    { 0, &(frv_cgen_ifld_table[27]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[27] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CRj_float: destination register */
   { "CRj_float", FRV_OPERAND_CRJ_FLOAT, HW_H_CCCR, 26, 2,
-    { 0, &(frv_cgen_ifld_table[28]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[28] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CRk: destination register */
   { "CRk", FRV_OPERAND_CRK, HW_H_CCCR, 27, 3,
-    { 0, &(frv_cgen_ifld_table[25]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[25] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CCi: condition   register */
   { "CCi", FRV_OPERAND_CCI, HW_H_CCCR, 11, 3,
-    { 0, &(frv_cgen_ifld_table[26]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[26] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ICCi_1: condition   register */
   { "ICCi_1", FRV_OPERAND_ICCI_1, HW_H_ICCR, 11, 2,
-    { 0, &(frv_cgen_ifld_table[29]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[29] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ICCi_2: condition   register */
   { "ICCi_2", FRV_OPERAND_ICCI_2, HW_H_ICCR, 26, 2,
-    { 0, &(frv_cgen_ifld_table[30]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[30] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ICCi_3: condition   register */
   { "ICCi_3", FRV_OPERAND_ICCI_3, HW_H_ICCR, 1, 2,
-    { 0, &(frv_cgen_ifld_table[31]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[31] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FCCi_1: condition   register */
   { "FCCi_1", FRV_OPERAND_FCCI_1, HW_H_FCCR, 11, 2,
-    { 0, &(frv_cgen_ifld_table[32]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[32] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FCCi_2: condition   register */
   { "FCCi_2", FRV_OPERAND_FCCI_2, HW_H_FCCR, 26, 2,
-    { 0, &(frv_cgen_ifld_table[33]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[33] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FCCi_3: condition   register */
   { "FCCi_3", FRV_OPERAND_FCCI_3, HW_H_FCCR, 1, 2,
-    { 0, &(frv_cgen_ifld_table[34]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[34] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* FCCk: condition   register */
   { "FCCk", FRV_OPERAND_FCCK, HW_H_FCCR, 26, 2,
-    { 0, &(frv_cgen_ifld_table[35]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[35] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* eir: exception insn reg */
   { "eir", FRV_OPERAND_EIR, HW_H_UINT, 17, 6,
-    { 0, &(frv_cgen_ifld_table[36]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[36] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* s10: 10 bit signed immediate */
   { "s10", FRV_OPERAND_S10, HW_H_SINT, 9, 10,
-    { 0, &(frv_cgen_ifld_table[37]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[37] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* u16: 16 bit unsigned immediate */
   { "u16", FRV_OPERAND_U16, HW_H_UINT, 15, 16,
-    { 0, &(frv_cgen_ifld_table[40]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[40] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* s16: 16 bit signed   immediate */
   { "s16", FRV_OPERAND_S16, HW_H_SINT, 15, 16,
-    { 0, &(frv_cgen_ifld_table[41]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[41] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* s6: 6  bit signed   immediate */
   { "s6", FRV_OPERAND_S6, HW_H_SINT, 5, 6,
-    { 0, &(frv_cgen_ifld_table[42]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[42] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* s6_1: 6  bit signed   immediate */
   { "s6_1", FRV_OPERAND_S6_1, HW_H_SINT, 11, 6,
-    { 0, &(frv_cgen_ifld_table[43]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[43] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* u6: 6  bit unsigned immediate */
   { "u6", FRV_OPERAND_U6, HW_H_UINT, 5, 6,
-    { 0, &(frv_cgen_ifld_table[44]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[44] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* s5: 5  bit signed   immediate */
   { "s5", FRV_OPERAND_S5, HW_H_SINT, 4, 5,
-    { 0, &(frv_cgen_ifld_table[45]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[45] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* cond: conditional arithmetic */
   { "cond", FRV_OPERAND_COND, HW_H_UINT, 8, 1,
-    { 0, &(frv_cgen_ifld_table[50]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[50] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* ccond: lr branch condition */
   { "ccond", FRV_OPERAND_CCOND, HW_H_UINT, 12, 1,
-    { 0, &(frv_cgen_ifld_table[51]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[51] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* hint: 2 bit branch predictor */
   { "hint", FRV_OPERAND_HINT, HW_H_UINT, 17, 2,
-    { 0, &(frv_cgen_ifld_table[52]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[52] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* hint_taken: 2 bit branch predictor */
   { "hint_taken", FRV_OPERAND_HINT_TAKEN, HW_H_HINT_TAKEN, 17, 2,
-    { 0, &(frv_cgen_ifld_table[52]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[52] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* hint_not_taken: 2 bit branch predictor */
   { "hint_not_taken", FRV_OPERAND_HINT_NOT_TAKEN, HW_H_HINT_NOT_TAKEN, 17, 2,
-    { 0, &(frv_cgen_ifld_table[52]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[52] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* LI: link indicator */
   { "LI", FRV_OPERAND_LI, HW_H_UINT, 25, 1,
-    { 0, &(frv_cgen_ifld_table[53]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[53] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* lock: cache lock indicator */
   { "lock", FRV_OPERAND_LOCK, HW_H_UINT, 25, 1,
-    { 0, &(frv_cgen_ifld_table[54]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[54] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* debug: debug mode indicator */
   { "debug", FRV_OPERAND_DEBUG, HW_H_UINT, 25, 1,
-    { 0, &(frv_cgen_ifld_table[55]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[55] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* A: all accumulator indicator */
   { "A", FRV_OPERAND_A, HW_H_UINT, 17, 1,
-    { 0, &(frv_cgen_ifld_table[56]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[56] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* ae: all entries indicator */
   { "ae", FRV_OPERAND_AE, HW_H_UINT, 25, 1,
-    { 0, &(frv_cgen_ifld_table[57]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[57] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* label16: 18 bit pc relative address */
   { "label16", FRV_OPERAND_LABEL16, HW_H_IADDR, 15, 16,
-    { 0, &(frv_cgen_ifld_table[60]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[60] } }, 
     { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* label24: 26 bit pc relative address */
   { "label24", FRV_OPERAND_LABEL24, HW_H_IADDR, 17, 24,
-    { 2, &(FRV_F_LABEL24_MULTI_IFIELD[0]) }, 
+    { 2, { (const PTR) &FRV_F_LABEL24_MULTI_IFIELD[0] } }, 
     { 0|A(PCREL_ADDR)|A(VIRTUAL), { (1<<MACH_BASE) } }  },
 /* d12: 12 bit signed immediate */
   { "d12", FRV_OPERAND_D12, HW_H_SINT, 11, 12,
-    { 0, &(frv_cgen_ifld_table[39]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[39] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* s12: 12 bit signed immediate */
   { "s12", FRV_OPERAND_S12, HW_H_SINT, 11, 12,
-    { 0, &(frv_cgen_ifld_table[39]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[39] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* u12: 12 bit signed immediate */
   { "u12", FRV_OPERAND_U12, HW_H_SINT, 5, 12,
-    { 2, &(FRV_F_U12_MULTI_IFIELD[0]) }, 
+    { 2, { (const PTR) &FRV_F_U12_MULTI_IFIELD[0] } }, 
     { 0|A(HASH_PREFIX)|A(VIRTUAL), { (1<<MACH_BASE) } }  },
 /* spr: special purpose register */
   { "spr", FRV_OPERAND_SPR, HW_H_SPR, 17, 12,
-    { 2, &(FRV_F_SPR_MULTI_IFIELD[0]) }, 
+    { 2, { (const PTR) &FRV_F_SPR_MULTI_IFIELD[0] } }, 
     { 0|A(VIRTUAL), { (1<<MACH_BASE) } }  },
 /* ulo16: 16 bit unsigned immediate, for #lo() */
   { "ulo16", FRV_OPERAND_ULO16, HW_H_UINT, 15, 16,
-    { 0, &(frv_cgen_ifld_table[40]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[40] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* slo16: 16 bit unsigned immediate, for #lo() */
   { "slo16", FRV_OPERAND_SLO16, HW_H_SINT, 15, 16,
-    { 0, &(frv_cgen_ifld_table[41]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[41] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* uhi16: 16 bit unsigned immediate, for #hi() */
   { "uhi16", FRV_OPERAND_UHI16, HW_H_UINT, 15, 16,
-    { 0, &(frv_cgen_ifld_table[40]) }, 
+    { 0, { (const PTR) &frv_cgen_ifld_table[40] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* psr_esr: PSR.ESR bit */
   { "psr_esr", FRV_OPERAND_PSR_ESR, HW_H_PSR_ESR, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psr_s: PSR.S   bit */
   { "psr_s", FRV_OPERAND_PSR_S, HW_H_PSR_S, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psr_ps: PSR.PS  bit */
   { "psr_ps", FRV_OPERAND_PSR_PS, HW_H_PSR_PS, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psr_et: PSR.ET  bit */
   { "psr_et", FRV_OPERAND_PSR_ET, HW_H_PSR_ET, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* bpsr_bs: BPSR.BS  bit */
   { "bpsr_bs", FRV_OPERAND_BPSR_BS, HW_H_BPSR_BS, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* bpsr_bet: BPSR.BET bit */
   { "bpsr_bet", FRV_OPERAND_BPSR_BET, HW_H_BPSR_BET, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* tbr_tba: TBR.TBA */
   { "tbr_tba", FRV_OPERAND_TBR_TBA, HW_H_TBR_TBA, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* tbr_tt: TBR.TT */
   { "tbr_tt", FRV_OPERAND_TBR_TT, HW_H_TBR_TT, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
-  { 0, 0, 0, 0, 0, {0, {0}} }
+/* sentinel */
+  { 0, 0, 0, 0, 0,
+    { 0, { (const PTR) 0 } },
+    { 0, { 0 } } }
 };
 
 #undef A
@@ -6270,7 +6274,7 @@ frv_cgen_cpu_close (cd)
      CGEN_CPU_DESC cd;
 {
   unsigned int i;
-  CGEN_INSN *insns;
+  const CGEN_INSN *insns;
 
   if (cd->macro_insn_table.init_entries)
     {
@@ -6278,7 +6282,7 @@ frv_cgen_cpu_close (cd)
       for (i = 0; i < cd->macro_insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX ((insns)))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 
@@ -6288,7 +6292,7 @@ frv_cgen_cpu_close (cd)
       for (i = 0; i < cd->insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX (insns))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 
