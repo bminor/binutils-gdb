@@ -1549,7 +1549,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\\n",
                       GDB_MULTI_ARCH);
 EOF
-function_list | sort -t: +2 | while do_read
+function_list | sort -t: -k 3 | while do_read
 do
     # multiarch functions don't have macros.
     if class_is_multiarch_p

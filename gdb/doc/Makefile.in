@@ -218,7 +218,7 @@ refcard.ps : refcard.dvi
 
 # File to record current GDB version number (copied from main dir version.in)
 GDBvn.texi : ${gdbdir}/version.in
-	echo "@set GDBVN `head -1 $(srcdir)/../version.in`" > ./GDBvn.new
+	echo "@set GDBVN `sed q $(srcdir)/../version.in`" > ./GDBvn.new
 	mv GDBvn.new GDBvn.texi
 
 # Updated atomically

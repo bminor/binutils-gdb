@@ -1,3 +1,8 @@
+2002-11-19  Andrew Cagney  <ac131313@redhat.com>
+
+	Fix POSIX problem reported by Paul Eggert.
+	* Makefile.in (GDBvn.texi): Use `sed q' instead of `head -1'.
+
 2002-09-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.texinfo: Use GNU/Linux instead of Linux.

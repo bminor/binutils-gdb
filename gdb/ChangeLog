@@ -1,5 +1,10 @@
 2002-11-19  Andrew Cagney  <ac131313@redhat.com>
 
+	Problems reported by Paul Eggert.
+	* gdbarch.sh: Use `sort -k 3`.
+
+2002-11-19  Andrew Cagney  <ac131313@redhat.com>
+
 	From mainline:
 	2002-11-12  Andrew Cagney  <ac131313@redhat.com>
 	* utils.c (gdb_realpath): Make rp a constant pointer.
