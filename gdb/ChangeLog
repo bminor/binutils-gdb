@@ -1,3 +1,17 @@
+Thu Feb  5 11:57:06 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c (tracepoint_operation): call free_actions instead
+	of free.  (free_actions): eliminate some memory leaks for actions.
+	(validate_actionline): pass string arg by reference, so we can 
+	change the pointer.  Change all memrange collection arguments to
+	canonical form (literal address and size), to enforce early
+	evaluation.  Accept UNOP_MEMVAL (assembly variables) for 
+	trace collection.  (parse_and_eval_memrange): accept expressions
+	for the address and size fields of a memrange (and evaluate
+	them immediately).  (several places): use -1 instead of zero
+	to distinguish an absolute memrange from a register-relative one.
+	(encode_actions): add handling for UNOP_MEMVAL (assembly variable).
+
 Wed Feb  4 17:40:21 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * Makefile.in (SFILES): add tracepoint.c.

@@ -517,6 +517,8 @@ enum tracepoint_opcode
   delete
 };
 
+static void  free_actions PARAMS((struct tracepoint *));
+
 /* This function implements enable, disable and delete. */
 static void
 tracepoint_operation (t, from_tty, opcode)
@@ -525,7 +527,6 @@ tracepoint_operation (t, from_tty, opcode)
      enum tracepoint_opcode opcode;
 {
   struct tracepoint *t2;
-  struct action_line *action, *next;
 
   switch (opcode) {
   case enable:
@@ -553,13 +554,9 @@ tracepoint_operation (t, from_tty, opcode)
       free (t->addr_string);
     if (t->source_file)
       free (t->source_file);
-    for (action = t->actions; action; action = next)
-      {
-	next = action->next;
-	if (action->action) 
-	  free (action->action);
-	free (action);
-      }
+    if (t->actions)
+      free_actions (t);
+
     free (t);
     break;
   }
@@ -712,7 +709,6 @@ trace_pass_command (args, from_tty)
 
 /* Prototypes for action-parsing utility commands  */
 static void  read_actions PARAMS((struct tracepoint *));
-static void  free_actions PARAMS((struct tracepoint *));
 static char *parse_and_eval_memrange PARAMS ((char *,
 					      CORE_ADDR, 
 					      long *,
@@ -795,7 +791,7 @@ enum actionline_type
   STEPPING =  2,
 };
 
-static enum actionline_type validate_actionline PARAMS((char *, 
+static enum actionline_type validate_actionline PARAMS((char **, 
 							struct tracepoint *));
 
 /* worker function */
@@ -838,7 +834,7 @@ read_actions (t)
       else
 	line = gdb_readline (0);
 
-      linetype = validate_actionline (line, t);
+      linetype = validate_actionline (&line, t);
       if (linetype == BADLINE)
 	continue;	/* already warned -- collect another line */
 
@@ -879,7 +875,7 @@ read_actions (t)
 /* worker function */
 static enum actionline_type
 validate_actionline (line, t)
-     char *line;
+     char **line;
      struct tracepoint *t;
 {
   struct cmd_list_element *c;
@@ -887,7 +883,7 @@ validate_actionline (line, t)
   value_ptr temp, temp2;
   char *p;
 
-  for (p = line; isspace (*p); )
+  for (p = *line; isspace (*p); )
     p++;
 
   /* symbol lookup etc. */
@@ -921,14 +917,38 @@ validate_actionline (line, t)
 	      p = strchr (p, ',');
 
 	    else if (p[1] == '(')	/* literal memrange */
-	      p = parse_and_eval_memrange (p, t->address, 
-					    &typecode, &offset, &size);
+	      {
+		char *temp, *newline;
+
+		newline = malloc (strlen (*line) + 32);
+		strcpy (newline, *line);
+		newline[p - *line] = '\0';
+		/* newline is now a copy of line, up to "p" (the memrange) */
+		temp = parse_and_eval_memrange (p, t->address, 
+						&typecode, &offset, &size) + 1;
+		/* now compose the memrange as a literal value */
+		if (typecode == -1)
+		  sprintf (newline + strlen (newline), 
+			   "$(0x%x, %d)",
+			   offset, size);
+		else
+		  sprintf (newline + strlen (newline), 
+			   "$($%s, 0x%x, %d)", 
+			   reg_names[typecode], offset, size);
+		/* now add the remainder of the old line to the new one */
+		p = newline + strlen (newline);
+		if (temp && *temp)
+		  strcat (newline, temp);
+		free (*line);
+		*line = newline;
+	      }
 	  }
 	else
 	  {
 	    exp   = parse_exp_1 (&p, block_for_pc (t->address), 1);
 
 	    if (exp->elts[0].opcode != OP_VAR_VALUE &&
+		exp->elts[0].opcode != UNOP_MEMVAL  &&
 	      /*exp->elts[0].opcode != OP_LONG      && */
 	      /*exp->elts[0].opcode != UNOP_CAST    && */
 		exp->elts[0].opcode != OP_REGISTER)
@@ -979,7 +999,7 @@ validate_actionline (line, t)
     return END;
   else
     {
-      warning ("'%s' is not a supported tracepoint action.", line);
+      warning ("'%s' is not a supported tracepoint action.", *line);
       return BADLINE;
     }
 }
@@ -994,6 +1014,8 @@ free_actions (t)
   for (line = t->actions; line; line = next)
     {
       next = line->next;
+      if (line->action) 
+	free (line->action);
       free (line);
     }
   t->actions = NULL;
@@ -1022,11 +1044,12 @@ parse_and_eval_memrange (arg, addr, typecode, offset, size)
      long *typecode, *size;
      bfd_signed_vma *offset;
 {
-  char *start = arg;
+  char *start      = arg;
   struct expression *exp;
+  value_ptr          val;
 
   if (*arg++ != '$' || *arg++ != '(')
-    error ("Internal: bad argument to validate_memrange: %s", start);
+    error ("Internal: bad argument to parse_and_eval_memrange: %s", start);
 
   if (*arg == '$')	/* register for relative memrange? */
     {
@@ -1038,67 +1061,18 @@ parse_and_eval_memrange (arg, addr, typecode, offset, size)
       *typecode = exp->elts[1].longconst;
     }
   else
-    *typecode = 0;
+    *typecode = -1;	/* absolute memrange; */
 
-#if 0
-  /* While attractive, this fails for a number of reasons:
-     1) parse_and_eval_address does not deal with trailing commas,
-        close-parens etc.
-     2) There is no safeguard against the user trying to use
-        an out-of-scope variable in an address expression (for instance).
-     2.5) If you are going to allow semi-arbitrary expressions, you 
-          would need to explain which expressions are allowed, and 
-	  which are not (which would provoke endless questions).
-     3) If you are going to allow semi-arbitrary expressions in the
-        offset and size fields, then the leading "$" of a register
-	name no longer disambiguates the typecode field.
-  */
+  exp = parse_exp_1 (&arg, 0, 1);
+  *offset = value_as_pointer (evaluate_expression (exp));
 
-  *offset = parse_and_eval_address (arg);
-  if ((arg = strchr (arg, ',')) == NULL)
-    error ("missing comma for memrange: %s", start);
-  else
-    arg++;
-
-  *size = parse_and_eval_address (arg);
-  if ((arg = strchr (arg, ')')) == NULL)
-    error ("missing close-parenthesis for memrange: %s", start);
-  else
-    arg++;
-#else
-#if 0
-  /* This, on the other hand, doesn't work because "-1" is an 
-     expression, not an OP_LONG!  Fall back to using strtol for now. */
-
-  exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
-  if (exp->elts[0].opcode != OP_LONG)
-    error ("Bad offset operand for memrange: %s", start);
-  *offset = exp->elts[2].longconst;
-
+  /* now parse the size */
   if (*arg++ != ',')
     error ("missing comma for memrange: %s", start);
 
-  exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
-  if (exp->elts[0].opcode != OP_LONG)
-    error ("Bad size operand for memrange: %s", start);
-  *size = exp->elts[2].longconst;
+  exp = parse_exp_1 (&arg, 0, 0);
+  *size = value_as_long (evaluate_expression (exp));
 
-  if (*size <= 0)
-    error ("invalid size in memrange: %s", start);
-
-  if (*arg++ != ')')
-    error ("missing close-parenthesis for memrange: %s", start);
-#else
-  *offset = strtol (arg, &arg, 0);
-  if (*arg++ != ',')
-    error ("missing comma for memrange: %s", start);
-  *size   = strtol (arg, &arg, 0);
-  if (*size <= 0)
-    error ("invalid size in memrange: %s", start);
-  if (*arg++ != ')')
-    error ("missing close-parenthesis for memrange: %s", start);
-#endif
-#endif
   if (info_verbose)
     printf_filtered ("Collecting memrange: (0x%x,0x%x,0x%x)\n", 
 		     *typecode, *offset, *size);
@@ -1195,7 +1169,7 @@ add_memrange (memranges, type, base, len)
 				  memranges->listsize);
     }
 
-  if (type != 0)	/* better collect the base register! */
+  if (type != -1)	/* better collect the base register! */
     add_register (memranges, type);
 }
 
@@ -1225,7 +1199,7 @@ collect_symbol (collect, sym)
       printf_filtered ("LOC_STATIC %s: collect %d bytes "
 		       "at 0x%08x\n",
 		       SYMBOL_NAME (sym), len, offset);
-    add_memrange (collect, 0, offset, len);	/* 0 == memory */
+    add_memrange (collect, -1, offset, len);	/* 0 == memory */
     break;
   case LOC_REGISTER:
   case LOC_REGPARM:
@@ -1404,6 +1378,7 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
   struct action_line *action;
   bfd_signed_vma      offset;
   long                i;
+  value_ptr           tempval;
   struct collection_list  *collect;
   struct cmd_list_element *cmd;
 
@@ -1474,6 +1449,15 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
 		    printf_filtered ("OP_REGISTER: ");
 		  add_register (collect, i);
 		  break;
+
+		case UNOP_MEMVAL:
+		  /* safe because we know it's a simple expression */
+		  tempval = evaluate_expression (exp);
+		  addr = VALUE_ADDRESS (tempval) + VALUE_OFFSET (tempval);
+		  len = TYPE_LENGTH (check_typedef (exp->elts[1].type));
+		  add_memrange (collect, -1, addr, len);
+		  break;
+
 		case OP_VAR_VALUE:
 		  collect_symbol (collect, exp->elts[2].symbol);
 		  break;
@@ -1493,7 +1477,7 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
 		  else 
 		    len = 4;
 
-		  add_memrange (collect, 0, addr, len);
+		  add_memrange (collect, -1, addr, len);
 		  break;
 #endif
 		}
