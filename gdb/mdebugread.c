@@ -722,8 +722,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       add_symbol (s, b);
 
       /* Type could be missing in a number of cases */
-      if (sh->sc == scUndefined || sh->sc == scNil ||
-	  sh->index == 0xfffff)
+      if (sh->sc == scUndefined || sh->sc == scNil)
 	SYMBOL_TYPE (s) = builtin_type_int;	/* undefined? */
       else
 	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
@@ -1341,6 +1340,10 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
   TIR t[1];
   struct type *tp = 0;
   enum type_code type_code = TYPE_CODE_UNDEF;
+
+  /* Handle undefined types, they have indexNil. */
+  if (aux_index == indexNil)
+    return builtin_type_int;
 
   /* Handle corrupt aux indices.  */
   if (aux_index >= (debug_info->fdr + fd)->caux)
@@ -2144,9 +2147,17 @@ parse_partial_symbols (objfile, section_offsets)
 	  ms_type = mst_file_text;
 	  break;
 	case stGlobal:
-          if (ext_in->asym.sc == scData
+          if (ext_in->asym.sc == scCommon)
+	    {
+	      /* The value of a common symbol is its size, not its address.
+		 Ignore it.  */
+	      continue;
+	    }
+          else if (ext_in->asym.sc == scData
 	      || ext_in->asym.sc == scSData
-	      || ext_in->asym.sc == scRData)
+	      || ext_in->asym.sc == scRData
+	      || ext_in->asym.sc == scPData
+	      || ext_in->asym.sc == scXData)
 	    ms_type = mst_data;
 	  else
 	    ms_type = mst_bss;
@@ -2154,14 +2165,18 @@ parse_partial_symbols (objfile, section_offsets)
 	case stLabel:
           if (ext_in->asym.sc == scAbs)
 	    ms_type = mst_abs;
-          else if (ext_in->asym.sc == scText)
-	    ms_type = mst_text;
+          else if (ext_in->asym.sc == scText
+          	   || ext_in->asym.sc == scInit
+          	   || ext_in->asym.sc == scFini)
+	    ms_type = mst_file_text;
           else if (ext_in->asym.sc == scData
 		   || ext_in->asym.sc == scSData
-		   || ext_in->asym.sc == scRData)
-	    ms_type = mst_data;
+		   || ext_in->asym.sc == scRData
+		   || ext_in->asym.sc == scPData
+		   || ext_in->asym.sc == scXData)
+	    ms_type = mst_file_data;
 	  else
-	    ms_type = mst_bss;
+	    ms_type = mst_file_bss;
 	  break;
 	case stLocal:
 	  /* The alpha has the section start addresses in stLocal symbols
@@ -2342,19 +2357,30 @@ parse_partial_symbols (objfile, section_offsets)
 		  long procaddr;
 		  int new_sdx;
 
-		case stStaticProc:	/* Function */
-		  /* I believe this is used only for file-local functions.
-		     The comment in symconst.h ("load time only static procs")
-		     isn't particularly clear on this point.  */
+		case stStaticProc:
 		  prim_record_minimal_symbol (name, sh.value, mst_file_text,
 					      objfile);
+
 		  /* FALLTHROUGH */
 
-		case stProc:	/* Asm labels apparently */
+		case stProc:
+		  /* Usually there is a local and a global stProc symbol
+		     for a function. This means that the function name
+		     has already been entered into the mimimal symbol table
+		     while processing the global symbols in pass 2 above.
+		     One notable exception is the PROGRAM name from
+		     f77 compiled executables, it is only put out as
+		     local stProc symbol, and a global MAIN__ stProc symbol
+		     points to it.  It doesn't matter though, as gdb is
+		     still able to find the PROGRAM name via the partial
+		     symbol table, and the MAIN__ symbol via the minimal
+		     symbol table.  */
 		  ADD_PSYMBOL_TO_LIST (name, strlen (name),
 				       VAR_NAMESPACE, LOC_BLOCK,
-				       objfile->static_psymbols, sh.value,
-				       psymtab_language, objfile);
+				       (sh.st == stProc)
+					 ? objfile->global_psymbols
+					 : objfile->static_psymbols,
+				       sh.value, psymtab_language, objfile);
 		  /* Skip over procedure to next one. */
 		  if (sh.index >= hdr->iauxMax)
 		    {
@@ -2391,7 +2417,11 @@ parse_partial_symbols (objfile, section_offsets)
 		  continue;
 
 		case stStatic:	/* Variable */
-		  if (sh.sc == scData || sh.sc == scSData || sh.sc == scRData)
+		  if (sh.sc == scData
+		      || sh.sc == scSData
+		      || sh.sc == scRData
+		      || sh.sc == scPData
+		      || sh.sc == scXData)
 		    prim_record_minimal_symbol (name, sh.value, mst_file_data,
 						objfile);
 		  else
@@ -2496,6 +2526,12 @@ parse_partial_symbols (objfile, section_offsets)
 		  continue;
 		case stProc:
 		case stStaticProc:
+		  /* If the index of the global symbol is not indexNil,
+		     it points to the local stProc symbol with the same
+		     name, which has already been entered into the
+		     partial symbol table above.  */
+		  if (psh->index != indexNil)
+		    continue;
 		  class = LOC_BLOCK;
 		  break;
 		case stLabel:
@@ -2577,6 +2613,14 @@ parse_partial_symbols (objfile, section_offsets)
 	  pst->dependencies[pst->number_of_dependencies++] = fdr_to_pst[rh].pst;
 	}
     }
+
+  /* Remove the dummy psymtab created for -O3 images above, if it is
+     still empty, to enable the detection of stripped executables.  */
+  if (objfile->psymtabs->next == NULL
+      && objfile->psymtabs->number_of_dependencies == 0
+      && objfile->psymtabs->n_global_syms == 0
+      && objfile->psymtabs->n_static_syms == 0)
+    objfile->psymtabs = NULL;
   do_cleanups (old_chain);
 }
 
@@ -3090,10 +3134,11 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
   (*debug_swap->swap_sym_in) (cur_bfd, esh, &sh);
 
   /* Make sure that this type of cross reference can be handled.  */
-  if (sh.sc != scInfo
-      || (sh.st != stBlock && sh.st != stTypedef
-	  && sh.st != stStruct && sh.st != stUnion
-	  && sh.st != stEnum))
+  if ((sh.sc != scInfo
+       || (sh.st != stBlock && sh.st != stTypedef
+	   && sh.st != stStruct && sh.st != stUnion
+	   && sh.st != stEnum))
+      && (sh.sc != scCommon || sh.st != stBlock))
     {
       /* File indirect entry is corrupt.  */
       *pname = "<illegal>";

@@ -1,3 +1,21 @@
+Wed Mar  9 21:43:24 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_type):  Do not complain for types with
+	an `indexNil' aux index, these are simply undefined types.
+	Remove indexNil check from caller of parse_type.
+	* mdebugread.c (parse_partial_symbols):  Do not enter
+	stGlobal, scCommon symbols into the minimal symbol table, their
+	value is the size of the common, not its address.
+	Handle scInit, scFini, scPData and scXData sections.
+	Use minimal symbol type mst_file_* for stLabel symbols, instead of
+	mst_*.
+	Enter stProc symbols into the global_psymbols list once, not into
+	the static_psymbols_list.
+	Get rid of dummy psymtab if it is empty, to allow proper detection
+	of stripped executables.
+	* mdebugread.c (cross_ref):  Allow cross references to Fortran
+	common blocks.
+
 Wed Mar  9 15:23:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c (common_block_end, fix_common_block): Stash the
