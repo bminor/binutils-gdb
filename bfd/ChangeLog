@@ -1,3 +1,14 @@
+2000-06-16  Nicholas Duffek  <nsd@redhat.com>
+
+	* rs6000-core.c: Support 64-bit core files, support pre-4.3 core
+	files on AIX 4.3.
+	(read_hdr): New function.
+	(rs6000coff_core_p): Store mstsave or __context64 struct instead
+	of trying to extract individual registers.  Set abfd->arch_info
+	to match the architecture that created the core file.
+	(rs6000coff_get_section_contents): Delete.
+	* xcoff-target.h (rs6000coff_get_section_contents): Delete.
+
 2000-06-14  H.J. Lu  <hjl@gnu.org>
 
 	* vms-misc.c (_bfd_vms_next_record): Return -1 if PRIV(vms_rec)

@@ -57,7 +57,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef CORE_FILE_P
 #define CORE_FILE_P rs6000coff_core_p
 extern const bfd_target * rs6000coff_core_p ();
-extern boolean rs6000coff_get_section_contents ();
 extern boolean rs6000coff_core_file_matches_executable_p ();
 
 #undef	coff_core_file_matches_executable_p
@@ -71,9 +70,6 @@ extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
 extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 #undef coff_core_file_failing_signal
 #define coff_core_file_failing_signal rs6000coff_core_file_failing_signal
-
-#undef	coff_get_section_contents
-#define	coff_get_section_contents	rs6000coff_get_section_contents
 #endif /* AIX_CORE */
 
 #ifdef LYNX_CORE
