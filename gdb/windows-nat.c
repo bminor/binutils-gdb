@@ -2009,7 +2009,8 @@ _initialize_check_for_gdb_ini (void)
 	{
 	  int len = strlen (oldini);
 	  char *newini = alloca (len + 1);
-	  sprintf (newini, "%.*s.gdbinit", len - (sizeof ("gdb.ini") - 1), oldini);
+	  sprintf (newini, "%.*s.gdbinit", 
+	    (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
 	  warning ("obsolete '%s' found. Rename to '%s'.", oldini, newini);
 	}
     }

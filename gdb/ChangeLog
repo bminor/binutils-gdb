@@ -1,6 +1,11 @@
+2002-02-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (_initialize_check_for_gdb_ini): 
+	Add typecast to sprintf argument to suppress a warning.
+
 2002-02-05  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	win32-nat.c (last_sig): Changed type of variable to target_signal,
+	* win32-nat.c (last_sig): Changed type of variable to target_signal,
 	to allow easier handling of pass state.
 	(DEBUG_EXCEPTION_SIMPLE): New macro, used in handle_exception,
 	that gives exception name and address.
