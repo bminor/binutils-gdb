@@ -732,6 +732,8 @@ extern struct type *create_set_type PARAMS ((struct type *, struct type *));
 extern struct type *f77_create_literal_complex_type PARAMS ((struct type *,
 							     struct type *));
 
+extern int chill_varying_type PARAMS ((struct type*));
+
 extern struct type *
 lookup_unsigned_typename PARAMS ((char *));
 

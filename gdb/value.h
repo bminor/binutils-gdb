@@ -186,14 +186,18 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
 
 #define COERCE_ARRAY(arg)    \
 { COERCE_REF(arg);							\
-  if (VALUE_REPEATED (arg)						\
-      || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)		\
+  if (current_language->c_style_arrays					\
+      && (VALUE_REPEATED (arg)						\
+	  || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY))		\
     arg = value_coerce_array (arg);					\
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)                   \
     arg = value_coerce_function (arg);                                  \
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
     arg = value_cast (builtin_type_unsigned_int, arg);			\
 }
+
+#define COERCE_VARYING_ARRAY(arg)	\
+{ if (chill_varying_type (VALUE_TYPE (arg))) arg = varying_to_slice (arg); }
 
 /* If ARG is an enum, convert it to an integer.  */
 
@@ -503,6 +507,10 @@ extern value_ptr value_copy PARAMS ((value_ptr));
 extern int baseclass_offset PARAMS ((struct type *, int, value_ptr, int));
 
 /* From valops.c */
+
+extern value_ptr varying_to_slice PARAMS ((value_ptr));
+
+extern value_ptr value_slice PARAMS ((value_ptr, int, int));
 
 extern value_ptr call_function_by_hand PARAMS ((value_ptr, int, value_ptr *));
 

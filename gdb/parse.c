@@ -535,6 +535,8 @@ length_of_subexp (expr, endpos)
       break;
 
     case TERNOP_COND:
+    case TERNOP_SLICE:
+    case TERNOP_SLICE_COUNT:
       args = 3;
       break;
 
@@ -677,6 +679,8 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       break;
 
     case TERNOP_COND:
+    case TERNOP_SLICE:
+    case TERNOP_SLICE_COUNT:
       args = 3;
       break;
 

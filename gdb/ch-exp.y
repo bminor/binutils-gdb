@@ -252,9 +252,7 @@ yyerror PARAMS ((char *));
 %type <voidval>		value_name
 %type <voidval>		literal
 %type <voidval>		tuple
-%type <voidval>		value_string_element
-%type <voidval>		value_string_slice
-%type <voidval>		value_array_slice
+%type <voidval>		slice
 %type <voidval>		expression_conversion
 %type <voidval>		value_procedure_call
 %type <voidval>		value_built_in_routine_call
@@ -281,15 +279,7 @@ yyerror PARAMS ((char *));
 %type <voidval>		value_enumeration_name
 %type <voidval>		value_do_with_name
 %type <voidval>		value_receive_name
-%type <voidval>		string_primitive_value
-%type <voidval>		start_element
-%type <voidval>		left_element
-%type <voidval>		right_element
-%type <voidval>		slice_size
 %type <voidval>		expression_list
-%type <voidval>		lower_element
-%type <voidval>		upper_element
-%type <voidval>		first_element
 %type <tval>		mode_argument
 %type <voidval>		upper_lower_argument
 %type <voidval>		length_argument
@@ -303,6 +293,7 @@ yyerror PARAMS ((char *));
 %type <voidval>		buffer_location
 %type <voidval>		single_assignment_action
 %type <tsym>		mode_name
+%type <lval>		rparen
 
 %%
 
@@ -379,16 +370,22 @@ expression_list	:	expression
 
 /* Z.200, 5.2.1 */
 
-primitive_value	:
-			access_name
-		|	primitive_value '('
+primitive_value_lparen: primitive_value '('
 				/* This is to save the value of arglist_len
 				   being accumulated for each dimension. */
 				{ start_arglist (); }
-			expression_list ')'
+		;
+
+rparen		:	')'
+				{ $$ = end_arglist (); }
+		;
+
+primitive_value	:
+			access_name
+		|	primitive_value_lparen expression_list rparen
 			{
 			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
-			  write_exp_elt_longcst ((LONGEST) end_arglist ());
+			  write_exp_elt_longcst ($3);
 			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
 			}
 		|	primitive_value FIELD_NAME
@@ -412,15 +409,7 @@ primitive_value	:
 			{
 			  $$ = 0;	/* FIXME */
 			}
-                |	value_string_element
-			{
-			  $$ = 0;	/* FIXME */
-			}
-                |	value_string_slice
-			{
-			  $$ = 0;	/* FIXME */
-			}
-                |	value_array_slice
+                |	slice
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -561,9 +550,13 @@ tuple_elements	:	tuple_element
 			}
 		;
 
+maybe_tuple_elements :	tuple_elements
+		| /* EMPTY */
+		;
+
 tuple	:	'['
 			{ start_arglist (); }
-		tuple_elements ']'
+		maybe_tuple_elements ']'
 			{
 			  write_exp_elt_opcode (OP_ARRAY);
 			  write_exp_elt_longcst ((LONGEST) 0);
@@ -573,7 +566,7 @@ tuple	:	'['
 		|
 		mode_name '['
 			{ start_arglist (); }
-		tuple_elements ']'
+		maybe_tuple_elements ']'
 			{
 			  write_exp_elt_opcode (OP_ARRAY);
 			  write_exp_elt_longcst ((LONGEST) 0);
@@ -589,33 +582,14 @@ tuple	:	'['
 
 /* Z.200, 5.2.6 */
 
-value_string_element:	string_primitive_value '(' start_element ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
 
-/* Z.200, 5.2.7 */
-
-value_string_slice:	string_primitive_value '(' left_element ':' right_element ')'
+slice:	primitive_value_lparen expression ':' expression rparen
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (TERNOP_SLICE);
 			}
-		|	string_primitive_value '(' start_element UP slice_size ')'
+		|	primitive_value_lparen expression UP expression rparen
 			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-/* Z.200, 5.2.9 */
-
-value_array_slice:	primitive_value '(' lower_element ':' upper_element ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	primitive_value '(' first_element UP slice_size ')'
-			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (TERNOP_SLICE_COUNT);
 			}
 		;
 
@@ -986,14 +960,6 @@ synonym_name	 	:	FIXME_11 { $$ = 0; }
 value_enumeration_name 	:	FIXME_12 { $$ = 0; }
 value_do_with_name 	:	FIXME_13 { $$ = 0; }
 value_receive_name 	:	FIXME_14 { $$ = 0; }
-string_primitive_value 	:	FIXME_15 { $$ = 0; }
-start_element 		:	FIXME_16 { $$ = 0; }
-left_element 		:	FIXME_17 { $$ = 0; }
-right_element 		:	FIXME_18 { $$ = 0; }
-slice_size 		:	FIXME_19 { $$ = 0; }
-lower_element 		:	FIXME_20 { $$ = 0; }
-upper_element 		:	FIXME_21 { $$ = 0; }
-first_element 		:	FIXME_22 { $$ = 0; }
 boolean_expression 	:	FIXME_26 { $$ = 0; }
 case_selector_list 	:	FIXME_27 { $$ = 0; }
 subexpression 		:	FIXME_28 { $$ = 0; }
@@ -1764,6 +1730,7 @@ static const struct token idtokentab[] =
     { "and", LOGAND },
     { "in", IN },
     { "or", LOGIOR },
+    { "up", UP },
     { "null", EMPTINESS_LITERAL }
 };
 

@@ -365,8 +365,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	{
 	  value_ptr rec = allocate_value (expect_type);
 	  int fieldno = 0;
-	  memset (VALUE_CONTENTS_RAW (rec), '\0',
-		  TYPE_LENGTH (expect_type) / TARGET_CHAR_BIT);
+	  memset (VALUE_CONTENTS_RAW (rec), '\0', TYPE_LENGTH (expect_type));
 	  for (tem = 0; tem < nargs; tem++)
 	    evaluate_labeled_field_init (rec, &fieldno, exp, pos, noside);
 	  return rec;
@@ -380,19 +379,21 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  LONGEST low_bound =  TYPE_FIELD_BITPOS (range_type, 0);
 	  LONGEST high_bound = TYPE_FIELD_BITPOS (range_type, 1);
 	  int element_size = TYPE_LENGTH (element_type);
-	  value_ptr rec = allocate_value (expect_type);
+	  value_ptr array = allocate_value (expect_type);
 	  if (nargs != (high_bound - low_bound + 1))
 	    error ("wrong number of initialiers for array type");
 	  for (tem = low_bound;  tem <= high_bound;  tem++)
 	    {
 	      value_ptr element = evaluate_subexp (element_type,
 						   exp, pos, noside);
-	      memcpy (VALUE_CONTENTS_RAW (rec)
+	      if (VALUE_TYPE (element) != element_type)
+		element = value_cast (element_type, element);
+	      memcpy (VALUE_CONTENTS_RAW (array)
 		      + (tem - low_bound) * element_size,
 		      VALUE_CONTENTS (element),
 		      element_size);
 	    }
-	  return rec;
+	  return array;
 	}
 
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
@@ -403,12 +404,11 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  int low_bound = TYPE_LOW_BOUND (element_type);
 	  int high_bound = TYPE_HIGH_BOUND (element_type);
 	  char *valaddr = VALUE_CONTENTS_RAW (set);
-	  memset (valaddr, '\0', TYPE_LENGTH (expect_type) / TARGET_CHAR_BIT);
+	  memset (valaddr, '\0', TYPE_LENGTH (expect_type));
 	  for (tem = 0; tem < nargs; tem++)
 	    {
 	      value_ptr element_val = evaluate_subexp (element_type,
 						       exp, pos, noside);
-	      /* FIXME check that element_val has appropriate type. */
 	      LONGEST element = value_as_long (element_val);
 	      int bit_index;
 	      if (element < low_bound || element > high_bound)
@@ -435,6 +435,26 @@ evaluate_subexp (expect_type, exp, pos, noside)
          return (f77_value_literal_string (tem2, tem3, argvec));
       return value_array (tem2, tem3, argvec);
       break;
+
+    case TERNOP_SLICE:
+      {
+	value_ptr array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	int lowbound
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	int upper
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	return value_slice (array, lowbound, upper - lowbound + 1);
+      }
+
+    case TERNOP_SLICE_COUNT:
+      {
+	value_ptr array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	int lowbound
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	int length
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	return value_slice (array, lowbound, length);
+      }
 
     case TERNOP_COND:
       /* Skip third and second args to evaluate the first one.  */
@@ -982,7 +1002,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 		}
 	    }
 	  
-	  if (binop_user_defined_p (op, arg1, arg2))
+	  if (binop_user_defined_p (op, arg1, arg2)
+	      && ! chill_varying_type (VALUE_TYPE (arg1)))
 	    {
 	      arg1 = value_x_binop (arg1, arg2, op, OP_NULL);
 	    }

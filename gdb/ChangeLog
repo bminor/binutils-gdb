@@ -1,3 +1,32 @@
+Wed Feb  1 12:23:57 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-exp.y (value_string_element, string_primitive_value,
+	start_element, left_element, right_element, slice_size,
+	lower_element, upper_element, first_element):  Removed.
+	(value_string_slice, value_array_slice):  Replaced by ...
+	(slice):  New non-terminal, with working slice support.
+	(primitive_value_lparen, rparen):  New non-terminals.
+	(maybe_tuple_elements):  New non-terminal, to allow empty tuples.
+	(idtokentab):  Added "up".
+
+	* value.h (COERCE_VARYING_ARRAY):  New macro.
+	* valarith.c (value_subscript):  Use it.
+	* valops.c (value_cast):  Likewise.  Also, do nothing if already
+	correct type, and allow converting from/to range to/from scalar.
+
+	* valops.c, value.h (varying_to_slice, value_slice):  New functions.
+	* eval.c (OP_ARRAY):  Add cast for array element.
+	* expression.h (TERNOP_SLICE, TERNOP_SLICE_COUNT):  New exp_opcodes.
+	* valops.c (chill_varying_type):  Moved function frp, here ...
+	* gdbtypes.c (chill_varying_type), gdbtypes.h: ... to here.
+	* parse.c (length_of_subexp, prefixify_subexp):  Add support
+	for TERNOP_SLICE, TERNOP_SLICE_COUNT.
+	* expprint.c (print_subexp, dump_expression):  Likewise.
+	* eval.c (evaluate_subexp):  Likewise.
+
+	* eval.c (evaluate_subexp case MULTI_SUBSCRIPT):  Don't call
+	value_x_binop on a Chill varying string.
+
 Tue Jan 31 13:51:53 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m68k/monitor.mt,

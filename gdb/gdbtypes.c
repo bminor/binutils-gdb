@@ -1236,6 +1236,23 @@ can_dereference (t)
      && TYPE_CODE (TYPE_TARGET_TYPE (t)) != TYPE_CODE_VOID);
 }
 
+/* Chill varying string and arrays are represented as follows:
+
+   struct { int __var_length; ELEMENT_TYPE[MAX_SIZE] __var_data};
+
+   Return true if TYPE is such a Chill varying type. */
+
+int
+chill_varying_type (type)
+     struct type *type;
+{
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+      || TYPE_NFIELDS (type) != 2
+      || strcmp (TYPE_FIELD_NAME (type, 0), "__var_length") != 0)
+    return 0;
+  return 1;
+}
+
 #if MAINTENANCE_CMDS
 
 static void

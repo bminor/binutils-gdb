@@ -129,6 +129,11 @@ value_cast (type, arg2)
   register enum type_code code2;
   register int scalar;
 
+  if (VALUE_TYPE (arg2) == type)
+    return arg2;
+
+  COERCE_VARYING_ARRAY (arg2);
+
   /* Coerce arrays but not enums.  Enums will work as-is
      and coercing them would cause an infinite recursion.  */
   if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_ENUM)
@@ -145,7 +150,7 @@ value_cast (type, arg2)
     code2 = TYPE_CODE_INT; 
 
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
-	    || code2 == TYPE_CODE_ENUM);
+	    || code2 == TYPE_CODE_ENUM || code2 == TYPE_CODE_RANGE);
 
   if (   code1 == TYPE_CODE_STRUCT
       && code2 == TYPE_CODE_STRUCT
@@ -164,7 +169,8 @@ value_cast (type, arg2)
     }
   if (code1 == TYPE_CODE_FLT && scalar)
     return value_from_double (type, value_as_double (arg2));
-  else if ((code1 == TYPE_CODE_INT || code1 == TYPE_CODE_ENUM)
+  else if ((code1 == TYPE_CODE_INT || code1 == TYPE_CODE_ENUM
+	    || code1 == TYPE_CODE_RANGE)
 	   && (scalar || code2 == TYPE_CODE_PTR))
     return value_from_longest (type, value_as_long (arg2));
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (VALUE_TYPE (arg2)))
@@ -193,6 +199,40 @@ value_cast (type, arg2)
 	}
       VALUE_TYPE (arg2) = type;
       return arg2;
+    }
+  else if (chill_varying_type (type))
+    {
+      struct type *range1, *range2, *eltype1, *eltype2;
+      value_ptr val;
+      int count1, count2;
+      char *valaddr, *valaddr_data;
+      if (code2 == TYPE_CODE_BITSTRING)
+	error ("not implemented: converting bitstring to varying type");
+      if ((code2 != TYPE_CODE_ARRAY && code2 != TYPE_CODE_STRING)
+	  || (eltype1 = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 1)),
+	      eltype2 = TYPE_TARGET_TYPE (VALUE_TYPE (arg2)),
+	      (TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2)
+	       /* || TYPE_CODE (eltype1) != TYPE_CODE (eltype2) */ )))
+	error ("Invalid conversion to varying type");
+      range1 = TYPE_FIELD_TYPE (TYPE_FIELD_TYPE (type, 1), 0);
+      range2 = TYPE_FIELD_TYPE (VALUE_TYPE (arg2), 0);
+      count1 = TYPE_HIGH_BOUND (range1) - TYPE_LOW_BOUND (range1) + 1;
+      count2 = TYPE_HIGH_BOUND (range2) - TYPE_LOW_BOUND (range2) + 1;
+      if (count2 > count1)
+	error ("target varying type is too small");
+      val = allocate_value (type);
+      valaddr = VALUE_CONTENTS_RAW (val);
+      valaddr_data = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8;
+      /* Set val's __var_length field to count2. */
+      store_signed_integer (valaddr, TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)),
+			    count2);
+      /* Set the __var_data field to count2 elements copied from arg2. */
+      memcpy (valaddr_data, VALUE_CONTENTS (arg2),
+	      count2 * TYPE_LENGTH (eltype2));
+      /* Zero the rest of the __var_data field of val. */
+      memset (valaddr_data + count2 * TYPE_LENGTH (eltype2), '\0',
+	      (count1 - count2) * TYPE_LENGTH (eltype2));
+      return val;
     }
   else if (VALUE_LVAL (arg2) == lval_memory)
     {
@@ -679,8 +719,9 @@ value_addr (arg1)
       VALUE_TYPE (arg2) = lookup_pointer_type (TYPE_TARGET_TYPE (type));
       return arg2;
     }
-  if (VALUE_REPEATED (arg1)
-      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (current_language->c_style_arrays
+      && (VALUE_REPEATED (arg1)
+	  || TYPE_CODE (type) == TYPE_CODE_ARRAY))
     return value_coerce_array (arg1);
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)
     return value_coerce_function (arg1);
@@ -799,8 +840,9 @@ value_arg_coerce (arg)
     arg = value_cast (builtin_type_unsigned_int, arg);
 
 #if 1	/* FIXME:  This is only a temporary patch.  -fnf */
-  if (VALUE_REPEATED (arg)
-      || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)
+  if (current_language->c_style_arrays
+      && (VALUE_REPEATED (arg)
+	  || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY))
     arg = value_coerce_array (arg);
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)
     arg = value_coerce_function (arg);
@@ -1278,9 +1320,19 @@ value_string (ptr, len)
      int len;
 {
   value_ptr val;
-  struct type *rangetype;
-  struct type *stringtype;
+  struct type *rangetype = create_range_type ((struct type *) NULL,
+					      builtin_type_int, 0, len - 1);
+  struct type *stringtype
+    = create_string_type ((struct type *) NULL, rangetype);
   CORE_ADDR addr;
+
+  if (current_language->c_style_arrays == 0)
+    {
+      val = allocate_value (stringtype);
+      memcpy (VALUE_CONTENTS_RAW (val), ptr, len);
+      return val;
+    }
+
 
   /* Allocate space to store the string in the inferior, and then
      copy LEN bytes from PTR in gdb to that address in the inferior. */
@@ -1288,12 +1340,6 @@ value_string (ptr, len)
   addr = allocate_space_in_inferior (len);
   write_memory (addr, ptr, len);
 
-  /* Create the string type and set up a string value to be evaluated
-     lazily. */
-
-  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
-				 0, len - 1);
-  stringtype = create_string_type ((struct type *) NULL, rangetype);
   val = value_at_lazy (stringtype, addr);
   return (val);
 }
@@ -2041,6 +2087,69 @@ f77_value_literal_string (lowbound, highbound, elemvec)
 
   VALUE_LVAL (val) = not_lval; 
   return val;
+}
+
+/* Create a slice (sub-string, sub-array) of ARRAY, that is LENGTH elements
+   long, starting at LOWBOUND.  The result has the same lower bound as
+   the original ARRAY.  */
+
+value_ptr
+value_slice (array, lowbound, length)
+     value_ptr array;
+     int lowbound, length;
+{
+  if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_BITSTRING)
+    error ("not implemented - bitstring slice");
+  if (TYPE_CODE (VALUE_TYPE (array)) != TYPE_CODE_ARRAY
+      && TYPE_CODE (VALUE_TYPE (array)) != TYPE_CODE_STRING)
+    error ("cannot take slice of non-array");
+  else
+    {
+      struct type *slice_range_type, *slice_type;
+      value_ptr slice;
+      struct type *range_type = TYPE_FIELD_TYPE (VALUE_TYPE (array), 0);
+      struct type *element_type = TYPE_TARGET_TYPE (VALUE_TYPE (array));
+      int lowerbound = TYPE_LOW_BOUND (range_type);
+      int upperbound = TYPE_HIGH_BOUND (range_type);
+      int offset = (lowbound - lowerbound) * TYPE_LENGTH (element_type);
+      if (lowbound < lowerbound || length < 0
+	  || lowbound + length - 1 > upperbound)
+	error ("slice out of range");
+      slice_range_type = create_range_type ((struct type*) NULL,
+					    TYPE_TARGET_TYPE (range_type),
+					    lowerbound,
+					    lowerbound + length - 1);
+      slice_type = create_array_type ((struct type*) NULL, element_type,
+				      slice_range_type);
+      TYPE_CODE (slice_type) = TYPE_CODE (VALUE_TYPE (array));
+      slice = allocate_value (slice_type);
+      if (VALUE_LAZY (array))
+	VALUE_LAZY (slice) = 1;
+      else
+	memcpy (VALUE_CONTENTS (slice), VALUE_CONTENTS (array) + offset,
+		TYPE_LENGTH (slice_type));
+      if (VALUE_LVAL (array) == lval_internalvar)
+	VALUE_LVAL (slice) = lval_internalvar_component;
+      else
+	VALUE_LVAL (slice) = VALUE_LVAL (array);
+      VALUE_ADDRESS (slice) = VALUE_ADDRESS (array);
+      VALUE_OFFSET (slice) = VALUE_OFFSET (array) + offset;
+      return slice;
+    }
+}
+
+/* Assuming chill_varying_type (VARRAY) is true, return an equivalent
+   value as a fixed-length array. */
+
+value_ptr
+varying_to_slice (varray)
+     value_ptr varray;
+{
+  struct type *vtype = VALUE_TYPE (varray);
+  LONGEST length = unpack_long (TYPE_FIELD_TYPE (vtype, 0),
+				VALUE_CONTENTS (varray)
+				+ TYPE_FIELD_BITPOS (vtype, 0) / 8);
+  return value_slice (value_primitive_field (varray, 0, 1, vtype), 0, length);
 }
 
 /* Create a value for a substring.  We copy data into a local 

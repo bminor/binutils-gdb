@@ -1,5 +1,5 @@
 /* Definitions for expressions stored in reversed prefix form, for GDB.
-   Copyright 1986, 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1992, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -47,6 +47,7 @@ enum exp_opcode
 
 /* BINOP_... operate on two values computed by following subexpressions,
    replacing them by one result value.  They take no immediate arguments.  */
+
   BINOP_ADD,		/* + */
   BINOP_SUB,		/* - */
   BINOP_MUL,		/* * */
@@ -72,7 +73,8 @@ enum exp_opcode
   BINOP_SUBSCRIPT,	/* x[y] */
   BINOP_EXP,		/* Exponentiation */
 
-/* C++.  */
+  /* C++.  */
+
   BINOP_MIN,		/* <? */
   BINOP_MAX,		/* >? */
   BINOP_SCOPE,		/* :: */
@@ -80,10 +82,12 @@ enum exp_opcode
   /* STRUCTOP_MEMBER is used for pointer-to-member constructs.
      X . * Y translates into X STRUCTOP_MEMBER Y.  */
   STRUCTOP_MEMBER,
+
   /* STRUCTOP_MPTR is used for pointer-to-member constructs
      when X is a pointer instead of an aggregate.  */
   STRUCTOP_MPTR,
-/* end of C++.  */
+
+  /* end of C++.  */
 
   /* For Modula-2 integer division DIV */
   BINOP_INTDIV,
@@ -94,76 +98,143 @@ enum exp_opcode
 			   Then comes another BINOP_ASSIGN_MODIFY,
 			   making three exp_elements in total.  */
 
-  /* Modula-2 standard (binary) procedures*/
+  /* Modula-2 standard (binary) procedures */
   BINOP_VAL,
   BINOP_INCL,
   BINOP_EXCL,
 
+  /* Concatenate two operands, such as character strings or bitstrings.
+     If the first operand is a integer expression, then it means concatenate
+     the second operand with itself that many times. */
+  BINOP_CONCAT,
+
+  /* For Chill and Pascal. */
+  BINOP_IN, /* Returns 1 iff ARG1 IN ARG2. */
+
   /* This must be the highest BINOP_ value, for expprint.c.  */
   BINOP_END,
 
-/* Operates on three values computed by following subexpressions.  */
+  /* Operates on three values computed by following subexpressions.  */
   TERNOP_COND,		/* ?: */
 
-/* Multidimensional subscript operator, such as Modula-2 x[a,b,...].
-   The dimensionality is encoded in the operator, like the number of
-   function arguments in OP_FUNCALL, I.E. <OP><dimension><OP>.
-   The value of the first following subexpression is subscripted
-   by each of the next following subexpressions, one per dimension. */
+  /* A sub-string/sub-array.  Chill syntax:  OP1(OP2:OP3).
+     Return elements OP2 through OP3 of OP1.  */
+  TERNOP_SLICE,
 
+  /* A sub-string/sub-array.  Chill syntax:  OP1(OP2 UP OP3).
+     Return OP3 elements of OP1, starting with element OP2. */
+  TERNOP_SLICE_COUNT,
+
+  /* Multidimensional subscript operator, such as Modula-2 x[a,b,...].
+     The dimensionality is encoded in the operator, like the number of
+     function arguments in OP_FUNCALL, I.E. <OP><dimension><OP>.
+     The value of the first following subexpression is subscripted
+     by each of the next following subexpressions, one per dimension. */
    MULTI_SUBSCRIPT,
 
-/* The OP_... series take immediate following arguments.
-   After the arguments come another OP_... (the same one)
-   so that the grouping can be recognized from the end.  */
+  /* For Fortran array subscripting (column major style). Like the 
+     Modula operator, we find that the dimensionality is 
+     encoded in the operator.  This operator is distinct 
+     from the above one because it uses column-major array 
+     ordering not row-major.  */ 
+  MULTI_F77_SUBSCRIPT,
 
-/* OP_LONG is followed by a type pointer in the next exp_element
-   and the long constant value in the following exp_element.
-   Then comes another OP_LONG.
-   Thus, the operation occupies four exp_elements.  */
+  /* The OP_... series take immediate following arguments.
+     After the arguments come another OP_... (the same one)
+     so that the grouping can be recognized from the end.  */
 
+  /* OP_LONG is followed by a type pointer in the next exp_element
+     and the long constant value in the following exp_element.
+     Then comes another OP_LONG.
+     Thus, the operation occupies four exp_elements.  */
   OP_LONG,
-/* OP_DOUBLE is similar but takes a double constant instead of a long one.  */
+
+  /* OP_DOUBLE is similar but takes a double constant instead of a long.  */
   OP_DOUBLE,
-/* OP_VAR_VALUE takes one struct symbol * in the following exp_element,
-   followed by another OP_VAR_VALUE, making three exp_elements.  */
+
+  /* OP_VAR_VALUE takes one struct block * in the following element,
+     and one struct symbol * in the following exp_element, followed by
+     another OP_VAR_VALUE, making four exp_elements.  If the block is
+     non-NULL, evaluate the symbol relative to the innermost frame
+     executing in that block; if the block is NULL use the selected frame.  */
   OP_VAR_VALUE,
-/* OP_LAST is followed by an integer in the next exp_element.
-   The integer is zero for the last value printed,
-   or it is the absolute number of a history element.
-   With another OP_LAST at the end, this makes three exp_elements.  */
+
+  /* OP_LAST is followed by an integer in the next exp_element.
+     The integer is zero for the last value printed,
+     or it is the absolute number of a history element.
+     With another OP_LAST at the end, this makes three exp_elements.  */
   OP_LAST,
-/* OP_REGISTER is followed by an integer in the next exp_element.
-   This is the number of a register to fetch (as an int).
-   With another OP_REGISTER at the end, this makes three exp_elements.  */
+
+  /* OP_REGISTER is followed by an integer in the next exp_element.
+     This is the number of a register to fetch (as an int).
+     With another OP_REGISTER at the end, this makes three exp_elements.  */
   OP_REGISTER,
-/* OP_INTERNALVAR is followed by an internalvar ptr in the next exp_element.
-   With another OP_INTERNALVAR at the end, this makes three exp_elements.  */
+
+  /* OP_INTERNALVAR is followed by an internalvar ptr in the next exp_element.
+     With another OP_INTERNALVAR at the end, this makes three exp_elements.  */
   OP_INTERNALVAR,
-/* OP_FUNCALL is followed by an integer in the next exp_element.
-   The integer is the number of args to the function call.
-   That many plus one values from following subexpressions
-   are used, the first one being the function.
-   The integer is followed by a repeat of OP_FUNCALL,
-   making three exp_elements.  */
+
+  /* OP_FUNCALL is followed by an integer in the next exp_element.
+     The integer is the number of args to the function call.
+     That many plus one values from following subexpressions
+     are used, the first one being the function.
+     The integer is followed by a repeat of OP_FUNCALL,
+     making three exp_elements.  */
   OP_FUNCALL,
-/* OP_STRING represents a string constant.
-   Its format is the same as that of a STRUCTOP, but the string
-   data is just made into a string constant when the operation
-   is executed.  */
+
+  /* This is EXACTLY like OP_FUNCALL but is semantically different.  
+     In F77, array subscript expressions, substring expressions
+     and function calls are  all exactly the same syntactically. They may 
+     only be dismabiguated at runtime.  Thus this operator, which 
+     indicates that we have found something of the form <name> ( <stuff> ) */ 
+  OP_F77_UNDETERMINED_ARGLIST,
+  
+  /* The following OP is a special one, it introduces a F77 complex
+     literal. It is followed by exactly two args that are doubles.  */ 
+  OP_F77_LITERAL_COMPLEX,
+
+  /* The following OP introduces a F77 substring operator.
+     It should have a string type and two integer types that follow 
+     indicating the "from" and "to" for the substring. */ 
+  OP_F77_SUBSTR,
+
+  /* OP_STRING represents a string constant.
+     Its format is the same as that of a STRUCTOP, but the string
+     data is just made into a string constant when the operation
+     is executed.  */
   OP_STRING,
 
-/* UNOP_CAST is followed by a type pointer in the next exp_element.
-   With another UNOP_CAST at the end, this makes three exp_elements.
-   It casts the value of the following subexpression.  */
+  /* OP_BITSTRING represents a packed bitstring constant.
+     Its format is the same as that of a STRUCTOP, but the bitstring
+     data is just made into a bitstring constant when the operation
+     is executed.  */
+  OP_BITSTRING,
+
+  /* OP_ARRAY creates an array constant out of the following subexpressions.
+     It is followed by two exp_elements, the first containing an integer
+     that is the lower bound of the array and the second containing another
+     integer that is the upper bound of the array.  The second integer is
+     followed by a repeat of OP_ARRAY, making four exp_elements total.
+     The bounds are used to compute the number of following subexpressions
+     to consume, as well as setting the bounds in the created array constant.
+     The type of the elements is taken from the type of the first subexp,
+     and they must all match. */
+  OP_ARRAY,
+
+  /* UNOP_CAST is followed by a type pointer in the next exp_element.
+     With another UNOP_CAST at the end, this makes three exp_elements.
+     It casts the value of the following subexpression.  */
   UNOP_CAST,
-/* UNOP_MEMVAL is followed by a type pointer in the next exp_element
-   With another UNOP_MEMVAL at the end, this makes three exp_elements.
-   It casts the contents of the word addressed by the value of the
-   following subexpression.  */
+
+  /* UNOP_MEMVAL is followed by a type pointer in the next exp_element
+     With another UNOP_MEMVAL at the end, this makes three exp_elements.
+     It casts the contents of the word addressed by the value of the
+     following subexpression.  */
   UNOP_MEMVAL,
-/* UNOP_... operate on one value from a following subexpression
-   and replace it with a result.  They take no immediate arguments.  */
+
+  /* UNOP_... operate on one value from a following subexpression
+     and replace it with a result.  They take no immediate arguments.  */
+
   UNOP_NEG,		/* Unary - */
   UNOP_LOGICAL_NOT,	/* Unary ! */
   UNOP_COMPLEMENT,	/* Unary ~ */
@@ -191,19 +262,21 @@ enum exp_opcode
   OP_BOOL,		/* Modula-2 builtin BOOLEAN type */
   OP_M2_STRING,		/* Modula-2 string constants */
 
-/* STRUCTOP_... operate on a value from a following subexpression
-   by extracting a structure component specified by a string
-   that appears in the following exp_elements (as many as needed).
-   STRUCTOP_STRUCT is used for "." and STRUCTOP_PTR for "->".
-   They differ only in the error message given in case the value is
-   not suitable or the structure component specified is not found.
+  /* STRUCTOP_... operate on a value from a following subexpression
+     by extracting a structure component specified by a string
+     that appears in the following exp_elements (as many as needed).
+     STRUCTOP_STRUCT is used for "." and STRUCTOP_PTR for "->".
+     They differ only in the error message given in case the value is
+     not suitable or the structure component specified is not found.
 
-   The length of the string follows in the next exp_element,
-   (after the string), followed by another STRUCTOP_... code.  */
+     The length of the string follows the opcode, followed by
+     BYTES_TO_EXP_ELEM(length) elements containing the data of the
+     string, followed by the length again and the opcode again.  */
+
   STRUCTOP_STRUCT,
   STRUCTOP_PTR,
 
-/* C++ */
+  /* C++ */
   /* OP_THIS is just a placeholder for the class instance variable.
      It just comes in a tight (OP_THIS, OP_THIS) pair.  */
   OP_THIS,
@@ -212,6 +285,16 @@ enum exp_opcode
      name is encoded as one element, but the field name stays as
      a string, which, of course, is variable length.  */
   OP_SCOPE,
+
+  /* Used to represent named structure field values in brace initializers
+     (or tuples as they are called in Chill).
+     The gcc C syntax is NAME:VALUE or .NAME=VALUE, the Chill syntax is
+     .NAME:VALUE.  Multiple labels (as in the Chill syntax
+     .NAME1,.NAME2:VALUE) is represented as if it were
+     .NAME1:(.NAME2:VALUE) (though that is not valid Chill syntax).
+
+     The NAME is represented as for STRUCTOP_STRUCT;  VALUE follows. */
+  OP_LABELED,
 
   /* OP_TYPE is for parsing types, and used with the "ptype" command
      so we can look up types that are qualified by scope, either with
@@ -225,9 +308,12 @@ union exp_element
   struct symbol *symbol;
   LONGEST longconst;
   double doubleconst;
+  /* Really sizeof (union exp_element) characters (or less for the last
+     element of a string).  */
   char string;
   struct type *type;
   struct internalvar *internalvar;
+  struct block *block;
 };
 
 struct expression
@@ -237,13 +323,19 @@ struct expression
   union exp_element elts[1];
 };
 
+/* Macros for converting between number of expression elements and bytes
+   to store that many expression elements. */
+
+#define EXP_ELEM_TO_BYTES(elements) \
+    ((elements) * sizeof (union exp_element))
+#define BYTES_TO_EXP_ELEM(bytes) \
+    (((bytes) + sizeof (union exp_element) - 1) / sizeof (union exp_element))
+
 /* From parse.c */
 
-extern struct expression *
-parse_expression PARAMS ((char *));
+extern struct expression *parse_expression PARAMS ((char *));
 
-extern struct expression *
-parse_exp_1 PARAMS ((char **, struct block *, int));
+extern struct expression *parse_exp_1 PARAMS ((char **, struct block *, int));
 
 /* The innermost context required by the stack and register variables
    we've encountered so far.  To use this, set it to NULL, then call
@@ -252,11 +344,9 @@ extern struct block *innermost_block;
 
 /* From expprint.c */
 
-extern void
-print_expression PARAMS ((struct expression *, FILE *));
+extern void print_expression PARAMS ((struct expression *, GDB_FILE *));
 
-extern char *
-op_string PARAMS ((enum exp_opcode));
+extern char *op_string PARAMS ((enum exp_opcode));
 
 /* To enable dumping of all parsed expressions in a human readable
    form, define DEBUG_EXPRESSIONS.  This is a compile time constant
@@ -264,8 +354,7 @@ op_string PARAMS ((enum exp_opcode));
    enough to include by default. */
 
 #ifdef DEBUG_EXPRESSIONS
-extern void
-dump_expression PARAMS ((struct expression *, FILE *, char *));
+extern void dump_expression PARAMS ((struct expression *, GDB_FILE *, char *));
 #define DUMP_EXPRESSION(exp,file,note) dump_expression ((exp), (file), (note))
 #else
 #define DUMP_EXPRESSION(exp,file,note)	/* Null expansion */
