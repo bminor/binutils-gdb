@@ -932,8 +932,8 @@ void OP_E0 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -954,8 +954,8 @@ void OP_F160 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -976,8 +976,8 @@ void OP_F150 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -998,8 +998,8 @@ void OP_F170 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1020,8 +1020,8 @@ void OP_2800 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1042,8 +1042,8 @@ void OP_FAC00000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1064,8 +1064,8 @@ void OP_FCC00000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1086,8 +1086,8 @@ void OP_2000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1108,8 +1108,8 @@ void OP_FAD00000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1130,8 +1130,8 @@ void OP_FCD00000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1152,8 +1152,8 @@ void OP_F8FE00 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1174,8 +1174,8 @@ void OP_FAFE0000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1196,8 +1196,8 @@ void OP_FCFE0000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1218,8 +1218,8 @@ void OP_F140 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1239,8 +1239,8 @@ void OP_F100 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1261,8 +1261,8 @@ void OP_F120 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1283,8 +1283,8 @@ void OP_F110 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1305,8 +1305,8 @@ void OP_F130 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1327,8 +1327,8 @@ void OP_FCC40000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1349,8 +1349,8 @@ void OP_FCD40000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1371,8 +1371,8 @@ void OP_F180 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1391,7 +1391,7 @@ void OP_F240 ()
   State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
   State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1407,7 +1407,7 @@ void OP_F250 ()
   State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
   State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1428,7 +1428,7 @@ void OP_F260 ()
   State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
   State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1449,7 +1449,7 @@ void OP_F270 ()
   State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
   State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1485,8 +1485,8 @@ void OP_A000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1506,8 +1506,8 @@ void OP_A0 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1527,8 +1527,8 @@ void OP_F1A0 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1548,8 +1548,8 @@ void OP_F190 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1569,8 +1569,8 @@ void OP_B000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1590,8 +1590,8 @@ void OP_B0 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x8000000) != (value & 0x80000000));
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1611,8 +1611,8 @@ void OP_FAC80000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1632,8 +1632,8 @@ void OP_FCC80000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1653,8 +1653,8 @@ void OP_FAD80000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1674,8 +1674,8 @@ void OP_FCD80000 ()
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
-       && (imm & 0x8000000) != (value & 0x80000000));
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -1689,7 +1689,7 @@ void OP_F200 ()
 
   State.regs[REG_D0 + (insn & 0x3)] &= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1701,7 +1701,7 @@ void OP_F8E000 ()
 
   State.regs[REG_D0 + ((insn & 0x300) >> 8)] &= (insn & 0xff);
   z = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1713,7 +1713,7 @@ void OP_FAE00000 ()
 
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)] &= (insn & 0xffff);
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1726,7 +1726,7 @@ void OP_FCE00000 ()
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
     &= ((insn & 0xffff) << 16 | extension);
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1744,7 +1744,7 @@ void OP_F210 ()
 
   State.regs[REG_D0 + (insn & 0x3)] |= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1756,7 +1756,7 @@ void OP_F8E400 ()
 
   State.regs[REG_D0 + ((insn & 0x300) >> 8)] |= insn & 0xff;
   z = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1768,7 +1768,7 @@ void OP_FAE40000 ()
 
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)] |= insn & 0xffff;
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1781,7 +1781,7 @@ void OP_FCE40000 ()
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
     |= ((insn & 0xffff) << 16 | extension);
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1799,7 +1799,7 @@ void OP_F220 ()
 
   State.regs[REG_D0 + (insn & 0x3)] ^= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1811,7 +1811,7 @@ void OP_FAE80000 ()
 
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)] ^= insn & 0xffff;
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1824,7 +1824,7 @@ void OP_FCE80000 ()
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
     ^= ((insn & 0xffff) << 16 | extension);
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -1836,7 +1836,7 @@ void OP_F230 ()
 
   State.regs[REG_D0 + (insn & 0x3)] = ~State.regs[REG_D0 + (insn & 0x3)];
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -2009,7 +2009,7 @@ void OP_F2B0 ()
   temp >>= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   State.regs[REG_D0 + (insn & 0x3)] = temp;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
@@ -2025,7 +2025,7 @@ void OP_F8C800 ()
   temp >>= (insn & 0xff);
   State.regs[REG_D0 + ((insn & 0x300) >> 8)] = temp;
   z = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
@@ -2039,7 +2039,7 @@ void OP_F2A0 ()
   State.regs[REG_D0 + (insn & 0x3)]
     >>= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
@@ -2052,7 +2052,7 @@ void OP_F8C400 ()
   c = State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 1;
   State.regs[REG_D0 + ((insn & 0x300) >> 8)] >>=  (insn & 0xff);
   z = (State.regs[REG_D0 + ((insn & 0x3) >> 8)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x3) >> 8)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x3) >> 8)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
@@ -2065,7 +2065,7 @@ void OP_F290 ()
   State.regs[REG_D0 + (insn & 0x3)]
     <<= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -2077,7 +2077,7 @@ void OP_F8C000 ()
 
   State.regs[REG_D0 + ((insn & 0x300) >> 8)] <<= (insn & 0xff);
   z = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] == 0);
-  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + ((insn & 0x300) >> 8)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -2089,7 +2089,7 @@ void OP_54 ()
 
   State.regs[REG_D0 + (insn & 0x3)] <<= 2;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
-  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
@@ -2108,7 +2108,7 @@ void OP_F284 ()
   value |= ((PSW & PSW_C) != 0) ? 0x80000000 : 0;
   State.regs[REG_D0 + (insn & 0x3)] = value;
   z = (value == 0);
-  n = (value & 0x8000000) != 0;
+  n = (value & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
@@ -2127,7 +2127,7 @@ void OP_F280 ()
   value |= ((PSW & PSW_C) != 0);
   State.regs[REG_D0 + (insn & 0x3)] = value;
   z = (value == 0);
-  n = (value & 0x8000000) != 0;
+  n = (value & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
