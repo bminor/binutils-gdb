@@ -1,3 +1,7 @@
+2003-12-04  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
+
+	* armpe.sh (RELOCATEABLE_OUTPUT_FORMAT): Define.
+
 2003-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_do_assignments): Function return is void.
