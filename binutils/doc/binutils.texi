@@ -1582,6 +1582,10 @@ option string.  Lastly, @option{suffix}, when in AT&T mode,
 instructs the dissassembler to print a mnemonic suffix even when the
 suffix could be inferred by the operands.
 
+For PPC, @option{booke}, @option{booke32} and @option{booke64} select
+disassembly of BookE instructions.  @option{32} and @option{64} select
+PowerPC and PowerPC64 disassembly, respectively.
+
 @item -p
 @itemx --private-headers
 Print information that is specific to the object file format.  The exact

@@ -44,13 +44,25 @@ powerpc_dialect(info)
 {
   int dialect = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC;
 
-  if (info->disassembler_options &&
-      (strcmp(info->disassembler_options, "booke") == 0 ||
-       strcmp(info->disassembler_options, "booke32") == 0 ||
-       strcmp(info->disassembler_options, "booke64") == 0))
+  if (BFD_DEFAULT_TARGET_SIZE == 64)
+    dialect |= PPC_OPCODE_64;
+
+  if (info->disassembler_options
+      && (strcmp (info->disassembler_options, "booke") == 0
+	  || strcmp (info->disassembler_options, "booke32") == 0
+	  || strcmp (info->disassembler_options, "booke64") == 0))
     dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_BOOKE64;
   else 
     dialect |= PPC_OPCODE_403 | PPC_OPCODE_601;
+
+  if (info->disassembler_options)
+    {
+      if (strstr (info->disassembler_options, "32") != NULL)
+	dialect &= ~PPC_OPCODE_64;
+      else if (strstr (info->disassembler_options, "64") != NULL)
+	dialect |= PPC_OPCODE_64;
+    }
+
   return dialect;
 }
 
@@ -145,7 +157,7 @@ print_insn_powerpc (memaddr, info, bigendian, dialect)
 	{
 	  operand = powerpc_operands + *opindex;
 	  if (operand->extract)
-	    (*operand->extract) (insn, &invalid);
+	    (*operand->extract) (insn, dialect, &invalid);
 	}
       if (invalid)
 	continue;
@@ -172,7 +184,7 @@ print_insn_powerpc (memaddr, info, bigendian, dialect)
 
 	  /* Extract the value from the instruction.  */
 	  if (operand->extract)
-	    value = (*operand->extract) (insn, (int *) NULL);
+	    value = (*operand->extract) (insn, dialect, (int *) NULL);
 	  else
 	    {
 	      value = (insn >> operand->shift) & ((1 << operand->bits) - 1);

@@ -1304,7 +1304,7 @@ ppc_insert_operand (insn, operand, val, file, line)
       const char *errmsg;
 
       errmsg = NULL;
-      insn = (*operand->insert) (insn, (long) val, &errmsg);
+      insn = (*operand->insert) (insn, (long) val, ppc_cpu | ppc_size, &errmsg);
       if (errmsg != (const char *) NULL)
 	as_bad_where (file, line, errmsg);
     }
@@ -1942,7 +1942,7 @@ md_assemble (str)
 	 from the input.  */
       if ((operand->flags & PPC_OPERAND_FAKE) != 0)
 	{
-	  insn = (*operand->insert) (insn, 0L, &errmsg);
+	  insn = (*operand->insert) (insn, 0L, ppc_cpu | ppc_size, &errmsg);
 	  if (errmsg != (const char *) NULL)
 	    as_bad (errmsg);
 	  continue;
@@ -1955,7 +1955,7 @@ md_assemble (str)
 	{
 	  if (operand->insert)
 	    {
-	      insn = (*operand->insert) (insn, 0L, &errmsg);
+	      insn = (*operand->insert) (insn, 0L, ppc_cpu | ppc_size, &errmsg);
 	      if (errmsg != (const char *) NULL)
 		as_bad (errmsg);
 	    }

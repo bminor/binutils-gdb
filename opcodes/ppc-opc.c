@@ -38,48 +38,90 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 /* Local insertion and extraction functions.  */
 
-static unsigned long insert_bat PARAMS ((unsigned long, long, const char **));
-static long extract_bat PARAMS ((unsigned long, int *));
-static unsigned long insert_bba PARAMS ((unsigned long, long, const char **));
-static long extract_bba PARAMS ((unsigned long, int *));
-static unsigned long insert_bd PARAMS ((unsigned long, long, const char **));
-static long extract_bd PARAMS ((unsigned long, int *));
-static unsigned long insert_bdm PARAMS ((unsigned long, long, const char **));
-static long extract_bdm PARAMS ((unsigned long, int *));
-static unsigned long insert_bdp PARAMS ((unsigned long, long, const char **));
-static long extract_bdp PARAMS ((unsigned long, int *));
-static int valid_bo PARAMS ((long));
-static unsigned long insert_bo PARAMS ((unsigned long, long, const char **));
-static long extract_bo PARAMS ((unsigned long, int *));
-static unsigned long insert_boe PARAMS ((unsigned long, long, const char **));
-static long extract_boe PARAMS ((unsigned long, int *));
-static unsigned long insert_ds PARAMS ((unsigned long, long, const char **));
-static long extract_ds PARAMS ((unsigned long, int *));
-static unsigned long insert_de PARAMS ((unsigned long, long, const char **));
-static long extract_de PARAMS ((unsigned long, int *));
-static unsigned long insert_des PARAMS ((unsigned long, long, const char **));
-static long extract_des PARAMS ((unsigned long, int *));
-static unsigned long insert_li PARAMS ((unsigned long, long, const char **));
-static long extract_li PARAMS ((unsigned long, int *));
-static unsigned long insert_mbe PARAMS ((unsigned long, long, const char **));
-static long extract_mbe PARAMS ((unsigned long, int *));
-static unsigned long insert_mb6 PARAMS ((unsigned long, long, const char **));
-static long extract_mb6 PARAMS ((unsigned long, int *));
-static unsigned long insert_nb PARAMS ((unsigned long, long, const char **));
-static long extract_nb PARAMS ((unsigned long, int *));
-static unsigned long insert_nsi PARAMS ((unsigned long, long, const char **));
-static long extract_nsi PARAMS ((unsigned long, int *));
-static unsigned long insert_ral PARAMS ((unsigned long, long, const char **));
-static unsigned long insert_ram PARAMS ((unsigned long, long, const char **));
-static unsigned long insert_ras PARAMS ((unsigned long, long, const char **));
-static unsigned long insert_rbs PARAMS ((unsigned long, long, const char **));
-static long extract_rbs PARAMS ((unsigned long, int *));
-static unsigned long insert_sh6 PARAMS ((unsigned long, long, const char **));
-static long extract_sh6 PARAMS ((unsigned long, int *));
-static unsigned long insert_spr PARAMS ((unsigned long, long, const char **));
-static long extract_spr PARAMS ((unsigned long, int *));
-static unsigned long insert_tbr PARAMS ((unsigned long, long, const char **));
-static long extract_tbr PARAMS ((unsigned long, int *));
+static unsigned long insert_bat
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_bat
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_bba
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_bba
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_bd
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_bd
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_bdm
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_bdm
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_bdp
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_bdp
+  PARAMS ((unsigned long, int, int *));
+static int valid_bo
+  PARAMS ((long, int));
+static unsigned long insert_bo
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_bo
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_boe
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_boe
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_ds
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_ds
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_de
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_de
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_des
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_des
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_li
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_li
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_mbe
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_mbe
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_mb6
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_mb6
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_nb
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_nb
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_nsi
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_nsi
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_ral
+  PARAMS ((unsigned long, long, int, const char **));
+static unsigned long insert_ram
+  PARAMS ((unsigned long, long, int, const char **));
+static unsigned long insert_ras
+  PARAMS ((unsigned long, long, int, const char **));
+static unsigned long insert_rbs
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_rbs
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_sh6
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_sh6
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_spr
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_spr
+  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_tbr
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_tbr
+  PARAMS ((unsigned long, int, int *));
 
 /* The operands table.
 
@@ -474,17 +516,19 @@ const struct powerpc_operand powerpc_operands[] =
 
 /*ARGSUSED*/
 static unsigned long
-insert_bat (insn, value, errmsg)
+insert_bat (insn, value, dialect, errmsg)
      unsigned long insn;
      long value ATTRIBUTE_UNUSED;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (((insn >> 21) & 0x1f) << 16);
 }
 
 static long
-extract_bat (insn, invalid)
+extract_bat (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid;
 {
   if (invalid != (int *) NULL
@@ -501,17 +545,19 @@ extract_bat (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_bba (insn, value, errmsg)
+insert_bba (insn, value, dialect, errmsg)
      unsigned long insn;
      long value ATTRIBUTE_UNUSED;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (((insn >> 16) & 0x1f) << 11);
 }
 
 static long
-extract_bba (insn, invalid)
+extract_bba (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid;
 {
   if (invalid != (int *) NULL
@@ -525,9 +571,10 @@ extract_bba (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_bd (insn, value, errmsg)
+insert_bd (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (value & 0xfffc);
@@ -535,48 +582,69 @@ insert_bd (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_bd (insn, invalid)
+extract_bd (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
-  if ((insn & 0x8000) != 0)
-    return (insn & 0xfffc) - 0x10000;
-  else
-    return insn & 0xfffc;
+  return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
 
 /* The BD field in a B form instruction when the - modifier is used.
    This modifier means that the branch is not expected to be taken.
-   We must set the y bit of the BO field to 1 if the offset is
-   negative.  When extracting, we require that the y bit be 1 and that
-   the offset be positive, since if the y bit is 0 we just want to
-   print the normal form of the instruction.  */
+   For 32 bit targets we set the y bit of the BO field to 1 if the
+   offset is negative.  When extracting, we require that the y bit be
+   1 and that the offset be positive, since if the y bit is 0 we just
+   want to print the normal form of the instruction.
+   64 bit targets use two bits, "a", and "t", instead of the "y" bit.
+   at == 10 => not taken, at == 11 => taken.  The t bit is 00001 in
+   BO field, the a bit is 00010 for branch on CR(BI) and 01000 for
+   branch on CTR.  */
 
 /*ARGSUSED*/
 static unsigned long
-insert_bdm (insn, value, errmsg)
+insert_bdm (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
-  if ((value & 0x8000) != 0)
-    insn |= 1 << 21;
+  if ((dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_64)) != PPC_OPCODE_64)
+    {
+      if ((value & 0x8000) != 0)
+	insn |= 1 << 21;
+    }
+  else
+    {
+      if ((insn & (0x14 << 21)) == (0x04 << 21))
+	insn |= 0x02 << 21;
+      else if ((insn & (0x14 << 21)) == (0x10 << 21))
+	insn |= 0x08 << 21;
+    }
   return insn | (value & 0xfffc);
 }
 
 static long
-extract_bdm (insn, invalid)
+extract_bdm (insn, dialect, invalid)
      unsigned long insn;
+     int dialect;
      int *invalid;
 {
-  if (invalid != (int *) NULL
-      && ((insn & (1 << 21)) == 0
-	  || (insn & (1 << 15)) == 0))
-    *invalid = 1;
-  if ((insn & 0x8000) != 0)
-    return (insn & 0xfffc) - 0x10000;
-  else
-    return insn & 0xfffc;
+  if (invalid != (int *) NULL)
+    {
+      if ((dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_64)) != PPC_OPCODE_64)
+	{
+	  if (((insn & (1 << 21)) == 0) != ((insn & (1 << 15)) == 0))
+	    *invalid = 1;
+	}
+      else
+	{
+	  if ((insn & (0x17 << 21)) != (0x06 << 21)
+	      && (insn & (0x1d << 21)) != (0x18 << 21))
+	    *invalid = 1;
+	}
+    }
+  return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
 
 /* The BD field in a B form instruction when the + modifier is used.
@@ -585,56 +653,100 @@ extract_bdm (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_bdp (insn, value, errmsg)
+insert_bdp (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
-  if ((value & 0x8000) == 0)
-    insn |= 1 << 21;
+  if ((dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_64)) != PPC_OPCODE_64)
+    {
+      if ((value & 0x8000) == 0)
+	insn |= 1 << 21;
+    }
+  else
+    {
+      if ((insn & (0x14 << 21)) == (0x04 << 21))
+	insn |= 0x03 << 21;
+      else if ((insn & (0x14 << 21)) == (0x10 << 21))
+	insn |= 0x09 << 21;
+    }
   return insn | (value & 0xfffc);
 }
 
 static long
-extract_bdp (insn, invalid)
+extract_bdp (insn, dialect, invalid)
      unsigned long insn;
+     int dialect;
      int *invalid;
 {
-  if (invalid != (int *) NULL
-      && ((insn & (1 << 21)) == 0
-	  || (insn & (1 << 15)) != 0))
-    *invalid = 1;
-  if ((insn & 0x8000) != 0)
-    return (insn & 0xfffc) - 0x10000;
-  else
-    return insn & 0xfffc;
+  if (invalid != (int *) NULL)
+    {
+      if ((dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_64)) != PPC_OPCODE_64)
+	{
+	  if (((insn & (1 << 21)) == 0) == ((insn & (1 << 15)) == 0))
+	    *invalid = 1;
+	}
+      else
+	{
+	  if ((insn & (0x17 << 21)) != (0x07 << 21)
+	      && (insn & (0x1d << 21)) != (0x19 << 21))
+	    *invalid = 1;
+	}
+    }
+  return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
 
 /* Check for legal values of a BO field.  */
 
 static int
-valid_bo (value)
+valid_bo (value, dialect)
      long value;
+     int dialect;
 {
-  /* Certain encodings have bits that are required to be zero.  These
-     are (z must be zero, y may be anything):
-         001zy
-	 011zy
-	 1z00y
-	 1z01y
-	 1z1zz
-     */
-  switch (value & 0x14)
+  if ((dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_64)) != PPC_OPCODE_64)
     {
-    default:
-    case 0:
-      return 1;
-    case 0x4:
-      return (value & 0x2) == 0;
-    case 0x10:
-      return (value & 0x8) == 0;
-    case 0x14:
-      return value == 0x14;
+      /* Certain encodings have bits that are required to be zero.
+	 These are (z must be zero, y may be anything):
+	     001zy
+	     011zy
+	     1z00y
+	     1z01y
+	     1z1zz
+      */
+      switch (value & 0x14)
+	{
+	default:
+	case 0:
+	  return 1;
+	case 0x4:
+	  return (value & 0x2) == 0;
+	case 0x10:
+	  return (value & 0x8) == 0;
+	case 0x14:
+	  return value == 0x14;
+	}
+    }
+  else
+    {
+      /* Certain encodings have bits that are required to be zero.
+	 These are (z must be zero, a & t may be anything):
+	     0000z
+	     0001z
+	     0100z
+	     0101z
+	     001at
+	     011at
+	     1a00t
+	     1a01t
+	     1z1zz
+      */
+      if ((value & 0x14) == 0)
+	return (value & 0x1) == 0;
+      else if ((value & 0x14) == 0x14)
+	return value == 0x14;
+      else
+	return 1;
     }
 }
 
@@ -642,27 +754,29 @@ valid_bo (value)
    the field to an illegal value.  */
 
 static unsigned long
-insert_bo (insn, value, errmsg)
+insert_bo (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect;
      const char **errmsg;
 {
   if (errmsg != (const char **) NULL
-      && ! valid_bo (value))
+      && ! valid_bo (value, dialect))
     *errmsg = _("invalid conditional option");
   return insn | ((value & 0x1f) << 21);
 }
 
 static long
-extract_bo (insn, invalid)
+extract_bo (insn, dialect, invalid)
      unsigned long insn;
+     int dialect;
      int *invalid;
 {
   long value;
 
   value = (insn >> 21) & 0x1f;
   if (invalid != (int *) NULL
-      && ! valid_bo (value))
+      && ! valid_bo (value, dialect))
     *invalid = 1;
   return value;
 }
@@ -672,14 +786,15 @@ extract_bo (insn, invalid)
    extracting it, we force it to be even.  */
 
 static unsigned long
-insert_boe (insn, value, errmsg)
+insert_boe (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect;
      const char **errmsg;
 {
   if (errmsg != (const char **) NULL)
     {
-      if (! valid_bo (value))
+      if (! valid_bo (value, dialect))
 	*errmsg = _("invalid conditional option");
       else if ((value & 1) != 0)
 	*errmsg = _("attempt to set y bit when using + or - modifier");
@@ -688,15 +803,16 @@ insert_boe (insn, value, errmsg)
 }
 
 static long
-extract_boe (insn, invalid)
+extract_boe (insn, dialect, invalid)
      unsigned long insn;
+     int dialect;
      int *invalid;
 {
   long value;
 
   value = (insn >> 21) & 0x1f;
   if (invalid != (int *) NULL
-      && ! valid_bo (value))
+      && ! valid_bo (value, dialect))
     *invalid = 1;
   return value & 0x1e;
 }
@@ -706,9 +822,10 @@ extract_boe (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_ds (insn, value, errmsg)
+insert_ds (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if ((value & 3) != 0 && errmsg != NULL)
@@ -718,23 +835,22 @@ insert_ds (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_ds (insn, invalid)
+extract_ds (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
-  if ((insn & 0x8000) != 0)
-    return (insn & 0xfffc) - 0x10000;
-  else
-    return insn & 0xfffc;
+  return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
 
 /* The DE field in a DE form instruction.  */
 
 /*ARGSUSED*/
 static unsigned long
-insert_de (insn, value, errmsg)
+insert_de (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if ((value > 2047 || value < -2048) && errmsg != NULL)
@@ -744,8 +860,9 @@ insert_de (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_de (insn, invalid)
+extract_de (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
   return (insn & 0xfff0) >> 4;
@@ -755,9 +872,10 @@ extract_de (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_des (insn, value, errmsg)
+insert_des (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if ((value > 8191 || value < -8192) && errmsg != NULL)
@@ -769,14 +887,12 @@ insert_des (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_des (insn, invalid)
+extract_des (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
-  if ((insn & 0x8000) != 0)
-    return ((insn & 0xfff0) >> 2) - 0x4000;
-  else
-    return (insn & 0xfff0) >> 2;
+  return (((insn >> 2) & 0x3ffc) ^ 0x2000) - 0x2000;
 }
 
 /* The LI field in an I form instruction.  The lower two bits are
@@ -784,9 +900,10 @@ extract_des (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_li (insn, value, errmsg)
+insert_li (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if ((value & 3) != 0 && errmsg != (const char **) NULL)
@@ -796,14 +913,12 @@ insert_li (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_li (insn, invalid)
+extract_li (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
-  if ((insn & 0x2000000) != 0)
-    return (insn & 0x3fffffc) - 0x4000000;
-  else
-    return insn & 0x3fffffc;
+  return ((insn & 0x3fffffc) ^ 0x2000000) - 0x2000000;
 }
 
 /* The MB and ME fields in an M form instruction expressed as a single
@@ -812,9 +927,10 @@ extract_li (insn, invalid)
    instruction which uses a field of this type.  */
 
 static unsigned long
-insert_mbe (insn, value, errmsg)
+insert_mbe (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   unsigned long uval, mask;
@@ -869,8 +985,9 @@ insert_mbe (insn, value, errmsg)
 }
 
 static long
-extract_mbe (insn, invalid)
+extract_mbe (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid;
 {
   long ret;
@@ -904,9 +1021,10 @@ extract_mbe (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_mb6 (insn, value, errmsg)
+insert_mb6 (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((value & 0x1f) << 6) | (value & 0x20);
@@ -914,8 +1032,9 @@ insert_mb6 (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_mb6 (insn, invalid)
+extract_mb6 (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
   return ((insn >> 6) & 0x1f) | (insn & 0x20);
@@ -925,9 +1044,10 @@ extract_mb6 (insn, invalid)
    0.  */
 
 static unsigned long
-insert_nb (insn, value, errmsg)
+insert_nb (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if (value < 0 || value > 32)
@@ -939,8 +1059,9 @@ insert_nb (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_nb (insn, invalid)
+extract_nb (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
   long ret;
@@ -958,25 +1079,24 @@ extract_nb (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_nsi (insn, value, errmsg)
+insert_nsi (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((- value) & 0xffff);
 }
 
 static long
-extract_nsi (insn, invalid)
+extract_nsi (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid;
 {
   if (invalid != (int *) NULL)
     *invalid = 1;
-  if ((insn & 0x8000) != 0)
-    return - ((long)(insn & 0xffff) - 0x10000);
-  else
-    return - (long)(insn & 0xffff);
+  return - (((insn & 0xffff) ^ 0x8000) - 0x8000);
 }
 
 /* The RA field in a D or X form instruction which is an updating
@@ -984,9 +1104,10 @@ extract_nsi (insn, invalid)
    equal the RT field.  */
 
 static unsigned long
-insert_ral (insn, value, errmsg)
+insert_ral (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if (value == 0
@@ -999,9 +1120,10 @@ insert_ral (insn, value, errmsg)
    restrictions.  */
 
 static unsigned long
-insert_ram (insn, value, errmsg)
+insert_ram (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if ((unsigned long) value >= ((insn >> 21) & 0x1f))
@@ -1014,9 +1136,10 @@ insert_ram (insn, value, errmsg)
    field may not be zero.  */
 
 static unsigned long
-insert_ras (insn, value, errmsg)
+insert_ras (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg;
 {
   if (value == 0)
@@ -1032,17 +1155,19 @@ insert_ras (insn, value, errmsg)
 
 /*ARGSUSED*/
 static unsigned long
-insert_rbs (insn, value, errmsg)
+insert_rbs (insn, value, dialect, errmsg)
      unsigned long insn;
      long value ATTRIBUTE_UNUSED;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (((insn >> 21) & 0x1f) << 11);
 }
 
 static long
-extract_rbs (insn, invalid)
+extract_rbs (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid;
 {
   if (invalid != (int *) NULL
@@ -1055,9 +1180,10 @@ extract_rbs (insn, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_sh6 (insn, value, errmsg)
+insert_sh6 (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
@@ -1065,8 +1191,9 @@ insert_sh6 (insn, value, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_sh6 (insn, invalid)
+extract_sh6 (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
   return ((insn >> 11) & 0x1f) | ((insn << 4) & 0x20);
@@ -1076,17 +1203,19 @@ extract_sh6 (insn, invalid)
    lower 5 bits are stored in the upper 5 and vice- versa.  */
 
 static unsigned long
-insert_spr (insn, value, errmsg)
+insert_spr (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
 }
 
 static long
-extract_spr (insn, invalid)
+extract_spr (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
   return ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
@@ -1103,9 +1232,10 @@ extract_spr (insn, invalid)
 #define TB (268)
 
 static unsigned long
-insert_tbr (insn, value, errmsg)
+insert_tbr (insn, value, dialect, errmsg)
      unsigned long insn;
      long value;
+     int dialect ATTRIBUTE_UNUSED;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
   if (value == 0)
@@ -1114,8 +1244,9 @@ insert_tbr (insn, value, errmsg)
 }
 
 static long
-extract_tbr (insn, invalid)
+extract_tbr (insn, dialect, invalid)
      unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
      int *invalid ATTRIBUTE_UNUSED;
 {
   long ret;
@@ -1167,9 +1298,12 @@ extract_tbr (insn, invalid)
 
 /* A BBO_MASK with the y bit of the BO field removed.  This permits
    matching a conditional branch regardless of the setting of the y
-   bit.  */
-#define Y_MASK (((unsigned long)1) << 21)
-#define BBOY_MASK (BBO_MASK &~ Y_MASK)
+   bit.  Similarly for the 'at' bits used for 64 bit branch hints.  */
+#define Y_MASK   (((unsigned long) 1) << 21)
+#define AT1_MASK (((unsigned long) 3) << 21)
+#define AT2_MASK (((unsigned long) 9) << 21)
+#define BBOY_MASK  (BBO_MASK &~ Y_MASK)
+#define BBOAT_MASK (BBO_MASK &~ AT1_MASK)
 
 /* A B form instruction setting the BO field and the condition bits of
    the BI field.  */
@@ -1179,9 +1313,12 @@ extract_tbr (insn, invalid)
 
 /* A BBOCB_MASK with the y bit of the BO field removed.  */
 #define BBOYCB_MASK (BBOCB_MASK &~ Y_MASK)
+#define BBOATCB_MASK (BBOCB_MASK &~ AT1_MASK)
+#define BBOAT2CB_MASK (BBOCB_MASK &~ AT2_MASK)
 
 /* A BBOYCB_MASK in which the BI field is fixed.  */
 #define BBOYBI_MASK (BBOYCB_MASK | BI_MASK)
+#define BBOATBI_MASK (BBOAT2CB_MASK | BI_MASK)
 
 /* The main opcode mask with the RA field clear.  */
 #define DRA_MASK (OP_MASK | RA_MASK)
@@ -1378,18 +1515,29 @@ extract_tbr (insn, invalid)
 #define BODNZFP	(0x1)
 #define BODZF	(0x2)
 #define BODZFP	(0x3)
-#define BOF	(0x4)
-#define BOFP	(0x5)
 #define BODNZT	(0x8)
 #define BODNZTP	(0x9)
 #define BODZT	(0xa)
 #define BODZTP	(0xb)
+
+#define BOF	(0x4)
+#define BOFP	(0x5)
+#define BOFM64	(0x6)
+#define BOFP64	(0x7)
 #define BOT	(0xc)
 #define BOTP	(0xd)
+#define BOTM64	(0xe)
+#define BOTP64	(0xf)
+
 #define BODNZ	(0x10)
 #define BODNZP	(0x11)
 #define BODZ	(0x12)
 #define BODZP	(0x13)
+#define BODNZM64 (0x18)
+#define BODNZP64 (0x19)
+#define BODZM64	(0x1a)
+#define BODZP64	(0x1b)
+
 #define BOU	(0x14)
 
 /* The BI condition bit encodings used in extended conditional branch
@@ -1421,8 +1569,10 @@ extract_tbr (insn, invalid)
 #undef	PPC
 #define PPC     PPC_OPCODE_PPC | PPC_OPCODE_ANY
 #define PPCCOM	PPC_OPCODE_PPC | PPC_OPCODE_COMMON | PPC_OPCODE_ANY
-#define PPC32   PPC_OPCODE_PPC | PPC_OPCODE_32 | PPC_OPCODE_ANY
-#define PPC64   PPC_OPCODE_64 | PPC_OPCODE_ANY
+#define PPCCOM32 PPC_OPCODE_32 | PPCCOM
+#define PPCCOM64 PPC_OPCODE_64 | PPCCOM
+#define PPC32   PPC_OPCODE_32 | PPC_OPCODE_PPC | PPC_OPCODE_ANY
+#define PPC64   PPC_OPCODE_64 | PPC_OPCODE_PPC | PPC_OPCODE_ANY
 #define PPCONLY	PPC_OPCODE_PPC
 #define PPC403	PPC_OPCODE_403
 #define PPC405	PPC403
@@ -1794,257 +1944,257 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "cau",     OP(15),	OP_MASK,	PWRCOM,		{ RT,RA,SISIGNOPT } },
 { "subis",   OP(15),	OP_MASK,	PPCCOM,		{ RT, RA, NSI } },
 
-{ "bdnz-",   BBO(16,BODNZ,0,0), BBOYBI_MASK, PPCCOM,	{ BDM } },
-{ "bdnz+",   BBO(16,BODNZ,0,0), BBOYBI_MASK, PPCCOM,	{ BDP } },
-{ "bdnz",    BBO(16,BODNZ,0,0), BBOYBI_MASK, PPCCOM,	{ BD } },
-{ "bdn",     BBO(16,BODNZ,0,0), BBOYBI_MASK, PWRCOM,	{ BD } },
-{ "bdnzl-",  BBO(16,BODNZ,0,1), BBOYBI_MASK, PPCCOM,	{ BDM } },
-{ "bdnzl+",  BBO(16,BODNZ,0,1), BBOYBI_MASK, PPCCOM,	{ BDP } },
-{ "bdnzl",   BBO(16,BODNZ,0,1), BBOYBI_MASK, PPCCOM,	{ BD } },
-{ "bdnl",    BBO(16,BODNZ,0,1), BBOYBI_MASK, PWRCOM,	{ BD } },
-{ "bdnza-",  BBO(16,BODNZ,1,0), BBOYBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdnza+",  BBO(16,BODNZ,1,0), BBOYBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdnza",   BBO(16,BODNZ,1,0), BBOYBI_MASK, PPCCOM,	{ BDA } },
-{ "bdna",    BBO(16,BODNZ,1,0), BBOYBI_MASK, PWRCOM,	{ BDA } },
-{ "bdnzla-", BBO(16,BODNZ,1,1), BBOYBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdnzla+", BBO(16,BODNZ,1,1), BBOYBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdnzla",  BBO(16,BODNZ,1,1), BBOYBI_MASK, PPCCOM,	{ BDA } },
-{ "bdnla",   BBO(16,BODNZ,1,1), BBOYBI_MASK, PWRCOM,	{ BDA } },
-{ "bdz-",    BBO(16,BODZ,0,0),  BBOYBI_MASK, PPCCOM,	{ BDM } },
-{ "bdz+",    BBO(16,BODZ,0,0),  BBOYBI_MASK, PPCCOM,	{ BDP } },
-{ "bdz",     BBO(16,BODZ,0,0),  BBOYBI_MASK, COM,	{ BD } },
-{ "bdzl-",   BBO(16,BODZ,0,1),  BBOYBI_MASK, PPCCOM,	{ BDM } },
-{ "bdzl+",   BBO(16,BODZ,0,1),  BBOYBI_MASK, PPCCOM,	{ BDP } },
-{ "bdzl",    BBO(16,BODZ,0,1),  BBOYBI_MASK, COM,	{ BD } },
-{ "bdza-",   BBO(16,BODZ,1,0),  BBOYBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdza+",   BBO(16,BODZ,1,0),  BBOYBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdza",    BBO(16,BODZ,1,0),  BBOYBI_MASK, COM,	{ BDA } },
-{ "bdzla-",  BBO(16,BODZ,1,1),  BBOYBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdzla+",  BBO(16,BODZ,1,1),  BBOYBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdzla",   BBO(16,BODZ,1,1),  BBOYBI_MASK, COM,	{ BDA } },
-{ "blt-",    BBOCB(16,BOT,CBLT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "blt+",    BBOCB(16,BOT,CBLT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "blt",     BBOCB(16,BOT,CBLT,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bltl-",   BBOCB(16,BOT,CBLT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bltl+",   BBOCB(16,BOT,CBLT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bltl",    BBOCB(16,BOT,CBLT,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "blta-",   BBOCB(16,BOT,CBLT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "blta+",   BBOCB(16,BOT,CBLT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "blta",    BBOCB(16,BOT,CBLT,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bltla-",  BBOCB(16,BOT,CBLT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bltla+",  BBOCB(16,BOT,CBLT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bltla",   BBOCB(16,BOT,CBLT,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bgt-",    BBOCB(16,BOT,CBGT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bgt+",    BBOCB(16,BOT,CBGT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bgt",     BBOCB(16,BOT,CBGT,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bgtl-",   BBOCB(16,BOT,CBGT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bgtl+",   BBOCB(16,BOT,CBGT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bgtl",    BBOCB(16,BOT,CBGT,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bgta-",   BBOCB(16,BOT,CBGT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bgta+",   BBOCB(16,BOT,CBGT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bgta",    BBOCB(16,BOT,CBGT,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bgtla-",  BBOCB(16,BOT,CBGT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bgtla+",  BBOCB(16,BOT,CBGT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bgtla",   BBOCB(16,BOT,CBGT,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "beq-",    BBOCB(16,BOT,CBEQ,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "beq+",    BBOCB(16,BOT,CBEQ,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "beq",     BBOCB(16,BOT,CBEQ,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "beql-",   BBOCB(16,BOT,CBEQ,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "beql+",   BBOCB(16,BOT,CBEQ,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "beql",    BBOCB(16,BOT,CBEQ,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "beqa-",   BBOCB(16,BOT,CBEQ,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "beqa+",   BBOCB(16,BOT,CBEQ,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "beqa",    BBOCB(16,BOT,CBEQ,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "beqla-",  BBOCB(16,BOT,CBEQ,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "beqla+",  BBOCB(16,BOT,CBEQ,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "beqla",   BBOCB(16,BOT,CBEQ,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bso-",    BBOCB(16,BOT,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bso+",    BBOCB(16,BOT,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bso",     BBOCB(16,BOT,CBSO,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bsol-",   BBOCB(16,BOT,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bsol+",   BBOCB(16,BOT,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bsol",    BBOCB(16,BOT,CBSO,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bsoa-",   BBOCB(16,BOT,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bsoa+",   BBOCB(16,BOT,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bsoa",    BBOCB(16,BOT,CBSO,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bsola-",  BBOCB(16,BOT,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bsola+",  BBOCB(16,BOT,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bsola",   BBOCB(16,BOT,CBSO,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bun-",    BBOCB(16,BOT,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bun+",    BBOCB(16,BOT,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bun",     BBOCB(16,BOT,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BD } },
-{ "bunl-",   BBOCB(16,BOT,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bunl+",   BBOCB(16,BOT,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bunl",    BBOCB(16,BOT,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BD } },
-{ "buna-",   BBOCB(16,BOT,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "buna+",   BBOCB(16,BOT,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "buna",    BBOCB(16,BOT,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDA } },
-{ "bunla-",  BBOCB(16,BOT,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bunla+",  BBOCB(16,BOT,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bunla",   BBOCB(16,BOT,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDA } },
-{ "bge-",    BBOCB(16,BOF,CBLT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bge+",    BBOCB(16,BOF,CBLT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bge",     BBOCB(16,BOF,CBLT,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bgel-",   BBOCB(16,BOF,CBLT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bgel+",   BBOCB(16,BOF,CBLT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bgel",    BBOCB(16,BOF,CBLT,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bgea-",   BBOCB(16,BOF,CBLT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bgea+",   BBOCB(16,BOF,CBLT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bgea",    BBOCB(16,BOF,CBLT,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bgela-",  BBOCB(16,BOF,CBLT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bgela+",  BBOCB(16,BOF,CBLT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bgela",   BBOCB(16,BOF,CBLT,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bnl-",    BBOCB(16,BOF,CBLT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bnl+",    BBOCB(16,BOF,CBLT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bnl",     BBOCB(16,BOF,CBLT,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bnll-",   BBOCB(16,BOF,CBLT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bnll+",   BBOCB(16,BOF,CBLT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bnll",    BBOCB(16,BOF,CBLT,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bnla-",   BBOCB(16,BOF,CBLT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnla+",   BBOCB(16,BOF,CBLT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnla",    BBOCB(16,BOF,CBLT,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bnlla-",  BBOCB(16,BOF,CBLT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnlla+",  BBOCB(16,BOF,CBLT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnlla",   BBOCB(16,BOF,CBLT,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "ble-",    BBOCB(16,BOF,CBGT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "ble+",    BBOCB(16,BOF,CBGT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "ble",     BBOCB(16,BOF,CBGT,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "blel-",   BBOCB(16,BOF,CBGT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "blel+",   BBOCB(16,BOF,CBGT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "blel",    BBOCB(16,BOF,CBGT,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "blea-",   BBOCB(16,BOF,CBGT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "blea+",   BBOCB(16,BOF,CBGT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "blea",    BBOCB(16,BOF,CBGT,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "blela-",  BBOCB(16,BOF,CBGT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "blela+",  BBOCB(16,BOF,CBGT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "blela",   BBOCB(16,BOF,CBGT,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bng-",    BBOCB(16,BOF,CBGT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bng+",    BBOCB(16,BOF,CBGT,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bng",     BBOCB(16,BOF,CBGT,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bngl-",   BBOCB(16,BOF,CBGT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bngl+",   BBOCB(16,BOF,CBGT,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bngl",    BBOCB(16,BOF,CBGT,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bnga-",   BBOCB(16,BOF,CBGT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnga+",   BBOCB(16,BOF,CBGT,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnga",    BBOCB(16,BOF,CBGT,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bngla-",  BBOCB(16,BOF,CBGT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bngla+",  BBOCB(16,BOF,CBGT,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bngla",   BBOCB(16,BOF,CBGT,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bne-",    BBOCB(16,BOF,CBEQ,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bne+",    BBOCB(16,BOF,CBEQ,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bne",     BBOCB(16,BOF,CBEQ,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bnel-",   BBOCB(16,BOF,CBEQ,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bnel+",   BBOCB(16,BOF,CBEQ,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bnel",    BBOCB(16,BOF,CBEQ,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bnea-",   BBOCB(16,BOF,CBEQ,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnea+",   BBOCB(16,BOF,CBEQ,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnea",    BBOCB(16,BOF,CBEQ,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bnela-",  BBOCB(16,BOF,CBEQ,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnela+",  BBOCB(16,BOF,CBEQ,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnela",   BBOCB(16,BOF,CBEQ,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bns-",    BBOCB(16,BOF,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bns+",    BBOCB(16,BOF,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bns",     BBOCB(16,BOF,CBSO,0,0), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bnsl-",   BBOCB(16,BOF,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bnsl+",   BBOCB(16,BOF,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bnsl",    BBOCB(16,BOF,CBSO,0,1), BBOYCB_MASK, COM,		{ CR, BD } },
-{ "bnsa-",   BBOCB(16,BOF,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnsa+",   BBOCB(16,BOF,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnsa",    BBOCB(16,BOF,CBSO,1,0), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bnsla-",  BBOCB(16,BOF,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnsla+",  BBOCB(16,BOF,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnsla",   BBOCB(16,BOF,CBSO,1,1), BBOYCB_MASK, COM,		{ CR, BDA } },
-{ "bnu-",    BBOCB(16,BOF,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bnu+",    BBOCB(16,BOF,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bnu",     BBOCB(16,BOF,CBSO,0,0), BBOYCB_MASK, PPCCOM,	{ CR, BD } },
-{ "bnul-",   BBOCB(16,BOF,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDM } },
-{ "bnul+",   BBOCB(16,BOF,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BDP } },
-{ "bnul",    BBOCB(16,BOF,CBSO,0,1), BBOYCB_MASK, PPCCOM,	{ CR, BD } },
-{ "bnua-",   BBOCB(16,BOF,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnua+",   BBOCB(16,BOF,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnua",    BBOCB(16,BOF,CBSO,1,0), BBOYCB_MASK, PPCCOM,	{ CR, BDA } },
-{ "bnula-",  BBOCB(16,BOF,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDMA } },
-{ "bnula+",  BBOCB(16,BOF,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDPA } },
-{ "bnula",   BBOCB(16,BOF,CBSO,1,1), BBOYCB_MASK, PPCCOM,	{ CR, BDA } },
-{ "bdnzt-",  BBO(16,BODNZT,0,0), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdnzt+",  BBO(16,BODNZT,0,0), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bdnz-",   BBO(16,BODNZ,0,0), BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdnz+",   BBO(16,BODNZ,0,0), BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdnz",    BBO(16,BODNZ,0,0), BBOATBI_MASK, PPCCOM,	{ BD } },
+{ "bdn",     BBO(16,BODNZ,0,0), BBOATBI_MASK, PWRCOM,	{ BD } },
+{ "bdnzl-",  BBO(16,BODNZ,0,1), BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdnzl+",  BBO(16,BODNZ,0,1), BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdnzl",   BBO(16,BODNZ,0,1), BBOATBI_MASK, PPCCOM,	{ BD } },
+{ "bdnl",    BBO(16,BODNZ,0,1), BBOATBI_MASK, PWRCOM,	{ BD } },
+{ "bdnza-",  BBO(16,BODNZ,1,0), BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdnza+",  BBO(16,BODNZ,1,0), BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdnza",   BBO(16,BODNZ,1,0), BBOATBI_MASK, PPCCOM,	{ BDA } },
+{ "bdna",    BBO(16,BODNZ,1,0), BBOATBI_MASK, PWRCOM,	{ BDA } },
+{ "bdnzla-", BBO(16,BODNZ,1,1), BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdnzla+", BBO(16,BODNZ,1,1), BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdnzla",  BBO(16,BODNZ,1,1), BBOATBI_MASK, PPCCOM,	{ BDA } },
+{ "bdnla",   BBO(16,BODNZ,1,1), BBOATBI_MASK, PWRCOM,	{ BDA } },
+{ "bdz-",    BBO(16,BODZ,0,0),  BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdz+",    BBO(16,BODZ,0,0),  BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdz",     BBO(16,BODZ,0,0),  BBOATBI_MASK, COM,	{ BD } },
+{ "bdzl-",   BBO(16,BODZ,0,1),  BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdzl+",   BBO(16,BODZ,0,1),  BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdzl",    BBO(16,BODZ,0,1),  BBOATBI_MASK, COM,	{ BD } },
+{ "bdza-",   BBO(16,BODZ,1,0),  BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdza+",   BBO(16,BODZ,1,0),  BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdza",    BBO(16,BODZ,1,0),  BBOATBI_MASK, COM,	{ BDA } },
+{ "bdzla-",  BBO(16,BODZ,1,1),  BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdzla+",  BBO(16,BODZ,1,1),  BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdzla",   BBO(16,BODZ,1,1),  BBOATBI_MASK, COM,	{ BDA } },
+{ "blt-",    BBOCB(16,BOT,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "blt+",    BBOCB(16,BOT,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "blt",     BBOCB(16,BOT,CBLT,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bltl-",   BBOCB(16,BOT,CBLT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bltl+",   BBOCB(16,BOT,CBLT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bltl",    BBOCB(16,BOT,CBLT,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "blta-",   BBOCB(16,BOT,CBLT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "blta+",   BBOCB(16,BOT,CBLT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "blta",    BBOCB(16,BOT,CBLT,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bltla-",  BBOCB(16,BOT,CBLT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bltla+",  BBOCB(16,BOT,CBLT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bltla",   BBOCB(16,BOT,CBLT,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bgt-",    BBOCB(16,BOT,CBGT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bgt+",    BBOCB(16,BOT,CBGT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bgt",     BBOCB(16,BOT,CBGT,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bgtl-",   BBOCB(16,BOT,CBGT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bgtl+",   BBOCB(16,BOT,CBGT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bgtl",    BBOCB(16,BOT,CBGT,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bgta-",   BBOCB(16,BOT,CBGT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bgta+",   BBOCB(16,BOT,CBGT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bgta",    BBOCB(16,BOT,CBGT,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bgtla-",  BBOCB(16,BOT,CBGT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bgtla+",  BBOCB(16,BOT,CBGT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bgtla",   BBOCB(16,BOT,CBGT,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "beq-",    BBOCB(16,BOT,CBEQ,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "beq+",    BBOCB(16,BOT,CBEQ,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "beq",     BBOCB(16,BOT,CBEQ,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "beql-",   BBOCB(16,BOT,CBEQ,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "beql+",   BBOCB(16,BOT,CBEQ,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "beql",    BBOCB(16,BOT,CBEQ,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "beqa-",   BBOCB(16,BOT,CBEQ,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "beqa+",   BBOCB(16,BOT,CBEQ,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "beqa",    BBOCB(16,BOT,CBEQ,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "beqla-",  BBOCB(16,BOT,CBEQ,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "beqla+",  BBOCB(16,BOT,CBEQ,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "beqla",   BBOCB(16,BOT,CBEQ,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bso-",    BBOCB(16,BOT,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bso+",    BBOCB(16,BOT,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bso",     BBOCB(16,BOT,CBSO,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bsol-",   BBOCB(16,BOT,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bsol+",   BBOCB(16,BOT,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bsol",    BBOCB(16,BOT,CBSO,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bsoa-",   BBOCB(16,BOT,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bsoa+",   BBOCB(16,BOT,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bsoa",    BBOCB(16,BOT,CBSO,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bsola-",  BBOCB(16,BOT,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bsola+",  BBOCB(16,BOT,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bsola",   BBOCB(16,BOT,CBSO,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bun-",    BBOCB(16,BOT,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bun+",    BBOCB(16,BOT,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bun",     BBOCB(16,BOT,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BD } },
+{ "bunl-",   BBOCB(16,BOT,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bunl+",   BBOCB(16,BOT,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bunl",    BBOCB(16,BOT,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BD } },
+{ "buna-",   BBOCB(16,BOT,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "buna+",   BBOCB(16,BOT,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "buna",    BBOCB(16,BOT,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDA } },
+{ "bunla-",  BBOCB(16,BOT,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bunla+",  BBOCB(16,BOT,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bunla",   BBOCB(16,BOT,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDA } },
+{ "bge-",    BBOCB(16,BOF,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bge+",    BBOCB(16,BOF,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bge",     BBOCB(16,BOF,CBLT,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bgel-",   BBOCB(16,BOF,CBLT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bgel+",   BBOCB(16,BOF,CBLT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bgel",    BBOCB(16,BOF,CBLT,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bgea-",   BBOCB(16,BOF,CBLT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bgea+",   BBOCB(16,BOF,CBLT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bgea",    BBOCB(16,BOF,CBLT,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bgela-",  BBOCB(16,BOF,CBLT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bgela+",  BBOCB(16,BOF,CBLT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bgela",   BBOCB(16,BOF,CBLT,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bnl-",    BBOCB(16,BOF,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bnl+",    BBOCB(16,BOF,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bnl",     BBOCB(16,BOF,CBLT,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bnll-",   BBOCB(16,BOF,CBLT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bnll+",   BBOCB(16,BOF,CBLT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bnll",    BBOCB(16,BOF,CBLT,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bnla-",   BBOCB(16,BOF,CBLT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnla+",   BBOCB(16,BOF,CBLT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnla",    BBOCB(16,BOF,CBLT,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bnlla-",  BBOCB(16,BOF,CBLT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnlla+",  BBOCB(16,BOF,CBLT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnlla",   BBOCB(16,BOF,CBLT,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "ble-",    BBOCB(16,BOF,CBGT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "ble+",    BBOCB(16,BOF,CBGT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "ble",     BBOCB(16,BOF,CBGT,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "blel-",   BBOCB(16,BOF,CBGT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "blel+",   BBOCB(16,BOF,CBGT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "blel",    BBOCB(16,BOF,CBGT,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "blea-",   BBOCB(16,BOF,CBGT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "blea+",   BBOCB(16,BOF,CBGT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "blea",    BBOCB(16,BOF,CBGT,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "blela-",  BBOCB(16,BOF,CBGT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "blela+",  BBOCB(16,BOF,CBGT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "blela",   BBOCB(16,BOF,CBGT,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bng-",    BBOCB(16,BOF,CBGT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bng+",    BBOCB(16,BOF,CBGT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bng",     BBOCB(16,BOF,CBGT,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bngl-",   BBOCB(16,BOF,CBGT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bngl+",   BBOCB(16,BOF,CBGT,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bngl",    BBOCB(16,BOF,CBGT,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bnga-",   BBOCB(16,BOF,CBGT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnga+",   BBOCB(16,BOF,CBGT,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnga",    BBOCB(16,BOF,CBGT,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bngla-",  BBOCB(16,BOF,CBGT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bngla+",  BBOCB(16,BOF,CBGT,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bngla",   BBOCB(16,BOF,CBGT,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bne-",    BBOCB(16,BOF,CBEQ,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bne+",    BBOCB(16,BOF,CBEQ,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bne",     BBOCB(16,BOF,CBEQ,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bnel-",   BBOCB(16,BOF,CBEQ,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bnel+",   BBOCB(16,BOF,CBEQ,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bnel",    BBOCB(16,BOF,CBEQ,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bnea-",   BBOCB(16,BOF,CBEQ,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnea+",   BBOCB(16,BOF,CBEQ,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnea",    BBOCB(16,BOF,CBEQ,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bnela-",  BBOCB(16,BOF,CBEQ,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnela+",  BBOCB(16,BOF,CBEQ,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnela",   BBOCB(16,BOF,CBEQ,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bns-",    BBOCB(16,BOF,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bns+",    BBOCB(16,BOF,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bns",     BBOCB(16,BOF,CBSO,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bnsl-",   BBOCB(16,BOF,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bnsl+",   BBOCB(16,BOF,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bnsl",    BBOCB(16,BOF,CBSO,0,1), BBOATCB_MASK, COM,		{ CR, BD } },
+{ "bnsa-",   BBOCB(16,BOF,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnsa+",   BBOCB(16,BOF,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnsa",    BBOCB(16,BOF,CBSO,1,0), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bnsla-",  BBOCB(16,BOF,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnsla+",  BBOCB(16,BOF,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnsla",   BBOCB(16,BOF,CBSO,1,1), BBOATCB_MASK, COM,		{ CR, BDA } },
+{ "bnu-",    BBOCB(16,BOF,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bnu+",    BBOCB(16,BOF,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bnu",     BBOCB(16,BOF,CBSO,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BD } },
+{ "bnul-",   BBOCB(16,BOF,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
+{ "bnul+",   BBOCB(16,BOF,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
+{ "bnul",    BBOCB(16,BOF,CBSO,0,1), BBOATCB_MASK, PPCCOM,	{ CR, BD } },
+{ "bnua-",   BBOCB(16,BOF,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnua+",   BBOCB(16,BOF,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnua",    BBOCB(16,BOF,CBSO,1,0), BBOATCB_MASK, PPCCOM,	{ CR, BDA } },
+{ "bnula-",  BBOCB(16,BOF,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDMA } },
+{ "bnula+",  BBOCB(16,BOF,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDPA } },
+{ "bnula",   BBOCB(16,BOF,CBSO,1,1), BBOATCB_MASK, PPCCOM,	{ CR, BDA } },
+{ "bdnzt-",  BBO(16,BODNZT,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdnzt+",  BBO(16,BODNZT,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdnzt",   BBO(16,BODNZT,0,0), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdnztl-", BBO(16,BODNZT,0,1), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdnztl+", BBO(16,BODNZT,0,1), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bdnztl-", BBO(16,BODNZT,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdnztl+", BBO(16,BODNZT,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdnztl",  BBO(16,BODNZT,0,1), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdnzta-", BBO(16,BODNZT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdnzta+", BBO(16,BODNZT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdnzta-", BBO(16,BODNZT,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdnzta+", BBO(16,BODNZT,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdnzta",  BBO(16,BODNZT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bdnztla-",BBO(16,BODNZT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdnztla+",BBO(16,BODNZT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdnztla-",BBO(16,BODNZT,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdnztla+",BBO(16,BODNZT,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdnztla", BBO(16,BODNZT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bdnzf-",  BBO(16,BODNZF,0,0), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdnzf+",  BBO(16,BODNZF,0,0), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bdnzf-",  BBO(16,BODNZF,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdnzf+",  BBO(16,BODNZF,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdnzf",   BBO(16,BODNZF,0,0), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdnzfl-", BBO(16,BODNZF,0,1), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdnzfl+", BBO(16,BODNZF,0,1), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bdnzfl-", BBO(16,BODNZF,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdnzfl+", BBO(16,BODNZF,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdnzfl",  BBO(16,BODNZF,0,1), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdnzfa-", BBO(16,BODNZF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdnzfa+", BBO(16,BODNZF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdnzfa-", BBO(16,BODNZF,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdnzfa+", BBO(16,BODNZF,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdnzfa",  BBO(16,BODNZF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bdnzfla-",BBO(16,BODNZF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdnzfla+",BBO(16,BODNZF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdnzfla-",BBO(16,BODNZF,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdnzfla+",BBO(16,BODNZF,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdnzfla", BBO(16,BODNZF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bt-",     BBO(16,BOT,0,0), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bt+",     BBO(16,BOT,0,0), BBOY_MASK, PPCCOM,	{ BI, BDP } },
-{ "bt",	     BBO(16,BOT,0,0), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bbt",     BBO(16,BOT,0,0), BBOY_MASK, PWRCOM,	{ BI, BD } },
-{ "btl-",    BBO(16,BOT,0,1), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "btl+",    BBO(16,BOT,0,1), BBOY_MASK, PPCCOM,	{ BI, BDP } },
-{ "btl",     BBO(16,BOT,0,1), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bbtl",    BBO(16,BOT,0,1), BBOY_MASK, PWRCOM,	{ BI, BD } },
-{ "bta-",    BBO(16,BOT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bta+",    BBO(16,BOT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
-{ "bta",     BBO(16,BOT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bbta",    BBO(16,BOT,1,0), BBOY_MASK, PWRCOM,	{ BI, BDA } },
-{ "btla-",   BBO(16,BOT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "btla+",   BBO(16,BOT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
-{ "btla",    BBO(16,BOT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bbtla",   BBO(16,BOT,1,1), BBOY_MASK, PWRCOM,	{ BI, BDA } },
-{ "bf-",     BBO(16,BOF,0,0), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bf+",     BBO(16,BOF,0,0), BBOY_MASK, PPCCOM,	{ BI, BDP } },
-{ "bf",	     BBO(16,BOF,0,0), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bbf",     BBO(16,BOF,0,0), BBOY_MASK, PWRCOM,	{ BI, BD } },
-{ "bfl-",    BBO(16,BOF,0,1), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bfl+",    BBO(16,BOF,0,1), BBOY_MASK, PPCCOM,	{ BI, BDP } },
-{ "bfl",     BBO(16,BOF,0,1), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bbfl",    BBO(16,BOF,0,1), BBOY_MASK, PWRCOM,	{ BI, BD } },
-{ "bfa-",    BBO(16,BOF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bfa+",    BBO(16,BOF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
-{ "bfa",     BBO(16,BOF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bbfa",    BBO(16,BOF,1,0), BBOY_MASK, PWRCOM,	{ BI, BDA } },
-{ "bfla-",   BBO(16,BOF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bfla+",   BBO(16,BOF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
-{ "bfla",    BBO(16,BOF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bbfla",   BBO(16,BOF,1,1), BBOY_MASK, PWRCOM,	{ BI, BDA } },
-{ "bdzt-",   BBO(16,BODZT,0,0), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdzt+",   BBO(16,BODZT,0,0), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bt-",     BBO(16,BOT,0,0), BBOAT_MASK, PPCCOM,	{ BI, BDM } },
+{ "bt+",     BBO(16,BOT,0,0), BBOAT_MASK, PPCCOM,	{ BI, BDP } },
+{ "bt",	     BBO(16,BOT,0,0), BBOAT_MASK, PPCCOM,	{ BI, BD } },
+{ "bbt",     BBO(16,BOT,0,0), BBOAT_MASK, PWRCOM,	{ BI, BD } },
+{ "btl-",    BBO(16,BOT,0,1), BBOAT_MASK, PPCCOM,	{ BI, BDM } },
+{ "btl+",    BBO(16,BOT,0,1), BBOAT_MASK, PPCCOM,	{ BI, BDP } },
+{ "btl",     BBO(16,BOT,0,1), BBOAT_MASK, PPCCOM,	{ BI, BD } },
+{ "bbtl",    BBO(16,BOT,0,1), BBOAT_MASK, PWRCOM,	{ BI, BD } },
+{ "bta-",    BBO(16,BOT,1,0), BBOAT_MASK, PPCCOM,	{ BI, BDMA } },
+{ "bta+",    BBO(16,BOT,1,0), BBOAT_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bta",     BBO(16,BOT,1,0), BBOAT_MASK, PPCCOM,	{ BI, BDA } },
+{ "bbta",    BBO(16,BOT,1,0), BBOAT_MASK, PWRCOM,	{ BI, BDA } },
+{ "btla-",   BBO(16,BOT,1,1), BBOAT_MASK, PPCCOM,	{ BI, BDMA } },
+{ "btla+",   BBO(16,BOT,1,1), BBOAT_MASK, PPCCOM,	{ BI, BDPA } },
+{ "btla",    BBO(16,BOT,1,1), BBOAT_MASK, PPCCOM,	{ BI, BDA } },
+{ "bbtla",   BBO(16,BOT,1,1), BBOAT_MASK, PWRCOM,	{ BI, BDA } },
+{ "bf-",     BBO(16,BOF,0,0), BBOAT_MASK, PPCCOM,	{ BI, BDM } },
+{ "bf+",     BBO(16,BOF,0,0), BBOAT_MASK, PPCCOM,	{ BI, BDP } },
+{ "bf",	     BBO(16,BOF,0,0), BBOAT_MASK, PPCCOM,	{ BI, BD } },
+{ "bbf",     BBO(16,BOF,0,0), BBOAT_MASK, PWRCOM,	{ BI, BD } },
+{ "bfl-",    BBO(16,BOF,0,1), BBOAT_MASK, PPCCOM,	{ BI, BDM } },
+{ "bfl+",    BBO(16,BOF,0,1), BBOAT_MASK, PPCCOM,	{ BI, BDP } },
+{ "bfl",     BBO(16,BOF,0,1), BBOAT_MASK, PPCCOM,	{ BI, BD } },
+{ "bbfl",    BBO(16,BOF,0,1), BBOAT_MASK, PWRCOM,	{ BI, BD } },
+{ "bfa-",    BBO(16,BOF,1,0), BBOAT_MASK, PPCCOM,	{ BI, BDMA } },
+{ "bfa+",    BBO(16,BOF,1,0), BBOAT_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bfa",     BBO(16,BOF,1,0), BBOAT_MASK, PPCCOM,	{ BI, BDA } },
+{ "bbfa",    BBO(16,BOF,1,0), BBOAT_MASK, PWRCOM,	{ BI, BDA } },
+{ "bfla-",   BBO(16,BOF,1,1), BBOAT_MASK, PPCCOM,	{ BI, BDMA } },
+{ "bfla+",   BBO(16,BOF,1,1), BBOAT_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bfla",    BBO(16,BOF,1,1), BBOAT_MASK, PPCCOM,	{ BI, BDA } },
+{ "bbfla",   BBO(16,BOF,1,1), BBOAT_MASK, PWRCOM,	{ BI, BDA } },
+{ "bdzt-",   BBO(16,BODZT,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdzt+",   BBO(16,BODZT,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdzt",    BBO(16,BODZT,0,0), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdztl-",  BBO(16,BODZT,0,1), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdztl+",  BBO(16,BODZT,0,1), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bdztl-",  BBO(16,BODZT,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdztl+",  BBO(16,BODZT,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdztl",   BBO(16,BODZT,0,1), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdzta-",  BBO(16,BODZT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdzta+",  BBO(16,BODZT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdzta-",  BBO(16,BODZT,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdzta+",  BBO(16,BODZT,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdzta",   BBO(16,BODZT,1,0), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bdztla-", BBO(16,BODZT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdztla+", BBO(16,BODZT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdztla-", BBO(16,BODZT,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdztla+", BBO(16,BODZT,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdztla",  BBO(16,BODZT,1,1), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bdzf-",   BBO(16,BODZF,0,0), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdzf+",   BBO(16,BODZF,0,0), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bdzf-",   BBO(16,BODZF,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdzf+",   BBO(16,BODZF,0,0), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdzf",    BBO(16,BODZF,0,0), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdzfl-",  BBO(16,BODZF,0,1), BBOY_MASK, PPCCOM,	{ BI, BDM } },
-{ "bdzfl+",  BBO(16,BODZF,0,1), BBOY_MASK, PPCCOM,	{ BI, BDP } },
+{ "bdzfl-",  BBO(16,BODZF,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDM } },
+{ "bdzfl+",  BBO(16,BODZF,0,1), BBOY_MASK, PPCCOM32,	{ BI, BDP } },
 { "bdzfl",   BBO(16,BODZF,0,1), BBOY_MASK, PPCCOM,	{ BI, BD } },
-{ "bdzfa-",  BBO(16,BODZF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdzfa+",  BBO(16,BODZF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdzfa-",  BBO(16,BODZF,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdzfa+",  BBO(16,BODZF,1,0), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdzfa",   BBO(16,BODZF,1,0), BBOY_MASK, PPCCOM,	{ BI, BDA } },
-{ "bdzfla-", BBO(16,BODZF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDMA } },
-{ "bdzfla+", BBO(16,BODZF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDPA } },
+{ "bdzfla-", BBO(16,BODZF,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDMA } },
+{ "bdzfla+", BBO(16,BODZF,1,1), BBOY_MASK, PPCCOM32,	{ BI, BDPA } },
 { "bdzfla",  BBO(16,BODZF,1,1), BBOY_MASK, PPCCOM,	{ BI, BDA } },
 { "bc-",     B(16,0,0),	B_MASK,		PPCCOM,		{ BOE, BI, BDM } },
 { "bc+",     B(16,0,0),	B_MASK,		PPCCOM,		{ BOE, BI, BDP } },
@@ -2077,149 +2227,213 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "blrl",    XLO(19,BOU,16,1), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
 { "brl",     XLO(19,BOU,16,1), XLBOBIBB_MASK, PWRCOM,	{ 0 } },
 { "bdnzlr",  XLO(19,BODNZ,16,0), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdnzlr-", XLO(19,BODNZ,16,0), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdnzlr+", XLO(19,BODNZP,16,0), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
+{ "bdnzlr-", XLO(19,BODNZ,16,0), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdnzlr+", XLO(19,BODNZP,16,0), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdnzlr-", XLO(19,BODNZM64,16,0), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
+{ "bdnzlr+", XLO(19,BODNZP64,16,0), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
 { "bdnzlrl", XLO(19,BODNZ,16,1), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdnzlrl-",XLO(19,BODNZ,16,1), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdnzlrl+",XLO(19,BODNZP,16,1), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
+{ "bdnzlrl-",XLO(19,BODNZ,16,1), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdnzlrl+",XLO(19,BODNZP,16,1), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdnzlrl-",XLO(19,BODNZM64,16,1), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
+{ "bdnzlrl+",XLO(19,BODNZP64,16,1), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
 { "bdzlr",   XLO(19,BODZ,16,0), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdzlr-",  XLO(19,BODZ,16,0), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdzlr+",  XLO(19,BODZP,16,0), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
+{ "bdzlr-",  XLO(19,BODZ,16,0), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdzlr+",  XLO(19,BODZP,16,0), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdzlr-",  XLO(19,BODZM64,16,0), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
+{ "bdzlr+",  XLO(19,BODZP64,16,0), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
 { "bdzlrl",  XLO(19,BODZ,16,1), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdzlrl-", XLO(19,BODZ,16,1), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
-{ "bdzlrl+", XLO(19,BODZP,16,1), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
+{ "bdzlrl-", XLO(19,BODZ,16,1), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdzlrl+", XLO(19,BODZP,16,1), XLBOBIBB_MASK, PPCCOM32,	{ 0 } },
+{ "bdzlrl-", XLO(19,BODZM64,16,1), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
+{ "bdzlrl+", XLO(19,BODZP64,16,1), XLBOBIBB_MASK, PPCCOM64,	{ 0 } },
 { "bltlr",   XLOCB(19,BOT,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bltlr-",  XLOCB(19,BOT,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bltlr+",  XLOCB(19,BOTP,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bltlr-",  XLOCB(19,BOT,CBLT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltlr+",  XLOCB(19,BOTP,CBLT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltlr-",  XLOCB(19,BOTM64,CBLT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bltlr+",  XLOCB(19,BOTP64,CBLT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bltr",    XLOCB(19,BOT,CBLT,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bltlrl",  XLOCB(19,BOT,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bltlrl-", XLOCB(19,BOT,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bltlrl+", XLOCB(19,BOTP,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bltlrl-", XLOCB(19,BOT,CBLT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltlrl+", XLOCB(19,BOTP,CBLT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltlrl-", XLOCB(19,BOTM64,CBLT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bltlrl+", XLOCB(19,BOTP64,CBLT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bltrl",   XLOCB(19,BOT,CBLT,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bgtlr",   XLOCB(19,BOT,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgtlr-",  XLOCB(19,BOT,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgtlr+",  XLOCB(19,BOTP,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bgtlr-",  XLOCB(19,BOT,CBGT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtlr+",  XLOCB(19,BOTP,CBGT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtlr-",  XLOCB(19,BOTM64,CBGT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgtlr+",  XLOCB(19,BOTP64,CBGT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgtr",    XLOCB(19,BOT,CBGT,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bgtlrl",  XLOCB(19,BOT,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgtlrl-", XLOCB(19,BOT,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgtlrl+", XLOCB(19,BOTP,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bgtlrl-", XLOCB(19,BOT,CBGT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtlrl+", XLOCB(19,BOTP,CBGT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtlrl-", XLOCB(19,BOTM64,CBGT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgtlrl+", XLOCB(19,BOTP64,CBGT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgtrl",   XLOCB(19,BOT,CBGT,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "beqlr",   XLOCB(19,BOT,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "beqlr-",  XLOCB(19,BOT,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "beqlr+",  XLOCB(19,BOTP,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "beqlr-",  XLOCB(19,BOT,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqlr+",  XLOCB(19,BOTP,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqlr-",  XLOCB(19,BOTM64,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "beqlr+",  XLOCB(19,BOTP64,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "beqr",    XLOCB(19,BOT,CBEQ,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "beqlrl",  XLOCB(19,BOT,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "beqlrl-", XLOCB(19,BOT,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "beqlrl+", XLOCB(19,BOTP,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "beqlrl-", XLOCB(19,BOT,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqlrl+", XLOCB(19,BOTP,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqlrl-", XLOCB(19,BOTM64,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "beqlrl+", XLOCB(19,BOTP64,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "beqrl",   XLOCB(19,BOT,CBEQ,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bsolr",   XLOCB(19,BOT,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bsolr-",  XLOCB(19,BOT,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bsolr+",  XLOCB(19,BOTP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bsolr-",  XLOCB(19,BOT,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsolr+",  XLOCB(19,BOTP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsolr-",  XLOCB(19,BOTM64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bsolr+",  XLOCB(19,BOTP64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bsor",    XLOCB(19,BOT,CBSO,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bsolrl",  XLOCB(19,BOT,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bsolrl-", XLOCB(19,BOT,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bsolrl+", XLOCB(19,BOTP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bsolrl-", XLOCB(19,BOT,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsolrl+", XLOCB(19,BOTP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsolrl-", XLOCB(19,BOTM64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bsolrl+", XLOCB(19,BOTP64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bsorl",   XLOCB(19,BOT,CBSO,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bunlr",   XLOCB(19,BOT,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bunlr-",  XLOCB(19,BOT,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bunlr+",  XLOCB(19,BOTP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bunlr-",  XLOCB(19,BOT,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunlr+",  XLOCB(19,BOTP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunlr-",  XLOCB(19,BOTM64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bunlr+",  XLOCB(19,BOTP64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bunlrl",  XLOCB(19,BOT,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bunlrl-", XLOCB(19,BOT,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bunlrl+", XLOCB(19,BOTP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bunlrl-", XLOCB(19,BOT,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunlrl+", XLOCB(19,BOTP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunlrl-", XLOCB(19,BOTM64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bunlrl+", XLOCB(19,BOTP64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgelr",   XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgelr-",  XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgelr+",  XLOCB(19,BOFP,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bgelr-",  XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgelr+",  XLOCB(19,BOFP,CBLT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgelr-",  XLOCB(19,BOFM64,CBLT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgelr+",  XLOCB(19,BOFP64,CBLT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bger",    XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bgelrl",  XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgelrl-", XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bgelrl+", XLOCB(19,BOFP,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bgelrl-", XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgelrl+", XLOCB(19,BOFP,CBLT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgelrl-", XLOCB(19,BOFM64,CBLT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgelrl+", XLOCB(19,BOFP64,CBLT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgerl",   XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnllr",   XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnllr-",  XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnllr+",  XLOCB(19,BOFP,CBLT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnllr-",  XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnllr+",  XLOCB(19,BOFP,CBLT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnllr-",  XLOCB(19,BOFM64,CBLT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnllr+",  XLOCB(19,BOFP64,CBLT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnlr",    XLOCB(19,BOF,CBLT,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnllrl",  XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnllrl-", XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnllrl+", XLOCB(19,BOFP,CBLT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnllrl-", XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnllrl+", XLOCB(19,BOFP,CBLT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnllrl-", XLOCB(19,BOFM64,CBLT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnllrl+", XLOCB(19,BOFP64,CBLT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnlrl",   XLOCB(19,BOF,CBLT,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "blelr",   XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "blelr-",  XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "blelr+",  XLOCB(19,BOFP,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "blelr-",  XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blelr+",  XLOCB(19,BOFP,CBGT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blelr-",  XLOCB(19,BOFM64,CBGT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "blelr+",  XLOCB(19,BOFP64,CBGT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bler",    XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "blelrl",  XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "blelrl-", XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "blelrl+", XLOCB(19,BOFP,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "blelrl-", XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blelrl+", XLOCB(19,BOFP,CBGT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blelrl-", XLOCB(19,BOFM64,CBGT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "blelrl+", XLOCB(19,BOFP64,CBGT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "blerl",   XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnglr",   XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnglr-",  XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnglr+",  XLOCB(19,BOFP,CBGT,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnglr-",  XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnglr+",  XLOCB(19,BOFP,CBGT,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnglr-",  XLOCB(19,BOFM64,CBGT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnglr+",  XLOCB(19,BOFP64,CBGT,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bngr",    XLOCB(19,BOF,CBGT,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnglrl",  XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnglrl-", XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnglrl+", XLOCB(19,BOFP,CBGT,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnglrl-", XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnglrl+", XLOCB(19,BOFP,CBGT,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnglrl-", XLOCB(19,BOFM64,CBGT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnglrl+", XLOCB(19,BOFP64,CBGT,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bngrl",   XLOCB(19,BOF,CBGT,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnelr",   XLOCB(19,BOF,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnelr-",  XLOCB(19,BOF,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnelr+",  XLOCB(19,BOFP,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnelr-",  XLOCB(19,BOF,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnelr+",  XLOCB(19,BOFP,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnelr-",  XLOCB(19,BOFM64,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnelr+",  XLOCB(19,BOFP64,CBEQ,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bner",    XLOCB(19,BOF,CBEQ,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnelrl",  XLOCB(19,BOF,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnelrl-", XLOCB(19,BOF,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnelrl+", XLOCB(19,BOFP,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnelrl-", XLOCB(19,BOF,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnelrl+", XLOCB(19,BOFP,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnelrl-", XLOCB(19,BOFM64,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnelrl+", XLOCB(19,BOFP64,CBEQ,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnerl",   XLOCB(19,BOF,CBEQ,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnslr",   XLOCB(19,BOF,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnslr-",  XLOCB(19,BOF,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnslr+",  XLOCB(19,BOFP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnslr-",  XLOCB(19,BOF,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnslr+",  XLOCB(19,BOFP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnslr-",  XLOCB(19,BOFM64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnslr+",  XLOCB(19,BOFP64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnsr",    XLOCB(19,BOF,CBSO,16,0), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnslrl",  XLOCB(19,BOF,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnslrl-", XLOCB(19,BOF,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnslrl+", XLOCB(19,BOFP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnslrl-", XLOCB(19,BOF,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnslrl+", XLOCB(19,BOFP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnslrl-", XLOCB(19,BOFM64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnslrl+", XLOCB(19,BOFP64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnsrl",   XLOCB(19,BOF,CBSO,16,1), XLBOCBBB_MASK, PWRCOM, { CR } },
 { "bnulr",   XLOCB(19,BOF,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnulr-",  XLOCB(19,BOF,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnulr+",  XLOCB(19,BOFP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnulr-",  XLOCB(19,BOF,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnulr+",  XLOCB(19,BOFP,CBSO,16,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnulr-",  XLOCB(19,BOFM64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnulr+",  XLOCB(19,BOFP64,CBSO,16,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnulrl",  XLOCB(19,BOF,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnulrl-", XLOCB(19,BOF,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
-{ "bnulrl+", XLOCB(19,BOFP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM, { CR } },
+{ "bnulrl-", XLOCB(19,BOF,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnulrl+", XLOCB(19,BOFP,CBSO,16,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnulrl-", XLOCB(19,BOFM64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnulrl+", XLOCB(19,BOFP64,CBSO,16,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "btlr",    XLO(19,BOT,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btlr-",   XLO(19,BOT,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btlr+",   XLO(19,BOTP,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "btlr-",   XLO(19,BOT,16,0), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btlr+",   XLO(19,BOTP,16,0), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btlr-",   XLO(19,BOTM64,16,0), XLBOBB_MASK, PPCCOM64,	{ BI } },
+{ "btlr+",   XLO(19,BOTP64,16,0), XLBOBB_MASK, PPCCOM64,	{ BI } },
 { "bbtr",    XLO(19,BOT,16,0), XLBOBB_MASK, PWRCOM,	{ BI } },
 { "btlrl",   XLO(19,BOT,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btlrl-",  XLO(19,BOT,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btlrl+",  XLO(19,BOTP,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "btlrl-",  XLO(19,BOT,16,1), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btlrl+",  XLO(19,BOTP,16,1), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btlrl-",  XLO(19,BOTM64,16,1), XLBOBB_MASK, PPCCOM64,	{ BI } },
+{ "btlrl+",  XLO(19,BOTP64,16,1), XLBOBB_MASK, PPCCOM64,	{ BI } },
 { "bbtrl",   XLO(19,BOT,16,1), XLBOBB_MASK, PWRCOM,	{ BI } },
 { "bflr",    XLO(19,BOF,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bflr-",   XLO(19,BOF,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bflr+",   XLO(19,BOFP,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bflr-",   XLO(19,BOF,16,0), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bflr+",   XLO(19,BOFP,16,0), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bflr-",   XLO(19,BOFM64,16,0), XLBOBB_MASK, PPCCOM64,	{ BI } },
+{ "bflr+",   XLO(19,BOFP64,16,0), XLBOBB_MASK, PPCCOM64,	{ BI } },
 { "bbfr",    XLO(19,BOF,16,0), XLBOBB_MASK, PWRCOM,	{ BI } },
 { "bflrl",   XLO(19,BOF,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bflrl-",  XLO(19,BOF,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bflrl+",  XLO(19,BOFP,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bflrl-",  XLO(19,BOF,16,1), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bflrl+",  XLO(19,BOFP,16,1), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bflrl-",  XLO(19,BOFM64,16,1), XLBOBB_MASK, PPCCOM64,	{ BI } },
+{ "bflrl+",  XLO(19,BOFP64,16,1), XLBOBB_MASK, PPCCOM64,	{ BI } },
 { "bbfrl",   XLO(19,BOF,16,1), XLBOBB_MASK, PWRCOM,	{ BI } },
 { "bdnztlr", XLO(19,BODNZT,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnztlr-",XLO(19,BODNZT,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnztlr+",XLO(19,BODNZTP,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bdnztlr-",XLO(19,BODNZT,16,0), XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bdnztlr+",XLO(19,BODNZTP,16,0), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bdnztlrl",XLO(19,BODNZT,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnztlrl-",XLO(19,BODNZT,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnztlrl+",XLO(19,BODNZTP,16,1), XLBOBB_MASK, PPCCOM,{ BI } },
+{ "bdnztlrl-",XLO(19,BODNZT,16,1), XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bdnztlrl+",XLO(19,BODNZTP,16,1), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bdnzflr", XLO(19,BODNZF,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnzflr-",XLO(19,BODNZF,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnzflr+",XLO(19,BODNZFP,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bdnzflr-",XLO(19,BODNZF,16,0), XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bdnzflr+",XLO(19,BODNZFP,16,0), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bdnzflrl",XLO(19,BODNZF,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnzflrl-",XLO(19,BODNZF,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdnzflrl+",XLO(19,BODNZFP,16,1), XLBOBB_MASK, PPCCOM,{ BI } },
+{ "bdnzflrl-",XLO(19,BODNZF,16,1), XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bdnzflrl+",XLO(19,BODNZFP,16,1), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bdztlr",  XLO(19,BODZT,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdztlr-", XLO(19,BODZT,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdztlr+", XLO(19,BODZTP,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bdztlr-", XLO(19,BODZT,16,0), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bdztlr+", XLO(19,BODZTP,16,0), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bdztlrl", XLO(19,BODZT,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdztlrl-",XLO(19,BODZT,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdztlrl+",XLO(19,BODZTP,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bdztlrl-",XLO(19,BODZT,16,1), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bdztlrl+",XLO(19,BODZTP,16,1), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bdzflr",  XLO(19,BODZF,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdzflr-", XLO(19,BODZF,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdzflr+", XLO(19,BODZFP,16,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bdzflr-", XLO(19,BODZF,16,0), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bdzflr+", XLO(19,BODZFP,16,0), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bdzflrl", XLO(19,BODZF,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdzflrl-",XLO(19,BODZF,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bdzflrl+",XLO(19,BODZFP,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bdzflrl-",XLO(19,BODZF,16,1), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "bdzflrl+",XLO(19,BODZFP,16,1), XLBOBB_MASK, PPCCOM32, { BI } },
 { "bclr",    XLLK(19,16,0), XLYBB_MASK,	PPCCOM,		{ BO, BI } },
 { "bclrl",   XLLK(19,16,1), XLYBB_MASK,	PPCCOM,		{ BO, BI } },
 { "bclr+",   XLYLK(19,16,1,0), XLYBB_MASK, PPCCOM,	{ BOE, BI } },
@@ -2265,89 +2479,145 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "bctr",    XLO(19,BOU,528,0), XLBOBIBB_MASK, COM,	{ 0 } },
 { "bctrl",   XLO(19,BOU,528,1), XLBOBIBB_MASK, COM,	{ 0 } },
 { "bltctr",  XLOCB(19,BOT,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bltctr-", XLOCB(19,BOT,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bltctr+", XLOCB(19,BOTP,CBLT,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bltctr-", XLOCB(19,BOT,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltctr+", XLOCB(19,BOTP,CBLT,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltctr-", XLOCB(19,BOTM64,CBLT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bltctr+", XLOCB(19,BOTP64,CBLT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bltctrl", XLOCB(19,BOT,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bltctrl-",XLOCB(19,BOT,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bltctrl+",XLOCB(19,BOTP,CBLT,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bltctrl-",XLOCB(19,BOT,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltctrl+",XLOCB(19,BOTP,CBLT,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bltctrl-",XLOCB(19,BOTM64,CBLT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bltctrl+",XLOCB(19,BOTP64,CBLT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgtctr",  XLOCB(19,BOT,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgtctr-", XLOCB(19,BOT,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgtctr+", XLOCB(19,BOTP,CBGT,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bgtctr-", XLOCB(19,BOT,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtctr+", XLOCB(19,BOTP,CBGT,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtctr-", XLOCB(19,BOTM64,CBGT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgtctr+", XLOCB(19,BOTP64,CBGT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgtctrl", XLOCB(19,BOT,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgtctrl-",XLOCB(19,BOT,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgtctrl+",XLOCB(19,BOTP,CBGT,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bgtctrl-",XLOCB(19,BOT,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtctrl+",XLOCB(19,BOTP,CBGT,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgtctrl-",XLOCB(19,BOTM64,CBGT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgtctrl+",XLOCB(19,BOTP64,CBGT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "beqctr",  XLOCB(19,BOT,CBEQ,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "beqctr-", XLOCB(19,BOT,CBEQ,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "beqctr+", XLOCB(19,BOTP,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "beqctr-", XLOCB(19,BOT,CBEQ,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqctr+", XLOCB(19,BOTP,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqctr-", XLOCB(19,BOTM64,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "beqctr+", XLOCB(19,BOTP64,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "beqctrl", XLOCB(19,BOT,CBEQ,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "beqctrl-",XLOCB(19,BOT,CBEQ,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "beqctrl+",XLOCB(19,BOTP,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "beqctrl-",XLOCB(19,BOT,CBEQ,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqctrl+",XLOCB(19,BOTP,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "beqctrl-",XLOCB(19,BOTM64,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "beqctrl+",XLOCB(19,BOTP64,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bsoctr",  XLOCB(19,BOT,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bsoctr-", XLOCB(19,BOT,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bsoctr+", XLOCB(19,BOTP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bsoctr-", XLOCB(19,BOT,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsoctr+", XLOCB(19,BOTP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsoctr-", XLOCB(19,BOTM64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bsoctr+", XLOCB(19,BOTP64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bsoctrl", XLOCB(19,BOT,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bsoctrl-",XLOCB(19,BOT,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bsoctrl+",XLOCB(19,BOTP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bsoctrl-",XLOCB(19,BOT,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsoctrl+",XLOCB(19,BOTP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bsoctrl-",XLOCB(19,BOTM64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bsoctrl+",XLOCB(19,BOTP64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bunctr",  XLOCB(19,BOT,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bunctr-", XLOCB(19,BOT,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bunctr+", XLOCB(19,BOTP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bunctr-", XLOCB(19,BOT,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunctr+", XLOCB(19,BOTP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunctr-", XLOCB(19,BOTM64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bunctr+", XLOCB(19,BOTP64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bunctrl", XLOCB(19,BOT,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bunctrl-",XLOCB(19,BOT,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bunctrl+",XLOCB(19,BOTP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bunctrl-",XLOCB(19,BOT,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunctrl+",XLOCB(19,BOTP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bunctrl-",XLOCB(19,BOTM64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bunctrl+",XLOCB(19,BOTP64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgectr",  XLOCB(19,BOF,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgectr-", XLOCB(19,BOF,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgectr+", XLOCB(19,BOFP,CBLT,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bgectr-", XLOCB(19,BOF,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgectr+", XLOCB(19,BOFP,CBLT,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgectr-", XLOCB(19,BOFM64,CBLT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgectr+", XLOCB(19,BOFP64,CBLT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bgectrl", XLOCB(19,BOF,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgectrl-",XLOCB(19,BOF,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bgectrl+",XLOCB(19,BOFP,CBLT,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bgectrl-",XLOCB(19,BOF,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgectrl+",XLOCB(19,BOFP,CBLT,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bgectrl-",XLOCB(19,BOFM64,CBLT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bgectrl+",XLOCB(19,BOFP64,CBLT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnlctr",  XLOCB(19,BOF,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnlctr-", XLOCB(19,BOF,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnlctr+", XLOCB(19,BOFP,CBLT,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnlctr-", XLOCB(19,BOF,CBLT,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnlctr+", XLOCB(19,BOFP,CBLT,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnlctr-", XLOCB(19,BOFM64,CBLT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnlctr+", XLOCB(19,BOFP64,CBLT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnlctrl", XLOCB(19,BOF,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnlctrl-",XLOCB(19,BOF,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnlctrl+",XLOCB(19,BOFP,CBLT,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnlctrl-",XLOCB(19,BOF,CBLT,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnlctrl+",XLOCB(19,BOFP,CBLT,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnlctrl-",XLOCB(19,BOFM64,CBLT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnlctrl+",XLOCB(19,BOFP64,CBLT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "blectr",  XLOCB(19,BOF,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "blectr-", XLOCB(19,BOF,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "blectr+", XLOCB(19,BOFP,CBGT,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "blectr-", XLOCB(19,BOF,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blectr+", XLOCB(19,BOFP,CBGT,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blectr-", XLOCB(19,BOFM64,CBGT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "blectr+", XLOCB(19,BOFP64,CBGT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "blectrl", XLOCB(19,BOF,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "blectrl-",XLOCB(19,BOF,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "blectrl+",XLOCB(19,BOFP,CBGT,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "blectrl-",XLOCB(19,BOF,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blectrl+",XLOCB(19,BOFP,CBGT,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "blectrl-",XLOCB(19,BOFM64,CBGT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "blectrl+",XLOCB(19,BOFP64,CBGT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bngctr",  XLOCB(19,BOF,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bngctr-", XLOCB(19,BOF,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bngctr+", XLOCB(19,BOFP,CBGT,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bngctr-", XLOCB(19,BOF,CBGT,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bngctr+", XLOCB(19,BOFP,CBGT,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bngctr-", XLOCB(19,BOFM64,CBGT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bngctr+", XLOCB(19,BOFP64,CBGT,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bngctrl", XLOCB(19,BOF,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bngctrl-",XLOCB(19,BOF,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bngctrl+",XLOCB(19,BOFP,CBGT,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bngctrl-",XLOCB(19,BOF,CBGT,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bngctrl+",XLOCB(19,BOFP,CBGT,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bngctrl-",XLOCB(19,BOFM64,CBGT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bngctrl+",XLOCB(19,BOFP64,CBGT,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnectr",  XLOCB(19,BOF,CBEQ,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnectr-", XLOCB(19,BOF,CBEQ,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnectr+", XLOCB(19,BOFP,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnectr-", XLOCB(19,BOF,CBEQ,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnectr+", XLOCB(19,BOFP,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnectr-", XLOCB(19,BOFM64,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnectr+", XLOCB(19,BOFP64,CBEQ,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnectrl", XLOCB(19,BOF,CBEQ,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnectrl-",XLOCB(19,BOF,CBEQ,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnectrl+",XLOCB(19,BOFP,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnectrl-",XLOCB(19,BOF,CBEQ,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnectrl+",XLOCB(19,BOFP,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnectrl-",XLOCB(19,BOFM64,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnectrl+",XLOCB(19,BOFP64,CBEQ,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnsctr",  XLOCB(19,BOF,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnsctr-", XLOCB(19,BOF,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnsctr+", XLOCB(19,BOFP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnsctr-", XLOCB(19,BOF,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnsctr+", XLOCB(19,BOFP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnsctr-", XLOCB(19,BOFM64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnsctr+", XLOCB(19,BOFP64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnsctrl", XLOCB(19,BOF,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnsctrl-",XLOCB(19,BOF,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnsctrl+",XLOCB(19,BOFP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnsctrl-",XLOCB(19,BOF,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnsctrl+",XLOCB(19,BOFP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnsctrl-",XLOCB(19,BOFM64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnsctrl+",XLOCB(19,BOFP64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnuctr",  XLOCB(19,BOF,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnuctr-", XLOCB(19,BOF,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnuctr+", XLOCB(19,BOFP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnuctr-", XLOCB(19,BOF,CBSO,528,0),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnuctr+", XLOCB(19,BOFP,CBSO,528,0), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnuctr-", XLOCB(19,BOFM64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnuctr+", XLOCB(19,BOFP64,CBSO,528,0), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "bnuctrl", XLOCB(19,BOF,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnuctrl-",XLOCB(19,BOF,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM,	{ CR } },
-{ "bnuctrl+",XLOCB(19,BOFP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM,	{ CR } },
+{ "bnuctrl-",XLOCB(19,BOF,CBSO,528,1),  XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnuctrl+",XLOCB(19,BOFP,CBSO,528,1), XLBOCBBB_MASK, PPCCOM32, { CR } },
+{ "bnuctrl-",XLOCB(19,BOFM64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
+{ "bnuctrl+",XLOCB(19,BOFP64,CBSO,528,1), XLBOCBBB_MASK, PPCCOM64, { CR } },
 { "btctr",   XLO(19,BOT,528,0),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btctr-",  XLO(19,BOT,528,0),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btctr+",  XLO(19,BOTP,528,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "btctr-",  XLO(19,BOT,528,0),  XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btctr+",  XLO(19,BOTP,528,0), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btctr-",  XLO(19,BOTM64,528,0), XLBOBB_MASK, PPCCOM64, { BI } },
+{ "btctr+",  XLO(19,BOTP64,528,0), XLBOBB_MASK, PPCCOM64, { BI } },
 { "btctrl",  XLO(19,BOT,528,1),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btctrl-", XLO(19,BOT,528,1),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "btctrl+", XLO(19,BOTP,528,1), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "btctrl-", XLO(19,BOT,528,1),  XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btctrl+", XLO(19,BOTP,528,1), XLBOBB_MASK, PPCCOM32,	{ BI } },
+{ "btctrl-", XLO(19,BOTM64,528,1), XLBOBB_MASK, PPCCOM64, { BI } },
+{ "btctrl+", XLO(19,BOTP64,528,1), XLBOBB_MASK, PPCCOM64, { BI } },
 { "bfctr",   XLO(19,BOF,528,0),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bfctr-",  XLO(19,BOF,528,0),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bfctr+",  XLO(19,BOFP,528,0), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bfctr-",  XLO(19,BOF,528,0),  XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bfctr+",  XLO(19,BOFP,528,0), XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bfctr-",  XLO(19,BOFM64,528,0), XLBOBB_MASK, PPCCOM64, { BI } },
+{ "bfctr+",  XLO(19,BOFP64,528,0), XLBOBB_MASK, PPCCOM64, { BI } },
 { "bfctrl",  XLO(19,BOF,528,1),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bfctrl-", XLO(19,BOF,528,1),  XLBOBB_MASK, PPCCOM,	{ BI } },
-{ "bfctrl+", XLO(19,BOFP,528,1), XLBOBB_MASK, PPCCOM,	{ BI } },
+{ "bfctrl-", XLO(19,BOF,528,1),  XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bfctrl+", XLO(19,BOFP,528,1), XLBOBB_MASK, PPCCOM32, { BI } },
+{ "bfctrl-", XLO(19,BOFM64,528,1), XLBOBB_MASK, PPCCOM64, { BI } },
+{ "bfctrl+", XLO(19,BOFP64,528,1), XLBOBB_MASK, PPCCOM64, { BI } },
 { "bcctr",   XLLK(19,528,0),     XLYBB_MASK,  PPCCOM,	{ BO, BI } },
 { "bcctr-",  XLYLK(19,528,0,0),  XLYBB_MASK,  PPCCOM,	{ BOE, BI } },
 { "bcctr+",  XLYLK(19,528,1,0),  XLYBB_MASK,  PPCCOM,	{ BOE, BI } },
@@ -3532,12 +3802,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lfqu",    OP(57),	OP_MASK,	POWER2,		{ FRT, D, RA } },
 
-{ "ld",      DSO(58,0),	DS_MASK,	PPC64,		{ RT, DS, RA } },
-
-{ "ldu",     DSO(58,1), DS_MASK,	PPC64,		{ RT, DS, RAL } },
-
-{ "lwa",     DSO(58,2), DS_MASK,	PPC64,		{ RT, DS, RA } },
-
 { "lbze",    DEO(58,0), DE_MASK,	BOOKE64,	{ RT, DE, RA } },
 { "lbzue",   DEO(58,1), DE_MASK,	BOOKE64,	{ RT, DE, RAL } },
 { "lhze",    DEO(58,2), DE_MASK,	BOOKE64,	{ RT, DE, RA } },
@@ -3552,6 +3816,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "sthue",   DEO(58,11), DE_MASK,	BOOKE64,	{ RS, DE, RAS } },
 { "stwe",    DEO(58,14), DE_MASK,	BOOKE64,	{ RS, DE, RA } },
 { "stwue",   DEO(58,15), DE_MASK,	BOOKE64,	{ RS, DE, RAS } },
+
+{ "ld",      DSO(58,0),	DS_MASK,	PPC64,		{ RT, DS, RA } },
+
+{ "ldu",     DSO(58,1), DS_MASK,	PPC64,		{ RT, DS, RAL } },
+
+{ "lwa",     DSO(58,2), DS_MASK,	PPC64,		{ RT, DS, RA } },
 
 { "fdivs",   A(59,18,0), AFRC_MASK,	PPC,		{ FRT, FRA, FRB } },
 { "fdivs.",  A(59,18,1), AFRC_MASK,	PPC,		{ FRT, FRA, FRB } },
@@ -3588,13 +3858,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "stfqu",   OP(61),	OP_MASK,	POWER2,		{ FRS, D, RA } },
 
 { "lde",     DEO(62,0), DE_MASK,	BOOKE64,	{ RT, DES, RA } },
-
-{ "std",     DSO(62,0),	DS_MASK,	PPC64,		{ RS, DS, RA } },
-
 { "ldue",    DEO(62,1), DE_MASK,	BOOKE64,	{ RT, DES, RA } },
-
-{ "stdu",    DSO(62,1),	DS_MASK,	PPC64,		{ RS, DS, RAS } },
-
 { "lfse",    DEO(62,4), DE_MASK,	BOOKE64,	{ FRT, DES, RA } },
 { "lfsue",   DEO(62,5), DE_MASK,	BOOKE64,	{ FRT, DES, RAS } },
 { "lfde",    DEO(62,6), DE_MASK,	BOOKE64,	{ FRT, DES, RA } },
@@ -3605,6 +3869,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "stfsue",  DEO(62,13), DE_MASK,	BOOKE64,	{ FRS, DES, RAS } },
 { "stfde",   DEO(62,14), DE_MASK,	BOOKE64,	{ FRS, DES, RA } },
 { "stfdue",  DEO(62,15), DE_MASK,	BOOKE64,	{ FRS, DES, RAS } },
+
+{ "std",     DSO(62,0),	DS_MASK,	PPC64,		{ RS, DS, RA } },
+
+{ "stdu",    DSO(62,1),	DS_MASK,	PPC64,		{ RS, DS, RAS } },
 
 { "fcmpu",   X(63,0),	X_MASK|(3<<21),	COM,		{ BF, FRA, FRB } },
 

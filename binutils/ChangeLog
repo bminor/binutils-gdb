@@ -1,3 +1,7 @@
+2001-11-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/binutils.texi (objdump): Document ppc -M options.
+
 2001-11-14  Andreas Jaeger  <aj@suse.de>
 
 	* doc/binutils.texi (objdump): Fix description to use x86-64.

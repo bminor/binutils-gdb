@@ -1,3 +1,38 @@
+2001-11-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (PPC64): Revert 2001-10-12. Do include PPC_OPCODE_PPC.
+	(insert_bat, extract_bat, insert_bba, extract_bba,
+	insert_bd, extract_bd, insert_bdm, extract_bdm,
+	insert_bdp, extract_bdp, valid_bo,
+	insert_bo, extract_bo, insert_boe, extract_boe,
+	insert_ds, extract_ds, insert_de, extract_de,
+	insert_des, extract_des, insert_li, extract_li,
+	insert_mbe, extract_mbe, insert_mb6, extract_mb6,
+	insert_nb, extract_nb, insert_nsi, extract_nsi,
+	insert_ral, insert_ram, insert_ras,
+	insert_rbs, extract_rbs, insert_sh6, extract_sh6,
+	insert_spr, extract_spr, insert_tbr, extract_tbr): Add dialect param.
+	(extract_bd, extract_bdm, extract_bdp,
+	extract_ds, extract_des,
+	extract_li, extract_nsi): Implement sign extension without conditional.
+	(insert_bdm, extract_bdm,
+	insert_bdp, extract_bdp, valid_bo): Handle 64 bit branch hints.
+	(extract_bdm, extract_bdp): Correct 32 bit validation.
+	(AT1_MASK, AT2_MASK): Define.
+	(BBOAT_MASK): Define.
+	(BBOATCB_MASK, BBOAT2CB_MASK, BBOATBI_MASK): Define.
+	(BOFM64, BOFP64, BOTM64, BOTP64): Define.
+	(BODNZM64, BODNZP64, BODZM64, BODZP64): Define.
+	(PPCCOM32, PPCCOM64): Define.
+	(powerpc_opcodes): Modify existing 32 bit insns with branch hints
+	and add new patterns to implement 64 bit branches with hints.  Move
+	booke instructions so they match before ppc64.
+
+	* ppc-dis.c (powerpc_dialect): Set PPC_OPCODE_64 in dialect for
+	64 bit default targets, and parse "32" and "64" in options.
+	Formatting fixes.
+	(print_insn_powerpc): Pass dialect to operand->extract.
+
 2001-11-14  Dave Brolley  <brolley@redhat.com>
 
 	* cgen-dis.c (count_decodable_bits): New function.

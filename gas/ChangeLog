@@ -1,3 +1,9 @@
+2001-11-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_insert_operand): Pass (ppc_cpu | ppc_size)
+	to operand->insert.
+	(md_assemble): Likewise.
+
 2001-11-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* frags.c (frag_grow): Use frag_make_room() to grow the
