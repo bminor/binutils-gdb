@@ -342,10 +342,9 @@ DESCRIPTION
 .     all the entries for that arch can be accessed via <<next>>.  *}
 .  bfd_boolean the_default;
 .  const struct bfd_arch_info * (*compatible)
-.	PARAMS ((const struct bfd_arch_info *a,
-.	         const struct bfd_arch_info *b));
+.    (const struct bfd_arch_info *a, const struct bfd_arch_info *b);
 .
-.  bfd_boolean (*scan) PARAMS ((const struct bfd_arch_info *, const char *));
+.  bfd_boolean (*scan) (const struct bfd_arch_info *, const char *);
 .
 .  const struct bfd_arch_info *next;
 .}
@@ -474,7 +473,7 @@ FUNCTION
 	bfd_printable_name
 
 SYNOPSIS
-	const char *bfd_printable_name(bfd *abfd);
+	const char *bfd_printable_name (bfd *abfd);
 
 DESCRIPTION
 	Return a printable string representing the architecture and machine
@@ -483,8 +482,7 @@ DESCRIPTION
 */
 
 const char *
-bfd_printable_name (abfd)
-     bfd *abfd;
+bfd_printable_name (bfd *abfd)
 {
   return abfd->arch_info->printable_name;
 }
@@ -494,7 +492,7 @@ FUNCTION
 	bfd_scan_arch
 
 SYNOPSIS
-	const bfd_arch_info_type *bfd_scan_arch(const char *string);
+	const bfd_arch_info_type *bfd_scan_arch (const char *string);
 
 DESCRIPTION
 	Figure out if BFD supports any cpu which could be described with
@@ -503,8 +501,7 @@ DESCRIPTION
 */
 
 const bfd_arch_info_type *
-bfd_scan_arch (string)
-     const char *string;
+bfd_scan_arch (const char *string)
 {
   const bfd_arch_info_type * const *app, *ap;
 
@@ -526,7 +523,7 @@ FUNCTION
 	bfd_arch_list
 
 SYNOPSIS
-	const char **bfd_arch_list(void);
+	const char **bfd_arch_list (void);
 
 DESCRIPTION
 	Return a freshly malloced NULL-terminated vector of the names
@@ -534,7 +531,7 @@ DESCRIPTION
 */
 
 const char **
-bfd_arch_list ()
+bfd_arch_list (void)
 {
   int vec_length = 0;
   const char **name_ptr;
@@ -554,7 +551,7 @@ bfd_arch_list ()
     }
 
   amt = (vec_length + 1) * sizeof (char **);
-  name_list = (const char **) bfd_malloc (amt);
+  name_list = bfd_malloc (amt);
   if (name_list == NULL)
     return NULL;
 
@@ -579,10 +576,8 @@ FUNCTION
 	bfd_arch_get_compatible
 
 SYNOPSIS
-	const bfd_arch_info_type *bfd_arch_get_compatible(
-		const bfd *abfd,
-	        const bfd *bbfd,
-		bfd_boolean accept_unknowns);
+	const bfd_arch_info_type *bfd_arch_get_compatible
+	  (const bfd *abfd, const bfd *bbfd, bfd_boolean accept_unknowns);
 
 DESCRIPTION
 	Determine whether two BFDs' architectures and machine types
@@ -593,10 +588,9 @@ DESCRIPTION
 */
 
 const bfd_arch_info_type *
-bfd_arch_get_compatible (abfd, bbfd, accept_unknowns)
-     const bfd *abfd;
-     const bfd *bbfd;
-     bfd_boolean accept_unknowns;
+bfd_arch_get_compatible (const bfd *abfd,
+			 const bfd *bbfd,
+			 bfd_boolean accept_unknowns)
 {
   const bfd * ubfd = NULL;
 
@@ -645,16 +639,14 @@ FUNCTION
 	bfd_set_arch_info
 
 SYNOPSIS
-	void bfd_set_arch_info(bfd *abfd, const bfd_arch_info_type *arg);
+	void bfd_set_arch_info (bfd *abfd, const bfd_arch_info_type *arg);
 
 DESCRIPTION
 	Set the architecture info of @var{abfd} to @var{arg}.
 */
 
 void
-bfd_set_arch_info (abfd, arg)
-     bfd *abfd;
-     const bfd_arch_info_type *arg;
+bfd_set_arch_info (bfd *abfd, const bfd_arch_info_type *arg)
 {
   abfd->arch_info = arg;
 }
@@ -664,9 +656,8 @@ INTERNAL_FUNCTION
 	bfd_default_set_arch_mach
 
 SYNOPSIS
-	bfd_boolean bfd_default_set_arch_mach(bfd *abfd,
-		enum bfd_architecture arch,
-		unsigned long mach);
+	bfd_boolean bfd_default_set_arch_mach
+	  (bfd *abfd, enum bfd_architecture arch, unsigned long mach);
 
 DESCRIPTION
 	Set the architecture and machine type in BFD @var{abfd}
@@ -676,10 +667,9 @@ DESCRIPTION
 */
 
 bfd_boolean
-bfd_default_set_arch_mach (abfd, arch, mach)
-     bfd *abfd;
-     enum bfd_architecture arch;
-     unsigned long mach;
+bfd_default_set_arch_mach (bfd *abfd,
+			   enum bfd_architecture arch,
+			   unsigned long mach)
 {
   abfd->arch_info = bfd_lookup_arch (arch, mach);
   if (abfd->arch_info != NULL)
@@ -695,7 +685,7 @@ FUNCTION
 	bfd_get_arch
 
 SYNOPSIS
-	enum bfd_architecture bfd_get_arch(bfd *abfd);
+	enum bfd_architecture bfd_get_arch (bfd *abfd);
 
 DESCRIPTION
 	Return the enumerated type which describes the BFD @var{abfd}'s
@@ -703,8 +693,7 @@ DESCRIPTION
 */
 
 enum bfd_architecture
-bfd_get_arch (abfd)
-     bfd *abfd;
+bfd_get_arch (bfd *abfd)
 {
   return abfd->arch_info->arch;
 }
@@ -714,7 +703,7 @@ FUNCTION
 	bfd_get_mach
 
 SYNOPSIS
-	unsigned long bfd_get_mach(bfd *abfd);
+	unsigned long bfd_get_mach (bfd *abfd);
 
 DESCRIPTION
 	Return the long type which describes the BFD @var{abfd}'s
@@ -722,8 +711,7 @@ DESCRIPTION
 */
 
 unsigned long
-bfd_get_mach (abfd)
-     bfd *abfd;
+bfd_get_mach (bfd *abfd)
 {
   return abfd->arch_info->mach;
 }
@@ -733,7 +721,7 @@ FUNCTION
 	bfd_arch_bits_per_byte
 
 SYNOPSIS
-	unsigned int bfd_arch_bits_per_byte(bfd *abfd);
+	unsigned int bfd_arch_bits_per_byte (bfd *abfd);
 
 DESCRIPTION
 	Return the number of bits in one of the BFD @var{abfd}'s
@@ -741,8 +729,7 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_arch_bits_per_byte (abfd)
-     bfd *abfd;
+bfd_arch_bits_per_byte (bfd *abfd)
 {
   return abfd->arch_info->bits_per_byte;
 }
@@ -752,7 +739,7 @@ FUNCTION
 	bfd_arch_bits_per_address
 
 SYNOPSIS
-	unsigned int bfd_arch_bits_per_address(bfd *abfd);
+	unsigned int bfd_arch_bits_per_address (bfd *abfd);
 
 DESCRIPTION
 	Return the number of bits in one of the BFD @var{abfd}'s
@@ -760,8 +747,7 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_arch_bits_per_address (abfd)
-     bfd *abfd;
+bfd_arch_bits_per_address (bfd *abfd)
 {
   return abfd->arch_info->bits_per_address;
 }
@@ -772,17 +758,15 @@ INTERNAL_FUNCTION
 
 SYNOPSIS
 	const bfd_arch_info_type *bfd_default_compatible
-	(const bfd_arch_info_type *a,
-	const bfd_arch_info_type *b);
+	  (const bfd_arch_info_type *a, const bfd_arch_info_type *b);
 
 DESCRIPTION
 	The default function for testing for compatibility.
 */
 
 const bfd_arch_info_type *
-bfd_default_compatible (a, b)
-     const bfd_arch_info_type *a;
-     const bfd_arch_info_type *b;
+bfd_default_compatible (const bfd_arch_info_type *a,
+			const bfd_arch_info_type *b)
 {
   if (a->arch != b->arch)
     return NULL;
@@ -804,7 +788,8 @@ INTERNAL_FUNCTION
 	bfd_default_scan
 
 SYNOPSIS
-	bfd_boolean bfd_default_scan(const struct bfd_arch_info *info, const char *string);
+	bfd_boolean bfd_default_scan
+	  (const struct bfd_arch_info *info, const char *string);
 
 DESCRIPTION
 	The default function for working out whether this is an
@@ -812,9 +797,7 @@ DESCRIPTION
 */
 
 bfd_boolean
-bfd_default_scan (info, string)
-     const bfd_arch_info_type *info;
-     const char *string;
+bfd_default_scan (const bfd_arch_info_type *info, const char *string)
 {
   const char *ptr_src;
   const char *ptr_tst;
@@ -1023,15 +1006,14 @@ FUNCTION
 	bfd_get_arch_info
 
 SYNOPSIS
-	const bfd_arch_info_type * bfd_get_arch_info(bfd *abfd);
+	const bfd_arch_info_type *bfd_get_arch_info (bfd *abfd);
 
 DESCRIPTION
 	Return the architecture info struct in @var{abfd}.
 */
 
 const bfd_arch_info_type *
-bfd_get_arch_info (abfd)
-     bfd *abfd;
+bfd_get_arch_info (bfd *abfd)
 {
   return abfd->arch_info;
 }
@@ -1042,9 +1024,7 @@ FUNCTION
 
 SYNOPSIS
 	const bfd_arch_info_type *bfd_lookup_arch
-		(enum bfd_architecture
-		arch,
-		unsigned long machine);
+	  (enum bfd_architecture arch, unsigned long machine);
 
 DESCRIPTION
 	Look for the architecure info structure which matches the
@@ -1054,9 +1034,7 @@ DESCRIPTION
 */
 
 const bfd_arch_info_type *
-bfd_lookup_arch (arch, machine)
-     enum bfd_architecture arch;
-     unsigned long machine;
+bfd_lookup_arch (enum bfd_architecture arch, unsigned long machine)
 {
   const bfd_arch_info_type * const *app, *ap;
 
@@ -1080,7 +1058,7 @@ FUNCTION
 
 SYNOPSIS
 	const char *bfd_printable_arch_mach
-		(enum bfd_architecture arch, unsigned long machine);
+	  (enum bfd_architecture arch, unsigned long machine);
 
 DESCRIPTION
 	Return a printable string representing the architecture and
@@ -1090,9 +1068,7 @@ DESCRIPTION
 */
 
 const char *
-bfd_printable_arch_mach (arch, machine)
-     enum bfd_architecture arch;
-     unsigned long machine;
+bfd_printable_arch_mach (enum bfd_architecture arch, unsigned long machine)
 {
   const bfd_arch_info_type *ap = bfd_lookup_arch (arch, machine);
 
@@ -1106,7 +1082,7 @@ FUNCTION
 	bfd_octets_per_byte
 
 SYNOPSIS
-	unsigned int bfd_octets_per_byte(bfd *abfd);
+	unsigned int bfd_octets_per_byte (bfd *abfd);
 
 DESCRIPTION
 	Return the number of octets (8-bit quantities) per target byte
@@ -1115,8 +1091,7 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_octets_per_byte (abfd)
-     bfd *abfd;
+bfd_octets_per_byte (bfd *abfd)
 {
   return bfd_arch_mach_octets_per_byte (bfd_get_arch (abfd),
 					bfd_get_mach (abfd));
@@ -1127,8 +1102,8 @@ FUNCTION
 	bfd_arch_mach_octets_per_byte
 
 SYNOPSIS
-	unsigned int bfd_arch_mach_octets_per_byte(enum bfd_architecture arch,
-                                                   unsigned long machine);
+	unsigned int bfd_arch_mach_octets_per_byte
+	  (enum bfd_architecture arch, unsigned long machine);
 
 DESCRIPTION
 	See bfd_octets_per_byte.
@@ -1138,9 +1113,8 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_arch_mach_octets_per_byte (arch, mach)
-     enum bfd_architecture arch;
-     unsigned long mach;
+bfd_arch_mach_octets_per_byte (enum bfd_architecture arch,
+			       unsigned long mach)
 {
   const bfd_arch_info_type *ap = bfd_lookup_arch (arch, mach);
 

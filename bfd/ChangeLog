@@ -1,3 +1,37 @@
+2003-06-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* archive.c: Convert to C90, remove unnecessary prototypes and casts.
+	Replace PTR with void *.  Formatting.
+	* archive64.c: Likewise.
+	* archures.c: Likewise.
+	* bfd-in.h: Likewise.
+	* bfd.c: Likewise.
+	* bfdio.c: Likewise.
+	* bfdwin.c: Likewise.
+	* cache.c: Likewise.
+	* corefile.c: Likewise.
+	* format.c: Likewise.
+	* init.c: Likewise.
+	* libbfd-in.h: Likewise.
+	* libbfd.c: Likewise.
+	* linker.c: Likewise.
+	* opncls.c: Likewise.
+	* reloc.c: Likewise.
+	* section.c: Likewise.
+	* simple.c: Likewise.
+	* syms.c: Likewise.
+	* targets.c: Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+	* ecoff.c (bfd_debug_section): Add missing kept_section initialization.
+	* libbfd-in.h (_bfd_sh_align_load_span): Don't declare if defined.
+	* libbfd.c (COERCE32, EIGHT_GAZILLION): Simplify.
+	(bfd_getb64): Rewrite without parens.
+	(bfd_getl64, bfd_getb_signed_64, bfd_getl_signed_64): Likewise.
+	* cache.c (insert, snip): Remove INLINE.
+	* linker.c (bfd_link_add_undef): Likewise.
+
 2003-06-29  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c: Convert to ISO C90 prototypes, remove

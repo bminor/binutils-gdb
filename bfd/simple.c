@@ -24,89 +24,56 @@
 #include "libbfd.h"
 #include "bfdlink.h"
 
-static bfd_boolean simple_dummy_warning
-  PARAMS ((struct bfd_link_info *, const char *, const char *, bfd *,
-	   asection *, bfd_vma));
-
-static bfd_boolean simple_dummy_undefined_symbol
-  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *,
-	   bfd_vma, bfd_boolean));
-
-static bfd_boolean simple_dummy_reloc_overflow
-  PARAMS ((struct bfd_link_info *, const char *, const char *, bfd_vma,
-	   bfd *, asection *, bfd_vma));
-
-static bfd_boolean simple_dummy_reloc_dangerous
-  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
-
-static bfd_boolean simple_dummy_unattached_reloc
-  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
-
-static void simple_save_output_info
-  PARAMS ((bfd *, asection *, PTR));
-
-static void simple_restore_output_info
-  PARAMS ((bfd *, asection *, PTR));
-
-bfd_byte * bfd_simple_get_relocated_section_contents
-  PARAMS ((bfd *, asection *, bfd_byte *, asymbol **));
-
 static bfd_boolean
-simple_dummy_warning (link_info, warning, symbol, abfd, section, address)
-     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
-     const char *warning ATTRIBUTE_UNUSED;
-     const char *symbol ATTRIBUTE_UNUSED;
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section ATTRIBUTE_UNUSED;
-     bfd_vma address ATTRIBUTE_UNUSED;
+simple_dummy_warning (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+		      const char *warning ATTRIBUTE_UNUSED,
+		      const char *symbol ATTRIBUTE_UNUSED,
+		      bfd *abfd ATTRIBUTE_UNUSED,
+		      asection *section ATTRIBUTE_UNUSED,
+		      bfd_vma address ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }
 
 static bfd_boolean
-simple_dummy_undefined_symbol (link_info, name, abfd, section, address, fatal)
-     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
-     const char *name ATTRIBUTE_UNUSED;
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section ATTRIBUTE_UNUSED;
-     bfd_vma address ATTRIBUTE_UNUSED;
-     bfd_boolean fatal ATTRIBUTE_UNUSED;
+simple_dummy_undefined_symbol (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			       const char *name ATTRIBUTE_UNUSED,
+			       bfd *abfd ATTRIBUTE_UNUSED,
+			       asection *section ATTRIBUTE_UNUSED,
+			       bfd_vma address ATTRIBUTE_UNUSED,
+			       bfd_boolean fatal ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }
 
 static bfd_boolean
-simple_dummy_reloc_overflow (link_info, name, reloc_name, addend, abfd,
-			     section, address)
-     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
-     const char *name ATTRIBUTE_UNUSED;
-     const char *reloc_name ATTRIBUTE_UNUSED;
-     bfd_vma addend ATTRIBUTE_UNUSED;
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section ATTRIBUTE_UNUSED;
-     bfd_vma address ATTRIBUTE_UNUSED;
+simple_dummy_reloc_overflow (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			     const char *name ATTRIBUTE_UNUSED,
+			     const char *reloc_name ATTRIBUTE_UNUSED,
+			     bfd_vma addend ATTRIBUTE_UNUSED,
+			     bfd *abfd ATTRIBUTE_UNUSED,
+			     asection *section ATTRIBUTE_UNUSED,
+			     bfd_vma address ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }
 
 static bfd_boolean
-simple_dummy_reloc_dangerous (link_info, message, abfd, section, address)
-     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
-     const char *message ATTRIBUTE_UNUSED;
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section ATTRIBUTE_UNUSED;
-     bfd_vma address ATTRIBUTE_UNUSED;
+simple_dummy_reloc_dangerous (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			      const char *message ATTRIBUTE_UNUSED,
+			      bfd *abfd ATTRIBUTE_UNUSED,
+			      asection *section ATTRIBUTE_UNUSED,
+			      bfd_vma address ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }
 
 static bfd_boolean
-simple_dummy_unattached_reloc (link_info, name, abfd, section, address)
-     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
-     const char *name ATTRIBUTE_UNUSED;
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section ATTRIBUTE_UNUSED;
-     bfd_vma address ATTRIBUTE_UNUSED;
+simple_dummy_unattached_reloc (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			       const char *name ATTRIBUTE_UNUSED,
+			       bfd *abfd ATTRIBUTE_UNUSED,
+			       asection *section ATTRIBUTE_UNUSED,
+			       bfd_vma address ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }
@@ -118,12 +85,11 @@ struct saved_output_info
 };
 
 static void
-simple_save_output_info (abfd, section, ptr)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section;
-     PTR ptr;
+simple_save_output_info (bfd *abfd ATTRIBUTE_UNUSED,
+			 asection *section,
+			 void *ptr)
 {
-  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
+  struct saved_output_info *output_info = ptr;
   output_info[section->index].offset = section->output_offset;
   output_info[section->index].section = section->output_section;
   section->output_offset = 0;
@@ -131,12 +97,11 @@ simple_save_output_info (abfd, section, ptr)
 }
 
 static void
-simple_restore_output_info (abfd, section, ptr)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section;
-     PTR ptr;
+simple_restore_output_info (bfd *abfd ATTRIBUTE_UNUSED,
+			    asection *section,
+			    void *ptr)
 {
-  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
+  struct saved_output_info *output_info = ptr;
   section->output_offset = output_info[section->index].offset;
   section->output_section = output_info[section->index].section;
 }
@@ -146,7 +111,8 @@ FUNCTION
 	bfd_simple_relocate_secton
 
 SYNOPSIS
-	bfd_byte *bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
+	bfd_byte *bfd_simple_get_relocated_section_contents
+	  (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
 
 DESCRIPTION
 	Returns the relocated contents of section @var{sec}.  The symbols in
@@ -163,18 +129,17 @@ DESCRIPTION
 */
 
 bfd_byte *
-bfd_simple_get_relocated_section_contents (abfd, sec, outbuf, symbol_table)
-     bfd *abfd;
-     asection *sec;
-     bfd_byte *outbuf;
-     asymbol **symbol_table;
+bfd_simple_get_relocated_section_contents (bfd *abfd,
+					   asection *sec,
+					   bfd_byte *outbuf,
+					   asymbol **symbol_table)
 {
   struct bfd_link_info link_info;
   struct bfd_link_order link_order;
   struct bfd_link_callbacks callbacks;
   bfd_byte *contents, *data;
   int storage_needed;
-  PTR saved_offsets;
+  void *saved_offsets;
 
   if (! (sec->flags & SEC_RELOC))
     {
@@ -246,7 +211,7 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf, symbol_table)
       _bfd_generic_link_add_symbols (abfd, &link_info);
 
       storage_needed = bfd_get_symtab_upper_bound (abfd);
-      symbol_table = (asymbol **) bfd_malloc (storage_needed);
+      symbol_table = bfd_malloc (storage_needed);
       bfd_canonicalize_symtab (abfd, symbol_table);
     }
   else
