@@ -1,3 +1,18 @@
+Tue Jun 11 15:24:48 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_build_ldsyms): Set XCOFF_DEF_REGULAR for a
+	common symbol defined by the linker.  Don't export function code
+	even if export_defineds is set.
+
+Mon Jun 10 11:57:27 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* coff-h8300.c (howto_table): Add new entries for R_BCC_INV
+	and R_JMP_DEL.
+	(rtype2howto): Handle R_BCC_INV and R_JMP_DEL.
+	(h8300_symbol_address_p): New function.
+	(h8300_reloc16_estimate): Eliminate jumps made unnecessary by
+	relaxing.
+
 Sun Jun  9 16:30:20 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* coff-h8300.c (h8300_reloc16_estimate): Fix many minor spacing

@@ -1064,7 +1064,9 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
     case bfd_archive:
       /* We need to look through the archive for stripped dynamic
          objects, because they will not appear in the archive map even
-         though they should, perhaps, be included.  */
+         though they should, perhaps, be included.  Also, if the
+         linker has no map, we just consider each object file in turn,
+         since that apparently is what the AIX native linker does.  */
       {
 	bfd *member;
 
@@ -1072,8 +1074,9 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
 	while (member != NULL)
 	  {
 	    if (bfd_check_format (member, bfd_object)
-		&& (member->flags & DYNAMIC) != 0
-		&& (member->flags & HAS_SYMS) == 0)
+		&& (! bfd_has_map (abfd)
+		    || ((member->flags & DYNAMIC) != 0
+			&& (member->flags & HAS_SYMS) == 0)))
 	      {
 		boolean needed;
 
@@ -1084,6 +1087,9 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
 	      }
 	    member = bfd_openr_next_archived_file (abfd, member);
 	  }
+
+	if (! bfd_has_map (abfd))
+	  return true;
 
 	/* Now do the usual search.  */
 	return (_bfd_generic_link_add_archive_symbols
@@ -3356,9 +3362,24 @@ xcoff_build_ldsyms (h, p)
   struct xcoff_loader_info *ldinfo = (struct xcoff_loader_info *) p;
   size_t len;
 
-  /* If all defined symbols should be exported, mark them now.  */
+  /* If this is a final link, and the symbol was defined as a common
+     symbol in a regular object file, and there was no definition in
+     any dynamic object, then the linker will have allocated space for
+     the symbol in a common section but the XCOFF_DEF_REGULAR flag
+     will not have been set.  */
+  if (h->root.type == bfd_link_hash_defined
+      && (h->flags & XCOFF_DEF_REGULAR) == 0
+      && (h->flags & XCOFF_REF_REGULAR) != 0
+      && (h->flags & XCOFF_DEF_DYNAMIC) == 0
+      && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+    h->flags |= XCOFF_DEF_REGULAR;
+
+  /* If all defined symbols should be exported, mark them now.  We
+     don't want to export the actual functions, just the function
+     descriptors.  */
   if (ldinfo->export_defineds
-      && (h->flags & XCOFF_DEF_REGULAR) != 0)
+      && (h->flags & XCOFF_DEF_REGULAR) != 0
+      && h->root.root.string[0] != '.')
     h->flags |= XCOFF_EXPORT;
 
   /* We don't want to garbage collect symbols which are not defined in
@@ -6039,8 +6060,7 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 	      /* Every symbol in a shared object is defined somewhere.  */
 	      val = 0;
 	    }
-	  else if (! info->relocateable
-		   && ! info->shared)
+	  else if (! info->relocateable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
