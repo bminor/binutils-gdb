@@ -3777,7 +3777,11 @@ sh_elf_final_processing (void)
   else
 #elif defined TARGET_SYMBIAN
     if (1)
-      val = sh_symbian_find_elf_flags (valid_arch);
+      {
+	extern int sh_symbian_find_elf_flags (unsigned int);
+
+	val = sh_symbian_find_elf_flags (valid_arch);
+      }
     else
 #endif /* HAVE_SH64 */
     val = sh_find_elf_flags (valid_arch);

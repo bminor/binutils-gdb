@@ -1,5 +1,8 @@
 2005-03-21  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-sh.c (sh_elf_final_processing): Fix compile time
+	warning by providing a prototype for sh_symbian_find_elf_flags.
+
 	* cgen.c (gas_cgen_parse_operand): Fix typo introduced by
 	previous delta.
 

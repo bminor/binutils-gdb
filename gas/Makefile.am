@@ -641,7 +641,10 @@ m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	if [ $$f = "m68k-parse.y" ]; then \
 	  rm -f m68k-parse.y; \
 	else true; fi
+# Disable -Werror, if it has been enabled, since old versions of bison/
+# yacc will produce working code which contain compile time warnings. 
 m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
+	$(COMPILE) -c $< -Wno-error
 
 # Don't let the .y.h rule clobber m68k-parse.h.
 m68k-parse.h: ; @true
@@ -652,7 +655,10 @@ $(srcdir)/config/m68k-parse.h: ; @true
 itbl-lex.c: $(srcdir)/itbl-lex.l
 itbl-lex.o: itbl-lex.c itbl-parse.h $(srcdir)/itbl-lex.h
 
+# Disable -Werror, if it has been enabled, since old versions of bison/
+# yacc will produce working code which contain compile time warnings. 
 itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h $(srcdir)/itbl-lex.h
+	$(COMPILE) -c $< -Wno-error
 
 itbl-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
 
