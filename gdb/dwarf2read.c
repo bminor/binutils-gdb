@@ -4714,6 +4714,11 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 	  if (abbrev_form == DW_FORM_ref_addr)
 	    saw_ref_addr = 1;
 
+	  /* If we don't know what form this attribute will have, then it
+	     might potentially be a DW_FORM_ref_addr.  */
+	  if (abbrev_form == DW_FORM_indirect)
+	    saw_ref_addr = 1;
+
 	  cur_attrs[cur_abbrev->num_attrs].name = abbrev_name;
 	  cur_attrs[cur_abbrev->num_attrs++].form = abbrev_form;
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);

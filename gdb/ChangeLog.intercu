@@ -1,5 +1,10 @@
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (dwarf2_read_abbrevs): Return 1 for DW_FORM_indirect
+	also.
+
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (dwarf2_read_abbrevs): Return 1 iff we saw any
 	DW_FORM_ref_addr tags.
 	(create_comp_unit_tree): Add prototype.  Take an objfile instead
