@@ -1,8 +1,15 @@
+<<<<<<< ChangeLog
+Fri Mar 13 15:45:44 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: pass down MAKEINFO explicitly on info.
+
+=======
 Fri Mar 13 08:03:03 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* flonum-const.c: renamed flonum-konst.c to stop dos name
 	conflict.
 
+>>>>>>> 1.43
 Wed Mar 11 23:32:42 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* configure.in: vxworks68 gets te-sun3.h.

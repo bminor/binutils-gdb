@@ -168,7 +168,7 @@ all: as.new
 	(cd doc ; $(MAKE) all)
 
 info:
-	(cd doc ; $(MAKE) info)
+	(cd doc ; $(MAKE) info "MAKEINFO=$(MAKEINFO)")
 
 install-info:
 	(cd doc ; $(MAKE) install-info)
