@@ -72,9 +72,9 @@ extern const struct frame_unwind *frame_unwind_find_by_pc (struct gdbarch
    other unwind methods.  Memory for that cache should be allocated
    using frame_obstack_zalloc().  */
 
-typedef void (frame_unwind_id_ftype) (struct frame_info *next_frame,
-				      void **this_cache,
-				      struct frame_id *this_id);
+typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
+				    void **this_cache,
+				    struct frame_id *this_id);
 
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
    use the NEXT frame, and its register unwind method, to unwind THIS
@@ -94,21 +94,21 @@ typedef void (frame_unwind_id_ftype) (struct frame_info *next_frame,
    other unwind methods.  Memory for that cache should be allocated
    using frame_obstack_zalloc().  */
 
-typedef void (frame_unwind_reg_ftype) (struct frame_info *next_frame,
-				       void **this_cache,
-				       int prev_regnum,
-				       int *optimized,
-				       enum lval_type * lvalp,
-				       CORE_ADDR *addrp,
-				       int *realnump, void *valuep);
+typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
+					  void **this_cache,
+					  int prev_regnum,
+					  int *optimized,
+					  enum lval_type * lvalp,
+					  CORE_ADDR *addrp,
+					  int *realnump, void *valuep);
 
 struct frame_unwind
 {
   /* Should the frame's type go here? */
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
-  frame_unwind_id_ftype *id;
-  frame_unwind_reg_ftype *reg;
+  frame_this_id_ftype *this_id;
+  frame_prev_register_ftype *prev_register;
 };
 
 #endif

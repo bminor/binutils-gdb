@@ -1,3 +1,14 @@
+2003-03-11  Andrew Cagney  <cagney@redhat.com>
+
+	* frame-unwind.h (frame_this_id_ftype): Rename
+	frame_unwind_id_ftype.
+	(frame_prev_register_ftype): Rename frame_unwind_reg_ftype.
+	(struct frame_unwind): Update.  Rename "id" to "this_id", and
+	"reg" to "prev_register".
+	* frame.c (get_prev_frame): Update.  Rename parameter next_frame
+	to this frame.
+	(frame_register_unwind): Update.
+
 2003-03-10  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (frame_pop): Merge with mainline
