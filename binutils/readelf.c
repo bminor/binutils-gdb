@@ -1829,6 +1829,10 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	      strcat (buf, ", software FP");
 	      break;
 
+	    case EF_ARM_VFP_FLOAT:
+	      strcat (buf, ", VFP");
+	      break;
+
 	    case EF_ARM_MAVERICK_FLOAT:
 	      strcat (buf, ", Maverick FP");
 	      break;
