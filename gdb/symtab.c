@@ -1371,7 +1371,7 @@ find_line_pc (symtab, line)
     return 0;
   l = LINETABLE (symtab);
   ind = find_line_common(l, line, &dummy);
-  return ind ? l->item[ind].pc : 0;
+  return (ind >= 0) ? l->item[ind].pc : 0;
 }
 
 /* Find the range of pc values in a line.
@@ -1395,7 +1395,7 @@ find_line_pc_range (symtab, thisline, startptr, endptr)
 
   l = LINETABLE (symtab);
   ind = find_line_common (l, thisline, &exact_match);
-  if (ind)
+  if (ind >= 0)
     {
       *startptr = l->item[ind].pc;
       /* If we have not seen an entry for the specified line,
@@ -1418,7 +1418,7 @@ find_line_pc_range (symtab, thisline, startptr, endptr)
 
 /* Given a line table and a line number, return the index into the line
    table for the pc of the nearest line whose number is >= the specified one.
-   Return 0 if none is found.  The value is never zero is it is an index.
+   Return -1 if none is found.  The value is >= 0 if it is an index.
 
    Set *EXACT_MATCH nonzero if the value returned is an exact match.  */
 
@@ -1435,11 +1435,11 @@ find_line_common (l, lineno, exact_match)
      or 0 if none has been seen so far.
      BEST_INDEX identifies the item for it.  */
 
-  int best_index = 0;
+  int best_index = -1;
   int best = 0;
 
   if (lineno <= 0)
-    return 0;
+    return -1;
 
   len = l->nitems;
   for (i = 0; i < len; i++)

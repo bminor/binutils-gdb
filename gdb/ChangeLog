@@ -1,3 +1,57 @@
+Sat Apr 20 21:42:47 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* symtab.c (various): Change error return of find_line_common to -1.
+
+	* coffread.c (find_linenos): Use LINESZ not sizeof (struct lineno).
+
+	* coffread.c (end_symtab): Initialize language, dirname, and
+	fullname fields.
+
+Fri Apr 19 18:18:31 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* mips-tdep.c (mips_frame_chain): Don't chain if saved_pc == 0.
+
+	* stddef.h (size_t): Let either _SIZE_T or _SIZE_T_ guard it.
+
+	* mipsread.c (parse_symbol): Set startup_file_{start,end} if
+	entry_point is in current file.
+
+	* findvar.c (read_register_gen): Add "target byte-order" comment.
+
+Wed Apr 17 17:09:48 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* i386-tdep.c (i386_get_frame_setup): Use SWAP_TARGET_AND_HOST
+	before returning locals or slocals.
+
+	* i386-tdep.c (i386_follow_jump): Do not add data16 to pos in
+	call to codestream_seek; add one to pos if (and only if)
+	we are dealing with a jump with data16 == 1 (i.e. 0x66, 0xe9).
+
+Mon Apr 15 12:04:32 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* valops.c (call_function_by_hand): Put dummy1 in target order
+	before FIX_CALL_DUMMY.
+
+	* tm-i386v.h (FIX_CALL_DUMMY): Don't depend on host byte order.
+
+Sun Apr 14 11:55:19 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* valops.c (push_word): Add SWAP_TARGET_AND_HOST.
+
+	* remote.c (remote_open): Send '+' before calling putpkt().
+
+	* tm-i386v.h (REGISTER_VIRTUAL_TYPE): Return pointer to void,
+	not int, for pc, fp, and sp.
+
+	* remote.c (remote_open): Call start_remote after putpkt("?");
+	infrun.c (start_remote): Also call wait_for_inferior & normal_stop.
+
+Sat Apr 13 22:11:42 1991  Jim Kingdon  (kingdon at spiff.cygnus.com)
+
+	* exec.c: Include <ctype.h>.
+
+	* sun3-xdep.c (fetch_core_registers): Add #ifdef FP0_REGNUM.
+
 Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* tm-68k.h (NUM_REGS): Conditionalize on TARGET_SUN3 not sun.

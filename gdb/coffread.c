@@ -512,6 +512,7 @@ end_symtab ()
   symtab->blockvector = blockvector;
   symtab->free_code = free_linetable;
   symtab->filename = last_source_file;
+  symtab->dirname = NULL;
   lv = line_vector;
   lv->nitems = line_vector_index;
   symtab->linetable = (struct linetable *)
@@ -519,6 +520,9 @@ end_symtab ()
 		   + lv->nitems * sizeof (struct linetable_entry)));
   symtab->nlines = 0;
   symtab->line_charpos = 0;
+
+  symtab->language = language_unknown;
+  symtab->fullname = NULL;
 
 #ifdef TDESC
   symtab->coffsem = last_coffsem;
@@ -624,7 +628,12 @@ find_linenos (abfd, asect, vpinfo)
 
   if (count == 0)
     return;
-  size = count * sizeof (struct lineno);
+#if !defined (LINESZ)
+/* Just in case, you never know what to expect from those
+   COFF header files.  */
+#define LINESZ (sizeof (struct lineno))
+#endif /* No LINESZ.  */
+  size = count * LINESZ;
 
   info = (struct coff_symfile_info *)vpinfo;
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
