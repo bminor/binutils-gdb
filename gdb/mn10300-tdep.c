@@ -157,7 +157,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
       CORE_ADDR *saved_regs;
       dummy = deprecated_frame_xmalloc ();
       saved_regs = xmalloc (SIZEOF_FRAME_SAVED_REGS);
-      deprecated_set_frame_saved_regs (dummy, saved_regs);
+      deprecated_set_frame_saved_regs_hack (dummy, saved_regs);
       extra_info = XMALLOC (struct frame_extra_info);
       deprecated_set_frame_extra_info_hack (dummy, extra_info);
     }
