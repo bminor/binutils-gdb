@@ -2,6 +2,7 @@ Thu Dec  8 17:48:25 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* configure.in (ns32k-pc532-mach*): Select correct emulation.
 	(mips-sony-bsd*): Use ecoff.
+	(mips-*-gnu*): New target, using aout format, from Roland McGrath.
 	* configure: Regenerated.
 
 start-sanitize-arc
