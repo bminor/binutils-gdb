@@ -1641,7 +1641,7 @@
   sum = imm + reg2 + ((PSW & PSW_C) != 0);
   State.regs[dstreg] = sum;
 
-  z = (sum == 0);
+  z = ((PSW & PSW_Z) != 0) && (sum == 0);
   n = (sum & 0x80000000);
   c = (sum < imm) || (sum < reg2);
   v = ((reg2 & 0x80000000) == (imm & 0x80000000)
@@ -1682,7 +1682,7 @@
   difference = reg2 - imm - ((PSW & PSW_C) != 0);
   State.regs[dstreg] = difference;
 
-  z = (difference == 0);
+  z = ((PSW & PSW_Z) != 0) && (difference == 0);
   n = (difference & 0x80000000);
   c = (imm > reg2);
   v = ((reg2 & 0x80000000) == (imm & 0x80000000)
@@ -1715,7 +1715,7 @@
   PC = cia;
 
   if (XRN0 == 0)
-    State.regs[REG_SP] = EXTEND8 (IMM8);
+    State.regs[REG_SP] = IMM8;
   else
     abort ();
 }
@@ -1888,7 +1888,6 @@
   srcreg = translate_rreg (SD_, RM0);
   genericBtst(IMM8, State.regs[srcreg]);
 }
-
 
 // 1111 1011 0000 1010 Rn Rm IMM8; mov (d8,Rm),Rn
 8.0xfb+8.0x0a+4.RN2,4.RM0+8.IMM8:D2l:::mov
@@ -2096,8 +2095,8 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RN2);
 
-  temp = ((signed64)EXTEND8 (IMM8)
-          * (signed64)State.regs[srcreg]);
+  temp = ((signed64)(signed32)EXTEND8 (IMM8)
+          * (signed64)(signed32)State.regs[srcreg]);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -2148,8 +2147,8 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RN2);
 
-  temp = ((signed64)EXTEND8 (IMM8)
-          * (signed64)State.regs[srcreg] & 0xff);
+  temp = ((signed64)(signed8)EXTEND8 (IMM8)
+          * (signed64)(signed8)State.regs[srcreg] & 0xff);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -2200,8 +2199,8 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RN2);
 
-  temp = ((signed64)EXTEND8 (IMM8)
-          * (signed64)State.regs[srcreg] & 0xffff);
+  temp = ((signed64)(signed16)EXTEND8 (IMM8)
+          * (signed64)(signed16)State.regs[srcreg] & 0xffff);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -2385,7 +2384,7 @@
   sum = source1 + source2 + ((PSW & PSW_C) != 0);
   State.regs[dstreg] = sum;
 
-  z = (sum == 0);
+  z = ((PSW & PSW_Z) != 0) && (sum == 0);
   n = (sum & 0x80000000);
   c = (sum < source1) || (sum < source2);
   v = ((source1 & 0x80000000) == (source2 & 0x80000000)
@@ -2445,7 +2444,7 @@
   difference = source2 - source1 - ((PSW & PSW_C) != 0);
   State.regs[dstreg] = difference;
 
-  z = (difference == 0);
+  z = ((PSW & PSW_Z) != 0) && (difference == 0);
   n = (difference & 0x80000000);
   c = (source1 > source2);
   v = ((source1 & 0x80000000) == (source2 & 0x80000000)
@@ -2461,7 +2460,7 @@
 "and"
 *am33
 {
-  int z, c, n, v;
+  int z, n;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2483,7 +2482,7 @@
 "or"
 *am33
 {
-  int z, c, n, v;
+  int z, n;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2505,7 +2504,7 @@
 "xor"
 *am33
 {
-  int z, c, n, v;
+  int z, n;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2527,7 +2526,7 @@
 "asr"
 *am33
 {
-  int z, c, n, v;
+  int z, c, n;
   long temp;
   int srcreg1, srcreg2, dstreg;
 
@@ -2553,7 +2552,7 @@
 "lsr"
 *am33
 {
-  int z, c, n, v;
+  int z, c, n;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2576,7 +2575,7 @@
 "asl"
 *am33
 {
-  int z, c, n, v;
+  int z, n;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2627,8 +2626,8 @@
   dstreg1 = translate_rreg (SD_, RD0);
   dstreg2 = translate_rreg (SD_, RD2);
 
-  temp = ((unsigned64)(unsigned32)State.regs[srcreg1]
-          *  (unsigned64)(unsigned32)State.regs[srcreg2]);
+  temp = ((unsigned64)State.regs[srcreg1]
+          *  (unsigned64)State.regs[srcreg2]);
   State.regs[dstreg1] = temp & 0xffffffff;
   State.regs[dstreg2] = (temp & 0xffffffff00000000LL) >> 32;;
 }
@@ -3157,7 +3156,7 @@
   sum = imm + reg2 + ((PSW & PSW_C) != 0);
   State.regs[dstreg] = sum;
 
-  z = (sum == 0);
+  z = ((PSW & PSW_Z) != 0) && (sum == 0);
   n = (sum & 0x80000000);
   c = (sum < imm) || (sum < reg2);
   v = ((reg2 & 0x80000000) == (imm & 0x80000000)
@@ -3196,7 +3195,7 @@
   difference = reg2 - imm - ((PSW & PSW_C) != 0);
   State.regs[dstreg] = difference;
 
-  z = (difference == 0);
+  z = ((PSW & PSW_Z) != 0) && (difference == 0);
   n = (difference & 0x80000000);
   c = (imm > reg2);
   v = ((reg2 & 0x80000000) == (imm & 0x80000000)
@@ -3415,7 +3414,8 @@
   srcreg = translate_rreg (SD_, RM0);
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+						       IMM24B, IMM24C)));
 }
 
 // 1111 1101 0001 1010 Rm Rn IMM24; mov Rm,(d24,Rn)
@@ -3428,7 +3428,7 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
   dstreg = translate_rreg (SD_, RN0);
-  store_word (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_word (State.regs[dstreg] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
 }
 
@@ -3443,7 +3443,8 @@
   srcreg = translate_rreg (SD_, RM0);
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[srcreg]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+						       IMM24B, IMM24C)));
 }
 
 // 1111 1101 0011 1010 Rm Rn IMM24; movbu Rm,(d24,Rn)
@@ -3456,7 +3457,7 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
   dstreg = translate_rreg (SD_, RN0);
-  store_byte (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_byte (State.regs[dstreg] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
 }
 
@@ -3471,7 +3472,8 @@
   srcreg = translate_rreg (SD_, RM0);
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+					      IMM24B, IMM24C)));
 }
 
 // 1111 1101 0101 1010 Rm Rn IMM24; movhu Rm,(d24,Rn)
@@ -3484,7 +3486,7 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
   dstreg = translate_rreg (SD_, RN0);
-  store_half (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_half (State.regs[dstreg] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
 }
 
@@ -3499,7 +3501,8 @@
   srcreg = translate_rreg (SD_, RM0);
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+						       IMM24B, IMM24C)));
   State.regs[srcreg] += 4;
 }
 
@@ -3513,7 +3516,7 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
   dstreg = translate_rreg (SD_, RN0);
-  store_word (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_word (State.regs[dstreg] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
   State.regs[dstreg] += 4;
 }
@@ -3529,7 +3532,8 @@
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[REG_SP]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+						       IMM24B, IMM24C)));
 }
 
 // 1111 1101 1001 1010 Rm 0000 IMM24; mov Rm,(d24,sp)
@@ -3541,7 +3545,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_word (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_word (State.regs[REG_SP] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
 }
 
@@ -3555,7 +3559,8 @@
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[REG_SP]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+						       IMM24B, IMM24C)));
 }
 
 // 1111 1101 1011 1010 Rm 0000 IMM24; movbu Rm,(d24,sp)
@@ -3567,7 +3572,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_byte (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_byte (State.regs[REG_SP] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
 }
 
@@ -3581,7 +3586,8 @@
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[REG_SP]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+						       IMM24B, IMM24C)));
 }
 
 // 1111 1101 1101 1010 Rm Rn IMM24; movhu Rm,(d24,sp)
@@ -3593,7 +3599,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_half (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_half (State.regs[REG_SP] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
 }
 
@@ -3608,7 +3614,8 @@
   srcreg = translate_rreg (SD_, RM0);
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]
-				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+				  + EXTEND24 (FETCH24 (IMM24A,
+					      IMM24B, IMM24C)));
   State.regs[dstreg] += 2;
 }
 
@@ -3622,7 +3629,7 @@
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
   dstreg = translate_rreg (SD_, RN0);
-  store_half (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+  store_half (State.regs[dstreg] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
 	      State.regs[srcreg]);
   State.regs[srcreg] += 2;
 }
@@ -3917,7 +3924,7 @@
   sum = imm + reg2 + ((PSW & PSW_C) != 0);
   State.regs[dstreg] = sum;
 
-  z = (sum == 0);
+  z = ((PSW & PSW_Z) != 0) && (sum == 0);
   n = (sum & 0x80000000);
   c = (sum < imm) || (sum < reg2);
   v = ((reg2 & 0x80000000) == (imm & 0x80000000)
@@ -3957,7 +3964,7 @@
   difference = reg2 - imm - ((PSW & PSW_C) != 0);
   State.regs[dstreg] = difference;
 
-  z = (difference == 0);
+  z = ((PSW & PSW_Z) != 0) && (difference == 0);
   n = (difference & 0x80000000);
   c = (imm > reg2);
   v = ((reg2 & 0x80000000) == (imm & 0x80000000)

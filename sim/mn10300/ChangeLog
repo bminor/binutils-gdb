@@ -4,6 +4,12 @@ Thu Jul  9 10:06:55 1998  Jeffrey A Law  (law@cygnus.com)
 	Minor fixes in multiply/divide patterns.
 
 start-sanitize-am33
+	* am33.igen: Fix Z bit for remaining addc/subc instructions.
+	Do not sign extend immediate for mov imm,XRn.
+	More random mul, mac & div fixes.
+	Remove some unused variables.
+	Sign extend 24bit displacement in memory addresses.
+
 	* am33.igen: Fix Z bit for addc Rm,Rn and subc Rm,Rn.  Various
 	fixes to 2 register multiply, divide and mac instructions.  Set
 	Z,N correctly for sat16.  Sign extend 24 bit immediate for add,
