@@ -174,8 +174,6 @@ struct value
     /* Do not add any new members here -- contents above will trash them */
   };
 
-typedef struct value *value_ptr;
-
 #define VALUE_TYPE(val) (val)->type
 #define VALUE_ENCLOSING_TYPE(val) (val)->enclosing_type
 #define VALUE_LAZY(val) (val)->lazy
