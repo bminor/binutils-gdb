@@ -7,6 +7,8 @@
 
 	* alpha-dis.c: Fix formatting.
 	* cris-dis.c: Likewise.
+	* d10v-dis.c: Likewise.
+	* d30v-dis.c: Likewise.
 	* m10300-dis.c: Likewise.
 	* tic54x-dis.c: Likewise.
 
