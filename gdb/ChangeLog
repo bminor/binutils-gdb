@@ -1,3 +1,21 @@
+Tue Sep 13 08:59:04 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdbtk_flush gdbtk_fputs):  Buffer up output to make
+	disassembly more efficient.
+	* (breakpoint_notify):  Include pc in gdbtk_tcl_breakpoint
+	callback.
+	* (gdb_loc):  Include pc in return value.  Also, return function
+	name if arg was specified.
+	* (gdb_cmd_stub):  Call gdb_flush to drain internal GDB buffers
+	after command completes.
+	* (gdbtk_init):  Improve error handling.
+
+	* gdbtk.tcl:  Add lots of comments.  Clean up code.
+	* (gdbtk_tcl_fputs):  Make output window redirectable.
+	* Add assembly window, and breapoint support.
+	* Make button 1 in margin toggle breakpoints.
+	* Use stippling to indicate breakpoint disabling.
+
 Sun Sep 11 22:34:57 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/pa/tm-hppa.h (REGISTER_NAMES): Use r26-r23 for arg0-arg3.

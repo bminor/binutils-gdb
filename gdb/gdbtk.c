@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <tcl.h>
 #include <tk.h>
+#include <unistd.h>
 
 /* Non-zero means that we're doing the gdbtk interface. */
 int gdbtk = 0;
@@ -63,18 +64,52 @@ null_routine(arg)
 /* This routine redirects the output of fputs_unfiltered so that
    the user can see what's going on in his debugger window. */
 
+static char holdbuf[200];
+static char *holdbufp = holdbuf;
+static int holdfree = sizeof (holdbuf);
+
 static void
-gdbtk_fputs (ptr)
-     const char *ptr;
+flush_holdbuf ()
 {
-  Tcl_VarEval (interp, "gdbtk_tcl_fputs ", "{", ptr, "}", NULL);
+  if (holdbufp == holdbuf)
+    return;
+
+  Tcl_VarEval (interp, "gdbtk_tcl_fputs ", "{", holdbuf, "}", NULL);
+  holdbufp = holdbuf;
+  holdfree = sizeof (holdbuf);
 }
 
 static void
 gdbtk_flush (stream)
      FILE *stream;
 {
+  flush_holdbuf ();
+
   Tcl_VarEval (interp, "gdbtk_tcl_flush", NULL);
+}
+
+static void
+gdbtk_fputs (ptr)
+     const char *ptr;
+{
+  int len;
+
+  len = strlen (ptr) + 1;
+
+  if (len > holdfree)
+    {
+      flush_holdbuf ();
+
+      if (len > sizeof (holdbuf))
+	{
+	  Tcl_VarEval (interp, "gdbtk_tcl_fputs ", "{", ptr, "}", NULL);
+	  return;
+	}
+    }
+
+  strncpy (holdbufp, ptr, len);
+  holdbufp += len - 1;
+  holdfree -= len - 1;
 }
 
 static int
@@ -135,7 +170,7 @@ breakpoint_notify(b, action)
      const char *action;
 {
   struct symbol *sym;
-  char bpnum[50], line[50];
+  char bpnum[50], line[50], pc[50];
   struct symtab_and_line sal;
   char *filename;
   int v;
@@ -149,6 +184,7 @@ breakpoint_notify(b, action)
 
   sprintf (bpnum, "%d", b->number);
   sprintf (line, "%d", sal.line);
+  sprintf (pc, "0x%x", b->address);
  
   v = Tcl_VarEval (interp,
 		   "gdbtk_tcl_breakpoint ",
@@ -156,6 +192,7 @@ breakpoint_notify(b, action)
 		   " ", bpnum,
 		   " ", filename,
 		   " ", line,
+		   " ", pc,
 		   NULL);
 
   if (v != TCL_OK)
@@ -210,36 +247,37 @@ gdb_loc (clientData, interp, argc, argv)
   char buf[100];
   struct symtab_and_line sal;
   char *funcname;
+  CORE_ADDR pc;
 
   if (argc == 1)
     {
       struct frame_info *frame;
       struct symbol *func;
-      CORE_ADDR pc;
 
       frame = get_frame_info (selected_frame);
+
       pc = frame ? frame->pc : stop_pc;
-      func = find_pc_function (pc);
-      funcname = func ? SYMBOL_NAME (func) : "";
+
       sal = find_pc_line (pc, 0);
     }
   else if (argc == 2)
     {
-      struct cleanup *old_chain;
       struct symtabs_and_lines sals;
+      int nelts;
 
       sals = decode_line_spec (argv[1], 1);
+
+      nelts = sals.nelts;
+      sal = sals.sals[0];
+      free (sals.sals);
 
       if (sals.nelts != 1)
 	{
 	  Tcl_SetResult (interp, "Ambiguous line spec", TCL_STATIC);
-	  free (sals.sals);
 	  return TCL_ERROR;
 	}
 
-      sal = sals.sals[0];
-      free (sals.sals);
-      funcname = "*";
+      pc = sal.pc;
     }
   else
     {
@@ -247,17 +285,22 @@ gdb_loc (clientData, interp, argc, argv)
       return TCL_ERROR;
     }
 
-  filename = full_filename (sal.symtab);
-
-  sprintf (buf, "%d", sal.line);
-
   if (sal.symtab)
     Tcl_AppendElement (interp, sal.symtab->filename);
   else
     Tcl_AppendElement (interp, "");
+
+  find_pc_partial_function (pc, &funcname, NULL, NULL);
   Tcl_AppendElement (interp, funcname);
+
+  filename = full_filename (sal.symtab);
   Tcl_AppendElement (interp, filename);
+
+  sprintf (buf, "%d", sal.line);
   Tcl_AppendElement (interp, buf); /* line number */
+
+  sprintf (buf, "0x%x", pc);
+  Tcl_AppendElement (interp, buf); /* PC */
 
   if (filename)
     free(filename);
@@ -299,6 +342,11 @@ gdb_cmd (clientData, interp, argc, argv)
 
   bpstat_do_actions (&stop_bpstat);
   do_cleanups (old_chain);
+
+  /* Drain all buffered command output */
+
+  gdb_flush (gdb_stderr);
+  gdb_flush (gdb_stdout);
 
   /* We could base the return value on val, but that would require most users
      to use catch.  Since GDB errors are already being handled elsewhere, I
@@ -379,20 +427,14 @@ gdbtk_init ()
   Tcl_CreateCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
 
   gdbtk_filename = getenv ("GDBTK_FILENAME");
-  if (gdbtk_filename)
-    {
-      if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
-	error ("Failure reading %s: %s", gdbtk_filename, interp->result);
-    }
-  else
-    {
-      if (Tcl_EvalFile (interp, "gdbtk.tcl") != TCL_OK)
-	{
-	  Tcl_ResetResult (interp);
-	  if (Tcl_EvalFile (interp, GDBTK_FILENAME) != TCL_OK)
-	    error ("Failure reading %s: %s", GDBTK_FILENAME, interp->result);
-	}
-    }
+  if (!gdbtk_filename)
+    if (access ("gdbtk.tcl", R_OK) == 0)
+      gdbtk_filename = "gdbtk.tcl";
+    else
+      gdbtk_filename = GDBTK_FILENAME;
+
+  if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
+    error ("Failure reading %s: %s", gdbtk_filename, interp->result);
 
   command_loop_hook = Tk_MainLoop;
   fputs_unfiltered_hook = gdbtk_fputs;
