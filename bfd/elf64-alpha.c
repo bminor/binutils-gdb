@@ -1257,8 +1257,8 @@ elf64_alpha_relax_with_lituse (info, symval, irel)
   if (lit_insn >> 26 != OP_LDQ)
     {
       ((*_bfd_error_handler)
-       ("%s: %s+0x%lx: warning: LITERAL relocation against unexpected insn",
-	bfd_archive_filename (info->abfd), info->sec->name,
+       ("%B: %A+0x%lx: warning: LITERAL relocation against unexpected insn",
+	info->abfd, info->sec,
 	(unsigned long) irel->r_offset));
       return TRUE;
     }
@@ -1570,8 +1570,8 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
     {
       reloc_howto_type *howto = elf64_alpha_howto_table + r_type;
       ((*_bfd_error_handler)
-       ("%s: %s+0x%lx: warning: %s relocation against unexpected insn",
-	bfd_archive_filename (info->abfd), info->sec->name,
+       ("%B: %A+0x%lx: warning: %s relocation against unexpected insn",
+	info->abfd, info->sec,
 	(unsigned long) irel->r_offset, howto->name));
       return TRUE;
     }
@@ -3638,9 +3638,8 @@ elf64_alpha_size_got_sections (info)
 	    {
 	      /* Yikes! A single object file has too many entries.  */
 	      (*_bfd_error_handler)
-	        (_("%s: .got subsegment exceeds 64K (size %d)"),
-	         bfd_archive_filename (i),
-	         alpha_elf_tdata (this_got)->total_got_size);
+	        (_("%B: .got subsegment exceeds 64K (size %d)"),
+	         i, alpha_elf_tdata (this_got)->total_got_size);
 	      return FALSE;
 	    }
 
@@ -4180,8 +4179,8 @@ elf64_alpha_relocate_section_r (output_bfd, info, input_bfd, input_section,
       if (r_type >= R_ALPHA_max)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: unknown relocation type %d"),
-	     bfd_archive_filename (input_bfd), (int)r_type);
+	    (_("%B: unknown relocation type %d"),
+	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
 	  continue;
@@ -4306,8 +4305,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
       if (r_type >= R_ALPHA_max)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: unknown relocation type %d"),
-	     bfd_archive_filename (input_bfd), (int)r_type);
+	    (_("%B: unknown relocation type %d"),
+	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
 	  continue;
@@ -4478,8 +4477,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (dynamic_symbol_p)
             {
               (*_bfd_error_handler)
-                (_("%s: gp-relative relocation against dynamic symbol %s"),
-                 bfd_archive_filename (input_bfd), h->root.root.root.string);
+                (_("%B: gp-relative relocation against dynamic symbol %s"),
+                 input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
 	  BFD_ASSERT(gp != 0);
@@ -4490,8 +4489,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (dynamic_symbol_p)
             {
               (*_bfd_error_handler)
-                (_("%s: gp-relative relocation against dynamic symbol %s"),
-                 bfd_archive_filename (input_bfd), h->root.root.root.string);
+                (_("%B: gp-relative relocation against dynamic symbol %s"),
+                 input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
 	  BFD_ASSERT(gp != 0);
@@ -4516,8 +4515,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (dynamic_symbol_p)
             {
               (*_bfd_error_handler)
-                (_("%s: pc-relative relocation against dynamic symbol %s"),
-                 bfd_archive_filename (input_bfd), h->root.root.root.string);
+                (_("%B: pc-relative relocation against dynamic symbol %s"),
+                 input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
 	  /* The regular PC-relative stuff measures from the start of
@@ -4544,8 +4543,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		&& gotobj != alpha_elf_tdata (sec->owner)->gotobj)
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: change in gp: BRSGP %s"),
-		   bfd_archive_filename (input_bfd), h->root.root.root.string);
+		  (_("%B: change in gp: BRSGP %s"),
+		   input_bfd, h->root.root.root.string);
 		ret_val = FALSE;
 	      }
 
@@ -4574,8 +4573,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		      name = bfd_section_name (input_bfd, sec);
 		  }
 		(*_bfd_error_handler)
-		  (_("%s: !samegp reloc against symbol without .prologue: %s"),
-		   bfd_archive_filename (input_bfd), name);
+		  (_("%B: !samegp reloc against symbol without .prologue: %s"),
+		   input_bfd, name);
 		ret_val = FALSE;
 		break;
 	      }
@@ -4625,8 +4624,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		if (r_type == R_ALPHA_REFLONG)
 		  {
 		    (*_bfd_error_handler)
-		      (_("%s: unhandled dynamic relocation against %s"),
-		       bfd_archive_filename (input_bfd),
+		      (_("%B: unhandled dynamic relocation against %s"),
+		       input_bfd,
 		       h->root.root.root.string);
 		    ret_val = FALSE;
 		  }
@@ -4649,8 +4648,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (dynamic_symbol_p)
             {
               (*_bfd_error_handler)
-                (_("%s: pc-relative relocation against dynamic symbol %s"),
-                 bfd_archive_filename (input_bfd), h->root.root.root.string);
+                (_("%B: pc-relative relocation against dynamic symbol %s"),
+                 input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
 
@@ -4708,8 +4707,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (dynamic_symbol_p)
             {
               (*_bfd_error_handler)
-                (_("%s: dtp-relative relocation against dynamic symbol %s"),
-                 bfd_archive_filename (input_bfd), h->root.root.root.string);
+                (_("%B: dtp-relative relocation against dynamic symbol %s"),
+                 input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
 	  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
@@ -4724,15 +4723,15 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (info->shared)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: TLS local exec code cannot be linked into shared objects"),
-		bfd_archive_filename (input_bfd));
+		(_("%B: TLS local exec code cannot be linked into shared objects"),
+		input_bfd);
               ret_val = FALSE;
 	    }
 	  else if (dynamic_symbol_p)
             {
               (*_bfd_error_handler)
-                (_("%s: tp-relative relocation against dynamic symbol %s"),
-                 bfd_archive_filename (input_bfd), h->root.root.root.string);
+                (_("%B: tp-relative relocation against dynamic symbol %s"),
+                 input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
 	  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);

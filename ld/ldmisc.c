@@ -1,6 +1,6 @@
 /* ldmisc.c
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2002, 2003
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -35,27 +35,29 @@
 #include "ldlex.h"
 #include "ldmain.h"
 #include "ldfile.h"
+#include "elf-bfd.h"
 
 /*
  %% literal %
- %F error is fatal
- %P print program name
- %S print script file and linenumber
- %E current bfd error or errno
- %I filename from a lang_input_statement_type
+ %A section name from a section
  %B filename from a bfd
- %T symbol name
- %X no object output, fail return
- %V hex bfd_vma
- %v hex bfd_vma, no leading zeros
- %W hex bfd_vma with 0x with no leading zeros taking up 8 spaces
  %C clever filename:linenumber with function
  %D like %C, but no function name
+ %E current bfd error or errno
+ %F error is fatal
  %G like %D, but only function name
+ %I filename from a lang_input_statement_type
+ %P print program name
  %R info about a relent
- %s arbitrary string, like printf
+ %S print script file and linenumber
+ %T symbol name
+ %V hex bfd_vma
+ %W hex bfd_vma with 0x with no leading zeros taking up 8 spaces
+ %X no object output, fail return
  %d integer, like printf
+ %s arbitrary string, like printf
  %u integer, like printf
+ %v hex bfd_vma, no leading zeros
 */
 
 static void
@@ -158,6 +160,30 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 	      }
 	      break;
 
+	    case 'A':
+	      /* section name from a section */
+	      {
+		asection *sec = va_arg (arg, asection *);
+		bfd *abfd = sec->owner;
+		const char *group = NULL;
+		struct coff_comdat_info *ci;
+
+		fprintf (fp, "%s", sec->name);
+		if (abfd != NULL
+		    && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+		    && elf_next_in_group (sec) != NULL
+		    && (sec->flags & SEC_GROUP) == 0)
+		  group = elf_group_name (sec);
+		else if (abfd != NULL
+			 && bfd_get_flavour (abfd) == bfd_target_coff_flavour
+			 && (ci = bfd_coff_get_comdat_section (sec->owner,
+							       sec)) != NULL)
+		  group = ci->name;
+		if (group != NULL)
+		  fprintf (fp, "[%s]", group);
+	      }
+	      break;
+
 	    case 'B':
 	      /* filename from a bfd */
 	      {
@@ -241,7 +267,6 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 		const char *functionname;
 		unsigned int linenumber;
 		bfd_boolean discard_last;
-		char *sec_name;
 
 		abfd = va_arg (arg, bfd *);
 		section = va_arg (arg, asection *);
@@ -270,11 +295,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 		      }
 		  }
 
-		sec_name = bfd_get_section_ident (section);
-		lfinfo (fp, "%B(%s+0x%v)", abfd,
-			sec_name ? sec_name : section->name, offset);
-		if (sec_name)
-		  free (sec_name);
+		lfinfo (fp, "%B(%A+0x%v)", abfd, section, offset);
 
 		discard_last = TRUE;
 		if (bfd_find_nearest_line (abfd, section, asymbols, offset,
@@ -493,65 +514,4 @@ ld_abort (const char *file, int line, const char *fn)
 	   file, line);
   einfo (_("%P%F: please report this bug\n"));
   xexit (1);
-}
-
-bfd_boolean
-error_handler (int id, const char *fmt, ...)
-{
-  va_list arg;
-
-  va_start (arg, fmt);
-
-  switch (id)
-    {
-    default:
-      break;
-
-    /* We can be called with
-
-	error_handler (-LD_DEFINITION_IN_DISCARDED_SECTION, "", 0);
-
-	to make this error non-fatal and
-
-	error_handler (-LD_DEFINITION_IN_DISCARDED_SECTION, "", 1);
-
-	to make this error fatal.  */
-    case -LD_DEFINITION_IN_DISCARDED_SECTION:
-    case LD_DEFINITION_IN_DISCARDED_SECTION:
-      {
-	static struct bfd_hash_table *hash;
-	static int fatal = 1;
-	const char *name;
-
-	if (id == -LD_DEFINITION_IN_DISCARDED_SECTION)
-	  {
-	    fatal = va_arg (arg, int);
-	    goto out;
-	  }
-
-	name = va_arg (arg, const char *);
-	/* Only warn once about a particular undefined symbol.  */
-	if (hash == NULL)
-	  {
-	    hash = xmalloc (sizeof (struct bfd_hash_table));
-	    if (! bfd_hash_table_init (hash, bfd_hash_newfunc))
-	      einfo (_("%F%P: bfd_hash_table_init failed: %E\n"));
-	  }
-
-	if (bfd_hash_lookup (hash, name, FALSE, FALSE) != NULL)
-	  goto out;
-
-	if (bfd_hash_lookup (hash, name, TRUE, TRUE) == NULL)
-	  einfo (_("%F%P: bfd_hash_lookup failed: %E\n"));
-
-	if (fatal)
-	  config.make_executable = FALSE;
-      }
-      break;
-    }
-  vfinfo (stderr, fmt, arg);
-
-out:
-  va_end (arg);
-  return TRUE;
 }

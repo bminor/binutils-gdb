@@ -156,8 +156,7 @@ static struct bfd_link_callbacks link_callbacks =
   reloc_overflow,
   reloc_dangerous,
   unattached_reloc,
-  notice,
-  error_handler
+  notice
 };
 
 struct bfd_link_info link_info;

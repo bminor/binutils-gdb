@@ -641,9 +641,8 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
-				 bfd_archive_filename (abfd),
-				 r_symndx);
+	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
+				 abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -2103,9 +2102,9 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
-	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	   bfd_archive_filename (input_bfd),
-	   bfd_get_section_name (input_bfd, input_section),
+	  (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
+	   input_bfd,
+	   input_section,
 	   (long) rel->r_offset,
 	   h->root.root.string);
 
@@ -2523,8 +2522,8 @@ elf_xtensa_merge_private_bfd_data (ibfd, obfd)
   if (out_mach != in_mach) 
     {
       (*_bfd_error_handler)
-	("%s: incompatible machine type. Output is 0x%x. Input is 0x%x",
-	 bfd_archive_filename (ibfd), out_mach, in_mach);
+	("%B: incompatible machine type. Output is 0x%x. Input is 0x%x",
+	 ibfd, out_mach, in_mach);
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
     }

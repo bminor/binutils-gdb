@@ -293,10 +293,8 @@ _bfd_link_section_stabs (abfd, sinfo, stabsec, stabstrsec, psecinfo, pstring_off
       if (symstroff >= stabstrsec->size)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): Stabs entry has invalid string index."),
-	     bfd_archive_filename (abfd),
-	     bfd_get_section_name (abfd, stabsec),
-	     (long) (sym - stabbuf));
+	    (_("%B(%A+0x%lx): Stabs entry has invalid string index."),
+	     abfd, stabsec, (long) (sym - stabbuf));
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}

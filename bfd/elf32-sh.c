@@ -2242,8 +2242,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       laddr = irel->r_offset + 4 + irel->r_addend;
       if (laddr >= sec->size)
 	{
-	  (*_bfd_error_handler) (_("%s: 0x%lx: warning: bad R_SH_USES offset"),
-				 bfd_archive_filename (abfd),
+	  (*_bfd_error_handler) (_("%B: 0x%lx: warning: bad R_SH_USES offset"),
+				 abfd,
 				 (unsigned long) irel->r_offset);
 	  continue;
 	}
@@ -2254,8 +2254,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if ((insn & 0xf000) != 0xd000)
 	{
 	  ((*_bfd_error_handler)
-	   (_("%s: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
-	    bfd_archive_filename (abfd), (unsigned long) irel->r_offset, insn));
+	   (_("%B: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
+	    abfd, (unsigned long) irel->r_offset, insn));
 	  continue;
 	}
 
@@ -2271,8 +2271,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if (paddr >= sec->size)
 	{
 	  ((*_bfd_error_handler)
-	   (_("%s: 0x%lx: warning: bad R_SH_USES load offset"),
-	    bfd_archive_filename (abfd), (unsigned long) irel->r_offset));
+	   (_("%B: 0x%lx: warning: bad R_SH_USES load offset"),
+	    abfd, (unsigned long) irel->r_offset));
 	  continue;
 	}
 
@@ -2286,8 +2286,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if (irelfn >= irelend)
 	{
 	  ((*_bfd_error_handler)
-	   (_("%s: 0x%lx: warning: could not find expected reloc"),
-	    bfd_archive_filename (abfd), (unsigned long) paddr));
+	   (_("%B: 0x%lx: warning: could not find expected reloc"),
+	    abfd, (unsigned long) paddr));
 	  continue;
 	}
 
@@ -2314,8 +2314,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	      != (unsigned int) _bfd_elf_section_from_bfd_section (abfd, sec))
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%s: 0x%lx: warning: symbol in unexpected section"),
-		bfd_archive_filename (abfd), (unsigned long) paddr));
+	       (_("%B: 0x%lx: warning: symbol in unexpected section"),
+		abfd, (unsigned long) paddr));
 	      continue;
 	    }
 
@@ -2439,8 +2439,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if (irelcount >= irelend)
 	{
 	  ((*_bfd_error_handler)
-	   (_("%s: 0x%lx: warning: could not find expected COUNT reloc"),
-	    bfd_archive_filename (abfd), (unsigned long) paddr));
+	   (_("%B: 0x%lx: warning: could not find expected COUNT reloc"),
+	    abfd, (unsigned long) paddr));
 	  continue;
 	}
 
@@ -2448,8 +2448,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	 just deleted one.  */
       if (irelcount->r_addend == 0)
 	{
-	  ((*_bfd_error_handler) (_("%s: 0x%lx: warning: bad count"),
-				  bfd_archive_filename (abfd),
+	  ((*_bfd_error_handler) (_("%B: 0x%lx: warning: bad count"),
+				  abfd,
 				  (unsigned long) paddr));
 	  continue;
 	}
@@ -2843,8 +2843,8 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 	  if (overflow)
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%s: 0x%lx: fatal: reloc overflow while relaxing"),
-		bfd_archive_filename (abfd), (unsigned long) irel->r_offset));
+	       (_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
+		abfd, (unsigned long) irel->r_offset));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -3213,8 +3213,8 @@ sh_elf_swap_insns (bfd *abfd, asection *sec, void *relocs,
 	  if (overflow)
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%s: 0x%lx: fatal: reloc overflow while relaxing"),
-		bfd_archive_filename (abfd), (unsigned long) irel->r_offset));
+	       (_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
+		abfd, (unsigned long) irel->r_offset));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4795,9 +4795,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (howto->rightshift || howto->src_mask != 0xffffffff)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s(%s+0x%lx): %s relocation against SEC_MERGE section"),
-		     bfd_archive_filename (input_bfd),
-		     bfd_get_section_name (input_bfd, input_section),
+		    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
+		     input_bfd, input_section,
 		     (long) rel->r_offset, howto->name);
 		  return FALSE;
 		}
@@ -4900,9 +4899,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      else if (sec->output_section == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd), h->root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
+		    (_("%B(%A): unresolvable relocation against symbol `%s'"),
+		     input_bfd, input_section, h->root.root.string);
 		  return FALSE;
 		}
 	      else
@@ -4971,8 +4969,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (disp & mask)
 		{
 		  ((*_bfd_error_handler)
-		   (_("%s: 0x%lx: fatal: unaligned branch target for relax-support relocation"),
-		    bfd_archive_filename (input_section->owner),
+		   (_("%B: 0x%lx: fatal: unaligned branch target for relax-support relocation"),
+		    input_section->owner,
 		    (unsigned long) rel->r_offset));
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
@@ -5004,10 +5002,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (relocation & 3)
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%s: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
-		bfd_archive_filename (input_section->owner),
+	       (_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		input_section->owner,
 		(unsigned long) rel->r_offset, howto->name, 
-		(unsigned long)relocation));
+		(unsigned long) relocation));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -5019,10 +5017,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (relocation & 1)
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%s: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
-		bfd_archive_filename (input_section->owner),
+	       (_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		input_section->owner,
 		(unsigned long) rel->r_offset, howto->name, 
-		(unsigned long)relocation));
+		(unsigned long) relocation));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -5033,10 +5031,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      || (signed int)relocation > 32)
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%s: 0x%lx: fatal: R_SH_PSHA relocation %d not in range -32..32"),
-		bfd_archive_filename (input_section->owner),
+	       (_("%B: 0x%lx: fatal: R_SH_PSHA relocation %d not in range -32..32"),
+		input_section->owner,
 		(unsigned long) rel->r_offset,
-		(unsigned long)relocation));
+		(unsigned long) relocation));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -5047,10 +5045,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      || (signed int)relocation > 16)
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%s: 0x%lx: fatal: R_SH_PSHL relocation %d not in range -32..32"),
-		bfd_archive_filename (input_section->owner),
+	       (_("%B: 0x%lx: fatal: R_SH_PSHL relocation %d not in range -32..32"),
+		input_section->owner,
 		(unsigned long) rel->r_offset,
-		(unsigned long)relocation));
+		(unsigned long) relocation));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -6577,8 +6575,8 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      else
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: `%s' accessed both as normal and thread local symbol"),
-		     bfd_archive_filename (abfd), h->root.root.string);
+		    (_("%B: `%s' accessed both as normal and thread local symbol"),
+		     abfd, h->root.root.string);
 		  return FALSE;
 		}
 	    }
@@ -6789,8 +6787,9 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	case R_SH_TLS_LE_32:
 	  if (info->shared)
 	    {
-	      (*_bfd_error_handler) (_("%s: TLS local exec code cannot be linked into shared objects"),
-				     bfd_archive_filename (abfd));
+	      (*_bfd_error_handler)
+		(_("%B: TLS local exec code cannot be linked into shared objects"),
+		 abfd);
 	      return FALSE;
 	    }
 
@@ -6914,9 +6913,9 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 
   if (! sh_merge_bfd_arch (ibfd, obfd))
     {
-      _bfd_error_handler ("%s: uses instructions which are incompatible "
+      _bfd_error_handler ("%B: uses instructions which are incompatible "
 			  "with instructions used in previous modules",
-			  bfd_archive_filename (ibfd));
+			  ibfd);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }

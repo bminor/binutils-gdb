@@ -2042,9 +2042,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 						      rel->r_addend))
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation at `%s+0x%x' references symbol `%s' with nonzero addend"),
-		 bfd_archive_filename (input_bfd), input_section->name,
-		 rel->r_offset, name);
+		(_("%B: relocation at `%A+0x%x' references symbol `%s' with nonzero addend"),
+		 input_bfd, input_section, rel->r_offset, name);
 	      return FALSE;
 
 	    }
@@ -4237,8 +4236,8 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	default:
 	bad_reloc:
 	  (*_bfd_error_handler)
-	    (_("%s: unsupported relocation type %i"),
-	     bfd_archive_filename (abfd), ELF32_R_TYPE (rel->r_info));
+	    (_("%B: unsupported relocation type %i"),
+	     abfd, ELF32_R_TYPE (rel->r_info));
 	  return FALSE;
         }
     }

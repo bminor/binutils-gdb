@@ -539,8 +539,8 @@ hppa_add_stub (const char *stub_name,
 				      TRUE, FALSE);
   if (stub_entry == NULL)
     {
-      (*_bfd_error_handler) (_("%s: cannot create stub entry %s"),
-			     bfd_archive_filename (section->owner),
+      (*_bfd_error_handler) (_("%B: cannot create stub entry %s"),
+			     section->owner,
 			     stub_name);
       return NULL;
     }
@@ -792,9 +792,9 @@ hppa_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      || sym_value - 8 + (1 << (22 + 1)) >= (1 << (22 + 2))))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
-	     bfd_archive_filename (stub_entry->target_section->owner),
-	     stub_sec->name,
+	    (_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
+	     stub_entry->target_section->owner,
+	     stub_sec,
 	     (long) stub_entry->stub_offset,
 	     stub_entry->root.string);
 	  bfd_set_error (bfd_error_bad_value);
@@ -1172,8 +1172,8 @@ elf32_hppa_check_relocs (bfd *abfd,
 	  if (info->shared)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s can not be used when making a shared object; recompile with -fPIC"),
-		 bfd_archive_filename (abfd),
+		(_("%B: relocation %s can not be used when making a shared object; recompile with -fPIC"),
+		 abfd,
 		 elf_hppa_howto_table[r_type].name);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -1192,8 +1192,8 @@ elf32_hppa_check_relocs (bfd *abfd,
 	  if (info->shared)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s should not be used when making a shared object; recompile with -fPIC"),
-		 bfd_archive_filename (abfd),
+		(_("%B: relocation %s should not be used when making a shared object; recompile with -fPIC"),
+		 abfd,
 		 elf_hppa_howto_table[r_type].name);
 	    }
 	  /* Fall through.  */
@@ -2573,8 +2573,8 @@ get_local_syms (bfd *output_bfd, bfd *input_bfd, struct bfd_link_info *info)
 		    }
 		  else
 		    {
-		      (*_bfd_error_handler) (_("%s: duplicate export stub %s"),
-					     bfd_archive_filename (input_bfd),
+		      (*_bfd_error_handler) (_("%B: duplicate export stub %s"),
+					     input_bfd,
 					     stub_name);
 		    }
 		}
@@ -3164,9 +3164,9 @@ final_link_relocate (asection *input_section,
 	       and convert the associated add instruction, so issue an
 	       error.  */
 	    (*_bfd_error_handler)
-	      (_("%s(%s+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
-	       bfd_archive_filename (input_bfd),
-	       input_section->name,
+	      (_("%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
+	       input_bfd,
+	       input_section,
 	       (long) rel->r_offset,
 	       howto->name,
 	       insn);
@@ -3194,9 +3194,9 @@ final_link_relocate (asection *input_section,
 	      insn &= ~ (0x1f << 21);
 #if 0 /* debug them.  */
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): fixing %s"),
-		 bfd_archive_filename (input_bfd),
-		 input_section->name,
+		(_("%B(%A+0x%lx): fixing %s"),
+		 input_bfd,
+		 input_section,
 		 (long) rel->r_offset,
 		 howto->name);
 #endif
@@ -3317,9 +3317,9 @@ final_link_relocate (asection *input_section,
       && value + addend + max_branch_offset >= 2*max_branch_offset)
     {
       (*_bfd_error_handler)
-	(_("%s(%s+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
-	 bfd_archive_filename (input_bfd),
-	 input_section->name,
+	(_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
+	 input_bfd,
+	 input_section,
 	 (long) rel->r_offset,
 	 stub_entry->root.string);
       bfd_set_error (bfd_error_bad_value);
@@ -3812,9 +3812,9 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	  if (r == bfd_reloc_notsupported || !warned_undef)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): cannot handle %s for %s"),
-		 bfd_archive_filename (input_bfd),
-		 input_section->name,
+		(_("%B(%A+0x%lx): cannot handle %s for %s"),
+		 input_bfd,
+		 input_section,
 		 (long) rel->r_offset,
 		 howto->name,
 		 sym_name);

@@ -1828,8 +1828,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 		&& inh->u.i.link == h)
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: indirect symbol `%s' to `%s' is a loop"),
-		   bfd_archive_filename (abfd), name, string);
+		  (_("%B: indirect symbol `%s' to `%s' is a loop"),
+		   abfd, name, string);
 		bfd_set_error (bfd_error_invalid_operation);
 		return FALSE;
 	      }
@@ -2992,14 +2992,9 @@ _bfd_generic_section_already_linked (bfd *abfd, asection *sec)
 	      break;
 
 	    case SEC_LINK_DUPLICATES_ONE_ONLY:
-	      if (s_comdat == NULL)
-		(*_bfd_error_handler)
-		  (_("%s: %s: warning: ignoring duplicate section `%s'\n"),
-		   bfd_archive_filename (abfd), name);
-	      else
-		(*_bfd_error_handler)
-		  (_("%s: %s: warning: ignoring duplicate `%s' section symbol `%s'\n"),
-		   bfd_archive_filename (abfd), name, s_comdat->name);
+	      (*_bfd_error_handler)
+		(_("%B: warning: ignoring duplicate section `%A'\n"),
+		 abfd, sec);
 	      break;
 
 	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
@@ -3012,8 +3007,8 @@ _bfd_generic_section_already_linked (bfd *abfd, asection *sec)
 	    case SEC_LINK_DUPLICATES_SAME_SIZE:
 	      if (sec->size != l->sec->size)
 		(*_bfd_error_handler)
-		  (_("%s: %s: warning: duplicate section `%s' has different size\n"),
-		   bfd_archive_filename (abfd), name);
+		  (_("%B: warning: duplicate section `%A' has different size\n"),
+		   abfd, sec);
 	      break;
 	    }
 

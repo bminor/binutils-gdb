@@ -2282,18 +2282,16 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  error = TRUE;
 	  (*_bfd_error_handler)
-	    (_("%s: compiled with -mrelocatable and linked with "
-	       "modules compiled normally"),
-	     bfd_archive_filename (ibfd));
+	    (_("%B: compiled with -mrelocatable and linked with "
+	       "modules compiled normally"), ibfd);
 	}
       else if ((new_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0
 	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
 	{
 	  error = TRUE;
 	  (*_bfd_error_handler)
-	    (_("%s: compiled normally and linked with "
-	       "modules compiled with -mrelocatable"),
-	     bfd_archive_filename (ibfd));
+	    (_("%B: compiled normally and linked with "
+	       "modules compiled with -mrelocatable"), ibfd);
 	}
 
       /* The output is -mrelocatable-lib iff both the input files are.  */
@@ -2319,9 +2317,9 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  error = TRUE;
 	  (*_bfd_error_handler)
-	    (_("%s: uses different e_flags (0x%lx) fields "
+	    (_("%B: uses different e_flags (0x%lx) fields "
 	       "than previous modules (0x%lx)"),
-	     bfd_archive_filename (ibfd), (long) new_flags, (long) old_flags);
+	     ibfd, (long) new_flags, (long) old_flags);
 	}
 
       if (error)
@@ -3561,8 +3559,8 @@ static void
 bad_shared_reloc (bfd *abfd, enum elf_ppc_reloc_type r_type)
 {
   (*_bfd_error_handler)
-    (_("%s: relocation %s cannot be used when making a shared object"),
-     bfd_archive_filename (abfd),
+    (_("%B: relocation %s cannot be used when making a shared object"),
+     abfd,
      ppc_elf_howto_table[r_type]->name);
   bfd_set_error (bfd_error_bad_value);
 }
@@ -3588,9 +3586,8 @@ ppc_elf_check_relocs (bfd *abfd,
     return TRUE;
 
 #ifdef DEBUG
-  fprintf (stderr, "ppc_elf_check_relocs called for section %s in %s\n",
-	   bfd_get_section_name (abfd, sec),
-	   bfd_archive_filename (abfd));
+  _bfd_error_handler ("ppc_elf_check_relocs called for section %A in %B",
+		      sec, abfd);
 #endif
 
   /* Initialize howto table if not already done.  */
@@ -3767,10 +3764,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      /* It does not make sense to have a procedure linkage
 		 table entry for a local symbol.  */
-	      (*_bfd_error_handler) (_("%s(%s+0x%lx): %s reloc against "
+	      (*_bfd_error_handler) (_("%B(%A+0x%lx): %s reloc against "
 				       "local symbol"),
-				     bfd_archive_filename (abfd),
-				     sec->name,
+				     abfd,
+				     sec,
 				     (long) rel->r_offset,
 				     ppc_elf_howto_table[r_type]->name);
 	      bfd_set_error (bfd_error_bad_value);
@@ -4664,12 +4661,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
   bfd_boolean ret = TRUE;
 
 #ifdef DEBUG
-  fprintf (stderr, "ppc_elf_relocate_section called for %s section %s, "
-	   "%ld relocations%s\n",
-	   bfd_archive_filename (input_bfd),
-	   bfd_section_name(input_bfd, input_section),
-	   (long) input_section->reloc_count,
-	   (info->relocatable) ? " (relocatable)" : "");
+  _bfd_error_handler ("ppc_elf_relocate_section called for %B section %A, "
+		      "%ld relocations%s",
+		      input_bfd, input_section,
+		      (long) input_section->reloc_count,
+		      (info->relocatable) ? " (relocatable)" : "");
 #endif
 
   if (info->relocatable)
@@ -4972,8 +4968,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	{
 	default:
 	  (*_bfd_error_handler)
-	    (_("%s: unknown relocation type %d for symbol %s"),
-	     bfd_archive_filename (input_bfd), (int) r_type, sym_name);
+	    (_("%B: unknown relocation type %d for symbol %s"),
+	     input_bfd, (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -5223,9 +5219,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	       got at entry m+n bears little relation to the entry m.  */
 	    if (addend != 0)
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): non-zero addend on %s reloc against `%s'"),
-		 bfd_archive_filename (input_bfd),
-		 bfd_get_section_name (input_bfd, input_section),
+		(_("%B(%A+0x%lx): non-zero addend on %s reloc against `%s'"),
+		 input_bfd,
+		 input_section,
 		 (long) rel->r_offset,
 		 howto->name,
 		 sym_name);
@@ -5534,9 +5530,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		       && (name[5] == 0 || name[5] == '.'))))
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: the target (%s) of a %s relocation is "
+		  (_("%B: the target (%s) of a %s relocation is "
 		     "in the wrong output section (%s)"),
-		   bfd_archive_filename (input_bfd),
+		   input_bfd,
 		   sym_name,
 		   howto->name,
 		   name);
@@ -5560,9 +5556,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		   || strncmp (name, ".sbss2", 6) == 0))
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: the target (%s) of a %s relocation is "
+		  (_("%B: the target (%s) of a %s relocation is "
 		     "in the wrong output section (%s)"),
-		   bfd_archive_filename (input_bfd),
+		   input_bfd,
 		   sym_name,
 		   howto->name,
 		   name);
@@ -5619,9 +5615,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    else
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: the target (%s) of a %s relocation is "
+		  (_("%B: the target (%s) of a %s relocation is "
 		     "in the wrong output section (%s)"),
-		   bfd_archive_filename (input_bfd),
+		   input_bfd,
 		   sym_name,
 		   howto->name,
 		   name);
@@ -5674,8 +5670,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_RELST_HA:
 	case R_PPC_EMB_BIT_FLD:
 	  (*_bfd_error_handler)
-	    (_("%s: relocation %s is not yet supported for symbol %s."),
-	     bfd_archive_filename (input_bfd),
+	    (_("%B: relocation %s is not yet supported for symbol %s."),
+	     input_bfd,
 	     howto->name,
 	     sym_name);
 
@@ -5729,9 +5725,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
-	     bfd_archive_filename (input_bfd),
-	     bfd_get_section_name (input_bfd, input_section),
+	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	     input_bfd,
+	     input_section,
 	     (long) rel->r_offset,
 	     howto->name,
 	     sym_name);
@@ -5779,9 +5775,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): %s reloc against `%s': error %d"),
-		 bfd_archive_filename (input_bfd),
-		 bfd_get_section_name (input_bfd, input_section),
+		(_("%B(%A+0x%lx): %s reloc against `%s': error %d"),
+		 input_bfd, input_section,
 		 (long) rel->r_offset, howto->name, sym_name, (int) r);
 	      ret = FALSE;
 	    }
@@ -6023,20 +6018,20 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
       length = asec->size;
       if (length < 24)
 	{
-	  error_message = _("corrupt or empty %s section in %s");
+	  error_message = _("corrupt or empty %s section in %B");
 	  goto fail;
 	}
 
       if (bfd_seek (ibfd, asec->filepos, SEEK_SET) != 0
 	  || (bfd_bread (buffer + offset, length, ibfd) != length))
 	{
-	  error_message = _("unable to read in %s section from %s");
+	  error_message = _("unable to read in %s section from %B");
 	  goto fail;
 	}
 
       /* Process the contents of the section.  */
       ptr = buffer + offset;
-      error_message = _("corrupt %s section in %s");
+      error_message = _("corrupt %s section in %B");
 
       /* Verify the contents of the header.  Note - we have to
 	 extract the values this way in order to allow for a
@@ -6079,14 +6074,13 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
 
   if (! bfd_set_section_size (abfd, asec, output_section_size))
     ibfd = abfd,
-      error_message = _("warning: unable to set size of %s section in %s");
+      error_message = _("warning: unable to set size of %s section in %B");
 
  fail:
   free (buffer);
 
   if (error_message)
-    (*_bfd_error_handler) (error_message, APUINFO_SECTION_NAME,
-			   bfd_archive_filename (ibfd));
+    (*_bfd_error_handler) (error_message, ibfd, APUINFO_SECTION_NAME);
 }
 
 

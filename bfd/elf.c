@@ -292,8 +292,8 @@ bfd_elf_string_from_elf_section (bfd *abfd,
   if (strindex >= hdr->sh_size)
     {
       (*_bfd_error_handler)
-	(_("%s: invalid string offset %u >= %lu for section `%s'"),
-	 bfd_archive_filename (abfd), strindex, (unsigned long) hdr->sh_size,
+	(_("%B: invalid string offset %u >= %lu for section `%s'"),
+	 abfd, strindex, (unsigned long) hdr->sh_size,
 	 ((shindex == elf_elfheader(abfd)->e_shstrndx
 	   && strindex == hdr->sh_name)
 	  ? ".shstrtab"
@@ -535,8 +535,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      if (idx >= shnum)
 			{
 			  ((*_bfd_error_handler)
-			   (_("%s: invalid SHT_GROUP entry"),
-			    bfd_archive_filename (abfd)));
+			   (_("%B: invalid SHT_GROUP entry"), abfd));
 			  idx = 0;
 			}
 		      dest->shdr = elf_elfsections (abfd)[idx];
@@ -606,8 +605,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 
   if (elf_group_name (newsect) == NULL)
     {
-      (*_bfd_error_handler) (_("%s: no group info for section %s"),
-			     bfd_archive_filename (abfd), newsect->name);
+      (*_bfd_error_handler) (_("%B: no group info for section %A"),
+			     abfd, newsect);
     }
   return TRUE;
 }
@@ -643,8 +642,8 @@ _bfd_elf_setup_group_pointers (bfd *abfd)
 	  {
 	    /* There are some unknown sections in the group.  */
 	    (*_bfd_error_handler)
-	      (_("%s: unknown [%d] section `%s' in group [%s]"),
-	       bfd_archive_filename (abfd),
+	      (_("%B: unknown [%d] section `%s' in group [%s]"),
+	       abfd,
 	       (unsigned int) idx->shdr->sh_type,
 	       elf_string_from_elf_strtab (abfd, idx->shdr->sh_name),
 	       shdr->bfd_section->name);
@@ -1904,8 +1903,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    || hdr->sh_link >= num_sec)
 	  {
 	    ((*_bfd_error_handler)
-	     (_("%s: invalid link %lu for reloc section %s (index %u)"),
-	      bfd_archive_filename (abfd), hdr->sh_link, name, shindex));
+	     (_("%B: invalid link %lu for reloc section %s (index %u)"),
+	      abfd, hdr->sh_link, name, shindex));
 	    return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 	  }
 
@@ -2895,15 +2894,9 @@ assign_section_numbers (bfd *abfd)
 			  const struct elf_backend_data *bed
 			    = get_elf_backend_data (abfd);
 			  if (bed->link_order_error_handler)
-			    {
-			      char *name = bfd_get_section_ident (s);
-			      bed->link_order_error_handler
-				(_("%s: warning: sh_link not set for section `%s'"),
-				 bfd_archive_filename (abfd),
-				 name ? name : s->name);
-			      if (name)
-				free (name);
-			    }
+			    bed->link_order_error_handler
+			      (_("%B: warning: sh_link not set for section `%S'"),
+			       abfd, s);
 			}
 		      else
 			{
@@ -4791,8 +4784,8 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
       /* This case can occur when using --strip-symbol on a symbol
          which is used in a relocation entry.  */
       (*_bfd_error_handler)
-	(_("%s: symbol `%s' required but not present"),
-	 bfd_archive_filename (abfd), bfd_asymbol_name (asym_ptr));
+	(_("%B: symbol `%s' required but not present"),
+	 abfd, bfd_asymbol_name (asym_ptr));
       bfd_set_error (bfd_error_no_symbols);
       return -1;
     }
@@ -5079,8 +5072,8 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	     a warning is produced.  */
 	  if (segment->p_type == PT_LOAD)
 	    (*_bfd_error_handler)
-	      (_("%s: warning: Empty loadable segment detected, is this intentional ?\n"),
-	       bfd_archive_filename (ibfd));
+	      (_("%B: warning: Empty loadable segment detected, is this intentional ?\n"),
+	       ibfd);
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -6503,8 +6496,8 @@ _bfd_elf_validate_reloc (bfd *abfd, arelent *areloc)
 
  fail:
   (*_bfd_error_handler)
-    (_("%s: unsupported relocation type %s"),
-     bfd_archive_filename (abfd), areloc->howto->name);
+    (_("%B: unsupported relocation type %s"),
+     abfd, areloc->howto->name);
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }

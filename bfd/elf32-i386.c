@@ -323,8 +323,8 @@ elf_i386_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
       && ((indx = r_type - R_386_vt_offset) - R_386_tls
 	  >= R_386_vt - R_386_tls))
     {
-      (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
-			     bfd_archive_filename (abfd), (int) r_type);
+      (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
+			     abfd, (int) r_type);
       indx = R_386_NONE;
     }
   cache_ptr->howto = &elf_howto_table[indx];
@@ -861,8 +861,8 @@ elf_i386_check_relocs (bfd *abfd,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
-				 bfd_archive_filename (abfd),
+	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
+				 abfd,
 				 r_symndx);
 	  return FALSE;
 	}
@@ -969,9 +969,9 @@ elf_i386_check_relocs (bfd *abfd,
 		else
 		  {
 		    (*_bfd_error_handler)
-		      (_("%s: `%s' accessed both as normal and "
+		      (_("%B: `%s' accessed both as normal and "
 			 "thread local symbol"),
-		       bfd_archive_filename (abfd),
+		       abfd,
 		       h ? h->root.root.string : "<local>");
 		    return FALSE;
 		  }
@@ -1086,8 +1086,8 @@ elf_i386_check_relocs (bfd *abfd,
 				 name + 4) != 0)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: bad relocation section name `%s\'"),
-			 bfd_archive_filename (abfd), name);
+			(_("%B: bad relocation section name `%s\'"),
+			 abfd, name);
 		    }
 
 		  if (htab->elf.dynobj == NULL)
@@ -2039,13 +2039,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
 	      >= R_386_tls - R_386_ext))
 	{
-	  char *name = bfd_get_section_ident (input_section);
 	  (*_bfd_error_handler)
-	    (_("%s: unrecognized relocation (0x%x) in section `%s'"),
-	     bfd_archive_filename (input_bfd), r_type,
-	     name ? name : input_section->name);
-	  if (name)
-	    free (name);
+	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
+	     input_bfd, input_section, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -2908,9 +2904,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	     bfd_archive_filename (input_bfd),
-	     bfd_get_section_name (input_bfd, input_section),
+	    (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
+	     input_bfd,
+	     input_section,
 	     (long) rel->r_offset,
 	     h->root.root.string);
 	  return FALSE;
@@ -2947,9 +2943,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
-		 bfd_archive_filename (input_bfd),
-		 bfd_get_section_name (input_bfd, input_section),
+		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }

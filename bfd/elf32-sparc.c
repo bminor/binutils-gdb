@@ -913,9 +913,8 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
-				 bfd_archive_filename (abfd),
-				 r_symndx);
+	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
+				 abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -1037,9 +1036,8 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 		else
 		  {
 		    (*_bfd_error_handler)
-		      (_("%s: `%s' accessed both as normal and thread local symbol"),
-		       bfd_archive_filename (abfd),
-		       h ? h->root.root.string : "<local>");
+		      (_("%B: `%s' accessed both as normal and thread local symbol"),
+		       abfd, h ? h->root.root.string : "<local>");
 		    return FALSE;
 		  }
 	      }
@@ -2495,8 +2493,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			    {
 			      BFD_FAIL ();
 			      (*_bfd_error_handler)
-				(_("%s: probably compiled without -fPIC?"),
-				 bfd_archive_filename (input_bfd));
+				(_("%B: probably compiled without -fPIC?"),
+				 input_bfd);
 			      bfd_set_error (bfd_error_bad_value);
 			      return FALSE;
 			    }
@@ -2853,9 +2851,9 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
-	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	   bfd_archive_filename (input_bfd),
-	   bfd_get_section_name (input_bfd, input_section),
+	  (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
+	   input_bfd,
+	   input_section,
 	   (long) rel->r_offset,
 	   h->root.root.string);
 
@@ -3318,8 +3316,7 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
     {
       error = TRUE;
       (*_bfd_error_handler)
-	(_("%s: compiled for a 64 bit system and target is 32 bit"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: compiled for a 64 bit system and target is 32 bit"), ibfd);
     }
   else if ((ibfd->flags & DYNAMIC) == 0)
     {
@@ -3332,8 +3329,7 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
       && previous_ibfd_e_flags != (unsigned long) -1)
     {
       (*_bfd_error_handler)
-	(_("%s: linking little endian files with big endian files"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: linking little endian files with big endian files"), ibfd);
       error = TRUE;
     }
   previous_ibfd_e_flags = elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA;

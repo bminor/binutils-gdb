@@ -1672,9 +1672,8 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
       /* This case occurs, e.g., for the *DEBUG* section of a COFF
 	 file.  */
       (*_bfd_error_handler)
-	("%s: can not represent section for symbol `%s' in a.out object file format",
-	 bfd_archive_filename (abfd),
-	 cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
+	("%B: can not represent section for symbol `%s' in a.out object file format",
+	 abfd, cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
     }
@@ -1700,8 +1699,8 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
   else
     {
       (*_bfd_error_handler)
-	("%s: can not represent section `%s' in a.out object file format",
-	 bfd_archive_filename (abfd), bfd_get_section_name (abfd, sec));
+	("%B: can not represent section `%A' in a.out object file format",
+	 abfd, sec);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
     }

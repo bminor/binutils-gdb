@@ -1063,8 +1063,8 @@ find_thumb_glue (info, name, input_bfd)
 
   if (myh == NULL)
     /* xgettext:c-format */
-    _bfd_error_handler (_("%s: unable to find THUMB glue '%s' for `%s'"),
-			bfd_archive_filename (input_bfd), tmp_name, name);
+    _bfd_error_handler (_("%B: unable to find THUMB glue '%s' for `%s'"),
+			input_bfd, tmp_name, name);
 
   free (tmp_name);
 
@@ -1093,8 +1093,8 @@ find_arm_glue (info, name, input_bfd)
 
   if (myh == NULL)
     /* xgettext:c-format */
-    _bfd_error_handler (_("%s: unable to find ARM glue '%s' for `%s'"),
-			bfd_archive_filename (input_bfd), tmp_name, name);
+    _bfd_error_handler (_("%B: unable to find ARM glue '%s' for `%s'"),
+			input_bfd, tmp_name, name);
 
   free (tmp_name);
 
@@ -1395,16 +1395,11 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			  if (h_sec->owner != NULL
 			      && INTERWORK_SET (h_sec->owner)
 			      && ! INTERWORK_FLAG (h_sec->owner))
-			    {
-			      _bfd_error_handler
-				/* xgettext:c-format */
-				(_("%s(%s): warning: interworking not enabled."),
-				 bfd_archive_filename (h_sec->owner), name);
-			      _bfd_error_handler
-				/* xgettext:c-format */
-				(_("  first occurrence: %s: arm call to thumb"),
-				 bfd_archive_filename (input_bfd));
-			    }
+			    _bfd_error_handler
+			      /* xgettext:c-format */
+			      (_("%B(%s): warning: interworking not enabled.\n"
+				 "  first occurrence: %B: arm call to thumb"),
+			       h_sec->owner, input_bfd, name);
 
 			  --my_offset;
 			  myh->root.u.def.value = my_offset;
@@ -1490,18 +1485,12 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			      && INTERWORK_SET (h_sec->owner)
 			      && ! INTERWORK_FLAG (h_sec->owner)
 			      && ! globals->support_old_code)
-			    {
-			      _bfd_error_handler
-				/* xgettext:c-format */
-				(_("%s(%s): warning: interworking not enabled."),
-				 bfd_archive_filename (h_sec->owner), name);
-			      _bfd_error_handler
-				/* xgettext:c-format */
-				(_("  first occurrence: %s: thumb call to arm"),
-				 bfd_archive_filename (input_bfd));
-			      _bfd_error_handler
-				(_("  consider relinking with --support-old-code enabled"));
-			    }
+			    _bfd_error_handler
+			      /* xgettext:c-format */
+			      (_("%B(%s): warning: interworking not enabled.\n"
+				 "  first occurrence: %B: thumb call to arm\n"
+				 "  consider relinking with --support-old-code enabled"),
+			       h_sec->owner, input_bfd, name);
 
 			  -- my_offset;
 			  myh->root.u.def.value = my_offset;
@@ -1795,10 +1784,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	case bfd_reloc_outofrange:
 	  (*_bfd_error_handler)
-	    (_("%s: bad reloc address 0x%lx in section `%s'"),
-	     bfd_archive_filename (input_bfd),
-	     (unsigned long) rel->r_vaddr,
-	     bfd_get_section_name (input_bfd, input_section));
+	    (_("%B: bad reloc address 0x%lx in section `%A'"),
+	     input_bfd, input_section, (unsigned long) rel->r_vaddr);
 	  return FALSE;
 	case bfd_reloc_overflow:
 	  {
@@ -2139,8 +2126,8 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 	  /* If the index is outside of the range of our table, something has gone wrong.  */
 	  if (symndx >= obj_conv_table_size (abfd))
 	    {
-	      _bfd_error_handler (_("%s: illegal symbol index in reloc: %d"),
-				  bfd_archive_filename (abfd), symndx);
+	      _bfd_error_handler (_("%B: illegal symbol index in reloc: %d"),
+				  abfd, symndx);
 	      continue;
 	    }
 
@@ -2272,9 +2259,10 @@ coff_arm_merge_private_bfd_data (ibfd, obfd)
 	    {
 	      _bfd_error_handler
 		/* xgettext: c-format */
-		(_("ERROR: %s is compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
-		 bfd_archive_filename (ibfd), APCS_26_FLAG (ibfd) ? 26 : 32,
-		 bfd_get_filename (obfd), APCS_26_FLAG (obfd) ? 26 : 32
+		(_("ERROR: %B is compiled for APCS-%d, whereas %B is compiled for APCS-%d"),
+		 ibfd, obfd,
+		 APCS_26_FLAG (ibfd) ? 26 : 32,
+		 APCS_26_FLAG (obfd) ? 26 : 32
 		 );
 
 	      bfd_set_error (bfd_error_wrong_format);
@@ -2287,13 +2275,12 @@ coff_arm_merge_private_bfd_data (ibfd, obfd)
 
 	      if (APCS_FLOAT_FLAG (ibfd))
 		/* xgettext: c-format */
-		msg = _("ERROR: %s passes floats in float registers, whereas %s passes them in integer registers");
+		msg = _("ERROR: %B passes floats in float registers, whereas %B passes them in integer registers");
 	      else
 		/* xgettext: c-format */
-		msg = _("ERROR: %s passes floats in integer registers, whereas %s passes them in float registers");
+		msg = _("ERROR: %B passes floats in integer registers, whereas %B passes them in float registers");
 
-	      _bfd_error_handler (msg, bfd_archive_filename (ibfd),
-				  bfd_get_filename (obfd));
+	      _bfd_error_handler (msg, ibfd, obfd);
 
 	      bfd_set_error (bfd_error_wrong_format);
 	      return FALSE;
@@ -2305,12 +2292,11 @@ coff_arm_merge_private_bfd_data (ibfd, obfd)
 
 	      if (PIC_FLAG (ibfd))
 		/* xgettext: c-format */
-		msg = _("ERROR: %s is compiled as position independent code, whereas target %s is absolute position");
+		msg = _("ERROR: %B is compiled as position independent code, whereas target %B is absolute position");
 	      else
 		/* xgettext: c-format */
-		msg = _("ERROR: %s is compiled as absolute position code, whereas target %s is position independent");
-	      _bfd_error_handler (msg, bfd_archive_filename (ibfd),
-				  bfd_get_filename (obfd));
+		msg = _("ERROR: %B is compiled as absolute position code, whereas target %B is position independent");
+	      _bfd_error_handler (msg, ibfd, obfd);
 
 	      bfd_set_error (bfd_error_wrong_format);
 	      return FALSE;
@@ -2337,13 +2323,12 @@ coff_arm_merge_private_bfd_data (ibfd, obfd)
 
 	      if (INTERWORK_FLAG (ibfd))
 		/* xgettext: c-format */
-		msg = _("Warning: %s supports interworking, whereas %s does not");
+		msg = _("Warning: %B supports interworking, whereas %B does not");
 	      else
 		/* xgettext: c-format */
-		msg = _("Warning: %s does not support interworking, whereas %s does");
+		msg = _("Warning: %B does not support interworking, whereas %B does");
 
-	      _bfd_error_handler (msg, bfd_archive_filename (ibfd),
-				  bfd_get_filename (obfd));
+	      _bfd_error_handler (msg, ibfd, obfd);
 	    }
 	}
       else
@@ -2438,12 +2423,12 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
     {
       if (flag)
 	/* xgettext: c-format */
-	_bfd_error_handler (_("Warning: Not setting interworking flag of %s since it has already been specified as non-interworking"),
-			    bfd_archive_filename (abfd));
+	_bfd_error_handler (_("Warning: Not setting interworking flag of %B since it has already been specified as non-interworking"),
+			    abfd);
       else
 	/* xgettext: c-format */
-	_bfd_error_handler (_("Warning: Clearing the interworking flag of %s due to outside request"),
-			    bfd_archive_filename (abfd));
+	_bfd_error_handler (_("Warning: Clearing the interworking flag of %B due to outside request"),
+			    abfd);
       flag = 0;
     }
 
@@ -2502,9 +2487,8 @@ coff_arm_copy_private_bfd_data (src, dest)
 		{
 		  /* xgettext:c-format */
 		  _bfd_error_handler (("\
-Warning: Clearing the interworking flag of %s because non-interworking code in %s has been linked with it"),
-				      bfd_get_filename (dest),
-				      bfd_archive_filename (src));
+Warning: Clearing the interworking flag of %B because non-interworking code in %B has been linked with it"),
+				      dest, src);
 		}
 
 	      SET_INTERWORK_FLAG (dest, 0);

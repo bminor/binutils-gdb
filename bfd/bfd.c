@@ -406,23 +406,150 @@ CODE_FRAGMENT
 
 static const char *_bfd_error_program_name;
 
-/* This is the default routine to handle BFD error messages.  */
+/* This is the default routine to handle BFD error messages.
+   Like fprintf (stderr, ...), but also handles some extra format specifiers.
+
+   %A section name from section.  For group components, print group name too.
+   %B file name from bfd.  For archive components, prints archive too.
+ */
 
 void
-_bfd_default_error_handler (const char *s, ...)
+_bfd_default_error_handler (const char *fmt, ...)
 {
-  va_list p;
+  va_list ap;
+  char *bufp;
+  const char *new_fmt, *p;
+  size_t avail = 1000;
+  char buf[1000];
 
   if (_bfd_error_program_name != NULL)
     fprintf (stderr, "%s: ", _bfd_error_program_name);
   else
     fprintf (stderr, "BFD: ");
 
-  va_start (p, s);
-  vfprintf (stderr, s, p);
-  va_end (p);
+  va_start (ap, fmt);
+  new_fmt = fmt;
+  bufp = buf;
 
-  fprintf (stderr, "\n");
+  /* Reserve enough space for the existing format string.  */
+  avail -= strlen (fmt) + 1;
+  if (avail > 1000)
+    abort ();
+
+  p = fmt;
+  while (*p != '\0')
+    {
+      char *q;
+      size_t len, extra, trim;
+
+      p = strchr (p, '%');
+      if (p == NULL || p[1] == '\0')
+	{
+	  if (new_fmt == buf)
+	    {
+	      len = strlen (fmt);
+	      memcpy (bufp, fmt, len + 1);
+	    }
+	  break;
+	}
+
+      if (p[1] == 'A' || p[1] == 'B')
+	{
+	  len = p - fmt;
+	  memcpy (bufp, fmt, len);
+	  bufp += len;
+	  fmt = p + 2;
+	  new_fmt = buf;
+
+	  /* If we run out of space, tough, you lose your ridiculously
+	     long file or section name.  It's not safe to try to alloc
+	     memory here;  We might be printing an out of memory message.  */
+	  if (avail == 0)
+	    {
+	      *bufp++ = '*';
+	      *bufp++ = '*';
+	      *bufp = '\0';
+	    }
+	  else
+	    {
+	      if (p[1] == 'B')
+		{
+		  bfd *abfd = va_arg (ap, bfd *);
+		  if (abfd->my_archive)
+		    snprintf (bufp, avail, "%s(%s)",
+			      abfd->my_archive->filename, abfd->filename);
+		  else
+		    snprintf (bufp, avail, "%s", abfd->filename);
+		}
+	      else
+		{
+		  asection *sec = va_arg (ap, asection *);
+		  bfd *abfd = sec->owner;
+		  const char *group = NULL;
+		  struct coff_comdat_info *ci;
+
+		  if (abfd != NULL
+		      && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+		      && elf_next_in_group (sec) != NULL
+		      && (sec->flags & SEC_GROUP) == 0)
+		    group = elf_group_name (sec);
+		  else if (abfd != NULL
+			   && bfd_get_flavour (abfd) == bfd_target_coff_flavour
+			   && (ci = bfd_coff_get_comdat_section (sec->owner,
+								 sec)) != NULL)
+		    group = ci->name;
+		  if (group != NULL)
+		    snprintf (bufp, avail, "%s[%s]", sec->name, group);
+		  else
+		    snprintf (bufp, avail, "%s", sec->name);
+		}
+	      len = strlen (bufp);
+	      avail = avail - len + 2;
+
+	      /* We need to replace any '%' we printed by "%%".
+		 First count how many.  */
+	      q = bufp;
+	      bufp += len;
+	      extra = 0;
+	      while ((q = strchr (q, '%')) != NULL)
+		{
+		  ++q;
+		  ++extra;
+		}
+
+	      /* If there isn't room, trim off the end of the string.  */
+	      q = bufp;
+	      bufp += extra;
+	      if (extra > avail)
+		{
+		  trim = extra - avail;
+		  bufp -= trim;
+		  do
+		    {
+		      if (*--q == '%')
+			--extra;
+		    }
+		  while (--trim != 0);
+		  *q = '\0';
+		}
+
+	      /* Now double all '%' chars, shuffling the string as we go.  */
+	      while (extra != 0)
+		{
+		  while ((q[extra] = *q) != '%')
+		    --q;
+		  q[--extra] = '%';
+		  --q;
+		}
+	    }
+	}
+      p = p + 2;
+    }
+
+  vfprintf (stderr, new_fmt, ap);
+  va_end (ap);
+
+  putc ('\n', stderr);
 }
 
 /* This is a function pointer to the routine which should handle BFD
@@ -490,56 +617,6 @@ bfd_error_handler_type
 bfd_get_error_handler (void)
 {
   return _bfd_error_handler;
-}
-
-/*
-FUNCTION
-	bfd_archive_filename
-
-SYNOPSIS
-	const char *bfd_archive_filename (bfd *);
-
-DESCRIPTION
-	For a BFD that is a component of an archive, returns a string
-	with both the archive name and file name.  For other BFDs, just
-	returns the file name.
-*/
-
-const char *
-bfd_archive_filename (bfd *abfd)
-{
-  if (abfd == NULL)
-    return NULL;
-  
-  if (abfd->my_archive)
-    {
-      static size_t curr = 0;
-      static char *buf;
-      size_t needed;
-
-      needed = (strlen (bfd_get_filename (abfd->my_archive))
-		+ strlen (bfd_get_filename (abfd)) + 3);
-      if (needed > curr)
-	{
-	  if (curr)
-	    free (buf);
-	  curr = needed + (needed >> 1);
-	  buf = bfd_malloc (curr);
-	  /* If we can't malloc, fail safe by returning just the file
-	     name. This function is only used when building error
-	     messages.  */
-	  if (!buf)
-	    {
-	      curr = 0;
-	      return bfd_get_filename (abfd);
-	    }
-	}
-      sprintf (buf, "%s(%s)", bfd_get_filename (abfd->my_archive),
-	       bfd_get_filename (abfd));
-      return buf;
-    }
-  else
-    return bfd_get_filename (abfd);
 }
 
 /*
@@ -1416,47 +1493,4 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
      inside bfd_alloc'd memory.  The section hash is on a separate
      objalloc.  */
   bfd_hash_table_free (&preserve->section_htab);
-}
-
-/*
-FUNCTION
-	bfd_get_section_ident
-
-SYNOPSIS
-	char *bfd_get_section_ident (asection *sec);
-
-DESCRIPTION
-	This function returns "section name[group name]" in a malloced
-	buffer if @var{sec} is a member of an ELF section group and
-	returns NULL otherwise. The caller should free the non-NULL
-	return after use.
-
-*/
-
-char *
-bfd_get_section_ident (asection *sec)
-{
-  char *buf;
-  bfd_size_type nlen;
-  bfd_size_type glen;
-
-  if (sec->owner == NULL
-      || bfd_get_flavour (sec->owner) != bfd_target_elf_flavour
-      || elf_next_in_group (sec) == NULL
-      || (sec->flags & SEC_GROUP) != 0)
-    return NULL;
-
-  nlen = strlen (sec->name);
-  glen = strlen (elf_group_name (sec));
-  buf = bfd_malloc (nlen + glen + 2 + 1);
-  if (buf != NULL)
-    {
-      strcpy (buf, sec->name);
-      buf [nlen] = '[';
-      strcpy (&buf [nlen + 1], elf_group_name (sec));
-      buf [nlen + 1 + glen] = ']';
-      buf [nlen + 1 + glen + 1] = '\0';
-    }
-
-  return buf;
 }

@@ -641,9 +641,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
-				 bfd_archive_filename (abfd),
-				 r_symndx);
+	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
+				 abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -663,8 +662,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	  if (info->shared)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 bfd_archive_filename (abfd),
+		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		 abfd,
 		 x86_64_elf_howto_table[r_type].name,
 		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
@@ -731,9 +730,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		else
 		  {
 		    (*_bfd_error_handler)
-		      (_("%s: %s' accessed both as normal and thread local symbol"),
-		       bfd_archive_filename (abfd),
-		       h ? h->root.root.string : "<local>");
+		      (_("%B: %s' accessed both as normal and thread local symbol"),
+		       abfd, h ? h->root.root.string : "<local>");
 		    return FALSE;
 		  }
 	      }
@@ -789,8 +787,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 bfd_archive_filename (abfd),
+		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		 abfd,
 		 x86_64_elf_howto_table[r_type].name,
 		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
@@ -881,8 +879,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 				 name + 5) != 0)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: bad relocation section name `%s\'"),
-			 bfd_archive_filename (abfd), name);
+			(_("%B: bad relocation section name `%s\'"),
+			 abfd, name);
 		    }
 
 		  if (htab->elf.dynobj == NULL)
@@ -1954,8 +1952,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      && (input_section->flags & SEC_READONLY) != 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 bfd_archive_filename (input_bfd),
+		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		 input_bfd,
 		 x86_64_elf_howto_table[r_type].name,
 		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
@@ -2408,9 +2406,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
-	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	   bfd_archive_filename (input_bfd),
-	   bfd_get_section_name (input_bfd, input_section),
+	  (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
+	   input_bfd,
+	   input_section,
 	   (long) rel->r_offset,
 	   h->root.root.string);
 
@@ -2451,9 +2449,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
-		 bfd_archive_filename (input_bfd),
-		 bfd_get_section_name (input_bfd, input_section),
+		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }

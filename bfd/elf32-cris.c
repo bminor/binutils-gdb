@@ -918,11 +918,11 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else if (unresolved_reloc)
 		{
 		  _bfd_error_handler
-		    (_("%s: unresolvable relocation %s against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd),
+		    (_("%B(%A): unresolvable relocation %s against symbol `%s'"),
+		     input_bfd,
+		     input_section,
 		     cris_elf_howto_table[r_type].name,
-		     symname,
-		     bfd_get_section_name (input_bfd, input_section));
+		     symname);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -975,14 +975,14 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      (*_bfd_error_handler)
 		((h->got.offset == (bfd_vma) -1)
-		 ? _("%s: No PLT nor GOT for relocation %s against\
- symbol `%s' from %s section")
-		 : _("%s: No PLT for relocation %s against\
- symbol `%s' from %s section"),
-		 bfd_archive_filename (input_bfd),
+		 ? _("%B(%A): No PLT nor GOT for relocation %s"
+		     " against symbol `%s'")
+		 : _("%B(%A): No PLT for relocation %s"
+		     " against symbol `%s'"),
+		 input_bfd,
+		 input_section,
 		 cris_elf_howto_table[r_type].name,
-		 symname[0] != '\0' ? symname : _("[whose name is lost]"),
-		 bfd_get_section_name (input_bfd, input_section));
+		 symname[0] != '\0' ? symname : _("[whose name is lost]"));
 
 	      /* FIXME: Perhaps blaming input is not the right thing to
 		 do; this is probably an internal error.  But it is true
@@ -1103,19 +1103,21 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   allowed to pass us these kinds of things.  */
 		if (h == NULL)
 		  (*_bfd_error_handler)
-		    (_("%s: relocation %s with non-zero addend %d against local symbol from %s section"),
-		     bfd_archive_filename (input_bfd),
+		    (_("%B(%A): relocation %s with non-zero addend %d"
+		       " against local symbol"),
+		     input_bfd,
+		     input_section,
 		     cris_elf_howto_table[r_type].name,
-		     rel->r_addend,
-		     bfd_get_section_name (input_bfd, input_section));
+		     rel->r_addend);
 		else
 		  (*_bfd_error_handler)
-		    (_("%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd),
+		    (_("%B(%A): relocation %s with non-zero addend %d"
+		       " against symbol `%s'"),
+		     input_bfd,
+		     input_section,
 		     cris_elf_howto_table[r_type].name,
 		     rel->r_addend,
-		     symname[0] != '\0' ? symname : _("[whose name is lost]"),
-		     bfd_get_section_name (input_bfd, input_section));
+		     symname[0] != '\0' ? symname : _("[whose name is lost]"));
 
 		bfd_set_error (bfd_error_bad_value);
 		return FALSE;
@@ -1135,11 +1137,11 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   && h->root.type == bfd_link_hash_undefweak))))
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s is not allowed for global symbol: `%s' from %s section"),
-		 bfd_archive_filename (input_bfd),
+		(_("%B(%A): relocation %s is not allowed for global symbol: `%s'"),
+		 input_bfd,
+		 input_section,
 		 cris_elf_howto_table[r_type].name,
-		 symname,
-		 bfd_get_section_name (input_bfd, input_section));
+		 symname);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1150,10 +1152,10 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (sgot == NULL)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s in section %s with no GOT created"),
-		 bfd_archive_filename (input_bfd),
-		 cris_elf_howto_table[r_type].name,
-		 bfd_get_section_name (input_bfd, input_section));
+		(_("%B: relocation %s in section %A with no GOT created"),
+		 input_bfd,
+		 input_section,
+		 cris_elf_howto_table[r_type].name);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1269,8 +1271,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (sreloc == NULL)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: Internal inconsistency; no relocation section %s"),
-			 bfd_archive_filename (input_bfd),
+			(_("%B: Internal inconsistency; no relocation section %s"),
+			 input_bfd,
 			 name);
 
 		      bfd_set_error (bfd_error_bad_value);
@@ -2491,9 +2493,9 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	    {
 	      /* FIXME: How do we make this optionally a warning only?  */
 	      (*_bfd_error_handler)
-		(_("%s, section %s:\n  relocation %s should not be used in a shared object; recompile with -fPIC"),
-		 bfd_archive_filename (abfd),
-		 sec->name,
+		(_("%B, section %A:\n  relocation %s should not be used in a shared object; recompile with -fPIC"),
+		 abfd,
+		 sec,
 		 cris_elf_howto_table[r_type].name);
 	    }
 	  /* Fall through.  */
@@ -3011,9 +3013,9 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	((new_flags & EF_CRIS_UNDERSCORE)
-	 ? _("%s: uses _-prefixed symbols, but writing file with non-prefixed symbols")
-	 : _("%s: uses non-prefixed symbols, but writing file with _-prefixed symbols"),
-	 bfd_archive_filename (ibfd));
+	 ? _("%B: uses _-prefixed symbols, but writing file with non-prefixed symbols")
+	 : _("%B: uses non-prefixed symbols, but writing file with _-prefixed symbols"),
+	 ibfd);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }

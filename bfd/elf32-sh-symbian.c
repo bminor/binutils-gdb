@@ -125,8 +125,8 @@ sh_symbian_import_as (struct bfd_link_info *info, bfd * abfd,
 	  return TRUE;
 
 	bfd_set_error (bfd_error_invalid_operation);
-	_bfd_error_handler (_("%s: IMPORT AS directive for %s conceals previous IMPORT AS"),
-			    bfd_archive_filename (abfd), current_name);
+	_bfd_error_handler (_("%B: IMPORT AS directive for %s conceals previous IMPORT AS"),
+			    abfd, current_name);
 	return FALSE;	    
       }
 
@@ -377,8 +377,8 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 	    fprintf (stderr, "offset into .directive section: %d\n", directive - contents);
 	  
 	  bfd_set_error (bfd_error_invalid_operation);
-	  _bfd_error_handler (_("%s: Unrecognised .directive command: %s"),
-			      bfd_archive_filename (abfd), directive);
+	  _bfd_error_handler (_("%B: Unrecognised .directive command: %s"),
+			      abfd, directive);
 	  break;
 	}
     }
@@ -495,8 +495,8 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 					   & new_value, & new_hash, & skip, & override, & type_change_ok,
 					   & size_change_ok))
 		{
-		  _bfd_error_handler (_("%s: Failed to add renamed symbol %s"),
-				      bfd_archive_filename (input_bfd), ptr->new_name);
+		  _bfd_error_handler (_("%B: Failed to add renamed symbol %s"),
+				      input_bfd, ptr->new_name);
 		  continue;
 		}
 	      /* XXX - should we check psec, skip, override etc ?  */

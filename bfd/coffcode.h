@@ -1071,8 +1071,8 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 	  /* Generate a warning message rather using the 'unhandled'
 	     variable as this will allow some .sys files generate by
 	     other toolchains to be processed.  See bugzilla issue 196.  */
-	  _bfd_error_handler (_("%s: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"),
-	     bfd_archive_filename (abfd), name);
+	  _bfd_error_handler (_("%B: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"),
+			      abfd, name);
 #endif
 	  break;
 	case IMAGE_SCN_MEM_EXECUTE:
@@ -1127,8 +1127,8 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
       if (unhandled != NULL)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s (%s): Section flag %s (0x%x) ignored"),
-	     bfd_archive_filename (abfd), name, unhandled, flag);
+	    (_("%B (%s): Section flag %s (0x%x) ignored"),
+	     abfd, name, unhandled, flag);
 	  result = FALSE;
 	}
     }
@@ -4445,8 +4445,7 @@ coff_slurp_line_table (abfd, asect)
   if (native_lineno == NULL)
     {
       (*_bfd_error_handler)
-        (_("%s: warning: line number table read failed"),
-	 bfd_archive_filename (abfd));
+        (_("%B: warning: line number table read failed"), abfd);
       return FALSE;
     }
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
@@ -4478,8 +4477,8 @@ coff_slurp_line_table (abfd, asect)
 		  || (bfd_vma) symndx >= obj_raw_syment_count (abfd))
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: illegal symbol index %ld in line numbers"),
-		     bfd_archive_filename (abfd), dst.l_addr.l_symndx);
+		    (_("%B: warning: illegal symbol index %ld in line numbers"),
+		     abfd, dst.l_addr.l_symndx);
 		  symndx = 0;
 		  warned = TRUE;
 		}
@@ -4492,9 +4491,8 @@ coff_slurp_line_table (abfd, asect)
 	      if (sym->lineno != NULL && ! warned)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: duplicate line number information for `%s'"),
-		     bfd_archive_filename (abfd),
-		     bfd_asymbol_name (&sym->symbol));
+		    (_("%B: warning: duplicate line number information for `%s'"),
+		     abfd, bfd_asymbol_name (&sym->symbol));
 		}
 	      sym->lineno = cache_ptr;
 	    }
@@ -4848,8 +4846,8 @@ coff_slurp_symbol_table (abfd)
 	    case C_HIDDEN:	/* Ext symbol in dmert public lib.  */
 	    default:
 	      (*_bfd_error_handler)
-		(_("%s: Unrecognized storage class %d for %s symbol `%s'"),
-		 bfd_archive_filename (abfd), src->u.syment.n_sclass,
+		(_("%B: Unrecognized storage class %d for %s symbol `%s'"),
+		 abfd, src->u.syment.n_sclass,
 		 dst->symbol.section->name, dst->symbol.name);
 	      dst->symbol.flags = BSF_DEBUGGING;
 	      dst->symbol.value = (src->u.syment.n_value);
@@ -4981,9 +4979,8 @@ coff_classify_symbol (abfd, syment)
       char buf[SYMNMLEN + 1];
 
       (*_bfd_error_handler)
-	(_("warning: %s: local symbol `%s' has no section"),
-	 bfd_archive_filename (abfd),
-	 _bfd_coff_internal_syment_name (abfd, syment, buf));
+	(_("warning: %B: local symbol `%s' has no section"),
+	 abfd, _bfd_coff_internal_syment_name (abfd, syment, buf));
     }
 
   return COFF_SYMBOL_LOCAL;
@@ -5088,8 +5085,8 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 	  if (dst.r_symndx < 0 || dst.r_symndx >= obj_conv_table_size (abfd))
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: warning: illegal symbol index %ld in relocs"),
-		 bfd_archive_filename (abfd), dst.r_symndx);
+		(_("%B: warning: illegal symbol index %ld in relocs"),
+		 abfd, dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
 	    }
@@ -5126,8 +5123,8 @@ coff_slurp_reloc_table (abfd, asect, symbols)
       if (cache_ptr->howto == NULL)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: illegal relocation type %d at address 0x%lx"),
-	     bfd_archive_filename (abfd), dst.r_type, (long) dst.r_vaddr);
+	    (_("%B: illegal relocation type %d at address 0x%lx"),
+	     abfd, dst.r_type, (long) dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

@@ -1399,9 +1399,8 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      if (sym_sec->output_section == NULL && dyn_h == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd), h->root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
+		    (_("%B(%A): warning: unresolvable relocation against symbol `%s'"),
+		     input_bfd, input_section, h->root.root.string);
 		  relocation = 0;
 		}
 	      else if (sym_sec->output_section)
@@ -1426,9 +1425,8 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      if (dyn_h == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd), h->root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
+		    (_("%B(%A): warning: unresolvable relocation against symbol `%s'"),
+		     input_bfd, input_section, h->root.root.string);
 		}
 	      relocation = 0;
 	    }
@@ -1442,9 +1440,8 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      if (dyn_h == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd), h->root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
+		    (_("%B(%A): warning: unresolvable relocation against symbol `%s'"),
+		     input_bfd, input_section, h->root.root.string);
 		}
 	      relocation = 0;
 	    }

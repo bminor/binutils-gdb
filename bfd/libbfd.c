@@ -823,11 +823,11 @@ _bfd_generic_verify_endian_match (bfd *ibfd, bfd *obfd)
       const char *msg;
 
       if (bfd_big_endian (ibfd))
-	msg = _("%s: compiled for a big endian system and target is little endian");
+	msg = _("%B: compiled for a big endian system and target is little endian");
       else
-	msg = _("%s: compiled for a little endian system and target is big endian");
+	msg = _("%B: compiled for a little endian system and target is big endian");
 
-      (*_bfd_error_handler) (msg, bfd_archive_filename (ibfd));
+      (*_bfd_error_handler) (msg, ibfd);
 
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;

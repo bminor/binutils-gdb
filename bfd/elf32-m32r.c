@@ -2606,8 +2606,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type < 0 || r_type >= (int) R_M32R_max)
 	{
-	  (*_bfd_error_handler) (_("%s: unknown relocation type %d"),
-				 bfd_archive_filename (input_bfd),
+	  (*_bfd_error_handler) (_("%B: unknown relocation type %d"),
+				 input_bfd,
 				 (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -3195,11 +3195,11 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		else
 		  {
 		    (*_bfd_error_handler)
-		      (_("%s: The target (%s) of an %s relocation is in the wrong section (%s)"),
-		       bfd_archive_filename (input_bfd),
+		      (_("%B: The target (%s) of an %s relocation is in the wrong section (%A)"),
+		       input_bfd,
+		       sec,
 		       sym_name,
-		       m32r_elf_howto_table[(int) r_type].name,
-		       bfd_get_section_name (abfd, sec));
+		       m32r_elf_howto_table[(int) r_type].name);
 		    /*bfd_set_error (bfd_error_bad_value); ??? why? */
 		    ret = FALSE;
 		    continue;
@@ -4262,8 +4262,7 @@ m32r_elf_merge_private_bfd_data (ibfd, obfd)
           || ((in_flags  & EF_M32R_ARCH) == E_M32R2_ARCH))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: Instruction set mismatch with previous modules"),
-	     bfd_archive_filename (ibfd));
+	    (_("%B: Instruction set mismatch with previous modules"), ibfd);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;

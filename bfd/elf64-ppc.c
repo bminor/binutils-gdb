@@ -2432,13 +2432,13 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       const char *msg;
 
       if (bfd_big_endian (ibfd))
-	msg = _("%s: compiled for a big endian system "
+	msg = _("%B: compiled for a big endian system "
 		"and target is little endian");
       else
-	msg = _("%s: compiled for a little endian system "
+	msg = _("%B: compiled for a little endian system "
 		"and target is big endian");
 
-      (*_bfd_error_handler) (msg, bfd_archive_filename (ibfd));
+      (*_bfd_error_handler) (msg, ibfd);
 
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
@@ -3205,9 +3205,8 @@ ppc_add_stub (const char *stub_name,
 				     TRUE, FALSE);
   if (stub_entry == NULL)
     {
-      (*_bfd_error_handler) (_("%s: cannot create stub entry %s"),
-			     bfd_archive_filename (section->owner),
-			     stub_name);
+      (*_bfd_error_handler) (_("%B: cannot create stub entry %s"),
+			     section->owner, stub_name);
       return NULL;
     }
 
@@ -4175,8 +4174,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 				 name + 5) != 0)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: bad relocation section name `%s\'"),
-			 bfd_archive_filename (abfd), name);
+			(_("%B: bad relocation section name `%s\'"),
+			 abfd, name);
 		      bfd_set_error (bfd_error_bad_value);
 		    }
 
@@ -5320,8 +5319,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 		 something silly in .opd with the assembler.  No .opd
 		 optimization for them!  */
 	      (*_bfd_error_handler)
-		(_("%s: .opd is not a regular array of opd entries"),
-		 bfd_archive_filename (ibfd));
+		(_("%B: .opd is not a regular array of opd entries"), ibfd);
 	      need_edit = FALSE;
 	      break;
 	    }
@@ -5330,8 +5328,8 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 	      || (r_type = ELF64_R_TYPE ((rel + 1)->r_info)) != R_PPC64_TOC)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: unexpected reloc type %u in .opd section"),
-		 bfd_archive_filename (ibfd), r_type);
+		(_("%B: unexpected reloc type %u in .opd section"),
+		 ibfd, r_type);
 	      need_edit = FALSE;
 	      break;
 	    }
@@ -5350,9 +5348,8 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 		sym_name = bfd_elf_local_sym_name (ibfd, sym);
 
 	      (*_bfd_error_handler)
-		(_("%s: undefined sym `%s' in .opd section"),
-		 bfd_archive_filename (ibfd),
-		 sym_name);
+		(_("%B: undefined sym `%s' in .opd section"),
+		 ibfd, sym_name);
 	      need_edit = FALSE;
 	      break;
 	    }
@@ -7913,10 +7910,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  else
 	    (*_bfd_error_handler)
 	      (sym_type == STT_TLS
-	       ? _("%s(%s+0x%lx): %s used with TLS symbol %s")
-	       : _("%s(%s+0x%lx): %s used with non-TLS symbol %s"),
-	       bfd_archive_filename (input_bfd),
-	       input_section->name,
+	       ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
+	       : _("%B(%A+0x%lx): %s used with non-TLS symbol %s"),
+	       input_bfd,
+	       input_section,
 	       (long) rel->r_offset,
 	       ppc64_elf_howto_table[r_type]->name,
 	       sym_name);
@@ -8314,21 +8311,21 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  || strcmp (input_section->output_section->name,
 				     ".fini") == 0)
 			(*_bfd_error_handler)
-			  (_("%s(%s+0x%lx): automatic multiple TOCs "
+			  (_("%B(%A+0x%lx): automatic multiple TOCs "
 			     "not supported using your crt files; "
 			     "recompile with -mminimal-toc or upgrade gcc"),
-			   bfd_archive_filename (input_bfd),
-			   input_section->name,
+			   input_bfd,
+			   input_section,
 			   (long) rel->r_offset);
 		      else
 			(*_bfd_error_handler)
-			  (_("%s(%s+0x%lx): sibling call optimization to `%s' "
+			  (_("%B(%A+0x%lx): sibling call optimization to `%s' "
 			     "does not allow automatic multiple TOCs; "
 			     "recompile with -mminimal-toc or "
 			     "-fno-optimize-sibling-calls, "
 			     "or make `%s' extern"),
-			   bfd_archive_filename (input_bfd),
-			   input_section->name,
+			   input_bfd,
+			   input_section,
 			   (long) rel->r_offset,
 			   sym_name,
 			   sym_name);
@@ -8424,8 +8421,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	{
 	default:
 	  (*_bfd_error_handler)
-	    (_("%s: unknown relocation type %d for symbol %s"),
-	     bfd_archive_filename (input_bfd), (int) r_type, sym_name);
+	    (_("%B: unknown relocation type %d for symbol %s"),
+	     input_bfd, (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -8964,8 +8961,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  /* These ones haven't been implemented yet.  */
 
 	  (*_bfd_error_handler)
-	    (_("%s: relocation %s is not supported for symbol %s."),
-	     bfd_archive_filename (input_bfd),
+	    (_("%B: relocation %s is not supported for symbol %s."),
+	     input_bfd,
 	     ppc64_elf_howto_table[r_type]->name, sym_name);
 
 	  bfd_set_error (bfd_error_invalid_operation);
@@ -9043,8 +9040,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (((relocation + addend) & mask) != 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: error: relocation %s not a multiple of %d"),
-		 bfd_archive_filename (input_bfd),
+		(_("%B: error: relocation %s not a multiple of %d"),
+		 input_bfd,
 		 ppc64_elf_howto_table[r_type]->name,
 		 mask + 1);
 	      bfd_set_error (bfd_error_bad_value);
@@ -9062,9 +9059,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
-	     bfd_archive_filename (input_bfd),
-	     bfd_get_section_name (input_bfd, input_section),
+	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	     input_bfd,
+	     input_section,
 	     (long) rel->r_offset,
 	     ppc64_elf_howto_table[(int) r_type]->name,
 	     h->root.root.string);
@@ -9108,9 +9105,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): %s reloc against `%s': error %d"),
-		 bfd_archive_filename (input_bfd),
-		 bfd_get_section_name (input_bfd, input_section),
+		(_("%B(%A+0x%lx): %s reloc against `%s': error %d"),
+		 input_bfd,
+		 input_section,
 		 (long) rel->r_offset,
 		 ppc64_elf_howto_table[r_type]->name,
 		 sym_name,

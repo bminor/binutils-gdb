@@ -1663,8 +1663,7 @@ _bfd_coff_read_string_table (abfd)
   if (strsize < STRING_SIZE_SIZE)
     {
       (*_bfd_error_handler)
-	(_("%s: bad string table size %lu"), bfd_archive_filename (abfd),
-	 (unsigned long) strsize);
+	(_("%B: bad string table size %lu"), abfd, (unsigned long) strsize);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }

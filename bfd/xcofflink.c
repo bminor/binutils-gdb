@@ -1240,8 +1240,8 @@ xcoff_link_add_symbols (abfd, info)
 	      if (enclosing == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: `%s' has line numbers but no enclosing section"),
-		     bfd_archive_filename (abfd), name);
+		    (_("%B: `%s' has line numbers but no enclosing section"),
+		     abfd, name);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -1293,8 +1293,8 @@ xcoff_link_add_symbols (abfd, info)
       if (sym.n_numaux == 0)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: class %d symbol `%s' has no aux entries"),
-	     bfd_archive_filename (abfd), sym.n_sclass, name);
+	    (_("%B: class %d symbol `%s' has no aux entries"),
+	     abfd, sym.n_sclass, name);
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}
@@ -1316,8 +1316,8 @@ xcoff_link_add_symbols (abfd, info)
 	{
 	default:
 	  (*_bfd_error_handler)
-	    (_("%s: symbol `%s' has unrecognized csect type %d"),
-	     bfd_archive_filename (abfd), name, smtyp);
+	    (_("%B: symbol `%s' has unrecognized csect type %d"),
+	     abfd, name, smtyp);
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 
@@ -1328,8 +1328,8 @@ xcoff_link_add_symbols (abfd, info)
 	      || aux.x_csect.x_scnlen.l != 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"),
-		 bfd_archive_filename (abfd), name, sym.n_sclass, sym.n_scnum,
+		(_("%B: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"),
+		 abfd, name, sym.n_sclass, sym.n_scnum,
 		 aux.x_csect.x_scnlen.l);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
@@ -1364,9 +1364,8 @@ xcoff_link_add_symbols (abfd, info)
 		  || aux.x_csect.x_scnlen.l != 0)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: XMC_TC0 symbol `%s' is class %d scnlen %d"),
-		     bfd_archive_filename (abfd), name, sym.n_sclass,
-		     aux.x_csect.x_scnlen.l);
+		    (_("%B: XMC_TC0 symbol `%s' is class %d scnlen %d"),
+		     abfd, name, sym.n_sclass, aux.x_csect.x_scnlen.l);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -1516,8 +1515,8 @@ xcoff_link_add_symbols (abfd, info)
 			> enclosing->vma + enclosing->size)))
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: csect `%s' not in enclosing section"),
-		   bfd_archive_filename (abfd), name);
+		  (_("%B: csect `%s' not in enclosing section"),
+		   abfd, name);
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
 	      }
@@ -1623,8 +1622,8 @@ xcoff_link_add_symbols (abfd, info)
 	    if (bad)
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: misplaced XTY_LD `%s'"),
-		   bfd_archive_filename (abfd), name);
+		  (_("%B: misplaced XTY_LD `%s'"),
+		   abfd, name);
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
 	      }
@@ -1954,8 +1953,8 @@ xcoff_link_add_symbols (abfd, info)
 	      if (*rel_csect == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: reloc %s:%d not in csect"),
-		     bfd_archive_filename (abfd), o->name, i);
+		    (_("%B: reloc %s:%d not in csect"),
+		     abfd, o->name, i);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -5283,9 +5282,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		      else
 			{
 			  (*_bfd_error_handler)
-			    (_("%s: loader reloc in unrecognized section `%s'"),
-			     bfd_archive_filename (input_bfd),
-			     sec->name);
+			    (_("%B: loader reloc in unrecognized section `%A'"),
+			     input_bfd, sec);
 			  bfd_set_error (bfd_error_nonrepresentable_section);
 			  return FALSE;
 			}
@@ -5305,8 +5303,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		      if (h->ldindx < 0 && ! quiet)
 			{
 			  (*_bfd_error_handler)
-			    (_("%s: `%s' in loader reloc but not loader sym"),
-			     bfd_archive_filename (input_bfd),
+			    (_("%B: `%s' in loader reloc but not loader sym"),
+			     input_bfd,
 			     h->root.root.string);
 			  bfd_set_error (bfd_error_bad_value);
 			  return FALSE;
@@ -5320,10 +5318,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		      && ! quiet)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: loader reloc in read-only section %s"),
-			 bfd_archive_filename (input_bfd),
-			 bfd_get_section_name (finfo->output_bfd,
-					       o->output_section));
+			(_("%B: loader reloc in read-only section %A"),
+			 input_bfd, o->output_section);
 		      bfd_set_error (bfd_error_invalid_operation);
 		      return FALSE;
 		    }

@@ -977,9 +977,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	      || strcmp (sec->output_section->name, ".fini") == 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: Can't relax br at 0x%lx in section `%s'. Please use brl or indirect branch."),
-		 bfd_archive_filename (sec->owner),
-		 (unsigned long) roff, sec->name);
+		(_("%B: Can't relax br at 0x%lx in section `%A'. Please use brl or indirect branch."),
+		 sec->owner, sec, (unsigned long) roff);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -3904,8 +3903,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
       if (r_type > R_IA64_MAX_RELOC_CODE)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: unknown relocation type %d"),
-	     bfd_archive_filename (input_bfd), (int)r_type);
+	    (_("%B: unknown relocation type %d"),
+	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
 	  continue;
@@ -4009,8 +4008,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  /* ??? People shouldn't be doing non-pic code in
 		     shared libraries nor dynamic executables.  */
 		  (*_bfd_error_handler)
-		    (_("%s: non-pic code with imm relocation against dynamic symbol `%s'"),
-		     bfd_archive_filename (input_bfd),
+		    (_("%B: non-pic code with imm relocation against dynamic symbol `%s'"),
+		     input_bfd,
 		     h->root.root.string);
 		  ret_val = FALSE;
 		  continue;
@@ -4074,8 +4073,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (dynamic_symbol_p)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: @gprel relocation against dynamic symbol %s"),
-		 bfd_archive_filename (input_bfd), h->root.root.string);
+		(_("%B: @gprel relocation against dynamic symbol %s"),
+		 input_bfd, h->root.root.string);
 	      ret_val = FALSE;
 	      continue;
 	    }
@@ -4134,8 +4133,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      /* ??? People shouldn't be doing non-pic code in
 			 shared libraries.  Hork.  */
 		      (*_bfd_error_handler)
-			(_("%s: linking non-pic code in a position independent executable"),
-			 bfd_archive_filename (input_bfd));
+			(_("%B: linking non-pic code in a position independent executable"),
+			 input_bfd);
 		      ret_val = FALSE;
 		      continue;
 		    }
@@ -4271,13 +4270,12 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      const char *msg;
 
 	      if (r_type == R_IA64_PCREL21BI)
-		msg = _("%s: @internal branch to dynamic symbol %s");
+		msg = _("%B: @internal branch to dynamic symbol %s");
 	      else if (r_type == R_IA64_PCREL21F || r_type == R_IA64_PCREL21M)
-		msg = _("%s: speculation fixup to dynamic symbol %s");
+		msg = _("%B: speculation fixup to dynamic symbol %s");
 	      else
-		msg = _("%s: @pcrel relocation against dynamic symbol %s");
-	      (*_bfd_error_handler) (msg, bfd_archive_filename (input_bfd),
-				     h->root.root.string);
+		msg = _("%B: @pcrel relocation against dynamic symbol %s");
+	      (*_bfd_error_handler) (msg, input_bfd, h->root.root.string);
 	      ret_val = FALSE;
 	      continue;
 	    }
@@ -4761,8 +4759,8 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
   if ((in_flags & EF_IA_64_TRAPNIL) != (out_flags & EF_IA_64_TRAPNIL))
     {
       (*_bfd_error_handler)
-	(_("%s: linking trap-on-NULL-dereference with non-trapping files"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: linking trap-on-NULL-dereference with non-trapping files"),
+	 ibfd);
 
       bfd_set_error (bfd_error_bad_value);
       ok = FALSE;
@@ -4770,8 +4768,8 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
   if ((in_flags & EF_IA_64_BE) != (out_flags & EF_IA_64_BE))
     {
       (*_bfd_error_handler)
-	(_("%s: linking big-endian files with little-endian files"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: linking big-endian files with little-endian files"),
+	 ibfd);
 
       bfd_set_error (bfd_error_bad_value);
       ok = FALSE;
@@ -4779,8 +4777,8 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
   if ((in_flags & EF_IA_64_ABI64) != (out_flags & EF_IA_64_ABI64))
     {
       (*_bfd_error_handler)
-	(_("%s: linking 64-bit files with 32-bit files"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: linking 64-bit files with 32-bit files"),
+	 ibfd);
 
       bfd_set_error (bfd_error_bad_value);
       ok = FALSE;
@@ -4788,8 +4786,8 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
   if ((in_flags & EF_IA_64_CONS_GP) != (out_flags & EF_IA_64_CONS_GP))
     {
       (*_bfd_error_handler)
-	(_("%s: linking constant-gp files with non-constant-gp files"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: linking constant-gp files with non-constant-gp files"),
+	 ibfd);
 
       bfd_set_error (bfd_error_bad_value);
       ok = FALSE;
@@ -4798,8 +4796,8 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
       != (out_flags & EF_IA_64_NOFUNCDESC_CONS_GP))
     {
       (*_bfd_error_handler)
-	(_("%s: linking auto-pic files with non-auto-pic files"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: linking auto-pic files with non-auto-pic files"),
+	 ibfd);
 
       bfd_set_error (bfd_error_bad_value);
       ok = FALSE;

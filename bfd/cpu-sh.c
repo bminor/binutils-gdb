@@ -434,8 +434,8 @@ sh_merge_bfd_arch (bfd *ibfd, bfd *obfd)
   if (!SH_VALID_CO_ARCH_SET (merged_arch))
     {
       (*_bfd_error_handler)
-	("%s: uses %s instructions while previous modules use %s instructions",
-	 bfd_archive_filename (ibfd),
+	("%B: uses %s instructions while previous modules use %s instructions",
+	 ibfd,
 	 SH_ARCH_SET_HAS_DSP (new_arch) ? "dsp" : "floating point",
 	 SH_ARCH_SET_HAS_DSP (new_arch) ? "floating point" : "dsp");
       bfd_set_error (bfd_error_bad_value);

@@ -980,9 +980,8 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
-				 bfd_archive_filename (abfd),
-				 r_symndx);
+	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
+				 abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -1158,8 +1157,8 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	      if (old_tls_type == GOT_NORMAL || tls_type == GOT_NORMAL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: `%s' accessed both as normal and thread local symbol"),
-		     bfd_archive_filename (abfd), h->root.root.string);
+		    (_("%B: `%s' accessed both as normal and thread local symbol"),
+		     abfd, h->root.root.string);
 		  return FALSE;
 		}
 	      if (old_tls_type > tls_type)
@@ -1269,8 +1268,8 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 				 name + 5) != 0)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: bad relocation section name `%s\'"),
-			 bfd_archive_filename (abfd), name);
+			(_("%B: bad relocation section name `%s\'"),
+			 abfd, name);
 		    }
 
 		  if (htab->elf.dynobj == NULL)
@@ -2231,9 +2230,9 @@ invalid_tls_insn (input_bfd, input_section, rel)
 
   howto = elf_howto_table + ELF32_R_TYPE (rel->r_info);
   (*_bfd_error_handler)
-    (_("%s(%s+0x%lx): invalid instruction for TLS relocation %s"),
-     bfd_archive_filename (input_bfd),
-     bfd_get_section_name (input_bfd, input_section),
+    (_("%B(%A+0x%lx): invalid instruction for TLS relocation %s"),
+     input_bfd,
+     input_section,
      (long) rel->r_offset,
      howto->name);
 }
@@ -2993,9 +2992,9 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
-	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	   bfd_archive_filename (input_bfd),
-	   bfd_get_section_name (input_bfd, input_section),
+	  (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
+	   input_bfd,
+	   input_section,
 	   (long) rel->r_offset,
 	   h->root.root.string);
 
@@ -3043,9 +3042,8 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
-		 bfd_archive_filename (input_bfd),
-		 bfd_get_section_name (input_bfd, input_section),
+		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }

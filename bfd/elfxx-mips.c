@@ -3719,9 +3719,9 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       if (!ok)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: %s+0x%lx: jump to stub routine which is not jal"),
-	     bfd_archive_filename (input_bfd),
-	     input_section->name,
+	    (_("%B: %A+0x%lx: jump to stub routine which is not jal"),
+	     input_bfd,
+	     input_section,
 	     (unsigned long) relocation->r_offset);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -5226,8 +5226,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: Malformed reloc detected for section %s"),
-	     bfd_archive_filename (abfd), name);
+	    (_("%B: Malformed reloc detected for section %s"),
+	     abfd, name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -5300,8 +5300,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (h == NULL)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: CALL16 reloc at 0x%lx not against global symbol"),
-		 bfd_archive_filename (abfd), (unsigned long) rel->r_offset);
+		(_("%B: CALL16 reloc at 0x%lx not against global symbol"),
+		 abfd, (unsigned long) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -8895,8 +8895,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     {
       (*_bfd_error_handler)
-	(_("%s: endianness incompatible with that of the selected emulation"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: endianness incompatible with that of the selected emulation"),
+	 ibfd);
       return FALSE;
     }
 
@@ -8907,8 +8907,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
     {
       (*_bfd_error_handler)
-	(_("%s: ABI is incompatible with that of the selected emulation"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: ABI is incompatible with that of the selected emulation"),
+	 ibfd);
       return FALSE;
     }
 
@@ -8979,8 +8979,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       != ((old_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0))
     {
       (*_bfd_error_handler)
-	(_("%s: warning: linking PIC files with non-PIC files"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: warning: linking PIC files with non-PIC files"),
+	 ibfd);
       ok = TRUE;
     }
 
@@ -8996,8 +8996,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (mips_32bit_flags_p (old_flags) != mips_32bit_flags_p (new_flags))
     {
       (*_bfd_error_handler)
-	(_("%s: linking 32-bit code with 64-bit code"),
-	 bfd_archive_filename (ibfd));
+	(_("%B: linking 32-bit code with 64-bit code"),
+	 ibfd);
       ok = FALSE;
     }
   else if (!mips_mach_extends_p (bfd_get_mach (ibfd), bfd_get_mach (obfd)))
@@ -9024,8 +9024,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  /* The ISAs aren't compatible.  */
 	  (*_bfd_error_handler)
-	    (_("%s: linking %s module with previous %s modules"),
-	     bfd_archive_filename (ibfd),
+	    (_("%B: linking %s module with previous %s modules"),
+	     ibfd,
 	     bfd_printable_name (ibfd),
 	     bfd_printable_name (obfd));
 	  ok = FALSE;
@@ -9047,8 +9047,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	      != elf_elfheader (obfd)->e_ident[EI_CLASS]))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: ABI mismatch: linking %s module with previous %s modules"),
-	     bfd_archive_filename (ibfd),
+	    (_("%B: ABI mismatch: linking %s module with previous %s modules"),
+	     ibfd,
 	     elf_mips_abi_name (ibfd),
 	     elf_mips_abi_name (obfd));
 	  ok = FALSE;
@@ -9070,8 +9070,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (new_flags != old_flags)
     {
       (*_bfd_error_handler)
-	(_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	 bfd_archive_filename (ibfd), (unsigned long) new_flags,
+	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
+	 ibfd, (unsigned long) new_flags,
 	 (unsigned long) old_flags);
       ok = FALSE;
     }

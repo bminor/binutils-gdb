@@ -656,9 +656,8 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
     return TRUE;
 
 #ifdef DEBUG
-  fprintf (stderr, "v850_elf_check_relocs called for section %s in %s\n",
-	   bfd_get_section_name (abfd, sec),
-	   bfd_archive_filename (abfd));
+  _bfd_error_handler ("v850_elf_check_relocs called for section %A in %B",
+		      sec, abfd);
 #endif
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1948,8 +1947,8 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
 	  return TRUE;
 	}
 
-      _bfd_error_handler (_("%s: Architecture mismatch with previous modules"),
-			  bfd_archive_filename (ibfd));
+      _bfd_error_handler (_("%B: Architecture mismatch with previous modules"),
+			  ibfd);
     }
 
   return TRUE;

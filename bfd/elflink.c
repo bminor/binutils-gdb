@@ -1392,8 +1392,8 @@ nondefault:
       if (hi->root.type != bfd_link_hash_defined
 	  && hi->root.type != bfd_link_hash_defweak)
 	(*_bfd_error_handler)
-	  (_("%s: warning: unexpected redefinition of indirect versioned symbol `%s'"),
-	   bfd_archive_filename (abfd), shortname);
+	  (_("%B: unexpected redefinition of indirect versioned symbol `%s'"),
+	   abfd, shortname);
     }
   else
     {
@@ -1711,8 +1711,8 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	  /* We could not find the version for a symbol when
 	     generating a shared archive.  Return an error.  */
 	  (*_bfd_error_handler)
-	    (_("%s: undefined versioned symbol name %s"),
-	     bfd_get_filename (sinfo->output_bfd), h->root.root.string);
+	    (_("%B: undefined versioned symbol name %s"),
+	     sinfo->output_bfd, h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  sinfo->failed = TRUE;
 	  return FALSE;
@@ -1859,14 +1859,11 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	r_symndx >>= 24;
       if ((size_t) r_symndx >= nsyms)
 	{
-	  char *sec_name = bfd_get_section_ident (sec);
 	  (*_bfd_error_handler)
-	    (_("%s: bad reloc symbol index (0x%lx >= 0x%lx) for offset 0x%lx in section `%s'"),
-	     bfd_archive_filename (abfd), (unsigned long) r_symndx,
-	     (unsigned long) nsyms, irela->r_offset,
-	     sec_name ? sec_name : sec->name);
-	  if (sec_name)
-	    free (sec_name);
+	    (_("%B: bad reloc symbol index (0x%lx >= 0x%lx)"
+	       " for offset 0x%lx in section `%A'"),
+	     abfd, sec,
+	     (unsigned long) r_symndx, (unsigned long) nsyms, irela->r_offset);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -2052,14 +2049,9 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
     }
   else
     {
-      char *sec_name = bfd_get_section_ident (input_section);
       (*_bfd_error_handler)
-	(_("%s: relocation size mismatch in %s section %s"),
-	 bfd_get_filename (output_bfd),
-	 bfd_archive_filename (input_section->owner),
-	 sec_name ? sec_name : input_section->name);
-      if (sec_name)
-	free (sec_name);
+	(_("%B: relocation size mismatch in %B section %A"),
+	 output_bfd, input_section->owner, input_section);
       bfd_set_error (bfd_error_wrong_object_format);
       return FALSE;
     }
@@ -3467,8 +3459,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		      if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
 			{
 			  (*_bfd_error_handler)
-			    (_("%s: %s: invalid version %u (max %d)"),
-			     bfd_archive_filename (abfd), name, vernum,
+			    (_("%B: %s: invalid version %u (max %d)"),
+			     abfd, name, vernum,
 			     elf_tdata (abfd)->dynverdef_hdr.sh_info);
 			  bfd_set_error (bfd_error_bad_value);
 			  goto error_free_vers;
@@ -3508,8 +3500,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		      if (verstr == NULL)
 			{
 			  (*_bfd_error_handler)
-			    (_("%s: %s: invalid needed version %d"),
-			     bfd_archive_filename (abfd), name, vernum);
+			    (_("%B: %s: invalid needed version %d"),
+			     abfd, name, vernum);
 			  bfd_set_error (bfd_error_bad_value);
 			  goto error_free_vers;
 			}
@@ -3683,12 +3675,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	      if (normal_align < common_align)
 		(*_bfd_error_handler)
-		  (_("Warning: alignment %u of symbol `%s' in %s is smaller than %u in %s"),
-		   1 << normal_align,
-		   name,
-		   bfd_archive_filename (normal_bfd),
-		   1 << common_align,
-		   bfd_archive_filename (common_bfd));
+		  (_("Warning: alignment %u of symbol `%s' in %B"
+		     " is smaller than %u in %B"),
+		   normal_bfd, common_bfd,
+		   1 << normal_align, name, 1 << common_align);
 	    }
 
 	  /* Remember the symbol size and type.  */
@@ -3697,11 +3687,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if (h->size != 0 && h->size != isym->st_size && ! size_change_ok)
 		(*_bfd_error_handler)
-		  (_("Warning: size of symbol `%s' changed from %lu in %s to %lu in %s"),
+		  (_("Warning: size of symbol `%s' changed"
+		     " from %lu in %B to %lu in %B"),
+		   old_bfd, abfd,
 		   name, (unsigned long) h->size,
-		   bfd_archive_filename (old_bfd),
-		   (unsigned long) isym->st_size,
-		   bfd_archive_filename (abfd));
+		   (unsigned long) isym->st_size);
 
 	      h->size = isym->st_size;
 	    }
@@ -3721,9 +3711,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  && h->type != ELF_ST_TYPE (isym->st_info)
 		  && ! type_change_ok)
 		(*_bfd_error_handler)
-		  (_("Warning: type of symbol `%s' changed from %d to %d in %s"),
-		   name, h->type, ELF_ST_TYPE (isym->st_info),
-		   bfd_archive_filename (abfd));
+		  (_("Warning: type of symbol `%s' changed"
+		     " from %d to %d in %B"),
+		   abfd, name, h->type, ELF_ST_TYPE (isym->st_info));
 
 	      h->type = ELF_ST_TYPE (isym->st_info);
 	    }
@@ -3861,7 +3851,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: invalid DSO for symbol `%s' definition"),
-		     bfd_archive_filename (abfd), name);
+		     abfd, name);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_free_vers;
 		}
@@ -4967,8 +4957,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 		      == SHT_PREINIT_ARRAY)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: .preinit_array section is not allowed in DSO"),
-			 bfd_archive_filename (sub));
+			(_("%B: .preinit_array section is not allowed in DSO"),
+			 sub);
 		      break;
 		    }
 
@@ -6040,14 +6030,13 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
       && ! elf_link_check_versioned_symbol (finfo->info, bed, h))
     {
       (*_bfd_error_handler)
-	(_("%s: %s symbol `%s' in %s is referenced by DSO"),
-	 bfd_get_filename (finfo->output_bfd),
+	(_("%B: %s symbol `%s' in %B is referenced by DSO"),
+	 finfo->output_bfd, h->root.u.def.section->owner,
 	 ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
 	 ? "internal"
 	 : ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
-	   ? "hidden" : "local",
-	 h->root.root.string,
-	 bfd_archive_filename (h->root.u.def.section->owner));
+	 ? "hidden" : "local",
+	 h->root.root.string);
       eoinfo->failed = TRUE;
       return FALSE;
     }
@@ -6120,14 +6109,9 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 						 input_sec->output_section);
 	    if (sym.st_shndx == SHN_BAD)
 	      {
-		char *sec_name = bfd_get_section_ident (input_sec);
 		(*_bfd_error_handler)
-		  (_("%s: could not find output section %s for input section %s"),
-		   bfd_get_filename (finfo->output_bfd),
-		   input_sec->output_section->name,
-		   sec_name ? sec_name : input_sec->name);
-		if (sec_name)
-		  free (sec_name);
+		  (_("%B: could not find output section %A for input section %A"),
+		   finfo->output_bfd, input_sec->output_section, input_sec);
 		eoinfo->failed = TRUE;
 		return FALSE;
 	      }
@@ -6223,13 +6207,13 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     {
       (*_bfd_error_handler)
-	(_("%s: %s symbol `%s' isn't defined"),
-	  bfd_get_filename (finfo->output_bfd),
-	  ELF_ST_VISIBILITY (sym.st_other) == STV_PROTECTED
-	  ? "protected"
-	  : ELF_ST_VISIBILITY (sym.st_other) == STV_INTERNAL
-	    ? "internal" : "hidden",
-	  h->root.root.string);
+	(_("%B: %s symbol `%s' isn't defined"),
+	 finfo->output_bfd,
+	 ELF_ST_VISIBILITY (sym.st_other) == STV_PROTECTED
+	 ? "protected"
+	 : ELF_ST_VISIBILITY (sym.st_other) == STV_INTERNAL
+	 ? "internal" : "hidden",
+	 h->root.root.string);
       eoinfo->failed = TRUE;
       return FALSE;
     }
@@ -6725,20 +6709,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			}
 		      else if (complain)
 			{
-			  char *r_sec = bfd_get_section_ident (o);
-			  char *d_sec = bfd_get_section_ident (sec);
-
-			  finfo->info->callbacks->error_handler
-			    (LD_DEFINITION_IN_DISCARDED_SECTION,
-			     _("`%T' referenced in section `%s' of %B: "
-			       "defined in discarded section `%s' of %B\n"),
-			     sym_name, sym_name,
-			     r_sec ? r_sec : o->name, input_bfd,
-			     d_sec ? d_sec : sec->name, sec->owner);
-			  if (r_sec)
-			    free (r_sec);
-			  if (d_sec)
-			    free (d_sec);
+			  (*_bfd_error_handler)
+			    (_("`%s' referenced in section `%A' of %B: "
+			       "defined in discarded section `%A' of %B\n"),
+			     o, input_bfd, sec, sec->owner, sym_name);
 			}
 
 		      /* Remove the symbol reference from the reloc, but
@@ -7244,15 +7218,8 @@ elf_get_linked_section_vma (struct bfd_link_order *p)
       const struct elf_backend_data *bed
 	= get_elf_backend_data (s->owner);
       if (bed->link_order_error_handler)
-	{
-	  char *name = bfd_get_section_ident (s);
-	  bed->link_order_error_handler
-	    (_("%s: warning: sh_link not set for section `%s'"),
-	     bfd_archive_filename (s->owner),
-	     name ? name : s->name);
-	  if (name)
-	    free (name);
-	}
+	bed->link_order_error_handler
+	  (_("%B: warning: sh_link not set for section `%A'"), s->owner, s);
       return 0;
     }
   else
@@ -7325,8 +7292,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 
   if (seen_other && seen_linkorder)
     {
-      (*_bfd_error_handler) (_("%s: has both ordered and unordered sections"),
-			     o->name);
+      (*_bfd_error_handler) (_("%A has both ordered and unordered sections"),
+			     o);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -8155,8 +8122,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (o == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: could not find output section %s"),
-		     bfd_get_filename (abfd), name);
+		    (_("%B: could not find output section %s"), abfd, name);
 		  goto error_return;
 		}
 	      if (o->size == 0)
@@ -8197,8 +8163,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (o == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: could not find output section %s"),
-		     bfd_get_filename (abfd), name);
+		    (_("%B: could not find output section %s"), abfd, name);
 		  goto error_return;
 		}
 	      dyn.d_un.d_ptr = o->vma;
@@ -8806,7 +8771,6 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
   struct elf_link_hash_entry **search, *child;
   bfd_size_type extsymcount;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  char *sec_name;
 
   /* The sh_info field of the symtab header tells us where the
      external symbols start.  We don't care about the local symbols at
@@ -8830,11 +8794,8 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
 	goto win;
     }
 
-  sec_name = bfd_get_section_ident (sec);
-  (*_bfd_error_handler) ("%s: %s+%lu: No symbol found for INHERIT",
-			 bfd_archive_filename (abfd),
-			 sec_name ? sec_name : sec->name,
-			 (unsigned long) offset);
+  (*_bfd_error_handler) ("%B: %A+%lu: No symbol found for INHERIT",
+			 abfd, sec, (unsigned long) offset);
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;
 
@@ -9387,15 +9348,15 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 
 	    case SEC_LINK_DUPLICATES_ONE_ONLY:
 	      (*_bfd_error_handler)
-		(_("%s: %s: warning: ignoring duplicate section `%s'\n"),
-		 bfd_archive_filename (abfd), name);
+		(_("%B: ignoring duplicate section `%A'\n"),
+		 abfd, sec);
 	      break;
 
 	    case SEC_LINK_DUPLICATES_SAME_SIZE:
 	      if (sec->size != l->sec->size)
 		(*_bfd_error_handler)
-		  (_("%s: %s: warning: duplicate section `%s' has different size\n"),
-		   bfd_archive_filename (abfd), name);
+		  (_("%B: duplicate section `%A' has different size\n"),
+		   abfd, sec);
 	      break;
 	    }
 

@@ -1,3 +1,127 @@
+2004-08-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (_bfd_default_error_handler): Handle %A and %B.
+	(bfd_archive_filename, bfd_get_section_ident): Delete.
+	* ecofflink.c (bfd_ecoff_debug_accumulate_other): Don't call
+	bfd_archive_filename.
+	* elflink.c (elf_link_input_bfd): Don't use callbacks->error_handler
+	to warn about symbols in discarded sections.  Use _bfd_error_handler.
+	* aout-adobe.c (aout_adobe_callback): See below.
+	* aout-cris.c (swap_ext_reloc_in): ..
+	* coff-arm.c (find_thumb_glue, find_arm_glue,
+	coff_arm_relocate_section, bfd_arm_process_before_allocation,
+	coff_arm_merge_private_bfd_data, _bfd_coff_arm_set_private_flags,
+	coff_arm_copy_private_bfd_data): ..
+	* coff-i860.c (i860_reloc_processing): ..
+	* coff-mcore.c (mcore_coff_unsupported_reloc,
+	coff_mcore_relocate_section): ..
+	* coff-ppc.c (coff_ppc_relocate_section): ..
+	* coff-rs6000.c (xcoff_create_csect_from_smclas
+	* coff-sh.c (sh_relax_section, sh_relax_delete_bytes,
+	sh_swap_insns, sh_relocate_section): ..
+	* coff-tic54x.c (tic54x_reloc_processing): ..
+	* coff-tic80.c (coff_tic80_relocate_section): ..
+	* coff64-rs6000.c (xcoff64_create_csect_from_smclas): ..
+	* coffcode.h (styp_to_sec_flags, coff_slurp_line_table,
+	coff_slurp_symbol_table, coff_classify_symbol,
+	coff_slurp_reloc_table): ..
+	* coffgen.c (_bfd_coff_read_string_table): ..
+	* cofflink.c (coff_link_add_symbols, _bfd_coff_link_input_bfd,
+	_bfd_coff_generic_relocate_section): ..
+	* cpu-arm.c (bfd_arm_merge_machines): ..
+	* cpu-sh.c (sh_merge_bfd_arch): ..
+	* elf-hppa.h (elf_hppa_relocate_section): ..
+	* elf.c (bfd_elf_string_from_elf_section, setup_group,
+	_bfd_elf_setup_group_pointers, bfd_section_from_shdr,
+	assign_section_numbers, _bfd_elf_symbol_from_bfd_symbol,
+	copy_private_bfd_data, _bfd_elf_validate_reloc): ..
+	* elf32-arm.h (find_thumb_glue, find_arm_glue,
+	bfd_elf32_arm_process_before_allocation, elf32_thumb_to_arm_stub,
+	elf32_arm_to_thumb_stub, elf32_arm_final_link_relocate,
+	elf32_arm_relocate_section, elf32_arm_set_private_flags,
+	elf32_arm_copy_private_bfd_data, elf32_arm_merge_private_bfd_data): ..
+	* elf32-cris.c (cris_elf_relocate_section, cris_elf_check_relocs,
+	cris_elf_merge_private_bfd_data
+	* elf32-frv.c (elf32_frv_relocate_section, elf32_frv_check_relocs): ..
+	* elf32-gen.c (elf32_generic_link_add_symbols): ..
+	* elf32-hppa.c (hppa_add_stub, hppa_build_one_stub,
+	elf32_hppa_check_relocs, get_local_syms, final_link_relocate,
+	elf32_hppa_relocate_section): ..
+	* elf32-i370.c (i370_elf_merge_private_bfd_data,
+	i370_elf_check_relocs, i370_elf_relocate_section): ..
+	* elf32-i386.c (elf_i386_info_to_howto_rel, elf_i386_check_relocs,
+	elf_i386_relocate_section): ..
+	* elf32-m32r.c (m32r_elf_relocate_section,
+	m32r_elf_merge_private_bfd_data): ..
+	* elf32-m68hc1x.c (m68hc12_add_stub,
+	_bfd_m68hc11_elf_merge_private_bfd_data): ..
+	* elf32-m68k.c (elf_m68k_relocate_section): ..
+	* elf32-mcore.c (mcore_elf_unsupported_reloc,
+	mcore_elf_relocate_section): ..
+	* elf32-ppc.c (ppc_elf_merge_private_bfd_data, bad_shared_reloc,
+	ppc_elf_check_relocs, ppc_elf_relocate_section,
+	ppc_elf_begin_write_processing): ..
+	* elf32-s390.c (elf_s390_check_relocs, invalid_tls_insn,
+	elf_s390_relocate_section): ..
+	* elf32-sh-symbian.c (sh_symbian_import_as,
+	sh_symbian_process_embedded_commands,
+	sh_symbian_relocate_section): ..
+	* elf32-sh.c (sh_elf_relax_section, sh_elf_relax_delete_bytes,
+	sh_elf_swap_insns, sh_elf_relocate_section, sh_elf_check_relocs,
+	sh_elf_merge_private_data): ..
+	* elf32-sparc.c (elf32_sparc_check_relocs,
+	elf32_sparc_relocate_section,
+	elf32_sparc_merge_private_bfd_data): ..
+	* elf32-v850.c (v850_elf_check_relocs,
+	v850_elf_merge_private_bfd_data): ..
+	* elf32-xtensa.c (elf_xtensa_check_relocs,
+	elf_xtensa_relocate_section, elf_xtensa_merge_private_bfd_data): ..
+	* elf64-alpha.c (elf64_alpha_relax_with_lituse,
+	elf64_alpha_relax_got_load, elf64_alpha_size_got_sections,
+	elf64_alpha_relocate_section_r, elf64_alpha_relocate_section): ..
+	* elf64-gen.c (elf64_generic_link_add_symbols): ..
+	* elf64-ppc.c (ppc64_elf_merge_private_bfd_data, ppc_add_stub,
+	ppc64_elf_check_relocs, ppc64_elf_edit_opd,
+	ppc64_elf_relocate_section): ..
+	* elf64-s390.c (elf_s390_check_relocs, invalid_tls_insn,
+	elf_s390_relocate_section): ..
+	* elf64-sh64.c (sh_elf64_relocate_section): ..
+	* elf64-sparc.c (sparc64_elf_check_relocs,
+	sparc64_elf_add_symbol_hook, sparc64_elf_relocate_section,
+	sparc64_elf_merge_private_bfd_data): ..
+	* elf64-x86-64.c (elf64_x86_64_check_relocs,
+	elf64_x86_64_relocate_section): ..
+	* elflink.c (_bfd_elf_add_default_symbol,
+	_bfd_elf_link_assign_sym_version, elf_link_read_relocs_from_section,
+	_bfd_elf_link_output_relocs, elf_link_add_object_symbols,
+	bfd_elf_size_dynamic_sections, elf_link_output_extsym,
+	elf_get_linked_section_vma, elf_fixup_link_order,
+	bfd_elf_final_link, bfd_elf_gc_record_vtinherit,
+	bfd_elf_gc_record_vtinherit, _bfd_elf_section_already_linked): ..
+	* elfxx-ia64.c (elfNN_ia64_relax_section,
+	elfNN_ia64_relocate_section, elfNN_ia64_merge_private_bfd_data): ..
+	* elfxx-mips.c (mips_elf_perform_relocation,
+	_bfd_mips_elf_check_relocs,
+	_bfd_mips_elf_merge_private_bfd_data): ..
+	* ieee.c (ieee_slurp_external_symbols): ..
+	* ihex.c (ihex_bad_byte, ihex_scan, ihex_read_section): ..
+	* libbfd.c (_bfd_generic_verify_endian_match): ..
+	* linker.c (_bfd_generic_link_add_one_symbol,
+	_bfd_generic_section_already_linked): ..
+	* pdp11.c (translate_to_native_sym_flags): ..
+	* pe-mips.c (coff_pe_mips_relocate_section): ..
+	* peicode.h (pe_ILF_build_a_bfd): ..
+	* srec.c (srec_bad_byte): ..
+	* stabs.c (_bfd_link_section_stabs): ..
+	* xcofflink.c (xcoff_link_add_symbols, xcoff_link_input_bfd): ..
+	Replace all uses of bfd_archive_filename and bfd_get_section_ident
+	with corresponding %B and %A in _bfd_error_handler format string.
+	Replace occurrences of "fprintf (stderr," with _bfd_error_handler
+	calls to use %A and %B.  Fix "against symbol .. from section" and
+	similar error messages.  Combine multiple _bfd_error_handler calls
+	where they were separated due to bfd_archive_filename deficiencies.
+	* bfd-in2.h: Regenerate.
+
 2004-08-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Report unrecognized

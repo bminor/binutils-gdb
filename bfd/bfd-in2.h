@@ -2639,7 +2639,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
 
-/* PC-relative or absolute relocation depending on target.  Used for
+/* Pc-relative or absolute relocation depending on target.  Used for
 entries in .init_array sections.  */
   BFD_RELOC_ARM_RELABS32,
 
@@ -4001,8 +4001,6 @@ void bfd_set_error_program_name (const char *);
 
 bfd_error_handler_type bfd_get_error_handler (void);
 
-const char *bfd_archive_filename (bfd *);
-
 long bfd_get_reloc_upper_bound (bfd *abfd, asection *sect);
 
 long bfd_canonicalize_reloc
@@ -4143,8 +4141,6 @@ bfd_boolean bfd_preserve_save (bfd *, struct bfd_preserve *);
 void bfd_preserve_restore (bfd *, struct bfd_preserve *);
 
 void bfd_preserve_finish (bfd *, struct bfd_preserve *);
-
-char *bfd_get_section_ident (asection *sec);
 
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
