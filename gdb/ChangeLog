@@ -1,5 +1,25 @@
 Thu Jan 27 15:12:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* main.c (baud_rate): Add FIXME comment about printing -1 value.
+
+	* remote-utils.c (usage): Fix message to be accurate and conform
+	more closely to normal conventions.
+
+	* remote-utils.c (gr_files_info): Have the exec_bfd test control
+	whether to show information about exec_bfd, and not control whether
+	to show information about device and speed.
+
+	* remote-utils.c (gr_open): If sr_get_device returns NULL, give
+	usage message, don't dump core.
+
+	* remote-bug.c (bug_write_memory): Use alloca, not GCC extension
+	for variable size array.
+	(bug_fetch_register, bug_store_register): Rename "value" to
+	"fpreg_buf" because some compilers don't like variables whose
+	names are the same as types.
+	(bug_store_register): Use a cast when converting char * to
+	unsigned char *.
+
 	* symmisc.c (maintenance_print_symbols): Don't refer to the name
 	of the command in error message (the text was referring to the old
 	name of the command).

@@ -76,10 +76,8 @@ usage(proto, junk)
   if (junk != NULL)
     fprintf_unfiltered(gdb_stderr, "Unrecognized arguments: `%s'.\n", junk);
 
-  /* FIXME-now: service@host? */
-
-  error("Usage: target %s <device <speed <debug>>>\n\
-or target %s <host> <port>\n", proto, proto);
+  error ("Usage: target %s [DEVICE [SPEED [DEBUG]]]\n\
+where DEVICE is the name of a device or HOST:PORT", proto, proto);
 
   return;
 }
@@ -166,6 +164,13 @@ gr_open(args, from_tty, gr)
 
   if (sr_get_desc() != NULL)
     gr_close (0);
+
+  /* If no args are specified, then we use the device specified by a
+     previous command or "set remotedevice".  But if there is no
+     device, better stop now, not dump core.  */
+
+  if (sr_get_device () == NULL)
+    usage (gr->ops->to_shortname, NULL);
 
   sr_set_desc(SERIAL_OPEN (sr_get_device()));
   if (!sr_get_desc())
@@ -430,22 +435,18 @@ void
 gr_files_info (ops)
      struct target_ops *ops;
 {
-  char *file = "nothing";
-
-  if (exec_bfd)
-    file = bfd_get_filename (exec_bfd);
+#ifdef __GO32__
+  printf_filtered ("\tAttached to DOS asynctsr\n");
+#else
+  printf_filtered ("\tAttached to %s at %d baud\n",
+		   sr_get_device(), sr_get_baud_rate());
+#endif
 
   if (exec_bfd)
     {
-#ifdef __GO32__
-      printf_filtered ("\tAttached to DOS asynctsr\n");
-#else
-      printf_filtered ("\tAttached to %s at %d baud\n",
-		       sr_get_device(), sr_get_baud_rate());
-#endif
+      printf_filtered ("\tand running program %s\n",
+		       bfd_get_filename (exec_bfd));
     }
-
-  printf_filtered ("\tand running program %s\n", file);
   printf_filtered ("\tusing the %s protocol.\n", ops->to_shortname);
 }
 

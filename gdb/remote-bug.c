@@ -464,7 +464,7 @@ bug_fetch_register(regno)
     {
       /* Float register so we need to parse a strange data format. */
       long p;
-      unsigned char value[10];
+      unsigned char fpreg_buf[10];
 
       sr_write("rs ", 3);
       sr_write(get_reg_name(regno), strlen(get_reg_name(regno)));
@@ -476,31 +476,31 @@ bug_fetch_register(regno)
 
       /* sign */
       p = sr_get_hex_digit(1);
-      value[0] = p << 7;
+      fpreg_buf[0] = p << 7;
 
       /* exponent */
       sr_expect("_");
       p = sr_get_hex_digit(1);
-      value[0] += (p << 4);
-      value[0] += sr_get_hex_digit(1);
+      fpreg_buf[0] += (p << 4);
+      fpreg_buf[0] += sr_get_hex_digit(1);
 
-      value[1] = sr_get_hex_digit(1) << 4;
+      fpreg_buf[1] = sr_get_hex_digit(1) << 4;
 
       /* fraction */
       sr_expect("_");
-      value[1] += sr_get_hex_digit(1);
+      fpreg_buf[1] += sr_get_hex_digit(1);
 
-      value[2] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      value[3] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      value[4] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      value[5] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      value[6] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      value[7] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      value[8] = 0;
-      value[9] = 0;
+      fpreg_buf[2] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
+      fpreg_buf[3] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
+      fpreg_buf[4] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
+      fpreg_buf[5] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
+      fpreg_buf[6] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
+      fpreg_buf[7] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
+      fpreg_buf[8] = 0;
+      fpreg_buf[9] = 0;
 
       gr_expect_prompt();
-      supply_register(regno, value);
+      supply_register(regno, fpreg_buf);
     }
 
   return;
@@ -536,23 +536,24 @@ bug_store_register (regno)
 		read_register(regno));
       else
 	{
-	  unsigned char *value = &registers[REGISTER_BYTE(regno)];
+	  unsigned char *fpreg_buf =
+	    (unsigned char *)&registers[REGISTER_BYTE(regno)];
 	  
 	  sprintf(buffer, "rs %s %1x_%02x%1x_%1x%02x%02x%02x%02x%02x%02x;d",
 		  regname,
 		  /* sign */
-		  (value[0] >> 7) & 0xf,
+		  (fpreg_buf[0] >> 7) & 0xf,
 		  /* exponent */
-		  value[0] & 0x7f,
-		  (value[1] >> 8) & 0xf,
+		  fpreg_buf[0] & 0x7f,
+		  (fpreg_buf[1] >> 8) & 0xf,
 		  /* fraction */
-		  value[1] & 0xf,
-		  value[2],
-		  value[3],
-		  value[4],
-		  value[5],
-		  value[6],
-		  value[7]);
+		  fpreg_buf[1] & 0xf,
+		  fpreg_buf[2],
+		  fpreg_buf[3],
+		  fpreg_buf[4],
+		  fpreg_buf[5],
+		  fpreg_buf[6],
+		  fpreg_buf[7]);
 	}
 
       sr_write_cr(buffer);
@@ -684,7 +685,7 @@ bug_write_memory (memaddr, myaddr, len)
   int checksum;
   int x;
   int retries;
-  char buffer[(srec_bytes + 8) << 1];
+  char *buffer = alloca ((srec_bytes + 8) << 1);
 
   retries = 0;
 
