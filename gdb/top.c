@@ -1035,6 +1035,52 @@ init_signals (void)
 #endif
 }
 
+/* The current saved history number from operate-and-get-next.
+   This is -1 if not valid.  */
+static int operate_saved_history = -1;
+
+/* This is put on the appropriate hook and helps operate-and-get-next
+   do its work.  */
+void
+gdb_rl_operate_and_get_next_completion ()
+{
+  int delta = where_history () - operate_saved_history;
+  /* The `key' argument to rl_get_previous_history is ignored.  */
+  rl_get_previous_history (delta, 0);
+  operate_saved_history = -1;
+
+  /* readline doesn't automatically update the display for us.  */
+  rl_redisplay ();
+
+  after_char_processing_hook = NULL;
+  rl_pre_input_hook = NULL;
+}
+
+/* This is a gdb-local readline command handler.  It accepts the
+   current command line (like RET does) and, if this command was taken
+   from the history, arranges for the next command in the history to
+   appear on the command line when the prompt returns.
+   We ignore the arguments.  */
+static int
+gdb_rl_operate_and_get_next (int count, int key)
+{
+  if (event_loop_p)
+    {
+      /* Use the async hook.  */
+      after_char_processing_hook = gdb_rl_operate_and_get_next_completion;
+    }
+  else
+    {
+      /* This hook only works correctly when we are using the
+	 synchronous readline.  */
+      rl_pre_input_hook = (Function *) gdb_rl_operate_and_get_next_completion;
+    }
+
+  /* Add 1 because we eventually want the next line.  */
+  operate_saved_history = where_history () + 1;
+  return rl_newline (1, key);
+}
+
 /* Read one line from the command input stream `instream'
    into the local static buffer `linebuffer' (whose current length
    is `linelength').
@@ -1879,6 +1925,10 @@ init_main (void)
 				 get_gdb_completer_word_break_characters ();
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_readline_name = "gdb";
+
+  /* The name for this defun comes from Bash, where it originated.
+     15 is Control-o, the same binding this function has in Bash.  */
+  rl_add_defun ("operate-and-get-next", gdb_rl_operate_and_get_next, 15);
 
   /* The set prompt command is different depending whether or not the
      async version is run. NOTE: this difference is going to

@@ -108,3 +108,4 @@ extern struct prompts the_prompts;
 extern void (*call_readline) (void *);
 extern void (*input_handler) (char *);
 extern int input_fd;
+extern void (*after_char_processing_hook) (void);

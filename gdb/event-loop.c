@@ -402,6 +402,14 @@ start_event_loop (void)
 	     interface specific, because interfaces can display the
 	     prompt in their own way. */
 	  display_gdb_prompt (0);
+	  /* This call looks bizarre, but it is required.  If the user
+	     entered a command that caused an error,
+	     after_char_processing_hook won't be called from
+	     rl_callback_read_char_wrapper.  Using a cleanup there
+	     won't work, since we want this function to be called
+	     after a new prompt is printed.  */
+	  if (after_char_processing_hook)
+	    (*after_char_processing_hook) ();
 	  /* Maybe better to set a flag to be checked somewhere as to
 	     whether display the prompt or not. */
 	}

@@ -153,6 +153,10 @@ struct readline_input_state
     char *linebuffer_ptr;
   }
 readline_input_state;
+
+/* This hook is called by rl_callback_read_char_wrapper after each
+   character is processed.  */
+void (*after_char_processing_hook) ();
 
 
 /* Wrapper function for calling into the readline library. The event
@@ -162,6 +166,8 @@ static void
 rl_callback_read_char_wrapper (gdb_client_data client_data)
 {
   rl_callback_read_char ();
+  if (after_char_processing_hook)
+    (*after_char_processing_hook) ();
 }
 
 /* Initialize all the necessary variables, start the event loop,

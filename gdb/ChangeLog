@@ -1,5 +1,19 @@
 2001-11-26  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Updated.
+	* event-loop.c (start_event_loop): Call
+	after_char_processing_hook.
+	* event-top.h (after_char_processing_hook): Declare.
+	* event-top.c (rl_callback_read_char_wrapper): Call
+	after_char_processing_hook.
+	(after_char_processing_hook): New global.
+	* top.c (operate_saved_history): New global.
+	(gdb_rl_operate_and_get_next): New function.
+	(init_main): Add the operate-and-get-next defun.
+	(gdb_rl_operate_and_get_next_completion): New function.
+
+2001-11-26  Tom Tromey  <tromey@redhat.com>
+
 	* NEWS: Update for --args.
 	* infcmd.c (construct_inferior_arguments): Moved from ...
 	* fork-child.c: ... here.
