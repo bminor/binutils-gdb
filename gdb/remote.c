@@ -737,6 +737,10 @@ readchar ()
 
   if (inbuf_index >= inbuf_count)
     {
+#ifndef HAVE_TERMIO
+      extern int alarm ();
+#endif
+
       /* Time to do another read... */
       inbuf_index = 0;
       inbuf_count = 0;
