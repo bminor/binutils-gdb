@@ -4470,6 +4470,7 @@ do
 	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
 	esac
 	case $targ in
+	thumb-*pe*)
 	arm-*pe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"

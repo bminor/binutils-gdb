@@ -163,6 +163,7 @@ changequote([,])dnl
 	esac
 	case $targ in
 	arm-*pe*)
+	thumb-*pe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
