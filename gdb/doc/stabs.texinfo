@@ -538,35 +538,43 @@ that symbol descriptors are followed by type information.  Instead, it
 is followed by @samp{=} and one of the following:
 
 @table @code
-@item b@var{value}
+@item b @var{value}
 Boolean constant.  @var{value} is a numeric value; I assume it is 0 for
 false or 1 for true.
 
-@item c@var{value}
+@item c @var{value}
 Character constant.  @var{value} is the numeric value of the constant.
 
-@item e@var{type-information},@var{value}
-Enumeration constant.  @var{type-information} is the type of the
-constant, as it would appear after a symbol descriptor
-(@pxref{Stabs Format}).  @var{value} is the numeric value of the constant.
+@item e @var{type-information} , @var{value}
+Constant whose value can be represented as integral.
+@var{type-information} is the type of the constant, as it would appear
+after a symbol descriptor (@pxref{Stabs Format}).  @var{value} is the
+numeric value of the constant.  GDB 4.9 does not actually get the right
+value if @var{value} does not fit in a host @code{int}, but it does not
+do anything violent, and future debuggers could be extended to accept
+integers of any size (whether unsigned or not).  This constant type is
+usually documented as being only for enumeration constants, but GDB has
+never imposed that restriction; I don't know about other debuggers.
 
-@item i@var{value}
-Integer constant.  @var{value} is the numeric value.
+@item i @var{value}
+Integer constant.  @var{value} is the numeric value.  The type is some
+sort of generic integer type (for GDB, a host @code{int}); to specify
+the type explicitly, use @samp{e} instead.
 
-@item r@var{value}
+@item r @var{value}
 Real constant.  @var{value} is the real value, which can be @samp{INF}
 (optionally preceded by a sign) for infinity, @samp{QNAN} for a quiet
 NaN (not-a-number), or @samp{SNAN} for a signalling NaN.  If it is a
 normal number the format is that accepted by the C library function
 @code{atof}.
 
-@item s@var{string}
+@item s @var{string}
 String constant.  @var{string} is a string enclosed in either @samp{'}
 (in which case @samp{'} characters within the string are represented as
 @samp{\'} or @samp{"} (in which case @samp{"} characters within the
 string are represented as @samp{\"}).
 
-@item S@var{type-information},@var{elements},@var{bits},@var{pattern}
+@item S @var{type-information} , @var{elements} , @var{bits} , @var{pattern}
 Set constant.  @var{type-information} is the type of the constant, as it
 would appear after a symbol descriptor (@pxref{Stabs Format}).
 @var{elements} is the number of elements in the set (is this just the
@@ -575,6 +583,9 @@ don't get it), @var{bits} is the number of bits in the constant (meaning
 it specifies the length of @var{pattern}, I think), and @var{pattern} is
 a hexadecimal representation of the set.  AIX documentation refers to a
 limit of 32 bytes, but I see no reason why this limit should exist.
+This form could probably be used for arbitrary constants, not just sets;
+the only catch is that @var{pattern} should be understood to be target,
+not host, byte order and format.
 @end table
 
 The boolean, character, string, and set constants are not supported by
@@ -1159,20 +1170,32 @@ Builtin types can also be described as subranges of @code{int}:
 .stabs "unsigned short:t6=r1;0;65535;",128,0,0,0
 @end example
 
-If the upper bound of a subrange is -1, it means that the type is an
-integral type whose bounds are too big to describe in an int.
-Traditionally this is only used for @code{unsigned int} and
-@code{unsigned long}; GCC also uses it for @code{long long} and
-@code{unsigned long long}, and the only way to tell those types apart is
-to look at their names.  On other machines GCC puts out bounds in octal,
-with a leading 0.  In this case a negative bound consists of a number
-which is a 1 bit followed by a bunch of 0 bits, and a positive bound is
-one in which a bunch of bits are 1.
+If the lower bound of a subrange is 0 and the upper bound is -1, it
+means that the type is an unsigned integral type whose bounds are too
+big to describe in an int.  Traditionally this is only used for
+@code{unsigned int} and @code{unsigned long}; GCC also sometimes uses it
+for @code{long long} and @code{unsigned long long}, and the only way to
+tell those types apart is to look at their names.  On other machines GCC
+puts out bounds in octal, with a leading 0.  In this case a negative
+bound consists of a number which is a 1 bit followed by a bunch of 0
+bits, and a positive bound is one in which a bunch of bits are 1.
 
 @example
 .stabs "unsigned int:t4=r1;0;-1;",128,0,0,0
 .stabs "long long int:t7=r1;0;-1;",128,0,0,0
 @end example
+
+If the lower bound of a subrange is 0 and the upper bound is negative,
+it means that it is an unsigned integral type whose size in bytes is the
+absolute value of the upper bound.  I believe this is a Convex
+convention for @code{unsigned long long}.
+
+If the lower bound of a subrange is negative and the upper bound is 0,
+it means that the type is a signed integral type whose size in bytes is
+the absolute value of the lower bound.  I believe this is a Convex
+convention for @code{long long}.  To distinguish this from a legitimate
+subrange, the type should be a subrange of itself.  I'm not sure whether
+this is the case for Convex.
 
 If the upper bound of a subrange is 0, it means that this is a floating
 point type, and the lower bound of the subrange indicates the number of
@@ -1298,6 +1321,10 @@ numbers.  If these type numbers start to get used on other systems, I
 suspect the correct thing to do is to define a new number in cases where
 a type does not have the size and format indicated below.
 
+Also note that part of the definition of the negative type number is
+the name of the type.  Types with identical size and format but
+different names have different negative type numbers.
+
 @table @code
 @item -1
 @code{int}, 32 bit signed integral type.
@@ -1342,23 +1369,26 @@ avoid this type; it uses -5 instead for @code{char}.
 @code{double}, IEEE double precision.
 
 @item -14
-@code{long double}, IEEE extended, RS6000 format.
+@code{long double}, IEEE double precision.  The compiler claims the size
+will increase in a future release, and for binary compatibility you have
+to avoid using @code{long double}.  I hope when they increase it they
+use a new negative type number.
 
 @item -15
-@code{integer}.  Pascal, I assume.  32 bit signed integral type.
+@code{integer}.  32 bit signed integral type.
 
 @item -16
-Boolean.  Only one bit is used, not sure about the actual size of the
+@code{boolean}.  Only one bit is used, not sure about the actual size of the
 type.
 
 @item -17
-@code{short real}.  Pascal, I assume.  IEEE single precision.
+@code{short real}.  IEEE single precision.
 
 @item -18
-@code{real}.  Pascal, I assume.  IEEE double precision.
+@code{real}.  IEEE double precision.
 
 @item -19
-A Pascal Stringptr.  @xref{Strings}.
+@code{stringptr}.  @xref{Strings}.
 
 @item -20
 @code{character}, 8 bit unsigned type.
@@ -1376,10 +1406,12 @@ A Pascal Stringptr.  @xref{Strings}.
 @code{logical}, 32 bit unsigned integral type.
 
 @item -25
-A complex type consisting of two IEEE single-precision floating point values.
+@code{complex}.  A complex type consisting of two IEEE single-precision
+floating point values.
 
 @item -26
-A complex type consisting of two IEEE double-precision floating point values.
+@code{complex}.  A complex type consisting of two IEEE double-precision
+floating point values.
 
 @item -27
 @code{integer*1}, 8 bit signed integral type.
@@ -1391,9 +1423,8 @@ A complex type consisting of two IEEE double-precision floating point values.
 @code{integer*4}, 32 bit signed integral type.
 
 @item -30
-Wide character.  AIX appears not to use this for the C type
-@code{wchar_t}; instead it uses an integral type of the appropriate
-size.
+@code{wchar}.  Wide character, 16 bits wide (Unicode format?).  This is
+not used for the C type @code{wchar_t}.
 @end table
 
 @node Miscellaneous Types
