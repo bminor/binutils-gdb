@@ -1,5 +1,5 @@
 /* ldlang.h - linker command language support
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -340,6 +340,16 @@ struct lang_nocrossrefs {
 
 extern struct lang_nocrossrefs *nocrossref_list;
 
+/* This structure is used to hold a list of input section names which
+   will not match an output section in the linker script.  */
+
+struct unique_sections {
+  struct unique_sections *next;
+  const char *name;
+};
+
+extern struct unique_sections *unique_section_list;
+
 extern lang_output_section_statement_type *abs_output_section;
 extern lang_statement_list_type lang_output_section_statement;
 extern boolean lang_has_input_file;
@@ -462,5 +472,7 @@ extern struct bfd_elf_version_deps *lang_add_vers_depend
 extern void lang_register_vers_node
   PARAMS ((const char *, struct bfd_elf_version_tree *,
 	   struct bfd_elf_version_deps *));
+boolean unique_section_p PARAMS ((const char *));
+extern void lang_add_unique PARAMS ((const char *));
 
 #endif

@@ -695,13 +695,15 @@ with @samp{-Ur}; once the constructor table has been built, it cannot
 be added to.  Use @samp{-Ur} only for the last partial link, and
 @samp{-r} for the others.
 
-@kindex --unique
-@item --unique
-Creates a separate output section for every orphan input section.  This
-option prevents the normal merging of orphan input sections with the same
-name.  An orphan section is one not specifically mentioned in a linker
-script, so this option along with a custom linker script allows any
-selection of input sections to be merged while others are kept separate.
+@kindex --unique[=@var{SECTION}]
+@item --unique[=@var{SECTION}]
+Creates a separate output section for every input section matching
+@var{SECTION}, or if the optional wildcard @var{SECTION} argument is
+missing, for every orphan input section.  An orphan section is one not
+specifically mentioned in a linker script.  You may use this option
+multiple times on the command line;  It prevents the normal merging of
+input sections with the same name, overriding output section assignments
+in a linker script.
 
 @kindex -v
 @kindex -V

@@ -1,3 +1,25 @@
+2001-01-14  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	rummage through the script for sections on the unique list.
+	Correct length of strncmp for ".note".
+	(gld${EMULATION_NAME}_check_needed): Rearrange function.
+
+	* ldlang.c (unique_section_list): New var.
+	(unique_section_p): New function.
+	(walk_wild_section): Don't match sections on unique_section_list.
+	(lang_add_unique): New function.
+
+	* ldlang.h (struct unique_sections): Declare.
+	(unique_section_list): Declare.
+	(unique_section_p): Declare.
+	(lang_add_unique): Declare.
+
+	* lexsup.c (ld_options): Allow --unique to take an optional arg.
+	(parse_args [OPTION_UNIQUE]): Call lang_add_unique.
+
+	* ld.texinfo (--unique): Update.
+
 2001-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (parse_args): Remove spurious white space.

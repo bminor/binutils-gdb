@@ -236,8 +236,8 @@ static const struct ld_option ld_options[] =
       'T', N_("FILE"), N_("Read linker script"), TWO_DASHES },
   { {"undefined", required_argument, NULL, 'u'},
       'u', N_("SYMBOL"), N_("Start with undefined reference to SYMBOL"), TWO_DASHES },
-  { {"unique", no_argument, NULL, OPTION_UNIQUE},
-      '\0', NULL, N_("Don't merge orphan sections with the same name"), TWO_DASHES },
+  { {"unique", optional_argument, NULL, OPTION_UNIQUE},
+      '\0', N_("[=SECTION]"), N_("Don't merge input [SECTION | orphan] sections"), TWO_DASHES },
   { {"Ur", no_argument, NULL, OPTION_UR},
       '\0', NULL, N_("Build global constructor/destructor tables"), ONE_DASH },
   { {"version", no_argument, NULL, OPTION_VERSION},
@@ -965,7 +965,10 @@ parse_args (argc, argv)
 	  ldlang_add_undef (optarg);
 	  break;
 	case OPTION_UNIQUE:
-	  config.unique_orphan_sections = true;
+	  if (optarg != NULL)
+	    lang_add_unique (optarg);
+	  else
+	    config.unique_orphan_sections = true;
 	  break;
 	case OPTION_VERBOSE:
 	  ldversion (1);

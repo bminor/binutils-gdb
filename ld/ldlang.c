@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -186,6 +186,7 @@ boolean had_output_filename = false;
 boolean lang_float_flag = false;
 boolean delete_output_file_on_failure = false;
 struct lang_nocrossrefs *nocrossref_list;
+struct unique_sections *unique_section_list;
 
 etree_type *base; /* Relocation base - or null */
 
@@ -209,6 +210,23 @@ stat_alloc (size)
      size_t size;
 {
   return obstack_alloc (&stat_obstack, size);
+}
+
+boolean
+unique_section_p (secnam)
+     const char *secnam;
+{
+  struct unique_sections *unam;
+
+  for (unam = unique_section_list; unam; unam = unam->next)
+    if (wildcardp (unam->name)
+	? fnmatch (unam->name, secnam, 0) == 0
+	: strcmp (unam->name, secnam) == 0)
+      {
+	return true;
+      }
+
+  return false;
 }
 
 /* Generic traversal routines for finding matching sections.  */
@@ -242,31 +260,26 @@ walk_wild_section (ptr, section, file, callback, data)
   if (file->just_syms_flag == false)
     {
       register asection *s;
-      boolean wildcard;
+      boolean wildcard = false;
 
-      if (section == NULL)
-	wildcard = false;
-      else
+      if (section != NULL)
 	wildcard = wildcardp (section);
 
       for (s = file->the_bfd->sections; s != NULL; s = s->next)
 	{
 	  boolean match;
+	  const char *sname = bfd_get_section_name (file->the_bfd, s);
 
 	  if (section == NULL)
 	    match = true;
+	  else if (wildcard)
+	    match = fnmatch (section, sname, 0) == 0 ? true : false;
 	  else
-	    {
-	      const char *name;
+	    match = strcmp (section, sname) == 0 ? true : false;
 
-	      name = bfd_get_section_name (file->the_bfd, s);
-	      if (wildcard)
-		match = fnmatch (section, name, 0) == 0 ? true : false;
-	      else
-		match = strcmp (section, name) == 0 ? true : false;
-	    }
-
-	  if (match)
+	  /* If this is a wild-card output section statement, exclude
+	     sections that match UNIQUE_SECTION_LIST.  */
+	  if (match && (data == NULL || !unique_section_p (sname)))
 	    (*callback) (ptr, s, file, data);
 	}
     }
@@ -925,20 +938,20 @@ section_already_linked (abfd, sec, data)
   if ((flags & SEC_LINK_ONCE) == 0)
     return;
 
-  /* FIXME: When doing a relocateable link, we may have trouble
+  /* FIXME: When doing a relocatable link, we may have trouble
      copying relocations in other sections that refer to local symbols
      in the section being discarded.  Those relocations will have to
      be converted somehow; as of this writing I'm not sure that any of
      the backends handle that correctly.
 
      It is tempting to instead not discard link once sections when
-     doing a relocateable link (technically, they should be discarded
+     doing a relocatable link (technically, they should be discarded
      whenever we are building constructors).  However, that fails,
      because the linker winds up combining all the link once sections
      into a single large link once section, which defeats the purpose
      of having link once sections in the first place.
 
-     Also, not merging link once sections in a relocateable link
+     Also, not merging link once sections in a relocatable link
      causes trouble for MIPS ELF, which relies in link once semantics
      to handle the .reginfo section correctly.  */
 
@@ -5043,4 +5056,20 @@ lang_do_version_exports_section ()
   lreg = lang_new_vers_regex (NULL, "*", NULL);
   lang_register_vers_node (command_line.version_exports_section,
 			   lang_new_vers_node (greg, lreg), NULL);
+}
+
+void
+lang_add_unique (name)
+     const char *name;
+{
+  struct unique_sections *ent;
+
+  for (ent = unique_section_list; ent; ent = ent->next)
+    if (strcmp (ent->name, name) == 0)
+      return;
+
+  ent = (struct unique_sections *) xmalloc (sizeof *ent);
+  ent->name = xstrdup (name);
+  ent->next = unique_section_list;
+  unique_section_list = ent;
 }
