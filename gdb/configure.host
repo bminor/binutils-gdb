@@ -85,7 +85,6 @@ i[34567]86-*-sysv*)	gdb_host=i386v ;;
 i[34567]86-*-isc*)	gdb_host=i386v ;;
 i[34567]86-*-cygwin*)	gdb_host=cygwin ;;
 
-ia64-*-aix*)		gdb_host=aix ;;
 ia64-*-linux*)		gdb_host=linux ;;
 
 m68*-*-linux*)		gdb_host=linux ;;

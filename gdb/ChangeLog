@@ -1,5 +1,13 @@
 2005-01-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.host (ia64-*-aix*): Remove.
+	* configure.tgt (ia64-*-aix*): Remove.
+	* config/ia64/aix.mh: Remove file.
+	* config/ia64/aix.mt: Remove file.
+	* config/ia64/tm-aix.h: Remove file.
+	* ia64-aix-nat.c: Remove file.
+	* Makefile.in (ia64-aix-nat.o): Remove dependency.
+
 	* config/m88k/obsd.mh (NATDEPFILES): Really remove inf-child.o.
 	Add back inf-ptrace.o.
 

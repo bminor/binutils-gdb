@@ -2051,9 +2051,6 @@ i386v-nat.o: i386v-nat.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
 i387-tdep.o: i387-tdep.c $(defs_h) $(doublest_h) $(floatformat_h) $(frame_h) \
 	$(gdbcore_h) $(inferior_h) $(language_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h)
-ia64-aix-nat.o: ia64-aix-nat.c $(defs_h) $(inferior_h) $(target_h) \
-	$(gdbcore_h) $(regcache_h) $(symtab_h) $(bfd_h) $(symfile_h) \
-	$(objfiles_h) $(gdb_stat_h)
 ia64-aix-tdep.o: ia64-aix-tdep.c $(defs_h)
 ia64-linux-nat.o: ia64-linux-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(target_h) $(gdbcore_h) $(regcache_h) $(gdb_wait_h) $(gregset_h)
