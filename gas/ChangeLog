@@ -1,5 +1,8 @@
 2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* configure.in (mips-dec-netbsd*): Delete.
+	* configure: Regenerate.
+
 	* configure.in (arm-*-netbsdelf*): Add target.
 	* configure: Regenerate.
 

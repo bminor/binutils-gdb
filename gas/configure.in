@@ -341,7 +341,6 @@ changequote([,])dnl
       mcore-*-pe)	    fmt=coff em=pe bfd_gas=yes ;;
 
       # don't change em like *-*-bsd does
-      mips-dec-netbsd*)	    fmt=elf endian=little ;;
       mips-dec-openbsd*)    fmt=elf endian=little ;;
       mips-dec-bsd*)        fmt=aout endian=little ;;
       mips-sony-bsd*)       fmt=ecoff ;;
