@@ -3893,8 +3893,8 @@ frame.  The value returned must match the dummy frame stack value
 previously saved using @code{SAVE_DUMMY_FRAME_TOS}.
 @xref{SAVE_DUMMY_FRAME_TOS}.
 
-@item USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
-@findex USE_STRUCT_CONVENTION
+@item DEPRECATED_USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
+@findex DEPRECATED_USE_STRUCT_CONVENTION
 If defined, this must be an expression that is nonzero if a value of the
 given @var{type} being returned from a function must have space
 allocated for it on the stack.  @var{gcc_p} is true if the function

@@ -1,3 +1,26 @@
+2004-06-20  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (DEPRECATED_USE_STRUCT_CONVENTION): Deprecated.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* values.c (using_struct_return): Update call.
+	* mcore-tdep.c: Update comment.
+	* infcall.c (call_function_by_hand): Update comment.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* arch-utils.h (always_use_struct_convention): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sh64-tdep.c (sh64_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m32r-tdep.c (m32r_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+
 2004-06-18  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* PROBLEMS: Add more specific information, and a work-around,

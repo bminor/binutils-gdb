@@ -1256,7 +1256,7 @@ using_struct_return (struct type *value_type, int gcc_p)
       if (code == TYPE_CODE_STRUCT
 	  || code == TYPE_CODE_UNION
 	  || code == TYPE_CODE_ARRAY)
-	return USE_STRUCT_CONVENTION (gcc_p, value_type);
+	return DEPRECATED_USE_STRUCT_CONVENTION (gcc_p, value_type);
       else
 	return 0;
     }

@@ -41,7 +41,7 @@ extern gdbarch_store_return_value_ftype legacy_store_return_value;
 
 /* To return any structure or union type by value, store it at the
    address passed as an invisible first argument to the function.  */
-extern gdbarch_use_struct_convention_ftype always_use_struct_convention;
+extern gdbarch_deprecated_use_struct_convention_ftype always_use_struct_convention;
 
 /* Typical remote_translate_xfer_address */
 extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer_address;

@@ -916,11 +916,11 @@ mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    argument.
 
    For gdb, this leaves us two routes, based on what
-   USE_STRUCT_CONVENTION (mcore_use_struct_convention) returns.  If
-   this macro returns 1, gdb will call STORE_STRUCT_RETURN to store
-   the return value.
+   DEPRECATED_USE_STRUCT_CONVENTION (mcore_use_struct_convention)
+   returns.  If this macro returns 1, gdb will call
+   STORE_STRUCT_RETURN to store the return value.
 
-   If USE_STRUCT_CONVENTION returns 0, then gdb uses
+   If DEPRECATED_USE_STRUCT_CONVENTION returns 0, then gdb uses
    STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE to store/fetch the
    functions return value.  */
 
@@ -1074,7 +1074,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Stack grows down.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_use_struct_convention (gdbarch, mcore_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, mcore_use_struct_convention);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   /* MCore will never pass a sturcture by reference. It will always be split
      between registers and stack.  */

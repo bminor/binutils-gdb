@@ -3028,8 +3028,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
   if (!sysv_abi)
-    set_gdbarch_use_struct_convention (gdbarch,
-				       rs6000_use_struct_convention);
+    set_gdbarch_deprecated_use_struct_convention (gdbarch, rs6000_use_struct_convention);
 
   if (!sysv_abi)
     {

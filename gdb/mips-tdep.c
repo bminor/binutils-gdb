@@ -5645,8 +5645,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_use_struct_convention (gdbarch,
-					 always_use_struct_convention);
+      set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
       set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
@@ -5662,8 +5661,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_deprecated_reg_struct_has_addr
 	(gdbarch, mips_eabi_reg_struct_has_addr);
-      set_gdbarch_use_struct_convention (gdbarch,
-					 mips_eabi_use_struct_convention);
+      set_gdbarch_deprecated_use_struct_convention (gdbarch, mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_EABI64:
       set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
@@ -5679,8 +5677,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_deprecated_reg_struct_has_addr
 	(gdbarch, mips_eabi_reg_struct_has_addr);
-      set_gdbarch_use_struct_convention (gdbarch,
-					 mips_eabi_use_struct_convention);
+      set_gdbarch_deprecated_use_struct_convention (gdbarch, mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_N32:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);

@@ -3795,7 +3795,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, cris_return_value);
   set_gdbarch_deprecated_reg_struct_has_addr (gdbarch, 
 					      cris_reg_struct_has_addr);
-  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
 
   /* There are 32 registers (some of which may not be implemented).  */
   set_gdbarch_num_regs (gdbarch, 32);

@@ -1225,7 +1225,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, v850_pop_frame);
   set_gdbarch_deprecated_store_struct_return (gdbarch, v850_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, v850_store_return_value);
-  set_gdbarch_use_struct_convention (gdbarch, v850_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, v850_use_struct_convention);
   set_gdbarch_breakpoint_from_pc (gdbarch, v850_breakpoint_from_pc);
 
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);

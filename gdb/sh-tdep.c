@@ -2215,7 +2215,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
-  set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, sh_use_struct_convention);
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);

@@ -1498,7 +1498,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
-  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);

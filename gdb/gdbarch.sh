@@ -543,14 +543,16 @@ F:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR a
 
 M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf
 
-# The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE and
-# USE_STRUCT_CONVENTION have all been folded into RETURN_VALUE.
+# The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
+# DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
+# DEPRECATED_USE_STRUCT_CONVENTION have all been folded into
+# RETURN_VALUE.
 
 f:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
 f:STORE_RETURN_VALUE:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf:::legacy_store_return_value::0
 f:DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf
 f:DEPRECATED_STORE_RETURN_VALUE:void:deprecated_store_return_value:struct type *type, char *valbuf:type, valbuf
-f:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::generic_use_struct_convention::0
+f:DEPRECATED_USE_STRUCT_CONVENTION:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::generic_use_struct_convention::0
 
 # As of 2004-01-17 only the 32-bit SPARC ABI has been identified as an
 # ABI suitable for the implementation of a robust extract

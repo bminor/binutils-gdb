@@ -2875,7 +2875,7 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
   set_gdbarch_deprecated_store_struct_return (gdbarch, sh64_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, sh64_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, sh64_use_struct_convention);
   set_gdbarch_deprecated_pop_frame (gdbarch, sh64_pop_frame);
   set_gdbarch_elf_make_msymbol_special (gdbarch,
 					sh64_elf_make_msymbol_special);

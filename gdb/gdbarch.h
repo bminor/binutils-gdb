@@ -1101,8 +1101,10 @@ typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarc
 extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
 
-/* The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE and
-   USE_STRUCT_CONVENTION have all been folded into RETURN_VALUE. */
+/* The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
+   DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
+   DEPRECATED_USE_STRUCT_CONVENTION have all been folded into
+   RETURN_VALUE. */
 
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, void *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, void *valbuf);
@@ -1144,14 +1146,14 @@ extern void set_gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, 
 #define DEPRECATED_STORE_RETURN_VALUE(type, valbuf) (gdbarch_deprecated_store_return_value (current_gdbarch, type, valbuf))
 #endif
 
-typedef int (gdbarch_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
-extern int gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
-extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_use_struct_convention_ftype *use_struct_convention);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (USE_STRUCT_CONVENTION)
-#error "Non multi-arch definition of USE_STRUCT_CONVENTION"
+typedef int (gdbarch_deprecated_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
+extern int gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
+extern void set_gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, gdbarch_deprecated_use_struct_convention_ftype *deprecated_use_struct_convention);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_USE_STRUCT_CONVENTION)
+#error "Non multi-arch definition of DEPRECATED_USE_STRUCT_CONVENTION"
 #endif
-#if !defined (USE_STRUCT_CONVENTION)
-#define USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_use_struct_convention (current_gdbarch, gcc_p, value_type))
+#if !defined (DEPRECATED_USE_STRUCT_CONVENTION)
+#define DEPRECATED_USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_deprecated_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
 
 /* As of 2004-01-17 only the 32-bit SPARC ABI has been identified as an

@@ -1320,7 +1320,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frameless_function_invocation (gdbarch, legacy_frameless_look_for_prologue);
 
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_breakpoint_from_pc (gdbarch, h8300_breakpoint_from_pc);
   set_gdbarch_push_dummy_code (gdbarch, h8300_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, h8300_push_dummy_call);

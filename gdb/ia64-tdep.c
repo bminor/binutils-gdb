@@ -99,7 +99,6 @@ static gdbarch_register_type_ftype ia64_register_type;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static gdbarch_extract_return_value_ftype ia64_extract_return_value;
-static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
 static struct type *is_float_or_hfa_type (struct type *t);
 
 static struct type *builtin_type_ia64_ext;
@@ -3334,7 +3333,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, ia64_skip_prologue);
 
-  set_gdbarch_use_struct_convention (gdbarch, ia64_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, ia64_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, ia64_extract_return_value);
 
   set_gdbarch_store_return_value (gdbarch, ia64_store_return_value);

@@ -953,9 +953,9 @@ the function call).", name);
     else
       {
 	/* NOTE: cagney/2003-10-20: Unlike "gdbarch_return_value", the
-	   EXTRACT_RETURN_VALUE and USE_STRUCT_CONVENTION methods do
-	   not handle the edge case of a function returning a small
-	   structure / union in registers.  */
+	   EXTRACT_RETURN_VALUE and DEPRECATED_USE_STRUCT_CONVENTION
+	   methods do not handle the edge case of a function returning
+	   a small structure / union in registers.  */
 	retval = allocate_value (value_type);
 	EXTRACT_RETURN_VALUE (value_type, retbuf, VALUE_CONTENTS_RAW (retval));
       }

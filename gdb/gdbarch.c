@@ -186,7 +186,7 @@ struct gdbarch
   gdbarch_store_return_value_ftype *store_return_value;
   gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value;
   gdbarch_deprecated_store_return_value_ftype *deprecated_store_return_value;
-  gdbarch_use_struct_convention_ftype *use_struct_convention;
+  gdbarch_deprecated_use_struct_convention_ftype *deprecated_use_struct_convention;
   gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs;
   gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info;
@@ -332,7 +332,7 @@ struct gdbarch startup_gdbarch =
   0,  /* store_return_value */
   0,  /* deprecated_extract_return_value */
   0,  /* deprecated_store_return_value */
-  0,  /* use_struct_convention */
+  0,  /* deprecated_use_struct_convention */
   0,  /* deprecated_extract_struct_value_address */
   0,  /* deprecated_frame_init_saved_regs */
   0,  /* deprecated_init_extra_frame_info */
@@ -459,7 +459,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->store_return_value = legacy_store_return_value;
-  current_gdbarch->use_struct_convention = generic_use_struct_convention;
+  current_gdbarch->deprecated_use_struct_convention = generic_use_struct_convention;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
@@ -604,7 +604,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of return_value, has predicate */
   /* Skip verify of extract_return_value, invalid_p == 0 */
   /* Skip verify of store_return_value, invalid_p == 0 */
-  /* Skip verify of use_struct_convention, invalid_p == 0 */
+  /* Skip verify of deprecated_use_struct_convention, invalid_p == 0 */
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of deprecated_frame_init_saved_regs, has predicate */
   /* Skip verify of deprecated_init_extra_frame_info, has predicate */
@@ -1422,6 +1422,16 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       (long) current_gdbarch->deprecated_target_read_fp
                       /*DEPRECATED_TARGET_READ_FP ()*/);
 #endif
+#ifdef DEPRECATED_USE_STRUCT_CONVENTION
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_USE_STRUCT_CONVENTION(gcc_p, value_type)",
+                      XSTRING (DEPRECATED_USE_STRUCT_CONVENTION (gcc_p, value_type)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_USE_STRUCT_CONVENTION = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_use_struct_convention
+                      /*DEPRECATED_USE_STRUCT_CONVENTION ()*/);
+#endif
 #ifdef DWARF2_REG_TO_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2078,16 +2088,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: unwind_sp = 0x%08lx\n",
                       (long) current_gdbarch->unwind_sp);
-#ifdef USE_STRUCT_CONVENTION
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "USE_STRUCT_CONVENTION(gcc_p, value_type)",
-                      XSTRING (USE_STRUCT_CONVENTION (gcc_p, value_type)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: USE_STRUCT_CONVENTION = <0x%08lx>\n",
-                      (long) current_gdbarch->use_struct_convention
-                      /*USE_STRUCT_CONVENTION ()*/);
-#endif
 #ifdef VALUE_TO_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3545,20 +3545,20 @@ set_gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type)
+gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->use_struct_convention != NULL);
+  gdb_assert (gdbarch->deprecated_use_struct_convention != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_use_struct_convention called\n");
-  return gdbarch->use_struct_convention (gcc_p, value_type);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_use_struct_convention called\n");
+  return gdbarch->deprecated_use_struct_convention (gcc_p, value_type);
 }
 
 void
-set_gdbarch_use_struct_convention (struct gdbarch *gdbarch,
-                                   gdbarch_use_struct_convention_ftype use_struct_convention)
+set_gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch,
+                                              gdbarch_deprecated_use_struct_convention_ftype deprecated_use_struct_convention)
 {
-  gdbarch->use_struct_convention = use_struct_convention;
+  gdbarch->deprecated_use_struct_convention = deprecated_use_struct_convention;
 }
 
 int
