@@ -1,3 +1,8 @@
+2002-04-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.in: Add support for powerpc-*-windiss.
+	* configure: Regenerated.
+	
 2002-04-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-s390.c (md_parse_option): Formatting.
