@@ -4744,7 +4744,6 @@ dot_xdata (size)
 
   md.keep_pending_output = 1;
   set_section (name);
-  obstack_free (&notes, name);
   cons (size);
   obj_elf_previous (0);
   md.keep_pending_output = 0;
@@ -4799,7 +4798,6 @@ dot_xfloat_cons (kind)
 
   md.keep_pending_output = 1;
   set_section (name);
-  obstack_free (&notes, name);
   stmt_float_cons (kind);
   obj_elf_previous (0);
   md.keep_pending_output = 0;
@@ -4815,7 +4813,6 @@ dot_xstringer (zero)
 
   md.keep_pending_output = 1;
   set_section (name);
-  obstack_free (&notes, name);
   stringer (zero);
   obj_elf_previous (0);
   md.keep_pending_output = 0;
@@ -4832,7 +4829,6 @@ dot_xdata_ua (size)
 
   md.keep_pending_output = 1;
   set_section (name);
-  obstack_free (&notes, name);
   md.auto_align = 0;
   cons (size);
   md.auto_align = saved_auto_align;
@@ -4851,7 +4847,6 @@ dot_xfloat_cons_ua (kind)
 
   md.keep_pending_output = 1;
   set_section (name);
-  obstack_free (&notes, name);
   md.auto_align = 0;
   stmt_float_cons (kind);
   md.auto_align = saved_auto_align;

@@ -1,5 +1,14 @@
 2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	(dot_xdata): Undo the last change. Section name is used by
+	set_section.
+	(dot_float_cons): Likewise.
+	(dot_xstringer): Likewise.
+	(dot_xdata_ua): Likewise.
+	(dot_float_cons_ua): Likewise.
+
+2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* NEWS: Mention "-munwind-check=[warning|error]".
 
 	* config/tc-ia64.c (md): Add unwind_check.
