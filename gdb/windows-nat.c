@@ -98,8 +98,9 @@ static void child_stop (void);
 static int win32_child_thread_alive (ptid_t);
 void child_kill_inferior (void);
 
-static int last_sig = 0;	/* Set if a signal was received from the
-				   debugged process */
+static enum target_signal last_sig = TARGET_SIGNAL_0;
+/* Set if a signal was received from the debugged process */
+
 /* Thread information structure used to track information that is
    not available in gdb's thread structure. */
 typedef struct thread_info_struct
@@ -218,6 +219,7 @@ static const struct xlate_exception
   {EXCEPTION_BREAKPOINT, TARGET_SIGNAL_TRAP},
   {DBG_CONTROL_C, TARGET_SIGNAL_INT},
   {EXCEPTION_SINGLE_STEP, TARGET_SIGNAL_TRAP},
+  {STATUS_FLOAT_DIVIDE_BY_ZERO, TARGET_SIGNAL_FPE},
   {-1, -1}};
 
 static void
@@ -823,6 +825,10 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
   return gotasig;
 }
 
+#define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
+  printf ("gdb: Target exception %s at 0x%08lx\n", x, \
+  (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress)
+
 static int
 handle_exception (struct target_waitstatus *ourstatus)
 {
@@ -837,52 +843,80 @@ handle_exception (struct target_waitstatus *ourstatus)
   switch (code)
     {
     case EXCEPTION_ACCESS_VIOLATION:
-      DEBUG_EXCEPT (("gdb: Target exception ACCESS_VIOLATION at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ACCESS_VIOLATION");
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
-      last_sig = SIGSEGV;
-      break;
-    case STATUS_FLOAT_UNDERFLOW:
-    case STATUS_FLOAT_DIVIDE_BY_ZERO:
-    case STATUS_FLOAT_OVERFLOW:
-    case STATUS_INTEGER_DIVIDE_BY_ZERO:
-      DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
-      ourstatus->value.sig = TARGET_SIGNAL_FPE;
-      last_sig = SIGFPE;
       break;
     case STATUS_STACK_OVERFLOW:
-      DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_STACK_OVERFLOW");
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
       break;
+    case STATUS_FLOAT_DENORMAL_OPERAND:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_DENORMAL_OPERAND");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_FLOAT_INEXACT_RESULT:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_INEXACT_RESULT");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_FLOAT_INVALID_OPERATION:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_INVALID_OPERATION");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_FLOAT_OVERFLOW:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_OVERFLOW");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_FLOAT_STACK_CHECK:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_STACK_CHECK");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_FLOAT_UNDERFLOW:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_UNDERFLOW");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_FLOAT_DIVIDE_BY_ZERO:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_DIVIDE_BY_ZERO");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_INTEGER_DIVIDE_BY_ZERO:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_INTEGER_DIVIDE_BY_ZERO");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
+    case STATUS_INTEGER_OVERFLOW:
+      DEBUG_EXCEPTION_SIMPLE ("STATUS_INTEGER_OVERFLOW");
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      break;
     case EXCEPTION_BREAKPOINT:
-      DEBUG_EXCEPT (("gdb: Target exception BREAKPOINT at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
     case DBG_CONTROL_C:
-      DEBUG_EXCEPT (("gdb: Target exception CONTROL_C at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      DEBUG_EXCEPTION_SIMPLE ("DBG_CONTROL_C");
       ourstatus->value.sig = TARGET_SIGNAL_INT;
-      last_sig = SIGINT;	/* FIXME - should check pass state */
       break;
     case DBG_CONTROL_BREAK:
-      DEBUG_EXCEPT (("gdb: Target exception CONTROL_BREAK at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      DEBUG_EXCEPTION_SIMPLE ("DBG_CONTROL_BREAK");
       ourstatus->value.sig = TARGET_SIGNAL_INT;
-      last_sig = SIGINT;	/* FIXME - should check pass state */
       break;
     case EXCEPTION_SINGLE_STEP:
-      DEBUG_EXCEPT (("gdb: Target exception SINGLE_STEP at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_SINGLE_STEP");
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
     case EXCEPTION_ILLEGAL_INSTRUCTION:
-      DEBUG_EXCEPT (("gdb: Target exception SINGLE_ILL at 0x%08lx\n",
-       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ILLEGAL_INSTRUCTION");
       ourstatus->value.sig = TARGET_SIGNAL_ILL;
-      last_sig = SIGILL;
+      break;
+    case EXCEPTION_PRIV_INSTRUCTION:
+      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_PRIV_INSTRUCTION");
+      ourstatus->value.sig = TARGET_SIGNAL_ILL;
+      break;
+    case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_NONCONTINUABLE_EXCEPTION");
+      ourstatus->value.sig = TARGET_SIGNAL_ILL;
       break;
     default:
       if (current_event.u.Exception.dwFirstChance)
@@ -894,6 +928,7 @@ handle_exception (struct target_waitstatus *ourstatus)
       break;
     }
   exception_count++;
+  last_sig = ourstatus->value.sig;
   return 1;
 }
 
@@ -906,8 +941,10 @@ child_continue (DWORD continue_status, int id)
   thread_info *th;
   BOOL res;
 
-  DEBUG_EVENTS (("ContinueDebugEvent (cpid=%ld, ctid=%ld, DBG_CONTINUE);\n",
-		 current_event.dwProcessId, current_event.dwThreadId));
+  DEBUG_EVENTS (("ContinueDebugEvent (cpid=%ld, ctid=%ld, %s);\n",
+		  current_event.dwProcessId, current_event.dwThreadId,
+		  continue_status == DBG_CONTINUE ? 
+		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
   res = ContinueDebugEvent (current_event.dwProcessId,
 			    current_event.dwThreadId,
 			    continue_status);
@@ -952,7 +989,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
   static thread_info dummy_thread_info;
   int retval = 0;
 
-  last_sig = 0;
+  last_sig = TARGET_SIGNAL_0;
 
   if (!(debug_event = WaitForDebugEvent (&current_event, 1000)))
     goto out;
@@ -1118,7 +1155,7 @@ do_initial_child_stuff (DWORD pid)
   extern int stop_after_trap;
   int i;
 
-  last_sig = 0;
+  last_sig = TARGET_SIGNAL_0;
   event_count = 0;
   exception_count = 0;
   debug_registers_changed = 0;
@@ -1470,11 +1507,45 @@ void
 child_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   thread_info *th;
-  DWORD continue_status = last_sig > 0 && last_sig < NSIG ?
-  DBG_EXCEPTION_NOT_HANDLED : DBG_CONTINUE;
+  DWORD continue_status = DBG_CONTINUE;
+
   int pid = PIDGET (ptid);
 
-  last_sig = 0;
+  if (sig != TARGET_SIGNAL_0)
+    {
+      if (current_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
+	{
+	  DEBUG_EXCEPT(("Cannot continue with signal %d here.\n",sig));
+	}
+      else if (sig == last_sig)
+	continue_status = DBG_EXCEPTION_NOT_HANDLED;
+      else
+#if 0
+/* This code does not seem to work, because
+  the kernel does probably not consider changes in the ExceptionRecord
+  structure when passing the exception to the inferior. 
+  Note that this seems possible in the exception handler itself.  */
+	{
+	  int i;
+	  for (i = 0; xlate[i].them != -1; i++)
+	    if (xlate[i].us == sig)
+	      {
+		current_event.u.Exception.ExceptionRecord.ExceptionCode =
+		  xlate[i].them;
+		continue_status = DBG_EXCEPTION_NOT_HANDLED;
+		break;
+	      }
+	  if (continue_status == DBG_CONTINUE)
+	    {
+	      DEBUG_EXCEPT(("Cannot continue with signal %d.\n",sig));
+	    }
+	}
+#endif
+	DEBUG_EXCEPT(("Can only continue with recieved signal %d.\n", 
+	  last_sig));
+    }
+
+  last_sig = TARGET_SIGNAL_0;
 
   DEBUG_EXEC (("gdb: child_resume (pid=%d, step=%d, sig=%d);\n",
 	       pid, step, sig));

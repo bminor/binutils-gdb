@@ -1,3 +1,18 @@
+2002-02-05  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	win32-nat.c (last_sig): Changed type of variable to target_signal,
+	to allow easier handling of pass state.
+	(DEBUG_EXCEPTION_SIMPLE): New macro, used in handle_exception,
+	that gives exception name and address.
+	(handle_exception): Use DEBUG_EXCEPTION_SIMPLE macro
+	and set last_sig value to ourstatus->value.sig. Some missing 
+	exceptions added.
+	(child_continue): Correctly report continue_status.	
+	(get_child_debug_event,do_initial_child_stuff): Set last_sig to 
+	TARGET_SIGNAL_0 (new default value).
+	(child_resume): consider sig argument passed to decide if 
+	the exception should be passed to debuggee or not.
+
 2002-02-05  Michael Snyder  <msnyder@redhat.com>
 
 	* regcache.c (fetch_register): Call target_fetch_register
