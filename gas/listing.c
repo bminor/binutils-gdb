@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*
  Contributed by Steve Chamberlain
@@ -988,23 +988,32 @@ listing_list (on)
 
 
 void
-listing_psize (ignore)
-     int ignore;
+listing_psize (width_only)
+     int width_only;
 {
-  paper_height = get_absolute_expression ();
+  if (! width_only)
+    {
+      paper_height = get_absolute_expression ();
 
-  if (paper_height < 0 || paper_height > 1000)
-    {
-      paper_height = 0;
-      as_warn ("strange paper height, set to no form");
+      if (paper_height < 0 || paper_height > 1000)
+	{
+	  paper_height = 0;
+	  as_warn ("strange paper height, set to no form");
+	}
+
+      if (*input_line_pointer != ',')
+	{
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+
+      ++input_line_pointer;
     }
-  if (*input_line_pointer == ',')
-    {
-      input_line_pointer++;
-      paper_width = get_absolute_expression ();
-    }
+
+  paper_width = get_absolute_expression ();
+
+  demand_empty_rest_of_line ();
 }
-
 
 void
 listing_title (depth)
