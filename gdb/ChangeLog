@@ -1,3 +1,8 @@
+2004-10-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* defs.h [!FOPEN_RB]: Include "fopen-bin.h" instead of
+	"fopen-same.h".  Update comment.
+
 2004-10-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386gnu-nat.c: Include "gdb_string.h".
