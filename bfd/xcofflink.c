@@ -3656,14 +3656,15 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	{
 	  boolean saw_contents;
 	  int indx;
-	  asection **op;
+	  asection **op, **prev;
 	  file_ptr sofar;
-
+	  
 	  /* Insert .pad sections before every section which has
              contents and is loaded, if it is preceded by some other
              section which has contents and is loaded.  */
 	  saw_contents = true;
-	  for (op = &abfd->sections; *op != NULL; op = &(*op)->next)
+	  for (op = &abfd->sections, prev = NULL; 
+	       *op != NULL; prev = op, op = &(*op)->next)
 	    {
 	      if (strcmp ((*op)->name, ".pad") == 0)
 		saw_contents = false;
@@ -3674,20 +3675,39 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 		    saw_contents = true;
 		  else
 		    {
-		      asection *n, *hold;
-
+		      asection *n, *hold, **st;
+		      
+		      /* Create a pad section and place it before the section
+			 that needs padding.  This requires unlinking and 
+			 relinking the bfd's sections list. 
+			 
+			 sections = S1
+			 .          S1.next = S2
+			 .          S2.next = S3
+			 .          S3.next = NULL
+			 section_tail = &S3.next */
+		      
 		      hold = *op;
-		      *op = NULL;
+		      st = abfd->section_tail;
+		      
 		      n = bfd_make_section_anyway (abfd, ".pad");
-		      BFD_ASSERT (*op == n);
-		      n->next = hold;
 		      n->flags = SEC_HAS_CONTENTS;
-		      n->alignment_power = 0;
+		      n->alignment_power = 0; 
+		      
+		      if (NULL == prev) 
+			abfd->sections = n;
+		      else
+			(*prev)->next = n;
+		      
+		      n->next = hold;
+		      *st = NULL;
+		      abfd->section_tail = st;
+
 		      saw_contents = false;
 		    }
 		}
 	    }
-
+	  
 	  /* Reset the section indices after inserting the new
              sections.  */
 	  indx = 0;
@@ -3957,17 +3977,6 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	  || bfd_bwrite (finfo.outsyms, symesz, abfd) != symesz)
 	goto error_return;
     }
-
-  /* init-fini */
-  if (info->init_function || info->fini_function)
-    {
-      struct xcoff_link_hash_entry *hrtinit;
-
-      hrtinit = xcoff_link_hash_lookup (xcoff_hash_table (info),
-					"__rtinit",
-					false, false, true);
-    }
-
 
   /* Write out all the global symbols which do not come from XCOFF
      input files.  */
