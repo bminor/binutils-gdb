@@ -21,6 +21,9 @@
 
 # $Id$
 
+# Please email any bugs, comments, and/or additions to this file to:
+# configure@cygnus.com
+
 #
 # Shell script to create proper links to machine-dependent files in
 # preparation for compilation.
@@ -30,7 +33,7 @@
 # 	config.status is removed.
 #
 
-set -e
+# set -e
 
 remove=rm
 hard_link=ln
@@ -40,8 +43,6 @@ symbolic_link='ln -s'
 #remove="echo rm"
 #hard_link="echo ln"
 #symbolic_link="echo ln -s"
-
-progname=$0
 
 # clear some things potentially inherited from environment.
 
@@ -56,6 +57,9 @@ destdir=
 fatal=
 hostsubdir=
 norecursion=
+objdir=
+objdiroption=
+progname=
 recurring=
 removing=
 srcdir=
@@ -64,15 +68,6 @@ target=
 targets=
 targetsubdir=
 verbose=
-
-#if [ "$0" != "./configure" ] ; then
-#	exec ./configure $*
-#fi
-
-#if [ ! -f ./config.sub ] ; then
-#	echo '***' Can not find config.sub.
-#	exit 1
-#fi
 
 for arg in $*;
 do
@@ -101,6 +96,10 @@ do
 	-norecursion | +no*)
 		norecursion=true
 		;;
+	-objdir=* | +objdir=* | +objdi=* | +objd=* | +obj=* | +ob=* | +o=*)
+		objdiroption=${arg}
+		objdir=`echo ${arg} | sed 's/[+-]o[a-z]*=//'`
+		;;
 	-recurring | +recurring | +recurrin | +recurri | +recurr | +recur | +recu | +rec | +re)
 		recurring=true
 		;;
@@ -124,6 +123,10 @@ do
 		newtargets="${targets} `echo ${arg} | sed 's/[+-]t[a-z]*=//'`"
 		targets="${newtargets}"
 		;;
+	-tmpdir=* | +tmpdir=* | +tmpdi=* | +tmpd=* | +tmp=* | +tm=*)
+		tmpdiroption=${arg}
+		TMPDIR=`echo ${arg} | sed 's/[+-]t[a-z]*=//'`
+		;;
 	-v | -verbose | +v*)
 		verbose=${arg}
 		;;
@@ -145,8 +148,42 @@ do
 done
 
 if [ -n "${verbose}" ] ; then
-	echo `pwd`/configure $*
+	echo $0 $*
 fi
+
+## this is a little touchy and won't always work, but...
+##
+## if the argv[0] starts with a slash then it is an absolute name that can be
+## used as is.
+##
+## otherwise, if argv[0] has no slash in it, we can assume that it is on the
+## path.  Since PATH might include "." we also add `pwd` to the end of PATH.
+##
+## otherwise we prepend `pwd` to $0 and hope that will give us an absolute
+## path.
+##
+
+if (echo $0 | grep '^/' > /dev/null) ; then
+	progname=$0
+	configsub=`echo $0 | sed -e 's:[^/]*$:config.sub:'`
+else
+	if (echo $0 | grep '/' > /dev/null) ; then
+		progname=`pwd`/$0
+
+		if [ ! -f config.sub ] ; then
+			echo '***' can not find config.sub.
+			echo 1
+		fi
+
+		configsub=`pwd`/config.sub
+	else
+		progname=$0
+		configsub="config.sub"
+		PATH=$PATH:`pwd` ; export PATH
+	fi
+fi
+
+echo configure = ${progname}, config.sub = ${configsub}
 
 # process host and target only if not removing.
 if [ -z "${removing}" -a -z "${fatal}" ] ; then
@@ -164,15 +201,17 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo ;
 	echo "Options: [defaults in brackets]" ;
 	echo " +ansi		configure w/ANSI library. [no ansi lib]" ;
-	echo " +destdir=MYDIR	configure for installation into MYDIR. [/usr/local]" ;
-	echo " +subdirs		configure in subdirectories.  [in source directories]" ;
-	echo " +lang=LANG	configure to build LANG. [gcc]" ;
-	echo " +help		print this message. [normal config]" ;
+	echo " +destdir=MYDIR	configure for installation into MYDIR. [\"/usr/local\"]" ;
 	echo " +gas		configure the compilers for use with gas. [native as]" ;
+	echo " +help		print this message. [normal config]" ;
+	echo " +lang=LANG	configure to build LANG. [gcc]" ;
 	echo " +nfp		configure the compilers default to soft floating point. [hard float]" ;
 	echo " +norecursion	configure this directory only. [recurse]" ;
+	echo " +objdir=ODIR	configure in a parallel tree rooted in ODIR. [rooted in \".\"]" ;
 	echo " +rm		remove this configuration. [build a configuration]" ;
+	echo " +subdirs		configure in subdirectories.  [in source directories]" ;
 	echo " +target=TARGET	configure for TARGET.  [TARGET = HOST]" ;
+	echo " +tmpdir=TMPDIR	create temporary files in TMPDIR.  [ TMPDIR = \"/tmp\" ]" ;
 	echo ;
 	echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
 	echo "Asking for more than one \"+target\" implies \"+subdirs\".  Any other" ;
@@ -197,16 +236,20 @@ if [ -r configure.in ] ; then
 		exit 1
 	fi
 
+	if [ -z "${TMPDIR}" ] ; then
+		TMPDIR=/tmp ; export TMPDIR
+	fi
+
 	# split configure.in into common, per-host, per-target,
 	# and post-target parts.  Post-target is optional.
-	sed -e '/^# per\-host:/,$d' configure.in > configure.com
-	sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > configure.hst
+	sed -e '/^# per\-host:/,$d' configure.in > ${TMPDIR}/configure.$$.com
+	sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > ${TMPDIR}/configure.$$.hst
 	if grep -s '^# post-target:' configure.in ; then
-	  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > configure.tgt
-	  sed -e '1,/^# post\-target:/d' configure.in > configure.pos
+	  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > ${TMPDIR}/configure.$$.tgt
+	  sed -e '1,/^# post\-target:/d' configure.in > ${TMPDIR}/configure.$$.pos
 	else
-	  sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
-	  echo >configure.pos
+	  sed -e '1,/^# per\-target:/d' configure.in > ${TMPDIR}/configure.$$.tgt
+	  echo >${TMPDIR}/configure.$$.pos
 	fi
 
 else
@@ -216,7 +259,7 @@ fi
 
 ### do common part of configure.in
 
-. ./configure.com
+. ${TMPDIR}/configure.$$.com
 
 # some sanity checks on configure.in
 if [ -z "${srctrigger}" ] ; then
@@ -233,32 +276,37 @@ for host in ${hosts} ; do
 
 	host_alias=${host}
 
-	result=`/bin/sh ./config.sub ${host}`
+	result=`${configsub} ${host}`
 	host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 	host=${host_cpu}-${host_vendor}-${host_os}
 	host_makefile_frag=config/hmake-${host}
 
-	. ./configure.hst
+	. ${TMPDIR}/configure.$$.hst
 
 	for target in ${targets} ; do
 
 		target_alias=${target}
-		result=`/bin/sh ./config.sub ${target}`
+		result=`${configsub} ${target}`
 		target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 		target=${target_cpu}-${target_vendor}-${target_os}
 		target_makefile_frag=config/tmake-${target}
 
-		. ./configure.tgt
+		. ${TMPDIR}/configure.$$.tgt
 
 		# Temporarily, we support only direct subdir builds.
 		hostsubdir=H-${host_alias}
 		targetsubdir=T-${target_alias}
 
 		if [ -n "${removing}" ] ; then
+			if [ -n "${objdir}" ] ; then
+				echo '***' +rm not supported for +objdir.  Just \"rm -rf ${objdir}\" by hand.
+				exit 1
+			fi
+
 			if [ -n "${subdirs}" ] ; then
 				if [ -d "${hostsubdir}" ] ; then
 					rm -rf ${hostsubdir}/${targetsubdir}
@@ -273,6 +321,11 @@ for host in ${hosts} ; do
 				rm -f ${Makefile} config.status ${links}
 			fi
 		else
+			if [ -n "${objdir}" ]; then
+				srcdir=`pwd`
+				cd ${objdir}
+			fi
+
 			if [ -n "${subdirs}" ] ; then
 				# check for existing status before allowing forced subdirs.
 				if [ -f ${Makefile} ] ; then
@@ -297,7 +350,9 @@ for host in ${hosts} ; do
 
 				cd ${targetsubdir}
 
-				srcdir=../..
+				if [ -z "${srcdir}" ] ; then
+					srcdir=../..
+				fi
 			else
 				# if not subdir builds, then make sure none exist.
 				if [ -n "`(ls .) 2>&1 | (grep H- ; true)`" ] ; then
@@ -399,9 +454,11 @@ for host in ${hosts} ; do
 			echo "target_os = ${target_os}" >> ${Makefile}
 
 			if [ -n "${subdirs}" ] ; then
-				echo "subdir = /${hostsubdir}/${targetsubdir}" >> ${Makefile}
+				(echo "subdir = /${hostsubdir}/${targetsubdir}" ;
+					echo "unsubdir = ../..") >> ${Makefile}
 			else
-				echo "subdir =" >> ${Makefile}
+				(echo "subdir =" ;
+					echo "unsubdir = .") >> ${Makefile}
 			fi
 
 		#	echo "workdir = `pwd`" >> ${Makefile}
@@ -486,8 +543,8 @@ for host in ${hosts} ; do
 				echo "Created \"${Makefile}\"" in `pwd`${andandusing}.
 			fi
 
-			if [ -f ./configure.pos ] ; then
-				. ./configure.pos
+			if [ -f ${TMPDIR}/configure.$$.pos ] ; then
+				. ${TMPDIR}/configure.$$.pos
 			fi
 
 			# describe the chosen configuration in config.status.
@@ -496,8 +553,8 @@ for host in ${hosts} ; do
 			# Makefiles.
 
 			echo "#!/bin/sh
-# ${srcname} was configured as follows:
-${srcdir}/configure" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norecursion ; else true ; fi` > config.status
+# `pwd` was configured as follows:
+(cd ${srcdir} ; ${progname}" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norecursion ; else true ; fi` ")" > config.status
 			chmod a+x config.status
 
 			originaldir=`pwd`
@@ -512,9 +569,17 @@ ${srcdir}/configure" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norec
 				fi
 
 				if [ -d ${configdir} ] ; then
+					if [ -n "${objdir}" ] ; then
+						if [ ! -d ${objdir}/${configdir} ] ; then
+							mkdir ${objdir}/${configdir}
+						fi
+					fi
+
 					(cd ${configdir} ;
-						configure +recurring ${host_alias} +target=${target_alias} \
-							${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
+						${progname} +recurring ${host_alias} +target=${target_alias} \
+							${verbose} ${subdirs} ${removing} +destdir=${destdir} \
+							`if [ -n "${objdir}" ] ; then echo +objdir=${objdir}/${configdir} ; fi` \
+							${tmpdiroption}) \
 						| sed 's/^/	/'
 				else
 					if [ -n "${verbose}" ] ; then
@@ -527,6 +592,12 @@ ${srcdir}/configure" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norec
 
 	# Now build a Makefile for this host.
 	if [ -n "${subdirs}" -a ! -n "${removing}" ] ; then
+		push=`pwd`
+
+		if [ -n "${objdir}" ] ; then
+			cd ${objdir}
+		fi
+
 		cd ${hostsubdir}
 		cat > GNUmakefile << E!O!F
 # Makefile generated by configure for host ${host_alias}.
@@ -538,20 +609,30 @@ ALL := $(shell ls -d T-*)
 
 all:
 E!O!F
-		cd ..
+		cd ${push}
 	fi
 done # for each host
 
 ### clean up.
 
-rm -f configure.com configure.tgt configure.hst configure.pos
+rm -f ${TMPDIR}/configure.$$.com ${TMPDIR}/configure.$$.tgt ${TMPDIR}/configure.$$.hst ${TMPDIR}/configure.$$.pos
 
 exit 0
 
 #
 #
 # $Log$
-# Revision 1.46  1991/10/02 06:29:53  rich
+# Revision 1.49  1991/10/04 22:52:09  rich
+# Use john's heuristic for finding ourselves.  kinda like hare krishna.
+#
+# Revision 1.48  1991/10/02  13:17:28  rich
+# take out the set -e for now
+#
+# Revision 1.47  1991/10/02  10:02:23  rich
+# * temporary files in TMPDIR
+# * +objdir
+#
+# Revision 1.46  1991/10/02  06:29:53  rich
 # Added +site=foo option for naming site specific Makefile fragments.
 #
 # Revision 1.45  1991/10/02  06:15:13  rich
