@@ -2980,8 +2980,12 @@ som_begin_writing (abfd)
 	      /* Demand paged executables have each space aligned to a
 		 page boundary.  Sharable executables (write-protected
 		 text) have just the private (aka data & bss) space aligned
-		 to a page boundary.  */
+		 to a page boundary.  Ugh.  Not true for HPUX.
+
+		 The HPUX kernel requires the text to always be page aligned
+		 within the file regardless of the executable's type.  */
 	      if (abfd->flags & D_PAGED
+		  || (subsection->flags & SEC_CODE)
 		  || ((abfd->flags & WP_TEXT)
 		      && (subsection->flags & SEC_DATA)))
 		current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);

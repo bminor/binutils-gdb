@@ -1,3 +1,9 @@
+Sun Mar 20 09:24:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_begin_writing): Align text in all executables to
+	make HPUX kernel happy.  Fixes strip/objcopy for shared
+	executables.
+
 Sat Mar 19 07:06:59 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_begin_writing): Account for alignment needs of
