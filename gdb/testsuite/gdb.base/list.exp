@@ -93,9 +93,16 @@ proc test_listsize {} {
     gdb_test "show listsize" "Number of source lines gdb will list by default is 10.*" "show default list size"
     
     # Show the default lines
+    # Note that remote targets that have debugging info for _start available will
+    # list the lines there instead of main, so we skip this test for remote targets.
     # The second case is for optimized code, it is still correct.
     
-    gdb_test "list" "(1\[ \t\]+#include \"list0.h\".*10\[ \t\]+x = 0;|2.*11\[ \t\]+foo .x\[+)\]+;)" "list default lines around main"
+    if [is_remote target] {
+	runto_main;
+	unsupported "list default lines around main";
+    } else {
+	gdb_test "list" "(1\[ \t\]+#include \"list0.h\".*10\[ \t\]+x = 0;|2.*11\[ \t\]+foo .x\[+)\]+;)" "list default lines around main"
+    }
 
     # Ensure we can limit printouts to one line
 

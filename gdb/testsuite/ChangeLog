@@ -1,3 +1,8 @@
+2002-03-26  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/list.exp: Revert the change made yesterday and add note
+	about why we don't list the default lines for remote targets.
+
 2002-03-25  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/help.exp: Clean up unnecessary wild cards in regexps.
