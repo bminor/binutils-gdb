@@ -31,10 +31,8 @@ SECTION
 	haven't bothered yet.
  */
 
-#ifdef __sparcv9
-#define _SYSCALL32	/* For Sparc64-cross-32 */
-#endif
-
+/* For sparc64-cross-sparc32.  */
+#define _SYSCALL32
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -802,7 +800,7 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 
 	if (name == NULL)
 	  {
-	    name = symbol->name;  
+	    name = symbol->name;
 	    bfd_print_symbol_vandf ((PTR) file, symbol);
 	  }
 
@@ -981,7 +979,7 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 }
 
 void
-_bfd_elf_link_hash_hide_symbol(info, h)
+_bfd_elf_link_hash_hide_symbol (info, h)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *h;
 {
@@ -5300,12 +5298,14 @@ elfcore_grok_prstatus (abfd, note)
   char* name;
   asection* sect;
   int raw_size;
+  int offset;
 
   if (note->descsz == sizeof (prstatus_t))
     {
       prstatus_t prstat;
 
       raw_size = sizeof (prstat.pr_reg);
+      offset   = offsetof (prstatus_t, pr_reg);
       memcpy (&prstat, note->descdata, sizeof (prstat));
 
       elf_tdata (abfd)->core_signal = prstat.pr_cursig;
@@ -5321,13 +5321,14 @@ elfcore_grok_prstatus (abfd, note)
       elf_tdata (abfd)->core_lwpid = prstat.pr_who;
 #endif
     }
-#if defined (__sparcv9)
+#if defined (HAVE_PRSTATUS32_T)
   else if (note->descsz == sizeof (prstatus32_t))
     {
       /* 64-bit host, 32-bit corefile */
       prstatus32_t prstat;
 
       raw_size = sizeof (prstat.pr_reg);
+      offset   = offsetof (prstatus32_t, pr_reg);
       memcpy (&prstat, note->descdata, sizeof (prstat));
 
       elf_tdata (abfd)->core_signal = prstat.pr_cursig;
@@ -5339,11 +5340,11 @@ elfcore_grok_prstatus (abfd, note)
 	 pr_who doesn't exist on:
 	 linux 2.[01]
 	 */
-#if defined (HAVE_PRSTATUS_T_PR_WHO)
+#if defined (HAVE_PRSTATUS32_T_PR_WHO)
       elf_tdata (abfd)->core_lwpid = prstat.pr_who;
 #endif
     }
-#endif /* __sparcv9 */
+#endif /* HAVE_PRSTATUS32_T */
   else
     {
       /* Fail - we don't know how to handle any other
@@ -5363,18 +5364,8 @@ elfcore_grok_prstatus (abfd, note)
   if (sect == NULL)
     return false;
 
-  if (note->descsz == sizeof (prstatus_t))
-    {
-      sect->_raw_size = raw_size;
-      sect->filepos = note->descpos + offsetof (prstatus_t, pr_reg);
-    }
-#if defined (__sparcv9)
-  else if (note->descsz == sizeof (prstatus32_t))
-    {
-      sect->_raw_size = raw_size;
-      sect->filepos = note->descpos + offsetof (prstatus32_t, pr_reg);
-    }
-#endif
+  sect->_raw_size = raw_size;
+  sect->filepos = note->descpos + offset;
 
   sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
@@ -5454,14 +5445,14 @@ elfcore_grok_prxfpreg (abfd, note)
 
 #if defined (HAVE_PRPSINFO_T)
 typedef prpsinfo_t   elfcore_psinfo_t;
-#if defined (__sparcv9)	/* Sparc64 cross Sparc32 */
+#if defined (HAVE_PRPSINFO32_T)		/* Sparc64 cross Sparc32 */
 typedef prpsinfo32_t elfcore_psinfo32_t;
 #endif
 #endif
 
 #if defined (HAVE_PSINFO_T)
 typedef psinfo_t   elfcore_psinfo_t;
-#if defined (__sparcv9)	/* Sparc64 cross Sparc32 */
+#if defined (HAVE_PSINFO32_T)		/* Sparc64 cross Sparc32 */
 typedef psinfo32_t elfcore_psinfo32_t;
 #endif
 #endif
@@ -5507,7 +5498,7 @@ elfcore_grok_psinfo (abfd, note)
     {
       elfcore_psinfo_t psinfo;
 
-      memcpy (&psinfo, note->descdata, note->descsz);
+      memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
       elf_tdata (abfd)->core_program
 	= elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
@@ -5515,13 +5506,13 @@ elfcore_grok_psinfo (abfd, note)
       elf_tdata (abfd)->core_command
 	= elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
     }
-#if defined (__sparcv9)
+#if defined (HAVE_PRPSINFO32_T) || defined (HAVE_PSINFO32_T)
   else if (note->descsz == sizeof (elfcore_psinfo32_t))
     {
       /* 64-bit host, 32-bit corefile */
       elfcore_psinfo32_t psinfo;
 
-      memcpy (&psinfo, note->descdata, note->descsz);
+      memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
       elf_tdata (abfd)->core_program
 	= elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
@@ -5569,7 +5560,7 @@ elfcore_grok_pstatus (abfd, note)
 
       elf_tdata (abfd)->core_pid = pstat.pr_pid;
     }
-#if defined (__sparcv9)
+#if defined (HAVE_PSTATUS32_T)
   else if (note->descsz == sizeof (pstatus32_t))
     {
       /* 64-bit host, 32-bit corefile */

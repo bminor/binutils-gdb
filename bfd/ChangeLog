@@ -1,3 +1,15 @@
+2000-08-29  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* elf.c: Eliminate references to __sparcv9 macro; replace with
+	autoconf variables HAVE_PSINFO32_T etc.
+	* configure.in: Auto-configure HAVE_PSINFO_32_T, HAVE_PRPSINFO32_T,
+	HAVE_PSTATUS32_T, HAVE_PRSTATUS32_T, HAVE_PRSTATUS32_T_PR_WHO.
+	* config.in: Ditto.
+	* acinclude.m4 (BFD_HAVE_SYS_PROCFS_TYPE) define _SYSCALL32 so it can
+	detect the above typedefs.  (BFD_HAVE_SYS_PROCFS_TYPE_MEMBER): Ditto.
+	* aclocal.m4: Ditto.
+	* configure: Regenerate.
+
 2000-08-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-i386.c (elf_i386_check_relocs): Keep info on relocs copied

@@ -74,7 +74,9 @@ dnl Check for existence of a type $1 in sys/procfs.h
 AC_DEFUN(BFD_HAVE_SYS_PROCFS_TYPE,
 [AC_MSG_CHECKING([for $1 in sys/procfs.h])
  AC_CACHE_VAL(bfd_cv_have_sys_procfs_type_$1,
-   [AC_TRY_COMPILE([#include <sys/procfs.h>],
+   [AC_TRY_COMPILE([
+#define _SYSCALL32
+#include <sys/procfs.h>],
       [$1 avar],
       bfd_cv_have_sys_procfs_type_$1=yes,
       bfd_cv_have_sys_procfs_type_$1=no
@@ -92,7 +94,9 @@ dnl Check for existence of member $2 in type $1 in sys/procfs.h
 AC_DEFUN(BFD_HAVE_SYS_PROCFS_TYPE_MEMBER,
 [AC_MSG_CHECKING([for $1.$2 in sys/procfs.h])
  AC_CACHE_VAL(bfd_cv_have_sys_procfs_type_member_$1_$2,
-   [AC_TRY_COMPILE([#include <sys/procfs.h>],
+   [AC_TRY_COMPILE([
+#define _SYSCALL32
+#include <sys/procfs.h>],
       [$1 avar; void* aref = (void*) &avar.$2],
       bfd_cv_have_sys_procfs_type_member_$1_$2=yes,
       bfd_cv_have_sys_procfs_type_member_$1_$2=no
