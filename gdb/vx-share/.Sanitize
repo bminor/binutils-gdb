@@ -27,6 +27,7 @@ Things-to-keep:
 README
 dbgRpcLib.h
 ptrace.h
+regPacket.h
 vxTypes.h
 vxWorks.h
 wait.h
