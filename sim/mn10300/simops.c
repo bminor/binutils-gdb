@@ -1148,16 +1148,6 @@ void OP_F8FE00 ()
   imm = SEXT8 (insn & 0xff);
   value = reg1 + imm;
   State.regs[REG_SP] = value;
-
-  z = (value == 0);
-  n = (value & 0x80000000);
-  c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
-       && (reg1 & 0x80000000) != (value & 0x80000000));
-
-  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
-  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
-	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
 /* add imm16,sp */
@@ -1170,16 +1160,6 @@ void OP_FAFE0000 ()
   imm = SEXT16 (insn & 0xffff);
   value = reg1 + imm;
   State.regs[REG_SP] = value;
-
-  z = (value == 0);
-  n = (value & 0x80000000);
-  c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
-       && (reg1 & 0x80000000) != (value & 0x80000000));
-
-  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
-  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
-	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
 /* add imm32, sp */
@@ -1192,16 +1172,6 @@ void OP_FCFE0000 ()
   imm = ((insn & 0xffff) << 16) | extension;
   value = reg1 + imm;
   State.regs[REG_SP] = value;
-
-  z = (value == 0);
-  n = (value & 0x80000000);
-  c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
-       && (reg1 & 0x80000000) != (value & 0x80000000));
-
-  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
-  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
-	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
 /* addc dm,dn */
@@ -1453,7 +1423,21 @@ void OP_F270 ()
 /* inc dn */
 void OP_40 ()
 {
-  State.regs[REG_D0 + ((insn & 0xc) >> 2)] += 1;
+  int z,n,c,v;
+  unsigned int value;
+
+  value = State.regs[REG_D0 + ((insn & 0xc) >> 2)] + 1;
+  State.regs[REG_D0 + ((insn & 0xc) >> 2)] = value;
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < reg2);
+  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
 /* inc an */

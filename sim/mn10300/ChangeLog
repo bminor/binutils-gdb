@@ -1,3 +1,8 @@
+Wed Dec  4 10:57:53 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: "add imm,sp" does not effect the condition codes.
+	"inc dn" does effect the condition codes.
+
 Tue Dec  3 17:37:45 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Treat both operands as signed values for
