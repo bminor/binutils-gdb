@@ -26,21 +26,32 @@
 #define TARGET_FORMAT	"coff-tic80"
 #define BFD_ARCH	TARGET_ARCH
 
+/* Define md_number_to_chars as the appropriate standard big endian or
+   little endian function.  Should we someday support endianness as a
+   runtime decision, this will need to change. */
+
 #define md_number_to_chars number_to_chars_littleendian
 
-/* We have no special operand handling.  */
+/* Define away the call to md_operand in the expression parsing code.
+   This is called whenever the expression parser can't parse the input
+   and gives the assembler backend a chance to deal with it instead. */
+
 #define md_operand(x)
 
 #ifdef OBJ_COFF
+
 /* COFF specific definitions.  */
 
 #define COFF_MAGIC	TIC80_ARCH_MAGIC
 
 /* Whether a reloc should be output.  */
+
 #define TC_COUNT_RELOC(fixp) ((fixp) -> fx_addsy != NULL)
 
 /* This macro translates between an internal fix and an coff reloc type */
+
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
+
 extern short tc_coff_fix2rtype ();
 
 #endif	/* OBJ_COFF */
