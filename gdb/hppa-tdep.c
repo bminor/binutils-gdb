@@ -1998,8 +1998,7 @@ hppa_stub_frame_unwind_cache (struct frame_info *next_frame,
 
   info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
 
-  if (gdbarch_osabi (gdbarch) == GDB_OSABI_HPUX_ELF 
-      || gdbarch_osabi (gdbarch) == GDB_OSABI_HPUX_SOM)
+  if (gdbarch_osabi (gdbarch) == GDB_OSABI_HPUX_SOM)
     {
       /* HPUX uses export stubs in function calls; the export stub clobbers
          the return value of the caller, and, later restores it from the
