@@ -1,3 +1,9 @@
+2001-08-02  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/completion.exp: Remove the symbol "a64l" from
+	the expect string; this is target-specific, and not related
+	to what is being tested.
+
 2001-08-02  Dave Brolley  <brolley@redhat.com>
 
 	* config/sid.exp: Rename gdb-socket to cpu-gdb-socket.

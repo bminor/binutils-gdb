@@ -387,7 +387,7 @@ gdb_expect {
     -re "^p 'a\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
-	    -re "a64l.*argv.*$gdb_prompt p .a$" {
+	    -re ".*argv.*$gdb_prompt p .a$" {
 		send_gdb "\n"
 		gdb_expect {
 		    -re "Invalid character constant\\..*$gdb_prompt $" {
@@ -447,7 +447,7 @@ gdb_expect {
     -re "^p b-a\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
-	    -re "a64l.*argv.*$gdb_prompt p b-a$" {
+	    -re ".*argv.*$gdb_prompt p b-a$" {
 		send_gdb "\n"
 		gdb_expect {
 		    -re "No symbol \"b\" in current context\\..*$gdb_prompt $" {
