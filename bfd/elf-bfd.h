@@ -628,6 +628,14 @@ struct elf_backend_data
   unsigned int (*elf_backend_count_relocs)
     PARAMS ((asection *, Elf_Internal_Rela *));
 
+  /* This function, if defined, is called when an NT_PRSTATUS note is found
+     in a core file. */
+  boolean (*elf_backend_grok_prstatus) PARAMS ((bfd *, Elf_Internal_Note *));
+
+  /* This function, if defined, is called when an NT_PSINFO or NT_PRPSINFO
+     note is found in a core file. */
+  boolean (*elf_backend_grok_psinfo) PARAMS ((bfd *, Elf_Internal_Note *));
+
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
@@ -1097,6 +1105,9 @@ boolean _bfd_elf_create_got_section PARAMS ((bfd *,
 					     struct bfd_link_info *));
 unsigned long _bfd_elf_link_renumber_dynsyms PARAMS ((bfd *,
 						      struct bfd_link_info *));
+
+boolean _bfd_elfcore_make_pseudosection PARAMS ((bfd *, char *, int, int));
+char *_bfd_elfcore_strndup PARAMS ((bfd *, char *, int));
 
 elf_linker_section_t *_bfd_elf_create_linker_section
   PARAMS ((bfd *abfd,

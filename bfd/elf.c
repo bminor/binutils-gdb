@@ -5376,6 +5376,46 @@ elfcore_maybe_make_sect (abfd, name, sect)
   return true;
 }
 
+/* Create a pseudosection containing SIZE bytes at FILEPOS.  This
+   actually creates up to two pseudosections:
+   - For the single-threaded case, a section named NAME, unless
+     such a section already exists.
+   - For the multi-threaded case, a section named "NAME/PID", where
+     PID is elfcore_make_pid (abfd).
+   Both pseudosections have identical contents. */
+boolean
+_bfd_elfcore_make_pseudosection (abfd, name, size, filepos)
+     bfd *abfd;
+     char *name;
+     int size;
+     int filepos;
+{
+  char buf[100];
+  char *threaded_name;
+  asection *sect;
+
+  /* Build the section name.  */
+
+  sprintf (buf, "%s/%d", name, elfcore_make_pid (abfd));
+  threaded_name = bfd_alloc (abfd, strlen (buf) + 1);
+  if (threaded_name == NULL)
+    return false;
+  strcpy (threaded_name, buf);
+
+  sect = bfd_make_section (abfd, threaded_name);
+  if (sect == NULL)
+    return false;
+  sect->_raw_size = size;
+  sect->filepos = filepos;
+  sect->flags = SEC_HAS_CONTENTS;
+  sect->alignment_power = 2;
+
+  if (! elfcore_maybe_make_sect (abfd, name, sect))
+    return false;
+
+  return true;
+}
+
 /* prstatus_t exists on:
      solaris 2.5+
      linux 2.[01] + glibc
@@ -5388,9 +5428,6 @@ elfcore_grok_prstatus (abfd, note)
      bfd *abfd;
      Elf_Internal_Note *note;
 {
-  char buf[100];
-  char *name;
-  asection *sect;
   int raw_size;
   int offset;
 
@@ -5446,69 +5483,23 @@ elfcore_grok_prstatus (abfd, note)
       return true;
     }
 
-  /* Make a ".reg/999" section.  */
-
-  sprintf (buf, ".reg/%d", elfcore_make_pid (abfd));
-  name = bfd_alloc (abfd, strlen (buf) + 1);
-  if (name == NULL)
-    return false;
-  strcpy (name, buf);
-
-  sect = bfd_make_section (abfd, name);
-  if (sect == NULL)
-    return false;
-
-  sect->_raw_size = raw_size;
-  sect->filepos = note->descpos + offset;
-
-  sect->flags = SEC_HAS_CONTENTS;
-  sect->alignment_power = 2;
-
-  if (! elfcore_maybe_make_sect (abfd, ".reg", sect))
+  /* Make a ".reg/999" section and a ".reg" section.  */
+  if (! _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					 raw_size, note->descpos + offset));
     return false;
 
   return true;
 }
 #endif /* defined (HAVE_PRSTATUS_T) */
 
-/* Create a pseudosection containing the exact contents of NOTE.  This
-   actually creates up to two pseudosections:
-   - For the single-threaded case, a section named NAME, unless
-     such a section already exists.
-   - For the multi-threaded case, a section named "NAME/PID", where
-     PID is elfcore_make_pid (abfd).
-   Both pseudosections have identical contents: the contents of NOTE.  */
-
+/* Create a pseudosection containing the exact contents of NOTE.  */
 static boolean
 elfcore_make_note_pseudosection (abfd, name, note)
      bfd *abfd;
      char *name;
      Elf_Internal_Note *note;
 {
-  char buf[100];
-  char *threaded_name;
-  asection *sect;
-
-  /* Build the section name.  */
-
-  sprintf (buf, "%s/%d", name, elfcore_make_pid (abfd));
-  threaded_name = bfd_alloc (abfd, strlen (buf) + 1);
-  if (threaded_name == NULL)
-    return false;
-  strcpy (threaded_name, buf);
-
-  sect = bfd_make_section (abfd, threaded_name);
-  if (sect == NULL)
-    return false;
-  sect->_raw_size = note->descsz;
-  sect->filepos = note->descpos;
-  sect->flags = SEC_HAS_CONTENTS;
-  sect->alignment_power = 2;
-
-  if (! elfcore_maybe_make_sect (abfd, name, sect))
-    return false;
-
-  return true;
+  return _bfd_elfcore_make_pseudosection (abfd, name, note->descsz, note->descpos);
 }
 
 /* There isn't a consistent prfpregset_t across platforms,
@@ -5549,14 +5540,12 @@ typedef psinfo32_t elfcore_psinfo32_t;
 #endif
 #endif
 
-#if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
-
 /* return a malloc'ed copy of a string at START which is at
    most MAX bytes long, possibly without a terminating '\0'.
    the copy will always have a terminating '\0'.  */
 
-static char*
-elfcore_strndup (abfd, start, max)
+char*
+_bfd_elfcore_strndup (abfd, start, max)
      bfd *abfd;
      char *start;
      int max;
@@ -5580,6 +5569,8 @@ elfcore_strndup (abfd, start, max)
   return dup;
 }
 
+#if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
+
 static boolean
 elfcore_grok_psinfo (abfd, note)
      bfd *abfd;
@@ -5592,10 +5583,10 @@ elfcore_grok_psinfo (abfd, note)
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
       elf_tdata (abfd)->core_program
-	= elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
 
       elf_tdata (abfd)->core_command
-	= elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
     }
 #if defined (HAVE_PRPSINFO32_T) || defined (HAVE_PSINFO32_T)
   else if (note->descsz == sizeof (elfcore_psinfo32_t))
@@ -5606,10 +5597,10 @@ elfcore_grok_psinfo (abfd, note)
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
       elf_tdata (abfd)->core_program
-	= elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
 
       elf_tdata (abfd)->core_command
-	= elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
     }
 #endif
 
@@ -5841,14 +5832,21 @@ elfcore_grok_note (abfd, note)
      bfd *abfd;
      Elf_Internal_Note *note;
 {
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
   switch (note->type)
     {
     default:
       return true;
 
-#if defined (HAVE_PRSTATUS_T)
     case NT_PRSTATUS:
+      if (bed->elf_backend_grok_prstatus)
+	if ((*bed->elf_backend_grok_prstatus) (abfd, note))
+	  return true;
+#if defined (HAVE_PRSTATUS_T)
       return elfcore_grok_prstatus (abfd, note);
+#else
+      return true;
 #endif
 
 #if defined (HAVE_PSTATUS_T)
@@ -5876,10 +5874,15 @@ elfcore_grok_note (abfd, note)
       else
 	return true;
 
-#if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
     case NT_PRPSINFO:
     case NT_PSINFO:
+      if (bed->elf_backend_grok_psinfo)
+	if ((*bed->elf_backend_grok_psinfo) (abfd, note))
+	  return true;
+#if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
       return elfcore_grok_psinfo (abfd, note);
+#else
+      return true;
 #endif
     }
 }
