@@ -1342,7 +1342,7 @@ ppc_cleanup ()
     md_number_to_chars (p, (valueT) 8, 4);
 
     p = frag_more (4);
-    md_number_to_chars (p, (valueT) ppc_apuinfo_num, 4);
+    md_number_to_chars (p, (valueT) ppc_apuinfo_num * 4, 4);
 
     p = frag_more (4);
     md_number_to_chars (p, (valueT) 2, 4);

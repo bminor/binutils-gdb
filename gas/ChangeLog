@@ -1,3 +1,7 @@
+2003-06-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* config/tc-ppc.c (ppc_cleanup): Use bytes to count APUinfo slots.
+
 2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
 
 	* gas/config/tc-i386.c (md_assemble): Support Intel Precott New
