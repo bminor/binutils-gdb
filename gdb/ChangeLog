@@ -1,3 +1,8 @@
+2004-01-02  Andrew Cagney  <cagney@redhat.com>
+
+	* utils.c (do_my_cleanups): Make static, add forward declaration.
+	* defs.h (do_my_cleanups): Delete declaration.
+
 2004-01-02  Eli Zaretskii  <eliz@elta.co.il>
 
 	* config/djgpp/fnchange.lst: Add lines for gdb/ChangeLog-2003 and

@@ -96,6 +96,8 @@ static void vfprintf_maybe_filtered (struct ui_file *, const char *,
 
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
+static void do_my_cleanups (struct cleanup **, struct cleanup *);
+
 #if defined (USE_MMALLOC) && !defined (NO_MMCHECK)
 static void malloc_botch (void);
 #endif
@@ -311,7 +313,7 @@ do_exec_error_cleanups (struct cleanup *old_chain)
   do_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
-void
+static void
 do_my_cleanups (struct cleanup **pmy_chain,
 		struct cleanup *old_chain)
 {
