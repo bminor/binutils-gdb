@@ -1,7 +1,13 @@
 Tue Jun  7 08:30:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.c++/demangle.exp: Use gdb_test_exact, rather than demangle
+	(which was basically just a local version of the same thing).  In
+	addition to avoiding duplication, gdb_test_exact is faster.
+	* lib/gdb.exp (gdb_test_exact): Fix typo.
+
 	* lib/gdb.exp (delete_breakpoints): If there were no breakpoints,
 	don't give an error.
+
 	* gdb.base/term.exp: Call delete_breakpoints before starting.
 
 	* gdb.base/Makefile.in (EXECUTABLES): Remove t10.

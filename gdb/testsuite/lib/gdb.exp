@@ -271,7 +271,7 @@ proc string_to_regexp {str} {
 
 proc gdb_test_exact { args } {
     set command [lindex $args 0]
-    set pattern [string_to_regexp [lindex args 1]]
+    set pattern [string_to_regexp [lindex $args 1]]
     if [llength $args]==3 then {
 	set message [lindex $args 2]
     } else {
