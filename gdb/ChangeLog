@@ -1,3 +1,8 @@
+2002-04-07  Andreas Schwab  <schwab@suse.de>
+
+	* m68klinux-nat.c (fill_fpregset): Properly pass address of
+	buffer to regcache_collect.
+
 2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from trunk:
