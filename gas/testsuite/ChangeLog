@@ -1,3 +1,18 @@
+Fri May 29 12:07:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/sh/fp.s: Remove ftst/nan.  The assembler no longer supports
+	the instruction.
+	* gas/sh/basic.exp: Adjust accordingly.
+
+start-sanitize-d30v
+Wed May 27 15:26:51 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/d30v/align.d: Updated to match latest assembler output.
+	* gas/d30v/inst.d: Updated to match latest assembler output.
+	* gas/d30v/inst.s: Updated to match latest assembler rules.
+	* gas/d30v/opt.d: Updated to match latest assembler output.
+
+end-sanitize-d30v
 Fri May 22 15:56:51 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/allinsn.d: Handle 64 bit bfd_vma.
