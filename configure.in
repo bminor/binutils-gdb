@@ -343,6 +343,9 @@ case "${target}" in
   *-*-netware)
     noconfigdirs="$noconfigdirs libg++ libstdc++ librx newlib xiberty"
     ;;
+  a29k-*-vxworks5.1)
+    noconfigdirs="$noconfigdirs newlib"
+    ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
     # work.  newlib is not 64 bit ready.  I'm not sure about emacs19,

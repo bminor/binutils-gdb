@@ -1,7 +1,16 @@
+Thu Jul 27 11:18:47 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* configure.in: Don't build newlib for a29k-*-vxworks5.1.
+	* test-build.mk: Add setting of --with-headers for a29k-vxworks5.1.
+
+Tue Jul 25 21:25:39 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cfg-ml-pos.in (MULTITOP): Trim excess trailing "/.".
+
 Fri Jul 21 10:41:12 1995  Doug Evans  <dje@canuck.cygnus.com>
 
-	* config-com.multi: New file.
-	* config-pos.multi: New file.
+	* cfg-ml-com.in: New file.
+	* cfg-ml-pos.in: New file.
 
 Wed Jul 19 00:37:27 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
