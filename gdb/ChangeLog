@@ -1,3 +1,9 @@
+2003-06-19  Kris Warkentin  <kewarken@qnx.com>
+
+	* solib.c (solib_open): Change tests for whether to search
+	LD_LIBRARY_PATH and PATH to better deal with remotes.  Update
+	comments.
+
 2003-06-19  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_frame_address): Delete function.
