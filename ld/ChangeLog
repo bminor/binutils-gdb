@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Sun Sep 15 10:38:16 1996  Mark Alexander  <marka@cygnus.com>
+
+	* emulparms/d10v.sh: Set OTHER_RELOCATING_SECTIONS to put
+	stack at top of simulator memory.
+
+end-sanitize-d10v
 Fri Sep 13 15:49:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlex.l (SYMBOLCHARN): Add $, _, and ~.
