@@ -1,3 +1,8 @@
+Wed Aug 12 11:54:37 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/udf.s: New test.
+	* gas/mn10300/basic.exp: Run it.
+
 Wed Aug 12 13:25:38 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/white.l: Expect warning for stand-alone ss prefix.
