@@ -1,23 +1,22 @@
-/* H8/300 simulator
-   Copyright 1993 Free Software Foundation, Inc.
+/* Interpreter fragment for the Hitachi H8/300 architecture simulator.
 
-   Contributed by Cygnus Support.
-   Written by Steve Chamberlain   (sac@cygnus.com).
+   Written by Steve Chamberlain of Cygnus Support.
+   sac@cygnus.com
+
+   This file is part of H8/300 sim
 
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+		THIS SOFTWARE IS NOT COPYRIGHTED
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   Cygnus offers the following for use in the public domain.  Cygnus
+   makes no warranty with regard to the software or it's performance
+   and the user accepts the software "AS IS" with all faults.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   CYGNUS DISCLAIMS ANY WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO
+   THIS SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+*/
 
 #include <stdio.h>
 #include <stdlib.h>

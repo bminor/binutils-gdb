@@ -1,25 +1,22 @@
-/* run front end support for H8/300 
-   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
+/* front end to the simulator.
 
-This file is part of H8300 SIM
+   Written by Steve Chamberlain of Cygnus Support.
+   sac@cygnus.com
 
-GNU CC is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-GNU CC is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GNU CC; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   This file is part of H8/300 sim
 
 
-/* Steve Chamberlain
-   sac@cygnus.com */
+		THIS SOFTWARE IS NOT COPYRIGHTED
+
+   Cygnus offers the following for use in the public domain.  Cygnus
+   makes no warranty with regard to the software or it's performance
+   and the user accepts the software "AS IS" with all faults.
+
+   CYGNUS DISCLAIMS ANY WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO
+   THIS SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+*/
 
 #include "bfd.h"
 #include "sysdep.h"

@@ -1,3 +1,21 @@
+/* 
+   Written by Steve Chamberlain of Cygnus Support.
+   sac@cygnus.com
+
+   This file is part of H8/300 sim
+
+
+		THIS SOFTWARE IS NOT COPYRIGHTED
+
+   Cygnus offers the following for use in the public domain.  Cygnus
+   makes no warranty with regard to the software or it's performance
+   and the user accepts the software "AS IS" with all faults.
+
+   CYGNUS DISCLAIMS ANY WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO
+   THIS SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+*/
 
 #define SET_WORD_MEM(x,y)  {saved_state.mem[(x)>>1] = y;}
 #define SET_BYTE_MEM(x,y)  {BYTE_MEM(x)=y;}
