@@ -1,6 +1,6 @@
 /* Abstraction of GNU v2 abi.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
@@ -31,14 +31,13 @@
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "gnu-v2-abi.h"
 
 #include <ctype.h>
 
 struct cp_abi_ops gnu_v2_abi_ops;
 
 static int vb_match (struct type *, int, struct type *);
-int gnuv2_baseclass_offset (struct type *type, int index, char *valaddr,
-			    CORE_ADDR address);
 
 static enum dtor_kinds
 gnuv2_is_destructor_name (const char *name)

@@ -1,5 +1,12 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* gnu-v2-abi.h: New file.
+	* gnu-v2-abi.c: Include "gnu-v2-abi.h".
+	(gnuv2_baseclass_offset): Delete declaration.
+	* hpacc-abi.c: Include "gnu-v2-abi.h".
+	(gnuv2_baseclass_offset): Delete extern declaration.
+	* Makefile.in: Update dependencies.
+
 	* doublest.c (floatformat_is_negative, floatformat_is_nan)
 	(floatformat_mantissa, get_field): Make the buffer a const
 	bfd_byte, simplify.

@@ -1,9 +1,10 @@
 /* Abstraction of HP aCC ABI.
+
    Contributed by Daniel Berlin <dberlin@redhat.com>
    Most of the real code is from HP, i've just fiddled it to fit in
    the C++ ABI abstraction framework.
 
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +32,7 @@
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "cp-abi.h"
+#include "gnu-v2-abi.h"
 
 struct cp_abi_ops hpacc_abi_ops;
 
@@ -284,9 +286,6 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 
   return rtti_type;
 }
-
-extern int gnuv2_baseclass_offset (struct type *type, int index,
-				   char *valaddr, CORE_ADDR address);
 
 static void
 init_hpacc_ops (void)

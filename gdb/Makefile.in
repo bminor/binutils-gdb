@@ -700,6 +700,7 @@ gdb_vfork_h = gdb_vfork.h
 gdb_wait_h = gdb_wait.h
 glibc_tdep_h = glibc-tdep.h
 gnu_nat_h = gnu-nat.h
+gnu_v2_abi_h = gnu-v2-abi.h
 gregset_h = gregset.h
 hppa_tdep_h = hppa-tdep.h
 i386bsd_nat_h = i386bsd-nat.h
@@ -1965,7 +1966,8 @@ gnu-nat.o: gnu-nat.c $(gdb_string_h) $(defs_h) $(inferior_h) $(symtab_h) \
 	$(gnu_nat_h) $(exc_request_S_h) $(notify_S_h) $(process_reply_S_h) \
 	$(msg_reply_S_h) $(exc_request_U_h) $(msg_U_h)
 gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
-	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h) $(cp_support_h)
+	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h) $(cp_support_h) \
+	$(gnu_v2_abi_h)
 gnu-v3-abi.o: gnu-v3-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(cp_support_h) \
 	$(demangle_h) $(gdb_assert_h) $(gdb_string_h)
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
@@ -1973,7 +1975,7 @@ go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
 	$(i387_tdep_h) $(i386_tdep_h) $(value_h) $(regcache_h) \
 	$(gdb_string_h)
 hpacc-abi.o: hpacc-abi.c $(defs_h) $(value_h) $(gdb_regex_h) $(gdb_string_h) \
-	$(gdbtypes_h) $(gdbcore_h) $(cp_abi_h)
+	$(gdbtypes_h) $(gdbcore_h) $(cp_abi_h) $(gnu_v2_abi_h)
 hppabsd-nat.o: hppabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(hppa_tdep_h)
 hppabsd-tdep.o: hppabsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
@@ -2337,7 +2339,8 @@ ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdb_string_h) $(frame_h) \
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
 	$(objfiles_h) $(regcache_h) $(value_h) $(osabi_h) $(regset_h) \
-	$(solib_svr4_h) $(ppc_tdep_h) $(trad_frame_h) $(frame_unwind_h)
+	$(solib_svr4_h) $(ppc_tdep_h) $(trad_frame_h) $(frame_unwind_h) \
+	$(tramp_frame_h)
 ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(gdb_assert_h) \
 	$(gdbcore_h) $(regcache_h) $(bsd_kvm_h) $(ppc_tdep_h) \
 	$(ppcnbsd_tdep_h) $(inf_ptrace_h)
@@ -2438,7 +2441,7 @@ rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(reggroups_h) $(libbfd_h) $(coff_internal_h) $(libcoff_h) \
 	$(coff_xcoff_h) $(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) \
 	$(ppc_tdep_h) $(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) \
-	$(frame_unwind_h) $(frame_base_h)
+	$(frame_unwind_h) $(frame_base_h) $(reggroups_h)
 s390-nat.o: s390-nat.c $(defs_h) $(tm_h) $(regcache_h) $(inferior_h) \
 	$(s390_tdep_h)
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
