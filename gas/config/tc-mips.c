@@ -4897,6 +4897,27 @@ macro (ip)
 	}
 
     case M_LI_D:
+      /* If we have a constant in IMM_EXPR, then in mips3 mode it is
+         the entire value, and in mips1 mode it is the high order 32
+         bits of the value and the low order 32 bits are either zero
+         or in offset_expr.  */
+      if (imm_expr.X_op == O_constant || imm_expr.X_op == O_big)
+	{
+	  load_register (&icnt, treg, &imm_expr, mips_opts.isa >= 3);
+	  if (mips_opts.isa < 3 && treg != 31)
+	    {
+	      if (offset_expr.X_op == O_absent)
+		macro_build ((char *) NULL, &icnt, NULL, "move", "d,s",
+			     treg + 1, 0);
+	      else
+		{
+		  assert (offset_expr.X_op == O_constant);
+		  load_register (&icnt, treg + 1, &offset_expr, 0);
+		}
+	    }
+	  return;
+	}
+
       /* We know that sym is in the .rdata section.  First we get the
 	 upper 16 bits of the address.  */
       if (mips_pic == NO_PIC)
@@ -4949,6 +4970,34 @@ macro (ip)
       break;
 
     case M_LI_DD:
+      /* If we have a constant in IMM_EXPR, then in mips3 mode it is
+         the entire value, and in mips1 mode it is the high order 32
+         bits of the value and the low order 32 bits are either zero
+         or in offset_expr.  */
+      if (imm_expr.X_op == O_constant || imm_expr.X_op == O_big)
+	{
+	  load_register (&icnt, AT, &imm_expr, mips_opts.isa >= 3);
+	  if (mips_opts.isa >= 3)
+	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			 "dmtc1", "t,S", AT, treg);
+	  else
+	    {
+	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			   "mtc1", "t,G", AT, treg + 1);
+	      if (offset_expr.X_op == O_absent)
+		macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			     "mtc1", "t,G", 0, treg);
+	      else
+		{
+		  assert (offset_expr.X_op == O_constant);
+		  load_register (&icnt, AT, &offset_expr, 0);
+		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			       "mtc1", "t,G", AT, treg);
+		}
+	    }
+	  break;
+	}
+
       assert (offset_expr.X_op == O_symbol
 	      && offset_expr.X_add_number == 0);
       s = segment_name (S_GET_SEGMENT (offset_expr.X_add_symbol));
@@ -6911,22 +6960,72 @@ mips_ip (str, ip)
 		    || (*args == 'l'
 			&& (! USE_GLOBAL_POINTER_OPT
 			    || mips_pic == EMBEDDED_PIC
-			    || g_switch_value < 4)
-			))
+			    || g_switch_value < 4
+			    || (temp[0] == 0 && temp[1] == 0)
+			    || (temp[2] == 0 && temp[3] == 0))))
 		  {
 		    imm_expr.X_op = O_constant;
 		    if (! target_big_endian)
-		      imm_expr.X_add_number =
-			(((((((int) temp[3] << 8)
-			     | temp[2]) << 8)
-			   | temp[1]) << 8)
-			 | temp[0]);
+		      imm_expr.X_add_number = bfd_getl32 (temp);
 		    else
-		      imm_expr.X_add_number =
-			(((((((int) temp[0] << 8)
-			     | temp[1]) << 8)
-			   | temp[2]) << 8)
-			 | temp[3]);
+		      imm_expr.X_add_number = bfd_getb32 (temp);
+		  }
+		else if (length > 4
+			 && ((temp[0] == 0 && temp[1] == 0)
+			     || (temp[2] == 0 && temp[3] == 0))
+			 && ((temp[4] == 0 && temp[5] == 0)
+			     || (temp[6] == 0 && temp[7] == 0)))
+		  {
+		    /* The value is simple enough to load with a
+                       couple of instructions.  In mips1 mode, set
+                       imm_expr to the high order 32 bits and
+                       offset_expr to the low order 32 bits.
+                       Otherwise, set imm_expr to the entire 64 bit
+                       constant.  */
+		    if (mips_opts.isa < 3)
+		      {
+			imm_expr.X_op = O_constant;
+			offset_expr.X_op = O_constant;
+			if (! target_big_endian)
+			  {
+			    imm_expr.X_add_number = bfd_getl32 (temp + 4);
+			    offset_expr.X_add_number = bfd_getl32 (temp);
+			  }
+			else
+			  {
+			    imm_expr.X_add_number = bfd_getb32 (temp);
+			    offset_expr.X_add_number = bfd_getb32 (temp + 4);
+			  }
+			if (offset_expr.X_add_number == 0)
+			  offset_expr.X_op = O_absent;
+		      }
+		    else if (sizeof (imm_expr.X_add_number) > 4)
+		      {
+			imm_expr.X_op = O_constant;
+			if (! target_big_endian)
+			  imm_expr.X_add_number = bfd_getl64 (temp);
+			else
+			  imm_expr.X_add_number = bfd_getb64 (temp);
+		      }
+		    else
+		      {
+			imm_expr.X_op = O_big;
+			imm_expr.X_add_number = 4;
+			if (! target_big_endian)
+			  {
+			    generic_bignum[0] = bfd_getl16 (temp);
+			    generic_bignum[1] = bfd_getl16 (temp + 2);
+			    generic_bignum[2] = bfd_getl16 (temp + 4);
+			    generic_bignum[3] = bfd_getl16 (temp + 6);
+			  }
+			else
+			  {
+			    generic_bignum[0] = bfd_getb16 (temp + 6);
+			    generic_bignum[1] = bfd_getb16 (temp + 4);
+			    generic_bignum[2] = bfd_getb16 (temp + 2);
+			    generic_bignum[3] = bfd_getb16 (temp);
+			  }
+		      }
 		  }
 		else
 		  {
@@ -9772,11 +9871,15 @@ nopic_need_relax (sym, before_relaxing)
 #ifndef NO_ECOFF_DEBUGGING
 		   || (sym->ecoff_extern_size != 0
 		       && sym->ecoff_extern_size <= g_switch_value)
+#endif
 		   /* We must defer this decision until after the whole
 		      file has been read, since there might be a .extern
 		      after the first use of this symbol.  */
-		   || (sym->ecoff_extern_size == 0 && before_relaxing)
+		   || (before_relaxing
+#ifndef NO_ECOFF_DEBUGGING
+		       && sym->ecoff_extern_size == 0
 #endif
+		       && S_GET_VALUE (sym) == 0)
 		   || (S_GET_VALUE (sym) != 0
 		       && S_GET_VALUE (sym) <= g_switch_value)))
 	change = 0;

@@ -1,3 +1,11 @@
+Wed May  7 15:39:48 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (macro): Handle constants for M_LI_D and
+	M_LI_DD.
+	(mips_ip): For 'F', 'L', 'f', and 'l', generate a constant rather
+	than an address if the floating point value looks sufficiently
+	simple.
+
 Tue May  6 12:18:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (md_section_align): If a.out and BFD, force
