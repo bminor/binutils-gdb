@@ -1,5 +1,10 @@
 Fri May 20 11:57:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Add DT_DEBUG to
+	the dynamic linking information for the benefit of the debugger.
+	From Peter Schauer.
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Likewise.
+
 	* elf.c (_bfd_elf_make_section_from_shdr): New function, based on
 	code repeated three times in bfd_section_from_shdr in elfcode.h.
 	* libelf.h (_bfd_elf_make_section_from_shdr): Declare.
