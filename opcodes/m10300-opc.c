@@ -936,7 +936,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 { "asr",	0xf8c801,    0xfffcff,    0,    FMT_D1, 0,	{DN0}},
 /* start-sanitize-am33 */
-{ "asr",	0xfb490000,  0xffff00ff,  0,    FMT_D7, AM33,	{RN02}},
+{ "asr",	0xfb490001,  0xffff00ff,  0,    FMT_D7, AM33,	{RN02}},
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
@@ -952,7 +952,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 { "lsr",	0xf8c401,    0xfffcff,    0,    FMT_D1, 0,	{DN0}},
 /* start-sanitize-am33 */
-{ "lsr",	0xfb590000,  0xffff00ff,  0,    FMT_D7, AM33,	{RN02}},
+{ "lsr",	0xfb590001,  0xffff00ff,  0,    FMT_D7, AM33,	{RN02}},
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
@@ -968,7 +968,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 { "asl",	0xf8c001,    0xfffcff,    0,    FMT_D1, 0,	{DN0}},
 /* start-sanitize-am33 */
-{ "asl",	0xfb690000,  0xffff00ff,  0,    FMT_D7, AM33,	{RN02}},
+{ "asl",	0xfb690001,  0xffff00ff,  0,    FMT_D7, AM33,	{RN02}},
 /* end-sanitize-am33 */
 
 { "asl2",	0x54,	     0xfc,	  0,    FMT_S0, 0,	{DN0}},
@@ -1097,22 +1097,22 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "udf15",	0xf9f000,    0xfffc00,    0,    FMT_D1, 0,	{SIMM8, DN0}},
 { "udf15",	0xfbf00000,  0xfffc0000,  0,    FMT_D2, 0,      {SIMM16, DN0}},
 { "udf15",	0xfdf00000,  0xfffc0000,  0,    FMT_D4, 0,	{IMM32, DN0}},
-{ "udf20",	0xf600,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf21",	0xf610,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf22",	0xf620,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf23",	0xf630,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf24",	0xf640,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf25",	0xf650,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf26",	0xf660,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf27",	0xf670,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf28",	0xf680,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf29",	0xf690,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf30",	0xf6a0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf31",	0xf6b0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf32",	0xf6c0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf33",	0xf6d0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf34",	0xf6e0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
-{ "udf35",	0xf6f0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf20",	0xf500,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf21",	0xf510,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf22",	0xf520,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf23",	0xf530,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf24",	0xf540,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf25",	0xf550,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf26",	0xf560,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf27",	0xf570,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf28",	0xf580,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf29",	0xf590,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf30",	0xf5a0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf31",	0xf5b0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf32",	0xf5c0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf33",	0xf5d0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf34",	0xf5e0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
+{ "udf35",	0xf5f0,	     0xfff0,	  0,    FMT_D0, 0,	{DM1, DN0}},
 { "udfu00",	0xf90400,    0xfffc00,    0,    FMT_D1, 0,	{IMM8, DN0}},
 { "udfu00",	0xfb040000,  0xfffc0000,  0,    FMT_D2, 0,      {IMM16, DN0}},
 { "udfu00",	0xfd040000,  0xfffc0000,  0,    FMT_D4, 0,	{IMM32, DN0}},

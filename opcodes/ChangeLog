@@ -1,3 +1,24 @@
+start-sanitize-am33
+Thu Oct  8 06:04:38 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c (asr, lsr, asl): Fix am33 single bit shift opcode.
+
+end-sanitize-am33
+Sun Oct  4 21:01:44 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (OP_3DNowSuffix): New static function.
+	(OPSUF): Define.
+	(GRP14): Define.
+	(dis386_twobyte): Add GRP14, femms, and 3DNow entries.
+	(twobyte_has_modrm): Set entries corresponding to GRP14, 3DNow.
+	(insn_codep): New static variable.
+	(print_insn_x86): Init insn_codep after prefixes.
+	(grps): Add GRP14 entries for prefetch, prefetchw.
+	(OP_REG): Reformat.
+
+	From Jeff B Epler <jepler@usgs.gov>
+	* i386-dis.c (Suffix3DNow): New table.
+
 Wed Sep 30 10:17:50 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d10v-opc.c: Treat TRAP as if it were a branch type instruction.
