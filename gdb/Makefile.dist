@@ -424,7 +424,7 @@ realclean: clean
 gdb-all.texinfo: ${srcdir}/doc/gdb.texinfo
 	${M4} $(srcdir)/doc/pretex.m4 $(srcdir)/doc/none.m4 $(srcdir)/doc/all.m4 $(srcdir)/doc/gdb.texinfo >gdb-all.texinfo
 
-gdb.dvi : gdb-all.texinfo
+gdb.dvi : gdb-all.texinfo ${srcdir}/readline/inc-readline.texinfo ${srcdir}/readline/inc-history.texinfo
 	tex gdb-all.texinfo
 	texindex gdb-all.??
 	tex gdb-all.texinfo
