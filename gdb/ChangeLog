@@ -1,3 +1,13 @@
+2003-09-03  Mark Kettenis  <m.kettenis@osp.nl>
+
+	* gcore.c: Reorder include files in alphabetical order.  Include
+	"gdb_assert.h".  Various coding style fixes.
+	(derive_stack_segment, derive_heap_segment): Replace check for
+	non-null BOTTOM and TOP with gdb_assert.
+	(derive_heap_segment): Replace check for successful creation of
+	ZERO with gdb_assert.
+	(make_mem_sec): Use bfd_section_lma to set OSEC->lma.
+
 2003-09-04  Andrew Cagney  <cagney@redhat.com>
 
 	* thread-db.c (verbose_dlsym): New function.
