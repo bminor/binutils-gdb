@@ -331,7 +331,7 @@ mod_path (char *dirname, char **which_path)
       }
 
       if (!(SLASH_P (*name) && p <= name + 1)	/* "/" */
-#if defined(_WIN32) || defined(__MSDOS__)
+#if defined(_WIN32) || defined(__MSDOS__) || defined(__CYGWIN__)
       /* On MS-DOS and MS-Windows, h:\ is different from h: */
 	  && !(!SLASH_P (*name) && ROOTED_P (name) && p <= name + 3)	/* d:/ */
 #endif
@@ -370,7 +370,7 @@ mod_path (char *dirname, char **which_path)
 
       if (name[0] == '~')
 	name = tilde_expand (name);
-#if defined(_WIN32) || defined(__MSDOS__)
+#if defined(_WIN32) || defined(__MSDOS__) || defined(__CYGWIN__)
       else if (ROOTED_P (name) && p == name + 2)	/* "d:" => "d:." */
 	name = concat (name, ".", NULL);
 #endif
@@ -526,7 +526,7 @@ openp (char *path, int try_cwd_first, char *string, int mode, int prot,
   if (!path)
     path = ".";
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
   mode |= O_BINARY;
 #endif
 

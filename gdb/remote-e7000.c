@@ -543,7 +543,7 @@ or \t\ttarget e7000 tcp_remote <host>[:<port>]\n\
 or \t\ttarget e7000 pc\n");
 	}
 
-#if !defined(__GO32__) && !defined(_WIN32)
+#if !defined(__GO32__) && !defined(_WIN32) && !defined(__CYGWIN__)
       /* FIXME!  test for ':' is ambiguous */
       if (n == 1 && strchr (dev_name, ':') == 0)
 	{

@@ -29,7 +29,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#ifndef __CYGWIN32__
+#ifndef __CYGWIN__
 #include <netinet/tcp.h>
 #endif
 

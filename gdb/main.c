@@ -91,7 +91,6 @@ extern int enable_external_editor;
 extern char *external_editor_command;
 
 #ifdef __CYGWIN__
-#include <windows.h>		/* for MAX_PATH */
 #include <sys/cygwin.h>		/* for cygwin32_conv_to_posix_path */
 #endif
 
@@ -535,13 +534,13 @@ extern int gdbtk_test (char *);
      *before* all the command line arguments are processed; it sets
      global parameters, which are independent of what file you are
      debugging or what directory you are in.  */
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   {
     char *tmp = getenv ("HOME");
 
     if (tmp != NULL)
       {
-	homedir = (char *) alloca (MAX_PATH + 1);
+	homedir = (char *) alloca (PATH_MAX + 1);
 	cygwin32_conv_to_posix_path (tmp, homedir);
       }
     else

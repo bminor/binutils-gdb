@@ -1,3 +1,15 @@
+Wed Apr  4 21:48:42 2001  Christopher Faylor <cgf@cygnus.com>
+
+	* main.c: Remove windows.h use.
+	(gdbtk_test): Use PATH_MAX for home var calculation.
+	* remote-e7000.c (e7000_parse_device): Accomodate Cygwin as well as
+	Win32 in colon test.
+	* ser-tcp.c: Use modern __CYGWIN__ conditional.
+	* source.c (mod_path): Add __CYGWIN__ conditional to WIN32 test.
+	(openp): Ditto.
+	* symfile.c (symfile_bfd_open): Ditto.
+	* gdbtk/generic/gdbtk.c: Ditto.
+
 2001-04-04  Martin M. Hunt  <hunt@redhat.com>
 
 	* main.c (captured_main): For GDBtk, don't use tui_fileopen().
