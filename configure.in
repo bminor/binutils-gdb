@@ -1,4 +1,4 @@
-################################################################################
+##############################################################################
 
 ## This file is a shell script fragment that supplies the information
 ## necessary to tailor a template configure script into the configure
@@ -13,7 +13,7 @@
 ## For more information on these two systems, check out the documentation
 ## for 'Autoconf' (autoconf.texi) and 'Configure' (configure.texi).  
 
-################################################################################
+##############################################################################
 
 ### To add a new directory to the tree, first choose whether it is a target
 ### or a host dependent tool.  Then put it into the appropriate list
@@ -34,17 +34,17 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    textutils wdiff find emacs"
 
 
-# these libraries are built for the target environment, and are built after the host
-# libraries and the host tools (which may be a cross compiler)
+# these libraries are built for the target environment, and are built after
+# the host libraries and the host tools (which may be a cross compiler)
 #
 target_libs="libm xiberty newlib libg++"
 
-# these tools are built using the target libs, and are intended to run only in the
-# target environment.  we currently have none.  
+# these tools are built using the target libs, and are intended to run only
+# in the target environment.  we currently have none.
 #
-# note: any program that uses libraries that are in the "target_libs" list
-# belongs in this list.  those programs are also very likely candidates for
-# the "native_only" list which follows
+# note: any program that *uses* libraries that are in the "target_libs"
+# list belongs in this list.  those programs are also very likely
+# candidates for the "native_only" list which follows
 #
 target_tools=
 
@@ -61,7 +61,7 @@ target_tools=
 native_only="autoconf cvs diff emacs fileutils find grep ispell m4
              rcs sed shellutils textutils wdiff"
 
-# directories to be built in the target environment only
+# directories to be built in a cross environment only
 #
 cross_only="xiberty newlib"
 
