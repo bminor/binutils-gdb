@@ -1,8 +1,34 @@
+2002-06-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* infrun.c (struct inferior_status): Replace fields
+	selected_frame_address and selected_level with field
+	selected_frame_id.
+	(save_inferior_status): Update.  Use get_frame_id.
+	(struct restore_selected_frame_args): Delete.
+	(restore_selected_frame): Update.  Use frame_find_by_id.
+	(restore_inferior_status): Update.
+
+	* breakpoint.h (struct breakpoint): Change type of
+	watchpoint_frame to frame_id.
+	* breakpoint.c (insert_breakpoints): Use frame_find_by_id.  Remove
+	call to get_current_frame.
+	(do_enable_breakpoint): Use frame_find_by_id.  Remove call to
+	get_current_frame.
+	(watchpoint_check): Use frame_find_by_id.
+
+	* frame.h (record_selected_frame): Delete declaration.
+	* stack.c (record_selected_frame): Delete function.
+	
+	* frame.h (struct frame_id): Define.
+	(get_frame_id): Declare.
+	(frame_find_by_id): Declare.
+	* frame.c (frame_find_by_id): New function.
+	(get_frame_id): New function.
+
 2002-06-10  Andrey Volkov <avolkov@transas.com>
 
 	* ser-e7kpc.c: Fix duplicated define and call of 
         _initialize_ser_e7000pc
-	    
 	    
 2002-06-09  Daniel Jacobowitz  <drow@mvista.com>
 

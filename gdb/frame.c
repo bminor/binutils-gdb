@@ -28,6 +28,56 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 
+/* Return a frame uniq ID that can be used to, later re-find the
+   frame.  */
+
+void
+get_frame_id (struct frame_info *fi, struct frame_id *id)
+{
+  if (fi == NULL)
+    {
+      id->base = 0;
+      id->pc = 0;
+    }
+  else
+    {
+      id->base = FRAME_FP (fi);
+      id->pc = fi->pc;
+    }
+}
+
+struct frame_info *
+frame_find_by_id (struct frame_id id)
+{
+  struct frame_info *frame;
+
+  /* ZERO denotes the null frame, let the caller decide what to do
+     about it.  Should it instead return get_current_frame()?  */
+  if (id.base == 0 && id.pc == 0)
+    return NULL;
+
+  for (frame = get_current_frame ();
+       frame != NULL;
+       frame = get_prev_frame (frame))
+    {
+      if (INNER_THAN (FRAME_FP (frame), id.base))
+	/* ``inner/current < frame < id.base''.  Keep looking along
+           the frame chain.  */
+	continue;
+      if (INNER_THAN (id.base, FRAME_FP (frame)))
+	/* ``inner/current < id.base < frame''.  Oops, gone past it.
+           Just give up.  */
+	return NULL;
+      /* FIXME: cagney/2002-04-21: This isn't sufficient.  It should
+	 use id.pc to check that the two frames belong to the same
+	 function.  Otherwise we'll do things like match dummy frames
+	 or mis-match frameless functions.  However, until someone
+	 notices, stick with the existing behavour.  */
+      return frame;
+    }
+  return NULL;
+}
+
 /* FIND_SAVED_REGISTER ()
 
    Return the address in which frame FRAME's value of register REGNUM

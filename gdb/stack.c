@@ -1545,17 +1545,6 @@ select_and_print_frame (struct frame_info *fi)
     }
 }
 
-
-/* Store the selected frame and its level into *FRAMEP and *LEVELP.
-   If there is no selected frame, *FRAMEP is set to NULL.  */
-
-void
-record_selected_frame (CORE_ADDR *frameaddrp, int *levelp)
-{
-  *frameaddrp = selected_frame ? selected_frame->frame : 0;
-  *levelp = frame_relative_level (selected_frame);
-}
-
 /* Return the symbol-block in which the selected frame is executing.
    Can return zero under various legitimate circumstances.
 

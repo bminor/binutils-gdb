@@ -909,13 +909,7 @@ insert_breakpoints (void)
 	else
 	  {
 	    struct frame_info *fi;
-
-	    /* There might be no current frame at this moment if we are
-	       resuming from a step over a breakpoint.
-	       Set up current frame before trying to find the watchpoint
-	       frame.  */
-	    get_current_frame ();
-	    fi = find_frame_addr_in_frame_chain (b->watchpoint_frame);
+	    fi = frame_find_by_id (b->watchpoint_frame);
 	    within_current_scope = (fi != NULL);
 	    if (within_current_scope)
 	      select_frame (fi);
@@ -2320,7 +2314,7 @@ watchpoint_check (PTR p)
          any chance of handling watchpoints on local variables, we'll need
          the frame chain (so we can determine if we're in scope).  */
       reinit_frame_cache ();
-      fr = find_frame_addr_in_frame_chain (b->watchpoint_frame);
+      fr = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
       /* in_function_epilogue_p() returns a non-zero value if we're still
 	 in the function but the stack frame has already been invalidated.
@@ -5321,10 +5315,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   if (frame)
     {
       prev_frame = get_prev_frame (frame);
-      b->watchpoint_frame = frame->frame;
+      get_frame_id (frame, &b->watchpoint_frame);
     }
   else
-    b->watchpoint_frame = (CORE_ADDR) 0;
+    {
+      memset (&b->watchpoint_frame, 0, sizeof (b->watchpoint_frame));
+    }
 
   /* If the expression is "local", then set up a "watchpoint scope"
      breakpoint at the point where we've left the scope of the watchpoint
@@ -7266,12 +7262,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
       if (bpt->exp_valid_block != NULL)
 	{
 	  struct frame_info *fr =
-
-	  /* Ensure that we have the current frame.  Else, this
-	     next query may pessimistically be answered as, "No,
-	     not within current scope". */
-	  get_current_frame ();
-	  fr = find_frame_addr_in_frame_chain (bpt->watchpoint_frame);
+	  fr = frame_find_by_id (bpt->watchpoint_frame);
 	  if (fr == NULL)
 	    {
 	      printf_filtered ("\

@@ -274,7 +274,21 @@ extern void show_stack_frame (struct frame_info *);
 
 extern void select_frame (struct frame_info *);
 
-extern void record_selected_frame (CORE_ADDR *, int *);
+/* Return an ID that can be used to re-find a frame.  */
+
+struct frame_id
+{
+  /* The frame's address.  This should be constant through out the
+     lifetime of a frame.  */
+  CORE_ADDR base;
+  /* The frame's current PC.  While this changes, the function that
+     the PC falls into, does not.  */
+  CORE_ADDR pc;
+};
+
+extern void get_frame_id (struct frame_info *fi, struct frame_id *id);
+
+extern struct frame_info *frame_find_by_id (struct frame_id id);
 
 extern void print_frame_info (struct frame_info *, int, int, int);
 
