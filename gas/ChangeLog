@@ -1,3 +1,8 @@
+2002-09-26  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-v850.c (v850_offset): Use frag_var instead of frag_now_fix
+	and frag_more.
+
 2002-09-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (CPU_HAS_MIPS16): Add mips-lsi-elf as MIPS16

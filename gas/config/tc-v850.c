@@ -193,12 +193,12 @@ static void
 v850_offset (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
+  char *pfrag;
   int temp = get_absolute_expression ();
-
-  temp -= frag_now_fix ();
-
-  if (temp > 0)
-    (void) frag_more (temp);
+   
+  pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, (symbolS *)0,
+                       (offsetT) temp, (char *) 0);
+  *pfrag = 0;
 
   demand_empty_rest_of_line ();
 }
