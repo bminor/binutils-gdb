@@ -1267,41 +1267,22 @@ regcache_collect (int regnum, void *buf)
 /* read_pc, write_pc, read_sp, deprecated_read_fp, etc.  Special
    handling for registers PC, SP, and FP.  */
 
-/* NOTE: cagney/2001-02-18: The functions generic_target_read_pc(),
-   read_pc_pid(), read_pc(), generic_target_write_pc(),
-   write_pc_pid(), write_pc(), generic_target_read_sp(), read_sp(),
-   generic_target_write_sp(), and deprecated_read_fp(), will
-   eventually be moved out of the reg-cache into either frame.[hc] or
-   to the multi-arch framework.  The are not part of the raw register
-   cache.  */
+/* NOTE: cagney/2001-02-18: The functions read_pc_pid(), read_pc(),
+   read_sp(), and deprecated_read_fp(), will eventually be replaced by
+   per-frame methods.  Instead of relying on the global INFERIOR_PTID,
+   they will use the contextual information provided by the FRAME.
+   These functions do not belong in the register cache.  */
 
-/* This routine is getting awfully cluttered with #if's.  It's probably
-   time to turn this into READ_PC and define it in the tm.h file.
-   Ditto for write_pc.
+/* NOTE: cagney/2003-06-07: The function generic_target_read_sp()
+   should be deleted.  */
 
-   1999-06-08: The following were re-written so that it assumes the
-   existence of a TARGET_READ_PC et.al. macro.  A default generic
-   version of that macro is made available where needed.
+/* NOTE: cagney/2003-06-07: The function generic_target_write_sp()
+   should be deleted.  */
 
-   Since the ``TARGET_READ_PC'' et.al. macro is going to be controlled
-   by the multi-arch framework, it will eventually be possible to
-   eliminate the intermediate read_pc_pid().  The client would call
-   TARGET_READ_PC directly. (cagney). */
-
-CORE_ADDR
-generic_target_read_pc (ptid_t ptid)
-{
-#ifdef PC_REGNUM
-  if (PC_REGNUM >= 0)
-    {
-      CORE_ADDR pc_val = ADDR_BITS_REMOVE ((CORE_ADDR) read_register_pid (PC_REGNUM, ptid));
-      return pc_val;
-    }
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_read_pc");
-  return 0;
-}
+/* NOTE: cagney/2003-06-07: The functions generic_target_write_pc(),
+   write_pc_pid(), write_pc(), and deprecated_read_fp(), all need to
+   be replaced by something that does not rely on global state.  But
+   what?  */
 
 CORE_ADDR
 read_pc_pid (ptid_t ptid)
@@ -1313,7 +1294,17 @@ read_pc_pid (ptid_t ptid)
   saved_inferior_ptid = inferior_ptid;
   inferior_ptid = ptid;
 
-  pc_val = TARGET_READ_PC (ptid);
+  if (TARGET_READ_PC_P ())
+    pc_val = TARGET_READ_PC (ptid);
+  /* Else use per-frame method on get_current_frame.  */
+  else if (PC_REGNUM >= 0)
+    {
+      CORE_ADDR raw_val = read_register_pid (PC_REGNUM, ptid);
+      CORE_ADDR pc_val = ADDR_BITS_REMOVE (raw_val);
+      return pc_val;
+    }
+  else
+    internal_error (__FILE__, __LINE__, "read_pc_pid: Unable to find PC");
 
   inferior_ptid = saved_inferior_ptid;
   return pc_val;

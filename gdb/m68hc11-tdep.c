@@ -1365,7 +1365,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
-  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);

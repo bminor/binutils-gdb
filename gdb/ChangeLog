@@ -1,5 +1,20 @@
 2003-06-07  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (TARGET_READ_PC): Add predicate, remove default.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* regcache.c: Update comments on read_pc et.al.
+	(generic_target_read_pc): Delete function.
+	(read_pc_pid): Try TARGET_READ_PC and PC_REGNUM for a PC register.
+	* inferior.h (generic_target_read_pc): Delete declaration.
+	* frv-tdep.c (frv_gdbarch_init): Do not set read_pc to
+	generic_target_read_pc.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	
+2003-06-07  Andrew Cagney  <cagney@redhat.com>
+
 	* elfread.c (elf_symtab_read): Replace "special_local_sym_p" and
 	"index" with "special_local_sect".  Use strcmp instead of STREQ.
 	Append period to coments.

@@ -283,9 +283,29 @@ extern void set_gdbarch_char_signed (struct gdbarch *gdbarch, int char_signed);
 #define TARGET_CHAR_SIGNED (gdbarch_char_signed (current_gdbarch))
 #endif
 
+#if defined (TARGET_READ_PC)
+/* Legacy for systems yet to multi-arch TARGET_READ_PC */
+#if !defined (TARGET_READ_PC_P)
+#define TARGET_READ_PC_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_PC_P)
+#define TARGET_READ_PC_P() (0)
+#endif
+
+extern int gdbarch_read_pc_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_READ_PC_P)
+#error "Non multi-arch definition of TARGET_READ_PC"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_PC_P)
+#define TARGET_READ_PC_P() (gdbarch_read_pc_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_PC)
-#define TARGET_READ_PC(ptid) (generic_target_read_pc (ptid))
+#define TARGET_READ_PC(ptid) (internal_error (__FILE__, __LINE__, "TARGET_READ_PC"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_read_pc_ftype) (ptid_t ptid);

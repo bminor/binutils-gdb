@@ -426,7 +426,7 @@ v:2:TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v:2:TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
-f:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
+F:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
 # This is simply not needed.  See value_of_builtin_frame_fp_reg and
 # call_function_by_hand.
