@@ -1,6 +1,11 @@
+Fri Mar  6 18:53:18 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* chew.c: now has -w switch turn on warnings
+
 Tue Dec 10 22:11:05 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
-	* Makefile.in: build chew into the current directory.
+	* Makefile.in: build chew into the current directory.  Complete
+	  the MKDOC macro transition.
 
 Tue Dec 10 08:26:28 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
