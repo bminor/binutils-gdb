@@ -1,3 +1,9 @@
+Wed Aug  3 16:45:41 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* coff-i960.c (coff_i960_relocate): Rewrote to change relocs
+	against locally defined symbols into relocs against section
+	symbols, for VxWorks 5.1.
+
 Wed Aug  3 10:34:37 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* i386linux.c (linux_add_one_symbol): Only handle

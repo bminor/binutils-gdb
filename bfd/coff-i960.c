@@ -107,8 +107,13 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
   return result;
 }
 
-/* When generating relocateable output, we don't want to do anything
-   for a reloc against a globally visible symbol.  */
+/* i960 COFF is used by VxWorks 5.1.  However, VxWorks 5.1 does not
+   appear to correctly handle a reloc against a symbol defined in the
+   same object file.  It appears to simply discard such relocs, rather
+   than adding their values into the object file.  We handle this here
+   by converting all relocs against defined symbols into relocs
+   against the section symbol, when generating a relocateable output
+   file.  */
 
 static bfd_reloc_status_type 
 coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
@@ -121,14 +126,43 @@ coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && reloc_entry->addend == 0)
+  const char *sec_name;
+  asymbol **syms, **sym_end;
+
+  if (output_bfd == NULL)
     {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
+      /* Not generating relocateable output file.  */
+      return bfd_reloc_continue;
     }
 
+  if (bfd_is_und_section (bfd_get_section (symbol)))
+    {
+      /* Symbol is not defined, so no need to worry about it.  */
+      return bfd_reloc_continue;
+    }
+
+  /* Convert the reloc to use the section symbol.  FIXME: This method
+     is ridiculous.  */
+  sec_name = bfd_get_section_name (output_bfd,
+				   bfd_get_section (symbol)->output_section);
+  syms = bfd_get_outsymbols (output_bfd);
+  sym_end = syms + bfd_get_symcount (output_bfd);
+  for (; syms < sym_end; syms++)
+    {
+      if (bfd_asymbol_name (*syms) != NULL
+	  && strcmp (bfd_asymbol_name (*syms), sec_name) == 0
+	  && (*syms)->value == 0)
+	{
+	  reloc_entry->sym_ptr_ptr = syms;
+	  break;
+	}
+    }
+
+  if (syms >= sym_end)
+    abort ();
+
+  /* Let bfd_perform_relocation do its thing, which will include
+     stuffing the symbol addend into the object file.  */
   return bfd_reloc_continue;
 }
 
