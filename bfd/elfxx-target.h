@@ -466,8 +466,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_plt_alignment,
   elf_backend_can_gc_sections,
   elf_backend_can_refcount,
-  elf_backend_want_dynbss,
-  elf_backend_want_got_sym
+  elf_backend_want_got_sym,
+  elf_backend_want_dynbss
 };
 #endif
 

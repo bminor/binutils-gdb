@@ -1,3 +1,7 @@
+2001-11-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfxx-target.h (elfNN_bed): Correct want_got_sym, want_dynbss order.
+
 2001-11-02  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Don't create
