@@ -57,3 +57,9 @@ extern int free ();
 /* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
 
 #define PTRACE_ARG3_TYPE char*
+
+/* Using termios is required to save and restore ICRNL and ONLCR
+   separately.  */
+
+/* At least SunOS 4.1.1 has termios.  I'm not sure about 4.0.3.  */
+#define HAVE_TERMIOS

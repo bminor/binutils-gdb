@@ -27,10 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    the name of this field is.  */
 #define U_FPSTATE(u) u.u_fps.u_fpstate
 
-/* TIOCGETC is defined in System V 3.2 termio.h, but struct tchars
-   is not.  This makes problems for inflow.c.  */
-#define TIOCGETC_BROKEN
-
 /* All the job control definitions exist in SCO Unix, but the standard
    shells don't use them.  So we must disable job control. */
 /* This is no longer true with 3.2v2 and later */

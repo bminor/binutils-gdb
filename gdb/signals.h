@@ -22,13 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     eliminates certain signal names when job control is not supported,
     (or, on some systems, when job control is there but doesn't work
     the way GDB expects it to work).  */
+/* This has been superceded by the job_control variable in serial.h.  */
 
 #include <signal.h>
-
-#ifdef NO_JOB_CONTROL
-# undef SIGTSTP
-# undef SIGSTOP
-# undef SIGCONT
-# undef SIGTTIN
-# undef SIGTTOU
-#endif

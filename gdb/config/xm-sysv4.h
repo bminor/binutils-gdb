@@ -22,21 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define SVR4_SHARED_LIBS
 
-/* SVR4 has termio facilities. */
+/* SVR4 has termios facilities. */
 
-#define HAVE_TERMIO
+#define HAVE_TERMIOS
 
 /* SVR4 has mmap facilities */
 
 #define HAVE_MMAP
-
-/* TIOCGETC and TIOCGLTC are picked up somewhere, but struct tchars
-   and struct ltchars are not.  This makes problems for inflow.c.
-   It is unknown at this time if this is a generic SVR4 problem or
-   one just limited to the initial SVR4 port host machine. */
-
-#define TIOCGETC_BROKEN
-#define TIOCGLTC_BROKEN
 
 /* SVR4 is a derivative of System V Release 3 (USG) */
 

@@ -24,9 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define USG 1
 #endif
 
-#define TIOCGETC_BROKEN 1
-#define TIOCGLTC_BROKEN 1
-
 #include <sys/param.h>
 #include <sys/time.h>
 

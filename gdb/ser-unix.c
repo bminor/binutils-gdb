@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct hardwire_ttystate
 {
   struct termios termios;
+  pid_t process_group;
 };
 #endif
 
@@ -42,6 +43,7 @@ struct hardwire_ttystate
 struct hardwire_ttystate
 {
   struct termio termio;
+  int process_group;
 };
 #endif
 
@@ -55,6 +57,17 @@ struct hardwire_ttystate
 struct hardwire_ttystate
 {
   struct sgttyb sgttyb;
+  struct tchars tc;
+  struct ltchars ltc;
+  /* Line discipline flags.  */
+  int lmode;
+
+#ifdef SHORT_PGRP
+  /* This is only used for the ultra.  Does it have pid_t?  */
+  short process_group;
+#else
+  int process_group;
+#endif
 };
 #endif
 
@@ -92,15 +105,45 @@ get_tty_state(scb, state)
      struct hardwire_ttystate *state;
 {
 #ifdef HAVE_TERMIOS
-  return tcgetattr(scb->fd, &state->termios);
+  pid_t new_process_group;
+
+  if (tcgetattr(scb->fd, &state->termios) < 0)
+    return -1;
+
+  if (!job_control)
+    return 0;
+
+  new_process_group = tcgetpgrp (scb->fd);
+  if (new_process_group == (pid_t)-1)
+    return -1;
+  state->process_group = new_process_group;
+  return 0;
 #endif
 
 #ifdef HAVE_TERMIO
-  return ioctl (scb->fd, TCGETA, &state->termio);
+  if (ioctl (scb->fd, TCGETA, &state->termio) < 0)
+    return -1;
+
+  if (!job_control)
+    return 0;
+
+  return ioctl (scb->fd, TIOCGPGRP, &state->process_group);
 #endif
 
 #ifdef HAVE_SGTTY
-  return ioctl (scb->fd, TIOCGETP, &state->sgttyb);
+  if (ioctl (scb->fd, TIOCGETP, &state->sgttyb) < 0)
+    return -1;
+  if (ioctl (scb->fd, TIOCGETC, &state->tc) < 0)
+    return -1;
+  if (ioctl (scb->fd, TIOCGLTC, &state->ltc) < 0)
+    return -1;
+  if (ioctl (scb->fd, TIOCLGET, &state->lmode) < 0)
+    return -1;
+
+  if (!job_control)
+    return 0;
+
+  return ioctl (scb->fd, TIOCGPGRP, &state->process_group);
 #endif
 }
 
@@ -109,18 +152,40 @@ set_tty_state(scb, state)
      serial_t scb;
      struct hardwire_ttystate *state;
 {
-  int err;
-
 #ifdef HAVE_TERMIOS
-  return tcsetattr(scb->fd, TCSANOW, &state->termios);
+  if (tcsetattr(scb->fd, TCSANOW, &state->termios) < 0)
+    return -1;
+
+  if (!job_control)
+    return 0;
+
+  /* Need to ignore errors, at least if attach_flag is set.  */
+  tcsetpgrp (scb->fd, state->process_group);
+  return 0;
 #endif
 
 #ifdef HAVE_TERMIO
-  return ioctl (scb->fd, TCSETA, &state->termio);
+  if (ioctl (scb->fd, TCSETA, &state->termio) < 0)
+    return -1;
+
+  if (!job_control)
+    return 0;
+
+  /* Need to ignore errors, at least if attach_flag is set.  */
+  ioctl (scb->fd, TIOCSPGRP, &state->process_group);
+  return 0;
 #endif
 
 #ifdef HAVE_SGTTY
-  return ioctl (scb->fd, TIOCSETP, &state->sgttyb);
+  if (ioctl (scb->fd, TIOCSETN, &state->sgttyb) < 0)
+    return -1;
+
+  if (!job_control)
+    return 0;
+
+  /* Need to ignore errors, at least if attach_flag is set.  */
+  ioctl (scb->fd, TIOCSPGRP, &state->process_group);
+  return 0;
 #endif
 }
 
@@ -148,6 +213,120 @@ hardwire_set_tty_state(scb, ttystate)
   state = (struct hardwire_ttystate *)ttystate;
 
   return set_tty_state(scb, state);
+}
+
+static int
+hardwire_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
+     serial_t scb;
+     serial_ttystate new_ttystate;
+     serial_ttystate old_ttystate;
+{
+  struct hardwire_ttystate new_state =
+    *(struct hardwire_ttystate *)new_ttystate;
+  struct hardwire_ttystate *state = (struct hardwire_ttystate *) old_ttystate;
+
+#ifdef HAVE_TERMIOS
+  /* I'm not sure whether this is necessary; the manpage makes no mention
+     of discarding input when switching to/from ICANON.  */
+  if (state->termios.c_lflag & ICANON)
+    new_state.termios.c_lflag |= ICANON;
+  else
+    new_state.termios.c_lflag &= ~ICANON;
+#endif
+
+#ifdef HAVE_TERMIO
+  /* I'm not sure whether this is necessary; the manpage makes no mention
+     of discarding input when switching to/from ICANON.  */
+  if (state->termio.c_lflag & ICANON)
+    new_state.termio.c_lflag |= ICANON;
+  else
+    new_state.termio.c_lflag &= ~ICANON;
+#endif
+
+#ifdef HAVE_SGTTY
+  if (state->sgttyb.sg_flags & RAW)
+    new_state.sgttyb.sg_flags |= RAW;
+  else
+    new_state.sgttyb.sg_flags &= ~RAW;
+
+  /* I'm not sure whether this is necessary; the manpage just mentions
+     RAW not CBREAK.  */
+  if (state->sgttyb.sg_flags & CBREAK)
+    new_state.sgttyb.sg_flags |= CBREAK;
+  else
+    new_state.sgttyb.sg_flags &= ~CBREAK;
+#endif
+
+  return set_tty_state (scb, &new_state);
+}
+
+static void
+hardwire_print_tty_state (scb, ttystate)
+     serial_t scb;
+     serial_ttystate ttystate;
+{
+  struct hardwire_ttystate *state = (struct hardwire_ttystate *) ttystate;
+  int i;
+
+  printf_filtered ("Process group = %d\n", state->process_group);
+
+#ifdef HAVE_TERMIOS
+  printf_filtered ("c_iflag = 0x%x, c_oflag = 0x%x,\n",
+		   state->termios.c_iflag, state->termios.c_oflag);
+  printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
+		   state->termios.c_cflag, state->termios.c_lflag,
+		   state->termios.c_line);
+  printf_filtered ("c_cc: ");
+  for (i = 0; i < NCCS; i += 1)
+    printf_filtered ("0x%x ", state->termios.c_cc[i]);
+  printf_filtered ("\n");
+#endif
+
+#ifdef HAVE_TERMIO
+  printf_filtered ("c_iflag = 0x%x, c_oflag = 0x%x,\n",
+		   state->termio.c_iflag, state->termio.c_oflag);
+  printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
+		   state->termio.c_cflag, state->termio.c_lflag,
+		   state->termio.c_line);
+  printf_filtered ("c_cc: ");
+  for (i = 0; i < NCC; i += 1)
+    printf_filtered ("0x%x ", state->termio.c_cc[i]);
+  printf_filtered ("\n");
+#endif
+
+#ifdef HAVE_SGTTY
+  printf_filtered ("sgttyb.sg_flags = 0x%x.\n", state->sgttyb.sg_flags);
+
+  printf_filtered ("tchars: ");
+  for (i = 0; i < (int)sizeof (struct tchars); i++)
+    printf_filtered ("0x%x ", ((unsigned char *)&state->tc)[i]);
+  printf_filtered ("\n");
+
+  printf_filtered ("ltchars: ");
+  for (i = 0; i < (int)sizeof (struct ltchars); i++)
+    printf_filtered ("0x%x ", ((unsigned char *)&state->ltc)[i]);
+  printf_filtered ("\n");
+
+  printf_filtered ("lmode:  0x%x\n", state->lmode);
+#endif
+}
+
+static int
+hardwire_flush_output (scb)
+     serial_t scb;
+{
+#ifdef HAVE_TERMIOS
+  return tcflush (scb->fd, TCOFLUSH);
+#endif
+
+#ifdef HAVE_TERMIO
+  return ioctl (scb->fd, TCFLSH, 1);
+#endif
+
+#ifdef HAVE_SGTTY
+  /* This flushes both input and output, but we can't do better.  */
+  return ioctl (scb->fd, TIOCFLUSH, 0);
+#endif  
 }
 
 static void
@@ -380,6 +559,16 @@ hardwire_setbaudrate(scb, rate)
 }
 
 static int
+hardwire_set_process_group (scb, ttystate, group)
+     serial_t scb;
+     serial_ttystate ttystate;
+     int group;
+{
+  ((struct hardwire_ttystate *)ttystate)->process_group = group;
+  return 0;
+}
+
+static int
 hardwire_write(scb, str, len)
      serial_t scb;
      const char *str;
@@ -418,14 +607,75 @@ static struct serial_ops hardwire_ops =
   hardwire_close,
   hardwire_readchar,
   hardwire_write,
+  hardwire_flush_output,
   hardwire_raw,
   hardwire_get_tty_state,
   hardwire_set_tty_state,
+  hardwire_print_tty_state,
+  hardwire_noflush_set_tty_state,
   hardwire_setbaudrate,
+  hardwire_set_process_group
 };
+
+int job_control;
+#if defined (HAVE_TERMIOS)
+#include <unistd.h>
+#endif
+
+/* This is here because this is where we figure out whether we (probably)
+   have job control.  Just using job_control only does part of it because
+   setpgid or setpgrp might not exist on a system without job control.
+   It might be considered misplaced (on the other hand, process groups and
+   job control are closely related to ttys).
+
+   For a more clean implementation, in libiberty, put a setpgid which merely
+   calls setpgrp and a setpgrp which does nothing (any system with job control
+   will have one or the other).  */
+int
+gdb_setpgid ()
+{
+  int retval = 0;
+  if (job_control)
+    {
+#if defined (NEED_POSIX_SETPGID) || defined (HAVE_TERMIOS)
+      /* Do all systems with termios have setpgid?  I hope so.  */
+      retval = setpgid (0, 0);
+#else
+#if defined (TIOCGPGRP)
+#if defined(USG) && !defined(SETPGRP_ARGS)
+      retval = setpgrp ();
+#else
+      retval = setpgrp (getpid (), getpid ());
+#endif /* USG */
+#endif /* TIOCGPGRP.  */
+#endif /* NEED_POSIX_SETPGID */
+    }
+  return retval;
+}
 
 void
 _initialize_ser_hardwire ()
 {
   serial_add_interface (&hardwire_ops);
+
+  /* OK, figure out whether we have job control.  */
+
+#if defined (HAVE_TERMIOS)
+  /* Do all systems with termios have the POSIX way of identifying job
+     control?  I hope so.  */
+#ifdef _POSIX_JOB_CONTROL
+  job_control = _POSIX_JOB_CONTROL;
+#else
+  job_control = sysconf (_SC_JOB_CONTROL);
+#endif
+
+#else /* not termios.  */
+
+#ifdef TIOCGPGRP
+  job_control = 1;
+#else
+  job_control = 0;
+#endif /* TIOCGPGRP */
+
+#endif /* not termios.  */
 }

@@ -266,6 +266,14 @@ go32_open (scb, name)
   return 0;
 }
 
+static int
+go32_flush_output (scb)
+     serial_t scb;
+{
+  /* No need to flush, because there is no buffering.  */
+  return 0;
+}
+
 static void
 go32_raw (scb)
      serial_t scb;
@@ -311,9 +319,36 @@ go32_set_tty_state(scb, ttystate)
 }
 
 static int
+go32_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
+     serial_t scb;
+     serial_ttystate new_ttystate;
+     serial_ttystate old_ttystate;
+{
+  return 0;
+}
+
+static void
+go32_print_tty_state (scb, ttystate)
+     serial_t scb;
+     serial_ttystate ttystate;
+{
+  /* Nothing to print.  */
+  return;
+}
+
+static int
 go32_setbaudrate (scb, rate)
      serial_t scb;
      int rate;
+{
+  return 0;
+}
+
+static int
+go32_set_process_group (scb, ttystate, group)
+     serial_t scb;
+     serial_ttystate ttystate;
+     int group;
 {
   return 0;
 }
@@ -343,13 +378,25 @@ static struct serial_ops go32_ops =
   go32_close,
   go32_readchar,
   go32_write,
+  go32_flush_output,
   go32_raw,
   go32_get_tty_state,
   go32_set_tty_state,
-  go32_setbaudrate
+  go32_print_tty_state,
+  go32_noflush_set_tty_state,
+  go32_setbaudrate,
+  go32_set_process_group
 };
+
+/* There is never job control on go32.  */
+int
+gdb_setpgid ()
+{
+  return 0;
+}
 
 _initialize_ser_go32 ()
 {
+  job_control = 0;
   serial_add_interface (&go32_ops);
 }

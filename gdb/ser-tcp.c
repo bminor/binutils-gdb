@@ -140,6 +140,15 @@ tcp_set_tty_state(scb, ttystate)
   return 0;
 }
 
+static int
+tcp_flush_output (scb)
+     serial_t scb;
+{
+  /* This is only used by utils.c on stdout, so it doesn't need to work
+     for tcp.  */
+  return 0;
+}
+
 static void
 tcp_raw(scb)
      serial_t scb;
@@ -227,11 +236,38 @@ tcp_readchar(scb, timeout)
 }
 
 static int
+tcp_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
+     serial_t scb;
+     serial_ttystate new_ttystate;
+     serial_ttystate old_ttystate;
+{
+  return 0;
+}
+
+static void
+tcp_print_tty_state (scb, ttystate)
+     serial_t scb;
+     serial_ttystate ttystate;
+{
+  /* Nothing to print.  */
+  return;
+}
+
+static int
 tcp_setbaudrate(scb, rate)
      serial_t scb;
      int rate;
 {
   return 0;			/* Never fails! */
+}
+
+static int
+tcp_set_process_group (scb, ttystate, group)
+     serial_t scb;
+     serial_ttystate ttystate;
+     int group;
+{
+  return 0;
 }
 
 static int
@@ -273,10 +309,14 @@ static struct serial_ops tcp_ops =
   tcp_close,
   tcp_readchar,
   tcp_write,
+  tcp_flush_output,
   tcp_raw,
   tcp_get_tty_state,
   tcp_set_tty_state,
+  tcp_print_tty_state,
+  tcp_noflush_set_tty_state,
   tcp_setbaudrate,
+  tcp_set_process_group
 };
 
 void

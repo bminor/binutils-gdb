@@ -1,3 +1,34 @@
+Tue Jun 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* inftarg.c: Remove unused include of terminal.h.
+	* signals.h: Don't undefine signals anymore.
+	* main.c: Use job_control from serial.h.
+	* fork-child.c (fork_inferior): Use gdb_setpgid.
+	* serial.h, ser-unix.c, ser-go32.c: Provide gdb_setpgid.
+	* utils.c (quit): Use current_target->to_terminal_ours to figure
+	out whether we care about lack of job control, rather than __GO32__.
+	* utils.c: Include serial.h not terminal.h
+	(quit): Use job_control not TIOCGPGRP.
+	* terminal.h: Don't undefine TIOCGPGRP.
+	* serial.h, ser-unix.c, ser-go32.c, ser-tcp.c: Add SERIAL_FLUSH_OUTPUT.
+	* utils.c (quit): Use it.
+	* serial.h: Add SERIAL_UN_FDOPEN.
+	* utils.c (quit): Use it.
+	* ser-unix.c: Add process group to ttystate.
+	[HAVE_SGTTY]: Add tchars, ltchars, and lmode to ttystate.
+	* inflow.c: Include serial.h not terminal.h.
+	Use serial.h stuff to replace most of the maze of #ifdef's.
+	* inflow.c, main.c, inferior.h: make gdb_has_a_terminal a function.
+	* serial.h: Document SERIAL_SET_TTY_STATE as being immediate.
+	* ser-unix.c: Use TIOCSETN not TIOCSETP so it is true.
+	* serial.h, ser-unix.c, ser-go32.c, ser-tcp.c:
+	Add SERIAL_PRINT_TTY_STATE, SERIAL_NOFLUSH_SET_TTY_STATE, and
+	SERIAL_SET_PROCESS_GROUP.
+	* inflow.c: Use them.
+	* config/xm-svr4.h, config/rs6000/xm-rs6000.h, config/sparc/sun4os4.h:
+	Define HAVE_TERMIOS.
+	* Various: Remove all use of TIOC*_BROKEN.
+
 Wed Jun 30 12:20:51 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/m68k/tm-sun3.h (BELIEVE_PCC_PROMOTION_TYPE): Define.

@@ -41,10 +41,15 @@ struct serial_ops {
   void (*close) PARAMS ((serial_t));
   int (*readchar) PARAMS ((serial_t, int timeout));
   int (*write) PARAMS ((serial_t, const char *str, int len));
+  int (*flush_output) PARAMS ((serial_t));
   void (*go_raw) PARAMS ((serial_t));
   serial_ttystate (*get_tty_state) PARAMS ((serial_t));
   int (*set_tty_state) PARAMS ((serial_t, serial_ttystate));
+  void (*print_tty_state) PARAMS ((serial_t, serial_ttystate));
+  int (*noflush_set_tty_state)
+    PARAMS ((serial_t, serial_ttystate, serial_ttystate));
   int (*setbaudrate) PARAMS ((serial_t, int rate));
+  int (*set_process_group) PARAMS ((serial_t, serial_ttystate, int));
 };
 
 /* Add a new serial interface to the interface list */
@@ -67,13 +72,35 @@ serial_t serial_fdopen PARAMS ((int fd));
 
 #define SERIAL_FDOPEN(FD) serial_fdopen(FD)
 
+/* Flush pending output.  */
+
+#define SERIAL_FLUSH_OUTPUT(SERIAL_T) \
+  ((SERIAL_T)->ops->flush_output((SERIAL_T)))
+
 /* Turn the port into raw mode. */
 
 #define SERIAL_RAW(SERIAL_T) (SERIAL_T)->ops->go_raw((SERIAL_T))
 
+/* Return a pointer to a newly malloc'd ttystate containing the state
+   of the tty.  */
 #define SERIAL_GET_TTY_STATE(SERIAL_T) (SERIAL_T)->ops->get_tty_state((SERIAL_T))
 
+/* Set the state of the tty to TTYSTATE.  The change is immediate.
+   When changing to or from raw mode, input might be discarded.  */
 #define SERIAL_SET_TTY_STATE(SERIAL_T, TTYSTATE) (SERIAL_T)->ops->set_tty_state((SERIAL_T), (TTYSTATE))
+
+/* printf_filtered a user-comprehensible description of ttystate.  */
+#define SERIAL_PRINT_TTY_STATE(SERIAL_T, TTYSTATE) \
+  ((*((SERIAL_T)->ops->print_tty_state)) ((SERIAL_T), (TTYSTATE)))
+
+/* Set the tty state to NEW_TTYSTATE, where OLD_TTYSTATE is the
+   current state (generally obtained from a recent call to
+   SERIAL_GET_TTY_STATE), but be careful not to discard any input.
+   This means that we never switch in or out of raw mode, even
+   if NEW_TTYSTATE specifies a switch.  */
+#define SERIAL_NOFLUSH_SET_TTY_STATE(SERIAL_T, NEW_TTYSTATE, OLD_TTYSTATE) \
+  ((*((SERIAL_T)->ops->noflush_set_tty_state)) \
+    ((SERIAL_T), (NEW_TTYSTATE), (OLD_TTYSTATE)))
 
 /* Read one char from the serial device with TIMEOUT seconds timeout.
    Returns char if ok, else one of the following codes.  Note that all
@@ -101,3 +128,21 @@ void serial_close PARAMS ((serial_t));
 
 #define SERIAL_CLOSE(SERIAL_T) serial_close(SERIAL_T)
 
+/* Destroy SERIAL_T without doing the rest of the stuff that SERIAL_CLOSE
+   does.  */
+
+#define SERIAL_UN_FDOPEN(SERIAL_T) (free (SERIAL_T))
+
+/* Set the process group saved in TTYSTATE to GROUP.  This just modifies
+   the ttystate setting; need to call SERIAL_SET_TTY_STATE for this to
+   actually have any effect.  If no job control, then don't do anything.  */
+#define SERIAL_SET_PROCESS_GROUP(SERIAL_T, TTYSTATE, GROUP) \
+  ((*((SERIAL_T)->ops->set_process_group)) (SERIAL_T, TTYSTATE, GROUP))
+
+/* Do we have job control?  Can be assumed to always be the same within
+   a given run of GDB.  In ser-unix.c, ser-go32.c, etc.  */
+extern int job_control;
+
+/* Set the process group of the caller to its own pid, or do nothing if
+   we lack job control.  */
+extern int gdb_setpgid PARAMS ((void));

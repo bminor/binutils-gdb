@@ -37,7 +37,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	HOST_BYTE_ORDER	BIG_ENDIAN
 
-#define	HAVE_TERMIO 1
+/* At least as of AIX 3.2, we have termios.  */
+#define	HAVE_TERMIOS 1
+/* #define HAVE_TERMIO 1 */
+
 #define	USG 1
 #define	HAVE_SIGSETMASK	1
 

@@ -22,7 +22,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Apparently there is inconsistency among various System V's about what
    the name of this field is.  */
 #define U_FPSTATE(u) u.u_fps.u_fpstate
-
-/* TIOCGETC is defined in System V 3.2 termio.h, but struct tchars
-   is not.  This makes problems for inflow.c.  */
-#define TIOCGETC_BROKEN
