@@ -87,6 +87,11 @@ Fri Oct 23 13:01:24 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
 	* gas/mips/vu0.[sd]: Update tests for VRNEXT and VRGET
 	instructions, to match corrected operand synatx.
 
+	Thu Jul 23 18:31:03 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/dvp/upper-[12].[sd]: Test two-operand CLIP; remove
+	old one-operand CLIP.
+
 end-sanitize-r5900
 Tue Oct 20 11:35:06 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
