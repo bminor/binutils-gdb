@@ -1,3 +1,23 @@
+Mon May 16 13:22:04 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* common.h (EM_HPPA): Delete.
+	(EM_PARISC): Add.
+	* hppa.h: New file.
+
+Mon May  9 13:27:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* common.h (SHN_LORESERVE): Rename from SHN_LORESERV.
+	(ELF32_R_TYPE, ELF32_R_INFO): Don't rely on size of unsigned char.
+	(ELF64_R_TYPE): Don't rely on size of unsigned long.
+
+Mon Apr 25 15:53:09 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* internal.h (Elf_Internal_Shdr): Use PTR, not void *.
+
+Fri Mar 11 00:34:59 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips.h (SHN_MIPS_TEXT, SHN_MIPS_DATA):  Define.
+
 Sat Mar  5 14:08:54 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* internal.h:  Remove Elf32_*, Elf64_* typedefs.  These names

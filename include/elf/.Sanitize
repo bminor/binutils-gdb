@@ -29,6 +29,7 @@ ChangeLog
 common.h
 dwarf.h
 external.h
+hppa.h
 internal.h
 mips.h
 
