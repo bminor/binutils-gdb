@@ -617,7 +617,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -785,7 +785,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -873,7 +873,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1007,7 +1007,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1176,7 +1176,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1330,7 +1330,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1494,7 +1494,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1649,7 +1649,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1721,7 +1721,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1759,7 +1759,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1795,7 +1795,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      else if (BITS (4, 7) == 0xE)
+	      else if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;
@@ -1833,7 +1833,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  Handle_Load_Double (state, instr);
 		  break;
 		}
-	      if (BITS (4, 7) == 0xE)
+	      if (BITS (4, 7) == 0xF)
 		{
 		  Handle_Store_Double (state, instr);
 		  break;

@@ -1,3 +1,8 @@
+2000-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Fix test for StoreDouble
+	instruction.
+
 2000-12-10  Nick Clifton  <nickc@redhat.com>
 
 	* armos.c (ARMul_OSHandleSWI): Add 0x91 as an FPE SWI.
