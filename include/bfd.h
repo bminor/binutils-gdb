@@ -1648,14 +1648,6 @@ Return a lower-case character corresponding to the symbol class of symbol.
  PROTO(int, bfd_decode_symclass, (asymbol *symbol));
 
 /*
-
- bfd_stab_name
-Returns a string for the stab with the given code, or NULL if not found.
-*/
-
- PROTO(char *, bfd_stab_name, (int code));
-
-/*
 */
 
 /*:bfd.c*/

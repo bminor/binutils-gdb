@@ -53,15 +53,30 @@ struct external_exec
      * entry point below TEXT_START_ADDR:
        (hack for SunOS shared libraries)
        start at 0, offset is 0, size as stated.
-     * entry point is EXEC_BYTES_SIZE or further into a page:
-       (no padding is needed; text can start after exec header.  Sun
+     * If N_HEADER_IN_TEXT(x) is true (which defaults to being the
+       case when the entry point is EXEC_BYTES_SIZE or further into a page):
+       no padding is needed; text can start after exec header.  Sun
        considers the text segment of such files to include the exec header;
-       for BFD's purposes, we don't, which makes more work for us.)
+       for BFD's purposes, we don't, which makes more work for us.
        start at TEXT_START_ADDR + EXEC_BYTES_SIZE, offset is EXEC_BYTES_SIZE,
        size as stated minus EXEC_BYTES_SIZE.
-     * entry point is less than EXEC_BYTES_SIZE into a page (e.g. page aligned):
-       (padding is needed so that text can start at a page boundary)
-       start at TEXT_START_ADDR, offset PAGE_SIZE, size as stated.  */
+     * If N_HEADER_IN_TEXT(x) is false (which defaults to being the case when
+       the entry point is less than EXEC_BYTES_SIZE into a page (e.g. page
+       aligned)): (padding is needed so that text can start at a page boundary)
+       start at TEXT_START_ADDR, offset PAGE_SIZE, size as stated.
+
+    Specific configurations may want to hardwire N_HEADER_IN_TEXT,
+    for efficiency or to allow people to play games with the entry point.
+    In that case, you would #define N_HEADER_IN_TEXT(x) as 1 for sunos,
+    and as 0 for most other hosts (Sony News, Vax Ultrix, etc).
+    (Do this in the appropriate bfd target file.)
+    (The default is a heuristic that will break if people try changing
+    the entry point, perhaps with the ld -e flag.)
+    */
+
+#ifndef N_HEADER_IN_TEXT
+#define N_HEADER_IN_TEXT(x) (((x).a_entry & (PAGE_SIZE-1)) >= EXEC_BYTES_SIZE)
+#endif
 
 #ifndef N_TXTADDR
 #define N_TXTADDR(x) \
@@ -69,7 +84,7 @@ struct external_exec
         0:					/* object file or NMAGIC */\
         ((x).a_entry < TEXT_START_ADDR)? \
 	    0:					/* shared lib */\
-	( (((x).a_entry & (PAGE_SIZE-1)) >= EXEC_BYTES_SIZE) ?	\
+	(N_HEADER_IN_TEXT(x)  ?	\
 	    TEXT_START_ADDR + EXEC_BYTES_SIZE:	/* no padding */\
 	    TEXT_START_ADDR			/* a page of padding */\
         )	\
@@ -83,7 +98,7 @@ struct external_exec
             EXEC_BYTES_SIZE:			/* object file or NMAGIC */\
         ((x).a_entry < TEXT_START_ADDR)? \
 	    0:					/* shared lib */\
-	( (((x).a_entry & (PAGE_SIZE-1)) >= EXEC_BYTES_SIZE) ?	\
+	(N_HEADER_IN_TEXT(x)  ?	\
 	    EXEC_BYTES_SIZE:			/* no padding */\
 	    PAGE_SIZE				/* a page of padding */\
         )	\
@@ -100,7 +115,7 @@ struct external_exec
             (x).a_text:				/* object file or NMAGIC */\
         ((x).a_entry < TEXT_START_ADDR)? \
 	    (x).a_text:				/* shared lib */\
-	( (((x).a_entry & (PAGE_SIZE-1)) >= EXEC_BYTES_SIZE) ?	\
+	(N_HEADER_IN_TEXT(x)  ?	\
 	    (x).a_text - EXEC_BYTES_SIZE:	/* no padding */\
 	    (x).a_text				/* a page of padding */\
         )	\

@@ -1,3 +1,13 @@
+Thu Nov 21 21:01:05 1991  Per Bothner  (bothner at cygnus.com)
+
+	* stab.def: Remove the GNU extended type codes (e.g. N_SETT).
+	* aout64.h:  The heuristic for distinguishing between
+	sunos-style and bsd-style ZMAGIC files (wrt. where the
+	text segment starts) is moved into (the default definition of)
+	the macro N_HEADER_IN_TEXT.  This definition is only used
+	if no other definition is used - e.g. bfd/newsos3.c defines
+	N_HEADER_IN_TEXT(x) to be always 0 (as before).
+
 Thu Nov 21 11:53:03 1991  John Gilmore  (gnu at cygnus.com)
 
 	* aout64.h (N_TXTADDR, N_TXTOFF, N_TXTSIZE):  New definitions
