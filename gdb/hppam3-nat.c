@@ -41,7 +41,7 @@ fetch_inferior_registers (regno)
 {
   kern_return_t ret;
   thread_state_data_t state;
-  unsigned int stateCnt = HP800_THREAD_STATE_COUNT;
+  unsigned int stateCnt = TRACE_FLAVOR_SIZE;
   int index;
   
   if (! MACH_PORT_VALID (current_thread))
@@ -51,7 +51,7 @@ fetch_inferior_registers (regno)
     setup_thread (current_thread, 1);
 
   ret = thread_get_state (current_thread,
-			  HP800_THREAD_STATE,
+			  TRACE_FLAVOR,
 			  state,
 			  &stateCnt);
 
@@ -61,7 +61,7 @@ fetch_inferior_registers (regno)
   else
     {
       for (index = 0; index < NUM_REGS; index++) 
-	supply_register (index,&state[index]);
+	supply_register (index,(void*)&state[index]);
     }
 
   if (must_suspend_thread)
@@ -80,7 +80,7 @@ store_inferior_registers (regno)
 {
   kern_return_t ret;
   thread_state_data_t state;
-  unsigned int stateCnt = HP800_THREAD_STATE_COUNT;
+  unsigned int stateCnt = TRACE_FLAVOR_SIZE;
   register int index;
 
   if (! MACH_PORT_VALID (current_thread))
@@ -91,7 +91,7 @@ store_inferior_registers (regno)
 
   /* Fetch the state of the current thread */
   ret = thread_get_state (current_thread,
-			  HP800_THREAD_STATE,
+			  TRACE_FLAVOR,
 			  state,
 			  &stateCnt);
 
@@ -128,9 +128,9 @@ store_inferior_registers (regno)
   /* Write gdb's current view of register to the thread
    */
   ret = thread_set_state (current_thread,
-			  HP800_THREAD_STATE,
+			  TRACE_FLAVOR,
 			  state,
-			  HP800_THREAD_STATE_COUNT);
+			  TRACE_FLAVOR_SIZE);
   
   if (ret != KERN_SUCCESS)
     warning ("store_inferior_registers (set): %s",

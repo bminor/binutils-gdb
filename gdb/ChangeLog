@@ -1,3 +1,8 @@
+Wed Jun 21 13:24:41 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppam3-nat.c: Change HP800_THREAD_STATE to TRACE_FLAVOR and
+	HP800_THREAD_STATE_COUNT to TRACE_FLAVOR_SIZE.
+
 Wed Jun 21 05:57:56 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* monitor.c: Turn on caching.
