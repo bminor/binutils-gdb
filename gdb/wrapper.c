@@ -90,7 +90,7 @@ wrap_parse_exp_1 (char *argptr)
 }
 
 int
-gdb_evaluate_expression (struct expression *exp, value_ptr *value)
+gdb_evaluate_expression (struct expression *exp, struct value **value)
 {
   struct gdb_wrapper_arguments args;
   args.args[0].pointer = exp;
@@ -102,7 +102,7 @@ gdb_evaluate_expression (struct expression *exp, value_ptr *value)
       return 0;
     }
 
-  *value = (value_ptr) args.result.pointer;
+  *value = (struct value *) args.result.pointer;
   return 1;
 }
 
@@ -117,7 +117,7 @@ wrap_evaluate_expression (char *a)
 }
 
 int
-gdb_value_fetch_lazy (value_ptr value)
+gdb_value_fetch_lazy (struct value *value)
 {
   struct gdb_wrapper_arguments args;
 
@@ -131,12 +131,12 @@ wrap_value_fetch_lazy (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
 
-  value_fetch_lazy ((value_ptr) (args)->args[0].pointer);
+  value_fetch_lazy ((struct value *) (args)->args[0].pointer);
   return 1;
 }
 
 int
-gdb_value_equal (value_ptr val1, value_ptr val2, int *result)
+gdb_value_equal (struct value *val1, struct value *val2, int *result)
 {
   struct gdb_wrapper_arguments args;
 
@@ -158,17 +158,18 @@ static int
 wrap_value_equal (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
-  value_ptr val1, val2;
+  struct value *val1;
+  struct value *val2;
 
-  val1 = (value_ptr) (args)->args[0].pointer;
-  val2 = (value_ptr) (args)->args[1].pointer;
+  val1 = (struct value *) (args)->args[0].pointer;
+  val2 = (struct value *) (args)->args[1].pointer;
 
   (args)->result.integer = value_equal (val1, val2);
   return 1;
 }
 
 int
-gdb_value_assign (value_ptr val1, value_ptr val2, value_ptr *result)
+gdb_value_assign (struct value *val1, struct value *val2, struct value **result)
 {
   struct gdb_wrapper_arguments args;
 
@@ -182,7 +183,7 @@ gdb_value_assign (value_ptr val1, value_ptr val2, value_ptr *result)
       return 0;
     }
 
-  *result = (value_ptr) args.result.pointer;
+  *result = (struct value *) args.result.pointer;
   return 1;
 }
 
@@ -190,17 +191,18 @@ static int
 wrap_value_assign (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
-  value_ptr val1, val2;
+  struct value *val1;
+  struct value *val2;
 
-  val1 = (value_ptr) (args)->args[0].pointer;
-  val2 = (value_ptr) (args)->args[1].pointer;
+  val1 = (struct value *) (args)->args[0].pointer;
+  val2 = (struct value *) (args)->args[1].pointer;
 
   (args)->result.pointer = value_assign (val1, val2);
   return 1;
 }
 
 int
-gdb_value_subscript (value_ptr val1, value_ptr val2, value_ptr *rval)
+gdb_value_subscript (struct value *val1, struct value *val2, struct value **rval)
 {
   struct gdb_wrapper_arguments args;
 
@@ -214,7 +216,7 @@ gdb_value_subscript (value_ptr val1, value_ptr val2, value_ptr *rval)
       return 0;
     }
 
-  *rval = (value_ptr) args.result.pointer;
+  *rval = (struct value *) args.result.pointer;
   return 1;
 }
 
@@ -222,17 +224,18 @@ static int
 wrap_value_subscript (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
-  value_ptr val1, val2;
+  struct value *val1;
+  struct value *val2;
 
-  val1 = (value_ptr) (args)->args[0].pointer;
-  val2 = (value_ptr) (args)->args[1].pointer;
+  val1 = (struct value *) (args)->args[0].pointer;
+  val2 = (struct value *) (args)->args[1].pointer;
 
   (args)->result.pointer = value_subscript (val1, val2);
   return 1;
 }
 
 int
-gdb_value_ind (value_ptr val, value_ptr *rval)
+gdb_value_ind (struct value *val, struct value **rval)
 {
   struct gdb_wrapper_arguments args;
 
@@ -245,7 +248,7 @@ gdb_value_ind (value_ptr val, value_ptr *rval)
       return 0;
     }
 
-  *rval = (value_ptr) args.result.pointer;
+  *rval = (struct value *) args.result.pointer;
   return 1;
 }
 
@@ -253,9 +256,9 @@ static int
 wrap_value_ind (char *opaque_arg)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) opaque_arg;
-  value_ptr val;
+  struct value *val;
 
-  val = (value_ptr) (args)->args[0].pointer;
+  val = (struct value *) (args)->args[0].pointer;
   (args)->result.pointer = value_ind (val);
   return 1;
 }

@@ -1,5 +1,11 @@
 2001-10-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* wrapper.h (struct value): Add opaque declaration.  Replace
+	value_ptr with ``struct value *''.
+	* wrapper.c: Replace value_ptr with ``struct value *''.
+
+2001-10-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* alpha-nat.c: Include <alpha/coreregs.h> instead of
 	<machine/reg.h>.
 	(fetch_osf_core_registers): Define core_reg_mapping in a way that

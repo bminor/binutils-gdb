@@ -19,23 +19,25 @@
 #ifndef WRAPPER_H
 #define WRAPPER_H 1
 
+struct value;
+
 /* Use this struct to pass arguments to wrapper routines. */
 struct gdb_wrapper_arguments;
 
 extern int gdb_parse_exp_1 (char **, struct block *,
 			    int, struct expression **);
 
-extern int gdb_evaluate_expression (struct expression *, value_ptr *);
+extern int gdb_evaluate_expression (struct expression *, struct value **);
 
-extern int gdb_value_fetch_lazy (value_ptr);
+extern int gdb_value_fetch_lazy (struct value *);
 
-extern int gdb_value_equal (value_ptr, value_ptr, int *);
+extern int gdb_value_equal (struct value *, struct value *, int *);
 
-extern int gdb_value_assign (value_ptr, value_ptr, value_ptr *);
+extern int gdb_value_assign (struct value *, struct value *, struct value **);
 
-extern int gdb_value_subscript (value_ptr, value_ptr, value_ptr *);
+extern int gdb_value_subscript (struct value *, struct value *, struct value **);
 
-extern int gdb_value_ind (value_ptr val, value_ptr * rval);
+extern int gdb_value_ind (struct value *val, struct value ** rval);
 
 extern int gdb_parse_and_eval_type (char *, int, struct type **);
 
