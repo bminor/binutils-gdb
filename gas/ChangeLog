@@ -1,3 +1,10 @@
+Mon Mar 30 11:22:08 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h (FWait): Define.
+	* config/tc-i386.c (md_assemble): Emit fwait prefix before any
+	other prefixes.  Check FWait flag in opcode table to see which
+	instructions require an fwait prefix.
+
 Mon Mar 30 10:12:00 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* stabs.c (get_stab_string_offset): Always create a stab string
