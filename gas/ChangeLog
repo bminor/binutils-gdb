@@ -1,3 +1,12 @@
+Thu Oct 26 19:18:27 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* doc/as.texinfo (Align): Mention SH.
+	* doc/c-m68k.texi (M68K-Directives, .even): Describe behavior, not
+	.align value.
+	* doc/c-z8k.texi (Z8000 Directives, global): Fix minor typo.
+	(Z8000 Directives, even): Don't give numeric align value, instead
+	explain behavior.
+
 Thu Oct 26 11:45:03 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
 
 	* tc-arm.c (do_ldst): Assemble ldr/str r0, [r1] as a pre-increment
