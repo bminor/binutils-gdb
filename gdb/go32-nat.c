@@ -47,6 +47,7 @@
 #undef disable
 #include <dpmi.h>
 #include <go32.h>
+#include <sys/farptr.h>
 #include <debug/v2load.h>
 #include <debug/dbgcom.h>
 #if __DJGPP_MINOR__ > 2
@@ -1294,6 +1295,7 @@ static int
 read_memory_region (unsigned long addr, void *dest, size_t len)
 {
   unsigned long dos_ds_limit = __dpmi_get_segment_limit (_dos_ds);
+  int retval = 1;
 
   /* For the low memory, we can simply use _dos_ds.  */
   if (addr <= dos_ds_limit - len)
@@ -1304,14 +1306,40 @@ read_memory_region (unsigned long addr, void *dest, size_t len)
 	 be able to access that memory.  */
       int sel = __dpmi_allocate_ldt_descriptors (1);
 
-      if (sel <= 0
-	  || __dpmi_set_segment_base_address (sel, addr) == -1
-	  || __dpmi_set_segment_limit (sel, len - 1) == -1)
-	return 0;
-      movedata (sel, 0, _my_ds (), (unsigned)dest, len);
-      __dpmi_free_ldt_descriptor (sel);
+      if (sel <= 0)
+	retval = 0;
+      else
+	{
+	  int access_rights = __dpmi_get_descriptor_access_rights (sel);
+	  size_t segment_limit = len - 1;
+
+	  /* Make sure the crucial bits in the descriptor access
+	     rights are set correctly.  Some DPMI providers might barf
+	     if we set the segment limit to something that is not an
+	     integral multiple of 4KB pages if the granularity bit is
+	     not set to byte-granular, even though the DPMI spec says
+	     it's the host's responsibility to set that bit correctly.  */
+	  if (len > 1024 * 1024)
+	    {
+	      access_rights |= 0x8000;
+	      /* Page-granular segments should have the low 12 bits of
+		 the limit set.  */
+	      segment_limit |= 0xfff;
+	    }
+	  else
+	    access_rights &= ~0x8000;
+
+	  if (__dpmi_set_segment_base_address (sel, addr) != -1
+	      && __dpmi_set_descriptor_access_rights (sel, access_rights) != -1
+	      && __dpmi_set_segment_limit (sel, segment_limit) != -1)
+	    movedata (sel, 0, _my_ds (), (unsigned)dest, len);
+	  else
+	    retval = 0;
+
+	  __dpmi_free_ldt_descriptor (sel);
+	}
     }
-  return 1;
+  return retval;
 }
 
 /* Get a segment descriptor stored at index IDX in the descriptor
@@ -1603,7 +1631,7 @@ go32_sidt (char *arg, int from_tty)
 	{
 	  idt_entry = parse_and_eval_long (arg);
 	  if (idt_entry < 0)
-	    error ("Invalid (negative) IDT entry 0x%03x.", idt_entry);
+	    error ("Invalid (negative) IDT entry %d.", idt_entry);
 	}
     }
 
@@ -1626,6 +1654,243 @@ go32_sidt (char *arg, int from_tty)
 
       for (i = 0; i < max_entry; i++)
 	display_descriptor (1, idtr.base, i, 0);
+    }
+}
+
+/* Cached linear address of the base of the page directory.  For
+   now, available only under CWSDPMI.  Code based on ideas and
+   suggestions from Charles Sandmann <sandmann@clio.rice.edu>.  */
+static unsigned long pdbr;
+
+static unsigned long
+get_cr3 (void)
+{
+  unsigned offset;
+  unsigned taskreg;
+  unsigned long taskbase, cr3;
+  struct dtr_reg gdtr;
+
+  if (pdbr > 0 && pdbr <= 0xfffff)
+    return pdbr;
+
+  /* Get the linear address of GDT and the Task Register.  */
+  __asm__ __volatile__ ("sgdt   %0" : "=m" (gdtr) : /* no inputs */ );
+  __asm__ __volatile__ ("str    %0" : "=m" (taskreg) : /* no inputs */ );
+
+  /* Task Register is a segment selector for the TSS of the current
+     task.  Therefore, it can be used as an index into the GDT to get
+     at the segment descriptor for the TSS.  To get the index, reset
+     the low 3 bits of the selector (which give the CPL).  Add 2 to the
+     offset to point to the 3 low bytes of the base address.  */
+  offset = gdtr.base + (taskreg & 0xfff8) + 2;
+
+
+  /* CWSDPMI's task base is always under the 1MB mark.  */
+  if (offset > 0xfffff)
+    return 0;
+
+  _farsetsel (_dos_ds);
+  taskbase  = _farnspeekl (offset) & 0xffffffU;
+  taskbase += _farnspeekl (offset + 2) & 0xff000000U;
+  if (taskbase > 0xfffff)
+    return 0;
+
+  /* CR3 (a.k.a. PDBR, the Page Directory Base Register) is stored at
+     offset 1Ch in the TSS.  */
+  cr3 = _farnspeekl (taskbase + 0x1c) & ~0xfff;
+  if (cr3 > 0xfffff)
+    {
+      /* The Page Directory is in UMBs.  In that case, CWSDPMI puts
+	 the first Page Table right below the Page Directory.  Thus,
+	 the first Page Table's entry for its own address and the Page
+	 Directory entry for that Page Table will hold the same
+	 physical address.  The loop below searches the entire UMB
+	 range of addresses for such an occurence.  */
+      unsigned long addr, pte_idx;
+
+      for (addr = 0xb0000, pte_idx = 0xb0;
+	   pte_idx < 0xff;
+	   addr += 0x1000, pte_idx++)
+	{
+	  if (((_farnspeekl (addr + 4 * pte_idx) & 0xfffff027) ==
+	       (_farnspeekl (addr + 0x1000) & 0xfffff027))
+	      && ((_farnspeekl (addr + 4 * pte_idx + 4) & 0xfffff000) == cr3))
+	    {
+	      cr3 = addr + 0x1000;
+	      break;
+	    }
+	}
+
+      if (cr3 > 0xfffff)
+	cr3 = 0;
+    }
+
+  return cr3;
+}
+
+/* Return the N'th Page Directory entry.  */
+static unsigned long
+get_pde (int n)
+{
+  unsigned long pde = 0;
+
+  if (pdbr && n >= 0 && n < 1024)
+    {
+      pde = _farpeekl (_dos_ds, pdbr + 4*n);
+    }
+  return pde;
+}
+
+/* Return the N'th entry of the Page Table whose Page Directory entry
+   is PDE.  */
+static unsigned long
+get_pte (unsigned long pde, int n)
+{
+  unsigned long pte = 0;
+
+  /* pde & 0x80 tests the 4MB page bit.  We don't support 4MB
+     page tables, for now.  */
+  if ((pde & 1) && !(pde & 0x80) && n >= 0 && n < 1024)
+    {
+      pde &= ~0xfff;	/* clear non-address bits */
+      pte = _farpeekl (_dos_ds, pde + 4*n);
+    }
+  return pte;
+}
+
+/* Display a Page Directory or Page Table entry.  IS_DIR, if non-zero,
+   says this is a Page Directory entry.  If FORCE is non-zero, display
+   the entry even if its Present flag is off.  OFF is the offset of the
+   address from the page's base address.  */
+static void
+display_ptable_entry (unsigned long entry, int is_dir, int force, unsigned off)
+{
+  if ((entry & 1) != 0)
+    {
+      printf_filtered ("Base=0x%05lx000", entry >> 12);
+      if ((entry & 0x100) && !is_dir)
+	puts_filtered (" Global");
+      if ((entry & 0x40) && !is_dir)
+	puts_filtered (" Dirty");
+      printf_filtered (" %sAcc.", (entry & 0x20) ? "" : "Not-");
+      printf_filtered (" %sCached", (entry & 0x10) ? "" : "Not-");
+      printf_filtered (" Write-%s", (entry & 8) ? "Thru" : "Back");
+      printf_filtered (" %s", (entry & 4) ? "Usr" : "Sup");
+      printf_filtered (" Read-%s", (entry & 2) ? "Write" : "Only");
+      if (off)
+	printf_filtered (" +0x%x", off);
+      puts_filtered ("\n");
+    }
+  else if (force)
+    printf_filtered ("Page%s not present or not supported; value=0x%lx.\n",
+		     is_dir ? " Table" : "", entry >> 1);
+}
+
+static void
+go32_pde (char *arg, int from_tty)
+{
+  long pde_idx = -1, i;
+
+  if (arg && *arg)
+    {
+      while (*arg && isspace(*arg))
+	arg++;
+
+      if (*arg)
+	{
+	  pde_idx = parse_and_eval_long (arg);
+	  if (pde_idx < 0 || pde_idx >= 1024)
+	    error ("Entry %ld is outside valid limits [0..1023].", pde_idx);
+	}
+    }
+
+  pdbr = get_cr3 ();
+  if (!pdbr)
+    puts_filtered ("Access to Page Directories is not supported on this system.\n");
+  else if (pde_idx >= 0)
+    display_ptable_entry (get_pde (pde_idx), 1, 1, 0);
+  else
+    for (i = 0; i < 1024; i++)
+      display_ptable_entry (get_pde (i), 1, 0, 0);
+}
+
+/* A helper function to display entries in a Page Table pointed to by
+   the N'th entry in the Page Directory.  If FORCE is non-zero, say
+   something even if the Page Table is not accessible.  */
+static void
+display_page_table (long n, int force)
+{
+  unsigned long pde = get_pde (n);
+
+  if ((pde & 1) != 0)
+    {
+      int i;
+
+      printf_filtered ("Page Table pointed to by Page Directory entry 0x%lx:\n", n);
+      for (i = 0; i < 1024; i++)
+	display_ptable_entry (get_pte (pde, i), 0, 0, 0);
+      puts_filtered ("\n");
+    }
+  else if (force)
+    printf_filtered ("Page Table not present; value=0x%lx.\n", pde >> 1);
+}
+
+static void
+go32_pte (char *arg, int from_tty)
+{
+  long pde_idx = -1, i;
+
+  if (arg && *arg)
+    {
+      while (*arg && isspace(*arg))
+	arg++;
+
+      if (*arg)
+	{
+	  pde_idx = parse_and_eval_long (arg);
+	  if (pde_idx < 0 || pde_idx >= 1024)
+	    error ("Entry %d is outside valid limits [0..1023].", pde_idx);
+	}
+    }
+
+  pdbr = get_cr3 ();
+  if (!pdbr)
+    puts_filtered ("Access to Page Tables is not supported on this system.\n");
+  else if (pde_idx >= 0)
+    display_page_table (pde_idx, 1);
+  else
+    for (i = 0; i < 1024; i++)
+      display_page_table (i, 0);
+}
+
+static void
+go32_pte_for_address (char *arg, int from_tty)
+{
+  CORE_ADDR addr = 0, i;
+
+  if (arg && *arg)
+    {
+      while (*arg && isspace(*arg))
+	arg++;
+
+      if (*arg)
+	addr = parse_and_eval_address (arg);
+    }
+  if (!addr)
+    error_no_arg ("linear address");
+
+  pdbr = get_cr3 ();
+  if (!pdbr)
+    puts_filtered ("Access to Page Tables is not supported on this system.\n");
+  else
+    {
+      int pde_idx = (addr >> 22) & 0x3ff;
+      int pte_idx = (addr >> 12) & 0x3ff;
+      unsigned offs = addr & 0xfff;
+
+      printf_filtered ("Page Table entry for address 0x%llx:\n",
+		       (unsigned long long)addr);
+      display_ptable_entry (get_pte (get_pde (pde_idx), pte_idx), 0, 1, offs);
     }
 }
 
@@ -1661,6 +1926,25 @@ _initialize_go32_nat (void)
   add_cmd ("idt", class_info, go32_sidt,
 	   "Display entries in the IDT (Interrupt Descriptor Table).\n"
 	   "Entry number (an expression) as an argument means display only that entry.",
+	   &info_dos_cmdlist);
+  add_cmd ("pde", class_info, go32_pde,
+	   "Display entries in the Page Directory.\n"
+	   "Entry number (an expression) as an argument means display only that entry.",
+	   &info_dos_cmdlist);
+  add_cmd ("pte", class_info, go32_pte,
+	   "Display entries in Page Tables.\n"
+	   "Entry number (an expression) as an argument means display only entries\n"
+	   "from the Page Table pointed to by the specified Page Directory entry.",
+	   &info_dos_cmdlist);
+  add_cmd ("address-pte", class_info, go32_pte_for_address,
+	   "Display a Page Table entry for a linear address.\n"
+	   "The address argument must be a linear address, after adding to\n"
+	   "it the base address of the appropriate segment.\n"
+	   "The base address of variables and functions in the debuggee's data\n"
+	   "or code segment is stored in the variable __djgpp_base_address,\n"
+	   "so use `__djgpp_base_address + (char *)&var' as the argument.\n"
+	   "For other segments, look up their base address in the output of\n"
+	   "the `info dos ldt' command.",
 	   &info_dos_cmdlist);
 }
 

@@ -1,3 +1,13 @@
+2001-07-23  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (read_memory_region): Set the granularity bit of the
+	allocated segment according to its size, and adjust the limit to
+	be page-aligned if the segment is page-granular.
+
+	* (get_cr3, get_pde, get_pte, display_ptable_entry, go32_pde) 
+	(display_page_table, go32_pte, go32_pte_for_address): New functions.
+	(_initialize_go32_nat): Initialize and document them.
+
 2001-07-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386gnu-nat.c: Include "i387-nat.h".

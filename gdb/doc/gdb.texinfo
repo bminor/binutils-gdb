@@ -10741,6 +10741,7 @@ configurations.
 @menu
 * HP-UX::                       HP-UX
 * SVR4 Process Information::    SVR4 process information
+* DJGPP Native::                Features specific to the DJGPP port
 @end menu
 
 @node HP-UX
@@ -10793,6 +10794,145 @@ received.
 
 @item info proc all
 Show all the above information about the process.
+@end table
+
+@node DJGPP Native
+@subsection Features for Debugging @sc{djgpp} Programs
+@cindex @sc{djgpp} debugging
+@cindex native @sc{djgpp} debugging
+@cindex MS-DOS-specific commands
+
+@sc{djgpp} is the port of @sc{gnu} development tools to MS-DOS and
+MS-Windows.  @sc{djgpp} programs are 32-bit protected-mode programs
+that use the @dfn{DPMI} (DOS Protected-Mode Interface) API to run on
+top of real-mode DOS systems and their emulations.
+
+@value{GDBN} supports native debugging of @sc{djgpp} programs, and
+defines a few commands specific to the @sc{djgpp} port.  This
+subsection describes those commands.
+
+@table @code
+@kindex info dos
+@item info dos
+This is a prefix of @sc{djgpp}-specific commands which print
+information about the target system and important OS structures.
+
+@kindex sysinfo
+@cindex MS-DOS system info
+@cindex free memory information (MS-DOS)
+@item info dos sysinfo
+This command displays assorted information about the underlying
+platform: the CPU type and features, the OS version and flavor, the
+DPMI version, and the available conventional and DPMI memory.
+
+@cindex GDT
+@cindex LDT
+@cindex IDT
+@cindex segment descriptor tables
+@cindex descriptor tables display
+@item info dos gdt
+@itemx info dos ldt
+@itemx info dos idt
+These 3 commands display entries from, respectively, Global, Local,
+and Interrupt Descriptor Tables (GDT, LDT, and IDT).  The descriptor
+tables are data structures which store a descriptor for each segment
+that is currently in use.  The segment's selector is an index into a
+descriptor table; the table entry for that index holds the
+descriptor's base address and limit, and its attributes and access
+rights.
+
+A typical @sc{djgpp} program uses 3 segments: a code segment, a data
+segment (used for both data and the stack), and a DOS segment (which
+allows access to DOS/BIOS data structures and absolute addresses in
+conventional memory).  However, the DPMI host will usually define
+additional segments in order to support the DPMI environment.
+
+@cindex garbled pointers
+These commands allow to display entries from the descriptor tables.
+Without an argument, all entries from the specified table are
+displayed.  An argument, which should be an integer expression, means
+display a single entry whose index is given by the argument.  For
+example, here's a convenient way to display information about the
+debugged program's data segment:
+
+@smallexample
+(@value{GDBP}) info dos ldt $ds
+0x13f: base=0x11970000 limit=0x0009ffff 32-Bit Data (Read/Write, Exp-up)
+@end smallexample
+
+@noindent
+This comes in handy when you want to see whether a pointer is outside
+the data segment's limit (i.e.@: @dfn{garbled}).
+
+@cindex page tables display (MS-DOS)
+@item info dos pde
+@itemx info dos pte
+These two commands display entries from, respectively, the Page
+Directory and the Page Tables.  Page Directories and Page Tables are
+data structures which control how virtual memory addresses are mapped
+into physical addresses.  A Page Table includes an entry for every
+page of memory that is mapped into the program's address space; there
+may be several Page Tables, each one holding up to 4096 entries.  A
+Page Directory has up to 4096 entries, one each for every Page Table
+that is currently in use.
+
+Without an argument, @kbd{info dos pde} displays the entire Page
+Directory, and @kbd{info dos pte} displays all the entries in all of
+the Page Tables.  An argument, an integer expression, given to the
+@kbd{info dos pde} command means display only that entry from the Page
+Directory table.  An argument given to the @kbd{info dos pte} command
+means display entries from a single Page Table, the one pointed to by
+the specified entry in the Page Directory.
+
+These commands are useful when your program uses @dfn{DMA} (Direct
+Memory Access), which needs physical addresses to program the DMA
+controller.
+
+These commands are supported only with some DPMI servers.
+
+@cindex physical address from linear address
+@item info dos address-pte
+This command displays the Page Table entry for a specified linear
+address.  The argument linear address should already have the
+appropriate segment's base address added to it, because this command
+accepts addresses which may belong to @emph{any} segment.  For
+example, here's how to display the Page Table entry for the page where
+the variable @code{i} is stored:
+
+@smallexample
+(@value{GDBP}) info dos address-pte __djgpp_base_address + (char *)&i
+Page Table entry for address 0x11a00d30:
+Base=0x02698000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0xd30
+@end smallexample
+
+@noindent
+This says that @code{i} is stored at offset @code{0xd30} from the page
+whose physical base address is @code{0x02698000}, and prints all the
+attributes of that page.
+
+Note that you must cast the addresses of variables to a @code{char *},
+since otherwise the value of @code{__djgpp_base_address}, the base
+address of all variables and functions in a @sc{djgpp} program, will
+be added using the rules of C pointer arithmetics: if @code{i} is
+declared an @code{int}, @value{GDBN} will add 4 times the value of
+@code{__djgpp_base_address} to the address of @code{i}.
+
+Here's another example, it displays the Page Table entry for the
+transfer buffer:
+
+@smallexample
+(@value{GDBP}) info dos address-pte *((unsigned *)&_go32_info_block + 3)
+Page Table entry for address 0x29110:
+Base=0x00029000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0x110
+@end smallexample
+
+@noindent
+(The @code{+ 3} offset is because the transfer buffer's address is the
+3rd member of the @code{_go32_info_block} structure.)  The output of
+this command clearly shows that addresses in conventional memory are
+mapped 1:1, i.e.@: the physical and linear addresses are identical.
+
+This command is supported only with some DPMI servers.
 @end table
 
 @node Embedded OS
