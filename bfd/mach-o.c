@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1657,7 +1657,7 @@ bfd_mach_o_scan (abfd, header, mdata)
     }
 
   if (bfd_mach_o_scan_start_address (abfd) < 0)
-    ;
+    return -1;
 
   bfd_mach_o_flatten_sections (abfd);
   return 0;

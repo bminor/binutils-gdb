@@ -369,132 +369,20 @@ typedef struct runtime_pdr {
 #define cbRPDR sizeof (RPDR)
 #define rpdNil ((pRPDR) 0)
 
-static struct bfd_hash_entry *mips_elf_link_hash_newfunc
-  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
-static void ecoff_swap_rpdr_out
-  (bfd *, const RPDR *, struct rpdr_ext *);
-static bfd_boolean mips_elf_create_procedure_table
-  (void *, bfd *, struct bfd_link_info *, asection *,
-   struct ecoff_debug_info *);
-static bfd_boolean mips_elf_check_mips16_stubs
-  (struct mips_elf_link_hash_entry *, void *);
-static void bfd_mips_elf32_swap_gptab_in
-  (bfd *, const Elf32_External_gptab *, Elf32_gptab *);
-static void bfd_mips_elf32_swap_gptab_out
-  (bfd *, const Elf32_gptab *, Elf32_External_gptab *);
-static void bfd_elf32_swap_compact_rel_out
-  (bfd *, const Elf32_compact_rel *, Elf32_External_compact_rel *);
-static void bfd_elf32_swap_crinfo_out
-  (bfd *, const Elf32_crinfo *, Elf32_External_crinfo *);
-static int sort_dynamic_relocs
-  (const void *, const void *);
-static int sort_dynamic_relocs_64
-  (const void *, const void *);
-static bfd_boolean mips_elf_output_extsym
-  (struct mips_elf_link_hash_entry *, void *);
-static int gptab_compare
-  (const void *, const void *);
-static asection *mips_elf_rel_dyn_section
-  (bfd *, bfd_boolean);
-static asection *mips_elf_got_section
-  (bfd *, bfd_boolean);
-static struct mips_got_info *mips_elf_got_info
-  (bfd *, asection **);
-static bfd_vma mips_elf_local_got_index
-  (bfd *, bfd *, struct bfd_link_info *, bfd_vma);
-static bfd_vma mips_elf_global_got_index
-  (bfd *, bfd *, struct elf_link_hash_entry *);
-static bfd_vma mips_elf_got_page
-  (bfd *, bfd *, struct bfd_link_info *, bfd_vma, bfd_vma *);
-static bfd_vma mips_elf_got16_entry
-  (bfd *, bfd *, struct bfd_link_info *, bfd_vma, bfd_boolean);
-static bfd_vma mips_elf_got_offset_from_index
-  (bfd *, bfd *, bfd *, bfd_vma);
 static struct mips_got_entry *mips_elf_create_local_got_entry
   (bfd *, bfd *, struct mips_got_info *, asection *, bfd_vma);
-static bfd_boolean mips_elf_sort_hash_table
-  (struct bfd_link_info *, unsigned long);
 static bfd_boolean mips_elf_sort_hash_table_f
   (struct mips_elf_link_hash_entry *, void *);
-static bfd_boolean mips_elf_record_local_got_symbol
-  (bfd *, long, bfd_vma, struct mips_got_info *);
-static bfd_boolean mips_elf_record_global_got_symbol
-  (struct elf_link_hash_entry *, bfd *, struct bfd_link_info *,
-   struct mips_got_info *);
-static const Elf_Internal_Rela *mips_elf_next_relocation
-  (bfd *, unsigned int, const Elf_Internal_Rela *, const Elf_Internal_Rela *);
-static bfd_boolean mips_elf_local_relocation_p
-  (bfd *, const Elf_Internal_Rela *, asection **, bfd_boolean);
-static bfd_boolean mips_elf_overflow_p
-  (bfd_vma, int);
 static bfd_vma mips_elf_high
   (bfd_vma);
-static bfd_vma mips_elf_higher
-  (bfd_vma);
-static bfd_vma mips_elf_highest
-  (bfd_vma);
-static bfd_boolean mips_elf_create_compact_rel_section
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean mips_elf_create_got_section
-  (bfd *, struct bfd_link_info *, bfd_boolean);
-static bfd_reloc_status_type mips_elf_calculate_relocation
-  (bfd *, bfd *, asection *, struct bfd_link_info *,
-   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
-   Elf_Internal_Sym *, asection **, bfd_vma *, const char **,
-   bfd_boolean *, bfd_boolean);
-static bfd_vma mips_elf_obtain_contents
-  (reloc_howto_type *, const Elf_Internal_Rela *, bfd *, bfd_byte *);
-static bfd_boolean mips_elf_perform_relocation
-  (struct bfd_link_info *, reloc_howto_type *, const Elf_Internal_Rela *,
-   bfd_vma, bfd *, asection *, bfd_byte *, bfd_boolean);
 static bfd_boolean mips_elf_stub_section_p
   (bfd *, asection *);
-static void mips_elf_allocate_dynamic_relocations
-  (bfd *, unsigned int);
 static bfd_boolean mips_elf_create_dynamic_relocation
   (bfd *, struct bfd_link_info *, const Elf_Internal_Rela *,
    struct mips_elf_link_hash_entry *, asection *, bfd_vma,
    bfd_vma *, asection *);
-static void mips_set_isa_flags
-  (bfd *);
-static INLINE char *elf_mips_abi_name
-  (bfd *);
-static void mips_elf_irix6_finish_dynamic_symbol
-  (bfd *, const char *, Elf_Internal_Sym *);
-static bfd_boolean mips_mach_extends_p
-  (unsigned long, unsigned long);
-static bfd_boolean mips_32bit_flags_p
-  (flagword);
-static INLINE hashval_t mips_elf_hash_bfd_vma
-  (bfd_vma);
 static hashval_t mips_elf_got_entry_hash
   (const void *);
-static int mips_elf_got_entry_eq
-  (const void *, const void *);
-
-static bfd_boolean mips_elf_multi_got
-  (bfd *, struct bfd_link_info *, struct mips_got_info *,
-   asection *, bfd_size_type);
-static hashval_t mips_elf_multi_got_entry_hash
-  (const void *);
-static int mips_elf_multi_got_entry_eq
-  (const void *, const void *);
-static hashval_t mips_elf_bfd2got_entry_hash
-  (const void *);
-static int mips_elf_bfd2got_entry_eq
-  (const void *, const void *);
-static int mips_elf_make_got_per_bfd
-  (void **, void *);
-static int mips_elf_merge_gots
-  (void **, void *);
-static int mips_elf_set_global_got_offset
-  (void **, void *);
-static int mips_elf_set_no_stub
-  (void **, void *);
-static int mips_elf_resolve_final_got_entry
-  (void **, void *);
-static void mips_elf_resolve_final_got_entries
-  (struct mips_got_info *);
 static bfd_vma mips_elf_adjust_gp
   (bfd *, struct mips_got_info *, bfd *);
 static struct mips_got_info *mips_elf_got_for_ibfd
@@ -1607,8 +1495,10 @@ sort_dynamic_relocs (const void *arg1, const void *arg2)
 /* Like sort_dynamic_relocs, but used for elf64 relocations.  */
 
 static int
-sort_dynamic_relocs_64 (const void *arg1, const void *arg2)
+sort_dynamic_relocs_64 (const void *arg1 ATTRIBUTE_UNUSED,
+			const void *arg2 ATTRIBUTE_UNUSED)
 {
+#ifdef BFD64
   Elf_Internal_Rela int_reloc1[3];
   Elf_Internal_Rela int_reloc2[3];
 
@@ -1619,6 +1509,9 @@ sort_dynamic_relocs_64 (const void *arg1, const void *arg2)
 
   return (ELF64_R_SYM (int_reloc1[0].r_info)
 	  - ELF64_R_SYM (int_reloc2[0].r_info));
+#else
+  abort ();
+#endif
 }
 
 

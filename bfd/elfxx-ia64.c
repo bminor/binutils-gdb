@@ -676,32 +676,39 @@ bfd_elfNN_ia64_after_parse (int itanium)
 static void
 elfNN_ia64_relax_brl (bfd_byte *contents, bfd_vma off)
 {
-  int template;
+  unsigned int template, t0, t1, t2, t3;
   bfd_byte *hit_addr;
-  bfd_vma t0, t1, i0, i1, i2;
 
   hit_addr = (bfd_byte *) (contents + off);
   hit_addr -= (long) hit_addr & 0x3;
-  t0 = bfd_getl64 (hit_addr);
-  t1 = bfd_getl64 (hit_addr + 8);
-
-  /* Keep the instruction in slot 0. */
-  i0 = (t0 >> 5) & 0x1ffffffffffLL;
-  /* Use nop.b for slot 1. */
-  i1 = 0x4000000000LL;
-  /* For slot 2, turn brl into br by masking out bit 40.  */
-  i2 = (t1 >> 23) & 0x0ffffffffffLL;
+  t0 = bfd_getl32 (hit_addr + 0);
+  t1 = bfd_getl32 (hit_addr + 4);
+  t2 = bfd_getl32 (hit_addr + 8);
+  t3 = bfd_getl32 (hit_addr + 12);
 
   /* Turn a MLX bundle into a MBB bundle with the same stop-bit
      variety.  */
   template = 0x12;
-  if ((t0 & 0x1fLL) == 5)
+  if ((t0 & 0x1f) == 5)
     template += 1;
-  t0 = (i1 << 46) | (i0 << 5) | template;
-  t1 = (i2 << 23) | (i1 >> 18);
 
-  bfd_putl64 (t0, hit_addr);
-  bfd_putl64 (t1, hit_addr + 8);
+  /* Keep the instruction in slot 0. */
+  t0 &= 0xffffffe0;
+  t1 &= 0x3fff;
+
+  t0 |= template;
+
+  /* For slot 2, turn brl into br by masking out bit 40.  */
+  t2 &= 0xff800000;
+  t3 &= 0x7fffffff;
+
+  /* Use nop.b for slot 1. */
+  t2 |= 0x100000;
+
+  bfd_putl32 (t0, hit_addr);
+  bfd_putl32 (t1, hit_addr + 4);
+  bfd_putl32 (t2, hit_addr + 8);
+  bfd_putl32 (t3, hit_addr + 12);
 }
 
 /* These functions do relaxation for IA-64 ELF.  */
@@ -957,7 +964,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 		  elfNN_ia64_relax_brl (contents, roff);
 
 		  irel->r_info
-		    = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
+		    = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
 				    R_IA64_PCREL21B);
 
 		  /* If the original relocation offset points to slot

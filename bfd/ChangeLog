@@ -4,6 +4,11 @@
 	* elf32-frv.c (frvfdpic_relocs_info_hash): Likewise.
 	* pef.c (bfd_pef_scan): Don't ignore return value of
 	bfd_pef_scan_start_address.
+	* mach-o.c (bfd_mach_o_scan): Don't ignore return value of
+	bfd_mach_o_scan_start_address.
+	* elfxx-ia64.c (elfNN_ia64_relax_brl): Rewrite for 32-bit bfd_vma.
+	* elfxx-mips.c: Remove unnecessary prototypes.
+	(sort_dynamic_relocs_64): Abort if not BFD64.
 
 2005-02-16  Alan Modra  <amodra@bigpond.net.au>
 
