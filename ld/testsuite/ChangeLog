@@ -1,3 +1,8 @@
+2003-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfvers/vers.exp (test_ldfail): Add "-Wl," to pass the
+	linker option from gcc.
+
 2003-10-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexetoc.d: Correct.

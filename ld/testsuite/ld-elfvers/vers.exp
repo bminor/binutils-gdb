@@ -613,7 +613,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
     if [string match "" $mapfile] then {
 	set script_arg ""
     } else {
-	set script_arg "$script $srcdir/$subdir/$mapfile"
+	set script_arg "-Wl,$script $srcdir/$subdir/$mapfile"
     }
 
     if {![ld_simple_link $CC $tmpdir/$execname "$tmpdir/$execname.o $other_lib $script_arg"]}     {
