@@ -1,3 +1,9 @@
+Mon Dec  1 20:24:18 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* coff-sh.c (sh_coff_howtos): Add R_SH_SWITCH8 entry.
+	(get_symbol_value): Handle R_SH_SWITCH8.
+	(sh_relax_delete_bytes): Likewise.
+
 Wed Nov 26 14:13:34 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (TARGET_UNDERSCORE): Changed to match definition in

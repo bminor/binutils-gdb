@@ -1,3 +1,16 @@
+Mon Dec  1 20:24:18 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* config/tc-sh.c (SWITCH_TABLE_CONS): Handle (fix)->fx_size == 1.
+	(SWITCH_TABLE): Handle BFD_RELOC_8.
+	(md_apply_fix): #ifndef BFD_ASSEMBLER code: Handle fixP->fx_size == 1.
+	(coff_reloc_map): Add BFD_RELOC_8_PCREL entry.
+	(sh_coff_reloc_mangle): SWITCH_TABLE case: Handle BFD_RELOC_8.
+
+Sat Nov 22 16:19:22 1997  Richard Henderson  <rth@cygnus.com>
+
+	* tc-alpha.c (range_signed_16, range_signed_32): Work around an
+	apparent bug in gcc's long long support crossing from x86.
+
 Sat Nov 22 14:26:09 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c: Brought up to date with latest changes on arm

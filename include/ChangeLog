@@ -1,3 +1,11 @@
+Mon Dec  1 20:24:18 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* coff/sh.h (R_SH_SWITCH8): New.
+
+Mon Dec  1 11:29:35 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* callback.h (CB_SYSCALL): Comment out arg names in prototypes.
+
 Wed Nov 26 16:47:58 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* callback.h (CB_SYSCALL): Consistantly use names for prototype
