@@ -293,8 +293,7 @@ elf_symtab_read (objfile, dynamic)
       if (number_of_symbols < 0)
 	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
-      /* FIXME: Should use section specific offset, not SECT_OFF_TEXT. */
-      offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
@@ -305,6 +304,7 @@ elf_symtab_read (objfile, dynamic)
 	      continue;
 	    }
 
+          offset = ANOFFSET (objfile->section_offsets, sym->section->index);
 	  if (dynamic
 	      && sym->section == &bfd_und_section
 	      && (sym->flags & BSF_FUNCTION))

@@ -1,3 +1,10 @@
+2000-05-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * elfread.c (elf_symtab_read): The calculation of 'offset' 
+        must be done for each symbol, not just once. The index 
+        used must be the index of the section where 'sym' resides,
+        not .text.
+
 2000-05-05  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* procfs.c (many functions): change int cmd; to long cmd;
@@ -19,7 +26,7 @@
 	and missing return when handling an ordinary signal from the
 	inferior.
 
-Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+2000-05-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * objfiles.h (SECT_OFF_DATA, SECT_OFF_TEXT, SECT_OFF_BSS,
         SECT_OFF_RODATA): Define as functions of OBJFILE.  Add
