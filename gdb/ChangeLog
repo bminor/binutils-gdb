@@ -2,6 +2,8 @@ Tue Nov  7 16:02:25 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* remote-mips.c (mips_initialize):  Fix brain damage found by
 	Jamie.  Basically had case statement in the wrong place...
+	* (mips_load):  Remove unnecessary `db tty0' command.  It's all
+	handled by mips_initialize now.
 
 Tue Nov  7 12:59:14 1995  Raymond Jou  <rjou@mexican.cygnus.com>
 

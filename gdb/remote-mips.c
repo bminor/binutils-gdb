@@ -2083,8 +2083,6 @@ mips_load (file, from_tty)
 
   mips_load_srec (file);
 
-  SERIAL_WRITE (mips_desc, "\015db tty0\015", sizeof "\015db tty0\015" - 1);
-
   mips_initialize ();
 
 /* Finally, make the PC point at the start address */
