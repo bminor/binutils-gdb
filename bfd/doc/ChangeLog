@@ -1,3 +1,10 @@
+Tue Jul 22 14:44:00 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
+
+	* Makefile.in: Change stamp-* files to s-* files.  Use bfdt.texi
+	rather than bfd.texi.
+ 	(DOCFILES): Change bfd.texi to bfdt.texi.
+	* bfd.texinfo: Include bfdt.texi, not bfd.texi.
+
 Mon Jun 16 15:33:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (CC, CFLAGS): Substitute from configure script.
