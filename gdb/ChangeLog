@@ -1,3 +1,9 @@
+2004-01-04  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* op50-rom.c: Delete.
+	* w89k-rom.c: Delete.
+	* Makefile.in: Remove references.
+
 2004-01-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c: Update copyright year.
