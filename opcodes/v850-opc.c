@@ -135,7 +135,9 @@ const struct v850_opcode v850_opcodes[] = {
 { "divh",	OP(0x02),		OP_MASK,	IF1 },
 { "cmp",	OP(0x0f),		OP_MASK,	IF1 },
 { "cmp",	OP(0x13),		OP_MASK,	IF2 },
-/* XXX missing setf */
+
+{ "setf",	two(0x0000,0x0000),	two(0x0000,0xffff), {I5,R2} },
+				/* XXX - really I4 */
 
 /* saturated operation instructions */
 { "satadd",	OP(0x06),		OP_MASK,	IF1 },
