@@ -1,3 +1,8 @@
+2002-07-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* wince.c (_initialize_wince): Rename _initialize_inftarg.
+	* win32-nat.c (_initialize_win32_nat): Rename _initialize_inftarg.
+
 2002-07-10  Grace Sainsbury  <graces@redhat.com>
 	
 	* NEWS: Mention m68k, mcore multi-arching.  

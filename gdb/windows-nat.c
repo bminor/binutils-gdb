@@ -1815,7 +1815,7 @@ init_child_ops (void)
 }
 
 void
-_initialize_inftarg (void)
+_initialize_win32_nat (void)
 {
   struct cmd_list_element *c;
 
