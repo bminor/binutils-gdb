@@ -98,6 +98,9 @@ proc start_structs_test { types } {
 	gdb_suppress_tests;
     }
 
+    # Get the debug format
+    get_debug_format
+
     # check that at the struct containing all the relevant types is correct
     set foo_t "type = struct struct[llength ${types}] \{"
     for {set n 0} {$n<[llength ${types}]} {incr n} {

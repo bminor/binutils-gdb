@@ -1,3 +1,9 @@
+2003-11-23  Michael Chastain  <mec@shout.net>
+
+	Fix PR testsuite/1463.
+	* gdb.base/structs.exp (start_structs_test): Call
+	get_debug_format before using the debug format.
+
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
 	* lib/gdb.exp (gdb_test_multiple): Add simple example.
