@@ -293,10 +293,15 @@ extern const struct ext_format ext_format_68881;
    In the case of the 68000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
+/* If we are chaining from sigtramp, then manufacture a sigtramp frame
+   (which isn't really on the stack.  I'm not sure this is right for anything
+   but BSD4.3 on an hp300.  */
 #define FRAME_CHAIN(thisframe)  \
-  (!inside_entry_file ((thisframe)->pc) ? \
-   read_memory_integer ((thisframe)->frame, 4) :\
-   0)
+  (thisframe->signal_handler_caller \
+   ? thisframe->frame \
+   : (!inside_entry_file ((thisframe)->pc) ? \
+      read_memory_integer ((thisframe)->frame, 4) :\
+      0)
 
 /* Define other aspects of the stack frame.  */
 
@@ -304,9 +309,31 @@ extern const struct ext_format ext_format_68881;
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+  do { \
+    if ((FI)->signal_handler_caller) \
+      (FRAMELESS) = 0; \
+    else \
+      (FRAMELESS) = frameless_look_for_prologue(FI); \
+  } while (0)
 
-#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
+/* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
+   it corresponds to some offset in /usr/include/sys/user.h or
+   something like that.  Using some system include file would
+   have the advantage of probably being more robust in the face
+   of OS upgrades, but the disadvantage of being wrong for
+   cross-debugging.  */
+
+#define SIG_PC_FP_OFFSET 530
+
+#define FRAME_SAVED_PC(FRAME) \
+  (((FRAME)->signal_handler_caller \
+    ? ((FRAME)->next \
+       ? read_memory_integer ((FRAME)->next->frame + SIG_PC_FP_OFFSET, 4) \
+       : read_memory_integer (read_register (SP_REGNUM) \
+			      + SIG_PC_FP_OFFSET - 8, 4) \
+       ) \
+    : read_memory_integer ((FRAME)->frame + 4, 4)) \
+   )
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 

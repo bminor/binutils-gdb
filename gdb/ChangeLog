@@ -1,5 +1,14 @@
 Tue May 18 14:08:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* blockframe.c (get_prev_frame_info): If pc in sigtramp, set
+	signal_handler_caller.
+	* tm-68k.h (FRAME_{CHAIN,SAVED_PC}): Deal with sigtramp.
+	* tm-hp300bsd.h: Define SIGTRAMP_{START,END} not IN_SIGTRAMP.
+	* inferior.h (IN_SIGTRAMP): Definition moved from infrun.c.
+	Use SIGTRAMP_START if defined.
+	* infcmd.c (step_1): Use SIGTRAMP_{START,END} if needed.
+	* infrun.c (wait_for_inferior): Check IN_SIGTRAMP before SKIP_PROLOGUE.
+
 	* infptrace.c: Remove unused KERNEL_U_ADDR_HPUX code.
 
 	* infcmd.c (step_1): Fix poorly worded error message.

@@ -38,10 +38,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (hence STACK_END_ADDR as opposed to KERNEL_U_ADDR).  This tests
    for the whole u area, since we don't necessarily have hp300bsd
    include files around.  */
-#define IN_SIGTRAMP(pc, name) \
-  ((pc) >= STACK_END_ADDR   \
-   && (pc) < STACK_END_ADDR + TARGET_UPAGES * TARGET_NBPG \
-   )
+#define SIGTRAMP_START STACK_END_ADDR
+#define SIGTRAMP_END (STACK_END_ADDR + TARGET_UPAGES * TARGET_NBPG)
 
 /* Address of end of stack space.  */
 

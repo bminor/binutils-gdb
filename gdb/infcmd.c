@@ -365,23 +365,36 @@ step_1 (skip_subroutines, single_inst, count_string)
 	    {
 	      struct minimal_symbol *msymbol;
 
-	      /* FIXME: we should be using containing_function_bounds or
-		 a cleaned up version thereof.  */
+	      /* FIXME: This should be using containing_function_bounds or a
+		 cleaned-up version thereof, to deal with things like the
+		 end of the text segment.  */
 
 	      msymbol = lookup_minimal_symbol_by_pc (stop_pc);
 	      target_terminal_ours ();
 	      printf_filtered ("Current function has no line number information.\n");
 	      fflush (stdout);
 
-	      /* No info or after _etext ("Can't happen") */
 	      if (msymbol == NULL || SYMBOL_NAME (msymbol + 1) == NULL)
-		error ("Cannot find bounds of current function.");
+		{
+		  /* If sigtramp is in the u area, check for it.  */
+#if defined SIGTRAMP_START
+		  if (IN_SIGTRAMP (stop_pc, (char *)NULL))
+		    {
+		      step_range_start = SIGTRAMP_START;
+		      step_range_end = SIGTRAMP_END;
+		    }
+		  else
+#endif
+		    error ("Cannot find bounds of current function.");
+	        }
+	      else
+		{
+		  step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
+		  step_range_end = SYMBOL_VALUE_ADDRESS (msymbol + 1);
+		}
 
 	      printf_filtered ("Single stepping until function exit.\n");
 	      fflush (stdout);
-
-	      step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
-	      step_range_end = SYMBOL_VALUE_ADDRESS (msymbol + 1);
 	    }
 	}
       else
