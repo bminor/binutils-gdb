@@ -22,3 +22,6 @@ Disassembly of section .text:
 0+01a <[^>]*> f4 b7 [ 	]*movs.l	y1,@r4
 0+01c <[^>]*> f7 cb [ 	]*movs.l	m0,@r3\+
 0+01e <[^>]*> f6 ef [ 	]*movs.l	m1,@r2\+r8
+0+020 <[^>]*> f8 00 b1 07 [ 	]padd	x0,y0,a0
+0+024 <[^>]*> f8 00 ed 07 [ 	]plds	a0,mach
+0+028 <[^>]*> f8 00 b1 07 [ 	]padd	x0,y0,a0

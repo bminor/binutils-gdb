@@ -1,3 +1,8 @@
+Mon Jun 17 16:23:59 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* gas/sh/dsp.s: Add three more instructions.
+	* gas/sh/dsp.d: Update.
+
 2002-06-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gas/mips/lineno.d: Use --gstabs.

@@ -21,4 +21,7 @@ dsp_tests:
 	movs.l y1, @r4
 	movs.l m0, @r3+
 	movs.l m1, @r2+r8
-		
+
+	padd x0,y0,a0
+	plds a0,mach
+	padd x0,y0,a0
