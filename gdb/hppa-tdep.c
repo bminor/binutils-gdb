@@ -2459,7 +2459,10 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
   if (regnum == HPPA_FLAGS_REGNUM)
     {
       if (valuep)
-	store_unsigned_integer (valuep, 4, 0);
+	store_unsigned_integer (valuep, 
+			        register_size (get_frame_arch (next_frame), 
+					       regnum), 
+				0);
 
       /* It's a computed value.  */
       *optimizedp = 0;

@@ -1,5 +1,10 @@
 2004-12-07  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (hppa_frame_prev_register_helper): Zero out the entire
+	register for both 32- and 64-bit targets.
+
+2004-12-07  Randolph Chung  <tausq@debian.org>
+
 	* frame.c (get_prev_frame): Don't terminate unwinding at main if we
 	are unwinding through a dummy frame.
 
