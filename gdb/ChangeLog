@@ -1,6 +1,7 @@
 Wed Apr  2 14:16:51 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* remote-sim.c (gdbsim_open): Check return code from sim_open.
+	Update call to sim_open (new arg SIM_OPEN_DEBUG).
 
 start-sanitize-gdbtk
 Tue Apr  1 15:04:21 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
