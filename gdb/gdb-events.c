@@ -129,6 +129,16 @@ register_update_event (int regno)
   current_event_hooks->register_update (regno);
 }
 
+void
+selected_frame_level_changed_event (int level)
+{
+  if (gdb_events_debug)
+    fprintf_unfiltered (gdb_stdlog, "selected_frame_level_changed_event\n");
+  if (!current_event_hooks->selected_frame_level_changed)
+    return;
+  current_event_hooks->selected_frame_level_changed (level);
+}
+
 #endif
 
 #if WITH_GDB_EVENTS
@@ -162,6 +172,7 @@ enum gdb_event
   tracepoint_modify,
   architecture_changed,
   register_update,
+  selected_frame_level_changed,
   nr_gdb_events
 };
 
@@ -200,6 +211,11 @@ struct register_update
     int regno;
   };
 
+struct selected_frame_level_changed
+  {
+    int level;
+  };
+
 struct event
   {
     enum gdb_event type;
@@ -213,6 +229,7 @@ struct event
 	struct tracepoint_delete tracepoint_delete;
 	struct tracepoint_modify tracepoint_modify;
 	struct register_update register_update;
+	struct selected_frame_level_changed selected_frame_level_changed;
       }
     data;
   };
@@ -300,6 +317,15 @@ queue_register_update (int regno)
   append (event);
 }
 
+static void
+queue_selected_frame_level_changed (int level)
+{
+  struct event *event = XMALLOC (struct event);
+  event->type = selected_frame_level_changed;
+  event->data.selected_frame_level_changed.level = level;
+  append (event);
+}
+
 void
 gdb_events_deliver (struct gdb_events *vector)
 {
@@ -352,6 +378,10 @@ gdb_events_deliver (struct gdb_events *vector)
 	  vector->register_update
 	    (event->data.register_update.regno);
 	  break;
+	case selected_frame_level_changed:
+	  vector->selected_frame_level_changed
+	    (event->data.selected_frame_level_changed.level);
+	  break;
 	}
       delivering_events = event->next;
       xfree (event);
@@ -372,6 +402,7 @@ _initialize_gdb_events (void)
   queue_event_hooks.tracepoint_modify = queue_tracepoint_modify;
   queue_event_hooks.architecture_changed = queue_architecture_changed;
   queue_event_hooks.register_update = queue_register_update;
+  queue_event_hooks.selected_frame_level_changed = queue_selected_frame_level_changed;
 #endif
 
   c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,

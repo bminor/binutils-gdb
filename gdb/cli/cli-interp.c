@@ -100,7 +100,7 @@ cli_interpreter_exec (void *data, char *command_str)
      It is important that it gets reset everytime, since the user could
      set gdb to use a different interpreter. */
   old_stream = cli_out_set_stream (cli_uiout, gdb_stdout);
-  result = gdb_execute_command (cli_uiout, command_str, 0);
+  result = gdb_execute_command (cli_uiout, command_str, 1);
   cli_out_set_stream (cli_uiout, old_stream);
   return result;
 }

@@ -398,6 +398,11 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     print_frame (fi, level, source, args, sal);
 
   source_print = (source == SRC_LINE || source == SRC_AND_LOC);
+  if (sal.symtab)
+    {
+      current_source_symtab = sal.symtab;
+      current_source_line = sal.line;
+    }
 
   if (source_print && sal.symtab)
     {
@@ -410,10 +415,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       if (!done)
 	{
 	  if (print_frame_info_listing_hook)
-	    {
-	      print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
-	      current_source_symtab = sal.symtab;
-	    }
+	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
 	  else
 	    {
 	      /* We used to do this earlier, but that is clearly
@@ -1638,9 +1640,12 @@ select_frame_command (char *level_exp, int from_tty)
 void
 frame_command (char *level_exp, int from_tty)
 {
+  int current_level = frame_relative_level (selected_frame);
   select_frame_command (level_exp, from_tty);
   show_and_print_stack_frame (selected_frame,
 			      frame_relative_level (selected_frame), 1);
+  if (current_level != frame_relative_level (selected_frame))
+    selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1688,6 +1693,7 @@ up_command (char *count_exp, int from_tty)
   up_silently_base (count_exp);
   show_and_print_stack_frame (selected_frame,
 			      frame_relative_level (selected_frame), 1);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1734,6 +1740,7 @@ down_command (char *count_exp, int from_tty)
   down_silently_base (count_exp);
   show_and_print_stack_frame (selected_frame,
 			      frame_relative_level (selected_frame), 1);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 void

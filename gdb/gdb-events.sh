@@ -66,6 +66,7 @@ f:void:tracepoint_delete:int number:number
 f:void:tracepoint_modify:int number:number
 f:void:architecture_changed:void
 f:void:register_update:int regno:regno
+f:void:selected_frame_level_changed:int level:level
 #*:void:annotate_starting_hook:void
 #*:void:annotate_stopped_hook:void
 #*:void:annotate_signalled_hook:void
@@ -101,7 +102,6 @@ f:void:register_update:int regno:regno
 #*:int:gdb_load_progress_hook:char *section, unsigned long num:section, num
 #*:void:pre_add_symbol_hook:char *name:name
 #*:void:post_add_symbol_hook:void
-#*:void:selected_frame_level_changed_hook:int level:level
 #*:int:gdb_loop_hook:int signo:signo
 ##*:void:solib_create_inferior_hook:void
 ##*:void:xcoff_relocate_symtab_hook:unsigned int

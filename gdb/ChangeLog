@@ -1,3 +1,20 @@
+2002-07-25  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (frame_command): If the frame level changed, issue
+	a selected_frame_level_changed event.
+	(up_command): Add selected_frame_level_changed event;
+	(down_command): Likewise.
+
+	* gdb-events.sh: Add selected_frame_level_changed event.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+	
+	* stack.c (print_frame_info_base): Always set current_source_symtab
+	and current_source_line.
+
+	* cli/cli-interp.c (cli_interpreter_exec): Pass from_tty=1 to
+	gdb_execute_command.
+
 2002-07-22  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh (register_changed_hook): Remove comment.
