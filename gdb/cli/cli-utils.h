@@ -19,9 +19,4 @@
 #if !defined (CLI_UTILS_H)
 # define CLI_UTILS_H 1
 
-/* Write character C to gdb_stdout using GDB's paging mechanism and return C.
-   May return nonlocally.  */
-
-extern int putchar_filtered (int c);
-
 #endif /* !defined (CLI_UTILS_H) */

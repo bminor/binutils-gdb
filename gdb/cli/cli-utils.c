@@ -19,11 +19,3 @@
 #include "defs.h"
 #include "cli/cli-utils.h"
 
-/* Write character C to gdb_stdout using GDB's paging mechanism and return C.
-   May return nonlocally.  */
-
-int
-putchar_filtered (int c)
-{
-  return fputc_filtered (c, gdb_stdout);
-}

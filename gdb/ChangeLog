@@ -1,3 +1,10 @@
+Tue Jan 30 15:43:08 2001  Andrew Cagney  <cagney@cygnus.com>
+
+	* cli/cli-utils.c (putchar_filtered): Move function from here.
+	* utils.c (putchar_filtered): To here.
+	* cli/cli-utils.h (putchar_filtered): Move declaration from here.
+	* defs.h (putchar_filtered): To here.
+	
 Tue Jan 30 17:27:11 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.in (AC_CHECK_FUNCS): Replace vfork test with
