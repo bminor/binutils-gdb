@@ -1,3 +1,56 @@
+Thu Nov 18 11:45:39 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config.bfd (mips*-*-irix5*): New target; use mipsbelf.
+	* configure.host (mips-sgi-irix5*) New host; use irix5 (no
+	hosts/irix5.h created; just use std-host.h).
+	* config/irix5.mh: New file; like irix4.mh, but don't use -G or
+	-lmalloc.
+	* Makefile.in: Rebuilt dependencies.
+
+	* ecoffswap.h: Changed type of internal pointers for swap out
+	functions to const *.
+
+	* elf32-mips.c (mips_elf_got16_reloc): New function.  Handle GOT16
+	correctly for assembler, but linker support not implemented.
+	(elf_mips_howto_table): Use mips_elf_got16_reloc for GOT16.
+	(mips_elf_sym_is_global): New function; at least on Irix 5, all
+	non section symbols are considered global.
+	(elf_backend_sym_is_global): Define.
+	(mips_elf_final_write_processing): New function.  Set the MIPS
+	architecture level correctly.
+	(elf_backend_final_write_processing): Define.
+	(mips_elf_section_from_shdr): Handle SHT_MIPS_OPTIONS.
+	(mips_elf_fake_sections): Set entsize of .mdebug or .reginfo
+	section to 1.  Handle .options section.
+	(mips_elf_acom_section, mips_elf_acom_symbol,
+	mips_elf_acom_symbol_ptr): New static variables, used to build a
+	generic .acommon section to hold SHN_MIPS_ACOMMON symbols.
+	(mips_elf_symbol_processing): Handle SHN_MIPS_ACOMMON symbols by
+	putting them all in a global .acommon section.
+
+	* elfcode.h (bfd_section_from_shdr): Don't dump core if target
+	section has no ELF section data.
+	(elf_make_sections): Set addralign of reloc section to 4.
+	(elf_fake_sections): Likewise.
+	(map_program_segments):	Don't consider section 0.
+	(assign_file_positions_except_relocs): Don't consider section 0.
+	In the main loop, skip the symtab and strtab sections, since their
+	positions are set elsewhere.
+	(swap_out_syms): Set addralign of symtab section to 4.  Set
+	addralign of strtab sections to 1.
+	(assign_file_positions_for_relocs): Don't consider section 0.
+	(write_object_contents): Don't write out section 0.
+
+	* libelf.h (struct elf_backend_data): Added fields
+	elf_backend_sym_is_global and elf_backend_final_write_processing.
+	* elf32-target.h (elf32_bed): Added corresponding initializers.
+	* elf64-target.h (elf64_bed): Likewise.
+	* elfcode.h (sym_is_global): Take abfd argument.  Call
+	elf_backend_sym_is_global if it is not NULL.
+	(elf_map_symbols): Pass abfd to sym_is_global.
+	(write_object_contents): Call elf_backend_final_write_processing
+	if it is defined.
+
 Wed Nov 17 18:43:28 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* libecoff.h: Include coff/ecoff.h.
