@@ -101,7 +101,7 @@ net_load (filename, pTextAddr, pDataAddr, pBssAddr)
     struct ldfile ldstruct;
     struct timeval load_timeout;
  
-    bzero ((char *) &ldstruct, sizeof (ldstruct));
+    memset ((char *) &ldstruct, '\0', sizeof (ldstruct));
 
     /* We invoke clnt_call () here directly, instead of through
        net_clnt_call (), because we need to set a large timeout value.
@@ -143,7 +143,7 @@ net_break (addr, procnum)
     Rptrace ptrace_in;  /* XXX This is stupid.  It doesn't need to be a ptrace
                            structure.  How about something smaller? */
 
-    bzero ((char *) &ptrace_in, sizeof (ptrace_in));
+    memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
     break_status = 0;
 
     ptrace_in.addr = addr;
@@ -195,8 +195,8 @@ vx_create_inferior (exec_file, args, env)
   arg_array passArgs;
   TASK_START taskStart;
 
-  bzero ((char *) &passArgs, sizeof (passArgs));
-  bzero ((char *) &taskStart, sizeof (taskStart));
+  memset ((char *) &passArgs, '\0', sizeof (passArgs));
+  memset ((char *) &taskStart, '\0', sizeof (taskStart));
 
   /* parse arguments, put them in passArgs */
 
@@ -254,7 +254,7 @@ parse_args (arg_string, arg_struct)
   register int arg_index = 0;
   register char *p0;
  
-  bzero ((char *) arg_struct, sizeof (arg_array));
+  memset ((char *) arg_struct, '\0', sizeof (arg_array));
  
   /* first count how many arguments there are */
 
@@ -334,7 +334,7 @@ net_wait (pEvent)
     int pid;
     enum clnt_stat status;
 
-    bzero ((char *) pEvent, sizeof (RDB_EVENT));
+    memset ((char *) pEvent, '\0', sizeof (RDB_EVENT));
 
     pid = inferior_pid;
     status = net_clnt_call (PROCESS_WAIT, xdr_int, &pid, xdr_RDB_EVENT, pEvent);
@@ -378,8 +378,8 @@ vx_read_register (regno)
   C_bytes out_data;
   extern char registers[];
 
-  bzero ((char *) &ptrace_in, sizeof (ptrace_in));
-  bzero ((char *) &ptrace_out, sizeof (ptrace_out));
+  memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
+  memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
 
   /* FIXME, eventually only get the ones we need.  */
   registers_fetched ();
@@ -422,7 +422,7 @@ vx_read_register (regno)
     }
   else
     {
-      bzero (&registers[REGISTER_BYTE (FP0_REGNUM)], VX_SIZE_FPREGS);
+      memset (&registers[REGISTER_BYTE (FP0_REGNUM)], '\0', VX_SIZE_FPREGS);
     }
 #endif /* VX_SIZE_FPREGS */
 }
@@ -454,8 +454,8 @@ vx_write_register (regno)
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
 
-  bzero ((char *) &ptrace_in, sizeof (ptrace_in));
-  bzero ((char *) &ptrace_out, sizeof (ptrace_out));
+  memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
+  memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
 
   ptrace_in.pid = inferior_pid;
   ptrace_in.info.ttype     = DATA;
@@ -521,8 +521,8 @@ vx_xfer_memory (memaddr, myaddr, len, write, target)
   Ptrace_return ptrace_out;
   C_bytes data;
 
-  bzero ((char *) &ptrace_in, sizeof (ptrace_in));
-  bzero ((char *) &ptrace_out, sizeof (ptrace_out));
+  memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
+  memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
 
   ptrace_in.pid = inferior_pid;		/* XXX pid unnecessary for READDATA */
   ptrace_in.addr = (int) memaddr;	/* Where from */
@@ -590,8 +590,8 @@ vx_resume (pid, step, siggnal)
   if (siggnal != 0 && siggnal != stop_signal)
     error ("Cannot send signals to VxWorks processes");
 
-  bzero ((char *) &ptrace_in, sizeof (ptrace_in));
-  bzero ((char *) &ptrace_out, sizeof (ptrace_out));
+  memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
+  memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
 
   ptrace_in.pid = pid;
   ptrace_in.addr = 1;	/* Target side insists on this, or it panics.  */
@@ -728,7 +728,7 @@ net_get_symbols (pLoadTable)
 {
   enum clnt_stat status;
 
-  bzero ((char *) pLoadTable, sizeof (struct ldtabl));
+  memset ((char *) pLoadTable, '\0', sizeof (struct ldtabl));
 
   status = net_clnt_call (VX_STATE_INQ, xdr_void, 0, xdr_ldtabl, pLoadTable);
   return (status == RPC_SUCCESS) ? 0 : -1;
@@ -750,7 +750,7 @@ vx_lookup_symbol (name, pAddr)
   SYMBOL_ADDR symbolAddr;
 
   *pAddr = 0;
-  bzero ((char *) &symbolAddr, sizeof (symbolAddr));
+  memset ((char *) &symbolAddr, '\0', sizeof (symbolAddr));
 
   status = net_clnt_call (VX_SYMBOL_INQ, xdr_wrapstring, &name,
 			  xdr_SYMBOL_ADDR, &symbolAddr);
@@ -803,7 +803,7 @@ net_connect (host)
       addr = * (unsigned long *) destHost->h_addr;
     }
 
-  bzero (&destAddr, sizeof (destAddr));
+  memset (&destAddr, '\0', sizeof (destAddr));
 
   destAddr.sin_addr.s_addr = addr;
   destAddr.sin_family      = AF_INET;
@@ -1104,8 +1104,8 @@ vx_attach (args, from_tty)
   if (from_tty)
       printf ("Attaching pid %s.\n", local_hex_string(pid));
 
-  bzero ((char *)&ptrace_in,  sizeof (ptrace_in));
-  bzero ((char *)&ptrace_out, sizeof (ptrace_out));
+  memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
+  memset ((char *)&ptrace_out, '\0', sizeof (ptrace_out));
   ptrace_in.pid = pid;
 
   status = net_ptrace_clnt_call (PTRACE_ATTACH, &ptrace_in, &ptrace_out);
@@ -1152,8 +1152,8 @@ vx_detach (args, from_tty)
   if (args)		/* FIXME, should be possible to leave suspended */
     signal = atoi (args);
   
-  bzero ((char *)&ptrace_in,  sizeof (ptrace_in));
-  bzero ((char *)&ptrace_out, sizeof (ptrace_out));
+  memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
+  memset ((char *)&ptrace_out, '\0', sizeof (ptrace_out));
   ptrace_in.pid = inferior_pid;
 
   status = net_ptrace_clnt_call (PTRACE_DETACH, &ptrace_in, &ptrace_out);
@@ -1180,8 +1180,8 @@ vx_kill ()
 
   printf ("Killing pid %s.\n", local_hex_string(inferior_pid));
 
-  bzero ((char *)&ptrace_in,  sizeof (ptrace_in));
-  bzero ((char *)&ptrace_out, sizeof (ptrace_out));
+  memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
+  memset ((char *)&ptrace_out, '\0', sizeof (ptrace_out));
   ptrace_in.pid = inferior_pid;
 
   status = net_ptrace_clnt_call (PTRACE_KILL, &ptrace_in, &ptrace_out);

@@ -426,7 +426,7 @@ struct coff_symbol *cs;
   if (inclLength == 0) {
     inclTable = (InclTable*) 
 	xmalloc (sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
-    bzero (inclTable, sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
+    memset (inclTable, '\0', sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
     inclLength = INITIAL_INCLUDE_TABLE_LENGTH;
     inclIndx = 0;
   }
@@ -434,8 +434,8 @@ struct coff_symbol *cs;
     inclLength += INITIAL_INCLUDE_TABLE_LENGTH;
     inclTable = (InclTable*) 
 	xrealloc (inclTable, sizeof (InclTable) * inclLength);
-    bzero (inclTable+inclLength-INITIAL_INCLUDE_TABLE_LENGTH, 
-			sizeof (InclTable)*INITIAL_INCLUDE_TABLE_LENGTH);
+    memset (inclTable+inclLength-INITIAL_INCLUDE_TABLE_LENGTH, 
+			'\0', sizeof (InclTable)*INITIAL_INCLUDE_TABLE_LENGTH);
   }
 
   inclTable [inclIndx].name  = cs->c_name;
@@ -490,7 +490,7 @@ process_linenos (start, end)
   if (!(offset = first_fun_line_offset))
     goto return_after_cleanup;
 
-  bzero (&main_subfile, sizeof (main_subfile));
+  memset (&main_subfile, '\0', sizeof (main_subfile));
   first_fun_line_offset = 0;
 
   if (inclIndx == 0)
@@ -519,7 +519,7 @@ process_linenos (start, end)
       tmpSubfile = inclTable[ii].subfile = (struct subfile*) 
       				xmalloc (sizeof (struct subfile));
 
-      bzero (tmpSubfile, sizeof (struct subfile));
+      memset (tmpSubfile, '\0', sizeof (struct subfile));
       firstLine = &(inclTable[ii].funStartLine);
 
       /* enter include file's lines now. */
@@ -619,7 +619,7 @@ return_after_cleanup:
   inclIndx = 0;
 
   /* start with a fresh subfile structure for the next file. */
-  bzero (&main_subfile, sizeof (struct subfile));
+  memset (&main_subfile, '\0', sizeof (struct subfile));
 }
 
 void
@@ -717,7 +717,7 @@ retrieve_tracebackinfo (abfd, textsec, cs)
 
   int functionstart = cs->c_value - textsec->vma;
 
-  bzero (&tbInfo, sizeof (tbInfo));
+  memset (&tbInfo, '\0', sizeof (tbInfo));
 
   /* keep reading blocks of data from the text section, until finding a zero
      word and a traceback table. */
@@ -1557,7 +1557,7 @@ process_xcoff_symbol (cs, objfile)
   if (name[0] == '.')
     ++name;
 
-  bzero (sym, sizeof (struct symbol));
+  memset (sym, '\0', sizeof (struct symbol));
 
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;

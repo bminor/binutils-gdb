@@ -987,7 +987,7 @@ frame_get_cache_fsr (fi, fdatap)
 
   fi->cache_fsr = (struct frame_saved_regs *)
       obstack_alloc (&frame_cache_obstack, sizeof (struct frame_saved_regs));
-  bzero (fi->cache_fsr, sizeof (struct frame_saved_regs));
+  memset (fi->cache_fsr, '\0', sizeof (struct frame_saved_regs));
 
   if (fi->prev && fi->prev->frame)
     frame_addr = fi->prev->frame;

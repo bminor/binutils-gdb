@@ -217,7 +217,7 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
   int fp_offset = -1;		/* -1 means not set */
   CORE_ADDR frame_fp;
 
-  bzero (must_adjust, sizeof (must_adjust));
+  memset (must_adjust, '\0', sizeof (must_adjust));
   next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
 
   /* Accept move of incoming registers to other registers, using
@@ -479,7 +479,7 @@ frame_find_saved_regs (fi, fsr)
       cache_fsr = (struct frame_saved_regs *)
 		  obstack_alloc (&frame_cache_obstack,
 				 sizeof (struct frame_saved_regs));
-      bzero (cache_fsr, sizeof (struct frame_saved_regs));
+      memset (cache_fsr, '\0', sizeof (struct frame_saved_regs));
       fi->fsr = cache_fsr;
 
       /* Find the start and end of the function prologue.  If the PC

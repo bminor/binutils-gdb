@@ -407,8 +407,8 @@ explicit_lookup_type (real_filenum, index)
       f->length *= 2;
       f->vector = (struct type **)
 	xrealloc (f->vector, f->length * sizeof (struct type *));
-      bzero (&f->vector[f->length / 2],
-	     f->length * sizeof (struct type *) / 2);
+      memset (&f->vector[f->length / 2],
+	     '\0', f->length * sizeof (struct type *) / 2);
     }
   return &f->vector[index];
 }

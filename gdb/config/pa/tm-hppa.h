@@ -351,7 +351,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   unsigned this_insn;							\
   unsigned address;							\
 									\
-  bzero (&frame_saved_regs, sizeof frame_saved_regs);			\
+  memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);			\
   if ((frame_info->pc >= (frame_info)->frame                            \
        && (frame_info)->pc <= ((frame_info)->frame + CALL_DUMMY_LENGTH  \
 			       + 32 * 4 + (NUM_REGS - FP0_REGNUM) * 8   \

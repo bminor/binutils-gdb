@@ -290,7 +290,7 @@ map_vmap (bfd *bf, bfd *arch)
   struct objfile *obj;
 
   vp = (void*) xmalloc (sizeof (*vp));
-  bzero (vp, sizeof (*vp));
+  memset (vp, '\0', sizeof (*vp));
   vp->nxt = 0;
   vp->bfd = bf;
   vp->name = bfd_get_filename(arch ? arch : bf);

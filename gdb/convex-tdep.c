@@ -223,7 +223,7 @@ xfer_core_file (memaddr, myaddr, len)
 	 read zeros if reading, or do nothing if writing.  */
       else
 	{
-	  bzero (myaddr, i);
+	  memset (myaddr, '\0', i);
 	  returnval = EIO;
 	}
 

@@ -99,7 +99,7 @@ mem( memaddr, word1, word2, noprint )
 
 	if ( mem_tab == NULL ){
 		mem_tab = (struct tabent *) xmalloc( MEM_SIZ );
-		bzero( mem_tab, MEM_SIZ );
+		memset( mem_tab, '\0', MEM_SIZ );
 		for ( i = 0; mem_init[i].opcode != 0; i++ ){
 			j = mem_init[i].opcode - MEM_MIN;
 			mem_tab[j].name = mem_init[i].name;

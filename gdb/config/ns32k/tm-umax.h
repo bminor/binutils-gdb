@@ -295,7 +295,7 @@ extern CORE_ADDR ns32k_get_enter_addr ();
   register CORE_ADDR	enter_addr;				\
   register CORE_ADDR	next_addr;				\
 								\
-  bzero (&(frame_saved_regs), sizeof (frame_saved_regs));	\
+  memset (&(frame_saved_regs), '\0', sizeof (frame_saved_regs));	\
   enter_addr = ns32k_get_enter_addr ((frame_info)->pc);		\
   if (enter_addr > 1)						\
     {								\

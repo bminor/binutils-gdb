@@ -189,7 +189,7 @@ get_frame_saved_regs (frame_info, frame_saved_regs)
   CORE_ADDR pc;
   int w;
 
-  bzero (frame_saved_regs, sizeof (*frame_saved_regs));
+  memset (frame_saved_regs, '\0', sizeof (*frame_saved_regs));
   pc = get_pc_function_start (frame_info->pc);
 
 /* wander down the instruction stream */

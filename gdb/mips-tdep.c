@@ -187,8 +187,8 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     unsigned long reg_mask = 0;
 
     if (start_pc == 0) return NULL;
-    bzero(&temp_proc_desc, sizeof(temp_proc_desc));
-    bzero(&temp_saved_regs, sizeof(struct frame_saved_regs));
+    memset(&temp_proc_desc, '\0', sizeof(temp_proc_desc));
+    memset(&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
     PROC_LOW_ADDR(&temp_proc_desc) = start_pc;
 
     if (start_pc + 200 < limit_pc) limit_pc = start_pc + 200;

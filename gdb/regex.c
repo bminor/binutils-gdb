@@ -68,7 +68,7 @@ init_syntax_once ()
    if (done)
      return;
 
-   bzero (re_syntax_table, sizeof re_syntax_table);
+   memset (re_syntax_table, '\0', sizeof re_syntax_table);
 
    for (c = 'a'; c <= 'z'; c++)
      re_syntax_table[c] = Sword;
@@ -404,7 +404,7 @@ re_compile_pattern (pattern, size, bufp)
 
 	  PATPUSH ((1 << BYTEWIDTH) / BYTEWIDTH);
 	  /* Clear the whole map */
-	  bzero (b, (1 << BYTEWIDTH) / BYTEWIDTH);
+	  memset (b, '\0', (1 << BYTEWIDTH) / BYTEWIDTH);
 	  /* Read in characters and ranges, setting map bits */
 	  while (1)
 	    {
@@ -705,7 +705,7 @@ re_compile_fastmap (bufp)
   unsigned char *stackb[NFAILURES];
   unsigned char **stackp = stackb;
 
-  bzero (fastmap, (1 << BYTEWIDTH));
+  memset (fastmap, '\0', (1 << BYTEWIDTH));
   bufp->fastmap_accurate = 1;
   bufp->can_be_null = 0;
       

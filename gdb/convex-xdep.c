@@ -282,7 +282,7 @@ read_inferior_memory (memaddr, myaddr, len)
       len -= i;
     }
   if (errno) 
-    bzero (myaddr, len);
+    memset (myaddr, '\0', len);
   return errno;
 }
 
@@ -391,7 +391,7 @@ read_vector_register (reg)
       ps.pi_thread = inferior_thread;
       ioctl (inferior_fd, PIXRDVREGS, &ps);
       if (errno)
-	bzero (&vector_registers, sizeof vector_registers);
+	memset (&vector_registers, '\0', sizeof vector_registers);
     }
   else if (corechan >= 0)
     {

@@ -153,7 +153,7 @@ frame_find_saved_regs (fi, fsr)
       cache_fsr = (struct frame_saved_regs *)
 	obstack_alloc (&frame_cache_obstack,
 		       sizeof (struct frame_saved_regs));
-      bzero (cache_fsr, sizeof (struct frame_saved_regs));
+      memset (cache_fsr, '\0', sizeof (struct frame_saved_regs));
 
       fi->fsr = cache_fsr;
 

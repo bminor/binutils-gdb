@@ -1,4 +1,15 @@
-Wed Sep  1 14:41:28 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+Wed Sep  1 14:36:00 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* arm-tdep.c, convex-tdep.c, convex-xdep.c, dbxread.c,
+	  h8300-tdep.c, h8500-tdep.c, i960-pinsn.c, i960-tdep.c,
+	  infptrace.c, m88k-tdep.c, mips-tdep.c, regex.c, remote-vx.c,
+	  rs6000-tdep.c, xcoffexec.c, xcoffread.c, z8k-tdep.c,
+	  config/arm/tm-arm.h, config/convex/tm-convex.h,
+	  config/gould/tm-np1.h, config/gould/tm-pn.h,
+	  config/m68k/tm-isi.h, config/ns32k/tm-umax.h,
+	  config/pa/tm-hppa.h, config/pyr/tm-pyr.h,
+	  config/rs6000/tm-rs6000.h, config/tahoe/tm-tahoe.h,
+	  config/vax/tm-vax.h:  bzero -> memset.
 
 	* regex.c: bcmp -> memcmp.
 
@@ -37,7 +48,7 @@ Wed Sep  1 13:12:43 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 	  config/pa/tm-hppa.h, config/pyr/tm-pyr.h,
 	  config/rs6000/tm-rs6000.h, config/sh/tm-sh.h,
 	  config/tahoe/tm-tahoe.h, config/vax/tm-vax.h,
-	  config/z8k/tm-z8k.h, nindy-share/nindy.c: bcopy -> memcpy
+	  config/z8k/tm-z8k.h, nindy-share/nindy.c: bcopy -> memcpy.
 
 Wed Sep  1 05:05:53 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 

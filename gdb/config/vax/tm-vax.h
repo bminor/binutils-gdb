@@ -267,7 +267,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 { register int regnum;     \
   register int regmask = read_memory_integer ((frame_info)->frame+4, 4) >> 16; \
   register CORE_ADDR next_addr;     \
-  bzero (&frame_saved_regs, sizeof frame_saved_regs);     \
+  memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);     \
   next_addr = (frame_info)->frame + 16;     \
   /* Regmask's low bit is for register 0,     \
      which is the first one that would be pushed.  */     \
