@@ -1,5 +1,16 @@
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
+	From 2000-12-03 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
+	* monitor.c (setmem_resp_delim_pattern): New regexp pattern.
+	(setreg_resp_delim_pattern): Likewise.
+	(setmem_resp_delim_fastmap): New buffer.
+	(setreg_resp_delim_fastmap): Likewise.
+	(monitor_open): Initialize above regexp if they are defined.
+	(monitor_write_memory): Use regexp to check the result of write.
+	(monitor_store_register): Likewise to check result of register set.
+
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2000-06-14 John Marshall <john_w_marshall@palm.com>:
 	* coff-solib.c: Include symfile.h and objfiles.h to make
 	OBJF_SHARED visible.

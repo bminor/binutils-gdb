@@ -129,6 +129,12 @@ static char register_fastmap[256];
 static struct re_pattern_buffer getmem_resp_delim_pattern;
 static char getmem_resp_delim_fastmap[256];
 
+static struct re_pattern_buffer setmem_resp_delim_pattern;
+static char setmem_resp_delim_fastmap[256];
+
+static struct re_pattern_buffer setreg_resp_delim_pattern;
+static char setreg_resp_delim_fastmap[256];
+
 static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
 
@@ -752,6 +758,14 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
     compile_pattern (mon_ops->getmem.resp_delim, &getmem_resp_delim_pattern,
 		     getmem_resp_delim_fastmap);
 
+  if (mon_ops->setmem.resp_delim)
+    compile_pattern (mon_ops->setmem.resp_delim, &setmem_resp_delim_pattern,
+                     setmem_resp_delim_fastmap);
+
+  if (mon_ops->setreg.resp_delim)
+    compile_pattern (mon_ops->setreg.resp_delim, &setreg_resp_delim_pattern,
+                     setreg_resp_delim_fastmap);
+  
   unpush_target (targ_ops);
 
   if (dev_name)
@@ -1340,6 +1354,13 @@ monitor_store_register (int regno)
   else
     monitor_printf (current_monitor->setreg.cmd, name, val);
 
+  if (current_monitor->setreg.resp_delim)
+    {
+      monitor_debug ("EXP setreg.resp_delim\n");
+      monitor_expect_regexp (&setreg_resp_delim_pattern, NULL, 0);
+      if (current_monitor->flags & MO_SETREG_INTERACTIVE)
+	monitor_printf ("%s\r", paddr_nz (val));
+    }
   if (current_monitor->setreg.term)
     {
       monitor_debug ("EXP setreg.term\n");
@@ -1466,6 +1487,12 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
       monitor_printf_noecho (cmd, memaddr);
 
+      if (current_monitor->setmem.resp_delim)
+        {
+          monitor_debug ("EXP setmem.resp_delim");
+          monitor_expect_regexp (&setmem_resp_delim_pattern, NULL, 0); 
+	  monitor_printf ("%x\r", val);
+       }
       if (current_monitor->setmem.term)
 	{
 	  monitor_debug ("EXP setmem.term");
