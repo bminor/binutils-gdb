@@ -59,12 +59,12 @@ int magic_number_for_object_file = DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE;
 #endif /* BFD_ASSEMBLER */
 
 #ifdef BFD_ASSEMBLER
-static fixS *fix_new_internal PARAMS ((fragS *, int where, short int size,
+static fixS *fix_new_internal PARAMS ((fragS *, int where, int size,
 				       symbolS *add, symbolS *sub,
 				       offsetT offset, int pcrel,
 				       bfd_reloc_code_real_type r_type));
 #else
-static fixS *fix_new_internal PARAMS ((fragS *, int where, short int size,
+static fixS *fix_new_internal PARAMS ((fragS *, int where, int size,
 				       symbolS *add, symbolS *sub,
 				       offsetT offset, int pcrel,
 				       int r_type));
@@ -83,7 +83,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
 		  r_type)
      fragS *frag;		/* Which frag? */
      int where;			/* Where in that frag? */
-     short int size;		/* 1, 2, or 4 usually. */
+     int size;			/* 1, 2, or 4 usually. */
      symbolS *add_symbol;	/* X_add_symbol. */
      symbolS *sub_symbol;	/* X_op_symbol. */
      offsetT offset;		/* X_add_number. */
@@ -198,6 +198,11 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
   switch (exp->X_op)
     {
     case O_absent:
+      break;
+
+    case O_uminus:
+      sub = exp->X_add_symbol;
+      off = exp->X_add_number;
       break;
 
     case O_subtract:
@@ -709,11 +714,6 @@ write_contents (abfd, sec, xxx)
   if (! (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS))
     return;
 
-#if 0 /* Who cares?  Let the first call, below, do it.  */
-  /* Force calculations (size, vma) to get done.  */
-  bfd_set_section_contents (stdoutput, sec, "", 0, (addressT) 0);
-#endif
-
   for (frags = seginfo->frchainP->frch_root;
        frags;
        frags = frags->fr_next)
@@ -749,152 +749,38 @@ write_contents (abfd, sec, xxx)
 }
 #endif
 
-#if defined (BFD_ASSEMBLER) || !defined (BFD)
-
-void 
-write_object_file ()
+static void
+merge_data_into_text ()
 {
-  register struct frchain *frchainP;	/* Track along all frchains. */
-  register fragS *fragP;	/* Track along all frags. */
-
-#if !defined (BFD_ASSEMBLER) && !defined (OBJ_VMS)
-  long object_file_size;
-#endif
-
-  /* Do we really want to write it?  */
-  {
-    int n_warns, n_errs;
-    n_warns = had_warnings ();
-    n_errs = had_errors ();
-    /* The -Z flag indicates that an object file should be generated,
-       regardless of warnings and errors.  */
-    if (flagseen['Z'])
-      {
-	if (n_warns || n_errs)
-	  as_warn ("%d error%s, %d warning%s, generating bad object file.\n",
-		   n_errs, n_errs == 1 ? "" : "s",
-		   n_warns, n_warns == 1 ? "" : "s");
-      }
-    else
-      {
-	if (n_errs)
-	  as_fatal ("%d error%s, %d warning%s, no object file generated.\n",
-		    n_errs, n_errs == 1 ? "" : "s",
-		    n_warns, n_warns == 1 ? "" : "s");
-      }
-  }
-
-#ifdef	OBJ_VMS
-  /*
-   *	Under VMS we try to be compatible with VAX-11 "C".  Thus, we
-   *	call a routine to check for the definition of the procedure
-   *	"_main", and if so -- fix it up so that it can be program
-   *	entry point.
-   */
-  VMS_Check_For_Main ();
-#endif /* VMS */
-
-  /* After every sub-segment, we fake an ".align ...". This conforms to
-     BSD4.2 brane-damage. We then fake ".fill 0" because that is the kind of
-     frag that requires least thought. ".align" frags like to have a
-     following frag since that makes calculating their intended length
-     trivial.
-
-     @@ Is this really necessary??  */
-#ifndef SUB_SEGMENT_ALIGN
 #ifdef BFD_ASSEMBLER
-#define SUB_SEGMENT_ALIGN(SEG) (0)
+  seg_info (text_section)->frchainP->frch_last->fr_next =
+    seg_info (data_section)->frchainP->frch_root;
+  seg_info (text_section)->frchainP->frch_last =
+    seg_info (data_section)->frchainP->frch_last;
+  seg_info (data_section)->frchainP = 0;
 #else
-#define SUB_SEGMENT_ALIGN(SEG) (2)
-#endif
-#endif
-  for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
+  fixS *tmp;
+
+  text_last_frag->fr_next = data_frag_root;
+  text_last_frag = data_last_frag;
+  data_last_frag = NULL;
+  data_frag_root = NULL;
+  if (text_fix_root)
     {
-#ifdef BFD_ASSEMBLER
-      subseg_set (frchainP->frch_seg, frchainP->frch_subseg);
-#else
-      subseg_new (frchainP->frch_seg, frchainP->frch_subseg);
-#endif
-      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
-      /* frag_align will have left a new frag.
-	 Use this last frag for an empty ".fill".
-
-	 For this segment ...
-	 Create a last frag. Do not leave a "being filled in frag".  */
-      frag_wane (frag_now);
-      frag_now->fr_fix = 0;
-      know (frag_now->fr_next == NULL);
-      /* know( frags . obstack_c_base == frags . obstack_c_next_free ); */
-      /* Above shows we haven't left a half-completed object on obstack. */
+      for (tmp = text_fix_root; tmp->fx_next; tmp = tmp->fx_next);;
+      tmp->fx_next = data_fix_root;
+      text_fix_tail = data_fix_tail;
     }
-
-  /* From now on, we don't care about sub-segments.  Build one frag chain
-     for each segment. Linked thru fr_next.  */
-
-#ifdef BFD_ASSEMBLER
-  /* Remove the sections created by gas for its own purposes.  */
-  {
-    asection **seclist, *sec;
-    seclist = &stdoutput->sections;
-    while (seclist && *seclist)
-      {
-	sec = *seclist;
-	while (sec == reg_section || sec == expr_section)
-	  {
-	    sec = sec->next;
-	    *seclist = sec;
-	    stdoutput->section_count--;
-	    if (!sec)
-	      break;
-	  }
-	if (*seclist)
-	  seclist = &(*seclist)->next;
-      }
-  }
-
-  bfd_map_over_sections (stdoutput, chain_frchains_together, (char *) 0);
-#else
-  remove_subsegs (frchain_root, SEG_TEXT, &text_frag_root, &text_last_frag);
-  remove_subsegs (data0_frchainP, SEG_DATA, &data_frag_root, &data_last_frag);
-  remove_subsegs (bss0_frchainP, SEG_BSS, &bss_frag_root, &bss_last_frag);
+  else
+    text_fix_root = data_fix_root;
+  data_fix_root = NULL;
 #endif
+}
 
-  /* We have two segments. If user gave -R flag, then we must put the
-     data frags into the text segment. Do this before relaxing so
-     we know to take advantage of -R and make shorter addresses.  */
-#if !defined (OBJ_AOUT) || defined (BFD_ASSEMBLER)
-  if (flagseen['R'])
-    {
-#ifdef BFD_ASSEMBLER
-      seg_info (text_section)->frchainP->frch_last->fr_next =
-	seg_info (data_section)->frchainP->frch_root;
-      seg_info (text_section)->frchainP->frch_last =
-	seg_info (data_section)->frchainP->frch_last;
-      seg_info (data_section)->frchainP = 0;
-#else
-      fixS *tmp;
-
-      text_last_frag->fr_next = data_frag_root;
-      text_last_frag = data_last_frag;
-      data_last_frag = NULL;
-      data_frag_root = NULL;
-      if (text_fix_root)
-	{
-	  for (tmp = text_fix_root; tmp->fx_next; tmp = tmp->fx_next);;
-	  tmp->fx_next = data_fix_root;
-	  text_fix_tail = data_fix_tail;
-	}
-      else
-	text_fix_root = data_fix_root;
-      data_fix_root = NULL;
-#endif
-    }
-#endif
-
-#ifdef BFD_ASSEMBLER
-
-  bfd_map_over_sections (stdoutput, relax_and_size_seg, (char *) 0);
-#else
+#if !defined (BFD_ASSEMBLER) && !defined (BFD)
+static void
+relax_and_size_all_segments ()
+{
   relax_segment (text_frag_root, SEG_TEXT);
   relax_segment (data_frag_root, SEG_DATA);
   relax_segment (bss_frag_root, SEG_BSS);
@@ -979,6 +865,130 @@ write_object_file ()
 		    bss_last_frag->fr_address - bss_frag_root->fr_address);
   else
     H_SET_BSS_SIZE (&headers, 0);
+}
+#endif /* ! BFD_ASSEMBLER && ! BFD */
+
+#if defined (BFD_ASSEMBLER) || !defined (BFD)
+
+void 
+write_object_file ()
+{
+  register struct frchain *frchainP;	/* Track along all frchains. */
+  register fragS *fragP;	/* Track along all frags. */
+#if !defined (BFD_ASSEMBLER) && !defined (OBJ_VMS)
+  long object_file_size;
+#endif
+
+  /* Do we really want to write it?  */
+  {
+    int n_warns, n_errs;
+    n_warns = had_warnings ();
+    n_errs = had_errors ();
+    /* The -Z flag indicates that an object file should be generated,
+       regardless of warnings and errors.  */
+    if (flagseen['Z'])
+      {
+	if (n_warns || n_errs)
+	  as_warn ("%d error%s, %d warning%s, generating bad object file.\n",
+		   n_errs, n_errs == 1 ? "" : "s",
+		   n_warns, n_warns == 1 ? "" : "s");
+      }
+    else
+      {
+	if (n_errs)
+	  as_fatal ("%d error%s, %d warning%s, no object file generated.\n",
+		    n_errs, n_errs == 1 ? "" : "s",
+		    n_warns, n_warns == 1 ? "" : "s");
+      }
+  }
+
+#ifdef	OBJ_VMS
+  /*
+   *	Under VMS we try to be compatible with VAX-11 "C".  Thus, we
+   *	call a routine to check for the definition of the procedure
+   *	"_main", and if so -- fix it up so that it can be program
+   *	entry point.
+   */
+  VMS_Check_For_Main ();
+#endif /* VMS */
+
+  /* After every sub-segment, we fake an ".align ...". This conforms to
+     BSD4.2 brane-damage. We then fake ".fill 0" because that is the kind of
+     frag that requires least thought. ".align" frags like to have a
+     following frag since that makes calculating their intended length
+     trivial.
+
+     @@ Is this really necessary??  */
+#ifndef SUB_SEGMENT_ALIGN
+#ifdef BFD_ASSEMBLER
+#define SUB_SEGMENT_ALIGN(SEG) (0)
+#else
+#define SUB_SEGMENT_ALIGN(SEG) (2)
+#endif
+#endif
+  for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
+    {
+#ifdef BFD_ASSEMBLER
+      subseg_set (frchainP->frch_seg, frchainP->frch_subseg);
+#else
+      subseg_new (frchainP->frch_seg, frchainP->frch_subseg);
+#endif
+      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
+      /* frag_align will have left a new frag.
+	 Use this last frag for an empty ".fill".
+
+	 For this segment ...
+	 Create a last frag. Do not leave a "being filled in frag".  */
+      frag_wane (frag_now);
+      frag_now->fr_fix = 0;
+      know (frag_now->fr_next == NULL);
+    }
+
+  /* From now on, we don't care about sub-segments.  Build one frag chain
+     for each segment. Linked thru fr_next.  */
+
+#ifdef BFD_ASSEMBLER
+  /* Remove the sections created by gas for its own purposes.  */
+  {
+    asection **seclist, *sec;
+    seclist = &stdoutput->sections;
+    while (seclist && *seclist)
+      {
+	sec = *seclist;
+	while (sec == reg_section || sec == expr_section)
+	  {
+	    sec = sec->next;
+	    *seclist = sec;
+	    stdoutput->section_count--;
+	    if (!sec)
+	      break;
+	  }
+	if (*seclist)
+	  seclist = &(*seclist)->next;
+      }
+  }
+
+  bfd_map_over_sections (stdoutput, chain_frchains_together, (char *) 0);
+#else
+  remove_subsegs (frchain_root, SEG_TEXT, &text_frag_root, &text_last_frag);
+  remove_subsegs (data0_frchainP, SEG_DATA, &data_frag_root, &data_last_frag);
+  remove_subsegs (bss0_frchainP, SEG_BSS, &bss_frag_root, &bss_last_frag);
+#endif
+
+  /* We have two segments. If user gave -R flag, then we must put the
+     data frags into the text segment. Do this before relaxing so
+     we know to take advantage of -R and make shorter addresses.  */
+#if !defined (OBJ_AOUT) || defined (BFD_ASSEMBLER)
+  if (flagseen['R'])
+    {
+      merge_data_into_text ();
+    }
+#endif
+
+#ifdef BFD_ASSEMBLER
+  bfd_map_over_sections (stdoutput, relax_and_size_seg, (char *) 0);
+#else
+  relax_and_size_all_segments ();
 #endif /* BFD_ASSEMBLER */
 
 #ifndef BFD_ASSEMBLER
@@ -1308,7 +1318,7 @@ write_object_file ()
 	    punt_it:
 	      prev = symbol_previous (symp);
 	      next = symbol_next (symp);
-#ifdef DEBUG
+#ifdef DEBUG_SYMS
 	      verify_symbol_chain_2 (symp);
 #endif
 	      if (prev)
@@ -1324,7 +1334,7 @@ write_object_file ()
 		symbol_previous (next) = prev;
 	      else
 		symbol_lastP = prev;
-#ifdef DEBUG
+#ifdef DEBUG_SYMS
 	      if (prev)
 		verify_symbol_chain_2 (prev);
 	      else if (next)
