@@ -1,3 +1,16 @@
+2000-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (native_find_global_pointer):  New global variable.
+	(struct gdbarch_tdep): Add member find_global_pointer.
+	(ia64_gdbarch_init): Initialize find_global_pointer member.  Also,
+	tell the gdbarch machinery that we have floating point registers.
+	(FIND_GLOBAL_POINTER): New macro.
+	(generic_elf_find_global_pointer):  Renamed from find_global_pointer.
+	(find_func_descr, ia64_push_return_address):  Call
+	FIND_GLOBAL_POINTER instead of find_global_pointer.
+	(process_note_abi_tag_sections):  Enable code previously disabled
+	by #if 0.
+
 2000-11-07  Daniel Berlin  <dberlin@redhat.com>
 
 	* dwarf2read.c: Revert June 5th change for caching of types,
