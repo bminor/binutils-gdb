@@ -1,3 +1,8 @@
+2002-05-23  Michael Snyder  <msnyder@redhat.com>
+
+	* cli/cli-dump.c (restore_command): Use parse_and_eval_long
+	for input, rather than parse_and_eval_address.  
+
 2002-05-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* d10v-tdep.c: Include "gdb/sim-d10v.h" instead of "sim-d10v.h".
