@@ -1,8 +1,9 @@
 Wed May 15 11:02:48 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
-	* gdb.texinfo: (1) better introductory example; (2) more
+	* doc/gdb.texinfo: (1) better introductory example; (2) more
 	consistent use of @code, @samp, @file, @kbd throughout; small
-	cleanups to first three nodes.
+	cleanups to first three nodes; (3) new "Contributors" node;
+	(4) Appendix, Renamed Commands
 
 	* pretex.m4: modify explanatory text slightly (and redefine
 	"regexp") to keep GNU m4 from complaining.  (It still crashes
