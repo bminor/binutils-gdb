@@ -456,7 +456,7 @@ OP_500 ()
   trace_input ("sld.w", OP_LOAD16, 4);
   temp = OP[1];
   temp &= 0x7f;
-  op2 = temp << 2;
+  op2 = temp << 1;
   result = load_mem (State.regs[30] + op2, 4);
   State.regs[OP[0]] = result;
   trace_output (OP_LOAD16);
@@ -505,7 +505,7 @@ OP_501 ()
   op0 = State.regs[OP[0]];
   temp = OP[1];
   temp &= 0x7f;
-  op1 = temp << 2;
+  op1 = temp << 1;
   store_mem (State.regs[30] + op1, 4, op0);
   trace_output (OP_STORE16);
 }
