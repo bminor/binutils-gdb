@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "c-lang.h" /* For c_val_print */
 #include "typeprint.h"
 #include "ch-lang.h"
+#include "annotate.h"
 
 static void
 chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,

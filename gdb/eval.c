@@ -1,5 +1,5 @@
 /* Evaluate expressions for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -28,15 +28,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "demangle.h"
 #include "language.h"	/* For CAST_IS_CONVERSION */
-#include "f-lang.h" /* for array bound stuff */
+#include "f-lang.h"	/* for array bound stuff */
 
 /* Prototypes for local functions. */
 
 static value_ptr evaluate_subexp_for_sizeof PARAMS ((struct expression *,
 						     int *));
-
-value_ptr evaluate_subexp_with_coercion PARAMS ((struct expression *,
-							int *, enum noside));
 
 static value_ptr evaluate_subexp_for_address PARAMS ((struct expression *,
 						      int *, enum noside));
@@ -951,7 +948,6 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	int ndimensions=1,i;
 	struct type *tmp_type; 
 	int offset_item;   /* The array offset where the item lives */ 
-	int fixed_subscript; 
 
 	if (nargs > MAX_FORTRAN_DIMS)
 	  error ("Too many subscripts for F77 (%d Max)", MAX_FORTRAN_DIMS);
@@ -1579,7 +1575,7 @@ calc_f77_array_dims (array_type)
    
   tmp_type = array_type; 
 
-  while (tmp_type = TYPE_TARGET_TYPE (tmp_type))
+  while ((tmp_type = TYPE_TARGET_TYPE (tmp_type)))
     {
       if (TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY)
 	++ndimen;

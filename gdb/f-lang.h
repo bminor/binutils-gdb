@@ -86,6 +86,8 @@ extern int f77_get_dynamic_lowerbound PARAMS ((struct type *, int *));
 
 extern void f77_get_dynamic_array_length PARAMS ((struct type *)); 
 
+extern int calc_f77_array_dims PARAMS ((struct type *));
+
 #define DEFAULT_DOTMAIN_NAME_IN_MF77            ".MAIN_"
 #define DEFAULT_MAIN_NAME_IN_MF77               "MAIN_"
 #define DEFAULT_DOTMAIN_NAME_IN_XLF_BUGGY       ".main "

@@ -1039,8 +1039,8 @@ yylex ()
 	      got_dot = got_d = 1;
 	    else if (!hex && !got_dot && *p == '.')
 	      got_dot = 1;
-	    else if ((got_e && (p[-1] == 'e' || p[-1] == 'E'))
-		     || (got_d && (p[-1] == 'd' || p[-1] == 'D'))
+	    else if (((got_e && (p[-1] == 'e' || p[-1] == 'E'))
+		     || (got_d && (p[-1] == 'd' || p[-1] == 'D')))
 		     && (*p == '-' || *p == '+'))
 	      /* This is the sign of the exponent, not the end of the
 		 number.  */
@@ -1114,7 +1114,6 @@ yylex ()
      and $$digits (equivalent to $<-digits> if you could type that).
      Make token type LAST, and put the number (the digits) in yylval.  */
   
- tryname:
   if (*tokstart == '$')
     {
       register int negate = 0;

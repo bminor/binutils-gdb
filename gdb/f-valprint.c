@@ -372,10 +372,8 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      enum val_prettyprint pretty;
 {
   register unsigned int i = 0;		/* Number of characters printed */
-  unsigned len;
   struct type *elttype;
   LONGEST val;
-  char *localstr;
   char *straddr;
   CORE_ADDR addr;
   
