@@ -6763,7 +6763,7 @@ delete_breakpoint (struct breakpoint *bpt)
   breakpoint_delete_event (bpt->number);
 
   if (bpt->inserted)
-    remove_breakpoint (bpt, mark_uninserted);
+    remove_breakpoint (bpt, mark_inserted);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
