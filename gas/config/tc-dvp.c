@@ -662,25 +662,38 @@ assemble_vif (str)
 	  /* Put a symbol at the start of data.  The relaxation code uses
 	     this to figure out how many bytes to insert.  $.mpgloc
 	     calculations use it.  The disassembler uses it.  The overlay
-	     tracking table uses it.  */
+	     tracking table uses it.
+	     Update $.mpgloc.
+	     Create an overlay section.  */
 	  {
 	    int mpgloc = vif_get_mpgloc ();
-	    offsetT addr = mpgloc * 8;
-	    const char * section_name = vuoverlay_section_name (addr);
+	    offsetT addr;
+	    const char * section_name;
+
+	    /* Get the value of mpgloc.  */
+	    if (mpgloc != -1)
+	      {
+		/* The value is recorded in bytes, mpgloc is in dwords.  */
+		mpgloc_sym = expr_build_uconstant (mpgloc * 8);
+	      }
+	    else
+	      {
+		/* Use the current value.
+		   ??? Things get complicated if this can't be resolved at this
+		   point.  Not sure what to do.  */
+		resolve_symbol_value (mpgloc_sym, 1);
+	      }
+
+	    addr = S_GET_VALUE (mpgloc_sym);
+	    section_name = vuoverlay_section_name (addr);
+
 	    vif_data_start = create_colon_label (STO_DVP_VU,
 						 VUOVERLAY_START_PREFIX,
 						 section_name);
 	    insn_frag->fr_symbol = vif_data_start;
 
-	    /* Get the value of mpgloc.  If it wasn't '*'
-	       then update $.mpgloc.  */
-	    /* FIXME: Need to handle `*' case as well.  */
-	    if (mpgloc != -1)
-	      {
-		/* The value is recorded in bytes.  */
-		create_vuoverlay_section (section_name, addr,
-					  vif_data_start, vif_data_end);
-	      }
+	    create_vuoverlay_section (section_name, addr,
+				      vif_data_start, vif_data_end);
 	  }
 	}
       else if (opcode->flags & VIF_OPCODE_DIRECT)
@@ -1523,7 +1536,10 @@ dvp_frob_label (sym)
 	 Not sure how we can distinguish them other than by some prefix.  */
       && *name != '.' && *name != '$'
       /* Check for recursive invocation creating the _$name.  */
-      && strncmp (name, VU_LABEL_PREFIX, sizeof (VU_LABEL_PREFIX) - 1) != 0)
+      && strncmp (name, VU_LABEL_PREFIX, sizeof (VU_LABEL_PREFIX) - 1) != 0
+      /* -gstabs creates FAKE_LABEL_NAME labels.  There's probably a better
+	 test than this.  */
+      && ! S_IS_LOCAL (sym))
     {
       /* Move this symbol to the vu overlay.  */
       symbolS * cur_mpgloc = compute_mpgloc (mpgloc_sym, vif_data_start,
@@ -2301,8 +2317,10 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
   begin_label = create_colon_label (STO_DVP_VU, "__start_", section_name);
 #endif
 
+#if 0 /* already done */
   /* Initialize $.mpgloc.  */
   mpgloc_sym = expr_build_uconstant (addr);
+#endif
 
 #if 0 /* $.mpgloc is kept in the ABS section.  */
   S_SET_SEGMENT (mpgloc_sym, vuoverlay_section);
