@@ -1,3 +1,7 @@
+2002-05-30  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* run.c: Fix formatting.
+
 2002-05-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* run-sim.h: New header.  Provide prototypes for functions used

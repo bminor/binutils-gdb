@@ -59,7 +59,7 @@ static char *myname;
 extern int getopt ();
 
 #ifdef NEED_UI_LOOP_HOOK
-/* Gdb foolery. This is only needed for gdb using a gui. */
+/* Gdb foolery. This is only needed for gdb using a gui.  */
 int (*ui_loop_hook) PARAMS ((int signo));
 #endif
 
@@ -108,7 +108,7 @@ main (ac, av)
 
   /* FIXME: This is currently being migrated into sim_open.
      Simulators that use functions such as sim_size() still require
-     this. */
+     this.  */
   default_callback.init (&default_callback);
   sim_set_callbacks (&default_callback);
 
@@ -120,9 +120,9 @@ main (ac, av)
      do all argv processing.  */
 
 #ifdef SIM_H8300 /* FIXME: quick hack */
-  while ((i = getopt (ac, av, "a:c:m:op:s:hStv")) != EOF) 
+  while ((i = getopt (ac, av, "a:c:m:op:s:hStv")) != EOF)
 #else
-  while ((i = getopt (ac, av, "a:c:m:op:s:tv")) != EOF) 
+  while ((i = getopt (ac, av, "a:c:m:op:s:tv")) != EOF)
 #endif
     switch (i)
       {
@@ -153,7 +153,7 @@ main (ac, av)
 #ifdef SIM_HAVE_ENVIRONMENT
       case 'o':
 	/* Operating enironment where any signals are delivered to the
-           target. */
+           target.  */
 	operating_p = 1;
 	break;
 #endif SIM_HAVE_ENVIRONMENT
@@ -178,11 +178,11 @@ main (ac, av)
 	/* FIXME: Quick hack, to be replaced by more general facility.  */
 #ifdef SIM_H8300
       case 'h':
-	set_h8300h (1,0);
+	set_h8300h (1, 0);
 	break;
       case 'S':
-	set_h8300h (1,1);
-        break;
+	set_h8300h (1, 1);
+	break;
 #endif
       default:
 	usage ();
@@ -202,9 +202,9 @@ main (ac, av)
     }
 
   abfd = bfd_openr (name, 0);
-  if (!abfd) 
+  if (!abfd)
     {
-      fprintf (stderr, "%s: can't open %s: %s\n", 
+      fprintf (stderr, "%s: can't open %s: %s\n",
 	       myname, name, bfd_errmsg (bfd_get_error ()));
       exit (1);
     }
@@ -231,7 +231,7 @@ main (ac, av)
 #endif
 
   /* Ensure that any run-time initialisation that needs to be
-     performed by the simulator can occur. */
+     performed by the simulator can occur.  */
   sd = sim_open (SIM_OPEN_STANDALONE, &default_callback, abfd, sim_argv);
   if (sd == 0)
     exit (1);
@@ -245,7 +245,7 @@ main (ac, av)
 #ifdef SIM_HAVE_ENVIRONMENT
   /* NOTE: An old simulator supporting the operating environment MUST
      provide sim_set_trace() and not sim_trace(). That way
-     sim_stop_reason() can be used to determine any stop reason. */
+     sim_stop_reason() can be used to determine any stop reason.  */
   if (trace)
     sim_set_trace ();
   sigrc = 0;
@@ -299,14 +299,14 @@ main (ac, av)
     case sim_signalled:
     case sim_stopped:
       if (sigrc != 0)
-        fprintf (stderr, "program stopped with signal %d.\n", sigrc);
+	fprintf (stderr, "program stopped with signal %d.\n", sigrc);
       break;
 
     case sim_exited:
       break;
 
     case sim_running:
-    case sim_polling: /* these indicate a serious problem */
+    case sim_polling: /* These indicate a serious problem.  */
       abort ();
       break;
 
