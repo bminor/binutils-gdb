@@ -51,7 +51,7 @@ INSTALL_DATA = $(INSTALL)
 
 AS = as
 AR = ar
-AR_FLAGS = qc
+AR_FLAGS = rc
 CFLAGS = -g
 CXXFLAGS = -g -O
 RANLIB = ranlib
