@@ -1566,6 +1566,27 @@ get_specific (opcode, operands)
 	  sh_operand_info *user = operands + n;
 	  sh_arg_type arg = this_try->arg[n];
 
+ 	  /* If this is a parallel insn check to see if both
+	     parts have the same destination register.  */
+ 	  if ((n == 2) && (this_try->nibbles[0] == PPI))
+	    {
+	      static boolean bIsPPI = false;
+	      static int nLastDestReg;
+
+	      if (!bIsPPI)
+		{
+		  bIsPPI = true;
+		  nLastDestReg = user->reg;
+		}
+	      else /* Second insn.  */
+		{
+		  if (nLastDestReg == user->reg)
+		    as_warn (_("destination register is same for parallel insns"));
+		  
+		  bIsPPI = false;
+		}
+	    }
+
 	  switch (arg)
 	    {
 	    case A_DISP_PC:
