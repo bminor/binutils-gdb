@@ -1,3 +1,13 @@
+2001-04-07  Steven J. Hill  <sjhill@cotw.com>
+
+	* config/tc-mips.c: Support ELF64 for traditional MIPS targets.
+
+	* Makefile.am: (TARG_ENV_HFILES): Add tc-mips.h.
+	* Makefile.in: Regenerated.
+
+	* configure.in: Use traditional MIPS targets for Linux/MIPS.
+	* configure: Regenerated.
+
 2001-04-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (xr_registers): Added `pc'.

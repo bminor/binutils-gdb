@@ -126,7 +126,8 @@ mips_target_format ()
 #ifdef TE_TMIPS
       /* This is traditional mips */
       return (target_big_endian
-	      ? "elf32-tradbigmips" : "elf32-tradlittlemips");
+	      ? (mips_64 ? "elf64-tradbigmips" : "elf32-tradbigmips")
+	      : (mips_64 ? "elf64-tradlittlemips" : "elf32-tradlittlemips"));
 #else
       return (target_big_endian
 	      ? (mips_64 ? "elf64-bigmips" : "elf32-bigmips")

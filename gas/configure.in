@@ -346,9 +346,10 @@ changequote([,])dnl
       mips-*-irix*)         fmt=ecoff ;;
       mips-*-lnews*)        fmt=ecoff em=lnews ;;
       mips-*-riscos*)       fmt=ecoff ;;
-      mips-*-sysv4*MP*)     fmt=elf em=tmips ;;
+      mips-*-sysv4*MP* | mips-*-linux-gnu* | mips-*-gnu*)
+			    fmt=elf em=tmips ;;
       mips-*-sysv*)         fmt=ecoff ;;
-      mips-*-elf* | mips-*-rtems* | mips-*-linux-gnu* | mips-*-gnu* | mips-*-openbsd*)
+      mips-*-elf* | mips-*-rtems* | mips-*-openbsd*)
 			    fmt=elf ;;
       mips-*-vxworks*)      fmt=elf
 			    AC_DEFINE(MIPS_STABS_ELF, 1,
