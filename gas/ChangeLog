@@ -1,5 +1,14 @@
 Wed Sep 21 11:11:30 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* config/tc-ppc.c (ppc_current_block): New static variable.
+	(ppc_stabx): Set sy_tc.within of a C_STSYM symbol to
+	ppc_current_block.  Don't move around any stab symbol, just those
+	for common symbols.
+	(ppc_bs): Set ppc_current_block.
+	(ppc_es): Clear ppc_current_block.
+	(ppc_frob_symbol): Set the value of a C_STSYM symbol to the offset
+	from the csect of the enclosing block.
+
 	* config/tc-mips.c (insns_since_cache_access): Remove.
 	(append_insn): Remove setting of insns_since_cache_access, and
 	special 4600 handling; it turns out not to be required.
