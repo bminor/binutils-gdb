@@ -38,7 +38,7 @@ CODE_FRAGMENT
 .    CONST char *filename;                
 .
 .    {* A pointer to the target jump table.             *}
-.    struct bfd_target *xvec;
+.    const struct bfd_target *xvec;
 .
 .    {* To avoid dragging too many header files into every file that
 .       includes `<<bfd.h>>', IOSTREAM has been declared as a "char
@@ -696,7 +696,7 @@ bfd_scan_vma (string, end, base)
 
   /* Let the host do it if possible.  */
   if (sizeof(bfd_vma) <= sizeof(unsigned long))
-    return (bfd_vma) strtoul (string, 0, base);
+    return (bfd_vma) strtoul (string, end, base);
 
   /* A negative base makes no sense, and we only need to go as high as hex.  */
   if ((base < 0) || (base > 16))
@@ -787,6 +787,9 @@ DESCRIPTION
 .#define bfd_stat_arch_elt(abfd, stat) \
 .        BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
 .
+.#define bfd_update_armap_timestamp(abfd) \
+.        BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
+.
 .#define bfd_set_arch_mach(abfd, arch, mach)\
 .        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .
@@ -808,6 +811,18 @@ DESCRIPTION
 .
 .#define bfd_free_cached_info(abfd) \
 .       BFD_SEND (abfd, _bfd_free_cached_info, (abfd))
+.
+.#define bfd_get_dynamic_symtab_upper_bound(abfd) \
+.	BFD_SEND (abfd, _bfd_get_dynamic_symtab_upper_bound, (abfd))
+.
+.#define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
+.	BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
+.
+.#define bfd_get_dynamic_reloc_upper_bound(abfd) \
+.	BFD_SEND (abfd, _bfd_get_dynamic_reloc_upper_bound, (abfd))
+.
+.#define bfd_canonicalize_dynamic_reloc(abfd, arels, asyms) \
+.	BFD_SEND (abfd, _bfd_canonicalize_dynamic_reloc, (abfd, arels, asyms))
 .
 
 */
