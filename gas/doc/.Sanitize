@@ -129,6 +129,7 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 			mv new $i
 		fi
 	done
+  fi
 fi
 
 # Don't try to clean directories here, as the 'mv' command will fail.
