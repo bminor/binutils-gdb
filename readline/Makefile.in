@@ -7,6 +7,9 @@
 srcdir = .
 destdir = /usr/local
 
+INSTALL_PROG = install -c
+INSTALL_FILE = $(INSTALL_PROG)
+
 #### host and target dependent Makefile fragments come in here.
 ##
 
@@ -102,13 +105,13 @@ includes:
 		 mkdir $(INCDIR)/readline;\
 		 chmod a+r $(INCDIR)/readline;\
 		fi
-		$(CP) readline.h keymaps.h chardefs.h $(INCDIR)/readline/
+		$(INSTALL_FILE) readline.h keymaps.h chardefs.h $(INCDIR)/readline/
 clean:
 		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
 
 $(DESTDIR)/libreadline.a: libreadline.a
 		-mv $(DESTDIR)/libreadline.a $(DESTDIR)/libreadline.old
-		cp libreadline.a $(DESTDIR)/libreadline.a
+		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.a
 		$(RANLIB) -t $(DESTDIR)/libreadline.a
 
 # Copy the object files from a particular stage into a subdirectory.
