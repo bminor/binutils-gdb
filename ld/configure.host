@@ -184,6 +184,10 @@ m88*-motorola-sysv3)
   HOSTING_LIBS="$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} -print-file-name=crtend.o; fi`'
   ;;
 
+powerpc64*-*-linux-gnu*)
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib64/ld64.so.1,"`
+  ;;
+
 powerpc*-*-linux-gnu*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld.so.1,"`
   ;;

@@ -1,5 +1,7 @@
 2002-11-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* configure.host: Correct dynamic-linker for powerpc64 hosts.
+
 	* Makefile.am (eelf32ppcwindiss.c): Correct dependencies.
 	* Makefile.in: Regenerate.
 
