@@ -1,3 +1,10 @@
+2000-11-07  Peter Targett  <peter.targett@arccores.com>
+
+	* gas/config/tc-arc.h: Avoid warnings for LITTLE_ENDIAN and
+	BIG_ENDIAN macros.
+	* gas/config/tc-arc.c: Use S_IS_LOCAL to test local symbols.
+	Fix compile time warning messages.
+	
 2000-11-07  Nick Clifton  <nickc@redhat.com>
 
 	* stabs.c (generate_asm_file): Increase length of xmalloc'ed

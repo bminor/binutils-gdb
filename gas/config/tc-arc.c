@@ -113,7 +113,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 int
 md_parse_option (c, arg)
      int c;
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -169,7 +169,7 @@ static void
 init_opcode_tables (mach)
      int mach;
 {
-  register unsigned int i;
+  int i;
   char *last;
 
   if ((arc_suffix_hash = hash_new ()) == NULL)
@@ -380,12 +380,12 @@ md_assemble (str)
 
 	  /* We have an operand.  Pick out any modifiers.  */
 	  mods = 0;
-	  while (ARC_MOD_P (arc_operands[arc_operand_map[*syn]].flags))
+	  while (ARC_MOD_P (arc_operands[arc_operand_map[(int) *syn]].flags))
 	    {
-	      mods |= arc_operands[arc_operand_map[*syn]].flags & ARC_MOD_BITS;
+	      mods |= arc_operands[arc_operand_map[(int) *syn]].flags & ARC_MOD_BITS;
 	      ++syn;
 	    }
-	  operand = arc_operands + arc_operand_map[*syn];
+	  operand = arc_operands + arc_operand_map[(int) *syn];
 	  if (operand->fmt == 0)
 	    as_fatal (_("unknown syntax format character `%c'"), *syn);
 
@@ -494,7 +494,6 @@ md_assemble (str)
 	  else
 	    /* This is either a register or an expression of some kind.  */
 	    {
-	      char c;
 	      char *hold;
 	      const struct arc_operand_value *reg = NULL;
 	      long value = 0;
@@ -570,7 +569,7 @@ md_assemble (str)
 			(insn, operand, mods, reg, 0L, &junk);
 		    }
 		  else
-		    fixups[fc].opindex = arc_operand_map[*syn];
+		    fixups[fc].opindex = arc_operand_map[(int) *syn];
 		  ++fc;
 		  value = 0;
 		}
@@ -636,7 +635,6 @@ md_assemble (str)
 	    int cc_set_p = 0;
 	    /* 1 if conditional branch, including `b' "branch always" */
 	    int cond_branch_p = opcode->flags & ARC_OPCODE_COND_BRANCH;
-	    int need_cc_nop_p = 0;
 
 	    for (i = 0; i < num_suffixes; ++i)
 	      {
@@ -754,12 +752,13 @@ md_assemble (str)
 
 static void
 arc_common (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;
   char *p;
-  int temp, size;
+  int temp;
+  unsigned int size;
   symbolS *symbolP;
 
   name = input_line_pointer;
@@ -816,14 +815,13 @@ arc_common (ignore)
 	  temp = 0;
 	  as_warn (_("Common alignment negative; 0 assumed"));
 	}
-      if (symbolP->local)
+      if (S_IS_LOCAL(symbolP))
 	{
 	  segT old_sec;
 	  int old_subsec;
 	  char *p;
 	  int align;
 
-	allocate_bss:
 	  old_sec = now_seg;
 	  old_subsec = now_subseg;
 	  align = temp;
@@ -886,7 +884,7 @@ arc_common (ignore)
 
 static void
 arc_cpu (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int mach;
   char c;
@@ -1055,8 +1053,8 @@ md_section_align (segment, size)
 
 int
 md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
+     fragS *fragp ATTRIBUTE_UNUSED;
+     asection *seg ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -1065,9 +1063,9 @@ md_estimate_size_before_relax (fragp, seg)
 
 void
 md_convert_frag (abfd, sec, fragp)
-     bfd *abfd;
-     asection *sec;
-     fragS *fragp;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     fragS *fragp ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -1141,7 +1139,7 @@ md_operand (expressionP)
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -1156,7 +1154,7 @@ md_undefined_symbol (name)
 void
 arc_parse_cons_expression (exp, nbytes)
      expressionS *exp;
-     int nbytes;
+     int nbytes ATTRIBUTE_UNUSED;
 {
   expr (0, exp);
 }
@@ -1441,7 +1439,7 @@ md_apply_fix3 (fixP, valueP, seg)
 
 arelent *
 tc_gen_reloc (section, fixP)
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      fixS *fixP;
 {
   arelent *reloc;

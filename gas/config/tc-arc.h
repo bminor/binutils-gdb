@@ -27,6 +27,14 @@
 
 #define TARGET_ARCH bfd_arch_arc
 
+#ifdef LITTLE_ENDIAN
+#undef LITTLE_ENDIAN
+#endif
+
+#ifdef BIG_ENDIAN
+#undef BIG_ENDIAN
+#endif
+
 #define LITTLE_ENDIAN   1234
 #define BIG_ENDIAN      4321
 
