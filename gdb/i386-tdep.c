@@ -1028,7 +1028,18 @@ i386_store_return_value (struct type *type, char *valbuf)
 static CORE_ADDR
 i386_extract_struct_value_address (struct regcache *regcache)
 {
-  return regcache_raw_read_as_address (regcache, LOW_RETURN_REGNUM);
+  /* NOTE: cagney/2002-08-12: Replaced a call to
+     regcache_raw_read_as_address() with a call to
+     regcache_cooked_read_unsigned().  The old, ...as_address function
+     was eventually calling extract_unsigned_integer (via
+     extract_address) to unpack the registers value.  The below is
+     doing an unsigned extract so that it is functionally equivalent.
+     The read needs to be cooked as, otherwise, it will never
+     correctly return the value of a register in the [NUM_REGS
+     .. NUM_REGS+NUM_PSEUDO_REGS) range.  */
+  ULONGEST val;
+  regcache_cooked_read_unsigned (regcache, LOW_RETURN_REGNUM, &val);
+  return val;
 }
 
 

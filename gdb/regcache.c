@@ -366,17 +366,6 @@ regcache_valid_p (struct regcache *regcache, int regnum)
   return regcache->raw_register_valid_p[regnum];
 }
 
-CORE_ADDR
-regcache_raw_read_as_address (struct regcache *regcache, int regnum)
-{
-  char *buf;
-  gdb_assert (regcache != NULL);
-  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
-  buf = alloca (regcache->descr->sizeof_register[regnum]);
-  regcache_raw_read (regcache, regnum, buf);
-  return extract_address (buf, regcache->descr->sizeof_register[regnum]);
-}
-
 char *
 deprecated_grub_regcache_for_registers (struct regcache *regcache)
 {
@@ -694,6 +683,32 @@ regcache_cooked_read (struct regcache *regcache, int regnum, void *buf)
   else
     gdbarch_pseudo_register_read (regcache->descr->gdbarch, regcache,
 				  regnum, buf);
+}
+
+void
+regcache_cooked_read_signed (struct regcache *regcache, int regnum,
+			     LONGEST *val)
+{
+  char *buf;
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  regcache_cooked_read (regcache, regnum, buf);
+  (*val) = extract_signed_integer (buf,
+				   regcache->descr->sizeof_register[regnum]);
+}
+
+void
+regcache_cooked_read_unsigned (struct regcache *regcache, int regnum,
+			       ULONGEST *val)
+{
+  char *buf;
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  regcache_cooked_read (regcache, regnum, buf);
+  (*val) = extract_unsigned_integer (buf,
+				     regcache->descr->sizeof_register[regnum]);
 }
 
 /* Write register REGNUM at MYADDR to the target.  MYADDR points at

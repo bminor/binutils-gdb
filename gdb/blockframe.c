@@ -1215,7 +1215,20 @@ generic_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
   struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
 
   if (dummy_regs)
-    return regcache_raw_read_as_address (dummy_regs, regno);
+    {
+      /* NOTE: cagney/2002-08-12: Replaced a call to
+	 regcache_raw_read_as_address() with a call to
+	 regcache_cooked_read_unsigned().  The old, ...as_address
+	 function was eventually calling extract_unsigned_integer (via
+	 extract_address) to unpack the registers value.  The below is
+	 doing an unsigned extract so that it is functionally
+	 equivalent.  The read needs to be cooked as, otherwise, it
+	 will never correctly return the value of a register in the
+	 [NUM_REGS .. NUM_REGS+NUM_PSEUDO_REGS) range.  */
+      ULONGEST val;
+      regcache_cooked_read_unsigned (dummy_regs, regno, &val);
+      return val;
+    }
   else
     return 0;
 }

@@ -39,12 +39,25 @@ void regcache_raw_read (struct regcache *regcache, int rawnum, void *buf);
 void regcache_raw_write (struct regcache *regcache, int rawnum,
 			 const void *buf);
 int regcache_valid_p (struct regcache *regcache, int regnum);
-CORE_ADDR regcache_raw_read_as_address (struct regcache *regcache, int rawnum);
 
 /* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */
 void regcache_cooked_read (struct regcache *regcache, int rawnum, void *buf);
 void regcache_cooked_write (struct regcache *regcache, int rawnum,
 			    const void *buf);
+
+/* NOTE: cagney/2002-08-13: At present GDB has no reliable mechanism
+   for indicating when a ``cooked'' register was constructed from
+   invalid or unavailable ``raw'' registers.  One fairly easy way of
+   adding such a mechanism would be for the cooked functions to return
+   a register valid indication.  Given the possibility of such a
+   change, the extract functions below use a reference parameter,
+   rather than a function result.  */
+
+/* Read a register as a signed/unsigned quantity.  */
+extern void regcache_cooked_read_signed (struct regcache *regcache,
+					 int regnum, LONGEST *val);
+extern void regcache_cooked_read_unsigned (struct regcache *regcache,
+					   int regnum, ULONGEST *val);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
