@@ -54,7 +54,6 @@ config
 config.guess
 config.sub
 configure
-configure.bat
 configure.in
 cvs
 deja-gnu
