@@ -16,6 +16,7 @@ Wed Aug 21 18:21:09 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	* xm-hp300bsd.h:  Define HOST_BYTE_ORDER.  Redefine INT_MIN,
 	since system include file defines it differently from "defs.h",
 	though the two are equivalent for our purposes.
+	* tconfig/hp300bsd:  Add m68k-tdep.o.
 
 Tue Aug 20 16:01:11 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
