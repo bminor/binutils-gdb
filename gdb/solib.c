@@ -844,6 +844,13 @@ no_shared_libraries (char *ignored, int from_tty)
   do_clear_solib (NULL);
 }
 
+static void
+reload_shared_libraries (char *ignored, int from_tty)
+{
+  no_shared_libraries (NULL, from_tty);
+  solib_add (NULL, from_tty, NULL, auto_solib_add);
+}
+
 void
 _initialize_solib (void)
 {
@@ -873,6 +880,7 @@ inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 For other (relative) files, you can add values using `set solib-search-path'.",
 		   &setlist);
   add_show_from_set (c, &showlist);
+  set_cmd_cfunc (c, reload_shared_libraries);
   set_cmd_completer (c, filename_completer);
 
   /* Set the default value of "solib-absolute-prefix" from the sysroot, if
@@ -885,5 +893,6 @@ For other (relative) files, you can add values using `set solib-search-path'.",
 This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
 		   &setlist);
   add_show_from_set (c, &showlist);
+  set_cmd_cfunc (c, reload_shared_libraries);
   set_cmd_completer (c, filename_completer);
 }

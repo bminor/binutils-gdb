@@ -1,3 +1,9 @@
+2003-02-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib.c (reload_shared_libraries): New function.
+	(_initialize_solib): Add callbacks for ``set solib-search-path''
+	and ``set solib-absolute-prefix''.
+
 2003-02-20  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.h (SYMBOL_PRINT_NAME): Rename from SYMBOL_SOURCE_NAME;
