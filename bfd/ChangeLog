@@ -1,5 +1,10 @@
 2002-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Cast signedness
+	mismatch.
+
+2002-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* elfxx-mips.c (ABI_64_P): Remove superfluous check.
 
 2002-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>

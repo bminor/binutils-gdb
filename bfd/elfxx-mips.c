@@ -2932,7 +2932,8 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 
       /* The relocation is always an REL32 relocation because we don't
 	 know where the shared library will wind up at load-time.  */
-      outrel[0].r_info = ELF_R_INFO (output_bfd, indx, R_MIPS_REL32);
+      outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
+				     R_MIPS_REL32);
 
       /* Adjust the output offset of the relocation to reference the
 	 correct location in the output file.  */
