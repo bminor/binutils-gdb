@@ -4,8 +4,8 @@ of these, you should consider sending mail to the same address, to
 find out whether anyone else is working on it.
 
 
-			Known problems in GDB 5.0
-			=========================
+		Known problems in GDB 5.0
+		=========================
 
 Below is a list of problems identified during the GDB 5.0 release
 cycle.  People hope to have these problems fixed in a follow-on
@@ -32,72 +32,6 @@ contained the directory.  The bug has been fixed in the current
 AUTOMAKE sources.  Automake snapshots can be found in:
 	ftp://sourceware.cygnus.com/pub/gdb/snapshots
 and	ftp://sourceware.cygnus.com/pub/binutils
-
---
-
-Generic: lin-thread cannot handle thread exit (Mark Kettenis, Michael
-Snyder) http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00525.html
-
-The thread_db assisted debugging code doesn't handle exiting threads
-properly, at least in combination with glibc 2.1.3 (the framework is
-there, just not the actual code).  There are at least two problems
-that prevent this from working.
-
-As an additional reference point, the pre thread_db code did not work
-either.
-
---
-
-Java (Anthony Green, David Taylor)
-
-Anthony Green has a number of Java patches that did not make it into
-the 5.0 release.
-
-Patch: java tests
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00512.html
-
-Patch: java booleans
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00515.html
-
-Patch: handle N_MAIN stab
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00527.html
-
---
-
-Pascal (Pierre Muller, David Taylor)
-
-Pierre Muller has contributed patches for adding Pascal Language
-support to GDB.
-
-2 pascal language patches inserted in database
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
-
-Indent -gnu ?
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
-
---
-
-GNU/Linux/x86 and random thread signals (and Solaris/SPARC but not
-Solaris/x86).
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00336.html
-
-Christopher Blizzard writes:
-
-So, I've done some more digging into this and it looks like Jim
-Kingdon has reported this problem in the past:
-
-http://sourceware.cygnus.com/ml/bug-gdb/1999-10/msg00058.html
-
-I can reproduce this problem both with and without Tom's patch.  Has
-anyone seen this before?  Maybe have a solution for it hanging around?
-:)
-
-There's a test case for this documented at:
-
-when debugging threaded applications you get extra SIGTRAPs
-http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=9565
-
-[There should be a GDB testcase - cagney]
 
 --
 
@@ -169,21 +103,39 @@ Dan Nicolaescu writes:
 
 --
 
-GDB5 TOT on unixware 7
-http://sourceware.cygnus.com/ml/gdb/2000-04/msg00119.html
-
-Robert Lipe writes:
-> I just spun the top of tree of the GDB5 branch on UnixWare 7.  As a
-> practical matter, the current thread support is somewhat more annoying
-> than when GDB was thread-unaware.
-
---
-
-			Code Cleanups
-			=============
+		Code Cleanups: Next Release
+		===========================
 
 The following are small cleanups that will hopefully be completed by
 the follow on to 5.0.
+
+--
+
+Delete macro TARGET_BYTE_ORDER_SELECTABLE.
+
+Patches in the database.
+
+--
+
+Purge PARAMS
+
+Eliminate all uses of PARAMS in GDB's source code.
+
+--
+
+Elimination of make_cleanup_func. (Andrew Cagney)
+
+make_cleanup_func elimination
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
+
+--
+
+		Code Cleanups: General
+		======================
+
+The following are more general cleanups and fixes.  They are not tied
+to any specific release.
 
 --
 
@@ -210,92 +162,9 @@ file at a time.
 
 --
 
-Delete macro TARGET_BYTE_ORDER_SELECTABLE.
-
-Patches in the database.
-
---
-
-Updated readline
-
-Readline 4.? is out.  A merge wouldn't hurt.
-
---
-
-Purge PARAMS
-
-Eliminate all uses of PARAMS in GDB's source code.
-
---
-
-Elimination of make_cleanup_func. (Andrew Cagney)
-
-make_cleanup_func elimination
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
-
---
-
 Elimination of ``(catch_errors_ftype *) func''.
 
 Like make_cleanup_func it isn't portable.
-
---
-
-Re: Various C++ things
-
-value_headof/value_from_vtable_info are worthless, and should be removed.
-The one place in printcmd.c that uses it should use the RTTI functions.
-
-RTTI for g++ should be using the typeinfo functions rather than the vtables.
-The typeinfo functions are always at offset 4 from the beginning of the vtable,
-and are always right. The vtables will have weird names like E::VB sometimes.
-The typeinfo function will always be "E type_info function", or somesuch.
-
-value_virtual_fn_field needs to be fixed so there are no failures for virtual
-functions for C++ using g++.
-
-Testsuite cases are the major priority right now for C++ support, since i have
-to make a lot of changes that could potentially break each other.
-
---
-
-Fix ``set architecture <tab>''
-
-This command should expand to a list of all supported architectures.
-At present ``info architecture'' needs to be used.  That is simply
-wrong.  It involves the use of add_set_enum_cmd().
-
---
-
-GDBARCH cleanup (Andrew Cagney)
-
-The non-generated parts of gdbarch.{sh,h,c} should be separated out
-into arch-utils.[hc].
-
-Document that gdbarch_init_ftype could easily fail because it didn't
-identify an architecture.
-
---
-
-Migrate qfThreadInfo packet -> qThreadInfo. (Andrew Cagney)
-
-Add support for packet enable/disable commands with these thread
-packets.  General cleanup.
-
-[PATCH] Document the ThreadInfo remote protocol queries
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00832.html
-
-[PATCH] "info threads" queries for remote.c
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
-
---
-
-			General Cleanups / Fixes
-			========================
-
-The following are more general cleanups and fixes.  They are not tied
-to any specific release.
 
 --
 
@@ -307,32 +176,6 @@ Nuke USG define.
 http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00363.html
 
 Do not forget to merge the patch back into the trunk.
-
---
-
-Update ALPHA so that it uses ``struct frame_extra_info'' instead of
-EXTRA_FRAME_INFO.
-
-This is a barrier to replacing mips_extra_func_info with something
-that works with multi-arch.
-
---
-
-Multi-arch  mips_extra_func_info.
-
-This first needs the alpha to be updated so that it uses ``struct
-frame_extra_info''.
-
---
-
-Send normal output to gdb_stdout.
-Send error messages to gdb_stderror.
-Send debug and log output log gdb_stdlog.
-
-GDB still contains many cases where (f)printf or printf_filtered () is
-used when it should be sending the messages to gdb_stderror or
-gdb_stdlog.  The thought of #defining printf to something has crossed
-peoples minds ;-)
 
 --
 
@@ -352,75 +195,44 @@ return value.
 
 --
 
-Rationaize savestring(), msavestring() and mstrsave().
+Replace strsave() + mstrsave() with libiberty:xstrdup().
 
-In general libiberty's xstrdup () can be used.
+--
+
+Replace savestring() with something from libiberty.
+
+An xstrldup()? but that would have different semantics.
+
+--
+
+Rationalize use of floatformat_unknown in GDB sources.
+
+Instead of defaulting to floatformat_unknown, should hosts/targets
+specify the value explicitly?
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00447.html
+
+--
+
+Add a ``name'' member to include/floatformat.h:struct floatformat.
+Print that name in gdbarch.c.
+
+--
+
+Sort out the harris mess in include/floatformat.h (it hardwires two
+different floating point formats).
+
+--
+
+See of the GDB local floatformat_do_doublest() and libiberty's
+floatformat_to_double (which was once GDB's ...) can be merged some
+how.
 
 --
 
 Eliminate mmalloc() from GDB.
 
 Also eliminate it from defs.h.
-
---
-
-Check/cleanup MI documentation.
-
-The list of commands specified in the documentation needs to be
-checked against the mi-cmds.c table in a mechanical way (so that they
-two can be kept up-to-date).
-
---
-
-Eliminate error_begin().
-
-With ui_file, there is no need for the statefull error_begin ()
-function.
-
---
-
-Add built-by, build-date, tm, xm, nm and anything else into gdb binary
-so that you can see how the GDB was created.
-
-Some of these (*m.h) would be added to the generated config.h.  That
-in turn would fix a long standing bug where by the build process many
-not notice a changed tm.h file.  Since everything depends on config.h,
-a change to *m.h forces a change to config.h and, consequently forces
-a rebuild.
-
---
-
-Replace gdb_stdtarg with gdb_targout (and possibly gdb_targerr).
-
-gdb_stdtarg is easily confused with gdb_stdarg.
-
---
-
-Remote protocol doco feedback.
-
-Too much feedback to mention needs to be merged in (901660).  Search
-for the word ``remote''.
-
---
-
-set/show remote X-packet ...
-
-``(gdb) help set remote X-packet'' doesn't list the applicable
-responses.  The help message needs to be expanded.
-
---
-
-Extra ui_file methods - dump.
-
-These are for debugging / testing.  An aside is to set up a whitebox
-testsuite for key internals such as ui_file.
-
---
-
-Add an "info bfd" command that displays supported object formats,
-similarly to objdump -i.
-
-Is there a command already?
 
 --
 
@@ -444,12 +256,349 @@ suffer bit rot.
 
 --
 
-			Architectural Changes
-			=====================
+Updated readline
+
+Readline 4.? is out.  A merge wouldn't hurt.
+
+--
+
+			New Features and Fixes
+			======================
+
+These are harder than cleanups but easier than work involving
+fundamental architectural change.
+
+--
+
+Add built-by, build-date, tm, xm, nm and anything else into gdb binary
+so that you can see how the GDB was created.
+
+Some of these (*m.h) would be added to the generated config.h.  That
+in turn would fix a long standing bug where by the build process many
+not notice a changed tm.h file.  Since everything depends on config.h,
+a change to *m.h forces a change to config.h and, consequently forces
+a rebuild.
+
+--
+
+Add an "info bfd" command that displays supported object formats,
+similarly to objdump -i.
+
+Is there a command already?
+
+--
+
+Fix ``I'm sorry, Dave, I can't do that.'' from symfile.c.
+
+This requires internationalization.
+
+--
+
+Convert GDB build process to AUTOMAKE.
+
+See also sub-directory configure below.
+
+--
+
+Cleanup configury support for optional sub-directories.
+
+Check how GCC handles multiple front ends for an example of how things
+could work.  A tentative first step is to rationalize things so that
+all sub directories are handled in a fashion similar to gdb/mi.
+
+See also automake above.
+
+--
+
+Restructure gdb directory tree so that it avoids any 8.3 and 14
+filename problems.
+
+--
+
+Add a transcript mechanism to GDB.
+
+Such a mechanism might log all gdb input and output to a file in a
+form that would allow it to be replayed.  It could involve ``gdb
+--transcript=FILE'' or it could involve ``(gdb) transcript file''.
+
+--
+
+Can the xdep files be replaced by autoconf?
+
+--
+
+Document trace machinery
+
+--
+
+Document overlay machinery.
+
+--
+
+``(gdb) catch signal SIGNAL''
+
+Overlaps with ``handle SIGNAL'' but the implied behavour is different.
+You can attach commands to a catch but not a handle.  A handle has a
+limited number of hardwired actions.
+
+--
+
+Get the TUI working on all platforms.
+
+--
+
+Add support for ``gdb --- PROGRAM ARGS ...''.
+Add support for ``gdb -cmd=...''
+
+Along with many variations.  Check:
+
+????? for a full discussion.
+
+for a discussion.
+
+--
+
+Implement ``(gdb) !ls''.
+
+Which is very different from ``(gdb) ! ls''.  Implementing the latter
+is trivial.
+
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00034.html
+
+--
+
+Replace the code that uses the host FPU with an emulator of the target
+FPU.
+
+--
+
+			Thread Support
+			==============
+
+--
+
+Generic: lin-thread cannot handle thread exit (Mark Kettenis, Michael
+Snyder) http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00525.html
+
+The thread_db assisted debugging code doesn't handle exiting threads
+properly, at least in combination with glibc 2.1.3 (the framework is
+there, just not the actual code).  There are at least two problems
+that prevent this from working.
+
+As an additional reference point, the pre thread_db code did not work
+either.
+
+--
+
+GNU/Linux/x86 and random thread signals (and Solaris/SPARC but not
+Solaris/x86).
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00336.html
+
+Christopher Blizzard writes:
+
+So, I've done some more digging into this and it looks like Jim
+Kingdon has reported this problem in the past:
+
+http://sourceware.cygnus.com/ml/bug-gdb/1999-10/msg00058.html
+
+I can reproduce this problem both with and without Tom's patch.  Has
+anyone seen this before?  Maybe have a solution for it hanging around?
+:)
+
+There's a test case for this documented at:
+
+when debugging threaded applications you get extra SIGTRAPs
+http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=9565
+
+[There should be a GDB testcase - cagney]
+
+--
+
+GDB5 TOT on unixware 7
+http://sourceware.cygnus.com/ml/gdb/2000-04/msg00119.html
+
+Robert Lipe writes:
+> I just spun the top of tree of the GDB5 branch on UnixWare 7.  As a
+> practical matter, the current thread support is somewhat more annoying
+> than when GDB was thread-unaware.
+
+--
+
+Migrate qfThreadInfo packet -> qThreadInfo. (Andrew Cagney)
+
+Add support for packet enable/disable commands with these thread
+packets.  General cleanup.
+
+[PATCH] Document the ThreadInfo remote protocol queries
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00832.html
+
+[PATCH] "info threads" queries for remote.c
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
+
+--
+
+			Language Support
+			================
+
+New languages come onto the scene all the time.
+
+--
+
+Pascal (Pierre Muller, David Taylor)
+
+Pierre Muller has contributed patches for adding Pascal Language
+support to GDB.
+
+2 pascal language patches inserted in database
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
+
+Indent -gnu ?
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
+
+--
+
+Java (Anthony Green, David Taylor)
+
+Anthony Green has a number of Java patches that did not make it into
+the 5.0 release.
+
+Patch: java tests
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00512.html
+
+Patch: java booleans
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00515.html
+
+Patch: handle N_MAIN stab
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00527.html
+
+--
+
+[Comming...]
+
+Modify gdb to work correctly with Pascal.
+
+--
+
+Re: Various C++ things
+
+value_headof/value_from_vtable_info are worthless, and should be removed.
+The one place in printcmd.c that uses it should use the RTTI functions.
+
+RTTI for g++ should be using the typeinfo functions rather than the vtables.
+The typeinfo functions are always at offset 4 from the beginning of the vtable,
+and are always right. The vtables will have weird names like E::VB sometimes.
+The typeinfo function will always be "E type_info function", or somesuch.
+
+value_virtual_fn_field needs to be fixed so there are no failures for virtual
+functions for C++ using g++.
+
+Testsuite cases are the major priority right now for C++ support, since i have
+to make a lot of changes that could potentially break each other.
+
+--
+
+Add support for Modula3
+
+Get DEC/Compaq to contribute their Modula-3 support.
+
+--
+
+		Remote Protocol Support
+		=======================
+
+--
+
+set/show remote X-packet ...
+
+``(gdb) help set remote X-packet'' doesn't list the applicable
+responses.  The help message needs to be expanded.
+
+--
+
+Remote protocol doco feedback.
+
+Too much feedback to mention needs to be merged in (901660).  Search
+for the word ``remote''.
+
+
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00023.html
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00056.html
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00382.html
+
+--
+
+GDB doesn't recover gracefully from remote protocol errors.
+
+GDB wasn't checking for NAKs from the remote target.  Instead a NAK is
+ignored and a timeout is required before GDB retries.  A pre-cursor to
+fixing this this is making GDB's remote protocol packet more robust.
+
+While downloading to a remote protocol target, gdb ignores packet
+errors in so far as it will continue to edownload with chunk N+1 even
+if chunk N was not correctly sent.  This causes gdb.base/remote.exp to
+take a painfully long time to run.  As a PS that test needs to be
+fixed so that it builds on 16 bit machines.
+
+--
+
+Add the cycle step command.
+
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00237.html
+
+--
+
+			Symbol Support
+			==============
+
+If / when GDB starts to support the debugging of multi-processor
+(rather than multi-thread) applications the symtab code will need to
+be updated a little so that several independant symbol tables are
+active at a given time.
+
+The other interesting change is a clarification of the exact meaning
+of CORE_ADDR and that has had consequences for a few targets (that
+were abusing that data type).
+
+--
+
+Investiagate ways of reducing memory.
+
+--
+
+Investigate ways of improving load time.
+
+--
+
+Get the d10v to use POINTER_TO_ADDRESS and ADDRESS_TO_POINTER.
+
+Consequence of recent symtab clarification.  No marks for figuring out
+who maintains the d10v.
+
+--
+
+Get the MIPS to correctly sign extend all address <-> pointer
+conversions.
+
+Consequence of recent symtab clarification.  No marks for figuring out
+who maintains the MIPS.
+
+--
+
+		Architectural Changes: General
+		==============================
 
 These are harder than simple cleanups / fixes and, consequently
 involve more work.  Typically an Architectural Change will be broken
 down into a more digestible set of cleanups and fixes.
+
+--
+
+Cleanup software single step.
+
+At present many targets implement software single step by directly
+blatting memory (see rs6000-tdep.c).  Those targets should register
+the applicable breakpoints using the breakpoint framework.  Perhaphs a
+new internal breakpoint class ``step'' is needed.
 
 --
 
@@ -464,17 +613,6 @@ Unfortunatly GDB still treats this synthetic FP register as though it
 is real.  That in turn really confuses users (arm and ``print $fp'' VS
 ``info registers fp'').  The synthetic FP should be separated out of
 the true register set presented to the user.
-
---
-
-MI's input does not use buffering.
-
-At present the MI interface reads raw characters of from an unbuffered
-FD.  This is to avoid several nasty buffer/race conditions.  That code
-should be changed so that it registers its self with the event loop
-(on the input FD) and then push commands up to MI as they arrive.
-
-The serial code already does this.
 
 --
 
@@ -597,12 +735,6 @@ Following that would, finaly be the corresponding changes to the target.
 
 --
 
-Fix ``I'm sorry, Dave, I can't do that.'' from symfile.c.
-
-This requires internationalization.
-
---
-
 Check that GDB can handle all BFD architectures (Andrew Cagney)
 
 There should be a test that checks that BFD/GDB are in sync with
@@ -612,51 +744,70 @@ to GDB..  Anyone interested in learning how to write tests?  :-)
 
 --
 
-Add support for Modula3
+		Architectural Change: Multi-arch et al.
+		=======================================
 
-Get DEC/Compaq to contribute their Modula-3 support.
+The long term objective is to remove all assumptions that there is a
+single target with a single address space with a single instruction
+set architecture and single application binary interface.
+
+This is an ongoing effort.  The first milestone is to enable
+``multi-arch'' where by all architectural decisions are made at
+runtime.
+
+It should be noted that ``gdbarch'' is really ``gdbabi'' and
+``gdbisa''.  Once things are multi-arched breaking that down correctly
+will become much easier.
+
+--
+
+GDBARCH cleanup (Andrew Cagney)
+
+The non-generated parts of gdbarch.{sh,h,c} should be separated out
+into arch-utils.[hc].
+
+Document that gdbarch_init_ftype could easily fail because it didn't
+identify an architecture.
+
+--
+
+Fix BELIEVE_PPC_PROMOTION.  Change it to BELIEVE_PPC_PROMOTION_P?
+
+At present there is still #ifdef BELIEVE_PPC_PROMOTION code in the
+symtab file.
+
+--
+
+Fix ``set architecture <tab>''
+
+This command should expand to a list of all supported architectures.
+At present ``info architecture'' needs to be used.  That is simply
+wrong.  It involves the use of add_set_enum_cmd().
+
+--
+
+Update ALPHA so that it uses ``struct frame_extra_info'' instead of
+EXTRA_FRAME_INFO.
+
+This is a barrier to replacing mips_extra_func_info with something
+that works with multi-arch.
+
+--
+
+Multi-arch  mips_extra_func_info.
+
+This first needs the alpha to be updated so that it uses ``struct
+frame_extra_info''.
+
+--
+
+Rationalize TARGET_SINGLE_FORMAT and TARGET_SINGLE_BIT et al.
+
+Surely one of them is redundant.
 
 --
 
 Convert ALL architectures to MULTI-ARCH.
-
---
-
-Convert GDB build process to AUTOMAKE.
-
-See also sub-directory configure below.
-
---
-
-Cleanup configury support for optional sub-directories.
-
-Check how GCC handles multiple front ends for an example of how things
-could work.  A tentative first step is to rationalize things so that
-all sub directories are handled in a fashion similar to gdb/mi.
-
-See also automake above.
-
---
-
-Restructure gdb directory tree so that it avoids any 8.3 and 14
-filename problems.
-
---
-
-Can the xdep files be replaced by autoconf?
-Can the tm.h and nm.h files be eliminated by multi-arch.
-
---
-
-Add a transcript mechanism to GDB.
-
-Such a mechanism might log all gdb input and output to a file in a
-form that would allow it to be replayed.  It could involve ``gdb
---transcript=FILE'' or it could involve ``(gdb) transcript file''.
-
---
-
-Make MI interface accessable from existing CLI.
 
 --
 
@@ -671,6 +822,108 @@ name.
 Truly multi-arch.
 
 Enable the code to recognize --enable-targets=.... like BINUTILS does.
+
+Can the tm.h and nm.h files be eliminated by multi-arch.
+
+--
+
+	Architectural Change: MI, LIBGDB and scripting languages
+	========================================================
+
+See also architectural changes related to the event loop.  LIBGDB
+can't be finished until there is a generic event loop being used by
+all targets.
+
+The long term objective is it to be possible to integrate GDB into
+scripting languages.
+
+--
+
+Implement generic ``(gdb) commmand > file''
+
+Once everything is going through ui_file it should be come fairly
+easy.
+
+http://sourceware.cygnus.com/ml/gdb/2000-04/msg00104.html
+
+--
+
+Replace gdb_stdtarg with gdb_targout (and possibly gdb_targerr).
+
+gdb_stdtarg is easily confused with gdb_stdarg.
+
+--
+
+Extra ui_file methods - dump.
+
+These are for debugging / testing.  An aside is to set up a whitebox
+testsuite for key internals such as ui_file.
+
+--
+
+Eliminate error_begin().
+
+With ui_file, there is no need for the statefull error_begin ()
+function.
+
+--
+
+Send normal output to gdb_stdout.
+Send error messages to gdb_stderror.
+Send debug and log output log gdb_stdlog.
+
+GDB still contains many cases where (f)printf or printf_filtered () is
+used when it should be sending the messages to gdb_stderror or
+gdb_stdlog.  The thought of #defining printf to something has crossed
+peoples minds ;-)
+
+--
+
+Re-do GDB's output pager.
+
+GDB's output pager still relies on people correctly using *_filtered
+for gdb_stdout and *_unfiltered for gdb_stdlog / gdb_stderr.
+Hopefully, with all normal output going to gdb_stdout, the pager can
+just look at the ui_file that the output is on and then use that to
+decide what to do about paging.  Sounds good in theory.
+
+--
+
+Check/cleanup MI documentation.
+
+The list of commands specified in the documentation needs to be
+checked against the mi-cmds.c table in a mechanical way (so that they
+two can be kept up-to-date).
+
+--
+
+Convert MI into libgdb
+
+MI provides a text interface into what should be many of the libgdb
+functions.  The implementation of those functions should be separated
+into the MI interface and the functions proper.  Those functions being
+moved to gdb/lib say.
+
+--
+
+Create libgdb.h
+
+The first part can already be found in defs.h.
+
+--
+
+MI's input does not use buffering.
+
+At present the MI interface reads raw characters of from an unbuffered
+FD.  This is to avoid several nasty buffer/race conditions.  That code
+should be changed so that it registers its self with the event loop
+(on the input FD) and then push commands up to MI as they arrive.
+
+The serial code already does this.
+
+--
+
+Make MI interface accessable from existing CLI.
 
 --
 
@@ -689,21 +942,12 @@ breakpoint was set is simplified.
 
 --
 
-Re-do GDB's output pager.
-
-GDB's output pager still relies on people correctly using *_filtered
-for gdb_stdout and *_unfiltered for gdb_stdlog / gdb_stderr.
-Hopefully, with all normal output going to gdb_stdout, the pager can
-just look at the ui_file that the output is on and then use that to
-decide what to do about paging.  Sounds good in theory.
-
---
-
-Add mechanism to reject expression classes to MI
+Add a mechanism to reject certain expression classes to MI
 
 There are situtations where you don't want GDB's expression
 parser/evaluator to perform inferior function calls or variable
-assignments.
+assignments.  A way of restricting the expression parser so that such
+operations are not accepted would be very helpful.
 
 --
 
@@ -722,25 +966,30 @@ hard.
 
 --
 
-GDB doesn't recover gracefully from remote protocol errors.
-
-GDB wasn't checking for NAKs from the remote target.  Instead a NAK is
-ignored and a timeout is required before GDB retries.  A pre-cursor to
-fixing this this is making GDB's remote protocol packet more robust.
-
-While downloading to a remote protocol target, gdb ignores packet
-errors in so far as it will continue to edownload with chunk N+1 even
-if chunk N was not correctly sent.  This causes gdb.base/remote.exp to
-take a painfully long time to run.  As a PS that test needs to be
-fixed so that it builds on 16 bit machines.
-
---
-
 Move gdb_lasterr to ui_out?
 
 The way GDB throws errors and records them needs a re-think.  ui_out
 handles the correct output well.  It doesn't resolve what to do with
 output / error-messages when things go wrong.
+
+--
+
+		Architectural Change: Async
+		===========================
+
+While GDB uses an event loop when prompting the user for input.  That
+event loop is not exploited by targets when they allow the target
+program to continue.  Typically targets still block in (target_wait())
+until the program again halts.
+
+The closest a target comes to supporting full asynchronous mode are
+the remote targets ``async'' and ``extended-async''.
+
+--
+
+Asynchronous expression evaluator
+
+Inferior function calls hang GDB.
 
 --
 
@@ -771,11 +1020,21 @@ opaque may also help.
 
 --
 
-Document trace machinery
+Make "target xxx" command interruptible.
+
+As things become async this becomes possible.  A target would start
+the connect and then return control to the event loop.  A cntrl-c
+would notify the target that the operation is to be abandoned and the
+target code could respond.
 
 --
 
-Document overlay machinery.
+Add a "suspend" subcommand of the "continue" command to suspend gdb
+while continuing  execution of the subprocess.  Useful when you are
+debugging servers and you want to dodge out and initiate a connection
+to a server running under gdb.
+
+[hey async!!]
 
 --
 
@@ -913,10 +1172,6 @@ thought we were stashing that info now!
 --
 
 We should be able to write to random files at hex offsets like adb.
-
---
-
-Make "target xxx" command interruptible.
 
 --
 
@@ -1159,26 +1414,11 @@ line number, etc.
 
 --
 
-Add a "suspend" subcommand of the "continue" command to suspend gdb
-while continuing  execution of the subprocess.  Useful when you are
-debugging servers and you want to dodge out and initiate a connection
-to a server running under gdb.
-
-[hey async!!]
-
---
-
 Modify the handling of symbols grouped through BINCL/EINCL stabs to
 allocate a partial symtab for each BINCL/EINCL grouping.  This will
 seriously decrease the size of inter-psymtab dependencies and hence
 lessen the amount that needs to be read in when a new source file is
 accessed. 
-
---
-
-[Comming...]
-
-Modify gdb to work correctly with Pascal.
 
 --
 
