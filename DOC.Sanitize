@@ -18,12 +18,11 @@ Configuration:
 Each directory to be kept in a release should have a .Sanitize file in
 cvs.  See devo/.Sanitize for a more or less self describing template.
 
-The default action is to remove all files and directories not
-explicitly listed in the .Sanitize file as being "Things-to-keep:".
+All files should be listed in "Things-to-keep:" or "Things-to-lose:"
+(or dealt with via keep_these_too and lose_these_too, see below).  If
+a file is not listed, it is removed, but a warning is printed.
 Directories that are kept will have Sanitize called on their own
 .Sanitize files.
-
-For other than default action, there are three hooks.
 
 The "Do-first:" section of .Sanitize should be a shell script
 fragment.  It will be sourced by the Sanitize shell script after
@@ -34,8 +33,10 @@ its use, see devo/gcc/config/.Sanitize.
 
 If the "Do-first:" section sets the local shell variable
 "keep_these_too", the files and/or directories listed there will be
-kept in addition to any files listed in "Things-to-keep:".  For an
-example of its use, see devo/gcc/config/.Sanitize.
+kept in addition to any files listed in "Things-to-keep:".  If it sets
+"lose_these_too", those files and/or directories will be removed in
+addition to any files listed in "Things-to-lose:".  For an example of
+its use, see devo/gcc/config/.Sanitize.
 
 The "Do-last:" section of .Sanitize should be a shell script fragment.
 It will be sourced by Sanitize after all other action is taken for
