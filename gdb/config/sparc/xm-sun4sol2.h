@@ -41,3 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* solaris doesn't have siginterrupt, though it has sigaction; however,
    in this case siginterrupt would just be setting the default. */
 #define NO_SIGINTERRUPT
+
+/* On sol2.7, <curses.h> emits a bunch of 'macro redefined'
+   warnings, which makes autoconf think curses.h doesn't
+   exist.  Compensate fot that here. */
+#define HAVE_CURSES_H 1
