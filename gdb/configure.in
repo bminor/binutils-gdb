@@ -43,6 +43,8 @@ CONFIG_DEPS=
 CONFIG_SRCS=
 CONFIG_INITS=
 ENABLE_CFLAGS=
+CONFIG_ALL=
+CONFIG_CLEAN=
 CONFIG_INSTALL=
 CONFIG_UNINSTALL=
 
@@ -390,6 +392,8 @@ case ${enable_gdbmi} in
       CONFIG_SRCS="${CONFIG_SRS} \$(SUBDIR_MI_SRCS)"
       CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_MI_INITS)"
       ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_MI_CFLAGS)"
+      CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_MI_ALL)"
+      CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_MI_CLEAN)"
       CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_MI_INSTALL)"
       CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_MI_UNINSTALL)"
     fi
@@ -701,6 +705,8 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CONFIG_SRCS="${CONFIG_SRCS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
 	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-varobj.o gdbtk-wrapper.o"
 	   CONFIG_INITS="${CONFIG_INITS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
+	   CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_GDBTK_ALL)"
+	   CONFIG_CLEAN="${CONFIG_ALL} \$(SUBDIR_GDBTK_CLEAN)"
 	   CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_GDBTK_INSTALL)"
 	   CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_GDBTK_UNINSTALL)"
 
@@ -767,6 +773,8 @@ AC_SUBST(CONFIG_OBS)
 AC_SUBST(CONFIG_DEPS)
 AC_SUBST(CONFIG_SRCS)
 AC_SUBST(CONFIG_INITS)
+AC_SUBST(CONFIG_ALL)
+AC_SUBST(CONFIG_CLEAN)
 AC_SUBST(CONFIG_INSTALL)
 AC_SUBST(CONFIG_UNINSTALL)
 
@@ -912,16 +920,6 @@ files="${files} config/nm-empty.h"
 links="${links} nm.h"
 fi
 AC_PROG_LN_S
-# Make it possible to use the GUI without doing a full install
-if test "${enable_gdbtk}" = "yes" ; then
-  if test "$LN_S" = "ln -s" -a ! -f gdbtcl ; then
-  echo linking $srcdir/gdbtk/library to gdbtcl
-  $LN_S $srcdir/gdbtk/library gdbtcl
-  else
-  echo Warning: Unable to link $srcdir/gdbtk/library to gdbtcl.  You will need to do a
-  echo "         " make install before you are able to run the GUI.
-  fi
-fi
 
 AC_LINK_FILES($files, $links)
 

@@ -49,6 +49,7 @@ SHELL = @SHELL@
 EXEEXT = @EXEEXT@
 
 AWK = @AWK@
+LN_S = @LN_S@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -162,6 +163,8 @@ SUBDIR_MI_INITS = \
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
 	-DUI_OUT=1
+SUBDIR_MI_ALL=
+SUBDIR_MI_CLEAN=
 SUBDIR_MI_INSTALL=
 SUBDIR_MI_UNINSTALL=
 
@@ -222,6 +225,8 @@ WIN32LDAPP = @WIN32LDAPP@
 LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
+SUBDIR_GDBTK_ALL= all-gdbtk
+SUBDIR_GDBTK_CLEAN= clean-gdbtk
 SUBDIR_GDBTK_INSTALL= install-gdbtk
 SUBDIR_GDBTK_UNINSTALL= 
 
@@ -231,6 +236,9 @@ CONFIG_DEPS= @CONFIG_DEPS@
 CONFIG_INITS= @CONFIG_INITS@
 CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
+CONFIG_ALL= @CONFIG_ALL@
+CONFIG_CLEAN= @CONFIG_CLEAN@
+CONFIG_CLEAN= @CONFIG_CLEAN@
 CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 
@@ -642,7 +650,7 @@ DISTSTUFF = $(YYFILES)
 .c.o:
 	$(CC) -c $(INTERNAL_CFLAGS) $<
 
-all: gdb$(EXEEXT)
+all: gdb$(EXEEXT) $(CONFIG_ALL)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 installcheck:
@@ -855,7 +863,7 @@ TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 
 tags: TAGS
 
-clean mostlyclean:
+clean mostlyclean: $(CONFIG_CLEAN)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp
 	rm -f init.c version.c
@@ -1250,6 +1258,19 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 
 fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
+
+all-gdbtk:
+	if test "$(LN_S)" = "ln -s" -a ! -d gdbtcl/images ; then \
+	  echo linking $srcdir/gdbtk/library to gdbtcl ; \
+	  $(LN_S) $srcdir/gdbtk/library gdbtcl ; \
+	else \
+	  echo Warning: Unable to link $srcdir/gdbtk/library to gdbtcl. ; \
+	  echo "         " You will need to do a ; \
+	  echo "         " make install before you are able to run the GUI. ; \
+	fi
+
+clean-gdbtk:
+	rm -f gdbtcl
 
 install-gdbtk:
 	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
