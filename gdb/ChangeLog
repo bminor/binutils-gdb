@@ -1,5 +1,9 @@
 2001-07-10  Jim Blandy  <jimb@redhat.com>
 
+	* printcmd.c (print_scalar_formatted): If we are printing an
+	address, remember that TARGET_ADDR_BIT is not always equal to
+	TARGET_PTR_BIT.
+
 	* valops.c (value_cast): When casting a pointer to an integer,
 	don't convert it to an address.
 
