@@ -1,3 +1,24 @@
+Mon Aug  8 17:18:49 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Update to ns32k support, from Ian Dall (dall@hfrd.dsto.gov.au).
+	* aout-ns32k.c: Add declarations that were in aout-ns32k.h, change
+	declarations to traditional form.
+	(MY_reloc_howto, MY_put_reloc): Change from macro to function.
+	(ns32k_relocate_contents): New function.
+	* aout-ns32k.h: Remove.
+	* cpu-ns32k.c: Add declarations that were in aout-ns32k.h, change
+	declarations to traditional form.
+	(ns32k_final_link_relocate): Call ns32k_relocate_contents.
+	* netbsd532.c: Reformat to standards, add copyright notice.
+	(ARCH): Don't define.
+	(aout-ns32k.h): Don't include.
+	* pc532-mach.c: Ditto.
+
+Mon Aug  8 17:55:52 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* coff-i960.c (coff_i960_relocate): Don't try to convert relocs
+	against common symbols.
+
 Sat Aug  6 22:27:30 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* irix-core.c (irix_core_core_file_p):  Ignore sections that
