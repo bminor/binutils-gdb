@@ -1,3 +1,9 @@
+2004-11-05  Andrew Cagney  <cagney@gnu.org>
+
+	Backport 2004-10-27 Jim Blandy <jimb@redhat.com>
+	* remote.c (fetch_register_using_p): Construct 'p' packet in a
+	manner independent of the host byte order.
+
 2004-11-04  Kei Sakamoto  <sakamoto.kei@denesas.com>
 
 	* Makefile.in (m32r-tdep.o): Update dependencies.
