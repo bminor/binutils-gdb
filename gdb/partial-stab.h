@@ -714,6 +714,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif /* DBXREAD_ONLY */
 	  continue;
 
+	case N_ENDM:
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+	  /* Solaris 2 end of module, finish current partial symbol table.
+	     END_PSYMTAB will set pst->texthigh to the proper value, which
+	     is necessary if a module compiled without debugging info
+	     follows this module.  */
+	  if (pst)
+	    {
+	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
+			   symnum * symbol_size,
+			   (CORE_ADDR) 0,
+			   dependency_list, dependencies_used);
+	      pst = (struct partial_symtab *) 0;
+	      includes_used = 0;
+	      dependencies_used = 0;
+	    }
+#endif
+	  continue;
+
 	case N_RBRAC:
 #ifdef HANDLE_RBRAC
 	  HANDLE_RBRAC(CUR_SYMBOL_VALUE);
@@ -742,7 +761,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 	case N_OBJ:		/* useless types from Solaris */
 	case N_OPT:
-	case N_ENDM:
 	  /* These symbols aren't interesting; don't worry about them */
 
 	  continue;
