@@ -1,5 +1,14 @@
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
+	From Brian Taylor <briant at model dot com>:
+	* ui-out.c (ui_out_field_core_addr): Use the function
+	longest_local_hex_string_custom'to format addresses > 32 bits
+	wide.
+
+	* ui-out.c (ui_out_field_core_addr): Update comment.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* stack.c (select_and_print_frame): Make static.  Delete the
 	parameter `level'.
 	(func_command): Update call.

@@ -492,9 +492,14 @@ ui_out_field_core_addr (struct ui_out *uiout,
 {
   char addstr[20];
 
-  /* FIXME-32x64: need a print_address_numeric with field width */
+  /* FIXME: cagney/2002-05-03: Need local_address_string() function
+     that returns the language localized string formatted to a width
+     based on TARGET_ADDR_BIT.  */
   /* print_address_numeric (address, 1, local_stream); */
-  strcpy (addstr, local_hex_string_custom ((unsigned long) address, "08l"));
+  if (TARGET_ADDR_BIT <= 32)
+    strcpy (addstr, local_hex_string_custom ((unsigned long) address, "08l"));
+  else
+    strcpy (addstr, local_hex_string_custom ((unsigned long) address, "016l"));
 
   ui_out_field_string (uiout, fldname, addstr);
 }
