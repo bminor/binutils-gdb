@@ -1,3 +1,22 @@
+Wed Nov 11 08:04:37 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config.sub: added -sco3.2v4 support from FSF.
+
+Sun Nov  8 21:14:30 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: expand the section that adds or removes
+	directories from the list of programs to build, to handle native
+	vs. cross in addition to host v. native
+
+Sat Nov  7 18:52:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Replace C++ in macro names with CXX.
+	This is less likely to break ...
+
+Sat Nov  7 15:16:58 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* test-build.mk: add -w to GNU_MAKE
+
 Fri Nov  6 23:10:37 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config.sub: remove 'sparc'-->'sparc-sun' default transformation,
