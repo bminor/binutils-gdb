@@ -2841,9 +2841,7 @@ mips_step_skips_delay (pc)
    This is a helper function for mips_skip_prologue.  */
 
 static CORE_ADDR
-mips32_skip_prologue (pc, lenient)
-     CORE_ADDR pc;		/* starting PC to search from */
-     int lenient;
+mips32_skip_prologue (CORE_ADDR pc)
 {
   t_inst inst;
   CORE_ADDR end_pc;
@@ -2937,9 +2935,7 @@ mips32_skip_prologue (pc, lenient)
    This is a helper function for mips_skip_prologue.  */
 
 static CORE_ADDR
-mips16_skip_prologue (pc, lenient)
-     CORE_ADDR pc;		/* starting PC to search from */
-     int lenient;
+mips16_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR end_pc;
   int extend_bytes = 0;
@@ -3051,9 +3047,7 @@ mips16_skip_prologue (pc, lenient)
    delay slot of a non-prologue instruction).  */
 
 CORE_ADDR
-mips_skip_prologue (pc, lenient)
-     CORE_ADDR pc;
-     int lenient;
+mips_skip_prologue (CORE_ADDR pc)
 {
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
@@ -3068,28 +3062,10 @@ mips_skip_prologue (pc, lenient)
      instructions.  */
 
   if (pc_is_mips16 (pc))
-    return mips16_skip_prologue (pc, lenient);
+    return mips16_skip_prologue (pc);
   else
-    return mips32_skip_prologue (pc, lenient);
+    return mips32_skip_prologue (pc);
 }
-
-#if 0
-/* The lenient prologue stuff should be superseded by the code in
-   init_extra_frame_info which looks to see whether the stores mentioned
-   in the proc_desc have actually taken place.  */
-
-/* Is address PC in the prologue (loosely defined) for function at
-   STARTADDR?  */
-
-static int
-mips_in_lenient_prologue (startaddr, pc)
-     CORE_ADDR startaddr;
-     CORE_ADDR pc;
-{
-  CORE_ADDR end_prologue = mips_skip_prologue (startaddr, 1);
-  return pc >= startaddr && pc < end_prologue;
-}
-#endif
 
 /* Determine how a return value is stored within the MIPS register
    file, given the return type `valtype'. */
@@ -3930,6 +3906,19 @@ mips_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
     *addrp = addr;
 }
 
+/* Immediately after a function call, return the saved pc.
+   Can't always go through the frames for this because on some machines
+   the new frame is not set up until the new function executes
+   some instructions.  */
+
+static CORE_ADDR
+mips_saved_pc_after_call (struct frame_info *frame)
+{
+
+  return read_register (RA_REGNUM);
+}
+
+
 static gdbarch_init_ftype mips_gdbarch_init;
 static struct gdbarch *
 mips_gdbarch_init (info, arches)
@@ -4234,6 +4223,14 @@ mips_gdbarch_init (info, arches)
 
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_get_saved_register (gdbarch, mips_get_saved_register);
+
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_ieee_float (gdbarch, 1);
+
+  set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
+  set_gdbarch_saved_pc_after_call (gdbarch, mips_saved_pc_after_call);
 
   return gdbarch;
 }

@@ -47,9 +47,6 @@ struct value;
 #define GDB_TARGET_UNMASK_DISAS_PC(addr) MAKE_MIPS16_ADDR(addr)
 #endif
 
-/* Floating point is IEEE compliant */
-#define IEEE_FLOAT (1)
-
 /* The name of the usual type of MIPS processor that is in the target
    system.  */
 
@@ -69,49 +66,16 @@ CORE_ADDR mips_addr_bits_remove (CORE_ADDR addr);
 
 #define FUNCTION_START_OFFSET 0
 
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
-
-#define SKIP_PROLOGUE(pc) (mips_skip_prologue (pc, 0))
-extern CORE_ADDR mips_skip_prologue (CORE_ADDR addr, int lenient);
-
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
 extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY_P (1)
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-#define SAVED_PC_AFTER_CALL(frame)	read_register(RA_REGNUM)
-
 /* Are we currently handling a signal */
 
 extern int in_sigtramp (CORE_ADDR, char *);
 #define IN_SIGTRAMP(pc, name)	in_sigtramp(pc, name)
-
-/* Stack grows downward.  */
-
-#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
-
-/* BREAKPOINT_FROM_PC uses the program counter value to determine whether a
-   16- or 32-bit breakpoint should be used.  It returns a pointer
-   to a string of bytes that encode a breakpoint instruction, stores
-   the length of the string to *lenptr, and adjusts the pc (if necessary) to
-   point to the actual memory location where the breakpoint should be
-   inserted.  */
-
-extern breakpoint_from_pc_fn mips_breakpoint_from_pc;
-#define BREAKPOINT_FROM_PC(pcptr, lenptr) mips_breakpoint_from_pc(pcptr, lenptr)
-
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.  */
-
-#define DECR_PC_AFTER_BREAK 0
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
