@@ -1,3 +1,19 @@
+Thu Jul 31 19:55:36 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: New file, based on old Makefile.in.
+	* acinclude.m4: New file, copied from old aclocal.m4.
+	* configure.in: Define and call AM_PROG_LIBTOOL and friends.
+	Remove shared library handling; now handled by libtool.  Replace
+	AC_CONFIG_HEADER with AM_CONFIG_HEADER.  Call AM_MAINTAINER_MODE,
+	AM_CYGWIN32, and AM_EXEEXT.  Change all .o files to .lo.  Remove
+	stamp-h handling in AC_OUTPUT.
+	* acconfig.h: Mention PACKAGE and VERSION.
+	* stamp-h.in: New file.
+	* dep-in.sed: Change .o to .lo.
+	* Makefile.in: Now built with automake.
+	* aclocal.m4: Now built with aclocal.
+	* config.in, configure: Rebuild.
+
 Thu Jul 31 12:09:20 1997  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Don't set TEXTREL

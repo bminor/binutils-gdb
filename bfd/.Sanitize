@@ -59,12 +59,14 @@ COPYING
 ChangeLog
 ChangeLog.1
 ChangeLog.2
+Makefile.am
 Makefile.in
 PORTING
 README
 TODO
 VERSION
 acconfig.h
+acinclude.m4
 aclocal.m4
 aix386-core.c
 aout-adobe.c
@@ -284,6 +286,7 @@ sparcnetbsd.c
 srec.c
 stabs.c
 stab-syms.c
+stamp-h.in
 sunos.c
 syms.c
 sysdep.h
