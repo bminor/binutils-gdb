@@ -1,3 +1,20 @@
+2002-05-29  Matt Thomas  <matt@3am-software.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf32-vax.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-vax.c.
+	(elf32-vax.lo): New rule.
+	* Makefile.in: Regenerate.
+	* configure.in (bfd_elf32_vax_vec)
+	(vaxnetbsd_vec): New vectors.
+	* configure: Regenerate.
+	* config.bfd (vax-*-netbsdelf*)
+	(vax-*-netbsdaout*)
+	(vax-*-netbsd*): New targets.
+	* elf32-vax.c: New file.
+	* reloc.c: Add VAX relocations.
+	* bfd-in2.h: Regenerate.
+	* targets.c (_bfd_target_vector): Add bfd_elf32_vax_vec.
+
 2002-05-29  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config.bfd (arm-*-netbsd*): Add bfd_elf32_littlearm_vec

@@ -231,6 +231,7 @@ BFD32_BACKENDS = \
 	elf32-sh-nbsd.lo \
 	elf32-sparc.lo \
 	elf32-v850.lo \
+	elf32-vax.lo \
 	elf32-xstormy16.lo \
 	elf32.lo \
 	elflink.lo \
@@ -380,6 +381,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sh-nbsd.c \
 	elf32-sparc.c \
 	elf32-v850.c \
+	elf32-vax.c \
 	elf32-xstormy16.c \
 	elf32.c \
 	elflink.c \
@@ -1209,6 +1211,10 @@ elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
 elf32-v850.lo: elf32-v850.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/libiberty.h elf32-target.h
+elf32-vax.lo: elf32-vax.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/vax.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/libiberty.h elf32-target.h
 elf32-xstormy16.lo: elf32-xstormy16.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \

@@ -1061,6 +1061,17 @@ case "${targ}" in
     ;;
 #endif
 
+  vax-*-netbsdelf*)
+    targ_defvec=bfd_elf32_vax_vec
+    targ_selvecs=vaxnetbsd_vec
+    ;;
+
+  vax-*-netbsdaout* | vax-*-netbsd*)
+    targ_defvec=vaxnetbsd_vec
+    targ_selvecs=bfd_elf32_vax_vec
+    targ_underscore=yes
+    ;;
+
   vax*-*-*vms*)
     targ_defvec=vms_vax_vec
     ;;
