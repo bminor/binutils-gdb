@@ -125,7 +125,7 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500hms.o \
-	em_hppaosf.o
+	em_hppaosf.o em_mipsidtl.o
 
 # start-sanitize-sh
 OTHER_EMULATIONS=em_sh.o
@@ -294,6 +294,9 @@ em_mipsbsd.c: $(srcdir)/mipsbsd.sh \
 em_mipsidt.c: $(srcdir)/mipsidt.sh \
   $(srcdir)/generic.em $(srcdir)/mips.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsidt.sh
+em_mipsidtl.c: $(srcdir)/mipsidtl.sh \
+  $(srcdir)/generic.em $(srcdir)/mips.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} mipsidtl.sh
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(LOADLIBES)

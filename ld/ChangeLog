@@ -1,5 +1,11 @@
 Fri Jun  4 08:50:14 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* configure.in (mips-idt-ecoffl*): New target; use mips-idtl.
+	(mips-idt-ecoff*): Added trailing '*'.
+	* config/mips-idtl.mt: New file; use EMUL of mipsidtl.
+	* mipsidtl.sh: New file; like mipsidt.sh, but little endian.
+	* Makefile.in (ALL_EMULATIONS): Added em_mipsidtl.o.
+
 	* config/sun3.mh (HOSTING_LIBS, HOSTING_EMU): Removed obsolete and
 	incorrect definitions.
 

@@ -116,6 +116,7 @@ mipsbig.sh
 mipsbsd.sc-sh
 mipsbsd.sh
 mipsidt.sh
+mipsidtl.sh
 mipslit.sh
 mri.c
 mri.h
