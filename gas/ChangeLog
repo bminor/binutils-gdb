@@ -1,3 +1,20 @@
+Mon Aug 18 20:33:06 1997  Richard Henderson  <rth@cygnus.com>
+
+	* as.c (show_usage): Add -am.
+	* input-scrub.c (input_scrub_include_sb): Don't add leading \n
+	if we've already got one.
+	* listing.c (struct list_info_struct): Add line_contents.
+	(listing_newline): Put unused argument to work: if non-null, save it...
+	(listing_listing): ... and regurgitate during listing instead of line
+	from file.
+	* listing.h (LISTING_MACEXP): New define.
+	(LISTING_NEWLINE): Argument is NULL.
+	* read.c (read_a_source_file): If expanding macros, break up input
+	lines and pass them to listing_newline.
+	* doc/as.texinfo: Document -ac and -am.
+
+	* cond.c (s_ifc): Add missing demand_empty_rest_of_line.
+
 Mon Aug 18 11:26:36 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_apply_fix3): Add support for new 16 bit PC

@@ -487,7 +487,7 @@ read_a_source_file (name)
   buffer = input_scrub_new_file (name);
 
   listing_file (name);
-  listing_newline ("");
+  listing_newline (NULL);
   register_dependency (name);
 
   while ((buffer_limit = input_scrub_next_buffer (&input_line_pointer)) != 0)
@@ -602,7 +602,39 @@ read_a_source_file (name)
 	      c = *input_line_pointer++;
 	    }
 	  know (c != ' ');	/* No further leading whitespace. */
-	  LISTING_NEWLINE ();
+
+#ifndef NO_LISTING
+	  /* If listing is on, and we are expanding a macro, then give
+	     the listing code the contents of the expanded line.  */
+	  if (listing)
+	    {
+	      if ((listing & LISTING_MACEXP) && macro_nest > 0)
+		{
+		  char *copy;
+		  int len;
+
+		  /* Find the end of the current expanded macro line.  */
+		  for (s = input_line_pointer-1; *s ; ++s)
+		    if (is_end_of_line[(unsigned char) *s])
+		      break;
+
+		  /* Copy it for safe keeping.  Also give an indication of
+		     how much macro nesting is involved at this point.  */
+		  len = s - (input_line_pointer-1);
+		  copy = (char *) xmalloc (len + macro_nest + 2);
+		  memset (copy, '>', macro_nest);
+		  copy[macro_nest] = ' ';
+		  memcpy (copy + macro_nest + 1, input_line_pointer-1, len);
+		  copy[macro_nest+1+len] = '\0';
+
+		  /* Install the line with the listing facility.  */
+		  listing_newline (copy);
+		}
+	      else
+		listing_newline (NULL);
+	    }
+#endif
+
 	  /*
 	   * C is the 1st significant character.
 	   * Input_line_pointer points after that character.
