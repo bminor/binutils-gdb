@@ -1,5 +1,5 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -969,7 +969,9 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		     without qualifiers, assume the tag is an
 		     enumeration.
 		     Alpha cc -migrate enums are recognized by a zero
-		     index and a zero symbol value.  */
+		     index and a zero symbol value.
+		     DU 4.0 cc enums are recognized by a member type of
+		     btEnum without qualifiers and a zero symbol value.  */
 		  if (tsym.index == indexNil
 		      || (tsym.index == 0 && sh->value == 0))
 		    type_code = TYPE_CODE_ENUM;
@@ -978,7 +980,8 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		      (*debug_swap->swap_tir_in) (bigend,
 						  &ax[tsym.index].a_ti,
 						  &tir);
-		      if ((tir.bt == btNil || tir.bt == btVoid)
+		      if ((tir.bt == btNil || tir.bt == btVoid
+			   || (tir.bt == btEnum && sh->value == 0))
 			  && tir.tq0 == tqNil)
 			type_code = TYPE_CODE_ENUM;
 		    }
@@ -3109,7 +3112,9 @@ handle_psymbol_enumerators (objfile, fh, stype, svalue)
 	 and its auxiliary index is indexNil or its auxiliary entry
 	 is a plain btNil or btVoid.
 	 Alpha cc -migrate enums are recognized by a zero index and
-	 a zero symbol value.  */
+	 a zero symbol value.
+	 DU 4.0 cc enums are recognized by a member type of btEnum without
+	 qualifiers and a zero symbol value.  */
       (*swap_sym_in) (cur_bfd, ext_sym, &sh);
       if (sh.st != stMember)
 	return;
@@ -3121,7 +3126,10 @@ handle_psymbol_enumerators (objfile, fh, stype, svalue)
 				  &(debug_info->external_aux
 				    + fh->iauxBase + sh.index)->a_ti,
 				  &tir);
-      if ((tir.bt != btNil && tir.bt != btVoid) || tir.tq0 != tqNil)
+      if ((tir.bt != btNil
+	   && tir.bt != btVoid
+	   && (tir.bt != btEnum || svalue != 0))
+	  || tir.tq0 != tqNil)
 	return;
       break;
 

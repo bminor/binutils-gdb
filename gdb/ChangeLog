@@ -1,3 +1,9 @@
+Sat Sep 13 08:32:13 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_symbol, handle_psymbol_enumerators):  Handle
+	yet another variant of enumerator debugging info, used by DU 4.0
+	native cc.
+
 Tue Sep  9 20:47:23 1997  Felix Lee  <flee@cygnus.com>
 
 	* config/i386/windows.mh (XDEPFILES): reduce to libwingdb.a.
