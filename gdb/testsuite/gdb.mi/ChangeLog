@@ -1,3 +1,7 @@
+2002-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cli.exp: New file.
+
 2002-06-19  Keith Seitz  <keiths@redhat.com>
 
 	* mi1-basics.exp, mi1-break,.exp mi1-console.exp, mi1-disassemble.exp,

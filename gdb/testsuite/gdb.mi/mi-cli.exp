@@ -1,0 +1,102 @@
+# Copyright 2002 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file tests that GDB's console can be accessed via the MI.
+# Specifically, we are testing the "interpreter-exec" command and that
+# the commands that are executed via this command are properly executed.
+# Console commands executed via MI should use MI output wrappers, MI event
+# handlers, etc.
+
+load_lib mi-support.exp
+set MIFLAGS "-i=mi"
+
+gdb_exit
+if [mi_gdb_start] {
+    continue
+}
+
+set testfile "basics"
+set srcfile ${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+mi_delete_breakpoints
+mi_gdb_reinitialize_dir $srcdir/$subdir
+
+mi_gdb_test "-interpreter-exec" \
+  {\^error,msg="mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command"} \
+  "-interpreter-exec with no arguments"
+
+mi_gdb_test "-interpreter-exec console" \
+  {\^error,msg="mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command"} \
+  "-interpreter-exec with one argument"
+
+mi_gdb_test "-interpreter-exec bogus command" \
+  {\^error,msg="mi_cmd_interpreter_exec: could not find interpreter \\\"bogus\\\""} \
+  "-interpreter-exec with bogus interpreter"
+
+mi_gdb_test "-interpreter-exec console bogus" \
+  {\^error,msg="Undefined command: \"bogus\".  Try \"help\"\."} \
+  "-interpreter-exec console bogus"
+
+mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
+  {(=.*)+\^done} \
+  "-interpreter-exec console \"file \$binfile\""
+
+mi_gdb_test "-interpreter-exec console \"break main\"" \
+  {(&.*)*.*~"Breakpoint 1 at.*\\n".*=breakpoint-create,number="1".*\^done} \
+  "-interpreter-exec console \"break main\""
+
+mi_gdb_test "-interpreter-exec console \"set args foobar\"" \
+  {\^done} \
+  "-interpreter-exec console \"set args foobar\""
+
+mi_gdb_test "-interpreter-exec console \"show args\"" \
+  {\~"Argument list to give program being debugged when it is started is \\\"foobar\\\"\.\\n".*\^done} \
+  "-interpreter-exec console \"show args\""
+
+mi_gdb_test "-interpreter-exec console \"info break\"" \
+  {\~"Num[ \t]*Type[ \t]*Disp[ \t]*Enb[ \t]*Address[ \t]*What\\n".*~"1[ \t]*breakpoint[ \t]*keep[ \t]*y[ \t]*0x[0-9A-Fa-f]+[ \t]*in main at .*basics.c:[0-9]+\\n".*\^done} \
+  "-interpreter-exec console \"info break\""
+
+# FIXME: Is this right? This doesn't work right now anyway...
+mi_gdb_test "-interpreter-exec console run" \
+  {\^running.*(=.*)*\*stopped,reason="breakpoint-hit",.*\^done} \
+  "-interpreter-exec console run"
+
+mi_gdb_test "-interpreter-exec console \"set listsize 1\"" \
+  {\^done} \
+  "-interpreter-exec console \"set listsize 1\""
+
+mi_gdb_test "-interpreter-exec console \"list\"" \
+  {\~"32[ \t(\\t)]*callee1.*\\n".*\^done} \
+  "-interpreter-exec console \"list\""
+
+mi_gdb_test "-interpreter-exec console \"help set args\"" \
+  {\~"Set argument list to give program being debugged when it is started\.\\nFollow this command with any number of args, to be passed to the program\.".*\^done} \
+  "-interpreter-exec console \"help set args\""
+
+#mi_gdb_test "-interpreter-exec console \"\"" \
+  {} \
+  "-interpreter-exec console \"\""
+
+mi_gdb_exit
+return 0
