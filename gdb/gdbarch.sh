@@ -514,14 +514,6 @@ f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int 
 f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum:regnum::0:legacy_convert_register_p::0
 f:1:REGISTER_TO_VALUE:void:register_to_value:int regnum, struct type *type, char *from, char *to:regnum, type, from, to::0:legacy_register_to_value::0
 f:1:VALUE_TO_REGISTER:void:value_to_register:struct type *type, int regnum, char *from, char *to:type, regnum, from, to::0:legacy_value_to_register::0
-# This function is called when the value of a pseudo-register needs to
-# be updated.  Typically it will be defined on a per-architecture
-# basis.
-F:2:FETCH_PSEUDO_REGISTER:void:fetch_pseudo_register:int regnum:regnum:
-# This function is called when the value of a pseudo-register needs to
-# be set or stored.  Typically it will be defined on a
-# per-architecture basis.
-F:2:STORE_PSEUDO_REGISTER:void:store_pseudo_register:int regnum:regnum:
 #
 f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, void *buf:type, buf:::unsigned_pointer_to_address::0
 f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr:::unsigned_address_to_pointer::0

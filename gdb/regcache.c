@@ -470,46 +470,6 @@ real_register (int regnum)
   return regnum >= 0 && regnum < NUM_REGS;
 }
 
-/* Return whether register REGNUM is a pseudo register.  */
-
-static int
-pseudo_register (int regnum)
-{
-  return regnum >= NUM_REGS && regnum < NUM_REGS + NUM_PSEUDO_REGS;
-}
-
-/* Fetch register REGNUM into the cache.  */
-
-static void
-fetch_register (int regnum)
-{
-  /* NOTE: cagney/2001-12-04: Legacy targets were using fetch/store
-     pseudo-register as a way of handling registers that needed to be
-     constructed from one or more raw registers.  New targets instead
-     use gdbarch register read/write.  */
-  if (FETCH_PSEUDO_REGISTER_P ()
-      && pseudo_register (regnum))
-    FETCH_PSEUDO_REGISTER (regnum);
-  else
-    target_fetch_registers (regnum);
-}
-
-/* Write register REGNUM cached value to the target.  */
-
-static void
-store_register (int regnum)
-{
-  /* NOTE: cagney/2001-12-04: Legacy targets were using fetch/store
-     pseudo-register as a way of handling registers that needed to be
-     constructed from one or more raw registers.  New targets instead
-     use gdbarch register read/write.  */
-  if (STORE_PSEUDO_REGISTER_P ()
-      && pseudo_register (regnum))
-    STORE_PSEUDO_REGISTER (regnum);
-  else
-    target_store_registers (regnum);
-}
-
 /* Low level examining and depositing of registers.
 
    The caller is responsible for making sure that the inferior is
@@ -668,7 +628,7 @@ legacy_read_register_gen (int regnum, char *myaddr)
     }
 
   if (!register_cached (regnum))
-    fetch_register (regnum);
+    target_fetch_registers (regnum);
 
   memcpy (myaddr, register_buffer (current_regcache, regnum),
 	  REGISTER_RAW_SIZE (regnum));
@@ -702,7 +662,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 	  registers_ptid = inferior_ptid;
 	}
       if (!register_cached (regnum))
-	fetch_register (regnum);
+	target_fetch_registers (regnum);
     }
   /* Copy the value directly into the register cache.  */
   memcpy (buf, (regcache->raw_registers
@@ -772,7 +732,7 @@ legacy_write_register_gen (int regnum, const void *myaddr)
   memcpy (register_buffer (current_regcache, regnum), myaddr, size);
 
   set_register_cached (regnum, 1);
-  store_register (regnum);
+  target_store_registers (regnum);
 }
 
 void
@@ -827,7 +787,7 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
   regcache->raw_register_valid_p[regnum] = 1;
-  store_register (regnum);
+  target_store_registers (regnum);
 }
 
 void
@@ -903,7 +863,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 		  myaddr + (overlapstart - myregstart),
 		  overlapend - overlapstart);
 
-	  store_register (regnum);
+	  target_store_registers (regnum);
 	}
     }
 }
