@@ -1,5 +1,5 @@
 /* Definitions for opcode table for the sparc.
-   Copyright 1989, 1991, 1992, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1991, 1992, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler, GDB, the GNU debugger, and
 the GNU Binutils.
@@ -35,21 +35,23 @@ Boston, MA 02111-1307, USA.  */
 /*
  * Structure of an opcode table entry.
  * This enumerator must parallel the architecture_pname array
- * in bfd/opc-sparc.c.
+ * in opcodes/sparc-opc.c.
  */
 enum sparc_architecture {
 	v6 = 0,
 	v7,
 	v8,
 	sparclite,
-	v9
+	v9,
+	v9a /* v9 with ultrasparc additions */
 };
 
 extern const char *architecture_pname[];
 
 /* Sparclite and v9 are both supersets of v8; we can't bump between them.  */
 
-#define ARCHITECTURES_CONFLICT_P(ARCH1, ARCH2) ((ARCH1) == sparclite && (ARCH2) == v9)
+#define ARCHITECTURES_CONFLICT_P(ARCH1, ARCH2) \
+((ARCH1) == sparclite && ((ARCH2) == v9 || (ARCH2) == v9vis))
 
 struct sparc_opcode {
 	const char *name;
@@ -163,6 +165,7 @@ The following chars are unused: (note: ,[] are used as punctuation)
 #define RD(x)		(((x)&0x1f) << 25) /* destination register field */
 #define RS1(x)		(((x)&0x1f) << 14) /* rs1 field */
 #define ASI_RS2(x)	(SIMM13(x))
+#define MEMBAR(x)	((x)&0x7f)
 
 #define ANNUL	(1<<29)
 #define BPRED	(1<<19)	/* v9 */
@@ -178,6 +181,10 @@ extern const int bfd_sparc_num_opcodes;
 
 int sparc_encode_asi ();
 char *sparc_decode_asi ();
+int sparc_encode_membar ();
+char *sparc_decode_membar ();
+int sparc_encode_prefetch ();
+char *sparc_decode_prefetch ();
 
 /*
  * Local Variables:
