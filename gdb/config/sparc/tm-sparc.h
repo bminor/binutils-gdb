@@ -1,6 +1,7 @@
 /* Target machine sub-parameters for SPARC, for GDB, the GNU debugger.
    This is included by other tm-*.h files to define SPARC cpu-related info.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 
 This file is part of GDB.
@@ -85,7 +86,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   { pc = skip_prologue (pc, 0); }
 #define SKIP_PROLOGUE_FRAMELESS_P(pc) \
   { pc = skip_prologue (pc, 1); }
-extern CORE_ADDR skip_prologue ();
+extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, int));
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -97,7 +98,7 @@ extern CORE_ADDR skip_prologue ();
    a fake insn, step past it.  */
 
 #define PC_ADJUST(pc) sparc_pc_adjust(pc)
-extern CORE_ADDR sparc_pc_adjust();
+extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 
 #define SAVED_PC_AFTER_CALL(frame) PC_ADJUST (read_register (RP_REGNUM))
 
@@ -383,7 +384,12 @@ CORE_ADDR sparc_frame_saved_pc ();
 
 #define FRAME_FIND_SAVED_REGS(fi, frame_saved_regs)    	    \
 	sparc_frame_find_saved_regs ((fi), &(frame_saved_regs))
-extern void sparc_frame_find_saved_regs ();
+#ifdef __STDC__
+struct frame_info;
+struct frame_saved_regs;
+#endif
+extern void sparc_frame_find_saved_regs PARAMS ((struct frame_info *,
+						 struct frame_saved_regs *));
 
 /* Things needed for making the inferior call functions.  */
 /*
@@ -567,7 +573,7 @@ arguments.  */
 /* Sparc has no reliable single step ptrace call */
 
 #define NO_SINGLE_STEP 1
-extern void single_step ();
+extern void single_step PARAMS ((int));
 
 /* We need more arguments in a frame specification for the
    "frame" or "info frame" command.  */
