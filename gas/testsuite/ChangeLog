@@ -1,3 +1,8 @@
+2000-05-01  Nick Clifton  <nickc@cygnus.com>
+
+	* gasp/macro.out: Fix label numbers to remove leading zeroes. 
+	* gasp/mdouble.out: Fix label numbers to remove leading zeroes. 
+
 2000-04-25  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/general.l: Allow for DISP32 pe relocs.
@@ -26,7 +31,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 			  Jim Wilson  <wilson@cygnus.com>
 
 	* gas/vtable/vtable.exp: Disable for ia64.
-	* gas/testsuite/gas/ia64: New testsuite directory.
+	* gas/ia64: New testsuite directory.
 	
 2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 
@@ -260,7 +265,7 @@ Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 	extract3.s, deposit2.s, deposit3.s:  New.
 
 	* gas/hppa/basic/add.s,addi.s,dcor.s,shladd.s,sub.s,subi.s,unit.s:
-	Add new syntax versions of instructions to tests. 
+	Add new syntax versions of instructions to tests.
 	* gas/hppa/basic/add2.s,dcor2.s,perf.s,purge2.s,shladd2.s,sub2.s,
 	system2.s, unit2.s:  New tests.
 	* hppa/basic/basic.exp: Add new tests.
