@@ -1,3 +1,15 @@
+2002-06-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* writecode.c (lookup_inst): Generate inverse table on-the-fly.
+	(z8k_inv_list): Delete global.
+	(DIRTY_HACK): Delete macro.
+	(makelist): Delete global.
+	(main): Delete code making a list.  Delete dirty hack code.  Use
+	lookup_inst instead of z8k_inv_list.
+	* list.c: Delete file.
+	* Makefile.in (writecode): Do not link in list.o.
+	(list.o): Delete target.
+
 2002-04-29  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* writecode.c (lookup_inst): Ignore CLASS_IGNORE.
