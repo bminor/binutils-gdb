@@ -1184,7 +1184,7 @@ mips_request (cmd, addr, data, perr, timeout, buff)
     {
       if (mips_need_reply)
 	fatal ("mips_request: Trying to send command before reply");
-      sprintf (buff, "0x0 %c 0x%s 0x%s", cmd, paddr(addr), paddr(data));
+      sprintf (buff, "0x0 %c 0x%s 0x%s", cmd, paddr_nz (addr), paddr_nz (data));
       mips_send_packet (buff, 1);
       mips_need_reply = 1;
     }
@@ -1968,7 +1968,7 @@ mips_fetch_word (addr)
 			  mips_receive_wait, NULL);
       if (err)
         mips_error ("Can't read address 0x%s: %s",
-	      paddr(addr), safe_strerror (errno));
+	      paddr_nz (addr), safe_strerror (errno));
     }
   return val;
 }
@@ -2340,7 +2340,9 @@ pmon_remove_breakpoint (addr, contents_cache)
 
       if (bpnum >= PMON_MAX_BP)
         {
-          fprintf_unfiltered (stderr, "pmon_remove_breakpoint: Failed to find breakpoint at address 0x%s\n", paddr(addr));
+          fprintf_unfiltered (stderr,
+	    "pmon_remove_breakpoint: Failed to find breakpoint at address 0x%s\n",
+	    paddr_nz (addr));
           return 1;
         }
 
@@ -2471,9 +2473,10 @@ common_breakpoint (cmd, addr, mask, flags)
   int nfields;
 
   if (flags)
-    sprintf (buf, "0x0 %c 0x%s 0x%s %s", cmd, paddr (addr), paddr (mask), flags);
+    sprintf (buf, "0x0 %c 0x%s 0x%s %s", cmd, paddr_nz (addr), paddr_nz (mask),
+	     flags);
   else
-    sprintf (buf, "0x0 %c 0x%s", cmd, paddr (addr));
+    sprintf (buf, "0x0 %c 0x%s", cmd, paddr_nz (addr));
 
   mips_send_packet (buf, 1);
 
@@ -2494,7 +2497,7 @@ common_breakpoint (cmd, addr, mask, flags)
         rresponse = rerrflg;
       if (rresponse != 22) /* invalid argument */
 	fprintf_unfiltered (stderr, "common_breakpoint (0x%s):  Got error: 0x%x\n",
-			    paddr(addr), rresponse);
+			    paddr_nz (addr), rresponse);
       return 1;
     }
 
@@ -2906,6 +2909,20 @@ pmon_start_download ()
     }
 }
 
+static int
+mips_expect_download (char *string)
+{
+  if (!mips_expect (string))
+    {
+      fprintf_unfiltered (gdb_stderr, "Load did not complete successfully.\n");
+      if (tftp_in_use)
+	remove (tftp_localname);	/* Remove temporary file */
+      return 0;
+    }
+  else
+    return 1;
+}
+
 static void
 pmon_end_download (final, bintotal)
      int final;
@@ -2937,9 +2954,12 @@ pmon_end_download (final, bintotal)
       strcat (cmd, "\r");
       mips_send_command (cmd, 0);
       free (cmd);
-      mips_expect ("Downloading from ");
-      mips_expect (tftp_name);
-      mips_expect (", ^C to abort\r\n");
+      if (!mips_expect_download ("Downloading from "))
+	return;
+      if (!mips_expect_download (tftp_name))
+	return;
+      if (!mips_expect_download (", ^C to abort\r\n"))
+	return;
     }
 
   /* Wait for the stuff that PMON prints after the load has completed.
@@ -2953,8 +2973,8 @@ pmon_end_download (final, bintotal)
   mips_expect ("\r\ntotal = 0x");
   sprintf (hexnumber,"%x",bintotal);
   mips_expect (hexnumber);
-  if (!mips_expect (" bytes\r\n"))
-    fprintf_unfiltered (gdb_stderr, "Load did not complete successfully.\n");
+  if (!mips_expect_download (" bytes\r\n"))
+    return;
 
   if (tftp_in_use)
     remove (tftp_localname);	/* Remove temporary file */

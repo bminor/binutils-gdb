@@ -42,11 +42,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern struct obstack frame_cache_obstack;
 
 /* FIXME! this code assumes 4-byte instructions.  */
-#define MIPS_INSTLEN 4
-#define MIPS_NUMREGS 32	/* FIXME! how many on 64-bit mips? */
-typedef unsigned long t_inst;
+#define MIPS_INSTLEN 4		/* Length of an instruction */
+#define MIPS_NUMREGS 32		/* Number of integer or float registers */
+typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
-
 #if 0
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 #endif
@@ -209,7 +208,6 @@ struct linked_proc_info
   struct linked_proc_info *next;
 } *linked_proc_desc_table = NULL;
 
-
 
 /* This returns the PC of the first inst after the prologue.  If we can't
    find the prologue, then return 0.  */
@@ -444,6 +442,37 @@ read_next_frame_reg(fi, regno)
   return read_register (regno);
 }
 
+/* mips_addr_bits_remove - remove useless address bits  */
+
+CORE_ADDR
+mips_addr_bits_remove (addr)
+    CORE_ADDR addr;
+{
+  if (GDB_TARGET_IS_MIPS64
+      && (addr >> 32 == (CORE_ADDR)0xffffffff)
+      && (strcmp(target_shortname,"pmon")==0
+	 || strcmp(target_shortname,"ddb")==0
+	 || strcmp(target_shortname,"sim")==0))
+    {
+      /* This hack is a work-around for existing boards using PMON,
+	 the simulator, and any other 64-bit targets that doesn't have
+	 true 64-bit addressing.  On these targets, the upper 32 bits
+	 of addresses are ignored by the hardware.  Thus, the PC or SP
+	 are likely to have been sign extended to all 1s by instruction
+	 sequences that load 32-bit addresses.  For example, a typical
+	 piece of code that loads an address is this:
+		lui $r2, <upper 16 bits>
+		ori $r2, <lower 16 bits>
+	 But the lui sign-extends the value such that the upper 32 bits
+	 may be all 1s.  The workaround is simply to mask off these bits.
+	 In the future, gcc may be changed to support true 64-bit
+	 addressing, and this masking will have to be disabled.  */
+        addr &= (CORE_ADDR)0xffffffff;
+    }
+
+  return addr;
+}
+
 CORE_ADDR
 mips_frame_saved_pc(frame)
      struct frame_info *frame;
@@ -460,18 +489,7 @@ mips_frame_saved_pc(frame)
   else
     saved_pc = read_next_frame_reg(frame, pcreg);
 
-  if (GDB_TARGET_IS_MIPS64 && strcmp(current_target.to_shortname,"pmon")==0)
-    {
-      /* This hack is a work-around for PMON. 
-       * The PMON version in the Vr4300 board has been
-       * compiled without the 64bit register access commands. 
-       * Thus, the upper word of the PC may be sign extended to all 1s.
-       * If so, change it to zero.  */
-      if (saved_pc >> 32 == (CORE_ADDR)0xffffffff)
-        saved_pc &= (CORE_ADDR)0xffffffff;
-    }
-
-  return saved_pc;
+  return ADDR_BITS_REMOVE (saved_pc);
 }
 
 static struct mips_extra_func_info temp_proc_desc;
@@ -511,7 +529,7 @@ heuristic_proc_start(pc)
 		else
 		  warning("Hit heuristic-fence-post without finding");
 		
-		warning("enclosing function for address 0x%x", pc);
+		warning("enclosing function for address 0x%s", paddr (pc));
 		if (!blurb_printed)
 		  {
 		    printf_filtered ("\
@@ -530,7 +548,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 	else if (ABOUT_TO_RETURN(start_pc))
 	    break;
 
-    start_pc += 8; /* skip return, and its delay slot */ /* FIXME!! */
+    start_pc += 2 * MIPS_INSTLEN; /* skip return, and its delay slot */
 #if 0
     /* skip nops (usually 1) 0 - is this */
     while (start_pc < pc && read_memory_integer (start_pc, MIPS_INSTLEN) == 0)
@@ -569,11 +587,12 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 	if (status) memory_error (status, cur_pc);
 	word = (unsigned long) extract_unsigned_integer (buf, MIPS_INSTLEN); /* FIXME!! */
 
-	if ((word & 0xFFFF0000) == 0x27bd0000) /* addiu $sp,$sp,-i */
+	if ((word & 0xFFFF0000) == 0x27bd0000		/* addiu $sp,$sp,-i */
+	    || (word & 0xFFFF0000) == 0x23bd0000	/* addi $sp,$sp,-i */
+	    || (word & 0xFFFF0000) == 0x67bd0000) 	/* daddiu $sp,$sp,-i */
 	    frame_size += (-word) & 0xFFFF;
-	else if ((word & 0xFFFF0000) == 0x23bd0000) /* addu $sp,$sp,-i */
-	    frame_size += (-word) & 0xFFFF;
-	else if ((word & 0xFFE00000) == 0xafa00000) { /* sw reg,offset($sp) */
+	else if ((word & 0xFFE00000) == 0xafa00000	/* sw reg,offset($sp) */
+	        || (word & 0xFFE00000) == 0xffa00000) {	/* sd reg,offset($sp) */
 	    int reg = (word & 0x001F0000) >> 16;
 	    reg_mask |= 1 << reg;
 	    temp_saved_regs.regs[reg] = sp + (word & 0xffff);
@@ -697,6 +716,15 @@ find_proc_desc (pc, next_frame)
   return proc_desc;
 }
 
+static CORE_ADDR
+get_frame_pointer(frame, proc_desc)
+    struct frame_info *frame;
+    mips_extra_func_info_t proc_desc;
+{
+  return ADDR_BITS_REMOVE (read_next_frame_reg (frame,
+    PROC_FRAME_REG(proc_desc)) + PROC_FRAME_OFFSET(proc_desc));
+}
+
 mips_extra_func_info_t cached_proc_desc;
 
 CORE_ADDR
@@ -725,14 +753,15 @@ mips_frame_chain(frame)
 	&& !frame->signal_handler_caller)
       return 0;
     else
-      return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))
-	+ PROC_FRAME_OFFSET(proc_desc);
+      return get_frame_pointer (frame, proc_desc);
 }
 
 void
 init_extra_frame_info(fci)
      struct frame_info *fci;
 {
+  int regnum;
+
   /* Use proc_desc calculated in frame_chain */
   mips_extra_func_info_t proc_desc =
     fci->next ? cached_proc_desc : find_proc_desc(fci->pc, fci->next);
@@ -750,9 +779,7 @@ init_extra_frame_info(fci)
 	  && !PROC_DESC_IS_DUMMY (proc_desc))
 	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
       else
-	fci->frame =
-	  read_next_frame_reg (fci->next, PROC_FRAME_REG (proc_desc))
-	    + PROC_FRAME_OFFSET (proc_desc);
+	fci->frame = get_frame_pointer (fci->next, proc_desc);
 
       if (proc_desc == &temp_proc_desc)
 	{
@@ -775,12 +802,15 @@ init_extra_frame_info(fci)
 	}
 
       /* hack: if argument regs are saved, guess these contain args */
-      if ((PROC_REG_MASK(proc_desc) & 0xF0) == 0) fci->num_args = -1;
-/* FIXME!  Increase this for MIPS EABI */
-      else if ((PROC_REG_MASK(proc_desc) & 0x80) == 0) fci->num_args = 4;
-      else if ((PROC_REG_MASK(proc_desc) & 0x40) == 0) fci->num_args = 3;
-      else if ((PROC_REG_MASK(proc_desc) & 0x20) == 0) fci->num_args = 2;
-      else if ((PROC_REG_MASK(proc_desc) & 0x10) == 0) fci->num_args = 1;
+      fci->num_args = -1;	/* assume we can't tell how many args for now */
+      for (regnum = MIPS_LAST_ARG_REGNUM; regnum >= A0_REGNUM; regnum--)
+	{
+	  if (PROC_REG_MASK(proc_desc) & (1 << regnum))
+	    {
+	      fci->num_args = regnum - A0_REGNUM + 1;
+	      break;
+	    }
+	} 
     }
 }
 
@@ -841,8 +871,8 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   /* Allocate descriptors for each argument, plus some extras for the
      dummies we will create to zero-fill the holes left when we align
      arguments passed in registers that are smaller than a register.  */
-  mips_args = /* FIXME!  Should this 4 be increased for MIPS64? */
-    (struct mips_arg*) alloca ((nargs + 4) * sizeof (struct mips_arg));
+  mips_args =
+    (struct mips_arg*) alloca ((nargs + MIPS_NUM_ARG_REGS) * sizeof (struct mips_arg));
 
   /* Build up the list of argument descriptors.  */
   for (i = 0, m_arg = mips_args; i < nargs; i++, m_arg++) {
@@ -852,7 +882,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
      * on 8-byte boundaries. It still isn't quite right, because MIPS decided
      * to align 'struct {int a, b}' on 4-byte boundaries (even though this
      * breaks their varargs implementation...). A correct solution
-     * requires an simulation of gcc's 'alignof' (and use of 'alignof'
+     * requires a simulation of gcc's 'alignof' (and use of 'alignof'
      * in stdarg.h/varargs.h).
      * On the 64 bit r4000 we always pass the first four arguments
      * using eight bytes each, so that we can load them up correctly
@@ -867,19 +897,17 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
       accumulate_size = ALIGN (accumulate_size + len, 4);
     else
       {
-	/* If the argument is being passed on the stack, not a register,
-	   adjust the size of the argument upward to account for stack
-	   alignment.  The EABI allows 8 arguments to be passed in
-	   registers; the old ABI allows only four.  This code seems
-	   bogus to me: shouldn't we be right-aligning small arguments
-	   as we do below for the args-in-registers case?  FIXME!! */
-#if MIPS_EABI
-	if (accumulate_size >= 8 * MIPS_REGSIZE)  /* Ignores FP.  FIXME!! */
+	/* The following test attempts to determine if the argument
+	   is being passed on the stack.  But it fails account for
+	   floating point arguments in the EABI, which should have their
+	   own accumulated size separate from that for integer arguments.
+	   FIXME!! */
+	if (accumulate_size >= MIPS_NUM_ARG_REGS * MIPS_REGSIZE)
+	  /* The argument is being passed on the stack, not a register,
+	     so adjust the size of the argument upward to account for stack
+	     alignment.  But shouldn't we be right-aligning small arguments
+	     as we do below for the args-in-registers case?  FIXME!! */
 	  accumulate_size = ALIGN (accumulate_size + len, 8);
-#else
-	if (accumulate_size >= 4 * MIPS_REGSIZE)
-	  accumulate_size = ALIGN (accumulate_size + len, 4);
-#endif
 	else
 	  {
 	    if (len < MIPS_REGSIZE)
@@ -946,7 +974,7 @@ mips_push_dummy_frame()
   struct linked_proc_info *link = (struct linked_proc_info*)
       xmalloc(sizeof(struct linked_proc_info));
   mips_extra_func_info_t proc_desc = &link->info;
-  CORE_ADDR sp = read_register (SP_REGNUM);
+  CORE_ADDR sp = ADDR_BITS_REMOVE (read_register (SP_REGNUM));
   CORE_ADDR old_sp = sp;
   link->next = linked_proc_desc_table;
   linked_proc_desc_table = link;
@@ -954,13 +982,9 @@ mips_push_dummy_frame()
 /* FIXME!   are these correct ? */
 #define PUSH_FP_REGNUM 16 /* must be a register preserved across calls */
 #define GEN_REG_SAVE_MASK MASK(1,16)|MASK(24,28)|(1<<(MIPS_NUMREGS-1))
-#define GEN_REG_SAVE_COUNT 22
 #define FLOAT_REG_SAVE_MASK MASK(0,19)
-#define FLOAT_REG_SAVE_COUNT 20
 #define FLOAT_SINGLE_REG_SAVE_MASK \
   ((1<<18)|(1<<16)|(1<<14)|(1<<12)|(1<<10)|(1<<8)|(1<<6)|(1<<4)|(1<<2)|(1<<0))
-#define FLOAT_SINGLE_REG_SAVE_COUNT 10
-#define SPECIAL_REG_SAVE_COUNT 4
   /*
    * The registers we must save are all those not preserved across
    * procedure calls. Dest_Reg (see tm-mips.h) must also be saved.
@@ -1186,7 +1210,7 @@ mips_frame_num_args (frame)
 #endif
   return -1;
 }
-
+
 /* Is this a branch with a delay slot?  */
 
 static int is_delayed PARAMS ((unsigned long));
@@ -1210,12 +1234,12 @@ int
 mips_step_skips_delay (pc)
      CORE_ADDR pc;
 {
-  char buf[4]; /* FIXME!! */
+  char buf[MIPS_INSTLEN];
 
-  if (target_read_memory (pc, buf, 4) != 0) /* FIXME!! */
+  if (target_read_memory (pc, buf, MIPS_INSTLEN) != 0)
     /* If error reading memory, guess that it is not a delayed branch.  */
     return 0;
-  return is_delayed ((unsigned long)extract_unsigned_integer (buf, 4)); /* FIXME */
+  return is_delayed ((unsigned long)extract_unsigned_integer (buf, MIPS_INSTLEN));
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
@@ -1253,7 +1277,7 @@ mips_skip_prologue (pc, lenient)
     /* Skip the typical prologue instructions. These are the stack adjustment
        instruction and the instructions that save registers on the stack
        or in the gcc frame.  */
-    for (offset = 0; offset < 100; offset += MIPS_INSTLEN) /* FIXME!! */
+    for (offset = 0; offset < 100; offset += MIPS_INSTLEN)
       {
 	char buf[MIPS_INSTLEN];
 	int status;
@@ -1268,6 +1292,7 @@ mips_skip_prologue (pc, lenient)
 	  continue;
 #endif
 
+	/* Must add cases for 64-bit operations.  FIXME!! */
 	if ((inst & 0xffff0000) == 0x27bd0000)	/* addiu $sp,$sp,offset */
 	    seen_sp_adjust = 1;
 	else if (inst == 0x03a1e823 || 	        /* subu $sp,$sp,$at */

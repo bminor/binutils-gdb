@@ -1,3 +1,18 @@
+Tue Nov 26 19:21:35 1996  Mark Alexander  <marka@cygnus.com>
+
+	* config/mips/tm-mips.h (ADDR_BITS_REMOVE, TARGET_READ_SP): Define.
+	(mips_addr_bits_remove): Declare.
+	* mips-tdep.c (mips_push_dummy_frame): Fix heuristic-fence-post
+	errors when hitting breakpoints during inferior function calls
+	in 64-bit programs.
+	(fix_sign_extension): Make public, rename to mips_addr_bits_remove.
+	* utils.c (paddr_nz, preg_nz): New functions, similar to 
+	paddr and preg but don't print leading zeroes.
+	* defs.h (paddr_nz, preg_nz): Declare.
+	* remote-mips.c: Use paddr_nz instead of paddr throughout
+	to reduce packet size.
+	(pmon_end_download): Improve timeout error handling.
+
 Tue Nov 26 17:21:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.12.
