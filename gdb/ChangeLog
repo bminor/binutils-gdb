@@ -1,3 +1,7 @@
+2002-09-13  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (child_create_inferior): Honor 'tty' command.
+
 2002-09-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbtypes.c (check_stub_method): Make static.
