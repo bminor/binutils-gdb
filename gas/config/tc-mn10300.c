@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "as.h"
-#include "subsegs.h"     
+#include "subsegs.h"
 #include "opcode/mn10300.h"
 #include "dwarf2dbg.h"
 
@@ -34,54 +34,54 @@ struct reg_name
 
 struct dwarf2_line_info debug_line;
 
-/* Generic assembler global variables which must be defined by all targets. */
+/* Generic assembler global variables which must be defined by all
+   targets.  */
 
-/* Characters which always start a comment. */
+/* Characters which always start a comment.  */
 const char comment_chars[] = "#";
 
 /* Characters which start a comment at the beginning of a line.  */
 const char line_comment_chars[] = ";#";
 
-/* Characters which may be used to separate multiple commands on a 
+/* Characters which may be used to separate multiple commands on a
    single line.  */
 const char line_separator_chars[] = ";";
 
-/* Characters which are used to indicate an exponent in a floating 
+/* Characters which are used to indicate an exponent in a floating
    point number.  */
 const char EXP_CHARS[] = "eE";
 
-/* Characters which mean that a number is a floating point constant, 
+/* Characters which mean that a number is a floating point constant,
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
 
-
 const relax_typeS md_relax_table[] = {
-  /* bCC relaxing */
+  /* bCC relaxing  */
   {0x7f, -0x80, 2, 1},
   {0x7fff, -0x8000, 5, 2},
   {0x7fffffff, -0x80000000, 7, 0},
 
-  /* bCC relaxing (uncommon cases) */
+  /* bCC relaxing (uncommon cases)  */
   {0x7f, -0x80, 3, 4},
   {0x7fff, -0x8000, 6, 5},
   {0x7fffffff, -0x80000000, 8, 0},
 
-  /* call relaxing */
+  /* call relaxing  */
   {0x7fff, -0x8000, 5, 7},
   {0x7fffffff, -0x80000000, 7, 0},
 
-  /* calls relaxing */
+  /* calls relaxing  */
   {0x7fff, -0x8000, 4, 9},
   {0x7fffffff, -0x80000000, 6, 0},
 
-  /* jmp relaxing */
+  /* jmp relaxing  */
   {0x7f, -0x80, 2, 11},
   {0x7fff, -0x8000, 3, 12},
   {0x7fffffff, -0x80000000, 5, 0},
 
 };
 
-/* local functions */
+/* Local functions.  */
 static void mn10300_insert_operand PARAMS ((unsigned long *, unsigned long *,
 					    const struct mn10300_operand *,
 					    offsetT, char *, unsigned,
@@ -97,7 +97,7 @@ static void set_arch_mach PARAMS ((int));
 
 static int current_machine;
 
-/* fixups */
+/* Fixups.  */
 #define MAX_INSN_FIXUPS (5)
 struct mn10300_fixup
 {
@@ -116,7 +116,7 @@ const char *md_shortopts = "";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts); 
+size_t md_longopts_size = sizeof (md_longopts);
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
@@ -135,7 +135,7 @@ const pseudo_typeS md_pseudo_table[] =
 /* Opcode hash table.  */
 static struct hash_control *mn10300_hash;
 
-/* This table is sorted. Suitable for searching by a binary search. */
+/* This table is sorted. Suitable for searching by a binary search.  */
 static const struct reg_name data_registers[] =
 {
   { "d0", 0 },
@@ -143,7 +143,8 @@ static const struct reg_name data_registers[] =
   { "d2", 2 },
   { "d3", 3 },
 };
-#define DATA_REG_NAME_CNT	(sizeof(data_registers) / sizeof(struct reg_name))
+#define DATA_REG_NAME_CNT				\
+  (sizeof (data_registers) / sizeof (struct reg_name))
 
 static const struct reg_name address_registers[] =
 {
@@ -152,7 +153,9 @@ static const struct reg_name address_registers[] =
   { "a2", 2 },
   { "a3", 3 },
 };
-#define ADDRESS_REG_NAME_CNT	(sizeof(address_registers) / sizeof(struct reg_name))
+
+#define ADDRESS_REG_NAME_CNT					\
+  (sizeof (address_registers) / sizeof (struct reg_name))
 
 static const struct reg_name r_registers[] =
 {
@@ -197,7 +200,9 @@ static const struct reg_name r_registers[] =
   { "r8", 8 },
   { "r9", 9 },
 };
-#define R_REG_NAME_CNT	(sizeof(r_registers) / sizeof(struct reg_name))
+
+#define R_REG_NAME_CNT					\
+  (sizeof (r_registers) / sizeof (struct reg_name))
 
 static const struct reg_name xr_registers[] =
 {
@@ -223,8 +228,9 @@ static const struct reg_name xr_registers[] =
   { "xr8", 8 },
   { "xr9", 9 },
 };
-#define XR_REG_NAME_CNT	(sizeof(xr_registers) / sizeof(struct reg_name))
 
+#define XR_REG_NAME_CNT					\
+  (sizeof (xr_registers) / sizeof (struct reg_name))
 
 static const struct reg_name other_registers[] =
 {
@@ -232,11 +238,13 @@ static const struct reg_name other_registers[] =
   { "psw", 0 },
   { "sp", 0 },
 };
-#define OTHER_REG_NAME_CNT	(sizeof(other_registers) / sizeof(struct reg_name))
+
+#define OTHER_REG_NAME_CNT				\
+  (sizeof (other_registers) / sizeof (struct reg_name))
 
 /* reg_name_search does a binary search of the given register table
    to see if "name" is a valid regiter name.  Returns the register
-   number from the array on success, or -1 on failure. */
+   number from the array on success, or -1 on failure.  */
 
 static int
 reg_name_search (regs, regcount, name)
@@ -258,13 +266,12 @@ reg_name_search (regs, regcount, name)
 	high = middle - 1;
       else if (cmp > 0)
 	low = middle + 1;
-      else 
-	  return regs[middle].value;
+      else
+	return regs[middle].value;
     }
   while (low <= high);
   return -1;
 }
-
 
 /* Summary of register_name().
  *
@@ -276,6 +283,7 @@ reg_name_search (regs, regcount, name)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.
  */
+
 static boolean
 r_register_name (expressionP)
      expressionS *expressionP;
@@ -285,29 +293,34 @@ r_register_name (expressionP)
   char *start;
   char c;
 
-  /* Find the spelling of the operand */
+  /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
   reg_number = reg_name_search (r_registers, R_REG_NAME_CNT, name);
 
-  /* look to see if it's in the register table */
-  if (reg_number >= 0) 
+  /* Look to see if it's in the register table.  */
+  if (reg_number >= 0)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
 
-      /* make the rest nice */
+      /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
       return true;
     }
   else
     {
-      /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      /* Reset the line as if we had not done anything.  */
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
+
+      /* Reset input_line pointer.  */
+      input_line_pointer = start;
       return false;
     }
 }
@@ -322,6 +335,7 @@ r_register_name (expressionP)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.
  */
+
 static boolean
 xr_register_name (expressionP)
      expressionS *expressionP;
@@ -331,29 +345,34 @@ xr_register_name (expressionP)
   char *start;
   char c;
 
-  /* Find the spelling of the operand */
+  /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
   reg_number = reg_name_search (xr_registers, XR_REG_NAME_CNT, name);
 
-  /* look to see if it's in the register table */
-  if (reg_number >= 0) 
+  /* Look to see if it's in the register table.  */
+  if (reg_number >= 0)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
 
-      /* make the rest nice */
+      /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
       return true;
     }
   else
     {
-      /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      /* Reset the line as if we had not done anything.  */
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
+
+      /* Reset input_line pointer.  */
+      input_line_pointer = start;
       return false;
     }
 }
@@ -368,6 +387,7 @@ xr_register_name (expressionP)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.
  */
+
 static boolean
 data_register_name (expressionP)
      expressionS *expressionP;
@@ -377,29 +397,34 @@ data_register_name (expressionP)
   char *start;
   char c;
 
-  /* Find the spelling of the operand */
+  /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
   reg_number = reg_name_search (data_registers, DATA_REG_NAME_CNT, name);
 
-  /* look to see if it's in the register table */
-  if (reg_number >= 0) 
+  /* Look to see if it's in the register table.  */
+  if (reg_number >= 0)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
 
-      /* make the rest nice */
+      /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
       return true;
     }
   else
     {
-      /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      /* Reset the line as if we had not done anything.  */
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
+
+      /* Reset input_line pointer.  */
+      input_line_pointer = start;
       return false;
     }
 }
@@ -414,6 +439,7 @@ data_register_name (expressionP)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.
  */
+
 static boolean
 address_register_name (expressionP)
      expressionS *expressionP;
@@ -423,29 +449,35 @@ address_register_name (expressionP)
   char *start;
   char c;
 
-  /* Find the spelling of the operand */
+  /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
   reg_number = reg_name_search (address_registers, ADDRESS_REG_NAME_CNT, name);
 
-  /* look to see if it's in the register table */
-  if (reg_number >= 0) 
+  /* Look to see if it's in the register table.  */
+  if (reg_number >= 0)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
 
-      /* make the rest nice */
+      /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
       return true;
     }
   else
     {
-      /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      /* Reset the line as if we had not done anything.  */
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
+
+      /* Reset input_line pointer.  */
+      input_line_pointer = start;
+
       return false;
     }
 }
@@ -460,6 +492,7 @@ address_register_name (expressionP)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.
  */
+
 static boolean
 other_register_name (expressionP)
      expressionS *expressionP;
@@ -469,40 +502,45 @@ other_register_name (expressionP)
   char *start;
   char c;
 
-  /* Find the spelling of the operand */
+  /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
   reg_number = reg_name_search (other_registers, OTHER_REG_NAME_CNT, name);
 
-  /* look to see if it's in the register table */
-  if (reg_number >= 0) 
+  /* Look to see if it's in the register table.  */
+  if (reg_number >= 0)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
 
-      /* make the rest nice */
+      /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
       return true;
     }
   else
     {
-      /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      /* Reset the line as if we had not done anything.  */
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
+
+      /* Reset input_line pointer.  */
+      input_line_pointer = start;
       return false;
     }
 }
 
 void
 md_show_usage (stream)
-  FILE *stream;
+     FILE *stream;
 {
-  fprintf(stream, _("MN10300 options:\n\
+  fprintf (stream, _("MN10300 options:\n\
 none yet\n"));
-} 
+}
 
 int
 md_parse_option (c, arg)
@@ -514,16 +552,16 @@ md_parse_option (c, arg)
 
 symbolS *
 md_undefined_symbol (name)
-  char *name;
+     char *name;
 {
   return 0;
 }
 
 char *
 md_atof (type, litp, sizep)
-  int type;
-  char *litp;
-  int *sizep;
+     int type;
+     char *litp;
+     int *sizep;
 {
   int prec;
   LITTLENUM_TYPE words[4];
@@ -544,7 +582,7 @@ md_atof (type, litp, sizep)
       *sizep = 0;
       return "bad call to md_atof";
     }
-  
+
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
     input_line_pointer = t;
@@ -560,12 +598,11 @@ md_atof (type, litp, sizep)
   return NULL;
 }
 
-
 void
 md_convert_frag (abfd, sec, fragP)
-  bfd *abfd;
-  asection *sec;
-  fragS *fragP;
+     bfd *abfd;
+     asection *sec;
+     fragS *fragP;
 {
   static unsigned long label_count = 0;
   char buf[40];
@@ -863,7 +900,7 @@ md_begin ()
   char *prev_name = "";
   register const struct mn10300_opcode *op;
 
-  mn10300_hash = hash_new();
+  mn10300_hash = hash_new ();
 
   /* Insert unique names into hash table.  The MN10300 instruction set
      has many identical opcode names that have different opcodes based
@@ -873,7 +910,7 @@ md_begin ()
   op = mn10300_opcodes;
   while (op->name)
     {
-      if (strcmp (prev_name, op->name)) 
+      if (strcmp (prev_name, op->name))
 	{
 	  prev_name = (char *) op->name;
 	  hash_insert (mn10300_hash, op->name, (char *) op);
@@ -894,7 +931,7 @@ md_begin ()
 }
 
 void
-md_assemble (str) 
+md_assemble (str)
      char *str;
 {
   char *s;
@@ -908,13 +945,13 @@ md_assemble (str)
   int match;
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && ! isspace (*s); s++)
+  for (s = str; *s != '\0' && !isspace (*s); s++)
     ;
   if (*s != '\0')
     *s++ = '\0';
 
-  /* find the first opcode with the proper name */
-  opcode = (struct mn10300_opcode *)hash_find (mn10300_hash, str);
+  /* Find the first opcode with the proper name.  */
+  opcode = (struct mn10300_opcode *) hash_find (mn10300_hash, str);
   if (opcode == NULL)
     {
       as_bad (_("Unrecognized opcode: `%s'"), str);
@@ -927,13 +964,12 @@ md_assemble (str)
 
   input_line_pointer = str;
 
-  for(;;)
+  for (;;)
     {
       const char *errmsg;
       int op_idx;
       char *hold;
       int extra_shift = 0;
-
 
       errmsg = _("Invalid opcode/operands");
 
@@ -977,7 +1013,7 @@ md_assemble (str)
 	  if (operand->flags & MN10300_OPERAND_RELAX)
 	    relaxable = 1;
 
-	  /* Gather the operand. */
+	  /* Gather the operand.  */
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
 
@@ -1172,10 +1208,10 @@ md_assemble (str)
 
 	      /* Eat the '['.  */
 	      input_line_pointer++;
-	     
+
 	      /* We used to reject a null register list here; however,
-		 we accept it now so the compiler can emit "call" instructions
-		 for all calls to named functions.
+		 we accept it now so the compiler can emit "call"
+		 instructions for all calls to named functions.
 
 		 The linker can then fill in the appropriate bits for the
 		 register list and stack size or change the instruction
@@ -1294,7 +1330,7 @@ md_assemble (str)
 	      expression (&ex);
 	    }
 
-	  switch (ex.X_op) 
+	  switch (ex.X_op)
 	    {
 	    case O_illegal:
 	      errmsg = _("illegal operand");
@@ -1315,7 +1351,7 @@ md_assemble (str)
 		    str = hold;
 		    goto error;
 		  }
-		
+
 		if (opcode->format == FMT_D1 || opcode->format == FMT_S1)
 		  extra_shift = 8;
 		else if (opcode->format == FMT_D2
@@ -1331,11 +1367,10 @@ md_assemble (str)
 		  extra_shift = 8;
 		else
 		  extra_shift = 0;
-	      
+
 		mn10300_insert_operand (&insn, &extension, operand,
 					ex.X_add_number, (char *) NULL,
 					0, extra_shift);
-
 
 		/* And note the register number in the register array.  */
 		mn10300_reg_operands[op_idx - 1] = ex.X_add_number;
@@ -1348,7 +1383,7 @@ md_assemble (str)
 		 then promote it (ie this opcode does not match).  */
 	      if (operand->flags
 		  & (MN10300_OPERAND_PROMOTE | MN10300_OPERAND_RELAX)
-		  && ! check_operand (insn, operand, ex.X_add_number))
+		  && !check_operand (insn, operand, ex.X_add_number))
 		{
 		  input_line_pointer = hold;
 		  str = hold;
@@ -1424,20 +1459,20 @@ keep_going:
 
     error:
       if (match == 0)
-        {
+	{
 	  next_opcode = opcode + 1;
-	  if (!strcmp(next_opcode->name, opcode->name))
+	  if (!strcmp (next_opcode->name, opcode->name))
 	    {
 	      opcode = next_opcode;
 	      continue;
 	    }
-	  
+
 	  as_bad ("%s", errmsg);
 	  return;
-        }
+	}
       break;
     }
-      
+
   while (isspace (*str))
     ++str;
 
@@ -1486,7 +1521,7 @@ keep_going:
     {
       int type;
 
-      /* bCC */
+      /* bCC  */
       if (size == 2)
 	{
 	  /* Handle bra specially.  Basically treat it like jmp so
@@ -1501,16 +1536,16 @@ keep_going:
 	  else
 	    type = 0;
 	}
-      /* call */
+      /* call  */
       else if (size == 5)
-        type = 6;
-      /* calls */
+	type = 6;
+      /* calls  */
       else if (size == 4)
 	type = 8;
-      /* jmp */
+      /* jmp  */
       else if (size == 3 && opcode->opcode == 0xcc0000)
 	type = 10;
-      /* bCC (uncommon cases) */
+      /* bCC (uncommon cases)  */
       else
 	type = 3;
 
@@ -1518,7 +1553,7 @@ keep_going:
 		    fixups[0].exp.X_add_symbol,
 		    fixups[0].exp.X_add_number,
 		    (char *)fixups[0].opindex);
-      
+
       /* This is pretty hokey.  We basically just care about the
 	 opcode, so we have to write out the first word big endian.
 
@@ -1619,29 +1654,33 @@ keep_going:
       else if (opcode->format == FMT_D4)
 	{
 	  unsigned long temp = ((insn & 0xffff) << 16) | (extension & 0xffff);
+
 	  number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
 	  number_to_chars_littleendian (f + 2, temp, 4);
 	}
       else if (opcode->format == FMT_D5)
 	{
-	  unsigned long temp = ((insn & 0xffff) << 16)
-	    			| ((extension >> 8) & 0xffff);
+	  unsigned long temp = (((insn & 0xffff) << 16)
+				| ((extension >> 8) & 0xffff));
+
 	  number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
 	  number_to_chars_littleendian (f + 2, temp, 4);
 	  number_to_chars_bigendian (f + 6, extension & 0xff, 1);
 	}
       else if (opcode->format == FMT_D8)
 	{
-          unsigned long temp = ((insn & 0xff) << 16) | (extension & 0xffff);
-          number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
-          number_to_chars_bigendian (f + 3, (temp & 0xff), 1);
-          number_to_chars_littleendian (f + 4, temp >> 8, 2);
+	  unsigned long temp = ((insn & 0xff) << 16) | (extension & 0xffff);
+
+	  number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
+	  number_to_chars_bigendian (f + 3, (temp & 0xff), 1);
+	  number_to_chars_littleendian (f + 4, temp >> 8, 2);
 	}
       else if (opcode->format == FMT_D9)
 	{
-          unsigned long temp = ((insn & 0xff) << 24) | (extension & 0xffffff);
-          number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
-          number_to_chars_littleendian (f + 3, temp, 4);
+	  unsigned long temp = ((insn & 0xff) << 24) | (extension & 0xffffff);
+
+	  number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
+	  number_to_chars_littleendian (f + 3, temp, 4);
 	}
 
       /* Create any fixups.  */
@@ -1657,15 +1696,16 @@ keep_going:
 	      int offset;
 	      fixS *fixP;
 
-	      reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
+	      reloc_howto = bfd_reloc_type_lookup (stdoutput,
+						   fixups[i].reloc);
 
 	      if (!reloc_howto)
-		abort();
-	  
+		abort ();
+
 	      size = bfd_get_reloc_size (reloc_howto);
 
 	      if (size < 1 || size > 4)
-		abort();
+		abort ();
 
 	      offset = 4 - size;
 	      fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
@@ -1692,7 +1732,7 @@ keep_going:
 	      pcrel = (operand->flags & MN10300_OPERAND_PCREL) != 0;
 
 	      /* Gross.  This disgusting hack is to make sure we
-		 get the right offset for the 16/32 bit reloc in 
+		 get the right offset for the 16/32 bit reloc in
 		 "call" instructions.  Basically they're a pain
 		 because the reloc isn't at the end of the instruction.  */
 	      if ((size == 5 || size == 7)
@@ -1707,7 +1747,7 @@ keep_going:
 		      || ((insn >> 16) & 0xffff) == 0xfe01
 		      || ((insn >> 16) & 0xffff) == 0xfe02))
 		size -= 1;
-	
+
 	      offset = size - reloc_size / 8;
 
 	      /* Choose a proper BFD relocation type.  */
@@ -1769,10 +1809,9 @@ keep_going:
     }
 }
 
+/* If while processing a fixup, a reloc really needs to be created
+   then it is done here.  */
 
-/* if while processing a fixup, a reloc really needs to be created */
-/* then it is done here */
-                 
 arelent *
 tc_gen_reloc (seg, fixp)
      asection *seg;
@@ -1785,15 +1824,15 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    _("reloc %d not supported by object file format"),
-		    (int)fixp->fx_r_type);
+		    _("reloc %d not supported by object file format"),
+		    (int) fixp->fx_r_type);
       return NULL;
     }
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   if (fixp->fx_addsy && fixp->fx_subsy)
     {
-    
+
       if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
 	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
 	{
@@ -1806,9 +1845,9 @@ tc_gen_reloc (seg, fixp)
       reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
 		       - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
     }
-  else 
+  else
     {
-      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof( asymbol *));
+      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->addend = fixp->fx_offset;
     }
@@ -1857,7 +1896,7 @@ md_estimate_size_before_relax (fragp, seg)
       else
 	return 2;
     }
-} 
+}
 
 long
 md_pcrel_from (fixp)
@@ -1865,7 +1904,7 @@ md_pcrel_from (fixp)
 {
   return fixp->fx_frag->fr_address;
 #if 0
-  if (fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
+  if (fixp->fx_addsy != (symbolS *) NULL && !S_IS_DEFINED (fixp->fx_addsy))
     {
       /* The symbol is undefined.  Let the linker figure it out.  */
       return 0;
@@ -1917,26 +1956,25 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
 	  min = - (1 << (bits - 1));
 	}
       else
-        {
-          max = (1 << bits) - 1;
-          min = 0;
-        }
+	{
+	  max = (1 << bits) - 1;
+	  min = 0;
+	}
 
       test = val;
 
-
       if (test < (offsetT) min || test > (offsetT) max)
-        {
-          const char *err =
-            _("operand out of range (%s not between %ld and %ld)");
-          char buf[100];
+	{
+	  const char *err =
+	    _("operand out of range (%s not between %ld and %ld)");
+	  char buf[100];
 
-          sprint_value (buf, test);
-          if (file == (char *) NULL)
-            as_warn (err, buf, min, max);
-          else
-            as_warn_where (file, line, err, buf, min, max);
-        }
+	  sprint_value (buf, test);
+	  if (file == (char *) NULL)
+	    as_warn (err, buf, min, max);
+	  else
+	    as_warn_where (file, line, err, buf, min, max);
+	}
     }
 
   if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
@@ -1996,13 +2034,12 @@ check_operand (insn, operand, val)
 	  min = - (1 << (bits - 1));
 	}
       else
-        {
-          max = (1 << bits) - 1;
-          min = 0;
-        }
+	{
+	  max = (1 << bits) - 1;
+	  min = 0;
+	}
 
       test = val;
-
 
       if (test < (offsetT) min || test > (offsetT) max)
 	return 0;
