@@ -1,5 +1,12 @@
 2002-03-19  Chris G. Demetriou  <cgd@broadcom.com>
 
+	* cp1.c (fpu_format_name): New function to replace...
+	(DOFMT): This.  Delete, and update all callers.
+	(fpu_rounding_mode_name): New function to replace...
+	(RMMODE): This.  Delete, and update all callers.
+
+2002-03-19  Chris G. Demetriou  <cgd@broadcom.com>
+
 	* interp.c: Move FPU support routines from here to...
 	* cp1.c: Here.  New file.
 	* Makefile.in (SIM_OBJS): Add cp1.o to object list.

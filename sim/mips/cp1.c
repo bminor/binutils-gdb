@@ -76,8 +76,10 @@
 #define FPINF_SINGLE    (0x7F800000)
 #define FPINF_DOUBLE    (((uword64)0x7FF00000 << 32) | 0x00000000)
 
-#define RMMODE(v) (((v) == FP_RM_NEAREST) ? "Round" : (((v) == FP_RM_TOZERO) ? "Trunc" : (((v) == FP_RM_TOPINF) ? "Ceil" : "Floor")))
-#define DOFMT(v)  (((v) == fmt_single) ? "single" : (((v) == fmt_double) ? "double" : (((v) == fmt_word) ? "word" : (((v) == fmt_long) ? "long" : (((v) == fmt_unknown) ? "<unknown>" : (((v) == fmt_uninterpreted) ? "<uninterpreted>" : (((v) == fmt_uninterpreted_32) ? "<uninterpreted_32>" : (((v) == fmt_uninterpreted_64) ? "<uninterpreted_64>" : "<format error>"))))))))
+static const char *fpu_format_name (FP_formats fmt);
+#ifdef DEBUG
+static const char *fpu_rounding_mode_name (int rm);
+#endif
 
 uword64
 value_fpr (SIM_DESC sd,
@@ -103,11 +105,11 @@ value_fpr (SIM_DESC sd,
   if (FPR_STATE[fpr] == fmt_uninterpreted) {
     FPR_STATE[fpr] = fmt;
 #ifdef DEBUG
-    printf("DBG: Register %d was fmt_uninterpreted. Now %s\n",fpr,DOFMT(fmt));
+    printf("DBG: Register %d was fmt_uninterpreted. Now %s\n",fpr, fpu_format_name (fmt));
 #endif /* DEBUG */
   }
   if (fmt != FPR_STATE[fpr]) {
-    sim_io_eprintf(sd,"FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",fpr,DOFMT(FPR_STATE[fpr]),DOFMT(fmt),pr_addr(cia));
+    sim_io_eprintf(sd,"FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",fpr, fpu_format_name (FPR_STATE[fpr]), fpu_format_name (fmt),pr_addr(cia));
     FPR_STATE[fpr] = fmt_unknown;
   }
 
@@ -183,7 +185,7 @@ value_fpr (SIM_DESC sd,
    SignalExceptionSimulatorFault ("Unrecognised FP format in ValueFPR()");
 
 #ifdef DEBUG
-  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_uword64(value),pr_addr(cia),SizeFGR());
+  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr, fpu_format_name (fmt),pr_uword64(value),pr_addr(cia),SizeFGR());
 #endif /* DEBUG */
 
   return(value);
@@ -200,7 +202,7 @@ store_fpr (SIM_DESC sd,
   int err = 0;
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d,\n",fpr,DOFMT(fmt),pr_uword64(value),pr_addr(cia),SizeFGR());
+  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d,\n",fpr, fpu_format_name (fmt),pr_uword64(value),pr_addr(cia),SizeFGR());
 #endif /* DEBUG */
 
   if (SizeFGR() == 64) {
@@ -272,7 +274,7 @@ store_fpr (SIM_DESC sd,
    SignalExceptionSimulatorFault ("Unrecognised FP format in StoreFPR()");
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr[%d] = 0x%s (format %s)\n",fpr,pr_uword64(FGR[fpr]),DOFMT(fmt));
+  printf("DBG: StoreFPR: fpr[%d] = 0x%s (format %s)\n",fpr,pr_uword64(FGR[fpr]), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return;
@@ -307,7 +309,7 @@ NaN(op,fmt)
   }
 
 #ifdef DEBUG
-printf("DBG: NaN: returning %d for 0x%s (format = %s)\n",boolean,pr_addr(op),DOFMT(fmt));
+printf("DBG: NaN: returning %d for 0x%s (format = %s)\n",boolean,pr_addr(op), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -321,7 +323,7 @@ Infinity(op,fmt)
   int boolean = 0;
 
 #ifdef DEBUG
-  printf("DBG: Infinity: format %s 0x%s\n",DOFMT(fmt),pr_addr(op));
+  printf("DBG: Infinity: format %s 0x%s\n", fpu_format_name (fmt),pr_addr(op));
 #endif /* DEBUG */
 
   switch (fmt) {
@@ -340,12 +342,12 @@ Infinity(op,fmt)
       break;
     }
    default:
-    printf("DBG: TODO: unrecognised format (%s) for Infinity check\n",DOFMT(fmt));
+    printf("DBG: TODO: unrecognised format (%s) for Infinity check\n", fpu_format_name (fmt));
     break;
   }
 
 #ifdef DEBUG
-  printf("DBG: Infinity: returning %d for 0x%s (format = %s)\n",boolean,pr_addr(op),DOFMT(fmt));
+  printf("DBG: Infinity: returning %d for 0x%s (format = %s)\n",boolean,pr_addr(op), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -362,7 +364,7 @@ Less(op1,op2,fmt)
   /* Argument checking already performed by the FPCOMPARE code */
 
 #ifdef DEBUG
-  printf("DBG: Less: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Less: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -391,7 +393,7 @@ Less(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Less: returning %d (format = %s)\n",boolean,DOFMT(fmt));
+  printf("DBG: Less: returning %d (format = %s)\n",boolean, fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -408,7 +410,7 @@ Equal(op1,op2,fmt)
   /* Argument checking already performed by the FPCOMPARE code */
 
 #ifdef DEBUG
-  printf("DBG: Equal: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Equal: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -437,7 +439,7 @@ Equal(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Equal: returning %d (format = %s)\n",boolean,DOFMT(fmt));
+  printf("DBG: Equal: returning %d (format = %s)\n",boolean, fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -451,7 +453,7 @@ AbsoluteValue(op,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: AbsoluteValue: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
+  printf("DBG: AbsoluteValue: %s: op = 0x%s\n", fpu_format_name (fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -492,7 +494,7 @@ Negate(op,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: Negate: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
+  printf("DBG: Negate: %s: op = 0x%s\n", fpu_format_name (fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -534,7 +536,7 @@ Add(op1,op2,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: Add: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Add: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -574,7 +576,7 @@ Add(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Add: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: Add: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -589,7 +591,7 @@ Sub(op1,op2,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: Sub: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Sub: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -629,7 +631,7 @@ Sub(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Sub: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: Sub: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -644,7 +646,7 @@ Multiply(op1,op2,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: Multiply: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Multiply: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -684,7 +686,7 @@ Multiply(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Multiply: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: Multiply: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -699,7 +701,7 @@ Divide(op1,op2,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: Divide: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Divide: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -739,7 +741,7 @@ Divide(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Divide: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: Divide: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -753,7 +755,7 @@ Recip(op,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: Recip: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
+  printf("DBG: Recip: %s: op = 0x%s\n", fpu_format_name (fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -789,7 +791,7 @@ Recip(op,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Recip: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: Recip: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -803,7 +805,7 @@ SquareRoot(op,fmt)
   uword64 result = 0;
 
 #ifdef DEBUG
-  printf("DBG: SquareRoot: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
+  printf("DBG: SquareRoot: %s: op = 0x%s\n", fpu_format_name (fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -839,7 +841,7 @@ SquareRoot(op,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: SquareRoot: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: SquareRoot: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -855,7 +857,7 @@ Max (uword64 op1,
   unsigned64 result;
 
 #ifdef DEBUG
-  printf("DBG: Max: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Max: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -908,7 +910,7 @@ Max (uword64 op1,
     }
 
 #ifdef DEBUG
-  printf("DBG: Max: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: Max: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -925,7 +927,7 @@ Min (uword64 op1,
   unsigned64 result;
 
 #ifdef DEBUG
-  printf("DBG: Min: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+  printf("DBG: Min: %s: op1 = 0x%s : op2 = 0x%s\n", fpu_format_name (fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -978,7 +980,7 @@ Min (uword64 op1,
     }
 
 #ifdef DEBUG
-  printf("DBG: Min: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+  printf("DBG: Min: returning 0x%s (format = %s)\n",pr_addr(result), fpu_format_name (fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -1001,7 +1003,7 @@ convert (SIM_DESC sd,
 
 #ifdef DEBUG
 #if 0 /* FIXME: doesn't compile */
-  printf("DBG: Convert: mode %s : op 0x%s : from %s : to %s : (PC = 0x%s)\n",RMMODE(rm),pr_addr(op),DOFMT(from),DOFMT(to),pr_addr(IPC));
+  printf("DBG: Convert: mode %s : op 0x%s : from %s : to %s : (PC = 0x%s)\n", fpu_rounding_mode_name (rm),pr_addr(op), fpu_format_name (from), fpu_format_name (to),pr_addr(IPC));
 #endif
 #endif /* DEBUG */
 
@@ -1086,10 +1088,54 @@ convert (SIM_DESC sd,
     }
  
 #ifdef DEBUG
-  printf("DBG: Convert: returning 0x%s (to format = %s)\n",pr_addr(result64),DOFMT(to));
+  printf("DBG: Convert: returning 0x%s (to format = %s)\n",pr_addr(result64), fpu_format_name (to));
 #endif /* DEBUG */
 
   return(result64);
 }
 
+static const char *
+fpu_format_name (FP_formats fmt)
+{
+  switch (fmt)
+    {
+    case fmt_single:
+      return "single";
+    case fmt_double:
+      return "double";
+    case fmt_word:
+      return "word";
+    case fmt_long:
+      return "long";
+    case fmt_unknown:
+      return "<unknown>";
+    case fmt_uninterpreted:
+      return "<uninterpreted>";
+    case fmt_uninterpreted_32:
+      return "<uninterpreted_32>";
+    case fmt_uninterpreted_64:
+      return "<uninterpreted_64>";
+    default:
+      return "<format error>";
+    }
+}
 
+#ifdef DEBUG
+static const char *
+fpu_rounding_mode_name (int rm)
+{
+  switch (rm)
+    {
+    case FP_RM_NEAREST:
+      return "Round";
+    case FP_RM_TOZERO:
+      return "Trunc";
+    case FP_RM_TOPINF:
+      return "Ceil";
+    case FP_RM_TOMINF:
+      return "Floor";
+    default:
+      return "<rounding mode error>";
+    }
+}
+#endif /* DEBUG */
