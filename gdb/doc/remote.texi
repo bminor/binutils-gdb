@@ -1286,20 +1286,32 @@ concentrator) instead of a serial port, using the syntax
 @value{GDBN} also supports these special commands for MIPS targets:
 
 @table @code
-@item set mipsfpu off
+@item set mipsfpu double
+@itemx set mipsfpu single
+@itemx set mipsfpu none
 @itemx show mipsfpu
-@kindex set mipsfpu off
+@kindex set mipsfpu
 @kindex show mipsfpu
 @cindex MIPS remote floating point
 @cindex floating point, MIPS remote
 If your target board does not support the MIPS floating point
-coprocessor, you should use the command @samp{set mipsfpu off} (if you
+coprocessor, you should use the command @samp{set mipsfpu none} (if you
 need this, you may wish to put the command in your @value{GDBINIT}
 file).  This tells @value{GDBN} how to find the return value of
 functions which return floating point values.  It also allows
 @value{GDBN} to avoid saving the floating point registers when calling
-functions on the board.  (As usual, you can inquire about the
-@code{mipsfpu} variable with @samp{show mipsfpu}.)
+functions on the board.  If you are using a floating point coprocessor
+with only single precision floating point support, as on the @sc{r4650}
+processor, use the command @samp{set mipsfpu single}.  The default
+double precision floating point coprocessor may be selected using
+@samp{set mipsfpu double}.
+
+In previous versions the only choices were double precision or no
+floating point, so @samp{set mipsfpu on} will select double precision
+and @samp{set mipsfpu off} will select no floating point.
+
+As usual, you can inquire about the @code{mipsfpu} variable with
+@samp{show mipsfpu}.
 
 @item set remotedebug @var{n}
 @itemx show remotedebug
