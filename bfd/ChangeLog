@@ -1,3 +1,13 @@
+2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (allocate_dynrelocs): For undef weak syms with
+	non-default visibility, a) don't make them dynamic, b) discard
+	space for dynamic relocs.
+	(elf_s390_relocate_section): Initialize the GOT entries and skip
+	R_390_{8,16,32}/R_390_PC{16,16DBL,32DBL,32} for weak undefined
+	symbols with non-default visibility.
+	* elf64-s390.c: Likewise.
+
 2003-05-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* cpu-arm.c (arm_check_note): Warning fix.
