@@ -35,17 +35,21 @@ struct hardwire_ttystate
   struct termios termios;
   pid_t process_group;
 };
-#endif
+#endif /* termios */
 
 #ifdef HAVE_TERMIO
 #include <termio.h>
 
+/* It is believed that all systems which have added job control to SVR3
+   (e.g. sco) have also added termios.  Even if not, trying to figure out
+   all the variations (TIOCGPGRP vs. TCGETPGRP, etc.) would be pretty
+   bewildering.  So we don't attempt it.  */
+
 struct hardwire_ttystate
 {
   struct termio termio;
-  int process_group;
 };
-#endif
+#endif /* termio */
 
 #ifdef HAVE_SGTTY
 /* Needed for the code which uses select().  We would include <sys/select.h>
@@ -69,7 +73,7 @@ struct hardwire_ttystate
   int process_group;
 #endif
 };
-#endif
+#endif /* sgtty */
 
 static int hardwire_open PARAMS ((serial_t scb, const char *name));
 static void hardwire_raw PARAMS ((serial_t scb));
@@ -123,11 +127,7 @@ get_tty_state(scb, state)
 #ifdef HAVE_TERMIO
   if (ioctl (scb->fd, TCGETA, &state->termio) < 0)
     return -1;
-
-  if (!job_control)
-    return 0;
-
-  return ioctl (scb->fd, TIOCGPGRP, &state->process_group);
+  return 0;
 #endif
 
 #ifdef HAVE_SGTTY
@@ -167,12 +167,6 @@ set_tty_state(scb, state)
 #ifdef HAVE_TERMIO
   if (ioctl (scb->fd, TCSETA, &state->termio) < 0)
     return -1;
-
-  if (!job_control)
-    return 0;
-
-  /* Need to ignore errors, at least if attach_flag is set.  */
-  ioctl (scb->fd, TIOCSPGRP, &state->process_group);
   return 0;
 #endif
 
@@ -269,9 +263,9 @@ hardwire_print_tty_state (scb, ttystate)
   struct hardwire_ttystate *state = (struct hardwire_ttystate *) ttystate;
   int i;
 
+#ifdef HAVE_TERMIOS
   printf_filtered ("Process group = %d\n", state->process_group);
 
-#ifdef HAVE_TERMIOS
   printf_filtered ("c_iflag = 0x%x, c_oflag = 0x%x,\n",
 		   state->termios.c_iflag, state->termios.c_oflag);
   printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x\n",
@@ -300,6 +294,8 @@ hardwire_print_tty_state (scb, ttystate)
 #endif
 
 #ifdef HAVE_SGTTY
+  printf_filtered ("Process group = %d\n", state->process_group);
+
   printf_filtered ("sgttyb.sg_flags = 0x%x.\n", state->sgttyb.sg_flags);
 
   printf_filtered ("tchars: ");
@@ -569,7 +565,9 @@ hardwire_set_process_group (scb, ttystate, group)
      serial_ttystate ttystate;
      int group;
 {
+#if defined (HAVE_SGTTY) || defined (HAVE_TERMIOS)
   ((struct hardwire_ttystate *)ttystate)->process_group = group;
+#endif
   return 0;
 }
 
@@ -669,21 +667,24 @@ _initialize_ser_hardwire ()
   /* Do all systems with termios have the POSIX way of identifying job
      control?  I hope so.  */
 #ifdef _POSIX_JOB_CONTROL
-  /* AIX defines _POSIX_JOB_CONTROL to an empty string, so I guess
-     defining _POSIX_JOB_CONTROL to 0 to mean no job control doesn't work
-     (I don't have the standard handy).  */
   job_control = 1;
 #else
   job_control = sysconf (_SC_JOB_CONTROL);
 #endif
+#endif /* termios */
 
-#else /* not termios.  */
+#ifdef HAVE_TERMIO
+  /* See comment at top of file about trying to support process groups
+     with termio.  */
+  job_control = 0;
+#endif /* termio */
 
+#ifdef HAVE_SGTTY
 #ifdef TIOCGPGRP
   job_control = 1;
 #else
   job_control = 0;
 #endif /* TIOCGPGRP */
+#endif /* sgtty */
 
-#endif /* not termios.  */
 }
