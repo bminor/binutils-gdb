@@ -1,3 +1,7 @@
+Mon Apr  4 17:06:04 1994  Jeffrey A. Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (tc_gen_reloc): Fix thinko in ELF version.
+
 Mon Apr  4 12:39:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-ppc.c (ppc_insert_operand): Check PPC_OPERAND_SIGNED

@@ -2774,10 +2774,9 @@ tc_gen_reloc (section, fixp)
 	  break;
 	default:
 	  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_FUNCTION)
-	    relocs[i]->addend = 0;
+	    reloc->addend = 0;
 	  else
-	    relocs[i]->addend = fixp->fx_addnumber;
-	  break;
+	    reloc->addend = fixp->fx_addnumber;
 	  break;
 	}
       break;
