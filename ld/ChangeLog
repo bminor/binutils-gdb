@@ -1,3 +1,8 @@
+2001-06-07  Andreas Jaeger  <aj@suse.de>
+
+	* elf_x86_64.sh (NONPAGED_TEXT_START_ADDR): Increase.
+	(TEXT_START_ADDR): Likewise.
+
 2001-06-06  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* configure.host: Set HOSTING_CRT0/HOSTING_LIBS correctly for s/390.
@@ -38,7 +43,7 @@
 2001-05-25  Timothy Wall  <twall@oculustech.com>
 
 	* emulparams/elf64_aix.sh: Change settings to match IBM linker
-	output. 
+	output.
 
 2001-05-25  Alan Modra  <amodra@one.net.au>
 
@@ -64,7 +69,7 @@
 
 2001-05-24 Tom Rix <trix@redhat.com>
 
-	* emultempl/aix.em : (gld${EMULATION_NAME}_read_file) 
+	* emultempl/aix.em : (gld${EMULATION_NAME}_read_file)
 	udate import file format.
 	(change_symbol_mode) New, same
 	(is_syscall) New, same
@@ -80,17 +85,17 @@
 	* scripttempl/aix.sc : default text section offset to 0x10000000
 	 default data section offset to 0x20000000
 	add .sv3264 and .sv64 pseudo sections
-	loader and debug sections use the currect section offset. 
+	loader and debug sections use the currect section offset.
 
 	* emultempl/aix.em : Add xcoff64 support
 	Add -binitfini support
-	(gld${EMULATION_NAME}_before_parse) -binitfini 
+	(gld${EMULATION_NAME}_before_parse) -binitfini
 	(gld${EMULATION_NAME}_parse_args) same
-	(gld${EMULATION_NAME}_before_allocation) format change for special 
+	(gld${EMULATION_NAME}_before_allocation) format change for special
 	sections
 
 	* emulparams/aixppc64.sh : New file for xcoff64 support
-	
+
 2001-05-23  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emultempl/elf32.em (ELF_INTERPRETER_SET_DEFAULT): Use this new
@@ -173,7 +178,7 @@
 
 	* emultempl/aix.em: Replace buystring with xstrdup.
 	* emultempl/beos.em: Replace buystring with xstrdup.
-	
+
 2001-05-02  H.J. Lu  <hjl@gnu.org>
 
 	* ldfile.c: Include "libiberty.h".
