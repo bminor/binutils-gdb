@@ -37,8 +37,12 @@ alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 static CORE_ADDR
 alpha_osf1_sigcontext_addr (struct frame_info *frame)
 {
-  return (read_memory_integer (frame->next ? frame->next->frame
-					   : frame->frame, 8));
+  struct frame_info *next_frame = get_next_frame (frame);
+
+  if (next_frame != NULL)
+    return (read_memory_integer (get_frame_base (next_frame), 8));
+  else
+    return (read_memory_integer (get_frame_base (frame), 8));
 }
 
 /* This is the definition of CALL_DUMMY_ADDRESS.  It's a heuristic that is used
