@@ -1,3 +1,8 @@
+2002-09-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Update for 5.3.
+	* README: Update.
+
 2002-09-04  Andrew Cagney  <ac131313@redhat.com>
 
 	GDB 5.3 branch created.
