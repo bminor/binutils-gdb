@@ -1,5 +1,11 @@
 2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-names.y (tokentab2, tokentab3): Remove.
+	(HANDLE_TOKEN2, HANDLE_TOKEN3): New macros.
+	(yylex): Use them.
+
+2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-names.y (%union): Remove typed_val_float.
 	(INT, FLOAT): Change to type comp.
 	(CONSTRUCTION_VTABLE): Change to untyped.

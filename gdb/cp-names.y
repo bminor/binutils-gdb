@@ -1413,36 +1413,6 @@ struct token
   int opcode;
 };
 
-static const struct token tokentab3[] =
-  {
-    {">>=", ASSIGN_MODIFY, BINOP_RSH},
-    {"<<=", ASSIGN_MODIFY, BINOP_LSH},
-  };
-
-static const struct token tokentab2[] =
-  {
-    {"+=", ASSIGN_MODIFY, BINOP_ADD},
-    {"-=", ASSIGN_MODIFY, BINOP_SUB},
-    {"*=", ASSIGN_MODIFY, BINOP_MUL},
-    {"/=", ASSIGN_MODIFY, BINOP_DIV},
-    {"%=", ASSIGN_MODIFY, BINOP_REM},
-    {"|=", ASSIGN_MODIFY, BINOP_BITWISE_IOR},
-    {"&=", ASSIGN_MODIFY, BINOP_BITWISE_AND},
-    {"^=", ASSIGN_MODIFY, BINOP_BITWISE_XOR},
-    {"++", INCREMENT, BINOP_END},
-    {"--", DECREMENT, BINOP_END},
-    {"->", ARROW, BINOP_END},
-    {"&&", ANDAND, BINOP_END},
-    {"||", OROR, BINOP_END},
-    {"::", COLONCOLON, BINOP_END},
-    {"<<", LSH, BINOP_END},
-    {">>", RSH, BINOP_END},
-    {"==", EQUAL, BINOP_END},
-    {"!=", NOTEQUAL, BINOP_END},
-    {"<=", LEQ, BINOP_END},
-    {">=", GEQ, BINOP_END}
-  };
-
 #define HANDLE_SPECIAL(string, len, comp)		\
   if (strncmp (tokstart, string, len) == 0)		\
     {							\
@@ -1451,6 +1421,22 @@ static const struct token tokentab2[] =
       return DEMANGLER_SPECIAL;				\
     }
 
+#define HANDLE_TOKEN2(string, token, op)		\
+  if (lexptr[1] == string[1])				\
+    {							\
+      lexptr += 2;					\
+      yylval.opname = string;				\
+      return token;					\
+    }      
+
+#define HANDLE_TOKEN3(string, token, op)		\
+  if (lexptr[1] == string[1] && lexptr[2] == string[2])	\
+    {							\
+      lexptr += 2;					\
+      yylval.opname = string;				\
+      return token;					\
+    }      
+
 /* Read one token, getting characters through lexptr.  */
 
 static int
@@ -1458,7 +1444,6 @@ yylex (void)
 {
   int c;
   int namelen;
-  unsigned int i;
   char *tokstart;
   char *tokptr;
   int tempbufindex;
@@ -1472,26 +1457,6 @@ yylex (void)
   unquoted_expr = 1;
 
   tokstart = lexptr;
-  /* See if it is a special token of length 3.  */
-  for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (tokstart[0] == tokentab3[i].operator[0]
-        && tokstart[1] == tokentab3[i].operator[1]
-        && tokstart[2] == tokentab3[i].operator[2])
-      {
-	lexptr += 3;
-	yylval.opname = tokentab3[i].operator;
-	return tokentab3[i].token;
-      }
-
-  /* See if it is a special token of length 2.  */
-  for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (tokstart[0] == tokentab2[i].operator[0]
-        && tokstart[1] == tokentab2[i].operator[1])
-      {
-	lexptr += 2;
-	yylval.opname = tokentab2[i].operator;
-	return tokentab2[i].token;
-      }
 
   switch (c = *tokstart)
     {
@@ -1561,6 +1526,10 @@ yylex (void)
       /* FALL THRU into number case.  */
 
     case '-':
+      HANDLE_TOKEN2 ("-=", ASSIGN_MODIFY, BINOP_SUB);
+      HANDLE_TOKEN2 ("--", DECREMENT, BINOP_END);
+      HANDLE_TOKEN2 ("->", ARROW, BINOP_END);
+
       /* For construction vtables.  This is kind of hokey.  */
       if (strncmp (tokstart, "-in-", 4) == 0)
 	{
@@ -1643,22 +1612,66 @@ yylex (void)
       }
 
     case '+':
+      HANDLE_TOKEN2 ("+=", ASSIGN_MODIFY, BINOP_ADD);
+      HANDLE_TOKEN2 ("++", INCREMENT, BINOP_END);
+      lexptr++;
+      return c;
     case '*':
+      HANDLE_TOKEN2 ("*=", ASSIGN_MODIFY, BINOP_MUL);
+      lexptr++;
+      return c;
     case '/':
+      HANDLE_TOKEN2 ("/=", ASSIGN_MODIFY, BINOP_DIV);
+      lexptr++;
+      return c;
     case '%':
+      HANDLE_TOKEN2 ("%=", ASSIGN_MODIFY, BINOP_REM);
+      lexptr++;
+      return c;
     case '|':
+      HANDLE_TOKEN2 ("|=", ASSIGN_MODIFY, BINOP_BITWISE_IOR);
+      HANDLE_TOKEN2 ("||", OROR, BINOP_END);
+      lexptr++;
+      return c;
     case '&':
+      HANDLE_TOKEN2 ("&=", ASSIGN_MODIFY, BINOP_BITWISE_AND);
+      HANDLE_TOKEN2 ("&&", ANDAND, BINOP_END);
+      lexptr++;
+      return c;
     case '^':
-    case '~':
+      HANDLE_TOKEN2 ("^=", ASSIGN_MODIFY, BINOP_BITWISE_XOR);
+      lexptr++;
+      return c;
     case '!':
-    case '@':
+      HANDLE_TOKEN2 ("!=", NOTEQUAL, BINOP_END);
+      lexptr++;
+      return c;
     case '<':
+      HANDLE_TOKEN2 ("<=", LEQ, BINOP_END);
+      HANDLE_TOKEN2 ("<<", LSH, BINOP_END);
+      HANDLE_TOKEN3 ("<<=", ASSIGN_MODIFY, BINOP_LSH);
+      lexptr++;
+      return c;
     case '>':
+      HANDLE_TOKEN2 (">=", GEQ, BINOP_END);
+      HANDLE_TOKEN2 (">>", RSH, BINOP_END);
+      HANDLE_TOKEN3 (">>=", ASSIGN_MODIFY, BINOP_RSH);
+      lexptr++;
+      return c;
+    case '=':
+      HANDLE_TOKEN2 ("==", EQUAL, BINOP_END);
+      lexptr++;
+      return c;
+    case ':':
+      HANDLE_TOKEN2 ("::", COLONCOLON, BINOP_END);
+      lexptr++;
+      return c;
+
     case '[':
     case ']':
     case '?':
-    case ':':
-    case '=':
+    case '@':
+    case '~':
     case '{':
     case '}':
     symbol:
