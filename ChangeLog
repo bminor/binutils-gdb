@@ -1,3 +1,8 @@
+Tue Sep 15 16:00:54 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure: always set $(tooldir) to $(libdir)/$(target_alias),
+	even for a native compilation.
+
 Thu Sep 10 10:43:19 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: added -I for newlib/targ-include to XTRAFLAGS, to
