@@ -286,8 +286,6 @@ static void i370_elf_post_process_headers
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean i370_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean i370_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean i370_elf_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static bfd_boolean i370_elf_check_relocs
@@ -385,15 +383,15 @@ i370_elf_merge_private_bfd_data (ibfd, obfd)
  */
 
 static bfd_boolean
-i370_elf_section_from_shdr (abfd, hdr, name)
-     bfd *abfd;
-     Elf_Internal_Shdr *hdr;
-     const char *name;
+i370_elf_section_from_shdr (bfd *abfd,
+			    Elf_Internal_Shdr *hdr,
+			    const char *name,
+			    int shindex)
 {
   asection *newsect;
   flagword flags;
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
   newsect = hdr->bfd_section;

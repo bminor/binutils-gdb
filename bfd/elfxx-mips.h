@@ -31,7 +31,7 @@ extern bfd_boolean _bfd_mips_elf_name_local_section_symbols
 extern bfd_boolean _bfd_mips_elf_section_processing
   (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_mips_elf_section_from_shdr
-  (bfd *, Elf_Internal_Shdr *, const char *);
+  (bfd *, Elf_Internal_Shdr *, const char *, int);
 extern bfd_boolean _bfd_mips_elf_fake_sections
   (bfd *, Elf_Internal_Shdr *, asection *);
 extern bfd_boolean _bfd_mips_elf_section_from_bfd_section

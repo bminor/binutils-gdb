@@ -2822,12 +2822,15 @@ elf64_x86_64_plt_sym_val (bfd_vma i, const asection *plt,
    is called when elfcode.h finds a section with an unknown type.  */
 
 static bfd_boolean
-elf64_x86_64_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr, const char *name)
+elf64_x86_64_section_from_shdr (bfd *abfd,
+				Elf_Internal_Shdr *hdr,
+				const char *name,
+				int shindex)
 {
   if (hdr->sh_type != SHT_X86_64_UNWIND)
     return FALSE;
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
   return TRUE;

@@ -78,8 +78,6 @@ static bfd_boolean v850_elf_add_symbol_hook
 static bfd_boolean v850_elf_link_output_symbol_hook
   PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
 	   asection *, struct elf_link_hash_entry *));
-static bfd_boolean v850_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean v850_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -2210,16 +2208,16 @@ v850_elf_link_output_symbol_hook (info, name, sym, input_sec, h)
 }
 
 static bfd_boolean
-v850_elf_section_from_shdr (abfd, hdr, name)
-     bfd *abfd;
-     Elf_Internal_Shdr *hdr;
-     const char *name;
+v850_elf_section_from_shdr (bfd *abfd,
+			    Elf_Internal_Shdr *hdr,
+			    const char *name,
+			    int shindex)
 {
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the
      sections by their name, instead.  */
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
   switch (hdr->sh_type)

@@ -183,8 +183,6 @@ static void elfNN_ia64_relax_ldxmov
   PARAMS((bfd_byte *contents, bfd_vma off));
 static bfd_boolean is_unwind_section_name
   PARAMS ((bfd *abfd, const char *));
-static bfd_boolean elfNN_ia64_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean elfNN_ia64_section_flags
   PARAMS ((flagword *, const Elf_Internal_Shdr *));
 static bfd_boolean elfNN_ia64_fake_sections
@@ -1261,13 +1259,14 @@ is_unwind_section_name (abfd, name)
 }
 
 /* Handle an IA-64 specific section when reading an object file.  This
-   is called when elfcode.h finds a section with an unknown type.  */
+   is called when bfd_section_from_shdr finds a section with an unknown
+   type.  */
 
 static bfd_boolean
-elfNN_ia64_section_from_shdr (abfd, hdr, name)
-     bfd *abfd;
-     Elf_Internal_Shdr *hdr;
-     const char *name;
+elfNN_ia64_section_from_shdr (bfd *abfd,
+			      Elf_Internal_Shdr *hdr,
+			      const char *name,
+			      int shindex)
 {
   asection *newsect;
 
@@ -1291,7 +1290,7 @@ elfNN_ia64_section_from_shdr (abfd, hdr, name)
       return FALSE;
     }
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
   newsect = hdr->bfd_section;
 

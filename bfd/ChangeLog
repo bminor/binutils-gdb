@@ -1,3 +1,30 @@
+2005-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Add int to
+	elf_backend_section_from_shdr.
+	(bfd_elf_section_data): Update comment for this_idx.
+	(_bfd_elf_make_section_from_shdr): Add int.
+	* elfxx-mips.h (_bfd_mips_elf_section_from_shdr): Likewise.
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Take section index
+	and use it to set this_idx in bfd_elf_section_data.
+	(bfd_section_from_shdr): Pass shindex to
+	_bfd_elf_make_section_from_shdr.
+	(_bfd_elf_section_from_bfd_section): Use this_idx in
+	bfd_elf_section_data to find section index.
+
+	* elf32-arm.c (elf32_arm_section_from_shdr): Take section
+	index and pass it to _bfd_elf_make_section_from_shdr.
+	* elf32-i370.c(i370_elf_section_from_shdr): Likewise.
+	* elf32-ppc.c (ppc_elf_section_from_shdr): Likewise.
+	* elf32-sh64.c (sh64_backend_section_from_shdr): Likewise.
+	* elf32-v850.c (v850_elf_section_from_shdr): Likewise.
+	* elf64-alpha.c (elf64_alpha_section_from_shdr): Likewise.
+	* elf64-hppa.c (elf64_hppa_section_from_shdr): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_section_from_shdr): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_section_from_shdr): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Likewise.
+
 2005-03-19  Danny Smith <dannysmith@users.sourceforge.net>
 	    Ross Ridge  <rridge@csclub.uwaterloo.ca>
 

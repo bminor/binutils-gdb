@@ -629,7 +629,7 @@ struct elf_backend_data
   /* A function to handle unusual section types when creating BFD
      sections from ELF sections.  */
   bfd_boolean (*elf_backend_section_from_shdr)
-    (bfd *, Elf_Internal_Shdr *, const char *);
+    (bfd *, Elf_Internal_Shdr *, const char *, int);
 
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
@@ -1059,8 +1059,7 @@ struct bfd_elf_section_data
   /* The number of relocations currently assigned to REL_HDR2.  */
   unsigned int rel_count2;
 
-  /* The ELF section number of this section.  Only used for an output
-     file.  */
+  /* The ELF section number of this section.  */
   int this_idx;
 
   /* The ELF section number of the reloc section indicated by
@@ -1416,7 +1415,7 @@ extern bfd_boolean bfd_elf_mkcorefile
 extern Elf_Internal_Shdr *bfd_elf_find_section
   (bfd *, char *);
 extern bfd_boolean _bfd_elf_make_section_from_shdr
-  (bfd *, Elf_Internal_Shdr *, const char *);
+  (bfd *, Elf_Internal_Shdr *, const char *, int);
 extern bfd_boolean _bfd_elf_make_section_from_phdr
   (bfd *, Elf_Internal_Phdr *, int, const char *);
 extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc

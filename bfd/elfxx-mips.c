@@ -5068,8 +5068,10 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
    how to.  */
 
 bfd_boolean
-_bfd_mips_elf_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr,
-				 const char *name)
+_bfd_mips_elf_section_from_shdr (bfd *abfd,
+				 Elf_Internal_Shdr *hdr,
+				 const char *name,
+				 int shindex)
 {
   flagword flags = 0;
 
@@ -5141,7 +5143,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr,
       return FALSE;
     }
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
   if (flags)

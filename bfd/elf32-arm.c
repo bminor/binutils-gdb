@@ -5486,13 +5486,15 @@ elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
   return TRUE;
 }
 
-/* Handle an ARM specific section when reading an object file.
-   This is called when elf.c finds a section with an unknown type.  */
+/* Handle an ARM specific section when reading an object file.  This is
+   called when bfd_section_from_shdr finds a section with an unknown
+   type.  */
 
 static bfd_boolean
 elf32_arm_section_from_shdr (bfd *abfd,
 			     Elf_Internal_Shdr * hdr,
-			     const char *name)
+			     const char *name,
+			     int shindex)
 {
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the
@@ -5508,7 +5510,7 @@ elf32_arm_section_from_shdr (bfd *abfd,
       return FALSE;
     }
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
   return TRUE;

@@ -1760,15 +1760,19 @@ ppc_elf_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED,
 }
 
 /* Handle a PowerPC specific section when reading an object file.  This
-   is called when elfcode.h finds a section with an unknown type.  */
+   is called when bfd_section_from_shdr finds a section with an unknown
+   type.  */
 
 static bfd_boolean
-ppc_elf_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr, const char *name)
+ppc_elf_section_from_shdr (bfd *abfd,
+			   Elf_Internal_Shdr *hdr,
+			   const char *name,
+			   int shindex)
 {
   asection *newsect;
   flagword flags;
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
   newsect = hdr->bfd_section;

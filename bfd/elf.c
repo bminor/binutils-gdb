@@ -673,7 +673,8 @@ bfd_elf_is_group_section (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
 bfd_boolean
 _bfd_elf_make_section_from_shdr (bfd *abfd,
 				 Elf_Internal_Shdr *hdr,
-				 const char *name)
+				 const char *name,
+				 int shindex)
 {
   asection *newsect;
   flagword flags;
@@ -692,6 +693,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   hdr->bfd_section = newsect;
   elf_section_data (newsect)->this_hdr = *hdr;
+  elf_section_data (newsect)->this_idx = shindex;
 
   /* Always use the real type/flags.  */
   elf_section_type (newsect) = hdr->sh_type;
@@ -1728,10 +1730,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     case SHT_FINI_ARRAY:	/* .fini_array section.  */
     case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
     case SHT_GNU_LIBLIST:	/* .gnu.liblist section.  */
-      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
 
     case SHT_DYNAMIC:	/* Dynamic linking information.  */
-      if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+      if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	return FALSE;
       if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_STRTAB)
 	{
@@ -1782,7 +1784,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
          linker.  */
       if ((hdr->sh_flags & SHF_ALLOC) != 0
 	  && (abfd->flags & DYNAMIC) != 0
-	  && ! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+	  && ! _bfd_elf_make_section_from_shdr (abfd, hdr, name,
+						shindex))
 	return FALSE;
 
       /* Go looking for SHT_SYMTAB_SHNDX too, since if there is one we
@@ -1826,7 +1829,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
       /* Besides being a symbol table, we also treat this as a regular
 	 section, so that objcopy can handle it.  */
-      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
 
     case SHT_SYMTAB_SHNDX:	/* Symbol section indices when >64k sections */
       if (elf_symtab_shndx (abfd) == shindex)
@@ -1862,7 +1865,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  elf_elfsections (abfd)[shindex] = hdr;
 	  /* We also treat this as a regular section, so that objcopy
 	     can handle it.  */
-	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name,
+						  shindex);
 	}
 
       /* If the string table isn't one of the above, then treat it as a
@@ -1887,7 +1891,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 		}
 	    }
 	}
-      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
 
     case SHT_REL:
     case SHT_RELA:
@@ -1904,7 +1908,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    ((*_bfd_error_handler)
 	     (_("%B: invalid link %lu for reloc section %s (index %u)"),
 	      abfd, hdr->sh_link, name, shindex));
-	    return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+	    return _bfd_elf_make_section_from_shdr (abfd, hdr, name,
+						    shindex);
 	  }
 
 	/* For some incomprehensible reason Oracle distributes
@@ -1951,7 +1956,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   can't use it as a reloc section if it points to the null
 	   section.  */
 	if (hdr->sh_link != elf_onesymtab (abfd) || hdr->sh_info == SHN_UNDEF)
-	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name,
+						  shindex);
 
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return FALSE;
@@ -1988,19 +1994,19 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     case SHT_GNU_verdef:
       elf_dynverdef (abfd) = shindex;
       elf_tdata (abfd)->dynverdef_hdr = *hdr;
-      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
       break;
 
     case SHT_GNU_versym:
       elf_dynversym (abfd) = shindex;
       elf_tdata (abfd)->dynversym_hdr = *hdr;
-      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
       break;
 
     case SHT_GNU_verneed:
       elf_dynverref (abfd) = shindex;
       elf_tdata (abfd)->dynverref_hdr = *hdr;
-      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
       break;
 
     case SHT_SHLIB:
@@ -2013,7 +2019,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       name = group_signature (abfd, hdr);
       if (name == NULL)
 	return FALSE;
-      if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name))
+      if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	return FALSE;
       if (hdr->contents != NULL)
 	{
@@ -2039,7 +2045,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     default:
       /* Check for any processor-specific section types.  */
-      return bed->elf_backend_section_from_shdr (abfd, hdr, name);
+      return bed->elf_backend_section_from_shdr (abfd, hdr, name,
+						 shindex);
     }
 
   return TRUE;
@@ -4781,19 +4788,7 @@ _bfd_elf_section_from_bfd_section (bfd *abfd, struct bfd_section *asect)
   else if (bfd_is_und_section (asect))
     index = SHN_UNDEF;
   else
-    {
-      Elf_Internal_Shdr **i_shdrp = elf_elfsections (abfd);
-      int maxindex = elf_numsections (abfd);
-
-      for (index = 1; index < maxindex; index++)
-	{
-	  Elf_Internal_Shdr *hdr = i_shdrp[index];
-
-	  if (hdr != NULL && hdr->bfd_section == asect)
-	    return index;
-	}
-      index = -1;
-    }
+    index = -1;
 
   bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_section_from_bfd_section)

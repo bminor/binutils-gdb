@@ -63,7 +63,7 @@ static bfd_boolean sh64_elf_link_output_symbol_hook
   (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
    struct elf_link_hash_entry *);
 static bfd_boolean sh64_backend_section_from_shdr
-  (bfd *, Elf_Internal_Shdr *, const char *);
+  (bfd *, Elf_Internal_Shdr *, const char *, int);
 static void sh64_elf_final_write_processing
   (bfd *, bfd_boolean);
 static bfd_boolean sh64_bfd_elf_copy_private_section_data
@@ -253,13 +253,14 @@ sh64_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 }
 
 /* Handle a SH64-specific section when reading an object file.  This
-   is called when elfcode.h finds a section with an unknown type.
+   is called when bfd_section_from_shdr finds a section with an unknown
+   type.
 
    We only recognize SHT_SH5_CR_SORTED, on the .cranges section.  */
 
 bfd_boolean
 sh64_backend_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr,
-				const char *name)
+				const char *name, int shindex)
 {
   flagword flags = 0;
 
@@ -284,7 +285,7 @@ sh64_backend_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr,
       return FALSE;
     }
 
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
   if (flags
