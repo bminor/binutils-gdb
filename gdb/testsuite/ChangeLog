@@ -1,6 +1,10 @@
+2003-01-29  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/args.exp: Skip if target does not support args passing.
+
 2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
 
-	* gdb.exp (gdb_test_multiple): New function, cloned from
+	* lib/gdb.exp (gdb_test_multiple): New function, cloned from
 	gdb_test.  Accept a list of expect arguments as the third
 	parameter.
 	(gdb_test): Use it.
