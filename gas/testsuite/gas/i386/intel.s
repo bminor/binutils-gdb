@@ -616,3 +616,6 @@ rot5:
  jmp	[eax]
  jmp	[bar]
  jmp	bar
+ nop
+ nop
+ nop

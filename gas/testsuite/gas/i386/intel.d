@@ -621,3 +621,6 @@ Disassembly of section .text:
  a70:	ff 20 [ 	]*jmp    \*\(%eax\)
  a72:	ff 25 d2 09 00 00 [ 	]*jmp    \*0x9d2
  a78:	e9 55 ff ff ff [ 	]*jmp    9d2 <bar>
+ a7d:	90 [ 	]*nop    
+ a7e:	90 [ 	]*nop    
+ a7f:	90 [ 	]*nop    
