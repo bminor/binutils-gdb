@@ -1,3 +1,26 @@
+2000-08-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* sim-main.h (m68hc11_map_level): Define level of address mappings.
+	* dv-m68hc11eepr.c (struct m68hc11eepr ): New flag to indicate
+	whether the eeprom is currently mapped or not.
+	(m68hc11eepr_port_event): Use the flag to see if we must unmap
+	or map the eeprom.  Update the flag to reflect the current state.
+	Use M6811_EEPROM_LEVEL when mapping the eeprom.
+	(m68hc11eepr_finish): Remove overlap hack.
+	(attach_m68hc11eepr_regs): Use M6811_IO_LEVEL when mapping the
+	config and control registers.
+	* dv-m68hc11.c (m68hc11cpu_finish): Remove overlap hack.
+	(attach_m68hc11_regs): Use M6811_IO_LEVEL.
+	(m68hc11cpu_io_write): Likewise when unmapping and re-mapping.
+	* dv-m68hc11spi.c (m68hc11spi_finish): Likewise.
+	(attach_m68hc11spi_regs): Likewise.
+	* dv-m68hc11tim.c (m68hc11tim_finish): Likewise.
+	(attach_m68hc11tim_regs): Likewise.
+	* dv-m68hc11sio.c (m68hc11sio_finish): Likewise.
+	(attach_m68hc11sio_regs): Likewise.
+	* interp.c (sim_open): Likewise.
+	* dv-nvram.c (attach_nvram_regs): Likewise.
+
 Thu Jul 27 21:27:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure, config.in: Regenerate.

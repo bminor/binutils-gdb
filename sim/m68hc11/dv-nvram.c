@@ -44,11 +44,6 @@
    
    PROPERTIES
 
-   overlap? <bool>
-
-        Boolean property which indicates whether the device can overlap
-        another device.  By default, overlapping is not allowed.
-
    reg <base> <length>
 
         Base and size of the non-volatile ram bank.
@@ -134,11 +129,6 @@ attach_nvram_regs (struct hw *me, struct nvram *controller)
   unsigned attach_size;
   reg_property_spec reg;
   int result, oerrno;
-
-  /* Get the flag that controls overlapping of ram bank to another device.  */
-  if (hw_find_property (me, "overlap?") != NULL
-      && hw_find_boolean_property (me, "overlap?"))
-    me->overlap_mode_hw = 1;
 
   /* Get ram bank description (base and size).  */
   if (hw_find_property (me, "reg") == NULL)

@@ -54,6 +54,18 @@ struct _sim_cpu;
 #include "interrupts.h"
 #include <setjmp.h>
 
+/* Specifies the level of mapping for the IO, EEprom, nvram and external
+   RAM.  IO registers are mapped over everything and the external RAM
+   is last (ie, it can be hidden by everything above it in the list).  */
+enum m68hc11_map_level
+{
+  M6811_IO_LEVEL,
+  M6811_EEPROM_LEVEL,
+  M6811_NVRAM_LEVEL,
+  M6811_RAM_LEVEL
+};
+
+
 #define X_REGNUM 	0
 #define D_REGNUM	1
 #define Y_REGNUM        2

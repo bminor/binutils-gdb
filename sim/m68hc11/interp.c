@@ -163,10 +163,11 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
       /* Allocate core managed memory */
 
       /* the monitor  */
-      sim_do_commandf (sd, "memory region 0x%lx,0x%lx",
+      sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
 		       /* MONITOR_BASE, MONITOR_SIZE */
-		       0x8000, 0x8000);
-      sim_do_command (sd, " memory region 0x000,0x8000");
+		       0x8000, M6811_RAM_LEVEL, 0x8000);
+      sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
+                       M6811_RAM_LEVEL);
       sim_hw_parse (sd, "/m68hc11/reg 0x1000 0x03F");
     }
 
@@ -195,7 +196,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
       sim_hw_parse (sd, "/m68hc11/nvram/reg 0x0 256");
       sim_hw_parse (sd, "/m68hc11/nvram/file m68hc11.ram");
       sim_hw_parse (sd, "/m68hc11/nvram/mode save-modified");
-      sim_hw_parse (sd, "/m68hc11/nvram/overlap? true");
       /*sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/pram"); */
     }
   if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11eepr/reg") == 0)

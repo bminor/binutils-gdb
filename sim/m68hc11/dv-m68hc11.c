@@ -198,7 +198,7 @@ attach_m68hc11_regs (struct hw *me,
 			       &reg.size,
 			       &controller->attach_size, me);
 
-  hw_attach_address (hw_parent (me), 0,
+  hw_attach_address (hw_parent (me), M6811_IO_LEVEL,
 		     controller->attach_space,
                      controller->attach_address,
                      controller->attach_size,
@@ -237,7 +237,6 @@ m68hc11cpu_finish (struct hw *me)
   struct m68hc11cpu *controller;
 
   controller = HW_ZALLOC (me, struct m68hc11cpu);
-  me->overlap_mode_hw = 1;
   set_hw_data (me, controller);
   set_hw_io_read_buffer (me, m68hc11cpu_io_read_buffer);
   set_hw_io_write_buffer (me, m68hc11cpu_io_write_buffer);
@@ -490,13 +489,13 @@ m68hc11cpu_io_write (struct hw *me, sim_cpu *cpu,
 	  {
             struct m68hc11cpu *controller = hw_data (me);
 
-            hw_detach_address (hw_parent (me), 0,
+            hw_detach_address (hw_parent (me), M6811_IO_LEVEL,
                                controller->attach_space,
                                controller->attach_address,
                                controller->attach_size,
                                me);
             controller->attach_address = (val & 0x0F0) << 12;
-            hw_attach_address (hw_parent (me), 0,
+            hw_attach_address (hw_parent (me), M6811_IO_LEVEL,
                                controller->attach_space,
                                controller->attach_address,
                                controller->attach_size,

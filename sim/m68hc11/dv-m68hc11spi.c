@@ -113,7 +113,7 @@ static void
 attach_m68hc11spi_regs (struct hw *me,
                         struct m68hc11spi *controller)
 {
-  hw_attach_address (hw_parent (me), 0, io_map,
+  hw_attach_address (hw_parent (me), M6811_IO_LEVEL, io_map,
                      M6811_SPI_FIRST_REG,
                      M6811_SPI_LAST_REG - M6811_SPI_FIRST_REG + 1,
 		     me);
@@ -125,7 +125,6 @@ m68hc11spi_finish (struct hw *me)
   struct m68hc11spi *controller;
 
   controller = HW_ZALLOC (me, struct m68hc11spi);
-  me->overlap_mode_hw = 1;
   set_hw_data (me, controller);
   set_hw_io_read_buffer (me, m68hc11spi_io_read_buffer);
   set_hw_io_write_buffer (me, m68hc11spi_io_write_buffer);

@@ -88,7 +88,8 @@ struct m68hc11eepr
   address_word  base_address; /* control register base */
   int           attach_space;
   unsigned      size;
-
+  int           mapped;
+  
   /* Current state of the eeprom programing:
      - eeprom_wmode indicates whether the EEPROM address and byte have
        been latched.
@@ -205,8 +206,10 @@ attach_m68hc11eepr_regs (struct hw *me,
   /* Attach the two IO registers that control the EEPROM.
      The EEPROM is only attached at reset time because it may
      be enabled/disabled by the EEON bit in the CONFIG register.  */
-  hw_attach_address (hw_parent (me), 0, io_map, M6811_PPROG, 1, me);
-  hw_attach_address (hw_parent (me), 0, io_map, M6811_CONFIG, 1, me);
+  hw_attach_address (hw_parent (me), M6811_IO_LEVEL,
+                     io_map, M6811_PPROG, 1, me);
+  hw_attach_address (hw_parent (me), M6811_IO_LEVEL,
+                     io_map, M6811_CONFIG, 1, me);
 
   if (hw_find_property (me, "file") == NULL)
     controller->file_name = "m6811.eeprom";
@@ -218,7 +221,8 @@ attach_m68hc11eepr_regs (struct hw *me,
   controller->eeprom = (char*) malloc (attach_size + 1);
   controller->eeprom_min_cycles = 10000;
   controller->size = attach_size + 1;
-
+  controller->mapped = 0;
+  
   m6811eepr_memory_rw (controller, O_RDONLY);
 }
 
@@ -267,19 +271,23 @@ m68hc11eepr_port_event (struct hw *me,
            see Motorola spec).  */
         if (cpu->ios[M6811_CONFIG] & M6811_EEON)
           {
-            hw_attach_address (hw_parent (me), 0,
-                               controller->attach_space,
-                               controller->base_address,
-                               controller->size - 1,
-                               me);
+            if (controller->mapped)
+              hw_attach_address (hw_parent (me), M6811_EEPROM_LEVEL,
+                                 controller->attach_space,
+                                 controller->base_address,
+                                 controller->size - 1,
+                                 me);
+            controller->mapped = 0;
           }
         else
           {
-            hw_detach_address (hw_parent (me), 0,
-                               controller->attach_space,
-                               controller->base_address,
-                               controller->size - 1,
-                               me);
+            if (!controller->mapped)
+              hw_detach_address (hw_parent (me), M6811_EEPROM_LEVEL,
+                                 controller->attach_space,
+                                 controller->base_address,
+                                 controller->size - 1,
+                                 me);
+            controller->mapped = 1;
           }
         break;
       }
@@ -297,7 +305,6 @@ m68hc11eepr_finish (struct hw *me)
   struct m68hc11eepr *controller;
 
   controller = HW_ZALLOC (me, struct m68hc11eepr);
-  me->overlap_mode_hw = 1;
   set_hw_data (me, controller);
   set_hw_io_read_buffer (me, m68hc11eepr_io_read_buffer);
   set_hw_io_write_buffer (me, m68hc11eepr_io_write_buffer);
