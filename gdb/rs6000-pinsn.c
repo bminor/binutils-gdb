@@ -189,7 +189,7 @@ int	insn_no;
   /* parse the operand now. */
   pp = rs6k_ops[insn_no].oprnd_format;
 
-  while (1) {
+  while (*pp != 0) {
     switch (*pp) {
       case TO	:
 	fprintf (stream, "%d", (insn_word >> 21) & 0x1f);
@@ -202,11 +202,27 @@ int	insn_no;
 
       case LI	:
 	tmp  = (insn_word >> 16) & 0x1f;
+#if 0
+	/* This is wrong, wrong, wrong.  The condition code only goes
+	   from 0 to 3 (for the instructions which can use extended
+	   mnemonics of this type), and the XX (lt, gt, eq etc.) goes
+	   into the mnemonic, not as an operand.
+
+	   Probably the best way to get this right in both assembler
+	   and disassembler is to switch to a match/lose style opcode
+	   table like the sparc.  */
 	if (tmp > 11) {
 	  fprintf (stream, "{unknown cond code: 0x%x}", insn_word);
 	  tmp = 0;
 	}
 	fprintf (stream, "%s", cond_code [tmp]);
+#else
+	/* So for just always use the "bbf/bbt" form.  This is perfectly
+	   correct, just not necessarily as legible.
+
+	   If tmp is not in the range 0-3, we can't use an XX form anyway.  */
+	fprintf (stream, "%d", tmp);
+#endif
 	break;
 
       case A2	:
@@ -372,9 +388,7 @@ int	insn_no;
     }
     ++pp;
 
-    if (*pp == '\0')
-      break;
-    else if (!nocomma)
+    if (*pp != '\0' && !nocomma)
       fputc(',', stream);
   }
 }

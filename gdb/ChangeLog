@@ -1,5 +1,10 @@
 Fri Apr  9 10:20:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* rs6000-pinsn.c (print_operand): Deal with no operand instructions.
+
+	* rs6000-pinsn.c (print_operand, case LI): Print condition register
+	operand in decimal rather than wrong textual versions.
+
 	* printcmd.c (_initialize_printcmd): Clean up docstring for "x"
 	(mention 't', remove false thing about 'g' only good with 'f').
 
