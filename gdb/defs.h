@@ -778,51 +778,11 @@ extern void free ();
 #define LITTLE_ENDIAN 1234
 #endif
 
-/* Target-system-dependent parameters for GDB. */
+/* Dynamic target-system-dependent parameters for GDB. */
 
-/* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
-   is selectable at runtime.  The user can use the `set endian'
-   command to change it.  TARGET_BYTE_ORDER_AUTO is nonzero when
-   target_byte_order should be auto-detected (from the program image
-   say). */
+#include "gdbarch.h"
 
-#ifndef TARGET_BYTE_ORDER_SELECTABLE_P
-/* compat - Catch old targets that define TARGET_BYTE_ORDER_SLECTABLE
-   when they should have defined TARGET_BYTE_ORDER_SELECTABLE_P 1 */
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-#else
-#define TARGET_BYTE_ORDER_SELECTABLE_P 0
-#endif
-#endif
-
-extern int target_byte_order;
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-/* compat - Catch old targets that define TARGET_BYTE_ORDER_SELECTABLE
-   and expect defs.h to re-define TARGET_BYTE_ORDER. */
-#undef TARGET_BYTE_ORDER
-#endif
-#ifndef TARGET_BYTE_ORDER
-#define TARGET_BYTE_ORDER (target_byte_order + 0)
-#endif
-
-extern int target_byte_order_auto;
-#ifndef TARGET_BYTE_ORDER_AUTO
-#define TARGET_BYTE_ORDER_AUTO (target_byte_order_auto + 0)
-#endif
-
-extern void set_endian_from_file PARAMS ((bfd *));
-
-/* The target architecture can be set at run-time. */
-extern int target_architecture_auto;
-extern const bfd_arch_info_type *target_architecture;
-#define TARGET_ARCHITECTURE_AUTO (target_architecture_auto + 0)
-#define TARGET_ARCHITECTURE (target_architecture + 0)
-extern void set_architecture_from_file PARAMS ((bfd *));
-/* Notify target of a change to the selected architecture. Zero return
-   status indicates that the target did not like the change. */
-extern int (*target_architecture_hook) PARAMS ((const bfd_arch_info_type *ap)); 
-extern void set_architecture_from_arch_mach PARAMS ((enum bfd_architecture arch, unsigned long mach));
+/* Static target-system-dependent parameters for GDB. */
 
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.  */
@@ -938,12 +898,12 @@ extern const struct floatformat floatformat_unknown;
 #endif
 
 #ifndef TARGET_FLOAT_FORMAT
-#define TARGET_FLOAT_FORMAT (target_byte_order == BIG_ENDIAN \
+#define TARGET_FLOAT_FORMAT (TARGET_BYTE_ORDER == BIG_ENDIAN \
 			     ? &floatformat_ieee_single_big \
 			     : &floatformat_ieee_single_little)
 #endif
 #ifndef TARGET_DOUBLE_FORMAT
-#define TARGET_DOUBLE_FORMAT (target_byte_order == BIG_ENDIAN \
+#define TARGET_DOUBLE_FORMAT (TARGET_BYTE_ORDER == BIG_ENDIAN \
 			      ? &floatformat_ieee_double_big \
 			      : &floatformat_ieee_double_little)
 #endif
@@ -1011,26 +971,6 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, ULONGEST));
 
 #ifdef MAINTENANCE_CMDS
 extern int watchdog;
-#endif
-
-#include "dis-asm.h"		/* Get defs for disassemble_info */
-
-extern int dis_asm_read_memory PARAMS ((bfd_vma memaddr, bfd_byte *myaddr,
-					int len, disassemble_info *info));
-
-extern void dis_asm_memory_error PARAMS ((int status, bfd_vma memaddr,
-					  disassemble_info *info));
-
-extern void dis_asm_print_address PARAMS ((bfd_vma addr,
-					   disassemble_info *info));
-
-extern int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info*));
-extern disassemble_info tm_print_insn_info;
-#ifndef TARGET_PRINT_INSN
-#define TARGET_PRINT_INSN(vma, info) (*tm_print_insn) (vma, info)
-#endif
-#ifndef TARGET_PRINT_INSN_INFO
-#define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
 #endif
 
 /* Hooks for alternate command interfaces.  */

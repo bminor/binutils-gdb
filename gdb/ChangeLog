@@ -1,3 +1,8 @@
+Wed Dec 23 12:32:00 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* defs.h (TARGET_FLOAT_FORMAT, TARGET_DOUBLE_FORMAT): Define using
+ 	TARGET_BYTE_ORDER and not target_byte_order.
+
 Tue Dec 22 10:51:33 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/i386/cygwin.mh (TERMCAP): define.
