@@ -1,5 +1,8 @@
 2002-08-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-i386v.h (FLOAT_INFO): Remove already commented
+	out define.
+
 	* i387-tdep.c (i387_print_float_info): Add comment about ignoring
 	FRAME.
 
