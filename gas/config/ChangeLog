@@ -1,0 +1,12 @@
+Tue Feb 18 02:11:10 1992  K. Richard Pixley  (rich at cygnus.com)
+
+	* tc-ns32k.c: Replaced previous tc_aout_fix_to_chars stub with the
+	  real thing.
+
+	* tc-i960.c, tc-sparc.c: white space and comments only.
+
+	* tc-a29k.h: delete duplicate macro definition.
+
+	* new file atof-ns32k.c copied from hack's last unreleased gas.
+
+
