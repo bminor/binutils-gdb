@@ -1,3 +1,7 @@
+Wed Jun 19 15:55:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sparc-opc.c: Add some two operand forms of the wr instruction.
+
 Tue Jun 18 15:58:27 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* h8300-dis.c (bfd_h8_disassemble): Rename "hmode" argument
@@ -8,6 +12,8 @@ start-sanitize-h8s
 	* h8300-dis.c (print_insn_h8300s): New function for H8/S.
 end-sanitize-h8s
 Tue Jun 18 18:06:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sparc-opc.c: Add beq/teq as aliases for be/te.
 
 	* ppc-opc.c: Fix fcmpo opcode.  From Sergei Steshenko
 	<sergei@msil.sps.mot.com>.
