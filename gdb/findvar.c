@@ -286,7 +286,7 @@ value_of_register (int regnum, struct frame_info *frame)
 	  register_size (current_gdbarch, regnum));
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
-  VALUE_REGNO (reg_val) = regnum;
+  VALUE_REGNUM (reg_val) = regnum;
   VALUE_OPTIMIZED_OUT (reg_val) = optim;
   return reg_val;
 }
@@ -622,7 +622,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          We'll just attribute the value to the original register.  */
       VALUE_LVAL (v) = lval_register;
       VALUE_ADDRESS (v) = regnum;
-      VALUE_REGNO (v) = regnum;
+      VALUE_REGNUM (v) = regnum;
     }
   else if (CONVERT_REGISTER_P (regnum, type))
     {
@@ -636,7 +636,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       REGISTER_TO_VALUE (frame, regnum, type, VALUE_CONTENTS_RAW (v));
       VALUE_LVAL (v) = lval_reg_frame_relative;
       VALUE_FRAME_ID (v) = get_frame_id (frame);
-      VALUE_FRAME_REGNUM (v) = regnum;
+      VALUE_REGNUM (v) = regnum;
     }
   else
     {
@@ -696,7 +696,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	{
 	  VALUE_LVAL (v) = lval_reg_frame_relative;
 	  VALUE_FRAME_ID (v) = get_frame_id (frame);
-	  VALUE_FRAME_REGNUM (v) = regnum;
+	  VALUE_REGNUM (v) = regnum;
 	}
       else if (mem_stor)
 	{
@@ -707,7 +707,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	{
 	  VALUE_LVAL (v) = lval_register;
 	  VALUE_ADDRESS (v) = first_addr;
-	  VALUE_REGNO (v) = first_realnum;
+	  VALUE_REGNUM (v) = first_realnum;
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -764,21 +764,21 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
   switch (VALUE_LVAL (lazy_value))
     {
     case lval_register:
-	gdb_assert (REGISTER_NAME (VALUE_REGNO (lazy_value)) != NULL
-	            && *REGISTER_NAME (VALUE_REGNO (lazy_value)) != '\0');
+      gdb_assert (REGISTER_NAME (VALUE_REGNUM (lazy_value)) != NULL
+		  && *REGISTER_NAME (VALUE_REGNUM (lazy_value)) != '\0');
       error("Address requested for identifier "
 	    "\"%s\" which is in register $%s",
             SYMBOL_PRINT_NAME (var), 
-	    REGISTER_NAME (VALUE_REGNO (lazy_value)));
+	    REGISTER_NAME (VALUE_REGNUM (lazy_value)));
       break;
 
     case lval_reg_frame_relative:
-	gdb_assert (REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)) != NULL
-	            && *REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)) != '\0');
+      gdb_assert (REGISTER_NAME (VALUE_REGNUM (lazy_value)) != NULL
+		  && *REGISTER_NAME (VALUE_REGNUM (lazy_value)) != '\0');
       error("Address requested for identifier "
 	    "\"%s\" which is in frame register $%s",
             SYMBOL_PRINT_NAME (var), 
-	    REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)));
+	    REGISTER_NAME (VALUE_REGNUM (lazy_value)));
       break;
 
     default:

@@ -1,5 +1,12 @@
 2004-11-12  Andrew Cagney  <cagney@gnu.org>
 
+	Merge VALUE_REGNO and VALUE_FRAME_REGNUM into VALUE_REGNUM.
+	* value.h (VALUE_REGNO, VALUE_FRAME_REGNUM): Delete.
+	(VALUE_REGNUM): Define.
+	(struct value): Delete location.regnum, rename "regno" to
+	"regnum".
+	* value.c, valops.c, valarith.c, findvar.c: Update.
+
 	* value.h (VALUE_TYPE, VALUE_NEXT, VALUE_OFFSET, VALUE_BITSIZE)
 	(VALUE_BITPOS): Delete.
 	(value_type, value_offset, value_bitsize, value_bitpos): Declare.

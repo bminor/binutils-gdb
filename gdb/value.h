@@ -58,9 +58,6 @@ struct value
 
     /* Pointer to internal variable.  */
     struct internalvar *internalvar;
-
-    /* Number of register.  Only used with lval_reg_frame_relative.  */
-    int regnum;
   } location;
 
   /* Describes offset of a value within lval of a structure in bytes.
@@ -139,7 +136,7 @@ struct value
     struct value *next;
 
     /* Register number if the value is from a register.  */
-    short regno;
+    short regnum;
 
     /* If zero, contents of this value are in the contents field.  If
        nonzero, contents are in inferior memory at address in the
@@ -218,9 +215,8 @@ extern int value_fetch_lazy (struct value *val);
 #define VALUE_LVAL(val) (val)->lval
 #define VALUE_ADDRESS(val) (val)->location.address
 #define VALUE_INTERNALVAR(val) (val)->location.internalvar
-#define VALUE_FRAME_REGNUM(val) ((val)->location.regnum)
 #define VALUE_FRAME_ID(val) ((val)->frame_id)
-#define VALUE_REGNO(val) (val)->regno
+#define VALUE_REGNUM(val) (val)->regnum
 #define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
 #define VALUE_EMBEDDED_OFFSET(val) ((val)->embedded_offset)
 #define VALUE_POINTED_TO_OFFSET(val) ((val)->pointed_to_offset)

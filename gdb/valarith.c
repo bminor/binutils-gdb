@@ -277,7 +277,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
   else
     VALUE_LVAL (v) = VALUE_LVAL (array);
   VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
-  VALUE_REGNO (v) = VALUE_REGNO (array);
+  VALUE_REGNUM (v) = VALUE_REGNUM (array);
   v->offset = value_offset (array) + elt_offs;
   return v;
 }

@@ -94,7 +94,7 @@ allocate_value (struct type *type)
   val->offset = 0;
   val->bitpos = 0;
   val->bitsize = 0;
-  VALUE_REGNO (val) = -1;
+  VALUE_REGNUM (val) = -1;
   VALUE_LAZY (val) = 0;
   VALUE_OPTIMIZED_OUT (val) = 0;
   VALUE_EMBEDDED_OFFSET (val) = 0;
@@ -248,7 +248,7 @@ value_copy (struct value *arg)
   val->bitpos = arg->bitpos;
   val->bitsize = arg->bitsize;
   VALUE_FRAME_ID (val) = VALUE_FRAME_ID (arg);
-  VALUE_REGNO (val) = VALUE_REGNO (arg);
+  VALUE_REGNUM (val) = VALUE_REGNUM (arg);
   VALUE_LAZY (val) = VALUE_LAZY (arg);
   VALUE_OPTIMIZED_OUT (val) = VALUE_OPTIMIZED_OUT (arg);
   VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (arg);
@@ -963,7 +963,7 @@ value_primitive_field (struct value *arg1, int offset,
   if (VALUE_LVAL (arg1) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
   VALUE_ADDRESS (v) = VALUE_ADDRESS (arg1);
-  VALUE_REGNO (v) = VALUE_REGNO (arg1);
+  VALUE_REGNUM (v) = VALUE_REGNUM (arg1);
 /*  VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
    + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8; */
   return v;

@@ -606,23 +606,23 @@ value_assign (struct value *toval, struct value *fromval)
 	if (VALUE_LVAL (toval) == lval_register)
 	  {
 	    frame = get_current_frame ();
-	    value_reg = VALUE_REGNO (toval);
+	    value_reg = VALUE_REGNUM (toval);
 	  }
 	else
 	  {
 	    frame = frame_find_by_id (VALUE_FRAME_ID (toval));
-	    value_reg = VALUE_FRAME_REGNUM (toval);
+	    value_reg = VALUE_REGNUM (toval);
 	  }
 
 	if (!frame)
 	  error ("Value being assigned to is no longer active.");
 	
 	if (VALUE_LVAL (toval) == lval_reg_frame_relative
-	    && CONVERT_REGISTER_P (VALUE_FRAME_REGNUM (toval), type))
+	    && CONVERT_REGISTER_P (VALUE_REGNUM (toval), type))
 	  {
 	    /* If TOVAL is a special machine register requiring
 	       conversion of program values to a special raw format.  */
-	    VALUE_TO_REGISTER (frame, VALUE_FRAME_REGNUM (toval),
+	    VALUE_TO_REGISTER (frame, VALUE_REGNUM (toval),
 			       type, VALUE_CONTENTS (fromval));
 	  }
 	else
