@@ -1465,9 +1465,11 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 {
   CORE_ADDR dyncall_addr;
   struct minimal_symbol *msymbol;
+  struct minimal_symbol *trampoline;
   int flags = read_register (FLAGS_REGNUM);
   struct unwind_table_entry *u;
 
+  trampoline = NULL;
   msymbol = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
   if (msymbol == NULL)
     error ("Can't find an address for $$dyncall trampoline");
@@ -1545,19 +1547,20 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   if (u && u->stub_type == IMPORT)
     {
       CORE_ADDR new_fun;
-      msymbol = lookup_minimal_symbol ("__d_plt_call", NULL, NULL);
-      if (msymbol == NULL)
-	msymbol = lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL);
 
-      if (msymbol == NULL)
+      /* Prefer __gcc_plt_call over the HP supplied routine because
+	 __gcc_plt_call works for any number of arguments.  */
+      trampoline = lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL);
+      if (trampoline == NULL)
+	trampoline = lookup_minimal_symbol ("__d_plt_call", NULL, NULL);
+
+      if (trampoline == NULL)
 	error ("Can't find an address for __d_plt_call or __gcc_plt_call trampoline");
 
       /* This is where sr4export will jump to.  */
-      new_fun = SYMBOL_VALUE_ADDRESS (msymbol);
+      new_fun = SYMBOL_VALUE_ADDRESS (trampoline);
 
-      if (strcmp (SYMBOL_NAME (msymbol), "__d_plt_call"))
-	write_register (22, fun);
-      else
+      if (strcmp (SYMBOL_NAME (trampoline), "__d_plt_call") == 0)
 	{
 	  /* We have to store the address of the stub in __shlib_funcptr.  */
 	  msymbol = lookup_minimal_symbol ("__shlib_funcptr", NULL,
@@ -1566,12 +1569,17 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 	    error ("Can't find an address for __shlib_funcptr");
 
 	  target_write_memory (SYMBOL_VALUE_ADDRESS (msymbol), (char *)&fun, 4);
+
+	  /* We want sr4export to call __d_plt_call, so we claim it is
+	     the final target.  Clear trampoline.  */
+	  fun = new_fun;
+	  trampoline = NULL;
 	}
-      fun = new_fun;
     }
 
-/* Store upper 21 bits of function address into ldil */
-
+  /* Store upper 21 bits of function address into ldil.  fun will either be
+     the final target (most cases) or __d_plt_call when calling into a shared
+     library and __gcc_plt_call is not available.  */
   store_unsigned_integer
     (&dummy[FUNC_LDIL_OFFSET],
      INSTRUCTION_SIZE,
@@ -1579,8 +1587,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 		 extract_unsigned_integer (&dummy[FUNC_LDIL_OFFSET],
 					   INSTRUCTION_SIZE)));
 
-/* Store lower 11 bits of function address into ldo */
-
+  /* Store lower 11 bits of function address into ldo */
   store_unsigned_integer
     (&dummy[FUNC_LDO_OFFSET],
      INSTRUCTION_SIZE,
@@ -1590,30 +1597,35 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 #ifdef SR4EXPORT_LDIL_OFFSET
 
   {
-    CORE_ADDR sr4export_addr;
+    CORE_ADDR trampoline_addr;
 
-    /* We still need sr4export's address too.  */
+    /* We may still need sr4export's address too.  */
 
-    msymbol = lookup_minimal_symbol ("_sr4export", NULL, NULL);
-    if (msymbol == NULL)
-      error ("Can't find an address for _sr4export trampoline");
+    if (trampoline == NULL)
+      {
+	msymbol = lookup_minimal_symbol ("_sr4export", NULL, NULL);
+	if (msymbol == NULL)
+	  error ("Can't find an address for _sr4export trampoline");
 
-    sr4export_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+	trampoline_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+      }
+    else
+      trampoline_addr = SYMBOL_VALUE_ADDRESS (trampoline);
 
-/* Store upper 21 bits of sr4export's address into ldil */
 
+    /* Store upper 21 bits of trampoline's address into ldil */
     store_unsigned_integer
       (&dummy[SR4EXPORT_LDIL_OFFSET],
        INSTRUCTION_SIZE,
-       deposit_21 (sr4export_addr >> 11,
+       deposit_21 (trampoline_addr >> 11,
 		   extract_unsigned_integer (&dummy[SR4EXPORT_LDIL_OFFSET],
 					     INSTRUCTION_SIZE)));
-/* Store lower 11 bits of sr4export's address into ldo */
 
+    /* Store lower 11 bits of trampoline's address into ldo */
     store_unsigned_integer
       (&dummy[SR4EXPORT_LDO_OFFSET],
        INSTRUCTION_SIZE,
-       deposit_14 (sr4export_addr & MASK_11,
+       deposit_14 (trampoline_addr & MASK_11,
 		   extract_unsigned_integer (&dummy[SR4EXPORT_LDO_OFFSET],
 					     INSTRUCTION_SIZE)));
   }

@@ -1,3 +1,8 @@
+Thu Jul 27 01:22:08 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* hppa-tdep.c (hppa_fix_call_dummy): Rewrite code for calling
+	into shared libraries.
+
 Wed Jul 26 23:33:34 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* config/rs6000/tm-rs6000.h (rs6000_framedata): Add offsets the
