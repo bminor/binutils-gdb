@@ -1,3 +1,8 @@
+Sun Aug 11 20:54:16 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* main.c (main):  Make sure command loop is used with cygwin32.
+	* terminal.h:  Allow cygwin32 to use termios.h.
+
 start-sanitize-gdbtk
 Fri Aug  9 12:32:53 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
