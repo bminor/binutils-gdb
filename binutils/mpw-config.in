@@ -5,3 +5,9 @@ Set target_arch `echo {target_canonical} | sed -e 's/-.*-.*//'`
 # (should canonicalize arch name) */
 
 Set archname ARCH_{target_arch}
+
+Echo '# From mpw-config.in'       > "{o}"mk.tmp
+
+Echo "ARCHDEFS = -d" {archname}  >> "{o}"mk.tmp
+
+Echo '# End from mpw-config.in'  >> "{o}"mk.tmp
