@@ -1555,7 +1555,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
       if (got)
 	unit.dbase = got->vma;
 
-      /* GCC emits the DW_EH_PE_textrel encoding type on sh and ia64 so far.  */
+      /* GCC emits the DW_EH_PE_textrel encoding type on sh and ia64
+         so far.  */
       txt = bfd_get_section_by_name (unit.abfd, ".text");
       if (txt)
 	unit.tbase = txt->vma;

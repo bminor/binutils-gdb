@@ -1,5 +1,7 @@
 2003-11-07  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf2-frame.c (dwarf2_build_frame_info): Wrap comment.
+
 	* fbsd-proc.c (read_mapping): Use sscanf and fgets instead of
 	fscanf.
 
