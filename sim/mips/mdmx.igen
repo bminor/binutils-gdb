@@ -74,7 +74,7 @@
     case fmt_unknown:
       break;
     default:
-      sim_io_eprintf(sd, "Vector %d format invalid (PC = 0x08lx)\n",
+      sim_io_eprintf(sd, "Vector %d format invalid (PC = 0x%08lx)\n",
 		     fpr, (long) cia);
       FPR_STATE[fpr] = fmt_unknown;
     }
@@ -96,7 +96,7 @@
   return 0;
 }
 
-:function:::signed:store_vr:int scale, int fpr, int element, signed value
+:function:::void:store_vr:int scale, int fpr, int element, signed value
 {
   switch (FPR_STATE[fpr])
     {
@@ -107,7 +107,7 @@
     case fmt_unknown:
       break;
     default:
-      sim_io_eprintf(sd, "Vector %d format invalid (PC = 0x08lx)\n",
+      sim_io_eprintf(sd, "Vector %d format invalid (PC = 0x%08lx)\n",
 		     fpr, (long) cia);
       FPR_STATE[fpr] = fmt_unknown;
     }
