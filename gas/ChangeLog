@@ -1,3 +1,9 @@
+Thu Nov 16 12:49:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/m68k-parse.y (yylex): In MRI mode, '@' can start an octal
+	number.
+	* expr.c (operand): Handle MRI suffixes after unadorned 0.
+
 Thu Nov 16 00:21:44 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	Version 2.6 released.
