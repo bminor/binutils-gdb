@@ -578,6 +578,23 @@ adjust_reloc_syms (abfd, sec, xxx)
 	fixp->fx_addsy = section_symbol (symsec);
 	fixp->fx_addsy->sy_used_in_reloc = 1;
       }
+#ifdef RELOC_REQUIRES_SYMBOL
+    else
+      {
+	/* There was no symbol required by this relocation.  However,
+	   BFD doesn't really handle relocations without symbols well.
+	   (At least, the COFF support doesn't.)  So for now we fake up
+	   a local symbol in the absolute section.  */
+	static symbolS *abs_sym;
+	if (!abs_sym)
+	  {
+	    abs_sym = symbol_new ("*absolute0zero*", &bfd_abs_section, 0,
+				  &zero_address_frag);
+	    abs_sym->sy_used_in_reloc = 1;
+	  }
+	fixp->fx_addsy = abs_sym;
+      }
+#endif
 
   dump_section_relocs (abfd, sec, stderr);
 }
@@ -1968,8 +1985,10 @@ fixup_segment (fixP, this_segment_type)
 		     as to whether or not a relocation will be needed to
 		     handle this fixup.  */
 		  if (!TC_FORCE_RELOCATION (fixP))
-		    fixP->fx_addsy = NULL;
-		  add_symbolP = NULL;
+		    {
+		      fixP->fx_addsy = NULL;
+		      add_symbolP = NULL;
+		    }
 		}
 	      else if (add_symbol_segment == undefined_section
 #ifdef BFD_ASSEMBLER
