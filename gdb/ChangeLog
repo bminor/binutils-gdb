@@ -1,3 +1,20 @@
+<<<<<<< ChangeLog
+Fri Oct  1 10:06:35 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* symtab.c: fix a bug in testsuite (virtfunc.exp)
+
+Wed Sep 29 10:53:24 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* cp-valprint.c: change vtble field name to __vtbl (pr2695)
+
+	* symtab.c: fix a bug in gdb_mangle_name, to get mangled name right
+
+<<<<<<< ChangeLog
+Wed Sep 29 09:50:11 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* c-valprint.c: to fix virtual table print bug (pr2695)
+
+=======
 Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* m88k-nat.c (fill_gregset): Fix typo (R_SFIP -> R_FIP).
@@ -56,6 +73,7 @@ Wed Sep 29 10:52:19 1993  Kung Hsu  (kung@cygnus.com)
 
 	* c-valprint.c: to fix virtual table print bug (pr2695).
 
+>>>>>>> 1.1795
 Wed Sep 29 10:52:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.c (target_detach): Call generic_mourn_inferior.
@@ -149,6 +167,7 @@ Mon Sep 27 10:22:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-udi.c (udi_mourn): Don't pop target.
 
+>>>>>>> 1.1783
 Fri Sep 24 17:25:41 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* corelow.c:  Add multi thread/process support for core files with
