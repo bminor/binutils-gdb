@@ -85,66 +85,59 @@ static char *dbug_regnames[NUM_REGS] =
   "SR", "PC"
   /* no float registers */
 };
-
 static struct target_ops dbug_ops;
+static struct monitor_ops dbug_cmds ;
 
 static char *dbug_inits[] = {"\r", NULL};
 
-static struct monitor_ops dbug_cmds =
+
+static void init_dbug_cmds(void)
 {
-  MO_CLR_BREAK_USES_ADDR | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR,
-  dbug_inits,			/* Init strings */
-  "go\r",			/* continue command */
-  "step\r",			/* single step */
-  NULL,				/* interrupt command */
-  "br %x\r",			/* set a breakpoint */
-  "br -c %x\r",			/* clear a breakpoint */
-  "br -c\r",			/* clear all breakpoints */
-  "bf.b %x %x %x",		/* fill (start end val) */
-  {
-    "mm.b %x %x\r",		/* setmem.cmdb (addr, value) */
-    "mm.w %x %x\r",		/* setmem.cmdw (addr, value) */
-    "mm.l %x %x\r",		/* setmem.cmdl (addr, value) */
-    NULL,			/* setmem.cmdll (addr, value) */
-    NULL,			/* setmem.resp_delim */
-    NULL,			/* setmem.term */
-    NULL			/* setmem.term_cmd */
-  },
-  {
-    "md.b %x %x\r",		/* getmem.cmdb (addr, addr2) */
-    "md.w %x %x\r",		/* getmem.cmdw (addr, addr2) */
-    "md.l %x %x\r",		/* getmem.cmdl (addr, addr2) */
-    NULL,			/* getmem.cmdll (addr, addr2) */
-    ":",			/* getmem.resp_delim */
-    NULL,			/* getmem.term */
-    NULL			/* getmem.term_cmd */
-  },
-  {
-    "rm %s %x\r",		/* setreg.cmd (name, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL			/* setreg.term_cmd */
-  },
-  {
-    "rd %s\r",			/* getreg.cmd (name) */
-    ":",			/* getreg.resp_delim */
-    NULL,			/* getreg.term */
-    NULL			/* getreg.term_cmd */
-  },
-  "rd\r",			/* dump_registers */
-  "\\(\\w+\\) +:\\([0-9a-fA-F]+\\b\\)", /* register_pattern */
-  dbug_supply_register,		/* supply_register */
-  NULL,				/* load_routine (defaults to SRECs) */
-  "dl\r",			/* download command */
-  "\n",				/* load response */
-  "dBUG>",			/* monitor command prompt */
-  "\r",				/* end-of-line terminator */
-  NULL,				/* optional command terminator */
-  &dbug_ops,			/* target operations */
-  SERIAL_1_STOPBITS,		/* number of stop bits */
-  dbug_regnames,		/* registers names */
-  MONITOR_OPS_MAGIC		/* magic */
-  };
+  dbug_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR;
+  dbug_cmds.init =   dbug_inits;			/* Init strings */
+  dbug_cmds.cont =   "go\r";			/* continue command */
+  dbug_cmds.step =   "step\r";			/* single step */
+  dbug_cmds.stop =   NULL;				/* interrupt command */
+  dbug_cmds.set_break =   "br %x\r";			/* set a breakpoint */
+  dbug_cmds.clr_break =   "br -c %x\r";			/* clear a breakpoint */
+  dbug_cmds.clr_all_break =   "br -c\r";			/* clear all breakpoints */
+  dbug_cmds.fill =   "bf.b %x %x %x";		/* fill (start end val) */
+  dbug_cmds.setmem.cmdb =     "mm.b %x %x\r";		/* setmem.cmdb (addr, value) */
+  dbug_cmds.setmem.cmdw =     "mm.w %x %x\r";		/* setmem.cmdw (addr, value) */
+  dbug_cmds.setmem.cmdl =     "mm.l %x %x\r";		/* setmem.cmdl (addr, value) */
+  dbug_cmds.setmem.cmdll =     NULL;			/* setmem.cmdll (addr, value) */
+  dbug_cmds.setmem.resp_delim =     NULL;			/* setmem.resp_delim */
+  dbug_cmds.setmem.term =     NULL;			/* setmem.term */
+  dbug_cmds.setmem.term_cmd =     NULL;			/* setmem.term_cmd */
+  dbug_cmds.getmem.cmdb =     "md.b %x %x\r";		/* getmem.cmdb (addr, addr2) */
+  dbug_cmds.getmem.cmdw =     "md.w %x %x\r";		/* getmem.cmdw (addr, addr2) */
+  dbug_cmds.getmem.cmdl =     "md.l %x %x\r";		/* getmem.cmdl (addr, addr2) */
+  dbug_cmds.getmem.cmdll =     NULL;			/* getmem.cmdll (addr, addr2) */
+  dbug_cmds.getmem.resp_delim =     ":";			/* getmem.resp_delim */
+  dbug_cmds.getmem.term =     NULL;			/* getmem.term */
+  dbug_cmds.getmem.term_cmd =     NULL;			/* getmem.term_cmd */
+  dbug_cmds.setreg.cmd =     "rm %s %x\r";		/* setreg.cmd (name, value) */
+  dbug_cmds.setreg.resp_delim =     NULL;			/* setreg.resp_delim */
+  dbug_cmds.setreg.term =     NULL;			/* setreg.term */
+  dbug_cmds.setreg.term_cmd =     NULL;			/* setreg.term_cmd */
+  dbug_cmds.getreg.cmd =     "rd %s\r";			/* getreg.cmd (name) */
+  dbug_cmds.getreg.resp_delim =     ":";			/* getreg.resp_delim */
+  dbug_cmds.getreg.term =     NULL;			/* getreg.term */
+  dbug_cmds.getreg.term_cmd =     NULL;			/* getreg.term_cmd */
+  dbug_cmds.dump_registers =   "rd\r";			/* dump_registers */
+  dbug_cmds.register_pattern =   "\\(\\w+\\) +:\\([0-9a-fA-F]+\\b\\)"; /* register_pattern */
+  dbug_cmds.supply_register =   dbug_supply_register;		/* supply_register */
+  dbug_cmds.load_routine =   NULL;				/* load_routine (defaults to SRECs) */
+  dbug_cmds.load =   "dl\r";			/* download command */
+  dbug_cmds.loadresp =   "\n";				/* load response */
+  dbug_cmds.prompt =   "dBUG>";			/* monitor command prompt */
+  dbug_cmds.line_term =   "\r";				/* end-of-line terminator */
+  dbug_cmds.cmd_end =   NULL;				/* optional command terminator */
+  dbug_cmds.target =   &dbug_ops ;			/* target operations */
+  dbug_cmds.stopbits =   SERIAL_1_STOPBITS;		/* number of stop bits */
+  dbug_cmds.regnames =   dbug_regnames;		/* registers names */
+  dbug_cmds.magic =   MONITOR_OPS_MAGIC	;	/* magic */
+} /* init_debug_ops */
 
 static void
 dbug_open(args, from_tty)
@@ -157,6 +150,7 @@ dbug_open(args, from_tty)
 void
 _initialize_dbug_rom ()
 {
+  init_dbug_cmds() ;
   init_monitor_ops (&dbug_ops);
 
   dbug_ops.to_shortname = "dbug";

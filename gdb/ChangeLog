@@ -1,3 +1,14 @@
+Tue May 19 17:23:54 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* w89k-rom.c (_initialize_w89k ): Call new init function
+	             (init_w89k_cmds): Convert to dynamic initialization of
+	              monitor_ops data structure for forward compatability with
+	              additions to the data structure.
+	* dbug-rom.c (_initialize_dbug_rom): ditto
+	             (init_dbug_cmds):       ditto
+	* m32r-rom.c (_initialize_m32r_rom):  ditto
+	             (init_m32r_cmds):        ditto
+
 Mon May 18 13:34:27 1998  Keith Seitz  <keiths@cygnus.com>
 
         * dbxread.c (process_one_symbol): If block addresses are relative to
