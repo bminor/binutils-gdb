@@ -1,3 +1,30 @@
+Sun Feb 22 20:33:05 1998  Richard Henderson  <rth@cygnus.com>
+
+	* configure.in (COREFILE selection): Remove sparc-*-linux*.  They
+	don't actually use trad-core, but a SunOS-style core file handled
+	by gdb directly.
+	* hosts/sparclinux.h: Remove.
+
+start-sanitize-sky
+Thu Feb 19 02:38:52 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* reloc.c (BFD_RELOC_MIPS_DVP_27_S4): New reloc type.
+	* elf32-mips.c (enum reloc_type): Add R_MIPS_DVP_27_S4.
+	(elf_mips_dvp_27_s4_howto): Describe it.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle it.
+	(mips_info_to_how_rel): Handle it.
+	(mips_elf_relocate_section): Handle it.
+	* bfd-in2.h,libbfd.h: Regenerate.
+
+end-sanitize-sky
+Wed Feb 18 15:31:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h (pe_print_idata): If there is no .idata section, look
+	for the import tables in some other section.  Make the initial
+	label line up better with the data.  Print the import address
+	table even if there is no import name table.  If the import
+	address table holds actual addresses, print them.
+
 start-sanitize-sky
 Tue Feb 17 20:00:26 1998  Doug Evans  <devans@canuck.cygnus.com>
 

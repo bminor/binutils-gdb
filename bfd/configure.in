@@ -114,6 +114,7 @@ if test "${target}" = "${host}"; then
 	COREFILE=trad-core.lo
 	AC_DEFINE(TRAD_HEADER,"hosts/alphalinux.h")
 	;;
+  alpha*-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   alpha*-*-*)		COREFILE=osf-core.lo ;;
   arm-*-riscix)		COREFILE=trad-core.lo ;;
   hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
@@ -255,12 +256,9 @@ changequote([,])dnl
   powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-beos*)	;;
+  powerpc-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   sparc-*-netbsd* | sparc-*-openbsd*)
 	COREFILE=netbsd-core.lo
-	;;
-  sparc*-*-linux-gnu*)
-	COREFILE=trad-core.lo
-	AC_DEFINE(TRAD_HEADER,"hosts/sparclinux.h")
 	;;
   tahoe-*-*)
 	COREFILE=trad-core.lo
@@ -286,6 +284,7 @@ changequote([,])dnl
   hpux-core.lo)		COREFLAG=-DHPUX_CORE ;;
   irix-core.lo)		COREFLAG=-DIRIX_CORE ;;
   lynx-core.lo)		COREFLAG=-DLYNX_CORE ;;
+  netbsd-core.lo)	COREFLAG=-DNETBSD_CORE ;;
   osf-core.lo)		COREFLAG=-DOSF_CORE ;;
   ptrace-core.lo)	COREFLAG=-DPTRACE_CORE ;;
   rs6000-core.lo)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
@@ -507,7 +506,7 @@ do
     shlcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
     som_vec)			tb="$tb som.lo" ;;
     sparcle_aout_vec)		tb="$tb aout-sparcle.lo aout32.lo" ;;
-    sparclinux_vec)		tb="$tb sparclinux.lo aout32.lo stab-syms.lo" ;;
+    sparclinux_vec)		tb="$tb sparclinux.lo aout32.lo" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.lo lynx-core.lo aout32.lo" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.lo lynx-core.lo" ;;
     sparcnetbsd_vec)		tb="$tb sparcnetbsd.lo aout32.lo" ;;
