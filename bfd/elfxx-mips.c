@@ -375,7 +375,7 @@ static bfd *reldyn_sorting_bfd;
 
 /* Nonzero if ABFD is using the 64-bit ABI. */
 #define ABI_64_P(abfd) \
-  ((elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64) != 0)
+  ((get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64) != 0)
 
 #define IRIX_COMPAT(abfd) \
   (get_elf_backend_data (abfd)->elf_backend_mips_irix_compat (abfd))

@@ -1,3 +1,8 @@
+2002-06-03  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* elfxx-mips.c (ABI_64_P): Use backend's data to determine the
+	ABI.
+
 2002-06-02  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* elf32-arc.c: Fix formatting.
