@@ -1,3 +1,8 @@
+2002-06-12  H.J. Lu <hjl@gnu.org>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_try_needed): Return
+	false if xvec doesn't match.
+
 2002-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ldlang.c (lang_size_sections_1): Skip removed output sections.

@@ -281,6 +281,13 @@ gld${EMULATION_NAME}_try_needed (name, force)
       return false;
     }
 
+  /* For DT_NEEDED, they have to match.  */
+  if (abfd->xvec != output_bfd->xvec)
+    {
+      bfd_close (abfd);
+      return false;
+    }
+
   /* Check whether this object would include any conflicting library
      versions.  If FORCE is set, then we skip this check; we use this
      the second time around, if we couldn't find any compatible
