@@ -1,5 +1,10 @@
 2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* elfxx-mips.c (mips_elf_irix6_finish_dynamic_symbol): Make the
+	symbols protected.
+
+2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Fix handling
 	of relocations whose offset is -2.
 

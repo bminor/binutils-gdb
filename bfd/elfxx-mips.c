@@ -6668,6 +6668,7 @@ mips_elf_irix6_finish_dynamic_symbol (abfd, name, sym)
 	  /* All of these symbols are given type STT_SECTION by the
 	     IRIX6 linker.  */
 	  sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
+	  sym->st_other = STO_PROTECTED;
 
 	  /* The IRIX linker puts these symbols in special sections.  */
 	  if (i == 0)
