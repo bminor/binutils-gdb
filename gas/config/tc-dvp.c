@@ -154,8 +154,6 @@ static symbolS *vif_data_end;
 
 /* Special symbol $.mpgloc.  The value is in bytes.  */
 static symbolS *mpgloc_sym;
-/* Special symbol $.unpackloc.  */
-static symbolS *unpackloc_sym;
 
 /* GIF insn support.  */
 /* Type of insn.  */
@@ -291,7 +289,6 @@ md_begin ()
 
   /* Create special symbols.  */
   mpgloc_sym = expr_build_uconstant (0);
-  unpackloc_sym = expr_build_uconstant (0);
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -696,20 +693,10 @@ assemble_vif (str)
 	  insn_frag = frag_now;
 	  /* Put a symbol at the start of data.  $.unpackloc calculations
 	     use it.  */
+	  /* ??? $.unpackloc is gone.  Is this also used for data length
+	     verification?  */
 	  vif_data_start = create_colon_label (STO_DVP_VIF, LOCAL_LABEL_PREFIX,
 					       unique_name ("unpack"));
-
-	  /* Get the value of unpackloc.  If it wasn't '*' update
-	     $.unpackloc.  */
-	  {
-	    int unpackloc = vif_get_unpackloc ();
-	    if (unpackloc != -1)
-	      {
-		unpackloc_sym->sy_value.X_op = O_constant;
-		unpackloc_sym->sy_value.X_add_number = unpackloc;
-		unpackloc_sym->sy_value.X_unsigned = 1;
-	      }
-	  }
 	}
       else
 	{
@@ -1433,19 +1420,6 @@ md_operand (expressionP)
     {
       expressionP->X_op = O_symbol;
       expressionP->X_add_symbol = mpgloc_sym;
-      expressionP->X_add_number = 0;
-
-      /* Advance over the '*'.  */
-      ++input_line_pointer;
-    }
-  /* Check if this is a '*' for unpackloc.  */
-  else if (cur_opcode
-	   && (cur_opcode->flags & VIF_OPCODE_UNPACK) != 0
-	   && (cur_operand->flags & DVP_OPERAND_UNPACK_ADDRESS) != 0
-	   && *input_line_pointer == '*')
-    {
-      expressionP->X_op = O_symbol;
-      expressionP->X_add_symbol = unpackloc_sym;
       expressionP->X_add_number = 0;
 
       /* Advance over the '*'.  */
@@ -2831,22 +2805,12 @@ s_endunpack (internal_p)
     }
 
   /* Record in the end data symbol the current location.  */
+  /* ??? $.unpackloc is gone.  Is this also used for data length
+     verification?  */
   if (now_seg != S_GET_SEGMENT (vif_data_end))
     as_bad (".endunpack in different section");
   vif_data_end->sy_frag = frag_now;
   S_SET_VALUE (vif_data_end, (valueT) frag_now_fix ());
-
-  /* Update $.UnpackLoc.  */
-  {
-    symbolS *s;
-    s = expr_build_binary (O_subtract, vif_data_end, vif_data_start);
-    /* Round up to next quadword boundary.  */
-    /* FIXME: This isn't correct, the size of the input data is not the
-       size of the output data.  Someone else can fix this.  */
-    s = expr_build_binary (O_add, s, expr_build_uconstant (15));
-    s = expr_build_binary (O_divide, s, expr_build_uconstant (16));
-    unpackloc_sym = expr_build_binary (O_add, unpackloc_sym, s);
-  }
 
   /* Round up to next word boundary.  */
   frag_align (2, 0, 0);

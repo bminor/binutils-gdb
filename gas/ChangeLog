@@ -1,3 +1,9 @@
+start-sanitize-sky
+Thu Apr 16 11:48:18 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (unpackloc_sym): Delete.  All uses deleted.
+
+end-sanitize-sky
 Wed Apr 15 15:17:27 1998  Richard Henderson  <rth@cygnus.com>
 
 	* symbols.c (resolve_symbol_value) [O_symbol]: Also store the symbol
