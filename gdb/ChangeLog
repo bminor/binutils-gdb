@@ -1,3 +1,8 @@
+Tue Oct  8 15:59:44 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* defs.h:  Remove decls of xmalloc and xrealloc.  There is a
+	conflicting definition in libiberty.h.
+
 Tue Oct  8 11:47:13 1996  Fred Fish  <fnf@cygnus.com>
 
 	* dbxread.c (dbx_symfile_read): Call free_pending_blocks rather
