@@ -1,3 +1,7 @@
+2004-12-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-hpux-nat.c (hppa_hpux_child_can_run): Tweak comment.
+
 2004-12-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-nat.c (ss_mpsfu_high): Remove define.

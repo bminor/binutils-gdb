@@ -225,8 +225,9 @@ static int
 hppa_hpux_child_can_run (void)
 {
   /* This variable is controlled by modules that layer their own
-     process structure atop that provided here.  hpux-thread.c does
-     this because of the HP-UX user-mode level thread model.  */
+     process structure atop that provided here.  The code in
+     hpux-thread.c does this to support the HP-UX user-mode DCE
+     threads.  */
   return !child_suppress_run;
 }
 
