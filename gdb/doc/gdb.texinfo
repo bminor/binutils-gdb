@@ -4493,6 +4493,8 @@ Table}.
 * Vector Unit::                 Vector Unit
 * Memory Region Attributes::    Memory region attributes
 * Dump/Restore Files::          Copy between memory and a file
+* Character Sets::              Debugging programs that use a different
+                                character set than GDB does
 @end menu
 
 @node Expressions
@@ -5878,6 +5880,254 @@ These offsets are relative to the addresses in the file, before
 the @var{bias} argument is applied.
 
 @end table
+
+@node Character Sets
+@section Character Sets
+@cindex character sets
+@cindex charset
+@cindex translating between character sets
+@cindex host character set
+@cindex target character set
+
+If the program you are debugging uses a different character set to
+represent characters and strings than the one @value{GDBN} uses itself,
+@value{GDBN} can automatically translate between the character sets for
+you.  The character set @value{GDBN} uses we call the @dfn{host
+character set}; the one the inferior program uses we call the
+@dfn{target character set}.
+
+For example, if you are running @value{GDBN} on a @sc{gnu}/Linux system, which
+uses the ISO Latin 1 character set, but you are using @value{GDBN}'s
+remote protocol (@pxref{Remote,Remote Debugging}) to debug a program
+running on an IBM mainframe, which uses the @sc{ebcdic} character set,
+then the host character set is Latin-1, and the target character set is
+@sc{ebcdic}.  If you give @value{GDBN} the command @code{set
+target-charset ebcdic-us}, then @value{GDBN} translates between
+@sc{ebcdic} and Latin 1 as you print character or string values, or use
+character and string literals in expressions.
+
+@value{GDBN} has no way to automatically recognize which character set
+the inferior program uses; you must tell it, using the @code{set
+target-charset} command, described below.
+
+Here are the commands for controlling @value{GDBN}'s character set
+support:
+
+@table @code
+@item set target-charset @var{charset}
+@kindex set target-charset
+Set the current target character set to @var{charset}.  We list the
+character set names @value{GDBN} recognizes below, but if you invoke the
+@code{set target-charset} command with no argument, @value{GDBN} lists
+the character sets it supports.
+@end table
+
+@table @code
+@item set host-charset @var{charset}
+@kindex set host-charset
+Set the current host character set to @var{charset}.
+
+By default, @value{GDBN} uses a host character set appropriate to the
+system it is running on; you can override that default using the
+@code{set host-charset} command.
+
+@value{GDBN} can only use certain character sets as its host character
+set.  We list the character set names @value{GDBN} recognizes below, and
+indicate which can be host character sets, but if you invoke the
+@code{set host-charset} command with no argument, @value{GDBN} lists the
+character sets it supports, placing an asterisk (@samp{*}) after those
+it can use as a host character set.
+
+@item set charset @var{charset}
+@kindex set charset
+Set the current host and target character sets to @var{charset}.  If you
+invoke the @code{set charset} command with no argument, it lists the
+character sets it supports.  @value{GDBN} can only use certain character
+sets as its host character set; it marks those in the list with an
+asterisk (@samp{*}).
+
+@item show charset
+@itemx show host-charset
+@itemx show target-charset
+@kindex show charset
+@kindex show host-charset
+@kindex show target-charset
+Show the current host and target charsets.  The @code{show host-charset}
+and @code{show target-charset} commands are synonyms for @code{show
+charset}.
+
+@end table
+
+@value{GDBN} currently includes support for the following character
+sets:
+
+@table @code
+
+@item ASCII
+@cindex ASCII character set
+Seven-bit U.S. @sc{ascii}.  @value{GDBN} can use this as its host
+character set.
+
+@item ISO-8859-1
+@cindex ISO 8859-1 character set
+@cindex ISO Latin 1 character set
+The ISO Latin 1 character set.  This extends ASCII with accented
+characters needed for French, German, and Spanish.  @value{GDBN} can use
+this as its host character set.
+
+@item EBCDIC-US
+@itemx IBM1047
+@cindex EBCDIC character set
+@cindex IBM1047 character set
+Variants of the @sc{ebcdic} character set, used on some of IBM's
+mainframe operating systems.  (@sc{gnu}/Linux on the S/390 uses U.S. @sc{ascii}.)
+@value{GDBN} cannot use these as its host character set.
+
+@end table
+
+Note that these are all single-byte character sets.  More work inside
+GDB is needed to support multi-byte or variable-width character
+encodings, like the UTF-8 and UCS-2 encodings of Unicode.
+
+Here is an example of @value{GDBN}'s character set support in action.
+Assume that the following source code has been placed in the file
+@file{charset-test.c}:
+
+@smallexample
+#include <stdio.h>
+
+char ascii_hello[]
+  = @{72, 101, 108, 108, 111, 44, 32, 119,
+     111, 114, 108, 100, 33, 10, 0@};
+char ibm1047_hello[]
+  = @{200, 133, 147, 147, 150, 107, 64, 166,
+     150, 153, 147, 132, 90, 37, 0@};
+
+main ()
+@{
+  printf ("Hello, world!\n");
+@}
+@end example
+
+In this program, @code{ascii_hello} and @code{ibm1047_hello} are arrays
+containing the string @samp{Hello, world!} followed by a newline,
+encoded in the @sc{ascii} and @sc{ibm1047} character sets.
+
+We compile the program, and invoke the debugger on it:
+
+@smallexample
+$ gcc -g charset-test.c -o charset-test
+$ gdb -nw charset-test
+GNU gdb 2001-12-19-cvs
+Copyright 2001 Free Software Foundation, Inc.
+@dots{}
+(gdb) 
+@end example
+
+We can use the @code{show charset} command to see what character sets
+@value{GDBN} is currently using to interpret and display characters and
+strings:
+
+@smallexample
+(gdb) show charset
+The current host and target character set is `iso-8859-1'.
+(gdb) 
+@end example
+
+For the sake of printing this manual, let's use @sc{ascii} as our
+initial character set:
+@smallexample
+(gdb) set charset ascii
+(gdb) show charset
+The current host and target character set is `ascii'.
+(gdb) 
+@end example
+
+Let's assume that @sc{ascii} is indeed the correct character set for our
+host system --- in other words, let's assume that if @value{GDBN} prints
+characters using the @sc{ascii} character set, our terminal will display
+them properly.  Since our current target character set is also
+@sc{ascii}, the contents of @code{ascii_hello} print legibly:
+
+@smallexample
+(gdb) print ascii_hello
+$1 = 0x401698 "Hello, world!\n"
+(gdb) print ascii_hello[0]
+$2 = 72 'H'
+(gdb) 
+@end example
+
+@value{GDBN} uses the target character set for character and string
+literals you use in expressions:
+
+@smallexample
+(gdb) print '+'
+$3 = 43 '+'
+(gdb) 
+@end example
+
+The @sc{ascii} character set uses the number 43 to encode the @samp{+}
+character.
+
+@value{GDBN} relies on the user to tell it which character set the
+target program uses.  If we print @code{ibm1047_hello} while our target
+character set is still @sc{ascii}, we get jibberish:
+
+@smallexample
+(gdb) print ibm1047_hello
+$4 = 0x4016a8 "\310\205\223\223\226k@@\246\226\231\223\204Z%"
+(gdb) print ibm1047_hello[0]
+$5 = 200 '\310'
+(gdb) 
+@end example
+
+If we invoke the @code{set target-charset} command without an argument,
+@value{GDBN} tells us the character sets it supports:
+
+@smallexample
+(gdb) set target-charset
+Valid character sets are:
+  ascii *
+  iso-8859-1 *
+  ebcdic-us  
+  ibm1047  
+* - can be used as a host character set
+@end example
+
+We can select @sc{ibm1047} as our target character set, and examine the
+program's strings again.  Now the @sc{ascii} string is wrong, but
+@value{GDBN} translates the contents of @code{ibm1047_hello} from the
+target character set, @sc{ibm1047}, to the host character set,
+@sc{ascii}, and they display correctly:
+
+@smallexample
+(gdb) set target-charset ibm1047
+(gdb) show charset
+The current host character set is `ascii'.
+The current target character set is `ibm1047'.
+(gdb) print ascii_hello
+$6 = 0x401698 "\110\145%%?\054\040\167?\162%\144\041\012"
+(gdb) print ascii_hello[0]
+$7 = 72 '\110'
+(gdb) print ibm1047_hello
+$8 = 0x4016a8 "Hello, world!\n"
+(gdb) print ibm1047_hello[0]
+$9 = 200 'H'
+(gdb)
+@end example
+
+As above, @value{GDBN} uses the target character set for character and
+string literals you use in expressions:
+
+@smallexample
+(gdb) print '+'
+$10 = 78 '+'
+(gdb) 
+@end example
+
+The IBM1047 character set uses the number 78 to encode the @samp{+}
+character.
+
 
 @node Macros
 @chapter C Preprocessor Macros

@@ -1,3 +1,13 @@
+2002-09-20  Kevin Buettner  <kevinb@redhat.com>
+
+	From Eli Zaretskii  <eliz@is.elta.co.il>:
+	* gdb.texinfo (Character Sets): Use @smallexample instead of
+	@example.  Use GNU/Linux instead of Linux.
+
+2002-09-20  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo: Add character set documentation.
+
 2002-09-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Packets): Revise `z' and `Z' packet documentation.
