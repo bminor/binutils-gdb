@@ -192,7 +192,7 @@ Change things in your program, so you can experiment with correcting the
 effects of one bug and go on to learn about another.
 @end itemize
 
-You can use @value{GDBN} to debug programs written in C and C++.
+You can use @value{GDBN} to debug programs written in C and C@t{++}.
 For more information, see @ref{Support,,Supported languages}.
 For more information, see @ref{C,,C and C++}.
 
@@ -6371,7 +6371,7 @@ character.
 @node Macros
 @chapter C Preprocessor Macros
 
-Some languages, such as C and C++, provide a way to define and invoke
+Some languages, such as C and C@t{++}, provide a way to define and invoke
 ``preprocessor macros'' which expand into strings of tokens.
 @value{GDBN} can evaluate expressions containing macro invocations, show
 the result of macro expansion, and show a macro's definition, including
@@ -9925,7 +9925,7 @@ Some embedded operating systems, like Sun Chorus and VxWorks, can load
 relocatable files into an already running program; such systems
 typically make the requirements above easy to meet.  However, it's
 important to recognize that many native systems use complex link
-procedures (@code{.linkonce} section factoring and C++ constructor table
+procedures (@code{.linkonce} section factoring and C@t{++} constructor table
 assembly, for example) that make the requirements difficult to meet.  In
 general, one cannot assume that using @code{add-symbol-file} to read a
 relocatable object file's symbolic information will have the same effect

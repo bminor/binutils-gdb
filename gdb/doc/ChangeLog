@@ -1,3 +1,9 @@
+2004-02-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.texinfo: Properly quote the name "C++".
+	* gdbint.texinfo: Ditto.
+	* stabs.texinfo: Ditto.
+
 2004-02-11  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdbint.texinfo (Support Libraries): Add doco about obstacks and
