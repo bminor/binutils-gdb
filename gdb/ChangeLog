@@ -1,3 +1,23 @@
+2000-03-24  Daniel Berlin  <dan@cgsoftware.com>
+
+	* gdbtypes.c (_initialize_gdbtypes): Add "set debug overload",
+	which never existed before, and thus, has no deprecated old command.
+
+	* gdbarch.c (_initialize_gdbarch): Add "set debug arch", deprecate
+	"set archdebug" (same goes for the show commands).
+	* gdb-events.c (_initialize_gdb_events): Add "set debug event",
+	deprecate "set eventdebug" (same goes for the show commands).
+	* gdbcmd.h: Add the setdebuglist and showdebuglist externs.
+	* top.c (init_main): Deprecate remotedebug, use "set/show debug remote"
+	instead.
+	x(init_main): Add the "set debug" and "show debug" commands.
+	Add setdebuglist and showdebuglist.
+
+Fri Mar 24 13:00:10 2000  Daniel Berlin <dan@cgsoftware.com>
+
+	* maint.c (maintenance_do_deprecate): Fix crash if you call with no arguments, and fixed the warning.
+	  Added prototype for the deprecate command so it doesn't complain.
+
 Tue Mar 28 11:52:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.c (print_gdb_version): Bump copyright year to 2000.

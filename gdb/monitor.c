@@ -2410,15 +2410,11 @@ When enabled, a hashmark \'#\' is displayed.",
 				  &setlist),
 		     &showlist);
 
-#if 0
-  /* FIXME: cagney/1999-10-07: Wait until there is a generic ``set
-     debug ...'' rather than another ``set ...debug'' command. */
   add_show_from_set
-    (add_set_cmd ("monitordebug", no_class, var_zinteger,
+    (add_set_cmd ("monitor", no_class, var_zinteger,
 		  (char *) &monitor_debug_p,
 		  "Set debugging of remote monitor communication.\n\
 When enabled, communication between GDB and the remote monitor\n\
-is displayed.", &setlist),
-     &showlist);
-#endif
+is displayed.", &setdebuglist),
+     &showdebuglist);
 }

@@ -214,16 +214,24 @@ void _initialize_gdb_events (void);
 void
 _initialize_gdb_events (void)
 {
+  struct cmd_list_element *c;
 #if WITH_GDB_EVENTS
   queue_event_hooks.breakpoint_create = queue_breakpoint_create;
   queue_event_hooks.breakpoint_delete = queue_breakpoint_delete;
   queue_event_hooks.breakpoint_modify = queue_breakpoint_modify;
-#endif
-  add_show_from_set (add_set_cmd ("eventdebug",
+#endif	/* WITH_GDB_EVENTS */
+
+  c=add_set_cmd("eventdebug", class_maintenance, var_zinteger,
+		(char *)&gdb_events_debug, "Set event debugging.\n\
+When non-zero, event/notify debugging is enabled.", &setlist);
+  deprecate_cmd(c,"set debug event");
+  deprecate_cmd(add_show_from_set(c,&showlist),"show debug event");
+
+  add_show_from_set (add_set_cmd ("event",
                                   class_maintenance,
                                   var_zinteger,
                                   (char *)&gdb_events_debug,
                                   "Set event debugging.\n\
-When non-zero, event/notify debugging is enabled.", &setlist),
-                     &showlist);
+When non-zero, event/notify debugging is enabled.", &setdebuglist),
+                     &showdebuglist);
 }

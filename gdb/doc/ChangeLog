@@ -1,3 +1,8 @@
+2000-03-27  Daniel Berlin  <dan@cgsoftware.com>
+
+        * gdb.texinfo (Debugging Output): Added new section, documenting
+        the "set/show debug" commands.
+
 Fri Mar 24 18:06:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* annotate.texi (Annotations): When GDBN omit @chapter and @node

@@ -96,6 +96,10 @@ extern struct cmd_list_element *setprintlist;
 
 extern struct cmd_list_element *showprintlist;
 
+extern struct cmd_list_element *setdebuglist;
+
+extern struct cmd_list_element *showdebuglist;
+
 extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;

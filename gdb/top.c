@@ -144,6 +144,10 @@ static void complete_command PARAMS ((char *, int));
 
 static void do_nothing PARAMS ((int));
 
+static void show_debug PARAMS ((char *, int));
+
+static void set_debug PARAMS ((char *, int));
+
 #ifdef SIGHUP
 /* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
@@ -254,6 +258,10 @@ struct cmd_list_element *maintenanceprintlist;
 struct cmd_list_element *setprintlist;
 
 struct cmd_list_element *showprintlist;
+
+struct cmd_list_element *setdebuglist;
+
+struct cmd_list_element *showdebuglist;
 
 struct cmd_list_element *setchecklist;
 
@@ -3986,7 +3994,24 @@ float_handler (signo)
   signal (SIGFPE, float_handler);
   error ("Erroneous arithmetic operation.");
 }
-
+
+static void
+set_debug (arg, from_tty)
+	char *arg;
+	int from_tty;
+{
+	printf_unfiltered (
+			"\"set debug\" must be followed by the name of a print subcommand.\n");
+	help_list (setdebuglist, "set debug ", -1, gdb_stdout);
+}
+
+static void
+show_debug (args, from_tty)
+	char *args;
+	int from_tty;
+{
+	          cmd_show_list (showdebuglist, from_tty, "");
+}
 
 static void
 init_cmd_lists ()
@@ -4313,12 +4338,18 @@ This value is used to set the speed of the serial port when debugging\n\
 using remote targets.", &setlist),
 		     &showlist);
 
+  c = add_set_cmd("remotedebug", no_class, var_zinteger, (char *) &remote_debug, "Set debugging of remote protocol.\n\
+When enabled, each packet sent or received with the remote target\n\
+is displayed.",&setlist);
+  deprecate_cmd(c,"set debug remote");
+  deprecate_cmd(add_show_from_set(c,&showlist),"show debug remote");
+
   add_show_from_set (
-  add_set_cmd ("remotedebug", no_class, var_zinteger, (char *) &remote_debug,
+  add_set_cmd ("remote", no_class, var_zinteger, (char *) &remote_debug,
 	       "Set debugging of remote protocol.\n\
 When enabled, each packet sent or received with the remote target\n\
-is displayed.", &setlist),
-		      &showlist);
+is displayed.", &setdebuglist),
+		      &showdebuglist);
 
   add_show_from_set (
 		      add_set_cmd ("remotetimeout", no_class, var_integer, (char *) &remote_timeout,
@@ -4358,4 +4389,7 @@ from the target.", &setlist),
 Use \"on\" to enable the notification, and \"off\" to disable it.", &setlist),
 	 &showlist);
     }
+	add_prefix_cmd("debug",no_class,set_debug, "Generic command for setting gdb debugging flags", &setdebuglist, "set debug ", 0, &setlist);
+
+	add_prefix_cmd("debug",no_class,show_debug,"Generic command for showing gdb debugging flags", &showdebuglist, "show debug ", 0, &showlist);
 }

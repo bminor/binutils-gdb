@@ -3262,6 +3262,8 @@ extern void _initialize_gdbarch (void);
 void
 _initialize_gdbarch ()
 {
+  struct cmd_list_element *c;
+
   add_prefix_cmd ("endian", class_support, set_endian,
 		  "Set endianness of target.",
 		  &endianlist, "set endian ", 0, &setlist);
@@ -3288,11 +3290,21 @@ _initialize_gdbarch ()
   tm_print_insn_info.memory_error_func = dis_asm_memory_error;
   tm_print_insn_info.print_address_func = dis_asm_print_address;
 
-  add_show_from_set (add_set_cmd ("archdebug",
+  add_show_from_set (add_set_cmd ("arch",
 				  class_maintenance,
 				  var_zinteger,
 				  (char *)&gdbarch_debug,
 				  "Set architecture debugging.\n\
-When non-zero, architecture debugging is enabled.", &setlist),
-		     &showlist);
+When non-zero, architecture debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
+  c=add_set_cmd("archdebug",
+		class_maintenance,
+		var_zinteger,
+		(char *)&gdbarch_debug,
+		"Set architecture debugging.\n\
+When non-zero, architecture debugging is enabled.", &setlist);
+
+  deprecate_cmd(c,"set debug arch");
+  deprecate_cmd(add_show_from_set(c,&showlist),"show debug arch");
+
 }

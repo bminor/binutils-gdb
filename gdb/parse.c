@@ -1400,10 +1400,10 @@ _initialize_parse ()
   register_gdbarch_swap (NULL, 0, build_parse);
 
   add_show_from_set (
-	    add_set_cmd ("expressiondebug", class_maintenance, var_zinteger,
+	    add_set_cmd ("expression", class_maintenance, var_zinteger,
 			 (char *) &expressiondebug,
 			 "Set expression debugging.\n\
 When non-zero, the internal representation of expressions will be printed.",
-			 &setlist),
-		      &showlist);
+			 &setdebuglist),
+		      &showdebuglist);
 }

@@ -672,11 +672,11 @@ by gdbserver.",
 		       &setlist),
      &showlist);
 
-  add_show_from_set (add_set_cmd ("serialdebug",
+  add_show_from_set (add_set_cmd ("serial",
 				  class_maintenance,
 				  var_zinteger,
 				  (char *)&global_serial_debug_p,
 				  "Set serial debugging.\n\
-When non-zero, serial port debugging is enabled.", &setlist),
-		     &showlist);
+When non-zero, serial port debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
 }

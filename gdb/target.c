@@ -3082,11 +3082,11 @@ initialize_targets ()
   add_info ("files", target_info, targ_desc);
 
   add_show_from_set (
-		add_set_cmd ("targetdebug", class_maintenance, var_zinteger,
+		add_set_cmd ("target", class_maintenance, var_zinteger,
 			     (char *) &targetdebug,
 			     "Set target debugging.\n\
-When non-zero, target debugging is enabled.", &setlist),
-		      &showlist);
+When non-zero, target debugging is enabled.", &setdebuglist),
+		      &showdebuglist);
 
 
   add_com ("monitor", class_obscure, do_monitor_command,

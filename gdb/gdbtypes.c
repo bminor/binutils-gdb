@@ -75,7 +75,7 @@ struct type *builtin_type_CORE_ADDR;
 struct type *builtin_type_bfd_vma;
 
 int opaque_type_resolution = 1;
-
+int overload_debug = 0;
 
 struct extra
   {
@@ -2186,16 +2186,10 @@ rank_one_type (parm, arg)
   if (TYPE_CODE (parm) == TYPE_CODE_REF)
     return (rank_one_type (arg, TYPE_TARGET_TYPE (parm))
 	    + REFERENCE_CONVERSION_BADNESS);
-
-#ifdef DEBUG_OLOAD
+  if (overload_debug)
   /* Debugging only. */
-  /* FIXME/FYI: cagney/2000-03-13: No need to #ifdef this sort of
-     thing.  Instead add a command like ``set debug gdbtypes <int>''.
-     (A predicate to this is the addition of the ``set debug''). Also,
-     send the output to gdb_stderr and don't use printf. */
-  printf ("------ Arg is %s [%d], parm is %s [%d]\n",
-      TYPE_NAME (arg), TYPE_CODE (arg), TYPE_NAME (parm), TYPE_CODE (parm));
-#endif
+    fprintf_filtered (gdb_stderr,"------ Arg is %s [%d], parm is %s [%d]\n",
+        TYPE_NAME (arg), TYPE_CODE (arg), TYPE_NAME (parm), TYPE_CODE (parm));
 
   /* x -> y means arg of type x being supplied for parameter of type y */
 
@@ -3020,6 +3014,7 @@ extern void _initialize_gdbtypes PARAMS ((void));
 void
 _initialize_gdbtypes ()
 {
+  struct cmd_list_element *c;
   build_gdbtypes ();
 
   /* FIXME - For the moment, handle types by swapping them in and out.
@@ -3060,4 +3055,11 @@ _initialize_gdbtypes ()
   REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
   REGISTER_GDBARCH_SWAP (builtin_type_bfd_vma);
   register_gdbarch_swap (NULL, 0, build_gdbtypes);
+
+  add_show_from_set (
+		     add_set_cmd ("overload", no_class, var_zinteger, (char *) &overload_debug,
+				  "Set debugging of C++ overloading.\n\
+			  When enabled, ranking of the functions\n\
+			  is displayed.", &setdebuglist),
+		     &showdebuglist);
 }
