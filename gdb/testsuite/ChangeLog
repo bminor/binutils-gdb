@@ -1,3 +1,10 @@
+2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.arch: New directory.
+	* gdb.arch/configure.in: New file.
+	* gdb.arch/configure: New file.
+	* gdb.arch/Makefile.in: New file.
+
 2002-05-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-source.exp: Add v850 as supported target.
