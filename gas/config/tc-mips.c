@@ -962,6 +962,33 @@ md_begin ()
   if (mips_opts.mips16 < 0)
     mips_opts.mips16 = target_cpu_had_mips16;
 
+  /* Backward compatibility for historic -mcpu= option.  Check for
+     incompatible options, warn if -mcpu is used.  */
+  if (mips_cpu != CPU_UNKNOWN
+      && mips_arch != CPU_UNKNOWN
+      && mips_cpu != mips_arch)
+    {
+      as_fatal (_("The -mcpu option can't be used together with -march. "
+		  "Use -mtune instead of -mcpu."));
+    }
+
+  if (mips_cpu != CPU_UNKNOWN
+      && mips_tune != CPU_UNKNOWN
+      && mips_cpu != mips_tune)
+    {
+      as_fatal (_("The -mcpu option can't be used together with -mtune. "
+		  "Use -march instead of -mcpu."));
+    }
+
+  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
+    {
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_arch = ci->cpu;
+      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
+		 "-mtune instead."));
+    }
+
   /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
      specified on the command line, or some other value if one was.
      Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
@@ -983,19 +1010,6 @@ md_begin ()
       ci = mips_cpu_info_from_isa (mips_opts.isa);
       assert (ci != NULL);
       mips_arch = ci->cpu;
-    }
-  else if (mips_arch == CPU_UNKNOWN
-	   && mips_opts.isa == ISA_UNKNOWN
-	   && mips_cpu != CPU_UNKNOWN)
-    {
-      /* Historic -mcpu= option.  Warn.  */
-      ci = mips_cpu_info_from_cpu (mips_cpu);
-      assert (ci != NULL);
-      mips_arch = ci->cpu;
-      mips_tune = ci->cpu;
-      mips_opts.isa = ci->isa;
-      as_warn (_("The -mcpu option is deprecated.  Please use -march and -mtune instead."));
-
     }
   else
     {
@@ -8985,18 +8999,31 @@ md_parse_option (c, arg)
 	switch (c)
 	  {
 	  case OPTION_MTUNE:
+	    if (mips_tune != CPU_UNKNOWN && mips_tune != cpu)
+	      as_warn(_("A different -mtune= was already specified, is now "
+			"-mtune=%s"), arg);
 	    mips_tune = cpu;
 	    break;
 	  case OPTION_MARCH:
+	    if (mips_arch != CPU_UNKNOWN && mips_arch != cpu)
+	      as_warn(_("A different -march= was already specified, is now "
+			"-march=%s"), arg);
 	    mips_arch = cpu;
 	    break;
 	  case OPTION_MCPU:
+	    if (mips_cpu != CPU_UNKNOWN && mips_cpu != cpu)
+	      as_warn(_("A different -mcpu= was already specified, is now "
+			"-mcpu=%s"), arg);
 	    mips_cpu = cpu;
 	  }
       }
       break;
 
     case OPTION_M4650:
+      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R4650)
+	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R4650))
+        as_warn(_("A different -march= or -mtune= was already specified, "
+		  "is now -m4650"));
       mips_arch = CPU_R4650;
       mips_tune = CPU_R4650;
       break;
@@ -9005,6 +9032,10 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_M4010:
+      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R4010)
+	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R4010))
+        as_warn(_("A different -march= or -mtune= was already specified, "
+		  "is now -m4010"));
       mips_arch = CPU_R4010;
       mips_tune = CPU_R4010;
       break;
@@ -9013,6 +9044,10 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_M4100:
+      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_VR4100)
+	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_VR4100))
+        as_warn(_("A different -march= or -mtune= was already specified, "
+		  "is now -m4100"));
       mips_arch = CPU_VR4100;
       mips_tune = CPU_VR4100;
       break;
@@ -9021,6 +9056,10 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_M3900:
+      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R3900)
+	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R3900))
+        as_warn(_("A different -march= or -mtune= was already specified, "
+		  "is now -m3900"));
       mips_arch = CPU_R3900;
       mips_tune = CPU_R3900;
       break;
