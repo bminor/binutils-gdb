@@ -1,3 +1,7 @@
+2004-06-14  Andrew Cagney  <cagney@gnu.org>
+
+	* NEWS: Mention that the TUI is built-in.
+
 2004-06-14  Randolph Chung  <tausq@debian.org>
 
 	* MAINTAINERS (Write After Approval): Alphabetize my entry correctly.

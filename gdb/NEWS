@@ -3,6 +3,14 @@
 
 *** Changes in GDB 6.1.1:
 
+* TUI (Text-mode User Interface) built-in (also included in GDB 6.1)
+
+The TUI (Text-mode User Interface) is now built as part of a default
+GDB configuration.  It is enabled by either selecting the TUI with the
+command line option "-i=tui" or by running the separate "gdbtui"
+program.  For more information on the TUI, see the manual "Debugging
+with GDB".
+
 * Pending breakpoint support (also included in GDB 6.1)
 
 Support has been added to allow you to specify breakpoints in shared
