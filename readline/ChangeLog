@@ -1,3 +1,7 @@
+Fri Dec 20 12:04:31 1991  Fred Fish  (fnf at cygnus.com)
+
+	* configure.in:  Change svr4 references to sysv4.
+
 Tue Dec 10 04:07:20 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* Makefile.in: infodir belongs in datadir.
