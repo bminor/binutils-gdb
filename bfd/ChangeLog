@@ -1,3 +1,7 @@
+2001-03-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Fix warning.
+
 2001-03-15  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_link_hash_entry): Add maybe_pic_call.

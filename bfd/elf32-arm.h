@@ -2173,10 +2173,10 @@ Error: %s uses %s floating point, whereas %s uses %s floating point"),
       if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
 	_bfd_error_handler (_("\
 Warning: %s %s interworking, whereas %s %s"),
-			  bfd_get_filename (ibfd),
-	  in_flags & EF_ARM_INTERWORK ? _("supports") : _("does not support"),
-			  bfd_get_filename (obfd),
-		    out_flags & EF_ARM_INTERWORK ? _("does not") : _("does"));
+			    bfd_get_filename (ibfd),
+			    in_flags & EF_ARM_INTERWORK ? _("supports") : _("does not support"),
+			    bfd_get_filename (obfd),
+			    out_flags & EF_ARM_INTERWORK ? _("does") : _("does not"));
     }
 
   return flags_compatible;
