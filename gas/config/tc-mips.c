@@ -219,7 +219,7 @@ static int mips_tune = CPU_UNKNOWN;
 /* The argument of the -mabi= flag.  */
 static char * mips_abi_string = 0;
 
-/* Wether we should mark the file EABI64 or EABI32.  */
+/* Whether we should mark the file EABI64 or EABI32.  */
 static int mips_eabi64 = 0;
 
 /* If they asked for mips1 or mips2 and a cpu that is

@@ -1,3 +1,7 @@
+2001-07-25  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c: Fix spelling error in comment.
+
 2001-07-25  Dave Brolley  <brolley@redhat.com>
 
 	* app.c (LEX_IS_PARALLEL_SEPARATOR): New macro.
