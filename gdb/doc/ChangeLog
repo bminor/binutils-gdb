@@ -1,5 +1,11 @@
 Thu Nov 11 13:26:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabs.texinfo (Stabs in ELF): Clarify how Bbss.bss work with respect
+	to picking which Bbss.bss symbol to use, and (because there seems to
+	be no good way of doing it) re-write some of the text to make it
+	sound like Bbss.bss isn't such a great idea after all (as currently
+	designed).
+
 	* gdb.texinfo (C): In addition to saying people have to use g++ for
 	good results, say they have to use stabs.  Specifically say cfront
 	doesn't work well.
