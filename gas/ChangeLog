@@ -1,5 +1,7 @@
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/obj-coff.c (fixup_segment): Delete sy_mri_common assertion.
+
 	* as.h (assert): Warning fix.
 	* expr.c (expr): Correct assertion.
 	* read.c (s_comm_internal): Remove assertion.
