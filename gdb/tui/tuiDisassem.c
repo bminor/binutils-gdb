@@ -382,6 +382,24 @@ tuiGetBeginAsmAddress (void)
   return addr;
 }				/* tuiGetBeginAsmAddress */
 
+/* Determine what the low address will be to display in the TUI's
+   disassembly window.  This may or may not be the same as the
+   low address input.  */
+CORE_ADDR
+tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
+{
+  int pos;
+
+  /* Determine where to start the disassembly so that the pc is about in the
+     middle of the viewport.  */
+  pos = tuiDefaultWinViewportHeight (DISASSEM_WIN, DISASSEM_COMMAND) / 2;
+  pc = tui_find_disassembly_address (pc, -pos);
+
+  if (pc < low)
+    pc = low;
+  return pc;
+}
+
 /*
    ** tuiVerticalDisassemScroll().
    **      Scroll the disassembly forward or backward vertically

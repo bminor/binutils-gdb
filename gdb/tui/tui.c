@@ -311,31 +311,6 @@ tuiFree (char *ptr)
     }
 }
 
-/* Determine what the low address will be to display in the TUI's
-   disassembly window.  This may or may not be the same as the
-   low address input.  */
-CORE_ADDR
-tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
-{
-  int line;
-  CORE_ADDR newLow;
-
-  /* Determine where to start the disassembly so that the pc is about in the
-     middle of the viewport.  */
-  for (line = 0, newLow = pc;
-       (newLow > low &&
-	line < (tuiDefaultWinViewportHeight (DISASSEM_WIN,
-					     DISASSEM_COMMAND) / 2));)
-    {
-      bfd_byte buffer[4];
-
-      newLow -= sizeof (bfd_getb32 (buffer));
-      line++;
-    }
-
-  return newLow;
-}
-
 void
 strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
 {
