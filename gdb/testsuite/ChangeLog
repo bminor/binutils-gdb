@@ -1,5 +1,16 @@
 2000-11-17  Nick Duffek  <nsd@redhat.com>
 
+	* configure.in: Add AC_EXEEXT.
+	* configure: Regenerate.
+	* Makefile.in (just-check): Export EXEEXT.
+	* lib/gdb.exp ($EXEEXT): Import from environment.
+	* gdb.base/maint.exp: Expect $EXEEXT in executable name.  Don't
+	expect "maint dump-me" on Cygwin.
+	* gdb.base/reread.exp ($binfile, $binfile1, $binfile2): Append
+	$EXEEXT.
+
+2000-11-17  Nick Duffek  <nsd@redhat.com>
+
 	* gdb.base/break.exp: Test backtrace and finish from called
 	function on all platforms, not just HP-UX.
 

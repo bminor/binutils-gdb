@@ -106,6 +106,9 @@ if test "${enable_gdbtk}" = "yes"; then
 fi
 # End stuff to support --enable-shared
 
+dnl Check for exe extension set on certain hosts (e.g. Win32)
+AC_EXEEXT
+
 # configure the subdirectories too
 AC_CONFIG_SUBDIRS($configdirs)
 

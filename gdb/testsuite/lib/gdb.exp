@@ -63,6 +63,16 @@ if ![info exists gdb_prompt] then {
     set gdb_prompt "\[(\]gdb\[)\]"
 }
 
+# Needed for some tests under Cygwin.
+global EXEEXT
+global env
+
+if ![info exists env(EXEEXT)] {
+    set EXEEXT ""
+} else {
+    set EXEEXT $env(EXEEXT)
+}
+
 ### Only procedures should come after this point.
 
 #

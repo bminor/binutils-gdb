@@ -198,7 +198,7 @@ set keep_looking 1
 while {$keep_looking} {
     gdb_expect  {
 
-	-re ".*Object file.*break:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
+	-re ".*Object file.*break$EXEEXT:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
 	-re ".*Psymtabs:\[\r\t \]+\n" { set psymtabs 1 }
 	-re ".*Symtabs:\[\r\t \]+\n" { set symtabs 1 }
 
@@ -377,7 +377,7 @@ set timeout [expr $timeout + 300]
 #
 send_gdb "maint info sections\n"
 gdb_expect  {
-        -re "Exec file:\r\n.*break., file type.*$gdb_prompt $"\
+        -re "Exec file:\r\n.*break$EXEEXT., file type.*$gdb_prompt $"\
                         { pass "maint info sections" }
         -re ".*$gdb_prompt $"       { fail "maint info sections" }
         timeout         { fail "(timeout) maint info sections" }
@@ -443,7 +443,7 @@ set timeout $oldtimeout
 
 send_gdb "help maint\n"
 gdb_expect  {
-        -re "Commands for use by GDB maintainers\\..*Includes commands to dump specific internal GDB structures in.*a human readable form, to cause GDB to deliberately dump core,.*to test internal functions such as the C.. demangler, etc\\..*List of maintenance subcommands:.*maintenance check-symtabs.*maintenance demangle.*maintenance dump-me.*maintenance info.*maintenance internal-error.*maintenance print.*maintenance space.*maintenance time.*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\..*Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
+        -re "Commands for use by GDB maintainers\\..*Includes commands to dump specific internal GDB structures in.*a human readable form, to cause GDB to deliberately dump core,.*to test internal functions such as the C.. demangler, etc\\..*List of maintenance subcommands:.*maintenance check-symtabs.*maintenance demangle.*(maintenance dump-me.*)?maintenance info.*maintenance internal-error.*maintenance print.*maintenance space.*maintenance time.*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\..*Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
  { pass "help maint" }
         -re ".*$gdb_prompt $"       { fail "help maint" }
         timeout         { fail "(timeout) help maint" }
@@ -482,6 +482,10 @@ gdb_expect  {
         timeout         { fail "(timeout) help maint demangle" }
         }
 
+# dump-me is disabled ifdef _WIN32.
+if [ishost *cygwin*] {
+    setup_xfail "*-*-*"
+}
 send_gdb "help maint dump-me\n"
 gdb_expect  {
         -re "Get fatal error; make debugger dump its core\\.\r\nGDB sets it's handling of SIGQUIT back to SIG_DFL and then sends\r\nitself a SIGQUIT signal\\..*$gdb_prompt $"\
@@ -608,6 +612,9 @@ gdb_expect  {
 #set oldtimeout $timeout
 #set timeout [expr $timeout + 300]
 
+if [ishost *cygwin*] {
+    setup_xfail "*-*-*"
+}
 send_gdb "maint dump-me\n"
 gdb_expect  {
         -re "Should GDB dump core.*\\(y or n\\) $"\
