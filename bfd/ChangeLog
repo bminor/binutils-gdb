@@ -1,5 +1,8 @@
 Wed May 12 14:39:59 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* bout.c (aout32_slurp_extended_name_table): Define to be
+	_bfd_slurp_extended_name_table rather than bfd_true.
+
 	* coff-mips.c: Include libaout.h and aout/aout64.h to get
 	definitions for N_SET[ATDB].
 	(ecoff_howto_table): Moved near top of file.
