@@ -464,6 +464,7 @@ m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
 
 # Don't let the .y.h rule clobber m68k-parse.h.
 m68k-parse.h: ; @true
+$(srcdir)/config/m68k-parse.h: ; @true
 
 # The instruction table specification lexical analyzer and parser.
 

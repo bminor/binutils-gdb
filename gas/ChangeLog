@@ -1,5 +1,9 @@
 Wed Aug  6 00:30:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am ($(srcdir)/config/m68k-parse.h): New target, to
+	further try to circumvent the .y.h rule.
+	* Makefile.in: Rebuild.
+
 Tue Aug  5 12:32:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: New file, based on old Makefile.in.
