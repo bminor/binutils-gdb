@@ -1,3 +1,9 @@
+2004-03-12  Michal Ludvig  <mludvig@suse.cz>
+
+	* gas/i386/padlock.s, gas/i386/padlock.d: New tests for 
+	VIA PadLock instructions.
+	* gas/i386/i386.exp: Run padlock tests.
+
 2004-03-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/katmai.d: Revert last change.
