@@ -1,3 +1,7 @@
+Thu Sep 14 14:44:59 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* monitor.c (monitor_expect): Discard NULL characters.
+
 Thu Sep 14 14:12:30 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* infcmd.c: Add extern declaration for auto_solib_add_at_startup.
