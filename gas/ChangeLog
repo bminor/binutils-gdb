@@ -1,3 +1,10 @@
+2005-03-30  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* as.h [NEED_DECLARATION_FFS] (ffs): Prototype and alphabetize.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.in: Check for ffs decl and alphabetize.
+
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Phil Blundell  <philb@gnu.org>
 

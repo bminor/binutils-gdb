@@ -127,21 +127,24 @@ extern void *alloca ();
 #endif /* !__MWERKS__ */
 
 /* Other stuff from config.h.  */
-#ifdef NEED_DECLARATION_STRSTR
-extern char *strstr ();
+#ifdef NEED_DECLARATION_ENVIRON
+extern char **environ;
+#endif
+#ifdef NEED_DECLARATION_ERRNO
+extern int errno;
+#endif
+#ifdef NEED_DECLARATION_FFS
+extern int ffs (int);
+#endif
+#ifdef NEED_DECLARATION_FREE
+extern void free ();
 #endif
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();
 extern PTR realloc ();
 #endif
-#ifdef NEED_DECLARATION_FREE
-extern void free ();
-#endif
-#ifdef NEED_DECLARATION_ERRNO
-extern int errno;
-#endif
-#ifdef NEED_DECLARATION_ENVIRON
-extern char **environ;
+#ifdef NEED_DECLARATION_STRSTR
+extern char *strstr ();
 #endif
 
 /* This is needed for VMS.  */

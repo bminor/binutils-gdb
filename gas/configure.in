@@ -707,11 +707,6 @@ gas_test_headers="
 #include <unistd.h>
 #endif
 "
-GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(malloc, f, char *(*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(free, f, void (*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(sbrk, f, char *(*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(environ, f, char **f, $gas_test_headers)
 
 # Does errno.h declare errno, or do we have to add a separate declaration
 # for it?
@@ -720,6 +715,13 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 #include <errno.h>
 #endif
 ])
+
+GAS_CHECK_DECL_NEEDED(environ, f, char **f, $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(ffs, f, int (*f)(int), $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(free, f, void (*f)(), $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(malloc, f, char *(*f)(), $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(sbrk, f, char *(*f)(), $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
 
 dnl This must come last.
 

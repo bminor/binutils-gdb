@@ -10444,9 +10444,12 @@ gas_test_headers="
 #endif
 "
 
-echo "$as_me:$LINENO: checking whether declaration is required for strstr" >&5
-echo $ECHO_N "checking whether declaration is required for strstr... $ECHO_C" >&6
-if test "${gas_cv_decl_needed_strstr+set}" = set; then
+# Does errno.h declare errno, or do we have to add a separate declaration
+# for it?
+
+echo "$as_me:$LINENO: checking whether declaration is required for errno" >&5
+echo $ECHO_N "checking whether declaration is required for errno... $ECHO_C" >&6
+if test "${gas_cv_decl_needed_errno+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10455,14 +10458,18 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-$gas_test_headers
+
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+
 int
 main ()
 {
 
-typedef char *(*f)();
+typedef int f;
 f x;
-x = (f) strstr;
+x = (f) errno;
 
   ;
   return 0;
@@ -10490,30 +10497,31 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  gas_cv_decl_needed_strstr=no
+  gas_cv_decl_needed_errno=no
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-gas_cv_decl_needed_strstr=yes
+gas_cv_decl_needed_errno=yes
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $gas_cv_decl_needed_strstr" >&5
-echo "${ECHO_T}$gas_cv_decl_needed_strstr" >&6
-if test $gas_cv_decl_needed_strstr = yes; then
+echo "$as_me:$LINENO: result: $gas_cv_decl_needed_errno" >&5
+echo "${ECHO_T}$gas_cv_decl_needed_errno" >&6
+if test $gas_cv_decl_needed_errno = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_STRSTR 1
+#define NEED_DECLARATION_ERRNO 1
 _ACEOF
 
 fi
 
 
-echo "$as_me:$LINENO: checking whether declaration is required for malloc" >&5
-echo $ECHO_N "checking whether declaration is required for malloc... $ECHO_C" >&6
-if test "${gas_cv_decl_needed_malloc+set}" = set; then
+
+echo "$as_me:$LINENO: checking whether declaration is required for environ" >&5
+echo $ECHO_N "checking whether declaration is required for environ... $ECHO_C" >&6
+if test "${gas_cv_decl_needed_environ+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10527,9 +10535,9 @@ int
 main ()
 {
 
-typedef char *(*f)();
+typedef char **f;
 f x;
-x = (f) malloc;
+x = (f) environ;
 
   ;
   return 0;
@@ -10557,22 +10565,89 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  gas_cv_decl_needed_malloc=no
+  gas_cv_decl_needed_environ=no
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-gas_cv_decl_needed_malloc=yes
+gas_cv_decl_needed_environ=yes
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $gas_cv_decl_needed_malloc" >&5
-echo "${ECHO_T}$gas_cv_decl_needed_malloc" >&6
-if test $gas_cv_decl_needed_malloc = yes; then
+echo "$as_me:$LINENO: result: $gas_cv_decl_needed_environ" >&5
+echo "${ECHO_T}$gas_cv_decl_needed_environ" >&6
+if test $gas_cv_decl_needed_environ = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_MALLOC 1
+#define NEED_DECLARATION_ENVIRON 1
+_ACEOF
+
+fi
+
+
+echo "$as_me:$LINENO: checking whether declaration is required for ffs" >&5
+echo $ECHO_N "checking whether declaration is required for ffs... $ECHO_C" >&6
+if test "${gas_cv_decl_needed_ffs+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$gas_test_headers
+int
+main ()
+{
+
+typedef int (*f)(int);
+f x;
+x = (f) ffs;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  gas_cv_decl_needed_ffs=no
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+gas_cv_decl_needed_ffs=yes
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $gas_cv_decl_needed_ffs" >&5
+echo "${ECHO_T}$gas_cv_decl_needed_ffs" >&6
+if test $gas_cv_decl_needed_ffs = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NEED_DECLARATION_FFS 1
 _ACEOF
 
 fi
@@ -10645,6 +10720,73 @@ _ACEOF
 fi
 
 
+echo "$as_me:$LINENO: checking whether declaration is required for malloc" >&5
+echo $ECHO_N "checking whether declaration is required for malloc... $ECHO_C" >&6
+if test "${gas_cv_decl_needed_malloc+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$gas_test_headers
+int
+main ()
+{
+
+typedef char *(*f)();
+f x;
+x = (f) malloc;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  gas_cv_decl_needed_malloc=no
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+gas_cv_decl_needed_malloc=yes
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $gas_cv_decl_needed_malloc" >&5
+echo "${ECHO_T}$gas_cv_decl_needed_malloc" >&6
+if test $gas_cv_decl_needed_malloc = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NEED_DECLARATION_MALLOC 1
+_ACEOF
+
+fi
+
+
 echo "$as_me:$LINENO: checking whether declaration is required for sbrk" >&5
 echo $ECHO_N "checking whether declaration is required for sbrk... $ECHO_C" >&6
 if test "${gas_cv_decl_needed_sbrk+set}" = set; then
@@ -10712,9 +10854,9 @@ _ACEOF
 fi
 
 
-echo "$as_me:$LINENO: checking whether declaration is required for environ" >&5
-echo $ECHO_N "checking whether declaration is required for environ... $ECHO_C" >&6
-if test "${gas_cv_decl_needed_environ+set}" = set; then
+echo "$as_me:$LINENO: checking whether declaration is required for strstr" >&5
+echo $ECHO_N "checking whether declaration is required for strstr... $ECHO_C" >&6
+if test "${gas_cv_decl_needed_strstr+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10728,9 +10870,9 @@ int
 main ()
 {
 
-typedef char **f;
+typedef char *(*f)();
 f x;
-x = (f) environ;
+x = (f) strstr;
 
   ;
   return 0;
@@ -10758,96 +10900,22 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  gas_cv_decl_needed_environ=no
+  gas_cv_decl_needed_strstr=no
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-gas_cv_decl_needed_environ=yes
+gas_cv_decl_needed_strstr=yes
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $gas_cv_decl_needed_environ" >&5
-echo "${ECHO_T}$gas_cv_decl_needed_environ" >&6
-if test $gas_cv_decl_needed_environ = yes; then
+echo "$as_me:$LINENO: result: $gas_cv_decl_needed_strstr" >&5
+echo "${ECHO_T}$gas_cv_decl_needed_strstr" >&6
+if test $gas_cv_decl_needed_strstr = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_ENVIRON 1
-_ACEOF
-
-fi
-
-
-# Does errno.h declare errno, or do we have to add a separate declaration
-# for it?
-
-echo "$as_me:$LINENO: checking whether declaration is required for errno" >&5
-echo $ECHO_N "checking whether declaration is required for errno... $ECHO_C" >&6
-if test "${gas_cv_decl_needed_errno+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
-
-int
-main ()
-{
-
-typedef int f;
-f x;
-x = (f) errno;
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  gas_cv_decl_needed_errno=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-gas_cv_decl_needed_errno=yes
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: $gas_cv_decl_needed_errno" >&5
-echo "${ECHO_T}$gas_cv_decl_needed_errno" >&6
-if test $gas_cv_decl_needed_errno = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_ERRNO 1
+#define NEED_DECLARATION_STRSTR 1
 _ACEOF
 
 fi
