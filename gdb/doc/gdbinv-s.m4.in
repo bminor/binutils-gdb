@@ -128,33 +128,6 @@ _GDBN__ session will get control.
 Call @code{breakpoint} if none of these is true, or if you simply want
 to make certain your program stops at a predetermined point for the
 start of your debugging session.
-
-@quotation
-@emph{Warning:} when you set a breakpoint using this subroutine, it's a
-little harder than usual to restart your program afterwards---because if
-you simply @code{continue}, you will immediately run into the line of
-your program that sets the breakpoint!
-
-To get past this, adjust the program counter manually to get past the
-current instruction before issuing the @code{continue} command.  For example,
-
-@example
-(_GDBP__) p $pc = 4+$pc
-
-FIXME!!! Stu, I suspect I don't have this quite right.  
-         Please supply the right incantation...  presumably the
-         constant depends on instruction width, BTW?
-         Sample output would be nice too, so I don't have to make
-         up a ridiculous number.         
-
-Nothing simpler works, right?  Frinstance, an ignore count on the
-continue would just keep stopping at the same place too?
-
-Whatta bout $pc++ ---does GDB know the instruction width as a "type" size?
-
-(_GDBP__) continue
-@end example
-@end quotation
 @end table
 
 @node bootstrapping
