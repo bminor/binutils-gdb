@@ -1,3 +1,12 @@
+Tue Oct 10 01:01:51 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.h (args_type): Add rpath_link field.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Search for
+	required dependencies in rpath_link path.  Only search
+	LD_LIBRARY_PATH when configured native.
+	* lexsup.c (parse_args): Recognize -rpath-link.
+	* ld.1, ld.texinfo: Document -rpath-link.
+
 Sat Oct  7 17:07:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Don't

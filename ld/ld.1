@@ -82,6 +82,12 @@ ld \- the GNU linker
 \&\|]
 .RB "[\|" \-relax "\|]"
 .RB "[\|" \-r | \-Ur "\|]" 
+.RB "[\|" "\-rpath\ "\c
+.I directory\c
+\&\|]
+.RB "[\|" "\-rpath\-link\ "\c
+.I directory\c
+\&\|]
 .RB "[\|" \-S "\|]" 
 .RB "[\|" \-s "\|]" 
 .RB "[\|" \-shared "\|]" 
@@ -690,6 +696,56 @@ constructors; \c
 This option does the same as \c
 .B \-i\c
 \&.
+
+.TP
+.B \-rpath\ \fIdirectory
+Add a directory to the runtime library search path.  This is used when
+linking an ELF executable with shared objects.  All 
+.B \-rpath
+arguments are concatenated and passed to the runtime linker, which uses
+them to locate shared objects at runtime.  The
+.B \-rpath
+option is also used when locating shared objects which are needed by
+shared objects explicitly included in the link; see the description of
+the
+.B \-rpath\-link
+option.
+
+The
+.B \-rpath
+option may also be used on SunOS.  By default, on SunOS, the linker
+will form a runtime search patch out of all the
+.B \-L
+options it is given.  If a
+.B \-rpath option is used, the runtime search path
+will be formed exclusively using the
+.B \-rpath
+options, ignoring
+the
+.B \-L
+options.  This can be useful when using gcc, which adds many
+.B \-L
+options which may be on NFS mounted filesystems.
+
+.TP
+.B \-rpath\-link\ \fIdirectory
+When using ELF, one shared library may require another.  This happens
+when an
+.B ld\ \-shared
+link includes a shared library as one of the input files.
+
+When the linker encounters such a dependency when doing a non-shared,
+non-relocateable link, it will automatically try to locate the required
+shared library and include it in the link, if it is not included
+explicitly.  In such a case, the
+.B \-rpath\-link
+option specifies the first set of directories to search.  The
+.B \-rpath\-link
+option may specify a sequence of directory names either by specifying
+a list of names separated by colons, or by appearing multiple times.
+
+If the required shared library is not found, the linker will issue a
+warning and continue with the link.
 
 .TP
 .B \-S 
