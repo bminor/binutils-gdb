@@ -3,6 +3,12 @@
 
 *** Changes in GDB 6.0:
 
+* GNU/Linux support for fork, vfork, and exec.
+
+The "catch fork", "catch exec", "catch vfork", and "set follow-fork-mode"
+commands are now implemented for GNU/Linux.  They require a 2.5.x or later
+kernel.
+
 * GDB supports logging output to a file
 
 There are two new commands, "set logging" and "show logging", which can be
