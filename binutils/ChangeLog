@@ -1,5 +1,15 @@
 2000-06-15  H.J. Lu  <hjl@gnu.org>
 
+	* dyn-string.c: Removed. Not needed with dyn-string.c in
+	libiberty.
+	* dyn-string.h: Likewise.
+
+	* Makefile.am: Remove references to dyn-string.c and
+	dyn-string.h. Rebuild dependency.
+	* Makefile.in: Rebuild.
+
+2000-06-15  H.J. Lu  <hjl@gnu.org>
+
 	* binutils.texi: Put a warning on copying relocatable object
 	files between two different formats.
 
