@@ -13,6 +13,11 @@ Thu Oct  5 20:17:30 1995  Ken Raeburn  <raeburn@cygnus.com>
 	if alignment stricter than 4 bytes is requested; in that case,
 	align to a 4-byte boundary first.
 
+	Thu Sep 28 19:35:27 1995  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.c (VMS_RSYM_Parse): eliminate "might be used
+	uninitialized" warning for `Max_Source_Offset'.
+
 Wed Oct  4 16:17:02 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* config/tc-ppc.c (parse_toc_entry): New function to parse [toc]

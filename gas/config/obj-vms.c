@@ -2165,6 +2165,9 @@ VMS_stab_parse (sp, expected_type, type1, type2, Text_Psect)
   return;
 }
 
+
+/* Simpler interfaces into VMS_stab_parse().  */
+
 static void
 VMS_GSYM_Parse (sp, Text_Psect)
      symbolS *sp;
@@ -2172,7 +2175,6 @@ VMS_GSYM_Parse (sp, Text_Psect)
 {				/* Global variables */
   VMS_stab_parse (sp, 'G', (N_UNDF | N_EXT), (N_DATA | N_EXT), Text_Psect);
 }
-
 
 static void
 VMS_LCSYM_Parse (sp, Text_Psect)
@@ -2191,29 +2193,29 @@ VMS_STSYM_Parse (sp, Text_Psect)
 }
 
 
-/* for register symbols, we must figure out what range of addresses within the
- * psect are valid. We will use the brackets in the stab directives to give us
- * guidance as to the PC range that this variable is in scope.  I am still not
- * completely comfortable with this but as I learn more, I seem to get a better
- * handle on what is going on.
- * Caveat Emptor.
- */
+/* For register symbols, we must figure out what range of addresses
+   within the psect are valid.  We will use the brackets in the stab
+   directives to give us guidance as to the PC range that this variable
+   is in scope.  I am still not completely comfortable with this but
+   as I learn more, I seem to get a better handle on what is going on.
+   Caveat Emptor.  */
+
 static void
 VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
      symbolS *sp, *Current_Routine;
      int Text_Psect;
 {
+  symbolS *symbolP;
+  struct VMS_DBG_Symbol *spnt;
   char *pnt;
   char *pnt1;
   char *str;
   int dbx_type;
-  struct VMS_DBG_Symbol *spnt;
   int len;
   int i = 0;
   int bcnt = 0;
   int Min_Offset = -1;		/* min PC of validity */
   int Max_Offset = 0;		/* max PC of validity */
-  symbolS *symbolP;
 
   for (symbolP = sp; symbolP; symbolP = symbol_next (symbolP))
     {
@@ -2235,48 +2237,45 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
 	break;
       if (S_GET_RAW_TYPE (symbolP) == N_FUN)
 	{
-	  pnt=(char*) strchr (S_GET_NAME (symbolP), ':') + 1;
+	  pnt = (char *) strchr (S_GET_NAME (symbolP), ':') + 1;
 	  if (*pnt == 'F' || *pnt == 'f') break;
 	}
     }
 
-/* Check to see that the addresses were defined.  If not, then there were no
- * brackets in the function, and we must try to search for the next function.
- * Since functions can be in any order, we should search all of the symbol
- * list to find the correct ending address.  */
+  /* Check to see that the addresses were defined.  If not, then there
+     were no brackets in the function, and we must try to search for
+     the next function.  Since functions can be in any order, we should
+     search all of the symbol list to find the correct ending address.  */
   if (Min_Offset == -1)
     {
       int Max_Source_Offset;
       int This_Offset;
+
       Min_Offset = S_GET_VALUE (sp);
+      Max_Source_Offset = Min_Offset;	/* just in case no N_SLINEs found */
       for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-	{
-	  /*
-	   *	Dispatch on STAB type
-	   */
-	  switch (S_GET_RAW_TYPE (symbolP))
-	    {
-	    case N_TEXT | N_EXT:
-	      This_Offset = S_GET_VALUE (symbolP);
-	      if ((This_Offset > Min_Offset) && (This_Offset < Max_Offset))
-		Max_Offset = This_Offset;
-	      break;
-	    case N_SLINE:
-	      This_Offset = S_GET_VALUE (symbolP);
-	      if (This_Offset > Max_Source_Offset)
-		Max_Source_Offset = This_Offset;
-	      break;
-	    }
-	}
-/* if this is the last routine, then we use the PC of the last source line
- * as a marker of the max PC for which this reg is valid */
+	switch (S_GET_RAW_TYPE (symbolP))
+	  {
+	  case N_TEXT | N_EXT:
+	    This_Offset = S_GET_VALUE (symbolP);
+	    if (This_Offset > Min_Offset && This_Offset < Max_Offset)
+	      Max_Offset = This_Offset;
+	    break;
+	  case N_SLINE:
+	    This_Offset = S_GET_VALUE (symbolP);
+	    if (This_Offset > Max_Source_Offset)
+	      Max_Source_Offset = This_Offset;
+	    break;
+	  }
+      /* If this is the last routine, then we use the PC of the last source
+         line as a marker of the max PC for which this reg is valid.  */
       if (Max_Offset == 0x7fffffff)
 	Max_Offset = Max_Source_Offset;
     }
+
   dbx_type = 0;
   str = S_GET_NAME (sp);
-  pnt = (char *) strchr (str, ':');
-  if (pnt == (char *) NULL)
+  if ((pnt = (char *) strchr (str, ':')) == 0)
     return;			/* no colon present */
   pnt1 = pnt;			/* save this for later*/
   pnt++;
@@ -2315,18 +2314,19 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
     generate_suffix (spnt, 0);
 }
 
-/* this function examines a structure definition, checking all of the elements
- * to make sure that all of them are fully defined.  The only thing that we
- * kick out are arrays of undefined structs, since we do not know how big
- * they are.  All others we can handle with a normal forward reference.
- */
+
+/* This function examines a structure definition, checking all of the elements
+   to make sure that all of them are fully defined.  The only thing that we
+   kick out are arrays of undefined structs, since we do not know how big
+   they are.  All others we can handle with a normal forward reference.  */
+
 static int
 forward_reference (pnt)
      char *pnt;
 {
+  struct VMS_DBG_Symbol *spnt, *spnt1;
   int i;
-  struct VMS_DBG_Symbol *spnt;
-  struct VMS_DBG_Symbol *spnt1;
+
   pnt = cvt_integer (pnt + 1, &i);
   if (*pnt == ';')
     return 0;			/* no forward references */
@@ -2335,26 +2335,21 @@ forward_reference (pnt)
       pnt = (char *) strchr (pnt, ':');
       pnt = cvt_integer (pnt + 1, &i);
       spnt = find_symbol (i);
-      if (spnt) {
-	while (spnt->advanced == POINTER || spnt->advanced == ARRAY)
+      while (spnt && (spnt->advanced == POINTER || spnt->advanced == ARRAY))
 	{
-	  i = spnt->type2;
 	  spnt1 = find_symbol (spnt->type2);
-	  if ((spnt->advanced == ARRAY) &&
-	      (spnt1 == (struct VMS_DBG_Symbol *) NULL))
+	  if (spnt->advanced == ARRAY && !spnt1)
 	    return 1;
-	  if (spnt1 == (struct VMS_DBG_Symbol *) NULL)
-	    break;
 	  spnt = spnt1;
 	}
-      }
       pnt = cvt_integer (pnt + 1, &i);
       pnt = cvt_integer (pnt + 1, &i);
-  } while (*++pnt != ';');
+    } while (*++pnt != ';');
   return 0;			/* no forward refences found */
 }
 
-/* Used to check a single element of a structure on the final pass*/
+
+/* Used to check a single element of a structure on the final pass.  */
 
 static int
 final_forward_reference (spnt)
@@ -2365,28 +2360,31 @@ final_forward_reference (spnt)
   while (spnt && (spnt->advanced == POINTER || spnt->advanced == ARRAY))
     {
       spnt1 = find_symbol (spnt->type2);
-      if (spnt->advanced == ARRAY && !spnt1) return 1;
+      if (spnt->advanced == ARRAY && !spnt1)
+	return 1;
       spnt = spnt1;
     }
   return 0;	/* no forward refences found */
 }
 
-/* This routine parses the stabs directives to find any definitions of dbx type
- * numbers.  It makes a note of all of them, creating a structure element
- * of VMS_DBG_Symbol that describes it.  This also generates the info for the
- * debugger that describes the struct/union/enum, so that further references
- * to these data types will be by number
- * 	We have to process pointers right away, since there can be references
- * to them later in the same stabs directive.  We cannot have forward
- * references to pointers, (but we can have a forward reference to a pointer to
- * a structure/enum/union) and this is why we process them immediately.
- * After we process the pointer, then we search for defs that are nested even
- * deeper.
- * 8/15/92: We have to process arrays right away too, because there can
- * be multiple references to identical array types in one structure
- * definition, and only the first one has the definition.  (We tend to
- * parse from the back going forward.
- */
+
+/* This routine parses the stabs directives to find any definitions of dbx
+   type numbers.  It makes a note of all of them, creating a structure
+   element of VMS_DBG_Symbol that describes it.  This also generates the
+   info for the debugger that describes the struct/union/enum, so that
+   further references to these data types will be by number
+
+   We have to process pointers right away, since there can be references
+   to them later in the same stabs directive.  We cannot have forward
+   references to pointers, (but we can have a forward reference to a
+   pointer to a structure/enum/union) and this is why we process them
+   immediately.  After we process the pointer, then we search for defs
+   that are nested even deeper.
+
+   8/15/92: We have to process arrays right away too, because there can
+   be multiple references to identical array types in one structure
+   definition, and only the first one has the definition.  */
+
 static int
 VMS_typedef_parse (str)
      char *str;
@@ -2401,13 +2399,12 @@ VMS_typedef_parse (str)
   struct VMS_DBG_Symbol *spnt;
   struct VMS_DBG_Symbol *spnt1;
 
-/* check for any nested def's */
+  /* check for any nested def's */
   pnt = (char *) strchr (str + 1, '=');
-  if ((pnt != (char *) NULL) && (*(str + 1) != '*')
-    && (str[1] != 'a' || str[2] != 'r'))
-    if (VMS_typedef_parse (pnt) == 1)
-      return 1;
-/* now find dbx_type of entry */
+  if (pnt && str[1] != '*' && (str[1] != 'a' || str[2] != 'r')
+      && VMS_typedef_parse (pnt) == 1)
+    return 1;
+  /* now find dbx_type of entry */
   pnt = str - 1;
   if (*pnt == 'c')
     {				/* check for static constants */
@@ -2419,7 +2416,7 @@ VMS_typedef_parse (str)
   pnt++;			/* and get back to the number */
   cvt_integer (pnt, &i1);
   spnt = find_symbol (i1);
-/* first we see if this has been defined already, due to a forward reference*/
+  /* first see if this has been defined already, due to forward reference */
   if (!spnt)
     {
       i2 = SYMTYP_HASH (i1);
@@ -2430,15 +2427,13 @@ VMS_typedef_parse (str)
       spnt->type2 = spnt->VMS_type = spnt->data_size = 0;
       spnt->index_min = spnt->index_max = spnt->struc_numb = 0;
     }
-/* for structs and unions, do a partial parse, otherwise we sometimes get
- * circular definitions that are impossible to resolve. We read enough info
- * so that any reference to this type has enough info to be resolved
- */
+  /*
+   * For structs and unions, do a partial parse, otherwise we sometimes get
+   * circular definitions that are impossible to resolve.  We read enough
+   * info so that any reference to this type has enough info to be resolved.
+   */
   pnt = str + 1;		/* point to character past equal sign */
-  if ((*pnt == 'u') || (*pnt == 's'))
-    {
-    }
-  if ((*pnt <= '9') && (*pnt >= '0'))
+  if (*pnt >= '0' && *pnt <= '9')
     {
       if (type_check ("void"))
 	{			/* this is the void symbol */
@@ -2464,7 +2459,7 @@ VMS_typedef_parse (str)
 		 spnt->dbx_type);
       return 1;			/* do not know what this is */
     }
-/* now define this module*/
+
   pnt = str + 1;		/* point to character past equal sign */
   switch (*pnt)
     {
@@ -2793,8 +2788,8 @@ VMS_typedef_parse (str)
 		 spnt->dbx_type);
       return 1;			/* unable to decipher */
     }
-/* this removes the evidence of the definition so that the outer levels of
-parsing do not have to worry about it */
+  /* This removes the evidence of the definition so that the outer levels
+     of parsing do not have to worry about it.  */
   pnt = str;
   while (*pnt1 != '\0')
     *pnt++ = *pnt1++;
@@ -2803,17 +2798,15 @@ parsing do not have to worry about it */
 }
 
 
-/*
- * This is the root routine that parses the stabs entries for definitions.
- * it calls VMS_typedef_parse, which can in turn call itself.
- * We need to be careful, since sometimes there are forward references to
- * other symbol types, and these cannot be resolved until we have completed
- * the parse.
- *
- * Also check and see if we are using continuation stabs, if we are, then
- * paste together the entire contents of the stab before we pass it to 
- * VMS_typedef_parse.
- */
+/* This is the root routine that parses the stabs entries for definitions.
+   it calls VMS_typedef_parse, which can in turn call itself.  We need to
+   be careful, since sometimes there are forward references to other symbol
+   types, and these cannot be resolved until we have completed the parse.
+
+   Also check and see if we are using continuation stabs, if we are, then
+   paste together the entire contents of the stab before we pass it to
+   VMS_typedef_parse.  */
+
 static void
 VMS_LSYM_Parse ()
 {
@@ -2871,7 +2864,7 @@ VMS_LSYM_Parse ()
 		      tlen += strlen (str);
 		      parse_buffer = (char *) xmalloc (tlen + 1);
 		      strcpy (parse_buffer, S_GET_NAME (sp));
-		      pnt2 = parse_buffer + strlen(parse_buffer) - 1;
+		      pnt2 = parse_buffer + strlen (parse_buffer) - 1;
 		      *pnt2 = '\0';
 		      spnext = sp;
 		      do {
@@ -2880,19 +2873,18 @@ VMS_LSYM_Parse ()
 			strcat (pnt2, str);
 			pnt2 +=  strlen (str) - 1;
 			*str = '\0';  /* Erase this string  */
+		     /* S_SET_NAME (spnext, str); */
 			if (*pnt2 != '?') break;
 			*pnt2 = '\0';
-		      } while (1 == 1);
+		      } while (1);
 		      str = parse_buffer;
 		      symbol_name = str;
 		    }
-		  pnt = (char *) strchr (str, ':');
-		  if (pnt != (char *) NULL)
+		  if ((pnt = (char *) strchr (str, ':')) != 0)
 		    {
 		      *pnt = '\0';
 		      pnt1 = pnt + 1;
-		      pnt2 = (char *) strchr (pnt1, '=');
-		      if (pnt2 != (char *) NULL)
+		      if ((pnt2 = (char *) strchr (pnt1, '=')) != 0)
 			incomplete += VMS_typedef_parse (pnt2);
 		      if (parse_buffer)
 			{
@@ -2900,9 +2892,10 @@ VMS_LSYM_Parse ()
 			      contain name:nn.  If it does not, then we
 			      are in real trouble.  Anyway, this is always
 			      shorter than the original line.  */
-			  strcpy (S_GET_NAME (sp), parse_buffer);
-			  free (parse_buffer);
-			  parse_buffer = 0;
+			  pnt2 = S_GET_NAME (sp);
+			  strcpy (pnt2, parse_buffer);
+		       /* S_SET_NAME (sp, pnt2); */
+			  free (parse_buffer),  parse_buffer = 0;
 			}
 		      *pnt = ':';	/* put back colon to restore dbx_type */
 		    }
@@ -2911,15 +2904,18 @@ VMS_LSYM_Parse ()
 	    }			/* if */
 	}			/*for*/
       pass++;
-/* Make one last pass, if needed, and define whatever we can that is left */
+      /*
+       * Make one last pass, if needed, and define whatever we can
+       * that is left.
+       */
       if (final_pass == 0 && incomplete == incom1)
-        {
-          final_pass = 1;
-	  incom1 ++;  /* Force one last pass through */
+	{
+	  final_pass = 1;
+	  incom1++;	/* Force one last pass through */
 	}
-  } while ((incomplete != 0) && (incomplete != incom1));
+  } while (incomplete != 0 && incomplete != incom1);
   /* repeat until all refs resolved if possible */
-/*	if (pass > 1) printf (" Required %d passes\n", pass);*/
+/*	if (pass > 1) printf (" Required %d passes\n", pass); */
   if (incomplete != 0)
     {
       as_tsktsk ("debugger output: Unable to resolve %d circular references.",
@@ -2927,12 +2923,11 @@ VMS_LSYM_Parse ()
     }
   fpnt = f_ref_root;
   symbol_name = "\0";
-  while (fpnt != (struct forward_ref *) NULL)
+  while (fpnt)
     {
       if (fpnt->resolved != 'Y')
 	{
-	  if (find_symbol (fpnt->dbx_type) !=
-	      (struct VMS_DBG_Symbol *) NULL)
+	  if (find_symbol (fpnt->dbx_type))
 	    {
 	      as_tsktsk ("debugger forward reference error, dbx type %d",
 			 fpnt->dbx_type);
@@ -2946,6 +2941,7 @@ VMS_LSYM_Parse ()
       fpnt = fpnt->next;
     }
 }
+
 
 static void
 Define_Local_Symbols (s0P, s2P, Current_Routine, Text_Psect)
@@ -2986,12 +2982,11 @@ Define_Local_Symbols (s0P, s2P, Current_Routine, Text_Psect)
     }				/* for */
 }
 
-
-/* This function crawls the symbol chain searching for local symbols that need
- * to be described to the debugger.  When we enter a new scope with a "{", it
- * creates a new "block", which helps the debugger keep track of which scope
- * we are currently in.
- */
+
+/* This function crawls the symbol chain searching for local symbols that
+   need to be described to the debugger.  When we enter a new scope with
+   a "{", it creates a new "block", which helps the debugger keep track
+   of which scope we are currently in.  */
 
 static symbolS *
 Define_Routine (s0P, Level, Current_Routine, Text_Psect)
