@@ -310,20 +310,26 @@ void cgen_asm_init_parse PARAMS ((void));
 #ifdef BFD_VERSION
 /* The result is an error message or NULL for success.
    The parsed value is stored in the bfd_vma *.  */
-const char *cgen_parse_operand PARAMS ((enum cgen_parse_operand_type,
+const char * cgen_parse_operand PARAMS ((enum cgen_parse_operand_type,
 					const char **, int, int,
 					enum cgen_parse_operand_result *,
 					bfd_vma *));
 #endif
 
+void cgen_save_fixups ();
+void cgen_restore_fixups ();
+void cgen_swap_fixups ();
+     
 /* Add a register to the assembler's hash table.
    This makes lets GAS parse registers for us.
    ??? This isn't currently used, but it could be in the future.  */
 void cgen_asm_record_register PARAMS ((char *, int));
 
 /* After CGEN_SYM (assemble_insn) is done, this is called to
-   output the insn and record any fixups.  */
-void cgen_asm_finish_insn PARAMS ((const struct cgen_insn *, cgen_insn_t *,
+   output the insn and record any fixups.  The address of the
+   assembled instruction is returned in case it is needed by
+   the caller.  */
+char * cgen_asm_finish_insn PARAMS ((const struct cgen_insn *, cgen_insn_t *,
 				   unsigned int));
 
 /* Operand values (keywords, integers, symbols, etc.)  */

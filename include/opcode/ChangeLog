@@ -1,3 +1,9 @@
+Thu Jan 22 17:54:56 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* cgen.h: Add prototypes for cgen_save_fixups(),
+	cgen_restore_fixups(), and cgen_swap_fixups().  Change prototype
+	of cgen_asm_finish_insn() to return a char *.
+
 Wed Jan 14 17:21:43 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* cgen.h: Formatting changes to improve readability. 
