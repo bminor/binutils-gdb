@@ -1,5 +1,10 @@
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64fbsd-tdep.c (amd64fbsd_r_reg_offset): New variable.
+	(amd64fbsd_init_abi): Set TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs and TDEP->sizeof_gregset.  Use ARRAY_SIZE
+	in initialization of TDEP->sc_num_regs.
+
 	* x86-64-tdep.c (x86_64_regset_from_core_section): New function.
 	(x86_64_init_abi): Initialize regset_from_core_section if
 	appropriate.
