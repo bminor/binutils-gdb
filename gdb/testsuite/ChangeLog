@@ -1,3 +1,9 @@
+Sun Feb  4 17:32:21 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.threads/pthreads.exp: Unify pass/fail messages for
+ 	``continue to bkpt at common_routine in thread 2'' and ``stopped
+ 	before calling common_routine 15 times'' tests.
+
 2001-02-11  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.c++/cplusfuncs.cc (dm_type_char_star): New function.

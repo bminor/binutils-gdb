@@ -142,9 +142,15 @@ proc all_threads_running {} {
 
     send_gdb "p common_routine::hits\n"
     gdb_expect {
-	-re ".*= 15\r\n$gdb_prompt $" {}
-	-re ".*= 16\r\n$gdb_prompt $" {}
-	-re ".*= 17\r\n$gdb_prompt $" {}
+	-re ".*= 15\r\n$gdb_prompt $" {
+	    pass "stopped before calling common_routine 15 times"
+	}
+	-re ".*= 16\r\n$gdb_prompt $" {
+	    pass "stopped before calling common_routine 15 times (16 times)"
+	}
+	-re ".*= 17\r\n$gdb_prompt $" {
+	    pass "stopped before calling common_routine 15 times (17 times)"
+	}
 	default {
 	    fail "stopped before calling common_routine 15 times"
 	    return 0
@@ -293,6 +299,7 @@ proc check_backtraces {} {
     send_gdb "continue\n"
     gdb_expect {
 	-re "Breakpoint .* common_routine \\(arg=2\\).*" {
+	    pass "continue to bkpt at common_routine in thread 2"
 	    send_gdb "backtrace\n"
 	    gdb_expect {
 		-re "#0.*common_routine \\(arg=2\\).*#1.*thread2.*" {
@@ -307,16 +314,16 @@ proc check_backtraces {} {
 	    }
 	}
 	-re "Breakpoint .* common_routine \\(arg=0\\).*" {
-	    fail "stopped in main thread at breakpoint for thread 2"
+	    fail "continue to bkpt at common_routine in thread 2 (arg=0)"
 	}
 	-re "Breakpoint .* common_routine \\(arg=1\\).*" {
-	    fail "stopped in main thread at breakpoint for thread 1"
+	    fail "continue to bkpt at common_routine in thread 2 (arg=1)"
 	}
 	-re ".*$gdb_prompt" {
 	    fail "continue to bkpt at common_routine in thread 2"
 	}
 	default {
-	    fail "continue to bkpt at common_routine in thread 2"
+	    fail "continue to bkpt at common_routine in thread 2 (default)"
 	}
 	timeout {
 	    fail "continue to bkpt at common_routine in thread 2 (timeout)"
