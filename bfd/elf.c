@@ -1661,7 +1661,6 @@ bfd_section_from_shdr (abfd, shindex)
       return true;
 
     case SHT_PROGBITS:	/* Normal section with contents.  */
-    case SHT_DYNAMIC:	/* Dynamic linking information.  */
     case SHT_NOBITS:	/* .bss section.  */
     case SHT_HASH:	/* .hash section.  */
     case SHT_NOTE:	/* .note section.  */
@@ -1669,6 +1668,39 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_FINI_ARRAY:	/* .fini_array section.  */
     case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+
+    case SHT_DYNAMIC:	/* Dynamic linking information.  */
+      if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+	return false;
+      if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_STRTAB)
+	{
+	  Elf_Internal_Shdr *dynsymhdr;
+
+	  /* The shared libraries distributed with hpux11 have a bogus
+	     sh_link field for the ".dynamic" section.  Find the
+	     string table for the ".dynsym" section instead.  */
+	  if (elf_dynsymtab (abfd) != 0)
+	    {
+	      dynsymhdr = elf_elfsections (abfd)[elf_dynsymtab (abfd)];
+	      hdr->sh_link = dynsymhdr->sh_link;
+	    }
+	  else
+	    {
+	      unsigned int i, num_sec;
+
+	      num_sec = elf_numsections (abfd);
+	      for (i = 1; i < num_sec; i++)
+		{
+		  dynsymhdr = elf_elfsections (abfd)[i];
+		  if (dynsymhdr->sh_type == SHT_DYNSYM)
+		    {
+		      hdr->sh_link = dynsymhdr->sh_link;
+		      break;
+		    }
+		}
+	    }
+	}
+      break;
 
     case SHT_SYMTAB:		/* A symbol table */
       if (elf_onesymtab (abfd) == shindex)

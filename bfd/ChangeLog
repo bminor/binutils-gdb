@@ -1,3 +1,10 @@
+2002-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_add_object_symbols): Revert 1999-09-02 hpux
+	fudge.
+	* elf.c (bfd_section_from_shdr): Work around broken hpux shared
+	libs here instead.
+
 2002-07-02  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf64-s390.c (create_got_section): Set .got section alignment to
