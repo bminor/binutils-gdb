@@ -437,7 +437,9 @@ po/POTFILES.in: @MAINT@ Makefile
 	for file in $(POTFILES); do echo $$file; done | sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
-noinst_PROGRAMS = as-new gasp-new
+# Note: GASP is now deprecated and will be removed at some point in the future.
+# Anything that GASP could do can now be done by GAS.
+noinst_PROGRAMS = as-new
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 
@@ -633,7 +635,7 @@ itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
 
 # stand-alone itbl assembler & disassembler
 
-EXTRA_PROGRAMS = itbl-test
+EXTRA_PROGRAMS = gasp-new itbl-test
 itbl_test_SOURCES = itbl-parse.y itbl-lex.l
 itbl_test_LDADD = itbl-tops.o itbl-test.o $(GASLIBS) @LEXLIB@
 

@@ -1,3 +1,12 @@
+2002-02-21  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* NEWS: Note that GASP is now deprecated.
+	* Makefile.am: Do not build gasp-new by default.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.am: Do not install gasp.info.
+	* doc/Makefile.in: Regenerate.
+	* gas/gasp.texi: Note that gasp is now deprecated.
+
 2002-02-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* NEWS: Mark 2.12 branch.
