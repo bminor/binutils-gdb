@@ -1,3 +1,8 @@
+2002-02-15  Richard Henderson  <rth@redhat.com>
+
+	* alpha-opc.c (alpha_opcodes): Add simple pseudos for
+	lda, ldah, jmp, ret.
+
 2002-02-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/da.po: Updated translation.
