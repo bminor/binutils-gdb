@@ -2344,8 +2344,9 @@ sh_elf_merge_private_data (ibfd, obfd)
 
   if (! elf_flags_init (obfd))
     {
+      /* This happens when ld starts out with a 'blank' output file.  */
       elf_flags_init (obfd) = true;
-      elf_elfheader (obfd)->e_flags = 0;
+      elf_elfheader (obfd)->e_flags = EF_SH1;
     }
   old_flags = elf_elfheader (obfd)->e_flags;
   new_flags = elf_elfheader (ibfd)->e_flags;

@@ -1,3 +1,8 @@
+Thu Aug 31 22:49:30 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* elf32-sh.c (sh_elf_merge_private_data): If ibfd's elf header flags
+	not initialized, set them to indicate the SH1 instruction set.
+
 2000-08-31  Alexandre Oliva  <aoliva@redhat.com>
 
 	* acinclude.m4: Include libtool and gettext macros from the
