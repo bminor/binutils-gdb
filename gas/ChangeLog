@@ -1,3 +1,9 @@
+2001-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	/gas/ChangeLog
+	* tc-mips.c (macro_build): Replace magic constants by defines.
+	(mips_ip): Likewise. Typo.
+
 2001-08-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	/gas/ChangeLog

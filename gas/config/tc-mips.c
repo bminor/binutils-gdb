@@ -2559,62 +2559,65 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	case 't':
 	case 'w':
 	case 'E':
-	  insn.insn_opcode |= va_arg (args, int) << 16;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_RT;
 	  continue;
 
 	case 'c':
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE;
+	  continue;
+
 	case 'T':
 	case 'W':
-	  insn.insn_opcode |= va_arg (args, int) << 16;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_FT;
 	  continue;
 
 	case 'd':
 	case 'G':
-	  insn.insn_opcode |= va_arg (args, int) << 11;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_RD;
 	  continue;
 
 	case 'U':
 	  {
 	    int tmp = va_arg (args, int);
 
-	    insn.insn_opcode |= tmp << 16;
-	    insn.insn_opcode |= tmp << 11;
+	    insn.insn_opcode |= tmp << OP_SH_RT;
+	    insn.insn_opcode |= tmp << OP_SH_RD;
 	    continue;
 	  }
 
 	case 'V':
 	case 'S':
-	  insn.insn_opcode |= va_arg (args, int) << 11;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_FS;
 	  continue;
 
 	case 'z':
 	  continue;
 
 	case '<':
-	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_SHAMT;
 	  continue;
 
 	case 'D':
-	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_FD;
 	  continue;
 
 	case 'B':
-	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE20;
 	  continue;
 
 	case 'J':
-	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE19;
 	  continue;
 
 	case 'q':
-	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE2;
 	  continue;
 
 	case 'b':
 	case 's':
 	case 'r':
 	case 'v':
-	  insn.insn_opcode |= va_arg (args, int) << 21;
+	  insn.insn_opcode |= va_arg (args, int) << OP_SH_RS;
 	  continue;
 
 	case 'i':
@@ -7004,16 +7007,19 @@ mips_ip (str, ip)
 		{
 		case 'r':
 		case 'v':
-		  ip->insn_opcode |= lastregno << 21;
+		  ip->insn_opcode |= lastregno << OP_SH_RS;
 		  continue;
 
 		case 'w':
+		  ip->insn_opcode |= lastregno << OP_SH_RT;
+		  continue;
+
 		case 'W':
-		  ip->insn_opcode |= lastregno << 16;
+		  ip->insn_opcode |= lastregno << OP_SH_FT;
 		  continue;
 
 		case 'V':
-		  ip->insn_opcode |= lastregno << 11;
+		  ip->insn_opcode |= lastregno << OP_SH_FS;
 		  continue;
 		}
 	      break;
@@ -7047,9 +7053,9 @@ mips_ip (str, ip)
 		{
 		  as_warn (_("Improper shift amount (%ld)"),
 			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number = imm_expr.X_add_number & 0x1f;
+		  imm_expr.X_add_number &= OP_MASK_SHAMT;
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << 6;
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_SHAMT;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -7060,7 +7066,7 @@ mips_ip (str, ip)
 	      if ((unsigned long) imm_expr.X_add_number < 32
 		  || (unsigned long) imm_expr.X_add_number > 63)
 		break;
-	      ip->insn_opcode |= (imm_expr.X_add_number - 32) << 6;
+	      ip->insn_opcode |= (imm_expr.X_add_number - 32) << OP_SH_SHAMT;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -7091,9 +7097,9 @@ mips_ip (str, ip)
 		{
 		  as_warn (_("Illegal break code (%ld)"),
 			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= 0x3ff;
+		  imm_expr.X_add_number &= OP_MASK_CODE;
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << 16;
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -7105,9 +7111,9 @@ mips_ip (str, ip)
 		{
 		  as_warn (_("Illegal lower break code (%ld)"),
 			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= 0x3ff;
+		  imm_expr.X_add_number &= OP_MASK_CODE2;
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << 6;
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE2;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -7115,10 +7121,10 @@ mips_ip (str, ip)
 	    case 'B':           /* 20-bit syscall/break code.  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
+	      if ((unsigned) imm_expr.X_add_number > OP_MASK_CODE20)
 		as_warn (_("Illegal 20-bit code (%ld)"),
 			 (long) imm_expr.X_add_number);
-	      ip->insn_opcode |= imm_expr.X_add_number << 6;
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE20;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -7140,10 +7146,10 @@ mips_ip (str, ip)
 	    case 'J':           /* 19-bit wait code.  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned) imm_expr.X_add_number > 0x7ffff)
+	      if ((unsigned) imm_expr.X_add_number > OP_MASK_CODE19)
 		as_warn (_("Illegal 19-bit code (%ld)"),
 			 (long) imm_expr.X_add_number);
-	      ip->insn_opcode |= imm_expr.X_add_number << 6;
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE19;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -7153,11 +7159,11 @@ mips_ip (str, ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number != 0 && imm_expr.X_add_number != 1)
 		{
-		  as_warn (_("Invalidate performance regster (%ld)"),
+		  as_warn (_("Invalid performance register (%ld)"),
 			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= 1;
+		  imm_expr.X_add_number &= OP_MASK_PERFREG;
 		}
-	      ip->insn_opcode |= (imm_expr.X_add_number << 1);
+	      ip->insn_opcode |= (imm_expr.X_add_number << OP_SH_PERFREG);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -7282,20 +7288,20 @@ mips_ip (str, ip)
 		    case 's':
 		    case 'v':
 		    case 'b':
-		      ip->insn_opcode |= regno << 21;
+		      ip->insn_opcode |= regno << OP_SH_RS;
 		      break;
 		    case 'd':
 		    case 'G':
-		      ip->insn_opcode |= regno << 11;
+		      ip->insn_opcode |= regno << OP_SH_RD;
 		      break;
 		    case 'U':
-		      ip->insn_opcode |= regno << 11;
-		      ip->insn_opcode |= regno << 16;
+		      ip->insn_opcode |= regno << OP_SH_RD;
+		      ip->insn_opcode |= regno << OP_SH_RT;
 		      break;
 		    case 'w':
 		    case 't':
 		    case 'E':
-		      ip->insn_opcode |= regno << 16;
+		      ip->insn_opcode |= regno << OP_SH_RT;
 		      break;
 		    case 'x':
 		      /* This case exists because on the r3000 trunc
@@ -7326,10 +7332,10 @@ mips_ip (str, ip)
 		{
 		case 'r':
 		case 'v':
-		  ip->insn_opcode |= lastregno << 21;
+		  ip->insn_opcode |= lastregno << OP_SH_RS;
 		  continue;
 		case 'w':
-		  ip->insn_opcode |= lastregno << 16;
+		  ip->insn_opcode |= lastregno << OP_SH_RT;
 		  continue;
 		}
 	      break;
@@ -7382,18 +7388,18 @@ mips_ip (str, ip)
 		  switch (c)
 		    {
 		    case 'D':
-		      ip->insn_opcode |= regno << 6;
+		      ip->insn_opcode |= regno << OP_SH_FD;
 		      break;
 		    case 'V':
 		    case 'S':
-		      ip->insn_opcode |= regno << 11;
+		      ip->insn_opcode |= regno << OP_SH_FS;
 		      break;
 		    case 'W':
 		    case 'T':
-		      ip->insn_opcode |= regno << 16;
+		      ip->insn_opcode |= regno << OP_SH_FT;
 		      break;
 		    case 'R':
-		      ip->insn_opcode |= regno << 21;
+		      ip->insn_opcode |= regno << OP_SH_FR;
 		      break;
 		    }
 		  lastregno = regno;
@@ -7403,10 +7409,10 @@ mips_ip (str, ip)
 	      switch (*args++)
 		{
 		case 'V':
-		  ip->insn_opcode |= lastregno << 11;
+		  ip->insn_opcode |= lastregno << OP_SH_FS;
 		  continue;
 		case 'W':
-		  ip->insn_opcode |= lastregno << 16;
+		  ip->insn_opcode |= lastregno << OP_SH_FT;
 		  continue;
 		}
 	      break;
