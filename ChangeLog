@@ -1,3 +1,28 @@
+Thu Feb  8 15:37:52 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* config.guess (UNAME_VERSION): Recognize X4.x as an OSF version.
+
+Mon Feb  5 16:36:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: If --enable-shared was used, set SET_LIB_PATH to
+	$(REALLY_SET_LIB_PATH) in Makefile.
+	* Makefile.in (SET_LIB_PATH): New variable.
+	(REALLY_SET_LIB_PATH): New variable.
+	($(DO_X)): Use $(SET_LIB_PATH).
+	(install.all, gcc-no-fixedincludes, $(ALL_MODULES)): Likewise.
+	($(NATIVE_CHECK_MODULES), $(CROSS_CHECK_MODULES)): Likewise.
+	($(INSTALL_MODULES), $(CONFIGURE_TARGET_MODULES)): Likewise.
+	($(ALL_TARGET_MODULES), $(CHECK_TARGET_MODULES)): Likewise.
+	($(INSTALL_TARGET_MODULES), $(ALL_X11_MODULES)): Likewise.
+	($(CHECK_X11_MODULES), $(INSTALL_X11_MODULES)): Likewise.
+	(all-gcc, all-bootstrap, check-gcc, install-gcc): Likewise.
+	(install-dosrel): Likewise.
+	(all-opcodes): Depend upon all-libiberty.
+
+Sun Feb  4 16:51:11 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* config.guess (*:CYGWIN*): New
+
 Sat Feb  3 10:42:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (all-target-winsup): All all-target-libiberty.
