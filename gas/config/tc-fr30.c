@@ -446,10 +446,8 @@ md_cgen_lookup_reloc (insn, operand, fixP)
     case FR30_OPERAND_DISP8:   return BFD_RELOC_FR30_8_IN_8;
     case FR30_OPERAND_UDISP6:  return BFD_RELOC_FR30_6_IN_4;
     case FR30_OPERAND_I8:      return BFD_RELOC_8;
-    case FR30_OPERAND_I32:     return BFD_RELOC_32;
-      /* waiting for this to be defined by Dave....
+    case FR30_OPERAND_I32:     return BFD_RELOC_FR30_48;
     case FR30_OPERAND_I20:     return BFD_RELOC_FR30_20;
-    */
     default : /* avoid -Wall warning */
       break;
     }

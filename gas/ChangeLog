@@ -1,4 +1,9 @@
 start-sanitize-fr30
+1998-12-03  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-fr30.c (md_cgen_lookup_reloc): Generate
+	BFD_RELOC_FR30_48 instead of BFD_RELOC_FR30_32.
+
 1998-12-02  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-fr30.c (md_cgen_lookup_reloc): Enable relocs for
