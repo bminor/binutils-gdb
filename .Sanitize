@@ -52,6 +52,7 @@ grep
 include
 ld
 libiberty
+libgcc
 libg++
 make
 newlib
