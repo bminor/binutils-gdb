@@ -1,3 +1,16 @@
+2001-12-21  Tom Rix  <trix@redhat.com>
+ 
+        * xcofflink.c (bfd_xcoff_link_generate_rtinit): New function.  
+	Interface to linker for generation of __rtinit.
+	* libxcoff.h (struct xcoff_backend_data_rec): Add new ops to xcoff 
+	backend to generate special linker symbol __rtinit.
+	* coff-rs6000.c (bfd_xcoff_backend_data, bfd_pmac_xcoff_backend_data) 
+	:  Add new rtinit ops
+	* coff64-rs6000.c (bfd_xcoff_aix5_backend_data, 
+	bfd_xcoff_backend_data): Same.
+	* bfd-in.h: Add bfd_xcoff_link_generate_rtinit.
+	* bfd-in2.h : Regenerate.
+
 2001-12-21  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Fix dst_mask for

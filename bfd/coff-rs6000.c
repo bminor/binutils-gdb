@@ -2918,6 +2918,254 @@ xcoff_loader_reloc_offset (abfd, ldhdr)
     (ldhdr->l_nsyms * bfd_xcoff_ldsymsz(abfd));
 }
 
+static boolean 
+xcoff_generate_rtinit  (abfd, init, fini)
+     bfd *abfd;
+     const char *init;
+     const char *fini;
+{
+  bfd_byte filehdr_ext[FILHSZ];
+  bfd_byte scnhdr_ext[SCNHSZ];
+  bfd_byte syment_ext[SYMESZ * 8];
+  bfd_byte reloc_ext[RELSZ * 2];
+  bfd_byte *data_buffer;
+  bfd_size_type data_buffer_size;
+  bfd_byte *string_table, *st_tmp;
+  bfd_size_type string_table_size;
+  bfd_vma val;
+  size_t initsz, finisz;
+  struct internal_filehdr filehdr;
+  struct internal_scnhdr scnhdr;
+  struct internal_syment syment;
+  union internal_auxent auxent;
+  struct internal_reloc reloc;
+  
+  char *data_name = ".data";
+  char *rtinit_name = "__rtinit";
+  
+  if (! bfd_xcoff_rtinit_size (abfd) 
+      || (init == NULL && fini == NULL))
+    return false;
+
+  initsz = (init == NULL ? 0 : 1 + strlen (init));
+  finisz = (fini == NULL ? 0 : 1 + strlen (fini));
+
+  /* file header */
+  memset (filehdr_ext, 0, FILHSZ);
+  memset (&filehdr, 0, sizeof (struct internal_filehdr));
+  filehdr.f_magic = bfd_xcoff_magic_number (abfd);
+  filehdr.f_nscns = 1; 
+  filehdr.f_timdat = 0;
+  filehdr.f_nsyms = 0;  /* at least 6, no more than 8 */
+  filehdr.f_symptr = 0; /* set below */
+  filehdr.f_opthdr = 0;
+  filehdr.f_flags = 0;
+
+  /* section header */
+  memset (scnhdr_ext, 0, SCNHSZ);
+  memset (&scnhdr, 0, sizeof (struct internal_scnhdr));
+  memcpy (scnhdr.s_name, data_name, strlen (data_name));
+  scnhdr.s_paddr = 0;
+  scnhdr.s_vaddr = 0;
+  scnhdr.s_size = 0;    /* set below */
+  scnhdr.s_scnptr = FILHSZ + SCNHSZ;
+  scnhdr.s_relptr = 0;  /* set below */
+  scnhdr.s_lnnoptr = 0;
+  scnhdr.s_nreloc = 0;  /* either 1 or 2 */
+  scnhdr.s_nlnno = 0;
+  scnhdr.s_flags = STYP_DATA;
+
+  /* .data 
+     0x0000           0x00000000 : rtl
+     0x0004           0x00000010 : offset to init, or 0
+     0x0008           0x00000028 : offset to fini, or 0
+     0x000C           0x0000000C : size of descriptor 
+     0x0010           0x00000000 : init, needs a reloc
+     0x0014           0x00000040 : offset to init name
+     0x0018           0x00000000 : flags, padded to a word
+     0x001C           0x00000000 : empty init
+     0x0020           0x00000000 : 
+     0x0024           0x00000000 : 
+     0x0028           0x00000000 : fini, needs a reloc
+     0x002C           0x00000??? : offset to fini name
+     0x0030           0x00000000 : flags, padded to a word
+     0x0034           0x00000000 : empty fini
+     0x0038           0x00000000 : 
+     0x003C           0x00000000 : 
+     0x0040           init name
+     0x0040 + initsz  fini name */
+
+  data_buffer_size = 0x0040 + initsz + finisz;
+  data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
+  data_buffer = (bfd_byte *)bfd_malloc (data_buffer_size);
+  memset (data_buffer, 0, data_buffer_size);
+
+  if (initsz) 
+    {
+      val = 0x10;
+      bfd_h_put_32 (abfd, val, &data_buffer[0x04]);
+      val = 0x40;
+      bfd_h_put_32 (abfd, val, &data_buffer[0x14]);
+      memcpy (&data_buffer[val], init, initsz);
+    }
+
+  if (finisz) 
+    {
+      val = 0x28;
+      bfd_h_put_32 (abfd, val, &data_buffer[0x08]);
+      val = 0x40 + initsz;
+      bfd_h_put_32 (abfd, val, &data_buffer[0x2C]);
+      memcpy (&data_buffer[val], fini, finisz);
+    }
+
+  val = 0x0C;
+  bfd_h_put_32 (abfd, val, &data_buffer[0x0C]);
+
+  scnhdr.s_size = data_buffer_size;
+
+  /* string table */
+  string_table_size = 0;
+  if (initsz > 9) 
+    string_table_size += initsz;
+  if (finisz > 9)
+    string_table_size += finisz;
+  if (string_table_size)
+    {
+      string_table_size += 4;
+      string_table = (bfd_byte *)bfd_malloc (string_table_size);
+      memset (string_table, 0, string_table_size);
+      val = string_table_size;
+      bfd_h_put_32 (abfd, val, &string_table[0]);
+      st_tmp = string_table + 4;
+    }
+  
+  /* symbols 
+     0. .data csect
+     2. __rtinit
+     4. init function 
+     6. fini function */
+  memset (syment_ext, 0, 8 * SYMESZ);
+  memset (reloc_ext, 0, 2 * RELSZ);
+
+  /* .data csect */
+  memset (&syment, 0, sizeof (struct internal_syment));
+  memset (&auxent, 0, sizeof (union internal_auxent));
+  memcpy (syment._n._n_name, data_name, strlen (data_name));
+  syment.n_scnum = 1;
+  syment.n_sclass = C_HIDEXT;
+  syment.n_numaux = 1;
+  auxent.x_csect.x_scnlen.l = data_buffer_size;
+  auxent.x_csect.x_smtyp = 3 << 3 | XTY_SD;
+  auxent.x_csect.x_smclas = XMC_RW;
+  bfd_coff_swap_sym_out (abfd, &syment, 
+			 &syment_ext[filehdr.f_nsyms * SYMESZ]);
+  bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
+			 syment.n_numaux, 
+			 &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
+  filehdr.f_nsyms += 2;
+
+  /* __rtinit */
+  memset (&syment, 0, sizeof (struct internal_syment));
+  memset (&auxent, 0, sizeof (union internal_auxent));
+  memcpy (syment._n._n_name, rtinit_name, strlen (rtinit_name));
+  syment.n_scnum = 1;
+  syment.n_sclass = C_EXT;
+  syment.n_numaux = 1;
+  auxent.x_csect.x_smtyp = XTY_LD;
+  auxent.x_csect.x_smclas = XMC_RW;
+  bfd_coff_swap_sym_out (abfd, &syment, 
+			 &syment_ext[filehdr.f_nsyms * SYMESZ]);
+  bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
+			 syment.n_numaux, 
+			 &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
+  filehdr.f_nsyms += 2;
+
+  /* init */
+  if (initsz) 
+    {
+      memset (&syment, 0, sizeof (struct internal_syment));
+      memset (&auxent, 0, sizeof (union internal_auxent));
+
+      if (initsz > 9) 
+	{
+	  syment._n._n_n._n_offset = st_tmp - string_table;
+	  memcpy (st_tmp, init, initsz);
+	  st_tmp += initsz;
+	}
+      else
+	memcpy (syment._n._n_name, init, initsz - 1);
+
+      syment.n_sclass = C_EXT;
+      syment.n_numaux = 1;
+      bfd_coff_swap_sym_out (abfd, &syment, 
+			     &syment_ext[filehdr.f_nsyms * SYMESZ]);
+      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
+			     syment.n_numaux, 
+			     &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
+
+      /* reloc */
+      memset (&reloc, 0, sizeof (struct internal_reloc));
+      reloc.r_vaddr = 0x0010;
+      reloc.r_symndx = filehdr.f_nsyms;
+      reloc.r_type = R_POS;
+      reloc.r_size = 31;
+      bfd_coff_swap_reloc_out (abfd, &reloc, &reloc_ext[0]);
+
+      filehdr.f_nsyms += 2;
+      scnhdr.s_nreloc += 1;
+    }
+  
+  /* fini */
+  if (finisz) 
+    {
+      memset (&syment, 0, sizeof (struct internal_syment));
+      memset (&auxent, 0, sizeof (union internal_auxent));
+
+      if (finisz > 9) 
+	{
+	  syment._n._n_n._n_offset = st_tmp - string_table;
+	  memcpy (st_tmp, fini, finisz);
+	  st_tmp += finisz;
+	}
+      else
+	memcpy (syment._n._n_name, fini, finisz - 1);
+
+      syment.n_sclass = C_EXT;
+      syment.n_numaux = 1;
+      bfd_coff_swap_sym_out (abfd, &syment, 
+			     &syment_ext[filehdr.f_nsyms * SYMESZ]);
+      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
+			     syment.n_numaux, 
+			     &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
+
+      /* reloc */
+      memset (&reloc, 0, sizeof (struct internal_reloc));
+      reloc.r_vaddr = 0x0028;
+      reloc.r_symndx = filehdr.f_nsyms;
+      reloc.r_type = R_POS;
+      reloc.r_size = 31;
+      bfd_coff_swap_reloc_out (abfd, &reloc, 
+			       &reloc_ext[scnhdr.s_nreloc * RELSZ]);
+
+      filehdr.f_nsyms += 2;
+      scnhdr.s_nreloc += 1;
+    }
+
+  scnhdr.s_relptr = scnhdr.s_scnptr + data_buffer_size;
+  filehdr.f_symptr = scnhdr.s_relptr + scnhdr.s_nreloc * RELSZ;
+
+  bfd_coff_swap_filehdr_out (abfd, &filehdr, filehdr_ext);
+  bfd_bwrite (filehdr_ext, FILHSZ, abfd);
+  bfd_coff_swap_scnhdr_out (abfd, &scnhdr, scnhdr_ext);
+  bfd_bwrite (scnhdr_ext, SCNHSZ, abfd);
+  bfd_bwrite (data_buffer, data_buffer_size, abfd);
+  bfd_bwrite (reloc_ext, scnhdr.s_nreloc * RELSZ, abfd);
+  bfd_bwrite (syment_ext, filehdr.f_nsyms * SYMESZ, abfd);
+  bfd_bwrite (string_table, string_table_size, abfd);
+
+  return true;
+}
+
 
 static reloc_howto_type xcoff_dynamic_reloc =
 HOWTO (0,	                /* type */
@@ -3045,6 +3293,10 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
     /* glink.  */
     & xcoff_glink_code[0],
     (36),           /* _xcoff_glink_size */
+
+    /* rtinit */
+    64,           /* _xcoff_rtinit_size */
+    xcoff_generate_rtinit,  /* _xcoff_generate_rtinit */
 };
 
 /* The transfer vector that leads the outside world to all of the above. */
@@ -3301,6 +3553,10 @@ static const struct xcoff_backend_data_rec bfd_pmac_xcoff_backend_data =
   /* glink */
   &xcoff_glink_code[0],
   (36),           /* _xcoff_glink_size */
+
+  /* rtinit */
+  0,           /* _xcoff_rtinit_size */
+  xcoff_generate_rtinit,  /* _xcoff_generate_rtinit */
 
 };
 

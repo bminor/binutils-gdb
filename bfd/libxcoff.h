@@ -112,6 +112,9 @@ struct xcoff_backend_data_rec
    */
   unsigned long _xcoff_glink_size;
 
+  /* rtinit */
+  unsigned int _xcoff_rtinit_size;
+  boolean (*_xcoff_generate_rtinit)(bfd *, const char *, const char *);
 };
 
 /* Look up an entry in an XCOFF link hash table.  */
@@ -201,8 +204,14 @@ struct xcoff_backend_data_rec
 #define bfd_xcoff_glink_code(a, b) ((xcoff_backend(a)->_xcoff_glink_code[(b)]))
 #define bfd_xcoff_glink_code_size(a) ((xcoff_backend(a)->_xcoff_glink_size))
 
+/* Check for the magic number U803XTOCMAGIC for 64 bit targets.  */
 #define bfd_xcoff_is_xcoff64(a) (0x01EF == (bfd_xcoff_magic_number(a)))
+
+/* Check for the magic number U802TOMAGIC for 32 bit targets.  */
 #define bfd_xcoff_is_xcoff32(a) (0x01DF == (bfd_xcoff_magic_number(a)))
+
+#define bfd_xcoff_rtinit_size(a) ((xcoff_backend(a)->_xcoff_rtinit_size))
+#define bfd_xcoff_generate_rtinit(a, b, c) ((xcoff_backend(a)->_xcoff_generate_rtinit ((a), (b), (c))))
 
 /* Functions in xcofflink.c.  */
 

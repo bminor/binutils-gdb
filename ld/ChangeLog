@@ -1,3 +1,10 @@
+2001-12-21  Tom Rix  <trix@redhat.com>
+
+	(gld*_create_output_section_statements): New function.  
+	For -binitfini support.
+	* emultempl/aix.em (gld*_before_parse): Fix comment.
+	* emultempl/aix.em (gld*_parse_args): Fix comment.
+
 2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.tgt (mips*-dec-netbsd*): Delete alias for

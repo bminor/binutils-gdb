@@ -67,6 +67,8 @@ static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static boolean gld${EMULATION_NAME}_unrecognized_file
   PARAMS ((lang_input_statement_type *));
+static void gld${EMULATION_NAME}_create_output_section_statements 
+  PARAMS((void));
 static int is_syscall PARAMS ((char *, unsigned int *));
 static int change_symbol_mode PARAMS ((char *));
 
@@ -126,6 +128,9 @@ static int is_64bit = 0;
 /* Which syscalls from import file are valid */
 static unsigned int syscall_mask = 0x77;
 
+/* fake file for -binitfini support */
+static lang_input_statement_type *initfini_file;
+ 
 /* This routine is called before anything else is done.  */
 
 static void
@@ -144,11 +149,10 @@ gld${EMULATION_NAME}_before_parse ()
 #endif /* not TARGET_ */
   config.has_shared = true;
 
-  /*
-   * The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
-   * Override them here so we can use the link_info.init_function as a
-   * state flag that lets the backend know that -binitfini has been done.
-   */
+  /* The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
+     Override them here so we can use the link_info.init_function as a
+     state flag that lets the backend know that -binitfini has been done.  */ 
+
   link_info.init_function = NULL;
   link_info.fini_function = NULL;
 
@@ -192,51 +196,14 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     OPTION_64,
   };
 
-  /*
-    binitfini has special handling in the linker backend.  The native linker
-    uses the arguemnts to generate a table of init and fini functions for
-    the executable.  The important use for this option is to support aix 4.2+
-    c++ constructors and destructors.  This is tied into gcc via collect2.c.
-    The function table is accessed by the runtime linker/loader by checking if
-    the first symbol in the loader symbol table is "__rtinit".  The native
-    linker generates this table and the loader symbol.  The gnu linker looks
-    for the symbol "__rtinit" and makes it the first loader symbol.  It is the
-    responsiblity of the user to define the __rtinit symbol.  The format for
-    __rtinit is given by the aix system file /usr/include/rtinit.h.  You can
-    look at collect2.c to see an example of how this is done for 32 and 64 bit.
-    Below is an exmaple of a 32 bit assembly file that defines __rtinit.
-
-    .file   "my_rtinit.s"
-
-    .csect .data[RW],3
-    .globl __rtinit
-    .extern init_function
-    .extern fini_function
-
-    __rtinit:
-            .long 0
-            .long f1i - __rtinit
-            .long f1f - __rtinit
-            .long f2i - f1i
-            .align 3
-    f1i:    .long init_function
-            .long s1i - __rtinit
-            .long 0
-    f2i:    .long 0
-            .long 0
-            .long 0
-    f1f:    .long fini_function
-            .long s1f - __rtinit
-            .long 0
-    f2f:    .long 0
-            .long 0
-            .long 0
-            .align 3
-    s1i:    .string "init_function"
-            .align 3
-    s1f:    .string "fini_function"
-
-   */
+  /* -binitfini has special handling in the linker backend.  The native linker
+     uses the arguemnts to generate a table of init and fini functions for
+     the executable.  The important use for this option is to support aix 4.2+
+     c++ constructors and destructors.  This is tied into gcc via collect2.c.
+     
+     The function table is accessed by the runtime linker/loader by checking if
+     the first symbol in the loader symbol table is __rtinit.  The gnu linker
+     generates this symbol and makes it the first loader symbol.  */
 
   static const struct option longopts[] = {
     {"basis", no_argument, NULL, OPTION_IGNORE},
@@ -1319,6 +1286,39 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
+static void 
+gld${EMULATION_NAME}_create_output_section_statements()
+{
+  /* __rtinit */
+  if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour) 
+      && (link_info.init_function != NULL  || link_info.fini_function != NULL))
+    {
+      
+      initfini_file = lang_add_input_file ("initfini",
+					   lang_input_file_is_file_enum,
+					   NULL);
+      
+      initfini_file->the_bfd = bfd_create ("initfini", output_bfd);
+      if (initfini_file->the_bfd == NULL
+	  || ! bfd_set_arch_mach (initfini_file->the_bfd,
+				  bfd_get_arch (output_bfd),
+				  bfd_get_mach (output_bfd)))
+	{
+	  einfo ("%X%P: can not create BFD %E\n");
+	  return;
+	}
+      
+      /* Call backend to fill in the rest */
+      if (false == bfd_xcoff_link_generate_rtinit (initfini_file->the_bfd, 
+						   link_info.init_function, 
+						   link_info.fini_function))
+	{
+	  einfo ("%X%P: can not create BFD %E\n");
+	  return;
+	}
+    }
+}
+
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,
@@ -1333,7 +1333,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
   0,				/* finish */
-  0,				/* create_output_section_statements */
+  gld${EMULATION_NAME}_create_output_section_statements,
   0,				/* open_dynamic_archive */
   0,				/* place_orphan */
   0,				/* set_symbols */

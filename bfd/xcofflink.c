@@ -3219,6 +3219,41 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   return false;
 }
 
+boolean 
+bfd_xcoff_link_generate_rtinit (abfd, init, fini)
+     bfd *abfd;
+     const char *init;
+     const char *fini;
+{
+  struct bfd_in_memory *bim;
+  
+  bim = ((struct bfd_in_memory *)
+	 bfd_malloc ((bfd_size_type) sizeof (struct bfd_in_memory)));
+  if (bim == NULL)
+    return false;
+
+  bim->size = 0;
+  bim->buffer = 0;
+
+  abfd->link_next = 0;
+  abfd->format = bfd_object;
+  abfd->iostream = (PTR) bim;
+  abfd->flags = BFD_IN_MEMORY;
+  abfd->direction = write_direction;
+  abfd->where = 0;
+
+  if (false == bfd_xcoff_generate_rtinit (abfd, init, fini)) 
+    return false;
+
+  /* need to reset to unknown or it will not be read back in correctly */
+  abfd->format = bfd_unknown;
+  abfd->direction = read_direction;
+  abfd->where = 0;
+
+  return true;
+}
+
+
 /* Add a symbol to the .loader symbols, if necessary.  */
 
 static boolean
