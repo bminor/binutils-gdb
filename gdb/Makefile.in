@@ -170,7 +170,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.10.1
+VERSION = 4.10.2
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -811,7 +811,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	mips-tdep.c news-xdep.c nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
-	remote-adapt.c remote-eb.c remote-es.c remote-hms.c remote-mips.c \
+	remote-adapt.c remote-bug.c remote-eb.c remote-es.c remote-hms.c remote-mips.c \
 	remote-mm.c remote-monitor.c remote-nindy.c remote-sim.c remote-st.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
@@ -1192,6 +1192,9 @@ pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 regex.o: regex.c regex.h
 
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
+	$(inferior_h) target.h terminal.h
+
+remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
 
 remote-eb.o: remote-eb.c $(wait_h) $(srcdir)/config/a29k/tm-a29k.h \
