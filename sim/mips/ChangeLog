@@ -1,3 +1,29 @@
+2002-06-02  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* mips.igen (mdmx): New (pseudo-)model.
+	* mdmx.c, mdmx.igen: New files.
+	* Makefile.in (SIM_OBJS): Add mdmx.o.
+	* sim-main.h (MDMX_accumulator, MX_fmtsel, signed24, signed48):
+	New typedefs.
+	(ACC, MX_Add, MX_AddA, MX_AddL, MX_And, MX_C_EQ, MX_C_LT, MX_Comp)
+	(MX_FMT_OB, MX_FMT_QH, MX_Max, MX_Min, MX_Msgn, MX_Mul, MX_MulA)
+	(MX_MulL, MX_MulS, MX_MulSL, MX_Nor, MX_Or, MX_Pick, MX_RAC)
+	(MX_RAC_H, MX_RAC_L, MX_RAC_M, MX_RNAS, MX_RNAU, MX_RND_AS)
+	(MX_RND_AU, MX_RND_ES, MX_RND_EU, MX_RND_ZS, MX_RND_ZU, MX_RNES)
+	(MX_RNEU, MX_RZS, MX_RZU, MX_SHFL, MX_ShiftLeftLogical)
+	(MX_ShiftRightArith, MX_ShiftRightLogical, MX_Sub, MX_SubA, MX_SubL)
+	(MX_VECT_ADD, MX_VECT_ADDA, MX_VECT_ADDL, MX_VECT_AND)
+	(MX_VECT_MAX, MX_VECT_MIN, MX_VECT_MSGN, MX_VECT_MUL, MX_VECT_MULA)
+	(MX_VECT_MULL, MX_VECT_MULS, MX_VECT_MULSL, MX_VECT_NOR)
+	(MX_VECT_OR, MX_VECT_SLL, MX_VECT_SRA, MX_VECT_SRL, MX_VECT_SUB)
+	(MX_VECT_SUBA, MX_VECT_SUBL, MX_VECT_XOR, MX_WACH, MX_WACL, MX_Xor)
+	(SIM_ARGS, SIM_STATE, UnpredictableResult, fmt_mdmx, ob_fmtsel)
+	(qh_fmtsel): New macros.
+	(_sim_cpu): New member "acc".
+	(mdmx_acc_op, mdmx_cc_op, mdmx_cpr_op, mdmx_pick_op, mdmx_rac_op)
+	(mdmx_round_op, mdmx_shuffle, mdmx_wach, mdmx_wacl): New functions.
+
 2002-05-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* interp.c: Use 'deprecated' rather than 'depreciated.'

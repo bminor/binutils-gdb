@@ -296,6 +296,24 @@ enum float_operation
   };
 
 
+/* The internal representation of an MDMX accumulator. 
+   Note that 24 and 48 bit accumulator elements are represented in
+   32 or 64 bits.  Since the accumulators are 2's complement with
+   overflow suppressed, high-order bits can be ignored in most contexts.  */
+
+typedef signed32 signed24;
+typedef signed64 signed48;
+
+typedef union { 
+  signed24  ob[8];
+  signed48  qh[4]; 
+} MDMX_accumulator;
+
+
+/* Conventional system arguments.  */ 
+#define SIM_STATE  sim_cpu *cpu, address_word cia
+#define SIM_ARGS   CPU, cia
+
 struct _sim_cpu {
 
 
@@ -438,6 +456,10 @@ struct _sim_cpu {
 #define FPR_STATE ((CPU)->fpr_state)
 
   pending_write_queue pending;
+
+  /* The MDMX accumulator (used only for MDMX ASE).  */
+  MDMX_accumulator acc; 
+#define ACC             ((CPU)->acc)
 
   /* LLBIT = Load-Linked bit. A bit of "virtual" state used by atomic
      read-write instructions. It is set when a linked load occurs. It
@@ -707,6 +729,107 @@ decode_coproc (SD, CPU, cia, (instruction))
 int sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
   
 
+/* MDMX access.  */
+
+typedef unsigned int MX_fmtsel;   /* MDMX format select field (5 bits).  */
+#define ob_fmtsel(sel) (((sel)<<1)|0x0)
+#define qh_fmtsel(sel) (((sel)<<2)|0x1)
+
+#define fmt_mdmx fmt_uninterpreted
+
+#define MX_VECT_AND  (0)
+#define MX_VECT_NOR  (1)
+#define MX_VECT_OR   (2)
+#define MX_VECT_XOR  (3)
+#define MX_VECT_SLL  (4)
+#define MX_VECT_SRL  (5)
+
+#define MX_VECT_ADD  (6)
+#define MX_VECT_SUB  (7)
+#define MX_VECT_MIN  (8)
+#define MX_VECT_MAX  (9)
+#define MX_VECT_MUL  (10)
+#define MX_VECT_MSGN (11)
+#define MX_VECT_SRA  (12)
+
+unsigned64 mdmx_cpr_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+#define MX_Add(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_ADD, op1, vt, fmtsel)
+#define MX_And(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_AND, op1, vt, fmtsel)
+#define MX_Max(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_MAX, op1, vt, fmtsel)
+#define MX_Min(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_MIN, op1, vt, fmtsel)
+#define MX_Msgn(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_MSGN, op1, vt, fmtsel)
+#define MX_Mul(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_MUL, op1, vt, fmtsel)
+#define MX_Nor(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_NOR, op1, vt, fmtsel)
+#define MX_Or(op1,vt,fmtsel)  mdmx_cpr_op(SIM_ARGS, MX_VECT_OR,  op1, vt, fmtsel)
+#define MX_ShiftLeftLogical(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_SLL, op1, vt, fmtsel)
+#define MX_ShiftRightArith(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_SRA, op1, vt, fmtsel)
+#define MX_ShiftRightLogical(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_SRL, op1, vt, fmtsel)
+#define MX_Sub(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_SUB, op1, vt, fmtsel)
+#define MX_Xor(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_XOR, op1, vt, fmtsel)
+
+#define MX_C_EQ  0x1
+#define MX_C_LT  0x4
+
+void mdmx_cc_op (SIM_STATE, int cond, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+#define MX_Comp(op1,cond,vt,fmtsel) mdmx_cc_op(SIM_ARGS, cond, op1, vt, fmtsel)
+
+unsigned64 mdmx_pick_op (SIM_STATE, int tf, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+#define MX_Pick(tf,op1,vt,fmtsel) mdmx_pick_op(SIM_ARGS, tf, op1, vt, fmtsel)
+
+#define MX_VECT_ADDA  (0)
+#define MX_VECT_ADDL  (1)
+#define MX_VECT_MULA  (2)
+#define MX_VECT_MULL  (3)
+#define MX_VECT_MULS  (4)
+#define MX_VECT_MULSL (5)
+#define MX_VECT_SUBA  (6)
+#define MX_VECT_SUBL  (7)
+
+void mdmx_acc_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+#define MX_AddA(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_ADDA, op1, vt, fmtsel)
+#define MX_AddL(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_ADDL, op1, vt, fmtsel)
+#define MX_MulA(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_MULA, op1, vt, fmtsel)
+#define MX_MulL(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_MULL, op1, vt, fmtsel)
+#define MX_MulS(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_MULS, op1, vt, fmtsel)
+#define MX_MulSL(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_MULSL, op1, vt, fmtsel)
+#define MX_SubA(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_SUBA, op1, vt, fmtsel)
+#define MX_SubL(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_SUBL, op1, vt, fmtsel)
+
+#define MX_FMT_OB   (0)
+#define MX_FMT_QH   (1)
+
+/* The following codes chosen to indicate the units of shift.  */
+#define MX_RAC_L    (0)
+#define MX_RAC_M    (1)
+#define MX_RAC_H    (2)
+
+unsigned64 mdmx_rac_op (SIM_STATE, int, int);
+#define MX_RAC(op,fmt) mdmx_rac_op(SIM_ARGS, op, fmt)
+
+void mdmx_wacl (SIM_STATE, int, unsigned64, unsigned64);
+#define MX_WACL(fmt,vs,vt) mdmx_wacl(SIM_ARGS, fmt, vs, vt)
+void mdmx_wach (SIM_STATE, int, unsigned64);
+#define MX_WACH(fmt,vs) mdmx_wach(SIM_ARGS, fmt, vs)
+
+#define MX_RND_AS   (0)
+#define MX_RND_AU   (1)
+#define MX_RND_ES   (2)
+#define MX_RND_EU   (3)
+#define MX_RND_ZS   (4)
+#define MX_RND_ZU   (5)
+
+unsigned64 mdmx_round_op (SIM_STATE, int, int, MX_fmtsel);
+#define MX_RNAS(vt,fmt) mdmx_round_op(SIM_ARGS, MX_RND_AS, vt, fmt)
+#define MX_RNAU(vt,fmt) mdmx_round_op(SIM_ARGS, MX_RND_AU, vt, fmt)
+#define MX_RNES(vt,fmt) mdmx_round_op(SIM_ARGS, MX_RND_ES, vt, fmt)
+#define MX_RNEU(vt,fmt) mdmx_round_op(SIM_ARGS, MX_RND_EU, vt, fmt)
+#define MX_RZS(vt,fmt)  mdmx_round_op(SIM_ARGS, MX_RND_ZS, vt, fmt)
+#define MX_RZU(vt,fmt)  mdmx_round_op(SIM_ARGS, MX_RND_ZU, vt, fmt)
+
+unsigned64 mdmx_shuffle (SIM_STATE, int, unsigned64, unsigned64);
+#define MX_SHFL(shop,op1,op2) mdmx_shuffle(SIM_ARGS, shop, op1, op2)
+
+
 
 /* Memory accesses */
 
@@ -774,6 +897,7 @@ prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 void unpredictable_action (sim_cpu *cpu, address_word cia);
 #define NotWordValue(val)	not_word_value (SD_, (val))
 #define Unpredictable()		unpredictable (SD_)
+#define UnpredictableResult()	/* For now, do nothing.  */
 
 INLINE_SIM_MAIN (unsigned32) ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
 #define IMEM32(CIA) ifetch32 (SD, CPU, (CIA), (CIA))

@@ -61,7 +61,9 @@
 //  MIPS Application Specific Extensions (ASEs)
 //
 //  Instructions for the ASEs are in separate .igen files.
+//  ASEs add instructions on to a base ISA.
 :model:::mips16:mips16:			// m16.igen (and m16.dc)
+:model:::mdmx:mdmx:			// mdmx.igen
 
 
 // Pseudo instructions known by IGEN
@@ -5054,6 +5056,7 @@
 
 
 :include:::m16.igen
+:include:::mdmx.igen
 :include:::tx.igen
 :include:::vr.igen
 
