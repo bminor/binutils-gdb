@@ -5,7 +5,6 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-gdb_reinitialize_dir $srcdir/$subdir
 set binfile $objdir/$subdir/signals
 
 if ![file exists $binfile] then {
@@ -16,11 +15,11 @@ if ![file exists $binfile] then {
 proc signal_tests_1 {} {
     global prompt
     if [runto main] then {
-	gdb_test "next" "signal \[(\]+SIGUSR1" \
-		"next over signal \[(\]SIGALRM, handler\[)\]+"
-	gdb_test "next" "alarm \[(\]" \
-		"next over signal \[(\]+SIGUSR1, handler\[)\]+"
-	gdb_test "next" "\[+\]+count" \
+	gdb_test "next" "signal \\(SIGUSR1.*" \
+		"next over signal (SIGALRM, handler)"
+	gdb_test "next" "alarm \\(.*" \
+		"next over signal (SIGUSR1, handler)"
+	gdb_test "next" "\\+\\+count; /\\* first \\*/" \
 		"next over alarm (1)"
 	# An alarm has been signaled, give the signal time to get delivered.
 	exec sleep 2
@@ -63,7 +62,7 @@ proc signal_tests_1 {} {
 		# handler.
 
 		fail "next to 2nd alarm (1) (probably kernel bug)"
-		gdb_test "next" "alarm" "next to 2nd alarm (1)"
+		gdb_test "next" "alarm.*" "next to 2nd alarm (1)"
 	    }
 	    -re "Program exited with code.*$prompt $" {
 
@@ -90,34 +89,38 @@ proc signal_tests_1 {} {
 	    eof { fail "next to 2nd alarm (1); (eof)" }
 	}
 
-	gdb_test "break handler" "Breakpoint \[0-9\]*"
-	gdb_test "next" "\[+\]+count" "next to 2nd ++count"
+	gdb_test "break handler" "Breakpoint \[0-9\]+ .*"
+	gdb_test "next" "\\+\\+count; /\\* second \\*/" \
+	    "next to 2nd ++count in signals_tests_1"
 	# An alarm has been signaled, give the signal time to get delivered.
 	exec sleep 2
 
 	set bash_bug 0
 	send "next\n"
 	expect {
-	    -re "Breakpoint.*handler.*$prompt $" { pass "next" }
+	    -re "Breakpoint.*handler.*$prompt $" {
+		pass "next to handler in signals_tests_1"
+	    }
 	    -re "Program received signal SIGEMT.*$prompt $" {
 		# Bash versions before 1.13.5 cause this behaviour
 		# by blocking SIGTRAP.
-		fail "next (known problem with bash versions before 1.13.5)"
+		fail "next to handler in signals_tests_1 (known problem with bash versions before 1.13.5)"
 		set bash_bug 1
-		gdb_test "signal 0" "Breakpoint.*handler"
+		gdb_test "signal 0" "Breakpoint.*handler.*"
 	    }
-	    -re ".*$prompt $" { fail "next" }
-	    timeout { fail "(timeout)" }
-	    eof { fail "(eof)" }
+	    -re ".*$prompt $" { fail "next to handler in signals_tests_1" }
+	    timeout { fail "next to handler in signals_tests_1 (timeout)" }
+	    eof { fail "next to handler in signals_tests_1 (eof)" }
 	}
 
 	# This doesn't test that main is frame #2, just that main is frame
 	# #2, #3, or higher.  At some point this should be fixed (but
 	# it quite possibly would introduce new FAILs on some systems).
-	gdb_test "backtrace" "#0.*handler.*#1.*#2.*main"
+	gdb_test "backtrace" "#0.*handler.*#1.*#2.*main.*" \
+	    "backtrace in signals_tests_1"
 
-	gdb_test "break func1" "Breakpoint \[0-9\]*"
-	gdb_test "break func2" "Breakpoint \[0-9\]*"
+	gdb_test "break func1" "Breakpoint \[0-9\]+ .*"
+	gdb_test "break func2" "Breakpoint \[0-9\]+ .*"
 
 	# Vax Ultrix and i386 BSD currently fail the next test with
 	# a SIGTRAP, but with different symptoms.
@@ -125,7 +128,7 @@ proc signal_tests_1 {} {
 	setup_xfail "i*86-*-bsd*"
 	send "continue\n"
 	expect {
-	    -re "Breakpoint.*func1.*$prompt $" { pass "continue" }
+	    -re "Breakpoint.*func1.*$prompt $" { pass "continue to func1" }
 	    -re "Program received signal SIGTRAP.*second.*$prompt $" {
 
 		# See explanation for `next to 2nd alarm (1)' fail above.
@@ -134,8 +137,9 @@ proc signal_tests_1 {} {
 		# The set trace flag in the restored context is causing
 		# the SIGTRAP, without stepping an instruction.
 
-		fail "continue (probably kernel bug)"
-		gdb_test "continue" "Breakpoint.*func1"
+		fail "continue to func1 (probably kernel bug)"
+		gdb_test "continue" "Breakpoint.*func1.*" \
+		    "extra continue to func1"
 	    }
 	    -re "Program received signal SIGTRAP.*func1 ..;.*$prompt $" {
 
@@ -143,13 +147,27 @@ proc signal_tests_1 {} {
 		# context is causing the SIGTRAP, but after stepping one
 		# instruction, as expected.
 
-		fail "continue (probably kernel bug)"
-		gdb_test "continue" "Breakpoint.*func1"
+		fail "continue to func1 (probably kernel bug)"
+		gdb_test "continue" "Breakpoint.*func1.*" \
+		    "extra continue to func1"
 	    }
-	    -re ".*$prompt $" { fail "continue" }
-	    default { fail "continue" }
+	    -re ".*$prompt $" { fail "continue to func1" }
+	    default { fail "continue to func1" }
 	}
-	gdb_test "signal SIGUSR1" "Breakpoint.*handler"
+
+	setup_xfail "*-*-irix*"
+	send "signal SIGUSR1\n"
+	expect {
+	    -re "Breakpoint.*handler.*$prompt $" { pass "signal SIGUSR1" }
+	    -re "Program received signal SIGUSR1.*$prompt $" {
+		# This is what irix4 and irix5 do.
+		# It would appear to be a kernel bug.
+		fail "signal SIGUSR1"
+		gdb_test "continue" "Breakpoint.*handler.*" "pass it SIGUSR1"
+	    }
+	    -re ".*$prompt $" { fail "signal SIGUSR1" }
+	    default { fail "signal SIGUSR1" }
+	}
 
 	# Will tend to wrongly require an extra continue.
 
@@ -165,13 +183,14 @@ proc signal_tests_1 {} {
 	setup_xfail "*-*-*"
 	send "continue\n"
 	expect {
-	    -re "Breakpoint.*func2.*$prompt $" { pass "continue" }
+	    -re "Breakpoint.*func2.*$prompt $" { pass "continue to func2" }
 	    -re "Breakpoint.*func1.*$prompt $" {
-	    	fail "continue"
-		gdb_test "continue" "Breakpoint.*func2"
+	    	fail "continue func2"
+		gdb_test "continue" "Breakpoint.*func2.*" \
+		    "extra continue to func2"
 	    }
-	    -re ".*$prompt $" { fail "continue" }
-	    default { fail "continue" }
+	    -re ".*$prompt $" { fail "continue to func2" }
+	    default { fail "continue to func2" }
 	}
 
 	exec sleep 2
@@ -191,7 +210,7 @@ proc signal_tests_1 {} {
 	    setup_xfail "m68*-*-sunos4*"
 	}
 
-	gdb_test "continue" "Breakpoint.*handler"
+	gdb_test "continue" "Breakpoint.*handler.*" "continue to handler"
 
 	# If the NO_SINGLE_STEP failure happened, we have already exited.
 	# If we succeeded a continue will return from the handler to func2.
@@ -203,7 +222,8 @@ proc signal_tests_1 {} {
 	if {$bash_bug} then {
 	     clear_xfail "m68*-*-sunos4*"
 	}
-	gdb_test "continue" "Program exited with code 010"
+	gdb_test "continue" "Program exited with code 010\\." \
+	    "continue to exit in signals_tests_1 "
     }
 }
 
@@ -226,6 +246,7 @@ if {[ istarget "m68*-motorola-*" ] || [ istarget "hppa*-*-bsd*" ] ||
 
 gdb_exit
 gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 signal_tests_1
 
@@ -239,13 +260,14 @@ expect {
 }
 
 if [runto main] then {
-    gdb_test "break handler if 0" "Breakpoint \[0-9\]*"
+    gdb_test "break handler if 0" "Breakpoint \[0-9\]+ .*"
     gdb_test "set \$handler_breakpoint_number = \$bpnum" ""
 
     # Get to the point where a signal is waiting to be delivered
-    gdb_test "next" "signal \[(\]+SIGUSR1"
-    gdb_test "next" "alarm \[(\]+"
-    gdb_test "next" "\[+\]+count"
+    gdb_test "next" "signal \\(SIGUSR1.*" "next to signal in signals.exp"
+    gdb_test "next" "alarm \\(.*" "next to alarm #1 in signals.exp"
+    gdb_test "next" "\\+\\+count; /\\* first \\*/" \
+	"next to ++count #1 in signals.exp"
     # Give the signal time to get delivered
     exec sleep 2
 
@@ -254,31 +276,34 @@ if [runto main] then {
     # lose its cool, this is not a problem, it just has to note
     # that the breakpoint condition is false and keep going.
 
-    gdb_test "p func1 ()" "^p func1 \[)(\]+\r\n.\[0-9\]* = void"
+    gdb_test "p func1 ()" "^p func1 \\(\\)\r\n.\[0-9\]* = void" \
+	"p func1 () #1 in signals.exp"
 
     # Make sure the count got incremented.
 
     # Haven't investigated this xfail
     setup_xfail "rs6000-*-*"
-    gdb_test "p count" "= 2"
+    gdb_test "p count" "= 2" "p count #1 in signals.exp"
     if [istarget "rs6000-*-*"] { return 0 }
 
-    gdb_test "condition \$handler_breakpoint_number" "now unconditional"
-    gdb_test "next" "alarm \[(\]+"
-    gdb_test "next" "\[+\]+count"
+    gdb_test "condition \$handler_breakpoint_number" "now unconditional\\."
+    gdb_test "next" "alarm \\(.*" "next to alarm #2 in signals.exp"
+    gdb_test "next" "\\+\\+count; /\\* second \\*/" \
+	"next to ++count #2 in signals.exp"
     exec sleep 2
 
     # This time we stop when GDB tries to run the stack dummy.
     # So it is OK that we do not print the return value from the function.
     gdb_test "p func1 ()" \
 "Breakpoint \[0-9\]*, handler.*
-The program being debugged stopped while in a function called from GDB"
+The program being debugged stopped while in a function called from GDB.*" \
+	"p func1 () #2 in signals.exp"
     # But we should be able to backtrace...
-    gdb_test "bt" "#0.*handler.*#1.*#2.*main"
+    gdb_test "bt" "#0.*handler.*#1.*#2.*main.*" "bt in signals.exp"
     # ...and continue...
-    gdb_test "continue" "Continuing"
+    gdb_test "continue" "Continuing\\." "continue in signals.exp"
     # ...and then count should have been incremented
-    gdb_test "p count" "= 5"
+    gdb_test "p count" "= 5" "p count #2 in signals.exp"
 }
 
 return 0

@@ -41,7 +41,9 @@ proc do_tests {} {
     # This is needed (at least on SunOS4) to make sure the
     # the symbol table is read.
     runto "x"
-    gdb_test "finish" "You loose" "Runs and reads symbols OK"
+    # "You loose"?  Why, thank you.  (But I suspect "You lose" might have
+    # been what was intended).
+    gdb_test "finish" "You loose.*" "Runs and reads symbols OK"
 }
 
 # Check to see if we have an executable to test.  If not, then either we

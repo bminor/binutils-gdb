@@ -89,18 +89,18 @@ if ![file exists $binfile] then {
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "ptype bsslocal" "<(data variable|variable), no debug info>"
 
-	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main"
+	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*"
 	# Or if that doesn't work, at least hope for the external symbols
-	gdb_test "backtrace" "#0.*inner.*#1.*#2.*top.*#3.*main"
+	gdb_test "backtrace" "#0.*inner.*#1.*#2.*top.*#3.*main.*"
 
 	# This test is not as obscure as it might look.  `p getenv ("TERM")'
 	# is a real-world example, at least on many systems.
-	test_print_accept {p/c array_index("abcdef",2)} "99 'c'"
+	test_print_accept {p/c array_index("abcdef",2)} "= 99 'c'"
 
 	# Now, try that we can give names of file-local symbols which happen
 	# to be unique, and have it still work
 	if [runto middle] then {
-	    gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main"
+	    gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main.*"
 	}
     }
 }

@@ -41,7 +41,7 @@ proc do_tests {} {
     send "break pr-5984.ch:6\n"; expect -re "$prompt $"
     send "run\n"; expect -re "Breakpoint .*pr-5984.ch:6"
     expect -re "$prompt $"
-    gdb_test "next" "Jason Dark"
+    gdb_test "next" "Jason Dark.*" "next over Jason Dark"
 }
 
 # Check to see if we have an executable to test.  If not, then either we

@@ -1,5 +1,15 @@
 Tue Mar 14 07:39:19 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* lib/gdb.exp (gdb_test): Between $pattern and $prompt, expect
+	only \r\n, not .*.  The test can pass .* as the last thing in
+	$pattern if that is what it wants.  In addition to providing this
+	flexibility, this change should speed up pattern matching in cases
+	where the pattern already ended with .* (there were a number of
+	them).  This change also helps catch bad patterns--in the old
+	scheme the typo "char \*" instead of "char \\*" would pass.  Now
+	it is caught.
+	* Many .exp files: Update callers.
+
 	* gdb.base/funcargs.exp: Replace \[(\]+ with \\(.  The latter is
 	clearer and does not spuriously match multiple ('s.  Likewise for
 	) and *.

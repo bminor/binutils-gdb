@@ -48,7 +48,7 @@ proc set_lang_chill {} {
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
-    return [gdb_test "show language" ".* source language is \"chill\"" \
+    return [gdb_test "show language" ".* source language is \"chill\".*" \
 	"set language to \"chill\""]
 }
 
@@ -76,6 +76,6 @@ if ![set_lang_chill] then {
     test_print_accept "print NULL" "NULL" "print emptiness literal"
 
     gdb_test "info line" \
-	{Line 5 of .*misc.ch.* at address H'[0-9a-fA-F]+}\
+	{Line 5 of .*misc.ch.* at address H'[0-9a-fA-F]+.*}\
 	"info about current line"
 }

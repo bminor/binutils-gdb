@@ -50,7 +50,7 @@ proc default_gdb_version {} {
     global GDB
     global GDBFLAGS
     if {[which $GDB] != 0} then {
-	set tmp [exec echo "q" | $GDB -nw]
+	set tmp [exec echo "q" | $GDB -nw $GDBFLAGS]
 	regexp " \[0-9\.\]+" $tmp version
 	clone_output "[which $GDB] version$version -nw $GDBFLAGS \n"
     } else {
@@ -237,7 +237,7 @@ proc gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
-	-re "$pattern.*$prompt $" {
+	-re "$pattern\r\n$prompt $" {
 	    if ![string match "" $message] then {
 		pass "$message"
 	    }
@@ -296,9 +296,7 @@ proc gdb_test { args } {
 #
 # This differs from gdb_test in a few ways: (1) handling of empty
 # sendthis (I suspect test_print_accept callers never use this), (2)
-# it tests for the " =" (that could easily be moved to the callers,
-# (3) the pattern must be followed by \r\n and the prompt, not other
-# garbage as in gdb_test (this feature seems kind of worthwhile).
+# it tests for the " =" (that could easily be moved to the callers.
 
 proc test_print_accept { args } {
     global prompt
@@ -612,4 +610,6 @@ if ![info exists argv0] then {
     }
 }
 
-
+proc skip_chill_tests {} {
+    return ![isnative]
+}

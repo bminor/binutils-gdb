@@ -802,19 +802,19 @@ proc test_print_strings {} {
     # printing; this was a bug in older gdb's.
     send "set print elements 0\n" ; expect -re "$prompt $"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"teststring contents\"\r\n"
+	" = (.unsigned char .. )?\"teststring contents\""
     send "set print elements 1\n" ; expect -re "$prompt $"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"t\"...\r\n"
+	" = (.unsigned char .. )?\"t\"\\.\\.\\."
     send "set print elements 5\n" ; expect -re "$prompt $"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"tests\"...\r\n"
+	" = (.unsigned char .. )?\"tests\"\\.\\.\\."
     send "set print elements 19\n" ; expect -re "$prompt $"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"teststring contents\"\r\n"
+	" = (.unsigned char .. )?\"teststring contents\""
     send "set print elements 20\n" ; expect -re "$prompt $"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"teststring contents\"\r\n"
+	" = (.unsigned char .. )?\"teststring contents\""
 
     send "set print elements 8\n" ; expect -re "$prompt $"
 
@@ -903,7 +903,7 @@ proc test_print_int_arrays {} {
 
 proc test_artificial_arrays {} {
     test_print_accept {p int1dim[0]@2} "{0, 1}"
-    gdb_test {p int1dim[0]@2@3} "({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot)"
+    gdb_test {p int1dim[0]@2@3} "({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)"
     test_print_accept {p/x (short [])0x12345678} \
 	"({0x1234, 0x5678}|{0x5678, 0x1234})"
 }
@@ -1008,7 +1008,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-gdb_test "print \$pc" "No registers"
+gdb_test "print \$pc" "No registers\\."
 # FIXME: should also test "print $pc" when there is an execfile but no
 # remote debugging target, process or corefile.
 

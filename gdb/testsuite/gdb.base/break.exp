@@ -1,4 +1,4 @@
-#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -73,73 +73,50 @@ expect {
 #
 # test break at function
 #
-send "break main\n"
-expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line.*$prompt $" { pass "breakpoint function" }
-	-re ".*$prompt $"   { fail "breakpoint function" }
-	timeout	    { fail "(timeout) breakpoint function" }
-}
-
+gdb_test "break main" \
+    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "breakpoint function"
 
 #
 # test break at function in file
 #
-send "break $srcfile:factorial\n"
-expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line.*$prompt $" { pass "breakpoint function in file" }
-	-re ".*$prompt $"   { fail "breakpoint function in file" }
-	timeout	    { fail "(timeout) breakpoint function in file" }
-}
-
+gdb_test "break $srcfile:factorial" \
+    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "breakpoint function in file"
 
 #
 # test break at line number
 #
-send "break 60\n"
-expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 60.*$prompt $" { pass "breakpoint line number" }
-	-re ".*$prompt $"   { fail "breakpoint line number" }
-	timeout	    { fail "(timeout) breakpoint line number" }
-}
-
+gdb_test "break 60" \
+    "Breakpoint.*at.* file .*$srcfile, line 60\\." \
+    "breakpoint line number"
 
 #
 # test duplicate breakpoint
 #
-send "break 60\n"
-expect {
-    -re "Note: breakpoint \[0-9\]+ also set at pc.*Breakpoint \[0-9\]+ at.* file .*$srcfile, line 60.*$prompt $"\
-	                    { pass "breakpoint duplicate" }
-	-re ".*$prompt $"   { fail "breakpoint duplicate" }
-	timeout	    { fail "(timeout) breakpoint duplicate" }
-}
-
+gdb_test "break 60" \
+    "Note: breakpoint \[0-9\]+ also set at pc.*Breakpoint \[0-9\]+ at.* file .*$srcfile, line 60\\." \
+    "breakpoint duplicate"
 
 #
 # test break at line number in file
 #
-send "break $srcfile:66\n"
-expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 66.*$prompt $" { pass "breakpoint line number in file" }
-	-re ".*$prompt $"   { fail "breakpoint line number in file" }
-	timeout	    { fail "(timeout) breakpoint line number in file" }
-}
+gdb_test "break $srcfile:66" \
+    "Breakpoint.*at.* file .*$srcfile, line 66\\." \
+    "breakpoint line number in file"
 
 
 #
 # check to see what breakpoints are set
 #
-send "info break\n"
-expect {
-    -re "Num Type\[ \]+Disp Enb Address\[ \]+What.*
+gdb_test "info break" \
+    "Num Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:56.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in factorial at .*$srcfile:72.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:60.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:60.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:66.*$prompt $" { pass "breakpoint info" }
-	-re ".*$prompt $"   { fail "breakpoint info" }
-	timeout	    { fail "(timeout) breakpoint info" }
-}
+\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:66" \
+    "breakpoint info"
 
 
 # FIXME: The rest of this test doesn't work with anything that can't
@@ -306,12 +283,12 @@ expect {
 
 
 proc test_clear_command {} {
-    gdb_test "break main" "Breakpoint.*at"
-    gdb_test "break main" "Breakpoint.*at"
+    gdb_test "break main" "Breakpoint.*at.*"
+    gdb_test "break main" "Breakpoint.*at.*"
 
     # We don't test that it deletes the correct breakpoints.  We do at
     # least test that it deletes more than one breakpoint.
-    gdb_test "clear main" {Deleted breakpoints [0-9]+ [0-9]+}
+    gdb_test "clear main" {Deleted breakpoints [0-9]+ [0-9]+.*}
 }
 
 #
@@ -364,7 +341,7 @@ proc test_next_with_recursion {} {
     # Do a backtrace just to confirm how many levels deep we are.
 
     set result [gdb_test "backtrace" \
-			"#0\[ \t\]+ factorial .value=5." \
+			"#0\[ \t\]+ factorial .value=5..*" \
 			"backtrace from factorial(5)"]
     if $result!=0 then { return }
 
@@ -402,12 +379,12 @@ proc test_next_with_recursion {} {
     # Do a backtrace just to confirm.
 
     set result [gdb_test "backtrace" \
-			 "#0\[ \t\]+ factorial .value=120.*\r\n#1\[ \t\]+ \[0-9a-fx\]+ in factorial .value=6." \
+			 "#0\[ \t\]+ factorial .value=120.*\r\n#1\[ \t\]+ \[0-9a-fx\]+ in factorial .value=6..*" \
 			 "backtrace from factorial(5)"]
     if $result!=0 then { return }
 
     # Continue until we exit.  Should not stop again.
-    gdb_test "continue" "Continuing.\r\n720"\
+    gdb_test "continue" "Continuing.\r\n720\r\n\r\nProgram exited normally\\."\
 		"continue until exit in recursive next test"
 }
 
@@ -419,9 +396,4 @@ if [istarget "*-*-vxworks"] then {
     set timeout 10
     send "set args main\n"
     expect -re ".*$prompt $" {}
-}
-
-if [istarget "a29k-*-udi"] then {
-    # FIXME: If PR 2415 is fixed, this is not needed.
-    gdb_target_udi
 }
