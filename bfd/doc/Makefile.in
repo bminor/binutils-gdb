@@ -1,6 +1,6 @@
 #
 # Makefile
-#   Copyright (C) 1990, 1991 Cygnus Support
+#   Copyright (C) 1990, 1991, 1992 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,10 +21,12 @@ srcdir = .
 
 prefix = /usr/local
 
-bindir = $(prefix)/bin
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+
 datadir = $(prefix)/lib
-libdir = $(prefix)/lib
-mandir = $(datadir)/man
+mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -34,11 +36,11 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(datadir)/info
+infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
-MKDOC=$(srcdir)/chew
+MKDOC=./chew
 SHELL = /bin/sh
 
 INSTALL = install -c
@@ -107,10 +109,10 @@ install-info: info
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
-docs: chew protos bfd.info bfd.dvi bfd.ps
+docs: $(MKDOC) protos bfd.info bfd.dvi bfd.ps
 
-chew:chew.c
-	$(CC) $(CFLAGS) -o ./chew $(srcdir)/chew.c $(LOADLIBES)
+$(MKDOC): chew.c
+	$(CC) $(CFLAGS) -o $(MKDOC) $(srcdir)/chew.c $(LOADLIBES)
 
 protos: libbfd.h libcoff.h bfd.h
 
@@ -141,7 +143,7 @@ format.texi: $(MKDOC) $(srcdir)/../format.c $(srcdir)/doc.str
 libbfd.texi: $(MKDOC) $(srcdir)/../libbfd.c $(srcdir)/doc.str
 	$(MKDOC) -f $(srcdir)/doc.str < $(srcdir)/../libbfd.c >libbfd.texi 
 
-opncls.texi:	$(srcdir)/chew $(srcdir)/../opncls.c $(srcdir)/doc.str
+opncls.texi: $(MKDOC) $(srcdir)/../opncls.c $(srcdir)/doc.str
 	$(MKDOC) -f $(srcdir)/doc.str  <$(srcdir)/../opncls.c >opncls.texi
 
 reloc.texi : $(MKDOC) $(srcdir)/../reloc.c
@@ -174,7 +176,7 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(srcdir)/../cpu-h8300.c	\
 	$(srcdir)/../cpu-i960.c		\
 	$(srcdir)/../archures.c		\
-	$(srcdir)/chew
+	$(MKDOC)
 	cat $(srcdir)/../libbfd-in.h >libbfd.h 
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../init.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../libbfd.c >>libbfd.h
@@ -189,7 +191,7 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 
 libcoff.h: $(srcdir)/../libcoff-in.h	\
 	$(srcdir)/../coffcode.h \
-	$(srcdir)/chew
+	$(MKDOC)
 	cat $(srcdir)/../libcoff-in.h >libcoff.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../coffcode.h >>libcoff.h
 
@@ -205,7 +207,7 @@ bfd.h: $(srcdir)/../bfd-in.h 		\
 	$(srcdir)/../core.c		\
 	$(srcdir)/../targets.c		\
 	$(srcdir)/../format.c		\
-	$(srcdir)/chew
+	$(MKDOC)
 	cat $(srcdir)/../bfd-in.h >bfd.h
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../init.c >>bfd.h
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../opncls.c >>bfd.h
@@ -222,8 +224,11 @@ bfd.h: $(srcdir)/../bfd-in.h 		\
 	echo "#endif" >>bfd.h
 
 
+clean-info:
+	rm -f $(STAGESTUFF) *.p *.ip  bfd.dvi bfd.ps *~* *# bfd.?? \
+	bfd.??? $(MKDOC) bfd.h libbfd.h libcoff.h texput.log 
+
 clean:
-	rm -f $(STAGESTUFF) *.p *.ip  bfd.dvi bfd.ps *~* *# bfd.?? bfd.??? chew
 
 bfd.info: $(DOCFILES) bfd.texinfo
 	$(MAKEINFO) -o bfd.info $(srcdir)/bfd.texinfo
