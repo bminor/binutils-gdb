@@ -1438,11 +1438,11 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 #
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
-DEVO_SUPPORT= README cfg-paper.texi Makefile.in configure configure.in \
-	config.sub config configure.man configure.texi move-if-change \
+DEVO_SUPPORT= README Makefile.in configure configure.in \
+	config.sub config etc move-if-change \
 	COPYING.LIB
 GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob
-GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
+GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS)
 
 setup-dirs: force
 	./configure sun4
