@@ -1,3 +1,7 @@
+Wed Sep 20 13:36:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New synonym for realclean.
+
 Sun Sep 10 10:23:56 1995  Michael Tiemann  <tiemann@axon.cygnus.com>
 
 	* registers.c (register_description): Add gdb synonyms for cr

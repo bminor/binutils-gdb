@@ -1,3 +1,7 @@
+Wed Sep 20 13:35:13 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New synonym for realclean.
+
 Wed Sep 20 09:51:50 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* run.c (sim_callback_write_stdout):  New.

@@ -120,7 +120,7 @@ clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
 	rm -f run libsim.a
 
-distclean mostlyclean realclean: clean
+distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status
 

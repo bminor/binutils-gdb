@@ -156,7 +156,7 @@ distclean:
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc gencode run
 	-rm -f $(PROGS) config.h stamp-h
 
-realclean: clean distclean
+maintainer-clean realclean: clean distclean
 	-rm -f $(DISTSTUFF) TAGS
 
 etags tags: TAGS
