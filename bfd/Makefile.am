@@ -173,6 +173,7 @@ BFD32_BACKENDS = \
 	elf32-d30v.lo \
 	elf32-fr30.lo \
 	elf32-gen.lo \
+	elf32-hppa.lo \
 	elf32-i370.lo \
 	elf32-i386.lo \
 	elf32-i860.lo \
@@ -854,6 +855,9 @@ ecofflink.lo: ecofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/objalloc.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   libcoff.h libecoff.h
+efi-app-ia32.lo: efi-app-ia32.c coff-i386.c $(INCDIR)/coff/i386.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 elf.lo: elf.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
@@ -1104,9 +1108,6 @@ coff-alpha.lo: coff-alpha.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h libcoff.h \
   libecoff.h coffswap.h ecoffswap.h
-coff-ia64.lo: coff-ia64.c $(INCDIR)/coff/ia64.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
-  coffswap.h
 coff64-rs6000.lo: coff64-rs6000.c $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6k64.h libcoff.h $(INCDIR)/bfdlink.h \
   xcoff.h coffcode.h coffswap.h
@@ -1114,6 +1115,9 @@ demo64.lo: demo64.c aoutf1.h $(INCDIR)/aout/sun4.h \
   libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   aout-target.h
+efi-app-ia64.lo: efi-app-ia64.c coff-ia64.c $(INCDIR)/coff/ia64.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 elf64-alpha.lo: elf64-alpha.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/alpha.h $(INCDIR)/elf/reloc-macros.h \

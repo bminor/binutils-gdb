@@ -1,3 +1,10 @@
+2000-05-02  Alan Modra  <alan@linuxcare.com.au>
+
+	* targets.c (bfd_target_vector): Restore bfd_elf32_hppa_vec.
+	* Makefile.am (BFD32_BACKENDS): Restore elf32-hppa.lo.  Regenerate
+	dependencies.
+	* Makefile.in: Regenerate.
+
 Mon May  1 16:56:47 2000  Jim Wilson  <wilson@cygnus.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add efi-app-ia32.lo.

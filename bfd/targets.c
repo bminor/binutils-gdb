@@ -721,9 +721,7 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,
-#if 0
 	&bfd_elf32_hppa_vec,
-#endif
 	&bfd_elf32_i370_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
