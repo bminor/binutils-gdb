@@ -1,3 +1,7 @@
+2003-04-25  Chris Demetriou  <cgd@broadcom.com>
+
+	* NEWS: Belatedly mention support for MIPS32 Release 2.
+
 2003-04-24  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (nopic_need_relax): Revert previous

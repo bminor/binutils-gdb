@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added support for MIPS32 Release 2.
+
 * Added support for Xtensa architecture.
 
 * Support for Intel's iWMMXt processor (an ARM variant) added.
