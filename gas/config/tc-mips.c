@@ -9904,6 +9904,7 @@ md_number_to_chars (buf, val, n)
 static int support_64bit_objects(void)
 {
   const char **list, **l;
+  int yes;
 
   list = bfd_target_list ();
   for (l = list; *l != NULL; l++)
@@ -9916,8 +9917,9 @@ static int support_64bit_objects(void)
 	|| strcmp (*l, "elf64-littlemips") == 0)
 #endif
       break;
+  yes = (*l != NULL);
   free (list);
-  return (*l != NULL);
+  return yes;
 }
 #endif /* OBJ_ELF */
 

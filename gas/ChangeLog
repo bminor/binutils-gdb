@@ -1,3 +1,8 @@
+2002-11-05  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-mips.c (support_64bit_objects): Check *l before it
+	is freed.
+
 2002-10-31  David O'Brien  <obrien@FreeBSD.org>
 
 	* config/tc-ia64.c: Cast dwarf2_directive_file to int.
