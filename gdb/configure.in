@@ -49,6 +49,7 @@ i[34]86-*-sunos*)	gdb_host=sun386 ;;
 i[34]86-*-sysv3.2)	gdb_host=i386v32 ;;
 i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
 i[34]86-*-sysv*)	gdb_host=i386v ;;
+i[34]86-*-isc*)		gdb_host=i386v32 ;;
 
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
@@ -171,7 +172,8 @@ i[34]86-*-sunos*)	gdb_target=sun386 ;;
 i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
 i[34]86-*-sco*)		gdb_target=i386v ;;
 i[34]86-*-sysv*)	gdb_target=i386v ;;
-i[34]86-*-linux)	gdb_target=linux ;;
+i[34]86-*-linux*)	gdb_target=linux ;;
+i[34]86-*-isc*)		gdb_target=i386v ;;
 
 i960-*-bout)		gdb_target=vxworks960 ;;
 i960-*-coff)		gdb_target=nindy960 ;;

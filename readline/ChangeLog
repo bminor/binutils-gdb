@@ -1,3 +1,8 @@
+Fri May 21 17:09:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/mh-isc: New file.
+	* configure.in: Use it.
+
 Sat Apr 17 00:40:12 1993  Jim Kingdon  (kingdon at calvin)
 
 	* readline.c, history.c: Don't include sys/types.h; sysdep.h does.
