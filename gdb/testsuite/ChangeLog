@@ -1,3 +1,12 @@
+2004-08-01  Andrew Cagney  <cagney@gnu.org>
+
+	Fix PR testsuite/1729.
+	* gdb.base/dump.exp: Add test name to callers of capture_value, do
+	not use capture_value with value 4.
+	(capture_value): Add optional test name parameter.
+	(test_reload_saved_value, test_restore_saved_value): Use $msg as
+	the prefix, pass to capture_value.
+
 2004-08-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/i386-prologue.exp: Add testcase for standard prolgue.
