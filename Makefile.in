@@ -83,7 +83,7 @@ install-info: dir.info install-info-dirs force
 #	$(MAKE) install-dir.info
 
 # clib prms
-all.normal: all-texinfo all-bison all-ld all-gnulib all-gdb all-make \
+all.normal: all-texinfo all-bison all-byacc all-ld all-gnulib all-gdb all-make \
 	all-cvs all-emacs all-ispell
 all.cross: all-bison all-ld all-gnulib all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
@@ -97,7 +97,7 @@ clean: clean-libiberty clean-texinfo clean-bfd clean-binutils clean-bison \
 install: $(INSTALL_TARGET)
 
 install.all: install-dirs install-libiberty install-texinfo install-binutils install-bison \
-	install-byacc install-ld install-gas install-gnulib \
+	install-byacc install-ld install-gas install-gcc install-gnulib \
 	install-readline install-glob install-gdb install-make install-cvs \
 	install-emacs install-ispell
 install.cross: install-dirs install-libiberty install-binutils install-bison \
