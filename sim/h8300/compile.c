@@ -1559,27 +1559,16 @@ sim_resume (step, siggnal)
 	case O_ADD:
 	  v = ((rd & 0x80000000) == (ea & 0x80000000)
 	       && (rd & 0x80000000) != (res & 0x80000000));
+	  c = ((unsigned) res < (unsigned) rd) || ((unsigned) res < (unsigned) ea);
 	  break;
 	case O_SUB:
 	case O_CMP:
 	  v = ((rd & 0x80000000) != (-ea & 0x80000000)
 	       && (rd & 0x80000000) != (res & 0x80000000));
-	  break;
-	case O_NEG:
-	  v = (rd == 0x80000000);
-	  break;
-	}
-      goto next;
-      switch (code->opcode / 4)
-	{
-	case O_ADD:
-	  c = ((unsigned) res < (unsigned) rd) || ((unsigned) res < (unsigned) ea);
-	  break;
-	case O_SUB:
-	case O_CMP:
 	  c = (unsigned) rd < (unsigned) -ea;
 	  break;
 	case O_NEG:
+	  v = (rd == 0x80000000);
 	  c = res != 0;
 	  break;
 	}

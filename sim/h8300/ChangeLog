@@ -1,3 +1,8 @@
+Fri Apr 12 09:39:56 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (sim_resume): Fix and simplify overflow and carry
+	handling for 32bit ALU insns.
+
 Mon Apr  8 23:58:49 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (sim_resume): Fix overflow checks for ALU insns.
