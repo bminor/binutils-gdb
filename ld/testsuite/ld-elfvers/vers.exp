@@ -1,5 +1,5 @@
 # Expect script for ld-version tests
-#   Copyright 1997, 1998, 1999, 2001 Free Software Foundation, Inc.
+#   Copyright 1997, 1998, 1999, 2001, 2003 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -913,4 +913,9 @@ build_vers_lib_no_pic "vers25b2" vers25b.c vers25b2 "vers25a.so vers25a.o" "" ve
 build_vers_lib_pic "vers26a" vers26a.c vers26a "" vers26a.map vers26a.ver vers26a.dsym ""
 build_vers_lib_pic "vers26b1" vers26b.c vers26b1 "" "" vers26b.ver vers26b.dsym ""
 build_vers_lib_pic "vers26b2" vers26b.c vers26b2 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
-build_vers_lib_no_pic "vers26b3" vers26b.c vers26b3 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
+if [istarget x86_64-*-linux*] {
+    # x86_64 doesn't like non-pic shared libraries
+    xfail "vers26b3"
+} else {
+    build_vers_lib_no_pic "vers26b3" vers26b.c vers26b3 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
+}
