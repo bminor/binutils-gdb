@@ -1,3 +1,11 @@
+start-sanitize-r5900
+Mon May 18 11:47:12 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* vu0.s: Test vopmula/vopmsub with and without opcode
+	completer.
+	* vu0.d: Corresponding changes.
+
+end-sanitize-r5900
 Mon May 18 13:11:45 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/{div,ld,mul}.d: Add assembler -mcpu= flag to match
