@@ -1,8 +1,13 @@
+2002-09-27  David Carlton  <carlton@math.stanford.edu>
+
+	* config/djgpp/fnchange.lst: Add entries for
+	gdb/testsuite/gdb.c++/m-static files.
+
 2002-09-27  Jim Wilson  <wilson@redhat.com>
 
 	* MAINTAINERS: Add myself to the Write After Approval list.
 
-2002-09-26Martin M. Hunt  <hunt@redhat.com>
+2002-09-26  Martin M. Hunt  <hunt@redhat.com>
 
 	* mips-tdep.c (find_proc_desc): Initialize startaddr.
 
