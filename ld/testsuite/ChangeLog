@@ -1,3 +1,7 @@
+Mon Nov 10 14:25:43 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/sr3.cc (__eh_pc): Define.
+
 Mon Oct 20 14:36:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-srec/sr3.cc: Add definitions for terminate, __terminate, and

@@ -59,6 +59,8 @@ void
 __terminate ()
 {
 }
+
+void *__eh_pc;
 }
 
 int Foo::foos = 0;
