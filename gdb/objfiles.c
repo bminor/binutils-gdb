@@ -644,12 +644,15 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
       }
   }
 
-  {
-    struct minimal_symbol *msym;
-    ALL_OBJFILE_MSYMBOLS (objfile, msym)
-      if (SYMBOL_SECTION (msym) >= 0)
-      SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
-  }
+  if (objfile->msymbols != NULL)
+    {
+      struct minimal_symbol *msym;
+      ALL_OBJFILE_MSYMBOLS (objfile, msym)
+	if (SYMBOL_SECTION (msym) >= 0)
+	  SYMBOL_VALUE_ADDRESS (msym)
+	    += ANOFFSET (delta, SYMBOL_SECTION (msym));
+    }
+
   /* Relocating different sections by different amounts may cause the symbols
      to be out of order.  */
   msymbols_sort (objfile);

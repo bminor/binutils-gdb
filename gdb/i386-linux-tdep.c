@@ -322,19 +322,15 @@ static struct minimal_symbol *
 find_minsym_and_objfile (char *name, struct objfile **objfile_p)
 {
   struct objfile *objfile;
+  struct minimal_symbol *msym;
 
-  ALL_OBJFILES (objfile)
+  ALL_MSYMBOLS (objfile, msym)
     {
-      struct minimal_symbol *msym;
-
-      ALL_OBJFILE_MSYMBOLS (objfile, msym)
+      if (SYMBOL_NAME (msym)
+	  && STREQ (SYMBOL_NAME (msym), name))
 	{
-	  if (SYMBOL_NAME (msym)
-	      && STREQ (SYMBOL_NAME (msym), name))
-	    {
-	      *objfile_p = objfile;
-	      return msym;
-	    }
+	  *objfile_p = objfile;
+	  return msym;
 	}
     }
 

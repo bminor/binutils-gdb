@@ -1,3 +1,12 @@
+2003-01-27  David Carlton  <carlton@math.stanford.edu>
+
+	* objfiles.h: Add comments about objfile->msymbols being NULL.
+	* objfiles.c (objfile_relocate): Enclose ALL_OBJFILE_MSYMBOLS in
+	guard.
+	* i386-linux-tdep.c (find_minsym_and_objfile): Call ALL_MSYMBOLS
+	instead of ALL_OBJFILES and ALL_OBJFILE_MSYMBOLS.
+	* arm-linux-tdep.c (find_minsym_and_objfile): Ditto.
+
 2003-01-24  David Carlton  <carlton@math.stanford.edu>
 
 	* valops.c (find_oload_champ): New function.

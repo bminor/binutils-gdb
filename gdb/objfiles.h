@@ -300,6 +300,12 @@ struct objfile
        null symbol.  The array itself, as well as all the data that it points
        to, should be allocated on the symbol_obstack for this file. */
 
+    /* NOTE: carlton/2003-01-27: For a newly-created objfile, msymbols
+       is set to NULL, rather than a one-element array ending in a
+       null symbol.  ALL_MSYMBOLS already guarded against that case,
+       so that seems to be a valid possibility; it can be useful if
+       you like to create artificial objfiles.  */
+
     struct minimal_symbol *msymbols;
     int minimal_symbol_count;
 
@@ -563,6 +569,10 @@ extern int is_in_import_list (char *, struct objfile *);
     for ((p) = (objfile) -> psymtabs; (p) != NULL; (p) = (p) -> next)
 
 /* Traverse all minimal symbols in one objfile.  */
+
+/* NOTE: carlton/2003-01-27: Don't call this macro unless
+   objfile->msymbols is non-NULL.  See NOTE above in the declaration
+   of 'struct objfile'.  */
 
 #define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
     for ((m) = (objfile) -> msymbols; SYMBOL_NAME(m) != NULL; (m)++)
