@@ -176,7 +176,7 @@ addressT abs_section_offset;
 
 /* If this line had an MRI style label, it is stored in this variable.
    This is used by some of the MRI pseudo-ops.  */
-static symbolS *mri_line_label;
+symbolS *mri_line_label;
 
 /* This global variable is used to support MRI common sections.  We
    translate such sections into a common symbol.  This variable is
@@ -309,10 +309,13 @@ static const pseudo_typeS potable[] =
   {"lsym", s_lsym, 0},
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off */
+  {"nopage", listing_nopage, 0},
   {"octa", cons, 16},
   {"offset", s_struct, 0},
   {"org", s_org, 0},
   {"p2align", s_align_ptwo, 0},
+  {"page", listing_eject, 0},
+  {"plen", listing_psize, 0},
   {"psize", listing_psize, 0},	/* set paper size */
 /* print */
   {"quad", cons, 8},
@@ -1602,6 +1605,16 @@ s_org (ignore)
   register segT segment;
   expressionS exp;
   register long temp_fill;
+
+  /* The MRI assembler has a different meaning for .org.  It means to
+     create an absolute section at a given address.  We can't support
+     that--use a linker script instead.  */
+  if (flag_mri)
+    {
+      as_bad ("MRI style ORG pseudo-op not supported");
+      ignore_rest_of_line ();
+      return;
+    }
 
   /* Don't believe the documentation of BSD 4.2 AS.  There is no such
      thing as a sub-segment-relative origin.  Any absolute origin is

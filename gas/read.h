@@ -63,6 +63,9 @@ extern int generate_asm_lineno;
 /* The offset in the absolute section.  */
 extern addressT abs_section_offset;
 
+/* The MRI label on a line, used by some of the MRI pseudo-ops.  */
+extern symbolS *mri_line_label;
+
 /* This is used to support MRI common sections.  */
 extern symbolS *mri_common_symbol;
 
