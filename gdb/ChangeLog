@@ -1,6 +1,6 @@
 2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
 	
-	dwarf2loc.c (locexpr_describe_location): Fix typo.
+	* dwarf2loc.c (locexpr_describe_location): Fix typos.
 
 2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
 

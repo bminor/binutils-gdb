@@ -430,7 +430,7 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
 						&dlbaton->data[dlbaton->size - 1],
 						&bytes_read);
 	fprintf_filtered (stream, 
-			  "a thread-local variable at offset %s in the"
+			  "a thread-local variable at offset %s in the "
 			  "thread-local storage for `%s'",
 			  paddr_nz (offset), dlbaton->objfile->name);
 	return 1;
