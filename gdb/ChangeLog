@@ -1,5 +1,10 @@
 2004-03-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-linux-nat.c (fill_fpregset): Call amd64_colletc_fxsave
+	instead of amd64_fill_fxsave.
+	* amd64bsd-nat.c (store_inferior_registers): Likewise.
+	* amd64fbsd-nat.c (fill_fpregset): Likewise.
+
 	* sparc-tdep.c (sparc_frame_cache): Don't bail out if %fp is zero.
 	Reorganize code a bit.
 

@@ -176,7 +176,7 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 void
 fill_fpregset (elf_fpregset_t *fpregsetp, int regnum)
 {
-  amd64_fill_fxsave ((char *) fpregsetp, regnum);
+  amd64_collect_fxsave (current_regcache, regnum, fpregsetp);
 }
 
 /* Fetch all floating-point registers from process/thread TID and store

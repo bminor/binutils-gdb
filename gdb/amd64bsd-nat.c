@@ -98,7 +98,7 @@ store_inferior_registers (int regnum)
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      amd64_fill_fxsave ((char *) &fpregs, regnum);
+      amd64_collect_fxsave (current_regcache, regnum, &fpregs);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
