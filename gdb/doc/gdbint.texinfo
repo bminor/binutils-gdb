@@ -50,7 +50,7 @@ Software Foundation raise funds for GNU development.''
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001
+Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001, 2002
    Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -721,6 +721,14 @@ To add commands in general, use @code{add_cmd}.  @code{add_com} adds to
 the main command list, and should be used for those commands.  The usual
 place to add commands is in the @code{_initialize_@var{xyz}} routines at
 the ends of most source files.
+
+@findex add_setshow_cmd
+@findex add_setshow_cmd_full
+To add paired @samp{set} and @samp{show} commands, use
+@code{add_setshow_cmd} or @code{add_setshow_cmd_full}.  The former is
+a slightly simpler interface which is useful when you don't need to
+further modify the new command structures, while the latter returns
+the new command structures for manipulation.
 
 @cindex deprecating commands
 @findex deprecate_cmd
