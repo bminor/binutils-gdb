@@ -1,3 +1,9 @@
+Fri Jan  5 00:01:22 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.h (enum ieee_record): Add ieee_asn_record_enum,
+	ieee_at_record_enum, ieee_ty_record_enum, ieee_atn_record_enum,
+	ieee_bb_record_enum, and ieee_be_record_enum.
+
 Wed Jan  3 13:12:09 1996  Fred Fish  <fnf@cygnus.com>
 
 	* obstack.h: Update copyright to 1996.
