@@ -892,7 +892,9 @@ extern segT obj_coff_add_segment         (const char *);
 extern void obj_coff_section             (int);
 extern void c_dot_file_symbol            (const char *, int);
 extern segT s_get_segment                (symbolS *);
+#ifndef tc_coff_symbol_emit_hook
 extern void tc_coff_symbol_emit_hook     (symbolS *);
+#endif
 extern void obj_coff_pe_handle_link_once (void);
 extern void obj_coff_init_stab_section   (segT);
 extern void c_section_header             (struct internal_scnhdr *,
