@@ -255,6 +255,14 @@ record_latest_value (val)
     }
 
   value_history_chain->values[i] = val;
+
+  /* We don't want this value to have anything to do with the inferior anymore.
+     In particular, "set $1 = 50" should not affect the variable from which
+     the value was taken, and fast watchpoints should be able to assume that
+     a value on the value history never changes.  */
+  if (VALUE_LAZY (val))
+    value_fetch_lazy (val);
+  VALUE_LVAL (val) = not_lval;
   release_value (val);
 
   /* Now we regard value_history_count as origin-one

@@ -1,6 +1,11 @@
+Mon Oct  4 11:02:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* values.c (record_latest_value): Fetch lazy values and set VALUE_LVAL
+	to not_lval.
+
 Sun Oct  3 15:54:51 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
-	* objfiles.h (objfile): New slot sym_stab_info, use by all
+	* objfiles.h (objfile): New slot sym_stab_info, use by most
 	stab-reading formats.
 	* gdb-stabs.h (DBX_SYMFILE_INFO): Access sym_stab_info instead of
 	sym_private.
