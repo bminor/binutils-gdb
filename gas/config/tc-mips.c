@@ -3166,7 +3166,7 @@ mips16_macro_build (place, counter, ep, name, fmt, args)
 	    assert (ep != NULL);
 
 	    if (ep->X_op != O_constant)
-	      *r = BFD_RELOC_UNUSED + c;
+	      *r = (int) BFD_RELOC_UNUSED + c;
 	    else
 	      {
 		mips16_immed (NULL, 0, c, ep->X_add_number, false, false,
@@ -7630,7 +7630,6 @@ mips_ip (str, ip)
   unsigned int lastregno = 0;
   char *s_reset;
   char save_c = 0;
-  int full_opcode_match = 1;
 
   insn_error = NULL;
 
@@ -7680,8 +7679,6 @@ mips_ip (str, ip)
 	  insn_error = "unrecognized opcode";
 	  return;
 	}
-
-      full_opcode_match = 0;
     }
 
   argsStart = s;
@@ -10483,7 +10480,7 @@ md_apply_fix3 (fixP, valP, seg)
      valueT * valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  unsigned char *buf;
+  bfd_byte *buf;
   long insn;
   valueT value;
 
@@ -10648,10 +10645,10 @@ md_apply_fix3 (fixP, valP, seg)
 		    + fixP->fx_next->fx_where);
 	}
       value = ((value + 0x8000) >> 16) & 0xffff;
-      buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
+      buf = (bfd_byte *) fixP->fx_frag->fr_literal + fixP->fx_where;
       if (target_big_endian)
 	buf += 2;
-      md_number_to_chars (buf, value, 2);
+      md_number_to_chars ((char *) buf, value, 2);
       break;
 
     case BFD_RELOC_PCREL_LO16:
@@ -10664,10 +10661,10 @@ md_apply_fix3 (fixP, valP, seg)
       if (fixP->fx_addsy
 	  && (symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
-      buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
+      buf = (bfd_byte *) fixP->fx_frag->fr_literal + fixP->fx_where;
       if (target_big_endian)
 	buf += 2;
-      md_number_to_chars (buf, value, 2);
+      md_number_to_chars ((char *) buf, value, 2);
       break;
 
     case BFD_RELOC_64:
@@ -10729,10 +10726,10 @@ md_apply_fix3 (fixP, valP, seg)
 	  if (value + 0x8000 > 0xffff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("relocation overflow"));
-	  buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
+	  buf = (bfd_byte *) fixP->fx_frag->fr_literal + fixP->fx_where;
 	  if (target_big_endian)
 	    buf += 2;
-	  md_number_to_chars (buf, value, 2);
+	  md_number_to_chars ((char *) buf, value, 2);
 	}
       break;
 
@@ -10763,7 +10760,7 @@ md_apply_fix3 (fixP, valP, seg)
       value = (offsetT) value >> 2;
 
       /* update old instruction data */
-      buf = (unsigned char *) (fixP->fx_where + fixP->fx_frag->fr_literal);
+      buf = (bfd_byte *) (fixP->fx_where + fixP->fx_frag->fr_literal);
       if (target_big_endian)
 	insn = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
       else
@@ -12666,12 +12663,12 @@ md_convert_frag (abfd, asec, fragp)
 
       if (use_extend)
 	{
-	  md_number_to_chars (buf, 0xf000 | extend, 2);
+	  md_number_to_chars ((char *) buf, 0xf000 | extend, 2);
 	  fragp->fr_fix += 2;
 	  buf += 2;
 	}
 
-      md_number_to_chars (buf, insn, 2);
+      md_number_to_chars ((char *) buf, insn, 2);
       fragp->fr_fix += 2;
       buf += 2;
     }
@@ -12944,9 +12941,7 @@ static void
 s_file (x)
      int x ATTRIBUTE_UNUSED;
 {
-  int line;
-
-  line = get_number ();
+  get_number ();
   s_app_file (0);
 }
 
@@ -13048,7 +13043,6 @@ static void
 s_mips_ent (aent)
      int aent;
 {
-  int number = 0;
   symbolS *symbolP;
   int maybe_text;
 
@@ -13058,7 +13052,7 @@ s_mips_ent (aent)
   SKIP_WHITESPACE ();
   if (ISDIGIT (*input_line_pointer)
       || *input_line_pointer == '-')
-    number = get_number ();
+    get_number ();
 
 #ifdef BFD_ASSEMBLER
   if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)

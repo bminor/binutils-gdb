@@ -1,3 +1,12 @@
+2002-04-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (mips16_macro_build): Cast type mismatch.
+	(mips_ip): Remove unused variable.
+	(md_apply_fix3): Cast signed/unsignes mismatches. Replace
+	unsigned char with bfd_byte.
+	(s_file): Remove unused variable.
+	(s_mips_ent): Likewise.
+
 2002-04-03  Tom Rix  <trix@redhat.com>
 
 	* config/tc-d10v.c (d10v_insert_operand): Fix warning in as_bad_where.
