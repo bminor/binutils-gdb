@@ -1,3 +1,13 @@
+Mon Feb 23 08:22:44 1998  Mark Alexander  <marka@cygnus.com>
+
+	* config/mn10300-eval.exp: New file to support MN10300 eval board.
+
+Wed Feb 18 16:43:46 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+ 
+        * gdb.base/overlays (several files): Merge the two overlay
+        managers into one.  Change variables (foox, barx, bazx, grbxx)
+        back into ints but force them to load in their proper sections.
+
 Thu Feb 12 13:49:30 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/d10vovly.c (D10VTranslate): Map IMAP0 to low 128k of
