@@ -1,3 +1,29 @@
+2002-01-22  Graydon Hoare  <graydon@redhat.com>
+
+	* fr30-asm.c: Regenerate.
+	* fr30-desc.c: Likewise.
+	* fr30-desc.h: Likewise.
+	* fr30-dis.c: Likewise.
+	* fr30-ibld.c: Likewise.
+	* fr30-opc.c: Likewise.
+	* fr30-opc.h: Likewise.
+	* m32r-asm.c: Likewise.
+	* m32r-desc.c: Likewise.
+	* m32r-desc.h: Likewise.
+	* m32r-dis.c: Likewise.
+	* m32r-ibld.c: Likewise.
+	* m32r-opc.c: Likewise.
+	* m32r-opc.h: Likewise.
+	* m32r-opinst.c: Likewise.
+	* openrisc-asm.c: Likewise.
+	* openrisc-desc.c: Likewise.
+	* openrisc-desc.h: Likewise.
+	* openrisc-dis.c: Likewise.
+	* openrisc-ibld.c: Likewise.
+	* openrisc-opc.c: Likewise.
+	* openrisc-opc.h: Likewise.
+	* xstormy16-desc.c: Likewise.
+
 2002-01-22  Richard Henderson  <rth@redhat.com>
 
 	* alpha-dis.c (print_insn_alpha): Also mask the base opcode for

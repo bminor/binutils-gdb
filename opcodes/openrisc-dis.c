@@ -75,8 +75,7 @@ void openrisc_cgen_print_operand
 
    This function could be moved into `print_insn_normal', but keeping it
    separate makes clear the interface between `print_insn_normal' and each of
-   the handlers.
-*/
+   the handlers.  */
 
 void
 openrisc_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)

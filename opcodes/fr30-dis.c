@@ -111,60 +111,60 @@ print_register_list (dis_info, value, offset, load_store)
 
 static void
 print_hi_register_list_ld (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 8, 0/*load*/);
 }
 
 static void
 print_low_register_list_ld (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 0, 0/*load*/);
 }
 
 static void
 print_hi_register_list_st (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 8, 1/*store*/);
 }
 
 static void
 print_low_register_list_st (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 0, 1/*store*/);
 }
 
 static void
 print_m4 (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
   (*info->fprintf_func) (info->stream, "%ld", value);
@@ -188,8 +188,7 @@ void fr30_cgen_print_operand
 
    This function could be moved into `print_insn_normal', but keeping it
    separate makes clear the interface between `print_insn_normal' and each of
-   the handlers.
-*/
+   the handlers.  */
 
 void
 fr30_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)

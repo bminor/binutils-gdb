@@ -186,8 +186,7 @@ const char * fr30_cgen_parse_operand
 
    This function could be moved into `parse_insn_normal', but keeping it
    separate makes clear the interface between `parse_insn_normal' and each of
-   the handlers.
-*/
+   the handlers.  */
 
 const char *
 fr30_cgen_parse_operand (cd, opindex, strp, fields)

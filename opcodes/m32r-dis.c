@@ -75,12 +75,12 @@ static int my_print_insn PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *));
 
 static void
 print_hash (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
-     long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     long value ATTRIBUTE_UNUSED;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
   (*info->fprintf_func) (info->stream, "#");
@@ -158,8 +158,7 @@ void m32r_cgen_print_operand
 
    This function could be moved into `print_insn_normal', but keeping it
    separate makes clear the interface between `print_insn_normal' and each of
-   the handlers.
-*/
+   the handlers.  */
 
 void
 m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
