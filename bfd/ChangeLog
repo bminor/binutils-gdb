@@ -1,3 +1,10 @@
+Fri Jun 12 13:34:02 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* elf.c (swap_out_syms): New arg relocatable_p.
+	Don't add section VMA to symbols for relocatable output.
+	(_bfd_elf_compute_section_file_positions): Update call to
+	swap_out_syms.
+
 Mon Jun  8 15:20:57 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_perform_relocation): Make comparisons

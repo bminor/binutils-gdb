@@ -45,7 +45,7 @@ static int elf_sort_sections PARAMS ((const PTR, const PTR));
 static boolean assign_file_positions_for_segments PARAMS ((bfd *));
 static boolean assign_file_positions_except_relocs PARAMS ((bfd *));
 static boolean prep_headers PARAMS ((bfd *));
-static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **));
+static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **, int));
 static boolean copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static char *elf_read PARAMS ((bfd *, long, unsigned int));
 static void elf_fake_sections PARAMS ((bfd *, asection *, PTR));
@@ -1982,7 +1982,10 @@ _bfd_elf_compute_section_file_positions (abfd, link_info)
   /* The backend linker builds symbol table information itself.  */
   if (link_info == NULL && abfd->symcount > 0)
     {
-      if (! swap_out_syms (abfd, &strtab))
+      /* Non-zero if doing a relocatable link.  */
+      int relocatable_p = ! (abfd->flags & (EXEC_P | DYNAMIC));
+
+      if (! swap_out_syms (abfd, &strtab, relocatable_p))
 	return false;
     }
 
@@ -3506,9 +3509,10 @@ _bfd_elf_copy_private_symbol_data (ibfd, isymarg, obfd, osymarg)
 /* Swap out the symbols.  */
 
 static boolean
-swap_out_syms (abfd, sttp)
+swap_out_syms (abfd, sttp, relocatable_p)
      bfd *abfd;
      struct bfd_strtab_hash **sttp;
+     int relocatable_p;
 {
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
@@ -3604,7 +3608,9 @@ swap_out_syms (abfd, sttp)
 		value += sec->output_offset;
 		sec = sec->output_section;
 	      }
-	    value += sec->vma;
+	    /* Don't add in the section vma for relocatable output.  */
+	    if (! relocatable_p)
+	      value += sec->vma;
 	    sym.st_value = value;
 	    sym.st_size = type_ptr ? type_ptr->internal_elf_sym.st_size : 0;
 
