@@ -18,7 +18,7 @@ enum arg_type {
         T_WORD = 2,
         T_INT = 3,
         T_FLOAT = 4,
-        T_DOUBLE = 5,
+        T_DOUBLE = 5
 };
 typedef enum arg_type arg_type;
 bool_t xdr_arg_type();
@@ -82,7 +82,7 @@ enum EVENT_TYPE {
         EVENT_SUSPEND = 4,
         EVENT_ZERO_DIV = 5,
         EVENT_SIGNAL = 6,
-        EVENT_START = 7,
+        EVENT_START = 7
 };
 typedef enum EVENT_TYPE EVENT_TYPE;
 

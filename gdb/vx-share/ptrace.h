@@ -39,6 +39,6 @@ enum ptracereq {
 	PTRACE_READTEXT,		/* 18, read text segment */
 	PTRACE_WRITETEXT,		/* 19, write text segment */
 	PTRACE_GETFPAREGS,		/* 20, get all fpa regs */
-	PTRACE_SETFPAREGS,		/* 21, set all fpa regs */
+	PTRACE_SETFPAREGS		/* 21, set all fpa regs */
 };
 #endif !_PTRACE

@@ -27,7 +27,7 @@ enum ptype {
 	REGS = 1,		/* regs 	(SETREGS)  	*/
 	FPREGS = 2,		/* fp_status 	(SETFPREGS)	*/
 	FPAREGS = 3,		/* fpa_regs	(SETFPAREGS)	*/
-	DATA = 4,		/* c_bytes	(WRITETEXT/DATA)*/
+	DATA = 4		/* c_bytes	(WRITETEXT/DATA)*/
 };
 typedef enum ptype ptype;
 
