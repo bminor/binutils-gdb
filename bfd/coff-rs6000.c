@@ -81,8 +81,9 @@ void _bfd_xcoff_rtype2howto PARAMS ((arelent *, struct internal_reloc *));
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
 #define coff_bfd_reloc_type_lookup _bfd_xcoff_reloc_type_lookup
 #ifdef AIX_CORE
-extern const bfd_target * rs6000coff_core_p ();
-extern boolean rs6000coff_core_file_matches_executable_p ();
+extern const bfd_target * rs6000coff_core_p PARAMS ((bfd *abfd));
+extern boolean rs6000coff_core_file_matches_executable_p 
+  PARAMS ((bfd *cbfd, bfd *ebfd));
 extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
 extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 #define CORE_FILE_P rs6000coff_core_p
@@ -144,8 +145,7 @@ static bfd_vma xcoff_loader_symbol_offset
 static bfd_vma xcoff_loader_reloc_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
 static boolean xcoff_generate_rtinit 
-  PARAMS((bfd *, const char *, const char *));
-
+  PARAMS((bfd *, const char *, const char *, boolean));
 
 /* We use our own tdata type.  Its first field is the COFF tdata type,
    so the COFF routines are compatible.  */
@@ -3051,15 +3051,16 @@ xcoff_loader_reloc_offset (abfd, ldhdr)
 }
 
 static boolean 
-xcoff_generate_rtinit  (abfd, init, fini)
+xcoff_generate_rtinit  (abfd, init, fini, rtld)
      bfd *abfd;
      const char *init;
      const char *fini;
+     boolean rtld;
 {
   bfd_byte filehdr_ext[FILHSZ];
   bfd_byte scnhdr_ext[SCNHSZ];
-  bfd_byte syment_ext[SYMESZ * 8];
-  bfd_byte reloc_ext[RELSZ * 2];
+  bfd_byte syment_ext[SYMESZ * 10];
+  bfd_byte reloc_ext[RELSZ * 3];
   bfd_byte *data_buffer;
   bfd_size_type data_buffer_size;
   bfd_byte *string_table = NULL, *st_tmp = NULL;
@@ -3074,9 +3075,9 @@ xcoff_generate_rtinit  (abfd, init, fini)
   
   char *data_name = ".data";
   char *rtinit_name = "__rtinit";
+  char *rtld_name = "__rtld";
   
-  if (! bfd_xcoff_rtinit_size (abfd) 
-      || (init == NULL && fini == NULL))
+  if (! bfd_xcoff_rtinit_size (abfd))
     return false;
 
   initsz = (init == NULL ? 0 : 1 + strlen (init));
@@ -3088,7 +3089,7 @@ xcoff_generate_rtinit  (abfd, init, fini)
   filehdr.f_magic = bfd_xcoff_magic_number (abfd);
   filehdr.f_nscns = 1; 
   filehdr.f_timdat = 0;
-  filehdr.f_nsyms = 0;  /* at least 6, no more than 8 */
+  filehdr.f_nsyms = 0;  /* at least 6, no more than 10 */
   filehdr.f_symptr = 0; /* set below */
   filehdr.f_opthdr = 0;
   filehdr.f_flags = 0;
@@ -3179,9 +3180,10 @@ xcoff_generate_rtinit  (abfd, init, fini)
      0. .data csect
      2. __rtinit
      4. init function 
-     6. fini function */
-  memset (syment_ext, 0, 8 * SYMESZ);
-  memset (reloc_ext, 0, 2 * RELSZ);
+     6. fini function 
+     8. __rtld  */
+  memset (syment_ext, 0, 10 * SYMESZ);
+  memset (reloc_ext, 0, 3 * RELSZ);
 
   /* .data csect */
   memset (&syment, 0, sizeof (struct internal_syment));
@@ -3277,6 +3279,32 @@ xcoff_generate_rtinit  (abfd, init, fini)
       /* reloc */
       memset (&reloc, 0, sizeof (struct internal_reloc));
       reloc.r_vaddr = 0x0028;
+      reloc.r_symndx = filehdr.f_nsyms;
+      reloc.r_type = R_POS;
+      reloc.r_size = 31;
+      bfd_coff_swap_reloc_out (abfd, &reloc, 
+			       &reloc_ext[scnhdr.s_nreloc * RELSZ]);
+
+      filehdr.f_nsyms += 2;
+      scnhdr.s_nreloc += 1;
+    }
+
+  if (rtld)
+    {
+      memset (&syment, 0, sizeof (struct internal_syment));
+      memset (&auxent, 0, sizeof (union internal_auxent));
+      memcpy (syment._n._n_name, rtld_name, strlen (rtld_name));
+      syment.n_sclass = C_EXT;
+      syment.n_numaux = 1;
+      bfd_coff_swap_sym_out (abfd, &syment, 
+			     &syment_ext[filehdr.f_nsyms * SYMESZ]);
+      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
+			     syment.n_numaux, 
+			     &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
+
+      /* reloc */
+      memset (&reloc, 0, sizeof (struct internal_reloc));
+      reloc.r_vaddr = 0x0000;
       reloc.r_symndx = filehdr.f_nsyms;
       reloc.r_type = R_POS;
       reloc.r_size = 31;
@@ -3696,7 +3724,6 @@ static const struct xcoff_backend_data_rec bfd_pmac_xcoff_backend_data =
   /* rtinit */
   0,           /* _xcoff_rtinit_size */
   xcoff_generate_rtinit,  /* _xcoff_generate_rtinit */
-
 };
 
 /* The transfer vector that leads the outside world to all of the above. */

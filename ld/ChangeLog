@@ -1,3 +1,11 @@
+2002-02-18  Tom Rix  <trix@redhat.com>
+
+	* emultempl/aix.em (gld*_parse_args): Add -brtl support.
+	(gld*_before_allocation): Same.
+	(gld*_create_output_section_statements): Generate 
+	__rtinit if run time linking.  Add librtl.a to the link.
+	(gld*_read_file): Clean.
+
 2002-02-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (OTHER_TEXT_SECTIONS): Define.

@@ -144,8 +144,7 @@ static bfd_vma xcoff64_loader_symbol_offset
 static bfd_vma xcoff64_loader_reloc_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
 static boolean xcoff64_generate_rtinit 
-  PARAMS((bfd *, const char *, const char *));
-
+  PARAMS((bfd *, const char *, const char *, boolean));
 
 /* coffcode.h needs these to be defined */
 /* Internalcoff.h and coffcode.h modify themselves based on these flags.  */
@@ -171,8 +170,9 @@ static boolean xcoff64_generate_rtinit
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
 #define coff_bfd_reloc_type_lookup xcoff64_reloc_type_lookup
 #ifdef AIX_CORE
-extern const bfd_target * rs6000coff_core_p ();
-extern boolean rs6000coff_core_file_matches_executable_p ();
+extern const bfd_target * rs6000coff_core_p PARAMS ((bfd *abfd));
+extern boolean rs6000coff_core_file_matches_executable_p 
+  PARAMS((bfd *cbfd, bfd *ebfd));
 extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
 extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 #define CORE_FILE_P rs6000coff_core_p
@@ -2098,15 +2098,16 @@ xcoff64_loader_reloc_offset (abfd, ldhdr)
 }
 
 static boolean 
-xcoff64_generate_rtinit  (abfd, init, fini)
+xcoff64_generate_rtinit (abfd, init, fini, rtld)
      bfd *abfd;
      const char *init;
      const char *fini;
+     boolean rtld;
 {
   bfd_byte filehdr_ext[FILHSZ];
-  bfd_byte scnhdr_ext[SCNHSZ];
-  bfd_byte syment_ext[SYMESZ * 8];
-  bfd_byte reloc_ext[RELSZ * 2];
+  bfd_byte scnhdr_ext[SCNHSZ * 3];
+  bfd_byte syment_ext[SYMESZ * 10];
+  bfd_byte reloc_ext[RELSZ * 3];
   bfd_byte *data_buffer;
   bfd_size_type data_buffer_size;
   bfd_byte *string_table, *st_tmp;
@@ -2114,16 +2115,20 @@ xcoff64_generate_rtinit  (abfd, init, fini)
   bfd_vma val;
   size_t initsz, finisz;
   struct internal_filehdr filehdr;
-  struct internal_scnhdr scnhdr;
+  struct internal_scnhdr text_scnhdr;
+  struct internal_scnhdr data_scnhdr;
+  struct internal_scnhdr bss_scnhdr;
   struct internal_syment syment;
   union internal_auxent auxent;
   struct internal_reloc reloc;
   
+  char *text_name = ".text";
   char *data_name = ".data";
+  char *bss_name = ".bss";
   char *rtinit_name = "__rtinit";
+  char *rtld_name = "__rtld";
   
-  if (! bfd_xcoff_rtinit_size (abfd) 
-      || (init == NULL && fini == NULL))
+  if (! bfd_xcoff_rtinit_size (abfd))
     return false;
 
   initsz = (init == NULL ? 0 : 1 + strlen (init));
@@ -2133,26 +2138,54 @@ xcoff64_generate_rtinit  (abfd, init, fini)
   memset (filehdr_ext, 0, FILHSZ);
   memset (&filehdr, 0, sizeof (struct internal_filehdr));
   filehdr.f_magic = bfd_xcoff_magic_number (abfd);
-  filehdr.f_nscns = 1; 
+  filehdr.f_nscns = 3; 
   filehdr.f_timdat = 0;
   filehdr.f_nsyms = 0;  /* at least 6, no more than 8 */
   filehdr.f_symptr = 0; /* set below */
   filehdr.f_opthdr = 0;
   filehdr.f_flags = 0;
 
-  /* section header */
-  memset (scnhdr_ext, 0, SCNHSZ);
-  memset (&scnhdr, 0, sizeof (struct internal_scnhdr));
-  memcpy (scnhdr.s_name, data_name, strlen (data_name));
-  scnhdr.s_paddr = 0;
-  scnhdr.s_vaddr = 0;
-  scnhdr.s_size = 0;    /* set below */
-  scnhdr.s_scnptr = FILHSZ + SCNHSZ;
-  scnhdr.s_relptr = 0;  /* set below */
-  scnhdr.s_lnnoptr = 0;
-  scnhdr.s_nreloc = 0;  /* either 1 or 2 */
-  scnhdr.s_nlnno = 0;
-  scnhdr.s_flags = STYP_DATA;
+  /* section headers */
+  memset (scnhdr_ext, 0, 3 * SCNHSZ);
+
+  /* text */
+  memset (&text_scnhdr, 0, sizeof (struct internal_scnhdr));
+  memcpy (text_scnhdr.s_name, text_name, strlen (text_name));
+  text_scnhdr.s_paddr = 0;
+  text_scnhdr.s_vaddr = 0;
+  text_scnhdr.s_size = 0;
+  text_scnhdr.s_scnptr = 0;
+  text_scnhdr.s_relptr = 0;
+  text_scnhdr.s_lnnoptr = 0;
+  text_scnhdr.s_nreloc = 0;
+  text_scnhdr.s_nlnno = 0;
+  text_scnhdr.s_flags = STYP_TEXT;
+
+  /* data */
+  memset (&data_scnhdr, 0, sizeof (struct internal_scnhdr));
+  memcpy (data_scnhdr.s_name, data_name, strlen (data_name));
+  data_scnhdr.s_paddr = 0;
+  data_scnhdr.s_vaddr = 0;
+  data_scnhdr.s_size = 0;    /* set below */
+  data_scnhdr.s_scnptr = FILHSZ + 3 * SCNHSZ;
+  data_scnhdr.s_relptr = 0;  /* set below */
+  data_scnhdr.s_lnnoptr = 0;
+  data_scnhdr.s_nreloc = 0;  /* either 1 or 2 */
+  data_scnhdr.s_nlnno = 0;
+  data_scnhdr.s_flags = STYP_DATA;
+
+  /* bss */
+  memset (&bss_scnhdr, 0, sizeof (struct internal_scnhdr));
+  memcpy (bss_scnhdr.s_name, bss_name, strlen (bss_name));
+  bss_scnhdr.s_paddr = 0; /* set below */
+  bss_scnhdr.s_vaddr = 0; /* set below */
+  bss_scnhdr.s_size = 0;  /* set below */
+  bss_scnhdr.s_scnptr = 0;
+  bss_scnhdr.s_relptr = 0;  
+  bss_scnhdr.s_lnnoptr = 0;
+  bss_scnhdr.s_nreloc = 0;
+  bss_scnhdr.s_nlnno = 0;
+  bss_scnhdr.s_flags = STYP_BSS;
 
   /* .data 
      0x0000           0x00000000 : rtl
@@ -2209,7 +2242,8 @@ xcoff64_generate_rtinit  (abfd, init, fini)
 
   val = 0x10;
   bfd_put_32 (abfd, val, &data_buffer[0x10]);
-  scnhdr.s_size = data_buffer_size;
+  data_scnhdr.s_size = data_buffer_size;
+  bss_scnhdr.s_paddr = bss_scnhdr.s_vaddr = data_scnhdr.s_size;
 
   /* string table */
   string_table_size = 4;
@@ -2217,6 +2251,8 @@ xcoff64_generate_rtinit  (abfd, init, fini)
   string_table_size += strlen (rtinit_name) + 1;
   string_table_size += initsz;
   string_table_size += finisz;
+  if (true == rtld)
+    string_table_size += strlen (rtld_name) + 1;
 
   string_table = (bfd_byte *)bfd_malloc (string_table_size);
   memset (string_table, 0, string_table_size);
@@ -2228,9 +2264,10 @@ xcoff64_generate_rtinit  (abfd, init, fini)
      0. .data csect
      2. __rtinit
      4. init function 
-     6. fini function */
-  memset (syment_ext, 0, 8 * SYMESZ);
-  memset (reloc_ext, 0, 2 * RELSZ);
+     6. fini function 
+     8. __rtld  */
+  memset (syment_ext, 0, 10 * SYMESZ);
+  memset (reloc_ext, 0, 3 * RELSZ);
 
   /* .data csect */
   memset (&syment, 0, sizeof (struct internal_syment));
@@ -2240,7 +2277,7 @@ xcoff64_generate_rtinit  (abfd, init, fini)
   memcpy (st_tmp, data_name, strlen (data_name));
   st_tmp += strlen (data_name) + 1;
 
-  syment.n_scnum = 1;
+  syment.n_scnum = 2;
   syment.n_sclass = C_HIDEXT;
   syment.n_numaux = 1;
   auxent.x_csect.x_scnlen.l = data_buffer_size;
@@ -2260,7 +2297,7 @@ xcoff64_generate_rtinit  (abfd, init, fini)
   memcpy (st_tmp, rtinit_name, strlen (rtinit_name));
   st_tmp += strlen (rtinit_name) + 1;
   
-  syment.n_scnum = 1;
+  syment.n_scnum = 2;
   syment.n_sclass = C_EXT;
   syment.n_numaux = 1;
   auxent.x_csect.x_smtyp = XTY_LD;
@@ -2298,7 +2335,7 @@ xcoff64_generate_rtinit  (abfd, init, fini)
       bfd_coff_swap_reloc_out (abfd, &reloc, &reloc_ext[0]);
 
       filehdr.f_nsyms += 2;
-      scnhdr.s_nreloc += 1;
+      data_scnhdr.s_nreloc += 1;
     }
 
   /* finit */
@@ -2326,21 +2363,55 @@ xcoff64_generate_rtinit  (abfd, init, fini)
       reloc.r_type = R_POS;
       reloc.r_size = 63;
       bfd_coff_swap_reloc_out (abfd, &reloc, 
-			       &reloc_ext[scnhdr.s_nreloc * RELSZ]);
+			       &reloc_ext[data_scnhdr.s_nreloc * RELSZ]);
 
       filehdr.f_nsyms += 2;
-      scnhdr.s_nreloc += 1;
+      data_scnhdr.s_nreloc += 1;
     }
 
-  scnhdr.s_relptr = scnhdr.s_scnptr + data_buffer_size;
-  filehdr.f_symptr = scnhdr.s_relptr + scnhdr.s_nreloc * RELSZ;
+  if (rtld)
+    {
+      memset (&syment, 0, sizeof (struct internal_syment));
+      memset (&auxent, 0, sizeof (union internal_auxent));
+
+      syment._n._n_n._n_offset = st_tmp - string_table;
+      memcpy (st_tmp, rtld_name, strlen (rtld_name));
+      st_tmp += strlen (rtld_name) + 1;
+
+      syment.n_sclass = C_EXT;
+      syment.n_numaux = 1;
+      bfd_coff_swap_sym_out (abfd, &syment, 
+			     &syment_ext[filehdr.f_nsyms * SYMESZ]);
+      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
+			     syment.n_numaux, 
+			     &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
+
+      /* reloc */
+      memset (&reloc, 0, sizeof (struct internal_reloc));
+      reloc.r_vaddr = 0x0000;
+      reloc.r_symndx = filehdr.f_nsyms;
+      reloc.r_type = R_POS;
+      reloc.r_size = 63;
+      bfd_coff_swap_reloc_out (abfd, &reloc, 
+			       &reloc_ext[data_scnhdr.s_nreloc * RELSZ]);
+
+      filehdr.f_nsyms += 2;
+      data_scnhdr.s_nreloc += 1;
+
+      bss_scnhdr.s_size = 0;
+    }
+
+  data_scnhdr.s_relptr = data_scnhdr.s_scnptr + data_buffer_size;
+  filehdr.f_symptr = data_scnhdr.s_relptr + data_scnhdr.s_nreloc * RELSZ;
 
   bfd_coff_swap_filehdr_out (abfd, &filehdr, filehdr_ext);
   bfd_bwrite (filehdr_ext, FILHSZ, abfd);
-  bfd_coff_swap_scnhdr_out (abfd, &scnhdr, scnhdr_ext);
-  bfd_bwrite (scnhdr_ext, SCNHSZ, abfd);
+  bfd_coff_swap_scnhdr_out (abfd, &text_scnhdr, &scnhdr_ext[SCNHSZ * 0]);
+  bfd_coff_swap_scnhdr_out (abfd, &data_scnhdr, &scnhdr_ext[SCNHSZ * 1]);
+  bfd_coff_swap_scnhdr_out (abfd, &bss_scnhdr, &scnhdr_ext[SCNHSZ * 2]);
+  bfd_bwrite (scnhdr_ext, 3 * SCNHSZ, abfd);
   bfd_bwrite (data_buffer, data_buffer_size, abfd);
-  bfd_bwrite (reloc_ext, scnhdr.s_nreloc * RELSZ, abfd);
+  bfd_bwrite (reloc_ext, data_scnhdr.s_nreloc * RELSZ, abfd);
   bfd_bwrite (syment_ext, filehdr.f_nsyms * SYMESZ, abfd);
   bfd_bwrite (string_table, string_table_size, abfd);
 
@@ -2478,7 +2549,6 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
   /* rtinit */
   88,           /* _xcoff_rtinit_size */
   xcoff64_generate_rtinit,  /* _xcoff_generate_rtinit */
-
 };
 
 /* The transfer vector that leads the outside world to all of the above. */

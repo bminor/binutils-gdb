@@ -1,3 +1,15 @@
+2002-02-18  Tom Rix  <trix@redhat.com>
+
+	* xcofflink.c (bfd_xcoff_link_gernate_rtinit): Add -brtl support.
+	(bfd_xcoff_size_dynamic_sections): Same.
+	* bfd-in.h (bfd_xcoff_link_generate_rtinit): Same.
+	(bfd_xcoff_size_dynamic_sections): Same.
+	* coff-rs6000.c (xcoff_generate_rtinit): Same.
+	* coff-rs646000.c (xcoff64_generate_rtinit): Same.
+	* libxcoff.h (struct xcoff_backend_data_rec): Same.
+	* xcofflink.c (xcoff_build_ldsyms, xcoff_link_add_symbols): Clean.
+	* bfd-in2.h: Regenerate.
+
 2002-02-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (STFD_FR0_0R1, LFD_FR0_0R1, BLR): Define.

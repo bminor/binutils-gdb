@@ -95,7 +95,8 @@ struct xcoff_backend_data_rec
 
   /* rtinit */
   unsigned int _xcoff_rtinit_size;
-  boolean (*_xcoff_generate_rtinit)(bfd *, const char *, const char *);
+  boolean (*_xcoff_generate_rtinit)(bfd *, const char *, const char *, 
+				    boolean);
 };
 
 /* Look up an entry in an XCOFF link hash table.  */
@@ -192,6 +193,6 @@ struct xcoff_backend_data_rec
 #define bfd_xcoff_is_xcoff32(a) (0x01DF == (bfd_xcoff_magic_number(a)))
 
 #define bfd_xcoff_rtinit_size(a) ((xcoff_backend(a)->_xcoff_rtinit_size))
-#define bfd_xcoff_generate_rtinit(a, b, c) ((xcoff_backend(a)->_xcoff_generate_rtinit ((a), (b), (c))))
+#define bfd_xcoff_generate_rtinit(a, b, c, d) ((xcoff_backend(a)->_xcoff_generate_rtinit ((a), (b), (c), (d))))
 
 #endif /* LIBXCOFF_H */

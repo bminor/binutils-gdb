@@ -1046,16 +1046,12 @@ xcoff_link_add_symbols (abfd, info)
       && ! info->static_link)
     {
       if (! xcoff_link_add_dynamic_symbols (abfd, info))
-	{
-	  return false;
-	}
+	return false;
     }
 
   /* create the loader, toc, gl, ds and debug sections, if needed */
   if (false == xcoff_link_create_extra_sections(abfd, info))
-    {
-      goto error_return;
-    }
+    goto error_return;
 
   if ((abfd->flags & DYNAMIC) != 0
       && ! info->static_link)
@@ -1145,7 +1141,6 @@ xcoff_link_add_symbols (abfd, info)
 
 	}
     }
-
 
   /* Don't let the linker relocation routines discard the symbols.  */
   obj_coff_keep_syms (abfd) = true;
@@ -2806,7 +2801,7 @@ boolean
 bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 				 file_align, maxstack, maxdata, gc,
 				 modtype, textro, export_defineds,
-				 special_sections)
+				 special_sections, rtld)
      bfd *output_bfd;
      struct bfd_link_info *info;
      const char *libpath;
@@ -2819,6 +2814,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
      boolean textro;
      boolean export_defineds;
      asection **special_sections;
+     boolean rtld;
 {
   struct xcoff_link_hash_entry *hentry;
   asection *lsec;
@@ -2837,7 +2833,6 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 
   if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     {
-
       for (i = 0; i < XCOFF_NUMBER_OF_SPECIAL_SECTIONS; i++)
 	special_sections[i] = NULL;
       return true;
@@ -2859,11 +2854,8 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   xcoff_hash_table (info)->file_align = file_align;
   xcoff_hash_table (info)->textro = textro;
 
-  if (entry == NULL)
-    {
-      hentry = NULL;
-    }
-  else
+  hentry = NULL;
+  if (entry != NULL)
     {
       hentry = xcoff_link_hash_lookup (xcoff_hash_table (info), entry,
 				       false, false, true);
@@ -2872,65 +2864,56 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
     }
 
   /* __rtinit */
-  if (info->init_function || info->fini_function) {
-    struct xcoff_link_hash_entry *hrtinit;
-    struct internal_ldsym *ldsym;
+  if (info->init_function || info->fini_function || rtld == true) 
+    {
+      struct xcoff_link_hash_entry *hsym;
+      struct internal_ldsym *ldsym;
+      
+      hsym = xcoff_link_hash_lookup (xcoff_hash_table (info),
+				     "__rtinit", false, false, true);
+      if (hsym == NULL)
+	{
+	  (*_bfd_error_handler)
+	    (_("error: undefined symbol __rtinit"));
+	  return false;
+	}
+      
+      xcoff_mark_symbol (info, hsym);
+      hsym->flags |= (XCOFF_DEF_REGULAR | XCOFF_RTINIT);
 
-    hrtinit = xcoff_link_hash_lookup (xcoff_hash_table (info),
-				      "__rtinit",
-				      false, false, true);
-    if (hrtinit != NULL)
-      {
-	xcoff_mark_symbol (info, hrtinit);
-	hrtinit->flags |= (XCOFF_DEF_REGULAR | XCOFF_RTINIT);
-      }
-    else
-      {
-	(*_bfd_error_handler)
-	  (_("error: undefined symbol __rtinit"));
-
+      /* __rtinit initalized */
+      amt = sizeof (struct internal_ldsym);
+      ldsym = (struct internal_ldsym *) bfd_malloc (amt);
+      
+      ldsym->l_value = 0;                  /* will be filled in later */
+      ldsym->l_scnum = 2;                  /* data section */
+      ldsym->l_smtype = XTY_SD;            /* csect section definition */
+      ldsym->l_smclas = 5;                 /* .rw */
+      ldsym->l_ifile = 0;                  /* special system loader symbol */
+      ldsym->l_parm = 0;                   /* NA */
+      
+      /* Force __rtinit to be the first symbol in the loader symbol table
+	 See xcoff_build_ldsyms
+	 
+	 The first 3 symbol table indices are reserved to indicate the data,
+	 text and bss sections.  */
+      BFD_ASSERT (0 == ldinfo.ldsym_count);
+      
+      hsym->ldindx = 3;
+      ldinfo.ldsym_count = 1;
+      hsym->ldsym = ldsym;
+      
+      if (false == bfd_xcoff_put_ldsymbol_name (ldinfo.output_bfd, &ldinfo,
+						hsym->ldsym,
+						hsym->root.root.string))
 	return false;
-      }
-
-    /* __rtinit initalized here
-       Some information, like the location of the .initfini seciton will
-       be filled in later.
-
-       name or offset taken care of below with bfd_xcoff_put_ldsymbol_name.  */
-    amt = sizeof (struct internal_ldsym);
-    ldsym = (struct internal_ldsym *) bfd_malloc (amt);
-
-    ldsym->l_value = 0;                  /* will be filled in later */
-    ldsym->l_scnum = 2;                  /* data section */
-    ldsym->l_smtype = XTY_SD;            /* csect section definition */
-    ldsym->l_smclas = 5;                 /* .rw */
-    ldsym->l_ifile = 0;                  /* special system loader symbol */
-    ldsym->l_parm = 0;                   /* NA */
-
-    /* Force __rtinit to be the first symbol in the loader symbol table
-       See xcoff_build_ldsyms
-
-       The first 3 symbol table indices are reserved to indicate the data,
-       text and bss sections.  */
-    BFD_ASSERT (0 == ldinfo.ldsym_count);
-
-    hrtinit->ldindx = 3;
-    ldinfo.ldsym_count = 1;
-    hrtinit->ldsym = ldsym;
-
-    if (false == bfd_xcoff_put_ldsymbol_name (ldinfo.output_bfd, &ldinfo,
-					      hrtinit->ldsym,
-					      hrtinit->root.root.string))
-      {
-	return false;
-      }
-
-    /* This symbol is written out by xcoff_write_global_symbol
-       Set stuff up so xcoff_write_global_symbol logic works.  */
-    hrtinit->flags |= XCOFF_DEF_REGULAR | XCOFF_MARK;
-    hrtinit->root.type = bfd_link_hash_defined;
-    hrtinit->root.u.def.value = 0;
-  }
+      
+      /* This symbol is written out by xcoff_write_global_symbol
+	 Set stuff up so xcoff_write_global_symbol logic works.  */
+      hsym->flags |= XCOFF_DEF_REGULAR | XCOFF_MARK;
+      hsym->root.type = bfd_link_hash_defined;
+      hsym->root.u.def.value = 0;
+    }
 
   /* Garbage collect unused sections.  */
   if (info->relocateable
@@ -3220,10 +3203,11 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 }
 
 boolean 
-bfd_xcoff_link_generate_rtinit (abfd, init, fini)
+bfd_xcoff_link_generate_rtinit (abfd, init, fini, rtld)
      bfd *abfd;
      const char *init;
      const char *fini;
+     boolean rtld;
 {
   struct bfd_in_memory *bim;
   
@@ -3242,7 +3226,7 @@ bfd_xcoff_link_generate_rtinit (abfd, init, fini)
   abfd->direction = write_direction;
   abfd->where = 0;
 
-  if (false == bfd_xcoff_generate_rtinit (abfd, init, fini)) 
+  if (false == bfd_xcoff_generate_rtinit (abfd, init, fini, rtld)) 
     return false;
 
   /* need to reset to unknown or it will not be read back in correctly */
@@ -3264,14 +3248,9 @@ xcoff_build_ldsyms (h, p)
   struct xcoff_loader_info *ldinfo = (struct xcoff_loader_info *) p;
   bfd_size_type amt;
 
-  /* __rtinit
-     Special handling of this symbol to make is the first symbol in
-     the loader symbol table.  Make sure this pass through does not
-     undo it.  */
+  /* __rtinit, this symbol has special handling. */
   if (h->flags & XCOFF_RTINIT)
-    {
       return true;
-    }
 
   /* If this is a final link, and the symbol was defined as a common
      symbol in a regular object file, and there was no definition in
@@ -3386,17 +3365,11 @@ xcoff_build_ldsyms (h, p)
 	     xcoff32 uses 4 bytes in the toc.
 	     xcoff64 uses 8 bytes in the toc.  */
 	  if (bfd_xcoff_is_xcoff64 (ldinfo->output_bfd))
-	    {
-	      byte_size = 8;
-	    }
+	    byte_size = 8;
 	  else if (bfd_xcoff_is_xcoff32 (ldinfo->output_bfd))
-	    {
-	      byte_size = 4;
-	    }
+	    byte_size = 4;
 	  else
-	    {
-	      return false;
-	    }
+	    return false;
 
 	  hds->toc_section = xcoff_hash_table (ldinfo->info)->toc_section;
 	  hds->u.toc_offset = hds->toc_section->_raw_size;

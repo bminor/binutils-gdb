@@ -130,7 +130,10 @@ static unsigned int syscall_mask = 0x77;
 
 /* fake file for -binitfini support */
 static lang_input_statement_type *initfini_file;
- 
+
+/* Whether to do run time linking */
+static boolean rtld;
+
 /* This routine is called before anything else is done.  */
 
 static void
@@ -155,7 +158,6 @@ gld${EMULATION_NAME}_before_parse ()
 
   link_info.init_function = NULL;
   link_info.fini_function = NULL;
-
 }
 
 /* Handle AIX specific options.  */
@@ -241,6 +243,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"bpD", required_argument, NULL, OPTION_PD},
     {"bpT", required_argument, NULL, OPTION_PT},
     {"bro", no_argument, &textro, 1},
+    {"brtl", no_argument, &rtld, 1},
     {"bS", required_argument, NULL, OPTION_MAXSTACK},
     {"bso", no_argument, NULL, OPTION_AUTOIMP},
     {"bstrcmpct", no_argument, NULL, OPTION_STRCMPCT},
@@ -663,13 +666,10 @@ gld${EMULATION_NAME}_before_allocation ()
     }
 
   /* Let the XCOFF backend set up the .loader section.  */
-  if (!bfd_xcoff_size_dynamic_sections (output_bfd, &link_info, libpath,
-					entry_symbol, file_align,
-					maxstack, maxdata,
-					gc && !unix_ld ? true : false,
-					modtype,
-					textro ? true : false,
-					unix_ld, special_sections))
+  if (!bfd_xcoff_size_dynamic_sections 
+      (output_bfd, &link_info, libpath,	entry_symbol, file_align,
+       maxstack, maxdata, gc && !unix_ld ? true : false,
+       modtype,	textro ? true : false, unix_ld, special_sections, rtld))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
   /* Look through the special sections, and put them in the right
@@ -943,12 +943,11 @@ gld${EMULATION_NAME}_read_file (filename, import)
 
   lineno = 0;
 
-  /*
-   * default to 32 and 64 bit mode
-   * symbols at top of /lib/syscalls.exp do not have a mode modifier and they
-   * are not repeated, assume 64 bit routines also want to use them.
-   * See the routine change_symbol_mode for more information.
-   */
+  /* Default to 32 and 64 bit mode
+     symbols at top of /lib/syscalls.exp do not have a mode modifier and they
+     are not repeated, assume 64 bit routines also want to use them.
+     See the routine change_symbol_mode for more information.  */
+
   symbol_mode = 0x04;
 
   while ((c = getc (f)) != EOF)
@@ -1291,9 +1290,10 @@ gld${EMULATION_NAME}_create_output_section_statements()
 {
   /* __rtinit */
   if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour) 
-      && (link_info.init_function != NULL  || link_info.fini_function != NULL))
+      && (link_info.init_function != NULL  
+	  || link_info.fini_function != NULL
+	  || rtld == true))
     {
-      
       initfini_file = lang_add_input_file ("initfini",
 					   lang_input_file_is_file_enum,
 					   NULL);
@@ -1311,11 +1311,16 @@ gld${EMULATION_NAME}_create_output_section_statements()
       /* Call backend to fill in the rest */
       if (false == bfd_xcoff_link_generate_rtinit (initfini_file->the_bfd, 
 						   link_info.init_function, 
-						   link_info.fini_function))
+						   link_info.fini_function,
+						   rtld))
 	{
 	  einfo ("%X%P: can not create BFD %E\n");
 	  return;
 	}
+
+      /* __rtld defined in /lib/librtl.a */
+      if (true == rtld) 
+	lang_add_input_file ("rtl", lang_input_file_is_l_enum, NULL);
     }
 }
 

@@ -751,9 +751,9 @@ extern boolean bfd_xcoff_record_link_assignment
 extern boolean bfd_xcoff_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, const char *, const char *,
 	   unsigned long, unsigned long, unsigned long, boolean,
-	   int, boolean, boolean, struct sec **));
+	   int, boolean, boolean, struct sec **, boolean));
 extern boolean bfd_xcoff_link_generate_rtinit
-  PARAMS ((bfd *, const char *, const char *));
+  PARAMS ((bfd *, const char *, const char *, boolean));
 
 /* Externally visible COFF routines.  */
 
