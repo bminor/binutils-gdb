@@ -908,12 +908,12 @@ ppc_elf_suffix (str_p)
 #define MAP(str,reloc) { str, sizeof(str)-1, reloc }
 
   static struct map_bfd mapping[] = {
-    MAP ("got",		BFD_RELOC_PPC_TOC16),
     MAP ("l",		BFD_RELOC_LO16),
     MAP ("h",		BFD_RELOC_HI16),
     MAP ("ha",		BFD_RELOC_HI16_S),
     MAP ("brtaken",	BFD_RELOC_PPC_B16_BRTAKEN),
     MAP ("brntaken",	BFD_RELOC_PPC_B16_BRNTAKEN),
+    MAP ("got",		BFD_RELOC_16_GOTOFF),
     MAP ("got@l",	BFD_RELOC_LO16_GOTOFF),
     MAP ("got@h",	BFD_RELOC_HI16_GOTOFF),
     MAP ("got@ha",	BFD_RELOC_HI16_S_GOTOFF),
@@ -932,6 +932,7 @@ ppc_elf_suffix (str_p)
     MAP ("sectoff@l",	BFD_RELOC_LO16_BASEREL),
     MAP ("sectoff@h",	BFD_RELOC_HI16_BASEREL),
     MAP ("sectoff@ha",	BFD_RELOC_HI16_S_BASEREL),
+    MAP ("xgot",	BFD_RELOC_PPC_TOC16),
 
     { (char *)0,	0,	BFD_RELOC_UNUSED }
   };
@@ -1728,6 +1729,62 @@ ppc_macro (str, macro)
   /* Assemble the constructed instruction.  */
   md_assemble (complete);
 }  
+
+/* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED */
+
+int
+ppc_section_letter (letter, ptr_msg)
+     int letter;
+     char **ptr_msg;
+{
+  if (letter == 'e')
+    return SHF_EXCLUDE;
+
+  *ptr_msg = "Bad .section directive: want a,w,x,e in string";
+  return 0;
+}
+
+int
+ppc_section_word (ptr_str)
+     char **ptr_str;
+{
+  if (strncmp (*ptr_str, "exclude", sizeof ("exclude")-1) == 0)
+    {
+      *ptr_str += sizeof ("exclude")-1;
+      return SHF_EXCLUDE;
+    }
+
+  return 0;
+}
+
+int
+ppc_section_type (ptr_str)
+     char **ptr_str;
+{
+  if (strncmp (*ptr_str, "ordered", sizeof ("ordered")-1) == 0)
+    {
+      *ptr_str += sizeof ("ordered")-1;
+      return SHT_ORDERED;
+    }
+
+  return 0;
+}
+
+int
+ppc_section_flags (flags, attr, type)
+     int flags;
+     int attr;
+     int type;
+{
+  if (type == SHT_ORDERED)
+    flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
+
+  if (attr & SHF_EXCLUDE)
+    flags |= SEC_EXCLUDE;
+
+  return flags;
+}
+
 
 /* Pseudo-op handling.  */
 
@@ -4217,10 +4274,14 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_LO16:
 	case BFD_RELOC_HI16:
 	case BFD_RELOC_HI16_S:
-	case BFD_RELOC_PPC_TOC16:
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
 	case BFD_RELOC_16_GOT_PCREL:
+	case BFD_RELOC_16_GOTOFF:
+	case BFD_RELOC_LO16_GOTOFF:
+	case BFD_RELOC_HI16_GOTOFF:
+	case BFD_RELOC_HI16_S_GOTOFF:
+	case BFD_RELOC_PPC_TOC16:
 	  if (fixp->fx_pcrel)
 	    abort ();
 

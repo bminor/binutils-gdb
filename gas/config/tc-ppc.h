@@ -25,8 +25,8 @@
 #endif
 
 /* If OBJ_COFF is defined, and TE_PE is not defined, we are assembling
-   XCOFF for AIX.  If TE_PE is defined, we are assembling COFF for
-   Windows NT.  */
+   XCOFF for AIX or PowerMac.  If TE_PE is defined, we are assembling
+   COFF for Windows NT.  */
 
 #ifdef OBJ_COFF
 #ifndef TE_PE
@@ -48,6 +48,14 @@ extern int target_big_endian;
 #else
 #define TARGET_FORMAT "aixcoff-rs6000"
 #endif
+#endif
+
+/* PowerMac has a BFD slightly different from AIX's.  */
+#ifdef TE_POWERMAC
+#ifdef TARGET_FORMAT
+#undef TARGET_FORMAT
+#endif
+#define TARGET_FORMAT "xcoff-powermac"
 #endif
 
 #ifdef OBJ_ELF
@@ -174,12 +182,12 @@ extern void ppc_frob_section PARAMS ((asection *));
 #define tc_frob_symbol(sym, punt) punt = ppc_frob_symbol (sym)
 extern int ppc_frob_symbol PARAMS ((struct symbol *));
 
+/* Finish up the entire symtab.  */
+#define tc_adjust_symtab() ppc_adjust_symtab ()
+extern void ppc_adjust_symtab PARAMS ((void));
+
 /* Niclas Andersson <nican@ida.liu.se> says this is needed.  */
 #define SUB_SEGMENT_ALIGN(SEG) 2
-
-/* Finish up the file.  */
-#define tc_frob_file() ppc_frob_file ()
-extern void ppc_frob_file PARAMS ((void));
 
 #endif /* OBJ_XCOFF */
 
@@ -199,6 +207,16 @@ extern void ppc_frob_file PARAMS ((void));
  || ((FIXP)->fx_addsy && !(FIXP)->fx_subsy && (FIXP)->fx_addsy->bsym	\
      && (FIXP)->fx_addsy->bsym->section != SEC))
 
+/* Support for SHF_EXCLUDE and SHT_ORDERED */
+extern int ppc_section_letter PARAMS ((int, char **));
+extern int ppc_section_type PARAMS ((char **));
+extern int ppc_section_word PARAMS ((char **));
+extern int ppc_section_flags PARAMS ((int, int, int));
+
+#define md_elf_section_letter(LETTER, PTR_MSG)	ppc_section_letter (LETTER, PTR_MSG)
+#define md_elf_section_type(PTR_STR)		ppc_section_type (PTR_STR)
+#define md_elf_section_word(PTR_STR)		ppc_section_word (PTR_STR)
+#define md_elf_section_flags(FLAGS, ATTR, TYPE)	ppc_section_flags (FLAGS, ATTR, TYPE)
 #endif /* OBJ_ELF */
 
 /* call md_apply_fix3 with segment instead of md_apply_fix */
@@ -208,3 +226,4 @@ extern void ppc_frob_file PARAMS ((void));
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
 
 #define md_operand(x)
+

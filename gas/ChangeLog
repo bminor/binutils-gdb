@@ -1,3 +1,16 @@
+Fri Jan 12 15:32:07 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/obj-elf.c (obj_elf_section): Add hooks so machine
+	dependent section attributes can be handled.
+
+	* config/tc-ppc.h: (md_elf_section_{letter,type,word,flags}): New
+	macros to add support for exclude section flag and ordered section
+	type.
+
+	* config/tc-ppc.c (ppc_elf_section_{letter,type,word,flags}): New
+	functions to add support for exclude section flag and ordered
+	section type.
+
 Fri Jan 12 12:04:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (cons_worker): Only call mri_comment_end from flag_mri.

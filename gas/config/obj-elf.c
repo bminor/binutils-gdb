@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public
    License along with GAS; see the file COPYING.  If not, write
-   to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define OBJ_HEADER "obj-elf.h"
 #include "as.h"
@@ -24,9 +24,11 @@
 
 #ifndef ECOFF_DEBUGGING
 #define ECOFF_DEBUGGING 0
+#else
+#define NEED_ECOFF_DEBUG
 #endif
 
-#if ECOFF_DEBUGGING
+#ifdef NEED_ECOFF_DEBUG
 #include "ecoff.h"
 #endif
 
@@ -34,7 +36,7 @@
 #include "elf/mips.h"
 #endif
 
-#if ECOFF_DEBUGGING
+#ifdef NEED_ECOFF_DEBUG
 static boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
 static void elf_set_index PARAMS ((asymbol *, bfd_size_type));
 #endif
@@ -57,6 +59,9 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"local", obj_elf_local, 0},
   {"previous", obj_elf_previous, 0},
   {"section", obj_elf_section, 0},
+  {"section.s", obj_elf_section, 0},
+  {"sect", obj_elf_section, 0},
+  {"sect.s", obj_elf_section, 0},
   {"size", obj_elf_size, 0},
   {"type", obj_elf_type, 0},
   {"version", obj_elf_version, 0},
@@ -80,6 +85,7 @@ static const pseudo_typeS elf_pseudo_table[] =
 
 static const pseudo_typeS ecoff_debug_pseudo_table[] =
 {
+#ifdef NEED_ECOFF_DEBUG
   /* COFF style debugging information for ECOFF. .ln is not used; .loc
      is used instead.  */
   { "def",	ecoff_directive_def,	0 },
@@ -106,6 +112,9 @@ static const pseudo_typeS ecoff_debug_pseudo_table[] =
   { "loc",	ecoff_directive_loc,	0 },
   { "mask",	ecoff_directive_mask,	0 },
 
+  /* Other ECOFF directives.  */
+  { "extern",	ecoff_directive_extern,	0 },
+
   /* These are used on Irix.  I don't know how to implement them.  */
   { "alias",	s_ignore,		0 },
   { "bgnb",	s_ignore,		0 },
@@ -114,6 +123,7 @@ static const pseudo_typeS ecoff_debug_pseudo_table[] =
   { "noalias",	s_ignore,		0 },
   { "verstamp",	s_ignore,		0 },
   { "vreg",	s_ignore,		0 },
+#endif
 
   {NULL}			/* end sentinel */
 };
@@ -273,7 +283,19 @@ obj_elf_common (ignore)
 	/* allocate_bss: */
 	  old_sec = now_seg;
 	  old_subsec = now_subseg;
-	  align = temp;
+	  if (temp)
+	    {
+	      /* convert to a power of 2 alignment */
+	      for (align = 0; (temp & 1) == 0; temp >>= 1, ++align);
+	      if (temp != 1)
+		{
+		  as_bad ("Common alignment not a power of 2");
+		  ignore_rest_of_line ();
+		  return;
+		}
+	    }
+	  else
+	    align = 0;
 	  record_alignment (bss_section, align);
 	  subseg_set (bss_section, 0);
 	  if (align)
@@ -284,6 +306,7 @@ obj_elf_common (ignore)
 	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
 			    (char *) 0);
 	  *pfrag = 0;
+	  S_SET_SIZE (symbolP, size);
 	  S_SET_SEGMENT (symbolP, bss_section);
 	  S_CLEAR_EXTERNAL (symbolP);
 	  subseg_set (old_sec, old_subsec);
@@ -476,6 +499,22 @@ obj_elf_section (xxx)
   md_flush_pending_output ();
 #endif
 
+  if (flag_mri)
+    {
+      char type;
+
+      previous_section = now_seg;
+      previous_subsection = now_subseg;
+
+      s_mri_sect (&type);
+
+#ifdef md_elf_section_change_hook
+      md_elf_section_change_hook ();
+#endif
+
+      return;
+    }
+
   /* Get name of section.  */
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '"')
@@ -558,9 +597,20 @@ obj_elf_section (xxx)
 		  attr |= SHF_EXECINSTR;
 		  break;
 		default:
-		  as_warn ("Bad .section directive: want a,w,x in string");
-		  ignore_rest_of_line ();
-		  return;
+		  {
+		    char *bad_msg = "Bad .section directive: want a,w,x in string";
+#ifdef md_elf_section_letter
+		    int md_attr = md_elf_section_letter (*input_line_pointer, &bad_msg);
+		    if (md_attr)
+		      attr |= md_attr;
+		    else
+#endif
+		      {
+			as_warn (bad_msg);
+			ignore_rest_of_line ();
+			return;
+		      }
+		  }
 		}
 	      ++input_line_pointer;
 	    }
@@ -590,8 +640,16 @@ obj_elf_section (xxx)
 		    }
 		  else
 		    {
-		      as_warn ("Unrecognized section type");
-		      ignore_rest_of_line ();
+#ifdef md_elf_section_type
+		    int md_type = md_elf_section_type (&input_line_pointer);
+		    if (md_type)
+		      type = md_type;
+		    else
+#endif
+		      {
+			as_warn ("Unrecognized section type");
+			ignore_rest_of_line ();
+		      }
 		    }
 		}
 	    }
@@ -628,9 +686,17 @@ obj_elf_section (xxx)
 		}
 	      else
 		{
-		  as_warn ("Unrecognized section attribute");
-		  ignore_rest_of_line ();
-		  return;
+#ifdef md_elf_section_word
+		  int md_attr = md_elf_section_word (&input_line_pointer);
+		  if (md_attr)
+		    attr |= md_attr;
+		  else
+#endif
+		    {
+		      as_warn ("Unrecognized section attribute");
+		      ignore_rest_of_line ();
+		      return;
+		    }
 		}
 	      SKIP_WHITESPACE ();
 	    }
@@ -671,6 +737,10 @@ obj_elf_section (xxx)
 	  flags |= SEC_ALLOC;
 	  flags &=~ SEC_LOAD;
 	}
+
+#ifdef md_elf_section_flags
+      flags = md_elf_section_flags (flags, attr, type);
+#endif
     }
 
   bfd_set_section_flags (stdoutput, sec, flags);
@@ -730,8 +800,10 @@ obj_elf_line (ignore)
 void 
 obj_read_begin_hook ()
 {
+#ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     ecoff_read_begin_hook ();
+#endif
 }
 
 void 
@@ -740,8 +812,10 @@ obj_symbol_new_hook (symbolP)
 {
   symbolP->sy_obj = 0;
 
+#ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     ecoff_symbol_new_hook (symbolP);
+#endif
 }
 
 void 
@@ -999,7 +1073,7 @@ adjust_stab_sections (abfd, sec, xxx)
   bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
 }
 
-/* #ifdef ECOFF_DEBUGGING */
+#ifdef NEED_ECOFF_DEBUG
 
 /* This function is called by the ECOFF code.  It is supposed to
    record the external symbol information so that the backend can
@@ -1041,15 +1115,17 @@ elf_set_index (sym, indx)
 {
 }
 
-/* #endif /* ECOFF_DEBUGGING */
+#endif /* NEED_ECOFF_DEBUG */
 
 void
 elf_frob_symbol (symp, puntp)
      symbolS *symp;
      int *puntp;
 {
+#ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     ecoff_frob_symbol (symp);
+#endif
 
   if (symp->sy_obj)
     {
@@ -1070,9 +1146,9 @@ elf_frob_symbol (symp, puntp)
 	  as_bad (".size expression too complicated to fix up");
 	  break;
 	}
+      free (symp->sy_obj);
+      symp->sy_obj = 0;
     }
-  free (symp->sy_obj);
-  symp->sy_obj = 0;
 
   /* Double check weak symbols.  */
   if (symp->bsym->flags & BSF_WEAK)
@@ -1092,6 +1168,7 @@ elf_frob_file ()
   elf_tc_final_processing ();
 #endif
 
+#ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     /* Generate the ECOFF debugging information.  */
     {
@@ -1154,6 +1231,7 @@ elf_frob_file ()
 	as_fatal ("Could not write .mdebug section: %s",
 		  bfd_errmsg (bfd_get_error ()));
     }
+#endif /* NEED_ECOFF_DEBUG */
 }
 
 const struct format_ops elf_format_ops =
@@ -1166,15 +1244,20 @@ const struct format_ops elf_format_ops =
   elf_s_get_size, elf_s_set_size,
   elf_s_get_align, elf_s_set_align,
   elf_copy_symbol_attributes,
-#ifdef ECOFF_DEBUGGING
+#ifdef NEED_ECOFF_DEBUG
   ecoff_generate_asm_lineno,
+  ecoff_stab,
+#else
+  0,
+  0,				/* process_stab */
+#endif
+  elf_sec_sym_ok_for_reloc,
+  elf_pop_insert,
+#ifdef NEED_ECOFF_DEBUG
+  elf_ecoff_set_ext,
 #else
   0,
 #endif
-  0,				/* process_stab */
-  elf_sec_sym_ok_for_reloc,
-  elf_pop_insert,
-  elf_ecoff_set_ext,
   obj_read_begin_hook,
   obj_symbol_new_hook,
 };
