@@ -1,9 +1,13 @@
 2002-09-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* expr.c (expr): Simplify foo-foo here.
+	(clean_up_expression): Remove O_subtract code.
+
 	* write.h (struct fix): Add fx_dot_value.
 	(dot_value): Declare.
 	* write.c (dot_value): New var.
 	(fix_new_internal): Save dot_value as fx_dot_value.
+	(fixup_segment): Adjust fx_offset using fx_dot_value.
 	* expr.c (expr): Update dot_value.
 
 2002-09-19  Jakub Jelinek  <jakub@redhat.com>
@@ -59,7 +63,7 @@
 
 	* config/tc-arm.c (md_apply_fix3): Note that an implemented
 	BFD_RELOC_ARM_IMMEDIATE has been done.
-        (tc_gen_reloc): Do not issue reloc number of unimplemented
+	(tc_gen_reloc): Do not issue reloc number of unimplemented
 	BFD_RELOC_ARM_IMMEDIATE and BFD_RELOC_ARM_OFFSET_IMM relocs -
 	their name is already in the error message - plus remove them
 	from the default case.
@@ -115,10 +119,10 @@
 
 2002-09-05  Jeff Law  <law@redhat.com>
 
-        * config/tc-hppa.c (md_apply_fix3): Don't set fx_done for
-        marker relocations such as ENTRY/EXIT.
-        * config/tc-hppa.h (MD_APPLY_SYM_VALUE): Definition applies
-        to both OBJ_ELF and OBJ_SOM.
+	* config/tc-hppa.c (md_apply_fix3): Don't set fx_done for
+	marker relocations such as ENTRY/EXIT.
+	* config/tc-hppa.h (MD_APPLY_SYM_VALUE): Definition applies
+	to both OBJ_ELF and OBJ_SOM.
 
 2002-09-05  Alan Modra  <amodra@bigpond.net.au>
 
@@ -2517,7 +2521,7 @@
 	(shmedia_md_convert_frag): Handle non-PC-relative UNDEF_MOVI
 	and MOVI_16.
 	(shmedia_md_estimate_size_before_relax): Remove redundant
-	blocks.	 Set fragP->fr_var even if relaxation type unchanged.
+	blocks.  Set fragP->fr_var even if relaxation type unchanged.
 	Retain UNDEF_MOVI until expression decays to number.
 	2002-01-24  Alexandre Oliva  <aoliva@redhat.com>
 	* config/tc-sh64.c (shmedia_init_reloc): Handle new SHmedia PIC
@@ -2639,13 +2643,13 @@
 	(shmedia_frob_file_before_adjust): Ditto.
 	(shmedia_md_apply_fix) <case BFD_RELOC_SH_IMM_MEDLOW16>: Cast mask
 	to valueT to remove signedness.
-	(shmedia_md_convert_frag): Add parameter final.	 Rename parameter
+	(shmedia_md_convert_frag): Add parameter final.  Rename parameter
 	headers to output_bfd.	Do not evaluate symbols if final is false;
 	do emit fixups.
 	(shmedia_md_estimate_size_before_relax) <case C (MOVI_IMM_32,
 	UNDEF_MOVI) et al>: If symbol cannot be modified to be PC-relative
 	to the current frag, call shmedia_md_convert_frag to emit fixups
-	and make frag_wane neutralize the frag.	 Update comments.
+	and make frag_wane neutralize the frag.  Update comments.
 	* config/tc-sh.c (md_convert_frag): Change caller of
 	shmedia_md_convert_frag.
 	2001-01-06  Hans-Peter Nilsson	<hpn@cygnus.com>
@@ -2657,7 +2661,7 @@
 	(shmedia_check_limits): Fix range check being off-by-one for PTA.
 	* config/tc-sh.c: Ditto.  Add proper comments to #ifdef/#ifndef
 	wrappers.
-	(SH64PCREL16_F): Increment for proper max-PTA handling.	 Update
+	(SH64PCREL16_F): Increment for proper max-PTA handling.  Update
 	comment.
 	(SH64PCREL16_M, MOVI_16_M): Correct range thinko.
 	(SH64PCREL48_M, MOVI_48_M): Similar; don't count in length of
@@ -2680,7 +2684,7 @@
 	(sh64_expand, sh64_pt32): New variables.
 	(shmedia_init_reloc): Handle BFD_RELOC_SH_PT_16.
 	(shmedia_md_apply_fix): Hold original fixP->fx_r_type in
-	orig_fx_r_type.	 Change SHMEDIA_BFD_RELOC_PT into
+	orig_fx_r_type.  Change SHMEDIA_BFD_RELOC_PT into
 	BFD_RELOC_SH_PT_16.  Handle BFD_RELOC_SH_PT_16 as pc-relative.
 	<resolved previously-pc-relative relocs>: Handle
 	SHMEDIA_BFD_RELOC_PT and BFD_RELOC_SH_PT_16.
@@ -2817,7 +2821,7 @@
 	(shmedia_md_pcrel_from_section): ...here.
 	(shmedia_md_apply_fix): Handle fixups for 16-bit operands that has
 	turned completely resolved.  Adjust relocation type for 16-bit
-	immediate operands that has turned PC-relative.	 Adjust back for
+	immediate operands that has turned PC-relative.  Adjust back for
 	MD_PCREL_FROM_SECTION being applied twice.
 	(shmedia_md_convert_frag): Always emit reloc for expression with
 	global or weak symbol.	Handle relaxation result for PC-relative
@@ -2831,7 +2835,7 @@
 	(shmedia_build_Mytes): CSE &operands->operands[j] into variable
 	opjp.
 	<case A_IMMS16>: Fix typo for initial minor relaxation type of
-	MOVI expansion.	 If X_op_symbol of the immediate expression is
+	MOVI expansion.  If X_op_symbol of the immediate expression is
 	set, make an expression symbol for the argument to frag_var.
 	* config/tc-sh.c (MOVI_IMM_32_PCREL, MOVI_IMM_64_PCREL): New
 	relaxations.
@@ -2855,7 +2859,7 @@
 	(sh64_adjust_symtab): For remaining datalabel symbols, set to
 	undefined and set STT_DATALABEL.
 	(sh64_frob_label): Initialize TC symbol field.
-	(sh64_consume_datalabel): Actually implement semantics.	 New
+	(sh64_consume_datalabel): Actually implement semantics.  New
 	parameter operandf, call it instead of expression.
 	(sh64_exclude_symbol): New.
 	* config/tc-sh64.h (md_parse_name): Pass on the function operand

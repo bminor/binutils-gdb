@@ -1347,8 +1347,6 @@ operand (expressionP)
 	Elsewise we waste time special-case testing. Sigh. Ditto SEG_ABSENT.
 
    Out:	expressionS may have been modified:
-	'foo-foo' symbol references cancelled to 0, which changes X_op
-	from O_subtract to O_constant.
 	Unused fields zeroed to help expr ().  */
 
 static void
@@ -1370,21 +1368,6 @@ clean_up_expression (expressionP)
     case O_uminus:
     case O_bit_not:
       expressionP->X_op_symbol = NULL;
-      break;
-    case O_subtract:
-      if (expressionP->X_op_symbol == expressionP->X_add_symbol
-	  || ((symbol_get_frag (expressionP->X_op_symbol)
-	       == symbol_get_frag (expressionP->X_add_symbol))
-	      && SEG_NORMAL (S_GET_SEGMENT (expressionP->X_add_symbol))))
-	{
-	  addressT diff = (S_GET_VALUE (expressionP->X_add_symbol)
-			   - S_GET_VALUE (expressionP->X_op_symbol));
-
-	  expressionP->X_op = O_constant;
-	  expressionP->X_add_symbol = NULL;
-	  expressionP->X_op_symbol = NULL;
-	  expressionP->X_add_number += diff;
-	}
       break;
     default:
       break;
@@ -1751,7 +1734,8 @@ expr (rankarg, resultP)
 	       && resultP->X_op == O_symbol
 	       && (symbol_get_frag (right.X_add_symbol)
 		   == symbol_get_frag (resultP->X_add_symbol))
-	       && SEG_NORMAL (rightseg))
+	       && (SEG_NORMAL (rightseg)
+		   || right.X_add_symbol == resultP->X_add_symbol))
 	{
 	  resultP->X_add_number -= right.X_add_number;
 	  resultP->X_add_number += (S_GET_VALUE (resultP->X_add_symbol)
