@@ -138,6 +138,16 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h)
 AC_CHECK_FUNCS(sbrk realpath glob)
 AC_HEADER_DIRENT
 
+AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
+AC_CACHE_VAL(ld_cv_decl_getopt_unistd_h,
+[AC_TRY_COMPILE([#include <unistd.h>], [extern int getopt (int, char *const*, const char *);],
+ld_cv_decl_getopt_unistd_h=yes, ld_cv_decl_getopt_unistd_h=no)])
+AC_MSG_RESULT($ld_cv_decl_getopt_unistd_h)
+if test $ld_cv_decl_getopt_unistd_h = yes; then
+  AC_DEFINE([HAVE_DECL_GETOPT], 1,
+	    [Is the prototype for getopt in <unistd.h> in the expected format?])
+fi
+	
 BFD_BINARY_FOPEN
 
 BFD_NEED_DECLARATION(strstr)

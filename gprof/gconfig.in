@@ -139,3 +139,5 @@
 /* Define as 1 if you have gettext and don't want to use GNU gettext. */
 #undef HAVE_GETTEXT
 
+/* Is the prototype for getopt in <unistd.h> in the expected format?  */
+#undef HAVE_DECL_GETOPT

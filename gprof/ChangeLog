@@ -1,3 +1,11 @@
+2005-04-04  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Add a check for <unistd.h> providing a prototype
+	for getopt() which is compatible with the one in
+	include/getopt.h.  If so then define HAVE_DECL_GETOPT.
+	* configure: Regenerate.
+	* gconfig.in (HAVE_DECL_GETOPT): Add.
+
 2005-03-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.

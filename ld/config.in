@@ -175,3 +175,5 @@
 /* Additional extension a shared object might have. */
 #undef EXTRA_SHLIB_EXTENSION
 
+/* Is the prototype for getopt in <unistd.h> in the expected format?  */
+#undef HAVE_DECL_GETOPT

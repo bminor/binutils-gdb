@@ -4824,6 +4824,39 @@ fi
 fi
 
 
+echo $ac_n "checking for a known getopt prototype in unistd.h""... $ac_c" 1>&6
+echo "configure:4829: checking for a known getopt prototype in unistd.h" >&5
+if eval "test \"`echo '$''{'ld_cv_decl_getopt_unistd_h'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4834 "configure"
+#include "confdefs.h"
+#include <unistd.h>
+int main() {
+extern int getopt (int, char *const*, const char *);
+; return 0; }
+EOF
+if { (eval echo configure:4841: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ld_cv_decl_getopt_unistd_h=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ld_cv_decl_getopt_unistd_h=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ld_cv_decl_getopt_unistd_h" 1>&6
+if test $ld_cv_decl_getopt_unistd_h = yes; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_DECL_GETOPT 1
+EOF
+
+fi
+	
 
 case "${host}" in
 *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
@@ -4834,12 +4867,12 @@ EOF
 esac
 
 echo $ac_n "checking whether strstr must be declared""... $ac_c" 1>&6
-echo "configure:4838: checking whether strstr must be declared" >&5
+echo "configure:4871: checking whether strstr must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_strstr'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4843 "configure"
+#line 4876 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -4860,7 +4893,7 @@ int main() {
 char *(*pfn) = (char *(*)) strstr
 ; return 0; }
 EOF
-if { (eval echo configure:4864: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4897: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_strstr=no
 else
@@ -4881,12 +4914,12 @@ EOF
 fi
 
 echo $ac_n "checking whether free must be declared""... $ac_c" 1>&6
-echo "configure:4885: checking whether free must be declared" >&5
+echo "configure:4918: checking whether free must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4890 "configure"
+#line 4923 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -4907,7 +4940,7 @@ int main() {
 char *(*pfn) = (char *(*)) free
 ; return 0; }
 EOF
-if { (eval echo configure:4911: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4944: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_free=no
 else
@@ -4928,12 +4961,12 @@ EOF
 fi
 
 echo $ac_n "checking whether sbrk must be declared""... $ac_c" 1>&6
-echo "configure:4932: checking whether sbrk must be declared" >&5
+echo "configure:4965: checking whether sbrk must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_sbrk'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4937 "configure"
+#line 4970 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -4954,7 +4987,7 @@ int main() {
 char *(*pfn) = (char *(*)) sbrk
 ; return 0; }
 EOF
-if { (eval echo configure:4958: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4991: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_sbrk=no
 else
@@ -4975,12 +5008,12 @@ EOF
 fi
 
 echo $ac_n "checking whether getenv must be declared""... $ac_c" 1>&6
-echo "configure:4979: checking whether getenv must be declared" >&5
+echo "configure:5012: checking whether getenv must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_getenv'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4984 "configure"
+#line 5017 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -5001,7 +5034,7 @@ int main() {
 char *(*pfn) = (char *(*)) getenv
 ; return 0; }
 EOF
-if { (eval echo configure:5005: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5038: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_getenv=no
 else
@@ -5022,12 +5055,12 @@ EOF
 fi
 
 echo $ac_n "checking whether environ must be declared""... $ac_c" 1>&6
-echo "configure:5026: checking whether environ must be declared" >&5
+echo "configure:5059: checking whether environ must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_environ'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5031 "configure"
+#line 5064 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -5048,7 +5081,7 @@ int main() {
 char *(*pfn) = (char *(*)) environ
 ; return 0; }
 EOF
-if { (eval echo configure:5052: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5085: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_environ=no
 else
@@ -5076,19 +5109,19 @@ fi
 # constants, while still supporting pre-ANSI compilers which do not
 # support string concatenation.
 echo $ac_n "checking whether ANSI C string concatenation works""... $ac_c" 1>&6
-echo "configure:5080: checking whether ANSI C string concatenation works" >&5
+echo "configure:5113: checking whether ANSI C string concatenation works" >&5
 if eval "test \"`echo '$''{'ld_cv_string_concatenation'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5085 "configure"
+#line 5118 "configure"
 #include "confdefs.h"
 
 int main() {
 char *a = "a" "a";
 ; return 0; }
 EOF
-if { (eval echo configure:5092: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5125: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ld_cv_string_concatenation=yes
 else

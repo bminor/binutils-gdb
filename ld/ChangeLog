@@ -1,3 +1,14 @@
+2005-04-04  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Add a check for <unistd.h> providing a prototype
+	for getopt() which is compatible with the one in
+	include/getopt.h.  If so then define HAVE_DECL_GETOPT.
+	* configure: Regenerate.
+	* config.in (HAVE_DECL_GETOPT): Add.
+	* ldemul.c: Include config.h
+	* lexsup.c: Likewise.
+	* emultempl/elf32.sc: Likewise.
+
 2005-03-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_layout_sections_again):
