@@ -1,3 +1,7 @@
+Tue Aug 18 14:11:50 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: in h8 config, do not describe searching commands.
+
 Mon Aug 17 18:07:59 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, none.m4, h8.m4, gdbinv-s.m4.in: improve H8/300

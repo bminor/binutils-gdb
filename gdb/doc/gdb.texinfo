@@ -3049,7 +3049,9 @@ _fi__(!_DOSHOST__)
 
 @menu
 * List::                        Printing Source Lines
+_if__(_GENERIC__ || !_H8__)
 * Search::                      Searching Source Files
+_fi__(_GENERIC__ || !_H8__)
 * Source Path::                 Specifying Source Directories
 * Machine Code::                Source and Machine Code
 @end menu
@@ -3173,6 +3175,7 @@ Specifies the line containing the program address @var{address}.
 @var{address} may be any expression.
 @end table
 
+_if__(_GENERIC__ || !_H8__)
 @node Search
 @section Searching Source Files
 @cindex searching
@@ -3198,6 +3201,7 @@ with the one before the last line listed and going backward, for a match
 for @var{regexp}.  It lists the line that is found.  You can abbreviate
 this command as @code{rev}.
 @end table
+_fi__(_GENERIC__ || !_H8__)
 
 @node Source Path
 @section Specifying Source Directories
