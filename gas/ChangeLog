@@ -1,3 +1,8 @@
+2004-03-22  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_post_relax_hook): Create literal
+	tables even when use_literal_section flag is not set.
+
 2004-03-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-sh.c: Remove trailing whitespace.
