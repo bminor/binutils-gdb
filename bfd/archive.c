@@ -1111,7 +1111,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
 
   firstreal = mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
 
-  fstat (arch->iostream, &statbuf); /* FIXME -- descriptor must be open! */
+  stat (arch->filename, &statbuf);
   memset ((char *)(&hdr), 0, sizeof (struct ar_hdr));
   sprintf (hdr.ar_name, "__.SYMDEF");
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
