@@ -466,8 +466,7 @@ compile (pc)
 {
   int idx;
 
-  /* find the next cache entry to use */
-
+  /* Find the next cache entry to use.  */
   idx = cpu.cache_top + 1;
   cpu.compiles++;
   if (idx >= cpu.csize)
@@ -476,16 +475,16 @@ compile (pc)
     }
   cpu.cache_top = idx;
 
-  /* Throw away its old meaning */
+  /* Throw away its old meaning.  */
   cpu.cache_idx[cpu.cache[idx].oldpc] = 0;
 
-  /* set to new address */
+  /* Set to new address.  */
   cpu.cache[idx].oldpc = pc;
 
-  /* fill in instruction info */
+  /* Fill in instruction info.  */
   decode (pc, cpu.memory + pc, cpu.cache + idx);
 
-  /* point to new cache entry */
+  /* Point to new cache entry.  */
   cpu.cache_idx[pc] = idx;
 }
 
@@ -713,7 +712,7 @@ init_pointers ()
       cpu.cache_idx = (unsigned short *) calloc (sizeof (short), memory_size);
       cpu.eightbit = (unsigned char *) calloc (sizeof (char), 256);
 
-      /* `msize' must be a power of two */
+      /* `msize' must be a power of two.  */
       if ((memory_size & (memory_size - 1)) != 0)
 	abort ();
       cpu.mask = memory_size - 1;
@@ -760,7 +759,7 @@ init_pointers ()
 
       lreg[8] = &cpu.regs[8];
 
-      /* initialize the seg registers */
+      /* Initialize the seg registers.  */
       if (!cpu.cache)
 	sim_set_simcache_size (CSIZE);
     }
@@ -1724,7 +1723,7 @@ int
 sim_trace (sd)
      SIM_DESC sd;
 {
-  /* FIXME: unfinished */
+  /* FIXME: Unfinished.  */
   abort ();
 }
 
@@ -1782,7 +1781,7 @@ sim_read (sd, addr, buffer, size)
 
 #define SP_REGNUM       R7_REGNUM	/* Contains address of top of stack */
 #define FP_REGNUM       R6_REGNUM	/* Contains address of executing
-					   * stack frame */
+					 * stack frame */
 
 #define CCR_REGNUM      8	/* Contains processor status */
 #define PC_REGNUM       9	/* Contains program counter */
@@ -1992,8 +1991,8 @@ sim_info (sd, verbose)
 #endif
 }
 
-/* Indicate whether the cpu is an h8/300 or h8/300h.
-   FLAG is non-zero for the h8/300h.  */
+/* Indicate whether the cpu is an H8/300 or H8/300H.
+   FLAG is non-zero for the H8/300H.  */
 
 void
 set_h8300h (flag)
@@ -2001,7 +2000,7 @@ set_h8300h (flag)
 {
   /* FIXME: Much of the code in sim_load can be moved to sim_open.
      This function being replaced by a sim_open:ARGV configuration
-     option */
+     option.  */
   h8300hmode = flag;
 }
 
@@ -2012,12 +2011,12 @@ sim_open (kind, ptr, abfd, argv)
      struct _bfd *abfd;
      char **argv;
 {
-  /* FIXME: Much of the code in sim_load can be moved here */
+  /* FIXME: Much of the code in sim_load can be moved here.  */
 
   sim_kind = kind;
   myname = argv[0];
   sim_callback = ptr;
-  /* fudge our descriptor */
+  /* Fudge our descriptor.  */
   return (SIM_DESC) 1;
 }
 
@@ -2026,7 +2025,7 @@ sim_close (sd, quitting)
      SIM_DESC sd;
      int quitting;
 {
-  /* nothing to do */
+  /* Nothing to do.  */
 }
 
 /* Called by gdb to load a program into memory.  */
@@ -2040,10 +2039,10 @@ sim_load (sd, prog, abfd, from_tty)
 {
   bfd *prog_bfd;
 
-  /* FIXME: The code below that sets a specific variant of the h8/300
-     being simulated should be moved to sim_open(). */
+  /* FIXME: The code below that sets a specific variant of the H8/300
+     being simulated should be moved to sim_open().  */
 
-  /* See if the file is for the h8/300 or h8/300h.  */
+  /* See if the file is for the H8/300 or H8/300H.  */
   /* ??? This may not be the most efficient way.  The z8k simulator
      does this via a different mechanism (INIT_EXTRA_SYMTAB_INFO).  */
   if (abfd != NULL)
@@ -2070,11 +2069,11 @@ sim_load (sd, prog, abfd, from_tty)
      simulator memory.
 
      The problem is when we do that, we don't know whether we're
-     debugging an h8/300 or h8/300h program.
+     debugging an H8/300 or H8/300H program.
 
      This is the first point at which we can make that determination,
      so we just reallocate memory now; this will also allow us to handle
-     switching between h8/300 and h8/300h programs without exiting
+     switching between H8/300 and H8/300H programs without exiting
      gdb.  */
   if (h8300hmode)
     memory_size = H8300H_MSIZE;
@@ -2092,7 +2091,7 @@ sim_load (sd, prog, abfd, from_tty)
   cpu.cache_idx = (unsigned short *) calloc (sizeof (short), memory_size);
   cpu.eightbit = (unsigned char *) calloc (sizeof (char), 256);
 
-  /* `msize' must be a power of two */
+  /* `msize' must be a power of two.  */
   if ((memory_size & (memory_size - 1)) != 0)
     abort ();
   cpu.mask = memory_size - 1;
