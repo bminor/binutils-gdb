@@ -25,6 +25,9 @@ Wed Sep  7 17:21:12 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 Wed Sep  7 19:10:09 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* Makefile.in (Makefile): Depend on config.status.
+	(config.status): Run config.status from . instead of srcdir.
+
 	* config/tc-i386.c (tc_gen_reloc): Use bfd_get_reloc_code_name to
 	display the name of the relocation type that couldn't be handled.
 	* config/tc-sparc.c (tc_gen_reloc): Likewise.
