@@ -43,6 +43,7 @@ code on the hardware.
 #include "sky-vu.h"
 #include "sky-vpe.h"
 #include "sky-libvpe.h"
+#include "sky-pke.h"
 #endif
 /* end-sanitize-sky */
 
@@ -438,6 +439,10 @@ sim_open (kind, cb, abfd, argv)
       cpu->register_widths[rn + NUM_R5900_REGS] = 32;
       cpu->register_widths[rn + NUM_R5900_REGS + NUM_VU_REGS] = 32;
     }
+
+    /* Finally the VIF registers */
+    for( rn = 2*NUM_VU_REGS; rn < 2*NUM_VU_REGS + 2*NUM_VIF_REGS; rn++ )
+      cpu->register_widths[rn + NUM_R5900_REGS] = 32;
 #endif
     /* end-sanitize-sky */
   }
@@ -661,94 +666,105 @@ sim_store_register (sd,rn,memory,length)
 #ifdef TARGET_SKY
   if (rn >= NUM_R5900_REGS) 
     {
-      int size = 4;	/* Default register size */
-
       rn = rn - NUM_R5900_REGS;
 
-      if (rn < NUM_VU_INTEGER_REGS)
-	size = write_vu_int_reg (&(vu0_device.state->regs), rn, memory);
-      else if( rn < NUM_VU_REGS )
+      if( rn < NUM_VU_REGS )
 	{
-	  if (rn >= FIRST_VEC_REG)
+	  if (rn < NUM_VU_INTEGER_REGS)
+	    return write_vu_int_reg (&(vu0_device.state->regs), rn, memory);
+	  else if (rn >= FIRST_VEC_REG)
 	    {
 	      rn -= FIRST_VEC_REG;
-	      size = write_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn&3,
-				      memory);
+	      return write_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn&3,
+				       memory);
 	    }
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      size = write_vu_special_reg (vu0_device.state, VU_REG_CIA,
-				      memory);
-	      break;
+	      return write_vu_special_reg (vu0_device.state, VU_REG_CIA, 
+					   memory);
 	    case 1:
-	      size = write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
-				      memory);
-	      break;
+	      return write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
+					memory);
 	    case 2: /* VU0 has no P register */
-	      break;
+	      return 4;
 	    case 3:
-	      size = write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
-				      memory);
-	      break;
+	      return write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
+					memory);
 	    case 4:
-	      size = write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
-				      memory);
-	      break;
+	      return write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
+					memory);
 	    default:
-	      size = write_vu_acc_reg (&(vu0_device.state->regs), 
+	      return write_vu_acc_reg (&(vu0_device.state->regs), 
 				      rn - (NUM_VU_INTEGER_REGS + 5),
 				      memory);
-	      break;
 	    }
 	}
-      else {
-	rn = rn - NUM_VU_REGS;
 
-	if( rn < NUM_VU_INTEGER_REGS ) 
-	  size = write_vu_int_reg (&(vu1_device.state->regs), rn, memory);
-	else if( rn < NUM_VU_REGS )
-	  {
-	    if (rn >= FIRST_VEC_REG)
-	      {
-		rn -= FIRST_VEC_REG;
-		size = write_vu_vec_reg (&(vu1_device.state->regs), 
-					  rn >> 2, rn & 3, memory);
-	      }
-	    else switch (rn - NUM_VU_INTEGER_REGS)
-	      {
-	      case 0:
-		size = write_vu_special_reg (vu1_device.state, VU_REG_CIA,
-					    memory);
-		break;
-	      case 1:
-		size = write_vu_misc_reg (&(vu1_device.state->regs), 
-					 VU_REG_MR, memory);
-		break;
-	      case 2: 
-		size = write_vu_misc_reg (&(vu1_device.state->regs), 
-					 VU_REG_MP, memory);
-		break;
-	      case 3:
-		size = write_vu_misc_reg (&(vu1_device.state->regs), 
-					 VU_REG_MI, memory);
-		break;
-	      case 4:
-		size = write_vu_misc_reg (&(vu1_device.state->regs), 
-					 VU_REG_MQ, memory);
-		break;
-	      default:
-		size = write_vu_acc_reg (&(vu1_device.state->regs), 
-					rn - (NUM_VU_INTEGER_REGS + 5),
+      rn = rn - NUM_VU_REGS;
+
+      if (rn < NUM_VU_REGS)
+	{
+	  if (rn < NUM_VU_INTEGER_REGS) 
+	    return write_vu_int_reg (&(vu1_device.state->regs), rn, memory);
+	  else if (rn >= FIRST_VEC_REG)
+	    {
+	      rn -= FIRST_VEC_REG;
+	      return write_vu_vec_reg (&(vu1_device.state->regs), 
+				       rn >> 2, rn & 3, memory);
+	    }
+	  else switch (rn - NUM_VU_INTEGER_REGS)
+	    {
+	    case 0:
+	      return write_vu_special_reg (vu1_device.state, VU_REG_CIA,
+					   memory);
+	    case 1:
+	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MR,
 					memory);
-		break;
-	      }
-	  }
-	else
-	  sim_io_eprintf( sd, "Invalid VU register (register store ignored)\n" );
-      }
+	    case 2: 
+	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MP,
+					memory);
+	    case 3:
+	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MI,
+					memory);
+	    case 4:
+	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MQ,
+					memory);
+	    default:
+	      return write_vu_acc_reg (&(vu1_device.state->regs), 
+				       rn - (NUM_VU_INTEGER_REGS + 5),
+				       memory);
+	    }
+	}
 
-      return size;
+      rn -= NUM_VU_REGS;	/* VIF0 registers are next */
+
+      if (rn < NUM_VIF_REGS)
+	{
+	  if (rn < NUM_VIF_REGS-1)
+	    return write_pke_reg (&pke0_device, rn, memory);
+	  else
+	    {
+	      sim_io_eprintf( sd, "Can't write vif0_pc (store ignored)\n" );
+	      return 0;
+	    }
+	}
+
+      rn -= NUM_VIF_REGS;	/* VIF1 registers are last */
+
+      if (rn < NUM_VIF_REGS)
+	{
+	  if (rn < NUM_VIF_REGS-1)
+	    return write_pke_reg (&pke1_device, rn, memory);
+	  else
+	    {
+	      sim_io_eprintf( sd, "Can't write vif1_pc (store ignored)\n" );
+	      return 0;
+	    }
+	}
+
+      sim_io_eprintf( sd, "Invalid VU register (register store ignored)\n" );
+      return 0;
     }
 #endif
   /* end-sanitize-sky */
@@ -777,6 +793,8 @@ sim_store_register (sd,rn,memory,length)
       cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
       return 8;
     }
+
+  return 0;
 }
 
 int
@@ -823,96 +841,97 @@ sim_fetch_register (sd,rn,memory,length)
 #ifdef TARGET_SKY
   if (rn >= NUM_R5900_REGS) 
     {
-      int size = 4; /* default register width */
-
       rn = rn - NUM_R5900_REGS;
 
-      if (rn < NUM_VU_INTEGER_REGS)
-	size = read_vu_int_reg (&(vu0_device.state->regs), rn, memory);
-      else if (rn < NUM_VU_REGS)
+      if (rn < NUM_VU_REGS)
 	{
-	  if (rn >= FIRST_VEC_REG)
+	  if (rn < NUM_VU_INTEGER_REGS)
+	    return read_vu_int_reg (&(vu0_device.state->regs), rn, memory);
+	  else if (rn >= FIRST_VEC_REG)
 	    {
 	      rn -= FIRST_VEC_REG;
-	      size = read_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn & 3,
+	      return read_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn & 3,
 				      memory);
 	    }
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      size = read_vu_special_reg (vu0_device.state, VU_REG_CIA,
-				      memory);
-
-	      break;
+	      return read_vu_special_reg(vu0_device.state, VU_REG_CIA, memory);
 	    case 1:
-	      size = read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
+	      return read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
 				      memory);
-	      break;
 	    case 2: /* VU0 has no P register */
-	      break;
+	      *((int *) memory) = 0;
+	      return 4;
 	    case 3:
-	      size = read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
+	      return read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
 				      memory);
-	      break;
 	    case 4:
-	      size = read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
+	      return read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
 				      memory);
-	      break;
 	    default:
-	      size = read_vu_acc_reg (&(vu0_device.state->regs), 
+	      return read_vu_acc_reg (&(vu0_device.state->regs), 
 				      rn - (NUM_VU_INTEGER_REGS + 5),
 				      memory);
-	      break;
 	    }
-	}
-      else
-	{
-	  rn = rn - NUM_VU_REGS;
-	
-	  if (rn < NUM_VU_INTEGER_REGS) 
-	    size = read_vu_int_reg (&(vu1_device.state->regs), rn, memory);
-	  else if (rn < NUM_VU_REGS)
-	    {
-	      if (rn >= FIRST_VEC_REG)
-		{
-		  rn -= FIRST_VEC_REG;
-		  size = read_vu_vec_reg (&(vu1_device.state->regs), 
-					  rn >> 2, rn & 3, memory);
-		}
-	      else switch (rn - NUM_VU_INTEGER_REGS)
-		{
-		case 0:
-		  size = read_vu_special_reg (vu1_device.state, VU_REG_CIA,
-					      memory);
-		  break;
-		case 1:
-		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
-					   VU_REG_MR, memory);
-		  break;
-		case 2:
-		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
-					   VU_REG_MP, memory);
-		  break;
-		case 3:
-		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
-					   VU_REG_MI, memory);
-		  break;
-		case 4:
-		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
-					   VU_REG_MQ, memory);
-		  break;
-		default:
-		  size = read_vu_acc_reg (&(vu1_device.state->regs), 
-					  rn - (NUM_VU_INTEGER_REGS + 5),
-					  memory);
-		  break;
-		}
-	    }
-	  else
-	    sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
 	}
 
-      return size;
+      rn -= NUM_VU_REGS;	/* VU1 registers are next */
+
+      if (rn < NUM_VU_REGS)
+	{
+	  if (rn < NUM_VU_INTEGER_REGS) 
+	    return read_vu_int_reg (&(vu1_device.state->regs), rn, memory);
+	  else if (rn >= FIRST_VEC_REG)
+	    {
+	      rn -= FIRST_VEC_REG;
+	      return read_vu_vec_reg (&(vu1_device.state->regs), 
+				      rn >> 2, rn & 3, memory);
+	    }
+	  else switch (rn - NUM_VU_INTEGER_REGS)
+	    {
+	    case 0:
+	      return read_vu_special_reg(vu1_device.state, VU_REG_CIA, memory);
+	    case 1:
+	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+				       VU_REG_MR, memory);
+	    case 2:
+	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+				       VU_REG_MP, memory);
+	    case 3:
+	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+				       VU_REG_MI, memory);
+	    case 4:
+	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+				       VU_REG_MQ, memory);
+	    default:
+	      return read_vu_acc_reg (&(vu1_device.state->regs), 
+				      rn - (NUM_VU_INTEGER_REGS + 5),
+				      memory);
+	    }
+	}
+
+      rn -= NUM_VU_REGS;	/* VIF0 registers are next */
+
+      if (rn < NUM_VIF_REGS)
+	{
+	  if (rn < NUM_VIF_REGS-1)
+	    return read_pke_reg (&pke0_device, rn, memory);
+	  else
+	    return read_pke_pc (&pke0_device, memory);
+	}
+
+      rn -= NUM_VIF_REGS;	/* VIF1 registers are last */
+
+      if (rn < NUM_VIF_REGS)
+	{
+	  if (rn < NUM_VIF_REGS-1)
+	    return read_pke_reg (&pke1_device, rn, memory);
+	  else
+	    return read_pke_pc (&pke1_device, memory);
+	}
+
+      sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
     }
 #endif
   /* end-sanitize-sky */
@@ -942,6 +961,8 @@ sim_fetch_register (sd,rn,memory,length)
       *(unsigned64*)memory = H2T_8 ((unsigned64)(cpu->registers[rn]));
       return 8;
     }
+
+  return 0;
 }
 
 
@@ -1529,350 +1550,6 @@ ColdReset (SIM_DESC sd)
     }
 }
 
-/* Description from page A-22 of the "MIPS IV Instruction Set" manual
-   (revision 3.1) */
-/* Translate a virtual address to a physical address and cache
-   coherence algorithm describing the mechanism used to resolve the
-   memory reference. Given the virtual address vAddr, and whether the
-   reference is to Instructions ot Data (IorD), find the corresponding
-   physical address (pAddr) and the cache coherence algorithm (CCA)
-   used to resolve the reference. If the virtual address is in one of
-   the unmapped address spaces the physical address and the CCA are
-   determined directly by the virtual address. If the virtual address
-   is in one of the mapped address spaces then the TLB is used to
-   determine the physical address and access type; if the required
-   translation is not present in the TLB or the desired access is not
-   permitted the function fails and an exception is taken.
-
-   NOTE: Normally (RAW == 0), when address translation fails, this
-   function raises an exception and does not return. */
-
-int
-address_translation (SIM_DESC sd,
-		     sim_cpu *cpu,
-		     address_word cia,
-		     address_word vAddr,
-		     int IorD,
-		     int LorS,
-		     address_word *pAddr,
-		     int *CCA,
-		     int raw)
-{
-  int res = -1; /* TRUE : Assume good return */
-
-#ifdef DEBUG
-  sim_io_printf(sd,"AddressTranslation(0x%s,%s,%s,...);\n",pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "iSTORE" : "isLOAD"));
-#endif
-
-  /* Check that the address is valid for this memory model */
-
-  /* For a simple (flat) memory model, we simply pass virtual
-     addressess through (mostly) unchanged. */
-  vAddr &= 0xFFFFFFFF;
-
-  *pAddr = vAddr; /* default for isTARGET */
-  *CCA = Uncached; /* not used for isHOST */
-
-  return(res);
-}
-
-/* Description from page A-23 of the "MIPS IV Instruction Set" manual
-   (revision 3.1) */
-/* Prefetch data from memory. Prefetch is an advisory instruction for
-   which an implementation specific action is taken. The action taken
-   may increase performance, but must not change the meaning of the
-   program, or alter architecturally-visible state. */
-
-void 
-prefetch (SIM_DESC sd,
-	  sim_cpu *cpu,
-	  address_word cia,
-	  int CCA,
-	  address_word pAddr,
-	  address_word vAddr,
-	  int DATA,
-	  int hint)
-{
-#ifdef DEBUG
-  sim_io_printf(sd,"Prefetch(%d,0x%s,0x%s,%d,%d);\n",CCA,pr_addr(pAddr),pr_addr(vAddr),DATA,hint);
-#endif /* DEBUG */
-
-  /* For our simple memory model we do nothing */
-  return;
-}
-
-/* Description from page A-22 of the "MIPS IV Instruction Set" manual
-   (revision 3.1) */
-/* Load a value from memory. Use the cache and main memory as
-   specified in the Cache Coherence Algorithm (CCA) and the sort of
-   access (IorD) to find the contents of AccessLength memory bytes
-   starting at physical location pAddr. The data is returned in the
-   fixed width naturally-aligned memory element (MemElem). The
-   low-order two (or three) bits of the address and the AccessLength
-   indicate which of the bytes within MemElem needs to be given to the
-   processor. If the memory access type of the reference is uncached
-   then only the referenced bytes are read from memory and valid
-   within the memory element. If the access type is cached, and the
-   data is not present in cache, an implementation specific size and
-   alignment block of memory is read and loaded into the cache to
-   satisfy a load reference. At a minimum, the block is the entire
-   memory element. */
-void
-load_memory (SIM_DESC sd,
-	     sim_cpu *cpu,
-	     address_word cia,
-	     uword64* memvalp,
-	     uword64* memval1p,
-	     int CCA,
-	     unsigned int AccessLength,
-	     address_word pAddr,
-	     address_word vAddr,
-	     int IorD)
-{
-  uword64 value = 0;
-  uword64 value1 = 0;
-
-#ifdef DEBUG
-  sim_io_printf(sd,"DBG: LoadMemory(%p,%p,%d,%d,0x%s,0x%s,%s)\n",memvalp,memval1p,CCA,AccessLength,pr_addr(pAddr),pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"));
-#endif /* DEBUG */
-
-#if defined(WARN_MEM)
-  if (CCA != uncached)
-    sim_io_eprintf(sd,"LoadMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
-#endif /* WARN_MEM */
-
-  /* If instruction fetch then we need to check that the two lo-order
-     bits are zero, otherwise raise a InstructionFetch exception: */
-  if ((IorD == isINSTRUCTION)
-      && ((pAddr & 0x3) != 0)
-      && (((pAddr & 0x1) != 0) || ((vAddr & 0x1) == 0)))
-    SignalExceptionInstructionFetch ();
-
-  if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
-    {
-      /* In reality this should be a Bus Error */
-      sim_io_error (sd, "LOAD AccessLength of %d would extend over %d bit aligned boundary for physical address 0x%s\n",
-		    AccessLength,
-		    (LOADDRMASK + 1) << 3,
-		    pr_addr (pAddr));
-    }
-
-#if defined(TRACE)
-  dotrace (SD, CPU, tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
-#endif /* TRACE */
-  
-  /* Read the specified number of bytes from memory.  Adjust for
-     host/target byte ordering/ Align the least significant byte
-     read. */
-
-  switch (AccessLength)
-    {
-    case AccessLength_QUADWORD :
-      {
-	unsigned_16 val = sim_core_read_aligned_16 (cpu, NULL_CIA, read_map, pAddr);
-	value1 = VH8_16 (val);
-	value = VL8_16 (val);
-	break;
-      }
-    case AccessLength_DOUBLEWORD :
-      value = sim_core_read_aligned_8 (cpu, NULL_CIA,
-				       read_map, pAddr);
-      break;
-    case AccessLength_SEPTIBYTE :
-      value = sim_core_read_misaligned_7 (cpu, NULL_CIA,
-					  read_map, pAddr);
-      break;
-    case AccessLength_SEXTIBYTE :
-      value = sim_core_read_misaligned_6 (cpu, NULL_CIA,
-					  read_map, pAddr);
-      break;
-    case AccessLength_QUINTIBYTE :
-      value = sim_core_read_misaligned_5 (cpu, NULL_CIA,
-					  read_map, pAddr);
-      break;
-    case AccessLength_WORD :
-      value = sim_core_read_aligned_4 (cpu, NULL_CIA,
-				       read_map, pAddr);
-      break;
-    case AccessLength_TRIPLEBYTE :
-      value = sim_core_read_misaligned_3 (cpu, NULL_CIA,
-					  read_map, pAddr);
-      break;
-    case AccessLength_HALFWORD :
-      value = sim_core_read_aligned_2 (cpu, NULL_CIA,
-				       read_map, pAddr);
-      break;
-    case AccessLength_BYTE :
-      value = sim_core_read_aligned_1 (cpu, NULL_CIA,
-				       read_map, pAddr);
-      break;
-    default:
-      abort ();
-    }
-  
-#ifdef DEBUG
-  printf("DBG: LoadMemory() : (offset %d) : value = 0x%s%s\n",
-	 (int)(pAddr & LOADDRMASK),pr_uword64(value1),pr_uword64(value));
-#endif /* DEBUG */
-  
-  /* See also store_memory. Position data in correct byte lanes. */
-  if (AccessLength <= LOADDRMASK)
-    {
-      if (BigEndianMem)
-	/* for big endian target, byte (pAddr&LOADDRMASK == 0) is
-	   shifted to the most significant byte position.  */
-	value <<= (((LOADDRMASK - (pAddr & LOADDRMASK)) - AccessLength) * 8);
-      else
-	/* For little endian target, byte (pAddr&LOADDRMASK == 0)
-	   is already in the correct postition. */
-	value <<= ((pAddr & LOADDRMASK) * 8);
-    }
-  
-#ifdef DEBUG
-  printf("DBG: LoadMemory() : shifted value = 0x%s%s\n",
-	 pr_uword64(value1),pr_uword64(value));
-#endif /* DEBUG */
-  
-  *memvalp = value;
-  if (memval1p) *memval1p = value1;
-}
-
-
-/* Description from page A-23 of the "MIPS IV Instruction Set" manual
-   (revision 3.1) */
-/* Store a value to memory. The specified data is stored into the
-   physical location pAddr using the memory hierarchy (data caches and
-   main memory) as specified by the Cache Coherence Algorithm
-   (CCA). The MemElem contains the data for an aligned, fixed-width
-   memory element (word for 32-bit processors, doubleword for 64-bit
-   processors), though only the bytes that will actually be stored to
-   memory need to be valid. The low-order two (or three) bits of pAddr
-   and the AccessLength field indicates which of the bytes within the
-   MemElem data should actually be stored; only these bytes in memory
-   will be changed. */
-
-void
-store_memory (SIM_DESC sd,
-	      sim_cpu *cpu,
-	      address_word cia,
-	      int CCA,
-	      unsigned int AccessLength,
-	      uword64 MemElem,
-	      uword64 MemElem1,   /* High order 64 bits */
-	      address_word pAddr,
-	      address_word vAddr)
-{
-#ifdef DEBUG
-  sim_io_printf(sd,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s)\n",CCA,AccessLength,pr_uword64(MemElem),pr_uword64(MemElem1),pr_addr(pAddr),pr_addr(vAddr));
-#endif /* DEBUG */
-  
-#if defined(WARN_MEM)
-  if (CCA != uncached)
-    sim_io_eprintf(sd,"StoreMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
-#endif /* WARN_MEM */
-  
-  if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
-    sim_io_error (sd, "STORE AccessLength of %d would extend over %d bit aligned boundary for physical address 0x%s\n",
-		  AccessLength,
-		  (LOADDRMASK + 1) << 3,
-		  pr_addr(pAddr));
-  
-#if defined(TRACE)
-  dotrace (SD, CPU, tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
-#endif /* TRACE */
-  
-#ifdef DEBUG
-  printf("DBG: StoreMemory: offset = %d MemElem = 0x%s%s\n",(unsigned int)(pAddr & LOADDRMASK),pr_uword64(MemElem1),pr_uword64(MemElem));
-#endif /* DEBUG */
-  
-  /* See also load_memory. Position data in correct byte lanes. */
-  if (AccessLength <= LOADDRMASK)
-    {
-      if (BigEndianMem)
-	/* for big endian target, byte (pAddr&LOADDRMASK == 0) is
-	   shifted to the most significant byte position.  */
-	MemElem >>= (((LOADDRMASK - (pAddr & LOADDRMASK)) - AccessLength) * 8);
-      else
-	/* For little endian target, byte (pAddr&LOADDRMASK == 0)
-	   is already in the correct postition. */
-	MemElem >>= ((pAddr & LOADDRMASK) * 8);
-    }
-  
-#ifdef DEBUG
-  printf("DBG: StoreMemory: shift = %d MemElem = 0x%s%s\n",shift,pr_uword64(MemElem1),pr_uword64(MemElem));
-#endif /* DEBUG */
-  
-  switch (AccessLength)
-    {
-    case AccessLength_QUADWORD :
-      {
-	unsigned_16 val = U16_8 (MemElem1, MemElem);
-	sim_core_write_aligned_16 (cpu, NULL_CIA, write_map, pAddr, val);
-	break;
-      }
-    case AccessLength_DOUBLEWORD :
-      sim_core_write_aligned_8 (cpu, NULL_CIA,
-				write_map, pAddr, MemElem);
-      break;
-    case AccessLength_SEPTIBYTE :
-      sim_core_write_misaligned_7 (cpu, NULL_CIA,
-				   write_map, pAddr, MemElem);
-      break;
-    case AccessLength_SEXTIBYTE :
-      sim_core_write_misaligned_6 (cpu, NULL_CIA,
-				   write_map, pAddr, MemElem);
-      break;
-    case AccessLength_QUINTIBYTE :
-      sim_core_write_misaligned_5 (cpu, NULL_CIA,
-				   write_map, pAddr, MemElem);
-      break;
-    case AccessLength_WORD :
-      sim_core_write_aligned_4 (cpu, NULL_CIA,
-				write_map, pAddr, MemElem);
-      break;
-    case AccessLength_TRIPLEBYTE :
-      sim_core_write_misaligned_3 (cpu, NULL_CIA,
-				   write_map, pAddr, MemElem);
-      break;
-    case AccessLength_HALFWORD :
-      sim_core_write_aligned_2 (cpu, NULL_CIA,
-				write_map, pAddr, MemElem);
-      break;
-    case AccessLength_BYTE :
-      sim_core_write_aligned_1 (cpu, NULL_CIA,
-				write_map, pAddr, MemElem);
-      break;
-    default:
-      abort ();
-    }	
-  
-  return;
-}
-
-
-unsigned32
-ifetch32 (SIM_DESC sd,
-	  sim_cpu *cpu,
-	  address_word cia,
-	  address_word vaddr)
-{
-  /* Copy the action of the LW instruction */
-  address_word reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
-  address_word bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
-  unsigned64 value;
-  address_word paddr;
-  unsigned32 instruction;
-  unsigned byte;
-  int cca;
-  AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &cca, isTARGET, isREAL);
-  paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
-  LoadMemory (&value, NULL, cca, AccessLength_WORD, paddr, vaddr, isINSTRUCTION, isREAL);
-  byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
-  instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
-  return instruction;
-}
-
-
 unsigned16
 ifetch16 (SIM_DESC sd,
 	  sim_cpu *cpu,
@@ -1895,23 +1572,6 @@ ifetch16 (SIM_DESC sd,
   return instruction;
 }
 
-
-/* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
-/* Order loads and stores to synchronise shared memory. Perform the
-   action necessary to make the effects of groups of synchronizable
-   loads and stores indicated by stype occur in the same order for all
-   processors. */
-void
-sync_operation (SIM_DESC sd,
-		sim_cpu *cpu,
-		address_word cia,
-		int stype)
-{
-#ifdef DEBUG
-  sim_io_printf(sd,"SyncOperation(%d) : TODO\n",stype);
-#endif /* DEBUG */
-  return;
-}
 
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Signal an exception condition. This will result in an exception
@@ -2166,82 +1826,6 @@ undefined_result(sd,cia)
   return;
 }
 #endif /* WARN_RESULT */
-
-void
-cache_op (SIM_DESC sd,
-	  sim_cpu *cpu,
-	  address_word cia,
-	  int op,
-	  address_word pAddr,
-	  address_word vAddr,
-	  unsigned int instruction)
-{
-#if 1 /* stop warning message being displayed (we should really just remove the code) */
-  static int icache_warning = 1;
-  static int dcache_warning = 1;
-#else
-  static int icache_warning = 0;
-  static int dcache_warning = 0;
-#endif
-
-  /* If CP0 is not useable (User or Supervisor mode) and the CP0
-     enable bit in the Status Register is clear - a coprocessor
-     unusable exception is taken. */
-#if 0
-  sim_io_printf(sd,"TODO: Cache availability checking (PC = 0x%s)\n",pr_addr(cia));
-#endif
-
-  switch (op & 0x3) {
-    case 0: /* instruction cache */
-      switch (op >> 2) {
-        case 0: /* Index Invalidate */
-        case 1: /* Index Load Tag */
-        case 2: /* Index Store Tag */
-        case 4: /* Hit Invalidate */
-        case 5: /* Fill */
-        case 6: /* Hit Writeback */
-          if (!icache_warning)
-            {
-              sim_io_eprintf(sd,"Instruction CACHE operation %d to be coded\n",(op >> 2));
-              icache_warning = 1;
-            }
-          break;
-
-        default:
-          SignalException(ReservedInstruction,instruction);
-          break;
-      }
-      break;
-
-    case 1: /* data cache */
-      switch (op >> 2) {
-        case 0: /* Index Writeback Invalidate */
-        case 1: /* Index Load Tag */
-        case 2: /* Index Store Tag */
-        case 3: /* Create Dirty */
-        case 4: /* Hit Invalidate */
-        case 5: /* Hit Writeback Invalidate */
-        case 6: /* Hit Writeback */ 
-          if (!dcache_warning)
-            {
-              sim_io_eprintf(sd,"Data CACHE operation %d to be coded\n",(op >> 2));
-              dcache_warning = 1;
-            }
-          break;
-
-        default:
-          SignalException(ReservedInstruction,instruction);
-          break;
-      }
-      break;
-
-    default: /* unrecognised cache ID */
-      SignalException(ReservedInstruction,instruction);
-      break;
-  }
-
-  return;
-}
 
 /*-- FPU support routines ---------------------------------------------------*/
 
@@ -4093,72 +3677,6 @@ pr_uword64(addr)
 }
 
 
-void
-pending_tick (SIM_DESC sd,
-	      sim_cpu *cpu,
-	      address_word cia)
-{
-  if (PENDING_TRACE)							
-    sim_io_printf (sd, "PENDING_DRAIN - pending_in = %d, pending_out = %d, pending_total = %d\n", PENDING_IN, PENDING_OUT, PENDING_TOTAL); 
-  if (PENDING_OUT != PENDING_IN)					
-    {									
-      int loop;							
-      int index = PENDING_OUT;					
-      int total = PENDING_TOTAL;					
-      if (PENDING_TOTAL == 0)						
-	sim_engine_abort (SD, CPU, cia, "PENDING_DRAIN - Mis-match on pending update pointers\n"); 
-      for (loop = 0; (loop < total); loop++)				
-	{								
-	  if (PENDING_SLOT_DEST[index] != NULL)			
-	    {								
-	      PENDING_SLOT_DELAY[index] -= 1;				
-	      if (PENDING_SLOT_DELAY[index] == 0)			
-		{							
-		  if (PENDING_SLOT_BIT[index] >= 0)			
-		    switch (PENDING_SLOT_SIZE[index])                 
-		      {						
-		      case 32:					
-			if (PENDING_SLOT_VALUE[index])		
-			  *(unsigned32*)PENDING_SLOT_DEST[index] |= 	
-			    BIT32 (PENDING_SLOT_BIT[index]);		
-			else						
-			  *(unsigned32*)PENDING_SLOT_DEST[index] &= 	
-			    BIT32 (PENDING_SLOT_BIT[index]);		
-			break;					
-		      case 64:					
-			if (PENDING_SLOT_VALUE[index])		
-			  *(unsigned64*)PENDING_SLOT_DEST[index] |= 	
-			    BIT64 (PENDING_SLOT_BIT[index]);		
-			else						
-			  *(unsigned64*)PENDING_SLOT_DEST[index] &= 	
-			    BIT64 (PENDING_SLOT_BIT[index]);		
-			break;					
-			break;					
-		      }
-		  else
-		    switch (PENDING_SLOT_SIZE[index])                 
-		      {						
-		      case 32:					
-			*(unsigned32*)PENDING_SLOT_DEST[index] = 	
-			  PENDING_SLOT_VALUE[index];			
-			break;					
-		      case 64:					
-			*(unsigned64*)PENDING_SLOT_DEST[index] = 	
-			  PENDING_SLOT_VALUE[index];			
-			break;					
-		      }							
-		}							
-	      if (PENDING_OUT == index)				
-		{							
-		  PENDING_SLOT_DEST[index] = NULL;			
-		  PENDING_OUT = (PENDING_OUT + 1) % PSLOTS;		
-		  PENDING_TOTAL--;					
-		}							
-	    }								
-	}								
-      index = (index + 1) % PSLOTS;					
-    }									
-}
 
 /*---------------------------------------------------------------------------*/
 /*> EOF interp.c <*/

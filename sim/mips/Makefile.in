@@ -53,6 +53,7 @@ SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	$(MIPS_EXTRA_OBJS) \
 	interp.o \
+	sim-main.o \
 	sim-hload.o \
 	sim-engine.o \
 	sim-stop.o \
@@ -118,7 +119,7 @@ getopt1.o: $(srcdir)/../../libiberty/getopt1.c
 ../igen/igen:
 	cd ../igen && $(MAKE)
 
-IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
+IGEN_TRACE= -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
 IGEN_INSN=$(srcdir)/mips.igen
 IGEN_DC=$(srcdir)/mips.dc
 M16_DC=$(srcdir)/m16.dc
@@ -133,7 +134,8 @@ IGEN_INCLUDE=\
 	$(start-sanitize-vr4320) \
 	$(srcdir)/vr4320.igen \
 	$(end-sanitize-vr4320) \
-	$(srcdir)/m16.igen
+	$(srcdir)/m16.igen \
+	$(srcdir)/tx.igen
 
 SIM_IGEN_ALL = tmp-igen
 
@@ -211,11 +213,11 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	$(srcdir)/../../move-if-change tmp-irun.c irun.c
 	touch tmp-igen
 
-semantics.o: sim-main.h $(SIM_EXTRA_DEPS)
-engine.o: sim-main.h $(SIM_EXTRA_DEPS)
-support.o: sim-main.h $(SIM_EXTRA_DEPS)
-idecode.o: sim-main.h $(SIM_EXTRA_DEPS)
-itable.o: sim-main.h $(SIM_EXTRA_DEPS)
+semantics.o: sim-main.h semantics.c $(SIM_EXTRA_DEPS)
+engine.o: sim-main.h engine.c $(SIM_EXTRA_DEPS)
+support.o: sim-main.h support.c $(SIM_EXTRA_DEPS)
+idecode.o: sim-main.h idecode.c $(SIM_EXTRA_DEPS)
+itable.o: sim-main.h itable.c $(SIM_EXTRA_DEPS)
 
 
 

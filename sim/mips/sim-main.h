@@ -516,11 +516,13 @@ struct _sim_cpu {
 #define NUM_VU_REGS	153
 #define NUM_VU_INTEGER_REGS 16
 
+#define NUM_VIF_REGS	25
+
 #define FIRST_VEC_REG	25
 #define NUM_R5900_REGS	128
 
 #undef NUM_REGS
-#define NUM_REGS (NUM_R5900_REGS + 2*(NUM_VU_REGS))
+#define NUM_REGS (NUM_R5900_REGS + 2*(NUM_VU_REGS) + 2*(NUM_VIF_REGS))
 #endif /* no tm-txvu.h */
 #endif
 /* end-sanitize-sky */
@@ -831,31 +833,31 @@ decode_coproc (SD, CPU, cia, (instruction))
 #define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
 #endif
 
-int address_translation PARAMS ((SIM_DESC sd, sim_cpu *, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
+INLINE_SIM_MAIN (int) address_translation PARAMS ((SIM_DESC sd, sim_cpu *, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
 address_translation (SD, CPU, cia, vAddr, IorD, LorS, pAddr, CCA, raw)
 
-void load_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, unsigned int AccessLength, address_word pAddr, address_word vAddr, int IorD));
+INLINE_SIM_MAIN (void) load_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, unsigned int AccessLength, address_word pAddr, address_word vAddr, int IorD));
 #define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \
 load_memory (SD, CPU, cia, memvalp, memval1p, CCA, AccessLength, pAddr, vAddr, IorD)
 
-void store_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, unsigned int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
+INLINE_SIM_MAIN (void) store_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, unsigned int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
 #define StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
 store_memory (SD, CPU, cia, CCA, AccessLength, MemElem, MemElem1, pAddr, vAddr)
 
-void cache_op PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
+INLINE_SIM_MAIN (void) cache_op PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
 #define CacheOp(op,pAddr,vAddr,instruction) \
 cache_op (SD, CPU, cia, op, pAddr, vAddr, instruction)
 
-void sync_operation PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int stype));
+INLINE_SIM_MAIN (void) sync_operation PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int stype));
 #define SyncOperation(stype) \
 sync_operation (SD, CPU, cia, (stype))
 
-void prefetch PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint));
+INLINE_SIM_MAIN (void) prefetch PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint));
 #define Prefetch(CCA,pAddr,vAddr,DATA,hint) \
 prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 
-unsigned32 ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
+INLINE_SIM_MAIN (unsigned32) ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
 #define IMEM32(CIA) ifetch32 (SD, CPU, (CIA), (CIA))
 unsigned16 ifetch16 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
 #define IMEM16(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
@@ -864,6 +866,14 @@ unsigned16 ifetch16 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, addres
 void dotrace PARAMS ((SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));
 FILE *tracefh;
 
-void pending_tick PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia));
+INLINE_SIM_MAIN (void) pending_tick PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia));
+
+char* pr_addr PARAMS ((SIM_ADDR addr));
+char* pr_uword64 PARAMS ((uword64 addr));
+
+
+#if H_REVEALS_MODULE_P (SIM_MAIN_INLINE)
+#include "sim-main.c"
+#endif
 
 #endif

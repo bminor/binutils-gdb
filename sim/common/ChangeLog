@@ -1,8 +1,12 @@
+Sat Apr  4 23:24:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (sim-inline): By default, disable sim-inline when
+ 	cross compiling.
+
 Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (sim-cflags): Add -fomit-frame-pointer to defaults.
 	(sim-inline): Update to match sim-inline.[hc]
-	
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
 	* Make-common.in (sim_main_headers): Add sim-inline.h
