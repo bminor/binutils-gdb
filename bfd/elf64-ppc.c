@@ -28,7 +28,6 @@
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-#include "elf/ppc.h"
 #include "elf/ppc64.h"
 #include "elf64-ppc.h"
 
