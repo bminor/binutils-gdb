@@ -1,6 +1,22 @@
 # Apply these patches to GDB to produce an Energize GDB.
 # To apply these patches, first cd to gdb-XX/gdb, then run patch -p0 < thisfile.
 ===================================================================
+RCS file: /local/cvsfiles/devo/gdb/.Sanitize,v
+retrieving revision 2.53
+diff -c -r2.53 .Sanitize
+*** 2.53	1992/06/20 00:59:25
+--- .Sanitize	1992/06/23 04:47:40
+***************
+*** 70,75 ****
+--- 70,76 ----
+  cplus-dem.c
+  createtags
+  dbxread.c
++ deblib
+  defs.h
+  demangle.h
+  depend
+===================================================================
 RCS file: /local/cvsfiles/devo/gdb/Makefile.in,v
 retrieving revision 1.158
 diff -c -r1.158 Makefile.in
