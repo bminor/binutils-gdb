@@ -1,3 +1,15 @@
+Sun May 19 07:49:34 1991  John Gilmore and Rich Pixley  (at cygnus.com)
+
+	Make readline independent of the applications that use it.
+
+	* readline.h, keymaps.h:  include other include files with "foo.h"
+	rather than <readline/foo.h>.  This works here, and works when
+	included from other applications.
+
+	* Makefile.in:  Create template for configurable Makefile.
+	This version is not ready for prime time, so we have left
+	Makefile itself (the original version) too.
+
 Sun Mar 11 04:32:03 1990  Brian Fox  (bfox at gnuwest.fsf.org)
 
 	* Signals are now supposedly handled inside of SYSV compilation.
