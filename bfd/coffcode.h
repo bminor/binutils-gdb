@@ -1228,6 +1228,9 @@ coff_set_alignment_hook (abfd, section, scnhdr)
     }
 #endif
 
+#ifdef COFF_WITH_PE
+  section->lma = hdr->s_vaddr;
+#endif
 }
 #undef ALIGN_SET
 #undef ELIFALIGN_SET
