@@ -1,3 +1,8 @@
+2005-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* cgen.c (gas_cgen_parse_operand): Fix typo introduced by
+	previous delta.
+
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.tgt: Handle setting of bfd_gas for fmt=multi targets

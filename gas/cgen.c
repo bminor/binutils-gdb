@@ -359,7 +359,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
   input_line_pointer = hold;
 
 #ifdef TC_CGEN_PARSE_FIX_EXP
-  opinfo = TC_CGEN_PARSE_FIX_EXP (opinfo_1, & exp);
+  opinfo_1 = TC_CGEN_PARSE_FIX_EXP (opinfo_1, & exp);
 #endif 
 
   /* FIXME: Need to check `want'.  */
