@@ -1,4 +1,12 @@
+Thu May 13 07:51:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc.h (TC_COFF_SIZEMACHDEP): Don't define here.
+	* config/tc-sh.h (TC_COFF_SIZEMACHDEP): Define here instead.
+
 Mon May 10 06:01:12 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/obj-vms.c (VMS_Symbol_type_list): Don't bother with
+	initialization.
 
 	* configure.in (targets): Treat m68*-*-sysv* like m68k-*-coff.
 
