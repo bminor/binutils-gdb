@@ -2940,6 +2940,7 @@ void OP_F020 (insn, extension)
 	State.exception = SIGABRT;
       else
 	State.exception = SIGQUIT;
+      State.exited = 1;
       break;
 
     case SYS_stat:	/* added at hmsi */
