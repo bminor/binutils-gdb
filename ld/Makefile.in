@@ -784,7 +784,7 @@ ldint.dvi: $(srcdir)/ldint.texinfo
 
 # info file for online browsing
 ld.info: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
-	$(MAKEINFO) -I$(BFDDIR)/doc -o ld.info $(srcdir)/ld.texinfo
+	$(MAKEINFO) -I$(BFDDIR)/doc -I$(srcdir) -o ld.info $(srcdir)/ld.texinfo
 
 ldint.info: $(srcdir)/ldint.texinfo
 	$(MAKEINFO) -o ldint.info $(srcdir)/ldint.texinfo
@@ -913,7 +913,7 @@ mostlyclean:
 	-rm -f ldemul-list.h
 	-rm -fr tmpdir
 clean: mostlyclean
-	-rm -f $(LD_PROG) configdoc.texi
+	-rm -f $(LD_PROG)
 distclean: clean
 	-rm -f Makefile config.status TAGS site.exp site.bak config.cache
 	-rm -f config.h stamp-h config.log
@@ -922,7 +922,7 @@ maintainer-clean realclean: clean distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f $(GENERATED_CFILES) $(GENERATED_HFILES)
-	-rm -f $(LDDISTSTUFF) *.info*
+	-rm -f $(LDDISTSTUFF) *.info* configdoc.texi
 
 .PHONY: diststuff mostlyclean clean distclean realclean
 
