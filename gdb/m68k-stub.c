@@ -522,10 +522,15 @@ char ch;
   return (-1);
 }
 
+static char remcomInBuffer[BUFMAX];
+static char remcomOutBuffer[BUFMAX];
 
+/* scan for the sequence $<data>#<checksum>     */
+  
 unsigned char *
-getpacket (unsigned char *buffer)
+getpacket ()
 {
+  unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
   unsigned char xmitcsum;
   int count;
@@ -621,11 +626,6 @@ char * buffer;
   } while (getDebugChar() != '+');
   
 }
-
-char  remcomInBuffer[BUFMAX];
-char  remcomOutBuffer[BUFMAX];
-static short error;
-
 
 void debug_error(format, parm)
 char * format;
@@ -777,9 +777,8 @@ void handle_exception(int exceptionVector)
   stepping = 0;
 
   while (1==1) { 
-    error = 0;
     remcomOutBuffer[0] = 0;
-    ptr = getpacket(remcomInBuffer);
+    ptr = getpacket();
     switch (*ptr++) {
       case '?' :   remcomOutBuffer[0] = 'S';
                    remcomOutBuffer[1] =  hexchars[sigval >> 4];

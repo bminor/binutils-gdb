@@ -98,8 +98,14 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 	bfd_vma addr = bfd_get_section_vma (abfd, s) + load_offset;
 	bfd_size_type size = bfd_get_section_size_before_reloc (s);
 	char *section_name = (char *) bfd_get_section_name (abfd, s);
-	printf_filtered ("%s\t: 0x%08x .. 0x%08x  ",
-			 section_name, (int) addr, (int) addr + size);
+	/* Both GDB and BFD have mechanisms for printing addresses.
+           In the below, GDB's is used so that the address is
+           consistent with the rest of GDB.  BFD's printf_vma() could
+           have also been used. cagney 1999-09-01 */
+	printf_filtered ("%s\t: 0x%s .. 0x%s  ",
+			 section_name,
+			 paddr (addr),
+			 paddr (addr + size));
 	gdb_flush (gdb_stdout);
 
 	data_count += size;

@@ -176,13 +176,51 @@ static int use_thread_step_needed = USE_THREAD_STEP_NEEDED;
 #define DYNAMIC_TRAMPOLINE_NEXTPC(pc) 0
 #endif
 
-/* On SVR4 based systems, determining the callee's address is exceedingly
-   difficult and depends on the implementation of the run time loader.
-   If we are stepping at the source level, we single step until we exit
-   the run time loader code and reach the callee's address.  */
+/* If the program uses ELF-style shared libraries, then calls to
+   functions in shared libraries go through stubs, which live in a
+   table called the PLT (Procedure Linkage Table).  The first time the
+   function is called, the stub sends control to the dynamic linker,
+   which looks up the function's real address, patches the stub so
+   that future calls will go directly to the function, and then passes
+   control to the function.
+
+   If we are stepping at the source level, we don't want to see any of
+   this --- we just want to skip over the stub and the dynamic linker.
+   The simple approach is to single-step until control leaves the
+   dynamic linker.
+
+   However, on some systems (e.g., Red Hat Linux 5.2) the dynamic
+   linker calls functions in the shared C library, so you can't tell
+   from the PC alone whether the dynamic linker is still running.  In
+   this case, we use a step-resume breakpoint to get us past the
+   dynamic linker, as if we were using "next" to step over a function
+   call.
+
+   IN_SOLIB_DYNSYM_RESOLVE_CODE says whether we're in the dynamic
+   linker code or not.  Normally, this means we single-step.  However,
+   if SKIP_SOLIB_RESOLVER then returns non-zero, then its value is an
+   address where we can place a step-resume breakpoint to get past the
+   linker's symbol resolution function.
+
+   IN_SOLIB_DYNSYM_RESOLVE_CODE can generally be implemented in a
+   pretty portable way, by comparing the PC against the address ranges
+   of the dynamic linker's sections.
+
+   SKIP_SOLIB_RESOLVER is generally going to be system-specific, since
+   it depends on internal details of the dynamic linker.  It's usually
+   not too hard to figure out where to put a breakpoint, but it
+   certainly isn't portable.  SKIP_SOLIB_RESOLVER should do plenty of
+   sanity checking.  If it can't figure things out, returning zero and
+   getting the (possibly confusing) stepping behavior is better than
+   signalling an error, which will obscure the change in the
+   inferior's state.  */
 
 #ifndef IN_SOLIB_DYNSYM_RESOLVE_CODE
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(pc) 0
+#endif
+
+#ifndef SKIP_SOLIB_RESOLVER
+#define SKIP_SOLIB_RESOLVER(pc) 0
 #endif
 
 /* For SVR4 shared libraries, each call goes through a small piece of
@@ -1137,8 +1175,10 @@ void init_execution_control_state (struct execution_control_state * ecs);
 void handle_inferior_event (struct execution_control_state * ecs);
 
 static void check_sigtramp2 (struct execution_control_state *ecs);
+static void step_over_function (struct execution_control_state *ecs);
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
+static void keep_going (struct execution_control_state *ecs);
 
 /* Wait for control to return from inferior to debugger.
    If inferior gets a signal, we may decide to start it up again
@@ -2108,15 +2148,17 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    trap_expected = 1;
 	    stop_signal = TARGET_SIGNAL_0;
-	    goto keep_going;
+	    keep_going (ecs);
+	    return;
 	  }
       }
     else if (ecs->ws.kind == TARGET_WAITKIND_VFORKED)
       {
 	if (ecs->random_signal)	/* I.e., no catchpoint triggered for this. */
 	  {
-	    stop_signal = TARGET_SIGNAL_0;
-	    goto keep_going;
+	    stop_signal = TARGET_SIGNAL_0;	
+	    keep_going (ecs);
+	    return;
 	  }
       }
     else if (ecs->ws.kind == TARGET_WAITKIND_EXECD)
@@ -2126,7 +2168,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    trap_expected = 1;
 	    stop_signal = TARGET_SIGNAL_0;
-	    goto keep_going;
+	    keep_going (ecs);
+	    return;
 	  }
       }
 
@@ -2182,7 +2225,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   that case, when we reach this point, there is already a
 	   step-resume breakpoint established, right where it should be:
 	   immediately after the function call the user is "next"-ing
-	   over.  If we jump to step_over_function now, two bad things
+	   over.  If we call step_over_function now, two bad things
 	   happen:
 
 	   - we'll create a new breakpoint, at wherever the current
@@ -2230,7 +2273,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  remove_breakpoints ();
 	  breakpoints_inserted = 0;
 	  if (!GET_LONGJMP_TARGET (&jmp_buf_pc))
-	    goto keep_going;
+	    {
+	      keep_going (ecs);
+	      return;
+	    }
 
 	  /* Need to blow away step-resume breakpoint, as it
 	     interferes with us */
@@ -2256,7 +2302,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 #endif /* 0 */
 	    set_longjmp_resume_breakpoint (jmp_buf_pc, NULL);
 	  ecs->handling_longjmp = 1;	/* FIXME */
-	  goto keep_going;
+	  keep_going (ecs);
+	  return;
 
 	case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
 	case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE:
@@ -2269,7 +2316,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 			      step_frame_address)))
 	    {
 	      ecs->another_trap = 1;
-	      goto keep_going;
+	      keep_going (ecs);
+	      return;
 	    }
 #endif /* 0 */
 	  disable_longjmp_breakpoint ();
@@ -2452,7 +2500,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	if (SOLIB_IN_DYNAMIC_LINKER (ecs->pid, stop_pc))
 	  {
 	    ecs->another_trap = 1;
-	    goto keep_going;
+	    keep_going (ecs);
+	    return;
 	  }
 #endif
 	/* Else, stop and report the catchpoint(s) whose triggering
@@ -2499,7 +2548,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* I'm not sure whether this needs to be check_sigtramp2 or
 	   whether it could/should be keep_going.  */
 	check_sigtramp2 (ecs);
-	goto keep_going;
+	keep_going (ecs);
+	return;
       }
     
     if (step_range_end == 0)
@@ -2508,7 +2558,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* I'm not sure whether this needs to be check_sigtramp2 or
 	   whether it could/should be keep_going.  */
 	check_sigtramp2 (ecs);
-	goto keep_going;
+	keep_going (ecs);
+	return;
       }
 
     /* If stepping through a line, keep going if still within it.
@@ -2522,7 +2573,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* We might be doing a BPSTAT_WHAT_SINGLE and getting a signal.
 	   So definately need to check for sigtramp here.  */
 	check_sigtramp2 (ecs);
-	goto keep_going;
+	keep_going (ecs);
+	return;
       }
 
     /* We stepped out of the stepping range.  */
@@ -2532,7 +2584,27 @@ handle_inferior_event (struct execution_control_state *ecs)
        until we exit the run time loader code and reach the callee's
        address.  */
     if (step_over_calls < 0 && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc))
-      goto keep_going;
+      {
+	CORE_ADDR pc_after_resolver = SKIP_SOLIB_RESOLVER (stop_pc);
+
+	if (pc_after_resolver)
+	  {
+	    /* Set up a step-resume breakpoint at the address
+	       indicated by SKIP_SOLIB_RESOLVER.  */
+	    struct symtab_and_line sr_sal;
+	    INIT_SAL (&sr_sal);
+	    sr_sal.pc = pc_after_resolver;
+
+	    check_for_old_step_resume_breakpoint ();
+	    step_resume_breakpoint =
+	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	    if (breakpoints_inserted)
+	      insert_breakpoints ();
+	  }
+
+	keep_going (ecs);
+	return;
+      }
 
     /* We can't update step_sp every time through the loop, because
        reading the stack pointer would slow down stepping too much.
@@ -2591,7 +2663,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      /* We just stepped out of a signal handler and into
 	         its calling trampoline.
 
-	         Normally, we'd jump to step_over_function from
+	         Normally, we'd call step_over_function from
 	         here, but for some reason GDB can't unwind the
 	         stack correctly to find the real PC for the point
 	         user code where the signal trampoline will return
@@ -2620,7 +2692,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  step_range_end = (step_range_start = prev_pc) + 1;
 
 	ecs->remove_breakpoints_on_following_step = 1;
-	goto keep_going;
+	keep_going (ecs);
+	return;
       }
 
     if (stop_pc == ecs->stop_func_start		/* Quick test */
@@ -2642,8 +2715,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  }
 
 	if (step_over_calls > 0 || IGNORE_HELPER_CALL (stop_pc))
-	  /* We're doing a "next".  */
-	  goto step_over_function;
+	  {
+	    /* We're doing a "next".  */
+	    step_over_function (ecs);
+	    keep_going (ecs);
+	    return;
+	  }
 
 	/* If we are in a function call trampoline (a stub between
 	   the calling routine and the real function), locate the real
@@ -2668,7 +2745,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 		step_resume_breakpoint =
 		  set_momentary_breakpoint (xxx, NULL, bp_step_resume);
 		insert_breakpoints ();
-		goto keep_going;
+		keep_going (ecs);
+		return;
 	      }
 	  }
 
@@ -2685,40 +2763,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  if (tmp_sal.line != 0)
 	    goto step_into_function;
 	}
-
-      step_over_function:
-	/* A subroutine call has happened.  */
-	{
-	  /* We've just entered a callee, and we wish to resume until it
-	     returns to the caller.  Setting a step_resume breakpoint on
-	     the return address will catch a return from the callee.
-
-	     However, if the callee is recursing, we want to be careful
-	     not to catch returns of those recursive calls, but only of
-	     THIS instance of the call.
-
-	     To do this, we set the step_resume bp's frame to our current
-	     caller's frame (step_frame_address, which is set by the "next"
-	     or "until" command, before execution begins).  */
-	  struct symtab_and_line sr_sal;
-
-	  INIT_SAL (&sr_sal);	/* initialize to zeros */
-	  sr_sal.pc = 
-	    ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
-	  sr_sal.section = find_pc_overlay (sr_sal.pc);
-
-	  check_for_old_step_resume_breakpoint ();
-	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, get_current_frame (),
-				      bp_step_resume);
-
-	  if (!IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
-	    step_resume_breakpoint->frame = step_frame_address;
-
-	  if (breakpoints_inserted)
-	    insert_breakpoints ();
-	}
-	goto keep_going;
+	step_over_function (ecs);
+	keep_going (ecs);
+	return;
 
       step_into_function:
 	/* Subroutine call with source code we should not step over.
@@ -2772,7 +2819,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    /* And make sure stepping stops right away then.  */
 	    step_range_end = step_range_start;
 	  }
-	goto keep_going;
+	keep_going (ecs);
+	return;
       }
 
     /* We've wandered out of the step range.  */
@@ -2817,7 +2865,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	    /* Restart without fiddling with the step ranges or
 	       other state.  */
-	    goto keep_going;
+	    keep_going (ecs);
+	    return;
 	  }
       }
 
@@ -2877,121 +2926,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	step_frame_address = current_frame;
     }
 
-  keep_going:
-    /* Come to this label when you need to resume the inferior.
-       It's really much cleaner to do a goto than a maze of if-else
-       conditions.  */
-
-    /* ??rehrauer: ttrace on HP-UX theoretically allows one to debug
-       a vforked child beetween its creation and subsequent exit or
-       call to exec().  However, I had big problems in this rather
-       creaky exec engine, getting that to work.  The fundamental
-       problem is that I'm trying to debug two processes via an
-       engine that only understands a single process with possibly
-       multiple threads.
-
-       Hence, this spot is known to have problems when
-       target_can_follow_vfork_prior_to_exec returns 1. */
-
-    /* Save the pc before execution, to compare with pc after stop.  */
-    prev_pc = read_pc ();	/* Might have been DECR_AFTER_BREAK */
-    prev_func_start = ecs->stop_func_start;	/* Ok, since if DECR_PC_AFTER
-						   BREAK is defined, the
-						   original pc would not have
-						   been at the start of a
-						   function. */
-    prev_func_name = ecs->stop_func_name;
-
-    if (ecs->update_step_sp)
-      step_sp = read_sp ();
-    ecs->update_step_sp = 0;
-
-    /* If we did not do break;, it means we should keep
-       running the inferior and not return to debugger.  */
-
-    if (trap_expected && stop_signal != TARGET_SIGNAL_TRAP)
-      {
-	/* We took a signal (which we are supposed to pass through to
-	   the inferior, else we'd have done a break above) and we
-	   haven't yet gotten our trap.  Simply continue.  */
-	resume (currently_stepping (ecs), stop_signal);
-      }
-    else
-      {
-	/* Either the trap was not expected, but we are continuing
-	   anyway (the user asked that this signal be passed to the
-	   child)
-	   -- or --
-	   The signal was SIGTRAP, e.g. it was our signal, but we
-	   decided we should resume from it.
-
-	   We're going to run this baby now!
-
-	   Insert breakpoints now, unless we are trying
-	   to one-proceed past a breakpoint.  */
-	/* If we've just finished a special step resume and we don't
-	   want to hit a breakpoint, pull em out.  */
-	if (step_resume_breakpoint == NULL
-	    && through_sigtramp_breakpoint == NULL
-	    && ecs->remove_breakpoints_on_following_step)
-	  {
-	    ecs->remove_breakpoints_on_following_step = 0;
-	    remove_breakpoints ();
-	    breakpoints_inserted = 0;
-	  }
-	else if (!breakpoints_inserted &&
-		 (through_sigtramp_breakpoint != NULL || !ecs->another_trap))
-	  {
-	    breakpoints_failed = insert_breakpoints ();
-	    if (breakpoints_failed)
-	      {
-		stop_stepping (ecs);
-		return;
-	      }
-	    breakpoints_inserted = 1;
-	  }
-
-	trap_expected = ecs->another_trap;
-
-	/* Do not deliver SIGNAL_TRAP (except when the user
-	   explicitly specifies that such a signal should be
-	   delivered to the target program).
-
-	   Typically, this would occure when a user is debugging a
-	   target monitor on a simulator: the target monitor sets a
-	   breakpoint; the simulator encounters this break-point and
-	   halts the simulation handing control to GDB; GDB, noteing
-	   that the break-point isn't valid, returns control back to
-	   the simulator; the simulator then delivers the hardware
-	   equivalent of a SIGNAL_TRAP to the program being
-	   debugged. */
-
-	if (stop_signal == TARGET_SIGNAL_TRAP
-	    && !signal_program[stop_signal])
-	  stop_signal = TARGET_SIGNAL_0;
-
-#ifdef SHIFT_INST_REGS
-	/* I'm not sure when this following segment applies.  I do know,
-	   now, that we shouldn't rewrite the regs when we were stopped
-	   by a random signal from the inferior process.  */
-	/* FIXME: Shouldn't this be based on the valid bit of the SXIP?
-	   (this is only used on the 88k).  */
-
-	if (!bpstat_explains_signal (stop_bpstat)
-	    && (stop_signal != TARGET_SIGNAL_CHLD)
-	    && !stopped_by_random_signal)
-	  SHIFT_INST_REGS ();
-#endif /* SHIFT_INST_REGS */
-
-	resume (currently_stepping (ecs), stop_signal);
-      }
-
-    prepare_to_wait (ecs);
-    return;
+    keep_going (ecs);
 
   } /* extra brace, to preserve old indentation */
-
-  stop_stepping (ecs);
 }
 
 /* Are we in the middle of stepping?  */
@@ -3043,6 +2980,39 @@ check_sigtramp2 (struct execution_control_state *ecs)
     }
 }
 
+
+/* We've just entered a callee, and we wish to resume until it returns
+   to the caller.  Setting a step_resume breakpoint on the return
+   address will catch a return from the callee.
+     
+   However, if the callee is recursing, we want to be careful not to
+   catch returns of those recursive calls, but only of THIS instance
+   of the call.
+
+   To do this, we set the step_resume bp's frame to our current
+   caller's frame (step_frame_address, which is set by the "next" or
+   "until" command, before execution begins).  */
+
+static void
+step_over_function (struct execution_control_state *ecs)
+{
+  struct symtab_and_line sr_sal;
+
+  INIT_SAL (&sr_sal);	/* initialize to zeros */
+  sr_sal.pc = ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
+  sr_sal.section = find_pc_overlay (sr_sal.pc);
+
+  check_for_old_step_resume_breakpoint ();
+  step_resume_breakpoint =
+    set_momentary_breakpoint (sr_sal, get_current_frame (), bp_step_resume);
+
+  if (!IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
+    step_resume_breakpoint->frame = step_frame_address;
+
+  if (breakpoints_inserted)
+    insert_breakpoints ();
+}
+
 static void
 stop_stepping (struct execution_control_state *ecs)
 {
@@ -3082,6 +3052,118 @@ stop_stepping (struct execution_control_state *ecs)
 
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
+}
+
+/* This function handles various cases where we need to continue
+   waiting for the inferior.  */
+/* (Used to be the keep_going: label in the old wait_for_inferior) */
+
+static void
+keep_going (struct execution_control_state *ecs)
+{
+  /* ??rehrauer: ttrace on HP-UX theoretically allows one to debug a
+     vforked child between its creation and subsequent exit or call to
+     exec().  However, I had big problems in this rather creaky exec
+     engine, getting that to work.  The fundamental problem is that
+     I'm trying to debug two processes via an engine that only
+     understands a single process with possibly multiple threads.
+
+     Hence, this spot is known to have problems when
+     target_can_follow_vfork_prior_to_exec returns 1. */
+
+  /* Save the pc before execution, to compare with pc after stop.  */
+  prev_pc = read_pc ();	/* Might have been DECR_AFTER_BREAK */
+  prev_func_start = ecs->stop_func_start;	/* Ok, since if DECR_PC_AFTER
+						   BREAK is defined, the
+						   original pc would not have
+						   been at the start of a
+						   function. */
+  prev_func_name = ecs->stop_func_name;
+
+  if (ecs->update_step_sp)
+    step_sp = read_sp ();
+  ecs->update_step_sp = 0;
+
+  /* If we did not do break;, it means we should keep running the
+     inferior and not return to debugger.  */
+
+  if (trap_expected && stop_signal != TARGET_SIGNAL_TRAP)
+    {
+      /* We took a signal (which we are supposed to pass through to
+	 the inferior, else we'd have done a break above) and we
+	 haven't yet gotten our trap.  Simply continue.  */
+      resume (currently_stepping (ecs), stop_signal);
+    }
+  else
+    {
+      /* Either the trap was not expected, but we are continuing
+	 anyway (the user asked that this signal be passed to the
+	 child)
+	 -- or --
+	 The signal was SIGTRAP, e.g. it was our signal, but we
+	 decided we should resume from it.
+
+	 We're going to run this baby now!
+
+	 Insert breakpoints now, unless we are trying to one-proceed
+	 past a breakpoint.  */
+      /* If we've just finished a special step resume and we don't
+	 want to hit a breakpoint, pull em out.  */
+      if (step_resume_breakpoint == NULL
+	  && through_sigtramp_breakpoint == NULL
+	  && ecs->remove_breakpoints_on_following_step)
+	{
+	  ecs->remove_breakpoints_on_following_step = 0;
+	  remove_breakpoints ();
+	  breakpoints_inserted = 0;
+	}
+      else if (!breakpoints_inserted &&
+	       (through_sigtramp_breakpoint != NULL || !ecs->another_trap))
+	{
+	  breakpoints_failed = insert_breakpoints ();
+	  if (breakpoints_failed)
+	    {
+	      stop_stepping (ecs);
+	      return;
+	    }
+	  breakpoints_inserted = 1;
+	}
+
+      trap_expected = ecs->another_trap;
+
+      /* Do not deliver SIGNAL_TRAP (except when the user explicitly
+	 specifies that such a signal should be delivered to the
+	 target program).
+
+	 Typically, this would occure when a user is debugging a
+	 target monitor on a simulator: the target monitor sets a
+	 breakpoint; the simulator encounters this break-point and
+	 halts the simulation handing control to GDB; GDB, noteing
+	 that the break-point isn't valid, returns control back to the
+	 simulator; the simulator then delivers the hardware
+	 equivalent of a SIGNAL_TRAP to the program being debugged. */
+
+      if (stop_signal == TARGET_SIGNAL_TRAP
+	  && !signal_program[stop_signal])
+	stop_signal = TARGET_SIGNAL_0;
+
+#ifdef SHIFT_INST_REGS
+      /* I'm not sure when this following segment applies.  I do know,
+	 now, that we shouldn't rewrite the regs when we were stopped
+	 by a random signal from the inferior process.  */
+      /* FIXME: Shouldn't this be based on the valid bit of the SXIP?
+	 (this is only used on the 88k).  */
+
+      if (!bpstat_explains_signal (stop_bpstat)
+	  && (stop_signal != TARGET_SIGNAL_CHLD)
+	  && !stopped_by_random_signal)
+	SHIFT_INST_REGS ();
+#endif /* SHIFT_INST_REGS */
+
+      resume (currently_stepping (ecs), stop_signal);
+    }
+
+    prepare_to_wait (ecs);
 }
 
 /* This function normally comes after a resume, before
@@ -3363,6 +3445,33 @@ int
 signal_pass_state (int signo)
 {
   return signal_program[signo];
+}
+
+int signal_stop_update (signo, state)
+     int signo;
+     int state;
+{
+  int ret = signal_stop[signo];
+  signal_stop[signo] = state;
+  return ret;
+}
+
+int signal_print_update (signo, state)
+     int signo;
+     int state;
+{
+  int ret = signal_print[signo];
+  signal_print[signo] = state;
+  return ret;
+}
+
+int signal_pass_update (signo, state)
+     int signo;
+     int state;
+{
+  int ret = signal_program[signo];
+  signal_program[signo] = state;
+  return ret;
 }
 
 static void

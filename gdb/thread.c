@@ -353,7 +353,7 @@ thread_alive (tp)
 static void
 prune_threads ()
 {
-  struct thread_info *tp, *tpprev, *next;
+  struct thread_info *tp, *next;
 
   for (tp = thread_list; tp; tp = next)
     {

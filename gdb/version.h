@@ -1,5 +1,5 @@
-/* Native support for GNU/Linux, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Version information for GDB.
+   Copyright (C) 1999, Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,22 +18,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef XM_LINUX_H
-#define XM_LINUX_H
+#ifndef VERSION_H
+#define VERSION_H
 
-#define HOST_I386
+/* Version number of GDB, as a string.  */
+extern const char version[];
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
+/* Canonical host name as a string. */
+extern const char host_name[];
 
-#define HAVE_TERMIOS
+/* Canonical target name as a string. */
+extern const char target_name[];
 
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-#define KERNEL_U_ADDR 0x0
-
-#define NEED_POSIX_SETPGID
-
-/* Need R_OK etc, but USG isn't defined.  */
-#include <unistd.h>
-
-#endif /* #ifndef XM_LINUX_H */
+#endif /* #ifndef VERSION_H */

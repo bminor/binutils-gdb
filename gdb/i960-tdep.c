@@ -567,7 +567,7 @@ saved_pc_after_call (frame)
    restoring all saved registers.  */
 
 void
-pop_frame ()
+i960_pop_frame (void)
 {
   register struct frame_info *current_fi, *prev_fi;
   register int i;

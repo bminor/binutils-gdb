@@ -52,7 +52,9 @@ void handle_sigint PARAMS ((int));
 static void handle_sigquit PARAMS ((int));
 static void handle_sighup PARAMS ((int));
 static void handle_sigfpe PARAMS ((int));
+#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 static void handle_sigwinch PARAMS ((int));
+#endif
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 #ifndef STOP_SIGNAL
 #ifdef SIGTSTP

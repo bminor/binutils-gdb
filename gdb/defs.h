@@ -517,12 +517,13 @@ extern void fputstr_unfiltered PARAMS ((const char *str, int quotr, GDB_FILE *st
 
 extern void fputstrn_unfiltered PARAMS ((const char *str, int n, int quotr, GDB_FILE *stream));
 
-extern void gdb_print_address PARAMS ((void *, GDB_FILE *));
+/* Display the host ADDR on STREAM formatted as ``0x%x''. */
+extern void gdb_print_host_address (void *addr, struct gdb_file *stream);
 
 /* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
    paddr_nz() is like %lx.  paddr_u() is like %lu. paddr_width() is
    for ``%*''. */
-extern int strlen_paddr ();
+extern int strlen_paddr (void);
 extern char* paddr (CORE_ADDR addr);
 extern char* paddr_nz (CORE_ADDR addr);
 extern char* paddr_u (CORE_ADDR addr);

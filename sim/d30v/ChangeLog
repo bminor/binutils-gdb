@@ -1,3 +1,15 @@
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Sep  1 11:38:21 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d30v-insns: Cast CIA to LONG in printfs.
+
+Tue Aug 31 01:32:22 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu.h (unqueue_writes): Add declaration.
+
 1999-05-27  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-insns (do_repeat): Print a warning if a REPEAT or REPEATI

@@ -39,9 +39,18 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+if { [skip_cplus_tests] } { continue }
+
 set testfile "derivation"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
+
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+
+if [get_compiler_info ${binfile} "c++"] {
+    return -1
+}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."

@@ -24,7 +24,6 @@
    CUR_SYMBOL_TYPE --Type code of current symbol.
    CUR_SYMBOL_VALUE --Value field of current symbol.  May be adjusted here.
    namestring - variable pointing to the name of the stab.
-   section_offsets - variable pointing to the section offsets.
    pst - the partial symbol table being built.
 
    psymtab_include_list, includes_used, includes_allocated - list of include
@@ -266,7 +265,7 @@ switch (CUR_SYMBOL_TYPE)
          immediately follow the first.  */
 
       if (!pst)
-	pst = START_PSYMTAB (objfile, objfile->section_offsets,
+	pst = START_PSYMTAB (objfile,
 			     namestring, valu,
 			     first_so_symnum * symbol_size,
 			     objfile->global_psymbols.next,

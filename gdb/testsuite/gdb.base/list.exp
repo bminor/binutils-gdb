@@ -111,7 +111,7 @@ proc test_listsize {} {
     # Try just two lines
     
     if [ set_listsize 2 ] {
-	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"" "list line 1 with listsize 2"
+	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"\r\n2\[ \t\]+" "list line 1 with listsize 2"
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\"\r\n2\[ \t\]+" "list line 2 with listsize 2"
 	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+int main \[)(\]+" "list line 3 with listsize 2"
     }
@@ -119,18 +119,16 @@ proc test_listsize {} {
     # Try small listsize > 1 that is an odd number
 
     if [ set_listsize 3 ] {
-	setup_xfail "*-*-*"
-	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"2\[ \t\]+" "list line 1 with listsize 3"
+	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 1 with listsize 3"
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 2 with listsize 3"
-	
 	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+int main \[(\]+\[)\]+\r\n4\[ \t\]+\{" "list line 3 with listsize 3"
     }
 
     # Try small listsize > 2 that is an even number.
 
     if [ set_listsize 4 ] then {
-	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"\r\n2\[ \t\]+" "list line 1 with listsize 4"
-	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 2 with listsize 4"
+	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 1 with listsize 4"
+	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 2 with listsize 4"
 	
 	gdb_test "list 3" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 3 with listsize 4"
 	gdb_test "list 4" "2\[ \t\]+\r\n.*5\[ \t\]+int x;.*" "list line 4 with listsize 4"
@@ -166,7 +164,7 @@ proc test_list_include_file {} {
     setup_xfail "a29k-*-udi"
     setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
-    gdb_test "list list0.h:1" "1\[ \t\]+/\[*\]+ An include file .*4\[ \t\]+.*foo \(.*x.*\).*" "list line 1 in include file"
+    gdb_test "list list0.h:1" "1\[ \t\]+/\[*\]+ An include file .*10\[ \t\]+bar \\(x\\+\\+\\);" "list line 1 in include file"
 
     setup_xfail "a29k-*-udi"
     setup_xfail_format "DWARF 1"
@@ -185,7 +183,7 @@ proc test_list_filename_and_number {} {
 
     send_gdb "list list0.c:1\n"
     gdb_expect {
-	-re "1\[ \t\]+#include \"list0.h\".*5\[ \t\]+int x;\r\n$gdb_prompt $" {
+	-re "1\[ \t\]+#include \"list0.h\".*10\[ \t]+x = 0;\r\n$gdb_prompt $" {
 	    incr testcnt 
 	}
 	-re ".*$gdb_prompt $" { fail "list list0.c:1" ; gdb_suppress_tests }
@@ -231,7 +229,7 @@ proc test_list_function {} {
     # in include files, which breaks this test.
     # SunPRO cc is the second case below, it's also correct.
     setup_xfail "a29k-*-udi"
-    gdb_test "list main" "(5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;|1\[ \t\]+#include .*8\[ \t\]+breakpoint\[(\]\[)\]+;)" "list function in source file 1"
+    gdb_test "list main" "(5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;|1\[ \t\]+#include .*10\[ \t\]+x = 0;)" "list function in source file 1"
 
     # Ultrix gdb takes the second case below; it's also correct.
     # SunPRO cc is the third case.
@@ -398,7 +396,7 @@ proc test_list_filename_and_function {} {
     setup_xfail "a29k-*-udi"
     send_gdb "list list0.c:main\n"
     gdb_expect {
-	-re "1\[ \t\]+#include .*8\[ \t\]+breakpoint\[(\]\[)\]+;\r\n$gdb_prompt $" {
+	-re "1\[ \t\]+#include .*10\[ \t\]+x = 0;\r\n$gdb_prompt $" {
 	    incr testcnt
 	}
 	-re "5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$gdb_prompt $" {

@@ -43,6 +43,7 @@ int remote_mips_remove_watchpoint PARAMS ((CORE_ADDR addr, int len, int type));
 
 #define HAVE_NONSTEPPABLE_WATCHPOINT
 
+int remote_mips_stopped_by_watchpoint (void);
 #define STOPPED_BY_WATCHPOINT(w) remote_mips_stopped_by_watchpoint ()
 
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \

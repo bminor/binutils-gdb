@@ -94,8 +94,11 @@ SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
 SIM_SMP = @sim_smp@
 SIM_STDCALL = @sim_stdcall@
-SIM_WARNINGS = @build_warnings@
 SIM_XOR_ENDIAN = @sim_xor_endian@
+WARN_CFLAGS = @WARN_CFLAGS@
+WERROR_CFLAGS = @WERROR_CFLAGS@
+SIM_WARN_CFLAGS = $(WARN_CFLAGS)
+SIM_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
 HDEFINES = @HDEFINES@
 TDEFINES =
@@ -214,7 +217,8 @@ CONFIG_CFLAGS = \
 	$(SIM_SCACHE) \
 	$(SIM_SMP) \
 	$(SIM_STDCALL) \
-	$(SIM_WARNINGS) \
+	$(SIM_WARN_CFLAGS) \
+	$(SIM_WERROR_CFLAGS) \
 	$(SIM_XOR_ENDIAN) \
 	$(SIM_HARDWARE) \
 	$(SIM_EXTRA_CFLAGS) \
@@ -557,6 +561,7 @@ CGEN_MAIN_CPU_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
 	$(srccom)/cgen-ops.h \
 	$(srccom)/cgen-mem.h \
+	$(srccom)/cgen-par.h \
 	$(srccom)/cgen-fpu.h
 
 cgen-run.o: $(srccom)/cgen-run.c $(sim_main_headers)
@@ -577,6 +582,10 @@ cgen-accfp.o: $(srccom)/cgen-accfp.c $(sim_main_headers) $(sim-fpu_h)
 cgen-utils.o: $(srccom)/cgen-utils.c $(sim_main_headers) \
 	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h $(srccom)/cgen-engine.h
 	$(CC) -c $(srccom)/cgen-utils.c $(ALL_CFLAGS)
+
+cgen-par.o: $(srccom)/cgen-par.c $(sim_main_headers) \
+	  $(srccom)/cgen-mem.h $(srccom)/cgen-par.h
+	$(CC) -c $(srccom)/cgen-par.c $(ALL_CFLAGS)
 
 # Support targets.
 

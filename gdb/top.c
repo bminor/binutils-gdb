@@ -34,6 +34,7 @@
 #include "terminal.h"		/* For job_control.  */
 #include "annotate.h"
 #include "top.h"
+#include "version.h"
 
 /* readline include files */
 #include <readline/readline.h>
@@ -168,18 +169,6 @@ int inhibit_gdbinit = 0;
    attempt to open them upon startup.  */
 
 int use_windows = 1;
-
-/* Version number of GDB, as a string.  */
-
-extern char *version;
-
-/* Canonical host name as a string. */
-
-extern char *host_name;
-
-/* Canonical target name as a string. */
-
-extern char *target_name;
 
 extern char lang_frame_mismatch_warn[];		/* language.c */
 
@@ -3178,7 +3167,7 @@ get_prompt_1 (formatted_prompt)
 		    else
 		      {
 			if (available >= 16 /*? */ )	/* overflow protect */
-			  sprintf (outp, "%d", (long) longval);
+			  sprintf (outp, "%ld", (long) longval);
 		      }
 		    break;
 		  }

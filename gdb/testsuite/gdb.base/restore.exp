@@ -80,7 +80,7 @@ proc restore_tests { } {
             # Check that the values of the local variables are what
 	    # they should be.
             for {set var 1} {$var <= $c} {incr var} {
-                set expected [expr 0xfeeb + $var]
+                set expected [expr 0x7eeb + $var]
 	        gdb_test "print l$var" " = $expected" \
                          "caller$c called callee$e; variable l$var restored"
             }

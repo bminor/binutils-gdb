@@ -854,7 +854,7 @@ struct symtab
     int block_line_section;
 
     /* If several symtabs share a blockvector, exactly one of them
-       should be designed the primary, so that the blockvector
+       should be designated the primary, so that the blockvector
        is relocated exactly once by objfile_relocate.  */
 
     int primary;

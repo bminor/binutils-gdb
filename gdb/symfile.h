@@ -77,12 +77,9 @@ struct sym_fns
 
     void (*sym_init) PARAMS ((struct objfile *));
 
-    /* sym_read (objfile, addr, mainline)
+    /* sym_read (objfile, mainline)
        Reads a symbol file into a psymtab (or possibly a symtab).
        OBJFILE is the objfile struct for the file we are reading.
-       SECTION_OFFSETS
-       are the offset between the file's specified section addresses and
-       their true addresses in memory.
        MAINLINE is 1 if this is the
        main symbol table being read, and 0 if a secondary
        symbol file (e.g. shared library or dynamically loaded file)
@@ -100,9 +97,9 @@ struct sym_fns
        The parameter is currently a CORE_ADDR (FIXME!) for backward compatibility
        with the higher levels of GDB.  It should probably be changed to
        a string, where NULL means the default, and others are parsed in a file
-       dependent way.  The result of this function is handed in to sym_read.  */
+       dependent way. */
 
-    struct section_offsets *(*sym_offsets) PARAMS ((struct objfile *, CORE_ADDR));
+    void (*sym_offsets) PARAMS ((struct objfile *, CORE_ADDR));
 
     /* Finds the next struct sym_fns.  They are allocated and initialized
        in whatever module implements the functions pointed to; an 
@@ -115,7 +112,7 @@ struct sym_fns
 /* The default version of sym_fns.sym_offsets for readers that don't
    do anything special.  */
 
-extern struct section_offsets *
+extern void
 default_symfile_offsets PARAMS ((struct objfile * objfile, CORE_ADDR addr));
 
 
@@ -270,16 +267,15 @@ extern CORE_ADDR
 /* From dwarfread.c */
 
 extern void
-dwarf_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *, int,
-			   file_ptr, unsigned int, file_ptr, unsigned int));
+dwarf_build_psymtabs PARAMS ((struct objfile *, int, file_ptr, unsigned int,
+			      file_ptr, unsigned int));
 
 /* From dwarf2read.c */
 
 extern int dwarf2_has_info PARAMS ((bfd * abfd));
 
-extern void dwarf2_build_psymtabs PARAMS ((struct objfile *,
-					   struct section_offsets *,
-					   int));
+extern void dwarf2_build_psymtabs PARAMS ((struct objfile *, int));
+
 /* From mdebugread.c */
 
 /* Hack to force structures to exist before use in parameter list.  */
@@ -291,13 +287,11 @@ struct ecoff_debug_hack
 extern void
 mdebug_build_psymtabs PARAMS ((struct objfile *,
 			       const struct ecoff_debug_swap *,
-			       struct ecoff_debug_info *,
-			       struct section_offsets *));
+			       struct ecoff_debug_info *));
 
 extern void
 elfmdebug_build_psymtabs PARAMS ((struct objfile *,
 				  const struct ecoff_debug_swap *,
-				  asection *,
-				  struct section_offsets *));
+				  asection *));
 
 #endif /* !defined(SYMFILE_H) */

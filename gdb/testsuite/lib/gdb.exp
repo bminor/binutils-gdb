@@ -830,6 +830,19 @@ proc default_gdb_start { } {
     return 0;
 }
 
+# Return a 1 for configurations for which we don't even want to try to
+# test C++.
+
+proc skip_cplus_tests {} {
+    if { [istarget "d10v-*-*"] } {
+	return 1
+    }
+    if { [istarget "h8300-*-*"] } {
+	return 1
+    }
+    return 0
+}
+
 # * For crosses, the CHILL runtime doesn't build because it can't find
 # setjmp.h, stdio.h, etc.
 # * For AIX (as of 16 Mar 95), (a) there is no language code for
@@ -872,7 +885,7 @@ proc get_compiler_info {binfile args} {
     if {![istarget "hppa*-*-hpux*"]} {
 	if { [llength $args] > 0 } {
 	    if {$args == "c++"} {
-	if { [gdb_compile "${srcdir}/${subdir}/compiler.cc" "${binfile}.ci" preprocess {}] != "" } {
+		if { [gdb_compile "${srcdir}/${subdir}/compiler.cc" "${binfile}.ci" preprocess {}] != "" } {
 		    perror "Couldn't make ${binfile}.ci file"
 		    return 1;
 		}

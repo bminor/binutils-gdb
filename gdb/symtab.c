@@ -1073,7 +1073,6 @@ lookup_transparent_type (name)
   struct blockvector *bv;
   register struct objfile *objfile;
   register struct block *block;
-  register struct minimal_symbol *msymbol;
 
   /* Now search all the global symbols.  Do the symtab's first, then
      check the psymtab's. If a psymtab indicates the existence
@@ -2664,7 +2663,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	*argptr = *argptr + 1;
       if (p[0] == '.' || p[1] == ':')
 	{
-	  int ix;
 	  char *saved_arg2 = *argptr;
 	  char *temp_end;
 	  /* First check for "global" namespace specification,
@@ -4464,11 +4462,10 @@ make_symbol_overload_list (fsym)
   register struct symbol *sym;
   register struct symtab *s;
   register struct partial_symtab *ps;
-  register struct minimal_symbol *msymbol;
   register struct objfile *objfile;
+  register struct minimal_symbol *msymbol;
   register struct block *b, *surrounding_static_block = 0;
-  register int i, j;
-  struct partial_symbol **psym;
+  register int i;
   /* The name we are completing on. */
   char *oload_name = NULL;
   /* Length of name.  */
@@ -4505,6 +4502,8 @@ make_symbol_overload_list (fsym)
 
   ALL_PSYMTABS (objfile, ps)
   {
+    struct partial_symbol **psym;
+
     /* If the psymtab's been read in we'll get it when we search
        through the blockvector.  */
     if (ps->readin)

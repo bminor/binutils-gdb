@@ -126,7 +126,7 @@ java_value_print (val, stream, format, pretty)
 	      if (element == 0)
 		fprintf_filtered (stream, "null");
 	      else
-		fprintf_filtered (stream, "@%x", element);
+		fprintf_filtered (stream, "@%s", paddr_nz (element));
 
 	      things_printed++;
 	      i += reps;

@@ -399,8 +399,10 @@ case "${enableval}" in
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
         build_warnings="${t} ${build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac],[build_warnings=""])dnl
-
+esac
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting warning flags = $build_warnings" 6>&1
+fi
 WARN_CFLAGS=""
 WERROR_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
@@ -413,7 +415,8 @@ then
     *) WARN_CFLAGS="${WARN_CFLAGS} $w"
     esac
   done
-fi
+fi],[build_warnings=""])dnl
+
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)
 

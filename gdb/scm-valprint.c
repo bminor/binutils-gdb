@@ -145,7 +145,7 @@ scm_ipruk (hdr, ptr, stream)
   if (SCM_CELLP (ptr))
     fprintf_filtered (stream, " (0x%lx . 0x%lx) @",
 		      (long) SCM_CAR (ptr), (long) SCM_CDR (ptr));
-  fprintf_filtered (stream, " 0x%x>", ptr);
+  fprintf_filtered (stream, " 0x%s>", paddr_nz (ptr));
 }
 
 void
@@ -217,7 +217,7 @@ taloop:
 			     (sizet) LENGTH (name),
 			   port);
 #endif
-	      fprintf_filtered (stream, " #X%lX>", svalue);
+	      fprintf_filtered (stream, " #X%s>", paddr_nz (svalue));
 	      break;
 	    }
 	case scm_tcs_cons_imcar:

@@ -640,67 +640,67 @@ sh_show_regs (args, from_tty)
   if (cpu == bfd_mach_sh4)
     cpu = bfd_mach_sh3;
 
-  printf_filtered ("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
-		   read_register (PC_REGNUM),
-		   read_register (SR_REGNUM),
-		   read_register (PR_REGNUM),
-		   read_register (MACH_REGNUM),
-		   read_register (MACL_REGNUM));
+  printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
+		   paddr (read_register (PC_REGNUM)),
+		   (long) read_register (SR_REGNUM),
+		   (long) read_register (PR_REGNUM),
+		   (long) read_register (MACH_REGNUM),
+		   (long) read_register (MACL_REGNUM));
 
-  printf_filtered ("GBR=%08x VBR=%08x",
-		   read_register (GBR_REGNUM),
-		   read_register (VBR_REGNUM));
+  printf_filtered ("GBR=%08lx VBR=%08lx",
+		   (long) read_register (GBR_REGNUM),
+		   (long) read_register (VBR_REGNUM));
   if (cpu == bfd_mach_sh3 || cpu == bfd_mach_sh3e)
     {
-      printf_filtered (" SSR=%08x SPC=%08x",
-		       read_register (SSR_REGNUM),
-		       read_register (SPC_REGNUM));
+      printf_filtered (" SSR=%08lx SPC=%08lx",
+		       (long) read_register (SSR_REGNUM),
+		       (long) read_register (SPC_REGNUM));
       if (cpu == bfd_mach_sh3e)
 	{
-	  printf_filtered (" FPUL=%08x FPSCR=%08x",
-			   read_register (FPUL_REGNUM),
-			   read_register (FPSCR_REGNUM));
+	  printf_filtered (" FPUL=%08lx FPSCR=%08lx",
+			   (long) read_register (FPUL_REGNUM),
+			   (long) read_register (FPSCR_REGNUM));
 	}
     }
 
-  printf_filtered ("\nR0-R7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
-		   read_register (0),
-		   read_register (1),
-		   read_register (2),
-		   read_register (3),
-		   read_register (4),
-		   read_register (5),
-		   read_register (6),
-		   read_register (7));
-  printf_filtered ("R8-R15 %08x %08x %08x %08x %08x %08x %08x %08x\n",
-		   read_register (8),
-		   read_register (9),
-		   read_register (10),
-		   read_register (11),
-		   read_register (12),
-		   read_register (13),
-		   read_register (14),
-		   read_register (15));
+  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		   (long) read_register (0),
+		   (long) read_register (1),
+		   (long) read_register (2),
+		   (long) read_register (3),
+		   (long) read_register (4),
+		   (long) read_register (5),
+		   (long) read_register (6),
+		   (long) read_register (7));
+  printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		   (long) read_register (8),
+		   (long) read_register (9),
+		   (long) read_register (10),
+		   (long) read_register (11),
+		   (long) read_register (12),
+		   (long) read_register (13),
+		   (long) read_register (14),
+		   (long) read_register (15));
   if (cpu == bfd_mach_sh3e)
     {
-      printf_filtered ("FP0-FP7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
-		       read_register (FP0_REGNUM + 0),
-		       read_register (FP0_REGNUM + 1),
-		       read_register (FP0_REGNUM + 2),
-		       read_register (FP0_REGNUM + 3),
-		       read_register (FP0_REGNUM + 4),
-		       read_register (FP0_REGNUM + 5),
-		       read_register (FP0_REGNUM + 6),
-		       read_register (FP0_REGNUM + 7));
-      printf_filtered ("FP8-FP15 %08x %08x %08x %08x %08x %08x %08x %08x\n",
-		       read_register (FP0_REGNUM + 8),
-		       read_register (FP0_REGNUM + 9),
-		       read_register (FP0_REGNUM + 10),
-		       read_register (FP0_REGNUM + 11),
-		       read_register (FP0_REGNUM + 12),
-		       read_register (FP0_REGNUM + 13),
-		       read_register (FP0_REGNUM + 14),
-		       read_register (FP0_REGNUM + 15));
+      printf_filtered ("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		       (long) read_register (FP0_REGNUM + 0),
+		       (long) read_register (FP0_REGNUM + 1),
+		       (long) read_register (FP0_REGNUM + 2),
+		       (long) read_register (FP0_REGNUM + 3),
+		       (long) read_register (FP0_REGNUM + 4),
+		       (long) read_register (FP0_REGNUM + 5),
+		       (long) read_register (FP0_REGNUM + 6),
+		       (long) read_register (FP0_REGNUM + 7));
+      printf_filtered ("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		       (long) read_register (FP0_REGNUM + 8),
+		       (long) read_register (FP0_REGNUM + 9),
+		       (long) read_register (FP0_REGNUM + 10),
+		       (long) read_register (FP0_REGNUM + 11),
+		       (long) read_register (FP0_REGNUM + 12),
+		       (long) read_register (FP0_REGNUM + 13),
+		       (long) read_register (FP0_REGNUM + 14),
+		       (long) read_register (FP0_REGNUM + 15));
     }
 }
 

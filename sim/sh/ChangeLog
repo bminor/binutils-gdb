@@ -1,3 +1,7 @@
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Wed Aug 25 07:55:23 1999  Brendan Kehoe  <brendan@cygnus.com>
 
 	* gencode.c (fcnvds <DR_N>,FPUL): Rewrite to use a local anonymous

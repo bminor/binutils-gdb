@@ -192,9 +192,9 @@ Text Range		Data Range		Syms	Shared Object Library\n");
 
   for (; vp != NULL; vp = vp->nxt)
     {
-      printf_unfiltered ("0x%08x-0x%08x	0x%08x-0x%08x	%s	%s%s%s%s\n",
-			 vp->tstart, vp->tend,
-			 vp->dstart, vp->dend,
+      printf_unfiltered ("0x%s-0x%s	0x%s-0x%s	%s	%s%s%s%s\n",
+			 paddr (vp->tstart),paddr (vp->tend),
+			 paddr (vp->dstart), paddr (vp->dend),
 			 vp->loaded ? "Yes" : "No ",
 			 *vp->member ? "(" : "",
 			 vp->member,

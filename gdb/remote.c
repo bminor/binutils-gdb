@@ -1499,13 +1499,8 @@ get_offsets ()
   if (symfile_objfile == NULL)
     return;
 
-  offs = alloca (sizeof (struct section_offsets)
-		 + symfile_objfile->num_sections
-		 * sizeof (offs->offsets));
-  memcpy (offs, symfile_objfile->section_offsets,
-	  sizeof (struct section_offsets)
-	  + symfile_objfile->num_sections
-	  * sizeof (offs->offsets));
+  offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
+  memcpy (offs, symfile_objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
 
   ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
 
@@ -1592,8 +1587,10 @@ remote_cisco_section_offsets (text_addr, data_addr, bss_addr,
       sprintf_vma (tmp + strlen (tmp), bss_addr);
       fprintf_filtered (gdb_stdlog, tmp);
       fprintf_filtered (gdb_stdlog,
-			"Reloc offset: text = 0x%x data = 0x%x bss = 0x%x\n",
-		    (long) *text_offs, (long) *data_offs, (long) *bss_offs);
+			"Reloc offset: text = 0x%s data = 0x%s bss = 0x%s\n",
+			paddr_nz (*text_offs),
+			paddr_nz (*data_offs),
+			paddr_nz (*bss_offs));
     }
 
   return 0;
@@ -1619,15 +1616,8 @@ remote_cisco_objfile_relocate (text_off, data_off, bss_off)
          broken for xcoff, dwarf, sdb-coff, etc.  But there is no
          simple canonical representation for this stuff.  */
 
-      offs = ((struct section_offsets *)
-	      alloca (sizeof (struct section_offsets)
-		      + (symfile_objfile->num_sections
-			 * sizeof (offs->offsets))));
-
-      memcpy (offs, symfile_objfile->section_offsets,
-	      (sizeof (struct section_offsets)
-	       + (symfile_objfile->num_sections
-		  * sizeof (offs->offsets))));
+      offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
+      memcpy (offs, symfile_objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
 
       ANOFFSET (offs, SECT_OFF_TEXT) = text_off;
       ANOFFSET (offs, SECT_OFF_DATA) = data_off;
@@ -2389,7 +2379,7 @@ Packet: '%s'\n",
 
 	    if (symfile_objfile == NULL)
 	      {
-		warning ("Relocation packet recieved with no symbol file.  \
+		warning ("Relocation packet received with no symbol file.  \
 Packet Dropped");
 		goto got_status;
 	      }
@@ -3453,7 +3443,7 @@ putpkt_binary (buf, cnt)
 	  *p = '\0';
 	  fprintf_unfiltered (gdb_stdlog, "Sending packet: ");
 	  fputstrn_unfiltered (buf2, p - buf2, 0, gdb_stdlog);
-	  fprintf_unfiltered (gdb_stdlog, "...", buf2);
+	  fprintf_unfiltered (gdb_stdlog, "...");
 	  gdb_flush (gdb_stdlog);
 	}
       if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
@@ -3994,7 +3984,6 @@ remote_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  char buf[PBUFSIZ];
   int bp_size;
 
   if ((remote_protocol_Z.support == PACKET_ENABLE)
@@ -4040,7 +4029,7 @@ remote_insert_watchpoint (addr, len, type)
   p = strchr (buf, '\0');
   addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  sprintf (p, ",%lx", len);
+  sprintf (p, ",%x", len);
   
   putpkt (buf);
   getpkt (buf, 0);
@@ -4063,7 +4052,7 @@ remote_remove_watchpoint (addr, len, type)
   p = strchr (buf, '\0');
   addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  sprintf (p, ",%lx", len);
+  sprintf (p, ",%x", len);
   putpkt (buf);
   getpkt (buf, 0);
 
@@ -4258,8 +4247,8 @@ compare_sections_command (args, from_tty)
       for (target_crc = 0, tmp = &buf[1]; *tmp; tmp++)
 	target_crc = target_crc * 16 + fromhex (*tmp);
 
-      printf_filtered ("Section %s, range 0x%08x -- 0x%08x: ",
-		       sectname, lma, lma + size);
+      printf_filtered ("Section %s, range 0x%s -- 0x%s: ",
+		       sectname, paddr (lma), paddr (lma + size));
       if (host_crc == target_crc)
 	printf_filtered ("matched.\n");
       else
@@ -4287,7 +4276,6 @@ remote_query (query_type, buf, outbuf, bufsiz)
   int i;
   char *buf2 = alloca (PBUFSIZ);
   char *p2 = &buf2[0];
-  char *p = buf;
 
   if (!bufsiz)
     error ("null pointer to remote bufer size specified");
@@ -4877,7 +4865,6 @@ readsocket ()
 static int
 readtty ()
 {
-  int status;
   int tty_bytecount;
 
   /* First, read a buffer full from the terminal */

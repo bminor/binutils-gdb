@@ -373,7 +373,7 @@ arm_rdi_create_inferior (exec_file, args, env)
 	      /* Set up memory limit */
 	      top_of_memory = strtoul (*env + sizeof ("MEMSIZE=") - 1,
 				       &end_of_num, 0);
-	      printf_filtered ("Setting top-of-memory to 0x%x\n",
+	      printf_filtered ("Setting top-of-memory to 0x%lx\n",
 			       top_of_memory);
 
 	      rslt = angel_RDI_info (RDIInfo_SetTopMem, &top_of_memory, &arg2);

@@ -808,7 +808,7 @@ This makes startup slower, but makes future operations faster.
 The @code{-mapped} and @code{-readnow} options are typically combined in
 order to build a @file{.syms} file that contains complete symbol
 information.  (@xref{Files,,Commands to specify files}, for
-information on @file{.syms} files.) A simple @value{GDBN} invocation to do
+information on @file{.syms} files.)  A simple @value{GDBN} invocation to do
 nothing but build a @file{.syms} file for future use is:
 
 @example
@@ -932,7 +932,8 @@ just use the @code{shell} command.
 @item shell @var{command string}
 Invoke a standard shell to execute @var{command string}.
 If it exists, the environment variable @code{SHELL} determines which
-shell to run.  Otherwise @value{GDBN} uses @code{/bin/sh}.
+shell to run.  Otherwise @value{GDBN} uses the default shell
+(@file{/bin/sh} on Unix systems, @file{COMMAND.COM} on MS-DOS, etc.).
 @end table
 
 The utility @code{make} is often needed in development environments.
@@ -1118,10 +1119,10 @@ In general, @value{GDBN} can tell that a quote is needed (and inserts it) if
 you have not yet started typing the argument list when you ask for
 completion on an overloaded symbol.
 
-For more information about overloaded functions, @pxref{C plus plus
+For more information about overloaded functions, see @ref{C plus plus
 expressions, ,C++ expressions}.  You can use the command @code{set
 overload-resolution off} to disable overload resolution;
-@pxref{Debugging C plus plus, ,@value{GDBN} features for C++}.
+see @ref{Debugging C plus plus, ,@value{GDBN} features for C++}.
 
 
 @node Help
@@ -1432,7 +1433,12 @@ They are passed to a shell, which expands wildcard characters and
 performs redirection of I/O, and thence to your program.  Your
 @code{SHELL} environment variable (if it exists) specifies what shell
 @value{GDBN} uses.  If you do not define @code{SHELL}, @value{GDBN} uses
-@code{/bin/sh}.
+the default shell (@file{/bin/sh} on Unix).
+
+On non-Unix systems, the program is usually invoked directly by
+@value{GDBN}, which emulates I/O redirection via the appropriate system
+calls, and the wildcard characters are expanded by the startup code of
+the program, not by the shell.
 
 @code{run} with no arguments uses the same arguments used by the previous
 @code{run}, or those set by the @code{set args} command.
@@ -1468,9 +1474,10 @@ environment without having to start @value{GDBN} over again.
 @item path @var{directory}
 Add @var{directory} to the front of the @code{PATH} environment variable
 (the search path for executables), for both @value{GDBN} and your program.
-You may specify several directory names, separated by @samp{:} or
-whitespace.  If @var{directory} is already in the path, it is moved to
-the front, so it is searched sooner.
+You may specify several directory names, separated by whitespace or by a
+system-dependent separator character (@samp{:} on Unix, @samp{;} on
+MS-DOS and MS-Windows).  If @var{directory} is already in the path, it
+is moved to the front, so it is searched sooner.
 
 You can use the string @samp{$cwd} to refer to whatever is the current
 working directory at the time @value{GDBN} searches the path.  If you
@@ -1511,7 +1518,7 @@ set env USER = foo
 @end example
 
 @noindent
-tells a Unix program, when subsequently run, that its user is named
+tells the debugged program, when subsequently run, that its user is named
 @samp{foo}.  (The spaces around @samp{=} are used for clarity here; they
 are not actually required.)
 
@@ -1523,7 +1530,8 @@ program.  This is different from @samp{set env @var{varname} =};
 rather than assigning it an empty value.
 @end table
 
-@emph{Warning:} @value{GDBN} runs your program using the shell indicated
+@emph{Warning:} On Unix systems, @value{GDBN} runs your program using
+the shell indicated
 by your @code{SHELL} environment variable if it exists (or
 @code{/bin/sh} if not).  If your @code{SHELL} variable names a shell
 that runs an initialization file---such as @file{.cshrc} for C-shell, or
@@ -1930,7 +1938,7 @@ so that the delay need not occur when you don't want to run @value{GDBN}
 on the child.  While the child is sleeping, use the @code{ps} program to
 get its process ID.  Then tell @value{GDBN} (a new invocation of
 @value{GDBN} if you are also debugging the parent process) to attach to
-the child process (see @ref{Attach}).  From that point on you can debug
+the child process (@pxref{Attach}).  From that point on you can debug
 the child process just like any other process which you attached to.
 
 On HP-UX (11.x and later only?), @value{GDBN} provides support for
@@ -2056,7 +2064,7 @@ exception or the loading of a library.  As with watchpoints, you use a
 different command to set a catchpoint (@pxref{Set Catchpoints, ,Setting
 catchpoints}), but aside from that, you can manage a catchpoint like any
 other breakpoint.  (To stop when your program receives a signal, use the
-@code{handle} command; @pxref{Signals, ,Signals}.)
+@code{handle} command; see @ref{Signals, ,Signals}.)
 
 @cindex breakpoint numbers
 @cindex numbers for breakpoints
@@ -2077,8 +2085,7 @@ enable it again.
 * Conditions::                  Break conditions
 * Break Commands::              Breakpoint command lists
 * Breakpoint Menus::            Breakpoint menus
-
-@c  * Error in Breakpoints::        ``Cannot insert breakpoints''
+* Error in Breakpoints::        ``Cannot insert breakpoints''
 @end menu
 
 @node Set Breaks
@@ -2111,12 +2118,13 @@ C++, @var{function} may refer to more than one possible place to break.
 @item break +@var{offset}
 @itemx break -@var{offset}
 Set a breakpoint some number of lines forward or back from the position
-at which execution stopped in the currently selected frame.
+at which execution stopped in the currently selected @dfn{stack frame}.
+(@xref{Frames, , Frames}, for a description of stack frames.)
 
 @item break @var{linenum}
 Set a breakpoint at line @var{linenum} in the current source file.
-That file is the last file whose source text was printed.  This
-breakpoint stops your program just before it executes any of the
+The current source file is the last file whose source text was printed.
+The breakpoint will stop your program just before it executes any of the
 code on that line.
 
 @item break @var{filename}:@var{linenum}
@@ -2168,18 +2176,20 @@ program stops there.  @xref{Disabling, ,Disabling breakpoints}.
 
 @kindex hbreak
 @item hbreak @var{args}
-Set a hardware-assisted breakpoint.  @var{args} are the same as for the 
-@code{break} command and the breakpoint is set in the same way, but the 
+Set a hardware-assisted breakpoint.  @var{args} are the same as for the
+@code{break} command and the breakpoint is set in the same way, but the
 breakpoint requires hardware support and some target hardware may not
 have this support.  The main purpose of this is EPROM/ROM code
-debugging, so you can set a breakpoint at an instruction without 
-changing the instruction.  This can be used with the new trap-generation 
-provided by SPARClite DSU.  DSU will generate traps when a program accesses
-some data or instruction address that is assigned to the debug registers.  
-However the hardware breakpoint registers can only take two data breakpoints,
-and @value{GDBN} will reject this command if more than two are used.  
-Delete or disable unused hardware breakpoints before setting
-new ones.  @xref{Conditions, ,Break conditions}.
+debugging, so you can set a breakpoint at an instruction without
+changing the instruction.  This can be used with the new trap-generation
+provided by SPARClite DSU and some x86-based targets.  These targets
+will generate traps when a program accesses some data or instruction
+address that is assigned to the debug registers.  However the hardware
+breakpoint registers can take a limited number of breakpoints.  For
+example, on the DSU, only two data breakpoints can be set at a time, and
+@value{GDBN} will reject this command if more than two are used.  Delete
+or disable unused hardware breakpoints before setting new ones
+(@pxref{Disabling, ,Disabling}).  @xref{Conditions, ,Break conditions}.
 
 @kindex thbreak
 @item thbreak @var{args}
@@ -2190,7 +2200,7 @@ the breakpoint is automatically deleted after the
 first time your program stops there.  Also, like the @code{hbreak}
 command, the breakpoint requires hardware support and some target hardware 
 may not have this support.  @xref{Disabling, ,Disabling breakpoints}.  
-Also @xref{Conditions, ,Break conditions}.
+See also @ref{Conditions, ,Break conditions}.
 
 @kindex rbreak
 @cindex regular expression
@@ -2322,7 +2332,8 @@ times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
-On some systems, such as HP-UX and Linux, GDB includes support for
+On some systems, such as HP-UX, Linux and some other x86-based targets,
+GDB includes support for
 hardware watchpoints, which do not slow down the running of your
 program.
 
@@ -2338,7 +2349,7 @@ Set a watchpoint that will break when watch @var{expr} is read by the program.
 
 @kindex awatch
 @item awatch @var{expr}
-Set a watchpoint that will break when @var{args} is read and written into
+Set a watchpoint that will break when @var{args} is either read or written into
 by the program.
 
 @kindex info watchpoints
@@ -2435,6 +2446,7 @@ can become current), then you can use watchpoints as usual.  However,
 @value{GDBN} may not notice when a non-current thread's activity changes
 the expression.
 
+@c FIXME: this is almost identical to the previous paragraph.
 @emph{HP-UX Warning:} In multi-thread programs, software watchpoints
 have only limited usefulness.  If @value{GDBN} creates a software
 watchpoint, it can only watch the value of an expression @emph{in a
@@ -2448,7 +2460,7 @@ watchpoints, in contrast, watch an expression in all threads.)
 
 @node Set Catchpoints
 @subsection Setting catchpoints
-@cindex catchpoints
+@cindex catchpoints, setting
 @cindex exception handlers
 @cindex event handling
 
@@ -2538,8 +2550,8 @@ which has the following ANSI C interface:
 
 @example
     /* @var{addr} is where the exception identifier is stored.
-       ID is the exception identifier.  */
-    void __raise_exception (void **@var{addr}, void *@var{id});
+       @var{id} is the exception identifier.  */
+    void __raise_exception (void **addr, void *id);
 @end example
 
 @noindent
@@ -2626,11 +2638,11 @@ with the @code{break} command starts out in this state.
 Disabled.  The breakpoint has no effect on your program.
 @item
 Enabled once.  The breakpoint stops your program, but then becomes
-disabled.  A breakpoint set with the @code{tbreak} command starts out in
-this state.
+disabled.
 @item
 Enabled for deletion.  The breakpoint stops your program, but
-immediately after it does so it is deleted permanently.
+immediately after it does so it is deleted permanently.  A breakpoint
+set with the @code{tbreak} command starts out in this state.
 @end itemize
 
 You can use the following commands to enable or disable breakpoints,
@@ -2662,6 +2674,8 @@ Enable the specified breakpoints to work once, then die.  @value{GDBN}
 deletes any of these breakpoints as soon as your program stops there.
 @end table
 
+@c FIXME: I think the following ``Except for [...] @code{tbreak}'' is
+@c confusing: tbreak is also initially enabled.
 Except for a breakpoint set with @code{tbreak} (@pxref{Set Breaks,
 ,Setting breakpoints}), breakpoints that you set are initially enabled;
 subsequently, they become disabled or enabled only when you use one of
@@ -2703,7 +2717,8 @@ format special data structures. The effects are completely predictable
 unless there is another enabled breakpoint at the same address.  (In
 that case, @value{GDBN} might see the other breakpoint first and stop your
 program without checking the condition of this one.)  Note that
-breakpoint commands are usually more convenient and flexible for the
+breakpoint commands are usually more convenient and flexible than break
+conditions for the
 purpose of performing side effects when a breakpoint is reached
 (@pxref{Break Commands, ,Breakpoint command lists}).
 
@@ -2726,12 +2741,19 @@ breakpoint @var{bnum} stops your program only if the value of
 @var{expression} is true (nonzero, in C).  When you use
 @code{condition}, @value{GDBN} checks @var{expression} immediately for
 syntactic correctness, and to determine whether symbols in it have
-referents in the context of your breakpoint.
-@c FIXME so what does GDB do if there is no referent?  Moreover, what
-@c about watchpoints?
+referents in the context of your breakpoint.  If @var{expression} uses
+symbols not referenced in the context of the breakpoint, @value{GDBN}
+prints an error message:
+
+@example
+No symbol "foo" in current context.
+@end example
+
+@noindent
 @value{GDBN} does
 not actually evaluate @var{expression} at the time the @code{condition}
-command is given, however.  @xref{Expressions, ,Expressions}.
+command (or a command that sets a breakpoint with a condition, like
+@code{break if @dots{}}) is given, however.  @xref{Expressions, ,Expressions}.
 
 @item condition @var{bnum}
 Remove the condition from breakpoint number @var{bnum}.  It becomes
@@ -2907,34 +2929,58 @@ Use the "delete" command to delete unwanted
 @end smallexample
 
 @c  @ifclear BARETARGET
-@c  @node Error in Breakpoints
-@c  @subsection ``Cannot insert breakpoints''
+@node Error in Breakpoints
+@subsection ``Cannot insert breakpoints''
 @c
 @c  FIXME!! 14/6/95  Is there a real example of this?  Let's use it.
 @c
-@c  Under some operating systems
-@c  any other process is running that program.  In this situation,
-@c  attempting to run or continue a program with a breakpoint causes 
-@c  @value{GDBN} to stop the other process.
-@c
-@c  When this happens, you have three ways to proceed:
-@c
-@c  @enumerate
-@c  @item
-@c  Remove or disable the breakpoints, then continue.
-@c
-@c  @item
-@c  Suspend @value{GDBN}, and copy the file containing your program to a new 
-@c  name.  Resume @value{GDBN} and use the @code{exec-file} command to specify
-@c  that @value{GDBN} should run your program under that name.  
-@c  Then start your program again.
-@c
-@c  @item
-@c  Relink your program so that the text segment is nonsharable, using the
-@c  linker option @samp{-N}.  The operating system limitation may not apply
-@c  to nonsharable executables.
-@c  @end enumerate
+Under some operating systems, breakpoints cannot be used in a program if
+any other process is running that program.  In this situation,
+attempting to run or continue a program with a breakpoint causes 
+@value{GDBN} to print an error message:
+
+@example
+Cannot insert breakpoints.
+The same program may be running in another process.
+@end example
+
+When this happens, you have three ways to proceed:
+
+@enumerate
+@item
+Remove or disable the breakpoints, then continue.
+
+@item
+Suspend @value{GDBN}, and copy the file containing your program to a new 
+name.  Resume @value{GDBN} and use the @code{exec-file} command to specify
+that @value{GDBN} should run your program under that name.  
+Then start your program again.
+
+@item
+Relink your program so that the text segment is nonsharable, using the
+linker option @samp{-N}.  The operating system limitation may not apply
+to nonsharable executables.
+@end enumerate
 @c  @end ifclear
+
+A similar message can be printed if you request too many active
+hardware-assisted breakpoints and watchpoints:
+
+@c FIXME: the precise wording of this message may change; the relevant
+@c source change is not committed yet (Sep 3, 1999).
+@smallexample
+Stopped; cannot insert breakpoints.
+You may have requested too many hardware breakpoints and watchpoints.
+@end smallexample
+
+@noindent
+This message is printed when you attempt to resume the program, since
+only then @value{GDBN} knows exactly how many hardware breakpoints and
+watchpoints it needs to insert.
+
+When this message is printed, you need to disable or remove some of the
+hardware-assisted breakpoints and watchpoints, and then continue.
+
 
 @node Continuing and Stepping
 @section Continuing and stepping
@@ -2948,8 +2994,8 @@ one more ``step'' of your program, where ``step'' may mean either one
 line of source code, or one machine instruction (depending on what
 particular command you use).  Either when continuing or when stepping,
 your program may stop even sooner, due to a breakpoint or a signal.  (If
-due to a signal, you may want to use @code{handle}, or use @samp{signal
-0} to resume execution.  @xref{Signals, ,Signals}.)
+it stops due to a signal, you may want to use @code{handle}, or use
+@samp{signal 0} to resume execution.  @xref{Signals, ,Signals}.)
 
 @table @code
 @kindex continue
@@ -2968,8 +3014,10 @@ The argument @var{ignore-count} is meaningful only when your program
 stopped due to a breakpoint.  At other times, the argument to
 @code{continue} is ignored.
 
-The synonyms @code{c} and @code{fg} are provided purely for convenience,
-and have exactly the same behavior as @code{continue}.
+The synonyms @code{c} and @code{fg} (for @dfn{foreground}, as the
+debugged program is deemed to be the foreground program) are provided
+purely for convenience, and have exactly the same behavior as
+@code{continue}.
 @end table
 
 To resume execution at a different place, you can use @code{return}
@@ -3006,13 +3054,15 @@ without debugging information, use the @code{stepi} command, described
 below.
 @end quotation
 
-The @code{step} command now only stops at the first instruction of a
-source line.  This prevents the multiple stops that used to occur in
+The @code{step} command only stops at the first instruction of a
+source line.  This prevents the multiple stops that could otherwise occur in
 switch statements, for loops, etc.  @code{step} continues to stop if a
 function that has debugging information is called within the line.
+In other words, @code{step} @emph{steps inside} any functions called
+within the line.
 
-Also, the @code{step} command now only enters a subroutine if there is line
-number information for the subroutine.  Otherwise it acts like the
+Also, the @code{step} command only enters a function if there is line
+number information for the function.  Otherwise it acts like the
 @code{next} command.  This avoids problems when using @code{cc -gl} 
 on MIPS machines.  Previously, @code{step} entered subroutines if there
 was any debugging information about the routine.  
@@ -3042,8 +3092,8 @@ An argument @var{count} is a repeat count, as for @code{step}.
 @c  @code{step}, but any function calls appearing within the code of the
 @c  function are executed without stopping.
 
-The @code{next} command now only stops at the first instruction of a
-source line.  This prevents the multiple stops that used to occur in
+The @code{next} command only stops at the first instruction of a
+source line.  This prevents multiple stops that could otherwise occur in
 switch statements, for loops, etc. 
 
 @kindex finish
@@ -3139,7 +3189,7 @@ An argument is a repeat count, as in @code{next}.
 A signal is an asynchronous event that can happen in a program.  The
 operating system defines the possible kinds of signals, and gives each
 kind a name and a number.  For example, in Unix @code{SIGINT} is the
-signal a program gets when you type an interrupt (often @kbd{C-c});
+signal a program gets when you type an interrupt character (often @kbd{C-c});
 @code{SIGSEGV} is the signal a program gets from referencing a place in
 memory far away from all the areas in use; @code{SIGALRM} occurs when
 the alarm clock timer goes off (which happens only if your program has
@@ -3148,7 +3198,7 @@ requested an alarm).
 @cindex fatal signals
 Some signals, including @code{SIGALRM}, are a normal part of the
 functioning of your program.  Others, such as @code{SIGSEGV}, indicate
-errors; these signals are @dfn{fatal} (kill your program immediately) if the
+errors; these signals are @dfn{fatal} (they kill your program immediately) if the
 program has not specified in advance some other way to handle the signal.
 @code{SIGINT} does not indicate an error in your program, but it is normally
 fatal so it can carry out the purpose of the interrupt: to kill the program.
@@ -3170,7 +3220,7 @@ Print a table of all the kinds of signals and how @value{GDBN} has been told to
 handle each one.  You can use this to see the signal numbers of all
 the defined types of signals.
 
-@code{info handle} is the new alias for @code{info signals}.
+@code{info handle} is an alias for @code{info signals}.
 
 @kindex handle
 @item handle @var{signal} @var{keywords}@dots{}
@@ -3209,7 +3259,8 @@ and not handled.
 @end table
 @c @end group
 
-When a signal stops your program, the signal is not visible until you
+When a signal stops your program, the signal is not visible to the
+program until you
 continue.  Your program sees the signal then, if @code{pass} is in
 effect for the signal in question @emph{at that time}.  In other words,
 after @value{GDBN} reports a signal, you can use the @code{handle}
@@ -3300,9 +3351,9 @@ current thread may run when the inferior is resumed.  The @code{step}
 mode optimizes for single-stepping.  It stops other threads from
 ``seizing the prompt'' by preempting the current thread while you are
 stepping.  Other threads will only rarely (or never) get a chance to run
-when you step.  They are more likely to run when you ``next'' over a
+when you step.  They are more likely to run when you @samp{next} over a
 function call, and they are completely free to run when you use commands
-like ``continue'', ``until'', or ``finish''.  However, unless another
+like @samp{continue}, @samp{until}, or @samp{finish}.  However, unless another
 thread hits a breakpoint during its timeslice, they will never steal the
 GDB prompt away from the thread that you are debugging.
 
@@ -3353,7 +3404,7 @@ currently executing frame and describes it briefly, similar to the
 @node Frames
 @section Stack frames
 
-@cindex frame
+@cindex frame, definition
 @cindex stack frame
 The call stack is divided up into contiguous pieces called @dfn{stack
 frames}, or @dfn{frames} for short; each frame is the data associated
@@ -3402,7 +3453,7 @@ correct tracing of the function call chain.  However, @value{GDBN} has
 no provision for frameless functions elsewhere in the stack.
 
 @table @code
-@kindex frame
+@kindex frame@r{, command}
 @item frame @var{args}
 The @code{frame} command allows you to move from one stack frame to another, 
 and to print the stack frame you select.  @var{args} may be either the
@@ -3488,7 +3539,7 @@ selecting a stack frame; all of them finish by printing a brief description
 of the stack frame just selected.
 
 @table @code
-@kindex frame
+@kindex frame@r{, selecting}
 @kindex f
 @item frame @var{n}
 @itemx f @var{n}
@@ -3599,6 +3650,8 @@ the language in which the source code corresponding to this frame is written
 @item
 the address of the frame's arguments
 @item
+the address of the frame's local variables
+@item
 the program counter saved in it (the address of execution in the caller frame)
 @item
 which registers were saved in the frame
@@ -3627,8 +3680,8 @@ line.  These are all variables (declared either static or automatic)
 accessible at the point of execution of the selected frame.
 
 @kindex info catch
-@cindex catch exceptions
-@cindex exception handlers
+@cindex catch exceptions, list active handlers
+@cindex exception handlers, how to list
 @item info catch
 Print a list of all the exception handlers that are active in the
 current stack frame at the current point of execution.  To see other
@@ -3651,7 +3704,7 @@ execution in that frame has stopped.  You can print other portions of
 source files by explicit command.
 
 If you use @value{GDBN} through its @sc{gnu} Emacs interface, you may
-prefer to use Emacs facilities to view source; @pxref{Emacs, ,Using
+prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 @value{GDBN} under @sc{gnu} Emacs}.
 
 @menu
@@ -3715,7 +3768,7 @@ each repetition moves up in the source file.
 @cindex linespec
 In general, the @code{list} command expects you to supply zero, one or two
 @dfn{linespecs}.  Linespecs specify source lines; there are several ways
-of writing them but the effect is always to specify some source line.
+of writing them, but the effect is always to specify some source line.
 Here is a complete description of the possible arguments for @code{list}:
 
 @table @code
@@ -3832,14 +3885,17 @@ each line is in the file.
 
 @kindex directory
 @kindex dir
-When you start @value{GDBN}, its source path is empty.
+When you start @value{GDBN}, its source path includes only @samp{cdir}
+and @samp{cwd}, in that order.
 To add other directories, use the @code{directory} command.
 
 @table @code
 @item directory @var{dirname} @dots{}
 @item dir @var{dirname} @dots{}
 Add directory @var{dirname} to the front of the source path.  Several
-directory names may be given to this command, separated by @samp{:} or
+directory names may be given to this command, separated by @samp{:}
+(@samp{;} on MS-DOS and MS-Windows, where @samp{:} usually appears as
+part of absolute file names) or
 whitespace.  You may specify a directory that is already in the source
 path; this moves it forward, so @value{GDBN} searches it sooner.
 
@@ -3890,7 +3946,7 @@ directories in one command.
 You can use the command @code{info line} to map source lines to program
 addresses (and vice versa), and the command @code{disassemble} to display
 a range of addresses as machine instructions.  When run under @sc{gnu} Emacs
-mode, the @code{info line} command now causes the arrow to point to the
+mode, the @code{info line} command causes the arrow to point to the
 line specified.  Also, @code{info line} prints addresses in symbolic form as 
 well as hex.
 
@@ -3907,6 +3963,8 @@ For example, we can use @code{info line} to discover the location of
 the object code for the first line of function
 @code{m4_changequote}:
 
+@c FIXME: I think this example should also show the addresses in
+@c symbolic form, as they usually would be displayed.
 @smallexample
 (@value{GDBP}) info line m4_changecom
 Line 895 of "builtin.c" starts at pc 0x634c and ends at 0x6350.
@@ -3921,6 +3979,7 @@ Line 926 of "builtin.c" starts at pc 0x63e4 and ends at 0x6404.
 @end smallexample
 
 @cindex @code{$_} and @code{info line}
+@kindex x@r{, and }@code{info line}
 After @code{info line}, the default address for the @code{x} command
 is changed to the starting address of the line, so that @samp{x/i} is
 sufficient to begin examining the machine code (@pxref{Memory,
@@ -3964,18 +4023,21 @@ Some architectures have more than one commonly-used set of instruction
 mnemonics or other syntax.
 
 @table @code
-@kindex set assembly-language
+@kindex set disassembly-flavor
 @cindex assembly instructions
 @cindex instructions, assembly
 @cindex machine instructions
 @cindex listing machine instructions
-@item set assembly-language @var{instruction-set}
+@cindex Intel disassembly flavor
+@cindex AT&T disassembly flavor
+@item set disassembly-flavor @var{instruction-set}
 Select the instruction set to use when disassembling the
 program via the @code{disassemble} or @code{x/i} commands.
 
 Currently this command is only defined for the Intel x86 family.  You
-can set @var{instruction-set} to either @code{i386} or @code{i8086}.
-The default is @code{i386}.
+can set @var{instruction-set} to either @code{intel} or @code{att}.
+The default is @code{att}, the AT&T flavor used by default by Unix
+assemblers for x86-based targets.
 @end table
 
 
@@ -3996,17 +4058,17 @@ program is written in (@pxref{Languages, ,Using @value{GDBN} with
 Different Languages}).
 
 @table @code
-@item print @var{exp}
-@itemx print /@var{f} @var{exp}
-@var{exp} is an expression (in the source language).  By default the
-value of @var{exp} is printed in a format appropriate to its data type;
+@item print @var{expr}
+@itemx print /@var{f} @var{expr}
+@var{expr} is an expression (in the source language).  By default the
+value of @var{expr} is printed in a format appropriate to its data type;
 you can choose a different format by specifying @samp{/@var{f}}, where
-@var{f} is a letter specifying the format; @pxref{Output Formats,,Output
+@var{f} is a letter specifying the format; see @ref{Output Formats,,Output
 formats}.
 
 @item print
 @itemx print /@var{f}
-If you omit @var{exp}, @value{GDBN} displays the last value again (from the
+If you omit @var{expr}, @value{GDBN} displays the last value again (from the
 @dfn{value history}; @pxref{Value History, ,Value history}).  This allows you to
 conveniently inspect the same value in an alternative format.
 @end table
@@ -4016,8 +4078,8 @@ It examines data in memory at a specified address and prints it in a
 specified format.  @xref{Memory, ,Examining memory}.
 
 If you are interested in information about types, or about how the
-fields of a struct or class are declared, use the @code{ptype @var{exp}}
-command rather than @code{print}. @xref{Symbols, ,Examining the Symbol
+fields of a struct or a class are declared, use the @code{ptype @var{exp}}
+command rather than @code{print}.  @xref{Symbols, ,Examining the Symbol
 Table}.
 
 @menu
@@ -4045,10 +4107,10 @@ by the programming language you are using is valid in an expression in
 and string constants.  It unfortunately does not include symbols defined
 by preprocessor @code{#define} commands.
 
-@value{GDBN} now supports array constants in expressions input by
-the user.  The syntax is @var{@{element, element@dots{}@}}.  For example,
-you can now use the command @code{print @{1, 2, 3@}} to build up an array in 
-memory that is malloc'd in the target program.
+@value{GDBN} supports array constants in expressions input by
+the user.  The syntax is @{@var{element}, @var{element}@dots{}@}.  For example,
+you can use the command @code{print @{1, 2, 3@}} to build up an array in 
+memory that is @code{malloc}ed in the target program.
 
 Because C is so widespread, most of the expressions shown in examples in
 this manual are in C.  @xref{Languages, , Using @value{GDBN} with Different
@@ -4138,7 +4200,7 @@ happens, referring to that name has unpredictable effects.  If you wish,
 you can specify a static variable in a particular function or file,
 using the colon-colon notation:
 
-@cindex colon-colon
+@cindex colon-colon, context for variables/functions
 @iftex
 @c info cannot cope with a :: index entry, but why deprive hard copy readers?
 @kindex ::
@@ -4184,6 +4246,29 @@ variable definitions may be gone.
 This may also happen when the compiler does significant optimizations.
 To be sure of always seeing accurate values, turn off all optimization
 when compiling.
+
+@cindex ``No symbol "foo" in current context''
+Another possible effect of compiler optimizations is to optimize
+unused variables out of existence, or assign variables to registers (as
+opposed to memory addresses).  Depending on the support for such cases
+offered by the debug info format used by the compiler, @value{GDBN}
+might not be able to display values for such local variables.  If that
+happens, @value{GDBN} will print a message like this:
+
+@example
+No symbol "foo" in current context.
+@end example
+
+To solve such problems, either recompile without optimizations, or use a
+different debug info format, if the compiler supports several such
+formats.  For example, @value{NGCC}, the @sc{gnu} C/C++ compiler usually
+supports the @samp{-gstabs} option.  @samp{-gstabs} produces debug info
+in a format that is superior to formats such as COFF.  You may be able
+to use DWARF-2 (@samp{-gdwarf-2}), which is also an effective form for
+debug info.  See @ref{Debugging Options,,Options for Debugging Your
+Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}, for more
+information.
+
 
 @node Arrays
 @section Artificial arrays
@@ -4231,7 +4316,7 @@ $1 = @{0x1234, 0x5678@}
 @end example
 
 As a convenience, if you leave the array length out (as in
-@samp{(@var{type})[])@var{value}}) gdb calculates the size to fill
+@samp{(@var{type}[])@var{value}}) gdb calculates the size to fill
 the value (as @samp{sizeof(@var{value})/sizeof(@var{type})}:
 @example
 (@value{GDBP}) p/x (short[])0x12345678
@@ -4291,7 +4376,7 @@ Print as integer in octal.
 Print as integer in binary.  The letter @samp{t} stands for ``two''.
 @footnote{@samp{b} cannot be used because these format letters are also
 used with the @code{x} command, where @samp{b} stands for ``byte'';
-@pxref{Memory,,Examining memory}.}
+see @ref{Memory,,Examining memory}.}
 
 @item a
 @cindex unknown address, locating
@@ -4394,7 +4479,7 @@ For example, @samp{x/3uh 0x54320} is a request to display three halfwords
 (@code{h}) of memory, formatted as unsigned decimal integers (@samp{u}),
 starting at address @code{0x54320}.  @samp{x/4xw $sp} prints the four
 words (@samp{w}) of memory above the stack pointer (here, @samp{$sp};
-@pxref{Registers}) in hexadecimal (@samp{x}).
+@pxref{Registers, ,Registers}) in hexadecimal (@samp{x}).
 
 Since the letters indicating unit sizes are all distinct from the
 letters specifying output formats, you do not have to remember whether
@@ -4406,7 +4491,7 @@ Even though the unit size @var{u} is ignored for the formats @samp{s}
 and @samp{i}, you might still want to use a count @var{n}; for example,
 @samp{3i} specifies that you want to see three machine instructions,
 including any operands.  The command @code{disassemble} gives an
-alternative way of inspecting machine instructions; @pxref{Machine
+alternative way of inspecting machine instructions; see @ref{Machine
 Code,,Source and machine code}.
 
 All the defaults for the arguments to @code{x} are designed to make it
@@ -4459,15 +4544,15 @@ supported by @code{x}; otherwise it uses @code{print}.
 
 @table @code
 @kindex display
-@item display @var{exp}
-Add the expression @var{exp} to the list of expressions to display
+@item display @var{expr}
+Add the expression @var{expr} to the list of expressions to display
 each time your program stops.  @xref{Expressions, ,Expressions}.
 
 @code{display} does not repeat if you press @key{RET} again after using it.
 
-@item display/@var{fmt} @var{exp}
+@item display/@var{fmt} @var{expr}
 For @var{fmt} specifying only a display format and not a size or
-count, add the expression @var{exp} to the auto-display list but
+count, add the expression @var{expr} to the auto-display list but
 arrange to display it each time in the specified format @var{fmt}.
 @xref{Output Formats,,Output formats}.
 
@@ -4480,7 +4565,7 @@ doing @samp{x/@var{fmt} @var{addr}}.  @xref{Memory, ,Examining memory}.
 
 For example, @samp{display/i $pc} can be helpful, to see the machine
 instruction about to be executed each time execution stops (@samp{$pc}
-is a common name for the program counter; @pxref{Registers}).
+is a common name for the program counter; @pxref{Registers, ,Registers}).
 
 @table @code
 @kindex delete display
@@ -4669,6 +4754,7 @@ Set a limit on how many elements of an array @value{GDBN} will print.
 If @value{GDBN} is printing a large array, it stops printing after it has
 printed the number of elements set by the @code{set print elements} command.
 This limit also applies to the display of strings.
+When @value{GDBN} starts, this limit is set to 200.
 Setting  @var{number-of-elements} to zero means that the printing is unlimited.
 
 @kindex show print elements
@@ -4679,8 +4765,9 @@ If the number is 0, then the printing is unlimited.
 @kindex set print null-stop
 @item set print null-stop
 Cause @value{GDBN} to stop printing the characters of an array when the first
-@sc{NULL} is encountered.  This is useful when large arrays actually
+@sc{null} is encountered.  This is useful when large arrays actually
 contain only short strings.
+The default is off.
 
 @kindex set print pretty
 @item set print pretty on
@@ -4791,7 +4878,7 @@ These settings are of interest when debugging C++ programs:
 @itemx set print demangle on
 Print C++ names in their source form rather than in the encoded
 (``mangled'') form passed to the assembler and linker for type-safe
-linkage.  The default is @samp{on}.
+linkage.  The default is on.
 
 @kindex show print demangle
 @item show print demangle
@@ -4975,7 +5062,7 @@ of your program.  That is why you can use them freely.
 
 Convenience variables are prefixed with @samp{$}.  Any name preceded by
 @samp{$} can be used for a convenience variable, unless it is one of
-the predefined machine-specific register names (@pxref{Registers}).
+the predefined machine-specific register names (@pxref{Registers, ,Registers}).
 (Value history references, in contrast, are @emph{numbers} preceded
 by @samp{$}.  @xref{Value History, ,Value history}.)
 
@@ -5004,7 +5091,7 @@ variable, when used as an expression, has the type of its current value.
 @kindex show convenience
 @item show convenience
 Print a list of convenience variables used so far, and their values.
-Abbreviated @code{show con}.
+Abbreviated @code{show conv}.
 @end table
 
 One of the ways to use a convenience variable is as a counter to be
@@ -5016,7 +5103,8 @@ set $i = 0
 print bar[$i++]->contents
 @end example
 
-@noindent Repeat that command by typing @key{RET}.
+@noindent
+Repeat that command by typing @key{RET}.
 
 Some convenience variables are created automatically by @value{GDBN} and given
 values likely to be useful.
@@ -5103,7 +5191,7 @@ memory (most machines, nowadays).  This assumes that the innermost
 stack frame is selected; setting @code{$sp} is not allowed when other
 stack frames are selected.  To pop entire frames off the stack,
 regardless of machine architecture, use @code{return};
-@pxref{Returning, ,Returning from a function}.} with
+see @ref{Returning, ,Returning from a function}.} with
 
 @example
 set $sp += 4
@@ -5114,7 +5202,8 @@ your machine even though the machine has different canonical mnemonics,
 so long as there is no conflict.  The @code{info registers} command
 shows the canonical names.  For example, on the SPARC, @code{info
 registers} displays the processor status register as @code{$psr} but you
-can also refer to it as @code{$ps}.
+can also refer to it as @code{$ps}; and on x86-based machines @code{$ps}
+is an alias for the @sc{eflags} register.
 
 @value{GDBN} always considers the contents of an ordinary register as an
 integer when the register is examined in this way.  Some machines have
@@ -5205,7 +5294,9 @@ source file is in.  However, most of the time @value{GDBN} infers the
 language from the name of the file.  The language of a source file
 controls whether C++ names are demangled---this way @code{backtrace} can
 show each frame appropriately for its own language.  There is no way to
-set the language of a source file from within @value{GDBN}.  
+set the language of a source file from within @value{GDBN}, but you can
+set the language associated with a filename extension.  @xref{Show, ,
+Displaying the language}.
 
 This is most commonly a problem when you use a program, such
 as @code{cfront} or @code{f2c}, that generates C but is written in 
@@ -5318,8 +5409,8 @@ The following commands help you find out which language is the
 working language, and also what language source files were written in.
 
 @kindex show language
-@kindex info frame
-@kindex info source
+@kindex info frame@r{, show the source language}
+@kindex info source@r{, show the source language}
 @table @code
 @item show language
 Display the current working language.  This is the
@@ -5427,7 +5518,7 @@ details on specific languages.
 
 @value{GDBN} provides some additional commands for controlling the type checker:
 
-@kindex set check
+@kindex set check@r{, type}
 @kindex set check type
 @kindex show check type
 @table @code
@@ -5441,7 +5532,7 @@ each language.
 Set type checking on or off, overriding the default setting for the
 current working language.  Issue a warning if the setting does not
 match the language default.  If any type mismatches occur in
-evaluating an expression while typechecking is on, @value{GDBN} prints a
+evaluating an expression while type checking is on, @value{GDBN} prints a
 message and aborts evaluation of the expression.
 
 @item set check type warn
@@ -5488,7 +5579,7 @@ Supported languages}, for further details on specific languages.
 
 @value{GDBN} provides some additional commands for controlling the range checker:
 
-@kindex set check
+@kindex set check@r{, range}
 @kindex set check range
 @kindex show check range
 @table @code
@@ -5594,7 +5685,8 @@ For the purposes of C and C++, the following definitions hold:
 specifiers; @code{char}; @code{enum}; and, for C++, @code{bool}.
 
 @item
-@emph{Floating-point types} include @code{float} and @code{double}.
+@emph{Floating-point types} include @code{float}, @code{double}, and
+@code{long double} (if supported by the target platform).
 
 @item
 @emph{Pointer types} include all types defined as @code{(@var{type} *)}.
@@ -5621,7 +5713,7 @@ assigned.  Defined on scalar types.
 @item @var{op}=
 Used in an expression of the form @w{@code{@var{a} @var{op}= @var{b}}},
 and translated to @w{@code{@var{a} = @var{a op b}}}.
-@w{@code{@var{op}=}} and @code{=} have the same precendence.
+@w{@code{@var{op}=}} and @code{=} have the same precedence.
 @var{op} is any one of the operators @code{|}, @code{^}, @code{&},
 @code{<<}, @code{>>}, @code{+}, @code{-}, @code{*}, @code{/}, @code{%}.
 
@@ -5757,6 +5849,11 @@ point, followed by a sequence of digits, and optionally followed by an
 exponent.  An exponent is of the form:
 @samp{@w{e@r{[[}+@r{]|}-@r{]}@var{nnn}}}, where @var{nnn} is another
 sequence of digits.  The @samp{+} is optional for positive exponents.
+A floating-point constant may also end with a letter @samp{f} or
+@samp{F}, specifying that the constant should be treated as being of
+the @code{float} (as opposed to the default @code{double}) type; or with
+a letter @samp{l} or @samp{L}, which specifies a @code{long double}
+constant.
 
 @item
 Enumerated constants consist of enumerated identifiers, or their
@@ -5765,7 +5862,7 @@ integral equivalents.
 @item
 Character constants are a single character surrounded by single quotes
 (@code{'}), or a number---the ordinal value of the corresponding character
-(usually its @sc{ASCII} value).  Within quotes, the single character may
+(usually its @sc{ascii} value).  Within quotes, the single character may
 be represented by a letter or by @dfn{escape sequences}, which are of
 the form @samp{\@var{nnn}}, where @var{nnn} is the octal representation
 of the character's ordinal value; or of the form @samp{\@var{x}}, where
@@ -5844,11 +5941,11 @@ that is, @value{GDBN} allows implicit references to the class instance
 pointer @code{this} following the same rules as C++.
 
 @cindex call overloaded functions
-@cindex overloaded functions
+@cindex overloaded functions, calling
 @cindex type conversions in C++
 @item
 You can call overloaded functions; @value{GDBN} resolves the function
-call to the right definition, with some restrictions.  GDB does not
+call to the right definition, with some restrictions.  @value{GDBN} does not
 perform overload resolution involving user-defined type conversions,
 calls to constructors, or instantiations of templates that do not exist
 in the program.  It also cannot handle ellipsis argument lists or
@@ -5864,13 +5961,14 @@ Overload resolution is always performed, unless you have specified
 @code{set overload-resolution off}.  @xref{Debugging C plus plus,
 ,@value{GDBN} features for C++}.
 
-You must specify@code{set overload-resolution off} in order to use an
+You must specify @code{set overload-resolution off} in order to use an
 explicit function signature to call an overloaded function, as in
 @smallexample
 p 'foo(char,int)'('x', 13)
 @end smallexample
+
 The @value{GDBN} command-completion facility can simplify this;
-@pxref{Completion, ,Command completion}.
+see @ref{Completion, ,Command completion}.
 
 @cindex reference declarations
 @item
@@ -6024,13 +6122,13 @@ Control the format for printing virtual function tables.
 ANSI C++ compiler (@code{aCC}).)
 
 @kindex set overload-resolution
-@cindex overloaded functions
+@cindex overloaded functions, overload resolution
 @item set overload-resolution on
 Enable overload resolution for C++ expression evaluation.  The default
 is on.  For overloaded functions, @value{GDBN} evaluates the arguments
 and searches for a function whose signature matches the argument types,
-using the standard C++ conversion rules (@pxref{C plus plus expressions, ,C++
-expressions} for details).  If it cannot find a match, it emits a
+using the standard C++ conversion rules (see @ref{C plus plus expressions, ,C++
+expressions}, for details).  If it cannot find a match, it emits a
 message.
 
 @item set overload-resolution off
@@ -6054,7 +6152,7 @@ available choices, or to finish the type list for you.
 @node Modula-2
 @subsection Modula-2
 
-@cindex Modula-2
+@cindex Modula-2, @value{GDBN} support
 
 The extensions made to @value{GDBN} to support Modula-2 only support
 output from the @sc{gnu} Modula-2 compiler (which is currently being
@@ -6145,7 +6243,7 @@ Same precedence as @code{<}.
 Boolean disjunction.  Defined on boolean types.
 
 @item AND@r{, }&
-Boolean conjuction.  Defined on boolean types.
+Boolean conjunction.  Defined on boolean types.
 
 @item @@
 The @value{GDBN} ``artificial array'' operator (@pxref{Expressions, ,Expressions}).
@@ -6366,12 +6464,12 @@ Set constants are not yet supported.
 
 If type and range checking are set automatically by @value{GDBN}, they
 both default to @code{on} whenever the working language changes to
-Modula-2.  This happens regardless of whether you, or @value{GDBN},
+Modula-2.  This happens regardless of whether you or @value{GDBN}
 selected the working language.
 
 If you allow @value{GDBN} to set the language automatically, then entering
 code compiled from a file whose name ends with @file{.mod} sets the
-working language to Modula-2. @xref{Automatically, ,Having @value{GDBN} set
+working language to Modula-2.  @xref{Automatically, ,Having @value{GDBN} set
 the language automatically}, for further details.
 
 @node Deviations
@@ -6438,7 +6536,7 @@ index bounds, and all built-in functions and procedures.
 @kindex .
 @cindex colon, doubled as scope operator
 @ifinfo
-@kindex colon-colon
+@kindex colon-colon@r{, in Modula-2}
 @c Info cannot handle :: but TeX can.
 @end ifinfo
 @iftex
@@ -6483,11 +6581,11 @@ apply to C++, and the last to the C @code{union} type, which has no direct
 analogue in Modula-2.
 
 The @code{@@} operator (@pxref{Expressions, ,Expressions}), while available
-while using any language, is not useful with Modula-2.  Its
+with any language, is not useful with Modula-2.  Its
 intent is to aid the debugging of @dfn{dynamic arrays}, which cannot be
 created in Modula-2 as they can in C or C++.  However, because an
 address can be specified by an integral constant, the construct
-@samp{@{@var{type}@}@var{adrexp}} is still useful.  (@pxref{Expressions, ,Expressions})
+@samp{@{@var{type}@}@var{adrexp}} is still useful.
 
 @cindex @code{#} in Modula-2
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
@@ -6497,12 +6595,14 @@ interpreted as the beginning of a comment.  Use @code{<>} instead.
 @subsection Chill
 
 The extensions made to @value{GDBN} to support Chill only support output
-from the GNU Chill compiler.  Other Chill compilers are not currently
+from the @sc{gnu} Chill compiler.  Other Chill compilers are not currently
 supported, and attempting to debug executables produced by them is most
 likely to give an error as @value{GDBN} reads in the executable's symbol
 table.
 
-This section covers the following Chill related topics and the features
+@c This used to say "... following Chill related topics ...", but since
+@c menus are not shown in the printed manual, it would look awkward.
+This section covers the Chill related topics and the features
 of @value{GDBN} which support these topics.
 
 @menu
@@ -6517,9 +6617,12 @@ of @value{GDBN} which support these topics.
 @subsubsection How modes are displayed
 
 The Chill Datatype- (Mode) support of @value{GDBN} is directly related
-with the functionality of the GNU Chill compiler, and therefore deviates
+with the functionality of the @sc{gnu} Chill compiler, and therefore deviates
 slightly from the standard specification of the Chill language. The
 provided modes are:
+
+@c FIXME: this @table's contents effectively disable @code by using @r
+@c on every @item.  So why does it need @code?
 @table @code
 @item @r{@emph{Discrete modes:}}
 @itemize @bullet
@@ -6546,7 +6649,7 @@ names).
 
 @item @r{@emph{Powerset Mode:}}
 A Powerset Mode is displayed by the keyword @code{POWERSET} followed by
-the member mode of the powerset. The member mode can be any discrete mode.
+the member mode of the powerset.  The member mode can be any discrete mode.
 @smallexample
 (@value{GDBP}) ptype x
 type = POWERSET SET (egon, hugo, otto)
@@ -6555,7 +6658,7 @@ type = POWERSET SET (egon, hugo, otto)
 @item @r{@emph{Reference Modes:}}
 @itemize @bullet
 @item
-@emph{Bound Reference Mode} which is diplayed by the keyword @code{REF}
+@emph{Bound Reference Mode} which is displayed by the keyword @code{REF}
 followed by the mode name to which the reference is bound.
 @item
 @emph{Free Reference Mode} which is displayed by the keyword @code{PTR}.
@@ -6564,8 +6667,8 @@ followed by the mode name to which the reference is bound.
 @item @r{@emph{Procedure mode}}
 The procedure mode is displayed by @code{type = PROC(<parameter list>)
 <return mode> EXCEPTIONS (<exception list>)}. The @code{<parameter
-list>} is a list of the parameter modes. @code{<return mode>} indicates
-the mode of the result of the procedure if any. The exceptionlist lists
+list>} is a list of the parameter modes.  @code{<return mode>} indicates
+the mode of the result of the procedure if any.  The exceptionlist lists
 all possible exceptions which can be raised by the procedure.
 
 @ignore
@@ -6618,9 +6721,9 @@ type = ARRAY (1:42)
 
 @item @r{@emph{Structure Mode}} 
 The Structure mode is displayed by the keyword @code{STRUCT(<field
-list>)}. The @code{<field list>} consists of names and modes of fields
-of the structure. Variant structures have the keyword @code{CASE <field>
-OF <variant fields> ESAC} in their field list. Since the current version
+list>)}.  The @code{<field list>} consists of names and modes of fields
+of the structure.  Variant structures have the keyword @code{CASE <field>
+OF <variant fields> ESAC} in their field list.  Since the current version
 of the GNU Chill compiler doesn't implement tag processing (no runtime
 checks of variant fields, and therefore no debugging info), the output
 always displays all variant fields.
@@ -6645,28 +6748,31 @@ type = STRUCT (
 A location in Chill is an object which can contain values.
 
 A value of a location is generally accessed by the (declared) name of
-the location. The output conforms to the specification of values in
-Chill programs. How values are specified
-is the topic of the next section.
+the location.  The output conforms to the specification of values in
+Chill programs.  How values are specified
+is the topic of the next section, @ref{Values and their Operations}.
 
 The pseudo-location @code{RESULT} (or @code{result}) can be used to
 display or change the result of a currently-active procedure:
+
 @smallexample
 set result := EXPR
 @end smallexample
-- does the same as the Chill action @code{RESULT EXPR} (which
+
+@noindent
+This does the same as the Chill action @code{RESULT EXPR} (which
 is not available in gdb).
 
 Values of reference mode locations are printed by @code{PTR(<hex
 value>)} in case of a free reference mode, and by @code{(REF <reference
-mode>) (<hex-value>)} in case of a bound reference. @code{<hex value>}
+mode>) (<hex-value>)} in case of a bound reference.  @code{<hex value>}
 represents the address where the reference points to.  To access the
 value of the location referenced by the pointer, use the dereference
-operator `@code{->}'.
+operator @samp{->}.
 
 Values of procedure mode locations are displayed by @code{@{ PROC
 (<argument modes> ) <return mode> @} <address> <name of procedure
-location>}. @code{<argument modes>} is a list of modes according to the
+location>}.  @code{<argument modes>} is a list of modes according to the
 parameter specification of the procedure and @code{<address>} shows the
 address of the entry point. 
 
@@ -6674,9 +6780,9 @@ address of the entry point.
 Locations of instance modes are displayed just like a structure with two
 fields specifying the @emph{process type} and the @emph{copy number} of
 the investigated instance location@footnote{This comes from the current
-implementation of instances. They are implemented as a structure (no
-na). The output should be something like @code{[<name of the process>;
-<instance number>]}.}. The field names are @code{__proc_type} and
+implementation of instances.  They are implemented as a structure (no
+na).  The output should be something like @code{[<name of the process>;
+<instance number>]}.}.  The field names are @code{__proc_type} and
 @code{__proc_copy}.
 
 Locations of synchronization modes are displayed like a structure with
@@ -6685,15 +6791,15 @@ like a structure with the field @code{__buffer_data} in case of a buffer
 mode location (refer to previous paragraph).
 
 Structure Mode locations are printed by @code{[.<field name>: <value>,
-...]}. The @code{<field name>} corresponds to the structure mode
+...]}.  The @code{<field name>} corresponds to the structure mode
 definition and the layout of @code{<value>} varies depending of the mode
-of the field. If the investigated structure mode location is of variant
-structure mode the variant parts of the structure are enclosed in curled
-braces (`@code{@{@}}'). Fields enclosed by `@code{@{,@}}' are residing
+of the field.  If the investigated structure mode location is of variant
+structure mode, the variant parts of the structure are enclosed in curled
+braces (@samp{@{@}}).  Fields enclosed by @samp{@{,@}} are residing
 on the same memory location and represent the current values of the
-memory location in their specific modes. Since no tag processing is done
+memory location in their specific modes.  Since no tag processing is done
 all variants are displayed. A variant field is printed by
-@code{(<variant name>) = .<field name>: <value>}. (who implements the
+@code{(<variant name>) = .<field name>: <value>}.  (who implements the
 stuff ???)
 @smallexample
 (@value{GDBP}) print str1 $4 = [.as: 0, .bs: karli, .<TAG>: { (karli) =
@@ -6703,14 +6809,16 @@ stuff ???)
 
 Substructures of string mode-, array mode- or structure mode-values
 (e.g. array slices, fields of structure locations) are accessed using
-certain operations which are descibed in the next chapter.
+certain operations which are described in the next section, @ref{Values
+and their Operations}.
 
 A location value may be interpreted as having a different mode using the
-location conversion. This mode conversion is written as @code{<mode
-name>(<location>)}. The user has to consider that the sizes of the modes
-have to be equal otherwise an error message occurs. Further no range
-checking of the location against the destination mode is performed and
+location conversion.  This mode conversion is written as @code{<mode
+name>(<location>)}.  The user has to consider that the sizes of the modes
+have to be equal otherwise an error occurs.  Furthermore, no range
+checking of the location against the destination mode is performed, and
 therefore the result can be quite confusing.
+
 @smallexample
 (@value{GDBP}) print int (s(3 up 4)) XXX TO be filled in !! XXX
 @end smallexample
@@ -6720,27 +6828,29 @@ therefore the result can be quite confusing.
 
 Values are used to alter locations, to investigate complex structures in
 more detail or to filter relevant information out of a large amount of
-data. There are several (mode dependent) operations defined which enable
-such investigations. These operations are not only applicable to
+data.  There are several (mode dependent) operations defined which enable
+such investigations.  These operations are not only applicable to
 constant values but also to locations, which can become quite useful
-when debugging complex structures. During parsing the command line
+when debugging complex structures.  During parsing the command line
 (e.g. evaluating an expression) @value{GDBN} treats location names as
 the values behind these locations.
 
-This subchapters describes how values have to be specified and which
+This section describes how values have to be specified and which
 operations are legal to be used with such values.
 
 @table @code
 @item Literal Values
-Literal values are specified in the same manner as in GNU Chill programs.
-For detailed specification refer to the GNU Chill implementation Manual
+Literal values are specified in the same manner as in @sc{gnu} Chill programs.
+For detailed specification refer to the @sc{gnu} Chill implementation Manual
 chapter 1.5.
+@c FIXME: if the Chill Manual is a Texinfo documents, the above should
+@c be converted to a @ref.
 
 @ignore 
 @itemize @bullet
 @item
 @emph{Integer Literals} are specified in the same manner as in Chill
-programs (refer z200/88 chpt 5.2.4.2)
+programs (refer to the Chill Standard z200/88 chpt 5.2.4.2)
 @item
 @emph{Boolean Literals} are defined by @code{TRUE} and @code{FALSE}.
 @item
@@ -6748,42 +6858,43 @@ programs (refer z200/88 chpt 5.2.4.2)
 @code{'M'})
 @item
 @emph{Set Literals} are defined by a name which was specified in a set
-mode. The value delivered by a Set Literal is the set value. This is
-comparable to an enumaration in C/C++ language.
+mode.  The value delivered by a Set Literal is the set value.  This is
+comparable to an enumeration in C/C++ language.
 @item
-@emph{Emptiness Literal} is predefined by @code{NULL}. The value of the
+@emph{Emptiness Literal} is predefined by @code{NULL}.  The value of the
 emptiness literal delivers either the empty reference value, the empty
 procedure value or the empty instance value. 
 
 @item
 @emph{Character String Literals} are defined by a sequence of characters
-enclosed in single- or double quotes. If a single- or double quote has
+enclosed in single- or double quotes.  If a single- or double quote has
 to be part of the string literal it has to be stuffed (specified twice).
 @item
 @emph{Bitstring Literals} are specified in the same manner as in Chill
 programs (refer z200/88 chpt 5.2.4.8).
 @item
 @emph{Floating point literals} are specified in the same manner as in
-(gnu-)Chill programs (refer GNU Chill implementation Manual chapter 1.5).
+(gnu-)Chill programs (refer @sc{gnu} Chill implementation Manual chapter 1.5).
 @end itemize
 @end ignore
 
 @item Tuple Values
 A tuple is specified by @code{<mode name>[<tuple>]}, where @code{<mode
-name>} can be omitted if the mode of the tuple is unambigous. This
+name>} can be omitted if the mode of the tuple is unambiguous.  This
 unambiguity is derived from the context of a evaluated expression.
 @code{<tuple>} can be one of the following:
+
 @itemize @bullet
 @item @emph{Powerset Tuple}
 @item @emph{Array Tuple}
 @item @emph{Structure Tuple}
 Powerset tuples, array tuples and structure tuples are specified in the
-same manner as in Chill programs refer z200/88 chpt 5.2.5.
+same manner as in Chill programs refer to z200/88 chpt 5.2.5.
 @end itemize
 
 @item String Element Value
 A string element value is specified by @code{<string value>(<index>)},
-where @code{<index>} is a integer expression. It delivers a character
+where @code{<index>} is a integer expression.  It delivers a character
 value which is equivalent to the character indexed by @code{<index>} in
 the string.
 
@@ -6802,31 +6913,32 @@ delivers a array element value of the mode of the specified array.
 @item Array Slice Values
 An array slice is specified by @code{<array value>(<slice spec>)}, where
 @code{<slice spec>} can be either a range specified by expressions or by
-@code{<start expr> up <size>}. @code{<size>} denotes the number of
-arrayelements the slice contains. The delivered value is an array value
+@code{<start expr> up <size>}.  @code{<size>} denotes the number of
+arrayelements the slice contains.  The delivered value is an array value
 which is part of the specified array.
 
 @item Structure Field Values
 A structure field value is derived by @code{<structure value>.<field
-name>}, where @code{<field name>} indcates the name of a field specified
-in the mode definition of the structure. The mode of the delivered value
+name>}, where @code{<field name>} indicates the name of a field specified
+in the mode definition of the structure.  The mode of the delivered value
 corresponds to this mode definition in the structure definition.
 
 @item Procedure Call Value
 The procedure call value is derived from the return value of the
 procedure@footnote{If a procedure call is used for instance in an
 expression, then this procedure is called with all its side
-effects. This can lead to confusing results if used carelessly.}.
+effects.  This can lead to confusing results if used carelessly.}.
 
-Values of duration mode locations are represented by ULONG literals.
+Values of duration mode locations are represented by @code{ULONG} literals.
 
-Values of time mode locations are represented by TIME(<secs>:<nsecs>).
+Values of time mode locations are represented by @code{TIME(<secs>:<nsecs>)}.
 
 @ignore
 This is not implemented yet:
 @item Built-in Value
 @noindent
 The following built in functions are provided:
+
 @table @code
 @item @code{ADDR()}
 @item @code{NUM()}
@@ -6862,42 +6974,53 @@ current active process.
 
 @item Expression Values
 The value delivered by an expression is the result of the evaluation of
-the specified expression. If there are error conditions (mode
+the specified expression.  If there are error conditions (mode
 incompatibility, etc.) the evaluation of expressions is aborted with a
-corresponding error message. Expressions may be paranthesised which
+corresponding error message.  Expressions may be parenthesised which
 causes the evaluation of this expression before any other expression
-which uses the result of the paranthesised expression. The following
+which uses the result of the parenthesised expression.  The following
 operators are supported by @value{GDBN}:
+
 @table @code
 @item @code{OR, ORIF, XOR}
-@item @code{AND, ANDIF}
-@item @code{NOT}
+@itemx @code{AND, ANDIF}
+@itemx @code{NOT}
 Logical operators defined over operands of boolean mode.
+
 @item @code{=, /=}
 Equality and inequality operators defined over all modes.
+
 @item @code{>, >=}
-@item @code{<, <=}
+@itemx @code{<, <=}
 Relational operators defined over predefined modes.
+
 @item @code{+, -}
-@item @code{*, /, MOD, REM}
+@itemx @code{*, /, MOD, REM}
 Arithmetic operators defined over predefined modes.
+
 @item @code{-}
 Change sign operator.
+
 @item @code{//}
 String concatenation operator.
+
 @item @code{()}
 String repetition operator.
+
 @item @code{->}
 Referenced location operator which can be used either to take the
 address of a location (@code{->loc}), or to dereference a reference
 location (@code{loc->}).
+
 @item @code{OR, XOR}
-@item @code{AND}
-@item @code{NOT}
+@itemx @code{AND}
+@itemx @code{NOT}
 Powerset and bitstring operators.
+
 @item @code{>, >=}
-@item @code{<, <=}
+@itemx @code{<, <=}
 Powerset inclusion operators.
+
 @item @code{IN}
 Membership operator.
 @end table
@@ -6907,21 +7030,20 @@ Membership operator.
 @subsubsection Chill type and range checks
 
 @value{GDBN} considers two Chill variables mode equivalent if the sizes
-of the two modes are equal. This rule applies recursively to more
+of the two modes are equal.  This rule applies recursively to more
 complex datatypes which means that complex modes are treated
-eqivalent if all element modes (which also can be complex modes like
+equivalent if all element modes (which also can be complex modes like
 structures, arrays, etc.) have the same size.
 
 Range checking is done on all mathematical operations, assignment, array
 index bounds and all built in procedures.
 
 Strong type checks are forced using the @value{GDBN} command @code{set
-check strong}. This enforces strong type and range checks on all
+check strong}.  This enforces strong type and range checks on all
 operations where Chill constructs are used (expressions, built in
 functions, etc.) in respect to the semantics as defined in the z.200
 language specification.
 
-@noindent
 All checks can be disabled by the @value{GDBN} command @code{set check
 off}.
 
@@ -6935,18 +7057,18 @@ see last paragraph ?
 
 If type and range checking are set automatically by @value{GDBN}, they
 both default to @code{on} whenever the working language changes to
-Chill.  This happens regardless of whether you, or @value{GDBN},
+Chill.  This happens regardless of whether you or @value{GDBN}
 selected the working language.
 
 If you allow @value{GDBN} to set the language automatically, then entering
 code compiled from a file whose name ends with @file{.ch} sets the
-working language to Chill. @xref{Automatically, ,Having @value{GDBN} set
+working language to Chill.  @xref{Automatically, ,Having @value{GDBN} set
 the language automatically}, for further details.
 
 @node Symbols
 @chapter Examining the Symbol Table
 
-The commands described in this section allow you to inquire about the
+The commands described in this chapter allow you to inquire about the
 symbols (names of variables, functions and types) defined in your
 program.  This information is inherent in the text of your program and
 does not change as your program executes.  @value{GDBN} finds it in your
@@ -6986,8 +7108,8 @@ at all for a register variable, and for a stack local variable prints
 the exact address of the current instantiation of the variable.
 
 @kindex whatis
-@item whatis @var{exp}
-Print the data type of expression @var{exp}.  @var{exp} is not
+@item whatis @var{expr}
+Print the data type of expression @var{expr}.  @var{expr} is not
 actually evaluated, and any side-effecting operations (such as
 assignments or function calls) inside it do not take place.
 @xref{Expressions, ,Expressions}.
@@ -7002,9 +7124,9 @@ the name of a type, or for C code it may have the form @samp{class
 @var{class-name}}, @samp{struct @var{struct-tag}}, @samp{union
 @var{union-tag}} or @samp{enum @var{enum-tag}}.
 
-@item ptype @var{exp}
+@item ptype @var{expr}
 @itemx ptype
-Print a description of the type of expression @var{exp}.  @code{ptype}
+Print a description of the type of expression @var{expr}.  @code{ptype}
 differs from @code{whatis} by printing a detailed description, instead
 of just the name of the type.
 
@@ -7036,11 +7158,11 @@ the type of @code{$}, the last value in the value history.
 @kindex info types
 @item info types @var{regexp}
 @itemx info types
-Print a brief description of all types whose name matches @var{regexp}
+Print a brief description of all types whose names match @var{regexp}
 (or all types in your program, if you supply no argument).  Each
 complete typename is matched as though it were a complete line; thus,
 @samp{i type value} gives information on all types in your program whose
-name includes the string @code{value}, but @samp{i type ^value$} gives
+names include the string @code{value}, but @samp{i type ^value$} gives
 information only on types whose complete name is @code{value}.
 
 This command differs from @code{ptype} in two ways: first, like
@@ -7666,8 +7788,8 @@ The @code{section} command changes the base address of section SECTION of
 the exec file to ADDR.  This can be used if the exec file does not contain 
 section addresses, (such as in the a.out format), or when the addresses 
 specified in the file itself are wrong.  Each section must be changed 
-separately.  The ``info files'' command lists all the sections and their 
-addresses.
+separately.  The @code{info files} command, described below, lists all
+the sections and their addresses.
 
 @kindex info files
 @kindex info target
@@ -7714,7 +7836,6 @@ Print the names of the shared libraries which are currently loaded.
 @kindex share
 @item sharedlibrary @var{regex}
 @itemx share @var{regex}
-
 Load shared object library symbols for files matching a
 Unix regular expression.
 As with files loaded automatically, it only loads shared libraries
@@ -7728,8 +7849,8 @@ and automatically reads in symbols from the newly loaded library, up to
 a threshold that is initially set but that you can modify if you wish.
 
 Beyond that threshold, symbols from shared libraries must be explicitly
-loaded.  To load these symbols, use the command @code{sharedlibrary}
-@var{filename}.  The base address of the shared library is determined
+loaded.  To load these symbols, use the command @code{sharedlibrary
+@var{filename}}.  The base address of the shared library is determined
 automatically by @value{GDBN} and need not be specified.
 
 To display or set the threshold, use the commands:
@@ -7815,7 +7936,7 @@ with this name.
 
 The symbol information contains new data types that @value{GDBN} does
 not yet know how to read.  @code{0x@var{nn}} is the symbol type of the
-misunderstood information, in hexadecimal.
+uncomprehended information, in hexadecimal.
 
 @value{GDBN} circumvents the error by ignoring this symbol information.
 This usually allows you to debug your program, though certain symbols
@@ -7935,10 +8056,13 @@ a @dfn{core}, or a @dfn{.o} file; however, you can specify the file format
 with the @code{set gnutarget} command.  Unlike most @code{target} commands, 
 with @code{gnutarget} the @code{target} refers to a program, not a machine.
 
+@quotation
 @emph{Warning:} To specify a file format with @code{set gnutarget},
 you must know the actual BFD name.
+@end quotation
 
-@noindent @xref{Files, , Commands to specify files}.
+@noindent
+@xref{Files, , Commands to specify files}.
 
 @kindex show gnutarget  
 @item show gnutarget
@@ -7967,7 +8091,7 @@ A core dump file.  @samp{target core @var{filename}} is the same as
 Remote serial target in GDB-specific protocol.  The argument @var{dev}
 specifies what serial device to use for the connection (e.g.
 @file{/dev/ttya}). @xref{Remote, ,Remote debugging}.  @code{target remote}
-now supports the @code{load} command.  This is only useful if you have
+supports the @code{load} command.  This is only useful if you have
 some other way of getting the stub to the target system, and you can put
 it somewhere in memory where it won't get clobbered by the download.
 
@@ -7980,8 +8104,9 @@ In general,
         load
         run
 @end example
+@noindent
 works; however, you cannot assume that a specific memory map, device
-drivers, or even basic I/O is available, although some simulator do
+drivers, or even basic I/O is available, although some simulators do
 provide these.  For info about any processor-specific simulator details,
 see the appropriate section in @ref{Embedded Processors, ,Embedded
 Processors}.
@@ -8043,7 +8168,7 @@ offer the ability to run either big-endian or little-endian byte
 orders.  Usually the executable or symbol will include a bit to
 designate the endian-ness, and you will not need to worry about
 which to use.  However, you may still find it useful to adjust
-GDB's idea of processor endian-ness manually.
+@value{GDBN}'s idea of processor endian-ness manually.
 
 @table @code
 @kindex set endian big
@@ -8108,7 +8233,7 @@ have a name like @file{crt0}.  The startup routine may be supplied by
 your hardware supplier, or you may have to write your own.
 
 @item 
-You probably need a C subroutine library to support your program's
+A C subroutine library to support your program's
 subroutine calls, notably managing input and output.
 
 @item
@@ -8216,7 +8341,7 @@ run when a trap is triggered.
 execution (for example, on a breakpoint), and mediates communications
 with @value{GDBN} on the host machine.  This is where the communications
 protocol is implemented; @code{handle_exception} acts as the @value{GDBN}
-representative on the target machine; it begins by sending summary
+representative on the target machine.  It begins by sending summary
 information on the state of your program, then continues to execute,
 retrieving and transmitting any information @value{GDBN} needs, until you
 execute a @value{GDBN} command that makes your program resume; at that point,
@@ -8306,7 +8431,7 @@ help from @code{exceptionHandler}.
 
 @item void flush_i_cache()
 @kindex flush_i_cache
-(sparc and sparclite only) Write this subroutine to flush the
+On @sc{sparc} and @sc{sparclite} only, write this subroutine to flush the
 instruction cache, if any, on your target machine.  If there is no
 instruction cache, this subroutine may be a no-op.
 
@@ -8329,7 +8454,7 @@ either obtain it from your hardware manufacturer, or write your own.
 If you do not use the GNU C compiler, you may need other standard
 library subroutines as well; this varies from one stub to another,
 but in general the stubs are likely to use any of the common library
-subroutines which @code{gcc} generates as inline code.
+subroutines which @code{@value{GCC}} generates as inline code.
 
 
 @node Debug Session
@@ -8364,8 +8489,9 @@ For the 680x0 stub only, you need to provide a variable called
 void (*exceptionHook)() = 0;
 @end example
 
+@noindent
 but if before calling @code{set_debug_traps}, you set it to point to a
-function in your program, that function is called when
+function in your program; that function is called when
 @code{@value{GDBN}} continues after stopping on a trap (for example, bus
 error).  The function indicated by @code{exceptionHook} is called with
 one parameter: an @code{int} which is the exception number.
@@ -8390,8 +8516,9 @@ as an executable file the program that is running in the remote machine.
 This tells @value{GDBN} how to find your program's symbols and the contents
 of its pure text.
 
+@item
 @cindex serial line, @code{target remote}
-Then establish communication using the @code{target remote} command.
+Establish communication using the @code{target remote} command.
 Its argument specifies how to communicate with the target
 machine---either via a devicename attached to a direct serial line, or a
 TCP port (usually to a terminal server which in turn has a serial line
@@ -8482,7 +8609,7 @@ or, with the optional @var{sequence-id}:
 The two-digit @var{checksum} is computed as the modulo 256 sum of all
 characters between the leading @samp{$} and the trailing @samp{#} (that
 consisting of both the optional @var{sequence-id}@code{:} and the actual
-@var{packet-data}).
+@var{packet-data}) (an eight bit unsigned checksum).
 
 @cindex sequence-id, for @value{GDBN} remote
 @noindent
@@ -8525,8 +8652,13 @@ Response @var{data} can be run-length encoded to save space.  A @samp{*}
 means that the next character is an ASCII encoding giving a repeat count
 which stands for that many repetitions of the character preceding the
 @samp{*}.  The encoding is @code{n+29}, yielding a printable character
-where @code{n >=3} (which is where rle starts to win).  Don't use an
-@code{n > 126}.
+where @code{n >=3} (which is where rle starts to win).  The printable
+characters @samp{$}, @samp{#}, @samp{+} and @samp{-} or with a numeric
+value greater than 126 should not be used.
+
+Some remote systems have used a different run-length encoding mechanism
+loosely refered to as the cisco encoding.  Following the @samp{*}
+character are two hex digits that indicate the size of the packet.
 
 So:
 @example
@@ -8541,7 +8673,7 @@ error number.  That number is not well defined.
 For any @var{command} not supported by the stub, an empty response
 (@samp{$#00}) should be returned.  That way it is possible to extend the
 protocol.  A newer @value{GDBN} can tell if a packet is supported based
-on the response.
+on that response.
 
 Below is a complete list of all currently defined @var{command}s and
 their corresponding response @var{data}:
@@ -8554,7 +8686,7 @@ their corresponding response @var{data}:
 @item extended ops @emph{(optional)}
 @tab @code{!}
 @tab
-Use the extended remote protocol. Sticky -- only needs to be set once.
+Use the extended remote protocol.  Sticky---only needs to be set once.
 The extended remote protocol support the @samp{R} packet.
 @item
 @tab reply @samp{}
@@ -8566,9 +8698,12 @@ support protocol extensions.
 @item last signal
 @tab @code{?}
 @tab
-Reply the current reason for stopping.  This is the same reply as is
-generated for step or cont : @code{S}@var{AA} where @var{AA} is the
-signal number.
+Indicate the reason the target halted.  The reply is the same as for step
+and continue.
+@item
+@tab reply
+@tab see below
+
 
 @item reserved
 @tab @code{a}
@@ -8579,6 +8714,7 @@ signal number.
 @tab
 Initialized @samp{argv[]} array passed into program. @var{arglen}
 specifies the number of bytes in the hex encoded byte stream @var{arg}.
+See @file{gdbserver} for more details.
 @item
 @tab reply @code{OK}
 @item
@@ -8622,14 +8758,20 @@ Continue with signal @var{sig} (hex signal number).  If
 @tab reply
 @tab see below
 
-@item toggle debug @emph{(optional)}
+@item toggle debug @emph{(deprecated)}
 @tab @code{d}
 @tab
-toggle debug flag (see 386 & 68k stubs)
+toggle debug flag.
 
 @item detach @emph{(optional)}
 @tab @code{D}
-@tab Reply OK.
+@tab
+Detach GDB from the remote system.  Sent to the remote target before
+GDB disconnects.
+@item
+@tab reply @emph{no response}
+@tab
+GDB does not check for any response after sending this packet
 
 @item reserved
 @tab @code{e}
@@ -8655,9 +8797,10 @@ toggle debug flag (see 386 & 68k stubs)
 @tab
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
-each register and their position within the @samp{g} @var{packet} is
-determined by the @var{REGISTER_RAW_SIZE} and @var{REGISTER_NAME}
-macros.
+each register and their position within the @samp{g} @var{packet} are
+determined by the GDB internal macros @var{REGISTER_RAW_SIZE} and
+@var{REGISTER_NAME} macros.  The specification of several standard
+@code{g} packets is specified below.
 @item
 @tab @code{E}@var{NN}
 @tab for an error.
@@ -8680,16 +8823,31 @@ See @samp{g} for a description of the @var{XX...} data.
 @item set thread @emph{(optional)}
 @tab @code{H}@var{c}@var{t...}
 @tab
-Set thread for subsequent operations.  @var{c} = @samp{c} for thread
-used in step and continue; @var{t...} can be -1 for all threads.
-@var{c} = @samp{g} for thread used in other operations.  If zero, pick a
-thread, any thread.
+Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
+@samp{G}, et.al.).  @var{c} = @samp{c} for thread used in step and
+continue; @var{t...} can be -1 for all threads.  @var{c} = @samp{g} for
+thread used in other operations.  If zero, pick a thread, any thread.
 @item
 @tab reply @code{OK}
 @tab for success
 @item
 @tab reply @code{E}@var{NN}
 @tab for an error
+
+@c FIXME: JTC:
+@c   'H': How restrictive (or permissive) is the thread model.  If a
+@c        thread is selected and stopped, are other threads allowed 
+@c        to continue to execute?  As I mentioned above, I think the
+@c        semantics of each command when a thread is selected must be
+@c        described.  For example:
+@c
+@c        'g':    If the stub supports threads and a specific thread is
+@c                selected, returns the register block from that thread;
+@c                otherwise returns current registers.
+@c
+@c        'G'     If the stub supports threads and a specific thread is
+@c                selected, sets the registers of the register block of
+@c                that thread; otherwise sets current registers.
 
 @item cycle step @strong{(draft)} @emph{(optional)}
 @tab @code{i}@var{addr}@code{,}@var{nnn}
@@ -8714,6 +8872,8 @@ See @samp{i} and @samp{S} for likely syntax and semantics.
 @item kill request @emph{(optional)}
 @tab @code{k}
 @tab
+FIXME: @emph{There is no description of how operate when a specific
+thread context has been selected (ie. does 'k' kill only that thread?)}.
 
 @item reserved
 @tab @code{l}
@@ -8727,11 +8887,16 @@ See @samp{i} and @samp{S} for likely syntax and semantics.
 @tab @code{m}@var{addr}@code{,}@var{length}
 @tab
 Read @var{length} bytes of memory starting at address @var{addr}.
+Neither GDB nor the stub assume that sized memory transfers are assumed
+using word alligned accesses. FIXME: @emph{A word aligned memory
+transfer mechanism is needed.}
 @item
 @tab reply @var{XX...}
 @tab
-@var{XX...} is mem contents. Can be fewer bytes than requested if able to
-read only part of the data.
+@var{XX...} is mem contents. Can be fewer bytes than requested if able
+to read only part of the data.  Neither GDB nor the stub assume that
+sized memory transfers are assumed using word alligned accesses. FIXME:
+@emph{A word aligned memory transfer mechanism is needed.}
 @item
 @tab reply @code{E}@var{NN}
 @tab @var{NN} is errno
@@ -8789,15 +8954,14 @@ digits for each byte in the register (target byte order).
 @item general query @emph{(optional)}
 @tab @code{q}@var{query}
 @tab
-Request info about @var{query}. In general @value{GDBN} @var{query}'s
+Request info about @var{query}.  In general @value{GDBN} @var{query}'s
 have a leading upper case letter.  Custom vendor queries should use a
-leading lower case letter and a company prefix, ex: @samp{qfsf.var}.
-@var{query} may optionally be followed by a @samp{,} or @samp{;}
-separated list.  Stubs should ensure that they fully match any
-@var{query} name.
+company prefix (in lower case) ex: @samp{qfsf.var}.  @var{query} may
+optionally be followed by a @samp{,} or @samp{;} separated list.  Stubs
+must ensure that they match the full @var{query} name.
 @item
 @tab reply @code{XX...}
-@tab Hex encoded data from query. The reply can not be empty.
+@tab Hex encoded data from query.  The reply can not be empty.
 @item
 @tab reply @code{E}@var{NN}
 @tab error reply
@@ -8805,96 +8969,23 @@ separated list.  Stubs should ensure that they fully match any
 @tab reply @samp{}
 @tab Indicating an unrecognized @var{query}.
 
-@item current thread
-@tab @code{q}@code{C}
-@tab Return the current thread id.
-@item
-@tab reply @code{QC}@var{pid}
-@tab
-Where @var{pid} is a HEX encoded 16 bit process id.
-@item
-@tab reply *
-@tab Any other reply implies the old pid.
-
-@item compute CRC of memory block
-@tab @code{q}@code{CRC:}@var{addr}@code{,}@var{length}
-@tab
-@item
-@tab reply @code{E}@var{NN}
-@tab An error (such as memory fault)
-@item
-@tab reply @code{C}@var{CRC32}
-@tab A 32 bit cyclic redundancy check of the specified memory region.
-
-@item query @var{LIST} or @var{threadLIST}
-@tab @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread}
-@tab
-Obtain thread information from RTOS.  @var{startflag} is one hex digit;
-@var{threadcount} is two hex digits; and @var{nextthread} is 16 hex
-digits.
-@item
-@tab reply *
-@tab
-See @code{remote.c:parse_threadlist_response()}.
-
-@item query sect offs
-@tab @code{q}@code{Offsets}
-@tab Get section offsets.
-@item
-@tab reply @code{Text=}@var{xxx}@code{;Data=}@var{yyy}@code{;Bss=}@var{zzz}
-
-@item thread info request
-@tab @code{q}@code{P}@var{mode}@var{threadid}
-@tab
-Returns information on @var{threadid}.  Where: @var{mode} is a hex
-encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
-@item
-@tab reply *
-@tab
-See @code{remote.c:remote_unpack_thread_info_response()}.
-
-@item remote command
-@tab @code{q}@code{Rcmd,}@var{COMMAND}
-@tab
-@var{COMMAND} (hex encoded) is passed to the local interpreter for
-execution. Invalid commands should be reported using the output string.
-Before the final result packet, the target may also respond with a
-number of intermediate @code{O}@var{OUTPUT} console output
-packets. @emph{Implementors should note that providing access to a
-stubs's interpreter may have security implications}.
-@item
-@tab reply @code{OK}
-@tab
-A command response with no output.
-@item
-@tab reply @var{OUTPUT}
-@tab
-A command response with the hex encoded output string @var{OUTPUT}.
-@item
-@tab reply @code{E}@var{NN}
-@tab
-Indicate a badly formed request.
-
-@item
-@tab reply @samp{}
-@tab
-When @samp{q}@samp{Rcmd} is not recognized.
-
 @item general set @emph{(optional)}
 @tab @code{Q}@var{var}@code{=}@var{val}
 @tab
 Set value of @var{var} to @var{val}.  See @samp{q} for a discussing of
 naming conventions.
 
-@item reset @emph{(optional)}
-@tab r
-@tab reset -- see sparc stub.
+@item reset @emph{(deprecated)}
+@tab @code{r}
+@tab
+Reset the entire system.
 
 @item remote restart @emph{(optional)}
 @tab @code{R}@var{XX}
 @tab
-Restart the remote server. @var{XX} while needed has no clear
-definition.
+Restart the remote server.  @var{XX} while needed has no clear
+definition.  FIXME: @emph{An example interaction explaining how this
+packet is used in extended-remote mode is needed}.
 
 @item step @emph{(optional)}
 @tab @code{s}@var{addr}
@@ -8918,7 +9009,7 @@ Like @samp{C} but step not continue.
 @tab
 Search backwards starting at address @var{addr} for a match with pattern
 @var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4
-bytes. @var{addr} must be at least 3 digits.
+bytes.  @var{addr} must be at least 3 digits.
 
 @item thread alive @emph{(optional)}
 @tab @code{T}@var{XX}
@@ -8962,7 +9053,8 @@ bytes. @var{addr} must be at least 3 digits.
 @tab @code{X}@var{addr}@code{,}@var{length}@var{:}@var{XX...}
 @tab
 @var{addr} is address, @var{length} is number of bytes, @var{XX...} is
-binary data.
+binary data.  The characters @code{$}, @code{#}, and @code{0x7d} are
+escaped using @code{0x7d}.
 @item
 @tab reply @code{OK}
 @tab for success
@@ -8991,7 +9083,9 @@ breakpoint, @samp{2} - write watchpoint, @samp{3} - read watchpoint,
 @samp{4} - access watchpoint; @var{addr} is address; @var{length} is in
 bytes.  For a software breakpoint, @var{length} specifies the size of
 the instruction to be patched.  For hardware breakpoints and watchpoints
-@var{length} specifies the memory region to be monitored.
+@var{length} specifies the memory region to be monitored.  To avoid
+potential problems with duplicate packets, the operations should be
+implemented in an ident-potentent way.
 @item
 @tab reply @code{E}@var{NN}
 @tab for an error
@@ -9008,9 +9102,12 @@ the instruction to be patched.  For hardware breakpoints and watchpoints
 
 @end multitable
 
-In the case of the @samp{C}, @samp{c}, @samp{S} and @samp{s} packets,
-there is no immediate response.  The reply, described below, comes when
-the machine stops:
+The @samp{C}, @samp{c}, @samp{S}, @samp{s} and @samp{?} packets can
+receive any of the below as a reply.  In the case of the @samp{C},
+@samp{c}, @samp{S} and @samp{s} packets, that reply is only returned
+when the target halts.  In the below the exact meaning of @samp{signal
+number} is poorly defined.  In general one of the UNIX signal numbering
+conventions is used.
 
 @multitable @columnfractions .4 .6
 
@@ -9023,7 +9120,7 @@ the machine stops:
 (hex), @var{r...}  = target byte ordered register contents, size defined
 by @code{REGISTER_RAW_SIZE}; @var{n...} = @samp{thread}, @var{r...} =
 thread process ID, this is a hex integer; @var{n...} = other string not
-starting with valid hex digit. @value{GDBN} should ignore this
+starting with valid hex digit.  @value{GDBN} should ignore this
 @var{n...}, @var{r...} pair and go on to the next.  This way we can
 extend the protocol.
 
@@ -9040,16 +9137,128 @@ The process terminated with signal @var{AA}.
 @tab
 @var{AA} = signal number; @var{tttttttt} = address of symbol "_start";
 @var{dddddddd} = base of data section; @var{bbbbbbbb} = base of bss
-section. @emph{Note: only used by Cisco Systems targets.  The difference
+section.  @emph{Note: only used by Cisco Systems targets.  The difference
 between this reply and the "qOffsets" query is that the 'N' packet may
 arrive spontaneously whereas the 'qOffsets' is a query initiated by the
 host debugger.}
 
 @item @code{O}@var{XX...}
 @tab
-@var{XX...} is hex encoding of ASCII data. This can happen at any time
+@var{XX...} is hex encoding of ASCII data.  This can happen at any time
 while the program is running and the debugger should continue to wait
 for 'W', 'T', etc.
+
+@end multitable
+
+The following set and query packets have already been defined.
+
+@multitable @columnfractions .2 .2 .6
+
+@item current thread
+@tab @code{q}@code{C}
+@tab Return the current thread id.
+@item
+@tab reply @code{QC}@var{pid}
+@tab
+Where @var{pid} is a HEX encoded 16 bit process id.
+@item
+@tab reply *
+@tab Any other reply implies the old pid.
+
+@item compute CRC of memory block
+@tab @code{q}@code{CRC:}@var{addr}@code{,}@var{length}
+@tab
+@item
+@tab reply @code{E}@var{NN}
+@tab An error (such as memory fault)
+@item
+@tab reply @code{C}@var{CRC32}
+@tab A 32 bit cyclic redundancy check of the specified memory region.
+
+@item query @var{LIST} or @var{threadLIST} @strong{(deprecated)}
+@tab @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread}
+@tab
+Obtain thread information from RTOS.  Where: @var{startflag} (one hex
+digit) is one to indicate the first query and zero to indicate a
+subsequent query; @var{threadcount} (two hex digits) is the maximum
+number of threads the response packet can contain; and @var{nextthread}
+(eight hex digits), for subsequent queries (@var{startflag} is zero), is
+returned in the response as @var{argthread}.
+@item
+@tab reply @code{q}@code{M}@var{count}@var{done}@var{argthread}@var{thread...}
+@tab
+Where: @var{count} (two hex digits) is the number of threads being
+returned; @var{done} (one hex digit) is zero to indicate more threads
+and one indicates no further threads; @var{argthreadid} (eight hex
+digits) is @var{nextthread} from the request packet; @var{thread...} is
+a sequence of thread IDs from the target.  @var{threadid} (eight hex
+digits).  See @code{remote.c:parse_threadlist_response()}.
+
+@item query sect offs
+@tab @code{q}@code{Offsets}
+@tab Get section offsets.
+@item
+@tab reply @code{Text=}@var{xxx}@code{;Data=}@var{yyy}@code{;Bss=}@var{zzz}
+
+@item thread info request
+@tab @code{q}@code{P}@var{mode}@var{threadid}
+@tab
+Returns information on @var{threadid}.  Where: @var{mode} is a hex
+encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
+@item
+@tab reply *
+@tab
+See @code{remote.c:remote_unpack_thread_info_response()}.
+
+@item remote command
+@tab @code{q}@code{Rcmd,}@var{COMMAND}
+@tab
+@var{COMMAND} (hex encoded) is passed to the local interpreter for
+execution.  Invalid commands should be reported using the output string.
+Before the final result packet, the target may also respond with a
+number of intermediate @code{O}@var{OUTPUT} console output
+packets.  @emph{Implementors should note that providing access to a
+stubs's interpreter may have security implications}.
+@item
+@tab reply @code{OK}
+@tab
+A command response with no output.
+@item
+@tab reply @var{OUTPUT}
+@tab
+A command response with the hex encoded output string @var{OUTPUT}.
+@item
+@tab reply @code{E}@var{NN}
+@tab
+Indicate a badly formed request.
+
+@item
+@tab reply @samp{}
+@tab
+When @samp{q}@samp{Rcmd} is not recognized.
+
+@end multitable
+
+The following @samp{g}/@samp{G} packets have previously been defined.
+In the below, some thirty-two bit registers are transferred as sixty-four
+bits.  Those registers should be zero/sign extended (which?) to fill the
+space allocated.  Register bytes are transfered in target byte order.
+The two nibbles within a register byte are transfered most-significant -
+least-significant.
+
+@multitable @columnfractions .5 .5
+
+@item MIPS32
+@tab
+All registers are transfered as thirty-two bit quantities in the order:
+32 general-purpose; sr; lo; hi; bad; cause; pc; 32 floating-point
+registers; fsr; fir; fp.
+
+@item MIPS64
+@tab
+All registers are transfered as sixty-four bit quantities (including
+thirty-two bit registers such as @code{sr}).  The ordering is the same
+as @code{MIPS32}.
 
 @end multitable
 
@@ -9082,8 +9291,8 @@ Example sequence of a target being stepped by a single instruction:
 <- @code{+}
 @end example
 
-@kindex set remotedebug
-@kindex show remotedebug
+@kindex set remotedebug@r{, serial protocol}
+@kindex show remotedebug@r{, serial protocol}
 @cindex packets, reporting on stdout
 @cindex serial connections, debugging
 If you have trouble with the serial connection, you can use the command
@@ -9162,7 +9371,7 @@ you want for the port number as long as it does not conflict with any
 TCP ports already in use on the target system (for example, @code{23} is
 reserved for @code{telnet}).@footnote{If you choose a port number that
 conflicts with another service, @code{gdbserver} prints an error message
-and exits.} You must use the same port number with the host @value{GDBN}
+and exits.}  You must use the same port number with the host @value{GDBN}
 @code{target remote} command.
 
 @item On the @value{GDBN} host machine,
@@ -9170,7 +9379,7 @@ you need an unstripped copy of your program, since @value{GDBN} needs
 symbols and debugging information.  Start up @value{GDBN} as usual,
 using the name of the local copy of your program as the first argument.
 (You may also need the @w{@samp{--baud}} option if the serial line is
-running at anything other than 9600 bps.)  After that, use @code{target
+running at anything other than 9600@dmn{bps}.)  After that, use @code{target
 remote} to establish communications with @code{gdbserver}.  Its argument
 is either a device name (usually a serial device, like
 @file{/dev/ttyb}), or a TCP port descriptor in the form
@@ -9224,11 +9433,11 @@ load gdbserve [ BOARD=@var{board} ] [ PORT=@var{port} ]
 
 @var{board} and @var{port} specify the serial line; @var{baud} specifies
 the baud rate used by the connection.  @var{port} and @var{node} default
-to 0, @var{baud} defaults to 9600 bps.
+to 0, @var{baud} defaults to 9600@dmn{bps}.
 
 For example, to debug Emacs with the argument @samp{foo.txt}and
 communicate with @value{GDBN} over serial port number 2 or board 1 
-using a 19200 bps connection:
+using a 19200@dmn{bps} connection:
 
 @smallexample
 load gdbserve BOARD=1 PORT=2 BAUD=19200 emacs foo.txt
@@ -9239,7 +9448,7 @@ you need an unstripped copy of your program, since @value{GDBN} needs
 symbols and debugging information.  Start up @value{GDBN} as usual,
 using the name of the local copy of your program as the first argument.
 (You may also need the @w{@samp{--baud}} option if the serial line is
-running at anything other than 9600 bps.  After that, use @code{target
+running at anything other than 9600@dmn{bps}.  After that, use @code{target
 remote} to establish communications with @code{gdbserve.nlm}.  Its
 argument is a device name (usually a serial device, like
 @file{/dev/ttyb}).  For example:
@@ -9409,9 +9618,9 @@ current target system as well as adding its symbols in @value{GDBN}.
 VxWorks targets from a Unix host.  Already-running tasks spawned from
 the VxWorks shell can also be debugged.  @value{GDBN} uses code that runs on
 both the Unix host and on the VxWorks target.  The program
-@code{gdb} is installed and executed on the Unix host.  (It may be
+@code{@value{GDBP}} is installed and executed on the Unix host.  (It may be
 installed with the name @code{vxgdb}, to distinguish it from a
-@value{GDBN} for debugging programs on the host itself.)
+@value{GDB} for debugging programs on the host itself.)
 
 @table @code
 @item VxWorks-timeout @var{args}
@@ -9440,7 +9649,7 @@ manual.
 
 Once you have included @file{rdb.a} in your VxWorks system image and set
 your Unix execution search path to find @value{GDBN}, you are ready to
-run @value{GDBN}.  From your Unix host, run @code{gdb} (or @code{vxgdb},
+run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}} (or @code{vxgdb},
 depending on your installation).
 
 @value{GDBN} comes up showing the prompt:
@@ -9511,7 +9720,8 @@ program, type this on VxWorks:
 @example
 -> cd "@var{vxpath}/vw/demo/rdb"
 @end example
-v
+
+@noindent
 Then, in @value{GDBN}, type:
 
 @example
@@ -9530,7 +9740,7 @@ after editing and recompiling the corresponding source file.  Note that
 this makes @value{GDBN} delete all currently-defined breakpoints,
 auto-displays, and convenience variables, and to clear the value
 history.  (This is necessary in order to preserve the integrity of
-debugger data structures that reference the target system's symbol
+debugger's data structures that reference the target system's symbol
 table.)
 
 @node VxWorks Attach
@@ -9658,6 +9868,12 @@ you must match the communications parameters when establishing the Unix
 end of the connection as well.
 @c FIXME: Who knows what this "no retry action" crud from the DOS manual may
 @c       mean?  It's optional; leave it out? ---doc@cygnus.com, 25feb91 
+@c
+@c It's optional, but it's unwise to omit it: who knows what is the
+@c default value set when the DOS machines boots?  "No retry" means that
+@c the DOS serial device driver won't retry the operation if it fails;
+@c I understand that this is needed because the GDB serial protocol
+@c handles any errors and retransmissions itself. ---Eli Zaretskii, 3sep99
 
 To give control of the PC to the Unix side of the serial line, type
 the following at the DOS console:
@@ -9700,6 +9916,10 @@ system table @file{/etc/remote}.
 @c can set these as internal variables, eg ~s parity=none; man stty
 @c suggests that it *might* work to stty these options with stdin or
 @c stdout redirected... ---doc@cygnus.com, 25feb91
+@c
+@c There's nothing to be done for the "none" part of the DOS MODE
+@c command.  The rest of the parameters should be matched by the
+@c baudrate, bits, and parity used by the Unix side. ---Eli Zaretskii, 3Sep99
 
 @kindex EBMON
 Using the @code{tip} or @code{cu} connection, change the DOS working
@@ -9746,7 +9966,7 @@ running, ready for @value{GDBN} to take over.
 
 For this example, we've assumed what is probably the most convenient
 way to make sure the same 29K program is on both the PC and the Unix
-system: a PC/NFS connection that establishes ``drive @code{G:}'' on the
+system: a PC/NFS connection that establishes ``drive @file{G:}'' on the
 PC as a file system on the Unix host.  If you do not have PC/NFS or
 something similar connecting the two systems, you must arrange some
 other way---perhaps floppy-disk transfer---of getting the 29K program
@@ -9794,7 +10014,7 @@ To return control of the PC to its console, use @code{tip} or @code{cu}
 once again, after your @value{GDBN} session has concluded, to attach to
 @code{EBMON}.  You can then type the command @code{q} to shut down
 @code{EBMON}, returning control to the DOS command-line interpreter.
-Type @code{CTTY con} to return command input to the main DOS console,
+Type @kbd{CTTY con} to return command input to the main DOS console,
 and type @kbd{~.} to leave @code{tip} or @code{cu}.
 
 @node Remote Log
@@ -9831,18 +10051,18 @@ ARM Demon monitor.
 
 @table @code
 
-@kindex target hms
+@kindex target hms@r{, with H8/300}
 @item target hms @var{dev}
 A Hitachi SH, H8/300, or H8/500 board, attached via serial line to your host.
 Use special commands @code{device} and @code{speed} to control the serial
 line and the communications speed used.
 
-@kindex target e7000
+@kindex target e7000@r{, with H8/300}
 @item target e7000 @var{dev}
 E7000 emulator for Hitachi H8 and SH.
 
-@kindex target sh3
-@kindex target sh3e
+@kindex target sh3@r{, with H8/300}
+@kindex target sh3e@r{, with H8/300}
 @item target sh3 @var{dev}
 @item target sh3e @var{dev}
 Hitachi SH-3 and SH-3E target systems.
@@ -9899,8 +10119,8 @@ hosts, where it is typically something like @file{/dev/ttya}.
 @code{@value{GDBP}} has another special command to set the communications
 speed: @samp{speed @var{bps}}.  This command also is only used from Unix
 hosts; on DOS hosts, set the line speed as usual from outside GDB with
-the DOS @kbd{mode} command (for instance, @w{@samp{mode
-com2:9600,n,8,1,p}} for a 9600 bps connection).
+the DOS @code{mode} command (for instance,
+@w{@kbd{mode com2:9600,n,8,1,p}} for a 9600@dmn{bps} connection).
 
 The @samp{device} and @samp{speed} commands are available only when you
 use a Unix host to debug your Hitachi microprocessor programs.  If you
@@ -9919,7 +10139,7 @@ First hook up your development board.  In this example, we use a
 board attached to serial port @code{COM2}; if you use a different serial
 port, substitute its name in the argument of the @code{mode} command.
 When you call @code{asynctsr}, the auxiliary comms program used by the
-degugger, you give it just the numeric part of the serial port's name;
+debugger, you give it just the numeric part of the serial port's name;
 for example, @samp{asyncstr 2} below runs @code{asyncstr} on
 @code{COM2}.
 
@@ -9940,7 +10160,7 @@ disable it, or even boot without it, to use @code{asynctsr} to control
 your development board.
 @end quotation
 
-@kindex target hms
+@kindex target hms@r{, and serial protocol}
 Now that serial communications are set up, and the development board is
 connected, you can start up @value{GDBN}.  Call @code{@value{GDBP}} with
 the name of your program as the argument.  @code{@value{GDBP}} prompts
@@ -9999,7 +10219,7 @@ development board as a ``normal exit'' of your program.
 @node Hitachi ICE
 @subsubsection Using the E7000 in-circuit emulator
 
-@kindex target e7000
+@kindex target e7000@r{, with Hitachi ICE}
 You can use the E7000 in-circuit emulator to develop code for either the
 Hitachi SH or the H8/300H.  Use one of these forms of the @samp{target
 e7000} command to connect @value{GDBN} to your E7000:
@@ -10356,8 +10576,8 @@ As usual, you can inquire about the @code{mipsfpu} variable with
 
 @item set remotedebug @var{n}
 @itemx show remotedebug
-@kindex set remotedebug
-@kindex show remotedebug
+@kindex set remotedebug@r{, MIPS protocol}
+@kindex show remotedebug@r{, MIPS protocol}
 @cindex @code{remotedebug}, MIPS protocol
 @cindex MIPS @code{remotedebug} protocol
 @c FIXME! For this to be useful, you must know something about the MIPS
@@ -10434,18 +10654,18 @@ W89K monitor, running on a Winbond HPPA board.
 
 @table @code
 
-@kindex target hms
+@kindex target hms@r{, with Hitachi SH}
 @item target hms @var{dev}
 A Hitachi SH board attached via serial line to your host.  Use special
 commands @code{device} and @code{speed} to control the serial line and
 the communications speed used.
 
-@kindex target e7000
+@kindex target e7000@r{, with Hitachi SH}
 @item target e7000 @var{dev}
 E7000 emulator for Hitachi SH.
 
-@kindex target sh3
-@kindex target sh3e
+@kindex target sh3@r{, with SH}
+@kindex target sh3e@r{, with SH}
 @item target sh3 @var{dev}
 @item target sh3e @var{dev}
 Hitachi SH-3 and SH-3E target systems.
@@ -10461,27 +10681,27 @@ Hitachi SH-3 and SH-3E target systems.
 Sparclet targets from a Unix host.  
 @value{GDBN} uses code that runs on
 both the Unix host and on the Sparclet target.  The program
-@code{gdb} is installed and executed on the Unix host.  
+@code{@value{GDBP}} is installed and executed on the Unix host.  
 
 @table @code
 @item timeout @var{args}
 @kindex remotetimeout
-@value{GDBN} now supports the option @code{remotetimeout}.  
+@value{GDBN} supports the option @code{remotetimeout}.  
 This option is set by the user, and  @var{args} represents the number of 
 seconds @value{GDBN} waits for responses.  
 @end table
 
 @kindex Compiling
-When compiling for debugging, include the options "-g" to get debug 
-information and "-Ttext" to relocate the program to where you wish to
-load it on the target.  You may also want to add the options "-n" or 
-"-N" in order to reduce the size of the sections.
+When compiling for debugging, include the options @samp{-g} to get debug 
+information and @samp{-Ttext} to relocate the program to where you wish to
+load it on the target.  You may also want to add the options @samp{-n} or 
+@samp{-N} in order to reduce the size of the sections.  Example:
 
 @example
 sparclet-aout-gcc prog.c -Ttext 0x12010000 -g -o prog -N
 @end example
 
-You can use objdump to verify that the addresses are what you intended.
+You can use @code{objdump} to verify that the addresses are what you intended:
 
 @example
 sparclet-aout-objdump --headers --syms prog
@@ -10490,7 +10710,7 @@ sparclet-aout-objdump --headers --syms prog
 @kindex Running
 Once you have set
 your Unix execution search path to find @value{GDBN}, you are ready to
-run @value{GDBN}.  From your Unix host, run @code{gdb} 
+run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}} 
 (or @code{sparclet-aout-gdb}, depending on your installation).
 
 @value{GDBN} comes up showing the prompt:
@@ -10551,9 +10771,9 @@ main () at ../prog.c:3
 @need 750
 @value{GDBN} displays messages like these:
 
-@smallexample
+@example
 Connected to ttya.
-@end smallexample
+@end example
 
 @node Sparclet Download
 @subsubsection Sparclet download
@@ -10565,7 +10785,7 @@ you can use the @value{GDBN}
 The file name and load offset should be given as arguments to the @code{load}
 command.
 Since the file format is aout, the program must be loaded to the starting 
-address.  You can use objdump to find out what this value is.  The load
+address.  You can use @code{objdump} to find out what this value is.  The load
 offset is an offset which is added to the VMA (virtual memory address)
 of each of the file's sections.
 For instance, if the program
@@ -10682,7 +10902,7 @@ appropriate by inspecting the object code.
 @table @code
 @item target sim @var{args}
 @kindex sim
-@kindex target sim
+@kindex target sim@r{, with Z8000}
 Debug programs on a simulated CPU.  If the simulator supports setup
 options, specify them via @var{args}.
 @end table
@@ -10693,9 +10913,9 @@ CPU in the same style as programs for your host computer; use the
 @code{file} command to load a new program image, the @code{run} command
 to run your program, and so on.
 
-As well as making available all the usual machine registers (see
-@code{info reg}), the Z8000 simulator provides three additional items
-of information as specially named registers:
+As well as making available all the usual machine registers
+(@pxref{Registers, ,Registers}), the Z8000 simulator provides three
+additional items of information as specially named registers:
 
 @table @code
 
@@ -10737,7 +10957,7 @@ all uses of GDB with this architecture, both native and cross.
 @cindex register stack, AMD29K
 @item set rstack_high_address @var{address}
 On AMD 29000 family processors, registers are saved in a separate
-``register stack''.  There is no way for @value{GDBN} to determine the
+@dfn{register stack}.  There is no way for @value{GDBN} to determine the
 extent of this stack.  Normally, @value{GDBN} just assumes that the
 stack is ``large enough''.  This may result in @value{GDBN} referencing
 memory locations that do not exist.  If necessary, you can get around
@@ -10798,7 +11018,7 @@ for debugging programs on Alpha or MIPS processors.
 
 You can alter the way @value{GDBN} interacts with you by using the
 @code{set} command.  For commands controlling how @value{GDBN} displays
-data, @pxref{Print Settings, ,Print settings}; other settings are
+data, see @ref{Print Settings, ,Print settings}.  Other settings are
 described here.
 
 @menu
@@ -10822,7 +11042,7 @@ instance, when debugging @value{GDBN} with @value{GDBN}, it is useful to change
 the prompt in one of the @value{GDBN} sessions so that you can always tell 
 which one you are talking to.
 
-@emph{Note:}  @code{set prompt} no longer adds a space for you after the
+@emph{Note:}  @code{set prompt} does not add a space for you after the
 prompt you set.  This allows you to set a prompt which ends in a space
 or a prompt that does not.
 
@@ -10886,7 +11106,8 @@ list, and where it writes the command history from this session when it
 exits.  You can access this list through history expansion or through
 the history command editing characters listed below.  This file defaults
 to the value of the environment variable @code{GDBHISTFILE}, or to
-@file{./.gdb_history} if this variable is not set.
+@file{./.gdb_history} (@file{./_gdb_history} on MS-DOS) if this variable
+is not set.
 
 @cindex history save
 @kindex set history save
@@ -10976,9 +11197,10 @@ determines when to wrap lines of output.  Depending on what is being
 printed, @value{GDBN} tries to break the line at a readable place,
 rather than simply letting it overflow onto the following line.
 
-Normally @value{GDBN} knows the size of the screen from the termcap data base
+Normally @value{GDBN} knows the size of the screen from the terminal
+driver software.  For example, on Unix @value{GDBN} uses the termcap data base
 together with the value of the @code{TERM} environment variable and the
-@code{stty rows} and @code{stty cols} settings. If this is not correct,
+@code{stty rows} and @code{stty cols} settings.  If this is not correct,
 you can override it with the @code{set height} and @code{set
 width} commands:
 
@@ -11149,13 +11371,15 @@ define adder
   print $arg0 + $arg1 + $arg2
 @end smallexample
 
-@noindent To execute the command use:
+@noindent
+To execute the command use:
 
 @smallexample
 adder 1 2 3
 @end smallexample
 
-@noindent This defines the command @code{adder}, which prints the sum of
+@noindent
+This defines the command @code{adder}, which prints the sum of
 its three arguments.  Note the arguments are text substitutions, so they may 
 reference variables, use complex expressions, or even perform inferior
 functions calls.
@@ -11225,13 +11449,15 @@ messages when used in a user-defined command.
 
 @node Hooks
 @section User-defined command hooks
-@cindex command files
+@cindex command hooks
+@cindex hooks, for commands
 
 You may define @emph{hooks}, which are a special kind of user-defined
 command.  Whenever you run the command @samp{foo}, if the user-defined
 command @samp{hook-foo} exists, it is executed (with no arguments)
 before that command.
 
+@kindex stop@r{, a pseudo-command}
 In addition, a pseudo-command, @samp{stop} exists.  Defining
 (@samp{hook-stop}) makes the associated commands execute every time
 execution stops in your program: before breakpoint commands are run,
@@ -11278,10 +11504,13 @@ the last command, as it would from the terminal.
 
 @cindex init file
 @cindex @file{.gdbinit}
+@cindex @file{gdb.ini}
 When you start @value{GDBN}, it automatically executes commands from its
 @dfn{init files}.  These are files named @file{.gdbinit} on Unix, or
 @file{gdb.ini} on DOS/Windows.  @value{GDBN} reads the init file (if
-any) in your home directory, then processes command line options and
+any) in your home directory@footnote{On DOS/Windows systems, the home
+directory is the one pointed to by the @code{HOME} environment variable.},
+then processes command line options and
 operands, and then reads the init file (if any) in the current working
 directory.  This is so the init file in your home directory can set
 options (such as @code{set complaints}) which affect the processing of
@@ -11387,6 +11616,10 @@ Print the values of the @var{expressions} under the control of
 either numbers or pointers.  Their values are printed as specified by
 @var{string}, exactly as if your program were to execute the C
 subroutine
+@c FIXME: the above implies that at least all ANSI C formats are
+@c supported, but it isn't true: %E and %G don't work (or so it seems).
+@c Either this is a bug, or the manual should document what formats are
+@c supported.
 
 @example
 printf (@var{string}, @var{expressions}@dots{});
@@ -11479,7 +11712,7 @@ Emacs variable @code{gdb-command-name}; for example,
 @end example
 
 @noindent
-(preceded by @kbd{ESC ESC}, or typed in the @code{*scratch*} buffer, or
+(preceded by @kbd{M-:} or @kbd{ESC :}, or typed in the @code{*scratch*} buffer, or
 in your @file{.emacs} file) makes Emacs call the program named
 ``@code{mygdb}'' instead.
 
@@ -11647,11 +11880,11 @@ In any event, we also recommend that you send bug reports for
 @value{GDBN} to this addresses:
 
 @example
-bug-gdb@@prep.ai.mit.edu
+bug-gdb@@gnu.org
 @end example
 
 @strong{Do not send bug reports to @samp{info-gdb}, or to
-@samp{help-gdb}, or to any newsgroups.} Most users of @value{GDBN} do
+@samp{help-gdb}, or to any newsgroups.}  Most users of @value{GDBN} do
 not want to receive bug reports.  Those that do have arranged to receive
 @samp{bug-gdb}.
 

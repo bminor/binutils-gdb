@@ -65,7 +65,7 @@
 	   (insert "int\n")
 	   (insert (caller i) " (void)\n")
 	   (insert "{\n")
-	   (let ((last (local-chain i "0xfeeb" (caller i))))
+	   (let ((last (local-chain i "0x7eeb" (caller i))))
 	     (insert "  register int n;\n")
 	     (let ((j 0))
 	       (while (<= j limit)
@@ -159,7 +159,7 @@ callee5 (int n)
 int
 caller1 (void)
 {
-  register int l1 = increment (0xfeeb);  /* caller1 */
+  register int l1 = increment (0x7eeb);  /* caller1 */
   register int n;
   n = callee0 (l1);
   n = callee1 (n + l1);
@@ -173,7 +173,7 @@ caller1 (void)
 int
 caller2 (void)
 {
-  register int l1 = increment (0xfeeb);  /* caller2 */
+  register int l1 = increment (0x7eeb);  /* caller2 */
   register int l2 = increment (l1);
   register int n;
   n = callee0 (l2);
@@ -188,7 +188,7 @@ caller2 (void)
 int
 caller3 (void)
 {
-  register int l1 = increment (0xfeeb);  /* caller3 */
+  register int l1 = increment (0x7eeb);  /* caller3 */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int n;
@@ -204,7 +204,7 @@ caller3 (void)
 int
 caller4 (void)
 {
-  register int l1 = increment (0xfeeb);  /* caller4 */
+  register int l1 = increment (0x7eeb);  /* caller4 */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int l4 = increment (l3);
@@ -221,7 +221,7 @@ caller4 (void)
 int
 caller5 (void)
 {
-  register int l1 = increment (0xfeeb);  /* caller5 */
+  register int l1 = increment (0x7eeb);  /* caller5 */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int l4 = increment (l3);

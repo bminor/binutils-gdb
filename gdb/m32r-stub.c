@@ -179,7 +179,7 @@ extern void breakpoint(void);
 
 static int  computeSignal(int);
 static void putpacket(unsigned char *);
-static unsigned char *getpacket(unsigned char *);
+static unsigned char *getpacket(void);
 
 static unsigned char *mem2hex(unsigned char *, unsigned char *, int, int);
 static unsigned char *hex2mem(unsigned char *, unsigned char *, int, int);
@@ -310,7 +310,7 @@ handle_exception(int exceptionVector)
 
   while (1==1) {
     remcomOutBuffer[0] = 0;
-    ptr = getpacket(remcomInBuffer);
+    ptr = getpacket();
     binary = 0;
     switch (*ptr++) {
       default:	/* Unknown code.  Return an empty reply message. */
@@ -575,9 +575,9 @@ hex(ch)
 /* scan for the sequence $<data>#<checksum>     */
 
 unsigned char *
-getpacket (buffer)
-     unsigned char *buffer;
+getpacket ()
 {
+  unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
   unsigned char xmitcsum;
   int count;

@@ -52,13 +52,13 @@ static void
 som_symtab_read PARAMS ((bfd *, struct objfile *,
 			 struct section_offsets *));
 
-static struct section_offsets *
+static void
 som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 /* FIXME: These should really be in a common header somewhere */
 
 extern void
-hpread_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *, int));
+hpread_build_psymtabs PARAMS ((struct objfile *, int));
 
 extern void
 hpread_symfile_finish PARAMS ((struct objfile *));
@@ -398,7 +398,7 @@ som_symfile_read (objfile, mainline)
      This builds the psymtab. This used to be done via a scan of
      the DNTT, but is now done via the PXDB-built quick-lookup tables
      together with a scan of the GNTT. See hp-psymtab-read.c. */
-  hpread_build_psymtabs (objfile, objfile->section_offsets, mainline);
+  hpread_build_psymtabs (objfile, mainline);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. 
@@ -459,27 +459,24 @@ som_symfile_init (objfile)
 
    Plain and simple for now.  */
 
-static struct section_offsets *
+static void
 som_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
 {
-  struct section_offsets *section_offsets;
   int i;
 
   objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = (struct section_offsets *)
+  objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
   /* First see if we're a shared library.  If so, get the section
      offsets from the library, else get them from addr.  */
-  if (!som_solib_section_offsets (objfile, section_offsets))
+  if (!som_solib_section_offsets (objfile, objfile->section_offsets))
     {
       for (i = 0; i < SECT_OFF_MAX; i++)
-	ANOFFSET (section_offsets, i) = addr;
+	ANOFFSET (objfile->section_offsets, i) = addr;
     }
-
-  return section_offsets;
 }
 
 /* Read in and initialize the SOM import list which is present

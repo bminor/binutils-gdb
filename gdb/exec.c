@@ -315,11 +315,7 @@ exec_file_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  char **argv;
-  char *filename;
-
   target_preopen (from_tty);
-
   exec_file_attach (args, from_tty);
 }
 
@@ -618,13 +614,21 @@ exec_files_info (t)
       struct vmap *vp;
 
       printf_unfiltered ("\tMapping info for file `%s'.\n", vmap->name);
-      printf_unfiltered ("\t  %8.8s   %8.8s   %8.8s   %8.8s %8.8s %s\n",
-			 "tstart", "tend", "dstart", "dend", "section",
+      printf_unfiltered ("\t  %*s   %*s   %*s   %*s %8.8s %s\n",
+			 strlen_paddr (), "tstart",
+			 strlen_paddr (), "tend",
+			 strlen_paddr (), "dstart",
+			 strlen_paddr (), "dend",
+			 "section",
 			 "file(member)");
 
       for (vp = vmap; vp; vp = vp->nxt)
-	printf_unfiltered ("\t0x%8.8x 0x%8.8x 0x%8.8x 0x%8.8x %s%s%s%s\n",
-		       vp->tstart, vp->tend, vp->dstart, vp->dend, vp->name,
+	printf_unfiltered ("\t0x%s 0x%s 0x%s 0x%s %s%s%s%s\n",
+			   paddr (vp->tstart),
+			   paddr (vp->tend),
+			   paddr (vp->dstart),
+			   paddr (vp->dend),
+			   vp->name,
 			   *vp->member ? "(" : "", vp->member,
 			   *vp->member ? ")" : "");
     }

@@ -1,3 +1,7 @@
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 1999-08-28  Doug Evans  <devans@casey.cygnus.com>
 
 	* cpu.h,decode.c,sem-switch.c,sem.c: Rebuild.

@@ -64,11 +64,32 @@ extern int kernel_u_size PARAMS ((void));
 #include "solib.h"		/* Support for shared libraries. */
 #endif
 
+/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
+#define FETCH_INFERIOR_REGISTERS
+
 extern CORE_ADDR
   i386_stopped_by_watchpoint PARAMS ((int));
 extern int
 i386_insert_watchpoint PARAMS ((int pid, CORE_ADDR addr, int len, int rw));
 extern int
 i386_remove_watchpoint PARAMS ((int pid, CORE_ADDR addr, int len));
+
+/* Support for the glibc linuxthreads package. */
+
+#ifdef __STDC__
+struct objfile;
+#endif
+
+extern void
+linuxthreads_new_objfile PARAMS ((struct objfile *objfile));
+#define target_new_objfile(OBJFILE) linuxthreads_new_objfile (OBJFILE)
+
+extern char *
+linuxthreads_pid_to_str PARAMS ((int pid));
+#define target_pid_to_str(PID) linuxthreads_pid_to_str (PID)
+
+extern int
+linuxthreads_prepare_to_proceed PARAMS ((int step));
+#define PREPARE_TO_PROCEED(select_it) linuxthreads_prepare_to_proceed (1)
 
 #endif /* #ifndef NM_LINUX_H */

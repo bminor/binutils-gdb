@@ -43,7 +43,6 @@
  *  It should use the same privilege level it runs at.  It should
  *  install it as an interrupt gate so that interrupts are masked
  *  while the handler runs.
- *  Also, need to assign exceptionHook and oldExceptionHook.
  *
  *  Because gdb will sometimes write to the stack area to execute function
  *  calls, this program cannot rely on using the supervisor stack so it
@@ -97,14 +96,10 @@
  *
  * external low-level support routines
  */
-typedef void (*ExceptionHook)(int);   /* pointer to function with int parm */
-typedef void (*Function)();           /* pointer to a function */
 
 extern void putDebugChar();	/* write a single character      */
 extern int getDebugChar();	/* read and return a single char */
-
-extern Function exceptionHandler();  /* assign an exception handler */
-extern ExceptionHook exceptionHook;  /* hook variable for errors/exceptions */
+extern void exceptionHandler();	/* assign an exception handler   */
 
 /************************************************************************/
 /* BUFMAX defines the maximum number of characters in inbound/outbound buffers*/
@@ -137,14 +132,6 @@ int registers[NUMREGS];
 #define STACKSIZE 10000
 int remcomStack[STACKSIZE/sizeof(int)];
 static int* stackPtr = &remcomStack[STACKSIZE/sizeof(int) - 1];
-
-/*
- * In many cases, the system will want to continue exception processing
- * when a continue command is given.
- * oldExceptionHook is a function to invoke in this case.
- */
-
-static ExceptionHook oldExceptionHook;
 
 /***************************  ASSEMBLY CODE MACROS *************************/
 /* 									   */
@@ -456,12 +443,15 @@ char ch;
   return (-1);
 }
 
+static char remcomInBuffer[BUFMAX];
+static char remcomOutBuffer[BUFMAX];
+
 /* scan for the sequence $<data>#<checksum>     */
 
 unsigned char *
-getpacket (buffer)
-     unsigned char *buffer;
+getpacket ()
 {
+  unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
   unsigned char xmitcsum;
   int count;
@@ -556,11 +546,6 @@ void putpacket(buffer)
   } while (getDebugChar() != '+');
 
 }
-
-char  remcomInBuffer[BUFMAX];
-char  remcomOutBuffer[BUFMAX];
-static short error;
-
 
 void debug_error(format, parm)
 char * format;
@@ -739,9 +724,8 @@ void handle_exception(int exceptionVector)
   stepping = 0;
 
   while (1==1) {
-    error = 0;
     remcomOutBuffer[0] = 0;
-    ptr = getpacket(remcomInBuffer);
+    ptr = getpacket();
 
     switch (*ptr++) {
       case '?' :   remcomOutBuffer[0] = 'S';
@@ -839,25 +823,7 @@ void handle_exception(int exceptionVector)
           /* set the trace bit if we're stepping */
           if (stepping) registers[ PS ] |= 0x100;
 
-          /*
-           * If we found a match for the PC AND we are not returning
-           * as a result of a breakpoint (33),
-           * trace exception (9), nmi (31), jmp to
-           * the old exception handler as if this code never ran.
-           */
-#if 0
-	  /* Don't really think we need this, except maybe for protection
-	     exceptions.  */
-                  /*
-                   * invoke the previous handler.
-                   */
-                  if (oldExceptionHook)
-                      (*oldExceptionHook) (frame->exceptionVector);
-                  newPC = registers[ PC ];    /* pc may have changed  */
-#endif /* 0 */
-
 	  _returnFromException(); /* this is a jump */
-
           break;
 
       /* kill the program */
@@ -899,12 +865,6 @@ int exception;
   exceptionHandler (13, _catchException13);
   exceptionHandler (14, _catchException14);
   exceptionHandler (16, _catchException16);
-
-  if (exceptionHook != remcomHandler)
-  {
-      oldExceptionHook = exceptionHook;
-      exceptionHook    = remcomHandler;
-  }
 
   initialized = 1;
 }

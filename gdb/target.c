@@ -1272,6 +1272,7 @@ static struct {
   {"SIG62", "Real-time event 62"},
   {"SIG63", "Real-time event 63"},
   {"SIGCANCEL", "LWP internal signal"},
+  {"SIG32", "Real-time event 32"},
 
 #if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
@@ -1571,8 +1572,16 @@ target_signal_from_host (hostsig)
 
 #if defined (REALTIME_LO)
   if (hostsig >= REALTIME_LO && hostsig < REALTIME_HI)
-    return (enum target_signal)
-      (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
+    {
+      /* This block of TARGET_SIGNAL_REALTIME value is in order.  */
+      if (33 <= hostsig && hostsig <= 63)
+	return (enum target_signal)
+	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
+      else if (hostsig == 32)
+	return TARGET_SIGNAL_REALTIME_32;
+      else
+	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
+    }
 #endif
   return TARGET_SIGNAL_UNKNOWN;
 }
@@ -1770,6 +1779,8 @@ target_signal_to_host (oursig)
     case TARGET_SIGNAL_PRIO:
       return SIGPRIO;
 #endif
+
+    case TARGET_SIGNAL_REALTIME_32: return 32; /* by definition */ 
 
       /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
 #if defined (EXC_BAD_ACCESS) && defined (_NSIG)

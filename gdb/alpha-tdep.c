@@ -465,7 +465,7 @@ heuristic_proc_start (pc)
 	    else
 	      warning ("Hit heuristic-fence-post without finding");
 
-	    warning ("enclosing function for address 0x%lx", pc);
+	    warning ("enclosing function for address 0x%s", paddr_nz (pc));
 	    if (!blurb_printed)
 	      {
 		printf_filtered ("\

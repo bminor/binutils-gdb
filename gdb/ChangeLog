@@ -1,3 +1,462 @@
+1999-09-07  J.T. Conklin  <jtc@redback.com>
+
+	* i386-stub.c (exceptionHook, oldExceptionHook): Removed.
+	(handle_exception): Removed #if'd out exception hook code.
+
+	* i386-stub.c, m68k-stub.c (error): Removed unused variable.
+
+	* i386-stub.c, m68k-stub.c, sh-stub.c, sparc-stub.c,
+	sparcl-stub.c, sparclet-stub.c (remcomInBuffer, remcomOutBuffer):
+	Make static.
+
+Tue Sep  7 14:06:22 1999  Kevin Buettner  <kevinb@cygnus.com>
+
+	* config/i386/tm-linux.h (SOFUN_ADDRESS_MAYBE_MISSING): 
+	Define.
+
+Tue Sep  7 08:18:01 1999  Kevin Buettner  <kevinb@cygnus.com>
+
+	From Jim Blandy <jimb@cygnus.com>:
+	
+	Step into calls to functions in shared libraries properly.  See
+	the comments for SKIP_SOLIB_RESOLVER atop infrun.c for details.
+	* infrun.c (SKIP_SOLIB_RESOLVER): New macro.
+
+1999-09-05  Fred Fish  <fnf@cygnus.com>
+
+	* elfread.c (elf_symtab_read): Remove separately passed bfd
+	pointer and offset.  Pick up bfd pointer from objfile, and
+	get offset from objfile's section_offsets.
+
+Fri Sep  3 22:29:39 1999  Kevin Buettner  <kevinb@cygnus.com>
+
+	* config/i386/tm-linux.h (REGISTER_NAMES): Changed register
+	named "foo" to "fopo" which more accurately describes the FPU
+	Operand Pointer Offset.  The real reason for this change, of
+	course, is that many programmers use $foo as a convenience
+	variable and are likely to be unpleasantly surprised to find
+	that they're unwittingly changing the state of their ia32 FPU.
+
+1999-09-03  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* monitor.c (monitor_supply_register): Stop scanning val string
+	if a newline is encountered.
+
+1999-09-03  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        monitor.c (TARGET_BUF_SIZE): New macro, defined to 2048.
+        (monitor_expect_regexp, monitor_wait, monitor_dump_reg_block,
+        monitor_dump_reg_block): Dump hard-coded constants in favor
+        of TARGET_BUF_SIZE.
+
+        (readchar): Re-enable output of characters read from monitor when
+        remotedebug is set.
+
+        (monitor_supply_register): Use ULONGEST to hold value.
+        Replace strtoul() call with hand-coded loop to handle values
+        larger than 'long'.
+
+        (monitor_store_register): Use ULONGEST to hold value.
+
+Fri Sep  3 00:47:44 1999  Kevin Buettner  <kevinb@cygnus.com>
+
+	[Merged linux/x86 floating point code from Bill Metzenthen,
+	Jim Blandy, Anthony Green, H. J. Liu, and possibly others.  The
+	following remarks are Jim Blandy's.]
+
+	* findvar.c (extract_floating): Call TARGET_EXTRACT_FLOATING, if
+	#defined.
+	(store_floating): Call TARGET_STORE_FLOATING, if #defined.
+
+	* i386-tdep.c (i386_print_register, i386_do_registers_info): New
+	functions.
+	(i386_extract_return_value): GNU/Linux returns floating point
+	values in a floating point register too.
+	(set_disassembly_flavor): Add prototype.
+	(i386_extract_return_value): Use FPDATA_REGNUM, not FP0_REGNUM (
+	which wasn't the first FP data register).
+	(i386_do_registers_info): Use FPSTART_REGNUM and FPEND_REGNUM as
+	the limits of the FPU-related registers.
+	(i386_extract_return_value): Tell GDB how to find return values
+	larger than four bytes.  (Thanks to Paul N. Hilfinger for the bug
+	report.)
+
+	* i387-tdep.c (print_387_control_word): Break out bit-splitting into...
+	(print_387_control_bits): New function.
+	(print_387_status_word): Break out bit-splitting into...
+	(print_387_status_bits): New function.
+	(i387_print_register, i387_float_info, i387_hex_float_input): New
+	functions.
+	(i387_extract_floating, i387_store_floating): New functions.
+
+	* valprint.c (print_floating): Use macro TARGET_ANALYZE_FLOATING,
+	if it's #defined.  Tolerate values of `nonnegative' other than
+	zero and one.
+
+	* i386-linux-nat.c: New file.
+	* Makefile.in (ALLDEPFILES): Mention i386-linux-nat.c.
+	(i386-linux-nat.o): New rule, listing dependencies.
+	* config/i386/linux.mh (NATDEPFILES): Use i386-linux-nat.o, not
+	the plain i386v4-nat.o.
+	* config/i386/nm-linux.h (FETCH_INFERIOR_REGISTERS): Define.
+	* config/i386/xm-linux.h: Define HOST_I386.
+
+	* config/i386/tm-linux.h (FP0_REGNUM): Replaced by...
+	(FPSTART_REGNUM, FPCONTROL_REGNUM, FPSTATUS_REGNUM, FPTAG_REGNUM,
+	FPDATA_REGNUM, FPEND_REGNUM): New definitions.
+	(REGISTER_BYTES): Changed accordingly.
+	(SKIP_SOLIB_RESOLVER): #define this.
+	(i386_linux_skip_solib_resolver): New declaration.
+	(i387_float_info): Added extern decl for this function.
+	(TARGET_EXTRACT_FLOATING, TARGET_STORE_FLOATING,
+	TARGET_ANALYZE_FLOATING): Define.
+	(i387_extract_floating, i387_store_floating): New extern decls.
+	(I386_GNULINUX_TARGET): Define.
+	(NUM_REGS, NUM_FREGS, REGISTER_NAMES, FP0_REGNUM, FPDATA_REGNUM,
+	FPENV_BYTES, FPREG_RAW_SIZE, FPREG_BYTES, REGISTER_BYTES,
+	REGISTER_BYTE, REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE,
+	MAX_REGISTER_RAW_SIZE, MAX_REGISTER_VIRTUAL_SIZE,
+	TARGET_LONG_DOUBLE_BIT, FLOAT_INFO, DO_REGISTERS_INFO): New
+	definitions, perhaps overriding those inherited from
+	config/i386/tm-i386.h.
+	(i386_do_registers_info, i387_print_register, double_to_i387,
+	i387_to_double): New declarations.
+	(LD_I387): Define iff both the host and target are using i387
+	FPU's.
+	(HEX_FLOAT_INPUT, REGISTER_CONVERTIBLE,
+	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW,
+	REGISTER_VIRTUAL_TYPE): Define these if LD_I387 is defined.
+
+	* source.c (list_command): List the right number of source lines,
+	even if we're at the top of the file.
+
+1999-09-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (step_over_function): New function, broken out from the
+ 	step_over_function label in handle_inferior_event.
+	(handle_inferior_event): Change a goto into a function call.
+
+Thu Sep  2 18:26:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (GDB_WERROR_CFLAGS, GBB_WARN_CFLAGS): Define.
+ 	(INTERNAL_CFLAGS): Update
+	* configure.in (WERROR_CFLAGS, WARN_CFLAGS): Sync with
+ 	../sim/common/aclocal.m4.
+	* configure: Re-generate.
+	
+Thu Sep  2 00:27:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (z8k-tdep.o): For moment, don't try to compile with
+ 	-Werror.  See Makefile.in.
+	* z8k-tdep.c (z8k_set_pointer_size): Document problem.
+
+	* config/z8k/tm-z8k.h (z8k_print_register_hook, z8k_frame_chain,
+ 	z8k_saved_pc_after_call, z8k_frame_saved_pc,
+ 	z8k_set_pointer_size): Declare.
+	(z8k_skip_prologue): Fix typo. Was mz8k_skip_prologue.
+	(FRAME_CHAIN, PRINT_REGISTER_HOOK, FRAME_SAVED_PC,
+ 	SAVED_PC_AFTER_CALL): Update.
+	* z8k-tdep.c (z8k_print_register_hook): Rename
+ 	z8k_print_register_hook.
+	(z8k_frame_chain): Rename frame_chain.
+	(z8k_saved_pc_after_call): Rename saved_pc_after_call.
+	(z8k_frame_saved_pc): Rename frame_saved_pc.
+	(z8k_print_register_hook): Fix printf.
+	(read_memory_pointer): Add declaration.
+	("value.h"): Include.
+	* Makefile.in (z8k-tdep.o): Add dependency on value.h.
+
+	* config/sparc/tm-sparc.h (PRINT_EXTRA_FRAME_INFO): Fix
+ 	printf. calls
+	* Makefile.in (remote-e7000.o): For moment, don't try to compile
+ 	with -Werror.  See Makefile.in.
+	* sh-tdep.c (sh_show_regs): Fix printf calls.
+	* xcoffsolib.c (solib_info): Fix Printf calls.
+	* dink32-rom.c: #include "symfile.h" for generic_load and
+ 	"inferior.h" for write_pc.
+	* Makefile.in (dink32-rom.o): Update.
+
+	* config/mn10300/tm-mn10300.h (mn10300_store_struct_return),
+ 	config/mn10200/tm-mn10200.h (mn10200_store_struct_return): Add
+ 	declarations.
+
+Tue Aug 31 00:48:27 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* config/mips/tm-tx49el.h (REGISTER_SIM_REGNO): Define.
+
+	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register):
+ 	Pass REGISTER_SIM_REGNO converted register number to the
+ 	simulator.
+
+1999-09-01  Tom Tromey  <tromey@cygnus.com>
+
+	* config/i386/nm-linux.h (PREPARE_TO_PROCEED): Added argument.
+
+1999-09-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* values.c (value_virtual_fn_field): Remove unused var(s).
+	* thread.c (prune_threads): Ditto.
+	* symtab.c (lookup_transparent_type): Ditto.
+	(decode_line_1): Ditto.
+	(make_symbol_overload_list): Ditto. 
+	* rs6000-tdep.c (frame_get_saved_regs): Ditto.
+	(set_processor): Ditto.
+	* remote.c (remote_remove_breakpoint): Ditto.
+	(remote_query): Ditto.
+	(readtty): Ditto.
+	* remote-sds.c (sds_fetch_registers): Ditto.
+	(putmessage): Ditto.
+	* ppcbug-rom.c (ppcbug_supply_register): Ditto.
+	(ppcbug_open): Remove unused prototype.
+	* parse.c (parse_nested_classes_for_hpacc): Remove unused var(s).
+	* ocd.c (ocd_open): Ditto.
+	(ocd_get_packet): Ditto.
+	* monitor.c (monitor_error): Ditto.
+	(monitor_wait_srec_ack): Ditto.
+	* main.c (main): Ditto.
+	* gdbtypes.c (count_virtual_fns): Ditto.
+	* exec.c (exec_file_command): Ditto.
+
+	* event-top.c: Include handle_sigwinch() function prototype within
+ 	appropriate #ifdef.
+
+	* eval.c (evaluate_subexp_standard): Remove unused variable.
+	(evaluate_subexp_standard): Remove unused variables.
+	* dink32-rom.c (dink32_supply_register): Remove unused variable.
+	* dbxread.c (elfstab_build_psymtabs): Ditto.
+	* command.c (do_setshow_command): Ditto.
+	* breakpoint.c (solib_load_unload_1): Remove unused variables 'i'
+ 	and 'sal'.
+	(until_break_command): Remove unused variables 'arg1' and 'arg2'.
+	(create_exception_catchpoint): Remove unused variable 'i'.
+	* ax-gdb.c (gen_sub): Remove unused variable.
+	(_initialize_ax_gdb): Ditto.
+
+	* ser-pipe.c (pipe_readchar): If timeout is expired return
+ 	SERIAL_TIMEOUT.
+	* ser-tcp.c (tcp_readchar): If timeout is expired return
+ 	SERIAL_TIMEOUT.
+
+Wed Sep  1 15:07:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* version.h: New file.
+	* Makefile.in (version_h): Define.
+	(version.o): Add target.
+
+	* remote-array.c: #include "version.h".
+ 	(version): Delete extern declarations.
+	* Makefile.in (remote-array.o): Add dependency on version.h.
+
+	* top.c: #include "version.h".
+	(version, host_name, target_name): Delete extern declarations.
+	* Makefile.in (top.o): Add dependency on version.h.
+
+	* remote.c (remote_remove_watchpoint, remote_insert_watchpoint),
+ 	remote-array.c (array_open), remote-mips.c (send_srec),
+ 	dve3900-rom.c (store_bitmapped_register): Fix Printfs.
+
+	* mips-tdep.c (mips_print_extra_frame_info, print_unpack),
+ 	m32r-rom.c (m32r_load_section), m32r-tdep.c (m32r_frame_chain),
+ 	dsrec.c (load_srec): Fix printf problems.
+	
+Wed Sep  1 13:16:49 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (monitor.o): For moment, don't try to compile with
+ 	-Werror.  monitor.c has -Wformat problems.  See Makefile.in for
+ 	more info.
+
+Tue Aug 31 21:23:38 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c (prologue_inst_adjust_sp): Correct offset computation
+	for doubleword store instructions.
+	(hppa_frame_find_saved_regs): Similarly.
+
+Wed Sep  1 09:22:50 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d30v-tdep.c (d30v_print_register): 
+	(tdisassemble_command): 
+
+	* d10v-tdep.c (show_regs, trace_info, tdisassemble_command): Fix
+ 	printf problems.
+
+	* remote-sim.c (dump_mem), remote-rdi.c (arm_rdi_create_inferior):
+ 	Fix printf arguments.
+
+	* remote-mips.c, mips-tdep.c: Move declaration of
+ 	``mips_set_processor_type_command'' from here.
+	* config/mips/tm-mips.h: To here.
+	* remote-array.c: #include "inferior.h".
+	* config/mips/tm-embed.h (remote_mips_stopped_by_watchpoint): Add
+ 	declaration.
+	* remote-mips.c (remote_mips_stopped_by_watchpoint): Define using
+ 	ISO-C prototype.
+	(monitor_supports_breakpoints): Integer variable.
+
+	* m32r-rom.c: #include "inferior.h" and <ctype.h>
+	* config/m32r/tm-m32r.h (m32r_write_sp): Add declaration.
+
+	* config/i960/tm-i960.h (leafproc_return, i960_pop_frame): Add
+ 	declaration.
+	(POP_FRAME): Call i960_pop_frame.
+	* i960-tdep.c (i960_pop_frame): Rename pop_frame.
+	* mon960-rom.c: #include "inferior.h" for declaration of write_pc.
+
+1999-08-15  Fred Fish  <fnf@cygnus.com>
+
+	* objfiles.c (objfile_relocate): Use SIZEOF_SECTION_OFFSETS when
+	allocating section_offsets array.
+	* remote-os9k.c (rombug_wait): Ditto.
+	* remote-vx.c (vx_add_symbols): Ditto.
+	* remote.c (get_offsets): Ditto.
+	(remote_cisco_objfile_relocate): Ditto.
+	* rs6000-nat.c (vmap_symtab): Ditto.
+
+	* dstread.c (dst_symfile_offsets): Set section_offsets directly instead
+	of returning a pointer to section offsets.
+	* somread.c (som_symfile_offsets): Ditto.
+	* xcoffread.c (xcoff_symfile_offsets): Ditto.
+	* symfile.c (default_symfile_offsets): Ditto.
+	(syms_from_objfile): The sym_offsets function has already set section
+	offsets and no longer returns a value.
+
+	* xcoffread.c (scan_xcoff_symtab): Eliminate section_offsets passed
+	separate from objfile.
+	(xcoff_start_psymtab): Ditto.
+	(START_PSYMTAB): Ditto.
+	* os9kread.c (read_minimal_symbols): Ditto.
+	(read_os9k_psymtab): Ditto.
+	(os9k_start_psymtab): Ditto.
+	(record_minimal_symbol): Ditto.
+	* dbxread.c (START_PSYMTAB): Ditto.
+	(start_psymtab): Ditto.
+	* mdebugread.c (START_PSYMTAB): Ditto.
+	(elfmdebug_build_psymtabs): Ditto.
+	(mdebug_build_psymtabs): Ditto.
+	(parse_partial_symbols): Ditto.
+	(new_psymtab): Ditto.
+	* dwarfread.c (dwarf_build_psymtabs): Ditto.
+	* partial-stab.h (START_PSYMTAB): Ditto.
+	* stabsread.h (start_psymtab): Ditto.
+	* dwarf2read.c (dwarf2_build_psymtabs): Ditto.
+	(dwarf2_build_psymtabs_easy): Ditto.
+	(dwarf2_build_psymtabs_hard): Ditto.
+	* hp-psymtab-read.c (hpread_build_psymtabs): Ditto.
+	(hpread_quick_traverse): Ditto.
+	(hpread_start_psymtab): Ditto.
+	(scan_procs): Ditto.
+	* hpread.c (hpread_build_psymtabs): Ditto.
+	* symfile.h (dwarf2_build_psymtabs): Ditto.
+
+	* dbxread.c (read_dbx_symtab): Use ANOFFSET to access section
+	offsets.
+	* core-cisco.c (get_seg_info): Make static.
+	* coffread.c (enter_linenos): Pass objfile instead of section
+	offsets.
+	* jv-vm.c (jv_vm_internal_lookup_symbol): Call allocate_objfile
+	with the right number of arguments.
+
+	* dbxread.c (dbx_symfile_read): No need to explicitly pass
+	text addr and size.  Let read_dbx_symtab find them.
+	(read_dbx_symtab): Get text addr and size from objfile.
+	(dbx_symfile_read): Remove dead code (call to strlen);
+	
+1999-08-31  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* Makefile.in: add rule for sol-thread.o.
+	Add rule for linux-thread.o.
+
+1999-08-13  Jim Kingdon  <kingdon@redhat.com>
+
+	Threads code from gdb 4.18-codefusion-990706
+	[Thanks to Eric Paire, H. J. Liu, Jim Blandy and others]
+	* infrun.c (signal_stop_update, signal_print_update,
+	signal_pass_update): new functions.
+	* inferior.h: new prototypes for above functions.
+	* target.h (enum strata): add thread stratum.
+	* linux-thread.c: new file.  Support for debugging linux threads.
+	* config/i386/nm-linux.h: several new prototypes for above.
+	* config/i386/linux.mh: add linux-thread.o to NATDEPFILES.
+
+	More threads code from the same place:
+	* config/i386/tm-linux.h (REALTIME_LO, REALTIME_HI): Add
+	definitions.
+	* target.h (enum target_signal): Add TARGET_SIGNAL_REALTIME_32.
+	* target.c (signals, target_signal_from_host,
+	target_signal_to_host): Add clauses for
+	TARGET_SIGNAL_REALTIME_32.
+	
+1999-08-31  Neil Schellenberger <neil.schellenberger@crosskeys.com>
+
+	* sol-thread.c (sol_thread_detach): strip thread-id out of 
+	inferior_pid, so that procfs_detach can't choke on it.
+
+1999-08-31  J.T. Conklin  <jtc@redback.com>
+
+	* i386-stub.c, m32r-stub.c, m68k-stub.c, sh-stub.c, sparc-stub.c,
+ 	sparcl-stub.c, sparclet-stub.c (getpacket): Remove 'buffer' arg,
+	define it as a pointer to &remcomInBuffer[0].
+	(handle_exception): Update.
+
+	* sparc-stub.c, sparcl-stub.c, sparclet-stub.c (handle_exception):
+ 	Removed #ifdef'd out code which implements the non-standard 'b'
+	(set baud rate) command.
+
+1999-08-31  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (keep_going): New function, broken out from the
+ 	keep_going label in handle_inferior_event.
+	(handle_inferior_event): Change more gotos into function calls.
+
+Tue Aug 31 02:29:27 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c (read_unwind_info): Handle multiple unwind sections.
+
+Tue Aug 31 15:28:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/alpha/tm-alpha.h (PRINT_EXTRA_FRAME_INFO): Fix printf
+ 	format argument.
+	* alpha-tdep.c (heuristic_proc_start): Ditto.
+
+	From Stan Shebs <shebs@andros.cygnus.com>:
+	* defs.h (strlen_paddr): Fix prototype - add void argument list.
+
+Tue Aug 31 14:02:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (gdb_print_host_address), utils.c
+ 	(gdb_print_host_address): Rename gdb_print_address.
+
+	* expprint.c, gdbtypes.c, symmisc.c: Update.
+
+	*expprint.c: Use gdb_print_host_address when displaying native
+ 	pointers.
+
+Sat Aug 28 14:23:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* scm-valprint.c (scm_ipruk), jv-valprint.c (java_value_print),
+ 	cp-valprint.c (cp_print_class_member), exec.c (exec_files_info),
+ 	remote.c (putpkt_binary, compare_sections_command,
+ 	remote_cisco_section_offsets), dcache.c (dcache_info),
+ 	breakpoint.c (break_at_finish_at_depth_command_1,
+ 	break_at_finish_command_1), symfile.c (generic_load),
+ 	(report_transfer_performance), top.c (get_prompt_1), f-valprint.c
+ 	(f_val_print), maint.c (maintenance_translate_address): Fix printf
+ 	-Wformat warnings.  Use paddr, paddr_nz, sizeof_paddr, paddr_u and
+ 	paddr_d to print addresses. Change ``d'' to ``ld''.
+
+	* utils.c (strlen_paddr): New function.
+	
+Tue Aug 31 01:36:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d30v/tm-d30v.h (d30v_frame_chain,
+ 	d30v_init_frame_pc): Add declaration.
+
+	* arc-tdep.c (arc_pop_frame): Rename pop_frame.
+	(arc_push_dummy_frame): Rename push_dummy_frame.
+	(arc_set_cpu_type_command): Add declaration.
+	
+	* config/arc/tm-arc.h (arc_pop_frame, arc_push_dummy_frame): Add
+ 	declaration.
+	
 1999-08-30  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* infrun.c (prepare_to_wait): New function, broken out from the

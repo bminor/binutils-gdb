@@ -131,7 +131,7 @@ dump_mem (buf, len)
 	{
 	  long l[2];
 	  memcpy (l, buf, len);
-	  printf_filtered ("\t0x%x", l[0]);
+	  printf_filtered ("\t0x%lx", l[0]);
 	  printf_filtered (len == 8 ? " 0x%x\n" : "\n", l[1]);
 	}
       else
@@ -290,6 +290,10 @@ gdb_os_error (host_callback * p, const char *format,...)
     }
 }
 
+#ifndef REGISTER_SIM_REGNO
+#define REGISTER_SIM_REGNO(N) (N)
+#endif
+
 static void
 gdbsim_fetch_register (regno)
      int regno;
@@ -300,19 +304,28 @@ gdbsim_fetch_register (regno)
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_fetch_register (regno);
     }
-  else if (REGISTER_NAME (regno) != NULL && *REGISTER_NAME (regno) != '\0')
+  else if (REGISTER_NAME (regno) != NULL
+	   && *REGISTER_NAME (regno) != '\0')
     {
       char buf[MAX_REGISTER_RAW_SIZE];
-      int nr_bytes = sim_fetch_register (gdbsim_desc, regno, buf, REGISTER_RAW_SIZE (regno));
+      int nr_bytes;
+      if (REGISTER_SIM_REGNO (regno) >= 0)
+	nr_bytes = sim_fetch_register (gdbsim_desc,
+				       REGISTER_SIM_REGNO (regno),
+				       buf, REGISTER_RAW_SIZE (regno));
+      else
+	nr_bytes = 0;
       if (nr_bytes == 0)
 	/* register not applicable, supply zero's */
 	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
       else if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno)
 	       && warn_user)
 	{
-	  printf_unfiltered ("Size of register %s (%d) incorrect (%d instead of %d))",
-			     REGISTER_NAME (regno), regno,
-			     nr_bytes, REGISTER_RAW_SIZE (regno));
+	  fprintf_unfiltered (gdb_stderr,
+			      "Size of register %s (%d/%d) incorrect (%d instead of %d))",
+			      REGISTER_NAME (regno),
+			      regno, REGISTER_SIM_REGNO (regno),
+			      nr_bytes, REGISTER_RAW_SIZE (regno));
 	  warn_user = 0;
 	}
       supply_register (regno, buf);
@@ -335,12 +348,16 @@ gdbsim_store_register (regno)
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_store_register (regno);
     }
-  else if (REGISTER_NAME (regno) != NULL && *REGISTER_NAME (regno) != '\0')
+  else if (REGISTER_NAME (regno) != NULL
+	   && *REGISTER_NAME (regno) != '\0'
+	   && REGISTER_SIM_REGNO (regno) >= 0)
     {
       char tmp[MAX_REGISTER_RAW_SIZE];
       int nr_bytes;
       read_register_gen (regno, tmp);
-      nr_bytes = sim_store_register (gdbsim_desc, regno, tmp, REGISTER_RAW_SIZE (regno));
+      nr_bytes = sim_store_register (gdbsim_desc,
+				     REGISTER_SIM_REGNO (regno),
+				     tmp, REGISTER_RAW_SIZE (regno));
       if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
 	internal_error ("Register size different to expected");
       if (sr_get_debug ())
@@ -743,8 +760,11 @@ gdbsim_xfer_inferior_memory (memaddr, myaddr, len, write, target)
 
   if (sr_get_debug ())
     {
-      printf_filtered ("gdbsim_xfer_inferior_memory: myaddr 0x%x, memaddr 0x%x, len %d, write %d\n",
-		       myaddr, memaddr, len, write);
+      /* FIXME: Send to something other than STDOUT? */
+      printf_filtered ("gdbsim_xfer_inferior_memory: myaddr 0x");
+      gdb_print_host_address (myaddr, gdb_stdout);
+      printf_filtered (", memaddr 0x%s, len %d, write %d\n",
+		       paddr_nz (memaddr), len, write);
       if (sr_get_debug () && write)
 	dump_mem (myaddr, len);
     }

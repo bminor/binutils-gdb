@@ -1,3 +1,24 @@
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+	* aclocal.m4 (WERROR_CFLAGS, WARN_CFLAGS): Merge from
+ 	../gdb/configure.in.
+	* Make-common.in (WERROR_CFLAGS, WARN_CFLAGS): Define.
+	(SIM_WERROR_CFLAGS, SIM_WARN_CFLAGS): Define.
+	(SIM_WARNINGS): Delete
+	(CONFIG_CFLAGS): Update.
+
+Tue Aug 31 16:01:42 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-par.c: New file.
+	* cgen-par.h: New file.
+	* cgen-sim.h (cgen-par.h): #include it.
+	* cgen-cpu.h (write_queue): New field.
+	(CPU_WRITE_QUEUE): New access macro.
+	* Make-common.in (CGEN_MAIN_CPU_DEPS): Add cgen-par.h.
+	(cgen-par.o): New target.
+
 1999-08-28  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-types.h (mode_type,MODE_VOID): Renamed from MODE_VM.

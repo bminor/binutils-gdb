@@ -532,7 +532,7 @@ store_bitmapped_register (regno, bf)
 	  oldbits = (oldval >> bf->start) & mask;
 	  newbits = (newval >> bf->start) & mask;
 	  if (oldbits != newbits)
-	    monitor_printf ("%s %x ", bf->user_name, newbits);
+	    monitor_printf ("%s %lx ", bf->user_name, newbits);
 	}
     }
 

@@ -37,6 +37,8 @@
 #include "serial.h"
 #include "monitor.h"
 #include "remote-utils.h"
+#include "inferior.h"
+#include "version.h"
 
 extern int baud_rate;
 
@@ -87,8 +89,6 @@ static int array_send_packet ();
 static int array_get_packet ();
 static unsigned long ascii2hexword ();
 static void hexword2ascii ();
-
-extern char *version;
 
 #define LOG_FILE "monitor.log"
 #if defined (LOG_FILE)
@@ -625,7 +625,7 @@ array_open (args, name, from_tty)
   log_file = fopen (LOG_FILE, "w");
   if (log_file == NULL)
     perror_with_name (LOG_FILE);
-  fprintf (log_file, "GDB %s (%s", version);
+  fprintf (log_file, "GDB %s (%s", version, host_name);
   fprintf (log_file, " --target %s)\n", array_ops.to_shortname);
   fprintf (log_file, "Remote target %s connected to %s\n\n", array_ops.to_shortname, dev_name);
 #endif
@@ -1025,7 +1025,7 @@ array_read_inferior_memory (memaddr, myaddr, len)
       /* Fetch the bytes */
       debuglogs (3, "read %d bytes from inferior address %x", len_this_pass,
 		 startaddr);
-      sprintf (buf, "m%08x,%04x", startaddr, len_this_pass);
+      sprintf (buf, "m%08lx,%04x", startaddr, len_this_pass);
       make_gdb_packet (packet, buf);
       if (array_send_packet (packet) == 0)
 	{
@@ -1112,7 +1112,7 @@ array_insert_breakpoint (addr, shadow)
 	{
 	  breakaddr[i] = addr;
 	  if (sr_get_debug () > 4)
-	    printf ("Breakpoint at %x\n", addr);
+	    printf ("Breakpoint at %s\n", paddr_nz (addr));
 	  array_read_inferior_memory (bp_addr, shadow, bp_size);
 	  printf_monitor ("b 0x%x\n", addr);
 	  expect_prompt (1);
@@ -1147,7 +1147,8 @@ array_remove_breakpoint (addr, shadow)
 	  return 0;
 	}
     }
-  fprintf (stderr, "Can't find breakpoint associated with 0x%x\n", addr);
+  fprintf (stderr, "Can't find breakpoint associated with 0x%s\n",
+	   paddr_nz (addr));
   return 1;
 }
 

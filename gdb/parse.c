@@ -602,8 +602,6 @@ parse_nested_classes_for_hpacc (name, len, token, class_prefix, argptr)
   struct symbol *sym_class = NULL;
   struct symbol *sym_var = NULL;
   struct type *t;
-  register int i;
-  int colons_found = 0;
   int prefix_len = 0;
   int done = 0;
   char *q;

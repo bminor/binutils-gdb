@@ -24,6 +24,8 @@
 #include "target.h"
 #include "monitor.h"
 #include "serial.h"
+#include "symfile.h" /* For generic_load() */
+#include "inferior.h" /* For write_pc() */
 
 static void dink32_open PARAMS ((char *args, int from_tty));
 
@@ -34,7 +36,7 @@ dink32_supply_register (regname, regnamelen, val, vallen)
      char *val;
      int vallen;
 {
-  int regno = 0, base = 0;
+  int regno = 0;
 
   if (regnamelen < 2 || regnamelen > 4)
     return;

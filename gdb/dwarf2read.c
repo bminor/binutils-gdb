@@ -563,14 +563,10 @@ extern int info_verbose;	/* From main.c; nonzero => verbose */
 static void dwarf2_locate_sections PARAMS ((bfd *, asection *, PTR));
 
 #if 0
-static void dwarf2_build_psymtabs_easy PARAMS ((struct objfile *,
-						struct section_offsets *,
-						int));
+static void dwarf2_build_psymtabs_easy PARAMS ((struct objfile *, int));
 #endif
 
-static void dwarf2_build_psymtabs_hard PARAMS ((struct objfile *,
-						struct section_offsets *,
-						int));
+static void dwarf2_build_psymtabs_hard PARAMS ((struct objfile *, int));
 
 static char *scan_partial_symbols PARAMS ((char *, struct objfile *,
 					   CORE_ADDR *, CORE_ADDR *));
@@ -840,9 +836,8 @@ dwarf2_locate_sections (ignore_abfd, sectp, ignore_ptr)
 /* Build a partial symbol table.  */
 
 void
-dwarf2_build_psymtabs (objfile, section_offsets, mainline)
+dwarf2_build_psymtabs (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
 
@@ -867,17 +862,17 @@ dwarf2_build_psymtabs (objfile, section_offsets, mainline)
 #if 0
   if (dwarf_aranges_offset && dwarf_pubnames_offset)
     {
-      /* Things are significanlty easier if we have .debug_aranges and
+      /* Things are significantly easier if we have .debug_aranges and
          .debug_pubnames sections */
 
-      dwarf2_build_psymtabs_easy (objfile, section_offsets, mainline);
+      dwarf2_build_psymtabs_easy (objfile, mainline);
     }
   else
 #endif
     /* only test this case for now */
     {
       /* In this case we have to work a bit harder */
-      dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline);
+      dwarf2_build_psymtabs_hard (objfile, mainline);
     }
 }
 
@@ -886,9 +881,8 @@ dwarf2_build_psymtabs (objfile, section_offsets, mainline)
    .debug_pubnames and .debug_aranges sections.  */
 
 static void
-dwarf2_build_psymtabs_easy (objfile, section_offsets, mainline)
+dwarf2_build_psymtabs_easy (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   bfd *abfd = objfile->obfd;
@@ -923,9 +917,8 @@ dwarf2_build_psymtabs_easy (objfile, section_offsets, mainline)
    .debug_info and .debug_abbrev sections.  */
 
 static void
-dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
+dwarf2_build_psymtabs_hard (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   /* Instead of reading this into a big buffer, we should probably use
@@ -1002,7 +995,7 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
       set_cu_language (comp_unit_die.language);
 
       /* Allocate a new partial symbol table structure */
-      pst = start_psymtab_common (objfile, section_offsets,
+      pst = start_psymtab_common (objfile, objfile->section_offsets,
 				  comp_unit_die.name ? comp_unit_die.name : "",
 				  comp_unit_die.lowpc,
 				  objfile->global_psymbols.next,
@@ -1016,7 +1009,7 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
       DWARF_ABBREV_BUFFER (pst) = dwarf_abbrev_buffer;
       DWARF_ABBREV_SIZE (pst) = dwarf_abbrev_size;
       DWARF_LINE_BUFFER (pst) = dwarf_line_buffer;
-      baseaddr = ANOFFSET (section_offsets, 0);
+      baseaddr = ANOFFSET (objfile->section_offsets, 0);
 
       /* Store the function that reads in the rest of the symbol table */
       pst->read_symtab = dwarf2_psymtab_to_symtab;

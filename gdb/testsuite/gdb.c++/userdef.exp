@@ -1,4 +1,5 @@
-# Copyright (C) 1998 Free Software Foundation, Inc.
+# Tests of overloaded operators resolution.
+# Copyright (C) 1998, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,19 +20,14 @@
 
 # written by Elena Zannoni (ezannoni@cygnus.com)
 #
-# testing overloaded operators resolution.
-# 
 # source file "userdef.cc"
 #
-
 
 if $tracelevel then {
         strace $tracelevel
 }
 
-# Check to see if we have an executable to test.  If not, then either we
-# haven't tried to compile one, or the compilation failed for some reason.
-# In either case, just notify the user and skip the tests in this file.
+if { [skip_cplus_tests] } { continue }
 
 set testfile "userdef"
 set srcfile ${testfile}.cc

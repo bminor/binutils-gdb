@@ -419,9 +419,9 @@ static void
 read_unwind_info (objfile)
      struct objfile *objfile;
 {
-  asection *unwind_sec, *elf_unwind_sec, *stub_unwind_sec;
-  unsigned unwind_size, elf_unwind_size, stub_unwind_size, total_size;
-  unsigned index, unwind_entries, elf_unwind_entries;
+  asection *unwind_sec, *stub_unwind_sec;
+  unsigned unwind_size, stub_unwind_size, total_size;
+  unsigned index, unwind_entries;
   unsigned stub_entries, total_entries;
   CORE_ADDR text_offset;
   struct obj_unwind_info *ui;
@@ -435,34 +435,31 @@ read_unwind_info (objfile)
   ui->cache = NULL;
   ui->last = -1;
 
-  /* Get hooks to all unwind sections.   Note there is no linker-stub unwind
-     section in ELF at the moment.  */
-  unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_START$");
-  elf_unwind_sec = bfd_get_section_by_name (objfile->obfd, ".PARISC.unwind");
+  /* For reasons unknown the HP PA64 tools generate multiple unwinder
+     sections in a single executable.  So we just iterate over every
+     section in the BFD looking for unwinder sections intead of trying
+     to do a lookup with bfd_get_section_by_name. 
+
+     First determine the total size of the unwind tables so that we
+     can allocate memory in a nice big hunk.  */
+  total_entries = 0;
+  for (unwind_sec = objfile->obfd->sections;
+       unwind_sec;
+       unwind_sec = unwind_sec->next)
+    {
+      if (strcmp (unwind_sec->name, "$UNWIND_START$") == 0
+	  || strcmp (unwind_sec->name, ".PARISC.unwind") == 0)
+	{
+	  unwind_size = bfd_section_size (objfile->obfd, unwind_sec);
+	  unwind_entries = unwind_size / UNWIND_ENTRY_SIZE;
+
+	  total_entries += unwind_entries;
+	}
+    }
+
+  /* Now compute the size of the stub unwinds.  Note the ELF tools do not
+     use stub unwinds at the curren time.  */
   stub_unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_END$");
-
-  /* Get sizes and unwind counts for all sections.  */
-  if (unwind_sec)
-    {
-      unwind_size = bfd_section_size (objfile->obfd, unwind_sec);
-      unwind_entries = unwind_size / UNWIND_ENTRY_SIZE;
-    }
-  else
-    {
-      unwind_size = 0;
-      unwind_entries = 0;
-    }
-
-  if (elf_unwind_sec)
-    {
-      elf_unwind_size = bfd_section_size (objfile->obfd, elf_unwind_sec);
-      elf_unwind_entries = elf_unwind_size / UNWIND_ENTRY_SIZE;
-    }
-  else
-    {
-      elf_unwind_size = 0;
-      elf_unwind_entries = 0;
-    }
 
   if (stub_unwind_sec)
     {
@@ -476,7 +473,7 @@ read_unwind_info (objfile)
     }
 
   /* Compute total number of unwind entries and their total size.  */
-  total_entries = unwind_entries + elf_unwind_entries + stub_entries;
+  total_entries += stub_entries;
   total_size = total_entries * sizeof (struct unwind_table_entry);
 
   /* Allocate memory for the unwind table.  */
@@ -484,16 +481,26 @@ read_unwind_info (objfile)
     obstack_alloc (&objfile->psymbol_obstack, total_size);
   ui->last = total_entries - 1;
 
-  /* Internalize the standard unwind entries.  */
+  /* Now read in each unwind section and internalize the standard unwind
+     entries.  */
   index = 0;
-  internalize_unwinds (objfile, &ui->table[index], unwind_sec,
-		       unwind_entries, unwind_size, text_offset);
-  index += unwind_entries;
-  internalize_unwinds (objfile, &ui->table[index], elf_unwind_sec,
-		       elf_unwind_entries, elf_unwind_size, text_offset);
-  index += elf_unwind_entries;
+  for (unwind_sec = objfile->obfd->sections;
+       unwind_sec;
+       unwind_sec = unwind_sec->next)
+    {
+      if (strcmp (unwind_sec->name, "$UNWIND_START$") == 0
+	  || strcmp (unwind_sec->name, ".PARISC.unwind") == 0)
+	{
+	  unwind_size = bfd_section_size (objfile->obfd, unwind_sec);
+	  unwind_entries = unwind_size / UNWIND_ENTRY_SIZE;
 
-  /* Now internalize the stub unwind entries.  */
+	  internalize_unwinds (objfile, &ui->table[index], unwind_sec,
+			       unwind_entries, unwind_size, text_offset);
+	  index += unwind_entries;
+	}
+    }
+
+  /* Now read in and internalize the stub unwind entries.  */
   if (stub_unwind_size > 0)
     {
       unsigned int i;
@@ -3272,7 +3279,7 @@ prologue_inst_adjust_sp (inst)
 
   /* std,ma X,D(sp) */
   if ((inst & 0xffe00008) == 0x73c00008)
-    return (inst & 0x1 ? -1 << 16 : 0) | (((inst >> 4) & 0x3ff) << 3);
+    return (inst & 0x1 ? -1 << 13 : 0) | (((inst >> 4) & 0x3ff) << 3);
 
   /* addil high21,%r1; ldo low11,(%r1),%r30)
      save high bits in save_high21 for later use.  */
@@ -3703,6 +3710,7 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
   int status, i, reg;
   char buf[4];
   int fp_loc = -1;
+  int final_iteration;
 
   /* Zero out everything.  */
   memset (frame_saved_regs, '\0', sizeof (struct frame_saved_regs));
@@ -3805,7 +3813,9 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
      Some unexpected things are expected with debugging optimized code, so
      we allow this routine to walk past user instructions in optimized
      GCC code.  */
-  while (save_gr || save_fr || save_rp || save_sp || stack_remaining > 0)
+  final_iteration = 0;
+  while ((save_gr || save_fr || save_rp || save_sp || stack_remaining > 0)
+	 && pc <= frame_info->pc)
     {
       status = target_read_memory (pc, buf, 4);
       inst = extract_unsigned_integer (buf, 4);
@@ -3853,7 +3863,7 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	      CORE_ADDR offset;
 
 	      if ((inst >> 26) == 0x1c)
-		offset = (inst & 0x1 ? -1 << 16 : 0) | (((inst >> 4) & 0x3ff) << 3);
+		offset = (inst & 0x1 ? -1 << 13 : 0) | (((inst >> 4) & 0x3ff) << 3);
 	      else if ((inst >> 26) == 0x03)
 		offset = low_sign_extend (inst & 0x1f, 5);
 	      else
@@ -3908,10 +3918,14 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	    }
 	}
 
-      /* Quit if we hit any kind of branch.  This can happen if a prologue
-         instruction is in the delay slot of the first call/branch.  */
-      if (is_branch (inst))
+      /* Quit if we hit any kind of branch the previous iteration.
+      if (final_iteration)
 	break;
+
+      /* We want to look precisely one instruction beyond the branch
+	 if we have not found everything yet.  */
+      if (is_branch (inst))
+	final_iteration = 1;
 
       /* Bump the PC.  */
       pc += 4;

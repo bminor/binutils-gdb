@@ -159,12 +159,12 @@ static struct type *hpread_read_struct_type
   PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
 void hpread_build_psymtabs
-  PARAMS ((struct objfile *, struct section_offsets *, int));
+  PARAMS ((struct objfile *, int));
 
 void hpread_symfile_finish PARAMS ((struct objfile *));
 
 static struct partial_symtab *hpread_start_psymtab
-  PARAMS ((struct objfile *, struct section_offsets *, char *, CORE_ADDR, int,
+  PARAMS ((struct objfile *, char *, CORE_ADDR, int,
 	   struct partial_symbol **, struct partial_symbol **));
 
 static struct partial_symtab *hpread_end_psymtab
@@ -305,15 +305,12 @@ hpread_symfile_init (objfile)
    We assume hpread_symfile_init has been called to initialize the
    symbol reader's private data structures.
 
-   SECTION_OFFSETS contains offsets relative to which the symbols in the
-   various sections are (depending where the sections were actually loaded).
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 void
-hpread_build_psymtabs (objfile, section_offsets, mainline)
+hpread_build_psymtabs (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   char *namestring;
@@ -469,8 +466,8 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  past_first_source_file = 1;
 
 		valu = hpread_get_textlow (i, hp_symnum, objfile);
-		valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-		pst = hpread_start_psymtab (objfile, section_offsets,
+		valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		pst = hpread_start_psymtab (objfile,
 					    namestring, valu,
 					    (hp_symnum
 					 * sizeof (struct dntt_type_block)),
@@ -487,10 +484,10 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	         is supposed to be.  */
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      valu = hpread_get_textlow (i, hp_symnum, objfile);
-	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	      if (!pst)
 		{
-		  pst = hpread_start_psymtab (objfile, section_offsets,
+		  pst = hpread_start_psymtab (objfile,
 					      namestring, valu,
 					      (hp_symnum
 					 * sizeof (struct dntt_type_block)),
@@ -504,12 +501,12 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	    case DNTT_TYPE_ENTRY:
 	      /* The beginning of a function.  DNTT_TYPE_ENTRY may also denote
 	         a secondary entry point.  */
-	      valu = dn_bufp->dfunc.hiaddr + ANOFFSET (section_offsets,
+	      valu = dn_bufp->dfunc.hiaddr + ANOFFSET (objfile->section_offsets,
 						       SECT_OFF_TEXT);
 	      if (valu > texthigh)
 		texthigh = valu;
 	      valu = dn_bufp->dfunc.lowaddr +
-		ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      add_psymbol_to_list (namestring, strlen (namestring),
 				   VAR_NAMESPACE, LOC_BLOCK,
@@ -571,7 +568,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		SET_NAMESTRING (dn_bufp, &namestring, objfile);
 		if (!pst)
 		  {
-		    pst = hpread_start_psymtab (objfile, section_offsets,
+		    pst = hpread_start_psymtab (objfile,
 						"globals", 0,
 						(hp_symnum
 					 * sizeof (struct dntt_type_block)),
@@ -602,7 +599,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      if (!pst)
 		{
-		  pst = hpread_start_psymtab (objfile, section_offsets,
+		  pst = hpread_start_psymtab (objfile,
 					      "globals", 0,
 					      (hp_symnum
 					 * sizeof (struct dntt_type_block)),
@@ -826,10 +823,9 @@ hpread_has_name (kind)
    (normal). */
 
 static struct partial_symtab *
-hpread_start_psymtab (objfile, section_offsets,
-		      filename, textlow, ldsymoff, global_syms, static_syms)
+hpread_start_psymtab (objfile, filename, textlow, ldsymoff, global_syms,
+		      static_syms)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      char *filename;
      CORE_ADDR textlow;
      int ldsymoff;

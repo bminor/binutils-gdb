@@ -521,9 +521,8 @@ objfile_relocate (objfile, new_offsets)
      struct objfile *objfile;
      struct section_offsets *new_offsets;
 {
-  struct section_offsets *delta = (struct section_offsets *)
-  alloca (sizeof (struct section_offsets)
-	  + objfile->num_sections * sizeof (delta->offsets));
+  struct section_offsets *delta =
+    (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
 
   {
     int i;

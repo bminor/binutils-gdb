@@ -704,7 +704,6 @@ set_cu_language (dip)
    SYNOPSIS
 
    void dwarf_build_psymtabs (struct objfile *objfile,
-   struct section_offsets *section_offsets,
    int mainline, file_ptr dbfoff, unsigned int dbfsize,
    file_ptr lnoffset, unsigned int lnsize)
 
@@ -728,10 +727,9 @@ set_cu_language (dip)
  */
 
 void
-dwarf_build_psymtabs (objfile, section_offsets, mainline, dbfoff, dbfsize,
+dwarf_build_psymtabs (objfile, mainline, dbfoff, dbfsize,
 		      lnoffset, lnsize)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
      file_ptr dbfoff;
      unsigned int dbfsize;
@@ -765,8 +763,8 @@ dwarf_build_psymtabs (objfile, section_offsets, mainline, dbfoff, dbfsize,
 
   /* Save the relocation factor where everybody can see it.  */
 
-  base_section_offsets = section_offsets;
-  baseaddr = ANOFFSET (section_offsets, 0);
+  base_section_offsets = objfile->section_offsets;
+  baseaddr = ANOFFSET (objfile->section_offsets, 0);
 
   /* Follow the compilation unit sibling chain, building a partial symbol
      table entry for each one.  Save enough information about each compilation

@@ -188,11 +188,6 @@ struct stab_section_list
    they are only used by some stabs readers.  */
 
 extern struct partial_symtab *
-  start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
-			 CORE_ADDR, int, struct partial_symbol **,
-			 struct partial_symbol **));
-
-extern struct partial_symtab *
   end_psymtab PARAMS ((struct partial_symtab * pst,
 		       char **include_list,
 		       int num_includes,

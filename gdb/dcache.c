@@ -525,8 +525,8 @@ dcache_info (exp, tty)
   for (p = last_cache->valid_head; p; p = p->p)
     {
       int j;
-      printf_filtered ("Line at %08xd, referenced %d times\n",
-		       p->addr, p->refs);
+      printf_filtered ("Line at %s, referenced %d times\n",
+		       paddr (p->addr), p->refs);
 
       for (j = 0; j < LINE_SIZE; j++)
 	printf_filtered ("%02x", p->data[j] & 0xFF);

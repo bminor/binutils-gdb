@@ -408,7 +408,7 @@ init_extra_frame_info PARAMS ((struct frame_info *));
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
   { \
     if (fi && fi->proc_desc && fi->proc_desc->pdr.framereg < NUM_REGS) \
-      printf_filtered (" frame pointer is at %s+%d\n", \
+      printf_filtered (" frame pointer is at %s+%ld\n", \
                        REGISTER_NAME (fi->proc_desc->pdr.framereg), \
                                  fi->proc_desc->pdr.frameoffset); \
   }

@@ -431,7 +431,7 @@ f_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 	    }
 
 	  if (addressprint && format != 's')
-	    fprintf_filtered (stream, "0x%x", addr);
+	    fprintf_filtered (stream, "0x%s", paddr_nz (addr));
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */

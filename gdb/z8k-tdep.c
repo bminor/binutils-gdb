@@ -32,6 +32,10 @@
 #include "dis-asm.h"
 #include "gdbcore.h"
 
+#include "value.h" /* For read_register() */
+
+
+static int read_memory_pointer (CORE_ADDR x);
 
 /* Return the saved PC from this frame.
 
@@ -39,7 +43,7 @@
    just use the register SRP_REGNUM itself.  */
 
 CORE_ADDR
-frame_saved_pc (frame)
+z8k_frame_saved_pc (frame)
      struct frame_info *frame;
 {
   return read_memory_pointer (frame->frame + (BIG ? 4 : 2));
@@ -152,15 +156,14 @@ z8k_addr_bits_remove (addr)
   return (addr & PTR_MASK);
 }
 
-int
-read_memory_pointer (x)
-     CORE_ADDR x;
+static int
+read_memory_pointer (CORE_ADDR x)
 {
   return read_memory_integer (ADDR_BITS_REMOVE (x), BIG ? 4 : 2);
 }
 
 CORE_ADDR
-frame_chain (thisframe)
+z8k_frame_chain (thisframe)
      struct frame_info *thisframe;
 {
   if (thisframe->prev == 0)
@@ -295,7 +298,7 @@ frame_find_saved_regs (fip, fsrp)
 #endif
 
 int
-saved_pc_after_call ()
+z8k_saved_pc_after_call (struct frame_info *frame)
 {
   return ADDR_BITS_REMOVE
     (read_memory_integer (read_register (SP_REGNUM), PTR_SIZE));
@@ -343,7 +346,7 @@ store_struct_return (addr, sp)
 
 
 void
-print_register_hook (regno)
+z8k_print_register_hook (regno)
      int regno;
 {
   if ((regno & 1) == 0 && regno < 16)
@@ -378,7 +381,8 @@ print_register_hook (regno)
       printf_unfiltered ("\n");
       for (i = 0; i < 10; i += 2)
 	{
-	  printf_unfiltered ("(sp+%d=%04x)", i, read_memory_short (rval + i));
+	  printf_unfiltered ("(sp+%d=%04x)", i,
+			     (unsigned int)read_memory_short (rval + i));
 	}
     }
 
@@ -409,6 +413,11 @@ z8k_set_pointer_size (newsize)
 	{
 	  BIG = 0;
 	}
+      /* FIXME: This code should be using the GDBARCH framework to
+         handle changed type sizes.  If this problem is ever fixed
+         (the direct reference to _initialize_gdbtypes() below
+         eliminated) then Makefile.in should be updated so that
+         z8k-tdep.c is again compiled with -Werror. */
       _initialize_gdbtypes ();
     }
 }

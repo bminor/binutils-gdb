@@ -76,6 +76,7 @@
   CIA = CIA + 4; /* NOTE not mips16 */
   STATE |= simDELAYSLOT;
   delay_insn = IMEM32 (CIA); /* NOTE not mips16 */
+  ENGINE_ISSUE_PREFIX_HOOK();
   idecode_issue (CPU_, delay_insn, (CIA));
   STATE &= ~simDELAYSLOT;
   return target;
@@ -1748,7 +1749,7 @@
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr4100:
 {
-  do_multu (SD_, RS, RT, 0);
+  do_multu (SD_, RS, RT, RD);
 }
 
 000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU

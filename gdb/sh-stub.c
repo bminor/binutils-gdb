@@ -199,7 +199,7 @@ static int hex (char);
 static char *mem2hex (char *, char *, int);
 static char *hex2mem (char *, char *, int);
 static int hexToInt (char **, int *);
-static unsigned char *getpacket (unsigned char *);
+static unsigned char *getpacket (void);
 static void putpacket (char *);
 static void handle_buserror (void);
 static int computeSignal (int exceptionVector);
@@ -277,8 +277,8 @@ int registers[NUMREGBYTES / 4];
 stepData instrBuffer;
 char stepped;
 static const char hexchars[] = "0123456789abcdef";
-char remcomInBuffer[BUFMAX];
-char remcomOutBuffer[BUFMAX];
+static char remcomInBuffer[BUFMAX];
+static char remcomOutBuffer[BUFMAX];
 
 char highhex(int  x)
 {
@@ -383,9 +383,9 @@ hexToInt (char **ptr, int *intValue)
 /* scan for the sequence $<data>#<checksum>     */
 
 char *
-getpacket (buffer)
-     char *buffer;
+getpacket ()
 {
+  unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
   unsigned char xmitcsum;
   int count;
@@ -689,7 +689,7 @@ gdb_handle_exception (int exceptionVector)
   while (1)
     {
       remcomOutBuffer[0] = 0;
-      ptr = getpacket (remcomInBuffer);
+      ptr = getpacket ();
 
       switch (*ptr++)
 	{

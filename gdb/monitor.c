@@ -143,6 +143,8 @@ static DCACHE *remote_dcache;
 static int first_time = 0;	/* is this the first time we're executing after 
 				   gaving created the child proccess? */
 
+#define TARGET_BUF_SIZE 2048
+
 /* Convert a string into a printable representation, Return # byte in the
    new string.  */
 
@@ -217,8 +219,7 @@ monitor_error (format, memaddr, len, string, final_char)
 {
   int real_len = (len == 0 && string != (char *) 0) ? strlen (string) : len;
   char *safe_string = alloca ((real_len * 4) + 1);
-  char *p, *q;
-  int ch;
+  char *p;
   int safe_len = monitor_printable_string (safe_string, string);
 
   if (final_char)
@@ -451,7 +452,6 @@ readchar (timeout)
       if (c >= 0)
 	{
 	  c &= 0x7f;
-#if 0
 	  /* This seems to interfere with proper function of the
 	     input stream */
 	  if (remote_debug > 0)
@@ -462,7 +462,6 @@ readchar (timeout)
 	      puts_debug ("read -->", buf, "<--");
 	    }
 
-#endif
 	}
 
       /* Canonicialize \n\r combinations into one \r */
@@ -634,8 +633,8 @@ monitor_expect_regexp (pat, buf, buflen)
     mybuf = buf;
   else
     {
-      mybuf = alloca (1024);
-      buflen = 1024;
+      mybuf = alloca (TARGET_BUF_SIZE);
+      buflen = TARGET_BUF_SIZE;
     }
 
   p = mybuf;
@@ -905,14 +904,35 @@ monitor_supply_register (regno, valstr)
      int regno;
      char *valstr;
 {
-  unsigned int val;
+  ULONGEST val;
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
   char *p;
 
-  val = strtoul (valstr, &p, 16);
+  p = valstr;
+  while (p && *p != '\0')
+    {
+      if (*p == '\r' || *p == '\n')
+        {
+          while (*p != '\0') 
+              p++;
+          break;
+        }
+      if (isspace (*p))
+        {
+          p++;
+          continue;
+        }
+      if (!isxdigit (*p) && *p != 'x')
+        {
+          break;
+        }
+
+      val <<= 4;
+      val += fromhex (*p++);
+    }
   RDEBUG (("Supplying Register %d %s\n", regno, valstr));
 
-  if (val == 0 && valstr == p)
+  if (*p != '\0')
     error ("monitor_supply_register (%d):  bad value from monitor: %s.",
 	   regno, valstr);
 
@@ -1098,7 +1118,7 @@ monitor_wait (pid, status)
      struct target_waitstatus *status;
 {
   int old_timeout = timeout;
-  char buf[1024];
+  char buf[TARGET_BUF_SIZE];
   int resp_len;
   struct cleanup *old_chain;
 
@@ -1282,7 +1302,7 @@ monitor_fetch_register (regno)
 int
 monitor_dump_reg_block (char *block_cmd)
 {
-  char buf[1024];
+  char buf[TARGET_BUF_SIZE];
   int resp_len;
   monitor_printf (block_cmd);
   resp_len = monitor_expect_prompt (buf, sizeof (buf));
@@ -1297,7 +1317,7 @@ monitor_dump_reg_block (char *block_cmd)
 static void
 monitor_dump_regs ()
 {
-  char buf[1024];
+  char buf[TARGET_BUF_SIZE];
   int resp_len;
   if (current_monitor->dumpregs)
     (*(current_monitor->dumpregs)) ();	/* call supplied function */
@@ -1340,7 +1360,7 @@ monitor_store_register (regno)
      int regno;
 {
   char *name;
-  unsigned int val;
+  ULONGEST val;
 
   name = current_monitor->regnames[regno];
   if (!name || (*name == '\0'))
@@ -1350,7 +1370,7 @@ monitor_store_register (regno)
     }
 
   val = read_register (regno);
-  RDEBUG (("MON storeg %d %08x\n", regno, (unsigned int) val))
+  RDEBUG (("MON storeg %d %08lx\n", regno, (ULONGEST) val))
 
   /* send the register deposit command */
 
@@ -1366,7 +1386,7 @@ monitor_store_register (regno)
       RDEBUG (("EXP setreg.term\n"))
 	monitor_expect (current_monitor->setreg.term, NULL, 0);
       if (current_monitor->flags & MO_SETREG_INTERACTIVE)
-	monitor_printf ("%x\r", val);
+	monitor_printf ("%A\r", val);
       monitor_expect_prompt (NULL, 0);
     }
   else
@@ -2148,7 +2168,7 @@ monitor_remove_breakpoint (addr, shadow)
 static int
 monitor_wait_srec_ack ()
 {
-  int i, ch;
+  int ch;
 
   if (current_monitor->flags & MO_SREC_ACK_PLUS)
     {

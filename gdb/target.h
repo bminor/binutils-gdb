@@ -50,7 +50,8 @@ enum strata
     file_stratum,		/* Executable files, etc */
     core_stratum,		/* Core dump files */
     download_stratum,		/* Downloading of remote targets */
-    process_stratum		/* Executing processes */
+    process_stratum,		/* Executing processes */
+    thread_stratum		/* Executing threads */
   };
 
 enum thread_control_capabilities
@@ -218,6 +219,12 @@ enum target_signal
 
     /* Used internally by Solaris threads.  See signal(5) on Solaris.  */
     TARGET_SIGNAL_CANCEL = 76,
+
+    /* Yes, this pains me, too.  But LynxOS didn't have SIG32, and now
+       Linux does, and we can't disturb the numbering, since it's part
+       of the protocol.  Note that in some GDB's TARGET_SIGNAL_REALTIME_32
+       is number 76.  */
+    TARGET_SIGNAL_REALTIME_32,
 
 #if defined(MACH) || defined(__MACH__)
     /* Mach exceptions */

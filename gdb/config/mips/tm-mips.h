@@ -579,3 +579,7 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
   (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
 #define MSYMBOL_SIZE(msym) \
   ((long) MSYMBOL_INFO (msym) & 0x7fffffff)
+
+
+/* Command to set the processor type. */
+extern void mips_set_processor_type_command (char *, int);

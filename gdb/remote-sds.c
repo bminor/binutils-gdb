@@ -498,7 +498,6 @@ sds_fetch_registers (regno)
 {
   unsigned char buf[PBUFSIZ];
   int i, retlen;
-  char *p;
   char regs[REGISTER_BYTES];
 
   /* Unimplemented registers read as all bits zero.  */
@@ -780,8 +779,6 @@ putmessage (buf, len)
   unsigned char csum = 0;
   char buf2[PBUFSIZ], buf3[PBUFSIZ];
   unsigned char header[3];
-  int ch;
-  int tcount = 0;
   char *p;
 
   /* Copy the packet into buffer BUF2, encapsulating it
@@ -831,8 +828,6 @@ putmessage (buf, len)
 
   while (1)
     {
-      int started_error_output = 0;
-
       if (remote_debug)
 	{
 	  *p = '\0';
@@ -846,9 +841,7 @@ putmessage (buf, len)
 	perror_with_name ("putmessage: write failed");
 
       return 1;
-
     }
-
 }
 
 /* Come here after finding the start of the frame.  Collect the rest

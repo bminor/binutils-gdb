@@ -26,6 +26,8 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+if { [skip_cplus_tests] } { continue }
+
 set testfile "virtfunc"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
@@ -35,10 +37,6 @@ if [get_compiler_info ${binfile} "c++"] {
 }
 
 source ${binfile}.ci
-
-# Check to see if we have an executable to test.  If not, then either we
-# haven't tried to compile one, or the compilation failed for some reason.
-# In either case, just notify the user and skip the tests in this file.
 
 set src "${srcdir}/${subdir}/${srcfile}"
 if  { [gdb_compile "${src}" "${binfile}" executable {c++ debug}] != "" } {

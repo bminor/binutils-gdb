@@ -35,7 +35,8 @@
 #include <time.h>		/* for time_t */
 #include "gdb_string.h"
 #include "objfiles.h"		/* for ALL_OBJFILES etc. */
-
+#include "inferior.h"		/* for write_pc() */
+#include <ctype.h>
 
 extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
 
@@ -79,7 +80,7 @@ m32r_load_section (abfd, s, data_count)
       print_address_numeric (section_base, 1, gdb_stdout);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
-      monitor_printf ("%x mw\r", section_base);
+      monitor_printf ("%s mw\r", paddr_nz (section_base));
       for (i = 0; i < section_size; i += 4)
 	{
 	  QUIT;

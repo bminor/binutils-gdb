@@ -23,6 +23,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+if { [skip_cplus_tests] } { continue }
+
 ### The demangling style we last sent to GDB.
 set current_demangling_style none
 

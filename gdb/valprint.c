@@ -623,10 +623,16 @@ print_floating (valaddr, type, stream)
 	high &= 0xfffff;
       }
     else
-      /* Extended.  We can't detect NaNs for extendeds yet.  Also note
-         that currently extendeds get nuked to double in
-         REGISTER_CONVERTIBLE.  */
-      is_nan = 0;
+      {
+#ifdef TARGET_ANALYZE_FLOATING
+	TARGET_ANALYZE_FLOATING;
+#else
+	/* Extended.  We can't detect extended NaNs for this target.
+	   Also note that currently extendeds get nuked to double in
+	   REGISTER_CONVERTIBLE.  */
+	is_nan = 0;
+#endif 
+      }
 
     if (is_nan)
       {
@@ -635,7 +641,7 @@ print_floating (valaddr, type, stream)
 	   (in an implementation-defined manner) distinguish between
 	   signaling and quiet NaN's.  */
 	if (high)
-	  fprintf_filtered (stream, "-NaN(0x%lx%.8lx)" + nonnegative,
+	  fprintf_filtered (stream, "-NaN(0x%lx%.8lx)" + !!nonnegative,
 			    high, low);
 	else
 	  fprintf_filtered (stream, "-NaN(0x%lx)" + nonnegative, low);

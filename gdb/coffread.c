@@ -201,7 +201,7 @@ static void patch_opaque_types PARAMS ((struct symtab *));
 
 static void patch_type PARAMS ((struct type *, struct type *));
 
-static void enter_linenos PARAMS ((long, int, int, struct section_offsets *));
+static void enter_linenos PARAMS ((long, int, int, struct objfile *));
 
 static void free_linetab PARAMS ((void));
 
@@ -1081,7 +1081,7 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 			     fcn_first_line_addr);
 	      else
 		enter_linenos (fcn_line_ptr, fcn_first_line, fcn_last_line,
-			       objfile->section_offsets);
+			       objfile);
 
 	      finish_block (new->name, &local_symbols, new->old_blocks,
 			    new->start_addr,
@@ -1389,11 +1389,11 @@ free_linetab ()
 #endif
 
 static void
-enter_linenos (file_offset, first_line, last_line, section_offsets)
+enter_linenos (file_offset, first_line, last_line, objfile)
      long file_offset;
      register int first_line;
      register int last_line;
-     struct section_offsets *section_offsets;
+     struct objfile *objfile;
 {
   register char *rawptr;
   struct internal_lineno lptr;
@@ -1423,7 +1423,7 @@ enter_linenos (file_offset, first_line, last_line, section_offsets)
       if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
 	record_line (current_subfile, first_line + L_LNNO32 (&lptr),
 		     lptr.l_addr.l_paddr
-		     + ANOFFSET (section_offsets, SECT_OFF_TEXT));
+		     + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT));
       else
 	break;
     }

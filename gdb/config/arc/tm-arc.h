@@ -309,12 +309,14 @@ extern void frame_find_saved_regs ();	/* See arc-tdep.c */
 
 
 /* Things needed for making calls to functions in the inferior process */
+void arc_push_dummy_frame (void);
 #define PUSH_DUMMY_FRAME \
-	push_dummy_frame ()
+	arc_push_dummy_frame ()
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
+void arc_pop_frame (void);
 #define POP_FRAME \
-	pop_frame ()
+	arc_pop_frame ()
 
 /* This sequence of words is the instructions  bl xxxx, flag 1 */
 #define CALL_DUMMY { 0x28000000, 0x1fbe8001 }

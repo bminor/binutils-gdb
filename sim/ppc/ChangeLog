@@ -1,3 +1,7 @@
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
         * configure.in: Use AC_EXEEXT instead of AM_EXEEXT.

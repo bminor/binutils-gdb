@@ -27,8 +27,6 @@
 #include "monitor.h"
 #include "serial.h"
 
-static void ppcbug_open PARAMS ((char *args, int from_tty));
-
 static void
 ppcbug_supply_register (regname, regnamelen, val, vallen)
      char *regname;
@@ -36,7 +34,7 @@ ppcbug_supply_register (regname, regnamelen, val, vallen)
      char *val;
      int vallen;
 {
-  int regno = 0, base = 0;
+  int regno = 0;
 
   if (regnamelen < 2 || regnamelen > 4)
     return;

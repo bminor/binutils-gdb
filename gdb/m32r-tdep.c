@@ -514,9 +514,9 @@ m32r_frame_chain (fi)
       return 0;			/* in _start fn, don't chain further */
   if (fi->framesize == 0)
     {
-      printf_filtered ("cannot determine frame size @ %08x , pc(%08x)\n",
-		       (unsigned long) fi->frame,
-		       (unsigned long) fi->pc);
+      printf_filtered ("cannot determine frame size @ %s , pc(%s)\n",
+		       paddr (fi->frame),
+		       paddr (fi->pc));
       return 0;
     }
   insn_debug (("m32rx frame %08x\n", fi->frame + fi->framesize));

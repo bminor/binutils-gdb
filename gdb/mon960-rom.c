@@ -28,7 +28,7 @@
 #include "xmodem.h"
 #include "symtab.h"
 #include "symfile.h"		/* for generic_load */
-
+#include "inferior.h"		/* for write_pc() */
 
 #define USE_GENERIC_LOAD
 

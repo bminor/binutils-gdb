@@ -258,6 +258,12 @@ extern int signal_print_state PARAMS ((int));
 
 extern int signal_pass_state PARAMS ((int));
 
+extern int signal_stop_update PARAMS ((int, int));
+
+extern int signal_print_update PARAMS ((int, int));
+
+extern int signal_pass_update PARAMS ((int, int));
+
 /* From infcmd.c */
 
 extern void tty_command PARAMS ((char *, int));

@@ -39,13 +39,13 @@ define(_IMM32, `6.IMM_6L,*,000,8.IMM_8L,00,18.IMM_18L')
 // The following is called when ever an illegal instruction is
 // encountered
 ::internal::illegal
-	sim_io_eprintf (sd, "illegal instruction at 0x%lx\n", cia);
+	sim_io_eprintf (sd, "illegal instruction at 0x%lx\n", (long) cia);
 	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIM_SIGILL);
 
 // The following is called when ever an instruction in the wrong
 // slot is encountered.
 ::internal::wrong_slot
-	sim_io_eprintf (sd, "wrong slot at 0x%lx\n", cia);
+	sim_io_eprintf (sd, "wrong slot at 0x%lx\n", (long) cia);
 	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIM_SIGILL);
 
 
@@ -1061,7 +1061,7 @@ int::function::make_even_reg:int reg, const char *name
 	if (reg & 1)
 	  sim_engine_abort (SD, CPU, cia,
 			    "0x%lx:%s odd register (r%d) used in multi-word load/mulx2h",
-			    cia, name, reg);
+			    (long) cia, name, reg);
 	return reg;
 
 void::function::do_ld2h:int ra, unsigned32 rb, unsigned32 src
@@ -1622,7 +1622,7 @@ void::function::do_repeat:unsigned32 count, address_word pcaddr
 	if (count > 1)
 	  PSW_SET_QUEUE (PSW_RP, 1);
 	if (rpt_e  < rpt_s + 0x18)
-	  sim_io_eprintf (sd, "warning: 0x%lx: REPEAT or REPEATI loop is too small\n", cia);
+	  sim_io_eprintf (sd, "warning: 0x%lx: REPEAT or REPEATI loop is too small\n", (long) cia);
 	WRITE32_QUEUE (&RPT_C, count - 1);
 	WRITE32_QUEUE (&RPT_S, rpt_s);
 	WRITE32_QUEUE (&RPT_E, rpt_e);
@@ -1702,7 +1702,7 @@ void::function::do_sat:signed32 *ra, signed32 rb, signed32 src
 	signed32 nsat = ~sat;
 	signed32 value;
 	if (bits != src)
-	  sim_io_eprintf (sd, "warning: 0x%lx:SAT bit overflow\n", cia);
+	  sim_io_eprintf (sd, "warning: 0x%lx:SAT bit overflow\n", (long) cia);
 	if (bits == 0)
 	  value = rb;
 	else if (rb >= sat)
@@ -1731,7 +1731,7 @@ void::function::do_sath:signed32 *ra, signed32 rb, signed32 src, int high, int u
 	signed32 nsat = ~sat;
 	signed32 value;
 	if (bits != src)
-	  sim_io_eprintf (sd, "warning: 0x%lx:SAT bit overflow\n", cia);
+	  sim_io_eprintf (sd, "warning: 0x%lx:SAT bit overflow\n", (long) cia);
 	if (bits == 0)
 	  value = rb;
 	else if (rb >= sat)
@@ -1809,7 +1809,7 @@ void::function::do_satzh:signed32 *ra, signed16 rb, signed32 src, int high
 	signed16 nsat = 0;
 	signed16 value;
 	if (bits != src)
-	  sim_io_eprintf (sd, "warning: 0x%lx:SATZ2H bit overflow\n", cia);
+	  sim_io_eprintf (sd, "warning: 0x%lx:SATZ2H bit overflow\n", (long) cia);
 	if (bits == 0 && rb > sat)
 	  value = rb;
 	else if (rb > sat)

@@ -339,8 +339,8 @@ extern void sparc_init_extra_frame_info PARAMS ((int, struct frame_info *));
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
   { \
     if ((fi) && (fi)->flat) \
-      printf_filtered (" flat, pc saved at 0x%x, fp saved at 0x%x\n", \
-                       (fi)->pc_addr, (fi)->fp_addr); \
+      printf_filtered (" flat, pc saved at 0x%s, fp saved at 0x%s\n", \
+                       paddr_nz ((fi)->pc_addr), paddr_nz ((fi)->fp_addr)); \
   }
 
 #define FRAME_CHAIN(thisframe) (sparc_frame_chain (thisframe))

@@ -27,6 +27,10 @@
 #include "symtab.h"
 #include "gdbcmd.h"
 
+/* Local functions */
+
+static int arc_set_cpu_type (char *str);
+
 /* Current CPU, set with the "set cpu" command.  */
 static int arc_bfd_mach_type;
 char *arc_cpu_type;
@@ -404,7 +408,7 @@ frame_find_saved_regs (fip, fsrp)
 }
 
 void
-push_dummy_frame ()
+arc_push_dummy_frame (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
   int regnum;
@@ -425,7 +429,7 @@ push_dummy_frame ()
 }
 
 void
-pop_frame ()
+arc_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
@@ -641,9 +645,7 @@ arc_print_insn (vma, info)
 /* Command to set cpu type.  */
 
 void
-arc_set_cpu_type_command (args, from_tty)
-     char *args;
-     int from_tty;
+arc_set_cpu_type_command (char *args, int from_tty)
 {
   int i;
 
@@ -677,7 +679,7 @@ arc_show_cpu_type_command (args, from_tty)
 /* Modify the actual cpu type.
    Result is a boolean indicating success.  */
 
-int
+static int
 arc_set_cpu_type (str)
      char *str;
 {

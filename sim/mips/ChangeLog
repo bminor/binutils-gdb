@@ -1,3 +1,19 @@
+Tue Sep  7 13:34:54 1999  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* mips.igen (delayslot32): Handle sequence like
+	mtc1 $at,$f12 ; jal fp_add ; mov.s $f13,$f12
+	correctly by calling ENGINE_ISSUE_PREFIX_HOOK() before issue.
+	(MULT): Actually pass the third register...
+
+1999-09-03  Mark Salter  <msalter@cygnus.com>
+
+	* interp.c (sim_open): Added more memory aliases for additional
+	hardware being touched by cygmon on jmr3904 board.
+
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Jul 27 16:36:51 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* interp.c (sim_store_register): Handle case where client - GDB -

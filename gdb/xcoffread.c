@@ -199,7 +199,7 @@ static void
 xcoff_initial_scan PARAMS ((struct objfile *, int));
 
 static void
-scan_xcoff_symtab PARAMS ((struct section_offsets *, struct objfile *));
+scan_xcoff_symtab PARAMS ((struct objfile *));
 
 static char *
   xcoff_next_symbol_text PARAMS ((struct objfile *));
@@ -223,7 +223,7 @@ xcoff_new_init PARAMS ((struct objfile *));
 static void
 xcoff_symfile_finish PARAMS ((struct objfile *));
 
-static struct section_offsets *
+static void
   xcoff_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 static void
@@ -1997,7 +1997,7 @@ init_stringtab (abfd, offset, objfile)
 static unsigned int first_fun_line_offset;
 
 static struct partial_symtab *xcoff_start_psymtab
-  PARAMS ((struct objfile *, struct section_offsets *, char *, int,
+  PARAMS ((struct objfile *, char *, int,
 	   struct partial_symbol **, struct partial_symbol **));
 
 /* Allocate and partially fill a partial symtab.  It will be
@@ -2008,19 +2008,18 @@ static struct partial_symtab *xcoff_start_psymtab
    (normal). */
 
 static struct partial_symtab *
-xcoff_start_psymtab (objfile, section_offsets,
-		     filename, first_symnum, global_syms, static_syms)
+xcoff_start_psymtab (objfile, filename, first_symnum, global_syms,
+		     static_syms)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      char *filename;
      int first_symnum;
      struct partial_symbol **global_syms;
      struct partial_symbol **static_syms;
 {
   struct partial_symtab *result =
-  start_psymtab_common (objfile, section_offsets,
+  start_psymtab_common (objfile, objfile->section_offsets,
 			filename,
-  /* We fill in textlow later.  */
+			/* We fill in textlow later.  */
 			0,
 			global_syms, static_syms);
 
@@ -2203,8 +2202,7 @@ swap_sym (symbol, aux, name, raw, symnump, objfile)
 }
 
 static void
-scan_xcoff_symtab (section_offsets, objfile)
-     struct section_offsets *section_offsets;
+scan_xcoff_symtab (objfile)
      struct objfile *objfile;
 {
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section. */
@@ -2335,7 +2333,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 			    /* Give all psymtabs for this source file the same
 			       name.  */
 			    pst = xcoff_start_psymtab
-			      (objfile, section_offsets,
+			      (objfile,
 			       filestring,
 			       symnum_before,
 			       objfile->global_psymbols.next,
@@ -2515,7 +2513,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 	    else
 	      filestring = namestring;
 
-	    pst = xcoff_start_psymtab (objfile, section_offsets,
+	    pst = xcoff_start_psymtab (objfile,
 				       filestring,
 				       symnum_before,
 				       objfile->global_psymbols.next,
@@ -2608,7 +2606,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 /* START_PSYMTAB and END_PSYMTAB are never used, because they are only
    called from DBXREAD_ONLY or N_SO code.  Likewise for the symnum
    variable.  */
-#define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms) 0
+#define START_PSYMTAB(ofile,fname,low,symoff,global_syms,static_syms) 0
 #define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set)\
   do {} while (0)
 /* We have already set the namestring.  */
@@ -2750,7 +2748,7 @@ xcoff_initial_scan (objfile, mainline)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
 
-  scan_xcoff_symtab (objfile->section_offsets, objfile);
+  scan_xcoff_symtab (objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
@@ -2760,16 +2758,15 @@ xcoff_initial_scan (objfile, mainline)
   do_cleanups (back_to);
 }
 
-static struct section_offsets *
+static void
 xcoff_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
 {
-  struct section_offsets *section_offsets;
   int i;
 
   objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = (struct section_offsets *)
+  objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
   /* syms_from_objfile kindly subtracts from addr the bfd_section_vma
@@ -2781,9 +2778,7 @@ xcoff_symfile_offsets (objfile, addr)
      parameter and use 0.  rs6000-nat.c will set the correct section
      offsets via objfile_relocate.  */
   for (i = 0; i < objfile->num_sections; ++i)
-    ANOFFSET (section_offsets, i) = 0;
-
-  return section_offsets;
+    ANOFFSET (objfile->section_offsets, i) = 0;
 }
 
 /* Register our ability to parse symbols for xcoff BFD files.  */

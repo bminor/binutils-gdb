@@ -72,7 +72,7 @@ char *argv[], **envp;
     set_debug_traps();
     breakpoint();
 #endif
-    if (argc == 123456) {
+    if (argc == 12345) {  /* an unlikely value < 2^16, in case uninited */
 	fprintf (stderr, "usage:  factorial <number>\n");
 	return 1;
     }

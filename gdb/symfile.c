@@ -457,23 +457,20 @@ find_lowest_section (abfd, sect, obj)
    don't need to do anything special.  It allocates a section_offsets table
    for the objectfile OBJFILE and stuffs ADDR into all of the offsets.  */
 
-struct section_offsets *
+void
 default_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
 {
-  struct section_offsets *section_offsets;
   int i;
 
   objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = (struct section_offsets *)
+  objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
-  memset (section_offsets, 0, SIZEOF_SECTION_OFFSETS);
+  memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
 
   for (i = 0; i < SECT_OFF_MAX; i++)
-    ANOFFSET (section_offsets, i) = addr;
-
-  return section_offsets;
+    ANOFFSET (objfile->section_offsets, i) = addr;
 }
 
 
@@ -563,8 +560,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   (*objfile->sf->sym_init) (objfile);
   clear_complaints (1, verbo);
 
-  section_offsets = (*objfile->sf->sym_offsets) (objfile, addr);
-  objfile->section_offsets = section_offsets;
+  (*objfile->sf->sym_offsets) (objfile, addr);
 
 #ifndef IBM6000_TARGET
   /* This is a SVR4/SunOS specific hack, I think.  In any event, it
@@ -1193,7 +1189,7 @@ generic_load (filename, from_tty)
   {
     unsigned long entry;
     entry = bfd_get_start_address (loadfile_bfd);
-    printf_filtered ("Start address 0x%lx , load size %d\n", entry, data_count);
+    printf_filtered ("Start address 0x%lx , load size %ld\n", entry, data_count);
     /* We were doing this in remote-mips.c, I suspect it is right
        for other targets too.  */
     write_pc (entry);
@@ -1219,10 +1215,10 @@ report_transfer_performance (data_count, start_time, end_time)
 {
   printf_filtered ("Transfer rate: ");
   if (end_time != start_time)
-    printf_filtered ("%d bits/sec",
+    printf_filtered ("%ld bits/sec",
 		     (data_count * 8) / (end_time - start_time));
   else
-    printf_filtered ("%d bits in <1 sec", (data_count * 8));
+    printf_filtered ("%ld bits in <1 sec", (data_count * 8));
   printf_filtered (".\n");
 }
 
@@ -1379,7 +1375,6 @@ reread_symbols ()
 	      struct cleanup *old_cleanups;
 	      struct section_offsets *offsets;
 	      int num_offsets;
-	      int section_offsets_size;
 	      char *obfd_filename;
 
 	      printf_filtered ("`%s' has changed; re-reading symbols.\n",
@@ -1418,11 +1413,8 @@ reread_symbols ()
 	      /* Save the offsets, we will nuke them with the rest of the
 	         psymbol_obstack.  */
 	      num_offsets = objfile->num_sections;
-	      section_offsets_size =
-		sizeof (struct section_offsets)
-	      + sizeof (objfile->section_offsets->offsets) * num_offsets;
-	      offsets = (struct section_offsets *) alloca (section_offsets_size);
-	      memcpy (offsets, objfile->section_offsets, section_offsets_size);
+	      offsets = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
+	      memcpy (offsets, objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
 
 	      /* Nuke all the state that we will re-read.  Much of the following
 	         code which sets things to NULL really is necessary to tell
@@ -1479,8 +1471,8 @@ reread_symbols ()
 	      /* We use the same section offsets as from last time.  I'm not
 	         sure whether that is always correct for shared libraries.  */
 	      objfile->section_offsets = (struct section_offsets *)
-		obstack_alloc (&objfile->psymbol_obstack, section_offsets_size);
-	      memcpy (objfile->section_offsets, offsets, section_offsets_size);
+		obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+	      memcpy (objfile->section_offsets, offsets, SIZEOF_SECTION_OFFSETS);
 	      objfile->num_sections = num_offsets;
 
 	      /* What the hell is sym_new_init for, anyway?  The concept of
@@ -2037,10 +2029,7 @@ again2:
 /* Allocate and partially fill a partial symtab.  It will be
    completely filled at the end of the symbol list.
 
-   SYMFILE_NAME is the name of the symbol-file we are reading from, and ADDR
-   is the address relative to which its symbols are (incremental) or 0
-   (normal). */
-
+   FILENAME is the name of the symbol-file we are reading from. */
 
 struct partial_symtab *
 start_psymtab_common (objfile, section_offsets,

@@ -394,7 +394,6 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
   int code;
   int ix;
   long mem_offset;
-  struct symbol *sym;
   struct type **arg_types;
   int save_pos1;
 
@@ -842,10 +841,6 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  int static_memfuncp;
 	  value_ptr temp = arg2;
 	  char tstr[256];
-	  struct fn_field *fns_ptr;
-	  int num_fns;
-	  struct type *basetype;
-	  int boffset;
 
 	  /* Method invocation : stuff "this" as first parameter */
 	  /* pai: this used to have lookup_pointer_type for some reason,

@@ -281,7 +281,7 @@ tcp_readchar (scb, timeout)
 
       else if (timeout == 0)
 	{
-	  status == SERIAL_TIMEOUT;
+	  status = SERIAL_TIMEOUT;
 	  break;
 	}
     }

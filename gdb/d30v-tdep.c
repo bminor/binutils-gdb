@@ -34,6 +34,8 @@
 #include "symfile.h"
 #include "objfiles.h"
 
+#include "language.h" /* For local_hex_string() */
+
 void d30v_frame_find_saved_regs PARAMS ((struct frame_info * fi,
 					 struct frame_saved_regs * fsr));
 void d30v_frame_find_saved_regs_offsets PARAMS ((struct frame_info * fi,
@@ -727,10 +729,11 @@ d30v_print_register (regnum, tabular)
   if (regnum < A0_REGNUM)
     {
       if (tabular)
-	printf_filtered ("%08x", read_register (regnum));
+	printf_filtered ("%08lx", (long) read_register (regnum));
       else
-	printf_filtered ("0x%x	%d", read_register (regnum),
-			 read_register (regnum));
+	printf_filtered ("0x%lx	%ld",
+			 (long) read_register (regnum),
+			 (long) read_register (regnum));
     }
   else
     {
@@ -1162,10 +1165,10 @@ trace_info (args, from_tty)
 
       for (i = 0; i < trace_data.size; ++i)
 	{
-	  printf_filtered ("%d: %d instruction%s at 0x%x\n",
+	  printf_filtered ("%d: %d instruction%s at 0x%s\n",
 			   i, trace_data.counts[i],
 			   (trace_data.counts[i] == 1 ? "" : "s"),
-			   trace_data.addrs[i]);
+			   paddr_nz (trace_data.addrs[i]));
 	}
     }
   else
@@ -1294,7 +1297,9 @@ tdisassemble_command (arg, from_tty)
 	high = low;
     }
 
-  printf_filtered ("Dump of trace from %d to %d:\n", low, high);
+  printf_filtered ("Dump of trace from %s to %s:\n",
+		   paddr_u (low),
+		   paddr_u (high));
 
   display_trace (low, high);
 

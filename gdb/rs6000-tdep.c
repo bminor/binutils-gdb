@@ -1281,7 +1281,6 @@ frame_get_saved_regs (fi, fdatap)
      struct frame_info *fi;
      struct rs6000_framedata *fdatap;
 {
-  int ii;
   CORE_ADDR frame_addr;
   struct rs6000_framedata work_fdata;
 
@@ -1806,8 +1805,6 @@ show_current_variant ()
 static void
 set_processor (char *arg, int from_tty)
 {
-  int i;
-
   if (!arg || arg[0] == '\0')
     {
       list_variants ();

@@ -1638,13 +1638,13 @@ init_dst_sections (chan)
 struct section_offsets dst_symfile_faker =
 {0};
 
-struct section_offsets *
+void
 dst_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
 {
   objfile->num_sections = 1;
-  return &dst_symfile_faker;
+  objfile->section_offsets = &dst_symfile_faker;
 }
 
 /* Register our ability to parse symbols for DST BFD files */

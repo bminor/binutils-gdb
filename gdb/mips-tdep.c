@@ -87,8 +87,6 @@ static CORE_ADDR heuristic_proc_start PARAMS ((CORE_ADDR));
 
 static CORE_ADDR read_next_frame_reg PARAMS ((struct frame_info *, int));
 
-void mips_set_processor_type_command PARAMS ((char *, int));
-
 int mips_set_processor_type PARAMS ((char *));
 
 static void mips_show_processor_type_command PARAMS ((char *, int));
@@ -247,9 +245,9 @@ mips_print_extra_frame_info (fi)
       && fi->extra_info
       && fi->extra_info->proc_desc
       && fi->extra_info->proc_desc->pdr.framereg < NUM_REGS)
-    printf_filtered (" frame pointer is at %s+%d\n",
+    printf_filtered (" frame pointer is at %s+%s\n",
 		     REGISTER_NAME (fi->extra_info->proc_desc->pdr.framereg),
-		     fi->extra_info->proc_desc->pdr.frameoffset);
+		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
 }
 
 /* Convert between RAW and VIRTUAL registers.  The RAW register size
@@ -689,8 +687,8 @@ static void
 print_unpack (char *comment,
 	      struct upk_mips16 *u)
 {
-  printf ("%s %04x ,f(%d) off(%08x) (x(%x) y(%x)\n",
-	  comment, u->inst, u->fmt, u->offset, u->regx, u->regy);
+  printf ("%s %04x ,f(%d) off(%s) (x(%x) y(%x)\n",
+	  comment, u->inst, u->fmt, paddr (u->offset), u->regx, u->regy);
 }
 
 /* The EXT-I, EXT-ri nad EXT-I8 instructions all have the same

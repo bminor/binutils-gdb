@@ -119,12 +119,16 @@ static void sol_core_close PARAMS ((int quitting));
 static void init_sol_thread_ops PARAMS ((void));
 static void init_sol_core_ops PARAMS ((void));
 
-#define THREAD_FLAG 0x80000000
-#define is_thread(ARG) (((ARG) & THREAD_FLAG) != 0)
-#define is_lwp(ARG) (((ARG) & THREAD_FLAG) == 0)
-#define GET_LWP(LWP_ID) (TIDGET(LWP_ID))
-#define GET_THREAD(THREAD_ID) (((THREAD_ID) >> 16) & 0x7fff)
-#define BUILD_LWP(LWP_ID, PID) ((LWP_ID) << 16 | (PID))
+/* Default definitions: These must be defined in tm.h 
+   if they are to be shared with a process module such as procfs.  */
+
+#define THREAD_FLAG            0x80000000
+#define is_thread(ARG)         (((ARG) & THREAD_FLAG) != 0)
+#define is_lwp(ARG)            (((ARG) & THREAD_FLAG) == 0)
+#define GET_LWP(PID)           TIDGET (PID)
+#define GET_THREAD(PID)        (((PID) >> 16) & 0x7fff)
+#define BUILD_LWP(TID, PID)    ((TID) << 16 | (PID))
+
 #define BUILD_THREAD(THREAD_ID, PID) (THREAD_FLAG | BUILD_LWP (THREAD_ID, PID))
 
 /* Pointers to routines from lithread_db resolved by dlopen() */
@@ -492,6 +496,7 @@ sol_thread_detach (args, from_tty)
      char *args;
      int from_tty;
 {
+  inferior_pid = PIDGET (main_ph.pid);
   unpush_target (&sol_thread_ops);
   procfs_ops.to_detach (args, from_tty);
 }
@@ -987,11 +992,15 @@ typedef size_t gdb_ps_size_t;
    by the time we call anything in thread_db, these routines need to do
    nothing.  */
 
+/* Process stop */
+
 ps_err_e
 ps_pstop (gdb_ps_prochandle_t ph)
 {
   return PS_OK;
 }
+
+/* Process continue */
 
 ps_err_e
 ps_pcontinue (gdb_ps_prochandle_t ph)
@@ -999,17 +1008,23 @@ ps_pcontinue (gdb_ps_prochandle_t ph)
   return PS_OK;
 }
 
+/* LWP stop */
+
 ps_err_e
 ps_lstop (gdb_ps_prochandle_t ph, lwpid_t lwpid)
 {
   return PS_OK;
 }
 
+/* LWP continue */
+
 ps_err_e
 ps_lcontinue (gdb_ps_prochandle_t ph, lwpid_t lwpid)
 {
   return PS_OK;
 }
+
+/* Looks up the symbol LD_SYMBOL_NAME in the debugger's symbol table.  */
 
 ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
@@ -1071,12 +1086,16 @@ rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
   return PS_OK;
 }
 
+/* Copies SIZE bytes from target process .data segment to debugger memory.  */
+
 ps_err_e
 ps_pdread (gdb_ps_prochandle_t ph, paddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (0, ph, addr, buf, size);
 }
+
+/* Copies SIZE bytes from debugger memory .data segment to target process.  */
 
 ps_err_e
 ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
@@ -1085,12 +1104,16 @@ ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
   return rw_common (1, ph, addr, (char *) buf, size);
 }
 
+/* Copies SIZE bytes from target process .text segment to debugger memory.  */
+
 ps_err_e
 ps_ptread (gdb_ps_prochandle_t ph, paddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (0, ph, addr, buf, size);
 }
+
+/* Copies SIZE bytes from debugger memory .text segment to target process.  */
 
 ps_err_e
 ps_ptwrite (gdb_ps_prochandle_t ph, paddr_t addr,
@@ -1099,7 +1122,7 @@ ps_ptwrite (gdb_ps_prochandle_t ph, paddr_t addr,
   return rw_common (1, ph, addr, (char *) buf, size);
 }
 
-/* Get integer regs */
+/* Get integer regs for LWP */
 
 ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
@@ -1122,7 +1145,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   return PS_OK;
 }
 
-/* Set integer regs */
+/* Set integer regs for LWP */
 
 ps_err_e
 ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
@@ -1144,6 +1167,8 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   return PS_OK;
 }
+
+/* Log a message (sends to gdb_stderr).  */
 
 void
 ps_plog (const char *fmt,...)
@@ -1229,7 +1254,7 @@ ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
   return PS_OK;
 }
 
-/* Get floating-point regs.  */
+/* Get floating-point regs for LWP */
 
 ps_err_e
 ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
@@ -1252,7 +1277,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   return PS_OK;
 }
 
-/* Set floating-point regs.  */
+/* Set floating-point regs for LWP */
 
 ps_err_e
 ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
@@ -1285,6 +1310,8 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
 static int nldt_allocated = 0;
 static struct ssd *ldt_bufp = NULL;
+
+/* Reads the local descriptor table of a LWP.  */
 
 ps_err_e
 ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
@@ -1391,7 +1418,7 @@ sol_find_new_threads_callback (th, ignored)
   return 0;
 }
 
-void
+static void
 sol_find_new_threads ()
 {
   /* don't do anything if init failed to resolve the libthread_db library */

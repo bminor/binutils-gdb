@@ -254,8 +254,11 @@ proc test_with_self { executable } {
     # do we have a version number ?
     send_gdb "print version\n"
     gdb_expect {
+	-re ".\[0-9\]+ = .\[0-9.\]+.*$gdb_prompt $" {
+	    pass "printed version as string"
+	}
 	-re ".\[0-9\]+ = +0x.*\[0-9.\]+.*$gdb_prompt $" {
-	    pass "printed version"
+	    pass "printed version as pointer"
 	}
 	-re ".\[0-9\]+ = +.+ +0x.*\[0-9.\]+.*$gdb_prompt $" {
 	    pass "printed version with cast"

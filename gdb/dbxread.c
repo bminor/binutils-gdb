@@ -289,7 +289,7 @@ static void
 read_dbx_dynamic_symtab PARAMS ((struct objfile * objfile));
 
 static void
-read_dbx_symtab PARAMS ((struct objfile *, CORE_ADDR, int));
+read_dbx_symtab PARAMS ((struct objfile *));
 
 static void
 free_bincl_list PARAMS ((struct objfile *));
@@ -332,6 +332,10 @@ add_old_header_file PARAMS ((char *, int));
 
 static void
 add_this_object_header_file PARAMS ((int));
+
+static struct partial_symtab *
+start_psymtab PARAMS ((struct objfile *, char *, CORE_ADDR, int,
+		       struct partial_symbol **, struct partial_symbol **));
 
 /* Free up old header file tables */
 
@@ -571,8 +575,6 @@ record_minimal_symbol (name, address, type, objfile)
    put all the relevant info into a "struct dbx_symfile_info",
    hung off the objfile structure.
 
-   SECTION_OFFSETS contains offsets relative to which the symbols in the
-   various sections are (depending where the sections were actually loaded).
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).  */
 
@@ -584,8 +586,6 @@ dbx_symfile_read (objfile, mainline)
   bfd *sym_bfd;
   int val;
   struct cleanup *back_to;
-
-  val = strlen (objfile->name);
 
   sym_bfd = objfile->obfd;
 
@@ -625,12 +625,9 @@ dbx_symfile_read (objfile, mainline)
   init_minimal_symbol_collection ();
   make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
 
-  /* Now that the symbol table data of the executable file are all in core,
-     process them and define symbols accordingly.  */
+  /* Read stabs data from executable file and define symbols. */
 
-  read_dbx_symtab (objfile,
-		   DBX_TEXT_ADDR (objfile),
-		   DBX_TEXT_SIZE (objfile));
+  read_dbx_symtab (objfile);
 
   /* Add the dynamic symbols.  */
 
@@ -1239,21 +1236,17 @@ read_dbx_dynamic_symtab (objfile)
   do_cleanups (back_to);
 }
 
-/* Given pointers to an a.out symbol table in core containing dbx
-   style data, setup partial_symtab's describing each source file for
-   which debugging information is available.
-   SYMFILE_NAME is the name of the file we are reading from
-   and SECTION_OFFSETS is the set of offsets for the various sections
-   of the file (a set of zeros if the mainline program).  */
+/* Setup partial_symtab's describing each source file for which
+   debugging information is available. */
 
 static void
-read_dbx_symtab (objfile, text_addr, text_size)
+read_dbx_symtab (objfile)
      struct objfile *objfile;
-     CORE_ADDR text_addr;
-     int text_size;
 {
   register struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
   struct internal_nlist nlist;
+  CORE_ADDR text_addr;
+  int text_size;
 
   register char *namestring;
   int nsl;
@@ -1275,6 +1268,9 @@ read_dbx_symtab (objfile, text_addr, text_size)
   /* Index within current psymtab dependency list */
   struct partial_symtab **dependency_list;
   int dependencies_used, dependencies_allocated;
+
+  text_addr = DBX_TEXT_ADDR (objfile);
+  text_size = DBX_TEXT_SIZE (objfile);
 
   /* FIXME.  We probably want to change stringtab_global rather than add this
      while processing every symbol entry.  FIXME.  */
@@ -1361,8 +1357,8 @@ read_dbx_symtab (objfile, text_addr, text_size)
 #define CUR_SYMBOL_VALUE nlist.n_value
 #define CUR_SYMBOL_STRX nlist.n_strx
 #define DBXREAD_ONLY
-#define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms)\
-  start_psymtab(ofile, secoff, fname, low, symoff, global_syms, static_syms)
+#define START_PSYMTAB(ofile,fname,low,symoff,global_syms,static_syms)\
+  start_psymtab(ofile, fname, low, symoff, global_syms, static_syms)
 #define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set)\
   end_psymtab(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set)
 
@@ -1385,7 +1381,7 @@ read_dbx_symtab (objfile, text_addr, text_size)
       /* Don't set pst->texthigh lower than it already is.  */
       CORE_ADDR text_end =
       (lowest_text_address == (CORE_ADDR) -1
-       ? (text_addr + objfile->section_offsets->offsets[SECT_OFF_TEXT])
+       ? (text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT))
        : lowest_text_address)
       + text_size;
 
@@ -1406,11 +1402,9 @@ read_dbx_symtab (objfile, text_addr, text_size)
    (normal). */
 
 
-struct partial_symtab *
-start_psymtab (objfile, section_offsets,
-	       filename, textlow, ldsymoff, global_syms, static_syms)
+static struct partial_symtab *
+start_psymtab (objfile, filename, textlow, ldsymoff, global_syms, static_syms)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      char *filename;
      CORE_ADDR textlow;
      int ldsymoff;
@@ -1418,7 +1412,7 @@ start_psymtab (objfile, section_offsets,
      struct partial_symbol **static_syms;
 {
   struct partial_symtab *result =
-  start_psymtab_common (objfile, section_offsets,
+  start_psymtab_common (objfile, objfile->section_offsets,
 			filename, textlow, global_syms, static_syms);
 
   result->read_symtab_private = (char *)
@@ -2635,7 +2629,6 @@ elfstab_build_psymtabs (objfile, mainline,
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   struct dbx_symfile_info *info;
-  asection *text_sect;
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */

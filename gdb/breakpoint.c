@@ -3415,10 +3415,8 @@ solib_load_unload_1 (hookname, tempflag, dll_pathname, cond_string, bp_kind)
 {
   struct breakpoint *b;
   struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
   struct cleanup *old_chain;
   struct cleanup *canonical_strings_chain = NULL;
-  int i;
   char *addr_start = hookname;
   char *addr_end = NULL;
   char **canonical = (char **) NULL;
@@ -4101,9 +4099,9 @@ break_at_finish_at_depth_command_1 (arg, flag, from_tty)
 	{
 	  addr_string = (char *) xmalloc (26 + extra_args_len);
 	  if (extra_args_len)
-	    sprintf (addr_string, "*0x%x %s", high, extra_args);
+	    sprintf (addr_string, "*0x%s %s", paddr_nz (high), extra_args);
 	  else
-	    sprintf (addr_string, "*0x%x", high);
+	    sprintf (addr_string, "*0x%s", paddr_nz (high));
 	  break_command_1 (addr_string, flag, from_tty);
 	  free (addr_string);
 	}
@@ -4138,7 +4136,7 @@ break_at_finish_command_1 (arg, flag, from_tty)
 	  if (selected_frame)
 	    {
 	      addr_string = (char *) xmalloc (15);
-	      sprintf (addr_string, "*0x%x", selected_frame->pc);
+	      sprintf (addr_string, "*0x%s", paddr_nz (selected_frame->pc));
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -4186,9 +4184,9 @@ break_at_finish_command_1 (arg, flag, from_tty)
 	{
 	  break_string = (char *) xmalloc (extra_args_len + 26);
 	  if (extra_args_len)
-	    sprintf (break_string, "*0x%x %s", high, extra_args);
+	    sprintf (break_string, "*0x%s %s", paddr_nz (high), extra_args);
 	  else
-	    sprintf (break_string, "*0x%x", high);
+	    sprintf (break_string, "*0x%s", paddr_nz (high));
 	  break_command_1 (break_string, flag, from_tty);
 	  free (break_string);
 	}
@@ -4666,7 +4664,6 @@ until_break_command (arg, from_tty)
   struct frame_info *prev_frame = get_prev_frame (selected_frame);
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
-  struct continuation_arg *arg1, *arg2;
 
   clear_proceed_status ();
 
@@ -5238,7 +5235,6 @@ create_exception_catchpoint (tempflag, cond_string, ex_event, sal)
      struct symtab_and_line *sal;
 {
   struct breakpoint *b;
-  int i;
   int thread = -1;		/* All threads. */
 
   if (!sal)			/* no exception support? */

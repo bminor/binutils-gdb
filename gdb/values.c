@@ -922,7 +922,6 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
       /* Deal with HP/Taligent runtime model for virtual functions */
       value_ptr vp;
       value_ptr argp;		/* arg1 cast to base */
-      CORE_ADDR vfunc_addr;	/* address of virtual method */
       CORE_ADDR coreptr;	/* pointer to target address */
       int class_index;		/* which class segment pointer to use */
       struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);	/* method type */

@@ -1,3 +1,25 @@
+1999-09-07  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.texinfo: Fiks speling errers.
+
+	* gdb.texinfo: Fix uses of @multitable.
+
+	From Eli Zaretskii  <eliz@is.elta.co.il>:
+	* gdb.texinfo: Include details specific to DOS host, clarify
+ 	some confusing language, fix @ref/@xref/@pxref usages, add
+	comments about using with optimization, add more indexing,
+	fix info about disassembly-flavor.
+
+Tue Sep  7 09:11:24 1999  Kevin Buettner  <kevinb@cygnus.com>
+
+	* gdbint.texinfo (IN_SOLIB_DYNSYM_RESOLVE_CODE,
+	SKIP_SOLIB_RESOLVER): Define.
+
+Fri Sep  3 18:05:14 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.texinfo (Protocol): Review.  Add tables describing ``q'' and
+ 	``g'' packets.
+
 1999-08-30  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo: Create a new "Configurations" chapter with

@@ -289,7 +289,6 @@ ocd_open (name, from_tty, target_type, ops)
      struct target_ops *ops;
 {
   unsigned char buf[10], *p;
-  int status;
   int pktlen;
 
   if (name == 0)
@@ -1066,7 +1065,6 @@ ocd_get_packet (cmd, lenp, timeout)
 {
   int ch;
   int len;
-  int i;
   static unsigned char packet[512];
   unsigned char *packet_ptr;
   unsigned char checksum;
@@ -1411,7 +1409,7 @@ bdm_update_flash_command (args, from_tty)
      int from_tty;
 {
   int status, pktlen;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain; 
   void (*store_registers_tmp) PARAMS ((int));
 
   if (!ocd_desc)

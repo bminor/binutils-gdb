@@ -215,6 +215,7 @@ extern void d30v_init_extra_frame_info PARAMS ((int fromleaf, struct frame_info 
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
   (frameless_look_for_prologue (FI))
 
+CORE_ADDR d30v_frame_chain (struct frame_info *frame);
 #define FRAME_CHAIN(FRAME)       d30v_frame_chain(FRAME)
 extern int d30v_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 #define FRAME_CHAIN_VALID(chain, thisframe) d30v_frame_chain_valid (chain, thisframe)
@@ -222,6 +223,7 @@ extern int d30v_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
 #define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
 
+void d30v_init_frame_pc (int fromleaf, struct frame_info *prev);
 #define INIT_FRAME_PC_FIRST(fromleaf, prev)	d30v_init_frame_pc(fromleaf, prev)
 #define INIT_FRAME_PC(fromleaf, prev)	/* nada */
 

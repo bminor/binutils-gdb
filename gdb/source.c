@@ -1311,19 +1311,12 @@ list_command (arg, from_tty)
     error ("No default source file yet.  Do \"help list\".");
   else if (no_end)
     {
-      if (lines_to_list % 2 == 0)
-	print_source_lines (sal.symtab,
-			    max (sal.line - (lines_to_list / 2), 1),
-			    sal.line + (lines_to_list / 2), 0);
-      else
-	/* If lines_to_list is odd, then we round down in
-	 * one of the lines_to_list/2 computations, round up in
-	 * the other, so the total window size around the specified
-	 * line comes out right.
-	 */
-	print_source_lines (sal.symtab,
-			    max (sal.line - (lines_to_list / 2), 1),
-			    sal.line + ((1 + lines_to_list) / 2), 0);
+      int first_line = sal.line - lines_to_list / 2;
+
+      if (first_line < 1) first_line = 1;
+
+      print_source_lines (sal.symtab, first_line, first_line + lines_to_list,
+			  0);
     }
   else
     print_source_lines (sal.symtab, sal.line,

@@ -168,6 +168,7 @@ extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
 
 #define COERCE_FLOAT_TO_DOUBLE 1
 
+extern void m32r_write_sp (CORE_ADDR val);
 #define TARGET_WRITE_SP m32r_write_sp
 
 

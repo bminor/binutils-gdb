@@ -343,9 +343,7 @@ vmap_symtab (vp)
       objfile = symfile_objfile;
     }
 
-  new_offsets = alloca
-    (sizeof (struct section_offsets)
-     + sizeof (new_offsets->offsets) * objfile->num_sections);
+  new_offsets = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
 
   for (i = 0; i < objfile->num_sections; ++i)
     ANOFFSET (new_offsets, i) = ANOFFSET (objfile->section_offsets, i);

@@ -77,7 +77,7 @@ static void
 elf_symfile_finish PARAMS ((struct objfile *));
 
 static void
-elf_symtab_read PARAMS ((bfd *, CORE_ADDR, struct objfile *, int));
+elf_symtab_read PARAMS ((struct objfile *, int));
 
 static void
 free_elfinfo PARAMS ((void *));
@@ -221,15 +221,13 @@ record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
 
    SYNOPSIS
 
-   void elf_symtab_read (bfd *abfd, CORE_ADDR addr,
-   struct objfile *objfile, int dynamic)
+   void elf_symtab_read (struct objfile *objfile, int dynamic)
 
    DESCRIPTION
 
-   Given an open bfd, a base address to relocate symbols to, and a
-   flag that specifies whether or not this bfd is for an executable
-   or not (may be shared library for example), add all the global
-   function and data symbols to the minimal symbol table.
+   Given an objfile and a flag that specifies whether or not the objfile
+   is for an executable or not (may be shared library for example), add
+   all the global function and data symbols to the minimal symbol table.
 
    In stabs-in-ELF, as implemented by Sun, there are some local symbols
    defined in the ELF symbol table, which can be used to locate
@@ -240,9 +238,7 @@ record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
  */
 
 static void
-elf_symtab_read (abfd, addr, objfile, dynamic)
-     bfd *abfd;
-     CORE_ADDR addr;
+elf_symtab_read (objfile, dynamic)
      struct objfile *objfile;
      int dynamic;
 {
@@ -254,6 +250,7 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
   int index;
   struct cleanup *back_to;
   CORE_ADDR symaddr;
+  CORE_ADDR offset;
   enum minimal_symbol_type ms_type;
   /* If sectinfo is nonNULL, it contains section info that should end up
      filed in the objfile.  */
@@ -267,11 +264,11 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 #endif
   struct dbx_symfile_info *dbx = objfile->sym_stab_info;
   unsigned long size;
-  int stripped = (bfd_get_symcount (abfd) == 0);
+  int stripped = (bfd_get_symcount (objfile->obfd) == 0);
 
   if (dynamic)
     {
-      storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
+      storage_needed = bfd_get_dynamic_symtab_upper_bound (objfile->obfd);
 
       /* Nothing to be done if there is no dynamic symtab.  */
       if (storage_needed < 0)
@@ -279,9 +276,9 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
     }
   else
     {
-      storage_needed = bfd_get_symtab_upper_bound (abfd);
+      storage_needed = bfd_get_symtab_upper_bound (objfile->obfd);
       if (storage_needed < 0)
-	error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
+	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
     }
   if (storage_needed > 0)
@@ -289,13 +286,15 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
       symbol_table = (asymbol **) xmalloc (storage_needed);
       back_to = make_cleanup (free, symbol_table);
       if (dynamic)
-	number_of_symbols = bfd_canonicalize_dynamic_symtab (abfd,
+	number_of_symbols = bfd_canonicalize_dynamic_symtab (objfile->obfd,
 							     symbol_table);
       else
-	number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+	number_of_symbols = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
       if (number_of_symbols < 0)
-	error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
+	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
+      /* FIXME: Should use section specific offset, not SECT_OFF_TEXT. */
+      offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
@@ -316,14 +315,14 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	         a shared library.
 	         If its value is non zero then it is usually the address
 	         of the corresponding entry in the procedure linkage table,
-	         relative to the base address.
+	         plus the desired section offset.
 	         If its value is zero then the dynamic linker has to resolve
 	         the symbol. We are unable to find any meaningful address
 	         for this symbol in the executable file, so we skip it.  */
 	      symaddr = sym->value;
 	      if (symaddr == 0)
 		continue;
-	      symaddr += addr;
+	      symaddr += offset;
 	      msym = record_minimal_symbol_and_info
 		((char *) sym->name, symaddr,
 		 mst_solib_trampoline, NULL, sym->section, objfile);
@@ -365,10 +364,10 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	         interested in will have a section. */
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym->value + sym->section->vma;
-	      /* Relocate all non-absolute symbols by base address.  */
+	      /* Relocate all non-absolute symbols by the section offset.  */
 	      if (sym->section != &bfd_abs_section)
 		{
-		  symaddr += addr;
+		  symaddr += offset;
 		}
 	      /* For non-absolute symbols, use the type of the section
 	         they are relative to, to intuit text/data.  Bfd provides
@@ -397,12 +396,12 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		    }
 
 		  /* If it is an Irix dynamic symbol, skip section name
-		     symbols, relocate all others. */
+		     symbols, relocate all others by section offset. */
 		  if (ms_type != mst_abs)
 		    {
 		      if (sym->name[0] == '.')
 			continue;
-		      symaddr += addr;
+		      symaddr += offset;
 		    }
 		}
 	      else if (sym->section->flags & SEC_CODE)
@@ -498,10 +497,10 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 			    }
 			  /* Bfd symbols are section relative. */
 			  symaddr = sym->value + sym->section->vma;
-			  /* Relocate non-absolute symbols by base address.  */
+			  /* Relocate non-absolute symbols by the section offset. */
 			  if (sym->section != &bfd_abs_section)
 			    {
-			      symaddr += addr;
+			      symaddr += offset;
 			    }
 			  sectinfo->sections[index] = symaddr;
 			  /* The special local symbols don't go in the
@@ -608,13 +607,11 @@ elf_symfile_read (objfile, mainline)
      chain of info into the dbx_symfile_info in objfile->sym_stab_info,
      which can later be used by elfstab_offset_sections.  */
 
-  /* FIXME, should take a section_offsets param, not just an offset.  */
-  offset = ANOFFSET (objfile->section_offsets, 0);
-  elf_symtab_read (abfd, offset, objfile, 0);
+  elf_symtab_read (objfile, 0);
 
   /* Add the dynamic symbols.  */
 
-  elf_symtab_read (abfd, offset, objfile, 1);
+  elf_symtab_read (objfile, 1);
 
   /* Now process debugging information, which is contained in
      special ELF sections. */
@@ -651,8 +648,7 @@ elf_symfile_read (objfile, mainline)
          information.  */
       swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
       if (swap)
-	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect,
-				  objfile->section_offsets);
+	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect);
     }
   if (ei.stabsect)
     {
@@ -674,13 +670,13 @@ elf_symfile_read (objfile, mainline)
   if (dwarf2_has_info (abfd))
     {
       /* DWARF 2 sections */
-      dwarf2_build_psymtabs (objfile, objfile->section_offsets, mainline);
+      dwarf2_build_psymtabs (objfile, mainline);
     }
   else if (ei.dboffset && ei.lnoffset)
     {
       /* DWARF sections */
       dwarf_build_psymtabs (objfile,
-			    objfile->section_offsets, mainline,
+			    mainline,
 			    ei.dboffset, ei.dbsize,
 			    ei.lnoffset, ei.lnsize);
     }

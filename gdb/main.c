@@ -119,8 +119,6 @@ main (argc, argv)
 
   long time_at_startup = get_run_time ();
 
-  int gdb_file_size;
-
   START_PROGRESS (argv[0], 0);
 
 #ifdef MPW

@@ -126,6 +126,8 @@ READLINE_CFLAGS = -I$(READLINE_SRC)/..
 
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
+GDB_WARN_CFLAGS = $(WARN_CFLAGS)
+GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
 # Where is the INTL library?  Typically in ../intl.
 INTL_DIR = ../intl
@@ -188,8 +190,8 @@ INTERNAL_WARN_CFLAGS = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) $(WARN_CFLAGS)
-INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(WERROR_CFLAGS)
+	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) $(GDB_WARN_CFLAGS)
+INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -227,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990830
+VERSION = 19990908
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -453,6 +455,7 @@ inferior_h =	inferior.h $(breakpoint_h)
 tracepoint_h =	tracepoint.h
 ax_h = 		ax.h
 event_loop_h = event-loop.h
+version_h = version.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -829,9 +832,12 @@ copying.c: COPYING copying.awk
 	awk -f $(srcdir)/copying.awk < $(srcdir)/COPYING > copying.c
 
 version.c: Makefile
-	echo 'char *version = "$(VERSION)";' >version.c
-	echo 'char *host_name = "$(host_alias)";' >> version.c
-	echo 'char *target_name = "$(target_alias)";' >> version.c
+	rm -f version.c
+	echo '#include "version.h"' >> version.c
+	echo 'const char version[] = "$(VERSION)";' >> version.c
+	echo 'const char host_name[] = "$(host_alias)";' >> version.c
+	echo 'const char target_name[] = "$(target_alias)";' >> version.c
+version.o: version.c $(version_h)
 
 # c-exp.tab.c is generated in objdir from c-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to c-exp.tab.o.
@@ -942,7 +948,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c \
         hp-psymtab-read.c hp-symtab-read.c \
-	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
+	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c i386-linux-nat.c \
 	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-tdep.c \
 	i387-tdep.c \
 	i960-tdep.c \
@@ -1092,7 +1098,7 @@ delta68-nat.o: delta68-nat.c $(defs_h)
 demangle.o: demangle.c $(defs_h) $(gdbcmd_h) gdb_string.h
 
 dink32-rom.o: dink32-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) target.h serial.h terminal.h
+	$(inferior_h) target.h serial.h terminal.h symfile.h
 
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) gdb_string.h
 
@@ -1189,6 +1195,9 @@ i386mach-nat.o: i386mach-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 i386v-nat.o: i386v-nat.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) language.h target.h
+
+i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(symtab_h) $(frame_h) $(symfile_h) $(objfiles_h) 
 
 i386v4-nat.o: i386v4-nat.c $(defs_h)
 
@@ -1309,8 +1318,14 @@ mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
+# FIXME: Monitor.c has -Wformat problems.  The code using the macros
+# RDEBUG and EXTRA_RDEBUG needs be replaced with something that:
+# doesn't cause -Wformat errors; sends all output to gdb_stdlog
+# instead of stdout; and controls the output throug a ``set
+# monitordebug'' command/variable. cagney, 1999-09-01.
 monitor.o: monitor.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h gdb_string.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 news-xdep.o: news-xdep.c
 
@@ -1382,6 +1397,12 @@ printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 procfs.o: procfs.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h gdb_string.h
 
+sol-thread.o: sol-thread.c $(defs_h) gdbthread.h target.h $(inferior_h) \
+	$(gdbcmd_h)
+
+linux-thread.o: linux-thread.c $(breakpoint_h) $(gdbcmd_h) $(wait_h) \
+	gdbthread.h $(gdbcore_h) $(inferior_h) target.h $(defs_h)
+
 # OBSOLETE pyr-tdep.o: pyr-tdep.c $(defs_h) 
 
 # OBSOLETE pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
@@ -1392,7 +1413,8 @@ remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdb_string.h
 
 remote-array.o: remote-array.c $(wait_h) $(defs_h) $(gdbcore_h) target.h \
-      gdb_string.h $(command_h) serial.h monitor.h $(remote_utils_h)
+      gdb_string.h $(command_h) serial.h monitor.h $(remote_utils_h) \
+	$(version_h)
 
 remote-rdi.o: remote-rdi.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) gdb_string.h
@@ -1416,8 +1438,13 @@ remote-rdp.o: remote-rdp.c $(wait_h) $(defs_h) $(gdbcore_h) \
 remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h $(remote_utils_h) gdb_string.h
 
+# FIXME: For the SH target, remote-e7000 contains numerous -Wformat
+# warnings.  Since the fixes involve modifications to the code that
+# handles the SH remote protocol the changes need to be tested against
+# an SH board before they can be committed. cagney 1999-09-01.
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) target.h \
 	$(wait_h) serial.h gdb_string.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 remote-eb.o: remote-eb.c $(wait_h) $(srcdir)/config/a29k/tm-a29k.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h \
@@ -1587,7 +1614,7 @@ thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h
 
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	$(remote_utils_h) gdb_string.h $(event_loop_h)
+	$(remote_utils_h) gdb_string.h $(event_loop_h) $(version_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
@@ -1645,8 +1672,12 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 
 xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h
 
+# FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
+# declared -Wimplicit fails. It should be using the GDBARCH framework.
+# cagney 1999-09-02.
 z8k-tdep.o: z8k-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h) $(frame_h) \
-	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(gdbcore_h)
+	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(gdbcore_h) $(value_h)
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 c-exp.tab.o: c-exp.tab.c c-lang.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \

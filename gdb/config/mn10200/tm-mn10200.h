@@ -161,6 +161,8 @@ extern CORE_ADDR mn10200_frame_saved_pc PARAMS ((struct frame_info *));
       } \
   }
 
+
+extern CORE_ADDR mn10200_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) \
   (SP) = mn10200_store_struct_return (STRUCT_ADDR, SP)
 

@@ -42,7 +42,7 @@
    to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(ip)   (z8k_skip_prologue (ip))
-extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
+extern CORE_ADDR z8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 
 /* Immediately after a function call, return the saved pc.
@@ -50,7 +50,9 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) saved_pc_after_call(frame)
+
+extern int z8k_saved_pc_after_call (struct frame_info *frame);
+#define SAVED_PC_AFTER_CALL(frame) z8k_saved_pc_after_call(frame)
 
 /* Stack grows downward.  */
 
@@ -167,7 +169,8 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
    is the address of a ptr sized byte word containing the calling
    frame's address.  */
 
-#define FRAME_CHAIN(thisframe) frame_chain(thisframe);
+extern CORE_ADDR z8k_frame_chain (struct frame_info *thisframe);
+#define FRAME_CHAIN(thisframe) z8k_frame_chain(thisframe);
 
 
 
@@ -179,7 +182,8 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
   (frameless_look_for_prologue (FI))
 
-#define FRAME_SAVED_PC(FRAME) frame_saved_pc(FRAME)
+extern CORE_ADDR z8k_frame_saved_pc (struct frame_info *frame);
+#define FRAME_SAVED_PC(FRAME) z8k_frame_saved_pc(FRAME)
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
@@ -276,9 +280,11 @@ int sim_z8001_mode;
 
 #define NO_STD_REGS
 
-#define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
+extern void z8k_print_register_hook (int regno);
+#define	PRINT_REGISTER_HOOK(regno) z8k_print_register_hook(regno)
 
 
+extern void z8k_set_pointer_size (int newsize);
 #define INIT_EXTRA_SYMTAB_INFO \
   z8k_set_pointer_size(objfile->obfd->arch_info->bits_per_address);
 

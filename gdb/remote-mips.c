@@ -41,7 +41,6 @@
 #define S_IROTH S_IREAD
 #endif
 
-extern void mips_set_processor_type_command PARAMS ((char *, int));
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
@@ -394,7 +393,7 @@ static int interrupt_count;
 static int mips_wait_flag = 0;
 
 /* If non-zero, monitor supports breakpoint commands. */
-static monitor_supports_breakpoints = 0;
+static int monitor_supports_breakpoints = 0;
 
 /* Data cache header.  */
 
@@ -2545,7 +2544,7 @@ remote_mips_remove_watchpoint (addr, len, type)
 }
 
 int
-remote_mips_stopped_by_watchpoint ()
+remote_mips_stopped_by_watchpoint (void)
 {
   return hit_watchpoint;
 }
@@ -2864,7 +2863,7 @@ send_srec (srec, len, addr)
 	case 0x6:		/* ACK */
 	  return;
 	case 0x15:		/* NACK */
-	  fprintf_unfiltered (gdb_stderr, "Download got a NACK at byte %d!  Retrying.\n", addr);
+	  fprintf_unfiltered (gdb_stderr, "Download got a NACK at byte %s!  Retrying.\n", paddr_u (addr));
 	  continue;
 	default:
 	  error ("Download got unexpected ack char: 0x%x, retrying.\n", ch);
@@ -2910,9 +2909,10 @@ mips_load_srec (args)
 	{
 	  unsigned int numbytes;
 
-	  /* FIXME!  vma too small?? */
-	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
-			   s->vma + s->_raw_size);
+	  /* FIXME!  vma too small????? */
+	  printf_filtered ("%s\t: 0x%4lx .. 0x%4lx  ", s->name,
+			   (long) s->vma,
+			   (long) (s->vma + s->_raw_size));
 	  gdb_flush (gdb_stdout);
 
 	  for (i = 0; i < s->_raw_size; i += numbytes)

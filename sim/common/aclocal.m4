@@ -801,9 +801,23 @@ case "${enableval}" in
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting warning flags = $build_warnings" 6>&1
+fi
+WARN_CFLAGS=""
+WERROR_CFLAGS=""
+if test "x${build_warnings}" != x -a "x$GCC" = xyes
+then
+  # Separate out the -Werror flag as some files just cannot be
+  # compiled with it enabled.
+  for w in ${build_warnings}; do
+    case $w in
+    -Werr*) WERROR_CFLAGS=-Werror ;;
+    *) WARN_CFLAGS="${WARN_CFLAGS} $w"
+    esac
+  done
 fi],[build_warnings=""])dnl
 ])
-AC_SUBST(build_warnings)
+AC_SUBST(WARN_CFLAGS)
+AC_SUBST(WERROR_CFLAGS)
 
 
 dnl Generate the Makefile in a target specific directory.

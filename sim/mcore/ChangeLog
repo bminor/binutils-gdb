@@ -1,3 +1,7 @@
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 1999-06-23  Nick Clifton  <nickc@cygnus.com>
 
 	* sysdep.h: Do not define prototypes for memcpy and strchr if they

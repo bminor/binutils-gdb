@@ -104,7 +104,7 @@ mipscoff_symfile_read (objfile, mainline)
     error ("Error reading symbol table: %s", bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (objfile, &ecoff_backend (abfd)->debug_swap,
-			 &ecoff_data (abfd)->debug_info, objfile->section_offsets);
+			 &ecoff_data (abfd)->debug_info);
 
   /* Add alpha coff dynamic symbols.  */
 

@@ -1481,6 +1481,17 @@ trampoline that connects to a shared library.
 Define this to evaluate to nonzero if the program is stopped in the
 trampoline that returns from a shared library.
 
+@item IN_SOLIB_DYNSYM_RESOLVE_CODE pc
+Define this to evaluate to nonzero if the program is stopped in the
+dynamic linker.
+
+@item SKIP_SOLIB_RESOLVER pc
+Define this to evaluate to the (nonzero) address at which execution
+should continue to get past the dynamic linker's symbol resolution
+function.  A zero value indicates that it is not important or necessary
+to set a breakpoint to get through the dynamic linker and that single
+stepping will suffice.
+
 @item IS_TRAPPED_INTERNALVAR (name)
 This is an ugly hook to allow the specification of special actions that
 should occur as a side-effect of setting the value of a variable

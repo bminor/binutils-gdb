@@ -1,3 +1,49 @@
+1999-09-08  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* break.c (main): Compare a possibly-uninitialized argc with an
+	unlikely value that fits in 16 bits.
+
+1999-09-07  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/restore.c, gdb.base/restore.exp: Use 0x7eeb instead of
+	0xfeeb, don't want negative numbers if ints are 16 bits.
+
+	* lib/gdb.exp (skip_cplus_tests): New proc.
+	* gdb.c++/ambiguous.exp, gdb.c++/annota2.exp,
+ 	gdb.c++/anon-union.exp, gdb.c++/classes.exp,
+ 	gdb.c++/cplusfuncs.exp, gdb.c++/ctti.exp, gdb.c++/demangle.exp,
+ 	gdb.c++/derivation.exp, gdb.c++/inherit.exp, gdb.c++/local.exp,
+ 	gdb.c++/member-ptr.exp, gdb.c++/method.exp, gdb.c++/misc.exp,
+ 	gdb.c++/overload.exp, gdb.c++/ovldbreak.exp,
+ 	gdb.c++/ref-types.exp, gdb.c++/templates.exp, gdb.c++/userdef.exp,
+ 	gdb.c++/virtfunc.exp: Use it to skip over C++ tests.
+
+	* gdb.c++/cplusfuncs.exp: Use get_compiler_info consistently.
+
+Fri Sep  3 15:37:12 1999  Kevin Buettner  <kevinb@cygnus.com>
+
+	* gdb.base/corefile.exp (up): Allow a parameter to appear
+	in the frame that we're going up to.
+
+	From Jim Blandy <jimb@cygnus.com>:
+
+	* gdb.base/default.exp (info float): Expect some output now.
+
+	* gdb.base/callfuncs.exp (do_function_calls): We no longer expect
+	returning floating-point values to fail on the x86.
+	* gdb.base/callfwmall.exp (do_function_calls): Same.
+
+	* gdb.base/list.exp (test_listsize): Correct expectations for
+	listing line 1 with listsize 2.  Also, listing a single line
+	works now, as does listing three lines.  [Kevin's note: There
+	were a number of other cases fixed too where the expectations
+	differed...]
+
+1999-09-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/selftest.exp: Add case for when version prints as
+	constant string instead of char pointer.
+
 1999-08-25  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/ending-run.exp: Add Solaris case for what happens when

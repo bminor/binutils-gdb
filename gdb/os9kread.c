@@ -127,7 +127,7 @@ static struct complaint lbrac_mismatch_complaint =
 /* Local function prototypes */
 
 static void
-read_minimal_symbols PARAMS ((struct objfile *, struct section_offsets *));
+read_minimal_symbols PARAMS ((struct objfile *));
 
 static void
 os9k_read_ofile_symtab PARAMS ((struct partial_symtab *));
@@ -139,8 +139,7 @@ static void
 os9k_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
 
 static void
-read_os9k_psymtab PARAMS ((struct section_offsets *, struct objfile *,
-			   CORE_ADDR, int));
+read_os9k_psymtab PARAMS ((struct objfile *, CORE_ADDR, int));
 
 static int
 fill_sym PARAMS ((FILE *, bfd *));
@@ -162,7 +161,7 @@ os9k_process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
 			       struct section_offsets *, struct objfile *));
 
 static struct partial_symtab *
-  os9k_start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
+  os9k_start_psymtab PARAMS ((struct objfile *, char *,
 			      CORE_ADDR, int, int, struct partial_symbol **,
 			      struct partial_symbol **));
 
@@ -171,8 +170,7 @@ static struct partial_symtab *
 			    struct partial_symtab **, int));
 
 static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *,
-			       struct section_offsets *));
+record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *));
 
 #define HANDLE_RBRAC(val) \
   if ((val) > pst->texthigh) pst->texthigh = (val);
@@ -198,12 +196,11 @@ record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *,
 #define N_ABS 6
 
 static void
-record_minimal_symbol (name, address, type, objfile, section_offsets)
+record_minimal_symbol (name, address, type, objfile)
      char *name;
      CORE_ADDR address;
      int type;
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
 {
   enum minimal_symbol_type ms_type;
 
@@ -211,7 +208,7 @@ record_minimal_symbol (name, address, type, objfile, section_offsets)
     {
     case N_TEXT:
       ms_type = mst_text;
-      address += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      address += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
       break;
     case N_DATA:
       ms_type = mst_data;
@@ -257,9 +254,8 @@ struct stbsymbol
 #define STBSYMSIZE 10
 
 static void
-read_minimal_symbols (objfile, section_offsets)
+read_minimal_symbols (objfile)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
 {
   FILE *fp;
   bfd *abfd;
@@ -314,7 +310,7 @@ read_minimal_symbols (objfile, section_offsets)
 	    break;
 	  ch = getc (fp);
 	};
-      record_minimal_symbol (buf1, sym.value, sym.type & 7, objfile, section_offsets);
+      record_minimal_symbol (buf1, sym.value, sym.type & 7, objfile);
       off += STBSYMSIZE;
     };
   install_minimal_symbols (objfile);
@@ -326,8 +322,6 @@ read_minimal_symbols (objfile, section_offsets)
    put all the relevant info into a "struct os9k_symfile_info",
    hung off the objfile structure.
 
-   SECTION_OFFSETS contains offsets relative to which the symbols in the
-   various sections are (depending where the sections were actually loaded).
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).  */
 
@@ -349,11 +343,11 @@ os9k_symfile_read (objfile, mainline)
   back_to = make_cleanup (really_free_pendings, 0);
 
   make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
-  read_minimal_symbols (objfile, objfile->section_offsets);
+  read_minimal_symbols (objfile);
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
-  read_os9k_psymtab (objfile->section_offsets, objfile,
+  read_os9k_psymtab (objfile,
 		     DBX_TEXT_ADDR (objfile),
 		     DBX_TEXT_SIZE (objfile));
 
@@ -565,13 +559,10 @@ fill_sym (dbg_file, abfd)
 /* Given pointers to an a.out symbol table in core containing dbx
    style data, setup partial_symtab's describing each source file for
    which debugging information is available.
-   SYMFILE_NAME is the name of the file we are reading from
-   and SECTION_OFFSETS is the set of offsets for the various sections
-   of the file (a set of zeros if the mainline program).  */
+   SYMFILE_NAME is the name of the file we are reading from. */
 
 static void
-read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
-     struct section_offsets *section_offsets;
+read_os9k_psymtab (objfile, text_addr, text_size)
      struct objfile *objfile;
      CORE_ADDR text_addr;
      int text_size;
@@ -617,7 +608,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 #ifdef END_OF_TEXT_DEFAULT
   end_of_text_addr = END_OF_TEXT_DEFAULT;
 #else
-  end_of_text_addr = text_addr + section_offsets->offsets[SECT_OFF_TEXT]
+  end_of_text_addr = text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)
     + text_size;		/* Relocate */
 #endif
 
@@ -664,7 +655,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	  continue;
 
 	case N_SYM_SE:
-	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	  if (psymfile_depth == 1 && pst)
 	    {
 	      os9k_end_psymtab (pst, psymtab_include_list, includes_used,
@@ -701,7 +692,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 
 		valu = CUR_SYMBOL_VALUE;
 		if (valu)
-		  valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		  valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 		past_first_source_file = 1;
 
 		p = strchr (namestring, ':');
@@ -716,7 +707,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 		if (psymfile_depth == 0)
 		  {
 		    if (!pst)
-		      pst = os9k_start_psymtab (objfile, section_offsets,
+		      pst = os9k_start_psymtab (objfile,
 						str, valu,
 						cursymoffset,
 						symnum - 1,
@@ -893,7 +884,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	      continue;
 
 	    case 'f':
-	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	      if (pst && pst->textlow == 0)
 		pst->textlow = CUR_SYMBOL_VALUE;
 
@@ -904,7 +895,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	      continue;
 
 	    case 'F':
-	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	      if (pst && pst->textlow == 0)
 		pst->textlow = CUR_SYMBOL_VALUE;
 
@@ -942,7 +933,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	    }
 
 	case N_SYM_RBRAC:
-	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 #ifdef HANDLE_RBRAC
 	  HANDLE_RBRAC (CUR_SYMBOL_VALUE);
 	  continue;
@@ -992,10 +983,9 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 
 
 static struct partial_symtab *
-os9k_start_psymtab (objfile, section_offsets,
+os9k_start_psymtab (objfile,
 	    filename, textlow, ldsymoff, ldsymcnt, global_syms, static_syms)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      char *filename;
      CORE_ADDR textlow;
      int ldsymoff;
@@ -1004,7 +994,7 @@ os9k_start_psymtab (objfile, section_offsets,
      struct partial_symbol **static_syms;
 {
   struct partial_symtab *result =
-  start_psymtab_common (objfile, section_offsets,
+  start_psymtab_common (objfile, objfile->section_offsets,
 			filename, textlow, global_syms, static_syms);
 
   result->read_symtab_private = (char *)
@@ -1313,7 +1303,6 @@ os9k_read_ofile_symtab (pst)
   int sym_offset;		/* Offset to start of symbols to read */
   CORE_ADDR text_offset;	/* Start of text segment for symbols */
   int text_size;		/* Size of text segment for symbols */
-  struct section_offsets *section_offsets;
   FILE *dbg_file;
 
   objfile = pst->objfile;
@@ -1321,7 +1310,6 @@ os9k_read_ofile_symtab (pst)
   max_symnum = LDSYMCNT (pst);
   text_offset = pst->textlow;
   text_size = pst->texthigh - pst->textlow;
-  section_offsets = pst->section_offsets;
 
   current_objfile = objfile;
   subfile_stack = NULL;
@@ -1386,7 +1374,7 @@ os9k_read_ofile_symtab (pst)
       type = bufp->n_type;
 
       os9k_process_one_symbol ((int) type, (int) bufp->n_desc,
-	 (CORE_ADDR) bufp->n_value, bufp->n_strx, section_offsets, objfile);
+	 (CORE_ADDR) bufp->n_value, bufp->n_strx, pst->section_offsets, objfile);
 
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine. */

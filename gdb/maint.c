@@ -347,13 +347,13 @@ maintenance_translate_address (arg, from_tty)
     sym = lookup_minimal_symbol_by_pc (address);
 
   if (sym)
-    printf_filtered ("%s+%u\n",
+    printf_filtered ("%s+%s\n",
 		     SYMBOL_SOURCE_NAME (sym),
-		     address - SYMBOL_VALUE_ADDRESS (sym));
+		     paddr_u (address - SYMBOL_VALUE_ADDRESS (sym)));
   else if (sect)
-    printf_filtered ("no symbol at %s:0x%08x\n", sect->name, address);
+    printf_filtered ("no symbol at %s:0x%s\n", sect->name, paddr (address));
   else
-    printf_filtered ("no symbol at 0x%08x\n", address);
+    printf_filtered ("no symbol at 0x%s\n", paddr (address));
 
   return;
 }

@@ -726,7 +726,7 @@ cp_print_class_member (valaddr, domain, stream, prefix)
 	fprintf_filtered (stream, " (offset in bits)");
     }
   else
-    fprintf_filtered (stream, "%d", val >> 3);
+    fprintf_filtered (stream, "%ld", (long) (val >> 3));
 }
 
 

@@ -1,3 +1,15 @@
+1999-09-07  Nick Clifton  <nickc@cygnus.com>
+
+	* simops.c (OP_6601): Do not write back decremented address if
+	either of the destination registers was the same as the address
+	register. 
+	(OP_6201): Do not write back incremented address if either of the
+	destination registers was the same as the address register. 
+
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

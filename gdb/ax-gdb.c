@@ -1049,8 +1049,6 @@ gen_sub (ax, value, value1, value2)
      struct agent_expr *ax;
      struct axs_value *value, *value1, *value2;
 {
-  struct type *element;
-
   if (value1->type->code == TYPE_CODE_PTR)
     {
       /* Is it PTR - INT?  */
@@ -1943,8 +1941,6 @@ void _initialize_ax_gdb PARAMS ((void));
 void
 _initialize_ax_gdb ()
 {
-  struct cmd_list_element *c;
-
   add_cmd ("agent", class_maintenance, agent_command,
 	   "Translate an expression into remote agent bytecode.",
 	   &maintenancelist);

@@ -706,7 +706,7 @@ dump_prefix_expression (exp, stream, note)
   int eltsize;
 
   fprintf_filtered (stream, "Dump of expression @ ");
-  gdb_print_address (exp, stream);
+  gdb_print_host_address (exp, stream);
   fprintf_filtered (stream, ", %s:\nExpression: `", note);
   if (exp->elts[0].opcode != OP_TYPE)
     print_expression (exp, stream);
@@ -831,7 +831,9 @@ dump_subexp (exp, stream, elt)
       elt = dump_subexp (exp, stream, elt);
       break;
     case OP_LONG:
-      fprintf_filtered (stream, "Type @0x%x (", exp->elts[elt].type);
+      fprintf_filtered (stream, "Type @");
+      gdb_print_host_address (exp->elts[elt].type, stream);
+      fprintf_filtered (stream, " (");
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, "), value %ld (0x%lx)",
 			(long) exp->elts[elt + 1].longconst,
@@ -839,16 +841,20 @@ dump_subexp (exp, stream, elt)
       elt += 3;
       break;
     case OP_DOUBLE:
-      fprintf_filtered (stream, "Type @0x%x (", exp->elts[elt].type);
+      fprintf_filtered (stream, "Type @");
+      gdb_print_host_address (exp->elts[elt].type, stream);
+      fprintf_filtered (stream, " (");
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, "), value %g",
 			(double) exp->elts[elt + 1].doubleconst);
       elt += 3;
       break;
     case OP_VAR_VALUE:
-      fprintf_filtered (stream, "Block @0x%x, symbol @0x%x (%s)",
-			exp->elts[elt].block,
-			exp->elts[elt + 1].symbol,
+      fprintf_filtered (stream, "Block @");
+      gdb_print_host_address (exp->elts[elt].block, stream);
+      fprintf_filtered (stream, ", symbol @");
+      gdb_print_host_address (exp->elts[elt + 1].symbol, stream);
+      fprintf_filtered (stream, " (%s)",
 			SYMBOL_NAME (exp->elts[elt + 1].symbol));
       elt += 3;
       break;
@@ -863,8 +869,9 @@ dump_subexp (exp, stream, elt)
       elt += 2;
       break;
     case OP_INTERNALVAR:
-      fprintf_filtered (stream, "Internal var @0x%x (%s)",
-			exp->elts[elt].internalvar,
+      fprintf_filtered (stream, "Internal var @");
+      gdb_print_host_address (exp->elts[elt].internalvar, stream);
+      fprintf_filtered (stream, " (%s)",
 			exp->elts[elt].internalvar->name);
       elt += 2;
       break;
@@ -898,15 +905,17 @@ dump_subexp (exp, stream, elt)
       break;
     case UNOP_MEMVAL:
     case UNOP_CAST:
-      fprintf_filtered (stream, "Type @0x%x (",
-			exp->elts[elt].type);
+      fprintf_filtered (stream, "Type @");
+      gdb_print_host_address (exp->elts[elt].type, stream);
+      fprintf_filtered (stream, " (");
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, ")");
       elt = dump_subexp (exp, stream, elt + 2);
       break;
     case OP_TYPE:
-      fprintf_filtered (stream, "Type @0x%x (",
-			exp->elts[elt].type);
+      fprintf_filtered (stream, "Type @");
+      gdb_print_host_address (exp->elts[elt].type, stream);
+      fprintf_filtered (stream, " (");
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, ")");
       elt += 2;
@@ -929,7 +938,9 @@ dump_subexp (exp, stream, elt)
 	char *elem_name;
 	int len;
 
-	fprintf_filtered (stream, "Type @0x%x (", exp->elts[elt].type);
+	fprintf_filtered (stream, "Type @");
+	gdb_print_host_address (exp->elts[elt].type, stream);
+	fprintf_filtered (stream, " (");
 	type_print (exp->elts[elt].type, NULL, stream, 0);
 	fprintf_filtered (stream, ") ");
 
@@ -972,7 +983,7 @@ dump_postfix_expression (exp, stream, note)
   int elt;
 
   fprintf_filtered (stream, "Dump of expression @ ");
-  gdb_print_address (exp, stream);
+  gdb_print_host_address (exp, stream);
   fprintf_filtered (stream, ", %s:\nExpression: `", note);
   if (exp->elts[0].opcode != OP_TYPE)
     print_expression (exp, stream);

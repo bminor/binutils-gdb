@@ -64,9 +64,6 @@
  *
  *    ?             What was the last sigval ?             SNN   (signal NN)
  *
- *    bBB..BB	    Set baud rate to BB..BB		   OK or BNN, then sets
- *							   baud rate
- *
  * All commands and responses are sent with a packet which includes a
  * checksum.  A packet consists of
  *
@@ -380,12 +377,15 @@ hex(ch)
   return -1;
 }
 
+static char remcomInBuffer[BUFMAX];
+static char remcomOutBuffer[BUFMAX];
+
 /* scan for the sequence $<data>#<checksum>     */
 
 unsigned char *
-getpacket (buffer)
-     unsigned char *buffer;
+getpacket ()
 {
+  unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
   unsigned char xmitcsum;
   int count;
@@ -477,9 +477,6 @@ putpacket(buffer)
     }
   while (getDebugChar() != '+');
 }
-
-static char remcomInBuffer[BUFMAX];
-static char remcomOutBuffer[BUFMAX];
 
 /* Indicate to caller of mem2hex or hex2mem that there has been an
    error.  */
@@ -796,7 +793,7 @@ handle_exception (registers)
     {
       remcomOutBuffer[0] = 0;
 
-      ptr = getpacket(remcomInBuffer);
+      ptr = getpacket();
       switch (*ptr++)
 	{
 	case '?':
@@ -936,43 +933,6 @@ handle_exception (registers)
 	  asm ("call 0
 		nop ");
 	  break;
-
-#if 0
-Disabled until we can unscrew this properly
-
-	case 'b':	  /* bBB...  Set baud rate to BB... */
-	  {
-	    int baudrate;
-	    extern void set_timer_3();
-
-	    if (!hexToInt(&ptr, &baudrate))
-	      {
-		strcpy(remcomOutBuffer,"B01");
-		break;
-	      }
-
-	    /* Convert baud rate to uart clock divider */
-	    switch (baudrate)
-	      {
-	      case 38400:
-		baudrate = 16;
-		break;
-	      case 19200:
-		baudrate = 33;
-		break;
-	      case 9600:
-		baudrate = 65;
-		break;
-	      default:
-		strcpy(remcomOutBuffer,"B02");
-		goto x1;
-	      }
-
-	    putpacket("OK");	/* Ack before changing speed */
-	    set_timer_3(baudrate); /* Set it */
-	  }
-x1:	  break;
-#endif
 	}			/* switch */
 
       /* reply to the request */

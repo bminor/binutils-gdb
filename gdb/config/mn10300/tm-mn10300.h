@@ -104,6 +104,8 @@ void mn10300_store_return_value PARAMS ((struct type * type, char *valbuf));
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
   mn10300_store_return_value (TYPE, VALBUF)
 
+
+extern CORE_ADDR mn10300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) \
   (mn10300_store_struct_return (STRUCT_ADDR, SP))
 

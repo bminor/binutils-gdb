@@ -218,9 +218,9 @@ dump_objfile (objfile)
 
   printf_filtered ("\nObject file %s:  ", objfile->name);
   printf_filtered ("Objfile at ");
-  gdb_print_address (objfile, gdb_stdout);
+  gdb_print_host_address (objfile, gdb_stdout);
   printf_filtered (", bfd at ");
-  gdb_print_address (objfile->obfd, gdb_stdout);
+  gdb_print_host_address (objfile->obfd, gdb_stdout);
   printf_filtered (", %d minsyms\n\n",
 		   objfile->minimal_symbol_count);
 
@@ -233,7 +233,7 @@ dump_objfile (objfile)
 	{
 	  printf_filtered ("%s at ",
 			   psymtab->filename);
-	  gdb_print_address (psymtab, gdb_stdout);
+	  gdb_print_host_address (psymtab, gdb_stdout);
 	  printf_filtered (", ");
 	  if (psymtab->objfile != objfile)
 	    {
@@ -252,7 +252,7 @@ dump_objfile (objfile)
 	   symtab = symtab->next)
 	{
 	  printf_filtered ("%s at ", symtab->filename);
-	  gdb_print_address (symtab, gdb_stdout);
+	  gdb_print_host_address (symtab, gdb_stdout);
 	  printf_filtered (", ");
 	  if (symtab->objfile != objfile)
 	    {
@@ -353,20 +353,20 @@ dump_psymtab (objfile, psymtab, outfile)
   fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
 		    psymtab->filename);
   fprintf_filtered (outfile, "(object ");
-  gdb_print_address (psymtab, outfile);
+  gdb_print_host_address (psymtab, outfile);
   fprintf_filtered (outfile, ")\n\n");
   fprintf_unfiltered (outfile, "  Read from object file %s (",
 		      objfile->name);
-  gdb_print_address (objfile, outfile);
+  gdb_print_host_address (objfile, outfile);
   fprintf_unfiltered (outfile, ")\n");
 
   if (psymtab->readin)
     {
       fprintf_filtered (outfile,
 			"  Full symtab was read (at ");
-      gdb_print_address (psymtab->symtab, outfile);
+      gdb_print_host_address (psymtab->symtab, outfile);
       fprintf_filtered (outfile, " by function at ");
-      gdb_print_address ((PTR) psymtab->read_symtab, outfile);
+      gdb_print_host_address ((PTR) psymtab->read_symtab, outfile);
       fprintf_filtered (outfile, ")\n");
     }
 
@@ -392,7 +392,7 @@ dump_psymtab (objfile, psymtab, outfile)
   for (i = 0; i < psymtab->number_of_dependencies; i++)
     {
       fprintf_filtered (outfile, "    %d ", i);
-      gdb_print_address (psymtab->dependencies[i], outfile);
+      gdb_print_host_address (psymtab->dependencies[i], outfile);
       fprintf_filtered (outfile, " %s\n",
 			psymtab->dependencies[i]->filename);
     }
@@ -429,7 +429,7 @@ dump_symtab (objfile, symtab, outfile)
     fprintf_filtered (outfile, "Compilation directory is %s\n",
 		      symtab->dirname);
   fprintf_filtered (outfile, "Read from object file %s (", objfile->name);
-  gdb_print_address (objfile, outfile);
+  gdb_print_host_address (objfile, outfile);
   fprintf_filtered (outfile, ")\n");
   fprintf_filtered (outfile, "Language: %s\n", language_str (symtab->language));
 
@@ -459,11 +459,11 @@ dump_symtab (objfile, symtab, outfile)
 	  depth = block_depth (b) * 2;
 	  print_spaces (depth, outfile);
 	  fprintf_filtered (outfile, "block #%03d, object at ", i);
-	  gdb_print_address (b, outfile);
+	  gdb_print_host_address (b, outfile);
 	  if (BLOCK_SUPERBLOCK (b))
 	    {
 	      fprintf_filtered (outfile, " under ");
-	      gdb_print_address (BLOCK_SUPERBLOCK (b), outfile);
+	      gdb_print_host_address (BLOCK_SUPERBLOCK (b), outfile);
 	    }
 	  blen = BLOCK_NSYMS (b);
 	  fprintf_filtered (outfile, ", %d syms in ", blen);
@@ -705,7 +705,7 @@ print_symbol (args)
 
 	case LOC_BLOCK:
 	  fprintf_filtered (outfile, "block object ");
-	  gdb_print_address (SYMBOL_BLOCK_VALUE (symbol), outfile);
+	  gdb_print_host_address (SYMBOL_BLOCK_VALUE (symbol), outfile);
 	  fprintf_filtered (outfile, ", ");
 	  print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (symbol)),
 				 1,

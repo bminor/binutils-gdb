@@ -287,6 +287,7 @@ extern use_struct_convention_fn i960_use_struct_convention;
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 
+CORE_ADDR leafproc_return (CORE_ADDR ip);
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
   (leafproc_return ((FI)->pc) != 0)
 
@@ -341,8 +342,10 @@ error("Function calls into the inferior process are not supported on the i960")
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
+
+void i960_pop_frame (void);
 #define POP_FRAME \
-	pop_frame ()
+	i960_pop_frame ()
 
 
 /* This sequence of words is the instructions

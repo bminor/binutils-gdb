@@ -30,6 +30,8 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+if { [skip_cplus_tests] } { continue }
+
 set testfile "ref-types"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}

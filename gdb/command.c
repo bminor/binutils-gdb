@@ -1374,8 +1374,6 @@ do_setshow_command (arg, from_tty, c)
 	{
 	case var_string:
 	  {
-	    unsigned char *p;
-
 	    fputs_filtered ("\"", gdb_stdout);
 	    if (*(unsigned char **) c->var)
 	      fputstr_filtered (*(unsigned char **) c->var, '"', gdb_stdout);

@@ -996,9 +996,7 @@ print_spaces (n, file)
 /* Print a host address.  */
 
 void
-gdb_print_address (addr, stream)
-     PTR addr;
-     GDB_FILE *stream;
+gdb_print_host_address (void *addr, struct gdb_file *stream)
 {
 
   /* We could use the %p conversion specifier to fprintf if we had any
@@ -3199,6 +3197,13 @@ get_cell ()
    -fnf
 
  */
+
+int
+strlen_paddr (void)
+{
+  return (TARGET_PTR_BIT / 8 * 2);
+}
+
 
 /* eliminate warning from compiler on 32-bit systems */
 static int thirty_two = 32;

@@ -240,4 +240,10 @@ extern int d30v_write_mem
  const char *buf,
  int bytes);
 
+/* Process all of the queued up writes in order now */
+void unqueue_writes
+(SIM_DESC sd,
+ sim_cpu *cpu,
+ address_word cia);
+
 #endif /* _CPU_H_ */

@@ -189,7 +189,7 @@ gdb_test "print func2::coremaker_local" "\\\$$decimal = {0, 1, 2, 3, 4}"
 # file correctly.  I don't think the other tests do this.
 
 gdb_test "bt" "abort.*func2.*func1.*main.*" "backtrace in corefile.exp"
-gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(\\).*" "up in corefile.exp"
+gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(.*\\).*" "up in corefile.exp"
 
 # Test ability to read mmap'd data
 

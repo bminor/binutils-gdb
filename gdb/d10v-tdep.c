@@ -729,34 +729,35 @@ show_regs (args, from_tty)
      int from_tty;
 {
   int a;
-  printf_filtered ("PC=%04x (0x%x) PSW=%04x RPT_S=%04x RPT_E=%04x RPT_C=%04x\n",
-     read_register (PC_REGNUM), D10V_MAKE_IADDR (read_register (PC_REGNUM)),
-		   read_register (PSW_REGNUM),
-		   read_register (24),
-		   read_register (25),
-		   read_register (23));
-  printf_filtered ("R0-R7  %04x %04x %04x %04x %04x %04x %04x %04x\n",
-		   read_register (0),
-		   read_register (1),
-		   read_register (2),
-		   read_register (3),
-		   read_register (4),
-		   read_register (5),
-		   read_register (6),
-		   read_register (7));
-  printf_filtered ("R8-R15 %04x %04x %04x %04x %04x %04x %04x %04x\n",
-		   read_register (8),
-		   read_register (9),
-		   read_register (10),
-		   read_register (11),
-		   read_register (12),
-		   read_register (13),
-		   read_register (14),
-		   read_register (15));
-  printf_filtered ("IMAP0 %04x    IMAP1 %04x    DMAP %04x\n",
-		   read_register (IMAP0_REGNUM),
-		   read_register (IMAP1_REGNUM),
-		   read_register (DMAP_REGNUM));
+  printf_filtered ("PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
+		   (long) read_register (PC_REGNUM),
+		   (long) D10V_MAKE_IADDR (read_register (PC_REGNUM)),
+		   (long) read_register (PSW_REGNUM),
+		   (long) read_register (24),
+		   (long) read_register (25),
+		   (long) read_register (23));
+  printf_filtered ("R0-R7  %04lx %04lx %04lx %04lx %04lx %04lx %04lx %04lx\n",
+		   (long) read_register (0),
+		   (long) read_register (1),
+		   (long) read_register (2),
+		   (long) read_register (3),
+		   (long) read_register (4),
+		   (long) read_register (5),
+		   (long) read_register (6),
+		   (long) read_register (7));
+  printf_filtered ("R8-R15 %04lx %04lx %04lx %04lx %04lx %04lx %04lx %04lx\n",
+		   (long) read_register (8),
+		   (long) read_register (9),
+		   (long) read_register (10),
+		   (long) read_register (11),
+		   (long) read_register (12),
+		   (long) read_register (13),
+		   (long) read_register (14),
+		   (long) read_register (15));
+  printf_filtered ("IMAP0 %04lx    IMAP1 %04lx    DMAP %04lx\n",
+		   (long) read_register (IMAP0_REGNUM),
+		   (long) read_register (IMAP1_REGNUM),
+		   (long) read_register (DMAP_REGNUM));
   printf_filtered ("A0-A1");
   for (a = A0_REGNUM; a <= A0_REGNUM + 1; a++)
     {
@@ -1129,10 +1130,11 @@ trace_info (args, from_tty)
 
       for (i = 0; i < trace_data.size; ++i)
 	{
-	  printf_filtered ("%d: %d instruction%s at 0x%x\n",
-			   i, trace_data.counts[i],
+	  printf_filtered ("%d: %d instruction%s at 0x%s\n",
+			   i,
+			   trace_data.counts[i],
 			   (trace_data.counts[i] == 1 ? "" : "s"),
-			   trace_data.addrs[i]);
+			   paddr_nz (trace_data.addrs[i]));
 	}
     }
   else
@@ -1261,7 +1263,7 @@ tdisassemble_command (arg, from_tty)
 	high = low;
     }
 
-  printf_filtered ("Dump of trace from %d to %d:\n", low, high);
+  printf_filtered ("Dump of trace from %s to %s:\n", paddr_u (low), paddr_u (high));
 
   display_trace (low, high);
 

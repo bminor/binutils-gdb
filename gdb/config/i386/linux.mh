@@ -4,4 +4,5 @@ XM_FILE= xm-linux.h
 XDEPFILES= ser-tcp.o
 
 NAT_FILE= nm-linux.h
-NATDEPFILES= infptrace.o solib.o inftarg.o fork-child.o corelow.o core-aout.o core-regset.o i386v-nat.o i386v4-nat.o
+NATDEPFILES= infptrace.o solib.o inftarg.o fork-child.o corelow.o \
+	core-aout.o core-regset.o i386v-nat.o i386-linux-nat.o linux-thread.o

@@ -90,6 +90,10 @@ typedef struct {
   CGEN_DISASSEMBLER *disassembler;
 #define CPU_DISASSEMBLER(cpu) ((cpu)->cgen_cpu.disassembler)
 
+  /* Queued writes for parallel write-after support.  */
+  CGEN_WRITE_QUEUE write_queue;
+#define CPU_WRITE_QUEUE(cpu) (& (cpu)->cgen_cpu.write_queue)
+
   /* Allow slop in size calcs for case where multiple cpu types are supported
      and space for the specified cpu is malloc'd at run time.  */
   double slop;
