@@ -1355,12 +1355,14 @@ process_one_symbol (type, desc, valu, name)
     {
     case N_FUN:
     case N_FNAME:
+#if 0
 /* It seems that the Sun ANSI C compiler (acc) replaces N_FUN with N_GSYM and
    N_STSYM with a type code of f or F.  Can't enable this until we get some
-   stuff straightened out with psymtabs.
-*/
+   stuff straightened out with psymtabs. */
+
     case N_GSYM:
     case N_STSYM:
+#endif /* 0 */
 
       /* Either of these types of symbols indicates the start of
 	 a new function.  We must process its "name" normally for dbx,
