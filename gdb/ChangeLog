@@ -1,3 +1,12 @@
+Sat Mar 16 16:22:09 1996  Fred Fish  <fnf@cygnus.com>
+
+	* acconfig.h: New file, for autoheader.
+	* configure.in (AC_CONFIG_HEADER): Add, generate config.h.
+	* configure: Regenerate.
+	* Makefile.in (defs_h): Add config.h
+	* defs.h (config.h): Include before any other includes or defines.
+	* i386-tdep.c (gdb_string.h): Move include after include of defs.h.
+
 Sat Mar 16 14:55:27 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>

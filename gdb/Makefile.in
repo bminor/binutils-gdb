@@ -402,7 +402,7 @@ breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 command_h =	command.h
 gdbcmd_h =	gdbcmd.h $(command_h)
 
-defs_h =	defs.h xm.h tm.h nm.h config.status
+defs_h =	defs.h xm.h tm.h nm.h config.status config.h
 
 inferior_h =	inferior.h $(breakpoint_h)
 
