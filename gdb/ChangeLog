@@ -1,3 +1,7 @@
+Thu Feb 27 14:12:41 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c: Put back the form feeds.
+
 Thu Feb 27 12:04:24 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-mips.c: Remove form feeds (^L) from source.

@@ -47,8 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern void mips_set_processor_type_command PARAMS ((char *, int));
 
-
-
+
 /* Prototypes for local functions.  */
 
 static int mips_readchar PARAMS ((int timeout));
@@ -153,8 +152,7 @@ static void common_open PARAMS ((struct target_ops *ops, char *name,
 extern struct target_ops mips_ops;
 extern struct target_ops pmon_ops;
 extern struct target_ops ddb_ops;
-
-
+
 /* The MIPS remote debugging interface is built on top of a simple
    packet protocol.  Each packet is organized as follows:
 
@@ -1149,8 +1147,7 @@ mips_receive_packet (buff, throw_error, timeout)
 
   return len;
 }
-
-
+
 /* Optionally send a request to the remote system and optionally wait
    for the reply.  This implements the remote debugging protocol,
    which is built on top of the packet protocol defined above.  Each
@@ -2250,8 +2247,7 @@ mips_mourn_inferior ()
     unpush_target (current_ops);
   generic_mourn_inferior ();
 }
-
-
+
 /* We can write a breakpoint and read the shadow contents in one
    operation.  */
 
@@ -2556,8 +2552,7 @@ common_breakpoint (cmd, addr, mask, flags)
 
   return 0;
 }
-
-
+
 static void
 send_srec (srec, len, addr)
      char *srec;
@@ -3229,8 +3224,7 @@ mips_load (file, from_tty)
 
   clear_symtab_users ();
 }
-
-
+
 /* The target vector.  */
 
 struct target_ops mips_ops =
@@ -3279,8 +3273,7 @@ HOST:PORT to access a board over a network",  /* to_doc */
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
-
-
+
 /* An alternative target vector: */
 struct target_ops pmon_ops =
 {
@@ -3328,8 +3321,7 @@ colon, HOST:PORT to access a board over a network",  /* to_doc */
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
-
-
+
 /* Another alternative target vector. This is a PMON system, but with
    a different monitor prompt, aswell as some other operational
    differences: */
@@ -3383,6 +3375,7 @@ of the TFTP temporary file, if it differs from the filename seen by the board",
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
+
 /* Another alternative target vector for LSI Logic MiniRISC boards.
    This is a PMON system, but with some other operational differences.  */
 struct target_ops lsi_ops =
@@ -3435,8 +3428,7 @@ of the TFTP temporary file, if it differs from the filename seen by the board",
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
-
-
+
 void
 _initialize_remote_mips ()
 {
