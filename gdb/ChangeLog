@@ -2,6 +2,7 @@ Wed Oct 15 10:27:14 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/sparc/tm-sparc.h (FIX_CALL_DUMMY): Mask off displacement
 	to 30 bits in call insn to handle --enable-64-bit-bfd.
+	(STORE_STRUCT_RETURN): Change to handle --enable-64-bit-bfd.
 
 Tue Oct 14 22:13:27 1997  Dawn Perchik  <dawn@cygnus.com>
 
