@@ -1,3 +1,7 @@
+1998-12-02  Ulrich Drepper  <drepper@cygnus.com>
+
+	* mips.h: Add R_MIPS_JALR and adjust R_MIPS_max appropriately.
+
 Tue Nov 10 15:12:28 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* common.h (EM_CYGNUS_FR30): Reduce to a 16 bit value.
