@@ -1,3 +1,10 @@
+2001-07-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* serial.h (struct serial): Rename `struct _serial_t'.
+	* serial.c (XMALLOC): Define.
+	(serial_open): Update. Use XMALLOC.
+	(serial_fdopen): Ditto.
+
 2001-07-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbtypes.h (builtin_type_void_data_ptr): Rename

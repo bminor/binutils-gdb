@@ -58,6 +58,9 @@ static const char logbase_ascii[] = "ascii";
 static const char *logbase_enums[] =
 {logbase_hex, logbase_octal, logbase_ascii, NULL};
 static const char *serial_logbase = logbase_ascii;
+
+#undef XMALLOC
+#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 
 
@@ -202,7 +205,7 @@ serial_open (const char *name)
   if (!ops)
     return NULL;
 
-  scb = (serial_t) xmalloc (sizeof (struct _serial_t));
+  scb = XMALLOC (struct serial);
 
   scb->ops = ops;
 
@@ -254,7 +257,7 @@ serial_fdopen (const int fd)
   if (!ops)
     return NULL;
 
-  scb = (serial_t) xmalloc (sizeof (struct _serial_t));
+  scb = XMALLOC (struct serial);
 
   scb->ops = ops;
 

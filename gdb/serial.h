@@ -29,8 +29,8 @@
    interface. */
 
 typedef void *serial_ttystate;
-struct _serial_t;
-typedef struct _serial_t *serial_t;
+struct serial;
+typedef struct serial *serial_t;
 
 /* Try to open NAME.  Returns a new serial_t on success, NULL on
    failure. */
@@ -199,7 +199,7 @@ extern int serial_debug_p (serial_t scb);
 
 /* Details of an instance of a serial object */
 
-struct _serial_t
+struct serial
   {
     int fd;			/* File descriptor */
     struct serial_ops *ops;	/* Function vector */
@@ -215,7 +215,7 @@ struct _serial_t
 				   still need to wait for this many
 				   more seconds.  */
     char *name;			/* The name of the device or host */
-    struct _serial_t *next;	/* Pointer to the next serial_t */
+    struct serial *next;	/* Pointer to the next serial_t */
     int refcnt;			/* Number of pointers to this block */
     int debug_p;		/* Trace this serial devices operation. */
     int async_state;		/* Async internal state. */
