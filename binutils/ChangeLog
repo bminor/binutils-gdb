@@ -1,3 +1,10 @@
+Tue Apr 28 10:33:07 1998  Bill Moyer  <ttk@cygnus.com>
+  
+ 	* dlltool.c, defparse.y, dlltool.h: added support 
+ 	  for parsing IMPORT declarations from input def 
+ 	  file correctly, added .idata sections to exp-file 
+ 	  object code.
+
 Mon Apr 27 16:39:22 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change version number to 2.9.4
