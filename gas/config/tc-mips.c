@@ -3330,7 +3330,7 @@ load_address (counter, reg, ep)
 	   lui		$reg,<sym>		(BFD_RELOC_HI16_S)
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
 	 If we have an addend, we always use the latter form.  */
-      if ((valueT) ep->X_add_number >= MAX_GPREL_OFFSET
+      if ((valueT) ep->X_add_number > MAX_GPREL_OFFSET
 	  || nopic_need_relax (ep->X_add_symbol, 1))
 	p = NULL;
       else
@@ -4226,7 +4226,7 @@ macro (ip)
 	       addiu	$tempreg,$tempreg,<sym>	(BFD_RELOC_LO16)
 	     If we have a constant, we need two instructions anyhow,
 	     so we may as well always use the latter form.  */
-	  if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
+	  if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
 	      || nopic_need_relax (offset_expr.X_add_symbol, 1))
 	    p = NULL;
 	  else
