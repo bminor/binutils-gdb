@@ -1,5 +1,5 @@
-/* Motorola 88000 COFF support ("Binary Compatability Standard") for BFD.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+/* BFD back-end for Motorola 88000 COFF "Binary Compatability Standard" files.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HOWTO_PREPARE(relocation, symbol) 	\
   {						\
   if (symbol != (asymbol *)NULL) {		\
-    if (symbol->section == &bfd_com_section) {	\
+    if (bfd_is_com_section (symbol->section)) { \
       relocation = 0;				\
     }						\
     else {					\
@@ -43,7 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
       symbol->section->output_offset;		\
   }						\
 }			
- 
 
 
 static bfd_reloc_status_type 
@@ -73,7 +72,7 @@ DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data,
 static reloc_howto_type howto_table[] = 
 {
   HOWTO(R_PCR16L,02,1,16,true, 0,false,true,0,"PCR16L",false,0x0000ffff,0x0000ffff,true),
-  HOWTO(R_PCR26L,02,2,16,true, 0,false,true,0,"PCR26L",false,0x03ffffff,0x03ffffff,true),
+  HOWTO(R_PCR26L,02,2,26,true, 0,false,true,0,"PCR26L",false,0x03ffffff,0x03ffffff,true),
   HOWTO(R_VRT16, 00,1,16,false,0,false,true,0,"VRT16", false,0x0000ffff,0x0000ffff,true),
   HOWTO(R_HVRT16,16,1,16,false,0,false,true,howto_hvrt16,"HVRT16",false,0x0000ffff,0x0000ffff,true),
   HOWTO(R_LVRT16,00,1,16,false,0,false,true,0,"LVRT16",false,0x0000ffff,0x0000ffff,true),
@@ -116,12 +115,16 @@ bfd_target m88kbcs_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* leading underscore */
+  '_',				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   3,				/* default alignment power */
-  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-  _do_getb64, _do_putb64,   _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+  _do_getb64, _do_getb_signed_64, _do_putb64,
+     _do_getb32, _do_getb_signed_32, _do_putb32,
+     _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
+  _do_getb64, _do_getb_signed_64, _do_putb64,
+     _do_getb32, _do_getb_signed_32, _do_putb32,
+     _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
 
     {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
        bfd_generic_archive_p, _bfd_dummy_target},
@@ -131,5 +134,5 @@ bfd_target m88kbcs_vec =
        _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE(coff),
-  COFF_SWAP_TABLE
+  COFF_SWAP_TABLE,
 };

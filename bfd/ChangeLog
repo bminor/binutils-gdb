@@ -1,3 +1,8 @@
+Thu Jul 15 16:02:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-m88k.c (howto_table): Corrected bitsize for R_PCR26L from
+	16 to 26.
+
 Wed Jul 14 15:29:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hppa.c [HOST_HPPABSD]: Use hpux-style core files.
