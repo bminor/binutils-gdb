@@ -1,3 +1,8 @@
+2002-07-19  Chris Demetriou  <cgd@broadcom.com>
+
+	* support/config.guess: Update from ../config.guess.
+	* support/config.sub: Update from ../config.sub.
+
 2002-02-24  Elena Zannoni  <ezannoni@redhat.com>
 
         * ChangeLog.gdb: Renamed from ChangeLog.Cygnus.
