@@ -1,9 +1,14 @@
+Mon Aug 16 14:16:02 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in (z8k-*-{coff,sim}): use coffbfd for this target
+
 Thu Aug 12 11:47:58 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (mips_ip): Suggested by
 	davidj@ICSI.Berkeley.EDU (David Johnson): Don't accept symbolic
 	names for 'E' and 'G' argument types (coprocessor registers) and
 	don't warn if $1 is used on the coprocessor.
+	(macro): Handle M_{L,S}WC{0,2,3}_AB correctly.
 
 Mon Aug  9 12:09:14 1993  Doug Evans  (dje@canuck.cygnus.com)
 
