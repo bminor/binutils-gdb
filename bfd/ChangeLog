@@ -1,5 +1,8 @@
 Fri Jun  4 07:49:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* configure.in (mips-*-ecoffl*): New target; use decstation.
+	(mips-*-ecoff*): Added trailing '*'.
+
 	* coff-mips.c (ecoff_get_debug): Get the offset from the first PDR
 	for the FDR, not from the first PDR in the file.
 
