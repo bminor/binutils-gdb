@@ -4,21 +4,15 @@ Mon Apr 22 00:02:43 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 	solib.c (solib_add): Don't malloc name passed to symbol_file_add.
 
 	* exec.c (build_section_table): If *start isn't NULL, free it.
-
-	* stack.c (parse_frame_specification): Error if NULL selected_frame.
-
-	* infcmd.c (finish_command): Error if NULL selected_frame.
-
-	* inflow.c (kill_command): Deal with NULL selected_frame.
-
-	* stack.c (record_selected_frame): Set *FRAMEP to NULL if there
+	stack.c (parse_frame_specification): Error if NULL selected_frame.
+	infcmd.c (finish_command): Error if NULL selected_frame.
+	inflow.c (kill_command): Deal with NULL selected_frame.
+	stack.c (record_selected_frame): Set *FRAMEP to NULL if there
 	is no selected frame.
 	infrun.c (restore_inferior_status): Add comment.
-
-	* findvar.c (read_var_value): Check for NULL frame where we need
+	findvar.c (read_var_value): Check for NULL frame where we need
 	a frame.
-
-	* breakpoint.c (get_catch_sals): Check for NULL selected_frame.
+	breakpoint.c (get_catch_sals): Check for NULL selected_frame.
 
 	* breakpoint.c (bpstat_print): Try all elements on the bpstat
 	chain before giving up with an internal error.
