@@ -1641,7 +1641,7 @@ do
     then
 	printf "  if (GDB_MULTI_ARCH)\n"
 	printf "    fprintf_unfiltered (file,\n"
-	printf "                        \"gdbarch_dump: ${macro} = 0x%%08lx\\\\n\",\n"
+	printf "                        \"gdbarch_dump: ${macro} = <0x%%08lx>\\\\n\",\n"
 	printf "                        (long) current_gdbarch->${function}\n"
 	printf "                        /*${macro} ()*/);\n"
     else
