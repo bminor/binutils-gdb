@@ -1,3 +1,33 @@
+2004-11-04 Jan Beulich <jbeulich@novell.com>
+
+	* i386-dis.c (Eq, Edqw, indirEp, Gdq, I1): Define.
+	(indirEb): Remove.
+	(Mp): Use f_mode rather than none at all.
+	(t_mode, dq_mode, dqw_mode, f_mode, const_1_mode): Define. t_mode
+	replaces what previously was x_mode; x_mode now means 128-bit SSE
+	operands.
+	(dis386): Make far jumps and calls have an 'l' prefix only in AT&T
+	mode. movmskpX's, pextrw's, and pmovmskb's first operands are Gdq.
+	pinsrw's second operand is Edqw.
+	(grps): 1-bit shifts' and rotates' second operands are I1. cmpxchg8b's
+	operand is Eq. movntq's and movntdq's first operands are EM. s[gi]dt,
+	fldenv, frstor, fsave, fstenv all should also have suffixes in Intel
+	mode when an operand size override is present or always suffixing.
+	More instructions will need to be added to this group.
+	(putop): Handle new macro chars 'C' (short/long suffix selector),
+	'I' (Intel mode override for following macro char), and 'J' (for
+	adding the 'l' prefix to far branches in AT&T mode). When an
+	alternative was specified in the template, honor macro character when
+	specified for Intel mode.
+	(OP_E): Handle new *_mode values. Correct pointer specifications for
+	memory operands. Consolidate output of index register.
+	(OP_G): Handle new *_mode values.
+	(OP_I): Handle const_1_mode.
+	(OP_ESreg, OP_DSreg): Generate pointer specifications. Indicate
+	respective opcode prefix bits have been consumed.
+	(OP_EM, OP_EX): Provide some default handling for generating pointer
+	specifications.
+
 2004-10-28  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-opc.c (REV_COP_INST): New macro, reverse operand order of

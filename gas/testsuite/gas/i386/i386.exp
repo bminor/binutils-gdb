@@ -47,6 +47,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "opcode"
     run_dump_test "intel"
     run_dump_test "intel16"
+    run_list_test "intelbad" ""
+    run_dump_test "intelok"
     run_dump_test "prefix"
     run_dump_test "amd"
     run_dump_test "katmai"

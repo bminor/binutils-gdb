@@ -1,3 +1,31 @@
+2004-11-04 Jan Beulich <jbeulich@novell.com>
+
+	* config/tc-i386.c (set_intel_syntax): Allow % in symbol names when
+	intel syntax and no register prefix, allow $ in symbol names when
+	intel syntax.
+	(set_16bit_gcc_code_flag): Replace literal 'l' by LONG_MNEM_SUFFIX.
+	(intel_float_operand): Add fourth return value indicating math control
+	operations. Make classification more precise.
+	(md_assemble): Complain if memory operand of mov[sz]x has no size
+	specified.
+	(parse_insn): Translate word operands to floating point instructions
+	operating on integers as well as control instructions to short ones
+	as expected by AT&T syntax. Translate 'd' suffix to short one only for
+	floating point instructions operating on non-integer operands.
+	(match_template): Remove fldcw special case. Adjust q-suffix handling
+	to permit it on fild/fistp/fisttp in AT&T mode.
+	(process_suffix): Don't guess DefaultSize insns' suffix from
+	stackop_size for certain floating point control instructions. Guess
+	suffix for branch and [ls][gi]dt based on flag_code. Split error
+	messages for Intel and AT&T syntax, and make the condition more strict
+	for the former. Adjust suppressing of generation of operand size
+	overrides.
+	(intel parser): Allow the full set of MASM operators. Add FWORD, TBYTE,
+	OWORD, and XMMWORD operand size specifiers (TBYTE replaces XWORD). Add
+	more error checking.
+	* config/tc-i386.h (BYTE_PTR WORD_PTR DWORD_PTR QWORD_PTR XWORD_PTR
+	SHORT OFFSET_FLAT FLAT NONE_FOUND): Remove unused defines.
+
 2004-11-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* symbols.c (colon) [!WORKING_DOT_WORD]: Don't declare

@@ -782,7 +782,7 @@ set_16bit_gcc_code_flag (new_code_flag)
   flag_code = new_code_flag;
   cpu_arch_flags &= ~(Cpu64 | CpuNo64);
   cpu_arch_flags |= (flag_code == CODE_64BIT ? Cpu64 : CpuNo64);
-  stackop_size = 'l';
+  stackop_size = LONG_MNEM_SUFFIX;
 }
 
 static void
@@ -815,6 +815,9 @@ set_intel_syntax (syntax_flag)
 		       && (bfd_get_symbol_leading_char (stdoutput) != '\0'));
   else
     allow_naked_reg = (ask_naked_reg < 0);
+
+  identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
+  identifier_chars['$'] = intel_syntax ? '$' : 0;
 }
 
 static void
@@ -1280,13 +1283,54 @@ static int
 intel_float_operand (mnemonic)
      const char *mnemonic;
 {
-  if (mnemonic[0] == 'f' && mnemonic[1] == 'i')
-    return 2;
+  /* Note that the value returned is meaningful only for opcodes with (memory)
+     operands, hence the code here is free to improperly handle opcodes that
+     have no operands (for better performance and smaller code). */
 
-  if (mnemonic[0] == 'f')
-    return 1;
+  if (mnemonic[0] != 'f')
+    return 0; /* non-math */
 
-  return 0;
+  switch (mnemonic[1])
+    {
+    /* fclex, fdecstp, fdisi, femms, feni, fincstp, finit, fsetpm, and
+       the fs segment override prefix not currently handled because no
+       call path can make opcodes without operands get here */
+    case 'i':
+      return 2 /* integer op */;
+    case 'l':
+      if (mnemonic[2] == 'd' && (mnemonic[3] == 'c' || mnemonic[3] == 'e'))
+	return 3; /* fldcw/fldenv */
+      break;
+    case 'n':
+      if (mnemonic[2] != 'o' /* fnop */)
+	return 3; /* non-waiting control op */
+      break;
+    case 'r':
+      if (mnemonic[2] == 's')
+	return 3; /* frstor/frstpm */
+      break;
+    case 's':
+      if (mnemonic[2] == 'a')
+	return 3; /* fsave */
+      if (mnemonic[2] == 't')
+	{
+	  switch (mnemonic[3])
+	    {
+	    case 'c': /* fstcw */
+	    case 'd': /* fstdw */
+	    case 'e': /* fstenv */
+	    case 's': /* fsts[gw] */
+	      return 3;
+	    }
+	}
+      break;
+    case 'x':
+      if (mnemonic[2] == 'r' || mnemonic[2] == 's')
+	return 0; /* fxsave/fxrstor are not really math ops */
+      break;
+    }
+
+  return 1;
 }
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
@@ -1358,7 +1402,20 @@ md_assemble (line)
 	 "word ptr" or "byte ptr" on the source operand, but we'll use
 	 the suffix later to choose the destination register.  */
       if ((i.tm.base_opcode & ~9) == 0x0fb6)
-	i.suffix = 0;
+	{
+	  if (i.reg_operands < 2
+	      && !i.suffix
+	      && (~i.tm.opcode_modifier
+		  & (No_bSuf
+		     | No_wSuf
+		     | No_lSuf
+		     | No_sSuf
+		     | No_xSuf
+		     | No_qSuf)))
+	    as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
+
+	  i.suffix = 0;
+	}
     }
 
   if (i.tm.opcode_modifier & FWait)
@@ -1580,6 +1637,9 @@ parse_insn (line, mnemonic)
       switch (mnem_p[-1])
 	{
 	case WORD_MNEM_SUFFIX:
+	  if (intel_syntax && (intel_float_operand (mnemonic) & 2))
+	    i.suffix = SHORT_MNEM_SUFFIX;
+	  else
 	case BYTE_MNEM_SUFFIX:
 	case QWORD_MNEM_SUFFIX:
 	  i.suffix = mnem_p[-1];
@@ -1600,7 +1660,7 @@ parse_insn (line, mnemonic)
 	case 'd':
 	  if (intel_syntax)
 	    {
-	      if (intel_float_operand (mnemonic))
+	      if (intel_float_operand (mnemonic) == 1)
 		i.suffix = SHORT_MNEM_SUFFIX;
 	      else
 		i.suffix = LONG_MNEM_SUFFIX;
@@ -2020,9 +2080,10 @@ match_template ()
   t = current_templates->start;
   if (i.suffix == QWORD_MNEM_SUFFIX
       && flag_code != CODE_64BIT
-      && (!intel_syntax
-	  || (!(t->opcode_modifier & IgnoreSize)
-	      && ! intel_float_operand (t->name)))
+      && (intel_syntax
+	  ? !(t->opcode_modifier & IgnoreSize)
+	    && !intel_float_operand (t->name)
+	  : intel_float_operand (t->name) != 2)
       && (!(t->operand_types[0] & (RegMMX | RegXMM))
 	  || !(t->operand_types[t->operands > 1] & (RegMMX | RegXMM)))
       && (t->base_opcode != 0x0fc7
@@ -2037,11 +2098,7 @@ match_template ()
       /* Check the suffix, except for some instructions in intel mode.  */
       if ((t->opcode_modifier & suffix_check)
 	  && !(intel_syntax
-	       && (t->opcode_modifier & IgnoreSize))
-	  && !(intel_syntax
-	       && t->base_opcode == 0xd9
-	       && (t->extension_opcode == 5	     /* 0xd9,5 "fldcw"  */
-		   || t->extension_opcode == 7)))  /* 0xd9,7 "f{n}stcw"  */
+	       && (t->opcode_modifier & IgnoreSize)))
 	continue;
 
       /* Do not verify operands when there are none.  */
@@ -2256,21 +2313,74 @@ process_suffix (void)
       else
 	abort ();
     }
-  else if ((i.tm.opcode_modifier & DefaultSize) && !i.suffix)
+  else if ((i.tm.opcode_modifier & DefaultSize)
+	   && !i.suffix
+	   /* exclude fldenv/frstor/fsave/fstenv */
+	   && (i.tm.opcode_modifier & No_sSuf))
     {
       i.suffix = stackop_size;
       if (i.suffix == QWORD_MNEM_SUFFIX
 	  && (i.tm.opcode_modifier & No_qSuf))
 	i.suffix = LONG_MNEM_SUFFIX;
     }
+  else if (intel_syntax
+	   && !i.suffix
+	   && ((i.tm.operand_types[0] & JumpAbsolute)
+	    || (i.tm.opcode_modifier & (JumpByte|JumpInterSegment))
+	    || (i.tm.base_opcode == 0x0f01 /* [ls][gi]dt */
+		&& i.tm.extension_opcode <= 3)))
+    {
+      switch (flag_code)
+	{
+	case CODE_64BIT:
+	  if (!(i.tm.opcode_modifier & No_qSuf))
+	    {
+	      i.suffix = QWORD_MNEM_SUFFIX;
+	      break;
+	    }
+	case CODE_32BIT:
+	  if (!(i.tm.opcode_modifier & No_lSuf))
+	    i.suffix = LONG_MNEM_SUFFIX;
+	  break;
+	case CODE_16BIT:
+	  if (!(i.tm.opcode_modifier & No_wSuf))
+	    i.suffix = WORD_MNEM_SUFFIX;
+	  break;
+	}
+    }
+
+  if (!i.suffix)
+    {
+      if (!intel_syntax)
+	{
+	  if (i.tm.opcode_modifier & W)
+	    {
+	      as_bad (_("no instruction mnemonic suffix given and no register operands; can't size instruction"));
+	      return 0;
+	    }
+	}
+      else
+	{
+	  unsigned int suffixes = ~i.tm.opcode_modifier
+				  & (No_bSuf
+				     | No_wSuf
+				     | No_lSuf
+				     | No_sSuf
+				     | No_xSuf
+				     | No_qSuf);
+
+	  if ((i.tm.opcode_modifier & W)
+	      || ((suffixes & (suffixes - 1))
+		  && !(i.tm.opcode_modifier & (DefaultSize | IgnoreSize))))
+	    {
+	      as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
+	      return 0;
+	    }
+	}
+    }
 
   /* Change the opcode based on the operand size given by i.suffix;
-     We need not change things for byte insns.  */
-  if (!i.suffix && (i.tm.opcode_modifier & W))
-    {
-      as_bad (_("no instruction mnemonic suffix given and no register operands; can't size instruction"));
-      return 0;
-    }
+     We don't need to change things for byte insns.  */
 
   if (i.suffix && i.suffix != BYTE_MNEM_SUFFIX)
     {
@@ -2287,7 +2397,8 @@ process_suffix (void)
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
       if (i.suffix != QWORD_MNEM_SUFFIX
-	  && !(i.tm.opcode_modifier & IgnoreSize)
+	  && i.suffix != LONG_DOUBLE_MNEM_SUFFIX
+	  && !(i.tm.opcode_modifier & (IgnoreSize | FloatMF))
 	  && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
 	      || (flag_code == CODE_64BIT
 		  && (i.tm.opcode_modifier & JumpByte))))
@@ -5336,15 +5447,17 @@ tc_gen_reloc (section, fixp)
 
    Initial production is 'expr'.
 
-    addOp		+ | - | & | \| | << | >>
+    addOp		+ | -
 
     alpha		[a-zA-Z]
+
+    binOp		& | AND | \| | OR | ^ | XOR
 
     byteRegister	AL | AH | BL | BH | CL | CH | DL | DH
 
     constant		digits [[ radixOverride ]]
 
-    dataType		BYTE | WORD | DWORD | QWORD | XWORD
+    dataType		BYTE | WORD | DWORD | FWORD | QWORD | TBYTE | OWORD | XMMWORD
 
     digits		decdigit
 			| digits decdigit
@@ -5352,13 +5465,18 @@ tc_gen_reloc (section, fixp)
 
     decdigit		[0-9]
 
-    e05			e05 addOp e06
+    e04			e04 addOp e05
+			| e05
+
+    e05			e05 binOp e06
 			| e06
 
     e06			e06 mulOp e09
 			| e09
 
     e09			OFFSET e10
+			| ~ e10
+			| NOT e10
 			| e09 PTR e10
 			| e09 : e10
 			| e10
@@ -5373,10 +5491,9 @@ tc_gen_reloc (section, fixp)
 			| id
 			| $
 			| register
-			| ~
 
- => expr		SHORT e05
-			| e05
+ => expr		SHORT e04
+			| e04
 
     gpRegister		AX | EAX | BX | EBX | CX | ECX | DX | EDX
 			| BP | EBP | SP | ESP | DI | EDI | SI | ESI
@@ -5388,7 +5505,7 @@ tc_gen_reloc (section, fixp)
 			| id alpha
 			| id decdigit
 
-    mulOp		* | / | MOD
+    mulOp		* | / | % | MOD | << | SHL | >> | SHR
 
     quote		" | '
 
@@ -5398,7 +5515,7 @@ tc_gen_reloc (section, fixp)
 
     segmentRegister	CS | DS | ES | FS | GS | SS
 
-    specialRegister	CR0 | CR2 | CR3
+    specialRegister	CR0 | CR2 | CR3 | CR4
 			| DR0 | DR1 | DR2 | DR3 | DR6 | DR7
 			| TR3 | TR4 | TR5 | TR6 | TR7
 
@@ -5406,12 +5523,17 @@ tc_gen_reloc (section, fixp)
     done by calling parse_register) and eliminate immediate left recursion
     to implement a recursive-descent parser.
 
-    expr	SHORT e05
-		| e05
+    expr	SHORT e04
+		| e04
+
+    e04		e05 e04'
+
+    e04'	addOp e05 e04'
+		| Empty
 
     e05		e06 e05'
 
-    e05'	addOp e06 e05'
+    e05'	binOp e06 e05'
 		| Empty
 
     e06		e09 e06'
@@ -5420,6 +5542,8 @@ tc_gen_reloc (section, fixp)
 		| Empty
 
     e09		OFFSET e10 e09'
+		| ~ e10
+		| NOT e10
 		| e10 e09'
 
     e09'	PTR e10 e09'
@@ -5436,13 +5560,15 @@ tc_gen_reloc (section, fixp)
 		| BYTE
 		| WORD
 		| DWORD
+		| FWORD
 		| QWORD
-		| XWORD
+		| TBYTE
+		| OWORD
+		| XMMWORD
 		| .
 		| $
 		| register
 		| id
-		| ~
 		| constant  */
 
 /* Parsing structure for the intel syntax parser. Used to implement the
@@ -5476,21 +5602,26 @@ static struct intel_token cur_token, prev_token;
 #define T_REG		2
 #define T_BYTE		3
 #define T_WORD		4
-#define	T_DWORD		5
-#define T_QWORD		6
-#define T_XWORD		7
+#define T_DWORD		5
+#define T_FWORD		6
+#define T_QWORD		7
+#define T_TBYTE		8
+#define T_XMMWORD	9
 #undef  T_SHORT
-#define T_SHORT		8
-#define T_OFFSET	9
-#define T_PTR		10
-#define T_ID		11
-#define T_SHIFTOP	12
+#define T_SHORT		10
+#define T_OFFSET	11
+#define T_PTR		12
+#define T_ID		13
+#define T_SHL		14
+#define T_SHR		15
 
 /* Prototypes for intel parser functions.  */
 static int intel_match_token	PARAMS ((int code));
 static void intel_get_token	PARAMS ((void));
 static void intel_putback_token	PARAMS ((void));
 static int intel_expr		PARAMS ((void));
+static int intel_e04		PARAMS ((void));
+static int intel_e04_1		PARAMS ((void));
 static int intel_e05		PARAMS ((void));
 static int intel_e05_1		PARAMS ((void));
 static int intel_e06		PARAMS ((void));
@@ -5534,9 +5665,15 @@ i386_intel_operand (operand_string, got_a_float)
 
   if (ret)
     {
+      if (cur_token.code != T_NIL)
+	{
+	  as_bad (_("invalid operand for '%s' ('%s' unexpected)"),
+		  current_templates->start->name, cur_token.str);
+	  ret = 0;
+	}
       /* If we found a memory reference, hand it over to i386_displacement
 	 to fill in the rest of the operand fields.  */
-      if (intel_parser.is_mem)
+      else if (intel_parser.is_mem)
 	{
 	  if ((i.mem_operands == 1
 	       && (current_templates->start->opcode_modifier & IsString) == 0)
@@ -5560,7 +5697,7 @@ i386_intel_operand (operand_string, got_a_float)
 	}
 
       /* Constant and OFFSET expressions are handled by i386_immediate.  */
-      else if (intel_parser.op_modifier == OFFSET_FLAT
+      else if (intel_parser.op_modifier == T_OFFSET
 	       || intel_parser.reg == NULL)
 	ret = i386_immediate (intel_parser.disp);
     }
@@ -5571,28 +5708,59 @@ i386_intel_operand (operand_string, got_a_float)
   return ret;
 }
 
-/* expr	SHORT e05
-	| e05  */
+/* expr	SHORT e04
+	| e04  */
 static int
 intel_expr ()
 {
-  /* expr  SHORT e05  */
+  /* expr  SHORT e04  */
   if (cur_token.code == T_SHORT)
     {
-      intel_parser.op_modifier = SHORT;
+      intel_parser.op_modifier = T_SHORT;
       intel_match_token (T_SHORT);
 
-      return (intel_e05 ());
+      return (intel_e04 ());
     }
 
-  /* expr  e05  */
+  /* expr  e04  */
   else
-    return intel_e05 ();
+    return intel_e04 ();
+}
+
+/* e04	e06 e04'
+
+   e04'	addOp e06 e04'
+	| Empty  */
+static int
+intel_e04 ()
+{
+  return (intel_e05 () && intel_e04_1 ());
+}
+
+static int
+intel_e04_1 ()
+{
+  /* e04'  addOp e05 e04'  */
+  if (cur_token.code == '+' || cur_token.code == '-')
+    {
+      char str[2];
+
+      str[0] = cur_token.code;
+      str[1] = 0;
+      strcat (intel_parser.disp, str);
+      intel_match_token (cur_token.code);
+
+      return (intel_e05 () && intel_e04_1 ());
+    }
+
+  /* e04'  Empty  */
+  else
+    return 1;
 }
 
 /* e05	e06 e05'
 
-   e05'	addOp e06 e05'
+   e05'	binOp e06 e05'
 	| Empty  */
 static int
 intel_e05 ()
@@ -5603,12 +5771,14 @@ intel_e05 ()
 static int
 intel_e05_1 ()
 {
-  /* e05'  addOp e06 e05'  */
-  if (cur_token.code == '+' || cur_token.code == '-'
-      || cur_token.code == '&' || cur_token.code == '|'
-      || cur_token.code == T_SHIFTOP)
+  /* e05'  binOp e06 e05'  */
+  if (cur_token.code == '&' || cur_token.code == '|' || cur_token.code == '^')
     {
-      strcat (intel_parser.disp, cur_token.str);
+      char str[2];
+
+      str[0] = cur_token.code;
+      str[1] = 0;
+      strcat (intel_parser.disp, str);
       intel_match_token (cur_token.code);
 
       return (intel_e06 () && intel_e05_1 ());
@@ -5633,9 +5803,27 @@ static int
 intel_e06_1 ()
 {
   /* e06'  mulOp e09 e06'  */
-  if (cur_token.code == '*' || cur_token.code == '/')
+  if (cur_token.code == '*' || cur_token.code == '/' || cur_token.code == '%')
     {
-      strcat (intel_parser.disp, cur_token.str);
+      char str[2];
+
+      str[0] = cur_token.code;
+      str[1] = 0;
+      strcat (intel_parser.disp, str);
+      intel_match_token (cur_token.code);
+
+      return (intel_e09 () && intel_e06_1 ());
+    }
+  else if (cur_token.code == T_SHL)
+    {
+      strcat (intel_parser.disp, "<<");
+      intel_match_token (cur_token.code);
+
+      return (intel_e09 () && intel_e06_1 ());
+    }
+  else if (cur_token.code == T_SHR)
+    {
+      strcat (intel_parser.disp, ">>");
       intel_match_token (cur_token.code);
 
       return (intel_e09 () && intel_e06_1 ());
@@ -5649,6 +5837,10 @@ intel_e06_1 ()
 /* e09	OFFSET e10 e09'
 	| e10 e09'
 
+   e09	~ e10 e09'
+	| NOT e10 e09'
+	| e10 e09'
+
    e09'	PTR e10 e09'
 	| : e10 e09'
 	| Empty */
@@ -5659,8 +5851,21 @@ intel_e09 ()
   if (cur_token.code == T_OFFSET)
     {
       intel_parser.is_mem = 0;
-      intel_parser.op_modifier = OFFSET_FLAT;
+      intel_parser.op_modifier = T_OFFSET;
       intel_match_token (T_OFFSET);
+
+      return (intel_e10 () && intel_e09_1 ());
+    }
+
+  /* e09  NOT e10 e09'  */
+  else if (cur_token.code == '~')
+    {
+      char str[2];
+
+      str[0] = cur_token.code;
+      str[1] = 0;
+      strcat (intel_parser.disp, str);
+      intel_match_token (cur_token.code);
 
       return (intel_e10 () && intel_e09_1 ());
     }
@@ -5676,39 +5881,90 @@ intel_e09_1 ()
   /* e09'  PTR e10 e09' */
   if (cur_token.code == T_PTR)
     {
+      char suffix;
+
       if (prev_token.code == T_BYTE)
-	i.suffix = BYTE_MNEM_SUFFIX;
+	suffix = BYTE_MNEM_SUFFIX;
 
       else if (prev_token.code == T_WORD)
 	{
-	  if (intel_parser.got_a_float == 2)	/* "fi..." */
-	    i.suffix = SHORT_MNEM_SUFFIX;
+	  if (current_templates->start->name[0] == 'l'
+	      && current_templates->start->name[2] == 's'
+	      && current_templates->start->name[3] == 0)
+	    suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
+	  else if (intel_parser.got_a_float == 2)	/* "fi..." */
+	    suffix = SHORT_MNEM_SUFFIX;
 	  else
-	    i.suffix = WORD_MNEM_SUFFIX;
+	    suffix = WORD_MNEM_SUFFIX;
 	}
 
       else if (prev_token.code == T_DWORD)
 	{
-	  if (intel_parser.got_a_float == 1)	/* "f..." */
-	    i.suffix = SHORT_MNEM_SUFFIX;
+	  if (current_templates->start->name[0] == 'l'
+	      && current_templates->start->name[2] == 's'
+	      && current_templates->start->name[3] == 0)
+	    suffix = WORD_MNEM_SUFFIX;
+	  else if (flag_code == CODE_16BIT
+		   && (current_templates->start->opcode_modifier
+		       & (Jump|JumpDword|JumpInterSegment)))
+	    suffix = LONG_DOUBLE_MNEM_SUFFIX;
+	  else if (intel_parser.got_a_float == 1)	/* "f..." */
+	    suffix = SHORT_MNEM_SUFFIX;
 	  else
-	    i.suffix = LONG_MNEM_SUFFIX;
+	    suffix = LONG_MNEM_SUFFIX;
+	}
+
+      else if (prev_token.code == T_FWORD)
+	{
+	  if (current_templates->start->name[0] == 'l'
+	      && current_templates->start->name[2] == 's'
+	      && current_templates->start->name[3] == 0)
+	    suffix = LONG_MNEM_SUFFIX;
+	  else if (!intel_parser.got_a_float)
+	    {
+	      if (flag_code == CODE_16BIT)
+		add_prefix (DATA_PREFIX_OPCODE);
+	      suffix = LONG_DOUBLE_MNEM_SUFFIX;
+	    }
+	  else
+	    suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
 	}
 
       else if (prev_token.code == T_QWORD)
 	{
 	  if (intel_parser.got_a_float == 1)	/* "f..." */
-	    i.suffix = LONG_MNEM_SUFFIX;
+	    suffix = LONG_MNEM_SUFFIX;
 	  else
-	    i.suffix = QWORD_MNEM_SUFFIX;
+	    suffix = QWORD_MNEM_SUFFIX;
 	}
 
-      else if (prev_token.code == T_XWORD)
-	i.suffix = LONG_DOUBLE_MNEM_SUFFIX;
+      else if (prev_token.code == T_TBYTE)
+	{
+	  if (intel_parser.got_a_float == 1)
+	    suffix = LONG_DOUBLE_MNEM_SUFFIX;
+	  else
+	    suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
+	}
+
+      else if (prev_token.code == T_XMMWORD)
+	{
+	  /* XXX ignored for now, but accepted since gcc uses it */
+	  suffix = 0;
+	}
 
       else
 	{
 	  as_bad (_("Unknown operand modifier `%s'"), prev_token.str);
+	  return 0;
+	}
+
+      if (current_templates->start->base_opcode == 0x8d /* lea */)
+	;
+      else if (!i.suffix)
+	i.suffix = suffix;
+      else if (i.suffix != suffix)
+	{
+	  as_bad (_("Conflicting operand modifiers"));
 	  return 0;
 	}
 
@@ -5722,7 +5978,7 @@ intel_e09_1 ()
     {
       /* Mark as a memory operand only if it's not already known to be an
 	 offset expression.  */
-      if (intel_parser.op_modifier != OFFSET_FLAT)
+      if (intel_parser.op_modifier != T_OFFSET)
 	intel_parser.is_mem = 1;
 
       return (intel_match_token (':') && intel_e10 () && intel_e09_1 ());
@@ -5754,7 +6010,7 @@ intel_e10_1 ()
       /* Mark as a memory operand only if it's not already known to be an
 	 offset expression.  If it's an offset expression, we need to keep
 	 the brace in.  */
-      if (intel_parser.op_modifier != OFFSET_FLAT)
+      if (intel_parser.op_modifier != T_OFFSET)
 	intel_parser.is_mem = 1;
       else
 	strcat (intel_parser.disp, "[");
@@ -5767,7 +6023,7 @@ intel_e10_1 ()
       if (intel_expr () && intel_match_token (']'))
 	{
 	  /* Preserve brackets when the operand is an offset expression.  */
-	  if (intel_parser.op_modifier == OFFSET_FLAT)
+	  if (intel_parser.op_modifier == T_OFFSET)
 	    strcat (intel_parser.disp, "]");
 
 	  return intel_e10_1 ();
@@ -5786,13 +6042,15 @@ intel_e10_1 ()
 	| BYTE
 	| WORD
 	| DWORD
+	| FWORD
 	| QWORD
-	| XWORD
+	| TBYTE
+	| OWORD
+	| XMMWORD
 	| $
 	| .
 	| register
 	| id
-	| ~
 	| constant  */
 static int
 intel_e11 ()
@@ -5812,15 +6070,6 @@ intel_e11 ()
 	return 0;
     }
 
-  /* e11 ~ expr */
-  else if (cur_token.code == '~')
-   {
-     strcat (intel_parser.disp, "~");
-     intel_match_token ('~');
-
-     return (intel_e11 ());
-   }
-
   /* e11  [ expr ] */
   else if (cur_token.code == '[')
     {
@@ -5829,16 +6078,14 @@ intel_e11 ()
       /* Mark as a memory operand only if it's not already known to be an
 	 offset expression.  If it's an offset expression, we need to keep
 	 the brace in.  */
-      if (intel_parser.op_modifier != OFFSET_FLAT)
+      if (intel_parser.op_modifier != T_OFFSET)
 	intel_parser.is_mem = 1;
       else
 	strcat (intel_parser.disp, "[");
 
       /* Operands for jump/call inside brackets denote absolute addresses.  */
-      if (current_templates->start->opcode_modifier & Jump
-	  || current_templates->start->opcode_modifier & JumpDword
-	  || current_templates->start->opcode_modifier & JumpByte
-	  || current_templates->start->opcode_modifier & JumpInterSegment)
+      if (current_templates->start->opcode_modifier
+	  & (Jump|JumpDword|JumpByte|JumpInterSegment))
 	i.types[this_operand] |= JumpAbsolute;
 
       /* Add a '+' to the displacement string if necessary.  */
@@ -5849,7 +6096,7 @@ intel_e11 ()
       if (intel_expr () && intel_match_token (']'))
 	{
 	  /* Preserve brackets when the operand is an offset expression.  */
-	  if (intel_parser.op_modifier == OFFSET_FLAT)
+	  if (intel_parser.op_modifier == T_OFFSET)
 	    strcat (intel_parser.disp, "]");
 
 	  return 1;
@@ -5861,13 +6108,18 @@ intel_e11 ()
   /* e11  BYTE
 	  | WORD
 	  | DWORD
+	  | FWORD
 	  | QWORD
-	  | XWORD  */
+	  | TBYTE
+	  | OWORD
+	  | XMMWORD  */
   else if (cur_token.code == T_BYTE
 	   || cur_token.code == T_WORD
 	   || cur_token.code == T_DWORD
+	   || cur_token.code == T_FWORD
 	   || cur_token.code == T_QWORD
-	   || cur_token.code == T_XWORD)
+	   || cur_token.code == T_TBYTE
+	   || cur_token.code == T_XMMWORD)
     {
       intel_match_token (cur_token.code);
 
@@ -5876,14 +6128,14 @@ intel_e11 ()
 
   /* e11  $
 	  | .  */
-  else if (cur_token.code == '$' || cur_token.code == '.')
+  else if (cur_token.code == '.')
     {
       strcat (intel_parser.disp, cur_token.str);
       intel_match_token (cur_token.code);
 
       /* Mark as a memory operand only if it's not already known to be an
 	 offset expression.  */
-      if (intel_parser.op_modifier != OFFSET_FLAT)
+      if (intel_parser.op_modifier != T_OFFSET)
 	intel_parser.is_mem = 1;
 
       return 1;
@@ -5980,7 +6232,7 @@ intel_e11 ()
 
       /* Offset modifier. Add the register to the displacement string to be
 	 parsed as an immediate expression after we're done.  */
-      else if (intel_parser.op_modifier == OFFSET_FLAT)
+      else if (intel_parser.op_modifier == T_OFFSET)
 	strcat (intel_parser.disp, reg->reg_name);
 
       /* It's neither base nor index nor offset.  */
@@ -5995,7 +6247,7 @@ intel_e11 ()
 	 when we're parsing offset operands), we may need to remove any
 	 preceding '+' from the displacement string.  */
       if (*intel_parser.disp != '\0'
-	  && intel_parser.op_modifier != OFFSET_FLAT)
+	  && intel_parser.op_modifier != T_OFFSET)
 	{
 	  char *s = intel_parser.disp;
 	  s += strlen (s) - 1;
@@ -6011,13 +6263,19 @@ intel_e11 ()
     {
       /* Add the identifier to the displacement string.  */
       strcat (intel_parser.disp, cur_token.str);
-      intel_match_token (T_ID);
 
       /* The identifier represents a memory reference only if it's not
-	 preceded by an offset modifier.  */
-      if (intel_parser.op_modifier != OFFSET_FLAT)
-	intel_parser.is_mem = 1;
+	 preceded by an offset modifier and if it's not an equate.  */
+      if (intel_parser.op_modifier != T_OFFSET)
+	{
+	  symbolS *symbolP;
 
+	  symbolP = symbol_find(cur_token.str);
+	  if (!symbolP || S_GET_SEGMENT(symbolP) != absolute_section)
+	    intel_parser.is_mem = 1;
+	}
+
+      intel_match_token (T_ID);
       return 1;
     }
 
@@ -6183,22 +6441,6 @@ intel_get_token ()
 	new_token.code = T_ID;
     }
 
-  else if (strchr ("<>", *intel_parser.op_string)
-	   && *intel_parser.op_string == *(intel_parser.op_string + 1))
-    {
-      new_token.code = T_SHIFTOP;
-      new_token.str[0] = *intel_parser.op_string;
-      new_token.str[1] = *intel_parser.op_string;
-      new_token.str[2] = '\0';
-    }
-
-  else if (strchr ("+-/*&|:[]()~", *intel_parser.op_string))
-    {
-      new_token.code = *intel_parser.op_string;
-      new_token.str[0] = *intel_parser.op_string;
-      new_token.str[1] = '\0';
-    }
-
   else if ((*intel_parser.op_string == REGISTER_PREFIX || allow_naked_reg)
 	   && ((reg = parse_register (intel_parser.op_string, &end_op)) != NULL))
     {
@@ -6223,8 +6465,8 @@ intel_get_token ()
 	 Otherwise, it's operator '.' followed by an expression.  */
       if ((*q == '.' || *q == '$') && !is_identifier_char (*(q + 1)))
 	{
-	  new_token.code = *q;
-	  new_token.str[0] = *q;
+	  new_token.code = '.';
+	  new_token.str[0] = '.';
 	  new_token.str[1] = '\0';
 	}
       else
@@ -6233,7 +6475,28 @@ intel_get_token ()
 	    *p++ = *q++;
 	  *p = '\0';
 
-	  if (strcasecmp (new_token.str, "BYTE") == 0)
+	  if (strcasecmp (new_token.str, "NOT") == 0)
+	    new_token.code = '~';
+
+	  else if (strcasecmp (new_token.str, "MOD") == 0)
+	    new_token.code = '%';
+
+	  else if (strcasecmp (new_token.str, "AND") == 0)
+	    new_token.code = '&';
+
+	  else if (strcasecmp (new_token.str, "OR") == 0)
+	    new_token.code = '|';
+
+	  else if (strcasecmp (new_token.str, "XOR") == 0)
+	    new_token.code = '^';
+
+	  else if (strcasecmp (new_token.str, "SHL") == 0)
+	    new_token.code = T_SHL;
+
+	  else if (strcasecmp (new_token.str, "SHR") == 0)
+	    new_token.code = T_SHR;
+
+	  else if (strcasecmp (new_token.str, "BYTE") == 0)
 	    new_token.code = T_BYTE;
 
 	  else if (strcasecmp (new_token.str, "WORD") == 0)
@@ -6242,11 +6505,20 @@ intel_get_token ()
 	  else if (strcasecmp (new_token.str, "DWORD") == 0)
 	    new_token.code = T_DWORD;
 
+	  else if (strcasecmp (new_token.str, "FWORD") == 0)
+	    new_token.code = T_FWORD;
+
 	  else if (strcasecmp (new_token.str, "QWORD") == 0)
 	    new_token.code = T_QWORD;
 
-	  else if (strcasecmp (new_token.str, "XWORD") == 0)
-	    new_token.code = T_XWORD;
+	  else if (strcasecmp (new_token.str, "TBYTE") == 0
+		   /* XXX remove (gcc still uses it) */
+		   || strcasecmp (new_token.str, "XWORD") == 0)
+	    new_token.code = T_TBYTE;
+
+	  else if (strcasecmp (new_token.str, "XMMWORD") == 0
+		   || strcasecmp (new_token.str, "OWORD") == 0)
+	    new_token.code = T_XMMWORD;
 
 	  else if (strcasecmp (new_token.str, "PTR") == 0)
 	    new_token.code = T_PTR;
@@ -6272,6 +6544,22 @@ intel_get_token ()
 	  else
 	    new_token.code = T_ID;
 	}
+    }
+
+  else if (strchr ("+-/*%|&^:[]()~", *intel_parser.op_string))
+    {
+      new_token.code = *intel_parser.op_string;
+      new_token.str[0] = *intel_parser.op_string;
+      new_token.str[1] = '\0';
+    }
+
+  else if (strchr ("<>", *intel_parser.op_string)
+	   && *intel_parser.op_string == *(intel_parser.op_string + 1))
+    {
+      new_token.code = *intel_parser.op_string == '<' ? T_SHL : T_SHR;
+      new_token.str[0] = *intel_parser.op_string;
+      new_token.str[1] = *intel_parser.op_string;
+      new_token.str[2] = '\0';
     }
 
   else

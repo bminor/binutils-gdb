@@ -1,3 +1,16 @@
+2004-11-04 Jan Beulich <jbeulich@novell.com>
+	* gas/i386/i386.exp: Execute new tests intelbad and intelok.
+	* gas/i386/intelbad.[sl]: New test to check for various things not
+	permitted in Intel mode.
+	* gas/i386/intel.d, gas/i386/opcode.d, gas/i386/x86-64-opcode.d:
+	Adjust for change to segment register store.
+	* gas/i386/intelok.[sd]: New test to check various Intel mode specific
+	things get handled correctly.
+	* gas/i386/x86_64.[sd]: Remove unsupported constructs referring to
+	'high' and 'low' parts of an operand, which the parser previously
+	accepted while neither telling that it's not supported nor that it
+	ignored the remainder of the line following these supposed keywords.
+
 2004-10-28  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/crx/cop_insn.d: Regenerate (after a bug fix in Assembler).

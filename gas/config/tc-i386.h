@@ -141,18 +141,6 @@ extern const char extra_symbol_chars[];
 
 #define END_OF_INSN '\0'
 
-/* Intel Syntax */
-/* Values 0-4 map onto scale factor */
-#define BYTE_PTR     0
-#define WORD_PTR     1
-#define DWORD_PTR    2
-#define QWORD_PTR    3
-#define XWORD_PTR    4
-#define SHORT        5
-#define OFFSET_FLAT  6
-#define FLAT         7
-#define NONE_FOUND   8
-
 typedef struct
 {
   /* instruction name sans width suffix ("mov" for movl insns) */
