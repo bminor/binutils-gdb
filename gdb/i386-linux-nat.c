@@ -329,7 +329,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
   int i;
 
   for (i = 0; i < NUM_GREGS; i++)
-    if ((regno == -1 || regno == i))
+    if (regno == -1 || regno == i)
       regcache_collect (i, regp + regmap[i]);
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
