@@ -1,3 +1,21 @@
+Tue Mar 30 09:40:25 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldindr.c (add_indirect): Keep more information in the alias
+	symbol chain.
+	* ldlang.c (wild_doit):  Don't inherit NEVER_LOAD section
+	attribute from an input section.
+	* ldmain.c (Q_enter_file_symbols): Common section is NEVER_LOAD by
+	default. (Q_enter_file_symbos): Indirect symbols now are known by
+	their section, not a special symbol flag.
+	* ldsym.c (write_file_locals): Indirect symbols aren't local.
+	(write_file_globals): Write the mapping for an indirect symbol.
+	* relax.c (build_it): When forced to write a NEVER_LOAD section,
+	fill it with zeros.
+
+Tue Mar 23 13:24:10 1993  Jeffrey Osier  (jeffrey@fowanton.cygnus.com)
+
+	* ld.texinfo:  changes for q1
+
 Tue Mar 23 00:13:29 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: add dvi target, define & use TEXI2DVI, add installcheck

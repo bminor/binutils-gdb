@@ -61,7 +61,6 @@ static lang_statement_list_type lang_output_section_statement;
 static CONST char *current_target;
 static CONST char *output_target;
 static size_t longest_section_name = 8;
-static asection common_section;
 static section_userdata_type common_section_userdata;
 static lang_statement_list_type statement_list;
 
@@ -612,11 +611,17 @@ DEFUN (wild_doit, (ptr, section, output, file),
     new->section = section;
     new->ifile = file;
     section->output_section = output->bfd_section;
-    section->output_section->flags |= section->flags;
+
+    /* Be selective about what the output section inherits from the
+       input section */
+
+    section->output_section->flags |= section->flags & ~SEC_NEVER_LOAD;
+
     if (!output->loadable) 
     {
-      /* Turn of load flag */
+      /* Turn off load flag */
       output->bfd_section->flags &= ~SEC_LOAD;
+      output->bfd_section->flags |= SEC_NEVER_LOAD;
     }
     if (section->alignment_power > output->bfd_section->alignment_power)
     {
@@ -653,9 +658,13 @@ DEFUN (wild_section, (ptr, section, file, output),
 	{
 	  /* Do the creation to all sections in the file */
 	  for (s = file->the_bfd->sections; s != (asection *) NULL; s = s->next)
+	  {
+	    /* except for bss */
+	    if ((s->flags & SEC_IS_COMMON)  == 0)
 	    {
 	      wild_doit (&ptr->children, s, output, file);
 	    }
+	  }
 	}
       else
 	{
@@ -729,6 +738,8 @@ DEFUN (wild, (s, section, file, target, output),
 	{
 	  wild_section (s, section, f, output);
 	}
+      /* Once more for the script file */
+      wild_section(s, section, script_file, output);
     }
   else
     {
@@ -947,13 +958,20 @@ DEFUN_VOID (lang_create_output_section_statements)
 static void
 DEFUN_VOID (lang_init_script_file)
 {
-  script_file = lang_add_input_file ("script file",
+  script_file = lang_add_input_file ("command line",
 				     lang_input_file_is_fake_enum,
 				     (char *) NULL);
-  script_file->the_bfd = bfd_create ("script file", output_bfd);
+  script_file->the_bfd = bfd_create ("command line", output_bfd);
   script_file->symbol_count = 0;
-  script_file->the_bfd->sections = output_bfd->sections;
-  abs_output_section = lang_output_section_statement_lookup (BFD_ABS_SECTION_NAME);
+  script_file->the_bfd->sections = 0;
+
+  /* The user data of a bfd points to the input statement attatched */
+  script_file->the_bfd->usrdata  = (void *)script_file;
+  script_file->common_section =
+   bfd_make_section(script_file->the_bfd,"COMMON");
+
+  abs_output_section =
+   lang_output_section_statement_lookup (BFD_ABS_SECTION_NAME);
 
   abs_output_section->bfd_section = &bfd_abs_section;
 
@@ -1876,16 +1894,18 @@ DEFUN_VOID (lang_relocate_globals)
       }
     if (it != (asymbol *) NULL)
       {
+	asymbol **prev = 0;
 	asymbol **ptr = lgs->srefs_chain;;
 	if (lgs->flags & SYM_WARNING)
 	  {
 	    produce_warnings (lgs, it);
 	  }
 
-	while (ptr != (asymbol **) NULL)
+	while (ptr != (asymbol **) NULL
+	       && ptr != prev)
 	  {
 	    asymbol *ref = *ptr;
-
+	    prev = ptr;
 	    *ptr = it;
 	    ptr = (asymbol **) (ref->udata);
 	  }
@@ -1954,9 +1974,6 @@ DEFUN_VOID (lang_check)
        file != (lang_statement_union_type *) NULL;
        file = file->input_statement.next)
     {
-      unsigned long ldfile_new_output_machine = 0;
-      enum bfd_architecture ldfile_new_output_architecture = bfd_arch_unknown;
-
       input_bfd = file->input_statement.the_bfd;
 
       input_machine = bfd_get_mach (input_bfd);
@@ -2051,15 +2068,35 @@ DEFUN_VOID (lang_common)
 		    }
 		  if (config.sort_common == false || align == power)
 		    {
+		      bfd *symbfd;
+
 		      /* Change from a common symbol into a definition of
 			 a symbol */
 		      lgs->sdefs_chain = lgs->scoms_chain;
 		      lgs->scoms_chain = (asymbol **) NULL;
 		      commons_pending--;
+
 		      /* Point to the correct common section */
-		      com->section =
-			((lang_input_statement_type *)
-			 (com->the_bfd->usrdata))->common_section;
+		      symbfd = bfd_asymbol_bfd (com);
+		      if (com->section == &bfd_com_section)
+			com->section =
+			  ((lang_input_statement_type *) symbfd->usrdata)
+			    ->common_section;
+		      else
+			{
+			  CONST char *name;
+			  asection *newsec;
+
+			  name = bfd_get_section_name (symbfd,
+						       com->section);
+			  newsec = bfd_get_section_by_name (symbfd,
+							    name);
+			  /* BFD backend must provide this section. */
+			  if (newsec == (asection *) NULL)
+			    einfo ("%P%F: No output section %s", name);
+			  com->section = newsec;
+			}
+
 		      /*  Fix the size of the common section */
 
 		      com->section->_raw_size =
@@ -2077,13 +2114,13 @@ DEFUN_VOID (lang_common)
 		      com->flags = BSF_EXPORT | BSF_GLOBAL | BSF_OLD_COMMON;
 		      com->value = com->section->_raw_size;
 
-		      if (write_map)
+		      if (write_map && config.map_file)
 			{
 			  fprintf (config.map_file, "Allocating common %s: %x at %x %s\n",
 				   lgs->name,
 				   (unsigned) size,
 				   (unsigned) com->value,
-				   com->the_bfd->filename);
+				   bfd_asymbol_bfd(com)->filename);
 			}
 
 		      com->section->_raw_size += size;
@@ -2274,6 +2311,7 @@ static int topower(x)
     if (i >= x) return l;
     i<<=1;
   }
+  return 0;
 }
 void
 DEFUN (lang_enter_output_section_statement,
@@ -2313,7 +2351,7 @@ DEFUN (lang_enter_output_section_statement,
    os->loadable = 0;
   else
    os->loadable = 1;
-  os->block_value = block_value;
+  os->block_value = block_value ? block_value : 1;
   stat_ptr = &os->children;
 
   os->subsection_alignment = topower(
@@ -2364,12 +2402,10 @@ DEFUN (create_symbol, (name, flags, section),
 
   /* Add this definition to script file */
   asymbol *def = (asymbol *) bfd_make_empty_symbol (script_file->the_bfd);
-
   def->name = buystring (name);
   def->udata = 0;
   def->flags = flags;
   def->section = section;
-
   *def_ptr = def;
   Q_enter_global_ref (def_ptr, name);
   return def;
@@ -2400,9 +2436,6 @@ DEFUN_VOID (lang_process)
   /* Create a bfd for each input file */
   current_target = default_target;
   lang_for_each_statement (open_input_bfds);
-
-  common_section.userdata = (PTR) & common_section_userdata;
-
 
   /* Run through the contours of the script and attatch input sections
      to the correct output sections

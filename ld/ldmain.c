@@ -188,10 +188,10 @@ main (argc, argv)
   lang_has_input_file = false;
   parse_args (argc, argv);
 
-  if (config.relocateable_output && command_line.relax) 
-  {
+  if (config.relocateable_output && command_line.relax)
+    {
       einfo ("%P%F: -relax and -r may not be used together\n");
-  }
+    }
   lang_final ();
 
   if (trace_files)
@@ -347,9 +347,9 @@ DEFUN (Q_enter_global_ref, (nlist_p, name),
   sp = ldsym_get (name);
 
 
-  /* If this symbol already has udata, it means that something strange 
+  /* If this symbol already has udata, it means that something strange
      has happened.
-     
+
      The strange thing is that we've had an undefined symbol resolved by
      an alias, but the thing the alias defined wasn't in the file. So
      the symbol got a udata entry, but the file wasn't loaded.  Then
@@ -358,130 +358,130 @@ DEFUN (Q_enter_global_ref, (nlist_p, name),
 
 
   if (sym->udata)
-   return;
+    return;
 
 
   if (flag_is_constructor (this_symbol_flags))
-  {
-    /* Add this constructor to the list we keep */
-    ldlang_add_constructor (sp);
-    /* Turn any commons into refs */
-    if (sp->scoms_chain != (asymbol **) NULL)
     {
-      refize (sp, sp->scoms_chain);
-      sp->scoms_chain = 0;
+      /* Add this constructor to the list we keep */
+      ldlang_add_constructor (sp);
+      /* Turn any commons into refs */
+      if (sp->scoms_chain != (asymbol **) NULL)
+	{
+	  refize (sp, sp->scoms_chain);
+	  sp->scoms_chain = 0;
+	}
+
+
     }
-
-
-  }
   else
-  {
-    if (bfd_is_com_section (sym->section))
     {
-      /* If we have a definition of this symbol already then
+      if (bfd_is_com_section (sym->section))
+	{
+	  /* If we have a definition of this symbol already then
 	 this common turns into a reference. Also we only
 	 ever point to the largest common, so if we
 	 have a common, but it's bigger that the new symbol
 	 the turn this into a reference too. */
-      if (sp->sdefs_chain)
-      {
-	/* This is a common symbol, but we already have a definition
+	  if (sp->sdefs_chain)
+	    {
+	      /* This is a common symbol, but we already have a definition
 	   for it, so just link it into the ref chain as if
 	   it were a reference  */
-	refize (sp, nlist_p);
-      }
-      else if (sp->scoms_chain)
-      {
-	/* If we have a previous common, keep only the biggest */
-	if ((*(sp->scoms_chain))->value > sym->value)
-	{
-	  /* other common is bigger, throw this one away */
-	  refize (sp, nlist_p);
-	}
-	else if (sp->scoms_chain != nlist_p)
-	{
-	  /* other common is smaller, throw that away */
-	  refize (sp, sp->scoms_chain);
-	  sp->scoms_chain = nlist_p;
-	}
-      }
-      else
-      {
-	/* This is the first time we've seen a common, so remember it
+	      refize (sp, nlist_p);
+	    }
+	  else if (sp->scoms_chain)
+	    {
+	      /* If we have a previous common, keep only the biggest */
+	      if ((*(sp->scoms_chain))->value > sym->value)
+		{
+		  /* other common is bigger, throw this one away */
+		  refize (sp, nlist_p);
+		}
+	      else if (sp->scoms_chain != nlist_p)
+		{
+		  /* other common is smaller, throw that away */
+		  refize (sp, sp->scoms_chain);
+		  sp->scoms_chain = nlist_p;
+		}
+	    }
+	  else
+	    {
+	      /* This is the first time we've seen a common, so remember it
 	   - if it was undefined before, we know it's defined now. If
 	   the symbol has been marked as really being a constructor,
 	   then treat this as a ref
 	   */
-	if (sp->flags & SYM_CONSTRUCTOR)
+	      if (sp->flags & SYM_CONSTRUCTOR)
+		{
+		  /* Turn this into a ref */
+		  refize (sp, nlist_p);
+		}
+	      else
+		{
+		  /* treat like a common */
+		  if (sp->srefs_chain)
+		    undefined_global_sym_count--;
+
+		  commons_pending++;
+		  sp->scoms_chain = nlist_p;
+		}
+	    }
+	}
+
+      else if (sym->section != &bfd_und_section)
 	{
-	  /* Turn this into a ref */
+	  /* This is the definition of a symbol, add to def chain */
+	  if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section)
+	    {
+	      /* Multiple definition */
+	      asymbol *sy = *(sp->sdefs_chain);
+	      lang_input_statement_type *stat =
+	      (lang_input_statement_type *) bfd_asymbol_bfd (sy)->usrdata;
+	      lang_input_statement_type *stat1 =
+	      (lang_input_statement_type *) bfd_asymbol_bfd (sym)->usrdata;
+	      asymbol **stat1_symbols = stat1 ? stat1->asymbols : 0;
+	      asymbol **stat_symbols = stat ? stat->asymbols : 0;
+
+	      multiple_def_count++;
+	      einfo ("%X%C: multiple definition of `%T'\n",
+		     bfd_asymbol_bfd (sym), sym->section, stat1_symbols, sym->value, sym);
+
+	      einfo ("%X%C: first seen here\n",
+		bfd_asymbol_bfd (sy), sy->section, stat_symbols, sy->value);
+	    }
+	  else
+	    {
+	      sym->udata = (PTR) (sp->sdefs_chain);
+	      sp->sdefs_chain = nlist_p;
+	    }
+	  /* A definition overrides a common symbol */
+	  if (sp->scoms_chain)
+	    {
+	      refize (sp, sp->scoms_chain);
+	      sp->scoms_chain = 0;
+	      commons_pending--;
+	    }
+	  else if (sp->srefs_chain && relaxing == false)
+	    {
+	      /* If previously was undefined, then remember as defined */
+	      undefined_global_sym_count--;
+	    }
+	}
+      else
+	{
+	  if (sp->scoms_chain == (asymbol **) NULL
+	      && sp->srefs_chain == (asymbol **) NULL
+	      && sp->sdefs_chain == (asymbol **) NULL)
+	    {
+	      /* And it's the first time we've seen it */
+	      undefined_global_sym_count++;
+
+	    }
+
 	  refize (sp, nlist_p);
 	}
-	else
-	{
-	  /* treat like a common */
-	  if (sp->srefs_chain)
-	   undefined_global_sym_count--;
-
-	  commons_pending++;
-	  sp->scoms_chain = nlist_p;
-	}
-      }
     }
-
-    else if (sym->section != &bfd_und_section)
-    {
-      /* This is the definition of a symbol, add to def chain */
-      if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section)
-      {
-	/* Multiple definition */
-	asymbol *sy = *(sp->sdefs_chain);
-	lang_input_statement_type *stat =
-	  (lang_input_statement_type *) bfd_asymbol_bfd(sy)->usrdata;
-	lang_input_statement_type *stat1 =
-	  (lang_input_statement_type *) bfd_asymbol_bfd(sym)->usrdata;
-	asymbol **stat1_symbols = stat1 ? stat1->asymbols : 0;
-	asymbol **stat_symbols = stat ? stat->asymbols : 0;
-
-	multiple_def_count++;
-	einfo ("%X%C: multiple definition of `%T'\n",
-	       bfd_asymbol_bfd(sym), sym->section, stat1_symbols, sym->value, sym);
-
-	einfo ("%X%C: first seen here\n",
-	       bfd_asymbol_bfd(sy), sy->section, stat_symbols, sy->value);
-      }
-      else
-      {
-	sym->udata = (PTR) (sp->sdefs_chain);
-	sp->sdefs_chain = nlist_p;
-      }
-      /* A definition overrides a common symbol */
-      if (sp->scoms_chain)
-      {
-	refize (sp, sp->scoms_chain);
-	sp->scoms_chain = 0;
-	commons_pending--;
-      }
-      else if (sp->srefs_chain && relaxing == false)
-      {
-	/* If previously was undefined, then remember as defined */
-	undefined_global_sym_count--;
-      }
-    }
-    else
-    {
-      if (sp->scoms_chain == (asymbol **) NULL
-	  && sp->srefs_chain == (asymbol **) NULL
-	  && sp->sdefs_chain == (asymbol **) NULL)
-      {
-	/* And it's the first time we've seen it */
-	undefined_global_sym_count++;
-
-      }
-
-      refize (sp, nlist_p);
-    }
-  }
 
   ASSERT (sp->sdefs_chain == 0 || sp->scoms_chain == 0);
   ASSERT (sp->scoms_chain == 0 || (*(sp->scoms_chain))->udata == 0);
@@ -496,74 +496,74 @@ Q_enter_file_symbols (entry)
   asymbol **q;
 
   entry->common_section =
-   bfd_make_section_old_way (entry->the_bfd, "COMMON");
-
+    bfd_make_section_old_way (entry->the_bfd, "COMMON");
+  entry->common_section->flags = SEC_NEVER_LOAD;
   ldlang_add_file (entry);
 
 
   if (trace_files || option_v)
-  {
-    info ("%I\n", entry);
-  }
+    {
+      info ("%I\n", entry);
+    }
 
   total_symbols_seen += entry->symbol_count;
   total_files_seen++;
   if (entry->symbol_count)
-  {
-    for (q = entry->asymbols; *q; q++)
     {
-      asymbol *p = *q;
+      for (q = entry->asymbols; *q; q++)
+	{
+	  asymbol *p = *q;
 
-      if (had_y && p->name) 
-      {
-	/* look up the symbol anyway to see if the trace bit was
+	  if (had_y && p->name)
+	    {
+	      /* look up the symbol anyway to see if the trace bit was
 	   set */
-	ldsym_type *s = ldsym_get(p->name);
-	if (s->flags & SYM_Y) 
-	{
-	  einfo("%B: %s %T\n", entry->the_bfd,
-		p->section ==  &bfd_und_section ? "reference to" : "definition of ",
-		p);
+	      ldsym_type *s = ldsym_get (p->name);
+	      if (s->flags & SYM_Y)
+		{
+		  einfo ("%B: %s %T\n", entry->the_bfd,
+			 p->section == &bfd_und_section ? "reference to" : "definition of ",
+			 p);
+		}
+	    }
+
+	  if (p->section == &bfd_ind_section)
+	    {
+	      add_indirect (q);
+	    }
+	  else if (p->flags & BSF_WARNING)
+	    {
+	      add_warning (p);
+	    }
+	  else if (p->section == &bfd_und_section
+		   || (p->flags & BSF_GLOBAL)
+		   || bfd_is_com_section (p->section)
+		   || (p->flags & BSF_CONSTRUCTOR))
+
+	    {
+
+	      asymbol *p = *q;
+
+	      if (p->flags & BSF_INDIRECT)
+		{
+		  add_indirect (q);
+		}
+	      else if (p->flags & BSF_WARNING)
+		{
+		  add_warning (p);
+		}
+	      else if (p->section == &bfd_und_section
+		       || (p->flags & BSF_GLOBAL)
+		       || bfd_is_com_section (p->section)
+		       || (p->flags & BSF_CONSTRUCTOR))
+		{
+		  Q_enter_global_ref (q, p->name);
+		}
+
+	    }
+
 	}
-      }
-
-      if (p->flags & BSF_INDIRECT)
-      {
-	add_indirect (q);
-      }
-      else if (p->flags & BSF_WARNING)
-      {
-	add_warning (p);
-      }
-      else if (p->section == &bfd_und_section
-	       || (p->flags & BSF_GLOBAL)
-	       || bfd_is_com_section (p->section)
-	       || (p->flags & BSF_CONSTRUCTOR))
-
-      {
-
-	asymbol *p = *q;
-
-	if (p->flags & BSF_INDIRECT)
-	{
-	  add_indirect (q);
-	}
-	else if (p->flags & BSF_WARNING)
-	{
-	  add_warning (p);
-	}
-	else if (p->section == &bfd_und_section
-		 || (p->flags & BSF_GLOBAL)
-		 || bfd_is_com_section (p->section)
-		 || (p->flags & BSF_CONSTRUCTOR))
-	{
-	  Q_enter_global_ref (q, p->name);
-	}
-
-      }
-
     }
-  }
 }
 
 
@@ -595,7 +595,7 @@ search_library (entry)
 
 #ifdef GNU960
 static
-       boolean
+  boolean
 gnu960_check_format (abfd, format)
      bfd *abfd;
      bfd_format format;
@@ -680,31 +680,31 @@ decode_library_subfile (library_entry, subfile_offset)
      lang_input_statement_struct  for this library subfile.  If so,
      just return it.  Otherwise, allocate some space and build a new one. */
 
-  if ( subfile_offset->usrdata
-      && ((struct lang_input_statement_struct *)subfile_offset->usrdata)->
-      loaded == true ) 
-  {
-    subentry = (struct lang_input_statement_struct *)subfile_offset->usrdata;
-  }
-  else 
-  {
-    subentry =
-     (struct lang_input_statement_struct *)
-      ldmalloc ((bfd_size_type) (sizeof (struct lang_input_statement_struct)));
+  if (subfile_offset->usrdata
+      && ((struct lang_input_statement_struct *) subfile_offset->usrdata)->
+      loaded == true)
+    {
+      subentry = (struct lang_input_statement_struct *) subfile_offset->usrdata;
+    }
+  else
+    {
+      subentry =
+	(struct lang_input_statement_struct *)
+	ldmalloc ((bfd_size_type) (sizeof (struct lang_input_statement_struct)));
 
-    subentry->filename = subfile_offset->filename;
-    subentry->local_sym_name = subfile_offset->filename;
-    subentry->asymbols = 0;
-    subentry->the_bfd = subfile_offset;
-    subentry->subfiles = 0;
-    subentry->next = 0;
-    subentry->superfile = library_entry;
-    subentry->is_archive = false;
+      subentry->filename = subfile_offset->filename;
+      subentry->local_sym_name = subfile_offset->filename;
+      subentry->asymbols = 0;
+      subentry->the_bfd = subfile_offset;
+      subentry->subfiles = 0;
+      subentry->next = 0;
+      subentry->superfile = library_entry;
+      subentry->is_archive = false;
 
-    subentry->just_syms_flag = false;
-    subentry->loaded = false;
-    subentry->chain = 0;
-  }
+      subentry->just_syms_flag = false;
+      subentry->loaded = false;
+      subentry->chain = 0;
+    }
   return subentry;
 }
 
@@ -856,13 +856,13 @@ linear_library (entry)
 
   if (entry->complained == false)
     {
-      if (entry->the_bfd->xvec->flavour != bfd_target_ieee_flavour) 
-                                           
-      {
-	/* IEEE can use table of contents, so this message is bogus */
-	einfo ("%P: library %s has bad table of contents, rerun ranlib\n",
-	       entry->the_bfd->filename);
-      }
+      if (entry->the_bfd->xvec->flavour != bfd_target_ieee_flavour)
+
+	{
+	  /* IEEE can use table of contents, so this message is bogus */
+	  einfo ("%P: library %s has bad table of contents, rerun ranlib\n",
+		 entry->the_bfd->filename);
+	}
       entry->complained = true;
 
     }
@@ -878,42 +878,42 @@ linear_library (entry)
 	     once */
 
 	  if (!archive->usrdata ||
-	     ! ((lang_input_statement_type *)(archive->usrdata))->loaded)
-	  {
+	      !((lang_input_statement_type *) (archive->usrdata))->loaded)
+	    {
 #ifdef GNU960
-	    if (gnu960_check_format (archive, bfd_object))
+	      if (gnu960_check_format (archive, bfd_object))
 #else
-	     if (bfd_check_format (archive, bfd_object))
+	      if (bfd_check_format (archive, bfd_object))
 #endif
-	     {
-	       register struct lang_input_statement_struct *subentry;
+		{
+		  register struct lang_input_statement_struct *subentry;
 
-	       subentry = decode_library_subfile (entry,
-						  archive);
+		  subentry = decode_library_subfile (entry,
+						     archive);
 
-	       archive->usrdata = (PTR) subentry;
-	       if (!subentry)
-		return;
-	       if (subentry->loaded == false)
-	       {
-		 Q_read_entry_symbols (archive, subentry);
+		  archive->usrdata = (PTR) subentry;
+		  if (!subentry)
+		    return;
+		  if (subentry->loaded == false)
+		    {
+		      Q_read_entry_symbols (archive, subentry);
 
-		 if (subfile_wanted_p (subentry) == true)
-		 {
-		   Q_enter_file_symbols (subentry);
+		      if (subfile_wanted_p (subentry) == true)
+			{
+			  Q_enter_file_symbols (subentry);
 
-		   if (prev)
-		    prev->chain = subentry;
-		   else
-		    entry->subfiles = subentry;
-		   prev = subentry;
+			  if (prev)
+			    prev->chain = subentry;
+			  else
+			    entry->subfiles = subentry;
+			  prev = subentry;
 
-		   more_to_do = true;
-		   subentry->loaded = true;
-		 }
-	       }
-	     }
-	  }
+			  more_to_do = true;
+			  subentry->loaded = true;
+			}
+		    }
+		}
+	    }
 	  archive = bfd_openr_next_archived_file (entry->the_bfd, archive);
 
 	}
@@ -921,7 +921,7 @@ linear_library (entry)
     }
 }
 
- /* ENTRY is an entry for a file inside an archive
+/* ENTRY is an entry for a file inside an archive
     Its symbols have been read into core, but not entered into the
     linker ymbol table
     Return nonzero if we ought to load this file */
@@ -941,7 +941,7 @@ subfile_wanted_p (entry)
 
       if (p->flags & BSF_INDIRECT)
 	{
-/**	add_indirect(q);*/
+	  /**	add_indirect(q);*/
 	}
 
       if (bfd_is_com_section (p->section)
@@ -1000,8 +1000,7 @@ subfile_wanted_p (entry)
 				(asymbol **) ((*(sp->srefs_chain))->udata);
 			      (*(sp->scoms_chain))->udata = (PTR) NULL;
 
-			      (*(sp->scoms_chain))->section =
-				&bfd_com_section;
+			      (*(sp->scoms_chain))->section = p->section;
 			      (*(sp->scoms_chain))->flags = 0;
 			      /* Remember the size of this item */
 			      sp->scoms_chain[0]->value = p->value;
@@ -1012,12 +1011,12 @@ subfile_wanted_p (entry)
 			    asymbol *com = *(sp->scoms_chain);
 
 			    if (((lang_input_statement_type *)
-				 (bfd_asymbol_bfd(com)->usrdata))->common_section ==
+				 (bfd_asymbol_bfd (com)->usrdata))->common_section ==
 				(asection *) NULL)
 			      {
 				((lang_input_statement_type *)
-				 (bfd_asymbol_bfd(com)->usrdata))->common_section =
-				  bfd_make_section_old_way (bfd_asymbol_bfd(com), "COMMON");
+				 (bfd_asymbol_bfd (com)->usrdata))->common_section =
+				  bfd_make_section_old_way (bfd_asymbol_bfd (com), "COMMON");
 			      }
 			  }
 			}
@@ -1040,10 +1039,10 @@ subfile_wanted_p (entry)
 }
 
 void
-add_ysym(text)
-char *text;
+add_ysym (text)
+     char *text;
 {
-  ldsym_type *lookup = ldsym_get(text);
+  ldsym_type *lookup = ldsym_get (text);
   lookup->flags |= SYM_Y;
   had_y = 1;
 }
