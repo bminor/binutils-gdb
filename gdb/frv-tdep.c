@@ -48,58 +48,6 @@ static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 
-/* Register numbers.  The order in which these appear define the
-   remote protocol, so take care in changing them.  */
-enum {
-  /* Register numbers 0 -- 63 are always reserved for general-purpose
-     registers.  The chip at hand may have less.  */
-  first_gpr_regnum = 0,
-  sp_regnum = 1,
-  fp_regnum = 2,
-  struct_return_regnum = 3,
-  last_gpr_regnum = 63,
-
-  /* Register numbers 64 -- 127 are always reserved for floating-point
-     registers.  The chip at hand may have less.  */
-  first_fpr_regnum = 64,
-  last_fpr_regnum = 127,
-
-  /* The PC register.  */
-  pc_regnum = 128,
-
-  /* Register numbers 129 on up are always reserved for special-purpose
-     registers.  */
-  first_spr_regnum = 129,
-  psr_regnum = 129,
-  ccr_regnum = 130,
-  cccr_regnum = 131,
-  fdpic_loadmap_exec_regnum = 132,
-  fdpic_loadmap_interp_regnum = 133,
-  tbr_regnum = 135,
-  brr_regnum = 136,
-  dbar0_regnum = 137,
-  dbar1_regnum = 138,
-  dbar2_regnum = 139,
-  dbar3_regnum = 140,
-  lr_regnum = 145,
-  lcr_regnum = 146,
-  iacc0h_regnum = 147,
-  iacc0l_regnum = 148,
-  last_spr_regnum = 148,
-
-  /* The total number of registers we know exist.  */
-  frv_num_regs = last_spr_regnum + 1,
-
-  /* Pseudo registers */
-  first_pseudo_regnum = frv_num_regs,
-
-  /* iacc0 - the 64-bit concatenation of iacc0h and iacc0l.  */
-  iacc0_regnum = first_pseudo_regnum + 0,
-
-  last_pseudo_regnum = iacc0_regnum,
-  frv_num_pseudo_regs = last_pseudo_regnum - first_pseudo_regnum + 1,
-};
-
 static LONGEST frv_call_dummy_words[] =
 {0};
 

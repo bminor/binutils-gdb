@@ -1,5 +1,17 @@
 2004-03-12  Kevin Buettner  <kevinb@redhat.com>
 
+	* frv-tdep.c, frv-tdep.h  (first_gpr_regnum, sp_regnum, fp_regnum)
+	(struct_return_regnum, last_gpr_regnum, first_fpr_regnum)
+	(last_fpr_regnum, pc_regnum, first_spr_regnum, psr_regnum, ccr_regnum)
+	(cccr_regnum, fdpic_loadmap_exec_regnum, fdpic_loadmap_interp_regnum)
+	(tbr_regnum, brr_regnum, dbar0_regnum, dbar1_regnum, dbar2_regnum)
+	(dbar3_regnum, lr_regnum, lcr_regnum, iacc0h_regnum, iacc0l_regnum)
+	(last_spr_regnum, frv_num_regs, first_pseudo_regnum, iacc0_regnum)
+	(last_pseudo_regnum, frv_num_pseudo_regs): Move constant (enum)
+	definitions from frv-tdep.c to frv-tdep.h.
+
+2004-03-12  Kevin Buettner  <kevinb@redhat.com>
+
 	Add shared library support for FR-V FDPIC ABI:
 	* Makefile.in (solib-frv.o): Add dependencies.
 	* frv-tdep.c (find_func_descr, frv_convert_from_func_ptr_addr):
