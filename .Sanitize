@@ -33,6 +33,7 @@ README.configure
 bison
 bfd
 binutils
+clib
 config
 config.sub
 configure
