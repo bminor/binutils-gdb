@@ -1,3 +1,11 @@
+2002-05-29  Adam Nemet  <anemet@lnxw.com>
+
+	* emultempl/armelf.em (arm_elf_after_open): Don't determine
+	bfd_for_interwork, instead add glue sections to each input bfd.
+	(bfd_for_interwork): New global.
+	(arm_elf_set_bfd_for_interworking): New function.
+	(arm_elf_before_allocation): Use it.
+
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
 	* Makefile.am: Add DLX make target.

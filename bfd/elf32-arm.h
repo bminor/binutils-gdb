@@ -547,29 +547,20 @@ record_thumb_to_arm_glue (link_info, h)
   return;
 }
 
-/* Select a BFD to be used to hold the sections used by the glue code.
-   This function is called from the linker scripts in ld/emultempl/
-   {armelf/pe}.em  */
+/* Add the glue sections to ABFD.  This function is called from the
+   linker scripts in ld/emultempl/{armelf}.em.  */
 
 boolean
-bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
+bfd_elf32_arm_add_glue_sections_to_bfd (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  struct elf32_arm_link_hash_table *globals;
   flagword flags;
   asection *sec;
 
-  /* If we are only performing a partial link do not bother
-     getting a bfd to hold the glue.  */
+  /* If we are only performing a partial
+     link do not bother adding the glue.  */
   if (info->relocateable)
-    return true;
-
-  globals = elf32_arm_hash_table (info);
-
-  BFD_ASSERT (globals != NULL);
-
-  if (globals->bfd_of_glue_owner != NULL)
     return true;
 
   sec = bfd_get_section_by_name (abfd, ARM2THUMB_GLUE_SECTION_NAME);
@@ -609,9 +600,35 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
       sec->gc_mark = 1;
     }
 
+  return true;
+}
+
+/* Select a BFD to be used to hold the sections used by the glue code.
+   This function is called from the linker scripts in ld/emultempl/
+   {armelf/pe}.em  */
+
+boolean
+bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  struct elf32_arm_link_hash_table *globals;
+
+  /* If we are only performing a partial link
+     do not bother getting a bfd to hold the glue.  */
+  if (info->relocateable)
+    return true;
+
+  globals = elf32_arm_hash_table (info);
+
+  BFD_ASSERT (globals != NULL);
+
+  if (globals->bfd_of_glue_owner != NULL)
+    return true;
+
   /* Save the bfd for later use.  */
   globals->bfd_of_glue_owner = abfd;
-
+  
   return true;
 }
 

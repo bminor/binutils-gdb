@@ -1,3 +1,11 @@
+2002-05-29  Adam Nemet  <anemet@lnxw.com>
+
+	* elf32-arm.h (bfd_elf32_arm_get_bfd_for_interworking): Don't add glue
+	sections only record bfd.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): New function. 
+	* bfd-in.h (bfd_elf32_arm_add_glue_sections_to_bfd): Declare it.
+	* bfd-in2.h: Regenerate.	  
+
 2002-05-28  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* syms.c (_bfd_stab_section_find_nearest_line): Move
