@@ -4,13 +4,13 @@
 
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/.Sanitize,v
-retrieving revision 2.56
-diff -c -r2.56 .Sanitize
-*** 2.56	1992/06/23 06:26:00
---- .Sanitize	1992/07/05 18:39:47
+retrieving revision 2.63
+diff -c -r2.63 .Sanitize
+*** 2.63	1992/07/14 07:51:45
+--- .Sanitize	1992/07/16 22:43:53
 ***************
-*** 76,81 ****
---- 76,84 ----
+*** 77,82 ****
+--- 77,85 ----
   doc
   dwarfread.c
   elfread.c
@@ -21,11 +21,14 @@ diff -c -r2.56 .Sanitize
   environ.h
   eval.c
 ===================================================================
-*** Makefile.in	Wed Jul 15 12:33:12 1992
---- Makefile.in	Thu Jul 16 12:03:36 1992
+RCS file: /local/cvsfiles/devo/gdb/Makefile.in,v
+retrieving revision 1.172
+diff -c -r1.172 Makefile.in
+*** 1.172	1992/07/17 23:53:54
+--- Makefile.in	1992/07/18 00:11:14
 ***************
 *** 123,128 ****
---- 123,136 ----
+--- 123,135 ----
   READLINE_DEP = $$(READLINE_DIR)
   RL_LIB = ./../readline${subdir}/libreadline.a
   
@@ -33,9 +36,8 @@ diff -c -r2.56 .Sanitize
 + # because it is a gdb subdir and we try to build the energize library
 + # if it doesn't exist, unlike readline, bfd, mmalloc, etc.  Note
 + # that SDIR and BDIR will be different if we configured with -srcdir.
-+ ENERGIZE_SDIR = ${srcdir}/../gdb/energize
-+ ENERGIZE_BDIR = ./../gdb/energize${subdir}
-+ ENERGIZE_LIB  = ${ENERGIZE_BDIR}/libconn.a
++ ENERGIZE_DIR = energize
++ ENERGIZE_LIB = ${ENERGIZE_DIR}/libconn.a
 + 
   # All the includes used for CFLAGS and for lint.
   # -I. for config files.
@@ -54,11 +56,11 @@ diff -c -r2.56 .Sanitize
   
   VERSION = 4.6.1
   DIST=gdb
---- 163,175 ----
+--- 162,174 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
   CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
-! 	${ENERGIZE_LIB} ${XM_CLIBS} ${TM_CLIBS}
+! 	${ENERGIZE_LIB}	${XM_CLIBS} ${TM_CLIBS}
   CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
   	${RL_LIB} ${MMALLOC_LIB}
   
@@ -77,7 +79,7 @@ diff -c -r2.56 .Sanitize
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
---- 199,205 ----
+--- 198,204 ----
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
@@ -94,7 +96,7 @@ diff -c -r2.56 .Sanitize
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
   
   RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
---- 285,291 ----
+--- 284,290 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
@@ -111,22 +113,22 @@ diff -c -r2.56 .Sanitize
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
---- 298,304 ----
+--- 297,303 ----
   
   NTSSTART = kdb-start.o
   
-! SUBDIRS = doc ${ENERGIZE_BDIR}
+! SUBDIRS = doc ${ENERGIZE_DIR}
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
 ***************
 *** 343,348 ****
---- 352,371 ----
+--- 351,370 ----
   	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
   	echo "Load .c corresponding to:" $(DEPFILES)
   
 + ${ENERGIZE_LIB} :
-+ 	@(cd ${ENERGIZE_BDIR}; \
++ 	@(cd ${ENERGIZE_DIR}; \
 + 		$(MAKE) \
 + 			"against=$(against)" \
 + 			"AR=$(AR)" \
@@ -143,25 +145,21 @@ diff -c -r2.56 .Sanitize
   # This is useful when debugging GDB, because some Unix's don't let you run GDB
   # on itself without copying the executable.  So "make gdb1" will make
 ***************
-*** 665,670 ****
---- 688,698 ----
+*** 643,649 ****
+  	     -e '/extern.*free/d' \
+  	  < y.tab.c > m2-exp.tab.c
+  	-rm y.tab.c
+- 
   
-  xcoffexec.o: ${srcdir}/xcoffexec.c
-  	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffexec.c
-+ 
-+ # Energize support has dependencies on ENERGIZE header files.
-+ 
-+ energize.o: ${srcdir}/energize.c
-+ 	${CC} -c ${INTERNAL_CFLAGS} -I$(ENERGIZE_SDIR) ${srcdir}/energize.c
-  
-  # Drag in the files that are in another directory.
-  
+  main.o:	${srcdir}/main.c
+  	${CC} -c ${INTERNAL_CFLAGS} -I${READLINE_DIR} $<
+--- 665,670 ----
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/breakpoint.c,v
-retrieving revision 1.38
-diff -c -r1.38 breakpoint.c
-*** 1.38	1992/07/04 03:20:43
---- breakpoint.c	1992/07/05 13:37:46
+retrieving revision 1.40
+diff -c -r1.40 breakpoint.c
+*** 1.40	1992/07/16 23:23:02
+--- breakpoint.c	1992/07/16 23:23:58
 ***************
 *** 273,278 ****
 --- 273,279 ----
@@ -183,16 +181,13 @@ diff -c -r1.38 breakpoint.c
   	      error ("Junk at end of expression");
   	  }
 ***************
-*** 316,330 ****
+*** 316,327 ****
     ALL_BREAKPOINTS (b)
       if (b->number == bnum)
         {
 ! 	if (from_tty && input_from_terminal_p ())
-! 	  {
-! 	    printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
+  	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
   End with a line saying just \"end\".\n", bnum);
-- 	    fflush (stdout);
-- 	  }
   	l = read_command_lines ();
   	free_command_lines (&b->commands);
   	b->commands = l;
@@ -204,7 +199,7 @@ diff -c -r1.38 breakpoint.c
       if (b->number == bnum)
         {
 ! 	if ((from_tty && input_from_terminal_p ()) || energize)
-! 	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
+  	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
   End with a line saying just \"end\".\n", bnum);
   	l = read_command_lines ();
   	free_command_lines (&b->commands);
@@ -214,7 +209,7 @@ diff -c -r1.38 breakpoint.c
         }
     error ("No breakpoint number %d.", bnum);
 ***************
-*** 925,930 ****
+*** 922,927 ****
 --- 925,931 ----
   	    {
   	      b->ignore_count--;
@@ -224,8 +219,8 @@ diff -c -r1.38 breakpoint.c
   	  else
   	    {
 ***************
-*** 1365,1370 ****
---- 1366,1373 ----
+*** 1366,1371 ****
+--- 1370,1377 ----
   mention (b)
        struct breakpoint *b;
   {
@@ -235,8 +230,8 @@ diff -c -r1.38 breakpoint.c
       {
       case bp_watchpoint:
 ***************
-*** 2112,2117 ****
---- 2115,2122 ----
+*** 2113,2118 ****
+--- 2119,2126 ----
     register struct breakpoint *b;
     register bpstat bs;
   
@@ -246,8 +241,8 @@ diff -c -r1.38 breakpoint.c
         target_remove_breakpoint(bpt->address, bpt->shadow_contents);
   
 ***************
-*** 2283,2288 ****
---- 2288,2294 ----
+*** 2284,2289 ****
+--- 2292,2298 ----
       if (b->number == bptnum)
         {
   	b->ignore_count = count;
@@ -256,7 +251,7 @@ diff -c -r1.38 breakpoint.c
   	  return;
   	else if (count == 0)
 ***************
-*** 2307,2313 ****
+*** 2308,2314 ****
     struct breakpoint *b;
   
     ALL_BREAKPOINTS (b)
@@ -264,7 +259,7 @@ diff -c -r1.38 breakpoint.c
   }
   
   /* Command to set ignore-count of breakpoint N to COUNT.  */
---- 2313,2322 ----
+--- 2317,2326 ----
     struct breakpoint *b;
   
     ALL_BREAKPOINTS (b)
@@ -276,8 +271,8 @@ diff -c -r1.38 breakpoint.c
   
   /* Command to set ignore-count of breakpoint N to COUNT.  */
 ***************
-*** 2374,2379 ****
---- 2383,2390 ----
+*** 2375,2380 ****
+--- 2387,2394 ----
   {
     bpt->enable = enabled;
   
@@ -287,8 +282,8 @@ diff -c -r1.38 breakpoint.c
       printf ("breakpoint #%d enabled\n", bpt->number);
   
 ***************
-*** 2421,2426 ****
---- 2432,2439 ----
+*** 2422,2427 ****
+--- 2436,2443 ----
   disable_breakpoint (bpt)
        struct breakpoint *bpt;
   {
@@ -299,12 +294,12 @@ diff -c -r1.38 breakpoint.c
     if (xgdb_verbose && bpt->type == bp_breakpoint)
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/command.c,v
-retrieving revision 1.17
-diff -c -r1.17 command.c
-*** 1.17	1992/07/04 03:20:54
---- command.c	1992/07/05 13:41:51
+retrieving revision 1.18
+diff -c -r1.18 command.c
+*** 1.18	1992/07/10 17:22:30
+--- command.c	1992/07/16 22:44:12
 ***************
-*** 1149,1155 ****
+*** 1148,1154 ****
       }
   
     if (pid != -1)
@@ -312,7 +307,7 @@ diff -c -r1.17 command.c
         ;
     else
       error ("Fork failed");
---- 1149,1155 ----
+--- 1148,1154 ----
       }
   
     if (pid != -1)
@@ -322,10 +317,10 @@ diff -c -r1.17 command.c
       error ("Fork failed");
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/configure.in,v
-retrieving revision 1.50
-diff -c -r1.50 configure.in
-*** 1.50	1992/06/23 00:25:00
---- configure.in	1992/07/05 17:50:08
+retrieving revision 1.51
+diff -c -r1.51 configure.in
+*** 1.51	1992/07/07 07:22:33
+--- configure.in	1992/07/16 22:44:14
 ***************
 *** 1,4 ****
 ! configdirs="doc"
@@ -339,15 +334,15 @@ diff -c -r1.50 configure.in
   target_dependent=true
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/defs.h,v
-retrieving revision 1.41
-diff -c -r1.41 defs.h
-*** 1.41	1992/06/30 08:53:18
---- defs.h	1992/07/05 13:24:31
+retrieving revision 1.43
+diff -c -r1.43 defs.h
+*** 1.43	1992/07/09 04:40:24
+--- defs.h	1992/07/16 22:48:44
 ***************
-*** 787,790 ****
---- 787,792 ----
-  extern CORE_ADDR
-  push_word ();
+*** 805,808 ****
+--- 805,810 ----
+  #define MAINTENANCE_CMDS 1
+  #endif
   
 + #include "energize.h"
 + 
@@ -426,13 +421,13 @@ diff -c -r1.11 inftarg.c
         {
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/main.c,v
-retrieving revision 1.49
-diff -c -r1.49 main.c
-*** 1.49	1992/07/04 12:20:57
---- main.c	1992/07/05 14:08:32
+retrieving revision 1.51
+diff -c -r1.51 main.c
+*** 1.51	1992/07/10 17:22:33
+--- main.c	1992/07/17 23:22:19
 ***************
-*** 397,402 ****
---- 397,403 ----
+*** 426,431 ****
+--- 426,432 ----
     char *corearg = NULL;
     char *cdarg = NULL;
     char *ttyarg = NULL;
@@ -441,8 +436,8 @@ diff -c -r1.49 main.c
     /* Pointers to all arguments of +command option.  */
     char **cmdarg;
 ***************
-*** 495,500 ****
---- 496,502 ----
+*** 524,529 ****
+--- 525,531 ----
   	{"tty", required_argument, 0, 't'},
   	{"baud", required_argument, 0, 'b'},
   	{"b", required_argument, 0, 'b'},
@@ -451,8 +446,8 @@ diff -c -r1.49 main.c
   #ifdef ADDITIONAL_OPTIONS
   	ADDITIONAL_OPTIONS
 ***************
-*** 527,532 ****
---- 529,537 ----
+*** 556,561 ****
+--- 558,566 ----
   	  case 11:
   	    cdarg = optarg;
   	    break;
@@ -463,8 +458,8 @@ diff -c -r1.49 main.c
   	    symarg = optarg;
   	    break;
 ***************
-*** 707,712 ****
---- 712,719 ----
+*** 736,741 ****
+--- 741,748 ----
     free ((PTR)dirarg);
     do_cleanups (ALL_CLEANUPS);
   
@@ -474,7 +469,7 @@ diff -c -r1.49 main.c
         && symarg != NULL
         && strcmp (execarg, symarg) == 0)
 ***************
-*** 821,827 ****
+*** 850,856 ****
         if (!setjmp (to_top_level))
   	{
   	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
@@ -482,7 +477,7 @@ diff -c -r1.49 main.c
             quit_command ((char *)0, instream == stdin);
   	}
       }
---- 828,837 ----
+--- 857,866 ----
         if (!setjmp (to_top_level))
   	{
   	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
@@ -494,7 +489,7 @@ diff -c -r1.49 main.c
   	}
       }
 ***************
-*** 883,889 ****
+*** 912,918 ****
         else if (c->function.cfunc == NO_FUNCTION)
   	error ("That is not a command, just a help topic.");
         else
@@ -502,7 +497,7 @@ diff -c -r1.49 main.c
      }
   
     /* Tell the user if the language has changed (except first time).  */
---- 893,899 ----
+--- 922,928 ----
         else if (c->function.cfunc == NO_FUNCTION)
   	error ("That is not a command, just a help topic.");
         else
@@ -511,7 +506,7 @@ diff -c -r1.49 main.c
   
     /* Tell the user if the language has changed (except first time).  */
 ***************
-*** 1519,1525 ****
+*** 1564,1570 ****
     while (1)
       {
         dont_repeat ();
@@ -519,7 +514,7 @@ diff -c -r1.49 main.c
         if (p == NULL)
   	/* Treat end of file like "end".  */
   	break;
---- 1529,1535 ----
+--- 1574,1580 ----
     while (1)
       {
         dont_repeat ();
@@ -528,7 +523,7 @@ diff -c -r1.49 main.c
   	/* Treat end of file like "end".  */
   	break;
 ***************
-*** 1823,1829 ****
+*** 1868,1874 ****
   void
   print_prompt ()
   {
@@ -536,7 +531,7 @@ diff -c -r1.49 main.c
     fflush (stdout);
   }
   
---- 1833,1839 ----
+--- 1878,1884 ----
   void
   print_prompt ()
   {
@@ -546,10 +541,10 @@ diff -c -r1.49 main.c
   
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/printcmd.c,v
-retrieving revision 1.29
-diff -c -r1.29 printcmd.c
-*** 1.29	1992/06/25 10:58:47
---- printcmd.c	1992/07/05 14:09:25
+retrieving revision 1.30
+diff -c -r1.30 printcmd.c
+*** 1.30	1992/07/06 00:22:52
+--- printcmd.c	1992/07/16 22:44:42
 ***************
 *** 778,783 ****
 --- 778,792 ----
@@ -579,8 +574,8 @@ diff -c -r1.29 printcmd.c
         if (inspect)
   	printf("\") )\030");
 ***************
-*** 1610,1620 ****
---- 1620,1638 ----
+*** 1653,1663 ****
+--- 1663,1681 ----
   	 standard indentation here is 4 spaces, and val_print indents
   	 2 for each recurse.  */
         val = read_var_value (sym, FRAME_INFO_ID (fi));
@@ -704,10 +699,10 @@ diff -c -r1.55 symfile.c
   
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/utils.c,v
-retrieving revision 1.53
-diff -c -r1.53 utils.c
-*** 1.53	1992/07/04 03:21:59
---- utils.c	1992/07/05 17:32:13
+retrieving revision 1.54
+diff -c -r1.54 utils.c
+*** 1.54	1992/07/09 04:40:35
+--- utils.c	1992/07/16 22:44:50
 ***************
 *** 694,700 ****
     register int ans2;
@@ -808,10 +803,10 @@ diff -c -r1.53 utils.c
      || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/valprint.c,v
-retrieving revision 1.45
-diff -c -r1.45 valprint.c
-*** 1.45	1992/07/04 03:22:04
---- valprint.c	1992/07/05 14:19:51
+retrieving revision 1.48
+diff -c -r1.48 valprint.c
+*** 1.48	1992/07/10 03:56:06
+--- valprint.c	1992/07/16 22:44:53
 ***************
 *** 485,490 ****
 --- 485,491 ----
@@ -883,11 +878,14 @@ diff -c -r1.45 valprint.c
   	      if (i < len)
   		fprintf_filtered (stream, "...");
 ===================================================================
-*** config/amix.mh	Tue Jun  9 19:05:16 1992
---- config/amix.mh	Wed Jul 15 12:37:29 1992
+RCS file: /local/cvsfiles/devo/gdb/config/amix.mh,v
+retrieving revision 1.4
+diff -c -r1.4 config/amix.mh
+*** 1.4	1992/06/10 02:05:16
+--- amix.mh	1992/07/05 17:47:19
 ***************
 *** 22,24 ****
---- 22,30 ----
+--- 22,31 ----
   
   # SVR4 puts the BSD compatible install in /usr/ucb.
   INSTALL = /usr/ucb/install -c
@@ -895,17 +893,18 @@ diff -c -r1.45 valprint.c
 + # These are the libs that are needed for the Energize version of gdb on
 + # SVR4.  Note that we MUST include the standard C library before libucb.a,
 + # otherwise we get lots of broken stuff we don't want.
-+ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
-+ 	/usr/ucblib/libucb.a -lnsl
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/config/ncr3000.mh,v
 retrieving revision 1.4
-diff -c -r1.4 ncr3000.mh
+diff -c -r1.4 config/ncr3000.mh
 *** 1.4	1992/06/15 19:25:13
---- config/ncr3000.mh	1992/07/05 17:49:34
+--- ncr3000.mh	1992/07/05 17:49:34
 ***************
 *** 38,40 ****
---- 38,46 ----
+--- 38,47 ----
   # The /usr/ucb/install program is incompatible (complains about unknown
   # group staff).  Use good old cp...
   INSTALL = cp
@@ -913,25 +912,6 @@ diff -c -r1.4 ncr3000.mh
 + # These are the libs that are needed for the Energize version of gdb on
 + # SVR4.  Note that we MUST include the standard C library before libucb.a,
 + # otherwise we get lots of broken stuff we don't want.
-+ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
-+ 	/usr/ucblib/libucb.a -lnsl
-===================================================================
-*** demangle.c	Wed Jul 15 11:42:27 1992
---- demangle.c	Wed Jul 15 11:25:14 1992
-***************
-*** 37,43 ****
-     the appropriate target configuration file. */
-  
-  #ifndef DEFAULT_DEMANGLING_STYLE
-! # define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
-  #endif
-  
-  /* The current demangling style in affect.  Global so that the demangler
---- 37,43 ----
-     the appropriate target configuration file. */
-  
-  #ifndef DEFAULT_DEMANGLING_STYLE
-! # define DEFAULT_DEMANGLING_STYLE LUCID_DEMANGLING_STYLE_STRING
-  #endif
-  
-  /* The current demangling style in affect.  Global so that the demangler
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
