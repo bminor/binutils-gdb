@@ -1607,10 +1607,13 @@ same value as @code{abs2}.
 @kindex SHORT(@var{expression})
 @itemx LONG(@var{expression})
 @kindex LONG(@var{expression})
+@itemx QUAD(@var{expression})
+@kindex QUAD(@var{expression})
 @cindex direct output
-By including one of these three statements in a section definition, you
-can explicitly place one, two, or four bytes (respectively) at the
-current address of that section.  
+By including one of these four statements in a section definition, you
+can explicitly place one, two, four, or eight bytes (respectively) at
+the current address of that section.  @code{QUAD} is only supported when
+using a 64 bit host or target.
 
 @ifclear SingleFormat
 Multiple-byte quantities are represented in whatever byte order is
@@ -1822,10 +1825,8 @@ Options}.
 @cindex naming the output file
 Use this command to name the link output file @var{filename}.  The
 effect of @code{OUTPUT(@var{filename})} is identical to the effect of
-@w{@samp{-o @var{filename}}}, and whichever is encountered last
-(@samp{-T} or @samp{-o} will control the name actually used to name the
-output file.  In particular, you can use this command to supply a
-default output-file name other than @code{a.out}.
+@w{@samp{-o @var{filename}}}, which overrides it.  You can use this
+command to supply a default output-file name other than @code{a.out}.
 
 @ifclear SingleFormat
 @item OUTPUT_ARCH ( @var{bfdname} )

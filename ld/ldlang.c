@@ -19,21 +19,18 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 
 #include "ld.h"
-#include "ldsym.h"
 #include "ldmain.h"
 #include "ldgram.h"
-#include "ldwarn.h"
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldemul.h"
 #include "ldlex.h"
 #include "ldmisc.h"
-#include "ldindr.h"
 #include "ldctor.h"
 #include "ldfile.h"
-#include "relax.h"
 
 /* FORWARDS */
 static void print_statements PARAMS ((void));
@@ -100,7 +97,6 @@ static void open_input_bfds PARAMS ((lang_statement_union_type *statement));
 static void lang_reasonable_defaults PARAMS ((void));
 static void lang_place_undefineds PARAMS ((void));
 static void lang_create_output_section_statements PARAMS ((void));
-static void lang_init_script_file PARAMS ((void));
 static void map_input_to_output_sections
   PARAMS ((lang_statement_union_type *s,
 	   const char *target,
@@ -129,21 +125,21 @@ static bfd_vma insert_pad PARAMS ((lang_statement_union_type **this_ptr,
 static bfd_vma size_input_section
   PARAMS ((lang_statement_union_type **this_ptr,
 	   lang_output_section_statement_type *output_section_statement,
-	   unsigned short fill, bfd_vma dot, boolean relax));
+	   fill_type fill, bfd_vma dot, boolean relax));
 static bfd_vma lang_size_sections
   PARAMS ((lang_statement_union_type *s,
 	   lang_output_section_statement_type *output_section_statement,
-	   lang_statement_union_type **prev, unsigned short fill,
+	   lang_statement_union_type **prev, fill_type fill,
 	   bfd_vma dot, boolean relax));
 static bfd_vma lang_do_assignments
   PARAMS ((lang_statement_union_type * s,
 	   lang_output_section_statement_type *output_section_statement,
-	   unsigned short fill,
+	   fill_type fill,
 	   bfd_vma dot));
-static void lang_relocate_globals PARAMS ((void));
 static void lang_finish PARAMS ((void));
 static void lang_check PARAMS ((void));
 static void lang_common PARAMS ((void));
+static boolean lang_one_common PARAMS ((struct bfd_link_hash_entry *, PTR));
 static void lang_place_orphans PARAMS ((void));
 static int topower PARAMS ((int));
 static void reset_memory_regions PARAMS ((void));
@@ -152,13 +148,11 @@ static void reset_memory_regions PARAMS ((void));
 boolean relaxing;
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
-lang_input_statement_type *script_file = 0;
 lang_statement_list_type file_chain =
 {0};
 CONST char *entry_symbol = 0;
 bfd_size_type largest_section = 0;
 boolean lang_has_input_file = false;
-lang_output_section_statement_type *create_object_symbols = 0;
 boolean had_output_filename = false;
 boolean lang_float_flag = false;
 boolean delete_output_file_on_failure = false;
@@ -220,7 +214,7 @@ print_section (name)
 
 static void
 lang_for_each_statement_worker (func, s)
-     void (*func) (lang_statement_union_type *);
+     void (*func) PARAMS ((lang_statement_union_type *));
      lang_statement_union_type *s;
 {
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
@@ -261,7 +255,7 @@ lang_for_each_statement_worker (func, s)
 
 void
 lang_for_each_statement (func)
-     void (*func) (lang_statement_union_type *);
+     void (*func) PARAMS ((lang_statement_union_type *));
 {
   lang_for_each_statement_worker (func,
 				  statement_list.head);
@@ -406,18 +400,6 @@ lang_add_input_file (name, file_type, target)
     }
 #endif
   return new_afile (name, file_type, target);
-}
-
-void
-lang_add_keepsyms_file (filename)
-     CONST char *filename;
-{
-  if (keepsyms_file != 0)
-    info_msg ("%X%P: error: duplicated keep-symbols-file value\n");
-  keepsyms_file = filename;
-  if (strip_symbols != STRIP_NONE)
-    info_msg ("%P: `-keep-only-symbols-file' overrides `-s' and `-S'\n");
-  strip_symbols = STRIP_SOME;
 }
 
 /* Build enough state so that the parser can build its tree */
@@ -778,27 +760,38 @@ lookup_name (name)
        search = (lang_input_statement_type *) search->next_real_file)
     {
       if (search->filename == (char *) NULL && name == (char *) NULL)
-	{
-	  return search;
-	}
-      if (search->filename != (char *) NULL && name != (char *) NULL)
-	{
-	  if (strcmp (search->filename, name) == 0)
-	    {
-	      ldmain_open_file_read_symbol (search);
-	      return search;
-	    }
-	}
+	return search;
+      if (search->filename != (char *) NULL
+	  && name != (char *) NULL
+	  && strcmp (search->filename, name) == 0)
+	break;
     }
 
-  /* There isn't an afile entry for this file yet, this must be
-     because the name has only appeared inside a load script and not
-     on the command line  */
-  search = new_afile (name, lang_input_file_is_file_enum, default_target);
-  ldmain_open_file_read_symbol (search);
+  if (search == (lang_input_statement_type *) NULL)
+    {
+      /* There isn't an afile entry for this file yet, this must be
+	 because the name has only appeared inside a load script and
+	 not on the command line */
+      search = new_afile (name, lang_input_file_is_file_enum, default_target);
+    }
+
+  ldfile_open_file (search);
+
+  if (bfd_check_format (search->the_bfd, bfd_object))
+    ldlang_add_file (search);
+  else if (bfd_check_format (search->the_bfd, bfd_archive))
+    {
+      /* There is nothing to do here; the add_symbols routine will
+	 call ldlang_add_file (via the add_archive_element callback)
+	 for each element of the archive which is used.  */
+    }
+  else
+    einfo ("%F%B: file not recognized: %E\n", search->the_bfd);
+
+  if (bfd_link_add_symbols (search->the_bfd, &link_info) == false)
+    einfo ("%F%B: could not read symbols: %E\n", search->the_bfd);
+
   return search;
-
-
 }
 
 static void
@@ -820,8 +813,6 @@ wild (s, section, file, target, output)
 	{
 	  wild_section (s, section, f, output);
 	}
-      /* Once more for the script file */
-      wild_section(s, section, script_file, output);
     }
   else
     {
@@ -877,6 +868,10 @@ open_output (name)
 			   ldfile_output_machine))
     einfo ("%P%F:%s: can not set architecture: %E\n", name);
 
+  link_info.hash = bfd_link_hash_table_create (output);
+  if (link_info.hash == (struct bfd_link_hash_table *) NULL)
+    einfo ("%P%F: can not create link hash table: %E\n");
+
   bfd_set_gp_size (output, g_switch_value);
   return output;
 }
@@ -890,10 +885,11 @@ ldlang_open_output (statement)
 {
   switch (statement->header.type)
     {
-      case lang_output_statement_enum:
+    case lang_output_statement_enum:
+      ASSERT (output_bfd == (bfd *) NULL);
       output_bfd = open_output (statement->output_statement.name);
       ldemul_set_output_arch ();
-      if (config.magic_demand_paged && !config.relocateable_output)
+      if (config.magic_demand_paged && !link_info.relocateable)
 	output_bfd->flags |= D_PAGED;
       else
 	output_bfd->flags &= ~D_PAGED;
@@ -999,19 +995,23 @@ ldlang_add_undef (name)
 static void
 lang_place_undefineds ()
 {
-  ldlang_undef_chain_list_type *ptr = ldlang_undef_chain_list_head;
+  ldlang_undef_chain_list_type *ptr;
 
-  while (ptr != (ldlang_undef_chain_list_type *) NULL)
+  for (ptr = ldlang_undef_chain_list_head;
+       ptr != (ldlang_undef_chain_list_type *) NULL;
+       ptr = ptr->next)
     {
-      asymbol *def;
-      asymbol **def_ptr = (asymbol **) stat_alloc ((bfd_size_type) (sizeof (asymbol **)));
+      struct bfd_link_hash_entry *h;
 
-      def = (asymbol *) bfd_make_empty_symbol (script_file->the_bfd);
-      *def_ptr = def;
-      def->name = ptr->name;
-      def->section = &bfd_und_section;
-      enter_global_ref (def_ptr, ptr->name);
-      ptr = ptr->next;
+      h = bfd_link_hash_lookup (link_info.hash, ptr->name, true, false, true);
+      if (h == (struct bfd_link_hash_entry *) NULL)
+	einfo ("%P%F: bfd_link_hash_lookup failed: %E");
+      if (h->type == bfd_link_hash_new)
+	{
+	  h->type = bfd_link_hash_undefined;
+	  h->u.undef.abfd = NULL;
+	  bfd_link_add_undef (link_info.hash, h);
+	}
     }
 }
 
@@ -1033,28 +1033,6 @@ lang_create_output_section_statements ()
 
       init_os (s);
     }
-
-}
-
-static void
-lang_init_script_file ()
-{
-  script_file = lang_add_input_file ("command line",
-				     lang_input_file_is_fake_enum,
-				     (char *) NULL);
-  script_file->the_bfd = bfd_create ("command line", output_bfd);
-  script_file->symbol_count = 0;
-  script_file->the_bfd->sections = 0;
-
-  /* The user data of a bfd points to the input statement attatched */
-  script_file->the_bfd->usrdata  = (void *)script_file;
-  script_file->common_section =
-   bfd_make_section(script_file->the_bfd,"COMMON");
-
-  abs_output_section =
-   lang_output_section_statement_lookup (BFD_ABS_SECTION_NAME);
-
-  abs_output_section->bfd_section = &bfd_abs_section;
 
 }
 
@@ -1119,7 +1097,6 @@ map_input_to_output_sections (s, target, output_section_statement)
 	  break;
 	case lang_input_statement_enum:
 	  /* A standard input statement, has no wildcards */
-	  /*	ldmain_open_file_read_symbol(&s->input_statement);*/
 	  break;
 	}
     }
@@ -1370,6 +1347,10 @@ print_data_statement (data)
       fprintf (config.map_file, "LONG ");
       print_dot += LONG_SIZE;
       break;
+    case QUAD:
+      fprintf (config.map_file, "QUAD ");
+      print_dot += QUAD_SIZE;
+      break;
     }
 
   exp_print_tree (data->exp);
@@ -1547,7 +1528,7 @@ static bfd_vma
 size_input_section (this_ptr, output_section_statement, fill, dot, relax)
      lang_statement_union_type ** this_ptr;
      lang_output_section_statement_type * output_section_statement;
-     unsigned short fill;
+     fill_type fill;
      bfd_vma dot;
      boolean relax;
 {
@@ -1607,7 +1588,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type * s;
      lang_output_section_statement_type * output_section_statement;
      lang_statement_union_type ** prev;
-     unsigned short fill;
+     fill_type fill;
      bfd_vma dot;
      boolean relax;
 {
@@ -1731,6 +1712,9 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 
        switch (s->data_statement.type)
        {
+        case QUAD:
+	 size = QUAD_SIZE;
+	 break;
 	case LONG:
 	 size = LONG_SIZE;
 	 break;
@@ -1758,7 +1742,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
       break;
 
      case lang_object_symbols_statement_enum:
-      create_object_symbols = output_section_statement;
+      link_info.create_object_symbols_section =
+	output_section_statement->bfd_section;
       break;
      case lang_output_statement_enum:
      case lang_target_statement_enum:
@@ -1766,12 +1751,18 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      case lang_input_section_enum:
       if (relax)
       {
+	lang_input_section_type *is;
+	asection *i;
+
 	relaxing = true;
 
-	if( relax_section (prev))
-	 had_relax = true;
-	relaxing = false;
+	is = &(*prev)->input_section;
+	i = is->section;
 
+	if (bfd_relax_section (i->owner, i, &link_info, is->ifile->asymbols))
+	  had_relax = true;
+
+	relaxing = false;
       }
       else  {
 	(*prev)->input_section.section->_cooked_size = 
@@ -1842,7 +1833,7 @@ static bfd_vma
 lang_do_assignments (s, output_section_statement, fill, dot)
      lang_statement_union_type * s;
      lang_output_section_statement_type * output_section_statement;
-     unsigned short fill;
+     fill_type fill;
      bfd_vma dot;
 {
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
@@ -1894,6 +1885,9 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	  }
 	  switch (s->data_statement.type)
 	    {
+	    case QUAD:
+	      dot += QUAD_SIZE;
+	      break;
 	    case LONG:
 	      dot += LONG_SIZE;
 	      break;
@@ -1942,110 +1936,56 @@ lang_do_assignments (s, output_section_statement, fill, dot)
   return dot;
 }
 
-
-
-static void
-lang_relocate_globals ()
-{
-  /*
-    Each ldsym_type maintains a chain of pointers to asymbols which
-    references the definition.  Replace each pointer to the referenence
-    with a pointer to only one place, preferably the definition. If
-    the defintion isn't available then the common symbol, and if
-    there isn't one of them then choose one reference.
-    */
-
-  FOR_EACH_LDSYM (lgs)
-  {
-    asymbol *it;
-
-    /* Skip indirect symbols.  */
-    if (lgs->flags & SYM_INDIRECT)
-      continue;
-
-    if (lgs->sdefs_chain)
-      {
-	it = *(lgs->sdefs_chain);
-      }
-    else if (lgs->scoms_chain != (asymbol **) NULL)
-      {
-	it = *(lgs->scoms_chain);
-      }
-    else if (lgs->srefs_chain != (asymbol **) NULL)
-      {
-	it = *(lgs->srefs_chain);
-      }
-    else
-      {
-	/* This can happen when the command line asked for a symbol to
-	   be -u */
-	it = (asymbol *) NULL;
-      }
-    if (it != (asymbol *) NULL)
-      {
-	asymbol **prev = 0;
-	asymbol **ptr = lgs->srefs_chain;;
-	if (lgs->flags & SYM_WARNING)
-	  {
-	    produce_warnings (lgs, it);
-	  }
-
-	while (ptr != (asymbol **) NULL
-	       && ptr != prev)
-	  {
-	    asymbol *ref = *ptr;
-	    prev = ptr;
-	    *ptr = it;
-	    ptr = (asymbol **) (ref->udata);
-	  }
-      }
-  }
-}
-
-
-
 static void
 lang_finish ()
 {
-  ldsym_type *lgs;
-  int warn = config.relocateable_output != true;
+  struct bfd_link_hash_entry *h;
+  boolean warn = link_info.relocateable ? false : true;
+
   if (entry_symbol == (char *) NULL)
-  {
-    /* No entry has been specified, look for start, but don't warn */
-    entry_symbol = "start";
-    warn =0;
-  }
-  lgs = ldsym_get_soft (entry_symbol);
-  if (lgs && lgs->sdefs_chain)
-  {
-    asymbol *sy = *(lgs->sdefs_chain);
+    {
+      /* No entry has been specified.  Look for start, but don't warn
+	 if we don't find it.  */
+      entry_symbol = "start";
+      warn = false;
+    }
 
-    /* We can set the entry address*/
-    bfd_set_start_address (output_bfd,
-			   outside_symbol_address (sy));
+  h = bfd_link_hash_lookup (link_info.hash, entry_symbol, false, false, true);
+  if (h != (struct bfd_link_hash_entry *) NULL
+      && h->type == bfd_link_hash_defined)
+    {
+      bfd_vma val;
 
-  }
+      val = (h->u.def.value
+	     + bfd_get_section_vma (output_bfd,
+				    h->u.def.section->output_section)
+	     + h->u.def.section->output_offset);
+      if (! bfd_set_start_address (output_bfd, val))
+	einfo ("%P%F:%s: can't set start address\n", entry_symbol);
+    }
   else
-  {
-    /* Cannot find anything reasonable,
-       use the first address in the text section
-       */
-    asection *ts = bfd_get_section_by_name (output_bfd, ".text");
-    if (ts)
     {
-      if (warn)
-       einfo ("%P: warning: cannot find entry symbol %s, defaulting to %V\n",
-	      entry_symbol, ts->vma);
+      asection *ts;
 
-      bfd_set_start_address (output_bfd, ts->vma);
+      /* Can't find the entry symbol.  Use the first address in the
+	 text section.  */
+      ts = bfd_get_section_by_name (output_bfd, ".text");
+      if (ts != (asection *) NULL)
+	{
+	  if (warn)
+	    einfo ("%P: warning: cannot find entry symbol %s; defaulting to %V\n",
+		   entry_symbol, bfd_get_section_vma (output_bfd, ts));
+	  if (! bfd_set_start_address (output_bfd,
+				       bfd_get_section_vma (output_bfd, ts)))
+	    einfo ("%P%F: can't set start address\n");
+	}
+      else
+	{
+	  if (warn)
+	    einfo ("%P: warning: cannot find entry symbol %s; not setting start address\n",
+		   entry_symbol);
+	}
     }
-    else 
-    {
-      if (warn)
-       einfo ("%P: warning: cannot find entry symbol %s, not setting start address\n",
-	      entry_symbol);
-    }
-  }
 }
 
 /* By now we know the target architecture, and we may have an */
@@ -2083,7 +2023,7 @@ lang_check ()
       else
 	{
 
-	  info_msg ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
+	  einfo ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
 		bfd_printable_name (input_bfd), input_bfd,
 		bfd_printable_name (output_bfd));
 
@@ -2097,137 +2037,100 @@ lang_check ()
     }
 }
 
-/*
- * run through all the global common symbols and tie them
- * to the output section requested.
- *
- As an experiment we do this 4 times, once for all the byte sizes,
- then all the two  bytes, all the four bytes and then everything else
-  */
+/* Look through all the global common symbols and attach them to the
+   correct section.  The -sort-common command line switch may be used
+   to roughly sort the entries by size.  */
 
 static void
 lang_common ()
 {
-  ldsym_type *lgs;
-  size_t power;
+  if (link_info.relocateable
+      && ! command_line.force_common_definition)
+    return;
 
-  if (config.relocateable_output == false ||
-      command_line.force_common_definition == true)
+  if (! config.sort_common)
+    bfd_link_hash_traverse (link_info.hash, lang_one_common, (PTR) NULL);
+  else
     {
-      for (power = 1; (config.sort_common == true && power == 1) || (power <= 16); power <<= 1)
-	{
-	  for (lgs = symbol_head;
-	       lgs != (ldsym_type *) NULL;
-	       lgs = lgs->next)
-	    {
-	      asymbol *com;
-	      unsigned int power_of_two;
-	      size_t size;
-	      size_t align;
+      unsigned int power;
 
-	      if (lgs->scoms_chain != (asymbol **) NULL)
-		{
-		  com = *(lgs->scoms_chain);
-		  size = com->value;
-		  switch (size)
-		    {
-		    case 0:
-		    case 1:
-		      align = 1;
-		      power_of_two = 0;
-		      break;
-		    case 2:
-		      power_of_two = 1;
-		      align = 2;
-		      break;
-		    case 3:
-		    case 4:
-		      power_of_two = 2;
-		      align = 4;
-		      break;
-		    case 5:
-		    case 6:
-		    case 7:
-		    case 8:
-		      power_of_two = 3;
-		      align = 8;
-		      break;
-		    default:
-		      power_of_two = 4;
-		      align = 16;
-		      break;
-		    }
-		  if (config.sort_common == false || align == power)
-		    {
-		      bfd *symbfd;
-
-		      /* Change from a common symbol into a definition of
-			 a symbol */
-		      lgs->sdefs_chain = lgs->scoms_chain;
-		      lgs->scoms_chain = (asymbol **) NULL;
-		      commons_pending--;
-
-		      /* Point to the correct common section */
-		      symbfd = bfd_asymbol_bfd (com);
-		      if (com->section == &bfd_com_section)
-			com->section =
-			  ((lang_input_statement_type *) symbfd->usrdata)
-			    ->common_section;
-		      else
-			{
-			  CONST char *name;
-			  asection *newsec;
-
-			  name = bfd_get_section_name (symbfd,
-						       com->section);
-			  newsec = bfd_get_section_by_name (symbfd,
-							    name);
-			  /* This section should have been created by
-			     enter_file_symbols if it did not already
-			     exist.  */
-			  if (newsec == (asection *) NULL)
-			    einfo ("%P%F: no output section %s\n", name);
-			  com->section = newsec;
-			}
-
-		      /*  Fix the size of the common section */
-
-		      com->section->_raw_size =
-			ALIGN_N (com->section->_raw_size,
-				 /* The coercion here is important, see ld.h.  */
-				 (bfd_vma) align);
-
-		      /* Remember if this is the biggest alignment ever seen */
-		      if (power_of_two > com->section->alignment_power)
-			{
-			  com->section->alignment_power = power_of_two;
-			}
-
-		      /* Symbol stops being common and starts being global, but
-			 we remember that it was common once. */
-
-		      com->flags = BSF_EXPORT | BSF_GLOBAL | BSF_OLD_COMMON;
-		      com->value = com->section->_raw_size;
-
-		      if (write_map && config.map_file)
-			{
-			  fprintf (config.map_file, "Allocating common %s: %x at %x %s\n",
-				   lgs->name,
-				   (unsigned) size,
-				   (unsigned) com->value,
-				   bfd_asymbol_bfd(com)->filename);
-			}
-
-		      com->section->_raw_size += size;
-
-		    }
-		}
-
-	    }
-	}
+      for (power = 1; power <= 16; power <<= 1)
+	bfd_link_hash_traverse (link_info.hash, lang_one_common,
+				(PTR) &power);
     }
+}
 
+/* Place one common symbol in the correct section.  */
 
+static boolean
+lang_one_common (h, info)
+     struct bfd_link_hash_entry *h;
+     PTR info;
+{
+  unsigned int power_of_two;
+  bfd_vma size;
+  size_t align;
+  asection *section;
+
+  if (h->type != bfd_link_hash_common)
+    return true;
+
+  size = h->u.c.size;
+  switch (size)
+    {
+    case 0:
+    case 1:
+      power_of_two = 0;
+      align = 1;
+      break;
+    case 2:
+      power_of_two = 1;
+      align = 2;
+      break;
+    case 3:
+    case 4:
+      power_of_two = 2;
+      align = 4;
+      break;
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+      power_of_two = 3;
+      align = 8;
+      break;
+    default:
+      power_of_two = 4;
+      align = 16;
+      break;
+    }
+	      
+  if (config.sort_common && align != *(unsigned int *) info)
+    return true;
+
+  section = h->u.c.section;
+
+  /* Increase the size of the section.  */
+  section->_raw_size = ALIGN_N (section->_raw_size, align);
+
+  /* Adjust the alignment if necessary.  */
+  if (power_of_two > section->alignment_power)
+    section->alignment_power = power_of_two;
+
+  /* Change the symbol from common to defined.  */
+  h->type = bfd_link_hash_defined;
+  h->u.def.section = section;
+  h->u.def.value = section->_raw_size;
+
+  /* Increase the size of the section.  */
+  section->_raw_size += size;
+
+  if (write_map && config.map_file != NULL)
+    fprintf (config.map_file, "Allocating common %s: %lx at %lx %s\n",
+	     h->root.string, (unsigned long) size,
+	     (unsigned long) h->u.def.value, section->owner->filename);
+
+  return true;
 }
 
 /*
@@ -2262,8 +2165,8 @@ lang_place_orphans ()
 		  /* This is a lonely common section which must
 		     have come from an archive. We attatch to the
 		     section with the wildcard  */
-		  if (config.relocateable_output != true
-		      && command_line.force_common_definition == false)
+		  if (! link_info.relocateable
+		      && ! command_line.force_common_definition)
 		    {
 		      if (default_common_section ==
 			  (lang_output_section_statement_type *) NULL)
@@ -2378,10 +2281,17 @@ void
 ldlang_add_file (entry)
      lang_input_statement_type * entry;
 {
-
   lang_statement_append (&file_chain,
 			 (lang_statement_union_type *) entry,
 			 &entry->next);
+
+  /* The BFD linker needs to have a list of all input BFDs involved in
+     a link.  */
+  ASSERT (entry->the_bfd->link_next == (bfd *) NULL);
+  ASSERT (entry->the_bfd != output_bfd);
+  entry->the_bfd->link_next = link_info.input_bfds;
+  link_info.input_bfds = entry->the_bfd;
+  entry->the_bfd->usrdata = (PTR) entry;
 }
 
 void
@@ -2488,27 +2398,6 @@ reset_memory_regions ()
     }
 }
 
-
-
-asymbol *
-create_symbol (name, flags, section)
-     CONST char *name;
-     flagword flags;
-     asection * section;
-{
-  asymbol **def_ptr = (asymbol **) stat_alloc ((bfd_size_type) (sizeof (asymbol **)));
-
-  /* Add this definition to script file */
-  asymbol *def = (asymbol *) bfd_make_empty_symbol (script_file->the_bfd);
-  def->name = buystring (name);
-  def->udata = 0;
-  def->flags = flags;
-  def->section = section;
-  *def_ptr = def;
-  enter_global_ref (def_ptr, name);
-  return def;
-}
-
 void
 lang_process ()
 {
@@ -2522,9 +2411,6 @@ lang_process ()
 
   ldemul_create_output_section_statements ();
 
-  /* Create a dummy bfd for the script */
-  lang_init_script_file ();
-
   /* Add to the hash table all undefineds on the command line */
   lang_place_undefineds ();
 
@@ -2532,10 +2418,13 @@ lang_process ()
   current_target = default_target;
   lang_for_each_statement (open_input_bfds);
 
+  /* Build all sets based on the information gathered from the input
+     files.  */
+  ldctor_build_sets ();
+
   /* Run through the contours of the script and attatch input sections
      to the correct output sections
      */
-  find_constructors ();
   map_input_to_output_sections (statement_list.head, (char *) NULL,
 				(lang_output_section_statement_type *) NULL);
 
@@ -2576,9 +2465,6 @@ lang_process ()
 			  (lang_output_section_statement_type *) NULL,
 			  &(statement_list.head), 0, (bfd_vma) 0, false);
 
-      /* Move the global symbols around so the second pass of relaxing
-	 can see them.  */
-      lang_relocate_globals ();
 
       reset_memory_regions ();
 
@@ -2587,7 +2473,7 @@ lang_process ()
 
       lang_do_assignments (statement_list.head,
 			   abs_output_section,
-			   0, (bfd_vma) 0);
+			   (fill_type) 0, (bfd_vma) 0);
 
       /* Perform another relax pass - this time we know where the
 	 globals are, so can make better guess.  */
@@ -2612,11 +2498,7 @@ lang_process ()
 
   lang_do_assignments (statement_list.head,
 		       abs_output_section,
-		       0, (bfd_vma) 0);
-
-
-  /* Move the global symbols around */
-  lang_relocate_globals ();
+		       (fill_type) 0, (bfd_vma) 0);
 
   /* Make sure that we're not mixing architectures */
 
@@ -2794,25 +2676,30 @@ lang_leave_output_section_statement (fill, memspec)
  If the symbol already exists, then do nothing.
 */
 void
-lang_abs_symbol_at_beginning_of (section, name)
-     CONST char *section;
-     CONST char *name;
+lang_abs_symbol_at_beginning_of (secname, name)
+     const char *secname;
+     const char *name;
 {
-  if (ldsym_undefined (name))
-    {
-      asection *s = bfd_get_section_by_name (output_bfd, section);
-      asymbol *def = create_symbol (name,
-				    BSF_GLOBAL | BSF_EXPORT,
-				    &bfd_abs_section);
+  struct bfd_link_hash_entry *h;
 
-      if (s != (asection *) NULL)
-	{
-	  def->value = s->vma;
-	}
+  h = bfd_link_hash_lookup (link_info.hash, name, true, true, true);
+  if (h == (struct bfd_link_hash_entry *) NULL)
+    einfo ("%P%F: bfd_link_hash_lookup failed: %E\n");
+
+  if (h->type == bfd_link_hash_new
+      || h->type == bfd_link_hash_undefined)
+    {
+      asection *sec;
+
+      h->type = bfd_link_hash_defined;
+
+      sec = bfd_get_section_by_name (output_bfd, secname);
+      if (sec == (asection *) NULL)
+	h->u.def.value = 0;
       else
-	{
-	  def->value = 0;
-	}
+	h->u.def.value = bfd_get_section_vma (output_bfd, sec);
+
+      h->u.def.section = &bfd_abs_section;
     }
 }
 
@@ -2823,27 +2710,31 @@ lang_abs_symbol_at_beginning_of (section, name)
  If the symbol already exists, then do nothing.
 */
 void
-lang_abs_symbol_at_end_of (section, name)
-     CONST char *section;
-     CONST char *name;
+lang_abs_symbol_at_end_of (secname, name)
+     const char *secname;
+     const char *name;
 {
-  if (ldsym_undefined (name))
+  struct bfd_link_hash_entry *h;
+
+  h = bfd_link_hash_lookup (link_info.hash, name, true, true, true);
+  if (h == (struct bfd_link_hash_entry *) NULL)
+    einfo ("%P%F: bfd_link_hash_lookup failed: %E\n");
+
+  if (h->type == bfd_link_hash_new
+      || h->type == bfd_link_hash_undefined)
     {
-      asection *s = bfd_get_section_by_name (output_bfd, section);
+      asection *sec;
 
-      /* Add a symbol called _end */
-      asymbol *def = create_symbol (name,
-				    BSF_GLOBAL | BSF_EXPORT,
-				    &bfd_abs_section);
+      h->type = bfd_link_hash_defined;
 
-      if (s != (asection *) NULL)
-	{
-	  def->value = s->vma + s->_raw_size;
-	}
+      sec = bfd_get_section_by_name (output_bfd, secname);
+      if (sec == (asection *) NULL)
+	h->u.def.value = 0;
       else
-	{
-	  def->value = 0;
-	}
+	h->u.def.value = (bfd_get_section_vma (output_bfd, sec)
+			  + bfd_section_size (output_bfd, sec));
+
+      h->u.def.section = &bfd_abs_section;
     }
 }
 

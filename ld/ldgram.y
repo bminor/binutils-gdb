@@ -107,7 +107,7 @@ static int error_index;
 %right UNARY
 %token END 
 %left <token> '('
-%token <token> ALIGN_K BLOCK LONG SHORT BYTE
+%token <token> ALIGN_K BLOCK QUAD LONG SHORT BYTE
 %token SECTIONS  
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
@@ -635,7 +635,9 @@ statement_list_opt:
 	;
 
 length:
-		LONG
+		QUAD
+			{ $$ = $1; }
+	|	LONG
 			{ $$ = $1; }
 	| 	SHORT
 			{ $$ = $1; }
@@ -897,10 +899,10 @@ memspec_opt:
 %%
 void
 yyerror(arg) 
-char *arg;
+     const char *arg;
 { 
-  if (error_index> 0  && error_index < ERROR_NAME_MAX)
-     einfo("%P%F: %S syntax error in %s\n",error_names[error_index-1]);
+  if (error_index > 0 && error_index < ERROR_NAME_MAX)
+     einfo("%P%F: %S %s in %s\n", arg, error_names[error_index-1]);
   else
-     einfo("%P%F: %S syntax error\n");
+     einfo("%P%F: %S %s\n", arg);
 }

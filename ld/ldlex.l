@@ -1,6 +1,6 @@
 %{
 
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -27,6 +27,7 @@ This was written by steve chamberlain
 #include <ansidecl.h>
 #include <stdio.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "ld.h"
 #include "ldgram.h"
 #include "ldmisc.h"
@@ -112,6 +113,8 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <COMMAND>"-n"			{ return OPTION_n; }
 <COMMAND>"-N"			{ return OPTION_N; }
 <COMMAND>"-r"			{ return OPTION_r; }
+<COMMAND>"-stats"		{ return OPTION_stats; }
+<COMMAND>"-no-keep-memory"	{ return OPTION_no_keep_memory; }
 <COMMAND>"-relax"		{ return OPTION_relax; }
 <COMMAND>"-i"			{ return OPTION_r; }
 <COMMAND>"-Ur"			{ return OPTION_Ur; }
@@ -329,6 +332,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"HLL"			{ RTOKEN(HLL);}
 <BOTH,SCRIPT>"SYSLIB"		{ RTOKEN(SYSLIB);}
 <BOTH,SCRIPT>"FLOAT"			{ RTOKEN(FLOAT);}
+<BOTH,SCRIPT>"QUAD"			{ RTOKEN( QUAD);}
 <BOTH,SCRIPT>"LONG"			{ RTOKEN( LONG);}
 <BOTH,SCRIPT>"SHORT"			{ RTOKEN( SHORT);}
 <BOTH,SCRIPT>"BYTE"			{ RTOKEN( BYTE);}
