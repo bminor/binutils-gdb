@@ -23,7 +23,7 @@
 #if !defined (SYMFILE_H)
 #define SYMFILE_H
 
-/* This file requires that you first include "bfd.h".  */
+/* This file requires that you first include "bfd.h" and "symtab.h".  */
 
 /* Opaque declarations.  */
 

@@ -26,6 +26,32 @@
 #include "demangle.h"
 #include "gdb_obstack.h"
 #include "gdb_assert.h"
+#include "symtab.h"
+#include "symfile.h"
+#include "block.h"
+#include "objfiles.h"
+#include "gdbtypes.h"
+#include "dictionary.h"
+#include "gdbcmd.h"
+
+static const char *find_last_component (const char *name);
+
+/* This block exists only to store symbols associated to namespaces.
+   Normally, try to avoid accessing it directly: instead, use
+   get_namespace_block if you can.  Similarly with
+   namespace_objfile.  */
+
+static struct block *namespace_block = NULL;
+
+static struct objfile *namespace_objfile = NULL;
+
+static struct block *get_namespace_block (void);
+
+static struct objfile *get_namespace_objfile (void);
+
+static void free_namespace_block (struct symtab *symtab);
+
+static void maintenance_print_namespace (char *args, int from_tty);
 
 /* Here are some random pieces of trivia to keep in mind while trying
    to take apart demangled names:
@@ -345,4 +371,137 @@ cp_find_first_component (const char *name)
 	  break;
 	}
     }
+}
+
+/* Locate the namespace_block, allocating it if necessary.  */
+
+static struct block *
+get_namespace_block (void)
+{
+  if (namespace_block == NULL)
+    {
+      struct objfile *objfile = get_namespace_objfile ();
+      struct symtab *namespace_symtab;
+      struct blockvector *bv;
+      struct block *bl;
+
+      namespace_symtab = allocate_symtab ("<C++-namespaces>", objfile);
+      namespace_symtab->language = language_cplus;
+      namespace_symtab->free_code = free_nothing;
+      namespace_symtab->dirname = NULL;
+
+      bv = obstack_alloc (&objfile->symbol_obstack,
+			  sizeof (struct blockvector));
+      BLOCKVECTOR_NBLOCKS (bv) = 1;
+      BLOCKVECTOR (namespace_symtab) = bv;
+      
+      /* Allocate dummy STATIC_BLOCK. */
+      bl = obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
+      BLOCK_START (bl) = 0;
+      BLOCK_END (bl) = 0;
+      BLOCK_FUNCTION (bl) = NULL;
+      BLOCK_SUPERBLOCK (bl) = NULL;
+      BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+					    NULL);
+      BLOCK_NAMESPACE (bl) = NULL;
+      BLOCK_GCC_COMPILED (bl) = 0;
+      BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
+
+      /* Allocate GLOBAL_BLOCK.  */
+      bl = (struct block *)
+	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
+      *bl = *BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+      BLOCK_DICT (bl) = dict_create_linear_expandable ();
+      BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
+      namespace_symtab->free_func = free_namespace_block;
+
+      namespace_block = bl;
+    }
+
+  return namespace_block;
+}
+
+/* Free the dictionary associated to the namespace block.  */
+
+static void
+free_namespace_block (struct symtab *symtab)
+{
+  gdb_assert (namespace_block != NULL);
+  dict_free (BLOCK_DICT (namespace_block));
+  namespace_block = NULL;
+  namespace_objfile = NULL;
+}
+
+/* Locate the namespace objfile, allocating it if necessary.  */
+
+static struct objfile *
+get_namespace_objfile (void)
+{
+  if (namespace_objfile == NULL)
+    {
+      namespace_objfile = allocate_objfile (NULL, 0);
+    }
+
+  return namespace_objfile;
+}
+
+/* Check to see if there's already a namespace symbol corresponding to
+   the initial substring of NAME whose length is LEN; if there isn't
+   one, allocate one and add it to the namespace symtab.  Return the
+   symbol in question.  */
+
+struct symbol *
+cp_check_namespace_symbol (const char *name, int len)
+{
+  struct objfile *objfile = get_namespace_objfile ();
+  char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
+  const struct block *block = get_namespace_block ();
+  struct symbol *sym = lookup_block_symbol (block, name_copy,
+					    NULL, VAR_NAMESPACE);
+
+  if (sym == NULL)
+    {
+      struct type *type = alloc_type (objfile);
+      INIT_CPLUS_SPECIFIC (type);
+      TYPE_TAG_NAME (type) = obsavestring (name, len, &objfile->type_obstack);
+      TYPE_CODE (type) = TYPE_CODE_NAMESPACE;
+      TYPE_LENGTH (type) = 0;
+      
+      sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+      memset (sym, 0, sizeof (struct symbol));
+      SYMBOL_LANGUAGE (sym) = language_cplus;
+      SYMBOL_NAME (sym) = name_copy;
+      SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+      SYMBOL_TYPE (sym) = type;
+      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+
+      dict_add_symbol (BLOCK_DICT (block), sym);
+    }
+  else
+    {
+      obstack_free (&objfile->symbol_obstack, name_copy);
+    }
+
+  return sym;
+}
+
+static void
+maintenance_print_namespace (char *args, int from_tty)
+{
+  const struct block *block = get_namespace_block ();
+  struct dict_iterator iter;
+  struct symbol *sym;
+
+  ALL_BLOCK_SYMBOLS (block, iter, sym)
+    {
+      printf_unfiltered ("%s\n", SYMBOL_BEST_NAME (sym));
+    }
+}
+
+void
+_initialize_cp_support (void)
+{
+  add_cmd ("namespace", class_maintenance, maintenance_print_namespace,
+	   "Print the list of current known C++ namespaces.",
+	   &maintenanceprintlist);
 }

@@ -23,6 +23,7 @@
 /* Opaque declarations.  */
 
 struct obstack;
+struct symbol;
 
 extern char *class_name_from_physname (const char *physname);
 
@@ -96,3 +97,5 @@ struct using_direct_node *cp_copy_usings (struct using_direct_node *tocopy,
 					  struct using_direct_node *tail);
 
 extern void cp_free_usings (struct using_direct_node *using);
+
+extern struct symbol *cp_check_namespace_symbol (const char *name, int len);

@@ -1296,9 +1296,17 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
          If not, there's no more debug_info for this comp unit. */
       if (comp_unit_die.has_children)
 	{
+	  lowpc = ((CORE_ADDR) -1);
+	  highpc = ((CORE_ADDR) 0);
+
 	  info_ptr = scan_partial_symbols (info_ptr, objfile, &lowpc, &highpc,
 					   &cu_header);
 
+	  /* If we didn't find a lowpc, set it to highpc to avoid
+	     complaints from `maint check'.  */
+	  if (lowpc == ((CORE_ADDR) -1))
+	    lowpc = highpc;
+	  
 	  /* If the compilation unit didn't have an explicit address range,
 	     then use the information extracted from its child dies.  */
 	  if (! comp_unit_die.has_pc_info)
@@ -1327,7 +1335,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   do_cleanups (back_to);
 }
 
-/* Read in all interesting dies to the end of the compilation unit.  */
+/* Read in all interesting dies to the end of the compilation unit or
+   to the end of the current namespace.  */
 
 static char *
 scan_partial_symbols (char *info_ptr, struct objfile *objfile,
@@ -1344,20 +1353,6 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
      back to that level. */
 
   int nesting_level = 1;
-
-  /* We only want to read in symbols corresponding to variables or
-     other similar objects that are global or static.  Normally, these
-     are all children of the DW_TAG_compile_unit die, so are all at
-     level 1.  But C++ namespaces give rise to DW_TAG_namespace dies
-     whose children are global objects.  So we keep track of what
-     level we currently think of as referring to file scope; this
-     should always equal 1 plus the number of namespaces that we are
-     currently nested within.  */
-  
-  int file_scope_level = 1;
-
-  *lowpc = ((CORE_ADDR) -1);
-  *highpc = ((CORE_ADDR) 0);
 
   while (nesting_level)
     {
@@ -1378,7 +1373,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 		    {
 		      *highpc = pdi.highpc;
 		    }
-		  if ((pdi.is_external || nesting_level == file_scope_level)
+		  if ((pdi.is_external || nesting_level == 1)
 		      && !pdi.is_declaration)
 		    {
 		      add_partial_symbol (&pdi, objfile, cu_header);
@@ -1391,7 +1386,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	    case DW_TAG_structure_type:
 	    case DW_TAG_union_type:
 	    case DW_TAG_enumeration_type:
-	      if ((pdi.is_external || nesting_level == file_scope_level)
+	      if ((pdi.is_external || nesting_level == 1)
 		  && !pdi.is_declaration)
 		{
 		  add_partial_symbol (&pdi, objfile, cu_header);
@@ -1402,22 +1397,20 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	         symbol table.  They're children of the enumeration
 	         type die, so they occur at a level one higher than we
 	         normally look for.  */
-	      if (nesting_level == file_scope_level + 1)
+	      if (nesting_level == 2)
 		add_partial_symbol (&pdi, objfile, cu_header);
 	      break;
 	    case DW_TAG_base_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
-	      if (nesting_level == file_scope_level)
+	      if (nesting_level == 1)
 		add_partial_symbol (&pdi, objfile, cu_header);
 	      break;
 	    case DW_TAG_namespace:
-	      /* FIXME: carlton/2002-10-16: we're not yet doing
-		 anything useful with this, but for now make sure that
-		 these tags at least don't cause us to miss any
-		 important symbols.  */
 	      if (pdi.has_children)
-		file_scope_level++;
+		info_ptr = scan_partial_symbols (info_ptr, objfile,
+						 lowpc, highpc,
+						 cu_header);
 	    default:
 	      break;
 	    }
@@ -1425,8 +1418,8 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 
       /* If the die has a sibling, skip to the sibling.  Do not skip
          enumeration types, we want to record their enumerators.  Do
-         not skip namespaces, we want to record symbols inside
-         them.  */
+         not skip namespaces, the scan_partial_symbols call has
+         already updated info_ptr for us.  */
       if (pdi.sibling
 	  && pdi.tag != DW_TAG_enumeration_type
 	  && pdi.tag != DW_TAG_namespace)
@@ -1443,20 +1436,9 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
       if (pdi.tag == 0)
 	{
 	  nesting_level--;
-	  /* If this is the end of a DW_TAG_namespace entry, then
-	     decrease the file_scope_level, too.  */
-	  if (nesting_level < file_scope_level)
-	    {
-	      file_scope_level--;
-	      gdb_assert (nesting_level == file_scope_level);
-	    }
 	}
     }
 
-  /* If we didn't find a lowpc, set it to highpc to avoid complaints
-     from `maint check'.  */
-  if (*lowpc == ((CORE_ADDR) -1))
-    *lowpc = *highpc;
   return info_ptr;
 }
 
@@ -2992,9 +2974,6 @@ read_common_block (struct die_info *die, struct objfile *objfile,
 }
 
 /* Read a C++ namespace.  */
-
-/* FIXME: carlton/2002-10-16: For now, we don't actually do anything
-   useful with the namespace data: we just process its children.  */
 
 static void
 read_namespace (struct die_info *die, struct objfile *objfile,

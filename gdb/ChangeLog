@@ -1,3 +1,35 @@
+2002-11-20  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (scan_partial_symbols): Move lowpc, highpc initial
+	and final setting to dwarf2_build_psymtabs_hard.
+	(dwarf2_build_psymtabs_hard): Set lowpc, highpc outside of
+	scan_partial_symbols.
+	(scan_partial_symbols): Handle namespaces by calling ourself
+	recursively.
+	* Makefile.in (cp-support.o): Depend on gdbcmd_h.
+	* cp-support.c (_initialize_cp_support): New function.
+	(maintenance_print_namespace): New function.
+	#include "gdbcmd.h"
+	* cp-support.h: Add opaque declaration for 'struct symbol'.
+	* symfile.h: Add comment saying that you must first include
+	symtab.h.
+	* Makefile.in (cp-support.o): Depend on dictionary_h.
+	* cp-support.c: #include "dictionary.h"
+	* gdbtypes.h: Add TYPE_CODE_NAMESPACE to enum type_code.
+	* cp-support.h: Add declaration for cp_check_namespace_symbol.
+	* Makefile.in (cp-support.o): Depend on gdbtypes_h.
+	* cp-support.c: New variable namespace_objfile.
+	(get_namespace_objfile): New function.
+	(cp_check_namespace_symbol): New function.
+	#include "gdbtypes.h"
+	* Makefile.in (cp-support.o): Depend on symfile_h, symtab_h,
+	block_h, objfiles_h.
+	* cp-support.c: Add declaration for find_last_component.
+	#include "symfile.h", "symtab.h", "block.h", "objfiles.h".
+	New variable namespace_block.
+	(get_namespace_block): New function.
+	(free_namespace_block): New function.
+
 2002-11-19  David Carlton  <carlton@math.stanford.edu>
 
 	* block.c: Whitespace cleanup.

@@ -1603,7 +1603,9 @@ corelow.o: corelow.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(gdbthread_h) $(regcache_h) $(symfile_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(gdb_string_h)
 cp-support.o: cp-support.c $(defs_h) $(cp_support_h) $(gdb_string_h) \
-	$(demangle_h) $(gdb_obstack_h) $(gdb_assert_h)
+	$(demangle_h) $(gdb_obstack_h) $(gdb_assert_h) $(symtab_h) \
+	$(symfile_h) $(block_h) $(objfiles_h) $(gdbtypes_h) $(dictionary_h) \
+	$(gdbcmd_h)
 cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
 	$(demangle_h) $(annotate_h) $(gdb_string_h) $(c_lang_h) $(target_h) \
