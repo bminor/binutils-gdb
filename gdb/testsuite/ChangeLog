@@ -1,7 +1,6 @@
 2000-12-20  Fernando Nasser  <fnasser@redhat.com>
 
-	* testsuite/lib/mi-support.exp (mi_gdb_start): Test for MI_OUT,
-	not UI_OUT.
+	* lib/mi-support.exp (mi_gdb_start): Test for MI_OUT, not UI_OUT.
 
 2000-12-18  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
