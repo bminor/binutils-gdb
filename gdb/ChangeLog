@@ -1,3 +1,9 @@
+Thu Oct 28 16:55:34 1993  Fred Fish  (fnf@cygnus.com)
+
+	* README:  Add note from Peter Schauer about OSF/1 shared
+	libraries.  Add note from Pace Willisson about configuring on BSDI
+	BSD/386 release 1.0.  Update gdb references to gdb 4.11.
+
 Thu Oct 28 09:14:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* NEWS: Add notes about Alpha and "set remotedebug" for UDI.
