@@ -349,10 +349,16 @@ void (*flush_hook) PARAMS ((FILE *stream));
 /* Called as appropriate to notify the interface of the specified breakpoint
    conditions.  */
 
-void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
+void (*create_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+
+/* Called during long calculations to allow GUI to repair window damage, and to
+   check for stop buttons, etc... */
+
+void (*interactive_hook) PARAMS ((void));
+
 
 /* Where to go for return_to_top_level (RETURN_ERROR).  */
 jmp_buf error_return;

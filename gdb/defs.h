@@ -66,7 +66,7 @@ extern int sevenbit_strings;
 
 extern void quit PARAMS ((void));
 
-#define QUIT { if (quit_flag) quit (); }
+#define QUIT { if (quit_flag) quit (); if (interactive_hook) interactive_hook (); }
 
 /* Command classes are top-level categories into which commands are broken
    down for "help" purposes.  
@@ -118,6 +118,13 @@ struct cleanup
   void (*function) PARAMS ((PTR));
   PTR arg;
 };
+
+/* Needed for various prototypes */
+
+#ifdef __STDC__
+struct symtab;
+struct breakpoint;
+#endif
 
 /* From blockframe.c */
 
@@ -310,6 +317,8 @@ extern void directory_command PARAMS ((char *, int));
 
 extern void init_source_path PARAMS ((void));
 
+extern char *symtab_to_filename PARAMS ((struct symtab *));
+
 /* From findvar.c */
 
 extern int read_relative_register_raw_bytes PARAMS ((int, char *));
@@ -318,26 +327,6 @@ extern int read_relative_register_raw_bytes PARAMS ((int, char *));
 
 extern char *tilde_expand PARAMS ((char *));
 
-/* Control types for commands */
-
-enum misc_command_type
-{
-  ok_command,
-  end_command,
-  else_command,
-  nop_command,
-};
-
-enum command_control_type
-{
-  simple_control,
-  break_control,
-  continue_control,
-  while_control,
-  if_control,
-  invalid_control
-};
-
 /* Structure for saved commands lines
    (for breakpoints, defined commands, etc).  */
 
@@ -345,9 +334,6 @@ struct command_line
 {
   struct command_line *next;
   char *line;
-  enum command_control_type control_type;
-  int body_count;
-  struct command_line **body_list;
 };
 
 extern struct command_line *read_command_lines PARAMS ((void));
@@ -832,11 +818,6 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
 
 /* Hooks for alternate command interfaces.  */
 
-#ifdef __STDC__
-struct symtab;
-struct breakpoint;
-#endif
-
 extern void (*init_ui_hook) PARAMS ((void));
 extern void (*command_loop_hook) PARAMS ((void));
 extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer));
@@ -848,6 +829,7 @@ extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+extern void (*interactive_hook) PARAMS ((void));
 
 /* Inhibit window interface if non-zero. */
 

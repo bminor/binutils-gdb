@@ -129,6 +129,7 @@ gdbtk_query (args)
   return val;
 }
 
+#if 0
 static char *
 full_filename(symtab)
      struct symtab *symtab;
@@ -163,6 +164,7 @@ full_filename(symtab)
 
   return filename;
 }
+#endif
 
 static void
 breakpoint_notify(b, action)
@@ -180,7 +182,7 @@ breakpoint_notify(b, action)
 
   sal = find_pc_line (b->address, 0);
 
-  filename = full_filename (sal.symtab);
+  filename = symtab_to_filename (sal.symtab);
 
   sprintf (bpnum, "%d", b->number);
   sprintf (line, "%d", sal.line);
@@ -200,9 +202,6 @@ breakpoint_notify(b, action)
       gdbtk_fputs (interp->result);
       gdbtk_fputs ("\n");
     }
-
-  if (filename)
-    free (filename);
 }
 
 static void
@@ -293,7 +292,7 @@ gdb_loc (clientData, interp, argc, argv)
   find_pc_partial_function (pc, &funcname, NULL, NULL);
   Tcl_AppendElement (interp, funcname);
 
-  filename = full_filename (sal.symtab);
+  filename = symtab_to_filename (sal.symtab);
   Tcl_AppendElement (interp, filename);
 
   sprintf (buf, "%d", sal.line);
@@ -301,9 +300,6 @@ gdb_loc (clientData, interp, argc, argv)
 
   sprintf (buf, "0x%x", pc);
   Tcl_AppendElement (interp, buf); /* PC */
-
-  if (filename)
-    free(filename);
 
   return TCL_OK;
 }
@@ -396,6 +392,15 @@ cleanup_init (ignored)
   interp = NULL;
 }
 
+/* Come here during long calculations to check for GUI events.  Usually invoked
+   via the QUIT macro.  */
+
+static void
+gdbtk_interactive ()
+{
+  /* Tk_DoOneEvent (TK_DONT_WAIT|TK_IDLE_EVENTS); */
+}
+
 static void
 gdbtk_init ()
 {
@@ -445,6 +450,7 @@ gdbtk_init ()
   delete_breakpoint_hook = gdbtk_delete_breakpoint;
   enable_breakpoint_hook = gdbtk_enable_breakpoint;
   disable_breakpoint_hook = gdbtk_disable_breakpoint;
+  interactive_hook = gdbtk_interactive;
 
   discard_cleanups (old_chain);
 

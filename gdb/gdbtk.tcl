@@ -183,8 +183,7 @@ proc create_breakpoint {bpnum file line pc} {
 
 	set win [asm_win_name $cfunc]
 	if [winfo exists $win] {
-		set line [lsearch -exact $pclist($cfunc) $pc]
-		insert_breakpoint_tag $win $line
+		insert_breakpoint_tag $win [pc_to_line $pclist($cfunc) $pc]
 	}
 }
 
@@ -219,12 +218,11 @@ proc delete_breakpoint {bpnum file line pc} {
 # Reset breakpoint annotation info
 
 	if {$pos_to_bpcount($file:$line) > 0} {
-		incr pos_to_bpcount($file:$line) -1
+		decr pos_to_bpcount($file:$line)
 
 		if {$pos_to_bpcount($file:$line) == 0} {
-			if [info exists pos_to_breakpoint($file:$line)] {
-				unset pos_to_breakpoint($file:$line)
-			}
+			catch "unset pos_to_breakpoint($file:$line)"
+
 			unset breakpoint_file($bpnum)
 			unset breakpoint_line($bpnum)
 
@@ -239,16 +237,14 @@ proc delete_breakpoint {bpnum file line pc} {
 # If there's an assembly window, update that too
 
 	if {$pos_to_bpcount($pc) > 0} {
-		incr pos_to_bpcount($pc) -1
+		decr pos_to_bpcount($pc)
 
 		if {$pos_to_bpcount($pc) == 0} {
-			if [info exists pos_to_breakpoint($pc)] {
-				unset pos_to_breakpoint($pc)
-			}
+			catch "unset pos_to_breakpoint($pc)"
+
 			set win [asm_win_name $cfunc]
 			if [winfo exists $win] {
-				set line [lsearch -exact $pclist($cfunc) $pc]
-				delete_breakpoint_tag $win $line
+				delete_breakpoint_tag $win [pc_to_line $pclist($cfunc) $pc]
 			}
 		}
 	}
@@ -278,8 +274,7 @@ proc enable_breakpoint {bpnum file line pc} {
 
 	set win [asm_win_name $cfunc]
 	if [winfo exists $win] {
-		set line [lsearch -exact $pclist($cfunc) $pc]
-		$win tag configure $line -fgstipple {}
+		$win tag configure [pc_to_line $pclist($cfunc) $pc] -fgstipple {}
 	}
 }
 
@@ -307,8 +302,7 @@ proc disable_breakpoint {bpnum file line pc} {
 
 	set win [asm_win_name $cfunc]
 	if [winfo exists $win] {
-		set line [lsearch -exact $pclist($cfunc) $pc]
-		$win tag configure $line -fgstipple gray50
+		$win tag configure [pc_to_line $pclist($cfunc) $pc] -fgstipple gray50
 	}
 }
 
@@ -349,6 +343,43 @@ proc delete_breakpoint_tag {win line} {
 	$win insert $line.0 " "
 	$win tag delete $line
 	$win configure -state disabled
+}
+
+#
+# Local procedure:
+#
+#	decr (var val) - compliment to incr
+#
+# Description:
+#
+#
+proc decr {var {val 1}} {
+	upvar $var num
+	set num [expr $num - $val]
+	return $num
+}
+
+#
+# Local procedure:
+#
+#	pc_to_line (pclist pc) - convert PC to a line number.
+#
+# Description:
+#
+#	Convert PC to a line number from PCLIST.  If exact line isn't found,
+#	we return the first line that starts before PC.
+#
+proc pc_to_line {pclist pc} {
+	set line [lsearch -exact $pclist $pc]
+
+	if {$line >= 1} { return $line }
+
+	set line 1
+	foreach linepc [lrange $pclist 1 end] {
+		if {$pc < $linepc} { decr line ; return $line }
+		incr line
+	}
+	return [expr $line - 1]
 }
 
 #
@@ -617,6 +648,20 @@ proc create_file_win {filename} {
 	regsub -all {\.|/} $filename {} temp
 	set win .text$temp
 
+# Open the file, and read it into the text widget
+
+	if [catch "open $filename" fh] {
+# File can't be read.  Put error message into .nofile window and return.
+
+		catch {destroy .nofile}
+		text .nofile -height 25 -width 80 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
+		.nofile insert 0.0 $fh
+		.nofile configure -state disabled
+		bind .nofile <1> do_nothing
+		bind .nofile <B1-Motion> do_nothing
+		return .nofile
+	}
+
 # Actually create and do basic configuration on the text widget.
 
 	text $win -height 25 -width 80 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
@@ -633,9 +678,6 @@ proc create_file_win {filename} {
 	bind $win u {gdb_cmd up ; update_ptr}
 	bind $win d {gdb_cmd down ; update_ptr}
 
-# Open the file, and read it into the text widget
-
-	set fh [open $filename]
 	$win delete 0.0 end
 	$win insert 0.0 [read $fh]
 	close $fh
@@ -665,7 +707,7 @@ proc create_file_win {filename} {
 #
 # Local procedure:
 #
-#	create_asm_win (funcname) - Create an assembly win for FUNCNAME.
+#	create_asm_win (funcname pc) - Create an assembly win for FUNCNAME.
 #
 # Return value:
 #
@@ -679,7 +721,7 @@ proc create_file_win {filename} {
 #	function FUNCNAME is read into the text widget.
 #
 
-proc create_asm_win {funcname} {
+proc create_asm_win {funcname pc} {
 	global breakpoint_file
 	global breakpoint_line
 	global current_output_win
@@ -710,20 +752,22 @@ proc create_asm_win {funcname} {
 # Disassemble the code, and read it into the new text widget
 
 	set current_output_win $win
-	gdb_cmd "disassemble '$funcname'"
+	gdb_cmd "disassemble $pc"
 	set current_output_win .command.text
 
 	set numlines [$win index end]
 	set numlines [lindex [split $numlines .] 0]
+	decr numlines
 
 # Delete the first and last lines, cuz these contain useless info
 
 	$win delete 1.0 2.0
 	$win delete {end - 1 lines} end
+	decr numlines 2
 
 # Add margins (for annotations) and note the PC for each line
 
-	if [info exists pclist($funcname)] { unset pclist($funcname) }
+	catch "unset pclist($funcname)"
 	lappend pclist($funcname) Unused
 	for {set i 1} {$i <= $numlines} {incr i} {
 		scan [$win get $i.0 "$i.0 lineend"] "%s " pc
@@ -835,9 +879,11 @@ proc update_listing {linespec} {
 
 		if ![info exists wins($cfile)] then {
 			set wins($cfile) [create_file_win $cfile]
-			set win_to_file($wins($cfile)) $cfile
-			set file_to_debug_file($cfile) $debug_file
-			set pointers($cfile) 1.1
+			if {$wins($cfile) != ".nofile"} {
+				set win_to_file($wins($cfile)) $cfile
+				set file_to_debug_file($cfile) $debug_file
+				set pointers($cfile) 1.1
+				}
 			}
 
 # Pack the text widget into the listing widget, and scroll to the right place
@@ -1042,7 +1088,7 @@ proc update_assembly {linespec} {
 # If we want to switch funcs, we need to unpack the current text widget, and
 # stick in the new one.
 
-	if {$funcname != $cfunc} then {
+	if {$funcname != $cfunc } {
 		pack forget $win
 		set cfunc $funcname
 
@@ -1050,8 +1096,8 @@ proc update_assembly {linespec} {
 
 # Create a text widget for this func if necessary
 
-		if ![winfo exists $win] then {
-			create_asm_win $cfunc
+		if {![winfo exists $win]} {
+			create_asm_win $cfunc $pc
 			set asm_pointers($cfunc) 1.1
 			set current_asm_label NIL
 			}
@@ -1060,7 +1106,7 @@ proc update_assembly {linespec} {
 
 		pack $win -side left -expand yes -fill both \
 			-after .asm.buts
-		set line [lsearch -exact $pclist($cfunc) $pc]
+		set line [pc_to_line $pclist($cfunc) $pc]
 		$win yview [expr $line - $asm_screen_height / 2]
 		}
 
@@ -1083,7 +1129,7 @@ proc update_assembly {linespec} {
 
 # Map the PC back to a line in the window		
 
-		set line [lsearch -exact $pclist($cfunc) $pc]
+		set line [pc_to_line $pclist($cfunc) $pc]
 
 		if {$line == -1} {
 			echo "Can't find PC $pc"

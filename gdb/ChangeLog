@@ -1,3 +1,23 @@
+Fri Sep 16 15:40:34 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* defs.h (QUIT):  Call interactive_hook to allow GUI to interrupt.
+	Also, add decl for symtab_to_filename.
+	* gdbtk.c:  Replace calls to full_filename with symtab_to_filename.  
+	* gdbtk.tcl:  New routine pc_to_line replaces in line code.  New
+	routine decr replaces in line code.
+	* (create_file_win):  Use catch to handle open failures more
+	elegantly.  Also, create special window to display file open
+	failure message.  Move opening of file prior to creation of text
+	widget.
+	* (create_asm_win):  Add PC as argument.  We now base disassembly
+	on PC instead of function name, since function names can be
+	ambiguous (usually seen with shared libs).  Also, use catch to
+	simplify code where we don't care about failures.
+	* source.c (symtab_to_filename):  New.  Returns the file
+	associated with a symtab.
+	* top.c:  Define interactive_hook.  Called during QUIT to animate
+	the GUI.
+
 Fri Sep 16 00:14:40 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* stabsread.c (read_type):  Handle stub types for bitstrings.
