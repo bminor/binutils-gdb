@@ -1143,7 +1143,7 @@ mips-pinsn.o: mips-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) language.h objfiles.h symfile.h
 
-mipsread.o: mipsread.c buildsym.h complaints.h $(defs_h) \
+mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
 	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
 

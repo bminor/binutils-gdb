@@ -1,10 +1,17 @@
+Wed Sep  8 10:21:33 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (mipsread.o): Depend on $(bfd_h).
+
+	* minsyms.c, symtab.h (lookup_next_minimal_symbol): New function.
+	* dbxread.c (process_one_symbol): Use it.
+
 Tue Sep  7 13:06:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbserver/Makefile.in (TAGS): config files are in
 	$(srcdir)/../config, not $(srcdir)/config.
 
 	* config/pa/tm-hppa.h: Declare target_read_pc and target_write_pc.
-	(STORE_RETURN_VAULE): Pass the correct offset of the return
+	(STORE_RETURN_VALUE): Pass the correct offset of the return
 	register to write_register_bytes.
 	* hppa-tdep.c: Use target_write_pc if PCOQ_TAIL_REGNUM was not saved.
 
