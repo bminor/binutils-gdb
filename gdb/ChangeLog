@@ -1,3 +1,25 @@
+2005-04-05  Jim Blandy  <jimb@redhat.com>
+
+	Move construction of IA-32 vector types to i386-tdep.c.
+	* gdbtypes.c (build_builtin_type_vec64i,
+	build_builtin_type_vec128i): Delete functions.
+	(builtin_type_vec64i, builtin_type_vec128i): Delete variables.
+	(build_gdbtypes): Don't initialize them.
+	(_initialize_gdbtypes): Don't register GDBARCH swap entries for
+	them.
+	* gdbtypes.h (builtin_type_vec64i, builtin_type_vec128i): Delete
+	declarations.
+	(builtin_type_v2_float, builtin_type_v2_int32,
+	builtin_type_v4_int16, builtin_type_v8_int8,
+	builtin_type_v2_double, builtin_type_v4_float,
+	builtin_type_v2_int64, builtin_type_v4_int32,
+	builtin_type_v8_int16, builtin_type_v16_int8): Add extern
+	declarations.
+	* i386-tdep.c (i386_mmx_type, i386_sse_type): New variables.
+	(i386_build_mmx_type, i386_build_sse_type): New functions.
+	(i386_register_type): Call them, rather than referring to
+	builtin_type_vec64i and builtin_type_vec128i.
+
 2005-04-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mips-linux-tdep.c (mips_linux_o32_sigframe_init): Adjust

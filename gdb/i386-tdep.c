@@ -1489,6 +1489,70 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
 }
 
 
+/* Types for the MMX and SSE registers.  */
+static struct type *i386_mmx_type;
+static struct type *i386_sse_type;
+
+/* Construct the type for MMX registers.  */
+static struct type *
+i386_build_mmx_type (void)
+{
+  /* The type we're building is this: */
+#if 0
+  union __gdb_builtin_type_vec64i 
+  {
+    int64_t uint64;
+    int32_t v2_int32[2];
+    int16_t v4_int16[4];
+    int8_t v8_int8[8];
+  };
+#endif
+
+  if (! i386_mmx_type)
+    {
+      struct type *t;
+
+      t = init_composite_type ("__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "uint64", builtin_type_int64);
+      append_composite_type_field (t, "v2_int32", builtin_type_v2_int32);
+      append_composite_type_field (t, "v4_int16", builtin_type_v4_int16);
+      append_composite_type_field (t, "v8_int8", builtin_type_v8_int8);
+
+      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_NAME (t) = "builtin_type_vec64i";
+
+      i386_mmx_type = t;
+    }
+
+  return i386_mmx_type;
+}
+
+/* Construct the type for SSE registers.  */
+static struct type *
+i386_build_sse_type (void)
+{
+  if (! i386_sse_type)
+    {
+      struct type *t;
+
+      t = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "v4_float", builtin_type_v4_float);
+      append_composite_type_field (t, "v2_double", builtin_type_v2_double);
+      append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
+      append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
+      append_composite_type_field (t, "v4_int32", builtin_type_v4_int32);
+      append_composite_type_field (t, "v2_int64", builtin_type_v2_int64);
+      append_composite_type_field (t, "uint128", builtin_type_int128);
+
+      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_NAME (t) = "builtin_type_vec128i";
+      
+      i386_sse_type = t;
+    }
+
+  return i386_sse_type;
+}
+
 /* Return the GDB type object for the "standard" data type of data in
    register REGNUM.  Perhaps %esi and %edi should go here, but
    potentially they could be used for things other than address.  */
@@ -1504,10 +1568,10 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type_i387_ext;
 
   if (i386_sse_regnum_p (gdbarch, regnum))
-    return builtin_type_vec128i;
+    return i386_build_sse_type ();
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
-    return builtin_type_vec64i;
+    return i386_build_mmx_type ();
 
   return builtin_type_int;
 }
