@@ -3,13 +3,12 @@
 
 @c @finalout
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
-* Stabs: (stabs).                 The "stabs" debugging information format.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@c This is a dir.info fragment to support semi-automated addition of
+@c manuals to an info tree.
+@dircategory Programming & development tools.
+@direntry
+* Stabs: (stabs).                 The "stabs" debugging information format.   
+@end direntry
 
 @ifinfo
 This document describes the stabs debugging symbol tables.
