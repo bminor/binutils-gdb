@@ -1,3 +1,18 @@
+Tue Jun 11 19:52:50 1996  Fred Fish  <fnf@cygnus.com>
+
+	From Michael Snyder <Michael_Snyder@next.com>:
+	* bcache.c (print_bcache_statistics): Avoid divide-by-zero
+	exception if one or more objfile has no symbols, such as when
+	a dynamic library has been stripped.
+
+Tue Jun 11 12:02:55 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in (INTERNAL_LDFLAGS):  Add in flags from configure.
+	* configure configure.in:  Only make sol-thread.o for native.
+	Also, switch to dlopened libthread_db.so.1.
+	* sol-thread.c:  Switch to using dlopen to get the thread_db
+	library.
+
 Mon Jun 10 14:17:19 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/sparc/{xm-sun4sol2.h,xm-sun4os4.h} (MMAP_BASE_ADDRESS):
