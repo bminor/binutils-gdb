@@ -1577,9 +1577,7 @@ struct section_offsets dst_symfile_faker =
 {0};
 
 void
-dst_symfile_offsets (objfile, addr)
-     struct objfile *objfile;
-     struct section_addr_info *addrs;
+dst_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 {
   objfile->num_sections = 1;
   objfile->section_offsets = &dst_symfile_faker;

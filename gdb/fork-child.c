@@ -94,15 +94,9 @@ breakup_args (char *scratch, char **argv)
    or NULL if we should pick one.  Errors reported with error().  */
 
 void
-fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
-	       pre_trace_fun, shell_file)
-     char *exec_file;
-     char *allargs;
-     char **env;
-     void (*traceme_fun) (void);
-     void (*init_trace_fun) (int);
-     void (*pre_trace_fun) (void);
-     char *shell_file;
+fork_inferior (char *exec_file, char *allargs, char **env,
+	       void (*traceme_fun) (void), void (*init_trace_fun) (int),
+	       void (*pre_trace_fun) (void), char *shell_file)
 {
   int pid;
   char *shell_command;
