@@ -1,5 +1,12 @@
 2004-12-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* inf-ttrace.c (inf_ttrace_him): Set TTEVT_BPT_SSTEP if available.
+	(inf_ttrace_attach): Likewise.
+	(inf_ttrace_resume_callback): New function.
+	(inf_ttrace_resume): Don't use TT_PROC_CONTINUE.  Iterate over all
+	lwps and call inf_ttrace_resume_callback instead.
+	(inf_ttrace_wait): Handle TTEVT_BPT_SSTEP.
+
 	* inf-ttrace.c (_initialize_inf_ttrace): Unconditionially compile.
 
 2004-12-10  Michael Snyder  <msnyder@redhat.com>

@@ -465,6 +465,9 @@ inf_ttrace_him (int pid)
   memset (&tte, 0, sizeof (tte));
   tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT;
   tte.tte_events |= TTEVT_LWP_CREATE | TTEVT_LWP_EXIT | TTEVT_LWP_TERMINATE;
+#ifdef TTEVT_BPT_SSTEP
+  tte.tte_events |= TTEVT_BPT_SSTEP;
+#endif
   tte.tte_opts = TTEO_NOSTRCCHLD;
   if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
@@ -600,6 +603,9 @@ inf_ttrace_attach (char *args, int from_tty)
   memset (&tte, 0, sizeof (tte));
   tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT;
   tte.tte_events |= TTEVT_LWP_CREATE | TTEVT_LWP_EXIT | TTEVT_LWP_TERMINATE;
+#ifdef TTEVT_BPT_SSTEP
+  tte.tte_events |= TTEVT_BPT_SSTEP;
+#endif
   tte.tte_opts = TTEO_NOSTRCCHLD;
   if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
@@ -643,6 +649,21 @@ inf_ttrace_detach (char *args, int from_tty)
   inferior_ptid = null_ptid;
 }
 
+static int
+inf_ttrace_resume_callback (struct thread_info *info, void *arg)
+{
+  if (!ptid_equal (info->ptid, inferior_ptid))
+    {
+      pid_t pid = ptid_get_pid (info->ptid);
+      lwpid_t lwpid = ptid_get_lwp (info->ptid);
+
+      if (ttrace (TT_LWP_CONTINUE, pid, lwpid, TT_NOPC, 0, 0) == -1)
+	perror_with_name ("ttrace");
+    }
+
+  return 0;
+}
+
 static void
 inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
 {
@@ -660,11 +681,10 @@ inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
   if (ttrace (request, pid, lwpid, TT_NOPC, sig, 0) == -1)
     perror_with_name ("ttrace");
 
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid_equal (ptid, minus_one_ptid) && inf_ttrace_num_lwps > 0)
     {
       /* Let all the other threads run too.  */
-      if (ttrace (TT_PROC_CONTINUE, pid, 0, 0, 0, 0) == -1)
-	perror_with_name ("ttrace");
+      iterate_over_threads (inf_ttrace_resume_callback, NULL);
     }
 }
 
@@ -708,6 +728,14 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   switch (tts.tts_event)
     {
+#ifdef TTEVT_BPT_SSTEP
+    case TTEVT_BPT_SSTEP:
+      /* Make it look like a breakpoint.  */
+      ourstatus->kind = TARGET_WAITKIND_STOPPED;
+      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      break;
+#endif
+
     case TTEVT_EXEC:
       /* Make it look like a breakpoint.  */
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
