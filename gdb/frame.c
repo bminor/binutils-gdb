@@ -268,25 +268,42 @@ struct frame_id
 frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
                         CORE_ADDR special_addr)
 {
-  struct frame_id id;
+  struct frame_id id = null_frame_id;
   id.stack_addr = stack_addr;
+  id.stack_addr_p = 1;
   id.code_addr = code_addr;
+  id.code_addr_p = 1;
   id.special_addr = special_addr;
+  id.special_addr_p = 1;
   return id;
 }
 
 struct frame_id
 frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
 {
-  return frame_id_build_special (stack_addr, code_addr, 0);
+  struct frame_id id = null_frame_id;
+  id.stack_addr = stack_addr;
+  id.stack_addr_p = 1;
+  id.code_addr = code_addr;
+  id.code_addr_p = 1;
+  return id;
+}
+
+struct frame_id
+frame_id_build_wild (CORE_ADDR stack_addr)
+{
+  struct frame_id id = null_frame_id;
+  id.stack_addr = stack_addr;
+  id.stack_addr_p = 1;
+  return id;
 }
 
 int
 frame_id_p (struct frame_id l)
 {
   int p;
-  /* The .code can be NULL but the .stack cannot.  */
-  p = (l.stack_addr != 0);
+  /* The frame is valid iff it has a valid stack address.  */
+  p = l.stack_addr_p;
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ frame_id_p (l=");
@@ -300,20 +317,21 @@ int
 frame_id_eq (struct frame_id l, struct frame_id r)
 {
   int eq;
-  if (l.stack_addr == 0 || r.stack_addr == 0)
-    /* Like a NaN, if either ID is invalid, the result is false.  */
+  if (!l.stack_addr_p || !r.stack_addr_p)
+    /* Like a NaN, if either ID is invalid, the result is false.
+       Note that a frame ID is invalid iff it is the null frame ID.  */
     eq = 0;
   else if (l.stack_addr != r.stack_addr)
     /* If .stack addresses are different, the frames are different.  */
     eq = 0;
-  else if (l.code_addr == 0 || r.code_addr == 0)
-    /* A zero code addr is a wild card, always succeed.  */
+  else if (!l.code_addr_p || !r.code_addr_p)
+    /* An invalid code addr is a wild card, always succeed.  */
     eq = 1;
   else if (l.code_addr != r.code_addr)
     /* If .code addresses are different, the frames are different.  */
     eq = 0;
-  else if (l.special_addr == 0 || r.special_addr == 0)
-    /* A zero special addr is a wild card (or unused), always succeed.  */
+  else if (!l.special_addr_p || !r.special_addr_p)
+    /* An invalid special addr is a wild card (or unused), always succeed.  */
     eq = 1;
   else if (l.special_addr == r.special_addr)
     /* Frames are equal.  */
@@ -336,7 +354,7 @@ int
 frame_id_inner (struct frame_id l, struct frame_id r)
 {
   int inner;
-  if (l.stack_addr == 0 || r.stack_addr == 0)
+  if (!l.stack_addr_p || !r.stack_addr_p)
     /* Like NaN, any operation involving an invalid ID always fails.  */
     inner = 0;
   else

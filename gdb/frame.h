@@ -94,23 +94,39 @@ struct frame_id
      outer-most address (the inner-most address of the previous frame)
      is used.  Watch out for all the legacy targets that still use the
      function pointer register or stack pointer register.  They are
-     wrong.  */
+     wrong.
+
+     This field is valid only if stack_addr_p is true.  Otherwise, this
+     frame represents the null frame.  */
   CORE_ADDR stack_addr;
+
   /* The frame's code address.  This shall be constant through out the
      lifetime of the frame.  While the PC (a.k.a. resume address)
      changes as the function is executed, this code address cannot.
      Typically, it is set to the address of the entry point of the
-     frame's function (as returned by frame_func_unwind().  */
+     frame's function (as returned by frame_func_unwind().  
+
+     This field is valid only if code_addr_p is true.  Otherwise, this
+     frame is considered to have a wildcard code address, i.e. one that
+     matches every address value in frame comparisons.  */
   CORE_ADDR code_addr;
+
   /* The frame's special address.  This shall be constant through out the
      lifetime of the frame.  This is used for architectures that may have
      frames that do not change the stack but are still distinct and have 
      some form of distinct identifier (e.g. the ia64 which uses a 2nd 
      stack for registers).  This field is treated as unordered - i.e. will
      not be used in frame ordering comparisons such as frame_id_inner().
-     A zero in this field will be treated as a wild-card when comparing
-     frames for equality.  */
+
+     This field is valid only if special_addr_p is true.  Otherwise, this
+     frame is considered to have a wildcard special address, i.e. one that
+     matches every address value in frame comparisons.  */
   CORE_ADDR special_addr;
+
+  /* Flags to indicate the above fields have valid contents.  */
+  int stack_addr_p : 1;
+  int code_addr_p : 1;
+  int special_addr_p : 1;
 };
 
 /* Methods for constructing and comparing Frame IDs.
@@ -135,21 +151,23 @@ extern const struct frame_id null_frame_id;
 
 /* Construct a frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), and the second the
-   frame's constant code address (typically the entry point) (or zero,
-   to indicate a wild card).  The special identifier address is
-   defaulted to zero.  */
+   frame's constant code address (typically the entry point).
+   The special identifier address is set to indicate a wild card.  */
 extern struct frame_id frame_id_build (CORE_ADDR stack_addr,
 				       CORE_ADDR code_addr);
 
 /* Construct a special frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), the second is the
-   frame's constant code address (typically the entry point) (or zero,
-   to indicate a wild card), and the third parameter is the frame's
-   special identifier address (or zero to indicate a wild card or 
-   unused default).  */
+   frame's constant code address (typically the entry point),
+   and the third parameter is the frame's special identifier address. */
 extern struct frame_id frame_id_build_special (CORE_ADDR stack_addr,
 					       CORE_ADDR code_addr,
 					       CORE_ADDR special_addr);
+
+/* Construct a wild card frame ID.  The parameter is the frame's constant
+   stack address (typically the outer-bound).  The code address as well
+   as the special identifier address are set to indicate wild cards.  */
+extern struct frame_id frame_id_build_wild (CORE_ADDR stack_addr);
 
 /* Returns non-zero when L is a valid frame (a valid frame has a
    non-zero .base).  */

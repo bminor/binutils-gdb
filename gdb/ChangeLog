@@ -1,3 +1,14 @@
+2004-06-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* frame.h (struct frame_id): New fields stack_addr_p, code_addr_p
+	and special_addr_p.
+	(frame_id_build, frame_id_build_special): Update comments.
+	(frame_id_build_wild): New prototype.
+	* frame.c (frame_id_build, frame_id_build_special): Fill in new
+	struct frame_id fields.
+	(frame_id_build_wild): New function.
+	(frame_id_eq, frame_id_inner): Use new struct frame_id fields.
+
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/djgpp/fnchange.lst: Add entries for hppabsd-nat.c and
