@@ -31,6 +31,12 @@ Tue Aug 31 15:01:27 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* Makefile.in (REMOTE_O): add dcache.o.
 	* config/m88k/m88k.mt (TDEPFILES): removed dcache.o.
 
+	Break dcache code out of remote-nindy.c.
+	* remote-nindy.c: removed dcache code.  Changed callers to use new
+	  conventions.  include dcache.h.
+	  (nindy_dcache): new static variable.
+	* config/i960/nindy960.mt (TDEPFILES): added dcache.o.
+
 	Break dcache code out of remote-bug.c into dcache.[hc].
 	* Makefile.in (dcache_h): new macro.
 	  (HFILES): added $(dcache_h).

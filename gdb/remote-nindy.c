@@ -116,6 +116,10 @@ NINDY ROM monitor at the other end of the line.
 #include "nindy-share/env.h"
 #include "nindy-share/stop.h"
 
+#include "dcache.h"
+
+static DCACHE *nindy_dcache;
+
 extern int unlink();
 extern char *getenv();
 extern char *mktemp();
@@ -144,12 +148,6 @@ static int have_regs = 0;	/* 1 iff regs read since i960 last halted */
 static int regs_changed = 0;	/* 1 iff regs were modified since last read */
 
 extern char *exists();
-
-static void
-dcache_flush (), dcache_poke (), dcache_init();
-
-static int
-dcache_fetch ();
 
 static void
 nindy_fetch_registers PARAMS ((int));
@@ -190,7 +188,7 @@ nindy_open (name, from_tty)
   nindy_close (0);
 
   have_regs = regs_changed = 0;
-  dcache_init();
+  nindy_dcache = dcache_init(ninMemGet, ninMemPut);
 
   /* Allow user to interrupt the following -- we could hang if there's
      no NINDY at the other end of the remote tty.  */
@@ -258,7 +256,7 @@ nindy_resume (pid, step, siggnal)
 	if (siggnal != 0 && siggnal != stop_signal)
 	  error ("Can't send signals to remote NINDY targets.");
 
-	dcache_flush();
+	dcache_flush(nindy_dcache);
 	if ( regs_changed ){
 		nindy_store_registers (-1);
 		regs_changed = 0;
@@ -501,7 +499,7 @@ int
 nindy_fetch_word (addr)
      CORE_ADDR addr;
 {
-	return dcache_fetch (addr);
+	return dcache_fetch (nindy_dcache, addr);
 }
 
 /* Write a word WORD into remote address ADDR.
@@ -512,7 +510,7 @@ nindy_store_word (addr, word)
      CORE_ADDR addr;
      int word;
 {
-	dcache_poke (addr, word);
+	dcache_poke (nindy_dcache, addr, word);
 }
 
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
@@ -587,170 +585,6 @@ nindy_xfer_inferior_memory(memaddr, myaddr, len, write, target)
   return len;
 }
 
-/* The data cache records all the data read from the remote machine
-   since the last time it stopped.
-
-   Each cache block holds 16 bytes of data
-   starting at a multiple-of-16 address.  */
-
-#define DCACHE_SIZE 64		/* Number of cache blocks */
-
-struct dcache_block {
-	struct dcache_block *next, *last;
-	unsigned int addr;	/* Address for which data is recorded.  */
-	int data[4];
-};
-
-struct dcache_block dcache_free, dcache_valid;
-
-/* Free all the data cache blocks, thus discarding all cached data.  */ 
-static
-void
-dcache_flush ()
-{
-  register struct dcache_block *db;
-
-  while ((db = dcache_valid.next) != &dcache_valid)
-    {
-      remque (db);
-      insque (db, &dcache_free);
-    }
-}
-
-/*
- * If addr is present in the dcache, return the address of the block
- * containing it.
- */
-static
-struct dcache_block *
-dcache_hit (addr)
-     unsigned int addr;
-{
-  register struct dcache_block *db;
-
-  if (addr & 3)
-    abort ();
-
-  /* Search all cache blocks for one that is at this address.  */
-  db = dcache_valid.next;
-  while (db != &dcache_valid)
-    {
-      if ((addr & 0xfffffff0) == db->addr)
-	return db;
-      db = db->next;
-    }
-  return NULL;
-}
-
-/*  Return the int data at address ADDR in dcache block DC.  */
-static
-int
-dcache_value (db, addr)
-     struct dcache_block *db;
-     unsigned int addr;
-{
-  if (addr & 3)
-    abort ();
-  return (db->data[(addr>>2)&3]);
-}
-
-/* Get a free cache block, put or keep it on the valid list,
-   and return its address.  The caller should store into the block
-   the address and data that it describes, then remque it from the
-   free list and insert it into the valid list.  This procedure
-   prevents errors from creeping in if a ninMemGet is interrupted
-   (which used to put garbage blocks in the valid list...).  */
-static
-struct dcache_block *
-dcache_alloc ()
-{
-  register struct dcache_block *db;
-
-  if ((db = dcache_free.next) == &dcache_free)
-    {
-      /* If we can't get one from the free list, take last valid and put
-	 it on the free list.  */
-      db = dcache_valid.last;
-      remque (db);
-      insque (db, &dcache_free);
-    }
-
-  remque (db);
-  insque (db, &dcache_valid);
-  return (db);
-}
-
-/* Return the contents of the word at address ADDR in the remote machine,
-   using the data cache.  */
-static
-int
-dcache_fetch (addr)
-     CORE_ADDR addr;
-{
-  register struct dcache_block *db;
-
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      immediate_quit++;
-      ninMemGet(addr & ~0xf, (unsigned char *)db->data, 16);
-      immediate_quit--;
-      db->addr = addr & ~0xf;
-      remque (db);			/* Off the free list */
-      insque (db, &dcache_valid);	/* On the valid list */
-    }
-  return (dcache_value (db, addr));
-}
-
-/* Write the word at ADDR both in the data cache and in the remote machine.  */
-static void
-dcache_poke (addr, data)
-     CORE_ADDR addr;
-     int data;
-{
-  register struct dcache_block *db;
-
-  /* First make sure the word is IN the cache.  DB is its cache block.  */
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      immediate_quit++;
-      ninMemGet(addr & ~0xf, (unsigned char *)db->data, 16);
-      immediate_quit--;
-      db->addr = addr & ~0xf;
-      remque (db);			/* Off the free list */
-      insque (db, &dcache_valid);	/* On the valid list */
-    }
-
-  /* Modify the word in the cache.  */
-  db->data[(addr>>2)&3] = data;
-
-  /* Send the changed word.  */
-  immediate_quit++;
-  ninMemPut(addr, (unsigned char *)&data, 4);
-  immediate_quit--;
-}
-
-/* The cache itself. */
-struct dcache_block the_cache[DCACHE_SIZE];
-
-/* Initialize the data cache.  */
-static void
-dcache_init ()
-{
-  register i;
-  register struct dcache_block *db;
-
-  db = the_cache;
-  dcache_free.next = dcache_free.last = &dcache_free;
-  dcache_valid.next = dcache_valid.last = &dcache_valid;
-  for (i=0;i<DCACHE_SIZE;i++,db++)
-    insque (db, &dcache_free);
-}
-
-
 static void
 nindy_create_inferior (execfile, args, env)
      char *execfile;
