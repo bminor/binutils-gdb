@@ -506,12 +506,12 @@ obj_elf_section (xxx)
 
   if (flag_mri)
     {
-      char type;
+      char mri_type;
 
       previous_section = now_seg;
       previous_subsection = now_subseg;
 
-      s_mri_sect (&type);
+      s_mri_sect (&mri_type);
 
 #ifdef md_elf_section_change_hook
       md_elf_section_change_hook ();
@@ -733,20 +733,19 @@ obj_elf_section (xxx)
 	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
 	   | ((attr & SHF_ALLOC) ? SEC_ALLOC | SEC_LOAD : 0)
 	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0));
-  if (special_sections[i].name == NULL)
+
+  if (type == SHT_PROGBITS)
+    flags |= SEC_ALLOC | SEC_LOAD;
+  else if (type == SHT_NOBITS)
     {
-      if (type == SHT_PROGBITS)
-	flags |= SEC_ALLOC | SEC_LOAD;
-      else if (type == SHT_NOBITS)
-	{
-	  flags |= SEC_ALLOC;
-	  flags &=~ SEC_LOAD;
-	}
+      flags |= SEC_ALLOC;
+      flags &=~ SEC_LOAD;
+    }
 
 #ifdef md_elf_section_flags
-      flags = md_elf_section_flags (flags, attr, type);
+  if (special_sections[i].name == NULL)
+    flags = md_elf_section_flags (flags, attr, type);
 #endif
-    }
 
   bfd_set_section_flags (stdoutput, sec, flags);
 

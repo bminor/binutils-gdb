@@ -1,3 +1,8 @@
+Thu Feb 29 13:58:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/obj-elf.c (obj_elf_section): Allow predefined section
+	types to set the nobits type.  Advoid a shadowed declaration.
+
 Wed Feb 28 15:38:56 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (hppa_fix_adjustable): For SOM, don't
