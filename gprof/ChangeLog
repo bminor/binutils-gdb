@@ -1,3 +1,7 @@
+Tue Nov 26 17:08:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.12.
+
 Wed Oct  2 15:23:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc.c (find_call): Align p_lowpc to avoid bus error.
