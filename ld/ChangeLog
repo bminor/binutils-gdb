@@ -1,3 +1,8 @@
+Sun Aug 30 21:38:53 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: map "ld" through program_transform_name when
+	installing.
+
 Sun Aug 30 18:12:13 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* cplus-dem.c:  Removed.  Use the version in libiberty now.
