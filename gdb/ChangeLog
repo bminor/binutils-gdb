@@ -4,6 +4,13 @@
 	match the location at which the kernel is placing the sigcontext
 	struct.
 
+	* ia64-tdep.c (max_skip_non_prologue_insns): New static global.
+	(refine_prologue_limit): New function.
+	(examine_prologue):  Further limit number of instructions
+	scanned by calling refine_prologue_limit().  Revise way in
+	which the end of prologue address is computed for frameless
+	functions.
+
 2001-05-29  Christopher Faylor  <cgf@redhat.com>
 
 	* partial-stab.h: Revert previous patch.
