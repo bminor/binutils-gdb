@@ -36,72 +36,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 static int asm_hash_insn_p PARAMS ((const CGEN_INSN *));
 static unsigned int asm_hash_insn PARAMS ((const char *));
 static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
-static unsigned int dis_hash_insn PARAMS ((const char *, unsigned long));
-
-/* Cover function to read and properly byteswap an insn value.  */
-
-CGEN_INSN_INT
-cgen_get_insn_value (od, buf, length)
-     CGEN_OPCODE_DESC od;
-     unsigned char *buf;
-     int length;
-{
-  CGEN_INSN_INT value;
-
-  switch (length)
-    {
-    case 8:
-      value = *buf;
-      break;
-    case 16:
-      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	value = bfd_getb16 (buf);
-      else
-	value = bfd_getl16 (buf);
-      break;
-    case 32:
-      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	value = bfd_getb32 (buf);
-      else
-	value = bfd_getl32 (buf);
-      break;
-    default:
-      abort ();
-    }
-
-  return value;
-}
-
-/* Cover function to store an insn value properly byteswapped.  */
-
-void
-cgen_put_insn_value (od, buf, length, value)
-     CGEN_OPCODE_DESC od;
-     unsigned char *buf;
-     int length;
-     CGEN_INSN_INT value;
-{
-  switch (length)
-    {
-    case 8:
-      buf[0] = value;
-      break;
-    case 16:
-      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	bfd_putb16 (value, buf);
-      else
-	bfd_putl16 (value, buf);
-      break;
-    case 32:
-      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	bfd_putb32 (value, buf);
-      else
-	bfd_putl32 (value, buf);
-      break;
-    default:
-      abort ();
-    }
-}
+static unsigned int dis_hash_insn PARAMS ((const char *, CGEN_INSN_INT));
 
 /* Look up instruction INSN_VALUE and extract its fields.
    INSN, if non-null, is the insn table entry.
@@ -111,7 +46,7 @@ cgen_put_insn_value (od, buf, length, value)
    If INSN != NULL, LENGTH must be valid.
    ALIAS_P is non-zero if alias insns are to be included in the search.
 
-   The result a pointer to the insn table entry, or NULL if the instruction
+   The result is a pointer to the insn table entry, or NULL if the instruction
    wasn't recognized.  */
 
 const CGEN_INSN *
@@ -123,9 +58,9 @@ fr30_cgen_lookup_insn (od, insn, insn_value, length, fields, alias_p)
      CGEN_FIELDS *fields;
      int alias_p;
 {
-  unsigned char buf[16];
+  unsigned char buf[CGEN_MAX_INSN_SIZE];
   unsigned char *bufp;
-  unsigned int base_insn;
+  CGEN_INSN_INT base_insn;
 #if CGEN_INT_INSN_P
   CGEN_EXTRACT_INFO *info = NULL;
 #else
@@ -133,24 +68,21 @@ fr30_cgen_lookup_insn (od, insn, insn_value, length, fields, alias_p)
   CGEN_EXTRACT_INFO *info = &ex_info;
 #endif
 
-#if ! CGEN_INT_INSN_P
+#if CGEN_INT_INSN_P
+  cgen_put_insn_value (od, buf, length, insn_value);
+  bufp = buf;
+  base_insn = insn_value; /*???*/
+#else
   ex_info.dis_info = NULL;
-  ex_info.bytes = insn_value;
+  ex_info.insn_bytes = insn_value;
   ex_info.valid = -1;
+  base_insn = cgen_get_insn_value (od, buf, length);
+  bufp = insn_value;
 #endif
 
   if (!insn)
     {
       const CGEN_INSN_LIST *insn_list;
-
-#if CGEN_INT_INSN_P
-      cgen_put_insn_value (od, buf, length, insn_value);
-      bufp = buf;
-      base_insn = insn_value; /*???*/
-#else
-      base_insn = cgen_get_insn_value (od, buf, length);
-      bufp = insn_value;
-#endif
 
       /* The instructions are stored in hash lists.
 	 Pick the first one and keep trying until we find the right one.  */
@@ -166,11 +98,11 @@ fr30_cgen_lookup_insn (od, insn, insn_value, length, fields, alias_p)
 	      /* Basic bit mask must be correct.  */
 	      /* ??? May wish to allow target to defer this check until the
 		 extract handler.  */
-	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+	      if ((base_insn & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 		{
 		  /* ??? 0 is passed for `pc' */
 		  int elength = (*CGEN_EXTRACT_FN (insn)) (od, insn, info,
-							   insn_value, fields,
+							   base_insn, fields,
 							   (bfd_vma) 0);
 		  if (elength > 0)
 		    {
@@ -196,7 +128,7 @@ fr30_cgen_lookup_insn (od, insn, insn_value, length, fields, alias_p)
 	abort ();
 
       /* ??? 0 is passed for `pc' */
-      length = (*CGEN_EXTRACT_FN (insn)) (od, insn, info, insn_value, fields,
+      length = (*CGEN_EXTRACT_FN (insn)) (od, insn, info, base_insn, fields,
 					  (bfd_vma) 0);
       /* Sanity check: must succeed.
 	 Could relax this later if it ever proves useful.  */
@@ -487,6 +419,9 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* u10: 10 bit unsigned immediate */
   { "u10", & HW_ENT (HW_H_UINT), 8, 8,
     { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* i32: 32 bit immediate */
+  { "i32", & HW_ENT (HW_H_UINT), 16, 32,
+    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* dir8: 8  bit direct address */
   { "dir8", & HW_ENT (HW_H_UINT), 8, 8,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
@@ -523,144 +458,152 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 
 #define INPUT CGEN_OPERAND_INSTANCE_INPUT
 #define OUTPUT CGEN_OPERAND_INSTANCE_OUTPUT
+#define COND_REF CGEN_OPERAND_INSTANCE_COND_REF
 
 static const CGEN_OPERAND_INSTANCE fmt_add_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0 },
-  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0, 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_addi_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "u4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (U4), 0 },
-  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "u4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (U4), 0, 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_add2_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "m4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (M4), 0 },
-  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "m4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (M4), 0, 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_addc_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0 },
-  { INPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0, 0 },
+  { INPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_addn_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_addni_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "u4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (U4), 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "u4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (U4), 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_addn2_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "m4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (M4), 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "m4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (M4), 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_cmp_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0 },
-  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0, 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_cmpi_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "u4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (U4), 0 },
-  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "u4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (U4), 0, 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_cmp2_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "m4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (M4), 0 },
-  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "m4", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (M4), 0, 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_and_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0 },
-  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_andm_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (RI), 0 },
-  { INPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_andh_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (RI), 0 },
-  { INPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_HI, & OP_ENT (RJ), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_HI, & OP_ENT (RJ), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_andb_ops[] = {
-  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (RI), 0 },
-  { INPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
-  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_QI, & OP_ENT (RJ), 0 },
-  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
-  { OUTPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (RI), 0, 0 },
+  { INPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
+  { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_QI, & OP_ENT (RJ), 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "h_memory_Ri", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_ldi32_ops[] = {
+  { INPUT, "i32", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (I32), 0, 0 },
+  { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
   { 0 }
 };
 
 #undef INPUT
 #undef OUTPUT
+#undef COND_REF
 
 #define A(a) (1 << CONCAT2 (CGEN_INSN_,a))
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
@@ -1151,6 +1094,15 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (I8), ',', OP (RI), 0 } },
     { 16, 16, 0xf000 }, 0xc000,
     (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* ldi:32 $i32,$Ri */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_LDI32, "ldi32", "ldi:32",
+    { { MNEM, ' ', OP (I32), ',', OP (RI), 0 } },
+    { 16, 48, 0xfff0 }, 0x9f80,
+    (PTR) & fmt_ldi32_ops[0],
     { 0, 0, { 0 } }
   },
 /* ld @$Rj,$Ri */
@@ -2153,7 +2105,7 @@ asm_hash_insn (mnem)
 static unsigned int
 dis_hash_insn (buf, value)
      const char * buf;
-     unsigned long value;
+     CGEN_INSN_INT value;
 {
   return CGEN_DIS_HASH (buf, value);
 }
@@ -2281,6 +2233,9 @@ fr30_cgen_get_int_operand (opindex, fields)
     case FR30_OPERAND_U10 :
       value = fields->f_u10;
       break;
+    case FR30_OPERAND_I32 :
+      value = fields->f_i32;
+      break;
     case FR30_OPERAND_DIR8 :
       value = fields->f_dir8;
       break;
@@ -2372,6 +2327,9 @@ fr30_cgen_get_vma_operand (opindex, fields)
       break;
     case FR30_OPERAND_U10 :
       value = fields->f_u10;
+      break;
+    case FR30_OPERAND_I32 :
+      value = fields->f_i32;
       break;
     case FR30_OPERAND_DIR8 :
       value = fields->f_dir8;
@@ -2469,6 +2427,9 @@ fr30_cgen_set_int_operand (opindex, fields, value)
     case FR30_OPERAND_U10 :
       fields->f_u10 = value;
       break;
+    case FR30_OPERAND_I32 :
+      fields->f_i32 = value;
+      break;
     case FR30_OPERAND_DIR8 :
       fields->f_dir8 = value;
       break;
@@ -2557,6 +2518,9 @@ fr30_cgen_set_vma_operand (opindex, fields, value)
       break;
     case FR30_OPERAND_U10 :
       fields->f_u10 = value;
+      break;
+    case FR30_OPERAND_I32 :
+      fields->f_i32 = value;
       break;
     case FR30_OPERAND_DIR8 :
       fields->f_dir8 = value;

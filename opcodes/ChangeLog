@@ -1,3 +1,24 @@
+1998-11-18  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-asm.in (insert_1): Replace calls to bfd_getb8/putb8.
+	(insert_normal, !CGEN_INT_INSN_P case): Only fetch enough bytes
+	to hold value.
+	(insert_insn_normal): Fix typo.
+	* cgen-dis.c (cgen_dis_lookup_insn): Update type of `value' arg.
+	* cgen-dis.in (extract_normal): Ditto.  New arg `pc'.
+	Rewrite ! CGEN_INT_INSN_P case.
+	(extract_insn_normal): Ditto.
+	(extract_1): New arg `pc'.  All callers updated.
+	Replace calls to bfd_getb8.
+	(fill_cache): New fn.
+	* cgen-opc.c (cgen_{get,put}_insn_value): Move here ...
+	* cgen-opc.in: ... from here.
+	(@arch@_cgen_lookup_insn): Rewrite ! CGEN_INT_INSN_P case.
+	* m32r-asm.c,m32r-dis.c,m32r-opc.c: Rebuild.
+start-sanitize-fr30
+	* fr30-asm.c,fr30-dis.c,fr30-opc.c: Rebuild.
+end-sanitize-fr30
+
 start-sanitize-fr30
 Wed Nov 18 11:30:04 1998  Dave Brolley  <brolley@cygnus.com>
 

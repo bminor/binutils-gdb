@@ -41,8 +41,8 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #define UNKNOWN_INSN_MSG _("*unknown*")
 
 static int extract_normal
-     PARAMS ((CGEN_OPCODE_DESC, CGEN_EXTRACT_INFO *, CGEN_INSN_BYTES,
-	      unsigned int, int, int, int, long *));
+     PARAMS ((CGEN_OPCODE_DESC, CGEN_EXTRACT_INFO *, CGEN_INSN_INT,
+	      unsigned int, int, int, int, bfd_vma, long *));
 static void print_normal
      PARAMS ((CGEN_OPCODE_DESC, PTR, long, unsigned int, bfd_vma, int));
 static void print_address
@@ -51,7 +51,7 @@ static void print_keyword
      PARAMS ((CGEN_OPCODE_DESC, PTR, CGEN_KEYWORD *, long, unsigned int));
 static int extract_insn_normal
      PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *, CGEN_EXTRACT_INFO *,
-	      unsigned long, CGEN_FIELDS *, bfd_vma));
+	      CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
 static void print_insn_normal
      PARAMS ((CGEN_OPCODE_DESC, PTR, const CGEN_INSN *, CGEN_FIELDS *,
 	      bfd_vma, int));
@@ -81,7 +81,7 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
      CGEN_OPCODE_DESC od;
      int opindex;
      CGEN_EXTRACT_INFO *ex_info;
-     CGEN_INSN_BYTES insn_value;
+     CGEN_INSN_INT insn_value;
      CGEN_FIELDS * fields;
      bfd_vma pc;
 {
@@ -90,61 +90,61 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
   switch (opindex)
     {
     case FR30_OPERAND_RI :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_Ri);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_Ri);
       break;
     case FR30_OPERAND_RJ :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_Rj);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_Rj);
       break;
     case FR30_OPERAND_RS1 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_Rs1);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_Rs1);
       break;
     case FR30_OPERAND_RS2 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_Rs2);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_Rs2);
       break;
     case FR30_OPERAND_R13 :
-      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_nil);
+      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_nil);
       break;
     case FR30_OPERAND_R14 :
-      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_nil);
+      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_nil);
       break;
     case FR30_OPERAND_R15 :
-      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_nil);
+      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_nil);
       break;
     case FR30_OPERAND_PS :
-      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_nil);
+      length = extract_normal (od, ex_info, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_nil);
       break;
     case FR30_OPERAND_U4 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_u4);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_u4);
       break;
     case FR30_OPERAND_M4 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) | ((! (15))));
         fields->f_m4 = value;
       }
       break;
     case FR30_OPERAND_U8 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_u8);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_u8);
       break;
     case FR30_OPERAND_I8 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_i8);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_i8);
       break;
     case FR30_OPERAND_UDISP6 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) << (2));
         fields->f_udisp6 = value;
       }
       break;
     case FR30_OPERAND_DISP8 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_disp8);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_disp8);
       break;
     case FR30_OPERAND_DISP9 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) << (1));
         fields->f_disp9 = value;
       }
@@ -152,7 +152,7 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_DISP10 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) << (2));
         fields->f_disp10 = value;
       }
@@ -160,7 +160,7 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_S10 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) << (2));
         fields->f_s10 = value;
       }
@@ -168,18 +168,21 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_U10 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) << (2));
         fields->f_u10 = value;
       }
       break;
+    case FR30_OPERAND_I32 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 32, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_i32);
+      break;
     case FR30_OPERAND_DIR8 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_dir8);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_dir8);
       break;
     case FR30_OPERAND_DIR9 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) << (1));
         fields->f_dir9 = value;
       }
@@ -187,7 +190,7 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_DIR10 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((value) << (2));
         fields->f_dir10 = value;
       }
@@ -195,7 +198,7 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_LABEL9 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((((value) << (1))) + (((pc) & (-2))));
         fields->f_rel9 = value;
       }
@@ -203,13 +206,13 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_LABEL12 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((((value) << (1))) + (((pc) & (-2))));
         fields->f_rel12 = value;
       }
       break;
     case FR30_OPERAND_CC :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_cc);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), pc, & fields->f_cc);
       break;
 
     default :
@@ -302,6 +305,9 @@ fr30_cgen_print_operand (od, opindex, info, fields, attrs, pc, length)
     case FR30_OPERAND_U10 :
       print_normal (od, info, fields->f_u10, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
+    case FR30_OPERAND_I32 :
+      print_normal (od, info, fields->f_i32, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
     case FR30_OPERAND_DIR8 :
       print_normal (od, info, fields->f_dir8, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
@@ -351,20 +357,65 @@ fr30_cgen_init_dis (od)
 
 #if ! CGEN_INT_INSN_P
 
+/* Subroutine of extract_normal.
+   Ensure sufficient bytes are cached in EX_INFO.
+   Returns 1 for success, 0 for failure.  */
+
+static INLINE int
+fill_cache (od, ex_info, offset, bytes, pc)
+     CGEN_OPCODE_DESC od;
+     CGEN_EXTRACT_INFO *ex_info;
+     int offset, bytes;
+     bfd_vma pc;
+{
+  /* It's doubtful that the middle part has already been fetched so
+     we don't optimize that case.  kiss.  */
+  int mask;
+  disassemble_info *info = (disassemble_info *) ex_info->dis_info;
+
+  /* First do a quick check.  */
+  mask = (1 << bytes) - 1;
+  if (((ex_info->valid >> offset) & mask) == mask)
+    return 1;
+
+  /* Search for the first byte we need to read.  */
+  for (mask = 1 << offset; bytes > 0; --bytes, ++offset, mask <<= 1)
+    if (! (mask & ex_info->valid))
+      break;
+
+  if (bytes)
+    {
+      int status;
+
+      pc += offset;
+      status = (*info->read_memory_func)
+	(pc, ex_info->insn_bytes + offset, bytes, info);
+
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, pc, info);
+	  return 0;
+	}
+
+      ex_info->valid |= ((1 << bytes) - 1) << offset;
+    }
+
+  return 1;
+}
+
 /* Subroutine of extract_normal.  */
 
 static INLINE long
-extract_1 (od, ex_info, start, length, word_length, bufp)
+extract_1 (od, ex_info, start, length, word_length, bufp, pc)
      CGEN_OPCODE_DESC od;
-     CGEN_EXTRACT_INFO *info;
+     CGEN_EXTRACT_INFO *ex_info;
      int start,length,word_length;
      unsigned char *bufp;
+     bfd_vma pc;
 {
   unsigned long x,mask;
   int shift;
   int big_p = CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG;
-
-  /* FIXME: Need to use ex_info to ensure bytes have been fetched.  */
 
   switch (word_length)
     {
@@ -381,9 +432,9 @@ extract_1 (od, ex_info, start, length, word_length, bufp)
       /* ??? This may need reworking as these cases don't necessarily
 	 want the first byte and the last two bytes handled like this.  */
       if (big_p)
-	x = (bfd_getb8 (bufp) << 16) | bfd_getb16 (bufp + 1);
+	x = (bufp[0] << 16) | bfd_getb16 (bufp + 1);
       else
-	x = bfd_getl16 (bufp) | (bfd_getb8 (bufp + 2) << 16);
+	x = bfd_getl16 (bufp) | (bufp[2] << 16);
       break;
     case 32:
       if (big_p)
@@ -408,19 +459,26 @@ extract_1 (od, ex_info, start, length, word_length, bufp)
 
 /* Default extraction routine.
 
+   INSN_VALUE is the first CGEN_BASE_INSN_SIZE bits of the insn in host order,
+   or sometimes less for cases like the m32r where the base insn size is 32
+   but some insns are 16 bits.
    ATTRS is a mask of the boolean attributes.  We only need `unsigned',
-   but for generality we take a bitmask of all of them.  */
+   but for generality we take a bitmask of all of them.
+   TOTAL_LENGTH is the length of the insn in bits.
+
+   Returns 1 for success, 0 for failure.  */
 
 /* ??? This doesn't handle bfd_vma's.  Create another function when
    necessary.  */
 
 static int
-extract_normal (od, ex_info, insn_value, attrs, start, length, total_length, valuep)
+extract_normal (od, ex_info, insn_value, attrs, start, length, total_length, pc, valuep)
      CGEN_OPCODE_DESC od;
      CGEN_EXTRACT_INFO *ex_info;
-     CGEN_INSN_BYTES insn_value;
+     CGEN_INSN_INT insn_value;
      unsigned int attrs;
      int start, length, total_length;
+     bfd_vma pc;
      long *valuep;
 {
   unsigned long value;
@@ -433,51 +491,52 @@ extract_normal (od, ex_info, insn_value, attrs, start, length, total_length, val
       return 1;
     }
 
-#if CGEN_INT_INSN_P
+  if (CGEN_INT_INSN_P
+      || (CGEN_INSN_LSB0_P
+	  ? ((total_length - start) <= CGEN_BASE_INSN_BITSIZE)
+	  : ((start + length) <= CGEN_BASE_INSN_BITSIZE)))
+    {
+      /* Written this way to avoid undefined behaviour.  */
+      unsigned long mask = (((1L << (length - 1)) - 1) << 1) | 1;
 
-  {
-    /* Written this way to avoid undefined behaviour.  */
-    unsigned long mask = (((1L << (length - 1)) - 1) << 1) | 1;
+      if (CGEN_INSN_LSB0_P)
+	value = insn_value >> start;
+      else
+	value = insn_value >> (total_length - (start + length));
+      value &= mask;
+      /* sign extend? */
+      if (! (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
+	  && (value & (1L << (length - 1))))
+	value |= ~mask;
+    }
 
-    if (CGEN_INSN_LSB0_P)
-      value = insn_value >> start;
-    else
-      value = insn_value >> (total_length - (start + length));
-    value &= mask;
-    /* sign extend? */
-    if (! (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
-	&& (value & (1L << (length - 1))))
-      value |= ~mask;
-  }
-
-#else
+#if ! CGEN_INT_INSN_P
 
   /* The hard case is probably too slow for the normal cases.
      It's certainly more difficult to understand than the normal case.
-     Thus this is split into two.  Keep it that way.  The hard case is defined
+     Thus this is split into two.  The hard case is defined
      to be when a field straddles a (loosely defined) word boundary
      (??? which may require target specific help to determine).  */
 
-#if 0 /*wip*/
-
 #define HARD_CASE_P 0 /* FIXME:wip */
 
-  if (HARD_CASE_P)
+  else if (HARD_CASE_P)
     {
     }
-#endif
+
   else
     {
-      unsigned char *bufp = (unsigned char *) insn_value;
+      unsigned char *bufp = ex_info->insn_bytes;
+      int offset = 0;
 
       if (length > 32)
 	abort ();
 
       /* Adjust start,total_length,bufp to point to the pseudo-word that holds
 	 the value.  For example in a 48 bit insn where the value to insert
-	 (say an immediate value) is the last 16 bits then word_length here
+	 (say an immediate value) is the last 16 bits then fetch_length here
 	 would be 16.  To handle a 24 bit insn with an 18 bit immediate,
-	 extract_1 handles 24 bits (using a combination of bfd_get8,16).  */
+	 extract_1 handles 24 bits.  */
 
       if (total_length > 32)
 	{
@@ -494,22 +553,22 @@ extract_normal (od, ex_info, insn_value, attrs, start, length, total_length, val
 		}
 	      else
 		{
-		  int offset = start & ~7;
+		  offset = start & ~7;
 
 		  bufp += offset / 8;
 		  start -= offset;
-		  total_length -= offset;
+		  total_length = fetch_length;
 		}
 	    }
 	  else
 	    {
 	      if (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG)
 		{
-		  int offset = start & ~7;
+		  offset = start & ~7;
 
 		  bufp += offset / 8;
 		  start -= offset;
-		  total_length -= offset;
+		  total_length = fetch_length;
 		}
 	      else
 		{
@@ -518,15 +577,16 @@ extract_normal (od, ex_info, insn_value, attrs, start, length, total_length, val
 	    }
 	}
 
-      /* FIXME: which bytes are being extracted have been lost.  */
-      value = extract_1 (od, ex_info, start, length, total_length, bufp);
+      if (fill_cache (od, ex_info, offset / 8, total_length / 8, pc) == 0)
+	return 0;
+
+      value = extract_1 (od, ex_info, start, length, total_length, bufp, pc);
     }
 
 #endif /* ! CGEN_INT_INSN_P */
 
   *valuep = value;
 
-  /* FIXME: for now */
   return 1;
 }
 
@@ -620,7 +680,7 @@ extract_insn_normal (od, insn, ex_info, insn_value, fields, pc)
      CGEN_OPCODE_DESC od;
      const CGEN_INSN *insn;
      CGEN_EXTRACT_INFO *ex_info;
-     unsigned long insn_value;
+     CGEN_INSN_INT insn_value;
      CGEN_FIELDS *fields;
      bfd_vma pc;
 {
@@ -707,7 +767,7 @@ print_insn (od, pc, info, buf, buflen)
 
   ex_info.dis_info = info;
   ex_info.valid = (1 << CGEN_BASE_INSN_SIZE) - 1;
-  ex_info.bytes = buf;
+  ex_info.insn_bytes = buf;
 
   switch (buflen)
     {

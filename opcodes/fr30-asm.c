@@ -133,6 +133,9 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_U10 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U10, &fields->f_u10);
       break;
+    case FR30_OPERAND_I32 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_I32, &fields->f_i32);
+      break;
     case FR30_OPERAND_DIR8 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR8, &fields->f_dir8);
       break;
@@ -266,6 +269,9 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
         errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
+    case FR30_OPERAND_I32 :
+      errmsg = insert_normal (od, fields->f_i32, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 32, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
     case FR30_OPERAND_DIR8 :
       errmsg = insert_normal (od, fields->f_dir8, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
@@ -360,9 +366,9 @@ insert_1 (od, value, start, length, word_length, bufp)
       /* ??? This may need reworking as these cases don't necessarily
 	 want the first byte and the last two bytes handled like this.  */
       if (big_p)
-	x = (bfd_getb8 (bufp) << 16) | bfd_getb16 (bufp + 1);
+	x = (bufp[0] << 16) | bfd_getb16 (bufp + 1);
       else
-	x = bfd_getl16 (bufp) | (bfd_getb8 (bufp + 2) << 16);
+	x = bfd_getl16 (bufp) | (bufp[2] << 16);
       break;
     case 32:
       if (big_p)
@@ -398,13 +404,13 @@ insert_1 (od, value, start, length, word_length, bufp)
 	 want the first byte and the last two bytes handled like this.  */
       if (big_p)
 	{
-	  bfd_putb8 (x >> 16, bufp);
+	  bufp[0] = x >> 16;
 	  bfd_putb16 (x, bufp + 1);
 	}
       else
 	{
 	  bfd_putl16 (x, bufp);
-	  bfd_putb8 (x >> 16, bufp + 2);
+	  bufp[2] = x >> 16;
 	}
       break;
     case 32:
@@ -429,12 +435,6 @@ insert_1 (od, value, start, length, word_length, bufp)
 
    The result is an error message or NULL if success.  */
 
-/* ??? May need to know word length in order to properly place values as
-   an insn may be made of multiple words and the current bit number handling
-   may be insufficient.  Word length is an architectural attribute and thus
-   methinks the way to go [if needed] is to fetch this value from OD or
-   define a macro in <arch>-opc.h rather than adding an extra argument -
-   after all that's how endianness is handled.  */
 /* ??? This duplicates functionality with bfd's howto table and
    bfd_install_relocation.  */
 /* ??? For architectures where insns can be representable as ints,
@@ -489,7 +489,7 @@ insert_normal (od, value, attrs, start, length, total_length, buffer)
 
 #if CGEN_INT_INSN_P
 
-  if (total_length > 32)
+  if (total_length > 32) /* 32 bits in a portable host int */
     abort ();
   {
     int shift;
@@ -505,17 +505,9 @@ insert_normal (od, value, attrs, start, length, total_length, buffer)
 
   /* FIXME: unfinished and untested */
 
-/* ??? To be defined in <arch>-opc.h as necessary.  */
-#ifndef CGEN_WORD_ENDIAN
-#define CGEN_WORD_ENDIAN(od) CGEN_OPCODE_ENDIAN (od)
-#endif
-#ifndef CGEN_INSN_WORD_ENDIAN
-#define CGEN_INSN_WORD_ENDIAN(od) CGEN_WORD_ENDIAN (od)
-#endif
-
   /* The hard case is probably too slow for the normal cases.
      It's certainly more difficult to understand than the normal case.
-     Thus this is split into two.  Keep it that way.  The hard case is defined
+     Thus this is split into two.  The hard case is defined
      to be when a field straddles a (loosely defined) word boundary
      (??? which may require target specific help to determine).  */
 
@@ -590,9 +582,9 @@ insert_normal (od, value, attrs, start, length, total_length, buffer)
 
       /* Adjust start,total_length,bufp to point to the pseudo-word that holds
 	 the value.  For example in a 48 bit insn where the value to insert
-	 (say an immediate value) is the last 16 bits then word_length here
+	 (say an immediate value) is the last 16 bits then fetch_length here
 	 would be 16.  To handle a 24 bit insn with an 18 bit immediate,
-	 insert_1 handles 24 bits (using a combination of bfd_get8,16).  */
+	 insert_1 handles 24 bits.  */
 
       if (total_length > 32)
 	{
@@ -613,7 +605,7 @@ insert_normal (od, value, attrs, start, length, total_length, buffer)
 
 		  bufp += offset / 8;
 		  start -= offset;
-		  total_length -= offset;
+		  total_length = fetch_length;
 		}
 	    }
 	  else
@@ -624,7 +616,7 @@ insert_normal (od, value, attrs, start, length, total_length, buffer)
 
 		  bufp += offset / 8;
 		  start -= offset;
-		  total_length -= offset;
+		  total_length = fetch_length;
 		}
 	      else
 		{
@@ -784,7 +776,7 @@ insert_insn_normal (od, insn, fields, buffer, pc)
 
 #else
 
-  cgen_insn_put_value (od, buffer, min (CGEN_BASE_INSN_BITSIZE,
+  cgen_put_insn_value (od, buffer, min (CGEN_BASE_INSN_BITSIZE,
 					CGEN_FIELDS_BITSIZE (fields)),
 		       value);
 
