@@ -21,7 +21,7 @@
 
 
 #include "sim-main.h"
-#include "hw-base.h"
+#include "hw-main.h"
 
 
 /* DEVICE
@@ -35,7 +35,10 @@
    
    Implements the tx3904 interrupt controller described in the tx3904
    user guide.  It does not include the interrupt detection circuit
-   that preprocesses the eight external interrupts.
+   that preprocesses the eight external interrupts, so assumes that
+   each event on an input interrupt port signals a new interrupt.
+   That is, it implements edge- rather than level-triggered
+   interrupts.
 
 
    PROPERTIES
@@ -89,9 +92,24 @@
 
 
 
+
+
+/* register numbers; each is one word long */
+enum
+{
+  ISR_REG = 0,
+  IMR_REG = 1,
+  ILR0_REG = 4,
+  ILR1_REG = 5,
+  ILR2_REG = 6,
+  ILR3_REG = 7,
+};
+
+
 /* port ID's */
 
-enum {
+enum
+{
   /* inputs, ordered to correspond to interrupt sources 0..15 */
   INT1_PORT = 0, INT2_PORT, INT3_PORT, INT4_PORT, INT5_PORT, INT6_PORT, INT7_PORT,
   DMAC3_PORT, DMAC2_PORT, DMAC1_PORT, DMAC0_PORT, SIO0_PORT, SIO1_PORT,
@@ -106,18 +124,6 @@ enum {
   /* output */
   IP_PORT
 };
-
-
-/* register numbers; each is one word long */
-enum {
-  ISR_REG = 0,
-  IMR_REG = 1,
-  ILR0_REG = 4,
-  ILR1_REG = 5,
-  ILR2_REG = 6,
-  ILR3_REG = 7,
-};
-
 
 
 static const struct hw_port_descriptor tx3904irc_ports[] = {
@@ -178,9 +184,9 @@ struct tx3904irc {
 /* Finish off the partially created hw device.  Attach our local
    callbacks.  Wire up our port names etc */
 
-static hw_io_read_buffer_callback tx3904irc_io_read_buffer;
-static hw_io_write_buffer_callback tx3904irc_io_write_buffer;
-static hw_port_event_callback tx3904irc_port_event;
+static hw_io_read_buffer_method tx3904irc_io_read_buffer;
+static hw_io_write_buffer_method tx3904irc_io_write_buffer;
+static hw_port_event_method tx3904irc_port_event;
 
 static void
 attach_tx3904irc_regs (struct hw *me,
@@ -250,6 +256,8 @@ tx3904irc_port_event (struct hw *me,
 		     int level)
 {
   struct tx3904irc *controller = hw_data (me);
+
+  /* Ignore level - use only edge-triggered interrupts */
 
   switch (my_port)
     {
@@ -385,7 +393,7 @@ tx3904irc_io_write_buffer (struct hw *me,
 }     
 
 
-const struct hw_device_descriptor dv_tx3904irc_descriptor[] = {
+const struct hw_descriptor dv_tx3904irc_descriptor[] = {
   { "tx3904irc", tx3904irc_finish, },
   { NULL },
 };

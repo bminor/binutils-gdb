@@ -3840,7 +3840,7 @@ esac
 #
 hw_enabled=no
 case "${target}" in
-  mips*tx39*) hw_enabled=yes ; hw_extra_devices="tx3904cpu tx3904irc" ;;
+  mips*tx39*) hw_enabled=yes ; hw_extra_devices="tx3904cpu tx3904irc tx3904tmr" ;;
   *) ;;
 esac
 

@@ -21,7 +21,7 @@
 
 
 #include "sim-main.h"
-#include "hw-base.h"
+#include "hw-main.h"
 
 /* DEVICE
 
@@ -109,7 +109,7 @@ static const struct hw_port_descriptor tx3904cpu_ports[] = {
 /* Finish off the partially created hw device.  Attach our local
    callbacks.  Wire up our port names etc */
 
-static hw_port_event_callback tx3904cpu_port_event;
+static hw_port_event_method tx3904cpu_port_event;
 
 
 
@@ -138,8 +138,8 @@ deliver_tx3904cpu_interrupt (struct hw *me,
 			    void *data)
 {
   struct tx3904cpu *controller = hw_data (me);
-  SIM_DESC simulator = hw_system (me);
-  sim_cpu *cpu = STATE_CPU (simulator, 0); /* NB: fix CPU 0. */
+  SIM_DESC sd = hw_system (me);
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* NB: fix CPU 0. */
   address_word cia = CIA_GET (cpu);
 
 #define CPU cpu
@@ -224,7 +224,7 @@ tx3904cpu_port_event (struct hw *me,
 }
 
 
-const struct hw_device_descriptor dv_tx3904cpu_descriptor[] = {
+const struct hw_descriptor dv_tx3904cpu_descriptor[] = {
   { "tx3904cpu", tx3904cpu_finish, },
   { NULL },
 };

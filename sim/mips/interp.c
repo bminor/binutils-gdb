@@ -518,11 +518,17 @@ sim_open (kind, cb, abfd, argv)
 		       0xA8000000);
 
       /* --- simulated devices --- */
-      sim_hw_parse (sd, "/tx3904irc@0xffffc00/reg 0xffffc000 0x20");
+      sim_hw_parse (sd, "/tx3904irc@0xffffc000/reg 0xffffc000 0x20");
       sim_hw_parse (sd, "/tx3904cpu");
+      sim_hw_parse (sd, "/tx3904tmr@0xfffff000/reg 0xfffff000 0x100");
+      sim_hw_parse (sd, "/tx3904tmr@0xfffff100/reg 0xfffff100 0x100");
+      sim_hw_parse (sd, "/tx3904tmr@0xfffff200/reg 0xfffff200 0x100");
       
       /* -- device connections --- */
       sim_hw_parse (sd, "/tx3904irc > ip level /tx3904cpu");
+      sim_hw_parse (sd, "/tx3904tmr@0xfffff000 > int tmr0 /tx3904irc");
+      sim_hw_parse (sd, "/tx3904tmr@0xfffff100 > int tmr1 /tx3904irc");
+      sim_hw_parse (sd, "/tx3904tmr@0xfffff200 > int tmr2 /tx3904irc");
 
       if(! strcmp(board, BOARD_JMR3904_DEBUG))
 	{

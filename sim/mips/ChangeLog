@@ -1,3 +1,14 @@
+start-sanitize-tx3904
+Thu Jun  4 15:37:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-tx3904tmr.c: New file - implements tx3904 timer.
+	* dv-tx3904{irc,cpu}.c: Mild reformatting.
+	* configure.in: Include tx3904tmr in hw_device list.
+	* configure: Rebuilt.
+	* interp.c (sim_open): Instantiate three timer instances.
+	Fix address typo of tx3904irc instance.
+
+end-sanitize-tx3904
 start-sanitize-r5900
 Thu Jun  4 16:47:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

@@ -31,7 +31,7 @@ else
         lose_these_too="${vr4320_files} ${lose_these_too}"
 fi
 
-tx3904_files="dv-tx3904cpu.c dv-tx3904irc.c"
+tx3904_files="dv-tx3904cpu.c dv-tx3904irc.c dv-tx3904tmr.c"
 if ( echo $* | grep keep\-tx3904 > /dev/null ) ; then
         keep_these_too="${tx3904_files} ${keep_these_too}"
 else
