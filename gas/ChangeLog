@@ -1,5 +1,9 @@
 2002-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* config/obj-coff.c: Fix compile time warnings when compiling
+	without BFD_ASSEMBLER defined.
+	Fix formatting.
+
 	* config/tc-sh.c (md_pcrel_from): Define for use with sh-hms
 	target.
 	(md_pcrel_from_section): Use md_pcrel_from().
