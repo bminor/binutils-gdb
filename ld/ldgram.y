@@ -72,7 +72,7 @@ static int error_index;
 
 %type <etree> exp  opt_exp_with_type  mustbe_exp opt_at
 %type <integer> fill_opt
-%type <name> memspec_opt
+%type <name> memspec_opt casesymlist
 %token <integer> INT  
 %token <name> NAME LNAME
 %type  <integer> length
@@ -220,7 +220,7 @@ mri_abs_name_list:
 	;
 
 casesymlist:
-	  /* empty */
+	  /* empty */ { $$ = NULL; }
 	| NAME
 	| casesymlist ',' NAME
 	;

@@ -1,5 +1,7 @@
 Wed Aug 16 11:45:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldgram.y: Tweak casesymlist to avoid bison errors.
+
 	* lexsup.c (parse_args): Accept -h as a synonym for --soname, for
 	Solaris compatibility.
 
