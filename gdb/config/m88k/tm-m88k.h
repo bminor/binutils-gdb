@@ -52,7 +52,7 @@ extern void init_extra_frame_info ();
    to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(frompc)   \
-	skip_prologue (frompc)
+	{ (frompc) = skip_prologue (frompc); }
 extern CORE_ADDR skip_prologue ();
 
 /* The m88k kernel aligns all instructions on 4-byte boundaries.  The
@@ -256,7 +256,7 @@ extern CORE_ADDR skip_prologue ();
 #define MAX_REGISTER_RAW_SIZE (REGISTER_RAW_SIZE(0))
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.
-/* Are FPS1, FPS2, FPR "virtual" regisers? */
+   Are FPS1, FPS2, FPR "virtual" regisers? */
 
 #define MAX_REGISTER_VIRTUAL_SIZE (REGISTER_RAW_SIZE(0))
 
