@@ -11,7 +11,7 @@
 # Each package is responsible for reporting which valid configurations
 # it does not support.  The user should be able to distinguish
 # a failure to support a valid configuration from a meaningless
-# configuration.
+# configuration (e.g. a typo).
 
 # Please email any bugs, comments, and/or additions to this file to:
 # configure@cygnus.com
@@ -36,11 +36,6 @@ altosgas)
 	cpu=m68k
 	vendor=altos
 	os=gas
-	;;
-am29k)
-	cpu=a29k
-	vendor=none
-	os=bsd
 	;;
 amdahl)
 	cpu=580
@@ -306,6 +301,11 @@ tower | tower-32)
 	cpu=m68k
 	vendor=ncr
 	os=sysv # maybe?
+	;;
+ultra3)
+	cpu=a29k
+	vendor=nyu
+	os=sym1
 	;;
 umax)
 	cpu=ns32k
