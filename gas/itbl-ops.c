@@ -351,7 +351,7 @@ append_insns_as_macros (void)
       printf (_("Unable to allocate memory for new instructions\n"));
       return;
     }
-  if (size)			/* copy prexisting opcodes table */
+  if (size)			/* copy preexisting opcodes table */
     memcpy (new_opcodes, ITBL_OPCODES, size);
 
   /* FIXME! some NUMOPCODES are calculated expressions.
@@ -372,13 +372,13 @@ append_insns_as_macros (void)
 	  o->name = e->name;
 	  o->args = strdup (form_args (e));
 	  o->mask = apply_range (e->value, e->range);
-	  /* FIXME how to catch durring assembly? */
+	  /* FIXME how to catch during assembly? */
 	  /* mask to identify this insn */
 	  o->match = apply_range (e->value, e->range);
 	  o->pinfo = 0;
 
 #ifdef USE_MACROS
-	  o->mask = id++;	/* FIXME how to catch durring assembly? */
+	  o->mask = id++;	/* FIXME how to catch during assembly? */
 	  o->match = 0;		/* for macros, the insn_isa number */
 	  o->pinfo = INSN_MACRO;
 #endif
@@ -616,7 +616,7 @@ itbl_disassemble (char *s, unsigned long insn)
       struct itbl_entry *r;
       unsigned long value;
 
-      if (f == e->fields)	/* First operand is preceeded by tab.  */
+      if (f == e->fields)	/* First operand is preceded by tab.  */
 	strcat (s, "\t");
       else			/* ','s separate following operands.  */
 	strcat (s, ",");

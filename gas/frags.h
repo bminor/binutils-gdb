@@ -116,7 +116,7 @@ COMMON fragS bss_address_frag;
 
 #if 0
 /* A macro to speed up appending exactly 1 char to current frag.  */
-/* JF changed < 1 to <= 1 to avoid a race conditon.  */
+/* JF changed < 1 to <= 1 to avoid a race condition.  */
 #define FRAG_APPEND_1_CHAR(datum)			\
 {							\
   if (obstack_room (&frags) <= 1)			\

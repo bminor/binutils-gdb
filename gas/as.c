@@ -501,7 +501,7 @@ parse_args (int * pargc, char *** pargv)
 	  if (md_parse_option (optc, optarg) != 0)
 	    break;
 	  /* `-v' isn't included in the general short_opts list, so check for
-	     it explicity here before deciding we've gotten a bad argument.  */
+	     it explicitly here before deciding we've gotten a bad argument.  */
 	  if (optc == 'v')
 	    {
 #ifdef VMS

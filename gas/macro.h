@@ -35,7 +35,7 @@
    list of formal arguments, and also keeps a hash table which points
    into the list to speed up formal search.  Each formal knows its
    name and its default value.  Each time the macro is expanded, the
-   formals get the actual values attatched to them.  */
+   formals get the actual values attached to them.  */
 
 /* Describe the formal arguments to a macro.  */
 

@@ -44,7 +44,7 @@
    Obstacks provide all the functionality needed, but are too
    complicated, hence the sb.
 
-   An sb is allocated by the caller, and is initialzed to point to an
+   An sb is allocated by the caller, and is initialized to point to an
    sb_element.  sb_elements are kept on a free lists, and used when
    needed, replaced onto the free list when unused.
  */

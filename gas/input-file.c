@@ -58,7 +58,7 @@ struct saved_file
     char * app_save;
   };
 
-/* These hooks accomodate most operating systems.  */
+/* These hooks accommodate most operating systems.  */
 
 void
 input_file_begin ()

@@ -237,7 +237,7 @@ typedef addressT valueT;
 #ifdef TEST
 #define COMMON			/* declare our COMMONs storage here.  */
 #else
-#define COMMON extern		/* our commons live elswhere */
+#define COMMON extern		/* our commons live elsewhere */
 #endif
 #endif
 /* COMMON now defined */

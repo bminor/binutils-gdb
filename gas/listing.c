@@ -65,7 +65,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
  The function listing_newline remembers the frag associated with the
  newline, and creates a new frag - note that this is wasteful, but not
  a big deal, since listing slows things down a lot anyway.  The
- function also rememebers when the filename changes.
+ function also remembers when the filename changes.
 
  When all the input has finished, and gas has had a chance to settle
  down, the listing is output. This is done by running down the list of
@@ -86,7 +86,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
  LISTING_LHS_WIDTH_SECOND   Number of words for the data on the lhs
  			for the second line
 
- LISTING_LHS_CONT_LINES	Max number of lines to use up for a continutation
+ LISTING_LHS_CONT_LINES	Max number of lines to use up for a continuation
  LISTING_RHS_WIDTH      Number of chars from the input file to print
                         on a line
 */
@@ -127,7 +127,7 @@ typedef struct file_info_struct {
   int                       at_end;
 } file_info_type;
 
-/* This structure rememebrs which line from which file goes into which
+/* This structure remembers which line from which file goes into which
    frag.  */
 struct list_info_struct {
   /* Frag which this line of source is nearest to.  */

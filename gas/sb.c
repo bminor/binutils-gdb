@@ -265,7 +265,7 @@ sb_skip_white (idx, ptr)
 }
 
 /* start at the index idx into the sb at ptr. skips whitespace,
-   a comma and any following whitespace. returnes the index of the
+   a comma and any following whitespace. returns the index of the
    next character.  */
 
 int

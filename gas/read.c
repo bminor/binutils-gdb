@@ -32,7 +32,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    grow when we do 4361 style flonums.  */
 #define MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT (16)
 
-/* Routines that read assembler source text to build spagetti in memory.
+/* Routines that read assembler source text to build spaghetti in memory.
    Another group of these functions is in the expr.c module.  */
 
 #include "as.h"
@@ -623,7 +623,7 @@ read_a_source_file (name)
 		}
 	    }
 
-	  /* We are at the begining of a line, or similar place.
+	  /* We are at the beginning of a line, or similar place.
 	     We expect a well-formed assembler statement.
 	     A "symbol-name:" is a statement.
 
@@ -982,7 +982,7 @@ read_a_source_file (name)
 		  /* The end of the #APP wasn't in this buffer.  We
 		     keep reading in buffers until we find the #NO_APP
 		     that goes with this #APP  There is one.  The specs
-		     guarentee it...  */
+		     guarantee it...  */
 		  tmp_len = buffer_limit - s;
 		  tmp_buf = xmalloc (tmp_len + 1);
 		  memcpy (tmp_buf, s, tmp_len);
@@ -3800,7 +3800,7 @@ emit_expr (exp, nbytes)
    them in words, longs, etc. and we'll pack them in target byte order
    for you.
 
-   The rules are: pack least significat bit first, if a field doesn't
+   The rules are: pack least significant bit first, if a field doesn't
    entirely fit, put it in the next unit.  Overflowing the bitfield is
    explicitly *not* even a warning.  The bitwidth should be considered
    a "mask".
@@ -4131,7 +4131,7 @@ hex_float (float_type, bytes)
    by 0d 0f 0g or 0h. After observing the STRANGE way my BSD AS does its
    reading, I decided to be incompatible. This always tries to give you
    rounded bits to the precision of the pseudo-op. Former AS did premature
-   truncatation, restored noisy bits instead of trailing 0s AND gave you
+   truncation, restored noisy bits instead of trailing 0s AND gave you
    a choice of 2 flavours of noise according to which of 2 floating-point
    scanners you directed AS to use.
 
@@ -5344,7 +5344,7 @@ read_print_statistics (file)
    This call avoids macro/conditionals nesting checking, since the contents of
    the line are assumed to replace the contents of a line already scanned.
 
-   An appropriate use of this function would be substition of input lines when
+   An appropriate use of this function would be substitution of input lines when
    called by md_start_line_hook().  The given line is assumed to already be
    properly scrubbed.  */
 

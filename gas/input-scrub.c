@@ -33,7 +33,7 @@
  * were broken across buffers, and return a buffer of full lines to
  * the caller.
  * The last partial line begins the next buffer we build and return to caller.
- * The buffer returned to caller is preceeded by BEFORE_STRING and followed
+ * The buffer returned to caller is preceded by BEFORE_STRING and followed
  * by AFTER_STRING, as sentinels. The last character before AFTER_STRING
  * is a newline.
  * Also looks after line numbers, for e.g. error messages.

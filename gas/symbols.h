@@ -131,7 +131,7 @@ struct broken_word
     symbolS *sub;
     offsetT addnum;
 
-    int added;			/* nasty thing happend yet? */
+    int added;			/* nasty thing happened yet? */
     /* 1: added and has a long-jump */
     /* 2: added but uses someone elses long-jump */
 

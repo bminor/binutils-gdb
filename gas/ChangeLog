@@ -1,3 +1,25 @@
+2003-10-27  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ChangeLog: Fix typos.
+	* ChangeLog-9295: Likewise.
+	* as.c: Fix comment typos.
+	* as.h: Likewise.
+	* atof-generic.c: Likewise.
+	* bit_fix.h: Likewise.
+	* frags.h: Likewise.
+	* hash.c: Likewise.
+	* input-file.c: Likewise.
+	* input-scrub.c: Likewise.
+	* itbl-ops.c: Likewise.
+	* itbl-parse.y: Likewise.
+	* listing.c: Likewise.
+	* macro.h: Likewise.
+	* read.c: Likewise.
+	* sb.c: Likewise.
+	* sb.h: Likewise.
+	* symbols.c: Likewise.
+	* symbols.h: Likewise.
+
 2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* config/tc-m68hc11.c: Convert to ISO C90.
@@ -2419,7 +2441,7 @@
 	operands.
 	(OPTION_MIPS32R2): New define.
 	(md_longopts): Add entry for OPTION_MIPS32R2.
-	(OPTION_ELF_BASE): Adjust to accomodate OPTIONS_MIPS32R2.
+	(OPTION_ELF_BASE): Adjust to accommodate OPTIONS_MIPS32R2.
 	(md_parse_option): Handle OPTION_MIPS32R2.
 	(s_mipsset): Reimplement handling of ".set mipsN" options
 	and add support for ".set mips32r2".
@@ -4999,7 +5021,7 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	types.
 	(OPTION_MDMX, OPTION_NO_MDMX, md_longopts, md_parse_option):
 	Add support for "-mdmx" and "-no-mdmx" options.
-	(OPTION_ELF_BASE): Move to accomodate new options.
+	(OPTION_ELF_BASE): Move to accommodate new options.
 	(s_mipsset): Support ".set mdmx" and ".set nomdmx".
 	(mips_elf_final_processing): Set MDMX ASE ELF header flag if
 	file_ase_mdmx was set.
@@ -5638,7 +5660,7 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	mips_opts.ase_mips3d is set.
 	(OPTION_MIPS3D, OPTION_NO_MIPS3D, md_longopts, md_parse_option):
 	Add support for "-mips3d" and "-no-mips3d" options.
-	(OPTION_ELF_BASE): Move to accomodate new options.
+	(OPTION_ELF_BASE): Move to accommodate new options.
 	(s_mipsset): Support ".set mips3d" and ".set nomips3d".
 	(mips_elf_final_processing): Add a comment indicating that a
 	MIPS-3D ASE ELF header flag should be set, when one exists.

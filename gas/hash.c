@@ -430,7 +430,7 @@ char answer[100];
 /* We test many hash tables at once.  */
 char *hashtable[TABLES];
 
-/* Points to curent hash_control.  */
+/* Points to current hash_control.  */
 char *h;
 char **pp;
 char *p;

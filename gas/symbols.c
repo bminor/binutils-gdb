@@ -1464,7 +1464,7 @@ dollar_label_name (n, augend)
   return symbol_name_build;
 }
 
-/* Sombody else's idea of local labels. They are made by "n:" where n
+/* Somebody else's idea of local labels. They are made by "n:" where n
    is any decimal digit. Refer to them with
     "nb" for previous (backward) n:
    or "nf" for next (forward) n:.
