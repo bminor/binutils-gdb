@@ -1,3 +1,9 @@
+Thu Apr  2 22:42:02 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (tc_gen_reloc): The difference of two symbols
+	is an error if the value can not be computed at assembly time.
+	* config/tc-mn10300.c (tc_gen-reloc): Likewise.
+
 Thu Apr  2 16:36:47 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gasp.c (main): Set next field of new include_path structure to
