@@ -1,3 +1,8 @@
+Thu Sep  4 12:10:01 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Only set BSF_OBJECT for
+	symbols on Irix.
+
 Wed Sep  3 11:21:33 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c: Remove BFD_RELOC_V850_16_PCREL.
