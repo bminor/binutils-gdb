@@ -37,6 +37,7 @@ cplus-dem.c
 ho-ansi.h
 ho-decstation.h
 ho-generic.h
+ho-go32.h
 ho-hpux.h
 ho-i386.h
 ho-rs6000.h
@@ -123,7 +124,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.18  1992/02/18 10:18:32  rich
+# Revision 1.19  1992/02/22 00:24:13  sac
+# How to compile gas on a PC
+#
+# Revision 1.18  1992/02/18  10:18:32  rich
 # keep ChangeLog
 #
 # Revision 1.17  1992/02/18  10:13:57  rich
