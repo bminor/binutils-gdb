@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Mon Nov 11 01:53:12 PST 1991, by rich@rtl.cygnus.com
+# Last Mod Tue Nov 12 00:21:50 PST 1991, by rich@sendai
 #
 # $Id$
 
@@ -163,6 +163,7 @@ MAKEDIRS= \
 	$(ddestdir)/lib/emacs \
 	$(idestdir) \
 	$(idestdir)/lib \
+	$(idestdir)/info \
 	$(idestdir)/doc \
 	$(idestdir)/man \
 	$(idestdir)/man/man1 \
@@ -170,6 +171,7 @@ MAKEDIRS= \
 
 install-dirs: force
 	for i in $(MAKEDIRS) ; do \
+		echo Making $$i... ; \
 		if [ -d $$i ] ; then true ; else mkdir $$i ; fi ; \
 	done
 
