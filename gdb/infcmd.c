@@ -1861,8 +1861,8 @@ attach_command (char *args, int from_tty)
 
   normal_stop ();
 
-  if (attach_hook)
-    attach_hook ();
+  if (deprecated_attach_hook)
+    deprecated_attach_hook ();
 }
 
 /*
@@ -1884,8 +1884,8 @@ detach_command (char *args, int from_tty)
 #if defined(SOLIB_RESTART)
   SOLIB_RESTART ();
 #endif
-  if (detach_hook)
-    detach_hook ();
+  if (deprecated_detach_hook)
+    deprecated_detach_hook ();
 }
 
 /* Disconnect from the current target without resuming it (leaving it
@@ -1904,8 +1904,8 @@ disconnect_command (char *args, int from_tty)
 #if defined(SOLIB_RESTART)
   SOLIB_RESTART ();
 #endif
-  if (detach_hook)
-    detach_hook ();
+  if (deprecated_detach_hook)
+    deprecated_detach_hook ();
 }
 
 /* Stop the execution of the target while running in async mode, in

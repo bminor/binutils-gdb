@@ -1551,8 +1551,8 @@ generic_mourn_inferior (void)
   if (!show_breakpoint_hit_counts)
     breakpoint_clear_ignore_counts ();
 
-  if (detach_hook)
-    detach_hook ();
+  if (deprecated_detach_hook)
+    deprecated_detach_hook ();
 }
 
 /* Helper function for child_wait and the Lynx derivatives of child_wait.

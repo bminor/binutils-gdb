@@ -193,7 +193,7 @@ static void stop_sig (int);
    If the UI fails to initialize and it wants GDB to continue
    using the default UI, then it should clear this hook before returning. */
 
-void (*init_ui_hook) (char *argv0);
+void (*deprecated_init_ui_hook) (char *argv0);
 
 /* This hook is called from within gdb's many mini-event loops which could
    steal control from a real user interface's event loop. It returns
@@ -204,92 +204,93 @@ int (*ui_loop_hook) (int);
 /* Called instead of command_loop at top level.  Can be invoked via
    throw_exception().  */
 
-void (*command_loop_hook) (void);
+void (*deprecated_command_loop_hook) (void);
 
 
 /* Called from print_frame_info to list the line we stopped in.  */
 
-void (*print_frame_info_listing_hook) (struct symtab * s, int line,
-				       int stopline, int noerror);
+void (*deprecated_print_frame_info_listing_hook) (struct symtab * s, int line,
+						  int stopline, int noerror);
 /* Replaces most of query.  */
 
-int (*query_hook) (const char *, va_list);
+int (*deprecated_query_hook) (const char *, va_list);
 
 /* Replaces most of warning.  */
 
-void (*warning_hook) (const char *, va_list);
+void (*deprecated_warning_hook) (const char *, va_list);
 
-/* These three functions support getting lines of text from the user.  They
-   are used in sequence.  First readline_begin_hook is called with a text
-   string that might be (for example) a message for the user to type in a
-   sequence of commands to be executed at a breakpoint.  If this function
-   calls back to a GUI, it might take this opportunity to pop up a text
-   interaction window with this message.  Next, readline_hook is called
-   with a prompt that is emitted prior to collecting the user input.
-   It can be called multiple times.  Finally, readline_end_hook is called
-   to notify the GUI that we are done with the interaction window and it
-   can close it. */
+/* These three functions support getting lines of text from the user.
+   They are used in sequence.  First deprecated_readline_begin_hook is
+   called with a text string that might be (for example) a message for
+   the user to type in a sequence of commands to be executed at a
+   breakpoint.  If this function calls back to a GUI, it might take
+   this opportunity to pop up a text interaction window with this
+   message.  Next, deprecated_readline_hook is called with a prompt
+   that is emitted prior to collecting the user input.  It can be
+   called multiple times.  Finally, deprecated_readline_end_hook is
+   called to notify the GUI that we are done with the interaction
+   window and it can close it.  */
 
-void (*readline_begin_hook) (char *, ...);
-char *(*readline_hook) (char *);
-void (*readline_end_hook) (void);
+void (*deprecated_readline_begin_hook) (char *, ...);
+char *(*deprecated_readline_hook) (char *);
+void (*deprecated_readline_end_hook) (void);
 
 /* Called as appropriate to notify the interface of the specified breakpoint
    conditions.  */
 
-void (*create_breakpoint_hook) (struct breakpoint * bpt);
-void (*delete_breakpoint_hook) (struct breakpoint * bpt);
-void (*modify_breakpoint_hook) (struct breakpoint * bpt);
+void (*deprecated_create_breakpoint_hook) (struct breakpoint * bpt);
+void (*deprecated_delete_breakpoint_hook) (struct breakpoint * bpt);
+void (*deprecated_modify_breakpoint_hook) (struct breakpoint * bpt);
 
 /* Called as appropriate to notify the interface that we have attached
    to or detached from an already running process. */
 
-void (*attach_hook) (void);
-void (*detach_hook) (void);
+void (*deprecated_attach_hook) (void);
+void (*deprecated_detach_hook) (void);
 
 /* Called during long calculations to allow GUI to repair window damage, and to
    check for stop buttons, etc... */
 
-void (*interactive_hook) (void);
+void (*deprecated_interactive_hook) (void);
 
 /* Called when the registers have changed, as a hint to a GUI
    to minimize window update. */
 
-void (*registers_changed_hook) (void);
+void (*deprecated_registers_changed_hook) (void);
 
 /* Tell the GUI someone changed the register REGNO. -1 means
    that the caller does not know which register changed or
    that several registers have changed (see value_assign). */
-void (*register_changed_hook) (int regno);
+void (*deprecated_register_changed_hook) (int regno);
 
 /* Tell the GUI someone changed LEN bytes of memory at ADDR */
-void (*memory_changed_hook) (CORE_ADDR addr, int len);
+void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
 
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */
 
-ptid_t (*target_wait_hook) (ptid_t ptid,
-                            struct target_waitstatus * status);
+ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
+				       struct target_waitstatus * status);
 
 /* Used by UI as a wrapper around command execution.  May do various things
    like enabling/disabling buttons, etc...  */
 
-void (*call_command_hook) (struct cmd_list_element * c, char *cmd,
-			   int from_tty);
+void (*deprecated_call_command_hook) (struct cmd_list_element * c, char *cmd,
+				      int from_tty);
 
 /* Called after a `set' command has finished.  Is only run if the
    `set' command succeeded.  */
 
-void (*set_hook) (struct cmd_list_element * c);
+void (*deprecated_set_hook) (struct cmd_list_element * c);
 
 /* Called when the current thread changes.  Argument is thread id.  */
 
-void (*context_hook) (int id);
+void (*deprecated_context_hook) (int id);
 
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
 
-NORETURN void (*error_hook) (void) ATTR_NORETURN;
+NORETURN void (*deprecated_error_hook) (void) ATTR_NORETURN;
 
 
 /* One should use catch_errors rather than manipulating these
@@ -737,8 +738,8 @@ execute_command (char *p, int from_tty)
 	do_setshow_command (arg, from_tty & caution, c);
       else if (!cmd_func_p (c))
 	error ("That is not a command, just a help topic.");
-      else if (call_command_hook)
-	call_command_hook (c, arg, from_tty & caution);
+      else if (deprecated_call_command_hook)
+	deprecated_call_command_hook (c, arg, from_tty & caution);
       else
 	cmd_func (c, arg, from_tty & caution);
        
@@ -1234,9 +1235,9 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	}
 
       /* Don't use fancy stuff if not talking to stdin.  */
-      if (readline_hook && instream == NULL)
+      if (deprecated_readline_hook && instream == NULL)
 	{
-	  rl = (*readline_hook) (local_prompt);
+	  rl = (*deprecated_readline_hook) (local_prompt);
 	}
       else if (command_editing_p && instream == stdin && ISATTY (instream))
 	{
@@ -1452,7 +1453,7 @@ quit_confirm (void)
       /* This is something of a hack.  But there's no reliable way to
          see if a GUI is running.  The `use_windows' variable doesn't
          cut it.  */
-      if (init_ui_hook)
+      if (deprecated_init_ui_hook)
 	s = "A debugging session is active.\nDo you still want to close the debugger?";
       else if (attach_flag)
 	s = "The program is running.  Quit anyway (and detach it)? ";
@@ -1905,8 +1906,9 @@ gdb_init (char *argv0)
   set_language (language_c);
   expected_language = current_language;		/* don't warn about the change.  */
 
-  /* Allow another UI to initialize. If the UI fails to initialize, and
-     it wants GDB to revert to the CLI, it should clear init_ui_hook. */
-  if (init_ui_hook)
-    init_ui_hook (argv0);
+  /* Allow another UI to initialize. If the UI fails to initialize,
+     and it wants GDB to revert to the CLI, it should clear
+     deprecated_init_ui_hook.  */
+  if (deprecated_init_ui_hook)
+    deprecated_init_ui_hook (argv0);
 }

@@ -594,8 +594,8 @@ registers_changed (void)
   for (i = 0; i < current_regcache->descr->nr_raw_registers; i++)
     set_register_cached (i, 0);
 
-  if (registers_changed_hook)
-    registers_changed_hook ();
+  if (deprecated_registers_changed_hook)
+    deprecated_registers_changed_hook ();
 }
 
 /* DEPRECATED_REGISTERS_FETCHED ()

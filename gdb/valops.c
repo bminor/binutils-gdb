@@ -606,8 +606,8 @@ value_assign (struct value *toval, struct value *fromval)
 	  }
 
 	write_memory (changed_addr, dest_buffer, changed_len);
-	if (memory_changed_hook)
-	  memory_changed_hook (changed_addr, changed_len);
+	if (deprecated_memory_changed_hook)
+	  deprecated_memory_changed_hook (changed_addr, changed_len);
 	target_changed_event ();
       }
       break;
@@ -698,8 +698,8 @@ value_assign (struct value *toval, struct value *fromval)
 	      put_frame_register (frame, regno, buffer + amount_copied);
 
 	  }
-	if (register_changed_hook)
-	  register_changed_hook (-1);
+	if (deprecated_register_changed_hook)
+	  deprecated_register_changed_hook (-1);
 	target_changed_event ();
 	break;
       }

@@ -206,7 +206,8 @@ static struct target_ops uw_thread_ops;
    they lack current_target's default callbacks. */
 static struct target_ops base_ops;
 
-/* Saved pointer to previous owner of target_new_objfile_hook. */
+/* Saved pointer to previous owner of
+   deprecated_target_new_objfile_hook.  */
 static void (*target_new_objfile_chain)(struct objfile *);
 
 /* Whether we are debugging a user-space thread program.  This isn't
@@ -1000,7 +1001,7 @@ libthread_init (void)
   deactivate_uw_thread ();
 }
 
-/* target_new_objfile_hook callback.
+/* deprecated_target_new_objfile_hook callback.
 
    If OBJFILE is non-null, check whether libthread.so was just loaded,
    and if so, prepare for user-mode thread debugging.
@@ -1062,6 +1063,6 @@ _initialize_uw_thread (void)
   procfs_suppress_run = 1;
 
   /* Notice when libthread.so gets loaded. */
-  target_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook = uw_thread_new_objfile;
+  target_new_objfile_chain = deprecated_target_new_objfile_hook;
+  deprecated_target_new_objfile_hook = uw_thread_new_objfile;
 }

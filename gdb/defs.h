@@ -198,7 +198,7 @@ extern void quit (void);
 #else
 #define QUIT { \
   if (quit_flag) quit (); \
-  if (interactive_hook) interactive_hook (); \
+  if (deprecated_interactive_hook) deprecated_interactive_hook (); \
 }
 #endif
 
@@ -1197,9 +1197,10 @@ extern int watchdog;
 extern char *interpreter_p;
 
 /* If a given interpreter matches INTERPRETER_P then it should update
-   command_loop_hook and init_ui_hook with the per-interpreter
-   implementation. */
-/* FIXME: command_loop_hook and init_ui_hook should be moved here. */
+   deprecated_command_loop_hook and deprecated_init_ui_hook with the
+   per-interpreter implementation.  */
+/* FIXME: deprecated_command_loop_hook and deprecated_init_ui_hook
+   should be moved here. */
 
 struct target_waitstatus;
 struct cmd_list_element;
@@ -1208,46 +1209,47 @@ struct cmd_list_element;
    event-loop) be enabled? */
 extern int event_loop_p;
 
-extern void (*init_ui_hook) (char *argv0);
-extern void (*command_loop_hook) (void);
-extern void (*show_load_progress) (const char *section,
-				   unsigned long section_sent, 
-				   unsigned long section_size, 
-				   unsigned long total_sent, 
-				   unsigned long total_size);
-extern void (*print_frame_info_listing_hook) (struct symtab * s,
-					      int line, int stopline,
-					      int noerror);
+extern void (*deprecated_init_ui_hook) (char *argv0);
+extern void (*deprecated_command_loop_hook) (void);
+extern void (*deprecated_show_load_progress) (const char *section,
+					      unsigned long section_sent, 
+					      unsigned long section_size, 
+					      unsigned long total_sent, 
+					      unsigned long total_size);
+extern void (*deprecated_print_frame_info_listing_hook) (struct symtab * s,
+							 int line, int stopline,
+							 int noerror);
 extern struct frame_info *parse_frame_specification (char *frame_exp);
-extern int (*query_hook) (const char *, va_list);
-extern void (*warning_hook) (const char *, va_list);
-extern void (*flush_hook) (struct ui_file * stream);
-extern void (*create_breakpoint_hook) (struct breakpoint * b);
-extern void (*delete_breakpoint_hook) (struct breakpoint * bpt);
-extern void (*modify_breakpoint_hook) (struct breakpoint * bpt);
-extern void (*interactive_hook) (void);
-extern void (*registers_changed_hook) (void);
-extern void (*readline_begin_hook) (char *,...);
-extern char *(*readline_hook) (char *);
-extern void (*readline_end_hook) (void);
-extern void (*register_changed_hook) (int regno);
-extern void (*memory_changed_hook) (CORE_ADDR addr, int len);
-extern void (*context_hook) (int);
-extern ptid_t (*target_wait_hook) (ptid_t ptid,
+extern int (*deprecated_query_hook) (const char *, va_list);
+extern void (*deprecated_warning_hook) (const char *, va_list);
+extern void (*deprecated_flush_hook) (struct ui_file * stream);
+extern void (*deprecated_create_breakpoint_hook) (struct breakpoint * b);
+extern void (*deprecated_delete_breakpoint_hook) (struct breakpoint * bpt);
+extern void (*deprecated_modify_breakpoint_hook) (struct breakpoint * bpt);
+extern void (*deprecated_interactive_hook) (void);
+extern void (*deprecated_registers_changed_hook) (void);
+extern void (*deprecated_readline_begin_hook) (char *,...);
+extern char *(*deprecated_readline_hook) (char *);
+extern void (*deprecated_readline_end_hook) (void);
+extern void (*deprecated_register_changed_hook) (int regno);
+extern void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
+extern void (*deprecated_context_hook) (int);
+extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
                                          struct target_waitstatus * status);
 
-extern void (*attach_hook) (void);
-extern void (*detach_hook) (void);
-extern void (*call_command_hook) (struct cmd_list_element * c,
-				  char *cmd, int from_tty);
+extern void (*deprecated_attach_hook) (void);
+extern void (*deprecated_detach_hook) (void);
+extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
+					     char *cmd, int from_tty);
 
-extern void (*set_hook) (struct cmd_list_element * c);
+extern void (*deprecated_set_hook) (struct cmd_list_element * c);
 
-extern NORETURN void (*error_hook) (void) ATTR_NORETURN;
+extern NORETURN void (*deprecated_error_hook) (void) ATTR_NORETURN;
 
-extern void (*error_begin_hook) (void);
+extern void (*deprecated_error_begin_hook) (void);
 
-extern int (*ui_load_progress_hook) (const char *section, unsigned long num);
+extern int (*deprecated_ui_load_progress_hook) (const char *section,
+						unsigned long num);
 
 
 /* Inhibit window interface if non-zero. */

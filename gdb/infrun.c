@@ -316,8 +316,8 @@ static struct breakpoint *through_sigtramp_breakpoint = NULL;
 static int number_of_threads_in_syscalls;
 
 /* This is a cached copy of the pid/waitstatus of the last event
-   returned by target_wait()/target_wait_hook().  This information is
-   returned by get_last_target_status(). */
+   returned by target_wait()/deprecated_target_wait_hook().  This
+   information is returned by get_last_target_status().  */
 static ptid_t target_last_wait_ptid;
 static struct target_waitstatus target_last_waitstatus;
 
@@ -1038,8 +1038,8 @@ wait_for_inferior (void)
 
   while (1)
     {
-      if (target_wait_hook)
-	ecs->ptid = target_wait_hook (ecs->waiton_ptid, ecs->wp);
+      if (deprecated_target_wait_hook)
+	ecs->ptid = deprecated_target_wait_hook (ecs->waiton_ptid, ecs->wp);
       else
 	ecs->ptid = target_wait (ecs->waiton_ptid, ecs->wp);
 
@@ -1095,9 +1095,9 @@ fetch_inferior_event (void *client_data)
       registers_changed ();
     }
 
-  if (target_wait_hook)
+  if (deprecated_target_wait_hook)
     async_ecs->ptid =
-      target_wait_hook (async_ecs->waiton_ptid, async_ecs->wp);
+      deprecated_target_wait_hook (async_ecs->waiton_ptid, async_ecs->wp);
   else
     async_ecs->ptid = target_wait (async_ecs->waiton_ptid, async_ecs->wp);
 
@@ -1154,9 +1154,9 @@ check_for_old_step_resume_breakpoint (void)
 }
 
 /* Return the cached copy of the last pid/waitstatus returned by
-   target_wait()/target_wait_hook().  The data is actually cached by
-   handle_inferior_event(), which gets called immediately after
-   target_wait()/target_wait_hook().  */
+   target_wait()/deprecated_target_wait_hook().  The data is actually
+   cached by handle_inferior_event(), which gets called immediately
+   after target_wait()/deprecated_target_wait_hook().  */
 
 void
 get_last_target_status (ptid_t *ptidp, struct target_waitstatus *status)
@@ -1726,8 +1726,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	  ecs->ptid = saved_singlestep_ptid;
 	  context_switch (ecs);
-	  if (context_hook)
-	    context_hook (pid_to_thread_id (ecs->ptid));
+	  if (deprecated_context_hook)
+	    deprecated_context_hook (pid_to_thread_id (ecs->ptid));
 
 	  resume (1, TARGET_SIGNAL_0);
 	  prepare_to_wait (ecs);
@@ -1841,8 +1841,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     {
       context_switch (ecs);
 
-      if (context_hook)
-	context_hook (pid_to_thread_id (ecs->ptid));
+      if (deprecated_context_hook)
+	deprecated_context_hook (pid_to_thread_id (ecs->ptid));
 
       flush_cached_frames ();
     }

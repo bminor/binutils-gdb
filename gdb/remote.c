@@ -1006,8 +1006,8 @@ static void *sigint_remote_token;
 /* These are pointers to hook functions that may be set in order to
    modify resume/wait behavior for a particular architecture.  */
 
-void (*target_resume_hook) (void);
-void (*target_wait_loop_hook) (void);
+void (*deprecated_target_resume_hook) (void);
+void (*deprecated_target_wait_loop_hook) (void);
 
 
 
@@ -2552,8 +2552,8 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
   /* A hook for when we need to do something at the last moment before
      resumption.  */
-  if (target_resume_hook)
-    (*target_resume_hook) ();
+  if (deprecated_target_resume_hook)
+    (*deprecated_target_resume_hook) ();
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
   if (remote_vcont_resume (ptid, step, siggnal))
@@ -2883,8 +2883,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* This is a hook for when we need to do something (perhaps the
          collection of trace data) every time the target stops.  */
-      if (target_wait_loop_hook)
-	(*target_wait_loop_hook) ();
+      if (deprecated_target_wait_loop_hook)
+	(*deprecated_target_wait_loop_hook) ();
 
       remote_stopped_by_watchpoint_p = 0;
 
@@ -3074,8 +3074,8 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* This is a hook for when we need to do something (perhaps the
          collection of trace data) every time the target stops.  */
-      if (target_wait_loop_hook)
-	(*target_wait_loop_hook) ();
+      if (deprecated_target_wait_loop_hook)
+	(*deprecated_target_wait_loop_hook) ();
 
       switch (buf[0])
 	{
@@ -5479,8 +5479,8 @@ _initialize_remote (void)
   add_target (&extended_async_remote_ops);
 
   /* Hook into new objfile notification.  */
-  remote_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = remote_new_objfile;
+  remote_new_objfile_chain = deprecated_target_new_objfile_hook;
+  deprecated_target_new_objfile_hook  = remote_new_objfile;
 
 #if 0
   init_remote_threadtests ();

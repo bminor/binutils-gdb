@@ -98,12 +98,12 @@ extern void generic_search (int len, char *data, char *mask,
 
 /* Hook for `exec_file_command' command to call.  */
 
-extern void (*exec_file_display_hook) (char *filename);
+extern void (*deprecated_exec_file_display_hook) (char *filename);
 
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before) */
 
-extern void (*file_changed_hook) (char *filename);
+extern void (*deprecated_file_changed_hook) (char *filename);
 
 extern void specify_exec_file_hook (void (*hook) (char *filename));
 

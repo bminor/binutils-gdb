@@ -914,8 +914,8 @@ select_frame (struct frame_info *fi)
   deprecated_selected_frame = fi;
   /* NOTE: cagney/2002-05-04: FI can be NULL.  This occurs when the
      frame is being invalidated.  */
-  if (selected_frame_level_changed_hook)
-    selected_frame_level_changed_hook (frame_relative_level (fi));
+  if (deprecated_selected_frame_level_changed_hook)
+    deprecated_selected_frame_level_changed_hook (frame_relative_level (fi));
 
   /* FIXME: kseitz/2002-08-28: It would be nice to call
      selected_frame_level_changed_event() right here, but due to limitations

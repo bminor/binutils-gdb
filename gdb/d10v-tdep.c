@@ -1542,8 +1542,8 @@ _initialize_d10v_tdep (void)
 {
   register_gdbarch_init (bfd_arch_d10v, d10v_gdbarch_init);
 
-  target_resume_hook = d10v_eva_prepare_to_trace;
-  target_wait_loop_hook = d10v_eva_get_trace_data;
+  deprecated_target_resume_hook = d10v_eva_prepare_to_trace;
+  deprecated_target_wait_loop_hook = d10v_eva_get_trace_data;
 
   deprecate_cmd (add_com ("regs", class_vars, show_regs, 
 			  "Print all registers"),

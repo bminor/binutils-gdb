@@ -52,7 +52,7 @@ void args_info (char *, int);
 
 void locals_info (char *, int);
 
-void (*selected_frame_level_changed_hook) (int);
+void (*deprecated_selected_frame_level_changed_hook) (int);
 
 void _initialize_stack (void);
 
@@ -494,8 +494,8 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
 				     get_frame_pc (fi));
       if (!done)
 	{
-	  if (print_frame_info_listing_hook)
-	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
+	  if (deprecated_print_frame_info_listing_hook)
+	    deprecated_print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
 	  else
 	    {
 	      /* We used to do this earlier, but that is clearly

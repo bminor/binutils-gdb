@@ -72,15 +72,15 @@ extern int hp_cxx_exception_support_initialized;
                               } while (0)
 #endif
 
-int (*ui_load_progress_hook) (const char *section, unsigned long num);
-void (*show_load_progress) (const char *section,
+int (*deprecated_ui_load_progress_hook) (const char *section, unsigned long num);
+void (*deprecated_show_load_progress) (const char *section,
 			    unsigned long section_sent,
 			    unsigned long section_size,
 			    unsigned long total_sent,
 			    unsigned long total_size);
 void (*pre_add_symbol_hook) (const char *);
 void (*post_add_symbol_hook) (void);
-void (*target_new_objfile_hook) (struct objfile *);
+void (*deprecated_target_new_objfile_hook) (struct objfile *);
 
 static void clear_symtab_users_cleanup (void *ignore);
 
@@ -903,8 +903,8 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 
   new_symfile_objfile (objfile, mainline, from_tty);
 
-  if (target_new_objfile_hook)
-    target_new_objfile_hook (objfile);
+  if (deprecated_target_new_objfile_hook)
+    deprecated_target_new_objfile_hook (objfile);
 
   return (objfile);
 }
@@ -1440,13 +1440,14 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 	      args->write_count += 1;
 	      sent += len;
 	      if (quit_flag
-		  || (ui_load_progress_hook != NULL
-		      && ui_load_progress_hook (sect_name, sent)))
+		  || (deprecated_ui_load_progress_hook != NULL
+		      && deprecated_ui_load_progress_hook (sect_name, sent)))
 		error ("Canceled the download");
 
-	      if (show_load_progress != NULL)
-		show_load_progress (sect_name, sent, size,
-				    args->data_count, args->total_size);
+	      if (deprecated_show_load_progress != NULL)
+		deprecated_show_load_progress (sect_name, sent, size,
+					       args->data_count,
+					       args->total_size);
 	    }
 	  while (sent < size);
 
@@ -2398,8 +2399,8 @@ clear_symtab_users (void)
   set_default_breakpoint (0, 0, 0, 0);
   clear_current_source_symtab_and_line ();
   clear_pc_function_cache ();
-  if (target_new_objfile_hook)
-    target_new_objfile_hook (NULL);
+  if (deprecated_target_new_objfile_hook)
+    deprecated_target_new_objfile_hook (NULL);
 }
 
 static void

@@ -1702,8 +1702,8 @@ _initialize_sol_thread (void)
   add_target (&core_ops);
 
   /* Hook into new_objfile notification. */
-  target_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = sol_thread_new_objfile;
+  target_new_objfile_chain = deprecated_target_new_objfile_hook;
+  deprecated_target_new_objfile_hook  = sol_thread_new_objfile;
   return;
 
 die:

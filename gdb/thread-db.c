@@ -1359,7 +1359,7 @@ _initialize_thread_db (void)
       add_target (&thread_db_ops);
 
       /* Add ourselves to objfile event chain.  */
-      target_new_objfile_chain = target_new_objfile_hook;
-      target_new_objfile_hook = thread_db_new_objfile;
+      target_new_objfile_chain = deprecated_target_new_objfile_hook;
+      deprecated_target_new_objfile_hook = thread_db_new_objfile;
     }
 }

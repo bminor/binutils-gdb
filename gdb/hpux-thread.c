@@ -581,6 +581,6 @@ _initialize_hpux_thread (void)
 
   child_suppress_run = 1;
   /* Hook into new_objfile notification. */
-  target_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = hpux_thread_new_objfile;
+  target_new_objfile_chain = deprecated_target_new_objfile_hook;
+  deprecated_target_new_objfile_hook  = hpux_thread_new_objfile;
 }

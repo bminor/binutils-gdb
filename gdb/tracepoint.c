@@ -65,9 +65,9 @@
 #define MAX_AGENT_EXPR_LEN	184
 
 
-extern void (*readline_begin_hook) (char *, ...);
-extern char *(*readline_hook) (char *);
-extern void (*readline_end_hook) (void);
+extern void (*deprecated_readline_begin_hook) (char *, ...);
+extern char *(*deprecated_readline_hook) (char *);
+extern void (*deprecated_readline_end_hook) (void);
 extern void x_command (char *, int);
 extern int addressprint;	/* Print machine addresses? */
 
@@ -787,8 +787,8 @@ trace_actions_command (char *args, int from_tty)
 
       if (from_tty)
 	{
-	  if (readline_begin_hook)
-	    (*readline_begin_hook) ("%s  %s\n", tmpbuf, end_msg);
+	  if (deprecated_readline_begin_hook)
+	    (*deprecated_readline_begin_hook) ("%s  %s\n", tmpbuf, end_msg);
 	  else if (input_from_terminal_p ())
 	    printf_filtered ("%s\n%s\n", tmpbuf, end_msg);
 	}
@@ -797,8 +797,8 @@ trace_actions_command (char *args, int from_tty)
       t->step_count = 0;	/* read_actions may set this */
       read_actions (t);
 
-      if (readline_end_hook)
-	(*readline_end_hook) ();
+      if (deprecated_readline_end_hook)
+	(*deprecated_readline_end_hook) ();
       /* tracepoints_changed () */
     }
   /* else just return */
@@ -842,8 +842,8 @@ read_actions (struct tracepoint *t)
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
 
-      if (readline_hook && instream == NULL)
-	line = (*readline_hook) (prompt);
+      if (deprecated_readline_hook && instream == NULL)
+	line = (*deprecated_readline_hook) (prompt);
       else if (instream == stdin && ISATTY (instream))
 	{
 	  line = gdb_readline_wrapper (prompt);
@@ -1804,8 +1804,8 @@ trace_start_command (char *args, int from_tty)
       set_tracepoint_num (-1);
       set_traceframe_context (-1);
       trace_running_p = 1;
-      if (trace_start_stop_hook)
-	trace_start_stop_hook (1, from_tty);
+      if (deprecated_trace_start_stop_hook)
+	deprecated_trace_start_stop_hook (1, from_tty);
 
     }
   else
@@ -1823,8 +1823,8 @@ trace_stop_command (char *args, int from_tty)
       if (strcmp (target_buf, "OK"))
 	error ("Bogus reply from target: %s", target_buf);
       trace_running_p = 0;
-      if (trace_start_stop_hook)
-	trace_start_stop_hook (0, from_tty);
+      if (deprecated_trace_start_stop_hook)
+	deprecated_trace_start_stop_hook (0, from_tty);
     }
   else
     error ("Trace can only be run on remote targets.");
@@ -1985,8 +1985,8 @@ trace_find_command (char *args, int from_tty)
 
   if (target_is_remote ())
     {
-      if (trace_find_hook)
-	trace_find_hook (args, from_tty);
+      if (deprecated_trace_find_hook)
+	deprecated_trace_find_hook (args, from_tty);
 
       if (args == 0 || *args == 0)
 	{			/* TFIND with no args means find NEXT trace frame. */

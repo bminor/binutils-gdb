@@ -527,7 +527,7 @@ extern int gdbtk_test (char *);
   }
 
   /* Initialize all files.  Give the interpreter a chance to take
-     control of the console via the init_ui_hook()) */
+     control of the console via the deprecated_init_ui_hook().  */
   gdb_init (argv[0]);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
@@ -779,10 +779,10 @@ extern int gdbtk_test (char *);
 	  /* GUIs generally have their own command loop, mainloop, or whatever.
 	     This is a good place to gain control because many error
 	     conditions will end up here via longjmp(). */
-	  if (command_loop_hook)
-	    command_loop_hook ();
+	  if (deprecated_command_loop_hook)
+	    deprecated_command_loop_hook ();
 	  else
-	    command_loop ();
+	    deprecated_command_loop ();
 	  quit_command ((char *) 0, instream == stdin);
 	}
     }

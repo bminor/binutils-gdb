@@ -1,5 +1,47 @@
 2004-04-21  Andrew Cagney  <cagney@redhat.com>
 
+	* annotate.h (deprecated_annotate_starting_hook)
+	(deprecated_annotate_stopped_hook)
+	(deprecated_annotate_exited_hook)
+	(deprecated_annotate_signal_hook)
+	(deprecated_annotate_signalled_hook): Deprecate.
+	* tracepoint.h (deprecated_create_tracepoint_hook)
+	(deprecated_delete_tracepoint_hook)
+	(deprecated_modify_tracepoint_hook)
+	(deprecated_trace_find_hook)
+	(deprecated_trace_start_stop_hook): Deprecate.
+	* target.h (deprecated_target_new_objfile_hook): Deprecate.
+	* remote.h (deprecated_target_resume_hook)
+	(deprecated_target_wait_loop_hook): Deprecate.
+	* gdbcore.h (deprecated_exec_file_display_hook)
+	(deprecated_file_changed_hook): Deprecate.
+	* frame.h (deprecated_selected_frame_level_changed_hook): Deprecate.
+	* defs.h (deprecated_modify_breakpoint_hook)
+	(deprecated_command_loop_hook, deprecated_show_load_progress)
+	(deprecated_print_frame_info_listing_hook)
+	(deprecated_query_hook, deprecated_warning_hook)
+	(deprecated_flush_hook, deprecated_create_breakpoint_hook)
+	(deprecated_delete_breakpoint_hook)
+	(deprecated_interactive_hook, deprecated_registers_changed_hook)
+	(deprecated_readline_begin_hook, deprecated_readline_hook)
+	(deprecated_readline_end_hook, deprecated_register_changed_hook)
+	(deprecated_memory_changed_hook, deprecated_init_ui_hook)
+	(deprecated_context_hook, deprecated_target_wait_hook)
+	(deprecated_attach_hook, deprecated_detach_hook)
+	(deprecated_call_command_hook, deprecated_set_hook)
+	(deprecated_error_hook, deprecated_error_begin_hook)
+	(deprecated_ui_load_progress_hook): Deprecate.
+	* valops.c, uw-thread.c, utils.c, tui/tui-io.c: Update.
+	* tui/tui-hooks.c, tracepoint.c, top.c, thread-db.c: Update.
+	* target.c, symfile.c, stack.c, sol-thread.c, rs6000-nat.c: Update.
+	* remote.c, remote-mips.c, regcache.c, mi/mi-interp.c: Update.
+	* main.c, interps.c, infcmd.c, hpux-thread.c, frame.c: Update.
+	* exec.c, dsrec.c, d10v-tdep.c, corefile.c, complaints.c: Update.
+	* cli/cli-script.c, cli/cli-setshow.c, breakpoint.c: Update.
+	* annotate.c, aix-thread.c: Update.
+
+2004-04-21  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (vaxnbsd-tdep.o): Update dependencies.
 	* vaxnbsd-tdep.c: Include "gdb_string.h".
 

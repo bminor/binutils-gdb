@@ -186,8 +186,8 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 
   if (complaint->file != NULL)
     internal_vwarning (complaint->file, complaint->line, complaint->fmt, args);
-  else if (warning_hook)
-    (*warning_hook) (complaint->fmt, args);
+  else if (deprecated_warning_hook)
+    (*deprecated_warning_hook) (complaint->fmt, args);
   else
     {
       if (complaints->explanation == NULL)

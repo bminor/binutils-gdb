@@ -83,7 +83,7 @@ extern char *canonicalize_file_name (const char *);
 /* readline defines this.  */
 #undef savestring
 
-void (*error_begin_hook) (void);
+void (*deprecated_error_begin_hook) (void);
 
 /* Holds the last error message issued by gdb */
 
@@ -566,8 +566,8 @@ discard_all_intermediate_continuations (void)
 void
 vwarning (const char *string, va_list args)
 {
-  if (warning_hook)
-    (*warning_hook) (string, args);
+  if (deprecated_warning_hook)
+    (*deprecated_warning_hook) (string, args);
   else
     {
       target_terminal_ours ();
@@ -659,8 +659,8 @@ error_output_message (char *pre_print, char *msg)
 NORETURN void
 error_stream (struct ui_file *stream)
 {
-  if (error_begin_hook)
-    error_begin_hook ();
+  if (deprecated_error_begin_hook)
+    deprecated_error_begin_hook ();
 
   /* Copy the stream into the GDB_LASTERR buffer.  */
   ui_file_rewind (gdb_lasterr);
@@ -1270,10 +1270,10 @@ query (const char *ctlstr, ...)
   int ans2;
   int retval;
 
-  if (query_hook)
+  if (deprecated_query_hook)
     {
       va_start (args, ctlstr);
-      return query_hook (ctlstr, args);
+      return deprecated_query_hook (ctlstr, args);
     }
 
   /* Automatically answer "yes" if input is not from a terminal.  */
@@ -1373,9 +1373,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       n_string = "[n]";
     }
 
-  if (query_hook)
+  if (deprecated_query_hook)
     {
-      return query_hook (ctlstr, args);
+      return deprecated_query_hook (ctlstr, args);
     }
 
   /* Automatically answer default value if input is not from a terminal.  */

@@ -685,7 +685,7 @@ read_next_line (struct command_line **command)
     error ("Control nesting too deep!\n");
 
   /* Set a prompt based on the nesting of the control commands.  */
-  if (instream == stdin || (instream == 0 && readline_hook != NULL))
+  if (instream == stdin || (instream == 0 && deprecated_readline_hook != NULL))
     {
       for (i = 0; i < control_level; i++)
 	control_prompt[i] = ' ';
@@ -893,10 +893,10 @@ read_command_lines (char *prompt_arg, int from_tty)
   enum misc_command_type val;
 
   control_level = 0;
-  if (readline_begin_hook)
+  if (deprecated_readline_begin_hook)
     {
       /* Note - intentional to merge messages with no newline */
-      (*readline_begin_hook) ("%s  %s\n", prompt_arg, END_MESSAGE);
+      (*deprecated_readline_begin_hook) ("%s  %s\n", prompt_arg, END_MESSAGE);
     }
   else if (from_tty && input_from_terminal_p ())
     {
@@ -962,9 +962,9 @@ read_command_lines (char *prompt_arg, int from_tty)
 	do_cleanups (old_chain);
     }
 
-  if (readline_end_hook)
+  if (deprecated_readline_end_hook)
     {
-      (*readline_end_hook) ();
+      (*deprecated_readline_end_hook) ();
     }
   return (head);
 }

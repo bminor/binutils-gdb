@@ -127,17 +127,17 @@ mi_interpreter_resume (void *data)
      be a better way of doing this... */
   clear_interpreter_hooks ();
 
-  show_load_progress = mi_load_progress;
+  deprecated_show_load_progress = mi_load_progress;
 
   /* If we're _the_ interpreter, take control. */
   if (current_interp_named_p (INTERP_MI1))
-    command_loop_hook = mi1_command_loop;
+    deprecated_command_loop_hook = mi1_command_loop;
   else if (current_interp_named_p (INTERP_MI2))
-    command_loop_hook = mi2_command_loop;
+    deprecated_command_loop_hook = mi2_command_loop;
   else if (current_interp_named_p (INTERP_MI3))
-    command_loop_hook = mi3_command_loop;
+    deprecated_command_loop_hook = mi3_command_loop;
   else
-    command_loop_hook = mi2_command_loop;
+    deprecated_command_loop_hook = mi2_command_loop;
 
   return 1;
 }
@@ -282,13 +282,13 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 static void
 mi_insert_notify_hooks (void)
 {
-  query_hook = mi_interp_query_hook;
+  deprecated_query_hook = mi_interp_query_hook;
 }
 
 static void
 mi_remove_notify_hooks (void)
 {
-  query_hook = NULL;
+  deprecated_query_hook = NULL;
 }
 
 static int
@@ -341,27 +341,27 @@ mi_command_loop (int mi_version)
   uiout = mi_out_new (mi_version);
   /* HACK: Override any other interpreter hooks.  We need to create a
      real event table and pass in that. */
-  init_ui_hook = 0;
-  /* command_loop_hook = 0; */
-  print_frame_info_listing_hook = 0;
-  query_hook = 0;
-  warning_hook = 0;
-  create_breakpoint_hook = 0;
-  delete_breakpoint_hook = 0;
-  modify_breakpoint_hook = 0;
-  interactive_hook = 0;
-  registers_changed_hook = 0;
-  readline_begin_hook = 0;
-  readline_hook = 0;
-  readline_end_hook = 0;
-  register_changed_hook = 0;
-  memory_changed_hook = 0;
-  context_hook = 0;
-  target_wait_hook = 0;
-  call_command_hook = 0;
-  error_hook = 0;
-  error_begin_hook = 0;
-  show_load_progress = mi_load_progress;
+  deprecated_init_ui_hook = 0;
+  /* deprecated_command_loop_hook = 0; */
+  deprecated_print_frame_info_listing_hook = 0;
+  deprecated_query_hook = 0;
+  deprecated_warning_hook = 0;
+  deprecated_create_breakpoint_hook = 0;
+  deprecated_delete_breakpoint_hook = 0;
+  deprecated_modify_breakpoint_hook = 0;
+  deprecated_interactive_hook = 0;
+  deprecated_registers_changed_hook = 0;
+  deprecated_readline_begin_hook = 0;
+  deprecated_readline_hook = 0;
+  deprecated_readline_end_hook = 0;
+  deprecated_register_changed_hook = 0;
+  deprecated_memory_changed_hook = 0;
+  deprecated_context_hook = 0;
+  deprecated_target_wait_hook = 0;
+  deprecated_call_command_hook = 0;
+  deprecated_error_hook = 0;
+  deprecated_error_begin_hook = 0;
+  deprecated_show_load_progress = mi_load_progress;
 #endif
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format. */

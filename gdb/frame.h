@@ -611,7 +611,7 @@ extern void args_info (char *, int);
 
 extern void locals_info (char *, int);
 
-extern void (*selected_frame_level_changed_hook) (int);
+extern void (*deprecated_selected_frame_level_changed_hook) (int);
 
 extern void return_command (char *, int);
 

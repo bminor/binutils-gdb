@@ -4723,13 +4723,13 @@ mention (struct breakpoint *b)
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
 
-  /* FIXME: This is misplaced; mention() is called by things (like hitting a
-     watchpoint) other than breakpoint creation.  It should be possible to
-     clean this up and at the same time replace the random calls to
-     breakpoint_changed with this hook, as has already been done for
-     delete_breakpoint_hook and so on.  */
-  if (create_breakpoint_hook)
-    create_breakpoint_hook (b);
+  /* FIXME: This is misplaced; mention() is called by things (like
+     hitting a watchpoint) other than breakpoint creation.  It should
+     be possible to clean this up and at the same time replace the
+     random calls to breakpoint_changed with this hook, as has already
+     been done for deprecated_delete_breakpoint_hook and so on.  */
+  if (deprecated_create_breakpoint_hook)
+    deprecated_create_breakpoint_hook (b);
   breakpoint_create_event (b->number);
 
   if (b->ops != NULL && b->ops->print_mention != NULL)
@@ -6874,8 +6874,8 @@ delete_breakpoint (struct breakpoint *bpt)
   if (bpt->type == bp_none)
     return;
 
-  if (delete_breakpoint_hook)
-    delete_breakpoint_hook (bpt);
+  if (deprecated_delete_breakpoint_hook)
+    deprecated_delete_breakpoint_hook (bpt);
   breakpoint_delete_event (bpt->number);
 
   if (bpt->loc->inserted)
@@ -7507,8 +7507,8 @@ disable_breakpoint (struct breakpoint *bpt)
 
   check_duplicates (bpt);
 
-  if (modify_breakpoint_hook)
-    modify_breakpoint_hook (bpt);
+  if (deprecated_modify_breakpoint_hook)
+    deprecated_modify_breakpoint_hook (bpt);
   breakpoint_modify_event (bpt->number);
 }
 
@@ -7651,8 +7651,8 @@ have been allocated for other watchpoints.\n", bpt->number);
 	}
     }
 
-  if (modify_breakpoint_hook)
-    modify_breakpoint_hook (bpt);
+  if (deprecated_modify_breakpoint_hook)
+    deprecated_modify_breakpoint_hook (bpt);
   breakpoint_modify_event (bpt->number);
 }
 

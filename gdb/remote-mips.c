@@ -2662,8 +2662,8 @@ mips_load_srec (char *args)
 	      reclen = mips_make_srec (srec, '3', s->vma + i, buffer, numbytes);
 	      send_srec (srec, reclen, s->vma + i);
 
-	      if (ui_load_progress_hook)
-		ui_load_progress_hook (s->name, i);
+	      if (deprecated_ui_load_progress_hook)
+		deprecated_ui_load_progress_hook (s->name, i);
 
 	      if (hashmark)
 		{
@@ -3186,8 +3186,8 @@ pmon_load_fast (char *file)
 			    break;
 			  }
 
-			if (ui_load_progress_hook)
-			  ui_load_progress_hook (s->name, i);
+			if (deprecated_ui_load_progress_hook)
+			  deprecated_ui_load_progress_hook (s->name, i);
 
 			if (hashmark)
 			  {

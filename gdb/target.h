@@ -949,19 +949,19 @@ extern char *normal_pid_to_str (ptid_t ptid);
  * The old way of doing this is to define a macro 'target_new_objfile'
  * that points to the function that you want to be called on every
  * objfile/shlib load.
- *
- * The new way is to grab the function pointer, 'target_new_objfile_hook',
- * and point it to the function that you want to be called on every
- * objfile/shlib load.
- *
- * If multiple clients are willing to be cooperative, they can each
- * save a pointer to the previous value of target_new_objfile_hook
- * before modifying it, and arrange for their function to call the
- * previous function in the chain.  In that way, multiple clients
- * can receive this notification (something like with signal handlers).
- */
 
-extern void (*target_new_objfile_hook) (struct objfile *);
+   The new way is to grab the function pointer,
+   'deprecated_target_new_objfile_hook', and point it to the function
+   that you want to be called on every objfile/shlib load.
+
+   If multiple clients are willing to be cooperative, they can each
+   save a pointer to the previous value of
+   deprecated_target_new_objfile_hook before modifying it, and arrange
+   for their function to call the previous function in the chain.  In
+   that way, multiple clients can receive this notification (something
+   like with signal handlers).  */
+
+extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
 
 #ifndef target_pid_or_tid_to_str
 #define target_pid_or_tid_to_str(ID) \
