@@ -1,3 +1,17 @@
+Thu Sep  7 12:12:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* nm.c (value_format): Initialize based on BFD64 and
+	BFD_HOST_64BIT_LONG.
+	(print_radix): New static variable.
+	(set_print_radix): Set print_radix.  Adjust changes to
+	value_format.
+	(print_value): New static function, to print 64 bit octal and
+	decimal values correctly.
+	(print_symbol_info_bsd): Check BFD64, not BFD_HOST_64_BIT.  Use
+	print_value.
+	(print_symbol_info_sysv): Use print_value.
+	(print_symbol_info_posix): Likewise.
+
 Wed Sep  6 15:02:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (*.o): Remove incorrect dependencies on
