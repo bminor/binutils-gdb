@@ -42,6 +42,7 @@ aix386-core.c
 aout-adobe.c
 aout-encap.c
 aout-ns32k.c
+aout-ns32k.h
 aout-target.h
 aout0.c
 aout32.c
@@ -95,6 +96,7 @@ cpu-i960.c
 cpu-m68k.c
 cpu-m88k.c
 cpu-mips.c
+cpu-ns32k.c
 cpu-powerpc.c
 cpu-rs6000.c
 cpu-sh.c
@@ -169,6 +171,7 @@ makefile.dos
 mipsbsd.c
 newsos3.c
 netbsd386.c
+netbsd532.c
 nlm-target.h
 nlm.c
 nlm32-alpha.c
@@ -224,6 +227,27 @@ else
 		mv new $f
 	done
 	chmod a+x config.bfd
+fi
+
+i960xl_files="ChangeLog archures.c bfd-in2.h cpu-i960.c coffcode.h"
+if ( echo $* | grep keep\-i960xl > /dev/null ) ; then
+	if [ -n "${verbose}" ] ; then
+		echo Keeping i960xl stuff in $i960xl_files.
+	fi
+else
+	if [ -n "${verbose}" ]; then
+		echo -n Cleaning i960xl in `pwd`:
+	fi
+	for f in $i960xl_files ; do
+		if [ -n "${verbose}" ] ; then
+			echo -n " " $f
+		fi
+		sed -e '/start\-sanitize\-i960xl/,/end\-sanitize\-i960xl/d' < $f > new
+		if [ -n "${safe}" ] ; then
+			mv $f .Recover
+		fi
+		mv new $f
+	done
 fi
 
 # End of file.
