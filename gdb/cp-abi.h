@@ -1,7 +1,9 @@
 /* Abstraction of various C++ ABI's we support, and the info we need
    to get from them.
+
    Contributed by Daniel Berlin <dberlin@redhat.com>
-   Copyright 2001 Free Software Foundation, Inc.
+
+   Copyright 2001, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -142,8 +144,8 @@ extern struct type *value_rtti_type (struct value *value,
 
    -1 is returned on error. */
 
-extern int baseclass_offset (struct type *type, int index, char *valaddr,
-			     CORE_ADDR address);
+extern int baseclass_offset (struct type *type, int index,
+			     const bfd_byte *valaddr, CORE_ADDR address);
                   
 struct cp_abi_ops
 {
@@ -160,8 +162,8 @@ struct cp_abi_ops
 				     int j, struct type * type, int offset);
   struct type *(*rtti_type) (struct value *v, int *full, int *top,
 			     int *using_enc);
-  int (*baseclass_offset) (struct type *type, int index, char *valaddr,
-			   CORE_ADDR address);
+  int (*baseclass_offset) (struct type *type, int index,
+			   const bfd_byte *valaddr, CORE_ADDR address);
 };
 
 

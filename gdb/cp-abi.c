@@ -1,5 +1,6 @@
 /* Generic code for supporting multiple C++ ABI's
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -69,7 +70,7 @@ is_operator_name (const char *name)
 }
 
 int
-baseclass_offset (struct type *type, int index, char *valaddr,
+baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
 		  CORE_ADDR address)
 {
   if (current_cp_abi.baseclass_offset == NULL)

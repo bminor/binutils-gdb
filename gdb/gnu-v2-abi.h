@@ -25,6 +25,7 @@
 #define GNU_V2_ABI_H
 
 extern int gnuv2_baseclass_offset (struct type *type, int index,
-				   char *valaddr, CORE_ADDR address);
+				   const bfd_byte *valaddr,
+				   CORE_ADDR address);
 
 #endif

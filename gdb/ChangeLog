@@ -1,5 +1,13 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* gnu-v2-abi.h (gnuv2_baseclass_offset): Make "valaddr" a const
+	bfd_byte.
+	* cp-abi.h (baseclass_offset): Make "valaddr" a const bfd_byte.
+	(struct cp_abi_ops): Make baseclass_offset's "valaddr" a const
+	bfd_byte.
+	* cp-abi.c (baseclass_offset): Update.
+	* gnu-v2-abi.c (gnuv2_baseclass_offset): Update.
+
 	* gnu-v2-abi.h: New file.
 	* gnu-v2-abi.c: Include "gnu-v2-abi.h".
 	(gnuv2_baseclass_offset): Delete declaration.

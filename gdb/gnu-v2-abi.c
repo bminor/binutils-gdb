@@ -346,8 +346,8 @@ vb_match (struct type *type, int index, struct type *basetype)
    -1 is returned on error. */
 
 int
-gnuv2_baseclass_offset (struct type *type, int index, char *valaddr,
-		  CORE_ADDR address)
+gnuv2_baseclass_offset (struct type *type, int index,
+			const bfd_byte *valaddr, CORE_ADDR address)
 {
   struct type *basetype = TYPE_BASECLASS (type, index);
 
