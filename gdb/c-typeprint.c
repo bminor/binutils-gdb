@@ -35,7 +35,6 @@
 #include "demangle.h"
 #include "c-lang.h"
 #include "typeprint.h"
-#include "cp-abi.h"
 
 #include "gdb_string.h"
 #include <errno.h>
@@ -903,10 +902,11 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		{
 		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 		  int is_full_physname_constructor =
-		   is_constructor_name (physname) 
-		   || is_destructor_name (physname)
-		   || method_name[0] == '~';
-
+		  ((physname[0] == '_' && physname[1] == '_'
+		    && strchr ("0123456789Qt", physname[2]))
+		   || STREQN (physname, "__ct__", 6)
+		   || DESTRUCTOR_PREFIX_P (physname)
+		   || STREQN (physname, "__dt__", 6));
 
 		  QUIT;
 		  if (TYPE_FN_FIELD_PROTECTED (f, j))
