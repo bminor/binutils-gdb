@@ -1,3 +1,7 @@
+2002-03-15  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (is_newabi): Fix ABI decoding.
+
 2002-03-14  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* mips-dis.c (mips_isa_type): Fix formatting of bfd_mach_mipsisa32
