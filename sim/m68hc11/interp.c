@@ -306,7 +306,31 @@ sim_prepare_for_program (SIM_DESC sd, struct _bfd* abfd)
 
   if (abfd != NULL)
     {
+      asection *s;
       cpu->cpu_elf_start = bfd_get_start_address (abfd);
+      /* See if any section sets the reset address */
+      cpu->cpu_use_elf_start = 1;
+      for (s = abfd->sections; s && cpu->cpu_use_elf_start; s = s->next) 
+        {
+          if (s->flags & SEC_LOAD)
+            {
+              bfd_size_type size;
+
+              size = bfd_get_section_size_before_reloc (s);
+              if (size > 0)
+                {
+                  bfd_vma lma;
+
+                  if (STATE_LOAD_AT_LMA_P (sd))
+                    lma = bfd_section_lma (abfd, s);
+                  else
+                    lma = bfd_section_vma (abfd, s);
+
+                  if (lma <= 0xFFFE && lma+size >= 0x10000)
+                    cpu->cpu_use_elf_start = 0;
+                }
+            }
+        }
     }
 
   /* reset all state information */
@@ -333,7 +357,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 
   cpu_initialize (sd, cpu);
 
-  cpu->cpu_use_elf_start = 1;
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
       free_state (sd);
