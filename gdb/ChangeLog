@@ -1,5 +1,26 @@
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
+	* scm-lang.c (c_builtin_types): Delete extern declaration.
+	(scm_language_defn): Replace
+	string_char_type and primitive_type_vector with
+	la_language_arch_info.
+	* jv-lang.c (java_language_defn): Replace
+	string_char_type and primitive_type_vector with
+	la_language_arch_info.
+	* config/i386/i386sco4.mh (NATDEPFILES): Remove reference to
+	c_builtin_types in comment.
+	* c-lang.h (struct language_arch_info): Declare opaque.
+	(c_language_arch_info): Declare.
+	(c_builtin_types): Delete declaration.
+	* c-lang.c (c_language_arch_info): Set string_char_type to
+	builtin_char, not builtin_true_char.  Make global.
+	(c_builtin_types): Delete array.
+	(asm_language_defn, minimal_language_defn): Replace
+	string_char_type and primitive_type_vector with
+	la_language_arch_info.
+
+2004-07-28  Andrew Cagney  <cagney@gnu.org>
+
 	* gdbtypes.h (struct builtin_type): Rename true_char to
 	builtin_true_char.
 	* gdbtypes.c (gdbtypes_post_init): Update.

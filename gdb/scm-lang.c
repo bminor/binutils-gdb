@@ -44,8 +44,6 @@ static void scm_printstr (struct ui_file * stream, char *string,
 			  unsigned int length, int width,
 			  int force_ellipses);
 
-extern struct type **const (c_builtin_types[]);
-
 struct type *builtin_type_scm;
 
 void
@@ -246,7 +244,7 @@ const struct language_defn scm_language_defn =
 {
   "scheme",			/* Language name */
   language_scm,
-  c_builtin_types,
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_off,
@@ -274,9 +272,9 @@ const struct language_defn scm_language_defn =
   NULL,				/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  c_language_arch_info,
   LANG_MAGIC
 };
 

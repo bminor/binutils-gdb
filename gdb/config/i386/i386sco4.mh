@@ -7,5 +7,5 @@ NAT_FILE= nm-i386sco4.h
 NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o core-aout.o i386v-nat.o
 
 # The cc compiler mishandles const in cases like 
-# struct type ** const (c_builtin_types[]) = 
+# struct type ** const (array[]) = 
 MH_CFLAGS=-Dconst=

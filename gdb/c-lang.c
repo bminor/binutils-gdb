@@ -513,28 +513,6 @@ const struct op_print c_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
-struct type **const (c_builtin_types[]) =
-{
-  &builtin_type_int,
-  &builtin_type_long,
-  &builtin_type_short,
-  &builtin_type_char,
-  &builtin_type_float,
-  &builtin_type_double,
-  &builtin_type_void,
-  &builtin_type_long_long,
-  &builtin_type_signed_char,
-  &builtin_type_unsigned_char,
-  &builtin_type_unsigned_short,
-  &builtin_type_unsigned_int,
-  &builtin_type_unsigned_long,
-  &builtin_type_unsigned_long_long,
-  &builtin_type_long_double,
-  &builtin_type_complex,
-  &builtin_type_double_complex,
-  0
-};
-
 enum c_primitive_types {
   c_primitive_type_int,
   c_primitive_type_long,
@@ -556,12 +534,12 @@ enum c_primitive_types {
   nr_c_primitive_types
 };
 
-static void
+void
 c_language_arch_info (struct gdbarch *gdbarch,
 		      struct language_arch_info *lai)
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
-  lai->string_char_type = builtin->builtin_true_char;
+  lai->string_char_type = builtin->builtin_char;
   lai->primitive_type_vector
     = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_c_primitive_types + 1,
 			      struct type *);
@@ -687,7 +665,7 @@ const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
   language_asm,
-  c_builtin_types,
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -715,9 +693,9 @@ const struct language_defn asm_language_defn =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  c_language_arch_info, /* FIXME: la_language_arch_info.  */
   LANG_MAGIC
 };
 
@@ -730,7 +708,7 @@ const struct language_defn minimal_language_defn =
 {
   "minimal",			/* Language name */
   language_minimal,
-  c_builtin_types,
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -758,9 +736,9 @@ const struct language_defn minimal_language_defn =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  c_language_arch_info,
   LANG_MAGIC
 };
 

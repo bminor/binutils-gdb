@@ -1084,7 +1084,7 @@ const struct language_defn java_language_defn =
 {
   "java",			/* Language name */
   language_java,
-  c_builtin_types,
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -1112,9 +1112,9 @@ const struct language_defn java_language_defn =
   java_op_print_tab,		/* expression operators for printing */
   0,				/* not c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  c_language_arch_info,
   LANG_MAGIC
 };
 
