@@ -1,3 +1,14 @@
+Wed Dec 28 12:21:39 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (push_dummy_frame): Return type is void.  Clear
+	in_syscall bit in flags.  Don't depend on the PC queue registers
+	when in_syscall is set, they're not valid.
+	* config/pa/tm-hppa.h (PUSH_DUMMY_FRAME): Pass inf_status down to
+	push_dummy_frame.
+	(SR4_REGNUM): Define.
+
+	* hppa-tdep.c: Misc. lint changes.
+
 Tue Dec 27 12:32:43 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* breakpoint.c (watchpoint_check): Don't bother restoring the

@@ -82,6 +82,8 @@ static void internalize_unwinds PARAMS ((struct objfile *,
 					 struct unwind_table_entry *,
 					 asection *, unsigned int,
 					 unsigned int, CORE_ADDR));
+static void pa_print_registers PARAMS ((char *, int, int));
+static void pa_print_fp_reg PARAMS ((int));
 
 
 /* Routines to extract various sized constants out of hppa 
@@ -311,7 +313,7 @@ internalize_unwinds (objfile, table, section, entries, size, text_offset)
 	  buf += 4;
 	  tmp = bfd_get_32 (objfile->obfd, (bfd_byte *)buf);
 	  buf += 4;
-	  table[i].Cannot_unwind = (tmp >> 31) & 0x1;;
+	  table[i].Cannot_unwind = (tmp >> 31) & 0x1;
 	  table[i].Millicode = (tmp >> 30) & 0x1;
 	  table[i].Millicode_save_sr0 = (tmp >> 29) & 0x1;
 	  table[i].Region_description = (tmp >> 27) & 0x3;
@@ -1077,13 +1079,42 @@ frame_chain_valid (chain, thisframe)
  * to be aligned to a 64-byte boundary.
  */
 
-int
-push_dummy_frame ()
+void
+push_dummy_frame (inf_status)
+     struct inferior_status *inf_status;
 {
-  register CORE_ADDR sp;
+  CORE_ADDR sp, pc, pcspace;
   register int regnum;
   int int_buffer;
   double freg_buffer;
+
+  /* Oh, what a hack.  If we're trying to perform an inferior call
+     while the inferior is asleep, we have to make sure to clear
+     the "in system call" bit in the flag register (the call will
+     start after the syscall returns, so we're no longer in the system
+     call!)  This state is kept in "inf_status", change it there.
+
+     We also need a number of horrid hacks to deal with lossage in the
+     PC queue registers (apparently they're not valid when the in syscall
+     bit is set).  */
+  pc = target_read_pc (inferior_pid);
+  int_buffer = read_register (FLAGS_REGNUM);
+  if (int_buffer & 0x2)
+    {
+      int_buffer &= ~0x2;
+      memcpy (inf_status->registers, &int_buffer, 4);
+      memcpy (inf_status->registers + REGISTER_BYTE (PCOQ_HEAD_REGNUM), &pc, 4);
+      pc += 4;
+      memcpy (inf_status->registers + REGISTER_BYTE (PCOQ_TAIL_REGNUM), &pc, 4);
+      pc -= 4;
+      pcspace = read_register (SR4_REGNUM);
+      memcpy (inf_status->registers + REGISTER_BYTE (PCSQ_HEAD_REGNUM),
+	      &pcspace, 4);
+      memcpy (inf_status->registers + REGISTER_BYTE (PCSQ_TAIL_REGNUM),
+	      &pcspace, 4);
+    }
+  else
+    pcspace = read_register (PCSQ_HEAD_REGNUM);
 
   /* Space for "arguments"; the RP goes in here. */
   sp = read_register (SP_REGNUM) + 48;
@@ -1110,13 +1141,14 @@ push_dummy_frame ()
     }
   sp = push_word (sp, read_register (IPSW_REGNUM));
   sp = push_word (sp, read_register (SAR_REGNUM));
-  sp = push_word (sp, read_register (PCOQ_HEAD_REGNUM));
-  sp = push_word (sp, read_register (PCSQ_HEAD_REGNUM));
-  sp = push_word (sp, read_register (PCOQ_TAIL_REGNUM));
-  sp = push_word (sp, read_register (PCSQ_TAIL_REGNUM));
+  sp = push_word (sp, pc);
+  sp = push_word (sp, pcspace);
+  sp = push_word (sp, pc + 4);
+  sp = push_word (sp, pcspace);
   write_register (SP_REGNUM, sp);
 }
 
+void
 find_dummy_frame_regs (frame, frame_saved_regs)
      struct frame_info *frame;
      struct frame_saved_regs *frame_saved_regs;
@@ -1149,7 +1181,7 @@ find_dummy_frame_regs (frame, frame_saved_regs)
   frame_saved_regs->regs[PCSQ_TAIL_REGNUM] = fp + 20;
 }
 
-int
+void
 hppa_pop_frame ()
 {
   register struct frame_info *frame = get_current_frame ();
@@ -1247,7 +1279,6 @@ restore_pc_queue (fsr)
 {
   CORE_ADDR pc = read_pc ();
   CORE_ADDR new_pc = read_memory_integer (fsr->regs[PCOQ_HEAD_REGNUM], 4);
-  int pid;
   struct target_waitstatus w;
   int insn_count;
 
@@ -1537,6 +1568,7 @@ hppa_alignof (arg)
 
 /* Print the register regnum, or all registers if regnum is -1 */
 
+void
 pa_do_registers_info (regnum, fpregs)
      int regnum;
      int fpregs;
@@ -1555,6 +1587,7 @@ pa_do_registers_info (regnum, fpregs)
     pa_print_fp_reg (regnum);
 }
 
+static void
 pa_print_registers (raw_regs, regnum, fpregs)
      char *raw_regs;
      int regnum;
@@ -1578,6 +1611,7 @@ pa_print_registers (raw_regs, regnum, fpregs)
       pa_print_fp_reg (i);
 }
 
+static void
 pa_print_fp_reg (i)
      int i;
 {
@@ -1625,6 +1659,7 @@ pa_print_fp_reg (i)
    Note we return one for *any* call trampoline (long-call, arg-reloc), not
    just shared library trampolines (import, export).  */
 
+int
 in_solib_call_trampoline (pc, name)
      CORE_ADDR pc;
      char *name;
@@ -1717,11 +1752,11 @@ in_solib_call_trampoline (pc, name)
    Note we return one for *any* call trampoline (long-call, arg-reloc), not
    just shared library trampolines (import, export).  */
 
+int
 in_solib_return_trampoline (pc, name)
      CORE_ADDR pc;
      char *name;
 {
-  struct minimal_symbol *minsym;
   struct unwind_table_entry *u;
 
   /* Get the unwind descriptor corresponding to PC, return zero
@@ -2144,7 +2179,7 @@ skip_prologue (pc)
     {
       unsigned int reg_num;
       unsigned long old_stack_remaining, old_save_gr, old_save_fr;
-      unsigned long old_save_rp, old_save_sp, old_args_stored, next_inst;
+      unsigned long old_save_rp, old_save_sp, next_inst;
 
       /* Save copies of all the triggers so we can compare them later
 	 (only for HPC).  */
