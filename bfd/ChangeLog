@@ -1,3 +1,8 @@
+Mon Oct  5 14:55:30 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (som_finish_writing): Perform some sanity checks when
+	writing an executable or shared library.
+
 Mon Oct  5 12:02:31 1998  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* dwarf1.c : New file.  Adds _bfd_dwarf1_find_nearest_line.
