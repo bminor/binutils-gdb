@@ -562,12 +562,15 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   int offset = 0;
   int line = 0;
 
-  struct cleanup *cleanup_chain = make_cleanup (free, name);
-  if (print_symbol_filename)
-    make_cleanup (free, filename);
+  /* throw away both name and filename */
+  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &name);
+  make_cleanup (free_current_contents, &filename);
 
   if (build_address_symbolic (addr, do_demangle, &name, &offset, &filename, &line, &unmapped))
-    return;
+    {
+      do_cleanups (cleanup_chain);
+      return;
+    }
 
   fputs_filtered (leadin, stream);
   if (unmapped)

@@ -1,3 +1,16 @@
+Thu Apr 20 17:39:11 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h, utils.c (free_current_contents): Change parameter to
+ 	void*.
+
+	From Philippe De Muyter  <phdm@macqel.be>:
+	* printcmd.c (print_address_symbolic): Call `make_cleanup' with
+	`(free_current_contents, &x)', not `(free, x)'.
+	* utils.c (free_current_contents): Do not `free (NULL)'.
+
+	* printcmd.c (print_address_symbolic): Cleanup after a failed
+	call to build_address_symbolic.
+
 2000-04-20  Christopher Faylor  <cgf@cygnus.com>
 
 	* wince-stub.c (FREE): New macro.

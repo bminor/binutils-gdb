@@ -375,10 +375,11 @@ restore_my_cleanups (pmy_chain, chain)
    to arrange to free the object thus allocated.  */
 
 void
-free_current_contents (location)
-     char **location;
+free_current_contents (void *ptr)
 {
-  free (*location);
+  void **location = ptr;
+  if (*location != NULL)
+    free (*location);
 }
 
 /* Provide a known function that does nothing, to use as a base for
