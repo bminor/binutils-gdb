@@ -1,3 +1,8 @@
+Thu May  8 17:29:50 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Add automake targets.
+	* configure.in (host_tools): Add automake.
+
 start-sanitize-ide
 Thu May  8 17:09:12 1997  Ian Lance Taylor  <ian@cygnus.com>
 

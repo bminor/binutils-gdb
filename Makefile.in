@@ -426,6 +426,7 @@ GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 ALL_MODULES = \
 	all-apache \
 	all-autoconf \
+	all-automake \
 	all-bash \
 	all-bfd \
 	all-binutils \
@@ -501,6 +502,7 @@ NATIVE_CHECK_MODULES = \
 CROSS_CHECK_MODULES = \
 	check-apache \
 	check-autoconf \
+	check-automake \
 	check-bash \
 	check-bfd \
 	check-binutils \
@@ -565,6 +567,7 @@ CHECK_MODULES=$(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 INSTALL_MODULES = \
 	install-apache \
 	install-autoconf \
+	install-automake \
 	install-bash \
 	install-bfd \
 	install-binutils \
@@ -711,6 +714,7 @@ INSTALL_TARGET_MODULES = \
 CLEAN_MODULES = \
 	clean-apache \
 	clean-autoconf \
+	clean-automake \
 	clean-bash \
 	clean-bfd \
 	clean-binutils \
@@ -1331,6 +1335,7 @@ install-dosrel-fake:
 # This is a list of inter-dependencies among modules.
 all-apache:
 all-autoconf: all-m4
+all-automake:
 all-bash:
 all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-byacc

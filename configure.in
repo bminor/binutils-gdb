@@ -53,7 +53,7 @@ fi
 # these tools are built for the host environment
 # Note, the powerpc-eabi build depends on sim occurring before gdb in order to
 # know that we are building the simulator.
-host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn"
+host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf automake ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn"
 # start-sanitize-ide
 host_tools="${host_tools} ilu vmake"
 # end-sanitize-ide
@@ -85,7 +85,7 @@ target_tools="target-examples target-groff"
 #
 # This must be a single line because of the way it is searched by grep in
 # the code below.
-native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv"
+native_only="autoconf automake cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv"
 
 # directories to be built in a cross environment only
 #
@@ -391,7 +391,7 @@ case "${host}" in
 # end-sanitize-ide
 	;;
   *-*-cygwin32)
-     noconfigdirs="expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn gnuserv"
+     noconfigdirs="expect dejagnu cvs autoconf automake bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn gnuserv"
 # start-sanitize-ide
      noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
@@ -402,7 +402,7 @@ case "${host}" in
      target_configdirs=
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn gnuserv"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn gnuserv"
 # start-sanitize-ide
      noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
