@@ -1,5 +1,9 @@
 2002-08-14  H.J. Lu <hjl@gnu.org>
 
+	* libbfd.h: Regenerate.
+
+2002-08-14  H.J. Lu <hjl@gnu.org>
+
 	* config.bfd: Always add 64bit vectors to 32bit Linux/mips.
 
 2002-08-14  Stephane Carrez  <stcarrez@nerim.fr>
