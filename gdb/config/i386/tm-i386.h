@@ -176,8 +176,6 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 #define IS_FP_REGNUM(n) (FP0_REGNUM <= (n) && (n) <= FP7_REGNUM)
 #define IS_SSE_REGNUM(n) (XMM0_REGNUM <= (n) && (n) <= XMM7_REGNUM)
 
-#define FPU_REG_RAW_SIZE (10)
-
 /* Return the name of register REG.  */
 
 #define REGISTER_NAME(reg) i386_register_name ((reg))
@@ -203,7 +201,7 @@ extern int i386_dwarf_reg_to_regnum (int reg);
    file, so summing up the sizes of those portions actually present
    yields REGISTER_BYTES.  */
 #define SIZEOF_GREGS (NUM_GREGS * 4)
-#define SIZEOF_FPU_REGS (8 * FPU_REG_RAW_SIZE)
+#define SIZEOF_FPU_REGS (8 * 10)
 #define SIZEOF_FPU_CTRL_REGS \
   ((LAST_FPU_CTRL_REGNUM - FIRST_FPU_CTRL_REGNUM + 1) * 4)
 #define SIZEOF_SSE_REGS (8 * 16 + 4)

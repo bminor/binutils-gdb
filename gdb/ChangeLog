@@ -1,3 +1,10 @@
+2001-11-11  Mark Kettenis  <kettenis@elgar.my.domain>
+
+	* i386-tdep.h (FPU_REG_RAW_SIZE): Define unconditionally.
+	* i387-nat.c, i387-tdep.c: Unconditionally include "i386-tdep.h".
+	* config/i386/tm-i386.h (FPU_REG_RAW_SIZE): Removed.
+	(SIZEOF_FPU_REGS): Don't use FPU_REG_RAW_SIZE here.
+
 2001-11-12  Jim Blandy  <jimb@redhat.com>
 
 	Patch from Andreas Schwab <schwab@suse.de>:

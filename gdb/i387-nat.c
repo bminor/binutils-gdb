@@ -24,10 +24,7 @@
 #include "regcache.h"
 
 #include "i387-nat.h"
-
-#if GDB_MULTI_ARCH > 0
 #include "i386-tdep.h"
-#endif
 
 /* FIXME: kettenis/2000-05-21: Right now more than a few i386 targets
    define their own routines to manage the floating-point registers in

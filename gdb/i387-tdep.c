@@ -30,9 +30,7 @@
 #include "gdb_assert.h"
 #include "doublest.h"
 
-#if GDB_MULTI_ARCH >0
 #include "i386-tdep.h"
-#endif
 
 /* FIXME: Eliminate the next two functions when we have the time to
    change all the callers.  */
