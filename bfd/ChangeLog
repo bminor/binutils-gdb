@@ -1,5 +1,11 @@
 Tue Aug 26 17:26:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am: Rebuild dependencies.
+	(ALL_MACHINES_CFILES): Add cpu-arc.c.
+	(ALL_MACHINES_CFILES): Add elf32-arc.c.
+	(elf32-arc.lo): Remove explicit dependency.
+	* Makefile.in: Rebuild.
+
 	* acinclude.m4 (BFD_CC_FOR_BUILD): Set EXEEXT_FOR_BUILD.
 	* doc/Makefile.am (MKDOC): Use EXEEXT_FOR_BUILD, not EXEEXT.
 	* aclocal.m4, configure, Makefile.in, doc/Makefile.in: Rebuild.
@@ -44,9 +50,9 @@ start-sanitize-v850eq
 	number.
 	
 	* elf.c (prep_headers): Add support for v850eq machine number. 
+
 end-sanitize-v850eq
 end-sanitize-v850
-
 Mon Aug 25 14:07:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* syms.c (_bfd_stab_section_find_nearest_line): Clear the

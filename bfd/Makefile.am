@@ -43,9 +43,7 @@ BFD_LIBS_CFILES = \
 ALL_MACHINES = \
 	cpu-a29k.lo \
 	cpu-alpha.lo \
-	$(start-sanitize-arc) \
 	cpu-arc.lo \
-	$(end-sanitize-arc) \
 	cpu-arm.lo \
 	cpu-d10v.lo \
 	$(start-sanitize-d30v) \
@@ -82,6 +80,7 @@ ALL_MACHINES = \
 ALL_MACHINES_CFILES = \
 	cpu-a29k.c \
 	cpu-alpha.c \
+	cpu-arc.c \
 	cpu-arm.c \
 	cpu-h8300.c \
 	cpu-h8500.c \
@@ -135,7 +134,7 @@ BFD32_BACKENDS = \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-sparc.lo \
-	coff-stubgo32.lo \
+	coff-stgo32.lo \
 	coff-svm68k.lo \
 	$(start-sanitize-tic80) \
 	coff-tic80.lo \
@@ -147,9 +146,7 @@ BFD32_BACKENDS = \
 	cofflink.lo \
 	ecoff.lo \
 	ecofflink.lo \
-	$(start-sanitize-arc) \
 	elf32-arc.lo \
-	$(end-sanitize-arc) \
 	elf32-d10v.lo \
 	$(start-sanitize-d30v) \
 	elf32-d30v.lo \
@@ -246,7 +243,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-sparc.c \
-	coff-stubgo32.c \
+	coff-stgo32.c \
 	coff-svm68k.c \
 	coff-u68k.c \
 	coff-we32k.c \
@@ -255,6 +252,8 @@ BFD32_BACKENDS_CFILES = \
 	cofflink.c \
 	ecoff.c \
 	ecofflink.c \
+	elf32-arc.c \
+	elf32-d10v.c \
 	elf32-gen.c \
 	elf32-hppa.c \
 	elf32-i386.c \
@@ -564,16 +563,6 @@ MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 
 CLEANFILES = bfd.h dep.sed stmp-bfd.h .dep .dep1 libbfd.a stamp-lib
 
-start-sanitize-arc:
-elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/arc.h elf32-target.h
-end-sanitize-arc:
-
-elf32-d10v.lo: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf32-target.h
-
 start-sanitize-d30v:
 elf32-d30v.lo: elf32-d30v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
@@ -629,6 +618,7 @@ stab-syms.lo: stab-syms.c libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab.def
 cpu-a29k.lo: cpu-a29k.c
 cpu-alpha.lo: cpu-alpha.c
+cpu-arc.lo: cpu-arc.c
 cpu-arm.lo: cpu-arm.c
 cpu-h8300.lo: cpu-h8300.c
 cpu-h8500.lo: cpu-h8500.c
@@ -723,7 +713,7 @@ coff-sh.lo: coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
 coff-sparc.lo: coff-sparc.c $(INCDIR)/coff/sparc.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
-coff-stubgo32.lo: coff-stubgo32.c coff-i386.c $(INCDIR)/coff/i386.h \
+coff-stgo32.lo: coff-stgo32.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/go32exe.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h \
   go32stub.h
@@ -751,6 +741,12 @@ ecofflink.lo: ecofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/objalloc.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   libcoff.h libecoff.h
+elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/arc.h elf32-target.h
+elf32-d10v.lo: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  elf32-target.h
 elf32-gen.lo: elf32-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
