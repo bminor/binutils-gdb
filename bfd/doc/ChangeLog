@@ -1,3 +1,10 @@
+Mon Jan  3 11:40:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfd.texinfo: Added Hash Tables node.
+	* Makefile.in (DOCFILES): Added hash.texi.
+	(SRCDOC): Added hash.c.
+	(hash.texi): New target.
+
 Thu Dec 30 16:57:04 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in: Delete all references to seclet.c, since it's just
