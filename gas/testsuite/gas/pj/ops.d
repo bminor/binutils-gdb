@@ -4,7 +4,7 @@
 
 # test all the instructions
 
-.*: +file format elf32-pj.
+.*: +file format elf32-pj
 
 Disassembly of section .text:
 
