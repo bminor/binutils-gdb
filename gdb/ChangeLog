@@ -1,5 +1,7 @@
 Tue Apr  7 08:45:46 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* rs6k-opcode.h:  Move to ../include/opcode/rs6k.h.
+
 	* mipsread.c (read_mips_symtab, read_the_mips_symtab,
 	mipscoff_symfile_read):  Convert to BFD to do file I/O.
 

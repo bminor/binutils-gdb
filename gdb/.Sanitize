@@ -157,7 +157,6 @@ remote.c
 rs6000-pinsn.c
 rs6000-tdep.c
 rs6000-xdep.c
-rs6k-opcode.h
 saber.suppress
 signals.h
 signame.c
