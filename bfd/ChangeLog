@@ -1,3 +1,10 @@
+1999-11-29  Jim Blandy  <jimb@cygnus.com>
+
+	* elf.c (bfd_get_elf_phdrs, bfd_get_elf_phdr_upper_bound): New
+	functions.
+	* bfd-in2.h (bfd_get_elf_phdrs, bfd_get_elf_phdr_upper_bound): New
+	declarations.
+
 1999-11-27  Michael Meissner  <meissner@cygnus.com>
 
 	* reloc.c (BFD_RELOC_ALPHA_USER_LITERAL): New relocation for

@@ -5359,3 +5359,51 @@ _bfd_elfcore_section_from_phdr (abfd, phdr, sec_num)
   return true;
 }
 
+
+
+/* Providing external access to the ELF program header table.  */
+
+/* Return an upper bound on the number of bytes required to store a
+   copy of ABFD's program header table entries.  Return -1 if an error
+   occurs; bfd_get_error will return an appropriate code.  */
+long
+bfd_get_elf_phdr_upper_bound (abfd)
+     bfd *abfd;
+{
+  if (abfd->xvec->flavour != bfd_target_elf_flavour)
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return -1;
+    }
+
+  return (elf_elfheader (abfd)->e_phnum
+	  * sizeof (Elf_Internal_Phdr));
+}
+
+
+/* Copy ABFD's program header table entries to *PHDRS.  The entries
+   will be stored as an array of Elf_Internal_Phdr structures, as
+   defined in include/elf/internal.h.  To find out how large the
+   buffer needs to be, call bfd_get_elf_phdr_upper_bound.
+
+   Return the number of program header table entries read, or -1 if an
+   error occurs; bfd_get_error will return an appropriate code.  */
+int
+bfd_get_elf_phdrs (abfd, phdrs)
+     bfd *abfd;
+     void *phdrs;
+{
+  int num_phdrs;
+
+  if (abfd->xvec->flavour != bfd_target_elf_flavour)
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return -1;
+    }
+
+  num_phdrs = elf_elfheader (abfd)->e_phnum;
+  memcpy (phdrs, elf_tdata (abfd)->phdr, 
+	  num_phdrs * sizeof (Elf_Internal_Phdr));
+
+  return num_phdrs;
+}
