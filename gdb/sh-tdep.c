@@ -4285,7 +4285,7 @@ sh_dsp_register_sim_regno (int nr)
 {
   if (legacy_register_sim_regno (nr) < 0)
     return legacy_register_sim_regno (nr);
-  if (nr >= DSP_DSR_REGNUM && nr < DSP_Y1_REGNUM)
+  if (nr >= DSP_DSR_REGNUM && nr <= DSP_Y1_REGNUM)
     return nr - DSP_DSR_REGNUM + SIM_SH_DSR_REGNUM;
   if (nr == DSP_MOD_REGNUM)
     return SIM_SH_MOD_REGNUM;

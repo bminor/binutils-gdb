@@ -1,3 +1,7 @@
+2003-07-09  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-tdep.c (sh_dsp_register_sim_regno): Off-by-one error.
+
 2003-07-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.h (X86_64_RAX_REGNUM, X86_64_RDX_REGNUM,
