@@ -3,6 +3,7 @@
 	* h8500-opc.h (h8500_table): Add missing initializers to quiet
 	warnings.
 	* pj-dis.c (print_insn_pj): Adjust for pj_opc_info_t change.
+	* pj-opc.c (pj_opc_info): Add braces around union initializer.
 	* z8kgen.c: Include "libiberty.h".
 	(opt, args, toks): Fix initializer warnings.
 	(chewname): Make "name" a char **.  Return mnemonic trimmed of
