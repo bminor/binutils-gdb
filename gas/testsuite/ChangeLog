@@ -1,3 +1,7 @@
+Wed Oct  8 16:22:50 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/reloc64.[sd]: Add testcases for %hix,%lox.
+
 Wed Oct  8 15:12:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/sparc/synth.d: Update for recent disassembler changes.
