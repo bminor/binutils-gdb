@@ -1114,21 +1114,12 @@ set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
   PROMPT (0) = savestring (new_async_prompt, strlen (new_async_prompt));
 }
 
-void
-_initialize_event_loop (void)
-{
-  /* Tell gdb to use the cli_command_loop as the main loop. */
-  if (event_loop_p && command_loop_hook == NULL)
-    command_loop_hook = cli_command_loop;
-}
-
 /* Set things up for readline to be invoked via the alternate
    interface, i.e. via a callback function (rl_callback_read_char),
    and hook up instream to the event loop. */
 void
 gdb_setup_readline (void)
 {
-
   /* This function is a noop for the sync case.  The assumption is that
      the sync setup is ALL done in gdb_init, and we would only mess it up
      here.  The sync stuff should really go away over time. */
@@ -1185,8 +1176,7 @@ gdb_setup_readline (void)
 
 /* Disable command input through the standard CLI channels.  Used in
    the suspend proc for interpreters that use the standard gdb readline
-   interface, like the cli & the mi. */
-
+   interface, like the cli & the mi.  */
 void
 gdb_disable_readline (void)
 {
@@ -1208,5 +1198,13 @@ gdb_disable_readline (void)
       rl_callback_handler_remove ();
       delete_file_handler (input_fd);
     }
+}
+
+void
+_initialize_event_loop (void)
+{
+  /* Tell gdb to use the cli_command_loop as the main loop. */
+  if (event_loop_p && command_loop_hook == NULL)
+    command_loop_hook = cli_command_loop;
 }
 

@@ -1,4 +1,8 @@
 2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+        
+        * event-top.c: Reorg some code, to minimize diffs with mainline.
+
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
 
         * Makefile.in (event-loop.o): Remove dependency on interps.h.
         * event-loop.c: Remove include of interps.h.
