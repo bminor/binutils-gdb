@@ -133,8 +133,8 @@ fi
 
 # See if we can extract a definition of CC from the fragment.
 if [ -z "${CC}" ]; then
-  if [ -n "${host_makefile_frag}" -a -f "${host_makefile_frag}" ]; then
-    CC=`sed -n -e 's/CC[ 	]*=[ 	]*\(.*\)$/\1/p' < ${host_makefile_frag}`
+  if [ -n "${host_makefile_frag}" -a -f "${srcdir}/${host_makefile_frag}" ]; then
+    CC=`sed -n -e 's/CC[ 	]*=[ 	]*\(.*\)$/\1/p' < ${srcdir}/${host_makefile_frag}`
   fi
 fi
 

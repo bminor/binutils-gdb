@@ -1,3 +1,8 @@
+Wed Oct  4 21:55:00 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (CC): Try to get CC from 
+	${srcdir}/${host_makefile_frag}, not ${host_makefile_frag}.
+
 Wed Oct  4 21:44:12 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* Makefile.in (TARGET_CONFIGDIRS): configure targetdirs
