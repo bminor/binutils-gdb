@@ -893,7 +893,8 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/i386/i386sol2.mh config/i386/i386sol2.mt config/i386/i386v.mh \
 	config/i386/i386v.mt config/i386/i386v32.mh config/i386/i386v4.mh \
 	config/i386/i386v4.mt config/i386/linux.mh config/i386/linux.mt \
-	config/i386/ncr3000.mh config/i386/ncr3000.mt config/i386/sun386.mh \
+	config/i386/ncr3000.mh config/i386/ncr3000.mt config/i386/ptx.mh \
+	config/i386/sun386.mh \
 	config/i386/sun386.mt config/i386/symmetry.mh config/i386/symmetry.mt \
 	config/i960/nindy960.mt config/i960/vxworks960.mt config/m68k/3b1.mh \
 	config/m68k/3b1.mt config/m68k/altos.mh config/m68k/altos.mt \
