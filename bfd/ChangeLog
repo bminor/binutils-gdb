@@ -1,5 +1,8 @@
 Wed Feb 17 12:28:13 1993  K. Richard Pixley  (rich@cygnus.com)
 
+	* trad-core.c (trad_unix_make_empty_symbol): wrap PARAMS around an
+	  ansi definition which otherwise confuses non-ansi compilers.
+
 	* aout-adobe.c (aout_adobe_object_p): eliminate a warning from vax
 	  ultrix cc by forward declaring getenv as is done in
 	  bfd_find_target.
