@@ -1,3 +1,18 @@
+Sat Feb 22 20:53:01 1997  Fred Fish  <fnf@cygnus.com>
+	* doc/internals.texi (CPU backend): Fix typo in md_section_align
+	description.
+start-sanitize-tic80
+	* config/tc-tic80.h (NEED_FX_R_TYPE): Define.
+	* config/tc-tic80.c (find_opcode): Add code to support O_symbol
+	operands.
+	(build_insn): Grab a frag early so we can use the address in
+ 	fixups.  Take one's complement of BITNUM values before insertion
+ 	in opcode.  Add code to support O_symbol operands.
+	(md_apply_fix): Replace unimplemented warning with implementation.
+	(md_pcrel_from): Ditto.
+	(tc_coff_fix2rtype): Ditto.
+end-sanitize-tic80
+
 Fri Feb 21 14:34:31 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 start-sanitize-d30v
 	* config/tc-d30v.c (parallel_ok): New function. 

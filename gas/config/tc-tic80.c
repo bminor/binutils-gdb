@@ -381,9 +381,28 @@ find_opcode (opcode, myops)
 		  match = 0;
 		}
 	      break;
+	    case O_symbol:
+	      if ((bits < 32) && (flags & TIC80_OPERAND_PCREL))
+		{
+		  /* For now we only allow PC relative relocations in the
+		     short immediate fields, like the TI assembler.
+		     FIXME: Should be able to choose "best-fit". */
+		}
+	      else if ((bits == 32) && (flags & TIC80_OPERAND_BASEREL))
+		{
+		  /* For now we only allow base relative relocations in
+		     the long immediate fields, like the TI assembler.
+		     FIXME: Should be able to choose "best-fit". */
+		}
+	      else
+		{
+		  /* Symbols that don't match one of the above cases are
+		     rejected as an operand. */
+		  match = 0;
+		}
+	      break;
 	    case O_illegal:
 	    case O_absent:
-	    case O_symbol:
 	    case O_symbol_rva:
 	    case O_big:
 	    case O_uminus:
@@ -524,6 +543,11 @@ build_insn (opcode, opers)
   /* Start with the raw opcode bits from the opcode table. */
   insn[0] = opcode -> opcode;
 
+  /* We are going to insert at least one 32 bit opcode so get the
+     frag now. */
+
+  f = frag_more (4);
+
   /* For each operand expression, insert the appropriate bits into the
      instruction . */
   for (expi = 0, opi = -1; opers[expi].X_op != O_illegal; expi++)
@@ -576,6 +600,11 @@ build_insn (opcode, opers)
 	      /* Endmask values of 0 and 32 give identical results */
 	      num = 0;
 	    }
+	  else if ((flags & TIC80_OPERAND_BITNUM))
+	    {
+	      /* BITNUM values are stored in one's complement form */
+	      num = (~num & 0x1F);
+	    }
 	  /* Mask off upper bits, just it case it is signed and is negative */
 	  if (bits < 32)
 	    {
@@ -588,9 +617,33 @@ build_insn (opcode, opers)
 	      insn[1] = num;
 	    }
 	  break;
+	case O_symbol:
+	  if (flags & TIC80_OPERAND_PCREL)
+	    {
+	      fix_new_exp (frag_now,
+			   f - (frag_now -> fr_literal),
+			   4,			/* FIXME! how is this used? */
+			   &opers[expi],
+			   1,
+			   R_MPPCR);
+	    }
+	  else if (flags & TIC80_OPERAND_BASEREL)
+	    {
+	      extended++;
+	      fix_new_exp (frag_now,
+			   (f + 4) - (frag_now -> fr_literal),
+			   4,
+			   &opers[expi], 
+			   0,			/* FIXME! should allow pcrel */
+			   R_RELLONGX);		/* FIXME! should be the right reloc type */
+	    }
+	  else
+	    {
+	      internal_error ("symbol reloc that is not PC or BASEREG relative");
+	    }
+	  break;
 	case O_illegal:
 	case O_absent:
-	case O_symbol:
 	case O_symbol_rva:
 	case O_big:
 	case O_uminus:
@@ -624,7 +677,6 @@ build_insn (opcode, opers)
 
   /* Write out the instruction, either 4 or 8 bytes.  */
 
-  f = frag_more (4);
   md_number_to_chars (f, insn[0], 4);
   if (extended)
     {
@@ -814,22 +866,38 @@ md_apply_fix (fixP, val)
      fixS *fixP;
      long val;
 {
-  internal_error ("md_apply_fix() not implemented yet");
-  abort ();
+  char *dest =  fixP -> fx_frag -> fr_literal + fixP -> fx_where;
+
+  switch (fixP -> fx_r_type)
+    {
+    case R_RELLONGX:
+      md_number_to_chars (dest, (valueT) val, 4);
+      break;
+    case R_MPPCR:
+      /* FIXME! - should check for overflow of the 15 bit field */
+      *dest++ = val >> 2;
+      *dest = (*dest & 0x80) | val >> 10;
+      break;
+    default:
+      internal_error_a ("unhandled relocation type in fixup", fixP -> fx_r_type);
+      break;
+    }
 }
 
 
 /* Functions concerning relocs.  */
 
 /* The location from which a PC relative jump should be calculated,
-   given a PC relative reloc.  */
+   given a PC relative reloc.
+
+   For the TIc80, this is the address of the 32 bit opcode containing
+   the PC relative field. */
 
 long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  internal_error ("md_pcrel_from() not implemented yet");
-  abort ();
+  return (fixP -> fx_frag -> fr_address + fixP -> fx_where) ;
 }
 
 /*
@@ -866,8 +934,7 @@ short
 tc_coff_fix2rtype (fixP)
      fixS *fixP;
 {
-  internal_error ("tc_coff_fix2rtype() not implemented yet");
-  abort ();
+  return (fixP -> fx_r_type);
 }
 
 #endif	/* OBJ_COFF */

@@ -26,6 +26,10 @@
 #define TARGET_FORMAT	"coff-tic80"
 #define BFD_ARCH	TARGET_ARCH
 
+/* We need the extra field in the fixup struct to put the relocation in. */
+
+#define NEED_FX_R_TYPE
+
 /* Define md_number_to_chars as the appropriate standard big endian or
    little endian function.  Should we someday support endianness as a
    runtime decision, this will need to change. */
