@@ -759,10 +759,11 @@ TAB: complete
 $if Bash
 # edit the path
 "\C-xp": "PATH=$@{PATH@}\e\C-e\C-a\ef\C-f"
-# prepare to type a quoted word -- insert open and close double quotes
-# and move to just after the open quote
+# prepare to type a quoted word -- insert open and close
+# double quotes and move to just after the open quote
 "\C-x\"": "\"\"\C-b"
-# insert a backslash (testing backslash escapes in sequences and macros)
+# insert a backslash (testing backslash escapes in sequences
+# and macros)
 "\C-x\\": "\\"
 # Quote the current or previous word
 "\C-xq": "\eb\"\ef\""
