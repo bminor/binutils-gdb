@@ -22,10 +22,15 @@ else
 fi
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw-make.in mpw-config.in ChangeLog.mpw"
-	if ( echo $* | grep keep\-gm > /dev/null ) ; then
-		keep_these_too="mpw-xconfig.in ChangeLog.gm ${keep_these_too}"
-	fi
+	keep_these_too="mpw-make.in mpw-config.in ChangeLog.mpw ${keep_these_too}"
+else
+	lose_these_too="mpw-make.in mpw-config.in ChangeLog.mpw ${lose_these_too}"
+fi
+
+if ( echo $* | grep keep\-gm > /dev/null ) ; then
+	keep_these_too="mpw-xconfig.in ChangeLog.gm ${keep_these_too}"
+else
+	lose_these_too="mpw-xconfig.in ChangeLog.gm ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
