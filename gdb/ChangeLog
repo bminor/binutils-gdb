@@ -3,7 +3,7 @@
 	* ppc-linux-nat.c (fetch_register): Replace 'gdb_assert (0)' with
 	a call to 'internal_error', with a more helpful error message.
 	* rs6000-tdep.c (e500_pseudo_register_read,
-	e500_pseudo_register_write): Same.
+	e500_pseudo_register_write, rs6000_store_return_value): Same.
 
 2004-08-04  Andrew Cagney  <cagney@gnu.org>
 
