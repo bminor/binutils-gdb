@@ -1,3 +1,23 @@
+Sun Jun 22 17:29:41 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	First stab at Windows resource compiler:
+	* windres.h: New file.
+	* windres.c: New file.
+	* resrc.c: New file.
+	* rcparse.y: New file.
+	* rclex.l: New file.
+	* configure.in: Define and substitute BUILD_WINDRES.
+	* configure: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+ 	(WINDRES_PROG): New variable.
+	(PROGS): Add @BUILD_WINDRES@.
+	(HFILES): Add dlltool.h and windres.h.
+	(CFILES): Add windres.c and resrc.c.
+	(GENERATED_CFILES): Add rcparse.c and rclex.c.
+	(WINDRES_OBJS): New variable.
+	$(WINDRES_PROG): New target.
+	(rcparse.c, rcparse.h, rclex.c): New targets.
+
 Thu Jun 12 12:27:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dlltool.c (export_type): Add data field.

@@ -98,8 +98,13 @@ esac
 
 if test "${commonbfdlib}" = "true"; then
   # when a shared libbfd is built with --enable-commonbfdlib,
-  # all of libopcodes is available in libbfd.so
-  OPCODES=
+  # all of libopcodes is available in libbfd.so.  Unfortunately, on
+  # HP/UX, when using gcc -g, the linker does a static link, so we
+  # need to continue linking against opcodes on that platform.
+  case "${host}" in
+  *-*-hpux*) ;;
+  *) OPCODES= ;;
+  esac
 fi
 
 AC_SUBST(BFDLIB)
@@ -166,7 +171,7 @@ BFD_BINARY_FOPEN
 if test -n "$enable_targets"; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
-	result=`$ac_config_sub $targ 2>/dev/null`
+	result=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $targ 2>/dev/null`
 	if test -n "$result"; then
 	    canon_targets="$canon_targets $result"
 	else
@@ -182,6 +187,7 @@ NLMCONV_DEFS=
 BUILD_SRCONV=
 BUILD_DLLTOOL=
 DLLTOOL_DEFS=
+BUILD_WINDRES=
 
 for targ in $target $canon_targets
 do
@@ -218,16 +224,19 @@ changequote([,])dnl
 	arm-*pe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
+	  BUILD_WINDRES='$(WINDRES_PROG)'
 	 ;;
 changequote(,)dnl
 	i[3-6]86-*pe* | i[3-6]86-*-cygwin32)
 changequote([,])dnl
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
+	  BUILD_WINDRES='$(WINDRES_PROG)'
 	 ;;
 	powerpc*-*-*pe* | powerpc*-*-cygwin32)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
+	  BUILD_WINDRES='$(WINDRES_PROG)'
 	 ;;
 	esac
     fi
@@ -238,6 +247,7 @@ AC_SUBST(BUILD_NLMCONV)
 AC_SUBST(BUILD_SRCONV)
 AC_SUBST(BUILD_DLLTOOL)
 AC_SUBST(DLLTOOL_DEFS)
+AC_SUBST(BUILD_WINDRES)
 
 targ=$target
 . $srcdir/../bfd/config.bfd

@@ -103,12 +103,13 @@ ADDR2LINE_PROG=addr2line
 
 NLMCONV_PROG=nlmconv
 DLLTOOL_PROG=dlltool
+WINDRES_PROG=windres
 
 SRCONV_PROG=srconv sysdump coffdump 
 
 MANPAGES= ar nm objdump ranlib size strings strip objcopy addr2line nlmconv
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 # Don't build $(DEMANGLER_PROG).1, since its name may vary with the
@@ -127,7 +128,8 @@ DEP = mkdep
 
 ALL_CFLAGS = -D_GNU_SOURCE $(INCLUDES) @HDEFINES@ $(CFLAGS)
 
-HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h
+HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h dlltool.h \
+	windres.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
 
@@ -135,11 +137,12 @@ CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	dlltool.c filemode.c ieee.c is-ranlib.c is-strip.c maybe-ranlib.c \
 	maybe-strip.c nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
-	stabs.c strings.c sysdump.c version.c wrstabs.c
+	stabs.c strings.c sysdump.c version.c wrstabs.c \
+	windres.c resrc.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
-	defparse.c deflex.c nlmheader.c
+	defparse.c deflex.c nlmheader.c rcparse.c rclex.c
 
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
@@ -235,7 +238,7 @@ check: site.exp
 	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
 	   export TCL_LIBRARY ; else true; fi ; \
 	$(RUNTEST) --tool binutils --srcdir $(srcdir)/testsuite \
-	  $(RUNTESTFLAGS) CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS)"
+	  $(RUNTESTFLAGS) CC_FOR_TARGET="$(CC_FOR_TARGET)" CFLAGS_FOR_TARGET="$(CFLAGS)"
 
 installcheck:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
@@ -406,6 +409,26 @@ nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_DEPS)
 	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
 
+WINDRES_OBJS = windres.o resrc.o rcparse.o rclex.o
+
+$(WINDRES_PROG): $(WINDRES_OBJS) $(ADDL_DEPS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(WINDRES_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
+
+# Depend upon defparse.c to avoid building both defparse.c and
+# rcparse.c simultaneously.
+rcparse.c: rcparse.y defparse.c
+	$(BISON) $(BISONFLAGS) $(srcdir)/rcparse.y
+	mv -f y.tab.c rcparse.c
+	mv -f y.tab.h rcparse.h
+
+rcparse.h: rcparse.c
+
+# Depend upon deflex.c to avoid building both deflex.c and rclex.c
+# simultaneously.
+rclex.c: rclex.l deflex.c
+	$(LEX) $(LEX_OPTIONS) $(srcdir)/rclex.l
+	mv lex.yy.c rclex.c
+
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
 .dep: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
@@ -533,7 +556,7 @@ distclean:
 maintainer-clean realclean: clean distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -f $(DISTSTUFF) *.info* TAGS
+	-rm -f $(DISTSTUFF) binutils.info* TAGS
 
 etags tags: TAGS
 
@@ -680,7 +703,7 @@ debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   debug.h
 dlltool.o: dlltool.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/demangle.h
+  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dlltool.h
 filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h
 ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/ieee.h \
@@ -737,6 +760,12 @@ wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   debug.h budbg.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def
+windres.o: windres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/getopt.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h windres.h
+resrc.o: resrc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  windres.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
@@ -744,10 +773,18 @@ arlex.o: arlex.c $(INCDIR)/libiberty.h arparse.h
 sysroff.o: sysroff.c
 sysinfo.o: sysinfo.c
 syslex.o: syslex.c sysinfo.h
-defparse.o: defparse.c
-deflex.o: deflex.c defparse.h
+defparse.o: defparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h dlltool.h
+deflex.o: deflex.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  defparse.h dlltool.h
 nlmheader.o: nlmheader.c ../bfd/bfd.h bucomm.h config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
   nlmconv.h
+rcparse.o: rcparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  windres.h
+rclex.o: rclex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  windres.h rcparse.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

@@ -82,6 +82,9 @@ objdump.c
 prdbg.c
 ranlib.1
 ranlib.sh
+rclex.l
+rcparse.y
+resrc.c
 rdcoff.c
 rddbg.c
 sanity.sh
@@ -98,6 +101,8 @@ syslex.l
 sysroff.info
 testsuite
 version.c
+windres.h
+windres.c
 wrstabs.c
 
 Things-to-lose:
