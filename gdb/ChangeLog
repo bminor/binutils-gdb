@@ -1,5 +1,9 @@
 2004-01-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.c (BIAS): Remove define.
+	* sparc64-sol2-tdep.c (BIAS): Remove define.
+	* sparc64fbsd-tdep.c: Likewise.
+
 	* sparc64-tdep.h: Update copyright year.
 	(BIAS): Define.
 	* sparc64nbsd-tdep.c: Update copyright year.  Include "frame.h",

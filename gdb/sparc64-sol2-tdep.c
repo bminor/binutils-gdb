@@ -32,12 +32,6 @@
 
 #include "sparc64-tdep.h"
 
-/* The stack pointer is offset from the stack frame by a BIAS of 2047
-   (0x7ff) for 64-bit code.  BIAS is likely to be defined on SPARC
-   hosts, so undefine it first.  */
-#undef BIAS
-#define BIAS 2047
-
 /* From <sys/regset.h>.  */
 const struct sparc_gregset sparc64_sol2_gregset =
 {

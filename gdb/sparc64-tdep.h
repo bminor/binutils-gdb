@@ -1,6 +1,6 @@
 /* Target-dependent code for UltraSPARC.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,12 @@
 #define SPARC64_TDEP_H 1
 
 #include "sparc-tdep.h"
+
+/* The stack pointer is offset from the stack frame by a BIAS of 2047
+   (0x7ff) for 64-bit code.  BIAS is likely to be defined on SPARC
+   hosts, so undefine it first.  */
+#undef BIAS
+#define BIAS 2047
 
 /* Register offsets for the general-purpose register set.  */
 

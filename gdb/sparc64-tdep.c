@@ -49,12 +49,6 @@
    sparc64_-prefix for 64-bit specific code and the sparc_-prefix for
    code can handle both.  */
 
-/* The stack pointer is offset from the stack frame by a BIAS of 2047
-   (0x7ff) for 64-bit code.  BIAS is likely to be defined on SPARC
-   hosts, so undefine it first.  */
-#undef BIAS
-#define BIAS 2047
-
 /* Macros to extract fields from SPARC instructions.  */
 #define X_OP(i) (((i) >> 30) & 0x3)
 #define X_RD(i) (((i) >> 25) & 0x1f)
