@@ -1,5 +1,11 @@
 Wed Nov 19 12:02:41 1997  Doug Evans  <devans@seba.cygnus.com>
 
+	* cgen-sim.h (enum_signal_type): Delete.
+	(engine_signal): Update prototype.
+	* cgen-utils.c: Don't include <signal.h>.
+	(sim_signal_to_host): Delete, lives in sim-signal.c now.
+	(engine_signal): Update.
+
 	* sim-utils.c (sim_state_alloc): Call SIM_STATE_ALLOC if defined.
 	(sim_state_free): Call SIM_STATE_FREE if defined.
 
