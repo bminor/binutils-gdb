@@ -16,6 +16,9 @@
 /* Define if you have the kill function.  */
 #undef HAVE_KILL
 
+/* Define if you have the sigaction function.  */
+#undef HAVE_SIGACTION
+
 /* Define if you have the time function.  */
 #undef HAVE_TIME
 
