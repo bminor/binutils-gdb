@@ -486,7 +486,7 @@ static valueT md_chars_to_number	PARAMS ((char *, int));
 static void insert_reg_alias	PARAMS ((char *, int));
 static void output_inst		PARAMS ((char *));
 #ifdef OBJ_ELF
-static bfd_reloc_code_real_type	arm_parse_reloc(void);
+static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 #endif
 
 /* ARM instructions take 4bytes in the object file, Thumb instructions
@@ -5010,8 +5010,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-/* The knowledge of the PC's pipeline offset is built into the relocs
-   for the ELF port and into the insns themselves for the COFF port.  */
+/* The knowledge of the PC's pipeline offset is built into the insns themselves.  */ 
 long
 md_pcrel_from (fixP)
      fixS * fixP;
@@ -5028,7 +5027,7 @@ md_pcrel_from (fixP)
 	 for the calculation */
       return (fixP->fx_where + fixP->fx_frag->fr_address) & ~3;
     }
-  
+
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
@@ -5179,7 +5178,8 @@ md_apply_fix3 (fixP, val, seg)
 	  && S_IS_DEFINED (fixP->fx_addsy)
 	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
 	{
-	  if (fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)
+	  if (target_oabi
+	      && fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)
 	    value = 0;
 	  else
 	    value += md_pcrel_from (fixP);
@@ -5315,14 +5315,12 @@ md_apply_fix3 (fixP, val, seg)
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
       newval = md_chars_to_number (buf, INSN_SIZE);
+
 #ifdef OBJ_ELF
-      newval &= 0xff000000;
       if (! target_oabi)
         value = fixP->fx_offset;
-      else
-#else
-	value = (value >> 2) & 0x00ffffff;
 #endif
+      value  = (value >> 2) & 0x00ffffff;
       value  = (value + (newval & 0x00ffffff)) & 0x00ffffff;
       newval = value | (newval & 0xff000000);
       md_number_to_chars (buf, newval, INSN_SIZE);

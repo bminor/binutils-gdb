@@ -1,19 +1,109 @@
-1999-04-29  Nick Clifton  <nickc@cygnus.com>
+1999-05-30  Cort Dougan  <cort@attis.cs.nmt.edu>
 
-	* emulparams/elf32mcore.sh (OTHER_BSS_SYMBOLS): Define.
-	(OTHER_BSS_END_SYMBOLS): Define.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ppclinux.o.
+	* configure.tgt (powerpc-*-linux-gnu): Use it.
+	* emulparams/elf32ppclinux.sh: New file.
 
-	* scripttempl/mcorepe.sc: New file: Duplicte of pe.sc with stack
-	section added.
+1999-05-29  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld.texinfo (Options): Clarify that options which refer to files
+	must be properly ordered.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/armelf.em (..._parse_args): New function: Parse
+	command line option.  Accept arm-elf specific command line option
+	'-p' or '--no-pipeline-knowledge'.
+	(..._list_options): New function: Describe the new command line
+	option.
+	(..._before_allocation): Pass the value of the new variable
+	no_pipeline_knowledge to bfd_elf32_arm_process_before_allocation.
+	
+	* emultemp/armelf_oabi.em (..._before_allocation): Pass zero as
+	the third parameter to bfd_elf32_arm_process_before_allocation.
+
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* lexsup.c (help): Minor formatting changes.
+
+1999-05-28  Martin Dorey  <mdorey@madge.com>
+
+	* configure.tgt (i960-*-elf*): New target.
+	* emulparams/elf32_i960.sh: New file.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_i960.o.
+	(eelf32_i960.c): New target.
+	* Makefile.in: Rebuild.
+
+1999-05-26  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/armelf_oabi.sh (TEMPLATE_NAME): Set to armelf_oabi. 
+
+1999-05-24  Philip Blundell  <philb@gnu.org>
+
+	* emultempl/armelf.em (before_parse): Set config.dynamic_link and
+ 	config.has_shared.
+	* emulparams/armelf.sh (GENERATE_SHLIB_SCRIPT): Define.
+	* emulparams/armelf_linux.sh (GENERATE_SHLIB_SCRIPT): Likewise.
+
+1999-04-13  Philip Blundell  <philb@gnu.org>
+
+	* emultempl/armelf.em: Add definitions related to shared objects
+	(copied from elf32.em).
+
+Wed May 19 12:44:26 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* Makefile.am (ALL_EMULATIONS): Remove earmlinux.o and
+	earm26linux.o, add earmelf_linux.o and earmelf_linux26.o.
+	* Makefile.in: Regenerated.
+
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/elf32mcore.sh (GENERATE_SHLIB_SCRIPT): Define.
+	(TEMPLATE_NAME): Define.
+
+Thu May 13 09:48:09 1999  Joel Sherrill (joel@OARcorp.com)
+
+	* configure.tgt (i386-*-rtemself*, sh-*-rtemself*): New targets.
+	(mips*el-*-rtems*, powerpcle-*-rtems*): New targets.
+
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* scripttempl/pe.sc: Specify the output arch, which Ian says is
+	the Right Thing to do.
+
+	* emultempl/pe.em: various changes to parameterize the
+	target-specific information.
+	(gld_i386pe_after_open): Detect and fix MS import libraries
+	by renaming the member objects (which are all named the same).
+
+	* pe-dll.c: various changes to parameterize the target-specific
+	information.
+	(generate_reloc): support relocs more generically to allow for
+	expansion.
+	(pe_exe_build_sections): new; used to add .relocs to .exes
+	(pe_exe_fill_sections): ditto
+
+1999-05-10  Catherine Moore  <clm@cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):
+	Check for TARGET_IS_arm_epoc_pe.
+	(gld_${EMULATION_NAME}_before_allocation): Likewise.
+
+1999-05-12  Anthony Green  <green@cygnus.com>
+
+	* ldlang.c (walk_wild, walk_wild_file, walk_wild_section,
+	output_section_callback, gc_section_callback): New functions for
+	generic section walks.
+	(wild, lang_gc_wild): Use walk_wild.
+	(wild_file, lang_gc_wild_file): Deleted. Common logic moved to
+	walk_wild_file.
+	(wild_section, lang_gc_wild_section): Deleted. Common logic moved
+	to walk_fild_section.  Unique logic moved into callbacks
+	output_section_callback and gc_section_callback.
 
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
-
-1999-04-22  Nick Clifton  <nickc@cygnus.com>
-
-	* emulparams/elf32mcore.sh (OTHER_RELOCATING_SECTIONS): Define to
-	generate _stack section.
 
 1999-04-12  Philip Blundell  <pb@nexus.co.uk>
 
@@ -56,17 +146,6 @@
 
 	* ldmain.c (main): Init link_info.no_undefined.
 	* lexsup.c: Add command-line option --no-undefined.
-
-1999-04-08  Nick Clifton  <nickc@cygnus.com>
-
-	* configure.tgt: Add support for MCore targets.
-	* Makefile.am: Add support for MCore targets.
-	* Makefile.in: Regenerate.
-	
-	* emulparams/elf32mcore.sh: New file:  Definitions for mcore-elf
-	target. 
-	* emulparams/mcorepe.sh: New file:  Definitions for mcore-pe
-	target.  
 
 1999-04-06  Ian Lance Taylor  <ian@zembu.com>
 

@@ -423,7 +423,7 @@ read_abbrevs (abfd, offset)
 	}
       
       stash->dwarf_abbrev_size = bfd_get_section_size_before_reloc (msec);
-      stash->dwarf_abbrev_buffer = (unsigned char*) bfd_alloc (abfd, stash->dwarf_abbrev_size);
+      stash->dwarf_abbrev_buffer = (char*) bfd_alloc (abfd, stash->dwarf_abbrev_size);
       if (! stash->dwarf_abbrev_buffer)
 	  return 0;
       
@@ -723,7 +723,7 @@ decode_line_info (unit)
 	}
       
       size = bfd_get_section_size_before_reloc (msec);
-      dwarf_line_buffer = (unsigned char*) bfd_alloc (abfd, size);
+      dwarf_line_buffer = (char*) bfd_alloc (abfd, size);
       if (! dwarf_line_buffer)
 	return 0;
 

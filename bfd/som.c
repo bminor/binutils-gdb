@@ -440,9 +440,7 @@ static const struct fixup_format som_fixup_formats[256] =
   1,    "Lb4*=Mb1+L*=",	/* 0x2b */
   2,    "Lb4*=Md1+4*=",	/* 0x2c */
   3,    "Ld1+=Me1+=",	/* 0x2d */
-  /* R_SHORT_PCREL_MODE */
   0,   	"",	        /* 0x2e */
-  /* R_LONG_PCREL_MODE */
   0,   	"",	        /* 0x2f */
   /* R_PCREL_CALL */
   0,    "L4=RD=Sb=",	/* 0x30 */
@@ -459,8 +457,9 @@ static const struct fixup_format som_fixup_formats[256] =
   1,    "L4=RD8<b+=Sb=",/* 0x3b */
   0,    "L4=RD8<b+=Sd=",/* 0x3c */
   1,    "L4=RD8<b+=Sd=",/* 0x3d */
-  /* R_RESERVED */
+  /* R_SHORT_PCREL_MODE */
   0,    "",	        /* 0x3e */
+  /* R_LONG_PCREL_MODE */
   0,    "",	        /* 0x3f */
   /* R_ABS_CALL */
   0,    "L4=RD=Sb=",	/* 0x40 */

@@ -1,6 +1,7 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-cat >e${EMULATION_NAME}.c <<EOF
+(echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
+cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
    Copyright 1995, 96, 97, 1998 Free Software Foundation, Inc.
 
@@ -42,9 +43,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
+#include "../bfd/libbfd.h"
 #include "deffile.h"
 
 #define TARGET_IS_${EMULATION_NAME}
+
+#if defined(TARGET_IS_i386pe)
+#define DLL_SUPPORT
+#endif
+
+#define	PE_DEF_SUBSYSTEM		3
 
 static void gld_${EMULATION_NAME}_set_symbols PARAMS ((void));
 static void gld_${EMULATION_NAME}_after_open PARAMS ((void));
@@ -78,7 +86,7 @@ gld_${EMULATION_NAME}_before_parse()
 {
   output_filename = "a.exe";
   ldfile_output_architecture = bfd_arch_${ARCH};
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   config.has_shared = 1;
 #endif
 }
@@ -128,7 +136,7 @@ static struct option longopts[] =
   {"stack", required_argument, NULL, OPTION_STACK},
   {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
   {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   /* getopt allows abbreviations, so we do this to stop it from treating -o
      as an abbreviation for this option */
   {"output-def", required_argument, NULL, OPTION_OUT_DEF},
@@ -174,7 +182,7 @@ static definfo init[] =
   D(MinorImageVersion,"__minor_image_version__", 0),
   D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
   D(MinorSubsystemVersion,"__minor_subsystem_version__", 0),
-  D(Subsystem,"__subsystem__", 3),
+  D(Subsystem,"__subsystem__", PE_DEF_SUBSYSTEM),
   D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x2000000),
   D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000),
   D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
@@ -202,7 +210,7 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --stack <size>                     Set size of the initial stack\n"));
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
   fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
@@ -410,6 +418,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_SUPPORT_OLD_CODE:
       support_old_code = 1;
       break;
+#ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:
       pe_out_def_filename = xstrdup (optarg);
       break;
@@ -417,9 +426,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       pe_dll_export_everything = 1;
       break;
     case OPTION_EXCLUDE_SYMBOLS:
-#ifdef TARGET_IS_i386pe
       pe_dll_add_excludes (optarg);
-#endif
       break;
     case OPTION_KILL_ATS:
       pe_dll_kill_ats = 1;
@@ -436,6 +443,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_IMPLIB_FILENAME:
       pe_implib_filename = xstrdup (optarg);
       break;
+#endif
     }
   return 1;
 }
@@ -617,7 +625,7 @@ gld_${EMULATION_NAME}_after_open ()
   pe_data (output_bfd)->pe_opthdr = pe;
   pe_data (output_bfd)->dll = init[DLLOFF].value;
 
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
     pe_fixup_stdcalls ();
 
@@ -626,7 +634,7 @@ gld_${EMULATION_NAME}_after_open ()
     pe_dll_build_sections (output_bfd, &link_info);
 #endif
 
-#ifdef TARGET_IS_armpe
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
   {
     /* Find a BFD that can hold the interworking stubs.  */
     LANG_FOR_EACH_INPUT_STATEMENT (is)
@@ -636,6 +644,70 @@ gld_${EMULATION_NAME}_after_open ()
       }
   }
 #endif
+
+  {
+    static int sequence = 0;
+    int is_ms_arch;
+    bfd *cur_arch = 0, *elt;
+    lang_input_statement_type *is2;
+    /* Careful - this is a shell script.  Watch those dollar signs! */
+    /* Microsoft import libraries have every member named the same,
+       and not in the right order for us to link them correctly.  We
+       must detect these and rename the members so that they'll link
+       correctly.  There are three types of objects: the head, the
+       thunks, and the sentinel(s).  The head is easy; it's the one
+       with idata2.  We assume that the sentinels won't have relocs,
+       and the thunks will.  It's easier than checking the symbol
+       table for external references. */
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	if (is->the_bfd->my_archive)
+	  {
+	    bfd *arch = is->the_bfd->my_archive;
+	    if (cur_arch != arch)
+	      {
+		cur_arch = arch;
+		is_ms_arch = 1;
+		for (is2 = is;
+		     is2 && is2->the_bfd->my_archive == arch;
+		     is2 = (lang_input_statement_type *)is2->next)
+		  {
+		    if (strcmp (is->the_bfd->filename, is2->the_bfd->filename))
+		      is_ms_arch = 0;
+		  }
+	      }
+
+	    if (is_ms_arch)
+	      {
+		int idata2 = 0, i, reloc_count=0;
+		asection *sec;
+		char *new_name, seq;
+		for (sec = is->the_bfd->sections; sec; sec = sec->next)
+		  {
+		    if (strcmp (sec->name, ".idata\$2") == 0)
+		      idata2 = 1;
+		    reloc_count += sec->reloc_count;
+		  }
+
+		if (idata2) /* .idata2 is the TOC */
+		  seq = 'a';
+		else if (reloc_count > 0) /* thunks */
+		  seq = 'b';
+		else /* sentinel */
+		  seq = 'c';
+
+		new_name = bfd_alloc (is->the_bfd,
+				      strlen (is->the_bfd->filename)+2);
+		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
+		is->the_bfd->filename = new_name;
+
+		new_name = bfd_alloc(is->the_bfd, strlen(is->filename)+2);
+		sprintf (new_name, "%s.%c", is->filename, seq);
+		is->filename = new_name;
+	      }
+	  }
+      }
+  }
 }
 
 static void  
@@ -658,7 +730,7 @@ gld_${EMULATION_NAME}_before_allocation()
   ppc_allocate_toc_section (&link_info);
 #endif /* TARGET_IS_ppcpe */
 
-#ifdef TARGET_IS_armpe
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
   /* FIXME: we should be able to set the size of the interworking stub
      section.
 
@@ -701,7 +773,7 @@ static boolean
 gld_${EMULATION_NAME}_unrecognized_file(entry)
   lang_input_statement_type *entry;
 {
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   const char *ext = entry->filename + strlen (entry->filename) - 4;
 
   if (strcmp (ext, ".def") == 0 || strcmp (ext, ".DEF") == 0)
@@ -786,7 +858,10 @@ static boolean
 gld_${EMULATION_NAME}_recognized_file(entry)
   lang_input_statement_type *entry;
 {
+#ifdef DLL_SUPPORT
 #ifdef TARGET_IS_i386pe
+  pe_dll_id_target ("pei-i386");
+#endif
   if (bfd_get_format (entry->the_bfd) == bfd_object)
     {
       const char *ext = entry->filename + strlen (entry->filename) - 4;
@@ -800,7 +875,7 @@ gld_${EMULATION_NAME}_recognized_file(entry)
 static void
 gld_${EMULATION_NAME}_finish ()
 {
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   if (link_info.shared)
     {
       pe_dll_fill_sections (output_bfd, &link_info);

@@ -58,6 +58,7 @@
 #include "elf/arc.h"
 #include "elf/fr30.h"
 #include "elf/mcore.h"
+#include "elf/i960.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -117,7 +118,7 @@ unsigned int		num_dump_sects = 0;
 static unsigned long (*   byte_get)                   PARAMS ((unsigned char *, int));
 static const char *       get_mips_dynamic_type       PARAMS ((unsigned long type));
 static const char *       get_dynamic_type            PARAMS ((unsigned long type));
-static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *));
+static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *, int));
 static char *             get_file_type               PARAMS ((unsigned e_type));
 static char *             get_machine_name            PARAMS ((unsigned e_machine));
 static char *             get_machine_data            PARAMS ((unsigned e_data));
@@ -173,8 +174,15 @@ static void		  request_dump                PARAMS ((unsigned int, char));
 static const char *       get_elf_class               PARAMS ((unsigned char));
 static const char *       get_data_encoding           PARAMS ((unsigned char));
 static const char *       get_osabi_name              PARAMS ((unsigned char));
+static int		  guess_is_rela               PARAMS ((unsigned long));
 
 typedef int Elf32_Word;
+
+#ifndef TRUE
+#define TRUE     1
+#define FALSE    0
+#endif
+#define UNKNOWN -1
 
 #define SECTION_NAME(X) 	(string_table + (X)->sh_name)
 
@@ -328,57 +336,24 @@ byte_get_big_endian (field, size)
 }
 
 
-/* Display the contents of the relocation data
-   found at the specified offset.  */
+/* Guess the relocation sized based on the sized commonly used by the specific machine.  */
 static int
-dump_relocations (file, rel_offset, rel_size, symtab, strtab)
-     FILE *                 file;
-     unsigned long          rel_offset;
-     unsigned long          rel_size;
-     Elf_Internal_Sym *     symtab;
-     char *                 strtab;
+guess_is_rela (e_machine)
+     unsigned long e_machine;
 {
-  unsigned int        i;
-  int                 is_rela;
-  Elf_Internal_Rel *  rels;
-  Elf_Internal_Rela * relas;
-
-
-  /* Compute number of relocations and read them in.  */
-  switch (elf_header.e_machine)
+  switch (e_machine)
     {
       /* Targets that use REL relocations.  */
     case EM_ARM:
     case EM_386:
     case EM_486:
+    case EM_960:
     case EM_CYGNUS_M32R:
     case EM_CYGNUS_D10V:
     case EM_MIPS:
     case EM_MIPS_RS4_BE:
-      {
-	Elf32_External_Rel * erels;
-
-	GET_DATA_ALLOC (rel_offset, rel_size, erels,
-			Elf32_External_Rel *, "relocs");
-
-	rel_size = rel_size / sizeof (Elf32_External_Rel);
-
-	rels = (Elf_Internal_Rel *) malloc (rel_size *
-					    sizeof (Elf_Internal_Rel));
-
-	for (i = 0; i < rel_size; i++)
-	  {
-	    rels[i].r_offset = BYTE_GET (erels[i].r_offset);
-	    rels[i].r_info   = BYTE_GET (erels[i].r_info);
-	  }
-
-	free (erels);
-
-	is_rela = 0;
-	relas   = (Elf_Internal_Rela *) rels;
-      }
-    break;
-
+      return FALSE;
+      
       /* Targets that use RELA relocations.  */
     case EM_68K:
     case EM_SPARC:
@@ -391,34 +366,89 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_SH:
     case EM_ALPHA:
     case EM_MCORE:
-      {
-	Elf32_External_Rela * erelas;
-
-	GET_DATA_ALLOC (rel_offset, rel_size, erelas,
-			Elf32_External_Rela *, "relocs");
-
-	rel_size = rel_size / sizeof (Elf32_External_Rela);
-
-	relas = (Elf_Internal_Rela *) malloc (rel_size *
-					      sizeof (Elf_Internal_Rela));
-
-	for (i = 0; i < rel_size; i++)
-	  {
-	    relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
-	    relas[i].r_info   = BYTE_GET (erelas[i].r_info);
-	    relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
-	  }
-
-	free (erelas);
-
-	is_rela = 1;
-	rels    = (Elf_Internal_Rel *) relas;
-      }
-    break;
-
+      return TRUE;
+      
     default:
       warn (_("Don't know about relocations on this machine architecture\n"));
-      return 0;
+      return FALSE;
+    }
+}
+
+/* Display the contents of the relocation data
+   found at the specified offset.  */
+static int
+dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela)
+     FILE *                 file;
+     unsigned long          rel_offset;
+     unsigned long          rel_size;
+     Elf_Internal_Sym *     symtab;
+     char *                 strtab;
+     int                    is_rela;
+{
+  unsigned int        i;
+  Elf_Internal_Rel *  rels;
+  Elf_Internal_Rela * relas;
+
+  
+  if (is_rela == UNKNOWN)
+    is_rela = guess_is_rela (elf_header.e_machine);
+
+  if (is_rela)
+    {
+      Elf32_External_Rela * erelas;
+      
+      GET_DATA_ALLOC (rel_offset, rel_size, erelas,
+		      Elf32_External_Rela *, "relocs");
+      
+      rel_size = rel_size / sizeof (Elf32_External_Rela);
+      
+      relas = (Elf_Internal_Rela *) malloc (rel_size *
+					    sizeof (Elf_Internal_Rela));
+      
+      if (relas == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+      
+      for (i = 0; i < rel_size; i++)
+	{
+	  relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
+	  relas[i].r_info   = BYTE_GET (erelas[i].r_info);
+	  relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
+	}
+      
+      free (erelas);
+      
+      rels = (Elf_Internal_Rel *) relas;
+    }
+  else
+    {
+      Elf32_External_Rel * erels;
+      unsigned long        saved_rel_size = rel_size;
+
+      GET_DATA_ALLOC (rel_offset, rel_size, erels,
+		      Elf32_External_Rel *, "relocs");
+      
+      rel_size = rel_size / sizeof (Elf32_External_Rel);
+      
+      rels = (Elf_Internal_Rel *) malloc (rel_size *
+					  sizeof (Elf_Internal_Rel));
+      if (rels == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+      
+      for (i = 0; i < rel_size; i++)
+	{
+	  rels[i].r_offset = BYTE_GET (erels[i].r_offset);
+	  rels[i].r_info   = BYTE_GET (erels[i].r_info);
+	}
+      
+      free (erels);
+      
+      relas = (Elf_Internal_Rela *) rels;
     }
 
   if (is_rela)
@@ -465,6 +495,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 
 	case EM_68K:
 	  rtype = elf_m68k_reloc_type (ELF32_R_TYPE (info));
+	  break;
+
+	case EM_960:
+	  rtype = elf_i960_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_SPARC:
@@ -555,6 +589,8 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  if (is_rela)
 	    printf (" + %lx", (unsigned long) relas [i].r_addend);
 	}
+      else if (is_rela)
+	printf ("%34c%lx", ' ', (unsigned long) relas[i].r_addend);
 
       putchar ('\n');
     }
@@ -809,6 +845,11 @@ get_machine_flags (e_flags, e_machine)
 	{
 	default:
 	  break;
+
+        case EM_68K:
+          if (e_flags & EF_CPU32)
+            strcat (buf, ", cpu32");
+          break;
 
 	case EM_PPC:
 	  if (e_flags & EF_PPC_EMB)
@@ -1312,12 +1353,16 @@ static const char *
 get_elf_class (elf_class)
      unsigned char elf_class;
 {
+  static char buff [32];
+  
   switch (elf_class)
     {
     case ELFCLASSNONE: return _("none");
     case ELFCLASS32:   return _("ELF32");
     case ELFCLASS64:   return _("ELF64");
-    default:           return _("<unknown>");
+    default:
+      sprintf (buff, _("<unknown: %lx>"), elf_class);
+      return buff;
     }
 }
 
@@ -1325,12 +1370,16 @@ static const char *
 get_data_encoding (encoding)
      unsigned char encoding;
 {
+  static char buff [32];
+  
   switch (encoding)
     {
     case ELFDATANONE: return _("none");
-    case ELFDATA2LSB: return _("2's compilment, little endian");
-    case ELFDATA2MSB: return _("2's compilment, big endian");
-    default:          return _("<unknown>");
+    case ELFDATA2LSB: return _("2's complement, little endian");
+    case ELFDATA2MSB: return _("2's complement, big endian");
+    default:          
+      sprintf (buff, _("<unknown: %lx>"), encoding);
+      return buff;
     }
 }
 
@@ -1338,12 +1387,16 @@ static const char *
 get_osabi_name (osabi)
      unsigned char osabi;
 {
+  static char buff [32];
+  
   switch (osabi)
     {
     case ELFOSABI_SYSV:       return _("UNIX - System V");
     case ELFOSABI_HPUX:       return _("UNIX - HP-UX");
     case ELFOSABI_STANDALONE: return _("Standalone App");
-    default:                  return _("<unknown>");
+    default:
+      sprintf (buff, _("<unknown: %lx>"), osabi);
+      return buff;
     }
 }
 
@@ -1377,7 +1430,8 @@ process_file_header ()
       printf (_("  Version:                           %d %s\n"),
 	      elf_header.e_ident [EI_VERSION],
 	      elf_header.e_ident [EI_VERSION] == EV_CURRENT ? "(current)" :
-	      elf_header.e_ident [EI_VERSION] != EV_NONE ? "<unknown>" : "");
+	      elf_header.e_ident [EI_VERSION] != EV_NONE ? "<unknown: %lx>" : "",
+	      elf_header.e_ident [EI_VERSION]);
       printf (_("  OS/ABI:                            %s\n"),
 	      get_osabi_name (elf_header.e_ident [EI_OSABI]));
       printf (_("  ABI Version:                       %d\n"),
@@ -1490,6 +1544,7 @@ process_program_headers (file)
 
   loadaddr = -1;
   dynamic_addr = 0;
+  dynamic_size = 0;
 
   for (i = 0, segment = program_headers;
        i < elf_header.e_phnum;
@@ -1813,6 +1868,8 @@ process_relocs (file)
 
   if (do_using_dynamic)
     {
+      int is_rela;
+
       rel_size   = 0;
       rel_offset = 0;
 
@@ -1820,16 +1877,30 @@ process_relocs (file)
 	{
 	  rel_offset = dynamic_info[DT_REL];
 	  rel_size   = dynamic_info[DT_RELSZ];
+	  is_rela    = FALSE;
 	}
       else if (dynamic_info [DT_RELA])
 	{
 	  rel_offset = dynamic_info[DT_RELA];
 	  rel_size   = dynamic_info[DT_RELASZ];
+	  is_rela    = TRUE;
 	}
       else if (dynamic_info[DT_JMPREL])
 	{
 	  rel_offset = dynamic_info[DT_JMPREL];
 	  rel_size   = dynamic_info[DT_PLTRELSZ];
+	  switch (dynamic_info[DT_PLTREL])
+	    {
+	    case DT_REL:
+	      is_rela = FALSE;
+	      break;
+	    case DT_RELA:
+	      is_rela = TRUE;
+	      break;
+	    default:
+	      is_rela = UNKNOWN;
+	      break;
+	    }
 	}
 
       if (rel_size)
@@ -1839,7 +1910,7 @@ process_relocs (file)
 	     rel_offset, rel_size);
 
 	  dump_relocations (file, rel_offset - loadaddr, rel_size,
-			    dynamic_symbols, dynamic_strings);
+			    dynamic_symbols, dynamic_strings, is_rela);
 	}
       else
 	printf (_("\nThere are no dynamic relocations in this file.\n"));
@@ -1867,13 +1938,18 @@ process_relocs (file)
 	      Elf32_Internal_Shdr * symsec;
 	      Elf_Internal_Sym *    symtab;
 	      char *                strtab;
-
+	      int                   is_rela;
+	      
 	      printf (_("\nRelocation section "));
 
 	      if (string_table == NULL)
-		printf ("%d", section->sh_name);
+		{
+		  printf ("%d", section->sh_name);
+		}
 	      else
-		printf ("'%s'", SECTION_NAME (section));
+		{
+		  printf ("'%s'", SECTION_NAME (section));
+		}
 
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
@@ -1890,8 +1966,10 @@ process_relocs (file)
 
 	      GET_DATA_ALLOC (strsec->sh_offset, strsec->sh_size, strtab,
 			      char *, "string table");
+	      
+	      is_rela = section->sh_type == SHT_RELA;
 
-	      dump_relocations (file, rel_offset, rel_size, symtab, strtab);
+	      dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela);
 
 	      free (strtab);
 	      free (symtab);
@@ -2502,7 +2580,7 @@ process_version_sections (file)
 	    printf (_("  Addr: 0x"));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
-		    section->sh_offset, section->sh_link,
+		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (section_headers + section->sh_link));
 
 	    GET_DATA_ALLOC (section->sh_offset, section->sh_size,
@@ -2590,7 +2668,7 @@ process_version_sections (file)
 	    printf (_(" Addr: 0x"));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link to section: %ld (%s)\n"),
-		    section->sh_offset, section->sh_link,
+		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (section_headers + section->sh_link));
 
 	    GET_DATA_ALLOC (section->sh_offset, section->sh_size,
@@ -2691,7 +2769,7 @@ process_version_sections (file)
 	    printf (_(" Addr: "));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
-		    section->sh_offset, section->sh_link,
+		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (link_section));
 
 	    GET_DATA_ALLOC (version_info [DT_VERSIONTAGIDX (DT_VERSYM)]
@@ -3195,14 +3273,7 @@ process_symbol_table (file)
 		      get_symbol_binding (ELF_ST_BIND (psym->st_info)),
 		      psym->st_other);
 
-	      if (psym->st_shndx == 0)
-		fputs (" UND", stdout);
-	      else if ((psym->st_shndx & 0xffff) == 0xfff1)
-		fputs (" ABS", stdout);
-	      else if ((psym->st_shndx & 0xffff) == 0xfff2)
-		fputs (" COM", stdout);
-	      else
-		printf ("%4x", psym->st_shndx);
+	      printf ("%4s", get_symbol_index_type (psym->st_shndx));
 
 	      printf (" %s", strtab + psym->st_name);
 

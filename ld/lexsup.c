@@ -341,7 +341,7 @@ static const struct ld_option ld_options[] =
       '\0', N_("FILE"), N_("Read version information script"), TWO_DASHES },
   { {"version-exports-section", required_argument, NULL,
      OPTION_VERSION_EXPORTS_SECTION },
-    '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using SYMBOL as the version."),
+    '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using\n\t\t\t\tSYMBOL as the version."),
     TWO_DASHES },
   { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
       '\0', NULL, N_("Warn about duplicate common symbols"), TWO_DASHES },
@@ -360,7 +360,7 @@ static const struct ld_option ld_options[] =
   { {"wrap", required_argument, NULL, OPTION_WRAP},
       '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES },
   { {"mpc860c0", optional_argument, NULL, OPTION_MPC860C0},
-      '\0', N_("[=WORDS]"), N_("Modify problematic branches in last WORDS (1-10, default 5) words of a page"), TWO_DASHES }
+      '\0', N_("[=WORDS]"), N_("Modify problematic branches in last WORDS (1-10,\n\t\t\t\tdefault 5) words of a page"), TWO_DASHES }
 };
 
 #define OPTION_COUNT ((int) (sizeof ld_options / sizeof ld_options[0]))
@@ -1119,7 +1119,7 @@ help ()
     }
 
   /* xgettext:c-format */
-  printf (_("%s: supported targets:"), program_name);
+  printf (_("%s: supported targets:\n  "), program_name);
   targets = bfd_target_list ();
   for (pp = targets; *pp != NULL; pp++)
     printf (" %s", *pp);
@@ -1127,7 +1127,7 @@ help ()
   printf ("\n");
 
   /* xgettext:c-format */
-  printf (_("%s: supported emulations: "), program_name);
+  printf (_("%s: supported emulations:\n  "), program_name);
   ldemul_list_emulations (stdout);
   printf ("\n");
 

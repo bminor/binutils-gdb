@@ -270,14 +270,21 @@ extern const char extra_symbol_chars[];
 #define Acc	      0x200000	/* Accumulator %al or %ax or %eax */
 #define JumpAbsolute  0x400000
 #define RegMMX	      0x800000	/* MMX register */
-#define EsSeg	     0x1000000	/* String insn operand with fixed es segment */
+#define RegXMM	     0x1000000	/* XMM registers in PIII */
+#define EsSeg	     0x2000000	/* String insn operand with fixed es segment */
+/* InvMem is for instructions with a modrm byte that only allow a
+   general register encoding in the i.tm.mode and i.tm.regmem fields,
+   eg. control reg moves.  They really ought to support a memory form,
+   but don't, so we add an InvMem flag to the register operand to
+   indicate that it should be encoded in the i.tm.regmem field.  */
+#define InvMem	     0x4000000
 
 #define Reg	(Reg8|Reg16|Reg32)	/* gen'l register */
 #define WordReg (Reg16|Reg32)
 #define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
 #define Imm	(Imm8|Imm8S|Imm16|Imm32) /* gen'l immediate */
 #define Disp	(Disp8|Disp16|Disp32)	/* General displacement */
-#define AnyMem	(Disp|BaseIndex)	/* General memory */
+#define AnyMem	(Disp|BaseIndex|InvMem)	/* General memory */
 /* The following aliases are defined because the opcode table
    carefully specifies the allowed memory types for each instruction.
    At the moment we can only tell a memory reference size by the
@@ -323,7 +330,6 @@ typedef struct
 #define D		   0x2	/* D = 0 if Reg --> Regmem;
 				   D = 1 if Regmem --> Reg:    MUST BE 0x2 */
 #define Modrm		   0x4
-#define ReverseRegRegmem   0x8  /* swap reg,regmem fields for 2 reg case */
 #define FloatR		   0x8	/* src/dest swap for floats:   MUST BE 0x8 */
 #define ShortForm	  0x10	/* register is in low 3 bits of opcode */
 #define FloatMF		  0x20	/* FP insn memory format bit, sized by 0x4 */
@@ -341,12 +347,13 @@ typedef struct
 #define No_wSuf	       0x20000	/* w suffix on instruction illegal */
 #define No_lSuf	       0x40000	/* l suffix on instruction illegal */
 #define No_sSuf	       0x80000	/* s suffix on instruction illegal */
-#define FWait	      0x100000	/* instruction needs FWAIT */
-#define IsString      0x200000	/* quick test for string instructions */
-#define regKludge     0x400000	/* fake an extra reg operand for clr, imul */
-#define IsPrefix      0x800000	/* opcode is a prefix */
-#define No_dSuf      0x1000000  /* d suffix on instruction illegal */
-#define No_xSuf      0x2000000  /* x suffix on instruction illegal */
+#define No_dSuf       0x100000  /* d suffix on instruction illegal */
+#define No_xSuf       0x200000  /* x suffix on instruction illegal */
+#define FWait	      0x400000	/* instruction needs FWAIT */
+#define IsString      0x800000	/* quick test for string instructions */
+#define regKludge    0x1000000	/* fake an extra reg operand for clr, imul */
+#define IsPrefix     0x2000000	/* opcode is a prefix */
+#define ImmExt	     0x4000000	/* instruction has extension in 8 bit imm */
 #define Ugh	    0x80000000	/* deprecated fp insn, gets a warning */
 
   /* operand_types[i] describes the type of operand i.  This is made

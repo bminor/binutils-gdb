@@ -1,3 +1,286 @@
+Wed Jun  2 12:38:49 1999  Miodrag Vallat <miodrag@multimania.com>
+
+	* hosts/alphalinux.h (TRAD_CORE_EXTRA_SIZE_ALLOWED): Expand to 4096.
+
+Tue Jun  1 17:57:58 1999  Mark P. Mitchell  <mitchell@n02.acl.lanl.gov>
+
+	* reloc.c (BFD_RELOC_MIPS_SUB): New relocation.
+	(BFD_RELOC_MIPS_GOT_PAGE): Likewise.
+	(BFD_RELOC_MIPS_GOT_OFST): Likewise.
+	(BFD_RELOC_MIPS_GOT_DISP): Likewise.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+	* elf32-mips.c (mips_info_to_howto_rela): New function.
+	(USE_REL): Adjust for new conventions.
+	(MINUS_ONE): New macro.
+	(elf_mips_howto_table): Add R_MIPS_SUB.
+	(mips_r): Add entries for MIPS_SUB, MIPS_GOT_PAGE, MIPS_GOT_OFST, 
+	and MIPS_GOT_DISP.
+	(mips_elf_final_write_processing): Set sh_link, not sh_info, for a
+	.MIPS.content section.
+	(_bfd_mips_elf_fake_sections): Treat all sections that begin
+	with .MIPS.content as .MIPS.content sections.  Set
+	SHF_MNIPS_NOSTRIP for such section.
+	(elf_info_to_howto): Define to mips_info_to_howto_rela.
+	* elf64-mips.c (mips_r):  Add entries for MIPS_SUB, MIPS_GOT_PAGE,
+	MIPS_GOT_OFST, and MIPS_GOT_DISP.
+
+Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* vms-misc.c (_bfd_vms_hash_newfunc): Fix use of uninitialized
+	variable.
+
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Avoid ambigous
+	`else'. 
+
+1999-05-30  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Reinstate change of
+	1993-03-25 (!!).  Take into account the bitmasks for the reloc so
+	the addend does not overflow into the rest of the word.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* bfd-in.h: Amend prototype for
+	bfd_elf32_arm_process_before_allocation .
+	* bfd-in.h: Regenerate.
+	
+	* elfarm-oabi.c (NUM_ELEM): New macro: Compute the number of
+	elements in a fixed sized array.
+	(ARM_ELF_ABI_VERSION): Define.
+	(ARM_ELF_OS_ABI_VERSION): Define.
+	(R_ARM_THM_ABS5): Fix rightshift and size.
+	(R_ARM_THM_PC22): Fix size.
+	(R_ARM_PLT32): Define Howto.
+	(find_howto): New function: Locate a howto based on a reloc
+	number.
+	(elf32_arm_info_to_howto): Use find_howto if necessary.
+	(elf32_arm_reloc_map): Change type of field bfd_reloc_val to
+	bfd_reloc_code_real_type.
+	(elf32_arm_reloc_map[]): Add entries for BFD_RELOC_VTABLE_INHERIT
+	and BFD_RELOC_VTABLE_ENTRY.
+	(elf32_arm_reloc_type_lookup): Use find_howto if necessary.
+
+	* elfarm-nabi.c (NUM_ELEM): New macro: Compute the number of
+	elements in a fixed sized array.
+	(ARM_ELF_ABI_VERSION): Define.
+	(ARM_ELF_OS_ABI_VERSION): Define.
+	(R_ARM_THM_ABS5): Fix rightshift and size.
+	(R_ARM_THM_PC22): Fix size.
+	(elf32_arm_info_to_howto_rel): Rename to elf32_arm_info_to_howto.
+	(elf32_arm_reloc_map): Change type of field bfd_reloc_val to
+	bfd_reloc_code_real_type.
+
+	* elf32-arm.h (struct elf32_arm_link_hash_table): Add new field:
+	no_pipeline_knowledge.
+	(elf32_arm_link_hash_create): Initialise new field to zero.
+	(bfd_elf32_arm_process_before_allocation): Add new paraemter:
+	no_pipeline_knowledge.  Use this parameter to initialise the field
+	in the globals data structure.
+	(elf32_arm_final_link_relocate): Only add in pipeline offset if
+	no_pipeline_knowledge is false and the binary is from an old
+	toolchain.
+	(elf32_arm_merge_private_data): Generate an error if an attempt is
+	made to linl together big endian and little endian code.
+	(elf32_arm_post_process_headers): New function:  Initialise the
+	EI_OSABI and EI_ABIVERSION fields of the newly created ELF program
+	header. 
+	(elf_backend_post_process_headers): Define.
+
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add new field:
+	elf_backend_post_process_headers.
+
+	* elfxx-target.h (elf_backend_post_process_headers): Define to
+	NULL if not already defined.
+	(elfNN_bed): Initialise elf_backend_post_process_headers field. 
+
+	* elf.c (prep_headers): Set the EI_OSABI and EI_ABIVERSION fields
+	to zero.
+	(_bfd_elf_compute_section_file_positions): Call
+	elf_backend_post_process_headers if defined. 
+
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Check whether getuid and getgid exist.
+	* archive.c: Define getuid and getgid as macros if HAVE_GETUID or
+	HAVE_GETGID are not defined, respectively.
+	(bfd_write_armap): Don't special case on _WIN32 for getuid and
+	getgid.
+	* configure.host: Set ac_cv_func_get{ug}id for *-*-windows*.
+	* configure, config.in: Rebuild.
+
+1999-05-28  Martin Dorey  <mdorey@madge.com>
+
+	* elf32-i960.c: New file.
+	* elf.c (prep_headers): Handle bfd_arch_i960.
+	* targets.c (bfd_target_vector): Add &bfd_elf32_i960_vec.
+	* config.bfd (i960-*-elf*): New target.
+	* configure.in (bfd_elf32_i960_vec): New target vector.
+	* Makefile.am (BFD32_BACKENDS): Add elf32-i960.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-i960.c.
+	* Makefile.in, aclocal.m4, configure: Rebuild.
+
+1999-05-27  Nick Clifton  <nickc@cygnus.com>
+
+	* elfarm-oabi.c (elf32_arm_howto_table): Add entry for
+	R_ARM_PLT32. 
+	(find_howto): New function: Find entries in the
+	elf32_arm_howto_table.
+	(elf32_arm_info_to_howto): Use find_howto if the entry cannot be
+	computed simply.
+	(elf32_arm_reloc_type_lookup): Add lookup for
+	BFD_RELOC_ARM_PLT32. 
+
+1999-05-25  Philip Blundell  <pb@nexus.co.uk>
+
+	* bfd/elf32-arm.h (elf32_arm_link_hash_newfunc): New function.
+	(elf32_arm_link_hash_table_create): Use above function as the
+	constructor for hash table entries.
+	(elf32_arm_relocate_section): Avoid crash when there is no output
+	section. 
+	(elf32_arm_final_link_relocate): New parameter h.
+	(elf32_arm_relocate_section): Pass symbol hash entry to above
+ 	routine.
+	(elf32_arm_gc_sweep_hook, elf32_arm_check relocs): Correct
+	comments.
+	
+1999-05-25  Catherine Moore  <clm@cygnus.com>
+ 
+        * coff-arm.c (coff_arm_relocate_section): Don't emit
+        base file entries for pc-relative values.
+        
+1999-05-25  DJ Delorie  <dj@cygnus.com>
+
+	* peicode.h (coff_swap_sym_in): When we create the actual section
+	to reflect the not-there section C_SECTION symbols refer to,
+	change the symbol class to C_STAT as the section is now really
+	there.
+
+1999-05-24  Philip Blundell  <pb@nexus.co.uk>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Undo change of
+ 	1999-03-25.
+
+Mon May 17 13:35:35 1999  Stan Cox  <scox@cygnus.com>
+	* coff-arm.c (_bfd_coff_arm_set_private_flags): Changed
+	F_PIC_INT to F_PIC.
+	* coffcode.h (coff_set_arch_mach_hook): Added F_ARM_2a, and
+	F_ARM_3M labels.  Changed F_PIC_INT to F_PIC.
+	
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-mcore.c (in_reloc_p): Reinstate.
+
+1999-05-15  Nick Clifton  <nickc@cygnus.com>
+
+	* reloc.c (BFD_RELOC_MCORE_RVA): Define.
+	* bfd-in2.h: Regenerate.
+	* coff-mcore.c (in_reloc_p): Remove defintion.
+	(mcore_coff_howto): Add IMAGE_REL_MCORE_RVA.
+	(mcore_coff_reloc_type_lookup): Map BFD_RELOC_RVA to
+	IMAGE_REL_MCORE_RVA.
+	(coff_mcore_rtype_to_howto): Add special processing for
+	IMAGE_REL_MCORE_RVA.
+	(coff_mcore_relocate_section): Add support for
+	IMAGE_REL_MCORE_RVA. 
+	* elf32-mcore (mcore_elf_howto_): Add R_MCORE_RELATIVE.
+	(mcore_elf_reloc_type_lookup): Map BFD_RELOC_RVA to
+	R_MCORE_RELATIVE.
+	(mcore_elf_relocate_section): Delete redundant case labels. 
+	
+Fri May 14 10:59:55 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Fix operator
+ 	precedence between bit-and and comparison.
+
+Thu May 13 09:45:23 1999  Joel Sherrill (joel@OARcorp.com)
+
+	* config.bfd (i[3456]86*-*-rtems*, m68k*-*-rtems*): Added to
+	list of target formats (targ_selvecs).
+	(i[3456]86*-*-rtemself*, mips*el-*-rtems*): New targets.
+	(powerpcle*-*rtems*, sh-*-rtemself*): New targets.
+
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* ecoff.c (_bfd_ecoff_write_armap): give the symtab element a
+	reasonable mode until "ar x" is smart enough to skip it (fixes
+	gcc/libgcc.a builds on mips-ecoff targets
+
+	* coffcode.h (styp_to_sec_flags): Explain how COMDATs are supposed
+	to work.  Hack to support MS import libraries, which use different
+	COMDAT types than GNU.
+	(coff_slurp_symbol_table): C_SECTION symbols are local; they refer
+	to implied zero-length sections (see peicode below)
+	* coffgen.c (coff_get_normalized_symtab): Properly read long MS
+	filename symbols, which use one *or more* auxents.
+	* coffswap.h (coff_swap_aux_in): ditto
+	* peicode.h (coff_swap_sym_in): Build the implied zero-length
+	sections
+	
+Tue May 11 15:51:58 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c (v850_elf_howto_table): Make partial_inplace false
+	for all relocations.
+
+1999-05-10  Catherine Moore  <clm@cygnus.com>
+
+        * bfd-in.h (bfd_arm_allocate_interworking_sections):  Static
+        if COFF_IMAGE_WITH_PE.
+        (bfd_arm_process_before_allocation): Likewise.
+        (bfd_arm_get_bfd_for_interworking): Likewise.
+        * coff-arm.c: Likewise.
+        * bfd-in2.h: Regenerate.
+        * configure.in (armpe_little_vec): Remove coff-arm.lo.
+        (armpe_big_vec): Likewise.
+        * configure: Rebuild.
+
+1999-05-10  Nick Clifton  <nickc@cygnus.com>
+
+	* elf.c (elf_fake_sections): Check for .rel. as start of rel
+	section, not just .rel.  Same for .rela.
+
+1999-05-07  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-mcore.c (coff_mcore_relocate_section): Replace assert about
+	endianism with an error message.
+
+Thu May  6 17:09:09 1999  Fred Fish  <fnf@be.com>
+
+	* dwarf2.c (read_abbrevs): Change cast of dwarf_abbrev_buffer
+	assignment from "unsigned char *" to "char *".
+	(decode_line_info): Likewise for dwarf_line_buffer assignment.
+
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+
+        * coff-arm.c (coff_arm_relocate_section):  Add one to
+        address of ARM_RVA32 thumb functions.
+ 
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+ 
+        * elf32-m68k.c (elf32_m68k_set_private_flags): New.
+        (elf32_m68k_copy_private_bfd_data): New.
+        (elf32_m68k_merge_private_bfd_data): New.
+        (elf32_m68k_print_private_bfd_data): New.
+        (CPU32_FLAG): Define.
+        (PLT_CPU32_ENTRY_SIZE): Define.
+        (elf_cpu32_plt0_entry): Declare.
+        (elf_cpu32_plt_entry): Declare.
+        (elf_m68k_adjust_dynamic_symbol): Generate cpu32 plt entries.
+        (elf_m68k_finish_dynamic_symbol): Likewise.
+        (elf_m68k_finish_dynamic_sections): Likewise.
+        (elf_backend_plt_header_size): Remove definition.
+        (bfd_elf32_bfd_copy_private_bfd_data): Define.
+        (bfd_elf32_bfd_merge_private_bfd_data): Define.
+        (bfd_elf32_bfd_set_private_flags): Define.
+        (bfd_elf32_bfd_print_private_bfd_data): Define.
+ 
+Mon May  3 09:24:49 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (som_fixup_formats): Fix comments for R_SHORT_PCREL_MODE
+	and R_LONG_PCREL_MODE.
+
 1999-04-29  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-mcore.c (coff_mcore_relocate_section): Fix typos.

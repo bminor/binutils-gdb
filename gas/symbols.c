@@ -456,23 +456,30 @@ symbol_find_base (name, strip_underscore)
 #ifdef tc_canonicalize_symbol_name
   {
     char *copy;
+    size_t len = strlen (name) + 1;
 
-    copy = (char *) alloca (strlen (name) + 1);
-    strcpy (copy, name);
+    copy = (char *) alloca (len);
+    memcpy (copy, name, len);
     name = tc_canonicalize_symbol_name (copy);
   }
 #endif
 
   if (! symbols_case_sensitive)
     {
-      unsigned char *copy;
+      char *copy;
+      const char *orig;
+      unsigned char c;
 
-      copy = (unsigned char *) alloca (strlen (name) + 1);
-      strcpy (copy, name);
-      name = (const char *) copy;
-      for (; *copy != '\0'; copy++)
-	if (islower (*copy))
-	  *copy = toupper (*copy);
+      orig = name;
+      name = copy = (char *) alloca (strlen (name) + 1);
+
+      while ((c = *orig++) != '\0')
+	{
+	  if (islower (c))
+	    c = toupper (c);
+	  *copy++ = c;
+	}
+      *copy = '\0';
     }
 
   return ((symbolS *) hash_find (sy_hash, name));

@@ -35,8 +35,10 @@
 #define TARGET_BIG_NAME                 "elf32-bigarm"
 
 #define elf_info_to_howto               0
-#define elf_info_to_howto_rel           elf32_arm_info_to_howto_rel 
+#define elf_info_to_howto_rel           elf32_arm_info_to_howto
 
+#define ARM_ELF_ABI_VERSION		0
+#define ARM_ELF_OS_ABI_VERSION		ELFOSABI_ARM
 
 static reloc_howto_type * elf32_arm_reloc_type_lookup
   PARAMS ((bfd * abfd, bfd_reloc_code_real_type code));
@@ -574,7 +576,7 @@ static reloc_howto_type elf32_arm_thm_pc9_howto =
 
  
 static void
-elf32_arm_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
+elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd * abfd;
      arelent * bfd_reloc;
      Elf32_Internal_Rel * elf_reloc;

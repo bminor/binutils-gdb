@@ -1,5 +1,5 @@
 /* tc-i960.h - Basic 80960 instruction formats.
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -21,6 +21,11 @@
 
 #ifndef TC_I960
 #define TC_I960 1
+
+#ifdef OBJ_ELF
+#define TARGET_FORMAT "elf32-i960"
+#define TARGET_ARCH bfd_arch_i960
+#endif
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
@@ -139,7 +144,23 @@ extern int i960_validate_fix PARAMS ((struct fix *, segT, struct symbol **));
 #define TC_VALIDATE_FIX(FIXP,SEGTYPE,LABEL) \
 	if (i960_validate_fix (FIXP, SEGTYPE, &add_symbolP) != 0) goto LABEL
 
+#ifdef OBJ_ELF
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)  \
+  ((FIX)->fx_addsy == NULL \
+   || (! S_IS_EXTERNAL ((FIX)->fx_addsy) \
+       && ! S_IS_WEAK ((FIX)->fx_addsy) \
+       && S_IS_DEFINED ((FIX)->fx_addsy) \
+       && ! S_IS_COMMON ((FIX)->fx_addsy)))
+#endif
+
+#ifndef OBJ_ELF
 #define tc_fix_adjustable(FIXP)		((FIXP)->fx_bsr == 0)
+#else
+#define tc_fix_adjustable(FIXP)						\
+  ((FIXP)->fx_bsr == 0							\
+   && ! S_IS_EXTERNAL ((FIXP)->fx_addsy)				\
+   && ! S_IS_WEAK ((FIXP)->fx_addsy))
+#endif
 
 extern void brtab_emit PARAMS ((void));
 #define md_end()	brtab_emit ()

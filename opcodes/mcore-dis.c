@@ -57,6 +57,9 @@ static const unsigned short imsk[] =
     /* OMc */ 0xFF00,
     /* SIa */ 0xFE00,
 
+/* start-sanitize-m340 */
+  /* MULSH */ 0xFF00,
+/* end-sanitize-m340 */
 		 
     /* JC  */ 0,		/* JC,JU,JL don't appear in object */
     /* JU  */ 0,
@@ -96,6 +99,8 @@ print_insn_mcore (memaddr, info)
   mcore_opcode_info * op;
   int                 status;
 
+  info->bytes_per_chunk = 2;
+
   status = info->read_memory_func (memaddr, ibytes, 2, info);
 
   if (status != 0) 
@@ -104,17 +109,24 @@ print_insn_mcore (memaddr, info)
       return -1;
     }
 
-  inst = (ibytes[0] << 8) | ibytes[1];
+/* start-sanitize-m340 */
+  if (info->endian == BFD_ENDIAN_BIG)
+/* end-sanitize-m340 */
+    inst = (ibytes[0] << 8) | ibytes[1];
+/* start-sanitize-m340 */
+  else if (info->endian == BFD_ENDIAN_LITTLE)
+    inst = (ibytes[1] << 8) | ibytes[0];
+  else
+    abort ();
+/* end-sanitize-m340 */
 
   /* Just a linear search of the table.  */
   for (op = mcore_table; op->name != 0; op ++)
-    {
-      if (op->inst == (inst & imsk[op->opclass]))
-	break;
-    }
+    if (op->inst == (inst & imsk[op->opclass]))
+      break;
 
   if (op->name == 0)
-    fprintf (stream, ".word 0x%04x", inst);
+    fprintf (stream, ".short 0x%04x", inst);
   else
     {
       const char * name = grname[inst & 0x0F];
@@ -130,6 +142,9 @@ print_insn_mcore (memaddr, info)
 	case JSR: fprintf (stream, "\t%s", name); break;
 	case OC:  fprintf (stream, "\t%s, %s", name, crname[(inst >> 4) & 0x1F]); break;
 	case O1R1: fprintf (stream, "\t%s, r1", name); break;
+/* start-sanitize-m340 */
+	case MULSH:
+/* end-sanitize-m340 */
 	case O2: fprintf (stream, "\t%s, %s", name, grname[(inst >> 4) & 0xF]); break;
 	case X1: fprintf (stream, "\tr1, %s", name); break;
 	case OI: fprintf (stream, "\t%s, %d", name, ((inst >> 4) & 0x1F) + 1); break;
@@ -191,11 +206,17 @@ print_insn_mcore (memaddr, info)
 	    if (status != 0) 
 	      {
 		info->memory_error_func (status, memaddr, info);
-		return -1;
+		break;
 	      }
 	    
-	    val = (ibytes[0] << 24) | (ibytes[1] << 16)
-	      | (ibytes[2] << 8) | (ibytes[3]);
+/* start-sanitize-m340 */
+	    if (info->endian == BFD_ENDIAN_LITTLE)
+	      val = (ibytes[3] << 24) | (ibytes[2] << 16)
+		| (ibytes[1] << 8) | (ibytes[0]);
+	    else
+/* end-sanitize-m340 */
+	      val = (ibytes[0] << 24) | (ibytes[1] << 16)
+		| (ibytes[2] << 8) | (ibytes[3]);
 	    
 	    /* Removed [] around literal value to match ABI syntax 12/95.  */
 	    fprintf (stream, "\t%s, 0x%X", grname[(inst >> 8) & 0xF], val);
@@ -216,11 +237,17 @@ print_insn_mcore (memaddr, info)
 	    if (status != 0) 
 	      {
 		info->memory_error_func (status, memaddr, info);
-		return -1;
+		break;
 	      }
-	    
-	    val = (ibytes[0] << 24) | (ibytes[1] << 16)
-	      | (ibytes[2] << 8) | (ibytes[3]);
+
+/* start-sanitize-m340 */
+	    if (info->endian == BFD_ENDIAN_LITTLE)
+	      val = (ibytes[3] << 24) | (ibytes[2] << 16)
+		| (ibytes[1] << 8) | (ibytes[0]);
+	    else
+/* end-sanitize-m340 */
+	      val = (ibytes[0] << 24) | (ibytes[1] << 16)
+		| (ibytes[2] << 8) | (ibytes[3]);
 	    
 	    /* Removed [] around literal value to match ABI syntax 12/95.  */
 	    fprintf (stream, "\t0x%X", val);

@@ -98,7 +98,7 @@ AC_CHECK_HEADERS(stddef.h string.h strings.h stdlib.h time.h unistd.h)
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
-AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen)
+AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid)
 
 BFD_BINARY_FOPEN
 
@@ -414,8 +414,8 @@ do
     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
     armcoff_little_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
     armcoff_big_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
-    armpe_little_vec)		tb="$tb pe-arm.lo coff-arm.lo cofflink.lo " ;;
-    armpe_big_vec)		tb="$tb pe-arm.lo coff-arm.lo cofflink.lo " ;;
+    armpe_little_vec)		tb="$tb pe-arm.lo cofflink.lo " ;;
+    armpe_big_vec)		tb="$tb pe-arm.lo cofflink.lo " ;;
     armpei_little_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
     armpei_big_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
     arm_epoc_pe_little_vec)	tb="$tb epoc-pe-arm.lo cofflink.lo " ;;
@@ -448,6 +448,7 @@ do
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.lo elf32.lo $elf" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.lo elf32.lo $elf" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.lo elf32.lo $elf" ;;
+    bfd_elf32_i960_vec)		tb="$tb elf32-i960.lo elf32.lo $elf" ;;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.lo elf64.lo elf32-mips.lo elf32.lo $elf ecofflink.lo"

@@ -515,6 +515,12 @@ struct elf_backend_data
     PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *o,
 	     const Elf_Internal_Rela *relocs));
 
+  /* This function, if defined, is called after the ELF headers have
+     been created.  This allows for things like the OS and ABI versions
+     to be changed.  */
+  void (*elf_backend_post_process_headers)
+    PARAMS ((bfd *, struct bfd_link_info *));
+
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;

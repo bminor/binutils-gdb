@@ -2707,6 +2707,27 @@ fixup_segment (fixP, this_segment_type)
 	    }
 	}
 
+      if (!fixP->fx_done)
+	{
+#ifdef MD_APPLY_FIX3
+	  md_apply_fix3 (fixP, &add_number, this_segment_type);
+#else
+#ifdef BFD_ASSEMBLER
+	  md_apply_fix (fixP, &add_number);
+#else
+	  md_apply_fix (fixP, add_number);
+#endif
+#endif
+
+#ifndef TC_HANDLES_FX_DONE
+	  /* If the tc-* files haven't been converted, assume it's handling
+	     it the old way, where a null fx_addsy means that the fix has
+	     been applied completely, and no further work is needed.  */
+	  if (fixP->fx_addsy == 0 && fixP->fx_pcrel == 0)
+	    fixP->fx_done = 1;
+#endif
+	}
+
       if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && size > 0)
 	{
 	  if ((size_t) size < sizeof (valueT))
@@ -2755,26 +2776,6 @@ fixup_segment (fixP, this_segment_type)
 #endif
 	}			/* not a bit fix */
 
-      if (!fixP->fx_done)
-	{
-#ifdef MD_APPLY_FIX3
-	  md_apply_fix3 (fixP, &add_number, this_segment_type);
-#else
-#ifdef BFD_ASSEMBLER
-	  md_apply_fix (fixP, &add_number);
-#else
-	  md_apply_fix (fixP, add_number);
-#endif
-#endif
-
-#ifndef TC_HANDLES_FX_DONE
-	  /* If the tc-* files haven't been converted, assume it's handling
-	     it the old way, where a null fx_addsy means that the fix has
-	     been applied completely, and no further work is needed.  */
-	  if (fixP->fx_addsy == 0 && fixP->fx_pcrel == 0)
-	    fixP->fx_done = 1;
-#endif
-	}
 #ifdef TC_VALIDATE_FIX
     skip: ;
 #endif
@@ -2824,7 +2825,7 @@ void
 write_print_statistics (file)
      FILE *file;
 {
-  fprintf (stderr, "fixups: %d\n", n_fixups);
+  fprintf (file, "fixups: %d\n", n_fixups);
 }
 
 /* for debugging */

@@ -740,7 +740,7 @@ pi (line, x)
       pt (x->types[i]);
       fprintf (stdout, "\n");
       if (x->types[i]
-	  & (Reg | SReg2 | SReg3 | Control | Debug | Test | RegMMX))
+	  & (Reg | SReg2 | SReg3 | Control | Debug | Test | RegMMX | RegXMM))
 	fprintf (stdout, "%s\n", x->regs[i]->reg_name);
       if (x->types[i] & Imm)
 	pe (x->imms[i]);
@@ -835,6 +835,7 @@ type_names[] =
   { Acc, "Acc" },
   { JumpAbsolute, "Jump Absolute" },
   { RegMMX, "rMMX" },
+  { RegXMM, "rXMM" },
   { EsSeg, "es" },
   { 0, "" }
 };
@@ -1552,8 +1553,10 @@ md_assemble (line)
 		    continue;
 		  }
 		/* Any other register is bad */
-		if (i.types[op] & (Reg | RegMMX | Control | Debug | Test
-				   | FloatReg | FloatAcc | SReg2 | SReg3))
+		if (i.types[op] & (Reg | RegMMX | RegXMM
+				   | SReg2 | SReg3
+				   | Control | Debug | Test
+				   | FloatReg | FloatAcc))
 		  {
 		    as_bad (_("`%%%s' not allowed with `%s%c'"),
 			    i.regs[op]->reg_name,
@@ -1740,12 +1743,12 @@ md_assemble (line)
           }
       }
 
-    if (i.tm.base_opcode == AMD_3DNOW_OPCODE)
+    if (i.tm.opcode_modifier & ImmExt)
       {
-	/* These AMD specific instructions have an opcode suffix which
-	   is coded in the same place as an 8-bit immediate field
-	   would be.  Here we fake an 8-bit immediate operand from the
-	   opcode suffix stored in tm.extension_opcode.  */
+	/* These AMD 3DNow! and Intel Katmai New Instructions have an
+	   opcode suffix which is coded in the same place as an 8-bit
+	   immediate field would be.  Here we fake an 8-bit immediate
+	   operand from the opcode suffix stored in tm.extension_opcode.  */
 
 	expressionS *exp;
 
@@ -1822,37 +1825,21 @@ md_assemble (line)
 	      {
 		unsigned int source, dest;
 		source = ((i.types[0]
-			   & (Reg
-			      | SReg2
-			      | SReg3
-			      | Control
-			      | Debug
-			      | Test
-			      | RegMMX))
+			   & (Reg | RegMMX | RegXMM
+			      | SReg2 | SReg3
+			      | Control | Debug | Test))
 			  ? 0 : 1);
 		dest = source + 1;
 
-		/* Certain instructions expect the destination to be
-		   in the i.rm.reg field.  This is by far the
-		   exceptional case.  For these instructions, if the
-		   source operand is a register, we must reverse the
-		   i.rm.reg and i.rm.regmem fields.  We accomplish
-		   this by pretending that the two register operands
-		   were given in the reverse order.  */
-		if (i.tm.opcode_modifier & ReverseRegRegmem)
-		  {
-		    const reg_entry *tmp = i.regs[source];
-		    i.regs[source] = i.regs[dest];
-		    i.regs[dest] = tmp;
-		  }
-
 		i.rm.mode = 3;
-		/* We must be careful to make sure that all
-		   segment/control/test/debug/MMX registers go into
-		   the i.rm.reg field (despite whether they are
-		   source or destination operands). */
-		if (i.regs[dest]->reg_type
-		    & (SReg2 | SReg3 | Control | Debug | Test | RegMMX))
+		/* One of the register operands will be encoded in the
+		   i.tm.reg field, the other in the combined i.tm.mode
+		   and i.tm.regmem fields.  If no form of this
+		   instruction supports a memory destination operand,
+		   then we assume the source operand may sometimes be
+		   a memory operand and so we need to store the
+		   destination in the i.rm.reg field.  */
+		if ((i.tm.operand_types[dest] & AnyMem) == 0)
 		  {
 		    i.rm.reg = i.regs[dest]->reg_num;
 		    i.rm.regmem = i.regs[source]->reg_num;
@@ -1999,12 +1986,14 @@ md_assemble (line)
 		  {
 		    unsigned int op =
 		      ((i.types[0]
-			& (Reg | SReg2 | SReg3 | Control | Debug
-			   | Test | RegMMX))
+			& (Reg | RegMMX | RegXMM
+			   | SReg2 | SReg3
+			   | Control | Debug | Test))
 		       ? 0
 		       : ((i.types[1]
-			   & (Reg | SReg2 | SReg3 | Control | Debug
-			      | Test | RegMMX))
+			   & (Reg | RegMMX | RegXMM
+			      | SReg2 | SReg3
+			      | Control | Debug | Test))
 			  ? 1
 			  : 2));
 		    /* If there is an extension opcode to put here, the
@@ -2602,6 +2591,7 @@ i386_immediate (imm_start)
 
   exp_seg = expression (exp);
 
+  SKIP_WHITESPACE ();
   if (*input_line_pointer)
     as_bad (_("Ignoring junk `%s' after expression"), input_line_pointer);
 
@@ -2847,6 +2837,7 @@ i386_displacement (disp_start, disp_end)
       }
 #endif
 
+     SKIP_WHITESPACE ();
      if (*input_line_pointer)
        as_bad (_("Ignoring junk `%s' after expression"),
                input_line_pointer);
@@ -3915,15 +3906,31 @@ md_apply_fix3 (fixP, valp, seg)
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valp;
 
-  if (fixP->fx_r_type == BFD_RELOC_32 && fixP->fx_pcrel)
-     fixP->fx_r_type = BFD_RELOC_32_PCREL;
-
 #if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
+  if (fixP->fx_pcrel)
+    {
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_32:
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	  break;
+	case BFD_RELOC_16:
+	  fixP->fx_r_type = BFD_RELOC_16_PCREL;
+	  break;
+	case BFD_RELOC_8:
+	  fixP->fx_r_type = BFD_RELOC_8_PCREL;
+	  break;
+	}
+    }
+
   /*
    * This is a hack.  There should be a better way to
    * handle this.
    */
-  if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
+  if ((fixP->fx_r_type == BFD_RELOC_32_PCREL
+       || fixP->fx_r_type == BFD_RELOC_16_PCREL
+       || fixP->fx_r_type == BFD_RELOC_8_PCREL)
+      && fixP->fx_addsy)
     {
 #ifndef OBJ_AOUT
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
@@ -4023,9 +4030,9 @@ md_apply_fix3 (fixP, valp, seg)
     default:
       break;
     }
-#endif
-
-#endif
+#endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) */
+  *valp = value;
+#endif /* defined (BFD_ASSEMBLER) && !defined (TE_Mach) */
   md_number_to_chars (p, value, fixP->fx_size);
 
   return 1;
@@ -4324,9 +4331,6 @@ i386_validate_fix (fixp)
     }
 }
 
-#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
-#define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
-
 arelent *
 tc_gen_reloc (section, fixp)
      asection *section;
@@ -4347,27 +4351,35 @@ tc_gen_reloc (section, fixp)
       code = fixp->fx_r_type;
       break;
     default:
-      switch (F (fixp->fx_size, fixp->fx_pcrel))
+      if (fixp->fx_pcrel)
 	{
-	  MAP (1, 0, BFD_RELOC_8);
-	  MAP (2, 0, BFD_RELOC_16);
-	  MAP (4, 0, BFD_RELOC_32);
-	  MAP (1, 1, BFD_RELOC_8_PCREL);
-	  MAP (2, 1, BFD_RELOC_16_PCREL);
-	  MAP (4, 1, BFD_RELOC_32_PCREL);
-	default:
-	  if (fixp->fx_pcrel)
-	    as_bad (_("Can not do %d byte pc-relative relocation"),
-		    fixp->fx_size);
-	  else
-	    as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
-	  code = BFD_RELOC_32;
-	  break;
+	  switch (fixp->fx_size)
+	    {
+	    default:
+	      as_bad (_("Can not do %d byte pc-relative relocation"),
+		      fixp->fx_size);
+	      code = BFD_RELOC_32_PCREL;
+	      break;
+	    case 1: code = BFD_RELOC_8_PCREL;  break;
+	    case 2: code = BFD_RELOC_16_PCREL; break;
+	    case 4: code = BFD_RELOC_32_PCREL; break;
+	    }
+	}
+      else
+	{
+	  switch (fixp->fx_size)
+	    {
+	    default:
+	      as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
+	      code = BFD_RELOC_32;
+	      break;
+	    case 1: code = BFD_RELOC_8;  break;
+	    case 2: code = BFD_RELOC_16; break;
+	    case 4: code = BFD_RELOC_32; break;
+	    }
 	}
       break;
     }
-#undef MAP
-#undef F
 
   if (code == BFD_RELOC_32
       && GOT_symbol
@@ -4470,6 +4482,6 @@ tc_coff_sizemachdep (frag)
 
 #endif /* I386COFF */
 
-#endif /* BFD_ASSEMBLER? */
+#endif /* ! BFD_ASSEMBLER */
 
 /* end of tc-i386.c */

@@ -2,8 +2,8 @@
 
 Changes in binutils 2.10:
 
-* objdump support for -mi386:intel which causes disassembly to be displayed with
-  intel syntax.
+* objdump support for -mi386:intel which causes disassembly to be displayed
+  with intel syntax.
 
 * New program: readelf.  This displays the contents of ELF format files,
   regardless of target machine.

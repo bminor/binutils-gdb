@@ -176,6 +176,8 @@ while (0)
 
 #define tc_fix_adjustable(X) tc_m68k_fix_adjustable(X)
 extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
+#define elf_tc_final_processing m68k_elf_final_processing
+extern void m68k_elf_final_processing PARAMS ((void));
 #endif
 
 #define TC_FORCE_RELOCATION(FIX)			\

@@ -198,11 +198,12 @@ _bfd_vms_hash_newfunc (entry, table, string)
 	  bfd_set_error (bfd_error_no_memory);
 	  return (struct bfd_hash_entry *)NULL;
 	}
+      entry = (struct bfd_hash_entry *) ret;
     }
 
   /* Call the allocation method of the base class.  */
 
-  ret = (vms_symbol_entry *) bfd_hash_newfunc ((struct bfd_hash_entry *)ret, table, string);
+  ret = (vms_symbol_entry *) bfd_hash_newfunc (entry, table, string);
 #if VMS_DEBUG
   vms_debug (6, "_bfd_vms_hash_newfunc ret %p\n", ret);
 #endif

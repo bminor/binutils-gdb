@@ -122,5 +122,6 @@ set ml "undefined.c:9: undefined reference to `this_function_is_not_defined'"
 setup_xfail arm-*-elf
 setup_xfail strongarm-*-elf
 setup_xfail thumb-*-elf
+setup_xfail mcore-*-elf
 
 checkund $ml $testline

@@ -1490,13 +1490,13 @@ elf_fake_sections (abfd, asect, failedptrarg)
       this_hdr->sh_type = SHT_DYNAMIC;
       this_hdr->sh_entsize = bed->s->sizeof_dyn;
     }
-  else if (strncmp (asect->name, ".rela", 5) == 0
+  else if (strncmp (asect->name, ".rela.", 6) == 0
 	   && get_elf_backend_data (abfd)->use_rela_p)
     {
       this_hdr->sh_type = SHT_RELA;
       this_hdr->sh_entsize = bed->s->sizeof_rela;
     }
-  else if (strncmp (asect->name, ".rel", 4) == 0
+  else if (strncmp (asect->name, ".rel.", 5) == 0
 	   && ! get_elf_backend_data (abfd)->use_rela_p)
     {
       this_hdr->sh_type = SHT_REL;
@@ -2010,6 +2010,10 @@ _bfd_elf_compute_section_file_positions (abfd, link_info)
 
   if (! prep_headers (abfd))
     return false;
+
+  /* Post process the headers if necessary.  */
+  if (bed->elf_backend_post_process_headers)
+    (*bed->elf_backend_post_process_headers) (abfd, link_info);
 
   failed = false;
   bfd_map_over_sections (abfd, elf_fake_sections, &failed);
@@ -3042,6 +3046,9 @@ prep_headers (abfd)
     bfd_big_endian (abfd) ? ELFDATA2MSB : ELFDATA2LSB;
   i_ehdrp->e_ident[EI_VERSION] = bed->s->ev_current;
 
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_SYSV;
+  i_ehdrp->e_ident[EI_ABIVERSION] = 0;
+
   for (count = EI_PAD; count < EI_NIDENT; count++)
     i_ehdrp->e_ident[count] = 0;
 
@@ -3076,6 +3083,9 @@ prep_headers (abfd)
       break;
     case bfd_arch_i860:
       i_ehdrp->e_machine = EM_860;
+      break;
+    case bfd_arch_i960:
+      i_ehdrp->e_machine = EM_960;
       break;
     case bfd_arch_mips:	/* MIPS Rxxxx */
       i_ehdrp->e_machine = EM_MIPS;	/* only MIPS R3000 */

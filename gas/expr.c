@@ -34,6 +34,10 @@
 #include "obstack.h"
 
 static void floating_constant PARAMS ((expressionS * expressionP));
+static valueT generic_bignum_to_int32 PARAMS ((void));
+#ifdef BFD64
+static valueT generic_bignum_to_int64 PARAMS ((void));
+#endif
 static void integer_constant PARAMS ((int radix, expressionS * expressionP));
 static void mri_char_constant PARAMS ((expressionS *));
 static void current_location PARAMS ((expressionS *));

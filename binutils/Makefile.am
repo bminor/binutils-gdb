@@ -240,6 +240,9 @@ dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 dlltool.o:dlltool.c
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
 
+rescoff.o:rescoff.c
+	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
+
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
 
 sysdump_SOURCES = sysdump.c $(BULIBS)

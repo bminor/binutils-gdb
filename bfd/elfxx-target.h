@@ -290,6 +290,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_plt_header_size
 #define elf_backend_plt_header_size	0
 #endif
+#ifndef elf_backend_post_process_headers
+#define elf_backend_post_process_headers	NULL
+#endif
 
 #ifndef ELF_MACHINE_ALT1
 #define ELF_MACHINE_ALT1 0
@@ -344,6 +347,7 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_modify_segment_map,
   elf_backend_gc_mark_hook,
   elf_backend_gc_sweep_hook,
+  elf_backend_post_process_headers,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,

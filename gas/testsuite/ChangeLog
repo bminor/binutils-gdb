@@ -1,3 +1,26 @@
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/vtable/vtable.exp: Don't run test for i960 yet.
+
+1999-05-17  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/mcore/allinsn.d: Updated to match latest objdump output.
+
+1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/opcode.d: Modify callw to suit disasm fix.
+
+	* gas/i386/amd.d: Modify a '(bad)' to SIMD instruction.
+
+	* gas/i386/amd.s: Pad to multiple of 8
+	* gas/i386/amd.d: Here too.
+
+	* gas/i386/prefix.[sd]: Align with nops
+	* gas/i386/reloc.[sd]: Here too.
+
+	* gas/i386/katmai.[sd]: New for PIII SIMD
+	* gas/i386/i386.exp: Call it.
+
 1999-05-02  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/mcore/allinsn.d: Update to match latest assembler

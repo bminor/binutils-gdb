@@ -422,7 +422,16 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 #if FILNMLEN != E_FILNMLEN
 	    -> Error, we need to cope with truncating or extending FILNMLEN!;
 #else
-	    memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+	    if (numaux > 1)
+	      {
+		if (indx == 0)
+		  memcpy (in->x_file.x_fname, ext->x_file.x_fname,
+			  numaux * sizeof (AUXENT));
+	      }
+	    else
+	      {
+		memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+	      }
 #endif
 	  }
       goto end;

@@ -42,4 +42,4 @@ void hash_print_statistics PARAMS ((FILE *, const char *,
 				    struct hash_control *));
 #endif /* #ifdef hashH */
 
-/* end of hash.c */
+/* end of hash.h */

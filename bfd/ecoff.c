@@ -3181,7 +3181,14 @@ _bfd_ecoff_write_armap (abfd, elength, map, orl_count, stridx)
      armap.  */
   hdr.ar_uid[0] = '0';
   hdr.ar_gid[0] = '0';
+#if 0
   hdr.ar_mode[0] = '0';
+#else
+  /* Building gcc ends up extracting the armap as a file - twice. */
+  hdr.ar_mode[0] = '6';
+  hdr.ar_mode[1] = '4';
+  hdr.ar_mode[2] = '4';
+#endif
 
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
 

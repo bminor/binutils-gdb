@@ -705,18 +705,27 @@ extern boolean bfd_coff_set_symbol_class
   PARAMS ((bfd *, struct symbol_cache_entry *, unsigned int));
 
 /* ARM Interworking support.  Called from linker.  */
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 extern boolean bfd_arm_allocate_interworking_sections
   PARAMS ((struct bfd_link_info *));
 
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 extern boolean bfd_arm_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *, int));
 
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 extern boolean bfd_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* ELF ARM Interworking support.  Called from linker.  */
   extern boolean bfd_elf32_arm_allocate_interworking_sections
-    PARAMS ((struct bfd_link_info *));
+    PARAMS ((struct bfd_link_info *, int));
  
   extern boolean bfd_elf32_arm_process_before_allocation
     PARAMS ((bfd *, struct bfd_link_info *));

@@ -460,7 +460,7 @@ gen_to_words (words, precision, exponent_bits)
 	  /* Bigger than one littlenum */
 	  num_bits -= (LITTLENUM_NUMBER_OF_BITS - 1) - exponent_bits;
 	  *lp++ = word1;
-	  if (num_bits + exponent_bits + 1 >= precision * LITTLENUM_NUMBER_OF_BITS)
+	  if (num_bits + exponent_bits + 1 > precision * LITTLENUM_NUMBER_OF_BITS)
 	    {
 	      /* Exponent overflow */
 	      make_invalid_floating_point_number (words);
@@ -501,7 +501,7 @@ gen_to_words (words, precision, exponent_bits)
       if (next_bits (1))
 	{
 	  --lp;
-	  if (prec_bits > LITTLENUM_NUMBER_OF_BITS)
+	  if (prec_bits >= LITTLENUM_NUMBER_OF_BITS)
 	    {
 	      int n = 0;
 	      int tmp_bits;
@@ -515,7 +515,19 @@ gen_to_words (words, precision, exponent_bits)
 		  --n;
 		  tmp_bits -= LITTLENUM_NUMBER_OF_BITS;
 		}
-	      if (tmp_bits > LITTLENUM_NUMBER_OF_BITS || (lp[n] & mask[tmp_bits]) != mask[tmp_bits])
+	      if (tmp_bits > LITTLENUM_NUMBER_OF_BITS
+		  || (lp[n] & mask[tmp_bits]) != mask[tmp_bits]
+		  || (prec_bits != (precision * LITTLENUM_NUMBER_OF_BITS
+				    - exponent_bits - 1)
+#ifdef TC_I386
+		      /* An extended precision float with only the integer
+			 bit set would be invalid.  That must be converted
+			 to the smallest normalized number.  */
+		      && !(precision == X_PRECISION
+			   && prec_bits == (precision * LITTLENUM_NUMBER_OF_BITS
+					    - exponent_bits - 2))
+#endif
+		      ))
 		{
 		  unsigned long carry;
 
@@ -539,11 +551,18 @@ gen_to_words (words, precision, exponent_bits)
 			    << ((LITTLENUM_NUMBER_OF_BITS - 1)
 				- exponent_bits));
 		  *lp++ = word1;
+#ifdef TC_I386
+		  /* Set the integer bit in the extended precision format.
+		     This cannot happen on the m68k where the mantissa
+		     just overflows into the integer bit above.  */
+		  if (precision == X_PRECISION)
+		    *lp++ = 1 << (LITTLENUM_NUMBER_OF_BITS - 1);
+#endif
 		  while (lp < words_end)
 		    *lp++ = 0;
 		}
 	    }
-	  else if ((*lp & mask[prec_bits]) != mask[prec_bits])
+	  else
 	    *lp += 1;
 	}
 

@@ -158,6 +158,7 @@ BFD32_BACKENDS = \
 	elf32-hppa.lo \
 	elf32-i386.lo \
 	elf32-i860.lo \
+	elf32-i960.lo \
 	elf32-m32r.lo \
 	elf32-m68k.lo \
 	elf32-m88k.lo \
@@ -276,6 +277,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-hppa.c \
 	elf32-i386.c \
 	elf32-i860.c \
+	elf32-i960.c \
 	elf32-m32r.c \
 	elf32-m68k.c \
 	elf32-m88k.c \
@@ -839,6 +841,9 @@ elf32-i386.lo: elf32-i386.c $(INCDIR)/bfdlink.h elf-bfd.h \
 elf32-i860.lo: elf32-i860.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
+elf32-i960.lo: elf32-i960.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/i960.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-m32r.lo: elf32-m32r.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/m32r.h $(INCDIR)/elf/reloc-macros.h elf32-target.h

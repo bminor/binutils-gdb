@@ -23,6 +23,10 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 
+#ifndef NUM_ELEM
+#define NUM_ELEM(a) (sizeof (a) / sizeof (a)[0])
+#endif
+
 #define USE_RELA
 
 #define TARGET_LITTLE_SYM               bfd_elf32_littlearm_oabi_vec
@@ -32,6 +36,9 @@
 
 #define elf_info_to_howto               elf32_arm_info_to_howto
 #define elf_info_to_howto_rel           0
+
+#define ARM_ELF_ABI_VERSION		0
+#define ARM_ELF_OS_ABI_VERSION		0
 
 static reloc_howto_type elf32_arm_howto_table[] =
 {
@@ -173,7 +180,7 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_SBREL32",	/* name */
 	 false,			/* partial_inplace */
@@ -254,7 +261,24 @@ static reloc_howto_type elf32_arm_howto_table[] =
          0,                     /* src_mask */
          0,                     /* dst_mask */
          false),                /* pcrel_offset */
- 
+
+  /* XXX - gap in index numbering here.  */
+  
+  HOWTO (R_ARM_PLT32,		/* type */
+         2,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         26,                    /* bitsize */
+         true,			/* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_bitfield,/* complain_on_overflow */
+         bfd_elf_generic_reloc, /* special_function */
+         "R_ARM_PLT32",		/* name */
+         true,			/* partial_inplace */
+         0x00ffffff,		/* src_mask */
+         0x00ffffff,		/* dst_mask */
+         true),			/* pcrel_offset */
+  
+  /* XXX - gap in index numbering here.  */
 
   HOWTO (R_ARM_RREL32,		/* type */
 	 0,			/* rightshift */
@@ -310,9 +334,23 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
+	 false)			/* pcrel_offset */
 };
+
+/* Locate a reloc in the howto table.  This function must be used
+   when the entry number is is > R_ARM_GNU_VTINHERIT.  */
+static reloc_howto_type *
+find_howto (r_type)
+     unsigned int r_type;
+{
+  int i;
+  
+  for (i = NUM_ELEM (elf32_arm_howto_table); i--;)
+    if (elf32_arm_howto_table [i].type == r_type)
+      return elf32_arm_howto_table + i;
+
+  return NULL;
+}
 
 static void
 elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
@@ -323,9 +361,11 @@ elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
-  /* fixme: need range test */
-  /* BFD_ASSERT (r_type < (unsigned int) R_ELF32_ARM_MAX); */
-  bfd_reloc->howto = &elf32_arm_howto_table[r_type];
+
+  if (r_type <= R_ARM_GNU_VTINHERIT)
+    bfd_reloc->howto = & elf32_arm_howto_table[r_type];
+  else
+    bfd_reloc->howto = find_howto (r_type);
 }
 
 struct elf32_arm_reloc_map
@@ -336,21 +376,21 @@ struct elf32_arm_reloc_map
 
 static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
 {
-  {BFD_RELOC_NONE, R_ARM_NONE,},
-  {BFD_RELOC_ARM_PCREL_BRANCH, R_ARM_PC24,},
-  {BFD_RELOC_32, R_ARM_ABS32,},
-  {BFD_RELOC_32_PCREL, R_ARM_REL32,},
-  {BFD_RELOC_8, R_ARM_ABS8,},
-  {BFD_RELOC_16, R_ARM_ABS16,},
-  {BFD_RELOC_ARM_OFFSET_IMM, R_ARM_ABS12,},
-  {BFD_RELOC_ARM_THUMB_OFFSET, R_ARM_THM_ABS5,},
-  {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22,},
-  {BFD_RELOC_VTABLE_INHERIT, R_ARM_GNU_VTINHERIT },
-  {BFD_RELOC_VTABLE_ENTRY, R_ARM_GNU_VTENTRY },
-  {BFD_RELOC_NONE, R_ARM_SBREL32,},
-  {BFD_RELOC_NONE, R_ARM_AMP_VCALL9,},
-  {BFD_RELOC_THUMB_PCREL_BRANCH12, R_ARM_THM_PC11,},
-  {BFD_RELOC_THUMB_PCREL_BRANCH9, R_ARM_THM_PC9,}
+  {BFD_RELOC_NONE,                 R_ARM_NONE },
+  {BFD_RELOC_ARM_PCREL_BRANCH,     R_ARM_PC24 },
+  {BFD_RELOC_32,                   R_ARM_ABS32 },
+  {BFD_RELOC_32_PCREL,             R_ARM_REL32 },
+  {BFD_RELOC_8,                    R_ARM_ABS8 },
+  {BFD_RELOC_16,                   R_ARM_ABS16 },
+  {BFD_RELOC_ARM_OFFSET_IMM,       R_ARM_ABS12 },
+  {BFD_RELOC_ARM_THUMB_OFFSET,     R_ARM_THM_ABS5 },
+  {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22 },
+  {BFD_RELOC_NONE,                 R_ARM_SBREL32 },
+  {BFD_RELOC_NONE,                 R_ARM_AMP_VCALL9 },
+  {BFD_RELOC_THUMB_PCREL_BRANCH12, R_ARM_THM_PC11 },
+  {BFD_RELOC_THUMB_PCREL_BRANCH9,  R_ARM_THM_PC9 },  
+  {BFD_RELOC_VTABLE_INHERIT,       R_ARM_GNU_VTINHERIT },
+  {BFD_RELOC_VTABLE_ENTRY,         R_ARM_GNU_VTENTRY }
 };
 
 static reloc_howto_type *
@@ -360,14 +400,13 @@ elf32_arm_reloc_type_lookup (abfd, code)
 {
   unsigned int i;
 
-  for (i = 0;
-     i < sizeof (elf32_arm_reloc_map) / sizeof (struct elf32_arm_reloc_map);
-       i++)
-    {
-      if (elf32_arm_reloc_map[i].bfd_reloc_val == code)
-	return & elf32_arm_howto_table[elf32_arm_reloc_map[i].elf_reloc_val];
-    }
+  for (i = NUM_ELEM (elf32_arm_reloc_map); i--;)
+    if (elf32_arm_reloc_map[i].bfd_reloc_val == code)
+      return & elf32_arm_howto_table [elf32_arm_reloc_map[i].elf_reloc_val];
 
+  if (code == BFD_RELOC_ARM_PLT32)
+    return find_howto (R_ARM_PLT32);
+  
   return NULL;
 }
 

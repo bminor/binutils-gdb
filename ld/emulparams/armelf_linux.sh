@@ -6,6 +6,8 @@ LITTLE_OUTPUT_FORMAT="elf32-littlearm"
 MAXPAGESIZE=0x8000
 TEMPLATE_NAME=armelf
 
+GENERATE_SHLIB_SCRIPT=yes
+
 OTHER_TEXT_SECTIONS='*(.glue_7t) *(.glue_7)'
 OTHER_BSS_SYMBOLS='__bss_start__ = .;'
 OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ;'

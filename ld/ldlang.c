@@ -77,16 +77,9 @@ static boolean wildcardp PARAMS ((const char *));
 static lang_statement_union_type *wild_sort
   PARAMS ((lang_wild_statement_type *, lang_input_statement_type *,
 	   asection *));
-static void wild_section PARAMS ((lang_wild_statement_type *ptr,
-				  const char *section,
-				  lang_input_statement_type *file,
-				  lang_output_section_statement_type *output));
 static lang_input_statement_type *lookup_name PARAMS ((const char *name));
 static void load_symbols PARAMS ((lang_input_statement_type *entry,
 				  lang_statement_list_type *));
-static void wild_file PARAMS ((lang_wild_statement_type *, const char *,
-			       lang_input_statement_type *,
-			       lang_output_section_statement_type *));
 static void wild PARAMS ((lang_wild_statement_type *s,
 			  const char *section, const char *file,
 			  const char *target,
@@ -142,20 +135,23 @@ static int topower PARAMS ((int));
 static void lang_set_startof PARAMS ((void));
 static void reset_memory_regions PARAMS ((void));
 static void lang_record_phdrs PARAMS ((void));
-static void lang_gc_wild_section
-  PARAMS ((lang_wild_statement_type *, const char *,
-	   lang_input_statement_type *));
-static void lang_gc_wild_file
-  PARAMS ((lang_wild_statement_type *, const char *,
-	   lang_input_statement_type *));
 static void lang_gc_wild
   PARAMS ((lang_wild_statement_type *, const char *, const char *));
 static void lang_gc_sections_1 PARAMS ((lang_statement_union_type *));
 static void lang_gc_sections PARAMS ((void));
 static void lang_do_version_exports_section PARAMS ((void));
 static void lang_check_section_addresses PARAMS ((void));
-					
 
+typedef void (*callback_t) PARAMS ((lang_wild_statement_type *,
+				    asection *, lang_input_statement_type *,
+				    void *));
+static void walk_wild_section
+  PARAMS ((lang_wild_statement_type *, const char *,
+	   lang_input_statement_type *, callback_t, void *));
+static void walk_wild_file
+  PARAMS ((lang_wild_statement_type *, const char *,
+	   lang_input_statement_type *, callback_t, void *));
+					
 /* EXPORTS */
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
@@ -192,6 +188,142 @@ stat_alloc (size)
   return obstack_alloc (&stat_obstack, size);
 }
 
+/*----------------------------------------------------------------------
+  Generic traversal routines for finding matching sections.
+*/
+
+static void
+walk_wild_section (ptr, section, file, callback, data)
+     lang_wild_statement_type *ptr;
+     const char *section;
+     lang_input_statement_type *file;
+     callback_t callback;
+     void *data;
+{
+  /* Don't process sections from files which were excluded. */
+  if (ptr->exclude_filename != NULL)
+    {
+      boolean match;
+
+      if (wildcardp (ptr->exclude_filename))
+         match = fnmatch (ptr->exclude_filename, file->filename, 0) == 0 ? true : false;
+      else
+         match = strcmp (ptr->exclude_filename, file->filename) == 0 ? true : false;
+
+      if (match)
+        return;
+    }
+
+  if (file->just_syms_flag == false)
+    {
+      register asection *s;
+      boolean wildcard;
+
+      if (section == NULL)
+	wildcard = false;
+      else
+	wildcard = wildcardp (section);
+
+      for (s = file->the_bfd->sections; s != NULL; s = s->next)
+	{
+	  boolean match;
+
+	  if (section == NULL)
+	    match = true;
+	  else
+	    {
+	      const char *name;
+
+	      name = bfd_get_section_name (file->the_bfd, s);
+	      if (wildcard)
+		match = fnmatch (section, name, 0) == 0 ? true : false;
+	      else
+		match = strcmp (section, name) == 0 ? true : false;
+	    }
+
+	  if (match)
+	    (*callback) (ptr, s, file, data);
+	}
+    }
+}
+
+/* Handle a wild statement for a single file F.  */
+
+static void
+walk_wild_file (s, section, f, callback, data)
+     lang_wild_statement_type *s;
+     const char *section;
+     lang_input_statement_type *f;
+     callback_t callback;
+     void *data;
+{
+  if (f->the_bfd == NULL
+      || ! bfd_check_format (f->the_bfd, bfd_archive))
+    walk_wild_section (s, section, f, callback, data);
+  else
+    {
+      bfd *member;
+
+      /* This is an archive file.  We must map each member of the
+	 archive separately.  */
+      member = bfd_openr_next_archived_file (f->the_bfd, (bfd *) NULL);
+      while (member != NULL)
+	{
+	  /* When lookup_name is called, it will call the add_symbols
+	     entry point for the archive.  For each element of the
+	     archive which is included, BFD will call ldlang_add_file,
+	     which will set the usrdata field of the member to the
+	     lang_input_statement.  */
+	  if (member->usrdata != NULL)
+	    {
+	      walk_wild_section (s, section,
+				 (lang_input_statement_type *) member->usrdata,
+				 callback, data);
+	    }
+
+	  member = bfd_openr_next_archived_file (f->the_bfd, member);
+	}
+    }
+}
+
+static void
+walk_wild (s, section, file, callback, data)
+     lang_wild_statement_type *s;
+     const char *section;
+     const char *file;
+     callback_t callback;
+     void *data;
+{
+  lang_input_statement_type *f;
+
+  if (file == (char *) NULL)
+    {
+      /* Perform the iteration over all files in the list.  */
+      for (f = (lang_input_statement_type *) file_chain.head;
+	   f != (lang_input_statement_type *) NULL;
+	   f = (lang_input_statement_type *) f->next)
+	{
+	  walk_wild_file (s, section, f, callback, data);
+	}
+    }
+  else if (wildcardp (file))
+    {
+      for (f = (lang_input_statement_type *) file_chain.head;
+	   f != (lang_input_statement_type *) NULL;
+	   f = (lang_input_statement_type *) f->next)
+	{
+	  if (fnmatch (file, f->filename, FNM_FILE_NAME) == 0)
+	    walk_wild_file (s, section, f, callback, data);
+	}
+    }
+  else
+    {
+      /* Perform the iteration over a single file.  */
+      f = lookup_name (file);
+      walk_wild_file (s, section, f, callback, data);
+    }
+}  
+     
 /*----------------------------------------------------------------------
   lang_for_each_statement walks the parse tree and calls the provided
   function for each node
@@ -1070,104 +1202,53 @@ wild_sort (wild, file, section)
    NULL, in which case it is a wild card.  */
 
 static void
-wild_section (ptr, section, file, output)
+output_section_callback (ptr, section, file, output)
      lang_wild_statement_type *ptr;
-     const char *section;
+     asection *section;
      lang_input_statement_type *file;
-     lang_output_section_statement_type *output;
+     void *output;
 {
-
-  /* Don't process sections from files which were excluded. */
-  if (ptr->exclude_filename != NULL)
+  lang_statement_union_type *before;
+  
+  /* If the wild pattern was marked KEEP, the member sections
+     should be as well.  */
+  if (ptr->keep_sections)
+    section->flags |= SEC_KEEP;
+  
+  before = wild_sort (ptr, file, section);
+  
+  /* Here BEFORE points to the lang_input_section which
+     should follow the one we are about to add.  If BEFORE
+     is NULL, then the section should just go at the end
+     of the current list.  */
+  
+  if (before == NULL)
+    wild_doit (&ptr->children, section, 
+	       (lang_output_section_statement_type *) output, 
+	       file);
+  else
     {
-      boolean match;
-
-      if (wildcardp (ptr->exclude_filename))
-         match = fnmatch (ptr->exclude_filename, file->filename, 0) == 0 ? true : false;
-      else
-         match = strcmp (ptr->exclude_filename, file->filename) == 0 ? true : false;
-
-      if (match)
-        return;
-    }
-
-  if (file->just_syms_flag == false)
-    {
-      register asection *s;
-      boolean wildcard;
-
-      if (section == NULL)
-	wildcard = false;
-      else
-	wildcard = wildcardp (section);
-
-      for (s = file->the_bfd->sections; s != NULL; s = s->next)
+      lang_statement_list_type list;
+      lang_statement_union_type **pp;
+      
+      lang_list_init (&list);
+      wild_doit (&list, section, 
+		 (lang_output_section_statement_type *) output, 
+		 file);
+      
+      /* If we are discarding the section, LIST.HEAD will
+	 be NULL.  */
+      if (list.head != NULL)
 	{
-	  boolean match;
-
-	  /* Attach all sections named SECTION.  If SECTION is NULL,
-	     then attach all sections.
-
-	     Previously, if SECTION was NULL, this code did not call
-	     wild_doit if the SEC_IS_COMMON flag was set for the
-	     section.  I did not understand that, and I took it out.
-	     --ian@cygnus.com.  */
-
-	  if (section == NULL)
-	    match = true;
-	  else
-	    {
-	      const char *name;
-
-	      name = bfd_get_section_name (file->the_bfd, s);
-	      if (wildcard)
-		match = fnmatch (section, name, 0) == 0 ? true : false;
-	      else
-		match = strcmp (section, name) == 0 ? true : false;
-	    }
-
-	  if (match)
-	    {
-	      lang_statement_union_type *before;
-
-	      /* If the wild pattern was marked KEEP, the member sections
-		 should be as well.  */
-	      if (ptr->keep_sections)
-		s->flags |= SEC_KEEP;
-
-	      before = wild_sort (ptr, file, s);
-
-	      /* Here BEFORE points to the lang_input_section which
-		 should follow the one we are about to add.  If BEFORE
-		 is NULL, then the section should just go at the end
-		 of the current list.  */
-
-	      if (before == NULL)
-		wild_doit (&ptr->children, s, output, file);
-	      else
-		{
-		  lang_statement_list_type list;
-		  lang_statement_union_type **pp;
-
-		  lang_list_init (&list);
-		  wild_doit (&list, s, output, file);
-
-		  /* If we are discarding the section, LIST.HEAD will
-                     be NULL.  */
-		  if (list.head != NULL)
-		    {
-		      ASSERT (list.head->next == NULL);
-
-		      for (pp = &ptr->children.head;
-			   *pp != before;
-			   pp = &(*pp)->next)
-			ASSERT (*pp != NULL);
-
-		      list.head->next = *pp;
-		      *pp = list.head;
-		    }
-		}
-	    }
+	  ASSERT (list.head->next == NULL);
+	  
+	  for (pp = &ptr->children.head;
+	       *pp != before;
+	       pp = &(*pp)->next)
+	    ASSERT (*pp != NULL);
+	  
+	  list.head->next = *pp;
+	  *pp = list.head;
 	}
     }
 }
@@ -1320,43 +1401,7 @@ load_symbols (entry, place)
   entry->loaded = true;
 }
 
-/* Handle a wild statement for a single file F.  */
-
-static void
-wild_file (s, section, f, output)
-     lang_wild_statement_type *s;
-     const char *section;
-     lang_input_statement_type *f;
-     lang_output_section_statement_type *output;
-{
-  if (f->the_bfd == NULL
-      || ! bfd_check_format (f->the_bfd, bfd_archive))
-    wild_section (s, section, f, output);
-  else
-    {
-      bfd *member;
-
-      /* This is an archive file.  We must map each member of the
-	 archive separately.  */
-      member = bfd_openr_next_archived_file (f->the_bfd, (bfd *) NULL);
-      while (member != NULL)
-	{
-	  /* When lookup_name is called, it will call the add_symbols
-	     entry point for the archive.  For each element of the
-	     archive which is included, BFD will call ldlang_add_file,
-	     which will set the usrdata field of the member to the
-	     lang_input_statement.  */
-	  if (member->usrdata != NULL)
-	    {
-	      wild_section (s, section,
-			    (lang_input_statement_type *) member->usrdata,
-			    output);
-	    }
-
-	  member = bfd_openr_next_archived_file (f->the_bfd, member);
-	}
-    }
-}
+     
 
 /* Handle a wild statement.  SECTION or FILE or both may be NULL,
    indicating that it is a wildcard.  Separate lang_input_section
@@ -1371,34 +1416,7 @@ wild (s, section, file, target, output)
      const char *target;
      lang_output_section_statement_type *output;
 {
-  lang_input_statement_type *f;
-
-  if (file == (char *) NULL)
-    {
-      /* Perform the iteration over all files in the list */
-      for (f = (lang_input_statement_type *) file_chain.head;
-	   f != (lang_input_statement_type *) NULL;
-	   f = (lang_input_statement_type *) f->next)
-	{
-	  wild_file (s, section, f, output);
-	}
-    }
-  else if (wildcardp (file))
-    {
-      for (f = (lang_input_statement_type *) file_chain.head;
-	   f != (lang_input_statement_type *) NULL;
-	   f = (lang_input_statement_type *) f->next)
-	{
-	  if (fnmatch (file, f->filename, FNM_FILE_NAME) == 0)
-	    wild_file (s, section, f, output);
-	}
-    }
-  else
-    {
-      /* Perform the iteration over a single file */
-      f = lookup_name (file);
-      wild_file (s, section, f, output);
-    }
+  walk_wild (s, section, file, output_section_callback, (void *) output);
 
   if (section != (char *) NULL
       && strcmp (section, "COMMON") == 0
@@ -3487,90 +3505,20 @@ reset_memory_regions ()
     }
 }
 
-/* ??? At some point this traversal for GC should share code with the
-   traversal for manipulating the output file.  */
-
 /* Expand a wild statement for a particular FILE, marking its sections KEEP
    as needed.  SECTION may be NULL, in which case it is a wild card.  */
 
 static void
-lang_gc_wild_section (ptr, section, file)
+gc_section_callback (ptr, section, file, data)
      lang_wild_statement_type *ptr;
-     const char *section;
+     asection *section;
      lang_input_statement_type *file;
+     void *data;
 {
-  if (file->just_syms_flag == false)
-    {
-      register asection *s;
-      boolean wildcard;
-
-      if (section == NULL)
-	wildcard = false;
-      else
-	wildcard = wildcardp (section);
-
-      for (s = file->the_bfd->sections; s != NULL; s = s->next)
-	{
-	  boolean match;
-
-	  if (section == NULL)
-	    match = true;
-	  else
-	    {
-	      const char *name;
-
-	      name = bfd_get_section_name (file->the_bfd, s);
-	      if (wildcard)
-		match = fnmatch (section, name, 0) == 0 ? true : false;
-	      else
-		match = strcmp (section, name) == 0 ? true : false;
-	    }
-
-	  if (match)
-	    {
-	      /* If the wild pattern was marked KEEP, the member sections
-		 should be as well.  */
-	      if (ptr->keep_sections)
-		s->flags |= SEC_KEEP;
-	    }
-	}
-    }
-}
-
-/* Handle a wild statement for a single file F.  */
-
-static void
-lang_gc_wild_file (s, section, f)
-     lang_wild_statement_type *s;
-     const char *section;
-     lang_input_statement_type *f;
-{
-  if (f->the_bfd == NULL
-      || ! bfd_check_format (f->the_bfd, bfd_archive))
-    lang_gc_wild_section (s, section, f);
-  else
-    {
-      bfd *member;
-
-      /* This is an archive file.  We must map each member of the
-	 archive separately.  */
-      member = bfd_openr_next_archived_file (f->the_bfd, (bfd *) NULL);
-      while (member != NULL)
-	{
-	  /* When lookup_name is called, it will call the add_symbols
-	     entry point for the archive.  For each element of the
-	     archive which is included, BFD will call ldlang_add_file,
-	     which will set the usrdata field of the member to the
-	     lang_input_statement.  */
-	  if (member->usrdata != NULL)
-	    {
-	      lang_gc_wild_section (s, section,
-			    (lang_input_statement_type *) member->usrdata);
-	    }
-
-	  member = bfd_openr_next_archived_file (f->the_bfd, member);
-	}
-    }
+  /* If the wild pattern was marked KEEP, the member sections
+     should be as well.  */
+  if (ptr->keep_sections)
+    section->flags |= SEC_KEEP;
 }
 
 /* Handle a wild statement, marking it against GC.  SECTION or FILE or both
@@ -3582,34 +3530,7 @@ lang_gc_wild (s, section, file)
      const char *section;
      const char *file;
 {
-  lang_input_statement_type *f;
-
-  if (file == (char *) NULL)
-    {
-      /* Perform the iteration over all files in the list */
-      for (f = (lang_input_statement_type *) file_chain.head;
-	   f != (lang_input_statement_type *) NULL;
-	   f = (lang_input_statement_type *) f->next)
-	{
-	  lang_gc_wild_file (s, section, f);
-	}
-    }
-  else if (wildcardp (file))
-    {
-      for (f = (lang_input_statement_type *) file_chain.head;
-	   f != (lang_input_statement_type *) NULL;
-	   f = (lang_input_statement_type *) f->next)
-	{
-	  if (fnmatch (file, f->filename, FNM_FILE_NAME) == 0)
-	    lang_gc_wild_file (s, section, f);
-	}
-    }
-  else
-    {
-      /* Perform the iteration over a single file */
-      f = lookup_name (file);
-      lang_gc_wild_file (s, section, f);
-    }
+  walk_wild (s, section, file, gc_section_callback, NULL);
 }
 
 /* Iterate over sections marking them against GC.  */

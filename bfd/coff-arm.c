@@ -1,5 +1,5 @@
 /* BFD back-end for ARM COFF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -934,8 +934,6 @@ static const insn32 a2t1_ldr_insn       = 0xe59fc000;
 static const insn32 a2t2_bx_r12_insn    = 0xe12fff1c;
 static const insn32 a2t3_func_addr_insn = 0x00000001;
 
-#define A2T3_OFFSET 8
-
 /*
    Thumb->ARM:				Thumb->(non-interworking aware) ARM
 
@@ -958,8 +956,6 @@ static const insn32 a2t3_func_addr_insn = 0x00000001;
 static const insn16 t2a1_bx_pc_insn = 0x4778;
 static const insn16 t2a2_noop_insn  = 0x46c0;
 static const insn32 t2a3_b_insn     = 0xea000000;
-
-#define T2A3_OFFSET 8
 
 static const insn16 t2a1_push_insn  = 0xb540;
 static const insn16 t2a2_ldr_insn   = 0x4e03;
@@ -1211,7 +1207,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				      s->contents + my_offset + 8);
 
                           if (info->base_file)
-                            arm_emit_base_file_entry (info, output_bfd, s, A2T3_OFFSET);
+                            arm_emit_base_file_entry (info, output_bfd, s, 
+                                                            my_offset + 8);
 
 			}
 
@@ -1236,7 +1233,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      
 		      bfd_put_32 (output_bfd, tmp, contents + rel->r_vaddr
 				  - input_section->vma);
-		      
 		      done = 1;
 		    }
                 }
@@ -1319,6 +1315,9 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			      /* Store the address of the function in the last word of the stub.  */
 			      bfd_put_32 (output_bfd, h_val,
 					  s->contents + my_offset + 16);
+
+                              if (info->base_file)
+                                arm_emit_base_file_entry (info, output_bfd, s, my_offset + 16);
 			    }
 			  else
 			    {
@@ -1341,8 +1340,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					  t2a3_b_insn | ((ret_offset >> 2) & 0x00FFFFFF),
 					  s->contents + my_offset + 4);
 
-                              if (info->base_file)
-                                arm_emit_base_file_entry (info, output_bfd, s, T2A3_OFFSET);
 			    }
 			}
 
@@ -1365,9 +1362,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				  contents + rel->r_vaddr
 				  - input_section->vma);
 		      
-                      if (info->base_file)
-                        arm_emit_base_file_entry (info, output_bfd, input_section, rel->r_vaddr);
-
 		      done = 1;
                     }
                 }
@@ -1537,7 +1531,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	 Probably not, but it works, and if it works it don't need fixing!  nickc@cygnus.com */
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
       if (! info->relocateable
-	  && rel->r_type == ARM_32)
+	  && (rel->r_type == ARM_32 || rel->r_type == ARM_RVA32))
 	{
 	  /* Determine if we need to set the bottom bit of a relocated address
 	     because the address is the address of a Thumb code symbol.  */
@@ -1610,7 +1604,9 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-#ifndef COFF_WITH_PE
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 boolean
 bfd_arm_allocate_interworking_sections (info) 
      struct bfd_link_info * info;
@@ -1797,6 +1793,9 @@ record_thumb_to_arm_glue (info, h)
 /* Select a BFD to be used to hold the sections used by the glue code.
    This function is called from the linker scripts in ld/emultempl/
    {armcoff/pe}.em  */
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 boolean
 bfd_arm_get_bfd_for_interworking (abfd, info)
      bfd * 		    abfd;
@@ -1852,6 +1851,9 @@ bfd_arm_get_bfd_for_interworking (abfd, info)
   return true;
 }
 
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 boolean
 bfd_arm_process_before_allocation (abfd, info, support_old_code)
      bfd *                   abfd;
@@ -1958,8 +1960,6 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 
   return true;
 }
-
-#endif /* ! COFF_WITH_PE */
 
 #define coff_bfd_reloc_type_lookup 		coff_arm_reloc_type_lookup
 #define coff_relocate_section 			coff_arm_relocate_section
@@ -2183,7 +2183,7 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
   if (APCS_SET (abfd)
       && (   (APCS_26_FLAG    (abfd) != flag)
 	  || (APCS_FLOAT_FLAG (abfd) != (flags & F_APCS_FLOAT))
-	  || (PIC_FLAG        (abfd) != (flags & F_PIC_INT ? F_PIC : 0))
+	  || (PIC_FLAG        (abfd) != (flags & F_PIC))
 	  ))
     return false;
 

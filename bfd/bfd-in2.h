@@ -705,18 +705,27 @@ extern boolean bfd_coff_set_symbol_class
   PARAMS ((bfd *, struct symbol_cache_entry *, unsigned int));
 
 /* ARM Interworking support.  Called from linker.  */
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 extern boolean bfd_arm_allocate_interworking_sections
   PARAMS ((struct bfd_link_info *));
 
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 extern boolean bfd_arm_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *, int));
 
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 extern boolean bfd_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* ELF ARM Interworking support.  Called from linker.  */
   extern boolean bfd_elf32_arm_allocate_interworking_sections
-    PARAMS ((struct bfd_link_info *));
+    PARAMS ((struct bfd_link_info *, int));
  
   extern boolean bfd_elf32_arm_process_before_allocation
     PARAMS ((bfd *, struct bfd_link_info *));
@@ -1828,6 +1837,10 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS_GOT_LO16,
   BFD_RELOC_MIPS_CALL_HI16,
   BFD_RELOC_MIPS_CALL_LO16,
+  BFD_RELOC_MIPS_SUB,
+  BFD_RELOC_MIPS_GOT_PAGE,
+  BFD_RELOC_MIPS_GOT_OFST,
+  BFD_RELOC_MIPS_GOT_DISP,
 
 
 /* i386/elf relocations */
@@ -2162,6 +2175,7 @@ short offset into 11 bits. */
   BFD_RELOC_MCORE_PCREL_IMM4BY2,
   BFD_RELOC_MCORE_PCREL_32,
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
+  BFD_RELOC_MCORE_RVA,
 
 /* These two relocations are used by the linker to determine which of 
 the entries in a C++ virtual function table are actually used.  When

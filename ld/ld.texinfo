@@ -179,18 +179,21 @@ result of linking the file @code{/lib/crt0.o} with @code{hello.o} and
 the library @code{libc.a}, which will come from the standard search
 directories.  (See the discussion of the @samp{-l} option below.)
 
-The command-line options to @code{ld} may be specified in any order, and
-may be repeated at will.  Repeating most options with a different
-argument will either have no further effect, or override prior
+Some of the command-line options to @code{ld} may be specified at any
+point in the command line.  However, options which refer to files, such
+as @samp{-l} or @samp{-T}, cause the file to be read at the point at
+which the option appears in the command line, relative to the object
+files and other file options.  Repeating non-file options with a
+different argument will either have no further effect, or override prior
 occurrences (those further to the left on the command line) of that
 option.  Options which may be meaningfully specified more than once are
 noted in the descriptions below.
 
 @cindex object files
-Non-option arguments are objects files which are to be linked together.
-They may follow, precede, or be mixed in with command-line options,
-except that an object file argument may not be placed between an option
-and its argument.
+Non-option arguments are object files or archives which are to be linked
+together.  They may follow, precede, or be mixed in with command-line
+options, except that an object file argument may not be placed between
+an option and its argument.
 
 Usually the linker is invoked with at least one object file, but you can
 specify other forms of binary input files using @samp{-l}, @samp{-R},

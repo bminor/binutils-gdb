@@ -1,3 +1,148 @@
+Wed Jun  2 12:34:36 1999  Richard Henderson  <rth@cygnus.com>
+
+	* dlltool.c (gen_exp_file): Revert 19990411 change.
+
+Mon May 31 09:56:22 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* readelf.c (process_relocs): Determine type of reloc from
+	DT_PLTREL and from section type.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_elf_class): Display unknown class number.
+	(get_data_encoding): Display unknown encoding number.
+	(get_osabi_name): Display unknown ABI number.
+	(process_file_header): Display unknown version number.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Fix typo.
+
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Add extra parameter: is_rela to
+	specify the kind of relocations to be dumped.  Call guess_is_rela
+	if this parameter has a value of UNKNOWN.
+	(guess_is_rela): New function:  Guess the kind of reloc being used
+	baced on the machine number.
+	(process_relocs): Determine type of reloc before calling
+	dump_relocations.
+
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* readelf.c: Include "elf/i960.h".
+	(dump_relocations): Handle EM_960.
+
+Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* objcopy.c (copy_archive): Preserve dates of archive members if
+	requested.
+
+	* readelf.c (dump_relocations): Always print the addend on RELA
+	systems even if there is no symbol.
+	(process_program_headers): Reset dynamic_size before looping
+	through the program headers.
+	(process_version_sections): Cast sh_offset to unsigned long for
+	printing in case bfd_vma is wider.
+	(process_symbol_table): Use get_symbol_index_type when printing
+	st_shndx.
+
+1999-05-17  DJ Delorie  <dj@cygnus.com>
+
+	* windres.c: add verbose option
+	(main): process verbose option
+	* resrc.c (look_for_default): new.  Look for the default
+	preprocessor in a given location.
+	(read_rc_file): for foo/bar-windres, look for foo/bar-gcc,
+	foo/gcc (in case of foo/windres), and then gcc (the old default).
+
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (deduce_name): New function: Deduce name of program to
+	run.
+	(mcore_elf_out_file): New variable: Name of mcore-elf output file.
+	(mcore_elf_linker): New variable: Name of linker to use.
+	(mcore_elf_linker_flags): New variable: Linker flags to pass.
+	(scan_obj_file): Cache filenames if necessary.
+	(usage): Document new command line options.
+	(main): Support new command line options: -M (generate an
+	mcore-elf output file) -L (name of linker to use) -F (flags to
+	pass to linker). 
+	(mcore_elf_cache_filename): Store a filename in a cache.
+	(mcore_elf_gen_out_file): New function: Generate an output file
+	per the mcore-elf spec.
+
+1999-05-15  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (BUILD_MISC): Build dlltool for mcore
+	* configure: Regenerate.
+	* dlltool.c: Update example in comment.
+	(DLLTOOL_MCORE): Define.
+	(DLLTOOL_MCORE_ELF): Define.
+	(DRECTVE_SECTION_NAME): Define.
+	(mcore_be_jtab, mcore_le_jtab): Binary for performing an mcore
+	jump to address.
+	(mtable): Add entries for mcore variants.
+	(rvaafter, rvabefore, asm_prefix): Add mcore suppport.
+	(scan_drectve_symbols): Use DRECTVE_SECTION_NAME.
+	(make_head, make_tail): Cope if file cannot be created.
+	(usage): Improve layout.
+	
+1999-05-13  DJ Delorie  <dj@cygnus.com>
+
+	* rclex.l: add code to suppress certain output from cpp, replace
+	all returns with MAYBE_RETURN
+	(MAYBE_RETURN): new, implement the suppression by returning
+	IGNORED_TOKEN as needed.
+	(cpp_line): remember which file we're in, mark data from included
+	*.h files for suppression.
+	* rcparse.y (input): allow IGNORED_TOKEN outside of known constructs
+
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* windres.c (quot): Quote shell metacharacters in a string
+	(main): quote parameters to cpp that might have metacharacters in
+	them.  Allow -D as an alias for --define to allow for sharing make
+	macros with gcc.
+
+	* objdump.c (dump_reloc_set): don't core if howto->name is NULL
+
+	* Makefile.am: Give rescoff.c a cpu-specific -D so it can set
+	the correct BFD.
+	* Makefile.in: ditto
+	* rescoff.c (write_coff_file): Set the correct BFD
+
+1999-05-06  Ian Lance Taylor  <ian@zembu.com>
+
+	* rename.c (smart_rename): Fix test of whether file exists.
+
+1999-05-06  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (disassemble_data): Set display_endian based on target
+	endianism.
+
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+
+	* dlltool.c (interwork): Remove.
+	(arm_interwork_jtab): Use bx insn.
+	(thumb_jtab): Likewise.
+	(MARM_INTERWORK): New machine type.
+	(rvaafter): Handle it.
+	(rvabefore) Likewise.
+	(asm_prefix): Likewise.
+	(gen_exp_type): Check machine type instead of
+	interwork flag.
+	(make_one_lib_file): Likewise.
+	(make_head): Likewise.
+	(make_tail): Likewise.
+	(usage): Update machine types.
+	(main): Remove -interwork support.
+
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+ 
+        * readelf.c (get_machine_flags):  Check for EF_CPU32.
+        (get_data_encoding): Fix typo.
+ 
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
