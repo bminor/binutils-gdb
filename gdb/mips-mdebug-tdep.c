@@ -37,10 +37,8 @@
 #include "mips-mdebug-tdep.h"
 
 #define PROC_LOW_ADDR(proc) ((proc)->pdr.adr)	/* least address */
-#define PROC_HIGH_ADDR(proc) ((proc)->high_addr)	/* upper address bound */
 #define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)
 #define PROC_FRAME_REG(proc) ((proc)->pdr.framereg)
-#define PROC_FRAME_ADJUST(proc)  ((proc)->frame_adjust)
 #define PROC_REG_MASK(proc) ((proc)->pdr.regmask)
 #define PROC_FREG_MASK(proc) ((proc)->pdr.fregmask)
 #define PROC_REG_OFFSET(proc) ((proc)->pdr.regoffset)
@@ -215,14 +213,10 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 			       sizeof (struct mips_extra_func_info));
 	      PROC_LOW_ADDR (proc_desc) = pdr_pc;
 
-	      /* Only used for dummy frames.  */
-	      PROC_HIGH_ADDR (proc_desc) = 0;
-
 	      PROC_FRAME_OFFSET (proc_desc)
 		= bfd_get_32 (sec->objfile->obfd, ptr + 20);
 	      PROC_FRAME_REG (proc_desc) = bfd_get_32 (sec->objfile->obfd,
 						       ptr + 24);
-	      PROC_FRAME_ADJUST (proc_desc) = 0;
 	      PROC_REG_MASK (proc_desc) = bfd_get_32 (sec->objfile->obfd,
 						      ptr + 4);
 	      PROC_FREG_MASK (proc_desc) = bfd_get_32 (sec->objfile->obfd,
@@ -301,7 +295,7 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* Extract the frame's base.  */
   cache->base = (frame_unwind_register_signed (next_frame, NUM_REGS + PROC_FRAME_REG (proc_desc))
-		 + PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
+		 + PROC_FRAME_OFFSET (proc_desc));
 
   kernel_trap = PROC_REG_MASK (proc_desc) & 1;
   gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK (proc_desc);

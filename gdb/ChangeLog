@@ -1,5 +1,11 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	Suggested by Mark Kettenis.
+	* config/mips/tm-mips.h (struct mips_extra_func_info): Delete
+	fields frame_adjust and high_addr.
+	* mips-mdebug-tdep.c (PROC_HIGH_ADDR, PROC_FRAME_ADJUST): Delete.
+	(non_heuristic_proc_desc): Delete references.
+
 	* mips-tdep.h (MIPS_PRID_REGNUM): Add.
 	* config/mips/tm-mips.h (PRID_REGNUM): Delete.
 	* mips-tdep.c: Update.

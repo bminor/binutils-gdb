@@ -58,8 +58,6 @@ extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 typedef struct mips_extra_func_info
   {
     long numargs;		/* number of args to procedure (was iopt) */
-    bfd_vma high_addr;		/* upper address bound */
-    long frame_adjust;		/* offset of FP from SP (used on MIPS16) */
     PDR pdr;			/* Procedure descriptor record */
   }
  *mips_extra_func_info_t;
