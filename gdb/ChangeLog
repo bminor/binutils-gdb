@@ -1,5 +1,9 @@
 2001-11-13  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_gdbarch_init): Register the function
+	`standard_coerce_float_to_double', since GCC for the S/390 follows
+	the standard rules for passing floats.
+
 	* valops.c (default_coerce_float_to_double,
 	standard_coerce_float_to_double): Doc fixes.
 

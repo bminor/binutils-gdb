@@ -1454,6 +1454,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (s390_call_dummy_words));
   set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
+  set_gdbarch_coerce_float_to_double (gdbarch,
+                                      standard_coerce_float_to_double);
 
   switch (info.bfd_arch_info->mach)
     {
