@@ -1,3 +1,8 @@
+Wed Nov 22 12:02:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c (sunos_scan_dynamic_symbol): Only set written if the
+	DEF_DYNAMIC flag is set.
+
 Tue Nov 21 13:25:29 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* host-aout.c: If TRAD_HEADER is defined, include it.

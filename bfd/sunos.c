@@ -1155,7 +1155,7 @@ bfd_sunos_get_needed_list (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  if (info->hash->creator != &MY(xvec))
+  if (info->hash->creator != &MY(vec))
     return NULL;
   return sunos_hash_table (info)->needed;
 }
@@ -1926,8 +1926,13 @@ sunos_scan_dynamic_symbol (h, data)
      part of the regular symbol table.  This is all symbols which are
      not defined in a regular object file.  For some reason symbols
      which are referenced by a regular object and defined by a dynamic
-     object do not seem to show up in the regular symbol table.  */
+     object do not seem to show up in the regular symbol table.  It is
+     possible for a symbol to have only SUNOS_REF_REGULAR set here, it
+     is an undefined symbol which was turned into a common symbol
+     because it was found in an archive object which was not included
+     in the link.  */
   if ((h->flags & SUNOS_DEF_REGULAR) == 0
+      && (h->flags & SUNOS_DEF_DYNAMIC) != 0
       && strcmp (h->root.root.root.string, "__DYNAMIC") != 0)
     h->root.written = true;
 
