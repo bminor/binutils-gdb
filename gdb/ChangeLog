@@ -1,3 +1,13 @@
+2001-04-03  Andrew Cagney  <ac131313@redhat.com>
+
+	Obsolete tic80-*-* target.
+	* configure.tgt (tic80-*-*): Obsolete.
+	* config/tic80/tic80.mt: Obsolete.
+	* config/tic80/tm-tic80.h: Obsolete.
+	* tic80-tdep.c: Obsolete.
+	* TODO: Update
+	* NEWS: Update.
+
 2001-04-02  J.T. Conklin  <jtc@redback.com>
 
 	* remote-mips.c (S_IROTH): Moved definition from here.

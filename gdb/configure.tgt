@@ -287,8 +287,8 @@ sparc86x-*-*)		gdb_target=sparclite ;;
 sparc64-*-linux*)	gdb_target=sp64linux ;;
 sparc64-*-*)		gdb_target=sp64 ;;
 
-tic80-*-*)		gdb_target=tic80
-			configdirs="${configdirs} gdbserver" ;;
+# OBSOLETE tic80-*-*)		gdb_target=tic80
+# OBSOLETE			configdirs="${configdirs} gdbserver" ;;
 
 vax-*-*)		gdb_target=vax ;;
 

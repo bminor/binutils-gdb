@@ -185,7 +185,7 @@ Steps:
 		  ns32k-umax-*		ns32k	 umax	  -	     yes
 		  ns32k-utek-sysv*	ns32k	 merlin	  merlin     yes
 		  ns32k-utek-*		ns32k	 -	  umax	     yes
-		  tic80-*		tic80	 -	  tic80
+		  tic80-*		tic80	 -	  tic80	     yes
 		  m68*-isi-*		m68k	 isi	  isi
 		  m68*-sony-*		m68k	 news	  news
 		  m68030-sony-*		m68k	 news1000 -
