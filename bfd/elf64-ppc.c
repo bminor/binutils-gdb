@@ -5128,6 +5128,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym_name = "<local symbol>";
 
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  /* rel may have changed, update our copy of addend.  */
+	  addend = rel->r_addend;
 	}
       else
 	{

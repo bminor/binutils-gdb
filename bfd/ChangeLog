@@ -1,3 +1,20 @@
+2002-05-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Reinstate code
+	reloading local sym addend mistakenly removed in 2002-05-01 change.
+
+	* dwarf2.c (struct line_head): Make prologue_length a bfd_vma.
+	(read_abbrevs): Change "offset" param to bfd_vma.
+	(parse_comp_unit): Change "version" and addr_size to unsigned ints.
+	Change "abbrev_offset" to bfd_vma.
+	(read_indirect_string): Use correct conversion chars in error
+	message format string, cast bfd_vma's to unsigned long.
+	(read_abbrevs): Likewise.
+	(read_attribute_value): Likewise.
+	(decode_line_info): Likewise.
+	(scan_unit_for_functions): Likewise.
+	(parse_comp_unit): Likewise.
+
 2002-05-04  Tom Rix  <trix@redhat.com>
 
 	* coffswap.h (coff_swap_reloc_in): Remove XCOFF support.
