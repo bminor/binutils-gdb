@@ -110,7 +110,6 @@ case "${host}" in
   m68k-hp-hpux*)	  host_makefile_frag=config/mh-hp300 ;;
   m68k-apollo-sysv*)      host_makefile_frag=config/mh-apollo68 ;;
   m68k-apollo-bsd*)       host_makefile_frag=config/mh-a68bsd ;;
-  m68k-*-linux*)	  host_makefile_frag=config/mh-linux ;;
   m88k-dg-dgux*)	  host_makefile_frag=config/mh-dgux ;;
   m88k-harris-cxux*)	  host_makefile_frag=config/mh-cxux ;;
   m88k-motorola-sysv*)    host_makefile_frag=config/mh-delta88;;
@@ -128,7 +127,6 @@ case "${host}" in
   i[3456]86-*-sco3.2v5*)  host_makefile_frag=config/mh-sysv ;;
   i[3456]86-*-sco*)       host_makefile_frag=config/mh-sco ;;
   i[3456]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
-  i[3456]86-*-linux*)     host_makefile_frag=config/mh-linux ;;
   i[3456]86-*-solaris2*)  host_makefile_frag=config/mh-sysv4 ;;
   i[3456]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
   i[3456]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;

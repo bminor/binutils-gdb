@@ -1,5 +1,7 @@
 Tue Dec 31 16:00:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Remove uses of config/mh-linux.
+
 	* config.sub, config.guess: Merge with latest FSF sources.
 
 start-sanitize-tic80
