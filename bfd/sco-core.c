@@ -269,9 +269,10 @@ bfd_target sco_core_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-    ' ',						   /* ar_pad_char */
-    16,							   /* ar_max_namelen */
-    3,							   /* minimum alignment power */
+    0,						/* leading underscore */
+    ' ',					/* ar_pad_char */
+    16,						/* ar_max_namelen */
+    3,						/* minimum alignment power */
     NO_GET, NO_PUT, NO_GET, NO_PUT, NO_GET, NO_PUT, /* data */
     NO_GET, NO_PUT, NO_GET, NO_PUT, NO_GET, NO_PUT, /* hdrs */
 
