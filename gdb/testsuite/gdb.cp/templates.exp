@@ -348,7 +348,7 @@ gdb_expect {
 	# This used to be a kfail gdb/33.  That problem has been
 	# fixed, but now gdb/931 and gdb/1512 are rearing their ugly
 	# heads.
-	kfail "gdb/931" "print Foo<volatile char *>::foo"
+	kfail "gdb/931" "print Foo<volatile char*>::foo"
     }
     -re "$gdb_prompt $"                     { fail "print Foo<volatile char*>::foo" }
     timeout                             { fail "(timeout) print Foo<volatile char*>::foo" }
