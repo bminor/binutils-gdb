@@ -56,6 +56,7 @@ PRINT_FN (dotdest);
 
 PARSE_FN (dotdest1);
 PARSE_FN (dest1);
+PRINT_FN (dest1);
 
 PARSE_FN (bc);
 EXTRACT_FN (bc);
@@ -218,7 +219,7 @@ const struct txvu_operand txvu_operands[] =
 
   /* Destination indicator, single letter only, no leading '.'.  */
 #define LDEST1 (LDOTDEST1 + 1)
-  { 0, 0, 0, parse_dest1, 0, 0, print_dotdest },
+  { 0, 0, 0, parse_dest1, 0, 0, print_dest1 },
 
 /* end of list place holder */
   { 0 }
@@ -459,12 +460,12 @@ struct txvu_opcode txvu_lower_opcodes[] = {
   { "ibltz", { SP, LISREG, C, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2c) },
   { "ibne", { SP, LITREG, C, LISREG, C, LPCREL11 }, MLOP7 + MDEST, VLOP7 (0x29) },
   { "ilw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x04) },
-  { "ilwr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3fe) },
+  { "ilwr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')', LDEST1 }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fe) },
   { "ior", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x34) },
   { "isub", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x31) },
   { "isubiu", { SP, LITREG, C, LISREG, C, LUIMM15 }, MLOP7, VLOP7 (0x09) },
   { "isw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x05) },
-  { "iswr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3ff) },
+  { "iswr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')', LDEST1 }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3ff) },
   { "jalr", { SP, LITREG, C, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x25) },
   { "jr", { SP, LISREG }, MLOP7 + MDEST + MT + MLIMM11, VLOP7 (0x24) },
   { "lq", { DOTDEST, SP, VFTREG, C, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x00) },
@@ -810,6 +811,15 @@ print_dotdest (info, insn, value)
   (*info->fprintf_func) (info->stream, ".");
   _print_dest (info, insn, value);
 }
+
+static void
+print_dest1 (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  _print_dest (info, insn, mnemonic_dest);
+}
 
 /* Utilities for single destination choice handling.  */
 
@@ -1107,7 +1117,7 @@ print_ffstreg (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vf%ld", value & TXVU_MASK_REG);
+  (*info->fprintf_func) (info->stream, "vf%02ld", value & TXVU_MASK_REG);
   print_sdest (info, insn, (value >> 5) & 3);
 }
 
@@ -1177,7 +1187,7 @@ print_freg (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vf%ld", value);
+  (*info->fprintf_func) (info->stream, "vf%02ld", value);
 }
 
 /* I register.  */
@@ -1219,7 +1229,7 @@ print_ireg (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vi%ld", value);
+  (*info->fprintf_func) (info->stream, "vi%02ld", value);
 }
 
 /* VI01 register.  */
