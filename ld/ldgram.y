@@ -39,8 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "mri.h"
 #include "ldlex.h"
 
-#define YYDEBUG 1
-
 static int typebits;
 
 lang_memory_region_type *region;
