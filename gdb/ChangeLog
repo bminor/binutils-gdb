@@ -106,7 +106,7 @@
 	printing output.  Use fprintf_unfiltered.  Only print output when
 	debugging.
 
-2005-03-05  Mark Kettenis  <kettenis@janacek.sibelius.xs4all.nl>
+2005-03-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.c (sparc64_store_floating_fields): Constify third
 	argument.
