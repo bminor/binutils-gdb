@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "elf/common.h"
 #include "elf/internal.h"
 #include "elf/external.h"
+#include "bfdlink.h"
 
 /* If size isn't specified as 64 or 32, NAME macro should fail.  */
 #ifndef NAME
@@ -83,6 +84,12 @@ struct elf_backend_data
 
   /* The maximum page size for this backend.  */
   bfd_vma maxpagesize;
+
+  /* This is true if the linker should act like collect and gather
+     global constructors and destructors by name.  This is true for
+     MIPS ELF because the Irix 5 tools can not handle the .init
+     section.  */
+  boolean collect;
 
   /* A function to translate an ELF RELA relocation to a BFD arelent
      structure.  */
@@ -149,6 +156,53 @@ struct elf_backend_data
   boolean (*elf_backend_section_from_bfd_section)
     PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *retval));
 
+  /* If this field is not NULL, it is called by the add_symbols phase
+     of a link just before adding a symbol to the global linker hash
+     table.  It may modify any of the fields as it wishes.  If *NAME
+     is set to NULL, the symbol will be skipped rather than being
+     added to the hash table.  This function is responsible for
+     handling all processor dependent symbol bindings and section
+     indices, and must set at least *FLAGS and *SEC for each processor
+     dependent case; failure to do so will cause a link error.  */
+  boolean (*elf_add_symbol_hook)
+    PARAMS ((bfd *abfd, struct bfd_link_info *info,
+	     const Elf_Internal_Sym *, const char **name,
+	     flagword *flags, asection **sec, bfd_vma *value));
+
+  /* The RELOCATE_SECTION function is called by the ELF backend linker
+     to handle the relocations for a section.
+
+     The relocs are always passed as Rela structures; if the section
+     actually uses Rel structures, the r_addend field will always be
+     zero.
+
+     This function is responsible for adjust the section contents as
+     necessary, and (if using Rela relocs and generating a
+     relocateable output file) adjusting the reloc addend as
+     necessary.
+
+     This function does not have to worry about setting the reloc
+     address or the reloc symbol index.
+
+     LOCAL_SYMS is a pointer to the swapped in local symbols.
+
+     LOCAL_SECTIONS is an array giving the section in the input file
+     corresponding to the st_shndx field of each local symbol.
+
+     The global hash table entry for the global symbols can be found
+     via elf_sym_hashes (input_bfd).
+
+     When generating relocateable output, this function must handle
+     STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
+     going to be the section symbol corresponding to the output
+     section, which means that the addend must be adjusted
+     accordingly.  */
+  boolean (*elf_backend_relocate_section)
+    PARAMS ((bfd *output_bfd, struct bfd_link_info *info,
+	     bfd *input_bfd, asection *input_section, bfd_byte *contents,
+	     Elf_Internal_Rela *relocs, Elf_Internal_Sym *local_syms,
+	     asection **local_sections));
+
   /* A function to do any beginning processing needed for the ELF file
      before building the ELF headers and computing file positions.  */
   void (*elf_backend_begin_write_processing) PARAMS ((bfd *));
@@ -173,6 +227,7 @@ struct bfd_elf_section_data {
   Elf_Internal_Shdr this_hdr;
   Elf_Internal_Shdr rel_hdr;
   int this_idx, rel_idx;
+  struct elf_link_hash_entry **rel_hashes;
 };
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
 #define shdr_name(abfd,shdr)	(elf_shstrtab (abfd)->tab + (shdr)->sh_name)
@@ -198,8 +253,6 @@ struct elf_obj_tdata
   struct strtab *strtab_ptr;
   int num_locals;
   int num_globals;
-  Elf_Internal_Sym *internal_syms;
-  elf_symbol_type *symbols;	/* elf_symbol_type */
   Elf_Sym_Extra *sym_extra;
   asymbol **section_syms;	/* STT_SECTION symbols for each section */
   int num_section_syms;		/* number of section_syms allocated */
@@ -214,6 +267,11 @@ struct elf_obj_tdata
   void *prpsinfo;		/* The raw /proc prpsinfo structure */
   bfd_vma gp;			/* The gp value (MIPS only, for now) */
   int gp_size;			/* The gp size (MIPS only, for now) */
+
+  /* A mapping from external symbols to entries in the linker hash
+     table, used when linking.  This is indexed by the symbol index
+     minus the sh_info field of the symbol table header.  */
+  struct elf_link_hash_entry **sym_hashes;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -229,11 +287,52 @@ struct elf_obj_tdata
 #define elf_num_section_syms(bfd) (elf_tdata(bfd) -> num_section_syms)
 #define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
 #define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
-#define obj_symbols(bfd)	(elf_tdata(bfd) -> symbols)
-#define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
 #define elf_gp(bfd)		(elf_tdata(bfd) -> gp)
 #define elf_gp_size(bfd)	(elf_tdata(bfd) -> gp_size)
+#define elf_sym_hashes(bfd)	(elf_tdata(bfd) -> sym_hashes)
+
+/* ELF linker hash table entries.  */
 
+struct elf_link_hash_entry
+{
+  struct bfd_link_hash_entry root;
+  /* Symbol index in output file.  This is initialized to -1.  It is
+     set to -2 if the symbol is used by a reloc.  */
+  long indx;
+  /* Symbol size.  */
+  bfd_size_type size;
+  /* Symbol alignment (common symbols only).  */
+  unsigned short align;
+  /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
+  char type;
+};
+
+/* ELF linker hash table.  */
+
+struct elf_link_hash_table
+{
+  struct bfd_link_hash_table root;
+};
+
+/* Look up an entry in an ELF linker hash table.  */
+
+#define elf_link_hash_lookup(table, string, create, copy, follow)	\
+  ((struct elf_link_hash_entry *)					\
+   bfd_link_hash_lookup (&(table)->root, (string), (create),		\
+			 (copy), (follow)))
+
+/* Traverse an ELF linker hash table.  */
+
+#define elf_link_hash_traverse(table, func, info)			\
+  (bfd_link_hash_traverse						\
+   (&(table)->root,							\
+    (boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
+    (info)))
+
+/* Get the ELF linker hash table from a link_info structure.  */
+
+#define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
+
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
 extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
 
@@ -252,6 +351,9 @@ extern bfd_reloc_status_type bfd_elf_generic_reloc PARAMS ((bfd *,
 							    char **));
 extern boolean bfd_elf_mkobject PARAMS ((bfd *));
 extern Elf_Internal_Shdr *bfd_elf_find_section PARAMS ((bfd *, char *));
+
+extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
+  PARAMS ((bfd *));
 
 extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
 extern boolean bfd_elf64_write_object_contents PARAMS ((bfd *));
@@ -289,6 +391,10 @@ extern boolean bfd_elf32_find_nearest_line PARAMS ((bfd *, asection *,
 extern int bfd_elf32_sizeof_headers PARAMS ((bfd *, boolean));
 extern void bfd_elf32__write_relocs PARAMS ((bfd *, asection *, PTR));
 extern boolean bfd_elf32_new_section_hook PARAMS ((bfd *, asection *));
+extern boolean bfd_elf32_bfd_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf32_bfd_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void bfd_elf32_no_info_to_howto PARAMS ((bfd *, arelent *,
@@ -327,6 +433,10 @@ extern boolean bfd_elf64_find_nearest_line PARAMS ((bfd *, asection *,
 extern int bfd_elf64_sizeof_headers PARAMS ((bfd *, boolean));
 extern void bfd_elf64__write_relocs PARAMS ((bfd *, asection *, PTR));
 extern boolean bfd_elf64_new_section_hook PARAMS ((bfd *, asection *));
+extern boolean bfd_elf64_bfd_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf64_bfd_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void bfd_elf64_no_info_to_howto PARAMS ((bfd *, arelent *,

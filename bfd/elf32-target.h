@@ -36,16 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_bfd_relax_section bfd_generic_relax_section
 #define bfd_elf32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
-#ifndef bfd_elf32_bfd_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_create \
-  _bfd_generic_link_hash_table_create
-#endif
-#ifndef bfd_elf32_bfd_link_add_symbols
-#define bfd_elf32_bfd_link_add_symbols	_bfd_generic_link_add_symbols
-#endif
-#ifndef bfd_elf32_bfd_final_link
-#define bfd_elf32_bfd_final_link	_bfd_generic_final_link
-#endif
 
 #ifndef bfd_elf32_bfd_copy_private_section_data
 #define bfd_elf32_bfd_copy_private_section_data \
@@ -68,12 +58,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   _bfd_nodynamic_canonicalize_dynamic_reloc
 #endif
 
+#ifdef elf_backend_relocate_section
+#ifndef bfd_elf32_bfd_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
+#endif
+#else /* ! defined (elf_backend_relocate_section) */
+/* If no backend relocate_section routine, use the generic linker.  */
+#ifndef bfd_elf32_bfd_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create \
+  _bfd_generic_link_hash_table_create
+#endif
+#ifndef bfd_elf32_bfd_link_add_symbols
+#define bfd_elf32_bfd_link_add_symbols	_bfd_generic_link_add_symbols
+#endif
+#ifndef bfd_elf32_bfd_final_link
+#define bfd_elf32_bfd_final_link	_bfd_generic_final_link
+#endif
+#endif /* ! defined (elf_backend_relocate_section) */
+
 #ifndef elf_info_to_howto_rel
 #define elf_info_to_howto_rel 0
 #endif
 
 #ifndef ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE 1
+#endif
+
+#ifndef elf_backend_collect
+#define elf_backend_collect false
 #endif
 
 #ifndef elf_backend_sym_is_global
@@ -100,6 +112,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef elf_backend_section_from_bfd_section
 #define elf_backend_section_from_bfd_section	0
 #endif
+#ifndef elf_backend_add_symbol_hook
+#define elf_backend_add_symbol_hook	0
+#endif
+#ifndef elf_backend_relocate_section
+#define elf_backend_relocate_section	0
+#endif
 #ifndef elf_backend_begin_write_processing
 #define elf_backend_begin_write_processing	0
 #endif
@@ -121,6 +139,7 @@ static CONST struct elf_backend_data elf32_bed =
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
+  elf_backend_collect,
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,
@@ -131,6 +150,8 @@ static CONST struct elf_backend_data elf32_bed =
   elf_backend_section_from_shdr,
   elf_backend_fake_sections,
   elf_backend_section_from_bfd_section,
+  elf_backend_add_symbol_hook,
+  elf_backend_relocate_section,
   elf_backend_begin_write_processing,
   elf_backend_final_write_processing,
   elf_backend_ecoff_debug_swap

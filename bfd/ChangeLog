@@ -1,3 +1,86 @@
+Mon May  9 11:53:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h: Include bfdlink.h.  Added several new functions to do
+	linking.
+	(ELF_R_TYPE): Define.
+	(bfd_add_to_strtab): Return unsigned long.  Change check for
+	realloc failure.
+	(elf_fake_sections): Check return value of bfd_add_to_strtab.
+	(elf_compute_section_file_positions): Add link_info argument.
+	Call elf_backend_begin_write_processing hook and prep_headers
+	here.  Only call swap_out_syms if link_info is NULL.  Set up
+	.shstrtab section here.  Pass dosyms argument to
+	assign_file_positions_except_relocs.  Set output_has_begun flag.
+	(assign_file_positions_for_symtab_and_strtabs): Add dosyms
+	argument, and use it to control setting .symtab and .strtab file
+	positions.
+	(assign_file_positions_except_relocs): Add dosyms argument, and
+	pass it on.
+	(prep_headers): Check return value of bfd_add_to_strtab.
+	(swap_out_syms): Likewise.  Also, don't set up .shstrtab here.
+	(NAME(bfd_elf,write_object_contents)): Some calls moved into
+	elf_compute_section_file_positions.
+	(elf_set_section_contents): Likewise.
+	(elf_slurp_symbol_table): SHN_LORESERV corrected to SHN_LORESERVE.
+	* libelf.h: Include bfdlink.h.
+	(struct elf_backend_data): Add fields collect,
+	elf_add_symbol_hook, elf_backend_relocate_section.
+	(struct bfd_elf_section_data): Add field rel_hashes.
+	(struct elf_obj_tdata): Remove fields internal_syms and symbols.
+	Add field sym_hashes.
+	(obj_symbols, obj_internal_syms): Remove definitions.
+	(elf_sym_hashes): Define.
+	(struct elf_link_hash_entry): Define.
+	(struct elf_link_hash_table): Define.
+	(elf_link_hash_lookup): Define.
+	(elf_link_hash_traverse): Define.
+	(elf_hash_table): Define.
+	(_bfd_elf_link_hash_table_create): Declare.
+	(bfd_elf32_bfd_link_add_symbols): Declare.
+	(bfd_elf32_bfd_final_link): Declare.
+	(bfd_elf64_bfd_link_add_symbols): Declare.
+	(bfd_elf64_bfd_final_link): Declare.
+	* elf.c: Include bfdlink.h.
+	(elf_link_hash_newfunc): New function.
+	(_bfd_elf_link_hash_table_create): New function.
+	* elf32-target.h (elf_backend_relocate_section): If not defined,
+	define as 0 and use generic linker.  Otherwise, use ELF backend
+	linker.
+	(elf_backend_collect): If not defined, define as false.
+	(elf_backend_add_symbol_hook): If not defined, define as 0.
+	(elf32_bed): Initialize new fields.
+	* elf64-target.h: Same changes as elf32-target.h.
+	* elf32-i386.c: Include bfdlink.h.
+	(elf_i386_relocate_section): New function.
+	(elf_backend_relocate_section): Define.
+	* elf32-sparc.c: Include bfdlink.h.
+	(elf_info_to_howto): Change type of dst from Elf32_Internal_Rela
+	to Elf_Internal_Rela (they're the same type anyhow).
+	(elf_sparc_relocate_section): New function.
+	(elf_backend_relocate_section): Define.
+	* elf32-mips.c (elf_backend_collect): Define.
+
+	* Makefile.in (stmp-bfd.h): Avoid useless make error message in a
+	different way; touch takes a numeric argument on some systems.
+
+Fri May  6 13:34:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmcode.h (nlm_swap_auxiliary_headers_in): Rework custom header
+	handling for latest suggested format.
+	(nlm_swap_auxiliary_headers_out): Likewise.
+	(nlm_compute_section_file_positions): Likewise.
+
+Fri May  6 11:11:50 1994  D. V. Henkel-Wallace  (gumby@rtl.cygnus.com)
+
+	* config.bfd: handle erricsson config (for OSE).
+
+Thu May  5 15:40:47 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	Patches from Ralph Campbell:
+	* mipsbsd.c (mips_fix_jmp_addr): New function.
+	(mips_fix_hi16_s): Use bfd_is_com_section.
+	(mips_howto_table_ext): Call mips_fix_jmp_addr for MIPS_RELOC_JMP.
+
 Fri May  6 11:48:55 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* config/go32.mh: XX support.
@@ -20,6 +103,7 @@ Thu May  5 15:40:47 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	(mips_fix_hi16_s): Use bfd_is_com_section.
 	(mips_howto_table_ext): Call mips_fix_jmp_addr for MIPS_RELOC_JMP.
 
+>>>>>>> 1.1152
 Wed May  4 11:09:53 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	Changed m68k-aout to set flags to 0; m68k-sunos still uses 1.
@@ -3771,4 +3855,6 @@ See file ChangeLog.1
 Local Variables:
 mode: indented-text
 left-margin: 8
-fill-column: 7
+fill-column: 74
+version-control: never
+End:
