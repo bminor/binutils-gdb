@@ -106,6 +106,10 @@ struct gdbarch_tdep
      frame.  */
   CORE_ADDR (*skip_sigtramp_frame) (struct frame_info *, CORE_ADDR);
 
+  /* Translate a signal handler frame into the address of the sigcontext
+     structure for that signal handler.  */
+  CORE_ADDR (*sigcontext_addr) (struct frame_info *);
+
   int jb_pc;			/* Offset to PC value in jump buffer.
 				   If htis is negative, longjmp support
 				   will be disabled.  */

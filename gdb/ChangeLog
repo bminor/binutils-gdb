@@ -1,3 +1,20 @@
+2002-04-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.h (gdbarch_tdep): Add sigcontext_addr member.
+	* alpha-tdep.c (alpha_sigcontext_addr): New function.
+	(alpha_find_saved_regs): Use alpha_sigcontext_addr.
+	(alpha_gdbarch_init): Initialize tdep->sigcontext_addr.
+	* alpha-linux-tdep.c: Include frame.h.
+	(alpha_linux_sigcontext_addr): New function.
+	(alpha_linux_init_abi): Set tdep->sigcontext_addr to
+	alpha_linux_sigcontext_addr.
+	* alpha-osf1-tdep.c: Include gdbcore.h.
+	(alpha_osf1_sigcontext_addr): New function.
+	(alpha_osf1_init_abi): Set tdep->sigcontext_addr to
+	alpha_osf1_sigcontext_addr.
+	* config/alpha/tm-alpha.h (SIGCONTEXT_ADDR): Remove.
+	* config/alpha/tm-alphalinux.h (SIGCONTEXT_ADDR): Remove.
+
 2002-04-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (selected_frame_level): 

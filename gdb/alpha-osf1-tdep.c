@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "frame.h"
+#include "gdbcore.h"
 #include "value.h"
 
 #include "alpha-tdep.h"
@@ -43,6 +44,13 @@ alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (func_name != NULL && STREQ ("__sigtramp", func_name));
 }
 
+static CORE_ADDR
+alpha_osf1_sigcontext_addr (struct frame_info *frame)
+{
+  return (read_memory_integer (frame->next ? frame->next->frame
+					   : frame->frame, 8));
+}
+
 static void
 alpha_osf1_init_abi (struct gdbarch_info info,
                      struct gdbarch *gdbarch)
@@ -52,6 +60,7 @@ alpha_osf1_init_abi (struct gdbarch_info info,
   set_gdbarch_pc_in_sigtramp (gdbarch, alpha_osf1_pc_in_sigtramp);
 
   tdep->skip_sigtramp_frame = alpha_osf1_skip_sigtramp_frame;
+  tdep->sigcontext_addr = alpha_osf1_sigcontext_addr;
 
   tdep->jb_pc = 2;
   tdep->jb_elt_size = 8;

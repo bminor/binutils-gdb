@@ -344,6 +344,17 @@ alpha_register_virtual_size (int regno)
 }
 
 
+static CORE_ADDR
+alpha_sigcontext_addr (struct frame_info *fi)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep->sigcontext_addr)
+    return (tdep->sigcontext_addr (fi));
+
+  return (0);
+}
+
 /* Guaranteed to set frame->saved_regs to some values (it never leaves it
    NULL).  */
 
@@ -372,7 +383,12 @@ alpha_find_saved_regs (struct frame_info *frame)
     {
       CORE_ADDR sigcontext_addr;
 
-      sigcontext_addr = SIGCONTEXT_ADDR (frame);
+      sigcontext_addr = alpha_sigcontext_addr (frame);
+      if (sigcontext_addr == 0)
+	{
+	  /* Don't know where the sigcontext is; just bail.  */
+	  return;
+	}
       for (ireg = 0; ireg < 32; ireg++)
 	{
 	  reg_position = sigcontext_addr + SIGFRAME_REGSAVE_OFF + ireg * 8;
@@ -1997,6 +2013,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep->dynamic_sigtramp_offset = NULL;
   tdep->skip_sigtramp_frame = NULL;
+  tdep->sigcontext_addr = NULL;
 
   tdep->jb_pc = -1;	/* longjmp support not enabled by default  */
 

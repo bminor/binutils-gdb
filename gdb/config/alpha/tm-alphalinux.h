@@ -40,12 +40,6 @@ extern LONGEST alpha_linux_sigtramp_offset (CORE_ADDR);
 #undef START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 2
 
-/* Translate a signal handler frame into the address of the sigcontext
-   structure.  */
-
-#undef SIGCONTEXT_ADDR
-#define SIGCONTEXT_ADDR(frame)			((frame)->frame - 0x298)
-
 #include "tm-linux.h"
 
 #endif /* TM_LINUXALPHA_H */

@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "frame.h"
 #include "gdbcore.h"
 #include "value.h"
 
@@ -91,6 +92,12 @@ alpha_linux_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (alpha_linux_sigtramp_offset (pc) >= 0);
 }
 
+static CORE_ADDR
+alpha_linux_sigcontext_addr (struct frame_info *frame)
+{
+  return (frame->frame - 0x298); /* sizeof(struct sigcontext) */
+}
+
 static void
 alpha_linux_init_abi (struct gdbarch_info info,
                       struct gdbarch *gdbarch)
@@ -100,6 +107,7 @@ alpha_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_pc_in_sigtramp (gdbarch, alpha_linux_pc_in_sigtramp);
 
   tdep->dynamic_sigtramp_offset = alpha_linux_sigtramp_offset;
+  tdep->sigcontext_addr = alpha_linux_sigcontext_addr;
 
   tdep->jb_pc = 2;
   tdep->jb_elt_size = 8;

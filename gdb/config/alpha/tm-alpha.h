@@ -83,10 +83,4 @@ extern void alpha_print_extra_frame_info (struct frame_info *);
   alpha_setup_arbitrary_frame (argc, argv)
 extern struct frame_info *alpha_setup_arbitrary_frame (int, CORE_ADDR *);
 
-/* Translate a signal handler frame into the address of the sigcontext
-   structure.  */
-
-#define SIGCONTEXT_ADDR(frame) \
-  (read_memory_integer ((frame)->next ? frame->next->frame : frame->frame, 8))
-
 #endif /* TM_ALPHA_H */
