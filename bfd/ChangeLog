@@ -1,3 +1,15 @@
+Tue Aug 16 16:53:00 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_prep_headers): If writing some form of an executable,
+	allocate and attach an exec header to the BFD private data.
+	(som_begin_writing): Don't fill fields of the exec header based
+	on BFD private data here (like the exec flags).  Do not write
+	the exec header here.
+	(som_write_headers): Instead do it here.
+	* som.h (struct somdata): New field "exec_hdr" for the executable
+	file header.
+	(obj_som_exec_hdr): New accessor macro.
+
 Tue Aug 16 00:12:31 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* i386linux.c (linux_link_create_dynamic_sections): Create section

@@ -1977,6 +1977,16 @@ som_prep_headers (abfd)
 
   if (abfd->flags & (EXEC_P | DYNAMIC))
     {
+
+      /* Make and attach an exec header to the BFD.  */
+      obj_som_exec_hdr (abfd) = (struct som_exec_auxhdr *)
+	bfd_zalloc (abfd, sizeof (struct som_exec_auxhdr));
+      if (obj_som_exec_hdr (abfd) == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
       if (abfd->flags & D_PAGED)
 	file_hdr->a_magic = DEMAND_MAGIC;
       else if (abfd->flags & WP_TEXT)
@@ -2257,7 +2267,7 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	     does not have a symbol.  Likewise if the symbol isn't associated
 	     with any section.  */
 	  if (reloc->sym_ptr_ptr == NULL
-	      || (*reloc->sym_ptr_ptr)->section == &bfd_abs_section)
+	      || bfd_is_abs_section ((*reloc->sym_ptr_ptr)->section))
 	    continue;
 
 	  /* Scaling to encourage symbols involved in R_DP_RELATIVE 
@@ -2755,7 +2765,7 @@ som_begin_writing (abfd)
   asection *section;
   asymbol **syms = bfd_get_outsymbols (abfd);
   unsigned int total_subspaces = 0;
-  struct som_exec_auxhdr exec_header;
+  struct som_exec_auxhdr *exec_header;
 
   /* The file header will always be first in an object file, 
      everything else can be in random locations.  To keep things
@@ -2780,11 +2790,12 @@ som_begin_writing (abfd)
       /* Parts of the exec header will be filled in later, so
 	 delay writing the header itself.  Fill in the defaults,
 	 and write it later.  */
-      current_offset += sizeof (exec_header);
-      obj_som_file_hdr (abfd)->aux_header_size += sizeof (exec_header);
-      memset (&exec_header, 0, sizeof (exec_header));
-      exec_header.som_auxhdr.type = EXEC_AUX_ID;
-      exec_header.som_auxhdr.length = 40;
+      current_offset += sizeof (struct som_exec_auxhdr);
+      obj_som_file_hdr (abfd)->aux_header_size
+	+= sizeof (struct som_exec_auxhdr);
+      exec_header = obj_som_exec_hdr (abfd);
+      exec_header->som_auxhdr.type = EXEC_AUX_ID;
+      exec_header->som_auxhdr.length = 40;
     }
   if (obj_som_version_hdr (abfd) != NULL)
     {
@@ -2982,15 +2993,15 @@ som_begin_writing (abfd)
 		current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
 
 	      /* Update the exec header.  */
-	      if (subsection->flags & SEC_CODE && exec_header.exec_tfile == 0)
+	      if (subsection->flags & SEC_CODE && exec_header->exec_tfile == 0)
 		{
-		  exec_header.exec_tmem = section->vma;
-		  exec_header.exec_tfile = current_offset;
+		  exec_header->exec_tmem = section->vma;
+		  exec_header->exec_tfile = current_offset;
 		}
-	      if (subsection->flags & SEC_DATA && exec_header.exec_dfile == 0)
+	      if (subsection->flags & SEC_DATA && exec_header->exec_dfile == 0)
 		{
-		  exec_header.exec_dmem = section->vma;
-		  exec_header.exec_dfile = current_offset;
+		  exec_header->exec_dmem = section->vma;
+		  exec_header->exec_dfile = current_offset;
 		}
 
 	      /* Keep track of exactly where we are within a particular
@@ -3018,9 +3029,9 @@ som_begin_writing (abfd)
 		 ps.  This is not necessary for unloadable space/subspaces.  */
 	      current_offset += subsection->vma - subspace_offset;
 	      if (subsection->flags & SEC_CODE)
-		exec_header.exec_tsize += subsection->vma - subspace_offset;
+		exec_header->exec_tsize += subsection->vma - subspace_offset;
 	      else
-		exec_header.exec_dsize += subsection->vma - subspace_offset;
+		exec_header->exec_dsize += subsection->vma - subspace_offset;
 	      subspace_offset += subsection->vma - subspace_offset;
 	    }
 
@@ -3032,10 +3043,10 @@ som_begin_writing (abfd)
 	      /* Update the size of the code & data.  */
 	      if (abfd->flags & (EXEC_P | DYNAMIC)
 		  && subsection->flags & SEC_CODE)
-		exec_header.exec_tsize += subsection->_cooked_size;
+		exec_header->exec_tsize += subsection->_cooked_size;
 	      else if (abfd->flags & (EXEC_P | DYNAMIC)
 		       && subsection->flags & SEC_DATA)
-		exec_header.exec_dsize += subsection->_cooked_size;
+		exec_header->exec_dsize += subsection->_cooked_size;
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= current_offset;
 	      subsection->filepos = current_offset;
@@ -3047,7 +3058,7 @@ som_begin_writing (abfd)
 	    {
 	      /* Update the size of the bss section.  */
 	      if (abfd->flags & (EXEC_P | DYNAMIC))
-		exec_header.exec_bsize += subsection->_cooked_size;
+		exec_header->exec_bsize += subsection->_cooked_size;
 
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= 0;
@@ -3132,32 +3143,6 @@ som_begin_writing (abfd)
   /* Done.  Store the total size of the SOM.  */
   obj_som_file_hdr (abfd)->som_length = current_offset;
 
-  /* Now write the exec header.  */
-  if (abfd->flags & (EXEC_P | DYNAMIC))
-    {
-      long tmp;
-
-      exec_header.exec_entry = bfd_get_start_address (abfd);
-      exec_header.exec_flags = obj_som_exec_data (abfd)->exec_flags;
-
-      /* Oh joys.  Ram some of the BSS data into the DATA section
-	 to be compatable with how the hp linker makes objects
-	 (saves memory space).  */
-      tmp = exec_header.exec_dsize;
-      tmp = SOM_ALIGN (tmp, PA_PAGESIZE);
-      exec_header.exec_bsize -= (tmp - exec_header.exec_dsize);
-      if (exec_header.exec_bsize < 0)
-	exec_header.exec_bsize = 0;
-      exec_header.exec_dsize = tmp;
-
-      if (bfd_seek (abfd, obj_som_file_hdr (abfd)->aux_header_location,
-		    SEEK_SET) < 0)
-	return false;
-
-      if (bfd_write ((PTR) &exec_header, AUX_HDR_SIZE, 1, abfd)
-	  != AUX_HDR_SIZE)
-	return false;
-    }
   return true;
 }
 
@@ -3340,6 +3325,35 @@ som_write_headers (abfd)
 		 sizeof (struct header), 1, abfd)
       != sizeof (struct header))
     return false;
+
+  /* Now write the exec header.  */
+  if (abfd->flags & (EXEC_P | DYNAMIC))
+    {
+      long tmp;
+      struct som_exec_auxhdr *exec_header;
+
+      exec_header = obj_som_exec_hdr (abfd);
+      exec_header->exec_entry = bfd_get_start_address (abfd);
+      exec_header->exec_flags = obj_som_exec_data (abfd)->exec_flags;
+
+      /* Oh joys.  Ram some of the BSS data into the DATA section
+	 to be compatable with how the hp linker makes objects
+	 (saves memory space).  */
+      tmp = exec_header->exec_dsize;
+      tmp = SOM_ALIGN (tmp, PA_PAGESIZE);
+      exec_header->exec_bsize -= (tmp - exec_header->exec_dsize);
+      if (exec_header->exec_bsize < 0)
+	exec_header->exec_bsize = 0;
+      exec_header->exec_dsize = tmp;
+
+      if (bfd_seek (abfd, obj_som_file_hdr (abfd)->aux_header_location,
+		    SEEK_SET) < 0)
+	return false;
+
+      if (bfd_write ((PTR) exec_header, AUX_HDR_SIZE, 1, abfd)
+	  != AUX_HDR_SIZE)
+	return false;
+    }
   return true;
 }
 
@@ -3382,7 +3396,7 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
     {
       /* Common symbols must have scope SS_UNSAT and type
 	 ST_STORAGE or the linker will choke.  */
-      if (sym->section == &bfd_com_section)
+      if (bfd_is_com_section (sym->section))
 	{
 	  info->symbol_scope = SS_UNSAT;
 	  info->symbol_type = ST_STORAGE;
@@ -3395,7 +3409,7 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 	 assign it type ST_CODE (the HP linker requires undefined
 	 external functions to have type ST_CODE rather than ST_ENTRY).  */
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN
-	       && sym->section == &bfd_und_section
+	       && bfd_is_und_section (sym->section)
 	       && sym->flags & BSF_FUNCTION)
 	info->symbol_type = ST_CODE;
 
@@ -3437,22 +3451,23 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
   /* Now handle the symbol's scope.  Exported data which is not
      in the common section has scope SS_UNIVERSAL.  Note scope
      of common symbols was handled earlier!  */
-  if (sym->flags & BSF_EXPORT && sym->section != &bfd_com_section)
+  if (sym->flags & BSF_EXPORT && ! bfd_is_com_section (sym->section))
     info->symbol_scope = SS_UNIVERSAL;
   /* Any undefined symbol at this point has a scope SS_UNSAT.  */
-  else if (sym->section == &bfd_und_section)
+  else if (bfd_is_und_section (sym->section))
     info->symbol_scope = SS_UNSAT;
   /* Anything else which is not in the common section has scope
      SS_LOCAL.  */
-  else if (sym->section != &bfd_com_section)
+  else if (! bfd_is_com_section (sym->section))
     info->symbol_scope = SS_LOCAL;
 
   /* Now set the symbol_info field.  It has no real meaning
      for undefined or common symbols, but the HP linker will
      choke if it's not set to some "reasonable" value.  We
      use zero as a reasonable value.  */
-  if (sym->section == &bfd_com_section || sym->section == &bfd_und_section
-      || sym->section == &bfd_abs_section)
+  if (bfd_is_com_section (sym->section)
+      || bfd_is_und_section (sym->section)
+      || bfd_is_abs_section (sym->section))
     info->symbol_info = 0;
   /* For all other symbols, the symbol_info field contains the 
      subspace index of the space this symbol is contained in.  */
@@ -3760,17 +3775,17 @@ som_slurp_symbol_table (abfd)
 	   so the section associated with this symbol can't be known.  */
 	case SS_EXTERNAL:
 	  if (bufp->symbol_type != ST_STORAGE)
-	    sym->symbol.section = &bfd_und_section;
+	    sym->symbol.section = bfd_und_section_ptr;
 	  else
-	    sym->symbol.section = &bfd_com_section;
+	    sym->symbol.section = bfd_com_section_ptr;
 	  sym->symbol.flags |= (BSF_EXPORT | BSF_GLOBAL);
 	  break;
 
 	case SS_UNSAT:
 	  if (bufp->symbol_type != ST_STORAGE)
-	    sym->symbol.section = &bfd_und_section;
+	    sym->symbol.section = bfd_und_section_ptr;
 	  else
-	    sym->symbol.section = &bfd_com_section;
+	    sym->symbol.section = bfd_com_section_ptr;
 	  break;
 
 	case SS_UNIVERSAL:
@@ -3981,7 +3996,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	  rptr->address = offset;
 	  rptr->howto = &som_hppa_howto_table[op];
 	  rptr->addend = 0;
-	  rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	  rptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	}
 
       /* Set default input length to 0.  Get the opcode class index
@@ -4606,14 +4621,14 @@ som_decode_symclass (symbol)
 
   if (bfd_is_com_section (symbol->section))
     return 'C';
-  if (symbol->section == &bfd_und_section)
+  if (bfd_is_und_section (symbol->section))
     return 'U';
-  if (symbol->section == &bfd_ind_section)
+  if (bfd_is_ind_section (symbol->section))
     return 'I';
   if (!(symbol->flags & (BSF_GLOBAL|BSF_LOCAL)))
     return '?';
 
-  if (symbol->section == &bfd_abs_section)
+  if (bfd_is_abs_section (symbol->section))
     c = 'a';
   else if (symbol->section)
     c = som_section_type (symbol->section->name);
@@ -5033,7 +5048,7 @@ som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
 	    continue;
 
 	  /* Do no include undefined symbols.  */
-	  if (sym->symbol.section == &bfd_und_section)
+	  if (bfd_is_und_section (sym->symbol.section))
 	    continue;
 
 	  /* Bump the various counters, being careful to honor
@@ -5228,7 +5243,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 	    continue;
 
 	  /* Do no include undefined symbols.  */
-	  if (sym->symbol.section == &bfd_und_section)
+	  if (bfd_is_und_section (sym->symbol.section))
 	    continue;
 
 	  /* If this is the first symbol from this SOM, then update
@@ -5248,7 +5263,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 	  curr_lst_sym->must_qualify = 0;
 	  curr_lst_sym->initially_frozen = 0;
 	  curr_lst_sym->memory_resident = 0;
-	  curr_lst_sym->is_common = (sym->symbol.section == &bfd_com_section);
+	  curr_lst_sym->is_common = bfd_is_com_section (sym->symbol.section);
 	  curr_lst_sym->dup_common = 0;
 	  curr_lst_sym->xleast = 0;
 	  curr_lst_sym->arg_reloc = info.arg_reloc;
