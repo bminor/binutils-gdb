@@ -156,7 +156,7 @@ proc test_cond {} {
 # not limited to the fact that it depends on specific section
 # names appearing in the output file.
 # again, p2align doesn't work on c54x target
-if { ![istarget *c54x*-*-*] ![istarget hppa*-*-*] } then {
+if { ![istarget *c54x*-*-*] && ![istarget hppa*-*-*] } then {
     test_cond
     run_dump_test incbin
 }

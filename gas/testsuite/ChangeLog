@@ -1,3 +1,7 @@
+2001-11-25  Andreas Jaeger  <aj@suse.de>
+
+	* gas/all/gas.exp (incbin): Fix condition.
+
 Fri Nov 23 09:20:43 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/all/gas.exp (incbin): Do not run on the PA.
@@ -22,13 +26,13 @@ Fri Nov 23 09:20:43 2001  Jeffrey A Law  (law@cygnus.com)
 	assembler, the difference is not worth the effort to fix.  We'd
 	prefer the assembler *not* fill the section alignment.
 	* gas/tic54x/all-opcodes.d: Verify Lmem opcodes have proper
-	length. 
+	length.
 	* gas/tic54x/labels.s: Document differences from TI tools.
 	* gas/tic54x/extaddr.d: Match output.
 	* gas/all/gas.exp: On c54x targets, don't do any tests that use
-	p2align. 
+	p2align.
 	* gas/macros/macros.exp: Expect failure matching use of .ascii.
-	
+
 2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/mips.exp: Change naming of some conditionals to reflect
@@ -44,7 +48,7 @@ Fri Nov 23 09:20:43 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mips/mips.exp (svr4pic): Set if target is *-*-netbsd*.
 	(aout): Don't set if *-*-netbsd*.
-	
+
 2001-11-02  NIIBE Yutaka  <gniibe@m17n.org>
 
 	* gas/sh/basic.exp: For Linux, add "-big" option for the
