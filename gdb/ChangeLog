@@ -1,5 +1,8 @@
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/linux.mt (TDEPFILES): Remove solib-legacy.o.
+	* config/i386/linux64.mt (TDEPFILES): Likewise.
+
 	* i386-linux-nat.c: Update copyrigth year.  Tweak comment.
 
 	* amd64-tdep.c (amd64_sigtramp_frame_sniffer): Rewrite to use new
