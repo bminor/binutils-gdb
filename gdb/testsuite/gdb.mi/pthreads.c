@@ -42,7 +42,14 @@ static pthread_attr_t null_attr;
 void *
 routine (void *arg)
 {
-  sleep (9);
+  /* When gdb is running, it sets hidden breakpoints in the thread
+     library.  The signals caused by these hidden breakpoints can
+     cause system calls such as 'sleep' to return early.  Pay attention
+     to the return value from 'sleep' to get the full sleep.  */
+  int unslept = 9;
+  while (unslept > 0)
+    unslept = sleep (unslept);
+
   printf ("hello thread\n");
 }
 

@@ -1,3 +1,7 @@
+2003-11-05  Michael Chastain  <mec@shout.net>
+
+	* gdb.mi/pthreads.c (routine): Handle early return from sleep.
+
 2003-11-03  Kris Warkentin  <kewarken@qnx.com>
 
 	* gdb.arch/gdb1291.c: New test file.
