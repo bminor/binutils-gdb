@@ -925,7 +925,7 @@
   unsigned32 temp = GPR[RS];
   unsigned32 i, mask;
   if (RT != RD)
-    Unpredictable();
+    Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[RS]);
   for (mask = ((unsigned32)1<<31), i = 0; i < 32; ++i)
     {
@@ -947,7 +947,7 @@
   unsigned32 temp = GPR[RS];
   unsigned32 i, mask;
   if (RT != RD)
-    Unpredictable();
+    Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[RS]);
   for (mask = ((unsigned32)1<<31), i = 0; i < 32; ++i)
     {
@@ -1056,7 +1056,7 @@
   unsigned64 mask;
   check_u64 (SD_, instruction_0);
   if (RT != RD)
-    Unpredictable();
+    Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[RS]);
   for (mask = ((unsigned64)1<<63), i = 0; i < 64; ++i)
     {
@@ -1079,7 +1079,7 @@
   unsigned64 mask;
   check_u64 (SD_, instruction_0);
   if (RT != RD)
-    Unpredictable();
+    Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[RS]);
   for (mask = ((unsigned64)1<<63), i = 0; i < 64; ++i)
     {
