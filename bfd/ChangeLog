@@ -1,3 +1,8 @@
+2003-03-06  Steven Konopa <skonopa@kgo.csc.com>
+
+	* som.c (som_fixup_formats): Correct formats for R_AUX_UNWIND and
+	R_COMMENT.
+
 2003-03-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_create_linker_section): Don't capitalize
@@ -16,7 +21,7 @@
 	* elfxx-ia64.c (USE_BRL): Removed.
 	(oor_ip): Removed.
 
-Mon Mar  3 20:48:23 2003  J"orn Rennecke <joern.rennecke@superh.com>
+2003-03-03  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* elf32-sh.c (sh_elf_howto_tab): Make R_SH_IND12W into an ordinary
 	relocation (no special function), and make it non-partial_inplace.
