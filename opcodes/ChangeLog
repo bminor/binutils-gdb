@@ -1,6 +1,11 @@
-Thu Jul  4 11:42:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+Tue Jul  9 10:55:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Released binutils 2.7.
+
+	* alpha-opc.c: Add new case of "mov".  From Klaus Kaempf
+	<kkaempf@progis.ac-net.de>.
+
+Thu Jul  4 11:42:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* alpha-opc.c: Correct second case of "mov" to use OPRL.
 
