@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2170,7 +2170,7 @@ elf32_arm_get_symbol_type (elf_sym, type)
     {
     case STT_ARM_TFUNC:
       return ELF_ST_TYPE (elf_sym->st_info);
-      break;
+
     case STT_ARM_16BIT:
       /* If the symbol is not an object, return the STT_ARM_16BIT flag.
 	 This allows us to distinguish between data used by Thumb instructions
@@ -2178,6 +2178,9 @@ elf32_arm_get_symbol_type (elf_sym, type)
 	 executable.  */
       if (type != STT_OBJECT)
 	return ELF_ST_TYPE (elf_sym->st_info);
+      break;
+      
+    default:
       break;
     }
 
