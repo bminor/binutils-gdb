@@ -96,7 +96,7 @@ coffgen.c
 cofflink.c
 coffswap.h
 config.bfd
-config.h.in
+config.in
 configure
 configure.bat
 configure.host
