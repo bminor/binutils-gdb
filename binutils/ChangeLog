@@ -1,3 +1,11 @@
+Fri Jul 10 16:17:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Christian Holland <CHolland@de.lucent.com>:
+	* ieee.c (parse_ieee): Initialize info.global_vars and
+	info.global_types.
+	(parse_ieee_atn): Ignore register lifetime information reportedly
+	emitted by MRI compiler.
+
 Thu Jul  9 13:08:01 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (MAINTAINERCLEANFILES): Define.
