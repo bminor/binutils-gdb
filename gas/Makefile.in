@@ -230,12 +230,23 @@ CPU_OBJ_VALID = \
 	esac;
 
 
-# This is like CPU_OBJ_VALID, for the obj=multi case.
+# These are like CPU_TYPES and CPU_OBJ_VALID, for the obj=multi case.
 
-CPU_MULTI_VALID = \
+MULTI_CPU_TYPES = i386 mips
+
+MULTI_CPU_OBJ_VALID = \
 	valid= ; \
-	case $$c in \
-	i386 | mips) valid=yes ;; \
+	case $$o in \
+	aout) \
+	  case $$c in \
+	  i386) valid=yes ;; \
+	  esac ;; \
+	coff) valid=yes ;; \
+	ecoff) \
+	  case $$c in \
+	  mips) valid=yes ;; \
+	  esac ;; \
+	elf) valid=yes ;; \
 	esac;
 
 
@@ -653,6 +664,16 @@ DEPTC_arm_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
   emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/arm.h \
   $(INCDIR)/elf/reloc-macros.h
 
+DEPTC_avr_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-avr.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h
+
+DEPTC_avr_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h
+
 DEPTC_d10v_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-d10v.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
@@ -1030,7 +1051,9 @@ DEPTC_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \
   $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h \
   $(BFDDIR)/som.h
 
-DEPTC_i386_multi = $(DEPTC_i386_coff) $(DEPTC_i386_elf)
+DEPTC_i386_multi = $(DEPTC_i386_aout) $(DEPTC_i386_coff) \
+  $(DEPTC_i386_elf)
+
 DEPTC_mips_multi = $(DEPTC_mips_coff) $(DEPTC_mips_ecoff) \
   $(DEPTC_mips_elf)
 
@@ -1090,6 +1113,16 @@ DEPOBJ_arm_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
 DEPOBJ_arm_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arm.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+
+DEPOBJ_avr_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-avr.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+
+DEPOBJ_avr_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h \
   emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 
 DEPOBJ_d10v_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
@@ -1438,7 +1471,9 @@ DEPOBJ_hppa_som = $(srcdir)/config/obj-som.h subsegs.h \
   $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(BFDDIR)/som.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 
-DEPOBJ_i386_multi = $(DEPOBJ_i386_coff) $(DEPOBJ_i386_elf)
+DEPOBJ_i386_multi = $(DEPOBJ_i386_aout) $(DEPOBJ_i386_coff) \
+  $(DEPOBJ_i386_elf)
+
 DEPOBJ_mips_multi = $(DEPOBJ_mips_coff) $(DEPOBJ_mips_ecoff) \
   $(DEPOBJ_mips_elf)
 
@@ -1481,6 +1516,13 @@ DEP_arm_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arm.h \
 DEP_arm_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arm.h
+
+DEP_avr_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-avr.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+
+DEP_avr_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h
 
 DEP_d10v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d10v.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
@@ -1734,7 +1776,9 @@ DEP_z8k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-z8k.h
 
 DEP_hppa_som = $(BFDDIR)/som.h
-DEP_i386_multi = $(DEP_i386_coff) $(DEP_i386_elf)
+DEP_i386_multi = $(DEP_i386_aout) $(DEP_i386_coff) \
+  $(DEP_i386_elf)
+
 DEP_mips_multi = $(DEP_mips_coff) $(DEP_mips_ecoff) \
   $(DEP_mips_elf)
 
@@ -2462,19 +2506,15 @@ DEPTC: $(TARGET_CPU_CFILES)
 	echo 'DEPTC_hppa_som = $$(srcdir)/config/tc-hppa.h subsegs.h \' >> DEPTCA
 	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> DEPTCA
 	echo '  $$(INCDIR)/opcode/hppa.h $$(BFDDIR)/som.h' >> DEPTCA
-# We don't try to handle all multi cases.
-	for c in $(CPU_TYPES); do \
-	  $(CPU_MULTI_VALID) \
-	  if [ x$${valid} = xyes ]; then \
-	    o=ecoff; \
-	    $(CPU_OBJ_VALID) \
-	    echo 'DEPTC_'"$${c}"'_multi = \' >> DEPTCA; \
-	    echo '$$(DEPTC_'"$${c}"'_coff) \' >> DEPTCA; \
+	for c in $(MULTI_CPU_TYPES); do \
+	  echo 'DEPTC_'"$${c}"'_multi = \' >> DEPTCA; \
+	  for o in $(OBJ_FORMATS); do \
+	    $(MULTI_CPU_OBJ_VALID) \
 	    if [ x$${valid} = xyes ]; then \
-	      echo '$$(DEPTC_'"$${c}"'_ecoff) \' >> DEPTCA; \
+	      echo '$$(DEPTC_'"$${c}_$${o}"') \' >> DEPTCA; \
 	    else true; fi; \
-	    echo '$$(DEPTC_'"$${c}"'_elf)' >> DEPTCA; \
-	  else true; fi; \
+	  done; \
+	  echo '' >> DEPTCA; \
 	done
 	mv -f DEPTCA DEPTC
 
@@ -2505,19 +2545,15 @@ DEPOBJ: $(OBJ_FORMAT_CFILES)
 	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> DEPOBJA
 	echo '  $$(BFDDIR)/som.h  $$(INCDIR)/aout/stab_gnu.h \' >> DEPOBJA
 	echo '  $$(INCDIR)/aout/stab.def' >> DEPOBJA
-# We don't try to handle all multi cases.
-	for c in $(CPU_TYPES); do \
-	  $(CPU_MULTI_VALID) \
-	  if [ x$${valid} = xyes ]; then \
-	    o=ecoff; \
-	    $(CPU_OBJ_VALID) \
-	    echo 'DEPOBJ_'"$${c}"'_multi = \' >> DEPOBJA; \
-	    echo '$$(DEPOBJ_'"$${c}"'_coff) \' >> DEPOBJA; \
+	for c in $(MULTI_CPU_TYPES); do \
+	  echo 'DEPOBJ_'"$${c}"'_multi = \' >> DEPOBJA; \
+	  for o in $(OBJ_FORMATS); do \
+	    $(MULTI_CPU_OBJ_VALID) \
 	    if [ x$${valid} = xyes ]; then \
-	      echo '$$(DEPOBJ_'"$${c}"'_ecoff) \' >> DEPOBJA; \
+	      echo '$$(DEPOBJ_'"$${c}_$${o}"') \' >> DEPOBJA; \
 	    else true; fi; \
-	    echo '$$(DEPOBJ_'"$${c}"'_elf)' >> DEPOBJA; \
-	  else true; fi; \
+	  done; \
+	  echo '' >> DEPOBJA; \
 	done
 	mv -f DEPOBJA DEPOBJ
 
@@ -2540,19 +2576,15 @@ DEP2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
 	  done; \
 	done
 	echo 'DEP_hppa_som = $$(BFDDIR)/som.h' >> DEP2a
-# We don't try to handle all multi cases.
-	for c in $(CPU_TYPES); do \
-	  $(CPU_MULTI_VALID) \
-	  if [ x$${valid} = xyes ]; then \
-	    o=ecoff; \
-	    $(CPU_OBJ_VALID) \
-	    echo 'DEP_'"$${c}"'_multi = \' >> DEP2a; \
-	    echo '$$(DEP_'"$${c}"'_coff) \' >> DEP2a; \
+	for c in $(MULTI_CPU_TYPES); do \
+	  echo 'DEP_'"$${c}"'_multi = \' >> DEP2a; \
+	  for o in $(OBJ_FORMATS); do \
+	    $(MULTI_CPU_OBJ_VALID) \
 	    if [ x$${valid} = xyes ]; then \
-	      echo '$$(DEP_'"$${c}"'_ecoff) \' >> DEP2a; \
+	      echo '$$(DEP_'"$${c}_$${o}"') \' >> DEP2a; \
 	    else true; fi; \
-	    echo '$$(DEP_'"$${c}"'_elf)' >> DEP2a; \
-	  else true; fi; \
+	  done; \
+	  echo '' >> DEP2a; \
 	done
 	mv -f DEP2a DEP2
 

@@ -1,7 +1,17 @@
+2000-04-19  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am: (CPU_MULTI_VALID): Remove.
+	(MULTI_CPU_TYPES): Define.
+	(MULTI_CPU_OBJ_VALID): Define.
+	(DEPTC): Use the above.
+	(DEPOBJ): Same here.
+	(DEP2): And here.
+	Regenerate dependencies.
+	* Makefile.in: Regenerate.
+
 2000-04-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* Makefile.am (FLEX, LEX): Get them from configure.
-	* Makefile.in: Regenerate.
 
 2000-04-18  H.J. Lu  (hjl@gnu.org)
 
@@ -59,7 +69,7 @@
 	(TARGET_CPU_CFILES): Add 'tc-avr.c'.
 	(TARGET_CPU_HFILES): Add 'tc-avr.h'.
 
-	* makefine.in: Regenerate.
+	* Makefile.in: Regenerate.
 
 	* doc/as.texinfo: Add M32R documentation.
 
