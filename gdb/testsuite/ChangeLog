@@ -1,3 +1,7 @@
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/chng-syms.exp: Remove stray newline.
+
 2004-01-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Set asm-note to "openbsd" for
