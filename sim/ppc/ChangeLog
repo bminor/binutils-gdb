@@ -1,3 +1,10 @@
+2002-05-30  DJ Delorie  <dj@redhat.com>
+
+	* lf.c (lf_print__gnu_copyleft): Convert multiline strings to
+	compatible format.
+	* gen-idecode.c (print_run_until_stop_body): Likewise.
+	* gen-model.c (gen_model_c): Likewise.
+
 2002-04-15  Elena Zannoni  <ezannoni@redhat.com>
 
         * sim_calls.c (sim_fetch_register, sim_store_register): Return -1 for
