@@ -1,3 +1,15 @@
+2002-07-18  Michael Snyder  <msnyder@redhat.com>
+
+	* aix-thread.c (ops_prepare_to_store): Eliminate.
+	(init_ops): Don't initialize ops.prepare_to_store.
+	(store_regs_kern): Pre-fetch register buffers from child, 
+	because some registers may not be in the cache.  Copy
+	regs from register cache only if they are cached.
+	(store_regs_lib): Copy regs from register cache only
+	if they are cached.
+	(fill_sprs32, (fill_sprs64, fill_fprs, fill_gprs32,
+	fill_gprs64): Ditto.
+
 2002-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* aix-thread.c (gdb_assert.h): Include.

@@ -1220,7 +1220,8 @@ fill_gprs64 (uint64_t *vals)
   int regno;
 
   for (regno = 0; regno < FP0_REGNUM; regno++)
-    regcache_collect (regno, vals + regno);
+    if (register_cached (regno))
+      regcache_collect (regno, vals + regno);
 }
 
 static void 
@@ -1229,7 +1230,8 @@ fill_gprs32 (uint32_t *vals)
   int regno;
 
   for (regno = 0; regno < FP0_REGNUM; regno++)
-    regcache_collect (regno, vals + regno);
+    if (register_cached (regno))
+      regcache_collect (regno, vals + regno);
 }
 
 /* Store the floating point registers into a double array.  */
@@ -1239,7 +1241,8 @@ fill_fprs (double *vals)
   int regno;
 
   for (regno = FP0_REGNUM; regno < FPLAST_REGNUM; regno++)
-    regcache_collect (regno, vals + regno);
+    if (register_cached (regno))
+      regcache_collect (regno, vals + regno);
 }
 
 /* Store the special registers into the specified 64-bit and 32-bit
@@ -1253,12 +1256,18 @@ fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
 
   gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
 
-  regcache_collect (regno,     iar);
-  regcache_collect (regno + 1, msr);
-  regcache_collect (regno + 2, cr);
-  regcache_collect (regno + 3, lr);
-  regcache_collect (regno + 4, ctr);
-  regcache_collect (regno + 5, xer);
+  if (register_cached (regno))
+    regcache_collect (regno,     iar);
+  if (register_cached (regno + 1))
+    regcache_collect (regno + 1, msr);
+  if (register_cached (regno + 2))
+    regcache_collect (regno + 2, cr);
+  if (register_cached (regno + 3))
+    regcache_collect (regno + 3, lr);
+  if (register_cached (regno + 4))
+    regcache_collect (regno + 4, ctr);
+  if (register_cached (regno + 5))
+    regcache_collect (regno + 5, xer);
 }
 
 static void
@@ -1273,12 +1282,18 @@ fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
      sizeof (long) == 4).  */
   gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
 
-  regcache_collect (regno,     iar);
-  regcache_collect (regno + 1, msr);
-  regcache_collect (regno + 2, cr);
-  regcache_collect (regno + 3, lr);
-  regcache_collect (regno + 4, ctr);
-  regcache_collect (regno + 5, xer);
+  if (register_cached (regno))
+    regcache_collect (regno,     iar);
+  if (register_cached (regno + 1))
+    regcache_collect (regno + 1, msr);
+  if (register_cached (regno + 2))
+    regcache_collect (regno + 2, cr);
+  if (register_cached (regno + 3))
+    regcache_collect (regno + 3, lr);
+  if (register_cached (regno + 4))
+    regcache_collect (regno + 4, ctr);
+  if (register_cached (regno + 5))
+    regcache_collect (regno + 5, xer);
 }
 
 /* Store all registers into pthread PDTID, which doesn't have a kernel
@@ -1310,18 +1325,19 @@ store_regs_lib (pthdb_pthread_t pdtid)
   /* Collect general-purpose register values from the regcache.  */
 
   for (i = 0; i < 32; i++)
-    {
-      if (arch64)
-	{
-	  regcache_collect (i, (void *) &int64);
-	  ctx.gpr[i] = int64;
-	}
-      else
-	{
-	  regcache_collect (i, (void *) &int32);
-	  ctx.gpr[i] = int32;
-	}
-    }
+    if (register_cached (i))
+      {
+	if (arch64)
+	  {
+	    regcache_collect (i, (void *) &int64);
+	    ctx.gpr[i] = int64;
+	  }
+	else
+	  {
+	    regcache_collect (i, (void *) &int32);
+	    ctx.gpr[i] = int32;
+	  }
+      }
 
   /* Collect floating-point register values from the regcache.  */
   fill_fprs (ctx.fpr);
@@ -1340,12 +1356,18 @@ store_regs_lib (pthdb_pthread_t pdtid)
       unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer;
 
       fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer);
-      ctx.iar = tmp_iar;
-      ctx.msr = tmp_msr;
-      ctx.cr  = tmp_cr;
-      ctx.lr  = tmp_lr;
-      ctx.ctr = tmp_ctr;
-      ctx.xer = tmp_xer;
+      if (register_cached (FIRST_UISA_SP_REGNUM))
+	ctx.iar = tmp_iar;
+      if (register_cached (FIRST_UISA_SP_REGNUM + 1))
+	ctx.msr = tmp_msr;
+      if (register_cached (FIRST_UISA_SP_REGNUM + 2))
+	ctx.cr  = tmp_cr;
+      if (register_cached (FIRST_UISA_SP_REGNUM + 3))
+	ctx.lr  = tmp_lr;
+      if (register_cached (FIRST_UISA_SP_REGNUM + 4))
+	ctx.ctr = tmp_ctr;
+      if (register_cached (FIRST_UISA_SP_REGNUM + 5))
+	ctx.xer = tmp_xer;
     }
 
   status = pthdb_pthread_setcontext (pd_session, pdtid, &ctx);
@@ -1381,11 +1403,15 @@ store_regs_kern (int regno, pthdb_tid_t tid)
     {
       if (arch64)
 	{
+	  /* Pre-fetch: some regs may not be in the cache.  */
+	  ptrace64aix (PTT_READ_GPRS, tid, (unsigned long) gprs64, 0, NULL);
 	  fill_gprs64 (gprs64);
 	  ptrace64aix (PTT_WRITE_GPRS, tid, (unsigned long) gprs64, 0, NULL);
 	}
       else
 	{
+	  /* Pre-fetch: some regs may not be in the cache.  */
+	  ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL);
 	  fill_gprs32 (gprs32);
 	  ptrace32 (PTT_WRITE_GPRS, tid, gprs32, 0, NULL);
 	}
@@ -1395,6 +1421,8 @@ store_regs_kern (int regno, pthdb_tid_t tid)
 
   if (regno == -1 || (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM))
     {
+      /* Pre-fetch: some regs may not be in the cache.  */
+      ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL);
       fill_fprs (fprs);
       ptrace32 (PTT_WRITE_FPRS, tid, (int *) fprs, 0, NULL);
     }
@@ -1406,7 +1434,7 @@ store_regs_kern (int regno, pthdb_tid_t tid)
     {
       if (arch64)
 	{
-	  /* Must read first, not all of it's in the cache.  */
+	  /* Pre-fetch: some registers won't be in the cache.  */
 	  ptrace64aix (PTT_READ_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	  fill_sprs64 (&sprs64.pt_iar, &sprs64.pt_msr, &sprs64.pt_cr,
@@ -1416,14 +1444,15 @@ store_regs_kern (int regno, pthdb_tid_t tid)
 	}
       else
 	{
-	  /* Must read first, not all of it's in the cache.  */
+	  /* Pre-fetch: some registers won't be in the cache.  */
 	  ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL);
 
 	  fill_sprs32 (&sprs32.pt_iar, &sprs32.pt_msr, &sprs32.pt_cr,
 		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer);
 
 	  if (REGISTER_RAW_SIZE (LAST_UISA_SP_REGNUM))
-	    regcache_collect (LAST_UISA_SP_REGNUM, &sprs32.pt_mq);
+	    if (register_cached (LAST_UISA_SP_REGNUM))
+	      regcache_collect (LAST_UISA_SP_REGNUM, &sprs32.pt_mq);
 
 	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &sprs32, 0, NULL);
 	}
@@ -1451,22 +1480,6 @@ ops_store_registers (int regno)
       else
 	store_regs_kern (regno, tid);
     }
-}
-
-/* Prepare to copy the register cache to the child:
-   The register cache must be fully fetched and up to date.  */
-
-static void
-ops_prepare_to_store (void)
-{
-  int regno;
-
-  if (!PD_TID (inferior_ptid))
-    base_ops.to_prepare_to_store ();
-  else
-    for (regno = 0; regno < NUM_REGS; regno++)
-      if (!register_cached (regno))
-	target_fetch_registers (regno);
 }
 
 /* Transfer LEN bytes of memory from GDB address MYADDR to target
@@ -1613,7 +1626,6 @@ init_ops (void)
   ops.to_wait               = ops_wait;
   ops.to_fetch_registers    = ops_fetch_registers;
   ops.to_store_registers    = ops_store_registers;
-  ops.to_prepare_to_store   = ops_prepare_to_store;
   ops.to_xfer_memory        = ops_xfer_memory;
   /* No need for ops.to_create_inferior, because we activate thread
      debugging when the inferior reaches pd_brk_addr.  */
