@@ -3471,13 +3471,7 @@ print_one_breakpoint (struct breakpoint *b,
 	  {
 	    annotate_field (4);
 	    if (b->pending)
-	      {
-		ui_out_field_string (uiout, "addr", "<PENDING>");
-		if (TARGET_ADDR_BIT <= 32)
-		  ui_out_spaces (uiout, 2);
-		else
-		  ui_out_spaces (uiout, 8);
-	      }
+	      ui_out_field_string (uiout, "addr", "<PENDING>");
 	    else
 	      ui_out_field_core_addr (uiout, "addr", b->loc->address);
 	  }

@@ -1,5 +1,10 @@
 2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
 
+	* breakpoint.c (print_one_breakpoint): Do not output spaces
+	after printing <PENDING> for a pending breakpoint.
+
+2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
+
 	* printcmd.c (print_scalar_formatted): Initialize val_long
 	to remove compiler warning message.
 
