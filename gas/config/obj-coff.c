@@ -1174,18 +1174,21 @@ coff_frob_symbol (symp, punt)
 
   if (!SF_GET_DEBUG (symp))
     {
-      symbolS *real;
+      symbolS * real;
+
       if (!SF_GET_LOCAL (symp)
 	  && !SF_GET_STATICS (symp)
 	  && S_GET_STORAGE_CLASS (symp) != C_LABEL
 	  && symbol_constant_p(symp)
 	  && (real = symbol_find_base (S_GET_NAME (symp), DO_NOT_STRIP))
+	  && S_GET_STORAGE_CLASS (real) == C_NULL
 	  && real != symp)
 	{
 	  c_symbol_merge (symp, real);
 	  *punt = 1;
 	  return;
 	}
+
       if (!S_IS_DEFINED (symp) && !SF_GET_LOCAL (symp))
 	{
 	  assert (S_GET_VALUE (symp) == 0);
@@ -1199,6 +1202,7 @@ coff_frob_symbol (symp, punt)
 	  else
 	    S_SET_STORAGE_CLASS (symp, C_STAT);
 	}
+
       if (SF_GET_PROCESS (symp))
 	{
 	  if (S_GET_STORAGE_CLASS (symp) == C_BLOCK)
@@ -1208,6 +1212,7 @@ coff_frob_symbol (symp, punt)
 	      else
 		{
 		  symbolS *begin;
+
 		  begin = *(symbolS **) stack_pop (block_stack);
 		  if (begin == 0)
 		    as_warn (_("mismatched .eb"));
@@ -1215,9 +1220,11 @@ coff_frob_symbol (symp, punt)
 		    next_set_end = begin;
 		}
 	    }
+
 	  if (coff_last_function == 0 && SF_GET_FUNCTION (symp))
 	    {
 	      union internal_auxent *auxp;
+
 	      coff_last_function = symp;
 	      if (S_GET_NUMBER_AUXILIARY (symp) < 1)
 		S_SET_NUMBER_AUXILIARY (symp, 1);
@@ -1225,6 +1232,7 @@ coff_frob_symbol (symp, punt)
 	      memset (auxp->x_sym.x_fcnary.x_ary.x_dimen, 0,
 		      sizeof (auxp->x_sym.x_fcnary.x_ary.x_dimen));
 	    }
+
 	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN)
 	    {
 	      if (coff_last_function == 0)
@@ -1236,6 +1244,7 @@ coff_frob_symbol (symp, punt)
 	      coff_last_function = 0;
 	    }
 	}
+
       if (S_IS_EXTERNAL (symp))
 	S_SET_STORAGE_CLASS (symp, C_EXT);
       else if (SF_GET_LOCAL (symp))
