@@ -1,3 +1,9 @@
+Tue Dec 29 23:49:20 1998  Christopher Faylor <cgf@cygnus.com>
+
+	* cross-build/cygwin.cache: Add a couple more known settings.
+	* configure.in: Fix typo.
+	* configure: Regenerated.
+
 Tue Dec 29 18:11:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* cross-build: new directory.

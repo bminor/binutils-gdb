@@ -42,16 +42,15 @@ dnl files as necessary
 if test "x$cross_compiling" = "xyes"; then
     case "${host}" in
     *-cygwin*)
-        cross_cache=${srcdir}/cross-build/cygwin.cache
-        if test -r "${cross_cache}"; then
-            echo "loading cross-build cache file ${cross_cache}"
-            . ${cross_cache}
-        fi
-        unset cross_cache
-        ;;
-    *)  echo "configure: cross-compiling for a non-cygwin target is not supported" >&
-2
-        ;;
+	cross_cache=${srcdir}/cross-build/cygwin.cache
+	if test -r "${cross_cache}"; then
+	    echo "loading cross-build cache file ${cross_cache}"
+	    . ${cross_cache}
+	fi
+	unset cross_cache
+	;;
+    *)  echo "configure: cross-compiling for a non-cygwin target is not supported" >&2
+	;;
     esac
 fi
  
