@@ -94,7 +94,7 @@ _bfd_dummy_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
      bfd *ignore_core_bfd;
      bfd *ignore_exec_bfd;
 {
-  bfd_error = invalid_operation;
+  bfd_set_error (bfd_error_invalid_operation);
   return false;
 }
 
@@ -132,10 +132,10 @@ char *
 bfd_zmalloc (size)
      bfd_size_type size;
 {
-  char *ptr = (char *) bfd_xmalloc (size);
+  char *ptr = (char *) malloc ((size_t) size);
 
-  if (size != 0)
-   memset(ptr,0, (size_t) size);
+  if (ptr && size)
+   memset(ptr, 0, (size_t) size);
 
   return ptr;
 }
@@ -162,6 +162,9 @@ real_read (where, a,b, file)
   return fread(where, a,b,file);
 }
 
+/* Return value is amount read (FIXME: how are errors and end of file dealt
+   with?  We never call bfd_set_error, which is probably a mistake).  */
+
 bfd_size_type
 bfd_read (ptr, size, nitems, abfd)
      PTR ptr;
@@ -175,6 +178,22 @@ bfd_read (ptr, size, nitems, abfd)
   if (nread > 0)
     abfd->where += nread;
 #endif
+
+  /* Set bfd_error if we did not read as much data as we expected.
+
+     If the read failed due to an error set the bfd_error_system_call,
+     else set bfd_error_file_truncated.
+
+     A BFD backend may wish to override bfd_error_file_truncated to
+     provide something more useful (eg. no_symbols or wrong_format).  */
+  if (nread < (int)(size * nitems))
+    {
+      if (ferror (bfd_cache_lookup (abfd)))
+	bfd_set_error (bfd_error_system_call);
+      else
+	bfd_set_error (bfd_error_file_truncated);
+    }
+
   return nread;
 }
 
@@ -196,7 +215,7 @@ bfd_write (ptr, size, nitems, abfd)
       if (nwrote >= 0)
 	errno = ENOSPC;
 #endif
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
     }
   return nwrote;
 }
@@ -252,6 +271,9 @@ bfd_stat (abfd, statbuf)
 {
   return fstat (fileno(bfd_cache_lookup(abfd)), statbuf);
 }
+
+/* Returns 0 for success, nonzero for failure (in which case bfd_get_error
+   can retrieve the error code).  */
 
 int
 bfd_seek (abfd, position, direction)
@@ -317,7 +339,7 @@ bfd_seek (abfd, position, direction)
     {
       /* Force redetermination of `where' field.  */
       bfd_tell (abfd);
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
     }
   else
     {
@@ -359,7 +381,7 @@ bfd_add_to_string_table (table, new_string, table_length, free_ptr)
     base = bfd_zmalloc ((bfd_size_type) space_length);
 
     if (base == NULL) {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   }
@@ -371,7 +393,7 @@ bfd_add_to_string_table (table, new_string, table_length, free_ptr)
 
     base = (char *) realloc (base, space_length);
     if (base == NULL) {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -815,3 +837,14 @@ bfd_log2(x)
     result++;
   return result;
 }
+
+boolean
+bfd_generic_is_local_label (abfd, sym)
+     bfd *abfd;
+     asymbol *sym;
+{
+  char locals_prefix = (bfd_get_symbol_leading_char (abfd) == '_') ? 'L' : '.';
+
+  return (sym->name[0] == locals_prefix);
+}
+
