@@ -1957,9 +1957,9 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
       else
 	SYMBOL_CLASS (sym) = LOC_LOCAL;
       SYMBOL_VALUE (sym) = dn_bufp->ddvar.location;
-#ifdef HPREAD_ADJUST_STACDNTT_TYPE_ADDRESS
+#ifdef HPREAD_ADJUST_STACK_ADDRESS
       SYMBOL_VALUE (sym)
-	+= HPREAD_ADJUST_STACDNTT_TYPE_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
+	+= HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
 #endif
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->ddvar.type, objfile);
       if (dn_bufp->ddvar.global)

@@ -1,3 +1,8 @@
+Wed Jan 25 01:11:21 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (hpread_process_one_debug_symbol): Fix lines garbled
+	by an ill-advised global search and replace.
+
 Tue Jan 24 12:10:28 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl (create_registers_window):  Work around a radiobutton
