@@ -2769,6 +2769,16 @@ recursive_dump_type (struct type *type, int spaces)
       print_cplus_stuff (type, spaces);
       break;
 
+    case TYPE_CODE_FLT:
+      printfi_filtered (spaces, "floatformat ");
+      if (TYPE_FLOATFORMAT (type) == NULL
+	  || TYPE_FLOATFORMAT (type)->name == NULL)
+	puts_filtered ("(null)");
+      else
+	puts_filtered (TYPE_FLOATFORMAT (type)->name);
+      puts_filtered ("\n");
+      break;
+
     default:
       /* We have to pick one of the union types to be able print and test
          the value.  Pick cplus_struct_type, even though we know it isn't
@@ -2848,14 +2858,17 @@ build_gdbtypes (void)
     init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "float", (struct objfile *) NULL);
+  TYPE_FLOATFORMAT (builtin_type_float) = TARGET_FLOAT_FORMAT;
   builtin_type_double =
     init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "double", (struct objfile *) NULL);
+  TYPE_FLOATFORMAT (builtin_type_double) = TARGET_DOUBLE_FORMAT;
   builtin_type_long_double =
     init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "long double", (struct objfile *) NULL);
+  TYPE_FLOATFORMAT (builtin_type_long_double) = TARGET_LONG_DOUBLE_FORMAT;
   builtin_type_complex =
     init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 	       0,

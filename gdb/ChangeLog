@@ -1,3 +1,12 @@
+2001-08-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbtypes.c (build_gdbtypes): Initialize TYPE_FLOATFORMAT field
+	of builtin_type_float, builtin_type_double and
+	builtin_type_long_double.
+	(recursive_dump_type): Print the floatformat name.
+	* gdbtypes.h (struct type): Add type_specific field floatformat.
+	(TYPE_FLOATFORMAT): Define
+
 2001-08-21  Keith Seitz  <keiths@redhat.com>
 
 	* printcmd.c (print_insn): Use the given stream for

@@ -413,6 +413,11 @@ struct type
 
 	struct cplus_struct_type *cplus_stuff;
 
+	/* FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to the
+           floatformat object that describes the floating-point value
+           that resides within the type.  */
+
+	const struct floatformat *floatformat;
       }
     type_specific;
   };
@@ -722,6 +727,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define	TYPE_TYPE_SPECIFIC(thistype) (thistype)->type_specific
 #define TYPE_ARG_TYPES(thistype) (thistype)->type_specific.arg_types
 #define TYPE_CPLUS_SPECIFIC(thistype) (thistype)->type_specific.cplus_stuff
+#define TYPE_FLOATFORMAT(thistype) (thistype)->type_specific.floatformat
 #define TYPE_BASECLASS(thistype,index) (thistype)->fields[index].type
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
 #define TYPE_BASECLASS_NAME(thistype,index) (thistype)->fields[index].name
