@@ -1,4 +1,10 @@
+Tue Nov  2 13:29:59 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* objcopy.c (S_ISLNK): Define as 0 if there's no S_IFLNK.
+
 Fri Oct 29 16:02:34 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* binutils.texi: Move objcopy docs into alphabetical order.
 
 	* objdump.c: Use xmalloc instead of malloc.
 
