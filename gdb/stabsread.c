@@ -367,6 +367,11 @@ patch_block_stabs (symbols, stabs, objfile)
 	{
 	  name = stabs->stab[ii];
 	  pp = (char*) strchr (name, ':');
+	  while (pp[1] == ':')
+	    {
+	       pp += 2;
+	       pp = (char *)strchr(pp, ':');
+	    }
 	  sym = find_symbol_in_list (symbols, name, pp-name);
 	  if (!sym)
 	    {
@@ -484,6 +489,12 @@ define_symbol (valu, string, desc, type, objfile)
   /* Ignore old-style symbols from cc -go  */
   if (p == 0)
     return 0;
+
+  while (p[1] == ':')
+    {
+       p += 2;
+       p = strchr(p, ':');
+    }
 
   /* If a nameless stab entry, all we need is the type, not the symbol.
      e.g. ":t10=*2" or a nameless enum like " :T16=ered:0,green:1,blue:2,;" */
@@ -1295,7 +1306,7 @@ read_type (pp, objfile)
 	char *type_name;
 	
 	{
-	  char *from, *to;
+	  char *from, *to, *p;
 	  
 	  /* Set the type code according to the following letter.  */
 	  switch ((*pp)[0])
@@ -1312,16 +1323,21 @@ read_type (pp, objfile)
 	    default:
 	      return error_type (pp);
 	    }
-	  
-	  to = type_name = (char *)
-	    obstack_alloc (&objfile -> type_obstack,
-			   (((char *) strchr (*pp, ':') - (*pp)) + 1));
+	   
+	  p = strchr(*pp, ':');
+	  while (p[1] == ':')
+	    {
+	       p += 2;
+	       p = strchr(p, ':');
+	    }
+	  to = type_name = 
+		(char *)obstack_alloc (&objfile->type_obstack, p - *pp + 1);
 	
 	  /* Copy the name.  */
 	  from = *pp + 1;
-	  while ((*to++ = *from++) != ':')
-	    ;
-	  *--to = '\0';
+	  while (from < p) 
+	    *to++ = *from++;
+	  *to = '\0';
 	  
 	  /* Set the pointer ahead of the name which we just read.  */
 	  *pp = from;

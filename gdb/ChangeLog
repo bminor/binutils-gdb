@@ -1,5 +1,10 @@
 Fri Nov 12 11:18:02 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
+	* stabsread.c (patch_block_stabs, define_symbol, read_type): in
+	g++ template instantiation, nested class can be part of the
+	params, and '::' can gets into symbol or type names. This is
+	to fix the problem.
+
 	* gdbtypes.c (lookup_struct_elt_type): Handle type ref or pointer
 	to struct/union case.
 
