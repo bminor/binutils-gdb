@@ -65,6 +65,7 @@ go32.cfg
 e-mipsecoff.c
 e-mipself.c
 i386coff.mt
+itbl-mips.h
 m68k-parse.h
 m68k-parse.y
 m68kcoff.mt

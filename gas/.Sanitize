@@ -73,6 +73,10 @@ link.cmd
 listing.c
 listing.h
 literal.c
+itbl-lex.l
+itbl-ops.c
+itbl-ops.h
+itbl-parse.y
 mac-as.r
 macro.c
 macro.h
