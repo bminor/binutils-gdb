@@ -1,5 +1,9 @@
 Wed Apr 30 11:34:14 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* cgen-mem.h, cgen-scache.[ch], cgen-sem.h, cgen-sim.h: New files.
+	* cgen-trace.[ch], cgen-types.h, cgen-utils.c, genmloop.sh: New files.
+	* sim-model.c: New file.
+
 	* Make-common.in (clean targets): Undo patch of Apr. 22.
 
 Fri Apr 25 15:28:32 1997  Mike Meissner  <meissner@cygnus.com>

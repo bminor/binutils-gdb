@@ -28,9 +28,19 @@ Make-common.in
 Makefile.in
 aclocal.m4
 callback.c
+cgen-mem.h
+cgen-scache.c
+cgen-scache.h
+cgen-sem.h
+cgen-sim.h
+cgen-trace.c
+cgen-trace.h
+cgen-types.h
+cgen-utils.c
 config.in
 configure.in
 configure
+genmloop.sh
 gentmap.c
 gentvals.sh
 nltvals.def
@@ -55,6 +65,7 @@ sim-inline.h
 sim-io.c
 sim-io.h
 sim-load.c
+sim-model.c
 sim-model.h
 sim-module.c
 sim-module.h
