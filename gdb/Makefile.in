@@ -1561,7 +1561,8 @@ c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 c-valprint.o: c-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(valprint_h) $(language_h) \
 	$(c_lang_h) $(cp_abi_h)
-charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) gdb_assert.h
+charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) $(gdb_assert_h) \
+	$(gdb_string_h)
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h) $(gdb_string_h) \
 	$(gdb_assert_h)
 coff-solib.o: coff-solib.c $(defs_h) $(frame_h) $(bfd_h) $(gdbcore_h) \
@@ -2496,9 +2497,9 @@ mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
 mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(target_h) $(value_h) \
 	$(mi_cmds_h) $(mi_getopt_h) $(ui_out_h) $(gdb_string_h) $(disasm_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
-mi-cmd-env.o: $(srcdir)/mi/mi-cmd-env.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
-	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h) $(inferior.h) \
-	$(mi_getopt_h) $(environ_h) $(gdbcmd_h) $(top_h)
+mi-cmd-env.o: $(srcdir)/mi/mi-cmd-env.c $(defs_h) $(inferior_h) $(value_h) \
+	$(mi_out_h) $(mi_cmds_h) $(mi_getopt_h) $(symtab_h) $(target_h) \
+	$(environ_h) $(command_h) $(ui_out_h) $(top_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-env.c
 mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(target_h) $(frame_h) \
 	$(value_h) $(mi_cmds_h) $(ui_out_h) $(symtab_h)

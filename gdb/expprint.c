@@ -220,7 +220,7 @@ print_subexp (register struct expression *exp, register int *pos,
 	  }
 	fprintf_unfiltered (stream, "]");
 	/* "selector" was malloc'd by target_read_string. Free it.  */
-	free (selector);
+	xfree (selector);
 	return;
       }
 

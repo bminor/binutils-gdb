@@ -66,7 +66,7 @@ static int restore_selected_frame (void *);
 
 static void build_infrun (void);
 
-static int follow_fork ();
+static int follow_fork (void);
 
 static void set_schedlock_func (char *args, int from_tty,
 				struct cmd_list_element *c);
@@ -377,7 +377,7 @@ static const char *follow_fork_mode_string = follow_fork_mode_parent;
 
 
 static int
-follow_fork ()
+follow_fork (void)
 {
   const char *follow_mode = follow_fork_mode_string;
   int follow_child = (follow_mode == follow_fork_mode_child);

@@ -1,3 +1,8 @@
+2003-01-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-env.c: Include "gdb_string.h" instead of <string.h>.
+	Move all includes to after "defs.h".
+
 2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* mi-cmds.c (-environment-directory) Change to use mi_cmd_env_dir,
