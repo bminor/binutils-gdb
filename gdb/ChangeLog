@@ -1,3 +1,15 @@
+2003-11-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_register_byte): Delete.
+	(frv_extract_return_value, frv_store_return_value)
+	(frv_extract_struct_value_address): Don't call frv_register_byte().
+	Convert to non-deprecated form.
+	(frv_gdbarch_init): Don't call set_gdbarch_deprecated_register_byte().
+	Convert calls to set_gdbarch_deprecated_extract_return_value(),
+	set_gdbarch_deprecated_store_return_value(), and
+	set_gdbarch_deprecated_extract_struct_value_address() into
+	non-deprecated forms.
+
 2003-11-05  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_dump_tdep): Do not print

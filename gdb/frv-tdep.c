@@ -43,8 +43,6 @@ static gdbarch_register_name_ftype frv_register_name;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
-static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
-static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 static gdbarch_deprecated_push_arguments_ftype frv_push_arguments;
 static gdbarch_deprecated_saved_pc_after_call_ftype frv_saved_pc_after_call;
@@ -251,12 +249,6 @@ frv_register_type (struct gdbarch *gdbarch, int reg)
     return builtin_type_float;
   else
     return builtin_type_int32;
-}
-
-static int
-frv_register_byte (int reg)
-{
-  return (reg * 4);
 }
 
 static int
@@ -822,20 +814,35 @@ frv_frame_unwind_cache (struct frame_info *next_frame,
 }
 
 static void
-frv_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+frv_extract_return_value (struct type *type, struct regcache *regcache,
+                          void *valbuf)
 {
-  memcpy (valbuf, (regbuf
-		   + frv_register_byte (8)
-		   + (TYPE_LENGTH (type) < 4 ? 4 - TYPE_LENGTH (type) : 0)),
-		   TYPE_LENGTH (type));
+  int len = TYPE_LENGTH (type);
+
+  if (len <= 4)
+    {
+      ULONGEST gpr8_val;
+      regcache_cooked_read_unsigned (regcache, 8, &gpr8_val);
+      store_unsigned_integer (valbuf, len, gpr8_val);
+    }
+  else if (len == 8)
+    {
+      ULONGEST regval;
+      regcache_cooked_read_unsigned (regcache, 8, &regval);
+      store_unsigned_integer (valbuf, 4, regval);
+      regcache_cooked_read_unsigned (regcache, 9, &regval);
+      store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, regval);
+    }
+  else
+    internal_error (__FILE__, __LINE__, "Illegal return value length: %d", len);
 }
 
 static CORE_ADDR
-frv_extract_struct_value_address (char *regbuf)
+frv_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_unsigned_integer (regbuf + 
-				   frv_register_byte (struct_return_regnum),
-				   4);
+  ULONGEST addr;
+  regcache_cooked_read_unsigned (regcache, struct_return_regnum, &addr);
+  return addr;
 }
 
 static void
@@ -957,19 +964,26 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 }
 
 static void
-frv_store_return_value (struct type *type, char *valbuf)
+frv_store_return_value (struct type *type, struct regcache *regcache,
+                        const void *valbuf)
 {
-  int length = TYPE_LENGTH (type);
-  int reg8_offset = frv_register_byte (8);
+  int len = TYPE_LENGTH (type);
 
-  if (length <= 4)
-    deprecated_write_register_bytes (reg8_offset + (4 - length), valbuf,
-				     length);
-  else if (length == 8)
-    deprecated_write_register_bytes (reg8_offset, valbuf, length);
+  if (len <= 4)
+    {
+      bfd_byte val[4];
+      memset (val, 0, sizeof (val));
+      memcpy (val + (4 - len), valbuf, len);
+      regcache_cooked_write (regcache, 8, val);
+    }
+  else if (len == 8)
+    {
+      regcache_cooked_write (regcache, 8, valbuf);
+      regcache_cooked_write (regcache, 9, (bfd_byte *) valbuf + 4);
+    }
   else
     internal_error (__FILE__, __LINE__,
-                    "Don't know how to return a %d-byte value.", length);
+                    "Don't know how to return a %d-byte value.", len);
 }
 
 
@@ -1193,7 +1207,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
 
   set_gdbarch_register_name (gdbarch, frv_register_name);
-  set_gdbarch_deprecated_register_byte (gdbarch, frv_register_byte);
   set_gdbarch_register_type (gdbarch, frv_register_type);
   set_gdbarch_register_sim_regno (gdbarch, frv_register_sim_regno);
 
@@ -1205,11 +1218,11 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, frv_extract_return_value);
+  set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, frv_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
+  set_gdbarch_store_return_value (gdbarch, frv_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 
   /* Frame stuff.  */
   set_gdbarch_unwind_pc (gdbarch, frv_unwind_pc);
