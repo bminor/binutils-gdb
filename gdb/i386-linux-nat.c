@@ -325,7 +325,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
       regcache_collect (i, regp + regmap[i]);
 
   if (regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
-    regcache_collect (I386_LINUX_ORIG_EAX_REGNUM, regp + regmap[ORIG_EAX]);
+    regcache_collect (I386_LINUX_ORIG_EAX_REGNUM, regp + ORIG_EAX);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

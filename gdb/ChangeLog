@@ -1,3 +1,8 @@
+2001-11-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* i386-linux-nat.c (fill_gregset): Fix botched regcache_collect()
+	conversion for I386_LINUX_ORIG_EAX_REGNUM.
+
 2001-11-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/i386/embed.mt (TM_FILE): Set to tm-i386.h.
