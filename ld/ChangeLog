@@ -1,3 +1,11 @@
+Tue May 24 16:13:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* emulparams/elf32mipb.sh (OTHER_READONLY_SECTIONS): Don't give
+	.reginfo an address.
+	(OTHER_READWRITE_SECTIONS): Don't give .lit4 or .lit8 an address.
+	(OTHER_SECTIONS): Define for .gptab.sdata and .gptab.sbss.
+	* scripttempl/elf.sc: Use OTHER_SECTIONS at end of script.
+
 Thu May 19 13:31:33 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Add support for ELF shared libraries.
