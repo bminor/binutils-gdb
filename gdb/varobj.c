@@ -1450,7 +1450,7 @@ variable_default_display (struct varobj *var)
    can't be established, *ERROR2 is set to non-zero.  */
 
 static int
-my_value_equal (struct value *val1, struct value *val2, int *error2)
+my_value_equal (struct value *val1, struct value *volatile val2, int *error2)
 {
   volatile struct exception except;
 

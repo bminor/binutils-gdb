@@ -1,5 +1,8 @@
 2005-03-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf2loc.c (dwarf_expr_tls_address): Mark addr as volatile.
+	* varobj.c (my_value_equal): Mark val2 as volatile.
+
 	* cp-names.y: Add prototype for yyparse.
 
 2005-03-19  Daniel Jacobowitz  <dan@codesourcery.com>
