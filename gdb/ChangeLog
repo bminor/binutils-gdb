@@ -1,3 +1,21 @@
+Fri Mar 20 14:45:36 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdbserver/Makefile.in: add dependency on XM_CLIBS.
+	* gdbserver/low-sim.c (registers) force into alignment.
+	(create_inferior): Fix typo on new_argv; add abfd arg to 
+	sim_open, sim_create_inferior.  Add reg_size arg to 
+	sim_fetch_register, sim_store_register.  Make simulator
+	take a single-step to get into a known running state.
+	* gdbserver/gdbreplay.c: include fcntl.h for def'n of F_SETFL.
+	* gdbserver/server.c: Add remote_debug variable to control 
+	debug output.
+	* gdbserver/server.h: Add prototypes for enable/disable_async_io.
+	* gdbserver/remote-utils.c: add verbose debugging output controlled 
+	by "remote_debug" variable.  Add call to "disable_async_io()"
+	to avoid being killed by async SIGIO signals.
+	* config/m32r/m32r.mt: define GDBSERVER_(LIBS and DEPFILES),
+	so that gdbserver can be built with the m32r simulator.
+	
 Fri Mar 20 09:04:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-r5900

@@ -23,9 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "callback.h"   /* GDB simulator callback interface */
 #include "remote-sim.h" /* GDB simulator interface */
 
+extern int remote_debug;
+
 extern host_callback default_callback;	/* in sim/common/callback.c */
 
-char registers[REGISTER_BYTES];
+char registers[REGISTER_BYTES] __attribute__ ((aligned));
 
 int target_byte_order;	/* used by simulator */
 
@@ -52,28 +54,28 @@ generic_load (loadfile_bfd)
 	  if (size > 0)
 	    {
 	      char *buffer;
-	      bfd_vma vma;
+	      bfd_vma lma;	/* use load address, not virtual address */
 
 	      buffer = xmalloc (size);
-	      vma = bfd_get_section_vma (loadfile_bfd, s);
+	      lma = s->lma;
 
 	      /* Is this really necessary?  I guess it gives the user something
 		 to look at during a long download.  */
-	      fprintf (stderr, "Loading section %s, size 0x%lx vma 0x%lx\n",
-		       bfd_get_section_name (loadfile_bfd, s),
-		       (unsigned long) size,
-		       (unsigned long) vma); /* chops high 32 bits.  FIXME!! */
+	      printf ("Loading section %s, size 0x%lx lma 0x%lx\n",
+		      bfd_get_section_name (loadfile_bfd, s),
+		      (unsigned long) size,
+		      (unsigned long) lma); /* chops high 32 bits.  FIXME!! */
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
-	      write_inferior_memory (vma, buffer, size);
+	      write_inferior_memory (lma, buffer, size);
 	      free (buffer);
 	    }
 	}
     }
 
-  fprintf (stderr, "Start address 0x%lx\n",
-	   (unsigned long)loadfile_bfd->start_address);
+  printf ("Start address 0x%lx\n",
+	  (unsigned long)loadfile_bfd->start_address);
 
   /* We were doing this in remote-mips.c, I suspect it is right
      for other targets too.  */
@@ -115,25 +117,26 @@ create_inferior (program, argv)
   new_argv = alloca (sizeof (char *) * (nargs + 3));	/* allocate new args */
   for (nargs = 0; argv[nargs] != NULL; nargs++)		/* copy old to new */
     new_argv[nargs] = argv[nargs];
-  new_args[nargs] = "-E";
-  new_args[nargs + 1] = bfd_big_endian (abfd) ? "big" : "little";
-  new_args[nargs + 2] = NULL;
-  argv = new_args;
+  new_argv[nargs] = "-E";
+  new_argv[nargs + 1] = bfd_big_endian (abfd) ? "big" : "little";
+  new_argv[nargs + 2] = NULL;
+  argv = new_argv;
 #endif
 
   /* Create an instance of the simulator.  */
   default_callback.init (&default_callback);
-  gdbsim_desc = sim_open (SIM_OPEN_STANDALONE, &default_callback, argv);
+  gdbsim_desc = sim_open (SIM_OPEN_STANDALONE, &default_callback, abfd, argv);
   if (gdbsim_desc == 0)
     exit (1);
 
   /* Load the program into the simulator.  */
-  if (sim_load (gdbsim_desc, program, NULL, 0) == SIM_RC_FAIL)
-    generic_load (abfd);
+  if (abfd)
+    if (sim_load (gdbsim_desc, program, NULL, 0) == SIM_RC_FAIL)
+      generic_load (abfd);
 
   /* Create an inferior process in the simulator.  This initializes SP.  */
-  sim_create_inferior (gdbsim_desc, argv, /* env */ NULL);
-
+  sim_create_inferior (gdbsim_desc, abfd, argv, /* env */ NULL);
+  sim_resume (gdbsim_desc, 1, 0);	/* execute one instr */
   return pid;
 }
 
@@ -152,7 +155,8 @@ static void
 fetch_register (regno)
      int regno;
 {
-  sim_fetch_register (gdbsim_desc, regno, &registers[REGISTER_BYTE (regno)]);
+  sim_fetch_register (gdbsim_desc, regno, &registers[REGISTER_BYTE (regno)],
+		      REGISTER_RAW_SIZE (regno));
 }
 
 /* Fetch all registers, or just one, from the child process.  */
@@ -182,7 +186,8 @@ store_inferior_registers (regno)
 	store_inferior_registers (regno);
     }
   else
-    sim_store_register (gdbsim_desc, regno, &registers[REGISTER_BYTE (regno)]);
+    sim_store_register (gdbsim_desc, regno, &registers[REGISTER_BYTE (regno)],
+			REGISTER_RAW_SIZE (regno));
 }
 
 /* Return nonzero if the given thread is still alive.  */
@@ -206,19 +211,22 @@ mywait (status)
   switch (reason)
     {
     case sim_exited:
-      fprintf (stderr, "\nChild exited with retcode = %x \n", sigrc);
+      if (remote_debug)
+	printf ("\nChild exited with retcode = %x \n", sigrc);
       *status = 'W';
       return sigrc;
 
 #if 0
     case sim_stopped:
-      fprintf (stderr, "\nChild terminated with signal = %x \n", sigrc);
+      if (remote_debug)
+	printf ("\nChild terminated with signal = %x \n", sigrc);
       *status = 'X';
       return sigrc;
 #endif
 
     default:   /* should this be sim_signalled or sim_stopped?  FIXME!! */
-      fprintf (stderr, "\nChild received signal = %x \n", sigrc);
+      if (remote_debug)
+	printf ("\nChild received signal = %x \n", sigrc);
       fetch_inferior_registers (0);
       *status = 'T';
       return (unsigned char) sigrc;
