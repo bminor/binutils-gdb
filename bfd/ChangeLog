@@ -20,6 +20,9 @@ Wed Nov  1 13:51:54 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 Wed Nov  1 11:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* reloc16.c (bfd_coff_reloc16_get_relocated_section_contents):
+	Pass input_bfd, not in_bfd, to bfd_coff_reloc16_extra_cases.
+
 	* elf.c (bfd_elf_set_dt_needed_name): Don't do anything if the
 	BFD is not of the right type.
 	(bfd_elf_get_needed_list): Likewise.
