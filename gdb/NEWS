@@ -3,6 +3,50 @@
 
 *** Changes since GDB-4.18:
 
+* Improved support for debugging FP programs on x86 targets
+
+Unified and much-improved support for debugging floating-point
+programs on all x86 targets.  In particular, ``info float'' now
+displays the FP registers in the same format on all x86 targets, with
+greater level of detail.
+
+* Improvements and bugfixes in hardware-assisted watchpoints
+
+It is now possible to watch array elements, struct members, and
+bitfields with hardware-assisted watchpoints.  Data-read watchpoints
+on x86 targets no longer erroneously trigger when the address is
+written.
+
+* Improvements in the native DJGPP version of GDB
+
+The distribution now includes all the scripts and auxiliary files
+necessary to build the native DJGPP version on MS-DOS/MS-Windows
+machines ``out of the box''.
+
+The DJGPP version can now debug programs that use signals.  It is
+possible to catch signals that happened in the debuggee, deliver
+signals to it, interrupt it with Ctrl-C, etc.  (Previously, a signal
+would kill the program being debugged.)  Programs that hook hardware
+interrupts (keyboard, timer, etc.) can also be debugged.
+
+It is now possible to debug DJGPP programs that redirect their
+standard handles or switch them to raw (as opposed to cooked) mode, or
+even close them.  The command ``run < foo > bar'' works as expected,
+and ``info terminal'' reports useful information about the debuggee's
+terminal, including raw/cooked mode, redirection, etc.
+
+The DJGPP version now uses termios functions for console I/O, which
+enables debugging graphics programs.  Interrupting GDB with Ctrl-C
+also works.
+
+DOS-style file names with drive letters are now fully supported by
+GDB.
+
+It is now possible to debug DJGPP programs that switch their working
+directory.  It is also possible to rerun the debuggee any number of
+times without restarting GDB; thus, you can use the same setup,
+breakpoints, etc. for many debugging sessions.
+
 * New native configurations
 
 ARM GNU/Linux					arm*-*-linux*
