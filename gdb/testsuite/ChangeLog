@@ -1,3 +1,8 @@
+2004-06-08  Randolph Chung  <tausq@debian.org>
+
+	* gdb.base/float.exp: Add pattern for hppa*-* target; make the failure
+	message for unknown architectures more clear.
+
 2004-06-08  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.ada/null_record.exp: Use "start" instead of "begin" to

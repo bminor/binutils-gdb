@@ -75,6 +75,8 @@ if { [istarget "alpha*-*-*"] } then {
 	      pass "info float (without FPU)"
 	}
     }
+} elseif [istarget "hppa*-*"] then {
+    gdb_test "info float" "fr4.*fr4R.*fr31R.*" "info float"
 } else {
-    gdb_test "info float" "No floating.point info available for this processor." "info float"
+    gdb_test "info float" "No floating.point info available for this processor." "info float (unknown target)"
 }
