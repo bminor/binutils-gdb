@@ -1,3 +1,8 @@
+2002-09-20  Nick Clifton  <nickc@redhat.com>
+
+	* symbols.c (colon): Do not allow symbols to be created in the
+	absolute section.
+
 2002-09-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* expr.c (expr): Simplify foo-foo here.

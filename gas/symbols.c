@@ -287,7 +287,13 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 {
   register symbolS *symbolP;	/* Symbol we are working with.  */
 
-  /* Sun local labels go out of scope whenever a non-local symbol is
+  if (now_seg == absolute_section)
+    {
+      as_bad (_("cannot define symbol `%s' in absolute section"), sym_name);
+      return NULL;
+    }
+
+    /* Sun local labels go out of scope whenever a non-local symbol is
      defined.  */
   if (LOCAL_LABELS_DOLLAR)
     {
