@@ -1,5 +1,5 @@
 /* Support routines for manipulating internal types for GDB.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -1335,12 +1335,40 @@ print_cplus_stuff (type, spaces)
     }
 }
 
+static struct obstack dont_print_type_obstack;
+
 void
 recursive_dump_type (type, spaces)
      struct type *type;
      int spaces;
 {
   int idx;
+
+  if (spaces == 0)
+    obstack_begin (&dont_print_type_obstack, 0);
+
+  if (TYPE_NFIELDS (type) > 0
+      || (TYPE_CPLUS_SPECIFIC (type) && TYPE_NFN_FIELDS (type) > 0))
+    {
+      struct type **first_dont_print
+	= (struct type **)obstack_base (&dont_print_type_obstack);
+
+      int i = (struct type **)obstack_next_free (&dont_print_type_obstack)
+	- first_dont_print;
+
+      while (--i >= 0)
+	{
+	  if (type == first_dont_print[i])
+	    {
+	      printfi_filtered (spaces, "type node ");
+	      gdb_print_address (type, gdb_stdout);
+	      printf_filtered (" <same as already seen type>\n");
+	      return;
+	    }
+	}
+
+      obstack_ptr_grow (&dont_print_type_obstack, type);
+    }
 
   printfi_filtered (spaces, "type node ");
   gdb_print_address (type, gdb_stdout);
@@ -1508,6 +1536,8 @@ recursive_dump_type (type, spaces)
 	break;
 
     }
+  if (spaces == 0)
+    obstack_free (&dont_print_type_obstack, NULL);
 }
 
 #endif	/* MAINTENANCE_CMDS */

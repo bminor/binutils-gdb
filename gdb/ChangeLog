@@ -1,3 +1,8 @@
+Sat Aug 19 01:19:34 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdbtypes.c (recursive_dump_type):  Add dont_print_type_obstack
+	to inhibit infinite recursion when printing aggregate types.
+
 Fri Aug 18 17:48:55 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dcache.c (dcache_write_line): Write dirty lines right.
