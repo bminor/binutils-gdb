@@ -31,6 +31,7 @@ SECTIONS
     { 					
       *(.data)
       CONSTRUCTORS;
+	*(.comment)
       _edata  =  .; 			
     }  					
   .bss   SIZEOF(.data) + ADDR(.data) :	
