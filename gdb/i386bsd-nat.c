@@ -397,7 +397,7 @@ _initialize_i386bsd_nat (void)
 #if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
   extern int i386fbsd4_sc_pc_offset;
 #define SC_PC_OFFSET i386fbsd4_sc_pc_offset
-#elif defined (NetBSD) || defined (__NetBSD_Version__)
+#elif defined (NetBSD) || defined (__NetBSD_Version__) || defined (OpenBSD)
   extern int i386nbsd_sc_pc_offset;
 #define SC_PC_OFFSET i386nbsd_sc_pc_offset
 #else

@@ -1,5 +1,8 @@
 2002-06-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c (_initialize_i386bsd_nat): Define SC_PC_OFFSET to
+	i386nbsd_sc_pc_offset on OpenBSD too.
+
 	* config/i386/tm-fbsd.h [!SVR4_SHARED_LIBS]
 	(IN_SOLIB_CALL_TRAMPOLINE): Remove define.
 	* config/i386/tm-nbsdaout.h (IN_SOLIB_CALL_TRAMPOLINE): Remove
