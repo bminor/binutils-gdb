@@ -3505,6 +3505,7 @@ decode_coproc (SIM_DESC sd,
 	int handle = 0;
 
 	/* start-sanitize-sky */
+#ifdef TARGET_SKY
 	/* On the R5900, this refers to a "VU" vector co-processor. */
 
 	int i_25_21 = (instruction >> 21) & 0x1f;
@@ -3625,6 +3626,7 @@ decode_coproc (SIM_DESC sd,
 	/* cleanup for semantic.c-like actions above */
 	PC = NIA;
 
+#endif /* TARGET_SKY */
 	/* end-sanitize-sky */
 
 	if(! handle)

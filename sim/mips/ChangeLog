@@ -1,3 +1,11 @@
+start-sanitize-sky
+Sun Mar 29 17:50:11       Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): Added a missing TARGET_SKY check
+	around COP2 implementation skeleton.
+
+end-sanitize-sky
+
 Fri Mar 27 16:19:29 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 start-sanitize-sky
