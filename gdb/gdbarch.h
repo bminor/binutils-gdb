@@ -1750,6 +1750,31 @@ extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
+#if defined (FRAME_INIT_SAVED_REGS)
+/* Legacy for systems yet to multi-arch FRAME_INIT_SAVED_REGS */
+#if !defined (FRAME_INIT_SAVED_REGS_P)
+#define FRAME_INIT_SAVED_REGS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS_P)
+#define FRAME_INIT_SAVED_REGS_P() (0)
+#endif
+
+extern int gdbarch_frame_init_saved_regs_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_INIT_SAVED_REGS_P)
+#error "Non multi-arch definition of FRAME_INIT_SAVED_REGS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_INIT_SAVED_REGS_P)
+#define FRAME_INIT_SAVED_REGS_P() (gdbarch_frame_init_saved_regs_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS)
+#define FRAME_INIT_SAVED_REGS(frame) (internal_error (__FILE__, __LINE__, "FRAME_INIT_SAVED_REGS"), 0)
+#endif
+
 typedef void (gdbarch_frame_init_saved_regs_ftype) (struct frame_info *frame);
 extern void gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs);

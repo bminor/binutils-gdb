@@ -739,9 +739,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of extract_struct_value_address, has predicate */
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->frame_init_saved_regs == 0))
-    fprintf_unfiltered (log, "\n\tframe_init_saved_regs");
+  /* Skip verify of frame_init_saved_regs, has predicate */
   /* Skip verify of init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->skip_prologue == 0))
@@ -1463,6 +1461,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_CHAIN_VALID = <0x%08lx>\n",
                         (long) current_gdbarch->frame_chain_valid
                         /*FRAME_CHAIN_VALID ()*/);
+#endif
+#ifdef FRAME_INIT_SAVED_REGS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_INIT_SAVED_REGS_P()",
+                      XSTRING (FRAME_INIT_SAVED_REGS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_INIT_SAVED_REGS_P() = %d\n",
+                      FRAME_INIT_SAVED_REGS_P ());
 #endif
 #ifdef FRAME_INIT_SAVED_REGS
 #if GDB_MULTI_ARCH
@@ -4354,6 +4361,13 @@ set_gdbarch_use_struct_convention (struct gdbarch *gdbarch,
                                    gdbarch_use_struct_convention_ftype use_struct_convention)
 {
   gdbarch->use_struct_convention = use_struct_convention;
+}
+
+int
+gdbarch_frame_init_saved_regs_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->frame_init_saved_regs != 0;
 }
 
 void

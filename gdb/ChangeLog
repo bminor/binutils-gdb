@@ -1,3 +1,14 @@
+2003-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (FRAME_INIT_SAVED_REGS): Change to function with
+	predicate.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* stack.c (frame_info): Only initialize the saved registers when
+	FRAME_INIT_SAVED_REGS_P.
+	* frame.c (frame_saved_regs_register_unwind): Assert
+	FRAME_INIT_SAVED_REGS_P.
+	(deprecated_generic_get_saved_register): Ditto.
+
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* source.c (openp): Squelch warning about "filename".

@@ -900,7 +900,8 @@ frame_info (char *addr_exp, int from_tty)
       }
   }
 
-  if (get_frame_saved_regs (fi) == NULL)
+  if (FRAME_INIT_SAVED_REGS_P ()
+      && get_frame_saved_regs (fi) == NULL)
     FRAME_INIT_SAVED_REGS (fi);
   /* Print as much information as possible on the location of all the
      registers.  */

@@ -570,6 +570,10 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
   gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
 		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
+  /* Only (older) architectures that implement the
+     FRAME_INIT_SAVED_REGS method should be using this function.  */
+  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+
   /* Load the saved_regs register cache.  */
   if (frame->saved_regs == NULL)
     FRAME_INIT_SAVED_REGS (frame);
@@ -737,6 +741,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 {
   if (!target_has_registers)
     error ("No registers.");
+
+  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
 
   /* Normal systems don't optimize out things with register numbers.  */
   if (optimized != NULL)
