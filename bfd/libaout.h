@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef LIBAOUT_H
 #define LIBAOUT_H
@@ -127,7 +127,9 @@ struct aout_backend_data
 
   /* Callback from the add symbols phase of the linker code to handle
      a dynamic object.  */
-  boolean (*add_dynamic_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+  boolean (*add_dynamic_symbols) PARAMS ((bfd *, struct bfd_link_info *,
+					  struct external_nlist **,
+					  bfd_size_type *, char **));
 
   /* Callback from the add symbols phase of the linker code to handle
      adding a single symbol to the global linker hash table.  */
@@ -145,14 +147,17 @@ struct aout_backend_data
   boolean (*write_dynamic_symbol) PARAMS ((bfd *, struct bfd_link_info *,
 					   struct aout_link_hash_entry *));
 
-  /* This callback is called by the linker for each reloc against an
-     external symbol.  RELOC is a pointer to the unswapped reloc.  If
-     *SKIP is set to true, the reloc will be skipped.  */
+  /* If this callback is not NULL, the linker calls it for each reloc.
+     RELOC is a pointer to the unswapped reloc.  If *SKIP is set to
+     true, the reloc will be skipped.  *RELOCATION may be changed to
+     change the effects of the relocation.  */
   boolean (*check_dynamic_reloc) PARAMS ((struct bfd_link_info *info,
 					  bfd *input_bfd,
 					  asection *input_section,
 					  struct aout_link_hash_entry *h,
-					  PTR reloc, boolean *skip));
+					  PTR reloc, bfd_byte *contents,
+					  boolean *skip,
+					  bfd_vma *relocation));
 
   /* Called at the end of a link to finish up any dynamic linking
      information.  */
@@ -217,12 +222,12 @@ enum machine_type {
   M_SPARC_NETBSD = 138,	/* NetBSD/sparc binary */
   M_MIPS1 = 151,        /* MIPS R2000/R3000 binary */
   M_MIPS2 = 152,        /* MIPS R4000/R6000 binary */
-  M_HP200 = 200,	/* HP 200 (68010) BSD binary */
-  M_HP300 = (300 % 256), /* HP 300 (68020+68881) BSD binary */
-  M_HPUX = (0x20c % 256)/* HP 200/300 HPUX binary */
 /* start-sanitize-rce */
   M_RCE = 155,		/* Motorola RCE binary */
 /* end-sanitize-rce */
+  M_HP200 = 200,	/* HP 200 (68010) BSD binary */
+  M_HP300 = (300 % 256), /* HP 300 (68020+68881) BSD binary */
+  M_HPUX = (0x20c % 256)/* HP 200/300 HPUX binary */
 };
 
 #define N_DYNAMIC(exec) ((exec).a_info & 0x80000000)
@@ -340,6 +345,11 @@ struct aoutdata {
 
   /* A pointer for shared library information.  */
   PTR dynamic_info;
+
+  /* A mapping from local symbols to offsets into the global offset
+     table, used when linking on SunOS.  This is indexed by the symbol
+     index.  */
+  bfd_vma *local_got_offsets;
 };
 
 struct  aout_data_struct {
@@ -380,6 +390,9 @@ struct aout_section_data_struct
 
 #define aout_section_data(s) \
   ((struct aout_section_data_struct *) (s)->used_by_bfd)
+
+#define set_aout_section_data(s,v) \
+  ((s)->used_by_bfd = (PTR)&(v)->relocs)
 
 /* Prototype declarations for functions defined in aoutx.h  */
 
@@ -440,10 +453,14 @@ NAME(aout,get_symtab) PARAMS ((bfd *abfd, asymbol **location));
 
 void
 NAME(aout,swap_ext_reloc_in) PARAMS ((bfd *, struct reloc_ext_external *,
-				      arelent *, asymbol **));
+				      arelent *, asymbol **, bfd_size_type));
 void
 NAME(aout,swap_std_reloc_in) PARAMS ((bfd *, struct reloc_std_external *,
-				      arelent *, asymbol **));
+				      arelent *, asymbol **, bfd_size_type));
+
+reloc_howto_type *
+NAME(aout,reloc_type_lookup) PARAMS ((bfd *abfd,
+				      bfd_reloc_code_real_type code));
 
 boolean
 NAME(aout,slurp_reloc_table) PARAMS ((bfd *abfd, sec_ptr asect,
@@ -474,6 +491,13 @@ boolean
 NAME(aout,find_nearest_line) PARAMS ((bfd *abfd, asection *section,
       asymbol **symbols, bfd_vma offset, CONST char **filename_ptr,
       CONST char **functionname_ptr, unsigned int *line_ptr));
+
+long
+NAME(aout,read_minisymbols) PARAMS ((bfd *, boolean, PTR *, unsigned int *));
+
+asymbol *
+NAME(aout,minisymbol_to_symbol) PARAMS ((bfd *, boolean, const PTR,
+					 asymbol *));
 
 int
 NAME(aout,sizeof_headers) PARAMS ((bfd *abfd, boolean exec));

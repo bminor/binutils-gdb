@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static boolean sunos_read_dynamic_info PARAMS ((bfd *));
 static long sunos_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
+static boolean sunos_slurp_dynamic_symtab PARAMS ((bfd *));
 static long sunos_canonicalize_dynamic_symtab PARAMS ((bfd *, asymbol **));
 static long sunos_get_dynamic_reloc_upper_bound PARAMS ((bfd *));
 static long sunos_canonicalize_dynamic_reloc
@@ -40,7 +41,8 @@ static struct bfd_link_hash_table *sunos_link_hash_table_create
 static boolean sunos_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, boolean));
 static boolean sunos_add_dynamic_symbols
-  PARAMS ((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *, struct external_nlist **,
+	   bfd_size_type *, char **));
 static boolean sunos_add_one_symbol
   PARAMS ((struct bfd_link_info *, bfd *, const char *, flagword, asection *,
 	   bfd_vma, const char *, boolean, boolean,
@@ -243,28 +245,26 @@ sunos_get_dynamic_symtab_upper_bound (abfd)
   return (info->dynsym_count + 1) * sizeof (asymbol *);
 }
 
-/* Read in the dynamic symbols.  */
+/* Read the external dynamic symbols.  */
 
-static long
-sunos_canonicalize_dynamic_symtab (abfd, storage)
+static boolean
+sunos_slurp_dynamic_symtab (abfd)
      bfd *abfd;
-     asymbol **storage;
 {
   struct sunos_dynamic_info *info;
-  unsigned long i;
 
   /* Get the general dynamic information.  */
   if (obj_aout_dynamic_info (abfd) == NULL)
     {
       if (! sunos_read_dynamic_info (abfd))
-	  return -1;
+	  return false;
     }
 
   info = (struct sunos_dynamic_info *) obj_aout_dynamic_info (abfd);
   if (! info->valid)
     {
       bfd_set_error (bfd_error_no_symbols);
-      return -1;
+      return false;
     }
 
   /* Get the dynamic nlist structures.  */
@@ -277,7 +277,7 @@ sunos_canonicalize_dynamic_symtab (abfd, storage)
       if (info->dynsym == NULL && info->dynsym_count != 0)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  return -1;
+	  return false;
 	}
       if (bfd_seek (abfd, info->dyninfo.ld_stab, SEEK_SET) != 0
 	  || (bfd_read ((PTR) info->dynsym, info->dynsym_count,
@@ -289,7 +289,7 @@ sunos_canonicalize_dynamic_symtab (abfd, storage)
 	      bfd_release (abfd, info->dynsym);
 	      info->dynsym = NULL;
 	    }
-	  return -1;
+	  return false;
 	}
     }
 
@@ -300,7 +300,7 @@ sunos_canonicalize_dynamic_symtab (abfd, storage)
       if (info->dynstr == NULL && info->dyninfo.ld_symb_size != 0)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  return -1;
+	  return false;
 	}
       if (bfd_seek (abfd, info->dyninfo.ld_symbols, SEEK_SET) != 0
 	  || (bfd_read ((PTR) info->dynstr, 1, info->dyninfo.ld_symb_size,
@@ -312,9 +312,27 @@ sunos_canonicalize_dynamic_symtab (abfd, storage)
 	      bfd_release (abfd, info->dynstr);
 	      info->dynstr = NULL;
 	    }
-	  return -1;
+	  return false;
 	}
     }
+
+  return true;
+}
+
+/* Read in the dynamic symbols.  */
+
+static long
+sunos_canonicalize_dynamic_symtab (abfd, storage)
+     bfd *abfd;
+     asymbol **storage;
+{
+  struct sunos_dynamic_info *info;
+  unsigned long i;
+
+  if (! sunos_slurp_dynamic_symtab (abfd))
+    return -1;
+
+  info = (struct sunos_dynamic_info *) obj_aout_dynamic_info (abfd);
 
 #ifdef CHECK_DYNAMIC_HASH
   /* Check my understanding of the dynamic hash table by making sure
@@ -828,12 +846,16 @@ sunos_create_dynamic_sections (abfd, info, needed)
    set.  */
 
 static boolean
-sunos_add_dynamic_symbols (abfd, info)
+sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
      bfd *abfd;
      struct bfd_link_info *info;
+     struct external_nlist **symsp;
+     bfd_size_type *sym_countp;
+     char **stringsp;
 {
   asection *s;
   bfd *dynobj;
+  struct sunos_dynamic_info *dinfo;
 
   /* We do not want to include the sections in a dynamic object in the
      output file.  We hack by simply clobbering the list of sections
@@ -897,6 +919,15 @@ sunos_add_dynamic_symbols (abfd, info)
 	  || ! bfd_set_section_alignment (dynobj, s, 2))
 	return false;
     }
+
+  /* Pick up the dynamic symbols and return them to the caller.  */
+  if (! sunos_slurp_dynamic_symtab (abfd))
+    return false;
+
+  dinfo = (struct sunos_dynamic_info *) obj_aout_dynamic_info (abfd);
+  *symsp = dinfo->dynsym;
+  *sym_countp = dinfo->dynsym_count;
+  *stringsp = dinfo->dynstr;
 
   return true;
 }

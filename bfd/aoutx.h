@@ -3126,6 +3126,7 @@ aout_link_add_symbols (abfd, info)
 				     bfd_vma, const char *, boolean,
 				     boolean,
 				     struct bfd_link_hash_entry **));
+  struct external_nlist *syms;
   bfd_size_type sym_count;
   char *strings;
   boolean copy;
@@ -3133,12 +3134,21 @@ aout_link_add_symbols (abfd, info)
   register struct external_nlist *p;
   struct external_nlist *pend;
 
+  syms = obj_aout_external_syms (abfd);
   sym_count = obj_aout_external_sym_count (abfd);
   strings = obj_aout_external_strings (abfd);
   if (info->keep_memory)
     copy = false;
   else
     copy = true;
+
+  if ((abfd->flags & DYNAMIC) != 0
+      && aout_backend_info (abfd)->add_dynamic_symbols != NULL)
+    {
+      if (! ((*aout_backend_info (abfd)->add_dynamic_symbols)
+	     (abfd, info, &syms, &sym_count, &strings)))
+	return false;
+    }
 
   /* We keep a list of the linker hash table entries that correspond
      to particular symbols.  We could just look them up in the hash
@@ -3155,18 +3165,11 @@ aout_link_add_symbols (abfd, info)
     }
   obj_aout_sym_hashes (abfd) = sym_hash;
 
-  if ((abfd->flags & DYNAMIC) != 0
-      && aout_backend_info (abfd)->add_dynamic_symbols != NULL)
-    {
-      if (! (*aout_backend_info (abfd)->add_dynamic_symbols) (abfd, info))
-	return false;
-    }
-
   add_one_symbol = aout_backend_info (abfd)->add_one_symbol;
   if (add_one_symbol == NULL)
     add_one_symbol = _bfd_generic_link_add_one_symbol;
 
-  p = obj_aout_external_syms (abfd);
+  p = syms;
   pend = p + sym_count;
   for (; p < pend; p++, sym_hash++)
     {
