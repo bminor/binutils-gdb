@@ -1,5 +1,20 @@
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_setshow_cmd): Delete function.
+	(add_setshow_cmd_full): Make static.
+	* command.h (add_setshow_cmd, add_setshow_cmd_full): Delete.
+	(add_setshow_filename_cmd, add_setshow_string_cmd): Declare.
+	* cli/cli-decode.c (add_setshow_filename_cmd) 
+	(add_setshow_string_cmd): New functions.
+	* nto-tdep.c (_initialize_nto_tdep): Update.  Fix parameters.
+	* mips-tdep.c (_initialize_mips_tdep): Update.
+	* m32r-rom.c (_initialize_m32r_rom): Update.  Update copyright.
+	* cli/cli-logging.c (_initialize_cli_logging): Update.
+	* complaints.c (_initialize_complaints): Update.
+	* remote.c (_initialize_remote): Update.
+	
+2004-07-28  Andrew Cagney  <cagney@gnu.org>
+
 	* cli/cli-decode.c (add_setshow_zinteger_cmd)
 	(add_setshow_cmd, add_setshow_auto_boolean_cmd)
 	(add_setshow_boolean_cmd, add_setshow_cmd_full): Add help_doc and

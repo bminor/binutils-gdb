@@ -1,6 +1,6 @@
 /* nto-tdep.c - general QNX Neutrino target functionality.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -306,12 +306,15 @@ static struct core_fns regset_core_fns = {
 void
 _initialize_nto_tdep (void)
 {
-  add_setshow_cmd ("nto-debug", class_maintenance, var_zinteger,
-		   &nto_internal_debugging, "Set QNX NTO internal debugging.\n\
+  add_setshow_zinteger_cmd ("nto-debug", class_maintenance,
+			    &nto_internal_debugging, "\
+Set QNX NTO internal debugging.", "\
+Show QNX NTO internal debugging.", "\
 When non-zero, nto specific debug info is\n\
 displayed. Different information is displayed\n\
-for different positive values.", "Show QNX NTO internal debugging.\n",
-		   NULL, NULL, &setdebuglist, &showdebuglist);
+for different positive values.", "\
+QNX NTO internal debugging is %s.",
+			    NULL, NULL, &setdebuglist, &showdebuglist);
 
   /* We use SIG45 for pulses, or something, so nostop, noprint
      and pass them.  */

@@ -311,13 +311,12 @@ clear_complaints (struct complaints **c, int less_verbose, int noisy)
 void
 _initialize_complaints (void)
 {
-  add_setshow_cmd ("complaints", class_support, var_zinteger,
-		   &stop_whining, "\
+  add_setshow_zinteger_cmd ("complaints", class_support, &stop_whining, "\
 Set max number of complaints about incorrect symbols.", "\
 Show max number of complaints about incorrect symbols.", "\
 Set to zero to disable incorrect symbol complaints.", "\
 Max number of complaints about incorrect symbols is %s.",
-		   NULL, NULL,
-		   &setlist, &showlist);
+			    NULL, NULL,
+			    &setlist, &showlist);
 
 }

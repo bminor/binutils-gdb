@@ -558,24 +558,21 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   mon2000_ops.to_open = mon2000_open;
   add_target (&mon2000_ops);
 
-  add_setshow_cmd ("download-path", class_obscure,
-		   var_string, &download_path, "\
+  add_setshow_string_cmd ("download-path", class_obscure, &download_path, "\
 Set the default path for downloadable SREC files.", "\
 Show the default path for downloadable SREC files.", "\
 Determines the default path for downloadable SREC files.", "\
 The default path for downloadable SREC files is %s.",
 		   NULL, NULL, &setlist, &showlist);
 
-  add_setshow_cmd ("board-address", class_obscure,
-		   var_string, &board_addr, "\
+  add_setshow_string_cmd ("board-address", class_obscure, &board_addr, "\
 Set IP address for M32R-EVA target board.", "\
 Show IP address for M32R-EVA target board.", "\
 Determine the IP address for M32R-EVA target board.", "\
 IP address for M32R-EVA target board is %s",
 		   NULL, NULL, &setlist, &showlist);
 
-  add_setshow_cmd ("server-address", class_obscure,
-		   var_string, &server_addr, "\
+  add_setshow_string_cmd ("server-address", class_obscure, &server_addr, "\
 Set IP address for download server (GDB's host computer).", "\
 Show IP address for download server (GDB's host computer).", "\
 Determine the IP address for download server (GDB's host computer).", "\

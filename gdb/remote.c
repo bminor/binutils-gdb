@@ -5469,20 +5469,22 @@ Whether to send break if interrupted is %s.",
 	   "Show the maximum number of bytes per memory-read packet.\n",
 	   &remote_show_cmdlist);
 
-  add_setshow_cmd ("hardware-watchpoint-limit", no_class,
-		   var_zinteger, &remote_hw_watchpoint_limit, "\
+  add_setshow_zinteger_cmd ("hardware-watchpoint-limit", no_class,
+			    &remote_hw_watchpoint_limit, "\
 Set the maximum number of target hardware watchpoints.", "\
 Show the maximum number of target hardware watchpoints.", "\
 Specify a negative limit for unlimited.", "\
 The maximum number of target hardware watchpoints is %s.",
-		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
-  add_setshow_cmd ("hardware-breakpoint-limit", no_class,
-		   var_zinteger, &remote_hw_breakpoint_limit, "\
+			    NULL, NULL,
+			    &remote_set_cmdlist, &remote_show_cmdlist);
+  add_setshow_zinteger_cmd ("hardware-breakpoint-limit", no_class,
+			    &remote_hw_breakpoint_limit, "\
 Set the maximum number of target hardware breakpoints.", "\
 Show the maximum number of target hardware breakpoints.", "\
 Specify a negative limit for unlimited.", "\
 The maximum number of target hardware breakpoints is %s.",
-		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
+			    NULL, NULL,
+			    &remote_set_cmdlist, &remote_show_cmdlist);
 
   deprecated_add_show_from_set
     (add_set_cmd ("remoteaddresssize", class_obscure,

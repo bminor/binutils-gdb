@@ -325,7 +325,7 @@ add_set_or_show_cmd (char *name,
    and SHOW_RESULT, if not NULL, are set to the resulting command
    structures.  */
 
-void
+static void
 add_setshow_cmd_full (char *name,
 		      enum command_class class,
 		      var_types var_type, void *var,
@@ -355,28 +355,6 @@ add_setshow_cmd_full (char *name,
     *set_result = set;
   if (show_result != NULL)
     *show_result = show;
-}
-
-/* Add element named NAME to both the command SET_LIST and SHOW_LIST.
-   CLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
-   setting.  VAR is address of the variable being controlled by this
-   command.  SET_FUNC and SHOW_FUNC are the callback functions (if
-   non-NULL).  SET_DOC and SHOW_DOC are the documentation strings.  */
-
-void
-add_setshow_cmd (char *name,
-		 enum command_class class,
-		 var_types var_type, void *var,
-		 const char *set_doc, const char *show_doc,
-		 const char *help_doc, const char *print,
-		 cmd_sfunc_ftype *set_func, cmd_sfunc_ftype *show_func,
-		 struct cmd_list_element **set_list,
-		 struct cmd_list_element **show_list)
-{
-  add_setshow_cmd_full (name, class, var_type, var,
-			set_doc, show_doc, help_doc, print,
-			set_func, show_func, set_list, show_list,
-			NULL, NULL);
 }
 
 struct cmd_list_element *
@@ -459,6 +437,44 @@ add_setshow_boolean_cmd (char *name, enum command_class class, int *var,
 			set_list, show_list,
 			&c, NULL);
   c->enums = boolean_enums;
+}
+
+/* Add element named NAME to both the set and show command LISTs (the
+   list for set/show or some sublist thereof).  */
+void
+add_setshow_filename_cmd (char *name, enum command_class class,
+			  char **var,
+			  const char *set_doc, const char *show_doc,
+			  const char *help_doc, const char *print,
+			  cmd_sfunc_ftype *set_func,
+			  cmd_sfunc_ftype *show_func,
+			  struct cmd_list_element **set_list,
+			  struct cmd_list_element **show_list)
+{
+  add_setshow_cmd_full (name, class, var_filename, var,
+			set_doc, show_doc, help_doc, print,
+			set_func, show_func,
+			set_list, show_list,
+			NULL, NULL);
+}
+
+/* Add element named NAME to both the set and show command LISTs (the
+   list for set/show or some sublist thereof).  */
+void
+add_setshow_string_cmd (char *name, enum command_class class,
+			  char **var,
+			  const char *set_doc, const char *show_doc,
+			  const char *help_doc, const char *print,
+			  cmd_sfunc_ftype *set_func,
+			  cmd_sfunc_ftype *show_func,
+			  struct cmd_list_element **set_list,
+			  struct cmd_list_element **show_list)
+{
+  add_setshow_cmd_full (name, class, var_string, var,
+			set_doc, show_doc, help_doc, print,
+			set_func, show_func,
+			set_list, show_list,
+			NULL, NULL);
 }
 
 /* Add element named NAME to both the set and show command LISTs (the

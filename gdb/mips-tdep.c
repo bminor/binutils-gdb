@@ -6195,8 +6195,8 @@ Zerroing of upper 32 bits of 64-bit address is %s.",
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */
-  add_setshow_cmd ("remote-mips64-transfers-32bit-regs", class_obscure,
-		   var_boolean, &mips64_transfers_32bit_regs_p, "\
+  add_setshow_boolean_cmd ("remote-mips64-transfers-32bit-regs", class_obscure,
+			   &mips64_transfers_32bit_regs_p, "\
 Set compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
 Show compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
 Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\

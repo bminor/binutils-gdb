@@ -187,12 +187,13 @@ If redirect is off, output will go to both the screen and the log file.\n\
 If redirect is on, output will go only to the log file.", "\
 The logging output mode is %s.",
 			   NULL, NULL, &set_logging_cmdlist, &show_logging_cmdlist);
-  add_setshow_cmd ("file", class_support, var_filename, &logging_filename, "\
+  add_setshow_filename_cmd ("file", class_support, &logging_filename, "\
 Set the current logfile.", "\
 Show the current logfile.", "\
 The logfile is used when directing GDB's output.", "\
 The current logfile is %s.",
-		   NULL, NULL, &set_logging_cmdlist, &show_logging_cmdlist);
+			    NULL, NULL,
+			    &set_logging_cmdlist, &show_logging_cmdlist);
   add_cmd ("on", class_support, set_logging_on,
 	   "Enable logging.", &set_logging_cmdlist);
   add_cmd ("off", class_support, set_logging_off,
