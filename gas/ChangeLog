@@ -1,3 +1,10 @@
+2002-04-24  Christian Groessler <chris@groessler.org>
+
+	* config/tc-z8k.c (build_bytes): Add support for new cases:
+	CLASS_IGNORE and ARG_NIM4.
+	(md_assemble): Prevent destruction of input_line_pointer if
+	get_operands returns failure.
+
 2002-04-24  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (macro_build): Do _not_ allow MIPS-3D

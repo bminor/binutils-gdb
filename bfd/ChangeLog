@@ -1,3 +1,9 @@
+2002-04-24  Christian Groessler <chris@groessler.org>
+
+	* coff-z8k.c (extra_case): Fix R_IMM32 relocations: The
+	addresses are 23bit with a special layout, not plain 32bit
+	values.  Prevent relocation of immediate values.
+
 2002-04-24  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data): If MDMX or

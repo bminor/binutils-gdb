@@ -79,7 +79,8 @@ responsibility among the other maintainers.
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
-  z8k		   Christian Groessler <cpg@aladdin.de>
+  z8k		   Christian Groessler <chris@groessler.org>
+
 
       --------- CGEN Maintainers -------------
 

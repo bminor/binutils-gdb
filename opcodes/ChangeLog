@@ -1,3 +1,24 @@
+2002-04-24  Christian Groessler <chris@groessler.org>
+
+	* z8k-dis.c (print_insn_z8k): Set disassemble_info to 2
+	bytes_per_chunk, 6 bytes_per_line for nicer display of the hex
+	codes.
+	(z8k_lookup_instr): CLASS_IGNORE case added.
+	(output_instr): Don't print hex codes, they are already
+	printed.
+	(unpack_instr): ARG_NIM4 case added.  ARG_NIM8 case
+	fixed. Support CLASS_BIT_1OR2 and CLASS_IGNORE cases.
+	(unparse_instr): Fix base and indexed addressing disassembly:
+	The index is inside the brackets.
+	* z8kgen.c (gas): Add ARG_NIM4 and CLASS_IGNORE defines.
+	(opt): Fix shift left/right arithmetic/logical byte defines:
+	The high byte of the immediate word is ignored by the
+	processor.
+	Fix n parameter of ldm opcodes: The opcode contains (n-1).
+	(args): Fix "n" entry.
+	(toks): Add "nim4" and "iiii" entries.
+	* z8k-opc.h: Regenerated with new z8kgen.c.
+
 2002-04-24  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/id.po: New Indonesian translation.

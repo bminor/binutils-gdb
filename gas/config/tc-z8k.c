@@ -1,5 +1,5 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800n
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1081,6 +1081,7 @@ build_bytes (this_try, operand)
 	case CLASS_FLAGS:
 	  *output_ptr++ = the_flags;
 	  break;
+	case CLASS_IGNORE:
 	case CLASS_BIT:
 	  *output_ptr++ = c & 0xf;
 	  break;
@@ -1116,6 +1117,9 @@ build_bytes (this_try, operand)
 	    nib = 0;
 	    switch (c & ARG_MASK)
 	      {
+	      case ARG_NIM4:
+		imm_operand->X_add_number = -imm_operand->X_add_number;
+		/* Drop through.  */
 	      case ARG_IMM4:
 		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
 		break;
@@ -1205,13 +1209,12 @@ md_assemble (str)
 
   if (opcode->opcode == 250)
     {
-      /* Was really a pseudo op.  */
-
       pseudo_typeS *p;
       char oc;
-
       char *old = input_line_pointer;
       *op_end = c;
+
+      /* Was really a pseudo op.  */
 
       input_line_pointer = op_end;
 
@@ -1227,7 +1230,11 @@ md_assemble (str)
     }
   else
     {
-      input_line_pointer = get_operands (opcode, op_end, operand);
+      char *new_input_line_pointer;
+
+      new_input_line_pointer = get_operands (opcode, op_end, operand);
+      if (new_input_line_pointer)
+        input_line_pointer = new_input_line_pointer;
       prev_opcode = opcode;
 
       opcode = get_specific (opcode, operand);
@@ -1335,9 +1342,10 @@ md_atof (type, litP, sizeP)
 
 CONST char *md_shortopts = "z:";
 
-struct option md_longopts[] = {
-  {NULL, no_argument, NULL, 0}
-};
+struct option md_longopts[] =
+  {
+    {NULL, no_argument, NULL, 0}
+  };
 
 size_t md_longopts_size = sizeof (md_longopts);
 
@@ -1401,7 +1409,6 @@ md_section_align (seg, size)
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1)
 	  & (-1 << section_alignment[(int) seg]));
-
 }
 
 void

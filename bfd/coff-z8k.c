@@ -185,10 +185,25 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
       break;
 
     case R_IMM32:
-      bfd_put_32 (in_abfd,
-		  /* 0x80000000 indicates a long segmented address.  */
-		  bfd_coff_reloc16_get_value (reloc, link_info, input_section) | 0x80000000,
-		  data + *dst_ptr);
+      /* If no flags are set, assume immediate value.  */
+      if (! (*reloc->sym_ptr_ptr)->section->flags)
+	{
+	  bfd_put_32 (in_abfd,
+		      bfd_coff_reloc16_get_value (reloc, link_info,
+						  input_section),
+		      data + *dst_ptr);
+	}
+      else
+	{
+	  bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
+						    input_section);
+	  /* Adresses are 23 bit, and the layout of those in a 32-bit
+	     value is as follows:
+	       1AAAAAAA xxxxxxxx AAAAAAAA AAAAAAAA
+	     (A - address bits,  x - ignore).  */
+	  dst = (dst & 0xffff) | ((dst & 0xff0000) << 8) | 0x80000000;
+	  bfd_put_32 (in_abfd, dst, data + *dst_ptr);
+	}
       (*dst_ptr) += 4;
       (*src_ptr) += 4;
       break;
