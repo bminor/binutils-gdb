@@ -1,5 +1,12 @@
 Thu Dec 15 16:55:35 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* defs.h: Include progress.h.
+	(QUIT): Call PROGRESS.
+	* main.c (main): Call START_PROGRESS and END_PROGRESS, break
+	usage message into shorter strings.
+	* source.c:  Change long command help strings into concats of
+	shorter ones, for picky ANSI compilers.
+
 	* top.c (command_loop): For space usage display, show both
         absolute size and the change from before command execution.
 
