@@ -20,6 +20,9 @@
 @ifset AOUT
 @set aout-bout
 @end ifset
+@ifset ARM/Thumb
+@set ARM
+@end ifset
 @ifset BOUT
 @set aout-bout
 @end ifset
@@ -202,11 +205,17 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
-@c start-sanitize-arc
 @ifset ARC
  [ -mbig-endian | -mlittle-endian ]
 @end ifset
-@c end-sanitize-arc
+@ifset ARM
+ [ -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 | -m[arm]6 | -m[arm]7[t][[d]m[i]] ]
+ [ -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m | -m[arm]v4 | -m[arm]v4t ]
+ [ -mthumb | -mall ]
+ [ -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu ]
+ [ -EB | -EL ]
+ [ -mapcs-32 | -mapcs-26 ]
+@end ifset
 @ifset D10V
  [ -O ]
 @end ifset
@@ -357,6 +366,24 @@ Generate ``little endian'' format output.
 @end table
 @end ifset
 
+@ifset ARM
+The following options are available when @value{AS} is configured for the ARM
+processor family.
+
+@table @code
+@item -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 | -m[arm]6 | -m[arm]7[t][[d]m] | -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m | -m[arm]v4 | -m[arm]v4t 
+Specify which variant of the ARM architecture is the target.
+@item -mthumb | -mall
+Enable or disable Thumb only instruction decoding.
+@item -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu
+Select which Floating Point architcture is the target.
+@item -mapcs-32 | -mapcs-26
+Select which procedure calling convention is in use.
+@item -EB | -EL
+Select either big-endian (-EB) or little-endian (-EL) output.
+@end table
+@end ifset
+
 @ifset D10V
 The following options are available when @value{AS} is configured for
 a D10V processor.
@@ -473,7 +500,7 @@ assembler, but it is passed by @code{@value{GCC}}.
 
 @cindex emulation
 @item --emulation=@var{name}
-This option causes @code{@value{AS}} to emulated @code{@value{AS}} configured
+This option causes @code{@value{AS}} to emulate @code{@value{AS}} configured
 for some other target, in all respects, including output format (choosing
 between ELF and ECOFF only), handling of pseudo-opcodes which may generate
 debugging information or store symbol table information, and default
@@ -515,7 +542,7 @@ break exception.
 
 @menu
 * Manual::                      Structure of this Manual
-* GNU Assembler::               @value{AS}, the GNU Assembler
+* GNU Assembler::               The GNU Assembler
 * Object Formats::              Object File Formats
 * Command Line::                Command Line
 * Input Files::                 Input Files
@@ -596,7 +623,7 @@ computer-readable series of instructions.  Different versions of
 @c directives).
 
 @node GNU Assembler
-@section @value{AS}, the GNU Assembler
+@section The GNU Assembler
 
 @sc{gnu} @code{as} is really a family of assemblers.
 @ifclear GENERIC
@@ -609,7 +636,7 @@ architecture.  Each version has much in common with the others,
 including object file formats, most assembler directives (often called
 @dfn{pseudo-ops}) and assembler syntax.@refill
 
-@cindex purpose of @sc{gnu} @code{@value{AS}}
+@cindex purpose of @sc{gnu} assembler
 @code{@value{AS}} is primarily intended to assemble the output of the
 @sc{gnu} C compiler @code{@value{GCC}} for use by the linker
 @code{@value{LD}}.  Nevertheless, we've tried to make @code{@value{AS}}
@@ -784,7 +811,7 @@ information for the debugger.
 
 @cindex error messsages
 @cindex warning messages
-@cindex messages from @code{@value{AS}}
+@cindex messages from assembler
 @code{@value{AS}} may write warnings and error messages to the standard error
 file (usually your terminal).  This should not happen when  a compiler
 runs @code{@value{AS}} automatically.  Warnings report an assumption made so
@@ -832,7 +859,7 @@ because many of them aren't supposed to happen.
 @node Invoking
 @chapter Command-Line Options
 
-@cindex options, all versions of @code{@value{AS}}
+@cindex options, all versions of assembler
 This chapter describes command-line options available in @emph{all}
 versions of the @sc{gnu} assembler; @pxref{Machine Dependencies}, for options specific
 @ifclear GENERIC
@@ -1010,11 +1037,9 @@ target is allowed to redefine the local label prefix.
 @ifset HPPA
 On the HPPA local labels begin with @samp{L$}.
 @end ifset
-@c start-sanitize-arc
-@ifset ARC
-On the ARC local labels begin with @samp{.L}.
+@ifset ARM
+@samp{;} for the ARM family;
 @end ifset
-@c end-sanitize-arc
 
 @node M
 @section Assemble in MRI Compatibility Mode: @code{-M}
@@ -1240,8 +1265,8 @@ seconds).
 
 @kindex -v
 @kindex -version
-@cindex @code{@value{AS}} version
-@cindex version of @code{@value{AS}}
+@cindex assembler version
+@cindex version of assembler
 You can find out what version of as is running by including the
 option @samp{-v} (which you can also spell as @samp{-version}) on the
 command line.
@@ -1378,11 +1403,9 @@ is considered a comment and is ignored.  The line comment character is
 @ifset A29K
 @samp{;} for the AMD 29K family;
 @end ifset
-@c start-sanitize-arc
 @ifset ARC
 @samp{;} on the ARC;
 @end ifset
-@c end-sanitize-arc
 @ifset H8/300
 @samp{;} for the H8/300 family;
 @end ifset
@@ -1842,10 +1865,8 @@ Hitachi SH,
 and AMD 29K architectures, the letter must be
 one of the letters @samp{DFPRSX} (in upper or lower case).
 
-@c start-sanitize-arc
-On the ARC, the letter one of the letters @samp{DFRS}
+On the ARC, the letter must be one of the letters @samp{DFRS}
 (in upper or lower case).
-@c end-sanitize-arc
 
 On the Intel 960 architecture, the letter must be
 one of the letters @samp{DFT} (in upper or lower case).
@@ -1856,11 +1877,9 @@ On the HPPA architecture, the letter must be @samp{E} (upper case only).
 @ifset A29K
 One of the letters @samp{DFPRSX} (in upper or lower case).
 @end ifset
-@c start-sanitize-arc
 @ifset ARC
 One of the letters @samp{DFRS} (in upper or lower case).
 @end ifset
-@c end-sanitize-arc
 @ifset H8
 One of the letters @samp{DFPRSX} (in upper or lower case).
 @end ifset
@@ -1947,8 +1966,8 @@ The directives @code{.byte}, @code{.hword}, @code{.int}, @code{.long},
 
 @menu
 * Secs Background::             Background
-* Ld Sections::                 @value{LD} Sections
-* As Sections::                 @value{AS} Internal Sections
+* Ld Sections::                 Linker Sections
+* As Sections::                 Assembler Internal Sections
 * Sub-Sections::                Sub-Sections
 * bss::                         bss Section
 @end menu
@@ -1984,7 +2003,7 @@ and for the Hitachi SH,
 ensure they end on a word (sixteen bit) boundary.
 @end ifset
 
-@cindex standard @code{@value{AS}} sections
+@cindex standard assembler sections
 An object file written by @code{@value{AS}} has at least three sections, any
 of which may be empty.  These are named @dfn{text}, @dfn{data} and
 @dfn{bss} sections.
@@ -2092,7 +2111,7 @@ Some sections are manipulated by @code{@value{LD}}; others are invented for
 use of @code{@value{AS}} and have no meaning except during assembly.
 
 @node Ld Sections
-@section @value{LD} Sections
+@section Linker Sections
 @code{@value{LD}} deals with just four kinds of sections, summarized below.
 
 @table @strong
@@ -2197,9 +2216,9 @@ DDDD}\boxit{2cm}{\tt 00000}\ \dots\hfil}
 @c END TEXI2ROFF-KILL
 
 @node As Sections
-@section @value{AS} Internal Sections
+@section Assembler Internal Sections
 
-@cindex internal @code{@value{AS}} sections
+@cindex internal assembler sections
 @cindex sections in messages, internal
 These sections are meant only for the internal use of @code{@value{AS}}.  They
 have no meaning at run-time.  You do not really need to know about these
@@ -2983,8 +3002,6 @@ Some machine configurations provide additional directives.
 * Sbttl::                       @code{.sbttl "@var{subheading}"}
 @ifset COFF
 * Scl::                         @code{.scl @var{class}}
-@end ifset
-@ifset COFF
 * Section::                     @code{.section @var{name}, @var{subsection}}
 @end ifset
 
@@ -2996,6 +3013,7 @@ Some machine configurations provide additional directives.
 @end ifset
 
 * Skip::                        @code{.skip @var{size} , @var{fill}}
+* Sleb128::			@code{.sleb128 @var{expressions}}
 * Space::                       @code{.space @var{size} , @var{fill}}
 @ifset have-stabs
 * Stab::                        @code{.stabd, .stabn, .stabs}
@@ -3016,6 +3034,7 @@ Some machine configurations provide additional directives.
 * Val::                         @code{.val @var{addr}}
 @end ifset
 
+* Uleb128::                     @code{.uleb128 @var{expressions}}
 * Word::                        @code{.word @var{expressions}}
 * Deprecated::                  Deprecated Directives
 @end menu
@@ -4246,6 +4265,14 @@ ignores it.
 @end ifset
 @end ifset
 
+@node Sleb128
+@section @code{.sleb128 @var{expressions}}
+
+@cindex @code{sleb128} directive
+@var{sleb128} stands for ``signed little endian base 128.''  This is a 
+compact, variable length representation of numbers used by the DWARF
+symbolic debugging format.  @xref{Uleb128,@code{.uleb128}}.
+
 @ifclear no-space-dir
 @node Skip
 @section @code{.skip @var{size} , @var{fill}}
@@ -4476,6 +4503,14 @@ configured for @code{b.out}, it accepts this directive but ignores it.
 @end ifset
 @end ifset
 
+@node Uleb128
+@section @code{.uleb128 @var{expressions}}
+
+@cindex @code{uleb128} directive
+@var{uleb128} stands for ``unsigned little endian base 128.''  This is a 
+compact, variable length representation of numbers used by the DWARF
+symbolic debugging format.  @xref{Sleb128,@code{.sleb128}}.
+
 @node Word
 @section @code{.word @var{expressions}}
 
@@ -4576,11 +4611,12 @@ subject, see the hardware manufacturer's manual.
 @ifset A29K
 * AMD29K-Dependent::            AMD 29K Dependent Features
 @end ifset
-@c start-sanitize-arc
 @ifset ARC
 * ARC-Dependent::               ARC Dependent Features
 @end ifset
-@c end-sanitize-arc
+@ifset ARM
+* ARM-Dependent::               ARM Dependent Features
+@end ifset
 @ifset D10V
 * D10V-Dependent::              D10V Dependent Features
 @end ifset
@@ -4630,7 +4666,6 @@ subject, see the hardware manufacturer's manual.
 @c node and sectioning commands; hence the repetition of @chapter BLAH
 @c in both conditional blocks.
 
-@c start-sanitize-arc
 @ifset ARC
 @ifset GENERIC
 @page
@@ -4661,7 +4696,8 @@ variants) of chip, using the same core instruction set, but including
 a few additional instructions at each level.
 
 By default, @code{@value{AS}} assumes the core instruction set (ARC
-base).  The @code{.cpu} pseudo-op is used to select a different variant.
+base).  The @code{.cpu} pseudo-op is intended to be used to select
+the variant.
 
 @table @code
 @cindex @code{-mbig-endian} option (ARC)
@@ -4699,16 +4735,20 @@ machine directives:
 @table @code
 @item .cpu
 @cindex @code{cpu} directive, SPARC
-This must be followed by the desired cpu.  It must be one of
-@code{base}, @code{host}, @code{graphics}, or @code{audio}.
+This must be followed by the desired cpu.
+The ARC is intended to be customizable, @code{.cpu} is used to
+select the desired variant [though currently there are none].
 
 @end table
 
 @end ifset
-@c end-sanitize-arc
 
 @ifset A29K
 @include c-a29k.texi
+@end ifset
+
+@ifset ARM
+@include c-arm.texi
 @end ifset
 
 @ifset Hitachi-all
@@ -4789,8 +4829,8 @@ family.
 
 @node Reporting Bugs
 @chapter Reporting Bugs
-@cindex bugs in @code{@value{AS}}
-@cindex reporting bugs in @code{@value{AS}}
+@cindex bugs in assembler
+@cindex reporting bugs in assembler
 
 Your bug reports play an essential role in making @code{@value{AS}} reliable.
 
@@ -4839,7 +4879,7 @@ of @code{@value{AS}} are welcome in any case.
 @node Bug Reporting
 @section How to report bugs
 @cindex bug reports
-@cindex @code{@value{AS}} bugs, reporting
+@cindex assembler bugs, reporting
 
 A number of companies and individuals offer support for @sc{gnu} products.  If
 you obtained @code{@value{AS}} from a support organization, we recommend you

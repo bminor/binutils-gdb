@@ -17,12 +17,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="arc ${keep_these_too}"
-else
-	lose_these_too="arc ${lose_these_too}"
-fi
-
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	keep_these_too="tic80 ${keep_these_too}"
 else
@@ -51,6 +45,7 @@ Things-to-keep:
 
 all
 alpha
+arc
 arm
 h8300
 hppa
