@@ -1,3 +1,8 @@
+Tue Jul  6 10:41:42 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.h (tc_frob_symbol): Always punt "$global$" symbol
+	for ELF.
+
 1999-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (ARM_EXT_V5): Define.
