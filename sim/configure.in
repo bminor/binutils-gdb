@@ -21,6 +21,10 @@ else
 fi
 AC_SUBST(CC_FOR_BUILD)
 
+# The PowerPC simulator uses the GCC extension long long as well as
+# ANSI prototypes, so don't enable it for random host compilers
+# unless asked to.
+
 AC_ARG_ENABLE(sim-powerpc,
 [  --enable-sim-powerpc ],
 [case "${enableval}" in
