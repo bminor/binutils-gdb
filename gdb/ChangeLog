@@ -1,3 +1,10 @@
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-windata.c: Include "gdb_string.h".
+	* tui/tui-source.c, tui/tui-winsource.c: Ditto.
+	* tui/tui-layout.c, tui/tui-command.c: Ditto.
+	* Makefile.in: Update dependencies.
+
 2004-02-16  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (infrun.o): Add $(gdb_assert_h).

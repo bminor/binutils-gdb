@@ -28,6 +28,7 @@
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-regs.h"
 
+#include "gdb_string.h"
 #include "gdb_curses.h"
 
 
