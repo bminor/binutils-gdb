@@ -1,3 +1,11 @@
+2002-01-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* stabsread.c: Update copyright years.
+
+	From Debashis Mahata <debashis.mahata@wipro.com>:
+	(read_struct_fields): Deal with Sun C compiler erroneous stab
+	output for structs and unions.
+
 2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* p-valprint.c: Include "cp-abi.h" for baseclass_offset

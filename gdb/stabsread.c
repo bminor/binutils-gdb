@@ -1,6 +1,6 @@
 /* Support routines for decoding "stabs" debugging information format.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000
+   1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -3541,8 +3541,10 @@ read_struct_fields (struct field_info *fip, char **pp, struct type *type,
   /* Read each data member type until we find the terminating ';' at the end of
      the data member list, or break for some other reason such as finding the
      start of the member function list. */
+  /* Stab string for structure/union does not end with two ';' in
+     SUN C compiler 5.3 i.e. F6U2, hence check for end of string. */
 
-  while (**pp != ';')
+  while (**pp != ';' && **pp != '\0')
     {
       if (os9k_stabs && **pp == ',')
 	break;
