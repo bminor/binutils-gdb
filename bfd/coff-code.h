@@ -125,7 +125,7 @@ swap_name(abfd, ptr)
     }
 }
 
-void
+static void
 bfd_coff_swap_sym(abfd, se)
     bfd            *abfd;
     SYMENT         *se;
@@ -138,7 +138,7 @@ bfd_coff_swap_sym(abfd, se)
     bfd_h_put_x(abfd, se->n_numaux, &se->n_numaux);
 }
 
-void
+static void
 bfd_coff_swap_aux(abfd, au, type, class)
     bfd            *abfd;
     AUXENT         *au;
@@ -164,7 +164,7 @@ bfd_coff_swap_aux(abfd, au, type, class)
 	sp(au->x_sym.x_tagndx);
 	sp(au->x_sym.x_tvndx);
 
-	if (ISARY(type) || class == C_BLOCK) {
+	if (ISARY(type)) {
 	    sp(au->x_sym.x_fcnary.x_ary.x_dimen[0]);
 	    sp(au->x_sym.x_fcnary.x_ary.x_dimen[1]);
 	    sp(au->x_sym.x_fcnary.x_ary.x_dimen[2]);
@@ -184,7 +184,7 @@ bfd_coff_swap_aux(abfd, au, type, class)
     }
 }
 
-void
+static void
 bfd_coff_swap_lineno(abfd, lineno)
     bfd            *abfd;
     LINENO         *lineno;
@@ -298,125 +298,123 @@ coff_real_object_p(abfd, nscns, opthdr)
     unsigned        nscns,
                     opthdr;
 {
-    struct icofdata *tdata;
-    char           *file_info;	/* buffer for all the headers */
-    size_t          readsize;	/* length of file_info */
-    struct filehdr *filehdr;	/* points into file_info */
-    struct scnhdr  *sections;	/* points into file_info */
-    /*
-       OK, now we know the format, read in the filehdr, soi-disant "optional
-       header", and all the sections.
-    */
-    readsize = sizeof(struct filehdr)
-	+ opthdr
-	+ (nscns * sizeof(struct scnhdr));
+  struct icofdata *tdata;
+  char           *file_info;	/* buffer for all the headers */
+  size_t          readsize;	/* length of file_info */
+  struct filehdr *filehdr;	/* points into file_info */
+  struct scnhdr  *sections;	/* points into file_info */
+  /*
+     OK, now we know the format, read in the filehdr, soi-disant "optional
+     header", and all the sections.
+     */
+  readsize = sizeof(struct filehdr)
+    + opthdr
+      + (nscns * sizeof(struct scnhdr));
 
-    file_info = malloc(readsize);
-    if (file_info == NULL) {
-	bfd_error = no_memory;
-	return 0;
+  file_info = malloc(readsize);
+  if (file_info == NULL) {
+    bfd_error = no_memory;
+    return 0;
+  }
+  if (bfd_seek(abfd, 0L, SEEK_SET) < 0)
+    return 0;
+  if (bfd_read((void *) file_info, 1, readsize, abfd) != readsize)
+    return 0;
+  filehdr = (struct filehdr *) file_info;
+  sections = (struct scnhdr *) (file_info + sizeof(struct filehdr) + opthdr);
+
+
+  swap_filehdr(abfd, filehdr);
+
+  /* Now copy data as required; construct all asections etc */
+  tdata = (struct icofdata *) malloc(sizeof(struct icofdata) +
+				     sizeof(AOUTHDR));
+  if (tdata == NULL) {
+    bfd_error = no_memory;
+    return 0;
+  }
+  tdata->symbol_index_slew = 0;
+  tdata->relocbase =0;
+  tdata->raw_syment_count = 0;
+  tdata->raw_linenos = 0;
+  tdata->raw_syments = 0;
+  tdata->sym_filepos =0;
+  tdata->flags = filehdr->f_flags;
+  if (nscns != 0) {
+    unsigned int    i;
+    for (i = 0; i < nscns; i++) {
+      swap_scnhdr(abfd, sections + i);
+      make_a_section_from_file(abfd, sections + i);
     }
-    if (bfd_seek(abfd, 0L, SEEK_SET) < 0)
-	return 0;
-    if (bfd_read((void *) file_info, 1, readsize, abfd) != readsize)
-	return 0;
-    filehdr = (struct filehdr *) file_info;
-    sections = (struct scnhdr *) (file_info + sizeof(struct filehdr) + opthdr);
-
-
-    swap_filehdr(abfd, filehdr);
-
-    /* Now copy data as required; construct all asections etc */
-    tdata = (struct icofdata *) malloc(sizeof(struct icofdata) +
-				       sizeof(AOUTHDR));
-    if (tdata == NULL) {
-	bfd_error = no_memory;
-	return 0;
-    }
-    tdata->symbol_index_slew = 0;
-    tdata->relocbase =0;
-    tdata->raw_syment_count = 0;
-    tdata->raw_linenos = 0;
-    tdata->raw_syments = 0;
-    tdata->sym_filepos =0;
-    tdata->flags = filehdr->f_flags;
-    if (nscns != 0) {
-	unsigned int    i;
-	for (i = 0; i < nscns; i++) {
-	    swap_scnhdr(abfd, sections + i);
-	    make_a_section_from_file(abfd, sections + i);
-	}
-    }
-    /* Determine the machine architecture and type.  */
-    abfd->obj_machine = 0;
-    switch (filehdr->f_magic) {
+  }
+  /* Determine the machine architecture and type.  */
+  abfd->obj_machine = 0;
+  switch (filehdr->f_magic) {
 #ifdef MC68MAGIC
-    case MC68MAGIC:
-    case MC68DMAGIC:
-	abfd->obj_arch = bfd_arch_m68k;
-	abfd->obj_machine = 68020;
-	break;
+  case MC68MAGIC:
+  case MC68DMAGIC:
+    abfd->obj_arch = bfd_arch_m68k;
+    abfd->obj_machine = 68020;
+    break;
 #endif
 #ifdef I960ROMAGIC
-    case I960ROMAGIC:
-    case I960RWMAGIC:
-	abfd->obj_arch = bfd_arch_i960;
-	switch (F_I960TYPE & filehdr->f_flags) {
-	case F_I960CORE:
-	    abfd->obj_machine = bfd_mach_i960_core;
-	    break;
-	case F_I960KB:
-	    abfd->obj_machine = bfd_mach_i960_kb_sb;
-	    break;
-	case F_I960MC:
-	    abfd->obj_machine = bfd_mach_i960_mc;
-	    break;
-	case F_I960XA:
-	    abfd->obj_machine = bfd_mach_i960_xa;
-	    break;
-	case F_I960CA:
-	    abfd->obj_machine = bfd_mach_i960_ca;
-	    break;
-	case F_I960KA:
-	    abfd->obj_machine = bfd_mach_i960_ka_sa;
-	    break;
-	    /*
-	       Doomed to fail but sneak out a bit of info in the process.
-	    */
-	default:
-	    abfd->obj_machine = filehdr->f_flags & F_I960TYPE;
-	}
+  case I960ROMAGIC:
+  case I960RWMAGIC:
+    abfd->obj_arch = bfd_arch_i960;
+    switch (F_I960TYPE & filehdr->f_flags) 
+      {
+      default:
+      case F_I960CORE:
+	abfd->obj_machine = bfd_mach_i960_core;
 	break;
+      case F_I960KB:
+	abfd->obj_machine = bfd_mach_i960_kb_sb;
+	break;
+      case F_I960MC:
+	abfd->obj_machine = bfd_mach_i960_mc;
+	break;
+      case F_I960XA:
+	abfd->obj_machine = bfd_mach_i960_xa;
+	break;
+      case F_I960CA:
+	abfd->obj_machine = bfd_mach_i960_ca;
+	break;
+      case F_I960KA:
+	abfd->obj_machine = bfd_mach_i960_ka_sa;
+	break;
+
+      }
+    break;
 #endif
 
-    default:			/* Unreadable input file type */
-	abfd->obj_arch = bfd_arch_obscure;
-	break;
-    }
+  default:			/* Unreadable input file type */
+    abfd->obj_arch = bfd_arch_obscure;
+    break;
+  }
 
-    if (!(filehdr->f_flags & F_RELFLG))
-	abfd->flags |= HAS_RELOC;
-    if ((filehdr->f_flags & F_EXEC))
-	abfd->flags |= EXEC_P;
-    if (!(filehdr->f_flags & F_LNNO))
-	abfd->flags |= HAS_LINENO;
-    if (!(filehdr->f_flags & F_LSYMS))
-	abfd->flags |= HAS_LOCALS;
+  if (!(filehdr->f_flags & F_RELFLG))
+    abfd->flags |= HAS_RELOC;
+  if ((filehdr->f_flags & F_EXEC))
+    abfd->flags |= EXEC_P;
+  if (!(filehdr->f_flags & F_LNNO))
+    abfd->flags |= HAS_LINENO;
+  if (!(filehdr->f_flags & F_LSYMS))
+    abfd->flags |= HAS_LOCALS;
 
-    abfd->tdata = (void *) tdata;
-    bfd_get_symcount(abfd) = filehdr->f_nsyms;
-    if (filehdr->f_nsyms)
-	abfd->flags |= HAS_SYMS;
+  abfd->tdata = (void *) tdata;
+  bfd_get_symcount(abfd) = filehdr->f_nsyms;
+  if (filehdr->f_nsyms)
+    abfd->flags |= HAS_SYMS;
 
-    tdata->sym_filepos = filehdr->f_symptr;
-    tdata->hdr = (struct aouthdr *) (file_info + sizeof(struct filehdr));
+  tdata->sym_filepos = filehdr->f_symptr;
+  tdata->hdr = (struct aouthdr *) (file_info + sizeof(struct filehdr));
 
-    swap_aouthdr(abfd, tdata->hdr);
+  swap_aouthdr(abfd, tdata->hdr);
 
-    tdata->symbols = (coff_symbol_type *) NULL;
-    bfd_get_start_address(abfd) = opthdr ? exec_hdr(abfd)->entry : 0;
+  tdata->symbols = (coff_symbol_type *) NULL;
+  bfd_get_start_address(abfd) = opthdr ? exec_hdr(abfd)->entry : 0;
 
-    return abfd->xvec;
+  return abfd->xvec;
 }
 
 
@@ -478,11 +476,10 @@ coff_mkobject(abfd)
 {
     char           *rawptr;
 
-
     bfd_error = system_call_error;
 
     /* Use an intermediate variable for clarity */
-    rawptr = malloc(sizeof(struct icofdata) + sizeof(AOUTHDR));
+    rawptr = zalloc(sizeof(struct icofdata) + sizeof(AOUTHDR));
     if (rawptr == NULL) {
 	bfd_error = no_memory;
 	return false;
@@ -532,35 +529,6 @@ coff_count_linenumbers(abfd)
     }
 }
 
-/* 
-  This function returns true if the supplied SYMENT has an auxent with
-  and endndx field which should be relocated as the symbol moves
-  within the file.
-*/
-static 
-boolean
-uses_x_sym_x_fcnary_x_fcn_x_endndx_p(native)
-SYMENT *native;
-{
-    if (ISFCN(native->n_type))
-	return true;
-    if (native->n_sclass == C_BLOCK)
-	return true;
-    if (native->n_sclass == C_STRTAG) 
-	return true;
-    if (native->n_sclass == C_ENTAG)
-	return true;
-    if (native->n_sclass == C_UNTAG)
-	return true;
-    if (native->n_sclass == C_MOS)
-	return true;
-    if(native->n_sclass == C_EOS)
-	return true;
-    if(native->n_sclass == C_MOE) 
-	return true;
-    return false;
-
-}
 /*
  This function returns true if the supplied SYMENT has an AUXENT with
  a tagndx field which should be relocated.
@@ -581,62 +549,8 @@ SYMENT *native;
 }
 
 
-/*
-  Return  the canonical symbol we work out how far it has moved since it
-  started life. This is done by finding the base of the raw syments as
-  read in when a file was slurped, which discovers the original offset
-  into the file. Then we return the value which we've saved in the
-  n_offset field of that name - and voila.
-*/
-static 
-unsigned int 
-new_idx(symbol, original_offset)
-coff_symbol_type *symbol;
-unsigned int original_offset;
-{
-    struct icofdata *coff = obj_icof(symbol->symbol.the_bfd);
-
-    /* Point to the native we used to point to */
-    SYMENT *native = coff->raw_syments + original_offset;
-
-    /* We keep the native's new index in it's string space */
-    return native->n_offset;
-}
 
 
-/* Function to run through the raw parts of a coff symbol table and
-   loads each SYMENT's n_offset with its output index. If a symbol has
-   been deleted or moved to the end, still mark the offset of the one
-   following it. This makes refs to symbols which have moved point to
-   the symbol which now sits in the spot vacated.
-*/
-
-static 
-void 
-preload_n_offset(abfd)
-bfd *abfd;
-{
-    unsigned int    limit = bfd_get_symcount(abfd);
-    asymbol **p    = abfd->outsymbols;
-    bfd *thebfd  = (bfd *)NULL;
-    unsigned int native_index;
-
-    native_index = 0;
-
-    /* First phase, mark each SYMENT with final position */
-    while (limit --) {
-	coff_symbol_type *q = coff_symbol_from(abfd, *p);
-	if (q != (coff_symbol_type *)NULL && q->native) {
-	    q->native->n_offset = native_index;
-	    native_index += 1 + q->native->n_numaux;
-	}
-	else {
-	    native_index++;
-	}
-	p++;
-    }
-	
-}
 
 
 /* 
@@ -743,8 +657,11 @@ bfd *bfd_ptr;
 	  }
 	else if ((syment->n_sclass == C_EXT 
 		  || syment->n_sclass == C_STAT 
+#ifdef C_LEAFEXT
 		  || syment->n_sclass == C_LEAFEXT 
-		  || syment->n_sclass == C_LEAFSTAT)
+		  || syment->n_sclass == C_LEAFSTAT
+#endif
+		  )
 		 && last_fcn != (SYMENT *)NULL) 
 	  {
 	    AUXENT *auxent = (AUXENT *)(last_fcn+1);
@@ -783,6 +700,7 @@ bfd *bfd_ptr;
 	  last_file->n_value = native_index;
 	  first_time = false;
 	}
+#ifdef C_LEAFPROC
 	if (syment->n_sclass == C_LEAFPROC && syment->n_numaux == 2) {
 	  AUXENT *auxent = (AUXENT *)(syment+2);
 	  /* This is the definition of a leaf proc, we'll relocate the 
@@ -792,6 +710,7 @@ bfd *bfd_ptr;
 	      coff_symbol_ptr->symbol.section->output_offset + 
 	    coff_symbol_ptr->symbol.section->output_section->vma ;
 	}
+#endif
 	/* If this symbol needs to be tied up then remember some facts */
 	if (syment->n_sclass == C_FILE) 
  	  {
@@ -1050,7 +969,7 @@ coff_write_relocs(abfd)
 	for (i = 0; i < s->reloc_count; i++) {
 	    struct reloc    n;
 	    arelent        *q = p[i];
-	    memset(&n, 0, sizeof(n));
+	    memset((PTR)&n, 0, sizeof(n));
 	    n.r_vaddr = q->address + s->vma;
 	    n.r_symndx = get_index((*(q->sym_ptr_ptr)));
 	    n.r_type = q->howto->type;
@@ -1075,12 +994,9 @@ coff_write_linenumbers(abfd)
 		if (l) {
 		    /* Found a linenumber entry, output */
 		    struct lineno   out;
+		    bzero( &out, sizeof(out));
 		    out.l_lnno = 0;
 		    out.l_addr.l_symndx = l->u.offset;
-#ifdef LINENO_PADDING
-		    out.padding[0] = 0;
-		    out.padding[1] = 0;
-#endif
 		    bfd_coff_swap_lineno(abfd, &out);
 		    bfd_write((void *) &out, 1, LINESZ, abfd);
 		    l++;
