@@ -1,3 +1,8 @@
+2000-02-23  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* dwarf2.c (read_address): Read 16-bits addresses.
+	(parse_comp_unit): Accept addr_size == 2.
+	
 2000-02-23  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* bfd-in.h: Update copyright date.

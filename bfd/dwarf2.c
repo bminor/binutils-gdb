@@ -1,5 +1,5 @@
 /* DWARF 2 support.
-   Copyright 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright 1994, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -336,15 +336,17 @@ read_address (unit, buf)
      struct comp_unit* unit;
      char *buf;
 {
-  bfd_vma retval = 0;
-
-  if (unit->addr_size == 4)
+  switch (unit->addr_size)
     {
-      retval = bfd_get_32 (unit->abfd, (bfd_byte *) buf);
-    } else {
-      retval = bfd_get_64 (unit->abfd, (bfd_byte *) buf);
+    case 8:
+      return bfd_get_64 (unit->abfd, (bfd_byte *) buf);
+    case 4:
+      return bfd_get_32 (unit->abfd, (bfd_byte *) buf);
+    case 2:
+      return bfd_get_16 (unit->abfd, (bfd_byte *) buf);
+    default:
+      abort ();
     }
-  return retval;
 }
 
 
@@ -1277,9 +1279,9 @@ parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
       return 0;
     }
 
-  if (addr_size != 4 && addr_size != 8)
+  if (addr_size != 2 && addr_size != 4 && addr_size != 8)
     {
-      (*_bfd_error_handler) ("Dwarf Error: found address size '%u', this reader can only handle address sizes '4' and '8'.", addr_size );
+      (*_bfd_error_handler) ("Dwarf Error: found address size '%u', this reader can only handle address sizes '2', '4' and '8'.", addr_size );
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
@@ -1494,7 +1496,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
      However, some compilers do things differently.  */
   if (addr_size == 0)
     addr_size = 4;
-  BFD_ASSERT (addr_size == 4 || addr_size == 8);
+  BFD_ASSERT (addr_size == 2 || addr_size == 4 || addr_size == 8);
     
   if (! stash)
     {
