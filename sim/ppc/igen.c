@@ -3083,6 +3083,9 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "#define STATIC_MODEL\n");
   lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
+  lf_printf(file, "#ifndef EXTERN_MODEL\n");
+  lf_printf(file, "#define EXTERN_MODEL extern\n");
+  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
 
   if (table->max_func_unit_mask > 0xffff) {
@@ -3150,10 +3153,10 @@ gen_model_h(insn_table *table, lf *file)
     lf_printf(file, "\n");
   }
 
-  lf_printf(file, "STATIC_MODEL model_enum current_model;\n");
-  lf_printf(file, "STATIC_MODEL const char *model_name[ (int)nr_models ];\n");
-  lf_printf(file, "STATIC_MODEL const char *const *const model_func_unit_name[ (int)nr_models ];\n");
-  lf_printf(file, "STATIC_MODEL const model_time *const model_time_mapping[ (int)nr_models ];\n");
+  lf_printf(file, "EXTERN_MODEL model_enum current_model;\n");
+  lf_printf(file, "EXTERN_MODEL const char *model_name[ (int)nr_models ];\n");
+  lf_printf(file, "EXTERN_MODEL const char *const *const model_func_unit_name[ (int)nr_models ];\n");
+  lf_printf(file, "EXTERN_MODEL const model_time *const model_time_mapping[ (int)nr_models ];\n");
   lf_printf(file, "\n");
   lf_printf(file, "INLINE_MODEL void model_set\n");
   lf_printf(file, "(const char *name);\n");
