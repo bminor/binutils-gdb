@@ -328,10 +328,11 @@ set_raw_tracepoint (sal)
   t->language = current_language->la_language;
   t->input_radix = input_radix;
   t->line_number = sal.line;
-  t->enabled = enabled;
-  t->next = 0;
-  t->step_count = 0;
-  t->pass_count = 0;
+  t->enabled     = enabled;
+  t->next        = 0;
+  t->step_count  = 0;
+  t->pass_count  = 0;
+  t->addr_string = NULL;
 
   /* Add this tracepoint to the end of the chain
      so that a list of tracepoints will come out in order
@@ -767,10 +768,13 @@ trace_actions_command (args, from_tty)
       sprintf (tmpbuf, "Enter actions for tracepoint %d, one per line.",
 	       t->number);
 
-      if (readline_begin_hook)
-	(*readline_begin_hook) ("%s  %s\n", tmpbuf, end_msg);
-      else if (from_tty && input_from_terminal_p ())
-	printf_filtered ("%s\n%s\n", tmpbuf, end_msg);
+      if (from_tty)
+	{
+	  if (readline_begin_hook)
+	    (*readline_begin_hook) ("%s  %s\n", tmpbuf, end_msg);
+	  else if (input_from_terminal_p ())
+	    printf_filtered ("%s\n%s\n", tmpbuf, end_msg);
+	}
 
       free_actions (t);
       read_actions (t);

@@ -1,3 +1,9 @@
+Wed Dec 17 10:47:05 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c (set_raw_tracepoint): initialize addr_string
+	to NULL; (trace_actions_command): call readline_begin_hook only
+	if from_tty is true.
+
 Tue Dec 16 20:05:48 1997  Mark Alexander  <marka@cygnus.com>
 
 	* configure.tgt: Change little-endian tx39 target name to tx39l.
