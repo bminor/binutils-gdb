@@ -2700,7 +2700,7 @@ ldst_extend (str, hwse)
           /* Halfword and signextension instructions have the
              immediate value split across bits 11..8 and bits 3..0 */
           if (hwse)
-            inst.instruction |= add | HWOFFSET_IMM | (value >> 4) << 8 | value & 0xF;
+            inst.instruction |= add | HWOFFSET_IMM | ((value >> 4) << 8) | (value & 0xF);
           else
             inst.instruction |= add | value;
 	}
@@ -2751,7 +2751,8 @@ do_ldst (str, flags)
   /* This is not ideal, but it is the simplest way of dealing with the
      ARM7T halfword instructions (since they use a different
      encoding, but the same mnemonic): */
-  if (halfword = ((flags & 0x80000000) != 0))
+  halfword = (flags & 0x80000000) != 0;
+  if (halfword)
     {
       /* This is actually a load/store of a halfword, or a
          signed-extension load */
@@ -5316,7 +5317,8 @@ md_apply_fix3 (fixP, val, seg)
 	  && (newimm = negate_data_op (&temp, value)) == (unsigned int) FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("invalid constant (%x) after fixup\n"), value);
+			_("invalid constant (%lx) after fixup\n"),
+			(unsigned long) value);
 	  break;
 	}
 
@@ -5328,7 +5330,7 @@ md_apply_fix3 (fixP, val, seg)
       sign = value >= 0;
       if ((value = validate_offset_imm (value, 0)) == FAIL)
         {
-          as_bad (_("bad immediate value for offset (%d)"), val);
+          as_bad (_("bad immediate value for offset (%ld)"), (long) value);
           break;
         }
       if (value < 0)
@@ -5349,7 +5351,7 @@ md_apply_fix3 (fixP, val, seg)
 	    as_bad_where (fixP->fx_file, fixP->fx_line, 
 			_("invalid literal constant: pool needs to be closer\n"));
           else
-            as_bad (_("bad immediate value for offset (%d)"), value);
+            as_bad (_("bad immediate value for offset (%ld)"), (long) value);
           break;
         }
 
@@ -5358,7 +5360,7 @@ md_apply_fix3 (fixP, val, seg)
 
       newval = md_chars_to_number (buf, INSN_SIZE);
       newval &= 0xff7ff0f0;
-      newval |= ((value >> 4) << 8) | value & 0xf | (sign ? INDEX_UP : 0);
+      newval |= ((value >> 4) << 8) | (value & 0xf) | (sign ? INDEX_UP : 0);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
@@ -5618,7 +5620,8 @@ md_apply_fix3 (fixP, val, seg)
 
 	default:
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			"Unable to process relocation for thumb opcode: %x", newval);
+			"Unable to process relocation for thumb opcode: %lx",
+			(unsigned long) newval);
 	  break;
 	}
       md_number_to_chars (buf, newval, THUMB_SIZE);
@@ -5657,7 +5660,8 @@ md_apply_fix3 (fixP, val, seg)
             if (subtract ||
                 value & ~0x3fc)
               as_bad_where (fixP->fx_file, fixP->fx_line,
-                            _("Invalid immediate for address calculation (value = 0x%08X)"), value);
+                            _("Invalid immediate for address calculation (value = 0x%08lX)"),
+			    (unsigned long) value);
             newval = (rs == REG_PC ? T_OPCODE_ADD_PC : T_OPCODE_ADD_SP);
             newval |= rd << 8;
             newval |= value >> 2;
@@ -5690,7 +5694,8 @@ md_apply_fix3 (fixP, val, seg)
         case 0x05: /* 8bit immediate CMP */
           if (value < 0 || value > 255)
             as_bad_where (fixP->fx_file, fixP->fx_line,
-                          _("Invalid immediate: %d is too large"), value);
+                          _("Invalid immediate: %ld is too large"),
+			  (long) value);
           newval |= value;
           break;
 
@@ -5704,7 +5709,7 @@ md_apply_fix3 (fixP, val, seg)
       /* 5bit shift value (0..31) */
       if (value < 0 || value > 31)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Illegal Thumb shift value: %d"), value);
+		      _("Illegal Thumb shift value: %ld"), (long) value);
       newval = md_chars_to_number (buf, THUMB_SIZE) & 0xf03f;
       newval |= value << 6;
       md_number_to_chars (buf, newval , THUMB_SIZE);
