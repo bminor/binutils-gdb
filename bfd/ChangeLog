@@ -1,3 +1,8 @@
+Tue Dec 12 11:34:23 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.bfd: Handle sparc-*-elf*.  From Ronald F. Guilmette
+	<rfg@monkeys.com>.
+
 Fri Dec  8 17:47:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Set section_count to 0
