@@ -74,12 +74,6 @@ extern int addressprint;	/* Print machine addresses? */
 
 extern void output_command (char *, int);
 
-/* If this definition isn't overridden by the header files, assume
-   that isatty and fileno exist on this system.  */
-#ifndef ISATTY
-#define ISATTY(FP)	(isatty (fileno (FP)))
-#endif
-
 /* 
    Tracepoint.c:
 
