@@ -3976,6 +3976,7 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
      struct elf_link_hash_entry **rel_hash;
 {
   unsigned int i;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   for (i = 0; i < count; i++, rel_hash++)
     {
@@ -3990,10 +3991,16 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
 	  Elf_Internal_Rel irel;
 	  
 	  erel = (Elf_External_Rel *) rel_hdr->contents + i;
-	  elf_swap_reloc_in (abfd, erel, &irel);
+	  if (bed->s->swap_reloc_in)
+	    (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, &irel);
+	  else
+	    elf_swap_reloc_in (abfd, erel, &irel);
 	  irel.r_info = ELF_R_INFO ((*rel_hash)->indx,
 				    ELF_R_TYPE (irel.r_info));
-	  elf_swap_reloc_out (abfd, &irel, erel);
+	  if (bed->s->swap_reloc_out)
+	    (*bed->s->swap_reloc_out) (abfd, &irel, (bfd_byte *) erel);
+	  else
+	    elf_swap_reloc_out (abfd, &irel, erel);
 	}
       else
 	{
@@ -4004,10 +4011,16 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
 		      == sizeof (Elf_External_Rela));
 	  
 	  erela = (Elf_External_Rela *) rel_hdr->contents + i;
-	  elf_swap_reloca_in (abfd, erela, &irela);
+	  if (bed->s->swap_reloca_in)
+	    (*bed->s->swap_reloca_in) (abfd, (bfd_byte *) erela, &irela);
+	  else
+	    elf_swap_reloca_in (abfd, erela, &irela);
 	  irela.r_info = ELF_R_INFO ((*rel_hash)->indx,
 				     ELF_R_TYPE (irela.r_info));
-	  elf_swap_reloca_out (abfd, &irela, erela);
+	  if (bed->s->swap_reloca_out)
+	    (*bed->s->swap_reloca_out) (abfd, &irela, (bfd_byte *) erela);
+	  else
+	    elf_swap_reloca_out (abfd, &irela, erela);
 	}
     }
 }
@@ -5183,6 +5196,7 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
   Elf_Internal_Shdr *output_rel_hdr;
   asection *output_section;
   unsigned int *rel_countp = NULL;
+  struct elf_backend_data *bed;
 
   output_section = input_section->output_section;
   output_rel_hdr = NULL;
@@ -5202,7 +5216,8 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
     }
 
   BFD_ASSERT (output_rel_hdr != NULL);
-  
+
+  bed = get_elf_backend_data (output_bfd);
   irela = internal_relocs;
   irelaend = irela + input_rel_hdr->sh_size / input_rel_hdr->sh_entsize;
   if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
@@ -5217,7 +5232,10 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
 	  irel.r_offset = irela->r_offset;
 	  irel.r_info = irela->r_info;
 	  BFD_ASSERT (irela->r_addend == 0);
-	  elf_swap_reloc_out (output_bfd, &irel, erel);
+	  if (bed->s->swap_reloc_out)
+	    (*bed->s->swap_reloc_out) (output_bfd, &irel, (PTR) erel);
+	  else
+	    elf_swap_reloc_out (output_bfd, &irel, erel);
 	}
     }
   else
@@ -5228,7 +5246,10 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
 		  == sizeof (Elf_External_Rela));
       erela = ((Elf_External_Rela *) output_rel_hdr->contents + *rel_countp);
       for (; irela < irelaend; irela++, erela++)
-	elf_swap_reloca_out (output_bfd, irela, erela);
+	if (bed->s->swap_reloca_out)
+	  (*bed->s->swap_reloca_out) (output_bfd, irela, (PTR) erela);
+	else
+	  elf_swap_reloca_out (output_bfd, irela, erela);
     }
 
   /* Bump the counter, so that we know where to add the next set of
@@ -5688,6 +5709,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
   bfd_vma addend;
   struct elf_link_hash_entry **rel_hash_ptr;
   Elf_Internal_Shdr *rel_hdr;
+  struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
 
   howto = bfd_reloc_type_lookup (output_bfd, link_order->u.reloc.p->reloc);
   if (howto == NULL)
@@ -5811,7 +5833,10 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
       irel.r_info = ELF_R_INFO (indx, howto->type);
       erel = ((Elf_External_Rel *) rel_hdr->contents
 	      + elf_section_data (output_section)->rel_count);
-      elf_swap_reloc_out (output_bfd, &irel, erel);
+      if (bed->s->swap_reloc_out)
+	(*bed->s->swap_reloc_out) (output_bfd, &irel, (bfd_byte *) erel);
+      else
+	elf_swap_reloc_out (output_bfd, &irel, erel);
     }
   else
     {
@@ -5823,7 +5848,10 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
       irela.r_addend = addend;
       erela = ((Elf_External_Rela *) rel_hdr->contents
 	       + elf_section_data (output_section)->rel_count);
-      elf_swap_reloca_out (output_bfd, &irela, erela);
+      if (bed->s->swap_reloca_out)
+	(*bed->s->swap_reloca_out) (output_bfd, &irela, (bfd_byte *) erela);
+      else
+	elf_swap_reloca_out (output_bfd, &irela, erela);
     }
 
   ++elf_section_data (output_section)->rel_count;

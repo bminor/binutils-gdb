@@ -1,3 +1,11 @@
+2000-06-15  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* elflink.h (elf_link_adjust_relocs): Check for and call backend
+	specifific swap_reloc_{in,out} and swap_reloca_{in,out} if
+	available.
+	(elf_link_output_relocs): Likewise.
+	(elf_reloc_link_order): Likewise.
+	
 2000-06-16  Nicholas Duffek  <nsd@redhat.com>
 
 	* archures.c (enum bfd_architecture): #define constants for
