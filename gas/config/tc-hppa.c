@@ -641,8 +641,8 @@ const pseudo_typeS md_pseudo_table[] =
 {
   /* align pseudo-ops on the PA specify the actual alignment requested,
      not the log2 of the requested alignment.  */
-  {"align", s_align_bytes, 0},
-  {"ALIGN", s_align_bytes, 0},
+  {"align", s_align_bytes, 8},
+  {"ALIGN", s_align_bytes, 8},
   {"block", pa_block, 1},
   {"BLOCK", pa_block, 1},
   {"blockz", pa_block, 0},

@@ -1,5 +1,8 @@
 Thu Oct 28 12:36:13 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (md_pseudo_table): Default alignment is 8 for
+	.align and .ALIGN directives.
+
 	* config/tc-hppa.c (pa_space): Do not report an error for a .space
 	directive which does not define a "well-known" space and does
 	not include a space number as an argument.
