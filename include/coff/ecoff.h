@@ -49,6 +49,7 @@
 /* If the extern bit in a reloc is 1, then r_symndx is an index into
    the external symbol table.  If the extern bit is 0, then r_symndx
    indicates a section, and is one of the following values.  */
+#define RELOC_SECTION_NONE	0
 #define RELOC_SECTION_TEXT	1
 #define RELOC_SECTION_RDATA	2
 #define RELOC_SECTION_DATA	3
@@ -180,14 +181,18 @@ union aux_ext {
 	unsigned char	a_count[4];
 };
 
-/* FIXME!  These are copied from ../bfd/libbfd.h */
-extern bfd_vma _do_getb32 PARAMS ((unsigned char *addr));
-extern bfd_vma _do_getl32 PARAMS ((unsigned char *addr));
+/* FIXME!  These are copied from ../bfd/libbfd.h.  They are used by
+   GDB (mipsread.c).  */
+extern bfd_vma _bfd__do_getb32 PARAMS ((unsigned char *addr));
+extern bfd_vma _bfd__do_getl32 PARAMS ((unsigned char *addr));
+#if 0
+/* These don't seem to be used.  */
 extern void _do_putb32 PARAMS ((bfd_vma data, unsigned char *addr));
 extern void _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
+#endif
 
 #define AUX_GET_ANY(bigend, ax, field) \
-  ((bigend) ? _do_getb32 ((ax)->field) : _do_getl32 ((ax)->field))
+  ((bigend) ? _bfd__do_getb32 ((ax)->field) : _bfd__do_getl32 ((ax)->field))
 
 #define	AUX_GET_DNLOW(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_dnLow)
 #define	AUX_GET_DNHIGH(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_dnHigh)
@@ -196,6 +201,8 @@ extern void _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
 #define AUX_GET_WIDTH(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_width)
 #define AUX_GET_COUNT(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_count)
 
+#if 0
+/* These don't seem to be used.  */
 #define AUX_PUT_ANY(bigend, val, ax, field) \
   ((bigend) \
    ? (_do_putb32 ((val), (ax)->field), 0) \
@@ -213,6 +220,7 @@ extern void _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
   AUX_PUT_ANY ((bigend), (val), (ax), a_width)
 #define AUX_PUT_COUNT(bigend, val, ax) \
   AUX_PUT_ANY ((bigend), (val), (ax), a_count)
+#endif
 
 /* Prototypes for the swapping functions.  These require that sym.h be
    included before this file.  */

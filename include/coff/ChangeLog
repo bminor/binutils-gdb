@@ -1,3 +1,12 @@
+Tue Sep  7 10:15:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* ecoff.h (AUX_GET_ANY): Change name of _do_getb32 to reflect bfd
+	changes.
+
+Fri Aug 13 14:30:32 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff.h (RELOC_SECTION_NONE): Define.
+
 Thu Aug 12 11:24:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* alpha.h (struct external_reloc): Add r_symndx field.
