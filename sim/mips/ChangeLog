@@ -2,16 +2,16 @@
 
 	* mips.igen: Fix formatting of all SignalException calls.
 
-2002-02-05  Chris Demetriou  <cgd@broadcom.com>
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
 
 	* sim-main.h (SIGNEXTEND): Remove.
 
-2002-02-04  Chris Demetriou  <cgd@broadcom.com>
+2002-03-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen: Remove gencode comment from top of file, fix
 	spelling in another comment.
 
-2002-02-04  Chris Demetriou  <cgd@broadcom.com>
+2002-03-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (check_fmt, check_fmt_p): New functions to check
 	whether specific floating point formats are usable.
@@ -22,7 +22,7 @@
 	(do_c_cond_fmt): Remove format checks...
 	(C.cond.fmta, C.cond.fmtb): And move them into all callers.
 
-2002-02-03  Chris Demetriou  <cgd@broadcom.com>
+2002-03-03  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen: Fix formatting of check_fpu calls.
 
