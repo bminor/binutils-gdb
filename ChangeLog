@@ -1,3 +1,15 @@
+Wed Dec 10 15:10:38 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	Source directory cvs renamed to cvssrc:
+	* configure.in (host_tools): Change cvs to cvssrc.
+	(native_only): Likewise.
+	(noconfigdirs) [various cases]: Likewise.
+	* Makefile.in (ALL_MODULES): Change all-cvs to all-cvssrc.
+	(CROSS_CHECK_MODULES): Change check-cvs to check-cvssrc.
+	(INSTALL_MODULES): Change install-cvs to install-cvssrc.
+	(CLEAN_MODULES): Change clean-cvs to clean-cvssrc.
+	(all-cvssrc): Rename target from all-cvs.
+
 Tue Dec  2 10:08:31 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (noconfigdirs): Add support for Thumb target.

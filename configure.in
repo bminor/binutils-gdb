@@ -50,7 +50,7 @@ fi
 # these tools are built for the host environment
 # Note, the powerpc-eabi build depends on sim occurring before gdb in order to
 # know that we are building the simulator.
-host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf automake ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn"
+host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf automake ispell grep diff rcs cvssrc fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn"
 # start-sanitize-ide
 host_tools="${host_tools} ilu vmake jstools"
 # end-sanitize-ide
@@ -82,7 +82,7 @@ target_tools="target-examples target-groff target-gperf"
 #
 # This must be a single line because of the way it is searched by grep in
 # the code below.
-native_only="autoconf automake cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv target-gperf"
+native_only="autoconf automake cvssrc emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv target-gperf"
 
 # directories to be built in a cross environment only
 #
@@ -397,7 +397,7 @@ case "${host}" in
 # end-sanitize-ide
 	;;
   *-*-cygwin32)
-     noconfigdirs="expect dejagnu cvs autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
+     noconfigdirs="expect dejagnu cvssrc autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
@@ -406,7 +406,7 @@ case "${host}" in
      target_configdirs=
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl tix db sn gnuserv"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvssrc autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
      noconfigdirs="$noconfigdirs vmake jstools"
 # end-sanitize-ide
@@ -534,7 +534,7 @@ case "${target}" in
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
-    noconfigdirs="$noconfigdirs gprof cvs target-libgloss"
+    noconfigdirs="$noconfigdirs gprof cvssrc target-libgloss"
     # This is needed until gcc and ld are fixed to work together.
     use_gnu_ld=no
     ;;
@@ -557,7 +557,7 @@ case "${target}" in
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
     # Newlib makes problems for libg++ in crosses.
-    noconfigdirs="$noconfigdirs target-newlib gprof cvs"
+    noconfigdirs="$noconfigdirs target-newlib gprof cvssrc"
     ;;
   rs6000-*-aix*)
     noconfigdirs="$noconfigdirs gprof"
