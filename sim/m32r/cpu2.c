@@ -1,4 +1,4 @@
-/* Misc. support for CPU family m32rbf.
+/* Misc. support for CPU family m32r2f.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-#define WANT_CPU m32rbf
-#define WANT_CPU_M32RBF
+#define WANT_CPU m32r2f
+#define WANT_CPU_M32R2F
 
 #include "sim-main.h"
 #include "cgen-ops.h"
@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Get the value of h-pc.  */
 
 USI
-m32rbf_h_pc_get (SIM_CPU *current_cpu)
+m32r2f_h_pc_get (SIM_CPU *current_cpu)
 {
   return CPU (h_pc);
 }
@@ -39,7 +39,7 @@ m32rbf_h_pc_get (SIM_CPU *current_cpu)
 /* Set a value for h-pc.  */
 
 void
-m32rbf_h_pc_set (SIM_CPU *current_cpu, USI newval)
+m32r2f_h_pc_set (SIM_CPU *current_cpu, USI newval)
 {
   CPU (h_pc) = newval;
 }
@@ -47,7 +47,7 @@ m32rbf_h_pc_set (SIM_CPU *current_cpu, USI newval)
 /* Get the value of h-gr.  */
 
 SI
-m32rbf_h_gr_get (SIM_CPU *current_cpu, UINT regno)
+m32r2f_h_gr_get (SIM_CPU *current_cpu, UINT regno)
 {
   return CPU (h_gr[regno]);
 }
@@ -55,7 +55,7 @@ m32rbf_h_gr_get (SIM_CPU *current_cpu, UINT regno)
 /* Set a value for h-gr.  */
 
 void
-m32rbf_h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
+m32r2f_h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
 {
   CPU (h_gr[regno]) = newval;
 }
@@ -63,7 +63,7 @@ m32rbf_h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
 /* Get the value of h-cr.  */
 
 USI
-m32rbf_h_cr_get (SIM_CPU *current_cpu, UINT regno)
+m32r2f_h_cr_get (SIM_CPU *current_cpu, UINT regno)
 {
   return GET_H_CR (regno);
 }
@@ -71,7 +71,7 @@ m32rbf_h_cr_get (SIM_CPU *current_cpu, UINT regno)
 /* Set a value for h-cr.  */
 
 void
-m32rbf_h_cr_set (SIM_CPU *current_cpu, UINT regno, USI newval)
+m32r2f_h_cr_set (SIM_CPU *current_cpu, UINT regno, USI newval)
 {
   SET_H_CR (regno, newval);
 }
@@ -79,7 +79,7 @@ m32rbf_h_cr_set (SIM_CPU *current_cpu, UINT regno, USI newval)
 /* Get the value of h-accum.  */
 
 DI
-m32rbf_h_accum_get (SIM_CPU *current_cpu)
+m32r2f_h_accum_get (SIM_CPU *current_cpu)
 {
   return GET_H_ACCUM ();
 }
@@ -87,15 +87,31 @@ m32rbf_h_accum_get (SIM_CPU *current_cpu)
 /* Set a value for h-accum.  */
 
 void
-m32rbf_h_accum_set (SIM_CPU *current_cpu, DI newval)
+m32r2f_h_accum_set (SIM_CPU *current_cpu, DI newval)
 {
   SET_H_ACCUM (newval);
+}
+
+/* Get the value of h-accums.  */
+
+DI
+m32r2f_h_accums_get (SIM_CPU *current_cpu, UINT regno)
+{
+  return GET_H_ACCUMS (regno);
+}
+
+/* Set a value for h-accums.  */
+
+void
+m32r2f_h_accums_set (SIM_CPU *current_cpu, UINT regno, DI newval)
+{
+  SET_H_ACCUMS (regno, newval);
 }
 
 /* Get the value of h-cond.  */
 
 BI
-m32rbf_h_cond_get (SIM_CPU *current_cpu)
+m32r2f_h_cond_get (SIM_CPU *current_cpu)
 {
   return CPU (h_cond);
 }
@@ -103,7 +119,7 @@ m32rbf_h_cond_get (SIM_CPU *current_cpu)
 /* Set a value for h-cond.  */
 
 void
-m32rbf_h_cond_set (SIM_CPU *current_cpu, BI newval)
+m32r2f_h_cond_set (SIM_CPU *current_cpu, BI newval)
 {
   CPU (h_cond) = newval;
 }
@@ -111,7 +127,7 @@ m32rbf_h_cond_set (SIM_CPU *current_cpu, BI newval)
 /* Get the value of h-psw.  */
 
 UQI
-m32rbf_h_psw_get (SIM_CPU *current_cpu)
+m32r2f_h_psw_get (SIM_CPU *current_cpu)
 {
   return GET_H_PSW ();
 }
@@ -119,7 +135,7 @@ m32rbf_h_psw_get (SIM_CPU *current_cpu)
 /* Set a value for h-psw.  */
 
 void
-m32rbf_h_psw_set (SIM_CPU *current_cpu, UQI newval)
+m32r2f_h_psw_set (SIM_CPU *current_cpu, UQI newval)
 {
   SET_H_PSW (newval);
 }
@@ -127,7 +143,7 @@ m32rbf_h_psw_set (SIM_CPU *current_cpu, UQI newval)
 /* Get the value of h-bpsw.  */
 
 UQI
-m32rbf_h_bpsw_get (SIM_CPU *current_cpu)
+m32r2f_h_bpsw_get (SIM_CPU *current_cpu)
 {
   return CPU (h_bpsw);
 }
@@ -135,7 +151,7 @@ m32rbf_h_bpsw_get (SIM_CPU *current_cpu)
 /* Set a value for h-bpsw.  */
 
 void
-m32rbf_h_bpsw_set (SIM_CPU *current_cpu, UQI newval)
+m32r2f_h_bpsw_set (SIM_CPU *current_cpu, UQI newval)
 {
   CPU (h_bpsw) = newval;
 }
@@ -143,7 +159,7 @@ m32rbf_h_bpsw_set (SIM_CPU *current_cpu, UQI newval)
 /* Get the value of h-bbpsw.  */
 
 UQI
-m32rbf_h_bbpsw_get (SIM_CPU *current_cpu)
+m32r2f_h_bbpsw_get (SIM_CPU *current_cpu)
 {
   return CPU (h_bbpsw);
 }
@@ -151,7 +167,7 @@ m32rbf_h_bbpsw_get (SIM_CPU *current_cpu)
 /* Set a value for h-bbpsw.  */
 
 void
-m32rbf_h_bbpsw_set (SIM_CPU *current_cpu, UQI newval)
+m32r2f_h_bbpsw_set (SIM_CPU *current_cpu, UQI newval)
 {
   CPU (h_bbpsw) = newval;
 }
@@ -159,7 +175,7 @@ m32rbf_h_bbpsw_set (SIM_CPU *current_cpu, UQI newval)
 /* Get the value of h-lock.  */
 
 BI
-m32rbf_h_lock_get (SIM_CPU *current_cpu)
+m32r2f_h_lock_get (SIM_CPU *current_cpu)
 {
   return CPU (h_lock);
 }
@@ -167,7 +183,7 @@ m32rbf_h_lock_get (SIM_CPU *current_cpu)
 /* Set a value for h-lock.  */
 
 void
-m32rbf_h_lock_set (SIM_CPU *current_cpu, BI newval)
+m32r2f_h_lock_set (SIM_CPU *current_cpu, BI newval)
 {
   CPU (h_lock) = newval;
 }
@@ -175,7 +191,7 @@ m32rbf_h_lock_set (SIM_CPU *current_cpu, BI newval)
 /* Record trace results for INSN.  */
 
 void
-m32rbf_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
+m32r2f_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
 			    int *indices, TRACE_RECORD *tr)
 {
 }

@@ -1,27 +1,27 @@
 /* collection of junk waiting time to sort out
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-This file is part of the GNU Simulators.
+   This file is part of GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef M32R_SIM_H
 #define M32R_SIM_H
 
-/* gdb register numbers */
+/* GDB register numbers.  */
 #define PSW_REGNUM	16
 #define CBR_REGNUM	17
 #define SPI_REGNUM	18
@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ACC1H_REGNUM	25
 #define BBPSW_REGNUM	26
 #define BBPC_REGNUM	27
+#define EVB_REGNUM	28
 
 extern int m32r_decode_gdb_ctrl_regnum (int);
 
@@ -41,27 +42,35 @@ extern int m32r_decode_gdb_ctrl_regnum (int);
    FIXME: Eventually move to cgen.  */
 #define GET_H_SM() ((CPU (h_psw) & 0x80) != 0)
 
-extern USI m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
+#ifndef GET_H_CR
+extern USI  m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
 extern void m32rbf_h_cr_set_handler (SIM_CPU *, UINT, USI);
+
 #define GET_H_CR(regno) \
   XCONCAT2 (WANT_CPU,_h_cr_get_handler) (current_cpu, (regno))
 #define SET_H_CR(regno, val) \
   XCONCAT2 (WANT_CPU,_h_cr_set_handler) (current_cpu, (regno), (val))
+#endif
 
-extern UQI m32rbf_h_psw_get_handler (SIM_CPU *);
+#ifndef  GET_H_PSW
+extern UQI  m32rbf_h_psw_get_handler (SIM_CPU *);
 extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
+
 #define GET_H_PSW() \
   XCONCAT2 (WANT_CPU,_h_psw_get_handler) (current_cpu)
 #define SET_H_PSW(val) \
   XCONCAT2 (WANT_CPU,_h_psw_set_handler) (current_cpu, (val))
+#endif
 
-extern DI m32rbf_h_accum_get_handler (SIM_CPU *);
+#ifndef  GET_H_ACCUM
+extern DI   m32rbf_h_accum_get_handler (SIM_CPU *);
 extern void m32rbf_h_accum_set_handler (SIM_CPU *, DI);
+
 #define GET_H_ACCUM() \
   XCONCAT2 (WANT_CPU,_h_accum_get_handler) (current_cpu)
 #define SET_H_ACCUM(val) \
   XCONCAT2 (WANT_CPU,_h_accum_set_handler) (current_cpu, (val))
-
+#endif
 
 /* Misc. profile data.  */
 

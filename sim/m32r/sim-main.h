@@ -58,6 +58,11 @@ struct _sim_cpu {
 #if defined (WANT_CPU_M32RBF)
   M32RBF_CPU_DATA cpu_data;
 #endif
+#if defined (WANT_CPU_M32RXF)
+  M32RXF_CPU_DATA cpu_data;
+#elif defined (WANT_CPU_M32R2F)
+  M32R2F_CPU_DATA cpu_data;
+#endif
 };
 
 /* The sim_state struct.  */

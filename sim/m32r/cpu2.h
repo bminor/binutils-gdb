@@ -1,4 +1,4 @@
-/* CPU family header for m32rxf.
+/* CPU family header for m32r2f.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-#ifndef CPU_M32RXF_H
-#define CPU_M32RXF_H
+#ifndef CPU_M32R2F_H
+#define CPU_M32R2F_H
 
 /* Maximum number of instructions that are fetched at a time.
    This is for LIW type instructions sets (e.g. m32r).  */
@@ -46,24 +46,24 @@ typedef struct {
 #define SET_H_GR(a1, x) (CPU (h_gr)[a1] = (x))
   /* control registers */
   USI h_cr[16];
-#define GET_H_CR(index) m32rxf_h_cr_get_handler (current_cpu, index)
+#define GET_H_CR(index) m32r2f_h_cr_get_handler (current_cpu, index)
 #define SET_H_CR(index, x) \
 do { \
-m32rxf_h_cr_set_handler (current_cpu, (index), (x));\
+m32r2f_h_cr_set_handler (current_cpu, (index), (x));\
 ;} while (0)
   /* accumulator */
   DI h_accum;
-#define GET_H_ACCUM() m32rxf_h_accum_get_handler (current_cpu)
+#define GET_H_ACCUM() m32r2f_h_accum_get_handler (current_cpu)
 #define SET_H_ACCUM(x) \
 do { \
-m32rxf_h_accum_set_handler (current_cpu, (x));\
+m32r2f_h_accum_set_handler (current_cpu, (x));\
 ;} while (0)
   /* accumulators */
   DI h_accums[2];
-#define GET_H_ACCUMS(index) m32rxf_h_accums_get_handler (current_cpu, index)
+#define GET_H_ACCUMS(index) m32r2f_h_accums_get_handler (current_cpu, index)
 #define SET_H_ACCUMS(index, x) \
 do { \
-m32rxf_h_accums_set_handler (current_cpu, (index), (x));\
+m32r2f_h_accums_set_handler (current_cpu, (index), (x));\
 ;} while (0)
   /* condition bit */
   BI h_cond;
@@ -71,10 +71,10 @@ m32rxf_h_accums_set_handler (current_cpu, (index), (x));\
 #define SET_H_COND(x) (CPU (h_cond) = (x))
   /* psw part of psw */
   UQI h_psw;
-#define GET_H_PSW() m32rxf_h_psw_get_handler (current_cpu)
+#define GET_H_PSW() m32r2f_h_psw_get_handler (current_cpu)
 #define SET_H_PSW(x) \
 do { \
-m32rxf_h_psw_set_handler (current_cpu, (x));\
+m32r2f_h_psw_set_handler (current_cpu, (x));\
 ;} while (0)
   /* backup psw */
   UQI h_bpsw;
@@ -90,37 +90,37 @@ m32rxf_h_psw_set_handler (current_cpu, (x));\
 #define SET_H_LOCK(x) (CPU (h_lock) = (x))
   } hardware;
 #define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
-} M32RXF_CPU_DATA;
+} M32R2F_CPU_DATA;
 
 /* Cover fns for register access.  */
-USI m32rxf_h_pc_get (SIM_CPU *);
-void m32rxf_h_pc_set (SIM_CPU *, USI);
-SI m32rxf_h_gr_get (SIM_CPU *, UINT);
-void m32rxf_h_gr_set (SIM_CPU *, UINT, SI);
-USI m32rxf_h_cr_get (SIM_CPU *, UINT);
-void m32rxf_h_cr_set (SIM_CPU *, UINT, USI);
-DI m32rxf_h_accum_get (SIM_CPU *);
-void m32rxf_h_accum_set (SIM_CPU *, DI);
-DI m32rxf_h_accums_get (SIM_CPU *, UINT);
-void m32rxf_h_accums_set (SIM_CPU *, UINT, DI);
-BI m32rxf_h_cond_get (SIM_CPU *);
-void m32rxf_h_cond_set (SIM_CPU *, BI);
-UQI m32rxf_h_psw_get (SIM_CPU *);
-void m32rxf_h_psw_set (SIM_CPU *, UQI);
-UQI m32rxf_h_bpsw_get (SIM_CPU *);
-void m32rxf_h_bpsw_set (SIM_CPU *, UQI);
-UQI m32rxf_h_bbpsw_get (SIM_CPU *);
-void m32rxf_h_bbpsw_set (SIM_CPU *, UQI);
-BI m32rxf_h_lock_get (SIM_CPU *);
-void m32rxf_h_lock_set (SIM_CPU *, BI);
+USI m32r2f_h_pc_get (SIM_CPU *);
+void m32r2f_h_pc_set (SIM_CPU *, USI);
+SI m32r2f_h_gr_get (SIM_CPU *, UINT);
+void m32r2f_h_gr_set (SIM_CPU *, UINT, SI);
+USI m32r2f_h_cr_get (SIM_CPU *, UINT);
+void m32r2f_h_cr_set (SIM_CPU *, UINT, USI);
+DI m32r2f_h_accum_get (SIM_CPU *);
+void m32r2f_h_accum_set (SIM_CPU *, DI);
+DI m32r2f_h_accums_get (SIM_CPU *, UINT);
+void m32r2f_h_accums_set (SIM_CPU *, UINT, DI);
+BI m32r2f_h_cond_get (SIM_CPU *);
+void m32r2f_h_cond_set (SIM_CPU *, BI);
+UQI m32r2f_h_psw_get (SIM_CPU *);
+void m32r2f_h_psw_set (SIM_CPU *, UQI);
+UQI m32r2f_h_bpsw_get (SIM_CPU *);
+void m32r2f_h_bpsw_set (SIM_CPU *, UQI);
+UQI m32r2f_h_bbpsw_get (SIM_CPU *);
+void m32r2f_h_bbpsw_set (SIM_CPU *, UQI);
+BI m32r2f_h_lock_get (SIM_CPU *);
+void m32r2f_h_lock_set (SIM_CPU *, BI);
 
 /* These must be hand-written.  */
-extern CPUREG_FETCH_FN m32rxf_fetch_register;
-extern CPUREG_STORE_FN m32rxf_store_register;
+extern CPUREG_FETCH_FN m32r2f_fetch_register;
+extern CPUREG_STORE_FN m32r2f_store_register;
 
 typedef struct {
   int empty;
-} MODEL_M32RX_DATA;
+} MODEL_M32R2_DATA;
 
 /* Instruction argument buffer.  */
 
@@ -1043,4 +1043,4 @@ typedef struct trace_record {
   /* FIXME:wip */
 } TRACE_RECORD;
 
-#endif /* CPU_M32RXF_H */
+#endif /* CPU_M32R2F_H */

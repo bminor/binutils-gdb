@@ -1,4 +1,4 @@
-/* Simulator instruction semantics for m32rxf.
+/* Simulator instruction semantics for m32r2f.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
@@ -32,300 +32,307 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     int index;
     void *label;
   } labels[] = {
-    { M32RXF_INSN_X_INVALID, && case_sem_INSN_X_INVALID },
-    { M32RXF_INSN_X_AFTER, && case_sem_INSN_X_AFTER },
-    { M32RXF_INSN_X_BEFORE, && case_sem_INSN_X_BEFORE },
-    { M32RXF_INSN_X_CTI_CHAIN, && case_sem_INSN_X_CTI_CHAIN },
-    { M32RXF_INSN_X_CHAIN, && case_sem_INSN_X_CHAIN },
-    { M32RXF_INSN_X_BEGIN, && case_sem_INSN_X_BEGIN },
-    { M32RXF_INSN_ADD, && case_sem_INSN_ADD },
-    { M32RXF_INSN_ADD3, && case_sem_INSN_ADD3 },
-    { M32RXF_INSN_AND, && case_sem_INSN_AND },
-    { M32RXF_INSN_AND3, && case_sem_INSN_AND3 },
-    { M32RXF_INSN_OR, && case_sem_INSN_OR },
-    { M32RXF_INSN_OR3, && case_sem_INSN_OR3 },
-    { M32RXF_INSN_XOR, && case_sem_INSN_XOR },
-    { M32RXF_INSN_XOR3, && case_sem_INSN_XOR3 },
-    { M32RXF_INSN_ADDI, && case_sem_INSN_ADDI },
-    { M32RXF_INSN_ADDV, && case_sem_INSN_ADDV },
-    { M32RXF_INSN_ADDV3, && case_sem_INSN_ADDV3 },
-    { M32RXF_INSN_ADDX, && case_sem_INSN_ADDX },
-    { M32RXF_INSN_BC8, && case_sem_INSN_BC8 },
-    { M32RXF_INSN_BC24, && case_sem_INSN_BC24 },
-    { M32RXF_INSN_BEQ, && case_sem_INSN_BEQ },
-    { M32RXF_INSN_BEQZ, && case_sem_INSN_BEQZ },
-    { M32RXF_INSN_BGEZ, && case_sem_INSN_BGEZ },
-    { M32RXF_INSN_BGTZ, && case_sem_INSN_BGTZ },
-    { M32RXF_INSN_BLEZ, && case_sem_INSN_BLEZ },
-    { M32RXF_INSN_BLTZ, && case_sem_INSN_BLTZ },
-    { M32RXF_INSN_BNEZ, && case_sem_INSN_BNEZ },
-    { M32RXF_INSN_BL8, && case_sem_INSN_BL8 },
-    { M32RXF_INSN_BL24, && case_sem_INSN_BL24 },
-    { M32RXF_INSN_BCL8, && case_sem_INSN_BCL8 },
-    { M32RXF_INSN_BCL24, && case_sem_INSN_BCL24 },
-    { M32RXF_INSN_BNC8, && case_sem_INSN_BNC8 },
-    { M32RXF_INSN_BNC24, && case_sem_INSN_BNC24 },
-    { M32RXF_INSN_BNE, && case_sem_INSN_BNE },
-    { M32RXF_INSN_BRA8, && case_sem_INSN_BRA8 },
-    { M32RXF_INSN_BRA24, && case_sem_INSN_BRA24 },
-    { M32RXF_INSN_BNCL8, && case_sem_INSN_BNCL8 },
-    { M32RXF_INSN_BNCL24, && case_sem_INSN_BNCL24 },
-    { M32RXF_INSN_CMP, && case_sem_INSN_CMP },
-    { M32RXF_INSN_CMPI, && case_sem_INSN_CMPI },
-    { M32RXF_INSN_CMPU, && case_sem_INSN_CMPU },
-    { M32RXF_INSN_CMPUI, && case_sem_INSN_CMPUI },
-    { M32RXF_INSN_CMPEQ, && case_sem_INSN_CMPEQ },
-    { M32RXF_INSN_CMPZ, && case_sem_INSN_CMPZ },
-    { M32RXF_INSN_DIV, && case_sem_INSN_DIV },
-    { M32RXF_INSN_DIVU, && case_sem_INSN_DIVU },
-    { M32RXF_INSN_REM, && case_sem_INSN_REM },
-    { M32RXF_INSN_REMU, && case_sem_INSN_REMU },
-    { M32RXF_INSN_DIVH, && case_sem_INSN_DIVH },
-    { M32RXF_INSN_JC, && case_sem_INSN_JC },
-    { M32RXF_INSN_JNC, && case_sem_INSN_JNC },
-    { M32RXF_INSN_JL, && case_sem_INSN_JL },
-    { M32RXF_INSN_JMP, && case_sem_INSN_JMP },
-    { M32RXF_INSN_LD, && case_sem_INSN_LD },
-    { M32RXF_INSN_LD_D, && case_sem_INSN_LD_D },
-    { M32RXF_INSN_LDB, && case_sem_INSN_LDB },
-    { M32RXF_INSN_LDB_D, && case_sem_INSN_LDB_D },
-    { M32RXF_INSN_LDH, && case_sem_INSN_LDH },
-    { M32RXF_INSN_LDH_D, && case_sem_INSN_LDH_D },
-    { M32RXF_INSN_LDUB, && case_sem_INSN_LDUB },
-    { M32RXF_INSN_LDUB_D, && case_sem_INSN_LDUB_D },
-    { M32RXF_INSN_LDUH, && case_sem_INSN_LDUH },
-    { M32RXF_INSN_LDUH_D, && case_sem_INSN_LDUH_D },
-    { M32RXF_INSN_LD_PLUS, && case_sem_INSN_LD_PLUS },
-    { M32RXF_INSN_LD24, && case_sem_INSN_LD24 },
-    { M32RXF_INSN_LDI8, && case_sem_INSN_LDI8 },
-    { M32RXF_INSN_LDI16, && case_sem_INSN_LDI16 },
-    { M32RXF_INSN_LOCK, && case_sem_INSN_LOCK },
-    { M32RXF_INSN_MACHI_A, && case_sem_INSN_MACHI_A },
-    { M32RXF_INSN_MACLO_A, && case_sem_INSN_MACLO_A },
-    { M32RXF_INSN_MACWHI_A, && case_sem_INSN_MACWHI_A },
-    { M32RXF_INSN_MACWLO_A, && case_sem_INSN_MACWLO_A },
-    { M32RXF_INSN_MUL, && case_sem_INSN_MUL },
-    { M32RXF_INSN_MULHI_A, && case_sem_INSN_MULHI_A },
-    { M32RXF_INSN_MULLO_A, && case_sem_INSN_MULLO_A },
-    { M32RXF_INSN_MULWHI_A, && case_sem_INSN_MULWHI_A },
-    { M32RXF_INSN_MULWLO_A, && case_sem_INSN_MULWLO_A },
-    { M32RXF_INSN_MV, && case_sem_INSN_MV },
-    { M32RXF_INSN_MVFACHI_A, && case_sem_INSN_MVFACHI_A },
-    { M32RXF_INSN_MVFACLO_A, && case_sem_INSN_MVFACLO_A },
-    { M32RXF_INSN_MVFACMI_A, && case_sem_INSN_MVFACMI_A },
-    { M32RXF_INSN_MVFC, && case_sem_INSN_MVFC },
-    { M32RXF_INSN_MVTACHI_A, && case_sem_INSN_MVTACHI_A },
-    { M32RXF_INSN_MVTACLO_A, && case_sem_INSN_MVTACLO_A },
-    { M32RXF_INSN_MVTC, && case_sem_INSN_MVTC },
-    { M32RXF_INSN_NEG, && case_sem_INSN_NEG },
-    { M32RXF_INSN_NOP, && case_sem_INSN_NOP },
-    { M32RXF_INSN_NOT, && case_sem_INSN_NOT },
-    { M32RXF_INSN_RAC_DSI, && case_sem_INSN_RAC_DSI },
-    { M32RXF_INSN_RACH_DSI, && case_sem_INSN_RACH_DSI },
-    { M32RXF_INSN_RTE, && case_sem_INSN_RTE },
-    { M32RXF_INSN_SETH, && case_sem_INSN_SETH },
-    { M32RXF_INSN_SLL, && case_sem_INSN_SLL },
-    { M32RXF_INSN_SLL3, && case_sem_INSN_SLL3 },
-    { M32RXF_INSN_SLLI, && case_sem_INSN_SLLI },
-    { M32RXF_INSN_SRA, && case_sem_INSN_SRA },
-    { M32RXF_INSN_SRA3, && case_sem_INSN_SRA3 },
-    { M32RXF_INSN_SRAI, && case_sem_INSN_SRAI },
-    { M32RXF_INSN_SRL, && case_sem_INSN_SRL },
-    { M32RXF_INSN_SRL3, && case_sem_INSN_SRL3 },
-    { M32RXF_INSN_SRLI, && case_sem_INSN_SRLI },
-    { M32RXF_INSN_ST, && case_sem_INSN_ST },
-    { M32RXF_INSN_ST_D, && case_sem_INSN_ST_D },
-    { M32RXF_INSN_STB, && case_sem_INSN_STB },
-    { M32RXF_INSN_STB_D, && case_sem_INSN_STB_D },
-    { M32RXF_INSN_STH, && case_sem_INSN_STH },
-    { M32RXF_INSN_STH_D, && case_sem_INSN_STH_D },
-    { M32RXF_INSN_ST_PLUS, && case_sem_INSN_ST_PLUS },
-    { M32RXF_INSN_STH_PLUS, && case_sem_INSN_STH_PLUS },
-    { M32RXF_INSN_STB_PLUS, && case_sem_INSN_STB_PLUS },
-    { M32RXF_INSN_ST_MINUS, && case_sem_INSN_ST_MINUS },
-    { M32RXF_INSN_SUB, && case_sem_INSN_SUB },
-    { M32RXF_INSN_SUBV, && case_sem_INSN_SUBV },
-    { M32RXF_INSN_SUBX, && case_sem_INSN_SUBX },
-    { M32RXF_INSN_TRAP, && case_sem_INSN_TRAP },
-    { M32RXF_INSN_UNLOCK, && case_sem_INSN_UNLOCK },
-    { M32RXF_INSN_SATB, && case_sem_INSN_SATB },
-    { M32RXF_INSN_SATH, && case_sem_INSN_SATH },
-    { M32RXF_INSN_SAT, && case_sem_INSN_SAT },
-    { M32RXF_INSN_PCMPBZ, && case_sem_INSN_PCMPBZ },
-    { M32RXF_INSN_SADD, && case_sem_INSN_SADD },
-    { M32RXF_INSN_MACWU1, && case_sem_INSN_MACWU1 },
-    { M32RXF_INSN_MSBLO, && case_sem_INSN_MSBLO },
-    { M32RXF_INSN_MULWU1, && case_sem_INSN_MULWU1 },
-    { M32RXF_INSN_MACLH1, && case_sem_INSN_MACLH1 },
-    { M32RXF_INSN_SC, && case_sem_INSN_SC },
-    { M32RXF_INSN_SNC, && case_sem_INSN_SNC },
-    { M32RXF_INSN_CLRPSW, && case_sem_INSN_CLRPSW },
-    { M32RXF_INSN_SETPSW, && case_sem_INSN_SETPSW },
-    { M32RXF_INSN_BSET, && case_sem_INSN_BSET },
-    { M32RXF_INSN_BCLR, && case_sem_INSN_BCLR },
-    { M32RXF_INSN_BTST, && case_sem_INSN_BTST },
-    { M32RXF_INSN_PAR_ADD, && case_sem_INSN_PAR_ADD },
-    { M32RXF_INSN_WRITE_ADD, && case_sem_INSN_WRITE_ADD },
-    { M32RXF_INSN_PAR_AND, && case_sem_INSN_PAR_AND },
-    { M32RXF_INSN_WRITE_AND, && case_sem_INSN_WRITE_AND },
-    { M32RXF_INSN_PAR_OR, && case_sem_INSN_PAR_OR },
-    { M32RXF_INSN_WRITE_OR, && case_sem_INSN_WRITE_OR },
-    { M32RXF_INSN_PAR_XOR, && case_sem_INSN_PAR_XOR },
-    { M32RXF_INSN_WRITE_XOR, && case_sem_INSN_WRITE_XOR },
-    { M32RXF_INSN_PAR_ADDI, && case_sem_INSN_PAR_ADDI },
-    { M32RXF_INSN_WRITE_ADDI, && case_sem_INSN_WRITE_ADDI },
-    { M32RXF_INSN_PAR_ADDV, && case_sem_INSN_PAR_ADDV },
-    { M32RXF_INSN_WRITE_ADDV, && case_sem_INSN_WRITE_ADDV },
-    { M32RXF_INSN_PAR_ADDX, && case_sem_INSN_PAR_ADDX },
-    { M32RXF_INSN_WRITE_ADDX, && case_sem_INSN_WRITE_ADDX },
-    { M32RXF_INSN_PAR_BC8, && case_sem_INSN_PAR_BC8 },
-    { M32RXF_INSN_WRITE_BC8, && case_sem_INSN_WRITE_BC8 },
-    { M32RXF_INSN_PAR_BL8, && case_sem_INSN_PAR_BL8 },
-    { M32RXF_INSN_WRITE_BL8, && case_sem_INSN_WRITE_BL8 },
-    { M32RXF_INSN_PAR_BCL8, && case_sem_INSN_PAR_BCL8 },
-    { M32RXF_INSN_WRITE_BCL8, && case_sem_INSN_WRITE_BCL8 },
-    { M32RXF_INSN_PAR_BNC8, && case_sem_INSN_PAR_BNC8 },
-    { M32RXF_INSN_WRITE_BNC8, && case_sem_INSN_WRITE_BNC8 },
-    { M32RXF_INSN_PAR_BRA8, && case_sem_INSN_PAR_BRA8 },
-    { M32RXF_INSN_WRITE_BRA8, && case_sem_INSN_WRITE_BRA8 },
-    { M32RXF_INSN_PAR_BNCL8, && case_sem_INSN_PAR_BNCL8 },
-    { M32RXF_INSN_WRITE_BNCL8, && case_sem_INSN_WRITE_BNCL8 },
-    { M32RXF_INSN_PAR_CMP, && case_sem_INSN_PAR_CMP },
-    { M32RXF_INSN_WRITE_CMP, && case_sem_INSN_WRITE_CMP },
-    { M32RXF_INSN_PAR_CMPU, && case_sem_INSN_PAR_CMPU },
-    { M32RXF_INSN_WRITE_CMPU, && case_sem_INSN_WRITE_CMPU },
-    { M32RXF_INSN_PAR_CMPEQ, && case_sem_INSN_PAR_CMPEQ },
-    { M32RXF_INSN_WRITE_CMPEQ, && case_sem_INSN_WRITE_CMPEQ },
-    { M32RXF_INSN_PAR_CMPZ, && case_sem_INSN_PAR_CMPZ },
-    { M32RXF_INSN_WRITE_CMPZ, && case_sem_INSN_WRITE_CMPZ },
-    { M32RXF_INSN_PAR_JC, && case_sem_INSN_PAR_JC },
-    { M32RXF_INSN_WRITE_JC, && case_sem_INSN_WRITE_JC },
-    { M32RXF_INSN_PAR_JNC, && case_sem_INSN_PAR_JNC },
-    { M32RXF_INSN_WRITE_JNC, && case_sem_INSN_WRITE_JNC },
-    { M32RXF_INSN_PAR_JL, && case_sem_INSN_PAR_JL },
-    { M32RXF_INSN_WRITE_JL, && case_sem_INSN_WRITE_JL },
-    { M32RXF_INSN_PAR_JMP, && case_sem_INSN_PAR_JMP },
-    { M32RXF_INSN_WRITE_JMP, && case_sem_INSN_WRITE_JMP },
-    { M32RXF_INSN_PAR_LD, && case_sem_INSN_PAR_LD },
-    { M32RXF_INSN_WRITE_LD, && case_sem_INSN_WRITE_LD },
-    { M32RXF_INSN_PAR_LDB, && case_sem_INSN_PAR_LDB },
-    { M32RXF_INSN_WRITE_LDB, && case_sem_INSN_WRITE_LDB },
-    { M32RXF_INSN_PAR_LDH, && case_sem_INSN_PAR_LDH },
-    { M32RXF_INSN_WRITE_LDH, && case_sem_INSN_WRITE_LDH },
-    { M32RXF_INSN_PAR_LDUB, && case_sem_INSN_PAR_LDUB },
-    { M32RXF_INSN_WRITE_LDUB, && case_sem_INSN_WRITE_LDUB },
-    { M32RXF_INSN_PAR_LDUH, && case_sem_INSN_PAR_LDUH },
-    { M32RXF_INSN_WRITE_LDUH, && case_sem_INSN_WRITE_LDUH },
-    { M32RXF_INSN_PAR_LD_PLUS, && case_sem_INSN_PAR_LD_PLUS },
-    { M32RXF_INSN_WRITE_LD_PLUS, && case_sem_INSN_WRITE_LD_PLUS },
-    { M32RXF_INSN_PAR_LDI8, && case_sem_INSN_PAR_LDI8 },
-    { M32RXF_INSN_WRITE_LDI8, && case_sem_INSN_WRITE_LDI8 },
-    { M32RXF_INSN_PAR_LOCK, && case_sem_INSN_PAR_LOCK },
-    { M32RXF_INSN_WRITE_LOCK, && case_sem_INSN_WRITE_LOCK },
-    { M32RXF_INSN_PAR_MACHI_A, && case_sem_INSN_PAR_MACHI_A },
-    { M32RXF_INSN_WRITE_MACHI_A, && case_sem_INSN_WRITE_MACHI_A },
-    { M32RXF_INSN_PAR_MACLO_A, && case_sem_INSN_PAR_MACLO_A },
-    { M32RXF_INSN_WRITE_MACLO_A, && case_sem_INSN_WRITE_MACLO_A },
-    { M32RXF_INSN_PAR_MACWHI_A, && case_sem_INSN_PAR_MACWHI_A },
-    { M32RXF_INSN_WRITE_MACWHI_A, && case_sem_INSN_WRITE_MACWHI_A },
-    { M32RXF_INSN_PAR_MACWLO_A, && case_sem_INSN_PAR_MACWLO_A },
-    { M32RXF_INSN_WRITE_MACWLO_A, && case_sem_INSN_WRITE_MACWLO_A },
-    { M32RXF_INSN_PAR_MUL, && case_sem_INSN_PAR_MUL },
-    { M32RXF_INSN_WRITE_MUL, && case_sem_INSN_WRITE_MUL },
-    { M32RXF_INSN_PAR_MULHI_A, && case_sem_INSN_PAR_MULHI_A },
-    { M32RXF_INSN_WRITE_MULHI_A, && case_sem_INSN_WRITE_MULHI_A },
-    { M32RXF_INSN_PAR_MULLO_A, && case_sem_INSN_PAR_MULLO_A },
-    { M32RXF_INSN_WRITE_MULLO_A, && case_sem_INSN_WRITE_MULLO_A },
-    { M32RXF_INSN_PAR_MULWHI_A, && case_sem_INSN_PAR_MULWHI_A },
-    { M32RXF_INSN_WRITE_MULWHI_A, && case_sem_INSN_WRITE_MULWHI_A },
-    { M32RXF_INSN_PAR_MULWLO_A, && case_sem_INSN_PAR_MULWLO_A },
-    { M32RXF_INSN_WRITE_MULWLO_A, && case_sem_INSN_WRITE_MULWLO_A },
-    { M32RXF_INSN_PAR_MV, && case_sem_INSN_PAR_MV },
-    { M32RXF_INSN_WRITE_MV, && case_sem_INSN_WRITE_MV },
-    { M32RXF_INSN_PAR_MVFACHI_A, && case_sem_INSN_PAR_MVFACHI_A },
-    { M32RXF_INSN_WRITE_MVFACHI_A, && case_sem_INSN_WRITE_MVFACHI_A },
-    { M32RXF_INSN_PAR_MVFACLO_A, && case_sem_INSN_PAR_MVFACLO_A },
-    { M32RXF_INSN_WRITE_MVFACLO_A, && case_sem_INSN_WRITE_MVFACLO_A },
-    { M32RXF_INSN_PAR_MVFACMI_A, && case_sem_INSN_PAR_MVFACMI_A },
-    { M32RXF_INSN_WRITE_MVFACMI_A, && case_sem_INSN_WRITE_MVFACMI_A },
-    { M32RXF_INSN_PAR_MVFC, && case_sem_INSN_PAR_MVFC },
-    { M32RXF_INSN_WRITE_MVFC, && case_sem_INSN_WRITE_MVFC },
-    { M32RXF_INSN_PAR_MVTACHI_A, && case_sem_INSN_PAR_MVTACHI_A },
-    { M32RXF_INSN_WRITE_MVTACHI_A, && case_sem_INSN_WRITE_MVTACHI_A },
-    { M32RXF_INSN_PAR_MVTACLO_A, && case_sem_INSN_PAR_MVTACLO_A },
-    { M32RXF_INSN_WRITE_MVTACLO_A, && case_sem_INSN_WRITE_MVTACLO_A },
-    { M32RXF_INSN_PAR_MVTC, && case_sem_INSN_PAR_MVTC },
-    { M32RXF_INSN_WRITE_MVTC, && case_sem_INSN_WRITE_MVTC },
-    { M32RXF_INSN_PAR_NEG, && case_sem_INSN_PAR_NEG },
-    { M32RXF_INSN_WRITE_NEG, && case_sem_INSN_WRITE_NEG },
-    { M32RXF_INSN_PAR_NOP, && case_sem_INSN_PAR_NOP },
-    { M32RXF_INSN_WRITE_NOP, && case_sem_INSN_WRITE_NOP },
-    { M32RXF_INSN_PAR_NOT, && case_sem_INSN_PAR_NOT },
-    { M32RXF_INSN_WRITE_NOT, && case_sem_INSN_WRITE_NOT },
-    { M32RXF_INSN_PAR_RAC_DSI, && case_sem_INSN_PAR_RAC_DSI },
-    { M32RXF_INSN_WRITE_RAC_DSI, && case_sem_INSN_WRITE_RAC_DSI },
-    { M32RXF_INSN_PAR_RACH_DSI, && case_sem_INSN_PAR_RACH_DSI },
-    { M32RXF_INSN_WRITE_RACH_DSI, && case_sem_INSN_WRITE_RACH_DSI },
-    { M32RXF_INSN_PAR_RTE, && case_sem_INSN_PAR_RTE },
-    { M32RXF_INSN_WRITE_RTE, && case_sem_INSN_WRITE_RTE },
-    { M32RXF_INSN_PAR_SLL, && case_sem_INSN_PAR_SLL },
-    { M32RXF_INSN_WRITE_SLL, && case_sem_INSN_WRITE_SLL },
-    { M32RXF_INSN_PAR_SLLI, && case_sem_INSN_PAR_SLLI },
-    { M32RXF_INSN_WRITE_SLLI, && case_sem_INSN_WRITE_SLLI },
-    { M32RXF_INSN_PAR_SRA, && case_sem_INSN_PAR_SRA },
-    { M32RXF_INSN_WRITE_SRA, && case_sem_INSN_WRITE_SRA },
-    { M32RXF_INSN_PAR_SRAI, && case_sem_INSN_PAR_SRAI },
-    { M32RXF_INSN_WRITE_SRAI, && case_sem_INSN_WRITE_SRAI },
-    { M32RXF_INSN_PAR_SRL, && case_sem_INSN_PAR_SRL },
-    { M32RXF_INSN_WRITE_SRL, && case_sem_INSN_WRITE_SRL },
-    { M32RXF_INSN_PAR_SRLI, && case_sem_INSN_PAR_SRLI },
-    { M32RXF_INSN_WRITE_SRLI, && case_sem_INSN_WRITE_SRLI },
-    { M32RXF_INSN_PAR_ST, && case_sem_INSN_PAR_ST },
-    { M32RXF_INSN_WRITE_ST, && case_sem_INSN_WRITE_ST },
-    { M32RXF_INSN_PAR_STB, && case_sem_INSN_PAR_STB },
-    { M32RXF_INSN_WRITE_STB, && case_sem_INSN_WRITE_STB },
-    { M32RXF_INSN_PAR_STH, && case_sem_INSN_PAR_STH },
-    { M32RXF_INSN_WRITE_STH, && case_sem_INSN_WRITE_STH },
-    { M32RXF_INSN_PAR_ST_PLUS, && case_sem_INSN_PAR_ST_PLUS },
-    { M32RXF_INSN_WRITE_ST_PLUS, && case_sem_INSN_WRITE_ST_PLUS },
-    { M32RXF_INSN_PAR_STH_PLUS, && case_sem_INSN_PAR_STH_PLUS },
-    { M32RXF_INSN_WRITE_STH_PLUS, && case_sem_INSN_WRITE_STH_PLUS },
-    { M32RXF_INSN_PAR_STB_PLUS, && case_sem_INSN_PAR_STB_PLUS },
-    { M32RXF_INSN_WRITE_STB_PLUS, && case_sem_INSN_WRITE_STB_PLUS },
-    { M32RXF_INSN_PAR_ST_MINUS, && case_sem_INSN_PAR_ST_MINUS },
-    { M32RXF_INSN_WRITE_ST_MINUS, && case_sem_INSN_WRITE_ST_MINUS },
-    { M32RXF_INSN_PAR_SUB, && case_sem_INSN_PAR_SUB },
-    { M32RXF_INSN_WRITE_SUB, && case_sem_INSN_WRITE_SUB },
-    { M32RXF_INSN_PAR_SUBV, && case_sem_INSN_PAR_SUBV },
-    { M32RXF_INSN_WRITE_SUBV, && case_sem_INSN_WRITE_SUBV },
-    { M32RXF_INSN_PAR_SUBX, && case_sem_INSN_PAR_SUBX },
-    { M32RXF_INSN_WRITE_SUBX, && case_sem_INSN_WRITE_SUBX },
-    { M32RXF_INSN_PAR_TRAP, && case_sem_INSN_PAR_TRAP },
-    { M32RXF_INSN_WRITE_TRAP, && case_sem_INSN_WRITE_TRAP },
-    { M32RXF_INSN_PAR_UNLOCK, && case_sem_INSN_PAR_UNLOCK },
-    { M32RXF_INSN_WRITE_UNLOCK, && case_sem_INSN_WRITE_UNLOCK },
-    { M32RXF_INSN_PAR_PCMPBZ, && case_sem_INSN_PAR_PCMPBZ },
-    { M32RXF_INSN_WRITE_PCMPBZ, && case_sem_INSN_WRITE_PCMPBZ },
-    { M32RXF_INSN_PAR_SADD, && case_sem_INSN_PAR_SADD },
-    { M32RXF_INSN_WRITE_SADD, && case_sem_INSN_WRITE_SADD },
-    { M32RXF_INSN_PAR_MACWU1, && case_sem_INSN_PAR_MACWU1 },
-    { M32RXF_INSN_WRITE_MACWU1, && case_sem_INSN_WRITE_MACWU1 },
-    { M32RXF_INSN_PAR_MSBLO, && case_sem_INSN_PAR_MSBLO },
-    { M32RXF_INSN_WRITE_MSBLO, && case_sem_INSN_WRITE_MSBLO },
-    { M32RXF_INSN_PAR_MULWU1, && case_sem_INSN_PAR_MULWU1 },
-    { M32RXF_INSN_WRITE_MULWU1, && case_sem_INSN_WRITE_MULWU1 },
-    { M32RXF_INSN_PAR_MACLH1, && case_sem_INSN_PAR_MACLH1 },
-    { M32RXF_INSN_WRITE_MACLH1, && case_sem_INSN_WRITE_MACLH1 },
-    { M32RXF_INSN_PAR_SC, && case_sem_INSN_PAR_SC },
-    { M32RXF_INSN_WRITE_SC, && case_sem_INSN_WRITE_SC },
-    { M32RXF_INSN_PAR_SNC, && case_sem_INSN_PAR_SNC },
-    { M32RXF_INSN_WRITE_SNC, && case_sem_INSN_WRITE_SNC },
-    { M32RXF_INSN_PAR_CLRPSW, && case_sem_INSN_PAR_CLRPSW },
-    { M32RXF_INSN_WRITE_CLRPSW, && case_sem_INSN_WRITE_CLRPSW },
-    { M32RXF_INSN_PAR_SETPSW, && case_sem_INSN_PAR_SETPSW },
-    { M32RXF_INSN_WRITE_SETPSW, && case_sem_INSN_WRITE_SETPSW },
-    { M32RXF_INSN_PAR_BTST, && case_sem_INSN_PAR_BTST },
-    { M32RXF_INSN_WRITE_BTST, && case_sem_INSN_WRITE_BTST },
+    { M32R2F_INSN_X_INVALID, && case_sem_INSN_X_INVALID },
+    { M32R2F_INSN_X_AFTER, && case_sem_INSN_X_AFTER },
+    { M32R2F_INSN_X_BEFORE, && case_sem_INSN_X_BEFORE },
+    { M32R2F_INSN_X_CTI_CHAIN, && case_sem_INSN_X_CTI_CHAIN },
+    { M32R2F_INSN_X_CHAIN, && case_sem_INSN_X_CHAIN },
+    { M32R2F_INSN_X_BEGIN, && case_sem_INSN_X_BEGIN },
+    { M32R2F_INSN_ADD, && case_sem_INSN_ADD },
+    { M32R2F_INSN_ADD3, && case_sem_INSN_ADD3 },
+    { M32R2F_INSN_AND, && case_sem_INSN_AND },
+    { M32R2F_INSN_AND3, && case_sem_INSN_AND3 },
+    { M32R2F_INSN_OR, && case_sem_INSN_OR },
+    { M32R2F_INSN_OR3, && case_sem_INSN_OR3 },
+    { M32R2F_INSN_XOR, && case_sem_INSN_XOR },
+    { M32R2F_INSN_XOR3, && case_sem_INSN_XOR3 },
+    { M32R2F_INSN_ADDI, && case_sem_INSN_ADDI },
+    { M32R2F_INSN_ADDV, && case_sem_INSN_ADDV },
+    { M32R2F_INSN_ADDV3, && case_sem_INSN_ADDV3 },
+    { M32R2F_INSN_ADDX, && case_sem_INSN_ADDX },
+    { M32R2F_INSN_BC8, && case_sem_INSN_BC8 },
+    { M32R2F_INSN_BC24, && case_sem_INSN_BC24 },
+    { M32R2F_INSN_BEQ, && case_sem_INSN_BEQ },
+    { M32R2F_INSN_BEQZ, && case_sem_INSN_BEQZ },
+    { M32R2F_INSN_BGEZ, && case_sem_INSN_BGEZ },
+    { M32R2F_INSN_BGTZ, && case_sem_INSN_BGTZ },
+    { M32R2F_INSN_BLEZ, && case_sem_INSN_BLEZ },
+    { M32R2F_INSN_BLTZ, && case_sem_INSN_BLTZ },
+    { M32R2F_INSN_BNEZ, && case_sem_INSN_BNEZ },
+    { M32R2F_INSN_BL8, && case_sem_INSN_BL8 },
+    { M32R2F_INSN_BL24, && case_sem_INSN_BL24 },
+    { M32R2F_INSN_BCL8, && case_sem_INSN_BCL8 },
+    { M32R2F_INSN_BCL24, && case_sem_INSN_BCL24 },
+    { M32R2F_INSN_BNC8, && case_sem_INSN_BNC8 },
+    { M32R2F_INSN_BNC24, && case_sem_INSN_BNC24 },
+    { M32R2F_INSN_BNE, && case_sem_INSN_BNE },
+    { M32R2F_INSN_BRA8, && case_sem_INSN_BRA8 },
+    { M32R2F_INSN_BRA24, && case_sem_INSN_BRA24 },
+    { M32R2F_INSN_BNCL8, && case_sem_INSN_BNCL8 },
+    { M32R2F_INSN_BNCL24, && case_sem_INSN_BNCL24 },
+    { M32R2F_INSN_CMP, && case_sem_INSN_CMP },
+    { M32R2F_INSN_CMPI, && case_sem_INSN_CMPI },
+    { M32R2F_INSN_CMPU, && case_sem_INSN_CMPU },
+    { M32R2F_INSN_CMPUI, && case_sem_INSN_CMPUI },
+    { M32R2F_INSN_CMPEQ, && case_sem_INSN_CMPEQ },
+    { M32R2F_INSN_CMPZ, && case_sem_INSN_CMPZ },
+    { M32R2F_INSN_DIV, && case_sem_INSN_DIV },
+    { M32R2F_INSN_DIVU, && case_sem_INSN_DIVU },
+    { M32R2F_INSN_REM, && case_sem_INSN_REM },
+    { M32R2F_INSN_REMU, && case_sem_INSN_REMU },
+    { M32R2F_INSN_REMH, && case_sem_INSN_REMH },
+    { M32R2F_INSN_REMUH, && case_sem_INSN_REMUH },
+    { M32R2F_INSN_REMB, && case_sem_INSN_REMB },
+    { M32R2F_INSN_REMUB, && case_sem_INSN_REMUB },
+    { M32R2F_INSN_DIVUH, && case_sem_INSN_DIVUH },
+    { M32R2F_INSN_DIVB, && case_sem_INSN_DIVB },
+    { M32R2F_INSN_DIVUB, && case_sem_INSN_DIVUB },
+    { M32R2F_INSN_DIVH, && case_sem_INSN_DIVH },
+    { M32R2F_INSN_JC, && case_sem_INSN_JC },
+    { M32R2F_INSN_JNC, && case_sem_INSN_JNC },
+    { M32R2F_INSN_JL, && case_sem_INSN_JL },
+    { M32R2F_INSN_JMP, && case_sem_INSN_JMP },
+    { M32R2F_INSN_LD, && case_sem_INSN_LD },
+    { M32R2F_INSN_LD_D, && case_sem_INSN_LD_D },
+    { M32R2F_INSN_LDB, && case_sem_INSN_LDB },
+    { M32R2F_INSN_LDB_D, && case_sem_INSN_LDB_D },
+    { M32R2F_INSN_LDH, && case_sem_INSN_LDH },
+    { M32R2F_INSN_LDH_D, && case_sem_INSN_LDH_D },
+    { M32R2F_INSN_LDUB, && case_sem_INSN_LDUB },
+    { M32R2F_INSN_LDUB_D, && case_sem_INSN_LDUB_D },
+    { M32R2F_INSN_LDUH, && case_sem_INSN_LDUH },
+    { M32R2F_INSN_LDUH_D, && case_sem_INSN_LDUH_D },
+    { M32R2F_INSN_LD_PLUS, && case_sem_INSN_LD_PLUS },
+    { M32R2F_INSN_LD24, && case_sem_INSN_LD24 },
+    { M32R2F_INSN_LDI8, && case_sem_INSN_LDI8 },
+    { M32R2F_INSN_LDI16, && case_sem_INSN_LDI16 },
+    { M32R2F_INSN_LOCK, && case_sem_INSN_LOCK },
+    { M32R2F_INSN_MACHI_A, && case_sem_INSN_MACHI_A },
+    { M32R2F_INSN_MACLO_A, && case_sem_INSN_MACLO_A },
+    { M32R2F_INSN_MACWHI_A, && case_sem_INSN_MACWHI_A },
+    { M32R2F_INSN_MACWLO_A, && case_sem_INSN_MACWLO_A },
+    { M32R2F_INSN_MUL, && case_sem_INSN_MUL },
+    { M32R2F_INSN_MULHI_A, && case_sem_INSN_MULHI_A },
+    { M32R2F_INSN_MULLO_A, && case_sem_INSN_MULLO_A },
+    { M32R2F_INSN_MULWHI_A, && case_sem_INSN_MULWHI_A },
+    { M32R2F_INSN_MULWLO_A, && case_sem_INSN_MULWLO_A },
+    { M32R2F_INSN_MV, && case_sem_INSN_MV },
+    { M32R2F_INSN_MVFACHI_A, && case_sem_INSN_MVFACHI_A },
+    { M32R2F_INSN_MVFACLO_A, && case_sem_INSN_MVFACLO_A },
+    { M32R2F_INSN_MVFACMI_A, && case_sem_INSN_MVFACMI_A },
+    { M32R2F_INSN_MVFC, && case_sem_INSN_MVFC },
+    { M32R2F_INSN_MVTACHI_A, && case_sem_INSN_MVTACHI_A },
+    { M32R2F_INSN_MVTACLO_A, && case_sem_INSN_MVTACLO_A },
+    { M32R2F_INSN_MVTC, && case_sem_INSN_MVTC },
+    { M32R2F_INSN_NEG, && case_sem_INSN_NEG },
+    { M32R2F_INSN_NOP, && case_sem_INSN_NOP },
+    { M32R2F_INSN_NOT, && case_sem_INSN_NOT },
+    { M32R2F_INSN_RAC_DSI, && case_sem_INSN_RAC_DSI },
+    { M32R2F_INSN_RACH_DSI, && case_sem_INSN_RACH_DSI },
+    { M32R2F_INSN_RTE, && case_sem_INSN_RTE },
+    { M32R2F_INSN_SETH, && case_sem_INSN_SETH },
+    { M32R2F_INSN_SLL, && case_sem_INSN_SLL },
+    { M32R2F_INSN_SLL3, && case_sem_INSN_SLL3 },
+    { M32R2F_INSN_SLLI, && case_sem_INSN_SLLI },
+    { M32R2F_INSN_SRA, && case_sem_INSN_SRA },
+    { M32R2F_INSN_SRA3, && case_sem_INSN_SRA3 },
+    { M32R2F_INSN_SRAI, && case_sem_INSN_SRAI },
+    { M32R2F_INSN_SRL, && case_sem_INSN_SRL },
+    { M32R2F_INSN_SRL3, && case_sem_INSN_SRL3 },
+    { M32R2F_INSN_SRLI, && case_sem_INSN_SRLI },
+    { M32R2F_INSN_ST, && case_sem_INSN_ST },
+    { M32R2F_INSN_ST_D, && case_sem_INSN_ST_D },
+    { M32R2F_INSN_STB, && case_sem_INSN_STB },
+    { M32R2F_INSN_STB_D, && case_sem_INSN_STB_D },
+    { M32R2F_INSN_STH, && case_sem_INSN_STH },
+    { M32R2F_INSN_STH_D, && case_sem_INSN_STH_D },
+    { M32R2F_INSN_ST_PLUS, && case_sem_INSN_ST_PLUS },
+    { M32R2F_INSN_STH_PLUS, && case_sem_INSN_STH_PLUS },
+    { M32R2F_INSN_STB_PLUS, && case_sem_INSN_STB_PLUS },
+    { M32R2F_INSN_ST_MINUS, && case_sem_INSN_ST_MINUS },
+    { M32R2F_INSN_SUB, && case_sem_INSN_SUB },
+    { M32R2F_INSN_SUBV, && case_sem_INSN_SUBV },
+    { M32R2F_INSN_SUBX, && case_sem_INSN_SUBX },
+    { M32R2F_INSN_TRAP, && case_sem_INSN_TRAP },
+    { M32R2F_INSN_UNLOCK, && case_sem_INSN_UNLOCK },
+    { M32R2F_INSN_SATB, && case_sem_INSN_SATB },
+    { M32R2F_INSN_SATH, && case_sem_INSN_SATH },
+    { M32R2F_INSN_SAT, && case_sem_INSN_SAT },
+    { M32R2F_INSN_PCMPBZ, && case_sem_INSN_PCMPBZ },
+    { M32R2F_INSN_SADD, && case_sem_INSN_SADD },
+    { M32R2F_INSN_MACWU1, && case_sem_INSN_MACWU1 },
+    { M32R2F_INSN_MSBLO, && case_sem_INSN_MSBLO },
+    { M32R2F_INSN_MULWU1, && case_sem_INSN_MULWU1 },
+    { M32R2F_INSN_MACLH1, && case_sem_INSN_MACLH1 },
+    { M32R2F_INSN_SC, && case_sem_INSN_SC },
+    { M32R2F_INSN_SNC, && case_sem_INSN_SNC },
+    { M32R2F_INSN_CLRPSW, && case_sem_INSN_CLRPSW },
+    { M32R2F_INSN_SETPSW, && case_sem_INSN_SETPSW },
+    { M32R2F_INSN_BSET, && case_sem_INSN_BSET },
+    { M32R2F_INSN_BCLR, && case_sem_INSN_BCLR },
+    { M32R2F_INSN_BTST, && case_sem_INSN_BTST },
+    { M32R2F_INSN_PAR_ADD, && case_sem_INSN_PAR_ADD },
+    { M32R2F_INSN_WRITE_ADD, && case_sem_INSN_WRITE_ADD },
+    { M32R2F_INSN_PAR_AND, && case_sem_INSN_PAR_AND },
+    { M32R2F_INSN_WRITE_AND, && case_sem_INSN_WRITE_AND },
+    { M32R2F_INSN_PAR_OR, && case_sem_INSN_PAR_OR },
+    { M32R2F_INSN_WRITE_OR, && case_sem_INSN_WRITE_OR },
+    { M32R2F_INSN_PAR_XOR, && case_sem_INSN_PAR_XOR },
+    { M32R2F_INSN_WRITE_XOR, && case_sem_INSN_WRITE_XOR },
+    { M32R2F_INSN_PAR_ADDI, && case_sem_INSN_PAR_ADDI },
+    { M32R2F_INSN_WRITE_ADDI, && case_sem_INSN_WRITE_ADDI },
+    { M32R2F_INSN_PAR_ADDV, && case_sem_INSN_PAR_ADDV },
+    { M32R2F_INSN_WRITE_ADDV, && case_sem_INSN_WRITE_ADDV },
+    { M32R2F_INSN_PAR_ADDX, && case_sem_INSN_PAR_ADDX },
+    { M32R2F_INSN_WRITE_ADDX, && case_sem_INSN_WRITE_ADDX },
+    { M32R2F_INSN_PAR_BC8, && case_sem_INSN_PAR_BC8 },
+    { M32R2F_INSN_WRITE_BC8, && case_sem_INSN_WRITE_BC8 },
+    { M32R2F_INSN_PAR_BL8, && case_sem_INSN_PAR_BL8 },
+    { M32R2F_INSN_WRITE_BL8, && case_sem_INSN_WRITE_BL8 },
+    { M32R2F_INSN_PAR_BCL8, && case_sem_INSN_PAR_BCL8 },
+    { M32R2F_INSN_WRITE_BCL8, && case_sem_INSN_WRITE_BCL8 },
+    { M32R2F_INSN_PAR_BNC8, && case_sem_INSN_PAR_BNC8 },
+    { M32R2F_INSN_WRITE_BNC8, && case_sem_INSN_WRITE_BNC8 },
+    { M32R2F_INSN_PAR_BRA8, && case_sem_INSN_PAR_BRA8 },
+    { M32R2F_INSN_WRITE_BRA8, && case_sem_INSN_WRITE_BRA8 },
+    { M32R2F_INSN_PAR_BNCL8, && case_sem_INSN_PAR_BNCL8 },
+    { M32R2F_INSN_WRITE_BNCL8, && case_sem_INSN_WRITE_BNCL8 },
+    { M32R2F_INSN_PAR_CMP, && case_sem_INSN_PAR_CMP },
+    { M32R2F_INSN_WRITE_CMP, && case_sem_INSN_WRITE_CMP },
+    { M32R2F_INSN_PAR_CMPU, && case_sem_INSN_PAR_CMPU },
+    { M32R2F_INSN_WRITE_CMPU, && case_sem_INSN_WRITE_CMPU },
+    { M32R2F_INSN_PAR_CMPEQ, && case_sem_INSN_PAR_CMPEQ },
+    { M32R2F_INSN_WRITE_CMPEQ, && case_sem_INSN_WRITE_CMPEQ },
+    { M32R2F_INSN_PAR_CMPZ, && case_sem_INSN_PAR_CMPZ },
+    { M32R2F_INSN_WRITE_CMPZ, && case_sem_INSN_WRITE_CMPZ },
+    { M32R2F_INSN_PAR_JC, && case_sem_INSN_PAR_JC },
+    { M32R2F_INSN_WRITE_JC, && case_sem_INSN_WRITE_JC },
+    { M32R2F_INSN_PAR_JNC, && case_sem_INSN_PAR_JNC },
+    { M32R2F_INSN_WRITE_JNC, && case_sem_INSN_WRITE_JNC },
+    { M32R2F_INSN_PAR_JL, && case_sem_INSN_PAR_JL },
+    { M32R2F_INSN_WRITE_JL, && case_sem_INSN_WRITE_JL },
+    { M32R2F_INSN_PAR_JMP, && case_sem_INSN_PAR_JMP },
+    { M32R2F_INSN_WRITE_JMP, && case_sem_INSN_WRITE_JMP },
+    { M32R2F_INSN_PAR_LD, && case_sem_INSN_PAR_LD },
+    { M32R2F_INSN_WRITE_LD, && case_sem_INSN_WRITE_LD },
+    { M32R2F_INSN_PAR_LDB, && case_sem_INSN_PAR_LDB },
+    { M32R2F_INSN_WRITE_LDB, && case_sem_INSN_WRITE_LDB },
+    { M32R2F_INSN_PAR_LDH, && case_sem_INSN_PAR_LDH },
+    { M32R2F_INSN_WRITE_LDH, && case_sem_INSN_WRITE_LDH },
+    { M32R2F_INSN_PAR_LDUB, && case_sem_INSN_PAR_LDUB },
+    { M32R2F_INSN_WRITE_LDUB, && case_sem_INSN_WRITE_LDUB },
+    { M32R2F_INSN_PAR_LDUH, && case_sem_INSN_PAR_LDUH },
+    { M32R2F_INSN_WRITE_LDUH, && case_sem_INSN_WRITE_LDUH },
+    { M32R2F_INSN_PAR_LD_PLUS, && case_sem_INSN_PAR_LD_PLUS },
+    { M32R2F_INSN_WRITE_LD_PLUS, && case_sem_INSN_WRITE_LD_PLUS },
+    { M32R2F_INSN_PAR_LDI8, && case_sem_INSN_PAR_LDI8 },
+    { M32R2F_INSN_WRITE_LDI8, && case_sem_INSN_WRITE_LDI8 },
+    { M32R2F_INSN_PAR_LOCK, && case_sem_INSN_PAR_LOCK },
+    { M32R2F_INSN_WRITE_LOCK, && case_sem_INSN_WRITE_LOCK },
+    { M32R2F_INSN_PAR_MACHI_A, && case_sem_INSN_PAR_MACHI_A },
+    { M32R2F_INSN_WRITE_MACHI_A, && case_sem_INSN_WRITE_MACHI_A },
+    { M32R2F_INSN_PAR_MACLO_A, && case_sem_INSN_PAR_MACLO_A },
+    { M32R2F_INSN_WRITE_MACLO_A, && case_sem_INSN_WRITE_MACLO_A },
+    { M32R2F_INSN_PAR_MACWHI_A, && case_sem_INSN_PAR_MACWHI_A },
+    { M32R2F_INSN_WRITE_MACWHI_A, && case_sem_INSN_WRITE_MACWHI_A },
+    { M32R2F_INSN_PAR_MACWLO_A, && case_sem_INSN_PAR_MACWLO_A },
+    { M32R2F_INSN_WRITE_MACWLO_A, && case_sem_INSN_WRITE_MACWLO_A },
+    { M32R2F_INSN_PAR_MUL, && case_sem_INSN_PAR_MUL },
+    { M32R2F_INSN_WRITE_MUL, && case_sem_INSN_WRITE_MUL },
+    { M32R2F_INSN_PAR_MULHI_A, && case_sem_INSN_PAR_MULHI_A },
+    { M32R2F_INSN_WRITE_MULHI_A, && case_sem_INSN_WRITE_MULHI_A },
+    { M32R2F_INSN_PAR_MULLO_A, && case_sem_INSN_PAR_MULLO_A },
+    { M32R2F_INSN_WRITE_MULLO_A, && case_sem_INSN_WRITE_MULLO_A },
+    { M32R2F_INSN_PAR_MULWHI_A, && case_sem_INSN_PAR_MULWHI_A },
+    { M32R2F_INSN_WRITE_MULWHI_A, && case_sem_INSN_WRITE_MULWHI_A },
+    { M32R2F_INSN_PAR_MULWLO_A, && case_sem_INSN_PAR_MULWLO_A },
+    { M32R2F_INSN_WRITE_MULWLO_A, && case_sem_INSN_WRITE_MULWLO_A },
+    { M32R2F_INSN_PAR_MV, && case_sem_INSN_PAR_MV },
+    { M32R2F_INSN_WRITE_MV, && case_sem_INSN_WRITE_MV },
+    { M32R2F_INSN_PAR_MVFACHI_A, && case_sem_INSN_PAR_MVFACHI_A },
+    { M32R2F_INSN_WRITE_MVFACHI_A, && case_sem_INSN_WRITE_MVFACHI_A },
+    { M32R2F_INSN_PAR_MVFACLO_A, && case_sem_INSN_PAR_MVFACLO_A },
+    { M32R2F_INSN_WRITE_MVFACLO_A, && case_sem_INSN_WRITE_MVFACLO_A },
+    { M32R2F_INSN_PAR_MVFACMI_A, && case_sem_INSN_PAR_MVFACMI_A },
+    { M32R2F_INSN_WRITE_MVFACMI_A, && case_sem_INSN_WRITE_MVFACMI_A },
+    { M32R2F_INSN_PAR_MVFC, && case_sem_INSN_PAR_MVFC },
+    { M32R2F_INSN_WRITE_MVFC, && case_sem_INSN_WRITE_MVFC },
+    { M32R2F_INSN_PAR_MVTACHI_A, && case_sem_INSN_PAR_MVTACHI_A },
+    { M32R2F_INSN_WRITE_MVTACHI_A, && case_sem_INSN_WRITE_MVTACHI_A },
+    { M32R2F_INSN_PAR_MVTACLO_A, && case_sem_INSN_PAR_MVTACLO_A },
+    { M32R2F_INSN_WRITE_MVTACLO_A, && case_sem_INSN_WRITE_MVTACLO_A },
+    { M32R2F_INSN_PAR_MVTC, && case_sem_INSN_PAR_MVTC },
+    { M32R2F_INSN_WRITE_MVTC, && case_sem_INSN_WRITE_MVTC },
+    { M32R2F_INSN_PAR_NEG, && case_sem_INSN_PAR_NEG },
+    { M32R2F_INSN_WRITE_NEG, && case_sem_INSN_WRITE_NEG },
+    { M32R2F_INSN_PAR_NOP, && case_sem_INSN_PAR_NOP },
+    { M32R2F_INSN_WRITE_NOP, && case_sem_INSN_WRITE_NOP },
+    { M32R2F_INSN_PAR_NOT, && case_sem_INSN_PAR_NOT },
+    { M32R2F_INSN_WRITE_NOT, && case_sem_INSN_WRITE_NOT },
+    { M32R2F_INSN_PAR_RAC_DSI, && case_sem_INSN_PAR_RAC_DSI },
+    { M32R2F_INSN_WRITE_RAC_DSI, && case_sem_INSN_WRITE_RAC_DSI },
+    { M32R2F_INSN_PAR_RACH_DSI, && case_sem_INSN_PAR_RACH_DSI },
+    { M32R2F_INSN_WRITE_RACH_DSI, && case_sem_INSN_WRITE_RACH_DSI },
+    { M32R2F_INSN_PAR_RTE, && case_sem_INSN_PAR_RTE },
+    { M32R2F_INSN_WRITE_RTE, && case_sem_INSN_WRITE_RTE },
+    { M32R2F_INSN_PAR_SLL, && case_sem_INSN_PAR_SLL },
+    { M32R2F_INSN_WRITE_SLL, && case_sem_INSN_WRITE_SLL },
+    { M32R2F_INSN_PAR_SLLI, && case_sem_INSN_PAR_SLLI },
+    { M32R2F_INSN_WRITE_SLLI, && case_sem_INSN_WRITE_SLLI },
+    { M32R2F_INSN_PAR_SRA, && case_sem_INSN_PAR_SRA },
+    { M32R2F_INSN_WRITE_SRA, && case_sem_INSN_WRITE_SRA },
+    { M32R2F_INSN_PAR_SRAI, && case_sem_INSN_PAR_SRAI },
+    { M32R2F_INSN_WRITE_SRAI, && case_sem_INSN_WRITE_SRAI },
+    { M32R2F_INSN_PAR_SRL, && case_sem_INSN_PAR_SRL },
+    { M32R2F_INSN_WRITE_SRL, && case_sem_INSN_WRITE_SRL },
+    { M32R2F_INSN_PAR_SRLI, && case_sem_INSN_PAR_SRLI },
+    { M32R2F_INSN_WRITE_SRLI, && case_sem_INSN_WRITE_SRLI },
+    { M32R2F_INSN_PAR_ST, && case_sem_INSN_PAR_ST },
+    { M32R2F_INSN_WRITE_ST, && case_sem_INSN_WRITE_ST },
+    { M32R2F_INSN_PAR_STB, && case_sem_INSN_PAR_STB },
+    { M32R2F_INSN_WRITE_STB, && case_sem_INSN_WRITE_STB },
+    { M32R2F_INSN_PAR_STH, && case_sem_INSN_PAR_STH },
+    { M32R2F_INSN_WRITE_STH, && case_sem_INSN_WRITE_STH },
+    { M32R2F_INSN_PAR_ST_PLUS, && case_sem_INSN_PAR_ST_PLUS },
+    { M32R2F_INSN_WRITE_ST_PLUS, && case_sem_INSN_WRITE_ST_PLUS },
+    { M32R2F_INSN_PAR_STH_PLUS, && case_sem_INSN_PAR_STH_PLUS },
+    { M32R2F_INSN_WRITE_STH_PLUS, && case_sem_INSN_WRITE_STH_PLUS },
+    { M32R2F_INSN_PAR_STB_PLUS, && case_sem_INSN_PAR_STB_PLUS },
+    { M32R2F_INSN_WRITE_STB_PLUS, && case_sem_INSN_WRITE_STB_PLUS },
+    { M32R2F_INSN_PAR_ST_MINUS, && case_sem_INSN_PAR_ST_MINUS },
+    { M32R2F_INSN_WRITE_ST_MINUS, && case_sem_INSN_WRITE_ST_MINUS },
+    { M32R2F_INSN_PAR_SUB, && case_sem_INSN_PAR_SUB },
+    { M32R2F_INSN_WRITE_SUB, && case_sem_INSN_WRITE_SUB },
+    { M32R2F_INSN_PAR_SUBV, && case_sem_INSN_PAR_SUBV },
+    { M32R2F_INSN_WRITE_SUBV, && case_sem_INSN_WRITE_SUBV },
+    { M32R2F_INSN_PAR_SUBX, && case_sem_INSN_PAR_SUBX },
+    { M32R2F_INSN_WRITE_SUBX, && case_sem_INSN_WRITE_SUBX },
+    { M32R2F_INSN_PAR_TRAP, && case_sem_INSN_PAR_TRAP },
+    { M32R2F_INSN_WRITE_TRAP, && case_sem_INSN_WRITE_TRAP },
+    { M32R2F_INSN_PAR_UNLOCK, && case_sem_INSN_PAR_UNLOCK },
+    { M32R2F_INSN_WRITE_UNLOCK, && case_sem_INSN_WRITE_UNLOCK },
+    { M32R2F_INSN_PAR_PCMPBZ, && case_sem_INSN_PAR_PCMPBZ },
+    { M32R2F_INSN_WRITE_PCMPBZ, && case_sem_INSN_WRITE_PCMPBZ },
+    { M32R2F_INSN_PAR_SADD, && case_sem_INSN_PAR_SADD },
+    { M32R2F_INSN_WRITE_SADD, && case_sem_INSN_WRITE_SADD },
+    { M32R2F_INSN_PAR_MACWU1, && case_sem_INSN_PAR_MACWU1 },
+    { M32R2F_INSN_WRITE_MACWU1, && case_sem_INSN_WRITE_MACWU1 },
+    { M32R2F_INSN_PAR_MSBLO, && case_sem_INSN_PAR_MSBLO },
+    { M32R2F_INSN_WRITE_MSBLO, && case_sem_INSN_WRITE_MSBLO },
+    { M32R2F_INSN_PAR_MULWU1, && case_sem_INSN_PAR_MULWU1 },
+    { M32R2F_INSN_WRITE_MULWU1, && case_sem_INSN_WRITE_MULWU1 },
+    { M32R2F_INSN_PAR_MACLH1, && case_sem_INSN_PAR_MACLH1 },
+    { M32R2F_INSN_WRITE_MACLH1, && case_sem_INSN_WRITE_MACLH1 },
+    { M32R2F_INSN_PAR_SC, && case_sem_INSN_PAR_SC },
+    { M32R2F_INSN_WRITE_SC, && case_sem_INSN_WRITE_SC },
+    { M32R2F_INSN_PAR_SNC, && case_sem_INSN_PAR_SNC },
+    { M32R2F_INSN_WRITE_SNC, && case_sem_INSN_WRITE_SNC },
+    { M32R2F_INSN_PAR_CLRPSW, && case_sem_INSN_PAR_CLRPSW },
+    { M32R2F_INSN_WRITE_CLRPSW, && case_sem_INSN_WRITE_CLRPSW },
+    { M32R2F_INSN_PAR_SETPSW, && case_sem_INSN_PAR_SETPSW },
+    { M32R2F_INSN_WRITE_SETPSW, && case_sem_INSN_WRITE_SETPSW },
+    { M32R2F_INSN_PAR_BTST, && case_sem_INSN_PAR_BTST },
+    { M32R2F_INSN_WRITE_BTST, && case_sem_INSN_WRITE_BTST },
     { 0, 0 }
   };
   int i;
@@ -422,8 +429,8 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB_M32RXF
-    m32rxf_pbb_after (current_cpu, sem_arg);
+#if WITH_SCACHE_PBB_M32R2F
+    m32r2f_pbb_after (current_cpu, sem_arg);
 #endif
   }
 
@@ -441,8 +448,8 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB_M32RXF
-    m32rxf_pbb_before (current_cpu, sem_arg);
+#if WITH_SCACHE_PBB_M32R2F
+    m32r2f_pbb_before (current_cpu, sem_arg);
 #endif
   }
 
@@ -460,14 +467,14 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB_M32RXF
+#if WITH_SCACHE_PBB_M32R2F
 #ifdef DEFINE_SWITCH
-    vpc = m32rxf_pbb_cti_chain (current_cpu, sem_arg,
+    vpc = m32r2f_pbb_cti_chain (current_cpu, sem_arg,
 			       pbb_br_type, pbb_br_npc);
     BREAK (sem);
 #else
     /* FIXME: Allow provision of explicit ifmt spec in insn spec.  */
-    vpc = m32rxf_pbb_cti_chain (current_cpu, sem_arg,
+    vpc = m32r2f_pbb_cti_chain (current_cpu, sem_arg,
 			       CPU_PBB_BR_TYPE (current_cpu),
 			       CPU_PBB_BR_NPC (current_cpu));
 #endif
@@ -488,8 +495,8 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB_M32RXF
-    vpc = m32rxf_pbb_chain (current_cpu, sem_arg);
+#if WITH_SCACHE_PBB_M32R2F
+    vpc = m32r2f_pbb_chain (current_cpu, sem_arg);
 #ifdef DEFINE_SWITCH
     BREAK (sem);
 #endif
@@ -510,16 +517,16 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE_PBB_M32RXF
+#if WITH_SCACHE_PBB_M32R2F
 #if defined DEFINE_SWITCH || defined FAST_P
     /* In the switch case FAST_P is a constant, allowing several optimizations
        in any called inline functions.  */
-    vpc = m32rxf_pbb_begin (current_cpu, FAST_P);
+    vpc = m32r2f_pbb_begin (current_cpu, FAST_P);
 #else
 #if 0 /* cgen engine can't handle dynamic fast/full switching yet.  */
-    vpc = m32rxf_pbb_begin (current_cpu, STATE_RUN_FAST_P (CPU_STATE (current_cpu)));
+    vpc = m32r2f_pbb_begin (current_cpu, STATE_RUN_FAST_P (CPU_STATE (current_cpu)));
 #else
-    vpc = m32rxf_pbb_begin (current_cpu, 0);
+    vpc = m32r2f_pbb_begin (current_cpu, 0);
 #endif
 #endif
 #endif
@@ -1512,6 +1519,167 @@ if (NESI (* FLD (i_sr), 0)) {
 if (NESI (* FLD (i_sr), 0)) {
   {
     SI opval = UMODSI (* FLD (i_dr), * FLD (i_sr));
+    * FLD (i_dr) = opval;
+    written |= (1 << 2);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+
+  abuf->written = written;
+#undef FLD
+}
+  NEXT (vpc);
+
+  CASE (sem, INSN_REMH) : /* remh $dr,$sr */
+{
+  SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+#define FLD(f) abuf->fields.sfmt_add.f
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+if (NESI (* FLD (i_sr), 0)) {
+  {
+    SI opval = MODSI (EXTHISI (TRUNCSIHI (* FLD (i_dr))), * FLD (i_sr));
+    * FLD (i_dr) = opval;
+    written |= (1 << 2);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+
+  abuf->written = written;
+#undef FLD
+}
+  NEXT (vpc);
+
+  CASE (sem, INSN_REMUH) : /* remuh $dr,$sr */
+{
+  SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+#define FLD(f) abuf->fields.sfmt_add.f
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+if (NESI (* FLD (i_sr), 0)) {
+  {
+    SI opval = UMODSI (* FLD (i_dr), * FLD (i_sr));
+    * FLD (i_dr) = opval;
+    written |= (1 << 2);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+
+  abuf->written = written;
+#undef FLD
+}
+  NEXT (vpc);
+
+  CASE (sem, INSN_REMB) : /* remb $dr,$sr */
+{
+  SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+#define FLD(f) abuf->fields.sfmt_add.f
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+if (NESI (* FLD (i_sr), 0)) {
+  {
+    SI opval = MODSI (EXTBISI (TRUNCSIBI (* FLD (i_dr))), * FLD (i_sr));
+    * FLD (i_dr) = opval;
+    written |= (1 << 2);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+
+  abuf->written = written;
+#undef FLD
+}
+  NEXT (vpc);
+
+  CASE (sem, INSN_REMUB) : /* remub $dr,$sr */
+{
+  SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+#define FLD(f) abuf->fields.sfmt_add.f
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+if (NESI (* FLD (i_sr), 0)) {
+  {
+    SI opval = UMODSI (* FLD (i_dr), * FLD (i_sr));
+    * FLD (i_dr) = opval;
+    written |= (1 << 2);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+
+  abuf->written = written;
+#undef FLD
+}
+  NEXT (vpc);
+
+  CASE (sem, INSN_DIVUH) : /* divuh $dr,$sr */
+{
+  SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+#define FLD(f) abuf->fields.sfmt_add.f
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+if (NESI (* FLD (i_sr), 0)) {
+  {
+    SI opval = UDIVSI (* FLD (i_dr), * FLD (i_sr));
+    * FLD (i_dr) = opval;
+    written |= (1 << 2);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+
+  abuf->written = written;
+#undef FLD
+}
+  NEXT (vpc);
+
+  CASE (sem, INSN_DIVB) : /* divb $dr,$sr */
+{
+  SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+#define FLD(f) abuf->fields.sfmt_add.f
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+if (NESI (* FLD (i_sr), 0)) {
+  {
+    SI opval = DIVSI (EXTBISI (TRUNCSIBI (* FLD (i_dr))), * FLD (i_sr));
+    * FLD (i_dr) = opval;
+    written |= (1 << 2);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+
+  abuf->written = written;
+#undef FLD
+}
+  NEXT (vpc);
+
+  CASE (sem, INSN_DIVUB) : /* divub $dr,$sr */
+{
+  SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+#define FLD(f) abuf->fields.sfmt_add.f
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+if (NESI (* FLD (i_sr), 0)) {
+  {
+    SI opval = UDIVSI (* FLD (i_dr), * FLD (i_sr));
     * FLD (i_dr) = opval;
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);

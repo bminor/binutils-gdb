@@ -1,3 +1,35 @@
+2003-12-11  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* Makefile.in: Add support for new machine m32r2.
+	* cpu2.c: New file for m32r2 support.
+	* cpu2.h: Likewise.
+	* decode2.c: Likewise.
+	* decode2.h: Likewise.
+	* m32r2.c: Likewise.
+	* mloop2.in: Likewise.
+	* model2.c: Likewise.
+	* sem2-switch.c: Likewise.
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* arch.c: Regenerate.
+	* cpuall.c: Regenerate.
+	* cpux.c: Regenerate.
+	* cpux.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* decodex.c: Regenerate.
+	* decodex.h: Regenerate.
+	* model.c: Regenerate.
+	* modelx.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+	* semx-switch.c: Regenerate.
+	* m32r-sim.h: Add EVB register support.
+	* sim-if.c: Likewise.
+	* sim-main.h: Likewise.
+	* traps.c: Likewise.
+
 2003-09-08  Dave Brolley  <brolley@redhat.com>
 
 	On behalf of Doug Evans <dje@sebabeach.org>

@@ -1,20 +1,22 @@
 /* Main simulator entry points specific to the M32R.
-   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This file is part of GDB, the GNU debugger.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sim-main.h"
 #include "sim-options.h"
@@ -240,6 +242,11 @@ print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
 		       PROFILE_LABEL_WIDTH, "Parallel insns:",
 		       sim_add_commas (buf, sizeof (buf),
 				       CPU_M32R_MISC_PROFILE (cpu)->parallel_count));
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_m32r2)
+	sim_io_printf (sd, "  %-*s %s\n\n",
+		       PROFILE_LABEL_WIDTH, "Parallel insns:",
+		       sim_add_commas (buf, sizeof (buf),
+				       CPU_M32R_MISC_PROFILE (cpu)->parallel_count));
     }
 }
 
@@ -270,12 +277,12 @@ sim_do_command (sd, cmd)
 	sim_io_eprintf (sd, "Too many arguments in `%s'\n", cmd);
       else if (strcasecmp (argv[2], "bbpsw") == 0)
 	{
-	  val = a_m32r_h_cr_get (STATE_CPU (sd, 0), H_CR_BBPSW);
+	  val = m32rbf_h_cr_get (STATE_CPU (sd, 0), H_CR_BBPSW);
 	  sim_io_printf (sd, "bbpsw 0x%x %d\n", val, val);
 	}
       else if (strcasecmp (argv[2], "bbpc") == 0)
 	{
-	  val = a_m32r_h_cr_get (STATE_CPU (sd, 0), H_CR_BBPC);
+	  val = m32rbf_h_cr_get (STATE_CPU (sd, 0), H_CR_BBPC);
 	  sim_io_printf (sd, "bbpc 0x%x %d\n", val, val);
 	}
       else
