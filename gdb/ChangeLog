@@ -1,3 +1,7 @@
+2002-07-23  Mark Salter  <msalter@redhat.com>
+
+	* remote.c (remote_read_bytes): Fix check for error.
+
 2002-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* aix-thread.c (language.h): Include.

@@ -3953,7 +3953,9 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       putpkt (buf);
       getpkt (buf, sizeof_buf, 0);
 
-      if (buf[0] == 'E')
+      if (buf[0] == 'E'
+	  && isxdigit (buf[1]) && isxdigit (buf[2])
+	  && buf[3] == '\0')
 	{
 	  /* There is no correspondance between what the remote protocol uses
 	     for errors and errno codes.  We would like a cleaner way of
