@@ -3799,7 +3799,7 @@
     {
       if (mask & 0x1)
 	{
-	  /* Need to restore MDQR, MCRH, MCRL, and MCVF */
+	  /* Need to restore MDRQ, MCRH, MCRL, and MCVF */
 	  sp += 16;
 	  State.regs[REG_E0 + 1] = load_word (sp);
 	  sp += 4;
@@ -3878,7 +3878,7 @@
 	  sp -= 4;
 	  store_word (sp, State.regs[REG_E0 + 1]);
 	  sp -= 16;
-	  /* Need to save MDQR, MCRH, MCRL, and MCVF */
+	  /* Need to save MDRQ, MCRH, MCRL, and MCVF */
 	}
     }
 
@@ -3979,7 +3979,7 @@
 	  sp -= 4;
 	  store_word (sp, State.regs[REG_E0 + 1]);
 	  sp -= 16;
-	  /* Need to save MDQR, MCRH, MCRL, and MCVF */
+	  /* Need to save MDRQ, MCRH, MCRL, and MCVF */
 	}
     }
 
@@ -4087,7 +4087,7 @@
 	  sp -= 4;
 	  store_word (sp, State.regs[REG_E0 + 1]);
 	  sp -= 16;
-	  /* Need to save MDQR, MCRH, MCRL, and MCVF */
+	  /* Need to save MDRQ, MCRH, MCRL, and MCVF */
 	}
     }
 
@@ -4189,7 +4189,7 @@
 
       if (mask & 0x1)
 	{
-	  /* Need to restore MDQR, MCRH, MCRL, and MCVF */
+	  /* Need to restore MDRQ, MCRH, MCRL, and MCVF */
 	  offset -= 16;
 	  State.regs[REG_E0 + 0] = load_word (sp + offset);
 	  offset -= 4;
@@ -4293,7 +4293,7 @@
 
       if (mask & 0x1)
 	{
-	  /* Need to restore MDQR, MCRH, MCRL, and MCVF */
+	  /* Need to restore MDRQ, MCRH, MCRL, and MCVF */
 	  offset -= 16;
 	  State.regs[REG_E0 + 0] = load_word (sp + offset);
 	  offset -= 4;
