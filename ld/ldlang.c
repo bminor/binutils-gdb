@@ -1072,7 +1072,7 @@ already_linked_table_free ()
 /* Return true if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
    wildcards, we do not consider the mere presence of a backslash to
-   be enough to cause the the pattern to be treated as a wildcard.
+   be enough to cause the pattern to be treated as a wildcard.
    That lets us handle DOS filenames more naturally.  */
 
 static boolean
