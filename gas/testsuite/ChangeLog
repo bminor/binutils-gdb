@@ -1,3 +1,8 @@
+2004-12-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/elf/elf.exp: Don't list reloc sections.
+	* gas/elf/section5.e: Remove reloc sections.
+
 2004-12-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/crx/beq_insn.d: Update reference file according to 

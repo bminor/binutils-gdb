@@ -60,7 +60,7 @@ if { ([istarget "*-*-*elf*"]
     run_list_test "section2" "$target_machine" "-al" "-s" ""
     run_dump_test "section3" 
     run_dump_test "section4"
-    run_list_test "section5" "" "-al" "-SW" "| grep \"\\\\.test\\\[\\\[:digit:\\\]\\\]\""
+    run_list_test "section5" "" "-al" "-SW" "| grep \" \\\\.test\\\[\\\[:digit:\\\]\\\]\""
     run_dump_test "symver" 
     run_list_test "type" "" "" "-s" "| grep \"1 \\\[FONT\\\]\""
 }
