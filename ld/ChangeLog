@@ -1,3 +1,8 @@
+Thu Jul 15 10:55:59 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (em_m88kbcs.c): Correct dependency.
+	(scripttempl/m88kbcs.sc): It's ARCH, not arch.
+
 Wed Jul 14 21:42:53 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldfile.c (ldlang_open_file, ldfile_open_command_file),
