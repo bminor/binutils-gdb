@@ -162,4 +162,11 @@ struct gdbarch_tdep
                                    link register is saved.  */
 };
 
+
+/* Constants for register set sizes.  */
+enum
+  {
+    ppc_num_fprs = 32           /* 32 floating-point registers */
+  };
+
 #endif

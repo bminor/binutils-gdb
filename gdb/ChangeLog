@@ -1,5 +1,16 @@
 2004-05-04  Jim Blandy  <jimb@redhat.com>
 
+	* config/rs6000/tm-rs6000.h (FPLAST_REGNUM): Delete #definition.
+	* ppc-tdep.h (ppc_num_fprs): New enum constant.
+	* aix-thread.c (fetch_regs_kernel_thread, fill_fprs,
+	store_regs_kernel_thread): Use FP0_REGNUM + ppc_num_fprs, not
+	FPLAST_REGNUM.
+	* ppc-bdm.c (bdm_ppc_fetch_registers, bdm_ppc_store_registers):
+	Same.
+	* ppc-linux-nat.c (ppc_register_u_addr): Same.
+	* rs6000-nat.c (regmap, fetch_inferior_registers) 
+	(store_inferior_registers): Same.
+
 	* aix-thread.c (fill_fprs): Fix off-by-one error comparing regno
 	with FPLAST_REGNUM.
 

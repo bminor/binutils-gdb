@@ -158,7 +158,7 @@ regmap (int regno, int *isfloat)
   *isfloat = 0;
   if (tdep->ppc_gp0_regnum <= regno && regno <= tdep->ppc_gplast_regnum)
     return regno;
-  else if (FP0_REGNUM <= regno && regno <= FPLAST_REGNUM)
+  else if (FP0_REGNUM <= regno && regno < FP0_REGNUM + ppc_num_fprs)
     {
       *isfloat = 1;
       return regno - FP0_REGNUM + FPR0;
@@ -357,7 +357,7 @@ fetch_inferior_registers (int regno)
 	}
 
       /* Read general purpose floating point registers.  */
-      for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
+      for (regno = FP0_REGNUM; regno < FP0_REGNUM + ppc_num_fprs; regno++)
 	fetch_register (regno);
 
       /* Read special registers.  */
@@ -396,7 +396,7 @@ store_inferior_registers (int regno)
 	}
 
       /* Write floating point registers.  */
-      for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
+      for (regno = FP0_REGNUM; regno < FP0_REGNUM + ppc_num_fprs; regno ++)
 	store_register (regno);
 
       /* Write special registers.  */

@@ -138,7 +138,7 @@ ppc_register_u_addr (int regno)
   /* Floating point regs: eight bytes each in both 32- and 64-bit
      ptrace interfaces.  Thus, two slots each in 32-bit interface, one
      slot each in 64-bit interface.  */
-  if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
+  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + ppc_num_fprs)
     u_addr = (PT_FPR0 * wordsize) + ((regno - FP0_REGNUM) * 8);
 
   /* UISA special purpose registers: 1 slot each */

@@ -72,7 +72,6 @@ extern void aix_process_linenos (void);
    but do serve to get the desired values when passed to read_register.  */
 
 #define FP0_REGNUM 32		/* Floating point register 0 */
-#define FPLAST_REGNUM 63	/* Last floating point register */
 
 /* Notice when a new child process is started. */
 

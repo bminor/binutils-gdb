@@ -1175,7 +1175,9 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 
   /* Floating-point registers.  */
 
-  if (regno == -1 || (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM))
+  if (regno == -1
+      || (regno >= FP0_REGNUM
+          && regno < FP0_REGNUM + ppc_num_fprs))
     {
       if (!ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
@@ -1262,7 +1264,7 @@ fill_fprs (double *vals)
 {
   int regno;
 
-  for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
+  for (regno = FP0_REGNUM; regno < FP0_REGNUM + ppc_num_fprs; regno++)
     if (register_cached (regno))
       regcache_collect (regno, vals + regno);
 }
@@ -1466,7 +1468,9 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 
   /* Floating-point registers.  */
 
-  if (regno == -1 || (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM))
+  if (regno == -1
+      || (regno >= FP0_REGNUM
+          && regno < FP0_REGNUM + ppc_num_fprs))
     {
       /* Pre-fetch: some regs may not be in the cache.  */
       ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL);

@@ -162,7 +162,7 @@ bdm_ppc_fetch_registers (int regno)
   int reglen, beginreglen, endreglen;
 
 #if 1
-  for (i = 0; i < (FPLAST_REGNUM - FP0_REGNUM + 1); i++)
+  for (i = 0; i < ppc_num_fprs; i++)
     {
       midregs[i] = -1;
     }
@@ -202,7 +202,8 @@ bdm_ppc_fetch_registers (int regno)
       /* if asking for an invalid register */
       if ((first_regno == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)
           || (first_regno == gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum)
-	  || ((first_regno >= FP0_REGNUM) && (first_regno <= FPLAST_REGNUM)))
+	  || ((first_regno >= FP0_REGNUM)
+              && (first_regno < FP0_REGNUM + ppc_num_fprs)))
 	{
 /*          printf("invalid reg request!\n"); */
 	  supply_register (first_regno, NULL);
@@ -221,7 +222,7 @@ bdm_ppc_fetch_registers (int regno)
       beginregs = ocd_read_bdm_registers (first_bdm_regno,
 					  FP0_REGNUM - 1, &beginreglen);
       endregs = (strcat (midregs,
-			 ocd_read_bdm_registers (FPLAST_REGNUM + 1,
+			 ocd_read_bdm_registers (FP0_REGNUM + ppc_num_fprs,
 					  last_bdm_regno - 1, &endreglen)));
       almostregs = (strcat (beginregs, endregs));
       regs = (strcat (almostregs, mqreg));
@@ -292,7 +293,7 @@ bdm_ppc_store_registers (int regno)
       /* (need to avoid FP regs and MQ reg) */
       if ((i != gdbarch_tdep (current_gdbarch)->ppc_mq_regnum) 
           && (i != gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum) 
-          && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
+          && ((i < FP0_REGNUM) || (i >= FP0_REGNUM + ppc_num_fprs)))
 	{
 /*          printf("write valid reg %d\n", bdm_regno); */
 	  ocd_write_bdm_registers (bdm_regno, deprecated_registers + DEPRECATED_REGISTER_BYTE (i), 4);
