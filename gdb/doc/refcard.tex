@@ -37,10 +37,13 @@
 %
 % NOTE ON INTENTIONAL OMISSIONS: This reference card includes most GDB
 % commands, but due to space constraints there are some things I chose
-% to omit.  In general, not all synonyms for commands are covered.
+% to omit.  In general, not all synonyms for commands are covered, nor
+% all variations of a command.
 % The GDB-under-Emacs section omits gdb-mode functions without default
 % keybindings.  GDB startup options are not described.
 % set print sevenbit-strings, set symbol-reloading omitted.
+% printsyms, printpsyms, omitted since they're for GDB maintenance primarily
+% share omitted due to obsolescence
 % set check range/type omitted at least til code is in GDB.
 %
 {%
@@ -76,9 +79,7 @@
 }
 }
 
-{\vbbf GDB QUICK REFERENCE}
-\vskip 5pt
-{\smrm GDB Version 4.2---Cygnus Support 1991}
+{\vbbf GDB QUICK REFERENCE}\hfil{\smrm GDB Version 4}\qquad
 
 \sec Essential Commands;
 gdb {\it program} \opt{{\it core}}&debug {\it program} \opt{using
@@ -93,9 +94,11 @@ s &next line, stepping into function calls\cr
 \endsec
 
 \sec Starting GDB;
-gdb&starts GDB, with no debugging files\cr
+gdb&start GDB, with no debugging files\cr
 gdb {\it program}&begin debugging {\it program}\cr
-gdb {\it program core}&debug coredump {\it core} produced by {\it program}\cr
+gdb {\it program core}&debug coredump {\it core} produced by {\it
+program}\cr
+gdb -help&describe command line options\cr
 \endsec
 
 \sec Stopping GDB;
@@ -112,7 +115,7 @@ help {\it command}&describe {\it command}\cr
 \sec Executing your Program;
 run {\it arglist}&start your program with {\it arglist}\cr
 run&start your program with current argument list\cr
-run $\ldots$ <{\it inf} >{\it outf}&start program with input, output
+run $\ldots$ <{\it inf} >{\it outf}&start your program with input, output
 redirected\cr
 \cr
 kill&kill running program\cr
@@ -137,7 +140,10 @@ shell {\it cmd}&execute arbitrary shell command string\cr
 \endsec
 
 \vfill
-\centerline{\smrm \copyright 1991 Free Software Foundation, Inc.\qquad Permissions on back}
+\line{\smrm \opt{ } surround optional arguments \hfil $\ldots$ show
+one or more arguments\rm\qquad}
+
+\centerline{\smrm \copyright 1991, 1992 Free Software Foundation, Inc.\qquad Permissions on back}
 \eject
 \sec Breakpoints and Watchpoints;
 break \opt{\it file\tt:}{\it line}\par
@@ -163,21 +169,30 @@ info watch&show defined watchpoints\cr
 clear&delete breakpoints at next instruction\cr
 clear \opt{\it file\tt:}{\it fun}&delete breakpoints at entry to {\it fun}()\cr
 clear \opt{\it file\tt:}{\it line}&delete breakpoints on source line \cr
-delete \opt{{\it n}}&delete breakpoints {\it n};
-\opt{or all breakpoints}\cr
+delete \opt{{\it n}}&delete breakpoints
+\opt{or breakpoint {\it n}}\cr
 \cr
-disable \opt{{\it n}}&disable breakpoints {\it n} \opt{or all}\cr
-enable \opt{{\it n}}&enable breakpoints {\it n} \opt{or all}\cr
-enable once \opt{{\it n}}&enable breakpoints; disable again when
-reached\cr
-enable del \opt{{\it n}}&enable breakpoints; delete when reached\cr
+disable \opt{{\it n}}&disable breakpoints
+\opt{or breakpoint {\it n}}
+\cr
+enable \opt{{\it n}}&enable breakpoints 
+\opt{or breakpoint {\it n}}
+\cr
+enable once \opt{{\it n}}&enable breakpoints \opt{or breakpoint {\it n}}; 
+disable again when reached
+\cr
+enable del \opt{{\it n}}&enable breakpoints \opt{or breakpoint {\it n}}; 
+delete when reached
+\cr
 \cr
 ignore {\it n} {\it count}&ignore breakpoint {\it n}, {\it count}
 times\cr
 \cr
 commands {\it n}\par
-\qquad {\it command list}&execute GDB {\it command list} every time breakpoint {\it n} is reached\cr
-end&end of {\it command list}\cr
+\qquad \opt{\tt silent}\par
+\qquad {\it command-list}&execute GDB {\it command-list} every time breakpoint {\it n} is reached. \opt{{\tt silent} suppresses default
+display}\cr
+end&end of {\it command-list}\cr
 \endsec
 
 \sec Program Stack;
@@ -192,7 +207,9 @@ info frame \opt{\it addr}&describe selected frame, or frame at
 {\it addr}\cr
 info args&arguments of selected frame\cr
 info locals&local variables of selected frame\cr
-info reg \opt{\it{rn}}&register values \opt{for reg {\it rn\/}} in selected frame\cr
+info reg \opt{\it rn}\par
+info all-reg \opt{\it rn}&register values \opt{for reg {\it rn\/}} in
+selected frame; {\tt all-reg} includes floating point\cr
 info catch&exception handlers active in selected frame\cr
 \endsec
 
@@ -205,14 +222,12 @@ this breakpoint next {\it count} times\cr
 step \opt{\it count}\par
 s \opt{\it count}&execute until another line reached; repeat {\it count} times if
 specified\cr
-\cr
 stepi \opt{\it count}\par
 si \opt{\it count}&step by machine instructions rather than source
 lines\cr
 \cr
 next \opt{\it count}\par
 n \opt{\it count}&execute next line, including any function calls\cr
-\cr
 nexti \opt{\it count}\par
 ni \opt{\it count}&next machine instruction rather than source
 line\cr
@@ -231,12 +246,14 @@ altering program variables\cr
 \endsec
 
 \sec Display;
-print \opt{\tt/{\it f}\/} {\it expr}\par
-p \opt{\tt/{\it f}\/} {\it expr}&show value of {\it expr} according to format {\it f}:\cr
+print \opt{\tt/{\it f}\/} \opt{\it expr}\par
+p \opt{\tt/{\it f}\/} \opt{\it expr}&show value of {\it expr} \opt{or
+last value \tt \$} according to format {\it f}:\cr
 \qquad x&hexadecimal\cr
 \qquad d&signed decimal\cr
 \qquad u&unsigned decimal\cr
 \qquad o&octal\cr
+\qquad t&binary\cr
 \qquad a&address, absolute and relative\cr
 \qquad c&character\cr
 \qquad f&floating point\cr
@@ -298,9 +315,9 @@ info func \opt{\it regex}&show names, types of defined functions
 (all, or matching {\it regex})\cr
 info var \opt{\it regex}&show names, types of global variables (all,
 or matching {\it regex})\cr
-whatis {\it expr}\par
-ptype {\it expr}&show data type of {\it expr} without evaluating; {\tt
-ptype} gives more detail\cr
+whatis \opt{\it expr}\par
+ptype \opt{\it expr}&show data type of {\it expr} \opt{or \tt \$}
+without evaluating; {\tt ptype} gives more detail\cr
 ptype {\it type}&describe type, struct, union, or enum\cr
 \endsec
 
@@ -309,13 +326,13 @@ source {\it script}&read, execute GDB commands from file {\it
 script}\cr
 \cr
 define {\it cmd}\par
-\qquad {\it command list}&new GDB command {\it cmd}, executes script
-defined by {\it command list} \cr
-end&end of {\it command list}\cr
+\qquad {\it command-list}&create new GDB command {\it cmd}; 
+execute script defined by {\it command-list}\cr
+end&end of {\it command-list}\cr
 document {\it cmd}\par
-\qquad {\it help text}&new online documentation for GDB command {\it
-cmd}\cr
-end&end of {\it help text}\cr
+\qquad {\it help-text}&create online documentation 
+for new GDB command {\it cmd}\cr
+end&end of {\it help-text}\cr
 \endsec
 
 \sec Signals;
@@ -339,7 +356,7 @@ detach&release target from GDB control\cr
 \vfill\eject
 \sec Controlling GDB;
 set {\it param} {\it value}&set one of GDB's internal parameters\cr
-show {\it param}&display current setting of a GDB parameter\cr
+show {\it param}&display current setting of parameter\cr
 \xtra{\rm Parameters understood by {\tt set} and {\tt show}:}
 \quad complaints {\it limit}&number of messages on unusual symbols\cr
 \quad confirm {\it on/off}&enable or disable cautionary queries\cr
@@ -351,19 +368,21 @@ show {\it param}&display current setting of a GDB parameter\cr
 \quad prompt {\it str}&use {\it str} as GDB prompt\cr
 \quad radix {\it base}&octal, decimal, or hex number representation\cr
 \quad verbose {\it on/off}&control messages when loading
-symbol table\cr
+symbols\cr
 \quad width {\it cpl}&number of characters before line folded\cr
 \quad write {\it on/off}&Allow or forbid patching binary, core files
 (when reopened with {\tt exec} or {\tt core})
 \cr
-\quad history $\ldots$&({\tt h}) groups the following options:\cr
-\quad h exp {\it off/on}&disable or enable {\tt readline} history expansion\cr
+\quad history $\ldots$\par
+\quad h $\ldots$&groups with the following options:\cr
+\quad h exp {\it off/on}&disable/enable {\tt readline} history expansion\cr
 \quad h file {\it filename}&file for recording GDB command history\cr
 \quad h size {\it size}&number of commands kept in history list\cr
 \quad h save {\it off/on}&control use of external file for
 command history\cr
 \cr
-\quad print $\ldots$&({\tt p}) groups the following options:\cr
+\quad print $\ldots$\par
+\quad p $\ldots$&groups with the following options:\cr
 \quad p address {\it on/off}&print memory addresses in stacks,
 values\cr
 \quad p  array {\it off/on}&compact or attractive format for
@@ -372,11 +391,10 @@ arrays\cr
 symbols\cr
 \quad p asm-dem {\it on/off}&demangle C++ symbols in
 machine-instruction output\cr
-\quad p elements {\it limit}&number of elements to display from an
-array\cr
+\quad p elements {\it limit}&number of array elements to display\cr
 \quad p object {\it on/off}&print C++ derived types for objects\cr
 \quad p pretty {\it off/on}&struct display: compact or indented\cr
-\quad p union {\it on/off}&enable or disable display of union members\cr
+\quad p union {\it on/off}&display of union members\cr
 \quad p vtbl {\it off/on}&display of C++ virtual function
 tables\cr
 \cr
@@ -386,10 +404,11 @@ show commands +&show next 10 commands\cr
 \endsec
 
 \sec Working Files;
-file {\it file}&use {\it file} for symbols and executable\cr
-core {\it file}&read {\it file} as coredump\cr
-exec {\it file}&use {\it file} as executable only\cr
-symbol {\it file}&use only symbol table from {\it file}\cr
+file \opt{\it file}&use {\it file} for both symbols and executable;
+with no arg, discard both\cr
+core \opt{\it file}&read {\it file} as coredump; or discard\cr
+exec \opt{\it file}&use {\it file} as executable only; or discard\cr
+symbol \opt{\it file}&use symbol table from {\it file}; or discard\cr
 load {\it file}&dynamically link {\it file\/} and add its symbols\cr
 add-sym {\it file} {\it addr}&read additional symbols from {\it file},
 dynamically loaded at {\it addr}\cr
@@ -440,16 +459,16 @@ M-d&down {\it arg} frames ({\tt down})\cr
 \endsec
 
 \sec GDB License;
-info copying&Display GNU General Public License\cr
-info warranty&There is NO WARRANTY for GDB.  Display full no-warranty
+show copying&Display GNU General Public License\cr
+show warranty&There is NO WARRANTY for GDB.  Display full no-warranty
 statement.\cr 
 \endsec
 
 
 \vfill
 {\smrm\parskip=6pt
-\centerline{Copyright \copyright 1991 Free Software Foundation, Inc.}
-\centerline{Roland Pesch (pesch@cygnus.com), September 1991---\manvers}
+\centerline{Copyright \copyright 1991, 1992 Free Software Foundation, Inc.}
+\centerline{Roland Pesch (pesch@cygnus.com), January 1992---\manvers}
 \centerline{The author assumes no responsibility for any errors on this card.}
 
 This card may be freely distributed under the terms of the GNU
