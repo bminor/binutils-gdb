@@ -1,3 +1,9 @@
+Thu Aug 25 10:44:53 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* coffgen.c (coff_write_alien_symbol): If we are not using the
+	symbol, clear the name so that it is not put in the string table.
+	From Antti.Miettinen@ntc.nokia.com.
+
 Wed Aug 24 11:49:19 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coffgen.c (coff_print_symbol): Cast pointer different to long

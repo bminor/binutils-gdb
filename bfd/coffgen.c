@@ -783,7 +783,9 @@ coff_write_alien_symbol (abfd, symbol, written)
     {
       /* There isn't much point to writing out a debugging symbol
          unless we are prepared to convert it into COFF debugging
-         format.  So, we just ignore them.  */
+         format.  So, we just ignore them.  We must clobber the symbol
+         name to keep it from being put in the string table.  */
+      symbol->name = "";
       return true;
     }
   else
