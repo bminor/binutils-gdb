@@ -1025,6 +1025,9 @@ proc skip_hp_tests {} {
     return $skip_hp
 }
 
+global compiler_info
+set compiler_info unknown
+
 proc get_compiler_info {binfile args} {
     # Create and source the file that provides information about the compiler
     # used to compile the test case.
@@ -1034,6 +1037,7 @@ proc get_compiler_info {binfile args} {
     # These two come from compiler.c.
     global signed_keyword_not_used
     global gcc_compiled
+    global compiler_info
 
     if {![istarget "hppa*-*-hpux*"] && ![istarget "mips*-*-irix*"]} {
 	if { [llength $args] > 0 } {
@@ -1104,6 +1108,11 @@ proc get_compiler_info {binfile args} {
     }
 
     return 0;
+}
+
+proc test_compiler_info { compiler } {
+    global compiler_info
+    return [string match $compiler $compiler_info]
 }
 
 proc get_compiler {args} {

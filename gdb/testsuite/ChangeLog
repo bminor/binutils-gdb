@@ -1,3 +1,11 @@
+2003-11-17  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/gdb.exp (compiler_info): New global.
+	(test_compiler_info): New function.
+	(get_compiler_info): Set compiler_info.
+	* lib/compiler.c, lib/compiler.cc: Add copyright.  When GNUC, set
+	"compiler_info" to gcc-<major>-<minor>.
+
 2003-11-15  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.trace/configure: Remove.
