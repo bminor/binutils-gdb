@@ -1,3 +1,8 @@
+Thu Mar  5 14:42:41 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* ocd.c (ocd_open): If we fail ocd_start_remote, make sure we
+	error () so that we abort out of bdm_ppc_open.
+
 Wed Mar  4 16:53:52 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* serial.c (_initialize_serial): Add a description of 

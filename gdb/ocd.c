@@ -332,7 +332,10 @@ device the OCD device is attached to (e.g. /dev/ttya).");
   if (!catch_errors (ocd_start_remote, (char *)target_type,
 		     "Couldn't establish connection to remote target\n",
 		     RETURN_MASK_ALL))
-    pop_target();
+    {
+      pop_target();
+      error ("Failed to connect to OCD.");
+    }
 }
 
 /* This takes a program previously attached to and detaches it.  After
