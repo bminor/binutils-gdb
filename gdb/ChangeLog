@@ -1,5 +1,14 @@
 Thu Apr 22 09:07:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* objfiles.h (obj_section), objfiles.c (build_objfile_section_table):
+	Add objfile field.
+	* objfiles.c (find_pc_section): Return a struct obj_section *.
+	* sparc-tdep.c (in_solib_trampoline): Deal with find_pc_section return.
+	* symfile.c (syms_from_objfile) [IBM6000_TARGET]:
+	Don't use obj_section hack.
+	* xcoffexec (vmap_symtab): Relocate obj_sections.
+	* printcmd.c (containing_function_bounds): Use find_pc_section.
+
 	* symtab.h: Clean up SYMBOL_VALUE comments.
 
 Wed Apr 21 14:29:57 1993  Jim Kingdon  (kingdon@cygnus.com)

@@ -81,6 +81,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
   if (0 == bfd_section_size (abfd, asect))
     return;
   section.offset = 0;
+  section.objfile = objfile;
   section.sec_ptr = asect;
   section.addr = bfd_section_vma (abfd, asect);
   section.endaddr = section.addr + bfd_section_size (abfd, asect);
@@ -715,7 +716,7 @@ map_to_address ()
 
 /* Returns a section whose range includes PC or NULL if none found. */
 
-sec_ptr
+struct obj_section *
 find_pc_section(pc)
      CORE_ADDR pc;
 {
@@ -726,7 +727,7 @@ find_pc_section(pc)
     for (s = objfile->sections; s < objfile->sections_end; ++s)
       if (s->addr <= pc
 	  && pc < s->endaddr)
-	return(s->sec_ptr);
+	return(s);
 
   return(NULL);
 }

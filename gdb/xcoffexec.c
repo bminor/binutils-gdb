@@ -312,7 +312,9 @@ vmap_symtab (vp)
   asection *textsec;
   asection *datasec;
   asection *bsssec;
-  CORE_ADDR old_text_offset;
+  CORE_ADDR text_delta;
+  CORE_ADDR data_delta;
+  CORE_ADDR bss_delta;
   struct section_offsets *new_offsets;
   int i;
   
@@ -335,18 +337,47 @@ vmap_symtab (vp)
     ANOFFSET (new_offsets, i) = ANOFFSET (objfile->section_offsets, i);
   
   textsec = bfd_get_section_by_name (vp->bfd, ".text");
-  old_text_offset = ANOFFSET (objfile->section_offsets, textsec->target_index);
+  text_delta =
+    vp->tstart - ANOFFSET (objfile->section_offsets, textsec->target_index);
   ANOFFSET (new_offsets, textsec->target_index) = vp->tstart;
+
   datasec = bfd_get_section_by_name (vp->bfd, ".data");
+  data_delta =
+    vp->dstart - ANOFFSET (objfile->section_offsets, datasec->target_index);
   ANOFFSET (new_offsets, datasec->target_index) = vp->dstart;
+  
   bsssec = bfd_get_section_by_name (vp->bfd, ".bss");
+  bss_delta =
+    vp->dstart - ANOFFSET (objfile->section_offsets, bsssec->target_index);
   ANOFFSET (new_offsets, bsssec->target_index) = vp->dstart;
 
   objfile_relocate (objfile, new_offsets);
+
+  {
+    struct obj_section *s;
+    for (s = objfile->sections; s < objfile->sections_end; ++s)
+      {
+	if (s->sec_ptr->target_index == textsec->target_index)
+	  {
+	    s->addr += text_delta;
+	    s->endaddr += text_delta;
+	  }
+	else if (s->sec_ptr->target_index == datasec->target_index)
+	  {
+	    s->addr += data_delta;
+	    s->endaddr += data_delta;
+	  }
+	else if (s->sec_ptr->target_index == bsssec->target_index)
+	  {
+	    s->addr += bss_delta;
+	    s->endaddr += bss_delta;
+	  }
+      }
+  }
   
-  if (old_text_offset != ANOFFSET (new_offsets, textsec->target_index))
+  if (text_delta != 0)
     /* breakpoints need to be relocated as well. */
-    fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_text_offset);
+    fixup_breakpoints (0, TEXT_SEGMENT_BASE, text_delta);
 }
 
 /* Add symbols for an objfile.  */

@@ -114,16 +114,39 @@ struct entry_info
 };
 
 
-/* This structure is used to map pc values into sections.  Note that
-   offset is currently target independent and is redundant to the
-   section_offsets field in the objfile struct.  FIXME.  */
+/* Sections in an objfile.
+
+   It is strange that we have both this notion of "sections"
+   and the one used by section_offsets.  Section as used
+   here, (currently at least) means a BFD section, and the sections
+   are set up from the BFD sections in allocate_objfile.
+
+   The sections in section_offsets have their meaning determined by
+   the symbol format, and they are set up by the sym_offsets function
+   for that symbol file format.
+
+   I'm not sure this could or should be changed, however.  */
 
 struct obj_section {
   CORE_ADDR	addr;	 /* lowest address in section */
   CORE_ADDR	endaddr; /* 1+highest address in section */
-  CORE_ADDR	offset;	 /* offset between (end)addr and actual
-			    memory addresses.  */
+
+  /* This field is being used for nefarious purposes by syms_from_objfile.
+     It is said to be redundant with section_offsets; it's not really being
+     used that way, however, it's some sort of hack I don't understand
+     and am not going to try to eliminate (yet, anyway).  FIXME.
+
+     It was documented as "offset between (end)addr and actual memory
+     addresses", but that's not true; addr & endaddr are actual memory
+     addresses.  */
+  CORE_ADDR offset;
+     
   sec_ptr	sec_ptr; /* BFD section pointer */
+
+  /* Objfile this section is part of.  Not currently used, but I'm sure
+     that someone will want the bfd that the sec_ptr goes with or something
+     like that before long.  */
+  struct objfile *objfile;
 };
 
 /* Master structure for keeping track of each input file from which
@@ -353,7 +376,7 @@ have_full_symbols PARAMS ((void));
 extern int
 have_minimal_symbols PARAMS ((void));
 
-extern sec_ptr
+extern struct obj_section *
 find_pc_section PARAMS((CORE_ADDR pc));
 
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete

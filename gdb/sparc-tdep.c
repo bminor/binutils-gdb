@@ -23,7 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "target.h"
 #include "ieee-float.h"
-#include "symfile.h" /* for find_pc_section */
+
+#include "symfile.h" /* for objfiles.h */
+#include "objfiles.h" /* for find_pc_section */
 
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
@@ -840,22 +842,19 @@ get_longjmp_target(pc)
 
 /* So far used only for sparc solaris.  In sparc solaris, we recognize
    a trampoline by it's section name.  That is, if the pc is in a
-   section named ".plt" then we are in a trampline.
-
-   Section and offset tracking belongs in objfiles.  FIXME. */
+   section named ".plt" then we are in a trampline.  */
 
 int
 in_solib_trampoline(pc, name)
      CORE_ADDR pc;
      char *name;
 {
-  struct section_table *s;
+  sec_ptr s;
   int retval = 0;
   
   s = find_pc_section(pc);
   
   retval = (s != NULL
-	    && s->sec_ptr != NULL
 	    && s->sec_ptr->name != NULL
 	    && STREQ (s->sec_ptr->name, ".plt"));
   return(retval);

@@ -442,6 +442,11 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   section_offsets = (*objfile -> sf -> sym_offsets) (objfile, addr);
   objfile->section_offsets = section_offsets;
 
+#ifndef IBM6000_TARGET
+  /* This is a SVR4/SunOS specific hack, I think.  In any event, it
+     screws RS/6000.  sym_offsets should be doing this sort of thing,
+     because it knows the mapping between bfd sections and
+     section_offsets.  */
   /* This is a hack.  As far as I can tell, section offsets are not
      target dependent.  They are all set to addr with a couple of
      exceptions.  The exceptions are sysvr4 shared libraries, whose
@@ -469,6 +474,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	  s->offset += addr;
 	}
     }
+#endif /* not IBM6000_TARGET */
 
   (*objfile -> sf -> sym_read) (objfile, section_offsets, mainline);
 
