@@ -1,3 +1,10 @@
+2004-10-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.h: Add MIPS_ZERO_REGNUM, MIPS_AT_REGNUM,
+	MIPS_V0_REGNUM. MIPS_A0_REGNUM, MIPS_T9_REGNUM and MIPS_RA_REGNUM
+	to enum with register numbers.
+	(enum mips_insn_size): New enum.
+
 2004-10-26  Andrew Cagney  <cagney@gnu.org>
 
 	* config/mips/tm-linux.h: Delete #undef SKIP_TRAMPOLINE_CODE.

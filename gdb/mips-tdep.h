@@ -61,8 +61,15 @@ struct mips_regnum
 };
 extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
 
-enum {
+enum
+{
+  MIPS_ZERO_REGNUM = 0,
+  MIPS_AT_REGNUM = 1,
+  MIPS_V0_REGNUM = 2,
+  MIPS_A0_REGNUM = 4,
+  MIPS_T9_REGNUM = 25,
   MIPS_SP_REGNUM = 29,
+  MIPS_RA_REGNUM = 31,
   MIPS_EMBED_LO_REGNUM = 33,
   MIPS_EMBED_HI_REGNUM = 34,
   MIPS_EMBED_BADVADDR_REGNUM = 35,
@@ -73,6 +80,13 @@ enum {
 
 /* Defined in mips-tdep.c and used in remote-mips.c */
 extern void deprecated_mips_set_processor_regs_hack (void);
+
+/* Instruction sizes.  */
+enum mips_insn_size
+{
+  MIPS16_INSN_SIZE = 2,
+  MIPS32_INSN_SIZE = 4
+};
 
 /* Single step based on where the current instruction will take us.  */
 extern void mips_software_single_step (enum target_signal, int);
