@@ -1356,11 +1356,18 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       case e_psel:
       case e_lpsel:
       case e_rpsel:
+	final_types[0] = final_type;
+	final_types[1] = NULL;
+	final_types[2] = NULL;
+	*final_type = base_type;
+	break;
+
       case e_tsel:
       case e_ltsel:
       case e_rtsel:
-	final_types[0] = final_type;
-	final_types[1] = NULL;
+	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	*final_types[0] = R_FSEL;
+	final_types[1] = final_type;
 	final_types[2] = NULL;
 	*final_type = base_type;
 	break;
@@ -1409,15 +1416,20 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       if (field == e_psel
 	  || field == e_lpsel
 	  || field == e_rpsel)
-	  {
-	    /* A PLABEL relocation that has a size of 32 bits must
-	       be a R_DATA_PLABEL.  All others are R_CODE_PLABELs.  */
-	    if (format == 32)
-	      *final_type = R_DATA_PLABEL;
-	    else
-	      *final_type = R_CODE_PLABEL;
-	  }
-      /* A relocatoin in the data space is always a full 32bits.  */
+	{
+	  /* A PLABEL relocation that has a size of 32 bits must
+	     be a R_DATA_PLABEL.  All others are R_CODE_PLABELs.  */
+	  if (format == 32)
+	    *final_type = R_DATA_PLABEL;
+	  else
+	    *final_type = R_CODE_PLABEL;
+	}
+      /* PIC stuff.  */
+      else if (field == e_tsel
+	  || field == e_ltsel
+	  || field == e_rtsel)
+	*final_type = R_DLT_REL;
+      /* A relocation in the data space is always a full 32bits.  */
       else if (format == 32)
 	*final_type = R_DATA_ONE_SYMBOL;
 
@@ -2197,6 +2209,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_S_MODE:
 		case R_D_MODE:
 		case R_R_MODE:
+		case R_FSEL:
+		case R_LSEL:
+		case R_RSEL:
 		  reloc_offset = bfd_reloc->address;
 		  break;
 
@@ -2249,6 +2264,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_DATA_ONE_SYMBOL:
 		case R_DATA_PLABEL:
 		case R_CODE_PLABEL:
+		case R_DLT_REL:
 		  /* Account for any addend.  */
 		  if (bfd_reloc->addend)
 		    p = som_reloc_addend (abfd, bfd_reloc->addend, p, 
@@ -2304,6 +2320,14 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		      p += 1;
 		      current_rounding_mode = bfd_reloc->howto->type;
 		    }
+		  break;
+
+		case R_FSEL:
+		case R_LSEL:
+		case R_RSEL:
+		  bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		  subspace_reloc_size += 1;
+		  p += 1;
 		  break;
 
 		/* Put a "R_RESERVED" relocation in the stream if

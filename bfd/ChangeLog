@@ -1,3 +1,12 @@
+Mon Dec 13 23:34:48 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (hppa_elf_gen_reloc_type): Handle 'T' field
+	selectors for PIC code.
+
+	* som.c (hppa_som_gen_reloc_type): Handle 'T' field selectors.
+	(som_write_fixups): Handle R_DLT_REL, R_FSEL, R_RSEL, R_LSEL
+	relocations needed by PIC.
+
 Tue Dec  7 15:47:51 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* nlmcode.h:  Fixes to avoid compiler warnings...

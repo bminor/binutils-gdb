@@ -524,11 +524,15 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_rpsel:
 	      final_type = R_HPPA_PLABEL_R11;
 	      break;
-	    case e_lpsel:
 	    case e_tsel:
-	    case e_ltsel:
+	      final_type = R_HPPA_DLT_11;
+	      break;
 	    case e_rtsel:
+	      final_type = R_HPPA_DLT_R11;
+	      break;
 
+	    case e_lpsel:
+	    case e_ltsel:
 	    case e_lsel:
 	    case e_lrsel:
 	    case e_lssel:
@@ -564,10 +568,15 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_rpsel:
 	      final_type = R_HPPA_PLABEL_R14;
 	      break;
-	    case e_lpsel:
 	    case e_tsel:
-	    case e_ltsel:
+	      final_type = R_HPPA_DLT_14;
+	      break;
 	    case e_rtsel:
+	      final_type = R_HPPA_DLT_R14;
+	      break;
+
+	    case e_lpsel:
+	    case e_ltsel:
 
 	    case e_fsel:
 	    case e_lsel:
@@ -626,6 +635,9 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_lpsel:
 	      final_type = R_HPPA_PLABEL_L21;
 	      break;
+	    case e_ltsel:
+	      final_type = R_HPPA_PLABEL_L21;
+	      break;
 	    case e_rsel:
 	    case e_rssel:
 	    case e_rdsel:
@@ -645,6 +657,9 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	      break;
 	    case e_psel:
 	      final_type = R_HPPA_PLABEL_32;
+	      break;
+	    case e_tsel:
+	      final_type == R_HPPA_DLT_32;
 	      break;
 	    default:
 	      UNDEFINED;
@@ -1561,7 +1576,16 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
 	 jump after the call returns (GCC optimization).  */
 	 
       if (insn & 2)
-	insn = BLE_N_XXX_0_0;
+        {
+	  insn = BLE_N_XXX_0_0;
+	  bfd_put_32 (abfd, insn, hit_data);
+	  r_type = R_HPPA_ABS_CALL_17;
+	  r_pcrel = 0;
+	  insn = hppa_elf_relocate_insn (abfd, input_section, insn,
+					 addr, symbol_in, sym_value,
+					 r_addend, r_type, r_format,
+					 r_field, r_pcrel);
+        }
       else
 	{
 	  unsigned long old_delay_slot_insn = bfd_get_32 (abfd, hit_data + 4);
@@ -1584,16 +1608,29 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
 		  new_delay_slot_insn |= ((31 << 21) | (31 << 16));
 		  bfd_put_32 (abfd, new_delay_slot_insn, hit_data + 4);
 		  insn = BLE_XXX_0_0;
-		  bfd_put_32 (abfd, insn, hit_data);
 		  r_type = R_HPPA_ABS_CALL_17;
 		  r_pcrel = 0;
 		  insn = hppa_elf_relocate_insn (abfd, input_section, insn,
 						 addr, symbol_in, sym_value,
 						 r_addend, r_type, r_format,
 						 r_field, r_pcrel);
-		  bfd_put_32 (abfd, insn, hit_data + 4);
+		  bfd_put_32 (abfd, insn, hit_data);
 		  return bfd_reloc_ok;
 		}
+              else if (rtn_reg == 31)
+                {
+                  /* The return register is r31, so this is a millicode
+		     call.  Do not perform any instruction reordering.  */
+	          insn = BLE_XXX_0_0;
+	          r_type = R_HPPA_ABS_CALL_17;
+	          r_pcrel = 0;
+	          insn = hppa_elf_relocate_insn (abfd, input_section, insn,
+					         addr, symbol_in, sym_value,
+					         r_addend, r_type, r_format,
+					         r_field, r_pcrel);
+	          bfd_put_32 (abfd, insn, hit_data);
+	          return bfd_reloc_ok;
+                }
 	      else
 		{
 		  /* Check to see if the delay slot instruction has a
@@ -1619,6 +1656,20 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
 		  return bfd_reloc_ok;
 		}
 	    }
+          else if (rtn_reg == 31)
+            {
+              /* The return register is r31, so this is a millicode call.
+		 Perform no instruction reordering in this case.  */
+	      insn = BLE_XXX_0_0;
+	      r_type = R_HPPA_ABS_CALL_17;
+	      r_pcrel = 0;
+	      insn = hppa_elf_relocate_insn (abfd, input_section, insn,
+					     addr, symbol_in, sym_value,
+					     r_addend, r_type, r_format,
+					     r_field, r_pcrel);
+	      bfd_put_32 (abfd, insn, hit_data);
+	      return bfd_reloc_ok;
+            }
 	  else
 	    {
 	      /* Check to see if the delay slot instruction has a
@@ -2363,7 +2414,9 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry,
 							  sizeof (asymbol *));
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
       if (reloc_entry->howto->type != R_HPPA_PLABEL_32
-	  && (get_opcode(insn) == BLE || get_opcode (insn) == BE))
+	  && (get_opcode(insn) == BLE
+	      || get_opcode (insn) == BE
+	      || get_opcode (insn) == BL))
 	reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
     }
   else
@@ -2385,7 +2438,9 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry,
 							  sizeof (asymbol *));
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
       if (reloc_entry->howto->type != R_HPPA_PLABEL_32
-	  && (get_opcode (insn) == BLE || get_opcode (insn) == BE))
+	  && (get_opcode (insn) == BLE
+	      || get_opcode (insn) == BE
+	      || get_opcode (insn) == BL))
 	reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
 
       /* Generate common code for all stubs.  */
@@ -2796,6 +2851,20 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
   
   if (strcmp (symbol->name, "$$dyncall") == 0)
     dyncall = true;
+
+  /* If we are creating a call from a stub to another stub, then
+     never do the instruction reordering.  We can tell if we are
+     going to be calling one stub from another by the fact that
+     the symbol name has '_stub_' (arg. reloc. stub) or '_lb_stub_'
+     prepended to the name.  Alternatively, the section of the
+     symbol will be '.hppa_linker_stubs'.  */
+
+  if ((strncmp (symbol->name, "_stub_", 6) == 0)
+      || (strncmp (symbol->name, "_lb_stub_", 9) == 0))
+    {
+      BFD_ASSERT (strcmp (symbol->section->name, ".hppa_linker_stubs") == 0);
+      rtn_adjust = false;
+    }
   
   /* Check to see if we modify the return pointer
      in the delay slot of the branch.  */
@@ -2812,6 +2881,8 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
 	if (get_opcode (delay_insn) == LDO
 	    && (((delay_insn & 0x001f0000) >> 16) == rtn_reg))
 	  rtn_adjust = false;
+        if (milli)
+          rtn_adjust = false;
       }
   }
   
@@ -2896,12 +2967,13 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
 	  /* 2. Make the call. */
 	  if (!milli)
 	    {
-	      NEW_INSTRUCTION (stub_entry, BE_N_XXX_0_31);
+	      NEW_INSTRUCTION (stub_entry, BE_XXX_0_31);
 	      hppa_elf_stub_reloc (stub_desc,
 				   abfd,
 				   target_sym,
 				   CURRENT_STUB_OFFSET (stub_entry),
 				   R_HPPA_ABS_CALL_R17);
+	      NEW_INSTRUCTION (stub_entry, COPY_2_31);
 	    }
 	  else
 	    {
@@ -2931,12 +3003,13 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
 			       CURRENT_STUB_OFFSET (stub_entry),
 			       R_HPPA_L21);
 	  
-	  NEW_INSTRUCTION (stub_entry, BE_N_XXX_0_31);
+	  NEW_INSTRUCTION (stub_entry, BE_XXX_0_31);
 	  hppa_elf_stub_reloc (stub_desc,
 			       abfd,
 			       target_sym,
 			       CURRENT_STUB_OFFSET (stub_entry),
 			       R_HPPA_ABS_CALL_R17);
+	  NEW_INSTRUCTION (stub_entry, COPY_2_31);
 	}
     }
   return stub_sym;
