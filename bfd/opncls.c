@@ -565,27 +565,6 @@ bfd_alloc (abfd, size)
   return ret;
 }
 
-void
-bfd_alloc_grow (abfd, ptr, size)
-     bfd *abfd;
-     PTR ptr;
-     size_t size;
-{
-  (void) obstack_grow(&(abfd->memory), ptr, size);
-}
-
-PTR
-bfd_alloc_finish (abfd)
-     bfd *abfd;
-{
-  PTR ret;
-
-  ret = obstack_finish (&(abfd->memory));
-  if (ret == NULL)
-    bfd_set_error (bfd_error_no_memory);
-  return ret;
-}
-
 PTR
 bfd_zalloc (abfd, size)
      bfd *abfd;

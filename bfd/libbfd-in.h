@@ -91,8 +91,6 @@ extern bfd_error_handler_type _bfd_error_handler;
 
 PTR	bfd_alloc PARAMS ((bfd *abfd, size_t size));
 PTR	bfd_zalloc PARAMS ((bfd *abfd, size_t size));
-void	bfd_alloc_grow PARAMS ((bfd *abfd, PTR thing, size_t size));
-PTR	bfd_alloc_finish PARAMS ((bfd *abfd));
 
 #define	bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 

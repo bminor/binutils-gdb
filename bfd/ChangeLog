@@ -1,5 +1,11 @@
 Mon Mar 17 11:32:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* opncls.c (bfd_alloc_grow, bfd_alloc_finish): Remove.
+	* libbfd-in.h (bfd_alloc_grow, bfd_alloc_finish): Don't declare.
+	* libbfd.h: Rebuild.
+	* ieee.c (ieee_archive_p): Rewrite to not use bfd_alloc_grow.
+	* sunos.c (sunos_add_dynamic_symbols): Likewise.
+
 	* opncls.c (bfd_alloc): Rename from bfd_alloc_by_size_t.  Remove
 	old version of bfd_alloc.
 	* libbfd-in.h (bfd_alloc_by_size_t): Don't declare.
