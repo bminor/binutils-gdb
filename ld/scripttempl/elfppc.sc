@@ -136,12 +136,18 @@ SECTIONS
   .sdata   ${RELOCATING-0} : { *(.sdata) }
   ${RELOCATING+_edata  =  .;}
   ${RELOCATING+PROVIDE (edata = .);}
-  ${RELOCATING+__bss_start = .;}
-  .sbss    ${RELOCATING-0} : { *(.sbss) *(.scommon) }
+  .sbss    ${RELOCATING-0} :
+  {
+    ${RELOCATING+__sbss_start = .;}
+    *(.sbss)
+    *(.scommon)
+    ${RELOCATING+__sbss_end = .;}
+  }
   ${RELOCATING+_GOT_END_ = .;}
-  ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   .bss     ${RELOCATING-0} :
   {
+   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
+   ${RELOCATING+__bss_start = .;}
    *(.dynbss)
    *(.bss)
    *(COMMON)

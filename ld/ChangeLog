@@ -1,3 +1,14 @@
+Thu Sep 21 17:55:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* scripttempl/elfppc.sc: Correctly locate __bss_start at the
+	beginning of the .bss area, not at the end of data.  Add
+	__sbss_{start,end} symbols.
+
+Wed Sep 20 12:29:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET): Quote $(program_transform_name).
+	(CXX_FOR_TARGET, install): Likewise.
+
 Mon Sep 18 14:53:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches by Alan Modra <alan@spri.levels.unisa.edu.au>:
