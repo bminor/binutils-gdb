@@ -1,3 +1,8 @@
+1999-05-25  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_apply_fix3): Only do 1999-05-17 fx_pcrel
+	reloc changes when defined(BFD_ASSEMBLER).
+
 1999-05-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (tc_gen_reloc): Remove F and MAP macros.
