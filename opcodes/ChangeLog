@@ -1,3 +1,8 @@
+Thu Oct 24 17:21:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (_print_insn_mips): Use a tab between the instruction
+	and the arguments.
+
 Tue Oct 22 23:32:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c (PPCPWR2): Define.
