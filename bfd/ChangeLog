@@ -1,5 +1,9 @@
 Mon Feb 19 12:37:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host: On Linux, only pass -rpath option if $(libdir)
+	is neither /lib nor /usr/lib.  From Alan Modra
+	<alan@mullet.Levels.UniSA.Edu.Au>.
+
 	* elf-bfd.h (struct elf_obj_tdata): Rename dt_needed_name to
 	dt_name.
 	(elf_dt_name): Rename from elf_dt_needed_name.
