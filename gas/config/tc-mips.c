@@ -10614,10 +10614,10 @@ mips_after_parse_args ()
 
   /* If the selected architecture includes support for ASEs, enable
      generation of code for them.  */
-  if (mips_opts.ase_mips3d == -1 && CPU_HAS_MIPS3D (mips_arch))
-    mips_opts.ase_mips3d = 1;
-  if (mips_opts.ase_mdmx == -1 && CPU_HAS_MDMX (mips_arch))
-    mips_opts.ase_mdmx = 1;
+  if (mips_opts.ase_mips3d == -1)
+    mips_opts.ase_mips3d = CPU_HAS_MIPS3D (mips_arch);
+  if (mips_opts.ase_mdmx == -1)
+    mips_opts.ase_mdmx = CPU_HAS_MDMX (mips_arch);
 
   if (file_mips_gp32 < 0)
     file_mips_gp32 = 0;

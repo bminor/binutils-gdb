@@ -1,3 +1,8 @@
+2002-06-06  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tc-mips.c (mips_after_parse_args): Always set mips_opts.ase_mips3d
+	and mips_opts.ase_mdmx if they are uninitialized.
+
 2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* gas/config/tc-hppa.c (pa_ip): Replace "L$0\001" with FAKE_LABEL_NAME.
