@@ -71,6 +71,8 @@ static void mips_open PARAMS ((char *name, int from_tty));
 
 static void pmon_open PARAMS ((char *name, int from_tty));
 
+static void cairo_open PARAMS ((char *name, int from_tty));
+
 static void mips_close PARAMS ((int quitting));
 
 static void mips_detach PARAMS ((char *args, int from_tty));
@@ -133,6 +135,7 @@ static void common_open PARAMS ((struct target_ops *ops, char *name,
 /* Forward declarations.  */
 extern struct target_ops mips_ops;
 extern struct target_ops pmon_ops;
+extern struct target_ops cairo_ops;
 
 /* The MIPS remote debugging interface is built on top of a simple
    packet protocol.  Each packet is organized as follows:
@@ -272,7 +275,8 @@ enum mips_monitor_type {
   /* IDT/SIM monitor being used: */
   MON_IDT,
   /* PMON monitor being used: */
-  MON_PMON,
+  MON_PMON,   /* 3.0.83 [COGENT,EB,FP,NET] Algorithmics Ltd. Nov  9 1995 17:19:50 */
+  MON_CAIRO,  /* 2.7.473 [Cairo ,EL,FP,NET] Risq Modular Systems,  Thu Jun 6 09:28:40 PDT 1996 */
   /* Last and unused value, for sizing vectors, etc. */
   MON_LAST
 };
@@ -1154,7 +1158,7 @@ mips_enter_debug ()
   mips_send_seq = 0;
   mips_receive_seq = 0;
 
-  if (mips_monitor == MON_PMON)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
     mips_send_command ("debug\015", 0);
   else /* assume IDT monitor by default */
     mips_send_command ("db tty0\015", 0);
@@ -1165,7 +1169,7 @@ mips_enter_debug ()
      mips_receive_header will eat up a reasonable number of characters
      whilst looking for the SYN, however this avoids the "garbage"
      being displayed to the user. */
-  if (mips_monitor == MON_PMON)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
     mips_expect ("\015");
   
   {
@@ -1181,14 +1185,31 @@ mips_exit_debug ()
 {
   int err;
 
-  mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
+  if (mips_monitor == MON_CAIRO)
+    {
+      /* The Cairo version of PMON exits immediately, so we do not get
+         a reply to this command: */
+      mips_request ('x', (unsigned int) 0, (unsigned int) 0, NULL,
 		mips_receive_wait, NULL);
+      mips_need_reply = 0;
+      if (!mips_expect (" break!"))
+        return -1;
+    }
+  else
+    mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
+                  mips_receive_wait, NULL);
 
   if (mips_monitor == MON_PMON && !mips_expect ("Exiting remote debug mode"))
     return -1;
     
-  if (!mips_expect ("\015\012"))
-    return -1;
+  if (mips_monitor == MON_CAIRO)
+    {
+      if (!mips_expect ("\012"))
+        return -1;
+    }
+  else
+    if (!mips_expect ("\015\012"))
+      return -1;
 
   if (!mips_expect (mips_monitor_prompt))
     return -1;
@@ -1224,7 +1245,7 @@ mips_initialize ()
 
   /* Force the system into the monitor.  After this we *should* be at
      the mips_monitor_prompt.  */
-  if (mips_monitor == MON_PMON)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
     j = 0; /* start by checking if we are already at the prompt */
   else
     j = 1; /* start by sending a break */
@@ -1244,7 +1265,7 @@ mips_initialize ()
 	  break;
 	case 3:			/* Then, try escaping from download */
 	  {
-            if (mips_monitor == MON_PMON)
+            if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
               {
                 char tbuff[7];
 
@@ -1293,7 +1314,7 @@ mips_initialize ()
 	break;
     }
 
-  if (mips_monitor == MON_PMON)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
     {
       /* Ensure the correct target state: */
       mips_send_command ("set regsize 64\015", -1);
@@ -1410,6 +1431,17 @@ pmon_open (name, from_tty)
   common_open (&pmon_ops, name, from_tty);
 }
 
+static void
+cairo_open (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  /* The PMON monitor has a prompt different from the default
+     "TARGET_MONITOR_PROMPT": */
+  mips_monitor_prompt = "NEC010>";
+  mips_monitor = MON_CAIRO;
+  common_open (&cairo_ops, name, from_tty);
+}
 
 /* Close a connection to the remote board.  */
 
@@ -1713,15 +1745,14 @@ mips_fetch_registers (regno)
     val = 0;
   else
     {
-#if 0 /* Unfortunately the PMON version in the Vr4300 board has been
+      /* Unfortunately the PMON version in the Vr4300 board has been
          compiled without the 64bit register access commands. This
          means we cannot get hold of the full register width. */
-      if (mips_monitor == MON_PMON)
-        val = mips_request ('t', (unsigned int) mips_map_regno (regno),
+      if (mips_monitor == MON_CAIRO)
+        val = (unsigned)mips_request ('t', (unsigned int) mips_map_regno (regno),
                             (unsigned int) 0, &err, mips_receive_wait, NULL);
       else
-#endif
-        val = mips_request ('r', (unsigned int) mips_map_regno (regno),
+        val = (unsigned)mips_request ('r', (unsigned int) mips_map_regno (regno),
                             (unsigned int) 0, &err, mips_receive_wait, NULL);
       if (err)
 	mips_error ("Can't read register %d: %s", regno,
@@ -2305,9 +2336,13 @@ common_breakpoint (cmd, addr, mask, flags)
 
   if (rerrflg != 0)
     {
+      /* Cairo returns "0x0 b 0x16 0x0\000", whereas
+         Cogent returns "0x0 b 0xffffffff 0x16\000": */
+      if (mips_monitor == MON_CAIRO)
+        rresponse = rerrflg;
       if (rresponse != 22) /* invalid argument */
 	fprintf_unfiltered (stderr, "common_breakpoint (0x%x):  Got error: 0x%x\n",
-			    addr, rresponse);
+			    (unsigned int)addr, rresponse);
       return 1;
     }
 
@@ -2745,8 +2780,8 @@ pmon_load_fast (file)
       bintotal += s->_raw_size;
       final = (s->vma + s->_raw_size);
 
-      printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
-                       s->vma + s->_raw_size);
+      printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, (unsigned int)s->vma,
+                       (unsigned int)(s->vma + s->_raw_size));
       gdb_flush (gdb_stdout);
 
       /* Output the starting address */
@@ -2859,7 +2894,7 @@ mips_load (file, from_tty)
   if (mips_exit_debug ())
     error ("mips_load:  Couldn't get into monitor mode.");
 
-  if (mips_monitor == MON_PMON)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
    pmon_load_fast (file);
   else
    mips_load_srec (file);
@@ -2979,11 +3014,62 @@ colon, HOST:PORT to access a board over a network",  /* to_doc */
   OPS_MAGIC			/* to_magic */
 };
 
+/* Another alternative target vector. This is a PMON system, but with
+   a different monitor prompt, aswell as some other operational
+   differences: */
+struct target_ops cairo_ops =
+{
+  "cairo",			/* to_shortname */
+  "Remote MIPS debugging over serial line",	/* to_longname */
+  "\
+Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
+line. The argument is the device it is connected to or, if it contains a\n\
+colon, HOST:PORT to access a board over a network",  /* to_doc */
+  cairo_open,			/* to_open */
+  mips_close,			/* to_close */
+  NULL,				/* to_attach */
+  mips_detach,			/* to_detach */
+  mips_resume,			/* to_resume */
+  pmon_wait,			/* to_wait */
+  mips_fetch_registers,		/* to_fetch_registers */
+  mips_store_registers,		/* to_store_registers */
+  mips_prepare_to_store,	/* to_prepare_to_store */
+  mips_xfer_memory,		/* to_xfer_memory */
+  mips_files_info,		/* to_files_info */
+  mips_insert_breakpoint,	/* to_insert_breakpoint */
+  mips_remove_breakpoint,	/* to_remove_breakpoint */
+  NULL,				/* to_terminal_init */
+  NULL,				/* to_terminal_inferior */
+  NULL,				/* to_terminal_ours_for_output */
+  NULL,				/* to_terminal_ours */
+  NULL,				/* to_terminal_info */
+  mips_kill,			/* to_kill */
+  mips_load,			/* to_load */
+  NULL,				/* to_lookup_symbol */
+  mips_create_inferior,		/* to_create_inferior */
+  mips_mourn_inferior,		/* to_mourn_inferior */
+  NULL,				/* to_can_run */
+  NULL,				/* to_notice_signals */
+  0,				/* to_thread_alive */
+  0,				/* to_stop */
+  process_stratum,		/* to_stratum */
+  NULL,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  NULL,				/* sections */
+  NULL,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
+};
+
 void
 _initialize_remote_mips ()
 {
   add_target (&mips_ops);
   add_target (&pmon_ops);
+  add_target (&cairo_ops);
 
   add_show_from_set (
     add_set_cmd ("timeout", no_class, var_zinteger,
