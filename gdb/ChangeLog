@@ -1,5 +1,9 @@
 2004-09-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib-sunos.c (sunos_relocate_main_executable): Remove function.
+	(sunos_solib_create_inferior_hook): Don't call
+	sunos_relocate_main_executable.
+
 	* sparcnbsd-tdep.c (sparc32nbsd_elf_init_abi): Set
 	solib_svr4_fetch_link_map_offsets to
 	svr4_ilp32_fetch_link_map_offsets.
