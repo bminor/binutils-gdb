@@ -2511,6 +2511,7 @@ struct _bfd
       struct nlm_obj_tdata *nlm_obj_data;
       struct bout_data_struct *bout_data;
       struct sun_core_struct *sun_core_data;
+      struct sco5_core_struct *sco5_core_data;
       struct trad_core_struct *trad_core_data;
       struct som_data_struct *som_data;
       struct hpux_core_struct *hpux_core_data;

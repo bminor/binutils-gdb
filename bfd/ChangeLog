@@ -1,3 +1,17 @@
+Tue Dec  8 22:15:48 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	SCO Open Server Release 5 core file support, from Jouke Numan
+	<jnuman@hiscom.nl>:
+	* sco5-core.c: New file.
+	* configure.in (i[3456]86-*-sco3.2v5*): Use sco5-core.lo.
+	(sco5-core.lo): Define SCO5_CORE in COREFLAG.
+	* Makefile.am: Rebuild dependencies.
+	(OPTIONAL_BACKENDS): Add sco5-core.lo.
+	(OPTIONAL_BACKENDS_CFILES): Add sco5-core.c.
+	* bfd.c (struct _bfd): Add sco5_core_data field to tdata.
+	* targets.c (sco5_core_vec): Add to target list if SCO5_CORE.
+	* bfd-in2.h, configure, Makefile.in: Rebuild.
+
 Tue Dec  8 19:38:42 1998  Mark Klein  <mklein@dis.com>
 
 	* config.bfd (hppa*-*-mpeix*): New target.
