@@ -1,3 +1,10 @@
+Wed Feb  9 01:14:54 2000  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* config/d10v/tm-d10v.h (NO_EXTRA_ALIGNMENT_NEEDED): Define.
+	* config/d10v/tm-d10v.h (STACK_ALIGN): Define.
+	(d10v_stack_align): Declare.
+	* d10v-tdep.c (d10v_stack_align): Define.
+
 1999-08-23  J.T. Conklin  <jtc@redback.com>
 
         * top.c (remote_timeout): Change default to 2.  Add comment
