@@ -10,57 +10,19 @@ find out whether anyone else is working on it.
 Below is a list of problems identified during the GDB 5.0 release
 cycle.  People hope to have these problems fixed in 5.1.
 
---
+-- 2001-03-08
 
-RFD: infrun.c: No bpstat_stop_status call after proceed over break?
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00665.html
+Update GDB's coding standard documentation.  Known topics:
 
-GDB misses watchpoint triggers after proceeding over a breakpoint on
-x86 targets.
+       o     alloca/malloc et.al.
 
---
+       o     typedef and structs
 
-x86 linux GDB and SIGALRM (???)
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
+       o	ISO-C
 
-This problem has been fixed, but a regression test still needs to be
-added to the testsuite:
-http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00309.html
+and most likely also:
 
-Mark
-
---
-
-Can't build IRIX -> arm GDB.
-http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00356.html
-
-David Whedon writes:
-> Now I'm building for an embedded arm target.  If there is a way of turning
-> remote-rdi off, I couldn't find it. It looks like it gets built by default
-> in gdb/configure.tgt(line 58) Anyway, the build dies in
-> gdb/rdi-share/unixcomm.c.  SERPORT1 et. al. never get defined because we
-> aren't one of the architectures supported.
-
---
-
-Problem with weak functions
-http://sourceware.cygnus.com/ml/gdb/2000-05/msg00060.html
-
-Dan Nicolaescu writes:
-> It seems that gdb-4.95.1  does not display correctly the function when
-> stoping in weak functions. 
-> 
-> It stops in a function that is defined as weak, not in the function
-> that is actually run... 
-
---
-
-GDB 5.0 doesn't work on Linux/SPARC
-
---
-
-Thread support.  Right now, as soon as a thread finishes and exits,
-you're hosed.  This problem is reported once a week or so.
+       o	 include conventions
 
 --
 
@@ -84,6 +46,42 @@ Mark
 
 --
 
+x86 linux GDB and SIGALRM (???)
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
+
+This problem has been fixed, but a regression test still needs to be
+added to the testsuite:
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00309.html
+
+Mark
+
+[The test has been submitted for approval - cagney]
+
+--
+
+RFD: infrun.c: No bpstat_stop_status call after proceed over break?
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00665.html
+
+GDB misses watchpoint triggers after proceeding over a breakpoint on
+x86 targets.
+
+--
+
+GDB 5.0 doesn't work on Linux/SPARC
+
+There are two parts to this.
+
+      o	  GDB 5.0 doesn't work on GNU/Linux/SPARC32
+
+      o	  GDB 5.0 doesn't work on the new target
+	  GNU/Linux/SPARC64
+
+GDB does build on both these targets.
+
+The first problem is the one that should be fixed.
+
+--
+
 		GDB 5.1 - New features
 		======================
 
@@ -92,6 +90,21 @@ The following new features should be included in 5.1.
 --
 
 Enable MI by default.  Old code can be deleted after 5.1 is out.
+
+Issues:
+
+	o	syntax change where a list would
+		look like:
+		     [ foo=a, foo=b, foo=c ]
+		instead of
+		     { foo=a, foo=b, foo=c }
+
+	o	kill off the idea of a reverse
+		query.
+
+	o	review test cases
+
+	o	enable it
 
 --
 
@@ -105,6 +118,8 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
 
 Indent -gnu ?
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
+
+[I think this has been merged, need to confirm - cagney]
 
 --
 
@@ -123,24 +138,12 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00515.html
 Patch: handle N_MAIN stab
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00527.html
 
---
+-- 2001-03-08
 
-[Comming...]
+Add CRIS target.
 
-Modify gdb to work correctly with Pascal.
-
---
-
-Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
-http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
-
-(Broken) support for GDB's remote protocol across UDP is to be
-included in the follow-on release.
-
-It should be noted that UDP can only work when the [Gg] packet fits in
-a single UDP packet.
-
-There is also much debate over the merit of this.
+A predicate to this is the multi-arching of SOFTWARE_SINGLE_STEP().  A
+patch has been submitted.
 
 --
 
@@ -148,6 +151,11 @@ There is also much debate over the merit of this.
 		==================
 
 The following code cleanups will hopefully be applied to GDB 5.1.
+
+-- 2001-03-08
+
+Resolve the status of all broken targets as identified by the MAINTAINERS
+file.
 
 --
 
@@ -164,12 +172,6 @@ http://www.gnu.org/copyleft/''
 
 --
 
-Delete macro TARGET_BYTE_ORDER_SELECTABLE.
-
-Patches in the database.
-
---
-
 Fix copyright notices.
 
 Turns out that ``1998-2000'' isn't considered valid :-(
@@ -178,42 +180,8 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00467.html
 
 --
 
-Purge PARAMS.
-
-Eliminate all uses of PARAMS in GDB's source code.
-
---
-
-printcmd.c (print_address_numeric):
-
-NOTE: This assumes that the significant address information is kept in
-the least significant bits of ADDR - the upper bits were either zero
-or sign extended.  Should ADDRESS_TO_POINTER() or some
-ADDRESS_TO_PRINTABLE() be used to do the conversion?
-
---
-
-Compiler warnings.
-
-Eliminate all warnings for at least one host/target for the flags:
--Wimplicit -Wreturn-type -Wcomment -Wtrigraphs -Wformat -Wparentheses
--Wpointer-arith -Wuninitialized
-
---
-
-Follow through `make check' with --enable-shared.
-
-When the srcware tree is configured with --enable-shared, the `expect'
-program won't run properly.  Jim Wilson found out gdb has a local hack
-to set LD_LIBRARY_PATH, but, AFAIK, no other project has been hacked
-similarly.
-
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
-
---
-
-		GDB 5.1 Known Problems
-		======================
+		GDB 5.1 - Known Problems
+		========================
 
 --
 
@@ -245,7 +213,8 @@ will still occure. sid/component/configure.in mis-configures
 
 --
 
-Fix at least one thread bug.
+Thread support.  Right now, as soon as a thread finishes and exits,
+you're hosed.  This problem is reported once a week or so.
 
 --
 
@@ -275,7 +244,11 @@ Makefile.in and configure.in.
 
 --
 
-Eliminate one more compiler warnings.
+Compiler warnings.
+
+Eliminate all warnings for at least one host/target for the flags:
+-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs -Wformat -Wparentheses
+-Wpointer-arith -Wuninitialized
 
 --
 
@@ -293,11 +266,79 @@ dependency lists.  It isn't done in a consistent way.
 
 --
 
+		GDB 5.2 - Known Problems
+		========================
+
+--
+
 		Code Cleanups: General
 		======================
 
 The following are more general cleanups and fixes.  They are not tied
 to any specific release.
+
+--
+
+Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
+
+(Broken) support for GDB's remote protocol across UDP is to be
+included in the follow-on release.
+
+It should be noted that UDP can only work when the [Gg] packet fits in
+a single UDP packet.
+
+There is also much debate over the merit of this.
+
+--
+
+Can't build IRIX -> arm GDB.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00356.html
+
+David Whedon writes:
+> Now I'm building for an embedded arm target.  If there is a way of turning
+> remote-rdi off, I couldn't find it. It looks like it gets built by default
+> in gdb/configure.tgt(line 58) Anyway, the build dies in
+> gdb/rdi-share/unixcomm.c.  SERPORT1 et. al. never get defined because we
+> aren't one of the architectures supported.
+
+--
+
+Problem with weak functions
+http://sourceware.cygnus.com/ml/gdb/2000-05/msg00060.html
+
+Dan Nicolaescu writes:
+> It seems that gdb-4.95.1  does not display correctly the function when
+> stoping in weak functions. 
+> 
+> It stops in a function that is defined as weak, not in the function
+> that is actually run... 
+
+--
+
+Follow through `make check' with --enable-shared.
+
+When the srcware tree is configured with --enable-shared, the `expect'
+program won't run properly.  Jim Wilson found out gdb has a local hack
+to set LD_LIBRARY_PATH, but, AFAIK, no other project has been hacked
+similarly.
+
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
+
+--
+
+Delete macro TARGET_BYTE_ORDER_SELECTABLE.
+
+Patches in the database.
+
+--
+
+printcmd.c (print_address_numeric):
+
+NOTE: This assumes that the significant address information is kept in
+the least significant bits of ADDR - the upper bits were either zero
+or sign extended.  Should ADDRESS_TO_POINTER() or some
+ADDRESS_TO_PRINTABLE() be used to do the conversion?
 
 --
 
