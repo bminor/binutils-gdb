@@ -3884,7 +3884,7 @@ create_internal_breakpoint (CORE_ADDR address, enum bptype type)
   struct symtab_and_line sal;
   struct breakpoint *b;
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
+  init_sal (&sal);		/* initialize to zeroes */
 
   sal.pc = address;
   sal.section = find_pc_overlay (sal.pc);
@@ -4204,7 +4204,7 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   struct breakpoint *b;
   int thread = -1;		/* All threads. */
 
-  INIT_SAL (&sal);
+  init_sal (&sal);
   sal.pc = 0;
   sal.symtab = NULL;
   sal.line = 0;
@@ -4243,7 +4243,7 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
   struct breakpoint *b;
   int thread = -1;		/* All threads. */
 
-  INIT_SAL (&sal);
+  init_sal (&sal);
   sal.pc = 0;
   sal.symtab = NULL;
   sal.line = 0;
@@ -4600,7 +4600,7 @@ parse_breakpoint_sals (char **address,
       if (default_breakpoint_valid)
 	{
 	  struct symtab_and_line sal;
-	  INIT_SAL (&sal);		/* initialize to zeroes */
+	  init_sal (&sal);		/* initialize to zeroes */
 	  sals->sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
 	  sal.pc = default_breakpoint_address;
@@ -5296,7 +5296,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   enum bptype bp_type;
   int mem_cnt = 0;
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
+  init_sal (&sal);		/* initialize to zeroes */
 
   /* Parse arguments.  */
   innermost_block = NULL;
@@ -6262,7 +6262,7 @@ handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
   char *save_arg;
   int i;
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
+  init_sal (&sal);		/* initialize to zeroes */
 
   /* If no arg given, or if first arg is 'if ', all active catch clauses
      are breakpointed. */
@@ -6533,7 +6533,7 @@ clear_command (char *arg, int from_tty)
       sals.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));
       make_cleanup (xfree, sals.sals);
-      INIT_SAL (&sal);		/* initialize to zeroes */
+      init_sal (&sal);		/* initialize to zeroes */
       sal.line = default_breakpoint_line;
       sal.symtab = default_breakpoint_symtab;
       sal.pc = default_breakpoint_address;

@@ -1207,13 +1207,7 @@ struct symtab_and_line
   CORE_ADDR end;
 };
 
-#define INIT_SAL(sal) { \
-  (sal)->symtab  = 0;   \
-  (sal)->section = 0;   \
-  (sal)->line    = 0;   \
-  (sal)->pc      = 0;   \
-  (sal)->end     = 0;   \
-}
+extern void init_sal (struct symtab_and_line *sal);
 
 struct symtabs_and_lines
 {

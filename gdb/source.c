@@ -1221,7 +1221,7 @@ line_info (char *arg, int from_tty)
   CORE_ADDR start_pc, end_pc;
   int i;
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
+  init_sal (&sal);		/* initialize to zeroes */
 
   if (arg == 0)
     {

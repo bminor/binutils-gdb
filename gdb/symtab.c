@@ -488,6 +488,17 @@ symbol_demangled_name (struct general_symbol_info *gsymbol)
   /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */
   /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */
 }
+
+/* Initialize the structure fields to zero values.  */
+void
+init_sal (struct symtab_and_line *sal)
+{
+  sal->symtab = 0;
+  sal->section = 0;
+  sal->line = 0;
+  sal->pc = 0;
+  sal->end = 0;
+}
 
 
 
@@ -1823,7 +1834,7 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
      But what we want is the statement containing the instruction.
      Fudge the pc to make sure we get that.  */
 
-  INIT_SAL (&val);		/* initialize to zeroes */
+  init_sal (&val);		/* initialize to zeroes */
 
   /* It's tempting to assume that, if we can't find debugging info for
      any function enclosing PC, that we shouldn't search for line

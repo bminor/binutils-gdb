@@ -983,7 +983,7 @@ run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
       struct breakpoint *bpt;
       struct symtab_and_line sal;
 
-      INIT_SAL (&sal);		/* initialize to zeroes */
+      init_sal (&sal);		/* initialize to zeroes */
       if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
 	{
 	  sal.pc = CALL_DUMMY_ADDRESS ();

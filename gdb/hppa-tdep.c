@@ -4426,7 +4426,7 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
     {
       break_callback_sal = (struct symtab_and_line *) xmalloc (sizeof (struct symtab_and_line));
     }
-  INIT_SAL (break_callback_sal);
+  init_sal (break_callback_sal);
   break_callback_sal->symtab = NULL;
   break_callback_sal->pc = eh_break_addr;
   break_callback_sal->line = 0;

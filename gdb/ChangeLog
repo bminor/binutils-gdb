@@ -1,3 +1,30 @@
+2002-10-24  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.h (INIT_SAL): Delete macro.
+	(init_sal): Export.
+	* symtab.c (init_sal): New function.
+
+	* ada-lang.c (ada_finish_decode_line_1): Change INIT_SAL macro
+	to init_sal function call.
+	(find_sal_from_funcs_and_line): Ditto.
+	(all_sals_for_line): Ditto. 
+	* breakpoint.c (create_internal_breakpoint): Ditto. 
+	(create_fork_vfork_event_catchpoint): Ditto. 
+	(create_exec_event_catchpoint): Ditto. 
+	(parse_breakpoint_sals): Ditto. 
+	(watch_command_1): Ditto. 
+	(handle_gnu_4_16_catch_command): Ditto.
+	(clear_command): Ditto. 
+	* hppa-tdep.c (child_enable_exception_callback): Ditto. 
+	* infcmd.c (run_stack_dummy): Ditto. 
+	* infrun.c (process_event_stop_test): Ditto.
+	(check_sigtramp2): Ditto.
+	(step_over_function): Ditto. 
+	* linespec.c (decode_line_2): Ditto. 
+	(decode_line_1): Ditto. 
+	* source.c (line_info): Ditto. 
+	* symtab.c (find_pc_sect_line): Ditto.
+
 2002-10-24  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c (struct context)
