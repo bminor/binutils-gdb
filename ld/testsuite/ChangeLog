@@ -1,3 +1,10 @@
+2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/bpo-18.d, ld-mmix/bpo64addr.ld, ld-mmix/bpo-18m.d,
+	ld-mmix/bpo-9.s, ld-mmix/bpo-19.d, ld-mmix/bpo-19m.d,
+	ld-mmix/bpo-10.s, ld-mmix/bpo-20.d, ld-mmix/bpo-20m.d: New tests
+	for on-demand global register allocation.
+
 2002-02-02  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-sh/shared-1.d: Fix incorrect offsets.
