@@ -98,18 +98,7 @@ struct objfile_data;
    use the block at main, or can't find it for some reason, everything
    still works as before.  And if we have no startup code debugging
    information but we do have usable information for main(), backtraces
-   from user code don't go wandering off into the startup code.
-
-   To use this method, define your DEPRECATED_FRAME_CHAIN_VALID macro
-   like:
-
-   #define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe)     \
-   (chain != 0                                   \
-   && !(inside_main_func ((thisframe)->pc))     \
-   && !(inside_entry_func ((thisframe)->pc)))
-
-   and add initializations of the four scope controlling variables inside
-   the object file / debugging information processing modules.  */
+   from user code don't go wandering off into the startup code.  */
 
 struct entry_info
   {

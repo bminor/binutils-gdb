@@ -1,3 +1,13 @@
+2004-02-04  Andrew Cagney  <cagney@redhat.com>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* objfiles.h: Delete comments refering to inside_entry_func and
+	DEPRECATED_FRAME_CHAIN_VALID.
+	* defs.h (inside_entry_func): Update prototype..
+	* blockframe.c (inside_entry_func): Rename to
+	legacy_inside_entry_func.  Add new inside_entry_func taking a frame.
+	* frame.c (get_prev_frame): Pass the frame to inside_entry_func.
+
 2004-02-03  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* breakpoint.c (struct captured_parse_breakpoint_args):  Move

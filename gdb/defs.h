@@ -324,10 +324,11 @@ struct cleanup
 
 struct symtab;
 struct breakpoint;
+struct frame_info;
 
 /* From blockframe.c */
 
-extern int inside_entry_func (CORE_ADDR);
+extern int inside_entry_func (struct frame_info *this_frame);
 
 extern int deprecated_inside_entry_file (CORE_ADDR addr);
 
@@ -655,8 +656,6 @@ enum lval_type
        lval_register or lval_memory).  */
     lval_reg_frame_relative
   };
-
-struct frame_info;
 
 /* Control types for commands */
 
