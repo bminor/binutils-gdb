@@ -1,3 +1,9 @@
+Mon Jun  7 11:25:16 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* config/obj-elf.c (obj_elf_common): In MRI mode if called as
+	`common' pass on to s_mri_common.
+	(elf_pseudo_table): Pass 1 to obj_elf_common for `common'. 
+
 1999-06-06  Richard Henderson  <rth@cygnus.com>
 
 	* config/obj-elf.c (obj_elf_section): Don't free the return

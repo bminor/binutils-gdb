@@ -77,7 +77,7 @@ static void obj_elf_popsection PARAMS ((int));
 static const pseudo_typeS elf_pseudo_table[] =
 {
   {"comm", obj_elf_common, 0},
-  {"common", obj_elf_common, 0},
+  {"common", obj_elf_common, 1},
   {"ident", obj_elf_ident, 0},
   {"local", obj_elf_local, 0},
   {"previous", obj_elf_previous, 0},
@@ -257,8 +257,8 @@ elf_file_symbol (s)
 }
 
 static void
-obj_elf_common (ignore)
-     int ignore;
+obj_elf_common (is_common)
+     int is_common;
 {
   char *name;
   char c;
@@ -266,6 +266,12 @@ obj_elf_common (ignore)
   int temp, size;
   symbolS *symbolP;
   int have_align;
+
+  if (flag_mri && is_common)
+    {
+      s_mri_common (0);
+      return;
+    }
 
   name = input_line_pointer;
   c = get_symbol_end ();
