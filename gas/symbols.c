@@ -119,7 +119,7 @@ symbol_new (name, segment, valu, frag)
   symbolP->sy_frag = frag;
 #ifndef BFD_ASSEMBLER
   symbolP->sy_number = ~0;
-  symbolP->sy_name_offset = ~0;
+  symbolP->sy_name_offset = (unsigned int) ~0;
 #endif
 
   /*
@@ -334,7 +334,7 @@ symbol_table_insert (symbolP)
   know (symbolP);
   know (S_GET_NAME (symbolP));
 
-  if (*(error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (PTR) symbolP)))
+  if ((error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (PTR) symbolP)))
     {
       as_fatal ("Inserting \"%s\" into symbol table failed: %s",
 		S_GET_NAME (symbolP), error_string);
@@ -571,14 +571,19 @@ void
 resolve_symbol_value (symp)
      symbolS *symp;
 {
+  int resolved;
+
   if (symp->sy_resolved)
     return;
+
+  resolved = 0;
 
   if (symp->sy_resolving)
     {
       as_bad ("Symbol definition loop encountered at %s",
 	      S_GET_NAME (symp));
       S_SET_VALUE (symp, (valueT) 0);
+      resolved = 1;
     }
   else
     {
@@ -596,6 +601,7 @@ resolve_symbol_value (symp)
 	  S_SET_VALUE (symp, S_GET_VALUE (symp) + symp->sy_frag->fr_address);
 	  if (S_GET_SEGMENT (symp) == expr_section)
 	    S_SET_SEGMENT (symp, absolute_section);
+	  resolved = 1;
 	  break;
 
 	case O_symbol:
@@ -614,6 +620,8 @@ resolve_symbol_value (symp)
 	      || S_GET_SEGMENT (symp) == undefined_section)
 	    S_SET_SEGMENT (symp,
 			   S_GET_SEGMENT (symp->sy_value.X_add_symbol));
+
+	  resolved = symp->sy_value.X_add_symbol->sy_resolved;
 	  break;
 
 	case O_uminus:
@@ -630,6 +638,7 @@ resolve_symbol_value (symp)
 	  if (S_GET_SEGMENT (symp) == expr_section
 	      || S_GET_SEGMENT (symp) == undefined_section)
 	    S_SET_SEGMENT (symp, absolute_section);
+	  resolved = symp->sy_value.X_add_symbol->sy_resolved;
 	  break;
 
 	case O_multiply:
@@ -681,17 +690,30 @@ resolve_symbol_value (symp)
 	  if (S_GET_SEGMENT (symp) == expr_section
 	      || S_GET_SEGMENT (symp) == undefined_section)
 	    S_SET_SEGMENT (symp, absolute_section);
+	  resolved = (symp->sy_value.X_add_symbol->sy_resolved
+		      && symp->sy_value.X_op_symbol->sy_resolved);
    	  break;
 
 	case O_register:
 	case O_big:
 	case O_illegal:
-	  as_bad ("bad value for symbol \"%s\"", S_GET_NAME (symp));
+	  /* Give an error (below) if not in expr_section.  We don't
+	     want to worry about expr_section symbols, because they
+	     are fictional (they are created as part of expression
+	     resolution), and any problems may not actually mean
+	     anything.  */
 	  break;
 	}
     }
 
-  symp->sy_resolved = 1;
+  /* Don't worry if we can't resolve an expr_section symbol.  */
+  if (resolved)
+    symp->sy_resolved = 1;
+  else if (S_GET_SEGMENT (symp) != expr_section)
+    {
+      as_bad ("can't resolve value for symbol \"%s\"", S_GET_NAME (symp));
+      symp->sy_resolved = 1;
+    }
 }
 
 #ifdef LOCAL_LABELS_DOLLAR
@@ -1093,6 +1115,7 @@ S_SET_VALUE (s, val)
 {
   s->sy_value.X_op = O_constant;
   s->sy_value.X_add_number = (offsetT) val;
+  s->sy_value.X_unsigned = 0;
 }
 
 #ifdef BFD_ASSEMBLER
@@ -1104,17 +1127,17 @@ S_IS_EXTERNAL (s)
   flagword flags = s->bsym->flags;
 
   /* sanity check */
-  if (flags & BSF_LOCAL && flags & (BSF_EXPORT | BSF_GLOBAL))
+  if (flags & BSF_LOCAL && flags & BSF_GLOBAL)
     abort ();
 
-  return (flags & (BSF_EXPORT | BSF_GLOBAL)) != 0;
+  return (flags & BSF_GLOBAL) != 0;
 }
 
 int
 S_IS_COMMON (s)
      symbolS *s;
 {
-  return s->bsym->section == &bfd_com_section;
+  return bfd_is_com_section (s->bsym->section);
 }
 
 int
@@ -1140,7 +1163,7 @@ S_IS_LOCAL (s)
   flagword flags = s->bsym->flags;
 
   /* sanity check */
-  if (flags & BSF_LOCAL && flags & (BSF_EXPORT | BSF_GLOBAL))
+  if (flags & BSF_LOCAL && flags & BSF_GLOBAL)
     abort ();
 
   return (S_GET_NAME (s)
