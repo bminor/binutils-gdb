@@ -555,10 +555,6 @@ extern char *strsave PARAMS ((const char *));
 
 extern char *mstrsave PARAMS ((void *, const char *));
 
-extern PTR xmalloc PARAMS ((long));
-
-extern PTR xrealloc PARAMS ((PTR, long));
-
 extern PTR xmmalloc PARAMS ((PTR, long));
 
 extern PTR xmrealloc PARAMS ((PTR, PTR, long));
@@ -616,7 +612,9 @@ extern void warning PARAMS ((char *, ...))
    Libiberty thingies are no longer declared here.  We include libiberty.h
    above, instead.  */
 
+#ifndef GETENV_PROVIDED
 extern char *getenv PARAMS ((const char *));
+#endif
 
 /* From other system libraries */
 
@@ -625,7 +623,15 @@ extern char *getenv PARAMS ((const char *));
 #include <stdlib.h>
 #endif
 
+
+/* We take the address of fclose later, but some stdio's forget
+   to declare this.  We can't always declare it since there's
+   no way to declare the parameters without upsetting some compiler
+   somewhere. */
+
+#ifndef FCLOSE_PROVIDED
 extern int fclose ();
+#endif
 
 #ifndef atof
 extern double atof ();

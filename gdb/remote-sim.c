@@ -95,6 +95,25 @@ int regno;
     }
 }
 
+
+int 
+gdbsim_write_stdout (arg, len)
+char *arg;
+int len;
+{
+  int i;
+  char b[2];
+  for (i = 0; i< len; i++) {
+    b[0] = arg[i];
+    b[1] = 0;
+    if (target_output_hook)
+      target_output_hook (b);
+    else
+      fputs_filtered (b, gdb_stdout);
+  }
+  return len;
+}
+
 static void
 gdbsim_store_register (regno)
 int regno;
