@@ -729,8 +729,8 @@ options which may be on NFS mounted filesystems.
 
 .TP
 .B \-rpath\-link\ \fIdirectory
-When using ELF, one shared library may require another.  This happens
-when an
+When using ELF or SunOS, one shared library may require another.  This
+happens when an
 .B ld\ \-shared
 link includes a shared library as one of the input files.
 
@@ -757,8 +757,12 @@ Omits all symbol information from the output file.
 
 .TP
 .B \-shared
-Create a shared library.  This is currently only supported on ELF
-platforms.
+Create a shared library.  This is currently only supported on ELF and
+SunOS platforms (on SunOS it is not required, as the linker will
+automatically create a shared library when there are undefined symbols
+and the
+.B \-e
+option is not used).
 
 .TP
 .B \-sort\-common

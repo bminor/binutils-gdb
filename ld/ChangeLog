@@ -1,5 +1,17 @@
 Tue Oct 17 12:22:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Move
+	directory searching code into gld${EMULATION_NAME}_search_dir.
+	(gld${EMULATION_NAME}_search_dir): New static function, extracted
+	from gld${EMULATION_NAME}_find_so.
+	(global_needed, global_found): New static variables.
+	(gld${EMULATION_NAME}_after_open): New static function.
+	(gld${EMULATION_NAME}_search_needed): New static function.
+	(gld${EMULATION_NAME}_try_needed): New static function.
+	(gld${EMULATION_NAME}_check_needed): New static function.
+	(ld_${EMULATION_NAME}_emulation): Use new after_open function.
+	* ld.texinfo, ld.1: Mention -rpath-link on SunOS.
+
 	* Makefile.in (eelf32ppc.c): Depend upon elf32.em, not generic.em.
 	(eelf32lppc.c): Likewise.
 	* emulparams/elf32lppc.sh (TEMPLATE_NAME): Define as elf32.

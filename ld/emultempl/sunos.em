@@ -61,8 +61,17 @@ static void gld${EMULATION_NAME}_create_output_section_statements
   PARAMS ((void));
 static void gld${EMULATION_NAME}_find_so
   PARAMS ((lang_input_statement_type *));
+static char *gld${EMULATION_NAME}_search_dir
+  PARAMS ((const char *, const char *, boolean *));
+static void gld${EMULATION_NAME}_after_open PARAMS ((void));
+static void gld${EMULATION_NAME}_check_needed
+  PARAMS ((lang_input_statement_type *));
+static boolean gld${EMULATION_NAME}_search_needed
+  PARAMS ((const char *, const char *));
+static boolean gld${EMULATION_NAME}_try_needed
+  PARAMS ((const char *, const char *));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
-static void gld${EMULATION_NAME}_find_statement_assignment
+static void gld${EMULATION_NAME}_find_assignment
   PARAMS ((lang_statement_union_type *));
 static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static void gld${EMULATION_NAME}_count_need
@@ -100,14 +109,8 @@ gld${EMULATION_NAME}_find_so (inp)
      lang_input_statement_type *inp;
 {
   search_dirs_type *search;
-  const char *filename;
-  const char *dot;
-  int force_maj;
-  unsigned int len;
-  char *alc;
-  int max_maj, max_min;
   char *found;
-  boolean found_static;
+  char *alc;
   struct stat st;
 
   if (! inp->search_dirs_flag
@@ -117,85 +120,12 @@ gld${EMULATION_NAME}_find_so (inp)
 
   ASSERT (strncmp (inp->local_sym_name, "-l", 2) == 0);
 
-  filename = inp->filename;
-  force_maj = -1;
-  dot = strchr (filename, '.');
-  if (dot == NULL)
-    len = strlen (filename);
-  else
-    {
-      force_maj = atoi (dot + 1);
-      len = dot - filename;
-      alc = (char *) xmalloc (len + 1);
-      strncpy (alc, filename, len);
-      alc[len] = '\0';
-      filename = alc;
-    }
-
-  found = NULL;
-  found_static = false;
-  max_maj = max_min = 0;
   for (search = search_head; search != NULL; search = search->next)
     {
-      DIR *dir;
-      struct dirent *entry;
+      boolean found_static;
 
-      dir = opendir (search->name);
-      if (dir == NULL)
-	continue;
-  
-      while ((entry = readdir (dir)) != NULL)
-	{
-	  int found_maj, found_min;
-
-	  if (strncmp (entry->d_name, "lib", 3) != 0
-	      || strncmp (entry->d_name + 3, inp->filename, len) != 0)
-	    continue;
-
-	  if (dot == NULL
-	      && strncmp (entry->d_name + 3 + len, ".a", 2) == 0)
-	    {
-	      found_static = true;
-	      continue;
-	    }
-
-	  if (strncmp (entry->d_name + 3 + len, ".so", 3) != 0)
-	    continue;
-
-	  /* We've found a .so file.  Work out the major and minor
-	     version numbers.  */
-	  found_maj = 0;
-	  found_min = 0;
-	  sscanf (entry->d_name + 3 + len, ".so.%d.%d",
-		  &found_maj, &found_min);
-
-	  if (force_maj != -1 && force_maj != found_maj)
-	    continue;
-
-	  /* We've found a match for the name we are searching for.
-	     See if this is the version we should use.  If the major
-	     and minor versions match, we use the last entry in
-	     alphabetical order; I don't know if this is how SunOS
-	     distinguishes libc.so.1.8 from libc.so.1.8.1, but it
-	     ought to suffice.  */
-	  if (found == NULL
-	      || (found_maj > max_maj)
-	      || (found_maj == max_maj
-		  && (found_min > max_min
-		      || (found_min == max_min
-			  && strcmp (entry->d_name, found) > 0))))
-	    {
-	      if (found != NULL)
-		free (found);
-	      found = (char *) xmalloc (strlen (entry->d_name) + 1);
-	      strcpy (found, entry->d_name);
-	      max_maj = found_maj;
-	      max_min = found_min;
-	    }
-	}
-
-      closedir (dir);
-
+      found = gld${EMULATION_NAME}_search_dir (search->name, inp->filename,
+					       &found_static);
       if (found != NULL || found_static)
 	break;
     }
@@ -258,6 +188,398 @@ gld${EMULATION_NAME}_find_so (inp)
     }
 }
 
+/* Search a directory for a .so file.  */
+
+static char *
+gld${EMULATION_NAME}_search_dir (dirname, filename, found_static)
+     const char *dirname;
+     const char *filename;
+     boolean *found_static;
+{
+  int force_maj, force_min;
+  const char *dot;
+  unsigned int len;
+  char *alc;
+  char *found;
+  int max_maj, max_min;
+  DIR *dir;
+  struct dirent *entry;
+
+  *found_static = false;
+
+  force_maj = -1;
+  force_min = -1;
+  dot = strchr (filename, '.');
+  if (dot == NULL)
+    {
+      len = strlen (filename);
+      alc = NULL;
+    }
+  else
+    {
+      force_maj = atoi (dot + 1);
+
+      len = dot - filename;
+      alc = (char *) xmalloc (len + 1);
+      strncpy (alc, filename, len);
+      alc[len] = '\0';
+      filename = alc;
+
+      dot = strchr (dot + 1, '.');
+      if (dot != NULL)
+	force_min = atoi (dot + 1);
+    }
+
+  found = NULL;
+  max_maj = max_min = 0;
+
+  dir = opendir (dirname);
+  if (dir == NULL)
+    return NULL;
+  
+  while ((entry = readdir (dir)) != NULL)
+    {
+      int found_maj, found_min;
+
+      if (strncmp (entry->d_name, "lib", 3) != 0
+	  || strncmp (entry->d_name + 3, filename, len) != 0)
+	continue;
+
+      if (dot == NULL
+	  && strcmp (entry->d_name + 3 + len, ".a") == 0)
+	{
+	  *found_static = true;
+	  continue;
+	}
+
+      if (strncmp (entry->d_name + 3 + len, ".so", 3) != 0)
+	continue;
+
+      /* We've found a .so file.  Work out the major and minor
+	 version numbers.  */
+      found_maj = 0;
+      found_min = 0;
+      sscanf (entry->d_name + 3 + len, ".so.%d.%d",
+	      &found_maj, &found_min);
+
+      if ((force_maj != -1 && force_maj != found_maj)
+	  || (force_min != -1 && force_min != found_min))
+	continue;
+
+      /* We've found a match for the name we are searching for.  See
+	 if this is the version we should use.  If the major and minor
+	 versions match, we use the last entry in alphabetical order;
+	 I don't know if this is how SunOS distinguishes libc.so.1.8
+	 from libc.so.1.8.1, but it ought to suffice.  */
+      if (found == NULL
+	  || (found_maj > max_maj)
+	  || (found_maj == max_maj
+	      && (found_min > max_min
+		  || (found_min == max_min
+		      && strcmp (entry->d_name, found) > 0))))
+	{
+	  if (found != NULL)
+	    free (found);
+	  found = (char *) xmalloc (strlen (entry->d_name) + 1);
+	  strcpy (found, entry->d_name);
+	  max_maj = found_maj;
+	  max_min = found_min;
+	}
+    }
+
+  closedir (dir);
+
+  if (alc != NULL)
+    free (alc);
+
+  return found;
+}
+
+/* These variables are required to pass information back and forth
+   between after_open and check_needed.  */
+
+static struct bfd_link_needed_list *global_needed;
+static boolean global_found;
+
+/* This is called after all the input files have been opened.  */
+
+static void
+gld${EMULATION_NAME}_after_open ()
+{
+  struct bfd_link_needed_list *needed, *l;
+
+  /* We only need to worry about this when doing a final link.  */
+  if (link_info.relocateable || link_info.shared)
+    return;
+
+  /* Get the list of files which appear in ld_need entries in dynamic
+     objects included in the link.  For each such file, we want to
+     track down the corresponding library, and include the symbol
+     table in the link.  This is what the runtime dynamic linker will
+     do.  Tracking the files down here permits one dynamic object to
+     include another without requiring special action by the person
+     doing the link.  Note that the needed list can actually grow
+     while we are stepping through this loop.  */
+  needed = bfd_sunos_get_needed_list (output_bfd, &link_info);
+  for (l = needed; l != NULL; l = l->next)
+    {
+      struct bfd_link_needed_list *ll;
+      const char *lname;
+      const char *lib_path;
+      search_dirs_type *search;
+
+      lname = l->name;
+
+      /* If we've already seen this file, skip it.  */
+      for (ll = needed; ll != l; ll = ll->next)
+	if (strcmp (ll->name, lname) == 0)
+	  break;
+      if (ll != l)
+	continue;
+
+      /* See if this file was included in the link explicitly.  */
+      global_needed = l;
+      global_found = false;
+      lang_for_each_input_file (gld${EMULATION_NAME}_check_needed);
+      if (global_found)
+	continue;
+
+      if (strncmp (lname, "-l", 2) != 0)
+	{
+	  bfd *abfd;
+
+	  abfd = bfd_openr (lname, bfd_get_target (output_bfd));
+	  if (abfd != NULL)
+	    {
+	      if (! bfd_check_format (abfd, bfd_object))
+		{
+		  (void) bfd_close (abfd);
+		  abfd = NULL;
+		}
+	    }
+	  if (abfd != NULL)
+	    {
+	      if ((bfd_get_file_flags (abfd) & DYNAMIC) == 0)
+		{
+		  (void) bfd_close (abfd);
+		  abfd = NULL;
+		}
+	    }
+	  if (abfd != NULL)
+	    {
+	      /* We've found the needed dynamic object.  */
+	      if (! bfd_link_add_symbols (abfd, &link_info))
+		einfo ("%F%B: could not read symbols: %E\n", abfd);
+	    }
+	  else
+	    {
+	      einfo ("%P: warning: %s, needed by %B, not found\n",
+		     lname, l->by);
+	    }
+
+	  continue;
+	}
+
+      lname += 2;
+
+      /* We want to search for the file in the same way that the
+	 dynamic linker will search.  That means that we want to use
+	 rpath_link, rpath or -L, then the environment variable
+	 LD_LIBRARY_PATH (native only), then (if rpath was used) the
+	 linker script LIB_SEARCH_DIRS.  */
+      if (gld${EMULATION_NAME}_search_needed (command_line.rpath_link,
+					      lname))
+	continue;
+      if (command_line.rpath != NULL)
+	{
+	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath, lname))
+	    continue;
+	}
+      else
+	{
+	  for (search = search_head; search != NULL; search = search->next)
+	    if (gld${EMULATION_NAME}_try_needed (search->name, lname))
+	      break;
+	  if (search != NULL)
+	    continue;
+	}
+EOF
+if [ "x${host_alias}" = "x${target_alias}" ] ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+      lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
+      if (gld${EMULATION_NAME}_search_needed (lib_path, lname))
+	continue;
+EOF
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
+      if (command_line.rpath != NULL)
+	{
+	  for (search = search_head; search != NULL; search = search->next)
+	    {
+	      if (search->cmdline)
+		continue;
+	      if (gld${EMULATION_NAME}_try_needed (search->name, lname))
+		break;
+	    }
+	  if (search != NULL)
+	    continue;
+	}
+
+      einfo ("%P: warning: %s, needed by %B, not found\n",
+	     l->name, l->by);
+    }
+}
+
+/* Search for a needed file in a path.  */
+
+static boolean
+gld${EMULATION_NAME}_search_needed (path, name)
+     const char *path;
+     const char *name;
+{
+  const char *s;
+
+  if (path == NULL || *path == '\0')
+    return false;
+  while (1)
+    {
+      const char *dir;
+      char *dircopy;
+
+      s = strchr (path, ':');
+      if (s == NULL)
+	{
+	  dircopy = NULL;
+	  dir = path;
+	}
+      else
+	{
+	  dircopy = (char *) xmalloc (s - path + 1);
+	  memcpy (dircopy, path, s - path);
+	  dircopy[s - path] = '\0';
+	  dir = dircopy;
+	}
+
+      if (gld${EMULATION_NAME}_try_needed (dir, name))
+	return true;
+
+      if (dircopy != NULL)
+	free (dircopy);
+
+      if (s == NULL)
+	break;
+      path = s + 1;
+    }
+
+  return false;	  
+}
+
+/* This function is called for each possible directory for a needed
+   dynamic object.  */
+
+static boolean
+gld${EMULATION_NAME}_try_needed (dir, name)
+     const char *dir;
+     const char *name;
+{
+  char *file;
+  char *alc;
+  boolean ignore;
+  bfd *abfd;
+
+  file = gld${EMULATION_NAME}_search_dir (dir, name, &ignore);
+  if (file == NULL)
+    return false;
+
+  alc = (char *) xmalloc (strlen (dir) + strlen (file) + 2);
+  sprintf (alc, "%s/%s", dir, file);
+  free (file);
+  abfd = bfd_openr (alc, bfd_get_target (output_bfd));
+  if (abfd == NULL)
+    return false;
+  if (! bfd_check_format (abfd, bfd_object))
+    {
+      (void) bfd_close (abfd);
+      return false;
+    }
+  if ((bfd_get_file_flags (abfd) & DYNAMIC) == 0)
+    {
+      (void) bfd_close (abfd);
+      return false;
+    }
+
+  /* We've found the needed dynamic object.  */
+
+  /* Add this file into the symbol table.  */
+  if (! bfd_link_add_symbols (abfd, &link_info))
+    einfo ("%F%B: could not read symbols: %E\n", abfd);
+
+  return true;
+}
+
+/* See if we have already included a needed object in the link.  This
+   does not have to be precise, as it does no harm to include a
+   dynamic object more than once.  */
+
+static void
+gld${EMULATION_NAME}_check_needed (s)
+     lang_input_statement_type *s;
+{
+  if (s->filename == NULL)
+    return;
+  if (strncmp (global_needed->name, "-l", 2) != 0)
+    {
+      if (strcmp (s->filename, global_needed->name) == 0)
+	global_found = true;
+    }
+  else
+    {
+      const char *sname, *lname;
+      const char *sdot, *ldot;
+      int lmaj, lmin, smaj, smin;
+
+      lname = global_needed->name + 2;
+
+      sname = strrchr (s->filename, '/');
+      if (sname == NULL)
+	sname = s->filename;
+      else
+	++sname;
+
+      if (strncmp (sname, "lib", 3) != 0)
+	return;
+      sname += 3;
+
+      ldot = strchr (lname, '.');
+      if (ldot == NULL)
+	ldot = lname + strlen (lname);
+
+      sdot = strstr (sname, ".so.");
+      if (sdot == NULL)
+	return;
+
+      if (sdot - sname != ldot - lname
+	  || strncmp (lname, sname, sdot - sname) != 0)
+	return;
+
+      lmaj = lmin = -1;
+      sscanf (ldot, ".%d.%d", &lmaj, &lmin);
+      smaj = smin = -1;
+      sscanf (sdot, ".so.%d.%d", &smaj, &smin);
+      if ((smaj != lmaj && smaj != -1 && lmaj != -1)
+	  || (smin != lmin && smin != -1 && lmin != -1))
+	return;
+
+      global_found = true;
+    }
+}
+
+/* We need to use static variables to pass information around the call
+   to lang_for_each_statement.  Ick.  */
+
+static const char *find_assign;
+static boolean found_assign;
+
 /* We need to use static variables to pass information around the call
    to lang_for_each_input_file.  Ick.  */
 
@@ -278,10 +600,47 @@ static bfd_byte *need_pnames;
 static void
 gld${EMULATION_NAME}_before_allocation ()
 {
-  struct bfd_link_hash_entry *h = NULL;
+  struct bfd_link_hash_entry *hdyn = NULL;
   asection *sneed;
   asection *srules;
   asection *sdyn;
+
+  /* The SunOS native linker creates a shared library whenever there
+     are any undefined symbols in a link, unless -e is used.  This is
+     pretty weird, but we are compatible.  */
+  if (! link_info.shared && ! link_info.relocateable && ! entry_from_cmdline)
+    {
+      struct bfd_link_hash_entry *h;
+      
+      for (h = link_info.hash->undefs; h != NULL; h = h->next)
+	{
+	  if (h->type == bfd_link_hash_undefined
+	      && h->u.undef.abfd != NULL
+	      && (h->u.undef.abfd->flags & DYNAMIC) == 0
+	      && strcmp (h->root.string, "__DYNAMIC") != 0)
+	    {
+	      find_assign = h->root.string;
+	      found_assign = false;
+	      lang_for_each_statement (gld${EMULATION_NAME}_find_assignment);
+	      if (! found_assign)
+		{
+		  link_info.shared = true;
+		  break;
+		}
+	    }
+	}
+    }
+
+  if (link_info.shared)
+    {
+      lang_output_section_statement_type *os;
+
+      /* Set the .text section to start at 0x20, not 0x2020.  FIXME:
+         This is too magical.  */
+      os = lang_output_section_statement_lookup (".text");
+      if (os->addr_tree == NULL)
+	os->addr_tree = exp_intop (0x20);
+    }
 
   /* We need to create a __DYNAMIC symbol.  We don't do this in the
      linker script because we want to set the value to the start of
@@ -291,9 +650,9 @@ gld${EMULATION_NAME}_before_allocation ()
      afterward.  */
   if (! link_info.relocateable)
     {
-      h = bfd_link_hash_lookup (link_info.hash, "__DYNAMIC", true, false,
-				false);
-      if (h == NULL)
+      hdyn = bfd_link_hash_lookup (link_info.hash, "__DYNAMIC", true, false,
+				   false);
+      if (hdyn == NULL)
 	einfo ("%P%F: bfd_link_hash_lookup: %E\n");
       if (! bfd_sunos_record_link_assignment (output_bfd, &link_info,
 					      "__DYNAMIC"))
@@ -303,7 +662,7 @@ gld${EMULATION_NAME}_before_allocation ()
   /* If we are going to make any variable assignments, we need to let
      the backend linker know about them in case the variables are
      referred to by dynamic objects.  */
-  lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+  lang_for_each_statement (gld${EMULATION_NAME}_find_assignment);
 
   /* Let the backend linker work out the sizes of any sections
      required by dynamic linking.  */
@@ -339,31 +698,41 @@ gld${EMULATION_NAME}_before_allocation ()
 
   if (srules != NULL)
     {
-      unsigned int size;
-      search_dirs_type *search;
-
       /* Set up the .rules section.  This is just a PATH like string
-	 of the -L arguments given on the command line.  */
-      size = 0;
-      for (search = search_head; search != NULL; search = search->next)
-	if (search->cmdline)
-	  size += strlen (search->name) + 1;
-      srules->_raw_size = size;
-      if (size > 0)
+	 of the -L arguments given on the command line.  We permit the
+	 user to specify the directories using the -rpath command line
+	 option.  */
+      if (command_line.rpath)
 	{
-	  char *p;
+	  srules->_raw_size = strlen (command_line.rpath);
+	  srules->contents = (bfd_byte *) command_line.rpath;
+	}
+      else
+	{
+	  unsigned int size;
+	  search_dirs_type *search;
 
-	  srules->contents = (bfd_byte *) xmalloc (size);
-	  p = (char *) srules->contents;
-	  *p = '\0';
+	  size = 0;
 	  for (search = search_head; search != NULL; search = search->next)
+	    if (search->cmdline)
+	      size += strlen (search->name) + 1;
+	  srules->_raw_size = size;
+	  if (size > 0)
 	    {
-	      if (search->cmdline)
+	      char *p;
+
+	      srules->contents = (bfd_byte *) xmalloc (size);
+	      p = (char *) srules->contents;
+	      *p = '\0';
+	      for (search = search_head; search != NULL; search = search->next)
 		{
-		  if (p != (char *) srules->contents)
-		    *p++ = ':';
-		  strcpy (p, search->name);
-		  p += strlen (p);
+		  if (search->cmdline)
+		    {
+		      if (p != (char *) srules->contents)
+			*p++ = ':';
+		      strcpy (p, search->name);
+		      p += strlen (p);
+		    }
 		}
 	    }
 	}
@@ -374,25 +743,28 @@ gld${EMULATION_NAME}_before_allocation ()
      we are doing one.  */
   if (! link_info.relocateable)
     {
-      h->type = bfd_link_hash_defined;
-      h->u.def.value = 0;
+      hdyn->type = bfd_link_hash_defined;
+      hdyn->u.def.value = 0;
       if (sdyn != NULL)
-	h->u.def.section = sdyn;
+	hdyn->u.def.section = sdyn;
       else
-	h->u.def.section = bfd_abs_section_ptr;
+	hdyn->u.def.section = bfd_abs_section_ptr;
     }
 }
 
 /* This is called by the before_allocation routine via
-   lang_for_each_statement.  It locates any assignment statements, and
-   tells the backend linker about them, in case they are assignments
-   to symbols which are referred to by dynamic objects.  */
+   lang_for_each_statement.  It does one of two things: if the
+   variable find_assign is set, it sets found_assign if it finds an
+   assignment to that variable; otherwise it tells the backend linker
+   about all assignment statements, in case they are assignments to
+   symbols which are referred to by dynamic objects.  */
 
 static void
-gld${EMULATION_NAME}_find_statement_assignment (s)
+gld${EMULATION_NAME}_find_assignment (s)
      lang_statement_union_type *s;
 {
-  if (s->header.type == lang_assignment_statement_enum)
+  if (s->header.type == lang_assignment_statement_enum
+      && (find_assign == NULL || ! found_assign))
     gld${EMULATION_NAME}_find_exp_assignment (s->assignment_statement.exp);
 }
 
@@ -405,6 +777,13 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
   switch (exp->type.node_class)
     {
     case etree_assign:
+      if (find_assign != NULL)
+	{
+	  if (strcmp (find_assign, exp->assign.dst) == 0)
+	    found_assign = true;
+	  return;
+	}
+
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
 	  if (! bfd_sunos_record_link_assignment (output_bfd, &link_info,
@@ -540,8 +919,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xbn`;
   else if (!config.magic_demand_paged)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xn`;
-  else if (link_info.shared)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xs`;
   else
     return `sed "$sc" ldscripts/${EMULATION_NAME}.x`;
 }
@@ -562,8 +939,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
     return "ldscripts/${EMULATION_NAME}.xbn";
   else if (!config.magic_demand_paged)
     return "ldscripts/${EMULATION_NAME}.xn";
-  else if (link_info.shared)
-    return "ldscripts/${EMULATION_NAME}.xs";
   else
     return "ldscripts/${EMULATION_NAME}.x";
 }
@@ -579,7 +954,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   syslib_default,
   hll_default,
   after_parse_default,
-  after_open_default,
+  gld${EMULATION_NAME}_after_open,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,
