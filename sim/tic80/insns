@@ -231,6 +231,7 @@ void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 	/* NOP */
 31./,27.F,26.Source2,21.0b110111,15.M,14.0b00,12.1,11./::::dcache l
 	long_immediate (LongSignedImmediate);
+	LongSignedImmediate++;
 	/* NOP */
 
 
@@ -552,26 +553,109 @@ void::function::do_rdcr:instruction_address cia, unsigned32 Dest, int cr
 
 
 // sl.{d|e|i}{m|s|z}
-31.Dest,26.Source,21.0b0001,17.Merge,14./,11.0,10.0,9.EndMask,4.Rotate::::sl i
-31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.0,10.0,9.EndMask,4.RotReg::::sl r
+void::function::do_shift:instruction_address cia, int Dest, int Source, int Merge, int i, int n, int EndMask, int Rotate
+	/* see 10-30 for a reasonable description */
+	unsigned32 rotated;
+	unsigned32 endmask;
+	unsigned32 shiftmask;
+	unsigned32 cm;
+	int nRotate;
+	/* rotate the source */
+	if (n)
+	  {
+	    rotated = ROTR32 (GPR (Source), Rotate);
+	    nRotate = (- Rotate) & 31;
+	  }
+	else
+	  {
+	    rotated = ROTL32 (GPR (Source), Rotate);
+	    nRotate = Rotate;
+	  }
+	/* form the end mask */
+	if (EndMask == 0)
+	  endmask = -1;
+	else
+	  endmask = (1 << EndMask) - 1;
+	if (i)
+	  endmask = ~endmask;
+	/* form the shiftmask */
+	switch (Merge)
+	  {
+	  case 0: case 1: case 2:
+	    shiftmask = -1; /* disabled */
+	    break;
+	  case 3: case 4: case 5:
+	    shiftmask = ((1 << nRotate) - 1); /* enabled */
+	    break;
+	  case 6: case 7:
+	    shiftmask = ~((1 << nRotate) - 1); /* inverted */
+	    break;
+	  default:
+	    engine_error (SD, CPU, cia,
+	                  "0x%lx: Invalid merge (%d) for shift",
+	                  cia.ip, Source);
+	    shiftmask = 0;
+	  }
+	/* and the composite mask */
+	cm = shiftmask & endmask;
+	/* and merge */
+	switch (Merge)
+	  {
+	  case 0: case 3: case 6: /* zero */
+	    GPR (Dest) = rotated & cm;
+	    break;
+	  case 1: case 4: case 7: /* merge */
+	    GPR (Dest) = (rotated & cm) | (GPR (Dest) & ~cm);
+	    break;
+	  case 2: case 5: /* sign */
+	    {
+	      int b;
+	      GPR (Dest) = rotated & cm;
+	      for (b = 1; b <= 31; b++)
+	        if (!MASKED32 (cm, b, b))
+	          GPR (Dest) |= INSERTED32 (EXTRACTED32 (GPR (Dest), b - 1, b - 1),
+	                                    b, b);
+	    }
+	    break;
+	  default:
+	    engine_error (SD, CPU, cia,
+	                  "0x%lx: Invalid merge (%d)",
+	                  cia.ip, Source);
+
+	  }
+31.Dest,26.Source,21.0b0001,17.Merge,14./,11.i,10.n,9.EndMask,4.Rotate::::sl i
+	do_shift (_SD, cia, Dest, Source, Merge, i, n, EndMask, Rotate);
+31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.i,10.n,9.EndMask,4.RotReg::::sl r
+	int endmask;
+	if (EndMask == 0)
+	  endmask = EndMask;
+	else
+	  {
+	    if (Source & 1)
+	      engine_error (SD, CPU, cia,
+	                    "0x%lx: Invalid source (%d) for shift",
+	                    cia.ip, Source);
+	    endmask = GPR (Source + 1) & 31;
+	  }
+	do_shift (_SD, cia, Dest, Source, Merge, i, n, endmask, GPR (RotReg) & 31);
 
 
 // sli.{d|e|i}{m|s|z}
-31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,10.0,9.EndMask,4.Rotate::::sli i
-31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,10.0,9.EndMask,4.RotReg::::sli r
+#31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,10.0,9.EndMask,4.Rotate::::sli i
+#31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,10.0,9.EndMask,4.RotReg::::sli r
 
 
 // sr.{d|e|i}{m|s|z}
-31.Dest,26.Source,21.0b0001,17.Merge,14./,11.0,10.1,9.EndMask,4.Rotate::::sr i
-31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.0,10.1,9.EndMask,4.RotReg::::sr r
+#31.Dest,26.Source,21.0b0001,17.Merge,14./,11.0,10.1,9.EndMask,4.Rotate::::sr i
+#31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.0,10.1,9.EndMask,4.RotReg::::sr r
 
 
 // sra - see sr.es
 
 
 // sri.{d|e|i}{m|s|z}
-31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,10.1,9.EndMask,4.Rotate::::sri i
-31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,10.1,9.EndMask,4.RotReg::::sri r
+#31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,10.1,9.EndMask,4.Rotate::::sri i
+#31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,10.1,9.EndMask,4.RotReg::::sri r
 
 
 // srl - see sr.ez
@@ -669,7 +753,9 @@ void::function::do_trap:instruction_address cia, unsigned32 trap_number
 	        {
 	          int i;
 	          if (GPR(2) != 1)
-	            engine_error (SD, CPU, cia, "write to invalid fid %d", GPR(2));
+	            engine_error (SD, CPU, cia,
+	                          "0x%lx: write to invalid fid %d",
+	                          (unsigned long) cia.ip, GPR(2));
 		  for (i = 0; i < GPR(6); i++)
 	            {
 		      char c;
@@ -680,11 +766,17 @@ void::function::do_trap:instruction_address cia, unsigned32 trap_number
 	          break;
 	        }
 	      default:
-	        engine_error (SD, CPU, cia, "unknown syscall trap %d", GPR(2));
+	        engine_error (SD, CPU, cia,
+	                      "0x%lx: unknown syscall %d",
+	                      (unsigned long) cia.ip, GPR(15));
 	      }
 	    break;
+	  case 73:
+	    engine_halt (SD, CPU, cia, sim_stopped, SIGTRAP);
 	  default:
-	    engine_error (SD, CPU, cia, "unsupported trap %d", trap_number);
+	    engine_error (SD, CPU, cia,
+	                  "0x%lx: unsupported trap %d",
+	                  (unsigned long) cia.ip, trap_number);
 	  }
 31./,27.0,26./,21.0b0000001,14.UTN::::trap i
 	do_trap (_SD, cia, UTN);
