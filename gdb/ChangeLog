@@ -1,5 +1,10 @@
 2000-03-16  Jim Blandy  <jimb@redhat.com>
 
+	* solib.c (current_sos): Be more careful about freeing the new
+	so_list node if an error occurs.
+
+2000-03-16  Jim Blandy  <jimb@redhat.com>
+
 	* i386-tdep.c (LINUX_SIGTRAMP_INSN0, LINUX_SIGTRAMP_OFFSET0,
 	LINUX_SIGTRAMP_INSN1, LINUX_SIGTRAMP_OFFSET1,
 	LINUX_SIGTRAMP_INSN2, LINUX_SIGTRAMP_OFFSET2, linux_sigtramp_code,
