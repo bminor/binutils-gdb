@@ -715,6 +715,51 @@ coff_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
   aouthdr_int->gprmask = bfd_h_get_32(abfd, aouthdr_ext->gprmask);
   aouthdr_int->fprmask = bfd_h_get_32(abfd, aouthdr_ext->fprmask);
 #endif
+
+#ifdef COFF_IMAGE_WITH_PE
+
+  {
+    struct internal_extra_pe_aouthdr *a;
+    PEAOUTHDR *src = (PEAOUTHDR *)(aouthdr_ext);
+    a = aouthdr_int->pe = bfd_alloc (abfd, sizeof (*a));
+
+    a->ImageBase = bfd_h_get_32 (abfd, src->ImageBase);
+    a->SectionAlignment = bfd_h_get_32 (abfd, src->SectionAlignment);
+    a->FileAlignment = bfd_h_get_32 (abfd, src->FileAlignment);
+    a->MajorOperatingSystemVersion = 
+      bfd_h_get_16 (abfd, src->MajorOperatingSystemVersion);
+    a->MinorOperatingSystemVersion = 
+      bfd_h_get_16 (abfd, src->MinorOperatingSystemVersion);
+    a->MajorImageVersion = bfd_h_get_16 (abfd, src->MajorImageVersion);
+    a->MinorImageVersion = bfd_h_get_16 (abfd, src->MinorImageVersion);
+    a->MajorSubsystemVersion = bfd_h_get_16 (abfd, src->MajorSubsystemVersion);
+    a->MinorSubsystemVersion = bfd_h_get_16 (abfd, src->MinorSubsystemVersion);
+    a->Reserved1 = bfd_h_get_32 (abfd, src->Reserved1);
+    a->SizeOfImage = bfd_h_get_32 (abfd, src->SizeOfImage);
+    a->SizeOfHeaders = bfd_h_get_32 (abfd, src->SizeOfHeaders);
+    a->CheckSum = bfd_h_get_32 (abfd, src->CheckSum);
+    a->Subsystem = bfd_h_get_16 (abfd, src->Subsystem);
+    a->DllCharacteristics = bfd_h_get_16 (abfd, src->DllCharacteristics);
+    a->SizeOfStackReserve = bfd_h_get_32 (abfd, src->SizeOfStackReserve);
+    a->SizeOfStackCommit = bfd_h_get_32 (abfd, src->SizeOfStackCommit);
+    a->SizeOfHeapReserve = bfd_h_get_32 (abfd, src->SizeOfHeapReserve);
+    a->SizeOfHeapCommit = bfd_h_get_32 (abfd, src->SizeOfHeapCommit);
+    a->LoaderFlags = bfd_h_get_32 (abfd, src->LoaderFlags);
+    a->NumberOfRvaAndSizes = bfd_h_get_32 (abfd, src->NumberOfRvaAndSizes);
+
+    {
+      int idx;
+      for (idx=0; idx < 16; idx++)
+	{
+	  a->DataDirectory[idx].VirtualAddress =
+	    bfd_h_get_32 (abfd, src->DataDirectory[idx][0]);
+	  a->DataDirectory[idx].Size =
+	    bfd_h_get_32 (abfd, src->DataDirectory[idx][1]);
+	}
+    }
+  }
+#endif
+
 }
 
 static unsigned int
@@ -736,7 +781,7 @@ coff_swap_aouthdr_out (abfd, in, out)
 			  (bfd_byte *) aouthdr_out->text_start);
   PUT_AOUTHDR_DATA_START (abfd, aouthdr_in->data_start,
 			  (bfd_byte *) aouthdr_out->data_start);
-#ifdef COFF_WITH_PE
+#ifdef COFF_IMAGE_WITH_PE
   {
   PEAOUTHDR *peaouthdr_out = (PEAOUTHDR *)aouthdr_out;
   bfd_h_put_32 (abfd, aouthdr_in->pe->ImageBase, 
@@ -855,13 +900,12 @@ coff_swap_scnhdr_in (abfd, ext, in)
 #ifdef I960
   scnhdr_int->s_align = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_align);
 #endif
-
+#ifdef COFF_IMAGE_WITH_PE
 #ifdef NT_EXE_IMAGE_BASE
-/*
   if (scnhdr_int->s_vaddr != 0) {
     scnhdr_int->s_vaddr += NT_EXE_IMAGE_BASE;
   }
-*/
+#endif
 #endif
 }
 

@@ -45,6 +45,8 @@ aoutarm_fix_pcrel_26 PARAMS ((bfd *, arelent *, asymbol *, PTR,
 static bfd_reloc_status_type coff_arm_reloc 
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
+
+/* Used by the assembler. */
 static bfd_reloc_status_type
 coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 error_message)
@@ -57,7 +59,6 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
      char **error_message;
 {
   symvalue diff;
-
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
 
@@ -183,7 +184,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	complain_overflow_signed,
 	aoutarm_fix_pcrel_26 ,
 	"ARM26",
-	true, 
+	false,
 	0x00ffffff,
 	0x00ffffff, 
 	PCRELOFFSET),
@@ -282,9 +283,33 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 };
 
 
-
 #define RTYPE2HOWTO(cache_ptr, dst) \
 	    (cache_ptr)->howto = aoutarm_std_reloc_howto + (dst)->r_type;
+
+#define coff_rtype_to_howto coff_arm_rtype_to_howto
+static reloc_howto_type *
+coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
+     bfd *abfd;
+     asection *sec;
+     struct internal_reloc *rel;
+     struct coff_link_hash_entry *h;
+     struct internal_syment *sym;
+     bfd_vma *addendp;
+{
+  reloc_howto_type *howto;
+
+  howto = aoutarm_std_reloc_howto + rel->r_type;
+
+  if (rel->r_type == 11)
+    {
+      /* Gross, where can I get this from ?? */
+      struct bfd_link_info *link_info = coff_data(sec->output_section->owner)->link_info;
+      *addendp -= link_info->pe_info->image_base.value;
+    }
+  return howto;
+
+}
+/* Used by the assembler. */
 
 static bfd_reloc_status_type
 aoutarm_fix_pcrel_26_done (abfd, reloc_entry, symbol, data, input_section,
@@ -300,6 +325,8 @@ aoutarm_fix_pcrel_26_done (abfd, reloc_entry, symbol, data, input_section,
   /* This is dead simple at present.  */
   return bfd_reloc_ok;
 }
+
+/* Used by the assembler. */
 
 static bfd_reloc_status_type
 aoutarm_fix_pcrel_26 (abfd, reloc_entry, symbol, data, input_section,
@@ -356,9 +383,10 @@ aoutarm_fix_pcrel_26 (abfd, reloc_entry, symbol, data, input_section,
   /* Now the ARM magic... Change the reloc type so that it is marked as done.
      Strictly this is only necessary if we are doing a partial relocation.  */
   reloc_entry->howto = &aoutarm_std_reloc_howto[7];
-  
+
   return flag;
 }
+
 
 static CONST struct reloc_howto_struct *
 arm_reloc_type_lookup(abfd,code)
@@ -395,100 +423,6 @@ arm_reloc_type_lookup(abfd,code)
 /* The page size is a guess based on ELF.  */
 #define COFF_PAGE_SIZE 0x1000
 
-/* For some reason when using arm COFF the value stored in the .text
-   section for a reference to a common symbol is the value itself plus
-   any desired offset.  Ian Taylor, Cygnus Support.  */
-
-/* If we are producing relocateable output, we need to do some
-   adjustments to the object file that are not done by the
-   bfd_perform_relocation function.  This function is called by every
-   reloc type to make any required adjustments.  */
-
-static bfd_reloc_status_type
-aacoff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
-		 error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
-{
-  symvalue diff;
-
-  if (output_bfd == (bfd *) NULL)
-    return bfd_reloc_continue;
-
-  if (bfd_is_com_section (symbol->section))
-    {
-      /* We are relocating a common symbol.  The current value in the
-	 object file is ORIG + OFFSET, where ORIG is the value of the
-	 common symbol as seen by the object file when it was compiled
-	 (this may be zero if the symbol was undefined) and OFFSET is
-	 the offset into the common symbol (normally zero, but may be
-	 non-zero when referring to a field in a common structure).
-	 ORIG is the negative of reloc_entry->addend, which is set by
-	 the CALC_ADDEND macro below.  We want to replace the value in
-	 the object file with NEW + OFFSET, where NEW is the value of
-	 the common symbol which we are going to put in the final
-	 object file.  NEW is symbol->value.  */
-      diff = symbol->value + reloc_entry->addend;
-    }
-  else
-    {
-      /* For some reason bfd_perform_relocation always effectively
-	 ignores the addend for a COFF target when producing
-	 relocateable output.  This seems to be always wrong for arm
-	 COFF, so we handle the addend here instead.  */
-      diff = reloc_entry->addend;
-    }
-
-#define DOIT(x) \
-  x = ((x & ~howto->dst_mask) | (((x & howto->src_mask) + diff) & howto->dst_mask))
-
-  if (diff != 0)
-    {
-      reloc_howto_type *howto = reloc_entry->howto;
-      unsigned char *addr = (unsigned char *) data + reloc_entry->address;
-
-      switch (howto->size)
-	{
-	case 0:
-	  {
-	    char x = bfd_get_8 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_8 (abfd, x, addr);
-	  }
-	  break;
-
-	case 1:
-	  {
-	    short x = bfd_get_16 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_16 (abfd, x, addr);
-	  }
-	  break;
-
-	case 2:
-	  {
-	    long x = bfd_get_32 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_32 (abfd, x, addr);
-	  }
-	  break;
-
-	default:
-	  abort ();
-	}
-    }
-
-  /* Now let bfd_perform_relocation finish everything up.  */
-  return bfd_reloc_continue;
-}
-
-
-
 
 
 /* Turn a howto into a reloc  nunmber */
@@ -511,8 +445,6 @@ aacoff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 
 /* We use the special COFF backend linker.  */
 #define coff_relocate_section _bfd_coff_generic_relocate_section
-
-
 
 #include "coffcode.h"
 

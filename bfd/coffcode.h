@@ -1507,7 +1507,7 @@ coff_compute_section_file_positions (abfd)
   asection *current;
   asection *previous = (asection *) NULL;
   file_ptr sofar = FILHSZ;
-  int page_size;
+
 #ifndef I960
   file_ptr old_sofar;
 #endif
@@ -1515,6 +1515,7 @@ coff_compute_section_file_positions (abfd)
 
 
 #ifdef COFF_IMAGE_WITH_PE
+  int page_size;
   if (coff_data (abfd)->link_info) 
     {
       page_size = pe_value (&(coff_data (abfd)->link_info->pe_info->file_alignment),
@@ -1522,9 +1523,10 @@ coff_compute_section_file_positions (abfd)
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;
-#else
-  page_size = COFF_PAGE_SIZE;
+#elif defined (COFF_PAGE_SIZE)
+  int page_size = COFF_PAGE_SIZE;
 #endif
+
   if (bfd_get_start_address (abfd))
     {
       /*  A start address may have been added to the original file. In this
@@ -1577,9 +1579,11 @@ coff_compute_section_file_positions (abfd)
 
       /* In demand paged files the low order bits of the file offset
 	 must match the low order bits of the virtual address.  */
+#ifdef COFF_PAGE_SIZE
       if ((abfd->flags & D_PAGED) != 0
 	  && (current->flags & SEC_ALLOC) != 0)
 	sofar += (current->vma - sofar) % page_size;
+#endif
 
       current->filepos = sofar;
 
@@ -1748,11 +1752,11 @@ fill_pe_header_info (abfd, internal_f, internal_a)
     internal_a->entry -= ib;
 
 
-  sa =   internal_a->pe->SectionAlignment = pe_value (&pe_info->section_alignment,
-						      NT_SECTION_ALIGNMENT);
+  sa = internal_a->pe->SectionAlignment = pe_value (&pe_info->section_alignment,
+						    NT_SECTION_ALIGNMENT);
 
-  fa =   internal_a->pe->FileAlignment = pe_value (&pe_info->file_alignment, 
-						   NT_FILE_ALIGNMENT);
+  fa = internal_a->pe->FileAlignment = pe_value (&pe_info->file_alignment, 
+						 NT_FILE_ALIGNMENT);
 
 #define FA(x)  (((x) + fa -1 ) & (- fa))
 #define SA(x)  (((x) + sa -1 ) & (- sa))
@@ -1841,8 +1845,6 @@ fill_pe_header_info (abfd, internal_f, internal_a)
      structure are in order and that I have successfully saved the last
      section's address and size. */
 
-
-
   /* The headers go up to where the first section starts. */
 
   internal_a->pe->SizeOfHeaders = abfd->sections->filepos;
@@ -1874,7 +1876,6 @@ fill_pe_header_info (abfd, internal_f, internal_a)
     bfd_vma dsize= 0;
     bfd_vma isize = SA(abfd->sections->filepos);
     bfd_vma tsize= 0;
-    bfd_vma dstart = 0;
     for (sec = abfd->sections; sec; sec = sec->next)
       {
 	int rounded = FA(sec->_raw_size);
