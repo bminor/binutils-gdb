@@ -1628,6 +1628,10 @@ enum bfd_architecture
 #define bfd_mach_rs6k_rsc      6003
 #define bfd_mach_rs6k_rs2      6002
   bfd_arch_hppa,      /* HP PA RISC */
+#define bfd_mach_hppa10        10
+#define bfd_mach_hppa11        11
+#define bfd_mach_hppa20        20
+#define bfd_mach_hppa20w       25
   bfd_arch_d10v,      /* Mitsubishi D10V */
 #define bfd_mach_d10v          1
 #define bfd_mach_d10v_ts2      2

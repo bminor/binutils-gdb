@@ -1,3 +1,9 @@
+2003-09-08  Joel Brobecker  <brobecker@gnat.com>
+
+	* archures.c: Add new machine names for hppa.
+	* bfd-in2.h: Regenerate.
+	* cpu-hppa.c: Use the new machine names.
+
 2003-09-06  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* elf32-m68hc1x.h (struct m68hc11_elf_link_hash_table): Remove
