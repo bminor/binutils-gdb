@@ -1,3 +1,7 @@
+Wed Mar 11 02:07:52 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: remove force dependencies, add grep to all.
+
 Tue Mar 10 21:49:18 1992  K. Richard Pixley  (rich@mars.cygnus.com)
 
 	* Makefile.in: drop flex.  make stamp files work.

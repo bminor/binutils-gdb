@@ -113,7 +113,7 @@ install-dir.info:
 #	all-libgcc
 all.normal: .stmp-texinfo .stmp-bison .stmp-byacc .stmp-ld \
 	.stmp-gas .stmp-gcc .stmp-binutils \
-	.stmp-libg++ .stmp-gdb .stmp-make .stmp-cvs .stmp-patch .stmp-emacs \
+	.stmp-libg++ .stmp-gdb .stmp-make .stmp-cvs .stmp-grep .stmp-patch .stmp-emacs \
 	.stmp-ispell .stmp-fileutils \
 	.stmp-newlib 
 all.cross: .stmp-bison .stmp-ld .stmp-libgcc .stmp-gdb
@@ -1335,7 +1335,7 @@ install-gdbm: force
 ### cvs
 
 all-cvs: .stmp-cvs .stmp-rcs .stmp-grep .stmp-diff
-.stmp-cvs: .stmp-gdbm force
+.stmp-cvs: .stmp-gdbm
 	if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
@@ -1355,7 +1355,7 @@ all-cvs: .stmp-cvs .stmp-rcs .stmp-grep .stmp-diff
 	fi
 	touch .stmp-cvs
 
-clean-cvs: clean-gdbm force
+clean-cvs: clean-gdbm
 	if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
@@ -1374,7 +1374,7 @@ clean-cvs: clean-gdbm force
 		true ; \
 	fi
 
-install-cvs: install-rcs install-gdbm force
+install-cvs: install-rcs install-gdbm
 	if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
@@ -1395,7 +1395,7 @@ install-cvs: install-rcs install-gdbm force
 
 ### patch
 all-patch: .stmp-patch
-.stmp-patch: force
+.stmp-patch:
 	if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
@@ -1415,7 +1415,7 @@ all-patch: .stmp-patch
 	fi
 	touch .stmp-patch
 
-clean-patch: force
+clean-patch:
 	if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
@@ -1434,7 +1434,7 @@ clean-patch: force
 		true ; \
 	fi
 
-install-patch: force
+install-patch:
 	if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
@@ -1456,7 +1456,7 @@ install-patch: force
 
 ### emacs
 all-emacs: .stmp-emacs
-.stmp-emacs: force
+.stmp-emacs:
 	if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
@@ -1476,7 +1476,7 @@ all-emacs: .stmp-emacs
 	fi
 	touch .stmp-emacs
 
-clean-emacs: force
+clean-emacs:
 	if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
@@ -1495,7 +1495,7 @@ clean-emacs: force
 		true ; \
 	fi
 
-install-emacs: install-rcs install-gdbm force
+install-emacs: install-rcs install-gdbm
 	if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
@@ -1515,8 +1515,8 @@ install-emacs: install-rcs install-gdbm force
 	fi
 
 ### ispell
-all-ispell: .stmp-ispell
-.stmp-ispell: all-emacs force
+all-ispell: .stmp-emacs .stmp-ispell
+.stmp-ispell:
 	if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
@@ -1536,7 +1536,7 @@ all-ispell: .stmp-ispell
 	fi
 	touch .stmp-ispell
 
-clean-ispell: force
+clean-ispell:
 	if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
@@ -1555,7 +1555,7 @@ clean-ispell: force
 		true ; \
 	fi
 
-install-ispell: install-rcs install-gdbm force
+install-ispell: install-rcs install-gdbm
 	if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
@@ -1576,7 +1576,7 @@ install-ispell: install-rcs install-gdbm force
 
 ### fileutils
 all-fileutils: .stmp-fileutils
-.stmp-fileutils: force
+.stmp-fileutils:
 	if [ -d ./fileutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./fileutils; \
@@ -1599,7 +1599,7 @@ all-fileutils: .stmp-fileutils
 	fi
 	touch .stmp-fileutils
 
-clean-fileutils: force
+clean-fileutils:
 	if [ -d ./fileutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./fileutils; \
@@ -1621,7 +1621,7 @@ clean-fileutils: force
 		true ; \
 	fi
 
-install-fileutils: force
+install-fileutils:
 	if [ -d ./fileutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./fileutils; \
@@ -1677,7 +1677,7 @@ all-libg++: .stmp-gas .stmp-ld .stmp-gcc .stmp-libg++
 	fi
 	touch .stmp-libg++
 
-clean-libg++: force
+clean-libg++:
 	if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
@@ -1699,7 +1699,7 @@ clean-libg++: force
 		true ; \
 	fi
 
-install-libg++: force
+install-libg++:
 	if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
@@ -1728,7 +1728,7 @@ all.xclib:	all.normal
 		(cd clib ; $(MAKE)) ; \
 	fi
 
-subdir_do: force
+subdir_do:
 	for i in $(DODIRS); do \
 		if [ -f ./$$i/localenv ] ; then \
 			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
@@ -1836,7 +1836,7 @@ MAKEDIRS= \
 #	$(man7dir) \
 #	$(man8dir)
 
-install-dirs: force
+install-dirs:
 	for i in $(MAKEDIRS) ; do \
 		echo Making $$i... ; \
 		[ -d $$i ] || mkdir $$i || exit 1 ; \
@@ -1846,18 +1846,18 @@ MAKEINFODIRS= \
 	$(prefix) \
 	$(infodir)
 
-install-info-dirs: force
+install-info-dirs:
 	if [ -d $(prefix) ] ; then true ; else mkdir $(prefix) ; fi
 	if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
 	if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 
-dir.info: force
+dir.info:
 	$(srcdir)/texinfo/gen-info-dir $(infodir) > dir.info.new
 	mv -f dir.info.new dir.info
 
 etags tags: TAGS
 
-TAGS: FORCE
+TAGS:
 	etags `$(MAKE) ls`
 
 ls:
