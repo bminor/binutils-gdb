@@ -175,7 +175,7 @@ push_event (void *context)
 }
 
 int
-ser_unix_write (struct serial *scb, const char *str, int len)
+ser_base_write (struct serial *scb, const char *str, int len)
 {
   int cc;
 
@@ -192,13 +192,13 @@ ser_unix_write (struct serial *scb, const char *str, int len)
 }
 
 int
-ser_unix_nop_flush_output (struct serial *scb)
+ser_base_flush_output (struct serial *scb)
 {
   return 0;
 }
 
 int
-ser_unix_flush_input (struct serial *scb)
+ser_base_flush_input (struct serial *scb)
 {
   if (scb->bufcnt >= 0)
     {
@@ -211,61 +211,61 @@ ser_unix_flush_input (struct serial *scb)
 }
 
 int
-ser_unix_nop_send_break (struct serial *scb)
+ser_base_send_break (struct serial *scb)
 {
   return 0;
 }
 
 int
-ser_unix_nop_drain_output (struct serial *scb)
+ser_base_drain_output (struct serial *scb)
 {
   return 0;
 }
 
 void
-ser_unix_nop_raw (struct serial *scb)
+ser_base_raw (struct serial *scb)
 {
   return;			/* Always in raw mode */
 }
 
 serial_ttystate
-ser_unix_nop_get_tty_state (struct serial *scb)
+ser_base_get_tty_state (struct serial *scb)
 {
   /* allocate a dummy */
   return (serial_ttystate) XMALLOC (int);
 }
 
 int
-ser_unix_nop_set_tty_state (struct serial *scb, serial_ttystate ttystate)
+ser_base_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 {
   return 0;
 }
 
 int
-ser_unix_nop_noflush_set_tty_state (struct serial *scb,
-				    serial_ttystate new_ttystate,
-				    serial_ttystate old_ttystate)
+ser_base_noflush_set_tty_state (struct serial *scb,
+				serial_ttystate new_ttystate,
+				serial_ttystate old_ttystate)
 {
   return 0;
 }
 
 void
-ser_unix_nop_print_tty_state (struct serial *scb, 
-			      serial_ttystate ttystate,
-			      struct ui_file *stream)
+ser_base_print_tty_state (struct serial *scb, 
+			  serial_ttystate ttystate,
+			  struct ui_file *stream)
 {
   /* Nothing to print.  */
   return;
 }
 
 int
-ser_unix_nop_setbaudrate (struct serial *scb, int rate)
+ser_base_setbaudrate (struct serial *scb, int rate)
 {
   return 0;			/* Never fails! */
 }
 
 int
-ser_unix_nop_setstopbits (struct serial *scb, int num)
+ser_base_setstopbits (struct serial *scb, int num)
 {
   return 0;			/* Never fails! */
 }
@@ -273,7 +273,7 @@ ser_unix_nop_setstopbits (struct serial *scb, int num)
 /* Put the SERIAL device into/out-of ASYNC mode.  */
 
 void
-ser_unix_async (struct serial *scb,
+ser_base_async (struct serial *scb,
 		int async_p)
 {
   if (async_p)

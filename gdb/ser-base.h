@@ -26,25 +26,25 @@ struct serial;
 struct ui_file;
 
 extern void reschedule (struct serial *scb);
-extern int ser_unix_nop_flush_output (struct serial *scb);
-extern int ser_unix_flush_input (struct serial *scb);
-extern int ser_unix_nop_send_break (struct serial *scb);
-extern void ser_unix_nop_raw (struct serial *scb);
-extern serial_ttystate ser_unix_nop_get_tty_state (struct serial *scb);
-extern int ser_unix_nop_set_tty_state (struct serial *scb,
-				       serial_ttystate ttystate);
-extern void ser_unix_nop_print_tty_state (struct serial *scb,
-					  serial_ttystate ttystate,
-					  struct ui_file *stream);
-extern int ser_unix_nop_noflush_set_tty_state (struct serial *scb,
-					       serial_ttystate new_ttystate,
-					       serial_ttystate old_ttystate);
-extern int ser_unix_nop_setbaudrate (struct serial *scb, int rate);
-extern int ser_unix_nop_setstopbits (struct serial *scb, int rate);
-extern int ser_unix_nop_drain_output (struct serial *scb);
+extern int ser_base_flush_output (struct serial *scb);
+extern int ser_base_flush_input (struct serial *scb);
+extern int ser_base_send_break (struct serial *scb);
+extern void ser_base_raw (struct serial *scb);
+extern serial_ttystate ser_base_get_tty_state (struct serial *scb);
+extern int ser_base_set_tty_state (struct serial *scb,
+				   serial_ttystate ttystate);
+extern void ser_base_print_tty_state (struct serial *scb,
+				      serial_ttystate ttystate,
+				      struct ui_file *stream);
+extern int ser_base_noflush_set_tty_state (struct serial *scb,
+					   serial_ttystate new_ttystate,
+					   serial_ttystate old_ttystate);
+extern int ser_base_setbaudrate (struct serial *scb, int rate);
+extern int ser_base_setstopbits (struct serial *scb, int rate);
+extern int ser_base_drain_output (struct serial *scb);
 
-extern int ser_unix_write (struct serial *scb, const char *str, int len);
+extern int ser_base_write (struct serial *scb, const char *str, int len);
 
-extern void ser_unix_async (struct serial *scb, int async_p);
+extern void ser_base_async (struct serial *scb, int async_p);
 
 #endif

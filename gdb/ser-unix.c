@@ -329,7 +329,7 @@ hardwire_flush_output (struct serial *scb)
 static int
 hardwire_flush_input (struct serial *scb)
 {
-  ser_unix_flush_input (scb);
+  ser_base_flush_input (scb);
 
 #ifdef HAVE_TERMIOS
   return tcflush (scb->fd, TCIFLUSH);
@@ -1062,7 +1062,7 @@ _initialize_ser_hardwire (void)
      the old TERMIOS/SGTTY/... timer code has been flushed. cagney
      1999-09-16. */
   ops->readchar = hardwire_readchar;
-  ops->write = ser_unix_write;
+  ops->write = ser_base_write;
   ops->flush_output = hardwire_flush_output;
   ops->flush_input = hardwire_flush_input;
   ops->send_break = hardwire_send_break;
@@ -1074,6 +1074,6 @@ _initialize_ser_hardwire (void)
   ops->setbaudrate = hardwire_setbaudrate;
   ops->setstopbits = hardwire_setstopbits;
   ops->drain_output = hardwire_drain_output;
-  ops->async = ser_unix_async;
+  ops->async = ser_base_async;
   serial_add_interface (ops);
 }
