@@ -1,3 +1,11 @@
+2003-04-18  David Carlton  <carlton@bactrian.org>
+
+	* mdebugread.c (parse_symbol): Move up declaration of 'iter'.
+	* dwarf2read.c (add_partial_namespace): Move up declaration of
+	'full_name'.
+	* cp-support.c (cp_find_first_component): Accept 'operator' in
+	more locations.
+
 2003-04-16  David Carlton  <carlton@bactrian.org>
 
 	* Merge with mainline; tag is carlton_dictionary-20030416-merge.

@@ -1686,9 +1686,11 @@ add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
   /* Calculate the full name of the namespace that we just entered.  */
 
   const char *new_name = pdi->name;
+  char *full_name;
+
   if (new_name == NULL)
     new_name = "(anonymous namespace)";
-  char *full_name = alloca (strlen (namespace) + 2 + strlen (new_name) + 1);
+  full_name = alloca (strlen (namespace) + 2 + strlen (new_name) + 1);
   strcpy (full_name, namespace);
   if (*namespace != '\0')
     strcat (full_name, "::");

@@ -1231,10 +1231,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	      if (nparams > 0)
 		{
+		  struct dict_iterator iter;
 		  TYPE_NFIELDS (ftype) = nparams;
 		  TYPE_FIELDS (ftype) = (struct field *)
 		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
-		  struct dict_iterator iter;
 
 		  for (sym = dict_iterator_first (BLOCK_DICT (b), &iter),
 			 iparams = 0;

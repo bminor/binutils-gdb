@@ -63,6 +63,11 @@ proc test_first_component {} {
     test_single_component "foo(std::basic_streambuf<wchar_t,std::char_traits<wchar_t> >)"
     test_single_component "operator>(X::Y)"
 
+    # Operator names can show up in weird places.
+
+    test_single_component "int operator<< <char>()"
+    test_single_component "T<Cooperator>"
+
     gdb_test "maint cp first_component foo::bar" "foo"
     gdb_test "maint cp first_component foo::bar::baz" "foo"
     gdb_test "maint cp first_component C<A>::bar" "C<A>"
