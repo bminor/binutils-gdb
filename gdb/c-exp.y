@@ -1297,7 +1297,8 @@ yylex ()
     case 8:
       if (!strncmp (tokstart, "unsigned", 8))
 	return UNSIGNED;
-      if (!strncmp (tokstart, "template", 8))
+      if (current_language->la_language == language_cplus
+	  && !strncmp (tokstart, "template", 8))
 	return TEMPLATE;
       break;
     case 6:
@@ -1319,7 +1320,8 @@ yylex ()
 	return ENUM;
       if (!strncmp (tokstart, "long", 4))
 	return LONG;
-      if (!strncmp (tokstart, "this", 4))
+      if (current_language->la_language == language_cplus
+	  && !strncmp (tokstart, "this", 4))
 	{
 	  static const char this_name[] =
 				 { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };

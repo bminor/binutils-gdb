@@ -2475,8 +2475,10 @@ read_struct_type (pp, type)
 	TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, i));
   }
 
-  for (n = nfn_fields; mainlist; mainlist = mainlist->next)
-    TYPE_FN_FIELDLISTS (type)[--n] = mainlist->fn_fieldlist;
+  for (n = nfn_fields; mainlist; mainlist = mainlist->next) {
+    --n;                      /* Circumvent Sun3 compiler bug */
+    TYPE_FN_FIELDLISTS (type)[n] = mainlist->fn_fieldlist;
+  }
 
   if (**pp == '~')
     {
