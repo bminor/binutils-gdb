@@ -1,3 +1,8 @@
+Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+
+	* config/ho-riscix.h, config/tc-arm.c, config/tc-arm.h: New files
+	* configure.in: Recognize the arm.
+
 Fri Sep  2 16:05:50 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ecoff.c (add_file): Don't try to generate line numbers if the

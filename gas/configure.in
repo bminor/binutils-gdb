@@ -9,11 +9,12 @@ dnl
 AC_INIT(as.h)
 dnl
 bfd_gas=no
+user_bfd_gas=
 AC_ARG_ENABLE(bfd-assembler,
 [    bfd-assembler	use BFD back end for writing object files],
 [case "${enableval}" in
-  yes) need_bfd=yes bfd_gas=yes ;;
-  no)  ;;
+  yes) need_bfd=yes user_bfd_gas=yes ;;
+  no)  user_bfd_gas=no ;;
   *)   AC_MSG_ERROR(bad value ${enableval} given for bfd-assembler option) ;;
 esac])dnl
 
@@ -23,6 +24,7 @@ AC_CONFIG_HEADER(conf)
 dnl For recursion to work right, this must be an absolute pathname.
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
+AC_PROGRAM_TRANSFORM_NAME
 
 emulation=generic
 
@@ -69,6 +71,8 @@ case ${generic_target} in
   alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
 
+  arm-*-riscix*)	obj_format=aout bfd_gas=yes ;;
+
   hppa-*-*elf*)		obj_format=elf emulation=hppa ;;
   hppa-*-osf*)		obj_format=som emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
@@ -85,7 +89,7 @@ case ${generic_target} in
   i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
   i386-*-linux*coff*)	obj_format=coff emulation=linux
 			 gas_target=i386coff ;;
-  i386-*-linux*)	obj_format=aout emulation=linux ;;
+  i386-*-linux*)	obj_format=aout emulation=linux bfd_gas=preferred ;;
   i386-*-lynxos*)	obj_format=coff gas_target=i386coff
 			 emulation=lynx ;;
   i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
@@ -209,17 +213,16 @@ fi
 target_frag=${srcdir}/config/${gas_target}.mt
 AC_SUBST_FILE(target_frag)
 
-case ${bfd_gas}-${obj_format} in
-  yes-coff)	need_bfd=yes ;;
-  no-coff)	need_bfd=yes
-		AC_DEFINE(MANY_SEGMENTS) ;;
+case ${cpu_type}-${obj_format} in
+# not yet
+# i386-aout)	bfd_gas=preferred ;;
   *-elf)	bfd_gas=yes ;;
   *-ecoff)	bfd_gas=yes ;;
   *-som)	bfd_gas=yes ;;
   *)		;;
 esac
 
-case ${with_bfd_assembler}-${bfd_gas} in
+case ${user_bfd_gas}-${bfd_gas} in
   yes-yes | no-no)
     # We didn't override user's choice.
     ;;
@@ -235,6 +238,12 @@ case ${with_bfd_assembler}-${bfd_gas} in
   -*)
     # User specified nothing.
     ;;
+esac
+
+case ${bfd_gas}-${cpu_type}-${obj_format} in
+  yes-*-coff)	need_bfd=yes ;;
+  no-*-coff)	need_bfd=yes
+		AC_DEFINE(MANY_SEGMENTS) ;;
 esac
 
 reject_dev_configs=yes

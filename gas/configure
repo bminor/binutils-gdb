@@ -171,11 +171,14 @@ EOF
   -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
     prefix="$ac_optarg" ;;
 
+    # The program_*_given variables are so we can distinguish between
+    # unspecified and empty-string-valued options.
   -program-prefix | --program-prefix | --program-prefi | --program-pref \
   | --program-pre | --program-pr | --program-p)
     ac_prev=program_prefix ;;
   -program-prefix=* | --program-prefix=* | --program-prefi=* \
   | --program-pref=* | --program-pre=* | --program-pr=* | --program-p=*)
+    program_prefix_given=yes
     program_prefix="$ac_optarg" ;;
 
   -program-suffix | --program-suffix | --program-suffi | --program-suff \
@@ -183,6 +186,7 @@ EOF
     ac_prev=program_suffix ;;
   -program-suffix=* | --program-suffix=* | --program-suffi=* \
   | --program-suff=* | --program-suf=* | --program-su=* | --program-s=*)
+    program_suffix_given=yes
     program_suffix="$ac_optarg" ;;
 
   -program-transform-name | --program-transform-name \
@@ -200,7 +204,10 @@ EOF
   | --program-transfo=* | --program-transf=* \
   | --program-trans=* | --program-tran=* \
   | --progr-tra=* | --program-tr=* | --program-t=*)
-    program_transform_name="$ac_optarg" ;;
+    # Double any backslashes or dollar signs in the argument
+    program_transform_name_given=yes
+    program_transform_name="${program_transform_name} -e `echo ${ac_optarg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
+    ;;
 
   -q | -quiet | --quiet | --quie | --qui | --qu | --q \
   | -silent | --silent | --silen | --sile | --sil)
@@ -393,12 +400,13 @@ ac_compile='${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS conftest.${ac_ext} -o conftest $
 
 
 bfd_gas=no
+user_bfd_gas=
 # Check whether --enable-bfd-assembler or --disable-bfd-assembler was given.
 enableval="$enable_bfd_assembler"
 if test -n "$enableval"; then
   case "${enableval}" in
-  yes) need_bfd=yes bfd_gas=yes ;;
-  no)  ;;
+  yes) need_bfd=yes user_bfd_gas=yes ;;
+  no)  user_bfd_gas=no ;;
   *)   { echo "configure: bad value ${enableval} given for bfd-assembler option" 1>&2; exit 1; } ;;
 esac
 fi
@@ -510,6 +518,22 @@ esac
 echo "$ac_t""$build" 1>&4
 
 
+if [ "${host_alias}" != "${target_alias}" ] ; then
+    if [ "${program_prefix_given}${program_suffix_given}${program_transform_name_given}" = "" ] ; then
+        program_prefix=${target_alias}- ;
+    fi
+fi
+
+# Merge program_prefix and program_suffix onto program_transform_name
+# Use a double $ so that make ignores it
+if [ "${program_suffix}" != "" ] ; then
+    program_transform_name="-e s,\$\$,${program_suffix}, ${program_transform_name}"
+fi
+
+if [ "${program_prefix}" != "" ] ; then
+    program_transform_name="-e s,^,${program_prefix}, ${program_transform_name}"
+fi
+
 
 emulation=generic
 
@@ -557,6 +581,8 @@ case ${generic_target} in
   alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
 
+  arm-*-riscix*)	obj_format=aout bfd_gas=yes ;;
+
   hppa-*-*elf*)		obj_format=elf emulation=hppa ;;
   hppa-*-osf*)		obj_format=som emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
@@ -573,7 +599,7 @@ case ${generic_target} in
   i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
   i386-*-linux*coff*)	obj_format=coff emulation=linux
 			 gas_target=i386coff ;;
-  i386-*-linux*)	obj_format=aout emulation=linux ;;
+  i386-*-linux*)	obj_format=aout emulation=linux bfd_gas=preferred ;;
   i386-*-lynxos*)	obj_format=coff gas_target=i386coff
 			 emulation=lynx ;;
   i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
@@ -694,20 +720,16 @@ fi
 target_frag=${srcdir}/config/${gas_target}.mt
 
 
-case ${bfd_gas}-${obj_format} in
-  yes-coff)	need_bfd=yes ;;
-  no-coff)	need_bfd=yes
-		cat >> confdefs.h <<\EOF
-#define MANY_SEGMENTS 1
-EOF
- ;;
+case ${cpu_type}-${obj_format} in
+# not yet
+# i386-aout)	bfd_gas=preferred ;;
   *-elf)	bfd_gas=yes ;;
   *-ecoff)	bfd_gas=yes ;;
   *-som)	bfd_gas=yes ;;
   *)		;;
 esac
 
-case ${with_bfd_assembler}-${bfd_gas} in
+case ${user_bfd_gas}-${bfd_gas} in
   yes-yes | no-no)
     # We didn't override user's choice.
     ;;
@@ -723,6 +745,15 @@ case ${with_bfd_assembler}-${bfd_gas} in
   -*)
     # User specified nothing.
     ;;
+esac
+
+case ${bfd_gas}-${cpu_type}-${obj_format} in
+  yes-*-coff)	need_bfd=yes ;;
+  no-*-coff)	need_bfd=yes
+		cat >> confdefs.h <<\EOF
+#define MANY_SEGMENTS 1
+EOF
+ ;;
 esac
 
 reject_dev_configs=yes
@@ -881,7 +912,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.${ac_ext} <<EOF
-#line 885 "configure"
+#line 914 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 Syntax Error
@@ -894,7 +925,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.${ac_ext} <<EOF
-#line 898 "configure"
+#line 927 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 Syntax Error
@@ -924,7 +955,7 @@ if eval "test \"`echo '${'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 928 "configure"
+#line 957 "configure"
 #include "confdefs.h"
 #include <${ac_hdr}>
 EOF
@@ -961,7 +992,7 @@ else
   { echo "configure: can not run test program while cross compiling" 1>&2; exit 1; }
 else
 cat > conftest.${ac_ext} <<EOF
-#line 965 "configure"
+#line 994 "configure"
 #include "confdefs.h"
 main(){exit(0);}
 EOF
@@ -984,7 +1015,7 @@ if eval "test \"`echo '${'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 988 "configure"
+#line 1017 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1015,7 +1046,7 @@ if eval "test \"`echo '${'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1019 "configure"
+#line 1048 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1073,7 +1104,7 @@ if eval "test \"`echo '${'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1077 "configure"
+#line 1106 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1100,7 +1131,7 @@ if eval "test \"`echo '${'ac_cv_func__getb67'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1104 "configure"
+#line 1133 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 int main() { return 0; }
@@ -1141,7 +1172,7 @@ if eval "test \"`echo '${'ac_cv_func_GETB67'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1145 "configure"
+#line 1174 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 int main() { return 0; }
@@ -1182,7 +1213,7 @@ if eval "test \"`echo '${'ac_cv_func_getb67'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1186 "configure"
+#line 1215 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 int main() { return 0; }
@@ -1236,7 +1267,7 @@ ac_cv_c_stack_direction=0
 
 else
 cat > conftest.${ac_ext} <<EOF
-#line 1240 "configure"
+#line 1269 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1277,7 +1308,7 @@ if eval "test \"`echo '${'ac_cv_c_inline'+set}'`\" = set"; then
 else
   if test "$GCC" = yes; then
 cat > conftest.${ac_ext} <<EOF
-#line 1281 "configure"
+#line 1310 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1315,7 +1346,7 @@ if eval "test \"`echo '${'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1319 "configure"
+#line 1348 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -1356,7 +1387,7 @@ if eval "test \"`echo '${'gas_cv_malloc_decl_needed'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1360 "configure"
+#line 1389 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_MEMORY_H
@@ -1401,7 +1432,7 @@ if eval "test \"`echo '${'gas_cv_free_decl_needed'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1405 "configure"
+#line 1434 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_MEMORY_H
@@ -1449,7 +1480,7 @@ if eval "test \"`echo '${'gas_cv_errno_decl_needed'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.${ac_ext} <<EOF
-#line 1453 "configure"
+#line 1482 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H
@@ -1589,6 +1620,9 @@ s%@build_alias@%$build_alias%g
 s%@build_cpu@%$build_cpu%g
 s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
+s%@program_prefix@%$program_prefix%g
+s%@program_suffix@%$program_suffix%g
+s%@program_transform_name@%$program_transform_name%g
 s%@OPCODES_LIB@%$OPCODES_LIB%g
 /@target_frag@/r $target_frag
 s%@target_frag@%%g

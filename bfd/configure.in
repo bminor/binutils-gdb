@@ -32,8 +32,8 @@ fi
 # per-target:
 
 # Canonicalize the secondary target names.
-if [ -n "$with_targets" ]; then
-    for targ in `echo $with_targets | sed 's/,/ /g'`
+if [ -n "$enable_targets" ]; then
+    for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
 	result=`$configsub $targ 2>/dev/null`
 	if [ -n "$result" ]; then
@@ -76,11 +76,11 @@ done
 rm -f Makefile.tmp Makefile.2
 mv Makefile Makefile.tmp
 
-case ${with_64_bit_bfd} in
+case ${enable_64_bit_bfd} in
   yes)		want64=true  ;;
   no | "")	want64=false ;;
   *)
-    echo "*** bad value \"${with_64_bit_bfd}\" for 64-bit-bfd flag; ignored" 1>&2
+    echo "*** bad value \"${enable_64_bit_bfd}\" for 64-bit-bfd flag; ignored" 1>&2
     ;;
 esac
 
@@ -144,12 +144,12 @@ do
     b_out_vec_big_host)		tb="$tb bout.o aout32.o stab-syms.o" ;;
     b_out_vec_little_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.o elf32.o elf.o" ;;
-    bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o" ;;
+    bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o ecoff.o ecofflink.o" ;;
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.o elf32.o elf.o" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.o elf32.o elf.o" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.o elf32.o elf.o" ;;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.o elf32.o elf.o" ;;
-    bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o" ;;
+    bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o ecoff.o ecofflink.o" ;;
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o elf.o" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o elf.o" ;;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o elf.o" ;;
@@ -163,20 +163,18 @@ do
     cisco_core_vec)		tb="$tb cisco-core.o" ;;
     demo_64_vec)		tb="$tb demo64.o aout64.o stab-syms.o"
 				target64=true ;;
-    ecoff_big_vec)		tb="$tb coff-mips.o" ;;
-    ecoff_little_vec)		tb="$tb coff-mips.o" ;;
-    ecoffalpha_little_vec)	tb="$tb coff-alpha.o"
+    ecoff_big_vec)		tb="$tb coff-mips.o ecoff.o ecofflink.o" ;;
+    ecoff_little_vec)		tb="$tb coff-mips.o ecoff.o ecofflink.o" ;;
+    ecoffalpha_little_vec)	tb="$tb coff-alpha.o ecoff.o ecofflink.o"
 				target64=true ;;
     h8300coff_vec)		tb="$tb coff-h8300.o reloc16.o" ;;
     h8500coff_vec)		tb="$tb coff-h8500.o reloc16.o" ;;
     host_aout_vec)		tb="$tb host-aout.o aout32.o stab-syms.o" ;;
     hp300bsd_vec)		tb="$tb hp300bsd.o aout32.o stab-syms.o" ;;
     hp300hpux_vec)		tb="$tb hp300hpux.o aout32.o stab-syms.o" ;;
-    som_vec)			tb="$tb som.o" ;;
     i386aout_vec)		tb="$tb i386aout.o aout32.o stab-syms.o" ;;
     i386bsd_vec)		tb="$tb i386bsd.o aout32.o stab-syms.o" ;;
     i386dynix_vec)		tb="$tb i386dynix.o aout32.o stab-syms.o" ;;
-    netbsd386_vec)		tb="$tb netbsd386.o aout32.o stab-syms.o" ;;
     i386coff_vec)		tb="$tb coff-i386.o" ;;
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
@@ -191,24 +189,28 @@ do
     m68klynx_aout_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
     m68klynx_coff_vec)		tb="$tb cf-m68klynx.o coff-m68k.o lynx-core.o stab-syms.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
+    netbsd386_vec)		tb="$tb netbsd386.o aout32.o stab-syms.o" ;;
+    netbsd532_vec)		tb="$tb netbsd532.o aout-ns32k.o stab-syms.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
     nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
     nlm32_sparc_vec)		tb="$tb nlm32-sparc.o nlm32.o nlm.o" ;;
     nlm32_alpha_vec)		tb="$tb nlm32-alpha.o nlm32.o nlm.o"
 				target64=true ;;
+    riscix_vec)			tb="$tb aout32.o riscix.o stab-syms.o" ;;
     nlm32_powerpc_vec)		tb="$tb nlm32-ppc.o nlm32.o nlm.o" ;;
+    pc532machaout_vec)		tb="$tb pc532-mach.o aout-ns32k.o stab-syms.o" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o reloc16.o" ;;
+    som_vec)			tb="$tb som.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.o lynx-core.o stab-syms.o" ;;
     sparccoff_vec)		tb="$tb coff-sparc.o" ;;
+    srec_vec)			tb="$tb srec.o" ;;
     sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
+    symbolsrec_vec)		tb="$tb srec.o" ;;
     tekhex_vec)			tb="$tb tekhex.o" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
     z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
-
-    srec_vec)			tb="$tb srec.o" ;;
-    symbolsrec_vec)		tb="$tb srec.o" ;;
 
     "")			;;
     *) echo "*** unknown target vector $vec" 1>&2; exit 1 ;;

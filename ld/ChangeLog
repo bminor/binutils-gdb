@@ -1,3 +1,9 @@
+Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+
+	* Makefile.in, configure.in: Add support (disabled) the ARM/RISCiX.
+	* config/riscix.mt, emulparams/riscix.sh, scripttempl/riscix.sc:
+	New files.
+
 Tue Aug 30 11:48:08 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* ld.h (args_type): Add field soname.

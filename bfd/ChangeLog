@@ -1,3 +1,12 @@
+Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+
+	* aoutx.h (NAME(aout,machine_type)): Recognize the ARM processor.
+	* archures.c, config.bfd, configure.host, libaout.h, reloc.c,
+	targets.c: Add support for the ARM.
+	* cpu-arm.c, riscix.c, config/riscix.mh, config/riscix.mt: New files.
+
+	* aoutx.h (add_to_stringtabl): Check that str isn't a NULL pointer.
+
 Fri Sep  2 14:10:30 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* reloc.c (enum bfd_reloc_code_real): Rewrote definition to use

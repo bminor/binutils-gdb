@@ -1,3 +1,14 @@
+Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+
+	* configure.in, Makefile.in, disassemble.c: Add support for the ARM.
+	* arm-dis.c, arm-opc.h: New files.
+
+Fri Aug  5 14:00:05 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (ns32k-dis.o): Add dependency.
+	* ns32k-dis.c (print_insn_arg): Declare initialized local as
+	string, not as array of chars.
+
 Thu Jul 28 18:14:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* sparc-dis.c (print_insn_sparc): Handle new operand type 'x'.
@@ -53,7 +64,7 @@ Sun Jul 10 00:27:47 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 	from distribution. A ns32k-dis.c from a previous distribution has
 	been brought up to date and supports the new interface.
 
-	* disaaemble.c: define ARCH_ns32k and add case bfd_arch_ns32k.
+	* disassemble.c: define ARCH_ns32k and add case bfd_arch_ns32k.
 
 	* configure.in: add bfd_ns32k_arch target support.
 

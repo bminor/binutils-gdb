@@ -1,3 +1,12 @@
+Mon Sep  5 05:01:30 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* configure.in (arm-*-*): Don't configure ld for this target.
+
+Thu Sep  1 09:35:00 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* configure.in (*-*-netware): don't configure libg++, libio,
+	  librx, or newlib.
+
 Wed Aug 31 13:52:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure.in (alpha-dec-osf*): Use osf*, not osf1*.  Don't

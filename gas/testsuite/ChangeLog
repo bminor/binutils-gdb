@@ -1,3 +1,12 @@
+Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+
+	* gas/arm/*: New subtree.  Add ARM tests.
+
+Mon Aug  8 12:13:31 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/unsorted/unsorted.exp: Accept any character
+	between foo's type and foo itself.
+
 Fri Jul 15 19:09:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* lib/gas-defs.exp (run_dump_test): New routine for running the
@@ -9,6 +18,9 @@ Fri Jul 15 19:09:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	(fail_phase, slurp_options): New auxiliary routines.
 	(regexp_diff): Always return a value.  Fix bugs in actually doing
 	the regexp test.
+
+	* gas/sun4/addend.exp: Use run_dump_test.
+	* gas/sun4/addend.d: Fix regular expressions so that they work.
 
 Thu Jul  7 11:55:33 1994  Jeff Law  (law@snake.cs.utah.edu)
 
