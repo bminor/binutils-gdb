@@ -1,3 +1,7 @@
+Thu Jul 14 11:47:27 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* coff-sparc.c (sparccoff_vec): Have leading underscores.
+
 Tue Jul 12 12:08:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* aix386-core.c, aoutf1.h, cisco-core.c, elfcode.h, hppabsd-core.c,
