@@ -55,7 +55,7 @@ struct sec_flags_struct {
   flagword flags_hassize;	/* flags we set if the section has a size > 0 */
 };
 
-/* These flags are deccrtl/vaxcrtl (openVMS 6.2) compatible  */  */
+/* These flags are deccrtl/vaxcrtl (openVMS 6.2) compatible  */
 
 static struct sec_flags_struct evax_section_flags[] = {
   { EVAX_ABS_NAME,
