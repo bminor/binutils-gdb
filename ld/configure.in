@@ -142,7 +142,7 @@ wrs)
 	sparc) my_target=vxsparc;;
 	esac
 	;;
-ericsson) my_target=OSE68 ;;
+ericsson) my_target=ose68 ;;
 tandem) my_target=st2000 ;;
 *)
 	case ${target_cpu} in

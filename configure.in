@@ -56,6 +56,19 @@ amd)
 			;;
 	esac
 	;;
+ericsson)
+	case "${target_alias}" in
+		OSE68000 | ose68000)
+			bfd_target="ose68000"
+			;;
+		OSE68k | ose68k)
+			bfd_target="ose68k"
+			;;
+		*)
+			bfd_target=${target-alias}
+			;;
+	esac
+	;;
 *)
 	bfd_target=${target_alias}
 	;;

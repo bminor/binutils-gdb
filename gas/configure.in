@@ -140,7 +140,7 @@ vxworks)
 	*) obj_format=aout ;;
 	esac
 	;;
-OSE)
+OSE | ose)
 	obj_format=aout
 	emulation=sun3
 	;;

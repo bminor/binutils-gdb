@@ -67,6 +67,14 @@ case $os in
 		os=-scosysv322
 		basic_machine=i386-unknown
 		;;
+	-OSE68k | -ose68k | -OSE | -ose | -es1800)
+		os=-ose
+		basic_machine=m68k-ericsson
+		;;
+	-OSE68000 | -ose68000)
+		os=-ose
+		basic_machine=m68000-ericsson
+		;;
 	-isc*)
 		os=-iscsysv
 		basic_machine=i386-unknown
@@ -90,13 +98,15 @@ esac
 # Decode aliases for certain CPU-COMPANY combinations.
 case $basic_machine in
 	# Recognize the basic CPU types with without company name.
-	tahoe | i386 | i860 | m68k | m680[01234]0 | m88k | ns32k | arm | pyramid \
+	tahoe | i386 | i486 | i860 | m68k | m680[01234]0 | m683?2 \
+		| m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 | we32k\
 		| v70)
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
-	vax-* | tahoe-* | i386-* | i860-* | m68k-* | m680[01234]0-* | m88k-* \
+	vax-* | tahoe-* | i386-* | i860-* | m68k-* \
+	      | m680[01234]0-* | m683?2-* | m88k-* \
 	      | sparc-* | ns32k-* | alliant-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
@@ -282,6 +292,10 @@ case $basic_machine in
 	sun4)
 		basic_machine=sparc-sun
 		;;
+	msdos)
+		basic_machine=i386-unknown	
+		os=-msdos
+		;;
 	pbd)
 		basic_machine=sparc-unicom
 		;;
@@ -443,7 +457,7 @@ case $basic_machine in
 		os=-hpux
 		;;
 	ncr3000)
-		basic_machine=i386-ncr
+		basic_machine=i486-ncr
 		os=-sysv4
 		;;
 	necv70)
@@ -477,6 +491,14 @@ case $basic_machine in
 	vxworks68)
 		basic_machine=m68k-wrs
 		os=-vxworks
+		;;
+	es1800 | OSE68k | ose68k)
+		basic_machine=m68k-ericsson
+		os=-ose
+		;;
+	OSE68000 | ose68000)
+		basic_machine=m68000-ericsson
+		os=-ose
 		;;
 	os68k)
 		basic_machine=m68k-none
@@ -542,12 +564,12 @@ case $os in
 	# First accept the basic system types.
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
-	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* | -aout \
+	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* | -aout | -coff \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
 	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -newsos | -amigados* | -msdos* | -none* | -os68k* | -irix* \
 	      | -nindy* | -vxworks* | -ebmon* | -udi | -hms* | -xray \
-	      | -m88kbcs* | -go32 | -linux*)
+	      | -m88kbcs* | -go32 | -linux* )
 	;;
 # start-sanitize-v9
 	-v7 | -v9 | -hal32 | -hal64) ;;
@@ -577,6 +599,12 @@ case $os in
 		;;
 	-svr3)
 		os=-sysv3
+		;;
+	-ose*)
+		os=-ose
+		;;
+	-es1800*)
+		os=-ose
 		;;
 	*)
 		# Get rid of the `-' at the beginning of $os.
@@ -665,6 +693,9 @@ case $basic_machine in
 				;;
 			-genix*)
 				vendor=ns
+				;;
+			-vxworks*)
+				vendor=wrs
 				;;
 		esac
 		basic_machine=`echo $basic_machine | sed "s/unknown/$vendor/"`

@@ -31,7 +31,6 @@ fi
 
 Things-to-keep:
 
-OSE68.mt
 coff-a29k.mt
 coff-h8300.mt
 delta88.mh
@@ -47,6 +46,7 @@ m68k.mt
 m68kv.mt
 m88k-bcs.mt
 news.mt
+ose68.mt
 rtbsd.mh
 sa29200.mt
 sparc-ll.mh

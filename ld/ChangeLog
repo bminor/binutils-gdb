@@ -1,3 +1,7 @@
+Mon Aug 24 14:42:06 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in, config/ose68.mt: renamed OSE to ose.
+
 Thu Aug 20 19:55:22 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* ldsym.c (write_file_locals): Reorder check for common or
