@@ -1,3 +1,9 @@
+2004-07-08  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* gas/m32r/pic.exp: Add New Test case for @GOTOFF, @GOT, @PLT.
+	* gas/m32r/pic2.s: New file: Test case for @GOTOFF, @GOT, @PLT.
+	* gas/m32r/pic2.d: New file: Expected results.
+
 2004-07-08  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-rel7.d: Expect relocations against bar to refer to bar.
