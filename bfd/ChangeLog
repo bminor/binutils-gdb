@@ -1,5 +1,13 @@
 2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (_bfd_elf_new_section_hook): Set the default section
+	type to SHT_NULL.
+	(elf_fake_sections): Set the section type based on asect->flags
+	if it is SHT_NULL. Don't abort on processor specific section
+	types.
+
+2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* bfd-in2.h: Regenerated.
 
 2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>

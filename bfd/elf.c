@@ -2293,12 +2293,7 @@ _bfd_elf_new_section_hook (abfd, sec)
       sec->used_by_bfd = (PTR) sdata;
     }
 
-  if ((sec->flags & SEC_ALLOC) != 0
-      && (((sec->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
-	  || (sec->flags & SEC_NEVER_LOAD) != 0))
-    elf_section_type (sec) = SHT_NOBITS;
-  else
-    elf_section_type (sec) = SHT_PROGBITS;
+  elf_section_type (sec) = SHT_NULL;
   if (sec->name && _bfd_elf_get_sec_type_attr (abfd, sec->name,
 					       &type, &attr))
     {
@@ -2544,14 +2539,21 @@ elf_fake_sections (abfd, asect, failedptrarg)
   this_hdr->bfd_section = asect;
   this_hdr->contents = NULL;
 
+  /* If the section type is unspecified, we set it based on
+     asect->flags.  */
+  if (this_hdr->sh_type == SHT_NULL)
+    {
+      if ((asect->flags & SEC_ALLOC) != 0
+	  && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	      || (asect->flags & SEC_NEVER_LOAD) != 0))
+	this_hdr->sh_type = SHT_NOBITS;
+      else
+	this_hdr->sh_type = SHT_PROGBITS;
+    }
+
   switch (this_hdr->sh_type)
     {
     default:
-      (*_bfd_error_handler)
-       (_("%s: Section `%s' has unknown type 0x%0x"),
-	bfd_get_filename (asect->owner), asect->name,
-	this_hdr->sh_type);
-      abort ();
       break;
 
     case SHT_STRTAB:
