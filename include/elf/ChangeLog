@@ -1,3 +1,20 @@
+Sat Aug 29 22:25:51 1998  Richard Henderson  <rth@cygnus.com>
+
+	* i386.h: Add vtable relocs.
+
+1998-08-25 16:42  Ulrich Drepper  <drepper@cygnus.com>
+
+	* common.h: Add SYMINFO_* macros to access Elf*_Syminfo information.
+
+	* external.h: Add Elf_External_Syminfo definition.
+
+	* internal.h: Add Elf_Internal_Syminfo, Elf32_Internal_Syminfo,
+	and Elf64_Syminfo definitions.
+
+Sun Aug  9 20:26:49 CDT 1998  Catherine Moore  <clm@cygnus.com>
+
+       * arm.h:  Add ST_THUMB definitions.
+
 Wed Aug  5 15:52:35 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm.h: Add ELF header flags to specify compile time optins:
