@@ -1,5 +1,21 @@
 2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-names.y (symbol_end): New function.
+	(trim_chars): Use it.
+	(start_opt, function): New non-terminals used to support
+	function-local names.
+	(GLOBAL): New terminal.
+	(start): Use start_opt.
+	(demangler_special): Handle GLOBAL.
+	(array_indicator): Swap arguments to D_COMP_ARRAY_TYPE.
+	(direct_abstract_declarator, direct_declarator)
+	(direct_declarator_1): Likewise.
+	(declarator_1): Use declarator_1 instead of declarator after
+	a ptr_operator.  Support function-local names.
+	(yylex): Handle GLOBAL specially.
+
+2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-names.y (demangler_special): New non-terminal.
 	(DEMANGLER_SPECIAL, CONSTRUCTION_VTABLE, CONSTRUCTION_IN): New
 	terminals.

@@ -49,6 +49,7 @@ typedef long double DOUBLEST;
 
 #include "safe-ctype.h"
 
+/* #define CP_DEMANGLE_DEBUG */
 #include "../libiberty/cp-demangle.c"
 
 static char *lexptr, *prev_lexptr;
@@ -61,6 +62,8 @@ static struct d_comp *d_op_from_string (const char *opname);
 
 static struct d_comp *d_unary (const char *opname, struct d_comp *);
 static struct d_comp *d_binary (const char *opname, struct d_comp *, struct d_comp *);
+
+static char *symbol_end (char *lexptr);
 
 /* Global state, ew.  */
 struct d_info *di;
@@ -195,14 +198,14 @@ void yyerror (char *);
 static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
-%type <comp> exp exp1 type start operator colon_name
+%type <comp> exp exp1 type start start_opt operator colon_name
 %type <comp> unqualified_name scope_id colon_ext_name
 %type <comp> template template_arg
 %type <comp> builtin_type
 %type <comp> typespec typespec_2 array_indicator
 %type <comp> colon_ext_only ext_only_name
 
-%type <comp> demangler_special
+%type <comp> demangler_special function
 
 %type <nested> abstract_declarator direct_abstract_declarator
 %type <nested> declarator direct_declarator function_arglist
@@ -244,6 +247,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 /* Non-C++ things we get from the demangler.  */
 %token <lval> DEMANGLER_SPECIAL CONSTRUCTION_VTABLE
 %token CONSTRUCTION_IN
+%token <typed_val_int> GLOBAL
 
 %{
 enum {
@@ -293,21 +297,37 @@ result		:	start
 start		:	type
 			{ $$ = $1; }
 
+		|	demangler_special
+
+		|	function
+
+		;
+
+start_opt	:	/* */
+			{ $$ = NULL; }
+		|	COLONCOLON start
+			{ $$ = $2; }
+		;
+
+function
 		/* Function with a return type.  declarator_1 is used to prevent
 		   ambiguity with the next rule.  */
-		|	typespec_2 declarator_1
+		:	typespec_2 declarator_1
 			{ $$ = $2.comp;
 			  *$2.last = $1;
 			}
 
 		/* Function without a return type.  We need to use typespec_2
-		   to prevent conflicts from qualifiers_opt.  Harmless.  */
-		|	typespec_2 function_arglist
-			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp); }
-		|	colon_ext_only function_arglist
-			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp); }
+		   to prevent conflicts from qualifiers_opt - harmless.  The
+		   start_opt is used to handle "function-local" variables and
+		   types.  */
+		|	typespec_2 function_arglist start_opt
+			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			  if ($3) $$ = d_make_comp (di, D_COMP_QUAL_NAME, $$, $3); }
+		|	colon_ext_only function_arglist start_opt
+			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			  if ($3) $$ = d_make_comp (di, D_COMP_QUAL_NAME, $$, $3); }
 
-		| demangler_special
 		;
 
 demangler_special
@@ -317,6 +337,10 @@ demangler_special
 			  d_right ($$) = NULL; }
 		|	CONSTRUCTION_VTABLE start CONSTRUCTION_IN start
 			{ $$ = d_make_comp (di, $1, $2, $4); }
+		|	GLOBAL
+			{ $$ = d_make_empty (di, $1.val);
+			  d_left ($$) = $1.type;
+			  d_right ($$) = NULL; }
 		;
 
 operator	:	OPERATOR NEW
@@ -385,6 +409,10 @@ operator	:	OPERATOR NEW
 			{ $$ = d_op_from_string ("()"); }
 		|	OPERATOR '[' ']'
 			{ $$ = d_op_from_string ("[]"); }
+
+		/* Conversion operators.  We don't try to handle some of
+		   the wackier demangler output for function pointers,
+		   since it's not clear that it's parseable.  */
 		|	OPERATOR typespec_2
 			{ $$ = d_make_comp (di, D_COMP_CAST, $2, NULL); }
 		|	OPERATOR typespec_2 ptr_operator_seq
@@ -641,7 +669,7 @@ ptr_operator_seq:	ptr_operator
 
 array_indicator	:	'[' ']'
 			{ $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
-			  d_right ($$) = NULL;
+			  d_left ($$) = NULL;
 			}
 		|	'[' INT ']'
 			{ struct d_comp *i;
@@ -651,7 +679,7 @@ array_indicator	:	'[' ']'
 			  i = d_make_name (di, buf, strlen (buf));
 			  i = d_make_comp (di, D_COMP_LITERAL, $2.type, i);
 			  $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
-			  d_right ($$) = i;
+			  d_left ($$) = i;
 			}
 
 /* Details of this approach inspired by the G++ < 3.4 parser.  */
@@ -686,11 +714,11 @@ direct_abstract_declarator
 		|	direct_abstract_declarator array_indicator
 			{ $$.comp = $1.comp;
 			  *$1.last = $2;
-			  $$.last = &d_left ($2);
+			  $$.last = &d_right ($2);
 			}
 		|	array_indicator
 			{ $$.comp = $1;
-			  $$.last = &d_left ($1);
+			  $$.last = &d_right ($1);
 			}
 		/* G++ has the following except for () and (type).  Then
 		   (type) is handled in regcast_or_absdcl and () is handled
@@ -728,7 +756,7 @@ direct_declarator
 		|	direct_declarator array_indicator
 			{ $$.comp = $1.comp;
 			  *$1.last = $2;
-			  $$.last = &d_left ($2);
+			  $$.last = &d_right ($2);
 			}
 		|	colon_ext_name
 			{ $$.comp = d_make_empty (di, D_COMP_TYPED_NAME);
@@ -743,7 +771,7 @@ direct_declarator
    parentheses around the colon_ext_name; any colon_ext_name in parentheses
    must be followed by an argument list or an array indicator, or preceded
    by a pointer.  */
-declarator_1	:	ptr_operator declarator
+declarator_1	:	ptr_operator declarator_1
 			{ $$.comp = $2.comp;
 			  $$.last = $1.last;
 			  *$2.last = $1.comp; }
@@ -753,6 +781,17 @@ declarator_1	:	ptr_operator declarator
 			  $$.last = &d_right ($$.comp);
 			}
 		|	direct_declarator_1
+
+			/* Function local variable or type.  The typespec to
+			   our left is the type of the containing function. 
+			   This should be OK, because function local types
+			   can not be templates, so the return types of their
+			   members will not be mangled.  */
+		|	colon_ext_name function_arglist COLONCOLON start
+			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			  $$.last = $2.last;
+			  $$.comp = d_make_comp (di, D_COMP_QUAL_NAME, $$.comp, $4);
+			}
 		;
 
 direct_declarator_1
@@ -768,7 +807,7 @@ direct_declarator_1
 		|	direct_declarator_1 array_indicator
 			{ $$.comp = $1.comp;
 			  *$1.last = $2;
-			  $$.last = &d_left ($2);
+			  $$.last = &d_right ($2);
 			}
 		|	colon_ext_name function_arglist
 			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
@@ -776,7 +815,7 @@ direct_declarator_1
 			}
 		|	colon_ext_name array_indicator
 			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2);
-			  $$.last = &d_left ($2);
+			  $$.last = &d_right ($2);
 			}
 		;
 
@@ -1862,6 +1901,16 @@ yylex ()
 	yylval.lval = tokentab_big[i].opcode;
 	if (yylval.lval == D_COMP_CONSTRUCTION_VTABLE)
 	  return CONSTRUCTION_VTABLE;
+	else if (yylval.lval == GLOBAL_CONSTRUCTORS
+		 || yylval.lval == GLOBAL_DESTRUCTORS)
+	  {
+	    /* Skip the trailing space, find the end of the symbol.  */
+	    char *p = symbol_end (lexptr + 1);
+	    yylval.typed_val_int.val = yylval.lval;
+	    yylval.typed_val_int.type = d_make_name (di, lexptr + 1, p - (lexptr + 1));
+	    lexptr = p;
+	    return GLOBAL;
+	  }
 	return DEMANGLER_SPECIAL;
       }  
 
@@ -2004,14 +2053,22 @@ cp_print (struct d_comp *result)
   return str3;
 }
 
-static char
-trim_chars (char *lexptr, char **extra_chars)
+static char *
+symbol_end (char *lexptr)
 {
   char *p = lexptr;
-  char c = 0;
 
   while (*p && (ISALNUM (*p) || *p == '_' || *p == '$' || *p == '.'))
     p++;
+
+  return p;
+}
+
+static char
+trim_chars (char *lexptr, char **extra_chars)
+{
+  char *p = symbol_end (lexptr);
+  char c = 0;
 
   if (*p)
     {
