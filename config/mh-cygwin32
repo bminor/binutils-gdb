@@ -2,7 +2,5 @@
 # file names don't work on DOS.
 MAKEINFOFLAGS=--no-split
 
-# This does some sort of DOS specific installation, I guess.
+# custom installation rules for cygwin32 (append .exe to binaries, etc.)
 INSTALL_DOSREL=install-dosrel
-
-CFLAGS=-D_WIN32
