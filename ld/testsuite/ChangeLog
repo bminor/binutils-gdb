@@ -1,4 +1,8 @@
-001-04-01  David O'Brien  <obrien@FreeBSD.org>
+2001-04-01  David O'Brien  <obrien@FreeBSD.org>
+	* ld-undefined/undefined.exp: XFAIL on FreeBSD/i386 for the usual (even
+	though it doesn't use DWARF2 yet (but its output is identical).
+
+2001-04-01  David O'Brien  <obrien@FreeBSD.org>
 
 	* ld-selective/selective.exp: Use -O with gcc rather than -O2.
 	This optimization level is buggy on some platforms, and this test
