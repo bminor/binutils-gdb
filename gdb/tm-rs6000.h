@@ -136,30 +136,20 @@ extern int aix_loadInfoTextIndex;
   } while (0)
 	
 
-#if 0
-   The following comment is not correct anymore. AIX has a trap signal
-   that might be sent with a "stopped after a load" status. This might
-   show up when the inferior is just started, or anytime inferior
-   loads something else. It is incorrect to try to skip over it *only* in
-   startup-time. It always has to be ignored and should not be mixed up
-   with breakpoint traps. See the macro SIGTRAP_STOP_AFTER_LOAD and its 
-   usage in infrun.c.
-
-/* In aix, number of the trap signals we need to skip over once the
-   inferior process starts running is different in version 3.1 and 3.2.
-   This will be 2 for version 3.1x, 3 for version 3.2x. */
-
-#define	START_INFERIOR_TRAPS_EXPECTED	aix_starting_inferior_traps ()
-#endif /* 0 */
+/* Number of trap signals we need to skip over, once the inferior process
+   starts running. */
 
 #define	START_INFERIOR_TRAPS_EXPECTED	2
 
 /* AIX might return a sigtrap, with a "stop after load" status. It should
    be ignored by gdb, shouldn't be mixed up with breakpoint traps. */
 
+/* Another little glitch  in AIX is signal 0. I have no idea why wait(2)
+   returns with this status word. It looks harmless. */
+
 #define SIGTRAP_STOP_AFTER_LOAD(W)	\
- if ( (W) == 0x57c ) {			\
-   if (breakpoints_inserted) {		\
+ if ( (W) == 0x57c || (W) == 0x7f) {	\
+   if ((W)==0x57c && breakpoints_inserted) {	\
      mark_breakpoints_out ();		\
      insert_breakpoints ();		\
      insert_step_breakpoint ();		\

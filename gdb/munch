@@ -23,8 +23,8 @@ if test "`$MUNCH_NM main.o | egrep main | egrep FUNC | egrep GLOB`" != "" ; then
 elif test "`$MUNCH_NM main.o | egrep '[TD] _?main$'`" = "" ; then
     # System V style nm
     shift;
-    $MUNCH_NM $* | egrep '^(.*[^a-zA-Z_]_|_)_?initialize_.*' | egrep '\.text'|\
-	sed -e 's/^.*\(_initialize_[a-zA-Z0-9_]*\)/   {extern void \1 (); \1 ();}/'
+    $MUNCH_NM $* | egrep '_initialize_.*' | egrep '\.text'|\
+	sed -e 's/^.*\(_initialize_[a-zA-Z0-9_]*\).*/   {extern void \1 (); \1 ();}/'
 else
     # BSD style nm
     # We now accept either text or data symbols, since the RT/PC uses data.

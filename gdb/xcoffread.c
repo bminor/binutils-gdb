@@ -495,17 +495,6 @@ struct coff_symbol *cs;
 }
 
 
-static void
-dumpIncludeChain ()
-{
-  int ii;
-  if (inclTable && inclLength)
-    for (ii=0; ii < inclIndx; ++ii)
-      printf ("name: %s, begin: 0x%x, end: 0x%x\n",
-		inclTable[ii].name, inclTable[ii].begin, inclTable[ii].end);
-}
-
-
 /* given the start and end addresses of a compilation unit (or a csect, at times)
    process its lines and create appropriate line vectors. */
 
@@ -537,6 +526,8 @@ process_linenos (start, end)
   first_fun_line_offset = 0;
 
   if (inclIndx == 0)
+    /* All source lines were in the main source file. None in include files. */
+
     enter_line_range (&main_subfile, offset, 0, start, end, 
     						&main_source_baseline);
 
@@ -601,7 +592,7 @@ process_linenos (start, end)
 
     current_subfile->line_vector_length = 
     			current_subfile->line_vector->nitems;
-
+  }
 
     /* Now, process included files' line numbers. */
 
@@ -654,11 +645,6 @@ process_linenos (start, end)
 	start_subfile (pop_subfile (), (char*)0);
       }
     }
-  }
-  else
-    /* I am not sure this logic is correct. There might be no lines in the
-       main file, whereas there are some in included ones. FIXMEibm */
-    current_subfile->line_vector = NULL;
 
 return_after_cleanup:
 
@@ -761,11 +747,13 @@ retrieve_tracebackinfo (abfd, textsec, cs)
   /* keep reading blocks of data from the text section, until finding a zero
      word and a traceback table. */
 
-  while (bfd_get_section_contents (abfd, textsec, buffer, 
-	(file_ptr)(functionstart + bytesread), 
+  while (
 	bufferbytes = (
 		(TBTABLE_BUFSIZ < (textsec->_raw_size - functionstart - bytesread)) ? 
-		 TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread))))
+		 TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread))
+
+	&& bfd_get_section_contents (abfd, textsec, buffer, 
+				(file_ptr)(functionstart + bytesread), bufferbytes))
   {
     bytesread += bufferbytes;
     pinsn = (int*) buffer;
@@ -1019,6 +1007,7 @@ read_xcoff_symtab (objfile, nsyms)
   int next_file_symnum = -1;
   int just_started = 1;
   int depth = 0;
+  int toc_offset = 0;		/* toc offset value in data section. */
   int val;
   int fcn_last_line;
   int fcn_start_addr;
@@ -1217,10 +1206,10 @@ read_xcoff_symtab (objfile, nsyms)
 		 uninitialized data will show up as XTY_CM/XMC_RW pair. */
 
 	    case XMC_TC0:
-#ifdef XCOFF_ADD_TOC_TO_LOADINFO
-	      XCOFF_ADD_TOC_TO_LOADINFO (cs->c_value);
-#endif
-	      /* fall down to default case. */
+	      if (toc_offset)
+	        warning ("More than one xmc_tc0 symbol found.");
+	      toc_offset = cs->c_value;
+	      continue;
 
 	    case XMC_TC	:		/* ignore toc entries	*/
 	    default	:		/* any other XMC_XXX	*/
@@ -1585,6 +1574,12 @@ function_entry_point:
 
   free (symtbl);
   current_objfile = NULL;
+
+  /* Record the toc offset value of this symbol table into ldinfo structure.
+     If no XMC_TC0 is found, toc_offset should be zero. Another place to obtain
+     this information would be file auxiliary header. */
+
+  xcoff_add_toc_to_loadinfo (toc_offset);
 }
 
 #define	SYMBOL_DUP(SYMBOL1, SYMBOL2)	\
@@ -2295,10 +2290,9 @@ aixcoff_symfile_read (objfile, addr, mainline)
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
 
-#ifdef XCOFF_INIT_LOADINFO
+  /* Initialize load info structure. */
   if (mainline)
-    XCOFF_INIT_LOADINFO ();
-#endif
+    xcoff_init_loadinfo ();
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly. */

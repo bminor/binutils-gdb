@@ -422,15 +422,37 @@ struct stat *vip;
 	  for (; s; s = s->next)
 	    if (!s->nonreloc || LINETABLE(s))
 		vmap_symtab_1(s, vp, old_start);
+
+#if 0 
+	  Himm.., recently we nullified trampoline entry names in order not
+	  to confuse them with real symbols.  Appearently this turned into a
+	  problem, and msymbol vector did not get relocated properly.  If
+	  msymbols have to have non-null names, then we should name
+	  trampoline entries with empty strings. 
+
+	  ALL_MSYMBOLS (objfile, msymbol)
+#else
+	  for (msymbol = objfile->msymbols;
+		msymbol->name || msymbol->address; (msymbol)++)
+#endif
+	      if (msymbol->address < TEXT_SEGMENT_BASE)
+		msymbol -> address += vp->tstart - old_start;
+
 	   break;
 	}
       }
     }
 
   if (vp->tstart != old_start) {
+
+#if 0
+  We don't have a valid `objfile' at this point. This is moved into the
+  previous statement; ALL_OBJFILES() for-loop.
+
     ALL_MSYMBOLS (objfile, msymbol)
       if (msymbol->address < TEXT_SEGMENT_BASE)
 	msymbol -> address += vp->tstart - old_start;
+#endif /* 0 */
 
     /* breakpoints need to be relocated as well. */
     fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_start);

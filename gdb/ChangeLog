@@ -1,3 +1,10 @@
+Fri Apr  3 12:17:14 1992  Per Bothner  (bothner@cygnus.com)
+
+	* munch: Must pre-pend "_" to "initialize" for SYSV style nm.
+	* tm-rs6000.h, xcoffexec.c, xcoffread.c, xm-rs6000.h:
+	Merge in more patches for rs6000 from Metin Ozisik.
+	* utils.c:  Fix typo in comment.
+
 Fri Apr  3 11:23:03 1992  Fred Fish  (fnf@cygnus.com)
 
 	* procfs.c (procinfo struct):  Add nopass_next_sigstop member.

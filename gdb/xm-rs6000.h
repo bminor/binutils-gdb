@@ -60,12 +60,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NO_SINGLE_STEP
 
-/* Interface between xcoff symbol reading code and AIX shared library
-   handling code.  FIXME, this probably needs generalizing.  */
-
-#define XCOFF_INIT_LOADINFO()	xcoff_init_loadinfo()
-#define XCOFF_ADD_TOC_TO_LOADINFO(x)	xcoff_add_toc_to_loadinfo (x)
-
 /* AIX's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
 #undef CPLUS_MARKER
