@@ -94,7 +94,3 @@ aix_resizewindow (signo)			\
       chars_per_line = val;			\
   }						\
 }
-
-/* setpgrp() messes up controling terminal. The other version of it
-   requires libbsd.a. */
-#define	setpgrp(XX,YY)		setpgid (XX, YY)

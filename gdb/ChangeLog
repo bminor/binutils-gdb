@@ -1,3 +1,8 @@
+2001-09-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/rs6000/xm-rs6000.h (setpgrp): Remove macro.  GDB defaults
+	to using setpgid if available now.
+
 2001-09-06  Keith Seitz  <keiths@redhat.com>
 
 	From Ian Roxborough  <irox@redhat.com>
