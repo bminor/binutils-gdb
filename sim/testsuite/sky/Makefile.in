@@ -78,9 +78,15 @@ RUN_FOR_TARGET := `\
     echo $(target_alias)-run ; \
   fi` $(RUNOPTS)
 
+# ??? This definition a hack.
+# This should be named CC_FOR_TARGET but the top level Makefile doesn't
+# specify -B.../libgloss/mips/.  But then again we should be using
+# dejagnu anyway [which handles this, among other things].
+
 GCC_FOR_TARGET := `\
-  if [ -x ../../../gcc/xgcc ]; then \
-    echo ../../../gcc/xgcc ; \
+  b=../../.. ; s=$(srcdir)/../../.. ; \
+  if [ -x $$b/gcc/xgcc ]; then \
+    echo "$$b/gcc/xgcc -B$$b/gcc/ -B$$b/$(target_alias)/libgloss/mips/ -B$$b/$(target_alias)/newlib/ -idirafter $$b/$(target_alias)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc" ; \
   else \
     echo $(target_alias)-gcc ; \
   fi`
