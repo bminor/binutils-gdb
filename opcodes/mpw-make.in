@@ -21,11 +21,11 @@ o = :
 
 CC = C -d MPW_C
 
-"{o}" Ä : "{s}"
+"{o}" \Option-f : "{s}"
 
 # Default rule that puts each file into separate segment.
 
-.c.o  Ä .c
+.c.o  \Option-f .c
    {CC}  {DepDir}{Default}.c {ALL_CFLAGS} {SymOptions} -s {Default} -o {TargDir}{Default}.c.o
 
 HDEFINES =
@@ -94,17 +94,17 @@ OFILES = {BFD_MACHINES} "{o}"dis-buf.c.o
 #### host and target dependent Makefile fragments come in here.
 ###
 
-FLAGS_TO_PASS = ¶
-	"against={against}" ¶
-	"AR={AR}" ¶
-	"AR_FLAGS={AR_FLAGS}" ¶
-	"CC={CC}" ¶
-	"CFLAGS={CFLAGS}" ¶
-	"RANLIB={RANLIB}" ¶
-	"MAKEINFO={MAKEINFO}" ¶
-	"INSTALL={INSTALL}" ¶
-	"INSTALL_DATA={INSTALL_DATA}" ¶
-	"INSTALL_PROGRAM={INSTALL_PROGRAM}" ¶
+FLAGS_TO_PASS = \Option-d
+	"against={against}" \Option-d
+	"AR={AR}" \Option-d
+	"AR_FLAGS={AR_FLAGS}" \Option-d
+	"CC={CC}" \Option-d
+	"CFLAGS={CFLAGS}" \Option-d
+	"RANLIB={RANLIB}" \Option-d
+	"MAKEINFO={MAKEINFO}" \Option-d
+	"INSTALL={INSTALL}" \Option-d
+	"INSTALL_DATA={INSTALL_DATA}" \Option-d
+	"INSTALL_PROGRAM={INSTALL_PROGRAM}" \Option-d
 	"BISON={BISON}"
 
 
@@ -113,34 +113,34 @@ CFILES = i386-dis.c z8k-dis.c m68k-dis.c mips-dis.c
 
 STAGESTUFF = {TARGETLIB} {OFILES}
 
-all Ä {TARGETLIB} 
+all \Option-f {TARGETLIB} 
 
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 
 
-{TARGETLIB} Ä {OFILES}
+{TARGETLIB} \Option-f {OFILES}
 #	 rm -f {TARGETLIB}
 	 Lib -o {TARGETLIB} {OFILES}
 #	 {RANLIB} {TARGETLIB}
 
-"{o}"a29k-dis.o Ä "{s}"a29k-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:a29k.h
-"{o}"dis-buf.c.o Ä "{s}"dis-buf.c {INCDIR}:dis-asm.h
-"{o}"h8500-dis.o Ä "{s}"h8500-dis.c h8500-opc.h {INCDIR}:dis-asm.h
-"{o}"h8300-dis.o Ä "{s}"h8300-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:h8300.h
-"{o}"i386-dis.o Ä "{s}"i386-dis.c {INCDIR}:dis-asm.h
-"{o}"i960-dis.o Ä "{s}"i960-dis.c {INCDIR}:dis-asm.h
-"{o}"m68881-ext.o Ä "{s}"m68881-ext.c {INCDIR}:ieee-float.h
-"{o}"m68k-dis.o Ä "{s}"m68k-dis.c {INCDIR}:dis-asm.h {INCDIR}:ieee-float.h ¶
+"{o}"a29k-dis.o \Option-f "{s}"a29k-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:a29k.h
+"{o}"dis-buf.c.o \Option-f "{s}"dis-buf.c {INCDIR}:dis-asm.h
+"{o}"h8500-dis.o \Option-f "{s}"h8500-dis.c h8500-opc.h {INCDIR}:dis-asm.h
+"{o}"h8300-dis.o \Option-f "{s}"h8300-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:h8300.h
+"{o}"i386-dis.o \Option-f "{s}"i386-dis.c {INCDIR}:dis-asm.h
+"{o}"i960-dis.o \Option-f "{s}"i960-dis.c {INCDIR}:dis-asm.h
+"{o}"m68881-ext.o \Option-f "{s}"m68881-ext.c {INCDIR}:ieee-float.h
+"{o}"m68k-dis.o \Option-f "{s}"m68k-dis.c {INCDIR}:dis-asm.h {INCDIR}:ieee-float.h \Option-d
 	{INCDIR}:opcode:m68k.h
-"{o}"mips-dis.c.o Ä "{s}"mips-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:mips.h
-"{o}"mips-opc.c.o Ä "{s}"mips-opc.c {INCDIR}:opcode:mips.h
-"{o}"sparc-dis.o Ä "{s}"sparc-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:sparc.h
-"{o}"sparc-opc.o Ä "{s}"sparc-opc.c {INCDIR}:opcode:sparc.h
-"{o}"z8k-dis.o Ä "{s}"z8k-dis.c z8k-opc.h {INCDIR}:dis-asm.h
-"{o}"sh-dis.o Ä "{s}"sh-dis.c sh-opc.h {INCDIR}:dis-asm.h
-"{o}"alpha-dis.o Ä "{s}"alpha-dis.c alpha-opc.h {INCDIR}:dis-asm.h
-"{o}"hppa-dis.o Ä "{s}"hppa-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:hppa.h
-"{o}"m88k-dis.o Ä "{s}"m88k-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:m88k.h
+"{o}"mips-dis.c.o \Option-f "{s}"mips-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:mips.h
+"{o}"mips-opc.c.o \Option-f "{s}"mips-opc.c {INCDIR}:opcode:mips.h
+"{o}"sparc-dis.o \Option-f "{s}"sparc-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:sparc.h
+"{o}"sparc-opc.o \Option-f "{s}"sparc-opc.c {INCDIR}:opcode:sparc.h
+"{o}"z8k-dis.o \Option-f "{s}"z8k-dis.c z8k-opc.h {INCDIR}:dis-asm.h
+"{o}"sh-dis.o \Option-f "{s}"sh-dis.c sh-opc.h {INCDIR}:dis-asm.h
+"{o}"alpha-dis.o \Option-f "{s}"alpha-dis.c alpha-opc.h {INCDIR}:dis-asm.h
+"{o}"hppa-dis.o \Option-f "{s}"hppa-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:hppa.h
+"{o}"m88k-dis.o \Option-f "{s}"m88k-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:m88k.h
 
 # Mark everything as depending on config.status, since the timestamp on
 # sysdep.h might actually move backwards if we reconfig and relink it
@@ -151,14 +151,14 @@ RECONFIG = config.status
 #
 #force:
 
-#install Ä
+#install \Option-f
 #	{INSTALL_DATA} {TARGETLIB} {libdir}:libopcodes.a
 #	{RANLIB} {libdir}:libopcodes.a
 
-#Makefile Ä {srcdir}:Makefile.in {host_makefile_frag} {target_makefile_frag}
+#Makefile \Option-f {srcdir}:Makefile.in {host_makefile_frag} {target_makefile_frag}
 #	{SHELL} .:config.status
 
-dep Ä {CFILES}
+dep \Option-f {CFILES}
 	mkdep {CFLAGS}
 
 
