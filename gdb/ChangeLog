@@ -1,3 +1,31 @@
+2004-10-08  Paul Hilfinger  <Hilfinger@gnat.com>
+
+	* ada-typeprint.c (ada_print_type): Use int_string for printing
+	modulus of modular type.
+	* ada-lang.h (ada_modulus): Change return type to unsigned.
+	* ada-lang.c (ada_language_arch_info): Correct type of 
+	string_char_type.
+	(ada_modulus): Return unsigned result.
+	(ada_lookup_symbol): Remove user disambiguation and modify comment 
+	accordingly.
+	
+2004-10-08 Eric Botcazou  <ebotcazou@act-europe.fr>	
+
+	Committed by Paul Hilfinger.
+	* ada-lang.c (decode_packed_array): On big-endian targets, 
+	left-justify the value if it comes with a modular type.
+
+2004-10-08  Joel Brobecker  <brobecker@gnat.com>	
+
+	Committed by Paul Hilfinger.
+        * ada-lang.c (template_to_static_fixed_type): Fix a small typo.
+	(is_name_suffix): Add support for "___JM" suffixes.
+	(ada_check_typedef): Renames ada_completed_type. 
+	Update all users of CHECK_TYPEDEF, check_typedef, and 
+	ada_complete_type to call ada_check_typedef.
+	* ada-typeprint.c: Likewise.
+	* ada-valprint.c: Likewise.
+
 2004-10-08  Corinna Vinschen  <vinschen@redhat.com>
 
 	* infcall.c (call_function_by_hand): Use correct VALUE_TYPE macro.
