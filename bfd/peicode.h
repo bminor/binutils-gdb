@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -697,7 +697,7 @@ typedef struct
 }
 jump_table;
 
-jump_table jtab[] =
+static jump_table jtab[] =
 {
 #ifdef I386MAGIC
   { I386MAGIC,
@@ -761,7 +761,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   struct internal_filehdr  internal_f;
   unsigned int             import_type;
   unsigned int             import_name_type;
-  asection_ptr             id2, id4, id5, id6, id7, text;
+  asection_ptr             id2, id4, id5, id6 = NULL, id7, text;
 
   text = NULL;
   
@@ -1197,7 +1197,7 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
   source_dll  = ptr + strlen (ptr) + 1;
   
   /* Verify that the strings are null terminated.  */
-  if (ptr[size - 1] != 0 || ((source_dll - ptr) >= size))
+  if (ptr[size - 1] != 0 || ((unsigned long)(source_dll - ptr) >= size))
     {
       _bfd_error_handler
 	(_("%s: string not null terminated in ILF object file."),

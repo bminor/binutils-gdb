@@ -454,7 +454,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       Elf_Internal_Sym *           sym = (Elf_Internal_Sym *) 0;
       unsigned long                r_symndx;
       struct elf_link_hash_entry * h = (struct elf_link_hash_entry *) 0;
-      unsigned short               oldinst;
+      unsigned short               oldinst = 0;
       
       /* Unknown relocation handling */
       if ((unsigned) r_type >= (unsigned) R_MCORE_max

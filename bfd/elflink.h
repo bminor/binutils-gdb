@@ -83,7 +83,7 @@ elf_bfd_link_add_symbols (abfd, info)
 /* Return true iff this is a non-common definition of a symbol.  */
 static boolean
 is_global_symbol_definition (abfd, sym)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      Elf_Internal_Sym * sym;
 {
   /* Local symbols do not count, but target specific ones might.  */

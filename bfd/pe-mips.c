@@ -41,7 +41,7 @@ static reloc_howto_type *coff_mips_rtype_to_howto
 	   struct coff_link_hash_entry *, struct internal_syment *,
 
 	   bfd_vma *));
-
+#if 0
 static void mips_ecoff_swap_reloc_in PARAMS ((bfd *, PTR,
 					      struct internal_reloc *));
 static void mips_ecoff_swap_reloc_out PARAMS ((bfd *,
@@ -52,7 +52,7 @@ static void mips_adjust_reloc_in PARAMS ((bfd *,
 					  arelent *));
 static void mips_adjust_reloc_out PARAMS ((bfd *, const arelent *,
 					   struct internal_reloc *));
-
+#endif
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */
 
@@ -74,9 +74,9 @@ coff_mips_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
-     asection *input_section;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   symvalue diff;
 
@@ -169,7 +169,7 @@ coff_mips_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
    appear in the output .reloc section. */
 
 static boolean in_reloc_p(abfd, howto)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type *howto;
 {
   return ! howto->pc_relative && howto->type != MIPS_R_RVA;
@@ -310,32 +310,32 @@ static reloc_howto_type howto_table[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  { 8 },
-  { 9 },
-  { 10 },
-  { 11 },
-  { 12 },
-  { 13 },
-  { 14 },
-  { 15 },
-  { 16 },
-  { 17 },
-  { 18 },
-  { 19 },
-  { 20 },
-  { 21 },
-  { 22 },
-  { 23 },
-  { 24 },
-  { 25 },
-  { 26 },
-  { 27 },
-  { 28 },
-  { 29 },
-  { 30 },
-  { 31 },
-  { 32 },
-  { 33 },
+  EMPTY_HOWTO (8),
+  EMPTY_HOWTO (9),
+  EMPTY_HOWTO (10),
+  EMPTY_HOWTO (11),
+  EMPTY_HOWTO (12),
+  EMPTY_HOWTO (13),
+  EMPTY_HOWTO (14),
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
+  EMPTY_HOWTO (20),
+  EMPTY_HOWTO (21),
+  EMPTY_HOWTO (22),
+  EMPTY_HOWTO (23),
+  EMPTY_HOWTO (24),
+  EMPTY_HOWTO (25),
+  EMPTY_HOWTO (26),
+  EMPTY_HOWTO (27),
+  EMPTY_HOWTO (28),
+  EMPTY_HOWTO (29),
+  EMPTY_HOWTO (30),
+  EMPTY_HOWTO (31),
+  EMPTY_HOWTO (32),
+  EMPTY_HOWTO (33),
   HOWTO (MIPS_R_RVA,            /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
@@ -349,8 +349,8 @@ static reloc_howto_type howto_table[] =
 	 0xffffffff,            /* src_mask */                             
 	 0xffffffff,            /* dst_mask */                             
 	 false),                /* pcrel_offset */
-  { 35 },
-  { 36 },
+  EMPTY_HOWTO (35),
+  EMPTY_HOWTO (36),
   HOWTO (MIPS_R_PAIR,           /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
@@ -413,7 +413,7 @@ static reloc_howto_type howto_table[] =
 
 static reloc_howto_type *
 coff_mips_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
      struct coff_link_hash_entry *h;
@@ -497,7 +497,7 @@ coff_mips_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
 static reloc_howto_type *
 coff_mips_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   int mips_type;
@@ -644,18 +644,13 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
      struct internal_syment *syms;
      asection **sections;
 {
-  asection **symndx_to_section;
-  struct ecoff_link_hash_entry **sym_hashes;
-  struct coff_link_hash_entry *h;
   bfd_vma gp;
   boolean gp_undefined;
   size_t adjust;
-  long *offsets;
   struct internal_reloc *rel;
   struct internal_reloc *rel_end;
   unsigned int i;
   boolean got_lo;
-  struct internal_reloc lo_int_rel;
 
   if (info->relocateable)
   {
@@ -695,7 +690,6 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
       bfd_vma addend = 0;
       bfd_vma val, tmp, targ, src, low;
       reloc_howto_type *howto;
-      bfd_reloc_status_type rstat;
       unsigned char *mem = contents + rel->r_vaddr;
 
       symndx = rel->r_symndx;
@@ -821,7 +815,7 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 	case MIPS_R_JMPADDR:
 	  tmp = bfd_get_32(input_bfd, mem);
 	  targ = val + (tmp&0x03ffffff)*4;
-	  if (src & 0xf0000000 != targ & 0xf0000000)
+	  if ((src & 0xf0000000) != (targ & 0xf0000000))
 	    {
 	      (*_bfd_error_handler)(_("%s: jump too far away\n"),
 				    bfd_get_filename (input_bfd));
@@ -894,7 +888,7 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 	  tmp = bfd_get_32 (input_bfd, mem);
 	  /* printf("rva: src=%08x targ=%08x+%08x\n", src, tmp, val); */
 	  tmp += val
-        - pe_data (input_section->output_section->owner)->pe_opthdr.ImageBase;
+	    - pe_data (input_section->output_section->owner)->pe_opthdr.ImageBase;
 	  bfd_put_32 (input_bfd, tmp, mem);
 	  break;
 

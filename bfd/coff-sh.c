@@ -29,6 +29,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifdef COFF_WITH_PE
 #include "coff/pe.h"
+
+#ifndef COFF_IMAGE_WITH_PE
+static boolean sh_align_load_span 
+  PARAMS ((bfd *, asection *, bfd_byte *,
+	   boolean (*) (bfd *, asection *, PTR, bfd_byte *, bfd_vma),
+	   PTR, bfd_vma **, bfd_vma *, bfd_vma, bfd_vma, boolean *));
+
+#define _bfd_sh_align_load_span sh_align_load_span
+#endif
 #endif
 
 #include "libcoff.h"
@@ -41,7 +50,9 @@ static boolean sh_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static boolean sh_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
+#ifndef COFF_IMAGE_WITH_PE
 static const struct sh_opcode *sh_insn_info PARAMS ((unsigned int));
+#endif
 static boolean sh_align_loads
   PARAMS ((bfd *, asection *, struct internal_reloc *, bfd_byte *, boolean *));
 static boolean sh_swap_insns
@@ -402,7 +413,7 @@ get_symbol_value (symbol)
 
 static reloc_howto_type *
 coff_sh_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      asection * sec;
      struct internal_reloc * rel;
      struct coff_link_hash_entry * h;
@@ -1547,7 +1558,7 @@ struct sh_opcode
      mask value in the sh_major_opcode structure.  */
   unsigned short opcode;
   /* Flags for this instruction.  */
-  unsigned short flags;
+  unsigned long flags;
 };
 
 /* Flag which appear in the sh_opcode structure.  */
@@ -1620,6 +1631,7 @@ struct sh_opcode
 #define SETSAS (0x40000)
 #define SETSAS_REG(x) USESAS_REG (x)
 
+#ifndef COFF_IMAGE_WITH_PE
 static boolean sh_insn_uses_reg
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
 static boolean sh_insn_sets_reg
@@ -1638,7 +1650,7 @@ static boolean sh_insns_conflict
 static boolean sh_load_use
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int,
 	   const struct sh_opcode *));
-
+#endif
 /* The opcode maps.  */
 
 #define MAP(a) a, sizeof a / sizeof a[0]
@@ -2101,6 +2113,7 @@ static const struct sh_minor_opcode sh_dsp_opcodef[] =
   { MAP (sh_dsp_opcodef0), 0xfc0d }
 };
 
+#ifndef COFF_IMAGE_WITH_PE
 /* Given an instruction, return a pointer to the corresponding
    sh_opcode structure.  Return NULL if the instruction is not
    recognized.  */
@@ -2384,7 +2397,6 @@ sh_load_use (i1, op1, i2, op2)
   return false;
 }
 
-#ifndef COFF_IMAGE_WITH_PE
 /* Try to align loads and stores within a span of memory.  This is
    called by both the ELF and the COFF sh targets.  ABFD and SEC are
    the BFD and section we are examining.  CONTENTS is the contents of
@@ -2395,6 +2407,9 @@ sh_load_use (i1, op1, i2, op2)
    STOP are the range of memory to examine.  If a swap is made,
    *PSWAPPED is set to true.  */
 
+#ifdef COFF_WITH_PE
+static
+#endif
 boolean
 _bfd_sh_align_load_span (abfd, sec, contents, swap, relocs,
 			 plabel, label_end, start, stop, pswapped)
@@ -2604,7 +2619,7 @@ _bfd_sh_align_load_span (abfd, sec, contents, swap, relocs,
 
   return true;
 }
-#endif
+#endif /* not COFF_IMAGE_WITH_PE */
 
 /* Look for loads and stores which we can align to four byte
    boundaries.  See the longer comment above sh_relax_section for why
@@ -3112,9 +3127,10 @@ CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NUL
 CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE,
 			       SEC_CODE | SEC_DATA, '_', NULL);
 #else
-CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE, 0, '_', NULL)
+CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE,
+			       0, '_', NULL)
 #endif
-     
+
 #ifndef TARGET_SHL_SYM
 /* Some people want versions of the SH COFF target which do not align
    to 16 byte boundaries.  We implement that by adding a couple of new

@@ -847,8 +847,8 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
   bfd *dynobj;
-  asection *sgot;
-  asection *srelgot;
+  asection *sgot = NULL;
+  asection *srelgot = NULL;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);

@@ -2101,7 +2101,7 @@ sh_elf_set_mach_from_flags (abfd)
 {
   flagword flags = elf_elfheader (abfd)->e_flags;
 
-  switch (elf_elfheader (abfd)->e_flags & EF_SH_MACH_MASK)
+  switch (flags & EF_SH_MACH_MASK)
     {
     case EF_SH1:
       bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh);

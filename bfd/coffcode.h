@@ -760,7 +760,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 	{
 	  bfd_byte *esymstart, *esym, *esymend;
 	  int seen_state = 0;
-	  char *target_name;
+	  char *target_name = NULL;
 
 	  esymstart = esym = (bfd_byte *) obj_coff_external_syms (abfd);
 	  esymend = esym + obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd);

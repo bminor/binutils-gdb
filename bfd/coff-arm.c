@@ -2045,7 +2045,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
       for (rel = i; rel < i + sec->reloc_count; ++rel) 
 	{
 	  unsigned short                 r_type  = rel->r_type;
-	  unsigned long                  symndx;
+	  long                           symndx;
 	  struct coff_link_hash_entry *  h;
 
 	  symndx = rel->r_symndx;

@@ -1,3 +1,58 @@
+2000-02-29  H.J. Lu  <hjl@gnu.org>
+
+	* peicode.h (jtab): Make it static.
+
+	* coff-sh.c (sh_align_load_span): Declared if COFF_WITH_PE is
+	defined and COFF_IMAGE_WITH_PE is not defined.
+	(_bfd_sh_align_load_span): Defined as sh_align_load_span if
+	COFF_WITH_PE is defined and COFF_IMAGE_WITH_PE is not defined.
+
+2000-03-01  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (bfd_arm_process_before_allocation): Make
+	'symndx' signed to prevent compile time warning.
+
+	* coff-mcore.c: Remove unused prototype for pe_object_p.
+
+	* coff-sh.c: Add "#ifndef COFF_IMAGE_WITH_PE" around static
+	functions that are not used when COFF_IMAGE_WITH_PE is
+	defined.
+	(struct sh_opcode): Change type of 'flags' field to unsigned
+	long so that it can hold the USESAS flag.
+
+	* coffcode.h (styp_to_sec_flags): Initialise 'target_name'.
+
+	* elf-m10300.c (mn10300_elf_relax_section): Initialise
+        'sym_sec'.
+
+	* elf32-i370.c: Add ATTRIBUTE_UNUSED to unused function
+	parameters.
+	Remove unusued variables and code.
+	(elf_backend_add_symbol_hook): Fix prototype.
+
+	* elf32-m68k.c (elf_m68k_gc_sweep_hook): Initialise 'sgot' and
+	'srelgot'.
+
+	* elf32-mcore.c (mcore_elf_relocate_section): Initialise
+	'oldinst'. 
+
+	* elf32-mips.c: Add ATTRIBUTE_UNUSED to unused function
+	parameters.
+	Remove unusued variables and code.
+	(elf_backend_add_symbol_hook): Fix prototype.
+
+	* elf32-sh.c (sh_elf_set_mach_from_flags): Use 'flags'.
+
+	* elflink.h (elf_bfd_link_add_symbols): Add ATTRIBUTE_UNUSED
+	to unused function parameter.
+	
+	* pe-mips.c: Add ATTRIBUTE_UNUSED to unused function
+	parameters.
+	Use EMPTY_HOWTO to initialise empty howto slots.
+	Remove unused variables.
+
+	* peicode.h (pe_ILF_build_a_bfd): Initialise id6.	
+
 2000-03-01  H.J. Lu  <hjl@gnu.org>
 
 	* aoutx.h (aout_link_input_section_std): Pass "true" to

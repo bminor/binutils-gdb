@@ -280,7 +280,7 @@ i370_elf_howto_init ()
 
 static reloc_howto_type *
 i370_elf_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   enum i370_reloc_type i370_reloc = R_I370_NONE;
@@ -325,12 +325,12 @@ static boolean i370_elf_section_from_shdr PARAMS ((bfd *,
 static boolean i370_elf_fake_sections PARAMS ((bfd *,
 					       Elf32_Internal_Shdr *,
 					       asection *));
-
+#if 0
 static elf_linker_section_t *i370_elf_create_linker_section
   PARAMS ((bfd *abfd,
 	   struct bfd_link_info *info,
 	   enum elf_linker_section_enum));
-
+#endif
 static boolean i370_elf_check_relocs PARAMS ((bfd *,
 					     struct bfd_link_info *,
 					     asection *,
@@ -355,7 +355,7 @@ static boolean i370_elf_finish_dynamic_sections PARAMS ((bfd *, struct bfd_link_
 
 static void
 i370_elf_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rela *dst;
 {
@@ -482,7 +482,7 @@ i370_elf_section_from_shdr (abfd, hdr, name)
 
 static boolean
 i370_elf_fake_sections (abfd, shdr, asect)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      Elf32_Internal_Shdr *shdr;
      asection *asect;
 {
@@ -496,6 +496,7 @@ i370_elf_fake_sections (abfd, shdr, asect)
 }
 
 
+#if 0
 /* Create a special linker section */
 /* XXX hack alert bogus This routine is mostly all junk and almost
  * certainly does the wrong thing.  Its here simply because it does
@@ -571,7 +572,7 @@ i370_elf_create_linker_section (abfd, info, which)
 
   return lsect;
 }
-
+#endif
 
 /* We have to create .dynsbss and .rela.sbss here so that they get mapped
    to output sections (just like _bfd_elf_create_dynamic_sections has
@@ -636,7 +637,6 @@ i370_elf_adjust_dynamic_symbol (info, h)
   bfd *dynobj = elf_hash_table (info)->dynobj;
   asection *s;
   unsigned int power_of_two;
-  bfd_vma plt_offset;
 
 #ifdef DEBUG
   fprintf (stderr, "i370_elf_adjust_dynamic_symbol called for %s\n",
@@ -1024,11 +1024,7 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   bfd_vma *local_got_offsets;
-  elf_linker_section_t *sdata;
-  elf_linker_section_t *sdata2;
   asection *sreloc;
-  asection *sgot;
-  asection *srelgot = NULL;
 
   if (info->relocateable)
     return true;
@@ -1732,8 +1728,8 @@ int i370_noop()
 
 #define elf_backend_add_symbol_hook \
   (boolean (*) PARAMS ((bfd *, struct bfd_link_info *, \
-			const char *, Elf_Internal_Sym *, \
-			asection *))) 				i370_noop
+			const Elf_Internal_Sym *, const char **, flagword *, \
+			asection **, bfd_vma *))) 		i370_noop
 #define elf_backend_finish_dynamic_symbol \
   (boolean (*) PARAMS ((bfd *, struct bfd_link_info *, \
 			struct elf_link_hash_entry *, \

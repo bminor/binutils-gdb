@@ -52,10 +52,6 @@ static reloc_howto_type *           mcore_coff_reloc_type_lookup
 static reloc_howto_type *           coff_mcore_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
-static const bfd_target *           pe_object_p
-  PARAMS ((bfd *));
-
-
 
 /* The NT loader points the toc register to &toc + 32768, in order to
    use the complete range of a 16-bit displacement. We have to adjust

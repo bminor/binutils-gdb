@@ -108,8 +108,10 @@ static void bfd_mips_elf32_swap_gptab_in
   PARAMS ((bfd *, const Elf32_External_gptab *, Elf32_gptab *));
 static void bfd_mips_elf32_swap_gptab_out
   PARAMS ((bfd *, const Elf32_gptab *, Elf32_External_gptab *));
+#if 0
 static void bfd_mips_elf_swap_msym_in 
   PARAMS ((bfd *, const Elf32_External_Msym *, Elf32_Internal_Msym *));
+#endif
 static void bfd_mips_elf_swap_msym_out
   PARAMS ((bfd *, const Elf32_Internal_Msym *, Elf32_External_Msym *));
 static boolean mips_elf_sym_is_global PARAMS ((bfd *, asymbol *));
@@ -2115,7 +2117,7 @@ bfd_mips_elf_swap_options_out (abfd, in, ex)
   bfd_h_put_16 (abfd, in->section, ex->section);
   bfd_h_put_32 (abfd, in->info, ex->info);
 }
-
+#if 0
 /* Swap in an MSYM entry.  */
 
 static void
@@ -2127,7 +2129,7 @@ bfd_mips_elf_swap_msym_in (abfd, ex, in)
   in->ms_hash_value = bfd_h_get_32 (abfd, ex->ms_hash_value);
   in->ms_info = bfd_h_get_32 (abfd, ex->ms_info);
 }
-
+#endif
 /* Swap out an MSYM entry.  */
 
 static void
@@ -5360,7 +5362,7 @@ mips_elf_got_page (abfd, info, value, offsetp)
   struct mips_got_info *g;
   bfd_byte *entry;
   bfd_byte *last_entry;
-  bfd_vma index;
+  bfd_vma index = 0;
   bfd_vma address;
 
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
@@ -5409,7 +5411,7 @@ mips_elf_got16_entry (abfd, info, value)
   struct mips_got_info *g;
   bfd_byte *entry;
   bfd_byte *last_entry;
-  bfd_vma index;
+  bfd_vma index = 0;
   bfd_vma address;
 
   /* Although the ABI says that it is "the high-order 16 bits" that we
@@ -6415,7 +6417,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 {
   Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *relend;
-  bfd_vma addend;
+  bfd_vma addend = 0;
   boolean use_saved_addend_p = false;
   struct elf_backend_data *bed;
 
