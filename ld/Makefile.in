@@ -202,7 +202,7 @@ ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmaoutb.o \
 	emipsidt.o emipsidtl.o emipslit.o enews.o ens32knbsd.o eppcnw.o \
 	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
-	ez8001.o ez8002.o ei386pe.o earmpe.o eelf32vr4300.o eelf32vr4300el.o \
+	ez8001.o ez8002.o ei386pe.o earmpe.o eelf32b4300.o eelf32l4300.o \
 	eaixppc.o eaixrs6.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
@@ -412,12 +412,12 @@ eelf32bmip.c: $(srcdir)/emulparams/elf32bmip.sh \
 eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lmip
-eelf32vr4300.c: $(srcdir)/emulparams/elf32vr4300.sh \
+eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} elf32vr4300
-eelf32vr4300el.c: $(srcdir)/emulparams/elf32vr4300el.sh \
+	${GENSCRIPTS} elf32b4300
+eelf32l4300.c: $(srcdir)/emulparams/elf32l4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} elf32vr4300el
+	${GENSCRIPTS} elf32l4300
 ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha
@@ -428,10 +428,10 @@ esparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparclynx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparclynx
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc
 eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppc
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
@@ -764,7 +764,7 @@ de-stage3: force
 
 # Stuff that should be included in a distribution:
 LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
-diststuff: $(LDDISTSTUFF)
+diststuff: $(LDDISTSTUFF) info
 
 mostlyclean:
 	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp] config.log
@@ -781,7 +781,7 @@ distclean: clean
 maintainer-clean realclean: clean distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -f $(LDDISTSTUFF)
+	-rm -f $(LDDISTSTUFF) *.info*
 
 .PHONY: diststuff mostlyclean clean distclean realclean
 
