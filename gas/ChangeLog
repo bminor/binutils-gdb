@@ -1,3 +1,10 @@
+2003-06-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (ADDRESS_ADD_INSN,ADDRESS_ADDI_INSN,
+	ADDRESS_LOAD_INSN,ADDRESS_STORE_INSN): New macros.
+	(macro_build_ldst_constoffset,load_address,macro,s_cpsetup,
+	s_cprestore,s_cpadd): Use them.
+
 2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in: Add specific case for cris-*-linux-gnu* with
