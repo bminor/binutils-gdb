@@ -1,3 +1,8 @@
+2001-05-14  DJ Delorie  <dj@delorie.com>
+
+	* Makefile.am (ld.dvi): Search bfd/doc for texinfo files.
+	* Makefile.in: Ditto.
+
 2001-05-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Put

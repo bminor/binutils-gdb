@@ -1624,7 +1624,7 @@ ld.info: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 
 ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
-	  MAKEINFO="$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc" $(TEXI2DVI) $(srcdir)/ld.texinfo
+	  MAKEINFO="$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc" $(TEXI2DVI) -I $(BFDDIR)/doc $(srcdir)/ld.texinfo
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
