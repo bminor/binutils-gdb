@@ -44,11 +44,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "ld.h"
 #include "ldmain.h"
-#include "ldemul.h"
-#include "ldfile.h"
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "ldfile.h"
+#include "ldemul.h"
 #include "ldctor.h"
 #include "ldgram.h"
 

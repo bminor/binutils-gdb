@@ -1,5 +1,8 @@
 2001-08-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/aix.em: ldexp.h,ldlang.h,ldfile.h,ldemul.h go in this
+	order.
+
 	* emultempl/beos.em (sort_sections): Modify for 2001-08-03 change,
 	ie. iterate over wild_statement.section_list.
 	(gld${EMULATION_NAME}_place_orphan): Likewise.
