@@ -1,5 +1,10 @@
 2001-08-10  H.J. Lu  <hjl@gnu.org>
 
+	* bfd.c (bfd_sprintf_vma): Fix a typo in the last change.
+	(bfd_fprintf_vma): Likewise.
+
+2001-08-10  H.J. Lu  <hjl@gnu.org>
+
 	* bfd.c (bfd_sprintf_vma): Don't return void.
 	(bfd_fprintf_vma): Likewise.
 

@@ -1271,7 +1271,8 @@ bfd_sprintf_vma (abfd, buf, value)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     bfd_elf_sprintf_vma (abfd, buf, value);
-  sprintf_vma (buf, value);
+  else
+    sprintf_vma (buf, value);
 }
 
 void
@@ -1282,5 +1283,6 @@ bfd_fprintf_vma (abfd, stream, value)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     bfd_elf_fprintf_vma (abfd, stream, value);
-  fprintf_vma ((FILE *) stream, value);
+  else
+    fprintf_vma ((FILE *) stream, value);
 }
