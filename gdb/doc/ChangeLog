@@ -1,3 +1,8 @@
+Wed May 24 21:27:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Brian Youmans:
+	* gdb.texinfo: Fix ``et al.''.
+
 Tue May 23 22:57:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (refcard.dvi): Remove quotes around REFEDITS in for
@@ -1914,7 +1919,7 @@ Thu Dec  5 22:46:12 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never
