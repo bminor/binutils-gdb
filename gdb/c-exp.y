@@ -1085,10 +1085,14 @@ parse_number (p, len, parsed_float, putithere)
     }
   else
     {
-      high_bit = (((ULONGEST)1)
-		  << (TARGET_LONG_LONG_BIT - 32 - 1)
-		  << 16
-		  << 16);
+      /* Avoid negative shift.  */
+      if (TARGET_LONG_LONG_BIT <= 32)
+	high_bit = ((ULONGEST)1 << TARGET_LONG_LONG_BIT - 1);
+      else
+	high_bit = (((ULONGEST)1)
+		    << (TARGET_LONG_LONG_BIT - 32 - 1)
+		    << 16
+		    << 16);
       if (high_bit == 0)
 	/* A long long does not fit in a LONGEST.  */
 	high_bit =

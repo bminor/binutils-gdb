@@ -1,3 +1,8 @@
+1998-11-03  Jim Wilson  <wilson@cygnus.com>
+
+	* c-exp.y (parse_number): Check TARGET_LONG_LONG_BIT when setting
+	high_bit to avoid undefined negative shift.
+
 Mon Nov  2 15:26:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: Check cygwin* instead of cygwin32*.
