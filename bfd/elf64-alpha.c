@@ -74,6 +74,8 @@ static boolean elf64_alpha_object_p
   PARAMS((bfd *));
 static boolean elf64_alpha_section_from_shdr
   PARAMS((bfd *, Elf64_Internal_Shdr *, char *));
+static boolean elf64_alpha_section_flags
+  PARAMS((flagword *, Elf64_Internal_Shdr *));
 static boolean elf64_alpha_fake_sections
   PARAMS((bfd *, Elf64_Internal_Shdr *, asection *));
 static boolean elf64_alpha_create_got_section
@@ -1641,6 +1643,19 @@ elf64_alpha_section_from_shdr (abfd, hdr, name)
   return true;
 }
 
+/* Convert Alpha specific section flags to bfd internal section flags.  */
+
+static boolean
+elf64_alpha_section_flags (flags, hdr)
+     flagword *flags;
+     Elf64_Internal_Shdr *hdr;
+{
+  if (hdr->sh_flags & SHF_ALPHA_GPREL)
+    *flags |= SEC_SMALL_DATA;
+
+  return true;
+}
+
 /* Set the correct type for an Alpha ELF section.  We do this by the
    section name, which is a hack, but ought to work.  */
 
@@ -1664,7 +1679,8 @@ elf64_alpha_fake_sections (abfd, hdr, sec)
       else
 	hdr->sh_entsize = 1;
     }
-  else if (strcmp (name, ".sdata") == 0
+  else if ((sec->flags & SEC_SMALL_DATA)
+	   || strcmp (name, ".sdata") == 0
 	   || strcmp (name, ".sbss") == 0
 	   || strcmp (name, ".lit4") == 0
 	   || strcmp (name, ".lit8") == 0)
@@ -4220,6 +4236,8 @@ const struct elf_size_info alpha_elf_size_info =
 
 #define elf_backend_section_from_shdr \
   elf64_alpha_section_from_shdr
+#define elf_backend_section_flags \
+  elf64_alpha_section_flags
 #define elf_backend_fake_sections \
   elf64_alpha_fake_sections
 
