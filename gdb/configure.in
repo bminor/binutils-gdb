@@ -215,12 +215,21 @@ m68000)
 		sunos4)	gdb_target=sun2os4 ;;
 		*)	gdb_target=sun2 ;;
 		esac
+		;;
+	wrs)	gdb_target=vxworks68 ;;
+	esac
+	;;
+
+m680[124]0)
+	case "${target_vendor}" in
+	wrs)	gdb_target=vxworks68 ;;
 	esac
 	;;
 
 m68030)
 	case "${target_vendor}" in
 	sony)	gdb_target=news1000 ;;
+	wrs)	gdb_target=vxworks68 ;;
 	esac
 	;;
 
