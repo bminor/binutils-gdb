@@ -1,3 +1,11 @@
+Fri Aug 23 14:07:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* WHATS.NEW: correct pointer to refcard.
+
+	* doc/gdb.texinfo: update New Features, Installing
+
+	* doc/gdbint.texinfo: add short description of configure +template
+
 Fri Aug 23 13:46:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* GDB-4.0 release!

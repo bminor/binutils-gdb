@@ -19,7 +19,8 @@ GDB now reads object files and symbol tables via a ``binary file''
 library, which allows a single copy of GDB to debug programs of multiple
 object file types such as a.out and coff.
 
-There is now a GDB reference card in "gdbrc.tex".
+There is now a GDB reference card in "doc/refcard.tex".  (Make targets
+refcard.dvi and refcard.ps are available to format it).
 
 
  *  Control-Variable user interface simplified
