@@ -107,6 +107,12 @@ DESCRIPTION
 #include "sysdep.h"
 #include "libbfd.h"
 
+static boolean srec_write_record PARAMS ((bfd *, int, bfd_vma,
+					  const unsigned char *,
+					  const unsigned char *));
+static boolean srec_write_header PARAMS ((bfd *));
+static boolean srec_write_symbols PARAMS ((bfd *));
+
 /* Macros for converting between hex and binary. */
 
 static CONST char digs[] = "0123456789ABCDEF";
@@ -188,6 +194,9 @@ typedef struct srec_data_struct
   }
 tdata_type;
 
+static boolean srec_write_section PARAMS ((bfd *, tdata_type *,
+					   srec_data_list_type *));
+static boolean srec_write_terminator PARAMS ((bfd *, tdata_type *));
 
 /*
    called once per input S-Record, used to work out vma and size of data.
@@ -336,7 +345,8 @@ pass_over (abfd, func, symbolfunc, section)
 
   srec_mkobject (abfd);
   /* To the front of the file */
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+    abort ();
   while (eof == false)
     {
       char buffer[MAXCHUNK];
@@ -410,7 +420,8 @@ pass_over (abfd, func, symbolfunc, section)
 	  src++;
 
 	  /* Fetch the type and the length */
-	  bfd_read (src, 1, 3, abfd);
+	  if (bfd_read (src, 1, 3, abfd) != 3)
+	    abort (); /* FIXME */
 
 	  type = *src++;
 
@@ -423,7 +434,8 @@ pass_over (abfd, func, symbolfunc, section)
 	    break;
 	  src += 2;
 
-	  bfd_read (src, 1, bytes_on_line * 2, abfd);
+	  if (bfd_read (src, 1, bytes_on_line * 2, abfd) != bytes_on_line * 2)
+	    abort (); /* FIXME */
 
 	  switch (type)
 	    {
@@ -487,8 +499,9 @@ srec_object_p (abfd)
 
   srec_init ();
 
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
-  bfd_read (b, 1, 4, abfd);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
+      || bfd_read (b, 1, 4, abfd) != 4)
+    return NULL;
 
   if (b[0] != 'S' || !ISHEX (b[1]) || !ISHEX (b[2]) || !ISHEX (b[3]))
     return (bfd_target *) NULL;
@@ -508,8 +521,9 @@ symbolsrec_object_p (abfd)
 
   srec_init ();
 
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
-  bfd_read (b, 1, 4, abfd);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
+      || bfd_read (b, 1, 4, abfd) != 4)
+    return NULL;
 
   if (b[0] != '$' || b[1] != '$')
     return (bfd_target *) NULL;
@@ -614,15 +628,13 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
    supplied bytes and length don't have a checksum. That's worked out
    here
 */
-static
-void
+static boolean
 srec_write_record (abfd, type, address, data, end)
      bfd *abfd;
-     char type;
+     int type;
      bfd_vma address;
-     CONST unsigned char *data;
-     CONST unsigned char *end;
-
+     const unsigned char *data;
+     const unsigned char *end;
 {
   char buffer[MAXCHUNK];
 
@@ -673,12 +685,14 @@ srec_write_record (abfd, type, address, data, end)
 
   *dst++ = '\r';
   *dst++ = '\n';
-  bfd_write ((PTR) buffer, 1, dst - buffer, abfd);
+  if (bfd_write ((PTR) buffer, 1, dst - buffer, abfd) != dst - buffer)
+    return false;
+  return true;
 }
 
 
 
-static void
+static boolean
 srec_write_header (abfd)
      bfd *abfd;
 {
@@ -691,10 +705,10 @@ srec_write_header (abfd)
     {
       *dst++ = abfd->filename[i];
     }
-  srec_write_record (abfd, 0, 0, buffer, dst);
+  return srec_write_record (abfd, 0, 0, buffer, dst);
 }
 
-static void
+static boolean
 srec_write_section (abfd, tdata, list)
      bfd *abfd;
      tdata_type *tdata;
@@ -716,32 +730,34 @@ srec_write_section (abfd, tdata, list)
 
       address = list->where + bytes_written;
 
-      srec_write_record (abfd,
-			 tdata->type,
-			 address,
-			 location,
-			 location + bytes_this_chunk);
+      if (! srec_write_record (abfd,
+			       tdata->type,
+			       address,
+			       location,
+			       location + bytes_this_chunk))
+	return false;
 
       bytes_written += bytes_this_chunk;
       location += bytes_this_chunk;
     }
 
+  return true;
 }
 
-static void
+static boolean
 srec_write_terminator (abfd, tdata)
      bfd *abfd;
      tdata_type *tdata;
 {
   unsigned char buffer[2];
 
-  srec_write_record (abfd, 10 - tdata->type,
-		     abfd->start_address, buffer, buffer);
+  return srec_write_record (abfd, 10 - tdata->type,
+			    abfd->start_address, buffer, buffer);
 }
 
 
 
-static void
+static boolean
 srec_write_symbols (abfd)
      bfd *abfd;
 {
@@ -752,10 +768,13 @@ srec_write_symbols (abfd)
 
   if (len)
     {
+      size_t len;
       asymbol **table = bfd_get_outsymbols (abfd);
       sprintf (buffer, "$$ %s\r\n", abfd->filename);
 
-      bfd_write (buffer, strlen (buffer), 1, abfd);
+      len = strlen (buffer) + 1;
+      if (bfd_write (buffer, len, 1, abfd) != len)
+	return false;
 
       for (i = 0; i < len; i++)
 	{
@@ -771,7 +790,8 @@ srec_write_symbols (abfd)
 	      int l;
 	      sprintf (buffer, "$$ %s\r\n", s->name);
 	      l = strlen (buffer);
-	      bfd_write (buffer, l, 1, abfd);
+	      if (bfd_write (buffer, l, 1, abfd) != l)
+		return false;
 	    }
 	  else
 #endif
@@ -793,12 +813,17 @@ srec_write_symbols (abfd)
 		p++;
 	      sprintf (buffer, "  %s $%s\r\n", s->name, p);
 	      l = strlen (buffer);
-	      bfd_write (buffer, l, 1, abfd);
+	      if (bfd_write (buffer, l, 1, abfd) != l)
+		return false;
 	    }
 	}
       sprintf (buffer, "$$ \r\n");
-      bfd_write (buffer, strlen (buffer), 1, abfd);
+      len = strlen (buffer) + 1;
+      if (bfd_write (buffer, len, 1, abfd) != len)
+	return false;
     }
+
+  return true;
 }
 
 static boolean
@@ -810,20 +835,24 @@ internal_srec_write_object_contents (abfd, symbols)
   srec_data_list_type *list;
 
   if (symbols)
-    srec_write_symbols (abfd);
+    {
+      if (! srec_write_symbols (abfd))
+	return false;
+    }
 
-  srec_write_header (abfd);
+  if (! srec_write_header (abfd))
+    return false;
 
   /* Now wander though all the sections provided and output them */
   list = tdata->head;
 
   while (list != (srec_data_list_type *) NULL)
     {
-      srec_write_section (abfd, tdata, list);
+      if (! srec_write_section (abfd, tdata, list))
+	return false;
       list = list->next;
     }
-  srec_write_terminator (abfd, tdata);
-  return true;
+  return srec_write_terminator (abfd, tdata);
 }
 
 static boolean
