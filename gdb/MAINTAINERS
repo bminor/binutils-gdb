@@ -121,6 +121,7 @@ GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
 			Jim Blandy		jimb@cygnus.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
+FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 hurd native		Mark Kettenis		kettenis@gnu.org
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
@@ -158,7 +159,7 @@ generic symtabs		Jim Blandy		jimb@cygnus.com
 tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
-breakpoint.c		Michael Snyder		msnyder@cygnus.com
+breakpoints		Michael Snyder		msnyder@cygnus.com
 			Jim Blandy		jimb@cygnus.com
 language support	David Taylor		taylor@cygnus.com
   C++ support		Daniel Berlin		dan@cgsoftware.com
@@ -184,7 +185,7 @@ documentation	 	Stan Shebs		shebs@apple.com
 			Eli Zaretskii		eliz@gnu.org
 testsuite	 	Stan Shebs		shebs@apple.com
 			Fernando Nasser		fnasser@cygnus.com
-  hp tests (gdb.hp)	*Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
+  hp tests (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
   Java tests (gdb.java)	Anthony Green 		green@cygnus.com
 Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
 
@@ -239,4 +240,7 @@ Kazu Hirata					kazu@hxi.com
 * Indicates folks we need to get Kerberos/SSH accounts ready so they
 can write in the source tree
 
-+ Indicates folks that have been caught up in a paper trail.
+
+Folks that have been caught up in a paper trail:
+
+FreeBSD native & host	David O 'Brien		obrien@NUXI.com

@@ -326,6 +326,10 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
 
 --
 
+Nuke #define CONST_PTR.
+
+--
+
 Nuke USG define.
 
 --
