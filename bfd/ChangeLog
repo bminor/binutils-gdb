@@ -1,5 +1,11 @@
 Wed Apr  2 10:49:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-mips.c (elf_mips_ctor64_howto): New static variable.
+	(elf_mips_isa): Move to earlier in file.
+	(mips_reloc_map): Remove BFD_RELOC_CTOR entry.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle BFD_RELOC_CTOR
+	specially.
+
 	* elf32-mips.c (mips16_jump_reloc): Print a warning rather than
 	calling abort.
 
