@@ -15,13 +15,6 @@
 
 Do-first:
 
-d10v_files="d10v"
-if ( echo $* | grep keep\-d10v > /dev/null ) ; then
-        keep_these_too="${d10v_files} ${keep_these_too}"
-else
-        lose_these_too="${d10v_files} ${lose_these_too}"
-fi
-
 m32r_files="m32r"
 if ( echo $* | grep keep\-m32r > /dev/null ) ; then
         keep_these_too="${m32r_files} ${keep_these_too}"
@@ -58,6 +51,7 @@ arm
 configure
 configure.in
 common
+d10v
 erc32
 h8300
 h8500
