@@ -1,5 +1,9 @@
 2000-12-08  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
+	* dwarf2read.c (DWARF2_REG_TO_REGNUM): New macro.  Provide default
+	definition.  Will be used to translate between the compiler's
+	register numbering and GDB's (for register variables etc).
+	(new_symbol): Use DWARF2_REG_TO_REGNUM to translate register ids.
 	* alpha-tdep.c: Fix typo in comment.
 	* dbxread.c: Fix typo in comment.
 	* fr30-tdep.c: Fix typo: newline missing after comment.

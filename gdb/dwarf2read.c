@@ -43,6 +43,10 @@
 #include "gdb_string.h"
 #include <sys/types.h>
 
+#ifndef DWARF2_REG_TO_REGNUM
+#define DWARF2_REG_TO_REGNUM(REG) (REG)
+#endif
+
 #if 0
 /* .debug_info header for a compilation unit
    Because of alignment constraints, this structure has padding and cannot
@@ -4201,11 +4205,13 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		  else if (isreg)
 		    {
 		      SYMBOL_CLASS (sym) = LOC_REGISTER;
+		      SYMBOL_VALUE (sym) = 
+			DWARF2_REG_TO_REGNUM (SYMBOL_VALUE (sym));
 		    }
 		  else if (offreg)
 		    {
 		      SYMBOL_CLASS (sym) = LOC_BASEREG;
-		      SYMBOL_BASEREG (sym) = basereg;
+		      SYMBOL_BASEREG (sym) = DWARF2_REG_TO_REGNUM (basereg);
 		    }
 		  else if (islocal)
 		    {
@@ -4247,6 +4253,8 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	      if (isreg)
 		{
 		  SYMBOL_CLASS (sym) = LOC_REGPARM;
+		  SYMBOL_VALUE (sym) = 
+		    DWARF2_REG_TO_REGNUM (SYMBOL_VALUE (sym));
 		}
 	      else if (offreg)
 		{
@@ -4259,7 +4267,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		  else
 		    {
 		      SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
-		      SYMBOL_BASEREG (sym) = basereg;
+		      SYMBOL_BASEREG (sym) = DWARF2_REG_TO_REGNUM (basereg);
 		    }
 		}
 	      else
