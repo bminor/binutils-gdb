@@ -4096,18 +4096,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
                relocs_copied field of the hash table entry.  */
 	    if ((info->shared || htab->root.is_relocatable_executable)
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& ((r_type != R_ARM_PC24
-		     && r_type != R_ARM_PLT32
-#ifndef OLD_ARM_ABI
-		     && r_type != R_ARM_CALL
-		     && r_type != R_ARM_JUMP24
-		     && r_type != R_ARM_PREL31
-#endif
-		     && r_type != R_ARM_REL32
-		     && r_type != R_ARM_THM_PC22)
-		    || (h != NULL
-			&& (! info->symbolic
-			    || !h->def_regular))))
+		&& (r_type == R_ARM_ABS32
+		    || (h != NULL && ! h->needs_plt
+			&& (! info->symbolic || ! h->def_regular))))
 	      {
 		struct elf32_arm_relocs_copied *p, **head;
 
@@ -4187,9 +4178,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    p->count = 0;
 		  }
 
-		if (r_type == R_ARM_ABS32
-		    || r_type == R_ARM_REL32)
-		  p->count += 1;
+		p->count += 1;
 	      }
 	    break;
 
