@@ -68,15 +68,17 @@ putenv( entry )
 {
   unsigned length;
   unsigned size;
+  char     *temp;
   char     **p;
   char     **new_environ;
 
   /*  Find the length of the "NAME="  */
 
-  if ( (length=(unsigned) index(entry,'=')) == 0 )
+  temp = index(entry,'=');
+  if ( temp == 0 )
     return( -1 );
 
-  length = length - (unsigned) entry + 1;
+  length = (unsigned) (temp - entry + 1);
 
 
   /*  Scan through the environment looking for "NAME="  */
@@ -95,7 +97,7 @@ putenv( entry )
 
   new_environ = (char **) malloc( (size+2)*PSIZE );
 
-  if ( new_environ == NULL )
+  if ( new_environ == (char **) NULL )
     return( -1 );
 
   bcopy( (char *) environ, (char *) new_environ, size*PSIZE );

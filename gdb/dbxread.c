@@ -1,5 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1986-1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -1251,21 +1251,15 @@ read_ofile_symtab (objfile, stringtab, stringtab_size, sym_offset,
 	{
 	  /* N_CATCH is not fixed up by the linker, and unfortunately,
 	     there's no other place to put it in the .stab map.  */
-	  bufp->n_value += text_offset + offset;
+	  bufp->n_value += text_offset - offset;
 	}
-      else {
-        type &= ~N_EXT;		/* Ignore external-bit */
-        if (type == N_TEXT || type == N_DATA || type == N_BSS)
-	  bufp->n_value += offset;
-        type = bufp->n_type;
-      }
 
       SET_NAMESTRING ();
 
       if (type & N_STAB) {
-	process_one_symbol (type, bufp->n_desc, bufp->n_value, namestring);
-	/* our_objfile is an implicit parameter.  */
-
+	  process_one_symbol (type, bufp->n_desc, bufp->n_value,
+			      namestring, offset);
+	  /* our_objfile is an implicit parameter.  */
       }
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine. */
@@ -1319,13 +1313,28 @@ hashname (name)
   if (total < 0) total += (1000 << 6);
   return total % HASHSIZE;
 }
-
 
+/* This handles a single symbol from the symbol-file, building symbols
+   into a GDB symtab.  It takes these arguments and an implicit argument.
+
+   TYPE is the type field of the ".stab" symbol entry.
+   DESC is the desc field of the ".stab" entry.
+   VALU is the value field of the ".stab" entry.
+   NAME is the symbol name, in our address space.
+   OFFSET is the amount by which this object file was relocated 
+	  when it was loaded into memory.  All symbols that refer
+	  to memory locations need to be offset by this amount.
+
+   The implicit argument is:
+   OUR_OBJFILE is the object file from which we are reading symbols.
+ 	       It is used in end_symtab.  */
+
 void
-process_one_symbol (type, desc, valu, name)
+process_one_symbol (type, desc, valu, name, offset)
      int type, desc;
      CORE_ADDR valu;
      char *name;
+     int offset;
 {
 #ifndef SUN_FIXED_LBRAC_BUG
   /* This records the last pc address we've seen.  We depend on there being
@@ -1364,6 +1373,8 @@ process_one_symbol (type, desc, valu, name)
     case N_STSYM:
 #endif /* 0 */
 
+      valu += offset;		/* Relocate for dynamic loading */
+
       /* Either of these types of symbols indicates the start of
 	 a new function.  We must process its "name" normally for dbx,
 	 but also record the start of a new lexical context, and possibly
@@ -1401,19 +1412,16 @@ process_one_symbol (type, desc, valu, name)
 
     case N_CATCH:
       /* Record the address at which this catch takes place.  */
-      define_symbol (valu, name, desc, type);
-      break;
-
-    case N_EHDECL:
-      /* Don't know what to do with these yet.  */
-      error ("action uncertain for eh extensions");
+      define_symbol (valu+offset, name, desc, type);
       break;
 
     case N_LBRAC:
       /* This "symbol" just indicates the start of an inner lexical
 	 context within a function.  */
 
-#if !defined (BLOCK_ADDRESS_ABSOLUTE)
+#if defined (BLOCK_ADDRESS_ABSOLUTE)
+      valu += offset;		/* Relocate for dynamic loading */
+#else
       /* On most machines, the block addresses are relative to the
 	 N_SO, the linker did not relocate them (sigh).  */
       valu += last_source_start_addr;
@@ -1433,7 +1441,9 @@ process_one_symbol (type, desc, valu, name)
       /* This "symbol" just indicates the end of an inner lexical
 	 context that was started with N_LBRAC.  */
 
-#if !defined (BLOCK_ADDRESS_ABSOLUTE)
+#if defined (BLOCK_ADDRESS_ABSOLUTE)
+      valu += offset;		/* Relocate for dynamic loading */
+#else
       /* On most machines, the block addresses are relative to the
 	 N_SO, the linker did not relocate them (sigh).  */
       valu += last_source_start_addr;
@@ -1492,6 +1502,7 @@ process_one_symbol (type, desc, valu, name)
     case N_FN:
     case N_FN_SEQ:
       /* This kind of symbol indicates the start of an object file.  */
+      valu += offset;		/* Relocate for dynamic loading */
       break;
 
     case N_SO:
@@ -1499,6 +1510,8 @@ process_one_symbol (type, desc, valu, name)
 	 for one source file.
 	 Finish the symbol table of the previous source file
 	 (if any) and start accumulating a new symbol table.  */
+      valu += offset;		/* Relocate for dynamic loading */
+
 #ifndef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
@@ -1531,11 +1544,13 @@ process_one_symbol (type, desc, valu, name)
       start_symtab (name, NULL, valu);
       break;
 
+
     case N_SOL:
       /* This type of symbol indicates the start of data for
 	 a sub-source-file, one whose contents were copied or
 	 included in the compilation of the main source file
 	 (whose name was given in the N_SO symbol.)  */
+      valu += offset;		/* Relocate for dynamic loading */
       start_subfile (name, NULL);
       break;
 
@@ -1557,6 +1572,7 @@ process_one_symbol (type, desc, valu, name)
       /* This type of "symbol" really just records
 	 one line-number -- core-address correspondence.
 	 Enter it in the line list for this symbol table.  */
+      valu += offset;		/* Relocate for dynamic loading */
 #ifndef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
@@ -1593,12 +1609,48 @@ process_one_symbol (type, desc, valu, name)
 	break;
       }
 
-    case N_ECOML:
-    case N_LENG:
-    case N_DEFD:		/* GNU Modula-2 symbol */
+    /* The following symbol types need to have the offset added to their
+       value; then we process symbol definitions in the name.  */
+    case N_STSYM:		/* Global symbol */
+    case N_LCSYM:		/* Local symbol */
+    case N_DSLINE:		/* Source line number, data seg */
+    case N_BSLINE:		/* Source line number, bss seg */
+    /*   N_BROWS:	overlaps with N_BSLINE */
+    case N_ENTRY:		/* Alternate entry point */
+      valu += offset;		/* Relocate for dynamic loading */
+      /* FALL THROUGH */
+
+    /* The following symbol types don't need the address field relocated,
+       since it is either unused, or is absolute.  */
+    case N_GSYM:		/* Global variable */
+    case N_NSYMS:		/* Number of symbols (ultrix) */
+    case N_NOMAP:		/* No map?  (ultrix) */
+    case N_RSYM:		/* Register variable */
+    case N_DEFD:		/* Modula-2 GNU module dependency */
+    case N_SSYM:		/* Struct or union element */
+    case N_LSYM:		/* Local symbol in stack */
+    case N_PSYM:		/* Parameter variable */
+    case N_LENG:		/* Length of preceding symbol type */
+      if (name)
+	define_symbol (valu, name, desc, type);
       break;
 
+    /* The following symbol types we don't know how to process.  Handle
+       them in a "default" way, but complain to people who care.  */
     default:
+    case N_EHDECL:		/* Exception handler name */
+    case N_MAIN:		/* Name of main routine (not used in C) */
+    case N_PC:			/* Global symbol in Pascal */
+    case N_M2C:			/* Modula-2 compilation unit */
+    /*   N_MOD2:	overlaps with N_EHDECL */
+    case N_SCOPE:		/* Modula-2 scope information */
+    case N_ECOML:		/* End common (local name) */
+    case N_NBTEXT:		/* Gould Non-Base-Register symbols??? */
+    case N_NBDATA:
+    case N_NBBSS:
+    case N_NBSTS:
+    case N_NBLCS:
+      complain (&unknown_symtype_complaint, local_hex_string(type));
       if (name)
 	define_symbol (valu, name, desc, type);
     }
