@@ -56,10 +56,11 @@ filemode.c
 gmalloc.c
 is-ranlib.c
 is-strip.c
+mac-binutils.r
 maybe-ranlib.c
 maybe-strip.c
 mpw-config.in
-mpw-make.in
+mpw-make.sed
 nlmconv.1
 nlmconv.c
 nlmconv.h
