@@ -1,3 +1,8 @@
+2001-03-28  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (DEFAULT_LEVEL): Define.
+	(md_begin): Use it when setting default architecture.
+
 2001-03-27  Nick Papadonis  <nick@coelacanth.com>
 
 	* read.c (equals): (for COFF) default symbols to being local.
@@ -83,7 +88,7 @@
 	(TC_RELOC_RTSYM_LOC_FIXUP): Define.
 	(tc_fix_adjustable): Don't adjust a globally visible symbol when
 	generating ELF.
-	(tc_frob_symbol): Avoid emitting undefined symbols. 
+	(tc_frob_symbol): Avoid emitting undefined symbols.
 
 2001-03-20  Alan Modra  <alan@linuxcare.com.au>
 

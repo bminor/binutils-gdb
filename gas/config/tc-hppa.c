@@ -105,6 +105,12 @@ typedef som_symbol_type obj_symbol_type;
 #endif
 #endif /* OBJ_SOM */
 
+#if TARGET_ARCH_SIZE == 64
+#define DEFAULT_LEVEL 25
+#else
+#define DEFAULT_LEVEL 10
+#endif
+
 /* Various structures and types used internally in tc-hppa.c.  */
 
 /* Unwind table and descriptor.  FIXME: Sync this with GDB version.  */
@@ -1393,7 +1399,7 @@ md_begin ()
   call_info_root = NULL;
 
   /* Set the default machine type.  */
-  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 10))
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, DEFAULT_LEVEL))
     as_warn (_("could not set architecture and machine"));
 
   /* Folding of text and data segments fails miserably on the PA.
