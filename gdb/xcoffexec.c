@@ -469,7 +469,7 @@ add_vmap(ldi)
 		       objname, bfd_errmsg(bfd_error));
 		/*NOTREACHED*/
 	}
-	obj = allocate_objfile (vp->abfd, 0);
+	obj = allocate_objfile (vp->bfd, 0);
 	vp->objfile = obj;
 
 #ifndef SOLIB_SYMBOLS_MANUAL
@@ -591,7 +591,7 @@ retry:
 	      	|| (memb[0] && !STREQ(memb, vp->member)))
 	    continue;
 
-	  io = bfd_cache_lookup(vp->abfd);		/* totally opaque! */
+	  io = bfd_cache_lookup(vp->bfd);		/* totally opaque! */
 	  if (!io)
 	    fatal("cannot find BFD's iostream for %s", vp->name);
 
@@ -695,7 +695,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 	if (p->endaddr >= memend)
 	  {
 	    /* Entire transfer is within this section.  */
-	    res = xfer_fn (p->abfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
 	else if (p->endaddr <= memaddr)
@@ -707,7 +707,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 	  {
 	    /* This section overlaps the transfer.  Just do half.  */
 	    len = p->endaddr - memaddr;
-	    res = xfer_fn (p->abfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
       else if (p->addr < nextsectaddr)
@@ -739,9 +739,9 @@ print_section_info (t, abfd)
     if (info_verbose)
       printf_filtered (" @ %s",
 		       local_hex_string_custom ((unsigned long) p->sec_ptr->filepos, "08l"));
-    printf_filtered (" is %s", bfd_section_name (p->abfd, p->sec_ptr));
-    if (p->abfd != abfd) {
-      printf_filtered (" in %s", bfd_get_filename (p->abfd));
+    printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
+    if (p->bfd != abfd) {
+      printf_filtered (" in %s", bfd_get_filename (p->bfd));
     }
     printf_filtered ("\n");
   }
@@ -808,8 +808,8 @@ char *args;
 
 	for (vp = vmap; vp; vp = vp->nxt) {
 		if (!strncmp(secname
-			     , bfd_section_name(vp->abfd, vp->sex), seclen)
-		    && bfd_section_name(vp->abfd, vp->sex)[seclen] == '\0') {
+			     , bfd_section_name(vp->bfd, vp->sex), seclen)
+		    && bfd_section_name(vp->bfd, vp->sex)[seclen] == '\0') {
 			offset = secaddr - vp->tstart;
 			vp->tstart += offset;
 			vp->tend   += offset;
@@ -1001,16 +1001,16 @@ bfd_err:
 	     So for text sections, bfd_section_vma tends to be 0x200,
 	     and if vp->tstart is 0xd0002000, then the first byte of
 	     the text section on disk corresponds to address 0xd0002200.  */
-	  stp->abfd = vp->abfd;
-	  stp->sec_ptr = bfd_get_section_by_name (stp->abfd, ".text");
-	  stp->addr = bfd_section_vma (stp->abfd, stp->sec_ptr) + vp->tstart;
-	  stp->endaddr = bfd_section_vma (stp->abfd, stp->sec_ptr) + vp->tend;
+	  stp->bfd = vp->bfd;
+	  stp->sec_ptr = bfd_get_section_by_name (stp->bfd, ".text");
+	  stp->addr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->tstart;
+	  stp->endaddr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->tend;
 	  stp++;
 	  
-	  stp->abfd = vp->abfd;
-	  stp->sec_ptr = bfd_get_section_by_name (stp->abfd, ".data");
-	  stp->addr = bfd_section_vma (stp->abfd, stp->sec_ptr) + vp->dstart;
-	  stp->endaddr = bfd_section_vma (stp->abfd, stp->sec_ptr) + vp->dend;
+	  stp->bfd = vp->bfd;
+	  stp->sec_ptr = bfd_get_section_by_name (stp->bfd, ".data");
+	  stp->addr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->dstart;
+	  stp->endaddr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->dend;
 	}
 
       vmap_symtab (vp);
