@@ -1066,7 +1066,7 @@ void::function::do_trap:unsigned32 trap_number
 	    if (!TRACE_ALU_P (CPU))
 	      trace_one_insn (SD, CPU, cia.ip, 1, itable[MY_INDEX].file,
 			      itable[MY_INDEX].line_nr, "trap",
-			      "Trap %d", trap_number);
+			      "Trap %ld", (long) trap_number);
 
 	    for (i = 0; i < 32; i++)
 	      sim_io_eprintf (SD, "%s0x%.8lx%s", ((i % 8) == 0) ? "\t" : " ", (long)GPR(i),

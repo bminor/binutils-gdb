@@ -1,3 +1,7 @@
+Thu May 15 10:14:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (do_trap): Printf formatting.
+
 Wed May 14 18:05:50 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* misc.c (tic80_trace_fpu{3,2,2i}): Align columns with other
