@@ -1,3 +1,16 @@
+Tue Nov 16 13:33:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (TAGS): Depend on TAGFILES_{NO,WITH}_SRCDIR.
+
+	* Makefile.in: (HFILES,TAGFILES): Split into _WITH_SRCDIR and
+	_NO_SRCDIR versions.
+	(TAGS): Only add srcdir to TAGFILES_NO_SRCDIR.
+	(This is part of a long saga involving me putting srcdir on
+	everything (perhaps for now-obsolete reasons, I forget), Rich
+	removing the srcdir from everything, Stu putting it back some
+	places for Sun make, and me just now getting around to fixing
+	`make TAGS' again).
+
 Mon Nov 15 12:29:10 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* stack.c(print_frame_info): print demangled function name
