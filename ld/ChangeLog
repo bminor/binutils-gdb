@@ -1,5 +1,12 @@
 Wed Apr 22 12:40:56 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (check-DEJAGNU): Add $(INTLLIBS) to LIBIBERTY when
+	invoking runtest.
+	* Makefile.in: Rebuild.
+
+	* lexsup.c (parse_args): Change -l options into --library options
+	to avoid confusion between -li and -library.
+
 	* ld.texinfo (MEMORY): Clarify use of >REGION.
 
 Tue Apr 21 23:12:40 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
