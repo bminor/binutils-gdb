@@ -33,7 +33,7 @@
  * In other words we permit a (possibly undefined) minuend, a
  * (possibly undefined) subtrahend and an (absolute) augend.
  * RMS says this is so we can have 1-pass assembly for any compiler
- * emmissions, and a 'case' statement might emit 'undefined1 - undefined2'.
+ * emissions, and a 'case' statement might emit 'undefined1 - undefined2'.
  *
  * To simplify table-driven dispatch, we also have a "segment" for the
  * entire expression. That way we don't require complex reasoning about
@@ -44,39 +44,31 @@
 
 typedef struct
 {
-  symbolS *X_add_symbol;	/* foo */
-  symbolS *X_subtract_symbol;	/* bar */
-  long X_add_number;		/* 42.    Must be signed. */
-  segT X_seg;			/* What segment (expr type)? */
+  symbolS *X_add_symbol;	/* "foo", above */
+  symbolS *X_subtract_symbol;	/* "bar", above */
+  offsetT X_add_number;		/* 42, above -- must be signed */
+  /* What segment (expr type)? */
+  segT X_seg;
 }
 
 expressionS;
 
-/* result should be type (expressionS *). */
+/* "result" should be type (expressionS *). */
 #define expression(result) expr(0,result)
 
-/* If an expression is SEG_BIG, look here */
-/* for its value. These common data may */
-/* be clobbered whenever expr() is called. */
-extern FLONUM_TYPE generic_floating_point_number;	/* Flonums returned here. */
-/* Enough to hold most precise flonum. */
-extern LITTLENUM_TYPE generic_bignum[];	/* Bignums returned here. */
-#define SIZE_OF_LARGE_NUMBER (20)	/* Number of littlenums in above. */
+/* If an expression is SEG_BIG, look here for its value. These common
+   data may be clobbered whenever expr() is called. */
+/* Flonums returned here.  Big enough to hold most precise flonum. */
+extern FLONUM_TYPE generic_floating_point_number;
+/* Bignums returned here. */
+extern LITTLENUM_TYPE generic_bignum[];
+/* Number of littlenums in above. */
+#define SIZE_OF_LARGE_NUMBER (20)
 
 typedef char operator_rankT;
 
-#if __STDC__ == 1
-
-char get_symbol_end (void);
-segT expr (int rank, expressionS * resultP);
-unsigned int get_single_number (void);
-
-#else /* not __STDC__ */
-
-char get_symbol_end ();
-segT expr ();
-unsigned int get_single_number ();
-
-#endif /* not __STDC__ */
+char get_symbol_end PARAMS ((void));
+segT expr PARAMS ((int rank, expressionS * resultP));
+unsigned int get_single_number PARAMS ((void));
 
 /* end of expr.h */
