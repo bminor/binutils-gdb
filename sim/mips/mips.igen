@@ -3576,9 +3576,8 @@
 }
 
 
-110101,5.BASE,5.FT,16.OFFSET:COP1:64::LDC1
+110101,5.BASE,5.FT,16.OFFSET:COP1:32,f::LDC1
 "ldc1 f<FT>, <OFFSET>(r<BASE>)"
-*mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -4081,9 +4080,8 @@
 }
 
 
-111101,5.BASE,5.FT,16.OFFSET:COP1:64::SDC1
+111101,5.BASE,5.FT,16.OFFSET:COP1:32,f::SDC1
 "sdc1 f<FT>, <OFFSET>(r<BASE>)"
-*mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:
