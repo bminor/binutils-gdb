@@ -60,6 +60,13 @@ destdir=
 fatal=
 hostsubdir=
 idestdir=
+next_ddestdir=
+next_destdir=
+next_idestdir=
+next_objdir=
+next_site=
+next_target=
+next_tmpdir=
 norecursion=
 objdir=
 objdiroption=
@@ -75,89 +82,132 @@ verbose=
 
 for arg in $*;
 do
-	case ${arg} in
-	-ansi | +a*)
-		ansi=true
-		clib=clib
-		;;
-	-ddestdir=* | +ddestdir=* | +ddestdi=* | +ddestd=* | +ddest=* | +ddes=* | +dde=* | +dd=*)
-		ddestdir=`echo ${arg} | sed 's/[+-]dd[a-z]*=//'`
-		;;
-	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=*)
-		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
-		ddestdir=${destdir}
-		idestdir=${destdir}
-		;;
-	-gas | +g*)
-		gas=yes
-		;;
-	-help | +h*)
-		fatal=true
-		;;
-	-idestdir=* | +idestdir=* | +idestdi=* | +idestd=* | +idest=* | +ides=* | +ide=* | +id=*)
-		idestdir=`echo ${arg} | sed 's/[+-]id[a-z]*=//'`
-		;;
-	-languages=* | +languages=* | +language=* | +languag=* \
-		| +langua=* | +langu=* | +lang=* | +lan=* | +la=* \
-		| +l=*)
-		languages="${languages} `echo ${arg} | sed 's/[+-]l[a-z]*=//'`"
-		;;
-	-nfp | +nf*)
-		nfp=yes
-		;;
-	-norecursion | +no*)
-		norecursion=true
-		;;
-	-objdir=* | +objdir=* | +objdi=* | +objd=* | +obj=* | +ob=* | +o=*)
-		objdiroption=${arg}
-		objdir=`echo ${arg} | sed 's/[+-]o[a-z]*=//'`
-		;;
-	-recurring | +recurring | +recurrin | +recurri | +recurr | +recur | +recu | +rec | +re)
-		recurring=true
-		arguments=`echo ${arguments} | sed "s:${arg}::"`
-		;;
-	-rm | +rm)
-		removing=${arg}
-		;;
-	-site=* | +site=* | +sit=* | +si=*)
-		site=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
-		;;
-#	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=*)
-#		srcdir=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
-#		;;
-	-subdirs | +su*)
-		subdirs=${arg}
-		;;
-	-target=* | +target=* | +targe=* | +targ=* | +tar=* | +ta=*)
+	# handle things that might have args following as separate words
+	if [ -n "${next_ddestdir}" ] ; then ddestdir=${arg} ; next_ddestdir=
+	elif [ -n "${next_destdir}" ] ; then destdir=${arg} ; next_destdir= ; ddestdir=${destdir} ; idestdir=${destdir}
+	elif [ -n "${next_idestdir}" ] ; then idestdir=${arg} ; next_idestdir=
+	elif [ -n "${next_objdir}" ] ; then objdir=${arg} ; next_objdir=
+	elif [ -n "${next_site}" ] ; then site=${arg} ; next_site=
+	elif [ -n "${next_target}" ] ; then
+		next_target=
 		if [ -n "${targets}" ] ; then
 			subdirs="+subdirs"
 		fi
 
-		newtargets="${targets} `echo ${arg} | sed 's/[+-]t[a-z]*=//'`"
+		newtargets="${targets} ${arg}"
 		targets="${newtargets}"
-		;;
-	-tmpdir=* | +tmpdir=* | +tmpdi=* | +tmpd=* | +tmp=* | +tm=*)
-		tmpdiroption=${arg}
-		TMPDIR=`echo ${arg} | sed 's/[+-]t[a-z]*=//'`
-		;;
-	-v | -verbose | +v*)
-		verbose=${arg}
-		;;
-	-* | +*)
-		(echo ;
-		echo "Unrecognized option: \"${arg}\"". ;
-		echo) 1>&2
-		fatal=true
-		;;
-	*)
-		if [ -n "${hosts}" ] ; then
-			subdirs="+subdirs"
-		fi
 
-		newhosts="${hosts} ${arg}"
-		hosts=${newhosts}
-		;;
-	esac
+	elif [ -n "${next_tmpdir}" ] ; then
+		next_tmpdir=
+		tmpdiroption="+tmpdir=${arg}"
+		TMPDIR=${arg}
+
+	else
+		case ${arg} in
+		-ansi | +a*)
+			ansi=true
+			clib=clib
+			;;
+		-ddestdir=* | +ddestdir=* | +ddestdi=* | +ddestd=* | +ddest=* | +ddes=* | +dde=* | +dd=*)
+			ddestdir=`echo ${arg} | sed 's/[+-]dd[a-z]*=//'`
+			;;
+		-ddestdir | +ddestdir | +ddestdi | +ddestd | +ddest | +ddes | +dde | +dd)
+			next_ddestdir=yes
+			;;
+		-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=*)
+			destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
+			ddestdir=${destdir}
+			idestdir=${destdir}
+			;;
+		-destdir | +destdir | +destdi | +destd | +dest | +des | +de)
+			next_destdir=yes
+			;;
+		-gas | +g*)
+			gas=yes
+			;;
+		-help | +h*)
+			fatal=true
+			;;
+		-idestdir=* | +idestdir=* | +idestdi=* | +idestd=* | +idest=* | +ides=* | +ide=* | +id=*)
+			idestdir=`echo ${arg} | sed 's/[+-]id[a-z]*=//'`
+			;;
+		-idestdir | +idestdir | +idestdi | +idestd | +idest | +ides | +ide | +id)
+			next_idestdir=yes
+			;;
+		-languages=* | +languages=* | +language=* | +languag=* \
+			| +langua=* | +langu=* | +lang=* | +lan=* | +la=* \
+			| +l=*)
+			languages="${languages} `echo ${arg} | sed 's/[+-]l[a-z]*=//'`"
+			;;
+		-nfp | +nf*)
+			nfp=yes
+			;;
+		-norecursion | +no*)
+			norecursion=true
+			;;
+		-objdir=* | +objdir=* | +objdi=* | +objd=* | +obj=* | +ob=* | +o=*)
+			objdiroption=${arg}
+			objdir=`echo ${arg} | sed 's/[+-]o[a-z]*=//'`
+			;;
+		-objdir | +objdir | +objdi | +objd | +obj | +ob | +o)
+			next_objdir=yes
+			;;
+		-recurring | +recurring | +recurrin | +recurri | +recurr | +recur | +recu | +rec | +re)
+			recurring=true
+			arguments=`echo ${arguments} | sed "s:${arg}::"`
+			;;
+		-rm | +rm)
+			removing=${arg}
+			;;
+		-site=* | +site=* | +sit=* | +si=*)
+			site=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
+			;;
+		-site | +site | +sit | +si)
+			next_site=yes
+			;;
+	#	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=*)
+	#		srcdir=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
+	#		;;
+		-subdirs | +su*)
+			subdirs=${arg}
+			;;
+		-target=* | +target=* | +targe=* | +targ=* | +tar=* | +ta=*)
+			if [ -n "${targets}" ] ; then
+				subdirs="+subdirs"
+			fi
+
+			newtargets="${targets} `echo ${arg} | sed 's/[+-]t[a-z]*=//'`"
+			targets="${newtargets}"
+			;;
+		-target | +target | +targe | +targ | +tar | +ta)
+			next_target=yes
+			;;
+		-tmpdir=* | +tmpdir=* | +tmpdi=* | +tmpd=* | +tmp=* | +tm=*)
+			tmpdiroption=${arg}
+			TMPDIR=`echo ${arg} | sed 's/[+-]t[a-z]*=//'`
+			;;
+		-tmpdir | +tmpdir | +tmpdi | +tmpd | +tmp | +tm)
+			next_tmpdir=yes
+			;;
+		-v | -verbose | +v*)
+			verbose=${arg}
+			;;
+		-* | +*)
+			(echo ;
+			echo "Unrecognized option: \"${arg}\"". ;
+			echo) 1>&2
+			fatal=true
+			;;
+		*)
+			if [ -n "${hosts}" ] ; then
+				subdirs="+subdirs"
+			fi
+
+			newhosts="${hosts} ${arg}"
+			hosts=${newhosts}
+			;;
+		esac
+	fi
 done
 
 if [ -n "${verbose}" ] ; then
@@ -667,7 +717,10 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.68  1991/11/09 11:34:52  rich
+# Revision 1.69  1991/11/12 04:41:21  rich
+# allow +foo bar options.  stolen from texinfo configure
+#
+# Revision 1.68  1991/11/09  11:34:52  rich
 # correct a comment
 #
 # Revision 1.67  1991/11/06  22:28:08  rich
