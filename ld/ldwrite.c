@@ -179,7 +179,7 @@ asymbol **symbols;
 		       s);
 		  break;
 		case bfd_reloc_outofrange:
-		  info("%B:%s relocation address out of range %T (%x)\n",
+		  info("%B:%s relocation address out of range %T (%V)\n",
 		       input_bfd,
 		       input_section->name,
 		       s,
