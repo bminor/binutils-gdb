@@ -1,3 +1,18 @@
+2000-09-28  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (md_apply_fix): Add fmt assertion.  Don't
+	adjust for external and weak syms as we will use a reloc.  Allow
+	for +8 offset when calculating limits of branches.
+	(hppa_fix_adjustable): Undo 2000-09-23 change.
+	(hppa_force_relocation): Likewise.  Add fx_addsy assertion.
+	Correct distance calculation.
+
+	From John David Anglin <dave@hiauly1.hia.nrc.ca>
+	* config/tc-hppa.c (nonzero_dibits): Define.
+	(arg_reloc_stub_needed): Check each arg and return value
+	separately for zero case.
+	(pa_align): Declare argument `bytes'.
+
 2000-09-25  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-cris.c: Fix formatting.

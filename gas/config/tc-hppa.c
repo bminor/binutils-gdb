@@ -4011,7 +4011,10 @@ tc_gen_reloc (section, fixp)
 			       symbol_get_bfdsym (fixp->fx_addsy));
 
   if (codes == NULL)
-    abort ();
+    {
+      as_bad (_("Cannot handle fixup at %s:%d"), fixp->fx_file, fixp->fx_line);
+      abort ();
+    }
 
   for (n_relocs = 0; codes[n_relocs]; n_relocs++)
     ;
@@ -4323,8 +4326,10 @@ md_undefined_symbol (name)
 }
 
 #if defined (OBJ_SOM) || defined (ELF_ARG_RELOC)
+#define nonzero_dibits(x) \
+  ((x) | (((x) & 0x55555555) << 1) | (((x) & 0xAAAAAAAA) >> 1))
 #define arg_reloc_stub_needed(CALLER, CALLEE) \
-  ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
+  (((CALLER) ^ (CALLEE)) & nonzero_dibits (CALLER) & nonzero_dibits (CALLEE))
 #else
 #define arg_reloc_stub_needed(CALLER, CALLEE) 0
 #endif
@@ -4375,6 +4380,8 @@ md_apply_fix (fixP, valp)
     {
       int fmt = bfd_hppa_insn2fmt (stdoutput, insn);
 
+      assert (fmt == hppa_fixP->fx_r_format);
+
       /* If there is a symbol associated with this fixup, then it's something
 	 which will need a SOM relocation (except for some PC-relative relocs).
 	 In such cases we should treat the "val" or "addend" as zero since it
@@ -4412,9 +4419,11 @@ md_apply_fix (fixP, valp)
 	  && fixP->fx_pcrel
 	  && !arg_reloc_stub_needed (symbol_arg_reloc_info (fixP->fx_addsy),
 				     hppa_fixP->fx_arg_reloc)
-	  && ((*valp + 8192) < 16384
-	      || (fmt == 17 && (*valp + 262144) < 524288)
-	      || (fmt == 22 && (*valp + 8388608) < 16777216))
+	  && ((*valp - 8 + 8192) < 16384
+	      || (fmt == 17 && (*valp - 8 + 262144) < 524288)
+	      || (fmt == 22 && (*valp - 8 + 8388608) < 16777216))
+	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && !S_IS_WEAK (fixP->fx_addsy)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
@@ -4464,10 +4473,10 @@ md_apply_fix (fixP, valp)
 
 	/* Handle all the opcodes with the 'w' operand type.  */
 	case 12:
-	  CHECK_FIELD (new_val, 8199, -8184, 0);
-	  val = new_val;
+	  CHECK_FIELD (new_val - 8, 8191, -8192, 0);
+	  val = new_val - 8;
 
-	  insn = (insn & ~ 0x1ffd) | re_assemble_12 ((val - 8) >> 2);
+	  insn = (insn & ~ 0x1ffd) | re_assemble_12 (val >> 2);
 	  break;
 
 	/* Handle some of the opcodes with the 'W' operand type.  */
@@ -4479,12 +4488,12 @@ md_apply_fix (fixP, valp)
 	       range target, then we want to complain.  */
 	    if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
 		&& (insn & 0xffe00000) == 0xe8000000)
-	      CHECK_FIELD (distance, 262143, -262144, 0);
+	      CHECK_FIELD (distance - 8, 262143, -262144, 0);
 
-	    CHECK_FIELD (new_val, 262143, -262144, 0);
-	    val = new_val;
+	    CHECK_FIELD (new_val - 8, 262143, -262144, 0);
+	    val = new_val - 8;
 
-	    insn = (insn & ~ 0x1f1ffd) | re_assemble_17 ((val - 8) >> 2);
+	    insn = (insn & ~ 0x1f1ffd) | re_assemble_17 (val >> 2);
 	    break;
 	  }
 
@@ -4496,12 +4505,12 @@ md_apply_fix (fixP, valp)
 	       range target, then we want to complain.  */
 	    if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
 		&& (insn & 0xffe00000) == 0xe8000000)
-	      CHECK_FIELD (distance, 8388607, -8388608, 0);
+	      CHECK_FIELD (distance - 8, 8388607, -8388608, 0);
 
-	    CHECK_FIELD (new_val, 8388607, -8388608, 0);
-	    val = new_val;
+	    CHECK_FIELD (new_val - 8, 8388607, -8388608, 0);
+	    val = new_val - 8;
 
-	    insn = (insn & ~ 0x3ff1ffd) | re_assemble_22 ((val - 8) >> 2);
+	    insn = (insn & ~ 0x3ff1ffd) | re_assemble_22 (val >> 2);
 	    break;
 	  }
 
@@ -5827,6 +5836,7 @@ pa_parse_addb_64_cmpltr (s)
    alignment of the subspace if necessary.  */
 static void
 pa_align (bytes)
+     int bytes;
 {
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
@@ -8310,11 +8320,11 @@ hppa_fix_adjustable (fixp)
   if (fixp->fx_r_type == (int) R_PARISC_GNU_VTINHERIT
       || fixp->fx_r_type ==  (int) R_PARISC_GNU_VTENTRY)
     return 0;
+#endif
 
   if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
 			 || S_IS_WEAK (fixp->fx_addsy)))
     return 0;
-#endif
 
   /* Reject reductions of symbols in sym1-sym2 expressions when
      the fixup will occur in a CODE subspace.
@@ -8381,10 +8391,10 @@ hppa_fix_adjustable (fixp)
     return 0;
 
   /* Reject reductions of function symbols.  */
-  if (fixp->fx_addsy == 0 || ! S_IS_FUNCTION (fixp->fx_addsy))
-    return 1;
+  if (fixp->fx_addsy != 0 && S_IS_FUNCTION (fixp->fx_addsy))
+    return 0;
 
-  return 0;
+  return 1;
 }
 
 /* Return nonzero if the fixup in FIXP will require a relocation,
@@ -8396,7 +8406,6 @@ hppa_force_relocation (fixp)
      struct fix *fixp;
 {
   struct hppa_fix_struct *hppa_fixp;
-  int distance;
 
   hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
 #ifdef OBJ_SOM
@@ -8414,28 +8423,35 @@ hppa_force_relocation (fixp)
   if (fixp->fx_r_type == (int) R_PARISC_GNU_VTINHERIT
       || fixp->fx_r_type == (int) R_PARISC_GNU_VTENTRY)
     return 1;
+#endif
+
+  assert (fixp->fx_addsy != NULL);
 
   /* Ensure we emit a relocation for global symbols so that dynamic
      linking works.  */
-  if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
-			 || S_IS_WEAK (fixp->fx_addsy)))
+  if (S_IS_EXTERNAL (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
     return 1;
-#endif
 
   /* It is necessary to force PC-relative calls/jumps to have a relocation
      entry if they're going to need either a argument relocation or long
      call stub.  */
-  if (fixp->fx_pcrel && fixp->fx_addsy
-      && (arg_reloc_stub_needed (symbol_arg_reloc_info (fixp->fx_addsy),
-				 hppa_fixp->fx_arg_reloc)))
+  if (fixp->fx_pcrel
+      && arg_reloc_stub_needed (symbol_arg_reloc_info (fixp->fx_addsy),
+				hppa_fixp->fx_arg_reloc))
     return 1;
 
-  distance = (fixp->fx_offset + S_GET_VALUE (fixp->fx_addsy)
-	      - md_pcrel_from (fixp));
-  /* Now check and see if we're going to need a long-branch stub.  */
-  if (fixp->fx_r_type == (int) R_HPPA_PCREL_CALL
-      && (distance > 262143 || distance < -262144))
-    return 1;
+  /* Now check to see if we're going to need a long-branch stub.  */
+  if (fixp->fx_r_type == (int) R_HPPA_PCREL_CALL)
+    {
+      valueT distance;
+
+      distance = (fixp->fx_offset + S_GET_VALUE (fixp->fx_addsy)
+		  - md_pcrel_from (fixp) - 8);
+      if (distance + 8388608 >= 16777216
+	  || (hppa_fixp->fx_r_format == 17 && distance + 262144 >= 524288)
+	  || (hppa_fixp->fx_r_format == 12 && distance + 8192 >= 16384))
+	return 1;
+    }
 
   if (fixp->fx_r_type == (int) R_HPPA_ABS_CALL)
     return 1;
