@@ -1,3 +1,18 @@
+2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/greg-14.d, ld-mmix/greg-5.d, ld-mmix/pushja1b.d,
+	ld-mmix/pushja1f.d, ld-mmix/pushja7b.d, ld-mmix/pushja7f.d: Pass
+	--no-pushj-stubs to the assembler.
+	* ld-mmix/pushjs2b.d, ld-mmix/greg-14s.d, ld-mmix/pushjs1.d,
+	ld-mmix/greg-5s.d, ld-mmix/pushjs3b.d, ld-mmix/pushja1f-s.d,
+	ld-mmix/pushjs1m.d, ld-mmix/pushja7b-s.d, ld-mmix/pushja7f-s.d,
+	ld-mmix/pushja1b-s.d, ld-mmix/pushjs2.d, ld-mmix/pushjs3.d,
+	ld-mmix/pushjs4b.d, ld-mmix/pushjs4.d, ld-mmix/pushjs1bm.d,
+	ld-mmix/pushjs1b.d, ld-mmix/pushjs2m.d, ld-mmix/pushjs1r.d,
+	ld-mmix/pushjs3m.d, ld-mmix/pushjs2bm.d, ld-mmix/pushjs4m.d,
+	ld-mmix/pushjs3bm.d, ld-mmix/pushjs2r.d, ld-mmix/pushjs4bm.d,
+	ld-mmix/pushjs3r.d, ld-mmix/pushjs4r.d: New tests.
+
 2003-10-15  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/sh64/rd-sh64.exp: If the test matches *-dso.d, copy
