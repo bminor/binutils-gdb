@@ -1,3 +1,9 @@
+Tue Jan 23 14:33:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_copy_private_bfd_data): Don't complain if
+	the embedded bit is set on some objects and not on others.  Just
+	or it together.
+
 Tue Jan 23 14:22:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_set_section_contents): Fix the handling of the

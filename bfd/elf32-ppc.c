@@ -1134,26 +1134,12 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
       else if ((new_flags & EF_PPC_RELOCATABLE_LIB) != 0)
 	elf_elfheader (obfd)->e_flags |= EF_PPC_RELOCATABLE_LIB;
 
-      new_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB);
-      old_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB);
 
-      /* Warn about eabi vs. V.4 mismatch */
-      if ((new_flags & EF_PPC_EMB) != 0 && (old_flags & EF_PPC_EMB) == 0)
-	{
-	  new_flags &= ~EF_PPC_EMB;
-	  error = true;
-	  (*_bfd_error_handler)
-	    ("%s: compiled for the eabi and linked with modules compiled for System V",
-	     bfd_get_filename (ibfd));
-	}
-      else if ((new_flags & EF_PPC_EMB) == 0 && (old_flags & EF_PPC_EMB) != 0)
-	{
-	  old_flags &= ~EF_PPC_EMB;
-	  error = true;
-	  (*_bfd_error_handler)
-	    ("%s: compiled for System V and linked with modules compiled for eabi",
-	     bfd_get_filename (ibfd));
-	}
+      /* Do not warn about eabi vs. V.4 mismatch, just or in the bit if any module uses it */
+      elf_elfheader (obfd)->e_flags |= (new_flags & EF_PPC_EMB);
+
+      new_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
+      old_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
 
       /* Warn about any other mismatches */
       if (new_flags != old_flags)
