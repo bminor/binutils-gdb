@@ -935,9 +935,9 @@ relax_and_size_all_segments ()
 void 
 write_object_file ()
 {
-  register struct frchain *frchainP;	/* Track along all frchains. */
+  struct frchain *frchainP;	/* Track along all frchains. */
 #if ! defined (BFD_ASSEMBLER) || ! defined (WORKING_DOT_WORD)
-  register fragS *fragP;	/* Track along all frags. */
+  fragS *fragP;			/* Track along all frags. */
 #endif
 #if !defined (BFD_ASSEMBLER) && !defined (OBJ_VMS)
   long object_file_size;
@@ -1897,8 +1897,9 @@ fixup_segment (fixP, this_segment_type)
 		}
 	      else
 	      bad_sub_reloc:
-		as_bad ("Negative of non-absolute symbol %s",
-			S_GET_NAME (sub_symbolP));
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      "Negative of non-absolute symbol %s",
+			      S_GET_NAME (sub_symbolP));
 	    }
 	  else if ((S_GET_SEGMENT (sub_symbolP) == add_symbol_segment)
 		   && (SEG_NORMAL (add_symbol_segment)
@@ -1911,7 +1912,8 @@ fixup_segment (fixP, this_segment_type)
 	      /* Makes no sense to use the difference of 2 arbitrary symbols
 		 as the target of a call instruction.  */
 	      if (fixP->fx_tcbit)
-		as_bad ("callj to difference of 2 symbols");
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      "callj to difference of 2 symbols");
 #endif /* TC_I960 */
 	      add_number += S_GET_VALUE (add_symbolP) -
 		S_GET_VALUE (sub_symbolP);
@@ -1964,9 +1966,10 @@ fixup_segment (fixP, this_segment_type)
 		{
 		  char buf[50];
 		  sprint_value (buf, fragP->fr_address + where);
-		  as_bad ("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %s.",
-			  segment_name (S_GET_SEGMENT (sub_symbolP)),
-			  S_GET_NAME (sub_symbolP), buf);
+		  as_bad_where (fixP->fx_file, fixP->fx_line,
+				"Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %s.",
+				segment_name (S_GET_SEGMENT (sub_symbolP)),
+				S_GET_NAME (sub_symbolP), buf);
 		}
 	    }
 	}
@@ -2035,7 +2038,8 @@ fixup_segment (fixP, this_segment_type)
 		       * for local branches: flag as error, don't generate
 		       * relocation.
 		       */
-		      as_bad ("can't use COBR format with external label");
+		      as_bad_where (fixP->fx_file, fixP->fx_line,
+				    "can't use COBR format with external label");
 		      fixP->fx_addsy = NULL;
 		      fixP->fx_done = 1;
 		      continue;

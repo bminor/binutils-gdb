@@ -1,3 +1,7 @@
+Fri Feb 18 14:16:32 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* write.c (write_object_file): Removed register declarations.
+
 Thu Feb 17 16:25:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Some support for PowerPC ELF, although it isn't in BFD yet.
