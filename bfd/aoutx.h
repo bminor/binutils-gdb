@@ -199,7 +199,8 @@ DEFUN(hlo10,(abfd, reloc_entry, symbol_in, data, input_section),
   return bfd_reloc_ok;
 }
 
-static r64() 
+static bfd_reloc_status_enum_type
+r64() 
 {
   abort();
 }
@@ -1090,7 +1091,7 @@ DEFUN(NAME(aout,write_syms),(abfd),
       
       
       
-      translate_to_native_sym_flags (&nsp, (PTR)g, abfd);
+      translate_to_native_sym_flags (&nsp, g, abfd);
       
       bfd_write((PTR)&nsp,1,EXTERNAL_LIST_SIZE, abfd);
     }

@@ -125,7 +125,7 @@ various flags to set in the @code{asymbol} @xref{Symbols}. The
 generated canonical table shares strings with the hidden internal
 symbol table.
 
-Any linenumbers are read from the coff file too, and attatched to the
+Any linenumbers are read from the coff file too, and attached to the
 symbols which own the functions the linenumbers belong to.
 
 @subsubsection Symbol Writing
@@ -1050,7 +1050,7 @@ DEFUN(coff_object_p,(abfd),
     if (bfd_read((PTR) &opthdr, 1,AOUTSZ, abfd) != AOUTSZ) {
       return 0;
     }
-    bfd_swap_aouthdr_in(abfd, &opthdr, &internal_a);
+    bfd_swap_aouthdr_in(abfd, (char *)&opthdr, (char *)&internal_a);
   }
     
   /* Seek past the opt hdr stuff */
@@ -2475,7 +2475,7 @@ bfd            *abfd)
   /* Swap all the raw entries */
   for (raw_src = raw, internal_ptr = internal; raw_src < raw_end; raw_src++, internal_ptr++) {
     unsigned int i;
-    coff_swap_sym_in(abfd, raw_src,&internal_ptr->u.syment);    
+    coff_swap_sym_in(abfd, (char *)raw_src, (char *)&internal_ptr->u.syment);    
     internal_ptr->fix_tag = 0;
     internal_ptr->fix_end = 0;
 

@@ -1,3 +1,7 @@
+Thu Aug 22 22:17:06 1991  Stu Grossman  (grossman at cygint.cygnus.com)
+
+	* coffread.c, symfile.c, stack.c:  saberized.
+
 Thu Aug 22 16:20:27 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/refcard.tex: permuted Essential Commands sec

@@ -1,3 +1,7 @@
+Thu Aug 22 22:20:19 1991  Stu Grossman  (grossman at cygint.cygnus.com)
+
+	* aoutx.h, coffcode.h:  saberized.
+
 Thu Aug 22 11:27:06 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* bfd.texinfo: some cleanup, reincorporated more intro matter from
