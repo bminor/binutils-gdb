@@ -1,3 +1,11 @@
+2004-01-12  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/member-ptr.exp: Use gdb_test, gdb_test_multiple.  Add
+	some patterns for recent versions of gcc and hpacc.  Delete
+	calls to setup_xfail for hppa*-*-*.  Delete redundant tests.
+	Delete tests that access a NULL pointer-to-member-data.  This
+	script is still disabled for gcc.
+
 2004-01-12  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.mi/mi2-basics.exp: Make sure that full pathnames are
