@@ -113,6 +113,7 @@ mpw-config.in
 mpw-make.sed
 ns32k-dis.c
 opintl.h
+po
 ppc-dis.c
 ppc-opc.c
 sh-opc.h
