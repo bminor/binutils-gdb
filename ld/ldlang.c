@@ -726,19 +726,28 @@ wild_doit (ptr, section, output, file)
      lang_output_section_statement_type *output;
      lang_input_statement_type *file;
 {
+  flagword flags;
   boolean discard;
+
+  flags = bfd_get_section_flags (section->owner, section);
 
   discard = false;
 
   /* If we are doing a final link, discard sections marked with
      SEC_EXCLUDE.  */
   if (! link_info.relocateable
-      && (bfd_get_section_flags (section->owner, section) & SEC_EXCLUDE) != 0)
+      && (flags & SEC_EXCLUDE) != 0)
     discard = true;
 
   /* Discard input sections which are assigned to a section named
      DISCARD_SECTION_NAME.  */
   if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
+    discard = true;
+
+  /* Discard debugging sections if we are stripping debugging
+     information.  */
+  if ((link_info.strip == strip_debugger || link_info.strip == strip_all)
+      && (flags & SEC_DEBUGGING) != 0)
     discard = true;
 
   if (discard)

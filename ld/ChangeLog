@@ -1,5 +1,8 @@
 Mon Apr 22 12:07:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldlang.c (wild_doit): Discard debugging sections if we are
+	stripping debugging information.
+
 	* emulparams/z8002.sh (ARCH): Set to z8002, not z8k.
 
 Tue Apr 16 16:38:32 1996  Ian Lance Taylor  <ian@cygnus.com>
