@@ -1,3 +1,8 @@
+Mon Oct  7 11:39:49 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-opc.c (plusha): Prefer encoding for m68040up, in case
+	m68851 wasn't reset.
+
 Thu Oct  3 17:17:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mn10300-opc.c (mn10300_opcodes): Add opcode & masks for
