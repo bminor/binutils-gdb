@@ -2904,7 +2904,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
       break;
     default:
-      set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
       set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);

@@ -1055,7 +1055,6 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call Dummies:  */
 
-  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);
   set_gdbarch_deprecated_push_return_address (gdbarch, mcore_push_return_address);

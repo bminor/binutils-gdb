@@ -1,5 +1,12 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* infcall.c (call_function_by_hand): When no
+	DEPRECATED_SAVE_DUMMY_FRAME_TOS call generic_save_dummy_frame_tos.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Do not set
+	DEPRECATED_SAVE_DUMMY_FRAME_TOS.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	
 	* gdbarch.sh (DEPRECATED_FIX_CALL_DUMMY): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set

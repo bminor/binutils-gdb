@@ -721,15 +721,13 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (DEPRECATED_DUMMY_WRITE_SP_P ())
     DEPRECATED_DUMMY_WRITE_SP (sp);
 
-  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
-    {
-      /* Sanity.  The exact same SP value is returned by
-	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
-	 unwind_dummy_id to form the frame ID's stack address.  */
-      generic_save_dummy_frame_tos (sp);
-    }
-  else if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
+  if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
     DEPRECATED_SAVE_DUMMY_FRAME_TOS (sp);
+  else
+    /* Sanity.  The exact same SP value is returned by
+       PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
+       unwind_dummy_id to form the frame ID's stack address.  */
+    generic_save_dummy_frame_tos (sp);
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
