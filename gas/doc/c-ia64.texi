@@ -65,6 +65,11 @@ These options select the byte order.  The @code{-mle} option selects little-endi
 byte order (default) and @code{-mbe} selects big-endian byte order.  Note that
 IA-64 machine code always uses little-endian byte order.
 
+@item -mtune=itanium1
+@item -mtune=itanium2
+Tune for a particular IA-64 CPU, @var{itanium1} or @var{itanium2}. The
+default is @var{itanium2}.
+
 @item -munwind-check=warning
 @item -munwind-check=error
 These options control what the assembler will do when performing

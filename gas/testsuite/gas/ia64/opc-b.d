@@ -1,4 +1,4 @@
-#as: -xnone -mhint.b=ok
+#as: -xnone -mhint.b=ok -mtune=itanium1
 #objdump: -d
 #name: ia64 opc-b
 

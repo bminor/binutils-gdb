@@ -1,3 +1,20 @@
+2005-03-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 803
+	* gas/ia64/dv-imply.d: Pass -mtune=itanium1 to as.
+	* gas/ia64/dv-mutex.d : Likewise.
+	* gas/ia64/dv-safe.d: Likewise.
+	* gas/ia64/dv-srlz.d.nop: Likewise.
+	* gas/ia64/ldxmov-1.d: Likewise.
+	* gas/ia64/opc-b.d: Likewise.
+	* gas/ia64/opc-f.d: Likewise.
+	* gas/ia64/opc-i.d: Likewise.
+	* gas/ia64/opc-m.d: Likewise.
+	* gas/ia64/operand-or.d: Likewise.
+	* gas/ia64/pcrel.d: Likewise.
+	* gas/ia64/pseudo.d: Likewise.
+	* gas/ia64/tls.d: Likewise.
+
 2005-03-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/range-err-1.s: Adjust expected messages for hosts with

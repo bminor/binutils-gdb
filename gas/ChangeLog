@@ -1,3 +1,21 @@
+2005-03-28  David Mosberger  <davidm@hpl.hp.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 803
+	NEWS: Mention "-mtune=[itanium1|itanium2]".
+
+	* config/tc-ia64.c (md): Add tune.
+	(md_parse_option): Accepted "-mtune=[itanium1|itanium2]".
+	(md_show_usage): Add "-mtune=[itanium1|itanium2]".
+	(extra_goodness): Prefer M- and I-unit NOPs for itanium2. F and
+	B unit NOPs are discouraged for McKinley-derived cores.
+	(md_begin): Don't hardcode the "extra_goodness()" function in
+	the comment...
+	(ia64_init): Set md.tune to itanium2.
+
+	* doc/as.texinfo: Add -mtune=[itanium1|itanium2]".
+	* doc/c-ia64.texi: Likewise.
+
 2005-03-27  Ian Lance Taylor  <ian@airs.com>
 
 	* config/obj-coff.c (coff_frob_symbol): When crashing because of a

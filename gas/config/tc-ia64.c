@@ -229,6 +229,13 @@ static struct
        that are predicatable.  */
     expressionS qp;
 
+    /* Optimize for which CPU.  */
+    enum
+      {
+	itanium1,
+	itanium2
+      } tune;
+
     /* What to do when hint.b is used.  */
     enum
       {
@@ -6957,6 +6964,16 @@ md_parse_option (c, arg)
 	  else
 	    return 0;
 	}
+      else if (strncmp (arg, "tune=", 5) == 0)
+	{
+	  arg += 5;
+	  if (strcmp (arg, "itanium1") == 0)
+	    md.tune = itanium1;
+	  else if (strcmp (arg, "itanium2") == 0)
+	    md.tune = itanium2;
+	  else
+	    return 0;
+	}
       else
 	return 0;
       break;
@@ -7069,6 +7086,8 @@ IA-64 options:\n\
 			  EF_IA_64_NOFUNCDESC_CONS_GP)\n\
   -milp32|-milp64|-mlp64|-mp64	select data model (default -mlp64)\n\
   -mle | -mbe		  select little- or big-endian byte order (default -mle)\n\
+  -mtune=[itanium1|itanium2]\n\
+			  tune for a specific CPU (default -mtune=itanium2)\n\
   -munwind-check=[warning|error]\n\
 			  unwind directive check (default -munwind-check=warning)\n\
   -mhint.b=[ok|warning|error]\n\
@@ -7122,11 +7141,30 @@ match (int templ, int type, int slot)
 static inline int
 extra_goodness (int templ, int slot)
 {
-  if (slot == 1 && match (templ, IA64_TYPE_F, slot))
-    return 2;
-  if (slot == 2 && match (templ, IA64_TYPE_B, slot))
-    return 1;
-  return 0;
+  switch (md.tune)
+    {
+    case itanium1:
+      if (slot == 1 && match (templ, IA64_TYPE_F, slot))
+	return 2;
+      else if (slot == 2 && match (templ, IA64_TYPE_B, slot))
+	return 1;
+      else
+	return 0;
+      break;
+    case itanium2:
+      if (match (templ, IA64_TYPE_M, slot)
+	  || match (templ, IA64_TYPE_I, slot))
+	/* Favor M- and I-unit NOPs.  We definitely want to avoid
+	   F-unit and B-unit may cause split-issue or less-than-optimal
+	   branch-prediction.  */
+	return 2;
+      else
+	return 0;
+      break;
+    default:
+      abort ();
+      return 0;
+    }
 }
 
 /* This function is called once, at assembler startup time.  It sets
@@ -7222,10 +7260,9 @@ md_begin ()
 		&zero_address_frag);
 
   /* Compute the table of best templates.  We compute goodness as a
-     base 4 value, in which each match counts for 3, each F counts
-     for 2, each B counts for 1.  This should maximize the number of
-     F and B nops in the chosen bundles, which is good because these
-     pipelines are least likely to be overcommitted.  */
+     base 4 value, in which each match counts for 3.  Match-failures
+     result in NOPs and we use extra_goodness() to pick the execution
+     units that are best suited for issuing the NOP.  */
   for (i = 0; i < IA64_NUM_TYPES; ++i)
     for (j = 0; j < IA64_NUM_TYPES; ++j)
       for (k = 0; k < IA64_NUM_TYPES; ++k)
@@ -7426,6 +7463,7 @@ ia64_init (argc, argv)
   /* FIXME: We should change it to unwind_check_error someday.  */
   md.unwind_check = unwind_check_warning;
   md.hint_b = hint_b_error;
+  md.tune = itanium2;
 }
 
 /* Return a string for the target object file format.  */

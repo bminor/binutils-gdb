@@ -1,3 +1,4 @@
+#as: -mtune=itanium1
 #objdump: -rs
 #name: ia64 pcrel
 

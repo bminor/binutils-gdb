@@ -1,4 +1,4 @@
-# as: -xnone
+# as: -xnone -mtune=itanium1
 # objdump: -d
 # name: ia64 opc-m
 

@@ -1,4 +1,4 @@
-# as: -xexplicit
+# as: -xexplicit -mtune=itanium1
 # objdump: -d
 # name ia64 dv-mutex
 
