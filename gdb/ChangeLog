@@ -1,3 +1,18 @@
+start-sanitize-gdbtk
+	Wed Mar 19 15:16:17 1997  Martin M. Hunt  <hunt@onions.cygnus.com>
+
+	* Makefile.in:  Install gdbtcl dir instead of gdbtk.tcl.
+	
+	* gdbtk.c: Added some ifdefs for Windows.  Changed GDBTK_FILENAME
+	to GDBTK_LIBRARY, which is now a path to search.
+	(gdb_path_conv): New function.  Convert Cygwin32 pathname to
+	DOS-style pathname.
+
+	* aclocal.m4, configure.in: Changes for Windows builds.
+
+	* configure: Rebuilt.
+
+end-sanitize-gdbtk	
 Mon Mar 17 17:52:00 1997  J.T. Conklin  <jtc@cygnus.com>
 
 	* dsrec.c (load_srec): Print leading zeroes when printing section

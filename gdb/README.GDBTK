@@ -1,6 +1,7 @@
 				 README.GDBTK
 			   Written by Stu Grossman
 	      Updated 9/26/95 by Fred Fish for gdb 4.15 release
+              Updated 4/18/97 by Martin Hunt
 
 This file describes how to build, install, use and hack on GDBtk, a TK based
 GUI for GDB, the GNU debugger.
@@ -9,8 +10,8 @@ Introduction
 ============
 
 GDBtk is a version of GDB that uses Tcl/Tk to implement a graphical
-user inter- face.  It is a fully integrated GUI, not a separate
-front-end program.  The interface consists of several seperate X
+user inter-face.  It is a fully integrated GUI, not a separate
+front-end program.  The interface consists of several seperate
 windows, which use standard elements like buttons, scrollbars, entry
 boxes and such to create a fairly easy to use interface.  Each window
 has a distinct content and purpose, and can be enabled or disabled
@@ -23,10 +24,16 @@ Building and installing
 
 Building GDBtk is very straightforward.  The main difference is that you will
 need to use the `--enable-gdbtk' option when you run configure in the top level
-directory.  You will also need to install Tcl version 7.5a2, and Tk 4.1a2.
+directory.  You will also need to install Tcl version 7.6 and Tk version 4.2.
 
-You will also need to have X11 (R4/R5/R6) installed (this is a prerequisite to
-installing Tk).
+On Unix machines, you will also need to have X11 (R4/R5/R6) installed 
+(this is a prerequisite to installing Tk).  
+
+For Windows, you can obtain Tcl/Tk from ftp://ftp.smli.com:/pub/tcl/win76p2.exe.
+There is a bug in this version of Tcl/tk that requires you to set the
+environmental variable TK_LIBRARY to where the tk library directory is installed.
+There is also a problem with the colors in images on 16-bit displays under
+Windows, so some icons may look strange.  
 
 [See the GDB README file for more details on configure options and such.]
 
@@ -79,7 +86,7 @@ Source window:
 	This contains the current source file.  The margin displays line
 	numbers, and has an indicator for lines that actually contain code (and
 	therefore can have breakpoints as well).  When a breakpoint is set at
-	that line, the indicator is replaced with a `B'.
+	that line, the indicator is replaced with a stop sign icon.
 
 	The buttons are:
 
@@ -134,15 +141,16 @@ Expressions:
 Customizing GDBtk
 =================
 
-There are three primary ways to customize GDBtk.  One is to modifiy the appropriate
-X resources.  The other is to hack a ~/.gdbtkinit file.  The last is to change
-gdbtk.tcl, which defines the most basic interface elements.
+There are three primary ways to customize GDBtk.  One is to modifiy the 
+appropriate X resources.  The other is to hack a ~/.gdbtkinit file.  The last 
+is to change the files in gdbtcl, which defines the most basic interface 
+elements.
 
 X resources give you control over things like the choice of fonts, color
 schemes and some geometry info.
 
-For more serious customizations, you will probably need to hack your ~/.gdbtkinit
-or gdbtk.tcl files.
+For more serious customizations, you will probably need to hack your 
+~/.gdbtkinit or gdbtcl files.
 
 X Resources
 ===========
@@ -191,24 +199,29 @@ Note that some things may be explicitly overridden by gdbtk.tcl.  In
 particular, the `tk colormodel . monochrome' command should probably be
 disabled if you want to use color.
 
-Hacking ~/.gdbtkinit and gdbtk.tcl
+Hacking ~/.gdbtkinit and gdbtcl
 ==================================
 ~/.gdbtkinit is sourced at the end of gdbtk.tcl.  Currently there is no good
-doc on this.  See gdbtk.tcl for see what you can change.
+doc on this.  See gdbtcl/main.tcl for see what you can change.
 
-The GUI is primarily implemented by Tcl/Tk code which lives in gdbtk.tcl and a
+The GUI is primarily implemented by Tcl/Tk code which lives in gdbtcl and a
 C file called gdbtk.c.  The Tcl/Tk code determines the look and feel, the
 layout, and the functions associated with all of the interface elements.  The C
 code is mostly just glue between GDB internals and Tclland.  In essence, all of
 the policy is implemented in Tcl/Tk, and is easily changed without recompiling.
 
 To make more serious changes to the interface, such as adding a new window or
-changing the framework, you will have to hack gdbtk.tcl.  This file is
+changing the framework, you will have to hack the tcl code.  This directory is
 installed in $(libdir) (probably /usr/local/lib/).  But, you will probably want
 to hack on your own private copy before putting it up for the rest of the
-users.  GDB actually searches three places for gdbtk.tcl.  First, it looks in
-the GDBTK_FILENAME environment variable.  Second, it looks for ./gdbtk.tcl.
-And third, it looks for $(libdir)/gdbtk.tcl.
+users.  To find the GDB tcl code, GDB first checks for the environment variable
+GDBTK_LIBRARY.  This can be a directory name or a list of directories seperated
+by colons (semicolons on Windows). GDB will check each directory in order until
+it finds "main.tcl".  If GDBTK_LIBRARY is not set, GDB will look for 
+"gdbtcl/main.tcl" in the current directory, and finally, it will try to find 
+the tcl directory in the sources.
+
+Note that the old GDBTK_FILENAME environment variable is no longer used. 
 
 Internally, GDBtk is basically GDB, linked with Tcl/Tk, and some glue code that
 interfaces GDB internals to Tclland.  This means that GDBtk operates as a

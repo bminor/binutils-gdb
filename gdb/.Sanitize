@@ -29,7 +29,7 @@ else
 	fi
 fi
 
-gdbtk_files="README.GDBTK gdbtk.c gdbtk.tcl"
+gdbtk_files="README.GDBTK gdbtk.c gdbtcl"
 
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	lose_these_too="${gdbtk_files} ${lose_these_too}"

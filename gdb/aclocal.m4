@@ -74,8 +74,9 @@ AC_DEFUN(CY_AC_PATH_TCLH, [
 # be careful that we don't match stuff like tclX by accident.
 # the alternative search directory is involked by --with-tclinclude
 #
+
 no_tcl=true
-AC_MSG_CHECKING(for Tcl private headers)
+AC_MSG_CHECKING(for Tcl private headers. dir=${configdir})
 AC_ARG_WITH(tclinclude, [  --with-tclinclude       directory where tcl private headers are], with_tclinclude=${withval})
 AC_CACHE_VAL(ac_cv_c_tclh,[
 # first check to see if --with-tclinclude was specified
@@ -187,8 +188,8 @@ if test x"${no_tcl}" = x ; then
 		`ls -dr ../../tcl[[7-9]]* 2>/dev/null` \
 		../../../tcl \
 		`ls -dr ../../../tcl[[7-9]]* 2>/dev/null` ; do
-      if test -f "$i/unix/tclConfig.sh" ; then
-        ac_cv_c_tclconfig=`(cd $i/unix; pwd)`
+      if test -f "$i/${configdir}/tclConfig.sh" ; then
+        ac_cv_c_tclconfig=`(cd $i/${configdir}; pwd)`
 	break
       fi
     done
@@ -207,8 +208,8 @@ if test x"${no_tcl}" = x ; then
     for i in \
 		${srcdir}/../tcl \
 		`ls -dr ${srcdir}/../tcl[[7-9]]* 2>/dev/null` ; do
-      if test -f "$i/unix/tclConfig.sh" ; then
-        ac_cv_c_tclconfig=`(cd $i/unix; pwd)`
+      if test -f "$i/${configdir}/tclConfig.sh" ; then
+        ac_cv_c_tclconfig=`(cd $i/${configdir}; pwd)`
 	break
       fi
     done
@@ -409,8 +410,8 @@ if test x"${no_tk}" = x ; then
 		`ls -dr ../../tk[[4-9]]* 2>/dev/null` \
 		../../../tk \
 		`ls -dr ../../../tk[[4-9]]* 2>/dev/null` ; do
-      if test -f "$i/unix/tkConfig.sh" ; then
-        ac_cv_c_tkconfig=`(cd $i/unix; pwd)`
+      if test -f "$i/${configdir}/tkConfig.sh" ; then
+        ac_cv_c_tkconfig=`(cd $i/${configdir}; pwd)`
 	break
       fi
     done
@@ -429,8 +430,8 @@ if test x"${no_tk}" = x ; then
     for i in \
 		${srcdir}/../tk \
 		`ls -dr ${srcdir}/../tk[[4-9]]* 2>/dev/null` ; do
-      if test -f "$i/unix/tkConfig.sh" ; then
-        ac_cv_c_tkconfig=`(cd $i/unix; pwd)`
+      if test -f "$i/${configdir}/tkConfig.sh" ; then
+        ac_cv_c_tkconfig=`(cd $i/${configdir}; pwd)`
 	break
       fi
     done

@@ -1,5 +1,5 @@
 /* Tcl/Tk interface routines.
-   Copyright 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
    Written by Stu Grossman <grossman@cygnus.com> of Cygnus Support.
 
@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include <tcl.h>
 #include <tk.h>
+/* #include <itcl.h> */
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
@@ -45,8 +46,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include "gdbcmd.h"
 
+#ifndef WINNT
 #ifndef FIOASYNC
 #include <sys/stropts.h>
+#endif
+#endif
+
+#ifdef WINNT
+#define GDBTK_PATH_SEP ";"
+#else
+#define GDBTK_PATH_SEP ":"
 #endif
 
 /* Some versions (1.3.79, 1.3.81) of Linux don't support SIOCSPGRP the way
@@ -71,6 +80,7 @@ static void tk_command PARAMS ((char *, int));
 static int gdb_disassemble PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int compare_lines PARAMS ((const PTR, const PTR));
 static int gdbtk_dis_asm_read_memory PARAMS ((bfd_vma, bfd_byte *, int, disassemble_info *));
+static int gdb_path_conv PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_stop PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_listfiles PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
@@ -116,6 +126,8 @@ static int running_now;
    otherwise the exec file is used.  */
 
 static int disassemble_from_exec = -1;
+
+static char *Gdbtk_Library;
 
 /* Supply malloc calls for tcl/tk.  */
 
@@ -304,6 +316,30 @@ dsprintf_append_element (va_alist)
   vsprintf (buf, format, args);
 
   Tcl_DStringAppendElement (dsp, buf);
+}
+
+static int
+gdb_path_conv (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+#ifdef WINNT
+  char pathname[256], *ptr;
+  if (argc != 2)
+    error ("wrong # args");
+  cygwin32_conv_to_full_win32_path (argv[1], pathname);
+  for (ptr = pathname; *ptr; ptr++)
+    {
+      if (*ptr == '\\')
+	*ptr = '/';
+    }
+#else
+  char *pathname = argv[1];
+#endif
+  Tcl_DStringAppend (result_ptr, pathname, strlen(pathname));
+  return TCL_OK;
 }
 
 static int
@@ -1186,12 +1222,16 @@ gdbtk_wait (pid, ourstatus)
   action.sa_handler = x_event;
   action.sa_mask = nullsigmask;
   action.sa_flags = SA_RESTART;
+#ifndef WINNT
   sigaction(SIGIO, &action, NULL);
+#endif
 
   pid = target_wait (pid, ourstatus);
 
   action.sa_handler = SIG_IGN;
-  sigaction(SIGIO, &action, NULL);
+#ifndef WINNT
+  sigaction(SIGIO, &action, NULL); 
+#endif
 
   return pid;
 }
@@ -1239,8 +1279,8 @@ static void
 gdbtk_init ()
 {
   struct cleanup *old_chain;
-  char *gdbtk_filename;
-  int i;
+  char *lib, *gdbtk_lib, gdbtk_lib_tmp[1024],gdbtk_file[128];
+  int i, found_main;
   struct sigaction action;
   static sigset_t nullsigmask = {0};
 
@@ -1248,8 +1288,10 @@ gdbtk_init ()
      causing gdb to abort.  If instead we simply return here, gdb will
      gracefully degrade to using the command line interface. */
 
+#ifndef WINNT
   if (getenv ("DISPLAY") == NULL)
     return;
+#endif
 
   old_chain = make_cleanup (cleanup_init, 0);
 
@@ -1263,11 +1305,17 @@ gdbtk_init ()
   if (Tcl_Init(interp) != TCL_OK)
     error ("Tcl_Init failed: %s", interp->result);
 
+  /*
+    if (Itcl_Init(interp) == TCL_ERROR) 
+  error ("Itcl_Init failed: %s", interp->result);
+    */
+  
   if (Tk_Init(interp) != TCL_OK)
     error ("Tk_Init failed: %s", interp->result);
 
   Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
+  Tcl_CreateCommand (interp, "gdb_path_conv", call_wrapper, gdb_path_conv, NULL);
   Tcl_CreateCommand (interp, "gdb_sourcelines", call_wrapper, gdb_sourcelines,
 		     NULL);
   Tcl_CreateCommand (interp, "gdb_listfiles", call_wrapper, gdb_listfiles,
@@ -1310,7 +1358,9 @@ gdbtk_init ()
   action.sa_mask = nullsigmask;
   action.sa_flags = 0;
   action.sa_handler = SIG_IGN;
+#ifndef WINNT
   sigaction(SIGIO, &action, NULL);
+#endif
 
 #ifdef FIOASYNC
   i = 1;
@@ -1330,8 +1380,11 @@ gdbtk_init ()
 #endif	/* F_SETOWN */
 #endif	/* !SIOCSPGRP */
 #else
+#ifndef WINNT
   if (ioctl (x_fd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
     perror_with_name ("gdbtk_init: ioctl I_SETSIG failed");
+#endif
+
 #endif /* ifndef FIOASYNC */
 
   add_com ("tk", class_obscure, tk_command,
@@ -1340,25 +1393,66 @@ gdbtk_init ()
   Tcl_LinkVar (interp, "disassemble-from-exec", (char *)&disassemble_from_exec,
 	       TCL_LINK_INT);
 
-  /* Load up gdbtk.tcl after all the environment stuff has been setup.  */
+  /* find the gdb tcl library and source main.tcl */
 
-  gdbtk_filename = getenv ("GDBTK_FILENAME");
-  if (!gdbtk_filename)
-    if (access ("gdbtk.tcl", R_OK) == 0)
-      gdbtk_filename = "gdbtk.tcl";
+  gdbtk_lib = getenv ("GDBTK_LIBRARY");
+  if (!gdbtk_lib)
+    if (access ("gdbtcl/main.tcl", R_OK) == 0)
+      gdbtk_lib = "gdbtcl";
     else
-      gdbtk_filename = GDBTK_FILENAME;
+      gdbtk_lib = GDBTK_LIBRARY;
+
+  strcpy (gdbtk_lib_tmp, gdbtk_lib);
+  found_main = 0;
+  /* see if GDBTK_LIBRARY is a path list */
+  lib = strtok (gdbtk_lib_tmp, GDBTK_PATH_SEP);
+  do
+    {
+      if (Tcl_VarEval (interp, "lappend auto_path ", lib, NULL) != TCL_OK)
+	{
+	  fputs_unfiltered (Tcl_GetVar (interp, "errorInfo", 0), gdb_stderr);
+	  error ("");
+	}
+      if (!found_main)
+	{
+	  strcpy (gdbtk_file, lib);
+	  strcat (gdbtk_file, "/main.tcl");
+	  if (access (gdbtk_file, R_OK) == 0)
+	    {
+	      found_main++;
+	      Tcl_SetVar (interp, "GDBTK_LIBRARY", lib, 0);
+	    }
+	}
+     } 
+  while (lib = strtok (NULL, ":"));
+  
+  if (!found_main)
+    {
+      fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
+      if (getenv("GDBTK_LIBRARY"))
+	{
+	  fprintf_unfiltered (stderr, "Unable to find main.tcl in %s\n",getenv("GDBTK_LIBRARY"));
+	  fprintf_unfiltered (stderr, 
+			      "Please set GDBTK_LIBRARY to a path that includes the GDB tcl files.\n");
+	}
+      else
+	{
+	  fprintf_unfiltered (stderr, "Unable to find main.tcl in %s\n", GDBTK_LIBRARY);
+	  fprintf_unfiltered (stderr, "You might want to set GDBTK_LIBRARY\n");	  
+	}
+      error("");
+    }
 
 /* Defer setup of fputs_unfiltered_hook to near the end so that error messages
    prior to this point go to stdout/stderr.  */
 
   fputs_unfiltered_hook = gdbtk_fputs;
 
-  if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
+  if (Tcl_EvalFile (interp, gdbtk_file) != TCL_OK)
     {
       fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
 
-      fprintf_unfiltered (stderr, "%s:%d: %s\n", gdbtk_filename,
+      fprintf_unfiltered (stderr, "%s:%d: %s\n", gdbtk_file,
 			  interp->errorLine, interp->result);
 
       fputs_unfiltered ("Stack trace:\n", gdb_stderr);
