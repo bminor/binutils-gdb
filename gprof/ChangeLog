@@ -1,3 +1,9 @@
+Wed May 17 17:56:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (Makefile): Added config.status to dependency list.
+	  (config.status): New target.
+	  (SHELL): New definition.
+
 Tue Apr 25 21:11:12 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (install): Depend on "all".

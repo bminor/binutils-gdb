@@ -18,6 +18,8 @@ man1dir = $(mandir)/man1
 infodir	= $(prefix)/info
 datadir = $(prefix)/lib
 
+SHELL = /bin/sh
+
 INSTALL = `cd $(srcdir); pwd`/../install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
@@ -114,9 +116,11 @@ distclean: clean
 realclean: distclean
 	-rm -f $(DISTSTUFF)
 
-Makefile : Makefile.in
-	sh config.status
+Makefile: Makefile.in config.status
+	$(SHELL) config.status
 
+config.status: configure
+	$(SHELL) config.status --recheck
 
 # These get around a bug in Sun Make in SunOS 4.1.1 and Solaris 2
 $(MY_TARGET).o: $(MY_TARGET).c
