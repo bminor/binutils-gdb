@@ -44,9 +44,9 @@
 
 
 
-/* Type definition of all hook functions.
-   Recommended pratice is to first declare each hook function using
-   the below ftype and then define it. */
+/* Type definition of all hook functions.  Recommended pratice is to
+   first declare each hook function using the below ftype and then
+   define it.  */
 
 typedef void (gdb_events_breakpoint_create_ftype) (int b);
 typedef void (gdb_events_breakpoint_delete_ftype) (int b);
@@ -73,7 +73,7 @@ struct gdb_events
 
 /* Interface into events functions.
    Where a *_p() predicate is present, it must be called before
-   calling the hook proper. */
+   calling the hook proper.  */
 extern void breakpoint_create_event (int b);
 extern void breakpoint_delete_event (int b);
 extern void breakpoint_modify_event (int b);
@@ -82,13 +82,13 @@ extern void tracepoint_delete_event (int number);
 extern void tracepoint_modify_event (int number);
 extern void architecture_changed_event (void);
 
-/* Install custom gdb-events hooks. */
+/* Install custom gdb-events hooks.  */
 extern struct gdb_events *deprecated_set_gdb_event_hooks (struct gdb_events *vector);
 
-/* Deliver any pending events. */
+/* Deliver any pending events.  */
 extern void gdb_events_deliver (struct gdb_events *vector);
 
-/* Clear event handlers */
+/* Clear event handlers.  */
 extern void clear_gdb_event_hooks (void);
 
 #endif

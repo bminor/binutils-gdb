@@ -19,7 +19,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# USA.
 
 IFS=:
 
@@ -88,7 +89,7 @@ copyright ()
    If editing this file, please also run gdb-events.sh and merge any
    changes into that script. Conversely, when making sweeping changes
    to this file, modifying gdb-events.sh and using its output may
-   prove easier. */
+   prove easier.  */
 
 EOF
 }
@@ -126,9 +127,9 @@ done
 echo ""
 echo ""
 cat <<EOF
-/* Type definition of all hook functions.
-   Recommended pratice is to first declare each hook function using
-   the below ftype and then define it. */
+/* Type definition of all hook functions.  Recommended pratice is to
+   first declare each hook function using the below ftype and then
+   define it.  */
 EOF
 echo ""
 function_list | while eval read $read
@@ -157,7 +158,7 @@ echo ""
 cat <<EOF
 /* Interface into events functions.
    Where a *_p() predicate is present, it must be called before
-   calling the hook proper. */
+   calling the hook proper.  */
 EOF
 function_list | while eval read $read
 do
@@ -176,13 +177,13 @@ done
 # our set function
 cat <<EOF
 
-/* Install custom gdb-events hooks. */
+/* Install custom gdb-events hooks.  */
 extern struct gdb_events *deprecated_set_gdb_event_hooks (struct gdb_events *vector);
 
-/* Deliver any pending events. */
+/* Deliver any pending events.  */
 extern void gdb_events_deliver (struct gdb_events *vector);
 
-/* Clear event handlers */
+/* Clear event handlers.  */
 extern void clear_gdb_event_hooks (void);
 EOF
 
@@ -477,14 +478,13 @@ When non-zero, event/notify debugging is enabled.", &setlist);
   deprecate_cmd (deprecated_add_show_from_set (c, &showlist),
                  "show debug event");
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("event",
-	          class_maintenance,
-		  var_zinteger,
-		  (char *) (&gdb_events_debug),
-		  "Set event debugging.\n\\
+  deprecated_add_show_from_set (add_set_cmd ("event",
+					     class_maintenance,
+					     var_zinteger,
+					     (char *) (&gdb_events_debug),
+					     "Set event debugging.\n\\
 When non-zero, event/notify debugging is enabled.", &setdebuglist),
-     &showdebuglist);
+				&showdebuglist);
 }
 EOF
 

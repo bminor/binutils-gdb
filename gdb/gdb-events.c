@@ -18,7 +18,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
 /* Work in progress */
 
@@ -32,7 +33,7 @@
    If editing this file, please also run gdb-events.sh and merge any
    changes into that script. Conversely, when making sweeping changes
    to this file, modifying gdb-events.sh and using its output may
-   prove easier. */
+   prove easier.  */
 
 
 #include "defs.h"
@@ -338,12 +339,12 @@ When non-zero, event/notify debugging is enabled.", &setlist);
   deprecate_cmd (deprecated_add_show_from_set (c, &showlist),
 		 "show debug event");
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("event",
-		  class_maintenance,
-		  var_zinteger,
-		  (char *) (&gdb_events_debug),
-		  "Set event debugging.\n\
-When non-zero, event/notify debugging is enabled.", &setdebuglist),
-     &showdebuglist);
+  deprecated_add_show_from_set (add_set_cmd ("event",
+					     class_maintenance,
+					     var_zinteger,
+					     (char *) (&gdb_events_debug),
+					     "Set event debugging.\n\
+When non-zero, event/notify debugging is enabled.", 
+					     &setdebuglist),
+				&showdebuglist);
 }
