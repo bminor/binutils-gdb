@@ -1,3 +1,8 @@
+2003-08-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* i386-tdep.c (i386_gdbarch_init): Enable default support for
+	SSE registers.
+
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.h (amd64fbsd_sigtramp_start, amd64fbsd_sigtramp_end,

@@ -1757,10 +1757,23 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* The i386 default settings don't include the SSE registers.
+  /* The i386 default settings now include the SSE registers.
+     I386_NUM_XREGS includes mxcsr, and we don't want to count
+     this as one of the xmm regs -- which is why we subtract one.
+
+     Note: kevinb/2003-07-14: Whatever Mark's concerns are about the
+     FPU registers in the FIXME below apply to the SSE registers as well.
+     The only problem that I see is that these registers will show up
+     in "info all-registers" even on CPUs where they don't exist.  IMO,
+     however, if it's a choice between printing them always (even when
+     they don't exist) or never showing them to the user (even when they
+     do exist), I prefer the former over the latter.  Ideally, of course,
+     we'd somehow autodetect that we have them (or not) and display them
+     when we have them and suppress them when we don't.
+
      FIXME: kettenis/20020614: They do include the FPU registers for
      now, which probably is not quite right.  */
-  tdep->num_xmm_regs = 0;
+  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
 
   tdep->jb_pc_offset = -1;
   tdep->struct_return = pcc_struct_return;
@@ -1782,9 +1795,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
 
-  /* The default ABI includes general-purpose registers and
-     floating-point registers.  */
-  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
+  /* The default ABI includes general-purpose registers, 
+     floating-point registers, and the SSE registers.  */
+  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS);
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_register_type (gdbarch, i386_register_type);
 
