@@ -1,3 +1,27 @@
+Wed Aug 18 16:51:29 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-elf.c: Undef NO_RELOC before including aout/aout64.h.
+	(obj_elf_weak): New function.
+	(obj_pseudo_table): Handle ".weak".
+	(obj_elf_section): If section directive includes a string, ignore
+	it for now.  Accept "progbits" flag.
+	(obj_elf_type): Accept `@' before flag name.
+
+	* write.c (relax_and_size_seg) [BFD_ASSEMBLER]: Get rid of `if(1)'
+	condition.
+	(fixup_segment) [BFD_ASSEMBLER]: Use bfd_is_com_section, rather
+	than checking for bfd_com_section directly.
+	(fixup_segment): Simplify range check.
+	(fixup_segment) [OBJ_COFF && TC_I960]: Simplify cpp condition
+	test.
+
+	* symbols.h (S_SET_WEAK): Declare.
+	* symbols.c (S_SET_WEAK): New function.
+	(S_SET_EXTERNAL, S_CLEAR_EXTERNAL): Don't bother with BSF_EXPORT,
+	it's not a separate flag any more.  Clear BSF_WEAK.
+
+	* read.c (potable): Treat "string" like "asciz".
+
 Wed Aug 18 15:30:29 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (append_insn): Don't swap branch instructions
