@@ -187,6 +187,48 @@ print_insn_normal (cd, dis_info, insn, fields, pc, length)
     }
 }
 
+/* Subroutine of print_insn. Reads an insn into the given buffers and updates
+   the extract info.
+   Returns 0 if all is well, non-zero otherwise.  */
+static int
+read_insn (cd, pc, info, buf, buflen, ex_info, insn_value)
+     CGEN_CPU_DESC cd;
+     bfd_vma pc;
+     disassemble_info *info;
+     char *buf;
+     int buflen;
+     CGEN_EXTRACT_INFO *ex_info;
+     unsigned long *insn_value;
+{
+  int status = (*info->read_memory_func) (pc, buf, buflen, info);
+  if (status != 0)
+    {
+      (*info->memory_error_func) (status, pc, info);
+      return -1;
+    }
+
+  ex_info->dis_info = info;
+  ex_info->valid = (1 << buflen) - 1;
+  ex_info->insn_bytes = buf;
+
+  switch (buflen)
+    {
+    case 1:
+      *insn_value = buf[0];
+      break;
+    case 2:
+      *insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb16 (buf) : bfd_getl16 (buf);
+      break;
+    case 4:
+      *insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb32 (buf) : bfd_getl32 (buf);
+      break;
+    default:
+      abort ();
+    }
+
+  return 0;
+}
+
 /* Utility to print an insn.
    BUF is the base part of the insn, target byte order, BUFLEN bytes long.
    The result is the size of the insn in bytes or zero for an unknown insn
@@ -205,24 +247,9 @@ print_insn (cd, pc, info, buf, buflen)
   const CGEN_INSN_LIST *insn_list;
   CGEN_EXTRACT_INFO ex_info;
 
-  ex_info.dis_info = info;
-  ex_info.valid = (1 << (cd->base_insn_bitsize / 8)) - 1;
-  ex_info.insn_bytes = buf;
-
-  switch (buflen)
-    {
-    case 1:
-      insn_value = buf[0];
-      break;
-    case 2:
-      insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb16 (buf) : bfd_getl16 (buf);
-      break;
-    case 4:
-      insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb32 (buf) : bfd_getl32 (buf);
-      break;
-    default:
-      abort ();
-    }
+  int rc = read_insn (cd, pc, info, buf, buflen, & ex_info, & insn_value);
+  if (rc != 0)
+    return rc;
 
   /* The instructions are stored in hash lists.
      Pick the first one and keep trying until we find the right one.  */
@@ -253,6 +280,22 @@ print_insn (cd, pc, info, buf, buflen)
 	  /* Printing is handled in two passes.  The first pass parses the
 	     machine insn and extracts the fields.  The second pass prints
 	     them.  */
+
+#if CGEN_INT_INSN_P
+	  /* Make sure the entire insn is loaded into insn_value.  */
+	  if (CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize)
+	    {
+	      unsigned long full_insn_value;
+	      int rc = read_insn (cd, pc, info, buf,
+				  CGEN_INSN_BITSIZE (insn) / 8,
+				  & ex_info, & full_insn_value);
+	      if (rc != 0)
+		return rc;
+	      length = CGEN_EXTRACT_FN (cd, insn)
+		(cd, insn, &ex_info, full_insn_value, &fields, pc);
+	    }
+	  else
+#endif
 
 	  length = CGEN_EXTRACT_FN (cd, insn)
 	    (cd, insn, &ex_info, insn_value, &fields, pc);

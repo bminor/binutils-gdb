@@ -1,3 +1,28 @@
+2000-08-28  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-ibld.in (cgen_put_insn_int_value): New function.
+	(insert_normal): Allow for non-zero word_offset with CGEN_INT_INSN_P.
+	(insert_insn_normal): Use cgen_put_insn_int_value with CGEN_INT_INSN_P.
+	(extract_normal): Allow for non-zero word_offset with CGEN_INT_INSN_P.
+	* cgen-dis.in (read_insn): New static function.
+	(print_insn): Use read_insn to read the insn into the buffer and set
+	up for disassembly.
+	(print_insn): in CGEN_INT_INSN_P, make sure that the entire insn is
+	in the buffer.
+	* fr30-asm.c: Regenerated.
+	* fr30-desc.c: Regenerated.
+	* fr30-desc.h Regenerated.
+	* fr30-dis.c: Regenerated.
+	* fr30-ibld.c: Regenerated.
+	* fr30-opc.c: Regenerated.
+	* fr30-opc.h Regenerated.
+	* m32r-asm.c: Regenerated.
+	* m32r-desc.c: Regenerated.
+	* m32r-desc.h Regenerated.
+	* m32r-dis.c: Regenerated.
+	* m32r-ibld.c: Regenerated.
+	* m32r-opc.c: Regenerated.
+
 2000-08-28  Kazu Hirata  <kazu@hxi.com>
 
 	* tic30-dis.c: Fix formatting.
