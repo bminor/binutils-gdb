@@ -140,7 +140,7 @@ GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = -g
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS} ${NWINCLUDES}
+INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS} 
 LDFLAGS = $(CFLAGS)
 
 # Perhaps should come from parent Makefile
