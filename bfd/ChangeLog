@@ -1,3 +1,7 @@
+2002-01-07  Aldy Hernandez  <aldyh@redhat.com>
+
+	* coff-rs6000.c (READ20): Use bfd_scan_vma.
+
 2002-01-07  Geoffrey Keating  <geoffk@redhat.com>
 
 	* elflink.h (elf_link_input_bfd): Don't ask for the merged offset

@@ -1555,7 +1555,7 @@ static char buff20[XCOFFARMAGBIG_ELEMENT_SIZE + 1];
 #define READ20(d, v) \
   buff20[20] = 0, \
   memcpy (buff20, (d), 20), \
-  (v) = strtoull (buff20, (char **) NULL, 10)
+  (v) = bfd_scan_vma (buff20, (const char **) NULL, 10)
 
 static boolean
 xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
