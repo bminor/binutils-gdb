@@ -1,3 +1,7 @@
+Thu Jun 29 17:24:52 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* coff-h8300.c (COFF_LONG_FILENAMES): Define.
+
 Wed Jun 28 18:04:42 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in: versados.o is now conditionally built.

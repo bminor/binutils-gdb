@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi H8/300 COFF binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -50,8 +50,6 @@ special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
      bfd *output_bfd;
      char **error_message;
 {
-  symvalue diff;
-
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
 
@@ -588,6 +586,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #define coff_reloc16_extra_cases h8300_reloc16_extra_cases
 #define coff_reloc16_estimate h8300_reloc16_estimate
 
+#define COFF_LONG_FILENAMES
 #include "coffcode.h"
 
 
