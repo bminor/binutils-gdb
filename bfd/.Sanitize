@@ -179,12 +179,6 @@ elfcore.h
 elflink.c
 elflink.h
 elfxx-target.h
-evax-alpha.c
-evax-egsd.c
-evax-emh.c
-evax-etir.c
-evax-misc.c
-evax.h
 format.c
 freebsd.h
 gen-aout.c
@@ -287,6 +281,12 @@ tekhex.c
 trad-core.c
 vaxnetbsd.c
 versados.c
+vms.c
+vms.h
+vms-gsd.c
+vms-hdr.c
+vms-misc.c
+vms-tir.c
 xcofflink.c
 
 Things-to-lose:

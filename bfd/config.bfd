@@ -76,7 +76,7 @@ case "${targ}" in
     targ_selvecs=ecoffalpha_little_vec
     ;;
   alpha*-*-*vms*)
-    targ_defvec=evax_alpha_vec
+    targ_defvec=vms_alpha_vec
     ;;
   alpha*-*-*)
     targ_defvec=ecoffalpha_little_vec
@@ -610,6 +610,10 @@ case "${targ}" in
     ;;
 #endif
 
+  vax*-*-*vms*)
+    targ_defvec=vms_vax_vec
+    ;;
+
   we32k-*-*)
     targ_defvec=we32kcoff_vec
     ;;
@@ -646,5 +650,18 @@ case "${targ}" in
     echo 1>&2 "*** BFD does not support target ${targ}."
     echo 1>&2 "*** Look in bfd/config.bfd for supported targets."
     exit 1
+    ;;
+esac
+
+# If we support any ELF target, then automatically add support for the
+# generic ELF targets.  This permits an objdump with some ELF support
+# to be used on an arbitrary ELF file for anything other than
+# relocation information.
+case "${targ_defvec} ${targ_selvecs}" in
+  *bfd_elf64*)
+    targ_selvecs="${targ_selvecs} bfd_elf64_little_generic_vec bfd_elf64_big_generic_vec bfd_elf32_little_generic_vec bfd_elf32_big_generic_vec"
+    ;;
+  *bfd_elf32*)
+    targ_selvecs="${targ_selvecs} bfd_elf32_little_generic_vec bfd_elf32_big_generic_vec"
     ;;
 esac

@@ -109,12 +109,6 @@ elf64-sparc.c
 elf64.c
 elfcode.h
 elflink.c
-evax-alpha.c
-evax-egsd.c
-evax-emh.c
-evax-etir.c
-evax-misc.c
-evax.h
 format.c
 genlink.h
 go32stub.h
@@ -197,4 +191,10 @@ tekhex.c
 trad-core.c
 vaxnetbsd.c
 versados.c
+vms-gsd.c
+vms-hdr.c
+vms-misc.c
+vms-tir.c
+vms.c
+vms.h
 xcofflink.c

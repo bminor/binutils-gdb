@@ -1,8 +1,8 @@
-/* evax-misc.c -- Miscellaneous functions for ALPHA EVAX (openVMS/Alpha) files.
+/* vms-misc.c -- Miscellaneous functions for VAX (openVMS/VAX) and
+   EVAX (openVMS/Alpha) files.
    Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
 
-   Written by Klaus K"ampf (kkaempf@progis.de)
-   of proGIS Softwareentwicklung, Aachen, Germany
+   Written by Klaus K"ampf (kkaempf@rmi.de)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,14 +28,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 #include "libbfd.h"
 
-#include "evax.h"
+#include "vms.h"
 
 /*-----------------------------------------------------------------------------*/
-#if EVAX_DEBUG
+#if VMS_DEBUG
 /* debug functions */
 
-/* debug function for all evax extensions
-   evaluates environment variable EVAX_DEBUG for a
+/* debug function for all vms extensions
+   evaluates environment variable VMS_DEBUG for a
    numerical value on the first call
    all error levels below this value are printed
   
@@ -51,7 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if __STDC__
 void
-_bfd_evax_debug (int level, char *format, ...)
+_bfd_vms_debug (int level, char *format, ...)
 {
   static int min_level = -1;
   static FILE *output = NULL;
@@ -61,7 +61,7 @@ _bfd_evax_debug (int level, char *format, ...)
 
   if (min_level == -1)
     {
-      if ((eptr = getenv("EVAX_DEBUG")) != NULL)
+      if ((eptr = getenv("VMS_DEBUG")) != NULL)
 	{
 	  min_level = atoi(eptr);
 	  output = stderr;
@@ -87,7 +87,7 @@ _bfd_evax_debug (int level, char *format, ...)
 #else /* not __STDC__ */
 
 void
-_bfd_evax_debug (level, format, a1, a2, a3, a4, a5, a6)
+_bfd_vms_debug (level, format, a1, a2, a3, a4, a5, a6)
      int level;
      char *format;
      long a1; long a2; long a3;
@@ -99,7 +99,7 @@ _bfd_evax_debug (level, format, a1, a2, a3, a4, a5, a6)
 
   if (min_level == -1)
     {
-      if ((eptr = getenv("EVAX_DEBUG")) != NULL)
+      if ((eptr = getenv("VMS_DEBUG")) != NULL)
 	{
 	  min_level = atoi(eptr);
 	  output = stderr;
@@ -139,31 +139,31 @@ _bfd_hexdump (level, ptr, size, offset)
   while (size-- > 0)
     {
       if ((count%16) == 0)
-	evax_debug (level, "%08lx:", start);
-      evax_debug (-level, " %02x", *ptr++);
+	vms_debug (level, "%08lx:", start);
+      vms_debug (-level, " %02x", *ptr++);
       count++;
       start++;
       if (size == 0)
 	{
 	  while ((count%16) != 0)
 	    {
-	      evax_debug (-level, "   ");
+	      vms_debug (-level, "   ");
 	      count++;
 	    }
 	}
       if ((count%16) == 0)
 	{
-	  evax_debug (-level, " ");
+	  vms_debug (-level, " ");
 	  while (lptr < ptr)
 	    {
-	      evax_debug (-level, "%c", (*lptr < 32)?'.':*lptr);
+	      vms_debug (-level, "%c", (*lptr < 32)?'.':*lptr);
 	      lptr++;
 	    }
-	  evax_debug (-level, "\n");
+	  vms_debug (-level, "\n");
 	}
     }
   if ((count%16) != 0)
-    evax_debug (-level, "\n");
+    vms_debug (-level, "\n");
 
   return;
 }
@@ -174,29 +174,38 @@ _bfd_hexdump (level, ptr, size, offset)
 
    These are needed when reading an object file.  */
 
-/* allocate new evax_hash_entry
+/* allocate new vms_hash_entry
    keep the symbol name and a pointer to the bfd symbol in the table  */
 
 struct bfd_hash_entry *
-_bfd_evax_hash_newfunc (entry, table, string)
+_bfd_vms_hash_newfunc (entry, table, string)
      struct bfd_hash_entry *entry;
      struct bfd_hash_table *table;
      const char *string;
 {
-  evax_symbol_entry *ret = (evax_symbol_entry *)entry;
+  vms_symbol_entry *ret;
 
-#if EVAX_DEBUG
-  evax_debug (5, "_bfd_evax_hash_newfunc(%p, %p, %s)\n", entry, table, string);
+#if VMS_DEBUG
+  vms_debug (5, "_bfd_vms_hash_newfunc(%p, %p, %s)\n", entry, table, string);
 #endif
 
-  if (ret == (evax_symbol_entry *)NULL)
-    ret = ((evax_symbol_entry *) bfd_hash_allocate (table, sizeof (evax_symbol_entry)));
-  if (ret == (evax_symbol_entry *)NULL)
+  if (entry == (struct bfd_hash_entry *)NULL)
     {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *)NULL;
+      ret = (vms_symbol_entry *)
+	      bfd_hash_allocate (table, sizeof (vms_symbol_entry));
+      if (ret == (vms_symbol_entry *) NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return (struct bfd_hash_entry *)NULL;
+	}
     }
-  ret = (evax_symbol_entry *) bfd_hash_newfunc ((struct bfd_hash_entry *)ret, table, string);
+
+  /* Call the allocation method of the base class.  */
+
+  ret = (vms_symbol_entry *) bfd_hash_newfunc ((struct bfd_hash_entry *)ret, table, string);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_hash_newfunc ret %p\n", ret);
+#endif
 
   ret->symbol = (asymbol *)NULL;
 
@@ -206,10 +215,10 @@ _bfd_evax_hash_newfunc (entry, table, string)
 
 /* object file input functions */
 
-/* Return type and length from record header (buf)  */
+/* Return type and length from record header (buf) on Alpha.  */
 
 void
-_bfd_evax_get_header_values (abfd, buf, type, length)
+_bfd_vms_get_header_values (abfd, buf, type, length)
      bfd *abfd;
      unsigned char *buf;
      int *type;
@@ -221,16 +230,21 @@ _bfd_evax_get_header_values (abfd, buf, type, length)
   if (length != 0)
     *length = bfd_getl16 (buf);
 
+#if VMS_DEBUG
+  vms_debug (10, "_bfd_vms_get_header_values type %x, length %x\n", (type?*type:0), (length?*length:0));
+#endif
+
+
   return;
 }
 
 
-/* Get next record from object file to evax_buf
+/* Get next record from object file to vms_buf
    set PRIV(buf_size) and return it
   
    this is a little tricky since it should be portable.
   
-   the openVMS/AXP object file has 'variable length' which means that
+   the openVMS object file has 'variable length' which means that
    read() returns data in chunks of (hopefully) correct and expected
    size. The linker (and other tools on vms) depend on that. Unix doesn't
    know about 'formatted' files, so reading and writing such an object
@@ -243,7 +257,7 @@ _bfd_evax_get_header_values (abfd, buf, type, length)
    happens during the transfer of object files from vms to unix,
    at least with ucx, dec's implementation of tcp/ip.
   
-   The EVAX format repeats the length at bytes 2 & 3 of every record.
+   The vms format repeats the length at bytes 2 & 3 of every record.
   
    On the first call (file_format == FF_UNKNOWN) we check if
    the first and the third byte pair (!) of the record match.
@@ -260,34 +274,38 @@ _bfd_evax_get_header_values (abfd, buf, type, length)
    all file i/o is always done on even file positions  */
 
 int
-_bfd_evax_get_record (abfd)
+_bfd_vms_get_record (abfd)
      bfd *abfd;
 {
   int test_len, test_start, remaining;
-  unsigned char *evax_buf;
+  unsigned char *vms_buf;
 
-#if EVAX_DEBUG
-  evax_debug (8, "_bfd_evax_get_record\n");
+#if VMS_DEBUG
+  vms_debug (8, "_bfd_vms_get_record\n");
 #endif
 
-  /* minimum is 6 bytes
-     (2 bytes length, 2 bytes record id, 2 bytes length repeated)  */
+  /* minimum is 6 bytes on Alpha
+     (2 bytes length, 2 bytes record id, 2 bytes length repeated)
+
+     on VAX there's no length information in the record
+     so start with OBJ_S_C_MAXRECSIZ  */
 
   if (PRIV(buf_size) == 0)
     {
-      PRIV(evax_buf) = (unsigned char *) malloc (6);
-#if EVAX_DEBUG
-      evax_debug (9, "PRIV(evax_buf) %p\n", PRIV(evax_buf));
-#endif
+      if (PRIV(is_vax))
+	{
+	  PRIV(vms_buf) = (unsigned char *) malloc (OBJ_S_C_MAXRECSIZ);
+	  PRIV(buf_size) = OBJ_S_C_MAXRECSIZ;
+	  PRIV(file_format) = FF_VAX;
+	}
+      else
+	PRIV(vms_buf) = (unsigned char *) malloc (6);
     }
 
-  evax_buf = PRIV(evax_buf);
+  vms_buf = PRIV(vms_buf);
 
-  if (evax_buf == 0)
+  if (vms_buf == 0)
     {
-#if EVAX_DEBUG
-      evax_debug (9, "can't alloc evax_buf\n");
-#endif
       bfd_set_error (bfd_error_no_memory);
       return -1;
     }
@@ -296,45 +314,37 @@ _bfd_evax_get_record (abfd)
     {
       case FF_UNKNOWN:
       case FF_FOREIGN:
-	test_len = 6;				/* probe 6 bytes */
-	test_start = 2;				/* where the record starts */
+	test_len = 6;			/* probe 6 bytes */
+	test_start = 2;			/* where the record starts */
       break;
 
       case FF_NATIVE:
 	test_len = 4;
 	test_start = 0;
       break;
+
+      case FF_VAX:
+	test_len = 0;
+	test_start = 0;
+      break;
   }
 
   /* skip odd alignment byte  */
-#if 0
-  if (PRIV(file_format) == FF_FOREIGN)
-    {
-#endif
-      if (bfd_tell (abfd) & 1)
-	{
-#if EVAX_DEBUG
-	  evax_debug (10, "skip odd\n");
-#endif
-	  if (bfd_read (PRIV(evax_buf), 1, 1, abfd) != 1)
-	    {
-#if EVAX_DEBUG
-	      evax_debug (9, "skip odd failed\n");
-#endif
-	      bfd_set_error (bfd_error_file_truncated);
-	      return 0;
-	    }
-	}
-#if 0
-    }
-#endif
-  /* read the record header  */
 
-  if (bfd_read (PRIV(evax_buf), 1, test_len, abfd) != test_len)
+  if (bfd_tell (abfd) & 1)
     {
-#if EVAX_DEBUG
-      evax_debug (9, "can't bfd_read test %d bytes\n", test_len);
-#endif
+      if (bfd_read (PRIV(vms_buf), 1, 1, abfd) != 1)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return 0;
+	}
+    }
+
+  /* read the record header on Alpha.  */
+
+  if ((test_len != 0)
+      && (bfd_read (PRIV(vms_buf), 1, test_len, abfd) != test_len))
+    {
       bfd_set_error (bfd_error_file_truncated);
       return 0;
     }
@@ -343,8 +353,8 @@ _bfd_evax_get_record (abfd)
 
   if (PRIV(file_format) == FF_UNKNOWN)
     {						/* record length repeats ? */
-      if ( (evax_buf[0] == evax_buf[4])
-        && (evax_buf[1] == evax_buf[5]))
+      if ( (vms_buf[0] == vms_buf[4])
+        && (vms_buf[1] == vms_buf[5]))
 	{
 	  PRIV(file_format) = FF_FOREIGN;	/* Y: foreign environment */
 	  test_start = 2;
@@ -354,97 +364,113 @@ _bfd_evax_get_record (abfd)
 	  PRIV(file_format) = FF_NATIVE;	/* N: native environment */
 	  test_start = 0;
 	}
-#if EVAX_DEBUG
-      evax_debug (10, "File format is %s\n", (PRIV(file_format) == FF_FOREIGN)?"foreign":"native");
-#endif
     }
 
-  /* extract evax record length  */
-
-  _bfd_evax_get_header_values (abfd, evax_buf+test_start, NULL,
-			       &PRIV(rec_length));
-
-  if (PRIV(rec_length) <= 0)
+  if (PRIV(is_vax))
     {
-      bfd_set_error (bfd_error_file_truncated);
-      return 0;
-    }
-
-  /* that's what the linker manual says  */
-
-  if (PRIV(rec_length) > EOBJ_S_C_MAXRECSIZ)
-    {
-      bfd_set_error (bfd_error_file_truncated);
-      return 0;
-    }
-
-  /* adjust the buffer  */
-
-  if (PRIV(rec_length) > PRIV(buf_size))
-    {
-      PRIV(evax_buf) = (unsigned char *) realloc (evax_buf, PRIV(rec_length));
-#if EVAX_DEBUG
-      evax_debug (3, "adjusted the buffer (%p) from %d to %d\n", PRIV(evax_buf), PRIV(buf_size), PRIV(rec_length));
-#endif
-      evax_buf = PRIV(evax_buf);
-      if (evax_buf == 0)
+      PRIV(rec_length) = bfd_read (vms_buf, 1, PRIV(buf_size), abfd);
+      if (PRIV(rec_length) <= 0)
 	{
-#if EVAX_DEBUG
-	  evax_debug (9, "can't realloc evax_buf to %d bytes\n", PRIV(rec_length));
-#endif
-	  bfd_set_error (bfd_error_no_memory);
-	  return -1;
+	  bfd_set_error (bfd_error_file_truncated);
+	  return 0;
 	}
-      PRIV(buf_size) = PRIV(rec_length);
+      PRIV(vms_rec) = vms_buf;
     }
-
-  /* read the remaining record  */
-
-  remaining = PRIV(rec_length) - test_len + test_start;
-
-  if (bfd_read (evax_buf + test_len, 1, remaining, abfd) != remaining)
+  else		/* Alpha  */
     {
-#if EVAX_DEBUG
-      evax_debug (9, "can't bfd_read remaining %d bytes\n", remaining);
+      /* extract vms record length  */
+
+      _bfd_vms_get_header_values (abfd, vms_buf+test_start, NULL,
+				  &PRIV(rec_length));
+
+      if (PRIV(rec_length) <= 0)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return 0;
+	}
+
+      /* that's what the linker manual says  */
+
+      if (PRIV(rec_length) > EOBJ_S_C_MAXRECSIZ)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return 0;
+	}
+
+      /* adjust the buffer  */
+
+      if (PRIV(rec_length) > PRIV(buf_size))
+	{
+	  PRIV(vms_buf) = (unsigned char *) realloc (vms_buf, PRIV(rec_length));
+	  vms_buf = PRIV(vms_buf);
+	  if (vms_buf == 0)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return -1;
+	    }
+	  PRIV(buf_size) = PRIV(rec_length);
+	}
+
+      /* read the remaining record  */
+
+      remaining = PRIV(rec_length) - test_len + test_start;
+
+#if VMS_DEBUG
+      vms_debug (10, "bfd_read remaining %d\n", remaining);
 #endif
-      bfd_set_error (bfd_error_file_truncated);
-      return 0;
+      if (bfd_read (vms_buf + test_len, 1, remaining, abfd) != remaining)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return 0;
+	}
+      PRIV(vms_rec) = vms_buf + test_start;
     }
 
-  PRIV(evax_rec) = evax_buf + test_start;
+#if VMS_DEBUG
+  vms_debug (11, "bfd_read rec_length %d\n", PRIV(rec_length));
+#endif
 
   return PRIV(rec_length);
 }
 
 
-/* get next EVAX record from file
-   update evax_rec and rec_length to new (remaining) values  */
+/* get next vms record from file
+   update vms_rec and rec_length to new (remaining) values  */
 
 int
-_bfd_evax_next_record (abfd)
+_bfd_vms_next_record (abfd)
      bfd *abfd;
 {
-#if EVAX_DEBUG
-  evax_debug (8, "_bfd_evax_next_record (len %d, size %d)\n",
+#if VMS_DEBUG
+  vms_debug (8, "_bfd_vms_next_record (len %d, size %d)\n",
 	      PRIV(rec_length), PRIV(rec_size));
 #endif
 
   if (PRIV(rec_length) > 0)
     {
-      PRIV(evax_rec) += PRIV(rec_size);
+      PRIV(vms_rec) += PRIV(rec_size);
     }
   else
     {
-      if (_bfd_evax_get_record (abfd) <= 0)
+      if (_bfd_vms_get_record (abfd) <= 0)
 	return -1;
     }
-  _bfd_evax_get_header_values (abfd, PRIV(evax_rec), &PRIV(rec_type),
-			       &PRIV(rec_size));
+
+  if (PRIV(is_vax))
+    {
+      PRIV(rec_type) = *(PRIV(vms_rec));
+      PRIV(rec_size) = PRIV(rec_length);
+    }
+  else
+    {
+      _bfd_vms_get_header_values (abfd, PRIV(vms_rec), &PRIV(rec_type),
+				  &PRIV(rec_size));
+    }
   PRIV(rec_length) -= PRIV(rec_size);
 
-#if EVAX_DEBUG
-  evax_debug (8, "_bfd_evax_next_record: rec %p, size %d, length %d, type %d\n",
-	      PRIV(evax_rec), PRIV(rec_size),	PRIV(rec_length),
+#if VMS_DEBUG
+  vms_debug (8, "_bfd_vms_next_record: rec %p, size %d, length %d, type %d\n",
+	      PRIV(vms_rec), PRIV(rec_size), PRIV(rec_length),
 	      PRIV(rec_type));
 #endif
 
@@ -457,15 +483,15 @@ _bfd_evax_next_record (abfd)
    size is string length (size of record)  */
 
 char *
-_bfd_evax_save_sized_string (str, size)
-     char *str;
+_bfd_vms_save_sized_string (str, size)
+     unsigned char *str;
      int size;
 {
   char *newstr = bfd_malloc (size + 1);
 
   if (newstr == NULL)
     return 0;
-  strncpy (newstr, str, size);
+  strncpy (newstr, (char *)str, size);
   newstr[size] = 0;
 
   return newstr;
@@ -475,29 +501,29 @@ _bfd_evax_save_sized_string (str, size)
    ptr points to length byte on entry  */
 
 char *
-_bfd_evax_save_counted_string (ptr)
-     char *ptr;
+_bfd_vms_save_counted_string (ptr)
+     unsigned char *ptr;
 {
   int len = *ptr++;
 
-  return _bfd_evax_save_sized_string (ptr, len);
+  return _bfd_vms_save_sized_string (ptr, len);
 }
 
 
-/* stack routines for EVAX ETIR commands */
+/* stack routines for vms ETIR commands */
 
 /* Push value and section index  */
 
 void
-_bfd_evax_push (abfd, val, psect)
+_bfd_vms_push (abfd, val, psect)
      bfd *abfd;
      uquad val;
      int psect;
 {
   static int last_psect;
 
-#if EVAX_DEBUG
-  evax_debug (4, "<push %016lx(%d) at %d>\n", val, psect, PRIV(stackptr));
+#if VMS_DEBUG
+  vms_debug (4, "<push %016lx(%d) at %d>\n", val, psect, PRIV(stackptr));
 #endif
 
   if (psect >= 0)
@@ -509,7 +535,8 @@ _bfd_evax_push (abfd, val, psect)
   if (PRIV(stackptr) >= STACKSIZE)
     {
       bfd_set_error (bfd_error_bad_value);
-      exit(1);
+      (*_bfd_error_handler) (_("Stack overflow (%d) in _bfd_vms_push"), PRIV(stackptr));
+      exit (1);
     }
   return;
 }
@@ -518,7 +545,7 @@ _bfd_evax_push (abfd, val, psect)
 /* Pop value and section index  */
 
 uquad
-_bfd_evax_pop (abfd, psect)
+_bfd_vms_pop (abfd, psect)
      bfd *abfd;
      int *psect;
 {
@@ -527,15 +554,16 @@ _bfd_evax_pop (abfd, psect)
   if (PRIV(stackptr) == 0)
     {
       bfd_set_error (bfd_error_bad_value);
-      exit(1);
+      (*_bfd_error_handler) (_("Stack underflow in _bfd_vms_pop"));
+      exit (1);
     }
   PRIV(stackptr)--;
   value = PRIV(stack[PRIV(stackptr)]).value;
   if ((psect != NULL) && (PRIV(stack[PRIV(stackptr)]).psect >= 0))
     *psect = PRIV(stack[PRIV(stackptr)]).psect;
 
-#if EVAX_DEBUG
-  evax_debug (4, "<pop %016lx(%d)>\n", value, PRIV(stack[PRIV(stackptr)]).psect);
+#if VMS_DEBUG
+  vms_debug (4, "<pop %016lx(%d)>\n", value, PRIV(stack[PRIV(stackptr)]).psect);
 #endif
 
   return value;
@@ -548,22 +576,22 @@ _bfd_evax_pop (abfd, psect)
    which we can't use directly. So we save the little chunks in linked
    lists (one per section) and write them later.  */
 
-/* Add a new evax_section structure to evax_section_table
+/* Add a new vms_section structure to vms_section_table
    - forward chaining -  */
 
-static evax_section *
+static vms_section *
 add_new_contents (abfd, section)
      bfd *abfd;
      sec_ptr section;
 {
-  evax_section *sptr, *newptr;
+  vms_section *sptr, *newptr;
 
-  sptr = PRIV(evax_section_table)[section->index];
+  sptr = PRIV(vms_section_table)[section->index];
   if (sptr != NULL)
     return sptr;
 
-  newptr = (evax_section *) bfd_malloc (sizeof (evax_section));
-  if (newptr == (evax_section *) NULL)
+  newptr = (vms_section *) bfd_malloc (sizeof (vms_section));
+  if (newptr == (vms_section *) NULL)
     return NULL;
   newptr->contents = (unsigned char *) bfd_alloc (abfd, (int)section->_raw_size);
   if (newptr->contents == (unsigned char *)NULL)
@@ -571,25 +599,25 @@ add_new_contents (abfd, section)
   newptr->offset = 0;
   newptr->size = section->_raw_size;
   newptr->next = 0;
-  PRIV(evax_section_table)[section->index] = newptr;
+  PRIV(vms_section_table)[section->index] = newptr;
   return newptr;
 }
 
 
-/* Save section data & offset to an evax_section structure
-   evax_section_table[] holds the evax_section chain  */
+/* Save section data & offset to an vms_section structure
+   vms_section_table[] holds the vms_section chain  */
 
 boolean
-_bfd_save_evax_section (abfd, section, data, offset, count)
+_bfd_save_vms_section (abfd, section, data, offset, count)
      bfd *abfd;
      sec_ptr section;
      PTR data;
      file_ptr offset;
      bfd_size_type count;
 {
-  evax_section *sptr;
+  vms_section *sptr;
 
-  if (section->index >= EVAX_SECTION_COUNT)
+  if (section->index >= VMS_SECTION_COUNT)
     {
       bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
@@ -605,19 +633,19 @@ _bfd_save_evax_section (abfd, section, data, offset, count)
 }
 
 
-/* Get evax_section pointer to saved contents for section # index  */
+/* Get vms_section pointer to saved contents for section # index  */
 
-evax_section *
-_bfd_get_evax_section (abfd, index)
+vms_section *
+_bfd_get_vms_section (abfd, index)
      bfd *abfd;
      int index;
 {
-  if (index >=  EVAX_SECTION_COUNT)
+  if (index >=  VMS_SECTION_COUNT)
     {
       bfd_set_error (bfd_error_nonrepresentable_section);
       return NULL;
     }
-  return PRIV(evax_section_table)[index];
+  return PRIV(vms_section_table)[index];
 }
 
 
@@ -629,32 +657,32 @@ _bfd_get_evax_section (abfd, index)
    write 2 bytes header type (ommitted if rechead == -1)  */
 
 void
-_bfd_evax_output_begin (abfd, rectype, rechead)
+_bfd_vms_output_begin (abfd, rectype, rechead)
      bfd *abfd;
      int rectype;
      int rechead;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_begin(type %d, head %d)\n", rectype,
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_begin(type %d, head %d)\n", rectype,
 	      rechead);
 #endif
 
-  _bfd_evax_output_short (abfd,rectype);
+  _bfd_vms_output_short (abfd,rectype);
 
   /* save current output position to fill in lenght later  */
 
   if (PRIV(push_level) > 0)
     PRIV(length_pos) = PRIV(output_size);
 
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_begin: length_pos = %d\n",
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_begin: length_pos = %d\n",
 	      PRIV(length_pos));
 #endif
 
-  _bfd_evax_output_short (abfd,0);		/* placeholder for length */
+  _bfd_vms_output_short (abfd,0);		/* placeholder for length */
 
   if (rechead != -1)
-    _bfd_evax_output_short (abfd,rechead);
+    _bfd_vms_output_short (abfd,rechead);
 
   return;
 }
@@ -663,12 +691,12 @@ _bfd_evax_output_begin (abfd, rectype, rechead)
 /* Set record/subrecord alignment  */
 
 void
-_bfd_evax_output_alignment (abfd, alignto)
+_bfd_vms_output_alignment (abfd, alignto)
      bfd *abfd;
      int alignto;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_alignment(%d)\n", alignto);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_alignment(%d)\n", alignto);
 #endif
 
   PRIV(output_alignment) = alignto;
@@ -679,11 +707,11 @@ _bfd_evax_output_alignment (abfd, alignto)
 /* Prepare for subrecord fields  */
 
 void
-_bfd_evax_output_push (abfd)
+_bfd_vms_output_push (abfd)
      bfd *abfd;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "evax_output_push(pushed_size = %d)\n", PRIV(output_size));
+#if VMS_DEBUG
+  vms_debug (6, "vms_output_push(pushed_size = %d)\n", PRIV(output_size));
 #endif
 
   PRIV(push_level)++;
@@ -695,18 +723,18 @@ _bfd_evax_output_push (abfd)
 /* End of subrecord fields  */
 
 void
-_bfd_evax_output_pop (abfd)
+_bfd_vms_output_pop (abfd)
      bfd *abfd;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "evax_output_pop(pushed_size = %d)\n", PRIV(pushed_size));
+#if VMS_DEBUG
+  vms_debug (6, "vms_output_pop(pushed_size = %d)\n", PRIV(pushed_size));
 #endif
 
-  _bfd_evax_output_flush (abfd);
+  _bfd_vms_output_flush (abfd);
   PRIV(length_pos) = 2;
 
-#if EVAX_DEBUG
-  evax_debug (6, "evax_output_pop: length_pos = %d\n", PRIV(length_pos));
+#if VMS_DEBUG
+  vms_debug (6, "vms_output_pop: length_pos = %d\n", PRIV(length_pos));
 #endif
 
   PRIV(pushed_size) = 0;
@@ -718,15 +746,15 @@ _bfd_evax_output_pop (abfd)
 /* Flush unwritten output, ends current record  */
 
 void
-_bfd_evax_output_flush (abfd)
+_bfd_vms_output_flush (abfd)
      bfd *abfd;
 {
   int real_size = PRIV(output_size);
   int aligncount;
   int length;
 
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_flush(real_size = %d, pushed_size %d at lenpos %d)\n",
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_flush(real_size = %d, pushed_size %d at lenpos %d)\n",
 	      real_size, PRIV(pushed_size), PRIV(length_pos));
 #endif
 
@@ -740,8 +768,8 @@ _bfd_evax_output_flush (abfd)
   aligncount = (PRIV(output_alignment)
 		- (length % PRIV(output_alignment))) % PRIV(output_alignment);
 
-#if EVAX_DEBUG
-  evax_debug (6, "align: adding %d bytes\n", aligncount);
+#if VMS_DEBUG
+  vms_debug (6, "align: adding %d bytes\n", aligncount);
 #endif
 
   while(aligncount-- > 0)
@@ -758,7 +786,7 @@ _bfd_evax_output_flush (abfd)
 
   /* put length to buffer  */
   PRIV(output_size) = PRIV(length_pos);
-  _bfd_evax_output_short (abfd, (unsigned int)length);
+  _bfd_vms_output_short (abfd, (unsigned int)length);
 
   if (PRIV(push_level) == 0)
     {
@@ -783,14 +811,14 @@ _bfd_evax_output_flush (abfd)
 /* End record output  */
 
 void
-_bfd_evax_output_end (abfd)
+_bfd_vms_output_end (abfd)
      bfd *abfd;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_end\n");
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_end\n");
 #endif
 
-  _bfd_evax_output_flush (abfd);
+  _bfd_vms_output_flush (abfd);
 
   return;
 }
@@ -801,12 +829,12 @@ _bfd_evax_output_end (abfd)
    return what's left.  */
 
 int
-_bfd_evax_output_check (abfd, size)
+_bfd_vms_output_check (abfd, size)
     bfd *abfd;
     int size;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_check(%d)\n", size);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_check(%d)\n", size);
 #endif
 
   return (MAX_OUTREC_SIZE - (PRIV(output_size) + size + MIN_OUTREC_LUFT));
@@ -816,12 +844,12 @@ _bfd_evax_output_check (abfd, size)
 /* Output byte (8 bit) value  */
 
 void
-_bfd_evax_output_byte (abfd, value)
+_bfd_vms_output_byte (abfd, value)
      bfd *abfd;
      unsigned int value;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_byte(%02x)\n", value);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_byte(%02x)\n", value);
 #endif
 
   bfd_put_8 (abfd, value & 0xff, PRIV(output_buf) + PRIV(output_size));
@@ -833,12 +861,12 @@ _bfd_evax_output_byte (abfd, value)
 /* Output short (16 bit) value  */
 
 void
-_bfd_evax_output_short (abfd, value)
+_bfd_vms_output_short (abfd, value)
      bfd *abfd;
      unsigned int value;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_short (%04x)\n", value);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_short (%04x)\n", value);
 #endif
 
   bfd_put_16 (abfd, value & 0xffff, PRIV(output_buf) + PRIV(output_size));
@@ -850,12 +878,12 @@ _bfd_evax_output_short (abfd, value)
 /* Output long (32 bit) value  */
 
 void
-_bfd_evax_output_long (abfd, value)
+_bfd_vms_output_long (abfd, value)
      bfd *abfd;
      unsigned long value;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_long (%08lx)\n", value);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_long (%08lx)\n", value);
 #endif
 
   bfd_put_32 (abfd, value, PRIV(output_buf) + PRIV(output_size));
@@ -867,12 +895,12 @@ _bfd_evax_output_long (abfd, value)
 /* Output quad (64 bit) value  */
 
 void
-_bfd_evax_output_quad (abfd, value)
+_bfd_vms_output_quad (abfd, value)
      bfd *abfd;
      uquad value;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_quad(%016lx)\n", value);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_quad(%016lx)\n", value);
 #endif
 
   bfd_put_64(abfd, value, PRIV(output_buf) + PRIV(output_size));
@@ -884,42 +912,42 @@ _bfd_evax_output_quad (abfd, value)
 /* Output c-string as counted string  */
 
 void
-_bfd_evax_output_counted (abfd, value)
+_bfd_vms_output_counted (abfd, value)
      bfd *abfd;
      char *value;
 {
 int len;
 
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_counted(%s)\n", value);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_counted(%s)\n", value);
 #endif
 
   len = strlen (value);
   if (len == 0)
     {
-      (*_bfd_error_handler) (_("_bfd_evax_output_counted called with zero bytes"));
+      (*_bfd_error_handler) (_("_bfd_vms_output_counted called with zero bytes"));
       return;
     }
   if (len > 255)
     {
-      (*_bfd_error_handler) (_("_bfd_evax_output_counted called with too many bytes"));
+      (*_bfd_error_handler) (_("_bfd_vms_output_counted called with too many bytes"));
       return;
     }
-  _bfd_evax_output_byte (abfd, len & 0xff);
-  _bfd_evax_output_dump (abfd, (unsigned char *)value, len);
+  _bfd_vms_output_byte (abfd, len & 0xff);
+  _bfd_vms_output_dump (abfd, (unsigned char *)value, len);
 }
 
 
 /* Output character area  */
 
 void
-_bfd_evax_output_dump (abfd, data, length)
+_bfd_vms_output_dump (abfd, data, length)
      bfd *abfd;
      unsigned char *data;
      int length;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_dump(%d)\n", length);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_dump(%d)\n", length);
 #endif
 
   if (length == 0)
@@ -935,13 +963,13 @@ _bfd_evax_output_dump (abfd, data, length)
 /* Output count bytes of value  */
 
 void
-_bfd_evax_output_fill (abfd, value, count)
+_bfd_vms_output_fill (abfd, value, count)
      bfd *abfd;
      int value;
      int count;
 {
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_evax_output_fill(val %02x times %d)\n", value, count);
+#if VMS_DEBUG
+  vms_debug (6, "_bfd_vms_output_fill(val %02x times %d)\n", value, count);
 #endif
 
   if (count == 0)
@@ -974,7 +1002,7 @@ hash_string (ptr)
 /* Generate a length-hashed VMS symbol name (limited to maxlen chars).  */
 
 char *
-_bfd_evax_length_hash_symbol (abfd, in, maxlen)
+_bfd_vms_length_hash_symbol (abfd, in, maxlen)
      bfd *abfd;
      const char *in;
      int maxlen;
@@ -989,8 +1017,8 @@ _bfd_evax_length_hash_symbol (abfd, in, maxlen)
   static char outbuf[EOBJ_S_C_SYMSIZ+1];
   char *out = outbuf;
 
-#if EVAX_DEBUG
-  evax_debug(4, "_bfd_evax_length_hash_symbol \"%s\"\n", in);
+#if VMS_DEBUG
+  vms_debug(4, "_bfd_vms_length_hash_symbol \"%s\"\n", in);
 #endif
 
   if (maxlen > EOBJ_S_C_SYMSIZ)
@@ -1030,8 +1058,8 @@ _bfd_evax_length_hash_symbol (abfd, in, maxlen)
   else
     *out = 0;
 
-#if EVAX_DEBUG
-  evax_debug(4, "--> [%d]\"%s\"\n", strlen (outbuf), outbuf);
+#if VMS_DEBUG
+  vms_debug(4, "--> [%d]\"%s\"\n", strlen (outbuf), outbuf);
 #endif
 
   if (in_len > maxlen
@@ -1042,3 +1070,76 @@ _bfd_evax_length_hash_symbol (abfd, in, maxlen)
   return outbuf;
 }
 
+
+/* Allocate and initialize a new symbol.  */
+
+static asymbol *
+new_symbol (abfd, name)
+     bfd *abfd;
+     char *name;
+{
+  asymbol *symbol;
+
+#if VMS_DEBUG
+  _bfd_vms_debug (7,  "new_symbol %s\n", name);
+#endif
+
+  symbol = _bfd_vms_make_empty_symbol (abfd);
+  if (symbol == 0)
+    return symbol;
+  symbol->name = name;
+  symbol->section = bfd_make_section (abfd, BFD_UND_SECTION_NAME);
+
+  return symbol;
+}
+
+
+/* Allocate and enter a new private symbol.  */
+
+vms_symbol_entry *
+_bfd_vms_enter_symbol (abfd, name)
+     bfd *abfd;
+     char *name;
+{
+  vms_symbol_entry *entry;
+
+#if VMS_DEBUG
+  _bfd_vms_debug (6,  "_bfd_vms_enter_symbol %s\n", name);
+#endif
+
+  entry = (vms_symbol_entry *)
+	  bfd_hash_lookup (PRIV(vms_symbol_table), name, false, false);
+  if (entry == 0)
+    {
+#if VMS_DEBUG
+      _bfd_vms_debug (8,  "creating hash entry for %s\n", name);
+#endif
+      entry = (vms_symbol_entry *)bfd_hash_lookup (PRIV(vms_symbol_table), name, true, false);
+      if (entry != 0)
+	{
+	  asymbol *symbol;
+	  symbol = new_symbol (abfd, name);
+	  if (symbol != 0)
+	    {
+	      entry->symbol = symbol;
+	      PRIV(gsd_sym_count)++;
+	      abfd->symcount++;
+	    }
+	  else
+	    entry = 0;
+	}
+      else
+	(*_bfd_error_handler) (_("failed to enter %s"), name);
+    }
+  else
+    {
+#if VMS_DEBUG
+      _bfd_vms_debug (8,  "found hash entry for %s\n", name);
+#endif
+    }
+
+#if VMS_DEBUG
+  _bfd_vms_debug (7, "-> entry %p, entry->symbol %p\n", entry, entry->symbol);
+#endif
+  return entry;
+}

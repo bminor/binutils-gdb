@@ -1,3 +1,38 @@
+Thu Jul  2 14:59:42 1998  Klaus Kaempf  <kkaempf@rmi.de>
+
+	Merge of vax/vms (read-only) support
+	* configure.com: Support Vax target.
+	* makefile.vms: Support Vax target.
+        * vms.h: Renamed from evax.h, merged vax/vms (read-only) support.
+	* vms.c: Renamed from evax-alpha.c, merged vax/vms (read-only)
+	support.
+	* vms-hdr.c: Renamed from evax-emh.c, merged vax/vms (read-only)
+	support.
+	* vms-gsd.c: Renamed from evax-egsd.c, merged vax/vms (read-only)
+	support.
+	* vms-tir.c: Renamed from evax-etir.c, merged vax/vms (read-only)
+	support.
+	* vms-misc.c: Renamed from evax-misc.c, merged vax/vms (read-only)
+	support.
+	* libbfd.c (real_read): Use unbuffered read on VMS/Vax.
+	* targets.c (bfd_target_ovax_flavour): New flavour.
+	(vms_alpha_vec): Renamed from evax_alpha_vec.
+	(vms_vax_vec): New.
+	(target_vector): Update accordingly.
+	* config.bfd (alpha*-*-*vms*): Use vms_alpha_vec, not
+	evax_alpha_vec.
+	(vax*-*-*vms*): New target.
+	* Makefile.am: Update for renamed files.  Rebuild dependencies.
+	* bfd-in2.h: Rebuild.
+	* configure.in, Makefile.in, aclocal.m4: Rebuild.
+
+Thu Jul  2 13:31:55 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patch from Matt Semersky <matts@scd.hp.com>:
+	* linker.c (_bfd_generic_final_link): Force a trailing NULL
+	pointer on abfd->outsymbols.
+	(generic_add_output_symbol): Handle NULL sym parameter.
+
 Wed Jul  1 17:05:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf.c (copy_private_bfd_data): Add support for changing VMA or
