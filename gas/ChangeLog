@@ -1,3 +1,16 @@
+2001-04-26  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c (arm_handle_align): New Function:  Generate
+	no-op filled alignment frags.
+	(arm_frag_align_code): New Function: Create a code alignment frag.
+	(arm_init_frag): New Function: Initialse the target dependent
+	parts of a frag.
+
+	* config/tc-arm.h (TC_FRAG_TYPE): Define.
+	(TC_FRAG_INIT): Define.
+	(HANDLE_ALIGN): Define.
+	(md_do_align): Define.
+
 2001-04-25  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/obj-coff.c (do_linenos_for): Check to see if the filename

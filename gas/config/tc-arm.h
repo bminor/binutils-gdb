@@ -214,3 +214,21 @@ void armelf_frob_symbol PARAMS ((symbolS *, int *));
 #ifdef OBJ_ELF
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
 #endif
+
+/* For frags in code sections we need to record whether they contain
+   ARM code or THUMB code.  This is that if they have to be aligned,
+   they can contain the correct type of no-op instruction.  */
+#define TC_FRAG_TYPE	int
+#define TC_FRAG_INIT(fragp)	arm_init_frag (fragp)
+extern void arm_init_frag PARAMS ((struct frag *));
+
+#define HANDLE_ALIGN(fragp) arm_handle_align (fragp)
+extern void arm_handle_align PARAMS ((struct frag *));
+
+#define md_do_align(N, FILL, LEN, MAX, LABEL)					\
+  if (FILL == NULL && (N) != 0 && ! need_pass_2 && subseg_text_p (now_seg))	\
+    {										\
+      arm_frag_align_code (N, MAX);						\
+      goto LABEL;								\
+    }
+extern void arm_frag_align_code PARAMS ((int, int));

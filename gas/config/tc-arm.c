@@ -8780,3 +8780,99 @@ s_arm_elf_cons (nbytes)
 }
 
 #endif /* OBJ_ELF */
+
+/* This is called from HANDLE_ALIGN in write.c.  Fill in the contents
+   of an rs_align_code fragment.  */
+
+void
+arm_handle_align (fragp)
+     fragS *fragp;
+{
+  static char const arm_noop[4] = { 0x00, 0x00, 0xa0, 0xe1 };
+  static char const thumb_noop[2] = { 0xc0, 0x46 };
+  static char const arm_bigend_noop[4] = { 0xe1, 0xa0, 0x00, 0x00 };
+  static char const thumb_bigend_noop[2] = { 0x46, 0xc0 };
+
+  int bytes, fix, noop_size;
+  char * p;
+  const char * noop;
+  
+  if (fragp->fr_type != rs_align_code)
+    return;
+
+  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  p = fragp->fr_literal + fragp->fr_fix;
+  fix = 0;
+  
+  if (fragp->tc_frag_data)
+    {
+      if (target_big_endian)
+	noop = thumb_bigend_noop;
+      else
+	noop = thumb_noop;
+      noop_size = sizeof (thumb_noop);
+    }
+  else
+    {
+      if (target_big_endian)
+	noop = arm_bigend_noop;
+      else
+	noop = arm_noop;
+      noop_size = sizeof (arm_noop);
+    }
+  
+  if (bytes & (noop_size - 1))
+    {
+      fix = bytes & (noop_size - 1);
+      memset (p, 0, fix);
+      p += fix;
+      bytes -= fix;
+    }
+
+  while (bytes >= noop_size)
+    {
+      memcpy (p, noop, noop_size);
+      p += noop_size;
+      bytes -= noop_size;
+      fix += noop_size;
+    }
+  
+  fragp->fr_fix += fix;
+  fragp->fr_var = noop_size;
+}
+
+/* Called from md_do_align.  Used to create an alignment
+   frag in a code section.  */
+
+void
+arm_frag_align_code (n, max)
+     int n;
+     int max;
+{
+  char * p;
+
+  /* We assume that there will never be a requirment
+     to support alignments greater than 32 bytes.  */
+  if (max > 31)
+    as_fatal (_("alignments in code section > 32 not supported."));
+  
+  p = frag_var (rs_align_code,
+		31,
+		1,
+		(relax_substateT) max,
+		(symbolS *) NULL,
+		(offsetT) n,
+		(char *) NULL);
+  *p = 0;
+
+}
+
+/* Perform target specific initialisation of a frag.  */
+
+void
+arm_init_frag (fragp)
+     fragS *fragp;
+{
+  /* Record whether this frag is in an ARM or a THUMB area.  */
+  fragp->tc_frag_data = thumb_mode;
+}
