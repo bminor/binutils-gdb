@@ -67,6 +67,7 @@ recognized:
 @code{arm7500fe},
 @code{arm7t},
 @code{arm7tdmi},
+@code{arm7tdmi-s},
 @code{arm8},
 @code{arm810},
 @code{strongarm},
@@ -82,7 +83,7 @@ recognized:
 @code{arm9tdmi},
 @code{arm9e},
 @code{arm926e},
-@code{arm926ejs},
+@code{arm926ej-s},
 @code{arm946e-r0},
 @code{arm946e},
 @code{arm966e-r0},
@@ -92,9 +93,9 @@ recognized:
 @code{arm1020},
 @code{arm1020t},
 @code{arm1020e},
-@code{arm1026ejs},
-@code{arm1136js},
-@code{arm1136jfs},
+@code{arm1026ej-s},
+@code{arm1136j-s},
+@code{arm1136jf-s},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
 @code{i80200} (Intel XScale processor)
 @code{iwmmxt} (Intel(r) XScale processor with Wireless MMX(tm) technology coprocessor)
@@ -170,7 +171,7 @@ The following format options are recognized:
 @code{vfpxd},
 @code{arm1020t},
 @code{arm1020e},
-@code{arm1136jfs}
+@code{arm1136jf-s}
 and
 @code{maverick}.
 

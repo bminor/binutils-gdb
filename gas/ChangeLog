@@ -3,6 +3,8 @@
 	* tc-arm.c (arm_cpus, arm_fpus): Allow <cpu>-s as well as <cpu>s
 	for synthesizable cores.
 
+	* doc/c-arm.texi (ARM Options): Document canonical names of CPUs.
+
 2004-08-25  Dmitry Diky  <diwil@spec.ru>
 
 	* config/tc-msp430.c:	Clean-up the code.
