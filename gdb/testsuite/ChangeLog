@@ -1,3 +1,7 @@
+2003-02-01  Mark Salter  <msalter@redhat.com>
+
+	* gdb.asm/arm.inc (gdbasm_startup): Clear frame pointer, not sp.
+
 2003-01-31  Mark Salter  <msalter@redhat.com>
 
 	* lib/mi-support.exp (mi_gdb_load): Support remote targets.
