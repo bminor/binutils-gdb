@@ -1,3 +1,22 @@
+2002-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS: Mention that the i[3456]-*mach3*, i[3456]-*-mach* and
+	i[3456]-*-osf1mk* configurations have been made obsolete.
+	* configure.host: Make i[3456]86-*-mach3*, i[3456]86-*mach* and
+	i[3456]86-*-osf1mk* hosts obsolete.
+	* confighure.tgt: Make i[3456]86-*-mach3*, i[3456]86-*-osf1mk*
+	targets obsolete.
+	* config/i386/i386mach.mh, config/i386/nm-i386mach.h,
+	config/i386/xm-i386mach.h, config/i386/i386m3.mh,
+	config/i386/i386m3.mt, config/i386/nm-m3.h,
+	config/i386/tm-i386m3.h, config/i386/xm-i386m3.h,
+	config/i386/i386mk.mh, config/i386/i386mk.mt,
+	config/i386/tm-i386mk.h, config/i386/xm-i386mk.h: Make files
+	obsolete.
+	* i386mach-nat.c, i386m3-nat.c: Make files obsolete.
+	* Makefile.in (ALLDEPFILES): Remove i386mach.c i386m3-nat.c
+	(i386mach-nat.o, i386m3-nat.o):Make targets obsolete.
+
 2002-08-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/pa/tm-hppa.h (hppa_store_return_value): Declare.

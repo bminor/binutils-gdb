@@ -111,11 +111,11 @@ i[3456]86-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
 i[3456]86-*-isc*)	gdb_target=i386v ;;
-i[3456]86-*-mach3*)	gdb_target=i386m3 ;;
+# OBSOLETE i[3456]86-*-mach3*)	gdb_target=i386m3 ;;
 i[3456]86-*-gnu*)	gdb_target=i386gnu ;;
 i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
-i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
+# OBSOLETE i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
 i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
 i[3456]86-*-vxworks*)	gdb_target=vxworks ;;
 i[3456]86-*-*)		gdb_target=embed ;;

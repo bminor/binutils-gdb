@@ -61,6 +61,9 @@ IBM AIX PS/2					i[3456]86-*-aix
 Fujitsu FR30					fr30-*-elf*
 Motorola Delta 88000 running Sys V		m88k-motorola-sysv  or  delta88
 Argonaut Risc Chip (ARC)			arc-*-*
+i386 running Mach 3.0				i[3456]86-*-mach3*
+i386 running Mach				i[3456]86-*-mach*
+i386 running OSF/1				i[3456]86-*osf1mk*
 
 * OBSOLETE languages
 
