@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Fri May 15 17:31:15 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim/m32r/allinsn.exp: Pass --m32rx-enable-special to gas.
+	* sim/m32r/misc.exp: Ditto.
+
+end-sanitize-m32rx
 Thu May 14 11:48:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/default.exp (CC,SIM): Delete.
