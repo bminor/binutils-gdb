@@ -1,3 +1,9 @@
+Sun Sep  1 15:41:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rs6000-core.c (rs6000coff_core_file_matches_executable_p):
+	Rewrite to use BFD file read routines and to avoid using a fixed
+	length for the file name.
+
 start-sanitize-v850
 Sat Aug 31 10:22:25 1996  Jeffrey A Law  (law@cygnus.com)
 
