@@ -7032,7 +7032,7 @@ experiment.
 This command takes no arguments.  It ends the trace experiment, and
 stops collecting data.
 
-@strong{Note:} a trace experiment and data collection may stop
+@strong{Note}: a trace experiment and data collection may stop
 automatically if any tracepoint's passcount is reached
 (@pxref{Tracepoint Passcounts}), or if the trace buffer becomes full.
 
@@ -21098,7 +21098,7 @@ differently, so the precise meaning of this parameter will vary.
 
 Reply:
 @table @asis
-@item @var{XX@dots}
+@item @var{XX@dots{}}
 Hex encoded (big endian) bytes representing the address of the thread
 local storage requested.
 
