@@ -148,7 +148,7 @@ mips*vr4100-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 # start-sanitize-r5900 
-mips*vr5900-*-elf*)	targ_emul=elf32l4300 ;;
+mips*r5900*-*-elf*)	targ_emul=elf32l4300 ;;
 # end-sanitize-r5900 
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
@@ -192,10 +192,8 @@ tic80-*-*)		targ_emul=tic80coff ;;
 v850-*-*)		targ_emul=v850 ;;
 # start-sanitize-v850e
 v850e-*-*)		targ_emul=v850 ;;
-# end-sanitize-v850e
-# start-sanitize-v850eq
 v850eq-*-*)		targ_emul=v850 ;;
-# end-sanitize-v850eq
+# end-sanitize-v850e
 w65-*-*)		targ_emul=w65 ;;
 *-*-aout)		targ_emul=${target_cpu}-${target_vendor} ;;
 *-*-coff)		targ_emul=${target_cpu}-${target_vendor} ;;
