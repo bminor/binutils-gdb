@@ -3739,6 +3739,7 @@ process_version_sections (file)
 	    for (cnt = 0; cnt < total; cnt += 4)
 	      {
 		int j, nn;
+		char *name;
 
 		printf ("  %03x:", cnt);
 
@@ -3799,10 +3800,10 @@ process_version_sections (file)
 				{
 				  ivna.vna_name = BYTE_GET (evna.vna_name);
 
+				  name = strtab + ivna.vna_name;
 				  nn += printf ("(%s%-*s",
-						strtab + ivna.vna_name,
-						12 - strlen (strtab
-							     + ivna.vna_name),
+						name,
+						12 - (int) strlen (name),
 						")");
 				  break;
 				}
@@ -3845,12 +3846,11 @@ process_version_sections (file)
 					  ivda.vda_name =
 					    BYTE_GET (evda.vda_name);
 
+					  name = strtab + ivda.vda_name;
 					  nn +=
 					    printf ("(%s%-*s",
-						    strtab + ivda.vda_name,
-						    12
-						    - strlen (strtab
-							      + ivda.vda_name),
+						    name,
+						    12 - (int) strlen (name),
 						    ")");
 					}
 				    }
@@ -3901,10 +3901,10 @@ process_version_sections (file)
 				{
 				  ivna.vna_name = BYTE_GET (evna.vna_name);
 
+				  name = strtab + ivna.vna_name;
 				  nn += printf ("(%s%-*s",
-						strtab + ivna.vna_name,
-						12 - strlen (strtab
-							     + ivna.vna_name),
+						name,
+						12 - (int) strlen (name),
 						")");
 				  break;
 				}
@@ -3946,10 +3946,10 @@ process_version_sections (file)
 
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
+			      name = strtab + ivda.vda_name;
 			      nn += printf ("(%s%-*s",
-					    strtab + ivda.vda_name,
-					    12 - strlen (strtab
-							 + ivda.vda_name),
+					    name,
+					    12 - (int) strlen (name),
 					    ")");
 			    }
 			}
@@ -6611,7 +6611,8 @@ process_mips_specific (file)
       GET_DATA_ALLOC (liblist_offset, liblistno * sizeof (Elf32_External_Lib),
 		      elib, Elf32_External_Lib *, "liblist");
 
-      printf ("\nSection '.liblist' contains %d entries:\n", liblistno);
+      printf ("\nSection '.liblist' contains %lu entries:\n",
+	      (unsigned long) liblistno);
       fputs ("     Library              Time Stamp          Checksum   Version Flags\n",
 	     stdout);
 
@@ -6629,7 +6630,7 @@ process_mips_specific (file)
 
 	  strftime (timebuf, 20, "%Y-%m-%dT%H:%M:%S", gmtime (&time));
 
-	  printf ("%3d: %-20s %s %#10lx %-7ld", cnt,
+	  printf ("%3lu: %-20s %s %#10lx %-7ld", (unsigned long) cnt,
 		  dynamic_strings + liblist.l_name, timebuf,
 		  liblist.l_checksum, liblist.l_version);
 
@@ -6913,7 +6914,7 @@ process_mips_specific (file)
 	{
 	  Elf_Internal_Sym * psym = &dynamic_symbols[iconf[cnt]];
 
-	  printf ("%5u: %8lu  ", cnt, iconf[cnt]);
+	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf[cnt]);
 	  print_vma (psym->st_value, FULL_HEX);
 	  printf ("  %s\n", dynamic_strings + psym->st_name);
 	}

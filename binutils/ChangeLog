@@ -1,3 +1,11 @@
+2000-02-22  Ian Lance Taylor  <ian@zembu.com>
+
+	From Brad Lucier <lucier@math.purdue.edu>:
+	* readelf.c (process_version_sections): Add casts to make sure
+	argument to %* is an int.
+	(process_mips_specific): Add casts to make printf arguments match
+	format.
+
 2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* objdump.c (dump_section_header): Change `opb' to unsigned.
