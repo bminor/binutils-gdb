@@ -12,6 +12,10 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+char *EXFUN(mktemp,(CONST char*));
+extern int EXFUN(fflush,(FILE *));
+extern int EXFUN(write,(int, CONST char *, int));
+extern int EXFUN(index,(CONST char *, char c));
 extern int EXFUN(abort,(void));
 extern int EXFUN(close,(int));
 extern int EXFUN(fcntl,(int des, int cmd, int e));
@@ -31,6 +35,16 @@ PTR EXFUN(memcpy,(PTR,CONST PTR,unsigned int));
 /* PROTO(char *, memcpy,(char *,CONST char *,unsigned int)); */
 #endif
 
+PTR EXFUN(memset,(PTR, int, int));
+void EXFUN( puts,(CONST char*));
+void EXFUN(fputs,(CONST char*,FILE*));
+
+int EXFUN(rmdir,(CONST char *));
+
+int EXFUN(getuid,(void));
+int EXFUN(getgid,(void));
+int EXFUN(rename,(CONST char *, CONST char*));
+
 extern int EXFUN(etuid,());
 extern int EXFUN(etgid,());
 extern char * strchr();
@@ -46,8 +60,8 @@ extern int sscanf();
 extern int stat();
 extern int strtol();
 #ifndef DONTDECLARE_MALLOC
-extern PTR EXFUN(alloc,(unsigned));
-extern PTR  EXFUN(ealloc, (PTR, unsigned));
+extern PTR EXFUN(malloc,(unsigned));
+extern PTR  EXFUN(realloc, (PTR, unsigned));
 #endif
 
 extern int EXFUN(free,(PTR));
@@ -115,3 +129,5 @@ typedef struct {
 #define uint64_typeLOW(x) (uint32_type)(((x) & 0xffffffff))
 #define uint64_typeHIGH(x) (uint32_type)(((x) >> 32) & 0xffffffff)
 #endif
+
+
