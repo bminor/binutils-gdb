@@ -1,5 +1,8 @@
 Fri Apr  9 10:20:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* printcmd.c (_initialize_printcmd): Clean up docstring for "x"
+	(mention 't', remove false thing about 'g' only good with 'f').
+
 	* breakpoint.h: move "struct breakpoint" and friends to top of
 	file so that bpstat_find_breakpoint prototype works.
 
