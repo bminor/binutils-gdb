@@ -1,3 +1,8 @@
+1999-06-03  Philip Blundell  <philb@gnu.org>
+
+	* arm-dis.c (print_insn_arm): Make LDRH/LDRB consistent with LDR
+	when target is PC-relative.
+
 1999-05-28  Linus Nordberg  <linus.nordberg@canit.se>
 
 	* m68k-opc.c: Rename MACL/MSACL to MAC/MSAC.  Add MACM/MSACM.  Add

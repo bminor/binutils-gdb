@@ -195,8 +195,12 @@ print_insn_arm (pc, info, given)
 			{
                           /* PC relative with immediate offset */
 			  int offset = ((given & 0xf00) >> 4) | (given & 0xf);
+			  
 			  if ((given & 0x00800000) == 0)
 			    offset = -offset;
+			  
+			  func (stream, "[pc, #%x]\t; ", offset);
+			  
 			  (*info->print_address_func)
 			    (offset + pc + 8, info);
 			}
