@@ -50,10 +50,13 @@ instantaneous and loud complaints.
 
 Target Instruction Set Architectures:
 
-Generic ISA (Instruction Set Architecture) issues, API variants, CPU
-variants.  *-tdep.c. The Target/Architecture maintainer works with the
-host maintainer when resolving build issues.  The Target/Architecture
-maintainer works with the native maintainer when resolving API issues.
+The *-tdep.c files.  ISA (Instruction Set Architecture) and OS-ABI
+(Operating System / Application Binary Interface) issues including CPU
+variants.
+
+The Target/Architecture maintainer works with the host maintainer when
+resolving build issues.  The Target/Architecture maintainer works with
+the native maintainer when resolving ABI issues.
 
 	alpha		--target=alpha-elf ,-Werror
 			Maintenance only

@@ -1,3 +1,8 @@
+2004-12-12  Andrew Cagney  <cagney@gnu.org>
+
+	* MAINTAINERS: Reword description of what "Target Instruction Set
+	Architectures" covers.
+
 2004-12-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-nat.c (hppa_hpux_child_can_run): Tweak comment.
@@ -336,7 +341,7 @@
 	* MAINTAINERS: Add Randolph Chung (pa), Jeff Johnston (ia64), Kei
 	Sakamoto (m32r), Joel Brobecker (mips), and Ulrich Weigand (s390)
 	as can-commit architecture developers.
-	
+
 2004-11-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c (X_RS1, X_SIMM13): New macros.
