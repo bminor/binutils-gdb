@@ -1,3 +1,8 @@
+2003-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* frv.cpu (media-dual-word-rotate-r-r): Use a signed 6-bit
+	immediate value not unsigned.
+
 2003-06-03  Andrew Cagney  <cagney@redhat.com>
 
 	Contributed by Red Hat.

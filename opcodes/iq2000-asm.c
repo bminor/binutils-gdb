@@ -385,14 +385,14 @@ iq2000_cgen_parse_operand (cd, opindex, strp, fields)
     case IQ2000_OPERAND_EXECODE :
       errmsg = cgen_parse_unsigned_integer (cd, strp, IQ2000_OPERAND_EXECODE, &fields->f_excode);
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, IQ2000_OPERAND_F_INDEX, &fields->f_index);
+      break;
     case IQ2000_OPERAND_HI16 :
       errmsg = parse_hi16 (cd, strp, IQ2000_OPERAND_HI16, &fields->f_imm);
       break;
     case IQ2000_OPERAND_IMM :
       errmsg = parse_imm (cd, strp, IQ2000_OPERAND_IMM, &fields->f_imm);
-      break;
-    case IQ2000_OPERAND_INDEX :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, IQ2000_OPERAND_INDEX, &fields->f_index);
       break;
     case IQ2000_OPERAND_JMPTARG :
       {
@@ -477,9 +477,6 @@ iq2000_cgen_init_asm (cd)
   iq2000_cgen_init_ibld_table (cd);
   cd->parse_handlers = & iq2000_cgen_parse_handlers[0];
   cd->parse_operand = iq2000_cgen_parse_operand;
-#ifdef CGEN_ASM_INIT_HOOK
-CGEN_ASM_INIT_HOOK
-#endif
 }
 
 

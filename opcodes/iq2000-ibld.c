@@ -35,9 +35,9 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "opintl.h"
 #include "safe-ctype.h"
 
-#undef  min
+#undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
-#undef  max
+#undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 /* Used by the ifield rtx function.  */
@@ -605,14 +605,14 @@ iq2000_cgen_insert_operand (cd, opindex, fields, buffer, pc)
     case IQ2000_OPERAND_EXECODE :
       errmsg = insert_normal (cd, fields->f_excode, 0, 0, 25, 20, 32, total_length, buffer);
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      errmsg = insert_normal (cd, fields->f_index, 0, 0, 8, 9, 32, total_length, buffer);
+      break;
     case IQ2000_OPERAND_HI16 :
       errmsg = insert_normal (cd, fields->f_imm, 0, 0, 15, 16, 32, total_length, buffer);
       break;
     case IQ2000_OPERAND_IMM :
       errmsg = insert_normal (cd, fields->f_imm, 0, 0, 15, 16, 32, total_length, buffer);
-      break;
-    case IQ2000_OPERAND_INDEX :
-      errmsg = insert_normal (cd, fields->f_index, 0, 0, 8, 9, 32, total_length, buffer);
       break;
     case IQ2000_OPERAND_JMPTARG :
       {
@@ -788,14 +788,14 @@ iq2000_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
     case IQ2000_OPERAND_EXECODE :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 20, 32, total_length, pc, & fields->f_excode);
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 9, 32, total_length, pc, & fields->f_index);
+      break;
     case IQ2000_OPERAND_HI16 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 16, 32, total_length, pc, & fields->f_imm);
       break;
     case IQ2000_OPERAND_IMM :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 16, 32, total_length, pc, & fields->f_imm);
-      break;
-    case IQ2000_OPERAND_INDEX :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 9, 32, total_length, pc, & fields->f_index);
       break;
     case IQ2000_OPERAND_JMPTARG :
       {
@@ -961,14 +961,14 @@ iq2000_cgen_get_int_operand (cd, opindex, fields)
     case IQ2000_OPERAND_EXECODE :
       value = fields->f_excode;
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      value = fields->f_index;
+      break;
     case IQ2000_OPERAND_HI16 :
       value = fields->f_imm;
       break;
     case IQ2000_OPERAND_IMM :
       value = fields->f_imm;
-      break;
-    case IQ2000_OPERAND_INDEX :
-      value = fields->f_index;
       break;
     case IQ2000_OPERAND_JMPTARG :
       value = fields->f_jtarg;
@@ -1075,14 +1075,14 @@ iq2000_cgen_get_vma_operand (cd, opindex, fields)
     case IQ2000_OPERAND_EXECODE :
       value = fields->f_excode;
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      value = fields->f_index;
+      break;
     case IQ2000_OPERAND_HI16 :
       value = fields->f_imm;
       break;
     case IQ2000_OPERAND_IMM :
       value = fields->f_imm;
-      break;
-    case IQ2000_OPERAND_INDEX :
-      value = fields->f_index;
       break;
     case IQ2000_OPERAND_JMPTARG :
       value = fields->f_jtarg;
@@ -1198,14 +1198,14 @@ iq2000_cgen_set_int_operand (cd, opindex, fields, value)
     case IQ2000_OPERAND_EXECODE :
       fields->f_excode = value;
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      fields->f_index = value;
+      break;
     case IQ2000_OPERAND_HI16 :
       fields->f_imm = value;
       break;
     case IQ2000_OPERAND_IMM :
       fields->f_imm = value;
-      break;
-    case IQ2000_OPERAND_INDEX :
-      fields->f_index = value;
       break;
     case IQ2000_OPERAND_JMPTARG :
       fields->f_jtarg = value;
@@ -1309,14 +1309,14 @@ iq2000_cgen_set_vma_operand (cd, opindex, fields, value)
     case IQ2000_OPERAND_EXECODE :
       fields->f_excode = value;
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      fields->f_index = value;
+      break;
     case IQ2000_OPERAND_HI16 :
       fields->f_imm = value;
       break;
     case IQ2000_OPERAND_IMM :
       fields->f_imm = value;
-      break;
-    case IQ2000_OPERAND_INDEX :
-      fields->f_index = value;
       break;
     case IQ2000_OPERAND_JMPTARG :
       fields->f_jtarg = value;

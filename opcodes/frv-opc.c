@@ -1033,6 +1033,10 @@ static const CGEN_IFMT ifmt_mcuti = {
   32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_ACC40SI) }, { F (F_OPE1) }, { F (F_S6) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_mdrotli = {
+  32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_S6) }, { 0 } }
+};
+
 static const CGEN_IFMT ifmt_mcmpsh = {
   32, 32, 0x79fc0fc0, { { F (F_PACK) }, { F (F_COND_NULL) }, { F (F_FCCK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
 };
@@ -5008,11 +5012,11 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTK), 0 } },
     & ifmt_mrotli, { 0x1ec02c0 }
   },
-/* mdrotli$pack $FRinti,$u6,$FRintk */
+/* mdrotli$pack $FRinti,$s6,$FRintk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTK), 0 } },
-    & ifmt_mrotli, { 0x1e002c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (S6), ',', OP (FRINTK), 0 } },
+    & ifmt_mdrotli, { 0x1e002c0 }
   },
 /* mcplhi$pack $FRinti,$u6,$FRintk */
   {

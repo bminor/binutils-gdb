@@ -5497,7 +5497,7 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
     FRV_INSN_MSRAHI, "msrahi", "msrahi", 32,
     { 0, { (1<<MACH_BASE), UNIT_FM01, FR400_MAJOR_M_1, FR500_MAJOR_M_2 } }
   },
-/* mdrotli$pack $FRinti,$u6,$FRintk */
+/* mdrotli$pack $FRinti,$s6,$FRintk */
   {
     FRV_INSN_MDROTLI, "mdrotli", "mdrotli", 32,
     { 0, { (1<<MACH_FR400), UNIT_FM0, FR400_MAJOR_M_2, FR500_MAJOR_NONE } }
