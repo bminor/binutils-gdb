@@ -2041,16 +2041,11 @@ command_line_input (prrompt, repeat, annotation_suffix)
   /* If we just got an empty line, and that is supposed
      to repeat the previous command, return the value in the
      global buffer.  */
-  if (repeat)
-    {
-      if (p == linebuffer)
-	return line;
-      p1 = linebuffer;
-      while (*p1 == ' ' || *p1 == '\t')
-	p1++;
-      if (!*p1)
-	return line;
-    }
+  if (repeat && p == linebuffer)
+    return line;
+  for (p1 = linebuffer; *p1 == ' ' || *p1 == '\t'; p1++) ;
+  if (repeat && !*p1)
+    return line;
 
   *p = 0;
 
@@ -2065,36 +2060,8 @@ command_line_input (prrompt, repeat, annotation_suffix)
      out the command and then later fetch it from the value history
      and remove the '#'.  The kill ring is probably better, but some
      people are in the habit of commenting things out.  */
-  p1 = linebuffer;
-  while ((c = *p1++) != '\0')
-    {
-      if (c == '"')
-	while ((c = *p1++) != '"')
-	  {
-	    /* Make sure an escaped '"' doesn't make us think the string
-	       is ended.  */
-	    if (c == '\\')
-	      parse_escape (&p1);
-	    if (c == '\0')
-	      break;
-	  }
-      else if (c == '\'')
-	while ((c = *p1++) != '\'')
-	  {
-	    /* Make sure an escaped '\'' doesn't make us think the string
-	       is ended.  */
-	    if (c == '\\')
-	      parse_escape (&p1);
-	    if (c == '\0')
-	      break;
-	  }
-      else if (c == '#')
-	{
-	  /* Found a comment.  */
-	  p1[-1] = '\0';
-	  break;
-	}
-    }
+  if (*p1 == '#')
+    *p1 = '\0';  /* Found a comment. */
 
   /* Save into global buffer if appropriate.  */
   if (repeat)

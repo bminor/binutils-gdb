@@ -1,5 +1,8 @@
 Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* top.c (command_line_input):  Only strip out an initial #-comment.
+	Looking for internal comments is language-specific (breaks Scheme).
+	
 	* expression.h (enum exp_opcode):  Add BINOP_RANGE.
 	* expprint.c (dump_expression):  Support BINOP_RANGE.
 	* eval.c (evaluate_subexp_standard):  Handle BINOP_RANGE (as error).
