@@ -1343,6 +1343,12 @@ md_begin ()
   last_call_info = NULL;
   call_info_root = NULL;
 
+  /* Folding of text and data segments fails miserably on the PA.
+     Warn user and disable "-R" option.  */
+  as_warn ("-R option not supported on this target.");
+  flag_readonly_data_in_text = 0;
+  flagseen['R'] = 0;
+
   pa_spaces_begin ();
 
   op_hash = hash_new ();
