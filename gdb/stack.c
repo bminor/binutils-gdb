@@ -119,11 +119,6 @@ struct frame_info *selected_frame;
    0 for innermost, 1 for its caller, ...
    or -1 for frame specified by address with no defined level.  */
 
-/* FIXME: cagney/2002-04-21: The variable `selected_frame_level' is
-   deprecated.  It will dissapear `real soon now'.  */
-
-int selected_frame_level; /* DEPRECATED */
-
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...
    or -1 for NULL frame.  */
 
@@ -1473,9 +1468,6 @@ select_frame (struct frame_info *fi, int level)
   register struct symtab *s;
 
   selected_frame = fi;
-  /* FIXME: cagney/2002-04-21: The variable `selected_frame_level' is
-     deprecated.  It will dissapear `real soon now'.  */
-  selected_frame_level = level; /* DEPRECATED */
   /* FIXME: cagney/2002-04-05: It can't be this easy (and looking at
      the increasingly complex list of checkes, it wasn't)!  GDB is
      dragging around, and constantly updating, the global variable

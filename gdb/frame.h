@@ -189,11 +189,6 @@ extern struct frame_info *selected_frame;
    0 for innermost, 1 for its caller, ...
    or -1 for frame specified by address with no defined level.  */
 
-/* FIXME: cagney/2002-04-21: The variable `selected_frame_level' is
-   deprecated.  It will dissapear `real soon now'.  */
-
-extern int selected_frame_level;  /* DEPRECATED */
-
 extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
 
 extern void flush_cached_frames (void);
