@@ -1,3 +1,15 @@
+Wed Aug  7 14:40:48 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* configure.in: Call BFD_NEED_DECLARATION on strstr and sbrk.
+	* acconfig.h (NEED_DECLARATION_STRSTR): New macro.
+	(NEED_DECLARATION_SBRK): New macro.
+	* configure, config.in: Rebuild.
+	* sysdep.h (strstr): Declare if NEED_DECLARATION_STRSTR.
+	* ldmain.c (sbrk): Declare if HAVE_SBRK and
+	NEED_DECLARATION_SBRK.
+
+	* ldlang.c (lang_record_phdrs): Cast xmalloc and xrealloc return.
+
 Mon Aug  5 16:26:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlex.l: Recognize OVERLAY.
