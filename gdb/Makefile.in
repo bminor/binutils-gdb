@@ -1,4 +1,4 @@
-#Copyright 1989, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -586,6 +586,12 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
 	echo "Load .c corresponding to:" $(DEPFILES)
 
+
+# A Mach 3.0 program to force gdb back to command level
+
+gdb-stop: gdb-stop.o
+	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdb-stop \
+	gdb-stop.o $(CLIBS) $(LOADLIBES)
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
 # on itself without copying the executable.  So "make gdb1" will make

@@ -1,3 +1,12 @@
+Thu Jun 16 14:41:37 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* configure.in: Improve sorting/formatting of hosts and targets.
+	(i[34]86-*-mach3*, i[34]86-*-osf1mk*, mips-*-mach3*,
+	m88*-*-mach3*, ns32k-*-mach3*): Recognize.
+	* Makefile.in (gdb-stop): New target.
+	* gdb-stop.c: New file, utility to gets attention of waiting GDBs
+	in Mach 3.
+
 Wed Jun 15 00:41:03 1994  Tom Lord  (lord@rtl.cygnus.com)
 
 	* top.c (gdb_init): Init current_directory in gdb_init.  Probably

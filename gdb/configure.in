@@ -1,6 +1,12 @@
-configdirs="doc testsuite"
+# This file is a shell script fragment that supplies the information
+# necessary to tailor a template configure script into the configure
+# script appropriate for this directory.  For more information, check
+# any existing configure script.
+
 srcname="GDB"
 srctrigger=main.c
+
+configdirs="doc testsuite"
 
 # per-host:
 
@@ -13,6 +19,7 @@ c[12])			gdb_host_cpu=convex ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[34]86)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
+m88*)			gdb_host_cpu=m88k ;;
 np1)			gdb_host_cpu=gould ;;
 pyramid)		gdb_host_cpu=pyr ;;
 *)			gdb_host_cpu=$host_cpu ;;
@@ -32,25 +39,23 @@ arm-*-*)		gdb_host=arm ;;
 c[12]-*-*)		gdb_host=convex ;;
 
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
-hppa*-*-hpux*)		gdb_host=hppahpux ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
+hppa*-*-hpux*)		gdb_host=hppahpux ;;
 hppa*-*-osf*)		gdb_host=hppabsd ;;
 
 i[34]86-ncr-*)		gdb_host=ncr3000 ;;
-i[34]86-sequent-bsd*)	gdb_host=symmetry ;; #dynix
+i[34]86-sequent-bsd*)	gdb_host=symmetry ;;  # dynix
 i[34]86-sequent-sysv4*)	gdb_host=ptx4 ;;
 i[34]86-sequent-sysv*)	gdb_host=ptx ;;
-
 i[34]86-*-aix*)		gdb_host=i386aix ;;
 i[34]86-*-bsd*)		gdb_host=i386bsd ;;
 i[34]86-*-netbsd*)	gdb_host=i386bsd ;;
-i[34]86-*-go32*)		gdb_host=go32 ;;
+i[34]86-*-go32*)	gdb_host=go32 ;;
 i[34]86-*-linux*)	gdb_host=linux ;;
 i[34]86-*-lynxos*)	gdb_host=i386lynx ;;
-# Obsolete I suspect
-# i[34]86-*-mach)		gdb_host=i386mach ;;
-i[34]86-*-mach*)	gdb_host=i386m3 ;;
-i[34]86-*-osf1mk*)	gdb_host=i386mk ;;
+i[34]86-*-mach3*)	gdb_host=mach3 ;;
+i[34]86-*-mach*)	gdb_host=i386mach ;;
+i[34]86-*-osf1mk*)	gdb_host=osf1mk ;;
 i[34]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
 i[34]86-*-sco*)		gdb_host=i386sco ;;
 i[34]86-*-solaris*)	gdb_host=i386sol2 ;;
@@ -85,24 +90,26 @@ m68*-sun-*)		gdb_host=sun3os4 ;;
 
 m88*-motorola-sysv4*)	gdb_host=delta88v4 ;;
 m88*-motorola-sysv*)	gdb_host=delta88 ;;
-# I suspect this is just used for DGUX
+m88*-*-mach3*)		gdb_host=mach3 ;;
 m88*-*-*)		gdb_host=m88k ;;
 
+mips-dec-mach3*)	gdb_host=mach3 ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3*)	gdb_host=irix3 ;;
 mips-sgi-irix4*)	gdb_host=irix4 ;;
 mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sony-*)		gdb_host=news-mips ;;
+mips-*-mach3*)		gdb_host=mach3 ;;
 mips-*-sysv4*)		gdb_host=mipsv4 ;;
 mips-*-sysv*)		gdb_host=riscos ;;
 mips-*-riscos*)		gdb_host=riscos ;;
-mips-*-mach*)		gdb_host=mipsm3 ;;
 
 none-*-*)		gdb_host=none ;;
 
 np1-*-*)		gdb_host=np1 ;;
 
+ns32k-*-mach3*)		gdb_host=mach3 ;;
 ns32k-umax-*)		gdb_host=umax ;;
 ns32k-utek-sysv*)	gdb_host=merlin ;;
 
@@ -149,14 +156,13 @@ c[12])			gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[34]86)		gdb_target_cpu=i386 ;;
 m68*)			gdb_target_cpu=m68k ;;
-m8*)			gdb_target_cpu=m88k ;;
+m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
 np1)			gdb_target_cpu=gould ;;
 pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
 sparclite*)		gdb_target_cpu=sparc
-			configdirs="${configdirs} sparclite"
-			;;
+			configdirs="${configdirs} sparclite" ;;
 sparc*)			gdb_target_cpu=sparc ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
@@ -177,8 +183,8 @@ a29k-*-udi*)		gdb_target=a29k-udi ;;
 
 alpha-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha-*-netware*)	gdb_target=alpha-nw
-			configdirs="${configdirs} nlm"
-			;;
+			configdirs="${configdirs} nlm" ;;
+
 arm-*-*)		gdb_target=arm ;;
 
 c1-*-*)			gdb_target=convex ;;
@@ -198,19 +204,16 @@ i[34]86-sequent-bsd*)	gdb_target=symmetry ;;
 i[34]86-sequent-sysv4*)	gdb_target=ptx4 ;;
 i[34]86-sequent-sysv*)	gdb_target=ptx ;;
 i[34]86-ncr-*)		gdb_target=ncr3000 ;;
-
 i[34]86-*-aout*)	gdb_target=i386aout ;;
 i[34]86-*-coff*)	gdb_target=i386v ;;
 i[34]86-*-elf*)		gdb_target=i386v ;;
-
 i[34]86-*-aix*)		gdb_target=i386aix ;;
 i[34]86-*-bsd*)		gdb_target=i386bsd ;;
 i[34]86-*-netbsd*)	gdb_target=i386bsd ;;
 i[34]86-*-os9k)		gdb_target=i386os9k ;;
 i[34]86-*-go32*)	gdb_target=i386aout ;;
 i[34]86-*-lynxos*)	gdb_target=i386lynx
-			configdirs="${configdirs} gdbserver" 
-			;;
+			configdirs="${configdirs} gdbserver" ;;
 i[34]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_target=sun386 ;;
 i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
@@ -218,7 +221,8 @@ i[34]86-*-sco*)		gdb_target=i386v ;;
 i[34]86-*-sysv*)	gdb_target=i386v ;;
 i[34]86-*-linux*)	gdb_target=linux ;;
 i[34]86-*-isc*)		gdb_target=i386v ;;
-i[34]86-*-mach*)	gdb_target=i386m3 ;;
+i[34]86-*-mach3*)	gdb_target=mach3 ;;
+i[34]86-*-mach*)	gdb_target=i386mach ;;
 i[34]86-*-netware*)	gdb_target=i386nw ;;
 i[34]86-*-osf1mk*)	gdb_target=i386mk ;;
 
@@ -232,43 +236,41 @@ i960-*-vxworks*)	gdb_target=vxworks960 ;;
 m68000-*-sunos3*)	gdb_target=sun2os3 ;;
 m68000-*-sunos4*)	gdb_target=sun2os4 ;;
 
-m68*-cbm-sysv4*)	gdb_target=amix ;;
-m68*-bull-sysv*)	gdb_target=dpx2 ;;
-m68*-hp-bsd*)		gdb_target=hp300bsd ;;
-m68*-hp-hpux*)		gdb_target=hp300hpux ;;
-
 m68*-altos-*)		gdb_target=altos ;;
 m68*-apollo*-bsd*)	gdb_target=apollo68b ;;
 m68*-att-*)		gdb_target=3b1 ;;
+m68*-bull-sysv*)	gdb_target=dpx2 ;;
+m68*-cbm-sysv4*)	gdb_target=amix ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
 m68*-ericsson-*)	gdb_target=es1800 ;;
+m68*-hp-bsd*)		gdb_target=hp300bsd ;;
+m68*-hp-hpux*)		gdb_target=hp300hpux ;;
 m68*-isi-*)		gdb_target=isi ;;
 m68*-motorola-*)	gdb_target=delta68 ;;
 m68*-netx-*)		gdb_target=vxworks68 ;;
 m68*-sony-*)		gdb_target=news ;;
 m68*-tandem-*)		gdb_target=st2000 ;;
-
 m68*-rom68k-*)          gdb_target=monitor ;;
 m68*-*bug-*)            gdb_target=monitor ;;
 m68*-monitor-*)         gdb_target=monitor ;;
-
 m68*-*-aout*)		gdb_target=monitor ;;
 m68*-*-coff*)		gdb_target=monitor ;;
 m68*-*-elf*)		gdb_target=monitor ;;
 m68*-*-lynxos*)		gdb_target=m68klynx
-			configdirs="${configdirs} gdbserver"
-			;;
+			configdirs="${configdirs} gdbserver" ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 m88*-motorola-sysv4*)	gdb_target=delta88v4 ;;
+m88*-*-mach3*)		gdb_target=mach3 ;;
 m88*-motorola-*)	gdb_target=delta88 ;;
 m88*-*-*)		gdb_target=m88k ;;
 
 mips64*-big-*)		gdb_target=bigmips64 ;;
 mips*-big-*)		gdb_target=bigmips ;;
+mips*-dec-mach3*)	gdb_target=mach3 ;;
 mips*-dec-*)		gdb_target=decstation ;;
 mips64*el-*-ecoff*)	gdb_target=idtl64 ;;
 mips64*-idt-ecoff*)	gdb_target=idt64 ;;
@@ -282,15 +284,16 @@ mips*-little-*)		gdb_target=littlemips ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;
 mips*-sony-*)		gdb_target=bigmips ;;
+mips*-*-mach3*)		gdb_target=mach3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-sysv*)		gdb_target=bigmips ;;
 mips*-*-riscos*)	gdb_target=bigmips ;;
-mips*-*-mach*)		gdb_target=mipsm3 ;;
 
 none-*-*)		gdb_target=none ;;
 
 np1-*-*)		gdb_target=np1 ;;
 
+ns32k-*-mach3*)		gdb_target=mach3 ;;
 ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
 
@@ -305,22 +308,21 @@ sparc-*-aout*)		gdb_target=sparc-em ;;
 sparc-*-coff*)		gdb_target=sparc-em ;;
 sparc-*-elf*)		gdb_target=sparc-em ;;
 sparc-*-lynxos*)	gdb_target=sparclynx
-			configdirs="${configdirs} gdbserver"
-			;;
+			configdirs="${configdirs} gdbserver" ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
 sparclite*-*-*)		gdb_target=sparclite ;;
-# start-sanitize-v9
-sparc64-*-*)		gdb_target_cpu=sparc gdb_target=sp64 ;;
-# end-sanitize-v9
+sparc64-*-*)		gdb_target=sp64 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
+
 vax-*-*)		gdb_target=vax ;;
 
 z8k-*-sim*)		gdb_target=z8ksim ;;
 z8k-*-coff*)		gdb_target=z8ksim ;;
+
 esac
 
 if [ ! -f ${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt ]; then
