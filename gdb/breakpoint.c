@@ -212,6 +212,12 @@ static void ep_skip_leading_whitespace (char **s);
    if such is available. */
 static int can_use_hw_watchpoints;
 
+/* If AUTO_BOOLEAN_FALSE, gdb will not attempt to create pending breakpoints.
+   If AUTO_BOOLEAN_TRUE, gdb will automatically create pending breakpoints
+   for unrecognized breakpoint locations.  
+   If AUTO_BOOLEAN_AUTO, gdb will query when breakpoints are unrecognized.  */
+static enum auto_boolean pending_break_support;
+
 void _initialize_breakpoint (void);
 
 extern int addressprint;	/* Print machine addresses? */
@@ -5097,8 +5103,22 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 
 	  error_output_message (NULL, err_msg);
 	  xfree (err_msg);
-	  if (!nquery ("Make breakpoint pending on future shared library load? "))
+
+	  /* If pending breakpoint support is turned off, throw error.  */
+
+	  if (pending_break_support == AUTO_BOOLEAN_FALSE)
+	    throw_exception (RETURN_ERROR);
+
+          /* If pending breakpoint support is auto query and the user selects 
+	     no, then simply return the error code.  */
+	  if (pending_break_support == AUTO_BOOLEAN_AUTO && 
+	      !nquery ("Make breakpoint pending on future shared library load? "))
 	    return rc;
+
+	  /* At this point, either the user was queried about setting a 
+	     pending breakpoint and selected yes, or pending breakpoint 
+	     behavior is on and thus a pending breakpoint is defaulted 
+	     on behalf of the user.  */
 	  copy_arg = xstrdup (addr_start);
 	  addr_string = &copy_arg;
 	  sals.nelts = 1;
@@ -7690,6 +7710,16 @@ enable_delete_command (char *args, int from_tty)
   map_breakpoint_numbers (args, enable_delete_breakpoint);
 }
 
+static void
+set_breakpoint_cmd (char *args, int from_tty)
+{
+}
+
+static void
+show_breakpoint_cmd (char *args, int from_tty)
+{
+}
+
 /* Use default_breakpoint_'s, or nothing if they aren't valid.  */
 
 struct symtabs_and_lines
@@ -7714,6 +7744,8 @@ decode_line_spec_1 (char *string, int funfirstline)
 void
 _initialize_breakpoint (void)
 {
+  static struct cmd_list_element *breakpoint_set_cmdlist;
+  static struct cmd_list_element *breakpoint_show_cmdlist;
   struct cmd_list_element *c;
 
   breakpoint_chain = 0;
@@ -8032,4 +8064,29 @@ hardware.)",
   add_show_from_set (c, &showlist);
 
   can_use_hw_watchpoints = 1;
+
+  add_prefix_cmd ("breakpoint", class_maintenance, set_breakpoint_cmd, "\
+Breakpoint specific settings\n\
+Configure various breakpoint-specific variables such as\n\
+pending breakpoint behavior",
+		  &breakpoint_set_cmdlist, "set breakpoint ",
+		  0/*allow-unknown*/, &setlist);
+  add_prefix_cmd ("breakpoint", class_maintenance, show_breakpoint_cmd, "\
+Breakpoint specific settings\n\
+Configure various breakpoint-specific variables such as\n\
+pending breakpoint behavior",
+		  &breakpoint_show_cmdlist, "show breakpoint ",
+		  0/*allow-unknown*/, &showlist);
+
+  add_setshow_cmd ("pending", no_class, var_auto_boolean,
+		   (char *) &pending_break_support,
+		   "Set debugger's behavior regarding pending breakpoints.\n\
+If on, an unrecognized breakpoint location will cause gdb to create a pending\n\
+breakpoint.  If off, an unrecognized breakpoint location results in an error.\n\
+If auto, an unrecognized breakpoint location results in a user-query to see if\n\
+a pending breakpoint should be created.","\
+Show debugger's behavior regarding pending breakpoints.",
+		   NULL, NULL, &breakpoint_set_cmdlist, &breakpoint_show_cmdlist);
+
+  pending_break_support = AUTO_BOOLEAN_AUTO;
 }

@@ -1,3 +1,12 @@
+2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* breakpoint.c (pending_break_support): New setting variable.
+	(break_command_1): Account for pending_break_support setting
+	when creating pending breakpoints.
+	(set_breakpoint_cmd, show_breakpoint_cmd): New functions.
+	(_initialize_breakpoint): Add "set breakpoint pending" and
+	"show breakpoint pending" commands.
+
 2004-02-26  Andrew Cagney  <cagney@redhat.com>
 
 	Fix PR i18n/1570.
