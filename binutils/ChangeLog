@@ -1,3 +1,9 @@
+Sun May  3 22:04:49 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (EXTRA_PROGRAMS): Change $(SRCONV_PROG) to sysconf
+	sysdump coffdump to avoid extra $(EXEEXT).
+	* Makefile.in: Rebuild.
+
 Wed Apr 29 22:22:55 1998  Geoffrey Noer <noer@cygnus.com>
 
 	* configure.in: Stop appending EXEEXT to the end of
