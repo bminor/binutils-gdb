@@ -5728,9 +5728,6 @@ and deleted from all of @value{GDBN}'s config files.
 Any @file{@var{foo}-xdep.c} file that references STACK_END_ADDR
 is so old that it has never been converted to use BFD.  Now that's old!
 
-@item REG_STACK_SEGMENT
-exec.c
-
 @end table
 
 @include fdl.texi
