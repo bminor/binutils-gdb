@@ -140,8 +140,6 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define COND8  1
 #define COND12 2
 #define COND32 3
-#define UNCOND12 1
-#define UNCOND32 2
 #define UNDEF_WORD_DISP 4
 
 #define UNCOND12 1
@@ -190,7 +188,9 @@ const relax_typeS md_relax_table[C (END, 0)] = {
   { COND12_F, COND12_M, COND12_LENGTH, C (COND_JUMP, COND32), },
   /* C (COND_JUMP, COND32) */
   { COND32_F, COND32_M, COND32_LENGTH, 0, },
-  EMPTY, EMPTY, EMPTY, EMPTY,
+  /* C (COND_JUMP, UNDEF_WORD_DISP) */
+  { 0, 0, COND32_LENGTH, 0, },
+  EMPTY, EMPTY, EMPTY,
   EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
 
   EMPTY,
@@ -200,7 +200,9 @@ const relax_typeS md_relax_table[C (END, 0)] = {
   { COND12_F, COND12_M, COND12_DELAY_LENGTH, C (COND_JUMP_DELAY, COND32), },
   /* C (COND_JUMP_DELAY, COND32) */
   { COND32_F, COND32_M, COND32_LENGTH, 0, },
-  EMPTY, EMPTY, EMPTY, EMPTY,
+  /* C (COND_JUMP_DELAY, UNDEF_WORD_DISP) */
+  { 0, 0, COND32_LENGTH, 0, },
+  EMPTY, EMPTY, EMPTY,
   EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
 
   EMPTY,
@@ -208,7 +210,10 @@ const relax_typeS md_relax_table[C (END, 0)] = {
   { UNCOND12_F, UNCOND12_M, UNCOND12_LENGTH, C (UNCOND_JUMP, UNCOND32), },
   /* C (UNCOND_JUMP, UNCOND32) */
   { UNCOND32_F, UNCOND32_M, UNCOND32_LENGTH, 0, },
-  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+  EMPTY,
+  /* C (UNCOND_JUMP, UNDEF_WORD_DISP) */
+  { 0, 0, UNCOND32_LENGTH, 0, },
+  EMPTY, EMPTY, EMPTY,
   EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
 };
 
@@ -3028,6 +3033,8 @@ md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP;
      register segT segment_type;
 {
+  int what;
+
   switch (fragP->fr_subtype)
     {
     default:
@@ -3038,58 +3045,57 @@ md_estimate_size_before_relax (fragP, segment_type)
       if (!fragP->fr_symbol)
 	{
 	  fragP->fr_subtype = C (UNCOND_JUMP, UNCOND12);
-	  fragP->fr_var = md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length;
 	}
       else if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
 	{
 	  fragP->fr_subtype = C (UNCOND_JUMP, UNCOND12);
-	  fragP->fr_var = md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length;
 	}
       else
 	{
 	  fragP->fr_subtype = C (UNCOND_JUMP, UNDEF_WORD_DISP);
-	  fragP->fr_var = md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_length;
 	}
       break;
 
     case C (COND_JUMP, UNDEF_DISP):
     case C (COND_JUMP_DELAY, UNDEF_DISP):
+      what = GET_WHAT (fragP->fr_subtype);
       /* Used to be a branch to somewhere which was unknown.  */
       if (fragP->fr_symbol
 	  && S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
 	{
-	  int what = GET_WHAT (fragP->fr_subtype);
 	  /* Got a symbol and it's defined in this segment, become byte
 	     sized - maybe it will fix up.  */
 	  fragP->fr_subtype = C (what, COND8);
-	  fragP->fr_var = md_relax_table[C (what, COND8)].rlx_length;
 	}
       else if (fragP->fr_symbol)
 	{
-	  int what = GET_WHAT (fragP->fr_subtype);
 	  /* Its got a segment, but its not ours, so it will always be long.  */
 	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
-	  fragP->fr_var = md_relax_table[C (what, COND32)].rlx_length;
 	}
       else
 	{
-	  int what = GET_WHAT (fragP->fr_subtype);
 	  /* We know the abs value.  */
 	  fragP->fr_subtype = C (what, COND8);
-	  fragP->fr_var = md_relax_table[C (what, COND8)].rlx_length;
 	}
       break;
 
     case C (UNCOND_JUMP, UNCOND12):
+    case C (UNCOND_JUMP, UNCOND32):
     case C (UNCOND_JUMP, UNDEF_WORD_DISP):
     case C (COND_JUMP, COND8):
+    case C (COND_JUMP, COND12):
+    case C (COND_JUMP, COND32):
     case C (COND_JUMP, UNDEF_WORD_DISP):
     case C (COND_JUMP_DELAY, COND8):
+    case C (COND_JUMP_DELAY, COND12):
+    case C (COND_JUMP_DELAY, COND32):
     case C (COND_JUMP_DELAY, UNDEF_WORD_DISP):
       /* When relaxing a section for the second time, we don't need to
-	 do anything.  */
+	 do anything besides return the current size.  */
       break;
     }
+
+  fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
   return fragP->fr_var;
 }
 

@@ -1,3 +1,23 @@
+2001-04-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in: Add h8500-*-coff and h8500-*-rtems targets.
+	* configure: Regenerate.
+
+	* config/tc-h8500.c (md_estimate_size_before_relax): Add missing
+	cases, and always return size based on current fr_subtype.
+	(md_begin): Move initialization of md_relax_table..
+	(md_relax_table): ..to static initializer.  Set rlx_length for
+	UNDEF_WORD_DISP cases.
+	* config/tc-w65.c (md_estimate_size_before_relax): Likewise.
+	(md_begin): Likewise.
+	(md_relax_table): Likewise.
+	* config/tc-mcore.c (md_estimate_size_before_relax): Likewise.
+	(md_relax_table): Set rlx_length for UNDEF_WORD_DISP cases.
+	Set rlx_backward and rlx_forward to zero for unused states.
+	* config/tc-sh.c (md_estimate_size_before_relax): Likewise.
+	(md_relax_table): Set rlx_length for UNDEF_WORD_DISP cases.
+	(UNCOND12, UNCOND32): Remove duplicate defines.
+
 2001-04-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (md_estimate_size_before_relax) <case

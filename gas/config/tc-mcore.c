@@ -111,20 +111,24 @@ cpu_type;
 cpu_type cpu = M340;
 
 /* Initialize the relax table.  */
-const relax_typeS md_relax_table[] =
-{
-{    1,     1,	     0, 0 },			/* 0: unused */
-{    1,     1,	     0, 0 },			/* 1: unused */
-{    1,     1,	     0, 0 },			/* 2: unused */
-{    1,     1,	     0, 0 },			/* 3: unused */
-{    1,     1,	     0, 0 },			/* 4: unused */
-{ 2048, -2046, C12_LEN, C(COND_JUMP, DISP32) },	/* 5: C(COND_JUMP, DISP12) */
-{    0,     0, C32_LEN, 0 },			/* 6: C(COND_JUMP, DISP32) */
-{    1,     1,	     0, 0 },			/* 7: unused */
-{    1,     1,	     0, 0 },			/* 8: unused */
-{ 2048, -2046, U12_LEN, C(UNCD_JUMP, DISP32) },	/* 9: C(UNCD_JUMP, DISP12) */
-{    0,     0, U32_LEN, 0 },			/*10: C(UNCD_JUMP, DISP32) */
-{    1,     1,	     0, 0 },			/*11: unused */
+const relax_typeS md_relax_table[] = {
+  {    0,     0, 0,	  0 },
+  {    0,     0, 0,	  0 },
+  {    0,     0, 0,	  0 },
+  {    0,     0, 0,	  0 },
+
+  /* COND_JUMP */
+  {    0,     0, 0,	  0 },			  /* UNDEF_DISP */
+  { 2048, -2046, C12_LEN, C(COND_JUMP, DISP32) }, /* DISP12 */
+  {    0,     0, C32_LEN, 0 },			  /* DISP32 */
+  {    0,     0, C32_LEN, 0 },			  /* UNDEF_WORD_DISP */
+
+  /* UNCD_JUMP */
+  {    0,     0, 0,	  0 },			  /* UNDEF_DISP */     
+  { 2048, -2046, U12_LEN, C(UNCD_JUMP, DISP32) }, /* DISP12 */         
+  {    0,     0, U32_LEN, 0 },			  /* DISP32 */         
+  {    0,     0, U32_LEN, 0 }			  /* UNDEF_WORD_DISP */
+
 };
 
 /* Literal pool data structures.  */
@@ -2251,17 +2255,14 @@ md_estimate_size_before_relax (fragP, segment_type)
       if (!fragP->fr_symbol)
 	{
 	  fragP->fr_subtype = C (UNCD_JUMP, DISP12);
-	  fragP->fr_var = md_relax_table[C (UNCD_JUMP, DISP12)].rlx_length;
 	}
       else if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
 	{
 	  fragP->fr_subtype = C (UNCD_JUMP, DISP12);
-	  fragP->fr_var = md_relax_table[C (UNCD_JUMP, DISP12)].rlx_length;
 	}
       else
 	{
 	  fragP->fr_subtype = C (UNCD_JUMP, UNDEF_WORD_DISP);
-	  fragP->fr_var = md_relax_table[C (UNCD_JUMP, DISP32)].rlx_length;
 	}
       break;
 
@@ -2273,31 +2274,31 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  /* Got a symbol and it's defined in this segment, become byte
 	     sized - maybe it will fix up */
 	  fragP->fr_subtype = C (COND_JUMP, DISP12);
-	  fragP->fr_var = md_relax_table[C (COND_JUMP, DISP12)].rlx_length;
 	}
       else if (fragP->fr_symbol)
 	{
 	  /* Its got a segment, but its not ours, so it will always be long.  */
 	  fragP->fr_subtype = C (COND_JUMP, UNDEF_WORD_DISP);
-	  fragP->fr_var = md_relax_table[C (COND_JUMP, DISP32)].rlx_length;
 	}
       else
 	{
 	  /* We know the abs value.  */
 	  fragP->fr_subtype = C (COND_JUMP, DISP12);
-	  fragP->fr_var = md_relax_table[C (COND_JUMP, DISP12)].rlx_length;
 	}
       break;
 
     case C (UNCD_JUMP, DISP12):
+    case C (UNCD_JUMP, DISP32):
     case C (UNCD_JUMP, UNDEF_WORD_DISP):
     case C (COND_JUMP, DISP12):
+    case C (COND_JUMP, DISP32):
     case C (COND_JUMP, UNDEF_WORD_DISP):
       /* When relaxing a section for the second time, we don't need to
-	 do anything.  */
+	 do anything besides return the current size.  */
       break;
     }
 
+  fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
   return fragP->fr_var;
 }
 

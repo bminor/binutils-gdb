@@ -231,6 +231,8 @@ changequote([,])dnl
 
       h8300-*-rtems*)       fmt=coff ;;
       h8300-*-coff)         fmt=coff ;;
+      h8500-*-rtems*)       fmt=coff ;;
+      h8500-*-coff)         fmt=coff ;;
 
       i370-*-elf* | i370-*-linux*) fmt=elf ;;
       i386-ibm-aix*)        fmt=coff em=i386aix ;;
