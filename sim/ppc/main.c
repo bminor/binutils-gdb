@@ -33,7 +33,7 @@ extern int optopt;
 extern int opterr;
 
 void
-printf_filtered(char *msg, ...)
+printf_filtered(const char *msg, ...)
 {
   va_list ap;
   va_start(ap, msg);
@@ -68,29 +68,36 @@ zfree(void *chunk)
 static void
 usage(void)
 {
-  error ("Usage: psim [ -p -c -s -i -t ] <image> [ <image-args> ... ]\n");
+  error ("Usage: psim [ -a -p -c -C -s -i -t ] <image> [ <image-args> ... ]\n");
 }
 
 int
 main(int argc, char **argv)
 {
   psim *system;
-  char **argp;
   const char *name_of_file;
   char *arg_;
   unsigned_word stack_pointer;
   psim_status status;
   int letter;
+  int i;
 
   /* check for arguments - FIXME use getopt */
-  while ((letter = getopt (argc, argv, "cipst")) != EOF)
+  while ((letter = getopt (argc, argv, "acCipst")) != EOF)
     {
-      switch (argp[0][1]) {
+      switch (letter) {
+      case 'a':
+	for (i = 0; i < nr_trace; i++)
+	  trace[i] = 1;
+	break;
       case 'p':
 	trace[trace_cpu] = trace[trace_semantics] = 1;
 	break;
       case 'c':
 	trace[trace_core] = 1;
+	break;
+      case 'C':
+	trace[trace_console_device] = 1;
 	break;
       case 's':
 	trace[trace_create_stack] = 1;
@@ -106,22 +113,22 @@ main(int argc, char **argv)
       }
     }
 
-  if (argp >= argv+argc)
+  if (optind >= argc)
     usage();
-  name_of_file = *argp;
+  name_of_file = argv[optind];
 
   /* create the simulator */
   system = psim_create(name_of_file, ((WITH_SMP > 0) ? WITH_SMP : 1));
 
   /* fudge the environment so that _=prog-name */
-  arg_ = (char*)zalloc(strlen(*argp) + strlen("_=") + 1);
+  arg_ = (char*)zalloc(strlen(argv[optind]) + strlen("_=") + 1);
   strcpy(arg_, "_=");
-  strcat(arg_, *argp);
+  strcat(arg_, argv[optind]);
   putenv(arg_);
 
   /* initialize it */
   psim_load(system);
-  psim_stack(system, argp, environ);
+  psim_stack(system, &argv[optind], environ);
 
   psim_run(system);
 

@@ -1,3 +1,7 @@
+Sun Oct  1 13:52:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* main.c (printf_filtered): Correct to match new prototype.
+
 Sat Sep 30 20:47:05 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* sim_callbacks.h (printf_filtered): Correct prototype.
