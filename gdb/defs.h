@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -911,6 +911,8 @@ extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 
 extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 
+extern NORETURN void error_silent (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
 /* Initialize the error buffer.  */
@@ -919,6 +921,9 @@ extern void error_init (void);
 /* Returns a freshly allocate buffer containing the last error
    message.  */
 extern char *error_last_message (void);
+
+/* Output arbitrary error message.  */
+extern void error_output_message (char *pre_print, char *msg);
 
 extern NORETURN void internal_verror (const char *file, int line,
 				      const char *, va_list ap) ATTR_NORETURN;
@@ -982,6 +987,11 @@ extern NORETURN void throw_exception (enum return_reason) ATTR_NORETURN;
    new cleanup_chain is established.  The old values are restored
    before catch_exceptions() returns.
 
+   The variant catch_exceptions_with_msg() is the same as
+   catch_exceptions() but adds the ability to return an allocated
+   copy of the gdb error message.  This is used when a silent error is 
+   issued and the caller wants to manually issue the error message.
+
    FIXME; cagney/2001-08-13: The need to override the global UIOUT
    builder variable should just go away.
 
@@ -994,6 +1004,11 @@ typedef int (catch_exceptions_ftype) (struct ui_out *ui_out, void *args);
 extern int catch_exceptions (struct ui_out *uiout,
 			     catch_exceptions_ftype *func, void *func_args,
 			     char *errstring, return_mask mask);
+extern int catch_exceptions_with_msg (struct ui_out *uiout,
+			     	      catch_exceptions_ftype *func, 
+			     	      void *func_args,
+			     	      char *errstring, char **gdberrmsg,
+				      return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned. It is

@@ -1,3 +1,13 @@
+2004-01-19  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* linespec.c (decode_variable, symtab_from_filename):  Call
+	error_silent with error message instead of throwing an exception
+	directly.
+	* defs.h (error_silent, error_output_message): Add prototypes.
+	(catch_exceptions_with_msg): Ditto.
+	* utils.c (error_silent, error_output_message): New functions.
+	* top.c (catch_exceptions_with_msg): New function.
+
 2004-01-20  Nick Roberts  <nick@nick.uklinux.net>
 
 	* mi/mi-cmds.h (enum print_values): Add definition.

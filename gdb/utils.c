@@ -1,7 +1,7 @@
 /* General utility routines for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -626,6 +626,38 @@ static void
 do_write (void *data, const char *buffer, long length_buffer)
 {
   ui_file_write (data, buffer, length_buffer);
+}
+
+/* Cause a silent error to occur.  Any error message is recorded
+   though it is not issued.  */
+NORETURN void
+error_silent (const char *string, ...)
+{
+  va_list args;
+  struct ui_file *tmp_stream = mem_fileopen ();
+  va_start (args, string);
+  make_cleanup_ui_file_delete (tmp_stream);
+  vfprintf_unfiltered (tmp_stream, string, args);
+  /* Copy the stream into the GDB_LASTERR buffer.  */
+  ui_file_rewind (gdb_lasterr);
+  ui_file_put (tmp_stream, do_write, gdb_lasterr);
+  va_end (args);
+
+  throw_exception (RETURN_ERROR);
+}
+
+/* Output an error message including any pre-print text to gdb_stderr.  */
+void
+error_output_message (char *pre_print, char *msg)
+{
+  target_terminal_ours ();
+  wrap_here ("");		/* Force out any buffered output */
+  gdb_flush (gdb_stdout);
+  annotate_error_begin ();
+  if (pre_print)
+    fputs_filtered (pre_print, gdb_stderr);
+  fputs_filtered (msg, gdb_stderr);
+  fprintf_filtered (gdb_stderr, "\n");
 }
 
 NORETURN void
