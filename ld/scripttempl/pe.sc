@@ -88,6 +88,7 @@ SECTIONS
     *(.data)
     *(.data2)
     ${R_DATA}
+    *(.jcr)
     ${RELOCATING+__data_end__ = . ;}
     ${RELOCATING+*(.data_cygwin_nocopy)}
   }
