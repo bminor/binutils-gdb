@@ -9,6 +9,10 @@
 	* gas/mips/empic.s: Likewise.  Also, correct typo in comment
 	about expected relocs.
 	
+        * gas/mips/mips32.s, gas/mips/mips32.d: New files for MIPS32
+        instruction assembly test.
+        * gas/mips/mips.exp: Add the test mentioned above.
+
 2000-11-30  Diego Novillo  <dnovillo@redhat.com>
 
 	* intel.s, intel.d: New test for @GOT references.
