@@ -1,3 +1,14 @@
+Thu Jan 14 18:29:17 1999  David Taylor  <taylor@texas.cygnus.com>
+
+start-sanitize-carp start-sanitize-vr4xxx
+	* mips-tdep.c (mips_gdbarch_init): fix stream arg in
+	fprintf_unfiltered calls.
+end-sanitize-carp end-sanitize-vr4xxx
+	* remote-mm.c (mm_wait): fix stream arg to gdb_flush.
+	* remote-udi.c (udi_wait): fix stream arg to fwrite.
+	* symmisc.c (maintenance_check_symtabs): fix stream argument to
+	print_address_numeric.
+	
 Wed Jan 13 19:33:16 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* breakpoint.c (insert_breakpoints): insert cast to eliminate

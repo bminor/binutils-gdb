@@ -453,13 +453,13 @@ udi_wait (pid, status)
 	       a whole bunch of output (more than SBUF_MAX, I would
 	       guess).  It doesn't seem to happen with the simulator.  */
 	    warning ("UDIGetStdout() failed in udi_wait");
-	  fwrite (sbuf, 1, CountDone, gdb_stdout);
+	  fwrite (sbuf, 1, CountDone, stdout);
 	  gdb_flush(gdb_stdout);
 	  continue;
 
 	case UDIStderrReady:
 	  UDIGetStderr (sbuf, (UDISizeT)SBUF_MAX, &CountDone);
-	  fwrite (sbuf, 1, CountDone, gdb_stderr);
+	  fwrite (sbuf, 1, CountDone, stderr);
 	  gdb_flush(gdb_stderr);
 	  continue;
 

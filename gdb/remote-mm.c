@@ -542,7 +542,7 @@ mm_wait (status)
         i=in_msg_buf->channel1_msg.length;
         in_msg_buf->channel1_msg.data[i] = '\0';
         printf("%s", in_msg_buf->channel1_msg.data);
-	gdb_flush(stdout);
+	gdb_flush(gdb_stdout);
         /* Send CHANNEL1_ACK message */
         out_msg_buf->channel1_ack_msg.code = CHANNEL1_ACK;
         out_msg_buf->channel1_ack_msg.length = 0;

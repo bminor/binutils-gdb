@@ -1017,9 +1017,9 @@ maintenance_check_symtabs (ignore, from_tty)
 	  printf_filtered ("Psymtab ");
 	  puts_filtered (ps->filename);
 	  printf_filtered (" covers bad range ");
-          print_address_numeric (ps->textlow, 1, stdout);
+          print_address_numeric (ps->textlow, 1, gdb_stdout);
 	  printf_filtered (" - ");
-          print_address_numeric (ps->texthigh, 1, stdout);
+          print_address_numeric (ps->texthigh, 1, gdb_stdout);
 	  printf_filtered ("\n");
 	  continue;
 	}
@@ -1030,13 +1030,13 @@ maintenance_check_symtabs (ignore, from_tty)
 	  printf_filtered ("Psymtab ");
 	  puts_filtered (ps->filename);
 	  printf_filtered (" covers ");
-          print_address_numeric (ps->textlow, 1, stdout);
+          print_address_numeric (ps->textlow, 1, gdb_stdout);
 	  printf_filtered (" - ");
-          print_address_numeric (ps->texthigh, 1, stdout);
+          print_address_numeric (ps->texthigh, 1, gdb_stdout);
 	  printf_filtered (" but symtab covers only ");
-          print_address_numeric (BLOCK_START (b), 1, stdout);
+          print_address_numeric (BLOCK_START (b), 1, gdb_stdout);
 	  printf_filtered (" - ");
-          print_address_numeric (BLOCK_END (b), 1, stdout);
+          print_address_numeric (BLOCK_END (b), 1, gdb_stdout);
 	  printf_filtered ("\n");
 	}
     }
