@@ -1,5 +1,7 @@
 2004-02-28  Andrew Cagney  <cagney@redhat.com>
 
+	* dwarf2-frame.h (struct gdbarch): Add opaque declaration.
+
 	* breakpoint.c (_initialize_breakpoint): Use
 	"add_setshow_auto_boolean_cmd.  Better word-wrap help messages.
 	Add help to show command.
