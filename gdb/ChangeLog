@@ -1,3 +1,7 @@
+Tue Mar 14 10:41:41 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote-es.c: Replace ignore with 0.
+
 Tue Mar 14 05:52:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* valops.c (value_repeat), eval.c (evaluate_subexp_standard):
