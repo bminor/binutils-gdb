@@ -620,7 +620,7 @@ section_already_linked (abfd, sec, ignore)
 	      break;
 
 	    case SEC_LINK_DUPLICATES_ONE_ONLY:
-	      einfo ("%P: %B: warning: ignoring duplicate section `%s'",
+	      einfo ("%P: %B: warning: ignoring duplicate section `%s'\n",
 		     abfd, name);
 	      break;
 
@@ -634,8 +634,8 @@ section_already_linked (abfd, sec, ignore)
 	    case SEC_LINK_DUPLICATES_SAME_SIZE:
 	      if (bfd_section_size (abfd, sec)
 		  != bfd_section_size (l->sec->owner, l->sec))
-		einfo ("%P: %B: warning: duplicate section `%s' has different size",
-		       abfd, sec);
+		einfo ("%P: %B: warning: duplicate section `%s' has different size\n",
+		       abfd, name);
 	      break;
 	    }
 

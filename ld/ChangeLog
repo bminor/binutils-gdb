@@ -1,3 +1,7 @@
+Wed May  1 17:50:06 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* ldlang.c (section_already_linked): Fix typos.
+
 Mon Apr 29 20:31:06 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* scripttempl/pe.sc (.endjunk): Define __end__.
