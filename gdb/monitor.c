@@ -23,7 +23,7 @@
 /* This file was derived from various remote-* modules. It is a collection
    of generic support functions so GDB can talk directly to a ROM based
    monitor. This saves use from having to hack an exception based handler
-   into existance, and makes for quick porting.
+   into existence, and makes for quick porting.
 
    This module talks to a debug monitor called 'MONITOR', which
    We communicate with MONITOR via either a direct serial line, or a TCP

@@ -1117,10 +1117,10 @@ mips16_next_pc (CORE_ADDR pc)
 	    pc += 2;
 	  break;
 	case 30:		/* This is an extend instruction */
-	  pc += 4;		/* Dont be setting breakpints on the second half */
+	  pc += 4;		/* Dont be setting breakpoints on the second half */
 	  break;
 	default:
-	  printf ("Filtered - next PC probably incorrrect due to jump inst\n");
+	  printf ("Filtered - next PC probably incorrect due to jump inst\n");
 	  pc += 2;
 	  break;
 	}
@@ -4565,7 +4565,7 @@ This option can be set to one of:\n\
 	   "Select single-precision MIPS floating-point coprocessor.",
 	   &mipsfpulist);
   add_cmd ("double", class_support, set_mipsfpu_double_command,
-	   "Select double-precision MIPS floating-point coprocessor .",
+	   "Select double-precision MIPS floating-point coprocessor.",
 	   &mipsfpulist);
   add_alias_cmd ("on", "double", class_support, 1, &mipsfpulist);
   add_alias_cmd ("yes", "double", class_support, 1, &mipsfpulist);

@@ -1659,13 +1659,13 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 	{
 	  if (thread->exc_port == port)
 	    {
-	      inf_debug (waiting_inf, "Handler is thread exeption port <%d>",
+	      inf_debug (waiting_inf, "Handler is thread exception port <%d>",
 			 thread->saved_exc_port);
 	      inf->wait.exc.handler = thread->saved_exc_port;
 	    }
 	  else
 	    {
-	      inf_debug (waiting_inf, "Handler is task exeption port <%d>",
+	      inf_debug (waiting_inf, "Handler is task exception port <%d>",
 			 inf->task->saved_exc_port);
 	      inf->wait.exc.handler = inf->task->saved_exc_port;
 	      assert (inf->task->exc_port == port);

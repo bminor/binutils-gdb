@@ -970,7 +970,7 @@ handle_swi (void)
 	  break;
 
 	default:
-	  error ("Unimplented SWI argument");
+	  error ("Unimplemented SWI argument");
 	}
 
       type = type >> 2;

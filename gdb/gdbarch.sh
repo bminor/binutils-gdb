@@ -1723,8 +1723,8 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   (*curr)->dump_tdep = dump_tdep;
   (*curr)->arches = NULL;
   (*curr)->next = NULL;
-  /* When non- multi-arch, install what ever target dump routine we've
-     been provided - hopefully that routine has been writen correct
+  /* When non- multi-arch, install whatever target dump routine we've
+     been provided - hopefully that routine has been written correctly
      and works regardless of multi-arch. */
   if (!GDB_MULTI_ARCH && dump_tdep != NULL
       && startup_gdbarch.dump_tdep == NULL)

@@ -658,8 +658,8 @@ hpread_get_slt (int index, struct objfile *objfile)
 
 /* Get the low address associated with some symbol (typically the start
    of a particular source file or module).  Since that information is not
-   stored as part of the DNTT_TYPE_MODULE or DNTT_TYPE_SRCFILE symbol we must infer it from
-   the existance of DNTT_TYPE_FUNCTION symbols.  */
+   stored as part of the DNTT_TYPE_MODULE or DNTT_TYPE_SRCFILE symbol we
+   must infer it from the existence of DNTT_TYPE_FUNCTION symbols.  */
 
 static unsigned long
 hpread_get_textlow (int global, int index, struct objfile *objfile)

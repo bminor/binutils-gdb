@@ -70,7 +70,7 @@ static struct partial_symtab *hpread_end_psymtab
 #include <stdlib.h>
 #include <string.h>
 
-/* check for the existance of a file, given its full pathname */
+/* check for the existence of a file, given its full pathname */
 int
 file_exists (char *filename)
 {
@@ -103,7 +103,7 @@ static char main_string[] = "main";
 /* Call PXDB to process our file.
 
    Approach copied from DDE's "dbgk_run_pxdb".  Note: we
-   don't check for BSD location of pxdb, nor for existance
+   don't check for BSD location of pxdb, nor for existence
    of pxdb itself, etc.
 
    NOTE: uses system function and string functions directly.
@@ -2104,8 +2104,8 @@ hpread_get_slt (int index, struct objfile *objfile)
 
 /* Get the low address associated with some symbol (typically the start
    of a particular source file or module).  Since that information is not
-   stored as part of the DNTT_TYPE_MODULE or DNTT_TYPE_SRCFILE symbol we must infer it from
-   the existance of DNTT_TYPE_FUNCTION symbols.  */
+   stored as part of the DNTT_TYPE_MODULE or DNTT_TYPE_SRCFILE symbol we
+   must infer it from the existence of DNTT_TYPE_FUNCTION symbols.  */
 
 static unsigned long
 hpread_get_textlow (int global, int index, struct objfile *objfile,

@@ -3328,7 +3328,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
       num = atoi (args);
 
       if (num == 0)
-	error ("cancelled");
+	error ("canceled");
       else if (num == 1)
 	{
 	  if (canonical_arr)

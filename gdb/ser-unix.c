@@ -1277,7 +1277,7 @@ ser_unix_async (serial_t scb,
       if (SERIAL_DEBUG_P (scb))
 	fprintf_unfiltered (gdb_stdlog, "[fd%d->synchronous]\n",
 			    scb->fd);
-      /* De-schedule what ever tasks are currently scheduled. */
+      /* De-schedule whatever tasks are currently scheduled. */
       switch (scb->async_state)
 	{
 	case FD_SCHEDULED:

@@ -118,7 +118,7 @@ struct frame_extra_info
 /* The base of the current frame is in a frame pointer register.
    This register is noted in frame_extra_info->fp_regnum.
 
-   Note that the existance of an FP might also indicate that the
+   Note that the existence of an FP might also indicate that the
    function has called alloca. */
 #define MY_FRAME_IN_FP 0x2
 
@@ -336,7 +336,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
       if (IS_SUBI0 (insn))
 	{
 	  int offset = 1 + ((insn >> 4) & 0x1f);
-	  mcore_insn_debug (("MCORE: got subi r0,%d; contnuing\n", offset));
+	  mcore_insn_debug (("MCORE: got subi r0,%d; continuing\n", offset));
 	  framesize += offset;
 	  continue;
 	}

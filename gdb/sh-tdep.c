@@ -1661,7 +1661,7 @@ static void
 sh_do_pseudo_register (int regnum)
 {
   if (regnum < NUM_REGS || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
-    internal_error ("Invalid pasudo register number %d\n", regnum);
+    internal_error ("Invalid pseudo register number %d\n", regnum);
   else if (regnum >= NUM_REGS && 
 	   regnum < gdbarch_tdep (current_gdbarch)->FV0_REGNUM)
     do_dr_register_info (regnum);

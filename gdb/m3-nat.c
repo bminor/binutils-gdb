@@ -692,7 +692,7 @@ intercept_exec_calls (int exec_counter)
   CHK ("mach_port_extract_right (bsd server send)", ret);
 
   if (acquired != MACH_MSG_TYPE_PORT_SEND)
-    error ("Incorrect right extracted, send right to bsd server excpected");
+    error ("Incorrect right extracted, send right to bsd server expected");
 
   ret = mach_port_insert_right (inferior_task,
 				original_server_port_name,
@@ -719,7 +719,7 @@ intercept_exec_calls (int exec_counter)
   CHK ("mach_port_extract_right (exec_reply)", ret);
 
   if (acquired != MACH_MSG_TYPE_PORT_SEND_ONCE)
-    error ("Incorrect right extracted, send once excpected for exec reply");
+    error ("Incorrect right extracted, send once expected for exec reply");
 
   ret = mach_port_move_member (mach_task_self (),
 			       fake_server,
@@ -1540,7 +1540,7 @@ mach_thread_parse_id (char *arg)
 {
   int mid;
   if (arg == 0)
-    error ("thread id excpected");
+    error ("thread id expected");
   mid = parse_thread_id (arg, 0, 1);
 
   return mid;

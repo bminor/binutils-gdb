@@ -627,7 +627,7 @@ e7000_start_remote (void *dummy)
   if (!sync)
     {
       fprintf_unfiltered (gdb_stderr, "Giving up after %d tries...\n", try);
-      error ("Unable to syncronize with target.\n");
+      error ("Unable to synchronize with target.\n");
     }
 
   puts_e7000debug ("\r");

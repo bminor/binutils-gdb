@@ -115,7 +115,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 
      There's nothing in the header which easily allows us to do
      this.  The only reliable way I know of is to check for the
-     existance of a $SHLIB_INFO$ section with a non-zero size.  */
+     existence of a $SHLIB_INFO$ section with a non-zero size.  */
   /* The code below is not a reliable way to check whether an
    * executable is dynamic, so I commented it out - RT
    * shlib_info = bfd_get_section_by_name (objfile->obfd, "$SHLIB_INFO$");

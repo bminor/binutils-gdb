@@ -1265,7 +1265,7 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
       printf_filtered ("Don't know LOC_UNRESOLVED %s\n", SYMBOL_NAME (sym));
       break;
     case LOC_OPTIMIZED_OUT:
-      printf_filtered ("%s has been optimized out of existance.\n",
+      printf_filtered ("%s has been optimized out of existence.\n",
 		       SYMBOL_NAME (sym));
       break;
     }

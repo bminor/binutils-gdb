@@ -1158,7 +1158,7 @@ verify_break (int vec)
 
 
 /* get_break_addr ()
-   find address of breakpint routine
+   find address of breakpoint routine
    vec - trap vector used for breakpoints
    addrp - store the address here       */
 

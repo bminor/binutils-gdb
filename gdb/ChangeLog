@@ -1,3 +1,22 @@
+2000-10-30  J.T. Conklin  <jtc@redback.com>
+
+	* gdbarch.sh, hp-psymtab-read.c, hpread.c, m3-nat.c, mcore-tdep.c, 
+	mips-tdep.c, monitor.c, regcache.c, remote-es.c, ser-unix.c, 
+	somread.c, tracepoint.c: Fix spelling errors in comments.
+	* gdbarch.c: Regenerate.
+
+	* gnu-nat.c (S_exception_raise_request): Fix typos and spelling 
+	errors in strings.
+	* m3-nat.c (intercept_exec_calls, mach_thread_parse_id): Likewise.
+	* mcore-tdep.c (mcore_analyze_prologue): Likewise.
+	* mips-tdep.c (mips16_next_pc, _initialize_mips_tdep): Likewise.
+	* remote-e7000.c (e7000_start_remote): Likewise.
+	* remote-rdp.c (handle_swi): Likewise.
+	* remote-vx.c (vx_load_command): Likewise.
+	* sh-tdep.c (sh_do_pseudo_register): Likewise.
+	* sol-thread.c (td_err_string): Likewise.
+	* symtab.c (decode_line_2): Likewise.
+	
 Mon Oct 30 10:19:01 2000  David Taylor  <taylor@redhat.com>
 
 	* eval.c (parse_and_eval_long): New function.
@@ -23,9 +42,9 @@ Mon Oct 30 10:19:01 2000  David Taylor  <taylor@redhat.com>
 2000-10-27  J.T. Conklin  <jtc@redback.com>
 
 	* arch-utils.c (set_architecture, set_architecture_from_arch_mach,
- 	set_gdbarch_from_file): Fix spelling error.
+ 	set_gdbarch_from_file): Fix spelling error in string.
 	* v850-tdep.c (v850_target_architecture_hook): Likewise.
-	* gdbarch.sh: Fix spelling errors in comment.
+	* gdbarch.sh: Fix spelling errors in comments.
 	* gdbarch.c, gdbarch.h: Regenerate.
 
 	* ppcnbsd-nat.c (fetch_core_registers, fetch_inferior_registers,

@@ -717,7 +717,7 @@ supply_register (int regno, char *val)
    Ditto for write_pc.
 
    1999-06-08: The following were re-written so that it assumes the
-   existance of a TARGET_READ_PC et.al. macro.  A default generic
+   existence of a TARGET_READ_PC et.al. macro.  A default generic
    version of that macro is made available where needed.
 
    Since the ``TARGET_READ_PC'' et.al. macro is going to be controlled

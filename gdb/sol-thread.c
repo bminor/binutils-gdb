@@ -217,7 +217,7 @@ td_err_string (td_err_e errcode)
     {TD_NOAPLIC, "Operation not applicable to"},
     {TD_NOTSD, "No thread specific data for this thread"},
     {TD_MALLOC, "Malloc failed"},
-    {TD_PARTIALREG, "Only part of register set was writen/read"},
+    {TD_PARTIALREG, "Only part of register set was written/read"},
     {TD_NOXREGS, "X register set not available for given thread"}
   };
   const int td_err_size = sizeof td_err_table / sizeof (struct string_map);

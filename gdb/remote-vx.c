@@ -713,7 +713,7 @@ vx_load_command (char *arg_string, int from_tty)
 Kill the target task? "))
 	target_kill ();
       else
-	error ("Load cancelled.");
+	error ("Load canceled.");
     }
 
   QUIT;
