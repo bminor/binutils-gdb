@@ -297,7 +297,8 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
       break;
 
     default:
-      as_bad ("expression too complex for fixup");
+      add = make_expr_symbol (exp);
+      break;
     }
 
   return fix_new_internal (frag, where, size, add, sub, off,
@@ -2429,7 +2430,8 @@ fixup_segment (fixP, this_segment_type)
 	    }
 	  else
 	    {
-	      if (add_symbol_segment == absolute_section)
+	      if (add_symbol_segment == absolute_section
+		  && ! pcrel)
 		{
 #ifdef TC_I960
 		  /* See comment about reloc_callj() above.  */
@@ -2480,9 +2482,15 @@ fixup_segment (fixP, this_segment_type)
 	      else
 		{
 		  seg_reloc_count++;
+/* start-sanitize-v850 */
+#if !(defined (TC_V850) && defined (OBJ_ELF))
+/* end-sanitize-v850 */
 #if !(defined (TC_M68K) && defined (OBJ_ELF))
 #if !defined (TC_I386) || !(defined (OBJ_ELF) || defined (OBJ_COFF))
 		  add_number += S_GET_VALUE (add_symbolP);
+/* start-sanitize-v850 */
+#endif
+/* end-sanitize-v850 */
 #endif
 #endif
 		}

@@ -1,3 +1,8 @@
+Thu Dec  5 11:03:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (fixup_segment): Don't discard the symbol for a PC
+	relative fixup to an absolute symbol.
+
 start-sanitize-d10v
 Wed Dec  4 15:42:41 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
