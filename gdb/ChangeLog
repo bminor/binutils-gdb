@@ -1,3 +1,48 @@
+Sat Oct 29 02:40:40 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* top.c (line_completion_function):  Renamed from
+	symbol_completion_function, takes the line buffer and the
+	point in the line buffer as additional arguments.
+	(readline_line_completion_function):  New function, interface
+	between readline and line_completion_function.
+	(init_main):  Use it.
+	(complete_command):  Use line_completion_function instead of
+	abusing rl_line_buffer. Free completion strings after printing
+	them.
+	* symtab.c (completion_list_add_name):  Recheck for duplicates
+	if we intend to add a modified symbol.
+
+	* gdbtypes.h (cplus_struct_type):  nfn_fields_total no longer
+	includes the number of methods from the baseclasses.
+	* stabsread.c (attach_fn_fields_to_type):  No longer add the
+	number of methods from the baseclasses to TYPE_NFN_FIELDS_TOTAL,
+	the baseclass type might not have been completely filled in yet.
+	* symtab.c (total_number_of_methods):  New function to compute
+	the total number of methods for a type, including the methods
+	from baseclasses.
+	(decode_line_1):  Use it instead of TYPE_NFN_FIELDS_TOTAL to
+	allocate the symbol array for find_methods.
+
+	* stabsread.c (scan_file_globals):  Add default case to minimal
+	symbol type switch, to avoid gcc -Wall warnings.
+
+	* config/rs6000/tm-rs6000.h (INIT_EXTRA_FRAME_INFO):
+	Don't test for zero backchain pointer to recognize a signal
+	handler frame, if read() gets interrupted by a signal, the
+	backchain will be non zero.
+	(SIG_FRAME_FP_OFFSET):  Move to here from rs6000-tdep.c,
+	improve comment.
+	(SIG_FRAME_PC_OFFSET):  New definition.
+	(FRAME_SAVED_PC):  Return saved pc from sigcontext if this
+	is a signal handler frame.
+	* rs6000-tdep.c (function_frame_info):  Do not error out
+	if we can't access the instructions.
+
+	* config/rs6000/tm-rs6000.h (CONVERT_FROM_FUNC_PTR_ADDR):
+	New definition to get the function address from a function pointer.
+	* valops.c (find_function_addr):  Use it when calling a user
+	function through a function pointer.
+
 Fri Oct 28 16:16:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* Makefile.in (MMALLOC_DIR): New definition.

@@ -2751,17 +2751,6 @@ attach_fn_fields_to_type (fip, type)
 {
   register int n;
 
-  for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
-    {
-      if (TYPE_CODE (TYPE_BASECLASS (type, n)) == TYPE_CODE_UNDEF)
-	{
-	  /* @@ Memory leak on objfile -> type_obstack?  */
-	  return 0;
-	}
-      TYPE_NFN_FIELDS_TOTAL (type) +=
-	TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, n));
-    }
-
   for (n = TYPE_NFN_FIELDS (type);
        fip -> fnlist != NULL;
        fip -> fnlist = fip -> fnlist -> next)
@@ -3822,6 +3811,8 @@ scan_file_globals (objfile)
 	case mst_file_data:
 	case mst_file_bss:
 	  continue;
+	default:
+	  break;
 	}
 
       prev = NULL;

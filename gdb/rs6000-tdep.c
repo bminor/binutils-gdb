@@ -564,12 +564,16 @@ function_frame_info (pc, fdata)
 {
   unsigned int tmp;
   register unsigned int op;
+  char buf[4];
 
   fdata->offset = 0;
   fdata->saved_gpr = fdata->saved_fpr = fdata->alloca_reg = -1;
   fdata->frameless = 1;
 
-  op  = read_memory_integer (pc, 4);
+  /* Do not error out if we can't access the instructions.  */
+  if (target_read_memory (pc, buf, 4))
+    return;
+  op = extract_unsigned_integer (buf, 4);
   if (op == 0x7c0802a6) {		/* mflr r0 */
     pc += 4;
     op = read_memory_integer (pc, 4);
@@ -1094,17 +1098,7 @@ rs6000_frame_chain (thisframe)
   if (inside_entry_file ((thisframe)->pc))
     return 0;
   if (thisframe->signal_handler_caller)
-    {
-      /* This was determined by experimentation on AIX 3.2.  Perhaps
-	 it corresponds to some offset in /usr/include/sys/user.h or
-	 something like that.  Using some system include file would
-	 have the advantage of probably being more robust in the face
-	 of OS upgrades, but the disadvantage of being wrong for
-	 cross-debugging.  */
-
-#define SIG_FRAME_FP_OFFSET 284
-      fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
-    }
+    fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
   else
     fp = read_memory_integer ((thisframe)->frame, 4);
 

@@ -58,7 +58,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for local functions */
 
-static char * symbol_completion_function PARAMS ((char *, int));
+static char * line_completion_function PARAMS ((char *, int, char *, int));
+
+static char * readline_line_completion_function PARAMS ((char *, int));
 
 static void command_loop_marker PARAMS ((int));
 
@@ -1169,30 +1171,32 @@ filename_completer (text, word)
    */
 
 /* Generate completions one by one for the completer.  Each time we are
-   called return another potential completion to the caller.  The function
-   is misnamed; it just completes on commands or passes the buck to the
-   command's completer function; the stuff specific to symbol completion
+   called return another potential completion to the caller.
+   line_completion just completes on commands or passes the buck to the
+   command's completer function, the stuff specific to symbol completion
    is in make_symbol_completion_list.
 
-   TEXT is readline's idea of the "word" we are looking at; we don't really
-   like readline's ideas about word breaking so we ignore it.
+   TEXT is the caller's idea of the "word" we are looking at.
 
    MATCHES is the number of matches that have currently been collected from
    calling this completion function.  When zero, then we need to initialize,
    otherwise the initialization has already taken place and we can just
    return the next potential completion string.
 
-   Returns NULL if there are no more completions, else a pointer to a string
-   which is a possible completion.
+   LINE_BUFFER is available to be looked at; it contains the entire text
+   of the line.  POINT is the offset in that line of the cursor.  You
+   should pretend that the line ends at POINT.
 
-   RL_LINE_BUFFER is available to be looked at; it contains the entire text
-   of the line.  RL_POINT is the offset in that line of the cursor.  You
-   should pretend that the line ends at RL_POINT. */
+   Returns NULL if there are no more completions, else a pointer to a string
+   which is a possible completion, it is the caller's responsibility to
+   free the string.  */
 
 static char *
-symbol_completion_function (text, matches)
+line_completion_function (text, matches, line_buffer, point)
      char *text;
      int matches;
+     char *line_buffer;
+     int point;
 {
   static char **list = (char **)NULL;		/* Cache of completions */
   static int index;				/* Next cached completion */
@@ -1228,17 +1232,17 @@ symbol_completion_function (text, matches)
 	  gdb_completer_word_break_characters;
 
       /* Decide whether to complete on a list of gdb commands or on symbols. */
-      tmp_command = (char *) alloca (rl_point + 1);
+      tmp_command = (char *) alloca (point + 1);
       p = tmp_command;
 
-      strncpy (tmp_command, rl_line_buffer, rl_point);
-      tmp_command[rl_point] = '\0';
+      strncpy (tmp_command, line_buffer, point);
+      tmp_command[point] = '\0';
       /* Since text always contains some number of characters leading up
-	 to rl_point, we can find the equivalent position in tmp_command
+	 to point, we can find the equivalent position in tmp_command
 	 by subtracting that many characters from the end of tmp_command.  */
-      word = tmp_command + rl_point - strlen (text);
+      word = tmp_command + point - strlen (text);
 
-      if (rl_point == 0)
+      if (point == 0)
 	{
 	  /* An empty line we want to consider ambiguous; that is, it
 	     could be any command.  */
@@ -1271,7 +1275,7 @@ symbol_completion_function (text, matches)
 	  q = p;
 	  while (*q && (isalnum (*q) || *q == '-' || *q == '_'))
 	    ++q;
-	  if (q != tmp_command + rl_point)
+	  if (q != tmp_command + point)
 	    {
 	      /* There is something beyond the ambiguous
 		 command, so there are no possible completions.  For
@@ -1303,7 +1307,7 @@ symbol_completion_function (text, matches)
 	{
 	  /* We've recognized a full command.  */
 
-	  if (p == tmp_command + rl_point)
+	  if (p == tmp_command + point)
 	    {
 	      /* There is no non-whitespace in the line beyond the command.  */
 
@@ -1400,6 +1404,16 @@ symbol_completion_function (text, matches)
 #endif
 
   return (output);
+}
+
+/* Line completion interface function for readline.  */
+
+static char *
+readline_line_completion_function (text, matches)
+     char *text;
+     int matches;
+{
+  return line_completion_function (text, matches, rl_line_buffer, rl_point);
 }
 
 /* Skip over a possibly quoted word (as defined by the quote characters
@@ -2137,25 +2151,22 @@ complete_command (arg, from_tty)
      int from_tty;
 {
   int i;
+  int argpoint;
   char *completion;
 
   dont_repeat ();
 
   if (arg == NULL)
-    {
-      rl_line_buffer[0] = '\0';
-      rl_point = 0;
-    }
-  else
-    {
-      strcpy (rl_line_buffer, arg);
-      rl_point = strlen (arg);
-    }
+    arg = "";
+  argpoint = strlen (arg);
 
-  for (completion = symbol_completion_function (rl_line_buffer, i = 0);
+  for (completion = line_completion_function (arg, i = 0, arg, argpoint);
        completion;
-       completion = symbol_completion_function (rl_line_buffer, ++i))
-    printf_unfiltered ("%s\n", completion);
+       completion = line_completion_function (arg, ++i, arg, argpoint))
+    {
+      printf_unfiltered ("%s\n", completion);
+      free (completion);
+    }
 }
 
 /* The "show" command with no arguments shows all the settings.  */
@@ -3005,7 +3016,7 @@ init_main ()
   write_history_p = 0;
 
   /* Setup important stuff for command line editing.  */
-  rl_completion_entry_function = (int (*)()) symbol_completion_function;
+  rl_completion_entry_function = (int (*)()) readline_line_completion_function;
   rl_completer_word_break_characters = gdb_completer_word_break_characters;
   rl_completer_quote_characters = gdb_completer_quote_characters;
   rl_readline_name = "gdb";

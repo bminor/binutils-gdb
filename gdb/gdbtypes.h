@@ -1,5 +1,5 @@
 /* Internal type definitions for GDB.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -349,7 +349,7 @@ struct cplus_struct_type
 
   short nfn_fields;
 
-  /* Number of methods described for this type plus all the
+  /* Number of methods described for this type, not including the
      methods that it derives from.  */
 
   int nfn_fields_total;
