@@ -1,3 +1,7 @@
+Mon Jun 13 12:26:57 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* .Sanitize: change name from sparclite-*.c to sparcl-*.c.
+
 Sun Jun 12 03:51:52 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/m68k/dpx2.mh (NATDEPFILES):  Remove duplicate inclusion
