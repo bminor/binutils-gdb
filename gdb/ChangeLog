@@ -1,3 +1,10 @@
+2002-07-02  Joel Brobecker  <brobecker@gnat.com>
+
+	* solib-osf.c (open_map): Compute the list of shared libraries
+	loaded by the inferior, rather than the list of libraries loaded
+	by GDB itself.  Otherwise, GDB ends up reading the symbols from
+	the wrong shared libraries...
+
 2002-07-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Make static.
