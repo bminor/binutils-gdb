@@ -41,7 +41,7 @@
 // 1111 0000 0011 Am00; mov Am,USP
 8.0xf0+4.0x3,2.AM1,00:D0q:::mov
 "mov"
-// end-sanitize-am33
+*am33
 {
   PC = cia;
   State.regs[REG_USP] = State.regs[REG_A0 + AM1];
@@ -50,7 +50,7 @@
 // 1111 0000 0011 Am01; mov Am,SSP
 8.0xf0+4.0x3,2.AM1,01:D0r:::mov
 "mov"
-// end-sanitize-am33
+*am33
 {
   PC = cia;
   State.regs[REG_SSP] = State.regs[REG_A0 + AM1];
@@ -59,7 +59,7 @@
 // 1111 0000 0011 Am10; mov Am,MSP
 8.0xf0+4.0x3,2.AM1,10:D0s:::mov
 "mov"
-// end-sanitize-am33
+*am33
 {
   PC = cia;
   State.regs[REG_MSP] = State.regs[REG_A0 + AM1];
@@ -170,6 +170,7 @@
 // 1111 1000 1100 1110 regs....; movm (USP),regs
 8.0xf8+8.0xce+8.REGS:D1a:::movm
 "movm"
+*am33
 {
   unsigned long usp = State.regs[REG_USP];
   unsigned long mask;
@@ -262,6 +263,7 @@
 // 1111 1000 1100 1111 regs....; movm (USP),regs
 8.0xf8+8.0xcf+8.REGS:D1b:::movm
 "movm"
+*am33
 {
   unsigned long usp = State.regs[REG_USP];
   unsigned long mask;
@@ -1227,7 +1229,7 @@
 
 
 // 1111 1001 0000 1010 Rm Rn; mov (Rm),Rn
-8.0xf9+8.0x0a+4.RM2,4.RN0:D1h:::mov
+8.0xf9+8.0x0a+4.RN2,4.RM0:D1h:::mov
 "mov"
 *am33
 {
@@ -1235,26 +1237,19 @@
 
   PC = cia;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
   else
-    srcreg = REG_E0 + RM2;
+    srcreg = REG_E0 + RM0;
 
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
   else
-    dstreg = REG_E0 + RN0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+    dstreg = REG_E0 + RN2;
 
   State.regs[dstreg] = load_word (State.regs[srcreg]);
 }
@@ -1282,18 +1277,11 @@
   else
     dstreg = REG_E0 + RN0;
 
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
   store_word (State.regs[dstreg], State.regs[srcreg]);
 }
 
 // 1111 1001 0010 1010 Rm Rn; movbu (Rm),Rn
-8.0xf9+8.0x2a+4.RM2,4.RN0:D1g:::movbu
+8.0xf9+8.0x2a+4.RN2,4.RM0:D1g:::movbu
 "movbu"
 *am33
 {
@@ -1301,26 +1289,19 @@
 
   PC = cia;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
   else
-    srcreg = REG_E0 + RM2;
+    srcreg = REG_E0 + RM0;
 
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
   else
-    dstreg = REG_E0 + RN0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+    dstreg = REG_E0 + RN2;
 
   State.regs[dstreg] = load_byte (State.regs[srcreg]);
 }
@@ -1348,18 +1329,11 @@
   else
     dstreg = REG_E0 + RN0;
 
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
   store_byte (State.regs[dstreg], State.regs[srcreg]);
 }
 
 // 1111 1001 0100 1010 Rm Rn; movhu (Rm),Rn
-8.0xf9+8.0x4a+4.RM2,4.RN0:D1g:::movhu
+8.0xf9+8.0x4a+4.RN2,4.RM0:D1g:::movhu
 "movhu"
 *am33
 {
@@ -1367,26 +1341,19 @@
 
   PC = cia;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
   else
-    srcreg = REG_E0 + RM2;
+    srcreg = REG_E0 + RM0;
 
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
   else
-    dstreg = REG_E0 + RN0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+    dstreg = REG_E0 + RN2;
 
   State.regs[dstreg] = load_half (State.regs[srcreg]);
 }
@@ -1406,13 +1373,6 @@
     srcreg = REG_D0 + RM2 - 12;
   else
     srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
 
   if (RN0 > 7 && RN0 < 12)
     dstreg = REG_A0 + RN0 - 8;
@@ -1941,11 +1901,32 @@
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
-// ??? btst
+// 1111 1011 1110 1001 Rn Rn IMM8; btst imm8,Rn
+8.0xfb+8.0xe9+4.RN2,4.RM0=RN2+8.IMM8:D2l:::btst
+"btst"
+*am33
+{
+  int srcreg;
 
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  genericBtst(IMM8, State.regs[srcreg]);
+
+}
+
+
+// XYZ
 // 1111 1011 0000 1010 Rn Rm IMM8; mov (d8,Rm),Rn
 8.0xfb+8.0x0a+4.RN2,4.RM0+8.IMM8:D2l:::mov
 "mov"
+*am33
 {
   int srcreg, dstreg;
 
@@ -2204,13 +2185,23 @@
   store_half (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
+// ??? movhu
+// ??? movhu
+// ??? mac
+// ??? macu
+// ??? macb
+// ??? macbu
+// ??? mach
+// ??? machu
+// ??? mcste
+
 // 1111 1011 0111 1100 Rm Rn Rd; add Rm,Rn,Rd
 8.0xfb+8.0x7c+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::add
 "add"
 *am33
 {
   int z, c, n, v;
-  unsigned long sum;
+  unsigned long sum, source1, source2;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2236,6 +2227,8 @@
   else
     dstreg = REG_E0 + RD0;
 
+  source1 = State.regs[srcreg1];
+  source2 = State.regs[srcreg2];
   sum = source1 + source2;
   State.regs[dstreg] = sum;
 
@@ -2244,6 +2237,564 @@
   c = (sum < source1) || (sum < source2);
   v = ((source1 & 0x80000000) == (source2 & 0x80000000)
        && (source1 & 0x80000000) != (sum & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1011 1000 1100 Rm Rn Rd; addc Rm,Rn,Rd
+8.0xfb+8.0x8c+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::addc
+"addc"
+*am33
+{
+  int z, c, n, v;
+  unsigned long sum, source1, source2;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  source1 = State.regs[srcreg1];
+  source2 = State.regs[srcreg2];
+  sum = source1 + source2 + ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = sum;
+
+  z = (sum == 0);
+  n = (sum & 0x80000000);
+  c = (sum < source1) || (sum < source2);
+  v = ((source1 & 0x80000000) == (source2 & 0x80000000)
+       && (source1 & 0x80000000) != (sum & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1011 1001 1100 Rm Rn Rd; sub Rm,Rn,Rd
+8.0xfb+8.0x9c+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::sub
+"sub"
+*am33
+{
+  int z, c, n, v;
+  unsigned long difference, source1, source2;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  source1 = State.regs[srcreg1];
+  source2 = State.regs[srcreg2];
+  difference = source2 - source1;
+  State.regs[dstreg] = difference;
+
+  z = (difference == 0);
+  n = (difference & 0x80000000);
+  c = (source1 > source1);
+  v = ((source1 & 0x80000000) == (source2 & 0x80000000)
+       && (source1 & 0x80000000) != (difference & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1011 1010 1100 Rm Rn Rd; subc Rm,Rn,Rd
+8.0xfb+8.0xac+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::subc
+"subc"
+*am33
+{
+  int z, c, n, v;
+  unsigned long difference, source1, source2;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  source1 = State.regs[srcreg1];
+  source2 = State.regs[srcreg2];
+  difference = source2 - source1 - ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = difference;
+
+  z = (difference == 0);
+  n = (difference & 0x80000000);
+  c = (source1 > source2);
+  v = ((source1 & 0x80000000) == (source2 & 0x80000000)
+       && (source1 & 0x80000000) != (difference & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1011 0000 1101 Rm Rn Rd; and Rm,Rn,Rd
+8.0xfb+8.0x0d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::and
+"and"
+*am33
+{
+  int z, c, n, v;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  State.regs[dstreg] = State.regs[srcreg1] & State.regs[srcreg2];
+
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000);
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0));
+}
+
+// 1111 1011 0001 1101 Rm Rn Rd; or Rm,Rn,Rd
+8.0xfb+8.0x1d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::or
+"or"
+*am33
+{
+  int z, c, n, v;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  State.regs[dstreg] = State.regs[srcreg1] | State.regs[srcreg2];
+
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000);
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0));
+}
+
+// 1111 1011 0010 1101 Rm Rn Rd; xor Rm,Rn,Rd
+8.0xfb+8.0x2d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::xor
+"xor"
+*am33
+{
+  int z, c, n, v;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  State.regs[dstreg] = State.regs[srcreg1] ^ State.regs[srcreg2];
+
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000);
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0));
+}
+
+// 1111 1011 0100 1101 Rm Rn Rd; asr Rm,Rn,Rd
+8.0xfb+8.0x4d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::asr
+"asr"
+*am33
+{
+  int z, c, n, v;
+  long temp;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  temp = State.regs[srcreg2];
+  c = temp & 1;
+  temp >>= State.regs[srcreg1];
+  State.regs[dstreg] = temp;
+
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000);
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0));
+}
+
+// 1111 1011 0101 1101 Rm Rn Rd; lsr Rm,Rn,Rd
+8.0xfb+8.0x5d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::lsr
+"lsr"
+*am33
+{
+  int z, c, n, v;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  c = State.regs[srcreg2] & 1;
+  State.regs[dstreg] = State.regs[srcreg2] >> State.regs[srcreg1];
+
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000);
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0));
+}
+
+// 1111 1011 0110 1101 Rm Rn Rd; asl Rm,Rn,Rd
+8.0xfb+8.0x6d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::asl
+"asl"
+*am33
+{
+  int z, c, n, v;
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  State.regs[dstreg] = State.regs[srcreg2] << State.regs[srcreg1];;
+
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000);
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0));
+}
+
+// mul
+// mulu
+// mov
+// mov
+// movbu
+// movbu
+// movhu
+// movhu
+// mov
+// mov
+// movbu
+// movbu
+// movhu
+// movhu
+// mac
+// macu
+// macb
+// macbu
+// mach
+// machu
+// dmach
+// dmachu
+// dmulh
+// dmulhu
+// sat24
+// bsch
+
+// 1111 1101 0000 1000 Rn Rn IMM32; mov imm24,Rn
+8.0xfd+8.0x08+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4t:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 0001 1000 Rn Rn IMM32; movu imm24,Rn
+8.0xfd+8.0x18+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4k:::movu
+"movu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff;
+}
+
+// 1111 1101 0111 1000 Rn Rn IMM32; add imm24,Rn
+8.0xfd+8.0x78+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4c:::add
+"add"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericAdd (FETCH24 (IMM24A, IMM24B, IMM24C), dstreg);
+}
+
+// 1111 1101 1000 1000 Rn Rn IMM32; addc imm24,Rn
+8.0xfd+8.0x88+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::addc
+"addc"
+*am33
+{
+  int dstreg, z, n, c, v;
+  unsigned long sum, imm, reg2;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  imm = EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C));
+  reg2 = State.regs[dstreg];
+  sum = imm + reg2 + ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = sum;
+
+  z = (sum == 0);
+  n = (sum & 0x80000000);
+  c = (sum < imm) || (sum < reg2);
+  v = ((reg2 & 0x80000000) == (imm & 0x80000000)
+       && (reg2 & 0x80000000) != (sum & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1101 1001 1000 Rn Rn IMM32; sub imm24,Rn
+8.0xfd+8.0x98+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::sub
+"sub"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericSub (FETCH24 (IMM24A, IMM24B, IMM24C), dstreg);
+}
+
+// 1111 1101 1010 1000 Rn Rn IMM32; subc imm24,Rn
+8.0xfd+8.0xa8+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::subc
+"subc"
+*am33
+{
+  int dstreg, z, n, c, v;
+  unsigned long difference, imm, reg2;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  imm = EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C));
+  reg2 = State.regs[dstreg];
+  difference = reg2 - imm - ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = difference;
+
+  z = (difference == 0);
+  n = (difference & 0x80000000);
+  c = (imm > reg2);
+  v = ((reg2 & 0x80000000) == (imm & 0x80000000)
+       && (reg2 & 0x80000000) != (difference & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
@@ -2266,8 +2817,607 @@
   else
     srcreg = REG_E0 + RN0;
 
-  genericCmp (FETCH24(IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
+  genericCmp (EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)), State.regs[srcreg]);
 }
+
+// 1111 1101 1111 1000 XRn XRn IMM32; mov imm24,XRn
+8.0xfd+8.0xf8+4.XRM2,4.XRN0=XRM2+8.IMM24A+8.IMM24B+8.IMM24C:D4o:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (XRN0 == 0)
+    {
+      State.regs[REG_SP] = FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff;
+    }
+  else
+    abort ();
+}
+
+// 1111 1101 0000 1001 Rn Rn IMM24; and imm24,Rn
+8.0xfd+8.0x09+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::and
+"and"
+*am33
+{
+  int dstreg;
+  int z,n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] &= (FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1101 0001 1001 Rn Rn IMM24; or imm24,Rn
+8.0xfd+8.0x19+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::or
+"or"
+*am33
+{
+  int dstreg;
+  int z,n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] |= (FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1101 0010 1001 Rn Rn IMM24; xor imm24,Rn
+8.0xfd+8.0x29+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::xor
+"xor"
+*am33
+{
+  int dstreg;
+  int z,n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] ^= (FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1101 0100 1001 Rn Rn IMM24; asr imm24,Rn
+8.0xfd+8.0x49+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::asr
+"asr"
+*am33
+{
+  int dstreg;
+  long temp;
+  int c, z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = State.regs[dstreg];
+  c = temp & 1;
+  temp >>= (FETCH24 (IMM24A, IMM24B, IMM24C));
+  State.regs[dstreg] = temp;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+
+// 1111 1101 0101 1001 Rn Rn IMM24; lsr imm24,Rn
+8.0xfd+8.0x59+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::lsr
+"lsr"
+*am33
+{
+  int dstreg;
+  int z, n, c;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  c = State.regs[dstreg] & 1;
+  State.regs[dstreg] >>= (FETCH24 (IMM24A, IMM24B, IMM24C));
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1101 0110 1001 Rn Rn IMM24; asl imm24,Rn
+8.0xfd+8.0x69+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::asl
+"asl"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] <<= (FETCH24 (IMM24A, IMM24B, IMM24C));
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// mul
+// mulu
+
+// 1111 1101 1110 1001 Rn Rn IMM24; btst imm24,,Rn
+8.0xfd+8.0xe9+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::btst
+"btst"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg = REG_D0 + RN0 - 12;
+  else
+    srcreg = REG_E0 + RN0;
+
+  genericBtst (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
+}
+
+// 1111 1101 0000 1010 Rn Rm IMM24; mov (d24,Rm),Rn
+8.0xfd+8.0x0a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 0001 1010 Rm Rn IMM24; mov Rm,(d24,Rn)
+8.0xfd+8.0x1a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4q:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+}
+
+// 1111 1101 0010 1010 Rn Rm IMM24; movbu (d24,Rm),Rn
+8.0xfd+8.0x2a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (State.regs[srcreg]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 0011 1010 Rm Rn IMM24; movbu Rm,(d24,Rn)
+8.0xfd+8.0x3a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4q:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_byte (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+}
+
+// 1111 1101 0100 1010 Rn Rm IMM24; movhu (d24,Rm),Rn
+8.0xfd+8.0x4a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 0101 1010 Rm Rn IMM24; movhu Rm,(d24,Rn)
+8.0xfd+8.0x5a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4q:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+}
+
+// mov
+// mov
+
+// 1111 1101 1000 1010 Rn 0000 IMM24; mov (d24,sp),Rn
+8.0xfd+8.0x8a+4.RN2,4.0x0+IMM24A+8.IMM24B+8.IMM24C:D4r:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[REG_SP]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 1001 1010 Rm 0000 IMM24; mov Rm,(d24,sp)
+8.0xfd+8.0x9a+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4s:::mov
+"mov"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_word (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+}
+
+// 1111 1101 1010 1010 Rn 0000 IMM24; movbu (d24,Rm),Rn
+8.0xfd+8.0xaa+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4r:::movbu
+"movbu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (State.regs[REG_SP]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 1011 1010 Rm 0000 IMM24; movbu Rm,(d24,sp)
+8.0xfd+8.0xba+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4s:::movbu
+"movbu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_byte (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+}
+
+// 1111 1101 1100 1010 Rn 0000 IMM24; movhu (d24,sp),Rn
+8.0xfd+8.0xca+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4r:::movhu
+"movhu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[REG_SP]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 1101 1010 Rm Rn IMM24; movhu Rm,(d24,sp)
+8.0xfd+8.0xda+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4s:::movhu
+"movhu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_half (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+}
+
+// movhu
+// movhu
+// mac
+// macb
+// macbu
+// mach
+// machu
+
+// 1111 1101 0000 1110 Rn 0000 ABS24; mov (abs24),Rn
+8.0xfd+8.0x0e+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4u:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 0001 1110 Rm 0000 ABS24; mov Rm,(abs24)
+8.0xfd+8.0x1e+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4v:::mov
+"mov"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_word (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
+}
+
+
+// 1111 1101 0010 1110 Rn 0000 ABS24; movbu (abs24),Rn
+8.0xfd+8.0x2e+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4t:::movbu
+"movbu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 0011 1110 Rm 0000 ABS24; movbu Rm,(abs24)
+8.0xfd+8.0x3e+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4u:::movbu
+"movbu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_byte (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
+}
+
+
+// 1111 1101 0100 1110 Rn 0000 ABS24; movhu (abs24),Rn
+8.0xfd+8.0x4e+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4t:::movhu
+"movhu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (FETCH24 (IMM24A, IMM24B, IMM24C));
+}
+
+// 1111 1101 0101 1110 Rm 0000 ABS24; movhu Rm,(abs24)
+8.0xfd+8.0x5e+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4u:::movhu
+"movhu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_half (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
+}
+
 
 // 1111 1110 0000 1000 Rn Rn IMM32; mov imm32,Rn
 8.0xfe+8.0x08+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mov
@@ -2307,9 +3457,9 @@
   State.regs[dstreg] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
 }
 
-// 1111 1110 0000 1000 Rn Rn IMM32; add imm32,Rn
+// 1111 1110 0111 1000 Rn Rn IMM32; add imm32,Rn
 8.0xfe+8.0x78+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::add
-"mov"
+"add"
 *am33
 {
   int dstreg;
@@ -2323,7 +3473,94 @@
   else
     dstreg = REG_E0 + RN0;
 
-  genericAdd (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), dstreg);
+  genericAdd (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), dstreg);
+}
+
+// 1111 1110 1000 1000 Rn Rn IMM32; addc imm32,Rn
+8.0xfe+8.0x88+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::addc
+"addc"
+*am33
+{
+  int dstreg;
+  unsigned int imm, reg2, sum;
+  int z, n, c, v;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+  reg2 = State.regs[dstreg];
+  sum = imm + reg2 + ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = sum;
+
+  z = (sum == 0);
+  n = (sum & 0x80000000);
+  c = (sum < imm) || (sum < reg2);
+  v = ((reg2 & 0x80000000) == (imm & 0x80000000)
+       && (reg2 & 0x80000000) != (sum & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1110 1001 1000 Rn Rn IMM32; sub imm32,Rn
+8.0xfe+8.0x98+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::sub
+"sub"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericSub (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), dstreg);
+}
+
+// 1111 1110 1010 1000 Rn Rn IMM32; subc imm32,Rn
+8.0xfe+8.0xa8+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::subc
+"subc"
+*am33
+{
+  int dstreg;
+  unsigned int imm, reg2, difference;
+  int z, n, c, v;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+  reg2 = State.regs[dstreg];
+  difference = reg2 - imm - ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = difference;
+
+  z = (difference == 0);
+  n = (difference & 0x80000000);
+  c = (imm > reg2);
+  v = ((reg2 & 0x80000000) == (imm & 0x80000000)
+       && (reg2 & 0x80000000) != (difference & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
 // 1111 1110 0111 1000 Rn Rn IMM32; cmp imm32,Rn
@@ -2345,3 +3582,609 @@
   genericCmp (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
 }
 
+// 1111 1110 1111 1000 XRn XRn IMM32; mov imm32,XRn
+8.0xfe+8.0xf8+4.XRM2,4.XRN0=XRM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5b:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (XRN0 == 0)
+    State.regs[REG_SP] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
+  else
+    abort ();
+}
+
+// 1111 1110 0000 1001 Rn Rn IMM32; and imm32,Rn
+8.0xfe+8.0x09+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::and
+"and"
+*am33
+{
+  int dstreg;
+  int z,n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] &= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1110 0001 1001 Rn Rn IMM32; or imm32,Rn
+8.0xfe+8.0x19+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::or
+"or"
+*am33
+{
+  int dstreg;
+  int z,n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] |= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1110 0010 1001 Rn Rn IMM32; xor imm32,Rn
+8.0xfe+8.0x29+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::xor
+"xor"
+*am33
+{
+  int dstreg;
+  int z,n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] ^= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1110 0100 1001 Rn Rn IMM32; asr imm32,Rn
+8.0xfe+8.0x49+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::asr
+"asr"
+*am33
+{
+  int dstreg;
+  long temp;
+  int c, z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = State.regs[dstreg];
+  c = temp & 1;
+  temp >>= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  State.regs[dstreg] = temp;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1110 0101 1001 Rn Rn IMM32; lsr imm32,Rn
+8.0xfe+8.0x59+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::lsr
+"lsr"
+*am33
+{
+  int dstreg;
+  int z, n, c;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  c = State.regs[dstreg] & 1;
+  State.regs[dstreg] >>= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1110 0110 1001 Rn Rn IMM32; asl imm32,Rn
+8.0xfe+8.0x69+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::asl
+"asl"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] <<= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// mul
+// mulu
+
+// 1111 1110 1110 1001 Rn Rn IMM32; btst imm32,Rn
+8.0xfe+8.0xe9+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5a:::btst
+"btst"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg = REG_D0 + RN0 - 12;
+  else
+    srcreg = REG_E0 + RN0;
+
+  genericBtst (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
+}
+
+// 1111 1110 0000 1010 Rn Rm IMM32; mov (d32,Rm),Rn
+8.0xfe+8.0x0a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5f:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 0001 1010 Rm Rn IMM32; mov Rm,(d32,Rn)
+8.0xfe+8.0x1a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5g:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+}
+
+// 1111 1110 0010 1010 Rn Rm IMM32; movbu (d32,Rm),Rn
+8.0xfe+8.0x2a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (State.regs[srcreg]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 0011 1010 Rm Rn IMM32; movbu Rm,(d32,Rn)
+8.0xfe+8.0x3a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5b:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_byte (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+}
+
+// 1111 1110 0100 1010 Rn Rm IMM32; movhu (d32,Rm),Rn
+8.0xfe+8.0x4a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 0101 1010 Rm Rn IMM32; movhu Rm,(d32,Rn)
+8.0xfe+8.0x5a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5b:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+}
+
+// mov
+// mov
+
+// 1111 1110 1000 1010 Rn 0000 IMM32; mov (d32,sp),Rn
+8.0xfe+8.0x8a+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5c:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[REG_SP]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 1001 1010 Rm 0000 IMM32; mov Rm,(d32,sp)
+8.0xfe+8.0x9a+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5d:::mov
+"mov"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_word (State.regs[REG_SP] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+}
+
+// 1111 1110 1010 1010 Rn 0000 IMM32; movbu (d32,sp),Rn
+8.0xfe+8.0xaa+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5c:::movbu
+"movbu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (State.regs[REG_SP]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 1011 1010 Rm 0000 IMM32; movbu Rm,(d32,sp)
+8.0xfe+8.0xba+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5d:::movbu
+"movbu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_byte (State.regs[REG_SP] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+}
+
+// 1111 1110 1100 1010 Rn 0000 IMM32; movhu (d32,sp),Rn
+8.0xfe+8.0xca+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5c:::movhu
+"movhu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[REG_SP]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 1101 1010 Rm 0000 IMM32; movhu Rm,(d32,sp)
+8.0xfe+8.0xda+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5d:::movhu
+"movhu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_half (State.regs[REG_SP] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+}
+
+
+// movhu
+// movhu
+
+// mac
+// macu
+// macb
+// macbu
+// mach
+// machu
+// dmach
+// dmachu
+// dmulh
+// dmulhu
+
+// 1111 1110 0000 1110 Rn 0000 IMM32; mov (abs32),Rn
+8.0xfe+8.0x0e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5h:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 0001 1110 Rm 0000 IMM32; mov Rn,(abs32)
+8.0xfe+8.0x1e+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5e:::mov
+"mov"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_word (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
+}
+
+// 1111 1110 0020 1110 Rn 0000 IMM32; movbu (abs32),Rn
+8.0xfe+8.0x2e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5i:::movbu
+"movbu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 0011 1110 Rm 0000 IMM32; movbu Rn,(abs32)
+8.0xfe+8.0x3e+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5e:::movbu
+"movbu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_byte (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
+}
+
+// 1111 1110 0100 1110 Rn 0000 IMM32; movhu (abs32),Rn
+8.0xfe+8.0x4e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5j:::movhu
+"movhu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+}
+
+// 1111 1110 0101 1110 Rm 0000 IMM32; movhu Rn,(abs32)
+8.0xfe+8.0x5e+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5e:::movhu
+"movhu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_half (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
+}
+
+// movbu
+// movbu
+// movhu
+// movhu
+
+// DSP

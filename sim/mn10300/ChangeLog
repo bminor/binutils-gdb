@@ -1,3 +1,9 @@
+start-sanitize-am33
+Mon Jul  6 15:39:22 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Add many more am33 instructions.
+
+end-sanitize-am33
 Wed Jul  1 17:07:09 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300_sim.h (FETCH24): Define.
