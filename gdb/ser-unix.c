@@ -150,6 +150,12 @@ set_tty_state(scb, state)
 #ifdef HAVE_SGTTY
   if (ioctl (scb->fd, TIOCSETN, &state->sgttyb) < 0)
     return -1;
+  if (ioctl (scb->fd, TIOCSETC, &state->tc) < 0)
+    return -1;
+  if (ioctl (scb->fd, TIOCSLTC, &state->ltc) < 0)
+    return -1;
+  if (ioctl (scb->fd, TIOCLSET, &state->lmode) < 0)
+    return -1;
 
   return 0;
 #endif

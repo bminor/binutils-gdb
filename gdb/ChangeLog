@@ -1,3 +1,8 @@
+Mon Dec  6 16:34:10 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* ser-unix.c (set_tty_state): set the rest of the terminal state
+	  pieces.
+
 Mon Dec  6 12:01:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Recognize mips* for all mips targets.
