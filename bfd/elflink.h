@@ -1734,45 +1734,8 @@ elf_link_add_object_symbols (abfd, info)
 				  == 0);
 
 		      ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
-
-		      /* Copy down any references that we may have
-			 already seen to the symbol which just became
-			 indirect.  */
-		      ht->elf_link_hash_flags |=
-			(hi->elf_link_hash_flags
-			 & (ELF_LINK_HASH_REF_DYNAMIC
-			    | ELF_LINK_HASH_REF_REGULAR
-			    | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-			    | ELF_LINK_NON_GOT_REF));
-
-		      /* Copy over the global and procedure linkage table
-			 offset entries.  These may have been already set
-			 up by a check_relocs routine.  */
-		      if (ht->got.offset == (bfd_vma) -1)
-			{
-			  ht->got.offset = hi->got.offset;
-			  hi->got.offset = (bfd_vma) -1;
-			}
-		      BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
-
-		      if (ht->plt.offset == (bfd_vma) -1)
-			{
-			  ht->plt.offset = hi->plt.offset;
-			  hi->plt.offset = (bfd_vma) -1;
-			}
-		      BFD_ASSERT (hi->plt.offset == (bfd_vma) -1);
-
-		      if (ht->dynindx == -1)
-			{
-			  ht->dynindx = hi->dynindx;
-			  ht->dynstr_index = hi->dynstr_index;
-			  hi->dynindx = -1;
-			  hi->dynstr_index = 0;
-			}
-		      BFD_ASSERT (hi->dynindx == -1);
-
-		      /* FIXME: There may be other information to copy
-			 over for particular targets.  */
+		      elf_link_hash_copy_indirect (elf_hash_table (info),
+						   ht, hi);
 
 		      /* See if the new flags lead us to realize that
 			 the symbol must be dynamic.  */
@@ -1845,44 +1808,8 @@ elf_link_add_object_symbols (abfd, info)
 					  | ELF_LINK_HASH_DEF_REGULAR))
 				      == 0);
 
-			  /* Copy down any references that we may have
-                             already seen to the symbol which just
-                             became indirect.  */
-			  h->elf_link_hash_flags |=
-			    (hi->elf_link_hash_flags
-			     & (ELF_LINK_HASH_REF_DYNAMIC
-				| ELF_LINK_HASH_REF_REGULAR
-				| ELF_LINK_HASH_REF_REGULAR_NONWEAK
-				| ELF_LINK_NON_GOT_REF));
-
-			  /* Copy over the global and procedure linkage
-                             table offset entries.  These may have been
-                             already set up by a check_relocs routine.  */
-			  if (h->got.offset == (bfd_vma) -1)
-			    {
-			      h->got.offset = hi->got.offset;
-			      hi->got.offset = (bfd_vma) -1;
-			    }
-			  BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
-
-			  if (h->plt.offset == (bfd_vma) -1)
-			    {
-			      h->plt.offset = hi->plt.offset;
-			      hi->plt.offset = (bfd_vma) -1;
-			    }
-			  BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
-
-			  if (h->dynindx == -1)
-			    {
-			      h->dynindx = hi->dynindx;
-			      h->dynstr_index = hi->dynstr_index;
-			      hi->dynindx = -1;
-			      hi->dynstr_index = 0;
-			    }
-			  BFD_ASSERT (hi->dynindx == -1);
-
-			  /* FIXME: There may be other information to
-                             copy over for particular targets.  */
+			  elf_link_hash_copy_indirect (elf_hash_table (info),
+						       h, hi);
 
 			  /* See if the new flags lead us to realize
                              that the symbol must be dynamic.  */
@@ -3758,10 +3685,8 @@ elf_link_assign_sym_version (h, data)
 			      && ! sinfo->export_dynamic)
 			    {
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			      h->elf_link_hash_flags &=~
-				ELF_LINK_HASH_NEEDS_PLT;
-			      h->dynindx = -1;
-			      h->plt.offset = (bfd_vma) -1;
+			      elf_link_hash_hide_symbol (elf_hash_table (info),
+							 h);
 			      /* FIXME: The name of the symbol has
 				 already been recorded in the dynamic
 				 string table section.  */
@@ -3873,9 +3798,7 @@ elf_link_assign_sym_version (h, data)
 			  && ! sinfo->export_dynamic)
 			{
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
-			  h->dynindx = -1;
-			  h->plt.offset = (bfd_vma) -1;
+			  elf_link_hash_hide_symbol (elf_hash_table (info), h);
 			  /* FIXME: The name of the symbol has already
 			     been recorded in the dynamic string table
 			     section.  */
@@ -3897,9 +3820,7 @@ elf_link_assign_sym_version (h, data)
 	      && ! sinfo->export_dynamic)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-	      h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
-	      h->dynindx = -1;
-	      h->plt.offset = (bfd_vma) -1;
+	      elf_link_hash_hide_symbol (elf_hash_table (info), h);
 	      /* FIXME: The name of the symbol has already been
 		 recorded in the dynamic string table section.  */
 	    }

@@ -1,3 +1,17 @@
+2000-02-13  Richard Henderson  <rth@cygnus.com>
+
+	* elf-bfd.h (struct elf_link_hash_table): Add copy_indirect and
+	hide_symbol members.
+	(elf_link_hash_copy_indirect): New.
+	(elf_link_hash_hide_symbol): New.
+	* elflink.h (elf_link_add_object_symbols): Break out copy from 
+	indirect new new symbol to elf.c.
+	(elf_link_assign_sym_version): Break out privatization of
+	non-exported symbol to elf.c.
+	* elf.c (_bfd_elf_link_hash_copy_indirect): New.
+	(_bfd_elf_link_hash_hide_symbol): New.
+	(_bfd_elf_link_hash_table_init): Init copy_indirect and hide_symbol.
+
 2000-02-13  Ian Lance Taylor  <ian@zembu.com>
 
 	* section.c (_bfd_strip_section_from_output): Add info parameter.

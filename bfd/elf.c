@@ -906,6 +906,60 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
   return (struct bfd_hash_entry *) ret;
 }
 
+/* Copy data from an indirect symbol to its direct symbol, hiding the
+   old indirect symbol.  */
+
+static void
+_bfd_elf_link_hash_copy_indirect (table, dir, ind)
+     struct elf_link_hash_table *table;
+     struct elf_link_hash_entry *dir, *ind;
+{
+  /* Copy down any references that we may have already seen to the
+     symbol which just became indirect.  */
+
+  dir->elf_link_hash_flags |=
+    (ind->elf_link_hash_flags
+     & (ELF_LINK_HASH_REF_DYNAMIC
+	| ELF_LINK_HASH_REF_REGULAR
+	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
+	| ELF_LINK_NON_GOT_REF));
+
+  /* Copy over the global and procedure linkage table offset entries.
+     These may have been already set up by a check_relocs routine.  */
+  if (dir->got.offset == (bfd_vma) -1)
+    {
+      dir->got.offset = ind->got.offset;
+      ind->got.offset = (bfd_vma) -1;
+    }
+  BFD_ASSERT (ind->got.offset == (bfd_vma) -1);
+
+  if (dir->plt.offset == (bfd_vma) -1)
+    {
+      dir->plt.offset = ind->plt.offset;
+      ind->plt.offset = (bfd_vma) -1;
+    }
+  BFD_ASSERT (ind->plt.offset == (bfd_vma) -1);
+
+  if (dir->dynindx == -1)
+    {
+      dir->dynindx = ind->dynindx;
+      dir->dynstr_index = ind->dynstr_index;
+      ind->dynindx = -1;
+      ind->dynstr_index = 0;
+    }
+  BFD_ASSERT (ind->dynindx == -1);
+}
+
+static void
+_bfd_elf_link_hash_hide_symbol(table, h)
+     struct elf_link_hash_table *table;
+     struct elf_link_hash_entry *h;
+{
+  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+  h->dynindx = -1;
+  h->plt.offset = (bfd_vma) -1;
+}
+
 /* Initialize an ELF linker hash table.  */
 
 boolean
@@ -925,6 +979,8 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->needed = NULL;
   table->hgot = NULL;
   table->stab_info = NULL;
+  table->copy_indirect = _bfd_elf_link_hash_copy_indirect;
+  table->hide_symbol = _bfd_elf_link_hash_hide_symbol;
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
 

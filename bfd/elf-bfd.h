@@ -243,6 +243,12 @@ struct elf_link_hash_table
   PTR stab_info;
   /* A linked list of local symbols to be added to .dynsym.  */
   struct elf_link_local_dynamic_entry *dynlocal;
+
+  void (*copy_indirect) PARAMS ((struct elf_link_hash_table *,
+				 struct elf_link_hash_entry *,
+				 struct elf_link_hash_entry *));
+  void (*hide_symbol) PARAMS ((struct elf_link_hash_table *,
+			       struct elf_link_hash_entry *));
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -263,6 +269,16 @@ struct elf_link_hash_table
 /* Get the ELF linker hash table from a link_info structure.  */
 
 #define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
+
+/* Call the copy_indirect method.  */
+
+#define elf_link_hash_copy_indirect(TABLE,DIR,IND) \
+  ((*(TABLE)->copy_indirect) ((TABLE), (DIR), (IND)))
+
+/* Call the hide_symbol method.  */
+
+#define elf_link_hash_hide_symbol(TABLE,SYM) \
+  ((*(TABLE)->hide_symbol) ((TABLE), (SYM)))
 
 /* Constant information held for an ELF backend.  */
 
