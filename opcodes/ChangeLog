@@ -1,3 +1,7 @@
+Wed Jul  3 14:21:18 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Add coldfire support.
+
 Fri Jun 28 15:53:51 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (asi_table): Add #ASI_N, #ASI_N_L, #ASI_NUCLEUS,
