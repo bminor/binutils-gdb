@@ -58,10 +58,6 @@ static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 
 #include "aout-target.h"
 
-/*
- * These really should be common to all BSD systems.
- * Also, to reduce space, should ifdef the individual cases if MINIMIZE=1.
- */
 void
 MY(set_arch_mach) (abfd, machtype)
      bfd *abfd;
@@ -72,38 +68,6 @@ MY(set_arch_mach) (abfd, machtype)
 
   /* Determine the architecture and machine type of the object file. */
   switch (machtype) {
-
-  case M_68010:
-  case M_HP200:
-    arch = bfd_arch_m68k;
-    machine = 68010;
-    break;
-
-  case M_68020:
-  case M_HP300:
-    arch = bfd_arch_m68k;
-    machine = 68020;
-    break;
-
-  case M_SPARC:
-    arch = bfd_arch_sparc;
-    machine = 0;
-    break;
-
-  case M_386:
-    arch = bfd_arch_i386;
-    machine = 0;
-    break;
-
-  case M_29K:
-    arch = bfd_arch_a29k;
-    machine = 0;
-    break;
-
-  case M_HPUX:
-    arch = bfd_arch_m68k;
-    machine = 0;
-    break;
 
   case M_MIPS1:
     arch = bfd_arch_mips;
@@ -267,38 +231,23 @@ MY(reloc_howto_type_lookup) (abfd, code)
 {
   extern reloc_howto_type NAME(aout,ext_howto_table)[];
 
-  switch (bfd_get_arch (abfd))
+  if (bfd_get_arch (abfd) != bfd_arch_mips)
+    return 0;
+
+  switch (code)
     {
-    case bfd_arch_sparc:
-      switch (code)
-	{
-	default:
-	  return 0;
-#define IDX(i,j)	case i: return &NAME(aout,ext_howto_table)[j]
-	IDX (BFD_RELOC_CTOR, 2);
-	IDX (BFD_RELOC_32, 2);
-	IDX (BFD_RELOC_HI22, 8);
-	IDX (BFD_RELOC_LO10, 11);
-	IDX (BFD_RELOC_32_PCREL_S2, 6);
-	}
-    case bfd_arch_mips:
-      switch (code)
-	{
-	case BFD_RELOC_32:
-	  return (&mips_howto_table_ext[MIPS_RELOC_32]);
-	case BFD_RELOC_MIPS_JMP:
-	  return (&mips_howto_table_ext[MIPS_RELOC_JMP]);
-	case BFD_RELOC_16_PCREL_S2:
-	  return (&mips_howto_table_ext[MIPS_RELOC_WDISP16]);
-	case BFD_RELOC_HI16:
-	  return (&mips_howto_table_ext[MIPS_RELOC_HI16]);
-	case BFD_RELOC_HI16_S:
-	  return (&mips_howto_table_ext[MIPS_RELOC_HI16_S]);
-	case BFD_RELOC_LO16:
-	  return (&mips_howto_table_ext[MIPS_RELOC_LO16]);
-	default:
-	  return 0;
-	}
+    case BFD_RELOC_32:
+      return (&mips_howto_table_ext[MIPS_RELOC_32]);
+    case BFD_RELOC_MIPS_JMP:
+      return (&mips_howto_table_ext[MIPS_RELOC_JMP]);
+    case BFD_RELOC_16_PCREL_S2:
+      return (&mips_howto_table_ext[MIPS_RELOC_WDISP16]);
+    case BFD_RELOC_HI16:
+      return (&mips_howto_table_ext[MIPS_RELOC_HI16]);
+    case BFD_RELOC_HI16_S:
+      return (&mips_howto_table_ext[MIPS_RELOC_HI16_S]);
+    case BFD_RELOC_LO16:
+      return (&mips_howto_table_ext[MIPS_RELOC_LO16]);
     default:
       return 0;
     }
