@@ -1,3 +1,8 @@
+Sun Aug 30 21:18:59 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: map program names through program_transform_name
+	when installing.
+
 Sun Aug 30 18:09:03 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in:  Bump to versions 1.97.90.

@@ -21,8 +21,7 @@ srcdir = .
 
 prefix = /usr/local
 
-program_prefix =
-program_suffix =
+program_transform_name =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -72,7 +71,7 @@ version=`./../gcc/gcc -dumpversion`
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
-MANPAGES= ar.1 nm.1 objdump.1 ranlib.1 size.1 strip.1
+MANPAGES= ar nm objdump ranlib size strip
 
 #CC=gcc -Wall
 # these two are almost the same program
@@ -317,13 +316,13 @@ install: all
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
 	for i in $(PROGS) ; do \
-		$(INSTALL_PROGRAM) $$i $(bindir)/$(program_prefix)$${i}$(program_suffix) ; \
+		$(INSTALL_PROGRAM) $$i $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` ; \
 	done
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
 	for i in $(MANPAGES) ; do \
-		$(INSTALL_DATA) $(srcdir)/$$i $(man1dir)/$(program_prefix)$${i}$(program_suffix) ; \
+		$(INSTALL_DATA) $(srcdir)/$$i.1 $(man1dir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t`.1 ; \
 	done
 
 install-info: info
