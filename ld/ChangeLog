@@ -1,3 +1,9 @@
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	2001-04-17  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/mn10300.sh (TEMPLATE_NAME): Define.
+	(GENERATE_SHLIB_SCRIPT): Likewise.
+
 2003-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (OTHER_GOT_SECTIONS): Don't define.
