@@ -562,7 +562,7 @@ or \t\ttarget e7000 pc\n");
 /* Stub for catch_errors.  */
 
 static int
-e7000_start_remote (char *dummy)
+e7000_start_remote (void *dummy)
 {
   int loop;
   int sync;
@@ -895,7 +895,7 @@ fetch_regs_from_dump (nextchar, want)
 	    }
 	  store_signed_integer (buf,
 				REGISTER_RAW_SIZE (regno),
-				(LONGEST) get_hex (&thischar, nextchar));
+				(LONGEST) get_hex (&thischar));
 	  supply_register (regno, buf);
 	  break;
 	}

@@ -1,3 +1,10 @@
+2000-07-31  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote-e7000.c (e7000_start_remote): Use void *, not char * as
+ 	parameter to avoid compiler warning.
+	(fetch_regs_from_dump): Call get_hex() with the correct number of
+ 	parameters.
+
 2000-07-31  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/fnchange.lst: Add file mappings as per last weekly

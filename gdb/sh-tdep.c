@@ -920,8 +920,8 @@ sh_pop_frame (void)
    to R7.   */
 
 static CORE_ADDR
-sh_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
-		   unsigned char struct_return, CORE_ADDR struct_addr)
+sh_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		   int struct_return, CORE_ADDR struct_addr)
 {
   int stack_offset, stack_alloc;
   int argreg;
