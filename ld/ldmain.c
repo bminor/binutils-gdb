@@ -836,8 +836,7 @@ add_archive_element (info, abfd, name)
 	{
 	  char buf[100];
 
-	  sprintf (buf, "%-29s %s\n\n", _("Archive member included"),
-		   _("because of file (symbol)"));
+	  sprintf (buf, _("Archive member included because of file (symbol)\n\n"));
 	  minfo ("%s", buf);
 	  header_printed = true;
 	}

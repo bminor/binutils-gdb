@@ -2282,14 +2282,20 @@ Error: %s uses %s floating point, whereas %s uses %s floating point"),
       /* Interworking mismatch is only a warning.  */
       if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
 	{
-	  char *s1 = (in_flags & EF_ARM_INTERWORK
-		      ? _("supports") : _("does not support"));
-	  char *s2 = out_flags & EF_ARM_INTERWORK ? _("does") : _("does not");
-
-	  _bfd_error_handler (_("\
-Warning: %s %s interworking, whereas %s %s"),
-			      bfd_archive_filename (ibfd), s1,
-			      bfd_get_filename (obfd), s2);
+	  if (in_flags & EF_ARM_INTERWORK)
+	    {
+	      _bfd_error_handler (_("\
+Warning: %s supports interworking, whereas %s does not"),
+				  bfd_archive_filename (ibfd),
+				  bfd_get_filename (obfd));    
+	    }
+	  else
+	    {
+	      _bfd_error_handler (_("\
+Warning: %s does not support interworking, whereas %s does"),
+				  bfd_archive_filename (ibfd),
+				  bfd_get_filename (obfd));
+	    }
 	}
     }
 

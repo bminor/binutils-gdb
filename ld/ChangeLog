@@ -1,3 +1,14 @@
+2001-12-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* emultempl/pe.em (..._list_options): Replace multiple fprintf
+	statements describing a single option with a single, newline
+	escaped fprintf.  This allows better translation into other
+	languages.
+        
+        * ldmain.c (add_archive_element): Combine multiple strings
+        into a single string to permit better translation into other
+        languages.
+
 2001-12-05  Tom Rix  <trix@redhat.com>
 
 	* Makefile.am: Remove eaixppc64.

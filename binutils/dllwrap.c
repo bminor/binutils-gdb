@@ -849,8 +849,8 @@ main (argc, argv)
       delete_def_file = 1;
       free (fileprefix);
       delete_def_file = 1;
-      warn (_("no export definition file provided"));
-      warn (_("creating one, but that may not be what you want"));
+      warn (_("no export definition file provided.\n\
+Creating one, but that may not be what you want"));
     }
   
   /* set the target platform. */

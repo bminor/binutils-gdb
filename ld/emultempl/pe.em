@@ -338,19 +338,19 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --out-implib <file>                Generate import library\n"));
   fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
   fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports.\n"));
-  fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n"));
-  fprintf (file, _("                                       create __imp_<SYMBOL> as well.\n"));
-  fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n"));
-  fprintf (file, _("                                       unless user specifies one\n"));
+  fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n\
+                                       create __imp_<SYMBOL> as well.\n"));
+  fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n\
+                                       unless user specifies one\n"));
   fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base. (default)\n"));
-  fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll witout an\n"));
-  fprintf (file, _("                                       importlib, use <string><basename>.dll \n"));
-  fprintf (file, _("                                       in preference to lib<basename>.dll \n"));
-  fprintf (file, _("  --enable-auto-import               Do sophistcated linking of _sym to \n"));
-  fprintf (file, _("                                       __imp_sym for DATA references\n"));
+  fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll witout an\n\
+                                       importlib, use <string><basename>.dll \n\
+                                       in preference to lib<basename>.dll \n"));
+  fprintf (file, _("  --enable-auto-import               Do sophistcated linking of _sym to \n\
+                                       __imp_sym for DATA references\n"));
   fprintf (file, _("  --disable-auto-import              Do not auto-import DATA items from DLLs\n"));
-  fprintf (file, _("  --enable-extra-pe-debug            Enable verbose debug output when building\n"));
-  fprintf (file, _("                                       or linking to DLLs (esp. auto-import)\n"));
+  fprintf (file, _("  --enable-extra-pe-debug            Enable verbose debug output when building\n\
+                                       or linking to DLLs (esp. auto-import)\n"));
 #endif
 }
 

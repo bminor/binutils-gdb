@@ -2318,8 +2318,8 @@ get_elf_class (elf_class)
   switch (elf_class)
     {
     case ELFCLASSNONE: return _("none");
-    case ELFCLASS32:   return _("ELF32");
-    case ELFCLASS64:   return _("ELF64");
+    case ELFCLASS32:   return "ELF32";
+    case ELFCLASS64:   return "ELF64";
     default:
       sprintf (buff, _("<unknown: %x>"), elf_class);
       return buff;
@@ -2351,20 +2351,20 @@ get_osabi_name (osabi)
 
   switch (osabi)
     {
-    case ELFOSABI_NONE:       return _("UNIX - System V");
-    case ELFOSABI_HPUX:       return _("UNIX - HP-UX");
-    case ELFOSABI_NETBSD:     return _("UNIX - NetBSD");
-    case ELFOSABI_LINUX:      return _("UNIX - Linux");
-    case ELFOSABI_HURD:       return _("GNU/Hurd");
-    case ELFOSABI_SOLARIS:    return _("UNIX - Solaris");
-    case ELFOSABI_AIX:        return _("UNIX - AIX");
-    case ELFOSABI_IRIX:       return _("UNIX - IRIX");
-    case ELFOSABI_FREEBSD:    return _("UNIX - FreeBSD");
-    case ELFOSABI_TRU64:      return _("UNIX - TRU64");
-    case ELFOSABI_MODESTO:    return _("Novell - Modesto");
-    case ELFOSABI_OPENBSD:    return _("UNIX - OpenBSD");
+    case ELFOSABI_NONE:       return "UNIX - System V";
+    case ELFOSABI_HPUX:       return "UNIX - HP-UX";
+    case ELFOSABI_NETBSD:     return "UNIX - NetBSD";
+    case ELFOSABI_LINUX:      return "UNIX - Linux";
+    case ELFOSABI_HURD:       return "GNU/Hurd";
+    case ELFOSABI_SOLARIS:    return "UNIX - Solaris";
+    case ELFOSABI_AIX:        return "UNIX - AIX";
+    case ELFOSABI_IRIX:       return "UNIX - IRIX";
+    case ELFOSABI_FREEBSD:    return "UNIX - FreeBSD";
+    case ELFOSABI_TRU64:      return "UNIX - TRU64";
+    case ELFOSABI_MODESTO:    return "Novell - Modesto";
+    case ELFOSABI_OPENBSD:    return "UNIX - OpenBSD";
     case ELFOSABI_STANDALONE: return _("Standalone App");
-    case ELFOSABI_ARM:        return _("ARM");
+    case ELFOSABI_ARM:        return "ARM";
     default:
       sprintf (buff, _("<unknown: %x>"), osabi);
       return buff;
@@ -2706,7 +2706,7 @@ process_program_headers (file)
 
   if (loadaddr == -1)
     {
-      /* Very strange. */
+      /* Very strange.  */
       loadaddr = 0;
     }
 
@@ -3018,7 +3018,7 @@ process_section_headers (file)
     }
 
   /* Scan the sections for the dynamic symbol table
-     and dynamic string table and debug sections. */
+     and dynamic string table and debug sections.  */
   dynamic_symbols = NULL;
   dynamic_strings = NULL;
   dynamic_syminfo = NULL;
@@ -3190,10 +3190,10 @@ process_section_headers (file)
 	}
     }
 
-  printf (_("Key to Flags:\n"));
-  printf (_("  W (write), A (alloc), X (execute), M (merge), S (strings)\n"));
-  printf (_("  I (info), L (link order), G (group), x (unknown)\n"));
-  printf (_("  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+  printf (_("Key to Flags:\n\
+  W (write), A (alloc), X (execute), M (merge), S (strings)\n\
+  I (info), L (link order), G (group), x (unknown)\n\
+  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
 
   return 1;
 }
@@ -4047,7 +4047,7 @@ process_dynamic_segment (file)
 	  /* Since we do not know how big the symbol table is,
 	     we default to reading in the entire file (!) and
 	     processing that.  This is overkill, I know, but it
-	     should work. */
+	     should work.  */
 	  offset = entry->d_un.d_val - loadaddr;
 
 	  if (fseek (file, 0, SEEK_END))
@@ -4086,7 +4086,7 @@ process_dynamic_segment (file)
 	  /* Since we do not know how big the string table is,
 	     we default to reading in the entire file (!) and
 	     processing that.  This is overkill, I know, but it
-	     should work. */
+	     should work.  */
 
 	  offset = entry->d_un.d_val - loadaddr;
 	  if (fseek (file, 0, SEEK_END))
@@ -5107,7 +5107,7 @@ get_dynamic_data (file, number)
   return i_data;
 }
 
-/* Dump the symbol table */
+/* Dump the symbol table.  */
 static int
 process_symbol_table (file)
      FILE * file;
@@ -7190,7 +7190,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       break;
 
     case DW_FORM_indirect:
-      /* handled above */
+      /* Handled above.  */
       break;
 
     default:
@@ -8933,7 +8933,7 @@ get_note_type (e_type)
    terminated, and namesz includes the terminating null byte.
    I.E. the value of namesz for the name "FSF" is 4.
 
-   If the value of namesz is zero, there is no name present. */
+   If the value of namesz is zero, there is no name present.  */
 static int
 process_note (pnote)
   Elf32_Internal_Note * pnote;
@@ -9156,8 +9156,8 @@ get_file_header (file)
 	 overwritting things.  */
       if (sizeof (bfd_vma) < 8)
 	{
-	  error (_("This instance of readelf has been built without support for a\n"));
-	  error (_("64 bit data type and so it cannot read 64 bit ELF files.\n"));
+	  error (_("This instance of readelf has been built without support for a\n\
+64 bit data type and so it cannot read 64 bit ELF files.\n"));
 	  return 0;
 	}
 
@@ -9289,7 +9289,7 @@ process_file (file_name)
 #ifdef SUPPORT_DISASSEMBLY
 /* Needed by the i386 disassembler.  For extra credit, someone could
    fix this so that we insert symbolic addresses here, esp for GOT/PLT
-   symbols */
+   symbols.  */
 
 void
 print_address (unsigned int addr, FILE * outfile)
@@ -9297,7 +9297,7 @@ print_address (unsigned int addr, FILE * outfile)
   fprintf (outfile,"0x%8.8x", addr);
 }
 
-/* Needed by the i386 disassembler. */
+/* Needed by the i386 disassembler.  */
 void
 db_task_printsym (unsigned int addr)
 {

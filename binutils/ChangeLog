@@ -1,3 +1,12 @@
+2001-12-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* dllwrap.c (main) Replace multiple strings describing a
+	single error with a single, newline escaped sentence to permit
+	better translation into foreign languages.
+
+	* readelf.c (get_elf_class): Remove internalionalisation of ELF
+	class names.
+
 2001-12-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* strings.c (get_char): Initialize value.
