@@ -1,3 +1,11 @@
+1999-06-29  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/objdump.exp: Add fr30 and MCore to expected cpus
+	list. 
+
+	* binutils-all/readelf.r: Do not assume a fixed number of spaces
+	in the output.
+
 1999-06-10  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils-all/readelf.wi: Update to match latest output.
