@@ -1,3 +1,9 @@
+Thu Nov  5 17:55:41 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* tc-sparc.c (sparc_ip): Add code to flag error if an absolute
+	constant will not fit in an immediate field.
+	(md_apply_fix, RELOC_BASE13 case): Check for relocation overflow.
+
 Wed Nov  4 07:50:46 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* obj-coff.c (callj_table): Delete global variable.

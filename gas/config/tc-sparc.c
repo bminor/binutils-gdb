@@ -525,6 +525,7 @@ char *str;
 	unsigned int mask = 0;
 	int match = 0;
 	int comma = 0;
+	long immediate_max = 0;
 	
 	for (s = str; islower(*s) || (*s >= '0' && *s <= '3'); ++s)
 	    ;
@@ -707,10 +708,12 @@ char *str;
 #ifndef NO_V9
 			case 'I':
 				the_insn.reloc = RELOC_11;
+			        immediate_max = 0x03FF;
 				goto immediate;
 				
 			case 'j':
 			  	the_insn.reloc = RELOC_10;
+			        immediate_max = 0x01FF;
 			  	goto immediate;
 
 			case 'k':
@@ -1118,6 +1121,7 @@ char *str;
 				
 			case 'i':   /* 13 bit immediate */
 				the_insn.reloc = RELOC_BASE13;
+			        immediate_max = 0x0FFF;
 				
 				/*FALLTHROUGH */
 				
@@ -1133,13 +1137,13 @@ char *str;
 						s+=3;
 						/* start-sanitize-v9 */
 #ifndef NO_V9
-					} else if (c == 'h'
+					} else if (c == 'u'
 						   && s[2] == 'h'
 						   && s[3] == 'i') {
 						the_insn.reloc = RELOC_HHI22;
 						s += 4;
 						
-					} else if (c == 'h'
+					} else if (c == 'u'
 						   && s[2] == 'l'
 						   && s[3] == 'o') {
 						the_insn.reloc = RELOC_HLO10;
@@ -1185,6 +1189,30 @@ char *str;
 				}
 				(void)getExpression(s);
 				s = expr_end;
+
+			  	/* Check for invalid constant values.  Don't
+				   warn if constant was inside %hi or %lo,
+				   since these truncate the constant to
+				   fit.  */
+			  	if (immediate_max != 0
+				    && the_insn.reloc != RELOC_LO10
+				    && the_insn.reloc != RELOC_HI22
+				    /* start-sanitize-v9 */
+#ifndef NO_V9
+				    && the_insn.reloc != RELOC_HLO10
+				    && the_insn.reloc != RELOC_HHI22
+#endif
+				    /* end-sanitize-v9 */
+				    && the_insn.exp.X_add_symbol == 0
+				    && the_insn.exp.X_subtract_symbol == 0
+				    && the_insn.exp.X_seg == SEG_ABSOLUTE
+				    && (the_insn.exp.X_add_number > immediate_max
+					|| the_insn.exp.X_add_number < ~immediate_max))
+				  as_bad ("constant value must be between %ld and %ld",
+					  ~immediate_max, immediate_max);
+			        /* Reset to prevent extraneous range check.  */
+			        immediate_max = 0;
+
 				continue;
 				
 			case 'a':
@@ -1514,7 +1542,7 @@ long val;
 			as_bad("relocation overflow.");
 		} /* on overflow */
 		
-		buf[2] = (val >> 8) & 0x7;
+		buf[2] |= (val >> 8) & 0x7;
 		buf[3] = val & 0xff;
 		break;
 		
@@ -1524,7 +1552,7 @@ long val;
 			as_bad("relocation overflow.");
 		} /* on overflow */
 		
-		buf[2] = (val >> 8) & 0x3;
+		buf[2] |= (val >> 8) & 0x3;
 		buf[3] = val & 0xff;
 		break;
 
@@ -1582,7 +1610,7 @@ long val;
 		if (val & ~0x00001fff) {
 			as_bad("relocation overflow");
 		} /* on overflow */
-		buf[2] = (val >> 8) & 0x1f;
+		buf[2] |= (val >> 8) & 0x1f;
 		buf[3] = val & 0xff;
 		break;
 		
@@ -1607,6 +1635,10 @@ long val;
 	case RELOC_BASE10:
 #endif
 	case RELOC_BASE13:
+		if (((val > 0) && (val & ~0x00001fff))
+		    || ((val < 0) && (~(val - 1) & ~0x00001fff))) {
+			as_bad("relocation overflow");
+		} /* on overflow */
 		buf[2] |= (val >> 8) & 0x1f;
 		buf[3] = val;
 		break;
