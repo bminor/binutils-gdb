@@ -69,8 +69,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
+#include <ctype.h>
 #include <errno.h>
+#include <time.h>
 
 #ifdef __i386__
 #include <dfs.h>
@@ -380,14 +381,14 @@ volatile int mem_err = 0;
    to mem_fault, they won't get restored, so there better not be any
    saved).  */
 
-static int
+int
 get_char (addr)
      char *addr;
 {
   return *addr;
 }
 
-static void
+void
 set_char (addr, val)
      char *addr;
      int val;

@@ -157,7 +157,9 @@ struct StackFrame
 extern unsigned char breakpoint_insn[];
 #define BREAKPOINT_SIZE 4
 
+#if 0
 #define ALTERNATE_MEM_FUNCS	/* We need our own get_char/set_char */
+#endif
 
 extern int get_char (char *addr);
 extern void set_char (char *addr, int val);

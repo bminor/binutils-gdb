@@ -61,12 +61,12 @@ registers_to_frame (regs, frame)
   hex2mem (&regs[MQ_REGNUM * 4 * 2], &frame->ExceptionState.u.SpecialRegistersEnumerated.CsavedMQ, 4 * 1, 0);
 }
 
-extern int ReadByteAltDebugger (char* addr, char *theByte);
-
-extern int WriteByteAltDebugger (char* addr, char theByte);
 
 extern volatile int mem_err;
 
+#ifdef ALTERNATE_MEM_FUNCS
+extern int ReadByteAltDebugger (char* addr, char *theByte);
+extern int WriteByteAltDebugger (char* addr, char theByte);
 int
 get_char (addr)
      char *addr;
@@ -87,6 +87,7 @@ set_char (addr, val)
   if (!WriteByteAltDebugger (addr, val))
     mem_err = 1;
 }
+#endif
 
 int
 mem_write (dst, src, len)
