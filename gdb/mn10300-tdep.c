@@ -1218,6 +1218,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_mn10300);
+
   return gdbarch;
 }
  
@@ -1225,8 +1227,6 @@ void
 _initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
-
-  deprecated_tm_print_insn = print_insn_mn10300;
 
   register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
 }

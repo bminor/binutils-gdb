@@ -1215,7 +1215,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (v850_processor_type_table[i].mach == info.bfd_arch_info->mach)
 	{
 	  v850_register_names = v850_processor_type_table[i].regnames;
-	  deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
 	  break;
 	}
     }
@@ -1288,6 +1287,8 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_v850);
+
   return gdbarch;
 }
 
@@ -1296,6 +1297,5 @@ extern initialize_file_ftype _initialize_v850_tdep; /* -Wmissing-prototypes */
 void
 _initialize_v850_tdep (void)
 {
-  deprecated_tm_print_insn = print_insn_v850;
   register_gdbarch_init (bfd_arch_v850, v850_gdbarch_init);
 }

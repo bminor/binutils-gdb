@@ -606,6 +606,8 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_ns32k);
+
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
@@ -619,5 +621,4 @@ _initialize_ns32k_tdep (void)
 {
   gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, NULL);
 
-  deprecated_tm_print_insn = print_insn_ns32k;
 }

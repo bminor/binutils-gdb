@@ -1119,6 +1119,8 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_mcore);
+
   return gdbarch;
 }
 
@@ -1133,9 +1135,7 @@ extern initialize_file_ftype _initialize_mcore_tdep; /* -Wmissing-prototypes */
 void
 _initialize_mcore_tdep (void)
 {
-  extern int print_insn_mcore (bfd_vma, disassemble_info *);
   gdbarch_register (bfd_arch_mcore, mcore_gdbarch_init, mcore_dump_tdep);
-  deprecated_tm_print_insn = print_insn_mcore;
 
 #ifdef MCORE_DEBUG
   add_show_from_set (add_set_cmd ("mcoredebug", no_class,

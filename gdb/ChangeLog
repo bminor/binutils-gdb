@@ -1,5 +1,36 @@
 2003-08-27  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (cris-tdep.o): Update dependencies.
+	* cris-tdep.c: Include "gdb_assert.h".
+	(cris_gdbarch_init): Set print_insn.
+	(_initialize_cris_tdep): Do not set deprecated_tm_print_insn.
+	(cris_delayed_get_disassembler): Simplify, directly call the
+	disassembler returned by cris_get_disassembler.
+	* hppa-tdep.c (hppa_gdbarch_init): Set print_insn.
+	(_initialize_hppa_tdep): Do not set deprecated_tm_print_insn.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Set print_insn.
+	(_initialize_ns32k_tdep): Do not set deprecated_tm_print_insn.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Set print_insn.
+	(_initialize_mn10300_tdep): Do not set deprecated_tm_print_insn.
+	* mcore-tdep.c (mcore_gdbarch_init): Set print_insn.
+	(_initialize_mcore_tdep): Do not set deprecated_tm_print_insn.
+	* frv-tdep.c (frv_gdbarch_init): Set print_insn.
+	(_initialize_frv_tdep): Do not set deprecated_tm_print_insn.
+	* sparc-tdep.c (sparc_gdbarch_init): Set print_insn.
+	(gdb_print_insn_sparc): Delete function.
+	(_initialize_sparc_tdep): Do not set deprecated_tm_print_insn or
+	deprecated_tm_print_insn_info.
+	* v850-tdep.c (v850_gdbarch_init): Set print_insn.
+	(_initialize_v850_tdep): Do not set deprecated_tm_print_insn.
+	(v850_gdbarch_init): Do not set deprecated_tm_print_insn_info.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Set print_insn.
+	(_initialize_xstormy16_tdep): Do not set deprecated_tm_print_insn.
+	* s390-tdep.c (gdb_print_insn_s390): Delete function.
+	(_initialize_s390_tdep): Do not set deprecated_tm_print_insn.
+	(s390_gdbarch_init): Set print_insn.
+
+2003-08-27  Andrew Cagney  <cagney@redhat.com>
+
 	* ppc-linux-tdep.c (ppc64_call_dummy_address): Delete function.
 	(ppc_linux_init_abi): For PPC64, do not set call_dummy_address.
 	* infcall.c (call_function_by_hand): Convert the entry point

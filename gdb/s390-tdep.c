@@ -1971,26 +1971,6 @@ s390_store_return_value (struct type *valtype, char *valbuf)
 				       value, arglen);
     }
 }
-static int
-gdb_print_insn_s390 (bfd_vma memaddr, disassemble_info * info)
-{
-  bfd_byte instrbuff[S390_MAX_INSTR_SIZE];
-  int instrlen, cnt;
-
-  instrlen = s390_readinstruction (instrbuff, (CORE_ADDR) memaddr, info);
-  if (instrlen < 0)
-    {
-      (*info->memory_error_func) (instrlen, memaddr, info);
-      return -1;
-    }
-  for (cnt = 0; cnt < instrlen; cnt++)
-    info->fprintf_func (info->stream, "%02X ", instrbuff[cnt]);
-  for (cnt = instrlen; cnt < S390_MAX_INSTR_SIZE; cnt++)
-    info->fprintf_func (info->stream, "   ");
-  instrlen = print_insn_s390 (memaddr, info);
-  return instrlen;
-}
-
 
 
 /* Not the most efficent code in the world */
@@ -2722,6 +2702,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_s390);
+
   return gdbarch;
 }
 
@@ -2735,6 +2717,4 @@ _initialize_s390_tdep (void)
 
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
-  if (!deprecated_tm_print_insn)	/* Someone may have already set it */
-    deprecated_tm_print_insn = gdb_print_insn_s390;
 }

@@ -2139,16 +2139,6 @@ sparc_do_registers_info (int regnum, int all)
 // OBSOLETE }
 #endif
 
-
-static int
-gdb_print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
-{
-  /* It's necessary to override mach again because print_insn messes it up. */
-  info->mach = TARGET_ARCHITECTURE->mach;
-  return print_insn_sparc (memaddr, info);
-}
-
-
 #define SPARC_F0_REGNUM		FP0_REGNUM	/* %f0 */
 #define SPARC_F1_REGNUM		(FP0_REGNUM + 1)/* %f1 */
 #define SPARC_O0_REGNUM		O0_REGNUM	/* %o0 */
@@ -2559,8 +2549,6 @@ _initialize_sparc_tdep (void)
   /* Hook us into the gdbarch mechanism.  */
   gdbarch_register (bfd_arch_sparc, sparc_gdbarch_init, sparc_dump_tdep);
 
-  deprecated_tm_print_insn = gdb_print_insn_sparc;
-  deprecated_tm_print_insn_info.mach = TM_PRINT_INSN_MACH;		/* Selects sparc/sparclite */
   /* OBSOLETE target_architecture_hook = sparc_target_architecture_hook; */
 }
 
@@ -3576,6 +3564,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->print_insn_mach = bfd_mach_sparc_v9a;
       break;
     }
+
+  set_gdbarch_print_insn (gdbarch, print_insn_sparc);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

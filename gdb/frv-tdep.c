@@ -1140,6 +1140,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     }
 
+  set_gdbarch_print_insn (gdbarch, print_insn_frv);
+
   return gdbarch;
 }
 
@@ -1147,8 +1149,6 @@ void
 _initialize_frv_tdep (void)
 {
   register_gdbarch_init (bfd_arch_frv, frv_gdbarch_init);
-
-  deprecated_tm_print_insn = print_insn_frv;
 }
 
 

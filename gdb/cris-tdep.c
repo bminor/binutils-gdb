@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/cris.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 /* To get entry_point_address.  */
 #include "symfile.h"
@@ -3540,8 +3541,14 @@ cris_gdb_func (enum cris_op_type op_type, unsigned short inst,
 static int
 cris_delayed_get_disassembler (bfd_vma addr, disassemble_info *info)
 {
-  deprecated_tm_print_insn = cris_get_disassembler (exec_bfd);
-  return TARGET_PRINT_INSN (addr, info);
+  int (*print_insn) (bfd_vma addr, disassemble_info *info);
+  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
+     disassembler, even when there is no BFD.  Does something like
+     "gdb; target remote; disassmeble *0x123" work?  */
+  gdb_assert (exec_bfd != NULL);
+  print_insn =  cris_get_disassembler (exec_bfd);
+  gdb_assert (print_insn != NULL);
+  return print_insn (addr, info);
 }
 
 /* Copied from <asm/elf.h>.  */
@@ -3854,9 +3861,6 @@ _initialize_cris_tdep (void)
 
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   
-  /* Used in disassembly.  */
-  deprecated_tm_print_insn = cris_delayed_get_disassembler;
-
   /* CRIS-specific user-commands.  */
   c = add_set_cmd ("cris-version", class_support, var_integer, 
                    (char *) &usr_cmd_cris_version, 
@@ -4304,5 +4308,10 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_solib_svr4_fetch_link_map_offsets 
     (gdbarch, cris_linux_svr4_fetch_link_map_offsets);
   
+  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
+     disassembler, even when there is no BFD.  Does something like
+     "gdb; target remote; disassmeble *0x123" work?  */
+  set_gdbarch_print_insn (gdbarch, cris_delayed_get_disassembler);
+
   return gdbarch;
 }
