@@ -4494,6 +4494,8 @@ struct elf_final_link_info
   size_t symbuf_count;
   /* Number of symbols which fit in symbuf.  */
   size_t symbuf_size;
+  /* And same for symshndxbuf.  */
+  size_t shndxbuf_size;
 };
 
 static boolean elf_link_output_sym
@@ -4919,6 +4921,7 @@ elf_bfd_final_link (abfd, info)
   Elf_Internal_Sym elfsym;
   unsigned int i;
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *symtab_shndx_hdr;
   Elf_Internal_Shdr *symstrtab_hdr;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_outext_info eoinfo;
@@ -4972,6 +4975,7 @@ elf_bfd_final_link (abfd, info)
   finfo.symbuf = NULL;
   finfo.symshndxbuf = NULL;
   finfo.symbuf_count = 0;
+  finfo.shndxbuf_size = 0;
   finfo.first_tls_sec = NULL;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     if ((o->flags & SEC_THREAD_LOCAL) != 0
@@ -5192,9 +5196,7 @@ elf_bfd_final_link (abfd, info)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   /* sh_name is set in prep_headers.  */
   symtab_hdr->sh_type = SHT_SYMTAB;
-  symtab_hdr->sh_flags = 0;
-  symtab_hdr->sh_addr = 0;
-  symtab_hdr->sh_size = 0;
+  /* sh_flags, sh_addr and sh_size all start off zero.  */
   symtab_hdr->sh_entsize = sizeof (Elf_External_Sym);
   /* sh_link is set in assign_section_numbers.  */
   /* sh_info is set below.  */
@@ -5221,9 +5223,11 @@ elf_bfd_final_link (abfd, info)
     goto error_return;
   if (elf_numsections (abfd) > SHN_LORESERVE)
     {
-      amt = finfo.symbuf_size;
+      /* Wild guess at number of output symbols.  realloc'd as needed.  */
+      amt = 2 * max_sym_count + elf_numsections (abfd) + 1000;
+      finfo.shndxbuf_size = amt;
       amt *= sizeof (Elf_External_Sym_Shndx);
-      finfo.symshndxbuf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+      finfo.symshndxbuf = (Elf_External_Sym_Shndx *) bfd_zmalloc (amt);
       if (finfo.symshndxbuf == NULL)
 	goto error_return;
     }
@@ -5283,7 +5287,7 @@ elf_bfd_final_link (abfd, info)
 	  if (! elf_link_output_sym (&finfo, (const char *) NULL,
 				     &elfsym, o))
 	    goto error_return;
-	  if (i == SHN_LORESERVE)
+	  if (i == SHN_LORESERVE - 1)
 	    i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	}
     }
@@ -5557,6 +5561,24 @@ elf_bfd_final_link (abfd, info)
 
   /* Now we know the size of the symtab section.  */
   off += symtab_hdr->sh_size;
+
+  symtab_shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  if (symtab_shndx_hdr->sh_name != 0)
+    {
+      symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
+      symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
+      symtab_shndx_hdr->sh_addralign = sizeof (Elf_External_Sym_Shndx);
+      amt = bfd_get_symcount (abfd) * sizeof (Elf_External_Sym_Shndx);
+      symtab_shndx_hdr->sh_size = amt;
+
+      off = _bfd_elf_assign_file_position_for_section (symtab_shndx_hdr,
+						       off, true);
+
+      if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
+	  || (bfd_bwrite ((PTR) finfo.symshndxbuf, amt, abfd) != amt))
+	return false;
+    }
+
 
   /* Finish up and write out the symbol string table (.strtab)
      section.  */
@@ -5866,7 +5888,7 @@ elf_bfd_final_link (abfd, info)
   if (finfo.symbuf != NULL)
     free (finfo.symbuf);
   if (finfo.symshndxbuf != NULL)
-    free (finfo.symbuf);
+    free (finfo.symshndxbuf);
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       if ((o->flags & SEC_RELOC) != 0
@@ -5900,7 +5922,7 @@ elf_bfd_final_link (abfd, info)
   if (finfo.symbuf != NULL)
     free (finfo.symbuf);
   if (finfo.symshndxbuf != NULL)
-    free (finfo.symbuf);
+    free (finfo.symshndxbuf);
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       if ((o->flags & SEC_RELOC) != 0
@@ -5959,11 +5981,24 @@ elf_link_output_sym (finfo, name, elfsym, input_sec)
   dest = finfo->symbuf + finfo->symbuf_count;
   destshndx = finfo->symshndxbuf;
   if (destshndx != NULL)
-    destshndx += finfo->symbuf_count;
-  elf_swap_symbol_out (finfo->output_bfd, elfsym, (PTR) dest, (PTR) destshndx);
-  ++finfo->symbuf_count;
+    {
+      if (bfd_get_symcount (finfo->output_bfd) >= finfo->shndxbuf_size)
+	{
+	  bfd_size_type amt;
 
-  ++ bfd_get_symcount (finfo->output_bfd);
+	  amt = finfo->shndxbuf_size * sizeof (Elf_External_Sym_Shndx);
+	  finfo->symshndxbuf = destshndx = bfd_realloc (destshndx, amt * 2);
+	  if (destshndx == NULL)
+	    return false;
+	  memset ((char *) destshndx + amt, 0, amt);
+	  finfo->shndxbuf_size *= 2;
+	}
+      destshndx += bfd_get_symcount (finfo->output_bfd);
+    }
+
+  elf_swap_symbol_out (finfo->output_bfd, elfsym, (PTR) dest, (PTR) destshndx);
+  finfo->symbuf_count += 1;
+  bfd_get_symcount (finfo->output_bfd) += 1;
 
   return true;
 }
@@ -5988,20 +6023,6 @@ elf_link_flush_output_syms (finfo)
 	return false;
 
       hdr->sh_size += amt;
-
-      if (finfo->symshndxbuf != NULL)
-	{
-	  hdr = &elf_tdata (finfo->output_bfd)->symtab_shndx_hdr;
-	  pos = hdr->sh_offset + hdr->sh_size;
-	  amt = finfo->symbuf_count * sizeof (Elf_External_Sym_Shndx);
-	  if (bfd_seek (finfo->output_bfd, pos, SEEK_SET) != 0
-	      || (bfd_bwrite ((PTR) finfo->symshndxbuf, amt, finfo->output_bfd)
-		  != amt))
-	    return false;
-
-	  hdr->sh_size += amt;
-	}
-
       finfo->symbuf_count = 0;
     }
 

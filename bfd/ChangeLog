@@ -1,3 +1,17 @@
+2002-11-04  Alan Modra  <amodra@bigpond.net.au>
+	    Hans-Peter Nilsson  <hp@axis.com>
+
+	* elflink.h (struct elf_final_link_info): Add shndxbuf_size.
+	(elf_bfd_final_link): Don't bother zeroing symtab_hdr fields.
+	Set up a larger symshndxbuf, and write it out.  Free it on
+	exit rather than freeing symbuf twice.  Correct section index
+	on output section symbol loop.
+	(elf_link_output_sym): Accumulate symbol extension section
+	indices, reallocating symshndxbuf rather than writing it out.
+	(elf_link_flush_output_syms): Don't flush symshndxbuf.
+	* elf.c (assign_section_numbers): Init i_shdrp to all zero.
+	Use bfd_zalloc to clear i_shdrp[0] too.
+
 2002-11-03  Stephen Clarke <stephen.clarke@earthling.net>
 
 	 * elf32-sh64-com.c (sh64_address_in_cranges): Use
