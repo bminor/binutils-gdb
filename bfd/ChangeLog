@@ -1,3 +1,17 @@
+2000-10-05  Jim Wilson  <wilson@cygnus.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add elf_backend_section_flags
+	field.
+	* elf.c (_bfd_elf_make_section_from_shdr): Call the
+	elf_backend_section_flags function.
+	* elf64-ia64.c (elf64_ia64_section_from_shdr): Delete flag conversion
+	code.
+	(elf64_ia64_section_flags): New function containing flag conversion
+	code.
+	(elf_backend_section_flags): Define to elf64_ia64_section_flags.
+	* elfxx-target.h (elf_backend_section_flags): Define.
+	(elfNN_bed): Initialize elf_backend_section_flags field.
+
 2000-10-02  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_check_relocs): Correct call to

@@ -237,6 +237,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_section_from_shdr
 #define elf_backend_section_from_shdr	0
 #endif
+#ifndef elf_backend_section_flags
+#define elf_backend_section_flags	0
+#endif
 #ifndef elf_backend_section_from_phdr
 #define elf_backend_section_from_phdr	0
 #endif
@@ -368,6 +371,7 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_get_symbol_type,
   elf_backend_section_processing,
   elf_backend_section_from_shdr,
+  elf_backend_section_flags,
   elf_backend_section_from_phdr,
   elf_backend_fake_sections,
   elf_backend_section_from_bfd_section,

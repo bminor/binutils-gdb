@@ -391,6 +391,11 @@ struct elf_backend_data
 						    Elf32_Internal_Shdr *,
 						    char *));
 
+  /* A function to convert machine dependent section header flags to
+     BFD internal section header flags.  */
+  boolean (*elf_backend_section_flags) PARAMS ((flagword *,
+						Elf32_Internal_Shdr *));
+
   /* A function to handle unusual program segment types when creating BFD
      sections from ELF program segments. */
   boolean (*elf_backend_section_from_phdr) PARAMS ((bfd *,

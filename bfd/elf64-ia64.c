@@ -946,8 +946,21 @@ elf64_ia64_section_from_shdr (abfd, hdr, name)
     return false;
   newsect = hdr->bfd_section;
 
+  return true;
+}
+
+/* Convert IA-64 specific section flags to bfd internal section flags.  */
+
+/* ??? There is no bfd internal flag equivalent to the SHF_IA_64_NORECOV
+   flag.  */
+
+static boolean
+elf64_ia64_section_flags (flags, hdr)
+     flagword *flags;
+     Elf64_Internal_Shdr *hdr;
+{
   if (hdr->sh_flags & SHF_IA_64_SHORT)
-    newsect->flags |= SEC_SMALL_DATA;
+    *flags |= SEC_SMALL_DATA;
 
   return true;
 }
@@ -4064,6 +4077,8 @@ elf64_ia64_print_private_bfd_data (abfd, ptr)
 
 #define elf_backend_section_from_shdr \
 	elf64_ia64_section_from_shdr
+#define elf_backend_section_flags \
+	elf64_ia64_section_flags
 #define elf_backend_fake_sections \
 	elf64_ia64_fake_sections
 #define elf_backend_add_symbol_hook \

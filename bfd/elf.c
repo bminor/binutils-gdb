@@ -345,6 +345,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 {
   asection *newsect;
   flagword flags;
+  struct elf_backend_data *bed;
 
   if (hdr->bfd_section != NULL)
     {
@@ -409,6 +410,11 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
      all but one of the sections.  */
   if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
     flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+
+  bed = get_elf_backend_data (abfd);
+  if (bed->elf_backend_section_flags)
+    if (! bed->elf_backend_section_flags (&flags, hdr))
+      return false;
 
   if (! bfd_set_section_flags (abfd, newsect, flags))
     return false;
