@@ -1,3 +1,25 @@
+Tue Feb 25 21:28:38 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (adjust_section_vma): New static variable.
+	(usage): Mention --adjust-section-vma.
+	(OPTION_ADJUST_VMA): Define.
+	(long_options): Add "addjust-vma".
+	(display_bfd): If adjust_section_vma is not 0, add it to all the
+	section addresses.
+	(main): Handle OPTION_ADJUST_VMA.
+	* binutils.texi, objdump.1: Document --adjust-vma.
+
+Fri Feb 14 18:46:47 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* nm.c (print_symbol): Cache the BFD as well as the symbols and
+ 	relocs, and don't try to use the symbols or relocs with a
+ 	different BFD.
+
+Thu Feb 13 21:34:43 1997  Klaus Kaempf  (kkaempf@progis.de)
+
+	* config.h-vms: sbrk() is provided on openVMS/Alpha.
+	* makefile.vms: allow compiling with current gcc snapshot.
+
 Thu Feb 13 20:14:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arsup.c, coffgrok.c, dlltool.c, nlmconv.c: Use xmalloc rather
@@ -4660,7 +4682,7 @@ Fri May  3 22:21:44 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never
