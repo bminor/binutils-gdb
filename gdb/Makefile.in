@@ -340,12 +340,12 @@ readline_headers = \
 	$(READLINE_SRC)/readline.h
 
 udiheaders = \
-	29k-share/udi/udiproc.h \
-	29k-share/udi/udiphcfg.h \
-	29k-share/udi/udiphunix.h \
-	29k-share/udi/udiptcfg.h \
-	29k-share/udi/udipt29k.h \
-	29k-share/udi/udisoc.h
+	$(srcdir)/29k-share/udi/udiproc.h \
+	$(srcdir)/29k-share/udi/udiphcfg.h \
+	$(srcdir)/29k-share/udi/udiphunix.h \
+	$(srcdir)/29k-share/udi/udiptcfg.h \
+	$(srcdir)/29k-share/udi/udipt29k.h \
+	$(srcdir)/29k-share/udi/udisoc.h
 
 dcache_h =	dcache.h
 
@@ -722,6 +722,7 @@ version.c: Makefile
 # else.
 c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: c-exp.y Makefile.in
+	@echo 'Expect 6 shift/reduce conflicts.'
 	$(YACC) $(YFLAGS) $(srcdir)/c-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
@@ -972,10 +973,10 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/vax/vaxult2.mh config/z8k/z8ksim.mt
 
 
-udip2soc.o: 29k-share/udi/udip2soc.c $(udiheaders)
+udip2soc.o: $(srcdir)/29k-share/udi/udip2soc.c $(udiheaders)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udip2soc.c
 
-udr.o: 29k-share/udi/udr.c $(udiheaders) 
+udr.o: $(srcdir)/29k-share/udi/udr.c $(udiheaders) 
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udr.c
 
 a29k-pinsn.o: a29k-pinsn.c $(bfd_h) $(dis-asm_h)
