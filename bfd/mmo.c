@@ -61,6 +61,12 @@ SUBSECTION
 	@samp{0x2000@dots{}00} to @samp{0x20ff@dots{}ff} is used for
 	writable data.  @xref{mmo section mapping}.
 
+	There is provision for specifying ``special data'' of 65536
+	different types.  We use type 80 (decimal), arbitrarily chosen the
+	same as the ELF <<e_machine>> number for MMIX, filling it with
+	section information normally found in ELF objects. @xref{mmo
+	section mapping}.
+
 	Contents is entered as 32-bit words, xor:ed over previous
 	contents, always zero-initialized.  A word that starts with the
 	byte @samp{0x98} forms a command called a @samp{lopcode}, where
@@ -70,12 +76,6 @@ SUBSECTION
 	various purposes different for each lopcode.  As documented in
 	@url{http://www-cs-faculty.stanford.edu/~knuth/mmixal-intro.ps.gz},
 	the lopcodes are:
-
-	There is provision for specifying ``special data'' of 65536
-	different types.  We use type 80 (decimal), arbitrarily chosen the
-	same as the ELF <<e_machine>> number for MMIX, filling it with
-	section information normally found in ELF objects. @xref{mmo
-	section mapping}.
 
 	@table @code
 	@item lop_quote

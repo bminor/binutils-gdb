@@ -1,3 +1,8 @@
+2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (File Layout): Correct place of misplaced blurb about
+	special data.
+
 2004-10-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* config.bfd: Add mips64*-*-openbsd.
