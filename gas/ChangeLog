@@ -1,5 +1,22 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (MAX_NOPS): New macro.
+	(history): Resize to 1 + MAX_NOPS.
+	(fix_vr4120_class): New enumeration.
+	(vr4120_conflicts): New variable.
+	(init_vr4120_conflicts): New function.
+	(md_begin): Call it.
+	(insn_uses_reg): Constify first argument.
+	(classify_vr4120_insn, insns_between, nops_for_insn, nops_for_sequence)
+	(nops_for_insn_or_target): New functions.
+	(append_insn): Use the new nops_for_* functions instead of inline
+	delay checks.  Generalize prev_nop_frag handling to handle an
+	arbitrary history length.  Insert nops into the history buffer
+	once the number of nops in prev_nop_frag is fixed.
+	(emit_delays): Use nops_for_insn instead of inline delay checks.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (append_insn): Remove now-redundant nops != 0
 	check from branch delay code.  Remove unnecessary check for branches.
 
