@@ -29,8 +29,18 @@ extern char gdbinit[];
 
 /* Generally one should use catch_errors rather than manipulating these
    directly.  The exception is main().  */
-extern jmp_buf error_return;
-extern jmp_buf quit_return;
+#if defined(HAVE_SIGSETJMP)
+#define SIGJMP_BUF		sigjmp_buf
+#define SIGSETJMP(buf)		sigsetjmp(buf, 1)
+#define SIGLONGJMP(buf,val)	siglongjmp(buf,val)
+#else
+#define SIGJMP_BUF		jmp_buf
+#define SIGSETJMP(buf)		setjmp(buf)
+#define SIGLONGJMP(buf,val)	longjmp(buf,val)
+#endif
+
+extern SIGJMP_BUF error_return;
+extern SIGJMP_BUF quit_return;
 
 extern void print_gdb_version PARAMS ((GDB_FILE *));
 

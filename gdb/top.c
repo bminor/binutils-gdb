@@ -458,9 +458,9 @@ NORETURN void (*error_hook) PARAMS ((void)) ATTR_NORETURN;
 
 
 /* Where to go for return_to_top_level (RETURN_ERROR).  */
-jmp_buf error_return;
+SIGJMP_BUF error_return;
 /* Where to go for return_to_top_level (RETURN_QUIT).  */
-jmp_buf quit_return;
+SIGJMP_BUF quit_return;
 
 /* Return for reason REASON.  This generally gets back to the command
    loop, but can be caught via catch_errors.  */
@@ -490,7 +490,7 @@ return_to_top_level (reason)
 	break;
       }
 
-  (NORETURN void) longjmp
+  (NORETURN void) SIGLONGJMP
     (reason == RETURN_ERROR ? error_return : quit_return, 1);
 }
 
@@ -520,9 +520,9 @@ catch_errors (func, args, errstring, mask)
      char *errstring;
      return_mask mask;
 {
-  jmp_buf saved_error;
-  jmp_buf saved_quit;
-  jmp_buf tmp_jmp;
+  SIGJMP_BUF saved_error;
+  SIGJMP_BUF saved_quit;
+  SIGJMP_BUF tmp_jmp;
   int val;
   struct cleanup *saved_cleanup_chain;
   char *saved_error_pre_print;
@@ -534,21 +534,21 @@ catch_errors (func, args, errstring, mask)
 
   if (mask & RETURN_MASK_ERROR)
     {
-      memcpy ((char *)saved_error, (char *)error_return, sizeof (jmp_buf));
+      memcpy ((char *)saved_error, (char *)error_return, sizeof (SIGJMP_BUF));
       error_pre_print = errstring;
     }
   if (mask & RETURN_MASK_QUIT)
     {
-      memcpy (saved_quit, quit_return, sizeof (jmp_buf));
+      memcpy (saved_quit, quit_return, sizeof (SIGJMP_BUF));
       quit_pre_print = errstring;
     }
 
-  if (setjmp (tmp_jmp) == 0)
+  if (SIGSETJMP (tmp_jmp) == 0)
     {
       if (mask & RETURN_MASK_ERROR)
-	memcpy (error_return, tmp_jmp, sizeof (jmp_buf));
+	memcpy (error_return, tmp_jmp, sizeof (SIGJMP_BUF));
       if (mask & RETURN_MASK_QUIT)
-	memcpy (quit_return, tmp_jmp, sizeof (jmp_buf));
+	memcpy (quit_return, tmp_jmp, sizeof (SIGJMP_BUF));
       val = (*func) (args);
     }
   else
@@ -558,12 +558,12 @@ catch_errors (func, args, errstring, mask)
 
   if (mask & RETURN_MASK_ERROR)
     {
-      memcpy (error_return, saved_error, sizeof (jmp_buf));
+      memcpy (error_return, saved_error, sizeof (SIGJMP_BUF));
       error_pre_print = saved_error_pre_print;
     }
   if (mask & RETURN_MASK_QUIT)
     {
-      memcpy (quit_return, saved_quit, sizeof (jmp_buf));
+      memcpy (quit_return, saved_quit, sizeof (SIGJMP_BUF));
       quit_pre_print = saved_quit_pre_print;
     }
   return val;
