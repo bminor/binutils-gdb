@@ -17,6 +17,10 @@ sysv* | irix*)	host_makefile_frag=config/mh-sysv ;;
 svr4)		host_makefile_frag=config/mh-svr4 ;;
 esac
 
+case "${host_vendor}" in
+sco*)		host_makefile_frag=config/mh-sco ;;
+esac
+
 # per-target:
 
 
