@@ -1,3 +1,9 @@
+2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
+
+	* po/Make-in (DESTDIR): New.
+	(install-data-yes): Support $(DESTDIR).
+	(uninstall): Likewise.
+
 2003-03-27  Chris Demetriou  <cgd@broadcom.com>
 
 	* gmon_io.c (enum gmon_ptr_size, enum gmon_ptr_signedness): New.

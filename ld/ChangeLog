@@ -1,3 +1,9 @@
+2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
+
+	* po/Make-in (DESTDIR): New.
+	(install-data-yes): Support $(DESTDIR).
+	(uninstall): Likewise.
+
 2003-06-10  Doug Evans  <dje@sebabeach.org>
 
 	* Makefile.am (ALL_EMULATIONS): Add em32relf.o.

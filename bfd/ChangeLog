@@ -1,3 +1,9 @@
+2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
+
+	* po/Make-in (DESTDIR): New.
+	(install-data-yes): Support $(DESTDIR).
+	(uninstall): Likewise.
+
 2003-06-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (config.status): Depend on version.h.
