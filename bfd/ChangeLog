@@ -6,6 +6,9 @@ Wed Jan 24 10:38:34 1996  Doug Evans  <dje@charmed.cygnus.com>
 	(elf32_sparc_object_p): Watch for EF_SPARC_SUN_US1.
 	(elf32_sparc_final_write_processing): Set EF_SPARC_SUN_US1 if v8plusa.
 
+	* config.bfd (sparc64-*-{sysv4*,solaris2*}): Comment out
+	bfd_elf64_sparc_vec support.
+
 Tue Jan 23 14:33:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_copy_private_bfd_data): Don't complain if

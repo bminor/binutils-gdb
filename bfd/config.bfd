@@ -426,7 +426,9 @@ case "${targ}" in
     ;;    
   sparc64-*-solaris2* | sparc64-*-sysv4*)
     targ_defvec=bfd_elf32_sparc_vec
-    targ_selvecs=bfd_elf64_sparc_vec
+    # Adding 64 bit support by default causes things like objdump to
+    # print addresses as 64 bits.
+    #targ_selvecs=bfd_elf64_sparc_vec
     ;;    
   sparc-*-netware*)
     targ_defvec=bfd_elf32_sparc_vec
