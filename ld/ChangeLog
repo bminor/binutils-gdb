@@ -1,3 +1,17 @@
+Tue Nov  8 17:47:45 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ldlang.c (load_symbols): Add new argument place.  Only accept
+	linker scripts if place is not NULL.  Put commands found in an
+	assumed linker script into place.
+	(lookup_name): Pass NULL as place argument to load_symbols.
+	(open_input_bfds): In lang_input_statement_enum case, pass a place
+	argument to load_symbols, and store any new statements after the
+	current one.
+
+Mon Nov  7 15:53:02 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* ldver.c (ldversion): Bump to 2.5.3.
+
 Fri Nov  4 15:11:26 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (e*nbsd.c): Fix typo in dependencies.

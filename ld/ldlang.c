@@ -77,7 +77,8 @@ static void wild_section PARAMS ((lang_wild_statement_type *ptr,
 				  lang_input_statement_type *file,
 				  lang_output_section_statement_type *output));
 static lang_input_statement_type *lookup_name PARAMS ((const char *name));
-static void load_symbols PARAMS ((lang_input_statement_type *entry));
+static void load_symbols PARAMS ((lang_input_statement_type *entry,
+				  lang_statement_list_type *));
 static void wild PARAMS ((lang_wild_statement_type *s,
 			  const char *section, const char *file,
 			  const char *target,
@@ -737,7 +738,7 @@ lookup_name (name)
       || search->filename == (const char *) NULL)
     return search;
 
-  load_symbols (search);
+  load_symbols (search, (lang_statement_list_type *) NULL);
 
   return search;
 }
@@ -745,8 +746,9 @@ lookup_name (name)
 /* Get the symbols for an input file.  */
 
 static void
-load_symbols (entry)
+load_symbols (entry, place)
      lang_input_statement_type *entry;
+     lang_statement_list_type *place;
 {
   char **matching;
 
@@ -759,6 +761,7 @@ load_symbols (entry)
       && ! bfd_check_format_matches (entry->the_bfd, bfd_object, &matching))
     {
       bfd_error_type err;
+      lang_statement_list_type *hold;
 
       err = bfd_get_error ();
       if (err == bfd_error_file_ambiguously_recognized)
@@ -771,7 +774,8 @@ load_symbols (entry)
 	    einfo (" %s", *p);
 	  einfo ("%F\n");
 	}
-      else if (err != bfd_error_file_not_recognized)
+      else if (err != bfd_error_file_not_recognized
+	       || place == NULL)
 	einfo ("%F%B: file not recognized: %E\n", entry->the_bfd);
 
       /* Try to interpret the file as a linker script.  */
@@ -781,10 +785,15 @@ load_symbols (entry)
 
       ldfile_open_command_file (entry->filename);
 
+      hold = stat_ptr;
+      stat_ptr = place;
+
       ldfile_assumed_script = true;
       parser_input = input_script;
       yyparse ();
       ldfile_assumed_script = false;
+
+      stat_ptr = hold;
 
       return;
     }
@@ -968,6 +977,8 @@ open_input_bfds (s, force)
 	case lang_input_statement_enum:
 	  if (s->input_statement.real == true)
 	    {
+	      lang_statement_list_type add;
+
 	      s->input_statement.target = current_target;
 
 	      /* If we are being called from within a group, and this
@@ -979,7 +990,15 @@ open_input_bfds (s, force)
 				       bfd_archive))
 		s->input_statement.loaded = false;
 
-	      load_symbols (&s->input_statement);
+	      lang_list_init (&add);
+
+	      load_symbols (&s->input_statement, &add);
+
+	      if (add.head != NULL)
+		{
+		  *add.tail = s->next;
+		  s->next = add.head;
+		}
 	    }
 	  break;
 	default:
@@ -2901,13 +2920,25 @@ lang_statement_append (list, element, field)
 }
 
 /* Set the output format type.  -oformat overrides scripts.  */
+
 void
-lang_add_output_format (format, from_script)
-     CONST char *format;
+lang_add_output_format (format, big, little, from_script)
+     const char *format;
+     const char *big;
+     const char *little;
      int from_script;
 {
   if (output_target == NULL || !from_script)
-    output_target = format;
+    {
+      if (command_line.endian == ENDIAN_BIG
+	  && big != NULL)
+	format = big;
+      else if (command_line.endian == ENDIAN_LITTLE
+	       && little != NULL)
+	format = little;
+
+      output_target = format;
+    }
 }
 
 /* Enter a group.  This creates a new lang_group_statement, and sets
