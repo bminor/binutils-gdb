@@ -21,13 +21,255 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #include "ansidecl.h"
 #include "opcode/tic80.h"
 
-/* This file holds the TMS320C80 (MVP) opcode table.  The table is
-   strictly constant data, so the compiler should be able to put it in
-   the .text section.
+/* This file holds various tables for the TMS320C80 (MVP).
+
+   The opcode table is strictly constant data, so the compiler should
+   be able to put it in the .text section.
 
    This file also holds the operand table.  All knowledge about
    inserting operands into instructions and vice-versa is kept in this
-   file.  */
+   file.
+
+   The predefined register table maps from register names to register
+   values.  */
+
+
+/* Table of predefined symbol names, such as general purpose registers,
+   floating point registers, condition codes, control registers, and bit
+   numbers.
+
+   The table is sorted case independently by name so that it is suitable for
+   searching via a binary search using a case independent comparison
+   function.
+
+   Note that the type of the symbol is stored in the upper bits of the value
+   field, which allows the value and type to be passed around as a unit in a
+   single int.  The types have to be masked off before using the numeric
+   value as a number.
+*/
+
+const struct predefined_symbol tic80_predefined_symbols[] =
+{
+  { "a0",	TIC80_OPERAND_FPA | 0 },
+  { "a1",	TIC80_OPERAND_FPA | 1 },
+  { "alw.b",	TIC80_OPERAND_CC | 7 },
+  { "alw.h",	TIC80_OPERAND_CC | 15 },
+  { "alw.w",	TIC80_OPERAND_CC | 23 },
+  { "ANASTAT",	TIC80_OPERAND_CR | 0x34 },
+  { "BRK1",	TIC80_OPERAND_CR | 0x39 },
+  { "BRK2",	TIC80_OPERAND_CR | 0x3A },
+  { "CONFIG",	TIC80_OPERAND_CR | 2 },
+  { "DLRU",	TIC80_OPERAND_CR | 0x500 },
+  { "DTAG0",	TIC80_OPERAND_CR | 0x400 },
+  { "DTAG1",	TIC80_OPERAND_CR | 0x401 },
+  { "DTAG10",	TIC80_OPERAND_CR | 0x40A },
+  { "DTAG11",	TIC80_OPERAND_CR | 0x40B },
+  { "DTAG12",	TIC80_OPERAND_CR | 0x40C },
+  { "DTAG13",	TIC80_OPERAND_CR | 0x40D },
+  { "DTAG14",	TIC80_OPERAND_CR | 0x40E },
+  { "DTAG15",	TIC80_OPERAND_CR | 0x40F },
+  { "DTAG2",	TIC80_OPERAND_CR | 0x402 },
+  { "DTAG3",	TIC80_OPERAND_CR | 0x403 },
+  { "DTAG4",	TIC80_OPERAND_CR | 0x404 },
+  { "DTAG5",	TIC80_OPERAND_CR | 0x405 },
+  { "DTAG6",	TIC80_OPERAND_CR | 0x406 },
+  { "DTAG7",	TIC80_OPERAND_CR | 0x407 },
+  { "DTAG8",	TIC80_OPERAND_CR | 0x408 },
+  { "DTAG9",	TIC80_OPERAND_CR | 0x409 },
+  { "ECOMCNTL",	TIC80_OPERAND_CR | 0x33 },
+  { "EIP",	TIC80_OPERAND_CR | 1 },
+  { "EPC",	TIC80_OPERAND_CR | 0 },
+  { "eq.b",	TIC80_OPERAND_BITNUM  | 0 },
+  { "eq.h",	TIC80_OPERAND_BITNUM  | 10 },
+  { "eq.w",	TIC80_OPERAND_BITNUM  | 20 },
+  { "eq0.b",	TIC80_OPERAND_CC | 2 },
+  { "eq0.h",	TIC80_OPERAND_CC | 10 },
+  { "eq0.w",	TIC80_OPERAND_CC | 18 },
+  { "FLTADR",	TIC80_OPERAND_CR | 0x11 },
+  { "FLTDTH",	TIC80_OPERAND_CR | 0x14 },
+  { "FLTDTL",	TIC80_OPERAND_CR | 0x13 },
+  { "FLTOP",	TIC80_OPERAND_CR | 0x10 },
+  { "FLTTAG",	TIC80_OPERAND_CR | 0x12 },
+  { "FPST",	TIC80_OPERAND_CR | 8 },
+  { "ge.b",	TIC80_OPERAND_BITNUM  | 5 },
+  { "ge.h",	TIC80_OPERAND_BITNUM  | 15 },
+  { "ge.w",	TIC80_OPERAND_BITNUM  | 25 },
+  { "ge0.b",	TIC80_OPERAND_CC | 3 },
+  { "ge0.h",	TIC80_OPERAND_CC | 11 },
+  { "ge0.w",	TIC80_OPERAND_CC | 19 },
+  { "gt.b",	TIC80_OPERAND_BITNUM  | 2 },
+  { "gt.h",	TIC80_OPERAND_BITNUM  | 12 },
+  { "gt.w",	TIC80_OPERAND_BITNUM  | 22 },
+  { "gt0.b",	TIC80_OPERAND_CC | 1 },
+  { "gt0.h",	TIC80_OPERAND_CC | 9 },
+  { "gt0.w",	TIC80_OPERAND_CC | 17 },
+  { "hi.b",	TIC80_OPERAND_BITNUM  | 6 },
+  { "hi.h",	TIC80_OPERAND_BITNUM  | 16 },
+  { "hi.w",	TIC80_OPERAND_BITNUM  | 26 },
+  { "hs.b",	TIC80_OPERAND_BITNUM  | 9 },
+  { "hs.h",	TIC80_OPERAND_BITNUM  | 19 },
+  { "hs.w",	TIC80_OPERAND_BITNUM  | 29 },
+  { "IE",	TIC80_OPERAND_CR | 6 },
+  { "ILRU",	TIC80_OPERAND_CR | 0x300 },
+  { "IN0P",	TIC80_OPERAND_CR | 0x4000 },
+  { "IN1P",	TIC80_OPERAND_CR | 0x4001 },
+  { "INTPEN",	TIC80_OPERAND_CR | 4 },
+  { "ITAG0",	TIC80_OPERAND_CR | 0x200 },
+  { "ITAG1",	TIC80_OPERAND_CR | 0x201 },
+  { "ITAG10",	TIC80_OPERAND_CR | 0x20A },
+  { "ITAG11",	TIC80_OPERAND_CR | 0x20B },
+  { "ITAG12",	TIC80_OPERAND_CR | 0x20C },
+  { "ITAG13",	TIC80_OPERAND_CR | 0x20D },
+  { "ITAG14",	TIC80_OPERAND_CR | 0x20E },
+  { "ITAG15",	TIC80_OPERAND_CR | 0x20F },
+  { "ITAG2",	TIC80_OPERAND_CR | 0x202 },
+  { "ITAG3",	TIC80_OPERAND_CR | 0x203 },
+  { "ITAG4",	TIC80_OPERAND_CR | 0x204 },
+  { "ITAG5",	TIC80_OPERAND_CR | 0x205 },
+  { "ITAG6",	TIC80_OPERAND_CR | 0x206 },
+  { "ITAG7",	TIC80_OPERAND_CR | 0x207 },
+  { "ITAG8",	TIC80_OPERAND_CR | 0x208 },
+  { "ITAG9",	TIC80_OPERAND_CR | 0x209 },
+  { "le.b",	TIC80_OPERAND_BITNUM  | 3 },
+  { "le.h",	TIC80_OPERAND_BITNUM  | 13 },
+  { "le.w",	TIC80_OPERAND_BITNUM  | 23 },
+  { "le0.b",	TIC80_OPERAND_CC | 6 },
+  { "le0.h",	TIC80_OPERAND_CC | 14 },
+  { "le0.w",	TIC80_OPERAND_CC | 22 },
+  { "lo.b",	TIC80_OPERAND_BITNUM  | 8 },
+  { "lo.h",	TIC80_OPERAND_BITNUM  | 18 },
+  { "lo.w",	TIC80_OPERAND_BITNUM  | 28 },
+  { "ls.b",	TIC80_OPERAND_BITNUM  | 7 },
+  { "ls.h",	TIC80_OPERAND_BITNUM  | 17 },
+  { "ls.w",	TIC80_OPERAND_BITNUM  | 27 },
+  { "lt.b",	TIC80_OPERAND_BITNUM  | 4 },
+  { "lt.h",	TIC80_OPERAND_BITNUM  | 14 },
+  { "lt.w",	TIC80_OPERAND_BITNUM  | 24 },
+  { "lt0.b",	TIC80_OPERAND_CC | 4 },
+  { "lt0.h",	TIC80_OPERAND_CC | 12 },
+  { "lt0.w",	TIC80_OPERAND_CC | 20 },
+  { "MIP",	TIC80_OPERAND_CR | 0x31 },
+  { "MPC",	TIC80_OPERAND_CR | 0x30 },
+  { "ne.b",	TIC80_OPERAND_BITNUM  | 1 },
+  { "ne.h",	TIC80_OPERAND_BITNUM  | 11 },
+  { "ne.w",	TIC80_OPERAND_BITNUM  | 21 },
+  { "ne0.b",	TIC80_OPERAND_CC | 5 },
+  { "ne0.h",	TIC80_OPERAND_CC | 13 },
+  { "ne0.w",	TIC80_OPERAND_CC | 21 },
+  { "nev.b",	TIC80_OPERAND_CC | 0 },
+  { "nev.h",	TIC80_OPERAND_CC | 8 },
+  { "nev.w",	TIC80_OPERAND_CC | 16 },
+  { "OUTP",	TIC80_OPERAND_CR | 0x4002 },
+  { "PKTREQ",	TIC80_OPERAND_CR | 0xD },
+  { "PPERROR",	TIC80_OPERAND_CR | 0xA },
+  { "r0",	TIC80_OPERAND_GPR | 0 },
+  { "r1",	TIC80_OPERAND_GPR | 1 },
+  { "r10",	TIC80_OPERAND_GPR | 10 },
+  { "r11",	TIC80_OPERAND_GPR | 11 },
+  { "r12",	TIC80_OPERAND_GPR | 12 },
+  { "r13",	TIC80_OPERAND_GPR | 13 },
+  { "r14",	TIC80_OPERAND_GPR | 14 },
+  { "r15",	TIC80_OPERAND_GPR | 15 },
+  { "r16",	TIC80_OPERAND_GPR | 16 },
+  { "r17",	TIC80_OPERAND_GPR | 17 },
+  { "r18",	TIC80_OPERAND_GPR | 18 },
+  { "r19",	TIC80_OPERAND_GPR | 19 },
+  { "r2",	TIC80_OPERAND_GPR | 2 },
+  { "r20",	TIC80_OPERAND_GPR | 20 },
+  { "r21",	TIC80_OPERAND_GPR | 21 },
+  { "r22",	TIC80_OPERAND_GPR | 22 },
+  { "r23",	TIC80_OPERAND_GPR | 23 },
+  { "r24",	TIC80_OPERAND_GPR | 24 },
+  { "r24",	TIC80_OPERAND_GPR | 24 },
+  { "r26",	TIC80_OPERAND_GPR | 26 },
+  { "r27",	TIC80_OPERAND_GPR | 27 },
+  { "r28",	TIC80_OPERAND_GPR | 28 },
+  { "r29",	TIC80_OPERAND_GPR | 29 },
+  { "r3",	TIC80_OPERAND_GPR | 3 },
+  { "r30",	TIC80_OPERAND_GPR | 30 },
+  { "r31",	TIC80_OPERAND_GPR | 31 },
+  { "r4",	TIC80_OPERAND_GPR | 4 },
+  { "r5",	TIC80_OPERAND_GPR | 5 },
+  { "r6",	TIC80_OPERAND_GPR | 6 },
+  { "r7",	TIC80_OPERAND_GPR | 7 },
+  { "r8",	TIC80_OPERAND_GPR | 8 },
+  { "r9",	TIC80_OPERAND_GPR | 9 },
+  { "SYSSTK",	TIC80_OPERAND_CR | 0x20 },
+  { "SYSTMP",	TIC80_OPERAND_CR | 0x21 },
+  { "TCOUNT",	TIC80_OPERAND_CR | 0xE },
+  { "TSCALE",	TIC80_OPERAND_CR | 0xF },
+};
+
+const int tic80_num_predefined_symbols = sizeof (tic80_predefined_symbols) / sizeof (struct predefined_symbol);
+
+/* This function takes a predefined symbol name in NAME and translates
+   it to a numeric value, which it returns.  If no translation is
+   possible, it returns -1, a value not used by any predefined
+   symbol. Note that the predefined symbol array is presorted case
+   independently by name. */
+
+int
+tic80_symbol_to_value (name)
+     char *name;
+{
+  int low = 0;
+  int middle;
+  int high = tic80_num_predefined_symbols - 1;
+  int cmp;
+  int rtnval = -1;
+
+  while (low <= high)
+    {
+      middle = (low + high) / 2;
+      cmp = strcasecmp (name, tic80_predefined_symbols[middle].name);
+      if (cmp < 0)
+	{
+	  high = middle - 1;
+	}
+      else if (cmp > 0)
+	{
+	  low = middle + 1;
+	}
+      else 
+	{
+	  rtnval = tic80_predefined_symbols[middle].value;
+	  break;
+	}
+    }
+  return (rtnval);
+}
+
+/* This function takes a value VAL and finds a matching predefined
+   symbol that is in the operand class specified by CLASS.  If CLASS
+   is zero, the first matching symbol is returned. */
+
+const char *
+tic80_value_to_symbol (val, class)
+     int val;
+     int class;
+{
+  const struct predefined_symbol *pdsp;
+  int ival;
+  char *name;
+
+  name = NULL;
+  for (pdsp = tic80_predefined_symbols;
+       pdsp < tic80_predefined_symbols + tic80_num_predefined_symbols;
+       pdsp++)
+    {
+      ival = pdsp -> value & ~TIC80_OPERAND_MASK;
+      if (ival == val)
+	{
+	  if ((class == 0) || (class & pdsp -> value))
+	    {
+	      /* Found the desired match */
+	      name = pdsp -> name;
+	      break;
+	    }
+	}
+    }
+  return (name);
+}
 
 
 /* The operands table.  The fields are:
@@ -885,4 +1127,3 @@ const struct tic80_opcode tic80_opcodes[] = {
 };
 
 const int tic80_num_opcodes = sizeof (tic80_opcodes) / sizeof (tic80_opcodes[0]);
-

@@ -1,3 +1,16 @@
+start-sanitize-tic80
+Thu Jan 30 14:09:03 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (tic80_predefined_symbols): Table of name/value
+	pairs for all predefined symbols recognized by the assembler.
+	Also used by the disassembling routines.
+	(tic80_symbol_to_value): New function.
+	(tic80_value_to_symbol): New function.
+	* tic80-dis.c (print_operand_control_register,
+ 	print_operand_condition_code, print_operand_bitnum):
+	Remove private tables and use tic80_value_to_symbol function.
+
+end-sanitize-tic80
 start-sanitize-d10v
 Thu Jan 30 11:30:45 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
