@@ -408,7 +408,7 @@ static const char *_bfd_error_program_name;
 
 /* This is the default routine to handle BFD error messages.  */
 
-static void
+void
 _bfd_default_error_handler (const char *s, ...)
 {
   va_list p;

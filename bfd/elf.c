@@ -2885,10 +2885,32 @@ assign_section_numbers (bfd *abfd)
 		      int elfsec
 			= _bfd_elf_section_from_bfd_section (s->owner, s);
 		      elfsec = elf_shdrp[elfsec]->sh_link;
-		      BFD_ASSERT (elfsec != 0);
-		      s = elf_shdrp[elfsec]->bfd_section->output_section;
-		      BFD_ASSERT (s != NULL);
-		      d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+		      /* PR 290:
+			 The Intel C compiler generates SHT_IA_64_UNWIND with
+			 SHF_LINK_ORDER.  But it doesn't set theh sh_link or
+			 sh_info fields.  Hence we could get the situation
+		         where elfsec is 0.  */
+		      if (elfsec == 0)
+			{
+			  const struct elf_backend_data *bed
+			    = get_elf_backend_data (abfd);
+			  if (bed->link_order_error_handler)
+			    {
+			      char *name = bfd_get_section_ident (s);
+			      bed->link_order_error_handler
+				(_("%s: warning: sh_link not set for section `%s'"),
+				 bfd_archive_filename (abfd),
+				 name ? name : s->name);
+			      if (name)
+				free (name);
+			    }
+			}
+		      else
+			{
+			  s = elf_shdrp[elfsec]->bfd_section->output_section;
+			  BFD_ASSERT (s != NULL);
+			  d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+			}
 		      break;
 		    }
 		}

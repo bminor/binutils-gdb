@@ -4987,6 +4987,13 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_rela_normal		1
 #define elf_backend_special_sections	elfNN_ia64_special_sections
 
+/* FIXME: PR 290: The Intel C compiler generates SHT_IA_64_UNWIND with
+   SHF_LINK_ORDER. But it doesn't set theh sh_link or sh_info fields.
+   We don't want to flood users with so many error messages. We turn
+   off the warning for now. It will be turned on later when the Intel
+   compiler is fixed.   */
+#define elf_backend_link_order_error_handler NULL
+
 #include "elfNN-target.h"
 
 /* HPUX-specific vectors.  */

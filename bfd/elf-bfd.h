@@ -925,6 +925,9 @@ struct elf_backend_data
      see elf.c.  */
   bfd_vma (*plt_sym_val) (bfd_vma, const asection *, const arelent *);
 
+  /* Used to handle bad SHF_LINK_ORDER input.  */
+  bfd_error_handler_type link_order_error_handler;
+
   /* Name of the PLT relocation section.  */
   const char *relplt_name;
 

@@ -491,6 +491,10 @@
 #define elf_backend_sign_extend_vma 0
 #endif
 
+#ifndef elf_backend_link_order_error_handler
+#define elf_backend_link_order_error_handler _bfd_default_error_handler
+#endif
+
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 #ifndef INCLUDED_TARGET_FILE
@@ -555,6 +559,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_ecoff_debug_swap,
   elf_backend_bfd_from_remote_memory,
   elf_backend_plt_sym_val,
+  elf_backend_link_order_error_handler,
   elf_backend_relplt_name,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,

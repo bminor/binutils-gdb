@@ -1,3 +1,26 @@
+2004-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 290
+	* bfd.c (_bfd_default_error_handler): Make it global.
+
+	* elf-bfd.h (elf_backend_data): Add link_order_error_handler.
+
+	* elf.c (assign_section_numbers): Cope gracefully with sections
+	which have SHF_LINK_ORDER set but no sh_link set up.
+	* elflink.c (elf_get_linked_section_vma): Likewise.
+
+	* elfxx-ia64.c (elf_backend_link_order_error_handler): New. Set
+	it to NULL.
+
+	* elfxx-target.h (elf_backend_link_order_error_handler): New.
+	Set it to _bfd_default_error_handler.
+	(elfNN_bed): Add elf_backend_link_order_error_handler.
+
+	* libbfd-in.h (_bfd_default_error_handler): New.
+
+	* libbfd.h: Regenerated.
+
 2004-07-30  Jakub Jelinek  <jakub@redhat.com>
 
 	* archures.c (bfd_mach_sparc_64bit_p): Define.

@@ -7220,8 +7220,32 @@ elf_get_linked_section_vma (struct bfd_link_order *p)
   elf_shdrp = elf_elfsections (s->owner);
   elfsec = _bfd_elf_section_from_bfd_section (s->owner, s);
   elfsec = elf_shdrp[elfsec]->sh_link;
-  s = elf_shdrp[elfsec]->bfd_section;
-  return s->output_section->vma + s->output_offset;
+  /* PR 290:
+     The Intel C compiler generates SHT_IA_64_UNWIND with
+     SHF_LINK_ORDER.  But it doesn't set theh sh_link or
+     sh_info fields.  Hence we could get the situation
+     where elfsec is 0.  */
+  if (elfsec == 0)
+    {
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (s->owner);
+      if (bed->link_order_error_handler)
+	{
+	  char *name = bfd_get_section_ident (s);
+	  bed->link_order_error_handler
+	    (_("%s: warning: sh_link not set for section `%s'"),
+	     bfd_archive_filename (s->owner),
+	     name ? name : s->name);
+	  if (name)
+	    free (name);
+	}
+      return 0;
+    }
+  else
+    {
+      s = elf_shdrp[elfsec]->bfd_section;
+      return s->output_section->vma + s->output_offset;
+    }
 }
 
 
