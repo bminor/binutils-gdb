@@ -89,6 +89,7 @@ newsos3.c
 oasys.c
 opncls.c
 reloc.c
+rs6000-core.c
 seclet.c
 seclet.h
 section.c
@@ -123,7 +124,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.38  1992/02/27 03:52:15  sac
+# Revision 1.39  1992/03/02 06:39:32  bothner
+# New file: rs6000-core.c.
+#
+# Revision 1.38  1992/02/27  03:52:15  sac
 # Wed Feb 26 19:40:59 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 #
 # 	* bfd.c: lint
