@@ -105,7 +105,7 @@ static void aix5_relocate_main_executable (void);
 static CORE_ADDR
 bfd_lookup_symbol (bfd *abfd, char *symname)
 {
-  unsigned int storage_needed;
+  long storage_needed;
   asymbol *sym;
   asymbol **symbol_table;
   unsigned int number_of_symbols;
@@ -140,10 +140,6 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   /* Look for the symbol in the dynamic string table too.  */
 
   storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
-/* FIXME: This problem should be addressed in BFD.  */
-#define REASONABLE_LIMIT 0x400000
-  if (storage_needed > REASONABLE_LIMIT)
-    storage_needed = REASONABLE_LIMIT;
 
   if (storage_needed > 0)
     {

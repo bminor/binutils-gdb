@@ -364,7 +364,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
 static CORE_ADDR
 bfd_lookup_symbol (bfd *abfd, char *symname)
 {
-  unsigned int storage_needed;
+  long storage_needed;
   asymbol *sym;
   asymbol **symbol_table;
   unsigned int number_of_symbols;

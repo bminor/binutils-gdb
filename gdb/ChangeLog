@@ -1,3 +1,13 @@
+2001-03-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-svr4.c (bfd_lookup_symbol):  Change type of
+	``storage_needed'' from unsigned int to long in order to
+	match return type of bfd_get_symtab_upper_bound() and
+	bfd_get_dynamic_symtab_upper_bound().
+	* solib-aix5.c (bfd_lookup_symbol): Likewise.  Also, eliminate
+	REASONABLE_LIMIT hack which had been added to work around this
+	problem.
+
 2001-03-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c (bfd_lookup_symbol, build_so_list_from_mapfile)
