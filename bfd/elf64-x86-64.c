@@ -125,6 +125,10 @@ static reloc_howto_type *elf64_x86_64_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf64_x86_64_info_to_howto
   PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
+static boolean elf64_x86_64_grok_prstatus 
+  PARAMS ((bfd *, Elf_Internal_Note *));
+static boolean elf64_x86_64_grok_psinfo 
+  PARAMS ((bfd *, Elf_Internal_Note *));
 static struct bfd_link_hash_table *elf64_x86_64_link_hash_table_create
   PARAMS ((bfd *));
 static boolean elf64_x86_64_elf_object_p PARAMS ((bfd *abfd));
@@ -206,6 +210,73 @@ elf64_x86_64_info_to_howto (abfd, cache_ptr, dst)
     }
   cache_ptr->howto = &x86_64_elf_howto_table[i];
   BFD_ASSERT (r_type == cache_ptr->howto->type);
+}
+
+/* Support for core dump NOTE sections.  */
+static boolean
+elf64_x86_64_grok_prstatus (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  int offset;
+  size_t raw_size;
+
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 336:		/* sizeof(istruct elf_prstatus) on Linux/x86_64 */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal 
+	  = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid 
+	  = bfd_get_32 (abfd, note->descdata + 32);
+
+	/* pr_reg */
+	offset = 112;
+	raw_size = 216;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
+}
+
+static boolean
+elf64_x86_64_grok_psinfo (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 136:		/* sizeof(struct elf_prpsinfo) on Linux/x86_64 */
+	elf_tdata (abfd)->core_program
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
+	elf_tdata (abfd)->core_command
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+
+  {
+    char *command = elf_tdata (abfd)->core_command;
+    int n = strlen (command);
+
+    if (0 < n && command[n - 1] == ' ')
+      command[n - 1] = '\0';
+  }
+
+  return true;
 }
 
 /* Functions for the x86-64 ELF linker.	 */
@@ -2228,6 +2299,8 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_finish_dynamic_symbol   elf64_x86_64_finish_dynamic_symbol
 #define elf_backend_gc_mark_hook	    elf64_x86_64_gc_mark_hook
 #define elf_backend_gc_sweep_hook	    elf64_x86_64_gc_sweep_hook
+#define elf_backend_grok_prstatus	    elf64_x86_64_grok_prstatus
+#define elf_backend_grok_psinfo		    elf64_x86_64_grok_psinfo
 #define elf_backend_reloc_type_class	    elf64_x86_64_reloc_type_class
 #define elf_backend_relocate_section	    elf64_x86_64_relocate_section
 #define elf_backend_size_dynamic_sections   elf64_x86_64_size_dynamic_sections
