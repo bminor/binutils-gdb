@@ -186,7 +186,7 @@ _initialize_demangler (void)
        libiberty_demanglers[ndems].demangling_style != unknown_demangling; 
        ndems++)
     ;
-  demangling_style_names = xmalloc (ndems * sizeof (char *));
+  demangling_style_names = xcalloc (ndems + 1, sizeof (char *));
   for (i = 0;
        libiberty_demanglers[i].demangling_style != unknown_demangling; 
        i++)
