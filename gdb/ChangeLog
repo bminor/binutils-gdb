@@ -1,3 +1,8 @@
+Fri Nov 15 17:57:59 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* mipsread.c (parse_partial_symbols):  patch to keep DEC C
+	compiler from making gdb bomb out.  Thanks to Ed Santiago!
+
 Thu Nov 14 19:27:30 1991  Fred Fish  (fnf at cygnus.com)
 
 	* symfile.c:  Add function compact_misc_function_vector() to
