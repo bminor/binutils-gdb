@@ -1,3 +1,14 @@
+2003-12-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (dwarf2_reg_rule): Add REG_RA and REG_CFA.
+	(dwarf2_frame_cache): Initialize PC_REGNUM with REG_RA and
+	SP_REGNUM with REG_CFA.  Don't overwrite the initialized register
+	rule for registers left unspecified by the CFI.  Remove the
+	special handling of PC_REGNUM.  Add code to eleminate any REG_RA
+	rules.
+	(dwarf2_frame_prev_register): Remove the special handling of
+	SP_REGNUM.  Add support for the REG_CFA rule.
+
 2003-12-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-tdep.c: Include "regset.h", "gdb_assert.h" and
