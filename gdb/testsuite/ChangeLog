@@ -1,3 +1,10 @@
+2004-08-12  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/unload.exp: New test for breakpoints in dynamically
+	loaded libraries.
+	* gdb.base/unload.c: Ditto.
+	* gdb.base/unloadshr.c: Ditto.
+
 2004-08-12  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/classes.exp (test_ptype_class_objects): Call
