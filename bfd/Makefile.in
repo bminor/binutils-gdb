@@ -504,12 +504,8 @@ do_clean: do_mostlyclean
 do_distclean: do_clean
 	rm -f Makefile config.status config.cache config.h stamp-h
 
-# Should we remove $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(srcdir)/bfd-in2.h?
-# make-stds.texi says it depends on whether they can be regenerated using
-# this makefile.  Well, they can, but only via an explicit "make headers";
-# the makefile does not regenerate them as needed.  So I guess we should not
-# remove them in realclean.
 do_maintainer_clean: do_distclean
+	rm -f $(srcdir)/bfd-in2.h $(srcdir)/libbfd.h $(srcdir)/libcoff.h
 
 mostlyclean: do_mostlyclean
 	$(MAKE) subdir_do DO=mostlyclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
@@ -519,6 +515,8 @@ distclean:
 	$(MAKE) subdir_do DO=distclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 	$(MAKE) do_distclean
 clobber maintainer-clean realclean:
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
 	$(MAKE) subdir_do DO=maintainer-clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 	$(MAKE) do_maintainer_clean
 
@@ -676,6 +674,21 @@ headers:
 	$(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
 	cp $(docdir)/libbfd.h libbfd.h-new
 	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
+	cp $(docdir)/libcoff.h libcoff.h-new
+	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+
+# The rules for the generated header files are here so that people can
+# type `make bfd-in2.h' if they remove it.  They are not run by default.
+bfd-in2.h:
+	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
+	cp $(docdir)/bfd.h bfd-in2.h-new
+	$(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
+libbfd.h:
+	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
+	cp $(docdir)/libbfd.h libbfd.h-new
+	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
+libcoff.h:
+	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
 	cp $(docdir)/libcoff.h libcoff.h-new
 	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 

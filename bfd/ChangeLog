@@ -1,5 +1,10 @@
 Tue Jan 30 12:09:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (do_maintainer_clean): Remove $(srcdir)/bfd-in2.h,
+	$(srcdir)/libbfd.h and $(srcdir)/libcoff.h.
+	(maintainer-clean): Warn about deleting special files.
+	(bfd-in2.h, libbfd.h, libcoff.h): New targets.
+
 	* elf32-hppa.c (elf32_hppa_relocate_section): Handle indirect and
 	warning symbols correctly.
 	* elf32-i386.c (elf_i386_relocate_section): Likewise.
