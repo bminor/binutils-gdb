@@ -1,3 +1,18 @@
+Sun Jul  6 02:44:28 1997  Philippe De Muyter  <phdm@macqel.be>
+
+        * m68k/tm-delta68.h (CPLUS_MARKER): Macro deleted.
+        (EXTRACT_STRUCT_VALUE_ADDRESS): Macro defined.
+        (EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE): Macros modified
+        because floating-point values return via %fp0.
+        (CLEAR_INSN_CACHE): New macro.
+        * m68k/tm-m68k.h (REGISTER_CONVERT_TO_VIRTUAL): Macro fixed
+        to use DOUBLEST.
+        (REGISTER_CONVERT_TO_RAW): Ditto.
+        * infptrace.c (child_xfer_memory): If CLEAR_INSN_CACHE is defined,
+        call it after having written in child process's memory.
+        * inflow.c (PROCESS_GROUP_TYPE): Macro defined if HAVE_TERMIO.
+        (gdb_has_a_terminal, terminal_ours_1): Functions fixed for HAVE_TERMIO.
+
 Fri Feb  6 16:17:30 1998  Jeffrey A Law  (law@cygnus.com)
 
         * config/mips/tm-mips64.h (TARGET_LONG_BIT): Allow final target to

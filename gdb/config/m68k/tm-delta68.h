@@ -1,5 +1,5 @@
 /* Target definitions for delta68.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,9 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define BPT_VECTOR 0x1
 
-#undef CPLUS_MARKER
-#define CPLUS_MARKER '%'
-
 #define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled%"
 #define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled%"
 
@@ -42,23 +39,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
+/* When it returns a float/double value, use fp0 in sysV68.  */
 /* When it returns a pointer value, use a0 in sysV68.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  memcpy ((VALBUF),							\
-	  (char *) ((REGBUF) +						\
-		    (TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 :		\
-		     (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)))), \
-	  TYPE_LENGTH(TYPE))
+#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)			\
+  if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
+    REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM,				\
+				 REGISTER_VIRTUAL_TYPE (FP0_REGNUM),	\
+				 &REGBUF[REGISTER_BYTE (FP0_REGNUM)],	\
+				 VALBUF);				\
+  else									\
+    memcpy ((VALBUF),							\
+	    (char *) ((REGBUF) +					\
+		      (TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 :	\
+		       (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)))), \
+	    TYPE_LENGTH(TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
+/* When it returns a float/double value, use fp0 in sysV68.  */
 /* When it returns a pointer value, use a0 in sysV68.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 : 0),	\
-			VALBUF, TYPE_LENGTH (TYPE))
+  if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
+      {									\
+	char raw_buf[REGISTER_RAW_SIZE (FP0_REGNUM)];			\
+	REGISTER_CONVERT_TO_RAW (REGISTER_VIRTUAL_TYPE (FP0_REGNUM),	\
+				 FP0_REGNUM, VALBUF, raw_buf);		\
+	write_register_bytes (FP0_REGNUM,				\
+			      raw_buf, REGISTER_RAW_SIZE (FP0_REGNUM)); \
+      }									\
+  else									\
+    write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 : 0), \
+			  VALBUF, TYPE_LENGTH (TYPE))
 
+/* On M68040 versions of sysV68 R3V7.1, ptrace(PT_WRITE_I) does not clear
+   the processor's instruction cache as it should.  */
+#define CLEAR_INSN_CACHE()	clear_insn_cache()
 
 #include "m68k/tm-m68k.h"
+
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value,
+   as a CORE_ADDR (or an expression that can be used as one).  */
+
+#undef EXTRACT_STRUCT_VALUE_ADDRESS
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF)\
+	(*(CORE_ADDR *)((char*)(REGBUF) + 8 * 4))

@@ -161,20 +161,23 @@ extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_save
    to virtual format with type TYPE in buffer TO.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
-{ \
-  double dbl_tmp_val; \
-  floatformat_to_double (&floatformat_m68881_ext, (FROM), &dbl_tmp_val); \
-  store_floating ((TO), TYPE_LENGTH (TYPE), dbl_tmp_val); \
-}
+do									\
+  {									\
+    DOUBLEST dbl_tmp_val;							\
+    floatformat_to_doublest (&floatformat_m68881_ext, (FROM), &dbl_tmp_val); \
+    store_floating ((TO), TYPE_LENGTH (TYPE), dbl_tmp_val);		\
+  } while (0)
 
 /* Convert data from virtual format with type TYPE in buffer FROM
    to raw format for register REGNUM in buffer TO.  */
 
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
-{ \
-  double dbl_tmp_val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  floatformat_from_double (&floatformat_m68881_ext, &dbl_tmp_val, (TO)); \
-}
+do									\
+  {									\
+    DOUBLEST dbl_tmp_val;						\
+    dbl_tmp_val = extract_floating ((FROM), TYPE_LENGTH (TYPE));	\
+    floatformat_from_doublest (&floatformat_m68881_ext, &dbl_tmp_val, (TO)); \
+  } while (0)
 
 /* Return the GDB type object for the "standard" data type of data 
    in register N.  This should be int for D0-D7, double for FP0-FP7,
