@@ -2,6 +2,7 @@
 
 	* config/tc-crx.c (preprocess_reglist): Handle Co-processor
 	Special registers. 
+	(md_assemble): Add error checking for Co-Processor instructions.
 	(get_cinv_parameters): Add 'b' option to invalidate the
 	branch-target cache.
 
