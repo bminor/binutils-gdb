@@ -37,6 +37,7 @@ aoutf1.h
 aoutx.h
 aout-adobe.c
 aout-encap.c
+aout-mipsbsd.c
 aout-target.h
 archive.c
 archures.c
