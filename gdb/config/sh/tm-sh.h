@@ -49,7 +49,7 @@ extern CORE_ADDR sh_skip_prologue ();
    The return address is the value saved in the PR register + 4  */
 
 #define SAVED_PC_AFTER_CALL(frame) \
-  (ADDR_BITS_REMOVE(read_register(PR_REGNUM))+4)
+  (ADDR_BITS_REMOVE(read_register(PR_REGNUM)))
 
 /* Stack grows downward.  */
 

@@ -1,5 +1,5 @@
 # Target: H8500 with HMS monitor and H8 simulator
-TDEPFILES= h8500-tdep.o monitor.o remote-hms.o
+TDEPFILES= h8500-tdep.o monitor.o remote-hms.o srec.o
 TM_FILE= tm-h8500.h
 
 SIM_OBS = remote-sim.o
