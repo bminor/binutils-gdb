@@ -233,6 +233,12 @@ sim_open (kind, cb, abfd, argv)
   STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = do_interrupt;
   STATE_WATCHPOINTS (sd)->interrupt_names = interrupt_names;
+  /* start-sanitize-v850e */
+  STATE_ARCHITECTURE (sd) = bfd_lookup_arch (bfd_arch_v850, bfd_mach_v850e);
+  /* end-sanitize-v850e */
+  /* start-sanitize-v850eq */
+  STATE_ARCHITECTURE (sd) = bfd_lookup_arch (bfd_arch_v850, bfd_mach_v850eq);
+  /* end-sanitize-v850eq */
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;

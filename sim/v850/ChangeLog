@@ -1,3 +1,26 @@
+Fri Sep 12 15:11:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+start-sanitize-v850eq
+	* v850.igen (prepare, ...): Add to v850eq architecture.
+
+end-sanitize-v850eq
+start-sanitize-v850e
+	* interp.c (sim_open): Default to v850eq.
+	
+end-sanitize-v850e
+start-sanitize-v850eq
+	
+	* interp.c (sim_open): Default to v850e.
+end-sanitize-v850eq
+	* sim-main.h (signal.h): Include.
+
+	* v850.igen (illegal): Report/halt illegal instructions.
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Add SIM_RESERVED_BITS.
+
+	* configure.in: Add reserved bits option.
+	* configure: Regenerate.
+
 Thu Sep 11 08:40:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Use sim_do_commandf instead of asprintf.

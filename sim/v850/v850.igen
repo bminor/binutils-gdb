@@ -72,7 +72,9 @@
 // What do we do with an illegal instruction?
 :internal:::illegal
 {
-  abort ();
+  sim_io_eprintf (SD, "Illegal instruction at address 0x%lx\n",
+		  (unsigned long) cia);
+  sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGILL);
 }
 
 
@@ -226,6 +228,9 @@ ddddd,1011,ddd,1111:III:::bgt
 // BSH
 rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "bsh r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_34207E0 ());
@@ -238,6 +243,9 @@ rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 // BSW
 rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "bsw r<reg2>, reg3>"
 {
   COMPAT_2 (OP_34007E0 ());
@@ -283,6 +291,9 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 // CMOV
 rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "cmov <cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_32007E0 ());
@@ -290,6 +301,9 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 
 rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "cmov <cccc>, <imm5>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_30007E0 ());
@@ -328,6 +342,9 @@ rrrrr,010011,iiiii:II:::cmp
 // "dispose <imm5>, <list12>"
 0000011001,iiiii,L + LLLLLLLLLLL,RRRRR:XIII:::dispose
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "dispose <imm5>, <list12>":RRRRR == 0
 "dispose <imm5>, <list12>, [reg1]"
 {
@@ -414,6 +431,9 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 // start-sanitize-v850e
 rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "hsw r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_34407E0 ());
@@ -539,6 +559,9 @@ rrrrr!0,110010,RRRRR + iiiiiiiiiiiiiiii:VI:::movhi
 // MUL
 rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "mul r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22007E0 ());
@@ -546,6 +569,9 @@ rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 
 rrrrr,111111,iiiii + wwwww,01001,IIII,00:XII:::mul
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "mul <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24007E0 ());
@@ -582,6 +608,9 @@ rrrrr!0,110111,RRRRR + iiiiiiiiiiiiiiii:VI:::mulhi
 // MULU
 rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "mulu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22207E0 ());
@@ -589,6 +618,9 @@ rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 
 rrrrr,111111,iiiii + wwwww,01001,IIII,10:XII:::mulu
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "mulu <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24207E0 ());
@@ -652,6 +684,9 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 // PREPARE
 0000011110,iiiii,L + LLLLLLLLLLL,00001:XIII:::prepare
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "prepare <list12>, <imm5>"
 {
   COMPAT_2 (OP_10780 ());
@@ -659,6 +694,9 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,00011:XIII:::prepare00
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "prepare <list12>, <imm5>, sp"
 {
   COMPAT_2 (OP_30780 ());
@@ -666,6 +704,9 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,01011 + iiiiiiiiiiiiiiii:XIII:::prepare01
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_B0780 ());
@@ -673,6 +714,9 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,10011 + iiiiiiiiiiiiiiii:XIII:::prepare10
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_130780 ());
@@ -680,6 +724,9 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,11011 + iiiiiiiiiiiiiiii + dddddddddddddddd:XIII:::prepare11
 *v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "prepare <list12>, <imm5>, <uimm32>"
 {
   COMPAT_2 (OP_1B0780 ());

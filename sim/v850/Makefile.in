@@ -51,12 +51,14 @@ SIM_EXTRA_DEPS = v850_sim.h sim-main.h simops.h itable.h
 SIM_WARNINGS=@sim_warnings@
 SIM_ENDIAN=@sim_endian@
 SIM_HOSTENDIAN=@sim_hostendian@
+SIM_RESERVED_BITS=@sim_reserved_bits@
 SIM_EXTRA_CFLAGS = \
 	-DDEBUG \
 	-I$(srcdir)/../../newlib/libc/sys/sysnecv850 \
 	$(SIM_WARNINGS) \
 	$(SIM_ENDIAN) \
-	$(SIM_HOSTENDIAN)
+	$(SIM_HOSTENDIAN) \
+	$(SIM_RESERVED_BITS)
 SIM_EXTRA_CLEAN = clean-extra
 
 INCLUDE = $(sim_main_headers) $(SIM_EXTRA_DEPS)

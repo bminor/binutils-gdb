@@ -8,6 +8,7 @@ SIM_AC_COMMON
 SIM_AC_OPTION_ENDIAN(LITTLE_ENDIAN)
 SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_WARNINGS
+SIM_AC_OPTION_RESERVED_BITS
 
 AC_CHECK_FUNCS(time chmod utime fork execve execv chown)
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h strings.h utime.h time.h)

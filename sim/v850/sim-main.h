@@ -5,6 +5,7 @@
 
 #include "sim-basics.h"
 
+#include <signal.h>
 typedef address_word sim_cia;
 
 
