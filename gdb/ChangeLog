@@ -1,5 +1,12 @@
 2004-08-10  Andrew Cagney  <cagney@gnu.org>
 
+	* defs.h (xmcalloc): Delete declaration.
+	* utils.c (xmcalloc): Delete.
+	(xcalloc): Inline calls to xmcalloc and mcalloc.
+	* ada-lang.c (_initialize_ada_language): Use htab_create_alloc,
+	xcalloc and xfree.
+	* symtab.c (create_demangled_names_hash): Ditto.
+
 	* defs.h (xmrealloc): Delete.
 	* utils.c (xmrealloc): Delete.
 	(xrealloc): Inline calls to xmrealloc, mmalloc and mrealloc.

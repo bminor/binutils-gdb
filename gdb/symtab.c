@@ -431,9 +431,9 @@ create_demangled_names_hash (struct objfile *objfile)
      Choosing a much larger table size wastes memory, and saves only about
      1% in symbol reading.  */
 
-  objfile->demangled_names_hash = htab_create_alloc_ex
+  objfile->demangled_names_hash = htab_create_alloc
     (256, htab_hash_string, (int (*) (const void *, const void *)) streq,
-     NULL, objfile->md, xmcalloc, xmfree);
+     NULL, xcalloc, xfree);
 }
 
 /* Try to determine the demangled name for a symbol, based on the

@@ -10261,9 +10261,9 @@ Show the maximum number of bytes allowed in a dynamic-sized object.",
 
   obstack_init (&symbol_list_obstack);
 
-  decoded_names_store = htab_create_alloc_ex
+  decoded_names_store = htab_create_alloc
     (256, htab_hash_string, (int (*)(const void *, const void *)) streq,
-     NULL, NULL, xmcalloc, xmfree);
+     NULL, xcalloc, xfree);
 }
 
 /* Create a fundamental Ada type using default reasonable for the current
