@@ -1,3 +1,11 @@
+Wed May 18 09:09:32 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.h (R_HPPA_ABS_CALL): Define.
+	* elf32-hppa.c (hppa_elf_gen_reloc_type): Handle absolute calls.
+
+	* som.h (R_HPPA_ABS_CALL): Define.
+	* som.c (hppa_som_gen_reloc_type): Delete complex relocation types.
+
 Tue May 17 19:33:12 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* coff-i960.c (icoff_little_vec, icoff_big_vec): Indicate leading

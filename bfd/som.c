@@ -1521,9 +1521,6 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
     case R_HPPA_NONE:
     case R_HPPA_ABS_CALL:
     case R_HPPA_PCREL_CALL:
-    case R_HPPA_COMPLEX:
-    case R_HPPA_COMPLEX_PCREL_CALL:
-    case R_HPPA_COMPLEX_ABS_CALL:
       /* Right now we can default all these.  */
       break;
     }
@@ -2033,7 +2030,7 @@ som_prep_headers (abfd)
 	  som_section_data (section)->space_dict->is_private = 
 	    som_section_data (section)->copy_data->is_private;
 	  som_section_data (section)->space_dict->space_number =
-	    section->target_index;
+	    som_section_data (section)->copy_data->space_number;
 	}
       else
 	{
@@ -4357,7 +4354,7 @@ bfd_som_set_section_attributes (section, defined, private, sort_key, spnum)
   som_section_data (section)->copy_data->is_defined = defined;
   som_section_data (section)->copy_data->is_private = private;
   som_section_data (section)->copy_data->container = section;
-  section->target_index = spnum;
+  som_section_data (section)->copy_data->space_number = spnum;
   return true;
 }
 
