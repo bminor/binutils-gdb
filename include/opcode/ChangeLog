@@ -1,3 +1,22 @@
+Sun Jul 10 11:01:09 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
+
+	* ns32k.h: Drop Q operand type as there is no correct use
+	for it. Add I and Z operand types which allow better checking.
+
+Thu Jul  7 12:34:48 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* h8300.h (xor.l) :fix bit pattern. 
+	(L_2): New size of operand.
+	(trapa): Use it.
+
+Fri Jun 10 16:38:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* m68k.h: Move "trap" before "tpcc" to change disassembly.
+
+Fri Jun  3 15:57:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* sparc.h: Include v9 definitions.
+
 Thu Jun  2 12:23:17 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* m68k.h (m68060): Defined.
