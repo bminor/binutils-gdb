@@ -1,3 +1,7 @@
+Mon Oct 20 15:01:27 1997  Klaus K"ampf  <kkaempf@progis.de>
+
+	* evax-egsd.c: make section flags dec c compatible
+
 Mon Oct 20 09:38:31 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (normalize): Delete function.
