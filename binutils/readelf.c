@@ -4656,9 +4656,8 @@ dynamic_section_ia64_val (Elf_Internal_Dyn *entry)
 static int
 get_32bit_dynamic_section (FILE *file)
 {
-  Elf32_External_Dyn *edyn;
+  Elf32_External_Dyn *edyn, *ext;
   Elf_Internal_Dyn *entry;
-  bfd_size_type i;
 
   edyn = get_data (NULL, file, dynamic_addr, dynamic_size,
 		   _("dynamic section"));
@@ -4674,12 +4673,12 @@ get_32bit_dynamic_section (FILE *file)
       return 0;
     }
 
-  for (i = 0, entry = dynamic_section;
-       i < dynamic_size;
-       i++, entry++)
+  for (ext = edyn, entry = dynamic_section;
+       (char *) ext < (char *) edyn + dynamic_size;
+       ext++, entry++)
     {
-      entry->d_tag      = BYTE_GET (edyn[i].d_tag);
-      entry->d_un.d_val = BYTE_GET (edyn[i].d_un.d_val);
+      entry->d_tag      = BYTE_GET (ext->d_tag);
+      entry->d_un.d_val = BYTE_GET (ext->d_un.d_val);
     }
 
   free (edyn);
@@ -4690,9 +4689,8 @@ get_32bit_dynamic_section (FILE *file)
 static int
 get_64bit_dynamic_section (FILE *file)
 {
-  Elf64_External_Dyn *edyn;
+  Elf64_External_Dyn *edyn, *ext;
   Elf_Internal_Dyn *entry;
-  bfd_size_type i;
 
   edyn = get_data (NULL, file, dynamic_addr, dynamic_size,
 		   _("dynamic section"));
@@ -4708,12 +4706,12 @@ get_64bit_dynamic_section (FILE *file)
       return 0;
     }
 
-  for (i = 0, entry = dynamic_section;
-       i < dynamic_size;
-       i++, entry++)
+  for (ext = edyn, entry = dynamic_section;
+       (char *) ext < (char *) edyn + dynamic_size;
+       ext++, entry++)
     {
-      entry->d_tag      = BYTE_GET8 (edyn[i].d_tag);
-      entry->d_un.d_val = BYTE_GET8 (edyn[i].d_un.d_val);
+      entry->d_tag      = BYTE_GET8 (ext->d_tag);
+      entry->d_un.d_val = BYTE_GET8 (ext->d_un.d_val);
     }
 
   free (edyn);

@@ -1,3 +1,9 @@
+2004-06-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (get_32bit_dynamic_section): Correct number of entries
+	translated from external to internal form.
+	(get_64bit_dynamic_section): Likewise.
+
 2004-06-18  Jie Zhang  <zhangjie@magima.com.cn>
 
 	* readelf.c (process_program_headers): When locating the dynamic
