@@ -108,6 +108,7 @@ case "${host}" in
   mips*-*-sysv*)	  host_makefile_frag=config/mh-riscos ;;
   i[345]86-ncr-sysv4.3)   host_makefile_frag=config/mh-ncrsvr43 ;;
   i[345]86-ncr-sysv4*)    host_makefile_frag=config/mh-ncr3000 ;;
+  i[345]86-*-sco3.2v5*)   host_makefile_frag=config/mh-sysv ;;
   i[345]86-*-sco*)        host_makefile_frag=config/mh-sco ;;
   i[345]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
   i[345]86-*-linux*)      host_makefile_frag=config/mh-linux ;;
@@ -415,7 +416,6 @@ case "${target}" in
     # but don't build gdb
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
     ;;
-
   i[345]86-*-win32)
     # Can't build gdb for win32 if not native.
     # make/glob's configure uses some AC_TRY_RUN type tests
@@ -426,6 +426,11 @@ case "${target}" in
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
+    ;;
+  i[345]86-*-sco3.2v5*)
+    # The linker does not yet know about weak symbols in COFF,
+    # and is not configured to handle mixed ELF and COFF.
+    noconfigdirs="$noconfigdirs gprof ld"
     ;;
   i[345]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"

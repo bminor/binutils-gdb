@@ -1,3 +1,10 @@
+Fri Jan 19 13:30:15 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	SCO OpenServer 5 changes from Robert Lipe <robertl@dgii.com>:
+	* configure.in (i[345]86-*-sco3.2v5*): Use mh-sysv instead of
+	mh-sco, since old workarounds no longer needed, and don't
+	build ld, since libraries have weak symbols in COFF.
+
 Sun Jan 14 23:01:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (CONFIGURE_TARGET_MODULES): Add missing ';'.
