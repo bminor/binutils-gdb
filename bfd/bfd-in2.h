@@ -1106,8 +1106,9 @@ typedef struct sec
      Entity size is given in the entsize field.  */
 #define SEC_MERGE 0x20000000
 
-  /* If given with SEC_MERGE, entities to merge are zero terminated strings
-     where entsize specifies character size instead of fixed size entries.  */
+  /* If given with SEC_MERGE, entities to merge are zero terminated
+     strings where entsize specifies character size instead of fixed
+     size entries.  */
 #define SEC_STRINGS 0x40000000
 
   /*  End of section flags.  */
