@@ -6040,14 +6040,14 @@ md_parse_option (c, arg)
 	      break;
 
 	    case 's':
-	      if (streq (str, "strongarm") || streq (str, "strongarm110"))
+	      if (! strcmp (str, "strongarm") || ! strcmp (str, "strongarm110"))
 		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7 | ARM_ARCHv4 | ARM_LONGMUL;
 	      else
 		goto bad;
 	      break;
 		
 	    case '8':
-	      if (streq (str, "8"))
+	      if (! strcmp (str, "8"))
 		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7 | ARM_ARCHv4 | ARM_LONGMUL;
 	      else
 		goto bad;
