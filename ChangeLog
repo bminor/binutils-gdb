@@ -4,6 +4,8 @@ Tue Dec  2 09:04:13 1997  Michael Meissner  <meissner@cygnus.com>
 	sanitization for it.
 	(noconfigdirs): Remove libide from all places that set noconfigdirs.
 
+	* Makefile.in (all-libide): Remove sanitization markers for libide.
+
 Mon Dec  1 10:53:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* configure: add all-libide to GDB_TK
