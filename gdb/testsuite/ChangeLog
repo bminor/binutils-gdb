@@ -1,5 +1,10 @@
 Fri Mar 24 06:11:05 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/a1-selftest.exp: Don't check for # followed by a digit
+	somewhere between `read' and `main.c'.  I'm pretty sure the
+	pattern ".*#\[0-9\].*" was slowing down pattern matching a lot,
+	and it isn't particularly useful.
+
 	* gdb.base/scope.exp: Make test names unique.  \[(\] -> \\(.
 
 Thu Mar 23 14:58:35 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)

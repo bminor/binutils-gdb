@@ -452,7 +452,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     set description "backtrace through signal handler"
     send "backtrace\n"
     expect {
-	-re "#0.*read.*#\[1-9\].*main.c.*$prompt $" {
+	-re "#0.*read.*in main \\(.*\\) at .*main\\.c.*$prompt $" {
 	    pass "$description"
 	}
 	-re ".*$prompt $" {
