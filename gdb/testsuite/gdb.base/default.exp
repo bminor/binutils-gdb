@@ -327,7 +327,7 @@ if { [istarget "arm*-*-*"] || \
 } elseif [istarget "i\[3456\]86-*-*"] then {
     gdb_test "info float" "R7:.*Status Word:.*Opcode:.*" "info float"
 } else {
-    gdb_test "info float" "No floating point info available for this processor." "info float"
+    gdb_test "info float" "No floating.point info available for this processor." "info float"
 }
 #test info functions
 gdb_test "info functions" "All defined functions:" "info functions"
