@@ -821,7 +821,7 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
-  (bfd *, struct bfd_link_info *, int, int);
+  (bfd *, struct bfd_link_info *, int, int, int);
 
 extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
   (bfd *, struct bfd_link_info *);
@@ -2641,7 +2641,7 @@ field in the instruction.  */
 
 /* Pc-relative or absolute relocation depending on target.  Used for
 entries in .init_array sections.  */
-  BFD_RELOC_ARM_RELABS32,
+  BFD_RELOC_ARM_TARGET1,
 
 /* Read-only segment base relative address.  */
   BFD_RELOC_ARM_ROSEGREL32,

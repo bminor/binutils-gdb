@@ -9,5 +9,5 @@
 	.word	sym(GOTOFF)
 1:
 	.word	_GLOBAL_OFFSET_TABLE_ - 1b
-	.word foo2(RELABS)
+	.word foo2(TARGET1)
 	.word foo3(SBREL)

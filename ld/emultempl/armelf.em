@@ -28,6 +28,7 @@ static int no_pipeline_knowledge = 0;
 static char *thumb_entry_symbol = NULL;
 static bfd *bfd_for_interwork;
 static int byteswap_code = 0;
+static int target1_is_rel = 0${TARGET1_IS_REL};
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -120,7 +121,8 @@ arm_elf_before_allocation (void)
       {
 	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, & link_info,
 						      no_pipeline_knowledge,
-						      byteswap_code))
+						      byteswap_code,
+						      target1_is_rel))
 	  {
 	    /* xgettext:c-format */
 	    einfo (_("Errors encountered processing file %s"), is->filename);
@@ -188,6 +190,8 @@ EOF
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_THUMB_ENTRY		301
 #define OPTION_BE8			302
+#define OPTION_TARGET1_REL		303
+#define OPTION_TARGET1_ABS		304
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -196,12 +200,16 @@ PARSE_AND_LIST_LONGOPTS='
   { "no-pipeline-knowledge", no_argument, NULL, '\'p\''},
   { "thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
   { "be8", no_argument, NULL, OPTION_BE8},
+  { "target1-rel", no_argument, NULL, OPTION_TARGET1_REL},
+  { "target1-abs", no_argument, NULL, OPTION_TARGET1_ABS},
 '
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  -p --no-pipeline-knowledge  Stop the linker knowing about the pipeline length\n"));
   fprintf (file, _("     --thumb-entry=<sym>      Set the entry point to be Thumb symbol <sym>\n"));
   fprintf (file, _("     --be8                    Oputput BE8 format image\n"));
+  fprintf (file, _("     --target1-rel            Interpret R_ARM_TARGET1 as R_ARM_REL32\n"));
+  fprintf (file, _("     --target1-abs            Interpret R_ARM_TARGET1 as R_ARM_ABS32\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -215,6 +223,14 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_BE8:
       byteswap_code = 1;
+      break;
+
+    case OPTION_TARGET1_REL:
+      target1_is_rel = 1;
+      break;
+
+    case OPTION_TARGET1_ABS:
+      target1_is_rel = 0;
       break;
 '
 

@@ -1,3 +1,17 @@
+2004-09-13  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update
+	prototype.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-arm.h (elf32_arm_link_hash_table): Add target1_is_rel.
+	(elf32_arm_link_hash_table_create): Set target1_is_rel.
+	(bfd_elf32_arm_process_before_allocation): Ditto.
+	(elf32_arm_final_link_relocate): Handle R_ARM_TARGET1.
+	(elf32_arm_gc_sweep_hook, elf32_arm_check_relocs): Ditto.
+	* elfarm-nabi.c (elf32_arm_howto_table): Rename RELABS to TARGET1.
+	* reloc.c: Ditto.
+
 2004-09-10  Joel Brobecker  <brobecker@gnat.com>
 
 	* hpux-core.c (thread_section_p): New function.

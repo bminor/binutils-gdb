@@ -2609,7 +2609,7 @@ ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.
 ENUM
-  BFD_RELOC_ARM_RELABS32
+  BFD_RELOC_ARM_TARGET1
 ENUMDOC
   Pc-relative or absolute relocation depending on target.  Used for
   entries in .init_array sections.

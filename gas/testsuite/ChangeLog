@@ -1,3 +1,8 @@
+2004-09-13  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/pic.d: Rename RELABS to TARGET1.
+	* gas/arm/pic.s: Ditto.
+
 2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/crx: New directory.

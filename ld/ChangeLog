@@ -1,3 +1,8 @@
+2004-09-13  Paul Brook  <paul@codesourcery.com>
+
+	* emulparams/armsymbian.sh: Set TARGET1_IS_REL.
+	* emultempl/armelf.em: Use TARGET1_IS_REL.  Add --target1-{rel,abs}.
+
 2004-09-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated with autconfig 2.13.

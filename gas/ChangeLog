@@ -1,3 +1,7 @@
+2004-09-13  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c: Rename RELABS to TARGET1.
+
 2004-09-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* messages.c (as_internal_value_out_of_range): Cast values passed

@@ -182,6 +182,10 @@ struct elf32_arm_link_hash_table
     /* Nonzero to output a BE8 image.  */
     int byteswap_code;
 
+    /* Zero if R_ARM_TARGET1 means R_ARM_ABS32.
+       Nonzero if R_ARM_TARGET1 means R_ARM_ABS32.  */
+    int target1_is_rel;
+
     /* The number of bytes in the initial entry in the PLT.  */
     bfd_size_type plt_header_size;
 
@@ -373,6 +377,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->bfd_of_glue_owner = NULL;
   ret->no_pipeline_knowledge = 0;
   ret->byteswap_code = 0;
+  ret->target1_is_rel = 0;
 #ifdef FOUR_WORD_PLT
   ret->plt_header_size = 16;
   ret->plt_entry_size = 16;
@@ -752,7 +757,8 @@ bfd_boolean
 bfd_elf32_arm_process_before_allocation (bfd *abfd,
 					 struct bfd_link_info *link_info,
 					 int no_pipeline_knowledge,
-					 int byteswap_code)
+					 int byteswap_code,
+					 int target1_is_rel)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs = NULL;
@@ -775,6 +781,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
   globals->no_pipeline_knowledge = no_pipeline_knowledge;
+  globals->target1_is_rel = target1_is_rel;
   if (byteswap_code && !bfd_big_endian (abfd))
     {
       _bfd_error_handler (_("%B: BE8 images only valid in big-endian mode."),
@@ -1174,6 +1181,22 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
   bfd_signed_vma                signed_addend;
   struct elf32_arm_link_hash_table * globals;
 
+  globals = elf32_arm_hash_table (info);
+
+#ifndef OLD_ARM_ABI
+  /* Some relocation type map to different relocations depending on the
+     target.  We pick the right one here.  */
+  if (r_type == R_ARM_TARGET1)
+    {
+      if (globals->target1_is_rel)
+	r_type = R_ARM_REL32;
+      else
+	r_type = R_ARM_ABS32;
+      
+      howto = &elf32_arm_howto_table[r_type];
+    }
+#endif /* OLD_ARM_ABI */
+
   /* If the start address has been set, then set the EF_ARM_HASENTRY
      flag.  Setting this more than once is redundant, but the cost is
      not too high, and it keeps the code simple.
@@ -1185,8 +1208,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
      flag will not be set.  */
   if (bfd_get_start_address (output_bfd) != 0)
     elf_elfheader (output_bfd)->e_flags |= EF_ARM_HASENTRY;
-
-  globals = elf32_arm_hash_table (info);
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj)
@@ -2738,6 +2759,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 
       case R_ARM_ABS32:
       case R_ARM_REL32:
+      case R_ARM_TARGET1:
       case R_ARM_PC24:
       case R_ARM_PLT32:
 	r_symndx = ELF32_R_SYM (rel->r_info);
@@ -2753,7 +2775,8 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 	      h->plt.refcount -= 1;
 
 	    if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
-		|| ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
+		|| ELF32_R_TYPE (rel->r_info) == R_ARM_REL32
+		|| ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1)
 	      {
 		eh = (struct elf32_arm_link_hash_entry *) h;
 
@@ -2864,6 +2887,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  case R_ARM_ABS32:
 	  case R_ARM_REL32:
+	  case R_ARM_TARGET1:
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
 	    if (h != NULL)
@@ -2906,7 +2930,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& ((ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
 		     && ELF32_R_TYPE (rel->r_info) != R_ARM_PLT32
-		     && ELF32_R_TYPE (rel->r_info) != R_ARM_REL32)
+		     && ELF32_R_TYPE (rel->r_info) != R_ARM_REL32
+		     && ELF32_R_TYPE (rel->r_info) != R_ARM_TARGET1)
 		    || (h != NULL
 			&& (! info->symbolic
 			    || (h->elf_link_hash_flags
@@ -2991,7 +3016,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  }
 
 		if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
-		    || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
+		    || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32
+		    || ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1)
 		  p->count += 1;
 	      }
 	    break;
