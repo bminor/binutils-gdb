@@ -1,3 +1,10 @@
+2003-04-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips5.d: New test.
+	* gas/mips/mips5.l: New test stderr listing.
+	* gas/mips/mips5.s: New test source file.
+	* gas/mips/mips.exp: Run the mips5 test.
+
 2003-04-03  Philip Blundell  <philb@gnu.org>
 
 	* gas/arm/offset.s: New test.

@@ -481,6 +481,7 @@ if { [istarget mips*-*-*] } then {
     # 2000-03-12 00:00 UTC.
     if $ecoff { run_dump_test "lif-empic" }
     run_dump_test_arches "mips4"	[mips_arch_list_matching mips4]
+    run_dump_test_arches "mips5"	[mips_arch_list_matching mips5]
     if $ilocks {
 	run_dump_test "mul-ilocks"
     } else {
