@@ -235,11 +235,11 @@ int dc_compare_tdesc_elems (elem1, elem2)
    s1 = ((tdesc_elem_t *) elem1)->start_address;
    s2 = ((tdesc_elem_t *) elem2)->start_address;
    if (s1 < s2) return -1;
-   if (s1 > s2) return +1;
+   if (s1 > s2) return  1;
    e1 = ((tdesc_elem_t *) elem1)->end_address;
    e2 = ((tdesc_elem_t *) elem2)->end_address;
    if (e1 < e2) return -1;
-   if (e1 > e2) return +1;
+   if (e1 > e2) return  1;
    return 0;
 }
 

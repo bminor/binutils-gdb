@@ -42,8 +42,8 @@ you
 lose
 -- must know STACK_DIRECTION at compile-time
 #endif /* STACK_DIRECTION undefined */
-#endif static
-#endif emacs
+#endif /* static */
+#endif /* emacs */
 
 #ifdef __STDC__
 typedef void	*pointer;		/* generic pointer type */
@@ -154,8 +154,8 @@ alloca (size)			/* returns pointer to storage */
     register header	*hp;	/* traverses linked list */
 
     for (hp = last_alloca_header; hp != NULL;)
-      if (STACK_DIR > 0 && hp->h.deep > depth
-	  || STACK_DIR < 0 && hp->h.deep < depth)
+      if (   (STACK_DIR > 0 && hp->h.deep > depth)
+	  || (STACK_DIR < 0 && hp->h.deep < depth) )
 	{
 	  register header	*np = hp->h.next;
 

@@ -18,80 +18,32 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* g++ support is not yet included.  */
 
-#include "tdesc.h"
-
-
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
-#define EXTRA_SYMTAB_INFO int coffsem;
+/* We cache information about saved registers in the frame structure,
+   to save us from having to re-scan function prologues every time
+   a register in a non-current frame is accessed.  */
 
-/* This is not a CREATE_INFERIOR_HOOK because it also applies to
-   remote debugging.  */
-#define START_INFERIOR_HOOK() \
-  { \
-    extern int safe_to_init_tdesc_context; \
-    extern dc_handle_t tdesc_handle; \
- \
-    safe_to_init_tdesc_context = 0; \
-    if (tdesc_handle) \
-      { \
-	dc_terminate (tdesc_handle); \
-	tdesc_handle = 0; \
-      } \
-  }
+#define EXTRA_FRAME_INFO 	\
+	struct frame_saved_regs *fsr;	\
+	CORE_ADDR locals_pointer;	\
+	CORE_ADDR args_pointer;
 
-dc_dcontext_t get_prev_context ();
-extern int stack_error;
+/* Zero the frame_saved_regs pointer when the frame is initialized,
+   so that FRAME_FIND_SAVED_REGS () will know to allocate and
+   initialize a frame_saved_regs struct the first time it is called.
+   Set the arg_pointer to -1, which is not valid; 0 and other values
+   indicate real, cached values.  */
 
-#define EXTRA_FRAME_INFO dc_dcontext_t frame_context;
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
-  {									 \
-    if (fci->next_frame != NULL)					 \
-      {								 \
-        extern jmp_buf stack_jmp;					 \
-        struct frame_info *next_frame = fci->next;                       \
-        /* The call to get_prev_context */				 \
-        /* will update current_context for us. */			 \
-        stack_error = 1;						 \
-        if (!setjmp (stack_jmp))					 \
-          {								 \
-            fci->frame_context					 \
-              = get_prev_context (next_frame->frame_context);		 \
-            stack_error = 0;						 \
-          }								 \
-        else								 \
-          {								 \
-            stack_error = 0;						 \
-            next_frame->prev = 0;					 \
-            return 0;							 \
-          }  								 \
-        if (!fci->frame_context)					 \
-          {								 \
-            next_frame->prev = 0;					 \
-            return 0;							 \
-          }								 \
-      }								 \
-    else								 \
-      {								 \
-        /* We are creating an arbitrary frame */			 \
-        /* (i.e. we are in create_new_frame).  */			 \
-        extern dc_dcontext_t current_context;				 \
-       								 \
-        fci->frame_context = current_context;				 \
-      }								 \
-  }
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
+	init_extra_frame_info (fromleaf, fi)
+extern void init_extra_frame_info ();
 
 #define INIT_FRAME_PC(fromleaf, prev) \
-  {									 \
-    prev->pc = dc_location (prev->frame_context);			 \
-    prev->frame = get_frame_base (prev->pc);  	       	       	       	 \
-  }
+	init_frame_pc (fromleaf, prev)
+extern void init_frame_pc ();
 
 #define IEEE_FLOAT
-
-/* Text Description (TDESC) is used by m88k to maintain stack & reg info */
-
-#define TDESC
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
@@ -110,7 +62,9 @@ extern int stack_error;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(frompc)   0
+#define SKIP_PROLOGUE(frompc)   \
+	skip_prologue (frompc)
+extern CORE_ADDR skip_prologue ();
 
 /* The m88k kernel aligns all instructions on 4-byte boundaries.  The
    kernel also uses the least significant two bits for its own hocus
@@ -128,25 +82,9 @@ extern int stack_error;
    some instructions.  */
 
 #define SAVED_PC_AFTER_CALL(frame) \
-  (read_register (SRP_REGNUM) & (~3))
+  (ADDR_BITS_REMOVE (read_register (SRP_REGNUM)))
 
-/* Address of end of stack space.  */
-
-#define STACK_END_ADDR 0xF0000000
-
-/* Stack grows downward.  */
-
-#define INNER_THAN <
-
-/* Sequence of bytes for breakpoint instruction.  */
-
-/* instruction 0xF000D1FF is 'tb0 0,r0,511'
-   If Bit bit 0 of r0 is clear (always true),
-   initiate exception processing (trap).
- */
-#define BREAKPOINT {0xF0, 0x00, 0xD1, 0xFF}
-
-/* Address of end of stack space.  */
+/* Address of end of stack space (in core files).  */
 
 #define STACK_END_ADDR 0xF0000000
 
@@ -174,7 +112,7 @@ extern int stack_error;
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0xF800)
 
 /* Return 1 if P points to an invalid floating point value.
-   LEN is the length in bytes -- not relevant on the 386.  */
+   LEN is the length in bytes.  */
 
 #define INVALID_FLOAT(p, len) IEEE_isNAN(p,len)
 
@@ -266,7 +204,7 @@ extern int stack_error;
 #define SRP_REGNUM 1		/* Contains subroutine return pointer */
 #define RV_REGNUM 2		/* Contains simple return values */
 #define SRA_REGNUM 12		/* Contains address of struct return values */
-#define FP_REGNUM 30		/* Contains address of executing stack frame */
+#define FP_REGNUM 31		/* Reg fetched to locate frame when pgm stops */
 #define SP_REGNUM 31		/* Contains address of top of stack */
 #define SXIP_REGNUM 35		/* Contains Shadow Execute Instruction Pointer */
 #define SNIP_REGNUM 36		/* Contains Shadow Next Instruction Pointer */
@@ -377,9 +315,6 @@ extern int stack_error;
 
 #define BELIEVE_PCC_PROMOTION 1
 
-/* We provide our own get_saved_register in m88k-tdep.c.  */
-#define GET_SAVED_REGISTER
-
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
@@ -393,22 +328,36 @@ extern int stack_error;
    it means the given frame is the outermost one and has no caller.
    In that case, FRAME_CHAIN_COMBINE is not used.  */
 
-/* These are just dummies for the 88k because INIT_FRAME_PC sets prev->frame
-   instead.  */
+extern CORE_ADDR frame_chain ();
+extern int frame_chain_valid ();
+extern CORE_ADDR frame_chain_combine ();
+extern int frameless_function_invocation ();
 
-#define FRAME_CHAIN(thisframe) (0)
+#define FRAME_CHAIN(thisframe) \
+	frame_chain (thisframe)
 
-#define FRAME_CHAIN_VALID(chain, thisframe) (1)
+#define FRAME_CHAIN_VALID(chain, thisframe)	\
+	frame_chain_valid (chain, thisframe)
 
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (0)
+#define FRAME_CHAIN_COMBINE(chain, thisframe)	\
+	frame_chain_combine (chain, thisframe)
+
+#define	FRAMELESS_FUNCTION_INVOCATION(frame, fromleaf)	\
+	fromleaf = frameless_function_invocation (frame)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame+4, 4))
+#define FRAME_SAVED_PC(FRAME)	\
+	frame_saved_pc (FRAME)
+extern CORE_ADDR frame_saved_pc ();
 
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_ARGS_ADDRESS(fi)	\
+	frame_args_address (fi)
+extern CORE_ADDR frame_args_address ();
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_LOCALS_ADDRESS(fi) \
+	frame_locals_address (fi)
+extern CORE_ADDR frame_locals_address ();
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */

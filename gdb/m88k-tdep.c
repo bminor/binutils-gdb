@@ -1,4 +1,5 @@
-/* Copyright (C) 1988, 1990 Free Software Foundation, Inc.
+/* Target-machine dependent code for Motorola 88000 series, for GDB.
+   Copyright (C) 1988, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -46,138 +47,482 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "setjmp.h"
 #include "value.h"
 
-int stack_error;
-jmp_buf stack_jmp;
+void frame_find_saved_regs ();
 
-void
-tdesc_error_function  (environment, continuable, message)
-dc_word_t environment;
-dc_boolean_t continuable;
-char *message;
+
+/* Given a GDB frame, determine the address of the calling function's frame.
+   This will be used to create a new GDB frame struct, and then
+   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+
+   For us, the frame address is its stack pointer value, so we look up
+   the function prologue to determine the caller's sp value, and return it.  */
+
+FRAME_ADDR
+frame_chain (thisframe)
+     FRAME thisframe;
 {
-  if (stack_error) longjmp (stack_jmp, 1);
-  if (!continuable)
-    {
-      printf("%s\n",message);
-      abort();
-    }
-}
 
-
-void
-tdesc_read_function (environment, memory, length, buffer)
-dc_word_t environment;
-dc_word_t memory;
-int length;
-char *buffer;
-{
-  int ptrace_code;
-  errno = 0;
-  if (memory < 2048) 
-#if 0
-    /* This is a no-op!  It sets buffer, but doesn't do anything to
-       what buffer points to.  What does this function do anyway?
-       And this is wrong for cross-debugging.  */
-    buffer = ptrace (3, inferior_pid, memory, 0);
-#else
-    return;
-#endif
+  frame_find_saved_regs (thisframe, (struct frame_saved_regs *) 0);
+  /* NOTE:  this depends on frame_find_saved_regs returning the VALUE, not
+ 	    the ADDRESS, of SP_REGNUM.  It also depends on the cache of
+	    frame_find_saved_regs results.  */
+  if (thisframe->fsr->regs[SP_REGNUM])
+    return thisframe->fsr->regs[SP_REGNUM];
   else
-    read_memory (memory, buffer, length);
+    return thisframe->frame;	/* Leaf fn -- next frame up has same SP. */
 }
 
-/* Map function for tdesc */
-void
-tdesc_map_function (map_env, loc, map_info_in, map_info_out)
-dc_word_t map_env;
-dc_word_t loc;
-dc_map_info_in_t map_info_in;
-dc_map_info_out_t *map_info_out;
+int
+frameless_function_invocation (frame)
+     FRAME frame;
 {
-int map_flags = DC_MIO_ENTRY_POINT | DC_MIO_IMPLICIT_PROLOGUE_END;
-int entry_point = get_pc_function_start(loc);
-map_info_out->flags = map_flags;
-map_info_out->entry_point = entry_point;
+
+  frame_find_saved_regs (frame, (struct frame_saved_regs *) 0);
+  /* NOTE:  this depends on frame_find_saved_regs returning the VALUE, not
+ 	    the ADDRESS, of SP_REGNUM.  It also depends on the cache of
+	    frame_find_saved_regs results.  */
+  if (frame->fsr->regs[SP_REGNUM])
+    return 0;			/* Frameful -- return addr saved somewhere */
+  else
+    return 1;			/* Frameless -- no saved return address */
 }
 
-dc_handle_t tdesc_handle;
-
-extern int debug_info;
-
-void
-init_tdesc ()
+int
+frame_chain_valid (chain, thisframe)
+     CORE_ADDR chain;
+     struct frame_info *thisframe;
 {
-  tdesc_handle = dc_initiate (debug_info, tdesc_error_function,
-			      0,tdesc_read_function,0,0,0,0,0,tdesc_map_function,0);
-} 
-dc_dcontext_t current_context;
-  
-/* setup current context, called from wait_for_inferior */
-
-dc_dcontext_t
-init_dcontext()
-{
-  dc_word_t reg_info[DC_NUM_REG];
-  dc_word_t reg_flags[2] = {0,-1};
-  dc_word_t aux_info[DC_NUM_AUX];
-  dc_word_t aux_flags[2] = {0,-1};
-  dc_exactness_t loc_exact = DC_NO;
-  dc_word_t psr_info;
-  dc_boolean_t psr_ind = 0;
-  dc_word_t psr_flags[2] = {0,-1};
-
-  bcopy (&registers, reg_info, DC_NUM_REG * 4);
-  aux_info[DC_AUX_LOC] =  read_register(SXIP_REGNUM);
-  aux_info[DC_AUX_SXIP] = read_register(SXIP_REGNUM);
-  aux_info[DC_AUX_SNIP] = read_register(SNIP_REGNUM);
-  aux_info[DC_AUX_SFIP] = read_register(SFIP_REGNUM);
-  aux_info[DC_AUX_FPSR] = read_register(FPSR_REGNUM);
-  aux_info[DC_AUX_FPCR] = read_register(FPCR_REGNUM);
-
-  psr_info = read_register(PSR_REGNUM);
-
-  return dc_make_dcontext (tdesc_handle, reg_info, reg_flags, aux_info,
-                         aux_flags, loc_exact, psr_info, psr_ind, psr_flags);
+  return (chain != 0
+       && outside_startup_file (FRAME_SAVED_PC (thisframe)));
 }
-
-
-dc_dcontext_t
-get_prev_context (context)
-  dc_dcontext_t context;
-{
-  return current_context = dc_previous_dcontext (context); 
-}
-  
-
-
-
-/* Determine frame base for this file's frames.  This will be either
-   the CFA or the old style FP_REGNUM; the symtab for the current pc's
-   file has the information					      */
 
 CORE_ADDR
-get_frame_base(pc)
-CORE_ADDR pc;
+frame_chain_combine (chain, thisframe)
+     CORE_ADDR chain;
 {
-  struct symtab *this_file = find_pc_symtab(pc);
-  int coffsem_frame_position;
-  
-  /* If this_file is null, there's a good chance the file was compiled
-     without -g.  If that's the case, use CFA (canonical frame addr) 
-     as the default frame pointer.                                 */
+  return chain;
+}
 
-  if (this_file)
+void
+init_extra_frame_info (fromleaf, fi)
+     int fromleaf;
+     struct frame_info *fi;
+{
+  fi->fsr = 0;			/* Not yet allocated */
+  fi->args_pointer = 0;		/* Unknown */
+  fi->locals_pointer = 0;	/* Unknown */
+}
+
+void
+init_frame_pc (fromleaf, prev)
+     int fromleaf;
+     struct frame_info *prev;
+{
+  /* FIXME, for now it's the default from blockframe.c.   If it stays that
+     way, remove it entirely from here.  */
+  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) :
+              prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+
+}
+
+/* Examine an m88k function prologue, recording the addresses at which
+   registers are saved explicitly by the prologue code, and returning
+   the address of the first instruction after the prologue (but not
+   after the instruction at address LIMIT, as explained below).
+
+   LIMIT places an upper bound on addresses of the instructions to be
+   examined.  If the prologue code scan reaches LIMIT, the scan is
+   aborted and LIMIT is returned.  This is used, when examining the
+   prologue for the current frame, to keep examine_prologue () from
+   claiming that a given register has been saved when in fact the
+   instruction that saves it has not yet been executed.  LIMIT is used
+   at other times to stop the scan when we hit code after the true
+   function prologue (e.g. for the first source line) which might
+   otherwise be mistaken for function prologue.
+
+   The format of the function prologue matched by this routine is
+   derived from examination of the source to gcc 1.95, particularly
+   the routine output_prologue () in config/out-m88k.c.
+
+   subu r31,r31,n			# stack pointer update
+
+   (st rn,r31,offset)?			# save incoming regs
+   (st.d rn,r31,offset)?
+
+   (addu r30,r31,n)?			# frame pointer update
+
+   (pic sequence)?			# PIC code prologue
+*/
+
+/* Macros for extracting fields from instructions.  */
+
+#define BITMASK(pos, width) (((0x1 << (width)) - 1) << (pos))
+#define EXTRACT_FIELD(val, pos, width) ((val) >> (pos) & BITMASK (0, width))
+
+/* Prologue code that handles position-independent-code setup.  */
+
+struct pic_prologue_code {
+  unsigned long insn, mask;
+};
+
+static struct pic_prologue_code pic_prologue_code [] = {
+/* FIXME -- until this is translated to hex, we won't match it... */
+	0xffffffff, 0,
+					/* or r10,r1,0  (if not saved) */
+					/* bsr.n LabN */
+					/* or.u r25,r0,const */
+					/*LabN: or r25,r25,const2 */
+					/* addu r25,r25,1 */
+					/* or r1,r10,0  (if not saved) */
+};
+
+/* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
+   is not the address of a valid instruction, the address of the next
+   instruction beyond ADDR otherwise.  *PWORD1 receives the first word
+   of the instruction.  PWORD2 is ignored -- a remnant of the original
+   i960 version.  */
+
+#define NEXT_PROLOGUE_INSN(addr, lim, pword1, pword2) \
+  (((addr) < (lim)) ? next_insn (addr, pword1) : 0)
+
+/* Read the m88k instruction at 'memaddr' and return the address of 
+   the next instruction after that, or 0 if 'memaddr' is not the
+   address of a valid instruction.  The instruction
+   is stored at 'pword1'.  */
+
+CORE_ADDR
+next_insn (memaddr, pword1)
+     unsigned long *pword1;
+     CORE_ADDR memaddr;
+{
+  unsigned long buf[1];
+
+  read_memory (memaddr, buf, sizeof (buf));
+  *pword1 = buf[0];
+  SWAP_TARGET_AND_HOST (pword1, sizeof (long));
+
+  return memaddr + 4;
+}
+
+/* Read a register from frames called by us (or from the hardware regs).  */
+
+int
+read_next_frame_reg(fi, regno)
+     FRAME fi;
+     int regno;
+{
+  for (; fi; fi = fi->next) {
+      if (regno == SP_REGNUM) return fi->frame;
+      else if (fi->fsr->regs[regno])
+	return read_memory_integer(fi->fsr->regs[regno], 4);
+  }
+  return read_register(regno);
+}
+
+/* Examine the prologue of a function.  `ip' points to the first instruction.
+   `limit' is the limit of the prologue (e.g. the addr of the first 
+   linenumber, or perhaps the program counter if we're stepping through).
+   `frame_sp' is the stack pointer value in use in this frame.  
+   `fsr' is a pointer to a frame_saved_regs structure into which we put
+   info about the registers saved by this frame.  
+   `fi' is a struct frame_info pointer; we fill in various fields in it
+   to reflect the offsets of the arg pointer and the locals pointer.  */
+
+static CORE_ADDR
+examine_prologue (ip, limit, frame_sp, fsr, fi)
+     register CORE_ADDR ip;
+     register CORE_ADDR limit;
+     FRAME_ADDR frame_sp;
+     struct frame_saved_regs *fsr;
+     struct frame_info *fi;
+{
+  register CORE_ADDR next_ip;
+  register int src;
+  register struct pic_prologue_code *pcode;
+  unsigned int insn1, insn2;
+  int size, offset;
+  char must_adjust[32];		/* If set, must adjust offsets in fsr */
+  int sp_offset = -1;		/* -1 means not set (valid must be mult of 8) */
+  int fp_offset = -1;		/* -1 means not set */
+  CORE_ADDR frame_fp;
+
+  bzero (must_adjust, sizeof (must_adjust));
+  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+
+  /* Accept an optional "subu sp,sp,n" to set up the stack pointer.  */
+
+#define	SUBU_SP_INSN	0x67ff0000
+#define	SUBU_SP_MASK	0xffff0007	/* Note offset must be mult. of 8 */
+#define	SUBU_OFFSET(x)	((unsigned)(x & 0xFFFF))
+  if (next_ip &&
+      ((insn1 & SUBU_SP_MASK) == SUBU_SP_INSN))	/* subu r31, r31, N */
     {
-    coffsem_frame_position = this_file->coffsem & 3;
-    if (coffsem_frame_position == 1) 
-      return (CORE_ADDR) dc_general_register (current_context, FP_REGNUM);
-    else
-      /* default is CFA, as well as if coffsem==2 */
-      return (CORE_ADDR) dc_frame_address  (current_context);
+      sp_offset = -SUBU_OFFSET (insn1);
+      ip = next_ip;
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
     }
 
-  return (CORE_ADDR) dc_frame_address (current_context);
+  /* The function must start with a stack-pointer adjustment, or
+     we don't know WHAT'S going on... */
+  if (sp_offset == -1)
+    return ip;
+
+  /* Accept zero or more instances of "st rx,sp,n" or "st.d rx,sp,n".  
+     This may cause us to mistake the copying of a register
+     parameter to the frame for the saving of a callee-saved
+     register, but that can't be helped, since with the
+     "-fcall-saved" flag, any register can be made callee-saved.
+     This probably doesn't matter, since the ``saved'' caller's values of
+     non-callee-saved registers are not relevant anyway.  */
+
+#define	STD_STACK_INSN	0x201f0000
+#define	STD_STACK_MASK	0xfc1f0000
+#define	ST_STACK_INSN	0x241f0000
+#define	ST_STACK_MASK	0xfc1f0000
+#define	ST_OFFSET(x)	((unsigned)((x) & 0xFFFF))
+#define	ST_SRC(x)	EXTRACT_FIELD ((x), 21, 5)
+
+  while (next_ip)
+    {
+           if ((insn1 & ST_STACK_MASK)  == ST_STACK_INSN)
+ 	size = 1;
+      else if ((insn1 & STD_STACK_MASK) == STD_STACK_INSN)
+	size = 2;
+      else
+	break;
+
+      src = ST_SRC (insn1);
+      offset = ST_OFFSET (insn1);
+      while (size--)
+	{
+	  must_adjust[src] = 1;
+	  fsr->regs[src++] = offset;		/* Will be adjusted later */
+	  offset += 4;
+	}
+      ip = next_ip;
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+    }
+
+  /* Accept an optional "addu r30,r31,n" to set up the frame pointer.  */
+
+#define	ADDU_FP_INSN	0x63df0000
+#define	ADDU_FP_MASK	0xffff0000
+#define	ADDU_OFFSET(x)	((unsigned)(x & 0xFFFF))
+  if (next_ip &&
+      ((insn1 & ADDU_FP_MASK) == ADDU_FP_INSN))	/* addu r30, r31, N */
+    {
+      fp_offset = ADDU_OFFSET (insn1);
+      ip = next_ip;
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+    }
+
+  /* Accept the PIC prologue code if present.  */
+
+  pcode = pic_prologue_code;
+  size = sizeof (pic_prologue_code) / sizeof (*pic_prologue_code);
+  /* If return addr is saved, we don't use first or last insn of PICstuff.  */
+  if (fsr->regs[SRP_REGNUM]) {
+    pcode++;
+    size-=2;
+  }
+
+  while (size-- && next_ip && (pcode->insn == (pcode->mask & insn1)))
+    {
+      pcode++;
+      ip = next_ip;
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+    }
+
+  /* We're done with the prologue.  If we don't care about the stack
+     frame itself, just return.  (Note that fsr->regs has been trashed,
+     but the one caller who calls with fi==0 passes a dummy there.)  */
+
+  if (fi == 0)
+    return ip;
+
+  /* OK, now we have:
+	sp_offset	original negative displacement of SP
+	fp_offset	positive displacement between new SP and new FP, or -1
+	fsr->regs[0..31]	offset from original SP where reg is stored
+	must_adjust[0..31]	set if corresp. offset was set
+
+     The current SP (frame_sp) might not be the original new SP as set
+     by the function prologue, if alloca has been called.  This can
+     only occur if fp_offset is set, though (the compiler allocates an
+     FP when it sees alloca).  In that case, we have the FP,
+     and can calculate the original new SP from the FP.
+
+     Then, we figure out where the arguments and locals are, and
+     relocate the offsets in fsr->regs to absolute addresses.  */
+
+  if (fp_offset != -1) {
+    /* We have a frame pointer, so get it, and base our calc's on it.  */
+    frame_fp = (CORE_ADDR) read_next_frame_reg (fi->next, FP_REGNUM);
+    frame_sp = frame_fp - fp_offset;
+  } else {
+    /* We have no frame pointer, therefore frame_sp is still the same value
+       as set by prologue.  But where is the frame itself?  */
+    if (must_adjust[SRP_REGNUM]) {
+      /* Function header saved SRP (r1), the return address.  Frame starts
+	 4 bytes down from where it was saved.  */
+      frame_fp = frame_sp + fsr->regs[SRP_REGNUM] - 4;
+      fi->locals_pointer = frame_fp;
+    } else {
+      /* Function header didn't save SRP (r1), so we are in a leaf fn or
+	 are otherwise confused.  */
+      frame_fp = -1;
+    }
+  }
+
+  /* The locals are relative to the FP (whether it exists as an allocated
+     register, or just as an assumed offset from the SP) */
+  fi->locals_pointer = frame_fp;
+
+  /* The arguments are just above the SP as it was before we adjusted it
+     on entry.  */
+  fi->args_pointer = frame_sp - sp_offset;
+
+  /* Now that we know the SP value used by the prologue, we know where
+     it saved all the registers.  */
+  for (src = 0; src < 32; src++)
+    if (must_adjust[src])
+      fsr->regs[src] += frame_sp;
+ 
+  /* The saved value of the SP is always known.  */
+  /* (we hope...) */
+  if (fsr->regs[SP_REGNUM] != 0 
+   && fsr->regs[SP_REGNUM] != frame_sp - sp_offset)
+    fprintf(stderr, "Bad saved SP value %x != %x, offset %x!\n",
+        fsr->regs[SP_REGNUM],
+	frame_sp - sp_offset, sp_offset);
+
+  fsr->regs[SP_REGNUM] = frame_sp - sp_offset;
+
+  return (ip);
 }
+
+/* Given an ip value corresponding to the start of a function,
+   return the ip of the first instruction after the function 
+   prologue.  */
+
+CORE_ADDR
+skip_prologue (ip)
+     CORE_ADDR (ip);
+{
+  struct frame_saved_regs saved_regs_dummy;
+  struct symtab_and_line sal;
+  CORE_ADDR limit;
+
+  sal = find_pc_line (ip, 0);
+  limit = (sal.end) ? sal.end : 0xffffffff;
+
+  return (examine_prologue (ip, limit, (FRAME_ADDR) 0, &saved_regs_dummy,
+			    (struct frame_info *)0 ));
+}
+
+/* Put here the code to store, into a struct frame_saved_regs,
+   the addresses of the saved registers of frame described by FRAME_INFO.
+   This includes special registers such as pc and fp saved in special
+   ways in the stack frame.  sp is even more special:
+   the address we return for it IS the sp for the next frame.
+
+   We cache the result of doing this in the frame_cache_obstack, since
+   it is fairly expensive.  */
+
+void
+frame_find_saved_regs (fi, fsr)
+     struct frame_info *fi;
+     struct frame_saved_regs *fsr;
+{
+  register CORE_ADDR next_addr;
+  register CORE_ADDR *saved_regs;
+  register int regnum;
+  register struct frame_saved_regs *cache_fsr;
+  extern struct obstack frame_cache_obstack;
+  CORE_ADDR ip;
+  struct symtab_and_line sal;
+  CORE_ADDR limit;
+
+  if (!fi->fsr)
+    {
+      cache_fsr = (struct frame_saved_regs *)
+		  obstack_alloc (&frame_cache_obstack,
+				 sizeof (struct frame_saved_regs));
+      bzero (cache_fsr, sizeof (struct frame_saved_regs));
+      fi->fsr = cache_fsr;
+
+      /* Find the start and end of the function prologue.  If the PC
+	 is in the function prologue, we only consider the part that
+	 has executed already.  */
+         
+      ip = get_pc_function_start (fi->pc);
+      sal = find_pc_line (ip, 0);
+      limit = (sal.end && sal.end < fi->pc) ? sal.end: fi->pc;
+
+      /* This will fill in fields in *fi as well as in cache_fsr.  */
+      examine_prologue (ip, limit, fi->frame, cache_fsr, fi);
+    }
+
+  if (fsr)
+    *fsr = *fi->fsr;
+}
+
+/* Return the address of the locals block for the frame
+   described by FI.  Returns 0 if the address is unknown.
+   NOTE!  Frame locals are referred to by negative offsets from the
+   argument pointer, so this is the same as frame_args_address().  */
+
+CORE_ADDR
+frame_locals_address (fi)
+     struct frame_info *fi;
+{
+  register FRAME frame;
+  struct frame_saved_regs fsr;
+  CORE_ADDR ap;
+
+  if (fi->args_pointer)	/* Cached value is likely there.  */
+    return fi->args_pointer;
+
+  /* Nope, generate it.  */
+
+  get_frame_saved_regs (fi, &fsr);
+
+  return fi->args_pointer;
+}
+
+/* Return the address of the argument block for the frame
+   described by FI.  Returns 0 if the address is unknown.  */
+
+CORE_ADDR
+frame_args_address (fi)
+     struct frame_info *fi;
+{
+  register FRAME frame;
+  struct frame_saved_regs fsr;
+  CORE_ADDR ap;
+
+  if (fi->args_pointer)		/* Cached value is likely there.  */
+    return fi->args_pointer;
+
+  /* Nope, generate it.  */
+
+  get_frame_saved_regs (fi, &fsr);
+
+  return fi->args_pointer;
+}
+
+/* Return the saved PC from this frame.
+
+   If the frame has a memory copy of SRP_REGNUM, use that.  If not,
+   just use the register SRP_REGNUM itself.  */
+
+CORE_ADDR
+frame_saved_pc (frame)
+     FRAME frame;
+{
+  return read_next_frame_reg(frame, SRP_REGNUM);
+}
+
 
 #if TARGET_BYTE_ORDER != HOST_BYTE_ORDER
 you lose
@@ -209,34 +554,6 @@ IEEE_isNAN(fp, len)
   else return 1;
 }
 #endif /* Host and target byte order the same.  */
-
-#define FIRST_PRESERVED_REGNUM	14
-#define LAST_PRESERVED_REGNUM	25
-#define FIRST_PARM_REGNUM	2
-#define LAST_PARM_REGNUM	9
-
-#define MAX_REG_PARMS	(LAST_PARM_REGNUM - FIRST_PARM_REGNUM + 1)
-
-void
-frame_find_saved_regs (fi, fsr)
-      struct frame_info *fi;
-      struct frame_saved_regs *fsr;
-{
-   register int regnum;
- 
-   error ("Feature not implemented for the 88k yet.");
-   return;
- 
-#if 0
-   for (regnum = FIRST_PARM_REGNUM; regnum <= LAST_PARM_REGNUM; regnum++)
-     fsr->regs[regnum]
-        = (unsigned) fi->frame - ((regnum - FIRST_PARM_REGNUM) * 4);
- 
-   fsr->regs[SP_REGNUM] = 0;		/* SP not saved in frames */
-   fsr->regs[FP_REGNUM] = fi->frame;
-   fsr->regs[PC_REGNUM] = fi->frame + 4;
-#endif
-}
 
 static int
 pushed_size (prev_words, v)
@@ -357,13 +674,15 @@ store_parm (prev_words, left_parm_addr, v)
     end up storing *all* parameter values onto the stack (even if we will
     realize later that some of these stores were unnecessary).  */
 
+#define	FIRST_PARM_REGNUM	2
+
 void
 push_parameters (return_type, struct_conv, nargs, args)
       struct type *return_type; 
       int struct_conv;
       int nargs;
       value *args;
- {
+{
    int parm_num;
    unsigned int p_words = 0;
    CORE_ADDR left_parm_addr;
@@ -445,20 +764,20 @@ pop_frame ()
   return;
 }
 
- void
- collect_returned_value (rval, value_type, struct_return, nargs, args)
-      value *rval;
-      struct type *value_type;
-      int struct_return;
-      int nargs;
-      value *args;
- {
-   char retbuf[REGISTER_BYTES];
- 
-   bcopy (registers, retbuf, REGISTER_BYTES);
-   *rval = value_being_returned (value_type, retbuf, struct_return);
-   return;
- }
+void
+collect_returned_value (rval, value_type, struct_return, nargs, args)
+     value *rval;
+     struct type *value_type;
+     int struct_return;
+     int nargs;
+     value *args;
+{
+  char retbuf[REGISTER_BYTES];
+
+  bcopy (registers, retbuf, REGISTER_BYTES);
+  *rval = value_being_returned (value_type, retbuf, struct_return);
+  return;
+}
 
 #if 0
 /* Now handled in a machine independent way with CALL_DUMMY_LOCATION.  */
@@ -466,129 +785,39 @@ pop_frame ()
     is not a good place for it).  Return the address at which the instruction
     got stuffed, or zero if we were unable to stuff it anywhere.  */
   
- CORE_ADDR
- push_breakpoint ()
-  {
-   static char breakpoint_insn[] = BREAKPOINT;
-   extern CORE_ADDR text_end;	/* of inferior */
-   static char readback_buffer[] = BREAKPOINT;
-   int i;
-  
-   /* With a little bit of luck, we can just stash the breakpoint instruction
-      in the word just beyond the end of normal text space.  For systems on
-      which the hardware will not allow us to execute out of the stack segment,
-      we have to hope that we *are* at least allowed to effectively extend the
-      text segment by one word.  If the actual end of user's the text segment
-      happens to fall right at a page boundary this trick may fail.  Note that
-      we check for this by reading after writing, and comparing in order to
-      be sure that the write worked.  */
+CORE_ADDR
+push_breakpoint ()
+{
+  static char breakpoint_insn[] = BREAKPOINT;
+  extern CORE_ADDR text_end;	/* of inferior */
+  static char readback_buffer[] = BREAKPOINT;
+  int i;
  
-   write_memory (text_end, &breakpoint_insn, 4);
- 
-   /* Fill the readback buffer with some garbage which is certain to be
-      unequal to the breakpoint insn.  That way we can tell if the
-      following read doesn't actually succeed.  */
- 
-   for (i = 0; i < sizeof (readback_buffer); i++)
-     readback_buffer[i] = ~ readback_buffer[i];	/* Invert the bits */
- 
-   /* Now check that the breakpoint insn was successfully installed.  */
- 
-   read_memory (text_end, readback_buffer, sizeof (readback_buffer));
-   for (i = 0; i < sizeof (readback_buffer); i++)
-     if (readback_buffer[i] != breakpoint_insn[i])
-       return 0;		/* Failed to install! */
- 
-   return text_end;
- }
+  /* With a little bit of luck, we can just stash the breakpoint instruction
+     in the word just beyond the end of normal text space.  For systems on
+     which the hardware will not allow us to execute out of the stack segment,
+     we have to hope that we *are* at least allowed to effectively extend the
+     text segment by one word.  If the actual end of user's the text segment
+     happens to fall right at a page boundary this trick may fail.  Note that
+     we check for this by reading after writing, and comparing in order to
+     be sure that the write worked.  */
+
+  write_memory (text_end, &breakpoint_insn, 4);
+
+  /* Fill the readback buffer with some garbage which is certain to be
+     unequal to the breakpoint insn.  That way we can tell if the
+     following read doesn't actually succeed.  */
+
+  for (i = 0; i < sizeof (readback_buffer); i++)
+    readback_buffer[i] = ~ readback_buffer[i];	/* Invert the bits */
+
+  /* Now check that the breakpoint insn was successfully installed.  */
+
+  read_memory (text_end, readback_buffer, sizeof (readback_buffer));
+  for (i = 0; i < sizeof (readback_buffer); i++)
+    if (readback_buffer[i] != breakpoint_insn[i])
+      return 0;		/* Failed to install! */
+
+  return text_end;
+}
 #endif
-
-/* Like dc_psr_register but takes an extra int arg.  */
-static dc_word_t
-psr_register (context, dummy)
-     dc_dcontext_t context;
-     int dummy;
-{
-  return dc_psr_register (context);
-}
-
-/* Same functionality as get_saved_register in findvar.c, but implemented
-   to use tdesc.  */
-void
-get_saved_register (raw_buffer, optim, addrp, frame, regnum, lvalp)
-     char *raw_buffer;
-     int *optim;
-     CORE_ADDR *addrp;
-     FRAME frame;
-     int regnum;
-     enum lval_type *lvalp;
-{
-  struct frame_info *fi = get_frame_info (frame);
-  
-  /* Functions to say whether a register is optimized out, and
-     if not, to get the value.  Take as args a context and the
-     value of get_reg_arg.  */
-  int (*get_reg_state) ();
-  dc_word_t (*get_reg) ();
-  int get_reg_arg;
-
-  /* Because tdesc doesn't tell us whether it got it from a register
-     or memory, always say we don't have an address for it.  */
-  if (addrp != NULL)
-    *addrp = 0;
-  
-  if (regnum < DC_NUM_REG)
-    {
-      get_reg_state = dc_general_register_state;
-      get_reg = dc_general_register;
-      get_reg_arg = regnum;
-    }
-  else
-    {
-      get_reg_state = dc_auxiliary_register_state;
-      get_reg = dc_auxiliary_register;
-      switch (regnum)
-	{
-	case SXIP_REGNUM:
-	  get_reg_arg = DC_AUX_SXIP;
-	  break;
-	case SNIP_REGNUM:
-	  get_reg_arg = DC_AUX_SNIP;
-	  break;
-	case FPSR_REGNUM:
-	  get_reg_arg = DC_AUX_FPSR;
-	  break;
-	case FPCR_REGNUM:
-	  get_reg_arg = DC_AUX_FPCR;
-	  break;
-	case PSR_REGNUM:
-	  get_reg_state = dc_psr_register_bit_state;
-	  get_reg = psr_register;
-	  get_reg_arg = 0;
-	  break;
-	default:
-	  if (optim != NULL)
-	    *optim = 1;
-	  return;
-	}
-    }
-
-  if ((*get_reg_state) (fi->frame_context, get_reg_arg))
-    {
-      if (raw_buffer != NULL)
-	*(int *)raw_buffer = (*get_reg) (fi->frame_context, get_reg_arg);
-      if (optim != NULL)
-	*optim = 0;
-      return;
-    }
-  else
-    {
-      if (optim != NULL)
-	*optim = 1;
-      return;
-    }
-
-  /* Well, the caller can't treat it as a register or memory...  */
-  if (lvalp != NULL)
-    *lvalp = not_lval;
-}

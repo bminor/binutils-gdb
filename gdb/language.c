@@ -974,18 +974,6 @@ add_language (lang)
 	languages_allocsize * sizeof (*languages));
     }
   languages[languages_size++] = lang;
-
-#if FIXME
-  if (targetlist == NULL)
-    add_prefix_cmd ("target", class_run, target_command,
-		    "Connect to a target machine or process.\n\
-The first argument is the type or protocol of the target machine.\n\
-Remaining arguments are interpreted by the target protocol.  For more\n\
-information on the arguments for a particular protocol, type\n\
-`help target ' followed by the protocol name.",
-		    &targetlist, "target ", 0, &cmdlist);
-  add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc, &targetlist);
-#endif FIXME
 }
 
 /* Define the language that is no language.  */

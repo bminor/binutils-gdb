@@ -1,3 +1,35 @@
+Wed Nov 13 16:45:13 1991  John Gilmore  (gnu at cygnus.com)
+
+	Motorola 88000 port without tears, I mean without tdescs.
+
+	* m88k-tdep.c:  Blow away all tdesc stuff.
+	Provide functions for all the frame-related macros in
+	tm-delta88.h.  Adopt i960-style EXTRA_FRAME_INFO.
+	(examine_prologue, frame_find_saved_regs, skip_prologue):  borrow
+	from i960-tdep.c and adapt to the function prologues on the 88k.
+	(read_next_frame_reg):  Borrow from mips-tdep.c.
+	FIXME:  frame_locals_address should go away.
+
+	* tm-delta88.h:  Dump all the tdesc stuff.
+	Macros for all frame-related stuff call fns of same name.
+	Remove duplicated definitions.  FP_REGNUM becomes same as
+	SP_REGNUM.  
+
+	* xm-88k.h:  Eliminate lots of library dependencies, now handled
+	in libiberty.  Eliminate KDB nonsupport.
+
+	* doc/gdbint.texinfo:  Add rudiments on frames.  FIXME, add more.
+
+
+	* stack.c (frame_info):  Mark frameless functions.
+	Print locals address (FIXME, remove if same).
+	* blockframe.c:  Comment changes, FIXME after.
+	* coffread.c:  Even without TDESC, need to zap "@" symbols.
+	Don't register for wierd format names; change the names in BFD.
+
+	* alloca.c, language.c, tdesc.c:  Lint.
+	* tdesc.c, tdesc-lib: FIXME:  remove these.
+
 Tue Nov 12 19:30:22 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Add tdesc library support.  Fixups to lint,
