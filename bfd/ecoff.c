@@ -2132,6 +2132,7 @@ ecoff_sizeof_headers (abfd, reloc)
 {
   asection *current;
   int c;
+  int ret;
 
   c = 0;
   for (current = abfd->sections;
