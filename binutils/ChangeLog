@@ -1,3 +1,9 @@
+2001-02-13  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* acinclude.m4 (AM_PROG_LEX): Override installed definition.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2001-02-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* nm.c (print_symbol_info_bsd): Don't #ifdef inside printf in case

@@ -2561,7 +2561,7 @@ fi
 
 test -n "$LEX" && break
 done
-test -n "$LEX" || LEX=""$missing_dir/missing flex""
+test -n "$LEX" || LEX="$missing_dir/missing flex"
 
 # Extract the first word of "flex", so it can be a program name with args.
 set dummy flex; ac_word=$2
