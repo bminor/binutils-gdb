@@ -200,7 +200,7 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
 
     xasprintf (&map_pathname, "/proc/%d/map", pid);
     map_fd = open (map_pathname, O_RDONLY);
-    free (map_pathname);
+    xfree (map_pathname);
     if (map_fd < 0)
       return 0;
 

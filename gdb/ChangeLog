@@ -1,3 +1,8 @@
+2001-03-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-aix5.c (build_so_lib_from_mapfile): Use xfree() instead
+	of free().
+
 2001-03-27  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* TODO (Cleanups): Remove the item about converting docs to GFDL.
