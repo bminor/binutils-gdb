@@ -1,3 +1,18 @@
+Mon Jan 18 10:46:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* stack.c (print_frame_info_base): Don't cast call to
+ 	catch_errors.
+	(print_args_stub): Change char* arg to PTR.
+	* symmisc.c (print_symbol): Ditto.
+	* top.c (quit_cover): Ditto.
+	* remote.c (remote_open_1, remote_start_remote): Ditto.
+	* infrun.c (normal_stop, hook_stop_stub, restore_selected_frame):
+ 	Ditto.
+
+	* stack.c (backtrace_command): Cast first arg of make_cleanup to
+ 	make_cleanup_func.
+	* remote.c (remote_kill): Cast putpkt arg to catch_errors_ftype.
+
 Mon Jan 18 08:47:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	
 	* defs.h (catch_errors_ftype): Define.

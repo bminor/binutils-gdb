@@ -140,7 +140,7 @@ static void complete_command PARAMS ((char *, int));
 static void do_nothing PARAMS ((int));
 
 #ifdef SIGHUP
-static int quit_cover PARAMS ((char *));
+static int quit_cover PARAMS ((PTR));
 
 static void disconnect PARAMS ((int));
 #endif
@@ -587,7 +587,7 @@ int signo;
 
 static int
 quit_cover (s)
-char *s;
+     PTR s;
 {
   caution = 0;		/* Throw caution to the wind -- we're exiting.
 			   This prevents asking the user dumb questions.  */
