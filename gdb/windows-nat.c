@@ -1386,6 +1386,7 @@ child_attach (char *args, int from_tty)
 
   pid = strtoul (args, 0, 0);
   ok = DebugActiveProcess (pid);
+  saw_create = 0;
 
   if (!ok)
     error ("Can't attach to process.");

@@ -1,3 +1,8 @@
+2002-11-22  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (child_attach): Reset saw_create counter or subsequent
+	attach will hang.
+
 2002-11-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (FRAME_ARGS_ADDRESS, FRAME_LOCALS_ADDRESS): Default
