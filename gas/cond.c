@@ -255,9 +255,6 @@ void
 s_elseif (arg)
      int arg;
 {
-  expressionS operand;
-  int t;
-
   if (current_cframe == NULL)
     {
       as_bad (_("\".elseif\" without matching \".if\" - ignored"));
@@ -277,54 +274,55 @@ s_elseif (arg)
       as_where (&current_cframe->else_file_line.file,
 		&current_cframe->else_file_line.line);
 
-      if (!current_cframe->dead_tree)
-	{
-	  current_cframe->dead_tree = !current_cframe->ignoring;
-	  current_cframe->ignoring = !current_cframe->ignoring;
-	  if (LISTING_SKIP_COND ())
-	    {
-	      if (! current_cframe->ignoring)
-		listing_list (1);
-	      else
-		listing_list (2);
-	    }
-	}			/* if not a dead tree */
-    }				/* if error else do it */
+      current_cframe->dead_tree |= !current_cframe->ignoring;
+      current_cframe->ignoring = current_cframe->dead_tree;
+    }
 
   if (current_cframe == NULL || current_cframe->ignoring)
     {
       while (! is_end_of_line[(unsigned char) *input_line_pointer])
 	++input_line_pointer;
-      return;
+
+      if (current_cframe == NULL)
+	return;
     }
-
-  /* Leading whitespace is part of operand.  */
-  SKIP_WHITESPACE ();
-
-  expression (&operand);
-  if (operand.X_op != O_constant)
-    as_bad (_("non-constant expression in \".elseif\" statement"));
-
-  switch ((operatorT) arg)
+  else
     {
-    case O_eq: t = operand.X_add_number == 0; break;
-    case O_ne: t = operand.X_add_number != 0; break;
-    case O_lt: t = operand.X_add_number < 0; break;
-    case O_le: t = operand.X_add_number <= 0; break;
-    case O_ge: t = operand.X_add_number >= 0; break;
-    case O_gt: t = operand.X_add_number > 0; break;
-    default:
-      abort ();
-      return;
-    }
+      expressionS operand;
+      int t;
 
-  current_cframe->ignoring = current_cframe->dead_tree || ! t;
+      /* Leading whitespace is part of operand.  */
+      SKIP_WHITESPACE ();
+
+      expression (&operand);
+      if (operand.X_op != O_constant)
+	as_bad (_("non-constant expression in \".elseif\" statement"));
+
+      switch ((operatorT) arg)
+	{
+	case O_eq: t = operand.X_add_number == 0; break;
+	case O_ne: t = operand.X_add_number != 0; break;
+	case O_lt: t = operand.X_add_number < 0; break;
+	case O_le: t = operand.X_add_number <= 0; break;
+	case O_ge: t = operand.X_add_number >= 0; break;
+	case O_gt: t = operand.X_add_number > 0; break;
+	default:
+	  abort ();
+	  return;
+	}
+
+      current_cframe->ignoring = current_cframe->dead_tree || ! t;
+    }
 
   if (LISTING_SKIP_COND ()
-      && current_cframe->ignoring
       && (current_cframe->previous_cframe == NULL
 	  || ! current_cframe->previous_cframe->ignoring))
-    listing_list (2);
+    {
+      if (! current_cframe->ignoring)
+	listing_list (1);
+      else
+	listing_list (2);
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -368,7 +366,6 @@ s_else (arg)
   if (current_cframe == NULL)
     {
       as_bad (_(".else without matching .if - ignored"));
-
     }
   else if (current_cframe->else_seen)
     {
@@ -385,20 +382,21 @@ s_else (arg)
       as_where (&current_cframe->else_file_line.file,
 		&current_cframe->else_file_line.line);
 
-      if (!current_cframe->dead_tree)
+      current_cframe->ignoring =
+	current_cframe->dead_tree | !current_cframe->ignoring;
+
+      if (LISTING_SKIP_COND ()
+	  && (current_cframe->previous_cframe == NULL
+	      || ! current_cframe->previous_cframe->ignoring))
 	{
-	  current_cframe->ignoring = !current_cframe->ignoring;
-	  if (LISTING_SKIP_COND ())
-	    {
-	      if (! current_cframe->ignoring)
-		listing_list (1);
-	      else
-		listing_list (2);
-	    }
-	}			/* if not a dead tree */
+	  if (! current_cframe->ignoring)
+	    listing_list (1);
+	  else
+	    listing_list (2);
+	}
 
       current_cframe->else_seen = 1;
-    }				/* if error else do it */
+    }
 
   if (flag_mri)
     {
