@@ -3923,6 +3923,10 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	  continue;
 	}
 
+      /* .plt is in the bss section.  We don't initialise it.  */
+      if ((s->flags & SEC_LOAD) == 0)
+	continue;
+
       /* Allocate memory for the section contents.  We use bfd_zalloc
 	 here in case unused entries are not reclaimed before the
 	 section's contents are written out.  This should not happen,
