@@ -1,3 +1,8 @@
+2004-09-01  Richard Earnshaw < reanrsha@arm.com>
+
+	* tc-arm.c (arm_cpus, arm_fpus): Allow <cpu>-s as well as <cpu>s
+	for synthesizable cores.
+
 2004-08-25  Dmitry Diky  <diwil@spec.ru>
 
 	* config/tc-msp430.c:	Clean-up the code.

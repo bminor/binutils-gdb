@@ -13280,6 +13280,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm7500fe",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
   {"arm7t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
   {"arm7tdmi",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
+  {"arm7tdmi-s",	ARM_ARCH_V4T,	 FPU_ARCH_FPA},
   {"arm8",		ARM_ARCH_V4,	 FPU_ARCH_FPA},
   {"arm810",		ARM_ARCH_V4,	 FPU_ARCH_FPA},
   {"strongarm",		ARM_ARCH_V4,	 FPU_ARCH_FPA},
@@ -13299,6 +13300,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm9e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
   {"arm926ej",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
   {"arm926ejs",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
+  {"arm926ej-s",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
   {"arm946e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
   {"arm946e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
   {"arm966e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
@@ -13309,8 +13311,11 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm1020t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
   {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   {"arm1026ejs",	ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
+  {"arm1026ej-s",	ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   {"arm1136js",		ARM_ARCH_V6,     FPU_NONE},
+  {"arm1136j-s"		ARM_ARCH_V6,     FPU_NONE},
   {"arm1136jfs",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
+  {"arm1136jf-s",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
   /* ??? iwmmxt is not a processor.  */
@@ -13399,6 +13404,7 @@ static struct arm_fpu_option_table arm_fpus[] =
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
   {"arm1136jfs",	FPU_ARCH_VFP_V2},
+  {"arm1136jf-s",	FPU_ARCH_VFP_V2},
   {"maverick",		FPU_ARCH_MAVERICK},
   {NULL, 0}
 };
