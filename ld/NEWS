@@ -1,5 +1,8 @@
 -*- text -*-
 
+* ELF: --warn-shared-textrel option to warn if adding a DT_TEXTREL to a shared
+  object.
+
 * Added SORT_BY_NAME and SORT_BY_ALIGNMENT to the linker script
   language to permit sorting sections by section name or section
   maximum alignment.
@@ -7,9 +10,8 @@
 * Added a new linker command line switch, --sort-section name|alignment,
   to sort sections by section name or maximum alignment.
 
-* New ELF --add-needed/--no-add-needed options to control if a
-DT_NEEDED tag should be added when a shared library comes from
-DT_NEEDED tags.
+* ELF: --add-needed/--no-add-needed options to control if a DT_NEEDED tag
+  should be added when a shared library comes from DT_NEEDED tags.
 
 * Support for the crx-elf target added.
 
@@ -29,10 +31,10 @@ DT_NEEDED tags.
 
 Changes in 2.15:
 
-* New ELF --as-needed/--no-as-needed options to control if a DT_NEEDED
-tag should be added only when a shared library is referenced.
+* ELF: --as-needed/--no-as-needed options to control if a DT_NEEDED tag should
+  be added only when a shared library is referenced.
   
-* New PE --large-address-aware option to indicate executables support virtual
+* PE: --large-address-aware option to indicate executables support virtual
   addresses greater than 2 gigabytes.
 
 * DWARF 2 support for i386pe added.

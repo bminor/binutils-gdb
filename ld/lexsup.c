@@ -147,6 +147,7 @@ enum option_values
   OPTION_UNRESOLVED_SYMBOLS,
   OPTION_WARN_UNRESOLVED_SYMBOLS,
   OPTION_ERROR_UNRESOLVED_SYMBOLS,
+  OPTION_WARN_SHARED_TEXTREL,
   OPTION_REDUCE_MEMORY_OVERHEADS
 };
 
@@ -304,6 +305,18 @@ static const struct ld_option ld_options[] =
      OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH},
     '\0', NULL, N_("Reject input files whose architecture is unknown"),
     TWO_DASHES },
+  { {"add-needed", no_argument, NULL, OPTION_ADD_NEEDED},
+    '\0', NULL, N_("Set DT_NEEDED tags for DT_NEEDED entries in\n"
+		   "\t\t\t\tfollowing dynamic libs"), TWO_DASHES },
+  { {"no-add-needed", no_argument, NULL, OPTION_NO_ADD_NEEDED},
+    '\0', NULL, N_("Do not set DT_NEEDED tags for DT_NEEDED entries\n"
+		   "\t\t\t\tin following dynamic libs"), TWO_DASHES },
+  { {"as-needed", no_argument, NULL, OPTION_AS_NEEDED},
+    '\0', NULL, N_("Only set DT_NEEDED for following dynamic libs if used"),
+    TWO_DASHES },
+  { {"no-as-needed", no_argument, NULL, OPTION_NO_AS_NEEDED},
+    '\0', NULL, N_("Always set DT_NEEDED for following dynamic libs"),
+    TWO_DASHES },
   { {"assert", required_argument, NULL, OPTION_ASSERT},
     '\0', N_("KEYWORD"), N_("Ignored for SunOS compatibility"), ONE_DASH },
   { {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
@@ -337,6 +350,9 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
     '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
+  { {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL},
+    '\0', NULL, N_("Treat warnings as errors"),
+    TWO_DASHES },
   { {"fini", required_argument, NULL, OPTION_FINI},
     '\0', N_("SYMBOL"), N_("Call SYMBOL at unload-time"), ONE_DASH },
   { {"force-exe-suffix", no_argument, NULL, OPTION_FORCE_EXE_SUFFIX},
@@ -476,29 +492,17 @@ static const struct ld_option ld_options[] =
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
+  { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_SHARED_TEXTREL},
+    '\0', NULL, N_("Warn if shared object has DT_TEXTREL"),
+    TWO_DASHES },
   { {"warn-unresolved-symbols", no_argument, NULL,
      OPTION_WARN_UNRESOLVED_SYMBOLS},
     '\0', NULL, N_("Report unresolved symbols as warnings"), TWO_DASHES },
   { {"error-unresolved-symbols", no_argument, NULL,
      OPTION_ERROR_UNRESOLVED_SYMBOLS},
     '\0', NULL, N_("Report unresolved symbols as errors"), TWO_DASHES },
-  { {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL},
-    '\0', NULL, N_("Treat warnings as errors"),
-    TWO_DASHES },
   { {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
     '\0', NULL, N_("Include all objects from following archives"),
-    TWO_DASHES },
-  { {"add-needed", no_argument, NULL, OPTION_ADD_NEEDED},
-    '\0', NULL, N_("Set DT_NEEDED tags for DT_NEEDED entries in\n"
-		   "\t\t\t\tfollowing dynamic libs"), TWO_DASHES },
-  { {"no-add-needed", no_argument, NULL, OPTION_NO_ADD_NEEDED},
-    '\0', NULL, N_("Do not set DT_NEEDED tags for DT_NEEDED entries\n"
-		   "\t\t\t\tin following dynamic libs"), TWO_DASHES },
-  { {"as-needed", no_argument, NULL, OPTION_AS_NEEDED},
-    '\0', NULL, N_("Only set DT_NEEDED for following dynamic libs if used"),
-    TWO_DASHES },
-  { {"no-as-needed", no_argument, NULL, OPTION_NO_AS_NEEDED},
-    '\0', NULL, N_("Always set DT_NEEDED for following dynamic libs"),
     TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
     '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES },
@@ -1213,6 +1217,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WARN_SECTION_ALIGN:
 	  config.warn_section_align = TRUE;
+	  break;
+	case OPTION_WARN_SHARED_TEXTREL:
+	  link_info.warn_shared_textrel = TRUE;
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = TRUE;

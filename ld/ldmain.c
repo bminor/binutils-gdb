@@ -336,6 +336,7 @@ main (int argc, char **argv)
   link_info.flags = 0;
   link_info.flags_1 = 0;
   link_info.need_relax_finalize = FALSE;
+  link_info.warn_shared_textrel = FALSE;
 
   ldfile_add_arch ("");
 

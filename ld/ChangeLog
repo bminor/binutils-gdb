@@ -1,3 +1,11 @@
+2004-10-07  Jeff Baker  <jbaker@qnx.com>
+	
+	* lexsup.c: Handle --warn-shared-textrel option.
+	(ld_options): Restore alpha sorting of options.
+	* ldmain.c (main): Initialise warn_shared_info field to FALSE.
+	* ld.texinfo: Add documentation for --warn-shared-textrel.
+	* NEWS: Added mention of --warn-shared-textrel option.
+
 2004-10-05  Tomer Levi  <Tomer.Levi@nsc.com>
  
 	* emultempl/crxelf.em (disable_relaxation): Add.

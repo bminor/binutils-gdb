@@ -1,3 +1,9 @@
+2004-10-07  Jeff Baker  <jbaker@qnx.com>
+
+	* elflink.c (_bfd_elf_add_dynamic_entry): Add code to warn if
+	adding a DT_TEXTREL to a shared object and --warn-shared-textrel
+	was specified.
+
 2004-10-04  Roland McGrath  <roland@redhat.com>
 
 	* hash.c (bfd_hash_set_default_size): Use const for table.

@@ -1690,6 +1690,10 @@ The address will only be changed if it not explicitly specified; that
 is, if the @code{SECTIONS} command does not specify a start address for
 the section (@pxref{SECTIONS}).
 
+@kindex --warn-shared-textrel
+@item --warn-shared-textrel
+Warn if the linker adds a DT_TEXTREL to a shared object.  
+
 @kindex --warn-unresolved-symbols
 @item --warn-unresolved-symbols
 If the linker is going to report an unresolved symbol (see the option
