@@ -53,7 +53,7 @@ asection *ignore_input_section;
   /* So the target symbol has to be of coff type, and the symbol 
      has to have the correct native information within it */
   if ((cs->symbol.the_bfd->xvec->flavour != bfd_target_coff_flavour_enum)
-      || (cs->native == (struct syment *)NULL)) {
+      || (cs->native == (struct internal_syment *)NULL)) {
      /* This is interesting, consider the case where we're outputting */
      /* coff from a mix n match input, linking from coff to a symbol */
      /* defined in a bout file will cause this match to be true. Should */
@@ -62,22 +62,23 @@ asection *ignore_input_section;
      result = bfd_reloc_dangerous;
   }
   else  {
-    switch (cs->native->n_sclass) 
+    switch (bfd_h_get_x(abfd, & cs->native->n_sclass)) 
       {
       case C_LEAFSTAT:
       case C_LEAFEXT:
   	/* This is a call to a leaf procedure, replace instruction with a bal
 	 to the correct location */
 	{
- 	 union auxent *aux = (union auxent *)(cs->native+2);
+	 AUXENT *aux = (AUXENT *)(cs->native+2);
 	  int word = bfd_getlong(abfd, data + reloc_entry->address);
-	  BFD_ASSERT(cs->native->n_numaux==2);
+	  BFD_ASSERT(bfd_h_get_x(abfd, &cs->native->n_numaux)==2);
 	  /* We replace the original call instruction with a bal to */
 	  /* the bal entry point - the offset of which is described in the */
 	  /* 2nd auxent of the original symbol. We keep the native sym and */
 	  /* auxents untouched, so the delta between the two is the */
 	  /* offset of the bal entry point */
-	  word = ((word + (aux->x_bal.x_balntry - cs->native->n_value))
+	  word = ((word + (bfd_h_get_x(abfd, &aux->x_bal.x_balntry) -
+			   bfd_h_get_x(abfd, &cs->native->n_value)))
 		  & BAL_MASK) | BAL;
   	  bfd_putlong(abfd, word,  data+reloc_entry->address);
   	}

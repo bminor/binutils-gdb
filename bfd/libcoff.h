@@ -31,12 +31,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define obj_relocbase(bfd)	(obj_icof(bfd)->relocbase)
 #define obj_raw_syments(bfd)	(obj_icof(bfd)->raw_syments)
 #define obj_convert(bfd)	(obj_icof(bfd)->conversion_table)
+#if CFILE_STUFF
 #define obj_symbol_slew(bfd)	(obj_icof(bfd)->symbol_index_slew)
+#else
+#define obj_symbol_slew(bfd) 0
+#endif
 #define obj_string_table(bfd)	(obj_icof(bfd)->string_table)
 
 typedef struct {
   asymbol symbol;
-  struct syment *native;
+  struct internal_syment *native;
   struct lineno_cache_entry *lineno;
 } coff_symbol_type;
 
@@ -50,7 +54,7 @@ typedef struct icofdata
   long symbol_index_slew;	/* used during read to mark whether a
 				   C_FILE symbol as been added. */
 
-  struct syment *raw_syments;
+  struct internal_syment *raw_syments;
   struct lineno *raw_linenos;
   unsigned int raw_syment_count;
   char *string_table;

@@ -26,15 +26,15 @@ You should have received a copy of the GNU General Public License along with
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 
 #define sp(x) bfd_h_put_x(abfd, x, &x)
+#if 0
+/* All the generic swapping routines:
 
-/* All the swapping routines:
-
-   FIXME, these routines assume that the sizes, alignments, and offsets of
-   these fields are the same in the host and target.  This is an invalid
-   assumption, which in particular breaks on the 386 and SPARC.  Fix this
-   the same way that a.out.h and sunos.c were fixed:  define char arrays
-   that represent the headers in the target systems' file, and have these
-   functions translate in from that format, and out to that format.  */
+FIXME
+   These routines cater for the sizes and alignments and offsets of
+   all the contained fields. Because of this, the fields can change
+   size, so these should be phased out to use the ones specific to the
+   file format.
+ */
 
 void 
 DEFUN(bfd_coff_swap_name,(abfd, ptr),
@@ -53,7 +53,7 @@ DEFUN(bfd_coff_swap_name,(abfd, ptr),
 void 
 DEFUN(bfd_coff_swap_sym,(abfd, se),
       bfd            *abfd AND
-      SYMENT         *se)
+      struct internal_syment      *se)
 {
     bfd_coff_swap_name(abfd, (long*)(se->n_name));
     bfd_h_put_x(abfd, se->n_value, &se->n_value);
@@ -66,7 +66,7 @@ DEFUN(bfd_coff_swap_sym,(abfd, se),
 void
 DEFUN(bfd_coff_swap_aux,(abfd, au, type, class),
       bfd            *abfd AND
-      AUXENT         *au AND
+      struct internal_auxent    *au AND
       int             type AND
       int             class)
 {
@@ -112,10 +112,12 @@ DEFUN(bfd_coff_swap_aux,(abfd, au, type, class),
 void
 DEFUN(bfd_coff_swap_lineno,(abfd, lineno),
       bfd            *abfd AND
-      LINENO         *lineno)
+      struct internal_lineno      *lineno)
 {
     sp(lineno->l_addr.l_symndx);
     sp(lineno->l_lnno);
 }
 
 
+
+#endif
