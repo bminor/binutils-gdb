@@ -267,7 +267,7 @@ static int g_switch_seen = 0;
 
    I don't know if a fix is needed for the SVR4_PIC mode.  I've only
    fixed it for the non-PIC mode.  KR 95/04/07  */
-static int nopic_need_relax PARAMS ((symbolS *));
+static int nopic_need_relax PARAMS ((symbolS *, int));
 
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash = NULL;
@@ -3078,7 +3078,7 @@ load_address (counter, reg, ep)
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
 	 If we have an addend, we always use the latter form.  */
       if ((valueT) ep->X_add_number >= MAX_GPREL_OFFSET
-          || nopic_need_relax (ep->X_add_symbol))
+          || nopic_need_relax (ep->X_add_symbol, 1))
 	p = NULL;
       else
 	{
@@ -3949,7 +3949,7 @@ macro (ip)
 	     If we have a constant, we need two instructions anyhow,
 	     so we may as well always use the latter form.  */
 	  if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
-	      || nopic_need_relax (offset_expr.X_add_symbol))
+	      || nopic_need_relax (offset_expr.X_add_symbol, 1))
 	    p = NULL;
 	  else
 	    {
@@ -4677,7 +4677,7 @@ macro (ip)
 	  if (breg == 0)
 	    {
 	      if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
-		  || nopic_need_relax (offset_expr.X_add_symbol))
+		  || nopic_need_relax (offset_expr.X_add_symbol, 1))
 		p = NULL;
 	      else
 		{
@@ -4702,7 +4702,7 @@ macro (ip)
 	  else
 	    {
 	      if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
-		  || nopic_need_relax (offset_expr.X_add_symbol))
+		  || nopic_need_relax (offset_expr.X_add_symbol, 1))
 		p = NULL;
 	      else
 		{
@@ -5110,7 +5110,7 @@ macro (ip)
 	     lui instruction.  If there is a constant, we always use
 	     the last case.  */
 	  if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
-	      || nopic_need_relax (offset_expr.X_add_symbol))
+	      || nopic_need_relax (offset_expr.X_add_symbol, 1))
 	    {
 	      p = NULL;
 	      used_at = 1;
@@ -9738,8 +9738,9 @@ md_section_align (seg, addr)
    undefined earlier.)  */
 
 static int
-nopic_need_relax (sym)
+nopic_need_relax (sym, before_relaxing)
      symbolS *sym;
+     int before_relaxing;
 {
   if (sym == 0)
     return 0;
@@ -9771,6 +9772,10 @@ nopic_need_relax (sym)
 #ifndef NO_ECOFF_DEBUGGING
 		   || (sym->ecoff_extern_size != 0
 		       && sym->ecoff_extern_size <= g_switch_value)
+		   /* We must defer this decision until after the whole
+		      file has been read, since there might be a .extern
+		      after the first use of this symbol.  */
+		   || (sym->ecoff_extern_size == 0 && before_relaxing)
 #endif
 		   || (S_GET_VALUE (sym) != 0
 		       && S_GET_VALUE (sym) <= g_switch_value)))
@@ -10032,7 +10037,7 @@ md_estimate_size_before_relax (fragp, segtype)
 
   if (mips_pic == NO_PIC)
     {
-      change = nopic_need_relax (fragp->fr_symbol);
+      change = nopic_need_relax (fragp->fr_symbol, 0);
     }
   else if (mips_pic == SVR4_PIC)
     {
