@@ -1,3 +1,7 @@
+2005-03-15  Mikkel Krautz  <krautz@gmail.com>
+
+	* config.bfd (x86_64-elf): Add target.
+
 2005-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/es.po: Commit new Spanish translation.
