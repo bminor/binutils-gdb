@@ -32,11 +32,11 @@ texidir		= $(srcdir)/../texinfo
 ###
 
 PROG=	gprof
-SRCS=	gprof.c arcs.c dfn.c lookup.c $(MACHINE).c hertz.c \
+SRCS=	gprof.c arcs.c dfn.c lookup.c $(MY_MACHINE).c hertz.c \
 	printgprof.c printlist.c
 LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 
-OBJS=	gprof.o arcs.o dfn.o lookup.o $(MACHINE).o hertz.o \
+OBJS=	gprof.o arcs.o dfn.o lookup.o $(MY_MACHINE).o hertz.o \
 	printgprof.o printlist.o \
 	flat_bl.o bsd_callg_bl.o fsf_callg_bl.o
 
@@ -46,7 +46,7 @@ DISTSTUFF = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 CFLAGS=-g
 LDFLAGS=
 .c.o:
-	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
+	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MY_MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
 
 all:	diststuff $(PROG)
 
@@ -113,7 +113,7 @@ gprof.o: gprof.c
 arcs.o: arcs.c
 dfn.o: dfn.c
 lookup.o: lookup.c
-$(MACHINE).o: $(MACHINE).c
+$(MY_MACHINE).o: $(MY_MACHINE).c
 hertz.o: hertz.c
 printgprof.o: printgprof.c
 printlist.o: printlist.c
