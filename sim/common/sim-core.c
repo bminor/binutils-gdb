@@ -108,9 +108,7 @@ sim_core_signal (SIM_DESC sd,
 		 sim_core_signals sig)
 {
   const char *copy = (transfer == read_transfer ? "read" : "write");
-  /* The CIA could either be a struct or a simple type.  Regardless,
-     the address of the instruction is found in the first word. */
-  address_word ip = *(address_word*)&cia;
+  address_word ip = CIA_ADDR (cia);
   switch (sig)
     {
     case sim_core_unmapped_signal:

@@ -3,6 +3,7 @@ Tue Nov 18 15:53:45 1997  Doug Evans  <devans@canuck.cygnus.com>
 	* Make-common.in (SIM_NEW_COMMON_OBJS): New variable.
 
 	* sim-base.h (CIA_ADDR): Provide default definition.
+	* sim-core.c (sim_core_signal): Use CIA_ADDR to fetch value.
 
 Mon Nov 17 14:15:31 1997  Doug Evans  <devans@seba.cygnus.com>
 
