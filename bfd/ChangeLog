@@ -1,3 +1,10 @@
+Thu Aug 10 15:53:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffswap.h (coff_swap_aux_in): Swap the array dimensions
+	whenever x_fcnary is not being used for something else, rather
+	than only for an array.
+	(coff_swap_aux_out): Likewise.
+
 Tue Aug  8 16:34:57 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Remove most
