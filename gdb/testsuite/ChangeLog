@@ -1,3 +1,7 @@
+2004-10-14  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.mi/gdb701.c (main): Return 0.
+
 2004-10-13  Daniel Jacobowitz  <dan@debian.org>
 
 	* dw2-intercu.S, dw2-intercu.exp: New files.
