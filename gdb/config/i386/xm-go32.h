@@ -29,6 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef QUIT
 #define QUIT  { pollquit(); }
 
+#define GDBINIT_FILENAME "gdb.ini"
+
 #if !defined(SIGURG) & !defined(SIGALRM) & !defined(SIGBUS) & !defined(SIGSTOP)
 #define SIGURG (NSIG)
 #define SIGALRM (NSIG + 1)
