@@ -1,3 +1,8 @@
+Mon Apr 17 15:53:38 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (IEEE_FLOAT): Only dump when defined.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 Mon Apr 17 11:26:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (REMOTE_TRANSLATE_XFER_ADDRESS), mem-break.c

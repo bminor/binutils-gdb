@@ -659,9 +659,11 @@ gdbarch_dump (void)
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_LONG_DOUBLE_BIT = %ld\n",
                       (long) TARGET_LONG_DOUBLE_BIT);
+#ifdef IEEE_FLOAT
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: IEEE_FLOAT = %ld\n",
                       (long) IEEE_FLOAT);
+#endif
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_READ_PC = 0x%08lx\n",
                       (long) current_gdbarch->read_pc
