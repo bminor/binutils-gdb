@@ -79,7 +79,7 @@ mn10300_option_handler (sd, cpu, opt, arg, is_command)
 static const OPTION mn10300_options[] = 
 {
 /* start-sanitize-am30 */
-#define BOARD_AM32 "am32"
+#define BOARD_AM32 "stdeval1"
   { {"board", required_argument, NULL, OPTION_BOARD},
      '\0', "none" /* rely on compile-time string concatenation for other options */
            "|" BOARD_AM32

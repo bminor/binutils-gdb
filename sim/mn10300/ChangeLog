@@ -1,4 +1,9 @@
 start-sanitize-am30
+Fri Jun 19 11:59:26 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* interp.c (board): Rename am32 to stdeval1 as this is the name
+	consistently used to refer to the mn1030002 board.
+
 Thu June 18 14:37:14 1998  Joyce Janczyn  <janczyn@cygnus.com>
 	* interp.c (sim_open): Fix typo in address of EXTMD register
 	(0x34000280, not 0x3400280).
