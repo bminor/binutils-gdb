@@ -631,8 +631,20 @@ get_register (regnum, fp)
   else
     memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (regnum));
 
-  val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0,
-	     gdb_stdout, format, 1, 0, Val_pretty_default);
+  if (format == 'r')
+    {
+      int j;
+      printf_filtered ("0x");
+      for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
+	{
+	  register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
+	    : REGISTER_RAW_SIZE (regnum) - 1 - j;
+	  printf_filtered ("%02x", (unsigned char)raw_buffer[idx]);
+	}
+    }
+  else
+    val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0,
+	       gdb_stdout, format, 1, 0, Val_pretty_default);
 
   Tcl_DStringAppend (result_ptr, " ", -1);
 }

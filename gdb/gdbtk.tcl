@@ -30,6 +30,8 @@ set disassemble_with_source nosource
 set expr_update_list(0) 0
 set gdb_prompt "(gdb) "
 
+# Hint: The following can be toggled from a tclsh window after
+# using the gdbtk "tk tclsh" command to open the window.
 set debug_interface 0
 
 #option add *Foreground Black
@@ -66,7 +68,7 @@ proc decr {var {val 1}} {
 #
 # Center a window on the screen.
 #
-proc center_window toplevel {
+proc center_window {toplevel} {
   # Withdraw and update, to ensure geometry computations are finished.
   wm withdraw $toplevel
   update idletasks
@@ -403,7 +405,7 @@ proc create_breakpoints_window {} {
 
 # Create a frame for bpnum in the .breakpoints canvas
 
-proc add_breakpoint_frame bpnum {
+proc add_breakpoint_frame {bpnum} {
   global bpframe_lasty
   global enabled
   global disposition
@@ -502,7 +504,7 @@ proc add_breakpoint_frame bpnum {
 
 # Delete a breakpoint frame
 
-proc delete_breakpoint_frame bpnum {
+proc delete_breakpoint_frame {bpnum} {
 	global bpframe_lasty
 
 	if {![winfo exists .breakpoints]} return
@@ -1764,60 +1766,148 @@ proc reg_config_menu {} {
 #
 
 proc create_registers_window {} {
-	global reg_format
 
-	if {[winfo exists .reg]} {raise .reg ; return}
+    # If we already have a register window, just use that one.
 
-# Create an initial register display list consisting of all registers
+    if {[winfo exists .reg]} {raise .reg ; return}
 
-	if {![info exists reg_format]} {
-		global reg_display_list
-		global changed_reg_list
-		global regena
+    # Create an initial register display list consisting of all registers
 
-		set reg_format {}
-		set num_regs [llength [gdb_regnames]]
-		for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
-			set regena($regnum) 1
-		}
-		recompute_reg_display_list $num_regs
-		set changed_reg_list $reg_display_list
+    init_reg_info
+
+    build_framework .reg Registers
+
+    # First, delete all the old menu entries
+
+    .reg.menubar.view.menu delete 0 last
+
+    # Natural menu item
+    .reg.menubar.view.menu add checkbutton -label reg_format_natural(label) \
+	    -variable reg_format_natural(enable) -onvalue on -offvalue off \
+	    -command {update_registers redraw}
+
+    # Decimal menu item
+    .reg.menubar.view.menu add checkbutton -label reg_format_decimal(label) \
+	    -variable reg_format_decimal(enable) -onvalue on -offvalue off \
+	    -command {update_registers redraw}
+
+    # Hex menu item
+    .reg.menubar.view.menu add checkbutton -label reg_format_hex(label) \
+	    -variable reg_format_hex(enable) -onvalue on -offvalue off \
+	    -command {update_registers redraw}
+
+    # Octal menu item
+    .reg.menubar.view.menu add checkbutton -label reg_format_octal(label) \
+	    -variable reg_format_octal(enable) -onvalue on -offvalue off \
+	    -command {update_registers redraw}
+
+    # Binary menu item
+    .reg.menubar.view.menu add checkbutton -label reg_format_binary(label) \
+	    -variable reg_format_binary(enable) -onvalue on -offvalue off \
+	    -command {update_registers redraw}
+
+    # Unsigned menu item
+    .reg.menubar.view.menu add checkbutton -label reg_format_unsigned(label) \
+	    -variable reg_format_unsigned(enable) -onvalue on -offvalue off \
+	    -command {update_registers redraw}
+
+    # Raw menu item
+    .reg.menubar.view.menu add checkbutton -label reg_format_raw(label) \
+	    -variable reg_format_raw(enable) -onvalue on -offvalue off \
+	    -command {update_registers redraw}
+
+    # Config menu item
+    .reg.menubar.view.menu add separator
+
+    .reg.menubar.view.menu add command -label Config \
+	    -command { reg_config_menu }
+
+    destroy .reg.label
+
+    # Install the reg names
+
+    populate_reg_window
+    update_registers all
+}
+
+proc init_reg_info {} {
+    global reg_format_natural
+    global reg_format_decimal
+    global reg_format_hex
+    global reg_format_octal
+    global reg_format_raw
+    global reg_format_binary
+    global reg_format_unsigned
+    global long_size
+    global double_size
+
+    if {![info exists reg_format_hex]} {
+	global reg_display_list
+	global changed_reg_list
+	global regena
+
+	set long_size [lindex [gdb_cmd {p sizeof(long)}] 2]
+	set double_size [lindex [gdb_cmd {p sizeof(double)}] 2]
+
+	# The natural format may print floats or doubles as floating point,
+	# which typically takes more room that printing ints on the same
+	# machine.  We assume that if longs are 8 bytes that this is
+	# probably a 64 bit machine.  (FIXME)
+	set reg_format_natural(label) Natural
+	set reg_format_natural(enable) on
+	set reg_format_natural(format) {}
+	if {$long_size == 8} then {
+	    set reg_format_natural(width) 25
+	} else {
+	    set reg_format_natural(width) 16
 	}
 
-	build_framework .reg Registers
+	set reg_format_decimal(label) Decimal
+	set reg_format_decimal(enable) off
+	set reg_format_decimal(format) d
+	if {$long_size == 8} then {
+	    set reg_format_decimal(width) 21
+	} else {
+	    set reg_format_decimal(width) 12
+	}
 
-# First, delete all the old menu entries
+	set reg_format_hex(label) Hex
+	set reg_format_hex(enable) off
+	set reg_format_hex(format) x
+	set reg_format_hex(width) [expr $long_size * 2 + 3]
 
-	.reg.menubar.view.menu delete 0 last
+	set reg_format_octal(label) Octal
+	set reg_format_octal(enable) off
+	set reg_format_octal(format) o
+	set reg_format_octal(width) [expr $long_size * 8 / 3 + 3]
 
-# Hex menu item
-	.reg.menubar.view.menu add radiobutton -label Hex \
-		-command {set reg_format x ; update_registers all}
+	set reg_format_raw(label) Raw
+	set reg_format_raw(enable) off
+	set reg_format_raw(format) r
+	set reg_format_raw(width) [expr $double_size * 2 + 3]
 
-# Decimal menu item
-	.reg.menubar.view.menu add radiobutton -label Decimal \
-		-command {set reg_format d ; update_registers all}
+	set reg_format_binary(label) Binary
+	set reg_format_binary(enable) off
+	set reg_format_binary(format) t
+	set reg_format_binary(width) [expr $long_size * 8 + 1]
 
-# Octal menu item
-	.reg.menubar.view.menu add radiobutton -label Octal \
-		-command {set reg_format o ; update_registers all}
+	set reg_format_unsigned(label) Unsigned
+	set reg_format_unsigned(enable) off
+	set reg_format_unsigned(format) u
+	if {$long_size == 8} then {
+	    set reg_format_unsigned(width) 21
+	} else {
+	    set reg_format_unsigned(width) 11
+	}
 
-# Natural menu item
-	.reg.menubar.view.menu add radiobutton -label Natural \
-		-command {set reg_format {} ; update_registers all}
-
-# Config menu item
-	.reg.menubar.view.menu add separator
-
-	.reg.menubar.view.menu add command -label Config -command {
-		reg_config_menu }
-
-	destroy .reg.label
-
-# Install the reg names
-
-	populate_reg_window
-	update_registers all
+	set num_regs [llength [gdb_regnames]]
+	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
+	    set regena($regnum) 1
+	}
+	recompute_reg_display_list $num_regs
+	#set changed_reg_list $reg_display_list
+	set changed_reg_list {}
+    }
 }
 
 # Convert regena into a list of the enabled $regnums
@@ -1828,8 +1918,9 @@ proc recompute_reg_display_list {num_regs} {
 	global regena
 
 	catch {unset reg_display_list}
+	set reg_display_list {}
 
-	set line 1
+	set line 2
 	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
 
 		if {[set regena($regnum)] != 0} {
@@ -1844,38 +1935,56 @@ proc recompute_reg_display_list {num_regs} {
 # reg_display_list.
 
 proc populate_reg_window {} {
-	global max_regname_width
-	global reg_display_list
+    global reg_format_natural
+    global reg_format_decimal
+    global reg_format_hex
+    global reg_format_octal
+    global reg_format_raw
+    global reg_format_binary
+    global reg_format_unsigned
+    global max_regname_width
+    global reg_display_list
 
-	.reg.text configure -state normal
+    set win .reg.text
+    $win configure -state normal
 
-	.reg.text delete 0.0 end
+    # Clear the entire widget and insert a blank line at the top where
+    # the column labels will appear.
+    $win delete 0.0 end
+    $win insert end "\n"
 
+    if {[llength $reg_display_list] > 0} {
 	set regnames [eval gdb_regnames $reg_display_list]
+    } else {
+	set regnames {}
+    }
 
-# Figure out the longest register name
+    # Figure out the longest register name
 
-	set max_regname_width 0
+    set max_regname_width 0
 
-	foreach reg $regnames {
-		set len [string length $reg]
-		if {$len > $max_regname_width} {set max_regname_width $len}
-	}
+    foreach reg $regnames {
+	set len [string length $reg]
+	if {$len > $max_regname_width} {set max_regname_width $len}
+    }
 
-	set width [expr $max_regname_width + 15]
+    set width [expr $max_regname_width + 15]
 
-	set height [llength $regnames]
+    set height [llength $regnames]
 
-	if {$height > 60} {set height 60}
+    if {$height > 60} {set height 60}
 
-	.reg.text configure -height $height -width $width
+    $win configure -height $height -width $width
+    foreach reg $regnames {
+	$win insert end [format "%-*s\n" $width ${reg}]
+    }
 
-	foreach reg $regnames {
-		.reg.text insert end [format "%-*s \n" $max_regname_width ${reg}]
-	}
-
-	.reg.text yview 0
-	.reg.text configure -state disabled
+    #Delete the blank line left at end by last insertion.
+    if {[llength $regnames] > 0} {
+	$win delete {end - 1 char} end
+    }
+    $win yview 0
+    $win configure -state disabled
 }
 
 #
@@ -1885,60 +1994,91 @@ proc populate_reg_window {} {
 #
 # Description:
 #
-#	This procedure updates the registers window.
+#	This procedure updates the registers window according to the value of
+#	the "which" arg.
 #
 
 proc update_registers {which} {
-	global max_regname_width
-	global reg_format
-	global reg_display_list
-	global changed_reg_list
-	global highlight
-	global regmap
+    global max_regname_width
+    global reg_format_natural
+    global reg_format_decimal
+    global reg_format_hex
+    global reg_format_octal
+    global reg_format_binary
+    global reg_format_unsigned
+    global reg_format_raw
+    global reg_display_list
+    global changed_reg_list
+    global highlight
+    global regmap
 
-	set margin [expr $max_regname_width + 1]
-	set win .reg.text
-	set winwidth [lindex [$win configure -width] 4]
-	set valwidth [expr $winwidth - $margin]
+    # margin is the column where we start printing values
+    set margin [expr $max_regname_width + 1]
+    set win .reg.text
+    $win configure -state normal
 
-	$win configure -state normal
-
-	if {$which == "all"} {
-		set lineindex 1
-		foreach regnum $reg_display_list {
-			set regval [gdb_fetch_registers $reg_format $regnum]
-			set regval [format "%-*s" $valwidth $regval]
-			$win delete $lineindex.$margin "$lineindex.0 lineend"
-			$win insert $lineindex.$margin $regval
-			incr lineindex
-		}
-		$win configure -state disabled
-		return
+    if {$which == "all" || $which == "redraw"} {
+	set display_list $reg_display_list
+	$win delete 1.0 1.end
+	$win insert 1.0 [format "%*s" $max_regname_width " "]
+	foreach format {natural decimal unsigned hex octal raw binary } {
+	    set field (enable)
+	    set var reg_format_$format$field
+	    if {[set $var] == "on"} {
+		set field (label)
+		set var reg_format_$format$field
+		set label [set $var]
+		set field (width)
+		set var reg_format_$format$field
+		set var [format "%*s" [set $var] $label]
+		$win insert 1.end $var
+	    }
 	}
-
-# Unhighlight the old values
-
+    } else {
+	# Unhighlight the old values
 	foreach regnum $changed_reg_list {
-		$win tag delete $win.$regnum
+	    $win tag delete $win.$regnum
 	}
-
-# Now, highlight the changed values of the interesting registers
-
 	set changed_reg_list [eval gdb_changed_register_list $reg_display_list]
-
-	set lineindex 1
-	foreach regnum $changed_reg_list {
-		set regval [gdb_fetch_registers $reg_format $regnum]
-		set regval [format "%-*s" $valwidth $regval]
-
-		set lineindex $regmap($regnum)
-		$win delete $lineindex.$margin "$lineindex.0 lineend"
-		$win insert $lineindex.$margin $regval
-		$win tag add $win.$regnum $lineindex.0 "$lineindex.0 lineend"
-		eval $win tag configure $win.$regnum $highlight
+	set display_list $changed_reg_list
+    }
+    foreach regnum $display_list {
+	set lineindex $regmap($regnum)
+	$win delete $lineindex.$margin "$lineindex.0 lineend"
+	foreach format {natural decimal unsigned hex octal raw binary } {
+	    set field (enable)
+	    set var reg_format_$format$field
+	    if {[set $var] == "on"} {
+		set field (format)
+		set var reg_format_$format$field
+		set regval [gdb_fetch_registers [set $var] $regnum]
+		set field (width)
+		set var reg_format_$format$field
+		set regval [format "%*s" [set $var] $regval]
+		$win insert $lineindex.end $regval
+	    }
 	}
-
-	$win configure -state disabled
+    }
+    # Now, highlight the changed values of the interesting registers
+    if {$which != "all"} {
+	foreach regnum $changed_reg_list {
+	    set lineindex $regmap($regnum)
+	    $win tag add $win.$regnum $lineindex.0 "$lineindex.0 lineend"
+	    eval $win tag configure $win.$regnum $highlight
+	}
+    }
+    set winwidth $margin
+    foreach format {natural decimal unsigned hex octal raw binary} {
+	set field (enable)
+	set var reg_format_$format$field
+	if {[set $var] == "on"} {
+	    set field (width)
+	    set var reg_format_$format$field
+	    set winwidth [expr $winwidth + [set $var]]
+	}
+    }
+    $win configure -width $winwidth
+    $win configure -state disabled
 }
 
 #
