@@ -45,15 +45,6 @@ here.  */
 #include "ansidecl.h"
 #include "obstack.h"
 
-/* Make it easier to declare prototypes (puts conditional here) */
-#ifndef PROTO
-#	if __STDC__
-#		define PROTO(type, name, arglist) type name arglist
-#	else
-#		define PROTO(type, name, arglist) type name ()
-#	endif
-#endif
-
 #define BFD_VERSION "2.0"
 
 /* forward declaration */
@@ -220,26 +211,25 @@ typedef enum bfd_error {
 
 extern bfd_ec bfd_error;
 struct reloc_cache_entry;
-struct bfd_seclet_struct ;
+struct bfd_seclet;
 
 
 typedef struct bfd_error_vector {
-  PROTO(void,(* nonrepresentable_section ),(CONST bfd  *CONST abfd,
-					    CONST char *CONST name));
-  PROTO(void,(* undefined_symbol),(CONST struct reloc_cache_entry *rel,
-				   CONST struct bfd_seclet_struct *sec
-				   ));
-  PROTO(void, (* reloc_value_truncated),(CONST struct
+  void (* nonrepresentable_section ) PARAMS ((CONST bfd  *CONST abfd,
+					      CONST char *CONST name));
+  void (* undefined_symbol) PARAMS ((CONST struct reloc_cache_entry *rel,
+				     CONST struct bfd_seclet *sec));
+  void (* reloc_value_truncated) PARAMS ((CONST struct
 					  reloc_cache_entry *rel,
-					  struct bfd_seclet_struct *sec));
+					  struct bfd_seclet *sec));
 
-  PROTO(void, (* reloc_dangerous),(CONST struct reloc_cache_entry *rel,
-				   CONST struct bfd_seclet_struct *sec));
+  void (* reloc_dangerous) PARAMS ((CONST struct reloc_cache_entry *rel,
+				    CONST struct bfd_seclet *sec));
   
 } bfd_error_vector_type;
 
-PROTO (CONST char *, bfd_errmsg, (bfd_ec error_tag));
-PROTO (void, bfd_perror, (CONST char *message));
+CONST char *bfd_errmsg PARAMS ((bfd_ec error_tag));
+void bfd_perror PARAMS ((CONST char *message));
 
 
 typedef enum bfd_print_symbol

@@ -1,3 +1,17 @@
+Sat Nov 28 04:01:21 1992  John Gilmore  (gnu@cygnus.com)
+
+	* libbfd-in.h, bfd-in.h:  Eliminate all PROTO calls, replace with
+	PARAMS for readability.
+
+Wed Nov 18 13:16:17 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* format.c (bfd_check_format): if default target isn't found
+	then look through the entire list rather than return early.
+
+Mon Nov 16 14:33:03 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config/i960-coff.mt: reorder vec to match bfd_check_format (from Per)
+
 Thu Nov 12 17:01:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: pass down prefix and exec_prefix in FLAGS_TO_PASS
