@@ -1007,9 +1007,13 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
 	     let's look for its import thunk */
 	  if (info->pei386_auto_import)
 	    {
-	      char *buf = alloca (strlen (h->root.string) + 10);
+	      char *buf = (char *) bfd_malloc (strlen (h->root.string) + 10);
+	      if (buf == NULL)
+		return false;
+
 	      sprintf (buf, "__imp_%s", h->root.string);
 	      arh = archive_hash_lookup (&arsym_hash, buf, false, false);
+	      free(buf);
 	    }
 	  if (arh == (struct archive_hash_entry *) NULL)
 	    {
