@@ -345,7 +345,7 @@ INTERNAL_FUNCTION
 	bfd_elf_find_section
 
 SYNOPSIS
-	Elf_Internal_Shdr *bfd_elf_find_section (bfd *abfd, char *name);
+	struct elf_internal_shdr *bfd_elf_find_section (bfd *abfd, char *name);
 
 DESCRIPTION
 	Helper functions for GDB to locate the string tables.
@@ -355,7 +355,7 @@ DESCRIPTION
 	mechanisms wouldn't work to find it, even if we had some.
 */
 
-Elf_Internal_Shdr *
+struct elf_internal_shdr *
 DEFUN(bfd_elf_find_section, (abfd, name),
       bfd		*abfd AND
       char		*name)

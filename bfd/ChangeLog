@@ -1,3 +1,8 @@
+Tue Dec 29 21:41:05 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf.c (bfd_elf_find_section): Switch back to "struct ..." for
+	return type, so libbfd.h doesn't reference undefined typedefnames.
+
 Tue Dec 29 13:54:35 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffcode.h (coff_real_object_p): use name I386AIXMAGIC rather
