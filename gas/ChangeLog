@@ -1,3 +1,13 @@
+Tue Dec 10 04:07:28 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* input-file.c: don't close a NULL file pointer.
+
+	* Makefile.in: infodir belongs in datadir.
+
+Sat Dec  7 17:13:42 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: fix fake-as target to also create as.new.
+
 Fri Dec  6 23:16:43 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* Makefile.in: install using INSTALL_DATA and INSTALL_PROGRAM.
