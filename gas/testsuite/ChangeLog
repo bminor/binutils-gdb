@@ -1,3 +1,8 @@
+2004-10-07  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/cfi/cfi-common-4.[ds]: New.
+	* gas/cfi/cfi.exp: Run new test.
+
 2004-10-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/crx/cop_insn.s: New file.

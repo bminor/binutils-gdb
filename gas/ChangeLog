@@ -3,6 +3,9 @@
 	* macro.c (macro_expand_body): When ELF, use .LL rather than LL as
 	prefix for symbol names generated from the LOCAL macro directive.
 
+	* dw2gencfi.c (select_cie_for_fde): When separating CIE out from
+	FDE, treat a DW_CFA_remember_state as we do a DW_CFA_advance_loc.
+
 2004-10-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c (preprocess_reglist): Handle Co-processor
