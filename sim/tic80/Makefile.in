@@ -10,28 +10,17 @@
 # Not all of these need to be mentioned, only the necessary ones.
 
 # List of object files, less common parts.
-SIM_OBJS = sim-endian.o sim-bits.o sim-config.o \
+SIM_OBJS = \
+	$(SIM_NEW_COMMON_OBJS) \
 	support.o idecode.o semantics.o itable.o misc.o \
 	sim-calls.o \
-	sim-events.o \
-	sim-core.o \
 	sim-hload.o \
 	sim-hrw.o \
-	sim-io.o \
-	sim-utils.o \
-	sim-load.o \
-	sim-memopt.o \
-	sim-module.o \
-	sim-options.o \
-	sim-trace.o \
-	sim-profile.o \
-	sim-fpu.o \
 	sim-engine.o \
 	sim-run.o \
 	sim-resume.o \
 	sim-stop.o \
-	sim-reason.o \
-	sim-watch.o
+	sim-reason.o
 
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.

@@ -40,6 +40,9 @@
 typedef instruction_address sim_cia;
 static const sim_cia null_cia = {0}; /* Dummy */
 #define NULL_CIA null_cia
+/* FIXME: Perhaps igen should generate access macros for
+   `instruction_address' that we could use.  */
+#define CIA_ADDR(cia) ((cia).ip)
 
 #define WITH_WATCHPOINTS 1
 
