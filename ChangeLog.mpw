@@ -1,3 +1,13 @@
+Mon Sep 12 16:44:17 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-configure (host_canonical): Set.
+	(mpw-xconfig.in): No longer use.
+	(target_cpu): Always add to makefiles.
+	(ARCHDEFS, EMUL): Add to makefile only if nonempty.
+	(TM_FILE, XM_FILE, NM_FILE): No longer add to makefile.
+	(mpw-mh-mpw): Look for in srcdir and srcroot.
+	Use sed instead of mpw-edit-prefix to edit prefix definitions.
+
 Thu Jun 30 18:20:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-README: Update the GDB information.
