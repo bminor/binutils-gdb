@@ -1478,11 +1478,14 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     There are 13 fpr's reserved for passing parameters. At this point
 	     there is no way we would run out of them.  */
 
-	  gdb_assert (len <= 8);
+	  if (len > 8)
+	    printf_unfiltered ("Fatal Error: a floating point parameter "
+                               "#%d with a size > 8 is found!\n", argno);
 
-	  regcache_cooked_write (regcache,
-	                         tdep->ppc_fp0_regnum + 1 + f_argno,
-	                         VALUE_CONTENTS (arg));
+	  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE
+                                        (tdep->ppc_fp0_regnum + 1 + f_argno)],
+		  VALUE_CONTENTS (arg),
+		  len);
 	  ++f_argno;
 	}
 
@@ -1492,15 +1495,12 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      char word[MAX_REGISTER_SIZE];
-	      memset (word, 0, reg_size);
-	      memcpy (word,
+	      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)], 0,
+		      reg_size);
+	      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)],
 		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
 		      (len - argbytes) > reg_size
 		        ? reg_size : len - argbytes);
-	      regcache_cooked_write (regcache,
-	                            tdep->ppc_gp0_regnum + 3 + ii,
-				    word);
 	      ++ii, argbytes += reg_size;
 
 	      if (ii >= 8)
@@ -1513,11 +1513,9 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* Argument can fit in one register.  No problem.  */
 	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
-	  char word[MAX_REGISTER_SIZE];
-
-	  memset (word, 0, reg_size);
-	  memcpy (word, VALUE_CONTENTS (arg), len);
-	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3 +ii, word);
+	  memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)], 0, reg_size);
+	  memcpy ((char *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)] + adj, 
+	          VALUE_CONTENTS (arg), len);
 	}
       ++argno;
     }
@@ -1594,11 +1592,15 @@ ran_out_of_registers_for_arguments:
 	  if (TYPE_CODE (type) == TYPE_CODE_FLT && f_argno < 13)
 	    {
 
-	      gdb_assert (len <= 8);
+	      if (len > 8)
+		printf_unfiltered ("Fatal Error: a floating point parameter"
+                                   " #%d with a size > 8 is found!\n", argno);
 
-	      regcache_cooked_write (regcache,
-				     tdep->ppc_fp0_regnum + 1 + f_argno,
-				     VALUE_CONTENTS (arg));
+	      memcpy (&(deprecated_registers
+                        [DEPRECATED_REGISTER_BYTE
+                         (tdep->ppc_fp0_regnum + 1 + f_argno)]),
+		      VALUE_CONTENTS (arg),
+		      len);
 	      ++f_argno;
 	    }
 

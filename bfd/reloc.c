@@ -2560,8 +2560,6 @@ ENUMX
 ENUMX
   BFD_RELOC_ARM_SHIFT_IMM
 ENUMX
-  BFD_RELOC_ARM_SMI
-ENUMX
   BFD_RELOC_ARM_SWI
 ENUMX
   BFD_RELOC_ARM_MULTI
@@ -2623,16 +2621,6 @@ ENUM
   BFD_RELOC_ARM_SBREL32
 ENUMDOC
   Data segment base relative address.
-ENUM
-  BFD_RELOC_ARM_TARGET2
-ENUMDOC
-  This reloc is used for References to RTTI dta from exception handling
-  tables.  The actual definition depends on the target.  It may be a
-  pc-relative or some form of GOT-indirect relocation.
-ENUM
-  BFD_RELOC_ARM_PREL31
-ENUMDOC
-  31-bit PC relative address.
 
 ENUM
   BFD_RELOC_SH_PCDISP8BY2
@@ -4143,95 +4131,15 @@ ENUMDOC
   Xtensa relocation used in ELF object files for symbols that may require
   PLT entries.  Otherwise, this is just a generic 32-bit relocation.
 ENUM
-  BFD_RELOC_XTENSA_DIFF8
-ENUMX
-  BFD_RELOC_XTENSA_DIFF16
-ENUMX
-  BFD_RELOC_XTENSA_DIFF32
-ENUMDOC
-  Xtensa relocations to mark the difference of two local symbols.
-  These are only needed to support linker relaxation and can be ignored
-  when not relaxing.  The field is set to the value of the difference
-  assuming no relaxation.  The relocation encodes the position of the
-  first symbol so the linker can determine whether to adjust the field
-  value.
-ENUM
-  BFD_RELOC_XTENSA_SLOT0_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT1_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT2_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT3_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT4_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT5_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT6_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT7_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT8_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT9_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT10_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT11_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT12_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT13_OP
-ENUMX
-  BFD_RELOC_XTENSA_SLOT14_OP
-ENUMDOC
-  Generic Xtensa relocations for instruction operands.  Only the slot
-  number is encoded in the relocation.  The relocation applies to the
-  last PC-relative immediate operand, or if there are no PC-relative
-  immediates, to the last immediate operand.
-ENUM
-  BFD_RELOC_XTENSA_SLOT0_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT1_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT2_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT3_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT4_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT5_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT6_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT7_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT8_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT9_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT10_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT11_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT12_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT13_ALT
-ENUMX
-  BFD_RELOC_XTENSA_SLOT14_ALT
-ENUMDOC
-  Alternate Xtensa relocations.  Only the slot is encoded in the
-  relocation.  The meaning of these relocations is opcode-specific.
-ENUM
   BFD_RELOC_XTENSA_OP0
 ENUMX
   BFD_RELOC_XTENSA_OP1
 ENUMX
   BFD_RELOC_XTENSA_OP2
 ENUMDOC
-  Xtensa relocations for backward compatibility.  These have all been
-  replaced by BFD_RELOC_XTENSA_SLOT0_OP.
+  Generic Xtensa relocations.  Only the operand number is encoded
+  in the relocation.  The details are determined by extracting the
+  instruction opcode.
 ENUM
   BFD_RELOC_XTENSA_ASM_EXPAND
 ENUMDOC

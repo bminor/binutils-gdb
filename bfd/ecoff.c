@@ -3563,9 +3563,9 @@ ecoff_link_add_archive_symbols (abfd, info)
 	     entry if it is the tail, because that would lose any
 	     entries we add to the list later on.  */
 	  if (*pundef != info->hash->undefs_tail)
-	    *pundef = (*pundef)->u.undef.next;
+	    *pundef = (*pundef)->und_next;
 	  else
-	    pundef = &(*pundef)->u.undef.next;
+	    pundef = &(*pundef)->und_next;
 	  continue;
 	}
 
@@ -3575,7 +3575,7 @@ ecoff_link_add_archive_symbols (abfd, info)
 	 other object format.  */
       if (h->type != bfd_link_hash_undefined)
 	{
-	  pundef = &(*pundef)->u.undef.next;
+	  pundef = &(*pundef)->und_next;
 	  continue;
 	}
 
@@ -3587,7 +3587,7 @@ ecoff_link_add_archive_symbols (abfd, info)
       if (file_offset == 0)
 	{
 	  /* Nothing in this slot.  */
-	  pundef = &(*pundef)->u.undef.next;
+	  pundef = &(*pundef)->und_next;
 	  continue;
 	}
 
@@ -3618,7 +3618,7 @@ ecoff_link_add_archive_symbols (abfd, info)
 
 	  if (! found)
 	    {
-	      pundef = &(*pundef)->u.undef.next;
+	      pundef = &(*pundef)->und_next;
 	      continue;
 	    }
 
@@ -3640,7 +3640,7 @@ ecoff_link_add_archive_symbols (abfd, info)
       if (! ecoff_link_add_object_symbols (element, info))
 	return FALSE;
 
-      pundef = &(*pundef)->u.undef.next;
+      pundef = &(*pundef)->und_next;
     }
 
   return TRUE;

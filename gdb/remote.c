@@ -961,23 +961,6 @@ show_remote_protocol_qPart_auxv_packet_cmd (char *args, int from_tty,
   show_packet_config_cmd (&remote_protocol_qPart_auxv);
 }
 
-static struct packet_config remote_protocol_p;
-
-static void
-set_remote_protocol_p_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_p);
-}
-
-static void
-show_remote_protocol_p_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
-{
-  show_packet_config_cmd (&remote_protocol_p);
-}
-
-
 
 /* Tokens for use by the asynchronous signal handlers for SIGINT */
 static void *sigint_remote_twice_token;
@@ -2058,7 +2041,6 @@ init_all_packet_configs (void)
 {
   int i;
   update_packet_config (&remote_protocol_P);
-  update_packet_config (&remote_protocol_p);
   update_packet_config (&remote_protocol_qSymbol);
   update_packet_config (&remote_protocol_vcont);
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
@@ -3168,36 +3150,6 @@ static int register_bytes_found;
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regnum.  */
 
-static int
-fetch_register_using_p (int regnum)
-{
-  struct remote_state *rs = get_remote_state ();
-  char *buf = alloca (rs->remote_packet_size), *p;
-  char regp[MAX_REGISTER_SIZE];
-  int i;
-
-  buf[0] = 'p';
-  bin2hex((char *) &regnum, &buf[1], sizeof(regnum));
-  buf[9] = 0;
-  remote_send (buf, rs->remote_packet_size);
-  if (buf[0] != 0 && buf[0] != 'E') {
-     p = buf;
-     i = 0;
-     while (p[0] != 0) {
-	if (p[1] == 0) {
-		error("fetch_register_using_p: early buf termination");
-		return 0;
-	}
-	regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
-        p += 2;
-    }
-    regcache_raw_supply (current_regcache, regnum, regp);
-    return 1;
- }
-
- return 0;
-}
-
 static void
 remote_fetch_registers (int regnum)
 {
@@ -3218,31 +3170,6 @@ remote_fetch_registers (int regnum)
 			"Attempt to fetch a non G-packet register when this "
 			"remote.c does not support the p-packet.");
     }
-      switch (remote_protocol_p.support)
-	{
-	case PACKET_DISABLE:
-	  break;
-	case PACKET_ENABLE:
-	  if (fetch_register_using_p (regnum))
-	    return;
-	  else
-	    error ("Protocol error: p packet not recognized by stub");
-	case PACKET_SUPPORT_UNKNOWN:
-	  if (fetch_register_using_p (regnum))
-	    {
-	      /* The stub recognized the 'p' packet.  Remember this.  */
-	      remote_protocol_p.support = PACKET_ENABLE;
-	      return;
-	    }
-	  else
-	    {
-	      /* The stub does not support the 'P' packet.  Use 'G'
-	         instead, and don't try using 'P' in the future (it
-	         will just waste our time).  */
-	      remote_protocol_p.support = PACKET_DISABLE;
-	      break;
-	    }
-	}
 
   sprintf (buf, "g");
   remote_send (buf, (rs->remote_packet_size));
@@ -4624,18 +4551,13 @@ remote_stopped_by_watchpoint (void)
 
 extern int stepped_after_stopped_by_watchpoint;
 
-static int
-remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
+static CORE_ADDR
+remote_stopped_data_address (void)
 {
-  int rc = 0;
   if (remote_stopped_by_watchpoint ()
       || stepped_after_stopped_by_watchpoint)
-    {
-      *addr_p = remote_watch_data_address;
-      rc = 1;
-    }
-
-  return rc;
+    return remote_watch_data_address;
+  return (CORE_ADDR)0;
 }
 
 
@@ -4868,31 +4790,6 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   char *buf2 = alloca (rs->remote_packet_size);
   char *p2 = &buf2[0];
   char query_type;
-
-  /* Handle memory using remote_xfer_memory.  */
-  if (object == TARGET_OBJECT_MEMORY)
-    {
-      int xfered;
-      errno = 0;
-
-      if (writebuf != NULL)
-	{
-	  void *buffer = xmalloc (len);
-	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
-	  memcpy (buffer, writebuf, len);
-	  xfered = remote_xfer_memory (offset, buffer, len, 1, NULL, ops);
-	  do_cleanups (cleanup);
-	}
-      else
-	xfered = remote_xfer_memory (offset, readbuf, len, 0, NULL, ops);
-
-      if (xfered > 0)
-	return xfered;
-      else if (xfered == 0 && errno == 0)
-	return 0;
-      else
-	return -1;
-    }
 
   /* Only handle reads.  */
   if (writebuf != NULL || readbuf == NULL)
@@ -5247,7 +5144,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_fetch_registers = remote_fetch_registers;
   remote_ops.to_store_registers = remote_store_registers;
   remote_ops.to_prepare_to_store = remote_prepare_to_store;
-  remote_ops.deprecated_xfer_memory = remote_xfer_memory;
+  remote_ops.to_xfer_memory = remote_xfer_memory;
   remote_ops.to_files_info = remote_files_info;
   remote_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_ops.to_remove_breakpoint = remote_remove_breakpoint;
@@ -5367,7 +5264,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_fetch_registers = remote_fetch_registers;
   remote_async_ops.to_store_registers = remote_store_registers;
   remote_async_ops.to_prepare_to_store = remote_prepare_to_store;
-  remote_async_ops.deprecated_xfer_memory = remote_xfer_memory;
+  remote_async_ops.to_xfer_memory = remote_xfer_memory;
   remote_async_ops.to_files_info = remote_files_info;
   remote_async_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_async_ops.to_remove_breakpoint = remote_remove_breakpoint;
@@ -5435,7 +5332,6 @@ show_remote_cmd (char *args, int from_tty)
      remote_show_cmdlist for a list of sub commands to show.  */
   show_remote_protocol_Z_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_p_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_vcont_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_binary_download_cmd (args, from_tty, NULL);
@@ -5629,13 +5525,6 @@ in a memory packet.\n",
 			 "P", "set-register",
 			 set_remote_protocol_P_packet_cmd,
 			 show_remote_protocol_P_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
-
-  add_packet_config_cmd (&remote_protocol_p,
-			 "p", "fetch-register",
-			 set_remote_protocol_p_packet_cmd,
-			 show_remote_protocol_p_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 1);
 

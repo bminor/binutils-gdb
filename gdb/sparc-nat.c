@@ -35,7 +35,6 @@
 
 #include "sparc-tdep.h"
 #include "sparc-nat.h"
-#include "inf-ptrace.h"
 
 /* With some trickery we can use the code in this file for most (if
    not all) ptrace(2) based SPARC systems, which includes SunOS 4,
@@ -304,20 +303,6 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
 
   memcpy (readbuf, buf + offset, len);
   return len;
-}
-
-/* Create a prototype generic SPARC target.  The client can override
-   it with local methods.  */
-
-struct target_ops *
-sparc_target (void)
-{
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = fetch_inferior_registers;
-  t->to_store_registers = store_inferior_registers;
-  return t;
 }
 
 

@@ -193,6 +193,21 @@ AC_ARG_ENABLE(tui,
     *)
       AC_MSG_ERROR([bad value $enableval for --enable-tui]) ;;
   esac],enable_tui=yes)
+if test x"$enable_tui" = xyes; then
+  if test -d $srcdir/tui; then
+    if test "$ac_cv_search_initscr" != no -a "$ac_cv_search_wborder" != no; then
+      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
+      CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
+      CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
+      CONFIG_INITS="$CONFIG_INITS \$(SUBDIR_TUI_INITS)"
+      ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
+      CONFIG_ALL="${CONFIG_ALL} all-tui"
+      CONFIG_CLEAN="${CONFIG_CLEAN} clean-tui"
+      CONFIG_INSTALL="${CONFIG_INSTALL} install-tui"
+      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-tui"
+    fi
+  fi
+fi
 
 # Enable gdbtk.
 AC_ARG_ENABLE(gdbtk,
@@ -317,20 +332,9 @@ AC_SEARCH_LIBS(gethostbyname, nsl)
 # Some systems (e.g. Solaris) have `socketpair' in libsocket.
 AC_SEARCH_LIBS(socketpair, socket)
 
-# For the TUI, we need enhanced curses functionality.
-#
-# FIXME: kettenis/20040905: We prefer ncurses over the vendor-supplied
-# curses library because the latter might not provide all the
-# functionality we need.  However, this leads to problems on systems
-# where the linker searches /usr/local/lib, but the compiler doesn't
-# search /usr/local/include, if ncurses is installed in /usr/local.  A
-# default installation of ncurses on alpha*-dec-osf* will lead to such
-# a situation.
-AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
-
-# Since GDB uses Readline, we need termcap functionality.  In many
-# cases this will be provided by the curses library, but some systems
-# have a seperate termcap library, or no curses library at all.
+# Since GDB uses Readline, we need termcap functionality, so we need
+# to find a library that provides that.  When GDB is configured with
+# the TUI, we need full curses functionality.
 
 case $host_os in
   cygwin*)
@@ -341,14 +345,46 @@ case $host_os in
   go32* | *djgpp*)
     ac_cv_search_tgetent="none required"
     ;;
+  aix*)
+    # Readline prefers curses over termcap on AIX.
+    # ??? Why?
+    AC_SEARCH_LIBS(tgetent, [tinfo ncurses curses termcap])
+    ;;
 esac
 
-# These are the libraries checked by Readline.
-AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncurses])
+# Note: We used to check for libtermlib and libterminfo too, but
+# Readline doesn't, so I think we're safe with leaving them out.
+AC_SEARCH_LIBS(tgetent, [termcap tinfo ncurses Hcurses curses])
 
 if test "$ac_cv_search_tgetent" = no; then
   AC_MSG_ERROR([no termcap library found])
 fi
+
+# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
+# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
+# Makefile fragments.  That's why we need to have `Hcurses' before
+# `curses'.  I don't see why we should use HP curses if a more
+# standard curses is available, except that according to HP's
+# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
+# HP-UX 10.10 and 10.20.
+
+# FIXME: ncurses does not work on native alphaev68-dec-osf5.1,
+# and probably other platforms.  AC_SEARCH_LIBS finds the library
+# in a place such as /usr/local/lib/libncurses.a, but does not
+# do anything to look for the matching include files.
+# -- chastain 2004-05-01
+
+AC_SEARCH_LIBS(initscr, [ncurses Hcurses cursesX curses pdcurses], [],
+  [AC_MSG_WARN([no curses library found])])
+
+# Check whether the wborder function is provided by the curses
+# library detected above.  In certain implementations such as
+# the HP/UX Hcurses for instance, this function is provided by an
+# additional library.  So if we did not find this function inside
+# the curses library, try some alternate libraries we know might
+# provide it.
+AC_SEARCH_LIBS(wborder, [cur_colr], [],
+    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
 
 # ------------------------- #
 # Checks for header files.  #
@@ -448,7 +484,6 @@ AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
 AC_CHECK_FUNCS(socketpair)
 AC_CHECK_FUNCS(syscall)
 AC_CHECK_FUNCS(ttrace)
-AC_CHECK_FUNCS(wborder)
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
@@ -1345,26 +1380,7 @@ AC_SUBST(GDBTK_SRC_DIR)
 
 AC_PATH_X
 
-# Check whether we should enable the TUI, but only do so if we really
-# can.
-if test x"$enable_tui" = xyes; then
-  if test -d $srcdir/tui; then
-    if test "$ac_cv_search_waddstr" != no; then
-      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
-      CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
-      CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
-      CONFIG_INITS="$CONFIG_INITS \$(SUBDIR_TUI_INITS)"
-      ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
-      CONFIG_ALL="${CONFIG_ALL} all-tui"
-      CONFIG_CLEAN="${CONFIG_CLEAN} clean-tui"
-      CONFIG_INSTALL="${CONFIG_INSTALL} install-tui"
-      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-tui"
-    else
-      AC_MSG_WARN([no enhanced curses library found; disabling TUI])
-    fi
-  fi
-fi
-
+ 
 # Unlike the sim directory, whether a simulator is linked is controlled by 
 # presence of a SIM= and a SIM_OBS= definition in the target '.mt' file.  
 # This code just checks for a few cases where we'd like to ignore those
@@ -1422,19 +1438,22 @@ fi
 AC_SUBST(target_subdir)
 
 frags=
-if test "${target}" = "${host}"; then
-  host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
-  if test ! -f ${host_makefile_frag}; then
-    AC_MSG_ERROR("*** Gdb does not support native target ${host}")
-  fi
-  frags="$frags $host_makefile_frag"
-else
-  host_makefile_frag=/dev/null
+host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
+if test ! -f ${host_makefile_frag}; then
+    # When building a native debuger the .mh file containing things
+    # like NATDEPFILES is needed.  Cross debuggers don't need .mh
+    # since it no longer contains anything useful.
+    if test "${target}" = "${host}"; then
+	AC_MSG_ERROR("*** Gdb does not support native target ${host}")
+    else
+	host_makefile_frag=/dev/null
+    fi
 fi
+frags="$frags $host_makefile_frag"
 
 target_makefile_frag=${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt
 if test ! -f ${target_makefile_frag}; then
-  AC_MSG_ERROR("*** Gdb does not support target ${target}")
+AC_MSG_ERROR("*** Gdb does not support target ${target}")
 fi
 frags="$frags $target_makefile_frag"
 
@@ -1561,6 +1580,14 @@ AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
 dnl Autoconf doesn't provide a mechanism for modifying definitions 
 dnl provided by makefile fragments.
 dnl
+if test "${nativefile}" = ""; then
+        < Makefile \
+        sed -e '/^NATDEPFILES[[ 	]]*=.*\\$/,/[[^\\]]$/s/^/# /' \
+            -e '/^NATDEPFILES[[ 	]]*=/s/^/# /' \
+        | sed -e '/^\(NATDEPFILES[[ 	]]*[[+]]=[[ 	]]*\)/s//# \1/' \
+	> Makefile.tem
+mv -f Makefile.tem Makefile
+fi
 
 changequote(,)dnl
 sed -e '/^DEPRECATED_TM_FILE[ 	]*=/s,^DEPRECATED_TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,

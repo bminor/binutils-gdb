@@ -150,7 +150,7 @@ maintainer works with the native maintainer when resolving API issues.
 	x86-64		--target=x86_64-linux-gnu ,-Werror
 			Maintenance only
 
-	xstormy16	--target=xstormy16-elf
+	xstormy16	--target=xstormy16-elf broken
 			Corinna Vinschen	vinschen@redhat.com
 
 	z8k		Deleted.
@@ -217,17 +217,22 @@ event loop		Elena Zannoni           ezannoni@redhat.com
                         For the part of top.c related to the event loop,
                         send questions to ezannoni@redhat.com
 
-generic symtabs		Elena Zannoni		ezannoni@redhat.com
-  dwarf readers		Elena Zannoni		ezannoni@redhat.com
-  elf reader		Elena Zannoni		ezannoni@redhat.com
-  stabs reader		Elena Zannoni		ezannoni@redhat.com
+generic symtabs		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
+  dwarf readers		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
+  elf reader		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
+  stabs reader		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
   coff reader		Philippe De Muyter	phdm@macqel.be
   xcoff reader		Any maintainer can modify this; please send tricky
 			ones to Kevin Buettner <kevinb@redhat.com>
   HP/UX readers		Any [past] maintainer can modify this.
 			Please send tricky ones to the symtabs maintainers.
 
-tracing bytecode stuff  (Global Maintainers)
+tracing bytecode stuff  Jim Blandy              jimb@redhat.com
+                        (Global Maintainers)
 tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
@@ -381,7 +386,7 @@ Hans-Peter Nilsson				hp@bitrange.com
 David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
-Nick Roberts					nickrob@snap.net.nz
+Nick Roberts					nick@nick.uklinux.net
 Bob Rossi 					bob_rossi@cox.net
 Theodore A. Roth				troth@openavr.org
 Ian Roxborough					irox@redhat.com

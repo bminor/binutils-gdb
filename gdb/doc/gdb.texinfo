@@ -2590,18 +2590,9 @@ an @code{fo} followed by zero or more @code{o}s.  There is an implicit
 @code{.*} leading and trailing the regular expression you supply, so to
 match only functions that begin with @code{foo}, use @code{^foo}.
 
-@cindex non-member C@t{++} functions, set breakpoint in
 When debugging C@t{++} programs, @code{rbreak} is useful for setting
 breakpoints on overloaded functions that are not members of any special
 classes.
-
-@cindex set breakpoints on all functions
-The @code{rbreak} command can be used to set breakpoints in
-@strong{all} the functions in a program, like this:
-
-@smallexample
-(@value{GDBP}) rbreak .
-@end smallexample
 
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}
@@ -6309,7 +6300,7 @@ $ gdb -nw charset-test
 GNU gdb 2001-12-19-cvs
 Copyright 2001 Free Software Foundation, Inc.
 @dots{}
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 We can use the @code{show charset} command to see what character sets
@@ -6317,18 +6308,18 @@ We can use the @code{show charset} command to see what character sets
 strings:
 
 @smallexample
-(@value{GDBP}) show charset
+(gdb) show charset
 The current host and target character set is `ISO-8859-1'.
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 For the sake of printing this manual, let's use @sc{ascii} as our
 initial character set:
 @smallexample
-(@value{GDBP}) set charset ASCII
-(@value{GDBP}) show charset
+(gdb) set charset ASCII
+(gdb) show charset
 The current host and target character set is `ASCII'.
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 Let's assume that @sc{ascii} is indeed the correct character set for our
@@ -6338,20 +6329,20 @@ them properly.  Since our current target character set is also
 @sc{ascii}, the contents of @code{ascii_hello} print legibly:
 
 @smallexample
-(@value{GDBP}) print ascii_hello
+(gdb) print ascii_hello
 $1 = 0x401698 "Hello, world!\n"
-(@value{GDBP}) print ascii_hello[0]
+(gdb) print ascii_hello[0]
 $2 = 72 'H'
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 @value{GDBN} uses the target character set for character and string
 literals you use in expressions:
 
 @smallexample
-(@value{GDBP}) print '+'
+(gdb) print '+'
 $3 = 43 '+'
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 The @sc{ascii} character set uses the number 43 to encode the @samp{+}
@@ -6362,20 +6353,20 @@ target program uses.  If we print @code{ibm1047_hello} while our target
 character set is still @sc{ascii}, we get jibberish:
 
 @smallexample
-(@value{GDBP}) print ibm1047_hello
+(gdb) print ibm1047_hello
 $4 = 0x4016a8 "\310\205\223\223\226k@@\246\226\231\223\204Z%"
-(@value{GDBP}) print ibm1047_hello[0]
+(gdb) print ibm1047_hello[0]
 $5 = 200 '\310'
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 If we invoke the @code{set target-charset} followed by @key{TAB}@key{TAB},
 @value{GDBN} tells us the character sets it supports:
 
 @smallexample
-(@value{GDBP}) set target-charset
+(gdb) set target-charset
 ASCII       EBCDIC-US   IBM1047     ISO-8859-1
-(@value{GDBP}) set target-charset
+(gdb) set target-charset
 @end smallexample
 
 We can select @sc{ibm1047} as our target character set, and examine the
@@ -6385,28 +6376,28 @@ target character set, @sc{ibm1047}, to the host character set,
 @sc{ascii}, and they display correctly:
 
 @smallexample
-(@value{GDBP}) set target-charset IBM1047
-(@value{GDBP}) show charset
+(gdb) set target-charset IBM1047
+(gdb) show charset
 The current host character set is `ASCII'.
 The current target character set is `IBM1047'.
-(@value{GDBP}) print ascii_hello
+(gdb) print ascii_hello
 $6 = 0x401698 "\110\145%%?\054\040\167?\162%\144\041\012"
-(@value{GDBP}) print ascii_hello[0]
+(gdb) print ascii_hello[0]
 $7 = 72 '\110'
-(@value{GDBP}) print ibm1047_hello
+(gdb) print ibm1047_hello
 $8 = 0x4016a8 "Hello, world!\n"
-(@value{GDBP}) print ibm1047_hello[0]
+(gdb) print ibm1047_hello[0]
 $9 = 200 'H'
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 As above, @value{GDBN} uses the target character set for character and
 string literals you use in expressions:
 
 @smallexample
-(@value{GDBP}) print '+'
+(gdb) print '+'
 $10 = 78 '+'
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
@@ -6547,7 +6538,7 @@ $ gdb -nw sample
 GNU gdb 2002-05-06-cvs
 Copyright 2002 Free Software Foundation, Inc.
 GDB is free software, @dots{}
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 We can expand macros and examine their definitions, even when the
@@ -6555,7 +6546,7 @@ program is not running.  @value{GDBN} uses the current listing position
 to decide which macro definitions are in scope:
 
 @smallexample
-(@value{GDBP}) list main
+(gdb) list main
 3
 4       #define M 42
 5       #define ADD(x) (M + x)
@@ -6566,18 +6557,18 @@ to decide which macro definitions are in scope:
 10        printf ("Hello, world!\n");
 11      #undef N
 12        printf ("We're so creative.\n");
-(@value{GDBP}) info macro ADD
+(gdb) info macro ADD
 Defined at /home/jimb/gdb/macros/play/sample.c:5
 #define ADD(x) (M + x)
-(@value{GDBP}) info macro Q
+(gdb) info macro Q
 Defined at /home/jimb/gdb/macros/play/sample.h:1
   included at /home/jimb/gdb/macros/play/sample.c:2
 #define Q <
-(@value{GDBP}) macro expand ADD(1)
+(gdb) macro expand ADD(1)
 expands to: (42 + 1)
-(@value{GDBP}) macro expand-once ADD(1)
+(gdb) macro expand-once ADD(1)
 expands to: once (M + 1)
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 In the example above, note that @command{macro expand-once} expands only
@@ -6589,27 +6580,27 @@ Once the program is running, GDB uses the macro definitions in force at
 the source line of the current stack frame:
 
 @smallexample
-(@value{GDBP}) break main
+(gdb) break main
 Breakpoint 1 at 0x8048370: file sample.c, line 10.
-(@value{GDBP}) run
+(gdb) run
 Starting program: /home/jimb/gdb/macros/play/sample
 
 Breakpoint 1, main () at sample.c:10
 10        printf ("Hello, world!\n");
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 At line 10, the definition of the macro @code{N} at line 9 is in force:
 
 @smallexample
-(@value{GDBP}) info macro N
+(gdb) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:9
 #define N 28
-(@value{GDBP}) macro expand N Q M
+(gdb) macro expand N Q M
 expands to: 28 < 42
-(@value{GDBP}) print N Q M
+(gdb) print N Q M
 $1 = 1
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 As we step over directives that remove @code{N}'s definition, and then
@@ -6617,23 +6608,23 @@ give it a new definition, @value{GDBN} finds the definition (or lack
 thereof) in force at each point:
 
 @smallexample
-(@value{GDBP}) next
+(gdb) next
 Hello, world!
 12        printf ("We're so creative.\n");
-(@value{GDBP}) info macro N
+(gdb) info macro N
 The symbol `N' has no definition as a C/C++ preprocessor macro
 at /home/jimb/gdb/macros/play/sample.c:12
-(@value{GDBP}) next
+(gdb) next
 We're so creative.
 14        printf ("Goodbye, world!\n");
-(@value{GDBP}) info macro N
+(gdb) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:13
 #define N 1729
-(@value{GDBP}) macro expand N Q M
+(gdb) macro expand N Q M
 expands to: 1729 < 42
-(@value{GDBP}) print N Q M
+(gdb) print N Q M
 $2 = 0
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 
@@ -7489,7 +7480,7 @@ Normally, when @value{GDBN} prints a code address, it includes the name
 of the function the address falls in:
 
 @smallexample
-(@value{GDBP}) print main
+(gdb) print main
 $3 = @{int ()@} 0x11a0 <main>
 @end smallexample
 @noindent
@@ -7499,9 +7490,9 @@ asterisks around them.  For example, if @code{foo} is a function in an
 unmapped overlay, @value{GDBN} prints it this way:
 
 @smallexample
-(@value{GDBP}) overlay list
+(gdb) overlay list
 No sections are mapped.
-(@value{GDBP}) print foo
+(gdb) print foo
 $5 = @{int (int)@} 0x100000 <*foo*>
 @end smallexample
 @noindent
@@ -7509,10 +7500,10 @@ When @code{foo}'s overlay is mapped, @value{GDBN} prints the function's
 name normally:
 
 @smallexample
-(@value{GDBP}) overlay list
+(gdb) overlay list
 Section .ov.foo.text, loaded at 0x100000 - 0x100034,
         mapped at 0x1016 - 0x104a
-(@value{GDBP}) print foo
+(gdb) print foo
 $6 = @{int (int)@} 0x1016 <foo>
 @end smallexample
 
@@ -7717,11 +7708,6 @@ If a source file name ends in one of the following extensions, then
 @value{GDBN} infers that its language is the one indicated.
 
 @table @file
-@item .ada
-@itemx .ads
-@itemx .adb
-@itemx .a
-Ada source file.
 
 @item .c
 C source file
@@ -8010,7 +7996,7 @@ being set automatically by @value{GDBN}.
 @node Support
 @section Supported languages
 
-@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, Modula-2, and Ada.
+@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, and Modula-2.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -8030,7 +8016,6 @@ language reference or tutorial.
 * C::                           C and C@t{++}
 * Objective-C::                 Objective-C
 * Modula-2::                    Modula-2
-* Ada::                         Ada
 @end menu
 
 @node C
@@ -8646,7 +8631,7 @@ the description of an object.  However, this command may only work
 with certain Objective-C libraries that have a particular hook
 function, @code{_NSPrintForDebugger}, defined.
 
-@node Modula-2, Ada, Objective-C, Support
+@node Modula-2,  , Objective-C, Support
 @subsection Modula-2
 
 @cindex Modula-2, @value{GDBN} support
@@ -9088,341 +9073,6 @@ address can be specified by an integral constant, the construct
 @cindex @code{#} in Modula-2
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
-
-@node Ada
-@subsection Ada
-@cindex Ada
-
-The extensions made to @value{GDBN} for Ada only support
-output from the @sc{gnu} Ada (GNAT) compiler.
-Other Ada compilers are not currently supported, and
-attempting to debug executables produced by them is most likely
-to be difficult.
-
-
-@cindex expressions in Ada
-@menu
-* Ada Mode Intro::              General remarks on the Ada syntax 
-                                   and semantics supported by Ada mode 
-                                   in @value{GDBN}.
-* Omissions from Ada::          Restrictions on the Ada expression syntax.
-* Additions to Ada::            Extensions of the Ada expression syntax.
-* Stopping Before Main Program:: Debugging the program during elaboration.
-* Ada Glitches::                Known peculiarities of Ada mode.
-@end menu
-
-@node Ada Mode Intro
-@subsubsection Introduction
-@cindex Ada mode, general
-
-The Ada mode of @value{GDBN} supports a fairly large subset of Ada expression 
-syntax, with some extensions.
-The philosophy behind the design of this subset is 
-
-@itemize @bullet
-@item
-That @value{GDBN} should provide basic literals and access to operations for 
-arithmetic, dereferencing, field selection, indexing, and subprogram calls, 
-leaving more sophisticated computations to subprograms written into the
-program (which therefore may be called from @value{GDBN}).
-
-@item 
-That type safety and strict adherence to Ada language restrictions
-are not particularly important to the @value{GDBN} user.
-
-@item 
-That brevity is important to the @value{GDBN} user.
-@end itemize
-
-Thus, for brevity, the debugger acts as if there were 
-implicit @code{with} and @code{use} clauses in effect for all user-written 
-packages, making it unnecessary to fully qualify most names with 
-their packages, regardless of context.  Where this causes ambiguity, 
-@value{GDBN} asks the user's intent.
-
-The debugger will start in Ada mode if it detects an Ada main program. 
-As for other languages, it will enter Ada mode when stopped in a program that
-was translated from an Ada source file.
-
-While in Ada mode, you may use `@t{--}' for comments.  This is useful 
-mostly for documenting command files.  The standard @value{GDBN} comment 
-(@samp{#}) still works at the beginning of a line in Ada mode, but not in the 
-middle (to allow based literals).
-
-The debugger supports limited overloading.  Given a subprogram call in which
-the function symbol has multiple definitions, it will use the number of 
-actual parameters and some information about their types to attempt to narrow
-the set of definitions.  It also makes very limited use of context, preferring
-procedures to functions in the context of the @code{call} command, and
-functions to procedures elsewhere. 
-
-@node Omissions from Ada
-@subsubsection Omissions from Ada
-@cindex Ada, omissions from
-
-Here are the notable omissions from the subset:
-
-@itemize @bullet
-@item
-Only a subset of the attributes are supported:
-
-@itemize @minus
-@item
-@t{'First}, @t{'Last}, and @t{'Length}
- on array objects (not on types and subtypes).
-
-@item
-@t{'Min} and @t{'Max}.  
-
-@item 
-@t{'Pos} and @t{'Val}. 
-
-@item
-@t{'Tag}.
-
-@item
-@t{'Range} on array objects (not subtypes), but only as the right
-operand of the membership (@code{in}) operator.
-
-@item 
-@t{'Access}, @t{'Unchecked_Access}, and 
-@t{'Unrestricted_Access} (a GNAT extension).
-
-@item
-@t{'Address}.
-@end itemize
-
-@item
-The names in
-@code{Characters.Latin_1} are not available and
-concatenation is not implemented.  Thus, escape characters in strings are 
-not currently available.
-
-@item
-Equality tests (@samp{=} and @samp{/=}) on arrays test for bitwise
-equality of representations.  They will generally work correctly
-for strings and arrays whose elements have integer or enumeration types.
-They may not work correctly for arrays whose element
-types have user-defined equality, for arrays of real values 
-(in particular, IEEE-conformant floating point, because of negative
-zeroes and NaNs), and for arrays whose elements contain unused bits with
-indeterminate values.  
-
-@item
-The other component-by-component array operations (@code{and}, @code{or}, 
-@code{xor}, @code{not}, and relational tests other than equality)
-are not implemented. 
-
-@item 
-There are no record or array aggregates.
-
-@item
-Calls to dispatching subprograms are not implemented.
-
-@item
-The overloading algorithm is much more limited (i.e., less selective)
-than that of real Ada.  It makes only limited use of the context in which a subexpression
-appears to resolve its meaning, and it is much looser in its rules for allowing
-type matches.  As a result, some function calls will be ambiguous, and the user
-will be asked to choose the proper resolution.
-
-@item
-The @code{new} operator is not implemented.
-
-@item
-Entry calls are not implemented.
-
-@item 
-Aside from printing, arithmetic operations on the native VAX floating-point 
-formats are not supported.
-
-@item
-It is not possible to slice a packed array.
-@end itemize
-
-@node Additions to Ada
-@subsubsection Additions to Ada
-@cindex Ada, deviations from 
-
-As it does for other languages, @value{GDBN} makes certain generic
-extensions to Ada (@pxref{Expressions}):
-
-@itemize @bullet
-@item
-If the expression @var{E} is a variable residing in memory 
-(typically a local variable or array element) and @var{N} is 
-a positive integer, then @code{@var{E}@@@var{N}} displays the values of
-@var{E} and the @var{N}-1 adjacent variables following it in memory as an array.  
-In Ada, this operator is generally not necessary, since its prime use
-is in displaying parts of an array, and slicing will usually do this in Ada.
-However, there are occasional uses when debugging programs
-in which certain debugging information has been optimized away.
-
-@item
-@code{@var{B}::@var{var}} means ``the variable named @var{var} that appears
-in function or file @var{B}.''  When @var{B} is a file name, you must typically
-surround it in single quotes.
-
-@item 
-The expression @code{@{@var{type}@} @var{addr}} means ``the variable of type
-@var{type} that appears at address @var{addr}.''
-
-@item
-A name starting with @samp{$} is a convenience variable 
-(@pxref{Convenience Vars}) or a machine register (@pxref{Registers}).
-@end itemize
-
-In addition, @value{GDBN} provides a few other shortcuts and outright additions specific 
-to Ada:
-
-@itemize @bullet
-@item 
-The assignment statement is allowed as an expression, returning
-its right-hand operand as its value.  Thus, you may enter
-
-@smallexample
-set x := y + 3
-print A(tmp := y + 1)
-@end smallexample
-
-@item 
-The semicolon is allowed as an ``operator,''  returning as its value 
-the value of its right-hand operand.
-This allows, for example,
-complex conditional breaks:
-
-@smallexample
-break f
-condition 1 (report(i); k += 1; A(k) > 100)
-@end smallexample
-
-@item 
-Rather than use catenation and symbolic character names to introduce special 
-characters into strings, one may instead use a special bracket notation, 
-which is also used to print strings.  A sequence of characters of the form 
-@samp{["@var{XX}"]} within a string or character literal denotes the 
-(single) character whose numeric encoding is @var{XX} in hexadecimal.  The
-sequence of characters @samp{["""]} also denotes a single quotation mark 
-in strings.   For example,
-@smallexample
-   "One line.["0a"]Next line.["0a"]"
-@end smallexample
-@noindent
-contains an ASCII newline character (@code{Ada.Characters.Latin_1.LF}) after each
-period.
-
-@item
-The subtype used as a prefix for the attributes @t{'Pos}, @t{'Min}, and
-@t{'Max} is optional (and is ignored in any case).  For example, it is valid
-to write
-
-@smallexample
-print 'max(x, y)
-@end smallexample
-
-@item
-When printing arrays, @value{GDBN} uses positional notation when the 
-array has a lower bound of 1, and uses a modified named notation otherwise.
-For example, a one-dimensional array of three integers with a lower bound of 3 might print as
-
-@smallexample
-(3 => 10, 17, 1)
-@end smallexample
-
-@noindent
-That is, in contrast to valid Ada, only the first component has a @code{=>} 
-clause.
-
-@item
-You may abbreviate attributes in expressions with any unique,
-multi-character subsequence of 
-their names (an exact match gets preference).
-For example, you may use @t{a'len}, @t{a'gth}, or @t{a'lh}
-in place of  @t{a'length}.
-
-@item
-@cindex quoting Ada internal identifiers
-Since Ada is case-insensitive, the debugger normally maps identifiers you type 
-to lower case.  The GNAT compiler uses upper-case characters for 
-some of its internal identifiers, which are normally of no interest to users.
-For the rare occasions when you actually have to look at them,
-enclose them in angle brackets to avoid the lower-case mapping. 
-For example,
-@smallexample
-@value{GDBP} print <JMPBUF_SAVE>[0]
-@end smallexample
-
-@item
-Printing an object of class-wide type or dereferencing an 
-access-to-class-wide value will display all the components of the object's
-specific type (as indicated by its run-time tag).  Likewise, component
-selection on such a value will operate on the specific type of the
-object.
-
-@end itemize
-
-@node Stopping Before Main Program
-@subsubsection Stopping at the Very Beginning
-
-@cindex breakpointing Ada elaboration code
-It is sometimes necessary to debug the program during elaboration, and
-before reaching the main procedure.
-As defined in the Ada Reference
-Manual, the elaboration code is invoked from a procedure called
-@code{adainit}.  To run your program up to the beginning of
-elaboration, simply use the following two commands:
-@code{tbreak adainit} and @code{run}.
-
-@node Ada Glitches
-@subsubsection Known Peculiarities of Ada Mode
-@cindex Ada, problems
-
-Besides the omissions listed previously (@pxref{Omissions from Ada}),
-we know of several problems with and limitations of Ada mode in
-@value{GDBN},
-some of which will be fixed with planned future releases of the debugger 
-and the GNU Ada compiler.
-
-@itemize @bullet
-@item
-Currently, the debugger 
-has insufficient information to determine whether certain pointers represent
-pointers to objects or the objects themselves.
-Thus, the user may have to tack an extra @code{.all} after an expression
-to get it printed properly.
-
-@item 
-Static constants that the compiler chooses not to materialize as objects in 
-storage are invisible to the debugger.
-
-@item
-Named parameter associations in function argument lists are ignored (the
-argument lists are treated as positional).
-
-@item
-Many useful library packages are currently invisible to the debugger.
-
-@item
-Fixed-point arithmetic, conversions, input, and output is carried out using 
-floating-point arithmetic, and may give results that only approximate those on 
-the host machine.
-
-@item
-The type of the @t{'Address} attribute may not be @code{System.Address}.
-
-@item
-The GNAT compiler never generates the prefix @code{Standard} for any of 
-the standard symbols defined by the Ada language.  @value{GDBN} knows about 
-this: it will strip the prefix from names when you use it, and will never
-look for a name you have so qualified among local symbols, nor match against
-symbols in other packages or subprograms.  If you have 
-defined entities anywhere in your program other than parameters and 
-local variables whose simple names match names in @code{Standard}, 
-GNAT's lack of qualification here can cause confusion.  When this happens,
-you can usually resolve the confusion 
-by qualifying the problematic names with package
-@code{Standard} explicitly.  
-@end itemize
 
 @node Unsupported languages
 @section Unsupported languages
@@ -12106,7 +11756,7 @@ some confusion. If in doubt, try the @code{info functions} and
 @pxref{Symbols}). Here's an example:
 
 @smallexample
-(@value{GDBP}) info function CreateFileA
+(gdb) info function CreateFileA
 All functions matching regular expression "CreateFileA":
 
 Non-debugging symbols:
@@ -12115,7 +11765,7 @@ Non-debugging symbols:
 @end smallexample
 
 @smallexample
-(@value{GDBP}) info function !
+(gdb) info function !
 All functions matching regular expression "!":
 
 Non-debugging symbols:
@@ -12142,28 +11792,28 @@ type information in the command. Here's an example of the type of
 problem:
 
 @smallexample
-(@value{GDBP}) print 'cygwin1!__argv'
+(gdb) print 'cygwin1!__argv'
 $1 = 268572168
 @end smallexample
 
 @smallexample
-(@value{GDBP}) x 'cygwin1!__argv'
+(gdb) x 'cygwin1!__argv'
 0x10021610:      "\230y\""
 @end smallexample
 
 And two possible solutions:
 
 @smallexample
-(@value{GDBP}) print ((char **)'cygwin1!__argv')[0]
+(gdb) print ((char **)'cygwin1!__argv')[0]
 $2 = 0x22fd98 "/cygdrive/c/mydirectory/myprogram"
 @end smallexample
 
 @smallexample
-(@value{GDBP}) x/2x &'cygwin1!__argv'
+(gdb) x/2x &'cygwin1!__argv'
 0x610c0aa8 <cygwin1!__argv>:    0x10021608      0x00000000
-(@value{GDBP}) x/x 0x10021608
+(gdb) x/x 0x10021608
 0x10021608:     0x0022fd98
-(@value{GDBP}) x/s 0x0022fd98
+(gdb) x/s 0x0022fd98
 0x22fd98:        "/cygdrive/c/mydirectory/myprogram"
 @end smallexample
 
@@ -12174,7 +11824,7 @@ function's frame set-up code. You can work around this by using ``*&''
 to set the breakpoint at a raw memory address:
 
 @smallexample
-(@value{GDBP}) break *&'python22!PyOS_Readline'
+(gdb) break *&'python22!PyOS_Readline'
 Breakpoint 1 at 0x1e04eff0
 @end smallexample
 
@@ -13383,7 +13033,7 @@ Prints a line of the form: @samp{Gdb's prompt is: @var{your-prompt}}
 @cindex readline
 @cindex command line editing
 
-@value{GDBN} reads its input commands via the @dfn{Readline} interface.  This
+@value{GDBN} reads its input commands via the @dfn{readline} interface.  This
 @sc{gnu} library provides consistent behavior for programs which provide a
 command line interface to the user.  Advantages are @sc{gnu} Emacs-style
 or @dfn{vi}-style inline editing of commands, @code{csh}-like history
@@ -13408,25 +13058,13 @@ Disable command line editing.
 Show whether command line editing is enabled.
 @end table
 
-@xref{Command Line Editing}, for more details about the Readline
-interface.  Users unfamiliar with @sc{gnu} Emacs or @code{vi} are
-encouraged to read that chapter.
-
 @node History
 @section Command history
-@cindex command history
 
 @value{GDBN} can keep track of the commands you type during your
 debugging sessions, so that you can be certain of precisely what
 happened.  Use these commands to manage the @value{GDBN} command
 history facility.
-
-@value{GDBN} uses the @sc{gnu} History library, a part of the Readline
-package, to provide the history facility.  @xref{Using History
-Interactively}, for the detailed description of the History library.
-
-Here is the description of @value{GDBN} commands related to command
-history.
 
 @table @code
 @cindex history substitution
@@ -13460,10 +13098,12 @@ This defaults to the value of the environment variable
 @code{HISTSIZE}, or to 256 if this variable is not set.
 @end table
 
+@cindex history expansion
 History expansion assigns special meaning to the character @kbd{!}.
-@xref{Event Designators}, for more details.
+@ifset have-readline-appendices
+@xref{Event Designators}.
+@end ifset
 
-@cindex history expansion, turn on/off
 Since @kbd{!} is also the logical not operator in C, history expansion
 is off by default. If you decide to enable history expansion with the
 @code{set history expansion on} command, you may sometimes need to
@@ -13477,11 +13117,18 @@ The commands to control history expansion are:
 @table @code
 @item set history expansion on
 @itemx set history expansion
-@kindex set history expansion
+@cindex history expansion
 Enable history expansion.  History expansion is off by default.
 
 @item set history expansion off
 Disable history expansion.
+
+The readline code comes with more complete documentation of
+editing and history expansion features.  Users unfamiliar with @sc{gnu} Emacs
+or @code{vi} may wish to read it.
+@ifset have-readline-appendices
+@xref{Command Line Editing}.
+@end ifset
 
 @c @group
 @kindex show history
@@ -15021,7 +14668,7 @@ corresponding output for that command will also be prefixed by that same
 
 @table @code
 @item @var{output} @expansion{}
-@code{( @var{out-of-band-record} )* [ @var{result-record} ] "(@value{GDBP})" @var{nl}}
+@code{( @var{out-of-band-record} )* [ @var{result-record} ] "(gdb)" @var{nl}}
 
 @item @var{result-record} @expansion{}
 @code{ [ @var{token} ] "^" @var{result-class} ( "," @var{result} )* @var{nl}}
@@ -18884,7 +18531,7 @@ for details.
 This GDB was configured as "i386-pc-linux-gnu"
 
 ^Z^Zpre-prompt
-(@value{GDBP})
+(gdb)
 ^Z^Zprompt
 @kbd{quit}
 
@@ -19806,13 +19453,13 @@ either quit @value{GDBN} or create a core file of the current
 @value{GDBN} session.
 
 @smallexample
-(@value{GDBP}) @kbd{maint internal-error testing, 1, 2}
+(gdb) @kbd{maint internal-error testing, 1, 2}
 @dots{}/maint.c:121: internal-error: testing, 1, 2
 A problem internal to GDB has been detected.  Further
 debugging may prove unreliable.
 Quit this debugging session? (y or n) @kbd{n}
 Create a core file? (y or n) @kbd{n}
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 Takes an optional parameter that is used as the text of the error or
@@ -19824,18 +19471,18 @@ warning message.
 Prints the contents of @value{GDBN}'s internal dummy-frame stack.
 
 @smallexample
-(@value{GDBP}) @kbd{b add}
+(gdb) @kbd{b add}
 @dots{}
-(@value{GDBP}) @kbd{print add(2,3)}
+(gdb) @kbd{print add(2,3)}
 Breakpoint 2, add (a=2, b=3) at @dots{}
 58	  return (a + b);
 The program being debugged stopped while in a function called from GDB.
 @dots{}
-(@value{GDBP}) @kbd{maint print dummy-frames}
+(gdb) @kbd{maint print dummy-frames}
 0x1a57c80: pc=0x01014068 fp=0x0200bddc sp=0x0200bdd6
  top=0x0200bdd4 id=@{stack=0x200bddc,code=0x101405c@}
  call_lo=0x01014000 call_hi=0x01014001
-(@value{GDBP})
+(gdb)
 @end smallexample
 
 Takes an optional file parameter.
@@ -19866,7 +19513,7 @@ Print @value{GDBN}'s internal register group data structures.
 Takes an optional file parameter.
 
 @smallexample
-(@value{GDBP}) @kbd{maint print reggroups}
+(gdb) @kbd{maint print reggroups}
  Group      Type
  general    user
  float      user
@@ -19894,19 +19541,6 @@ data in a @file{gmon.out} file, be sure to move it to a safe location.
 
 Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
 compiled with the @samp{-pg} compiler option.
-
-@kindex maint set dwarf2 max-cache-age
-@kindex maint show dwarf2 max-cache-age
-@item maint set dwarf2 max-cache-age
-@itemx maint show dwarf2 max-cache-age
-Control the DWARF 2 compilation unit cache.
-
-In object files with inter-compilation-unit references, such as those
-produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF 2
-reader needs to frequently refer to previously read compilation units.
-This setting controls how long a compilation unit will remain in the cache
-if it is not referenced.  Setting it to zero disables caching, which will
-slow down @value{GDBN} startup but reduce memory consumption.
 
 @end table
 
@@ -20307,20 +19941,17 @@ Reserved for future use.
 
 @item @code{O} --- reserved
 
-@item @code{p}@var{hex number of register} --- read register packet
+Reserved for future use.
+
+@item @code{p}@var{n@dots{}} --- read reg @strong{(reserved)}
 @cindex @code{p} packet
 
-@xref{read registers packet}, for a description of how the returned
-register value is encoded.
+@xref{write register packet}.
 
 Reply:
 @table @samp
-@item @var{XX@dots{}}
-the register's value
-@item E@var{NN}
-for an error
-@item
-Indicating an unrecognized @var{query}.
+@item @var{r@dots{}.}
+The hex encoded value of the register in target byte order.
 @end table
 
 @item @code{P}@var{n@dots{}}@code{=}@var{r@dots{}} --- write register
@@ -21070,7 +20701,7 @@ previous activity (continue, step).  No additional continue or step
 request from @value{GDBN} is required.
 
 @smallexample
-(@value{GDBP}) continue
+(gdb) continue
   <- target requests 'system call X'
   target is stopped, @value{GDBN} executes system call
   -> GDB returns result

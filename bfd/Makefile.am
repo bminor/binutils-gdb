@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 
-AUTOMAKE_OPTIONS = 1.9 cygnus
+AUTOMAKE_OPTIONS = cygnus
 
 # Uncomment the following line when doing a release.
 # RELEASE=y
@@ -575,14 +575,6 @@ OPTIONAL_BACKENDS_CFILES = \
 	trad-core.c \
 	cisco-core.c
 
-# We want to rerun configure if configure.in, config.bfd or
-# configure.host change. configure.in is needed since the version
-# number in Makefile comes from configure.in.
-CONFIG_STATUS_DEPENDENCIES = \
-	$(srcdir)/configure.in \
-	$(srcdir)/config.bfd \
-	$(srcdir)/configure.host
-
 # These are defined by configure.in:
 WORDSIZE = @wordsize@
 ALL_BACKENDS = @all_backends@
@@ -771,6 +763,8 @@ uninstall_libbfd:
 	rm -f $(DESTDIR)$(bfdincludedir)/symcat.h
 	rm -f $(DESTDIR)$(bfdincludedir)/bfdlink.h
 
+Makefile: $(srcdir)/configure.in
+
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
 DEP: dep.sed $(CFILES) $(HFILES) bfd.h
 	rm -f DEP1
@@ -876,6 +870,10 @@ CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES)
+
+# We want to rerun configure if configure, config.bfd or configure.host change.
+config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
+	$(SHELL) ./config.status --recheck
 
 bfdver.h: $(srcdir)/version.h $(srcdir)/Makefile.in
 	@echo "creating $@"
@@ -1174,9 +1172,9 @@ elf32-cris.lo: elf32-cris.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/cris.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
-elf32-crx.lo: elf32-crx.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/elf/crx.h $(INCDIR)/elf/reloc-macros.h \
+elf32-crx.lo: elf32-crx.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/crx.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-d10v.lo: elf32-d10v.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
@@ -1323,10 +1321,10 @@ elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/libiberty.h $(srcdir)/../opcodes/sh-opc.h \
   elf32-target.h
-elf32-sh-symbian.lo: elf32-sh-symbian.c elf32-sh.c \
-  $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
+elf32-sh-symbian.lo: elf32-sh-symbian.c elf32-sh.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
   $(srcdir)/../opcodes/sh-opc.h elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
@@ -1557,10 +1555,9 @@ xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h libcoff.h \
   libxcoff.h
 xsym.lo: xsym.c xsym.h $(INCDIR)/filenames.h
-xtensa-isa.lo: xtensa-isa.c $(INCDIR)/filenames.h $(INCDIR)/xtensa-isa.h \
+xtensa-isa.lo: xtensa-isa.c $(INCDIR)/xtensa-isa.h \
   $(INCDIR)/xtensa-isa-internal.h
-xtensa-modules.lo: xtensa-modules.c $(INCDIR)/xtensa-isa.h \
-  $(INCDIR)/xtensa-isa-internal.h
+xtensa-modules.lo: xtensa-modules.c $(INCDIR)/xtensa-isa-internal.h
 aix5ppc-core.lo: aix5ppc-core.c
 aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \

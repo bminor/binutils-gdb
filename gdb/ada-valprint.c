@@ -367,7 +367,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
   unsigned int i;
   unsigned len;
 
-  type = ada_check_typedef (type);
+  CHECK_TYPEDEF (type);
 
   switch (TYPE_CODE (type))
     {
@@ -599,7 +599,7 @@ ada_val_print_1 (struct type *type, char *valaddr0, int embedded_offset,
   LONGEST val;
   char *valaddr = valaddr0 + embedded_offset;
 
-  type = ada_check_typedef (type);
+  CHECK_TYPEDEF (type);
 
   if (ada_is_array_descriptor_type (type) || ada_is_packed_array_type (type))
     {
@@ -960,7 +960,7 @@ static void
 print_record (struct type *type, char *valaddr, struct ui_file *stream,
 	      int format, int recurse, enum val_prettyprint pretty)
 {
-  type = ada_check_typedef (type);
+  CHECK_TYPEDEF (type);
 
   fprintf_filtered (stream, "(");
 

@@ -924,7 +924,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	     location of interest is just "sym".  */
 	   if (symtype == STT_SECTION)
 	     toff += irel->r_addend;
-
+	   
 	   toff = _bfd_merged_section_offset (abfd, &tsec,
 					      elf_section_data (tsec)->sec_info,
 					      toff);
@@ -1125,7 +1125,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
      enough that the data segment moves, which will change the GP.
      Reset the GP so that we re-calculate next round.  We need to
      do this at the _beginning_ of the next round; now will not do.  */
-
+      
   /* Clean up and go home.  */
   while (fixups)
     {
@@ -1641,10 +1641,12 @@ elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
-  dir->root.ref_dynamic |= ind->root.ref_dynamic;
-  dir->root.ref_regular |= ind->root.ref_regular;
-  dir->root.ref_regular_nonweak |= ind->root.ref_regular_nonweak;
-  dir->root.needs_plt |= ind->root.needs_plt;
+  dir->root.elf_link_hash_flags |=
+    (ind->root.elf_link_hash_flags
+     & (ELF_LINK_HASH_REF_DYNAMIC
+        | ELF_LINK_HASH_REF_REGULAR
+        | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+        | ELF_LINK_HASH_NEEDS_PLT));
 
   if (ind->root.root.type != bfd_link_hash_indirect)
     return;
@@ -2233,7 +2235,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  h->ref_regular = 1;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
 	}
 
       /* We can only get preliminary data on whether a symbol is
@@ -2242,9 +2244,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((!info->executable
-		 && (!info->symbolic
-		     || info->unresolved_syms_in_shared_libs == RM_IGNORE))
-		|| !h->def_regular
+		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
+		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak))
 	maybe_dynamic = TRUE;
 
@@ -2443,7 +2444,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	{
           if (!ia64_info->root.dynobj)
 	    ia64_info->root.dynobj = abfd;
-	  h->needs_plt = 1;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  dyn_i->want_plt = 1;
 	}
       if (need_entry & NEED_FULL_PLT)
@@ -2458,7 +2459,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	      if (!pltoff)
 		return FALSE;
 	    }
-
+	  
 	  dyn_i->want_pltoff = 1;
 	}
       if ((need_entry & NEED_DYNREL) && (sec->flags & SEC_ALLOC))
@@ -2650,7 +2651,7 @@ allocate_plt_entries (dyn_i, data)
 	       || h->root.type == bfd_link_hash_warning)
 	  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      /* ??? Versioned symbols seem to lose NEEDS_PLT.  */
+      /* ??? Versioned symbols seem to lose ELF_LINK_HASH_NEEDS_PLT.  */
       if (elfNN_ia64_dynamic_symbol_p (h, x->info, 0))
 	{
 	  bfd_size_type offset = x->ofs;
@@ -2838,12 +2839,12 @@ elfNN_ia64_adjust_dynamic_symbol (info, h)
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->weakdef != NULL)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-                  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
+                  || h->weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->weakdef->root.u.def.section;
+      h->root.u.def.value = h->weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -4178,7 +4179,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    dyn_i = get_dyn_sym_info (ia64_info, h, input_bfd, rel, FALSE);
 	    if (dyn_i->want_fptr)
 	      {
-		BFD_ASSERT (h == NULL || h->dynindx == -1);
+		BFD_ASSERT (h == NULL || h->dynindx == -1)
 	        if (!undef_weak_ref)
 	          value = set_fptr_entry (output_bfd, info, dyn_i, value);
 		dynindx = -1;
@@ -4262,7 +4263,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_PCREL64I:
 	  /* The PCREL21BI reloc is specifically not intended for use with
 	     dynamic relocs.  PCREL21F and PCREL21M are used for speculation
-	     fixup code, and thus probably ought not be dynamic.  The
+	     fixup code, and thus probably ought not be dynamic.  The 
 	     PCREL22 and PCREL64I relocs aren't emitted as dynamic relocs.  */
 	  if (dynamic_symbol_p)
 	    {
@@ -4574,7 +4575,7 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     plt section.  Leave the value alone.  */
 	  /* ??? We didn't redefine it in adjust_dynamic_symbol in the
 	     first place.  But perhaps elflink.c did some for us.  */
-	  if (!h->def_regular)
+	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	    sym->st_shndx = SHN_UNDEF;
 	}
 

@@ -86,8 +86,6 @@ static int target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 
 static void init_dummy_target (void);
 
-static struct target_ops debug_target;
-
 static void debug_to_open (char *, int);
 
 static void debug_to_close (int);
@@ -108,9 +106,8 @@ static void debug_to_store_registers (int);
 
 static void debug_to_prepare_to_store (void);
 
-static int deprecated_debug_xfer_memory (CORE_ADDR, char *, int, int,
-					 struct mem_attrib *,
-					 struct target_ops *);
+static int debug_to_xfer_memory (CORE_ADDR, char *, int, int,
+				 struct mem_attrib *, struct target_ops *);
 
 static void debug_to_files_info (struct target_ops *);
 
@@ -130,7 +127,7 @@ static int debug_to_remove_watchpoint (CORE_ADDR, int, int);
 
 static int debug_to_stopped_by_watchpoint (void);
 
-static int debug_to_stopped_data_address (struct target_ops *, CORE_ADDR *);
+static CORE_ADDR debug_to_stopped_data_address (void);
 
 static int debug_to_region_size_ok_for_hw_watchpoint (int);
 
@@ -161,12 +158,6 @@ static void debug_to_notice_signals (ptid_t);
 static int debug_to_thread_alive (ptid_t);
 
 static void debug_to_stop (void);
-
-/* NOTE: cagney/2004-09-29: Many targets reference this variable in
-   wierd and mysterious ways.  Putting the variable here lets those
-   wierd and mysterious ways keep building while they are being
-   converted to the inferior inheritance structure.  */
-struct target_ops deprecated_child_ops;
 
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 
@@ -388,10 +379,11 @@ update_current_target (void)
       INHERIT (to_disconnect, t);
       INHERIT (to_resume, t);
       INHERIT (to_wait, t);
+      INHERIT (to_post_wait, t);
       INHERIT (to_fetch_registers, t);
       INHERIT (to_store_registers, t);
       INHERIT (to_prepare_to_store, t);
-      INHERIT (deprecated_xfer_memory, t);
+      INHERIT (to_xfer_memory, t);
       INHERIT (to_files_info, t);
       INHERIT (to_insert_breakpoint, t);
       INHERIT (to_remove_breakpoint, t);
@@ -489,6 +481,9 @@ update_current_target (void)
   de_fault (to_wait, 
 	    (ptid_t (*) (ptid_t, struct target_waitstatus *)) 
 	    noprocess);
+  de_fault (to_post_wait, 
+	    (void (*) (ptid_t, int)) 
+	    target_ignore);
   de_fault (to_fetch_registers, 
 	    (void (*) (int)) 
 	    target_ignore);
@@ -498,7 +493,7 @@ update_current_target (void)
   de_fault (to_prepare_to_store, 
 	    (void (*) (void)) 
 	    noprocess);
-  de_fault (deprecated_xfer_memory, 
+  de_fault (to_xfer_memory, 
 	    (int (*) (CORE_ADDR, char *, int, int, struct mem_attrib *, struct target_ops *)) 
 	    nomemory);
   de_fault (to_files_info, 
@@ -527,7 +522,7 @@ update_current_target (void)
 	    (int (*) (void))
 	    return_zero);
   de_fault (to_stopped_data_address,
-	    (int (*) (struct target_ops *, CORE_ADDR *))
+	    (CORE_ADDR (*) (void))
 	    return_zero);
   de_fault (to_region_size_ok_for_hw_watchpoint,
 	    default_region_size_ok_for_hw_watchpoint);
@@ -784,7 +779,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
       tlen = MIN (len, 4 - (memaddr & 3));
       offset = memaddr & 3;
 
-      errcode = target_read_memory (memaddr & ~3, buf, 4);
+      errcode = target_xfer_memory (memaddr & ~3, buf, 4, 0);
       if (errcode != 0)
 	{
 	  /* The transfer request might have crossed the boundary to an
@@ -792,7 +787,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 	     a single byte.  */
 	  tlen = 1;
 	  offset = 0;
-	  errcode = target_read_memory (memaddr, buf, 1);
+	  errcode = target_xfer_memory (memaddr, buf, 1, 0);
 	  if (errcode != 0)
 	    goto done;
 	}
@@ -843,147 +838,6 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
   return NULL;
 }
 
-/* Return non-zero when the target vector has supplied an xfer_partial
-   method and it, rather than xfer_memory, should be used.  */
-static int
-target_xfer_partial_p (void)
-{
-  return (target_stack != NULL
-	  && target_stack->to_xfer_partial != default_xfer_partial);
-}
-
-static LONGEST
-target_xfer_partial (struct target_ops *ops,
-		     enum target_object object, const char *annex,
-		     void *readbuf, const void *writebuf,
-		     ULONGEST offset, LONGEST len)
-{
-  LONGEST retval;
-
-  gdb_assert (ops->to_xfer_partial != NULL);
-  retval = ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
-				 offset, len);
-  if (targetdebug)
-    {
-      const unsigned char *myaddr = NULL;
-
-      fprintf_unfiltered (gdb_stdlog,
-			  "%s:target_xfer_partial (%d, %s, 0x%lx,  0x%lx,  0x%s, %s) = %s",
-			  ops->to_shortname,
-			  (int) object,
-			  (annex ? annex : "(null)"),
-			  (long) readbuf, (long) writebuf,
-			  paddr_nz (offset), paddr_d (len), paddr_d (retval));
-
-      if (readbuf)
-	myaddr = readbuf;
-      if (writebuf)
-	myaddr = writebuf;
-      if (retval > 0 && myaddr != NULL)
-	{
-	  int i;
-	  
-	  fputs_unfiltered (", bytes =", gdb_stdlog);
-	  for (i = 0; i < retval; i++)
-	    {
-	      if ((((long) &(myaddr[i])) & 0xf) == 0)
-		{
-		  if (targetdebug < 2 && i > 0)
-		    {
-		      fprintf_unfiltered (gdb_stdlog, " ...");
-		      break;
-		    }
-		  fprintf_unfiltered (gdb_stdlog, "\n");
-		}
-	      
-	      fprintf_unfiltered (gdb_stdlog, " %02x", myaddr[i] & 0xff);
-	    }
-	}
-      
-      fputc_unfiltered ('\n', gdb_stdlog);
-    }
-  return retval;
-}
-
-/* Attempt a transfer all LEN bytes starting at OFFSET between the
-   inferior's KIND:ANNEX space and GDB's READBUF/WRITEBUF buffer.  If
-   the transfer succeeds, return zero, otherwize the host ERRNO is
-   returned.
-
-   The inferior is formed from several layers.  In the case of
-   corefiles, inf-corefile is layered above inf-exec and a request for
-   text (corefiles do not include text pages) will be first sent to
-   the core-stratum, fail, and then sent to the object-file where it
-   will succeed.
-
-   NOTE: cagney/2004-09-30:
-
-   The old code tried to use four separate mechanisms for mapping an
-   object:offset:len tuple onto an inferior and its address space: the
-   target stack; the inferior's TO_SECTIONS; solib's SO_LIST;
-   overlays.
-
-   This is stupid.
-
-   The code below is instead using a single mechanism (currently
-   strata).  If that mechanism proves insufficient then re-factor it
-   implementing another singluar mechanism (for instance, a generic
-   object:annex onto inferior:object:annex say).  */
-
-static LONGEST
-xfer_using_stratum (enum target_object object, const char *annex,
-		    ULONGEST offset, LONGEST len, void *readbuf,
-		    const void *writebuf)
-{
-  LONGEST xfered;
-  struct target_ops *target;
-
-  /* Always successful.  */
-  if (len == 0)
-    return 0;
-  /* Never successful.  */
-  if (target_stack == NULL)
-    return EIO;
-
-  target = target_stack;
-  while (1)
-    {
-      xfered = target_xfer_partial (target, object, annex,
-				    readbuf, writebuf, offset, len);
-      if (xfered > 0)
-	{
-	  /* The partial xfer succeeded, update the counts, check that
-	     the xfer hasn't finished and if it hasn't set things up
-	     for the next round.  */
-	  len -= xfered;
-	  if (len <= 0)
-	    return 0;
-	  offset += xfered;
-	  if (readbuf != NULL)
-	    readbuf = (bfd_byte *) readbuf + xfered;
-	  if (writebuf != NULL)
-	    writebuf = (bfd_byte *) writebuf + xfered;
-	  target = target_stack;
-	}
-      else if (xfered < 0)
-	{
-	  /* Something totally screwed up, abandon the attempt to
-	     xfer.  */
-	  if (errno)
-	    return errno;
-	  else
-	    return EIO;
-	}
-      else
-	{
-	  /* This "stratum" didn't work, try the next one down.  */
-	  target = target->beneath;
-	  if (target == NULL)
-	    return EIO;
-	}
-    }
-}
-
 /* Read LEN bytes of target memory at address MEMADDR, placing the results in
    GDB's memory at MYADDR.  Returns either 0 for success or an errno value
    if any error occurs.
@@ -997,37 +851,14 @@ xfer_using_stratum (enum target_object object, const char *annex,
 int
 target_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  if (target_xfer_partial_p ())
-    return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
-			       memaddr, len, myaddr, NULL);
-  else
-    return target_xfer_memory (memaddr, myaddr, len, 0);
+  return target_xfer_memory (memaddr, myaddr, len, 0);
 }
 
 int
 target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  if (target_xfer_partial_p ())
-    return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
-			       memaddr, len, NULL, myaddr);
-  else
-    return target_xfer_memory (memaddr, myaddr, len, 1);
+  return target_xfer_memory (memaddr, myaddr, len, 1);
 }
-
-#ifndef target_stopped_data_address_p
-int
-target_stopped_data_address_p (struct target_ops *target)
-{
-  if (target->to_stopped_data_address
-      == (int (*) (struct target_ops *, CORE_ADDR *)) return_zero)
-    return 0;
-  if (target->to_stopped_data_address == debug_to_stopped_data_address
-      && (debug_target.to_stopped_data_address
-	  == (int (*) (struct target_ops *, CORE_ADDR *)) return_zero))
-    return 0;
-  return 1;
-}
-#endif
 
 static int trust_readonly = 0;
 
@@ -1048,8 +879,8 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   if (len == 0)
     return 0;
 
-  /* deprecated_xfer_memory is not guaranteed to set errno, even when
-     it returns 0.  */
+  /* to_xfer_memory is not guaranteed to set errno, even when it returns
+     0.  */
   errno = 0;
 
   if (!write && trust_readonly)
@@ -1066,7 +897,7 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     }
 
   /* The quick case is that the top target can handle the transfer.  */
-  res = current_target.deprecated_xfer_memory
+  res = current_target.to_xfer_memory
     (memaddr, myaddr, len, write, attrib, &current_target);
 
   /* If res <= 0 then we call it again in the loop.  Ah well. */
@@ -1077,7 +908,7 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  if (!t->to_has_memory)
 	    continue;
 
-	  res = t->deprecated_xfer_memory (memaddr, myaddr, len, write, attrib, t);
+	  res = t->to_xfer_memory (memaddr, myaddr, len, write, attrib, t);
 	  if (res > 0)
 	    break;		/* Handled all or part of xfer */
 	  if (t->to_has_all_memory)
@@ -1232,21 +1063,13 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
 int
 target_read_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
-  if (target_xfer_partial_p ())
-    return target_xfer_partial (target_stack, TARGET_OBJECT_MEMORY, NULL,
-				buf, NULL, memaddr, len);
-  else
-    return target_xfer_memory_partial (memaddr, buf, len, 0, err);
+  return target_xfer_memory_partial (memaddr, buf, len, 0, err);
 }
 
 int
 target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
-  if (target_xfer_partial_p ())
-    return target_xfer_partial (target_stack, TARGET_OBJECT_MEMORY, NULL,
-				NULL, buf, memaddr, len);
-  else
-    return target_xfer_memory_partial (memaddr, buf, len, 1, err);
+  return target_xfer_memory_partial (memaddr, buf, len, 1, err);
 }
 
 /* More generic transfers.  */
@@ -1257,9 +1080,9 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const void *writebuf, ULONGEST offset, LONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
-      && ops->deprecated_xfer_memory != NULL)
-    /* If available, fall back to the target's
-       "deprecated_xfer_memory" method.  */
+      && ops->to_xfer_memory != NULL)
+    /* If available, fall back to the target's "to_xfer_memory"
+       method.  */
     {
       int xfered = -1;
       errno = 0;
@@ -1268,25 +1091,25 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 	  void *buffer = xmalloc (len);
 	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
 	  memcpy (buffer, writebuf, len);
-	  xfered = ops->deprecated_xfer_memory (offset, buffer, len,
-						1/*write*/, NULL, ops);
+	  xfered = ops->to_xfer_memory (offset, buffer, len, 1/*write*/, NULL,
+					ops);
 	  do_cleanups (cleanup);
 	}
       if (readbuf != NULL)
-	xfered = ops->deprecated_xfer_memory (offset, readbuf, len, 0/*read*/,
-					      NULL, ops);
+	xfered = ops->to_xfer_memory (offset, readbuf, len, 0/*read*/, NULL,
+				      ops);
       if (xfered > 0)
 	return xfered;
       else if (xfered == 0 && errno == 0)
-	/* "deprecated_xfer_memory" uses 0, cross checked against
-           ERRNO as one indication of an error.  */
+	/* "to_xfer_memory" uses 0, cross checked against ERRNO as one
+           indication of an error.  */
 	return 0;
       else
 	return -1;
     }
   else if (ops->beneath != NULL)
-    return target_xfer_partial (ops->beneath, object, annex,
-				readbuf, writebuf, offset, len);
+    return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					  readbuf, writebuf, offset, len);
   else
     return -1;
 }
@@ -1303,7 +1126,8 @@ target_read_partial (struct target_ops *ops,
 		     const char *annex, void *buf,
 		     ULONGEST offset, LONGEST len)
 {
-  return target_xfer_partial (ops, object, annex, buf, NULL, offset, len);
+  gdb_assert (ops->to_xfer_partial != NULL);
+  return ops->to_xfer_partial (ops, object, annex, buf, NULL, offset, len);
 }
 
 LONGEST
@@ -1312,7 +1136,8 @@ target_write_partial (struct target_ops *ops,
 		      const char *annex, const void *buf,
 		      ULONGEST offset, LONGEST len)
 {
-  return target_xfer_partial (ops, object, annex, NULL, buf, offset, len);
+  gdb_assert (ops->to_xfer_partial != NULL);
+  return ops->to_xfer_partial (ops, object, annex, NULL, buf, offset, len);
 }
 
 /* Wrappers to perform the full transfer.  */
@@ -1796,6 +1621,9 @@ init_dummy_target (void)
   dummy_target.to_magic = OPS_MAGIC;
 }
 
+
+static struct target_ops debug_target;
+
 static void
 debug_to_open (char *args, int from_tty)
 {
@@ -1913,6 +1741,15 @@ debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
 }
 
 static void
+debug_to_post_wait (ptid_t ptid, int status)
+{
+  debug_target.to_post_wait (ptid, status);
+
+  fprintf_unfiltered (gdb_stdlog, "target_post_wait (%d, %d)\n",
+		      PIDGET (ptid), status);
+}
+
+static void
 debug_print_register (const char * func, int regno)
 {
   fprintf_unfiltered (gdb_stdlog, "%s ", func);
@@ -1965,14 +1802,14 @@ debug_to_prepare_to_store (void)
 }
 
 static int
-deprecated_debug_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			      int write, struct mem_attrib *attrib,
-			      struct target_ops *target)
+debug_to_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		      struct mem_attrib *attrib,
+		      struct target_ops *target)
 {
   int retval;
 
-  retval = debug_target.deprecated_xfer_memory (memaddr, myaddr, len, write,
-						attrib, target);
+  retval = debug_target.to_xfer_memory (memaddr, myaddr, len, write,
+					attrib, target);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",
@@ -2084,17 +1921,16 @@ debug_to_stopped_by_watchpoint (void)
   return retval;
 }
 
-static int
-debug_to_stopped_data_address (struct target_ops *target, CORE_ADDR *addr)
+static CORE_ADDR
+debug_to_stopped_data_address (void)
 {
-  int retval;
+  CORE_ADDR retval;
 
-  retval = debug_target.to_stopped_data_address (target, addr);
+  retval = debug_target.to_stopped_data_address ();
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_stopped_data_address ([0x%lx]) = %ld\n",
-		      (unsigned long)*addr,
-		      (unsigned long)retval);
+		      "target_stopped_data_address () = 0x%lx\n",
+		      (unsigned long) retval);
   return retval;
 }
 
@@ -2431,6 +2267,25 @@ debug_to_stop (void)
   fprintf_unfiltered (gdb_stdlog, "target_stop ()\n");
 }
 
+static LONGEST
+debug_to_xfer_partial (struct target_ops *ops, enum target_object object,
+		       const char *annex, void *readbuf, const void *writebuf,
+		       ULONGEST offset, LONGEST len)
+{
+  LONGEST retval;
+
+  retval = debug_target.to_xfer_partial (&debug_target, object, annex,
+					 readbuf, writebuf, offset, len);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_xfer_partial (%d, %s, 0x%lx,  0x%lx,  0x%s, %s) = %s\n",
+		      (int) object, (annex ? annex : "(null)"),
+		      (long) readbuf, (long) writebuf, paddr_nz (offset),
+		      paddr_d (len), paddr_d (retval));
+
+  return retval;
+}
+
 static void
 debug_to_rcmd (char *command,
 	       struct ui_file *outbuf)
@@ -2485,10 +2340,11 @@ setup_target_debug (void)
   current_target.to_disconnect = debug_to_disconnect;
   current_target.to_resume = debug_to_resume;
   current_target.to_wait = debug_to_wait;
+  current_target.to_post_wait = debug_to_post_wait;
   current_target.to_fetch_registers = debug_to_fetch_registers;
   current_target.to_store_registers = debug_to_store_registers;
   current_target.to_prepare_to_store = debug_to_prepare_to_store;
-  current_target.deprecated_xfer_memory = deprecated_debug_xfer_memory;
+  current_target.to_xfer_memory = debug_to_xfer_memory;
   current_target.to_files_info = debug_to_files_info;
   current_target.to_insert_breakpoint = debug_to_insert_breakpoint;
   current_target.to_remove_breakpoint = debug_to_remove_breakpoint;
@@ -2527,6 +2383,7 @@ setup_target_debug (void)
   current_target.to_thread_alive = debug_to_thread_alive;
   current_target.to_find_new_threads = debug_to_find_new_threads;
   current_target.to_stop = debug_to_stop;
+  current_target.to_xfer_partial = debug_to_xfer_partial;
   current_target.to_rcmd = debug_to_rcmd;
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;

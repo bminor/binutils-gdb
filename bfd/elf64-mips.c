@@ -2352,8 +2352,6 @@ mips_elf64_write_rel (bfd *abfd, asection *sec,
       sym = *ptr->sym_ptr_ptr;
       if (sym == last_sym)
 	n = last_sym_idx;
-      else if (bfd_is_abs_section (sym->section) && sym->value == 0)
-	n = STN_UNDEF;
       else
 	{
 	  last_sym = sym;
@@ -2450,8 +2448,6 @@ mips_elf64_write_rela (bfd *abfd, asection *sec,
       sym = *ptr->sym_ptr_ptr;
       if (sym == last_sym)
 	n = last_sym_idx;
-      else if (bfd_is_abs_section (sym->section) && sym->value == 0)
-	n = STN_UNDEF;
       else
 	{
 	  last_sym = sym;

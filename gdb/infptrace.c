@@ -138,24 +138,17 @@ call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 /* Wait for a process to finish, possibly running a target-specific
    hook before returning.  */
 
-/* NOTE: cagney: 2004-09-29: Dependant on the native configuration,
-   "hppah-nat.c" may either call this or infttrace.c's implementation
-   of ptrace_wait.  See "hppahpux.mh".  */
-
 int
 ptrace_wait (ptid_t ptid, int *status)
 {
   int wstate;
 
   wstate = wait (status);
+  target_post_wait (pid_to_ptid (wstate), *status);
   return wstate;
 }
 
-#ifndef DEPRECATED_KILL_INFERIOR
-/* NOTE: cagney/2004-09-12: Instead of definining this macro, code
-   should call inf_ptrace_target to get a basic ptrace target and then
-   locally update any necessary methods.  See ppcnbsd-nat.c.  */
-
+#ifndef KILL_INFERIOR
 void
 kill_inferior (void)
 {
@@ -174,15 +167,12 @@ kill_inferior (void)
      The kill call causes problems under hpux10, so it's been removed;
      if this causes problems we'll deal with them as they arise.  */
   ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
-  wait (&status);
+  ptrace_wait (null_ptid, &status);
   target_mourn_inferior ();
 }
-#endif /* DEPRECATED_KILL_INFERIOR */
+#endif /* KILL_INFERIOR */
 
-#ifndef DEPRECATED_CHILD_RESUME
-/* NOTE: cagney/2004-09-12: Instead of definining this macro, code
-   should call inf_ptrace_target to get a basic ptrace target and then
-   locally update any necessary methods.  See ppcnbsd-nat.c.  */
+#ifndef CHILD_RESUME
 
 /* Resume execution of the inferior process.
    If STEP is nonzero, single-step it.
@@ -221,7 +211,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
   if (errno != 0)
     perror_with_name ("ptrace");
 }
-#endif /* DEPRECATED_CHILD_RESUME */
+#endif /* CHILD_RESUME */
 
 
 /* Start debugging the process whose number is PID.  */
@@ -403,8 +393,8 @@ store_inferior_registers (int regnum)
 
    Returns the length copied, which is either the LEN argument or
    zero.  This xfer function does not do partial moves, since
-   deprecated_child_ops doesn't allow memory operations to cross below
-   us in the target stack anyway.  */
+   child_ops doesn't allow memory operations to cross below us in the
+   target stack anyway.  */
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,

@@ -304,8 +304,6 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
   ((void (*) (bfd *, asymbol *, symbol_info *)) bfd_void)
 #define _bfd_nosymbols_bfd_is_local_label_name \
   ((bfd_boolean (*) (bfd *, const char *)) bfd_false)
-#define _bfd_nosymbols_bfd_is_target_special_symbol \
-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define _bfd_nosymbols_get_lineno \
   ((alent *(*) (bfd *, asymbol *)) bfd_nullvoidptr)
 #define _bfd_nosymbols_find_nearest_line \
@@ -600,10 +598,10 @@ void bfd_assert
   (const char*,int);
 
 #define BFD_ASSERT(x) \
-  do { if (!(x)) bfd_assert(__FILE__,__LINE__); } while (0)
+  { if (!(x)) bfd_assert(__FILE__,__LINE__); }
 
 #define BFD_FAIL() \
-  do { bfd_assert(__FILE__,__LINE__); } while (0)
+  { bfd_assert(__FILE__,__LINE__); }
 
 extern void _bfd_abort
   (const char *, int, const char *) ATTRIBUTE_NORETURN;
@@ -1113,7 +1111,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARM_ADRL_IMMEDIATE",
   "BFD_RELOC_ARM_OFFSET_IMM",
   "BFD_RELOC_ARM_SHIFT_IMM",
-  "BFD_RELOC_ARM_SMI",
   "BFD_RELOC_ARM_SWI",
   "BFD_RELOC_ARM_MULTI",
   "BFD_RELOC_ARM_CP_OFF_IMM",
@@ -1140,8 +1137,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARM_TARGET1",
   "BFD_RELOC_ARM_ROSEGREL32",
   "BFD_RELOC_ARM_SBREL32",
-  "BFD_RELOC_ARM_TARGET2",
-  "BFD_RELOC_ARM_PREL31",
   "BFD_RELOC_SH_PCDISP8BY2",
   "BFD_RELOC_SH_PCDISP12BY2",
   "BFD_RELOC_SH_IMM3",
@@ -1652,39 +1647,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_XTENSA_JMP_SLOT",
   "BFD_RELOC_XTENSA_RELATIVE",
   "BFD_RELOC_XTENSA_PLT",
-  "BFD_RELOC_XTENSA_DIFF8",
-  "BFD_RELOC_XTENSA_DIFF16",
-  "BFD_RELOC_XTENSA_DIFF32",
-  "BFD_RELOC_XTENSA_SLOT0_OP",
-  "BFD_RELOC_XTENSA_SLOT1_OP",
-  "BFD_RELOC_XTENSA_SLOT2_OP",
-  "BFD_RELOC_XTENSA_SLOT3_OP",
-  "BFD_RELOC_XTENSA_SLOT4_OP",
-  "BFD_RELOC_XTENSA_SLOT5_OP",
-  "BFD_RELOC_XTENSA_SLOT6_OP",
-  "BFD_RELOC_XTENSA_SLOT7_OP",
-  "BFD_RELOC_XTENSA_SLOT8_OP",
-  "BFD_RELOC_XTENSA_SLOT9_OP",
-  "BFD_RELOC_XTENSA_SLOT10_OP",
-  "BFD_RELOC_XTENSA_SLOT11_OP",
-  "BFD_RELOC_XTENSA_SLOT12_OP",
-  "BFD_RELOC_XTENSA_SLOT13_OP",
-  "BFD_RELOC_XTENSA_SLOT14_OP",
-  "BFD_RELOC_XTENSA_SLOT0_ALT",
-  "BFD_RELOC_XTENSA_SLOT1_ALT",
-  "BFD_RELOC_XTENSA_SLOT2_ALT",
-  "BFD_RELOC_XTENSA_SLOT3_ALT",
-  "BFD_RELOC_XTENSA_SLOT4_ALT",
-  "BFD_RELOC_XTENSA_SLOT5_ALT",
-  "BFD_RELOC_XTENSA_SLOT6_ALT",
-  "BFD_RELOC_XTENSA_SLOT7_ALT",
-  "BFD_RELOC_XTENSA_SLOT8_ALT",
-  "BFD_RELOC_XTENSA_SLOT9_ALT",
-  "BFD_RELOC_XTENSA_SLOT10_ALT",
-  "BFD_RELOC_XTENSA_SLOT11_ALT",
-  "BFD_RELOC_XTENSA_SLOT12_ALT",
-  "BFD_RELOC_XTENSA_SLOT13_ALT",
-  "BFD_RELOC_XTENSA_SLOT14_ALT",
   "BFD_RELOC_XTENSA_OP0",
   "BFD_RELOC_XTENSA_OP1",
   "BFD_RELOC_XTENSA_OP2",

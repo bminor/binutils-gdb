@@ -1350,7 +1350,7 @@ m32r_info_to_howto_rel (abfd, cache_ptr, dst)
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) <= (unsigned int) R_M32R_GNU_VTENTRY);
+  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) <= (unsigned int) R_M32R_GNU_VTENTRY)
   cache_ptr->howto = &m32r_elf_howto_table[r_type];
 }
 
@@ -1783,7 +1783,7 @@ m32r_elf_create_dynamic_sections (abfd, info)
               get_elf_backend_data (abfd)->collect, &bh)))
         return FALSE;
       h = (struct elf_link_hash_entry *) bh;
-      h->def_regular = 1;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
       if (info->shared
@@ -1954,22 +1954,25 @@ printf("m32r_elf_adjust_dynamic_symbol()\n");
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-              && (h->needs_plt
-                  || h->u.weakdef != NULL
-                  || (h->def_dynamic
-                      && h->ref_regular
-                      && !h->def_regular)));
+              && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+                  || h->weakdef != NULL
+                  || ((h->elf_link_hash_flags
+                       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+                      && (h->elf_link_hash_flags
+                          & ELF_LINK_HASH_REF_REGULAR) != 0
+                      && (h->elf_link_hash_flags
+                          & ELF_LINK_HASH_DEF_REGULAR) == 0)));
 
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
      when we know the address of the .got section.  */
   if (h->type == STT_FUNC
-      || h->needs_plt)
+      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (! info->shared
-          && !h->def_dynamic
-          && !h->ref_dynamic
+          && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+          && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
 	  && h->root.type != bfd_link_hash_undefweak
 	  && h->root.type != bfd_link_hash_undefined)
         {
@@ -1979,7 +1982,7 @@ printf("m32r_elf_adjust_dynamic_symbol()\n");
              a procedure linkage table, and we can just do a PCREL
              reloc instead.  */
           h->plt.offset = (bfd_vma) -1;
-          h->needs_plt = 0;
+          h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
         }
 
       return TRUE;
@@ -1990,12 +1993,12 @@ printf("m32r_elf_adjust_dynamic_symbol()\n");
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->weakdef != NULL)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-                  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
+                  || h->weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->weakdef->root.u.def.section;
+      h->root.u.def.value = h->weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -2011,13 +2014,13 @@ printf("m32r_elf_adjust_dynamic_symbol()\n");
 
   /* If there are no references to this symbol that do not use the
      GOT, we don't need to generate a copy reloc.  */
-  if (!h->non_got_ref)
+  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return TRUE;
 
   /* If -z nocopyreloc was given, we won't generate them either.  */
   if (info->nocopyreloc)
     {
-      h->non_got_ref = 0;
+      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
       return TRUE;
     }
 
@@ -2034,7 +2037,7 @@ printf("m32r_elf_adjust_dynamic_symbol()\n");
      the copy reloc.  */
   if (p == NULL)
     {
-      h->non_got_ref = 0;
+      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
       return TRUE;
     }
 
@@ -2063,7 +2066,7 @@ printf("m32r_elf_adjust_dynamic_symbol()\n");
       srel = htab->srelbss;
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
-      h->needs_copy = 1;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
   /* We need to figure out the alignment required for this symbol.  I
@@ -2117,7 +2120,7 @@ allocate_dynrelocs (h, inf)
 
   eh = (struct elf_m32r_link_hash_entry *) h;
 //  if ((h->got.refcount > 0
-//      || h->forced_local)
+//      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
 //      && eh->gotplt_refcount > 0)
 //    {
 //      /* The symbol has been forced local, or we have some direct got refs,
@@ -2133,7 +2136,7 @@ allocate_dynrelocs (h, inf)
       /* Make sure this symbol is output as a dynamic symbol.
          Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
-          && !h->forced_local)
+          && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
         {
           if (! bfd_elf_link_record_dynamic_symbol (info, h))
             return FALSE;
@@ -2156,7 +2159,7 @@ allocate_dynrelocs (h, inf)
              pointers compare as equal between the normal executable and
              the shared library.  */
           if (! info->shared
-              && !h->def_regular)
+              && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
             {
               h->root.u.def.section = s;
               h->root.u.def.value = h->plt.offset;
@@ -2175,13 +2178,13 @@ allocate_dynrelocs (h, inf)
       else
         {
           h->plt.offset = (bfd_vma) -1;
-          h->needs_plt = 0;
+          h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
         }
     }
   else
     {
       h->plt.offset = (bfd_vma) -1;
-      h->needs_plt = 0;
+      h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
     }
 
   if (h->got.refcount > 0)
@@ -2192,7 +2195,7 @@ allocate_dynrelocs (h, inf)
       /* Make sure this symbol is output as a dynamic symbol.
          Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
-          && !h->forced_local)
+          && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
         {
           if (! bfd_elf_link_record_dynamic_symbol (info, h))
             return FALSE;
@@ -2220,8 +2223,8 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if (h->def_regular
-          && (h->forced_local
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+          && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
               || info->symbolic))
         {
           struct elf_m32r_dyn_relocs **pp;
@@ -2242,9 +2245,9 @@ allocate_dynrelocs (h, inf)
          symbols which turn out to need copy relocs or are not
          dynamic.  */
 
-      if (!h->non_got_ref
-          && ((h->def_dynamic
-               && !h->def_regular)
+      if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+          && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+               && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
               || (htab->root.dynamic_sections_created
                   && (h->root.type == bfd_link_hash_undefweak
                       || h->root.type == bfd_link_hash_undefined))))
@@ -2252,7 +2255,7 @@ allocate_dynrelocs (h, inf)
           /* Make sure this symbol is output as a dynamic symbol.
              Undefined weak syms won't yet be marked as dynamic.  */
           if (h->dynindx == -1
-              && !h->forced_local)
+              && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
             {
               if (! bfd_elf_link_record_dynamic_symbol (info, h))
                 return FALSE;
@@ -2758,17 +2761,20 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 							      info->shared, h)
                           && (! info->shared
                               || (! info->symbolic && h->dynindx != -1)
-                              || !h->def_regular))
+                              || (h->elf_link_hash_flags
+                                  & ELF_LINK_HASH_DEF_REGULAR) == 0))
                       || (info->shared
                           && ((! info->symbolic && h->dynindx != -1)
-                              || !h->def_regular)
+                              || (h->elf_link_hash_flags
+                                  & ELF_LINK_HASH_DEF_REGULAR) == 0)
                           && (((r_type == R_M32R_16_RELA
                               || r_type == R_M32R_32_RELA
                               || r_type == R_M32R_24_RELA
                               || r_type == R_M32R_HI16_ULO_RELA
                               || r_type == R_M32R_HI16_SLO_RELA
                               || r_type == R_M32R_LO16_RELA)
-			          && !h->forced_local)
+			          && (h->elf_link_hash_flags
+				      & ELF_LINK_FORCED_LOCAL) == 0)
                               || r_type == R_M32R_10_PCREL_RELA
                               || r_type == R_M32R_18_PCREL_RELA
                               || r_type == R_M32R_26_PCREL_RELA)
@@ -2778,7 +2784,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                                  externally in shared libraries.  We can't do
                                  anything with them here.  */
                               || ((input_section->flags & SEC_DEBUGGING) != 0
-                                  && h->def_dynamic))))
+                                  && (h->elf_link_hash_flags
+                                      & ELF_LINK_HASH_DEF_DYNAMIC) != 0))))
                     {
                       /* In these cases, we don't need the relocation
                          value.  We check specially because in some
@@ -2828,7 +2835,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
             case R_M32R_GOTOFF:
               /* Relocation is relative to the start of the global offset
                  table (for ld24 rx, #uimm24). eg access at label+addend
-
+		 
                  ld24 rx. #label@GOTOFF + addend
                  sub  rx, r12.  */
 
@@ -2902,8 +2909,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                       || (info->shared
                           && (info->symbolic
                               || h->dynindx == -1
-                              || h->forced_local)
-                          && h->def_regular))
+                              || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
+                          && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
                     {
                       /* This is actually a static link, or it is a
                          -Bsymbolic link and the symbol is defined
@@ -2993,7 +3000,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
               //if (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
               //    || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
               //  break;
-              if (h->forced_local)
+              if (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL)
                 break;
 
               if (h->plt.offset == (bfd_vma) -1)
@@ -3032,7 +3039,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                       || (h != NULL
                           && h->dynindx != -1
                           && (! info->symbolic
-                              || !h->def_regular))))
+                              || (h->elf_link_hash_flags
+                                  & ELF_LINK_HASH_DEF_REGULAR) == 0))))
                 {
                   Elf_Internal_Rela outrel;
                   bfd_boolean skip, relocate;
@@ -3091,7 +3099,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                        become local.  */
                     if (h == NULL
                         || ((info->symbolic || h->dynindx == -1)
-                             && h->def_regular))
+                             && (h->elf_link_hash_flags
+                                 & ELF_LINK_HASH_DEF_REGULAR) != 0))
                       {
                         relocate = TRUE;
                         outrel.r_info = ELF32_R_INFO (0, R_M32R_RELATIVE);
@@ -3391,7 +3400,7 @@ printf("m32r_elf_finish_dynamic_symbol()\n");
       loc += plt_index * sizeof(Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
-      if (!h->def_regular)
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
         {
           /* Mark the symbol as undefined, rather than as defined in
              the .plt section.  Leave the value alone.  */
@@ -3424,8 +3433,8 @@ printf("m32r_elf_finish_dynamic_symbol()\n");
       if (info->shared
           && (info->symbolic
 	      || h->dynindx == -1
-	      || h->forced_local)
-          && h->def_regular)
+	      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
+          && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
         {
           rela.r_info = ELF32_R_INFO (0, R_M32R_RELATIVE);
           rela.r_addend = (h->root.u.def.value
@@ -3446,7 +3455,7 @@ printf("m32r_elf_finish_dynamic_symbol()\n");
       ++srela->reloc_count;
     }
 
-  if (h->needs_copy)
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
       Elf_Internal_Rela rela;
@@ -4271,7 +4280,7 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
 {
   FILE * file = (FILE *) ptr;
 
-  BFD_ASSERT (abfd != NULL && ptr != NULL);
+  BFD_ASSERT (abfd != NULL && ptr != NULL)
 
   _bfd_elf_print_private_bfd_data (abfd, ptr);
 
@@ -4555,10 +4564,10 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
           if (h == NULL)
             continue;
 
-          if (h->forced_local)
+          if (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL)
             break;
 
-          h->needs_plt = 1;
+          h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.refcount += 1;
           break;
 
@@ -4574,7 +4583,7 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 
           if (h != NULL && !info->shared)
             {
-              h->non_got_ref = 1;
+              h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
               h->plt.refcount += 1;
             }
 
@@ -4604,12 +4613,14 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 	           || (h != NULL
 		       && (! info->symbolic
 		           || h->root.type == bfd_link_hash_defweak
-		           || !h->def_regular))))
+		           || (h->elf_link_hash_flags
+		               & ELF_LINK_HASH_DEF_REGULAR) == 0))))
               || (!info->shared
                   && (sec->flags & SEC_ALLOC) != 0
                   && h != NULL
                   && (h->root.type == bfd_link_hash_defweak
-                      || !h->def_regular)))
+                      || (h->elf_link_hash_flags
+                          & ELF_LINK_HASH_DEF_REGULAR) == 0)))
             {
               struct elf_m32r_dyn_relocs *p;
               struct elf_m32r_dyn_relocs **head;

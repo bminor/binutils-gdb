@@ -506,7 +506,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		{
 		  /* Make sure this symbol is output as a dynamic symbol.  */
 		  if (h->dynindx == -1
-		      && !h->forced_local)
+		      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 		    {
 		      if (!bfd_elf_link_record_dynamic_symbol (info, h))
 			return FALSE;
@@ -564,7 +564,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	  if (h == NULL)
 	    continue;
 
-	  h->needs_plt = 1;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.refcount++;
 	  break;
 
@@ -584,13 +584,13 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 
 	  /* Make sure this symbol is output as a dynamic symbol.  */
 	  if (h->dynindx == -1
-	      && !h->forced_local)
+	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	    {
 	      if (!bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
 	    }
 
-	  h->needs_plt = 1;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.refcount++;
 	  break;
 
@@ -612,7 +612,8 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		&& h != NULL
 		&& (!info->symbolic
 		    || h->root.type == bfd_link_hash_defweak
-		    || !h->def_regular)))
+		    || (h->elf_link_hash_flags
+			& ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
 	      if (h != NULL)
 		{
@@ -924,21 +925,24 @@ elf_m68k_adjust_dynamic_symbol (info, h)
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && (h->needs_plt
-		  || h->u.weakdef != NULL
-		  || (h->def_dynamic
-		      && h->ref_regular
-		      && !h->def_regular)));
+	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+		  || h->weakdef != NULL
+		  || ((h->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_REF_REGULAR) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
      when we know the address of the .got section.  */
   if (h->type == STT_FUNC
-      || h->needs_plt)
+      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (! info->shared
-	  && !h->def_dynamic
-	  && !h->ref_dynamic
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
 	  /* We must always create the plt entry if it was referenced
 	     by a PLTxxO relocation.  In this case we already recorded
 	     it as a dynamic symbol.  */
@@ -949,7 +953,7 @@ elf_m68k_adjust_dynamic_symbol (info, h)
 	     object.  In such a case, we don't actually need to build
 	     a procedure linkage table, and we can just do a PCxx
 	     reloc instead.  */
-	  BFD_ASSERT (h->needs_plt);
+	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
 	  h->plt.offset = (bfd_vma) -1;
 	  return TRUE;
 	}
@@ -957,14 +961,14 @@ elf_m68k_adjust_dynamic_symbol (info, h)
       /* GC may have rendered this entry unused.  */
       if (h->plt.refcount <= 0)
 	{
-	  h->needs_plt = 0;
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.offset = (bfd_vma) -1;
 	  return TRUE;
 	}
 
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1
-	  && !h->forced_local)
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -989,7 +993,7 @@ elf_m68k_adjust_dynamic_symbol (info, h)
 	 pointers compare as equal between the normal executable and
 	 the shared library.  */
       if (!info->shared
-	  && !h->def_regular)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  h->root.u.def.section = s;
 	  h->root.u.def.value = s->size;
@@ -1024,12 +1028,12 @@ elf_m68k_adjust_dynamic_symbol (info, h)
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->weakdef != NULL)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
+		  || h->weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->weakdef->root.u.def.section;
+      h->root.u.def.value = h->weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -1067,7 +1071,7 @@ elf_m68k_adjust_dynamic_symbol (info, h)
       srel = bfd_get_section_by_name (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
-      h->needs_copy = 1;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
   /* We need to figure out the alignment required for this symbol.  I
@@ -1291,9 +1295,9 @@ elf_m68k_discard_copies (h, inf)
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if (!h->def_regular
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
       || (!info->symbolic
-	  && !h->forced_local))
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0))
     {
       if ((info->flags & DF_TEXTREL) == 0)
 	{
@@ -1438,8 +1442,8 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		    || (info->shared
 			&& (info->symbolic
 			    || h->dynindx == -1
-			    || h->forced_local)
-			&& h->def_regular))
+			    || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)) != 0)
 		  {
 		    /* This is actually a static link, or it is a
 		       -Bsymbolic link and the symbol is defined
@@ -1575,7 +1579,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_68K_PC32:
 	  if (h == NULL
 	      || (info->shared
-		  && h->forced_local))
+		  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 	    break;
 	  /* Fall through.  */
 	case R_68K_8:
@@ -1593,7 +1597,8 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		  || (h != NULL
 		      && h->dynindx != -1
 		      && (!info->symbolic
-			  || !h->def_regular))))
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -1625,7 +1630,8 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 			   || r_type == R_68K_PC32
 			   || !info->shared
 			   || !info->symbolic
-			   || !h->def_regular))
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;
@@ -1696,7 +1702,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	 not process them.  */
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
-	       && h->def_dynamic))
+	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
 	    (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
@@ -1848,7 +1854,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
       loc = srela->contents + plt_index * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
-      if (!h->def_regular)
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
 	     the .plt section.  Leave the value alone.  */
@@ -1882,8 +1888,8 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
       if (info->shared
 	  && (info->symbolic
 	      || h->dynindx == -1
-	      || h->forced_local)
-	  && h->def_regular)
+	      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_68K_RELATIVE);
 	  rela.r_addend = bfd_get_signed_32 (output_bfd,
@@ -1903,7 +1909,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
-  if (h->needs_copy)
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
       Elf_Internal_Rela rela;

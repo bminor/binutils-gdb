@@ -2888,6 +2888,9 @@ ptrace_wait (ptid_t ptid, int *status)
       *status = _SIGTRAP;
     }
 
+  target_post_wait (pid_to_ptid (tsp.tts_pid), *status);
+
+
 #ifdef THREAD_DEBUG
   if (debug_on)
     printf ("Done waiting, pid is %d, tid %d\n", real_pid, real_tid);
@@ -3839,7 +3842,7 @@ kill_inferior (void)
 }
 
 
-#ifndef DEPRECATED_CHILD_RESUME
+#ifndef CHILD_RESUME
 
 /* Sanity check a thread about to be continued.
  */
@@ -4250,7 +4253,7 @@ threads_continue_one_with_signal (lwpid_t gdb_tid, int signal)
 }
 #endif
 
-#ifndef DEPRECATED_CHILD_RESUME
+#ifndef CHILD_RESUME
 
 /* Resume execution of the inferior process.
 
@@ -4551,7 +4554,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 #endif
 
 }
-#endif /* DEPRECATED_CHILD_RESUME */
+#endif /* CHILD_RESUME */
 
 /*
  * Like it says.
@@ -4815,10 +4818,10 @@ _initialize_kernel_u_addr (void)
    to debugger memory starting at MYADDR.   Copy to inferior if
    WRITE is nonzero.  TARGET is ignored.
 
-   Returns the length copied, which is either the LEN argument or
-   zero.  This xfer function does not do partial moves, since
-   deprecated_child_ops doesn't allow memory operations to cross below
-   us in the target stack anyway.  */
+   Returns the length copied, which is either the LEN argument or zero.
+   This xfer function does not do partial moves, since child_ops
+   doesn't allow memory operations to cross below us in the target stack
+   anyway.  */
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,

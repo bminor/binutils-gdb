@@ -1,7 +1,4 @@
 # Host: OpenBSD/i386 a.out
-NATDEPFILES= fork-child.o inf-ptrace.o \
-	i386bsd-nat.o i386nbsd-nat.o i386obsd-nat.o bsd-kvm.o \
+NATDEPFILES= fork-child.o infptrace.o inftarg.o i386bsd-nat.o i386obsd-nat.o \
 	solib.o solib-sunos.o
 NAT_FILE= nm-obsd.h
-
-LOADLIBES= -lkvm

@@ -26,6 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* each successive token and places a semantic value into yylval */
 /* (ada-lval), defined by the parser.   */
 
+/* Run flex with (at least) the -i option (case-insensitive), and the -I */
+/* option (interactive---no unnecessary lookahead).  */
+
 DIG	[0-9]
 NUM10	({DIG}({DIG}|_)*)
 HEXDIG	[0-9a-f]
@@ -42,6 +45,8 @@ EXP	(e[+-]{NUM10})
 POSEXP  (e"+"?{NUM10})
 
 %{
+#define malloc xmalloc
+#define free xfree
 
 #define NUMERAL_WIDTH 256
 #define LONGEST_SIGN ((ULONGEST) 1 << (sizeof(LONGEST) * HOST_CHAR_BIT - 1))
@@ -83,8 +88,6 @@ static int name_lookup (char *, char *, int *, int);
 static int find_dot_all (const char *);
 
 %}
-
-%option case-insensitive interactive nodefault
 
 %s IN_STRING BEFORE_QUAL_QUOTE
 
@@ -141,18 +144,20 @@ static int find_dot_all (const char *);
 		}
 
 <INITIAL>"'"({GRAPHIC}|\")"'" {
-		   yylval.typed_val.type = type_char ();
+		   yylval.typed_val.type = builtin_type_ada_char;
 		   yylval.typed_val.val = yytext[1];
 		   return CHARLIT;
 		}
 
 <INITIAL>"'[\""{HEXDIG}{2}"\"]'"   {
                    int v;
-                   yylval.typed_val.type = type_char ();
+                   yylval.typed_val.type = builtin_type_ada_char;
 		   sscanf (yytext+3, "%2x", &v);
 		   yylval.typed_val.val = v;
 		   return CHARLIT;
 		}
+
+\"{OPER}\"/{WHITE}*"(" { return processId (yytext, yyleng); }
 
 <INITIAL>\"	{
 		   tempbuf_len = 0;
@@ -345,7 +350,7 @@ resize_tempbuf (unsigned int n)
   if (tempbufsize < n)
     {
       tempbufsize = (n+63) & ~63;
-      tempbuf = xrealloc (tempbuf, tempbufsize);
+      tempbuf = (char *) xrealloc (tempbuf, tempbufsize);
     }
 }
 
@@ -473,9 +478,9 @@ processInt (const char *base0, const char *num0, const char *exp0)
     }
 
   if ((result >> (TARGET_INT_BIT-1)) == 0)
-    yylval.typed_val.type = type_int ();
+    yylval.typed_val.type = builtin_type_ada_int;
   else if ((result >> (TARGET_LONG_BIT-1)) == 0)
-    yylval.typed_val.type = type_long ();
+    yylval.typed_val.type = builtin_type_ada_long;
   else if (((result >> (TARGET_LONG_BIT-1)) >> 1) == 0)
     {
       /* We have a number representable as an unsigned integer quantity.
@@ -495,7 +500,7 @@ processInt (const char *base0, const char *num0, const char *exp0)
       return INT;
     }
   else
-    yylval.typed_val.type = type_long_long ();
+    yylval.typed_val.type = builtin_type_ada_long_long;
 
   yylval.typed_val.val = (LONGEST) result;
   return INT;
@@ -522,11 +527,11 @@ processReal (const char *num0)
       yylval.typed_val_float.dval = temp;
     }
 
-  yylval.typed_val_float.type = type_float ();
+  yylval.typed_val_float.type = builtin_type_ada_float;
   if (sizeof(DOUBLEST) >= TARGET_DOUBLE_BIT / TARGET_CHAR_BIT)
-    yylval.typed_val_float.type = type_double ();
+    yylval.typed_val_float.type = builtin_type_ada_double;
   if (sizeof(DOUBLEST) >= TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT)
-    yylval.typed_val_float.type = type_long_double ();
+    yylval.typed_val_float.type = builtin_type_ada_long_double;
 
   return FLOAT;
 }
@@ -740,7 +745,7 @@ name_lookup (char *name0, char *err_name, int *token_type, int depth)
                                                          current_gdbarch,
                                                          name);
 	  if (type == NULL && strcmp ("system__address", name) == 0)
-	    type = type_system_address ();
+	    type = builtin_type_ada_system_address;
 	  if (type != NULL)
 	    {
 	      /* First check to see if we have a regular definition of this
@@ -919,10 +924,3 @@ yywrap(void)
 {
   return 1;
 }
-
-/* Dummy definition to suppress warnings about unused static definitions. */
-typedef void (*dummy_function) ();
-dummy_function ada_flex_use[] = 
-{ 
-  (dummy_function) yyunput
-};

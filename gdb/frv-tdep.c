@@ -1293,8 +1293,8 @@ frv_check_watch_resources (int type, int cnt, int ot)
 }
 
 
-int
-frv_stopped_data_address (CORE_ADDR *addr_p)
+CORE_ADDR
+frv_stopped_data_address (void)
 {
   CORE_ADDR brr, dbar0, dbar1, dbar2, dbar3;
 
@@ -1305,24 +1305,15 @@ frv_stopped_data_address (CORE_ADDR *addr_p)
   dbar3 = read_register (dbar3_regnum);
 
   if (brr & (1<<11))
-    *addr_p = dbar0;
+    return dbar0;
   else if (brr & (1<<10))
-    *addr_p = dbar1;
+    return dbar1;
   else if (brr & (1<<9))
-    *addr_p = dbar2;
+    return dbar2;
   else if (brr & (1<<8))
-    *addr_p = dbar3;
+    return dbar3;
   else
     return 0;
-
-  return 1;
-}
-
-int
-frv_have_stopped_data_address (void)
-{
-  CORE_ADDR addr = 0;
-  return frv_stopped_data_address (&addr);
 }
 
 static CORE_ADDR

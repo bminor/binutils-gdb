@@ -126,22 +126,6 @@ static void write_object_renaming (struct block *, struct symbol *, int);
 static void write_var_from_name (struct block *, struct name_info);
 
 static LONGEST convert_char_literal (struct type *, LONGEST);
-
-static struct type *type_int (void);
-
-static struct type *type_long (void);
-
-static struct type *type_long_long (void);
-
-static struct type *type_float (void);
-
-static struct type *type_double (void);
-
-static struct type *type_long_double (void);
-
-static struct type *type_char (void);
-
-static struct type *type_system_address (void);
 %}
 
 %union
@@ -442,17 +426,17 @@ simple_exp :	simple_exp TICK_ACCESS
 	|	simple_exp TICK_ADDRESS
 			{ write_exp_elt_opcode (UNOP_ADDR);
 			  write_exp_elt_opcode (UNOP_CAST);
-			  write_exp_elt_type (type_system_address ());
+			  write_exp_elt_type (builtin_type_ada_system_address);
 			  write_exp_elt_opcode (UNOP_CAST);
 			}
 	|	simple_exp TICK_FIRST tick_arglist
-			{ write_int ($3, type_int ());
+			{ write_int ($3, builtin_type_int);
 			  write_exp_elt_opcode (OP_ATR_FIRST); }
 	|	simple_exp TICK_LAST tick_arglist
-			{ write_int ($3, type_int ());
+			{ write_int ($3, builtin_type_int);
 			  write_exp_elt_opcode (OP_ATR_LAST); }
 	| 	simple_exp TICK_LENGTH tick_arglist
-			{ write_int ($3, type_int ());
+			{ write_int ($3, builtin_type_int);
 			  write_exp_elt_opcode (OP_ATR_LENGTH); }
         |       simple_exp TICK_SIZE
 			{ write_exp_elt_opcode (OP_ATR_SIZE); }
@@ -465,13 +449,13 @@ simple_exp :	simple_exp TICK_ACCESS
 	| 	opt_type_prefix TICK_POS '(' exp ')'
 			{ write_exp_elt_opcode (OP_ATR_POS); }
 	|	type_prefix TICK_FIRST tick_arglist
-			{ write_int ($3, type_int ());
+			{ write_int ($3, builtin_type_int);
 			  write_exp_elt_opcode (OP_ATR_FIRST); }
 	|	type_prefix TICK_LAST tick_arglist
-			{ write_int ($3, type_int ());
+			{ write_int ($3, builtin_type_int);
 			  write_exp_elt_opcode (OP_ATR_LAST); }
 	| 	type_prefix TICK_LENGTH tick_arglist
-			{ write_int ($3, type_int ());
+			{ write_int ($3, builtin_type_int);
 			  write_exp_elt_opcode (OP_ATR_LENGTH); }
 	|	type_prefix TICK_VAL '(' exp ')'
 			{ write_exp_elt_opcode (OP_ATR_VAL); }
@@ -521,7 +505,7 @@ exp	:	FLOAT
 	;
 
 exp	:	NULL_PTR
-			{ write_int (0, type_int ()); }
+			{ write_int (0, builtin_type_int); }
 	;
 
 exp	:	STRING
@@ -682,8 +666,8 @@ write_var_from_name (struct block *orig_left_context,
   if (name.msym != NULL)
     {
       write_exp_msymbol (name.msym,
-			 lookup_function_type (type_int ()),
-			 type_int ());
+			 lookup_function_type (builtin_type_int),
+			 builtin_type_int);
     }
   else if (name.sym == NULL)
     {
@@ -795,7 +779,7 @@ write_object_renaming (struct block *orig_left_context,
 	      goto BadEncoding;
 	    suffix = next;
 	    write_exp_elt_opcode (OP_LONG);
-	    write_exp_elt_type (type_int ());
+	    write_exp_elt_type (builtin_type_ada_int);
 	    write_exp_elt_longcst ((LONGEST) val);
 	    write_exp_elt_opcode (OP_LONG);
 	  }
@@ -852,7 +836,7 @@ write_object_renaming (struct block *orig_left_context,
 	  if (end == NULL)
 	    end = suffix + strlen (suffix);
 	  field_name.length = end - suffix;
-	  field_name.ptr = xmalloc (end - suffix + 1);
+	  field_name.ptr = (char *) malloc (end - suffix + 1);
 	  strncpy (field_name.ptr, suffix, end - suffix);
 	  field_name.ptr[end - suffix] = '\000';
 	  suffix = end;
@@ -895,70 +879,8 @@ convert_char_literal (struct type *type, LONGEST val)
   return val;
 }
 
-static struct type *
-type_int (void)
-{
-  return builtin_type (current_gdbarch)->builtin_int;
-}
-
-static struct type *
-type_long (void)
-{
-  return builtin_type (current_gdbarch)->builtin_long;
-}
-
-static struct type *
-type_long_long (void)
-{
-  return builtin_type (current_gdbarch)->builtin_long_long;
-}
-
-static struct type *
-type_float (void)
-{
-  return builtin_type (current_gdbarch)->builtin_float;
-}
-
-static struct type *
-type_double (void)
-{
-  return builtin_type (current_gdbarch)->builtin_double;
-}
-
-static struct type *
-type_long_double (void)
-{
-  return builtin_type (current_gdbarch)->builtin_long_double;
-}
-
-static struct type *
-type_char (void)
-{
-  return language_string_char_type (current_language, current_gdbarch);
-}
-
-static struct type *
-type_system_address (void)
-{
-  struct type *type 
-    = language_lookup_primitive_type_by_name (current_language,
-					      current_gdbarch, 
-					      "system__address");
-  return  type != NULL ? type : lookup_pointer_type (builtin_type_void);
-}
-
 void
 _initialize_ada_exp (void)
 {
   obstack_init (&temp_parse_space);
 }
-
-/* FIXME: hilfingr/2004-10-05: Hack to remove warning.  The function
-   string_to_operator is supposed to be used for cases where one
-   calls an operator function with prefix notation, as in 
-   "+" (a, b), but at some point, this code seems to have gone
-   missing. */
-
-struct stoken (*dummy_string_to_ada_operator) (struct stoken) 
-     = string_to_operator;
-

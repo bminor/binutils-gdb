@@ -149,7 +149,7 @@ print_range (struct type *type, struct ui_file *stream)
     case TYPE_CODE_ENUM:
       break;
     default:
-      target_type = builtin_type_int;
+      target_type = builtin_type_ada_int;
       break;
     }
 
@@ -754,7 +754,7 @@ void
 ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 		int show, int level)
 {
-  struct type *type = ada_check_typedef (ada_get_base_type (type0));
+  struct type *type = ada_completed_type (ada_get_base_type (type0));
   char *type_name = decoded_type_name (type);
   int is_var_decl = (varstring != NULL && varstring[0] != '\0');
 
@@ -768,7 +768,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
     }
 
   if (show > 0)
-    type = ada_check_typedef (type);
+    CHECK_TYPEDEF (type);
 
   if (is_var_decl && TYPE_CODE (type) != TYPE_CODE_FUNC)
     fprintf_filtered (stream, "%.*s: ",

@@ -104,6 +104,40 @@ struct elf_link_hash_entry
      not visible outside this DSO.  */
   long dynindx;
 
+  /* String table index in .dynstr if this is a dynamic symbol.  */
+  unsigned long dynstr_index;
+
+  /* Hash value of the name computed using the ELF hash function.  */
+  unsigned long elf_hash_value;
+
+  /* If this is a weak defined symbol from a dynamic object, this
+     field points to a defined symbol with the same value, if there is
+     one.  Otherwise it is NULL.  */
+  struct elf_link_hash_entry *weakdef;
+
+  /* Version information.  */
+  union
+  {
+    /* This field is used for a symbol which is not defined in a
+       regular object.  It points to the version information read in
+       from the dynamic object.  */
+    Elf_Internal_Verdef *verdef;
+    /* This field is used for a symbol which is defined in a regular
+       object.  It is set up in size_dynamic_sections.  It points to
+       the version information we should write out for this symbol.  */
+    struct bfd_elf_version_tree *vertree;
+  } verinfo;
+
+  /* Virtual table entry use information.  This array is nominally of size
+     size/sizeof(target_void_pointer), though we have to be able to assume
+     and track a size while the symbol is still undefined.  It is indexed
+     via offset/sizeof(target_void_pointer).  */
+  size_t vtable_entries_size;
+  bfd_boolean *vtable_entries_used;
+
+  /* Virtual table derivation info.  */
+  struct elf_link_hash_entry *vtable_parent;
+
   /* If this symbol requires an entry in the global offset table, the
      processor specific backend uses this field to track usage and
      final offset.  Two schemes are supported:  The first assumes that
@@ -128,89 +162,47 @@ struct elf_link_hash_entry
   bfd_size_type size;
 
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
-  unsigned int type : 8;
+  char type;
 
   /* Symbol st_other value, symbol visibility.  */
-  unsigned int other : 8;
+  unsigned char other;
 
+  /* Some flags; legal values follow.  */
+  unsigned short elf_link_hash_flags;
   /* Symbol is referenced by a non-shared object.  */
-  unsigned int ref_regular : 1;
+#define ELF_LINK_HASH_REF_REGULAR 01
   /* Symbol is defined by a non-shared object.  */
-  unsigned int def_regular : 1;
+#define ELF_LINK_HASH_DEF_REGULAR 02
   /* Symbol is referenced by a shared object.  */
-  unsigned int ref_dynamic : 1;
+#define ELF_LINK_HASH_REF_DYNAMIC 04
   /* Symbol is defined by a shared object.  */
-  unsigned int def_dynamic : 1;
+#define ELF_LINK_HASH_DEF_DYNAMIC 010
   /* Symbol has a non-weak reference from a non-shared object.  */
-  unsigned int ref_regular_nonweak : 1;
+#define ELF_LINK_HASH_REF_REGULAR_NONWEAK 020
   /* Dynamic symbol has been adjustd.  */
-  unsigned int dynamic_adjusted : 1;
+#define ELF_LINK_HASH_DYNAMIC_ADJUSTED 040
   /* Symbol needs a copy reloc.  */
-  unsigned int needs_copy : 1;
+#define ELF_LINK_HASH_NEEDS_COPY 0100
   /* Symbol needs a procedure linkage table entry.  */
-  unsigned int needs_plt : 1;
+#define ELF_LINK_HASH_NEEDS_PLT 0200
   /* Symbol appears in a non-ELF input file.  */
-  unsigned int non_elf : 1;
+#define ELF_LINK_NON_ELF 0400
   /* Symbol should be marked as hidden in the version information.  */
-  unsigned int hidden : 1;
+#define ELF_LINK_HIDDEN 01000
   /* Symbol was forced to local scope due to a version script file.  */
-  unsigned int forced_local : 1;
+#define ELF_LINK_FORCED_LOCAL 02000
   /* Symbol was marked during garbage collection.  */
-  unsigned int mark : 1;
+#define ELF_LINK_HASH_MARK 04000
   /* Symbol is referenced by a non-GOT/non-PLT relocation.  This is
      not currently set by all the backends.  */
-  unsigned int non_got_ref : 1;
-  /* Symbol has a definition in a shared object.
-     FIXME: There is no real need for this field if def_dynamic is never
-     cleared and all places that test def_dynamic also test def_regular.  */
-  unsigned int dynamic_def : 1;
+#define ELF_LINK_NON_GOT_REF 010000
+  /* Symbol has a definition in a shared object.  */
+#define ELF_LINK_DYNAMIC_DEF 020000
   /* Symbol is weak in all shared objects.  */
-  unsigned int dynamic_weak : 1;
+#define ELF_LINK_DYNAMIC_WEAK 040000
   /* Symbol is referenced with a relocation where C/C++ pointer equality
      matters.  */
-  unsigned int pointer_equality_needed : 1;
-
-  /* String table index in .dynstr if this is a dynamic symbol.  */
-  unsigned long dynstr_index;
-
-  union
-  {
-    /* If this is a weak defined symbol from a dynamic object, this
-       field points to a defined symbol with the same value, if there is
-       one.  Otherwise it is NULL.  */
-    struct elf_link_hash_entry *weakdef;
-
-    /* Hash value of the name computed using the ELF hash function.
-       Used part way through size_dynamic_sections, after we've finished
-       with weakdefs.  */
-    unsigned long elf_hash_value;
-  } u;
-
-  /* Version information.  */
-  union
-  {
-    /* This field is used for a symbol which is not defined in a
-       regular object.  It points to the version information read in
-       from the dynamic object.  */
-    Elf_Internal_Verdef *verdef;
-    /* This field is used for a symbol which is defined in a regular
-       object.  It is set up in size_dynamic_sections.  It points to
-       the version information we should write out for this symbol.  */
-    struct bfd_elf_version_tree *vertree;
-  } verinfo;
-
-  struct
-  {
-    /* Virtual table entry use information.  This array is nominally of size
-       size/sizeof(target_void_pointer), though we have to be able to assume
-       and track a size while the symbol is still undefined.  It is indexed
-       via offset/sizeof(target_void_pointer).  */
-    size_t size;
-    bfd_boolean *used;
-
-    /* Virtual table derivation info.  */
-    struct elf_link_hash_entry *parent;
-  } *vtable;
+#define ELF_LINK_POINTER_EQUALITY_NEEDED 0100000
 };
 
 /* Will references to this symbol always reference the symbol
@@ -229,8 +221,8 @@ struct elf_link_hash_entry
 /* Common symbols that are turned into definitions don't have the
    DEF_REGULAR flag set, so they might appear to be undefined.  */
 #define ELF_COMMON_DEF_P(H) \
-  (!(H)->def_regular							\
-   && !(H)->def_dynamic							\
+  (((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0		\
+   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0	\
    && (H)->root.type == bfd_link_hash_defined)
 
 /* Records local symbols to be emitted in the dynamic symbol table.  */
@@ -286,10 +278,9 @@ struct cie
 
 struct eh_cie_fde
 {
-  /* For FDEs, this points to the CIE used.  */
-  struct eh_cie_fde *cie_inf;
-  unsigned int size;
   unsigned int offset;
+  unsigned int size;
+  asection *sec;
   unsigned int new_offset;
   unsigned char fde_encoding;
   unsigned char lsda_encoding;
@@ -298,8 +289,6 @@ struct eh_cie_fde
   unsigned int removed : 1;
   unsigned int make_relative : 1;
   unsigned int make_lsda_relative : 1;
-  unsigned int need_relative : 1;
-  unsigned int need_lsda_relative : 1;
   unsigned int per_encoding_relative : 1;
 };
 
@@ -320,15 +309,14 @@ struct eh_frame_hdr_info
 {
   struct cie last_cie;
   asection *last_cie_sec;
-  struct eh_cie_fde *last_cie_inf;
   asection *hdr_sec;
+  unsigned int last_cie_offset;
   unsigned int fde_count, array_count;
   struct eh_frame_array_ent *array;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
   bfd_boolean table;
-  bfd_boolean offsets_adjusted;
 };
 
 /* ELF linker hash table.  */
@@ -1260,7 +1248,7 @@ struct elf_obj_tdata
   unsigned int cverrefs;
 
   /* Segment flags for the PT_GNU_STACK segment.  */
-  unsigned int stack_flags;
+  unsigned int stack_flags;  
 
   /* Should the PT_GNU_RELRO segment be emitted?  */
   bfd_boolean relro;
@@ -1532,7 +1520,7 @@ extern bfd_boolean _bfd_elf_discard_section_eh_frame
 extern bfd_boolean _bfd_elf_discard_section_eh_frame_hdr
   (bfd *, struct bfd_link_info *);
 extern bfd_vma _bfd_elf_eh_frame_section_offset
-  (bfd *, struct bfd_link_info *, asection *, bfd_vma);
+  (bfd *, asection *, bfd_vma);
 extern bfd_boolean _bfd_elf_write_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
 extern bfd_boolean _bfd_elf_write_section_eh_frame_hdr
@@ -1783,8 +1771,10 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
    about initializing any .plt and .got entries in relocate_section.  */
 #define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
   ((DYN)								\
-   && ((SHARED) || !(H)->forced_local)					\
-   && ((H)->dynindx != -1 || (H)->forced_local))
+   && ((SHARED)								\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 
 /* This macro is to avoid lots of duplicated code in the body
    of xxx_relocate_section() in the various elfxx-xxxx.c files.  */

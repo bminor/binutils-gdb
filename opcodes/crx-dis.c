@@ -59,24 +59,9 @@ cinv_entry;
 /* CRX 'cinv' options.  */
 const cinv_entry crx_cinvs[] =
 {
-  {"[i]", 2}, {"[i,u]", 3}, {"[d]", 4}, {"[d,u]", 5}, 
-  {"[d,i]", 6}, {"[d,i,u]", 7}, {"[b]", 8}, 
-  {"[b,i]", 10}, {"[b,i,u]", 11}, {"[b,d]", 12}, 
-  {"[b,d,u]", 13}, {"[b,d,i]", 14}, {"[b,d,i,u]", 15}
+  {"[i]", 2}, {"[i,u]", 3}, {"[d]", 4},
+  {"[d,u]", 5}, {"[d,i]", 6}, {"[d,i,u]", 7}
 };
-
-/* Enum to distinguish CO-Processor [special] registers arguments 
-   from general purpose regidters.  */
-typedef enum COP_ARG_TYPE
-  {
-    /* Not a CO-Processor argument (probably a general purpose reg.).  */
-    NO_COP_ARG = 0,
-    /* A CO-Processor argument (c<N>).  */
-    COP_ARG,
-    /* A CO-Processor special argument (cs<N>).  */
-    COPS_ARG 
-  }
-COP_ARG_TYPE;
 
 /* Number of valid 'cinv' instruction options.  */
 int NUMCINVS = ((sizeof crx_cinvs)/(sizeof crx_cinvs[0]));
@@ -104,7 +89,7 @@ static char *getcopregname    (copreg, reg_type);
 static char * getprocregname  (int);
 static char *gettrapstring    (unsigned);
 static char *getcinvstring    (unsigned);
-static void getregliststring  (int, char *, enum COP_ARG_TYPE);
+static void getregliststring  (int, char *, int);
 static wordU get_word_at_PC   (bfd_vma, struct disassemble_info *);
 static void get_words_at_PC   (bfd_vma, struct disassemble_info *);
 static unsigned long build_mask (void);
@@ -240,7 +225,7 @@ powerof2 (int x)
 /* Transform a register bit mask to a register list.  */
 
 void
-getregliststring (int trap, char *string, enum COP_ARG_TYPE core_cop)
+getregliststring (int trap, char *string, int core_cop)
 {
   char temp_string[5];
   int i;
@@ -251,21 +236,11 @@ getregliststring (int trap, char *string, enum COP_ARG_TYPE core_cop)
   for (i = 0; i < 16; i++)
     {
       if (trap & 0x1)
-	{
-	  switch (core_cop)
-	    {
-	    case NO_COP_ARG:
-	      sprintf (temp_string, "r%d", i);
-	      break;
-	    case COP_ARG:
-	      sprintf (temp_string, "c%d", i);
-	      break;
-	    case COPS_ARG:
-	      sprintf (temp_string, "cs%d", i);
-	      break;
-	    default:
-	      break;
-	    }
+        {
+          if (core_cop)
+	    sprintf (temp_string, "r%d", i);
+          else
+	    sprintf (temp_string, "c%d", i);
           strcat (string, temp_string);
           if (trap & 0xfffe)
 	    strcat (string, ",");
@@ -515,25 +490,21 @@ print_arg (argument *a, struct disassemble_info *info)
 
       else if (INST_HAS_REG_LIST)
         {
-	  COP_ARG_TYPE cop_ins = IS_INSN_TYPE (COP_REG_INS) ? 
-				 COP_ARG : IS_INSN_TYPE (COPS_REG_INS) ? 
-				 COPS_ARG : NO_COP_ARG;
-
-          if (cop_ins != NO_COP_ARG)
-	    {
-	      /*  Check for proper argument number.  */
-	      if (processing_argument_number == 2)
-		{
-		  getregliststring (a->constant, string, cop_ins);
-		  func (stream, "%s", string);
-		}
-	      else
-		func (stream, "$0x%x", a->constant);
-	    }
-	  else
+          if (!IS_INSN_TYPE (COP_REG_INS))
             {
-              getregliststring (a->constant, string, cop_ins);
+              getregliststring (a->constant, string, 1);
               func (stream, "%s", string);
+            }
+          else
+            {
+              /*  Check for proper argument number.  */
+              if (processing_argument_number == 2)
+                {
+                  getregliststring (a->constant, string, 0);
+                  func (stream, "%s", string);
+                }
+              else
+		func (stream, "$0x%x", a->constant);
             }
         }
       else

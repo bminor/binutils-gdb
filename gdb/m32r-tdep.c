@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -41,7 +41,27 @@
 
 #include "gdb_assert.h"
 
-#include "m32r-tdep.h"
+struct gdbarch_tdep
+{
+  /* gdbarch target dependent data here. Currently unused for M32R. */
+};
+
+/* m32r register names. */
+
+enum
+{
+  R0_REGNUM = 0,
+  R3_REGNUM = 3,
+  M32R_FP_REGNUM = 13,
+  LR_REGNUM = 14,
+  M32R_SP_REGNUM = 15,
+  PSW_REGNUM = 16,
+  M32R_PC_REGNUM = 21,
+  /* m32r calling convention. */
+  ARG1_REGNUM = R0_REGNUM,
+  ARGN_REGNUM = R3_REGNUM,
+  RET1_REGNUM = R0_REGNUM,
+};
 
 /* Local functions */
 
@@ -53,6 +73,19 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   /* Align to the size of an instruction (so that they can safely be
      pushed onto the stack.  */
   return sp & ~3;
+}
+
+/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   is the type (which is known to be struct, union or array).
+
+   The m32r returns anything less than 8 bytes in size in
+   registers. */
+
+static int
+m32r_use_struct_convention (int gcc_p, struct type *type)
+{
+  return (TYPE_LENGTH (type) > 8);
 }
 
 
@@ -205,12 +238,18 @@ char *m32r_register_names[] = {
   "evb"
 };
 
+static int
+m32r_num_regs (void)
+{
+  return (sizeof (m32r_register_names) / sizeof (m32r_register_names[0]));
+}
+
 static const char *
 m32r_register_name (int reg_nr)
 {
   if (reg_nr < 0)
     return NULL;
-  if (reg_nr >= M32R_NUM_REGS)
+  if (reg_nr >= m32r_num_regs ())
     return NULL;
   return m32r_register_names[reg_nr];
 }
@@ -253,56 +292,69 @@ m32r_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value,
+   as a CORE_ADDR (or an expression that can be used as one).  */
+
+static CORE_ADDR
+m32r_extract_struct_value_address (struct regcache *regcache)
+{
+  ULONGEST addr;
+  regcache_cooked_read_unsigned (regcache, ARG1_REGNUM, &addr);
+  return addr;
+}
+
+
 /* This is required by skip_prologue. The results of decoding a prologue
    should be cached because this thrashing is getting nuts.  */
 
-static int
+static void
 decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
-		 CORE_ADDR *pl_endptr, unsigned long *framelength)
+		 CORE_ADDR *pl_endptr)
 {
   unsigned long framesize;
   int insn;
   int op1;
+  int maybe_one_more = 0;
   CORE_ADDR after_prologue = 0;
-  CORE_ADDR after_push = 0;
   CORE_ADDR after_stack_adjust = 0;
   CORE_ADDR current_pc;
-  LONGEST return_value;
 
   framesize = 0;
   after_prologue = 0;
 
   for (current_pc = start_pc; current_pc < scan_limit; current_pc += 2)
     {
-      /* Check if current pc's location is readable. */
-      if (!safe_read_memory_integer (current_pc, 2, &return_value))
-	return -1;
-
       insn = read_memory_unsigned_integer (current_pc, 2);
-
-      if (insn == 0x0000)
-	break;
 
       /* If this is a 32 bit instruction, we dont want to examine its
          immediate data as though it were an instruction */
       if (current_pc & 0x02)
 	{
+	  /* Clear the parallel execution bit from 16 bit instruction */
+	  if (maybe_one_more)
+	    {
+	      /* The last instruction was a branch, usually terminates
+	         the series, but if this is a parallel instruction,
+	         it may be a stack framing instruction */
+	      if (!(insn & 0x8000))
+		{
+		  /* nope, we are really done */
+		  break;
+		}
+	    }
 	  /* decode this instruction further */
 	  insn &= 0x7fff;
 	}
       else
 	{
+	  if (maybe_one_more)
+	    break;		/* This isnt the one more */
 	  if (insn & 0x8000)
 	    {
 	      if (current_pc == scan_limit)
 		scan_limit += 2;	/* extend the search */
-
 	      current_pc += 2;	/* skip the immediate data */
-
-	      /* Check if current pc's location is readable. */
-	      if (!safe_read_memory_integer (current_pc, 2, &return_value))
-		return -1;
-
 	      if (insn == 0x8faf)	/* add3 sp, sp, xxxx */
 		/* add 16 bit sign-extended offset */
 		{
@@ -312,8 +364,6 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	      else
 		{
 		  if (((insn >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
-		      && safe_read_memory_integer (current_pc + 2, 2,
-						   &return_value)
 		      && read_memory_unsigned_integer (current_pc + 2,
 						       2) == 0x0f24)
 		    /* subtract 24 bit sign-extended negative-offset */
@@ -326,7 +376,7 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 		      framesize += insn;
 		    }
 		}
-	      after_push = current_pc + 2;
+	      after_prologue = current_pc;
 	      continue;
 	    }
 	}
@@ -365,23 +415,17 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	  after_prologue = current_pc + 2;
 	  break;		/* end of stack adjustments */
 	}
-
       /* Nop looks like a branch, continue explicitly */
       if (insn == 0x7000)
 	{
 	  after_prologue = current_pc + 2;
 	  continue;		/* nop occurs between pushes */
 	}
-      /* End of prolog if any of these are trap instructions */
-      if ((insn & 0xfff0) == 0x10f0)
-	{
-	  after_prologue = current_pc;
-	  break;
-	}
       /* End of prolog if any of these are branch instructions */
       if ((op1 == 0x7000) || (op1 == 0xb000) || (op1 == 0xf000))
 	{
 	  after_prologue = current_pc;
+	  maybe_one_more = 1;
 	  continue;
 	}
       /* Some of the branch instructions are mixed with other types */
@@ -391,13 +435,11 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	  if ((subop == 0x0ec0) || (subop == 0x0fc0))
 	    {
 	      after_prologue = current_pc;
+	      maybe_one_more = 1;
 	      continue;		/* jmp , jl */
 	    }
 	}
     }
-
-  if (framelength)
-    *framelength = framesize;
 
   if (current_pc >= scan_limit)
     {
@@ -410,13 +452,6 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	    {
 	      *pl_endptr = after_stack_adjust;
 	    }
-	  else if (after_push != 0)
-	    /* We did not find a "mv fp,sp", but we DID find
-	       a push.  Is it safe to use that as the
-	       end of the prologue?  I just don't know. */
-	    {
-	      *pl_endptr = after_push;
-	    }
 	  else
 	    /* We reached the end of the loop without finding the end
 	       of the prologue.  No way to win -- we should report failure.  
@@ -424,29 +459,25 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	       GDB will set a breakpoint at the start of the function (etc.) */
 	    *pl_endptr = start_pc;
 	}
-      return 0;
+      return;
     }
-
   if (after_prologue == 0)
     after_prologue = current_pc;
 
   if (pl_endptr)
     *pl_endptr = after_prologue;
-
-  return 0;
 }				/*  decode_prologue */
 
 /* Function: skip_prologue
    Find end of function prologue */
 
-#define DEFAULT_SEARCH_LIMIT 128
+#define DEFAULT_SEARCH_LIMIT 44
 
 CORE_ADDR
 m32r_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
-  LONGEST return_value;
 
   /* See what the symbol table says */
 
@@ -468,17 +499,10 @@ m32r_skip_prologue (CORE_ADDR pc)
     }
   else
     func_end = pc + DEFAULT_SEARCH_LIMIT;
-
-  /* If pc's location is not readable, just quit. */
-  if (!safe_read_memory_integer (pc, 4, &return_value))
-    return pc;
-
-  /* Find the end of prologue.  */
-  if (decode_prologue (pc, func_end, &sal.end, NULL) < 0)
-    return pc;
-
+  decode_prologue (pc, func_end, &sal.end);
   return sal.end;
 }
+
 
 struct m32r_unwind_cache
 {
@@ -508,13 +532,12 @@ static struct m32r_unwind_cache *
 m32r_frame_unwind_cache (struct frame_info *next_frame,
 			 void **this_prologue_cache)
 {
-  CORE_ADDR pc, scan_limit;
+  CORE_ADDR pc;
   ULONGEST prev_sp;
   ULONGEST this_base;
-  unsigned long op, op2;
+  unsigned long op;
   int i;
   struct m32r_unwind_cache *info;
-
 
   if ((*this_prologue_cache))
     return (*this_prologue_cache);
@@ -525,11 +548,10 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 
   info->size = 0;
   info->sp_offset = 0;
-  info->uses_frame = 0;
 
-  scan_limit = frame_pc_unwind (next_frame);
+  info->uses_frame = 0;
   for (pc = frame_func_unwind (next_frame);
-       pc > 0 && pc < scan_limit; pc += 2)
+       pc > 0 && pc < frame_pc_unwind (next_frame); pc += 2)
     {
       if ((pc & 2) == 0)
 	{
@@ -543,19 +565,18 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 		  short n = op & 0xffff;
 		  info->sp_offset += n;
 		}
-	      else if (((op >> 8) == 0xe4)
-		       && get_frame_memory_unsigned (next_frame, pc + 2,
+	      else if (((op >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
+		       && get_frame_memory_unsigned (next_frame, pc + 4,
 						     2) == 0x0f24)
 		{
-		  /* ld24 r4, xxxxxx; sub sp, r4 */
 		  unsigned long n = op & 0xffffff;
 		  info->sp_offset += n;
-		  pc += 2;	/* skip sub instruction */
+		  pc += 2;
 		}
+	      else
+		break;
 
-	      if (pc == scan_limit)
-		scan_limit += 2;	/* extend the search */
-	      pc += 2;		/* skip the immediate data */
+	      pc += 2;
 	      continue;
 	    }
 	}
@@ -580,13 +601,12 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 	  /* mv fp, sp */
 	  info->uses_frame = 1;
 	  info->r13_offset = info->sp_offset;
-	  break;		/* end of stack adjustments */
 	}
-      else if ((op & 0xfff0) == 0x10f0)
-	{
-	  /* end of prologue if this is a trap instruction */
-	  break;		/* end of stack adjustments */
-	}
+      else if (op == 0x7000)
+	/* nop */
+	continue;
+      else
+	break;
     }
 
   info->size = -info->sp_offset;
@@ -787,24 +807,6 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-enum return_value_convention
-m32r_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		   struct regcache *regcache, void *readbuf,
-		   const void *writebuf)
-{
-  if (TYPE_LENGTH (valtype) > 8)
-    return RETURN_VALUE_STRUCT_CONVENTION;
-  else
-    {
-      if (readbuf != NULL)
-	m32r_extract_return_value (valtype, regcache, readbuf);
-      if (writebuf != NULL)
-	m32r_store_return_value (valtype, regcache, writebuf);
-      return RETURN_VALUE_REGISTER_CONVENTION;
-    }
-}
-
-
 
 static CORE_ADDR
 m32r_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
@@ -919,13 +921,16 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, m32r_write_pc);
   set_gdbarch_unwind_sp (gdbarch, m32r_unwind_sp);
 
-  set_gdbarch_num_regs (gdbarch, M32R_NUM_REGS);
+  set_gdbarch_num_regs (gdbarch, m32r_num_regs ());
   set_gdbarch_sp_regnum (gdbarch, M32R_SP_REGNUM);
   set_gdbarch_register_name (gdbarch, m32r_register_name);
   set_gdbarch_register_type (gdbarch, m32r_register_type);
 
+  set_gdbarch_extract_return_value (gdbarch, m32r_extract_return_value);
   set_gdbarch_push_dummy_call (gdbarch, m32r_push_dummy_call);
-  set_gdbarch_return_value (gdbarch, m32r_return_value);
+  set_gdbarch_store_return_value (gdbarch, m32r_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m32r_extract_struct_value_address);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, m32r_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, m32r_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

@@ -64,7 +64,7 @@ struct target_waitstatus;
 
 /* Override child_resume in infptrace.c */
 
-#define DEPRECATED_CHILD_RESUME
+#define CHILD_RESUME
 
 /* Override child_thread_alive in intarg.c */
 

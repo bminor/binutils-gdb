@@ -743,7 +743,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  h->ref_regular = 1;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
 	}
 
       /* We can only get preliminary data on whether a symbol is
@@ -752,9 +752,8 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((info->shared
-		 && (!info->symbolic
-		     || info->unresolved_syms_in_shared_libs == RM_IGNORE))
-		|| !h->def_regular
+		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
+		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak))
 	maybe_dynamic = TRUE;
 
@@ -914,7 +913,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	  /* This could be a local function that had its address taken, in
 	     which case H will be NULL.  */
 	  if (h)
-	    h->needs_plt = 1;
+	    h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	}
 
       /* Add a new dynamic relocation to the chain of dynamic
@@ -1015,7 +1014,7 @@ elf64_hppa_mark_exported_functions (h, data)
       dyn_h->want_opd = 1;
       /* Put a flag here for output_symbol_hook.  */
       dyn_h->st_shndx = -1;
-      h->needs_plt = 1;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
     }
 
   return TRUE;
@@ -1559,12 +1558,12 @@ elf64_hppa_adjust_dynamic_symbol (info, h)
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->weakdef != NULL)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
+		  || h->weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->weakdef->root.u.def.section;
+      h->root.u.def.value = h->weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -1969,7 +1968,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
      the original values (in elf64_hppa_link_output_symbol_hook).  */
   if (dyn_h && dyn_h->want_opd)
     {
-      BFD_ASSERT (sopd != NULL);
+      BFD_ASSERT (sopd != NULL)
 
       /* Save away the original value and section index so that we
 	 can restore them later.  */
@@ -1993,7 +1992,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       Elf_Internal_Rela rel;
       bfd_byte *loc;
 
-      BFD_ASSERT (splt != NULL && spltrel != NULL);
+      BFD_ASSERT (splt != NULL && spltrel != NULL)
 
       /* We do not actually care about the value in the PLT entry
 	 if we are creating a shared library and the symbol is
@@ -2043,7 +2042,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       int insn;
       unsigned int max_offset;
 
-      BFD_ASSERT (stub != NULL);
+      BFD_ASSERT (stub != NULL)
 
       /* Install the generic stub template.
 

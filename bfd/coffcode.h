@@ -3243,7 +3243,7 @@ coff_compute_section_file_positions (abfd)
 #ifdef COFF_PAGE_SIZE
       if ((abfd->flags & D_PAGED) != 0
 	  && (current->flags & SEC_ALLOC) != 0)
-	sofar += (current->vma - (bfd_vma) sofar) % page_size;
+	sofar += (current->vma - sofar) % page_size;
 #endif
       current->filepos = sofar;
 
@@ -5545,10 +5545,6 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 
 #ifndef coff_bfd_is_local_label_name
 #define coff_bfd_is_local_label_name	    _bfd_coff_is_local_label_name
-#endif
-
-#ifndef coff_bfd_is_target_special_symbol
-#define coff_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #endif
 
 #ifndef coff_read_minisymbols

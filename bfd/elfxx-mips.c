@@ -1490,10 +1490,10 @@ mips_elf_output_extsym (struct mips_elf_link_hash_entry *h, void *data)
 
   if (h->root.indx == -2)
     strip = FALSE;
-  else if ((h->root.def_dynamic
-	    || h->root.ref_dynamic)
-	   && !h->root.def_regular
-	   && !h->root.ref_regular)
+  else if (((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	    || (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0)
+	   && (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+	   && (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
     strip = TRUE;
   else if (einfo->info->strip == strip_all
 	   || (einfo->info->strip == strip_some
@@ -1611,7 +1611,7 @@ mips_elf_output_extsym (struct mips_elf_link_hash_entry *h, void *data)
       else
 	h->esym.asym.value = 0;
     }
-  else if (h->root.needs_plt)
+  else if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       struct mips_elf_link_hash_entry *hd = h;
       bfd_boolean no_fn_stub = h->no_fn_stub;
@@ -2411,8 +2411,10 @@ mips_elf_set_global_got_offset (void **entryp, void *p)
 	  entry->gotidx = arg->value * (long) g->assigned_gotno++;
 	  if (arg->info->shared
 	      || (elf_hash_table (arg->info)->dynamic_sections_created
-		  && entry->d.h->root.def_dynamic
-		  && !entry->d.h->root.def_regular))
+		  && ((entry->d.h->root.elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
+		  && ((entry->d.h->root.elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    ++arg->needed_relocs;
 	}
       else
@@ -2762,7 +2764,7 @@ mips_elf_local_relocation_p (bfd *input_bfd,
       while (h->root.root.type == bfd_link_hash_indirect
  	     || h->root.root.type == bfd_link_hash_warning)
 	h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
-      if (h->root.forced_local)
+      if ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
 	return TRUE;
     }
 
@@ -2908,8 +2910,8 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
     return FALSE;
 
   h = (struct elf_link_hash_entry *) bh;
-  h->non_elf = 0;
-  h->def_regular = 1;
+  h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
+  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
   if (info->shared
@@ -3235,7 +3237,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  if (! elf_hash_table(info)->dynamic_sections_created
 	      || (info->shared
 		  && (info->symbolic || h->root.dynindx == -1)
-		  && h->root.def_regular))
+		  && (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 	    {
 	      /* This is a static link or a -Bsymbolic link.  The
 		 symbol is defined locally, or was forced to be local.
@@ -3298,8 +3300,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if ((info->shared
 	   || (elf_hash_table (info)->dynamic_sections_created
 	       && h != NULL
-	       && h->root.def_dynamic
-	       && !h->root.def_regular))
+	       && ((h->root.elf_link_hash_flags
+		    & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
+	       && ((h->root.elf_link_hash_flags
+		    & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	  && r_symndx != 0
 	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
@@ -3853,14 +3857,16 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
       /* We must now calculate the dynamic symbol table index to use
 	 in the relocation.  */
       if (h != NULL
-	  && (! info->symbolic || !h->root.def_regular)
+	  && (! info->symbolic || (h->root.elf_link_hash_flags
+				   & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	  /* h->root.dynindx may be -1 if this symbol was marked to
 	     become local.  */
 	  && h->root.dynindx != -1)
 	{
 	  indx = h->root.dynindx;
 	  if (SGI_COMPAT (output_bfd))
-	    defined_p = h->root.def_regular;
+	    defined_p = ((h->root.elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) != 0);
 	  else
 	    /* ??? glibc's ld.so just adds the final GOT entry to the
 	       relocation field.  It therefore treats relocs against
@@ -4807,8 +4813,8 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	return FALSE;
 
       h = (struct elf_link_hash_entry *) bh;
-      h->non_elf = 0;
-      h->def_regular = 1;
+      h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -4919,8 +4925,8 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 
 	  h = (struct elf_link_hash_entry *) bh;
-	  h->non_elf = 0;
-	  h->def_regular = 1;
+	  h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_SECTION;
 
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -4964,8 +4970,8 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
 
       h = (struct elf_link_hash_entry *) bh;
-      h->non_elf = 0;
-      h->def_regular = 1;
+      h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
 
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -4988,8 +4994,8 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 
 	  h = (struct elf_link_hash_entry *) bh;
-	  h->non_elf = 0;
-	  h->def_regular = 1;
+	  h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
 
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -5312,7 +5318,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* We need a stub, not a plt entry for the undefined
 		 function.  But we record it as if it needs plt.  See
 		 _bfd_elf_adjust_dynamic_symbol.  */
-	      h->needs_plt = 1;
+	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	      h->type = STT_FUNC;
 	    }
 	  break;
@@ -5332,9 +5338,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		hmips = (struct mips_elf_link_hash_entry *)
 		  hmips->root.root.u.i.link;
 
-	      if (hmips->root.def_regular
+	      if ((hmips->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		  && ! (info->shared && ! info->symbolic
-			&& ! hmips->root.forced_local))
+			&& ! (hmips->root.elf_link_hash_flags
+			      & ELF_LINK_FORCED_LOCAL)))
 		break;
 	    }
 	  /* Fall through.  */
@@ -5543,7 +5550,7 @@ _bfd_mips_relax_section (bfd *abfd, asection *sec,
 		  || h->root.root.type == bfd_link_hash_defweak)
 		 && h->root.root.u.def.section)
 	      || (link_info->shared && ! link_info->symbolic
-		  && !h->root.forced_local))
+		  && ! (h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL)))
 	    continue;
 
 	  sym_sec = h->root.root.u.def.section;
@@ -5667,11 +5674,14 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && (h->needs_plt
-		  || h->u.weakdef != NULL
-		  || (h->def_dynamic
-		      && h->ref_regular
-		      && !h->def_regular)));
+	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+		  || h->weakdef != NULL
+		  || ((h->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_REF_REGULAR) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
 
   /* If this symbol is defined in a dynamic object, we need to copy
      any R_MIPS_32 or R_MIPS_REL32 relocs against it into the output
@@ -5680,7 +5690,8 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (! info->relocatable
       && hmips->possibly_dynamic_relocs != 0
       && (h->root.type == bfd_link_hash_defweak
-	  || !h->def_regular))
+	  || (h->elf_link_hash_flags
+	      & ELF_LINK_HASH_DEF_REGULAR) == 0))
     {
       mips_elf_allocate_dynamic_relocations (dynobj,
 					     hmips->possibly_dynamic_relocs);
@@ -5692,7 +5703,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* For a function, create a stub, if allowed.  */
   if (! hmips->no_fn_stub
-      && h->needs_plt)
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (! elf_hash_table (info)->dynamic_sections_created)
 	return TRUE;
@@ -5701,7 +5712,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 the symbol to the stub location.  This is required to make
 	 function pointers compare as equal between the normal
 	 executable and the shared library.  */
-      if (!h->def_regular)
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* We need .stub section.  */
 	  s = bfd_get_section_by_name (dynobj,
@@ -5723,7 +5734,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	}
     }
   else if ((h->type == STT_FUNC)
-	   && !h->needs_plt)
+	   && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0)
     {
       /* This will set the entry for this symbol in the GOT to 0, and
          the dynamic linker will take care of this.  */
@@ -5734,12 +5745,12 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->weakdef != NULL)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
+		  || h->weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->weakdef->root.u.def.section;
+      h->root.u.def.value = h->weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -6597,7 +6608,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   BFD_ASSERT (h->dynindx != -1
-	      || h->forced_local);
+	      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0);
 
   sgot = mips_elf_got_section (dynobj, FALSE);
   BFD_ASSERT (sgot != NULL);
@@ -6640,8 +6651,10 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      if (info->shared
 		  || (elf_hash_table (info)->dynamic_sections_created
 		      && p->d.h != NULL
-		      && p->d.h->root.def_dynamic
-		      && !p->d.h->root.def_regular))
+		      && ((p->d.h->root.elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
+		      && ((p->d.h->root.elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 		{
 		  /* Create an R_MIPS_REL32 relocation for this entry.  Due to
 		     the various compatibility problems, it's easier to mock

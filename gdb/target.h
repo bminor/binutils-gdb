@@ -304,6 +304,7 @@ struct target_ops
     void (*to_disconnect) (char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
+    void (*to_post_wait) (ptid_t, int);
     void (*to_fetch_registers) (int);
     void (*to_store_registers) (int);
     void (*to_prepare_to_store) (void);
@@ -324,15 +325,12 @@ struct target_ops
 
        negative (call its absolute value N) means that we cannot
        transfer right at MEMADDR, but we could transfer at least
-       something at MEMADDR + N.
+       something at MEMADDR + N.  */
 
-       NOTE: cagney/2004-10-01: This has been entirely superseeded by
-       to_xfer_partial and inferior inheritance.  */
-
-    int (*deprecated_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
-				   int len, int write,
-				   struct mem_attrib *attrib,
-				   struct target_ops *target);
+    int (*to_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
+			   int len, int write,
+			   struct mem_attrib *attrib,
+			   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
     int (*to_insert_breakpoint) (CORE_ADDR, char *);
@@ -344,7 +342,7 @@ struct target_ops
     int (*to_insert_watchpoint) (CORE_ADDR, int, int);
     int (*to_stopped_by_watchpoint) (void);
     int to_have_continuable_watchpoint;
-    int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
+    CORE_ADDR (*to_stopped_data_address) (void);
     int (*to_region_size_ok_for_hw_watchpoint) (int);
     void (*to_terminal_init) (void);
     void (*to_terminal_inferior) (void);
@@ -509,6 +507,19 @@ extern void target_disconnect (char *, int);
 #define	target_wait(ptid, status)		\
      (*current_target.to_wait) (ptid, status)
 
+/* The target_wait operation waits for a process event to occur, and
+   thereby stop the process.
+
+   On some targets, certain events may happen in sequences.  gdb's
+   correct response to any single event of such a sequence may require
+   knowledge of what earlier events in the sequence have been seen.
+
+   This operation provides a target-specific hook that allows the
+   necessary bookkeeping to be performed to track such sequences.  */
+
+#define target_post_wait(ptid, status) \
+     (*current_target.to_post_wait) (ptid, status)
+
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
 #define	target_fetch_registers(regno)	\
@@ -566,6 +577,8 @@ extern char *child_core_file_to_sym_file (char *);
 #if defined(CHILD_POST_ATTACH)
 extern void child_post_attach (int);
 #endif
+
+extern void child_post_wait (ptid_t, int);
 
 extern void child_post_startup_inferior (ptid_t);
 
@@ -1070,14 +1083,9 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
      (*current_target.to_remove_hw_breakpoint) (addr, save)
 #endif
 
-extern int target_stopped_data_address_p (struct target_ops *);
-
 #ifndef target_stopped_data_address
-#define target_stopped_data_address(target, x) \
-    (*target.to_stopped_data_address) (target, x)
-#else
-/* Horrible hack to get around existing macros :-(.  */
-#define target_stopped_data_address_p(CURRENT_TARGET) (1)
+#define target_stopped_data_address() \
+    (*current_target.to_stopped_data_address) ()
 #endif
 
 /* This will only be defined by a target that supports catching vfork events,
@@ -1228,7 +1236,5 @@ extern void push_remote_target (char *name, int from_tty);
 
 /* Blank target vector entries are initialized to target_ignore. */
 void target_ignore (void);
-
-extern struct target_ops deprecated_child_ops;
 
 #endif /* !defined (TARGET_H) */
