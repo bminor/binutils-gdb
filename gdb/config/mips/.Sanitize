@@ -70,8 +70,8 @@ tm-vr4300el.h
 tm-vr5000.h
 tm-vr5000el.h
 tm-vxmips.h
-tx39.mh
-tx39l.mh
+tx39.mt
+tx39l.mt
 vr4300.mt
 vr4300el.mt
 vr5000.mt
@@ -87,7 +87,10 @@ xm-news-mips.h
 xm-riscos.h
 
 Things-to-lose:
-
+r3900.mt
+r3900l.mt
+tm-r3900.h
+tm-r3900l.h
 
 Do-last:
 
