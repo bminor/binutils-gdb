@@ -1,3 +1,16 @@
+Tue Nov 18 18:45:14 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+	* d10v-opc.c (OPERAND_FLAG): Split into:
+	(OPERAND_FFLAG, OPERAND_CFLAG) .
+	(FSRC): Split into:
+	(FFSRC, CFSRC).
+
+Thu Nov 13 11:05:33 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c: Move the INSN_MACRO ISA value to the membership
+	field for all INSN_MACRO's.
+	* mips16-opc.c: same
+
 Wed Nov 12 10:16:57 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* mips-opc.c (sync,cache): These are 3900 insns.

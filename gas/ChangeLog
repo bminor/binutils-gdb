@@ -1,3 +1,8 @@
+Tue Nov 18 18:45:14 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+	* config/tc-d10v.c (parallel_ok, find_opcode): 
+	Split OPERAND_FLAG into OPERAND_FFLAG and OPERAND_CFLAG.
+
 Sun Nov 16 10:05:07 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config/obj-coff.c (fixup_segment): Cast second arg of

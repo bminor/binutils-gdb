@@ -1,3 +1,13 @@
+Tue Nov 18 18:45:14 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+	* d10v.h (OPERAND_FLAG): Split into:
+	(OPERAND_FFLAG, OPERAND_CFLAG) .
+
+Thu Nov 13 11:04:24 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips.h (struct mips_opcode): Changed comments to reflect new
+	field usage.
+
 start-sanitize-tx49
 Wed Oct 29 17:33:37 1997  Gavin Koch  <gavin@cygnus.com>
 
