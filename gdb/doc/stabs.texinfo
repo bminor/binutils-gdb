@@ -1321,24 +1321,63 @@ Since the debugger knows about the builtin types anyway, the idea of
 negative type numbers is simply to give a special type number which
 indicates the builtin type.  There is no stab defining these types.
 
-I'm not sure whether anyone has tried to define what this means if
-@code{int} can be other than 32 bits (or if other types can be other than
-their customary size).  If @code{int} has exactly one size for each
-architecture, then it can be handled easily enough, but if the size of
-@code{int} can vary according the compiler options, then it gets hairy.
-The best way to do this would be to define separate negative type
-numbers for 16-bit @code{int} and 32-bit @code{int}; therefore I have
-indicated below the customary size (and other format information) for
-each type.  The information below is currently correct because AIX on
-the RS6000 is the only system which uses these type numbers.  If these
-type numbers start to get used on other systems, I suspect the correct
-thing to do is to define a new number in cases where a type does not
-have the size and format indicated below (or avoid negative type numbers
-in these cases).
+There are several subtle issues with negative type numbers.
 
-Part of the definition of the negative type number is
-the name of the type.  Types with identical size and format but
-different names have different negative type numbers.
+One is the size of the type.  A builtin type (for example the C types
+@code{int} or @code{long}) might have different sizes depending on
+compiler options, the target architecture, the ABI, etc.  This issue
+doesn't come up for IBM tools since (so far) they just target the
+RS/6000; the sizes indicated below for each size are what the IBM
+RS/6000 tools use.  To deal with differing sizes, either define separate
+negative type numbers for each size (which works but requires changing
+the debugger, and, unless you get both AIX dbx and GDB to accept the
+change, introduces an incompatibility), or use a type attribute
+(@pxref{String Field}) to define a new type with the appropriate size
+(which merely requires a debugger which understands type attributes,
+like AIX dbx).  For example,
+
+@example
+.stabs "boolean:t10=@@s8;-16",128,0,0,0
+@end example
+
+defines an 8-bit boolean type, and
+
+@example
+.stabs "boolean:t10=@@s64;-16",128,0,0,0
+@end example
+
+defines a 64-bit boolean type.
+
+A similar issue is the format of the type.  This comes up most often for
+floating-point types, which could have various formats (particularly
+extended doubles, which vary quite a bit even among IEEE systems).
+Again, it is best to define a new negative type number for each
+different format; changing the format based on the target system has
+various problems.  One such problem is that the Alpha has both VAX and
+IEEE floating types.  One can easily imagine one library using the VAX
+types and another library in the same executable using the IEEE types.
+Another example is that the interpretation of whether a boolean is true
+or false can be based on the least significant bit, most significant
+bit, whether it is zero, etc., and different compilers (or different
+options to the same compiler) might provide different kinds of boolean.
+
+The last major issue is the names of the types.  The name of a given
+type depends @emph{only} on the negative type number given; these do not
+vary depending on the language, the target system, or anything else.
+One can always define separate type numbers---in the following list you
+will see for example separate @code{int} and @code{integer*4} types
+which are identical except for the name.  But compatibility can be
+maintained by not inventing new negative type numbers and instead just
+defining a new type with a new name.  For example:
+
+@example
+.stabs "CARDINAL:t10=-8",128,0,0,0
+@end example
+
+Here is the list of negative type numbers.  The phrase @dfn{integral
+type} is used to mean twos-complement (I strongly suspect that all
+machines which use stabs use twos-complement; most machines use
+twos-complement these days).
 
 @table @code
 @item -1
