@@ -1,4 +1,14 @@
+2004-08-24  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/all/altmacro.[sd]: Split out part from here...
+	* gas/all/altmac2.[sd]: ... to here.
+	* gas/all/excl.s: New.
+	* gas/all/gas.exp: Suppress both tests for a few targets known to
+	  break. Run the new (split out) test only when the target doesn't
+	  use '!' as a comment character.
+
 2004-08-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
 	* gas/mips/branch-swap.s: New testcase.
 	* gas/mips/branch-swap.d: New testcase.
 	* gas/mips/mips.exp: Run the testcase.
