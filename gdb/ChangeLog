@@ -1,5 +1,26 @@
 2003-11-02  Mark Kettenis  <kettenis@gnu.org>
 
+	Merge from mailine:
+
+	2003-10-27  Andrew Cagney  <cagney@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): Use info.bfd_arch_info instead of
+	arch_info.  Use warning instead of fprintf_filtered.  Do not use
+	deprecated bfd_printable_arch_mach.
+
+	2003-10-24  Andrew Cagney  <cagney@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): Fix typos, and "fortunatly"[sic].
+	
+	2003-10-23  Jim Blandy  <jimb@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): A handler is okay if it's for an
+	architecture the current arch can run code for --- but not if it's
+	a superset.
+	(can_run_code_for): New function.
+
+2003-11-02  Mark Kettenis  <kettenis@gnu.org>
+
 	* sparc64-tdep.h (r_tstate_offset): New define.
 	(sparc64_supply_gregset, sparc64_collect_gregset,
 	sparc64_supply_fpregset, sparc64_collect_fpregset): New
