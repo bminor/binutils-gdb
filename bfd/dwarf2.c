@@ -431,7 +431,7 @@ read_abbrevs (abfd, offset)
 	  return 0;
 	}
       
-      stash->dwarf_abbrev_size = bfd_get_section_size_before_reloc (msec);
+      stash->dwarf_abbrev_size = msec->_raw_size;
       stash->dwarf_abbrev_buffer = (char*) bfd_alloc (abfd, stash->dwarf_abbrev_size);
       if (! stash->dwarf_abbrev_buffer)
 	  return 0;
@@ -793,7 +793,7 @@ decode_line_info (unit)
 	  return 0;
 	}
       
-      size = bfd_get_section_size_before_reloc (msec);
+      size = msec->_raw_size;
       stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, size);
       if (! stash->dwarf_line_buffer)
 	return 0;
@@ -1518,7 +1518,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	  return false;
 	}
 
-      size = bfd_get_section_size_before_reloc (msec);
+      size = msec->_raw_size;
       if (size == 0)
 	return false;
       

@@ -1,3 +1,10 @@
+2000-02-27  Ian Lance Taylor  <ian@zembu.com>
+
+	* dwarf2.c (read_abbrevs): Use _raw_size directly rather than
+	calling bfd_get_section_size_before_reloc.
+	(decode_line_info): Likewise.
+	(_bfd_dwarf2_find_nearest_line): Likewise.
+
 2000-02-27  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.am (stamp-lib): Use $(LIBTOOL) --config to get the
