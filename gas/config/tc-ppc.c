@@ -1037,8 +1037,8 @@ PowerPC options:\n\
 			generate code For Motorola PowerPC 7400/7410/7450/7455\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
--mbooke64		generate code for 64-bit Motorola BookE\n\
--mbooke, mbooke32	generate code for 32-bit Motorola BookE\n\
+-mbooke64		generate code for 64-bit PowerPC BookE\n\
+-mbooke, mbooke32	generate code for 32-bit PowerPC BookE\n\
 -maltivec		generate code for AltiVec\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n\

@@ -1,3 +1,7 @@
+2002-01-03  matthew green  <mrg@redhat.com>
+
+	* config/tc-ppc.c (md_parse_option): BookE is not Motorola specific.
+
 2002-01-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-m68k.c (md_estimate_size_before_relax): Test for a
