@@ -1,3 +1,9 @@
+Fri Jan  5 12:02:00 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* config/sh/sh.mt, config/powerpc/*.mt, config/pa/hppapro.mt,
+	config/m68k/monitor.mt, config/h8500/h8500.mt, config/h8300/h8300.mt:
+	srec.o renamed to dsrec.o.
+
 Thu Jan  4 16:04:54 1996  Stu Grossman  (grossman@cygnus.com)
 
 	* breakpoint.c (remove_breakpoint):  Change error to warning so
