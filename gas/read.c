@@ -1472,7 +1472,6 @@ s_comm_internal (int param,
 #endif
     }
 
-  know (symbolP == NULL || symbolP->sy_frag == &zero_address_frag);
   demand_empty_rest_of_line ();
  out:
   if (flag_mri)

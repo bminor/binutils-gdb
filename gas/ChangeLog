@@ -1,5 +1,17 @@
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* as.h (assert): Warning fix.
+	* expr.c (expr): Correct assertion.
+	* read.c (s_comm_internal): Remove assertion.
+	* write.c (relax_segment): Enable vma assertion only for BFD_ASSEMBLER.
+	(fixup_segment): Remove assertion.
+	* config/tc-dlx.c (machine_ip): Remove untrue assertions.
+	(md_apply_fix3): Likewise.
+	* config/tc-i370.c (md_begin): Correct assertion.
+	(i370_macro): Warning fix for assertion.
+
+2005-03-01  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure.in (AC_C_BIGENDIAN): Invoke.
 	* configure: Regenerate.
 	* write.c (write_object_file <!BFD_ASSEMBLER>): Don't use sizeof

@@ -972,21 +972,18 @@ machine_ip (str)
 	  /* Type 'a' Register.  */
 	case 'a':
 	  /* A general register at bits 21-25, rs1.  */
-	  know (operand->X_op != O_register);
 	  reg_shift = 21;
 	  goto general_reg;
 
 	  /* Type 'b' Register.  */
 	case 'b':
 	  /* A general register at bits 16-20, rs2/rd.  */
-	  know (operand->X_op != O_register);
 	  reg_shift = 16;
 	  goto general_reg;
 
 	  /* Type 'c' Register.  */
 	case 'c':
 	  /* A general register at bits 11-15, rd.  */
-	  know (operand->X_op != O_register);
 	  reg_shift = 11;
 
 	general_reg:
@@ -1134,9 +1131,6 @@ md_apply_fix3 (fixP, valP, seg)
 {
   long val = *valP;
   char *place = fixP->fx_where + fixP->fx_frag->fr_literal;
-
-  know (fixP->fx_size == 4);
-  know (fixP->fx_r_type < NO_RELOC);
 
   switch (fixP->fx_r_type)
     {

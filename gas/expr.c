@@ -1716,7 +1716,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
       know (op_right == O_illegal
 	    || op_rank[(int) op_right] <= op_rank[(int) op_left]);
       know ((int) op_left >= (int) O_multiply
-	    && (int) op_left <= (int) O_logical_or);
+	    && (int) op_left <= (int) O_index);
 
       /* input_line_pointer->after right-hand quantity.  */
       /* left-hand quantity in resultP.  */

@@ -2395,7 +2395,9 @@ relax_segment (struct frag *segment_frag_root, segT segment)
                          into the section.  Here it is assumed that the
                          section's VMA is zero, and can omit subtracting it
                          from the symbol's value to get the address offset.  */
-                      know (S_GET_SECTION (symbolP)->vma == 0);
+#ifdef BFD_ASSEMBLER
+                      know (S_GET_SEGMENT (symbolP)->vma == 0);
+#endif
 		      target += S_GET_VALUE (symbolP) * OCTETS_PER_BYTE;
 		    }
 
@@ -2583,7 +2585,6 @@ fixup_segment (fixS *fixP, segT this_segment)
       if (fixP->fx_addsy != NULL
 	  && symbol_mri_common_p (fixP->fx_addsy))
 	{
-	  know (fixP->fx_addsy->sy_value.X_op == O_symbol);
 	  add_number += S_GET_VALUE (fixP->fx_addsy);
 	  fixP->fx_offset = add_number;
 	  fixP->fx_addsy

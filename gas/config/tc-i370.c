@@ -588,7 +588,8 @@ md_begin ()
    op_end = i370_opcodes + i370_num_opcodes;
    for (op = i370_opcodes; op < op_end; op++)
      {
-       know ((op->opcode & op->mask) == op->opcode);
+       know ((op->opcode.i[0] & op->mask.i[0]) == op->opcode.i[0]
+	     && (op->opcode.i[1] & op->mask.i[1]) == op->opcode.i[1]);
 
        if ((op->flags & i370_cpu) != 0)
          {
@@ -2422,7 +2423,7 @@ i370_macro (str, macro)
       else
         {
           arg = strtol (format + 1, &send, 10);
-          know (send != format && arg >= 0 && arg < count);
+          know (send != format && arg >= 0 && (unsigned) arg < count);
           len += strlen (operands[arg]);
           format = send;
         }
