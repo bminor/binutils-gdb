@@ -220,21 +220,21 @@ typedef enum bfd_error {
 
 extern bfd_ec bfd_error;
 struct reloc_cache_entry;
-struct bfd_seclet_struct ;
+struct bfd_seclet;
 
 
 typedef struct bfd_error_vector {
   PROTO(void,(* nonrepresentable_section ),(CONST bfd  *CONST abfd,
 					    CONST char *CONST name));
   PROTO(void,(* undefined_symbol),(CONST struct reloc_cache_entry *rel,
-				   CONST struct bfd_seclet_struct *sec
+				   CONST struct bfd_seclet *sec
 				   ));
   PROTO(void, (* reloc_value_truncated),(CONST struct
 					  reloc_cache_entry *rel,
-					  struct bfd_seclet_struct *sec));
+					  struct bfd_seclet *sec));
 
   PROTO(void, (* reloc_dangerous),(CONST struct reloc_cache_entry *rel,
-				   CONST struct bfd_seclet_struct *sec));
+				   CONST struct bfd_seclet *sec));
   
 } bfd_error_vector_type;
 
@@ -594,8 +594,8 @@ typedef struct sec
 	  /* A symbol which points at this section only */
    struct symbol_cache_entry *symbol;  
    struct symbol_cache_entry **symbol_ptr_ptr;
-   struct bfd_seclet_struct *seclets_head;
-   struct bfd_seclet_struct *seclets_tail;
+   struct bfd_seclet *seclets_head;
+   struct bfd_seclet *seclets_tail;
 } asection ;
 
 
@@ -1436,7 +1436,7 @@ typedef struct bfd_target
   SDEF (void, _bfd_debug_info_start, (bfd *));
   SDEF (void, _bfd_debug_info_end, (bfd *));
   SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
-  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *, bfd_byte *data));
+  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet *, bfd_byte *data));
   SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
   SDEF(void, _bfd_coff_swap_aux_in,(
        bfd            *abfd ,
