@@ -778,7 +778,7 @@ extern int bfd_ticoff_get_section_load_page
   PARAMS ((struct sec *));
 
 /* And more from the source.  */
-void 
+void
 bfd_init PARAMS ((void));
 
 bfd *
@@ -793,19 +793,19 @@ bfd_openstreamr PARAMS ((const char *, const char *, PTR));
 bfd *
 bfd_openw PARAMS ((CONST char *filename, CONST char *target));
 
-boolean 
+boolean
 bfd_close PARAMS ((bfd *abfd));
 
-boolean 
+boolean
 bfd_close_all_done PARAMS ((bfd *));
 
 bfd *
 bfd_create PARAMS ((CONST char *filename, bfd *templ));
 
-boolean 
+boolean
 bfd_make_writable PARAMS ((bfd *abfd));
 
-boolean 
+boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
 
@@ -1302,41 +1302,38 @@ bfd_make_section_anyway PARAMS ((bfd *abfd, const char *name));
 asection *
 bfd_make_section PARAMS ((bfd *, const char *name));
 
-boolean 
+boolean
 bfd_set_section_flags PARAMS ((bfd *abfd, asection *sec, flagword flags));
 
-void 
+void
 bfd_map_over_sections PARAMS ((bfd *abfd,
     void (*func) (bfd *abfd,
     asection *sect,
     PTR obj),
     PTR obj));
 
-boolean 
+boolean
 bfd_set_section_size PARAMS ((bfd *abfd, asection *sec, bfd_size_type val));
 
-boolean 
-bfd_set_section_contents
- PARAMS ((bfd *abfd,
+boolean
+bfd_set_section_contents PARAMS ((bfd *abfd,
     asection *section,
     PTR data,
     file_ptr offset,
     bfd_size_type count));
 
-boolean 
-bfd_get_section_contents
- PARAMS ((bfd *abfd, asection *section, PTR location,
+boolean
+bfd_get_section_contents PARAMS ((bfd *abfd, asection *section, PTR location,
     file_ptr offset, bfd_size_type count));
 
-boolean 
+boolean
 bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec, bfd *obfd, asection *osec));
 
 #define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
      BFD_SEND (obfd, _bfd_copy_private_section_data, \
                (ibfd, isection, obfd, osection))
-void 
-_bfd_strip_section_from_output
- PARAMS ((struct bfd_link_info *info, asection *section));
+void
+_bfd_strip_section_from_output PARAMS ((struct bfd_link_info *info, asection *section));
 
 enum bfd_architecture
 {
@@ -1557,38 +1554,36 @@ bfd_arch_get_compatible PARAMS ((
     const bfd *abfd,
     const bfd *bbfd));
 
-void 
+void
 bfd_set_arch_info PARAMS ((bfd *abfd, const bfd_arch_info_type *arg));
 
-enum bfd_architecture 
+enum bfd_architecture
 bfd_get_arch PARAMS ((bfd *abfd));
 
-unsigned long 
+unsigned long
 bfd_get_mach PARAMS ((bfd *abfd));
 
-unsigned int 
+unsigned int
 bfd_arch_bits_per_byte PARAMS ((bfd *abfd));
 
-unsigned int 
+unsigned int
 bfd_arch_bits_per_address PARAMS ((bfd *abfd));
 
-const bfd_arch_info_type * 
+const bfd_arch_info_type *
 bfd_get_arch_info PARAMS ((bfd *abfd));
 
 const bfd_arch_info_type *
-bfd_lookup_arch
- PARAMS ((enum bfd_architecture
+bfd_lookup_arch PARAMS ((enum bfd_architecture
     arch,
     unsigned long machine));
 
 const char *
-bfd_printable_arch_mach
- PARAMS ((enum bfd_architecture arch, unsigned long machine));
+bfd_printable_arch_mach PARAMS ((enum bfd_architecture arch, unsigned long machine));
 
-unsigned int 
+unsigned int
 bfd_octets_per_byte PARAMS ((bfd *abfd));
 
-unsigned int 
+unsigned int
 bfd_arch_mach_octets_per_byte PARAMS ((enum bfd_architecture arch,
     unsigned long machine));
 
@@ -1769,26 +1764,22 @@ struct reloc_howto_struct
     }                                          \
   }                                            \
 }
-unsigned int 
-bfd_get_reloc_size  PARAMS ((reloc_howto_type *));
+unsigned int
+bfd_get_reloc_size PARAMS ((reloc_howto_type *));
 
 typedef struct relent_chain {
   arelent relent;
   struct   relent_chain *next;
 } arelent_chain;
 bfd_reloc_status_type
-
-bfd_check_overflow
- PARAMS ((enum complain_overflow how,
+bfd_check_overflow PARAMS ((enum complain_overflow how,
     unsigned int bitsize,
     unsigned int rightshift,
     unsigned int addrsize,
     bfd_vma relocation));
 
 bfd_reloc_status_type
-
-bfd_perform_relocation
- PARAMS ((bfd *abfd,
+bfd_perform_relocation PARAMS ((bfd *abfd,
     arelent *reloc_entry,
     PTR data,
     asection *input_section,
@@ -1796,9 +1787,7 @@ bfd_perform_relocation
     char **error_message));
 
 bfd_reloc_status_type
-
-bfd_install_relocation
- PARAMS ((bfd *abfd,
+bfd_install_relocation PARAMS ((bfd *abfd,
     arelent *reloc_entry,
     PTR data, bfd_vma data_start,
     asection *input_section,
@@ -2668,11 +2657,10 @@ This is the 3 bits of a value. */
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
-
-bfd_reloc_type_lookup  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
+bfd_reloc_type_lookup PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
 const char *
-bfd_get_reloc_code_name  PARAMS ((bfd_reloc_code_real_type code));
+bfd_get_reloc_code_name PARAMS ((bfd_reloc_code_real_type code));
 
 
 typedef struct symbol_cache_entry
@@ -2799,10 +2787,10 @@ typedef struct symbol_cache_entry
 } asymbol;
 #define bfd_get_symtab_upper_bound(abfd) \
      BFD_SEND (abfd, _bfd_get_symtab_upper_bound, (abfd))
-boolean 
+boolean
 bfd_is_local_label PARAMS ((bfd *abfd, asymbol *sym));
 
-boolean 
+boolean
 bfd_is_local_label_name PARAMS ((bfd *abfd, const char *name));
 
 #define bfd_is_local_label_name(abfd, name) \
@@ -2810,26 +2798,26 @@ bfd_is_local_label_name PARAMS ((bfd *abfd, const char *name));
 #define bfd_canonicalize_symtab(abfd, location) \
      BFD_SEND (abfd, _bfd_canonicalize_symtab,\
                   (abfd, location))
-boolean 
-bfd_set_symtab  PARAMS ((bfd *abfd, asymbol **location, unsigned int count));
+boolean
+bfd_set_symtab PARAMS ((bfd *abfd, asymbol **location, unsigned int count));
 
-void 
+void
 bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
 
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
 #define bfd_make_debug_symbol(abfd,ptr,size) \
         BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
-int 
+int
 bfd_decode_symclass PARAMS ((asymbol *symbol));
 
-boolean 
-bfd_is_undefined_symclass  PARAMS ((int symclass));
+boolean
+bfd_is_undefined_symclass PARAMS ((int symclass));
 
-void 
+void
 bfd_symbol_info PARAMS ((asymbol *symbol, symbol_info *ret));
 
-boolean 
+boolean
 bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym));
 
 #define bfd_copy_private_symbol_data(ibfd, isymbol, obfd, osymbol) \
@@ -3015,85 +3003,83 @@ typedef enum bfd_error
   bfd_error_invalid_error_code
 } bfd_error_type;
 
-bfd_error_type 
-bfd_get_error  PARAMS ((void));
+bfd_error_type
+bfd_get_error PARAMS ((void));
 
-void 
-bfd_set_error  PARAMS ((bfd_error_type error_tag));
+void
+bfd_set_error PARAMS ((bfd_error_type error_tag));
 
 CONST char *
-bfd_errmsg  PARAMS ((bfd_error_type error_tag));
+bfd_errmsg PARAMS ((bfd_error_type error_tag));
 
-void 
-bfd_perror  PARAMS ((CONST char *message));
+void
+bfd_perror PARAMS ((CONST char *message));
 
 typedef void (*bfd_error_handler_type) PARAMS ((const char *, ...));
 
-bfd_error_handler_type 
-bfd_set_error_handler  PARAMS ((bfd_error_handler_type));
+bfd_error_handler_type
+bfd_set_error_handler PARAMS ((bfd_error_handler_type));
 
-void 
-bfd_set_error_program_name  PARAMS ((const char *));
+void
+bfd_set_error_program_name PARAMS ((const char *));
 
-bfd_error_handler_type 
-bfd_get_error_handler  PARAMS ((void));
+bfd_error_handler_type
+bfd_get_error_handler PARAMS ((void));
 
-long 
+long
 bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
 
-long 
-bfd_canonicalize_reloc
- PARAMS ((bfd *abfd,
+long
+bfd_canonicalize_reloc PARAMS ((bfd *abfd,
     asection *sec,
     arelent **loc,
     asymbol **syms));
 
-void 
-bfd_set_reloc
- PARAMS ((bfd *abfd, asection *sec, arelent **rel, unsigned int count)
+void
+bfd_set_reloc PARAMS ((bfd *abfd, asection *sec, arelent **rel, unsigned int count)
     
     );
 
-boolean 
+boolean
 bfd_set_file_flags PARAMS ((bfd *abfd, flagword flags));
 
-int 
-bfd_get_arch_size  PARAMS ((bfd *abfd));
+int
+bfd_get_arch_size PARAMS ((bfd *abfd));
 
-int 
-bfd_get_sign_extend_vma  PARAMS ((bfd *abfd));
+int
+bfd_get_sign_extend_vma PARAMS ((bfd *abfd));
 
-boolean 
+boolean
 bfd_set_start_address PARAMS ((bfd *abfd, bfd_vma vma));
 
-long 
+long
 bfd_get_mtime PARAMS ((bfd *abfd));
 
-long 
+long
 bfd_get_size PARAMS ((bfd *abfd));
 
-int 
+int
 bfd_get_gp_size PARAMS ((bfd *abfd));
 
-void 
+void
 bfd_set_gp_size PARAMS ((bfd *abfd, int i));
 
-bfd_vma 
+bfd_vma
 bfd_scan_vma PARAMS ((CONST char *string, CONST char **end, int base));
 
-boolean 
+boolean
 bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 
 #define bfd_copy_private_bfd_data(ibfd, obfd) \
      BFD_SEND (obfd, _bfd_copy_private_bfd_data, \
                (ibfd, obfd))
-boolean 
+boolean
 bfd_merge_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 
 #define bfd_merge_private_bfd_data(ibfd, obfd) \
      BFD_SEND (obfd, _bfd_merge_private_bfd_data, \
                (ibfd, obfd))
-boolean 
+boolean
 bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 #define bfd_set_private_flags(abfd, flags) \
@@ -3163,10 +3149,10 @@ extern bfd_byte *bfd_get_relocated_section_contents
                  struct bfd_link_order *, bfd_byte *,
                  boolean, asymbol **));
 
-symindex 
+symindex
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
 
-boolean 
+boolean
 bfd_set_archive_head PARAMS ((bfd *output, bfd *new_head));
 
 bfd *
@@ -3175,12 +3161,11 @@ bfd_openr_next_archived_file PARAMS ((bfd *archive, bfd *previous));
 CONST char *
 bfd_core_file_failing_command PARAMS ((bfd *abfd));
 
-int 
+int
 bfd_core_file_failing_signal PARAMS ((bfd *abfd));
 
-boolean 
-core_file_matches_executable_p
- PARAMS ((bfd *core_bfd, bfd *exec_bfd));
+boolean
+core_file_matches_executable_p PARAMS ((bfd *core_bfd, bfd *exec_bfd));
 
 #define BFD_SEND(bfd, message, arglist) \
                ((*((bfd)->xvec->message)) arglist)
@@ -3478,8 +3463,8 @@ CAT(NAME,_canonicalize_dynamic_reloc)
  PTR backend_data;
 
 } bfd_target;
-boolean 
-bfd_set_default_target  PARAMS ((const char *name));
+boolean
+bfd_set_default_target PARAMS ((const char *name));
 
 const bfd_target *
 bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
@@ -3487,16 +3472,16 @@ bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
 const char **
 bfd_target_list PARAMS ((void));
 
-const bfd_target * 
-bfd_search_for_target  PARAMS ((int (* search_func) (const bfd_target *, void *), void *));
+const bfd_target *
+bfd_search_for_target PARAMS ((int (* search_func) (const bfd_target *, void *), void *));
 
-boolean 
+boolean
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
 
-boolean 
+boolean
 bfd_check_format_matches PARAMS ((bfd *abfd, bfd_format format, char ***matching));
 
-boolean 
+boolean
 bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 
 CONST char *

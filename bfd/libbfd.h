@@ -552,10 +552,10 @@ extern boolean _bfd_sh_align_load_span
 
 /* And more follows */
 
-void 
+void
 bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
 
-unsigned int 
+unsigned int
 bfd_log2 PARAMS ((bfd_vma x));
 
 #define BFD_CACHE_MAX_OPEN 10
@@ -565,13 +565,13 @@ extern bfd *bfd_last_cache;
     ((x)==bfd_last_cache? \
       (FILE*) (bfd_last_cache->iostream): \
        bfd_cache_lookup_worker(x))
-boolean 
-bfd_cache_init  PARAMS ((bfd *abfd));
+boolean
+bfd_cache_init PARAMS ((bfd *abfd));
 
-boolean 
-bfd_cache_close  PARAMS ((bfd *abfd));
+boolean
+bfd_cache_close PARAMS ((bfd *abfd));
 
-FILE* 
+FILE*
 bfd_open_file PARAMS ((bfd *abfd));
 
 FILE *
@@ -1021,23 +1021,19 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
 #endif
 
 reloc_howto_type *
-bfd_default_reloc_type_lookup
- PARAMS ((bfd *abfd, bfd_reloc_code_real_type  code));
+bfd_default_reloc_type_lookup PARAMS ((bfd *abfd, bfd_reloc_code_real_type  code));
 
-boolean 
-bfd_generic_relax_section
- PARAMS ((bfd *abfd,
+boolean
+bfd_generic_relax_section PARAMS ((bfd *abfd,
     asection *section,
     struct bfd_link_info *,
     boolean *));
 
-boolean 
-bfd_generic_gc_sections
- PARAMS ((bfd *, struct bfd_link_info *));
+boolean
+bfd_generic_gc_sections PARAMS ((bfd *, struct bfd_link_info *));
 
 bfd_byte *
-
-bfd_generic_get_relocated_section_contents  PARAMS ((bfd *abfd,
+bfd_generic_get_relocated_section_contents PARAMS ((bfd *abfd,
     struct bfd_link_info *link_info,
     struct bfd_link_order *link_order,
     bfd_byte *data,
@@ -1045,19 +1041,18 @@ bfd_generic_get_relocated_section_contents  PARAMS ((bfd *abfd,
     asymbol **symbols));
 
 extern const bfd_arch_info_type bfd_default_arch_struct;
-boolean 
+boolean
 bfd_default_set_arch_mach PARAMS ((bfd *abfd,
     enum bfd_architecture arch,
     unsigned long mach));
 
 const bfd_arch_info_type *
-bfd_default_compatible
- PARAMS ((const bfd_arch_info_type *a,
+bfd_default_compatible PARAMS ((const bfd_arch_info_type *a,
     const bfd_arch_info_type *b));
 
-boolean 
+boolean
 bfd_default_scan PARAMS ((const struct bfd_arch_info *info, const char *string));
 
 struct elf_internal_shdr *
-bfd_elf_find_section  PARAMS ((bfd *abfd, char *name));
+bfd_elf_find_section PARAMS ((bfd *abfd, char *name));
 
