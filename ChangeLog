@@ -1,5 +1,8 @@
 Thu Mar 14 19:15:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in (mips*-nec-sysvr4*): Use a host_makefile_frag of
+	config/mh-necv4.
+
 	* install.sh: Correct misspelling of transformbasename.
 
 	* config.guess: Recognize mips-*-sysv*.
