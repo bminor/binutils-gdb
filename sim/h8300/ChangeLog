@@ -1,3 +1,24 @@
+Wed Jun 26 12:20:56 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+        * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
+        INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set values.
+        (docdir): Removed.
+        * configure.in (AC_PREREQ): autoconf 2.5 or higher.
+        (AC_PROG_INSTALL): Added.
+        * configure: Rebuilt.
+
+start-sanitize-h8s
+Tue Jun 18 16:31:10 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* compile.c (sim_load): Treat the H8/S like the H8/300H for now.
+	* run.c (main): Treat the H8/S like the H8/300H for now.
+	
+end-sanitize-h8s 
+Fri May 24 10:35:25 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (SEXTCHAR): Clear upper bits when sign
+	bit is clear.
+
 Wed May 22 22:23:37 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (sim_resume): Correctly handle divu.

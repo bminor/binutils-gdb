@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.3)dnl
+AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
@@ -9,6 +9,7 @@ AC_ARG_PROGRAM
 . ${srcdir}/../../bfd/configure.host
 
 AC_PROG_CC
+AC_PROG_INSTALL
 AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
 AR=${AR-ar}
