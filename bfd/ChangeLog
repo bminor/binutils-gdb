@@ -1,3 +1,7 @@
+Mon Jan 19 12:49:52 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cpu-sh.c (arch_info_struct): Correct next field of sh3e.
+
 Wed Jan 14 17:23:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-m32r.c: Add macros to handle NOP insertion.
