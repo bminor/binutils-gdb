@@ -1,3 +1,10 @@
+1999-08-02  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (_bfd_mips_elf_relocate_section): Handle R_MIPS_26
+	and R_MIPS16_26 relocations correctly when relocating.
+	(_bfd_mips_elf_check_relocs): Don't assume that R_MIPS_CALL_HI16
+	and R_MIPS_CALL_LO16 are for global symbols.
+	
 1999-08-02  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* elflink.h (elf_bfd_final_link): Copy the whole isym, not just

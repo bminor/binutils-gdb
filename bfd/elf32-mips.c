@@ -6552,6 +6552,11 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			    | ((addend & 0x7e00000) >> 16)
 			    | (addend & 0x1f));
 		}
+	      else if (r_type == R_MIPS16_26 
+		       || r_type == R_MIPS16_26)
+		/* The addend is stored without its two least
+		   significant bits (which are always zero.)  */
+		addend << 2;
 	    }
 	  else
 	    addend = rel->r_addend;
@@ -6590,6 +6595,11 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
 	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
 	    addend >>= 16;
+	  /* If the relocation is for an R_MIPS_26 relocation, then
+	     the two low-order bits are not stored in the object file;
+	     they are implicitly zero.  */
+	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26)
+	    addend >>= 2;
 
 	  if (rela_relocation_p)
 	    /* If this is a RELA relocation, just update the addend.
@@ -7373,16 +7383,18 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 
 	case R_MIPS_CALL_HI16:
 	case R_MIPS_CALL_LO16:
-	  /* This symbol requires a global offset table entry.  */
-	  if (!mips_elf_record_global_got_symbol (h, info, g))
-	    return false;
+	  if (h != NULL)
+	    {
+	      /* This symbol requires a global offset table entry.  */
+	      if (!mips_elf_record_global_got_symbol (h, info, g))
+		return false;
 
-	  /* We need a stub, not a plt entry for the undefined
-	     function.  But we record it as if it needs plt.  See
-	     elf_adjust_dynamic_symbol in elflink.h.  */
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	  h->type = STT_FUNC;
-
+	      /* We need a stub, not a plt entry for the undefined
+		 function.  But we record it as if it needs plt.  See
+		 elf_adjust_dynamic_symbol in elflink.h.  */
+	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	      h->type = STT_FUNC;
+	    }
 	  break;
 
 	case R_MIPS_GOT16:
