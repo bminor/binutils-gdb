@@ -4,6 +4,9 @@
 # We store the generated files in the source directory until we decide to
 # ship a scheme with gdb/binutils.  Maybe we never will.
 
+# We want to behave like make, any error forces us to stop.
+set -e
+
 srcdir=$1
 cgendir=$2
 cgenflags=$3
