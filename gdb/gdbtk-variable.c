@@ -499,7 +499,14 @@ variable_create (interp, objc, objv)
     }
 
   /* Create the variable */
-  var = create_variable (name, name, pc);
+  {
+    /* Add parentheses to the name so that casts do
+       not confuse it. */
+    char *newname = (char *) xmalloc (strlen (name) + 2);
+    sprintf (newname, "(%s)", name);
+    var = create_variable (name, newname, pc);
+    FREEIF (newname);
+  }
 
   if (var != NULL)
     {
