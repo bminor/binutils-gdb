@@ -579,6 +579,9 @@ bfd *
 bfd_fdopenr PARAMS ((CONST char *filename, CONST char *target, int fd));
 
 bfd *
+bfd_openstreamr PARAMS (());
+
+bfd *
 bfd_openw PARAMS ((CONST char *filename, CONST char *target));
 
 boolean 
@@ -2009,7 +2012,6 @@ enum bfd_flavour {
   bfd_target_oasys_flavour,
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,
-  bfd_target_raw_flavour,
   bfd_target_som_flavour,
   bfd_target_os9k_flavour};
 

@@ -1,5 +1,8 @@
 Tue Jan 17 10:52:32 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* opncls.c (bfd_openstreamr): New function.
+	* bfd-in2.h: Rebuilt.
+
 	* elf32-mips.c (enum reloc_type): Define new relocs used on Irix.
 	(elf_mips_howto_table): Add entries for new relocs.
 	(mips_elf_section_from_shdr): Handle SHT_MIPS_MSYM,
