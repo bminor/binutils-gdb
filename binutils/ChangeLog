@@ -1,3 +1,14 @@
+Wed Jun 11 17:15:47 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.h: New file.
+	* deflex.l: Include dlltool.h and libiberty.h.  Don't declare
+	strdup.  Use xstrdup rather than strdup.
+	* defparse.y: Include bfd.h, bucomm.h, and dlltool.h.
+	* dlltool.c: Include dlltool.h and time.h.  Make a lot of
+	variables and functions static.  Make a lot of char * variables
+	and parameters const.  Add declarations for static functions.  Do
+	some reindenting.  Hide more PowerPC stuff inside DLLTOOL_PPC.
+
 Wed Jun 11 12:05:52 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* ar.c (bfd_special_undocumented_glue): Add const.

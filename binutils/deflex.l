@@ -1,7 +1,6 @@
-%{
-/* deflex.l - Lexer for .def files */
+%{/* deflex.l - Lexer for .def files */
 
-/*   Copyright (C) 1995 Free Software Foundation, Inc.
+/*   Copyright (C) 1995, 1997 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -17,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 /* Contributed by Steve Chamberlain
@@ -25,29 +24,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 */
 #define DONTDECLARE_MALLOC
+#include "libiberty.h"
 #include "defparse.h"
-extern char *strdup();
+#include "dlltool.h"
+
 int linenumber;
 
 %}
 %%
-"NAME" 		 { return NAME;}
-"LIBRARY"	 { return LIBRARY;}
-"DESCRIPTION" 	 { return DESCRIPTION;}
-"STACKSIZE"	 { return STACKSIZE;}
-"HEAPSIZE" 	 { return HEAPSIZE;}
-"CODE" 		 { return CODE;}
-"DATA"		 { return DATA;}
-"SECTIONS"	 { return SECTIONS;}
-"EXPORTS"	 { return EXPORTS;}
-"IMPORTS"	 { return IMPORTS;}
-"VERSION"	 { return VERSION;}
-"BASE"		 { return BASE;}
+"NAME" 		{ return NAME;}
+"LIBRARY"	{ return LIBRARY;}
+"DESCRIPTION" 	{ return DESCRIPTION;}
+"STACKSIZE"	{ return STACKSIZE;}
+"HEAPSIZE" 	{ return HEAPSIZE;}
+"CODE" 		{ return CODE;}
+"DATA"		{ return DATA;}
+"SECTIONS"	{ return SECTIONS;}
+"EXPORTS"	{ return EXPORTS;}
+"IMPORTS"	{ return IMPORTS;}
+"VERSION"	{ return VERSION;}
+"BASE"		{ return BASE;}
 "CONSTANT"	{ return CONSTANT; }
 "NONAME"	{ return NONAME; }
-
-"READ"	{ return READ;}
-"WRITE"	{ return WRITE;}
+"READ"		{ return READ;}
+"WRITE"		{ return WRITE;}
 "EXECUTE"	{ return EXECUTE;}
 "SHARED"	{ return SHARED;}
 
@@ -55,29 +55,30 @@ int linenumber;
 		return NUMBER; }
 
 [A-Za-z$:\-\_][A-Za-z0-9/$:\-\_@]+ { 	
-		yylval.id =  strdup(yytext);
+		yylval.id =  xstrdup (yytext);
 		return ID;
 		}
+
 "\""[^\"]*"\"" {
-					yylval.string = strdup (yytext+1);
-					yylval.string[yyleng-2] = 0;
-					return STRING;
+		yylval.id = xstrdup (yytext+1);
+		yylval.id[yyleng-2] = 0;
+		return ID;
 		}
 
 "\'"[^\']*"\'" {
-					yylval.string = strdup (yytext+1);
-					yylval.string[yyleng-2] = 0;
-					return STRING;
+		yylval.id = xstrdup (yytext+1);
+		yylval.id[yyleng-2] = 0;
+		return ID;
 		}
 "*".* 		{ }
 ";".* 		{ }
 " "		{ }
 "\t"		{ }
-"\n"	 	 { linenumber ++ ;}
-"=" { return '=';}
-"." { return '.';}
-"@" { return '@';}
-"," { return ',';}
+"\n"	 	{ linenumber ++ ;}
+"=" 		{ return '=';}
+"." 		{ return '.';}
+"@"	 	{ return '@';}
+","		{ return ',';}
 %%
 #ifndef yywrap
 /* Needed for lex, though not flex. */

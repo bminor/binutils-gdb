@@ -1,7 +1,6 @@
-{
-/* defparse.y - parser for .def files */
+%{ /* defparse.y - parser for .def files */
 
-/*   Copyright (C) 1995 Free Software Foundation, Inc.
+/*   Copyright (C) 1995, 1997 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -17,20 +16,22 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "bfd.h"
+#include "bucomm.h"
+#include "dlltool.h"
+%}
 
 %union {
   char *id;
   int number;
-char *string;
 };
 
 %token NAME, LIBRARY, DESCRIPTION, STACKSIZE, HEAPSIZE, CODE, DATA
 %token SECTIONS, EXPORTS, IMPORTS, VERSION, BASE, CONSTANT
 %token READ WRITE EXECUTE SHARED NONAME
 %token <id> ID
-%token <string> STRING
 %token <number> NUMBER
 %type  <number> opt_base opt_ordinal opt_NONAME opt_CONSTANT attr attr_list opt_number
 %type  <id> opt_name opt_equal_name 
@@ -45,7 +46,7 @@ command:
 		NAME opt_name opt_base { def_name ($2, $3); }
 	|	LIBRARY opt_name opt_base { def_library ($2, $3); }
 	|	EXPORTS explist 
-	|	DESCRIPTION STRING { def_description ($2);}
+	|	DESCRIPTION ID { def_description ($2);}
 	|	STACKSIZE NUMBER opt_number { def_stacksize ($2, $3);}
 	|	HEAPSIZE NUMBER opt_number { def_heapsize ($2, $3);}
 	|	CODE attr_list { def_code ($2);}

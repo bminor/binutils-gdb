@@ -51,6 +51,7 @@ configure.com
 configure.in
 cxxfilt.man
 dlltool.c
+dlltool.h
 debug.c
 debug.h
 dep-in.sed
