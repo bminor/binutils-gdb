@@ -1702,7 +1702,7 @@ mcore-rom.o: mcore-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 
 mdebugread.o: mdebugread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
 	$(expression_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
-	$(language_h) partial-stab.h $(objfiles_h) $(stabsread_h) \
+	$(language_h) $(objfiles_h) $(stabsread_h) \
 	$(symfile_h) $(symtab_h) $(gdb_string_h)
 
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
