@@ -685,7 +685,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   MSYMBOL_INFO (msymbol) = info;	/* FIXME! */
 
   /* The hash pointers must be cleared! If they're not,
-     MSYMBOL_HASH_ADD will NOT add this msymbol to the hash table. */
+     add_minsym_to_hash_table will NOT add this msymbol to the hash table. */
   msymbol->hash_next = NULL;
   msymbol->demangled_hash_next = NULL;
 
