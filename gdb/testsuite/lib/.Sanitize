@@ -23,7 +23,9 @@ Do-first:
 
 Things-to-keep:
 
+emc-support.exp
 gdb.exp
+trace-support.exp
 
 Things-to-lose:
 

@@ -53,6 +53,7 @@ gdb.disasm
 gdb.fortran
 gdb.stabs
 gdb.threads
+gdb.trace
 lib
 
 Things-to-lose:
