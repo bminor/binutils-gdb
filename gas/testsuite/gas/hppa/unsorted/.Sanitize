@@ -29,6 +29,7 @@ Things-to-keep:
 align3.s
 fragbug.s
 globalbug.s
+importbug.s
 labeldiffs.s
 locallabel.s
 ss_align.s
