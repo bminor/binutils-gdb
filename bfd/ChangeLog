@@ -1,4 +1,26 @@
+Sat Aug  5 00:04:08 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som (som_get_reloc_upper_bound): Return -1 on error.  Compute
+	return value with sizeof (arelent *), not sizeof (arelent).
+
+Wed Aug  2 12:32:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (bfd_section_from_shdr): If the section pointed to by the
+	sh_link field of a reloc section is not a symbol table, and the
+	file contains a single symbol table, clobber the sh_link field of
+	the reloc section to point to the symbol table.
+
+Tue Aug  1 10:09:01 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* coff-arm.c (howto reloc ARM26): Change size from 3 to 2.
+	(howto reloc ARM26D): Likewise.
+
 Mon Jul 24 14:17:50 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (NAME(aout,find_nearest_line)): Use the line just before
+	the offset, not the one just after.  Break out of the loop after
+	finding a function past the offset, not merely when finding a
+	function with a line defined.
 
 	* ecofflink.c (_bfd_ecoff_locate_line): When handling stabs:
 	correct setting of sym_ptr_end to consider symbols skipped when
