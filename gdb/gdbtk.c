@@ -1184,11 +1184,16 @@ gdbtk_init ()
 
   if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
     {
+      char *err;
+
       fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
 
       fprintf_unfiltered (stderr, "%s:%d: %s\n", gdbtk_filename,
 			  interp->errorLine, interp->result);
-      error ("Stack trace:\n%s", Tcl_GetVar (interp, "errorInfo", 0));
+
+      fputs_unfiltered ("Stack trace:\n", gdb_stderr);
+      fputs_unfiltered (Tcl_GetVar (interp, "errorInfo", 0), gdb_stderr);
+      error ("");
     }
 
   discard_cleanups (old_chain);

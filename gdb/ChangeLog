@@ -1,3 +1,10 @@
+Wed Jan 25 18:23:46 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdbtk_init):  Prevent segfault when gdbtk.tcl can't be
+	found.
+	* gdbtk.tcl:  Initialize expr_update_list() to prevent errors when
+	popping up expression window for the first time.
+
 Wed Jan 25 18:13:14 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* eval.c (evaluate_subexp case OP_ARRAY):  Fix calls to memset:

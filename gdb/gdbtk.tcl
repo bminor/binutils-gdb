@@ -31,6 +31,7 @@ set cfunc NIL
 set line_numbers 1
 set breakpoint_file(-1) {[garbage]}
 set disassemble_with_source nosource
+set expr_update_list(0) 0
 
 #option add *Foreground Black
 #option add *Background White
