@@ -1178,6 +1178,17 @@ xfree (void *ptr)
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
 
+char *
+xstrprintf (const char *format, ...)
+{
+  char *ret;
+  va_list args;
+  va_start (args, format);
+  xvasprintf (&ret, format, args);
+  va_end (args);
+  return ret;
+}
+
 void
 xasprintf (char **ret, const char *format, ...)
 {

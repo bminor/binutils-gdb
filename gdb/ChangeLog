@@ -1,5 +1,16 @@
 2003-08-09  Andrew Cagney  <cagney@redhat.com>
 
+	* defs.h (xstrprintf): Declare.
+	* utils.c (xstrprintf): New function.
+	* breakpoint.c (insert_breakpoints): Replace sprintf and
+	non-literal format strings, with xstrprintf and cleanups.
+	(delete_breakpoint,breakpoint_re_set): Ditto.
+	(commands_command, insert_breakpoints): Ditto.
+	(bpstat_stop_status, break_at_finish_at_depth_command_1): Ditto.
+	(break_at_finish_command_1): Ditto.
+
+2003-08-09  Andrew Cagney  <cagney@redhat.com>
+
 	* MAINTAINERS (language support): List Adam Fedor as Objective C
 	maintainer.
 
