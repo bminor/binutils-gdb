@@ -1,3 +1,8 @@
+Tue Sep  7 14:25:15 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-dis.c, m88k-dis.c: Don't include libbfd.h.  Changed calls
+	to BFD swapping routines to correspond to BFD name changes.
+
 Thu Sep  2 10:35:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c: Change div machine instruction to be z,s,t rather
