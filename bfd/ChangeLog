@@ -1,3 +1,14 @@
+Fri Nov 11 10:35:33 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpux-core.c (hpux_core_struct): Delete handles for the
+	data, reg and stack sections.  They're never used.  Delete
+	accessor macros.
+	(make_bfd_asection): Use bfd_make_section_anyway since debugging
+	cores from dynamic executables may have several sections with the
+	same logical name.
+	(hpux_core_core_file_p): Don't save handles to data, reg and
+	stack sections.  Handle CORE_TEXT, CORE_MMF and CORE_SHM.
+
 Tue Nov  8 13:03:30 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* bout.c (callj_callback): Add new argument shrinking.  Change all
