@@ -52,6 +52,7 @@ mn10300.dc
 sim-main.h
 sim-main.c
 op_utils.c
+tconfig.in
 
 Things-to-lose:
 

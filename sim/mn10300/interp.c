@@ -3,9 +3,7 @@
 #if WITH_COMMON
 #include "sim-main.h"
 #include "sim-options.h"
-/* start-sanitize-am30 */
 #include "sim-hw.h"
-/* end-sanitize-am30 */
 #else
 #include "mn10300_sim.h"
 #endif
@@ -40,6 +38,7 @@
 
 host_callback *mn10300_callback;
 int mn10300_debug;
+struct _state State;
 
 
 /* simulation target board.  NULL=default configuration */
@@ -78,13 +77,11 @@ mn10300_option_handler (sd, cpu, opt, arg, is_command)
 
 static const OPTION mn10300_options[] = 
 {
-/* start-sanitize-am30 */
 #define BOARD_AM32 "stdeval1"
   { {"board", required_argument, NULL, OPTION_BOARD},
      '\0', "none" /* rely on compile-time string concatenation for other options */
            "|" BOARD_AM32
     , "Customize simulation for a particular board.", mn10300_option_handler },
-/* end-sanitize-am30 */
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
@@ -887,6 +884,7 @@ sim_stop_reason (sd, reason, sigrc)
     *reason = sim_exited;
   else
     *reason = sim_stopped;
+
   if (State.exception == SIGQUIT)
     *sigrc = 0;
   else
@@ -973,7 +971,7 @@ sim_open (kind, cb, abfd, argv)
 
   /* Allocate core managed memory */
   sim_do_command (sd, "memory region 0,0x100000");
-  sim_do_command (sd, "memory region 0x40000000,0x100000");
+  sim_do_command (sd, "memory region 0x40000000,0x200000");
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
@@ -986,118 +984,144 @@ sim_open (kind, cb, abfd, argv)
       return 0;
     }
 
-  /* start-sanitize-am30 */
   if ( NULL != board
        && (strcmp(board, BOARD_AM32) == 0 ) )
-       {
-	 /* device support for mn1030002 */
-	 /* interrupt controller */
+    {
+      /* environment */
+      STATE_ENVIRONMENT (sd) = OPERATING_ENVIRONMENT;
 
-	 sim_hw_parse (sd, "/mn103int@0x34000100/reg 0x34000100 0x7C 0x34000200 0x8 0x34000280 0x8");
+      sim_do_command (sd, "memory region 0x44000000,0x40000");
+      sim_do_command (sd, "memory region 0x48000000,0x400000");
 
-	 /* DEBUG: NMI input's */
-	 sim_hw_parse (sd, "/glue@0x30000000/reg 0x30000000 12");
-	 sim_hw_parse (sd, "/glue@0x30000000 > int0 nmirq /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30000000 > int1 watchdog /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30000000 > int2 syserr /mn103int");
+      /* device support for mn1030002 */
+      /* interrupt controller */
 
-	 /* DEBUG: ACK input */
-	 sim_hw_parse (sd, "/glue@0x30002000/reg 0x30002000 4");
-	 sim_hw_parse (sd, "/glue@0x30002000 > int ack /mn103int");
-	 
-	 /* DEBUG: LEVEL output */
-	 sim_hw_parse (sd, "/glue@0x30004000/reg 0x30004000 8");
-	 sim_hw_parse (sd, "/mn103int > nmi int0 /glue@0x30004000");
-	 sim_hw_parse (sd, "/mn103int > level int1 /glue@0x30004000");
+      sim_hw_parse (sd, "/mn103int@0x34000100/reg 0x34000100 0x7C 0x34000200 0x8 0x34000280 0x8");
 
-	 /* DEBUG: A bunch of interrupt inputs */
-	 sim_hw_parse (sd, "/glue@0x30006000/reg 0x30006000 32");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int0 irq-0 /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int1 irq-1 /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int2 irq-2 /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int3 irq-3 /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int4 irq-4 /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int5 irq-5 /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int6 irq-6 /mn103int");
-	 sim_hw_parse (sd, "/glue@0x30006000 > int7 irq-7 /mn103int");
+      /* DEBUG: NMI input's */
+      sim_hw_parse (sd, "/glue@0x30000000/reg 0x30000000 12");
+      sim_hw_parse (sd, "/glue@0x30000000 > int0 nmirq /mn103int");
+      sim_hw_parse (sd, "/glue@0x30000000 > int1 watchdog /mn103int");
+      sim_hw_parse (sd, "/glue@0x30000000 > int2 syserr /mn103int");
+      
+      /* DEBUG: ACK input */
+      sim_hw_parse (sd, "/glue@0x30002000/reg 0x30002000 4");
+      sim_hw_parse (sd, "/glue@0x30002000 > int ack /mn103int");
+      
+      /* DEBUG: LEVEL output */
+      sim_hw_parse (sd, "/glue@0x30004000/reg 0x30004000 8");
+      sim_hw_parse (sd, "/mn103int > nmi int0 /glue@0x30004000");
+      sim_hw_parse (sd, "/mn103int > level int1 /glue@0x30004000");
+      
+      /* DEBUG: A bunch of interrupt inputs */
+      sim_hw_parse (sd, "/glue@0x30006000/reg 0x30006000 32");
+      sim_hw_parse (sd, "/glue@0x30006000 > int0 irq-0 /mn103int");
+      sim_hw_parse (sd, "/glue@0x30006000 > int1 irq-1 /mn103int");
+      sim_hw_parse (sd, "/glue@0x30006000 > int2 irq-2 /mn103int");
+      sim_hw_parse (sd, "/glue@0x30006000 > int3 irq-3 /mn103int");
+      sim_hw_parse (sd, "/glue@0x30006000 > int4 irq-4 /mn103int");
+      sim_hw_parse (sd, "/glue@0x30006000 > int5 irq-5 /mn103int");
+      sim_hw_parse (sd, "/glue@0x30006000 > int6 irq-6 /mn103int");
+      sim_hw_parse (sd, "/glue@0x30006000 > int7 irq-7 /mn103int");
+      
+      /* processor interrupt device */
+      
+      /* the device */
+      sim_hw_parse (sd, "/mn103cpu@0x20000000");
+      sim_hw_parse (sd, "/mn103cpu@0x20000000/reg 0x20000000 0x42");
+      
+      /* DEBUG: ACK output wired upto a glue device */
+      sim_hw_parse (sd, "/glue@0x20002000");
+      sim_hw_parse (sd, "/glue@0x20002000/reg 0x20002000 4");
+      sim_hw_parse (sd, "/mn103cpu > ack int0 /glue@0x20002000");
+      
+      /* DEBUG: RESET/NMI/LEVEL wired up to a glue device */
+      sim_hw_parse (sd, "/glue@0x20004000");
+      sim_hw_parse (sd, "/glue@0x20004000/reg 0x20004000 12");
+      sim_hw_parse (sd, "/glue@0x20004000 > int0 reset /mn103cpu");
+      sim_hw_parse (sd, "/glue@0x20004000 > int1 nmi /mn103cpu");
+      sim_hw_parse (sd, "/glue@0x20004000 > int2 level /mn103cpu");
+      
+      /* REAL: The processor wired up to the real interrupt controller */
+      sim_hw_parse (sd, "/mn103cpu > ack ack /mn103int");
+      sim_hw_parse (sd, "/mn103int > level level /mn103cpu");
+      sim_hw_parse (sd, "/mn103int > nmi nmi /mn103cpu");
+      
+      
+      /* PAL */
+      
+      /* the device */
+      sim_hw_parse (sd, "/pal@0x31000000");
+      sim_hw_parse (sd, "/pal@0x31000000/reg 0x31000000 64");
+      sim_hw_parse (sd, "/pal@0x31000000/poll? true");
+      
+      /* DEBUG: PAL wired up to a glue device */
+      sim_hw_parse (sd, "/glue@0x31002000");
+      sim_hw_parse (sd, "/glue@0x31002000/reg 0x31002000 16");
+      sim_hw_parse (sd, "/pal@0x31000000 > countdown int0 /glue@0x31002000");
+      sim_hw_parse (sd, "/pal@0x31000000 > timer int1 /glue@0x31002000");
+      sim_hw_parse (sd, "/pal@0x31000000 > int int2 /glue@0x31002000");
+      sim_hw_parse (sd, "/glue@0x31002000 > int0 int3 /glue@0x31002000");
+      sim_hw_parse (sd, "/glue@0x31002000 > int1 int3 /glue@0x31002000");
+      sim_hw_parse (sd, "/glue@0x31002000 > int2 int3 /glue@0x31002000");
+      
+      /* REAL: The PAL wired up to the real interrupt controller */
+      sim_hw_parse (sd, "/pal@0x31000000 > countdown irq-0 /mn103int");
+      sim_hw_parse (sd, "/pal@0x31000000 > timer irq-1 /mn103int");
+      sim_hw_parse (sd, "/pal@0x31000000 > int irq-2 /mn103int");
+      
+      /* 8 and 16 bit timers */
+      sim_hw_parse (sd, "/mn103tim@0x34001000/reg 0x34001000 36 0x34001080 100 0x34004000 16");
 
-	 /* processor interrupt device */
+      /* Hook timer interrupts up to interrupt controller */
+      sim_hw_parse (sd, "/mn103tim > timer-0-underflow timer-0-underflow /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-1-underflow timer-1-underflow /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-2-underflow timer-2-underflow /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-3-underflow timer-3-underflow /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-4-underflow timer-4-underflow /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-5-underflow timer-5-underflow /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-6-underflow timer-6-underflow /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-6-compare-a timer-6-compare-a /mn103int");
+      sim_hw_parse (sd, "/mn103tim > timer-6-compare-b timer-6-compare-b /mn103int");
+      
+      
+      /* Serial devices 0,1,2 */
+      sim_hw_parse (sd, "/mn103ser@0x34000800/reg 0x34000800 48");
+      sim_hw_parse (sd, "/mn103ser@0x34000800/poll? true");
+      
+      /* Hook serial interrupts up to interrupt controller */
+      sim_hw_parse (sd, "/mn103ser > serial-0-receive serial-0-receive /mn103int");
+      sim_hw_parse (sd, "/mn103ser > serial-0-transmit serial-0-transmit /mn103int");
+      sim_hw_parse (sd, "/mn103ser > serial-1-receive serial-1-receive /mn103int");
+      sim_hw_parse (sd, "/mn103ser > serial-1-transmit serial-1-transmit /mn103int");
+      sim_hw_parse (sd, "/mn103ser > serial-2-receive serial-2-receive /mn103int");
+      sim_hw_parse (sd, "/mn103ser > serial-2-transmit serial-2-transmit /mn103int");
+      
+      sim_hw_parse (sd, "/mn103iop@0x36008000/reg 0x36008000 8 0x36008020 8 0x36008040 0xc 0x36008060 8 0x36008080 8");
 
-	 /* the device */
-	 sim_hw_parse (sd, "/mn103cpu@0x20000000");
-	 sim_hw_parse (sd, "/mn103cpu@0x20000000/reg 0x20000000 0x42");
-
-	 /* DEBUG: ACK output wired upto a glue device */
-	 sim_hw_parse (sd, "/glue@0x20002000");
-	 sim_hw_parse (sd, "/glue@0x20002000/reg 0x20002000 4");
-	 sim_hw_parse (sd, "/mn103cpu > ack int0 /glue@0x20002000");
-
-	 /* DEBUG: RESET/NMI/LEVEL wired up to a glue device */
-	 sim_hw_parse (sd, "/glue@0x20004000");
-	 sim_hw_parse (sd, "/glue@0x20004000/reg 0x20004000 12");
-	 sim_hw_parse (sd, "/glue@0x20004000 > int0 reset /mn103cpu");
-	 sim_hw_parse (sd, "/glue@0x20004000 > int1 nmi /mn103cpu");
-	 sim_hw_parse (sd, "/glue@0x20004000 > int2 level /mn103cpu");
-
-	 /* REAL: The processor wired up to the real interrupt controller */
-	 sim_hw_parse (sd, "/mn103cpu > ack ack /mn103int");
-	 sim_hw_parse (sd, "/mn103int > level level /mn103cpu");
-	 sim_hw_parse (sd, "/mn103int > nmi nmi /mn103cpu");
-
-
-	 /* PAL */
-
-	 /* the device */
-	 sim_hw_parse (sd, "/pal@0x31000000");
-	 sim_hw_parse (sd, "/pal@0x31000000/reg 0x31000000 64");
-	 sim_hw_parse (sd, "/pal@0x31000000/poll? true");
-
-	 /* DEBUG: PAL wired up to a glue device */
-	 sim_hw_parse (sd, "/glue@0x31002000");
-	 sim_hw_parse (sd, "/glue@0x31002000/reg 0x31002000 16");
-	 sim_hw_parse (sd, "/pal@0x31000000 > countdown int0 /glue@0x31002000");
-	 sim_hw_parse (sd, "/pal@0x31000000 > timer int1 /glue@0x31002000");
-	 sim_hw_parse (sd, "/pal@0x31000000 > int int2 /glue@0x31002000");
-	 sim_hw_parse (sd, "/glue@0x31002000 > int0 int3 /glue@0x31002000");
-	 sim_hw_parse (sd, "/glue@0x31002000 > int1 int3 /glue@0x31002000");
-	 sim_hw_parse (sd, "/glue@0x31002000 > int2 int3 /glue@0x31002000");
-	 
-	 /* REAL: The PAL wired up to the real interrupt controller */
-	 sim_hw_parse (sd, "/pal@0x31000000 > countdown irq-0 /mn103int");
-	 sim_hw_parse (sd, "/pal@0x31000000 > timer irq-1 /mn103int");
-	 sim_hw_parse (sd, "/pal@0x31000000 > int irq-2 /mn103int");
-	 
-	 /* 8 and 16 bit timers */
-	 sim_hw_parse (sd, "/mn103tim@0x34001000/reg 0x34001000 36 0x34001080 100");
+      /* Memory control registers */
+      sim_do_command (sd, "memory region 0x32000020,0x30");
+      /* Cache control register */
+      sim_do_command (sd, "memory region 0x20000070,0x4");
+      /* Cache purge regions */
+      sim_do_command (sd, "memory region 0x28400000,0x800");
+      sim_do_command (sd, "memory region 0x28401000,0x800");
+      /* DMA registers */
+      sim_do_command (sd, "memory region 0x32000100,0xF");
+      sim_do_command (sd, "memory region 0x32000200,0xF");
+      sim_do_command (sd, "memory region 0x32000400,0xF");
+      sim_do_command (sd, "memory region 0x32000800,0xF");
+    }
+  else
+    {
+      if ( NULL != board )
+	{
+	  printf("Error: invalid --board option.\n");
+	  return 0;
+	}
+    }
   
-	 /* Hook timer interrupts up to interrupt controller */
-	 sim_hw_parse (sd, "/mn103tim > timer-0-underflow timer-0-underflow /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-1-underflow timer-1-underflow /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-2-underflow timer-2-underflow /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-3-underflow timer-3-underflow /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-4-underflow timer-4-underflow /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-5-underflow timer-5-underflow /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-6-underflow timer-6-underflow /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-6-compare-a timer-6-compare-a /mn103int");
-	 sim_hw_parse (sd, "/mn103tim > timer-6-compare-b timer-6-compare-b /mn103int");
-
-
-	 /* Serial devices 0,1,2 */
-	 sim_hw_parse (sd, "/mn103ser@0x34000800/reg 0x34000800 48");
-	 sim_hw_parse (sd, "/mn103ser@0x34000800/poll? true");
   
-	 /* Hook serial interrupts up to interrupt controller */
-	 sim_hw_parse (sd, "/mn103ser > serial-0-receive serial-0-receive /mn103int");
-	 sim_hw_parse (sd, "/mn103ser > serial-0-transmit serial-0-transmit /mn103int");
-	 sim_hw_parse (sd, "/mn103ser > serial-1-receive serial-0-receive /mn103int");
-	 sim_hw_parse (sd, "/mn103ser > serial-1-transmit serial-0-transmit /mn103int");
-	 sim_hw_parse (sd, "/mn103ser > serial-2-receive serial-0-receive /mn103int");
-	 sim_hw_parse (sd, "/mn103ser > serial-2-transmit serial-0-transmit /mn103int");
-
-	 sim_hw_parse (sd, "/mn103iop@0x36008000/reg 0x36008000 8 0x36008020 8 0x36008040 0xc 0x36008060 8 0x36008080 8");
-       }
-  
-  /* end-sanitize-am30 */
 
   /* check for/establish the a reference program image */
   if (sim_analyze_program (sd,
@@ -1258,4 +1282,121 @@ sim_store_register (sd, rn, memory, length)
 {
   State.regs[rn] = get_word (memory);
   return -1;
+}
+
+
+void
+mn10300_core_signal (SIM_DESC sd,
+                 sim_cpu *cpu,
+                 sim_cia cia,
+                 unsigned map,
+                 int nr_bytes,
+                 address_word addr,
+                 transfer_type transfer,
+                 sim_core_signals sig)
+{
+  const char *copy = (transfer == read_transfer ? "read" : "write");
+  address_word ip = CIA_ADDR (cia);
+
+  switch (sig)
+    {
+    case sim_core_unmapped_signal:
+      sim_io_eprintf (sd, "mn10300-core: %d byte %s to unmapped address 0x%lx at 0x%lx\n",
+                      nr_bytes, copy, 
+                      (unsigned long) addr, (unsigned long) ip);
+      program_interrupt(sd, cpu, cia, SIM_SIGSEGV);
+      break;
+
+    case sim_core_unaligned_signal:
+      sim_io_eprintf (sd, "mn10300-core: %d byte %s to unaligned address 0x%lx at 0x%lx\n",
+                      nr_bytes, copy, 
+                      (unsigned long) addr, (unsigned long) ip);
+      program_interrupt(sd, cpu, cia, SIM_SIGBUS);
+      break;
+
+    default:
+      sim_engine_abort (sd, cpu, cia,
+                        "mn10300_core_signal - internal error - bad switch");
+    }
+}
+
+
+void
+program_interrupt (SIM_DESC sd,
+		   sim_cpu *cpu,
+		   sim_cia cia,
+		   SIM_SIGNAL sig)
+{
+  int status;
+  struct hw *device;
+
+#ifdef SIM_CPU_EXCEPTION_TRIGGER
+  SIM_CPU_EXCEPTION_TRIGGER(sd,cpu,cia);
+#endif
+
+  /* copy NMI handler code from dv-mn103cpu.c */
+  /* XXX: possible infinite recursion if these store_*() calls fail! */
+  store_word (SP - 4, CIA_GET (cpu));
+  store_half (SP - 8, PSW);
+  PSW &= ~PSW_IE;
+  SP = SP - 8;
+  CIA_SET (cpu, 0x40000008);
+
+  sim_engine_halt(sd, cpu, NULL, cia, sim_stopped, sig);
+}
+
+
+void
+mn10300_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word cia)
+{
+  ASSERT(cpu != NULL);
+
+  if(State.exc_suspended > 0)
+    sim_io_eprintf(sd, "Warning, nested exception triggered (%d)\n", State.exc_suspended); 
+
+  CIA_SET (cpu, cia);
+  memcpy(State.exc_trigger_regs, State.regs, sizeof(State.exc_trigger_regs));
+  State.exc_suspended = 0;
+}
+
+void
+mn10300_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception)
+{
+  ASSERT(cpu != NULL);
+
+  if(State.exc_suspended > 0)
+    sim_io_eprintf(sd, "Warning, nested exception signal (%d then %d)\n", 
+		   State.exc_suspended, exception); 
+
+  memcpy(State.exc_suspend_regs, State.regs, sizeof(State.exc_suspend_regs));
+  memcpy(State.regs, State.exc_trigger_regs, sizeof(State.regs));
+  CIA_SET (cpu, PC); /* copy PC back from new State.regs */
+  State.exc_suspended = exception;
+}
+
+void
+mn10300_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception)
+{
+  ASSERT(cpu != NULL);
+
+  if(exception == 0 && State.exc_suspended > 0)
+    {
+      if(State.exc_suspended != SIGTRAP) /* warn not for breakpoints */
+         sim_io_eprintf(sd, "Warning, resuming but ignoring pending exception signal (%d)\n",
+  		       State.exc_suspended); 
+    }
+  else if(exception != 0 && State.exc_suspended > 0)
+    {
+      if(exception != State.exc_suspended) 
+	sim_io_eprintf(sd, "Warning, resuming with unmatching exception signal (%d vs %d)\n",
+		       State.exc_suspended, exception); 
+      
+      memcpy(State.regs, State.exc_suspend_regs, sizeof(State.regs)); 
+      CIA_SET (cpu, PC); /* copy PC back from new State.regs */
+    }
+  else if(exception != 0 && State.exc_suspended == 0)
+    {
+      sim_io_eprintf(sd, "Warning, ignoring spontanous exception signal (%d)\n", exception); 
+    }
+  State.exc_suspended = 0; 
 }
