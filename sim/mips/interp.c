@@ -3419,7 +3419,7 @@ decode_coproc (SIM_DESC sd,
 	    unsigned_4 vu_upper, vu_lower;
 	    vu_upper = 0x000002ff; /* NOP/NOP */
 	    vu_lower =
-	      0x10000000 | /* bits 31 .. 25 */
+	      0x80000000 | /* bits 31 .. 25 */
 	      (instruction & 0x01ffffff); /* bits 24 .. 0 */
 
 	    /* POLICY: never busy in macro mode */

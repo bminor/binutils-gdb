@@ -1,4 +1,11 @@
 start-sanitize-sky
+	Mon Apr 13 16:28:52 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): Add proper 1000000 bit-string at top
+	of VU lower instruction.
+
+end-sanitize-sky
+start-sanitize-sky
 Thu Apr  9 16:38:23 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* r5900.igen (LQC,SQC): Adapted code to DOUBLEWORD accesses
