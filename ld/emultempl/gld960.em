@@ -1,7 +1,7 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
-/* Copyright 1991, 1992, 1994, 1999, 2000, 2001, 2002, 2003
+/* Copyright 1991, 1992, 1994, 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.

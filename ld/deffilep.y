@@ -1,6 +1,6 @@
 %{ /* deffilep.y - parser for .def files */
 
-/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
      Free Software Foundation, Inc.
 
      This file is part of GNU Binutils.

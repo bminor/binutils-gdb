@@ -1,5 +1,5 @@
 /* filemode.c -- make a string describing file modes
-   Copyright 1985, 1990, 1991, 1994, 1995, 1997, 2003
+   Copyright 1985, 1990, 1991, 1994, 1995, 1997, 1999, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify

@@ -1,7 +1,7 @@
 /* This file is tc-tahoe.c
 
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1995, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1995, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 

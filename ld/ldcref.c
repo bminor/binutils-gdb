@@ -1,5 +1,5 @@
 /* ldcref.c -- output a cross reference table
-   Copyright 1996, 1997, 1998, 2000, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>
 
