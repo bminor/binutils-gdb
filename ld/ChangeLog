@@ -1,3 +1,12 @@
+Wed Jan  5 17:42:16 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldemul.h (ld_emulation_xfer_struct): Comment the members.
+
+Sat Jan  1 13:39:31 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* Makefile.in, configure.in: Add support for VSTa micro-kernel.
+	* config/vsta.mt, emulparams/vsta.sh: New files for VSTa.
+
 Sat Jan  1 10:53:35 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* scripttempl/aout.sc: Pad .text to DATA_ALIGNMENT if relocating;
