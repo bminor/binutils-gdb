@@ -495,7 +495,7 @@ rombug_wait (pid, status)
 
   obj_sec = find_pc_section (pc);
   if (obj_sec != NULL)
-    new_symfile_objfile (obj_sec, 1, 0);
+    new_symfile_objfile (obj_sec->objfile, 1, 0);
 
   offs = ((struct section_offsets *)
 	 alloca (sizeof (struct section_offsets)
