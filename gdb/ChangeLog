@@ -1,3 +1,26 @@
+2004-06-07  Jim Blandy  <jimb@redhat.com>
+
+	Add native Linux support for the PowerPC E500.
+	* ppc-tdep.h (struct gdbarch_tdep): New member: 'ppc_gprs_pseudo_p'.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize it to false on
+	all architectures except the E500.
+	* ppc-linux-nat.c: (PTRACE_GETEVRREGS, PTRACE_SETEVRREGS): New
+	#definitions.
+	(struct gdb_evrregset_t): New type.
+	(have_ptrace_getsetevrregs): New variable.
+	(get_spe_registers, read_spliced_spe_reg, fetch_spe_register, 
+	fetch_spe_registers): New functions.
+	(fetch_register): Call fetch_spe_register as appropriate.
+	Assert that we're only passed raw register numbers.
+	(fetch_ppc_registers): Call fetch_spe_registers as appropriate.
+	Don't fetch gprs if they're pseudoregisters.
+	(set_spe_registers, write_spliced_spe_reg, store_spe_register,
+	store_spe_registers): New functions.
+	(store_register): Call store_spe_register as appropriate.
+	Assert that we're only passed raw register numbers.
+	(store_ppc_registers): Call store_spe_registers as appropriate.
+	Don't store gprs if they're pseudoregisters.
+	
 2004-06-07  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* thread-db.c (thread_get_info_callback): Fill in the thread_info

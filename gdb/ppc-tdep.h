@@ -144,6 +144,7 @@ struct gdbarch_tdep
     int wordsize;              /* size in bytes of fixed-point word */
     const struct reg *regs;    /* from current variant */
     int ppc_gp0_regnum;		/* GPR register 0 */
+    int ppc_gprs_pseudo_p;      /* non-zero if GPRs are pseudo-registers */
     int ppc_toc_regnum;		/* TOC register */
     int ppc_ps_regnum;	        /* Processor (or machine) status (%msr) */
     int ppc_cr_regnum;		/* Condition register */

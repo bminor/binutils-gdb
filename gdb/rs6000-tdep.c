@@ -2872,6 +2872,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->regs = v->regs;
 
   tdep->ppc_gp0_regnum = 0;
+  tdep->ppc_gprs_pseudo_p = 0;
   tdep->ppc_toc_regnum = 2;
   tdep->ppc_ps_regnum = 65;
   tdep->ppc_cr_regnum = 66;
@@ -2927,6 +2928,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	break;
       case bfd_mach_ppc_e500:
         tdep->ppc_gp0_regnum = 41;
+        tdep->ppc_gprs_pseudo_p = 1;
         tdep->ppc_toc_regnum = -1;
         tdep->ppc_ps_regnum = 1;
         tdep->ppc_cr_regnum = 2;
