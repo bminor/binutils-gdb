@@ -1,3 +1,9 @@
+Wed Feb 19 15:35:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* external.h, internal.h, common.h: Added new structures and
+	definitions for ELF versions.
+
 start-sanitize-d30v
 Tue Feb 18 17:40:36 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

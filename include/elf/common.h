@@ -1,5 +1,5 @@
 /* ELF support for BFD.
-   Copyright (C) 1991, 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -179,6 +179,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SHT_REL		9		/* Relocation entries, no addends */
 #define SHT_SHLIB	10		/* Reserved, unspecified semantics */
 #define SHT_DYNSYM	11		/* Dynamic linking symbol table */
+
+/* The next three section types are defined by Solaris, and are named
+   SHT_SUNW*.  We use them in GNU code, so we also define SHT_GNU*
+   versions.  */
+#define SHT_SUNW_verdef	0x6ffffffd	/* Versions defined by file */
+#define SHT_SUNW_verneed 0x6ffffffe	/* Versions needed by file */
+#define SHT_SUNW_versym	0x6fffffff	/* Symbol versions */
+
+#define SHT_GNU_verdef	SHT_SUNW_verdef
+#define SHT_GNU_verneed	SHT_SUNW_verneed
+#define SHT_GNU_versym	SHT_SUNW_versym
+
 #define SHT_LOPROC	0x70000000	/* Processor-specific semantics, lo */
 #define SHT_HIPROC	0x7FFFFFFF	/* Processor-specific semantics, hi */
 #define SHT_LOUSER	0x80000000	/* Application-specific semantics */
@@ -273,6 +285,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define DT_DEBUG	21
 #define DT_TEXTREL	22
 #define DT_JMPREL	23
+
+/* The next four dynamic tags are used on Solaris.  We support them
+   everywhere.  */
+#define DT_VERDEF	0x6ffffffc
+#define DT_VERDEFNUM	0x6ffffffd
+#define DT_VERNEED	0x6ffffffe
+#define DT_VERNEEDNUM	0x6fffffff
+
+/* This tag is a GNU extension to the Solaris version scheme.  */
+#define DT_VERSYM	0x6ffffff0
+
 #define DT_LOPROC	0x70000000
 #define DT_HIPROC	0x7fffffff
 
@@ -281,5 +304,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define DT_AUXILIARY	0x7ffffffd
 #define DT_FILTER	0x7fffffff
+
+/* These constants are used for the version number of a Elf32_Verdef
+   structure.  */
+
+#define VER_DEF_NONE		0
+#define VER_DEF_CURRENT		1
+
+/* These constants appear in the vd_flags field of a Elf32_Verdef
+   structure.  */
+
+#define VER_FLG_BASE		0x1
+#define VER_FLG_WEAK		0x2
+
+/* These special constants can be found in an Elf32_Versym field.  */
+
+#define VER_NDX_LOCAL		0
+#define VER_NDX_GLOBAL		1
+
+/* These constants are used for the version number of a Elf32_Verneed
+   structure.  */
+
+#define VER_NEED_NONE		0
+#define VER_NEED_CURRENT	1
+
+/* This is a special token which appears as part of a symbol name.  It
+   indictes that the rest of the name is actually the name of a
+   version node, and is not part of the actual name.  This is a GNU
+   extension.  For example, the symbol name `stat@ver2' is taken to
+   mean the symbol `stat' in version `ver2'.  */
+
+#define ELF_VER_CHR	'@'
 
 #endif /* _ELF_COMMON_H */
