@@ -1371,7 +1371,17 @@ typedef enum bfd_reloc_code_real {
 8 bits wide, pc relative
 */
 
-  BFD_RELOC_8_PCREL
+  BFD_RELOC_8_PCREL,
+
+/*
+The type of reloc used to build a contructor table - at the moment probably a 32 bit
+wide abs address, but the cpu can choose.
+*/
+
+  BFD_RELOC_CTOR
+
+/*
+*/
  } bfd_reloc_code_real_type;
 
 /*
@@ -1380,8 +1390,6 @@ typedef enum bfd_reloc_code_real {
 This routine returns a pointer to a howto struct which when invoked,
 will perform the supplied relocation on data from the architecture
 noted.
-
-[Note] This function will go away.
 */
 
  PROTO(CONST struct reloc_howto_struct *,
