@@ -1,3 +1,7 @@
+Fri Feb 27 19:09:57 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-module.c (*): Fix typos in assertion tests.
+
 Sat Feb 28 13:54:10 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-module.c (sim_pre_argv_init): String passed to asprintf

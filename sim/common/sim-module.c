@@ -1,5 +1,5 @@
 /* Module support.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -147,7 +147,7 @@ sim_module_init (SIM_DESC sd)
   MODULE_INIT_LIST *modp;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   for (modp = modules->init_list; modp != NULL; modp = modp->next)
     {
@@ -166,7 +166,7 @@ sim_module_resume (SIM_DESC sd)
   MODULE_RESUME_LIST *modp;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   for (modp = modules->resume_list; modp != NULL; modp = modp->next)
     {
@@ -185,7 +185,7 @@ sim_module_suspend (SIM_DESC sd)
   MODULE_SUSPEND_LIST *modp;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   for (modp = modules->suspend_list; modp != NULL; modp = modp->next)
     {
@@ -204,7 +204,7 @@ sim_module_uninstall (SIM_DESC sd)
   MODULE_UNINSTALL_LIST *modp;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   /* Uninstall the modules.  */
   for (modp = modules->uninstall_list; modp != NULL; modp = modp->next)
@@ -273,7 +273,7 @@ sim_module_info (SIM_DESC sd, int verbose)
   MODULE_INFO_LIST *modp;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   for (modp = modules->info_list; modp != NULL; modp = modp->next)
     {
@@ -292,7 +292,7 @@ sim_module_add_init_fn (SIM_DESC sd, MODULE_INIT_FN fn)
   MODULE_INIT_LIST **last;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   last = &modules->init_list;
   while (*last != NULL)
@@ -314,7 +314,7 @@ sim_module_add_resume_fn (SIM_DESC sd, MODULE_RESUME_FN fn)
   MODULE_RESUME_LIST **last;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   last = &modules->resume_list;
   while (*last != NULL)
@@ -336,7 +336,7 @@ sim_module_add_suspend_fn (SIM_DESC sd, MODULE_SUSPEND_FN fn)
   MODULE_SUSPEND_LIST **last;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   last = &modules->suspend_list;
   while (*last != NULL)
@@ -357,7 +357,7 @@ sim_module_add_uninstall_fn (SIM_DESC sd, MODULE_UNINSTALL_FN fn)
   MODULE_UNINSTALL_LIST *l = ZALLOC (MODULE_UNINSTALL_LIST);
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   l->fn = fn;
   l->next = modules->uninstall_list;
@@ -375,7 +375,7 @@ sim_module_add_info_fn (SIM_DESC sd, MODULE_INFO_FN fn)
   MODULE_INFO_LIST **last;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+  SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
   last = &modules->info_list;
   while (*last != NULL)
