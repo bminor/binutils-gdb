@@ -59,15 +59,15 @@ struct dbx_symfile_info {
   int symcount;			/* How many symbols are there in the file */
   char *stringtab;		/* The actual string table */
   int stringtab_size;		/* Its size */
-  off_t symtab_offset;		/* Offset in file to symbol table */
+  file_ptr symtab_offset;	/* Offset in file to symbol table */
   int symbol_size;		/* Bytes in a single symbol */
   struct stab_section_info *stab_section_info; 	/* section starting points
 				   of the original .o files before linking. */
-/* FIXME:  HP kludges that shouldn't be here, probably.  */
+/* FIXME:  HP kludges that shouldn't be here.  */
   int hp_symcount;
   char *hp_stringtab;
   int hp_stringtab_size;
-  off_t hp_symtab_offset;
+  file_ptr hp_symtab_offset;
 };
 
 #define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_private))

@@ -174,7 +174,7 @@ static int
 init_debugsection PARAMS ((bfd *));
 
 static int
-init_stringtab PARAMS ((bfd *, long, struct objfile *));
+init_stringtab PARAMS ((bfd *, file_ptr, struct objfile *));
 
 static void
 xcoff_symfile_init PARAMS ((struct objfile *));
@@ -196,7 +196,7 @@ static struct section_offsets *
 xcoff_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 static int
-init_lineno PARAMS ((bfd *, long, int));
+init_lineno PARAMS ((bfd *, file_ptr, int));
 
 static void
 find_linenos PARAMS ((bfd *, sec_ptr, PTR));
@@ -2009,12 +2009,12 @@ PTR vpinfo;
 static int
 init_lineno (abfd, offset, size)
      bfd *abfd;
-     long offset;
+     file_ptr offset;
      int size;
 {
   int val;
 
-  if (bfd_seek(abfd, offset, 0) < 0)
+  if (bfd_seek(abfd, offset, L_SET) < 0)
     return -1;
 
   linetab = (char *) xmalloc(size);
@@ -2150,14 +2150,14 @@ xcoff_symfile_finish (objfile)
 static int
 init_stringtab(abfd, offset, objfile)
      bfd *abfd;
-     long offset;
+     file_ptr offset;
      struct objfile *objfile;
 {
   long length;
   int val;
   unsigned char lengthbuf[4];
 
-  if (bfd_seek(abfd, offset, 0) < 0)
+  if (bfd_seek(abfd, offset, L_SET) < 0)
     return -1;
 
   val    = bfd_read((char *)lengthbuf, 1, sizeof lengthbuf, abfd);
@@ -2235,9 +2235,9 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   struct section_offset *section_offset;
   int mainline;
 {
-  int num_symbols;				/* # of symbols */
-  int symtab_offset;				/* symbol table and */
-  int stringtab_offset;				/* string table file offsets */
+  int num_symbols;			/* # of symbols */
+  file_ptr symtab_offset;		/* symbol table and */
+  file_ptr stringtab_offset;		/* string table file offsets */
   int val;
   bfd *abfd;
   struct coff_symfile_info *info;
@@ -2262,7 +2262,7 @@ xcoff_symfile_read (objfile, section_offset, mainline)
 
     /* only read in the line # table if one exists */
     val = init_lineno(abfd, info->min_lineno_offset,
-	info->max_lineno_offset - info->min_lineno_offset);
+	(int) (info->max_lineno_offset - info->min_lineno_offset));
 
     if (val < 0)
       error("\"%s\": error reading line numbers\n", name);
@@ -2278,7 +2278,7 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   }
 
   /* Position to read the symbol table.  Do not read it all at once. */
-  val = bfd_seek(abfd, (long)symtab_offset, 0);
+  val = bfd_seek(abfd, symtab_offset, L_SET);
   if (val < 0)
     perror_with_name(name);
 

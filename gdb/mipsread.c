@@ -230,7 +230,7 @@ struct type *builtin_type_string;
 /* Forward declarations */
 
 static void
-fixup_symtab PARAMS ((HDRR *, char *, int, bfd *));
+fixup_symtab PARAMS ((HDRR *, char *, file_ptr, bfd *));
 
 static void
 read_mips_symtab PARAMS ((struct objfile *, struct section_offsets *));
@@ -449,7 +449,7 @@ read_the_mips_symtab(abfd, end_of_text_segp)
 	CORE_ADDR	*end_of_text_segp;
 {
 	int             stsize, st_hdrsize;
-	unsigned        st_filptr;
+	file_ptr        st_filptr;
 	struct hdr_ext	hdr_ext;
 	HDRR            st_hdr;
 	/* Header for executable/object file we read symbols from */
@@ -457,7 +457,7 @@ read_the_mips_symtab(abfd, end_of_text_segp)
 	int val;
 
 	/* We need some info from the initial headers */
-	val = bfd_seek(abfd, 0L, L_SET);
+	val = bfd_seek(abfd, (file_ptr) 0, L_SET);
 	val = bfd_read((PTR)&filhdr, sizeof filhdr, 1, abfd);
 
 	if (end_of_text_segp)
@@ -514,7 +514,7 @@ static void
 fixup_symtab (hdr, data, f_ptr, abfd)
 	HDRR *hdr;
 	char *data;
-	int f_ptr;
+	file_ptr f_ptr;
 	bfd *abfd;
 {
 	int             f_idx, s_idx, i;
@@ -526,8 +526,9 @@ fixup_symtab (hdr, data, f_ptr, abfd)
 
 	/* This function depends on the external and internal forms
 	   of the MIPS symbol table taking identical space.  Check this
-	   assumption at compile-time.  */
-#if 0	/* FIXME: Unused */
+	   assumption at compile-time.  
+	   DO NOT DELETE THESE ENTRIES, OR COMMENT THEM OUT, JUST BECAUSE SOME
+	   "LINT" OR COMPILER THINKS THEY ARE UNUSED!  Thank you.  */
 	static check_hdr1[1 + sizeof (struct hdr_ext) - sizeof (HDRR)] = {0};
 	static check_hdr2[1 + sizeof (HDRR) - sizeof (struct hdr_ext)] = {0};
 	static check_fdr1[1 + sizeof (struct fdr_ext) - sizeof (FDR)] = {0};
@@ -540,7 +541,6 @@ fixup_symtab (hdr, data, f_ptr, abfd)
 	static check_ext2[1 + sizeof (EXTR) - sizeof (struct ext_ext)] = {0};
 	static check_rfd1[1 + sizeof (struct rfd_ext) - sizeof (RFDT)] = {0};
 	static check_rfd2[1 + sizeof (RFDT) - sizeof (struct rfd_ext)] = {0};
-#endif
 
 	/* Swap in the header record.  */
 	ecoff_swap_hdr_in (abfd, hdr, hdr);

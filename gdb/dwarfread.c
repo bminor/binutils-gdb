@@ -41,10 +41,6 @@ other things to work on, if you get bored. :-)
 */
 
 #include "defs.h"
-#include <varargs.h>
-#include <fcntl.h>
-#include <string.h>
-
 #include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -54,6 +50,18 @@ other things to work on, if you get bored. :-)
 #include "elf/dwarf.h"
 #include "buildsym.h"
 #include "demangle.h"
+
+#include <varargs.h>
+#include <fcntl.h>
+#include <string.h>
+#ifndef	NO_SYS_FILE
+#include <sys/file.h>
+#endif
+
+/* FIXME -- convert this to SEEK_SET a la POSIX, move to config files.  */
+#ifndef L_SET
+#define L_SET 0
+#endif
 
 #ifdef MAINTENANCE	/* Define to 1 to compile in some maintenance stuff */
 #define SQUAWK(stuff) dwarfwarn stuff
@@ -253,10 +261,10 @@ static struct section_offsets *base_section_offsets;
  */
 
 struct dwfinfo {
-  int dbfoff;		/* Absolute file offset to start of .debug section */
+  file_ptr dbfoff;	/* Absolute file offset to start of .debug section */
   int dbroff;		/* Relative offset from start of .debug section */
   int dblength;		/* Size of the chunk of DIE's being examined */
-  int lnfoff;		/* Absolute file offset to line table fragment */
+  file_ptr lnfoff;	/* Absolute file offset to line table fragment */
 };
 
 #define DBFOFF(p) (((struct dwfinfo *)((p)->read_symtab_private))->dbfoff)
@@ -342,8 +350,8 @@ static void
 scan_partial_symbols PARAMS ((char *, char *, struct objfile *));
 
 static void
-scan_compilation_units PARAMS ((char *, char *, char *, unsigned int,
-				unsigned int, struct objfile *));
+scan_compilation_units PARAMS ((char *, char *, file_ptr,
+				file_ptr, struct objfile *));
 
 static void
 add_partial_symbol PARAMS ((struct dieinfo *, struct objfile *));
@@ -498,18 +506,17 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	void dwarf_build_psymtabs (int desc, char *filename, 
+	void dwarf_build_psymtabs (struct objfile *objfile,
 	     struct section_offsets *section_offsets,
-	     int mainline, unsigned int dbfoff, unsigned int dbfsize,
-	     unsigned int lnoffset, unsigned int lnsize,
-	     struct objfile *objfile)
+	     int mainline, file_ptr dbfoff, unsigned int dbfsize,
+	     file_ptr lnoffset, unsigned int lnsize)
 
 DESCRIPTION
 
 	This function is called upon to build partial symtabs from files
 	containing DIE's (Dwarf Information Entries) and DWARF line numbers.
 
-	It is passed a file descriptor for an open file containing the DIES
+	It is passed a bfd* containing the DIES
 	and line number information, the corresponding filename for that
 	file, a base address for relocating the symbols, a flag indicating
 	whether or not this debugging information is from a "main symbol
@@ -524,29 +531,28 @@ RETURNS
  */
 
 void
-dwarf_build_psymtabs (desc, filename, section_offsets, mainline, dbfoff, dbfsize,
-		      lnoffset, lnsize, objfile)
-     int desc;
-     char *filename;
+dwarf_build_psymtabs (objfile, section_offsets, mainline, dbfoff, dbfsize,
+		      lnoffset, lnsize)
+     struct objfile *objfile;
      struct section_offsets *section_offsets;
      int mainline;
-     unsigned int dbfoff;
+     file_ptr dbfoff;
      unsigned int dbfsize;
-     unsigned int lnoffset;
+     file_ptr lnoffset;
      unsigned int lnsize;
-     struct objfile *objfile;
 {
+  bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
   
   current_objfile = objfile;
   dbsize = dbfsize;
   dbbase = xmalloc (dbsize);
   dbroff = 0;
-  if ((lseek (desc, dbfoff, 0) != dbfoff) ||
-      (read (desc, dbbase, dbsize) != dbsize))
+  if ((bfd_seek (abfd, dbfoff, L_SET) != 0) ||
+      (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
     {
       free (dbbase);
-      error ("can't read DWARF data from '%s'", filename);
+      error ("can't read DWARF data from '%s'", bfd_get_filename (abfd));
     }
   back_to = make_cleanup (free, dbbase);
   
@@ -569,8 +575,7 @@ dwarf_build_psymtabs (desc, filename, section_offsets, mainline, dbfoff, dbfsize
      table entry for each one.  Save enough information about each compilation
      unit to locate the full DWARF information later. */
   
-  scan_compilation_units (filename, dbbase, dbbase + dbsize,
-			  dbfoff, lnoffset, objfile);
+  scan_compilation_units (dbbase, dbbase + dbsize, dbfoff, lnoffset, objfile);
   
   do_cleanups (back_to);
   current_objfile = NULL;
@@ -2083,7 +2088,7 @@ read_ofile_symtab (pst)
 {
   struct cleanup *back_to;
   unsigned long lnsize;
-  int foffset;
+  file_ptr foffset;
   bfd *abfd;
   char lnsizedata[SIZEOF_LINETBL_LENGTH];
 
@@ -2100,7 +2105,7 @@ read_ofile_symtab (pst)
   foffset = DBFOFF(pst) + dbroff;
   base_section_offsets = pst->section_offsets;
   baseaddr = ANOFFSET (pst->section_offsets, 0);
-  if (bfd_seek (abfd, foffset, 0) ||
+  if (bfd_seek (abfd, foffset, L_SET) ||
       (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
     {
       free (dbbase);
@@ -2116,7 +2121,7 @@ read_ofile_symtab (pst)
   lnbase = NULL;
   if (LNFOFF (pst))
     {
-      if (bfd_seek (abfd, LNFOFF (pst), 0) ||
+      if (bfd_seek (abfd, LNFOFF (pst), L_SET) ||
 	  (bfd_read ((PTR) lnsizedata, sizeof (lnsizedata), 1, abfd) !=
 	   sizeof (lnsizedata)))
 	{
@@ -2125,7 +2130,7 @@ read_ofile_symtab (pst)
       lnsize = target_to_host (lnsizedata, SIZEOF_LINETBL_LENGTH,
 			       GET_UNSIGNED, pst -> objfile);
       lnbase = xmalloc (lnsize);
-      if (bfd_seek (abfd, LNFOFF (pst), 0) ||
+      if (bfd_seek (abfd, LNFOFF (pst), L_SET) ||
 	  (bfd_read (lnbase, lnsize, 1, abfd) != lnsize))
 	{
 	  free (lnbase);
@@ -2637,12 +2642,11 @@ RETURNS
  */
 
 static void
-scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
-     char *filename;
+scan_compilation_units (thisdie, enddie, dbfoff, lnoffset, objfile)
      char *thisdie;
      char *enddie;
-     unsigned int dbfoff;
-     unsigned int lnoffset;
+     file_ptr dbfoff;
+     file_ptr lnoffset;
      struct objfile *objfile;
 {
   char *nextdie;
@@ -2650,7 +2654,7 @@ scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
   struct partial_symtab *pst;
   int culength;
   int curoff;
-  int curlnoffset;
+  file_ptr curlnoffset;
 
   while (thisdie < enddie)
     {

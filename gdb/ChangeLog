@@ -1,3 +1,43 @@
+Thu Oct 15 02:59:30 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (VERSION):  Roll to 4.6.8.
+	(OBS):  Put version.o first, so Makefile rebuild happens early.
+	
+	* command.h:  Publicize prototype for not_just_help_class_command.
+	* command.c:  Remove proto.
+	* maint.c (maintenance_init):  Mark "mt" as an abbrev, to avoid
+	duplicated help output.  Move "maint info" from class info to
+	class maintenance, and improve text.
+	* infrun.c ():  Move "stop" to class_obscure, and give it a
+	function so it will not be seen as a global help topic.  FIXME,
+	it should be possible to set these attributes independently.
+
+	* core.c (core_command):  Make nicer error message for no core support.
+	
+
+	Lint around file_ptr's (bfd's off_t's) and bfd_seek.
+
+	* dbxread.c (read_dbx_symtab):  Use L_SET as bfd_seek arg.
+	(elfstab_build_psymtabs):  staboffset and stabstroffset args are
+	file_ptr's.
+	* dwarfread.c (struct dwfinfo):  Convert dbfoff, lnfoff to file_ptr.
+	(scan_compilation_units):  Punt unused filename arg.  dbfoff,
+	lnoffset, and curlnoffset are file_ptr's now.
+	(dwarf_build_psymtabs):  Drop desc and filename args; use
+	objfile.  dbfoff and lnoffset are file_ptr's now.
+	(read_ofile_symtab):  foffset is now file_ptr.  Use L_SET in bfd_seek.
+	* elfread.c (struct elfinfo):  dboffset and lnoffset are file_ptr's.
+	(elf_symfile_read):  Skip desc and filename args to
+	dwarf_build_psymtabs.  Pass file_ptr's to elfstab_build_psymtabs.
+	* gdb-stabs.h:  Use file_ptr rather than off_t.
+	* mipsread.c (fixup_symtab): f_ptr is a file_ptr.  Re-enable
+	compile-time debug check that someone turned off as "unused".
+	(read_the_mips_symtab):  st_filptr is a file_ptr.  Fix bfd_seek call.
+	* symfile.h:  Update dwarf_build_psymtabs and
+	elfstab_build_psymtabs prototypes.
+	* xcoffread.c (init_stringtab, init_lineno, xcoff_symfile_read):
+	Use file_ptr offsets.  bfd_seeks use L_SET.
+
 Thu Oct 15 01:27:32 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* mips-tdep.c, mipsread.c, tm-mips.h:  Get rid of ".gdbinfo."
@@ -92,7 +132,8 @@ Fri Oct  9 00:31:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* config/irix4.mh (XDEPFILES): removed procfs.o fork-child.o.
 	(NAT_FILE, NATDEPFILES): new macros for native support.
 	(CC): supply default compiler switches.
-	* config/irix3.mh (XDEPFILES): removed infptrace.o inftarg.o fork-child.o coredep.o.
+	* config/irix3.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o coredep.o.
 	(NAT_FILE, NATDEPFILES): new macros for native support.  Note that
 	irix3 is untested.
 	* config/decstation.mh (XDEPFILES): removed infptrace.o inftarg.o

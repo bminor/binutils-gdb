@@ -42,8 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
-
-#include <sys/types.h>		/* For off_t for gdb-stabs.h */
 #include "gdb-stabs.h"
 
 #define STREQ(a,b) (strcmp((a),(b))==0)
@@ -53,9 +51,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    It's local to elf_symfile_read.  */
 
 struct elfinfo {
-  unsigned int dboffset;	/* Offset to dwarf debug section */
+  file_ptr dboffset;		/* Offset to dwarf debug section */
   unsigned int dbsize;		/* Size of dwarf debug section */
-  unsigned int lnoffset;	/* Offset to dwarf line number section */
+  file_ptr lnoffset;		/* Offset to dwarf line number section */
   unsigned int lnsize;		/* Size of dwarf line number section */
   asection *stabsect;		/* Section pointer for .stab section */
   asection *stabindexsect;	/* Section pointer for .stab.index section */
@@ -464,11 +462,10 @@ elf_symfile_read (objfile, section_offsets, mainline)
   if (ei.dboffset && ei.lnoffset)
     {
       /* DWARF sections */
-      dwarf_build_psymtabs (fileno ((FILE *)(abfd -> iostream)),
-			    bfd_get_filename (abfd),
+      dwarf_build_psymtabs (objfile,
 			    section_offsets, mainline,
 			    ei.dboffset, ei.dbsize,
-			    ei.lnoffset, ei.lnsize, objfile);
+			    ei.lnoffset, ei.lnsize);
     }
   if (ei.stabsect)
     {
@@ -489,7 +486,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
 	  mainline,
 	  ei.stabsect->filepos,				/* .stab offset */
 	  bfd_get_section_size_before_reloc (ei.stabsect),/* .stab size */
-	  elf_sect->sh_offset,				/* .stabstr offset */
+	  (file_ptr) elf_sect->sh_offset,		/* .stabstr offset */
 	  elf_sect->sh_size);				/* .stabstr size */
     }
 
