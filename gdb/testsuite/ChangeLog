@@ -1,3 +1,11 @@
+2003-03-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/watchpoint.exp (test_watchpoint_and_breakpoint): New
+	test, for PR breakpoints/38.
+	Call test_watchpoint_and_breakpoint.
+	* gdb.base/watchpoint.c (func3): New function.
+	(main): Call func3.
+
 2003-03-04  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/templates.exp (do_tests): Accept valid const in "print
