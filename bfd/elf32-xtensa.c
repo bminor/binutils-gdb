@@ -523,12 +523,6 @@ property_table_compare (const void *ap, const void *bp)
 
   if (a->address == b->address)
     {
-      /* The only circumstance where two entries may legitimately have the
-	 same address is when one of them is a zero-size placeholder to
-	 mark a place where fill can be inserted.  The zero-size entry should
-	 come first.  */
-      BFD_ASSERT ((a->size == 0 || b->size == 0));
-
       if (a->size != b->size)
 	return (a->size - b->size);
 
@@ -585,7 +579,7 @@ xtensa_read_table_entries (bfd *abfd,
   bfd_size_type table_size = 0;
   bfd_byte *table_data;
   property_table_entry *blocks;
-  int block_count;
+  int blk, block_count;
   bfd_size_type num_records;
   Elf_Internal_Rela *internal_relocs;
   bfd_vma section_addr;
@@ -700,6 +694,25 @@ xtensa_read_table_entries (bfd *abfd,
       /* Now sort them into address order for easy reference.  */
       qsort (blocks, block_count, sizeof (property_table_entry),
 	     property_table_compare);
+
+      /* Check that the table contents are valid.  Problems may occur,
+         for example, if an unrelocated object file is stripped.  */
+      for (blk = 1; blk < block_count; blk++)
+	{
+	  /* The only circumstance where two entries may legitimately
+	     have the same address is when one of them is a zero-size
+	     placeholder to mark a place where fill can be inserted.
+	     The zero-size entry should come first.  */
+	  if (blocks[blk - 1].address == blocks[blk].address &&
+	      blocks[blk - 1].size != 0)
+	    {
+	      (*_bfd_error_handler) (_("%B(%A): invalid property table"),
+				     abfd, section);
+	      bfd_set_error (bfd_error_bad_value);
+	      free (blocks);
+	      return -1;
+	    }
+	}
     }
 
   *table_p = blocks;

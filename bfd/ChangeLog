@@ -1,3 +1,9 @@
+2004-11-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (property_table_compare): Remove assertion about
+	entries with the same address and non-zero size.
+	(xtensa_read_table_entries): Report such entries as errors.
+
 2004-11-11  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Correct logic for
