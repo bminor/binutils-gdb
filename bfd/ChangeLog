@@ -1,3 +1,11 @@
+Thu May 30 15:30:10 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+        *../include/i386coff.h : fixed typo in type field with size
+
+	* i386coff.c icoff.c m88k-bcs.c ecoff.c ../include/bfd.h : Added
+	support in the jump table for the swapping routines exported to
+	gdb. Now gdb works with the 386.
+
 Tue May 28 17:21:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* Merge in changes from gdb-3.95 release.

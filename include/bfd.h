@@ -514,7 +514,7 @@ typedef struct bfd_target
   /* All the standard stuff */
   SDEF (boolean, _close_and_cleanup, (bfd *)); /* free any allocated data */
   SDEF (boolean, _bfd_set_section_contents, (bfd *, sec_ptr, PTR,
-					    file_ptr, bfd_size_type));
+					     file_ptr, bfd_size_type));
   SDEF (boolean, _bfd_get_section_contents, (bfd *, sec_ptr, PTR, 
 					     file_ptr, bfd_size_type));
   SDEF (boolean, _new_section_hook, (bfd *, sec_ptr));
@@ -542,6 +542,26 @@ typedef struct bfd_target
   SDEF (int,	 _bfd_stat_arch_elt, (bfd *, struct stat *));
 
   SDEF (int,	 _bfd_sizeof_headers, (bfd *, boolean));
+
+  /* Jumps for coff swapping */
+
+  SDEF(void, _bfd_coff_swap_aux_in,(
+       bfd            *abfd ,
+       AUXENT    *ext ,
+       int             type,
+       int             class ,
+       union internal_auxent  *in));
+
+  SDEF(void, _bfd_coff_swap_sym_in,(
+       bfd            *abfd ,
+       SYMENT *ext ,
+       struct internal_syment      *in));
+
+  SDEF(void, _bfd_coff_swap_lineno_in,(
+       bfd            *abfd,
+       LINENO *ext,
+       struct internal_lineno      *in));
+
 } bfd_target;
 
 /* The code that implements targets can initialize a jump table with this
@@ -582,6 +602,8 @@ CAT(NAME,_openr_next_archived_file),\
 CAT(NAME,_find_nearest_line),\
 CAT(NAME,_generic_stat_arch_elt),\
 CAT(NAME,_sizeof_headers)
+
+#define COFF_SWAP_TABLE coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
 
 /* User program access to BFD facilities */
 
@@ -762,6 +784,14 @@ PROTO(boolean,	bfd_scan_arch_mach,(CONST char *, enum bfd_architecture *,
 #define bfd_canonicalize_symtab(abfd, location) \
      BFD_SEND (abfd, _bfd_canonicalize_symtab, (abfd, location))
 
+#define bfd_coff_swap_lineno_in(abfd, ext, in) \
+  BFD_SEND(abfd, _bfd_coff_swap_lineno_in, (abfd, ext, in))
+
+#define bfd_coff_swap_sym_in(abfd, ext, in) \
+  BFD_SEND(abfd, _bfd_coff_swap_sym_in,(abfd, ext, in))
+
+#define bfd_coff_swap_aux_in(abfd, ext, type, class, in) \
+  BFD_SEND(abfd, _bfd_coff_swap_aux_in,(abfd, ext, type, class, in))
 
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))

@@ -93,7 +93,8 @@ _do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
 
-     JUMP_TABLE(coff)
+     JUMP_TABLE(coff),
+       COFF_SWAP_TABLE
 
   };
 

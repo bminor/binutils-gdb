@@ -85,5 +85,6 @@ _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs 
 	  bfd_false},
 	{bfd_false, coff_write_object_contents, /* bfd_write_contents */
 	  bfd_false, bfd_false},
-	JUMP_TABLE(coff)
+	JUMP_TABLE(coff),
+	  COFF_SWAP_TABLE
 };

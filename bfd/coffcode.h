@@ -78,8 +78,7 @@ DEFUN(set_index,(symbol, idx),
 */
 
 
-GDB_EXPORT
-void
+static void
 DEFUN(bfd_swap_reloc_in,(abfd, reloc_src, reloc_dst),
       bfd            *abfd AND
       RELOC *reloc_src AND
@@ -93,8 +92,8 @@ DEFUN(bfd_swap_reloc_in,(abfd, reloc_src, reloc_dst),
 #endif
 }
 
-GDB_EXPORT
- void
+
+static void
 DEFUN(bfd_swap_reloc_out,(abfd, reloc_src, reloc_dst),
       bfd            *abfd AND
       struct internal_reloc *reloc_src AND
@@ -109,7 +108,7 @@ DEFUN(bfd_swap_reloc_out,(abfd, reloc_src, reloc_dst),
 
 }
 
-GDB_EXPORT  void 
+static void
 DEFUN(bfd_swap_filehdr_in,(abfd, filehdr_src, filehdr_dst),
       bfd            *abfd AND
       FILHDR         *filehdr_src AND
@@ -140,9 +139,9 @@ DEFUN(bfd_swap_filehdr_out,(abfd, filehdr_in, filehdr_out),
 }
 
 
-GDB_EXPORT 
-void 
-DEFUN(bfd_coff_swap_sym_in,(abfd, ext, in),
+
+static void 
+DEFUN(coff_swap_sym_in,(abfd, ext, in),
       bfd            *abfd AND
       SYMENT *ext AND
       struct internal_syment      *in)
@@ -167,7 +166,7 @@ DEFUN(bfd_coff_swap_sym_in,(abfd, ext, in),
 }
 
 GDB_EXPORT void 
-DEFUN(bfd_coff_swap_sym_out,(abfd,in,  ext),
+DEFUN(coff_swap_sym_out,(abfd,in,  ext),
       bfd            *abfd AND
       struct internal_syment      *in AND
       SYMENT *ext)
@@ -193,8 +192,8 @@ DEFUN(bfd_coff_swap_sym_out,(abfd,in,  ext),
   bfd_h_put_8(abfd,  in->n_numaux , ext->e_numaux);
 }
 
-GDB_EXPORT void
-DEFUN(bfd_coff_swap_aux_in,(abfd, ext, type, class, in),
+static void
+DEFUN(coff_swap_aux_in,(abfd, ext, type, class, in),
       bfd            *abfd AND
       AUXENT    *ext AND
       int             type AND
@@ -245,7 +244,7 @@ DEFUN(bfd_coff_swap_aux_in,(abfd, ext, type, class, in),
 }
 
 GDB_EXPORT void
-DEFUN(bfd_coff_swap_aux_out,(abfd, in, type, class, ext),
+DEFUN(coff_swap_aux_out,(abfd, in, type, class, ext),
   bfd   *abfd AND
   union internal_auxent *in AND
   int    type AND
@@ -296,7 +295,7 @@ DEFUN(bfd_coff_swap_aux_out,(abfd, in, type, class, ext),
 }
 
 GDB_EXPORT void
-DEFUN(bfd_coff_swap_lineno_in,(abfd, ext, in),
+DEFUN(coff_swap_lineno_in,(abfd, ext, in),
       bfd            *abfd AND
       LINENO *ext AND
       struct internal_lineno      *in)
@@ -306,7 +305,7 @@ DEFUN(bfd_coff_swap_lineno_in,(abfd, ext, in),
 }
 
 GDB_EXPORT void
-DEFUN(bfd_coff_swap_lineno_out,(abfd, in, ext),
+DEFUN(coff_swap_lineno_out,(abfd, in, ext),
       bfd            *abfd AND
       struct internal_lineno      *in AND
       struct external_lineno *ext)
@@ -357,7 +356,7 @@ DEFUN(bfd_swap_aouthdr_out,(abfd, aouthdr_in, aouthdr_out),
 }
 
 GDB_EXPORT void 
-DEFUN(bfd_coff_swap_scnhdr_in,(abfd, scnhdr_ext, scnhdr_int),
+DEFUN(coff_swap_scnhdr_in,(abfd, scnhdr_ext, scnhdr_int),
       bfd            *abfd AND
       SCNHDR         *scnhdr_ext AND
       struct internal_scnhdr *scnhdr_int)
@@ -541,7 +540,7 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
     unsigned int    i;
     for (i = 0; i < nscns; i++) {
       struct internal_scnhdr tmp;
-      bfd_coff_swap_scnhdr_in(abfd, external_sections + i, &tmp);
+      coff_swap_scnhdr_in(abfd, external_sections + i, &tmp);
       make_a_section_from_file(abfd,&tmp);
     }
   }
@@ -1123,12 +1122,12 @@ bfd            *abfd)
 	    int             type = native->n_type;
 	    int             class =  native->n_sclass;
 	    SYMENT buf;
-	    bfd_coff_swap_sym_out(abfd, native, &buf);
+	    coff_swap_sym_out(abfd, native, &buf);
 	    bfd_write((PTR)& buf, 1, SYMESZ, abfd);
 	    for (j = 0; j != native->n_numaux;
 		 j++) {
 	      AUXENT buf1;
-	      bfd_coff_swap_aux_out(abfd,
+	      coff_swap_aux_out(abfd,
 				    (union internal_auxent *)(native + j + 1), type, class, &buf1);
 	      bfd_write((PTR) (native + j + 1), 1, AUXESZ, abfd);
 	    }
@@ -1221,13 +1220,13 @@ DEFUN(coff_write_linenumbers,(abfd),
 	    bzero( (PTR)&out, sizeof(out));
 	    out.l_lnno = 0;
 	    out.l_addr.l_symndx = l->u.offset;
-	    bfd_coff_swap_lineno_out(abfd, &out, &buff);
+	    coff_swap_lineno_out(abfd, &out, &buff);
 	    bfd_write((PTR) &buff, 1, LINESZ, abfd);
 	    l++;
 	    while (l->line_number) {
 	      out.l_lnno = l->line_number;
 	      out.l_addr.l_symndx = l->u.offset;
-	      bfd_coff_swap_lineno_out(abfd, &out, &buff);
+	      coff_swap_lineno_out(abfd, &out, &buff);
 	      bfd_write((PTR) &buff, 1, LINESZ, abfd);
 	      l++;
 	    }
@@ -1825,29 +1824,6 @@ DEFUN(offset_symbol_indices,(abfd, symtab, count, offset),
   return;
 }				/* offset_symbol_indices() */
 
-#if 0
-/* swap the entire symbol table - we c*/
-static void 
-swap_raw_symtab(abfd, raw_symtab)
-bfd            *abfd;
-SYMENT         *raw_symtab;
-  {
-    long            i;
-    SYMENT         *end = raw_symtab + bfd_get_symcount(abfd);
-    for (; raw_symtab < end; ++raw_symtab) {
-      bfd_coff_swap_sym(abfd, raw_symtab);
-      
-      for (i = raw_symtab->n_numaux; i; --i, ++raw_symtab) {
-	bfd_coff_swap_aux(abfd,
-			  (AUXENT *)(raw_symtab + 1),
-			  raw_symtab->n_type,
-			  raw_symtab->n_sclass);
-      }				/* swap all the aux entries */
-    }				/* walk the symbol table */
-    
-    return;
-  }				/* swap_raw_symtab() */
-#endif
 /*
 read a symbol table into freshly mallocated memory, swap it, and knit the
 symbol names into a normalized form. By normalized here I mean that all
@@ -1901,9 +1877,9 @@ bfd            *abfd)
   /* Swap all the raw entries */
   for (raw_src = raw, internal_ptr = internal; raw_src < raw_end; raw_src++, internal_ptr++) {
     unsigned int i;
-    bfd_coff_swap_sym_in(abfd, raw_src,internal_ptr);    
+    coff_swap_sym_in(abfd, raw_src,internal_ptr);    
     for (i = internal_ptr->n_numaux; i; --i, raw_src++, internal_ptr++) {
-      bfd_coff_swap_aux_in(abfd, (AUXENT *)(raw_src +1), internal_ptr->n_type,
+      coff_swap_aux_in(abfd, (AUXENT *)(raw_src +1), internal_ptr->n_type,
 			   internal_ptr->n_sclass, (union
 						    internal_auxent *)(internal_ptr +1));
     }
@@ -2043,7 +2019,7 @@ asection       *asect;
       
       while (counter < asect->lineno_count) {
 	struct internal_lineno dst;
-	bfd_coff_swap_lineno_in(abfd, src, &dst);
+	coff_swap_lineno_in(abfd, src, &dst);
 	cache_ptr->line_number = dst.l_lnno;
 	
 	if (cache_ptr->line_number == 0) {
@@ -2071,52 +2047,6 @@ asection       *asect;
     return true;
   }				/* coff_slurp_line_table() */
 
-#if 0
-static struct internal_syment  *
-DEFUN(find_next_file_symbol,(abfd, current, end),
-      bfd *abfd AND
-      struct internal_syment *current AND
-      struct internal_syment *end)
-{
-  current += current->n_numaux + 1;
-    
-  while (current < end) {
-    if (current->n_sclass== C_FILE) {
-      return (current);
-    }	
-    current += current->n_numaux + 1;
-  }
-  return end;
-}
-#endif
-
-/*
-Note that C_FILE symbols can, and some do, have more than 1 aux entry.
-*/
-#if 0
-static void
-DEFUN(force_indices_file_symbol_relative,(abfd, symtab),
-      bfd            *abfd AND
-     struct internal_syment         *symtab)
-{
-  struct internal_syment         *end = symtab + bfd_get_symcount(abfd);
-  struct internal_syment         *current;
-  struct internal_syment         *next;
-  /* the first symbol had damn well better be a C_FILE. */
-  BFD_ASSERT(symtab->n_sclass == C_FILE);
-    
-  for (current = find_next_file_symbol(abfd, symtab, end);
-       current < end;
-       current = next) {
-    offset_symbol_indices(abfd, current,
-			  ((next =
-			    find_next_file_symbol(abfd, current,
-						  end)) - current),
-			  symtab - current);
-  }
-  return;
-}	
-#endif
 static          boolean
 DEFUN(coff_slurp_symbol_table,(abfd),
       bfd            *abfd)

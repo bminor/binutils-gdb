@@ -82,7 +82,7 @@ static reloc_howto_type howto_table[] =
 
 
 #define BADMAG(x) MC88BADMAG(x)
-#include "coff-code.h"
+#include "coffcode.h"
 
 
 
@@ -115,5 +115,6 @@ _do_getb64, _do_putb64,   _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdr
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(coff)
+  JUMP_TABLE(coff),
+COFF_SWAP_TABLE
 };

@@ -283,9 +283,9 @@ struct internal_syment {
 #define DT_FCN		(2)	/* function */
 #define DT_ARY		(3)	/* array */
 
-#define N_BTMASK	(0x1f)
-#define N_TMASK		(0x60)
-#define N_BTSHFT	(5)
+#define N_BTMASK	(0xf)
+#define N_TMASK		(0x30)
+#define N_BTSHFT	(4)
 #define N_TSHIFT	(2)
   
 #define BTYPE(x)	((x) & N_BTMASK)
