@@ -1,3 +1,10 @@
+2001-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* peicode.h (coff_swap_scnhdr_in): For sections containing
+	uninitialised data, only set their size to s_paddr if this does
+	not reset their size to zero.  MS's latest compilers will set
+	s_paddr to zero.
+
 2001-06-20  Bo Thorsen  <bo@suse.co.uk>
 
         * elf64-x86-64.c (elf64_x86_64_relocate_section): Fix linking of
