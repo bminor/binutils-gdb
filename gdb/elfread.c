@@ -190,6 +190,9 @@ record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
     case mst_text:
     case mst_file_text:
       section = SECT_OFF_TEXT;
+#ifdef SMASH_TEXT_ADDRESS
+      SMASH_TEXT_ADDRESS (address);
+#endif
       break;
     case mst_data:
     case mst_file_data:

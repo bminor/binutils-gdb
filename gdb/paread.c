@@ -158,7 +158,9 @@ pa_symtab_read (abfd, addr, objfile)
 	    case ST_MILLICODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_text;
-	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
+#ifdef SMASH_TEXT_ADDRESS
+	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
+#endif
 	      break;
 	    case ST_DATA:
 	      symname = bufp->name.n_strx + stringtab;
@@ -183,7 +185,9 @@ pa_symtab_read (abfd, addr, objfile)
 	    case ST_CODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
-	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
+#ifdef SMASH_TEXT_ADDRESS
+	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
+#endif
 
 	    check_strange_names:
 	      /* GAS leaves labels in .o files after assembling.  At
@@ -207,7 +211,9 @@ pa_symtab_read (abfd, addr, objfile)
 	    case ST_MILLICODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
-	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
+#ifdef SMASH_TEXT_ADDRESS
+	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
+#endif
 	      break;
 
 	    case ST_DATA:

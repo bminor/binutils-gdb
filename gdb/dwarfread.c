@@ -1989,6 +1989,11 @@ process_dies (thisdie, enddie, objfile)
 	    {
 	      nextdie = thisdie + di.die_length;
 	    }
+#ifdef SMASH_TEXT_ADDRESS
+	  /* I think that these are always text, not data, addresses.  */
+	  SMASH_TEXT_ADDRESS (di.at_low_pc);
+	  SMASH_TEXT_ADDRESS (di.at_high_pc);
+#endif
 	  switch (di.die_tag)
 	    {
 	    case TAG_compile_unit:

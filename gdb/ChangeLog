@@ -1,3 +1,9 @@
+Fri Jan 28 10:40:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/pa/tm-hppa.h: Define macro SMASH_TEXT_ADDRESS.
+	* elfread.c (record_minimal_symbol_and_info),
+	dwarfread.c (process_dies), paread.c (pa_symtab_read): Use it.
+
 Thu Jan 27 15:12:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* i386-stub.c: Add ".text" right before "mem_fault:".

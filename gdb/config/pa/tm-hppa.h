@@ -404,11 +404,14 @@ CORE_ADDR hppa_fix_call_dummy();
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
     sp = hppa_push_arguments(nargs, args, sp, struct_return, struct_addr)
-
-/* Symbol files have two symbol tables.  Rather than do this right,
-   like the ELF symbol reading code, massive hackery was added
-   to dbxread.c and partial-stab.h.  This flag turns on that
-   hackery, which should all go away FIXME FIXME FIXME FIXME now.  */
+
+/* The low two bits of the PC on the PA contain the privilege level.  Some
+   genius implementing a (non-GCC) compiler apparently decided this means
+   that "addresses" in a text section therefore include a privilege level,
+   and thus symbol tables should contain these bits.  This seems like a
+   bonehead thing to do--anyway, it seems to work for our purposes to just
+   ignore those bits.  */
+#define SMASH_TEXT_ADDRESS(addr) ((addr) &= ~0x3)
 
 #define	GDB_TARGET_IS_HPPA
 
