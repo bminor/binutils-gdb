@@ -1,3 +1,15 @@
+Thu Feb  6 12:36:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (struct bincl_file): Add next_stack field.
+	(push_bincl): Put the new file on both bincl_list and
+	bincl_stack.  Clear the file_types field.
+	(pop_bincl): Use the next_stack field when popping the stack.
+	Don't put the file on bincl_list.
+	(find_excl): Include the file name when warning about an unfound
+	N_EXCL.
+
+	* debug.c (debug_type_samep): Don't crash if we are passed NULL.
+
 Thu Feb  6 11:54:24 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* objcopy.1: Add missing space after .B.
