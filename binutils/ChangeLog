@@ -1,3 +1,13 @@
+2002-05-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* rcparse.y: Remove newcmd rule.  Move rcparse_discard_strings
+	calls to rules that need no lookahead.  Check for no lookahead.
+
+2002-05-06  Borut Razem  <borut.razem@siol.net>
+
+	* rclex.l (get_string): Correct "strings" list handling.
+	* resrc.c (read_rc_file): Discard strings.
+
 2002-05-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ar.c (replace_members): Remove unused var.  Formatting fix.

@@ -452,7 +452,7 @@ get_string (len)
   as->s = xmalloc (len);
 
   as->next = strings;
-  strings = as->next;
+  strings = as;
 
   return as->s;
 }

@@ -481,6 +481,7 @@ read_rc_file (filename, preprocessor, preprocargs, language, use_temp_file)
     rcparse_set_language (language);
   yyin = cpp_pipe;
   yyparse ();
+  rcparse_discard_strings ();
 
   close_input_stream ();
   

@@ -153,28 +153,21 @@ static unsigned long class;
 
 input:
 	  /* empty */
-	| input newcmd accelerator
-	| input newcmd bitmap
-	| input newcmd cursor
-	| input newcmd dialog
-	| input newcmd font
-	| input newcmd icon
-	| input newcmd language
-	| input newcmd menu
-	| input newcmd menuex
-	| input newcmd messagetable
-	| input newcmd rcdata
-	| input newcmd stringtable
-	| input newcmd user
-	| input newcmd versioninfo
-	| input newcmd IGNORED_TOKEN
-	;
-
-newcmd:
-	  /* empty */
-	  {
-	    rcparse_discard_strings ();
-	  }
+	| input accelerator
+	| input bitmap
+	| input cursor
+	| input dialog
+	| input font
+	| input icon
+	| input language
+	| input menu
+	| input menuex
+	| input messagetable
+	| input rcdata
+	| input stringtable
+	| input user
+	| input versioninfo
+	| input IGNORED_TOKEN
 	;
 
 /* Accelerator resources.  */
@@ -183,6 +176,9 @@ accelerator:
 	  id ACCELERATORS suboptions BEG acc_entries END
 	  {
 	    define_accelerator ($1, &$3, $5);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -309,6 +305,9 @@ bitmap:
 	  id BITMAP memflags_move file_name
 	  {
 	    define_bitmap ($1, &$3, $4);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -318,6 +317,9 @@ cursor:
 	  id CURSOR memflags_move_discard file_name
 	  {
 	    define_cursor ($1, &$3, $4);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -345,6 +347,9 @@ dialog:
 	    styles BEG controls END
 	  {
 	    define_dialog ($1, &sub_res_info, &dialog);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	| id DIALOGEX memflags_move exstyle posnumexpr cnumexpr cnumexpr
 	    cnumexpr
@@ -369,6 +374,9 @@ dialog:
 	    styles BEG controls END
 	  {
 	    define_dialog ($1, &sub_res_info, &dialog);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	| id DIALOGEX memflags_move exstyle posnumexpr cnumexpr cnumexpr
 	    cnumexpr cnumexpr
@@ -394,6 +402,9 @@ dialog:
 	    styles BEG controls END
 	  {
 	    define_dialog ($1, &sub_res_info, &dialog);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -902,6 +913,9 @@ font:
 	  id FONT memflags_move_discard file_name
 	  {
 	    define_font ($1, &$3, $4);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -911,6 +925,9 @@ icon:
 	  id ICON memflags_move_discard file_name
 	  {
 	    define_icon ($1, &$3, $4);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -930,6 +947,9 @@ menu:
 	  id MENU suboptions BEG menuitems END
 	  {
 	    define_menu ($1, &$3, $5);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -1017,6 +1037,9 @@ menuex:
 	  id MENUEX suboptions BEG menuexitems END
 	  {
 	    define_menu ($1, &$3, $5);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -1083,6 +1106,9 @@ messagetable:
 	  id MESSAGETABLE memflags_move file_name
 	  {
 	    define_messagetable ($1, &$3, $4);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -1092,6 +1118,9 @@ rcdata:
 	  id RCDATA suboptions BEG optrcdata_data END
 	  {
 	    define_rcdata ($1, &$3, $5.first);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -1171,10 +1200,16 @@ string_data:
 	| string_data numexpr QUOTEDSTRING
 	  {
 	    define_stringtable (&sub_res_info, $2, $3);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	| string_data numexpr ',' QUOTEDSTRING
 	  {
 	    define_stringtable (&sub_res_info, $2, $4);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -1185,10 +1220,16 @@ user:
 	  id id suboptions BEG optrcdata_data END
 	  {
 	    define_user_data ($1, $2, &$3, $5.first);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	| id id suboptions file_name
 	  {
 	    define_user_file ($1, $2, &$3, $4);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
@@ -1198,6 +1239,9 @@ versioninfo:
 	  id VERSIONINFO fixedverinfo BEG verblocks END
 	  {
 	    define_versioninfo ($1, language, $3, $5);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
 	  }
 	;
 
