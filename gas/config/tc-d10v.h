@@ -1,5 +1,5 @@
 /* tc-d10v.h -- Header file for tc-d10v.c.
-   Copyright 1996, 1997, 1998, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.

@@ -1,3 +1,36 @@
+2002-04-03  Tom Rix  <trix@redhat.com>
+
+	* config/tc-d10v.c (d10v_insert_operand): Fix warning in as_bad_where.
+	(build_insn): Same.
+	(find_opcode): Fix warning in as_warn.
+	* config/tc-d10v.h: Update Copyright.
+
+2002-04-03  Alan Matsuoka <alanm@redhat.com>
+	    Tom Rix  <trix@redhat.com>
+
+	From Jeff Knaggs <jknaggs@redhat.com>
+	* config/tc-d10v.c (check_resource_conflict): New function to 
+	check for resource conflicts.
+
+	From Jason Eckhardt  <jle@redhat.com>
+        * config/tc-d10v.c (build_insn): Check for unresolved imm4 or
+        imm3 fields.
+        * config/tc-d10v.c (find_opcode): Emit a warning if one of the
+        reserved control registers is used.
+        * config/tc-d10v.c (build_insn): Check for unresolved imm4 or
+        imm3 fields.
+
+	From 2001-03-28  Diego Novillo  <dnovillo@redhat.com>
+        * tc-d10v.c (parallel_ok): Prevent packing only if the first
+        instruction cannot be packed.
+
+	From 2001-03-30  Diego Novillo  <dnovillo@redhat.com>
+        * gas/config/tc-d10v.c (check_resource_conflict): Only check
+        write-write conflicts.
+        (md_assemble): Reformat introductory comment.
+        * opcodes/d10v-opc.c (d10v_opcodes): `btsti' does not modify its
+        arguments.
+
 2002-04-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (resolve_symbol_value <O_uminus, O_bit_not,

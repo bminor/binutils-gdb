@@ -1,5 +1,5 @@
 /* tc-d10v.c -- Assembler code for the Mitsubishi D10V
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -25,7 +25,6 @@
 #include "subsegs.h"
 #include "opcode/d10v.h"
 #include "elf/ppc.h"
-//#include "read.h"
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -99,6 +98,12 @@ static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_ty
 static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1,
 				struct d10v_opcode *opcode2, unsigned long insn2,
 				packing_type exec_type));
+
+static void check_resource_conflict PARAMS ((struct d10v_opcode *opcode1, 
+					     unsigned long insn1, 
+					     struct d10v_opcode *opcode2, 
+					     unsigned long insn2));
+
 static symbolS * find_symbol_matching_register PARAMS ((expressionS *));
 
 struct option md_longopts[] =
@@ -578,7 +583,7 @@ d10v_insert_operand (insn, op_type, value, left, fix)
   /* Truncate to the proper number of bits.  */
   if (check_range (value, bits, d10v_operands[op_type].flags))
     as_bad_where (fix->fx_file, fix->fx_line,
-		  _("operand out of range: %d"), value);
+		  _("operand out of range: %ld"), (long) value);
 
   value &= 0x7FFFFFFF >> (31 - bits);
   insn |= (value << shift);
@@ -660,14 +665,14 @@ build_insn (opcode, opers, insn)
 
       /* Truncate to the proper number of bits.  */
       if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
-	as_bad (_("operand out of range: %d"), number);
+	as_bad (_("operand out of range: %lu"), number);
       number &= 0x7FFFFFFF >> (31 - bits);
       insn = insn | (number << shift);
     }
 
-  /* kludge: for DIVS, we need to put the operands in twice  */
-  /* on the second pass, format is changed to LONG_R to force
-     the second set of operands to not be shifted over 15.  */
+  /* kludge: for DIVS, we need to put the operands in twice on the second 
+     pass, format is changed to LONG_R to force the second set of operands 
+     to not be shifted over 15.  */
   if ((opcode->opcode == OPCODE_DIVS) && (format == LONG_L))
     insn = build_insn (opcode, opers, insn);
 
@@ -723,9 +728,9 @@ write_1_short (opcode, insn, fx)
   if (opcode->exec_type & PARONLY)
     as_fatal (_("Instruction must be executed in parallel with another instruction."));
 
-  /* The other container needs to be NOP.  */
-  /* According to 4.3.1: for FM=00, sub-instructions performed only
-     by IU cannot be encoded in L-container.  */
+  /* The other container needs to be NOP.  
+     According to 4.3.1: for FM=00, sub-instructions performed only by IU 
+     cannot be encoded in L-container.  */
   if (opcode->unit == IU)
     insn |= FM00 | (NOP << 15);		/* Right container.  */
   else
@@ -787,8 +792,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     case PACK_UNSPEC:	/* Order not specified.  */
       if (opcode1->exec_type & ALONE)
 	{
-	  /* Case of a short branch on a separate GAS line.
-	     Pack with NOP.  */
+	  /* Case of a short branch on a separate GAS line.  Pack with NOP.  */
 	  write_1_short (opcode1, insn1, fx->next);
 	  return 1;
 	}
@@ -833,6 +837,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	}
       else
 	insn = FM00 | (insn1 << 15) | insn2;
+      check_resource_conflict (opcode1, insn1, opcode2, insn2);
       break;
 
     case PACK_LEFT_RIGHT:
@@ -939,7 +944,8 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
   /* If this is auto parallization, and either instruction is a branch,
      don't parallel.  */
   if (exec_type == PACK_UNSPEC
-      && (op1->exec_type & ALONE || op2->exec_type & ALONE))
+      && (op1->exec_type & (ALONE | BRANCH) 
+	  || op2->exec_type & (ALONE | BRANCH)))
     return 0;
 
   /* The idea here is to create two sets of bitmasks (mod and used)
@@ -957,12 +963,12 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
      and the second reads the PSW (which includes C, F0, and F1), then
      they cannot operate safely in parallel.  */
 
-  /* The bitmasks (mod and used) look like this (bit 31 = MSB).  */
-  /* r0-r15	  0-15   */
-  /* a0-a1	  16-17  */
-  /* cr (not psw) 18     */
-  /* psw	  19     */
-  /* mem	  20     */
+  /* The bitmasks (mod and used) look like this (bit 31 = MSB). 
+     r0-r15	  0-15   
+     a0-a1	  16-17
+     cr (not psw) 18
+     psw	  19
+     mem	  20  */
 
   for (j = 0; j < 2; j++)
     {
@@ -1042,6 +1048,155 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
   return 0;
 }
 
+/* Determine if there are any resource conflicts among two manually
+   parallelized instructions.  Some of this was lifted from parallel_ok.  */
+
+static void 
+check_resource_conflict (op1, insn1, op2, insn2)
+     struct d10v_opcode *op1, *op2;
+     unsigned long insn1, insn2;
+{
+  int i, j, flags, mask, shift, regno;
+  unsigned long ins, mod[2], used[2];
+  struct d10v_opcode *op;
+
+  if ((op1->exec_type & SEQ)
+      || ! ((op1->exec_type & PAR) || (op1->exec_type & PARONLY)))
+    {
+      as_warn (_("packing conflict: %s must dispatch sequentially"),
+	      op1->name);
+      return;
+    }
+
+  if ((op2->exec_type & SEQ)
+      || ! ((op2->exec_type & PAR) || (op2->exec_type & PARONLY)))
+    {
+      as_warn (_("packing conflict: %s must dispatch sequentially"),
+	      op2->name);
+      return;
+    }
+
+  /* The idea here is to create two sets of bitmasks (mod and used)
+     which indicate which registers are modified or used by each
+     instruction.  The operation can only be done in parallel if
+     instruction 1 and instruction 2 modify different registers, and
+     the first instruction does not modify registers that the second
+     is using (The second instruction can modify registers that the
+     first is using as they are only written back after the first
+     instruction has completed).  Accesses to control registers
+     and memory are treated as accesses to a single register.  So if
+     both instructions write memory or if the first instruction writes
+     memory and the second reads, then they cannot be done in
+     parallel. We treat reads to the PSW (which includes C, F0, and F1)
+     in isolation. So simultaneously writing C and F0 in two different
+     sub-instructions is permitted.  */
+
+  /* The bitmasks (mod and used) look like this (bit 31 = MSB).
+     r0-r15	  0-15
+     a0-a1	  16-17
+     cr (not psw) 18
+     psw(other)   19
+     mem	  20
+     psw(C flag)  21
+     psw(F0 flag) 22  */
+
+  for (j = 0; j < 2; j++)
+    {
+      if (j == 0)
+	{
+	  op = op1;
+	  ins = insn1;
+	}
+      else
+	{
+	  op = op2;
+	  ins = insn2;
+	}
+      mod[j] = used[j] = 0;
+      if (op->exec_type & BRANCH_LINK)
+	mod[j] |= 1 << 13;
+
+      for (i = 0; op->operands[i]; i++)
+	{
+	  flags = d10v_operands[op->operands[i]].flags;
+	  shift = d10v_operands[op->operands[i]].shift;
+	  mask = 0x7FFFFFFF >> (31 - d10v_operands[op->operands[i]].bits);
+	  if (flags & OPERAND_REG)
+	    {
+	      regno = (ins >> shift) & mask;
+	      if (flags & (OPERAND_ACC0 | OPERAND_ACC1))
+		regno += 16;
+	      else if (flags & OPERAND_CONTROL)	/* mvtc or mvfc */
+		{ 
+		  if (regno == 0)
+		    regno = 19;
+		  else
+		    regno = 18; 
+		}
+	      else if (flags & OPERAND_FFLAG)
+		regno = 22;
+	      else if (flags & OPERAND_CFLAG)
+		regno = 21;
+	      
+            if ( flags & OPERAND_DEST )
+		{
+		  mod[j] |= 1 << regno;
+		  if (flags & OPERAND_EVEN)
+		    mod[j] |= 1 << (regno + 1);
+		}
+            else
+              {
+                used[j] |= 1 << regno ;
+                if (flags & OPERAND_EVEN)
+                  used[j] |= 1 << (regno + 1);
+
+                /* Auto inc/dec also modifies the register.  */
+                if (op->operands[i+1] != 0
+                    && (d10v_operands[op->operands[i+1]].flags
+                        & (OPERAND_PLUS | OPERAND_MINUS)) != 0)
+                  mod[j] |= 1 << regno;
+              }
+	    }
+	  else if (flags & OPERAND_ATMINUS)
+	    {
+	      /* SP implicitly used/modified.  */
+	      mod[j] |= 1 << 15;
+	      used[j] |= 1 << 15;
+	    }
+	}
+      if (op->exec_type & RMEM)
+	used[j] |= 1 << 20;
+      else if (op->exec_type & WMEM)
+	mod[j] |= 1 << 20;
+      else if (op->exec_type & RF0)
+	used[j] |= 1 << 22;
+      else if (op->exec_type & WF0)
+	mod[j] |= 1 << 22;
+      else if (op->exec_type & WCAR)
+	mod[j] |= 1 << 21;
+    }
+  if ((mod[0] & mod[1]) == 0)
+    return;
+  else
+    {
+      unsigned long x;
+      x = mod[0] & mod[1];
+
+      for (j = 0; j <= 15; j++)
+	if (x & (1 << j))
+	  as_warn (_("resource conflict (R%d)"), j);
+      for (j = 16; j <= 17; j++)
+	if (x & (1 << j))
+	  as_warn (_("resource conflict (A%d)"), j - 16);
+      if (x & (1 << 19))
+	as_warn (_("resource conflict (PSW)"));
+      if (x & (1 << 21))
+	as_warn (_("resource conflict (C flag)"));
+      if (x & (1 << 22))
+	as_warn (_("resource conflict (F flag)"));
+    }
+}
+
 /* This is the main entry point for the machine-dependent assembler.
    STR points to a machine-dependent instruction.  This function is
    supposed to emit the frags/bytes it assembles to.  For the D10V, it
@@ -1083,7 +1238,8 @@ md_assemble (str)
 		extype = PACK_RIGHT_LEFT;
 	    }
 	}
-      /* STR2 points to the separator, if there is one.  */
+
+      /* str2 points to the separator, if there is one.  */
       if (str2)
 	{
 	  *str2 = 0;
@@ -1138,7 +1294,8 @@ md_assemble (str)
     d10v_cleanup ();
 
   if (prev_opcode
-      && (write_2_short (prev_opcode, prev_insn, opcode, insn, extype, fixups) == 0))
+      && (0 == write_2_short (prev_opcode, prev_insn, opcode, insn, extype, 
+			      fixups)))
     {
       /* No instructions saved.  */
       prev_opcode = NULL;
@@ -1206,7 +1363,7 @@ do_assemble (str, opcode)
   return (insn);
 }
 
-/* Find the symbol which has the same name as the register in EXP.  */
+/* Find the symbol which has the same name as the register in exp.  */
 
 static symbolS *
 find_symbol_matching_register (exp)
@@ -1296,7 +1453,7 @@ find_opcode (opcode, myops)
 	      if (myops[opnum].X_op == O_constant)
 		{
 		  if (!check_range (myops[opnum].X_add_number, bits, flags))
-		    return next_opcode;
+		    break;
 		}
 	      else
 		{
@@ -1341,109 +1498,112 @@ find_opcode (opcode, myops)
 			{
 			  bits += 2;
 			  if (!check_range (value, bits, flags))
-			    return next_opcode;
+			    break;
 			}
 		    }
 		  else if (!check_range (value, bits, flags))
-		    return next_opcode;
+		    break;
 		}
 	      next_opcode++;
 	    }
-	  as_fatal (_("value out of range"));
+
+	  if (opcode->operands [i + 1] == 0)
+	    as_fatal (_("value out of range"));
+	  else
+	    opcode = next_opcode;
 	}
       else
 	{
 	  /* Not a constant, so use a long instruction.  */
-	  return opcode + 2;
+	  opcode += 2;
 	}
     }
-  else
+
+  match = 0;
+  
+  /* Now search the opcode table table for one with operands
+     that matches what we've got.  */
+  while (!match)
     {
-      match = 0;
-      /* Now search the opcode table table for one with operands
-	 that matches what we've got.  */
-      while (!match)
+      match = 1;
+      for (i = 0; opcode->operands[i]; i++)
 	{
-	  match = 1;
-	  for (i = 0; opcode->operands[i]; i++)
+	  int flags = d10v_operands[opcode->operands[i]].flags;
+	  int X_op = myops[i].X_op;
+	  int num = myops[i].X_add_number;
+
+	  if (X_op == 0)
 	    {
-	      int flags = d10v_operands[opcode->operands[i]].flags;
-	      int X_op = myops[i].X_op;
-	      int num = myops[i].X_add_number;
+	      match = 0;
+	      break;
+	    }
 
-	      if (X_op == 0)
+	  if (flags & OPERAND_REG)
+	    {
+	      if ((X_op != O_register)
+		  || (num & ~flags
+		      & (OPERAND_GPR | OPERAND_ACC0 | OPERAND_ACC1
+			 | OPERAND_FFLAG | OPERAND_CFLAG
+			 | OPERAND_CONTROL))
+		  || ((flags & OPERAND_SP) && ! (num & OPERAND_SP)))
 		{
 		  match = 0;
 		  break;
-		}
-
-	      if (flags & OPERAND_REG)
-		{
-		  if ((X_op != O_register)
-		      || (num & ~flags
-			  & (OPERAND_GPR | OPERAND_ACC0 | OPERAND_ACC1
-			     | OPERAND_FFLAG | OPERAND_CFLAG
-			     | OPERAND_CONTROL))
-		      || ((flags & OPERAND_SP) && ! (num & OPERAND_SP)))
-		    {
-		      match = 0;
-		      break;
-		    }
-		}
-
-	      if (((flags & OPERAND_MINUS)   && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
-		  ((flags & OPERAND_PLUS)    && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
-		  ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
-		  ((flags & OPERAND_ATPAR)   && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
-		  ((flags & OPERAND_ATSIGN)  && ((X_op != O_absent) || ((num != OPERAND_ATSIGN) && (num != OPERAND_ATPAR)))))
-		{
-		  match = 0;
-		  break;
-		}
-
-	      /* Unfortunatly, for the indirect operand in
-		 instructions such as ``ldb r1, @(c,r14)'' this
-		 function can be passed X_op == O_register (because
-		 'c' is a valid register name).  However we cannot
-		 just ignore the case when X_op == O_register but
-		 flags & OPERAND_REG is null, so we check to see if a
-		 symbol of the same name as the register exists.  If
-		 the symbol does exist, then the parser was unable to
-		 distinguish the two cases and we fix things here.
-		 (Ref: PR14826)  */
-
-	      if (!(flags & OPERAND_REG) && (X_op == O_register))
-		{
-		  symbolS *sym = find_symbol_matching_register (&myops[i]);
-
-		  if (sym != NULL)
-		    {
-		      myops[i].X_op = X_op = O_symbol;
-		      myops[i].X_add_symbol = sym;
-		    }
-		  else
-		    as_bad
-		      (_("illegal operand - register name found where none expected"));
 		}
 	    }
 
-	  /* We're only done if the operands matched so far AND there
-	     are no more to check.  */
-	  if (match && myops[i].X_op == 0)
-	    break;
-	  else
-	    match = 0;
+	  if (((flags & OPERAND_MINUS)   && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
+	      ((flags & OPERAND_PLUS)    && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
+	      ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
+	      ((flags & OPERAND_ATPAR)   && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
+	      ((flags & OPERAND_ATSIGN)  && ((X_op != O_absent) || ((num != OPERAND_ATSIGN) && (num != OPERAND_ATPAR)))))
+	    {
+	      match = 0;
+	      break;
+	    }
 
-	  next_opcode = opcode + 1;
+	  /* Unfortunatly, for the indirect operand in instructions such 
+	     as ``ldb r1, @(c,r14)'' this function can be passed 
+	     X_op == O_register (because 'c' is a valid register name).  
+	     However we cannot just ignore the case when X_op == O_register 
+	     but flags & OPERAND_REG is null, so we check to see if a symbol 
+	     of the same name as the register exists.  If the symbol does 
+	     exist, then the parser was unable to distinguish the two cases 
+	     and we fix things here. (Ref: PR14826)  */
 
-	  if (next_opcode->opcode == 0)
-	    break;
+	  if (!(flags & OPERAND_REG) && (X_op == O_register))
+	    {
+	      symbolS * sym;
+		  
+	      sym = find_symbol_matching_register (& myops[i]);
 
-	  if (strcmp (next_opcode->name, opcode->name))
-	    break;
-
-	  opcode = next_opcode;
+	      if (sym != NULL)
+		{
+		  myops[i].X_op = X_op = O_symbol;
+		  myops[i].X_add_symbol = sym;
+		}
+	      else
+		as_bad
+		  (_("illegal operand - register name found where none expected"));
+	    }
 	}
+
+      /* We're only done if the operands matched so far AND there
+	     are no more to check.  */
+      if (match && myops[i].X_op == 0)
+	break;
+      else
+	match = 0;
+
+      next_opcode = opcode + 1;
+
+      if (next_opcode->opcode == 0)
+	break;
+
+      if (strcmp (next_opcode->name, opcode->name))
+	break;
+
+      opcode = next_opcode;
     }
 
   if (!match)
@@ -1474,6 +1634,15 @@ find_opcode (opcode, myops)
 	      myops[i].X_op_symbol = NULL;
 	    }
 	}
+      if ((d10v_operands[opcode->operands[i]].flags & OPERAND_CONTROL)
+	  && (myops[i].X_add_number == OPERAND_CONTROL + 4
+	      || myops[i].X_add_number == OPERAND_CONTROL + 5
+	      || myops[i].X_add_number == OPERAND_CONTROL + 6
+	      || myops[i].X_add_number == OPERAND_CONTROL + 12
+	      || myops[i].X_add_number == OPERAND_CONTROL + 13
+	      || myops[i].X_add_number == OPERAND_CONTROL + 15))
+	as_warn (_("cr%ld is a reserved control register"),
+		 myops[i].X_add_number - OPERAND_CONTROL);
     }
   return opcode;
 }
@@ -1503,9 +1672,9 @@ tc_gen_reloc (seg, fixp)
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     reloc->address = fixp->fx_offset;
-
+  
   reloc->addend = fixp->fx_addnumber;
-
+  
   return reloc;
 }
 
@@ -1595,6 +1764,19 @@ md_apply_fix3 (fixP, valP, seg)
     case BFD_RELOC_D10V_10_PCREL_L:
     case BFD_RELOC_D10V_10_PCREL_R:
     case BFD_RELOC_D10V_18_PCREL:
+      /* If the fix is relative to a global symbol, not a section
+	 symbol, then ignore the offset.
+         XXX - Do we have to worry about branches to a symbol + offset ?  */
+      if (fixP->fx_addsy != NULL
+	  && S_IS_EXTERN (fixP->fx_addsy) )
+        {
+          segT fseg = S_GET_SEGMENT (fixP->fx_addsy);
+          segment_info_type *segf = seg_info(fseg);
+
+	  if ( segf && segf->sym != fixP->fx_addsy)
+	    value = 0;
+        }
+      /* Drop through.  */
     case BFD_RELOC_D10V_18:
       /* Instruction addresses are always right-shifted by 2.  */
       value >>= AT_WORD_RIGHT_SHIFT;
@@ -1607,8 +1789,10 @@ md_apply_fix3 (fixP, valP, seg)
 	  rep = (struct d10v_opcode *) hash_find (d10v_hash, "rep");
 	  repi = (struct d10v_opcode *) hash_find (d10v_hash, "repi");
 	  if ((insn & FM11) == FM11
-	      && (  (repi != NULL && (insn & repi->mask) == (unsigned) repi->opcode)
-		  || (rep != NULL && (insn & rep->mask) == (unsigned) rep->opcode))
+	      && ((repi != NULL 
+		   && (insn & repi->mask) == (unsigned) repi->opcode)
+		  || (rep != NULL 
+		      && (insn & rep->mask) == (unsigned) rep->opcode))
 	      && value < 4)
 	    as_fatal
 	      (_("line %d: rep or repi must include at least 4 instructions"),
@@ -1669,15 +1853,14 @@ d10v_cleanup ()
 	subseg_set (prev_seg, prev_subseg);
 
       write_1_short (prev_opcode, prev_insn, fixups->next);
-
       subseg_set (seg, subseg);
       prev_opcode = NULL;
     }
   return 1;
 }
 
-/* Like normal .word, except support @word.  */
-/* Clobbers input_line_pointer, checks end-of-line.  */
+/* Like normal .word, except support @word.
+   Clobbers input_line_pointer, checks end-of-line.  */
 
 static void
 d10v_dot_word (dummy)
@@ -1720,8 +1903,8 @@ d10v_dot_word (dummy)
    compatibility problem by simply ignoring any '#' at the beginning
    of an operand.  */
 
-/* Operands that begin with '#' should fall through to here.  */
-/* From expr.c.  */
+/* Operands that begin with '#' should fall through to here.
+   From expr.c.  */
 
 void
 md_operand (expressionP)
