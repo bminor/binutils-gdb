@@ -1,3 +1,7 @@
+2001-05-23  Alan Modra  <amodra@one.net.au>
+
+	* gas/elf/ehopt0.d: Tweak for bigendian targets.
+
 2001-05-14  Richard Henderson  <rth@redhat.com>
 
 	* gas/elf/ehopt0.s: New.
