@@ -175,10 +175,13 @@ const struct m68k_opcode m68k_opcodes[] =
 {"jle",		one(0067400),	one(0177400), "Bg", m68000up | mcf5200 },
 
 {"bchg",	one(0000500),	one(0170700), "Dd$s", m68000up | mcf5200 },
-{"bchg",	one(0004100),	one(0177700), "#b$s", m68000up | mcf5200 },
+{"bchg",	one(0004100),	one(0177700), "#b$s", m68000up },
+{"bchg",	one(0004100),	one(0177700), "#bqs", mcf5200 },
 
-{"bclr",	one(0000600),	one(0170700), "Dd$s", m68000up | mcf5200 },
-{"bclr",	one(0004200),	one(0177700), "#b$s", m68000up | mcf5200 },
+{"bclr",	one(0000600),	one(0170700), "Dd$s", m68000up },
+{"bclr",	one(0000600),	one(0170700), "Ddvs", mcf5200 },
+{"bclr",	one(0004200),	one(0177700), "#b$s", m68000up },
+{"bclr",	one(0004200),	one(0177700), "#bqs", mcf5200 },
 
 {"bfchg",	two(0165300, 0), two(0177700, 0170000),	"?sO2O3",   m68020up },
 {"bfclr",	two(0166300, 0), two(0177700, 0170000),	"?sO2O3",   m68020up },
@@ -197,15 +200,18 @@ const struct m68k_opcode m68k_opcodes[] =
 {"bral",	one(0060377),	one(0177777), "BL", m68020up | cpu32 },
 {"bras",	one(0060000),	one(0177400), "BB", m68000up | mcf5200 },
 
-{"bset",	one(0000700),	one(0170700), "Dd$s", m68000up | mcf5200 },
-{"bset",	one(0004300),	one(0177700), "#b$s", m68000up | mcf5200 },
+{"bset",	one(0000700),	one(0170700), "Dd$s", m68000up },
+{"bset",	one(0000700),	one(0170700), "Ddvs", mcf5200 },
+{"bset",	one(0004300),	one(0177700), "#b$s", m68000up },
+{"bset",	one(0004300),	one(0177700), "#bqs", mcf5200 },
 
 {"bsrw",	one(0060400),	one(0177777), "BW", m68000up | mcf5200 },
 {"bsrl",	one(0060777),	one(0177777), "BL", m68020up | cpu32 },
 {"bsrs",	one(0060400),	one(0177400), "BB", m68000up | mcf5200 },
 
 {"btst",	one(0000400),	one(0170700), "Dd@s", m68000up | mcf5200 },
-{"btst",	one(0004000),	one(0177700), "#b@s", m68000up | mcf5200 },
+{"btst",	one(0004000),	one(0177700), "#b@s", m68000up },
+{"btst",	one(0004000),	one(0177700), "#bqs", mcf5200 },
 
 {"callm",	one(0003300),		one(0177700), "#b!s", m68020 },
 
