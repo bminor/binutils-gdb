@@ -240,9 +240,6 @@ tui_enable (void)
   tui_version = 1;
   tui_active = 1;
   refresh ();
-
-  /* Update gdb's knowledge of its terminal.  */
-  terminal_save_ours ();
 }
 
 /* Leave the tui mode.
@@ -265,8 +262,6 @@ tui_disable (void)
      so that terminal management with the inferior works.  */
   tui_setup_io (0);
 
-  /* Update gdb's knowledge of its terminal.  */
-  terminal_save_ours ();
   tui_version = 0;
   tui_active = 0;
 }

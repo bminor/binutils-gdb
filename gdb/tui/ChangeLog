@@ -1,3 +1,8 @@
+2001-07-31  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tui.c (tui_enable): Remove call to terminal_save_ours().
+	(tui_disable): Likewise.
+
 2001-07-28  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiWin.c (_initialize_tuiWin): Use specific tui prefix for
