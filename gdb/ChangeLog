@@ -1,5 +1,11 @@
 2000-09-11  Kevin Buettner  <kevinb@redhat.com>
 
+	* configure.in (HAVE_STRUCT_LINK_MAP32): Change test to use
+	AC_TRY_COMPILE instead of AC_TRY_RUN.
+	* configure: Regenerate.
+
+2000-09-11  Kevin Buettner  <kevinb@redhat.com>
+
 	* irix4-nat.c (fetch_core_registers): Protoize.
 	* irix5-nat.c (fetch_core_registers, find_solib): Protoize.
 

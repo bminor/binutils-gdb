@@ -239,17 +239,10 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
 
   AC_MSG_CHECKING(for struct link_map32 in sys/link.h)
   AC_CACHE_VAL(gdb_cv_have_struct_link_map32, 
-    [AC_TRY_RUN([#define _SYSCALL32
-     #include <sys/link.h>
-     int main()
-     {
-       if (sizeof (struct link_map32) > 0)
-	 return 1;
-       return 0;
-     }],
-     gdb_cv_have_struct_link_map32=no,
+    [AC_TRY_COMPILE([#define _SYSCALL32
+#include <sys/link.h>], [struct link_map32 l;],
      gdb_cv_have_struct_link_map32=yes,
-     gdb_cv_have_struct_link_map32=yes)])
+     gdb_cv_have_struct_link_map32=no)])
   AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
   if test $gdb_cv_have_struct_link_map32 = yes; then
     AC_DEFINE(HAVE_STRUCT_LINK_MAP32)
