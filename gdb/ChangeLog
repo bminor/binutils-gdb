@@ -1,3 +1,13 @@
+2004-05-09  Andrew Cagney  <cagney@redhat.com>
+
+	* remote-vx.c (net_step): Delete step-range code.
+	* remote.c (remote_resume, init_all_packet_configs)
+	(set_remote_protocol_E_packet_cmd)
+	(show_remote_protocol_E_packet_cmd)
+	(remote_protocol_E, show_remote_cmd, _initialize_remote)
+	(remote_protocol_e, set_remote_protocol_e_packet_cmd)
+	(show_remote_protocol_e_packet_cmd): Ditto.
+
 2004-05-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-tdep.h (enum hppa_regnum): Name enum, add HPPA_R1_REGNUM.

@@ -747,17 +747,8 @@ net_step (void)
   SOURCE_STEP source_step;
 
   source_step.taskId = PIDGET (inferior_ptid);
-
-  if (step_range_end)
-    {
-      source_step.startAddr = step_range_start;
-      source_step.endAddr = step_range_end;
-    }
-  else
-    {
-      source_step.startAddr = 0;
-      source_step.endAddr = 0;
-    }
+  source_step.startAddr = 0;
+  source_step.endAddr = 0;
 
   status = net_clnt_call (VX_SOURCE_STEP, xdr_SOURCE_STEP, &source_step,
 			  xdr_int, &step_status);

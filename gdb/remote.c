@@ -774,42 +774,6 @@ show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
   show_packet_config_cmd (&remote_protocol_qSymbol);
 }
 
-/* Should we try the 'e' (step over range) request? */
-static struct packet_config remote_protocol_e;
-
-static void
-set_remote_protocol_e_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_e);
-}
-
-static void
-show_remote_protocol_e_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
-{
-  show_packet_config_cmd (&remote_protocol_e);
-}
-
-
-/* Should we try the 'E' (step over range / w signal #) request? */
-static struct packet_config remote_protocol_E;
-
-static void
-set_remote_protocol_E_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_E);
-}
-
-static void
-show_remote_protocol_E_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
-{
-  show_packet_config_cmd (&remote_protocol_E);
-}
-
-
 /* Should we try the 'P' (set register) request?  */
 
 static struct packet_config remote_protocol_P;
@@ -2077,8 +2041,6 @@ static void
 init_all_packet_configs (void)
 {
   int i;
-  update_packet_config (&remote_protocol_e);
-  update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
   update_packet_config (&remote_protocol_qSymbol);
   update_packet_config (&remote_protocol_vcont);
@@ -2564,60 +2526,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
     set_thread (0, 0);		/* run any thread */
   else
     set_thread (pid, 0);	/* run this thread */
-
-  /* The s/S/c/C packets do not return status.  So if the target does
-     not support the S or C packets, the debug agent returns an empty
-     string which is detected in remote_wait().  This protocol defect
-     is fixed in the e/E packets. */
-
-  if (step && step_range_end)
-    {
-      /* If the target does not support the 'E' packet, we try the 'S'
-	 packet.  Ideally we would fall back to the 'e' packet if that
-	 too is not supported.  But that would require another copy of
-	 the code to issue the 'e' packet (and fall back to 's' if not
-	 supported) in remote_wait().  */
-
-      if (siggnal != TARGET_SIGNAL_0)
-	{
-	  if (remote_protocol_E.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'E';
-	      *p++ = tohex (((int) siggnal >> 4) & 0xf);
-	      *p++ = tohex (((int) siggnal) & 0xf);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
-		return;
-	    }
-	}
-      else
-	{
-	  if (remote_protocol_e.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'e';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
-		return;
-	    }
-	}
-    }
 
   if (siggnal != TARGET_SIGNAL_0)
     {
@@ -5422,8 +5330,6 @@ show_remote_cmd (char *args, int from_tty)
   /* FIXME: cagney/2002-06-15: This function should iterate over
      remote_show_cmdlist for a list of sub commands to show.  */
   show_remote_protocol_Z_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_e_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_E_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_vcont_packet_cmd (args, from_tty, NULL);
@@ -5607,28 +5513,6 @@ in a memory packet.\n",
 			 show_remote_protocol_qSymbol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
-
-  add_packet_config_cmd (&remote_protocol_e,
-			 "e", "step-over-range",
-			 set_remote_protocol_e_packet_cmd,
-			 show_remote_protocol_e_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
-  /* Disable by default.  The ``e'' packet has nasty interactions with
-     the threading code - it relies on global state.  */
-  remote_protocol_e.detect = AUTO_BOOLEAN_FALSE;
-  update_packet_config (&remote_protocol_e);
-
-  add_packet_config_cmd (&remote_protocol_E,
-			 "E", "step-over-range-w-signal",
-			 set_remote_protocol_E_packet_cmd,
-			 show_remote_protocol_E_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
-  /* Disable by default.  The ``e'' packet has nasty interactions with
-     the threading code - it relies on global state.  */
-  remote_protocol_E.detect = AUTO_BOOLEAN_FALSE;
-  update_packet_config (&remote_protocol_E);
 
   add_packet_config_cmd (&remote_protocol_P,
 			 "P", "set-register",
