@@ -1,3 +1,11 @@
+Mon Jul 28 18:07:43 1997  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* aclocal.m4: Add CYGWIN and EXEEXT autoconf macros.
+        * configure.in: Use CYGWIN and EXEEXT autoconf macro to look for
+        win32 dependencies.
+        * configure: Regenerated with autoconf 2.12.
+        * doc/Makefile.in: Add $(EXEEXT) to chew executable.
+
 Mon Jul 28 02:50:29 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* rs6000-core.c (rs6000coff_core_p):  If CORE_TRUNC is set, print

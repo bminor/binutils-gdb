@@ -40,7 +40,8 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
-MKDOC=./chew
+EXEEXT = @EXEEXT@
+MKDOC=./chew$(EXEEXT)
 SHELL = /bin/sh
 
 INSTALL = @INSTALL@

@@ -76,6 +76,10 @@ AC_PROG_CC
 
 AC_ISC_POSIX
 
+# check for win32 specific settings.
+CY_CYGWIN32
+CY_EXEEXT
+ 
 # Permit host specific settings.
 . ${srcdir}/configure.host
 
