@@ -1,3 +1,7 @@
+2001-11-14  Andreas Jaeger  <aj@suse.de>
+
+	* i386-dis.c (print_insn): Use x86-64 as option.
+
 2001-11-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* disassemble.c (disassembler): Call print_insn_i386.
@@ -18,7 +22,7 @@
 	(has_lkaddr): Don't forget about Lmem insns.
 	* tic54x-opc.c: Add emulation trap.  Parallel table now uses
 	standard opcode templates.
-	
+
 2001-11-13  Zack Weinberg <zack@codesourcery.com>
 
 	* i386-dis.c (grps): Change "sldt", "str", and "smsw" entries
@@ -130,7 +134,7 @@
 	* openrisc-desc.c: Regenerate.
 	* openrisc-ibld.c: Regenerate.
 	* po/opcodes.pot: Regenerate.
-        
+
 2001-10-12  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (insert_de, extract_de, insert_des, extract_des): New
@@ -186,7 +190,7 @@
 	DSP single data transfer instructions.
 
         * sh-dis.c (print_insn_shx): Fix decoding of As opcode in DSP
-	instructions. 
+	instructions.
 
 2001-10-08  Nick Clifton  <nickc@cambridge.redhat.com>
 

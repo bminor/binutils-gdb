@@ -1903,7 +1903,7 @@ print_insn (pc, info)
 
   for (p = info->disassembler_options; p != NULL; )
     {
-      if (strncmp (p, "x86_64", 6) == 0)
+      if (strncmp (p, "x86-64", 6) == 0)
 	{
 	  mode_64bit = 1;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
