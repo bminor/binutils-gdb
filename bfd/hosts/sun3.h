@@ -21,7 +21,7 @@ extern int EXFUN(free,(PTR));
 extern void  EXFUN(abort,(void));
 extern int  EXFUN(close,(int));
 extern int  EXFUN(fcntl,(int des, int cmd, int e));
-extern int  EXFUN(fprintf,(FILE *,char *,...));
+extern int  EXFUN(fprintf,(FILE *,CONST char *,...));
 extern int  EXFUN(printf,(char *,...));
 extern int  EXFUN(qsort,(void *data,int els, int siz, int func()));
 extern void  EXFUN(exit,(int));

@@ -1,5 +1,7 @@
 Fri Apr  9 10:43:20 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/sun3.h: String argument to fprintf is const.
+
 	* coff-mips.c: Renamed PAGE_SIZE to ROUND_SIZE, to avoid confusion
 	on systems which define PAGE_SIZE in <limits.h>.
 
