@@ -1,3 +1,11 @@
+Thu Mar 12 16:23:00 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gdb.asm: New directory.
+	* configure.in: Configure it.
+	* configure: Regenerate.
+	* gdb.asm/{Makefile.in,configure.in,configure}: New files.
+	* gdb.asm/{asm-source.exp,asmsrc1.s,asmsrc2.s}: New files.
+
 Mon Feb 23 08:22:44 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/mn10300-eval.exp: New file to support MN10300 eval board.
