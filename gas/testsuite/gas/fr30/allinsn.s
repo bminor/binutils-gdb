@@ -213,7 +213,7 @@ ld:
 lduh:
 	lduh @r10, r11
 	lduh @(r13, r12), r13
-	lduh @(r14, -256), r15
+	lduh @(r14, #-256), r15
 	.text
 	.global ldub
 ldub:
@@ -425,7 +425,7 @@ bhi_d:
 dmov:
 	dmov @88H, r13
 	dmov r13, @54H
-	dmov @0x44, r13+
+	dmov @0x44, @r13+
 	dmov @R13+, @2
 	dmov @2cH, @-r15
 	dmov @r15+, @38
@@ -441,7 +441,7 @@ dmovh:
 dmovb:
 	dmovb @91H, r13
 	dmovb r13, @0x53
-	dmovb @71, r13+
+	dmovb @71, @r13+
 	dmovb @r13+, @0
 	.text
 	.global ldres
