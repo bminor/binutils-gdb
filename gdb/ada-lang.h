@@ -413,10 +413,6 @@ extern int ada_print_exception_breakpoint_nontask (struct breakpoint *);
 
 extern void ada_print_exception_breakpoint_task (struct breakpoint *);
 
-extern int ada_maybe_exception_partial_symbol (struct partial_symbol *sym);
-
-extern int ada_is_exception_sym (struct symbol *sym);
-
 extern void ada_find_printable_frame (struct frame_info *fi);
 
 extern void ada_reset_thread_registers (void);

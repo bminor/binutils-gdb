@@ -293,6 +293,17 @@ enum type_code
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_FLAG_ADDRESS_CLASS_ALL)
 
+/* The debugging formats (especially STABS) do not contain enough information
+   to represent all Ada types---especially those whose size depends on
+   dynamic quantities.  Therefore, the GNAT Ada compiler includes
+   extra information in the form of additional type definitions
+   connected by naming conventions.  This flag indicates that the 
+   type is an ordinary (unencoded) GDB type that has been created from 
+   the necessary run-time information, and does not need further 
+   interpretation. Optionally marks ordinary, fixed-size GDB type. */
+
+#define TYPE_FLAG_FIXED_INSTANCE (1 << 15)
+
 /*  Array bound type.  */
 enum array_bound_type
 {

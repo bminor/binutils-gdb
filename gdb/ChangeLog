@@ -1,3 +1,24 @@
+2004-10-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* symfile.c (init_filename_language_table): Add extensions for
+	Ada.
+	* defs.h (enum language): Add language_ada.
+	* gdbtypes.h (TYPE_FLAG_FIXED_INSTANCE): Define.
+	* ada-lang.c: Strip code that is conditionalized out by GNAT_GDB.
+	(add_symbols_from_enclosing_procs): Make a no-op for now.
+	(ada_unqualified_name,add_angle_brackets,function_name_from_pc)
+	(extended_canonical_line_spec, find_sal_from_funcs_and_line)
+	(find_line_in_linetable, find_next_line_in_linetable)
+	(read_all_symtabs, is_plausible_func_for_line)
+	(adjust_pc_past_prologue, error_breakpoint_runtime_sym_not_found)
+	(is_runtime_sym_defined, check_size): Remove declaration.
+	(function_name_from_pc, ada_translate_error_message)
+	(ada_lookup_minimal_symbol): Remove definition.
+	(ada_add_block_symbols): Remove useless label.
+	* ada-lang.h (ada_maybe_exception_partial_symbol): Remove 
+	useless declaration.
+	(ada_is_exception_sym): Likewise.
+
 2004-09-30    Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	Add m32r-linux support.

@@ -2185,6 +2185,10 @@ init_filename_language_table (void)
       add_filename_language (".pas", language_pascal);
       add_filename_language (".p", language_pascal);
       add_filename_language (".pp", language_pascal);
+      add_filename_language (".adb", language_ada);
+      add_filename_language (".ads", language_ada);
+      add_filename_language (".a", language_ada);
+      add_filename_language (".ada", language_ada);
     }
 }
 
