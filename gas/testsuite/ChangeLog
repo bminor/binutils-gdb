@@ -1,5 +1,44 @@
 2002-12-27  Chris Demetriou  <cgd@broadcom.com>
 
+	* gas/mips/mips.exp: Define the notion of an "architecture data
+	array," add comments indicating how to add a new architecture and
+	suggestions for adding new tests.  Populate the architecture data
+	array with many known architectures and convert many tests to
+	be run for multiple architectures.
+	(mips_arches): New global array.
+	(mips_arch_create, mips_arch_list_all, mips_arch_data)
+	(mips_arch_displayname, mips_arch_properties)
+	(mips_arch_as_flags, mips_arch_objdump_flags, mips_arch_matches)
+	(mips_arch_list_matching): New functions to operate on mips_arches.
+	(run_dump_test_arch, run_dump_test_arches, run_list_test_arch)
+	(run_list_test_arches): New functions.
+	(run_list_test): Document and add an optional "test name" argument.
+	* gas/mips/abs.d: Remove CPU-specific assembler and objdump flags,
+	and CPU names from test names.
+	* gas/mips/add.d: Likewise.
+	* gas/mips/and.d: Likewise.
+	* gas/mips/dli.d: Likewise.
+	* gas/mips/jal-empic-elf-2.d: Likewise.
+	* gas/mips/jal-empic-elf-3.d: Likewise.
+	* gas/mips/jal-empic-elf.d: Likewise.
+	* gas/mips/lb-svr4pic.d: Likewise.
+	* gas/mips/lb.d: Likewise.
+	* gas/mips/mips32.d: Likewise.
+	* gas/mips/mips4.d: Likewise.
+	* gas/mips/mips64.d: Likewise.
+	* gas/mips/rol-hw.d: Likewise.
+	* gas/mips/rol.d: Likewise.
+	* gas/mips/rol64-hw.d: Likewise.
+	* gas/mips/rol64.d: Likewise.
+	* gas/mips/elf-jal.d: Likewise.  Also, indicate ELF in test name.
+	* gas/mips/mips64-mdmx.d: Tweak printed name to indicate that this
+	test uses the -mdmx flag.
+	* gas/mips/mips64-mips3d.d: Tweak printed name to indicate that
+	this test uses the -mips3d flag.
+	* gas/mips/mips64-mips3d-incl.d: New file.
+
+2002-12-27  Chris Demetriou  <cgd@broadcom.com>
+
 	* gas/mips/cp0-names-mips32.d: New file.
 	* gas/mips/cp0-names-mips64.d: New file.
 	* gas/mips/cp0-names-numeric.d: New file.

@@ -1,6 +1,6 @@
-#objdump: -dr --prefix-addresses -mmips:3000
+#objdump: -dr --prefix-addresses
 #name: MIPS lb-svr4pic
-#as: -mips1 -KPIC
+#as: -KPIC
 #source: lb-pic.s
 
 # Test the lb macro with -KPIC.

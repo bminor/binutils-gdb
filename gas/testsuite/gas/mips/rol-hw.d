@@ -1,6 +1,5 @@
-#objdump: -dr --prefix-addresses -mmips:5400
-#as: -march=vr5400 -mtune=vr5400
-#name: MIPS hardware rol (vr5400)
+#objdump: -dr --prefix-addresses
+#name: MIPS hardware rol/ror
 #source: rol.s
 #stderr: rol-hw.l
 

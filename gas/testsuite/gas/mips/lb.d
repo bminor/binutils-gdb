@@ -1,6 +1,5 @@
-#objdump: -dr --prefix-addresses -mmips:3000
+#objdump: -dr --prefix-addresses
 #name: MIPS lb
-#as: -mips1
 
 # Test the lb macro.
 

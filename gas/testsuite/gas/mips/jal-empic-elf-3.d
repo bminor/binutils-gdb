@@ -1,6 +1,6 @@
-#objdump: -dr --prefix-addresses -mmips:3000 --show-raw-insn
+#objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS jal-empic-elf-3
-#as: -mips1 -membedded-pic
+#as: -membedded-pic
 
 # Test the jal macro harder with -membedded-pic.
 

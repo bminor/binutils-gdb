@@ -1,5 +1,5 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -mmips:isa64
-#name: MIPS MIPS64 MDMX ASE instructions
+#name: MIPS MIPS64 MDMX ASE instructions (-mdmx flag)
 #as: -mips64 -mdmx
 
 # Check MIPS64 MDMX ASE instruction assembly and disassembly

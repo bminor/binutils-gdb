@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses -mmips:4000
+#objdump: -dr --prefix-addresses
 #name: MIPS and
 
 # Test the and macro.

@@ -1,8 +1,10 @@
-#objdump: -dr --prefix-addresses --show-raw-insn -mmips:isa64
-#name: MIPS MIPS64 MIPS-3D ASE instructions (-mips3d flag)
-#as: -mips64 -mips3d
+#objdump: -dr --prefix-addresses --show-raw-insn
+#name: MIPS MIPS64 MIPS-3D ASE instructions
+#source: mips64-mips3d.s
 
 # Check MIPS64 MIPS-3D ASE instruction assembly and disassembly
+# Same as mips64-mips3d.d, but does not need -mips3d assembler
+# flag because the archiectures that use this always include MIPS-3D.
 
 .*: +file format .*mips.*
 

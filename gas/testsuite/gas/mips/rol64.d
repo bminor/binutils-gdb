@@ -1,6 +1,5 @@
-#objdump: -dr --prefix-addresses -mmips:4000
-#as: -march=r4000 -mtune=r4000
-#name: MIPS macro drol (r4000)
+#objdump: -dr --prefix-addresses
+#name: MIPS macro drol/dror
 #stderr: rol64.l
 
 # Test the drol and dror macros.
