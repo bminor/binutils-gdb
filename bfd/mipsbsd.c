@@ -350,7 +350,16 @@ bfd_target aout_mips_little_vec =
        _bfd_generic_mkarchive, bfd_false},
     {bfd_false, MY_write_object_contents, /* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
-  JUMP_TABLE (MY),
+
+     BFD_JUMP_TABLE_GENERIC (MY),
+     BFD_JUMP_TABLE_COPY (MY),
+     BFD_JUMP_TABLE_CORE (MY),
+     BFD_JUMP_TABLE_ARCHIVE (MY),
+     BFD_JUMP_TABLE_SYMBOLS (MY),
+     BFD_JUMP_TABLE_RELOCS (MY),
+     BFD_JUMP_TABLE_WRITE (MY),
+     BFD_JUMP_TABLE_LINK (MY),
+
   (PTR) MY_backend_data,
 };
 
@@ -380,6 +389,15 @@ bfd_target aout_mips_big_vec =
        _bfd_generic_mkarchive, bfd_false},
     {bfd_false, MY_write_object_contents, /* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
-  JUMP_TABLE (MY),
+
+     BFD_JUMP_TABLE_GENERIC (MY),
+     BFD_JUMP_TABLE_COPY (MY),
+     BFD_JUMP_TABLE_CORE (MY),
+     BFD_JUMP_TABLE_ARCHIVE (MY),
+     BFD_JUMP_TABLE_SYMBOLS (MY),
+     BFD_JUMP_TABLE_RELOCS (MY),
+     BFD_JUMP_TABLE_WRITE (MY),
+     BFD_JUMP_TABLE_LINK (MY),
+
   (PTR) MY_backend_data,
 };

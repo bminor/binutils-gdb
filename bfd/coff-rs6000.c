@@ -469,17 +469,9 @@ rs6000coff_reloc_type_lookup (abfd, code)
 /*	Stolen from Damon A. Permezel's `bfd' portation.		    */
 /* ------------------------------------------------------------------------ */
 
-#undef	coff_openr_next_archived_file
-#define coff_openr_next_archived_file	rs6000coff_openr_next_archived_file
-
-#undef	coff_write_armap
-#define coff_write_armap		rs6000coff_write_armap
-
-#undef	coff_stat_arch_elt
-#define	coff_stat_arch_elt		rs6000coff_stat_arch_elt
-
-#undef	coff_snarf_ar_hdr
-#define	coff_snarf_ar_hdr		rs6000coff_snarf_ar_hdr
+#define rs6000coff_slurp_armap bfd_slurp_coff_armap
+#define rs6000coff_slurp_extended_name_table _bfd_slurp_extended_name_table
+#define rs6000coff_truncate_arname bfd_dont_truncate_arname
 
 #undef	coff_mkarchive
 #define	coff_mkarchive			rs6000coff_mkarchive
@@ -669,7 +661,7 @@ rs6000coff_archive_p (abfd)
 
 
 static int
-rs6000coff_stat_arch_elt(abfd, buf)
+rs6000coff_generic_stat_arch_elt(abfd, buf)
   bfd *abfd;
   struct stat *buf;
 {
@@ -712,6 +704,11 @@ rs6000coff_write_armap (arch, elength, map, orl_count, stridx)
 
 
 #define CORE_FILE_P _bfd_dummy_target
+
+#define coff_core_file_failing_command _bfd_nocore_core_file_failing_command
+#define coff_core_file_failing_signal _bfd_nocore_core_file_failing_signal
+#define coff_core_file_matches_executable_p \
+  _bfd_nocore_core_file_matches_executable_p
 
 #ifdef HOST_AIX
 #undef CORE_FILE_P
@@ -782,6 +779,18 @@ bfd_target rs6000coff_vec =
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(coff),
+     BFD_JUMP_TABLE_GENERIC (coff),
+     BFD_JUMP_TABLE_COPY (coff),
+     BFD_JUMP_TABLE_CORE (coff),
+#ifdef HOST_AIX
+     BFD_JUMP_TABLE_ARCHIVE (rs6000coff),
+#else
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+#endif
+     BFD_JUMP_TABLE_SYMBOLS (coff),
+     BFD_JUMP_TABLE_RELOCS (coff),
+     BFD_JUMP_TABLE_WRITE (coff),
+     BFD_JUMP_TABLE_LINK (coff),
+
   COFF_SWAP_TABLE,
 };

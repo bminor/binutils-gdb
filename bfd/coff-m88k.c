@@ -46,14 +46,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 static bfd_reloc_status_type 
-DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data,
-		    ignore_input_section, ignore_bfd),
-      bfd *abfd AND
-      arelent *reloc_entry AND
-      asymbol *symbol_in AND
-      PTR data AND
-      asection *ignore_input_section AND
-      bfd *ignore_bfd)
+howto_hvrt16 (abfd, reloc_entry, symbol_in, data,
+		    ignore_input_section, ignore_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol_in;
+     PTR data;
+     asection *ignore_input_section;
+     bfd *ignore_bfd;
+     char **error_message;
 {
   long relocation = 0;
   bfd_vma addr = reloc_entry->address;
@@ -71,12 +72,12 @@ DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data,
 
 static reloc_howto_type howto_table[] = 
 {
-  HOWTO(R_PCR16L,02,1,16,true, 0,false,true,0,"PCR16L",false,0x0000ffff,0x0000ffff,true),
-  HOWTO(R_PCR26L,02,2,26,true, 0,false,true,0,"PCR26L",false,0x03ffffff,0x03ffffff,true),
-  HOWTO(R_VRT16, 00,1,16,false,0,false,true,0,"VRT16", false,0x0000ffff,0x0000ffff,true),
-  HOWTO(R_HVRT16,16,1,16,false,0,false,true,howto_hvrt16,"HVRT16",false,0x0000ffff,0x0000ffff,true),
-  HOWTO(R_LVRT16,00,1,16,false,0,false,true,0,"LVRT16",false,0x0000ffff,0x0000ffff,true),
-  HOWTO(R_VRT32, 00,2,32,false,0,false,true,0,"VRT32", false,0xffffffff,0xffffffff,true),
+  HOWTO(R_PCR16L,02,1,16,true, 0,complain_overflow_signed, 0, "PCR16L",false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_PCR26L,02,2,26,true, 0,complain_overflow_signed, 0, "PCR26L",false,0x03ffffff,0x03ffffff,true),
+  HOWTO(R_VRT16, 00,1,16,false,0,complain_overflow_bitfield, 0, "VRT16", false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_HVRT16,16,1,16,false,0,complain_overflow_dont,howto_hvrt16,"HVRT16",false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_LVRT16,00,1,16,false,0,complain_overflow_dont, 0, "LVRT16",false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_VRT32, 00,2,32,false,0,complain_overflow_bitfield, 0, "VRT32", false,0xffffffff,0xffffffff,true),
 };
 
 
@@ -112,19 +113,19 @@ bfd_target m88kbcs_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   3,				/* default alignment power */
-  _do_getb64, _do_getb_signed_64, _do_putb64,
-     _do_getb32, _do_getb_signed_32, _do_putb32,
-     _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
-  _do_getb64, _do_getb_signed_64, _do_putb64,
-     _do_getb32, _do_getb_signed_32, _do_putb32,
-     _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
     {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
        bfd_generic_archive_p, _bfd_dummy_target},
@@ -133,6 +134,14 @@ bfd_target m88kbcs_vec =
     {bfd_false, coff_write_object_contents, /* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(coff),
+     BFD_JUMP_TABLE_GENERIC (coff),
+     BFD_JUMP_TABLE_COPY (coff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+     BFD_JUMP_TABLE_SYMBOLS (coff),
+     BFD_JUMP_TABLE_RELOCS (coff),
+     BFD_JUMP_TABLE_WRITE (coff),
+     BFD_JUMP_TABLE_LINK (coff),
+
   COFF_SWAP_TABLE,
 };

@@ -5493,31 +5493,22 @@ som_bfd_free_cached_info (abfd)
 
 /* End of miscellaneous support functions. */
 
-#define som_bfd_debug_info_start        bfd_void
-#define som_bfd_debug_info_end          bfd_void
-#define som_bfd_debug_info_accumulate   (PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+#define	som_close_and_cleanup		som_bfd_free_cached_info
 
 #define som_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define som_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define som_truncate_arname		bfd_bsd_truncate_arname
 #define som_slurp_extended_name_table	_bfd_slurp_extended_name_table
 
-#define som_get_lineno                   (struct lineno_cache_entry *(*)())bfd_nullvoidptr
-#define	som_close_and_cleanup		som_bfd_free_cached_info
+#define som_get_lineno                  _bfd_nosymbols_get_lineno
+#define som_bfd_make_debug_symbol	_bfd_nosymbols_bfd_make_debug_symbol
 
 #define som_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents
 #define som_bfd_relax_section bfd_generic_relax_section
-#define som_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 #define som_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define som_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define som_bfd_final_link _bfd_generic_final_link
-
-/* Core file support is in the hpux-core backend.  */
-#define som_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define som_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
-#define som_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
 
 bfd_target som_vec =
 {
@@ -5561,7 +5552,16 @@ bfd_target som_vec =
     bfd_false,
   },
 #undef som
-  JUMP_TABLE (som),
+
+  BFD_JUMP_TABLE_GENERIC (som),
+  BFD_JUMP_TABLE_COPY (som),
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),
+  BFD_JUMP_TABLE_ARCHIVE (som),
+  BFD_JUMP_TABLE_SYMBOLS (som),
+  BFD_JUMP_TABLE_RELOCS (som),
+  BFD_JUMP_TABLE_WRITE (som),
+  BFD_JUMP_TABLE_LINK (som),
+
   (PTR) 0
 };
 

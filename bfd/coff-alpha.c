@@ -1895,12 +1895,6 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-#define ecoff_core_file_p _bfd_dummy_target
-#define ecoff_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define ecoff_core_file_failing_signal _bfd_dummy_core_file_failing_signal
-#define ecoff_core_file_matches_executable_p \
-  _bfd_dummy_core_file_matches_executable_p
-
 /* This is the ECOFF backend structure.  The backend field of the
    target vector points to this.  */
 
@@ -2024,6 +2018,15 @@ bfd_target ecoffalpha_little_vec =
      _bfd_generic_mkarchive, bfd_false},
   {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
-  JUMP_TABLE (ecoff),
+
+     BFD_JUMP_TABLE_GENERIC (ecoff),
+     BFD_JUMP_TABLE_COPY (ecoff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (ecoff),
+     BFD_JUMP_TABLE_SYMBOLS (ecoff),
+     BFD_JUMP_TABLE_RELOCS (ecoff),
+     BFD_JUMP_TABLE_WRITE (ecoff),
+     BFD_JUMP_TABLE_LINK (ecoff),
+
   (PTR) &alpha_ecoff_backend_data
 };

@@ -465,39 +465,26 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
 
 /* Build the transfer vector for Adobe A.Out files.  */
 
-/* We don't have core files.  */
-#define	aout_32_core_file_failing_command _bfd_dummy_core_file_failing_command
-#define	aout_32_core_file_failing_signal _bfd_dummy_core_file_failing_signal
-#define	aout_32_core_file_matches_executable_p	\
-				_bfd_dummy_core_file_matches_executable_p
+#define aout_32_close_and_cleanup aout_32_bfd_free_cached_info
 
-/* We use BSD-Unix generic archive files.  */
-#define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aout_32_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#define	aout_32_slurp_armap		bfd_slurp_bsd_armap
-#define	aout_32_slurp_extended_name_table	bfd_true
-#define	aout_32_write_armap		bsd_write_armap
-#define	aout_32_truncate_arname		bfd_bsd_truncate_arname
-
-/* We override these routines from the usual a.out file routines.  */
-#define	aout_32_set_section_contents	aout_adobe_set_section_contents
-#define	aout_32_set_arch_mach		aout_adobe_set_arch_mach
-#define	aout_32_sizeof_headers		aout_adobe_sizeof_headers
-
-#define aout_32_bfd_debug_info_start		bfd_void
-#define aout_32_bfd_debug_info_end		bfd_void
-#define aout_32_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-
-#define aout_32_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
-#define aout_32_bfd_relax_section                   bfd_generic_relax_section
-#define aout_32_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define aout_32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
-#define aout_32_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
-#define aout_32_bfd_link_add_symbols _bfd_generic_link_add_symbols
-#define aout_32_bfd_final_link _bfd_generic_final_link
-#define aout_32_close_and_cleanup aout_32_bfd_free_cached_info
+
+#define aout_32_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) \
+    PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+
+#define	aout_32_set_arch_mach		aout_adobe_set_arch_mach
+#define	aout_32_set_section_contents	aout_adobe_set_section_contents
+
+#define	aout_32_sizeof_headers		aout_adobe_sizeof_headers
+#define aout_32_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
+#define aout_32_bfd_relax_section       bfd_generic_relax_section
+#define aout_32_bfd_link_hash_table_create \
+  _bfd_generic_link_hash_table_create
+#define aout_32_bfd_link_add_symbols	_bfd_generic_link_add_symbols
+#define aout_32_bfd_final_link		_bfd_generic_final_link
 
 bfd_target a_out_adobe_vec =
 {
@@ -528,6 +515,14 @@ bfd_target a_out_adobe_vec =
  {bfd_false, aout_adobe_write_object_contents, /* bfd_write_contents */
    _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(aout_32),
+     BFD_JUMP_TABLE_GENERIC (aout_32),
+     BFD_JUMP_TABLE_COPY (_bfd_generic),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+     BFD_JUMP_TABLE_SYMBOLS (aout_32),
+     BFD_JUMP_TABLE_RELOCS (aout_32),
+     BFD_JUMP_TABLE_WRITE (aout_32),
+     BFD_JUMP_TABLE_LINK (aout_32),
+
   (PTR) 0
 };

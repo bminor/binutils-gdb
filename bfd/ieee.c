@@ -3275,6 +3275,9 @@ ieee_sizeof_headers (abfd, x)
 }
 
 
+/* The debug info routines are never used.  */
+#if 0
+
 static void
 ieee_bfd_debug_info_start (abfd)
      bfd *abfd;
@@ -3337,33 +3340,33 @@ ieee_bfd_debug_info_accumulate (abfd, section)
   }
 }
 
+#endif
 
-#define FOO PROTO
-#define ieee_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
-#define ieee_core_file_failing_signal (int (*)())bfd_0
-#define ieee_core_file_matches_executable_p ( FOO(boolean, (*),(bfd *, bfd *)))bfd_false
+#define	ieee_close_and_cleanup _bfd_generic_close_and_cleanup
+#define ieee_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
+
 #define ieee_slurp_armap bfd_true
 #define ieee_slurp_extended_name_table bfd_true
-#define ieee_truncate_arname (void (*)())bfd_nullvoidptr
-#define ieee_write_armap  (FOO( boolean, (*),(bfd *, unsigned int, struct orl *, unsigned int, int))) bfd_nullvoidptr
-#define ieee_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
-#define	ieee_close_and_cleanup		bfd_generic_close_and_cleanup
-#define ieee_set_arch_mach bfd_default_set_arch_mach
-#define ieee_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
+#define ieee_truncate_arname bfd_dont_truncate_arname
+#define ieee_write_armap \
+  ((boolean (*) \
+    PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
+   bfd_true)
+
+#define ieee_bfd_is_local_label bfd_generic_is_local_label
+#define ieee_get_lineno _bfd_nosymbols_get_lineno
+#define ieee_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+
+#define ieee_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
+
+#define ieee_set_arch_mach _bfd_generic_set_arch_mach
+
+#define ieee_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
 #define ieee_bfd_relax_section bfd_generic_relax_section
-#define ieee_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
-#define ieee_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 #define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ieee_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define ieee_bfd_final_link _bfd_generic_final_link
-#define ieee_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
-#define ieee_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
-#define ieee_bfd_is_local_label bfd_generic_is_local_label
-#define ieee_bfd_free_cached_info bfd_true
 
 /*SUPPRESS 460 */
 bfd_target ieee_vec =
@@ -3405,6 +3408,15 @@ bfd_target ieee_vec =
     _bfd_write_archive_contents,
     bfd_false,
   },
-  JUMP_TABLE (ieee),
+
+  BFD_JUMP_TABLE_GENERIC (ieee),
+  BFD_JUMP_TABLE_COPY (_bfd_generic),
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),
+  BFD_JUMP_TABLE_ARCHIVE (ieee),
+  BFD_JUMP_TABLE_SYMBOLS (ieee),
+  BFD_JUMP_TABLE_RELOCS (ieee),
+  BFD_JUMP_TABLE_WRITE (ieee),
+  BFD_JUMP_TABLE_LINK (ieee),
+
   (PTR) 0
 };

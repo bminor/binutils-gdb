@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -31,7 +31,8 @@ static bfd_reloc_status_type coff_i386_reloc PARAMS ((bfd *abfd,
 						      asymbol *symbol,
 						      PTR data,
 						      asection *input_section,
-						      bfd *output_bfd));
+						      bfd *output_bfd,
+						      char **error_message));
 
 /* For some reason when using i386 COFF the value stored in the .text
    section for a reference to a common symbol is the value itself plus
@@ -43,13 +44,15 @@ static bfd_reloc_status_type coff_i386_reloc PARAMS ((bfd *abfd,
    reloc type to make any required adjustments.  */
 
 static bfd_reloc_status_type
-coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd)
+coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
+		 error_message)
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
+     char **error_message;
 {
   symvalue diff;
 
@@ -85,7 +88,7 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd)
 
   if (diff != 0)
     {
-      reloc_howto_type *howto = reloc_entry->howto;
+      const reloc_howto_type *howto = reloc_entry->howto;
       unsigned char *addr = (unsigned char *) data + reloc_entry->address;
 
       switch (howto->size)
@@ -234,7 +237,7 @@ static reloc_howto_type howto_table[] =
 
 /* Turn a howto into a reloc  nunmber */
 
-#define SELECT_RELOC(x,howto) { x = howto->type; }
+#define SELECT_RELOC(x,howto) { x.r_type = howto->type; }
 #define BADMAG(x) I386BADMAG(x)
 #define I386 1			/* Customize coffcode.h */
 
@@ -284,14 +287,6 @@ static reloc_howto_type howto_table[] =
       cache_ptr->addend += asect->vma;				\
   }
 
-/* For aix386, define a variable to track the number of sections discarded
-   during a strip. */
-
-#if defined(_AIX) && defined(_I386)
-#define USE_DISCARDED_SECTIONS_COUNT
-int discarded_sections_count = 0;
-#endif
- 
 #include "coffcode.h"
 
 static bfd_target *
@@ -319,7 +314,7 @@ bfd_target
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   0,				/* leading underscore */
@@ -342,6 +337,14 @@ bfd_target
     {bfd_false, coff_write_object_contents, /* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(coff),
+     BFD_JUMP_TABLE_GENERIC (coff),
+     BFD_JUMP_TABLE_COPY (coff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+     BFD_JUMP_TABLE_SYMBOLS (coff),
+     BFD_JUMP_TABLE_RELOCS (coff),
+     BFD_JUMP_TABLE_WRITE (coff),
+     BFD_JUMP_TABLE_LINK (coff),
+
   COFF_SWAP_TABLE,
 };

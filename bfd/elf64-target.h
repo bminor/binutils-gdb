@@ -25,21 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    There are two such structures here:  one for big-endian machines and
    one for little-endian machines.   */
 
-/* Archives are generic or unimplemented.  */
-#ifndef bfd_elf64_slurp_armap
-#define bfd_elf64_slurp_armap		bfd_slurp_coff_armap
+#define	bfd_elf64_close_and_cleanup _bfd_generic_close_and_cleanup
+#define bfd_elf64_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
+#ifndef bfd_elf64_get_section_contents
+#define bfd_elf64_get_section_contents _bfd_generic_get_section_contents
 #endif
-#define bfd_elf64_slurp_extended_name_table	_bfd_slurp_extended_name_table
-#define bfd_elf64_truncate_arname		bfd_dont_truncate_arname
-#define bfd_elf64_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define bfd_elf64_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#ifndef bfd_elf64_write_armap
-#define	bfd_elf64_write_armap		coff_write_armap
-#endif
-
-/* Ordinary section reading and writing */
-#define bfd_elf64_get_section_contents	bfd_generic_get_section_contents
-#define	bfd_elf64_close_and_cleanup		bfd_generic_close_and_cleanup
 
 #define bfd_elf64_bfd_debug_info_start	bfd_void
 #define bfd_elf64_bfd_debug_info_end	bfd_void
@@ -70,9 +60,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #ifndef bfd_elf64_bfd_is_local_label
 #define bfd_elf64_bfd_is_local_label bfd_generic_is_local_label
-#endif
-#ifndef bfd_elf64_bfd_free_cached_info
-#define bfd_elf64_bfd_free_cached_info bfd_true
 #endif
 
 #ifndef elf_info_to_howto_rel
@@ -211,9 +198,14 @@ bfd_target TARGET_BIG_SYM =
     bfd_false
   },
 
-  /* Initialize a jump table with the standard macro.  All names start with
-     "elf" */
-  JUMP_TABLE(bfd_elf64),
+      BFD_JUMP_TABLE_GENERIC (bfd_elf64),
+      BFD_JUMP_TABLE_COPY (bfd_elf64),
+      BFD_JUMP_TABLE_CORE (bfd_elf64),
+      BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+      BFD_JUMP_TABLE_SYMBOLS (bfd_elf64),
+      BFD_JUMP_TABLE_RELOCS (bfd_elf64),
+      BFD_JUMP_TABLE_WRITE (bfd_elf64),
+      BFD_JUMP_TABLE_LINK (bfd_elf64),
 
   /* backend_data: */
   (PTR) &elf64_bed,
@@ -293,9 +285,14 @@ bfd_target TARGET_LITTLE_SYM =
     bfd_false
   },
 
-  /* Initialize a jump table with the standard macro.  All names start with
-     "elf" */
-  JUMP_TABLE(bfd_elf64),
+      BFD_JUMP_TABLE_GENERIC (bfd_elf64),
+      BFD_JUMP_TABLE_COPY (bfd_elf64),
+      BFD_JUMP_TABLE_CORE (bfd_elf64),
+      BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+      BFD_JUMP_TABLE_SYMBOLS (bfd_elf64),
+      BFD_JUMP_TABLE_RELOCS (bfd_elf64),
+      BFD_JUMP_TABLE_WRITE (bfd_elf64),
+      BFD_JUMP_TABLE_LINK (bfd_elf64),
 
   /* backend_data: */
   (PTR) &elf64_bed,

@@ -273,74 +273,6 @@ cisco_core_file_matches_executable_p (core_bfd, exec_bfd)
   return true;
 }
 
-/* No archive file support via this BFD */
-#define	cisco_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	cisco_generic_stat_arch_elt		bfd_generic_stat_arch_elt
-#define	cisco_slurp_armap			bfd_false
-#define	cisco_slurp_extended_name_table	bfd_true
-#define	cisco_write_armap			(boolean (*) PARAMS	\
-    ((bfd *arch, unsigned int elength, struct orl *map, \
-      unsigned int orl_count, int stridx))) bfd_false
-#define	cisco_truncate_arname		bfd_dont_truncate_arname
-#define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
-
-#define	cisco_close_and_cleanup		bfd_generic_close_and_cleanup
-#define	cisco_set_section_contents		(boolean (*) PARAMS	\
-        ((bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-        bfd_size_type count))) bfd_generic_set_section_contents
-#define	cisco_get_section_contents		bfd_generic_get_section_contents
-#define	cisco_new_section_hook		(boolean (*) PARAMS	\
-	((bfd *, sec_ptr))) bfd_true
-#define	cisco_get_symtab_upper_bound	bfd_0l
-#define	cisco_get_symtab			(long (*) PARAMS \
-        ((bfd *, struct symbol_cache_entry **))) bfd_0l
-#define	cisco_get_reloc_upper_bound		(long (*) PARAMS \
-	((bfd *, sec_ptr))) bfd_0l
-#define	cisco_canonicalize_reloc		(long (*) PARAMS \
-	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
-#define	cisco_make_empty_symbol		(struct symbol_cache_entry * \
-	(*) PARAMS ((bfd *))) bfd_false
-#define	cisco_print_symbol			(void (*) PARAMS	\
-	((bfd *, PTR, struct symbol_cache_entry  *,			\
-	bfd_print_symbol_type))) bfd_false
-#define	cisco_get_symbol_info		(void (*) PARAMS	\
-	((bfd *, struct symbol_cache_entry  *,			\
-	symbol_info *))) bfd_false
-#define	cisco_get_lineno			(alent * (*) PARAMS	\
-	((bfd *, struct symbol_cache_entry *))) bfd_nullvoidptr
-#define	cisco_set_arch_mach			(boolean (*) PARAMS	\
-	((bfd *, enum bfd_architecture, unsigned long))) bfd_false
-#define	cisco_find_nearest_line		(boolean (*) PARAMS	\
-        ((bfd *abfd, struct sec  *section,				\
-         struct symbol_cache_entry  **symbols,bfd_vma offset,		\
-         CONST char **file, CONST char **func, unsigned int *line))) bfd_false
-#define	cisco_sizeof_headers		(int (*) PARAMS	\
-	((bfd *, boolean))) bfd_0
-
-#define cisco_bfd_debug_info_start		bfd_void
-#define cisco_bfd_debug_info_end		bfd_void
-#define cisco_bfd_debug_info_accumulate	(void (*) PARAMS	\
-	((bfd *, struct sec *))) bfd_void
-#define cisco_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
-#define cisco_bfd_relax_section		bfd_generic_relax_section
-#define cisco_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
-#define cisco_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
-#define cisco_bfd_link_hash_table_create \
-  ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
-#define cisco_bfd_link_add_symbols \
-  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
-#define cisco_bfd_final_link \
-  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
-#define cisco_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
-#define cisco_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
-#define cisco_bfd_is_local_label \
-  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
-#define cisco_bfd_free_cached_info bfd_true
-
 bfd_target cisco_core_vec =
   {
     "trad-core",
@@ -377,6 +309,14 @@ bfd_target cisco_core_vec =
      bfd_false, bfd_false
     },
     
-    JUMP_TABLE(cisco),
+       BFD_JUMP_TABLE_GENERIC (_bfd_generic),
+       BFD_JUMP_TABLE_COPY (_bfd_generic),
+       BFD_JUMP_TABLE_CORE (cisco),
+       BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+       BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols),
+       BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+       BFD_JUMP_TABLE_WRITE (_bfd_generic),
+       BFD_JUMP_TABLE_LINK (_bfd_nolink),
+
     (PTR) 0			/* backend_data */
 };

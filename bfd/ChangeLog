@@ -1,3 +1,37 @@
+Wed Apr  6 17:24:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* targets.c (bfd_target): Rearranged fields in target vector.
+	Removed _bfd_debug_info_start, _bfd_debug_info_end and
+	_bfd_debug_info_accumulate, which were never used.
+	(BFD_JUMP_TABLE_GENERIC, BFD_JUMP_TABLE_COPY): Defined.
+	(BFD_JUMP_TABLE_CORE, BFD_JUMP_TABLE_ARCHIVE): Defined.
+	(BFD_JUMP_TABLE_SYMBOLS, BFD_JUMP_TABLE_RELOCS): Defined.
+	(BFD_JUMP_TABLE_WRITE, BFD_JUMP_TABLE_LINK): Defined.
+	* All backends: Changed to use the new BFD_JUMP_TABLE_* macros
+	rather than the single JUMP_TABLE macro.  Removed many of the
+	weird macro definitions needed to support the monolithic
+	JUMP_TABLE.
+	* bfd-in.h (JUMP_TABLE): Removed.
+	* libbfd-in.h: Define a bunch of macros, and declare a few
+	functions, for use with the new BFD_JUMP_TABLE_* macros.
+	* libbfd.c (_bfd_dummy_new_section_hook): Removed.
+	(bfd_false): Set bfd_error_invalid_operation.
+	(bfd_nullvoidptr): Likewise.
+	(bfd_n1): New function.
+	(_bfd_nocore_core_file_matches_executable_p): Renamed from
+	_bfd_dummy_core_file_matches_executable_p.
+	(_bfd_nocore_core_file_failing_command): Similar rename.  Set
+	bfd_error_invalid_operation.
+	(_bfd_nocore_core_file_failing_signal): Likewise.
+	(_bfd_generic_get_section_contents): Renamed from
+	bfd_generic_get_section_contents.  Changed all callers.
+	(_bfd_generic_set_section_contents): Similar rename.
+	* ieee.c: #if 0 out ieee_bfd_debug_info_start,
+	ieee_bfd_debug_info_end, ieee_bfd_debug_info_accumulate.  They
+	were never called.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+
 Tue Apr  5 22:10:04 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Crude support for examining dynamic libraries.

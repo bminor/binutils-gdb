@@ -1,5 +1,5 @@
 /* BFD back-end for Zilog Z800n COFF binaries.
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -60,7 +60,7 @@ coff_z8k_select_reloc (howto)
   return howto->type;
 }
 
-#define SELECT_RELOC(x,howto) x= coff_z8k_select_reloc(howto)
+#define SELECT_RELOC(x,howto) x.r_type = coff_z8k_select_reloc(howto)
 
 
 #define BADMAG(x) Z8KBADMAG(x)
@@ -80,9 +80,9 @@ coff_z8k_select_reloc (howto)
    */
 
 static void
-DEFUN (rtype2howto, (internal, dst),
-       arelent * internal AND
-       struct internal_reloc *dst)
+rtype2howto (internal, dst)
+     arelent * internal;
+     struct internal_reloc *dst;
 {
   switch (dst->r_type)
     {
@@ -120,12 +120,12 @@ DEFUN (rtype2howto, (internal, dst),
  reloc_processing(relent, reloc, symbols, abfd, section)
 
 static void 
-DEFUN (reloc_processing, (relent, reloc, symbols, abfd, section),
-       arelent * relent AND
-       struct internal_reloc *reloc AND
-       asymbol ** symbols AND
-       bfd * abfd AND
-       asection * section)
+reloc_processing (relent, reloc, symbols, abfd, section)
+     arelent * relent;
+     struct internal_reloc *reloc;
+     asymbol ** symbols;
+     bfd * abfd;
+     asection * section;
 {
   relent->address = reloc->r_vaddr;
   rtype2howto (relent, reloc);
@@ -265,6 +265,14 @@ bfd_target z8kcoff_vec =
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
    _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE (coff),
+     BFD_JUMP_TABLE_GENERIC (coff),
+     BFD_JUMP_TABLE_COPY (coff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+     BFD_JUMP_TABLE_SYMBOLS (coff),
+     BFD_JUMP_TABLE_RELOCS (coff),
+     BFD_JUMP_TABLE_WRITE (coff),
+     BFD_JUMP_TABLE_LINK (coff),
+
   COFF_SWAP_TABLE,
 };

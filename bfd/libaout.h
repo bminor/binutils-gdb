@@ -398,21 +398,13 @@ aout_stab_name PARAMS ((int code));
 
 /* A.out uses the generic versions of these routines... */
 
-#define	aout_32_get_section_contents	bfd_generic_get_section_contents
+#define	aout_32_get_section_contents	_bfd_generic_get_section_contents
 
-#define	aout_64_get_section_contents	bfd_generic_get_section_contents
+#define	aout_64_get_section_contents	_bfd_generic_get_section_contents
 #ifndef NO_WRITE_HEADER_KLUDGE
 #define NO_WRITE_HEADER_KLUDGE 0
 #endif
 
-#ifndef aout_32_bfd_copy_private_section_data
-#define aout_32_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
-#endif
-#ifndef aout_32_bfd_copy_private_bfd_data
-#define aout_32_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
-#endif
 #ifndef aout_32_bfd_is_local_label
 #define aout_32_bfd_is_local_label bfd_generic_is_local_label
 #endif

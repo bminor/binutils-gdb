@@ -244,73 +244,6 @@ aix386_core_file_matches_executable_p (core_bfd, exec_bfd)
 				   point */
 }
 
-/* No archive file support via this BFD */
-#define	aix386_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aix386_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#define	aix386_slurp_armap			bfd_false
-#define	aix386_slurp_extended_name_table	bfd_true
-#define	aix386_write_armap			(PROTO (boolean, (*),	\
-     (bfd *arch, unsigned int elength, struct orl *map, \
-      unsigned int orl_count, int stridx))) bfd_false
-#define	aix386_truncate_arname		bfd_dont_truncate_arname
-
-#define	aix386_close_and_cleanup		bfd_generic_close_and_cleanup
-#define	aix386_set_section_contents		(PROTO(boolean, (*),	\
-         (bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-	 bfd_size_type count))) bfd_generic_set_section_contents
-#define	aix386_get_section_contents		bfd_generic_get_section_contents
-#define	aix386_new_section_hook		(PROTO (boolean, (*),	\
-	(bfd *, sec_ptr))) bfd_true
-#define	aix386_get_symtab_upper_bound	bfd_0l
-#define	aix386_get_symtab			(PROTO (long, (*), \
-        (bfd *, struct symbol_cache_entry **))) bfd_0l
-#define	aix386_get_reloc_upper_bound		(PROTO (long, (*), \
-	(bfd *, sec_ptr))) bfd_0l
-#define	aix386_canonicalize_reloc		(PROTO (long, (*), \
-	(bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
-#define	aix386_make_empty_symbol		(PROTO (		\
-	struct symbol_cache_entry *, (*), (bfd *))) bfd_false
-#define	aix386_print_symbol			(PROTO (void, (*),	\
-	(bfd *, PTR, struct symbol_cache_entry  *,			\
-	 bfd_print_symbol_type))) bfd_false
-#define	aix386_get_symbol_info			(PROTO (void, (*),	\
-	(bfd *, struct symbol_cache_entry  *,			\
-	 symbol_info *))) bfd_false
-#define	aix386_get_lineno			(PROTO (alent *, (*),	\
-	(bfd *, struct symbol_cache_entry *))) bfd_nullvoidptr
-#define	aix386_set_arch_mach			(PROTO (boolean, (*),	\
-	(bfd *, enum bfd_architecture, unsigned long))) bfd_false
-#define	aix386_find_nearest_line		(PROTO (boolean, (*),	\
-        (bfd *abfd, struct sec  *section,				\
-         struct symbol_cache_entry  **symbols,bfd_vma offset,		\
-         CONST char **file, CONST char **func, unsigned int *line))) bfd_false
-#define	aix386_sizeof_headers		(PROTO (int, (*),	\
-	(bfd *, boolean))) bfd_0
-
-#define aix386_bfd_debug_info_start		bfd_void
-#define aix386_bfd_debug_info_end		bfd_void
-#define aix386_bfd_debug_info_accumulate	(PROTO (void, (*),	\
-	(bfd *, struct sec *))) bfd_void
-#define aix386_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
-#define aix386_bfd_relax_section bfd_generic_relax_section
-#define aix386_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
-#define aix386_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
-#define aix386_bfd_link_hash_table_create \
-  ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
-#define aix386_bfd_link_add_symbols \
-  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
-#define aix386_bfd_final_link \
-  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
-#define aix386_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
-#define aix386_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
-#define aix386_bfd_is_local_label \
-  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
-#define aix386_bfd_free_cached_info bfd_true
-
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
 swap_abort()
@@ -349,7 +282,15 @@ bfd_target aix386_core_vec =
      bfd_false, bfd_false},
     {bfd_false, bfd_false,	/* bfd_write_contents */
      bfd_false, bfd_false},
-    
-    JUMP_TABLE(aix386),
+
+     BFD_JUMP_TABLE_GENERIC (_bfd_generic),
+     BFD_JUMP_TABLE_COPY (_bfd_generic),
+     BFD_JUMP_TABLE_CORE (aix386),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+     BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols),
+     BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+     BFD_JUMP_TABLE_WRITE (_bfd_generic),
+     BFD_JUMP_TABLE_LINK (_bfd_nolink),
+
     (PTR) 0
 };

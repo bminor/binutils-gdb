@@ -272,14 +272,14 @@ MY_bfd_final_link (abfd, info)
 
 /* No core file defined here -- configure in trad-core.c separately.  */
 #ifndef	MY_core_file_failing_command
-#define	MY_core_file_failing_command _bfd_dummy_core_file_failing_command
+#define	MY_core_file_failing_command _bfd_nocore_core_file_failing_command
 #endif
 #ifndef	MY_core_file_failing_signal
-#define	MY_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
+#define	MY_core_file_failing_signal	_bfd_nocore_core_file_failing_signal
 #endif
 #ifndef	MY_core_file_matches_executable_p
 #define	MY_core_file_matches_executable_p	\
-				_bfd_dummy_core_file_matches_executable_p
+				_bfd_nocore_core_file_matches_executable_p
 #endif
 #ifndef	MY_core_file_p
 #define	MY_core_file_p		_bfd_dummy_target
@@ -304,18 +304,6 @@ MY_bfd_final_link (abfd, info)
 #endif
 #ifndef MY_core_file_matches_executable_p
 #define MY_core_file_matches_executable_p NAME(aout,core_file_matches_executable_p)
-#endif
-#ifndef MY_slurp_armap
-#define MY_slurp_armap NAME(aout,slurp_armap)
-#endif
-#ifndef MY_slurp_extended_name_table
-#define MY_slurp_extended_name_table NAME(aout,slurp_extended_name_table)
-#endif
-#ifndef MY_truncate_arname
-#define MY_truncate_arname NAME(aout,truncate_arname)
-#endif
-#ifndef MY_write_armap
-#define MY_write_armap NAME(aout,write_armap)
 #endif
 #ifndef MY_set_section_contents
 #define MY_set_section_contents NAME(aout,set_section_contents)
@@ -353,14 +341,8 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_set_arch_mach
 #define MY_set_arch_mach NAME(aout,set_arch_mach)
 #endif
-#ifndef MY_openr_next_archived_file
-#define MY_openr_next_archived_file NAME(aout,openr_next_archived_file)
-#endif
 #ifndef MY_find_nearest_line
 #define MY_find_nearest_line NAME(aout,find_nearest_line)
-#endif
-#ifndef MY_generic_stat_arch_elt
-#define MY_generic_stat_arch_elt NAME(aout,generic_stat_arch_elt)
 #endif
 #ifndef MY_sizeof_headers
 #define MY_sizeof_headers NAME(aout,sizeof_headers)
@@ -387,11 +369,10 @@ MY_bfd_final_link (abfd, info)
 
 #ifndef MY_bfd_copy_private_section_data
 #define MY_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+  _bfd_generic_bfd_copy_private_section_data
 #endif
 #ifndef MY_bfd_copy_private_bfd_data
-#define MY_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define MY_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
 #endif
 
 #ifndef MY_bfd_is_local_label
@@ -458,7 +439,15 @@ bfd_target MY(vec) =
     {bfd_false, MY_write_object_contents, /* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE (MY),
+     BFD_JUMP_TABLE_GENERIC (MY),
+     BFD_JUMP_TABLE_COPY (MY),
+     BFD_JUMP_TABLE_CORE (MY),
+     BFD_JUMP_TABLE_ARCHIVE (MY),
+     BFD_JUMP_TABLE_SYMBOLS (MY),
+     BFD_JUMP_TABLE_RELOCS (MY),
+     BFD_JUMP_TABLE_WRITE (MY),
+     BFD_JUMP_TABLE_LINK (MY),
+
   (PTR) MY_backend_data,
 };
 #endif /* MY_BFD_TARGET */

@@ -2185,7 +2185,7 @@ ecoff_get_section_contents (abfd, section, location, offset, count)
   int i;
 
   if (strcmp (section->name, REGINFO) != 0)
-    return bfd_generic_get_section_contents (abfd, section, location,
+    return _bfd_generic_get_section_contents (abfd, section, location,
 					     offset, count);
 
   s.gp_value = tdata->gp;

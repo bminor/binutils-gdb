@@ -999,42 +999,21 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
     }
 }
 
-#define FOO PROTO
-#define tekhex_new_section_hook (FOO(boolean, (*), (bfd *, asection *)))bfd_true
-#define tekhex_get_reloc_upper_bound (FOO(long, (*),(bfd*, asection *)))bfd_0l
-#define tekhex_canonicalize_reloc (FOO(long, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0l
+#define	tekhex_close_and_cleanup _bfd_generic_close_and_cleanup
+#define tekhex_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
+#define tekhex_new_section_hook _bfd_generic_new_section_hook
 
-#define tekhex_openr_next_archived_file (FOO(bfd *, (*), (bfd*,bfd*))) bfd_nullvoidptr
-#define tekhex_find_nearest_line (FOO(boolean, (*),(bfd*,asection*,asymbol**,bfd_vma, CONST char**, CONST char**, unsigned int *))) bfd_false
-#define tekhex_generic_stat_arch_elt  (FOO(int, (*), (bfd *,struct stat *))) bfd_0
+#define tekhex_bfd_is_local_label bfd_generic_is_local_label
+#define tekhex_get_lineno _bfd_nosymbols_get_lineno
+#define tekhex_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define tekhex_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 
-#define tekhex_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
-#define tekhex_core_file_failing_signal (int (*)())bfd_0
-#define tekhex_core_file_matches_executable_p (FOO(boolean, (*),(bfd*, bfd*)))bfd_false
-#define tekhex_slurp_armap bfd_true
-#define tekhex_slurp_extended_name_table bfd_true
-#define tekhex_truncate_arname (void (*)())bfd_nullvoidptr
-#define tekhex_write_armap  (FOO( boolean, (*),(bfd *, unsigned int, struct orl *, unsigned int, int))) bfd_nullvoidptr
-#define tekhex_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
-#define	tekhex_close_and_cleanup	bfd_generic_close_and_cleanup
-#define tekhex_bfd_debug_info_start bfd_void
-#define tekhex_bfd_debug_info_end bfd_void
-#define tekhex_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *,	 asection *))) bfd_void
-#define tekhex_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
+#define tekhex_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
 #define tekhex_bfd_relax_section bfd_generic_relax_section
-#define tekhex_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
-#define tekhex_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 #define tekhex_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define tekhex_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define tekhex_bfd_final_link _bfd_generic_final_link
-#define tekhex_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
-#define tekhex_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
-#define tekhex_bfd_is_local_label bfd_generic_is_local_label
-#define tekhex_bfd_free_cached_info bfd_true
 
 bfd_target tekhex_vec =
 {
@@ -1076,6 +1055,15 @@ bfd_target tekhex_vec =
     _bfd_write_archive_contents,
     bfd_false,
   },
-  JUMP_TABLE (tekhex),
+
+  BFD_JUMP_TABLE_GENERIC (tekhex),
+  BFD_JUMP_TABLE_COPY (_bfd_generic),
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+  BFD_JUMP_TABLE_SYMBOLS (tekhex),
+  BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+  BFD_JUMP_TABLE_WRITE (tekhex),
+  BFD_JUMP_TABLE_LINK (tekhex),
+
   (PTR) 0
 };

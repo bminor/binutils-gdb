@@ -1776,14 +1776,6 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 /* Relaxing sections is MIPS specific.  */
 #define ecoff_bfd_relax_section mips_relax_section
 
-/* Core file support is usually traditional (but note that Irix uses
-   irix-core.c).  */
-#define ecoff_core_file_p _bfd_dummy_target
-#define ecoff_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define ecoff_core_file_failing_signal _bfd_dummy_core_file_failing_signal
-#define ecoff_core_file_matches_executable_p \
-  _bfd_dummy_core_file_matches_executable_p
-
 bfd_target ecoff_little_vec =
 {
   "ecoff-littlemips",		/* name */
@@ -1814,7 +1806,16 @@ bfd_target ecoff_little_vec =
      _bfd_generic_mkarchive, bfd_false},
   {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
-  JUMP_TABLE (ecoff),
+
+     BFD_JUMP_TABLE_GENERIC (ecoff),
+     BFD_JUMP_TABLE_COPY (ecoff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (ecoff),
+     BFD_JUMP_TABLE_SYMBOLS (ecoff),
+     BFD_JUMP_TABLE_RELOCS (ecoff),
+     BFD_JUMP_TABLE_WRITE (ecoff),
+     BFD_JUMP_TABLE_LINK (ecoff),
+
   (PTR) &mips_ecoff_backend_data
 };
 
@@ -1841,14 +1842,20 @@ bfd_target ecoff_big_vec =
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16,
  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-    ecoff_archive_p, ecoff_core_file_p},
+    ecoff_archive_p, _bfd_dummy_target},
  {bfd_false, ecoff_mkobject, /* bfd_set_format */
     _bfd_generic_mkarchive, bfd_false},
  {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
     _bfd_write_archive_contents, bfd_false},
-  JUMP_TABLE(ecoff),
+
+     BFD_JUMP_TABLE_GENERIC (ecoff),
+     BFD_JUMP_TABLE_COPY (ecoff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (ecoff),
+     BFD_JUMP_TABLE_SYMBOLS (ecoff),
+     BFD_JUMP_TABLE_RELOCS (ecoff),
+     BFD_JUMP_TABLE_WRITE (ecoff),
+     BFD_JUMP_TABLE_LINK (ecoff),
+
   (PTR) &mips_ecoff_backend_data
-  /* Note that there is another bfd_target just above this one.  If
-     you are adding initializers here, you should be adding them there
-     as well.  */
 };

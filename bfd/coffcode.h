@@ -2497,40 +2497,27 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_reloc16_extra_cases, coff_reloc16_estimate
 };
 
-#define coff_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define coff_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
-#define coff_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
-#define coff_slurp_armap		bfd_slurp_coff_armap
-#define coff_slurp_extended_name_table	_bfd_slurp_extended_name_table
-#define coff_truncate_arname		bfd_dont_truncate_arname
-#define coff_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define coff_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#define	coff_get_section_contents	bfd_generic_get_section_contents
-#define	coff_close_and_cleanup		bfd_generic_close_and_cleanup
+#define	coff_close_and_cleanup _bfd_generic_close_and_cleanup
+#define coff_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
+#define	coff_get_section_contents _bfd_generic_get_section_contents
 
-#define coff_bfd_debug_info_start	bfd_void
-#define coff_bfd_debug_info_end		bfd_void
-#define coff_bfd_debug_info_accumulate	\
-			(void (*) PARAMS ((bfd *, struct sec *))) bfd_void
-#define coff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
-#define coff_bfd_relax_section		bfd_generic_relax_section
-#ifndef coff_bfd_reloc_type_lookup
-#define coff_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
-#endif
-#define coff_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
-#define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
-#define coff_bfd_final_link _bfd_generic_final_link
-
-#ifndef coff_bfd_copy_private_section_data
 #define coff_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
-#endif
-#ifndef coff_bfd_copy_private_bfd_data
-#define coff_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
-#endif
+  _bfd_generic_bfd_copy_private_section_data
+#define coff_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
+
 #ifndef coff_bfd_is_local_label
 #define coff_bfd_is_local_label bfd_generic_is_local_label
 #endif
-#define coff_bfd_free_cached_info bfd_true
+
+/* The reloc lookup routine must be supplied by each individual COFF
+   backend.  */
+#ifndef coff_bfd_reloc_type_lookup
+#define coff_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
+#endif
+
+#define coff_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
+#define coff_bfd_relax_section bfd_generic_relax_section
+#define coff_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define coff_bfd_final_link _bfd_generic_final_link

@@ -118,14 +118,10 @@ PTR	bfd_nullvoidptr PARAMS ((bfd *ignore));
 int	bfd_0 PARAMS ((bfd *ignore));
 unsigned int	bfd_0u PARAMS ((bfd *ignore));
 long	bfd_0l PARAMS ((bfd *ignore));
+long	_bfd_n1 PARAMS ((bfd *ignore));
 void	bfd_void PARAMS ((bfd *ignore));
 
 bfd *	_bfd_new_bfd_contained_in PARAMS ((bfd *));
-boolean	 _bfd_dummy_new_section_hook PARAMS ((bfd *ignore, asection *newsect));
-char *	 _bfd_dummy_core_file_failing_command PARAMS ((bfd *abfd));
-int	 _bfd_dummy_core_file_failing_signal PARAMS ((bfd *abfd));
-boolean	 _bfd_dummy_core_file_matches_executable_p PARAMS ((bfd *core_bfd,
-							    bfd *exec_bfd));
 bfd_target *	_bfd_dummy_target PARAMS ((bfd *abfd));
 
 void	bfd_dont_truncate_arname PARAMS ((bfd *abfd, CONST char *filename,
@@ -146,13 +142,146 @@ bfd *	bfd_generic_openr_next_archived_file PARAMS ((bfd *archive,
 
 int	bfd_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 
-boolean	bfd_generic_get_section_contents PARAMS ((bfd *abfd, sec_ptr section,
- 						  PTR location, file_ptr offset,
-						  bfd_size_type count));
+
+/* Generic routines to use for BFD_JUMP_TABLE_GENERIC.  Use
+   BFD_JUMP_TABLE_GENERIC (_bfd_generic).  */
 
-boolean	bfd_generic_set_section_contents PARAMS ((bfd *abfd, sec_ptr section,
-						  PTR location, file_ptr offset,
-						  bfd_size_type count));
+#define _bfd_generic_close_and_cleanup bfd_true
+#define _bfd_generic_bfd_free_cached_info bfd_true
+#define _bfd_generic_new_section_hook \
+  ((boolean (*) PARAMS ((bfd *, asection *))) bfd_true)
+extern boolean _bfd_generic_get_section_contents
+  PARAMS ((bfd *, asection *, PTR location, file_ptr offset,
+	   bfd_size_type count));
+
+/* Generic routines to use for BFD_JUMP_TABLE_COPY.  Use
+   BFD_JUMP_TABLE_COPY (_bfd_generic).  */
+
+#define _bfd_generic_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define _bfd_generic_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+
+/* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
+   support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
+
+extern char *_bfd_nocore_core_file_failing_command PARAMS ((bfd *));
+extern int _bfd_nocore_core_file_failing_signal PARAMS ((bfd *));
+extern boolean _bfd_nocore_core_file_matches_executable_p
+  PARAMS ((bfd *, bfd *));
+
+/* Routines to use for BFD_JUMP_TABLE_ARCHIVE when there is no archive
+   file support.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive).  */
+
+#define _bfd_noarchive_slurp_armap bfd_false
+#define _bfd_noarchive_slurp_extended_name_table bfd_false
+#define _bfd_noarchive_truncate_arname \
+  ((void (*) PARAMS ((bfd *, const char *, char *))) bfd_void)
+#define _bfd_noarchive_write_armap \
+  ((boolean (*) \
+    PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
+   bfd_false)
+#define _bfd_noarchive_openr_next_archived_file \
+  ((bfd *(*) PARAMS ((bfd *, bfd *))) bfd_nullvoidptr)
+#define _bfd_noarchive_generic_stat_arch_elt bfd_generic_stat_arch_elt
+
+/* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get BSD style
+   archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd).  */
+
+#define _bfd_archive_bsd_slurp_armap bfd_slurp_bsd_armap
+#define _bfd_archive_bsd_slurp_extended_name_table \
+  _bfd_slurp_extended_name_table
+#define _bfd_archive_bsd_truncate_arname bfd_bsd_truncate_arname
+#define _bfd_archive_bsd_write_armap bsd_write_armap
+#define _bfd_archive_bsd_openr_next_archived_file \
+  bfd_generic_openr_next_archived_file
+#define _bfd_archive_bsd_generic_stat_arch_elt \
+  bfd_generic_stat_arch_elt
+
+/* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get COFF style
+   archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff).  */
+
+#define _bfd_archive_coff_slurp_armap bfd_slurp_coff_armap
+#define _bfd_archive_coff_slurp_extended_name_table \
+  _bfd_slurp_extended_name_table
+#define _bfd_archive_coff_truncate_arname bfd_dont_truncate_arname
+#define _bfd_archive_coff_write_armap coff_write_armap
+#define _bfd_archive_coff_openr_next_archived_file \
+  bfd_generic_openr_next_archived_file
+#define _bfd_archive_coff_generic_stat_arch_elt \
+  bfd_generic_stat_arch_elt
+
+/* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol
+   support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */
+
+#define _bfd_nosymbols_get_symtab_upper_bound _bfd_n1
+#define _bfd_nosymbols_get_symtab \
+  ((long (*) PARAMS ((bfd *, asymbol **))) _bfd_n1)
+#define _bfd_nosymbols_make_empty_symbol \
+  ((asymbol *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
+#define _bfd_nosymbols_print_symbol \
+  ((void (*) PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type))) bfd_void)
+#define _bfd_nosymbols_get_symbol_info \
+  ((void (*) PARAMS ((bfd *, asymbol *, symbol_info *))) bfd_void)
+#define _bfd_nosymbols_bfd_is_local_label \
+  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
+#define _bfd_nosymbols_get_lineno \
+  ((alent *(*) PARAMS ((bfd *, asymbol *))) bfd_nullvoidptr)
+#define _bfd_nosymbols_find_nearest_line \
+  ((boolean (*) \
+    PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **, \
+	     const char **, unsigned int *))) \
+   bfd_false)
+#define _bfd_nosymbols_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, PTR, unsigned long))) bfd_nullvoidptr)
+
+/* Routines to use for BFD_JUMP_TABLE_RELOCS when there is no reloc
+   support.  Use BFD_JUMP_TABLE_RELOCS (_bfd_norelocs).  */
+
+#define _bfd_norelocs_get_reloc_upper_bound \
+  ((long (*) PARAMS ((bfd *, asection *))) _bfd_n1)
+#define _bfd_norelocs_canonicalize_reloc \
+  ((long (*) PARAMS ((bfd *, asection *, arelent **, asymbol **))) _bfd_n1)
+#define _bfd_norelocs_bfd_reloc_type_lookup \
+  ((const reloc_howto_type *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) \
+   bfd_nullvoidptr)
+
+/* Routines to use for BFD_JUMP_TABLE_WRITE for targets which may not
+   be written.  Use BFD_JUMP_TABLE_WRITE (_bfd_nowrite).  */
+
+#define _bfd_nowrite_set_arch_mach \
+  ((boolean (*) PARAMS ((bfd *, enum bfd_architecture, unsigned long))) \
+   bfd_false)
+#define _bfd_nowrite_set_section_contents \
+  ((boolean (*) PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type))) \
+   bfd_false)
+
+/* Generic routines to use for BFD_JUMP_TABLE_WRITE.  Use
+   BFD_JUMP_TABLE_WRITE (_bfd_generic).  */
+
+#define _bfd_generic_set_arch_mach bfd_default_set_arch_mach
+extern boolean _bfd_generic_set_section_contents
+  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+
+/* Routines to use for BFD_JUMP_TABLE_LINK for targets which do not
+   support linking.  Use BFD_JUMP_TABLE_LINK (_bfd_nolink).  */
+
+#define _bfd_nolink_sizeof_headers ((int (*) PARAMS ((bfd *, boolean))) bfd_0)
+#define _bfd_nolink_bfd_get_relocated_section_contents \
+  ((bfd_byte *(*) \
+    PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, \
+	     bfd_byte *, boolean, asymbol **))) \
+   bfd_nullvoidptr)
+#define _bfd_nolink_bfd_relax_section \
+  ((boolean (*) \
+    PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *))) \
+   bfd_false)
+#define _bfd_nolink_bfd_link_hash_table_create \
+  ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
+#define _bfd_nolink_bfd_link_add_symbols \
+  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define _bfd_nolink_bfd_final_link \
+  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 
 /* Generic routine to determine of the given symbol is a local
    label.  */
@@ -258,9 +387,6 @@ extern bfd *bfd_last_cache;
 #define itos(x) ((char*)(x))
 #define stoi(x) ((int)(x))
 #endif
-
-/* Generic routine for close_and_cleanup is really just bfd_true.  */
-#define	bfd_generic_close_and_cleanup	bfd_true
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */

@@ -46,10 +46,10 @@ static bfd_vma get_value PARAMS ((arelent *, struct bfd_link_info *,
 				  asection *));
 static int abs32code PARAMS ((bfd *, asection *, arelent *,
 			      unsigned int, struct bfd_link_info *));
-static boolean b_out_relax_section PARAMS ((bfd *, asection *,
-					    struct bfd_link_info *,
-					    boolean *));
-static bfd_byte *b_out_get_relocated_section_contents
+static boolean b_out_bfd_relax_section PARAMS ((bfd *, asection *,
+						struct bfd_link_info *,
+						boolean *));
+static bfd_byte *b_out_bfd_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, boolean, asymbol **));
 
@@ -428,7 +428,7 @@ static reloc_howto_type howto_done_align_table[] = {
 };
 
 static const reloc_howto_type *
-b_out_reloc_type_lookup (abfd, code)
+b_out_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
@@ -1100,7 +1100,7 @@ aligncode (abfd, input_section, r, shrink)
 }
 
 static boolean
-b_out_relax_section (abfd, i, link_info, again)
+b_out_bfd_relax_section (abfd, i, link_info, again)
      bfd *abfd;
      asection *i;
      struct bfd_link_info *link_info;
@@ -1174,8 +1174,8 @@ b_out_relax_section (abfd, i, link_info, again)
 }
 
 static bfd_byte *
-b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
-				      relocateable, symbols)
+b_out_bfd_get_relocated_section_contents (in_abfd, link_info, link_order,
+					  data, relocateable, symbols)
      bfd *in_abfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
@@ -1356,40 +1356,12 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
 
 /* Build the transfer vectors for Big and Little-Endian B.OUT files.  */
 
-/* We don't have core files.  */
-#define	aout_32_core_file_failing_command _bfd_dummy_core_file_failing_command
-#define	aout_32_core_file_failing_signal _bfd_dummy_core_file_failing_signal
-#define	aout_32_core_file_matches_executable_p	\
-				_bfd_dummy_core_file_matches_executable_p
-
-/* We use BSD-Unix generic archive files.  */
-#define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aout_32_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#define	aout_32_slurp_armap		bfd_slurp_bsd_armap
-#define	aout_32_slurp_extended_name_table	_bfd_slurp_extended_name_table
-#define	aout_32_write_armap		bsd_write_armap
-#define	aout_32_truncate_arname		bfd_bsd_truncate_arname
-
-/* We override these routines from the usual a.out file routines.  */
-#define	aout_32_canonicalize_reloc	b_out_canonicalize_reloc
-#define	aout_32_get_reloc_upper_bound	b_out_get_reloc_upper_bound
-#define	aout_32_set_section_contents	b_out_set_section_contents
-#define	aout_32_set_arch_mach		b_out_set_arch_mach
-#define	aout_32_sizeof_headers		b_out_sizeof_headers
-
-#define aout_32_bfd_debug_info_start		bfd_void
-#define aout_32_bfd_debug_info_end		bfd_void
-#define aout_32_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-
-#define aout_32_bfd_get_relocated_section_contents  b_out_get_relocated_section_contents
-#define aout_32_bfd_relax_section                   b_out_relax_section
-#define aout_32_bfd_reloc_type_lookup		    b_out_reloc_type_lookup
-#define aout_32_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
-#define aout_32_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
-#define aout_32_bfd_link_add_symbols _bfd_generic_link_add_symbols
-#define aout_32_bfd_final_link _bfd_generic_final_link
+#define aout_32_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define aout_32_close_and_cleanup aout_32_bfd_free_cached_info
+
+#define b_out_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define b_out_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define b_out_bfd_final_link _bfd_generic_final_link
 
 bfd_target b_out_vec_big_host =
 {
@@ -1419,7 +1391,15 @@ bfd_target b_out_vec_big_host =
  {bfd_false, b_out_write_object_contents, /* bfd_write_contents */
    _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(aout_32),
+     BFD_JUMP_TABLE_GENERIC (aout_32),
+     BFD_JUMP_TABLE_COPY (_bfd_generic),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+     BFD_JUMP_TABLE_SYMBOLS (aout_32),
+     BFD_JUMP_TABLE_RELOCS (b_out),
+     BFD_JUMP_TABLE_WRITE (b_out),
+     BFD_JUMP_TABLE_LINK (b_out),
+
   (PTR) 0,
 };
 
@@ -1451,6 +1431,15 @@ bfd_target b_out_vec_little_host =
      _bfd_generic_mkarchive, bfd_false},
   {bfd_false, b_out_write_object_contents, /* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
-  JUMP_TABLE(aout_32),
+
+     BFD_JUMP_TABLE_GENERIC (aout_32),
+     BFD_JUMP_TABLE_COPY (_bfd_generic),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+     BFD_JUMP_TABLE_SYMBOLS (aout_32),
+     BFD_JUMP_TABLE_RELOCS (b_out),
+     BFD_JUMP_TABLE_WRITE (b_out),
+     BFD_JUMP_TABLE_LINK (b_out),
+
   (PTR) 0
 };

@@ -389,11 +389,6 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 						    PTR),
 				       PTR info));
 
-/* The code that implements targets can initialize a jump table with this
-   macro.  It must name all its routines the same way (a prefix plus
-   the standard routine suffix), or it must #define the routines that
-   are not so named, before calling JUMP_TABLE in the initializer.  */
-
 /* Semi-portable string concatenation in cpp.
    The CAT4 hack is to avoid a problem with some strict ANSI C preprocessors.
    The problem is, "32_" is not a valid preprocessing token, and we don't
@@ -419,48 +414,7 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 #endif
 #endif
 
-#define JUMP_TABLE(NAME)\
-CAT(NAME,_core_file_failing_command),\
-CAT(NAME,_core_file_failing_signal),\
-CAT(NAME,_core_file_matches_executable_p),\
-CAT(NAME,_slurp_armap),\
-CAT(NAME,_slurp_extended_name_table),\
-CAT(NAME,_truncate_arname),\
-CAT(NAME,_write_armap),\
-CAT(NAME,_close_and_cleanup),\
-CAT(NAME,_set_section_contents),\
-CAT(NAME,_get_section_contents),\
-CAT(NAME,_new_section_hook),\
-CAT(NAME,_bfd_copy_private_section_data),\
-CAT(NAME,_bfd_copy_private_bfd_data),\
-CAT(NAME,_get_symtab_upper_bound),\
-CAT(NAME,_get_symtab),\
-CAT(NAME,_get_reloc_upper_bound),\
-CAT(NAME,_canonicalize_reloc),\
-CAT(NAME,_make_empty_symbol),\
-CAT(NAME,_print_symbol),\
-CAT(NAME,_get_symbol_info),\
-CAT(NAME,_bfd_is_local_label),\
-CAT(NAME,_get_lineno),\
-CAT(NAME,_set_arch_mach),\
-CAT(NAME,_openr_next_archived_file),\
-CAT(NAME,_find_nearest_line),\
-CAT(NAME,_generic_stat_arch_elt),\
-CAT(NAME,_sizeof_headers),\
-CAT(NAME,_bfd_debug_info_start),\
-CAT(NAME,_bfd_debug_info_end),\
-CAT(NAME,_bfd_debug_info_accumulate),\
-CAT(NAME,_bfd_get_relocated_section_contents),\
-CAT(NAME,_bfd_relax_section),\
-CAT(NAME,_bfd_reloc_type_lookup),\
-CAT(NAME,_bfd_make_debug_symbol),\
-CAT(NAME,_bfd_link_hash_table_create),\
-CAT(NAME,_bfd_link_add_symbols),\
-CAT(NAME,_bfd_final_link),\
-CAT(NAME,_bfd_free_cached_info)
-
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
-
 
 /* User program access to BFD facilities */
 

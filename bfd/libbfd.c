@@ -32,22 +32,20 @@ DESCRIPTION
 	completeness.
 */
 
-/*ARGSUSED*/
-boolean
-_bfd_dummy_new_section_hook (ignore, ignore_newsect)
-     bfd *ignore;
-     asection *ignore_newsect;
-{
-  return true;
-}
+/* A routine which is used in target vectors for unsupported
+   operations.  */
 
 /*ARGSUSED*/
 boolean
 bfd_false (ignore)
      bfd *ignore;
 {
+  bfd_set_error (bfd_error_invalid_operation);
   return false;
 }
+
+/* A routine which is used in target vectors for supported operations
+   which do not actually do anything.  */
 
 /*ARGSUSED*/
 boolean
@@ -57,12 +55,16 @@ bfd_true (ignore)
   return true;
 }
 
+/* A routine which is used in target vectors for unsupported
+   operations which return a pointer value.  */
+
 /*ARGSUSED*/
 PTR
 bfd_nullvoidptr (ignore)
      bfd *ignore;
 {
-  return (PTR)NULL;
+  bfd_set_error (bfd_error_invalid_operation);
+  return NULL;
 }
 
 /*ARGSUSED*/
@@ -89,6 +91,18 @@ bfd_0l (ignore)
   return 0;
 }
 
+/* A routine which is used in target vectors for unsupported
+   operations which return -1 on error.  */
+
+/*ARGSUSED*/
+long
+_bfd_n1 (ignore_abfd)
+     bfd *ignore_abfd;
+{
+  bfd_set_error (bfd_error_invalid_operation);
+  return -1;
+}
+
 /*ARGSUSED*/
 void 
 bfd_void (ignore)
@@ -98,7 +112,7 @@ bfd_void (ignore)
 
 /*ARGSUSED*/
 boolean
-_bfd_dummy_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
+_bfd_nocore_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
      bfd *ignore_core_bfd;
      bfd *ignore_exec_bfd;
 {
@@ -106,21 +120,27 @@ _bfd_dummy_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
   return false;
 }
 
-/* of course you can't initialize a function to be the same as another, grr */
+/* Routine to handle core_file_failing_command entry point for targets
+   without core file support.  */
 
 /*ARGSUSED*/
 char *
-_bfd_dummy_core_file_failing_command (ignore_abfd)
+_bfd_nocore_core_file_failing_command (ignore_abfd)
      bfd *ignore_abfd;
 {
+  bfd_set_error (bfd_error_invalid_operation);
   return (char *)NULL;
 }
 
+/* Routine to handle core_file_failing_signal entry point for targets
+   without core file support.  */
+
 /*ARGSUSED*/
 int
-_bfd_dummy_core_file_failing_signal (ignore_abfd)
+_bfd_nocore_core_file_failing_signal (ignore_abfd)
      bfd *ignore_abfd;
 {
+  bfd_set_error (bfd_error_invalid_operation);
   return 0;
 }
 
@@ -787,7 +807,7 @@ bfd_putl64 (data, addr)
 /* Default implementation */
 
 boolean
-bfd_generic_get_section_contents (abfd, section, location, offset, count)
+_bfd_generic_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
      PTR location;
@@ -808,7 +828,7 @@ bfd_generic_get_section_contents (abfd, section, location, offset, count)
    in read-write files, though.  See other set_section_contents functions
    to see why it doesn't work for new sections.  */
 boolean
-bfd_generic_set_section_contents (abfd, section, location, offset, count)
+_bfd_generic_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
      PTR location;

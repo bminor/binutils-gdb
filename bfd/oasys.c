@@ -1469,35 +1469,32 @@ oasys_sizeof_headers (abfd, exec)
 {
   return 0;
 }
-#define FOO PROTO
-#define oasys_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
-#define oasys_core_file_failing_signal (int (*)())bfd_0
-#define oasys_core_file_matches_executable_p  0
+
+#define	oasys_close_and_cleanup _bfd_generic_close_and_cleanup
+#define oasys_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
+
 #define oasys_slurp_armap bfd_true
 #define oasys_slurp_extended_name_table bfd_true
-#define oasys_truncate_arname (void (*)())bfd_nullvoidptr
-#define oasys_write_armap 0
-#define oasys_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
-#define	oasys_close_and_cleanup		bfd_generic_close_and_cleanup
+#define oasys_truncate_arname bfd_dont_truncate_arname
+#define oasys_write_armap \
+  ((boolean (*) \
+    PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
+   bfd_true)
+
+#define oasys_bfd_is_local_label bfd_generic_is_local_label
+#define oasys_get_lineno _bfd_nosymbols_get_lineno
+#define oasys_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+
+#define oasys_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
+
 #define oasys_set_arch_mach bfd_default_set_arch_mach
-#define oasys_bfd_debug_info_start bfd_void
-#define oasys_bfd_debug_info_end bfd_void
-#define oasys_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *, asection *)))bfd_void
-#define oasys_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
+
+#define oasys_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
 #define oasys_bfd_relax_section bfd_generic_relax_section
-#define oasys_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
-#define oasys_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 #define oasys_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define oasys_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define oasys_bfd_final_link _bfd_generic_final_link
-#define oasys_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
-#define oasys_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
-#define oasys_bfd_is_local_label bfd_generic_is_local_label
-#define oasys_bfd_free_cached_info bfd_true
 
 /*SUPPRESS 460 */
 bfd_target oasys_vec =
@@ -1539,6 +1536,15 @@ bfd_target oasys_vec =
     _bfd_write_archive_contents,
     bfd_false,
   },
-  JUMP_TABLE (oasys),
+
+  BFD_JUMP_TABLE_GENERIC (oasys),
+  BFD_JUMP_TABLE_COPY (_bfd_generic),
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),
+  BFD_JUMP_TABLE_ARCHIVE (oasys),
+  BFD_JUMP_TABLE_SYMBOLS (oasys),
+  BFD_JUMP_TABLE_RELOCS (oasys),
+  BFD_JUMP_TABLE_WRITE (oasys),
+  BFD_JUMP_TABLE_LINK (oasys),
+
   (PTR) 0
 };

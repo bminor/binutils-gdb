@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi Super-H COFF binaries.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -21,18 +21,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-#include "libbfd.h"
 #include "obstack.h"
+#include "libbfd.h"
+#include "bfdlink.h"
 #include "coff/sh.h"
 #include "coff/internal.h"
 #include "libcoff.h"
-#include "seclet.h"
-
-extern bfd_error_vector_type bfd_error_vector;
 
 static reloc_howto_type r_imm32 =
-HOWTO (R_SH_IMM32, 0,2, 32, false, 0, true,
-       true, 0, "r_imm32", false, 0x0, 0xffffffff, false);
+HOWTO (R_SH_IMM32, 0,2, 32, false, 0,
+       complain_overflow_bitfield, 0, "r_imm32", false, 0x0, 0xffffffff,
+       false);
 
 
 
@@ -45,7 +44,7 @@ coff_SH_select_reloc (howto)
   return howto->type;
 }
 
-#define SELECT_RELOC(x,howto) x= coff_SH_select_reloc(howto)
+#define SELECT_RELOC(x,howto) x.r_type = coff_SH_select_reloc(howto)
 
 
 #define BADMAG(x) SHBADMAG(x)
@@ -64,9 +63,9 @@ coff_SH_select_reloc (howto)
    */
 
 static void
-DEFUN (rtype2howto, (internal, dst),
-       arelent * internal AND
-       struct internal_reloc *dst)
+rtype2howto (internal, dst)
+     arelent * internal;
+     struct internal_reloc *dst;
 {
   switch (dst->r_type)
     {
@@ -92,12 +91,12 @@ DEFUN (rtype2howto, (internal, dst),
  reloc_processing(relent, reloc, symbols, abfd, section)
 
 static void 
-DEFUN (reloc_processing, (relent, reloc, symbols, abfd, section),
-       arelent * relent AND
-       struct internal_reloc *reloc AND
-       asymbol ** symbols AND
-       bfd * abfd AND
-       asection * section)
+reloc_processing (relent, reloc, symbols, abfd, section)
+     arelent * relent;
+     struct internal_reloc *reloc;
+     asymbol ** symbols;
+     bfd * abfd;
+     asection * section;
 {
   relent->address = reloc->r_vaddr;
   rtype2howto (relent, reloc);
@@ -117,9 +116,10 @@ DEFUN (reloc_processing, (relent, reloc, symbols, abfd, section),
 }
 
 static void
-extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
+extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
      bfd *in_abfd;
-     bfd_seclet_type *seclet;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
      arelent *reloc;
      bfd_byte *data;
      unsigned int *src_ptr;
@@ -129,7 +129,8 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
     {
     case R_SH_IMM32:
       {
-	int v = bfd_coff_reloc16_get_value(reloc, seclet);
+	int v = bfd_coff_reloc16_get_value(reloc, link_info,
+					   link_order->u.indirect.section);
 	bfd_put_32 (in_abfd, v, data  + *dst_ptr);
 	(*dst_ptr) +=4;
 	(*src_ptr)+=4;;
@@ -148,7 +149,8 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
 #undef  coff_bfd_get_relocated_section_contents
 #undef coff_bfd_relax_section
-#define  coff_bfd_get_relocated_section_contents bfd_coff_reloc16_get_relocated_section_contents
+#define coff_bfd_get_relocated_section_contents \
+  bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
 bfd_target shcoff_vec =
@@ -160,19 +162,19 @@ bfd_target shcoff_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
   '_',				/* leading symbol underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   2,				/* minimum section alignment */
-_do_getb64, _do_getb_signed_64, _do_putb64,
-     _do_getb32, _do_getb_signed_32, _do_putb32,
-     _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
-_do_getb64, _do_getb_signed_64, _do_putb64,
-     _do_getb32, _do_getb_signed_32, _do_putb32,
-     _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
+bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
      bfd_generic_archive_p, _bfd_dummy_target},
@@ -181,6 +183,14 @@ _do_getb64, _do_getb_signed_64, _do_putb64,
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
 
-     JUMP_TABLE(coff),
+     BFD_JUMP_TABLE_GENERIC (coff),
+     BFD_JUMP_TABLE_COPY (coff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+     BFD_JUMP_TABLE_SYMBOLS (coff),
+     BFD_JUMP_TABLE_RELOCS (coff),
+     BFD_JUMP_TABLE_WRITE (coff),
+     BFD_JUMP_TABLE_LINK (coff),
+
     COFF_SWAP_TABLE,
 };

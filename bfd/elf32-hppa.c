@@ -3055,8 +3055,8 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
       if (section->output_section == NULL
 	  && abfd->direction == read_direction)
 	{
-	  return bfd_generic_get_section_contents (abfd, section, location,
-						   offset, count);
+	  return _bfd_generic_get_section_contents (abfd, section, location,
+						    offset, count);
 	}
       
       /* If this is the first time through, and there are output sections,
@@ -3098,8 +3098,8 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
   else
     /* It's not the symbol extension or linker stub sections, use
        the generic routines.  */
-    return bfd_generic_get_section_contents (abfd, section, location,
-					     offset, count);
+    return _bfd_generic_get_section_contents (abfd, section, location,
+					      offset, count);
 }
 
 /* Translate from an elf into field into a howto relocation pointer.  */
@@ -3396,7 +3396,7 @@ elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, ignored)
 #define elf_backend_symbol_processing	elf32_hppa_backend_symbol_processing
 #define elf_backend_symbol_table_processing	elf32_hppa_backend_symbol_table_processing
 
-#define bfd_generic_get_section_contents	hppa_elf_get_section_contents
+#define bfd_elf32_get_section_contents		hppa_elf_get_section_contents
 #define bfd_elf32_set_section_contents		hppa_elf_set_section_contents
 #define bfd_elf32_bfd_is_local_label		hppa_elf_is_local_label
 
