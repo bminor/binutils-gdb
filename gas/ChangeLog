@@ -1,5 +1,11 @@
 Mon Sep 25 00:23:16 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-arm.c (md_atof): Output little endian constants in
+	little endian mode.
+
+	* config/obj-coff.c (obj_coff_section): Pass &type, not type,
+	s_mri_sect.
+
 	* configure.in: Fix typo: fmt-elf to fmt=elf.
 
 Fri Sep 22 16:34:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
