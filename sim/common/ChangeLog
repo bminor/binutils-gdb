@@ -1,3 +1,11 @@
+Wed Nov 19 12:02:41 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-utils.c (sim_state_alloc): Call SIM_STATE_ALLOC if defined.
+	(sim_state_free): Call SIM_STATE_FREE if defined.
+
+	* sim-module.c (sim_module_install): Don't leave any modules
+	installed if one fails to install.
+
 Wed Nov 19 13:25:48 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* sim-options.c: Don't include ../libiberty/alloca-conf.h any
