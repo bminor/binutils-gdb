@@ -1,3 +1,20 @@
+2002-10-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (SIMPLE_EXPR): New macro.
+	(cris_relax_frag): New function.
+	(md_estimate_size_before_relax) <case ENCODE_RELAX
+	(STATE_BASE_PLUS_DISP_PREFIX, STATE_UNDF)>: Pass on unresolved
+	expressions that will become absolute expressions to relaxation.
+	(md_convert_frag) <case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX,
+	STATE_WORD)>: Expect only absolute expressions.  Use the symbol
+	value, not distance to symbol.
+	<case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_BYTE)>:
+	Ditto.  Correct placement of fixup.
+	(md_assemble): Use SIMPLE_EXPR when dissecting expressions.
+	(gen_bdap): Ditto.
+	* config/tc-cris.h (cris_relax_frag): Declare.
+	(md_relax_frag): Define.
+
 2002-10-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (special_sections): Use correct types for init

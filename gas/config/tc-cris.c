@@ -43,6 +43,13 @@
 #define SYNTAX_USER_SYM_NO_LEADING_UNDERSCORE "no_leading_underscore"
 #define REGISTER_PREFIX_CHAR '$'
 
+/* True for expressions where getting X_add_symbol and X_add_number is
+   enough to get the "base" and "offset"; no need to make_expr_symbol.
+   It's not enough to check if X_op_symbol is NULL; that misses unary
+   operations like O_uminus.  */
+#define SIMPLE_EXPR(EXP) \
+ ((EXP)->X_op == O_constant || (EXP)->X_op == O_symbol)
+
 /* Like in ":GOT", ":GOTOFF" etc.  Other ports use '@', but that's in
    line_separator_chars for CRIS, so we avoid it.  */
 #define PIC_SUFFIX_CHAR ':'
@@ -330,6 +337,98 @@ cris_target_format ()
     }
 }
 
+/* We need a port-specific relaxation function to cope with sym2 - sym1
+   relative expressions with both symbols in the same segment (but not
+   necessarily in the same frag as this insn), for example:
+     move.d [pc+sym2-(sym1-2)],r10
+    sym1:
+   The offset can be 8, 16 or 32 bits long.  */
+
+long
+cris_relax_frag (seg, fragP, stretch)
+     segT seg ATTRIBUTE_UNUSED;
+     fragS *fragP;
+     long stretch ATTRIBUTE_UNUSED;
+{
+  long growth;
+  offsetT aim = 0;
+  symbolS *symbolP;
+  const relax_typeS *this_type;
+  const relax_typeS *start_type;
+  relax_substateT next_state;
+  relax_substateT this_state;
+  const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
+
+  /* We only have to cope with frags as prepared by
+     md_estimate_size_before_relax.  The dword cases may geet here
+     because of the different reasons that they aren't relaxable.  */
+  switch (fragP->fr_subtype)
+    {
+    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_DWORD):
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_DWORD):
+      /* When we get to these states, the frag won't grow any more.  */
+      return 0;
+
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_WORD):
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_BYTE):
+      if (fragP->fr_symbol == NULL
+	  || S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
+	as_fatal (_("internal inconsistency problem in %s: fr_symbol %lx"),
+		  __FUNCTION__, (long) fragP->fr_symbol);
+      symbolP = fragP->fr_symbol;
+      if (symbol_resolved_p (symbolP))
+	as_fatal (_("internal inconsistency problem in %s: resolved symbol"),
+		  __FUNCTION__);
+      aim = S_GET_VALUE (symbolP);
+      break;
+
+    default:
+      as_fatal (_("internal inconsistency problem in %s: fr_subtype %d"),
+		  __FUNCTION__, fragP->fr_subtype);
+    }
+
+  /* The rest is stolen from relax_frag.  There's no obvious way to
+     share the code, but fortunately no requirement to keep in sync as
+     long as fragP->fr_symbol does not have its segment changed.  */
+
+  this_state = fragP->fr_subtype;
+  start_type = this_type = table + this_state;
+
+  if (aim < 0)
+    {
+      /* Look backwards.  */
+      for (next_state = this_type->rlx_more; next_state;)
+	if (aim >= this_type->rlx_backward)
+	  next_state = 0;
+	else
+	  {
+	    /* Grow to next state.  */
+	    this_state = next_state;
+	    this_type = table + this_state;
+	    next_state = this_type->rlx_more;
+	  }
+    }
+  else
+    {
+      /* Look forwards.  */
+      for (next_state = this_type->rlx_more; next_state;)
+	if (aim <= this_type->rlx_forward)
+	  next_state = 0;
+	else
+	  {
+	    /* Grow to next state.  */
+	    this_state = next_state;
+	    this_type = table + this_state;
+	    next_state = this_type->rlx_more;
+	  }
+    }
+
+  growth = this_type->rlx_length - start_type->rlx_length;
+  if (growth != 0)
+    fragP->fr_subtype = this_state;
+  return growth;
+}
+
 /* Prepare machine-dependent frags for relaxation.
 
    Called just before relaxation starts. Any symbol that is now undefined
@@ -384,6 +483,17 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  /* Go for dword if not absolute or same segment.  */
 	  fragP->fr_subtype
 	    = ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_DWORD);
+	  fragP->fr_var = md_cris_relax_table[fragP->fr_subtype].rlx_length;
+	}
+      else if (!symbol_resolved_p (fragP->fr_symbol))
+	{
+	  /* The symbol will eventually be completely resolved as an
+	     absolute expression, but right now it depends on the result
+	     of relaxation and we don't know anything else about the
+	     value.  We start relaxation with the assumption that it'll
+	     fit in a byte.  */
+	  fragP->fr_subtype
+	    = ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_BYTE);
 	  fragP->fr_var = md_cris_relax_table[fragP->fr_subtype].rlx_length;
 	}
       else
@@ -526,7 +636,10 @@ md_convert_frag (abfd, sec, fragP)
       break;
 
     case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_BYTE):
-      var_partp[0] = target_address - (address_of_var_part + 1);
+      if (symbolP == NULL)
+	as_fatal (_("internal inconsistency in %s: bdapq no symbol"),
+		    __FUNCTION__);
+      opcodep[0] = S_GET_VALUE (symbolP);
       var_part_size = 0;
       break;
 
@@ -536,7 +649,10 @@ md_convert_frag (abfd, sec, fragP)
       opcodep[0] = BDAP_PC_LOW + (1 << 4);
       opcodep[1] &= 0xF0;
       opcodep[1] |= BDAP_INCR_HIGH;
-      md_number_to_chars (var_partp, (long) (target_address), 2);
+      if (symbolP == NULL)
+	as_fatal (_("internal inconsistency in %s: bdap.w with no symbol"),
+		  __FUNCTION__);
+      md_number_to_chars (var_partp, S_GET_VALUE (symbolP), 2);
       var_part_size = 2;
       break;
 
@@ -813,12 +929,13 @@ md_assemble (str)
 	{
 	  /* Handle complex expressions.  */
 	  valueT addvalue
-	    = (output_instruction.expr.X_op_symbol != NULL
-	       ? 0 : output_instruction.expr.X_add_number);
+	    = (SIMPLE_EXPR (&output_instruction.expr)
+	       ? output_instruction.expr.X_add_number
+	       : 0);
 	  symbolS *sym
-	    = (output_instruction.expr.X_op_symbol != NULL
-	       ? make_expr_symbol (&output_instruction.expr)
-	       : output_instruction.expr.X_add_symbol);
+	    = (SIMPLE_EXPR (&output_instruction.expr)
+	       ? output_instruction.expr.X_add_symbol
+	       : make_expr_symbol (&output_instruction.expr));
 
 	  /* If is_undefined, then the expression may BECOME now_seg.  */
 	  length_code = is_undefined ? STATE_UNDF : STATE_BYTE;
@@ -2386,10 +2503,10 @@ gen_bdap (base_regno, exprP)
     {
       /* Handle complex expressions.  */
       valueT addvalue
-	= exprP->X_op_symbol != NULL ? 0 : exprP->X_add_number;
+	= SIMPLE_EXPR (exprP) ? exprP->X_add_number : 0;
       symbolS *sym
-	= (exprP->X_op_symbol != NULL
-	   ? make_expr_symbol (exprP) : exprP->X_add_symbol);
+	= (SIMPLE_EXPR (exprP)
+	   ? exprP->X_add_symbol : make_expr_symbol (exprP));
 
       /* The expression is not defined yet but may become absolute.  We
 	 make it a relocation to be relaxed.  */

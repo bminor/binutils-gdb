@@ -75,6 +75,16 @@ extern const int md_long_jump_size;
 extern const struct relax_type md_cris_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_cris_relax_table
 
+long cris_relax_frag PARAMS ((segT, fragS *, long));
+
+/* GAS only handles relaxations for pc-relative data targeting addresses
+   in the same segment, so we have to handle the rest on our own.  */
+#define md_relax_frag(SEG, FRAGP, STRETCH)		\
+ ((FRAGP)->fr_symbol != NULL				\
+  && S_GET_SEGMENT ((FRAGP)->fr_symbol) == (SEG)	\
+  ? relax_frag (SEG, FRAGP, STRETCH)			\
+  : cris_relax_frag (SEG, FRAGP, STRETCH))
+
 #define TC_FORCE_RELOCATION(FIX) md_cris_force_relocation (FIX)
 extern int md_cris_force_relocation PARAMS ((struct fix *));
 
