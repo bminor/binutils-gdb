@@ -1,3 +1,11 @@
+Wed Aug 19 11:20:59 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-m68k.c, tc-m68kmote.c: the cas2 instruction is supposed to be
+	written with indirection on the last two operands, which can be
+	either data or address registers.  Added a new operand type 'r'
+	which accepts either register type.  Added '(' to notend stuff in
+	tc-m68kmote.c to accept (a0):(a2) in cas2 instruction.
+
 Tue Aug 11 12:58:14 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* sparc.mt: New file.
@@ -11,7 +19,6 @@ Thu Aug  6 12:08:42 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-h8300.c: if a :8 is seen after an operand, fill top
 	two bytes of any constant with 0xff:
-
 
 Wed Aug  5 01:54:34 1992  John Gilmore  (gnu at cygnus.com)
 

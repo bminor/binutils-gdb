@@ -117,6 +117,7 @@ static struct obstack robyn;
    *** MSCR  otherreg			--> Magic
    With -l option
    5.? AOFF  apc@(num)			--> *(apc+num) -- empty string and ZPC not allowed here still
+   ?.? DINDR dreg@			--> (dreg) -- cas2 only
 
    examples:
    #foo	#0x35	#12
@@ -151,6 +152,7 @@ enum operand_type {
 	ABSL,
 	MSCR,
 	REGLST,
+	DINDR
 };
 
 
@@ -665,7 +667,9 @@ register struct m68k_op *opP;
 		return OK;
 	}
 
-	if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL) {	/* Can't indirect off non address regs */
+	/* Can't indirect off non address regs, but Dx@ is OK for cas2 */
+	if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL
+	   && (str[1] != '\0' || i<DATA+0 || i>DATA+7)) {
 		opP->error="Invalid indirect register";
 		return FAIL;
 	}
@@ -674,7 +678,10 @@ register struct m68k_op *opP;
 	str++;
 	switch(*str) {
 	case '\0':
-		opP->mode=AINDR;
+	  	if (i < DATA + 0 || i > DATA + 7)
+		  opP->mode=AINDR;
+		else
+		  opP->mode=DINDR;
 		return OK;
 	case '-':
 		opP->mode=ADEC;
@@ -1294,6 +1301,11 @@ void m68k_ip (instring)
 	    losing++;
 	  break;
 
+	case 'r':
+	  if (opP->mode!=AINDR && opP->mode!=DINDR)
+	    losing++;
+	  break;
+
 	case 's':
 	  if(opP->mode!=MSCR || !(opP->reg==FPI || opP->reg==FPS || opP->reg==FPC))
 	    losing++;
@@ -1809,6 +1821,9 @@ void m68k_ip (instring)
 	  break;
 	}
 	break;
+      case DINDR:
+	as_bad("invalid indirect register");
+	break;
       case MSCR:
       default:
 	as_bad("unknown/incorrect operand");
@@ -2090,6 +2105,7 @@ void m68k_ip (instring)
       break;
 
     case 'R':
+    case 'r':
       /* This depends on the fact that ADDR registers are
 	 eight more than their corresponding DATA regs, so
 	 the result will have the ADDR_REG bit set */

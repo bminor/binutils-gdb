@@ -123,6 +123,7 @@ static struct obstack robyn;
    *** MSCR  otherreg			--> Magic
    With -l option
    5.? AOFF  apc@(num)			--> *(apc+num) -- empty string and ZPC not allowed here still
+   ?.? DINDR dreg@			--> (dreg) -- cas2 only
    
    examples:
    #foo	#0x35	#12
@@ -157,6 +158,7 @@ enum operand_type {
 	ABSL,
 	MSCR,
 	REGLST,
+	DINDR
 };
 
 
@@ -933,8 +935,10 @@ register struct m68k_op *opP;
 	if(*str=='(') {
 		str++;
 		i=m68k_reg_parse(&str);
-		if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL) {	
-			/* Can't indirect off non address regs */
+		if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL
+		   && (*str != ')' || str[1] != '\0' || i<DATA+0 || i>DATA+7)) {
+			/* Can't indirect off non address regs,
+			   but (dx) is OK for cas2.  */
 			opP->error="Invalid indirect register";
 			return FAIL;
 		}
@@ -943,8 +947,12 @@ register struct m68k_op *opP;
 			if(*str==')') {
 				str++;
 				if(*str=='\0') {
-					/* "(An)"  Address Register Indirect mode */
-					opP->mode=AINDR;
+					/* "(An)"  Address Register Indirect mode
+					   or "(Dn)" for cas2 instruction.  */
+					if (i < DATA + 0 || i > DATA + 7)
+					  opP->mode=AINDR;
+					else
+					  opP->mode=DINDR;
 					return OK;
 				}
 				if(*str=='+') {
@@ -1209,7 +1217,9 @@ register struct m68k_op *opP;
 		return OK;
 	}
 	
-	if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL) {	/* Can't indirect off non address regs */
+	/* Can't indirect off non address regs, but Dx@ is OK for cas2 */
+	if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL
+	   && (str[1] != '\0' || i<DATA+0 || i>DATA+7)) {
 		opP->error="Invalid indirect register";
 		return FAIL;
 	}
@@ -1218,7 +1228,10 @@ register struct m68k_op *opP;
 	str++;
 	switch(*str) {
 	case '\0':
-		opP->mode=AINDR;
+	  	if (i < DATA + 0 || i > DATA + 7)
+		  opP->mode=AINDR;
+		else
+		  opP->mode=DINDR;
 		return OK;
 	case '-':
 		opP->mode=ADEC;
@@ -1863,6 +1876,11 @@ char *instring;
 					    losing++;
 					break;
 					
+				case 'r':
+					if(opP->mode!=AINDR && opP->mode!=DINDR)
+					  losing++;
+					break;
+
 				case 's':
 					if(opP->mode!=MSCR || !(opP->reg==FPI || opP->reg==FPS || opP->reg==FPC))
 					    losing++;
@@ -2327,6 +2345,9 @@ char *instring;
 					break;
 				}
 				break;
+			case DINDR:
+				as_bad("invalid indirect register");
+				break;
 			case MSCR:
 			default:
 				as_bad("unknown/incorrect operand");
@@ -2608,6 +2629,7 @@ char *instring;
 			break;
 			
 		case 'R':
+		case 'r':
 			/* This depends on the fact that ADDR registers are
 			   eight more than their corresponding DATA regs, so
 			   the result will have the ADDR_REG bit set */
@@ -3015,7 +3037,7 @@ char *s;
 	    return 0;
 	if(*s!=':') return 1;
 	/* This kludge here is for the division cmd, which is a kludge */
-	if(index("aAdD#",s[1])) return 0;
+	if(index("aAdD#(",s[1])) return 0;
 	return 1;
 }
 #endif
@@ -3296,6 +3318,7 @@ void
 	alt_notend_table['#'] = 1;
 	alt_notend_table['f'] = 1;
 	alt_notend_table['F'] = 1;
+	alt_notend_table['('] = 1;
 	
 #ifdef REGISTER_PREFIX
 	alt_notend_table[REGISTER_PREFIX] = 1;
@@ -3306,7 +3329,7 @@ void
 
 #if 0
 #define notend(s) ((*s == ',' || *s == '}' || *s == '{' \
-		    || (*s == ':' && strchr("aAdD#", s[1]))) \
+		    || (*s == ':' && strchr("aAdD#(", s[1]))) \
 		   ? 0 : 1)
 #endif
 
