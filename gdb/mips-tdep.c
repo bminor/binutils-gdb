@@ -2510,7 +2510,7 @@ do_fp_register_row (regnum)
 	       regnum + 1, REGISTER_NAME (regnum + 1));
 
       /* copy the two floats into one double, and unpack both */
-      memcpy (dbl_buffer, raw_buffer, sizeof (dbl_buffer));
+      memcpy (dbl_buffer, raw_buffer, 2 * REGISTER_RAW_SIZE (FP0_REGNUM));
       flt1 = unpack_double (builtin_type_float, raw_buffer[HI], &inv1);
       flt2 = unpack_double (builtin_type_float, raw_buffer[LO], &inv2);
       doub = unpack_double (builtin_type_double, dbl_buffer, &inv3);
@@ -2528,7 +2528,7 @@ do_fp_register_row (regnum)
     {				/* eight byte registers: print each one as float AND as double. */
       int offset = 4 * (TARGET_BYTE_ORDER == BIG_ENDIAN);
 
-      memcpy (dbl_buffer, raw_buffer[HI], sizeof (dbl_buffer));
+      memcpy (dbl_buffer, raw_buffer[HI], 2 * REGISTER_RAW_SIZE (FP0_REGNUM));
       flt1 = unpack_double (builtin_type_float,
 			    &raw_buffer[HI][offset], &inv1);
       doub = unpack_double (builtin_type_double, dbl_buffer, &inv3);

@@ -1,3 +1,8 @@
+2000-04-13  DJ Delorie  <dj@cygnus.com>
+
+	* mips-tdep.c (do_fp_register_row): copy the number of bytes
+	allocated, not the size of the pointer.
+
 2000-04-13  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* config/i386/nm-i386sol2.h (CANNOT_STEP_HW_WATCHPOINTS):  Define.
