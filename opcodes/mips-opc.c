@@ -62,6 +62,11 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define RD_HI	INSN_READ_HI
 #define RD_LO	INSN_READ_LO
 
+/* start-sanitize-vr5400 */
+#define WR_HILO WR_HI|WR_LO
+#define RD_HILO RD_HI|RD_LO
+#define MOD_HILO WR_HILO|RD_HILO
+/* end-sanitize-vr5400 */
 
 #define I1	INSN_ISA1
 #define I2	INSN_ISA2
@@ -71,6 +76,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define L1	INSN_4010
 #define V1      INSN_4100
 #define T3      INSN_3900
+/* start-sanitize-vr5400 */
+#define N5	INSN_5400
+/* end-sanitize-vr5400 */
 /* start-sanitize-r5900 */
 #define T5	INSN_5900
 /* end-sanitize-r5900 */
@@ -298,6 +306,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"daddiu",  "t,r,j",	0x64000000, 0xfc000000, WR_t|RD_s,	I3	},
 {"daddu",   "d,v,t",	0x0000002d, 0xfc0007ff, WR_d|RD_s|RD_t,	I3	},
 {"daddu",   "t,r,I",	3,    (int) M_DADDU_I,	INSN_MACRO	},
+  /* start-sanitize-vr5400 */
+{"dbreak",  "",		0x7000003f, 0xffffffff,	0,	N5	},
+  /* end-sanitize-vr5400 */
 /* dctr and dctw are used on the r5000.  */
 {"dctr",    "o(b)",	0xbc050000, 0xfc1f0000, RD_b,	I3	},
 {"dctw",    "o(b)",	0xbc090000, 0xfc1f0000, RD_b,	I3	},
@@ -356,6 +367,12 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"dremu",   "z,s,t",	0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO,	I3	},
 {"dremu",   "d,v,t",	3,    (int) M_DREMU_3,	INSN_MACRO	},
 {"dremu",   "d,v,I",	3,    (int) M_DREMU_3I,	INSN_MACRO	},
+  /* start-sanitize-vr5400 */
+{"dret",    "",		0x7000003e, 0xffffffff,	0,	N5	},
+{"drorv",   "d,t,s",	0x00000056, 0xfc0007ff, RD_t|RD_s|WR_d,	N5	},
+{"dror32",  "d,t,>",	0x0020003e, 0xffe0003f, WR_d|RD_t,	N5	},
+{"dror",    "d,t,<",	0x00200036, 0xffe0003f, WR_d|RD_t,	N5	},
+  /* end-sanitize-vr5400 */
 {"dsllv",   "d,t,s",	0x00000014, 0xfc0007ff,	WR_d|RD_t|RD_s,	I3	},
 {"dsll32",  "d,w,<",	0x0000003c, 0xffe0003f, WR_d|RD_t,	I3	},
 {"dsll",    "d,w,s",	0x00000014, 0xfc0007ff,	WR_d|RD_t|RD_s,	I3	}, /* dsllv */
@@ -473,6 +490,12 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"lwu",     "t,o(b)",	0x9c000000, 0xfc000000,	LDD|RD_b|WR_t,	I3	},
 {"lwu",     "t,A(b)",	3,    (int) M_LWU_AB,	INSN_MACRO	},
 {"lwxc1",   "D,t(b)",	0x4c000000, 0xfc00f83f, LDD|WR_D|RD_t|RD_b,	I4	},
+  /* start-sanitize-vr5400 */
+{"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"maccu",   "d,s,t",	0x00000159, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"macchi",  "d,s,t",	0x00000358, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"macchiu", "d,s,t",	0x00000359, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+  /* end-sanitize-vr5400 */
 {"mad",	    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
 {"madu",    "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
 {"addciu",  "t,r,j",	0x70000000, 0xfc000000,	WR_t|RD_s,L1	},
@@ -500,11 +523,20 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"maddu1",  "d,s,t",	0x70000021, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d,	T5	},
   /* end-sanitize-r5900 */
 {"madd16",  "s,t",      0x00000028, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	V1	},
+  /* start-sanitize-vr5400 */
+{"mfpc",    "t,P",	0x4000c801, 0xffe0ffc1, RD_C0|WR_t,	N5	},
+{"mfps",    "t,P",	0x4000c800, 0xffe0ffc1, RD_C0|WR_t,	N5	},
+{"mtpc",    "t,P",	0x4080c801, 0xffe0ffc1, WR_C0|RD_t,	N5	},
+{"mtps",    "t,P",	0x4080c800, 0xffe0ffc1, WR_C0|RD_t,	N5	},
+  /* end-sanitize-vr5400 */
 {"mfc0",    "t,G",	0x40000000, 0xffe007ff,	LCD|WR_t|RD_C0,	I1	},
 {"mfc1",    "t,S",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I1	},
 {"mfc1",    "t,G",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I1	},
 {"mfc2",    "t,G",	0x48000000, 0xffe007ff,	LCD|WR_t|RD_C2,	I1	},
 {"mfc3",    "t,G",	0x4c000000, 0xffe007ff,	LCD|WR_t|RD_C3,	I1	},
+  /* start-sanitize-vr5400 */
+{"mfdr",    "t,G",	0x7000003d, 0xffe007ff, LCD|WR_t|RD_C0,	N5	},
+  /* end-sanitize-vr5400 */
 {"mfhi",    "d",	0x00000010, 0xffff07ff,	WR_d|RD_HI,	I1	},
   /* start-sanitize-r5900 */
 {"mfhi1",   "d",	0x70000010, 0xffff07ff,	WR_d|RD_HI,	T5	},
@@ -536,6 +568,12 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"ffs",     "d,v",	0x0000000a, 0xfc0007ff,	WR_d|RD_s,L1	},
 {"movz.d",  "D,S,t",	0x46200012, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,	I4	},
 {"movz.s",  "D,S,t",	0x46000012, 0xffe0003f, WR_D|RD_S|RD_t|FP_S,	I4	},
+  /* start-sanitize-vr5400 */
+{"msac",    "d,s,t",	0x000001d8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"msacu",   "d,s,t",	0x000001d9, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"msachi",  "d,s,t",	0x000003d8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"msachiu", "d,s,t",	0x000003d9, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+  /* end-sanitize-vr5400 */
 /* move is at the top of the table.  */
 {"msub.d",  "D,R,S,T",	0x4c000029, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
 {"msub.s",  "D,R,S,T",	0x4c000028, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	I4	},
@@ -549,6 +587,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mtc1",    "t,G",	0x44800000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I1	},
 {"mtc2",    "t,G",	0x48800000, 0xffe007ff,	COD|RD_t|WR_C2|WR_CC,	I1	},
 {"mtc3",    "t,G",	0x4c800000, 0xffe007ff,	COD|RD_t|WR_C3|WR_CC,	I1	},
+  /* start-sanitize-vr5400 */
+{"mtdr",    "t,G",	0x7080003d, 0xffe007ff, COD|RD_t|WR_C0,	N5	},
+  /* end-sanitize-vr5400 */
 {"mthi",    "s",	0x00000011, 0xfc1fffff,	RD_s|WR_HI,	I1	},
   /* start-sanitize-r5900 */
 {"mthi1",   "s",	0x70000011, 0xfc1fffff,	RD_s|WR_HI,	T5	},
@@ -562,6 +603,12 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* end-sanitize-r5900 */
 {"mul.d",   "D,V,T",	0x46200002, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I1	},
 {"mul.s",   "D,V,T",	0x46000002, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	I1	},
+  /* start-sanitize-vr5400 */
+{"mulu",    "d,s,t",	0x00000059, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"mulhi",   "d,s,t",	0x00000258, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"mulhiu",  "d,s,t",	0x00000259, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"mul",     "d,s,t",	0x00000058, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+  /* end-sanitize-vr5400 */
 {"mul",     "d,v,t",	0x70000002, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HI|WR_LO,	P3	},
 {"mul",     "d,v,t",	0,    (int) M_MUL,	INSN_MACRO	},
 {"mul",     "d,v,I",	0,    (int) M_MUL_I,	INSN_MACRO	},
@@ -569,6 +616,12 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mulo",    "d,v,I",	0,    (int) M_MULO_I,	INSN_MACRO	},
 {"mulou",   "d,v,t",	0,    (int) M_MULOU,	INSN_MACRO	},
 {"mulou",   "d,v,I",	0,    (int) M_MULOU_I,	INSN_MACRO	},
+  /* start-sanitize-vr5400 */
+{"muls",    "d,s,t",	0x000000d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"mulsu",   "d,s,t",	0x000000d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"mulshi",  "d,s,t",	0x000002d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"mulshiu", "d,s,t",	0x000002d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+  /* end-sanitize-vr5400 */
 {"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
 {"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
   /* start-sanitize-r5900 */
@@ -737,8 +790,14 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"rfe",     "",		0x42000010, 0xffffffff,	0,	I1|T3		},
 {"rol",     "d,v,t",	0,    (int) M_ROL,	INSN_MACRO	},
 {"rol",     "d,v,I",	0,    (int) M_ROL_I,	INSN_MACRO	},
+  /* start-sanitize-vr5400 */
+{"ror",     "d,t,<",	0x00200002, 0xffe0003f, WR_d|RD_t,	N5	},
+  /* end-sanitize-vr5400 */
 {"ror",     "d,v,t",	0,    (int) M_ROR,	INSN_MACRO	},
 {"ror",     "d,v,I",	0,    (int) M_ROR_I,	INSN_MACRO	},
+  /* start-sanitize-vr5400 */
+{"rorv",    "d,t,s",	0x00000046, 0xfc0007ff, RD_t|RD_s|WR_d,	N5	},
+  /* end-sanitize-vr5400 */
 {"round.l.d", "D,S",	0x46200008, 0xffff003f, WR_D|RD_S|FP_D,	I3	},
 {"round.l.s", "D,S",	0x46000008, 0xffff003f, WR_D|RD_S|FP_S,	I3	},
 {"round.w.d", "D,S",	0x4620000c, 0xffff003f, WR_D|RD_S|FP_D,	I2	},
@@ -905,6 +964,77 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"wait",    "",		0x42000020, 0xffffffff,	TRAP,	I3	},
 {"waiti",   "",		0x42000020, 0xffffffff,	TRAP,	L1	},
 {"wb", 	    "o(b)",	0xbc040000, 0xfc1f0000, SM|RD_b,	L1	},
+  /* start-sanitize-vr5400 */
+{"add.ob",  "D,S,T",    0x4ac0000b, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"add.ob",  "D,S,T[e]", 0x4800000b, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"add.ob",  "D,S,k",    0x4bc0000b, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"alni.ob", "D,S,T,%",	0x48000018, 0xff00003f, WR_D|RD_S|RD_T, N5	},
+{"and.ob",  "D,S,T",    0x4ac0000c, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"and.ob",  "D,S,T[e]", 0x4800000c, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"and.ob",  "D,S,k",    0x4bc0000c, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"c.eq.ob", "S,k",	0x4bc00001, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.eq.ob", "S,T",	0x4ac00001, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.eq.ob", "S,T[e]",	0x48000001, 0xfe2007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.le.ob", "S,k",	0x4bc00005, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.le.ob", "S,T",	0x4ac00005, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.le.ob", "S,T[e]",	0x48000005, 0xfe2007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.lt.ob", "S,k",	0x4bc00004, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.lt.ob", "S,T",	0x4ac00004, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"c.lt.ob", "S,T[e]",	0x48000004, 0xfe2007ff, WR_CC|RD_S|RD_T, N5	},
+{"max.ob",  "D,S,T",    0x4ac00007, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"max.ob",  "D,S,T[e]", 0x48000007, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"max.ob",  "D,S,k",    0x4bc00007, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"min.ob",  "D,S,T",    0x4ac00006, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"min.ob",  "D,S,T[e]", 0x48000006, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"min.ob",  "D,S,k",    0x4bc00006, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"mul.ob",  "D,S,T",    0x4ac00030, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"mul.ob",  "D,S,T[e]", 0x48000030, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"mul.ob",  "D,S,k",    0x4bc00030, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"mula.ob", "S,k",	0x4bc00033, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"mula.ob", "S,T",	0x4ac00033, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"mula.ob", "S,T[e]",	0x48000033, 0xfe2007ff, WR_CC|RD_S|RD_T, N5	},
+{"mull.ob", "S,k",	0x4bc00433, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"mull.ob", "S,T",	0x4ac00433, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"mull.ob", "S,T[e]",	0x48000433, 0xfe2007ff, WR_CC|RD_S|RD_T, N5	},
+{"muls.ob", "S,k",	0x4bc00032, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"muls.ob", "S,T",	0x4ac00032, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"muls.ob", "S,T[e]",	0x48000032, 0xfe2007ff, WR_CC|RD_S|RD_T, N5	},
+{"mulsl.ob","S,k",	0x4bc00432, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"mulsl.ob","S,T",	0x4ac00432, 0xffe007ff, WR_CC|RD_S|RD_T, N5	},
+{"mulsl.ob","S,T[e]",	0x48000432, 0xfe2007ff, WR_CC|RD_S|RD_T, N5	},
+{"nor.ob",  "D,S,T",    0x4ac0000f, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"nor.ob",  "D,S,T[e]", 0x4800000f, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"nor.ob",  "D,S,k",    0x4bc0000f, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"or.ob",   "D,S,T",    0x4ac0000e, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"or.ob",   "D,S,T[e]", 0x4800000e, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"or.ob",   "D,S,k",    0x4bc0000e, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"pickf.ob", "D,S,T",   0x4ac00002, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"pickf.ob", "D,S,T[e]", 0x48000002, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"pickf.ob", "D,S,k",   0x4bc00002, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"pickt.ob", "D,S,T",   0x4ac00003, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"pickt.ob", "D,S,T[e]", 0x48000003, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"pickt.ob", "D,S,k",   0x4bc00003, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"rach.ob", "D",	0x4a00003f, 0xfffff83f, WR_D, N5	},
+{"racl.ob", "D",	0x4800003f, 0xfffff83f, WR_D, N5	},
+{"racm.ob", "D",	0x4900003f, 0xfffff83f, WR_D, N5	},
+{"rzu.ob",  "D,S,k",    0x4bc00020, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"shfl.mixh.ob","D,S,T",0x4980001f, 0xffe0003f, WR_D|RD_S|RD_T, N5	},
+{"shfl.mixl.ob","D,S,T",0x49c0001f, 0xffe0003f, WR_D|RD_S|RD_T, N5	},
+{"shfl.pach.ob","D,S,T",0x4900001f, 0xffe0003f, WR_D|RD_S|RD_T, N5	},
+{"shfl.pacl.ob","D,S,T",0x4940001f, 0xffe0003f, WR_D|RD_S|RD_T, N5	},
+{"sll.ob",  "D,S,T[e]", 0x48000010, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"sll.ob",  "D,S,k",    0x4bc00010, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"srl.ob",  "D,S,T[e]", 0x48000012, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"srl.ob",  "D,S,k",    0x4bc00012, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"sub.ob",  "D,S,T",    0x4ac0000a, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"sub.ob",  "D,S,T[e]", 0x4800000a, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"sub.ob",  "D,S,k",    0x4bc0000a, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"wach.ob", "S",	0x4a00003e, 0xffff07ff, RD_S, N5	},
+{"wacl.ob", "S,T",	0x4800003e, 0xffe007ff, RD_S|RD_T, N5	},
+{"xor.ob",  "D,S,T",    0x4ac0000d, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+{"xor.ob",  "D,S,T[e]", 0x4800000d, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
+{"xor.ob",  "D,S,k",    0x4bc0000d, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
+  /* end-sanitize-vr5400 */
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
    user to put in nops as necessary.  These are at the end so that the
