@@ -24,10 +24,12 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
+Makefile.am
 Makefile.in
 NEWS
 README
 acconfig.h
+acinclude.m4
 aclocal.m4
 addr2line.1
 addr2line.c
@@ -94,6 +96,7 @@ size.1
 size.c
 srconv.c
 stabs.c
+stamp-h.in
 strings.1
 strings.c
 strip.1

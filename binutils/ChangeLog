@@ -1,5 +1,19 @@
 Thu Jul 31 11:51:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am: New file, based on old Makefile.in.
+	* acinclude.m4: New file, from old aclocal.m4.
+	* configure.in: Call AM_INIT_AUTOMAKE and AM_PROG_LIBTOOL.  Remove
+	shared library handling; now handled by libtool.  Replace
+	AC_CONFIG_HEADER with AM_CONFIG_HEADER.  Call AC_PROG_YACC,
+	AC_PROG_LEX, AC_DECL_YYTEST, AM_MAINTAINER_MODE, AM_CYGWIN32, and
+	AM_EXEEXT.  Replace AC_PROG_INSTALL with AM_PROG_INSTALL.  Remove
+	stamp-h handling in AC_OUTPUT.
+	* acconfig.h: Mention PACKAGE and VERSION.
+	* stamp-h.in: New file.
+	* Makefile.in: Now built with automake.
+	* aclocal.m4: Now built with aclocal.
+	* config.in, configure: Rebuild.
+
 	From Ton van Overbeek <tvoverbe@wk.estec.esa.nl>:
 	* rcparse.y (dialog): Default menu and class to be named.
 	(styles): If FONT is seen, set DS_SETFONT in dialog style.
