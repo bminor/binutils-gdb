@@ -1466,7 +1466,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!!ByteSwapMem)
+	  if (!BigEndianMem)
 	    paddr &= ~mask;
 	  LoadMemory(&memval,&memval1,uncached,byte,paddr,vaddr,isDATA,isREAL);
 	  GPR[destreg] = ((memval << ((7 - byte) * 8)) | (GPR[destreg] & (((unsigned64)1 << ((7 - byte) * 8)) - 1)));
@@ -1510,7 +1510,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!ByteSwapMem)
+	  if (BigEndianMem)
 	    paddr &= ~mask;
 	  LoadMemory(&memval,&memval1,uncached,(7 - byte),paddr,vaddr,isDATA,isREAL);
 	  {
@@ -1864,7 +1864,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!!ByteSwapMem)
+	  if (!BigEndianMem)
 	    paddr &= ~mask;
 	  LoadMemory(&memval,&memval1,uncached,byte,paddr,vaddr,isDATA,isREAL);
 	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {
@@ -1914,7 +1914,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!ByteSwapMem)
+	  if (BigEndianMem)
 	    paddr &= ~mask;
 	  LoadMemory(&memval,&memval1,uncached,(3 - byte),paddr,vaddr,isDATA,isREAL);
 	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {
@@ -2497,7 +2497,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!!ByteSwapMem)
+	  if (!BigEndianMem)
 	    paddr &= ~mask;
 	  memval = (op2 >> (8 * (7 - byte)));
 	  StoreMemory(uncached,byte,memval,memval1,paddr,vaddr,isREAL);
@@ -2541,7 +2541,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!ByteSwapMem)
+	  if (!BigEndianMem)
 	    paddr &= ~mask;
 	  memval = ((unsigned64) op2 << (byte * 8));
 	  StoreMemory(uncached,(AccessLength_DOUBLEWORD - byte),memval,memval1,paddr,vaddr,isREAL);
@@ -2996,7 +2996,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!!ByteSwapMem)
+	  if (!BigEndianMem)
 	    paddr &= ~mask;
 	  memval = (op2 >> (8 * (3 - byte)));
 	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {
@@ -3045,7 +3045,7 @@
 	  int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
 	  byte = ((vaddr & mask) ^ bigend);
-	  if (!ByteSwapMem)
+	  if (!BigEndianMem)
 	    paddr &= ~mask;
 	  memval = ((unsigned64) op2 << (byte * 8));
 	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {

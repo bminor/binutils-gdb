@@ -1,3 +1,34 @@
+Wed Nov  5 12:19:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (MAX_INSNS, INSN_NAME): Define.
+
+	* interp.c (load_memory, store_memory): Delete parameter RAW.
+	(sim_read, sim_write): Use sim_core_{read,write}_buffer directly
+ 	bypassing {load,store}_memory.
+
+	* sim-main.h (ByteSwapMem): Delete definition.
+
+	* Makefile.in (SIM_OBJS): Add sim-memopt module.
+
+	* interp.c (sim_do_command, sim_commands): Delete mips specific
+ 	commands.  Handled by module sim-options.
+		
+	* sim-main.h (SIM_HAVE_FLATMEM): Undefine, use sim-core.o module.
+	(WITH_MODULO_MEMORY): Define.
+
+	* interp.c (sim_info): Delete code printing memory size.
+
+	* interp.c (mips_size): Nee sim_size, delete function.
+	(power2): Delete.
+	(monitor, monitor_base, monitor_size): Delete global variables.
+	(sim_open, sim_close): Delete code creating monitor and other
+ 	memory regions.  Use sim-memopts module, via sim_do_commandf, to
+ 	manage memory regions.
+	(load_memory, store_memory): Use sim-core for memory model.
+	
+	* interp.c (address_translation): Delete all memory map code
+ 	except line forcing 32 bit addresses.
+
 Wed Nov  5 11:21:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (WITH_TRACE): Delete definition.  Enables common

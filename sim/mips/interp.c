@@ -19,11 +19,6 @@
 
 NOTEs:
 
-We only need to take account of the target endianness when moving data
-between the simulator and the host. We do not need to worry about the
-endianness of the host, since this sim code and GDB are executing in
-the same process.
-
 The IDT monitor (found on the VR4300 board), seems to lie about
 register contents. It seems to treat the registers as sign-extended
 32-bit values. This cause *REAL* problems when single-stepping 64-bit
@@ -110,9 +105,6 @@ char* pr_uword64 PARAMS ((uword64 addr));
 
 static void dotrace PARAMS((SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...));
 static void ColdReset PARAMS((SIM_DESC sd));
-static long getnum PARAMS((SIM_DESC sd, char *value));
-static unsigned int power2 PARAMS((unsigned int value));
-static void mips_size PARAMS((SIM_DESC sd, int n));
 
 /*---------------------------------------------------------------------------*/
 
@@ -149,11 +141,6 @@ static void mips_size PARAMS((SIM_DESC sd, int n));
 #define MONITOR_BASE (0xBFC00000)
 #define MONITOR_SIZE (1 << 11)
 #define MEM_SIZE (2 << 20)
-
-/* Simple run-time monitor support */
-static unsigned char *monitor = NULL;
-static ut_reg monitor_base = MONITOR_BASE;
-static unsigned monitor_size = MONITOR_SIZE; /* power-of-2 */
 
 #if defined(TRACE)
 static char *tracefile = "trace.din"; /* default filename for trace log */
@@ -274,16 +261,23 @@ sim_open (kind, cb, abfd, argv)
   STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = interrupt_event;
 
-  /* memory defaults (unless sim_size was here first) */
-  if (STATE_MEM_SIZE (sd) == 0)
-    STATE_MEM_SIZE (sd) = MEM_SIZE;
-  STATE_MEM_BASE (sd) = K1BASE;
-
   STATE = 0;
   
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
   sim_add_option_table (sd, mips_options);
+
+  /* Allocate core managed memory */
+
+  /* the monitor  */
+  sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE, MONITOR_SIZE);
+  /* For compatibility with the old code - under this (at level one)
+     are the kernel spaces K0 & K1.  Both of these map to a single
+     smaller sub region */
+  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
+		   K1BASE, K0SIZE,
+		   MEM_SIZE, /* actual size */
+		   K0BASE);
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
@@ -381,24 +375,6 @@ sim_open (kind, cb, abfd, argv)
       cpu->register_widths[rn] = 64;      
     /* end-sanitize-r5900 */
   }
-
-
-  /* FIXME: In the future both of these malloc's can be replaced by
-     calls to sim-core.  */
-
-  /* If the host has "mmap" available we could use it to provide a
-     very large virtual address space for the simulator, since memory
-     would only be allocated within the "mmap" space as it is
-     accessed. This can also be linked to the architecture specific
-     support, required to simulate the MMU. */
-  mips_size(sd, STATE_MEM_SIZE (sd));
-  /* NOTE: The above will also have enabled any profiling state! */
- 
-  /* Create the monitor address space as well */
-  monitor = (unsigned char *)calloc(1,monitor_size);
-  if (!monitor)
-    fprintf(stderr,"Not enough VM for monitor simulation (%d bytes)\n",
-	    monitor_size);
 
 #if defined(TRACE)
   if (STATE & simTRACE)
@@ -505,10 +481,6 @@ sim_close (sd, quitting)
   STATE &= ~simTRACE;
 #endif /* TRACE */
 
-  if (STATE_MEMORY (sd) != NULL)
-    free(STATE_MEMORY (sd)); /* cfree not available on all hosts */
-  STATE_MEMORY (sd) = NULL;
-
   return;
 }
 
@@ -537,7 +509,8 @@ sim_write (sd,addr,buffer,size)
       int cca;
       if (!AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
 	break;
-      StoreMemory (cca, AccessLength_BYTE, buffer[index], 0, paddr, vaddr, isRAW); 
+      if (sim_core_write_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
+	break;
     }
 
   return(index);
@@ -561,12 +534,11 @@ sim_read (sd,addr,buffer,size)
     {
       address_word vaddr = (address_word)addr + index;
       address_word paddr;
-      unsigned64 value;
       int cca;
       if (!AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &cca, isTARGET, isRAW))
 	break;
-      LoadMemory (&value, NULL, cca, AccessLength_BYTE, paddr, vaddr, isDATA, isRAW);
-      buffer[index] = (unsigned char)(value&0xFF);
+      if (sim_core_read_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
+	break;
     }
 
   return(index);
@@ -648,10 +620,6 @@ sim_info (sd,verbose)
 		     (PROCESSOR_64BIT ? 64 : 32),
 		     (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN ? "Big" : "Little"));
       
-      sim_io_printf (sd, "0x%08X bytes of memory at 0x%s\n",
-		     STATE_MEM_SIZE (sd),
-		     pr_addr (STATE_MEM_BASE (sd)));
-      
 #if !defined(FASTSIM)
       /* It would be a useful feature, if when performing multi-cycle
 	 simulations (rather than single-stepping) we keep the start and
@@ -712,109 +680,15 @@ sim_create_inferior (sd, abfd, argv,env)
   return SIM_RC_OK;
 }
 
-typedef enum {e_terminate,e_help,e_setmemsize,e_reset} e_cmds;
-
-static struct t_sim_command {
- e_cmds id;
- const char *name;
- const char *help;
-} sim_commands[] = {
-  {e_help,      "help",           ": Show MIPS simulator private commands"},
-  {e_setmemsize,"set-memory-size","<n> : Specify amount of memory simulated"},
-  {e_reset,     "reset-system",   ": Reset the simulated processor"},
-  {e_terminate, NULL}
-};
-
 void
 sim_do_command (sd,cmd)
      SIM_DESC sd;
      char *cmd;
 {
-  struct t_sim_command *cptr;
-
-  if (!(cmd && *cmd != '\0'))
-   cmd = "help";
-
-  /* NOTE: Accessed from the GDB "sim" commmand: */
-  for (cptr = sim_commands; cptr && cptr->name; cptr++)
-    if (strncmp (cmd, cptr->name, strlen(cptr->name)) == 0)
-      {
-	cmd += strlen(cptr->name);
-	switch (cptr->id) {
-	case e_help: /* no arguments */
-	  { /* no arguments */
-	    struct t_sim_command *lptr;
-	    sim_io_printf(sd,"List of MIPS simulator commands:\n");
-	    for (lptr = sim_commands; lptr->name; lptr++)
-	      sim_io_printf(sd,"%s %s\n",lptr->name,lptr->help);
-	    sim_args_command (sd, "help");
-	  }
-        break;
-
-	case e_setmemsize: /* memory size argument */
-	  {
-	    unsigned int newsize = (unsigned int)getnum(sd, cmd);
-	    mips_size(sd, newsize);
-	  }
-        break;
-
-	case e_reset: /* no arguments */
-	  ColdReset(sd);
-	  /* NOTE: See the comments in sim_open() relating to device
-	     initialisation. */
-	  break;
-
-	default:
-	  sim_io_printf(sd,"FATAL: Matched \"%s\", but failed to match command id %d.\n",cmd,cptr->id);
-	  break;
-	}
-	break;
-      }
-
-  if (!(cptr->name))
-    {
-      /* try for a common command when the sim specific lookup fails */
-      if (sim_args_command (sd, cmd) != SIM_RC_OK)
-	sim_io_printf(sd,"Error: \"%s\" is not a valid MIPS simulator command.\n",cmd);
-    }
-
-  return;
+  if (sim_args_command (sd, cmd) != SIM_RC_OK)
+    sim_io_printf (sd, "Error: \"%s\" is not a valid MIPS simulator command.\n",
+		   cmd);
 }
-
-/*---------------------------------------------------------------------------*/
-/* NOTE: The following routines do not seem to be used by GDB at the
-   moment. However, they may be useful to the standalone simulator
-   world. */
-
-
-static void
-mips_size(sd, newsize)
-     SIM_DESC sd;
-     int newsize;
-{
-  char *new;
-  /* Used by "run", and internally, to set the simulated memory size */
-  if (newsize == 0) {
-    sim_io_printf(sd,"Zero not valid: Memory size still 0x%08X bytes\n",STATE_MEM_SIZE (sd));
-    return;
-  }
-  newsize = power2(newsize);
-  if (STATE_MEMORY (sd) == NULL)
-   new = (char *)calloc(64,(STATE_MEM_SIZE (sd) / 64));
-  else
-   new = (char *)realloc(STATE_MEMORY (sd),newsize);
-  if (new == NULL) {
-    if (STATE_MEMORY (sd) == NULL)
-     sim_io_error(sd,"Not enough VM for simulation memory of 0x%08X bytes",STATE_MEM_SIZE (sd));
-    else
-     sim_io_eprintf(sd,"Failed to resize memory (still 0x%08X bytes)\n",STATE_MEM_SIZE (sd));
-  } else {
-    STATE_MEM_SIZE (sd) = (unsigned)newsize;
-    STATE_MEMORY (sd) = new;
-  }
-  return;
-}
-
 
 /*---------------------------------------------------------------------------*/
 /*-- Private simulator support interface ------------------------------------*/
@@ -1215,48 +1089,6 @@ mips16_entry (sd,insn)
     }
 }
 
-static unsigned int
-power2(value)
-     unsigned int value;
-{
-  int loop,tmp;
-
-  /* Round *UP* to the nearest power-of-2 if not already one */
-  if (value != (value & ~(value - 1))) {
-    for (tmp = value, loop = 0; (tmp != 0); loop++)
-     tmp >>= 1;
-    value = (1 << loop);
-  }
-
-  return(value);
-}
-
-static long
-getnum(sd,value)
-     SIM_DESC sd;
-     char *value;
-{
-  long num;
-  char *end;
-
-  num = strtol(value,&end,10);
-  if (end == value)
-   sim_io_printf(sd,"Warning: Invalid number \"%s\" ignored, using zero\n",value);
-  else {
-    if (*end && ((tolower(*end) == 'k') || (tolower(*end) == 'm'))) {
-      if (tolower(*end) == 'k')
-       num *= (1 << 10);
-      else
-       num *= (1 << 20);
-      end++;
-    }
-    if (*end)
-     sim_io_printf(sd,"Warning: Spurious characters \"%s\" at end of number ignored\n",end);
-  }
-
-  return(num);
-}
-
 /*-- trace support ----------------------------------------------------------*/
 
 /* The TRACE support is provided (if required) in the memory accessing
@@ -1408,57 +1240,14 @@ address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,raw)
      addressess through (mostly) unchanged. */
   vAddr &= 0xFFFFFFFF;
 
-  /* Treat the kernel memory spaces identically for the moment: */
-  if ((STATE_MEM_BASE (sd) == K1BASE) && (vAddr >= K0BASE) && (vAddr < (K0BASE + K0SIZE)))
-    vAddr += (K1BASE - K0BASE);
-
-  /* Also assume that the K1BASE memory wraps. This is required to
-     allow the PMON run-time __sizemem() routine to function (without
-     having to provide exception simulation). NOTE: A kludge to work
-     around the fact that the monitor memory is currently held in the
-     K1BASE space. */
-  if (((vAddr < monitor_base) || (vAddr >= (monitor_base + monitor_size))) && (vAddr >= K1BASE && vAddr < (K1BASE + K1SIZE)))
-    vAddr = (K1BASE | (vAddr & (STATE_MEM_SIZE (sd) - 1)));
-
   *pAddr = vAddr; /* default for isTARGET */
   *CCA = Uncached; /* not used for isHOST */
-
-  /* NOTE: This is a duplicate of the code that appears in the
-     LoadMemory and StoreMemory functions. They should be merged into
-     a single function (that can be in-lined if required). */
-  if ((vAddr >= STATE_MEM_BASE (sd)) && (vAddr < (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd)))) {
-    /* do nothing */
-  } else if ((vAddr >= monitor_base) && (vAddr < (monitor_base + monitor_size))) {
-    /* do nothing */
-  } else {
-#ifdef DEBUG
-    sim_io_eprintf(sd,"Failed: AddressTranslation(0x%s,%s,%s,...) IPC = 0x%s\n",pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"),pr_addr(IPC));
-#endif /* DEBUG */
-    res = 0; /* AddressTranslation has failed */
-    *pAddr = (SIM_ADDR)-1;
-    if (!raw) /* only generate exceptions on real memory transfers */
-      {
-	if (IorD == isINSTRUCTION)
-	  SignalExceptionInstructionFetch ();
-	else if (LorS == isSTORE)
-	  SignalExceptionAddressStore ();
-	else
-	  SignalExceptionAddressLoad ();
-      }
-#ifdef DEBUG
-    else
-      /* This is a normal occurance during gdb operation, for instance
-	 trying to print parameters at function start before they have
-	 been setup, and hence we should not print a warning except
-	 when debugging the simulator.  */
-      sim_io_eprintf(sd,"AddressTranslation for %s %s from 0x%s failed\n",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),pr_addr(vAddr));
-#endif
-  }
 
   return(res);
 }
 
-/* Description from page A-23 of the "MIPS IV Instruction Set" manual (revision 3.1) */
+/* Description from page A-23 of the "MIPS IV Instruction Set" manual
+   (revision 3.1) */
 /* Prefetch data from memory. Prefetch is an advisory instruction for
    which an implementation specific action is taken. The action taken
    may increase performance, but must not change the meaning of the
@@ -1481,7 +1270,8 @@ prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
   return;
 }
 
-/* Description from page A-22 of the "MIPS IV Instruction Set" manual (revision 3.1) */
+/* Description from page A-22 of the "MIPS IV Instruction Set" manual
+   (revision 3.1) */
 /* Load a value from memory. Use the cache and main memory as
    specified in the Cache Coherence Algorithm (CCA) and the sort of
    access (IorD) to find the contents of AccessLength memory bytes
@@ -1497,7 +1287,7 @@ prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
    satisfy a load reference. At a minimum, the block is the entire
    memory element. */
 void
-load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
+load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
      SIM_DESC sd;
      uword64* memvalp;
      uword64* memval1p;
@@ -1506,173 +1296,108 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
      address_word pAddr;
      address_word vAddr;
      int IorD;
-     int raw;
 {
   uword64 value = 0;
   uword64 value1 = 0;
 
 #ifdef DEBUG
-  if (STATE_MEMORY (sd) == NULL)
-   sim_io_printf(sd,"DBG: LoadMemory(%p,%p,%d,%d,0x%s,0x%s,%s,%s)\n",memvalp,memval1p,CCA,AccessLength,pr_addr(pAddr),pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(raw ? "isRAW" : "isREAL"));
+  sim_io_printf(sd,"DBG: LoadMemory(%p,%p,%d,%d,0x%s,0x%s,%s)\n",memvalp,memval1p,CCA,AccessLength,pr_addr(pAddr),pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"));
 #endif /* DEBUG */
 
 #if defined(WARN_MEM)
   if (CCA != uncached)
-   sim_io_eprintf(sd,"LoadMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
-
-  if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK) {
-    /* In reality this should be a Bus Error */
-    sim_io_error(sd,"AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",AccessLength,(LOADDRMASK + 1)<<2,pr_addr(pAddr));
-  }
+    sim_io_eprintf(sd,"LoadMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
 #endif /* WARN_MEM */
-
-  /* Decide which physical memory locations are being dealt with. At
-     this point we should be able to split the pAddr bits into the
-     relevant address map being simulated. */
-  /* If the "raw" variable is set, the memory read being performed
-     should *NOT* update any I/O state or affect the CPU state
-     (including statistics gathering).  The parameter MEMVALP is least
-     significant byte justified. */
 
   /* If instruction fetch then we need to check that the two lo-order
      bits are zero, otherwise raise a InstructionFetch exception: */
   if ((IorD == isINSTRUCTION)
       && ((pAddr & 0x3) != 0)
       && (((pAddr & 0x1) != 0) || ((vAddr & 0x1) == 0)))
-   SignalExceptionInstructionFetch ();
-  else {
-    unsigned int index = 0;
-    unsigned char *mem = NULL;
+    SignalExceptionInstructionFetch ();
+
+  if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
+    {
+      /* In reality this should be a Bus Error */
+      sim_io_error (sd, "AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",
+		    AccessLength,
+		    (LOADDRMASK + 1) << 2,
+		    pr_addr (pAddr));
+    }
 
 #if defined(TRACE)
-    if (!raw)
-     dotrace(sd,tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
+  dotrace(sd,tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
 #endif /* TRACE */
+  
+  /* Read the specified number of bytes from memory.  Adjust for
+     host/target byte ordering/ Align the least significant byte
+     read. */
 
-    /* NOTE: Quicker methods of decoding the address space can be used
-       when a real memory map is being simulated (i.e. using hi-order
-       address bits to select device). */
-    if ((pAddr >= STATE_MEM_BASE (sd)) && (pAddr < (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd)))) {
-      index = ((unsigned int)(pAddr - STATE_MEM_BASE (sd)) & (STATE_MEM_SIZE (sd) - 1));
-      mem = STATE_MEMORY (sd);
-    } else if ((pAddr >= monitor_base) && (pAddr < (monitor_base + monitor_size))) {
-      index = ((unsigned int)(pAddr - monitor_base) & (monitor_size - 1));
-      mem = monitor;
+  switch (AccessLength)
+    {
+    case AccessLength_QUADWORD :
+      {
+	unsigned_16 val = sim_core_read_aligned_16 (STATE_CPU (sd, 0), NULL_CIA,
+						    sim_core_read_map, pAddr);
+	value1 = VH8_16 (val);
+	value = VL8_16 (val);
+	break;
+      }
+    case AccessLength_DOUBLEWORD :
+      value = sim_core_read_aligned_8 (STATE_CPU (sd, 0), NULL_CIA,
+				       sim_core_read_map, pAddr);
+      break;
+    case AccessLength_SEPTIBYTE :
+      value = sim_core_read_misaligned_7 (STATE_CPU (sd, 0), NULL_CIA,
+					  sim_core_read_map, pAddr);
+    case AccessLength_SEXTIBYTE :
+      value = sim_core_read_misaligned_6 (STATE_CPU (sd, 0), NULL_CIA,
+					  sim_core_read_map, pAddr);
+    case AccessLength_QUINTIBYTE :
+      value = sim_core_read_misaligned_5 (STATE_CPU (sd, 0), NULL_CIA,
+					  sim_core_read_map, pAddr);
+    case AccessLength_WORD :
+      value = sim_core_read_aligned_4 (STATE_CPU (sd, 0), NULL_CIA,
+				       sim_core_read_map, pAddr);
+      break;
+    case AccessLength_TRIPLEBYTE :
+      value = sim_core_read_misaligned_3 (STATE_CPU (sd, 0), NULL_CIA,
+					  sim_core_read_map, pAddr);
+    case AccessLength_HALFWORD :
+      value = sim_core_read_aligned_2 (STATE_CPU (sd, 0), NULL_CIA,
+				       sim_core_read_map, pAddr);
+      break;
+    case AccessLength_BYTE :
+      value = sim_core_read_aligned_1 (STATE_CPU (sd, 0), NULL_CIA,
+				       sim_core_read_map, pAddr);
+      break;
+    default:
+      abort ();
     }
-    if (mem == NULL)
-     sim_io_error(sd,"Simulator memory not found for physical address 0x%s\n",pr_addr(pAddr));
-    else {
-      /* If we obtained the endianness of the host, and it is the same
-         as the target memory system we can optimise the memory
-         accesses. However, without that information we must perform
-         slow transfer, and hope that the compiler optimisation will
-         merge successive loads. */
-
-      /* In reality we should always be loading a doubleword value (or
-         word value in 32bit memory worlds). The external code then
-         extracts the required bytes. However, to keep performance
-         high we only load the required bytes into the relevant
-         slots. */
+  
+#ifdef DEBUG
+  printf("DBG: LoadMemory() : (offset %d) : value = 0x%s%s\n",
+	 (int)(pAddr & LOADDRMASK),pr_uword64(value1),pr_uword64(value));
+#endif /* DEBUG */
+  
+  /* See also store_memory. */
+  if (AccessLength <= AccessLength_DOUBLEWORD)
+    {
       if (BigEndianMem)
-       switch (AccessLength) { /* big-endian memory */
-         case AccessLength_QUADWORD :
-          value1 |= ((uword64)mem[index++] << 56);
-         case 14:   /* AccessLength is one less than datalen */
-          value1 |= ((uword64)mem[index++] << 48);
-         case 13:
-          value1 |= ((uword64)mem[index++] << 40);
-         case 12:
-          value1 |= ((uword64)mem[index++] << 32);
-         case 11:
-          value1 |= ((unsigned int)mem[index++] << 24);
-         case 10:
-          value1 |= ((unsigned int)mem[index++] << 16);
-         case 9:
-          value1 |= ((unsigned int)mem[index++] << 8);
-         case 8:
-          value1 |= mem[index];
-
-         case AccessLength_DOUBLEWORD :
-          value |= ((uword64)mem[index++] << 56);
-         case AccessLength_SEPTIBYTE :
-          value |= ((uword64)mem[index++] << 48);
-         case AccessLength_SEXTIBYTE :
-          value |= ((uword64)mem[index++] << 40);
-         case AccessLength_QUINTIBYTE :
-          value |= ((uword64)mem[index++] << 32);
-         case AccessLength_WORD :
-          value |= ((unsigned int)mem[index++] << 24);
-         case AccessLength_TRIPLEBYTE :
-          value |= ((unsigned int)mem[index++] << 16);
-         case AccessLength_HALFWORD :
-          value |= ((unsigned int)mem[index++] << 8);
-         case AccessLength_BYTE :
-          value |= mem[index];
-          break;
-       }
-      else {
-        index += (AccessLength + 1);
-        switch (AccessLength) { /* little-endian memory */
-          case AccessLength_QUADWORD :
-           value1 |= ((uword64)mem[--index] << 56);
-         case 14:   /* AccessLength is one less than datalen */
-           value1 |= ((uword64)mem[--index] << 48);
-         case 13:
-           value1 |= ((uword64)mem[--index] << 40);
-         case 12:
-           value1 |= ((uword64)mem[--index] << 32);
-         case 11:
-           value1 |= ((uword64)mem[--index] << 24);
-         case 10:
-           value1 |= ((uword64)mem[--index] << 16);
-         case 9:
-           value1 |= ((uword64)mem[--index] << 8);
-         case 8:
-           value1 |= ((uword64)mem[--index] << 0);
-
-          case AccessLength_DOUBLEWORD :
-           value |= ((uword64)mem[--index] << 56);
-          case AccessLength_SEPTIBYTE :
-           value |= ((uword64)mem[--index] << 48);
-          case AccessLength_SEXTIBYTE :
-           value |= ((uword64)mem[--index] << 40);
-          case AccessLength_QUINTIBYTE :
-           value |= ((uword64)mem[--index] << 32);
-          case AccessLength_WORD :
-           value |= ((uword64)mem[--index] << 24);
-          case AccessLength_TRIPLEBYTE :
-           value |= ((uword64)mem[--index] << 16);
-          case AccessLength_HALFWORD :
-           value |= ((uword64)mem[--index] << 8);
-          case AccessLength_BYTE :
-           value |= ((uword64)mem[--index] << 0);
-           break;
-        }
-      }
-
-#ifdef DEBUG
-      printf("DBG: LoadMemory() : (offset %d) : value = 0x%s%s\n",
-             (int)(pAddr & LOADDRMASK),pr_uword64(value1),pr_uword64(value));
-#endif /* DEBUG */
-
-      /* When dealing with raw memory accesses there is no need to
-         deal with shifts. */
-      if (AccessLength <= AccessLength_DOUBLEWORD) {
-        if (!raw) { /* do nothing for raw accessess */
-          if (BigEndianMem)
-            value <<= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
-          else /* little-endian only needs to be shifted up to the correct byte offset */
-            value <<= ((pAddr & LOADDRMASK) * 8);
-        }
-      }
-
-#ifdef DEBUG
-      printf("DBG: LoadMemory() : shifted value = 0x%s%s\n",
-             pr_uword64(value1),pr_uword64(value));
-#endif /* DEBUG */
+	/* for big endian target, byte (pAddr&LOADDRMASK == 0) is
+	   shifted to the most significant byte position.  */
+	value <<= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
+      else
+	/* For little endian target, byte (pAddr&LOADDRMASK == 0)
+	   is already in the correct postition. */
+	value <<= ((pAddr & LOADDRMASK) * 8);
     }
-  }
-
+  
+#ifdef DEBUG
+  printf("DBG: LoadMemory() : shifted value = 0x%s%s\n",
+	 pr_uword64(value1),pr_uword64(value));
+#endif /* DEBUG */
+  
   *memvalp = value;
   if (memval1p) *memval1p = value1;
 }
@@ -1692,7 +1417,7 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
    will be changed. */
 
 void
-store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
+store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
      SIM_DESC sd;
      int CCA;
      int AccessLength;
@@ -1700,169 +1425,89 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
      uword64 MemElem1;   /* High order 64 bits */
      address_word pAddr;
      address_word vAddr;
-     int raw;
 {
 #ifdef DEBUG
-  sim_io_printf(sd,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s,%s)\n",CCA,AccessLength,pr_uword64(MemElem),pr_uword64(MemElem1),pr_addr(pAddr),pr_addr(vAddr),(raw ? "isRAW" : "isREAL"));
+  sim_io_printf(sd,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s)\n",CCA,AccessLength,pr_uword64(MemElem),pr_uword64(MemElem1),pr_addr(pAddr),pr_addr(vAddr));
 #endif /* DEBUG */
-
+  
 #if defined(WARN_MEM)
   if (CCA != uncached)
-   sim_io_eprintf(sd,"StoreMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
- 
-  if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
-   sim_io_error(sd,"AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",AccessLength,(LOADDRMASK + 1)<<2,pr_addr(pAddr));
+    sim_io_eprintf(sd,"StoreMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
 #endif /* WARN_MEM */
-
+  
+  if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
+    sim_io_error(sd,"AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",AccessLength,(LOADDRMASK + 1)<<2,pr_addr(pAddr));
+  
 #if defined(TRACE)
-  if (!raw)
-   dotrace(sd,tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
+  dotrace(sd,tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
 #endif /* TRACE */
-
-  /* See the comments in the LoadMemory routine about optimising
-     memory accesses. Also if we wanted to make the simulator smaller,
-     we could merge a lot of this code with the LoadMemory
-     routine. However, this would slow the simulator down with
-     run-time conditionals. */
-     
-  /* If the "raw" variable is set, the memory read being performed
-     should *NOT* update any I/O state or affect the CPU state
-     (including statistics gathering).  The parameter MEMELEM is least
-     significant byte justified. */
-  {
-    unsigned int index = 0;
-    unsigned char *mem = NULL;
-
-    if ((pAddr >= STATE_MEM_BASE (sd)) && (pAddr < (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd)))) {
-      index = ((unsigned int)(pAddr - STATE_MEM_BASE (sd)) & (STATE_MEM_SIZE (sd) - 1));
-      mem = STATE_MEMORY (sd);
-    } else if ((pAddr >= monitor_base) && (pAddr < (monitor_base + monitor_size))) {
-      index = ((unsigned int)(pAddr - monitor_base) & (monitor_size - 1));
-      mem = monitor;
-    }
-
-    if (mem == NULL)
-     sim_io_error(sd,"Simulator memory not found for physical address 0x%s\n",pr_addr(pAddr));
-    else {
-      int shift = 0;
-
+  
 #ifdef DEBUG
-      printf("DBG: StoreMemory: offset = %d MemElem = 0x%s%s\n",(unsigned int)(pAddr & LOADDRMASK),pr_uword64(MemElem1),pr_uword64(MemElem));
+  printf("DBG: StoreMemory: offset = %d MemElem = 0x%s%s\n",(unsigned int)(pAddr & LOADDRMASK),pr_uword64(MemElem1),pr_uword64(MemElem));
 #endif /* DEBUG */
-
-      if (AccessLength <= AccessLength_DOUBLEWORD) {
-        if (BigEndianMem) {
-          if (raw)
-	    /* need to shift raw (least significant byte aligned) data
-	       into correct byte slots */
-            shift = ((7 - AccessLength) * 8);
-          else /* real memory access */
-            shift = ((pAddr & LOADDRMASK) * 8);
-          MemElem <<= shift;
-        } else {
-          /* no need to shift raw little-endian data */
-          if (!raw)
-            MemElem >>= ((pAddr & LOADDRMASK) * 8);
-        }
-      }
-
-#ifdef DEBUG
-      printf("DBG: StoreMemory: shift = %d MemElem = 0x%s%s\n",shift,pr_uword64(MemElem1),pr_uword64(MemElem));
-#endif /* DEBUG */
-
-      if (BigEndianMem) {
-        switch (AccessLength) { /* big-endian memory */
-          case AccessLength_QUADWORD :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-           MemElem1 <<= 8;
-          case 14 :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-           MemElem1 <<= 8;
-          case 13 :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-           MemElem1 <<= 8;
-          case 12 :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-           MemElem1 <<= 8;
-          case 11 :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-           MemElem1 <<= 8;
-          case 10 :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-           MemElem1 <<= 8;
-          case 9 :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-           MemElem1 <<= 8;
-          case 8 :
-           mem[index++] = (unsigned char)(MemElem1 >> 56);
-
-          case AccessLength_DOUBLEWORD :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           MemElem <<= 8;
-          case AccessLength_SEPTIBYTE :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           MemElem <<= 8;
-          case AccessLength_SEXTIBYTE :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           MemElem <<= 8;
-          case AccessLength_QUINTIBYTE :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           MemElem <<= 8;
-          case AccessLength_WORD :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           MemElem <<= 8;
-          case AccessLength_TRIPLEBYTE :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           MemElem <<= 8;
-          case AccessLength_HALFWORD :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           MemElem <<= 8;
-          case AccessLength_BYTE :
-           mem[index++] = (unsigned char)(MemElem >> 56);
-           break;
-        }
-      } else {
-        index += (AccessLength + 1);
-        switch (AccessLength) { /* little-endian memory */
-          case AccessLength_QUADWORD :
-           mem[--index] = (unsigned char)(MemElem1 >> 56);
-          case 14 :
-           mem[--index] = (unsigned char)(MemElem1 >> 48);
-          case 13 :
-           mem[--index] = (unsigned char)(MemElem1 >> 40);
-          case 12 :
-           mem[--index] = (unsigned char)(MemElem1 >> 32);
-          case 11 :
-           mem[--index] = (unsigned char)(MemElem1 >> 24);
-          case 10 :
-           mem[--index] = (unsigned char)(MemElem1 >> 16);
-          case 9 :
-           mem[--index] = (unsigned char)(MemElem1 >> 8);
-          case 8 :
-           mem[--index] = (unsigned char)(MemElem1 >> 0);
-
-          case AccessLength_DOUBLEWORD :
-           mem[--index] = (unsigned char)(MemElem >> 56);
-          case AccessLength_SEPTIBYTE :
-           mem[--index] = (unsigned char)(MemElem >> 48);
-          case AccessLength_SEXTIBYTE :
-           mem[--index] = (unsigned char)(MemElem >> 40);
-          case AccessLength_QUINTIBYTE :
-           mem[--index] = (unsigned char)(MemElem >> 32);
-          case AccessLength_WORD :
-           mem[--index] = (unsigned char)(MemElem >> 24);
-          case AccessLength_TRIPLEBYTE :
-           mem[--index] = (unsigned char)(MemElem >> 16);
-          case AccessLength_HALFWORD :
-           mem[--index] = (unsigned char)(MemElem >> 8);
-          case AccessLength_BYTE :
-           mem[--index] = (unsigned char)(MemElem >> 0);
-           break;
-        }
-      }
+  
+  /* See also load_memory */
+  if (AccessLength <= AccessLength_DOUBLEWORD)
+    {
+      if (BigEndianMem)
+	/* for big endian target, byte (pAddr&LOADDRMASK == 0) is
+	   shifted to the most significant byte position.  */
+	MemElem >>= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
+      else
+	/* For little endian target, byte (pAddr&LOADDRMASK == 0)
+	   is already in the correct postition. */
+	MemElem >>= ((pAddr & LOADDRMASK) * 8);
     }
-  }
-
+  
+#ifdef DEBUG
+  printf("DBG: StoreMemory: shift = %d MemElem = 0x%s%s\n",shift,pr_uword64(MemElem1),pr_uword64(MemElem));
+#endif /* DEBUG */
+  
+  switch (AccessLength)
+    {
+    case AccessLength_QUADWORD :
+      {
+	unsigned_16 val = U16_8 (MemElem1, MemElem);
+	sim_core_write_aligned_16 (STATE_CPU (sd, 0), NULL_CIA,
+				   sim_core_write_map, pAddr, val);
+	break;
+      }
+    case AccessLength_DOUBLEWORD :
+      sim_core_write_aligned_8 (STATE_CPU (sd, 0), NULL_CIA,
+				sim_core_write_map, pAddr, MemElem);
+      break;
+    case AccessLength_SEPTIBYTE :
+      sim_core_write_misaligned_7 (STATE_CPU (sd, 0), NULL_CIA,
+				   sim_core_write_map, pAddr, MemElem);
+      break;
+    case AccessLength_SEXTIBYTE :
+      sim_core_write_misaligned_6 (STATE_CPU (sd, 0), NULL_CIA,
+				   sim_core_write_map, pAddr, MemElem);
+      break;
+    case AccessLength_QUINTIBYTE :
+      sim_core_write_misaligned_5 (STATE_CPU (sd, 0), NULL_CIA,
+				   sim_core_write_map, pAddr, MemElem);
+      break;
+    case AccessLength_WORD :
+      sim_core_write_aligned_4 (STATE_CPU (sd, 0), NULL_CIA,
+				sim_core_write_map, pAddr, MemElem);
+      break;
+    case AccessLength_TRIPLEBYTE :
+      sim_core_write_misaligned_3 (STATE_CPU (sd, 0), NULL_CIA,
+				   sim_core_write_map, pAddr, MemElem);
+      break;
+    case AccessLength_HALFWORD :
+      sim_core_write_aligned_2 (STATE_CPU (sd, 0), NULL_CIA,
+				sim_core_write_map, pAddr, MemElem);
+      break;
+    case AccessLength_BYTE :
+      sim_core_write_aligned_1 (STATE_CPU (sd, 0), NULL_CIA,
+				sim_core_write_map, pAddr, MemElem);
+      break;
+    default:
+      abort ();
+    }	
+  
   return;
 }
 

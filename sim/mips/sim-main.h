@@ -26,15 +26,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SIM_ENGINE_RESUME_HOOK(SD, LAST_CPU, CIA)
 
 #define SIM_HAVE_BIENDIAN
-#define SIM_HAVE_FLATMEM
 
 
 /* hobble some common features for moment */
 #define WITH_WATCHPOINTS 1
+#define WITH_MODULO_MEMORY 1
 
 #include "sim-basics.h"
 
 typedef address_word sim_cia;
+
+#if (WITH_IGEN)
+/* Get the number of instructions.  FIXME: must be a more elegant way
+   of doing this.  */
+#include "itable.h"
+#define MAX_INSNS (nr_itable_entries)
+#define INSN_NAME(i) itable[(i)].name
+#endif
 
 #include "sim-base.h"
 
@@ -579,10 +587,6 @@ struct sim_state {
 #define BigEndianMem    (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
 /*(state & simBE) ? 1 : 0)*/
 
-/* ByteSwapMem */
-/* This is true if the host and target have different endianness.  */
-#define ByteSwapMem (CURRENT_TARGET_BYTE_ORDER != CURRENT_HOST_BYTE_ORDER)
-
 /* ReverseEndian */
 /* This mode is selected if in User mode with the RE bit being set in
    SR (Status Register). It reverses the endianness of load and store
@@ -691,13 +695,13 @@ int address_translation PARAMS ((SIM_DESC sd, address_word vAddr, int IorD, int 
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
 address_translation(sd, vAddr,IorD,LorS,pAddr,CCA,raw)
 
-void load_memory PARAMS ((SIM_DESC sd, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD, int raw));
+void load_memory PARAMS ((SIM_DESC sd, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD));
 #define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \
-load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
+load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
 
-void store_memory PARAMS ((SIM_DESC sd, int CCA, int AccessLength, uword64 MemElem,     uword64 MemElem1, address_word pAddr, address_word vAddr, int raw));
+void store_memory PARAMS ((SIM_DESC sd, int CCA, int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
 #define StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
-store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
+store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
 
 void cache_op PARAMS ((SIM_DESC sd, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
 #define CacheOp(op,pAddr,vAddr,instruction) cache_op(sd,op,pAddr,vAddr,instruction)

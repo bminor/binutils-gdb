@@ -38,6 +38,7 @@ SIM_OBJS = \
 	sim-config.o \
 	sim-endian.o \
 	sim-engine.o \
+	sim-memopt.o \
 	sim-stop.o \
 	sim-resume.o \
 	sim-reason.o \

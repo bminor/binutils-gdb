@@ -1,3 +1,28 @@
+Wed Nov  5 13:40:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.h (DECLARE_SIM_CORE_WRITE_N. DECLARE_SIM_CORE_READ_N):
+ 	Add argument M, size of data type.
+	(sim_core_read_misaligned_3, sim_core_write_misaligned_3):
+ 	Declare, ditto for 5, 6 & 7 byte transfers.
+	(sim_core_write_unaligned_1, sim_core_write_unaligned_1): Define
+ 	as aligned variant.
+	
+	* sim-n-core.h (sim_core_trace_M): Rename from
+ 	sim_core_trace_N. Add nr_bytes argument. Replace transfer argument
+ 	with transfer type. Print transfer direction.  Handle 1 and 2 byte
+ 	transfers.
+	(sim_core_read_unaligned_N, sim_core_write_unaligned_N): Trace
+ 	unaligned accesses.
+	(unsigned_M, T2H_M, H2T_M): Rename from unsigned_N, T2H_N, H2T_N.
+  	Update all functions.
+
+	* sim-core.c: Generate functions starting with 16 not 1.
+	(sim_core_read_unaligned_3): Generate. Ditto for 3 byte write and
+ 	all 5, 6 & 7 byte transfers.
+
+	* sim-n-core.h (sim_core_read_misaligned_N,
+ 	sim_core_write_misaligned_N): Implement.
+
 Mon Nov  3 15:03:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-endian.h (U16_8): Implement
