@@ -782,11 +782,7 @@ static void read_type_die (struct die_info *, struct dwarf2_cu *);
 
 static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
-static char *determine_prefix_aux (struct die_info *die, struct dwarf2_cu *);
-
 static char *typename_concat (const char *prefix, const char *suffix);
-
-static char *class_name (struct die_info *die, struct dwarf2_cu *);
 
 static void read_typedef (struct die_info *, struct dwarf2_cu *);
 
@@ -823,6 +819,8 @@ static void dwarf2_attach_fn_fields_to_type (struct field_info *,
 static void read_structure_type (struct die_info *, struct dwarf2_cu *);
 
 static void process_structure_scope (struct die_info *, struct dwarf2_cu *);
+
+static char *determine_class_name (struct die_info *die, struct dwarf2_cu *cu);
 
 static void read_common_block (struct die_info *, struct dwarf2_cu *);
 
@@ -3167,13 +3165,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   struct type *type;
   struct attribute *attr;
-  char *name = NULL;
   const char *previous_prefix = processing_current_prefix;
   struct cleanup *back_to = NULL;
-  /* This says whether or not we want to try to update the structure's
-     name to include enclosing namespace/class information, if
-     any.  */
-  int need_to_update_name = 0;
 
   if (die->type)
     return;
@@ -3184,41 +3177,20 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr && DW_STRING (attr))
     {
-      name = DW_STRING (attr);
-
       if (cu->language == language_cplus)
 	{
-	  struct die_info *spec_die = die_specification (die, cu);
-
-	  if (spec_die != NULL)
-	    {
-	      char *specification_prefix = determine_prefix (spec_die, cu);
-	      processing_current_prefix = specification_prefix;
-	      back_to = make_cleanup (xfree, specification_prefix);
-	    }
-	}
-
-      if (processing_has_namespace_info)
-	{
-	  /* FIXME: carlton/2003-11-10: This variable exists only for
-	     const-correctness reasons.  When I tried to change
-	     TYPE_TAG_NAME to be a const char *, I ran into a cascade
-	     of changes which would have forced decode_line_1 to take
-	     a const char **.  */
-	  char *new_prefix = obconcat (&objfile->objfile_obstack,
-				       processing_current_prefix,
-				       processing_current_prefix[0] == '\0'
-				       ? "" : "::",
-				       name);
-	  TYPE_TAG_NAME (type) = new_prefix;
+	  char *new_prefix = determine_class_name (die, cu);
+	  TYPE_TAG_NAME (type) = obsavestring (new_prefix,
+					       strlen (new_prefix),
+					       &objfile->objfile_obstack);
+	  back_to = make_cleanup (xfree, new_prefix);
 	  processing_current_prefix = new_prefix;
 	}
       else
 	{
 	  /* The name is already allocated along with this objfile, so
 	     we don't need to duplicate it for the type.  */
-	  TYPE_TAG_NAME (type) = name;
-	  need_to_update_name = (cu->language == language_cplus);
+	  TYPE_TAG_NAME (type) = DW_STRING (attr);
 	}
     }
 
@@ -3279,41 +3251,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	      /* C++ member function. */
 	      read_type_die (child_die, cu);
 	      dwarf2_add_member_fn (&fi, child_die, type, cu);
-	      if (need_to_update_name)
-		{
-		  /* The demangled names of member functions contain
-		     information about enclosing namespaces/classes,
-		     if any.  */
-
-		  /* FIXME: carlton/2003-11-10: The excessive
-		     demangling here is a bit wasteful, as is the
-		     memory usage for names.  */
-
-		  /* NOTE: carlton/2003-11-10: As commented in
-		     add_partial_structure, the demangler sometimes
-		     prints the type info in a different form from the
-		     debug info.  We could solve this by using the
-		     demangled name to get the prefix; if doing so,
-		     however, we'd need to be careful when reading a
-		     class that's nested inside a template class.
-		     That would also cause problems when trying to
-		     determine RTTI information, since we use the
-		     demangler to determine the appropriate class
-		     name.  */
-		  char *actual_class_name
-		    = class_name_from_physname (dwarf2_linkage_name
-						(child_die, cu));
-		  if (actual_class_name != NULL
-		      && strcmp (actual_class_name, name) != 0)
-		    {
-		      TYPE_TAG_NAME (type)
-			= obsavestring (actual_class_name,
-					strlen (actual_class_name),
-					&objfile->objfile_obstack);
-		    }
-		  xfree (actual_class_name);
-		  need_to_update_name = 0;
-		}
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
 	    {
@@ -3472,6 +3409,62 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   die->type = type;
+}
+
+/* Determine the name of the type represented by DIE, which should be
+   a named C++ compound type.  Return the name in question; the caller
+   is responsible for xfree()'ing it.  */
+
+static char *
+determine_class_name (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct cleanup *back_to = NULL;
+  struct die_info *spec_die = die_specification (die, cu);
+  char *new_prefix = NULL;
+
+  /* If this is the definition of a class that is declared by another
+     die, then processing_current_prefix may not be accurate; see
+     read_func_scope for a similar example.  */
+  if (spec_die != NULL)
+    {
+      char *specification_prefix = determine_prefix (spec_die, cu);
+      processing_current_prefix = specification_prefix;
+      back_to = make_cleanup (xfree, specification_prefix);
+    }
+
+  /* If we don't have namespace debug info, guess the name by trying
+     to demangle the names of members, just like we did in
+     add_partial_structure.  */
+  if (!processing_has_namespace_info)
+    {
+      struct die_info *child;
+
+      for (child = die->child;
+	   child != NULL && child->tag != 0;
+	   child = sibling_die (child))
+	{
+	  if (child->tag == DW_TAG_subprogram)
+	    {
+	      new_prefix = class_name_from_physname (dwarf2_linkage_name
+						     (child, cu));
+
+	      if (new_prefix != NULL)
+		break;
+	    }
+	}
+    }
+
+  if (new_prefix == NULL)
+    {
+      const char *name = dwarf2_name (die, cu);
+      new_prefix = typename_concat (processing_current_prefix,
+				    name ? name : "<<anonymous>>");
+    }
+
+  if (back_to != NULL)
+    do_cleanups (back_to);
+
+  return new_prefix;
 }
 
 /* Given a pointer to a die which begins an enumeration, process all
@@ -3724,6 +3717,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
       new_symbol (die, type, cu);
+      die->type = type;
 
       if (is_anonymous)
 	cp_add_using_directive (processing_current_prefix,
@@ -6298,18 +6292,6 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
 static char *
 determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 {
-  char *prefix = determine_prefix_aux (die, cu);
-
-  return prefix ? prefix : xstrdup ("");
-}
-
-/* Return the name of the namespace/class that DIE is defined
-   within, or NULL if we can't tell.  The caller should xfree the
-   result.  */
-
-static char *
-determine_prefix_aux (struct die_info *die, struct dwarf2_cu *cu)
-{
   struct die_info *parent;
 
   if (cu->language != language_cplus)
@@ -6319,49 +6301,55 @@ determine_prefix_aux (struct die_info *die, struct dwarf2_cu *cu)
 
   if (parent == NULL)
     {
-      return (processing_has_namespace_info ? xstrdup ("") : NULL);
+      return xstrdup ("");
     }
   else
     {
-      char *parent_prefix = determine_prefix_aux (parent, cu);
-      char *retval;
-
       switch (parent->tag) {
       case DW_TAG_namespace:
 	{
-	  int dummy;
-
-	  retval = typename_concat (parent_prefix,
-				    namespace_name (parent, &dummy, cu));
+	  /* FIXME: carlton/2004-03-05: Should I follow extension dies
+	     before doing this check?  */
+	  if (parent->type != NULL && TYPE_TAG_NAME (parent->type) != NULL)
+	    {
+	      return xstrdup (TYPE_TAG_NAME (parent->type));
+	    }
+	  else
+	    {
+	      int dummy;
+	      char *parent_prefix = determine_prefix (parent, cu);
+	      char *retval = typename_concat (parent_prefix,
+					      namespace_name (parent, &dummy,
+							      cu));
+	      xfree (parent_prefix);
+	      return retval;
+	    }
 	}
 	break;
       case DW_TAG_class_type:
       case DW_TAG_structure_type:
 	{
-	  if (parent_prefix != NULL)
+	  if (parent->type != NULL && TYPE_TAG_NAME (parent->type) != NULL)
 	    {
-	      const char *parent_name = dwarf2_name (parent, cu);
-
-	      if (parent_name != NULL)
-		retval = typename_concat (parent_prefix, dwarf2_name (parent, cu));
-	      else
-		/* FIXME: carlton/2003-11-10: I'm not sure what the
-		   best thing to do here is.  */
-		retval = typename_concat (parent_prefix,
-					  "<<anonymous class>>");
+	      return xstrdup (TYPE_TAG_NAME (parent->type));
 	    }
 	  else
-	    retval = class_name (parent, cu);
-	}
-	break;
-      default:
-	retval = parent_prefix;
-	break;
-      }
+	    {
+	      const char *old_prefix = processing_current_prefix;
+	      char *new_prefix = determine_prefix (parent, cu);
+	      char *retval;
 
-      if (retval != parent_prefix)
-	xfree (parent_prefix);
-      return retval;
+	      processing_current_prefix = new_prefix;
+	      retval = determine_class_name (parent, cu);
+	      processing_current_prefix = old_prefix;
+
+	      xfree (new_prefix);
+	      return retval;
+	    }
+	}
+      default:
+	return determine_prefix (parent, cu);
+      }
     }
 }
 
@@ -6384,28 +6372,6 @@ typename_concat (const char *prefix, const char *suffix)
 
       return retval;
     }
-}
-
-/* Return a newly-allocated string giving the name of the class given
-   by DIE.  */
-
-static char *
-class_name (struct die_info *die, struct dwarf2_cu *cu)
-{
-  struct die_info *child;
-  const char *name;
-
-  for (child = die->child; child != NULL; child = sibling_die (child))
-    {
-      if (child->tag == DW_TAG_subprogram)
-	return class_name_from_physname (dwarf2_linkage_name (child, cu));
-    }
-
-  name = dwarf2_name (die, cu);
-  if (name != NULL)
-    return xstrdup (name);
-  else
-    return xstrdup ("");
 }
 
 static struct type *

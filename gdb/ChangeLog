@@ -1,3 +1,13 @@
+2004-03-15  David Carlton  <carlton@kealia.com>
+
+	Fix for PR c++/1553:
+	* dwarf2read.c (read_structure_type): Determine type name by
+	calling determine_class_name.
+	(determine_class_name): New.
+	(determine_prefix): Look at TYPE_TAG_NAME and call
+	determine_class_name when appropriate.
+	(determine_prefix_aux, class_name): Delete.
+
 2004-03-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* breakpoint.c (TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Delete
