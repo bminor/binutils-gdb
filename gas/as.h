@@ -423,6 +423,9 @@ COMMON int flag_no_warnings; /* -W */
    are detected.  */
 COMMON unsigned char flag_always_generate_output; /* -Z */
 
+/* True if instruction swapping warnings should be inhibited.  */
+COMMON unsigned char flag_warn_instructionswap; /* --nowarnswap */
+
 /* This is true if the assembler should output time and space usage. */
 COMMON unsigned char flag_print_statistics;
 

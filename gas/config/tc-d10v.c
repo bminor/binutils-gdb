@@ -501,7 +501,7 @@ build_insn (opcode, opers, insn)
      unsigned long insn;
 {
   int i, bits, shift, flags, format;
-  unsigned int number;
+  unsigned long number;
   
   /* the insn argument is only used for the DIVS kludge */
   if (insn)
@@ -718,14 +718,16 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	{
 	  if (opcode2->unit == IU)
 	    as_fatal ("Two IU instructions may not be executed in parallel");
-	  as_warn ("Swapping instruction order");
+          if (flag_warn_instructionswap)
+	    as_warn ("Swapping instruction order");
  	  insn = FM00 | (insn2 << 15) | insn1;
 	}
       else if (opcode2->unit == MU)
 	{
 	  if (opcode1->unit == MU)
 	    as_fatal ("Two MU instructions may not be executed in parallel");
-	  as_warn ("Swapping instruction order");
+          if (flag_warn_instructionswap)
+	    as_warn ("Swapping instruction order");
 	  insn = FM00 | (insn2 << 15) | insn1;
 	}
       else
@@ -863,7 +865,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 		  else
 		    regno = 18; 
 		}
-	      else if (flags & OPERAND_FLAG)  
+	      else if (flags & (OPERAND_FFLAG|OPERAND_CFLAG))  
 		regno = 19;
 	      
 	      if ( flags & OPERAND_DEST )
@@ -1086,6 +1088,7 @@ find_opcode (opcode, myops)
   if (opcode->format == OPCODE_FAKE)
     {
       int opnum = opcode->operands[0];
+      int flags;
 			 
       if (myops[opnum].X_op == O_register)
 	{
@@ -1095,11 +1098,31 @@ find_opcode (opcode, myops)
 	  myops[opnum].X_op_symbol = NULL;
 	}
 
+      next_opcode=opcode+1;
+
+      /* If the first operand is supposed to be a register, make sure
+	 we got a valid one.  */
+      flags = d10v_operands[next_opcode->operands[0]].flags;
+      if (flags & OPERAND_REG)
+	{
+	  int X_op = myops[0].X_op;
+	  int num = myops[0].X_add_number;
+
+	  if (X_op != O_register
+	      || (flags & OPERAND_ACC) != (num & OPERAND_ACC)
+	      || (flags & OPERAND_FFLAG) != (num & OPERAND_FFLAG)
+	      || (flags & OPERAND_CFLAG) != (num & OPERAND_CFLAG)
+	      || (flags & OPERAND_CONTROL) != (num & OPERAND_CONTROL))
+	    {
+	      as_bad ("bad opcode or operands");
+	      return 0;
+	    }
+	}
+
       if (myops[opnum].X_op == O_constant || (myops[opnum].X_op == O_symbol &&
 	  S_IS_DEFINED(myops[opnum].X_add_symbol) &&
 	  (S_GET_SEGMENT(myops[opnum].X_add_symbol) == now_seg)))
 	{
-	  next_opcode=opcode+1;
 	  for (i=0; opcode->operands[i+1]; i++)
 	    {
 	      int bits = d10v_operands[next_opcode->operands[opnum]].bits;
@@ -1173,7 +1196,8 @@ find_opcode (opcode, myops)
 		{
 		  if ((X_op != O_register) ||
 		      ((flags & OPERAND_ACC) != (num & OPERAND_ACC)) ||
-		      ((flags & OPERAND_FLAG) != (num & OPERAND_FLAG)) ||
+		      ((flags & OPERAND_FFLAG) != (num & OPERAND_FFLAG)) ||
+		      ((flags & OPERAND_CFLAG) != (num & OPERAND_CFLAG)) ||
 		      ((flags & OPERAND_CONTROL) != (num & OPERAND_CONTROL)))
 		    {
 		      match=0;

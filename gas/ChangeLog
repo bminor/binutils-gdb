@@ -1,3 +1,10 @@
+Fri Jan 28 10:18:06 1998  Bill Moyer <billm@cygnus.com>
+	 
+	* as.h (flag_warn_instructionswap): added new flag variable.
+	* as.c (parse_args): added "--nowarnswap" command line arg.
+	* tc-d10v.c (write_2_short): emit "Swapping instructions"
+	warning only if flag_warn_instructionswap is set.
+
 start-sanitize-sky
 Wed Jan 28 10:00:40 1998  Doug Evans  <devans@canuck.cygnus.com>
 
