@@ -83,6 +83,9 @@ extern int _fisatty (FILE *);
 /* For RDIError_BreakpointReached.  */
 #include "dbg_rdi.h"
 
+#include "callback.h"
+extern host_callback *sim_callback;
+
 extern unsigned ARMul_OSInit (ARMul_State * state);
 extern void ARMul_OSExit (ARMul_State * state);
 extern unsigned ARMul_OSHandleSWI (ARMul_State * state, ARMword number);
@@ -258,9 +261,9 @@ SWIWrite0 (ARMul_State * state, ARMword addr)
   struct OSblock *OSptr = (struct OSblock *) state->OSptr;
 
   while ((temp = ARMul_SafeReadByte (state, addr++)) != 0)
-    (void) fputc ((char) temp, stdout);
+    (void) sim_callback->write_stdout (sim_callback, (char *) &temp, 1);
 
-  OSptr->ErrorNo = errno;
+  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 }
 
 static void
@@ -303,8 +306,8 @@ SWIopen (ARMul_State * state, ARMword name, ARMword SWIflags)
     }
   else
     {
-      state->Reg[0] = (int) open (dummy, flags, 0666);
-      OSptr->ErrorNo = errno;
+      state->Reg[0] = sim_callback->open (sim_callback, dummy, flags);
+      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
     }
 }
 
@@ -318,19 +321,19 @@ SWIread (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
 
   if (local == NULL)
     {
-      fprintf (stderr, "sim: Unable to read 0x%ulx bytes - out of memory\n",
+      sim_callback->printf_filtered (sim_callback, "sim: Unable to read 0x%ulx bytes - out of memory\n",
 	       len);
       return;
     }
 
-  res = read (f, local, len);
+  res = sim_callback->read (sim_callback, f, local, len);
   if (res > 0)
     for (i = 0; i < res; i++)
       ARMul_SafeWriteByte (state, ptr + i, local[i]);
 
   free (local);
   state->Reg[0] = res == -1 ? -1 : len - res;
-  OSptr->ErrorNo = errno;
+  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 }
 
 static void
@@ -343,7 +346,7 @@ SWIwrite (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
 
   if (local == NULL)
     {
-      fprintf (stderr, "sim: Unable to write 0x%lx bytes - out of memory\n",
+      sim_callback->printf_filtered (sim_callback, "sim: Unable to write 0x%lx bytes - out of memory\n",
 	       (long) len);
       return;
     }
@@ -351,11 +354,11 @@ SWIwrite (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
   for (i = 0; i < len; i++)
     local[i] = ARMul_SafeReadByte (state, ptr + i);
 
-  res = write (f, local, len);
+  res = sim_callback->write (sim_callback, f, local, len);
   state->Reg[0] = res == -1 ? -1 : len - res;
   free (local);
 
-  OSptr->ErrorNo = errno;
+  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 }
 
 static void
@@ -371,12 +374,12 @@ SWIflen (ARMul_State * state, ARMword fh)
       return;
     }
 
-  addr = lseek (fh, 0, SEEK_CUR);
+  addr = sim_callback->lseek (sim_callback, fh, 0, SEEK_CUR);
 
-  state->Reg[0] = lseek (fh, 0L, SEEK_END);
-  (void) lseek (fh, addr, SEEK_SET);
+  state->Reg[0] = sim_callback->lseek (sim_callback, fh, 0L, SEEK_END);
+  (void) sim_callback->lseek (sim_callback, fh, addr, SEEK_SET);
 
-  OSptr->ErrorNo = errno;
+  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 }
 
 /* The emulator calls this routine when a SWI instruction is encuntered.
@@ -442,13 +445,13 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
       break;
 
     case SWI_Time:
-      state->Reg[0] = (ARMword) time (NULL);
-      OSptr->ErrorNo = errno;
+      state->Reg[0] = (ARMword) sim_callback->time (sim_callback, NULL);
+      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
       break;
 
     case SWI_Close:
-      state->Reg[0] = close (state->Reg[0]);
-      OSptr->ErrorNo = errno;
+      state->Reg[0] = sim_callback->close (sim_callback, state->Reg[0]);
+      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
       break;
 
     case SWI_Flen:
@@ -461,13 +464,16 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 
     case SWI_Seek:
       /* We must return non-zero for failure.  */
-      state->Reg[0] = -1 >= lseek (state->Reg[0], state->Reg[1], SEEK_SET);
-      OSptr->ErrorNo = errno;
+      state->Reg[0] = -1 >= sim_callback->lseek (sim_callback, state->Reg[0], state->Reg[1], SEEK_SET);
+      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
       break;
 
     case SWI_WriteC:
-      (void) fputc ((int) state->Reg[0], stdout);
-      OSptr->ErrorNo = errno;
+      {
+	char tmp = state->Reg[0];
+	(void) sim_callback->write_stdout (sim_callback, &tmp, 1);
+	OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
+      }
       break;
 
     case SWI_Write0:
@@ -528,13 +534,16 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  break;
 
 	case AngelSWI_Reason_Time:
-	  state->Reg[0] = (ARMword) time (NULL);
-	  OSptr->ErrorNo = errno;
+	  state->Reg[0] = (ARMword) sim_callback->time (sim_callback, NULL);
+	  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	  break;
 
 	case AngelSWI_Reason_WriteC:
-	  (void) fputc ((int) ARMul_SafeReadByte (state, addr), stdout);
-	  OSptr->ErrorNo = errno;
+	  {
+	    char tmp = ARMul_SafeReadByte (state, addr);
+	    (void) sim_callback->write_stdout (sim_callback, &tmp, 1);
+	    OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
+	  }
 	  /* Fall thgrough.  */
 
 	case AngelSWI_Reason_Write0:
@@ -542,15 +551,15 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  break;
 
 	case AngelSWI_Reason_Close:
-	  state->Reg[0] = close (ARMul_ReadWord (state, addr));
-	  OSptr->ErrorNo = errno;
+	  state->Reg[0] = sim_callback->close (sim_callback, ARMul_ReadWord (state, addr));
+	  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	  break;
 
 	case AngelSWI_Reason_Seek:
-	  state->Reg[0] = -1 >= lseek (ARMul_ReadWord (state, addr),
+	  state->Reg[0] = -1 >= sim_callback->lseek (sim_callback, ARMul_ReadWord (state, addr),
 				       ARMul_ReadWord (state, addr + 4),
 				       SEEK_SET);
-	  OSptr->ErrorNo = errno;
+	  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	  break;
 
 	case AngelSWI_Reason_FLen:
@@ -652,7 +661,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	}
       else
 	{
-	  fprintf (stderr, "unknown SWI encountered - %x - ignoring\n", number);
+	  sim_callback->printf_filtered (sim_callback, "sim: unknown SWI encountered - %x - ignoring\n", number);
 	  return FALSE;
 	}
     }

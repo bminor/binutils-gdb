@@ -1,3 +1,13 @@
+2002-02-21  Keith Seitz  <keiths@redhat.com>
+
+	* armos.c (SWIWrite0): Use generic host_callback mechanism
+	for supported OS functions "open", "close", "write", etc.
+	(SWIopen): Likewise.
+	(SWIread): Likewise.
+	(SWIwrite): Likewise.
+	(SWIflen): Likewise.
+	(ARMul_OSHandleSWI): Likewise.
+
 2002-02-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* wrapper.c (sim_create_inferior): Modify previous patch so that
