@@ -394,7 +394,7 @@ binemul.o: binemul.c binemul.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h bucomm.h config.h \
   $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h
-budemang.o: budemang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+budemang.o: budemang.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
   budemang.h
 coffdump.o: coffdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
@@ -475,15 +475,15 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/d30v.h $(INCDIR)/elf/dlx.h $(INCDIR)/elf/fr30.h \
   $(INCDIR)/elf/frv.h $(INCDIR)/elf/h8.h $(INCDIR)/elf/hppa.h \
   $(INCDIR)/elf/i386.h $(INCDIR)/elf/i860.h $(INCDIR)/elf/i960.h \
-  $(INCDIR)/elf/ia64.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/m68k.h \
-  $(INCDIR)/elf/m68hc11.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/mips.h \
-  $(INCDIR)/elf/mmix.h $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h \
-  $(INCDIR)/elf/or32.h $(INCDIR)/elf/pj.h $(INCDIR)/elf/ppc.h \
-  $(INCDIR)/elf/s390.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/sparc.h \
-  $(INCDIR)/elf/v850.h $(INCDIR)/elf/vax.h $(INCDIR)/elf/x86-64.h \
-  $(INCDIR)/elf/xstormy16.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/elf/ip2k.h \
-  $(INCDIR)/fopen-same.h unwind-ia64.h
+  $(INCDIR)/elf/ia64.h $(INCDIR)/elf/ip2k.h $(INCDIR)/elf/m32r.h \
+  $(INCDIR)/elf/m68k.h $(INCDIR)/elf/m68hc11.h $(INCDIR)/elf/mcore.h \
+  $(INCDIR)/elf/mips.h $(INCDIR)/elf/mmix.h $(INCDIR)/elf/mn10200.h \
+  $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/or32.h $(INCDIR)/elf/pj.h \
+  $(INCDIR)/elf/ppc.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/sh.h \
+  $(INCDIR)/elf/sparc.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/vax.h \
+  $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/xstormy16.h bucomm.h \
+  config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  unwind-ia64.h
 rename.o: rename.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
   $(INCDIR)/fopen-same.h
