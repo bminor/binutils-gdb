@@ -1,5 +1,10 @@
 2001-10-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* read.c (s_bad_endr): New function.  Issues a warning message
+	about a bad use of the .rept pseudo op.
+	(po_table[]): Add .endr.
+	* read.h: Prototype s_bad_endr.
+
 	* CONTRIBUTORS: Update contact email address.
 
 2001-10-11  Kazu Hirata  <kazu@hxi.com>

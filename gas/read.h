@@ -139,6 +139,7 @@ extern void s_align_bytes PARAMS ((int arg));
 extern void s_align_ptwo PARAMS ((int));
 extern void s_app_file PARAMS ((int));
 extern void s_app_line PARAMS ((int));
+extern void s_bad_endr PARAMS ((int));
 extern void s_comm PARAMS ((int));
 extern void s_data PARAMS ((int));
 extern void s_desc PARAMS ((int));

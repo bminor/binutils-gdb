@@ -315,6 +315,7 @@ static const pseudo_typeS potable[] = {
   {"endc", s_endif, 0},
   {"endfunc", s_func, 1},
   {"endif", s_endif, 0},
+  {"endr", s_bad_endr, 0},
 /* endef  */
   {"equ", s_set, 0},
   {"equiv", s_set, 1},
@@ -2688,6 +2689,16 @@ s_purgem (ignore)
   while (*input_line_pointer++ == ',');
 
   --input_line_pointer;
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .rept pseudo-op.  */
+
+void
+s_bad_endr (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  as_warn (_(".endr encountered without preceeding .rept, .irc, or .irp"));
   demand_empty_rest_of_line ();
 }
 
