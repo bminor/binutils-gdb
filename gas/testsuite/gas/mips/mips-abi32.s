@@ -1,14 +1,13 @@
 
 	.sdata
-shared:	.4byte	11
+shared:	.word	11
 
 	.data
-	.size	unshared,16
 unshared:
-	.4byte	1
-	.4byte	2
-	.4byte	3
-	.4byte	4
+	.word	1
+	.word	2
+	.word	3
+	.word	4
 
 	.text
 func:

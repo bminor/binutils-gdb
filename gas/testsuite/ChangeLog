@@ -1,3 +1,17 @@
+2001-10-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips-abi32-pic.s: Use ".word" rather than ".4byte".
+	Delete use of ".size".
+	* gas/mips/mips-abi32.s: Likewise.
+	* gas/mips/mips-gp32-fp32-pic.s: Likewise.
+	* gas/mips/mips-gp32-fp32.s: Likewise.
+	* gas/mips/mips-gp32-fp64-pic.s: Likewise.
+	* gas/mips/mips-gp32-fp64.s: Likewise.
+	* gas/mips/mips-gp64-fp32-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp32.s: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp64.s: Likewise.
+
 2001-10-23  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/beq.s: Add zero words at end of instructions so
