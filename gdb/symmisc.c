@@ -26,9 +26,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <obstack.h>
-
-static void free_symtab ();
-
 
 /* Free all the symtabs that are currently installed,
    and all storage associated with them.
@@ -91,7 +88,7 @@ free_symtab_block (b)
    which maybe per symtab even when the rest is not).
    It is s->free_code that says which alternative to use.  */
 
-static void
+void
 free_symtab (s)
      register struct symtab *s;
 {
@@ -102,7 +99,7 @@ free_symtab (s)
   switch (s->free_code)
     {
     case free_nothing:
-      /* All the contents are part of a big block of memory
+      /* All the contents are part of a big block of memory (an obstack),
 	 and some other symtab is in charge of freeing that block.
 	 Therefore, do nothing.  */
       break;
@@ -141,85 +138,6 @@ free_symtab (s)
     free (s->fullname);
   free (s);
 }
-
-/* If a symtab for filename NAME is found, free it along
-   with any dependent breakpoints, displays, etc.
-   Used when loading new versions of object modules with the "add-file"
-   command.
-   
-   FIXME.  I think this is not the right way to do this.  It needs further
-   investigation, though.  -- gnu@cygnus  */
-
-void
-free_named_symtab (name)
-     char *name;
-{
-  register struct symtab *s;
-  register struct symtab *prev;
-  struct blockvector *bv;
-
-#if 0	/* FIXME */
-  /* Look for a symtab with the specified name.
-     We can't use lookup_symtab () for this, since it 
-     might generate a recursive call to psymtab_to_symtab ().  */
-
-  for (s = symtab_list; s; s = s->next)
-    {
-      if (!strcmp (name, s->filename))
-	break;
-      prev = s;
-    }
-
-  if (s)
-    {
-      if (s == symtab_list)
-	symtab_list = s->next;
-      else
-	prev->next = s->next;
-
-      /* For now, delete all breakpoints, displays, etc., whether or
-	 not they depend on the symtab being freed.  This should be
-	 changed so that only those data structures affected are deleted.  */
-
-      /* But don't delete anything if the symtab is empty.
-	 This test is necessary due to a bug in "dbxread.c" that
-	 causes empty symtabs to be created for N_SO symbols that
-	 contain the pathname of the object file.  (This problem
-	 has been fixed in GDB 3.9x).  */
-
-      bv = BLOCKLIST (s);
-      if (BLOCKLIST_NBLOCKS (bv) > 2
-	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, 0))
-	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, 1)))
-	{
-	  /* Took the following line out because GDB ends up printing it
-	     many times when a given module is loaded, because each module
-	     contains many symtabs.  */
-	  /*
-	  printf ("Clearing breakpoints and resetting debugger state.\n");
-	  */
-
-	  clear_value_history ();
-	  clear_displays ();
-	  clear_internalvars ();
-	  clear_breakpoints ();
-	  set_default_breakpoint (0, 0, 0, 0);
-	  current_source_symtab = 0;
-	}
-
-      free_symtab (s);
-    }
-  else
-    /* It is still possible that some breakpoints will be affected
-       even though no symtab was found, since the file might have
-       been compiled without debugging, and hence not be associated
-       with a symtab.  In order to handle this correctly, we would need
-       to keep a list of text address ranges for undebuggable files.
-       For now, we do nothing, since this is a fairly obscure case.  */
-    ;
-#endif  /* FIXME */
-}
-
 
 static int block_depth ();
 static void print_symbol ();
