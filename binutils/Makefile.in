@@ -210,7 +210,7 @@ underscore.c: Makefile
 	echo "int prepends_underscore = $(UNDERSCORE);" >>underscore.t
 	mv -f underscore.t underscore.c
 
-version.o: version.c
+version.o: version.c Makefile
 	$(CC) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' $(CFLAGS) -c $(srcdir)/version.c
 
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
@@ -219,10 +219,14 @@ cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 $(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o version.o
 	$(CC) $(CFLAGS) $(LDFLAGS)  -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
 
-arparse.h arparse.c: arparse.y
+arparse.c: arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
-	-mv y.tab.c arparse.c
-	-mv y.tab.h arparse.h
+	mv -f y.tab.c arparse.c
+	mv -f y.tab.h arparse.h
+
+# Separate from arparse.c so that a parallel make doesn't try to build
+# both arparse.c and arparse.h simultaneously.
+arparse.h: arparse.c
 
 arlex.c: arlex.l
 	$(LEX) $(LEX_OPTIONS) $(srcdir)/arlex.l
@@ -259,24 +263,38 @@ sysroff.c: sysinfo sysroff.info
 	./sysinfo -g <$(srcdir)/sysroff.info >>sysroff.c
 	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h	
 
-sysinfo.h sysinfo.c: sysinfo.y 
+# Depend upon arparse.c to avoid building both arparse.c and sysinfo.c
+# simultaneously.
+sysinfo.c: sysinfo.y arparse.c
 	$(BISON) -tvd $(srcdir)/sysinfo.y
 	rm -f sysinfo.c
-	-mv y.tab.c sysinfo.c
-	-mv y.tab.h sysinfo.h
+	mv -f y.tab.c sysinfo.c
+	mv -f y.tab.h sysinfo.h
+
+# Separate from sysinfo.c so that a parallel make doesn't try to build
+# both sysinfo.c and sysinfo.h simultaneously.
+sysinfo.h: sysinfo.c
 
 syslex.c : syslex.l
 	$(LEX) $(LEX_OPTIONS) $(srcdir)/syslex.l
 	mv lex.yy.c syslex.c
 	
-sysinfo: sysinfo.o syslex.o $(ADDL_LIBS)
+sysinfo: sysinfo.o syslex.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o 
 
 syslex.o: syslex.c sysinfo.h
-	$(CC_FOR_BUILD) -c -I. $(CFLAGS)  syslex.c 
+	if [ -r syslex.c ]; then \
+	  $(CC_FOR_BUILD) -c -I. $(CFLAGS)  syslex.c  ; \
+	else \
+	  $(CC_FOR_BUILD) -c -I. $(CFLAGS) $(srcdir)/syslex.c ;\
+	fi
 
 sysinfo.o: sysinfo.c
-	$(CC_FOR_BUILD) -c -I. $(CFLAGS)  sysinfo.c 
+	if [ -r sysinfo.c ]; then \
+	  $(CC_FOR_BUILD) -c -I. $(CFLAGS)  sysinfo.c  ; \
+	else \
+	  $(CC_FOR_BUILD) -c -I. $(CFLAGS) $(srcdir)/sysinfo.c ; \
+	fi
 
 srconv: sysroff.c srconv.o sysroff.c  coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
@@ -287,10 +305,12 @@ coffdump: coffdump.o coffgrok.o $(ADDL_LIBS)
 sysdump: sysroff.c sysdump.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
 
-nlmheader.c: nlmheader.y
+# Depend upon sysinfo.c to avoid building both nlmheader.c and sysinfo.c
+# simultaneously.
+nlmheader.c: nlmheader.y sysinfo.c
 	$(BISON) $(srcdir)/nlmheader.y
 	rm -f nlmheader.c
-	-mv y.tab.c nlmheader.c
+	mv -f y.tab.c nlmheader.c
 
 nlmconv.o: nlmconv.c
 	ldname=`t='$(program_transform_name)'; echo ld | sed -e "s/brokensed/brokensed/" $$t`; \

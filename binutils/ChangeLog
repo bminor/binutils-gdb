@@ -1,5 +1,14 @@
 Wed Sep 28 13:04:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* Makefile.in (arparse.c): Don't ignore errors from mv.
+	(sysinfo.c): Likewise.  Also, depend upon arparse.c, to prevent a
+	parallel make from trying to build both arparse.c and sysinfo.c
+	simultaneously.
+	(nlmheader.c): Similar change.
+	(arparse.h): Separate target from arparse.c, so that a parallel
+	make does not try to build both at once.  Depend upon arparse.c.
+	(sysinfo.h): Similar change.
+
 	* objdump.c (disassemble_data): Pass the reloc buffer to free, not
 	the pointer used to loop over the relocs.
 
