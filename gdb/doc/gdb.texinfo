@@ -418,12 +418,12 @@ Fred Fish wrote most of the support for Unix System Vr4.
 He also enhanced the command-completion support to cover C@t{++} overloaded
 symbols.
 
-Hitachi America, Ltd. sponsored the support for H8/300, H8/500, and
+Renesas America, Ltd. sponsored the support for H8/300, H8/500, and
 Super-H processors.
 
 NEC sponsored the support for the v850, Vr4xxx, and Vr5xxx processors.
 
-Mitsubishi sponsored the support for D10V, D30V, and M32R/D processors.
+Renesas sponsored the support for D10V, D30V, and M32R/D processors.
 
 Toshiba sponsored the support for the TX39 Mips processor.
 
@@ -10481,7 +10481,7 @@ specifies a fixed address.
 @cindex choosing target byte order
 @cindex target byte order
 
-Some types of processors, such as the MIPS, PowerPC, and Hitachi SH,
+Some types of processors, such as the MIPS, PowerPC, and Renesas SH,
 offer the ability to run either big-endian or little-endian byte
 orders.  Usually the executable or symbol will include a bit to
 designate the endian-ness, and you will not need to worry about
@@ -10928,9 +10928,9 @@ For Motorola 680x0 architectures.
 
 @item sh-stub.c
 @cindex @file{sh-stub.c}
-@cindex Hitachi
+@cindex Renesas
 @cindex SH
-For Hitachi SH architectures.
+For Renesas SH architectures.
 
 @item sparc-stub.c
 @cindex @file{sparc-stub.c}
@@ -11782,15 +11782,15 @@ configurations.
 
 @menu
 * ARM::                         ARM
-* H8/300::                      Hitachi H8/300
-* H8/500::                      Hitachi H8/500
-* M32R/D::                      Mitsubishi M32R/D
+* H8/300::                      Renesas H8/300
+* H8/500::                      Renesas H8/500
+* M32R/D::                      Renesas M32R/D
 * M68K::                        Motorola M68K
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
 * PowerPC:                      PowerPC
-* SH::                          Hitachi SH
+* SH::                          Renesas SH
 * Sparclet::                    Tsqware Sparclet
 * Sparclite::                   Fujitsu Sparclite
 * ST2000::                      Tandem ST2000
@@ -11815,50 +11815,50 @@ ARM Demon monitor.
 @end table
 
 @node H8/300
-@subsection Hitachi H8/300
+@subsection Renesas H8/300
 
 @table @code
 
 @kindex target hms@r{, with H8/300}
 @item target hms @var{dev}
-A Hitachi SH, H8/300, or H8/500 board, attached via serial line to your host.
+A Renesas SH, H8/300, or H8/500 board, attached via serial line to your host.
 Use special commands @code{device} and @code{speed} to control the serial
 line and the communications speed used.
 
 @kindex target e7000@r{, with H8/300}
 @item target e7000 @var{dev}
-E7000 emulator for Hitachi H8 and SH.
+E7000 emulator for Renesas H8 and SH.
 
 @kindex target sh3@r{, with H8/300}
 @kindex target sh3e@r{, with H8/300}
 @item target sh3 @var{dev}
 @itemx target sh3e @var{dev}
-Hitachi SH-3 and SH-3E target systems.
+Renesas SH-3 and SH-3E target systems.
 
 @end table
 
 @cindex download to H8/300 or H8/500
 @cindex H8/300 or H8/500 download
-@cindex download to Hitachi SH
-@cindex Hitachi SH download
-When you select remote debugging to a Hitachi SH, H8/300, or H8/500
-board, the @code{load} command downloads your program to the Hitachi
+@cindex download to Renesas SH
+@cindex Renesas SH download
+When you select remote debugging to a Renesas SH, H8/300, or H8/500
+board, the @code{load} command downloads your program to the Renesas
 board and also opens it as the current executable target for
 @value{GDBN} on your host (like the @code{file} command).
 
 @value{GDBN} needs to know these things to talk to your
-Hitachi SH, H8/300, or H8/500:
+Renesas SH, H8/300, or H8/500:
 
 @enumerate
 @item
 that you want to use @samp{target hms}, the remote debugging interface
-for Hitachi microprocessors, or @samp{target e7000}, the in-circuit
-emulator for the Hitachi SH and the Hitachi 300H.  (@samp{target hms} is
-the default when @value{GDBN} is configured specifically for the Hitachi SH,
+for Renesas microprocessors, or @samp{target e7000}, the in-circuit
+emulator for the Renesas SH and the Renesas 300H.  (@samp{target hms} is
+the default when @value{GDBN} is configured specifically for the Renesas SH,
 H8/300, or H8/500.)
 
 @item
-what serial device connects your host to your Hitachi board (the first
+what serial device connects your host to your Renesas board (the first
 serial device available on your host is the default).
 
 @item
@@ -11866,24 +11866,24 @@ what speed to use over the serial device.
 @end enumerate
 
 @menu
-* Hitachi Boards::      Connecting to Hitachi boards.
-* Hitachi ICE::         Using the E7000 In-Circuit Emulator.
-* Hitachi Special::     Special @value{GDBN} commands for Hitachi micros.
+* Renesas Boards::      Connecting to Renesas boards.
+* Renesas ICE::         Using the E7000 In-Circuit Emulator.
+* Renesas Special::     Special @value{GDBN} commands for Renesas micros.
 @end menu
 
-@node Hitachi Boards
-@subsubsection Connecting to Hitachi boards
+@node Renesas Boards
+@subsubsection Connecting to Renesas boards
 
 @c only for Unix hosts
 @kindex device
-@cindex serial device, Hitachi micros
+@cindex serial device, Renesas micros
 Use the special @code{@value{GDBN}} command @samp{device @var{port}} if you
 need to explicitly set the serial device.  The default @var{port} is the
 first available port on your host.  This is only necessary on Unix
 hosts, where it is typically something like @file{/dev/ttya}.
 
 @kindex speed
-@cindex serial line speed, Hitachi micros
+@cindex serial line speed, Renesas micros
 @code{@value{GDBN}} has another special command to set the communications
 speed: @samp{speed @var{bps}}.  This command also is only used from Unix
 hosts; on DOS hosts, set the line speed as usual from outside @value{GDBN} with
@@ -11891,7 +11891,7 @@ the DOS @code{mode} command (for instance,
 @w{@kbd{mode com2:9600,n,8,1,p}} for a 9600@dmn{bps} connection).
 
 The @samp{device} and @samp{speed} commands are available only when you
-use a Unix host to debug your Hitachi microprocessor programs.  If you
+use a Unix host to debug your Renesas microprocessor programs.  If you
 use a DOS host,
 @value{GDBN} depends on an auxiliary terminate-and-stay-resident program
 called @code{asynctsr} to communicate with the development board
@@ -11901,7 +11901,7 @@ to set up the serial port on the DOS side.
 The following sample session illustrates the steps needed to start a
 program under @value{GDBN} control on an H8/300.  The example uses a
 sample H8/300 program called @file{t.x}.  The procedure is the same for
-the Hitachi SH and the H8/500.
+the Renesas SH and the H8/500.
 
 First hook up your development board.  In this example, we use a
 board attached to serial port @code{COM2}; if you use a different serial
@@ -11934,7 +11934,7 @@ connected, you can start up @value{GDBN}.  Call @code{@value{GDBP}} with
 the name of your program as the argument.  @code{@value{GDBN}} prompts
 you, as usual, with the prompt @samp{(@value{GDBP})}.  Use two special
 commands to begin your debugging session: @samp{target hms} to specify
-cross-debugging to the Hitachi board, and the @code{load} command to
+cross-debugging to the Renesas board, and the @code{load} command to
 download your program to the board.  @code{load} displays the names of
 the program's sections, and a @samp{*} for each 2K of data downloaded.
 (If you want to refresh @value{GDBN} data on symbols or on the
@@ -11984,12 +11984,12 @@ to detect program completion.
 In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
 
-@node Hitachi ICE
+@node Renesas ICE
 @subsubsection Using the E7000 in-circuit emulator
 
-@kindex target e7000@r{, with Hitachi ICE}
+@kindex target e7000@r{, with Renesas ICE}
 You can use the E7000 in-circuit emulator to develop code for either the
-Hitachi SH or the H8/300H.  Use one of these forms of the @samp{target
+Renesas SH or the H8/300H.  Use one of these forms of the @samp{target
 e7000} command to connect @value{GDBN} to your E7000:
 
 @table @code
@@ -12004,8 +12004,8 @@ If your E7000 is installed as a host on a TCP/IP network, you can just
 specify its hostname; @value{GDBN} uses @code{telnet} to connect.
 @end table
 
-@node Hitachi Special
-@subsubsection Special @value{GDBN} commands for Hitachi micros
+@node Renesas Special
+@subsubsection Special @value{GDBN} commands for Renesas micros
 
 Some @value{GDBN} commands are available only for the H8/300:
 
@@ -12038,13 +12038,13 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @end table
 
 @node M32R/D
-@subsection Mitsubishi M32R/D
+@subsection Renesas M32R/D
 
 @table @code
 
 @kindex target m32r
 @item target m32r @var{dev}
-Mitsubishi M32R/D ROM monitor.
+Renesas M32R/D ROM monitor.
 
 @end table
 
@@ -12391,25 +12391,25 @@ W89K monitor, running on a Winbond HPPA board.
 @end table
 
 @node SH
-@subsection Hitachi SH
+@subsection Renesas SH
 
 @table @code
 
-@kindex target hms@r{, with Hitachi SH}
+@kindex target hms@r{, with Renesas SH}
 @item target hms @var{dev}
-A Hitachi SH board attached via serial line to your host.  Use special
+A Renesas SH board attached via serial line to your host.  Use special
 commands @code{device} and @code{speed} to control the serial line and
 the communications speed used.
 
-@kindex target e7000@r{, with Hitachi SH}
+@kindex target e7000@r{, with Renesas SH}
 @item target e7000 @var{dev}
-E7000 emulator for Hitachi SH.
+E7000 emulator for Renesas SH.
 
 @kindex target sh3@r{, with SH}
 @kindex target sh3e@r{, with SH}
 @item target sh3 @var{dev}
 @item target sh3e @var{dev}
-Hitachi SH-3 and SH-3E target systems.
+Renesas SH-3 and SH-3E target systems.
 
 @end table
 

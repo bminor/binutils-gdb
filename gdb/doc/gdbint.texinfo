@@ -2505,7 +2505,7 @@ However, architectures with smaller word sizes are often cramped for
 address space, so they may choose a pointer representation that breaks this
 identity, and allows a larger code address space.
 
-For example, the Mitsubishi D10V is a 16-bit VLIW processor whose
+For example, the Renesas D10V is a 16-bit VLIW processor whose
 instructions are 32 bits long@footnote{Some D10V instructions are
 actually pairs of 16-bit sub-instructions.  However, since you can't
 jump into the middle of such a pair, code addresses can only refer to
