@@ -1,5 +1,5 @@
 /* Print Motorola 68k instructions for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,9 +19,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
-#include "opcode/m68k.h"
 #include "gdbcore.h"
 #include "ieee-float.h"
+
+/* Opcode/m68k.h is a massive table.  As a kludge, break it up into
+   two pieces.  This makes nonportable C -- FIXME -- it assumes that
+   two data items declared near each other will be contiguous in
+   memory.  This kludge can be removed, FIXME, when GCC is fixed to not
+   be a hog about initializers.  */
+
+#ifdef __GNUC__
+#define	BREAK_UP_BIG_DECL	}; \
+				struct m68k_opcode m68k_opcodes_2[] = {
+#define	AND_OTHER_PART		sizeof (m68k_opcodes_2)
+#endif
+
+#include "opcode/m68k.h"
+
 
 /* Local function prototypes */
 
@@ -40,9 +54,6 @@ print_insn_arg PARAMS ((char *, unsigned char *, unsigned char *, CORE_ADDR,
 
 /* 68k instructions are never longer than this many bytes.  */
 #define MAXLEN 22
-
-/* Number of elements in the opcode table.  */
-#define NOPCODES (sizeof m68k_opcodes / sizeof m68k_opcodes[0])
 
 const char * const fpcr_names[] = {
   "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
@@ -92,7 +103,7 @@ print_insn (memaddr, stream)
 
   bestmask = 0;
   best = -1;
-  for (i = 0; i < NOPCODES; i++)
+  for (i = 0; i < numopcodes; i++)
     {
       register unsigned int opcode = m68k_opcodes[i].opcode;
       register unsigned int match = m68k_opcodes[i].match;
@@ -500,7 +511,8 @@ print_insn_arg (d, buffer, p, addr, stream)
 
 #ifdef HAVE_68881
 		case 'x':
-		  ieee_extended_to_double (&ext_format_68881, p, &flval);
+		  ieee_extended_to_double (&ext_format_68881,
+					   (char *)p, &flval);
 		  p += 12;
 		  break;
 #endif

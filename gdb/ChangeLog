@@ -1,3 +1,12 @@
+Thu Feb 18 01:56:06 1993  John Gilmore  (gnu@cygnus.com)
+
+	* nm-hp300bsd.h (ATTACH_DETACH, PTRACE_ATTACH, PTRACE_DETACH): define.
+	* config/hp300bsd.mh (REGEX, REGEX1):  Define.
+	* m68k-pinsn.c (BREAK_UP_BIG_DECL, AND_OTHER_PART):  #if __GNUC__,
+	define to kludge the large opcode table into two smaller tables,
+	since GCC take exponential space to build the table.  Lint.
+	(NOPCODES):  Remove, use "numopcodes" from opcode/m68k.h instead.
+
 Wed Feb 17 19:24:40 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (VERSION):  Roll to 4.7.9.
