@@ -1,5 +1,8 @@
 Tue May 18 14:08:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/{i386/linux.mh,m68k/isi.mh} (NATDEPFILES):
+	Comment out corelow.c because core dumps are broken on these machines.
+
 	* Makefile.in (depend):  Put "${srcdir}" in generated dependencies
 	if srcdir is not ".".
 	Also put in -I${BFD_DIR} or -I${READLINE_DIR} for files which need it.

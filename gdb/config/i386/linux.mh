@@ -1,0 +1,14 @@
+# Host: Intel 386 running System V
+XDEPFILES= 
+XM_FILE= xm-linux.h
+NAT_FILE= nm-linux.h
+# corelow.o commented out because core dumps are broken as of GDB 4.9.
+# According to eichin@cygnus.com, the GDB which ships with linux (not sure
+# which linux distribution) can read a linux core dump.  It's numbered 4.8,
+# but I don't know whether it's vanilla 4.8 or modified.
+NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o coredep.o i386v-nat.o
+XM_CLIBS=
+TERMLIB=
+SYSV_DEFINE=-DSYSV
+REGEX=regex.o
+REGEX1=regex.o
