@@ -1,5 +1,7 @@
 2004-06-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-nat.c (amd64_supply_native_gregset): Fix comment.
+
 	* vax-tdep.c: Tweak comment.
 
 	Add OpenBSD/hppa support.
