@@ -1,5 +1,5 @@
 /* Select target systems and architectures at runtime for GDB.
-   Copyright 1990, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include <errno.h>
 #include <ctype.h>
+#include <string.h>
 #include "target.h"
 #include "gdbcmd.h"
 #include "symtab.h"

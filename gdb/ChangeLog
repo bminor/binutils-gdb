@@ -1,3 +1,12 @@
+Sat Jul 15 01:02:53 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/alpha/alpha-osf3.mh, config/alpha/nm-osf3.h:  New files
+	for OSF/1-3.x procfs support.
+	* configure.in (alpha-dec-osf):  Use them when configuring
+	for OSF/1-3.x.
+	* configure:  Updated.
+	* target.c:  Include <string.h>.
+
 Fri Jul 14 16:16:56 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in, configure.in: Use one variable, frags, to hold

@@ -1546,7 +1546,8 @@ case "${host}" in
 a29k-*-*)		gdb_host=ultra3 ;;
 
 alpha-*-osf1*)		gdb_host=alpha-osf1 ;;
-alpha-*-osf[23456789]*)	gdb_host=alpha-osf2 ;;
+alpha-*-osf2*)		gdb_host=alpha-osf2 ;;
+alpha-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
 
 arm-*-*)		gdb_host=arm ;;
 
