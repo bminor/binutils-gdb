@@ -75,12 +75,12 @@ distribution includes a file `gdb/config/djgpp/fnchange.lst' with the
 necessary mappings.  So you need first to retrieve that batch file,
 and then invoke it to unpack the distribution.  Here's how:
 
- djtar -x -p -o gdb-5.1/djunpack.bat gdb-5.1.tar.gz > djunpack.bat
- djunpack gdb-5.1.tar.gz
+ djtar -x -p -o gdb-5.2/djunpack.bat gdb-5.2.tar.gz > djunpack.bat
+ djunpack gdb-5.2.tar.gz
 
 (The name of the distribution archive and the leading directory of the
 path to `djunpack.bat' in the distribution will be different for
-versions of GDB other than 5.1.)
+versions of GDB other than 5.2.)
 
 If the argument to `djunpack.bat' include leading directories, it MUST
 be given with the DOS-style backslashes; Unix-style forward slashes
@@ -90,9 +90,9 @@ If the distribution comes as a .tar.bz2 archive, and your version of
 `djtar' doesn't support bzip2 decompression, you need to unpack it as
 follows:
 
- bnzip2 gdb-5.1.tar.bz2
- djtar -x -p -o gdb-5.1/djunpack.bat gdb-5.1.tar > djunpack.bat
- djunpack gdb-5.1.tar
+ bnzip2 gdb-5.2.tar.bz2
+ djtar -x -p -o gdb-5.2/djunpack.bat gdb-5.2.tar > djunpack.bat
+ djunpack gdb-5.2.tar
 
 
 3. How to build
@@ -133,7 +133,7 @@ It is also possible to build GDB in a directory that is different from
 the one where the sources were unpacked.  In that case, you have to
 pass the source directory as the first argument to the script:
 
-	sh ./gdb/config/djgpp/djconfig.sh d:/gnu/gdb-5.1
+	sh ./gdb/config/djgpp/djconfig.sh d:/gnu/gdb-5.2
 
 You MUST use forward slashes in the first argument.
 
@@ -148,16 +148,12 @@ some of the Texinfo sources), type this:
 
 When Make finishes, you can install the package:
 
-	make -k install prefix='${DJDIR}' INSTALL='ginstall -c'
+	make install prefix='${DJDIR}' INSTALL='ginstall -c'
 
 The above doesn't install the docs; for that you will need to say
 this:
 
-	make -k install-info prefix='${DJDIR}' INSTALL='ginstall -c'
-
-(The -k switch is required, because some unneeded targets that are
-part of the install process fail; -k lets Make run to completion
-nonetheless.)
+	make install-info prefix='${DJDIR}' INSTALL='ginstall -c'
 
 The test suite has been made to work with DJGPP.  If you make a change
 in some of the programs, or want to be sure you have a fully
