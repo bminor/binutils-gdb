@@ -1,3 +1,8 @@
+Thu Feb 27 20:07:43 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set_one):  Don't reset breakpoint
+	unless symbol table indicates that something has changed.
+
 Thu Feb 27 11:48:47 1992  John Gilmore  (gnu at cygnus.com)
 
 	* remote.c:  Make it work for embedded MIPS.  Increase buffer

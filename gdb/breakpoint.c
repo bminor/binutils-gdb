@@ -2212,20 +2212,25 @@ breakpoint_re_set_one (bint)
       for (i = 0; i < sals.nelts; i++)
 	{
 	  resolve_sal_pc (&sals.sals[i]);
-	  b->symtab = sals.sals[i].symtab;
-	  b->line_number = sals.sals[i].line;
-	  b->address = sals.sals[i].pc;
-
-	  if (b->cond_string != NULL)
+	  if (b->symtab != sals.sals[i].symtab
+	      || b->line_number != sals.sals[i].line
+	      || b->address != sals.sals[i].pc)
 	    {
-	      s = b->cond_string;
-	      b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
-	    }
-	  
-	  check_duplicates (b->address);
+	      b->symtab = sals.sals[i].symtab;
+	      b->line_number = sals.sals[i].line;
+	      b->address = sals.sals[i].pc;
 
+	      if (b->cond_string != NULL)
+		{
+		  s = b->cond_string;
+		  b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
+		}
+	  
+	      check_duplicates (b->address);
+
+	      mention (b);
+	    }
 	  b->enable = save_enable;	/* Restore it, this worked. */
-	  mention (b);
 	}
       free (sals.sals);
       break;
@@ -2256,7 +2261,6 @@ breakpoint_re_set ()
   
   ALL_BREAKPOINTS_SAFE (b, temp)
     {
-      b->symtab = 0;		/* Be sure we don't point to old dead symtab */
       sprintf (message, message1, b->number);	/* Format possible error msg */
       (void) catch_errors (breakpoint_re_set_one, (char *) b, message);
     }
