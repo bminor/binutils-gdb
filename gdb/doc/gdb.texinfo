@@ -5773,7 +5773,7 @@ tekhex format file @var{filename}.
 @item dump tekhex value @var{filename} @var{expression}
 Dump value of @var{expression} into tekhex format file @var{filename}.
 
-@item restore @var{filename} @var{[binary]} @var{bias} @var{start} @var{end}
+@item restore @var{filename} [@var{binary}] @var{bias} @var{start} @var{end}
 Restore the contents of file @var{filename} into memory.  The @code{restore}
 command can automatically recognize any known bfd file format, except for
 raw binary.  To restore a raw binary file you must use the optional argument
