@@ -497,7 +497,6 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 	    }
 	  know (s->s_paddr == paddr);
 
-	  s->s_flags = STYP_REG;
 	  if (strcmp (s->s_name, ".text") == 0)
 	    s->s_flags |= STYP_TEXT;
 	  else if (strcmp (s->s_name, ".data") == 0)
@@ -667,8 +666,6 @@ DEFUN (symbol_to_chars, (abfd, where, symbolP),
   return where;
 
 }
-
-
 
 
 void
@@ -961,29 +958,24 @@ DEFUN_VOID (obj_coff_endef)
       break;
     }				/* switch on storage class */
 
-  /* Now that we have built a debug symbol, try to find if
-       we should merge with an existing symbol or not.  If a
-       symbol is C_EFCN or SEG_ABSOLUTE or untagged
-       SEG_DEBUG it never merges.  We also don't merge
-       labels, which are in a different namespace, nor
-       symbols which have not yet been defined since they
-       are typically unique, nor do we merge tags with
-       non-tags.  */
+  /* Now that we have built a debug symbol, try to find if we should
+     merge with an existing symbol or not.  If a symbol is C_EFCN or
+     SEG_ABSOLUTE or untagged SEG_DEBUG it never merges.  We also
+     don't merge labels, which are in a different namespace, nor
+     symbols which have not yet been defined since they are typically
+     unique, nor do we merge tags with non-tags.  */
 
-  /* Two cases for functions.  Either debug followed
-       by definition or definition followed by debug.
-       For definition first, we will merge the debug
-       symbol into the definition.  For debug first, the
-       lineno entry MUST point to the definition
-       function or else it will point off into space
-       when crawl_symbols() merges the debug
-       symbol into the real symbol.  Therefor, let's
-       presume the debug symbol is a real function
-       reference. */
+  /* Two cases for functions.  Either debug followed by definition or
+     definition followed by debug.  For definition first, we will
+     merge the debug symbol into the definition.  For debug first, the
+     lineno entry MUST point to the definition function or else it
+     will point off into space when crawl_symbols() merges the debug
+     symbol into the real symbol.  Therefor, let's presume the debug
+     symbol is a real function reference. */
 
-  /* FIXME-SOON If for some reason the definition
-       label/symbol is never seen, this will probably
-       leave an undefined symbol at link time. */
+  /* FIXME-SOON If for some reason the definition label/symbol is
+     never seen, this will probably leave an undefined symbol at link
+     time. */
 
   if (S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_EFCN
       || S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_LABEL
@@ -994,22 +986,19 @@ DEFUN_VOID (obj_coff_endef)
       || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL
       || (SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP)))
     {
-
-      symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
-
+      symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP,
+		     &symbol_lastP);
     }
   else
     {
-      /* This symbol already exists, merge the
-		   newly created symbol into the old one.
-		   This is not mandatory. The linker can
-		   handle duplicate symbols correctly. But I
-		   guess that it save a *lot* of space if
-		   the assembly file defines a lot of
-		   symbols. [loic] */
+      /* This symbol already exists, merge the newly created symbol
+	 into the This is not mandatory. The linker can handle
+	 duplicate symbols correctly. But I guess that it save a *lot*
+	 of space if the assembly file defines a lot of
+	 symbols. [loic] */
 
-      /* The debug entry (def_symbol_in_progress)
-		   is merged into the previous definition. */
+      /* The debug entry (def_symbol_in_progress) is merged into the
+	 previous definition.  */
 
       c_symbol_merge (def_symbol_in_progress, symbolP);
       /* FIXME-SOON Should *def_symbol_in_progress be free'd? xoxorich. */
@@ -1018,13 +1007,16 @@ DEFUN_VOID (obj_coff_endef)
       if (SF_GET_FUNCTION (def_symbol_in_progress)
 	  || SF_GET_TAG (def_symbol_in_progress))
 	{
-	  /* For functions, and tags, the symbol *must* be where the debug symbol
-			   appears.  Move the existing symbol to the current place. */
+	  /* For functions, and tags, the symbol *must* be where the
+	     debug symbol appears.  Move the existing symbol to the
+	     current place. */
 	  /* If it already is at the end of the symbol list, do nothing */
 	  if (def_symbol_in_progress != symbol_lastP)
 	    {
-	      symbol_remove (def_symbol_in_progress, &symbol_rootP, &symbol_lastP);
-	      symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
+	      symbol_remove (def_symbol_in_progress, &symbol_rootP,
+			     &symbol_lastP);
+	      symbol_append (def_symbol_in_progress, symbol_lastP,
+			     &symbol_rootP, &symbol_lastP);
 	    }			/* if not already in place */
 	}			/* if function */
     }				/* normal or mergable */
@@ -1033,7 +1025,7 @@ DEFUN_VOID (obj_coff_endef)
       && symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP) == NULL)
     {
       tag_insert (S_GET_NAME (def_symbol_in_progress), def_symbol_in_progress);
-    }				/* If symbol is a {structure,union} tag, associate symbol to its name. */
+    }
 
   if (SF_GET_FUNCTION (def_symbol_in_progress))
     {
@@ -1041,14 +1033,12 @@ DEFUN_VOID (obj_coff_endef)
       function_lineoff
 	= c_line_new (def_symbol_in_progress, 0, 0, &zero_address_frag);
 
-
-
       SF_SET_PROCESS (def_symbol_in_progress);
 
       if (symbolP == NULL)
 	{
-	  /* That is, if this is the first
-		       time we've seen the function... */
+	  /* That is, if this is the first time we've seen the
+	     function... */
 	  symbol_table_insert (def_symbol_in_progress);
 	}			/* definition follows debug */
     }				/* Create the line number entry pointing to the function being defined */
@@ -1056,7 +1046,7 @@ DEFUN_VOID (obj_coff_endef)
   def_symbol_in_progress = NULL;
   demand_empty_rest_of_line ();
   return;
-}				/* obj_coff_endef() */
+}
 
 static void
 DEFUN_VOID (obj_coff_dim)
@@ -1371,6 +1361,7 @@ DEFUN_VOID (yank_symbols)
 	  /* L* and C_EFCN symbols never merge. */
 	  if (!SF_GET_LOCAL (symbolP)
 	      && S_GET_STORAGE_CLASS (symbolP) != C_LABEL
+	      && symbolP->sy_forward == NULL
 	      && (real_symbolP = symbol_find_base (S_GET_NAME (symbolP), DO_NOT_STRIP))
 	      && real_symbolP != symbolP)
 	    {
@@ -1614,26 +1605,15 @@ DEFUN (crawl_symbols, (h, abfd),
 
   block_stack = stack_init (512, sizeof (symbolS *));
   /* JF deal with forward references first... */
-  for (symbolP = symbol_rootP;
-       symbolP;
-       symbolP = symbol_next (symbolP))
-    {
-
-      if (symbolP->sy_forward)
-	{
-	  S_SET_VALUE (symbolP, (S_GET_VALUE (symbolP)
-				 + S_GET_VALUE (symbolP->sy_forward)
+  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
+    if (symbolP->sy_forward)
+      {
+	S_SET_VALUE (symbolP, (S_GET_VALUE (symbolP)
+			       + S_GET_VALUE (symbolP->sy_forward)
 			       + symbolP->sy_forward->sy_frag->fr_address));
-
-	  if (SF_GET_GET_SEGMENT (symbolP))
-	    {
-	      S_SET_SEGMENT (symbolP, S_GET_SEGMENT (symbolP->sy_forward));
-	    }			/* forward segment also */
-
-	  symbolP->sy_forward = 0;
-	}			/* if it has a forward reference */
-    }				/* walk the symbol chain */
-
+	if (SF_GET_GET_SEGMENT (symbolP))
+	  S_SET_SEGMENT (symbolP, S_GET_SEGMENT (symbolP->sy_forward));
+      }
 
   /* The symbol list should be ordered according to the following sequence
    * order :
@@ -1958,11 +1938,11 @@ DEFUN (change_to_section, (name, len, exp),
 	{
 	  subseg_new (i, exp);
 	  return;
-
 	}
     }
   /* No section, add one */
   strncpy (segment_info[i].scnhdr.s_name, name, 8);
+  segment_info[i].scnhdr.s_flags = STYP_REG;
   subseg_new (i, exp);
 }
 
