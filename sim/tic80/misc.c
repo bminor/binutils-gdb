@@ -411,8 +411,11 @@ tic80_trace_ucond_br (int indx,
 
 /* Trace the result of a load or store operation with 2 integer addresses
    and an integer output or input */
-char *
-tic80_trace_ldst (int indx,
+void
+tic80_trace_ldst (SIM_DESC sd,
+		  sim_cpu *cpu,
+		  sim_cia cia,
+		  int indx,
 		  int st_p,
 		  int m_p,
 		  int s_p,
@@ -432,14 +435,14 @@ tic80_trace_ldst (int indx,
   if (s_p)
     strcat (name, ":s");
 
-  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld 0x%.*lx/%*ld %s 0x%.*lx/%*ld",
-	   tic80_size_name, name,
-	   SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
-	   SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2,
-	   (!st_p) ? "=>" : "<=",
-	   SIZE_HEX, value, SIZE_DECIMAL, (long)(signed32)value);
-
-  return tic80_trace_buffer;
+  trace_one_insn (sd, cpu, cia.ip, 1,
+		  itable[indx].file, itable[indx].line_nr, "memory",
+		  "%-*s 0x%.*lx/%*ld 0x%.*lx/%*ld %s 0x%.*lx/%*ld",
+		  tic80_size_name, name,
+		  SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
+		  SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2,
+		  (!st_p) ? "=>" : "<=",
+		  SIZE_HEX, value, SIZE_DECIMAL, (long)(signed32)value);
 }
 
 #endif /* WITH_TRACE */

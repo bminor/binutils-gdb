@@ -172,7 +172,7 @@ extern char *tic80_trace_sink2	  PARAMS ((int, unsigned32, unsigned32));
 extern char *tic80_trace_sink3	  PARAMS ((int, unsigned32, unsigned32, unsigned32));
 extern char *tic80_trace_cond_br  PARAMS ((int, int, unsigned32, unsigned32));
 extern char *tic80_trace_ucond_br PARAMS ((int, unsigned32));
-extern char *tic80_trace_ldst	  PARAMS ((int, int, int, int, unsigned32, unsigned32, unsigned32));
+extern void tic80_trace_ldst	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, int, int, int, unsigned32, unsigned32, unsigned32));
 
 #define TRACE_ALU3(indx, result, input1, input2)			\
 do {									\
@@ -202,31 +202,35 @@ do {									\
   }									\
 } while (0)
 
-#define TRACE_FPU3(indx, result, input1, input2)			\
+#define TRACE_FPU3(result, input1, input2)				\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
-    tic80_trace_fpu3 (SD, CPU, cia, indx, result, input1, input2);	\
+    tic80_trace_fpu3 (SD, CPU, cia, MY_INDEX, 				\
+		      result, input1, input2);				\
   }									\
 } while (0)
 
-#define TRACE_FPU2(indx, result, input)					\
+#define TRACE_FPU2(result, input)					\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
-    tic80_trace_fpu2 (SD, CPU, cia, indx, result, input);		\
+    tic80_trace_fpu2 (SD, CPU, cia, MY_INDEX, 				\
+		      result, input);					\
   }									\
 } while (0)
 
-#define TRACE_FPU1(indx, result)					\
+#define TRACE_FPU1(result)						\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
-    tic80_trace_fpu1 (SD, CPU, cia, indx, result);			\
+    tic80_trace_fpu1 (SD, CPU, cia, MY_INDEX, 				\
+		      result);						\
   }									\
 } while (0)
 
-#define TRACE_FPU2I(indx, result, input1, input2)			\
+#define TRACE_FPU2I(result, input1, input2)				\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
-    tic80_trace_fpu2i (SD, CPU, cia, indx, result, input1, input2);	\
+    tic80_trace_fpu2i (SD, CPU, cia, MY_INDEX, 				\
+		      result, input1, input2);				\
   }									\
 } while (0)
 
@@ -284,35 +288,35 @@ do {									\
   }									\
 } while (0)
 
-#define TRACE_LD(indx, result, m, s, addr1, addr2)			\
+#define TRACE_LD(result, m, s, addr1, addr2)				\
 do {									\
   if (TRACE_MEMORY_P (CPU)) {						\
-    trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
-		    itable[indx].line_nr, "memory",			\
-		    tic80_trace_ldst (indx, 0, m, s, result,		\
-				      addr1, addr2));			\
+    tic80_trace_ldst (SD, CPU, cia, MY_INDEX, 				\
+ 		      0, m, s, result, addr1, addr2);			\
   }									\
 } while (0)
 
-#define TRACE_ST(indx, value, m, s, addr1, addr2)			\
+#define TRACE_ST(value, m, s, addr1, addr2)				\
 do {									\
   if (TRACE_MEMORY_P (CPU)) {						\
-    trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
-		    itable[indx].line_nr, "memory",			\
-		    tic80_trace_ldst (indx, 1, m, s, value,		\
-				      addr1, addr2));			\
+    tic80_trace_ldst (SD, CPU, cia, MY_INDEX, 				\
+		      1, m, s, value, addr1, addr2);			\
   }									\
 } while (0)
 
 #else
 #define TRACE_ALU3(indx, result, input1, input2)
 #define TRACE_ALU2(indx, result, input)
+#define TRACE_FPU3(result, input1, input2)
+#define TRACE_FPU2(result, input)
+#define TRACE_FPU1(result)
+#define TRACE_FPU2I(result, input1, input2)
 #define TRACE_NOP(indx)
 #define TRACE_SINK1(indx, input)
 #define TRACE_SINK2(indx, input1, input2)
 #define TRACE_SINK3(indx, input1, input2, input3)
 #define TRACE_COND_BR(indx, jump_p, cond, target)
 #define TRACE_UCOND_BR(indx, target)
-#define TRACE_LD(indx, m, s, result, addr1, addr2)
-#define TRACE_ST(indx, m, s, value, addr1, addr2)
+#define TRACE_LD(m, s, result, addr1, addr2)
+#define TRACE_ST(m, s, value, addr1, addr2)
 #endif

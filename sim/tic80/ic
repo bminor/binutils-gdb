@@ -40,6 +40,8 @@ compute:UnsignedImmediate:vSource1:signed_word:UnsignedImmediate
 #
 compute:BITNUM:BITNUM:
 compute:Code:Code:
+compute:BITNUM:bitnum:int:(~BITNUM) & 0x1f
+
 #
 compute:SignedOffset:SignedOffset:
 compute:SignedOffset:vSignedOffset:signed_word:SEXT (SignedOffset, 14)

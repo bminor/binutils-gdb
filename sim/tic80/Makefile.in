@@ -27,7 +27,8 @@ SIM_OBJS = sim-endian.o sim-bits.o sim-config.o \
 	sim-run.o \
 	sim-resume.o \
 	sim-stop.o \
-	sim-reason.o
+	sim-reason.o \
+	sim-watch.o
 
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.

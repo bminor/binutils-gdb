@@ -1,3 +1,20 @@
+Thu May 29 14:02:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* misc.c (tic80_trace_fpu3, tic80_trace_fpu2, tic80_trace_fpu1,
+ 	tic80_trace_fpu2i): Pass in function prefix.
+	(tic80_trace_ldst): Rewrite so it calls print_one_insn directly.
+	
+	* Makefile.in (SIM_OBJS): Include sim-watch.o module.
+
+	* sim-main.h (WITH_WATCHPOINTS): Enable watchpoints.
+
+	* ic (bitnum): Compute bitnum from BITNUM.
+	* insn (bbo, bbz): Use.
+	
+	* insn: Convert long immediate instructions to igen long immediate
+ 	form.
+	* insn: Add disasembler information.
+	
 Thu May 29 12:09:13 1997  Andrew Cagney  <cagney@b2.cygnus.com>
 
 	* alu.h (IMEM_IMMED): New macro, fetch 32bit immediate operand N.

@@ -23,6 +23,7 @@
 #ifndef _SIM_MAIN_H_
 #define _SIM_MAIN_H_
 
+
 #include "sim-basics.h"
 
 #include <signal.h>
@@ -39,6 +40,8 @@
 typedef instruction_address sim_cia;
 static const sim_cia null_cia = {0}; /* Dummy */
 #define NULL_CIA null_cia
+
+#define WITH_WATCHPOINTS 1
 
 #include "sim-base.h"
 
