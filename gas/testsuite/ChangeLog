@@ -1,3 +1,10 @@
+2001-06-04  H.J. Lu  <hjl@gnu.org>
+
+	* gas/mips/mips4010.s: Add the missing ".end".
+	* gas/mips/mips4100.s: Likewise.
+	* gas/mips/mips4650.s: Likewise.
+	* gas/mips/sync.s: Likewise.
+
 2001-06-02  H.J. Lu  <hjl@gnu.org>
 
 	* gas/sparc/unalign.d: Support Sparc V9.
