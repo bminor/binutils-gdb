@@ -3181,7 +3181,6 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * ABORT::                       @code{.ABORT}
 @end ifset
-
 * Align::                       @code{.align @var{abs-expr} , @var{abs-expr}}
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
@@ -3198,7 +3197,6 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * Dim::                         @code{.dim}
 @end ifset
-
 * Double::                      @code{.double @var{flonums}}
 * Eject::                       @code{.eject}
 * Else::                        @code{.else}
@@ -3207,7 +3205,6 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * Endef::                       @code{.endef}
 @end ifset
-
 * Endfunc::                     @code{.endfunc}
 * Endif::                       @code{.endif}
 * Equ::                         @code{.equ @var{symbol}, @var{expression}}
@@ -3219,16 +3216,21 @@ Some machine configurations provide additional directives.
 @ifclear no-file-dir
 * File::                        @code{.file @var{string}}
 @end ifclear
-
 * Fill::                        @code{.fill @var{repeat} , @var{size} , @var{value}}
 * Float::                       @code{.float @var{flonums}}
 * Func::                        @code{.func}  
 * Global::                      @code{.global @var{symbol}}, @code{.globl @var{symbol}}
+@ifset ELF
+* Hidden::                      @code{.hidden @var{names}}
+@end ifset
 * hword::                       @code{.hword @var{expressions}}
 * Ident::                       @code{.ident}
 * If::                          @code{.if @var{absolute expression}}
 * Include::                     @code{.include "@var{file}"}
 * Int::                         @code{.int @var{expressions}}
+@ifset ELF
+* Internal::                    @code{.internal @var{names}}
+@end ifset
 * Irp::				@code{.irp @var{symbol},@var{values}}@dots{}
 * Irpc::			@code{.irpc @var{symbol},@var{values}}@dots{}
 * Lcomm::                       @code{.lcomm @var{symbol} , @var{length}}
@@ -3236,7 +3238,6 @@ Some machine configurations provide additional directives.
 @ifclear no-line-dir
 * Line::                        @code{.line @var{line-number}}
 @end ifclear
-
 * Ln::                          @code{.ln @var{line-number}}
 * Linkonce::			@code{.linkonce [@var{type}]}
 * List::                        @code{.list}
@@ -3244,17 +3245,25 @@ Some machine configurations provide additional directives.
 @ignore
 * Lsym::                        @code{.lsym @var{symbol}, @var{expression}}
 @end ignore
-
 * Macro::			@code{.macro @var{name} @var{args}}@dots{}
 * MRI::				@code{.mri @var{val}}
-
 * Nolist::                      @code{.nolist}
 * Octa::                        @code{.octa @var{bignums}}
 * Org::                         @code{.org @var{new-lc} , @var{fill}}
 * P2align::                     @code{.p2align @var{abs-expr} , @var{abs-expr}}
+@ifset ELF
+* PopSection::                  @code{.popsection}
+* Previous::                    @code{.previous}
+@end ifset
 * Print::			@code{.print @var{string}}
+@ifset ELF
+* Protected::                   @code{.protected @var{names}}
+@end ifset
 * Psize::                       @code{.psize @var{lines}, @var{columns}}
 * Purgem::			@code{.purgem @var{name}}
+@ifset ELF
+* PushSection::                 @code{.pushsection @var{name}}
+@end ifset
 * Quad::                        @code{.quad @var{bignums}}
 * Rept::			@code{.rept @var{count}}
 * Sbttl::                       @code{.sbttl "@var{subheading}"}
@@ -3262,44 +3271,46 @@ Some machine configurations provide additional directives.
 * Scl::                         @code{.scl @var{class}}
 * Section::                     @code{.section @var{name}, @var{subsection}}
 @end ifset
-
 * Set::                         @code{.set @var{symbol}, @var{expression}}
 * Short::                       @code{.short @var{expressions}}
 * Single::                      @code{.single @var{flonums}}
-@ifset COFF
-* Size::                        @code{.size}
-@end ifset
-
+* Size::                        @code{.size [@var{name} , @var{expression}]}
 * Skip::                        @code{.skip @var{size} , @var{fill}}
 * Sleb128::			@code{.sleb128 @var{expressions}}
 * Space::                       @code{.space @var{size} , @var{fill}}
 @ifset have-stabs
 * Stab::                        @code{.stabd, .stabn, .stabs}
 @end ifset
-
 * String::                      @code{.string "@var{str}"}
 * Struct::			@code{.struct @var{expression}}
 @ifset ELF
+* SubSection::                  @code{.subsection}
 * Symver::                      @code{.symver @var{name},@var{name2@@nodename}}
 @end ifset
 @ifset COFF
 * Tag::                         @code{.tag @var{structname}}
 @end ifset
-
 * Text::                        @code{.text @var{subsection}}
 * Title::                       @code{.title "@var{heading}"}
+* Type::                        @code{.type <@var{int} | @var{name} , @var{type description}>}
+* Uleb128::                     @code{.uleb128 @var{expressions}}
 @ifset COFF
-* Type::                        @code{.type @var{int}}
 * Val::                         @code{.val @var{addr}}
 @end ifset
 @ifset ELF
-* Visibility::                  @code{.internal @var{name}, .hidden @var{name}, .protected @var{name}}
+* Version::                     @code{.version "@var{string}"}
 @end ifset
-
-* Uleb128::                     @code{.uleb128 @var{expressions}}
+@ifset ELF
+* VTableEntry::                 @code{.vtable_entry @var{table}, @var{offset}}
+* VTableInherit::               @code{.vtable_inherit @var{child}, @var{parent}}
+@end ifset
+@ifset ELF
+* Weak::                        @code{.weak @var{names}}
+@end ifset
 * Word::                        @code{.word @var{expressions}}
 * Deprecated::                  Deprecated Directives
 @end menu
+
 
 @node Abort
 @section @code{.abort}
@@ -3754,6 +3765,21 @@ partial programs.  You may need the HPPA-only @code{.EXPORT} directive as well.
 @xref{HPPA Directives,, HPPA Assembler Directives}.
 @end ifset
 
+@ifset ELF
+@node Hidden
+@section @code{.hidden @var{names}}
+
+@cindex @code{.hidden} directive
+@cindex Visibility
+This one of the ELF visibility directives.  The other two are
+@pxref{Internal,,@code{.internal}} and @pxref{Protected,,@code{.protected}}
+
+This directive overrides the named symbols default visibility (which is set by
+their binding: local, global or weak).  The directive sets the visibility to
+@code{hidden} which means that the symbols are not visible to other components.
+Such symbols are always considered to be @code{protected} as well. 
+@end ifset
+
 @node hword
 @section @code{.hword @var{expressions}}
 
@@ -3895,6 +3921,22 @@ integers.  On the H8/300H and the Hitachi SH, however, @code{.int} emits
 32-bit integers.
 @end ifset
 @end ifclear
+
+@ifset ELF
+@node Internal
+@section @code{.internal @var{names}}
+
+@cindex @code{.internal} directive
+@cindex Visibility
+This one of the ELF visibility directives.  The other two are
+@pxref{Hidden,,@code{.hidden}} and @pxref{Protected,,@code{.protected}}
+
+This directive overrides the named symbols default visibility (which is set by
+their binding: local, global or weak).  The directive sets the visibility to
+@code{internal} which means that the symbols are considered to be @code{hidden}
+(ie not visible to other components), and that some extra, processor specific
+processing must also be performed upon the  symbols as well.
+@end ifset
 
 @node Irp
 @section @code{.irp @var{symbol},@var{values}}@dots{}
@@ -4323,12 +4365,64 @@ filled in with the value 0x368d (the exact placement of the bytes depends upon
 the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
 
+@ifset ELF
+@node Previous
+@section @code{.previous}
+
+@cindex @code{.previous} directive
+@cindex Section Stack
+This is one of the ELF section stack manipulation directives.  The others are
+@pxref{Section}, @xref{SubSection}, @pxref{PushSection}, and
+@pxref{PopSection}.
+
+This directive swaps the current section (and subsection) with most recently
+referenced section (and subsection) prior to this one.  Multiple
+@code{.previous} directives in a row will flip between two sections (and their
+subsections).
+
+In terms of the section stack, this directive swaps the current section with
+the top section on the section stack.
+@end ifset
+
+@ifset ELF
+@node PopSection
+@section @code{.popsection}
+
+@cindex @code{.popsection} directive
+@cindex Section Stack
+This is one of the ELF section stack manipulation directives.  The others are
+@pxref{Section}, @xref{SubSection}, @pxref{PushSection}, and
+@pxref{Previous}.
+
+This directive replaces the current section (and subsection) with the top
+section (and subsection) on the section stack.  This section is popped off the
+stack. 
+
+@end ifset
+
 @node Print
 @section @code{.print @var{string}}
 
 @cindex @code{print} directive
 @code{@value{AS}} will print @var{string} on the standard output during
 assembly.  You must put @var{string} in double quotes.
+
+@ifset ELF
+@node Protected
+@section @code{.protected @var{names}}
+
+@cindex @code{.protected} directive
+@cindex Visibility
+This one of the ELF visibility directives.  The other two are
+@pxref{Hidden} and @pxref{Internal}
+
+This directive overrides the named symbols default visibility (which is set by
+their binding: local, global or weak).  The directive sets the visibility to
+@code{protected} which means that any references to the symbols from within the
+components that defines them must be resolved to the definition in that
+component, even if a definition in another component would normally preempt
+this. 
+@end ifset
 
 @node Psize
 @section @code{.psize @var{lines} , @var{columns}}
@@ -4356,6 +4450,22 @@ those explicitly specified with @code{.eject}.
 @cindex @code{purgem} directive
 Undefine the macro @var{name}, so that later uses of the string will not be
 expanded.  @xref{Macro}.
+
+@ifset ELF
+@node PushSection
+@section @code{.pushsection @var{name} , @var{subsection}}
+
+@cindex @code{.pushsection} directive
+@cindex Section Stack
+This is one of the ELF section stack manipulation directives.  The others are
+@pxref{Section}, @xref{SubSection}, @pxref{PopSection}, and
+@pxref{Previous}.
+
+This directive is a synonym for @code{.section}.  It psuhes the current section
+(and subsection) onto the top of the section stack, and then replaces the
+current section and subsection with @code{name} and @code{subsection}.
+
+@end ifset
 
 @node Quad
 @section @code{.quad @var{bignums}}
@@ -4434,7 +4544,7 @@ accepts this directive but ignores it.
 @end ifset
 
 @node Section
-@section @code{.section @var{name}}
+@section @code{.section @var{name}} (COFF version)
 
 @cindex @code{section} directive
 @cindex named section
@@ -4445,9 +4555,9 @@ This directive is only supported for targets that actually support arbitrarily
 named sections; on @code{a.out} targets, for example, it is not accepted, even
 with a standard @code{a.out} section name.
 
-@ifset COFF
 For COFF targets, the @code{.section} directive is used in one of the following
 ways:
+
 @smallexample
 .section @var{name}[, "@var{flags}"]
 .section @var{name}[, @var{subsegment}]
@@ -4478,13 +4588,25 @@ loaded and writable.
 
 If the optional argument to the @code{.section} directive is not quoted, it is
 taken as a subsegment number (@pxref{Sub-Sections}).
+
+
+@section @code{.section @var{name}} (ELF version)
+
+@cindex @code{section} directive
+@cindex named section
+@ifset ELF
+@cindex Section Stack
+This is one of the ELF section stack manipulation directives.  The others are
+@xref{SubSection}, @pxref{PushSection}@pxref{PopSection}, and
+@pxref{Previous}.
 @end ifset
 
-@ifset ELF
 For ELF targets, the @code{.section} directive is used like this:
+
 @smallexample
-.section @var{name}[, "@var{flags}"[, @@@var{type}]]
+.section @var{name} [, "@var{flags}"[, @@@var{type}]]
 @end smallexample
+
 The optional @var{flags} argument is a quoted string which may contain any
 combintion of the following characters:
 @table @code
@@ -4511,9 +4633,11 @@ executable.  The section will contain data.
 
 For ELF targets, the assembler supports another type of @code{.section}
 directive for compatibility with the Solaris assembler:
+
 @smallexample
 .section "@var{name}"[, @var{flags}...]
 @end smallexample
+
 Note that the section name is quoted.  There may be a sequence of comma
 separated flags:
 @table @code
@@ -4524,7 +4648,11 @@ section is writable
 @item #execinstr
 section is executable
 @end table
-@end ifset
+
+This directive replaces the current section and subsection.  The replaced
+section and subsection are pushed onto the section stack.  See the contents of
+the gas testsuite directory @code{gas/testsuite/gas/elf} for some examples of
+how this directive and the other section stack directives work.
 
 @node Set
 @section @code{.set @var{symbol}, @var{expression}}
@@ -4585,21 +4713,27 @@ numbers in @sc{ieee} format.
 @end ifset
 @end ifclear
 
-@ifset COFF
 @node Size
-@section @code{.size}
-
+@section @code{.size} (COFF version)
 @cindex @code{size} directive
+
 This directive is generated by compilers to include auxiliary debugging
 information in the symbol table.  It is only permitted inside
 @code{.def}/@code{.endef} pairs.
-@ifset BOUT
 
+@ifset BOUT
 @samp{.size} is only meaningful when generating COFF format output; when
 @code{@value{AS}} is generating @code{b.out}, it accepts this directive but
 ignores it.
 @end ifset
-@end ifset
+
+@section @code{.size @var{name} , @var{expression}} (ELF version)
+@cindex @code{size} directive
+
+This directive is used to set the size associated with a symbol @var{name}.
+The size in bytes is computed from @var{expression} which can make use of label
+arithmetic.  This directive is typically used to set the size of function
+symbols.
 
 @node Sleb128
 @section @code{.sleb128 @var{expressions}}
@@ -4753,6 +4887,24 @@ value 8.  Assembly would be left in the absolute section, and you would need to
 use a @code{.section} directive of some sort to change to some other section
 before further assembly.
 
+
+@ifset ELF
+@node SubSection
+@section @code{.subsection @var{name}}
+
+@cindex @code{.subsection} directive
+@cindex Section Stack
+This is one of the ELF section stack manipulation directives.  The others are
+@pxref{Section}, @xref{PushSection}, @pxref{PopSection}, and
+@pxref{Previous}.
+
+This directive replaces the current subsection with @code{name}.  The current
+section is not changed.  The replaced subsection is put onto the section stack
+in place of the then current top of stack subsection.
+
+@end ifset
+
+
 @ifset ELF
 @node Symver
 @section @code{.symver}
@@ -4825,22 +4977,55 @@ source file name and pagenumber) when generating assembly listings.
 This directive affects subsequent pages, as well as the current page if
 it appears within ten lines of the top of a page.
 
-@ifset COFF
 @node Type
-@section @code{.type @var{int}}
+@section @code{.type @var{int}} (COFF version)
 
 @cindex COFF symbol type
 @cindex symbol type, COFF
 @cindex @code{type} directive
 This directive, permitted only within @code{.def}/@code{.endef} pairs,
 records the integer @var{int} as the type attribute of a symbol table entry.
-@ifset BOUT
 
+@ifset BOUT
 @samp{.type} is associated only with COFF format output; when
 @code{@value{AS}} is configured for @code{b.out} output, it accepts this
 directive but ignores it.
 @end ifset
-@end ifset
+
+@section @code{.type @var{name} , @var{type description}} (ELF version)
+
+@cindex ELF symbol type
+@cindex symbol type, ELF
+@cindex @code{type} directive
+This directive is used to set the type of symbol @var{name} to be either a
+function symbol or an ojbect symbol.  There are five different syntaxes
+supported for the @var{type description} field, in order to provide
+comptability with various other assemblers.  The syntaxes supported are:
+
+@smallexample
+  .type <name>,#function
+  .type <name>,#object
+
+  .type <name>,@@function
+  .type <name>,@@object
+
+  .type <name>,%function
+  .type <name>,%object
+  
+  .type <name>,"function"
+  .type <name>,"object"
+  
+  .type <name> STT_FUNCTION
+  .type <name> STT_OBJECT
+@end smallexample
+
+@node Uleb128
+@section @code{.uleb128 @var{expressions}}
+
+@cindex @code{uleb128} directive
+@var{uleb128} stands for ``unsigned little endian base 128.''  This is a 
+compact, variable length representation of numbers used by the DWARF
+symbolic debugging format.  @xref{Sleb128,@code{.sleb128}}.
 
 @ifset COFF
 @node Val
@@ -4859,46 +5044,40 @@ configured for @code{b.out}, it accepts this directive but ignores it.
 @end ifset
 @end ifset
 
-@node Uleb128
-@section @code{.uleb128 @var{expressions}}
+@ifset ELF
+@node Version
+@section @code{.version "@var{string}"}
 
-@cindex @code{uleb128} directive
-@var{uleb128} stands for ``unsigned little endian base 128.''  This is a 
-compact, variable length representation of numbers used by the DWARF
-symbolic debugging format.  @xref{Sleb128,@code{.sleb128}}.
+@cindex @code{.version}
+This directive creates a @code{.note} section and places into it an ELF
+formatted note of type NT_VERSION.  The note's name is set to @code{string}.
+@end ifset 
 
 @ifset ELF
-@node Visibility
-@section @code{.internal}, @code{.hidden}, @code{.protected}
-@cindex @code{internal} directive
-@cindex @code{hidden} directive
-@cindex @code{protected} directive
-@cindex symbol visibility
+@node VTableEntry
+@section @code{.vtable_entry @var{table}, @var{offset}}
 
-These directives can be used to set the visibility of a specified symbol.  By
-default a symbol's visibility is set by its binding (local, global or weak),
-but these directives can be used to override that.
+@cindex @code{.vtable_entry}
+This directive finds or creates a symbol @code{table} and creates a
+@code{VTABLE_ENTRY} relocation for it with an addend of @code{offset}.
 
-A visibility of @code{protected} means that any references to the symbol from
-within the component that defines the symbol must be resolved to the definition
-in that component, even if a definition in another component would normally
-preempt this.
+@node VTableInherit
+@section @code{.vtable_inherit @var{child}, @var{parent}}
 
-A visibility of @code{hidden} means that the symbol is not visible to other 
-components.  Such a symbol is always considered to be protected as well.
+@cindex @code{.vtable_inherit}
+This directive finds the symbol @code{child} and finds or creates the symbol
+@code{parent} and then creates a @code{VTABLE_INHERIT} relocation for the
+parent whoes addend is the value of the child symbol.  As a special case the
+parent name of @code{0} is treated as refering the @code{*ABS*} section.
+@end ifset
 
-A visibility of @code{internal} is the same as a visibility of @code{hidden},
-except that some extra, processor specific processing must also be performed
-upon the symbol. 
+@ifset ELF
+@node Weak
+@section @code{.weak @var{names}}
 
-For ELF targets, the directives are used like this:
-
-@smallexample
-.internal @var{name}
-.hidden @var{name}
-.protected @var{name}
-@end smallexample
-
+@cindex @code{.weak}
+This directive sets the weak attribute on the comma seperated list of symbol
+@code{names}.  If the symbols do not already exist, they will be created.
 @end ifset
 
 @node Word
