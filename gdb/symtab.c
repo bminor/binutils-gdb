@@ -517,6 +517,17 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	      sym = lookup_block_symbol (block, msymbol -> name, namespace);
+#if 0 /* defined(IBM6000) */
+              /* we kept static functions in misc_function_vector as well as
+		 in static scope. We want to find them in the symbol table. */
+
+		if (!sym) {
+		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+		  sym = lookup_block_symbol (block, misc_function_vector[ind].name,
+							namespace);
+		}
+#endif
+
 	      /* sym == 0 if symbol was found in the minimal symbol table
 		 but not in the symtab.
 		 Return 0 to use the msymbol definition of "foo_".

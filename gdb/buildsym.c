@@ -842,6 +842,10 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
     blockvector = make_blockvector (objfile);
   }
 
+#ifdef PROCESS_LINENUMBER_HOOK
+    PROCESS_LINENUMBER_HOOK ();			/* Needed for aixcoff. */
+#endif
+
   /* Now create the symtab objects proper, one for each subfile.  */
   /* (The main file is the last one on the chain.)  */
 

@@ -20,7 +20,7 @@ if test "`$MUNCH_NM main.o | egrep main | egrep FUNC | egrep GLOB`" != "" ; then
     # System V Release 4 style nm
     $MUNCH_NM $* | egrep '|__?initialize_' | egrep FUNC | \
 	sed -e 's/^.*\(_initialize_[a-zA-Z0-9_]*\).*$/   {extern void \1 (); \1 ();}/'
-elif test "`$MUNCH_NM main.o | egrep 'T _?main$'`" = "" ; then
+elif test "`$MUNCH_NM main.o | egrep '[TD] _?main$'`" = "" ; then
     # System V style nm
     shift;
     $MUNCH_NM $* | egrep '^(.*[^a-zA-Z_]_|_)_?initialize_.*\.text' | \
@@ -28,8 +28,8 @@ elif test "`$MUNCH_NM main.o | egrep 'T _?main$'`" = "" ; then
 else
     # BSD style nm
     # We now accept either text or data symbols, since the RT/PC uses data.
-    $MUNCH_NM -p $* | egrep '[TD] *_?_initialize_' | \
-	sed -e 's/^.*[TD] *_*\(.*\)/    {extern void _\1 (); _\1 ();}/'
+    $MUNCH_NM -p $* | egrep '[TD] *_?[_.]initialize_' | \
+	sed -e 's/^.*\(initialize_.*\)/    {extern void _\1 (); _\1 ();}/'
 fi
 
 echo '}'

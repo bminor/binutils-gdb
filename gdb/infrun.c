@@ -307,7 +307,7 @@ resume (step, sig)
 
 #ifdef NO_SINGLE_STEP
   if (step) {
-    single_step();	/* Do it the hard way, w/temp breakpoints */
+    single_step(sig);	/* Do it the hard way, w/temp breakpoints */
     step = 0;		/* ...and don't ask hardware to do it.  */
   }
 #endif
@@ -555,7 +555,7 @@ child_create_inferior (exec_file, allargs, env)
 #ifdef NEED_POSIX_SETPGID
       debug_setpgrp = setpgid (0, 0);
 #else
-#ifdef USG
+#if defined(USG) && !defined(SETPGRP_ARGS)
       debug_setpgrp = setpgrp ();
 #else
       debug_setpgrp = setpgrp (getpid (), getpid ());
@@ -916,7 +916,7 @@ wait_for_inferior ()
 	     will be set and we should check whether we've hit the
 	     step breakpoint.  */
 	  if (stop_signal == SIGTRAP && trap_expected
-	      && step_resume_break_address == NULL)
+	      && step_resume_break_address == 0)
 	    bpstat_clear (&stop_bpstat);
 	  else
 	    {
@@ -1046,7 +1046,7 @@ wait_for_inferior ()
 		/* Need to blow away step-resume breakpoint, as it
 		   interferes with us */
 		remove_step_breakpoint ();
-		step_resume_break_address = NULL;
+		step_resume_break_address = 0;
 		stop_step_resume_break = 0;
 
 #if 0				/* FIXME - Need to implement nested temporary breakpoints */
@@ -1409,7 +1409,7 @@ wait_for_inferior ()
 	      breakpoints_inserted = 0;
 	    }
 	  else if (!breakpoints_inserted &&
-		   (step_resume_break_address != NULL || !another_trap))
+		   (step_resume_break_address != 0 || !another_trap))
 	    {
 	      insert_step_breakpoint ();
 	      breakpoints_failed = insert_breakpoints ();

@@ -54,7 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Setpgrp() takes arguments, unlike ordinary Sys V's.  */
 
-#define	SETPGRP_ARGS
+#define	SETPGRP_ARGS 1
 
 /* RS6000/AIXCOFF does not support PT_STEP. Has to be simulated. */
 
@@ -65,3 +65,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define XCOFF_INIT_LOADINFO()	xcoff_init_loadinfo()
 #define XCOFF_ADD_TOC_TO_LOADINFO(x)	xcoff_add_toc_to_loadinfo (x)
+
+/* AIX's assembler doesn't grok dollar signs in identifiers.
+   So we use dots instead.  This item must be coordinated with G++. */
+#undef CPLUS_MARKER
+#define CPLUS_MARKER '.'
+
+/* Flag for machine-specific stuff in shared files.  FIXME */
+#ifndef IBM6000
+#define IBM6000
+#endif

@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <sys/core.h>
 #include <sys/ldr.h>
+#include <sys/utsname.h>
 
 extern int errno;
 extern int attach_flag;
@@ -60,6 +61,7 @@ static int special_regs[] = {
 extern int one_stepped;
 
 
+void
 fetch_inferior_registers (regno)
      int regno;
 {
@@ -196,30 +198,19 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 frameless_function_invocation (fi)
 struct frame_info *fi;
 {
-  int ret;
-  CORE_ADDR func_start, after_prologue;			                 
+  CORE_ADDR func_start;
+  int frameless, dummy;
 
-#if 0
-  func_start = (LOAD_ADDR (get_pc_function_start (fi->pc)) +
-		FUNCTION_START_OFFSET);			                 
-#else
   func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
-#endif
-  if (func_start)                                                        
-    {									 
-      after_prologue = func_start;					 
-      SKIP_PROLOGUE (after_prologue);					 
-      ret  = (after_prologue == func_start);			 
-    }									 
-  else									 
-    /* If we can't find the start of the function, we don't really */    
-    /* know whether the function is frameless, but we should be	   */    
-    /* able to get a reasonable (i.e. best we can do under the	   */    
-    /* circumstances) backtrace by saying that it isn't.  */	         
-	ret = 0;
- 
-  return ret;
 
+  /* If we failed to find the start of the function, it is a mistake
+     to inspect the instructions. */
+
+  if (!func_start)
+    return 0;
+
+  function_frame_info (func_start, &frameless, &dummy, &dummy, &dummy);
+  return frameless;
 }
 
 
@@ -245,8 +236,10 @@ unsigned int pid;
 
     errno = 0;
     ptrace(PT_LDINFO, pid, ldi, MAX_LOAD_SEGS * sizeof(*ldi), ldi);
-    if (errno)
+    if (errno) {
       perror_with_name ("ptrace ldinfo");
+      return 0;
+    }
 
     vmap_ldinfo(ldi);
 
@@ -255,8 +248,10 @@ unsigned int pid;
     } while (ldi->ldinfo_next
 	     && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
 
+#if 0
   /* Now that we've jumbled things around, re-sort them.  */
   sort_minimal_symbols ();
+#endif
 
   /* relocate the exec and core sections as well. */
   vmap_exec ();
@@ -275,13 +270,13 @@ typedef struct {
 static	LoadInfo *loadInfo = NULL;
 static	int	loadInfoLen = 0;
 static	int	loadInfoTocIndex = 0;
-static	int	loadInfoTextIndex = 0;
+int	aix_loadInfoTextIndex = 0;
 
 
 xcoff_init_loadinfo ()
 {
   loadInfoTocIndex = 0;
-  loadInfoTextIndex = 0;
+  aix_loadInfoTextIndex = 0;
 
   if (loadInfoLen == 0) {
     loadInfo = (void*) xmalloc (sizeof (LoadInfo) * LOADINFOLEN);
@@ -297,7 +292,7 @@ free_loadinfo ()
   loadInfo = NULL;
   loadInfoLen = 0;
   loadInfoTocIndex = 0;
-  loadInfoTextIndex = 0;
+  aix_loadInfoTextIndex = 0;
 }
 
 
@@ -313,24 +308,26 @@ xcoff_add_toc_to_loadinfo (unsigned long tocaddr)
 
 add_text_to_loadinfo (unsigned long textaddr, unsigned long dataaddr)
 {
-  while (loadInfoTextIndex >= loadInfoLen) {
+  while (aix_loadInfoTextIndex >= loadInfoLen) {
     loadInfoLen += LOADINFOLEN;
     loadInfo = (void*) xrealloc (loadInfo, sizeof(LoadInfo) * loadInfoLen);
   }
-  loadInfo [loadInfoTextIndex].textorg = textaddr;
-  loadInfo [loadInfoTextIndex].dataorg = dataaddr;
-  ++loadInfoTextIndex;
+  loadInfo [aix_loadInfoTextIndex].textorg = textaddr;
+  loadInfo [aix_loadInfoTextIndex].dataorg = dataaddr;
+  ++aix_loadInfoTextIndex;
 }
 
 
 unsigned long
 find_toc_address (unsigned long pc)
 {
-  int ii, toc_entry;
+  int ii, toc_entry, tocbase = 0;
 
-  for (ii=0; ii < loadInfoTextIndex; ++ii)
-    if (pc > loadInfo [ii].textorg)
+  for (ii=0; ii < aix_loadInfoTextIndex; ++ii)
+    if (pc > loadInfo [ii].textorg && loadInfo [ii].textorg > tocbase) {
       toc_entry = ii;
+      tocbase =  loadInfo [ii].textorg;
+    }
 
   return loadInfo [toc_entry].dataorg + loadInfo [toc_entry].toc_offset;
 }
@@ -342,10 +339,13 @@ find_toc_address (unsigned long pc)
 
 exec_one_dummy_insn ()
 {
-#define	DUMMY_INSN_ADDR	0x10000200
+#define	DUMMY_INSN_ADDR	(TEXT_SEGMENT_BASE)+0x200
 
   unsigned long shadow;
   unsigned int status, pid;
+
+  /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We assume that
+     this address will never be executed again by the real code. */
 
   target_insert_breakpoint (DUMMY_INSN_ADDR, &shadow);
 
@@ -361,3 +361,24 @@ exec_one_dummy_insn ()
   target_remove_breakpoint (DUMMY_INSN_ADDR, &shadow);
 }
 
+
+/* Return the number of initial trap signals we need to ignore once the inferior
+   process starts running. This will be `2' for aix-3.1, `3' for aix-3.2 */
+
+int
+aix_starting_inferior_traps ()
+{
+  struct utsname unamebuf;
+
+  if (uname (&unamebuf) == -1)
+    fatal ("uname(3) failed.");
+
+  /* Assume the future versions will behave like 3.2 and return '3' for
+     anything other than 3.1x. The extra trap in 3.2 is the "trap after the
+     program is loaded" signal. */
+  
+  if (unamebuf.version[0] == '3' && unamebuf.release[0] == '1')
+    return 2;
+  else
+    return 3;
+}

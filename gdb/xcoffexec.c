@@ -43,9 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for local functions */
 
 static void
-add_to_section_table PARAMS ((bfd *, sec_ptr, PTR));
-
-static void
 file_command PARAMS ((char *, int));
 
 static void
@@ -59,6 +56,8 @@ struct section_table *exec_sections, *exec_sections_end;
 
 int write_files = 0;
 
+extern int info_verbose;
+
 bfd *exec_bfd;			/* needed by core.c	*/
 
 extern char *getenv();
@@ -66,6 +65,7 @@ extern void child_create_inferior (), child_attach ();
 extern void add_syms_addr_command ();
 extern void symbol_file_command ();
 static void exec_files_info();
+extern struct objfile *lookup_objfile_bfd ();
 
 /*
  * the vmap struct is used to describe the virtual address space of
@@ -102,18 +102,29 @@ extern struct target_ops exec_ops;
 /* exec_close -	done with exec file, clean up all resources. */
 
 static void
-exec_close(quitting) {
-	register struct vmap *vp, *nxt;
+exec_close(quitting)
+{
+  register struct vmap *vp, *nxt;
+  struct objfile *obj;
+  
+  for (nxt = vmap; vp = nxt; )
+    {
+      nxt = vp->nxt;
 
-	for (nxt = vmap; vp = nxt; ) {
-		nxt = vp->nxt;
-		bfd_close(vp->bfd);
-		free_named_symtabs(vp->name, vp->member);	/* XXX	*/
-		free(vp);
-	}
-
-	vmap = 0;
-	exec_bfd = 0;
+      /* if there is an objfile associated with this bfd,
+	 free_objfile() will do proper cleanup of objfile *and* bfd. */
+		   
+      if (obj = lookup_objfile_bfd (vp->bfd))
+	free_objfile (obj);
+      else
+	bfd_close(vp->bfd);
+      
+      free_named_symtabs(vp->name);
+      free(vp);
+    }
+  
+  vmap = 0;
+  exec_bfd = 0;
 }
 
 /*
@@ -327,7 +338,8 @@ relocate_minimal_symbol (objfile, msymbol, arg1, arg2, arg3)
      PTR arg2;
      PTR arg3;
 {
-  msymbol -> address += (int) arg1;
+  if (msymbol->address < TEXT_SEGMENT_BASE)
+    msymbol -> address += (int) arg1;
 }
 
 /* true, if symbol table and minimal symbol table are relocated. */
@@ -391,23 +403,17 @@ struct stat *vip;
 	  vmap_symtab_1(s, vp, old_start);
       }
     }
-  if (vp->tstart != old_start)
+  if (vp->tstart != old_start) {
     iterate_over_msymbols (relocate_minimal_symbol,
 			   (PTR) (vp->tstart - old_start),
 			   (PTR) NULL, (PTR) NULL);
+
+    /* breakpoints need to be relocated as well. */
+    fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_start);
+  }
   
   symtab_relocated = 1;
 }
-
-
-fixup_misc_vector (int disp)
-{
-  int ii;
-  for (ii=0; ii < misc_function_count; ++ii)
-    if (misc_function_vector[ii].address < 0x10000000)
-      misc_function_vector[ii].address += disp;
-}
-
 
 vmap_symtab_1(s, vp, old_start)
 register struct symtab *s;
@@ -429,12 +435,14 @@ CORE_ADDR old_start;
 
     /*
      * The line table must be relocated.  This is only present for
-     * b.text sections, so only vp->text type maps need be considered.
+     * .text sections, so only vp->text type maps need be considered.
      */
     l = LINETABLE (s);
-    len = l->nitems;
-    for (i = 0; i < len; i++)
+    if (l) {
+      len = l->nitems;
+      for (i = 0; i < len; i++)
 	l->item[i].pc += reloc;
+    }
 
     /* if this symbol table is not relocatable, only line table should
        be relocated and the rest ignored. */
@@ -693,7 +701,6 @@ retry:
   } while (ldi->ldinfo_next
 	 && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
 
-  breakpoint_re_set();
 }
 
 /*
@@ -728,18 +735,17 @@ vmap_inferior() {
     we just tail-call it with more arguments to select between them.  */
 
 int
-xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
+xfer_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
-     bfd *abfd;
-     struct section_table *sections, *sections_end;
+     struct target_ops *target;
 {
   boolean res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  boolean (*xfer_fn) ();
+  boolean (*xfer_fn) PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
 
   if (len <= 0)
     abort();
@@ -748,13 +754,13 @@ xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
   xfer_fn = write? bfd_set_section_contents: bfd_get_section_contents;
   nextsectaddr = memend;
 
-  for (p = sections; p < sections_end; p++)
+  for (p = target->to_sections; p < target->to_sections_end; p++)
     {
       if (p->addr <= memaddr)
 	if (p->endaddr >= memend)
 	  {
 	    /* Entire transfer is within this section.  */
-	    res = xfer_fn (abfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
 	else if (p->endaddr <= memaddr)
@@ -766,7 +772,7 @@ xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
 	  {
 	    /* This section overlaps the transfer.  Just do half.  */
 	    len = p->endaddr - memaddr;
-	    res = xfer_fn (abfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
       else if (p->addr < nextsectaddr)
@@ -779,24 +785,31 @@ xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
     return - (nextsectaddr - memaddr);	/* Next boundary where we can help */
 }
 
-/* The function called by target_xfer_memory via our target_ops */
-
-int
-exec_xfer_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
+void
+print_section_info (t, abfd)
+  struct target_ops *t;
+  bfd *abfd;
 {
-  return xfer_memory (memaddr, myaddr, len, write,
-		      exec_bfd, exec_sections, exec_sections_end);
-}
+#if 1
+  struct section_table *p;
 
-/*
- * exec_files_info -	"info files" command processor
- */
-static void
-exec_files_info() {
+  printf_filtered ("\t`%s', ", bfd_get_filename(abfd));
+  wrap_here ("        ");
+  printf_filtered ("file type %s.\n", bfd_get_target(abfd));
+
+  for (p = t->to_sections; p < t->to_sections_end; p++) {
+    printf_filtered ("\t%s", local_hex_string_custom (p->addr, "08"));
+    printf_filtered (" - %s", local_hex_string_custom (p->endaddr, "08"));
+    if (info_verbose)
+      printf_filtered (" @ %s",
+		       local_hex_string_custom (p->sec_ptr->filepos, "08"));
+    printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
+    if (p->bfd != abfd) {
+      printf_filtered (" in %s", bfd_get_filename (p->bfd));
+    }
+    printf_filtered ("\n");
+  }
+#else
 	register struct vmap *vp = vmap;
 
 	if (!vp)
@@ -814,6 +827,14 @@ exec_files_info() {
 		       , *vp->member ? "(" : ""
 		       ,  vp->member
 		       , *vp->member ? ")" : "");
+#endif
+}
+
+static void
+exec_files_info (t)
+  struct target_ops *t;
+{
+  print_section_info (t, exec_bfd);
 }
 
 #ifdef DAMON
@@ -914,7 +935,7 @@ Specify the filename of the executable file.",
 	child_attach, 0, 0, 0, /* attach, detach, resume, wait, */
 	0, 0, /* fetch_registers, store_registers, */
 	0, 0, 0, /* prepare_to_store, conv_to, conv_from, */
-	exec_xfer_memory, exec_files_info,
+	xfer_memory, exec_files_info,
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, /* kill, load */

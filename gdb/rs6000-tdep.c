@@ -46,190 +46,6 @@ extern int attach_flag;
 /* Nonzero if we just simulated a single step break. */
 int one_stepped;
 
-#if 0
-
-/* This is Damon's implementation of single step simulation. It suffers the
-   following program:
-
-   1 main () {
-   2   char buf[10];
-   3   puts ("test");
-   4   strcmp (buf, "test");  puts ("test");
-   5   exit (0);
-   6 }
-
-   You cannot `next' on line 4 in the above program. gdb puts a breakpoint
-   to the return address of `strcmp', and when execution arrives that point,
-   it is still in the line range and gdb attemps to resume it with single 
-   steps. At that point the breakpoint at step_resume_break_address (return 
-   address of strcmp) and single step's breakpoint mixes up and we end up
-   with a breakpoint which its shadow and itself are identical.
-
-   Fix that problem and use this version. FIXMEmgo.
-*/
-
-
-static struct sstep_breaks {
-	int address;
-	int data;
-} tbreak[2];
-
-
-/*
- * branch_dest -	calculate all places the current instruction may go
- */
-static
-branch_dest(tb)
-     register struct sstep_breaks *tb; 
-{
-    register ulong opcode, iar;
-    long instr;
-    int immediate, absolute;;
-
-    iar = read_pc();					/* current IAR	*/
-    target_read_memory(iar, &instr, sizeof (instr));	/* current inst	*/
-
-    opcode   = instr >> 26;
-    absolute = instr & 2;
-
-    tb[1].address = -1;
-
-    switch (opcode) {
-      case 0x10:			/* branch conditional	*/
-	immediate = ((instr & ~3) << 16) >> 16;
-
-	/*
-	 * two possible locations for next instruction
-	 */
-	tb[0].address = iar + 4;
-	tb[1].address = immediate + (absolute ? 0 : iar);
-
-	break;
-
-      case 0x12:			/* branch unconditional	*/
-	immediate = ((instr & ~3) << 6) >> 6;
-
-	/*
-	 * only one possible location for next instr
-	 */
-	tb[0].address = immediate + (absolute ? 0 : iar);
-
-	break;
-
-      case 0x13:			/* branch conditional register	*/
-	/*
-	 * WE NEED TO CHECK THE CR HERE, TO SEE IF THIS IS
-	 * REALLY UNCONDITIONAL.
-	 */
-	tb++->address = iar + 4;
-
-	switch ((instr >> 1) & 0x3ff) {
-	  case 0x10:			/* branch conditional register	*/
-	    tb->address = read_register(LR_REGNUM) & ~3;
-	    sigtramp_chk(tb);		/* return from sig handler?	*/
-	    break;
-
-	  case 0x210:			/* branch cond to CTR		*/
-	    tb->address = read_register(CTR_REGNUM) & ~3;
-	    sigtramp_chk(tb);		/* return from sig handler?	*/
-	    break;
-
-	  default:
-	    /*
-	     * not a branch.
-	     */
-	    tb->address = iar + 4;
-	    break;
-	}
-	break;
-	
-      default:
-	/*
-	 * not a branch, flow proceeds normally
-	 */
-	tb->address = iar + 4;
-	break;
-    }
-}
-
-/*
- * sigtramp_chk -	heuristic check to see if we think we are returning
- *			from a signal handler.
- *
- * Input:
- *	tb	-	^ to a single step branch location
- *
- * Note:
- *	When we are at the "br" instruction returning to a signal handler,
- *	we return in user mode to an address in the kernel.  If the
- *	segment of the branch target is 0, we may very well be in a
- *	signal handler.  From scrounging through this code, we note that
- *	register 29 has the signal context pointer, from which we can
- *	determine where we will end up next.
- */
-sigtramp_chk(tb)
-register struct sstep_breaks *tb; {
-    struct sigcontext sc;
-
-    if (tb->address & 0xf0000000)
-	return;		/* can't have been sigtramp	*/
-
-    if (target_read_memory(read_register(GPR29), &sc, sizeof (sc)))
-	return;		/* read fails, heuristic fails	*/
-
-    if ((sc.sc_jmpbuf.jmp_context.iar & 0xf0000000) == 0x10000000) {
-	/*
-	 * looks like it might be ok.....
-	 */
-	tb->address = sc.sc_jmpbuf.jmp_context.iar;
-    }
-}
-
-
-/*
- * single_step -	no trace mode harware support, or software support.
- *			sigh.
- */
-single_step(signal) {
-    register i;
-
-    if (!one_stepped) {
-	/*
-	 * need to set breakpoints for single step.
-	 * figure out all places the current instruction could go.
-	 */
-	branch_dest(&tbreak[0]);
-
-	/*
-	 * always at least one place to go to
-	 */
-	target_insert_breakpoint(tbreak[0].address, &tbreak[0].data);
-
-	/*
-	 * if there is another possible location, set a breakpoint there
-	 * as well.
-	 */
-	if (tbreak[1].address != -1)
-	    target_insert_breakpoint(tbreak[1].address, &tbreak[1].data);
-
-	one_stepped = 1;
-	ptrace(PT_CONTINUE, inferior_pid, 1, signal, 0);
-    } else {
-	/*
-	 * need to clear the breakpoints.
-	 */
-	for (i = 0; i < 2; ++i)
-	    if (tbreak[i].address != -1)
-		target_remove_breakpoint(tbreak[i].address, &tbreak[i].data);
-
-	one_stepped = 0;
-    }
-
-    return 1;
-}
-
-#else	/* !DAMON'S VERSION */
-
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
 static struct sstep_breaks {
@@ -280,7 +96,7 @@ branch_dest (opcode, instr, pc, safety)
 	
        default: return -1;
   }
-  return (dest < 0x10000000) ? safety : dest;
+  return (dest < TEXT_SEGMENT_BASE) ? safety : dest;
 }
 
 
@@ -309,6 +125,10 @@ int signal;
     opcode = insn >> 26;
     breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
 
+    /* Don't put two breakpoints on the same address. */
+    if (breaks[1] == breaks[0])
+      breaks[1] = -1;
+
     stepBreaks[1].address = -1;
 
     for (ii=0; ii < 2; ++ii) {
@@ -324,7 +144,7 @@ int signal;
     }  
 
     one_stepped = 1;
-    ptrace (PT_CONTINUE, inferior_pid, 1, signal);
+    ptrace (PT_CONTINUE, inferior_pid, 1, signal, 0);
   }
   else {
 
@@ -336,10 +156,9 @@ int signal;
 
     one_stepped = 0;
   }
+  errno = 0;
   return 1;
 }
-#endif /* !DAMON's version of single step. */
-
 
 
 /* return pc value after skipping a function prologue. */
@@ -360,8 +179,6 @@ int pc;
     pc += 4;
     op = read_memory_integer (pc, 4);
   }
-  else				/* else, this is a frameless invocation */
-    return pc;
 
   if ((op & 0xfc00003e) == 0x7c000026) { /* mfcr Rx */
     pc += 4;
@@ -373,10 +190,12 @@ int pc;
     op = read_memory_integer (pc, 4);
   }
 
+#if 0
   if ((op & 0xfc1f0000) == 0xd8010000) { /* stfd Rx,NUM(r1) */
     pc += 4;				 /* store floating register double */
     op = read_memory_integer (pc, 4);
   }
+#endif
 
   if ((op & 0xfc1f0000) == 0xbc010000) { /* stm Rx, NUM(r1) */
     pc += 4;
@@ -396,22 +215,31 @@ int pc;
     op = read_memory_integer (pc, 4);
   }
 
-  while ((op & 0xfc1f0000) == 0x90010000) {	/* st r?, NUM(r1) */  
-    pc += 4;
-    op = read_memory_integer (pc, 4);
-  }
+   /* store parameters into stack */
+  while(
+	(op & 0xfc1f0000) == 0xd8010000 || 	/* stfd Rx,NUM(r1) */
+	(op & 0xfc1f0000) == 0x90010000 ||	/* st r?, NUM(r1)  */
+	(op & 0xfc000000) == 0xfc000000 ||	/* frsp, fp?, .. */
+	(op & 0xd0000000) == 0xd0000000)	/* stfs, fp?, .. */
+    {
+      pc += 4;					/* store fpr double */
+      op = read_memory_integer (pc, 4);
+    }
 
   if (op == 0x603f0000) {			/* oril r31, r1, 0x0 */
     pc += 4;					/* this happens if r31 is used as */
     op = read_memory_integer (pc, 4);		/* frame ptr. (gcc does that)	  */
 
-    if ((op >> 16) == 0x907f) {			/* st r3, NUM(r31) */
-      pc += 4;
+    tmp = 0;
+    while ((op >> 16) == (0x907f + tmp)) {	/* st r3, NUM(r31) */
+      pc += 4;					/* st r4, NUM(r31), ... */
       op = read_memory_integer (pc, 4);
+      tmp += 0x20;
     }
   }
   return pc;
 }
+
 
 /* text start and end addresses in virtual memory. */
 
@@ -424,10 +252,21 @@ CORE_ADDR text_end;
   frames, etc. 
 *************************************************************************/
 
+/* The total size of dummy frame is 436, which is;
+
+	32 gpr's	- 128 bytes
+	32 fpr's	- 256   "
+	7  the rest	- 28    "
+	and 24 extra bytes for the callee's link area. The last 24 bytes
+	for the link area might not be necessary, since it will be taken
+	care of by push_arguments(). */
+
+#define DUMMY_FRAME_SIZE 436
+
 #define	DUMMY_FRAME_ADDR_SIZE 10
 
 /* Make sure you initialize these in somewhere, in case gdb gives up what it
-   was debugging and starts debugging something else. FIXMEmgo */
+   was debugging and starts debugging something else. FIXMEibm */
 
 static int dummy_frame_count = 0;
 static int dummy_frame_size = 0;
@@ -464,15 +303,13 @@ push_dummy_frame ()
      before writing register values into the new frame, decrement and update
      %sp first in order to secure your frame. */
 
-  write_register (SP_REGNUM, sp-408);
+  write_register (SP_REGNUM, sp-DUMMY_FRAME_SIZE);
 
-#if 1
   /* gdb relies on the state of current_frame. We'd better update it,
      otherwise things like do_registers_info() wouldn't work properly! */
 
   flush_cached_frames ();
-  set_current_frame (create_new_frame (sp-408, pc));
-#endif /* 0 */
+  set_current_frame (create_new_frame (sp-DUMMY_FRAME_SIZE, pc));
 
   /* save program counter in link register's space. */
   write_memory (sp+8, &pc, 4);
@@ -488,12 +325,17 @@ push_dummy_frame ()
   for (ii=1; ii <=32; ++ii)
     write_memory (sp-256-(ii*4), &registers[REGISTER_BYTE (32-ii)], 4);
 
-  /* so far, 32*2 + 32 words = 384 bytes have been written. We need 6 words
-     (24 bytes) for the rest of the registers. It brings the total to 408 
-     bytes.
-     save sp or so call back chain right here. */
-  write_memory (sp-408, &sp, 4);
-  sp -= 408;
+  /* so far, 32*2 + 32 words = 384 bytes have been written. 
+     7 extra registers in our register set: pc, ps, cnd, lr, cnt, xer, mq */
+
+  for (ii=1; ii <= (LAST_SP_REGNUM-FIRST_SP_REGNUM+1); ++ii) {
+    write_memory (sp-384-(ii*4), 
+	       &registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
+  }
+
+  /* Save sp or so called back chain right here. */
+  write_memory (sp-DUMMY_FRAME_SIZE, &sp, 4);
+  sp -= DUMMY_FRAME_SIZE;
 
   /* And finally, this is the back chain. */
   write_memory (sp+8, &pc, 4);
@@ -505,12 +347,13 @@ push_dummy_frame ()
    In rs6000 when we push a dummy frame, we save all of the registers. This
    is usually done before user calls a function explicitly.
 
-   After a dummy frame is pushed, some instructions are copied into stack, and
-   stack pointer is decremented even more. Since we don't have a frame pointer to
-   get back to the parent frame of the dummy, we start having trouble poping it.
-   Therefore, we keep a dummy frame stack, keeping addresses of dummy frames as
-   such. When poping happens and when we detect that was a dummy frame, we pop
-   it back to its parent by using dummy frame stack (`dummy_frame_addr' array).
+   After a dummy frame is pushed, some instructions are copied into stack,
+   and stack pointer is decremented even more.  Since we don't have a frame
+   pointer to get back to the parent frame of the dummy, we start having
+   trouble poping it.  Therefore, we keep a dummy frame stack, keeping
+   addresses of dummy frames as such.  When poping happens and when we
+   detect that was a dummy frame, we pop it back to its parent by using
+   dummy frame stack (`dummy_frame_addr' array). 
  */
    
 pop_dummy_frame ()
@@ -528,7 +371,13 @@ pop_dummy_frame ()
     read_memory (sp-256-(ii*4), &registers[REGISTER_BYTE (32-ii)], 4);
   }
 
-  read_memory (sp-400, &registers [REGISTER_BYTE(PC_REGNUM)], 4);
+  /* restore the rest of the registers. */
+  for (ii=1; ii <=(LAST_SP_REGNUM-FIRST_SP_REGNUM+1); ++ii)
+    read_memory (sp-384-(ii*4),
+    		&registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
+
+  read_memory (sp-(DUMMY_FRAME_SIZE-8), 
+  				&registers [REGISTER_BYTE(PC_REGNUM)], 4);
 
   /* when a dummy frame was being pushed, we had to decrement %sp first, in 
      order to secure astack space. Thus, saved %sp (or %r1) value, is not the

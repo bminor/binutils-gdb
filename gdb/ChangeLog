@@ -1,3 +1,30 @@
+Thu Feb 27 22:57:19 1992  Per Bothner  (bothner@cygnus.com)
+
+	* rs6k-opcode.h, tm-rs6000.h, xm-rs6000.h, rs6000-tdep.c,
+	rs6000-xdep.c, xcoffexec.c, xcoffread.c:
+	Merge in changes (mostly from IBM) for RS6000.
+	* breakpoint.c, buildsym.c, infptrace.c, stack.c, symtab.c:
+	More changes from IBM for RS6000.  These are in machine-
+	independent code, and probably could do with some cleaning
+	up.  The most questionable of these are #ifdef IBM6000.
+	* infrun.c, sparc-tdep.c: Pass a parameter (signal number)
+	to single_step() (for consistency with rs6000 and i860).
+	* utils.c:  Allow the 1st arg to xrealloc to be NULL
+	(in which case do malloc).  This removes the need for
+	some tests in xcoff code (and perhaps other places?).
+	* coffread.c: Removed variables last_source_file,
+	type_vector, and type_vector_length as these are now
+	defined by buildsym.[ch].
+	* defs.h:  Remove prototypes for malloc and realloc, since
+	these should only be used to implement xmalloc and xrealloc,
+	and they conflict with <stdlib.h> in AIX - where they
+	return void* even when __STDC__ isn't defined.  Sigh.
+	* munch:  Recognize *initialize* in data as well as text
+	(AIX uses data).  Also, incorporate a patch from Garrett
+	Wollman <wollman@uvm-gen.uvm.edu> to make the sed script
+	much more sensible, by only trying to match the name of
+	the initialize_foo function, and not the junk before it.
+	
 Thu Feb 27 20:07:43 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* breakpoint.c (breakpoint_re_set_one):  Don't reset breakpoint

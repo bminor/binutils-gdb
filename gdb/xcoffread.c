@@ -23,6 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "bfd.h"
 
+#ifdef IBM6000
+/* Native only:  Need struct tbtable in <sys/debug.h>. */
+
 /* AIX COFF names have a preceeding dot `.' */
 #define NAMES_HAVE_DOT 1
 
@@ -36,6 +39,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #endif
 #include <sys/stat.h>
+/*#include <linenum.h>*/
+#include <sys/debug.h>
 
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -73,7 +78,7 @@ static bfd *symfile_bfd;
    This is calculated from the first function seen after a C_FILE
    symbol. */
 
-static CORE_ADDR cur_src_start_addr;
+
 static CORE_ADDR cur_src_end_addr;
 
 /* Core address of the end of the first object file.  */
@@ -97,7 +102,7 @@ static char *symtbl;
 #define	INITIAL_STABVECTOR_LENGTH	40
 
 struct pending_stabs *global_stabs;
-struct pending_stabs *file_stabs;
+
 
 /* Nonzero if within a function (so symbols should be local,
    if nothing says specifically).  */
@@ -125,6 +130,7 @@ static unsigned	local_n_tmask;
 
 static unsigned	local_symesz;
 
+
 /* coff_symfile_init()
    is the coff-specific initialization routine for reading symbols.
    It is passed a struct sym_fns which contains, among other things,
@@ -145,8 +151,8 @@ struct coff_symfile_info {
 
 
 static void
-enter_line_range PARAMS ((struct subfile *, unsigned, unsigned, CORE_ADDR,
-			  unsigned *));
+enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
+			  CORE_ADDR, CORE_ADDR, unsigned *));
 
 static void
 aixcoff_symfile_read PARAMS ((struct sym_fns *, CORE_ADDR, int));
@@ -183,10 +189,6 @@ process_xcoff_symbol PARAMS ((struct coff_symbol *, struct objfile *));
 
 static void
 read_xcoff_symtab PARAMS ((struct objfile *, int));
-
-static void
-enter_line_range PARAMS ((struct subfile *, unsigned, unsigned, CORE_ADDR,
-			  unsigned *));
 
 static void
 add_stab_to_list PARAMS ((char *, struct pending_stabs **));
@@ -273,22 +275,412 @@ struct pending_stabs **stabvector;
 }
 
 
-/* Enter a given range of lines into the line vector.
-   can be called in the following two ways:
-     enter_line_range (subfile, beginoffset, endoffset, 0, firstLine)  or
-     enter_line_range (subfile, beginoffset, 0, endaddr, firstLine) */
+#if 0
+/* for all the stabs in a given stab vector, build appropriate types 
+   and fix their symbols in given symbol vector. */
+
+void
+patch_block_stabs (symbols, stabs)
+struct pending *symbols;
+struct pending_stabs *stabs;
+{
+  int ii;
+
+  if (!stabs)
+    return;
+
+  /* for all the stab entries, find their corresponding symbols and 
+     patch their types! */
+
+  for (ii=0; ii < stabs->count; ++ii) {
+    char *name = stabs->stab[ii];
+    char *pp = (char*) index (name, ':');
+    struct symbol *sym = find_symbol_in_list (symbols, name, pp-name);
+    if (!sym) {
+      ;
+      /* printf ("ERROR! stab symbol not found!\n");	/* FIXME */
+      /* The above is a false alarm. There are cases the we can have
+         a stab, without its symbol. xlc generates this for the extern
+	 definitions in inner blocks. */
+    }
+    else {
+      pp += 2;
+
+      if (*(pp-1) == 'F' || *(pp-1) == 'f')
+	SYMBOL_TYPE (sym) = lookup_function_type (read_type (&pp));
+      else
+	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
+    }
+  }
+}
+#endif
+
+
+/* compare line table entry addresses. */
+
+  static int
+compare_lte (lte1, lte2)
+  struct linetable_entry *lte1, *lte2;
+{
+  return lte1->pc - lte2->pc;
+}
+
+/* Give a line table with function entries are marked, arrange its functions
+   in assending order and strip off function entry markers and return it in
+   a newly created table. If the old one is good enough, return the old one. */
+
+static struct linetable *
+arrange_linetable (oldLineTb)
+  struct linetable *oldLineTb;			/* old linetable */
+{
+  int ii, jj, 
+      newline, 					/* new line count */
+      function_count;				/* # of functions */
+
+  struct linetable_entry *fentry;		/* function entry vector */
+  int fentry_size;				/* # of function entries */
+  struct linetable *newLineTb;			/* new line table */
+
+#define NUM_OF_FUNCTIONS 20
+
+  fentry_size = NUM_OF_FUNCTIONS;
+  fentry = (struct linetable_entry*)
+	malloc (fentry_size * sizeof (struct linetable_entry));
+
+  for (function_count=0, ii=0; ii <oldLineTb->nitems; ++ii) {
+
+    if (oldLineTb->item[ii].line == 0) {	/* function entry found. */
+
+      if (function_count >= fentry_size) {	/* make sure you have room. */
+	fentry_size *= 2;
+	fentry = (struct linetable_entry*) 
+	   realloc (fentry, fentry_size * sizeof (struct linetable_entry));
+      }
+      fentry[function_count].line = ii;
+      fentry[function_count].pc = oldLineTb->item[ii].pc;
+      ++function_count;
+    }
+  }
+
+  if (function_count == 0) {
+    free (fentry);
+    return oldLineTb;
+  }
+  else if (function_count > 1)
+    qsort (fentry, function_count, sizeof(struct linetable_entry), compare_lte);
+
+  /* allocate a new line table. */
+  newLineTb = (struct linetable*) malloc (sizeof (struct linetable) + 
+	(oldLineTb->nitems - function_count) * sizeof (struct linetable_entry));
+
+  /* if line table does not start with a function beginning, copy up until
+     a function begin. */
+
+  newline = 0;
+  if (oldLineTb->item[0].line != 0)
+    for (newline=0; 
+	newline < oldLineTb->nitems && oldLineTb->item[newline].line; ++newline)
+      newLineTb->item[newline] = oldLineTb->item[newline];
+
+  /* Now copy function lines one by one. */
+
+  for (ii=0; ii < function_count; ++ii) {
+    for (jj = fentry[ii].line + 1;
+	         jj < oldLineTb->nitems && oldLineTb->item[jj].line != 0; 
+							 ++jj, ++newline)
+      newLineTb->item[newline] = oldLineTb->item[jj];
+  }
+  free (fentry);
+  newLineTb->nitems = oldLineTb->nitems - function_count;
+  return newLineTb;  
+}     
+
+
+
+/* We try to detect the beginning of a compilation unit. That info will
+   be used as an entry in line number recording routines (enter_line_range) */
+
+static unsigned first_fun_line_offset;
+static unsigned first_fun_bf;
+
+#define mark_first_line(OFFSET, SYMNUM) \
+  if (!first_fun_line_offset) {         \
+    first_fun_line_offset = OFFSET;     \
+    first_fun_bf = SYMNUM;              \
+  }
+  
+
+/* include file support: C_BINCL/C_EINCL pairs will be kept in the 
+   following `IncludeChain'. At the end of each symtab (end_symtab),
+   we will determine if we should create additional symtab's to
+   represent if (the include files. */
+
+
+typedef struct _inclTable {
+  char		*name;				/* include filename */
+  int		begin, end;			/* offsets to the line table */
+  struct subfile *subfile;
+  unsigned	funStartLine;			/* start line # of its function */
+} InclTable;
+
+#define	INITIAL_INCLUDE_TABLE_LENGTH	20
+static InclTable  *inclTable;			/* global include table */
+static int	  inclIndx;			/* last entry to table */
+static int	  inclLength;			/* table length */
+static int	  inclDepth;			/* nested include depth */
+
 
 static void
-enter_line_range (subfile, beginoffset, endoffset, endaddr, firstLine)
-  struct subfile *subfile;		/* which sub-file to put line#s in */
+record_include_begin (cs)
+struct coff_symbol *cs;
+{
+  /* In aixcoff, we assume include files cannot be nested (not in .c file
+     of course, but in corresponding .s files.) */
+
+  if (inclDepth)
+    fatal ("aix internal: pending include file exists.");
+
+  ++inclDepth;
+
+  /* allocate an include file, or make room for the new entry */
+  if (inclLength == 0) {
+    inclTable = (InclTable*) 
+	xmalloc (sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
+    bzero (inclTable, sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
+    inclLength = INITIAL_INCLUDE_TABLE_LENGTH;
+    inclIndx = 0;
+  }
+  else if (inclIndx >= inclLength) {
+    inclLength += INITIAL_INCLUDE_TABLE_LENGTH;
+    inclTable = (InclTable*) 
+	xrealloc (inclTable, sizeof (InclTable) * inclLength);
+    bzero (inclTable+inclLength-INITIAL_INCLUDE_TABLE_LENGTH, 
+			sizeof (InclTable)*INITIAL_INCLUDE_TABLE_LENGTH);
+  }
+
+  inclTable [inclIndx].name  = cs->c_name;
+  inclTable [inclIndx].begin = cs->c_value;
+}
+
+
+static void
+record_include_end (cs)
+struct coff_symbol *cs;
+{
+  InclTable *pTbl;  
+
+  if (inclDepth == 0)
+    fatal ("aix internal: Mismatch C_BINCL/C_EINCL pair found.");
+
+  pTbl = &inclTable [inclIndx];
+  pTbl->end = cs->c_value;
+
+  --inclDepth;
+  ++inclIndx;
+}
+
+
+static void
+dumpIncludeChain ()
+{
+  int ii;
+  if (inclTable && inclLength)
+    for (ii=0; ii < inclIndx; ++ii)
+      printf ("name: %s, begin: 0x%x, end: 0x%x\n",
+		inclTable[ii].name, inclTable[ii].begin, inclTable[ii].end);
+}
+
+
+/* given the start and end addresses of a compilation unit (or a csect, at times)
+   process its lines and create appropriate line vectors. */
+
+static void
+process_linenos (start, end)
+  CORE_ADDR start, end;
+{
+  char *pp;
+  int offset, ii;
+
+  struct subfile main_subfile;		/* subfile structure for the main
+  					   compilation unit. */
+
+  /* in the main source file, any time we see a function entry, we reset
+     this variable to function's absolute starting line number. All the
+     following line numbers in the function are relative to this, and
+     we record absolute line numbers in record_line(). */
+
+  int main_source_baseline = 0;
+
+  
+  unsigned *firstLine;
+  CORE_ADDR addr;
+
+  if (!(offset = first_fun_line_offset))
+    goto return_after_cleanup;
+
+  bzero (&main_subfile, sizeof (main_subfile));
+  first_fun_line_offset = 0;
+
+  if (inclIndx == 0)
+    enter_line_range (&main_subfile, offset, 0, start, end, 
+    						&main_source_baseline);
+
+  /* else, there was source with line numbers in include files */
+  else {
+
+    main_source_baseline = 0;
+    for (ii=0; ii < inclIndx; ++ii) {
+
+      struct subfile *tmpSubfile;
+
+      /* if there is main file source before include file, enter it. */
+      if (offset < inclTable[ii].begin) {
+	enter_line_range
+	  (&main_subfile, offset, inclTable[ii].begin - LINESZ, start, 0, 
+	  					&main_source_baseline);
+      }
+
+      /* Have a new subfile for the include file */
+
+      tmpSubfile = inclTable[ii].subfile = (struct subfile*) 
+      				xmalloc (sizeof (struct subfile));
+
+      bzero (tmpSubfile, sizeof (struct subfile));
+      firstLine = &(inclTable[ii].funStartLine);
+
+      /* enter include file's lines now. */
+      enter_line_range (tmpSubfile, inclTable[ii].begin, 
+      				inclTable[ii].end, start, 0, firstLine);
+
+      offset = inclTable[ii].end + LINESZ;
+    }
+
+    /* all the include files' line have been processed at this point. Now,
+       enter remaining lines of the main file, if any left. */
+    if (offset < (linetab_offset + linetab_size + 1 - LINESZ)) {
+      enter_line_range (&main_subfile, offset, 0, start, end, 
+      						&main_source_baseline);
+    }
+  }
+
+  /* Process main file's line numbers. */
+  if (main_subfile.line_vector) {
+    struct linetable *lineTb, *lv;
+
+    lv = main_subfile.line_vector;
+
+    /* Line numbers are not necessarily ordered. xlc compilation will
+       put static function to the end. */
+
+    lineTb = arrange_linetable (lv);
+    if (lv == lineTb) {
+      current_subfile->line_vector = (struct linetable *)
+	xrealloc (lv, (sizeof (struct linetable)
+			+ lv->nitems * sizeof (struct linetable_entry)));
+
+    }
+    else {
+	free (lv);
+	current_subfile->line_vector = lineTb;
+    }
+
+    current_subfile->line_vector_length = 
+    			current_subfile->line_vector->nitems;
+
+
+    /* Now, process included files' line numbers. */
+
+    for (ii=0; ii < inclIndx; ++ii) {
+
+      if ( (inclTable[ii].subfile)->line_vector) { /* Useless if!!! FIXMEmgo */
+        struct linetable *lineTb, *lv;
+
+        lv = (inclTable[ii].subfile)->line_vector;
+
+        /* Line numbers are not necessarily ordered. xlc compilation will
+           put static function to the end. */
+
+        lineTb = arrange_linetable (lv);
+
+	push_subfile ();
+
+	/* For the same include file, we might want to have more than one subfile.
+	   This happens if we have something like:
+   
+  		......
+	        #include "foo.h"
+		......
+	 	#include "foo.h"
+		......
+
+	   while foo.h including code in it. (stupid but possible)
+	   Since start_subfile() looks at the name and uses an existing one if finds,
+	   we need to provide a fake name and fool it. */
+
+/*	start_subfile (inclTable[ii].name, (char*)0);  */
+	start_subfile (" ?", (char*)0);
+	current_subfile->name = 
+		obsavestring (inclTable[ii].name, strlen (inclTable[ii].name),
+			      &current_objfile->symbol_obstack);
+
+        if (lv == lineTb) {
+	  current_subfile->line_vector = (struct linetable *)
+		xrealloc (lv, (sizeof (struct linetable)
+			+ lv->nitems * sizeof (struct linetable_entry)));
+
+	}
+	else {
+	  free (lv);
+	  current_subfile->line_vector = lineTb;
+	}
+
+	current_subfile->line_vector_length = 
+    			current_subfile->line_vector->nitems;
+	start_subfile (pop_subfile (), (char*)0);
+      }
+    }
+  }
+  else
+    /* I am not sure this logic is correct. There might be no lines in the
+       main file, whereas there are some in included ones. FIXMEibm */
+    current_subfile->line_vector = NULL;
+
+return_after_cleanup:
+
+  /* We don't want to keep alloc/free'ing the global include file table. */
+  inclIndx = 0;
+
+  /* start with a fresh subfile structure for the next file. */
+  bzero (&main_subfile, sizeof (struct subfile));
+}
+
+void
+aix_process_linenos ()
+{
+  /* process line numbers and enter them into line vector */
+  process_linenos (last_source_start_addr, cur_src_end_addr);
+}
+
+
+/* Enter a given range of lines into the line vector.
+   can be called in the following two ways:
+     enter_line_range (subfile, beginoffset, endoffset, startaddr, 0, firstLine)  or
+     enter_line_range (subfile, beginoffset, 0, startaddr, endaddr, firstLine) */
+
+static void
+enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr, firstLine)
+  struct subfile *subfile;
   unsigned   beginoffset, endoffset;	/* offsets to line table */
-  CORE_ADDR  endaddr;
+  CORE_ADDR  startaddr, endaddr;
   unsigned   *firstLine;
 {
   char		*pp, *limit;
   CORE_ADDR	addr;
-  struct internal_lineno lptr;
-  unsigned local_linesz = coff_data (symfile_bfd)->local_linesz;
+
+/* Do Byte swapping, if needed. FIXME! */
+#define	P_LINENO(PP)  (*(unsigned short*)((struct external_lineno*)(PP))->l_lnno)
+#define	P_LINEADDR(PP)	(*(long*)((struct external_lineno*)(PP))->l_addr.l_paddr)
+#define	P_LINESYM(PP)	    (*(long*)((struct external_lineno*)(PP))->l_addr.l_symndx)
 
   pp = &linetab [beginoffset - linetab_offset];
   limit = endoffset ? &linetab [endoffset - linetab_offset]
@@ -296,26 +688,230 @@ enter_line_range (subfile, beginoffset, endoffset, endaddr, firstLine)
 
   while (pp <= limit) {
 
-    /* Swap and align this lineno entry into lptr.  */
-    bfd_coff_swap_lineno_in (symfile_bfd, pp, &lptr);
-
     /* find the address this line represents */
-    addr = lptr.l_lnno ? 
-      lptr.l_addr.l_paddr : read_symbol_nvalue (symtbl, lptr.l_addr.l_symndx);
+    addr = P_LINENO(pp) ? 
+      P_LINEADDR(pp) : read_symbol_nvalue (symtbl, P_LINESYM(pp)); 
 
-    if (endaddr && addr >= endaddr)
+    if (addr < startaddr || (endaddr && addr > endaddr))
       return;
 
-    if (lptr.l_lnno == 0) {
-      *firstLine = read_symbol_lineno (symtbl, lptr.l_addr.l_symndx);
+    if (P_LINENO(pp) == 0) {
+      *firstLine = read_symbol_lineno (symtbl, P_LINESYM(pp));
+      record_line (subfile, 0, addr);
       --(*firstLine);
     }
     else
-      record_line (subfile, *firstLine + lptr.l_lnno, addr);
+      record_line (subfile, *firstLine + P_LINENO(pp), addr);
 
-    pp += local_linesz;
+    pp += LINESZ;
   }
 }
+
+typedef struct {
+  int fsize;				/* file size */
+  int fixedparms;			/* number of fixed parms */
+  int floatparms;			/* number of float parms */
+  unsigned int parminfo;		/* parameter info. 
+  					   See /usr/include/sys/debug.h
+					   tbtable_ext.parminfo */
+  int framesize;			/* function frame size */
+} TracebackInfo;
+
+
+/* Given a function symbol, return its traceback information. */
+
+  TracebackInfo *
+retrieve_tracebackinfo (abfd, textsec, cs)
+  bfd *abfd;
+  sec_ptr textsec;
+  struct coff_symbol *cs;
+{
+#define TBTABLE_BUFSIZ  2000
+#define	MIN_TBTABSIZ	50		/* minimum buffer size to hold a
+					   traceback table. */
+
+  static TracebackInfo tbInfo;
+  struct tbtable *ptb;
+
+  static char buffer [TBTABLE_BUFSIZ];
+
+  int  *pinsn;
+  int  bytesread=0;			/* total # of bytes read so far */
+  int  bufferbytes;			/* number of bytes in the buffer */
+
+  int functionstart = cs->c_value - textsec->vma;
+
+  bzero (&tbInfo, sizeof (tbInfo));
+
+  /* keep reading blocks of data from the text section, until finding a zero
+     word and a traceback table. */
+
+  while (bfd_get_section_contents (abfd, textsec, buffer, 
+	(file_ptr)(functionstart + bytesread), 
+	bufferbytes = (
+		(TBTABLE_BUFSIZ < (textsec->_raw_size - functionstart - bytesread)) ? 
+		 TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread))))
+  {
+    bytesread += bufferbytes;
+    pinsn = (int*) buffer;
+
+    /* if this is the first time we filled the buffer, retrieve function
+       framesize info. */
+
+    if (bytesread == bufferbytes) {
+
+      /* skip over unrelated instructions */
+
+      if (*pinsn == 0x7c0802a6)			/* mflr r0 */
+        ++pinsn;
+      if ((*pinsn & 0xfc00003e) == 0x7c000026)	/* mfcr Rx */
+	++pinsn;
+      if ((*pinsn & 0xfc000000) == 0x48000000)	/* bl foo, save fprs */
+        ++pinsn;
+      if ((*pinsn  & 0xfc1f0000) == 0xbc010000)	/* stm Rx, NUM(r1) */
+        ++pinsn;
+
+      do {
+	int tmp = (*pinsn >> 16) & 0xffff;
+
+	if (tmp ==  0x9421) {			/* stu  r1, NUM(r1) */
+	  tbInfo.framesize = 0x10000 - (*pinsn & 0xffff);
+	  break;
+	}
+	else if ((*pinsn == 0x93e1fffc) ||	/* st   r31,-4(r1) */
+		 (tmp == 0x9001))		/* st   r0, NUM(r1) */
+	;
+	/* else, could not find a frame size. */
+	else
+	  return NULL;
+
+      } while (++pinsn && *pinsn);
+
+      if (!tbInfo.framesize)
+        return NULL;      
+    }
+
+    /* look for a zero word. */
+
+    while (*pinsn && (pinsn < (int*)(buffer + bufferbytes - sizeof(int))))
+      ++pinsn;
+
+    if (pinsn >= (int*)(buffer + bufferbytes))
+      continue;
+
+    if (*pinsn == 0) {
+
+      /* function size is the amount of bytes we have skipped so far. */
+      tbInfo.fsize = bytesread - (buffer + bufferbytes - (char*)pinsn);
+
+      ++pinsn;
+
+      /* if we don't have the whole traceback table in the buffer, re-read
+         the whole thing. */
+
+      if ((char*)pinsn > (buffer + bufferbytes - MIN_TBTABSIZ)) {
+
+	/* In case if we are *very* close to the end of the text section
+	   and cannot read properly from that point on, abort by returning
+	   NULL.
+	   Handle this case more graciously -- FIXME */
+
+	if (!bfd_get_section_contents (
+		abfd, textsec, buffer, 
+		(file_ptr)(functionstart + 
+		 bytesread - (buffer + bufferbytes - (char*)pinsn)),MIN_TBTABSIZ))
+	  { printf ("Abnormal return!..\n"); return NULL; }
+
+	ptb = (struct tbtable *)buffer;
+      }
+      else
+        ptb = (struct tbtable *)pinsn;
+
+      tbInfo.fixedparms = ptb->tb.fixedparms;
+      tbInfo.floatparms = ptb->tb.floatparms;
+      tbInfo.parminfo = ptb->tb_ext.parminfo;
+      return &tbInfo;
+    }
+  }
+  return NULL;
+}
+
+#if 0
+/* Given a function symbol, return a pointer to its traceback table. */
+
+  struct tbtable *
+retrieve_traceback (abfd, textsec, cs, size)
+  bfd *abfd;
+  sec_ptr textsec;
+  struct coff_symbol *cs;
+  int *size;				/* return function size */
+{
+#define TBTABLE_BUFSIZ  2000
+#define	MIN_TBTABSIZ	50		/* minimum buffer size to hold a
+					   traceback table. */
+
+  static char buffer [TBTABLE_BUFSIZ];
+
+  int  *pinsn;
+  int  bytesread=0;			/* total # of bytes read so far */
+  int  bufferbytes;			/* number of bytes in the buffer */
+
+  int functionstart = cs->c_value - textsec->filepos + textsec->vma;
+  *size = 0;
+
+  /* keep reading blocks of data from the text section, until finding a zero
+     word and a traceback table. */
+
+  while (bfd_get_section_contents (abfd, textsec, buffer, 
+	(file_ptr)(functionstart + bytesread), 
+	bufferbytes = (
+		(TBTABLE_BUFSIZ < (textsec->size - functionstart - bytesread)) ? 
+		 TBTABLE_BUFSIZ : (textsec->size - functionstart - bytesread))))
+  {
+    bytesread += bufferbytes;
+    pinsn = (int*) buffer;
+
+    /* look for a zero word. */
+
+    while (*pinsn && (pinsn < (int*)(buffer + bufferbytes - sizeof(int))))
+      ++pinsn;
+
+    if (pinsn >= (int*)(buffer + bufferbytes))
+      continue;
+
+    if (*pinsn == 0) {
+
+      /* function size is the amount of bytes we have skipped so far. */
+      *size = bytesread - (buffer + bufferbytes - pinsn);
+
+      ++pinsn;
+
+      /* if we don't have the whole traceback table in the buffer, re-read
+         the whole thing. */
+
+      if ((char*)pinsn > (buffer + bufferbytes - MIN_TBTABSIZ)) {
+
+	/* In case if we are *very* close to the end of the text section
+	   and cannot read properly from that point on, abort for now.
+	   Handle this case more graciously -- FIXME */
+
+	if (!bfd_get_section_contents (
+		abfd, textsec, buffer, 
+		(file_ptr)(functionstart + 
+		 bytesread - (buffer + bufferbytes - pinsn)),MIN_TBTABSIZ))
+	/*   abort (); */ { printf ("abort!!!\n"); return NULL; }
+
+	return (struct tbtable *)buffer;
+      }
+      else
+        return (struct tbtable *)pinsn;
+    }
+  }
+  return NULL;
+}
+#endif /* 0 */
+
+
 
 
 /* Save the vital information for use when closing off the current file.
@@ -324,7 +920,7 @@ enter_line_range (subfile, beginoffset, endoffset, endaddr, firstLine)
 
 #define complete_symtab(name, start_addr) {	\
   last_source_file = savestring (name, strlen (name));	\
-  cur_src_start_addr = start_addr;			\
+  last_source_start_addr = start_addr;			\
 }
 
 
@@ -347,9 +943,32 @@ enter_line_range (subfile, beginoffset, endoffset, endaddr, firstLine)
     (ALLOCED) = 1;						\
   }								\
   prim_record_minimal_symbol (namestr, (ADDR), (TYPE));		\
-  last_recorded_fun = (ADDR);					\
+  misc_func_recorded = 1;					\
 }
 
+
+/* A parameter template, used by ADD_PARM_TO_PENDING. */
+
+static struct symbol parmsym = {		/* default parameter symbol */
+	"",					/* name */
+	VAR_NAMESPACE,				/* namespace */
+	LOC_ARG,				/* class */
+	NULL,					/* type */
+	0,					/* line number */
+	0,					/* value */
+};
+
+/* Add a parameter to a given pending symbol list. */ 
+
+#define	ADD_PARM_TO_PENDING(PARM, VALUE, PTYPE, PENDING_SYMBOLS)	\
+{									\
+  PARM = (struct symbol *)						\
+      obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));	\
+  *(PARM) = parmsym;							\
+  SYMBOL_TYPE (PARM) = PTYPE;						\
+  SYMBOL_VALUE (PARM) = VALUE;						\
+  add_symbol_to_list (PARM, &PENDING_SYMBOLS);				\
+}
 
 
 /* aixcoff has static blocks marked in `.bs', `.es' pairs. They cannot be
@@ -370,9 +989,11 @@ read_xcoff_symtab (objfile, nsyms)
      int nsyms;			/* # of symbols */
 {
   bfd *abfd = objfile->obfd;
-  /* char *symtbl; */		/* Raw symbol table base */
   char *raw_symbol;		/* Pointer into raw seething symbol table */
   char *raw_auxptr;		/* Pointer to first raw aux entry for sym */
+  sec_ptr  textsec;		/* Pointer to text section */
+  TracebackInfo *ptb;		/* Pointer to traceback table */
+
   struct internal_syment symbol[1];
   union internal_auxent main_aux[1];
   struct coff_symbol cs[1];
@@ -383,7 +1004,6 @@ read_xcoff_symtab (objfile, nsyms)
   int just_started = 1;
   int depth = 0;
   int val;
-  int fcn_first_line;
   int fcn_last_line;
   int fcn_start_addr;
   long fcn_line_offset;
@@ -391,11 +1011,14 @@ read_xcoff_symtab (objfile, nsyms)
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it. */
   union internal_auxent fcn_aux_saved;
+  struct type *fcn_type_saved = NULL;
   struct context_stack *new;
 
   char *filestring = " _start_ ";	/* Name of the current file. */
-  char *last_seen_csect;
-  int last_recorded_fun = 0;		/* last recorded fun. value */
+
+  char *last_csect_name;		/* last seen csect's name and value */
+  CORE_ADDR last_csect_val;
+  int  misc_func_recorded;		/* true if any misc. function */
 
   current_objfile = objfile;
 
@@ -405,8 +1028,9 @@ read_xcoff_symtab (objfile, nsyms)
   local_symesz = coff_data (abfd)->local_symesz;
 
   last_source_file = 0;
-  last_seen_csect = 0;
-  last_recorded_fun = 0;
+  last_csect_name = 0;
+  last_csect_val = 0;
+  misc_func_recorded = 0;
 
   start_symtab (filestring, (char *)NULL, file_start_addr);
   symnum = 0;
@@ -424,6 +1048,11 @@ read_xcoff_symtab (objfile, nsyms)
     perror_with_name ("reading symbol table");
 
   raw_symbol = symtbl;
+
+  textsec = bfd_get_section_by_name (abfd, ".text");
+  if (!textsec) {
+    printf ("Unable to locate text section!\n");
+  }
 
   while (symnum < nsyms) {
 
@@ -478,7 +1107,7 @@ read_xcoff_symtab (objfile, nsyms)
 
     if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE) {
       if (last_source_file)
-	end_symtab (cur_src_end_addr, 1, 1, objfile);
+	end_symtab (cur_src_end_addr, 1, 0, objfile);
 
       start_symtab ("_globals_", (char *)NULL, (CORE_ADDR)0);
       cur_src_end_addr = first_object_file_end;
@@ -527,10 +1156,22 @@ read_xcoff_symtab (objfile, nsyms)
 		   CU might get fragmented in the memory and gdb's file start and end address
 		   approach does not work!  */
 
-		if (last_seen_csect) {
+		if (last_csect_name) {
+
+		  /* if no misc. function recorded in the last seen csect, enter
+		     it as a function. This will take care of functions like
+		     strcmp() compiled by xlc. */
+
+		  if (!misc_func_recorded) {
+		     int alloced = 0;
+		     RECORD_MINIMAL_SYMBOL (last_csect_name, last_csect_val,
+					    mst_text, alloced);
+		  }
+		    
+
 		  complete_symtab (filestring, file_start_addr);
 		  cur_src_end_addr = file_end_addr;
-		  end_symtab (file_end_addr, 1, 1, objfile);
+		  end_symtab (file_end_addr, 1, 0, objfile);
 		  start_symtab ((char *)NULL, (char *)NULL, (CORE_ADDR)0);
 		}
 
@@ -544,10 +1185,11 @@ read_xcoff_symtab (objfile, nsyms)
 		file_end_addr = cs->c_value + CSECT_LEN (main_aux);
 
 		if (cs->c_name && cs->c_name[0] == '.') {
-		  last_seen_csect = cs->c_name;
-		  RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, symname_alloced);
+		  last_csect_name = cs->c_name;
+		  last_csect_val = cs->c_value;
 		}
 	      }
+	      misc_func_recorded = 0;
 	      continue;
 
 	    case XMC_RW :
@@ -575,9 +1217,8 @@ read_xcoff_symtab (objfile, nsyms)
 	  if (CSECT_SCLAS (main_aux) == XMC_PR) {
 
 function_entry_point:
-	    if (cs->c_value != last_recorded_fun)
-	      RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, 
-	      						symname_alloced);
+	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, 
+				   symname_alloced);
 
 	    fcn_line_offset = main_aux->x_sym.x_fcnary.x_fcn.x_lnnoptr;
 	    fcn_start_addr = cs->c_value;
@@ -586,26 +1227,90 @@ function_entry_point:
 	       when `.bf' is seen. */
 	    fcn_cs_saved = *cs;
 	    fcn_aux_saved = *main_aux;
+
+
+	    ptb = NULL;
+
+	    /* If function has two auxent, then debugging information is
+	       already available for it. Process traceback table for
+	       functions with only one auxent. */
+
+	    if (cs->c_nsyms == 1)
+	      ptb = retrieve_tracebackinfo (abfd, textsec, cs);
+
+	    else if (cs->c_nsyms != 2)
+	      abort ();
+
+	    /* If there is traceback info, create and add parameters for it. */
+
+	    if (ptb && (ptb->fixedparms || ptb->floatparms)) {
+
+	      int parmcnt = ptb->fixedparms + ptb->floatparms;
+	      char *parmcode = (char*) &ptb->parminfo;
+	      int parmvalue = ptb->framesize + 0x18;	/* sizeof(LINK AREA) == 0x18 */
+	      unsigned int ii, mask;
+
+	      for (ii=0, mask = 0x80000000; ii <parmcnt; ++ii) {
+		struct symbol *parm;
+
+		if (ptb->parminfo & mask) {		/* float or double */
+		  mask = mask >> 1;
+		  if (ptb->parminfo & mask) {		/* double parm */
+		    ADD_PARM_TO_PENDING
+			(parm, parmvalue, builtin_type_double, local_symbols);
+		    parmvalue += sizeof (double);
+		  }
+		  else {				/* float parm */
+		    ADD_PARM_TO_PENDING
+			(parm, parmvalue, builtin_type_float, local_symbols);
+		    parmvalue += sizeof (float);
+		  }
+ 		}
+		else {					/* fixed parm */
+		  ADD_PARM_TO_PENDING
+			(parm, parmvalue, builtin_type_int, local_symbols);
+		  parmvalue += sizeof (int);
+		}
+		mask = mask >> 1;
+	      }
+		
+ 	      /* Fake this as a function. Needed in process_xcoff_symbol() */
+	      cs->c_type = 32;		
+	      				   
+	      finish_block(process_xcoff_symbol (cs, objfile), &local_symbols, 
+			   pending_blocks, cs->c_value,
+			   cs->c_value + ptb->fsize, objfile);
+	    }
 	    continue;
 	  }
-
-	  /* shared library function entry point. */
+	  /* shared library function trampoline code entry point. */
 	  else if (CSECT_SCLAS (main_aux) == XMC_GL) {
-	    if (last_recorded_fun != cs->c_value)
-	      RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text,
-	      						symname_alloced);
+	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text,
+				   symname_alloced);
 	    continue;
 	  }
 	  break;
 
 	default :		/* all other XTY_XXXs */
 	  break;
-	}			/* switch CSECT_SMTYP() */
-    }
+	}			/* switch CSECT_SMTYP() */    }
 
     switch (cs->c_sclass) {
 
     case C_FILE:
+
+      /* see if the last csect needs to be recorded. */
+
+      if (last_csect_name && !misc_func_recorded) {
+
+	  /* if no misc. function recorded in the last seen csect, enter
+	     it as a function. This will take care of functions like
+	     strcmp() compiled by xlc. */
+
+	  int alloced = 0;
+	  RECORD_MINIMAL_SYMBOL (last_csect_name, last_csect_val,
+				mst_text, alloced);
+      }
 
       /* c_value field contains symnum of next .file entry in table
 	 or symnum of first global after last .file. */
@@ -618,11 +1323,12 @@ function_entry_point:
       /* Whether or not there was a csect in the previous file, we have 
 	 to call `end_symtab' and `start_symtab' to reset type_vector, 
 	 line_vector, etc. structures. */
+
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      end_symtab (file_end_addr, 1, 1, objfile);
+      end_symtab (file_end_addr, 1, 0, objfile);
       start_symtab (cs->c_name, (char *)NULL, (CORE_ADDR)0);
-      last_seen_csect = 0;
+      last_csect_name = 0;
 
       /* reset file start and end addresses. A compilation unit with no text
          (only data) should have zero file boundaries. */
@@ -632,6 +1338,25 @@ function_entry_point:
       break;
 
 
+    case C_FUN:
+
+      /* For a function stab, just save its type in `fcn_type_saved', and leave
+	 it for the `.bf' processing. */
+      {
+	char *pp = (char*) index (cs->c_name, ':');
+
+	if (!pp || ( *(pp+1) != 'F' && *(pp+1) != 'f'))
+	  fatal ("Unrecognized stab");
+	pp += 2;
+
+	if (fcn_type_saved)
+	  fatal ("Unprocessed function type");
+
+	fcn_type_saved = lookup_function_type (read_type (&pp, objfile));
+      }
+      break;
+    
+
     case C_FCN:
       if (strcmp (cs->c_name, ".bf") == 0) {
 
@@ -640,17 +1365,73 @@ function_entry_point:
 
 	within_function = 1;
 
-	/* value contains address of first non-init type code */
-	/* main_aux.x_sym.x_misc.x_lnsz.x_lnno
-	   contains line number of '{' } */
-	fcn_first_line = main_aux->x_sym.x_misc.x_lnsz.x_lnno;
-
 	/* Linenos are now processed on a file-by-file, not fn-by-fn, basis.
 	   Metin did it, I'm not sure why.  FIXME.  -- gnu@cygnus.com */
-	/* mark_first_line (fcn_line_offset, cs->c_symnum); */
+
+	/* Two reasons:
+	
+	    1) xlc (IBM's native c compiler) postpones static function code
+	       emission to the end of a compilation unit. This way it can
+	       determine if those functions (statics) are needed or not, and
+	       can do some garbage collection (I think). This makes line
+	       numbers and corresponding addresses unordered, and we end up
+	       with a line table like:
+	       
+
+ 			lineno	addr
+	        foo()	  10	0x100
+			  20	0x200
+			  30	0x300
+
+		foo3()	  70	0x400
+			  80	0x500
+			  90	0x600
+
+		static foo2()
+			  40	0x700
+			  50	0x800
+			  60	0x900		
+
+		and that breaks gdb's binary search on line numbers, if the
+		above table is not sorted on line numbers. And that sort
+		should be on function based, since gcc can emit line numbers
+		like:
+		
+			10	0x100	- for the init/test part of a for stmt.
+			20	0x200
+			30	0x300
+			10	0x400	- for the increment part of a for stmt.
+
+ 		arrange_linenos() will do this sorting.		
+
+
+	     2)	aix symbol table might look like:
+	
+			c_file		// beginning of a new file
+			.bi		// beginning of include file
+			.ei		// end of include file
+			.bi
+			.ei
+
+		basically, .bi/.ei pairs do not necessarily encapsulate
+		their scope. They need to be recorded, and processed later
+		on when we come the end of the compilation unit.
+		Include table (inclTable) and process_linenos() handle
+		that.
+	*/
+	mark_first_line (fcn_line_offset, cs->c_symnum);
 
 	new = push_context (0, fcn_start_addr);
 	new->name = process_xcoff_symbol (&fcn_cs_saved, objfile);
+
+	/* Between a function symbol and `.bf', there always will be a function
+	   stab. We save function type when processing that stab. */
+
+	if (fcn_type_saved == NULL)
+	  fatal ("Unknown function type");
+
+	SYMBOL_TYPE (new->name) = fcn_type_saved;
+	fcn_type_saved = NULL;
       }
       else if (strcmp (cs->c_name, ".ef") == 0) {
 
@@ -663,11 +1444,6 @@ function_entry_point:
 	   contains number of lines to '}' */
 
 	fcn_last_line = main_aux->x_sym.x_misc.x_lnsz.x_lnno;
-#if 0
-	enter_linenos (fcn_line_offset, fcn_first_line, 
-					fcn_first_line + fcn_last_line);
-#endif
-
 	new = pop_context ();
 	if (context_stack_depth != 0)
 	  error ("invalid symbol data; .bf/.ef/.bb/.eb symbol mismatch, at symbol %d.",
@@ -704,18 +1480,18 @@ function_entry_point:
       break;
 
     case C_BINCL	:		/* beginning of include file */
-	push_subfile ();
-  	start_subfile (cs->c_name, (char *)0);
-  	fcn_first_line = cs->c_value;	/* Offset to first lineno of file */
+
+	/* In xlc output, C_BINCL/C_EINCL pair doesn't show up in sorted
+	   order. Thus, when wee see them, we might not know enough info
+	   to process them. Thus, we'll be saving them into a table 
+	   (inclTable) and postpone their processing. */
+
+	record_include_begin (cs);
 	break;
 
     case C_EINCL	:		/* end of include file */
-	fcn_last_line = cs->c_value;	/* Offset to last line number */
-	{ long dummy = 0;
-	enter_line_range (current_subfile, fcn_first_line, cs->c_value, 0,
-			  (unsigned *) &dummy);
-	}
-	start_subfile (pop_subfile (), (char *)0);
+			/* see the comment after case C_BINCL. */
+	record_include_end (cs);
 	break;
 
     case C_BLOCK	:
@@ -747,7 +1523,7 @@ function_entry_point:
   } /* while */
 
   if (last_source_file)
-    end_symtab (cur_src_end_addr, 1, 1, objfile);
+    end_symtab (cur_src_end_addr, 1, 0, objfile);
 
   free (symtbl);
   current_objfile = NULL;
@@ -763,7 +1539,6 @@ function_entry_point:
   (ALLOCED) ? (NAME) : obstack_copy0 (&objfile->symbol_obstack, (NAME), strlen (NAME));
 
 
-
 /* process one xcoff symbol. */
 
 static struct symbol *
@@ -776,6 +1551,7 @@ process_xcoff_symbol (cs, objfile)
   struct symbol *sym2 = NULL;
   struct type *ttype;
   char *name, *pp, *qq;
+  int struct_and_type_combined;
 
   name = cs->c_name;
   if (name[0] == '.')
@@ -794,7 +1570,7 @@ process_xcoff_symbol (cs, objfile)
        on in patch_block_stabs () */
 
     SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-    SYMBOL_TYPE (sym) = lookup_function_type (lookup_fundamental_type (current_objfile, FT_INTEGER));
+    SYMBOL_TYPE (sym) = lookup_function_type (lookup_fundamental_type (objfile, FT_INTEGER));
 
     SYMBOL_CLASS (sym) = LOC_BLOCK;
     SYMBOL_DUP (sym, sym2);
@@ -808,23 +1584,26 @@ process_xcoff_symbol (cs, objfile)
   else {
 
     /* in case we can't figure out the type, default is `int'. */
-    SYMBOL_TYPE (sym) = lookup_fundamental_type (current_objfile, FT_INTEGER);
+    SYMBOL_TYPE (sym) = lookup_fundamental_type (objfile, FT_INTEGER);
 
     switch (cs->c_sclass)
     {
+#if 0
     case C_FUN:
       if (fcn_cs_saved.c_sclass == C_EXT)
 	add_stab_to_list (name, &global_stabs);
       else
 	add_stab_to_list (name, &file_stabs);
       break;
+#endif
 
     case C_DECL:      			/* a type decleration?? */
 	qq =  (char*) strchr (name, ':');
 	if (!qq)			/* skip if there is no ':' */
 	  return NULL;
 
-	pp = qq + 2;
+	struct_and_type_combined = (qq[1] == 'T' && qq[2] == 't');
+	pp = qq + (struct_and_type_combined ? 3 : 2);
 	ttype = SYMBOL_TYPE (sym) = read_type (&pp, objfile);
 
 	/* read_type() will return null if type (or tag) definition was
@@ -846,18 +1625,26 @@ process_xcoff_symbol (cs, objfile)
 	SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	SYMBOL_NAME (sym) = obsavestring (name, qq-name, &objfile->symbol_obstack);
 
-	if  (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE)
+	if (struct_and_type_combined)
+	  TYPE_NAME (ttype) = SYMBOL_NAME (sym);
+	  
+	else if  (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE)
 	    TYPE_NAME (ttype) = concat (
 		TYPE_CODE (ttype) == TYPE_CODE_UNION ? "union " :
 		TYPE_CODE (ttype) == TYPE_CODE_STRUCT? "struct " : "enum ",
 		SYMBOL_NAME (sym), NULL);
 
-	else if (!TYPE_NAME (ttype))      /* else, regular typedef. */
-	    TYPE_NAME (ttype) = SYMBOL_NAME (sym);
-
 	SYMBOL_DUP (sym, sym2);
 	add_symbol_to_list 
 	   (sym2, within_function ? &local_symbols : &file_symbols);
+
+	/* For a combination of struct and type, add one more symbol for the type. */
+	if (struct_and_type_combined) {
+	  SYMBOL_DUP (sym, sym2);
+	  SYMBOL_NAMESPACE (sym2) = VAR_NAMESPACE;
+	  add_symbol_to_list 
+	     (sym2, within_function ? &local_symbols : &file_symbols);
+	}
 	break;
 
     case C_GSYM:
@@ -865,10 +1652,11 @@ process_xcoff_symbol (cs, objfile)
       break;
 
     case C_PSYM:
+    case C_RPSYM:
 	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
 	  return NULL;
 	SYMBOL_NAME (sym) = obsavestring (name, pp-name, &objfile -> symbol_obstack);
-	SYMBOL_CLASS (sym) = LOC_ARG;
+	SYMBOL_CLASS (sym) = (cs->c_sclass == C_PSYM) ? LOC_ARG : LOC_REGPARM;
 	pp += 2;
 	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
 	SYMBOL_DUP (sym, sym2);
@@ -944,8 +1732,8 @@ process_xcoff_symbol (cs, objfile)
 	     `int' or `float', depending on the register class. */
 
 	  SYMBOL_TYPE (sym) = (SYMBOL_VALUE (sym) < 32)
-	      ? lookup_fundamental_type (current_objfile, FT_INTEGER)
-		  : lookup_fundamental_type (current_objfile, FT_FLOAT);
+	      ? lookup_fundamental_type (objfile, FT_INTEGER)
+		  : lookup_fundamental_type (objfile, FT_FLOAT);
 
 	SYMBOL_DUP (sym, sym2);
 	add_symbol_to_list (sym2, &local_symbols);
@@ -1020,7 +1808,7 @@ PTR vpinfo;
 
   count = asect->lineno_count;
 
-  if (count == 0)
+  if (strcmp (asect->name, ".text") || count == 0)
     return;
 
   size   = count * coff_data (symfile_bfd)->local_linesz;
@@ -1169,7 +1957,14 @@ build_function_symbol (ind, objfile)
 static void
 aixcoff_new_init ()
 {
-  /* Nothin' to do.  */
+  /* This routine is executed once per executable. We should start with a
+     fresh include table per executable. */
+
+  if (inclTable) {
+    free (inclTable);
+    inclTable = NULL;
+  }
+  inclIndx = inclLength = inclDepth = NULL;
 }
 
 static void
@@ -1375,3 +2170,11 @@ _initialize_xcoffread ()
 {
   add_symtab_fns(&aixcoff_sym_fns);
 }
+#else /* IBM6000 */
+struct type *
+builtin_type (pp)
+char **pp;
+{
+    fatal ("internals eror: builtin_type called!");
+}
+#endif /* IBM6000 */

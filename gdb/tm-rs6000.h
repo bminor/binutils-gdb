@@ -18,14 +18,32 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+
+/* A successful ptrace(continue) might return errno != 0 in this particular port
+   of rs6000. I am not sure why. We will use this kludge and ignore it until
+   we figure out the real problem. */
+
+#define AIX_BUGGY_PTRACE_CONTINUE	\
+{ \
+  int ret = ptrace (PT_CONTINUE, inferior_pid, (int *)1, signal, 0); \
+  if (errno) { \
+/*    printf ("ret: %d, errno: %d, signal: %d\n", ret, errno, signal); */ \
+    errno = 0; } \
+}
+
 extern int	symtab_relocated;
+
+/* Minimum possible text address in AIX */
+
+#define TEXT_SEGMENT_BASE	0x10000000
+
 
 /* text addresses in a core file does not necessarily match to symbol table,
    if symbol table relocation wasn't done yet. */
 
 #define	CORE_NEEDS_RELOCATION(PC)	\
-  if (!symtab_relocated && !inferior_pid && (PC) > 0x10000000)	\
-    (PC) -= (0x10000000 + text_adjustment (exec_bfd));
+  if (!symtab_relocated && !inferior_pid && (PC) >  TEXT_SEGMENT_BASE)	\
+    (PC) -= ( TEXT_SEGMENT_BASE + text_adjustment (exec_bfd));
 
 /* Conversion between a register number in stab string to actual register num. */
 
@@ -89,14 +107,40 @@ struct fp_status {
 
 /* When a child process is just starting, we sneak in and relocate
    the symbol table (and other stuff) after the dynamic linker has
-   figured out where they go.  */
+   figured out where they go. But we want to do this relocation just
+   once. */
 
-#define	SOLIB_CREATE_INFERIOR_HOOK(PID)	aixcoff_relocate_symtab (PID)
+extern int aix_loadInfoTextIndex;
 
+#define	SOLIB_CREATE_INFERIOR_HOOK()	\
+  do {					\
+    if (aix_loadInfoTextIndex == 0)	\
+	aixcoff_relocate_symtab (pid);	\
+  } while (0)
+	
+
+/* In aix, number of the trap signals we need to skip over once the
+   inferior process starts running is different in version 3.1 and 3.2.
+   This will be 2 for version 3.1x, 3 for version 3.2x. */
+
+#define	START_INFERIOR_TRAPS_EXPECTED	aix_starting_inferior_traps ()
+
+/* In aixcoff, we cannot process line numbers when we see them. This is
+   mainly because we don't know the boundaries of the include files. So,
+   we postpone that, and then enter and sort(?) the whole line table at
+   once, when we are closing the current symbol table in end_symtab(). */
+
+#define	PROCESS_LINENUMBER_HOOK()	aix_process_linenos ()
+   
+   
 /* When a target process or core-file has been attached, we sneak in
-   and figure out where the shared libraries have got to.  */
+   and figure out where the shared libraries have got to. In case there
+   is no inferior_process exists (e.g. bringing up a core file), we can't
+   attemtp to relocate symbol table, since we don't have information about
+   load segments. */
 
-#define	SOLIB_ADD(a, b, c)		aixcoff_relocate_symtab (inferior_pid)
+#define	SOLIB_ADD(a, b, c)	\
+   if (inferior_pid)	aixcoff_relocate_symtab (inferior_pid)
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -173,7 +217,7 @@ extern char registers[];
    There should be NUM_REGS strings in this initializer.  */
 
 #define REGISTER_NAMES  \
- {"r0", "sp", "toc", "r3", "r4", "r5", "r6", "r7",  \
+ {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",  \
   "r8", "r9", "r10","r11","r12","r13","r14","r15", \
   "r16","r17","r18","r19","r20","r21","r22","r23", \
   "r24","r25","r26","r27","r28","r29","r30","r31", \
@@ -194,6 +238,8 @@ extern char registers[];
 #define SP_REGNUM 1		/* Contains address of top of stack */
 #define	TOC_REGNUM 2		/* TOC register */
 #define FP0_REGNUM 32		/* Floating point register 0 */
+#define	GP0_REGNUM 0		/* GPR register 0 */
+#define FP0_REGNUM 32		/* FPR (Floating point) register 0 */
 #define FPLAST_REGNUM 63	/* Last floating point register */  
 
 /* Special purpose registers... */
@@ -307,7 +353,21 @@ extern unsigned int rs6000_struct_return_address;
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  printf ("FIXMEmgo! STORE_RETURN_VALUE not implemented yet!\n")
+  {									\
+    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
+									\
+     /* Floating point values are returned starting from FPR1 and up.	\
+	Say a double_double_double type could be returned in		\
+	FPR1/FPR2/FPR3 triple. */					\
+									\
+      write_register_bytes (REGISTER_BYTE (FP0_REGNUM+1), (VALBUF),	\
+						TYPE_LENGTH (TYPE));	\
+    else								\
+      /* Everything else is returned in GPR3 and up. */			\
+      write_register_bytes (REGISTER_BYTE (GP0_REGNUM+3), (VALBUF),	\
+						TYPE_LENGTH (TYPE));	\
+  }
+
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -318,7 +378,12 @@ extern unsigned int rs6000_struct_return_address;
 
 /* Do implement the attach and detach commands.  */
 
-#define ATTACH_DETACH	/* FIXMEmgo! Not implemented yet! */
+#define ATTACH_DETACH
+
+/* infptrace.c requires those. */
+
+#define PTRACE_ATTACH 30
+#define	PTRACE_DETACH 31
 
 
 /* Describe the pointer in each stack frame to the previous stack frame
@@ -453,3 +518,8 @@ extern unsigned int rs6000_struct_return_address;
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, using_gcc) \
 	fix_call_dummy(dummyname, pc, fun, nargs, type)
+
+/* Flag for machine-specific stuff in shared files.  FIXME */
+#ifndef IBM6000
+#define IBM6000
+#endif

@@ -1,13 +1,13 @@
 /* IBM RS/6000 instruction set definitions, for GNU software.  */
 
-struct rs6000_insn {
+typedef struct rs6000_insn {
   char	*operator;			/* opcode name		*/
   char	*opr_ext;			/* opcode name extension */
   char	*format;			/* opcode format	*/
   char	p_opcode;			/* primary opcode	*/
   int	e_opcode;			/* extended opcode	*/
   char	oprnd_format[6];		/* operand format	*/
-};
+} OPCODE;
 
 /* operand format specifiers */
 
