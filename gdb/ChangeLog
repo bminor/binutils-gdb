@@ -1,3 +1,9 @@
+2002-08-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (gdbtk-bp.o): Update dependencies.
+	(gdbtk-register.o): Ditto.
+	(gdbtk-varobj.o): Ditto.
+
 2002-08-03  Andrew Cagney  <cagney@redhat.com>
 
 	* m68hc11-tdep.c (m68hc11_pseudo_register_read): Replace
