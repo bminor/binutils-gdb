@@ -372,6 +372,9 @@ static int alpha_current_align;
 /* These are exported to ECOFF code.  */
 unsigned long alpha_gprmask, alpha_fprmask;
 
+/* Whether the debugging option was seen.  */
+static int alpha_debug;
+
 #ifdef OBJ_EVAX
 /* Collect information about current procedure here.  */
 static struct {
@@ -806,6 +809,8 @@ md_section_align (seg, size)
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
 
+extern char *vax_md_atof PARAMS ((int, char *, int *));
+
 char *
 md_atof (type, litP, sizeP)
      char type;
@@ -816,7 +821,6 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
   char *t;
-  char *atof_ieee (), *vax_md_atof ();
 
   switch (type)
     {
@@ -883,9 +887,7 @@ md_parse_option (c, arg)
       break;
 
     case 'g':
-      /* Ignore `-g' so gcc can provide this option to the Digital
-	 UNIX assembler, which otherwise would throw away info that
-	 mips-tfile needs.  */
+      alpha_debug = 1;
       break;
 
     case 'm':
@@ -1426,6 +1428,24 @@ found:
   return framereg;
 }
 
+/* This is called before the symbol table is processed.  In order to
+   work with gcc when using mips-tfile, we must keep all local labels.
+   However, in other cases, we want to discard them.  If we were
+   called with -g, but we didn't see any debugging information, it may
+   mean that gcc is smuggling debugging information through to
+   mips-tfile, in which case we must generate all local labels.  */
+
+#ifdef OBJ_ECOFF
+
+void
+alpha_frob_file_before_adjust ()
+{
+  if (alpha_debug != 0
+      && ! ecoff_debugging_seen)
+    flag_keep_locals = 1;
+}
+
+#endif /* OBJ_ECOFF */
 
 /* Parse the arguments to an opcode.  */
 
@@ -2326,6 +2346,12 @@ load_expression (targreg, exp, pbasereg, poffset)
       if (poffset)
 	set_tok_const (*poffset, 0);
       return 0;
+
+    case O_big:
+      as_bad ("%s number invalid; zero assumed",
+	      exp->X_add_number > 0 ? "bignum" : "floating point");
+      addend = 0;
+      break;
 
     default:
       abort();
@@ -3336,7 +3362,7 @@ s_alpha_comm (ignore)
   symbolP = symbol_find_or_make (name);
   *p = c;
 
-  if (S_IS_DEFINED (symbolP))
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad ("Ignoring attempt to re-define symbol");
       ignore_rest_of_line ();
@@ -4174,6 +4200,20 @@ alpha_cons_align (size)
     alpha_current_align = log_size;
   alpha_insn_label = NULL;
 }
+
+/* Here come the .uword, .ulong, and .uquad explicitly unaligned
+   pseudos.  We just turn off auto-alignment and call down to cons.  */
+
+static void
+s_alpha_ucons (bytes)
+     int bytes;
+{
+  int hold = alpha_auto_align_on;
+  alpha_auto_align_on = 0;
+  cons (bytes);
+  alpha_auto_align_on = hold;
+}
+
 
 
 #ifdef DEBUG1
@@ -4274,6 +4314,18 @@ const pseudo_typeS md_pseudo_table[] =
   {"space", s_alpha_space, 0},
   {"skip", s_alpha_space, 0},
   {"zero", s_alpha_space, 0},
+
+/* Unaligned data pseudos.  */
+  {"uword", s_alpha_ucons, 2},
+  {"ulong", s_alpha_ucons, 4},
+  {"uquad", s_alpha_ucons, 8},
+
+#ifdef OBJ_ELF
+/* Dwarf wants these versions of unaligned.  */
+  {"2byte", s_alpha_ucons, 2},
+  {"4byte", s_alpha_ucons, 4},
+  {"8byte", s_alpha_ucons, 8},
+#endif
 
 /* We don't do any optimizing, so we can safely ignore these.  */
   {"noalias", s_ignore, 0},
