@@ -2390,7 +2390,7 @@ which its expression is valid.\n");
 
 /* Get a bpstat associated with having just stopped at address *PC
    and frame address CORE_ADDRESS.  Update *PC to point at the
-   breakpoint (if we hit a breakpoint).  NOT_A_BREAKPOINT is nonzero
+   breakpoint (if we hit a breakpoint).  NOT_A_SW_BREAKPOINT is nonzero
    if this is known to not be a real breakpoint (it could still be a
    watchpoint, though).  */
 
@@ -2409,7 +2409,7 @@ which its expression is valid.\n");
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
+bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 {
   register struct breakpoint *b, *temp;
   CORE_ADDR bp_addr;
@@ -2423,13 +2423,13 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
   "Error evaluating expression for watchpoint %d\n";
   char message[sizeof (message1) + 30 /* slop */ ];
 
-  /* Get the address where the breakpoint would have been.  
-     The "not_a_breakpoint" argument is meant to distinguish 
-     between a breakpoint trap event and a trace/singlestep
-     trap event.  For a trace/singlestep trap event, we would
-     not want to subtract DECR_PC_AFTER_BREAK from the PC. */
+  /* Get the address where the breakpoint would have been.  The
+     "not_a_sw_breakpoint" argument is meant to distinguish between a
+     breakpoint trap event and a trace/singlestep trap event.  For a
+     trace/singlestep trap event, we would not want to subtract
+     DECR_PC_AFTER_BREAK from the PC. */
 
-  bp_addr = *pc - (not_a_breakpoint && !SOFTWARE_SINGLE_STEP_P () ? 
+  bp_addr = *pc - (not_a_sw_breakpoint && !SOFTWARE_SINGLE_STEP_P () ? 
                    0 : DECR_PC_AFTER_BREAK);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
