@@ -29,10 +29,6 @@
 struct type;
 struct value;
 
-/* Target byte order on ARM defaults to selectable, and defaults to
-   little endian.  */
-#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_LITTLE
-
 /* IEEE format floating point.  */
 #define TARGET_DOUBLE_FORMAT  (target_byte_order == BFD_ENDIAN_BIG \
 			       ? &floatformat_ieee_double_big	 \
@@ -168,6 +164,9 @@ extern void arm_float_info (void);
 #define NUM_SREGS	2	/* Number of status registers.  */
 #define NUM_GREGS	16	/* Number of general purpose registers.  */
 #define NUM_REGS	(NUM_GREGS + NUM_FREGS + NUM_SREGS)
+
+/* An array of names of registers. */
+extern char **arm_register_names;
 
 #define REGISTER_NAME(i) arm_register_name(i)
 char *arm_register_name (int);

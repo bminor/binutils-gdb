@@ -3471,12 +3471,6 @@ where @var{valbuf} is the address of the value to be stored.
 The default value of the ``symbol-reloading'' variable.  (Never defined in
 current sources.)
 
-@item TARGET_BYTE_ORDER_DEFAULT
-@findex TARGET_BYTE_ORDER_DEFAULT
-The ordering of bytes in the target.  This must be either
-@code{BFD_ENDIAN_BIG} or @code{BFD_ENDIAN_LITTLE}.  This macro replaces
-@code{TARGET_BYTE_ORDER} which is deprecated.
-
 @item TARGET_CHAR_BIT
 @findex TARGET_CHAR_BIT
 Number of bits in a char; defaults to 8.

@@ -1,5 +1,15 @@
 2002-01-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* arch-utils.c (TARGET_BYTE_ORDER_DEFAULT): Delete macro.
+	(target_byte_order): Initialize to BFD_ENDIAN_BIG.
+	(initialize_current_architecture): Update target_byte_order using
+	information from BFD.
+	* config/powerpc/tm-ppcle-eabi.h (TARGET_BYTE_ORDER_DEFAULT):
+	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_DEFAULT): 
+	* config/arm/tm-arm.h (TARGET_BYTE_ORDER_DEFAULT): Delete.
+
+2002-01-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/vax/tm-vax.h (INVALID_FLOAT): Move macro from here...
 	* vax-tdep.c (INVALID_FLOAT): To here.  Document why it is broken.
 

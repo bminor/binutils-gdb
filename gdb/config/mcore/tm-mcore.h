@@ -20,9 +20,6 @@
 
 #include "regcache.h"
 
-/* The mcore is little endian (by default) */
-#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_LITTLE
-
 /* All registers are 32 bits */
 #define REGISTER_SIZE 4
 #define MAX_REGISTER_RAW_SIZE 4

@@ -399,13 +399,14 @@ generic_register_virtual_size (int regnum)
 
 /* Functions to manipulate the endianness of the target.  */
 
-#ifndef TARGET_BYTE_ORDER_DEFAULT
-#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_BIG /* arbitrary */
-#endif
 /* ``target_byte_order'' is only used when non- multi-arch.
-   Multi-arch targets obtain the current byte order using
-   TARGET_BYTE_ORDER which is controlled by gdbarch.*. */
-int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
+   Multi-arch targets obtain the current byte order using the
+   TARGET_BYTE_ORDER gdbarch method.
+
+   The choice of initial value is entirely arbitrary.  During startup,
+   the function initialize_current_architecture() updates this value
+   based on default byte-order information extracted from BFD.  */
+int target_byte_order = BFD_ENDIAN_BIG;
 int target_byte_order_auto = 1;
 
 static const char endian_big[] = "big";
@@ -725,9 +726,7 @@ initialize_current_architecture (void)
 			"initialize_current_architecture: Arch not found");
     }
 
-  /* take several guesses at a byte order. */
-  /* NB: can't use TARGET_BYTE_ORDER_DEFAULT as its definition is
-     forced above. */
+  /* Take several guesses at a byte order.  */
   if (info.byte_order == BFD_ENDIAN_UNKNOWN
       && default_bfd_vec != NULL)
     {
@@ -769,7 +768,13 @@ initialize_current_architecture (void)
 	}
     }
   else
-    initialize_non_multiarch ();
+    {
+      /* If the multi-arch logic comes up with a byte-order (from BFD)
+         use it for the non-multi-arch case.  */
+      if (info.byte_order != BFD_ENDIAN_UNKNOWN)
+	target_byte_order = info.byte_order;
+      initialize_non_multiarch ();
+    }
 
   /* Create the ``set architecture'' command appending ``auto'' to the
      list of architectures. */
