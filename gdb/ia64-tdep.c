@@ -37,6 +37,7 @@
 #include "elf/common.h"		/* for DT_PLTGOT value */
 #include "elf-bfd.h"
 #include "dis-asm.h"
+#include "infcall.h"
 #include "ia64-tdep.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
@@ -3023,7 +3024,7 @@ ia64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 }
 
 static CORE_ADDR
-ia64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr, 
+ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
@@ -3035,6 +3036,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int nslots, rseslots, memslots, slotnum, nfuncargs;
   int floatreg;
   CORE_ADDR bsp, cfm, pfs, new_bsp, funcdescaddr, pc, global_pointer;
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   nslots = 0;
   nfuncargs = 0;

@@ -36,6 +36,7 @@
 #include "value.h"
 #include "parser-defs.h"
 #include "osabi.h"
+#include "infcall.h"
 
 #include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
@@ -1271,7 +1272,7 @@ rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
    starting from r4.  */
 
 static CORE_ADDR
-rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
@@ -1284,6 +1285,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   char tmp_buffer[50];
   int f_argno = 0;		/* current floating point argno */
   int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   struct value *arg = 0;
   struct type *type;

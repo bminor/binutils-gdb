@@ -205,7 +205,8 @@ find_function_addr (struct value *function, struct type **retval_type)
   else
     error ("Invalid data type for function to be called.");
 
-  *retval_type = value_type;
+  if (retval_type != NULL)
+    *retval_type = value_type;
   return funaddr + FUNCTION_START_OFFSET;
 }
 
@@ -660,7 +661,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     /* When there is no push_dummy_call method, should this code
        simply error out.  That would the implementation of this method
        for all ABIs (which is probably a good thing).  */
-    sp = gdbarch_push_dummy_call (current_gdbarch, funaddr, current_regcache,
+    sp = gdbarch_push_dummy_call (current_gdbarch, function, current_regcache,
 				  bp_addr, nargs, args, sp, struct_return,
 				  struct_addr);
   else  if (DEPRECATED_PUSH_ARGUMENTS_P ())

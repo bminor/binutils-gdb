@@ -53,6 +53,7 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "trad-frame.h"
+#include "infcall.h"
 
 static const struct objfile_data *mips_pdr_data;
 
@@ -2767,7 +2768,7 @@ mips_eabi_reg_struct_has_addr (int gcc_p, struct type *type)
 }
 
 static CORE_ADDR
-mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			   struct regcache *regcache, CORE_ADDR bp_addr,
 			   int nargs, struct value **args, CORE_ADDR sp,
 			   int struct_return, CORE_ADDR struct_addr)
@@ -2778,6 +2779,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int len = 0;
   int stack_offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
@@ -3085,7 +3087,7 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 /* N32/N64 ABI stuff.  */
 
 static CORE_ADDR
-mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			     struct regcache *regcache, CORE_ADDR bp_addr,
 			     int nargs, struct value **args, CORE_ADDR sp,
 			     int struct_return, CORE_ADDR struct_addr)
@@ -3096,6 +3098,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int len = 0;
   int stack_offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
@@ -3423,7 +3426,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 /* O32 ABI stuff.  */
 
 static CORE_ADDR
-mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			  struct regcache *regcache, CORE_ADDR bp_addr,
 			  int nargs, struct value **args, CORE_ADDR sp,
 			  int struct_return, CORE_ADDR struct_addr)
@@ -3434,6 +3437,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int len = 0;
   int stack_offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
@@ -3875,7 +3879,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
    ABI.  */
 
 static CORE_ADDR
-mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			  struct regcache *regcache, CORE_ADDR bp_addr,
 			  int nargs,
 			  struct value **args, CORE_ADDR sp,
@@ -3887,6 +3891,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int len = 0;
   int stack_offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */

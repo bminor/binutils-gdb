@@ -30,6 +30,7 @@
 #include "ppc-tdep.h"
 #include "target.h"
 #include "objfiles.h"
+#include "infcall.h"
 
 /* Pass the arguments in either registers, or in the stack. Using the
    ppc sysv ABI, the first eight words of the argument list (that might
@@ -43,7 +44,7 @@
    starting from r4. */
 
 CORE_ADDR
-ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			      struct regcache *regcache, CORE_ADDR bp_addr,
 			      int nargs, struct value **args, CORE_ADDR sp,
 			      int struct_return, CORE_ADDR struct_addr)
@@ -540,11 +541,12 @@ ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
    greatly simplifies the logic. */
 
 CORE_ADDR
-ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				struct regcache *regcache, CORE_ADDR bp_addr,
 				int nargs, struct value **args, CORE_ADDR sp,
 				int struct_return, CORE_ADDR struct_addr)
 {
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* By this stage in the proceedings, SP has been decremented by "red
      zone size" + "struct return size".  Fetch the stack-pointer from

@@ -41,14 +41,14 @@ enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *g
 							       void *readbuf,
 							       const void *writebuf);
 CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
-					CORE_ADDR func_addr,
+					struct value *function,
 					struct regcache *regcache,
 					CORE_ADDR bp_addr, int nargs,
 					struct value **args, CORE_ADDR sp,
 					int struct_return,
 					CORE_ADDR struct_addr);
 CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
-					  CORE_ADDR func_addr,
+					  struct value *function,
 					  struct regcache *regcache,
 					  CORE_ADDR bp_addr, int nargs,
 					  struct value **args, CORE_ADDR sp,

@@ -885,7 +885,7 @@ sh_treat_as_flt_p (struct type *type)
 
 static CORE_ADDR
 sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
-			CORE_ADDR func_addr,
+			struct value *function,
 			struct regcache *regcache,
 			CORE_ADDR bp_addr, int nargs,
 			struct value **args,
@@ -997,7 +997,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 
 static CORE_ADDR
 sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
-			  CORE_ADDR func_addr,
+			  struct value *function,
 			  struct regcache *regcache,
 			  CORE_ADDR bp_addr,
 			  int nargs, struct value **args,

@@ -686,7 +686,7 @@ m32r_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 
 static CORE_ADDR
-m32r_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
 		      struct value **args, CORE_ADDR sp, int struct_return,
 		      CORE_ADDR struct_addr)

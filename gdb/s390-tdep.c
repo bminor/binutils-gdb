@@ -2565,7 +2565,7 @@ alignment_of (struct type *type)
    Our caller has taken care of any type promotions needed to satisfy
    prototypes or the old K&R argument-passing rules.  */
 static CORE_ADDR
-s390_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)

@@ -1210,7 +1210,7 @@ pop_stack_item (struct stack_item *si)
    we should probably support some of them based on the selected ABI.  */
 
 static CORE_ADDR
-arm_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
 		     struct value **args, CORE_ADDR sp, int struct_return,
 		     CORE_ADDR struct_addr)

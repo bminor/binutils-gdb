@@ -40,6 +40,7 @@
 #include "arch-utils.h"
 #include "osabi.h"
 #include "block.h"
+#include "infcall.h"
 
 #include "elf-bfd.h"
 
@@ -263,7 +264,7 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
    structure to be returned is passed as a hidden first argument.  */
 
 static CORE_ADDR
-alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       struct regcache *regcache, CORE_ADDR bp_addr,
 		       int nargs, struct value **args, CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
@@ -281,6 +282,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   struct alpha_arg *m_arg;
   char arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
   int required_arg_regs;
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   /* The ABI places the address of the called function in T12.  */
   regcache_cooked_write_signed (regcache, ALPHA_T12_REGNUM, func_addr);

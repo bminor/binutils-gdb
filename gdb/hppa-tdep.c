@@ -709,7 +709,7 @@ hppa64_register_name (int i)
    arguments into their proper slots.  */
    
 CORE_ADDR
-hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
@@ -870,7 +870,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
    to the callee, so we do that too.  */
    
 CORE_ADDR
-hppa64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)

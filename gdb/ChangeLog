@@ -1,3 +1,44 @@
+2004-06-06  Randolph Chung  <tausq@debian.org>
+
+	* gdbarch.sh (PUSH_DUMMY_CALL): Change CORE_ADDR func_addr argument
+	to struct value *function.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* infcall.c (call_function_by_hand): Pass entire function value
+	to push_dummy_call.
+
+	* Makefile.in (alpha-tdep.o, frv-tdep.o, ia64-tdep.o, mips-tdep.o)
+	(ppc-sysv-tdep.o, rs6000-tdep.o): Update dependencies.
+	* alpha-tdep.c (alpha_push_dummy_call): Update call signature.
+	* amd64-tdep.c (amd64_push_dummy_call): Likewise.
+	* arm-tdep.c (arm_push_dummy_call): Likewise.
+	* avr-tdep.c (avr_push_dummy_call): Likewise.
+	* cris-tdep.c (cris_push_dummy_call): Likewise.
+	* d10v-tdep.c (d10v_push_dummy_call): Likewise.
+	* frv-tdep.c (frv_push_dummy_call): Likewise.
+	* h8300-tdep.c (h8300_push_dummy_call): Likewise.
+	* hppa-tdep.c (hppa32_push_dummy_call)
+	(hppa64_push_dummy_call): Likewise.
+	* i386-tdep.c (i386_push_dummy_call): Likewise.
+	* ia64-tdep.c (ia64_push_dummy_call): Likewise.
+	* m32r-tdep.c (m32r_push_dummy_call): Likewise.
+	* m68hc11-tdep.c (m68hc11_push_dummy_call): Likewise.
+	* m68k-tdep.c (m68k_push_dummy_call): Likewise.
+	* m88k-tdep.c (m88k_push_dummy_call): Likewise.
+	* mips-tdep.c (mips_eabi_push_dummy_call, mips_n32n64_push_dummy_call)
+	(mips_o32_push_dummy_call, mips_o64_push_dummy_call): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call)
+	(ppc64_sysv_abi_push_dummy_call): Likewise.
+	* ppc-tdep.h (ppc_sysv_abi_push_dummy_call)
+	(ppc64_sysv_abi_push_dummy_call): Likewise.
+	* rs6000-tdep.c (rs6000_push_dummy_call): Likewise.
+	* s390-tdep.c (s390_push_dummy_call): Likewise.
+	* sh-tdep.c (sh_push_dummy_call_fpu)
+	(sh_push_dummy_call_nofpu): Likewise.
+	* sparc-tdep.c (sparc32_push_dummy_call): Likewise.
+	* sparc64-tdep.c (sparc64_push_dummy_call): Likewise.
+	* vax-tdep.c (vax_push_dummy_call): Likewise.
+
 2004-06-04  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (fetch_register): Don't forget to pass the

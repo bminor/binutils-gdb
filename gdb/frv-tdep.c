@@ -37,6 +37,7 @@
 #include "elf-bfd.h"
 #include "elf/frv.h"
 #include "osabi.h"
+#include "infcall.h"
 #include "frv-tdep.h"
 
 extern void _initialize_frv_tdep (void);
@@ -1118,7 +1119,7 @@ frv_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
 }
 
 static CORE_ADDR
-frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                      struct regcache *regcache, CORE_ADDR bp_addr,
                      int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
@@ -1135,6 +1136,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int stack_space;
   int stack_offset;
   enum frv_abi abi = frv_abi (gdbarch);
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
 #if 0
   printf("Push %d args at sp = %x, struct_return=%d (%x)\n",

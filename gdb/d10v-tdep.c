@@ -953,7 +953,7 @@ d10v_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-d10v_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+d10v_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp, 
 		      int struct_return, CORE_ADDR struct_addr)
