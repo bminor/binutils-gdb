@@ -1,3 +1,7 @@
+Mon Apr 6 16:40:17 1998 Jillian Ye <jillian@cygnus.com>
+
+	* c_gen.pl: Added subroutin perform_test64.
+
 Sun Apr  5 12:34:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* t-pke3.trc: Modified to confirm parts of GPUIF PATH3-masking

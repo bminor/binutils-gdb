@@ -15,7 +15,8 @@
 #         n (for data)   0xH_H_H_H         0xH           4-CHARs   
 #         ? (for test)   0xH  (addr)       0xH  (value)  0xH (mask)
 #         ! (reg wrt 32) 0xH  (addr)       0xH  (data) 
-#         ~ (reg wrt 64) 0xH  (addr)       0xHigh_Low (data) 
+#         ~ (reg wrt 64) 0xH  (addr)       0xHigh_Low (data)
+#         % (reg read 64) 0xH (addr)       0xHigh_Low (data) 
 #         # comment line
 #       Note: n can be 0 (for VU1), 1 (for VU2), or 2 (for GIF).
 #             H, High, or Low is hex data in the format of FFFFFFFF
@@ -74,10 +75,6 @@ while( $inputline = <INFILE> )
   {  
       &process_comment;
   } 
-  elsif ( $inputline =~ /^\?/ )      # A line starts with "?" is a verification request
-  {
-      &perform_test;
-  }
   elsif ( $inputline =~ /^[012]/ )   # This is a data line
   {
       &process_data;
@@ -89,7 +86,15 @@ while( $inputline = <INFILE> )
   elsif ( $inputline =~ /^\~/ )      # This is a 64-bit register write
   {
       &process_data_reg64;
-  }  
+  }
+  elsif ( $inputline =~ /^\?/ )      # A line starts with "?" is a 32bit read/verification request
+  {
+      &perform_test32;
+  }
+  elsif ( $inputline =~ /^\%/ )      # A line starts with "%" is a 64bit read/verification request
+  {
+      &perform_test64;
+  }
   else   # ignore this input
   {
      print OUTFILE ("\n");
@@ -114,30 +119,6 @@ exit(0);
 sub process_comment {
    $inputline =~ s/#//;
    print OUTFILE ("/*".$inputline."*/\n");
-}
-
-sub perform_test {
-  print OUTFILE ("\n");
-  print OUTFILE ("/******************************************************************/\n");
-  print OUTFILE ("/*Verify the data in the specified address with the input value:  */\n\n");
-  
-  @columns = split ( /[\s]+/, $inputline );
- 
-  #column[1] is the address;
-  #column[2] is the value, in the format of oxH;
-  #column[3] is the mask, in the format of oxH;
-
-  print OUTFILE ("\n{\n");
-  print OUTFILE ("  volatile unsigned* test_ptr = \(unsigned *\)".$columns[1].";\n");
-  print OUTFILE ("  unsigned test_data = *test_ptr;\n");
-  print OUTFILE ("  if \( \( test_data & $columns[3] \) == $columns[2] \) {\n");
-  print OUTFILE ("     num_passed ++;\n");
-  print OUTFILE ("  } else {\n");
-  print OUTFILE ("     printf \(\"Data Verification (line $current_line_number) failed!\\n\"\); \n" );
-  print OUTFILE ("     printf \(\"Expecting \%08x mask \%08x in address \%08x but got \%08x !\\n\", $columns[2], $columns[3], $columns[1], test_data\); \n");
-  print OUTFILE ("     num_failed++;\n");
-  print OUTFILE ("  }\n}\n");
-
 }
 
 sub process_data {
@@ -229,6 +210,54 @@ sub process_data_reg64 {
   print OUTFILE ("  num_w_written ++;\n");
   print OUTFILE ("}\n");
   
+}
+
+sub perform_test32 {
+  print OUTFILE ("\n");
+  print OUTFILE ("/******************************************************************/\n");
+  print OUTFILE ("/*Verify the data in the specified address with the input value:  */\n\n");
+  
+  @columns = split ( /[\s]+/, $inputline );
+ 
+  #column[1] is the address;
+  #column[2] is the value, in the format of oxH;
+  #column[3] is the mask, in the format of oxH;
+
+  print OUTFILE ("\n{\n");
+  print OUTFILE ("  volatile unsigned* test_ptr = \(unsigned *\)".$columns[1].";\n");
+  print OUTFILE ("  unsigned test_data = *test_ptr;\n");
+  print OUTFILE ("  if \( \( test_data & $columns[3] \) == $columns[2] \) {\n");
+  print OUTFILE ("     num_passed ++;\n");
+  print OUTFILE ("  } else {\n");
+  print OUTFILE ("     printf \(\"Data Verification (line $current_line_number) failed!\\n\"\); \n" );
+  print OUTFILE ("     printf \(\"Expecting \%08x mask \%08x in address \%08x but got \%08x !\\n\", $columns[2], $columns[3], $columns[1], test_data\); \n");
+  print OUTFILE ("     num_failed++;\n");
+  print OUTFILE ("  }\n}\n");
+
+}
+
+sub perform_test64 {
+  print OUTFILE ("\n");
+  print OUTFILE ("/******************************************************************/\n");
+  print OUTFILE ("/*Verify the data in the specified address with the input value:  */\n\n");
+  
+  @columns = split ( /[\s]+/, $inputline );
+ 
+  #column[1] is the address;
+  #column[2] is the value, in the format of 0xH_H;
+  @llword = split ("_", $columns[2]);
+
+  print OUTFILE ("\n{\n");
+  print OUTFILE ("  volatile long long int* test64_ptr = \(long long int *\)".$columns[1].";\n");
+  print OUTFILE ("  long long int test64_data = \(long long\)".$llword[0]." \<\< 32 \| \(long long\)0x".$llword[1].";\n");
+  print OUTFILE ("  if \( \( test64_data \) == *test64_ptr \) {\n");
+  print OUTFILE ("     num_passed ++;\n");
+  print OUTFILE ("  } else {\n");
+  print OUTFILE ("     printf \(\"Data Verification (line $current_line_number) failed!\\n\"\); \n" );
+  print OUTFILE ("     printf \(\"Expecting \%20s in address \%08x but got \%16x !\\n\", \"$columns[2]\", $columns[1], *test64_ptr\); \n");
+  print OUTFILE ("     num_failed++;\n");
+  print OUTFILE ("  }\n}\n");
+
 }
 
 
