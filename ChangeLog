@@ -1,3 +1,24 @@
+Wed Dec 18 10:29:31 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in: Do build gcc and the target libraries for
+	the mn10200.
+
+Wed Dec  4 16:53:05 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: don't avoid building gdb for mn10300 any more
+	* Makefile.in: double-quote GCC_FOR_TARGET line in EXTRA_GCC_FLAGS
+	instead of single-quoting it.
+
+Tue Dec  3 23:26:50 1996  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* configure.in: Don't use --with-stabs on IRIX 6.
+
+start-sanitize-m32r
+Tue Dec  3 09:05:25 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (m32r): Build gdb, libg++ now.
+
+end-sanitize-m32r
 Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in (mips*-sgi-irix6*):  Remove gdb and related
