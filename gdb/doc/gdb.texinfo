@@ -36,6 +36,9 @@ original English.
 @c @smallbook
 @setchapternewpage odd
 @settitle Using GDB (v3.94)
+@iftex
+@finalout
+@end iftex
 @titlepage
 @title{Using GDB}
 @subtitle{A Guide to the GNU Source-Level Debugger}
