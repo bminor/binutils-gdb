@@ -57,6 +57,12 @@ static void show_range_command (char *, int);
 
 static void set_range_command (char *, int);
 
+static void show_case_command (char *, int);
+
+static void set_case_command (char *, int);
+
+static void set_case_str (void);
+
 static void set_range_str (void);
 
 static void set_type_str (void);
@@ -71,7 +77,7 @@ static void show_check (char *, int);
 
 static void set_check (char *, int);
 
-static void set_type_range (void);
+static void set_type_range_case (void);
 
 static void unk_lang_emit_char (int c, struct ui_file *stream, int quoter);
 
@@ -105,6 +111,8 @@ enum range_mode range_mode = range_mode_auto;
 enum range_check range_check = range_check_off;
 enum type_mode type_mode = type_mode_auto;
 enum type_check type_check = type_check_off;
+enum case_mode case_mode = case_mode_auto;
+enum case_sensitivity case_sensitivity = case_sensitive_on;
 
 /* The current language and language_mode (see language.h) */
 
@@ -132,6 +140,7 @@ static unsigned languages_allocsize;
 static char *language;
 static char *type;
 static char *range;
+static char *case_sensitive;
 
 /* Warning issued when current_language and the language of the current
    frame do not match. */
@@ -211,7 +220,7 @@ set_language_command (char *ignore, int from_tty)
 	      /* Enter manual mode.  Set the specified language.  */
 	      language_mode = language_mode_manual;
 	      current_language = languages[i];
-	      set_type_range ();
+	      set_type_range_case ();
 	      set_lang_str ();
 	      expected_language = current_language;
 	      return;
@@ -259,9 +268,9 @@ set_type_command (char *ignore, int from_tty)
   else if (STREQ (type, "auto"))
     {
       type_mode = type_mode_auto;
-      set_type_range ();
+      set_type_range_case ();
       /* Avoid hitting the set_type_str call below.  We
-         did it in set_type_range. */
+         did it in set_type_range_case. */
       return;
     }
   else
@@ -305,9 +314,9 @@ set_range_command (char *ignore, int from_tty)
   else if (STREQ (range, "auto"))
     {
       range_mode = range_mode_auto;
-      set_type_range ();
+      set_type_range_case ();
       /* Avoid hitting the set_range_str call below.  We
-         did it in set_type_range. */
+         did it in set_type_range_case. */
       return;
     }
   else
@@ -318,12 +327,56 @@ set_range_command (char *ignore, int from_tty)
   show_range_command ((char *) 0, from_tty);
 }
 
-/* Set the status of range and type checking based on
+/* Show command.  Display a warning if the case sensitivity setting does
+   not match the current language. */
+static void
+show_case_command(ignore, from_tty)
+   char *ignore;
+   int from_tty;
+{
+   if (case_sensitivity != current_language->la_case_sensitivity)
+      printf_unfiltered(
+"Warning: the current case sensitivity setting does not match the language.\n");
+}
+
+/* Set command.  Change the setting for case sensitivity. */
+static void
+set_case_command(ignore, from_tty)
+   char *ignore;
+   int from_tty;
+{
+   if (STREQ (case_sensitive, "on"))
+   {
+      case_sensitivity = case_sensitive_on;
+      case_mode = case_mode_manual;
+   }
+   else if (STREQ (case_sensitive, "off"))
+   {
+      case_sensitivity = case_sensitive_off;
+      case_mode = case_mode_manual;
+   }
+   else if (STREQ (case_sensitive, "auto"))
+   {
+      case_mode = case_mode_auto;
+      set_type_range_case ();
+      /* Avoid hitting the set_case_str call below.  We
+         did it in set_type_range_case. */
+      return;
+   }
+   else
+   {
+      warning ("Unrecognized case-sensitive setting: \"%s\"", case_sensitive);
+   }
+   set_case_str();
+   show_case_command ((char *) NULL, from_tty);
+}
+
+/* Set the status of range and type checking and case sensitivity based on
    the current modes and the current language.
    If SHOW is non-zero, then print out the current language,
    type and range checking status. */
 static void
-set_type_range (void)
+set_type_range_case (void)
 {
 
   if (range_mode == range_mode_auto)
@@ -332,8 +385,12 @@ set_type_range (void)
   if (type_mode == type_mode_auto)
     type_check = current_language->la_type_check;
 
+  if (case_mode == case_mode_auto)
+    case_sensitivity = current_language->la_case_sensitivity;
+
   set_type_str ();
   set_range_str ();
+  set_case_str ();
 }
 
 /* Set current language to (enum language) LANG.  Returns previous language. */
@@ -351,7 +408,7 @@ set_language (enum language lang)
       if (languages[i]->la_language == lang)
 	{
 	  current_language = languages[i];
-	  set_type_range ();
+	  set_type_range_case ();
 	  set_lang_str ();
 	  break;
 	}
@@ -431,6 +488,29 @@ set_range_str (void)
   range = concat (pref, tmp, NULL);
 }
 
+static void
+set_case_str()
+{
+   char *tmp = NULL, *prefix = "";
+
+   if (case_mode==case_mode_auto)
+      prefix = "auto; currently ";
+
+   switch (case_sensitivity)
+   {
+   case case_sensitive_on:
+     tmp = "on";
+     break;
+   case case_sensitive_off:
+     tmp = "off";
+     break;
+   default:
+     error ("Unrecognized case-sensitive setting.");
+   }
+
+   free (case_sensitive);
+   case_sensitive = concat (prefix, tmp, NULL);
+}
 
 /* Print out the current language settings: language, range and
    type checking.  If QUIETLY, print only what has changed.  */
@@ -451,6 +531,8 @@ language_info (int quietly)
       show_type_command ((char *) 0, 1);
       printf_unfiltered ("Range checking:    %s\n", range);
       show_range_command ((char *) 0, 1);
+      printf_unfiltered ("Case sensitivity:  %s\n", case_sensitive);
+      show_case_command ((char *) 0, 1);
     }
 }
 
@@ -1400,6 +1482,7 @@ const struct language_defn unknown_language_defn =
   &unknown_builtin_types[0],
   range_check_off,
   type_check_off,
+  case_sensitive_on,
   unk_lang_parser,
   unk_lang_error,
   evaluate_subexp_standard,
@@ -1429,6 +1512,7 @@ const struct language_defn auto_language_defn =
   &unknown_builtin_types[0],
   range_check_off,
   type_check_off,
+  case_sensitive_on,
   unk_lang_parser,
   unk_lang_error,
   evaluate_subexp_standard,
@@ -1457,6 +1541,7 @@ const struct language_defn local_language_defn =
   &unknown_builtin_types[0],
   range_check_off,
   type_check_off,
+  case_sensitive_on,
   unk_lang_parser,
   unk_lang_error,
   evaluate_subexp_standard,
@@ -1523,16 +1608,24 @@ _initialize_language (void)
   set->function.cfunc = set_range_command;
   show->function.cfunc = show_range_command;
 
+  set = add_set_cmd ("case-sensitive", class_support, var_string_noescape,
+                     (char *) &case_sensitive,
+                     "Set case sensitivity in name search.  (on/off/auto)\n\
+For Fortran the default is off; for other languages the default is on.",
+                     &setlist);
+  show = add_show_from_set (set, &showlist);
+  set->function.cfunc = set_case_command;
+  show->function.cfunc = show_case_command;
+
   add_language (&unknown_language_defn);
   add_language (&local_language_defn);
   add_language (&auto_language_defn);
 
   language = savestring ("auto", strlen ("auto"));
-  set_language_command (language, 0);
-
   type = savestring ("auto", strlen ("auto"));
-  set_type_command (NULL, 0);
-
   range = savestring ("auto", strlen ("auto"));
-  set_range_command (NULL, 0);
+  case_sensitive = savestring ("auto",strlen ("auto"));
+
+  /* Have the above take effect */
+  set_language (language_auto);
 }

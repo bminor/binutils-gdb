@@ -460,6 +460,7 @@ const struct language_defn f_language_defn =
   f_builtin_types,
   range_check_on,
   type_check_on,
+  case_sensitive_off,
   f_parse,			/* parser */
   f_error,			/* parser error function */
   evaluate_subexp_standard,

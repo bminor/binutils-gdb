@@ -608,6 +608,7 @@ const struct language_defn chill_language_defn =
   chill_builtin_types,
   range_check_on,
   type_check_on,
+  case_sensitive_on,
   chill_parse,			/* parser */
   chill_error,			/* parser error function */
   evaluate_subexp_chill,

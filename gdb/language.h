@@ -81,6 +81,26 @@ extern enum type_check
     type_check_off, type_check_warn, type_check_on
   }
 type_check;
+
+/* case_mode ==
+   case_mode_auto:   case_sensitivity set upon selection of scope 
+   case_mode_manual: case_sensitivity set only by user.  */
+
+extern enum case_mode
+  {
+    case_mode_auto, case_mode_manual
+  }
+case_mode;
+
+/* case_sensitivity ==
+   case_sensitive_on:   Case sensitivity in name matching is used
+   case_sensitive_off:  Case sensitivity in name matching is not used  */
+
+extern enum case_sensitivity
+  {
+    case_sensitive_on, case_sensitive_off
+  }
+case_sensitivity;
 
 /* Information for doing language dependent formatting of printed values. */
 
@@ -139,6 +159,9 @@ struct language_defn
     /* Default type checking */
 
     enum type_check la_type_check;
+
+    /* Default case sensitivity */
+    enum case_sensitivity la_case_sensitivity;
 
     /* Parser function. */
 

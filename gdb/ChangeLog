@@ -1,5 +1,29 @@
 2000-08-10  Jimmy Guo  <guo@cup.hp.com>
 
+	* c-lang.c: Set case sensitivity on for c_language_defn,
+	cplus_language_defn, and asm_language_defn.
+	* ch-lang.c: Set case sensitivity on for chill_language_defn.
+	* f-lang.c: Set case sensivitity off for f_language_defn.
+	* jv-lang.c: Set case sensitivity on for java_language_defn.
+	* language.h: Add enum case_mode, case_sensitivity.
+	* language.c: Define case_mode, case_sensitivity.  Set case
+	sensitivity on for unknown_language_defn, auto_language_defn,
+	and local_language_defn.
+	(show_case_command,set_case_command,set_case_str): New static func.
+	(set_type_range_case): New static func, replaces set_type_range ().
+	(set_language_command,set_type_command,set_range_command,set_language):
+	Call set_type_range_case ().
+	(language_info): Print case sensitivity setting.
+	(_initialize_language): Add set/show commands for 'case-sensitive'.
+	Set default case mode 'auto'.  Set default language 'auto'.
+	* m2-lang.c: Set case sensitivity on for m2_language_defn.
+	* p-lang.c: Set case sensitivity on for pascal_language_defn.
+	* scm-lang.c: Set case sensitivity off for scm_language_defn.
+	* symtab.c (lookup_symbol): Downcase symbol name if case sensivitity
+	is off.
+
+2000-08-10  Jimmy Guo  <guo@cup.hp.com>
+
 	* MAINTAINERS: Change my contact email for hp tests maintainership.
 
 Thu Aug 10 15:28:17 2000  Andrew Cagney  <cagney@ryobi.cygnus.com>

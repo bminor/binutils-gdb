@@ -388,6 +388,7 @@ const struct language_defn pascal_language_defn =
   pascal_builtin_types,
   range_check_on,
   type_check_on,
+  case_sensitive_on,
   pascal_parse,
   pascal_error,
   evaluate_subexp_standard,

@@ -414,6 +414,7 @@ const struct language_defn m2_language_defn =
   m2_builtin_types,
   range_check_on,
   type_check_on,
+  case_sensitive_on,
   m2_parse,			/* parser */
   m2_error,			/* parser error function */
   evaluate_subexp_standard,

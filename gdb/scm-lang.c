@@ -233,6 +233,7 @@ const struct language_defn scm_language_defn =
   c_builtin_types,
   range_check_off,
   type_check_off,
+  case_sensitive_off,
   scm_parse,
   c_error,
   evaluate_subexp_scm,

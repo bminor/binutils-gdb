@@ -584,6 +584,19 @@ lookup_symbol (const char *name, register const struct block *block,
   register struct block *b;
   register struct minimal_symbol *msymbol;
 
+  if (case_sensitivity == case_sensitive_off)
+    {
+      char *copy;
+      int len, i;
+
+      len = strlen (name);
+      copy = (char *) alloca (len + 1);
+      for (i= 0; i < len; i++)
+        copy[i] = tolower (name[i]);
+      copy[len] = 0;
+      name = copy;
+    }
+
   /* Search specified block and its superiors.  */
 
   while (block != 0)

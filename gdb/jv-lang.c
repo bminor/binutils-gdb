@@ -1033,6 +1033,7 @@ const struct language_defn java_language_defn =
   c_builtin_types,
   range_check_off,
   type_check_off,
+  case_sensitive_on,
   java_parse,
   java_error,
   evaluate_subexp_java,
