@@ -21,6 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sparc/tm-sparc.h"
 
+/* overrides of tm-sparc.h */
+
+#undef TARGET_BYTE_ORDER
+#define TARGET_BYTE_ORDER_SELECTABLE
+
 /* Select the sparclite disassembler.  Slightly different instruction set from
    the V8 sparc.  */
 
