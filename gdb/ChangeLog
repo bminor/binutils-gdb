@@ -1,7 +1,7 @@
 Mon Mar  5 11:56:09 2001  Christopher Faylor <cgf@cygnus.com>
 
 	* wince.c: Change realloc to xrealloc throughout.
-	(handle_load_dll): Use void * rather than PTR.
+	(handle_load_dll): Use void * rather than PTR in argument.
 
 2001-03-04  Andrew Cagney  <ac131313@redhat.com>
 
