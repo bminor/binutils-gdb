@@ -1,3 +1,9 @@
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
+	MKDEP.
+	* Makefile.in: Rebuild.
+
 1999-08-05  Donn Terry  <donn@interix.com>
 
 	* Makefile.am (YACC): If bison is not in the source tree, use

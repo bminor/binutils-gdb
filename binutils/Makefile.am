@@ -68,7 +68,7 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
 
-DEP = mkdep
+MKDEP = mkdep
 
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
@@ -272,18 +272,18 @@ DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \
 	site.exp site.bak
 
 # Targets to rebuild dependencies in this Makefile.
-# Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
-.dep: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
-	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
-	sed -f dep.sed <.dep1 >.dep
+# Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
+DEP: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
+	rm -f DEP1
+	$(MAKE) MKDEP=$(MKDEP) DEP1
+	sed -f dep.sed <DEP1 >DEP
 
 # This rule really wants a mkdep that runs "gcc -MM".
-.dep1: $(CFILES) $(GENERATED_CFILES)
-	rm -f .dep2
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
-	$(DEP) -f .dep2 $(INCLUDES) $?
-	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
+DEP1: $(CFILES) $(GENERATED_CFILES)
+	rm -f DEP2
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
+	$(MKDEP) -f DEP2 $(INCLUDES) $?
+	$(SHELL) $(srcdir)/../move-if-change DEP2 DEP1
 
 dep.sed: dep-in.sed config.status
 	objdir=`pwd`; \
@@ -293,19 +293,19 @@ dep.sed: dep-in.sed config.status
 		-e 's!@SRCDIR@!$(srcdir)!'	\
 		-e "s!@OBJDIR@!$${objdir}!"
 
-dep: .dep
+dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat .dep >> tmp-Makefile
+	cat DEP >> tmp-Makefile
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
 
-dep-in: .dep
+dep-in: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat .dep >> tmp-Makefile.in
+	cat DEP >> tmp-Makefile.in
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
-dep-am: .dep
+dep-am: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat .dep >> tmp-Makefile.am
+	cat DEP >> tmp-Makefile.am
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
 .PHONY: dep dep-in dep-am
@@ -331,7 +331,7 @@ MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1 binutils.log binutils.sum \
 mostlyclean-local:
 	-rm -rf tmpdir
 
-CLEANFILES = dep.sed .dep .dep1
+CLEANFILES = dep.sed DEP DEP1
 
 .PHONY: install-exec-local
 
