@@ -1,3 +1,14 @@
+Wed Mar  2 13:28:06 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* configure.host: Recognize i[34]86-sequent-*.
+
+	* trad-core.c (trad_unix_core_file_p): A non-zero, not zero,
+	return from bfd_seek indicates an error.
+	New macro TRAD_CORE_DSIZE_INCLUDES_TSIZE to replace
+	TRAD_CORE_STACK_OFFSET.
+	* hosts/symmetry.h: Define TRAD_CORE_DSIZE_INCLUDES_TSIZE and
+	TRAD_CORE_USER_OFFSET but not HOST_STACK_OFFSET.
+
 Wed Mar  2 11:57:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.[ch]: Do not include libhppa.h in som.c, instead include

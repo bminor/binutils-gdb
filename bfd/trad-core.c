@@ -82,7 +82,7 @@ trad_unix_core_file_p (abfd)
 
 #ifdef TRAD_CORE_USER_OFFSET
   /* If defined, this macro is the file position of the user struct.  */
-  if (bfd_seek (abfd, TRAD_CORE_USER_OFFSET, SEEK_SET) == 0)
+  if (bfd_seek (abfd, TRAD_CORE_USER_OFFSET, SEEK_SET) != 0)
     return 0;
 #endif
     
@@ -90,19 +90,19 @@ trad_unix_core_file_p (abfd)
   if (val != sizeof u)
     {
       /* Too small to be a core file */
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
   /* Sanity check perhaps??? */
   if (u.u_dsize > 0x1000000)	/* Remember, it's in pages... */
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
   if (u.u_ssize > 0x1000000)
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
@@ -114,12 +114,16 @@ trad_unix_core_file_p (abfd)
       return 0;
     if (fstat (fileno (stream), &statbuf) < 0)
       {
-	bfd_error = system_call_error;
+	bfd_set_error (bfd_error_system_call);
 	return 0;
       }
-    if (NBPG * (UPAGES + u.u_dsize + u.u_ssize) > statbuf.st_size)
+    if (NBPG * (UPAGES + u.u_dsize
+#ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
+		- u.u_tsize
+#endif
+		+ u.u_ssize) > statbuf.st_size)
       {
-	bfd_error = file_truncated;
+	bfd_set_error (bfd_error_file_truncated);
 	return 0;
       }
 #ifndef TRAD_CORE_ALLOW_ANY_EXTRA_SIZE
@@ -132,7 +136,7 @@ trad_unix_core_file_p (abfd)
       {
 	/* The file is too big.  Maybe it's not a core file
 	   or we otherwise have bad values for u_dsize and u_ssize).  */
-	bfd_error = wrong_format;
+	bfd_set_error (bfd_error_wrong_format);
 	return 0;
       }
 #endif
@@ -145,7 +149,7 @@ trad_unix_core_file_p (abfd)
   rawptr = (struct trad_core_struct *)
 		bfd_zalloc (abfd, sizeof (struct trad_core_struct));
   if (rawptr == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return 0;
   }
   
@@ -156,20 +160,20 @@ trad_unix_core_file_p (abfd)
   /* Create the sections.  This is raunchy, but bfd_close wants to free
      them separately.  */
 
-  core_stacksec(abfd) = (asection *) zalloc (sizeof (asection));
+  core_stacksec(abfd) = (asection *) bfd_zmalloc (sizeof (asection));
   if (core_stacksec (abfd) == NULL) {
   loser:
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     free ((void *)rawptr);
     return 0;
   }
-  core_datasec (abfd) = (asection *) zalloc (sizeof (asection));
+  core_datasec (abfd) = (asection *) bfd_zmalloc (sizeof (asection));
   if (core_datasec (abfd) == NULL) {
   loser1:
     free ((void *)core_stacksec (abfd));
     goto loser;
   }
-  core_regsec (abfd) = (asection *) zalloc (sizeof (asection));
+  core_regsec (abfd) = (asection *) bfd_zmalloc (sizeof (asection));
   if (core_regsec (abfd) == NULL) {
     free ((void *)core_datasec (abfd));
     goto loser1;
@@ -183,7 +187,11 @@ trad_unix_core_file_p (abfd)
   core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
   core_regsec (abfd)->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
 
-  core_datasec (abfd)->_raw_size =  NBPG * u.u_dsize;
+  core_datasec (abfd)->_raw_size =  NBPG * u.u_dsize
+#ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
+    - NBPG * u.u_tsize
+#endif
+      ;
   core_stacksec (abfd)->_raw_size = NBPG * u.u_ssize;
   core_regsec (abfd)->_raw_size = NBPG * UPAGES; /* Larger than sizeof struct u */
 
@@ -218,11 +226,11 @@ trad_unix_core_file_p (abfd)
   core_regsec (abfd)->vma = 0 - (int) u.u_ar0;
 
   core_datasec (abfd)->filepos = NBPG * UPAGES;
-#ifdef TRAD_CORE_STACK_FILEPOS
-  core_stacksec (abfd)->filepos = TRAD_CORE_STACK_FILEPOS;
-#else
-  core_stacksec (abfd)->filepos = (NBPG * UPAGES) + NBPG * u.u_dsize;
+  core_stacksec (abfd)->filepos = (NBPG * UPAGES) + NBPG * u.u_dsize
+#ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
+    - NBPG * u.u_tsize
 #endif
+      ;
   core_regsec (abfd)->filepos = 0; /* Register segment is the upage */
 
   /* Align to word at least */
@@ -285,7 +293,7 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define	trad_unix_close_and_cleanup		bfd_generic_close_and_cleanup
 #define	trad_unix_set_section_contents		(boolean (*) PARAMS	\
         ((bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-        bfd_size_type count))) bfd_false
+        bfd_size_type count))) bfd_generic_set_section_contents
 #define	trad_unix_get_section_contents		bfd_generic_get_section_contents
 #define	trad_unix_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
@@ -338,9 +346,10 @@ swap_abort()
 {
   abort(); /* This way doesn't require any declaration for ANSI to fuck up */
 }
-#define	NO_GET	((bfd_vma (*) PARAMS ((         bfd_byte *))) swap_abort )
+#define	NO_GET	((bfd_vma (*) PARAMS ((   const bfd_byte *))) swap_abort )
 #define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
-#define	NO_SIGNED_GET ((bfd_signed_vma (*) PARAMS ((bfd_byte *))) swap_abort )
+#define	NO_SIGNED_GET \
+  ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
 bfd_target trad_core_vec =
   {
