@@ -1364,7 +1364,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       isym.st_other = 0;
       isym.st_shndx = 0;
       elf_swap_symbol_out (output_bfd, &isym,
-			   (char *) (Elf_External_Sym *) s->contents);
+			   (PTR) (Elf_External_Sym *) s->contents);
 
       for (i = 0; elf_buckets[i] != 0; i++)
 	{
@@ -2289,7 +2289,7 @@ elf_link_output_sym (finfo, name, elfsym, input_sec)
     }
 
   elf_swap_symbol_out (finfo->output_bfd, elfsym,
-		       (char *) (finfo->symbuf + finfo->symbuf_count));
+		       (PTR) (finfo->symbuf + finfo->symbuf_count));
   ++finfo->symbuf_count;
 
   ++finfo->output_bfd->symcount;
@@ -2479,8 +2479,9 @@ elf_link_output_extsym (h, data)
 	}
 
       elf_swap_symbol_out (finfo->output_bfd, &sym,
-			   (char *) ((Elf_External_Sym *) finfo->dynsym_sec->contents
-				     + h->dynindx));
+			   (PTR) (((Elf_External_Sym *)
+				   finfo->dynsym_sec->contents)
+				  + h->dynindx));
 
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
       bucket = (bfd_elf_hash ((const unsigned char *) h->root.root.string)

@@ -1,3 +1,18 @@
+Tue Jul 11 15:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libelf.h (struct elf_size_info): Change type of last argument to
+	swap_symbol_out from char * to PTR.
+	(bfd_elf32_swap_symbol_out): Update declaration.
+	(bfd_elf64_swap_symbol_out): Likewise.
+	* elfcode.h (elf_swap_symbol_out): Change type of cdst from char *
+	to PTR.
+	* elf.c (swap_out_syms): Cast to PTR, not char *, when calling
+	swap_symbol_out routine.
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Likewise.
+	(elf_link_output_sym): Likewise.
+	(elf_link_output_extsym): Likewise.
+	* elf32-sparc.c (elf32_sparc_finish_dynamic_sections): Likewise.
+
 Tue Jul 11 12:29:49 1995  Rick Sladkey  <jrs@world.std.com>
 
 	* elf.c (_bfd_elf_find_nearest_line): Handle the simple case where

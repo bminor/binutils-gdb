@@ -2323,7 +2323,7 @@ swap_out_syms (abfd, sttp)
       sym.st_info = 0;
       sym.st_other = 0;
       sym.st_shndx = SHN_UNDEF;
-      bed->s->swap_symbol_out (abfd, &sym, outbound_syms);
+      bed->s->swap_symbol_out (abfd, &sym, (PTR) outbound_syms);
       outbound_syms += bed->s->sizeof_sym;
     }
     for (idx = 0; idx < symcount; idx++)
@@ -2423,7 +2423,7 @@ swap_out_syms (abfd, sttp)
 	  }
 
 	sym.st_other = 0;
-	bed->s->swap_symbol_out (abfd, &sym, outbound_syms);
+	bed->s->swap_symbol_out (abfd, &sym, (PTR) outbound_syms);
 	outbound_syms += bed->s->sizeof_sym;
       }
 
