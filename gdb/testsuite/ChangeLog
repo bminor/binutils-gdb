@@ -1,5 +1,14 @@
 2004-08-09  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* lib/cp-support.exp: New file.
+	* lib/cp-support.exp (cp_test_type_class): New function.
+	* gdb.cp/derivation.exp: Use cp_test_ptype_class.
+	* gdb.cp/virtfunc.exp (test_one_ptype): Removed.
+	* gdb.cp/virtfunc.exp (test_ptype_of_classes): Use
+	cp_test_ptype_class.
+
+2004-08-09  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.mi/mi2-basics.exp, gdb.mi/mi2-break.exp,
 	gdb.mi/mi2-console.exp, gdb.mi/mi2-disassemble.exp,
 	gdb.mi/mi2-eval.exp, gdb.mi/mi2-file.exp, gdb.mi/mi2-hack-cli.exp,
