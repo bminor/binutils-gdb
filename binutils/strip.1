@@ -11,24 +11,31 @@
 strip\(em\&Discard symbols from object files.
 
 .SH SYNOPSIS
-.B strip\c
-.RB " [\|" \-v "\|] "\c
-.I objfiles\c
+.B strip
+.RB "[\|" "\-F \fIformat\fP" | \-\-format=\fIformat\fP | \-\-target=\fIformat\fP "\|]"
+.RB "[\|" "\-I \fIformat\fP" | \-\-input\-format=\fIformat\fP "\|]"
+.RB "[\|" "\-O \fIformat\fP" | \-\-output\-format=\fIformat\fP "\|]"
+.RB "[\|" \-s | \-\-strip\-all "\|]"
+.RB "[\|" \-S | -g | \-\-strip\-debug "\|]"
+.RB "[\|" \-x | \-\-discard\-all "\|]"
+.RB "[\|" \-X | \-\-discard\-locals "\|]"
+.RB "[\|" \-v | \-\-verbose "\|]"
+.RB "[\|" \-V | \-\-version "\|]"
+.I objfile\c
 \&.\|.\|.
 
 .SH DESCRIPTION
 GNU \c
 .B strip\c
-\& will discard all symbols from object files
+\& discards all symbols from the object files
 \c
-.I objfiles\c
+.I objfile\c
 \&.  The list of object files may include archives.
 
 \c
 .B strip\c
 \& will not execute unless at least one object file is listed.
 
-.I WARNING:\c
 \& \c
 .B strip\c
 \& modifies the files named in its argument,
@@ -41,6 +48,47 @@ Verbose operation: list all object files modified.  In the case of
 archives, `\|\c
 .B strip \-v\c
 \&\|' will list all members of the archive.
+
+.TP
+.B "\-F \fIformat\fP \-\-format=\fIformat\fP \-\-target=\fIformat\fP"
+Treat the original \fIobjfile\fP as a file with the object
+code format \fIformat\fP, and rewrite it in the same format.
+
+.TP
+.B "\-I \fIformat\fP \-\-input\-format=\fIformat\fP"
+Treat the original \fIobjfile\fP as a file with the object
+code format \fIformat\fP.
+
+.TP
+.B "\-O \fIformat\fP \-\-output\-format=\fIformat\fP"
+Replace \fIobjfile\fP with a file in the output format \fIformat\fP.
+
+.TP
+.B "\-s \-\-strip\-all"
+Remove all symbols.
+
+.TP
+.B "\-S -g \-\-strip\-debug"
+Remove debugging symbols only.
+
+.TP
+.B "\-x \-\-discard\-all"
+Remove non-global symbols.
+
+.TP
+.B "\-X \-\-discard\-locals"
+Remove compiler-generated local symbols.
+(These usually start with ``L'' or ``.''.)
+
+.TP
+.B "\-v \-\-verbose"
+Verbose output: list all object files modified.  In the case of
+archives, ``strip -V'' lists all members of the archive.
+
+.TP
+.B "\-V \-\-version
+Show the version number for \fBstrip\fP.
+
 .PP
 
 .SH "SEE ALSO"

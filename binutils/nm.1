@@ -15,19 +15,19 @@ nm\(em\&list symbols from object files.
 .na
 .TP
 .B nm
-.RB "[\|" \-a | +debug-syms "\|]" 
-.RB "[\|" \-g | +extern-only "\|]"
-.RB "[\|" \-s | +print-armap "\|]" 
-.RB "[\|" \-o | +print-file-name "\|]"  
-.RB "[\|" \-n | +numeric-sort "\|]" 
-.RB "[\|" \-p | +no-sort "\|]"
-.RB "[\|" \-r | +reverse-sort "\|]" 
-.RB "[\|" \-u | +undefined-only "\|]"  
-.RB "[\|" "+target\ "\c
+.RB "[\|" \-a | \-\-debug\-syms "\|]" 
+.RB "[\|" \-g | \-\-extern\-only "\|]"
+.RB "[\|" \-s | \-\-print\-armap "\|]" 
+.RB "[\|" \-o | \-\-print\-file\-name "\|]"  
+.RB "[\|" \-n | \-\-numeric\-sort "\|]" 
+.RB "[\|" \-p | \-\-no\-sort "\|]"
+.RB "[\|" \-r | \-\-reverse\-sort "\|]" 
+.RB "[\|" \-u | \-\-undefined\-only "\|]"  
+.RB "[\|" "\-\-target="\c
 .I bfdname\c
 \&\|]
 .RB "[\|" \c
-.I objfiles\c
+.I objfile\c
 \&.\|.\|.\|]
 .ad b
 .hy 1
@@ -35,7 +35,7 @@ nm\(em\&list symbols from object files.
 GNU \c
 .B nm\c
 \& will list the symbols from object files \c
-.I objfiles\c
+.I objfile\c
 \&.
 
 .SH OPTIONS
@@ -43,7 +43,7 @@ The long and short forms of options, shown here as alternatives, are
 equivalent.
 
 .TP
-.IR "objfiles" .\|.\|.
+.IR "objfile" .\|.\|.
 Object files whose symbols are to be listed.  If no object files are
 listed as arguments, \c
 .B nm\c
@@ -54,33 +54,33 @@ listed as arguments, \c
 .TP
 .B \-a
 .TP
-.B +debug-syms 
+.B \-\-debug\-syms 
 Display debugger-only symbols; normally these are not listed.
 
 .TP
 .B \-g
 .TP
-.B +extern-only 
+.B \-\-extern\-only 
 Display only external symbols.
 
 .TP
 .B \-p
 .TP
-.B +no-sort 
+.B \-\-no\-sort 
 Don't bother to sort the symbols in any order; just print them in the
 order encountered.
 
 .TP
 .B \-n
 .TP
-.B +numeric-sort 
+.B \-\-numeric\-sort 
 Sort symbols numerically by their addresses, not alphabetically by their
 names. 
 
 .TP
 .B \-s
 .TP
-.B +print-armap
+.B \-\-print\-armap
 When listing symbols from archive members, include the index: a mapping
 (stored in the archive by \c
 .B ar\c
@@ -92,7 +92,7 @@ contain definitions for what names.
 .TP
 .B \-o
 .TP
-.B +print-file-name 
+.B \-\-print\-file\-name 
 Precede each symbol by the name of the input file where it was found,
 rather than identifying the input file once only before all of its
 symbols. 
@@ -100,12 +100,12 @@ symbols.
 .TP
 .B \-r
 .TP
-.B +reverse-sort 
+.B \-\-reverse\-sort 
 Reverse the sense of the sort (whether numeric or alphabetic); let the
 last come first.
 
 .TP
-.BI "+target " "bfdname"\c
+.BI "\-\-target " "bfdname"\c
 \&
 Specify an object code format other than your system's default format.
 See 
@@ -115,7 +115,7 @@ for information on listing available formats.
 .TP
 .B \-u
 .TP
-.B +undefined-only 
+.B \-\-undefined\-only 
 Display only undefined symbols (those external to each object file).
 
 .PP

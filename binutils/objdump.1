@@ -21,7 +21,7 @@ objdump\(em\&display information from object files.
 \&\|] 
 .RB "[\|" \-d "\|]" 
 .RB "[\|" \-f "\|]"
-.RB "[\|" \-h | --header "\|]" 
+.RB "[\|" \-h | \-\-header "\|]" 
 .RB "[\|" \-i "\|]" 
 .RB "[\|" "\-j\ "\c
 .I section\c
@@ -30,12 +30,12 @@ objdump\(em\&display information from object files.
 .RB "[\|" "\-m\ "\c
 .I machine\c
 \&\|] 
-.RB "[\|" \-r | --reloc "\|]" 
+.RB "[\|" \-r | \-\-reloc "\|]" 
 .RB "[\|" \-s "\|]"
-.RB "[\|" \--stabs "\|]"
-.RB "[\|" \-t | --syms "\|]" 
+.RB "[\|" \-\-stabs "\|]"
+.RB "[\|" \-t | \-\-syms "\|]" 
 .RB "[\|" \-x "\|]"
-.I objfiles\c
+.I objfile\c
 \&.\|.\|.
 .ad b
 .hy 1
@@ -52,7 +52,7 @@ Where long and short forms of an option are shown together, they are
 equivalent.
 
 .TP
-.IR  "objfiles" .\|.\|.
+.IR  "objfile" .\|.\|.
 The object files to be examined.  When you specify archives,
 \c
 .B objdump\c
@@ -61,7 +61,7 @@ The object files to be examined.  When you specify archives,
 .TP
 .B \-a
 If any files from \c
-.I objfiles\c
+.I objfile\c
 \& are archives, display the archive
 header information (in a format similar to `\|\c
 .B ls \-l\c
@@ -106,20 +106,20 @@ formats available with the `\|\c
 .B \-d
 Disassemble.  Display the assembler mnemonics for the machine
 instructions from \c
-.I objfiles\c
+.I objfile\c
 \&.
 
 .TP
 .B \-f
 File header.  Display summary information from the overall header of
 each file in \c
-.I objfiles\c
+.I objfile\c
 \&.
 
 .TP
 .B \-h
 .TP
-.B --header
+.B \-\-header
 Header.  Display summary information from the section headers of the
 object file.
 
@@ -148,7 +148,7 @@ and line numbers corresponding to the object code shown.
 .BI "-m " "machine"\c
 \&
 Specify the object files \c
-.I objfiles\c
+.I objfile\c
 \& are for architecture
 \c
 .I machine\c
@@ -160,7 +160,7 @@ option.
 .TP
 .B \-r
 .TP
-.B --reloc
+.B \-\-reloc
 Relocation.  Print the relocation entries of the file.
 
 .TP
@@ -168,18 +168,18 @@ Relocation.  Print the relocation entries of the file.
 Display the full contents of any sections requested.
 
 .TP
-.B \--stabs
+.B \-\-stabs
 Display the contents of the .stab, .stab.index, and .stab.excl
 sections from an ELF file.  This is only useful on systems (such as
 Solaris 2.0) in which .stab debugging symbol-table entries are carried
 in an ELF section.  In most other file formats, debugging symbol-table
 entries are interleaved with linkage symbols, and are visible in the
---syms output.
+\-\-syms output.
 
 .TP
 .B \-t
 .TP
-.B --syms
+.B \-\-syms
 Symbol Table.  Print the symbol table entries of the file.
 This is similar to the information provided by the `\|\c
 .B nm\c

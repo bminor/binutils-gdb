@@ -16,18 +16,18 @@ size\(em\&list section sizes and total size.
 .TP
 .B size
 .RB "[\|" \-A \||\| \-B \||\| \c
-.BI "+format\ " compatibility\c
+.BI "\-\-format=" compatibility\c
 \&\|]
-.RB "[\|" +help "\|]" 
+.RB "[\|" \-\-help "\|]" 
 .RB "[\|" \-d \||\| \-o \||\| \-x\c
 \||\|\c
-.BI "+radix\ " number\c
+.BI "\-\-radix=" number\c
 \&\|]
 .RB "[\|" \c
-.BI "+target\ " bfdname\c
+.BI "\-\-target=" bfdname\c
 \&\|]
-.RB "[\|" \-V \||\| +version "\|]"  
-.I objfiles\c
+.RB "[\|" \-V \||\| \-\-version "\|]"  
+.I objfile\c
 \&.\|.\|.
 .ad b
 .hy 1
@@ -36,14 +36,14 @@ The GNU \c
 .B size\c
 \& utility lists the section sizes\(em\&and the total
 size\(em\&for each of the object files \c
-.I objfiles\c
+.I objfile\c
 \& in its argument list.
 By default, one line of output is generated for each object file or each
 module in an archive.
 
 .SH OPTIONS
 .TP
-.IR "objfiles" .\|.\|.
+.IR "objfile" .\|.\|.
 The object files to be examined.
 
 .TP
@@ -51,7 +51,7 @@ The object files to be examined.
 .TP
 .B \-B
 .TP
-.BI "+format " "compatibility"\c
+.BI "\-\-format " "compatibility"\c
 \&
 Using one of these options, you can choose whether the output from GNU
 \c
@@ -62,19 +62,19 @@ Using one of these options, you can choose whether the output from GNU
 .B \-A\c
 \|',
 or `\|\c
-.B +format sysv\c
+.B \-\-format sysv\c
 \|'), or Berkeley \c
 .B size\c
 \& (using `\|\c
 .B \-B\c
 \|', or
 `\|\c
-.B +format berkeley\c
+.B \-\-format berkeley\c
 \|').  The default is the one-line format similar to
 Berkeley's.  
 
 .TP
-.B +help
+.B \-\-help
 Show a summary of acceptable arguments and options.
 
 .TP
@@ -84,25 +84,25 @@ Show a summary of acceptable arguments and options.
 .TP
 .B \-x
 .TP
-.BI "+radix " "number"\c
+.BI "\-\-radix " "number"\c
 \&
 Using one of these options, you can control whether the size of each
 section is given in decimal (`\|\c
 .B \-d\c
 \|', or `\|\c
-.B +radix 10\c
+.B \-\-radix 10\c
 \|'); octal
 (`\|\c
 .B \-o\c
 \|', or `\|\c
-.B +radix 8\c
+.B \-\-radix 8\c
 \|'); or hexadecimal (`\|\c
 .B \-x\c
 \|', or
 `\|\c
-.B +radix 16\c
+.B \-\-radix 16\c
 \|').  In `\|\c
-.B +radix \c
+.B \-\-radix \c
 .I number\c
 \&\c
 \|', only the three
@@ -117,10 +117,10 @@ octal and hexadecimal if you're using `\|\c
 \|'.
 
 .TP
-.BI "+target " "bfdname"\c
+.BI "\-\-target " "bfdname"\c
 \&
 You can specify a particular object-code format for \c
-.I objfiles\c
+.I objfile\c
 \& as
 \c
 .I bfdname\c
@@ -135,7 +135,7 @@ on listing available formats.
 .TP
 .B \-V
 .TP
-.B +version
+.B \-\-version
 Display version number information on \c
 .B size\c
 \& itself.

@@ -14,7 +14,7 @@ ar\(em\&create, modify, and extract from archives.
 .hy 0
 .na
 .BR ar " [\|" "-" "\|]"\c
-.I pmod \c
+.I {dmpqrtx}[abcilosuvV] \c
 [\|\c
 .I membername\c
 \&\|] \c
@@ -79,7 +79,7 @@ their placement in the archive.
 You may use `\|\c
 .B nm \-s\c
 \|' or `\|\c
-.B nm +print-armap\c
+.B nm \-\-print\-armap\c
 \|' to list this index
 table.  If an archive lacks the table, another form of \c
 .B ar\c
@@ -434,6 +434,11 @@ operations display additional information, such as filenames processed,
 when the modifier `\|\c
 .B v\c
 \|' is appended.
+
+.TP
+.B V
+This modifier shows the version number of
+.BR ar .
 
 .PP
 
