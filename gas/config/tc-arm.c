@@ -13703,7 +13703,7 @@ arm_adjust_symtab (void)
 	  elf_symbol_type * elf_sym;
 
 	  elf_sym = elf_symbol (symbol_get_bfdsym (sym));
-	  bind = ELF_ST_BIND (elf_sym);
+	  bind = ELF_ST_BIND (elf_sym->internal_elf_sym.st_info);
 
 	  /* If it's a .thumb_func, declare it as so,
 	     otherwise tag label as .code 16.  */

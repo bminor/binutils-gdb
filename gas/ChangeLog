@@ -1,3 +1,8 @@
+2005-03-23  Jim Blandy  <jimb@redhat.com>
+
+	* config/tc-arm.c (arm_adjust_symtab): Fetch elf_sym's binding
+	attributes properly.
+
 2005-03-23  Mike Frysinger  <vapier@gentoo.org>
 	    Nick Clifton  <nickc@redhat.com>
 
