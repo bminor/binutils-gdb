@@ -1,3 +1,7 @@
+Tue Jan 20 13:02:09 1998  Mark Alexander  <marka@cygnus.com>
+
+	* gdb.base/funcargs.exp: Increase timeout for slow TX39 boards.
+
 Mon Jan 19 08:53:04 1998  Mark Alexander  <marka@cygnus.com>
 
 	* gdb.base/break.exp: Increase timeout for slow TX39 boards.
