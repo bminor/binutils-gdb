@@ -1,3 +1,7 @@
+2004-01-09  Andrew Cagney  <cagney@redhat.com>
+
+	* jv-valprint.c, ser-unix.c: Add missing copyright years.
+
 2004-01-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* dbxread.c (read_dbx_symtab): Ignore N_PATCH stabs instead of
