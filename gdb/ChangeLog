@@ -1,3 +1,8 @@
+Thu Dec  5 18:59:51 1991  Michael Tiemann  (tiemann at cygnus.com)
+
+	* cplus-dem.c (cplus_demangle): Call `string_need' when
+	null-terminating a partially-computed string.
+
 Thu Dec  5 18:19:43 1991  Fred Fish  (fnf at cygnus.com)
 
 	* dwarfread.c (enum_type):  Build a correct TYPE_NAME, add a

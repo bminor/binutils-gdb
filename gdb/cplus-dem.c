@@ -338,7 +338,8 @@ cplus_demangle (type, arg_mode)
 	  p += 1;
 	  while (*p != '\0' && !(*p == '_' && p[1] == '_'))
 	    p++;
-	  string_appendn (&decl, type, p - type);	  
+	  string_appendn (&decl, type, p - type);
+	  string_need (&decl, 1);
 	  *(decl.p) = '\0';
 	  munge_function_name (&decl, 1);
 	  if (decl.b[0] == '_')
@@ -358,6 +359,7 @@ cplus_demangle (type, arg_mode)
   else
     {
       string_appendn (&decl, type, p - type);
+      string_need (&decl, 1);
       *(decl.p) = '\0';
       munge_function_name (&decl, arg_mode);
       p += 2;
