@@ -1,3 +1,8 @@
+2001-01-31  Jonathan Larmour  <jlarmour@redhat.com>
+
+	* Makefile.in (gencode): Link with libopcodes in build tree rather
+	than building source files from there.
+
 2000-05-30  Nick Clifton  <nickc@cygnus.com>
 
 	* v850.igen: Remove illegal instruction pattern, since it is the

@@ -56,10 +56,8 @@ tmp-gencode: gencode
 	touch tmp-gencode
 gencode.o: gencode.c
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gencode.c
-v850-opc.o: $(srcdir)/../../opcodes/v850-opc.c
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $<
-gencode: gencode.o v850-opc.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o v850-opc.o
+gencode: gencode.o ../../opcodes/libopcodes.a
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o ../../opcodes/libopcodes.a
 
 
 
