@@ -109,6 +109,7 @@ get_tty_state(scb, state)
      struct hardwire_ttystate *state;
 {
 #ifdef HAVE_TERMIOS
+  extern int errno;
   pid_t new_process_group;
 
   if (tcgetattr(scb->fd, &state->termios) < 0)
@@ -117,9 +118,14 @@ get_tty_state(scb, state)
   if (!job_control)
     return 0;
 
+  /* Apparently, if a tty has no process group, then tcgetpgrp returns -1 with
+     errno == 0.   In this case, set the process group to -1 so that we know to
+     omit resetting it later.  */
   new_process_group = tcgetpgrp (scb->fd);
-  if (new_process_group == (pid_t)-1)
+  if ((new_process_group == (pid_t)-1)
+      && (errno != ENOTTY))
     return -1;
+  errno = 0;
   state->process_group = new_process_group;
   return 0;
 #endif
@@ -159,7 +165,11 @@ set_tty_state(scb, state)
   if (!job_control)
     return 0;
 
-  return tcsetpgrp (scb->fd, state->process_group);
+  /* If the tty had no process group before, then do not reset it. */
+  if (state->process_group == -1)
+    return 0;
+  else
+    return tcsetpgrp (scb->fd, state->process_group);
 #endif
 
 #ifdef HAVE_TERMIO
@@ -491,8 +501,8 @@ wait_for(scb, timeout)
 
 /* Read a character with user-specified timeout.  TIMEOUT is number of seconds
    to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
-   char if successful.  Returns -2 if timeout expired, EOF if line dropped
-   dead, or -3 for any other error (see errno in that case). */
+   char if successful.  Returns SERIAL_TIMEOUT if timeout expired, EOF if line
+   dropped dead, or SERIAL_ERROR for any other error (see errno in that case).  */
 
 static int
 hardwire_readchar(scb, timeout)

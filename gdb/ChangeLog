@@ -1,5 +1,12 @@
 Fri Aug 13 14:37:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* ser-unix.c (get_tty_state): if a descriptor is not a tty, then
+	  simply save encode this fact as the process group and return
+	  success rather than an error.
+	  (set_tty_state): if process group is -1, do not reset the
+	  process group.
+	  (hardwire_reachar): comment change.
+
 	* serial.h: comment change.
 
 	* config/m88k/tm-m88k.h: comment change to remove embedded
