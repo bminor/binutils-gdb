@@ -41,6 +41,15 @@ static int m68hc12_addr_is_banked PARAMS ((bfd_vma));
 static bfd_vma m68hc12_phys_addr PARAMS ((bfd_vma));
 static bfd_vma m68hc12_phys_page PARAMS ((bfd_vma));
 
+/* GC mark and sweep.  */
+static asection *elf32_m68hc11_gc_mark_hook
+PARAMS ((bfd *abfd, struct bfd_link_info *info,
+         Elf_Internal_Rela *rel, struct elf_link_hash_entry *h,
+         Elf_Internal_Sym *sym));
+static boolean elf32_m68hc11_gc_sweep_hook
+PARAMS ((bfd *abfd, struct bfd_link_info *info,
+         asection *sec, const Elf_Internal_Rela *relocs));
+
 boolean _bfd_m68hc12_elf_merge_private_bfd_data PARAMS ((bfd*, bfd*));
 boolean _bfd_m68hc12_elf_set_private_flags PARAMS ((bfd*, flagword));
 boolean _bfd_m68hc12_elf_print_private_bfd_data PARAMS ((bfd*, PTR));
@@ -582,6 +591,57 @@ m68hc11_info_to_howto_rel (abfd, cache_ptr, dst)
   cache_ptr->howto = &elf_m68hc11_howto_table[r_type];
 }
 
+static asection *
+elf32_m68hc11_gc_mark_hook (abfd, info, rel, h, sym)
+     bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
+{
+  if (h != NULL)
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	default:
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+  else
+    {
+      if (!(elf_bad_symtab (abfd)
+	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
+	  && !((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
+	       && sym->st_shndx != SHN_COMMON))
+	{
+	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
+	}
+    }
+  return NULL;
+}
+
+static boolean
+elf32_m68hc11_gc_sweep_hook (abfd, info, sec, relocs)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
+{
+  /* We don't use got and plt entries for 68hc11/68hc12.  */
+  return true;
+}
+
 
 /* Set and control ELF flags in ELF header.  */
 
@@ -720,8 +780,11 @@ _bfd_m68hc12_elf_print_private_bfd_data (abfd, ptr)
 
 #define elf_info_to_howto	0
 #define elf_info_to_howto_rel	m68hc11_info_to_howto_rel
+#define elf_backend_gc_mark_hook     elf32_m68hc11_gc_mark_hook
+#define elf_backend_gc_sweep_hook    elf32_m68hc11_gc_sweep_hook
 #define elf_backend_object_p	0
 #define elf_backend_final_write_processing	0
+#define elf_backend_can_gc_sections		1
 
 #define bfd_elf32_bfd_merge_private_bfd_data \
 					_bfd_m68hc12_elf_merge_private_bfd_data

@@ -1,5 +1,15 @@
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* elf32-m68hc11.c (elf32_m68hc11_gc_mark_hook): New for section GC.
+	(elf32_m68hc11_gc_sweep_hook): Likewise.
+	(elf_backend_gc_mark_hook): Define for GC section support.
+	(elf_backend_gc_sweep_hook): Likewise.
+	(elf_backend_can_gc_sections): Likewise.
+
+	* elf32-m68hc12.c: Likewise.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* elf32-m68hc11.c (_bfd_m68hc11_elf_print_private_bfd_data): New.
 	(_bfd_m68hc11_elf_merge_private_bfd_data): New function.
 	(_bfd_m68hc11_elf_set_private_flags): New function.
