@@ -1,5 +1,11 @@
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/cr-err.[ls]: New.
+	* gas/i386/crx.[ds]: New.
+	* gas/i386/i386.exp: Run new tests.
+
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/intelok.d: Add -r to objdump options. Adjust expectations.
 	* gas/i386/intelok.s: Add checks for various special memory operands.
 

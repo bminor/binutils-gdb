@@ -1,3 +1,9 @@
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (print_insn): Suppress lock prefix printing for cr8...15
+	accesses.
+	(OP_C): Consider lock prefix in non-64-bit modes.
+
 2005-02-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* cris-dis.c (format_hex): Remove ineffective warning fix.

@@ -1,5 +1,11 @@
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (build_modrm_byte): Add lock prefix for cr8...15
+	accesses.
+	(parse_register): Allow cr8...15 in all modes.
+
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (intel_e11): If not followed by T_PTR, treat T_BYTE
 	etc. like normal symbol references (T_ID).
 

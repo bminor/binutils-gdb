@@ -1956,7 +1956,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
   int i;
   char *first, *second, *third;
   int needcomma;
-  unsigned char uses_SSE_prefix;
+  unsigned char uses_SSE_prefix, uses_LOCK_prefix;
   int sizeflag;
   const char *p;
   struct dis_private priv;
@@ -2128,12 +2128,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
       dp = &dis386_twobyte[*++codep];
       need_modrm = twobyte_has_modrm[*codep];
       uses_SSE_prefix = twobyte_uses_SSE_prefix[*codep];
+      uses_LOCK_prefix = (*codep & ~0x02) == 0x20;
     }
   else
     {
       dp = &dis386[*codep];
       need_modrm = onebyte_has_modrm[*codep];
       uses_SSE_prefix = 0;
+      uses_LOCK_prefix = 0;
     }
   codep++;
 
@@ -2147,7 +2149,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
       oappend ("repnz ");
       used_prefixes |= PREFIX_REPNZ;
     }
-  if (prefixes & PREFIX_LOCK)
+  if (!uses_LOCK_prefix && (prefixes & PREFIX_LOCK))
     {
       oappend ("lock ");
       used_prefixes |= PREFIX_LOCK;
@@ -3993,9 +3995,16 @@ static void
 OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   int add = 0;
-  USED_REX (REX_EXTX);
   if (rex & REX_EXTX)
-    add = 8;
+    {
+      USED_REX (REX_EXTX);
+      add = 8;
+    }
+  else if (!mode_64bit && (prefixes & PREFIX_LOCK))
+    {
+      used_prefixes |= PREFIX_LOCK;
+      add = 8;
+    }
   sprintf (scratchbuf, "%%cr%d", reg + add);
   oappend (scratchbuf + intel_syntax);
 }

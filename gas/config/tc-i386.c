@@ -2868,6 +2868,13 @@ build_modrm_byte ()
 	  if ((i.op[source].regs->reg_flags & RegRex) != 0)
 	    i.rex |= REX_EXTX;
 	}
+      if (flag_code != CODE_64BIT && (i.rex & (REX_EXTX | REX_EXTZ)))
+	{
+	  if (!((i.types[0] | i.types[1]) & Control))
+	    abort ();
+	  i.rex &= ~(REX_EXTX | REX_EXTZ);
+	  add_prefix (LOCK_PREFIX_OPCODE);
+	}
     }
   else
     {			/* If it's not 2 reg operands...  */
@@ -5040,6 +5047,7 @@ parse_register (reg_string, end_op)
 
   if (r != NULL
       && ((r->reg_flags & (RegRex64 | RegRex)) | (r->reg_type & Reg64)) != 0
+      && (r->reg_type != Control || !(cpu_arch_flags & CpuSledgehammer))
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;
 
