@@ -1,3 +1,15 @@
+2003-05-13  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): For weak symbols,
+	copy ELF_LINK_NON_GOT_REF from weakdef.
+	(allocate_dynrelocs):  For undef weak syms with non-default
+	visibility, a) don't allocate plt entries, b) don't allocate
+	.got relocs, c) discard dyn rel space
+        (sh_elf_relocate_section): d) don't generate .got relocs, e)
+        don't generate dynamic relocs.
+	(sh_elf_copy_indirect_symbol): Don't copy ELF_LINK_NON_GOT_REF
+	for weakdefs when symbol already adjusted.
+
 2003-05-12  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-xstormy16.c (xstormy16_elf_howto_table): use 'bitfield'

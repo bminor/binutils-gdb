@@ -3940,6 +3940,10 @@ sh_elf_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      if (info->nocopyreloc)
+	h->elf_link_hash_flags
+	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
+	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
@@ -4083,7 +4087,9 @@ allocate_dynrelocs (h, inf)
     }
 
   if (htab->root.dynamic_sections_created
-      && h->plt.refcount > 0)
+      && h->plt.refcount > 0
+      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  || h->root.type != bfd_link_hash_undefweak))
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -4169,8 +4175,10 @@ allocate_dynrelocs (h, inf)
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
       else if (tls_type == GOT_TLS_GD)
 	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rela);
-      else if (info->shared ||
-	       WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+      else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		|| h->root.type != bfd_link_hash_undefweak)
+	       && (info->shared
+		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
     }
   else
@@ -4229,6 +4237,12 @@ allocate_dynrelocs (h, inf)
 		pp = &p->next;
 	    }
 	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->dyn_relocs = NULL;
     }
   else
     {
@@ -4885,6 +4899,9 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_SH_DIR32:
 	case R_SH_REL32:
 	  if (info->shared
+	      && (h == NULL
+		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  || h->root.type != bfd_link_hash_undefweak)
 	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && (r_type != R_SH_REL32
@@ -5053,7 +5070,9 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  || (info->shared
 		      && (info->symbolic || h->dynindx == -1
 			  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+		  || (ELF_ST_VISIBILITY (h->other)
+		      && h->root.type == bfd_link_hash_undefweak))
 		{
 		  /* This is actually a static link, or it is a
 		     -Bsymbolic link and the symbol is defined
@@ -6128,7 +6147,17 @@ sh_elf_copy_indirect_symbol (bed, dir, ind)
       eind->tls_type = GOT_UNKNOWN;
     }
 
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+  if (ind->root.type != bfd_link_hash_indirect
+      && (dir->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
+    /* If called to transfer flags for a weakdef during processing
+       of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
+       We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+    dir->elf_link_hash_flags |=
+      (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				   | ELF_LINK_HASH_REF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+  else
+    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 static int
