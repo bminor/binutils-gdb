@@ -84,8 +84,24 @@ EOF
 	    # NOT YET: Breaks BELIEVE_PCC_PROMOTION and confuses non-
 	    # multi-arch defaults.
 	    # test "${predefault}" || predefault=0
+
+	    # come up with a format, use a few guesses for variables
+	    case ":${class}:${fmt}:${print}:" in
+		:[vV]::: )
+		    if [ "${returntype}" = int ]
+		    then
+			fmt="%d"
+			print="${macro}"
+		    elif [ "${returntype}" = long ]
+		    then
+			fmt="%ld"
+			print="${macro}"
+		    fi
+		    ;;
+	    esac
 	    test "${fmt}" || fmt="%ld"
 	    test "${print}" || print="(long) ${macro}"
+
 	    case "${invalid_p}" in
 		0 ) valid_p=1 ;;
 		"" )
@@ -1496,6 +1512,7 @@ do
 	printf "                        (long) current_gdbarch->${function});\n"
 	continue
     fi
+    # Print the macro definition.
     printf "#ifdef ${macro}\n"
     if [ "x${returntype}" = "xvoid" ]
     then
@@ -1513,6 +1530,7 @@ do
 	printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
 	printf "                      XSTRING (${macro}));\n"
     fi
+    # Print the architecture vector value
     if [ "x${returntype}" = "xvoid" ]
     then
 	printf "#endif\n"
