@@ -1,5 +1,9 @@
+2002-01-18  Andreas Jaeger  <aj@suse.de>
+
+	* as.c (parse_args): Update year.
+
 2002-01-17  Timothy Wall  <twall@alum.mit.edu>
-	
+
 	* config/tc-tic54x.c (encode_address): Add a more informative
 	warning about incorrect syntax.
 
@@ -66,7 +70,7 @@
 
 2002-01-15  Richard Earnshaw  <rearnsha@arm.com>
 
-	* tc-arm.c (md_parse_option): Tidy up setting of cpu_variant for 
+	* tc-arm.c (md_parse_option): Tidy up setting of cpu_variant for
 	various command line options.
 
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
@@ -83,7 +87,7 @@
 
 2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
 
-	* tc-arm.c (md_longopts): Fix misplaced #endif -- the -oabi option 
+	* tc-arm.c (md_longopts): Fix misplaced #endif -- the -oabi option
 	is not dependent on ARM_BI_ENDIAN.
 
 2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
@@ -167,7 +171,7 @@
 	* configure.in (sh*le): Set cpu_type=sh and endian=little.
 	(sh*-*-netbsdelf*): New target.
 	* configure: Regenerate.
-	* tc-sh.h: Update copyright years. 
+	* tc-sh.h: Update copyright years.
 	(TARGET_FORMAT): Add version for TE_NetBSD.
 
 2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
@@ -221,4 +225,3 @@ left-margin: 8
 fill-column: 74
 version-control: never
 End:
-

@@ -1,5 +1,5 @@
 /* ldver.c -- Print linker version.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000, 2001
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -39,7 +39,7 @@ ldversion (noisy)
 
   if (noisy & 2)
     {
-      printf (_("Copyright 2001 Free Software Foundation, Inc.\n"));
+      printf (_("Copyright 2002 Free Software Foundation, Inc.\n"));
       printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License.  This program has absolutely no warranty.\n"));
