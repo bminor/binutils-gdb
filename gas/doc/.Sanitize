@@ -25,7 +25,8 @@ Do-first:
 
 Things-to-keep:
 
-Makefile
+Makefile.in
+configure.in
 a29k-coff.m4
 a29k.m4
 all.m4
@@ -50,7 +51,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.2  1992/02/21 09:08:37  rich
+# Revision 1.3  1992/02/24 13:54:45  tiemann
+# Keep Makefile.in and configure.in.  Don't keep Makefile.
+#
+# Revision 1.2  1992/02/21  09:08:37  rich
 # don't keep *.dvi
 #
 # Revision 1.1  1992/02/14  00:28:22  pesch
