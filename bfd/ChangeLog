@@ -1,3 +1,10 @@
+Fri Apr 21 12:48:48 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Patches from H.J. Lu for Linux ELF core file support.
+	* elfcode.h (elf_core_file_matches_executable_p) [HAVE_PROCFS]:
+	Use prpsinfo_t instead of struct prpsinfo, for consistency.
+	* hosts/i386linux.h (HAVE_PROCFS): Define.
+
 Thu Apr 20 09:07:39 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* linker.c (link_action): Do the right thing when a undefined
