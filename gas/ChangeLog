@@ -1,3 +1,12 @@
+Fri Dec 13 13:00:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_begin): If configured for an embedded ELF
+	system, don't set the section alignment to 2**4.
+	(s_change_sec): Likewise.
+	(append_insn): Call record_alignment for the section.
+	(md_section_align): Don't align the section size for an embedded
+	ELF system.
+
 Thu Dec 12 16:40:47 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (adjust_reloc_syms): Make sure that symbols are

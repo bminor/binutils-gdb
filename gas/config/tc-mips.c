@@ -895,17 +895,23 @@ md_begin ()
   mips_cprmask[3] = 0;
 
   /* set the default alignment for the text section (2**2) */
-  record_alignment (text_section, 2);
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+    record_alignment (text_section, 2);
 
   if (USE_GLOBAL_POINTER_OPT)
     bfd_set_gp_size (stdoutput, g_switch_value);
 
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
-      /* Sections must be aligned to 16 byte boundaries.  */
-      (void) bfd_set_section_alignment (stdoutput, text_section, 4);
-      (void) bfd_set_section_alignment (stdoutput, data_section, 4);
-      (void) bfd_set_section_alignment (stdoutput, bss_section, 4);
+      /* On a native system, sections must be aligned to 16 byte
+	 boundaries.  When configured for an embedded ELF target, we
+	 don't bother.  */
+      if (strcmp (TARGET_OS, "elf") != 0)
+	{
+	  (void) bfd_set_section_alignment (stdoutput, text_section, 4);
+	  (void) bfd_set_section_alignment (stdoutput, data_section, 4);
+	  (void) bfd_set_section_alignment (stdoutput, bss_section, 4);
+	}
 
       /* Create a .reginfo section for register masks and a .mdebug
 	 section for debugging information.  */
@@ -1148,6 +1154,17 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
   fixS *fixp;
   int nops = 0;
 
+  /* Make sure the section will be aligned appropriately.  Note that
+     we do not insert an alignment directive; it remains the user's
+     responsibility to align instructions if necessary.  Here we only
+     ensure that the section will have the right default alignment, so
+     that the right thing will happen if no alignment directive is
+     used.  */
+  if (mips16)
+    record_alignment (now_seg, 1);
+  else
+    record_alignment (now_seg, 2);
+
   prev_pinfo = prev_insn.insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
 
@@ -1374,7 +1391,12 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
   else if (place != NULL)
     f = place;
   else if (mips16 && ! ip->use_extend && reloc_type != BFD_RELOC_MIPS16_JMP)
-    f = frag_more (2);
+    {
+      /* Make sure there is enough room to swap this instruction with
+         a following jump instruction.  */
+      frag_grow (6);
+      f = frag_more (2);
+    }
   else
     f = frag_more (4);
   fixp = NULL;
@@ -8466,7 +8488,8 @@ s_change_sec (sec)
 				      | SEC_READONLY
 				      | SEC_RELOC
 				      | SEC_DATA));
-	      bfd_set_section_alignment (stdoutput, seg, 4);
+	      if (strcmp (TARGET_OS, "elf") != 0)
+		bfd_set_section_alignment (stdoutput, seg, 4);
 	    }
 	  demand_empty_rest_of_line ();
 	}
@@ -8487,7 +8510,8 @@ s_change_sec (sec)
 	      bfd_set_section_flags (stdoutput, seg,
 				     SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				     | SEC_DATA);
-	      bfd_set_section_alignment (stdoutput, seg, 4);
+	      if (strcmp (TARGET_OS, "elf") != 0)
+		bfd_set_section_alignment (stdoutput, seg, 4);
 	    }
 	  demand_empty_rest_of_line ();
 	  break;
@@ -8943,7 +8967,10 @@ md_section_align (seg, addr)
 #ifdef OBJ_ELF
   /* We don't need to align ELF sections to the full alignment.
      However, Irix 5 may prefer that we align them at least to a 16
-     byte boundary.  */
+     byte boundary.  We don't bother to align the sections if we are
+     targeted for an embedded system.  */
+  if (strcmp (TARGET_OS, "elf") == 0)
+    return addr;
   if (align > 4)
     align = 4;
 #endif
