@@ -79,6 +79,7 @@ static char *solib_break_names[] =
   "r_debug_state",
   "_r_debug_state",
   "_dl_debug_state",
+  "._dl_debug_state",
   "rtld_db_dlactivity",
   "_rtld_debug_state",
   NULL

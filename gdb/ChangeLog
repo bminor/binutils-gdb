@@ -1,5 +1,8 @@
 2003-06-11  Jim Blandy  <jimb@redhat.com>
 
+	* solib-svr4.c (solib_break_names): Recognize the 64-bit PowerPC
+	Linux entry point symbols for _dl_debug_state, too.
+
 	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): New
 	function.
 	(ppc_linux_init_abi): Register it as the
