@@ -1,3 +1,10 @@
+Fri May  5 14:47:13 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/obj-coff.h (SEPARATE_STAB_SECTIONS): Define to 1, not
+	empty.
+	* config/obj-elf.h (SEPARATE_STAB_SECTIONS): Ditto.
+	* config/obj-som.h (SEPARATE_STAB_SECTIONS): Ditto.
+
 Thu May  4 19:26:55 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* stabs.c (get_stab_string_offset): Always define.  If

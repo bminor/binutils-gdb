@@ -105,6 +105,11 @@
 #define TARGET_FORMAT "coff-m88kbcs"
 #endif
 
+#ifdef TC_W65
+#include "coff/w65.h"
+#define TARGET_FORMAT "coff-w65"
+#endif
+
 /* Targets may also set this.  Also, if BFD_ASSEMBLER is defined, this
    will already have been defined.  */
 #undef SYMBOLS_NEED_BACKPOINTERS
@@ -157,6 +162,8 @@
 #ifdef BFD_ASSEMBLER
 
 #include "bfd/libcoff.h"
+
+#define OUTPUT_FLAVOR bfd_target_coff_flavour
 
 /* SYMBOL TABLE */
 
@@ -301,6 +308,7 @@ extern void coff_add_linesym PARAMS ((struct symbol *));
 
 
 void c_dot_file_symbol PARAMS ((char *filename));
+#define obj_app_file c_dot_file_symbol
 
 extern void coff_frob_symbol PARAMS ((struct symbol *, int *));
 extern void coff_adjust_symtab PARAMS ((void));
@@ -703,6 +711,7 @@ extern segT obj_coff_add_segment PARAMS ((const char *));
 extern void obj_coff_section PARAMS ((int));
 
 extern void c_dot_file_symbol PARAMS ((char *filename));
+#define obj_app_file c_dot_file_symbol
 extern void obj_extra_stuff PARAMS ((object_headers * headers));
 
 extern segT s_get_segment PARAMS ((struct symbol * ptr));
@@ -741,7 +750,7 @@ extern struct internal_scnhdr text_section_header;
 #endif /* not BFD_ASSEMBLER */
 
 /* Stabs in a coff file go into their own section.  */
-#define SEPARATE_STAB_SECTIONS
+#define SEPARATE_STAB_SECTIONS 1
 
 /* We need 12 bytes at the start of the section to hold some initial
    information.  */

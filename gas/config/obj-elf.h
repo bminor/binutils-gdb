@@ -84,7 +84,7 @@ extern void obj_elf_version PARAMS ((int));
   S_SET_SIZE ((DEST), S_GET_SIZE (SRC))
 
 /* Stabs go in a separate section.  */
-#define SEPARATE_STAB_SECTIONS
+#define SEPARATE_STAB_SECTIONS 1
 
 /* We need 12 bytes at the start of the section to hold some initial
    information.  */
