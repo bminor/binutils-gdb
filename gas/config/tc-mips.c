@@ -734,6 +734,9 @@ static const char *mips_isa_to_str PARAMS ((int));
 static const char *mips_cpu_to_str PARAMS ((int));
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 static void show PARAMS ((FILE *, char *, int *, int *));
+#ifdef OBJ_ELF
+static int mips_need_elf_addend_fixup PARAMS ((fixS *));
+#endif
 
 /* Return values of my_getSmallExpression().  */
 
@@ -10218,6 +10221,25 @@ mips_force_relocation (fixp)
 	      || fixp->fx_r_type == BFD_RELOC_PCREL_LO16));
 }
 
+#ifdef OBJ_ELF
+static int
+mips_need_elf_addend_fixup (fixP)
+     fixS *fixP;
+{
+  return (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16
+	  || ((S_IS_WEAK (fixP->fx_addsy)
+	       || S_IS_EXTERN (fixP->fx_addsy))
+	      && !S_IS_COMMON (fixP->fx_addsy))
+	  || (symbol_used_in_reloc_p (fixP->fx_addsy)
+	      && (((bfd_get_section_flags (stdoutput,
+					   S_GET_SEGMENT (fixP->fx_addsy))
+		    & SEC_LINK_ONCE) != 0)
+		  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
+			       ".gnu.linkonce",
+			       sizeof (".gnu.linkonce") - 1))));
+}
+#endif
+
 /* Apply a fixup to the object file.  */
 
 void
@@ -10257,25 +10279,12 @@ md_apply_fix3 (fixP, valP, seg)
 #ifdef OBJ_ELF
   if (fixP->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
-      if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16
-	  || ((S_IS_WEAK (fixP->fx_addsy)
-	       || S_IS_EXTERN (fixP->fx_addsy))
-	      && !S_IS_COMMON (fixP->fx_addsy))
-	  || (symbol_used_in_reloc_p (fixP->fx_addsy)
-	      && (((bfd_get_section_flags (stdoutput,
-					   S_GET_SEGMENT (fixP->fx_addsy))
-		    & SEC_LINK_ONCE) != 0)
-		  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-			       ".gnu.linkonce",
-			       sizeof (".gnu.linkonce") - 1))))
-
+      if (mips_need_elf_addend_fixup (fixP))
 	{
 	  valueT symval = S_GET_VALUE (fixP->fx_addsy);
 
 	  value -= symval;
-	  if (value != 0
-	      && ! fixP->fx_pcrel
-	      && fixP->fx_r_type != BFD_RELOC_MIPS_GPREL)
+	  if (value != 0 && ! fixP->fx_pcrel)
 	    {
 	      /* In this case, the bfd_install_relocation routine will
 		 incorrectly add the symbol value back in.  We just want
@@ -12250,6 +12259,19 @@ tc_gen_reloc (section, fixp)
 			bfd_get_reloc_code_name (code));
 	}
     }
+
+#ifdef OBJ_ELF
+  /* md_apply_fix3 has a double-subtraction hack to get
+     bfd_install_relocation to behave nicely.  GPREL relocations are
+     handled correctly without this hack, so undo it here.  We can't
+     stop md_apply_fix3 from subtracting twice in the first place since
+     the fake addend is required for variant frags above.  */
+  if (fixp->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour
+      && code == BFD_RELOC_MIPS_GPREL
+      && reloc->addend != 0
+      && mips_need_elf_addend_fixup (fixp))
+    reloc->addend += S_GET_VALUE (fixp->fx_addsy);
+#endif
 
   /* To support a PC relative reloc when generating embedded PIC code
      for ECOFF, we use a Cygnus extension.  We check for that here to

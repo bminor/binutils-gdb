@@ -1,3 +1,11 @@
+2001-11-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (mips_need_elf_addend_fixup): New, extracted from...
+	(md_apply_fix3): ...here.  Don't prevent the symbol value being
+	subtracted twice from GPREL addends.
+	(tc_gen_reloc): Add the symbol value to a GPREL addend if it was
+	subtracted by the previous function.
+
 2001-11-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-avr.c (md_apply_fix3): Fix typo introduced by
