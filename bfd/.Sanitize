@@ -84,6 +84,7 @@ coff-i960.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
+coff-pmac.c
 coff-ppc.c
 coff-rs6000.c
 coff-sh.c
@@ -193,7 +194,7 @@ m88kmach3.c
 makefile.dos
 mipsbsd.c
 mpw-config.in
-mpw-make.in
+mpw-make.sed
 newsos3.c
 netbsd.h
 nlm-target.h

@@ -35,7 +35,6 @@ m68knbsd.h
 m88kmach3.h
 mipsbsd.h
 mipsmach3.h
-mpw.h
 nbsd.h
 news-mips.h
 news.h
