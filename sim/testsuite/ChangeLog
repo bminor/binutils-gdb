@@ -1,3 +1,16 @@
+Tue Apr 21 10:49:03 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (run_sim_test): Don't exit early if one mach fails,
+	try all machs.
+
+Fri Apr 17 16:00:52 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/mv[ft]achi.cgs: Fix expected result
+	(sign extension of top 8 bits).
+start-sanitize-m32rx
+	* sim/m32r/mv[ft]achi-a.cgs: Ditto.
+end-sanitize-m32rx
+
 start-sanitize-m32rx
 Tue Apr 14 14:06:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -46,7 +59,7 @@ Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
 	* sim/m32r/unlock.cgs: Test UNLOCK instruction.
 start-sanitize-m32rx
 	* sim/m32r/mvfachi-a.cgs: Test extended MVFACHI instruction.
-	* sim/m32r/mvfaclo-a.cgs: Test extended MVFACLO.cgs instruction.
+	* sim/m32r/mvfaclo-a.cgs: Test extended MVFACLO instruction.
 	* sim/m32r/mvtachi-a.cgs: Test extended MVTACHI instruction.
 	* sim/m32r/mvtaclo-a.cgs: Test extended MVTACLO instruction.
 end-sanitize-m32rx
