@@ -3026,6 +3026,50 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_call_dummy_length (gdbarch, 0x38);
+
+      /* NOTE: cagney/2002-04-26: Based from info posted by Peter
+	 Schauer around Oct '99.  Briefly, due to aspects of the SPARC
+	 ABI, it isn't possible to use ON_STACK with a strictly
+	 compliant compiler.
+
+	 Peter Schauer writes ...
+
+	 No, any call from GDB to a user function returning a
+	 struct/union will fail miserably. Try this:
+
+	 *NOINDENT*
+	 struct x
+	 {
+           int a[4];
+         };
+
+	 struct x gx;
+
+	 struct x
+	 sret ()
+	 {
+	   return gx;
+	 }
+
+	 main ()
+	 {
+	   int i;
+	   for (i = 0; i < 4; i++)
+	     gx.a[i] = i + 1;
+	   gx = sret ();
+	 }
+	 *INDENT*
+
+	 Set a breakpoint at the gx = sret () statement, run to it and
+	 issue a `print sret()'. It will not succed with your
+	 approach, and I doubt that continuing the program will work
+	 as well.
+
+	 For details of the ABI see the Sparc Architecture Manual.  I
+	 have Version 8 (Prentice Hall ISBN 0-13-825001-4) and the
+	 calling conventions for functions returning aggregate values
+	 are explained in Appendix D.3.  */
+
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_32);
 #else

@@ -1,3 +1,8 @@
+2002-04-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* sparc-tdep.c (sparc_gdbarch_init): Add comment explaining why
+	ON_STACK is needed.
+
 2002-04-26  Ben Elliston  <bje@redhat.com>
 
 	* target.c (do_xfer_memory): Correct reference to the new option
