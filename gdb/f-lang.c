@@ -484,6 +484,7 @@ const struct language_defn f_language_defn =
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   &builtin_type_f_character,	/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 

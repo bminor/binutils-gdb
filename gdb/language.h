@@ -267,6 +267,9 @@ struct language_defn
     /* Type of elements of strings. */
     struct type **string_char_type;
 
+    /* The list of characters forming word boundaries.  */
+    char *(*la_word_break_characters) (void);
+
     /* Add fields above this point, so the magic number is always last. */
     /* Magic number for compat checking */
 

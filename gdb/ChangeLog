@@ -1,3 +1,22 @@
+2003-10-06  J. Brobecker  <brobecker@gnat.com>
+
+	* language.h (language_defn): new field, la_word_break_characters.
+	* language.c (unknown_language_defn): Set new field to
+	default_word_break_characters.
+	(auto_language_defn): Likewise.
+	(local_language_defn): Likewise.
+	* ada-lang.c (ada_language_defn): Likewise.
+	* c-lang.c (c_language_defn): Likewise.
+	(cplus_language_defn): Likewise.
+	(asm_language_defn): Likewise.
+	(minimal_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* jv-lang.c (java_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+	* scm-lang.c (scm_language_defn): Likewise.
+
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
 	* ppc-sysv-tdep.c: Re-indent.

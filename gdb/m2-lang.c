@@ -437,6 +437,7 @@ const struct language_defn m2_language_defn =
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
   &builtin_type_m2_char,	/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 
