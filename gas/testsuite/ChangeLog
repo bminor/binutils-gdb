@@ -1,3 +1,8 @@
+Wed Jan 12 13:41:10 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/procbug.s: Add test for another bug relating
+	to having a function's label follow the .PROC directive.
+
 Tue Jan 11 21:47:48 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/reloc.exp: Add test for cross-subspace call bug
