@@ -1,3 +1,7 @@
+Wed Aug  4 17:08:08 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objcopy.c (copy_file): Make failures to process a file nonfatal.
+
 Mon Aug  2 11:28:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* nm.c: Add -B option, like --format=bsd.
