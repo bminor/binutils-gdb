@@ -685,6 +685,7 @@ static void check_absolute_expr PARAMS ((struct mips_cl_insn * ip,
 					 expressionS *));
 static void load_register PARAMS ((int *, int, expressionS *, int));
 static void load_address PARAMS ((int *counter, int reg, expressionS *ep));
+static void move_register PARAMS ((int *, int, int));
 static void macro PARAMS ((struct mips_cl_insn * ip));
 static void mips16_macro PARAMS ((struct mips_cl_insn * ip));
 #ifdef LOSING_COMPILER
@@ -2533,8 +2534,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
     {
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_arch,
-			       HAVE_32BIT_GPRS)
+	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_arch)
 	  && (mips_arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
@@ -3430,6 +3430,19 @@ load_address (counter, reg, ep)
     abort ();
 }
 
+/* Move the contents of register SOURCE into register DEST.  */
+
+static void
+move_register (counter, dest, source)
+     int *counter;
+     int dest;
+     int source;
+{
+  macro_build ((char *) NULL, counter, (expressionS *) NULL,
+	       HAVE_32BIT_GPRS ? "addu" : "daddu",
+	       "d,v,t", dest, source, 0);
+}
+
 /*
  *			Build macros
  *   This routine implements the seemingly endless macro or synthesized
@@ -3503,7 +3516,7 @@ macro (ip)
       if (dreg == sreg)
 	macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
       else
-	macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, sreg, 0);
+	move_register (&icnt, dreg, sreg);
       macro_build ((char *) NULL, &icnt, NULL,
 		   dbl ? "dsub" : "sub", "d,v,t", dreg, 0, sreg);
 
@@ -4056,10 +4069,9 @@ macro (ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  if (strcmp (s2, "mflo") == 0)
-	    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg,
-			 sreg);
+	    move_register (&icnt, dreg, sreg);
 	  else
-	    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, 0);
+	    move_register (&icnt, dreg, 0);
 	  return;
 	}
       if (imm_expr.X_op == O_constant
@@ -4072,7 +4084,7 @@ macro (ip)
 			   "d,w", dreg, sreg);
 	    }
 	  else
-	    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, 0);
+	    move_register (&icnt, dreg, 0);
 	  return;
 	}
 
@@ -5189,8 +5201,7 @@ macro (ip)
 	      if (lreg <= 31)
 		{
 		  if (offset_expr.X_op == O_absent)
-		    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s",
-				 lreg, 0);
+		    move_register (&icnt, lreg, 0);
 		  else
 		    {
 		      assert (offset_expr.X_op == O_constant);
@@ -5808,6 +5819,10 @@ macro (ip)
 		   ip->insn_opcode);
       return;
 
+    case M_MOVE:
+      move_register (&icnt, dreg, sreg);
+      return;
+
 #ifdef LOSING_COMPILER
     default:
       /* Try and see if this is a new itbl instruction.
@@ -6039,7 +6054,7 @@ macro2 (ip)
 	{
 	  as_warn (_("Instruction %s: result is always false"),
 		   ip->insn_mo->name);
-	  macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, 0);
+	  move_register (&icnt, dreg, 0);
 	  return;
 	}
       if (imm_expr.X_op == O_constant
@@ -6778,8 +6793,7 @@ mips16_macro (ip)
       expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, "slti", "x,8",  yreg);
       if (xreg != yreg)
-	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		     "move", "y,X", xreg, yreg);
+	move_register (&icnt, xreg, yreg);
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bteqz", "p");
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
@@ -6948,7 +6962,7 @@ mips_ip (str, ip)
 
       assert (strcmp (insn->name, str) == 0);
 
-      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_arch, HAVE_32BIT_GPRS))
+      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_arch))
 	ok = true;
       else
 	ok = false;

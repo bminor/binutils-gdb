@@ -1,3 +1,12 @@
+2001-08-10  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (move_register): New function.
+	(macro_build): Remove OPCODE_IS_MEMBER's gp32 argument.
+	(mips_ip): Likewise.
+	(macro2): Use move_register rather than macro_build for moves.
+	(mips16_macro): Likewise.
+	(macro): Likewise.  Handle M_MOVE.
+
 2001-08-10  Andreas Jaeger  <aj@suse.de>
 
 	* configure.in: Add -Wstrict-prototypes and -Wmissing-prototypes
