@@ -376,16 +376,21 @@ print_insn_arg (d, l, pc, info)
     }
 }
 
-
-
 #if SYMTAB_AVAILABLE
 
-static
-void set_mips_isa_type (int mach, int * isa, int *cputype) 
+/* Figure out the MIPS ISA and CPU based on the machine number.
+   FIXME: What does this have to do with SYMTAB_AVAILABLE?  */
+
+static void
+set_mips_isa_type (mach, isa, cputype)
+     int mach;
+     int *isa;
+     int *cputype;
 {
-  int target_processor = 0 ;
-  int mips_isa = 0 ;
-    switch (mach)
+  int target_processor = 0;
+  int mips_isa = 0;
+
+  switch (mach)
     {
       /* start-sanitize-tx19 */
       case bfd_mach_mips1900:
@@ -479,10 +484,12 @@ void set_mips_isa_type (int mach, int * isa, int *cputype)
 	break;
 
     }
-    *isa = mips_isa ;
-    *cputype = target_processor ;
+
+  *isa = mips_isa;
+  *cputype = target_processor;
 }
-#endif /* symbol table available */
+
+#endif /* SYMTAB_AVAILABLE */
 
 /* Print the mips instruction at address MEMADDR in debugged memory,
    on using INFO.  Returns length of the instruction, in bytes, which is
@@ -521,12 +528,14 @@ _print_insn_mips (memaddr, word, info)
 
       init = 1;
     }
+
 #if ! SYMTAB_AVAILABLE
-  /* This is running out on a target machine, not in a host tool */
-  target_processor = mips_target_info.processor ;
-  mips_isa = mips_target_info.isa ;
+  /* This is running out on a target machine, not in a host tool.
+     FIXME: Where does mips_target_info come from?  */
+  target_processor = mips_target_info.processor;
+  mips_isa = mips_target_info.isa;
 #else  
-  set_mips_isa_type(info->mach, &target_processor, &mips_isa) ;
+  set_mips_isa_type (info->mach, &target_processor, &mips_isa);
 #endif  
 
   info->bytes_per_chunk = 4;
@@ -616,12 +625,11 @@ _print_insn_mips (memaddr, word, info)
 }
 
 
-/* In an environment where we do not know the symbol type of the instruction
-   we are forces to assumd the low order bit of the instructions address
-   may mark it as a mips16 instruction. If we are sincle stepping or the
-   pc is within the disassembled function, this works. Otherwise,
-   we need a clue. Sometimes. */
-   
+/* In an environment where we do not know the symbol type of the
+   instruction we are forced to assume that the low order bit of the
+   instructions' address may mark it as a mips16 instruction.  If we
+   are single stepping, or the pc is within the disassembled function,
+   this works.  Otherwise, we need a clue.  Sometimes.  */
 
 int
 print_insn_big_mips (memaddr, info)
@@ -632,8 +640,8 @@ print_insn_big_mips (memaddr, info)
   int status;
 
 #if 1
-  /* FIXME: If odd address, this is CLEARLY a mips 16 instruction */
-  /* Only a few tools will work this way */
+  /* FIXME: If odd address, this is CLEARLY a mips 16 instruction.  */
+  /* Only a few tools will work this way.  */
   if (memaddr & 0x01)
     return print_insn_mips16 (memaddr, info);
 #endif  
@@ -682,7 +690,8 @@ print_insn_little_mips (memaddr, info)
   /* end-sanitize-sky */
 
 #if 1
-  if (memaddr & 0x01)  return print_insn_mips16 (memaddr, info);
+  if (memaddr & 0x01)
+    return print_insn_mips16 (memaddr, info);
 #endif  
 
 #if SYMTAB_AVAILABLE
