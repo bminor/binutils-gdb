@@ -1,3 +1,7 @@
+2002-04-20  Tom Rix  <trix@redhat.com>
+
+	* coff64-rs6000.c (_bfd_xcoff64_swap_aux_in): Fix C_FILE auxent.
+
 2002-04-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* archures.c (bfd_lookup_arch): Move the list order comment..
