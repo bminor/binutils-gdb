@@ -70,6 +70,7 @@ case "${canon}" in
   mips*-dec-*)		bfd_name=decstation ;;
   mips*el-*-ecoff*)	bfd_name=decstation ;;
   mips*-*-ecoff*)	bfd_name=bigmips ;;
+  mips*-*-irix5*)	bfd_name=mipsbelf ;;
   mips*-sgi-*)		bfd_name=bigmips ;;
   mips*-*-sysv*)	bfd_name=riscos ;;
   mips*-*-riscos*)	bfd_name=riscos ;;
@@ -83,9 +84,8 @@ case "${canon}" in
   sparc-*-solaris2*)	bfd_name=sparc-elf ;;
   sparc-*-sysv4*)	bfd_name=sparc-elf ;;
 #	start-sanitize-v9
-# Don't set target64=true for sparc64-*-aout*.
   sparc64-*-aout*)	bfd_name=sparc-aout ;;
-  sparc64-*-elf*)	bfd_name=sparc64-elf  ; target64=true ;;
+  sparc64-*-elf*)	bfd_name=sparc64-elf ;;
 #	end-sanitize-v9
   sparc-*-netware*)	bfd_name=sparc-nlm ;;
   sparc*-*-*)		bfd_name=sparc-aout ;;
@@ -103,8 +103,8 @@ case "${canon}" in
   *-*-go32*)		bfd_name=${cpu}-aout ;;
   *-*-sysv*)		bfd_name=${cpu}-coff ;;
 
-  *-*-aout64*)		bfd_name=${cpu}-aout64 ; target64=true ;;
-  *-*-elf64*)		bfd_name=${cpu}-elf64 ; target64=true ;;
+  *-*-aout64*)		bfd_name=${cpu}-aout64 ;;
+  *-*-elf64*)		bfd_name=${cpu}-elf64 ;;
 
   *-adobe-*)		bfd_name=adobe ;;
   *-sony-*)		bfd_name=news ;;

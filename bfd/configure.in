@@ -164,7 +164,8 @@ do
 				target64=true ;;
     ecoff_big_vec)		tb="$tb coff-mips.o" ;;
     ecoff_little_vec)		tb="$tb coff-mips.o" ;;
-    ecoffalpha_little_vec)	tb="$tb coff-alpha.o" ;;
+    ecoffalpha_little_vec)	tb="$tb coff-alpha.o"
+				target64=true ;;
     h8300coff_vec)		tb="$tb coff-h8300.o reloc16.o" ;;
     h8500coff_vec)		tb="$tb coff-h8500.o reloc16.o" ;;
     host_aout_vec)		tb="$tb host-aout.o aout32.o stab-syms.o" ;;
@@ -178,7 +179,7 @@ do
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
     i386lynx_coff_vec)		tb="$tb cf-i386lynx.o lynx-core.o stab-syms.o" ;;
-    i386mach3_vec)		tb="$tb i386mach3.o" ;;
+    i386mach3_vec)		tb="$tb i386mach3.o aout32.o stab-syms.o" ;;
     icoff_big_vec)		tb="$tb coff-i960.o" ;;
     icoff_little_vec)		tb="$tb coff-i960.o" ;;
     ieee_vec)			tb="$tb ieee.o" ;;
@@ -190,6 +191,7 @@ do
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
     nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
     nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
+    nlm32_sparc_vec)		tb="$tb nlm32-sparc.o nlm32.o nlm.o" ;;
     nlm32_little_generic_vec) 	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
     nlm64_big_generic_vec)	tb="$tb nlm64-gen.o nlm64.o nlm.o"
 				target64=true ;;
