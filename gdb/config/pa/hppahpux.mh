@@ -6,3 +6,4 @@ NAT_FILE= nm-hppah.h
 NATDEPFILES= hppah-nat.o coredep.o corelow.o inftarg.o fork-child.o paread.o
 REGEX=regex.o
 REGEX1=regex.o
+HOST_IPC=-DBSD_IPC -DPOSIX_WAIT
