@@ -1,5 +1,10 @@
 Sun Dec  6 12:46:36 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in (m68k-*-gnu*): New target.  From Aymeric Vincent
+	<aymeric.vincent@emi.u-bordeaux.fr>.
+	* aclocal.m4: Rebuild with current tools.
+	* configure: Rebuild.
+
 	* config/tc-alpha.c (emit_ldgp): Give an error message rather than
 	an assertion failure for a case we can't handle when OBJ_ECOFF.
 
