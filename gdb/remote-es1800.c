@@ -2173,8 +2173,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   NULL,				/* to_fetch_registers */
   NULL,				/* to_store_registers */
   es1800_prepare_to_store,	/* to_prepare_to_store */
-  NULL,				/* to_convert_to_virtual */
-  NULL,				/* to_convert_from_virtual */
   es1800_xfer_inferior_memory,	/* to_xfer_memory */
   es1800_files_info,		/* to_files_info */
   es1800_insert_breakpoint,	/* to_insert_breakpoint */
@@ -2220,8 +2218,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   es1800_fetch_register,	/* to_fetch_registers */
   es1800_store_register,	/* to_store_registers */
   es1800_prepare_to_store,	/* to_prepare_to_store */
-  NULL,				/* to_convert_to_virtual */
-  NULL,				/* to_convert_from_virtual */
   es1800_xfer_inferior_memory,	/* to_xfer_memory */
   es1800_files_info,		/* to_files_info */
   es1800_insert_breakpoint,	/* to_insert_breakpoint */

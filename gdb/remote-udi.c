@@ -1332,7 +1332,7 @@ static struct target_ops udi_ops = {
         udi_open, udi_close,
         udi_attach, udi_detach, udi_resume, udi_wait,
         udi_fetch_registers, udi_store_registers,
-        udi_prepare_to_store, 0, 0,   /* conv_to, conv_from */
+        udi_prepare_to_store,
         udi_xfer_inferior_memory,
         udi_files_info,
         udi_insert_breakpoint, udi_remove_breakpoint, /* Breakpoints */

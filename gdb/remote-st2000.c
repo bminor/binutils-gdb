@@ -781,8 +781,6 @@ the speed to connect at in bits per second.",
   st2000_fetch_register,
   st2000_store_register,
   st2000_prepare_to_store,
-  0,
-  0,				/* conv_to, conv_from */
   st2000_xfer_inferior_memory,
   st2000_files_info,
   st2000_insert_breakpoint,

@@ -932,7 +932,7 @@ specified when you started GDB.",
 	nindy_open, nindy_close,
 	0, nindy_detach, nindy_resume, nindy_wait,
 	nindy_fetch_registers, nindy_store_registers,
-	nindy_prepare_to_store, 0, 0, /* conv_from, conv_to */
+	nindy_prepare_to_store,
 	nindy_xfer_inferior_memory, nindy_files_info,
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0,	/* Terminal crud */

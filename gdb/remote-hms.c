@@ -1395,7 +1395,7 @@ by a serial line.",
 	hms_open, hms_close, 
 	hms_attach, hms_detach, hms_resume, hms_wait,
 	hms_fetch_register, hms_store_register,
-	hms_prepare_to_store, 0, 0, 	/* conv_to, conv_from */
+	hms_prepare_to_store,
 	hms_xfer_inferior_memory, 
 	hms_files_info,
 	hms_insert_breakpoint, hms_remove_breakpoint, /* Breakpoints */

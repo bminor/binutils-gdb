@@ -270,7 +270,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   if (baud_rate)
     {
-      if (1 != sscanf (baud_rate, "%d ", &a_rate))
+      if (sscanf (baud_rate, "%d", &a_rate) == 1)
 	{
 	  b_rate = damn_b (a_rate);
 	  baudrate_set = 1;
@@ -416,8 +416,8 @@ remote_wait (status)
   void (*ofunc)();
   unsigned char *p;
   int i;
-  int regno;
-  unsigned char regs[8];	/* Better be big enough for largest reg */
+  long regno;
+  unsigned char regs[MAX_REGISTER_RAW_SIZE];
 
   WSETEXIT ((*status), 0);
 
@@ -430,15 +430,21 @@ remote_wait (status)
   if (buf[0] == 'T')
     {
       /* Expedited reply, containing Signal, {regno, reg} repeat */
+      /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
+	  ss = signal number
+	  n... = register number
+	  r... = register contents
+	  */
+
       p = &buf[3];		/* after Txx */
 
       while (*p)
 	{
-	  regno = fromhex (p[0]) * 16 + fromhex (p[1]);
-	  p += 2;
-	  if (regno >= NUM_REGS)
-	    error ("Remote sent illegal register number %d (0x%x)", regno,
-		   regno);
+	  regno = strtol (p, &p, 16); /* Read the register number */
+
+	  if (*p++ != ':'
+	      || regno >= NUM_REGS)
+	    error ("Remote sent bad register number %s", buf);
 
 	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
 	    {
@@ -447,6 +453,9 @@ remote_wait (status)
 	      regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
 	      p += 2;
 	    }
+
+	  if (*p++ != ';')
+	    error("Remote register badly formatted: %s", buf);
 
 	  supply_register (regno, regs);
 	}
@@ -1045,8 +1054,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   remote_fetch_registers,	/* to_fetch_registers */
   remote_store_registers,	/* to_store_registers */
   remote_prepare_to_store,	/* to_prepare_to_store */
-  NULL,				/* to_convert_to_virtual */
-  NULL,				/* to_convert_from_virtual */
   remote_xfer_memory,		/* to_xfer_memory */
   remote_files_info,		/* to_files_info */
   NULL,				/* to_insert_breakpoint */

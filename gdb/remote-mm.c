@@ -1673,7 +1673,7 @@ struct target_ops mm_ops = {
         mm_open, mm_close,
         mm_attach, mm_detach, mm_resume, mm_wait,
         mm_fetch_registers, mm_store_registers,
-        mm_prepare_to_store, 0, 0,   /* conv_to, conv_from */
+        mm_prepare_to_store,
         mm_xfer_inferior_memory,
         mm_files_info,
         mm_insert_breakpoint, mm_remove_breakpoint, /* Breakpoints */

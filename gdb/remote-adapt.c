@@ -1415,7 +1415,7 @@ struct target_ops adapt_ops = {
 	adapt_open, adapt_close, 
 	adapt_attach, adapt_detach, adapt_resume, adapt_wait,
 	adapt_fetch_register, adapt_store_register,
-	adapt_prepare_to_store, 0, 0, 	/* conv_to, conv_from */
+	adapt_prepare_to_store,
 	adapt_xfer_inferior_memory, 
 	adapt_files_info,
 	adapt_insert_breakpoint, adapt_remove_breakpoint, /* Breakpoints */

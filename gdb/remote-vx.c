@@ -55,8 +55,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern void symbol_file_command ();
 extern int stop_soon_quietly;		/* for wait_for_inferior */
-extern void host_convert_to_virtual ();
-extern void host_convert_from_virtual ();
 
 static int net_ptrace_clnt_call ();	/* Forward decl */
 static enum clnt_stat net_clnt_call ();	/* Forward decl */
@@ -1333,7 +1331,7 @@ Specify the name of the machine to connect to.",
 	vx_open, vx_close, vx_attach, 0, /* vx_detach, */
 	0, 0, /* resume, wait */
 	0, 0, /* read_reg, write_reg */
-	0, host_convert_to_virtual, host_convert_from_virtual,  /* prep_to_store, */
+	0, /* prep_to_store, */
 	vx_xfer_memory, vx_files_info,
 	0, 0, /* insert_breakpoint, remove_breakpoint */
 	0, 0, 0, 0, 0,	/* terminal stuff */
@@ -1355,7 +1353,7 @@ struct target_ops vx_run_ops = {
 	vx_proc_open, vx_proc_close, 0, vx_detach, /* vx_attach */
 	vx_resume, vx_wait,
 	vx_read_register, vx_write_register,
-	vx_prepare_to_store, host_convert_to_virtual, host_convert_from_virtual,
+	vx_prepare_to_store,
 	vx_xfer_memory, vx_run_files_info,
 	vx_insert_breakpoint, vx_remove_breakpoint,
 	0, 0, 0, 0, 0,	/* terminal stuff */

@@ -435,7 +435,7 @@ struct target_ops core_ops = {
 	core_open, core_close,
 	child_attach, core_detach, 0, 0, /* resume, wait */
 	get_core_registers, 
-	0, 0, 0, 0, /* store_regs, prepare_to_store, conv_to, conv_from */
+	0, 0, /* store_regs, prepare_to_store */
 	xfer_memory, core_files_info,
 	0, 0, /* core_insert_breakpoint, core_remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */

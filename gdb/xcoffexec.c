@@ -991,7 +991,7 @@ Specify the filename of the executable file.",
 	exec_file_command, exec_close, /* open, close */
 	child_attach, 0, 0, 0, /* attach, detach, resume, wait, */
 	0, 0, /* fetch_registers, store_registers, */
-	0, 0, 0, /* prepare_to_store, conv_to, conv_from, */
+	0, /* prepare_to_store */
 	xfer_memory, exec_files_info,
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
