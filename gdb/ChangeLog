@@ -1,3 +1,13 @@
+2002-11-19  Andreas Schwab  <schwab@suse.de>
+
+	* m68klinux-nat.c (IS_SIGTRAMP, IS_RT_SIGTRAMP) 
+	(m68k_linux_in_sigtramp, SIGCONTEXT_PC_OFFSET) 
+	(UCONTEXT_PC_OFFSET, m68k_linux_sigtramp_saved_pc) 
+	(m68k_linux_frame_saved_pc): Move to ...
+	* m68klinux-tdep.c: ... here.  New file.
+	* Makefile.in (m68klinux-tdep.o): Add dependencies.
+	* config/m68k/linux.mt (TDEPFILES): Add m68klinux-tdep.o.
+
 2002-11-19  Adam Fedor  <fedor@gnu.org>
 
 	* objc-exp.y: Revert to old skip_quoted usage.

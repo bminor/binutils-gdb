@@ -1896,6 +1896,8 @@ m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbcore_h) \
 m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(language_h) $(gdbcore_h) $(regcache_h) $(gdb_stat_h) \
 	$(floatformat_h) $(target_h) $(gregset_h)
+m68klinux-tdep.o: m68klinux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
+	$(target_h)
 m68knbsd-nat.o: m68knbsd-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h)
 m68knbsd-tdep.o: m68knbsd-tdep.c $(defs_h) $(gdbtypes_h) $(regcache_h)
