@@ -1,3 +1,15 @@
+Mon Feb 27 12:52:46 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config.sub: add vxworks29k configuration.
+
+Fri Feb 10 16:12:26 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (taz): Do "diststuff" part quietly.
+
+Sun Feb  5 14:16:35 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config.sub: Mini-merge with gcc/config.sub.
+
 Sat Feb  4 12:11:35 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* config.guess (IRIX): Sed - to _.
