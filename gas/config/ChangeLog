@@ -1,5 +1,8 @@
 Tue Feb 18 02:11:10 1992  K. Richard Pixley  (rich at cygnus.com)
 
+	* tc-i860.[hc]: blew off the dust.  Something must still be done
+	  about conflicting relocation types.
+
 	* tc-ns32k.c: Replaced previous tc_aout_fix_to_chars stub with the
 	  real thing.
 
