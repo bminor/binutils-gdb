@@ -1,3 +1,11 @@
+2004-10-25  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* stabs.c (stab_demangle_v3_arglist): New static function, broken
+	out of stab_demangle_v3_argtypes.
+	(stab_demangle_v3_argtypes): Call it.
+	(stab_demangle_v3_arg): Handle DEMANGLE_COMPONENT_FUNCTION_TYPE.
+	If we find an unrecognized component, print out its number.
+
 2004-10-25  David Mosberger  <davidm@hpl.hp.com>
 
 	* readelf.c (slurp_ia64_unwind_table): Support relocations against
