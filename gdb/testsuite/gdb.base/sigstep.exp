@@ -16,10 +16,11 @@
 
 
 # The program sigstep.c creates a very simple backtrace containing one
-# signal handler and signal trampoline.
+# signal handler and signal trampoline.  A flag is set and then the
+# handler returns.  This is repeated at infinitum.
 
 # This test runs the program up to the signal handler, and then
-# attempts to step/next the inferior back to main.
+# attempts to step/next out of the handler and back into main.
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping sigstep.exp because of nosignals."
@@ -71,12 +72,12 @@ gdb_expect_list "backtrace for nexti" ".*$gdb_prompt $" {
 
 proc advance { i } {
     global gdb_prompt
+    set prefix "$i from handler"
 
     # Get us back into the handler
-    rerun_to_main
-    gdb_test "continue" ".* handler .*" "continue to handler for $i"
+    gdb_test "continue" ".* handler .*" "$prefix; continue to handler"
 
-    set test "$i out of handler"
+    set test "$prefix; leave handler"
     gdb_test_multiple "$i" "${test}" {
 	-re "done = 1;.*${gdb_prompt} $" {
 	    send_gdb "$i\n"
@@ -90,7 +91,7 @@ proc advance { i } {
 	    setup_kfail powerpc-*-*bsd* gdb/1639
 	    fail "$test (program exited)"
 	}
-	-re "(while ..done|return 0).*${gdb_prompt} $" {
+	-re "(while ..done|done = 0).*${gdb_prompt} $" {
 	    # After stepping out of a function /r signal-handler, GDB will
 	    # advance the inferior until it is at the first instruction of
 	    # a code-line.  While typically things return to the middle of
@@ -104,13 +105,13 @@ proc advance { i } {
 
 proc advancei { i } {
     global gdb_prompt
+    set prefix "$i from handleri"
     set program_exited 0
 
     # Get us back into the handler
-    rerun_to_main
-    gdb_test "continue" ".* handler .*" "continue to handler for $i"
+    gdb_test "continue" ".* handler .*" "$prefix; continue to handler"
 
-    set test "$i into signal trampoline"
+    set test "$prefix; leave handler"
     gdb_test_multiple "$i" "${test}" {
         -re "Cannot insert breakpoint 0.*${gdb_prompt} $" {
             # Some platforms use a special read-only page for signal
@@ -144,7 +145,7 @@ proc advancei { i } {
 	}
     }
 
-    set test "$i out of signal trampoline"
+    set test "$prefix; leave signal trampoline"
     gdb_test_multiple "$i" "${test}" {
 	-re "while .*${gdb_prompt} $" {
 	    pass "$test (in main)"
@@ -175,6 +176,8 @@ proc advancei { i } {
     }
 }
 
+# Check that we can step/next our way out of a signal handler.
+
 advance step
 advancei stepi
 
@@ -183,3 +186,153 @@ advancei nexti
 
 advancei finish
 advancei return
+gdb_test "set done = 1" "" "Set done as return will have skipped it"
+
+
+# Check that we can step/next our way into / over a signal handler.
+
+# There are at least the following cases: breakpoint @pc VS breakpoint
+# in handler VS step / next / continue.
+
+# Use the real-time itimer, as otherwize the process never gets enough
+# time to expire the timer.
+
+delete_breakpoints
+set infinite_loop [gdb_get_line_number {while (!done)}]
+gdb_test "set itimer = itimer_real"
+gdb_test "break [gdb_get_line_number {done = 0}]"
+
+# Try stepping when there's a signal pending, and a breakpoint at the
+# handler.  Should step into the signal handler.
+
+proc skip_to_handler { i } {
+    global gdb_prompt
+    global infinite_loop
+    set prefix "$i to handler"
+    
+    # Run around to the done
+    set test "$prefix; resync"
+    gdb_test_multiple "continue" "$test" {
+	-re "done = 0.*$gdb_prompt " {
+	    pass "$test"
+	}
+	# other patterns can go here
+    }
+    
+    # Advance to the infinite loop
+    gdb_test "advance $infinite_loop" "" "$prefix; advance to infinite loop"
+
+    # Make the signal pending
+    sleep 1
+    
+    # Insert / remove the handler breakpoint.
+    gdb_test "break handler" "" "$prefix; break handler"
+    gdb_test "$i" " handler .*" "$prefix; performing $i"
+    gdb_test "clear handler" "" "$prefix; clear handler"
+}
+
+skip_to_handler step
+skip_to_handler next
+skip_to_handler continue
+
+# Try stepping when there's a signal pending but no breakpoints.
+# Should skip the handler advancing to the next line.
+
+proc skip_over_handler { i } {
+    global gdb_prompt
+    global infinite_loop
+    set prefix "$i over handler"
+    
+    # Run around to the done
+    set test "$prefix; resync"
+    gdb_test_multiple "continue" "$test" {
+	-re "done = 0.*$gdb_prompt " {
+	    pass "$test"
+	}
+	# other patterns can go here
+    }
+    
+    # Advance to the infinite loop
+    gdb_test "advance $infinite_loop" "" "$prefix; advance to infinite loop"
+
+    # Make the signal pending
+    sleep 1
+    
+    gdb_test "$i" "done = 0.*" "$prefix; performing $i"
+}
+
+skip_over_handler step
+skip_over_handler next
+skip_over_handler continue
+
+# Try stepping when there's a signal pending, a pre-existing
+# breakpoint at the current instruction, and a breakpoint in the
+# handler.  Should advance to the signal handler.
+
+proc breakpoint_to_handler { i } {
+    global gdb_prompt
+    global infinite_loop
+    set prefix "$i on breakpoint, to handler"
+    
+    # Run around to the done
+    set test "$prefix; resync"
+    gdb_test_multiple "continue" "$test" {
+	-re "done = 0.*$gdb_prompt " {
+	    pass "$test"
+	}
+	# other patterns can go here
+    }
+    
+    gdb_test "break $infinite_loop" "" "$prefix; break infinite loop"
+    gdb_test "break handler" "" "$prefix; break handler"
+
+    # Continue to the infinite loop
+    gdb_test "continue" "while ..done.*" "$prefix; continue to infinite loop"
+
+    # Make the signal pending
+    sleep 1
+    
+    setup_kfail "i*86-*-*" gdb/1738
+    gdb_test "$i" " handler .*" "$prefix; performing $i"
+    gdb_test "clear $infinite_loop" "" "$prefix; clear infinite loop"
+    gdb_test "clear handler" "" "$prefix; clear handler"
+}
+
+breakpoint_to_handler step
+breakpoint_to_handler next
+breakpoint_to_handler continue
+
+# Try stepping when there's a signal pending, and a pre-existing
+# breakpoint at the current instruction, and no breakpoint in the
+# handler.  Should advance to the next line.
+
+proc breakpoint_over_handler { i } {
+    global gdb_prompt
+    global infinite_loop
+    set prefix "$i on breakpoint, skip handler"
+    
+    # Run around to the done
+    set test "$prefix; resync"
+    gdb_test_multiple "continue" "$test" {
+	-re "done = 0.*$gdb_prompt " {
+	    pass "$test"
+	}
+	# other patterns can go here
+    }
+    
+    gdb_test "break $infinite_loop" "" "$prefix; break infinite loop"
+
+    # Continue to the infinite loop
+    gdb_test "continue" "while ..done.*" "$prefix; continue to infinite loop"
+
+    # Make the signal pending
+    sleep 1
+    
+    setup_kfail "powerpc*-*-*" gdb/1757
+    gdb_test "$i" "done = 0.*" "$prefix; performing $i"
+    gdb_test "clear $infinite_loop" "" "$prefix; clear infinite loop"
+}
+
+breakpoint_over_handler step
+breakpoint_over_handler next
+breakpoint_over_handler continue

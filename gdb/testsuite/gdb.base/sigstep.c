@@ -31,27 +31,38 @@ handler (int sig)
   done = 1;
 } /* handler */
 
+struct itimerval itime;
+struct sigaction action;
+
+/* The enum is so that GDB can easily see these macro values.  */
+enum {
+  itimer_real = ITIMER_REAL,
+  itimer_virtual = ITIMER_VIRTUAL
+} itimer = ITIMER_VIRTUAL;
+
 main ()
 {
+
   /* Set up the signal handler.  */
-  {
-    struct sigaction action;
-    memset (&action, 0, sizeof (action));
-    action.sa_handler = handler;
-    sigaction (SIGVTALRM, &action, NULL);
-  }
+  memset (&action, 0, sizeof (action));
+  action.sa_handler = handler;
+  sigaction (SIGVTALRM, &action, NULL);
+  sigaction (SIGALRM, &action, NULL);
 
-  /* Set up a one-off timer.  A timer, rather than SIGSEGV, is used as
-     after a timer handler finishes the interrupted code can safely
-     resume.  */
-  {
-    struct itimerval itime;
-    memset (&itime, 0, sizeof (itime));
-    itime.it_value.tv_usec = 250 * 1000;
-    setitimer (ITIMER_VIRTUAL, &itime, NULL);
-  }
+  /* The values needed for the itimer.  This needs to be at least long
+     enough for the setitimer() call to return.  */
+  memset (&itime, 0, sizeof (itime));
+  itime.it_value.tv_usec = 250 * 1000;
 
-  /* Wait.  */
-  while (!done);
-  return 0;
-} /* main */
+  /* Loop for ever, constantly taking an interrupt.  */
+  while (1)
+    {
+      /* Set up a one-off timer.  A timer, rather than SIGSEGV, is
+	 used as after a timer handler finishes the interrupted code
+	 can safely resume.  */
+      setitimer (itimer, &itime, NULL);
+      /* Wait.  */
+      while (!done);
+      done = 0;
+    }
+}
