@@ -149,8 +149,10 @@ start of your debugging session.
 @cindex remote stub, support routines
 The debugging stubs that come with @value{GDBN} are set up for a particular
 chip architecture, but they have no information about the rest of your
-debugging target machine.  To allow the stub to work, you must supply
-these special low-level subroutines:
+debugging target machine.
+
+First of all you need to tell the stub how to communicate with the
+serial port.
 
 @table @code
 @item int getDebugChar()
@@ -164,7 +166,17 @@ different name is used to allow you to distinguish the two if you wish.
 Write this subroutine to write a single character to the serial port.
 It may be identical to @code{putchar} for your target system; a 
 different name is used to allow you to distinguish the two if you wish.
+@end table
 
+If you want @value{GDBN} to be able to stop your program while it is
+running, you need to use an interrupt-driven serial driver, and arrange
+for it to execute a breakpoint instruction when it receives a control C
+character.  That is the character which @value{GDBN} uses to tell the
+remote system to stop.
+
+Other routines you need to supply are:
+
+@table @code
 @item void exceptionHandler (int @var{exception_number}, void *@var{exception_address})
 @kindex exceptionHandler
 Write this function to install @var{exception_address} in the exception

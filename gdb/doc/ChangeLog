@@ -1,3 +1,8 @@
+Wed Oct 27 00:25:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.texi (Bootstrapping): Talk about getting the serial driver
+	to deal with ^C sent by gdb to stop the remote system.
+
 Mon Oct 25 03:25:41 1993  Tom Lord  (lord@cygnus.com)
 
 	* libgdb.texinfo (Defining Commands): made the DOC arg
