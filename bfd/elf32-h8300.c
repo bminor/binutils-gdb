@@ -847,14 +847,34 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
 
+		/* Get the instruction code being relaxed.  */
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+
 		/* If the previous instruction conditionally jumped around
 		   this instruction, we may be able to reverse the condition
 		   and redirect the previous instruction to the target of
 		   this instruction.
 
 		   Such sequences are used by the compiler to deal with
-		   long conditional branches.  */
-		if ((int) gap <= 130
+		   long conditional branches.
+
+		   Only perform this optimisation for jumps (code 0x5a) not
+		   subroutine calls, as otherwise it could transform:
+
+		   	             mov.w   r0,r0
+		   	             beq     .L1
+		         	     jsr     @_bar
+		              .L1:   rts
+		              _bar:  rts
+		   into:
+		   	             mov.w   r0,r0
+			             bne     _bar
+			             rts
+			      _bar:  rts
+
+		   which changes the call (jsr) into a branch (bne).  */
+		if (code == 0x5a
+		    && (int) gap <= 130
 		    && (int) gap >= -128
 		    && last_reloc
 		    && ELF32_R_TYPE (last_reloc->r_info) == R_H8_PCREL8
@@ -910,9 +930,6 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 			break;
 		      }
 		  }
-
-		/* We could not eliminate this jump, so just shorten it.  */
-		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
 		if (code == 0x5e)
 		  bfd_put_8 (abfd, 0x55, contents + irel->r_offset - 1);

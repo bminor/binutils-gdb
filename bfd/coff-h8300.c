@@ -485,6 +485,13 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 	 closer if we do relax this branch.  */
       if ((int)gap >= -128 && (int)gap <= 128 )
 	{
+	  bfd_byte code;
+
+	  if (!bfd_get_section_contents (abfd, input_section, & code,
+					 reloc->address, 1))
+	    break;
+	  code = bfd_get_8 (abfd, & code);
+
 	  /* It's possible we may be able to eliminate this branch entirely;
 	     if the previous instruction is a branch around this instruction,
 	     and there's no label at this instruction, then we can reverse
@@ -496,9 +503,25 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 		lab1:				lab1:
 
 	     This saves 4 bytes instead of two, and should be relatively
-	     common.  */
+	     common.
 
-	  if (gap <= 126
+	     Only perform this optimisation for jumps (code 0x5a) not
+	     subroutine calls, as otherwise it could transform:
+
+	     	             mov.w   r0,r0
+	     	             beq     .L1
+	           	     jsr     @_bar
+	              .L1:   rts
+	              _bar:  rts
+	     into:
+	     	             mov.w   r0,r0
+	     	             bne     _bar
+	     	             rts
+	     	      _bar:  rts
+
+	     which changes the call (jsr) into a branch (bne).  */
+	  if (code == 0x5a
+	      && gap <= 126
 	      && last_reloc
 	      && last_reloc->howto->type == R_PCRBYTE)
 	    {

@@ -1,3 +1,11 @@
+2002-12-15  Kazu Hirata  <kazu@cs.umass.edu>
+
+	Merge from mainline:
+	2002-11-15  Kazu Hirata  <kazu@cs.umass.edu>
+	* coff-h8300.c (h8300_reloc16_estimate): Do not optimize away
+	jsr after a short jump.
+	* elf32-h8300.c (elf32_h8_relax_section): Likewise.
+
 2002-12-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
