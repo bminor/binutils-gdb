@@ -1,3 +1,13 @@
+start-sanitize-phase2-m32rx
+Wed Feb 25 11:43:45 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-m32r.c (optimize): New static local.
+	(md_shortopts): Add -O.
+	(md_parse_option): Recognize it.
+	(md_show_usage): Document it.
+	(md_assemble): Don't try to combine insns in parallel if !optimize.
+
+end-sanitize-phase2-m32rx
 start-sanitize-m32rx
 Tue Feb 24 18:03:25 1998  Nick Clifton  <nickc@cygnus.com>
 
