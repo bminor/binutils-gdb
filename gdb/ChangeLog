@@ -1,3 +1,13 @@
+Tue Nov 12 07:23:46 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Add xcoffread.c, xcoffexec.c.
+	* xcoffread.c:  New file for handling AIX mangled-coff files.
+	* xconfig/rs6000, tconfig/rs6000:  New files.
+	* buildsym.c:  Add hooks for xcoffread.c.
+	* rs6000-pinsn.c, rs6000-tdep.c, rs6000-xdep.c, tm-rs6000.h,
+	xm-rs6000.h:  New files.
+	* xcoffexec.c:  New file for handling AIX shared libraries.
+
 Mon Nov 11 19:14:31 1991  Fred Fish  (fnf at cygnus.com)
 
 	* core.c:  Minor rewording of message to user containing name of

@@ -716,6 +716,19 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
      file_symbols is still good).  */
   cleanup_undefined_types ();
 
+  /* Hooks for xcoffread.c */
+  if (file_stabs) {
+    patch_block_stabs (file_symbols, file_stabs);
+    free (file_stabs);
+    file_stabs = 0;
+  }
+
+  if (global_stabs) {
+    patch_block_stabs (global_symbols, global_stabs);
+    free (global_stabs);
+    global_stabs = 0;
+  }
+
   if (pending_blocks == 0
    && file_symbols == 0
    && global_symbols == 0) {
@@ -1629,6 +1642,11 @@ read_type (pp)
 	add_undefined_type (type);
 	return type;
       }
+
+    case '-':				/* RS/6000 built-in type */
+      (*pp)--;
+      type = builtin_type (pp);		/* (in xcoffread.c) */
+      goto after_digits;
 
     case '0':
     case '1':
