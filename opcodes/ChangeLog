@@ -1,5 +1,8 @@
 Wed Nov 20 10:37:13 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-opc.c: Fix handling of register list operand for
+	"call", "ret", and "rets" instructions.
+
 	* mn10300-dis.c (disassemble): Print PC-relative and memory
 	addresses symbolically if possible.
 	* mn10300-opc.c: Distinguish between absolute memory addresses,

@@ -159,13 +159,13 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM8E    (D16_SHIFT+1)
   {8, 0, MN10300_OPERAND_EXTENDED},
 
-#define IMM8E_SHIFT8    (IMM8E+1)
-  {8, 8, MN10300_OPERAND_EXTENDED},
+#define REGSE_SHIFT8    (IMM8E+1)
+  {8, 8, MN10300_OPERAND_EXTENDED | MN10300_OPERAND_REG_LIST},
 
-#define IMM8_SHIFT8 (IMM8E_SHIFT8 + 1)
-  {8, 8, 0},
+#define REGS_SHIFT8 (REGSE_SHIFT8 + 1)
+  {8, 8, MN10300_OPERAND_REG_LIST},
 
-#define REGS    (IMM8_SHIFT8+1)
+#define REGS    (REGS_SHIFT8+1)
   {8, 0, MN10300_OPERAND_REG_LIST},
 
 } ; 
@@ -423,15 +423,15 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "jmp",	0xf0f4,		0xfffc,		FMT_D0, {PAREN,AN0,PAREN}},
 { "jmp",	0xcc0000,	0xff0000,	FMT_S2, {IMM16_PCREL}},
 { "jmp",	0xdc000000,	0xff000000,	FMT_S4, {IMM32_HIGH24}},
-{ "call",	0xcd000000,	0xff000000,	FMT_S4, {D16_SHIFT,IMM8,IMM8E}},
+{ "call",	0xcd000000,	0xff000000,	FMT_S4, {D16_SHIFT,REGS,IMM8E}},
 { "call",	0xdd000000,	0xff000000,	FMT_S6,
-					{IMM32_HIGH24_LOWSHIFT16,IMM8E_SHIFT8,IMM8E}},
+					{IMM32_HIGH24_LOWSHIFT16,REGSE_SHIFT8,IMM8E}},
 { "calls",	0xf0f0,		0xfffc,		FMT_D0, {PAREN,AN0,PAREN}},
 { "calls",	0xfaff0000,	0xffff0000,	FMT_D2, {IMM16_PCREL}},
 { "calls",	0xfcff0000,	0xffff0000,	FMT_D4, {IMM32_PCREL}},
 
-{ "ret",	0xdf0000,	0xff0000,	FMT_S2, {IMM8_SHIFT8, IMM8}},
-{ "retf",	0xde0000,	0xff0000,	FMT_S2, {IMM8_SHIFT8, IMM8}},
+{ "ret",	0xdf0000,	0xff0000,	FMT_S2, {REGS_SHIFT8, IMM8}},
+{ "retf",	0xde0000,	0xff0000,	FMT_S2, {REGS_SHIFT8, IMM8}},
 { "rets",	0xf0fc,		0xffff,		FMT_D0, {UNUSED}},
 { "rti",	0xf0fd,		0xffff,		FMT_D0, {UNUSED}},
 { "trap",	0xf0fe,		0xffff,		FMT_D0, {UNUSED}},
