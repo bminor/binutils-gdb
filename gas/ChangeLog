@@ -1,3 +1,8 @@
+2001-11-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (md_apply_fix3): Cast value, not pointer, in
+	val assignment.
+
 2001-11-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-m68k.c (md_apply_fix3): Change val back to a signed type.
