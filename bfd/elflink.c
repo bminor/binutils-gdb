@@ -6782,8 +6782,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	 For the benefit of the MIPS ELF linker, we check SEC_EXCLUDE
 	 as well as linker_mark.  */
       if ((isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
-	  && isec != NULL
-	  && ((! isec->linker_mark && (isec->flags & SEC_HAS_CONTENTS) != 0)
+	  && (isec == NULL
+	      || (! isec->linker_mark && (isec->flags & SEC_HAS_CONTENTS) != 0)
 	      || (! finfo->info->relocatable
 		  && (isec->flags & SEC_EXCLUDE) != 0)))
 	continue;

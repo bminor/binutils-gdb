@@ -1,3 +1,8 @@
+2005-02-08  Paul Brook  <paul@codesourcery.com>
+
+	* elflink.c (elf_link_input_bfd): Ignore symbols from null input
+	sections.
+
 2005-02-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elflink.c (elf_link_add_object_symbols): Don't add "warning: "
