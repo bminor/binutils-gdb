@@ -1,3 +1,8 @@
+2001-08-16  Jonathan Larmour  <jlarmour@redhat.com>
+
+	* mips-opc.c: R3900s can support all branch likely INSN_MACROs where
+	the corresponding non-likely insn is in MIPS I.
+
 2001-08-13  Kazu Hirata  <kazu@hxi.com>
 
 	* mcore-dis.c: Fix formatting.
