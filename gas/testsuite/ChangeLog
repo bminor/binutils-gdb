@@ -1,3 +1,8 @@
+2003-11-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/frv/reloc1.[sd]: Test references to external symbols and
+	inter-section references too.
+
 2003-11-26  Christian Groessler  <chris@groessler.org>
 
 	* gas/z8k/jmp-cc.d: New file.
