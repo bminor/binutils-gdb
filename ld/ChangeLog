@@ -1,3 +1,37 @@
+Mon Feb 24 18:16:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* ldlex.l (V_TAG, V_IDENTIFIER): New macros.
+	(VERS_START, VERS_SCRIPT, VERS_NODE): New states to parse version
+	information.
+	(ldlex_version_script, ldlex_version_file): New functions.
+	* ldlex.h (enum input_enum): Add input_version_script.
+	(ldlex_version_script): Declare.
+	(ldlex_version_file): Declare.
+	* ldgram.y (%union): Add deflist, versyms, and versnode.
+	(VERS_TAG, VERS_IDENTIFIER): New terminals.
+	(GLOBAL, LOCAL, VERSION, INPUT_VERSION_SCRIPT): New terminals.
+	(file): Accept INPUT_VERSION_SCRIPT.
+	(ifile_p1): Accept version.
+	(version_script_file): New nonterminal.
+	(version, vers_nodes, vers_node): Likewise.
+	(verdep, vers_tag, ver_defns): Likewise.
+	* ldlang.c (lang_elf_version_info): New global variable.
+	(lang_new_vers_regex): New function.
+	(lang_new_vers_node): New function.
+	(version_index): New static variable.
+	(lang_register_vers_node): New function.
+	(lang_add_vers_depend): New function.
+	* ldlang.h (lang_elf_version_info): Declare.
+	(lang_new_vers_regex, lang_new_vers_node): Declare.
+	(lang_add_vers_depend, lang_register_vers_node): Declare.
+	* lexsup.c (OPTION_VERSION_SCRIPT): Define.
+	(ld_options): Add "version-script".
+	(parse_args): Handle OPTION_VERSION_SCRIPT.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Pass lang_elf_version_info to size_dynamic_sections.
+	* scripttempl/elf.sc: Add .gnu.version sections.
+
 start-sanitize-d30v
 Fri Feb 21 17:37:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
