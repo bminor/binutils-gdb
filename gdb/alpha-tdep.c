@@ -691,8 +691,19 @@ alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
     {
       value_ptr arg = args[i];
       /* Cast argument to long if necessary as the compiler does it too.  */
-      if (TYPE_LENGTH (VALUE_TYPE (arg)) < TYPE_LENGTH (builtin_type_long))
-        arg = value_cast (builtin_type_long, arg);
+      switch (TYPE_CODE (VALUE_TYPE (arg)))
+	{
+	case TYPE_CODE_INT:
+	case TYPE_CODE_BOOL:
+	case TYPE_CODE_CHAR:
+	case TYPE_CODE_RANGE:
+	case TYPE_CODE_ENUM:
+	  if (TYPE_LENGTH (VALUE_TYPE (arg)) < TYPE_LENGTH (builtin_type_long))
+	    arg = value_cast (builtin_type_long, arg);
+	  break;
+	default:
+	  break;
+	}
       m_arg->len = TYPE_LENGTH (VALUE_TYPE (arg));
       m_arg->offset = accumulate_size;
       accumulate_size = (accumulate_size + m_arg->len + 7) & ~7;
