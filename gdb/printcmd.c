@@ -1959,7 +1959,7 @@ print_frame_nameless_args (struct frame_info *fi, long start, int num,
 #ifdef NAMELESS_ARG_VALUE
       NAMELESS_ARG_VALUE (fi, start, &arg_value);
 #else
-      argsaddr = FRAME_ARGS_ADDRESS (fi);
+      argsaddr = get_frame_args_address (fi);
       if (!argsaddr)
 	return;
 

@@ -25,6 +25,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "frame-base.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
@@ -1558,8 +1559,7 @@ d10v_frame_prev_register (struct frame_info *next_frame,
     }
 }
 
-
-static struct frame_unwind d10v_frame_unwind = {
+static const struct frame_unwind d10v_frame_unwind = {
   d10v_frame_this_id,
   d10v_frame_prev_register
 };
@@ -1569,6 +1569,21 @@ d10v_frame_p (CORE_ADDR pc)
 {
   return &d10v_frame_unwind;
 }
+
+static CORE_ADDR
+d10v_frame_base_address (struct frame_info *next_frame, void **this_cache)
+{
+  struct d10v_unwind_cache *info
+    = d10v_frame_unwind_cache (next_frame, this_cache);
+  return info->base;
+}
+
+static const struct frame_base d10v_frame_base = {
+  &d10v_frame_unwind,
+  d10v_frame_base_address,
+  d10v_frame_base_address,
+  d10v_frame_base_address
+};
 
 /* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
    dummy frame.  The frame ID's base needs to match the TOS value
@@ -1719,6 +1734,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_registers_info (gdbarch, d10v_print_registers_info);
 
   frame_unwind_append_predicate (gdbarch, d10v_frame_p);
+  frame_base_set_default (gdbarch, &d10v_frame_base);
 
   /* Methods for saving / extracting a dummy frame's ID.  */
   set_gdbarch_unwind_dummy_id (gdbarch, d10v_unwind_dummy_id);

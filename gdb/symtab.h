@@ -402,8 +402,8 @@ enum address_class
   /* Value is in register number SYMBOL_VALUE.  Just like LOC_REGISTER
      except this is an argument.  Probably the cleaner way to handle
      this would be to separate address_class (which would include
-     separate ARG and LOCAL to deal with FRAME_ARGS_ADDRESS versus
-     FRAME_LOCALS_ADDRESS), and an is_argument flag.
+     separate ARG and LOCAL to deal with get_frame_args_address()
+     versus get_frame_locals_address()), and an is_argument flag.
 
      For some symbol formats (stabs, for some compilers at least),
      the compiler generates two symbols, an argument and a register.
@@ -447,9 +447,9 @@ enum address_class
 
   /* Value is arg at SYMBOL_VALUE offset in stack frame. Differs from
      LOC_LOCAL in that symbol is an argument; differs from LOC_ARG in
-     that we find it in the frame (FRAME_LOCALS_ADDRESS), not in the
-     arglist (FRAME_ARGS_ADDRESS).  Added for i960, which passes args
-     in regs then copies to frame.  */
+     that we find it in the frame (get_frame_locals_address()), not in
+     the arglist (get_frame_args_address()).  Added for i960, which
+     passes args in regs then copies to frame.  */
 
   LOC_LOCAL_ARG,
 

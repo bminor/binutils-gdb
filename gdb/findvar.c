@@ -533,7 +533,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     case LOC_LOCAL_ARG:
       if (frame == NULL)
 	return 0;
-      addr = FRAME_LOCALS_ADDRESS (frame);
+      addr = get_frame_locals_address (frame);
       addr += SYMBOL_VALUE (var);
       break;
 

@@ -600,16 +600,6 @@ parse_frame_specification (char *frame_exp)
   /* NOTREACHED */
 }
 
-/* FRAME_ARGS_ADDRESS_CORRECT is just like FRAME_ARGS_ADDRESS except
-   that if it is unsure about the answer, it returns 0
-   instead of guessing (this happens on the VAX and i960, for example).
-
-   On most machines, we never have to guess about the args address,
-   so FRAME_ARGS_ADDRESS{,_CORRECT} are the same.  */
-#if !defined (FRAME_ARGS_ADDRESS_CORRECT)
-#define FRAME_ARGS_ADDRESS_CORRECT FRAME_ARGS_ADDRESS
-#endif
-
 /* Print verbosely the selected frame or the frame at address ADDR.
    This means absolutely all information in the frame is printed.  */
 
@@ -743,7 +733,7 @@ frame_info (char *addr_exp, int from_tty)
 
   {
     /* Address of the argument list for this frame, or 0.  */
-    CORE_ADDR arg_list = FRAME_ARGS_ADDRESS_CORRECT (fi);
+    CORE_ADDR arg_list = get_frame_args_address (fi);
     /* Number of args for this frame, or -1 if unknown.  */
     int numargs;
 
@@ -770,7 +760,7 @@ frame_info (char *addr_exp, int from_tty)
   }
   {
     /* Address of the local variables for this frame, or 0.  */
-    CORE_ADDR arg_list = FRAME_LOCALS_ADDRESS (fi);
+    CORE_ADDR arg_list = get_frame_locals_address (fi);
 
     if (arg_list == 0)
       printf_filtered (" Locals at unknown address,");

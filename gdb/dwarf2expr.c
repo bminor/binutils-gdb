@@ -454,6 +454,9 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	       afterwards, effectively erasing whatever the recursive
 	       call put there.  */
 	    before_stack_len = ctx->stack_len;
+	    /* FIXME: cagney/2003-03-26: This code should be using
+               get_frame_base_address(), and then implement a dwarf2
+               specific this_base method.  */
 	    (ctx->get_frame_base) (ctx->baton, &datastart, &datalen);
 	    dwarf_expr_eval (ctx, datastart, datalen);
 	    result = dwarf_expr_fetch (ctx, 0);

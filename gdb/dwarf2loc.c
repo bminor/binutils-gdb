@@ -87,6 +87,9 @@ dwarf_expr_read_mem (void *baton, char *buf, CORE_ADDR addr, size_t len)
 static void
 dwarf_expr_frame_base (void *baton, unsigned char **start, size_t * length)
 {
+  /* FIXME: cagney/2003-03-26: This code should be using
+     get_frame_base_address(), and then implement a dwarf2 specific
+     this_base method.  */
   struct symbol *framefunc;
   struct dwarf2_locexpr_baton *symbaton;
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
