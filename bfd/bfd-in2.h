@@ -3237,6 +3237,7 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
 
 /* Sony Xstormy16 Relocations.  */
   BFD_RELOC_XSTORMY16_REL_12,
+  BFD_RELOC_XSTORMY16_12,
   BFD_RELOC_XSTORMY16_24,
   BFD_RELOC_XSTORMY16_FPTR16,
 

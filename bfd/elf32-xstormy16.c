@@ -238,6 +238,21 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+ 
+  /* A 12 bit absolute relocation.  */
+  HOWTO (R_XSTORMY16_12,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_XSTORMY16_12",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0000,		/* src_mask */
+	 0x0fff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 static reloc_howto_type xstormy16_elf_howto_table2 [] =
@@ -297,6 +312,7 @@ static const reloc_map xstormy16_reloc_map [] =
   { BFD_RELOC_XSTORMY16_FPTR16,	    R_XSTORMY16_FPTR16,        xstormy16_elf_howto_table },
   { BFD_RELOC_LO16,                 R_XSTORMY16_LO16,          xstormy16_elf_howto_table },
   { BFD_RELOC_HI16,                 R_XSTORMY16_HI16,          xstormy16_elf_howto_table },
+  { BFD_RELOC_XSTORMY16_12,         R_XSTORMY16_12,            xstormy16_elf_howto_table },
   { BFD_RELOC_VTABLE_INHERIT,       R_XSTORMY16_GNU_VTINHERIT, xstormy16_elf_howto_table2 },
   { BFD_RELOC_VTABLE_ENTRY,         R_XSTORMY16_GNU_VTENTRY,   xstormy16_elf_howto_table2 },
 };
@@ -332,7 +348,7 @@ xstormy16_info_to_howto_rela (abfd, cache_ptr, dst)
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
 
-  if (r_type <= (unsigned int) R_XSTORMY16_HI16)
+  if (r_type <= (unsigned int) R_XSTORMY16_12)
     cache_ptr->howto = &xstormy16_elf_howto_table [r_type];
   else if (r_type - R_XSTORMY16_GNU_VTINHERIT
 	   <= (unsigned int) R_XSTORMY16_GNU_VTENTRY)

@@ -1,3 +1,11 @@
+2002-12-20  DJ Delorie  <dj@redhat.com>
+
+	* reloc.c: Add BFD_RELOC_XSTORMY16_12.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* elf32-xstormy16.c (xstormy16_elf_howto): Add R_XSTORMY16_12.
+	(xstormy16_reloc_map): Add R_XSTORMY16_12.
+	
 2002-12-19  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* doc/bfdint.texi: Fix typos.
