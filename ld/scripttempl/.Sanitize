@@ -1,4 +1,4 @@
-# .Sanitize for devo/ld/config
+# .Sanitize for devo/ld/scripttempl
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -42,6 +42,7 @@ mips.sc
 mipsbsd.sc
 sa29200.sc
 sh.sc
+sparccoff.sc
 st2000.sc
 vanilla.sc
 z8ksim.sc
