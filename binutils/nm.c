@@ -55,16 +55,16 @@ extern char *program_version;
 extern char *target;
 
 struct option long_options[] = {
-	{"debug-syms",	    0, &print_debug_syms,  1},
-	{"extern-only",	    0, &external_only,     1},
-	{"no-sort",	    0, &no_sort,	   1},
-	{"numeric-sort",    0, &sort_numerically,  1},
-	{"print-armap",	    0, &print_armap,       1},
-	{"print-file-name", 0, &file_on_each_line, 1},
-	{"reverse-sort",    0, &reverse_sort,      1},
-	{"target", 	    2, (int *)NULL,	   0},
-	{"undefined-only",  0, &undefined_only,    1},
-	{0, 0, 0, 0}
+	{"debug-syms",	    no_argument, &print_debug_syms,  1},
+	{"extern-only",	    no_argument, &external_only,     1},
+	{"no-sort",	    no_argument, &no_sort,	   1},
+	{"numeric-sort",    no_argument, &sort_numerically,  1},
+	{"print-armap",	    no_argument, &print_armap,       1},
+	{"print-file-name", no_argument, &file_on_each_line, 1},
+	{"reverse-sort",    no_argument, &reverse_sort,      1},
+	{"target", 	    optional_argument, (int *)NULL,	   0},
+	{"undefined-only",  no_argument, &undefined_only,    1},
+	{0, no_argument, 0, 0}
 };
 
 int show_names = 0;
@@ -85,14 +85,13 @@ main (argc, argv)
      char **argv;
 {
   int c;			/* sez which option char */
-  int ind = 0;			/* used by getopt and ignored by us */
-  extern int optind;		/* steps thru options */
+  int option_index = 0;		/* used by getopt and ignored by us */
   int retval;	
   program_name = *argv;
 
   bfd_init();
 
-  while ((c = getopt_long(argc, argv, "agnoprsu", long_options, &ind)) != EOF) {
+  while ((c = getopt_long(argc, argv, "agnoprsu", long_options, &option_index)) != EOF) {
     switch (c) {
     case 'a': print_debug_syms = 1; break;
     case 'g': external_only = 1; break;
@@ -119,7 +118,7 @@ main (argc, argv)
      on sucess -- the inverse of the C sense. */
   
   /* OK, all options now parsed.  If no filename specified, do a.out. */
-  if (optind == argc) return !display_file ("a.out");
+  if (option_index == argc) return !display_file ("a.out");
   
   retval = 0;
   show_names = (argc -optind)>1;
@@ -248,7 +247,7 @@ do_one_rel_file (abfd)
 }
 
 /* Symbol-sorting predicates */
-#define valueof(x) (x)->section->vma + (x)->value 
+#define valueof(x) ((x)->section->vma + (x)->value)
 int
 numeric_forward (x, y)
      char *x;
@@ -304,16 +303,23 @@ filter_symbols (abfd, syms, symcount)
 {
   asymbol **from, **to;
   unsigned int dst_count = 0;
+  asymbol *sym;
+  
   unsigned int src_count;
   for (from = to = syms, src_count = 0; src_count <symcount; src_count++) {
     int keep = 0;
-    flagword flags = (from[src_count])->flags;
 
+    
+	
+    flagword flags = (from[src_count])->flags;
+    sym = from[src_count];
     if (undefined_only) {
-      keep = (flags & BSF_UNDEFINED);
+      keep = sym->section == &bfd_und_section;
     } else if (external_only) {
-      keep = ((flags & BSF_GLOBAL) || (flags & BSF_UNDEFINED) ||
-	      (flags & BSF_FORT_COMM));
+      keep = ((flags & BSF_GLOBAL) 
+	      || (sym->section == &bfd_und_section) 
+	      ||   (sym->section == &bfd_com_section));
+      
     } else {
       keep = 1;
     }
@@ -342,7 +348,7 @@ print_symbols (abfd, syms, symcount)
     if (file_on_each_line) printf("%s:", bfd_get_filename(abfd));
 
     if (undefined_only) {
-      if ((*sym)->flags & BSF_UNDEFINED)
+      if ((*sym)->section == &bfd_und_section)
 	puts ((*sym)->name);
     }
     else {
