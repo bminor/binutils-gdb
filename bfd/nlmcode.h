@@ -38,6 +38,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define Nlm_External_Copyright_Header	NlmNAME(External_Copyright_Header)
 #define Nlm_External_Extended_Header	NlmNAME(External_Extended_Header)
 #define Nlm_External_Custom_Header	NlmNAME(External_Custom_Header)
+#define Nlm_External_Cygnus_Section_Header \
+  NlmNAME(External_Cygnus_Section_Header)
 
 #define nlm_symbol_type			nlmNAME(symbol_type)
 #define nlm_get_symtab_upper_bound	nlmNAME(get_symtab_upper_bound)
@@ -98,6 +100,7 @@ nlm_object_p (abfd)
   boolean (*backend_object_p) PARAMS ((bfd *));
   PTR x_fxdhdr = NULL;
   Nlm_Internal_Fixed_Header *i_fxdhdrp;
+  struct nlm_obj_tdata *new_tdata = NULL;
   const char *signature;
   enum bfd_architecture arch;
 
@@ -131,16 +134,20 @@ nlm_object_p (abfd)
   /* Allocate an instance of the nlm_obj_tdata structure and hook it up to
      the tdata pointer in the bfd.  */
 
-  nlm_tdata (abfd) = (struct nlm_obj_tdata *)
-    bfd_zalloc (abfd, sizeof (struct nlm_obj_tdata));
-  if (nlm_tdata (abfd) == NULL)
+  new_tdata = ((struct nlm_obj_tdata *)
+	       bfd_zalloc (abfd, sizeof (struct nlm_obj_tdata)));
+  if (new_tdata == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       goto got_no_match;
     }
 
+  nlm_tdata (abfd) = new_tdata;
+
   i_fxdhdrp = nlm_fixed_header (abfd);
   nlm_swap_fixed_header_in (abfd, x_fxdhdr, i_fxdhdrp);
+  free (x_fxdhdr);
+  x_fxdhdr = NULL;
 
   /* Check to see if we have an NLM file for this backend by matching
      the NLM signature. */
@@ -162,29 +169,39 @@ nlm_object_p (abfd)
   /* There's no supported way to check for 32 bit versus 64 bit addresses,
      so ignore this distinction for now.  (FIXME) */
 
-  /* FIXME:  Any return(NULL) exits below here will leak memory (tdata).
-     And a memory leak also means we lost the real tdata info we wanted
-     to save, because it was in the leaked memory. */
+  /* Swap in the rest of the required header.  */
+  if (!nlm_swap_variable_header_in (abfd))
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	goto got_wrong_format_error;
+      else
+	goto got_no_match;
+    }
 
-  /* Swap in the rest of the fixed length header. */
+  /* Add the sections supplied by all NLM's, and then read in the
+     auxiliary headers.  Reading the auxiliary headers may create
+     additional sections described in the cygnus_sections header.
+     From this point on we assume that we have an NLM, and do not
+     treat errors as indicating the wrong format.  */
 
-  if (!nlm_swap_variable_header_in (abfd)
-      || !nlm_swap_auxiliary_headers_in (abfd)
-      || !add_bfd_section (abfd, NLM_CODE_NAME,
-			   i_fxdhdrp->codeImageOffset,
-			   i_fxdhdrp->codeImageSize,
-			 (SEC_CODE | SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-			  | SEC_RELOC))
+  if (!add_bfd_section (abfd, NLM_CODE_NAME,
+			i_fxdhdrp->codeImageOffset,
+			i_fxdhdrp->codeImageSize,
+			(SEC_CODE | SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			 | SEC_RELOC))
       || !add_bfd_section (abfd, NLM_INITIALIZED_DATA_NAME,
 			   i_fxdhdrp->dataImageOffset,
 			   i_fxdhdrp->dataImageSize,
-			 (SEC_DATA | SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-			  | SEC_RELOC))
+			   (SEC_DATA | SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			    | SEC_RELOC))
       || !add_bfd_section (abfd, NLM_UNINITIALIZED_DATA_NAME,
 			   (file_ptr) 0,
 			   i_fxdhdrp->uninitializedDataSize,
 			   SEC_ALLOC))
-    goto got_wrong_format_error;
+    goto got_no_match;
+
+  if (!nlm_swap_auxiliary_headers_in (abfd))
+    goto got_no_match;
 
   if (nlm_fixed_header (abfd)->numberOfRelocationFixups != 0
       || nlm_fixed_header (abfd)->numberOfExternalReferences != 0)
@@ -198,14 +215,14 @@ nlm_object_p (abfd)
   if (arch != bfd_arch_unknown)
     bfd_default_set_arch_mach (abfd, arch, (unsigned long) 0);
 
-  if (x_fxdhdr != NULL)
-    free (x_fxdhdr);
   return (abfd->xvec);
 
 got_wrong_format_error:
   bfd_set_error (bfd_error_wrong_format);
 got_no_match:
   nlm_tdata (abfd) = preserved_tdata;
+  if (new_tdata != NULL)
+    bfd_release (abfd, new_tdata);
   if (x_fxdhdr != NULL)
     free (x_fxdhdr);
   return (NULL);
@@ -524,6 +541,90 @@ nlm_swap_auxiliary_headers_in (abfd)
 	      nlm_copyright_header (abfd)->copyrightMessageLength + 1)
 	    return (false);
 	}
+      else if (strncmp (tempstr, "CyGnUsSeCs", 10) == 0)
+	{
+	  Nlm_External_Cygnus_Section_Header thdr;
+	  bfd_size_type len;
+	  file_ptr pos;
+	  bfd_byte *contents;
+	  bfd_byte *p, *pend;
+
+	  if (bfd_read ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
+	    return false;
+	  memcpy (nlm_cygnus_section_header (abfd)->stamp, thdr.stamp,
+		  sizeof (thdr.stamp));
+	  nlm_cygnus_section_header (abfd)->offset =
+	    get_word (abfd, (bfd_byte *) thdr.offset);
+	  len = get_word (abfd, (bfd_byte *) thdr.length);
+	  nlm_cygnus_section_header (abfd)->length = len;
+
+	  /* This data this header points to provides a list of the
+	     sections which were in the original object file which was
+	     converted to become an NLM.  We locate those sections and
+	     add them to the BFD.  Note that this is likely to create
+	     a second .text, .data and .bss section; retrieving the
+	     sections by name will get the actual NLM sections, which
+	     is what we want to happen.  The sections from the
+	     original file, which may be subsets of the NLM section,
+	     can only be found using bfd_map_over_sections.  */
+	  contents = (bfd_byte *) malloc (len);
+	  if (contents == (bfd_byte *) NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  pos = bfd_tell (abfd);
+	  if (bfd_seek (abfd, nlm_cygnus_section_header (abfd)->offset,
+			SEEK_SET) != 0
+	      || bfd_read (contents, len, 1, abfd) != len)
+	    {
+	      free (contents);
+	      return false;
+	    }
+	  p = contents;
+	  pend = p + len;
+	  while (p < pend)
+	    {
+	      char *name;
+	      size_t l;
+	      file_ptr filepos;
+	      bfd_size_type size;
+	      asection *newsec;
+
+	      /* The format of this information is
+		     null terminated section name
+		     zeroes to adjust to 4 byte boundary
+		     4 byte section data file pointer
+		     4 byte section size
+		 */
+
+	      name = p;
+	      l = strlen (name) + 1;
+	      l = (l + 3) &~ 3;
+	      p += l;
+	      filepos = bfd_h_get_32 (abfd, p);
+	      p += 4;
+	      size = bfd_h_get_32 (abfd, p);
+	      p += 4;
+
+	      newsec = bfd_make_section_anyway (abfd, name);
+	      if (newsec == (asection *) NULL)
+		{
+		  free (contents);
+		  return false;
+		}
+	      newsec->_raw_size = size;
+	      if (filepos != 0)
+		{
+		  newsec->filepos = filepos;
+		  newsec->flags |= SEC_HAS_CONTENTS;
+		}
+	    }
+
+	  free (contents);
+	  if (bfd_seek (abfd, pos, SEEK_SET) != 0)
+	    return false;
+	}
       else
 	{
 	  break;
@@ -716,6 +817,21 @@ nlm_swap_auxiliary_headers_out (abfd)
 		     nlm_copyright_header (abfd)->copyrightMessageLength + 1,
 		     1, abfd) !=
 	  nlm_copyright_header (abfd)->copyrightMessageLength + 1)
+	return false;
+    }
+
+  /* Write out the Cygnus debugging header if there is one.  */
+  if (find_nonzero ((PTR) nlm_cygnus_section_header (abfd),
+		    sizeof (Nlm_Internal_Cygnus_Section_Header)))
+    {
+      Nlm_External_Cygnus_Section_Header thdr;
+
+      memcpy (thdr.stamp, "CyGnUsSeCs", 10);
+      put_word (abfd, (bfd_vma) nlm_cygnus_section_header (abfd)->offset,
+		(bfd_byte *) thdr.offset);
+      put_word (abfd, (bfd_vma) nlm_cygnus_section_header (abfd)->length,
+		(bfd_byte *) thdr.length);
+      if (bfd_write ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
 	return false;
     }
 
@@ -1259,6 +1375,9 @@ nlm_compute_section_file_positions (abfd)
 		    sizeof (Nlm_Internal_Copyright_Header)))
     sofar += (sizeof (Nlm_External_Copyright_Header)
 	      + nlm_copyright_header (abfd)->copyrightMessageLength + 1);
+  if (find_nonzero ((PTR) nlm_cygnus_section_header (abfd),
+		    sizeof (Nlm_Internal_Cygnus_Section_Header)))
+    sofar += sizeof (Nlm_External_Cygnus_Section_Header);
 
   /* Compute the section file positions in two passes.  First get the
      sizes of the text and data sections, and then set the file

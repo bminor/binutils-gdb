@@ -1,3 +1,17 @@
+Thu Apr 21 11:58:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libnlm.h (struct nlm_obj_tdata): Add nlm_cygnus_section_hdr
+	field.
+	(nlm_cygnus_section_header): New accessor macro.
+	* nlmcode.h (nlm_object_p): Free new tdata structure if failure.
+	Add fixed sections before swapping in auxiliary headers.  After
+	adding sections, treat errors as real, not as wrong format.
+	(nlm_swap_auxiliary_headers_in): Swap in the sections header; add
+	sections to the BFD for each section it describes.
+	(nlm_swap_auxiliary_headers_out): Swap out the sections header.
+	(nlm_compute_section_file_positions): Account for the size of the
+	sections header.
+
 Wed Apr 20 16:45:51 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* coff-sparc.c (sparccoff_vec): Change minimum alignment power to

@@ -91,6 +91,7 @@ struct nlm_obj_tdata
   Nlm_Internal_Copyright_Header	nlm_copyright_hdr[1];
   Nlm_Internal_Extended_Header	nlm_extended_hdr[1];
   Nlm_Internal_Custom_Header	nlm_custom_hdr[1];
+  Nlm_Internal_Cygnus_Section_Header nlm_cygnus_section_hdr[1];
   /* BFD NLM symbols.  */
   nlmNAME(symbol_type)		*nlm_symbols;
   /* Lowest text and data VMA values.  */
@@ -122,6 +123,7 @@ struct nlm_obj_tdata
 #define nlm_copyright_header(bfd)	(nlm_tdata(bfd) -> nlm_copyright_hdr)
 #define nlm_extended_header(bfd)	(nlm_tdata(bfd) -> nlm_extended_hdr)
 #define nlm_custom_header(bfd)		(nlm_tdata(bfd) -> nlm_custom_hdr)
+#define nlm_cygnus_section_header(bfd) (nlm_tdata(bfd)->nlm_cygnus_section_hdr)
 #define nlm_get_symbols(bfd)		(nlm_tdata(bfd) -> nlm_symbols)
 #define nlm_set_symbols(bfd, p)		(nlm_tdata(bfd) -> nlm_symbols = (p))
 #define nlm_set_text_low(bfd, i)	(nlm_tdata(bfd) -> nlm_text_low = (i))
