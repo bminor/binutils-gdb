@@ -352,7 +352,7 @@ elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
 static bfd_reloc_status_type
 elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 				 input_section, contents, offset, value,
-				 addend, info, sym_sec, is_local)
+				 addend, info, sym_sec, sym_flags)
      reloc_howto_type *howto;
      bfd *input_bfd;
      bfd *output_bfd;
@@ -363,7 +363,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
      bfd_vma addend;
      struct bfd_link_info *info;
      asection *sym_sec;
-     int is_local;
+     unsigned char sym_flags;
 {
   unsigned long r_type = howto->type;
   bfd_byte *hit_data = contents + offset;
@@ -379,9 +379,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       value += addend;
       value = value >> 2;
 
-      /* if ((long) value > 0xffffff || (long) value < -0x1000000)
-        return bfd_reloc_overflow; */
- 
       value &= 0xffffff;
       value |= (bfd_get_32 (input_bfd, hit_data) & 0xff000000);
       bfd_put_32 (input_bfd, value, hit_data);
@@ -389,6 +386,11 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
     case R_ARM_ABS32:
       value += addend;
+ 
+      if (sym_flags == C_THUMBSTATFUNC
+          || sym_flags == C_THUMBEXTFUNC)
+        value = value | 1;
+
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
@@ -440,40 +442,85 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       value |= bfd_get_16 (input_bfd, hit_data) & 0xf82f;
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
-      break;
 
-#define LOW_HI_ORDER 0xF800F000
-#define HI_LOW_ORDER 0xF000F800
 
-    /* thumb BL (branch long instruction). */
     case R_ARM_THM_PC22:
+    /* thumb BL (branch long instruction). */
       {
-      unsigned int low_bits;
-      unsigned int high_bits;
-      bfd_vma insn;
-
-      value -= (input_section->output_offset + offset + 8);
-      value += addend;
-      value = value >> 1;
+      bfd_vma         relocation;
+      boolean         overflow         = false;
+      bfd_vma         insn             = bfd_get_32 (input_bfd, hit_data);
+      bfd_vma         src_mask         = 0x007FFFFE;
+      bfd_signed_vma  reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
+      bfd_signed_vma  reloc_signed_min = ~reloc_signed_max;
+      bfd_vma         check;
+      bfd_signed_vma  signed_check;
+      bfd_vma         add;
+      bfd_signed_vma  signed_add;
  
-      low_bits = value & 0x000007ff;
-      high_bits = (value >> 11) & 0x000007ff;
-      insn = bfd_get_32 (input_bfd, hit_data);
-
-      if ((insn & LOW_HI_ORDER) == LOW_HI_ORDER)
-        insn = LOW_HI_ORDER | (low_bits << 16) | high_bits;
-      else if ((insn & HI_LOW_ORDER) == HI_LOW_ORDER)
-        insn = HI_LOW_ORDER | (high_bits << 16) | low_bits;
+      relocation  = value + addend;
+      relocation -= (input_section->output_section->vma + input_section->output_offset);
+      relocation -= offset;
+ 
+      check = relocation >> howto->rightshift;
+ 
+      /* If this is a signed value, the rightshift just dropped
+         leading 1 bits (assuming twos complement).  */
+      if ((bfd_signed_vma) relocation >= 0)
+         signed_check = check;
       else
-        abort(); /* error - not a valid branch instruction form */
+         signed_check = (check | ((bfd_vma) - 1 & ~((bfd_vma) - 1 >> howto->rightshift)));
+ 
+      /* Get the value from the object file.  */
+      if (bfd_big_endian (input_bfd))
+         add = (((insn) & 0x07ff0000) >> 4) | (((insn) & 0x7ff) << 1);
+      else
+         add = ((((insn) & 0x7ff) << 12) | (((insn) & 0x07ff0000) >> 15));
 
+      /* Get the value from the object file with an appropriate sign.
+         The expression involving howto->src_mask isolates the upper
+         bit of src_mask.  If that bit is set in the value we are
+         adding, it is negative, and we subtract out that number times
+         two.  If src_mask includes the highest possible bit, then we
+         can not get the upper bit, but that does not matter since
+         signed_add needs no adjustment to become negative in that case.  */
+ 
+      signed_add = add;
+ 
+      if ((add & (((~ src_mask) >> 1) & src_mask)) != 0)
+         signed_add -= (((~ src_mask) >> 1) & src_mask) << 1;
+
+      /* Add the value from the object file, shifted so that it is a
+         straight number.  */
+      /* howto->bitpos == 0 */
+ 
+      signed_check += signed_add;
+      relocation += signed_add;
+ 
+      /* Assumes two's complement.  */
+      if (signed_check > reloc_signed_max
+          || signed_check < reloc_signed_min)
+         overflow = true;
+ 
+      /* Put RELOCATION into the correct bits:  */
+ 
+      if (bfd_big_endian (input_bfd))
+        relocation = (((relocation & 0xffe) >> 1)  | ((relocation << 4) & 0x07ff0000));
+      else
+        relocation = (((relocation & 0xffe) << 15) | ((relocation >> 12) & 0x7ff));
+
+      /* Add RELOCATION to the correct bits of X:  */
+      insn = ((insn & ~howto->dst_mask) | relocation);
+ 
+      /* Put the relocated value back in the object file:  */
       bfd_put_32 (input_bfd, insn, hit_data);
-      return bfd_reloc_ok;
+ 
+      return (overflow ? bfd_reloc_overflow : bfd_reloc_ok);
       }
       break;
       
     case R_ARM_SBREL32:
-      break;
+      return bfd_reloc_notsupported;
 
     case R_ARM_AMP_VCALL9:
       return bfd_reloc_notsupported;
@@ -598,7 +645,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					   input_section,
 					   contents, rel->r_offset,
 					   relocation, rel->r_addend,
-					   info, sec, h == NULL);
+					   info, sec, (h ? h->other : sym->st_other));
 
 
       if (r != bfd_reloc_ok)
@@ -752,7 +799,10 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
     return true;
 
   /* The input BFD must have had its flags initialised.  */
-  BFD_ASSERT (elf_flags_init (ibfd));
+  /* The following seems bogus to me -- The flags are initialized in
+     the assembler but I don't think an elf_flags_init field is
+     written into the object */
+  /* BFD_ASSERT (elf_flags_init (ibfd)); */
   
   in_flags  = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
