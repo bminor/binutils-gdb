@@ -152,9 +152,6 @@ extern void frame_saved_regs_zalloc (struct frame_info *);
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.
 
-   If a particular target needs a different definition, then it can override
-   the definition here by providing one in the tm file.
-
    XXXX - both default and alternate frame_chain_valid functions are
    deprecated.  New code should use dummy frames and one of the
    generic functions. */
@@ -165,17 +162,6 @@ extern int nonnull_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern int generic_file_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern int generic_func_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
-
-#if !defined (FRAME_CHAIN_VALID)
-#if !defined (FRAME_CHAIN_VALID_ALTERNATE)
-#define FRAME_CHAIN_VALID(chain, thisframe) file_frame_chain_valid (chain, thisframe)
-#else
-/* Use the alternate method of avoiding running up off the end of the frame
-   chain or following frames back into the startup code.  See the comments
-   in objfiles.h. */
-#define FRAME_CHAIN_VALID(chain, thisframe) func_frame_chain_valid (chain,thisframe)
-#endif /* FRAME_CHAIN_VALID_ALTERNATE */
-#endif /* FRAME_CHAIN_VALID */
 
 /* The stack frame that the user has specified for commands to act on.
    Note that one cannot assume this is the address of valid data.  */

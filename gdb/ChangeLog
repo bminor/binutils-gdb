@@ -1,3 +1,10 @@
+2002-02-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (FRAME_CHAIN_VALID): Only require at level 2.
+	Default to func_frame_chain_valid.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.h (FRAME_CHAIN_VALID): Delete definition.
+
 2002-02-18  Elena Zannoni  <ezannoni@redhat.com>
 
 	* ppc-linux-nat.c: Update copyright.

@@ -1812,16 +1812,27 @@ extern void set_gdbarch_frame_chain (struct gdbarch *gdbarch, gdbarch_frame_chai
 #endif
 #endif
 
-/* See comments on DUMMY_FRAME for why this is required at level 1. */
+/* Define a default FRAME_CHAIN_VALID, in the form that is suitable for
+   most targets.  If FRAME_CHAIN_VALID returns zero it means that the
+   given frame is the outermost one and has no caller.
+  
+   XXXX - both default and alternate frame_chain_valid functions are
+   deprecated.  New code should use dummy frames and one of the generic
+   functions. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_VALID)
+#define FRAME_CHAIN_VALID(chain, thisframe) (func_frame_chain_valid (chain, thisframe))
+#endif
 
 typedef int (gdbarch_frame_chain_valid_ftype) (CORE_ADDR chain, struct frame_info *thisframe);
 extern int gdbarch_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct frame_info *thisframe);
 extern void set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_frame_chain_valid_ftype *frame_chain_valid);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_VALID)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_VALID)
 #error "Non multi-arch definition of FRAME_CHAIN_VALID"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID)
 #define FRAME_CHAIN_VALID(chain, thisframe) (gdbarch_frame_chain_valid (current_gdbarch, chain, thisframe))
 #endif
 #endif
