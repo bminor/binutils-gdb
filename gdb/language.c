@@ -630,9 +630,7 @@ longest_local_hex_string_custom (num, width)
      can use local_hex_string_custom 
    */
   return local_hex_string_custom ((unsigned long) num, width);
-#endif
-
-#if defined (PRINTF_HAS_LONG_LONG)
+#elif defined (PRINTF_HAS_LONG_LONG)
   /* Just use printf.  */
   strcpy (format, local_hex_format_prefix ());	/* 0x */
   strcat (format, "%");
