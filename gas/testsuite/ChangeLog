@@ -1,3 +1,8 @@
+1999-09-12  Donn Terry  <donn@interix.com>
+
+	* gas/all/gas.exp: Run cofftag test for i*86-*-interix*.
+	* lib/gas-defs.exp: Add perror if can not read .d file.
+
 1999-09-04  Steve Chamberlain  <sac@pobox.com>
 
 	* gas/pj/{pj.exp, ops.c, ops.d}: New tests for picoJava.

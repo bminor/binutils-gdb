@@ -253,6 +253,7 @@ proc run_dump_test { name } {
     }
     set opt_array [slurp_options "${file}.d"]
     if { $opt_array == -1 } {
+	perror "error reading options from $file.d"
 	unresolved $subdir/$name
 	return
     }

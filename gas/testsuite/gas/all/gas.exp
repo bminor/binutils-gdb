@@ -112,6 +112,7 @@ if {   ([istarget *-*-coff*] && ![istarget m88*-*-*] && ![istarget *arm*-*-coff]
      || [istarget i*86-*-go32*] \
      || [istarget i*86-*-cygwin*] \
      || [istarget i*86-*-*nt] \
+     || [istarget i*86-*-interix*] \
      || ([istarget i960-*-vxworks5.*] && ![istarget i960-*-vxworks5.0*]) } {
     run_dump_test cofftag
 }
