@@ -1,3 +1,14 @@
+2003-12-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-sol2-tdep.c (i386_sol2_gregset_reg_offset): New variable.
+	(i386_sol2_init_abi): Initialize TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs, TDEP->sizeof_gregset and
+	TDEP->sizeof_fpregset.
+	* config/i386/i386sol2.mh (XM_FILE): Set to xm-i386.h.
+	(XM_CLIBS): Remove.
+	(NATDEPFILES): Remove core-regset.o and corelow.o.
+	* config/i386/i386sol2.mt (TDEPFILES): Add corelow.o.
+
 2003-12-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* proc-api.c (procfs_note): Add format string to fprintf call.

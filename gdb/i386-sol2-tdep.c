@@ -24,6 +24,27 @@
 
 #include "i386-tdep.h"
 
+/* From <ia32/sys/reg.h>.  */
+static int i386_sol2_gregset_reg_offset[] =
+{
+  11 * 4,			/* %eax */
+  10 * 4,			/* %ecx */
+  9 * 4,			/* %edx */
+  8 * 4,			/* %ebx */
+  17 * 4,			/* %esp */
+  6 * 4,			/* %ebp */
+  5 * 4,			/* %esi */
+  4 * 4,			/* %edi */
+  14 * 4,			/* %eip */
+  16 * 4,			/* %eflags */
+  15 * 4,			/* %cs */
+  18 * 4,			/* %ss */
+  3 * 4,			/* %ds */
+  2 * 4,			/* %es */
+  1 * 4,			/* %fs */
+  0 * 4				/* %gs */
+};
+
 static int
 i386_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
@@ -41,6 +62,14 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Solaris is SVR4-based.  */
   i386_svr4_init_abi (info, gdbarch);
+
+  /* Solaris reserves space for its FPU emulator in `fpregset_t'.
+     There is also some space reserved for the registers of a Weitek
+     math coprocessor.  */
+  tdep->gregset_reg_offset = i386_sol2_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (i386_sol2_gregset_reg_offset);
+  tdep->sizeof_gregset = 19 * 4;
+  tdep->sizeof_fpregset = 380;
 
   /* Signal trampolines are slightly different from SVR4.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);
