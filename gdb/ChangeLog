@@ -1,3 +1,12 @@
+start-sanitize-d10v
+Tue Oct 29 12:48:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-tdep.c: Snapshot that supports D10V-EVA board.
+ 	
+	* config/d10v/tm-d10v.h (REGISTER_NAMES): Add imap0,imap1,dmap.
+	(TARGET_READ_FP,TARGET_WRITE_FP): Define. 
+	
+end-sanitize-d10v
 Mon Oct 28 17:34:24 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* mswin/genmakes mswin/recordit:  New scripts to generate make

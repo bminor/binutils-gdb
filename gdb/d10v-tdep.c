@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 
 void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *fsr));
+static void d10v_pop_dummy_frame PARAMS ((struct frame_info *fi));
 
 /* Discard from the stack the innermost frame,
    restoring all saved registers.  */
@@ -44,6 +45,13 @@ d10v_pop_frame ()
   char raw_buffer[8];
 
   fp = FRAME_FP (frame);
+  printf("pop_frame %x\n",(int)fp);
+  if (frame->dummy)
+    {
+      d10v_pop_dummy_frame(frame);
+      return;
+    }
+
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   get_frame_saved_regs (frame, &fsr);
@@ -143,7 +151,7 @@ d10v_skip_prologue (pc)
     }
   return pc;
 }
- 
+
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
@@ -162,9 +170,9 @@ d10v_frame_chain (frame)
 
   if (!fsr.regs[FP_REGNUM])
     {
-      return (CORE_ADDR)fsr.regs[SP_REGNUM];
+      return (CORE_ADDR)fsr.regs[SP_REGNUM]+0x2000000;
     }
-  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2);
+  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2)+0x2000000;
 }  
 
 static int next_addr;
@@ -305,9 +313,9 @@ d10v_frame_find_saved_regs (fi, fsr)
       }
 
   if (fsr->regs[13])
-    fi->return_pc = (read_memory_unsigned_integer(fsr->regs[13],2)-1) << 2;
+    fi->return_pc = ((read_memory_unsigned_integer(fsr->regs[13],2)-1) << 2) + 0x1000000;
   else
-    fi->return_pc = (read_register(13) - 1)  << 2;
+    fi->return_pc = ((read_register(13) - 1)  << 2) + 0x1000000;
 
   /* th SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
@@ -331,12 +339,19 @@ d10v_init_extra_frame_info (fromleaf, fi)
   if (fi->next && (fi->pc == 0)) 
     fi->pc = fi->next->return_pc; 
 
+  /*
+  printf("init_extra_frame_info: fi->pc=%x  frame=%x  PC=%x SP=%x\n",
+	 (int)fi->pc,(int)fi->frame,(int)read_register(PC_REGNUM)<<2,(int)read_register(SP_REGNUM));
+	 */
+
   d10v_frame_find_saved_regs (fi, &dummy); 
   if (!dummy.regs[FP_REGNUM])
     {
-      fi->frame = dummy.regs[SP_REGNUM] - fi->size;
+      /*      printf("init_extra_frame_info: sp=%x  size=%x\n",dummy.regs[SP_REGNUM],fi->size);; */
+      fi->frame = dummy.regs[SP_REGNUM] - fi->size + 0x2000000;
       d10v_frame_find_saved_regs (fi, &dummy); 
-    }      
+    }
+  /*  printf("init_extra_frame_info end: pc=%x  frame=%x\n",(int)fi->pc,(int)fi->frame); */
 }
 
 static void
@@ -369,6 +384,10 @@ show_regs (args, from_tty)
                    read_register (13),
                    read_register (14),
                    read_register (15));
+  printf_filtered ("IMAP0 %04x    IMAP1 %04x    DMAP %04x\n",
+                   read_register (IMAP0_REGNUM),
+                   read_register (IMAP1_REGNUM),
+                   read_register (DMAP_REGNUM));
   read_register_gen (A0_REGNUM, (char *)&num1);
   read_register_gen (A0_REGNUM+1, (char *)&num2);
   printf_filtered ("A0-A1  %010llx %010llx\n",num1, num2);
@@ -381,45 +400,61 @@ _initialize_d10v_tdep ()
   add_com ("regs", class_vars, show_regs, "Print all registers");
 } 
 
-CORE_ADDR
-d10v_read_register_pid (regno, pid)
-     int regno, pid;
+static CORE_ADDR
+d10v_xlate_addr (addr)
+     int addr;
 {
-  int save_pid;
-  CORE_ADDR retval;
+  int imap;
 
-  if (pid == inferior_pid)
-    return (read_register(regno)) << 2;
+  if (addr < 0x20000)
+    imap = (int)read_register(IMAP0_REGNUM);
+  else
+    imap = (int)read_register(IMAP1_REGNUM);
+
+  if (imap & 0x1000)
+    return (CORE_ADDR)(addr + 0x1000000);
+  return (CORE_ADDR)(addr + (imap & 0xff)*0x20000);
+}
+
+
+CORE_ADDR
+d10v_read_pc (pid)
+     int pid;
+{
+  int save_pid, retval;
 
   save_pid = inferior_pid;
   inferior_pid = pid;
-  retval = read_register (regno);
+  retval = (int)read_register (PC_REGNUM);
   inferior_pid = save_pid;
-  return (retval << 2);
+  return d10v_xlate_addr(retval << 2);
 }
 
 void
-d10v_write_register_pid (regno, val, pid)
-     int regno;
+d10v_write_pc (val, pid)
      LONGEST val;
      int pid;
 {
   int save_pid;
 
-  val >>= 2;
-
-  if (pid == inferior_pid)
-    {
-      write_register (regno, val);
-      return;
-    }
-
   save_pid = inferior_pid;
   inferior_pid = pid;
-  write_register (regno, val);
+  write_register (PC_REGNUM, (val & 0x3ffff) >> 2);
   inferior_pid = save_pid;
 }
 
+CORE_ADDR
+d10v_read_fp ()
+{
+  return (read_register(FP_REGNUM) + 0x2000000);
+}
+
+void
+d10v_write_fp (val)
+     LONGEST val;
+{
+  write_register (FP_REGNUM, val & 0xffff);
+}
 
 void
 d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
@@ -434,7 +469,9 @@ d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
   int regnum, i;
   CORE_ADDR sp;
   char buffer[MAX_REGISTER_RAW_SIZE];
-
+  struct frame_info *frame = get_current_frame ();
+  frame->dummy = 1;
+  printf("D10v_fix_call_dummy: %x %x %d  frame=%x\n",(int)start_sp,(int)fun,nargs,(int)frame->frame);
   sp = start_sp;
   for (regnum = 0; regnum < NUM_REGS-1; regnum++)
     {
@@ -443,12 +480,27 @@ d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
       sp -= REGISTER_RAW_SIZE(regnum);
     }
   write_register (SP_REGNUM, (LONGEST)sp);  
-  /* now we need to load PC with the return address */
-  write_register (PC_REGNUM, (LONGEST)d10v_call_dummy_address()>>2);  
+  printf("writing %x to sp\n",(int)sp);
+  /* now we need to load LR with the return address */
   write_register (LR_REGNUM, (LONGEST)d10v_call_dummy_address()>>2);  
-  target_store_registers (-1);
-  flush_cached_frames ();
 }
+
+static void
+d10v_pop_dummy_frame (fi)
+     struct frame_info *fi;
+{
+  printf("pop_dummy_frame:  start_sp=%x\n",(int)fi->frame);
+  /*
+  sp = start_sp;
+  for (regnum = 0; regnum < NUM_REGS-1; regnum++)
+    {
+      store_address (buffer, REGISTER_RAW_SIZE(regnum), read_register(regnum));
+      write_memory (sp, buffer, REGISTER_RAW_SIZE(regnum));
+      sp -= REGISTER_RAW_SIZE(regnum);
+    }
+    */
+}
+
 
 CORE_ADDR
 d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
@@ -460,13 +512,14 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 {
   int i, len, regnum=2;
   char *contents;
-
+  LONGEST val;
+  
   for (i = 0; i < nargs; i++)
     {
       value_ptr arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       switch (TYPE_CODE (arg_type))
-	{
+        {
 	case TYPE_CODE_INT:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_CHAR:
@@ -478,46 +531,32 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	}
       len = TYPE_LENGTH (arg_type);
       contents = VALUE_CONTENTS(arg);
-      switch (len)
-	{
-	case 1:
-	  write_register (regnum++, (LONGEST)(*contents));   
-	  break;
-	case 2:
-	  write_register (regnum++, (LONGEST)(*(short *)contents));   
-	  break;
-	case 4:
-	  {
-	    LONGEST val = *(long *)contents;
-	    write_register (regnum++, val >> 16 );
-	    write_register (regnum++, val & 0xFFFF );
-	  }
-	break;
-	default:
-	}
+      val = extract_signed_integer (contents, len);
+      printf("arg %d:  len=%d  contents=%x\n",i,len,(int)val);
+      if (len == 4)
+	write_register (regnum++, val>>16);
+      write_register (regnum++, val & 0xffff);
     }
 }
+
 
 CORE_ADDR
 d10v_call_dummy_address ()
 {
-  CORE_ADDR entry, retval;
+  CORE_ADDR entry;
   struct minimal_symbol *sym;
 
   entry = entry_point_address ();
 
   if (entry != 0)
-    {
-      return entry;
-    }
+    return entry;
 
   sym = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
 
   if (!sym || MSYMBOL_TYPE (sym) != mst_text)
-    retval = 0;
+    return 0;
   else
-    retval =  SYMBOL_VALUE_ADDRESS (sym);
-  return retval;
+    return SYMBOL_VALUE_ADDRESS (sym);
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 
@@ -529,5 +568,7 @@ d10v_extract_return_value (valtype, regbuf, valbuf)
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
+  printf("EXTRACT: regbuf=%x, *regbuf=%x %x %x %x  len=%d %d\n",(int)regbuf,*(int *)regbuf,
+	 *(int *)(regbuf+4),*(int *)(regbuf+8),*(int *)(regbuf+12),TYPE_LENGTH (valtype),REGISTER_BYTE (2) );
   memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
 }
