@@ -1,3 +1,7 @@
+2002-10-25  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS: Check all warnings when h8300hms and alpha-elf.
+
 2002-10-24  Martin M. Hunt  <hunt@redhat.com>
 
 	* utils.c (string_to_core_addr): Revert patch from 11 Oct.
