@@ -2,6 +2,7 @@ Wed Aug 18 12:03:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (print_address), values.c (value_as_pointer): Don't
 	use ADDR_BITS_REMOVE.
+	* defs.h: Try to clarify comment about ADDR_BITS_REMOVE.
 
 	* blockframe.c (block_innermost_frame): Uncomment.
 	Return NULL if passed NULL.
