@@ -1,3 +1,8 @@
+2002-12-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Bump version to 2.13.2.
+	* configure: Regenerate.
+
 2002-12-20  Paul Eggert  <eggert@twinsun.com>
 
 	Port to POSIX 1003.1-2001.
