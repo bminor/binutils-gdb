@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
 
 # tests for misc. C++ method stuff
 # Written by Satish Pai <pai@apollo.hp.com> 1997-07-08
@@ -96,7 +93,7 @@ gdb_test "break A::bar" \
   "Breakpoint \[0-9\]* at $hex.*file .*method.cc, line 44\\."
 
 gdb_test "continue" \
-  "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::bar(\\(int\\) const|) \\(this=$hex, arg=15\\) at .*method\\.cc:44\r\n44\[\t \]*return arg \\+ 2 \\* x;" \
+  "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::bar(|\\(int\\) const| const) \\(this=$hex, arg=15\\) at .*method\\.cc:44\r\n44\[\t \]*return arg \\+ 2 \\* x;" \
   "continue to A::bar"
 
 # Check ability to access this-relative stuff.
@@ -168,6 +165,9 @@ gdb_expect {
       pass "ptype A"
    }
    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*A & operator=\\(A const ?&\\);\r\n\[ \]*A\\(A const ?&\\);\r\n\[ \]*A\\((void|)\\);\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\}\r\n$gdb_prompt $" {
+      pass "ptype A"
+   }
+   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\[ \]*A & operator=\\(A const ?&\\);\r\n\[ \]*A\\(A const ?&\\);\r\n\[ \]*A\\((void|)\\);\r\n\}\r\n$gdb_prompt $" {
       pass "ptype A"
    }
    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\);\r\n\[ \]*int qux\\(int, float\\) const;\r\n\}\r\n$gdb_prompt $" {

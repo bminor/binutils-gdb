@@ -1,4 +1,4 @@
-#   Copyright 2002
+#   Copyright 2002, 2003, 2004
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -20,14 +20,9 @@
 
 # This file was written by Corinna Vinschen <vinschen@redhat.com>
 
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping interrupt.exp because of nointerrupts."
+if [target_info exists gdb,nofileio] {
+    verbose "Skipping fileio.exp because of no fileio capabilities."
     continue
-}
-
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping interrupt.exp because of noinferiorio."
-    return
 }
 
 if $tracelevel then {
@@ -221,9 +216,19 @@ gdb_test continue \
 "Renaming a file to existing directory returns EISDIR"
 
 send_gdb "tbreak 388\n" ; gdb_expect -re "$gdb_prompt $"
-gdb_test continue \
-	"Continuing\\..*rename 3:.*(ENOTEMPTY|EEXIST).*test_rename \\(\\) at.*$srcfile:388.*" \
-"Renaming a directory to a non-empty directory returns ENOTEMPTY or EEXIST"
+set test "Renaming a directory to a non-empty directory returns ENOTEMPTY or EEXIST"
+gdb_test_multiple continue "${test}" {
+    -re "Continuing\\..*rename 3:.*(ENOTEMPTY|EEXIST).*test_rename \\(\\) at.*$srcfile:388.*$gdb_prompt $" {
+	pass "${test}"
+    }
+    -re "Continuing\\..*rename 3:.*EBUSY.*test_rename \\(\\) at.*$srcfile:388.*$gdb_prompt $" {
+	# At least version <= 2.6/2004-01-08 of the Linux Kernel gets
+	# this wrong (reporting EBUSY) when the file system is NFS
+	# mounted.
+	setup_xfail *-*-*linux* gdb/1502
+	fail "${test}"
+    }
+}
 
 send_gdb "tbreak 393\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \

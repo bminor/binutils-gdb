@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,10 +65,19 @@ set bug_id 0
 
 set testfile "break"
 set srcfile ${testfile}.c
+set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-w}] != ""
- } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 
@@ -182,6 +191,11 @@ gdb_expect  {
 send_gdb "maint print statistics\n"
 gdb_expect  {
         -re "Statistics for.*break.*Number of \"minimal\" symbols read.*Number of \"partial\" symbols read.*Number of \"types\" defined.*Number of psym tables \\(not yet expanded\\).*Number of symbol tables.*Number of symbol tables with line tables.*Number of symbol tables with blockvectors.*Total memory used for psymbol obstack.*Total memory used for psymbol cache.*Total memory used for symbol obstack.*Total memory used for type obstack.*$gdb_prompt $"\
+                        { 
+			    # Old output for gdb 6.0 and earlier
+			    pass "maint print statistics" 
+			}
+        -re "Statistics for.*break.*Number of \"minimal\" symbols read.*Number of \"partial\" symbols read.*Number of \"types\" defined.*Number of psym tables \\(not yet expanded\\).*Number of symbol tables.*Number of symbol tables with line tables.*Number of symbol tables with blockvectors.*Total memory used for objfile obstack.*Total memory used for psymbol cache.*Total memory used for macro cache.*$gdb_prompt $"\
                         { pass "maint print statistics" }
         -re ".*$gdb_prompt $"       { fail "maint print statistics" }
         timeout         { fail "(timeout) maint print statistics" }
@@ -391,6 +405,7 @@ gdb_expect {
     -re ".*bss.*$gdb_prompt $"      { fail "maint info sections .text" }
     -re ".*data.*$gdb_prompt $"     { fail "maint info sections .text" }
     -re ".* .text .*$gdb_prompt $"  { pass "maint info sections .text" }
+    -re ".*$gdb_prompt $"           { fail "maint info sections .text" }
     timeout               { fail "(timeout) maint info sections .text" }
 }
 
@@ -400,6 +415,7 @@ send_gdb "maint info sections CODE\n"
 gdb_expect {
     -re ".* .data .*$gdb_prompt $" { fail "maint info sections CODE" }
     -re ".* .text .*$gdb_prompt $" { pass "maint info sections CODE" }
+    -re ".*$gdb_prompt $"          { fail "maint info sections CODE" }
     timeout              { fail "(timeout) maint info sections CODE" }
 }
 
@@ -409,14 +425,17 @@ send_gdb "maint info sections DATA\n"
 gdb_expect {
     -re ".* .text .*$gdb_prompt $" { fail "maint info sections DATA" }
     -re ".* .data .*$gdb_prompt $" { pass "maint info sections DATA" }
+    -re ".*$gdb_prompt $"          { fail "maint info sections DATA" }
     timeout              { fail "(timeout) maint info sections DATA" }
 }
 
+set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
+
 send_gdb "maint info breakpoints\n"
 gdb_expect {
-    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex\[ \t\]+in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
+    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex\[ \t\]+in main at.*break.c:$bp_location6\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
 		{ pass "maint info breakpoints" }
-	-re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
+	-re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:$bp_location6\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
 		{ pass "maint info breakpoints (with shlib events)" }
 	-re ".*$gdb_prompt $"       { fail "maint info breakpoints" }
 	timeout         { fail "(timeout) maint info breakpoints" }
@@ -650,34 +669,22 @@ gdb_expect  {
         }
 
 send_gdb "maint internal-error\n"
-gdb_expect  {
-    -re "Quit this debugging session.*\\(y or n\\) $" {
-	send_gdb "n\n"
-	gdb_expect {
-	    -re "Create a core file.*\\(y or n\\) $" {
-		send_gdb "n\n"
-		gdb_expect {
-		    -re ".*$gdb_prompt $" {
-			pass "maint internal-error"
-		    }
-		    timeout {
-			fail "(timeout)  maint internal-error"
-		    }
-		}
-	    }
-	    -re ".*$gdb_prompt $" {
-		fail "maint internal-error"
-	    }
-	    timeout {
-		fail "(timeout)  maint internal-error"
-	    }
+gdb_expect {
+    -re "A problem internal to GDB has been detected" {
+	pass "maint internal-error"
+	if [gdb_internal_error_resync] {
+	    pass "internal-error resync"
+	} else {
+	    fail "internal-error resync"
 	}
     }
     -re ".*$gdb_prompt $" {
 	fail "maint internal-error"
+	untested "internal-error resync"
     }
     timeout {
-	fail "(timeout) maint internal-error"
+	fail "maint internal-error (timeout)"
+	untested "internal-error resync"
     }
 }
 

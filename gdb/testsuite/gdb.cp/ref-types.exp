@@ -1,5 +1,5 @@
 # Tests for reference types with short type variables in GDB.
-# Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,9 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
 
 # written by Elena Zannoni (ezannoni@cygnus.com)
 
@@ -71,8 +68,6 @@ proc gdb_start_again {} {
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${binfile}
-
-    source ${binfile}.ci
 
     #
     # set it up at a breakpoint so we can play with the variable values

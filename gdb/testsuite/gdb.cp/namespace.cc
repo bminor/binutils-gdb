@@ -75,6 +75,11 @@ namespace
   namespace G
   {
     int Xg = 10;
+
+    namespace
+    {
+      int XgX = 11;
+    }
   }
 }
 
@@ -83,6 +88,22 @@ namespace C
   int c = 1;
   int shadow = 12;
 
+  class CClass {
+  public:
+    int x;
+    class NestedClass {
+    public:
+      int y;
+    };
+  };
+
+  void ensureRefs () {
+    // NOTE (2004-04-23, carlton): This function is here only to make
+    // sure that GCC 3.4 outputs debug info for these classes.
+    static CClass *c = new CClass();
+    static CClass::NestedClass *n = new CClass::NestedClass();
+  }
+
   namespace
   {
     int cX = 6;
@@ -90,12 +111,22 @@ namespace C
     namespace F
     {
       int cXf = 7;
+
+      namespace
+      {
+	int cXfX = 8;
+      }
     }
   }
 
   namespace C
   {
     int cc = 2;
+  }
+
+  namespace E
+  {
+    int ce = 4;
   }
 
   namespace D
@@ -118,14 +149,18 @@ namespace C
       //cc;
       C::cc;
       cd;
+      //C::D::cd;
       E::cde;
       shadow;
+      //E::ce;
       cX;
       F::cXf;
+      F::cXfX;
       X;
       G::Xg;
       //cXOtherFile;
       //XOtherFile;
+      G::XgX;
 
       return;
     }

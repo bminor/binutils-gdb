@@ -1,4 +1,5 @@
-# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -91,11 +92,6 @@ proc set_lang_c {} {
     }
 }
 
-
-
-source ${binfile}.ci
-
-
 # Start with a fresh gdb.
 
 gdb_exit
@@ -114,13 +110,13 @@ if ![runto_main] then {
 
 
 gdb_test "break loop_count" \
-    "Breakpoint.* file .*call-rt-st.c, line 106\\." \
+    "Breakpoint.* file .*call-rt-st.c, line 128\\." \
     "breakpoint loop_count"
 
 
 send_gdb "continue\n"
 gdb_expect {
- -re  "Continuing\\..*Breakpoint.*loop_count \\(\\) at.*call-rt-st.c:106\[ \t\r\n\]+106\[\t \]+for \\(index=0; index.4; index..\\);\[\r\n \]+$gdb_prompt $" {
+ -re  "Continuing\\..*Breakpoint.*loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+128\[\t \]+for \\(index=0; index.4; index..\\);\[\r\n \]+$gdb_prompt $" {
                  pass "continue to loop_count"}
       -re ".*$gdb_prompt $" { fail "continue to loop_count"}           
       timeout           { fail "(timeout) continue to loop_count"}
@@ -128,11 +124,11 @@ gdb_expect {
 
 send_gdb "finish\n"
 gdb_expect {
-    -re  "Run till exit from .0  loop_count \\(\\) at.*call-rt-st.c:106\[ \t\r\n\]+main \\(\\) at.*call-rt-st.c:617\[ \t\r\n\]+617\[\t \]+return 0;.*$gdb_prompt $" {
-	pass "finish out from loop_count (line 617)"
+    -re  "Run till exit from .0  loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+main \\(\\) at.*call-rt-st.c:777\[ \t\r\n\]+777\[\t \]+return 0;.*$gdb_prompt $" {
+	pass "finish out from loop_count (line 777)"
     }
-    -re  "Run till exit from .0  loop_count \\(\\) at.*call-rt-st.c:106\[ \t\r\n\]+main \\(\\) at.*call-rt-st.c:615\[ \t\r\n\]+615\[\t \]+loop_count.*$gdb_prompt $" {
-	pass "finish out from loop_count (line 615)"
+    -re  "Run till exit from .0  loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+main \\(\\) at.*call-rt-st.c:775\[ \t\r\n\]+775\[\t \]+loop_count.*$gdb_prompt $" {
+	pass "finish out from loop_count (line 775)"
     }
     -re ".*$gdb_prompt $" {
 	fail "finish out from loop_count"
@@ -189,6 +185,16 @@ if {![gdb_skip_float_test "print print_two_floats(*f3)"] && \
         ![gdb_skip_stdio_test "print print_two_floats(*f3)"] } {
     print_struct_call "print_two_floats(*f3)" \
             ".*Contents of two_floats_t:\[ \r\n\]+-2\\.345000\[ \t]+1\\.000000\[ \r\n\]+.\[0-9\]+ = \\{float1 = -2\\.34500003, float2 = 1\\}"
+}
+
+if ![gdb_skip_stdio_test "print print_bit_flags_char(*flags)"] {
+    print_struct_call "print_bit_flags_char(*flags)" \
+            ".*alpha\[ \r\n\]+gamma\[ \r\n\]+epsilon\[ \r\n\]+.\[0-9\]+ = \\{alpha = 1 '\\\\001', beta = 0 '\\\\0', gamma = 1 '\\\\001', delta = 0 '\\\\0', epsilon = 1 '\\\\001', omega = 0 '\\\\0'\\}"
+}
+
+if ![gdb_skip_stdio_test "print print_bit_flags_short(*flags)"] {
+    print_struct_call "print_bit_flags_short(*flags)" \
+            ".*alpha\[ \r\n\]+gamma\[ \r\n\]+epsilon\[ \r\n\]+.\[0-9\]+ = \\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\\}"
 }
 
 if ![gdb_skip_stdio_test "print print_bit_flags(*flags)"] {

@@ -202,6 +202,11 @@ gdb_expect {
 	    -re ".*in __wrap__?main ().*$gdb_prompt $" {
 		pass "step out of main (status wrapper)"
 	    }
+	    -re "__setup_argv_for_main (.*).*$gdb_prompt $" {
+		# On sh, another wrapper function (start_l) exists, so
+		# another `next' is necessary.
+		gdb_test "next" ".*in start_l ().*" "step out of main (on sh)"
+	    }
             -re ".*$gdb_prompt $" { fail "step out of main (at end 2)" }
 	    timeout { 
 		fail "step out of main (hang or timeout on step at end 2)" 

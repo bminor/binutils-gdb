@@ -1,4 +1,4 @@
-# Copyright 2003 Free Software Foundation, Inc.
+# Copyright 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,8 +46,9 @@ set srcfile2 "${srcdir}/${subdir}/${testfile}2.cc"
 set objfile2 "${objdir}/${subdir}/${testfile}2.o"
 set binfile ${objdir}/${subdir}/${testfile}
 
-# gdb_get_line_number needs this to be called srcfile.
-set srcfile "${srcfile1}"
+# gdb_get_line_number needs this to be called srcfile.  Except that it
+# gets confused if the directories are included. :-(
+set srcfile "${testfile}1.cc"
 
 if  { [gdb_compile "${srcfile1}" "${objfile1}" object {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -78,11 +79,16 @@ if ![runto_main] then {
 
 # First, run to after we've constructed the object:
 
-gdb_breakpoint [gdb_get_line_number "constructs-done"]
-gdb_continue_to_breakpoint "end of constructors"
+gdb_breakpoint [gdb_get_line_number "main-constructs-done"]
+gdb_continue_to_breakpoint "end of constructors in main"
 
 gdb_test_multiple "print *e1" "print *e1" {
+    -re "warning: RTTI symbol not found for class 'n1::D1'.*$gdb_prompt $" {
+	# gdb HEAD 2003-12-05
+	kfail "gdb/488" "print *e1"
+    }
     -re "warning: can't find class named `n1::D1', as given by C\\+\\+ RTTI.*$gdb_prompt $" {
+	# gdb 6.0
 	kfail "gdb/488" "print *e1"
     }
     -re "\\$\[0-9\]* = {<n1::Base1> = .*}\r\n$gdb_prompt $" {
@@ -97,23 +103,26 @@ gdb_test_multiple "print *e1" "print *e1" {
     }
 }
 
-# NOTE: carlton/2003-05-16: This test fails on my branch with an
-# "<incomplete type>" message because, within rtt1.cc, GDB has no way
-# of knowing that the class is called 'n2::D2' instead of just 'D2'.
-# This is an artifical test case, though: if we were using these
-# classes in a more substantial way, G++ would emit more debug info.
-# As is, I don't think there's anything that GDB can do about this
-# case until G++ starts emitting DW_TAG_namespace info; when that part
-# of the branch gets merged in, then we'll probably want to convert
-# that fail branch to an xfail.
+# NOTE: carlton/2004-01-14: This test with an "<incomplete type>"
+# message because, within rtt1.cc, GDB has no way of knowing that the
+# class is called 'n2::D2' instead of just 'D2'.  This is an artifical
+# test case, though: if we were using these classes in a more
+# substantial way, G++ would emit more debug info.  As is, I don't
+# think there's anything that GDB can do about this case until G++
+# starts emitting DW_TAG_namespace info; this should arrive with GCC
+# 3.4.
 
 gdb_test_multiple "print *e2" "print *e2" {
+    -re "warning: RTTI symbol not found for class 'n2::D2'.*$gdb_prompt $" {
+	# gdb HEAD 2003-12-05
+	kfail "gdb/488" "print *e2"
+    }
     -re "warning: can't find class named `n2::D2', as given by C\\+\\+ RTTI.*$gdb_prompt $" {
+	# gdb 6.0
 	kfail "gdb/488" "print *e2"
     }
     -re "\\$\[0-9\]* = <incomplete type>\r\n$gdb_prompt $" {
-	# See above NOTE.
-	fail "print *e2"
+	kfail "gdb/1511" "print *e2"
     }
     -re "\\$\[0-9\]* = {<n2::Base2> = .*}\r\n$gdb_prompt $" {
 	pass "print *e2"
@@ -122,6 +131,19 @@ gdb_test_multiple "print *e2" "print *e2" {
 	kfail "gdb/57" "print *e2"
     }
 }
+
+# Now we test the hack that's been implemented to get around some
+# instances of PR gdb/1511.
+
+gdb_breakpoint [gdb_get_line_number "func-constructs-done"]
+gdb_continue_to_breakpoint "end of constructors in func"
+
+gdb_test "print *obj" "\\$\[0-9\]* = {<n2::Base2> = .*}"
+
+gdb_breakpoint [gdb_get_line_number "func3-constructs-done"]
+gdb_continue_to_breakpoint "end of constructors in func3"
+
+gdb_test "print *obj3" "\\$\[0-9\]* = {<n2::C2> = .*}"
 
 gdb_exit
 return 0

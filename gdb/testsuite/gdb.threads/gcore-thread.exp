@@ -1,4 +1,4 @@
-# Copyright 2002, 2003 Free Software Foundation, Inc.
+# Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ set bug_id 0
 # Single-threaded test case
 set testfile "pthreads"
 set srcfile  ${testfile}.c
-set binfile  ${objdir}/${subdir}/${testfile}
+set binfile  ${objdir}/${subdir}/gcore-${testfile}
 
 if [istarget "*-*-linux"] then {
     set target_cflags "-D_MIT_POSIX_THREADS"
@@ -78,7 +78,7 @@ gdb_expect {
     }
 }
 
-if { ! [ runto main ] } then {
+if { ! [ runto_main ] } then {
     gdb_suppress_entire_file "Run to main failed, so all tests in this file will automatically fail."
 }
 
@@ -105,9 +105,25 @@ gdb_test "continue" "Continuing.*Breakpoint.* thread2 .*" "thread 2 is running"
 
 set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore.test]
 # Drop corefile
-gdb_test "gcore ${objdir}/${subdir}/gcore.test" \
-	"Saved corefile ${escapedfilename}" \
-	"save a corefile"
+gdb_test_multiple "gcore ${objdir}/${subdir}/gcore.test" \
+	"save a corefile" \
+{
+  -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
+    pass "save a corefile"
+    global core_supported
+    set core_supported 1
+  }
+  -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
+    unsupported "save a corefile"
+    global core_supported
+    set core_supported 0
+  }
+}
+
+global core_supported
+if {!$core_supported} {
+  return -1
+}
 
 # Now restart gdb and load the corefile.
 gdb_exit

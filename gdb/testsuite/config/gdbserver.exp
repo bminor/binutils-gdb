@@ -2,7 +2,7 @@
 # ie. a debug agent running as a native process on the same or
 # a different host.
 
-#   Copyright 2000, 2002 Free Software Foundation, Inc.
+#   Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -89,12 +89,8 @@ global server_exec;
 global portnum;
 set portnum "2345";
 
-proc gdb_load { arg } {
-    global host_exec;
-    global server_exec;
-    global portnum;
-    global verbose;
-    global gdb_prompt;
+proc gdbserver_gdb_load { server_exec } {
+    global portnum
 
     # Port id -- either specified in baseboard file, or managed here.
     if [target_info exists gdb,socketport] {
@@ -134,35 +130,6 @@ proc gdb_load { arg } {
     # Export the host:port pair.
     set gdbport $debughost$portnum;
 
-    # Remember new exec file.
-    if { $arg == "" } {
-	if { ! [info exists host_exec] } {
-	    send_gdb "info files\n";
-	    gdb_expect 30 {
-		-re "Symbols from \"(\[^\"\]+)\"" {
-		    set host_exec $expect_out(1,string);
-		    exp_continue;
-		}
-		-re "Local exec file:\[\r\n\]+\[ \t\]*`(\[^'\]+)'," {
-		    set host_exec $expect_out(1,string);
-		    exp_continue;
-		}
-		-re "$gdb_prompt $" { }
-	    }
-	}
-    } else {
-	set host_exec $arg
-	if [info exists server_exec] { unset server_exec }
-    }
-
-    if { ! [info exists server_exec] } {
-	if [is_remote target] {
-	    set server_exec [remote_download target $host_exec]
-	} else {
-	    set server_exec $host_exec
-	}
-    }
-
     # Fire off the debug agent
     if [target_info exists gdb_server_args] {
         # This flavour of gdbserver takes as arguments those specified
@@ -175,52 +142,79 @@ proc gdb_load { arg } {
         # and the name of the executable file to be debugged.
 	set server_spawn_id [remote_spawn target \
 	    "$gdbserver $sockethost$portnum $server_exec"]
-    } 
+    }
 
-    # We can't call close, because if gdbserver is local then that means
-    # that it will get a SIGHUP.
-    ## close -i $server_spawn_id
-    wait -nowait -i $server_spawn_id
+    # Wait for the server to produce at least one line and an additional
+    # character of output.  This will wait until any TCP socket has been
+    # created, so that GDB can connect.
+    expect {
+	-i $server_spawn_id
+	-notransfer
+	-re ".*\n." { }
+    }
 
-    # Give it a little time to establish
-    sleep 1
-
-    # tell gdb what file we are debugging
-    if { $arg != "" } {
-	if [gdb_file_cmd $arg] {
-	    return -1;
+    # We can't just call close, because if gdbserver is local then that means
+    # that it will get a SIGHUP.  Doing it this way could also allow us to
+    # get at the inferior's input or output if necessary, and means that we
+    # don't need to redirect output.
+    expect_background {
+	-i $server_spawn_id
+	-re "." { }
+	eof {
+	    # The spawn ID is already closed now (but not yet waited for).
+	    wait -i $expect_out(spawn_id)
 	}
     }
 
-    # attach to the "serial port"
-    gdb_target_cmd $protocol $gdbport;
+    return [list $protocol $gdbport];
+}
 
-    # do the real load if needed
-    if [target_info exists gdb_server_do_load] {
-        send_gdb "load\n"
-        set timeout 2400
-        verbose "Timeout is now $timeout seconds" 2
-        gdb_expect {
-            -re ".*$gdb_prompt $" {
-                if $verbose>1 then {
-                    send_user "Loaded $arg into $GDB\n"
-                }
-                set timeout 30
-                verbose "Timeout is now $timeout seconds" 2
-                return 1
-            }
-            -re "$gdb_prompt $"     {
-                if $verbose>1 then {
-                    perror "GDB couldn't load."
-                }
-            }
-            timeout {
-                if $verbose>1 then {
-                    perror "Timed out trying to load $arg."
-                }
-            }
-        }
+proc infer_host_exec { } {
+    set host_exec ""
+
+    send_gdb "info files\n";
+    gdb_expect 30 {
+	-re "Symbols from \"(\[^\"\]+)\"" {
+	    set host_exec $expect_out(1,string);
+	    exp_continue;
+	}
+	-re "Local exec file:\[\r\n\]+\[ \t\]*`(\[^'\]+)'," {
+	    set host_exec $expect_out(1,string);
+	    exp_continue;
+	}
+	-re "$gdb_prompt $" { }
     }
 
-    return 0;
+    return $host_exec
+}
+
+proc gdb_load { arg } {
+    global host_exec
+    global server_exec
+
+    if { $arg == "" && $host_exec == "" } {
+	set host_exec [infer_host_exec]
+    } elseif { $arg != "" } {
+	set host_exec $arg
+	if [info exists server_exec] { unset server_exec }
+    }
+
+    if { ! [info exists server_exec] } {
+	if [is_remote target] {
+	    set server_exec [remote_download target $host_exec]
+	} else {
+	    set server_exec $host_exec
+	}
+    }
+
+    set res [gdbserver_gdb_load $host_exec]
+    set protocol [lindex $res 0]
+    set gdbport [lindex $res 1]
+
+    if { $arg != "" } {
+	if [gdb_file_cmd $arg] {
+	    return -1
+	}
+    }
+    gdb_target_cmd $protocol $gdbport
 }

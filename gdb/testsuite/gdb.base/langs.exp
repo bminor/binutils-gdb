@@ -65,8 +65,15 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
-gdb_test "b langs0" "Function \"langs0\" not defined\.|Breakpoint .* (deferred).*" \
-    "break on nonexistent function in langs.exp"
+gdb_test_multiple "b langs0" "break on nonexistent function in langs.exp" {
+	-re "Function \"langs0\" not defined\..*Make breakpoint pending on future shared library load.*y or .n.. $" {
+
+		gdb_test "n" "" "break on nonexistent function in langs.exp"
+	}
+	-re "Breakpoint .* (deferred).*$gdb_prompt $" {
+		pass "break on nonexistent function in langs.exp"
+	}
+}
 
 if {$hp_aCC_compiler} {
     set isfixed 1

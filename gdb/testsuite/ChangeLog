@@ -1,3 +1,1191 @@
+2004-03-22  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/watchpoint.exp (test_stepping): Delete bogus XFAILs
+	hiding problems with DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET.
+	Problem identified by Ulrich Weigand.
+
+2004-03-17  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/classes.exp (test_enums): Refer to PR c++/1588 instead of
+	PR c++/826.
+
+2004-03-16  Roland McGrath  <roland@redhat.com>
+
+	* gdb.base/auxv.exp: New file.
+	* gdb.base/auxv.c: New file, copied verbatim from coremaker2.c.
+
+2004-03-12  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/pr-1553.exp: New.  Tests for PR c++/1553.
+	* gdb.cp/pr-1553.cc: Ditto.
+	* gdb.cp/local.exp (ptype NestedInnerLocal): Add comment, third
+	pass branch.
+
+2004-03-12  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp: Accept more template types.
+
+2004-03-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	From Corinna Vinschen with modifications.
+	* gdb.cp/classes.cc (enums1): Add a line to extend scope of
+	local variable obj_with_enum.
+	* gdb.cp/classes.exp (test_enums): Remove TODO note about FAIL
+	results with obj_with_enum.
+
+2004-03-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.cc: New file, copied from misc.cc.
+	* gdb.cp/classes.exp: Use classes.cc rather than misc.cc.
+
+2004-03-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/misc.cc: Add copyright notice.
+
+2004-03-05  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/rtti.exp: Add 'print *obj3' test.
+	* gdb.cp/rtti.h: Update copyright.
+	(namespace n2::n3): New.
+	* gdb.cp/rtti1.cc: (refer_to (n2::n3::C3 *)): New.
+	(n2::n3::func3): New.
+	(main): Call n2::n3::func3.
+	* gdb.cp/rtti2.cc: Update copyright.
+	(n2::create3): New.
+
+2004-03-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/openbsd.inc: Fix typo.
+
+2004-03-03  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/pc-fp.exp (get_valueofx): Fix apparent typo to now set
+	"val" instead of unused "size".  Update copyright year.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.cp/ctti.exp: Handle unsigned char type.  Expect templates
+	to use unsigned char.
+	* gdb.cp/cttiadd.c, gdb.cp/cttiadd1.c, gdb.cp/cttiadd2.c,
+	gdb.cp/cttiadd3.c: Change type of variable to unsigned char.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/gdbserver.exp (gdbserver_gdb_load): Wait for a complete
+	line of output.
+
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/relocate.c (dummy): Initialize.
+
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/chng-syms.exp: Anchor exit pattern.  Allow
+	a breakpoint at exit.
+
+2004-02-27  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/chng-syms.exp: Add expect condition to match failing
+	case that isn't a timeout.
+
+2004-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/bigcore.exp: Disable on HP/UX, no sparse corefile
+	support.
+
+2004-02-26  Fred Fish  <fnf@redhat.com>
+
+	* gdb.arch/gdb1431.c: Remove.
+	* gdb.arch/gdb1431.s: New file, copy of gdb1291.s
+	* gdb.arch/gdb1431.exp: Use "advance" correctly instead
+	of "until" incorrectly.
+
+2004-02-26  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.cp/class2.cc (empty): New class.
+	(refer): New function.
+	(main): Declare an object of type empty and use it.
+	* gdb.cp/class2.exp: Print the value of an object of type empty.
+
+2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/langs.exp: Update query string to match the
+	new nquery format used for pending breakpoints.
+
+2004-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	Fix PR i18n/1570.
+	* gdb.base/charset.c: Update copyright notice.
+	(main, init_string): Remove the escape character '\e' tests.
+	* gdb.base/printcmds.exp (test_print_all_chars): Ditto.
+	* gdb.base/charset.exp (valid_host_charset): Ditto.
+	* gdb.base/setvar.exp: Ditto.
+
+2004-02-24  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/corefile.exp: Use gdb_test_multiple, make "accessing
+	mmapped data in core file" PASS and FAIL messages consistent.
+
+	* gdb.java/jmisc.exp: Use the fully quallified name of "main" when
+	setting a breakpoint.  Work around PR java/1565.
+
+2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/gdb.exp (gdb_breakpoint): Update query string to match
+	new nquery format.
+	* gdb.base/pending.exp: Ditto.
+
+2004-02-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Run stabs tests on *BSD.
+	* configure: Regenerated.
+
+2004-02-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/bigcore.exp: Bail out on *BSD instead of only NetBSD.
+
+2004-02-20  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): Remove extraneous
+	blank in test for "returns short", for consistency with other
+	"returns xxx" tests.  Update copyright year.
+
+2004-02-19  Fred Fish  <fnf@redhat.com>
+
+	New testcase for PR breakpoint/1558.
+	* gdb.arch/gdb1558.exp: New file.
+	* gdb.arch/gdb1558.c: New file.
+
+2004-02-19  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/nodebug.exp: Fix typo.
+
+2004-02-17  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	Committed by Jim Blandy  <jimb@redhat.com>.
+
+	* gdb.objc/basicclass.exp: Adapt to fixed return type of printHi.
+
+	* gdb.base/dump.exp: Handle negative offsets in decimal, not hex.
+
+	* gdb.base/float.exp: Support s390*-*-* targets.
+
+2004-02-17  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.base/gdb1555.exp: New file.
+	* gdb.base/gdb1555-main.c, gdb.base/gdb1555.c: New files.
+
+2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Add comment.
+
+2004-02-16  Fred Fish  <fnf@redhat.com>
+
+	* gdb.arch/gdb1291.c: Remove
+	* gdb.arch/gdb1291.s: New test input file.
+	* gdb.arch/gdb1291.exp: Expand test to check case that should not
+	fail.  Test for correct result, known incorrect result, other
+	failures and timeouts.
+
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/bigcore.exp: New file.
+	* gdb.base/bigcore.c: New file.
+
+2004-02-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.mi/mi1-basics.exp, gdb.mi/mi1-break.exp: Delete file.
+	* gdb.mi/mi1-console.exp, gdb.mi/mi1-disassemble.exp: Delete file.
+	* gdb.mi/mi1-eval.exp, gdb.mi/mi1-hack-cli.exp: Delete file.
+	* gdb.mi/mi1-pthreads.exp, gdb.mi/mi1-read-memory.exp: Delete file.
+	* gdb.mi/mi1-regs.exp, gdb.mi/mi1-return.exp: Delete file.
+	* gdb.mi/mi1-simplerun.exp, gdb.mi/mi1-stack.exp: Delete file.
+	* gdb.mi/mi1-stepi.exp, gdb.mi/mi1-symbol.exp: Delete file.
+	* gdb.mi/mi1-until.exp, gdb.mi/mi1-var-block.exp: Delete file.
+	* gdb.mi/mi1-var-child.exp, gdb.mi/mi1-var-cmd.exp: Delete file.
+	* gdb.mi/mi1-var-display.exp, gdb.mi/mi1-watch.exp: Delete file.
+
+2004-02-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.asm/ia64.inc (gdbasm_startup): Make sure first instruction
+	executed is an alloc instruction.
+
+2004-02-11  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/breakpoint.exp: New.
+	* gdb.cp/breakpoint.cc: New.
+
+2004-02-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR gdb/1543.
+	* gdb.cp/ambiguous.exp, gdb.cp/annota2.exp, gdb.cp/annota3.exp,
+	gdb.cp/anon-union.exp, gdb.cp/casts.exp, gdb.cp/classes.exp,
+	gdb.cp/cplusfuncs.exp, gdb.cp/ctti.exp, gdb.exp/demangle.exp,
+	gdb.cp/derivation.exp, gdb.cp/exception.exp, gdb.cp/hang.exp,
+	gdb.cp/inherit.exp, gdb.cp/local.exp, gdb.cp/maint.exp,
+	gdb.cp/member-ptr.exp, gdb.cp/method.exp, gdb.cp/misc.exp,
+	gdb.cp/namespace.exp, gdb.cp/overload.exp, gdb.cp/ovldbreak.exp,
+	gdb.cp/psmang.exp, gdb.cp/ref-types.exp, gdb.cp/templates.exp,
+	gdb.cp/userdef.exp, gdb.cp/virtfunc.exp: Remove reference
+	to bug-gdb@prep.ai.mit.edu .
+	* gdb.cp/bs15503.cc, gdb.cp/class2.cc, gdb.cp/cttiadd.cc,
+	gdb.cp/cttiadd1.cc, gdb.cp/cttiadd2.cc, gdb.cp/cttiadd3.cc,
+	gdb.cp/exception.cc, gdb.cp/member-ptr.cc, gdb.cp/namespace1.cc:
+	Likewise.
+
+2004-02-10  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/gdb.exp (gdb_expect_list): Recover from internal-errors
+	using gdb_internal_error_resync.
+
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/thread-specific.exp: Stop early if no threads are
+	found.
+
+2004-02-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/pending.exp: Remove extra \n from gdb_test calls.
+
+2004-02-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/gdb.exp (gdb_breakpoint): Fail on unexpected pending
+	breakpoints.
+
+2004-02-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/sim.exp (gdb_load): Handle $arg == "".
+	* lib/gdb.exp (gdb_run_cmd): Honor gdb,do_reload_on_run.
+	* gdb.objc/basicclass.exp: Use gdb_run_cmd.
+
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/maint.exp: Update test to reflect
+         obstack changes.
+
+2004-02-04  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/pendshr.c (pendfunc): New function that calls
+	pendfunc1.
+	* gdb.base/pending.c: Call pendfunc instead of pendfunc1.
+
+2004-02-04  Fred Fish  <fnf@redhat.com>
+
+	* gdb.arch/gdb1431.c: Add underbar prefixed version of global
+	function symbols and update copyright years.
+	* gdb.arch/gdb1291.c: Ditto.
+
+2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Accept both "ctor()" and "ctor(void)".
+
+2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/inherit.exp: Accept both "ctor()" and "ctor(void)".
+
+2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/inherit.exp: Accept output with gcc 3.2-7-rh.
+
+2004-02-02  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/bang.exp: Use gdb_run_cmd so this tests works with
+	remote targets.  Update copyright years.
+
+2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/gdb.exp (gdb_breakpoint): Add pending breakpoint
+	support.
+	* gdb.base/langs.exp: Fix test which attempts to create
+	breakpoint on non-existent function to handle new pending
+	support.
+	* gdb.base/shlib-call.exp: Use gdb_breakpoint to set
+	a breakpoint.
+	* gdb.base/pending.exp: New test.
+	* gdb.base/pending.c: New file.
+	* gdb.base/pendshr.c: Ditto.
+
+2004-02-02  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/overload.exp: Add overloadNamespace tests.
+	* gdb.cp/overload.cc (dummyClass, dummyInstance): New.
+	(overloadNamespace, XXX): New.
+	(main): Call XXX::marker2.
+
+2004-02-01  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/dump.exp: Use runto_main instead of "runto main".
+	* gdb.base/finish.exp: Ditto.
+	* gdb.base/gcore.exp: Ditto.
+	* gdb.base/huge.exp: Ditto.
+	* gdb.base/info-proc.exp: Ditto.
+	* gdb.base/return2.exp: Ditto.
+	* gdb.threads/gcore-thread.exp: Ditto.
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/thread-specific.exp: Add missing anchor to regexp.
+
+2004-02-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/fileio.c (test_open): Replace O_RDONLY with O_RDWR such
+	that opening the file succeeds on OpenBSD.
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/thread-specific.c: New file.
+	* gdb.threads/threads-specific.exp: New test script.
+	* lib/gdb.exp (gdb_test_multiple): Allow user patterns access
+	to expect_out.
+
+2004-02-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/call-ar-st.exp: Call get_debug_format.  Remove xfail on
+	sparc*-*-solaris* into a kfail PR gdb/1539 on sparc-*-* for stabs
+	only on the "print_small_structs from print_long_arg_list" test.
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/completion.exp: Kill a stray backslash.
+
+	From Jim Ingham <jingham@apple.com>:
+	* gdb.base/completion.exp: Test that "complete file ./gdb.base/compl"
+	agrees with the result from sending a tab.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/chng-syms.exp: Remove stray newline.
+
+2004-01-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Set asm-note to "openbsd" for
+	*-*-openbsd*.
+	* gdb.asm/openbsd.inc: New file.
+
+2004-01-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Strip -Wl, from link-flags.  Don't
+	append -static to link-flags for *-*-freebsd*, *-*netbsd* and
+	*-*solaris2*.  Remove commented out default settings for
+	asm-flags.  Replace gdb_compile with target_link.
+
+2004-01-29  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/inherit.exp: Rewrite.  Use gdb_test_multiple and gdb
+	for all tests.  Remove old hp-ux and cygnus xfail cases.
+
+2004-01-29  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* gdb.base/chng-syms.exp: New file.
+	* gdb.base/chng-syms.c: New file.
+
+2004-01-24  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/local.exp: Rewrite "ptype Local".  Add "ptype l".
+	Provide arms for current output in all my configurations.
+
+2004-01-24  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/compiler.c: Add hp_cc_compiler and hp_aCC_compiler.
+	* lib/compiler.cc: Likewise.
+	* lib/gdb.exp (get_compiler_info): Always call gdb_compile to
+	get the right preprocessor.  Eval the output directly.  Remove
+	special tests for hp_cc_compiler and hp_aCC_compiler.  Remove
+	hp_f77_compiler and hp_f90_compiler completely.
+	(gdb_preprocess): Delete.
+	(get_compiler): Delete.
+
+2004-01-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/charset.c, gdb.base/dump.c, gdb.base/huge.c: Include
+	<string.h>.
+
+2004-01-24  Nick Roberts  <nick@nick.uklinux.net>
+
+	* gdb.mi/mi-stack.exp: Update copyright.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/rtti.exp: Don't include full path in ${srcfile}.  Add
+	test for cp_lookup_transparent_type.
+	* gdb.cp/rtti1.cc: Update copyright.  Add n2::func and refer_to;
+	call them.
+
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-var-child.exp: Update copyright year.  Move new test
+	after -var-update.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.cc (C::ensureRefs): New.
+	* gdb.cp/namespace1.cc (C::ensureOtherRefs): New.
+
+2004-01-20  Nick Roberts  <nick@nick.uklinux.net>
+
+	* gdb.mi/mi-stack.exp (test_stack_locals_listing): Test for
+	case "-stack-list-locals 2".
+	* gdb.mi/mi-var-child.exp: Test for case
+	"-var-list-children --all-values NAME".
+
+2004-01-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/local.exp: Accept correct output for gcc v3 -gstabs+.
+
+2004-01-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/fileio.exp: Add "$gdb_prompt $" anchors to patterns
+	used with gdb_test_multiple.
+
+	* gdb.base/gdb1476.exp: Accept alternat pattern for failed memory
+	read at address 0.  This fixes PR testsuite/1504.
+
+2004-01-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/gdbserver.exp (gdbserver_gdb_load): Rename from gdb_load.
+	Remove downloading, guessing the host executable, the calls to
+	gdb_file_cmd and gdb_target_cmd, and "load" support.
+	(infer_host_exec): New function broken out from gdb_load.
+	(gdb_load): New wrapper for gdbserver_gdb_load.
+	* lib/mi-support.exp (mi_gdb_target_cmd): New function, based on
+	gdb_target_cmd.  Use -target-select.
+	(mi_gdb_file_cmd): New function, broken out from mi_gdb_load.
+	Download binaries to the host.  Clear last_mi_remote_file when
+	we load a new binary.
+	(mi_gdb_load): Call mi_gdb_file_cmd.  If gdbserver.exp is loaded,
+	call gdbserver_gdb_load and mi_gdb_target_cmd.
+
+2004-01-17  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp: Accept more spaces with "<foo, ?bar>"
+	type patterns.
+
+2004-01-17  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp: Fix typo in test name of
+	"print Foo<volatile char*>::foo".
+
+2004-01-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/setvar.exp: Remove setup_xfail for hppa*-*-*11*.
+
+2004-01-16  Ben Elliston  <bje@wasabisystems.com>
+
+	* gdb.arch/Makefile.in (MISCELLANEOUS): Remove.
+	(clean mostlyclean): Remove empty rm.
+
+2004-01-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/setvar.exp: Add copyright years.
+
+2004-01-14  David Carlton  <carlton@bactrian.org>
+
+	* gdb.cp/rtti.exp: Update copyright.  KFAIL test with repect to
+	PR c++/1511 and update coment.
+	* gdb.cp/templates.exp: Update patterns to match current output.
+	If changes involve something other than whitespace, KFAIL
+	w.r.t. PR c++/1512 or PR c++/931 as appropriate.
+
+2004-01-14  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.exp: Add tests involving classes defined within
+	namespaces.
+	* gdb.cp/namespace.cc (C::CClass): New.
+	* gdb.cp/namespace1.cc (C::OtherFileClass): New.
+
+2004-01-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/sepdebug.exp: Bail out of the test if we don't know
+	what debug info we have. Print a better message if something goes
+	wrong while producing the separate debug info file.
+
+2004-01-14  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/callfuncs.c: Remove explicit declaration of malloc.
+
+2004-01-14  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/callfuncs.c: Add copyright notice.
+
+2004-01-13  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/derivation.exp: Add XFAIL for bug with protected
+	inheritance.  PR gdb/1498, PR gcc/13539.
+
+2004-01-13  Elena Zannoni  <ezannoni@redhat.com>
+
+         * gdb.threads/gcore-thread.exp: Prefix name of binary with
+         test specific name.
+         * gdb.mi/gdb669.exp: Ditto.
+         * gdb.mi/mi-pthreads.exp: Ditto.
+         * gdb.mi/mi1-pthreads.exp: Ditto.
+         * gdb.mi/mi2-pthreads.exp: Ditto.
+
+2004-01-12  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/member-ptr.cc: Add copyright notice.
+
+2004-01-12  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/member-ptr.exp: Use gdb_test, gdb_test_multiple.  Add
+	some patterns for recent versions of gcc and hpacc.  Delete
+	calls to setup_xfail for hppa*-*-*.  Delete redundant tests.
+	Delete tests that access a NULL pointer-to-member-data.  This
+	script is still disabled for gcc.
+
+2004-01-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.mi/mi2-basics.exp: Make sure that full pathnames are
+        escaped correctly.
+
+2004-01-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/sepdebug.exp: New file.
+	* gdb.base/sepdebug.c: New file.
+	* lib/gdb.exp (separate_debug_filename): New procedure.
+	(gdb_gnu_strip_debug): New procedure.
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.mi/ChangeLog: Delete file.  Renamed to ...
+	* gdb.mi/ChangeLog-1999-2003: New file.
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.exp: Update copyright year.  On GNU/Linux, for
+	"Renaming a directory to a non-empty directory returns ENOTEMPTY
+	or EEXIST", treat EBUSY as an XFAIL.
+
+2004-01-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/scope.exp: Remove obsolete setup_xfail for
+	hp_cc_compiler.
+
+2004-01-10  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Remove old "(obsolescent gcc or gdb)"
+	decorations.
+
+2004-01-10  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Remove old "(obsolescent gcc or gdb)"
+	and "(aCC)" decorations.  Remove obsolete doco about old
+	test results.
+
+2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.exp: Fix typo in doco.
+
+2004-01-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp: Fix typo.
+
+2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.aCC/exception.exp: Re-create as a nearly empty
+	file.
+
+2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.cc: Change <iostream.h> to <iostream>.
+	* gdb.cp/exception.exp: Use gdb test, gdb_test_multiple.
+	Use gdb_compile.  Remove restriction on gcc.  Add some patterns
+	for recent version of gdb.  Delete second half, which was a copy
+	of the first half with different build flags.  This test is
+	still disabled because it is still not ready for production.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.cc: Add copyright notice.
+	* gdb.cp/exception.exp: Add a notice that this file is broken
+	because of line number changes caused by addition of copyright
+	notice.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.cc: Renamed from gdb.hp/gdb.aCC/exception.cc.
+	* gdb.cp/exception.exp: Renamed from gdb.hp/gdb.aCC/exception.exp.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Accept gnu abi 2.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.mi/pthreads.c (done_making_threads): Remove extraneous
+	semicolon after end of function.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/bs15503.cc: Include <iostream>, not <iostream.h>.
+	* gdb.cp/bs15503.exp: Remove hp-only restriction.  Use modern
+	boilerplate code for compiling and running the program under
+	test.  Add some string method tests.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/bs15503.cc: Add copyright notice.
+	* gdb.cp/bs15503.exp: Adjust line number.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.defects/bs15503.exp: Renamed to gdb.cp/bs15503.exp.
+	* gdb.hp/gdb.defects/bs15503.cc: Renamed to gdb.cp/bs15503.cc.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/funcargs.exp: Remove obsolete setup_xfail for
+	hp_cc_compiler.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/cttiadd.c: Add a marker for gdb_get_line_number.
+	* gdb.cp/ctti.exp: Use the marker instead of "next".
+	With gcc, run further before bailing.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/cttiadd.cc: Add copyright notice.
+	* gdb.cp/cttiadd1.cc: Likewise.
+	* gdb.cp/cttiadd2.cc: Likewise.
+	* gdb.cp/cttiadd3.cc: Likewise.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/ctti.exp: Partial rewrite.  Call gdb_compile properly.
+	Use gdb_test, gdb_test_multiple.  Use floating-point values that
+	have exact representations in IEEE-ish formats.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/constvars.exp: Do not force lang=c++ if using HP
+	compilers.  Delete duplicate call to get_compiler_info.
+	(local_compiler_xfail_check): setup_xfail if $hp_cc_compiler.
+	* gdb.base/volatile.exp: Likewise.
+
+2004-01-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp: Only run the tests if we can't read the
+	memory at address 0.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.stabs/weird.exp: Use hp_cc_compiler and hp_aCC_compiler
+	to test for hp-ux assembler.  Fix copyright years.
+
+2004-01-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.c (strerrno): Add "EBUSY".
+
+2004-01-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.c (test_open): Do not pass S_IWUSR to "open"
+	when creating the read-only file.  From analysis by Roland McGrath
+	and Elena Zannoni.
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/namespace.exp: Call get_compiler_info with "c++".
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/cvexpr.c: Be type-safe with function pointers and
+	data pointers.
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/m-static.exp: Compile one source file at a time.
+	Delete unused call to get_compiler_info.
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/call-ar-st.exp: Delete explicit reference to ${binfile}.ci.
+	* gdb.base/call-rt-st.exp: Likewise.
+	* gdb.base/nodebug.exp: Likewise.
+	* gdb.base/volatile.exp: Likewise.
+	* gdb.cp/ref-types.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+
+2004-01-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp, gdb.base/gdb1476.c: New files.
+
+2004-01-05  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/funcargs.exp: Delete special timeout of 240 seconds for
+	hppa*-hp-hpux*.
+
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Add patterns to kfail PR gdb/1447 for
+	x86_64-*-*.
+
+	* gdb.base/structs.exp: Add patterns to kfail PR gdb/1447 for
+	sparc64-*-* and sparc*-solaris2*.
+
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Remove ${testfile} from "zed L<n> for
+	return ${tests}" test.  The ${tests} already mentions the
+	filename.
+
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/local.exp: Accept gcc abi 2.
+
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp: Accept gcc abi 2.
+
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/compiler.cc: Remove supports_template_debugging.
+	* gdb.cp/templates.exp: Do not test supports_template_debugging.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/namespace.exp: Accept gcc abi 2.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/method.exp: Accept gcc abi 2.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Generate identical results as old version.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Modify some patterns to avoid a
+	mysterious bug with sourceware version of expect.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/overload.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Remove gratuitous
+	restart of test program.  Use gdb_test_multiple and gdb_test for
+	all tests.  Add patterns to xfail missing "const" in "const char *"
+	and kfail PR gdb/1155.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/derivation.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Remove gratuitous
+	restart of test program.  Use gdb_test_multiple and gdb_test for
+	all tests.  Add patterns to kfail PR gdb/1498.
+
+2003-12-31  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Use "breakpoint"
+	and "continue" instead of restarting the target program.  Use
+	gdb_test_multiple and gdb_test for all tests.
+
+2004-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Update copyright year.  Link statically
+	for *-*-solaris2*.
+
+2003-12-31  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Use "breakpoint"
+	and "continue" instead of restarting the target program several
+	times.  Use gdb_test_multiple and gdb_test for all tests.
+
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/sect-cmd.exp: Handle compiling test case from multiple
+	source files.
+
+2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/environ.exp: Handle compiling test case from multiple
+	source files.
+
+2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/structs.exp: Call gdb_exit as well as gdb_start.
+
+2003-12-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/freebpcmd.c: Add copyright notice.
+
+	* gdb.base/freebpcmd.exp: Mark the interesting failure as known.
+
+2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/maint.exp: Add generic FAIL patterns to prevent timeouts.
+
+2003-12-13  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/freebpcmd.exp, gdb.base/freebpcmd.c: New test.
+
+2003-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.asm/frv.inc: New file.
+	* gdb.asm/asm-source.exp: Add frv-*-* as a supported target.
+
+2003-12-09  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/break.c (marker1, marker2, marker3, marker4): Move
+	functions to break1.c and leave prototypes behind.  Add more
+	"set breakpoint NN here" comments.
+	* gdb.base/break1.c: New file.
+
+	* gdb.base/break.exp: Handle compiling test case from multiple
+	source files and change source file references as needed.
+	* gdb.base/completion.exp: Ditto.
+	* gdb.base/condbreak.exp: Ditto.
+	* gdb.base/define.exp: Ditto.
+	* gdb.base/ena-dis-br.exp: Ditto.
+	* gdb.base/info-proc.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+
+	* gdb.base/condbreak.exp: Use bp_locationNN variables instead of
+	hardcoded line numbers.
+	* gdb.base/define.exp: Ditto.
+	* gdb.base/ena-dis-br.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+
+	* gdb.base/completion.exp: Use "break1" for completion tests since
+	"break" is no longer a unique prefix.
+
+2003-12-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/structs.exp (test_struct_returns): When applicable, set
+	"return_value_unimplemented".  When an unimplemented struct return
+	architecture, report incorrect values as a KFAIL
+
+2003-12-05  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/rtti.exp: Accept new wording of warning from
+	cp_lookup_rtti_type.
+
+2003-12-05  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/scope.exp (test_at_main): Replace references to
+	gcc_compiled with calls to test_compiler_info.
+	(test_at_foo): Likewise.
+	(test_at_bar): Likewise.
+
+2003-12-04  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/so-impl-ld.exp: Replace reference to gcc_compiled with call
+	to test_compiler_info.
+
+2003-12-03  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/so-impl-ld.exp: Update copyright notice.
+
+2003-12-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/mips_pro.exp: Replace references to gcc_compiled with calls
+	to test_compiler_info.
+
+2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.objc/objcdecode.exp: Match and KFAIL the output that comes
+	from current versions of gdb.  Clean up regular expressions.
+	Delete redundant timeout case.
+
+2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.objc/nondebug.exp: Match and KFAIL the output that comes
+	from current versions of gdb.  Clean up regular expressions.
+	Delete redundant timeout case.
+
+2003-12-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/callfuncs.exp (do_function_calls): Replace reference to
+	gcc_compiled with call to test_compiler_info.
+
+2003-11-30  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/list.exp (test_list_function): Delete unused declaration
+	of gcc_compiled.
+
+2003-11-29  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/complex.exp: Replace reference to gcc_compiled with
+	call to test_compiler_info.
+
+2003-11-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Initialize asm-note to "empty".  Set
+	asm-note to "netbsd" for *-*-netbsdelf* and x86_64-*-netbsd*.  Use
+	it to create the appropriate note.inc.
+	* gdb.asm/asmsrc1.s: Include "note.inc".
+	* gdb.asm/netbsd.inc: New file.
+	* gdb.asm/empty.inc: New file.
+
+2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/constvars.exp: Replace references to gcc_compiled with
+	calls to test_compiler_info.
+
+2003-11-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/volatile.exp: Replace references to gcc_compiled with
+	calls to test_compiler_info.
+
+2003-11-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Use i*86-*-* instead of i686-*-* as a
+	pattern for the KFAILs.
+
+2003-11-25  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.objc/objcdecode.exp: Test for PR objc/1238.
+	* gdb.objc/objcdecode.m: New file.
+
+2003-11-25  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.objc/nondebug.exp: Test for PR objc/1236.
+	* gdb.objc/nondebug.m: New file.
+
+2003-11-26  Ben Elliston  <bje@wasabisystems.com>
+
+	* gdb.asm/asm-source.exp: Make sure the final link succeeds on
+	NetBSD as it does on FreeBSD.  Modelled on a similar change by
+	Mark Kettenis on 2003-05-30.
+	(link-flags): Set to "--entry _start" regardless of target.
+	Special linker flags are to be appended to $link-flags.
+	* gdb.asm/mips.inc (gdbasm_startup): Remove __start label.
+
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/method.exp: Accept output of new demangler.
+
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb/class2.exp: New file.
+	* gdb/class2.cc: New file.
+
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp (test_ptype_of_templates): Accept output
+	of new demangler.
+
+2003-11-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-unwind.exp: Use gdb_run_cmd and gdb_expect instead
+	of gdb_test "run".
+
+2003-11-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-unwind.exp: Don't use runto_main.  Change
+	"continue" into "run".
+
+2003-11-23  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.cp/ambiguous.exp: Replace reference to gcc_compiled with
+	call to test_compiler_info.
+	* gdb.cp/ctti.exp: Likewise.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/member-ptr.exp: Likewise.
+	* gdb.cp/virtfunc.exp (test_virtual_calls): Remove unused
+	reference to gcc_compiled.
+
+2003-11-23  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR testsuite/1463.
+	* gdb.base/structs.exp (start_structs_test): Call
+	get_debug_format before using the debug format.
+
+2003-11-22  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Add simple example.
+	* gdb.base/structs.exp: Use gdb_test_multiple.
+
+2003-11-20  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/structs.exp: Handle and recover from internal errors.
+	Replace "foo${n}" with "foo<n>" in test messages.
+
+	* gdb.base/structs.exp: Update copyright.  Rewrite.
+	* gdb.base/structs.c: Update copyright.  Rewrite.
+
+	* lib/gdb.exp (gdb_internal_error_resync): Issue a perror when the
+	resync count exceeded.
+
+	* gdb.base/maint.exp: Use gdb_internal_error_resync to recover
+	from the internal error.
+	* lib/gdb.exp (gdb_internal_error_resync): New procedure.
+	Original from Jim Blandy.
+	(gdb_test_multiple): Use gdb_internal_error_resync.
+
+2003-11-19  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/callfuncs.exp: Change the XFAILed descriptor test to a
+	KFAIL.
+
+2003-11-17  Mark Kettenis  <kettenis@gnu.org>
+
+	New testcase for PR backtrace/1435.
+	* gdb.arch/i386-unwind.exp: New file.
+	* gdb.arch/i386-unwind.c: New file.
+
+2003-11-17  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/gdb.exp (compiler_info): New global.
+	(test_compiler_info): New function.
+	(get_compiler_info): Set compiler_info.
+	* lib/compiler.c, lib/compiler.cc: Add copyright.  When GNUC, set
+	"compiler_info" to gcc-<major>-<minor>.
+
+2003-11-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.trace/configure: Remove.
+
+2003-11-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/break.c: Add comments to aid finding line numbers for
+	breakpoints.
+	* gdb.base/break.exp: Remove all references to explicit line
+	numbers.
+
+2003-11-11  Nick Clifton  <nickc@redhat.com>
+
+	* gdb.base/shreloc.exp: Do not run for targets which do not
+	support shared objects.
+
+2003-11-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.exp: Drop tests for nointerrupts and noinferiorio.
+	Don't run tests if nofileio flag is given.
+
+2003-11-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.cp/annota3.exp: Make sure we can match 'Hardware watchpoint'
+        as well as 'Watchpoint'.
+
+2003-11-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	Reported by Jim Ingham <jingham@apple.com>:
+	* gdb.base/annota1.exp: Match at least one occurrence of the
+	signal handler annotation.
+
+2003-11-06  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.cp/annota2.exp: Make sure we can match 'Hardware watchpoint'
+        as well as 'Watchpoint'.
+
+2003-11-05  Michael Chastain  <mec@shout.net>
+
+	* gdb.mi/pthreads.c (routine): Handle early return from sleep.
+
+2003-11-03  Kris Warkentin  <kewarken@qnx.com>
+
+	* gdb.arch/gdb1291.c: New test file.
+	* gdb.arch/gdb1291.exp: New test script.
+	* gdb.arch/gdb1431.c: New test file.
+	* gdb.arch/gdb1431.exp: New test script.
+
+2003-10-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.mi/pthreads.c: Add copyright notice.
+
+2003-10-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.threads/pthreads.c: Add copyright notice.
+
+2003-10-20  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1056.exp: New test script.
+
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/killed.exp: Use gdb_run_cmd.
+
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/gcore.exp: Issue an UNSUPPORTED and exit if we can't
+	create a core file.
+	* gdb.threads/gcore-thread.exp: Likewise.
+
+2003-10-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/call-rt-st.c (struct bit_flags_char_t): New bitfield
+	type, based on char type.
+	(struct bit_flags_short_t): New bitfield type, based on short type.
+	(init_bit_flags_char): New fuction.
+	(init_bit_flags_short): Ditto.
+	(print_bit_flags_char): Ditto.
+	(print_bit_flags_short): Ditto.
+	(main): Add handling for bit_flags_char_t and bit_flags_short_t.
+
+2003-10-11  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/call-rt-st.exp: Update copyright year.
+
+2003-10-10  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* config/hmsirom.exp: Replace "Hitachi" with "Renesas".
+	* gdb.disasm/sh3.s: Ditto.
+
+2003-10-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/switch-threads.exp: New test.
+	* gdb.threads/switch-threads.c: New source file.
+
+2003-10-07  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Add sh specific case.
+
+2003-10-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/watchpoint.exp: Delete obsolete clear_xfail.
+	* gdb.disasm/mn10200.exp: Delete obsolete file.
+
+2003-09-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ChangeLog: Correct an entry command.exp -> commands.exp.
+	* gdb.base/commands.exp (bp_deleted_in_command_test)
+	(temporary_breakpoint_commands): Check noargs.
+
+2003-09-25  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.exp: Tweak comments.  Add non-quoted versions
+	of some print tests, where appropriate.  Add tests for C::D::cd,
+	E::ce, F::cXfX, G::XgX.
+	* gdb.cp/namespace.cc: Add XgX, cXfX, ce.
+
+2003-09-25  Richard Earnshaw  <rearnsha@arm.com>
+
+	* lib/java.exp (java_init): Import target_alias before using it.
+
+2003-09-25  David Carlton  <carlton@kealia.com>
+
+	* gdb.base/corefile.exp: Delete obsolete setup_xfail.
+
+2003-09-23  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/selftest.exp: Accomodate more instruction reordering
+        weirdness.
+
+2003-09-17  Michael Chastain  <mec@shout.net>
+
+	* gdb.cp/gdb1355.exp: New file.
+	* gdb.cp/gdb1355.c: New file.
+
 2003-09-15  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-source.exp: Add sh*-*-* as supported target.
@@ -5,8 +1193,8 @@
 
 2003-09-11  David Carlton  <carlton@kealia.com>
 
-	* gdb.c++/namespace.exp: Add tests for namespace types.
-	* gdb.c++/maint.exp (test_help): Test 'help maint cp namespace'.
+	* gdb.cp/namespace.exp: Add tests for namespace types.
+	* gdb.cp/maint.exp (test_help): Test 'help maint cp namespace'.
 	(test_namespace): New.
 
 2003-09-11  Elena Zannoni  <ezannoni@redhat.com>
@@ -97,7 +1285,7 @@
         escaped correctly.
 
 2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
-        
+
         * configure.in: Don't generate config.h from config.hin.
         * configure: Regenerate.
         * config.hin: Remove file.
@@ -145,12 +1333,12 @@
 
 2003-07-22  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.disasm/8300s.s: Fix syntax of bsr insn.  
+	* gdb.disasm/8300s.s: Fix syntax of bsr insn.
 
 	* gdb.disasm/h8300s.exp : Minor changes in disassembler output require
 	patterns to be more general, accepting old and new output.
 	Some output chars (such as '+') also must be quoted.
-	Some addresses are displayed numerically instead of 
+	Some addresses are displayed numerically instead of
 	symbolically.
 
 2003-07-23  Michael Snyder  <msnyder@redhat.com>
@@ -231,7 +1419,7 @@
 
 	* gdb.base/annota1.exp: Make sure that we properly escape the
 	full path of the source file. Xfail more permissive patterns,
-	due to a compiler debug info problem. 
+	due to a compiler debug info problem.
 
 2003-07-07  Andreas Schwab  <schwab@suse.de>
 
@@ -338,7 +1526,7 @@
 	* gdb.base/fileio.exp: Disable target when nointerrupts and
 	noinferiorio, instead of limiting it to remote.  Use remote_exec
 	instead of system.
-	
+
 2003-06-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/float.exp: Add ia64 support.
@@ -426,7 +1614,7 @@
 
 	* gdb.base/corefile.exp: Tolerate stuff after argument parens in
 	backtrace.
-	
+
 2003-05-20  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/namespace1.cc: Actually do 'cvs add' before committing
@@ -449,13 +1637,13 @@
 2003-05-14  Jeff Johnston  <jjohnstn@redhat.com>
 
 	Roland McGrath  <roland@redhat.com>
-	* gdb.threads/linux-dp.exp: Account for fact that in nptl model 
+	* gdb.threads/linux-dp.exp: Account for fact that in nptl model
 	there is no manager thread.
 
 2003-05-08  Jeff Johnston  <jjohnstn@redhat.com>
 
-	* gdb.threads/schedlock.exp: Remove assumption that all threads 
-	will run in a particular small time slice.  Also ensure we break 
+	* gdb.threads/schedlock.exp: Remove assumption that all threads
+	will run in a particular small time slice.  Also ensure we break
 	in one of the child threads rather than the main thread.
 
 2003-05-07  Jim Blandy  <jimb@redhat.com>
@@ -527,7 +1715,7 @@
 
         * gdb.base/attach.exp: Add new message from ptrace in case of
         attaching to nonexistent process.
-	
+
 2003-04-11  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
@@ -544,7 +1732,7 @@
 
 2003-04-10  Elena Zannoni  <ezannoni@redhat.com>
 
-	* gdb.base/completion.exp: Use string_to_regexp to match the 
+	* gdb.base/completion.exp: Use string_to_regexp to match the
 	working directory name.
 
 2003-04-09  Jim Blandy  <jimb@redhat.com>
@@ -580,9 +1768,9 @@
 	* lib/gdb.exp: Put "the program is no longer running", and "the
 	program exited" in parenthesis.
 	* lib/mi-support.exp: Ditto.
-	
+
 2003-04-02  Bob Rossi  <bob_rossi@cox.net>
-    
+
 	* gdb.mi/mi-file.exp: New file for -file-list-exec-source-file.
 
 2003-03-29  Andrew Cagney  <cagney@redhat.com>
@@ -711,7 +1899,7 @@
 
 2003-02-27  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.base/restore.c (main): Return zero, so exit code 
+	* gdb.base/restore.c (main): Return zero, so exit code
 	will be consistant.
 
 2003-02-26  David Carlton  <carlton@math.stanford.edu>
@@ -783,7 +1971,7 @@
 	    Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.mi/mi-cli.exp: New file.
-	
+
 2003-02-04  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/anon-union.exp: Do not call gdb_suppress_entire_file.
@@ -889,7 +2077,7 @@
 	* gdb.asm/asm-source.exp: Ditto.
 	* gdb.base/advance.exp: Ditto.
 	* gdb.base/display.exp: Ditto.
-	* gdb.base/long_long.exp: Ditto. 
+	* gdb.base/long_long.exp: Ditto.
 	* gdb.base/mips_pro.exp: Ditto.
 	* gdb.base/overlays.exp: Ditto.
 	* gdb.base/relocate.exp: Ditto.
@@ -1223,8 +2411,8 @@
 
 2002-11-08  Jeff Johnston  <jjohnstn@redhat.com>
 
-	* lib/mi-support.exp (mi_gdb_start): Verify the startup message 
-	for mi1 and current mi is in correct format.  New mi startup message 
+	* lib/mi-support.exp (mi_gdb_start): Verify the startup message
+	for mi1 and current mi is in correct format.  New mi startup message
 	should be in mi console format.  This is part of fix for PR gdb/604.
 
 2002-09-18  Fernando Nasser  <fnasser@redhat.com>
@@ -1279,7 +2467,7 @@
 	* mi0-stack.exp, mi0-stepi.exp, mi0-until.exp: Delete.
 	* mi0-var-block.exp, mi0-var-child.exp: Delete.
 	* mi0-var-cmd.exp, mi0-var-display.exp, mi0-watch.exp: Delete.
-	
+
 2002-09-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/annota1.exp (info break): Make directory components of
@@ -1306,7 +2494,7 @@
 	(test_empty_complaint): New function.
 	(test_empty_complaints): New function.  Check no output when no
 	complaints.
-	
+
 2002-09-19  Jim Blandy  <jimb@redhat.com>
 
         * gdb.base/charset.exp, gdb.base/charset.c: New files.
@@ -1364,7 +2552,7 @@
 
 2002-09-14  Corinna Vinschen  <vinschen@redhat.com>
 
-	* gdb.base/command.exp: Don't expect a "Program exited normally"
+	* gdb.base/commands.exp: Don't expect a "Program exited normally"
 	string after running the commands execution on breakpoint tests.
 
 2002-09-13  Corinna Vinschen  <vinschen@redhat.com>
@@ -1549,7 +2737,7 @@
 	to avoid having GDB convert them to pointers (with loss
 	of information).
 
-	* gdb.base/d10v.ld: Merge in several years worth of 
+	* gdb.base/d10v.ld: Merge in several years worth of
 	default linker script changes.
 	* gdb.base/long_long.exp: Add check for sizeof (long double).
 
@@ -1557,7 +2745,7 @@
 
 	* gdb.asm/asm-source.exp: Add x86-64 target.
 	* gdb.asm/x86_64.inc: New.
-	
+
 2002-05-30  Michael Chastain  <mec@shout.net>
 
 	From Benjamin Kosnik <bkoz@redhat.com>:
@@ -1579,7 +2767,7 @@
 
 	From Benjamin Kosnik <bkoz@redhat.com>:
 	* gdb.c++/try_catch.cc: New file.
-	* gdb.c++/try_catch.exp: New file.	
+	* gdb.c++/try_catch.exp: New file.
 
 2002-05-27  Michael Chastain  <mec@shout.net>
 
@@ -1599,7 +2787,7 @@
 
 2002-05-23  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.base/all-bin.exp: Revise previous patch by just reducing 
+	* gdb.base/all-bin.exp: Revise previous patch by just reducing
 	the precision of the floating point test results.
 	* gdb.base/call-rt-st.exp: Ditto.
 
@@ -1631,7 +2819,7 @@
 
 	* gdb.base/maint.exp (maint print type): Update for new type
 	structure.
-	
+
 2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.arch: New directory.
@@ -1677,7 +2865,7 @@
 	* gdb.base/default.exp: Merge clauses for arm, strongarm, xscale.
 	* gdb.base/long_long.exp: Merge clauses for arm and xscale.
 	Add iftarget clause for strongarm.
-	
+
 2002-05-06  Michael Snyder  <msnyder@redhat.com>
 
 	* lib/gdb.exp (gdb_test): Add case to allow for status wrapper.
@@ -1907,7 +3095,7 @@ From Jim Blandy  <jimb@redhat.com>
 
 2002-03-27  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.base/help.exp: Modify expect strings to reflect 
+	* gdb.base/help.exp: Modify expect strings to reflect
 	clean-ups in help messages.
 
 2002-03-26  Fred Fish  <fnf@redhat.com>
@@ -2193,7 +3381,7 @@ From Jim Blandy  <jimb@redhat.com>
 	print foo_instance1.overload1arg((unsigned int)arg8)
 	print foo_instance1.overload1arg((float)arg11)
 	print foo_instance1.overload1arg((double)arg12)
-  
+
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/huge.exp: New test.  Print a very large target data object.
@@ -2315,7 +3503,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
         * gdb.base/break.exp: Fix HP specific search string when testing
         backtracing in a called function.
 
-        * gdb.base/constvars.exp: Only set lang to C++ if we're 
+        * gdb.base/constvars.exp: Only set lang to C++ if we're
         compiling the test with HP's compilers.
         * gdb.base/volatile.exp: Similarly.
 
@@ -2398,7 +3586,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 
 2001-12-06  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.asm/asm-source.exp: Add tests for info target, info symbol, 
+	* gdb.asm/asm-source.exp: Add tests for info target, info symbol,
 	and detect whether the start symbol has a leading underscore.
 
 2001-12-04  Jim Blandy  <jimb@redhat.com>
@@ -2450,7 +3638,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 	* gdb.asm/asm-source.exp: Recognize sparc target.
 	* gdb.asm/configure.in: Recognize sparc target.
 	* gdb.asm/configure: Regenerate.
-	
+
 2001-11-21  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.asm/m32r.inc: New file.
@@ -2497,7 +3685,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 	* gdb.mi/mi0-simplerun.exp: Likewise.
 	* gdb.mi/mi-var-cmd.exp: Likewise.
 	* gdb.mi/mi0-var-cmd.exp: Likewise.
-	
+
 2001-11-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.asm/asmsrc1.s: Add ``gdbasm_'' prefix to all macros.
@@ -2520,21 +3708,21 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 
 2001-11-07  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.c++/templates.exp (test_template_breakpoints): 
-	If we get an overload menu, but it does not match what 
+	* gdb.c++/templates.exp (test_template_breakpoints):
+	If we get an overload menu, but it does not match what
 	we expect, we still need to issue the "cancel" command.
 	* gdb.c++/templates.exp: Replace "void \\*" with "void ?\\*",
 	making the whitespace optional.  Argument for "new" may be
 	"unsigned" as well as "unsigned int/long".
-	* gdb.c++/templates.exp: Replace "const &" with "const ?&", 
+	* gdb.c++/templates.exp: Replace "const &" with "const ?&",
 	making the whitespace optional.  Also replace "(void) with
 	"((void|)), making the keyword "void" optional.
-	* gdb.c++/virtfunc.exp: Replace "const &" with "const ?&", 
+	* gdb.c++/virtfunc.exp: Replace "const &" with "const ?&",
 	making the whitespace optional.  Also replace "(void) with
 	"((void|)), making the keyword "void" optional.
 	* gdb.base/callfuncs.c (t_float_values): This function must
 	_not_ be prototyped, and the following function (t_float_values2)
-	must be prototyped (if the compiler supports it), so that GDB 
+	must be prototyped (if the compiler supports it), so that GDB
 	can be tested against both cases.  Usually one case involves
 	promotion of float to double, while the other does not.
 	* gdb.base/callfwmall.c: Ditto.
@@ -2589,7 +3777,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 
 	* gdb.base/ending-run.exp: Create identical output when passing
 	`step to end of run' case.  Add regular expression branch satisfying
-	Stormy16 target.  
+	Stormy16 target.
 
 2001-10-28  Mark Kettenis  <kettenis@gnu.org>
 
@@ -2797,7 +3985,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 
 2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
-	* gdb.base/remote.c (RANDOM_DATA_SIZE): New define, defaults to 48K 
+	* gdb.base/remote.c (RANDOM_DATA_SIZE): New define, defaults to 48K
 	and defined to 1K for m68hc11.
 	(random_data): Reduce table to 1K for embedded platforms (68hc11).
 	* gdb.base/remote.exp (get_sizeof): New function from sizeof.exp.
@@ -2883,13 +4071,13 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 2001-06-04  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.threads/pthreads.exp (check_control_c): Return 0 for success,
-	non-zero if control_c fails.  Terminate the test on failure, 
+	non-zero if control_c fails.  Terminate the test on failure,
 	rather than wait for 12 more tests to time out.
 
 2001-06-06  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/exprs.exp ("sizeof (long long) > sizeof (long) (true)"):
-	Don't forget to match the GDB prompt. 
+	Don't forget to match the GDB prompt.
 
 	* gdb.trace/gdb_c_test.c, actions.c: Fix misspellings.
 
@@ -2930,7 +4118,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 	Don't assume that short is shorter than int.
 	* gdb.base/exprs.exp ("print unsigned short == (~0)"): Don't
 	assume that shorts are smaller than ints.  On a 16-bit machine,
-	this isn't true. 
+	this isn't true.
 	("print unsigned char == (~0)"): Add test that verifies that ~0,
 	an int, is not equal to ~0 stored in an unsigned char.  This tests
 	the same thing that the previous test meant to, but works on
@@ -2940,7 +4128,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 2001-05-24  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.threads/pthreads.exp (all_threads_running): Add an explicit
-	test for (full_coverage == 0).  This makes the test run faster, 
+	test for (full_coverage == 0).  This makes the test run faster,
 	and prevents dejagnu getting out of step.
 
 2001-05-23  Kevin Buettner  <kevinb@redhat.com>
@@ -3008,7 +4196,7 @@ Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 	* config/sid.exp (gdb_target_sid): Check for error messages.
 	On error or timeout, don't make expect exit (which will terminate
 	all subsequent tests); instead just make gdb exit.
-	(gdb_load): Check for error messages.  On error or timeout, 
+	(gdb_load): Check for error messages.  On error or timeout,
 	return a negative value.
 
 2001-04-24  Jim Blandy  <jimb@redhat.com>
@@ -3254,7 +4442,7 @@ Sun Feb  4 17:32:21 2001  Andrew Cagney  <cagney@redhat.com>
 2001-01-25  matthew green  <mrg@redhat.com>
 
 	* config/sid.exp (sid_start): Use `remote_spawn' instead of `spawn.'
-	Deprecate $sid_spawn_id. 
+	Deprecate $sid_spawn_id.
 	(sid_exit): Remove code necessary only for `spawn.'
 
 2001-01-25  matthew green  <mrg@redhat.com>
@@ -3302,7 +4490,7 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-12-18  Michael Snyder  <msnyder@cygnus.com>
 
-	* gdb.base/setvar.exp: Use double '\\' to quote curly braces 
+	* gdb.base/setvar.exp: Use double '\\' to quote curly braces
 	in regexp.  One '\' does not suffice on Linux.
 
 2000-12-09  Michael Chastain  <chastain@redhat.com>
@@ -3381,7 +4569,7 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/monitor.exp (gdb_target_cmd): Abstracts some of the
 	code from gdb_target_monitor, so it can be used independantly
 	for gdbserver.  Also comment out an unnecessary PUTS.
-	
+
 2000-11-03  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/a2-run.exp: Use gdb_skip_stdio_test.
@@ -3461,7 +4649,7 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 	gnu-oldld case on ARM.
 	* gdb.base/watchpoint.exp (test_stepping): Clear xfail
 	for ARM targets.
- 
+
 Mon Jul 24 07:46:02 CDT 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* gdb.java/configure.in (AC_INIT): Use jmisc.exp.
@@ -3517,7 +4705,7 @@ Tue Jul  4 03:43:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	compile/link program.  Update line numbers.
 	* gdb.asm/d10v.inc: Define ``startup''.
 	* gdb.asm/asmsrc1.s: Add definition of _start.
-	
+
 Fri Jun 23 17:45:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/call-ar-st.exp: More rewrites of multi-line patterns.
@@ -3541,12 +4729,12 @@ Wed Jun  7 13:02:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-06-03  Daniel Berlin  <dan@cgsoftware.com>
 
 	* gdb.c++/templates.exp (do_tests): Make all of these work under
-	g++, and stop skipping them. 
+	g++, and stop skipping them.
 
 	* gdb.c++/namespace.exp: Move from gdb.hp/gdb.aCC to here, make it
 	work under g++.
 
-	* gdb.c++/misc.cc: Fix ambiguous initialization with correct 
+	* gdb.c++/misc.cc: Fix ambiguous initialization with correct
 	initialization.
 
 2000-06-02  Michael Snyder  <msnyder@cygnus.com>
@@ -3568,7 +4756,7 @@ Wed Jun  7 13:02:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-05-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/step-test.exp: On IA-64 targets, when stepping out of
-	a call, do not require that gdb stop on the line after the call. 
+	a call, do not require that gdb stop on the line after the call.
 	Instead, it is permissible for gdb to stop on the line of the
 	call itself.
 
@@ -3585,7 +4773,7 @@ Wed Jun  7 13:02:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-05-08  Michael Snyder  <msnyder@cygnus.com>
 
-	* gdb.base/interrupt.exp: Make "pass" message say "send" 
+	* gdb.base/interrupt.exp: Make "pass" message say "send"
 	rather than "send_gdb" (for consistancy).
 
 Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
@@ -3596,7 +4784,7 @@ Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-04-28  Michael Snyder  <msnyder@cygnus.com>
 
-	* gdb.base/break.exp: When compiled with -O2 optimization, 
+	* gdb.base/break.exp: When compiled with -O2 optimization,
 	gdb may not stop at the first line of main, due to code motion.
 
 2000-04-26  Michael Snyder  <msnyder@cygnus.com>
@@ -3690,7 +4878,7 @@ Mon Mar 27 14:46:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-03-13  James Ingham  <jingham@leda.cygnus.com>
 
 	* lib/gdb.exp: Fix the gdbtk_start routine to correctly find all
-	the library directories. 
+	the library directories.
 
 Mon Feb 21 13:05:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -3698,7 +4886,7 @@ Mon Feb 21 13:05:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure: Re-generate.
 
 	* gdb.mi: New directory.
-	
+
 2000-02-25  Scott Bambrough <scottb@netwinder.org>
 
 	* gdb.base/long_long.exp: Correct test suite failure when printing
@@ -3759,7 +4947,7 @@ Mon Feb 21 13:05:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/so-indr-cl.exp: Don't execute the test if not on HPUX.
   	Don't use xfail's because that affects only the following test.
-	
+
 	* gdb.base/so-impl-ld.exp: Don't execute the tests if not on hpux,
  	solaris or linux.
 
@@ -3767,7 +4955,7 @@ Mon Feb 21 13:05:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-01-07  Michael Snyder  <msnyder@cygnus.com>
 
-	* gdb.base/display.exp: Some yacc parsers like to say 
+	* gdb.base/display.exp: Some yacc parsers like to say
 	"A syntax error" rather than "A parse error".  Accept both.
 
 2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
@@ -3894,13 +5082,13 @@ Sat Dec  4 15:21:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.c++/derivation.exp: remove redundant get compiler info code.
 
-	* gdb.base/commands.exp: add '$gdb_prompt $' anchor to 
+	* gdb.base/commands.exp: add '$gdb_prompt $' anchor to
 	'continue with watch' test point.
 
 1999-11-08  Jim Blandy  <jimb@zenia.red-bean.com>
 
 	Merged from p2linux-990323-branch:
-	
+
 	* lib/gdb.exp (gdb_continue_to_breakpoint): New function.
 
 Mon Nov  8 23:07:09 1999  Andrew Cagney  <cagney@amy.cygnus.com>
@@ -3966,7 +5154,7 @@ Mon Oct 11 13:57:21 1999  Andrew Cagney  <cagney@amy.cygnus.com>
  	containing exp_continue into a while within an expect.  Don't
  	attempt a start more than three times.  Check return value from
  	gdb_load.
-	
+
 Wed Oct  6 12:05:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/watchpoint.exp: Match fail ``finish from marker1'' with
@@ -3981,7 +5169,7 @@ Wed Oct  6 12:05:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 1999-10-01  Fred Fish  <fnf@cygnus.com>
 
-	* gdb.base/help.exp (help add-symbol-file): Update to match current 
+	* gdb.base/help.exp (help add-symbol-file): Update to match current
 	gdb output.
 
 1999-09-18  Jim Blandy  <jimb@cris.red-bean.com>
@@ -4212,7 +5400,7 @@ Tue Aug 10 15:25:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.c++/virtfunc.cc: Add return type and value for main.
 	* gdb.c++/virtfunc.exp: Run if HP compiler used, add some
 	match alternatives.
-	
+
 1999-07-30  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/display.exp: Fix output of 'p/a &&j' test.
@@ -4266,8 +5454,8 @@ Tue Aug 10 15:25:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.c++/annota2.exp: Fix delete breakpoint query testcase.
 	Fix run to main failures. Watchpoint can be hardware watchpoint.
-	
-	* gdb.base/annota1.exp: Clean up some more, in case printf has 
+
+	* gdb.base/annota1.exp: Clean up some more, in case printf has
 	debug info.  Deal with lack of signal hanlder info in stack.
 
         From Jim Kingdon  <kingdon@redhat.com>:
@@ -4409,7 +5597,7 @@ Fri Jun 25 19:27:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	print_double_array(double_array)", "continuing to breakpoint
  	1018", "print print_double_array(array_d)" and "continuing to
  	1034" tests.
-	
+
 1999-06-24  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * Makefile.in: Add empty html and install-html targets.
@@ -4482,9 +5670,9 @@ Wed Jun  2 17:37:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 1999-05-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* gdb.base/annota1.exp: Allow any number of "frames-invalid" and 
+	* gdb.base/annota1.exp: Allow any number of "frames-invalid" and
 	"breakpoint-invalid" to be printed.
-	* gdb.base/annota2.exp: Revise line number for main breakpoint. Allow any 
+	* gdb.base/annota2.exp: Revise line number for main breakpoint. Allow any
 	number of "frames-invalid" and "breakpoint-invalid" to be printed.
 	* gdb.base/annota2.cc: Initialize a.x to 0.
 
@@ -4501,7 +5689,7 @@ Wed Jun  2 17:37:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	"skip_float_tests" is set.
 	* gdb.base/varargs.exp: Skip "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)"
 	when "skip_float_tests" set.
-	
+
 1999-05-06  Keith Seitz  <keiths@cygnus.com>
 
 	* gdb.base/annota2.cc: Include stdio.h.
@@ -4583,7 +5771,7 @@ Wed May  5 17:44:31 1999  Stan Shebs  <shebs@andros.cygnus.com>
  	change, to mollify finicky HP compiler.
 	* gdb.hp/reg-test.exp (testfile): Fix file name.
 	* gdb.stabs/weird.exp: Don't try to run if HP compiler in use.
-	
+
 	* gdb.c++/misc.cc (main): Initialize obj_with_enum.
 	* gdb.c++/classes.exp: Fix test of obj_with_enum values, allow
 	alternate form of enum ptype.
@@ -4602,7 +5790,7 @@ Wed May  5 17:44:31 1999  Stan Shebs  <shebs@andros.cygnus.com>
 Tue Mar 23 14:56:36 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/commands.exp: Add test for correct position of '>'
-	when issuing the 'commands' command after a 'while' or 'if' 
+	when issuing the 'commands' command after a 'while' or 'if'
 	command.
 
 1999-03-18  James Ingham  <jingham@cygnus.com>
@@ -4615,7 +5803,7 @@ Tue Mar 23 14:56:36 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	* gdb.base/watchpoint.exp: Use gdb_continue_to_end.
 
 	* gdb.base/step-test.exp: Catch a case where finish is broken and
-	keep it from killing the rest of the tests. 
+	keep it from killing the rest of the tests.
 	Use gdb_continue_to_end.
 
 	* gdb.base/sigall.exp: use gdb_continue_to_end.
@@ -4624,11 +5812,11 @@ Tue Mar 23 14:56:36 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/display.exp: use runto_main, not run.
 
-	* gdb.base/default.exp: Check for the current error message in the 
-	r abbreviation test.  
+	* gdb.base/default.exp: Check for the current error message in the
+	r abbreviation test.
 	Add strongarm to the targets that know info float.
 
-	* gdb.base/condbreak.exp: Use the gdb_run command rather than just 
+	* gdb.base/condbreak.exp: Use the gdb_run command rather than just
 	run which doesn't work with monitors.
 
 	* gdb.base/call-ar-st.exp: fixed bogus regexp in continuing to 1034 test.
@@ -4636,8 +5824,8 @@ Tue Mar 23 14:56:36 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	* gdb.base/break.exp: use the gdb_continue_to_end proc.
 
 	* lib/gdb.exp: I had added gdb_continue_to_end used to run to the end of a
-	program.  Traps the case (in Cygmon) when the program never really 
-	exits.  Same as Mark's continue_to_exit, but I had put it in a lot 
+	program.  Traps the case (in Cygmon) when the program never really
+	exits.  Same as Mark's continue_to_exit, but I had put it in a lot
 	more places, so I used my name.  Sorry Mark...
 
 	* config/monitor.exp (gdb_target_monitor): added another
@@ -4675,7 +5863,7 @@ Fri Mar 12 18:06:21 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/call-ar-st.c (main): Terminate char_array with a null
  	character, so GDB won't print garbage after its end.
-	
+
 	* gdb.base/call-ar-st.exp: Don't step into sum_array_print; set a
 	breakpoint there instead.  Sometimes GCC emits memcpy to handle
 	the large structures being passed by value, so we step into that
@@ -4699,7 +5887,7 @@ Fri Mar 12 18:06:21 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 1999-03-05  Nick Clifton  <nickc@cygnus.com>
 
-	* gdb.base/a2-run.exp: Add expected fails for strongarm-coff. 
+	* gdb.base/a2-run.exp: Add expected fails for strongarm-coff.
 
 1999-03-04  Jim Blandy  <jimb@zwingli.cygnus.com>
 
@@ -4763,12 +5951,12 @@ Fri Feb  5 12:42:56 1999  Stan Shebs  <shebs@andros.cygnus.com>
 	* gdb.base/long_long.c (known_types): Initialize values to zero.
 	* gdb.base/long_long.exp: Step one more line
 	so 'dec' is initialized in "get to known place".  GDB removes
-        leading zeros.  Explicitly ask for hex formatting.  Use 
+        leading zeros.  Explicitly ask for hex formatting.  Use
         unique test case names.
 
 Tue Feb  2 10:16:08 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* lib/gdb.exp (gdb_preprocess): Remove 'puts' statement. 
+	* lib/gdb.exp (gdb_preprocess): Remove 'puts' statement.
 
 	* gdb.c++/method.exp: Add missing close brace.
 
@@ -4818,8 +6006,8 @@ Tue Jan 19 17:20:09 1999  David Taylor  <taylor@texas.cygnus.com>
 
 Fri Jan 15 14:04:57 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* gdb.hp/xdb3.exp: do not execute unless on hppa-hpux platform 
-	and compiled w/o GCC. 
+	* gdb.hp/xdb3.exp: do not execute unless on hppa-hpux platform
+	and compiled w/o GCC.
 
 	* gdb.hp/watch-cmd.exp: ditto.
 
@@ -4959,7 +6147,7 @@ Wed Jan  6 18:41:15 1999  David Taylor  <taylor@texas.cygnus.com>
 	* gdb.c++/ref-types.exp: new file.
 	* gdb.c++/ref-types2.exp: new file.
 	* gdb.c++/userdef.exp: new file.
-	
+
 Wed Jan  6 13:50:57 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/default.exp: Reflect wording change in remote.c.
@@ -4997,22 +6185,22 @@ Tue Jan  5 13:05:32 1999  David Taylor  <taylor@texas.cygnus.com>
 	* gdb.c++/ref-types.cc: new file.
 	* gdb.c++/ref-types2.cc: new file.
 	* gdb.c++/userdef.cc: new file.
-	
+
 	* gdb.base/scope.exp: compile one file at a time, then link.
 	* gdb.base/langs.exp: ditto.
 	* gdb.base/list.exp: ditto.
-	
+
 Mon Jan  4 10:06:43 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by David Taylor
  	<taylor@cygnus.com>, Elena Zannoni <ezannoni@cygnus.com>, and
  	Edith Epstein <eepstein@cygnus.com> as part of a project to merge
  	in changes by HP.
-	
+
 	* gdb.c++/inherit.exp: if on hppa*-*-hpux* and not using gcc,
 	skip tests.  When compiling pass c++ flag to gdb_compile.
 	* gdb.c++/
-	
+
 	* lib/gdb.exp (get_compiler_info): new, optional argument -- args;
 	test for on hppa*-*-hpux*; use args to see if c++ was specified.
 	(skip_hp_tests): new function.
@@ -5041,7 +6229,7 @@ Mon Jan  4 10:06:43 1999  David Taylor  <taylor@texas.cygnus.com>
 	run the tests.  tell gdb_compile that it's a c++ compilation.
 
 	* gdb.threads/pthreads.exp: fix typo in message.
-	
+
 	* gdb.base/all-bin.exp: new file.
 	* gdb.base/arithmet.exp: new file.
 	* gdb.base/assign.exp: new file.
@@ -5125,7 +6313,7 @@ Mon Dec 21 14:08:38 1998  David Taylor  <taylor@texas.cygnus.com>
                      T1<char>::~T1(void)
 
  	(test_hp_style_demangling): new hp specific demangling test cases.
-	
+
 Mon Dec 14 15:07:03 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.trace/actions.exp: Ignore compiler warnings compiling actions.c
@@ -5214,7 +6402,7 @@ Mon Sep 14 20:00:04 1998  Michael Snyder  <msnyder@cygnus.com>
 	* gdb.trace/{packetlen.exp passc-dyn.exp passcount.exp}: New files.
 	* gdb.trace/{report.exp save-trace.exp tracecmd.exp}: New files.
 	* gdb.trace/{while-dyn.exp while-stepping.exp}: New files.
-	
+
 Fri Sep 11 13:58:02 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.c++/classes.exp: Change all regular expressions to match
@@ -5245,7 +6433,7 @@ Thu Jul 16 18:20:46 1998  Jeffrey A Law  (law@cygnus.com)
 
 Thurs Jul 9 11:08:31 1998  Dawn Perchik  <dawn@cygnus.com>
 
-	* gdb.base/commands.exp: Break up infrun_breakpoint_command_test 
+	* gdb.base/commands.exp: Break up infrun_breakpoint_command_test
 	into two parts to get around a synchronization problem in expect.
 
 Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
@@ -5368,15 +6556,15 @@ Mon Apr 13 22:32:51 1998 Frank Ch. Eigler <fche@cygnus.com>
 Fri Apr 10 22:38:12 1998 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
         * gdb.base/help.exp:  Clean up `help set args' and `help show args'
-        tests.                                                             
+        tests.
         * gdb.base/interrupt.exp:  Add "i*86-*-solaris2*" xfail for calling
-        function when asleep.                                              
+        function when asleep.
         * gdb.base/signals.exp:  Add "i*86-*-solaris2*" xfails. Add comment
-        for i*86 Linux and SVR4 signal handling problems.                  
-        Remove linux xfail for `next to handler in signals_tests_1', fixed 
-        by recent infrun.c change.                                         
+        for i*86 Linux and SVR4 signal handling problems.
+        Remove linux xfail for `next to handler in signals_tests_1', fixed
+        by recent infrun.c change.
         Limit backtrace to 10 frames to avoid timeout problems with infinite
-        stack backtraces.                                                   
+        stack backtraces.
         Adjust expect pattern in `handle all print' test to match Apr 28 1997
         target.[ch] change.
 
@@ -5413,7 +6601,7 @@ Mon Feb 23 08:22:44 1998  Mark Alexander  <marka@cygnus.com>
 	* config/mn10300-eval.exp: New file to support MN10300 eval board.
 
 Wed Feb 18 16:43:46 1998  Michael Snyder  (msnyder@cygnus.com)
- 
+
         * gdb.base/overlays (several files): Merge the two overlay
         managers into one.  Change variables (foox, barx, bazx, grbxx)
         back into ints but force them to load in their proper sections.
@@ -5436,7 +6624,7 @@ Tue Feb 10 17:23:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.base/d10vovly.c (D10VTranslate): New function, handle
  	updated d10v memory VMA/LMA map.
 	(D10VCopy): Call D10VTranslate.
-	
+
 Fri Feb  6 14:13:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/m32rovly.c: Force variable _novlys into .data section.
@@ -5450,12 +6638,12 @@ Fri Feb  6 14:13:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/overlays.exp: Expect variables barx, bazx, foox, grbxx
  	to be arrays.
-	
+
 Thu Jan 29 14:48:19 1998  Michael Snyder  (msnyder@cygnus.com)
- 
+
         * gdb.base/overlays.exp: fix up and get working again.
         Add tests for backtraces from an overlay function.
- 
+
 Fri Jan 23 07:52:45 1998  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/watchpoint.exp: Set "d10v*-*-*" clear_xfail for
@@ -5498,7 +6686,7 @@ Tue Nov 25 12:46:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
  	target_sizeof_long and target_bigendian_p.
 	(structs_by_value, structs_by_reference): Check values according
  	to targets word size and endianess.
-	
+
 Mon Nov 24 16:37:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/langs.exp: For "continue to exit" ignore any trailing
@@ -5558,7 +6746,7 @@ Fri Sep 12 16:56:38 1997  Bob Manson  <manson@charmed.cygnus.com>
 	exists, reload the executable and do a "continue" instead of
 	doing a jump.
 	(runto_main): Use gdb_step_for_stub.
-	
+
 	* gdb.base/break.exp: Use gdb_step_for_stub. Also, rename certain
  	tests to have unique names.
 	* gdb.base/callfuncs.exp: Ditto.
@@ -5569,7 +6757,7 @@ Fri Sep 12 16:56:38 1997  Bob Manson  <manson@charmed.cygnus.com>
 	* gdb.base/opaque.exp: Ditto.
 	* gdb.base/printcmds.exp: Ditto. Use a loop to emit multiple
 	similar tests.
-	
+
 	* gdb.base/setshow.c: Add set_debug_traps/breakpoint calls.
 	* gdb.c++/cplusfuncs.cc: Ditto.
 	* gdb.c++/virtfunc.cc: Ditto.
@@ -5640,7 +6828,7 @@ Fri Jun 27 07:44:25 1997  Fred Fish  <fnf@cygnus.com>
 	* gdb.c++/inherit.exp: Ditto.
 	* gdb.c++/templates.exp: Ditto.
 	* gdb.c++/virtfunc.exp: Ditto.
-	
+
 Wed Jun 25 09:08:51 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(default_gdb_exit): Don't give an error if the remote
@@ -5771,7 +6959,7 @@ Thu May  1 18:01:50 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cygnus.com>
 
-	* gdb.base/printcmds.exp: add a couple more tests a la 
+	* gdb.base/printcmds.exp: add a couple more tests a la
 	"p 123DEADBEEF", to check parse_number.
 	* top.c: change "to enable to enable" to "to enable" in a couple
 	of help strings.
@@ -5780,7 +6968,7 @@ Thu Apr 24 14:38:18 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/callfuncs.exp: Mark some tests as expected to fail
 	on the mn10300.
- 
+
 Mon Apr 21 15:05:42 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/a2-run.exp: Add arm-*-coff setup_xfails for cases
@@ -5825,7 +7013,7 @@ Thu Apr  3 15:21:26 1997  Michael Snyder  <msnyder@cygnus.com>
 	d10v.ld m32r.ld d10vovly.c m32rovly.c: add test case for overlays.
 	* gdb.base/sigall.c: add usestubs code frag
 	* gdb.base/watchpoint.exp: turn on complex watchpoint test for M32R.
-	
+
 Thu Apr  3 09:38:53 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_suppress_tests): Add explanation for subsequent
@@ -5980,7 +7168,7 @@ Sun Feb 23 19:56:02 1997  Bob Manson  <manson@charmed.cygnus.com>
 	* config/vr4300.exp: New file.
 
 	* gdb.*/*.exp: Call gdb_expect instead of expect.
-	
+
 	* lib/gdb.exp(gdb_expect): New function.
 
 Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
@@ -6155,7 +7343,7 @@ Sun Feb  2 00:55:14 1997  Bob Manson  <manson@charmed.cygnus.com>
 Sat Feb  1 23:51:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.*/*.exp: Replace $prompt with $gdb_prompt.
-	
+
 	* gdb.base/scope.exp: Use gdb_test.
 	* gdb.c++/classes.exp: Ditto.
 	* gdb.c++/inherit.exp: Ditto.
@@ -6185,7 +7373,7 @@ Thu Jan 30 16:49:25 1997  Bob Manson  <manson@charmed.cygnus.com>
 Tue Jan 28 14:42:31 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	   Major rewrite for testsuite revision.
-	
+
 	* lib/gdb.exp: Remove references to global CC, CXX, B_OPTIONS,
 	TARGET_INCLUDES, LDFLAGS and target_alias. Use gdb_spawn_id
 	instead of relying on spawn_id to always contain a valid
@@ -6193,7 +7381,7 @@ Tue Jan 28 14:42:31 1997  Bob Manson  <manson@charmed.cygnus.com>
 	(get_compiler_info): New procedure to build the ${binfile}.ci
 	file, instead of replicating this in N different places.
 	(gdb_compile): New procedure.
-	
+
 	gdb.*/*.exp: Use gdb_compile and get_compiler_info (with
  	appropriate arguments) instead of compile. Use gdb_test in a lot
  	more places.  Use send_gdb instead of send. Always run gdb_start
@@ -6257,7 +7445,7 @@ Sat Nov 23 13:32:15 1996  Fred Fish  <fnf@cygnus.com>
 	* gdb.base/signals.exp (signal_tests_1): Remove setup_xfail
 	"i*86-*-linux" for "signal SIGUSR1".  Now works, at least with
 	RedHat 4.0.
-	
+
 	* gdb.threads/pthreads.c (_MIT_POSIX_THREADS): Define if target is
  	linux.  This allows the test case to at least compile on latest
  	linux, but still not run due to missing the threads runtime library.
@@ -6286,7 +7474,7 @@ Thu Nov 21 09:17:19 1996  Fred Fish  <fnf@cygnus.com>
 	(xgcc): Set variable to full path of gcc in build tree.  Use findfile
 	to verify that gcc exists in build tree, and if so set CC to that
 	gcc and to use B_OPTIONS and TARGET_INCLUDES.
-	
+
 Tue Nov 12 16:20:13 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.c++/inherit.exp (test_print_anon_union): Reenable
@@ -6330,7 +7518,7 @@ Tue Nov  5 10:44:23 1996  Michael Snyder  <msnyder@cygnus.com>
 	* gdb.base/[bitfields.exp crossload.exp funcargs.exp interrupt.exp
 	            list.exp scope.exp watchpoint.exp]
 	  Make all timeout error msgs explicitly say "(timeout)".
-	
+
 Mon Nov  4 12:03:06 1996  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/monitor.exp: Increase download timeout to 1000 seconds.
@@ -6399,7 +7587,7 @@ Fri Oct 11 17:05:22 1996  Fred Fish  <fnf@cygnus.com>
 	(distclean maintainer-clean realclean): No need to remove files
  	twice.  Nuke the duplicates.
 	* gdb.base/Makefile.in (EXECUTABLES): Add "structs".
-	* gdb.threads/Makefile.in (distclean maintainer-clean realclean): 
+	* gdb.threads/Makefile.in (distclean maintainer-clean realclean):
 	Remove config.h along with other config files.
 
 Mon Sep 30 20:16:22 1996  Fred Fish  <fnf@cygnus.com>
@@ -6424,7 +7612,7 @@ Mon Sep 30 20:16:22 1996  Fred Fish  <fnf@cygnus.com>
 	* lib/gdb.exp (gdb_test): When a gdb aborts, print a more
 	meaningful error message and return -1 so the caller can
 	suppress further tests and avoid a cascade of errors.
-	
+
 Fri Sep 27 10:34:51 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/a1-selftest.exp: Tweak tests to account for new
@@ -6432,7 +7620,7 @@ Fri Sep 27 10:34:51 1996  Fred Fish  <fnf@cygnus.com>
 	* gdb.base/default.exp: Ditto.
 	* gdb.base/interrupt.exp: Fix problem with cascade of
 	errors if child process dies while calling a function.
-	
+
 Fri Sep 13 21:43:48 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (VPATH): Add
@@ -6464,7 +7652,7 @@ Mon Sep  2 06:36:02 1996  Fred Fish  <fnf@cygnus.com>
 	executable, give more meaningful message.
 	* gdb.threads/pthreads.c: Hpux also uses old definition of second
 	arg for pthread_create.
-	
+
 Mon Aug 19 09:58:59 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.threads/pthreads.c (PTHREAD_CREATE_ARG2,
@@ -6483,7 +7671,7 @@ Mon Aug 19 09:58:59 1996  Fred Fish  <fnf@cygnus.com>
 	for not compiled with gcc.
 	* gdb.base/mips_pro.exp: Only do setup_xfail hppa*-*-* for
 	backtrace when compiled with gcc.
-	* lib/gdb.exp (runto_main): Return result of "runto main" rather 
+	* lib/gdb.exp (runto_main): Return result of "runto main" rather
 	than always return success.
 
 Sat Aug 17 13:28:00 1996  Fred Fish  <fnf@cygnus.com>
@@ -6507,7 +7695,7 @@ Mon Aug 12 15:29:08 1996  Fred Fish  <fnf@cygnus.com>
 	tests.
 	gdb.c++/virtfunc.exp (do_tests): Add "mips-*-irix5*" setup_xfail
 	for "runto test_calls(void)" test.
-	
+
 Sun Aug 11 13:11:24 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/term.exp: Set 7-bit strings, address off, width to 0,
@@ -6546,7 +7734,7 @@ Wed Aug  7 11:05:47 1996  Fred Fish  <fnf@cygnus.com>
 	* gdb.threads/{config.in, pthreads.c, pthreads.exp}: New.
 	* gdb.threads/{Makefile.in, configure.in}: Complete rewrites.
 	* gdb.threads/configure: New, generated with autoconf.
-	
+
 Tue Aug  6 10:23:04 1996  Tom Tromey  <tromey@rtl.cygnus.com>
 
 	* lib/gdb.exp (gdb_test_exact): Turn \n in pattern into \r\n.
@@ -6616,9 +7804,9 @@ Tue Jun 25 23:16:58 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 Tue Jun 25 17:02:39 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* configure.in (AC_PREREQ): autoconf 2.5 or higher.
-	* gdb.{base,c++,chill,disasm,stabs}/Makefile.in (VPATH): set to 
+	* gdb.{base,c++,chill,disasm,stabs}/Makefile.in (VPATH): set to
 	@srcdir@.
-	* gdb.{base,c++,chill,disasm,stabs}/configure.in (AC_PREREQ): 
+	* gdb.{base,c++,chill,disasm,stabs}/configure.in (AC_PREREQ):
 	autoconf 2.5 or higher.
 	* gdb.{base,c++,chill,disasm,stabs}/configure: Rebuilt.
 
@@ -6682,7 +7870,7 @@ Wed May 15 08:47:42 1996  Jeffrey A Law  (law@cygnus.com)
 	* gdb.base/ptype.exp: Likewise.
 	* gdb.base/setvar.exp: Handle sizeof (int) != 4 for h8300.  Add
 	h8300 xfails.
-	* gdb.base/return.exp: Handle float/double precision problems 
+	* gdb.base/return.exp: Handle float/double precision problems
 	on the h8300.
 	* gdb.base/funcargs.c: Explicitly make last constant argument to
 	call_after_alloca_subr an unsigned long type.
@@ -6719,13 +7907,13 @@ Wed Mar 20 08:48:03 1996  Fred Fish  <fnf@cygnus.com>
 	gdb.stabs/weird.exp: Remove use of compiler options "-c -o ..."
 	since some compilers don't allow both options to be given
 	on the same command line.  Create object file and move it.
-	
+
 Tue Mar 19 23:49:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp: Always regenerate the core file, since
 	we always regenerate the coremaker program.  Detect special case
 	where registers cannot be read from core file.
-	
+
 Tue Mar 19 16:52:49 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
@@ -6738,7 +7926,7 @@ Tue Mar 19 16:52:49 1996  Fred Fish  <fnf@cygnus.com>
 	* configure: Regenerate.
 	* gdb.base/Makefile.in (clean): Remove generated file twice-tmp.c
 	here, rather than in distclean.
-	
+
 Sun Mar 17 13:35:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/mips_pro.exp: Create mips_pro.ci to get gcc_compiled
@@ -6776,10 +7964,10 @@ Fri Mar 15 17:49:57 1996  Fred Fish  (fnf@cygnus.com)
 	* gdb.base/ptype.exp: Change "i*86-*-sysv4*" setup_xfail for
 	"whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
 	and "ptype t_char_array" to be for native cc only.
-	
+
 Fri Mar 15 16:17:22 1996  Fred Fish  <fnf@cygnus.com>
 
-	* gdb.base/corefile.exp: Remove "alpha-dec-osf2*" native compiled 
+	* gdb.base/corefile.exp: Remove "alpha-dec-osf2*" native compiled
 	setup_xfail for "print coremaker_bss", "print coremaker_ro",
  	"print func2::coremaker_local", and "backtrace in corefile.exp".
 
@@ -6822,7 +8010,7 @@ Sun Feb 18 11:39:12 1996  Fred Fish  <fnf@cygnus.com>
 	Change "alpha-dec-osf2*" setup_xfail for "bt in signals.exp"
 	to be for gcc only.
 	* lib/gdb.exp: Move verbose statements outside conditionals.
-	
+
 Sat Feb 17 02:22:14 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/sigall.exp:  Remove setup_xfail for irix4.  Fixed by
@@ -6900,7 +8088,7 @@ Mon Jan 15 09:33:00 1996  Fred Fish  <fnf@cygnus.com>
 	* gdb.stabs/configure.in (alpha-*-*,mips-*-*): Replace
 	[] tests with "test" and enclose string in quotes.
 	* gdb.stabs/configure: Rebuild
-	
+
 Thu Jan 11 09:43:14 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	Changes in sync with expect:
@@ -6924,7 +8112,7 @@ Wed Jan  3 01:30:41 1996  Jeffrey A Law  (law@cygnus.com)
 	* gdb.stabs/weird.exp: Use ${target_triplet} to determine
 	which sed script to run.  Expect failure for v_comb test
 	on PA targets too.
-	
+
 Sat Dec 30 16:09:04 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* gdb.base/corefile.exp: Remove "i*86-*-linux" xfail for
@@ -7006,7 +8194,7 @@ Sat Nov 25 11:03:42 1995  Fred Fish  <fnf@cygnus.com>
  	to returns as necessary, arrange for test to compile own testcase
  	executable.
 	* lib/gdb.exp: Changes for testsuite to compile own test cases.
-	
+
 Tue Nov 21 16:15:45 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.c++/classes.exp (test_pointers_to_class_members): Add
@@ -7071,13 +8259,13 @@ Wed Oct 18 11:27:47 1995  Jeffrey A Law  (law@cygnus.com)
 
 Tue Oct 17 23:02:12 1995  Jeffrey A Law  (law@cygnus.com)
 
-	* Many files: When warning about suppressed tests due to a 
+	* Many files: When warning about suppressed tests due to a
 	nonexistant test binary, avoid incrementing the warning count.
 
 Tue Oct 10 11:00:41 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (TARGET_FLAGS_TO_PASS):  Remove BISON.
-	
+
 Sun Oct  8 04:23:14 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/return.exp:  Change xfail from "sparc-*-solaris2.*" to
@@ -7183,7 +8371,7 @@ Sat Sep  2 06:41:26 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Sat Sep  2 00:17:31 1995  Fred Fish  <fnf@cygnus.com>
 
-	* gdb.base/callfuncs.exp (do_function_calls):  Remove 
+	* gdb.base/callfuncs.exp (do_function_calls):  Remove
 	mips-sgi-irix* xfail for
 	"call inferior func with struct - returns char *"
 	and fix test so that an optional (unsigned char *) cast is
@@ -7199,7 +8387,7 @@ Fri Sep  1 13:42:01 1995  Fred Fish  <fnf@cygnus.com>
 
 Sun Aug 27 23:35:35 1995  Fred Fish  <fnf@cygnus.com>
 
-	* gdb.base/callfuncs.exp (do_function_calls):  Add alpha-dec-osf2* 
+	* gdb.base/callfuncs.exp (do_function_calls):  Add alpha-dec-osf2*
 	clear_xfail for "p t_float_values2(3.14159,float_val2)" for gcc
 	compiled test.
 	* gdb.base/opaque.exp (setup_xfail_on_opaque_pointer):
@@ -7239,11 +8427,11 @@ Sun Aug 27 23:35:35 1995  Fred Fish  <fnf@cygnus.com>
 	* gdb.base/callfuncs.exp (do_function_calls):
 	Add mips-sgi-irix* xfail, when compiled with native compiler, for
 	"call inferior func with struct - returns char *".
-	* gdb.base/return.exp (return_tests): Change xfail for 
+	* gdb.base/return.exp (return_tests): Change xfail for
 	"correct value returned double test" to include Solaris 2.4.
 	* gdb.base/funcargs.exp (float_and_integral_args):
 	Add sparc-sun-solaris2* xfail for "print f1 after run to call2a".
-	
+
 Sat Aug 26 00:26:11 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/setvar.c, gdb.base/setvar.exp:  Add new tests for
@@ -7312,14 +8500,14 @@ Tue Aug 15 09:42:44 1995  Fred Fish  <fnf@cygnus.com>
 	"print 'scope1.c'::bar::funclocal" and
 	"print 'scope1.c'::bar::funclocal_bss"
 	to only be xfail'd when not compiled with gcc.
-	Add rs6000-*-* xfail for 
+	Add rs6000-*-* xfail for
 	"print 'scope0.c'::filelocal_bss before run"
 	when compiled with gcc.
 	(test_at_main): Add rs6000-*-* xfail for
 	"print filelocal_ro in test_at_main"
 	when compiled with gcc.
 	* gdb.base/ptype.exp: Source gdb.base/ptype.ci.
- 	Add rs6000-*-aix* xfail for 
+ 	Add rs6000-*-aix* xfail for
 	"whatis unnamed typedef'd enum (compiler bug in IBM's xlc)" and
 	"ptype t_char_array",  not compiled with gcc.
 	* gdb.base/list.exp (test_list_function):  Add rs6000-*-*
@@ -7362,7 +8550,7 @@ Tue Aug 15 09:42:44 1995  Fred Fish  <fnf@cygnus.com>
 	* gdb.base/opaque.exp: Source gdb.base/opaque0.ci rather
 	than opaque-info.exp.
 	Setup rs6000-*-* xfail for
-	"ptype on opaque struct pointer (statically)" and 
+	"ptype on opaque struct pointer (statically)" and
 	"ptype on opaque struct pointer (dynamically)" when
 	not compiled with gcc.
 	* gdb.base/callfuncs.exp: Source gdb.base/callfuncs.ci
@@ -7389,7 +8577,7 @@ Tue Aug 15 09:42:44 1995  Fred Fish  <fnf@cygnus.com>
 	Add rs6000-*-* xfail for "up to foo in langs.exp"
 	"up to cppsub_ in langs.exp" and "up to fsub in langs.exp"
  	when not gcc compiled.
-	
+
 Sat Aug 12 15:05:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* gdb.base/callfuncs.exp: Add xfails for the powerpc.
@@ -7420,7 +8608,7 @@ Mon Aug 14 09:01:59 1995  Fred Fish  <fnf@cygnus.com>
 	"print 'scope0.c'::filelocal_bss in test_at_foo",
 	"print 'scope0.c'::filelocal at bar",
 	"print 'scope0.c'::filelocal_bss in test_at_bar"
-	
+
 	* gdb.base/list.exp: Remove rs6000-*-* xfail for "list function
 	in source file 1".  This bug seems to have been fixed with both
 	gcc and native cc (was native assembler bug?).
@@ -7445,7 +8633,7 @@ Wed Aug  9 08:04:12 1995  Fred Fish  (fnf@cygnus.com)
 	* gdb.base/callfuncs.exp: Change xfail to "i*86-*-*" for
 	"call inferior function with struct - returns float" and
 	"call inferior function with struct - returns double".
-	
+
 Mon Aug  7 02:43:28 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.disasm/sh3.s: Source for sh3 disassembler tests.
@@ -8550,7 +9738,7 @@ Fri Nov 25 13:37:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	and 'value' method to T5 class for template tests.
 	* gdb.c++/templates.exp:  Add testcases for printing of template
 	types, setting breakpoints on template methods and calling a
-	template method. 
+	template method.
 
 Sat Nov  5 00:20:17 1994  Jeff Law  (law@snake.cs.utah.edu)
 
@@ -8993,7 +10181,7 @@ Thu Apr 21 12:48:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Thu Apr 21 11:54:04 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
-	* gdb.t24/demangle.exp: change expect pattern of 
+	* gdb.t24/demangle.exp: change expect pattern of
 	__t10ListS_link1ZUiRCUiPT0
 
 Wed Apr 13 15:05:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
@@ -9060,7 +10248,7 @@ Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Tue Mar 29 23:55:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-	* gdb.t07/watchpoint.exp (test_watchpoint_triggered_in_syscall): 
+	* gdb.t07/watchpoint.exp (test_watchpoint_triggered_in_syscall):
 	Fix typo(s).
 
 Sun Mar 27 16:53:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
@@ -9132,7 +10320,7 @@ Thu Feb 24 19:49:25 1994  Rob Savoye  (rob@poseidon.cygnus.com)
 	one from the path.
 	* Makefile.in: Use a fresh expect if there is one, use runtest
 	from the src tree if there is one.
-  
+
 Thu Feb 24 18:49:37 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.t06/break.exp (test_next_with_recursion): Remove xfail for
@@ -9319,7 +10507,7 @@ Thu Jan 13 17:16:09 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* Makefile.in: Pass LDFLAGS and LIBS to sub-makes.
 	* gdb.t06/configure.in: Don't try to compile signals test program
-	if doing mips-idt-ecoff.	
+	if doing mips-idt-ecoff.
 
 Thu Jan 13 08:25:55 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
@@ -9467,7 +10655,7 @@ Tue Oct 19 14:57:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t15/funcargs.exp: Don't put comments on same line as
 	setup_xfail (@#$*%& tcl braindamage!).
-  
+
 Mon Oct 18 21:50:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.disasm/hppa.exp: Use $objdir/$subdir/$binfile not just $binfile.
@@ -9758,7 +10946,7 @@ Thu Aug 12 15:24:28 1993  Fred Fish  (fnf@deneb.cygnus.com)
 	* Makefile.in (distclean):  Remove *.log *.plog *.sum *.psum site.*.
 
 	* gdb.t17/interrupt.exp:  Fix 'missing Continuing' case so pattern
-	to match does not match the passing case but still matches the 
+	to match does not match the passing case but still matches the
 	failing case.
 
 Thu Aug 12 16:58:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
@@ -10420,7 +11608,7 @@ Thu Mar 25 21:05:16 1993  Fred Fish  (fnf@cygnus.com)
 	* gdb.t10/crossload.exp:  Disable the i860-elf test until such
 	time as i860 support works.
 
-	* gdb.t15/funcargs.exp:  Fix expected outputs to include 
+	* gdb.t15/funcargs.exp:  Fix expected outputs to include
 	"backtrace 100\r" rather than just "backtrace\r", to match last
 	change.
 
@@ -10599,7 +11787,7 @@ Wed Feb 24 08:03:38 1993  Fred Fish  (fnf@cygnus.com)
 	* gdb.t31/chillvars.exp (test_strings):  Expect "CHAR" now, rather
 	than "char".
 	* gdb.t31/in-gdbme.ch (simple_struct, nested_struct, struct1,
-	struct2):  New struct definitions and initializations to test 
+	struct2):  New struct definitions and initializations to test
 	simple Chill STRUCT types.
 
 Tue Feb 23 11:55:06 1993  Fred Fish  (fnf@cygnus.com)
@@ -10640,6 +11828,8 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 	of dejagnu.  The modifications to these testcases, etc., which
 	will allow them to work with the new version of dejagnu will be
 	made in a future update.
+
+For additional changes see gdb.mi/ChangeLog-1999-2003.
 
 Local Variables:
 mode: change-log

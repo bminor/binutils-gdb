@@ -1,4 +1,7 @@
-#   Copyright 1997, 1999, 2000 Free Software Foundation, Inc.
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+# 1999, 2000, 2001, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,27 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
-#   Copyright (C) 1988, 1990, 1991, 1992, 1994, 1995
-#   Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
+# bug-gdb@gnu.org
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
@@ -139,7 +122,7 @@ proc test_set { args } {
 
 test_set "set variable v_char=0" "print v_char" ".\[0-9\]* = 0 \'.0\'"        "set variable char=0" 
 test_set "set variable v_char=1" "print v_char" ".\[0-9\]* = 1 \'.001\'"        "set variable char=1" 
-test_set "set variable v_char=27" "print v_char" ".\[0-9\]* = 27 \'.e\'"        "set variable char=27 (Esc)" 
+test_set "set variable v_char=7" "print v_char" ".\[0-9\]* = 7 \'.a\'"        "set variable char=7 (Bel)" 
 test_set "set variable v_char=32" "print v_char" ".\[0-9\]* = 32 \' \'"        "set variable char=32 (SPC)" 
 test_set "set variable v_char=65" "print v_char" ".\[0-9\]* = 65 \'A\'"        "set variable char=65 ('A')" 
 test_set "set variable v_char=97" "print v_char" ".\[0-9\]* = 97 \'a\'"        "set variable char=97 ('a')" 
@@ -150,7 +133,7 @@ test_set "set variable v_char=127" "print v_char" ".\[0-9\]* = 127 \'.177\'"    
 #    
 test_set "set variable v_char=0" "print v_signed_char" ".\[0-9\]* = 0 \'.0\'"                 "set variable signed char=0" 
 test_set "set variable v_signed_char=1" "print v_signed_char" ".\[0-9\]* = 1 \'.001\'"        "set variable signed char=1" 
-test_set "set variable v_signed_char=27" "print v_signed_char" ".\[0-9\]* = 27 \'.e\'"        "set variable signed char=27 (Esc)" 
+test_set "set variable v_signed_char=7" "print v_signed_char" ".\[0-9\]* = 7 \'.a\'"        "set variable signed char=7 (Bel)" 
 test_set "set variable v_signed_char=32" "print v_signed_char" ".\[0-9\]* = 32 \' \'"        "set variable signed char=32 (SPC)" 
 test_set "set variable v_signed_char=65" "print v_signed_char" ".\[0-9\]* = 65 \'A\'"        "set variable signed char=65 ('A')" 
 test_set "set variable v_signed_char=97" "print v_signed_char" ".\[0-9\]* = 97 \'a\'"        "set variable signed char=97 ('a')" 
@@ -169,7 +152,7 @@ gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
 #
 test_set "set variable v_unsigned_char=0" "print v_unsigned_char" ".\[0-9\]* = 0 \'.0\'"        "set variable unsigned char=0" 
 test_set "set variable v_unsigned_char=1" "print v_unsigned_char" ".\[0-9\]* = 1 \'.001\'"        "set variable unsigned char=1" 
-test_set "set variable v_unsigned_char=27" "print v_unsigned_char" ".\[0-9\]* = 27 \'.e\'"        "set variable unsigned char=27 (Esc)" 
+test_set "set variable v_unsigned_char=7" "print v_unsigned_char" ".\[0-9\]* = 7 \'.a\'"        "set variable unsigned char=7 (Bel)" 
 test_set "set variable v_unsigned_char=32" "print v_unsigned_char" ".\[0-9\]* = 32 \' \'"        "set variable unsigned char=32 (SPC)" 
 test_set "set variable v_unsigned_char=65" "print v_unsigned_char" ".\[0-9\]* = 65 \'A\'"        "set variable unsigned char=65 ('A')" 
 test_set "set variable v_unsigned_char=97" "print v_unsigned_char" ".\[0-9\]* = 97 \'a\'"        "set variable unsigned char=97 ('a')" 
@@ -329,12 +312,8 @@ gdb_test "print *(v_signed_short_pointer+1)" ".\[0-9\]*.*=.*-456"
 gdb_test "set v_unsigned_short_pointer=v_unsigned_short_array" ""
 gdb_test "set variable *(v_unsigned_short_pointer)=123" ""
 gdb_test "set variable *(v_unsigned_short_pointer+1)=-456" ""
-# DTS 10060CLLbs - bad type info from cc
-if {$hp_cc_compiler} {setup_xfail hppa*-*-*11* 10060CLLbs}
 gdb_test "print v_unsigned_short_array" ".\[0-9\]* =.*\\{123,.*65080\\}" \
     "set variable unsigned short pointer"
-# DTS 10060CLLbs - bad type info from cc
-if {$hp_cc_compiler} {setup_xfail hppa*-*-*11* 10060CLLbs}
 gdb_test "print *(v_unsigned_short_pointer+1)" ".\[0-9\]* = 65080"
 #
 # test "set variable" for type "int *"

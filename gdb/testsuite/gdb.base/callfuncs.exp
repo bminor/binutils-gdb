@@ -1,5 +1,5 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-# Free Software Foundation, Inc.
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+# 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -95,7 +95,6 @@ proc set_lang_c {} {
 
 proc do_function_calls {} {
     global prototypes
-    global gcc_compiled
     global gdb_prompt
 
     # We need to up this because this can be really slow on some boards.
@@ -149,7 +148,7 @@ proc do_function_calls {} {
 	# to be a generic problem on quite a few platforms.
 	if $prototypes then {
 	    setup_xfail "sparc-*-*" "mips*-*-*" 5318
-	    if {!$gcc_compiled} then {
+	    if { ! [test_compiler_info gcc-*-*] } then {
 		setup_xfail "alpha-dec-osf2*" "i*86-*-sysv4*" 5318
 	    }
 	}
@@ -182,30 +181,27 @@ proc do_function_calls {} {
     gdb_test "p t_func_values(func_val2,func_val1)" " = 0"
     gdb_test "p t_func_values(func_val1,func_val2)" " = 1"
 
-    # On the rs6000, we need to pass the address of the trampoline routine,
-    # not the address of add itself.  I don't know how to go from add to
-    # the address of the trampoline.  Similar problems exist on the HPPA,
-    # and in fact can present an unsolvable problem as the stubs may not
-    # even exist in the user's program.  We've slightly recoded t_func_values
-    # to avoid such problems in the common case.  This may or may not help
-    # the RS6000.
-    setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
-    if {![istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_func_values(add,func_val2)" " = 1"
-    }
-
-    setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
-    if {![istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
-    }
-
-    setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
-    if {![istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_call_add(add,3,4)" " = 7"
-    }
+    # GDB currently screws up the passing of function parameters for
+    # ABIs that use function descriptors.  Instead of passing the
+    # address of te function descriptor, GDB passes the address of the
+    # function body.  This results in the called function treating the
+    # first few instructions of the function proper as a descriptor
+    # and attempting a jump through that (a totally random address).
+    setup_kfail "rs6000*-*-aix*" gdb/1457
+    setup_kfail "powerpc*-*-aix*" gdb/1457
+    setup_kfail "powerpc64*-*-*" gdb/1457
+    setup_kfail hppa*-*-hpux* gdb/1457
+    gdb_test "p t_func_values(add,func_val2)" " = 1"
+    setup_kfail "rs6000*-*-aix*" gdb/1457
+    setup_kfail "powerpc*-*-aix*" gdb/1457
+    setup_kfail "powerpc64*-*-*" gdb/1457
+    setup_kfail hppa*-*-hpux* gdb/1457
+    gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
+    setup_kfail "rs6000*-*-aix*" gdb/1457
+    setup_kfail "powerpc*-*-aix*" gdb/1457
+    setup_kfail "powerpc64*-*-*" gdb/1457
+    setup_kfail hppa*-*-hpux* gdb/1457
+    gdb_test "p t_call_add(add,3,4)" " = 7"
     gdb_test "p t_call_add(func_val1,3,4)" " = 7"
 
     gdb_test "p t_enum_value1(enumval1)" " = 1"
@@ -228,7 +224,7 @@ proc do_function_calls {} {
     gdb_test "p t_structs_c(struct_val1)" "= 120 'x'" \
 	"call inferior func with struct - returns char"
     gdb_test "p t_structs_s(struct_val1)" "= 87" \
-	"call inferior func with struct -  returns short"
+	"call inferior func with struct - returns short"
     gdb_test "p t_structs_i(struct_val1)" "= 76" \
 	"call inferior func with struct - returns int"
     gdb_test "p t_structs_l(struct_val1)" "= 51" \

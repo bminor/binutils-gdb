@@ -1,4 +1,4 @@
-#   Copyright 1998, 1999, 2000, 2001
+#   Copyright 1998, 1999, 2000, 2001, 2004
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -89,8 +89,6 @@ proc set_lang_c {} {
     }
 }
 
-source ${binfile}.ci
-
 # Start with a fresh gdb.
 
 gdb_exit
@@ -106,6 +104,8 @@ if ![runto_main] then {
     perror "couldn't run to breakpoint"
     continue
 }
+
+get_debug_format
 
 #go -until 1209
 gdb_test "tbreak 1209" \
@@ -502,11 +502,14 @@ set ws "\[\n\r\t \]+"
 
 if {![gdb_skip_float_test "print_small_structs from print_long_arg_list"] && \
     ![gdb_skip_stdio_test "print_small_structs from print_long_arg_list"] } {
-    # On Solaris, some of the args are passed by ref, others by value,
-    # and GDB gets confused and says "Invalid cast" because it thinks
-    # it has to cast the structure into a pointer to structure.  A real
-    # GDB bug, probably for all Sparc configs, but obscure. -sts 1999-08-17.
-    setup_xfail "sparc*-*-solaris*"
+
+    # On 32-bit SPARC, some of the args are passed by ref, others by
+    # value, and GDB gets confused and says "Invalid cast" because it
+    # thinks it has to cast the structure into a pointer to structure.
+    if { [test_debug_format "stabs"] } then {
+	setup_kfail "gdb/1539" "sparc-*-*"
+    }
+
     send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
     gdb_expect_list "print print_small_structs from print_long_arg_list" ".*$gdb_prompt $" {
 	"\[\t\r\n \]+alpha"

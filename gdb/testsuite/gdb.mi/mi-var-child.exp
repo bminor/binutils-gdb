@@ -1,4 +1,4 @@
-#   Copyright (C) 1999, 2000, 2002 Free Software Foundation
+#   Copyright (C) 1999, 2000, 2002, 2004 Free Software Foundation
 
 # This Program Is Free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -833,6 +833,9 @@ mi_gdb_test "-var-update *" \
 	"\\^done,changelist=\\\[\{name=\"struct_declarations.long_array.3\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.4\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.5\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.6\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.7\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.8\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.9\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
 	"update all vars struct_declarations.long_array.3-9 changed"
 
+mi_gdb_test "-var-list-children --all-values struct_declarations.long_array" \
+        "\\^done,numchild=\"10\",children=\\\[child=\{name=\"struct_declarations.long_array.0\",exp=\"0\",numchild=\"0\",value=\"1234\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.1\",exp=\"1\",numchild=\"0\",value=\"2345\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.2\",exp=\"2\",numchild=\"0\",value=\"3456\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.3\",exp=\"3\",numchild=\"0\",value=\"4567\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.4\",exp=\"4\",numchild=\"0\",value=\"5678\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.5\",exp=\"5\",numchild=\"0\",value=\"6789\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.6\",exp=\"6\",numchild=\"0\",value=\"7890\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.7\",exp=\"7\",numchild=\"0\",value=\"8901\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.8\",exp=\"8\",numchild=\"0\",value=\"9012\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.9\",exp=\"9\",numchild=\"0\",value=\"1234\",type=\"long int\"\}\\\]" \
+                "listing of names and values of children"
 
 # Step over "weird->func_ptr = nothing;"
 set line 211

@@ -66,7 +66,9 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_test "set print sevenbit-strings" ".*"
 
 if ![set_lang_java] then {
-    runto ${testfile}.main
+    # Ref PR gdb:java/1565.  Don't use the simpler "break jmisc.main".
+    # As of 2004-02-24 it wasn't working and is being tested separatly.
+    runto "\'${testfile}.main(java.lang.String\[\])\'"
 
     send_gdb "ptype jmisc\n"   
     gdb_expect {   

@@ -1,4 +1,4 @@
-/* Copyright 2003 Free Software Foundation, Inc.
+/* Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,12 +13,23 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+   */
 
-   Please email any bugs, comments, and/or additions to this file to:
-   bug-gdb@prep.ai.mit.edu  */
+
 
 namespace C
 {
+  class OtherFileClass {
+  public:
+    int z;
+  };
+
+  void ensureOtherRefs () {
+    // NOTE (2004-04-23, carlton): This function is here only to make
+    // sure that GCC 3.4 outputs debug info for this class.
+    static OtherFileClass *c = new OtherFileClass();
+  }
+
   namespace {
     int cXOtherFile = 29;
   };

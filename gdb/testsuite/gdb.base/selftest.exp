@@ -95,6 +95,9 @@ proc do_steps_and_nexts {} {
 		set command "next"
 	    }
 	    -re ".*START_PROGRESS.*$gdb_prompt $" {
+		# Note: ezannoni/2004/02/17: This check should be
+		# removed, since as of today that source line is not
+		# in gdb anymore.
 		set description "next over START_PROGRESS and everything it calls"
 		set command "next"
 	    }
@@ -342,6 +345,11 @@ proc test_with_self { executable } {
 	    send_gdb "step\n"
 	    exp_continue
 	}
+        -re ".*cmdarg = .* xmalloc.*$gdb_prompt $" {
+	    set stepped_back 1
+	    send_gdb "step\n"
+	    exp_continue
+        }
 	-re "dirsize = 1;.*$gdb_prompt $" {
 	    set stepped_back 1
 	    send_gdb "step\n"

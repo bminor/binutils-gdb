@@ -1,4 +1,4 @@
-# Copyright 2000 Free Software Foundation, Inc.
+# Copyright 2000, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ proc finish_void { } {
 proc finish_tests { } {
     global gdb_prompt
 
-    if { ! [ runto main ] } then {
+    if { ! [ runto_main ] } then {
 	gdb_suppress_entire_file "Run to main failed, so all tests in this file will automatically fail."
     }
 

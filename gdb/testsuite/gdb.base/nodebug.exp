@@ -1,4 +1,4 @@
-#   Copyright 1997, 1999 Free Software Foundation, Inc.
+# Copyright 1997, 1999, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,8 +39,6 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
-source ${binfile}.ci
-
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
@@ -67,7 +65,7 @@ if [runto inner] then {
     # even without -g, which should be accepted.
     # Irix5, even though it is ELF, counts as "ecoff" because it
     # encapsulates ecoff debugging info in a .mdebug section.
-    # Irix6 gcc omits no debug info at all for static functions and
+    # Irix6 gcc emits no debug info at all for static functions and
     # variables, so all tests involving statics fail.
     
     if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }

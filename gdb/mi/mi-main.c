@@ -1,5 +1,8 @@
 /* MI Command Set.
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
+   Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -405,14 +408,14 @@ register_changed_p (int regnum)
   if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     return -1;
 
-  if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	      REGISTER_RAW_SIZE (regnum)) == 0)
+  if (memcmp (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
+	      DEPRECATED_REGISTER_RAW_SIZE (regnum)) == 0)
     return 0;
 
   /* Found a changed register. Return 1. */
 
-  memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	  REGISTER_RAW_SIZE (regnum));
+  memcpy (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
+	  DEPRECATED_REGISTER_RAW_SIZE (regnum));
 
   return 1;
 }
@@ -537,14 +540,15 @@ get_register (int regnum, int format)
 
   /* Convert raw data to virtual format if necessary.  */
 
-  if (DEPRECATED_REGISTER_CONVERTIBLE (regnum))
+  if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
+      && DEPRECATED_REGISTER_CONVERTIBLE (regnum))
     {
       DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum,
 				   register_type (current_gdbarch, regnum),
 				   raw_buffer, virtual_buffer);
     }
   else
-    memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (regnum));
+    memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 
   if (format == 'r')
     {
@@ -553,10 +557,10 @@ get_register (int regnum, int format)
 
       strcpy (buf, "0x");
       ptr = buf + 2;
-      for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
+      for (j = 0; j < DEPRECATED_REGISTER_RAW_SIZE (regnum); j++)
 	{
-	  register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
-	  : REGISTER_RAW_SIZE (regnum) - 1 - j;
+	  int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
+	  : DEPRECATED_REGISTER_RAW_SIZE (regnum) - 1 - j;
 	  sprintf (ptr, "%02x", (unsigned char) raw_buffer[idx]);
 	  ptr += 2;
 	}
@@ -642,7 +646,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  old_chain = make_cleanup (xfree, buffer);
 	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
 	  /* Write it down */
-	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
+	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum), buffer, DEPRECATED_REGISTER_RAW_SIZE (regnum));
 	  /* Free the buffer.  */
 	  do_cleanups (old_chain);
 	}
@@ -1485,6 +1489,6 @@ mi_setup_architecture_data (void)
 void
 _initialize_mi_main (void)
 {
-  register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
-  register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (old_regs);
+  deprecated_register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }

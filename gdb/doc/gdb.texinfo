@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002, 2003
+@c 1999, 2000, 2001, 2002, 2003, 2004
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -52,7 +52,7 @@ This is the @value{EDITION} Edition, of @cite{Debugging with
 Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
-              1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+              1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -84,7 +84,7 @@ development.''
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place - Suite 330, @*
@@ -115,7 +115,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, for @value{GDBN} Version
 @value{GDBVN}.
 
-Copyright (C) 1988-2003 Free Software Foundation, Inc.
+Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -192,7 +192,7 @@ Change things in your program, so you can experiment with correcting the
 effects of one bug and go on to learn about another.
 @end itemize
 
-You can use @value{GDBN} to debug programs written in C and C++.
+You can use @value{GDBN} to debug programs written in C and C@t{++}.
 For more information, see @ref{Support,,Supported languages}.
 For more information, see @ref{C,,C and C++}.
 
@@ -347,7 +347,7 @@ omitted from this list, we would like to add your names!
 So that they may not regard their many labors as thankless, we
 particularly thank those who shepherded @value{GDBN} through major
 releases:
-Andrew Cagney (releases 6.0, 5.3, 5.2, 5.1 and 5.0);
+Andrew Cagney (releases 6.1, 6.0, 5.3, 5.2, 5.1 and 5.0);
 Jim Blandy (release 4.18);
 Jason Molenda (release 4.17);
 Stan Shebs (release 4.14);
@@ -418,12 +418,13 @@ Fred Fish wrote most of the support for Unix System Vr4.
 He also enhanced the command-completion support to cover C@t{++} overloaded
 symbols.
 
-Hitachi America, Ltd. sponsored the support for H8/300, H8/500, and
-Super-H processors.
+Hitachi America (now Renesas America), Ltd. sponsored the support for
+H8/300, H8/500, and Super-H processors.
 
 NEC sponsored the support for the v850, Vr4xxx, and Vr5xxx processors.
 
-Mitsubishi sponsored the support for D10V, D30V, and M32R/D processors.
+Mitsubishi (now Renesas) sponsored the support for D10V, D30V, and M32R/D
+processors.
 
 Toshiba sponsored the support for the TX39 Mips processor.
 
@@ -860,7 +861,7 @@ equivalent to the @samp{-c}/@samp{-p} option followed by that argument.)
 If the second argument begins with a decimal digit, @value{GDBN} will
 first attempt to attach to it as a process, and if that fails, attempt
 to open it as a corefile.  If you have a corefile whose name begins with
-a digit, you can prevent @value{GDBN} from treating it as a pid by 
+a digit, you can prevent @value{GDBN} from treating it as a pid by
 prefixing it with @file{./}, eg. @file{./12345}.
 
 If @value{GDBN} has not been configured to included core file support,
@@ -900,7 +901,7 @@ file.
 @itemx -c @var{file}
 @cindex @code{--core}
 @cindex @code{-c}
-Use file @var{file} as a core dump to examine.  
+Use file @var{file} as a core dump to examine.
 
 @item -c @var{number}
 @item -pid @var{number}
@@ -1111,7 +1112,7 @@ Run using @var{device} for your program's standard input and output.
 @c resolve the situation of these eventually
 @item -tui
 @cindex @code{--tui}
-Activate the Terminal User Interface when starting. 
+Activate the Terminal User Interface when starting.
 The Terminal User Interface manages several text windows on the terminal,
 showing source, assembly, registers and @value{GDBN} command outputs
 (@pxref{TUI, ,@value{GDBN} Text User Interface}).
@@ -1134,10 +1135,10 @@ communicate with @value{GDBN} using it as a back end.
 
 @samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
 @value{GDBN} to use the @dfn{@sc{gdb/mi} interface} (@pxref{GDB/MI, ,
-The @sc{gdb/mi} Interface}) included in @var{GDBN} version 6.0.  The
-previous @sc{gdb/mi} interface, included in @value{GDBN} version 5.3,
-can be selected with @samp{--interpreter=mi1}.  Earlier @sc{gdb/mi}
-interfaces are not supported.
+The @sc{gdb/mi} Interface}) included since @var{GDBN} version 6.0.  The
+previous @sc{gdb/mi} interface, included in @value{GDBN} version 5.3 and
+selected with @samp{--interpreter=mi1}, is deprecated.  Earlier
+@sc{gdb/mi} interfaces are no longer supported.
 
 @item -write
 @cindex @code{--write}
@@ -2288,9 +2289,10 @@ get its process ID.  Then tell @value{GDBN} (a new invocation of
 the child process (@pxref{Attach}).  From that point on you can debug
 the child process just like any other process which you attached to.
 
-On HP-UX (11.x and later only?), @value{GDBN} provides support for
-debugging programs that create additional processes using the
-@code{fork} or @code{vfork} function.
+On some systems, @value{GDBN} provides support for debugging programs that
+create additional processes using the @code{fork} or @code{vfork} functions.
+Currently, the only platforms with this feature are HP-UX (11.x and later
+only?) and GNU/Linux (kernel version 2.5.60 and later).
 
 By default, when a program forks, @value{GDBN} will continue to debug
 the parent process and the child process will run unimpeded.
@@ -2314,8 +2316,6 @@ unimpeded.  This is the default.
 The new process is debugged after a fork.  The parent process runs
 unimpeded.
 
-@item ask
-The debugger will ask for one of the above choices.
 @end table
 
 @item show follow-fork-mode
@@ -2441,6 +2441,7 @@ all breakpoint in that range are operated on.
 * Break Commands::              Breakpoint command lists
 * Breakpoint Menus::            Breakpoint menus
 * Error in Breakpoints::        ``Cannot insert breakpoints''
+* Breakpoint related warnings:: ``Breakpoint address adjusted...''
 @end menu
 
 @node Set Breaks
@@ -2598,16 +2599,23 @@ Whether the breakpoint is marked to be disabled or deleted when hit.
 Enabled breakpoints are marked with @samp{y}.  @samp{n} marks breakpoints
 that are not enabled.
 @item Address
-Where the breakpoint is in your program, as a memory address.
+Where the breakpoint is in your program, as a memory address.  If the
+breakpoint is pending (see below for details) on a future load of a shared library, the address
+will be listed as @samp{<PENDING>}.
 @item What
 Where the breakpoint is in the source for your program, as a file and
-line number.
+line number.  For a pending breakpoint, the original string passed to
+the breakpoint command will be listed as it cannot be resolved until
+the appropriate shared library is loaded in the future.
 @end table
 
 @noindent
 If a breakpoint is conditional, @code{info break} shows the condition on
 the line following the affected breakpoint; breakpoint commands, if any,
-are listed after that.
+are listed after that.  A pending breakpoint is allowed to have a condition
+specified for it.  The condition is not parsed for validity until a shared
+library is loaded that allows the pending breakpoint to resolve to a
+valid location.
 
 @noindent
 @code{info break} with a breakpoint
@@ -2629,6 +2637,58 @@ will get you quickly to the last hit of that breakpoint.
 your program.  There is nothing silly or meaningless about this.  When
 the breakpoints are conditional, this is even useful
 (@pxref{Conditions, ,Break conditions}).
+
+@cindex pending breakpoints
+If a specified breakpoint location cannot be found, it may be due to the fact
+that the location is in a shared library that is yet to be loaded.  In such
+a case, you may want @value{GDBN} to create a special breakpoint (known as
+a @dfn{pending breakpoint}) that
+attempts to resolve itself in the future when an appropriate shared library
+gets loaded.
+
+Pending breakpoints are useful to set at the start of your
+@value{GDBN} session for locations that you know will be dynamically loaded
+later by the program being debugged.  When shared libraries are loaded,
+a check is made to see if the load resolves any pending breakpoint locations.
+If a pending breakpoint location gets resolved,
+a regular breakpoint is created and the original pending breakpoint is removed.
+
+@value{GDBN} provides some additional commands for controlling pending
+breakpoint support:
+
+@kindex set breakpoint pending
+@kindex show breakpoint pending
+@table @code
+@item set breakpoint pending auto
+This is the default behavior.  When @value{GDBN} cannot find the breakpoint
+location, it queries you whether a pending breakpoint should be created.
+
+@item set breakpoint pending on
+This indicates that an unrecognized breakpoint location should automatically
+result in a pending breakpoint being created.
+
+@item set breakpoint pending off
+This indicates that pending breakpoints are not to be created.  Any
+unrecognized breakpoint location results in an error.  This setting does
+not affect any pending breakpoints previously created.
+
+@item show breakpoint pending
+Show the current behavior setting for creating pending breakpoints.
+@end table
+
+@cindex operations allowed on pending breakpoints
+Normal breakpoint operations apply to pending breakpoints as well.  You may
+specify a condition for a pending breakpoint and/or commands to run when the
+breakpoint is reached.  You can also enable or disable
+the pending breakpoint.  When you specify a condition for a pending breakpoint,
+the parsing of the condition will be deferred until the point where the
+pending breakpoint location is resolved.  Disabling a pending breakpoint
+tells @value{GDBN} to not attempt to resolve the breakpoint on any subsequent
+shared library load.  When a pending breakpoint is re-enabled,
+@value{GDBN} checks to see if the location is already resolved.
+This is done because any number of shared library loads could have
+occurred since the time the breakpoint was disabled and one or more
+of these loads could resolve the location.
 
 @cindex negative breakpoint numbers
 @cindex internal @value{GDBN} breakpoints
@@ -3214,7 +3274,7 @@ end
 @cindex overloading
 @cindex symbol overloading
 
-Some programming languages (notably C@t{++} and Objective-C) permit a 
+Some programming languages (notably C@t{++} and Objective-C) permit a
 single function name
 to be defined several times, for application in different contexts.
 This is called @dfn{overloading}.  When a function name is overloaded,
@@ -3309,6 +3369,58 @@ watchpoints it needs to insert.
 When this message is printed, you need to disable or remove some of the
 hardware-assisted breakpoints and watchpoints, and then continue.
 
+@node Breakpoint related warnings
+@subsection ``Breakpoint address adjusted...''
+@cindex breakpoint address adjusted
+
+Some processor architectures place constraints on the addresses at
+which breakpoints may be placed.  For architectures thus constrained,
+@value{GDBN} will attempt to adjust the breakpoint's address to comply
+with the constraints dictated by the architecture.
+
+One example of such an architecture is the Fujitsu FR-V.  The FR-V is
+a VLIW architecture in which a number of RISC-like instructions may be
+bundled together for parallel execution.  The FR-V architecture
+constrains the location of a breakpoint instruction within such a
+bundle to the instruction with the lowest address.  @value{GDBN}
+honors this constraint by adjusting a breakpoint's address to the
+first in the bundle.
+
+It is not uncommon for optimized code to have bundles which contain
+instructions from different source statements, thus it may happen that
+a breakpoint's address will be adjusted from one source statement to
+another.  Since this adjustment may significantly alter @value{GDBN}'s
+breakpoint related behavior from what the user expects, a warning is
+printed when the breakpoint is first set and also when the breakpoint
+is hit.
+
+A warning like the one below is printed when setting a breakpoint
+that's been subject to address adjustment:
+
+@smallexample
+warning: Breakpoint address adjusted from 0x00010414 to 0x00010410.
+@end smallexample
+
+Such warnings are printed both for user settable and @value{GDBN}'s
+internal breakpoints.  If you see one of these warnings, you should
+verify that a breakpoint set at the adjusted address will have the
+desired affect.  If not, the breakpoint in question may be removed and
+other breakpoints may be set which will have the desired behavior.
+E.g., it may be sufficient to place the breakpoint at a later
+instruction.  A conditional breakpoint may also be useful in some
+cases to prevent the breakpoint from triggering too often.
+
+@value{GDBN} will also issue a warning when stopping at one of these
+adjusted breakpoints:
+
+@smallexample
+warning: Breakpoint 1 address previously adjusted from 0x00010414
+to 0x00010410.
+@end smallexample
+
+When this warning is encountered, it may be too late to take remedial
+action except in cases where the breakpoint is hit earlier or more
+frequently than expected.
 
 @node Continuing and Stepping
 @section Continuing and stepping
@@ -3706,6 +3818,47 @@ Whenever your program stops under @value{GDBN} for any reason,
 allows you to examine the overall state of the program, including
 switching between threads, without worrying that things may change
 underfoot.
+
+@cindex thread breakpoints and system calls
+@cindex system calls and thread breakpoints
+@cindex premature return from system calls
+There is an unfortunate side effect.  If one thread stops for a
+breakpoint, or for some other reason, and another thread is blocked in a
+system call, then the system call may return prematurely.  This is a
+consequence of the interaction between multiple threads and the signals
+that @value{GDBN} uses to implement breakpoints and other events that
+stop execution.
+
+To handle this problem, your program should check the return value of
+each system call and react appropriately.  This is good programming
+style anyways.
+
+For example, do not write code like this:
+
+@smallexample
+  sleep (10);
+@end smallexample
+
+The call to @code{sleep} will return early if a different thread stops
+at a breakpoint or for some other reason.
+
+Instead, write this:
+
+@smallexample
+  int unslept = 10;
+  while (unslept > 0)
+    unslept = sleep (unslept);
+@end smallexample
+
+A system call is allowed to return early, so the system is still
+conforming to its specification.  But @value{GDBN} does cause your
+multi-threaded program to behave differently than it would without
+@value{GDBN}.
+
+Also, @value{GDBN} uses internal breakpoints in the thread library to
+monitor certain events such as thread creation and thread destruction.
+When such an event happens, a system call in another thread may return
+prematurely, even though your program does not appear to stop.
 
 @cindex continuing threads
 @cindex threads, continuing
@@ -4590,6 +4743,7 @@ Table}.
 * Registers::                   Registers
 * Floating Point Hardware::     Floating point hardware
 * Vector Unit::                 Vector Unit
+* Auxiliary Vector::            Auxiliary data provided by operating system
 * Memory Region Attributes::    Memory region attributes
 * Dump/Restore Files::          Copy between memory and a file
 * Character Sets::              Debugging programs that use a different
@@ -5770,12 +5924,38 @@ Display information about the vector unit.  The exact contents and
 layout vary depending on the hardware.
 @end table
 
+@node Auxiliary Vector
+@section Operating system auxiliary vector
+@cindex auxiliary vector
+@cindex vector, auxiliary
+
+Some operating systems supply an @dfn{auxiliary vector} to programs at
+startup.  This is akin to the arguments and environment that you
+specify for a program, but contains a system-dependent variety of
+binary values that tell system libraries important details about the
+hardware, operating system, and process.  Each value's purpose is
+identified by an integer tag; the meanings are well-known but system-specific.
+Depending on the configuration and operating system facilities,
+@value{GDBN} may be able to show you this information.
+
+@table @code
+@kindex info auxv
+@item info auxv
+Display the auxiliary vector of the inferior, which can be either a
+live process or a core dump file.  @value{GDBN} prints each tag value
+numerically, and also shows names and text descriptions for recognized
+tags.  Some values in the vector are numbers, some bit masks, and some
+pointers to strings or other data.  @value{GDBN} displays each value in the
+most appropriate form for a recognized tag, and in hexadecimal for
+an unrecognized tag.
+@end table
+
 @node Memory Region Attributes
-@section Memory region attributes 
+@section Memory region attributes
 @cindex memory region attributes
 
-@dfn{Memory region attributes} allow you to describe special handling 
-required by regions of your target's memory.  @value{GDBN} uses attributes 
+@dfn{Memory region attributes} allow you to describe special handling
+required by regions of your target's memory.  @value{GDBN} uses attributes
 to determine whether to allow certain types of memory accesses; whether to
 use specific width accesses; and whether to cache target memory.
 
@@ -5785,7 +5965,7 @@ accessing memory in that region.  Similarly, if no memory regions have
 been defined, @value{GDBN} uses the default attributes when accessing
 all memory.
 
-When a memory region is defined, it is given a number to identify it; 
+When a memory region is defined, it is given a number to identify it;
 to enable, disable, or remove a memory region, you specify that number.
 
 @table @code
@@ -5803,7 +5983,7 @@ Remove memory regions @var{nums}@dots{}.
 @kindex disable mem
 @item disable mem @var{nums}@dots{}
 Disable memory regions @var{nums}@dots{}.
-A disabled memory region is not forgotten.  
+A disabled memory region is not forgotten.
 It may be enabled again later.
 
 @kindex enable mem
@@ -5818,7 +5998,7 @@ for each region.
 @table @emph
 @item Memory Region Number
 @item Enabled or Disabled.
-Enabled memory regions are marked with @samp{y}.  
+Enabled memory regions are marked with @samp{y}.
 Disabled memory regions are marked with @samp{n}.
 
 @item Lo Address
@@ -5835,7 +6015,7 @@ The list of attributes set for this memory region.
 
 @subsection Attributes
 
-@subsubsection Memory Access Mode 
+@subsubsection Memory Access Mode
 The access mode attributes set whether @value{GDBN} may make read or
 write accesses to a memory region.
 
@@ -5876,7 +6056,7 @@ Use 64 bit memory accesses.
 @c
 @c @table @code
 @c @item hwbreak
-@c Always use hardware breakpoints 
+@c Always use hardware breakpoints
 @c @item swbreak (default)
 @c @end table
 
@@ -5889,13 +6069,13 @@ registers.
 
 @table @code
 @item cache
-Enable @value{GDBN} to cache target memory. 
+Enable @value{GDBN} to cache target memory.
 @item nocache
 Disable @value{GDBN} from caching target memory.  This is the default.
 @end table
 
 @c @subsubsection Memory Write Verification
-@c The memory write verification attributes set whether @value{GDBN} 
+@c The memory write verification attributes set whether @value{GDBN}
 @c will re-reads data after each write to verify the write was successful.
 @c
 @c @table @code
@@ -5957,7 +6137,7 @@ Restore the contents of file @var{filename} into memory.  The
 file format, except for raw binary.  To restore a raw binary file you
 must specify the optional keyword @code{binary} after the filename.
 
-If @var{bias} is non-zero, its value will be added to the addresses 
+If @var{bias} is non-zero, its value will be added to the addresses
 contained in the file.  Binary files always start at address zero, so
 they will be restored at address @var{bias}.  Other bfd files have
 a built-in location; they will be restored at offset @var{bias}
@@ -5965,7 +6145,7 @@ from that location.
 
 If @var{start} and/or @var{end} are non-zero, then only data between
 file offset @var{start} and file offset @var{end} will be restored.
-These offsets are relative to the addresses in the file, before 
+These offsets are relative to the addresses in the file, before
 the @var{bias} argument is applied.
 
 @end table
@@ -6036,15 +6216,15 @@ for both host and target.
 
 @item show charset
 @kindex show charset
-Show the names of the current host and target charsets. 
+Show the names of the current host and target charsets.
 
 @itemx show host-charset
 @kindex show host-charset
-Show the name of the current host charset. 
+Show the name of the current host charset.
 
 @itemx show target-charset
 @kindex show target-charset
-Show the name of the current target charset. 
+Show the name of the current target charset.
 
 @end table
 
@@ -6111,7 +6291,7 @@ $ gdb -nw charset-test
 GNU gdb 2001-12-19-cvs
 Copyright 2001 Free Software Foundation, Inc.
 @dots{}
-(gdb) 
+(gdb)
 @end smallexample
 
 We can use the @code{show charset} command to see what character sets
@@ -6121,7 +6301,7 @@ strings:
 @smallexample
 (gdb) show charset
 The current host and target character set is `ISO-8859-1'.
-(gdb) 
+(gdb)
 @end smallexample
 
 For the sake of printing this manual, let's use @sc{ascii} as our
@@ -6130,7 +6310,7 @@ initial character set:
 (gdb) set charset ASCII
 (gdb) show charset
 The current host and target character set is `ASCII'.
-(gdb) 
+(gdb)
 @end smallexample
 
 Let's assume that @sc{ascii} is indeed the correct character set for our
@@ -6144,7 +6324,7 @@ them properly.  Since our current target character set is also
 $1 = 0x401698 "Hello, world!\n"
 (gdb) print ascii_hello[0]
 $2 = 72 'H'
-(gdb) 
+(gdb)
 @end smallexample
 
 @value{GDBN} uses the target character set for character and string
@@ -6153,7 +6333,7 @@ literals you use in expressions:
 @smallexample
 (gdb) print '+'
 $3 = 43 '+'
-(gdb) 
+(gdb)
 @end smallexample
 
 The @sc{ascii} character set uses the number 43 to encode the @samp{+}
@@ -6168,7 +6348,7 @@ character set is still @sc{ascii}, we get jibberish:
 $4 = 0x4016a8 "\310\205\223\223\226k@@\246\226\231\223\204Z%"
 (gdb) print ibm1047_hello[0]
 $5 = 200 '\310'
-(gdb) 
+(gdb)
 @end smallexample
 
 If we invoke the @code{set target-charset} followed by @key{TAB}@key{TAB},
@@ -6176,8 +6356,8 @@ If we invoke the @code{set target-charset} followed by @key{TAB}@key{TAB},
 
 @smallexample
 (gdb) set target-charset
-ASCII       EBCDIC-US   IBM1047     ISO-8859-1  
-(gdb) set target-charset 
+ASCII       EBCDIC-US   IBM1047     ISO-8859-1
+(gdb) set target-charset
 @end smallexample
 
 We can select @sc{ibm1047} as our target character set, and examine the
@@ -6208,7 +6388,7 @@ string literals you use in expressions:
 @smallexample
 (gdb) print '+'
 $10 = 78 '+'
-(gdb) 
+(gdb)
 @end smallexample
 
 The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
@@ -6218,7 +6398,7 @@ character.
 @node Macros
 @chapter C Preprocessor Macros
 
-Some languages, such as C and C++, provide a way to define and invoke
+Some languages, such as C and C@t{++}, provide a way to define and invoke
 ``preprocessor macros'' which expand into strings of tokens.
 @value{GDBN} can evaluate expressions containing macro invocations, show
 the result of macro expansion, and show a macro's definition, including
@@ -6379,7 +6559,7 @@ Defined at /home/jimb/gdb/macros/play/sample.h:1
 expands to: (42 + 1)
 (gdb) macro expand-once ADD(1)
 expands to: once (M + 1)
-(gdb) 
+(gdb)
 @end smallexample
 
 In the example above, note that @command{macro expand-once} expands only
@@ -6394,11 +6574,11 @@ the source line of the current stack frame:
 (gdb) break main
 Breakpoint 1 at 0x8048370: file sample.c, line 10.
 (gdb) run
-Starting program: /home/jimb/gdb/macros/play/sample 
+Starting program: /home/jimb/gdb/macros/play/sample
 
 Breakpoint 1, main () at sample.c:10
 10        printf ("Hello, world!\n");
-(gdb) 
+(gdb)
 @end smallexample
 
 At line 10, the definition of the macro @code{N} at line 9 is in force:
@@ -6411,7 +6591,7 @@ Defined at /home/jimb/gdb/macros/play/sample.c:9
 expands to: 28 < 42
 (gdb) print N Q M
 $1 = 1
-(gdb) 
+(gdb)
 @end smallexample
 
 As we step over directives that remove @code{N}'s definition, and then
@@ -6435,7 +6615,7 @@ Defined at /home/jimb/gdb/macros/play/sample.c:13
 expands to: 1729 < 42
 (gdb) print N Q M
 $2 = 0
-(gdb) 
+(gdb)
 @end smallexample
 
 
@@ -6474,9 +6654,9 @@ tracepoints as of this writing.
 This chapter describes the tracepoint commands and features.
 
 @menu
-* Set Tracepoints::         
-* Analyze Collected Data::      
-* Tracepoint Variables::        
+* Set Tracepoints::
+* Analyze Collected Data::
+* Tracepoint Variables::
 @end menu
 
 @node Set Tracepoints
@@ -6501,12 +6681,12 @@ This section describes commands to set tracepoints and associated
 conditions and actions.
 
 @menu
-* Create and Delete Tracepoints::  
-* Enable and Disable Tracepoints::  
-* Tracepoint Passcounts::       
-* Tracepoint Actions::          
-* Listing Tracepoints::         
-* Starting and Stopping Trace Experiment::  
+* Create and Delete Tracepoints::
+* Enable and Disable Tracepoints::
+* Tracepoint Passcounts::
+* Tracepoint Actions::
+* Listing Tracepoints::
+* Starting and Stopping Trace Experiment::
 @end menu
 
 @node Create and Delete Tracepoints
@@ -6605,7 +6785,7 @@ user.
 Examples:
 
 @smallexample
-(@value{GDBP}) @b{passcount 5 2} // Stop on the 5th execution of 
+(@value{GDBP}) @b{passcount 5 2} // Stop on the 5th execution of
 @exdent @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @code{// tracepoint 2}
 
 (@value{GDBP}) @b{passcount 12}  // Stop on the 12th execution of the
@@ -7317,7 +7497,7 @@ name normally:
 
 @smallexample
 (gdb) overlay list
-Section .ov.foo.text, loaded at 0x100000 - 0x100034, 
+Section .ov.foo.text, loaded at 0x100000 - 0x100034,
         mapped at 0x1016 - 0x104a
 (gdb) print foo
 $6 = @{int (int)@} 0x1016 <foo>
@@ -7400,7 +7580,7 @@ will silently set a breakpoint there.  If the overlay manager then
 calls this function whenever it has changed the overlay table, this
 will enable @value{GDBN} to accurately keep track of which overlays
 are in program memory, and update any breakpoints that may be set
-in overlays.  This will allow breakpoints to work even if the 
+in overlays.  This will allow breakpoints to work even if the
 overlays are kept in ROM or other non-writable memory while they
 are not being executed.
 
@@ -7832,7 +8012,7 @@ language reference or tutorial.
 
 @menu
 * C::                           C and C@t{++}
-* Objective-C::                 Objective-C             
+* Objective-C::                 Objective-C
 * Modula-2::                    Modula-2
 @end menu
 
@@ -8358,8 +8538,8 @@ This section provides information about some commands and command
 options that are useful for debugging Objective-C code.
 
 @menu
-* Method Names in Commands::    
-* The Print Command with Objective-C::  
+* Method Names in Commands::
+* The Print Command with Objective-C::
 @end menu
 
 @node Method Names in Commands, The Print Command with Objective-C, Objective-C, Objective-C
@@ -8387,12 +8567,13 @@ A fully qualified Objective-C method name is specified as
 -[@var{Class} @var{methodName}]
 @end smallexample
 
-where the minus sign is used to indicate an instance method and a plus
-sign (not shown) is used to indicate a class method. The
-class name @var{Class} and method name @var{methoName} are enclosed in
-brackets, similar to the way messages are specified in Objective-C source
-code. For example, to set a breakpoint at the @code{create} instance method of 
-class @code{Fruit} in the program currently being debugged, enter:
+where the minus sign is used to indicate an instance method and a
+plus sign (not shown) is used to indicate a class method.  The class
+name @var{Class} and method name @var{methodName} are enclosed in
+brackets, similar to the way messages are specified in Objective-C
+source code.  For example, to set a breakpoint at the @code{create}
+instance method of class @code{Fruit} in the program currently being
+debugged, enter:
 
 @smallexample
 break -[Fruit create]
@@ -8405,10 +8586,10 @@ enter:
 list +[NSText initialize]
 @end smallexample
 
-In the current version of GDB, the plus or minus sign is required.  In
-future versions of GDB, the plus or minus sign will be optional, but you
-can use it to narrow the search.  It is also possible to specify just a
-method name:
+In the current version of @value{GDBN}, the plus or minus sign is
+required.  In future versions of @value{GDBN}, the plus or minus
+sign will be optional, but you can use it to narrow the search.  It
+is also possible to specify just a method name:
 
 @smallexample
 break create
@@ -8429,20 +8610,24 @@ clear -[NSWindow makeKeyAndOrderFront:]
 
 @node The Print Command with Objective-C
 @subsubsection The Print Command With Objective-C
+@kindex print-object
+@kindex po @r{(@code{print-object})}
 
-The print command has also been extended to accept methods. For example:
+The print command has also been extended to accept methods.  For example:
 
 @smallexample
-print -[object hash]
+print -[@var{object} hash]
 @end smallexample
 
 @cindex print an Objective-C object description
-will tell gdb to send the -hash message to object and print the
-result. Also an additional command has been added, @code{print-object}
-or @code{po} for short, which is meant to print the description of an
-object. However, this command may only work with certain Objective-C
-libraries that have a particular hook function, called
-@code{_NSPrintForDebugger} defined.
+@cindex @code{_NSPrintForDebugger}, and printing Objective-C objects
+@noindent
+will tell @value{GDBN} to send the @code{hash} message to @var{object}
+and print the result.  Also, an additional command has been added,
+@code{print-object} or @code{po} for short, which is meant to print
+the description of an object.  However, this command may only work
+with certain Objective-C libraries that have a particular hook
+function, @code{_NSPrintForDebugger}, defined.
 
 @node Modula-2,  , Objective-C, Support
 @subsection Modula-2
@@ -9086,8 +9271,8 @@ Print the names and data types of all defined functions
 whose names contain a match for regular expression @var{regexp}.
 Thus, @samp{info fun step} finds all functions whose names
 include @code{step}; @samp{info fun ^step} finds those whose names
-start with @code{step}.  If a function name contains characters 
-that conflict with the regular expression language (eg. 
+start with @code{step}.  If a function name contains characters
+that conflict with the regular expression language (eg.
 @samp{operator*()}), they may be quoted with a backslash.
 
 @kindex info variables
@@ -9218,7 +9403,7 @@ structure in more detail.  For example:
 (@value{GDBP}) maint info psymtabs dwarf2read
 @{ objfile /home/gnu/build/gdb/gdb
   ((struct objfile *) 0x82e69d0)
-  @{ psymtab /home/gnu/src/gdb/dwarf2read.c 
+  @{ psymtab /home/gnu/src/gdb/dwarf2read.c
     ((struct partial_symtab *) 0x8474b10)
     readin no
     fullname (null)
@@ -9243,9 +9428,9 @@ read the symtab for the compilation unit containing that function:
 Breakpoint 1 at 0x814e5da: file /home/gnu/src/gdb/dwarf2read.c,
 line 1574.
 (@value{GDBP}) maint info symtabs
-@{ objfile /home/gnu/build/gdb/gdb 
+@{ objfile /home/gnu/build/gdb/gdb
   ((struct objfile *) 0x82e69d0)
-  @{ symtab /home/gnu/src/gdb/dwarf2read.c 
+  @{ symtab /home/gnu/src/gdb/dwarf2read.c
     ((struct symtab *) 0x86c1f38)
     dirname (null)
     fullname (null)
@@ -9253,7 +9438,7 @@ line 1574.
     debugformat DWARF 2
   @}
 @}
-(@value{GDBP}) 
+(@value{GDBP})
 @end smallexample
 @end table
 
@@ -9767,7 +9952,7 @@ Some embedded operating systems, like Sun Chorus and VxWorks, can load
 relocatable files into an already running program; such systems
 typically make the requirements above easy to meet.  However, it's
 important to recognize that many native systems use complex link
-procedures (@code{.linkonce} section factoring and C++ constructor table
+procedures (@code{.linkonce} section factoring and C@t{++} constructor table
 assembly, for example) that make the requirements difficult to meet.  In
 general, one cannot assume that using @code{add-symbol-file} to read a
 relocatable object file's symbolic information will have the same effect
@@ -10481,7 +10666,7 @@ specifies a fixed address.
 @cindex choosing target byte order
 @cindex target byte order
 
-Some types of processors, such as the MIPS, PowerPC, and Hitachi SH,
+Some types of processors, such as the MIPS, PowerPC, and Renesas SH,
 offer the ability to run either big-endian or little-endian byte
 orders.  Usually the executable or symbol will include a bit to
 designate the endian-ness, and you will not need to worry about
@@ -10533,9 +10718,7 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 
 @node KOD
 @section Kernel Object Display
-
 @cindex kernel object display
-@cindex kernel object
 @cindex KOD
 
 Some targets support kernel object display.  Using this facility,
@@ -10544,6 +10727,7 @@ and can display information about operating system-level objects such as
 mutexes and other synchronization objects.  Exactly which objects can be
 displayed is determined on a per-OS basis.
 
+@kindex set os
 Use the @code{set os} command to set the operating system.  This tells
 @value{GDBN} which kernel object display module to initialize:
 
@@ -10551,11 +10735,17 @@ Use the @code{set os} command to set the operating system.  This tells
 (@value{GDBP}) set os cisco
 @end smallexample
 
+@kindex show os
+The associated command @code{show os} displays the operating system
+set with the @code{set os} command; if no operating system has been
+set, @code{show os} will display an empty string @samp{""}.
+
 If @code{set os} succeeds, @value{GDBN} will display some information
 about the operating system, and will create a new @code{info} command
 which can be used to query the target.  The @code{info} command is named
 after the operating system:
 
+@kindex info cisco
 @smallexample
 (@value{GDBP}) info cisco
 List of Cisco Kernel Objects
@@ -10566,8 +10756,10 @@ any        Any and all objects
 Further subcommands can be used to query about particular objects known
 by the kernel.
 
-There is currently no way to determine whether a given operating system
-is supported other than to try it.
+There is currently no way to determine whether a given operating
+system is supported other than to try setting it with @kbd{set os
+@var{name}}, where @var{name} is the name of the operating system you
+want to try.
 
 
 @node Remote Debugging
@@ -10928,9 +11120,9 @@ For Motorola 680x0 architectures.
 
 @item sh-stub.c
 @cindex @file{sh-stub.c}
-@cindex Hitachi
+@cindex Renesas
 @cindex SH
-For Hitachi SH architectures.
+For Renesas SH architectures.
 
 @item sparc-stub.c
 @cindex @file{sparc-stub.c}
@@ -11348,10 +11540,10 @@ accepts addresses which may belong to @emph{any} segment.  For
 example, here's how to display the Page Table entry for the page where
 the variable @code{i} is stored:
 
-@smallexample 
+@smallexample
 @exdent @code{(@value{GDBP}) info dos address-pte __djgpp_base_address + (char *)&i}
 @exdent @code{Page Table entry for address 0x11a00d30:}
-@exdent @code{Base=0x02698000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0xd30} 
+@exdent @code{Base=0x02698000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0xd30}
 @end smallexample
 
 @noindent
@@ -11420,9 +11612,9 @@ This is a Cygwin specific alias of info shared.
 This command loads symbols from a dll similarly to
 add-sym command but without the need to specify a base address.
 
-@kindex set new-console 
+@kindex set new-console
 @item set new-console @var{mode}
-If @var{mode} is @code{on} the debuggee will 
+If @var{mode} is @code{on} the debuggee will
 be started in a new console on next start.
 If @var{mode} is @code{off}i, the debuggee will
 be started in the same console as the debugger.
@@ -11449,17 +11641,17 @@ This boolean value adds debug output concerning events seen by the debugger.
 
 @kindex set debugexec
 @item set debugexec
-This boolean value adds debug output concerning execute events 
+This boolean value adds debug output concerning execute events
 seen by the debugger.
 
 @kindex set debugexceptions
 @item set debugexceptions
-This boolean value adds debug ouptut concerning exception events 
+This boolean value adds debug ouptut concerning exception events
 seen by the debugger.
 
 @kindex set debugmemory
 @item set debugmemory
-This boolean value adds debug ouptut concerning memory events 
+This boolean value adds debug ouptut concerning memory events
 seen by the debugger.
 
 @kindex set shell
@@ -11782,15 +11974,15 @@ configurations.
 
 @menu
 * ARM::                         ARM
-* H8/300::                      Hitachi H8/300
-* H8/500::                      Hitachi H8/500
-* M32R/D::                      Mitsubishi M32R/D
+* H8/300::                      Renesas H8/300
+* H8/500::                      Renesas H8/500
+* M32R/D::                      Renesas M32R/D
 * M68K::                        Motorola M68K
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
 * PowerPC:                      PowerPC
-* SH::                          Hitachi SH
+* SH::                          Renesas SH
 * Sparclet::                    Tsqware Sparclet
 * Sparclite::                   Fujitsu Sparclite
 * ST2000::                      Tandem ST2000
@@ -11815,50 +12007,50 @@ ARM Demon monitor.
 @end table
 
 @node H8/300
-@subsection Hitachi H8/300
+@subsection Renesas H8/300
 
 @table @code
 
 @kindex target hms@r{, with H8/300}
 @item target hms @var{dev}
-A Hitachi SH, H8/300, or H8/500 board, attached via serial line to your host.
+A Renesas SH, H8/300, or H8/500 board, attached via serial line to your host.
 Use special commands @code{device} and @code{speed} to control the serial
 line and the communications speed used.
 
 @kindex target e7000@r{, with H8/300}
 @item target e7000 @var{dev}
-E7000 emulator for Hitachi H8 and SH.
+E7000 emulator for Renesas H8 and SH.
 
 @kindex target sh3@r{, with H8/300}
 @kindex target sh3e@r{, with H8/300}
 @item target sh3 @var{dev}
 @itemx target sh3e @var{dev}
-Hitachi SH-3 and SH-3E target systems.
+Renesas SH-3 and SH-3E target systems.
 
 @end table
 
 @cindex download to H8/300 or H8/500
 @cindex H8/300 or H8/500 download
-@cindex download to Hitachi SH
-@cindex Hitachi SH download
-When you select remote debugging to a Hitachi SH, H8/300, or H8/500
-board, the @code{load} command downloads your program to the Hitachi
+@cindex download to Renesas SH
+@cindex Renesas SH download
+When you select remote debugging to a Renesas SH, H8/300, or H8/500
+board, the @code{load} command downloads your program to the Renesas
 board and also opens it as the current executable target for
 @value{GDBN} on your host (like the @code{file} command).
 
 @value{GDBN} needs to know these things to talk to your
-Hitachi SH, H8/300, or H8/500:
+Renesas SH, H8/300, or H8/500:
 
 @enumerate
 @item
 that you want to use @samp{target hms}, the remote debugging interface
-for Hitachi microprocessors, or @samp{target e7000}, the in-circuit
-emulator for the Hitachi SH and the Hitachi 300H.  (@samp{target hms} is
-the default when @value{GDBN} is configured specifically for the Hitachi SH,
+for Renesas microprocessors, or @samp{target e7000}, the in-circuit
+emulator for the Renesas SH and the Renesas 300H.  (@samp{target hms} is
+the default when @value{GDBN} is configured specifically for the Renesas SH,
 H8/300, or H8/500.)
 
 @item
-what serial device connects your host to your Hitachi board (the first
+what serial device connects your host to your Renesas board (the first
 serial device available on your host is the default).
 
 @item
@@ -11866,24 +12058,24 @@ what speed to use over the serial device.
 @end enumerate
 
 @menu
-* Hitachi Boards::      Connecting to Hitachi boards.
-* Hitachi ICE::         Using the E7000 In-Circuit Emulator.
-* Hitachi Special::     Special @value{GDBN} commands for Hitachi micros.
+* Renesas Boards::      Connecting to Renesas boards.
+* Renesas ICE::         Using the E7000 In-Circuit Emulator.
+* Renesas Special::     Special @value{GDBN} commands for Renesas micros.
 @end menu
 
-@node Hitachi Boards
-@subsubsection Connecting to Hitachi boards
+@node Renesas Boards
+@subsubsection Connecting to Renesas boards
 
 @c only for Unix hosts
 @kindex device
-@cindex serial device, Hitachi micros
+@cindex serial device, Renesas micros
 Use the special @code{@value{GDBN}} command @samp{device @var{port}} if you
 need to explicitly set the serial device.  The default @var{port} is the
 first available port on your host.  This is only necessary on Unix
 hosts, where it is typically something like @file{/dev/ttya}.
 
 @kindex speed
-@cindex serial line speed, Hitachi micros
+@cindex serial line speed, Renesas micros
 @code{@value{GDBN}} has another special command to set the communications
 speed: @samp{speed @var{bps}}.  This command also is only used from Unix
 hosts; on DOS hosts, set the line speed as usual from outside @value{GDBN} with
@@ -11891,7 +12083,7 @@ the DOS @code{mode} command (for instance,
 @w{@kbd{mode com2:9600,n,8,1,p}} for a 9600@dmn{bps} connection).
 
 The @samp{device} and @samp{speed} commands are available only when you
-use a Unix host to debug your Hitachi microprocessor programs.  If you
+use a Unix host to debug your Renesas microprocessor programs.  If you
 use a DOS host,
 @value{GDBN} depends on an auxiliary terminate-and-stay-resident program
 called @code{asynctsr} to communicate with the development board
@@ -11901,7 +12093,7 @@ to set up the serial port on the DOS side.
 The following sample session illustrates the steps needed to start a
 program under @value{GDBN} control on an H8/300.  The example uses a
 sample H8/300 program called @file{t.x}.  The procedure is the same for
-the Hitachi SH and the H8/500.
+the Renesas SH and the H8/500.
 
 First hook up your development board.  In this example, we use a
 board attached to serial port @code{COM2}; if you use a different serial
@@ -11934,7 +12126,7 @@ connected, you can start up @value{GDBN}.  Call @code{@value{GDBP}} with
 the name of your program as the argument.  @code{@value{GDBN}} prompts
 you, as usual, with the prompt @samp{(@value{GDBP})}.  Use two special
 commands to begin your debugging session: @samp{target hms} to specify
-cross-debugging to the Hitachi board, and the @code{load} command to
+cross-debugging to the Renesas board, and the @code{load} command to
 download your program to the board.  @code{load} displays the names of
 the program's sections, and a @samp{*} for each 2K of data downloaded.
 (If you want to refresh @value{GDBN} data on symbols or on the
@@ -11984,12 +12176,12 @@ to detect program completion.
 In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
 
-@node Hitachi ICE
+@node Renesas ICE
 @subsubsection Using the E7000 in-circuit emulator
 
-@kindex target e7000@r{, with Hitachi ICE}
+@kindex target e7000@r{, with Renesas ICE}
 You can use the E7000 in-circuit emulator to develop code for either the
-Hitachi SH or the H8/300H.  Use one of these forms of the @samp{target
+Renesas SH or the H8/300H.  Use one of these forms of the @samp{target
 e7000} command to connect @value{GDBN} to your E7000:
 
 @table @code
@@ -12004,8 +12196,8 @@ If your E7000 is installed as a host on a TCP/IP network, you can just
 specify its hostname; @value{GDBN} uses @code{telnet} to connect.
 @end table
 
-@node Hitachi Special
-@subsubsection Special @value{GDBN} commands for Hitachi micros
+@node Renesas Special
+@subsubsection Special @value{GDBN} commands for Renesas micros
 
 Some @value{GDBN} commands are available only for the H8/300:
 
@@ -12038,13 +12230,17 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @end table
 
 @node M32R/D
-@subsection Mitsubishi M32R/D
+@subsection Renesas M32R/D
 
 @table @code
 
 @kindex target m32r
 @item target m32r @var{dev}
-Mitsubishi M32R/D ROM monitor.
+Renesas M32R/D ROM monitor.
+
+@kindex target m32rsdi
+@item target m32rsdi @var{dev}
+Renesas M32R SDI server, connected via parallel port to the board.
 
 @end table
 
@@ -12391,25 +12587,25 @@ W89K monitor, running on a Winbond HPPA board.
 @end table
 
 @node SH
-@subsection Hitachi SH
+@subsection Renesas SH
 
 @table @code
 
-@kindex target hms@r{, with Hitachi SH}
+@kindex target hms@r{, with Renesas SH}
 @item target hms @var{dev}
-A Hitachi SH board attached via serial line to your host.  Use special
+A Renesas SH board attached via serial line to your host.  Use special
 commands @code{device} and @code{speed} to control the serial line and
 the communications speed used.
 
-@kindex target e7000@r{, with Hitachi SH}
+@kindex target e7000@r{, with Renesas SH}
 @item target e7000 @var{dev}
-E7000 emulator for Hitachi SH.
+E7000 emulator for Renesas SH.
 
 @kindex target sh3@r{, with SH}
 @kindex target sh3e@r{, with SH}
 @item target sh3 @var{dev}
 @item target sh3e @var{dev}
-Hitachi SH-3 and SH-3E target systems.
+Renesas SH-3 and SH-3E target systems.
 
 @end table
 
@@ -13028,7 +13224,7 @@ current ABI.
 @kindex show osabi
 
 One @value{GDBN} configuration can debug binaries for multiple operating
-system targets, either via remote debugging or native emulation. 
+system targets, either via remote debugging or native emulation.
 @value{GDBN} will autodetect the @dfn{OS ABI} (Operating System ABI) in use,
 but you can override its conclusion using the @code{set osabi} command.
 One example where this is useful is in debugging of binaries which use
@@ -13238,7 +13434,9 @@ info.
 @item set debug target
 Turns on or off display of @value{GDBN} target debugging info. This info
 includes what is going on at the target level of GDB, as it happens. The
-default is off.
+default is 0.  Set it to 1 to track events, and to 2 to also track the
+value of large memory transfers.  Changes to this flag do not take effect
+until the next time you connect to a target or use the @code{run} command.
 @kindex show debug target
 @item show debug target
 Displays the current state of displaying @value{GDBN} target debugging
@@ -13422,7 +13620,7 @@ end
 @end smallexample
 
 As a further example, to hook at the begining and end of the @code{echo}
-command, and to add extra text to the beginning and end of the message, 
+command, and to add extra text to the beginning and end of the message,
 you could define:
 
 @smallexample
@@ -13933,7 +14131,7 @@ key bindings such as @key{C-p}, @key{C-n}, @key{C-b} and @key{C-f}.
 
 The TUI provides a @emph{SingleKey} mode in which it installs a particular
 key binding in the readline keymaps to connect single keys to
-some gdb commands. 
+some gdb commands.
 
 @table @kbd
 @kindex c @r{(SingleKey TUI key)}
@@ -14239,7 +14437,7 @@ the files with these buffers if you wish; but keep in mind that @value{GDBN}
 communicates with Emacs in terms of line numbers.  If you add or
 delete lines from the text, the line numbers that @value{GDBN} knows cease
 to correspond properly with the code.
-  
+
 The description given here is for GNU Emacs version 21.3 and a more
 detailed description of its interaction with @value{GDBN} is given in
 the Emacs manual (@pxref{Debuggers,,, Emacs, The @sc{gnu} Emacs Manual}).
@@ -15879,17 +16077,17 @@ The corresponding @value{GDBN} command is @samp{cd}.
 
 Add directories @var{pathdir} to beginning of search path for source files.
 If the @samp{-r} option is used, the search path is reset to the default
-search path.  If directories @var{pathdir} are supplied in addition to the 
+search path.  If directories @var{pathdir} are supplied in addition to the
 @samp{-r} option, the search path is first reset and then addition
 occurs as normal.
-Multiple directories may be specified, separated by blanks.  Specifying 
+Multiple directories may be specified, separated by blanks.  Specifying
 multiple directories in a single command
 results in the directories added to the beginning of the
 search path in the same order they were presented in the command.
 If blanks are needed as
 part of a directory name, double-quotes should be used around
 the name.  In the command output, the path will show up separated
-by the system directory-separator character.  The directory-seperator 
+by the system directory-separator character.  The directory-seperator
 character must not be used
 in any directory name.
 If no directories are specified, the current search path is displayed.
@@ -15928,18 +16126,18 @@ The corresponding @value{GDBN} command is @samp{dir}.
 
 Add directories @var{pathdir} to beginning of search path for object files.
 If the @samp{-r} option is used, the search path is reset to the original
-search path that existed at gdb start-up.  If directories @var{pathdir} are 
-supplied in addition to the 
+search path that existed at gdb start-up.  If directories @var{pathdir} are
+supplied in addition to the
 @samp{-r} option, the search path is first reset and then addition
 occurs as normal.
-Multiple directories may be specified, separated by blanks.  Specifying 
+Multiple directories may be specified, separated by blanks.  Specifying
 multiple directories in a single command
 results in the directories added to the beginning of the
 search path in the same order they were presented in the command.
 If blanks are needed as
 part of a directory name, double-quotes should be used around
 the name.  In the command output, the path will show up separated
-by the system directory-separator character.  The directory-seperator 
+by the system directory-separator character.  The directory-seperator
 character must not be used
 in any directory name.
 If no directories are specified, the current path is displayed.
@@ -15953,7 +16151,7 @@ The corresponding @value{GDBN} command is @samp{path}.
 
 @smallexample
 (@value{GDBP})
--environment-path 
+-environment-path
 ^done,path="/usr/bin"
 (@value{GDBP})
 -environment-path /kwikemart/marge/ezannoni/flathead-dev/ppc-eabi/gdb /bin
@@ -16559,7 +16757,7 @@ N.A.
  -file-list-exec-source-file
 @end smallexample
 
-List the line number, the current source file, and the absolute path 
+List the line number, the current source file, and the absolute path
 to the current source file for the current executable.
 
 @subsubheading @value{GDBN} Command
@@ -16772,7 +16970,7 @@ information when you start an interactive session.
 ~Type "show copying" to see the conditions.
 ~There is absolutely no warranty for GDB.  Type "show warranty" for
 ~ details.
-~This GDB was configured as 
+~This GDB was configured as
  "--host=sparc-sun-solaris2.5.1 --target=ppc-eabi".
 ^done
 (@value{GDBP})
@@ -17103,8 +17301,14 @@ Show a single frame:
 @end smallexample
 
 Display the local variable names for the current frame.  With an
-argument of 0 prints only the names of the variables, with argument of 1
-prints also their values.
+argument of 0 or @code{--no-values}, prints only the names of the variables.
+With argument of 1 or @code{--all-values}, prints also their values.  With
+argument of 2 or @code{--simple-values}, prints the name, type and value for
+simple data types and the name and type for arrays, structures and
+unions.  In this last case, the idea is that the user can see the
+value of simple data types immediately and he can create variable
+objects for other data types if he wishes to explore their values in
+more detail.
 
 @subsubheading @value{GDBN} Command
 
@@ -17117,9 +17321,12 @@ prints also their values.
 -stack-list-locals 0
 ^done,locals=[name="A",name="B",name="C"]
 (@value{GDBP})
--stack-list-locals 1
+-stack-list-locals --all-values
 ^done,locals=[@{name="A",value="1"@},@{name="B",value="2"@},
-  @{name="C",value="3"@}]
+  @{name="C",value="@{1, 2, 3@}"@}]
+-stack-list-locals --simple-values
+^done,locals=[@{name="A",type="int",value="1"@},
+  @{name="B",type="int",value="2"@},@{name="C",type="int [3]"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -17226,7 +17433,7 @@ Show the core addresses of the code for a source line.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} comamnd is @samp{info line}.
+The corresponding @value{GDBN} command is @samp{info line}.
 @code{gdbtk} has the @samp{gdb_get_line} and @samp{gdb_get_file} commands.
 
 @subsubheading Example
@@ -18063,14 +18270,26 @@ Returns the number of children of a variable object @var{name}:
 @subsubheading Synopsis
 
 @smallexample
- -var-list-children @var{name}
+ -var-list-children [@var{print-values}] @var{name}
 @end smallexample
 
-Returns a list of the children of the specified variable object:
+Returns a list of the children of the specified variable object.  With
+just the variable object name as an argument or with an optional
+preceding argument of 0 or @code{--no-values}, prints only the names of the
+variables.  With an optional preceding argument of 1 or @code{--all-values},
+also prints their values.
+
+@subsubheading Example
 
 @smallexample
+(@value{GDBP})
+ -var-list-children n
  numchild=@var{n},children=[@{name=@var{name},
  numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
+(@value{GDBP})
+ -var-list-children --all-values n
+ numchild=@var{n},children=[@{name=@var{name},
+ numchild=@var{n},value=@var{value},type=@var{type}@},@r{(repeats N times)}]
 @end smallexample
 
 
@@ -18159,7 +18378,7 @@ before the value of a child variable can be evaluated.
 
 Assigns the value of @var{expression} to the variable object specified
 by @var{name}.  The object must be @samp{editable}.  If the variable's
-value is altered by the assign, the variable will show up in any 
+value is altered by the assign, the variable will show up in any
 subsequent @code{-var-update} list.
 
 @subsubheading Example
@@ -18259,12 +18478,12 @@ for details.
 This GDB was configured as "i386-pc-linux-gnu"
 
 ^Z^Zpre-prompt
-(gdb) 
+(gdb)
 ^Z^Zprompt
 @kbd{quit}
 
 ^Z^Zpost-prompt
-$ 
+$
 @end smallexample
 
 Here @samp{quit} is input to @value{GDBN}; the rest is output from
@@ -18414,13 +18633,13 @@ deleted a breakpoint.
 @findex starting
 @findex stopping
 When the program starts executing due to a @value{GDBN} command such as
-@code{step} or @code{continue}, 
+@code{step} or @code{continue},
 
 @smallexample
 ^Z^Zstarting
 @end smallexample
 
-is output.  When the program stops, 
+is output.  When the program stops,
 
 @smallexample
 ^Z^Zstopped
@@ -19177,7 +19396,7 @@ A problem internal to GDB has been detected.  Further
 debugging may prove unreliable.
 Quit this debugging session? (y or n) @kbd{n}
 Create a core file? (y or n) @kbd{n}
-(gdb) 
+(gdb)
 @end smallexample
 
 Takes an optional parameter that is used as the text of the error or
@@ -19200,7 +19419,7 @@ The program being debugged stopped while in a function called from GDB.
 0x1a57c80: pc=0x01014068 fp=0x0200bddc sp=0x0200bdd6
  top=0x0200bdd4 id=@{stack=0x200bddc,code=0x101405c@}
  call_lo=0x01014000 call_hi=0x01014001
-(gdb) 
+(gdb)
 @end smallexample
 
 Takes an optional file parameter.
@@ -19232,14 +19451,14 @@ Takes an optional file parameter.
 
 @smallexample
 (gdb) @kbd{maint print reggroups}
- Group      Type      
- general    user      
- float      user      
- all        user      
- vector     user      
- system     user      
- save       internal  
- restore    internal  
+ Group      Type
+ general    user
+ float      user
+ all        user
+ vector     user
+ system     user
+ save       internal
+ restore    internal
 @end smallexample
 
 @kindex maint set profile
@@ -19258,7 +19477,7 @@ if you use profiling, @value{GDBN} will overwrite the profiling log file
 data in a @file{gmon.out} file, be sure to move it to a safe location.
 
 Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
-compiled with the @samp{-pg} compiler option. 
+compiled with the @samp{-pg} compiler option.
 
 @end table
 
@@ -19357,10 +19576,6 @@ where @code{n >=3} (which is where rle starts to win).  The printable
 characters @samp{$}, @samp{#}, @samp{+} and @samp{-} or with a numeric
 value greater than 126 should not be used.
 
-Some remote systems have used a different run-length encoding mechanism
-loosely refered to as the cisco encoding.  Following the @samp{*}
-character are two hex digits that indicate the size of the packet.
-
 So:
 @smallexample
 "@code{0* }"
@@ -19376,8 +19591,8 @@ For any @var{command} not supported by the stub, an empty response
 protocol.  A newer @value{GDBN} can tell if a packet is supported based
 on that response.
 
-A stub is required to support the @samp{g}, @samp{G}, @samp{m}, @samp{M}, 
-@samp{c}, and @samp{s} @var{command}s.  All other @var{command}s are 
+A stub is required to support the @samp{g}, @samp{G}, @samp{m}, @samp{M},
+@samp{c}, and @samp{s} @var{command}s.  All other @var{command}s are
 optional.
 
 @node Packets
@@ -19517,9 +19732,9 @@ Reply:
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} @var{packet} are
-determined by the @value{GDBN} internal macros @var{REGISTER_RAW_SIZE}
-and @var{REGISTER_NAME} macros.  The specification of several standard
-@code{g} packets is specified below.
+determined by the @value{GDBN} internal macros
+@var{DEPRECATED_REGISTER_RAW_SIZE} and @var{REGISTER_NAME} macros.  The
+specification of several standard @code{g} packets is specified below.
 @item E@var{NN}
 for an error.
 @end table
@@ -19542,7 +19757,7 @@ for an error
 
 Reserved for future use.
 
-@item @code{H}@var{c}@var{t@dots{}} --- set thread 
+@item @code{H}@var{c}@var{t@dots{}} --- set thread
 @cindex @code{H} packet
 
 Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
@@ -19753,7 +19968,7 @@ Like @samp{C} but step not continue.
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item @code{t}@var{addr}@code{:}@var{PP}@code{,}@var{MM} --- search 
+@item @code{t}@var{addr}@code{:}@var{PP}@code{,}@var{MM} --- search
 @cindex @code{t} packet
 
 Search backwards starting at address @var{addr} for a match with pattern
@@ -19781,9 +19996,51 @@ Reserved for future use.
 
 Reserved for future use.
 
-@item @code{v} --- reserved
+@item @code{v} --- verbose packet prefix
 
-Reserved for future use.
+Packets starting with @code{v} are identified by a multi-letter name,
+up to the first @code{;} or @code{?} (or the end of the packet).
+
+@item @code{vCont}[;@var{action}[@code{:}@var{tid}]]... --- extended resume
+@cindex @code{vCont} packet
+
+Resume the inferior.  Different actions may be specified for each thread.
+If an action is specified with no @var{tid}, then it is applied to any
+threads that don't have a specific action specified; if no default action is
+specified then other threads should remain stopped.  Specifying multiple
+default actions is an error; specifying no actions is also an error.
+Thread IDs are specified in hexadecimal.  Currently supported actions are:
+
+@table @code
+@item c
+Continue.
+@item C@var{sig}
+Continue with signal @var{sig}.  @var{sig} should be two hex digits.
+@item s
+Step.
+@item S@var{sig}
+Step with signal @var{sig}.  @var{sig} should be two hex digits.
+@end table
+
+The optional @var{addr} argument normally associated with these packets is
+not supported in @code{vCont}.
+
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
+@item @code{vCont?} --- extended resume query
+@cindex @code{vCont?} packet
+
+Query support for the @code{vCont} packet.
+
+Reply:
+@table @samp
+@item @code{vCont}[;@var{action}]...
+The @code{vCont} packet is supported.  Each @var{action} is a supported
+command in the @code{vCont} packet.
+@item
+The @code{vCont} packet is not supported.
+@end table
 
 @item @code{V} --- reserved
 
@@ -19971,12 +20228,13 @@ conventions is used.
 
 @var{AA} = two hex digit signal number; @var{n...} = register number
 (hex), @var{r...}  = target byte ordered register contents, size defined
-by @code{REGISTER_RAW_SIZE}; @var{n...} = @samp{thread}, @var{r...} =
-thread process ID, this is a hex integer; @var{n...} = (@samp{watch} | 
-@samp{rwatch} | @samp{awatch}, @var{r...} = data address, this is a hex
-integer; @var{n...} = other string not starting with valid hex digit.
-@value{GDBN} should ignore this @var{n...}, @var{r...} pair and go on
-to the next.  This way we can extend the protocol.
+by @code{DEPRECATED_REGISTER_RAW_SIZE}; @var{n...} = @samp{thread},
+@var{r...} = thread process ID, this is a hex integer; @var{n...} =
+(@samp{watch} | @samp{rwatch} | @samp{awatch}, @var{r...} = data
+address, this is a hex integer; @var{n...} = other string not starting
+with valid hex digit.  @value{GDBN} should ignore this @var{n...},
+@var{r...} pair and go on to the next.  This way we can extend the
+protocol.
 
 @item W@var{AA}
 
@@ -19986,15 +20244,6 @@ applicable to certain targets.
 @item X@var{AA}
 
 The process terminated with signal @var{AA}.
-
-@item N@var{AA};@var{t@dots{}};@var{d@dots{}};@var{b@dots{}} @strong{(obsolete)}
-
-@var{AA} = signal number; @var{t@dots{}} = address of symbol
-@code{_start}; @var{d@dots{}} = base of data section; @var{b@dots{}} =
-base of bss section.  @emph{Note: only used by Cisco Systems targets.
-The difference between this reply and the @samp{qOffsets} query is that
-the @samp{N} packet may arrive spontaneously whereas the @samp{qOffsets}
-is a query initiated by the host debugger.}
 
 @item O@var{XX@dots{}}
 
@@ -20202,6 +20451,82 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 (if available), until the target ceases to request them.
 @end table
 
+@item @code{qPart}:@var{object}:@code{read}:@var{annex}:@var{offset},@var{length} --- read special data
+
+Read uninterpreted bytes from the target's special data area
+identified by the keyword @code{object}.
+Request @var{length} bytes starting at @var{offset} bytes into the data.
+The content and encoding of @var{annex} is specific to the object;
+it can supply additional details about what data to access.
+
+Here are the specific requests of this form defined so far.
+All @samp{@code{qPart}:@var{object}:@code{read}:@dots{}}
+requests use the same reply formats, listed below.
+
+@table @asis
+@item @code{qPart}:@code{auxv}:@code{read}::@var{offset},@var{length}
+Access the target's @dfn{auxiliary vector}.  @xref{Auxiliary Vector}.
+Note @var{annex} must be empty.
+@end table
+
+Reply:
+@table @asis
+@item @code{OK}
+The @var{offset} in the request is at the end of the data.
+There is no more data to be read.
+
+@item @var{XX@dots{}}
+Hex encoded data bytes read.
+This may be fewer bytes than the @var{length} in the request.
+
+@item @code{E00}
+The request was malformed, or @var{annex} was invalid.
+
+@item @code{E}@var{nn}
+The offset was invalid, or there was an error encountered reading the data.
+@var{nn} is a hex-encoded @code{errno} value.
+
+@item @code{""} (empty)
+An empty reply indicates the @var{object} or @var{annex} string was not
+recognized by the stub.
+@end table
+
+@item @code{qPart}:@var{object}:@code{write}:@var{annex}:@var{offset}:@var{data@dots{}}
+
+Write uninterpreted bytes into the target's special data area
+identified by the keyword @code{object},
+starting at @var{offset} bytes into the data.
+@var{data@dots{}} is the hex-encoded data to be written.
+The content and encoding of @var{annex} is specific to the object;
+it can supply additional details about what data to access.
+
+No requests of this form are presently in use.  This specification
+serves as a placeholder to document the common format that new
+specific request specifications ought to use.
+
+Reply:
+@table @asis
+@item @var{nn}
+@var{nn} (hex encoded) is the number of bytes written.
+This may be fewer bytes than supplied in the request.
+
+@item @code{E00}
+The request was malformed, or @var{annex} was invalid.
+
+@item @code{E}@var{nn}
+The offset was invalid, or there was an error encountered writing the data.
+@var{nn} is a hex-encoded @code{errno} value.
+
+@item @code{""} (empty)
+An empty reply indicates the @var{object} or @var{annex} string was not
+recognized by the stub, or that the object does not support writing.
+@end table
+
+@item @code{qPart}:@var{object}:@var{operation}:@dots{}
+Requests of this form may be added in the future.  When a stub does
+not recognize the @var{object} keyword, or its support for
+@var{object} does not recognize the @var{operation} keyword,
+the stub must respond with an empty packet.
 @end table
 
 @node Register Packet Format
@@ -20269,8 +20594,8 @@ Example sequence of a target being stepped by a single instruction:
 @menu
 * File-I/O Overview::
 * Protocol basics::
-* The `F' request packet::
-* The `F' reply packet::
+* The F request packet::
+* The F reply packet::
 * Memory transfer::
 * The Ctrl-C message::
 * Console I/O::
@@ -20332,20 +20657,20 @@ system are not supported by this protocol.
 
 The File-I/O protocol uses the @code{F} packet, as request as well
 as as reply packet.  Since a File-I/O system call can only occur when
-@value{GDBN} is waiting for the continuing or stepping target, the 
+@value{GDBN} is waiting for the continuing or stepping target, the
 File-I/O request is a reply that @value{GDBN} has to expect as a result
 of a former @samp{C}, @samp{c}, @samp{S} or @samp{s} packet.
 This @code{F} packet contains all information needed to allow @value{GDBN}
 to call the appropriate host system call:
 
 @itemize @bullet
-@item 
+@item
 A unique identifier for the requested system call.
 
 @item
 All parameters to the system call.  Pointers are given as addresses
 in the target memory address space.  Pointers to strings are given as
-pointer/length pair.  Numerical values are given as they are. 
+pointer/length pair.  Numerical values are given as they are.
 Numerical control values are given in a protocol specific representation.
 
 @end itemize
@@ -20353,7 +20678,7 @@ Numerical control values are given in a protocol specific representation.
 At that point @value{GDBN} has to perform the following actions.
 
 @itemize @bullet
-@item 
+@item
 If parameter pointer values are given, which point to data needed as input
 to a system call, @value{GDBN} requests this data from the target with a
 standard @code{m} packet request.  This additional communication has to be
@@ -20397,7 +20722,7 @@ Return value.
 After having done the needed type and value coercion, the target continues
 the latest continue or step action.
 
-@node The `F' request packet
+@node The F request packet
 @subsection The @code{F} request packet
 @cindex file-i/o request packet
 @cindex @code{F} request packet
@@ -20415,7 +20740,7 @@ This is just the name of the function.
 
 @var{parameter@dots{}} are the parameters to the system call.
 
-@end table 
+@end table
 
 Parameters are hexadecimal integer values, either the real values in case
 of scalar datatypes, as pointers to target buffer space in case of compound
@@ -20424,7 +20749,7 @@ of string parameters.  These are appended to the call-id, each separated
 from its predecessor by a comma.  All values are transmitted in ASCII
 string representation, pointer/length pairs separated by a slash.
 
-@node The `F' reply packet
+@node The F reply packet
 @subsection The @code{F} reply packet
 @cindex file-i/o reply packet
 @cindex @code{F} reply packet
@@ -20482,7 +20807,7 @@ reply packet.  In this case the target should behave, as if it had
 gotten a break message.  The meaning for the target is ``system call
 interupted by @code{SIGINT}''.  Consequentially, the target should actually stop
 (as with a break message) and return to @value{GDBN} with a @code{T02}
-packet.  In this case, it's important for the target to know, in which 
+packet.  In this case, it's important for the target to know, in which
 state the system call was interrupted.  Since this action is by design
 not an atomic operation, we have to differ between two cases:
 
@@ -20567,7 +20892,7 @@ in case the user pressed @kbd{Ctrl-C}.  Otherwise the return value consists
 entirely of the exit status of the called command.
 
 Due to security concerns, the @code{system} call is refused to be called
-by @value{GDBN} by default.  The user has to allow this call explicitly by 
+by @value{GDBN} by default.  The user has to allow this call explicitly by
 entering
 
 @table @samp
@@ -20616,7 +20941,7 @@ The current setting is shown by typing
 int open(const char *pathname, int flags);
 int open(const char *pathname, int flags, mode_t mode);
 
-@exdent Request:     
+@exdent Request:
 Fopen,pathptr/len,flags,mode
 @end smallexample
 
@@ -20624,30 +20949,30 @@ Fopen,pathptr/len,flags,mode
 @code{flags} is the bitwise or of the following values:
 
 @table @code
-@item O_CREAT    
+@item O_CREAT
 If the file does not exist it will be created.  The host
 rules apply as far as file ownership and time stamps
 are concerned.
 
-@item O_EXCL     
+@item O_EXCL
 When used with O_CREAT, if the file already exists it is
 an error and open() fails.
 
-@item O_TRUNC    
+@item O_TRUNC
 If the file already exists and the open mode allows
 writing (O_RDWR or O_WRONLY is given) it will be
 truncated to length 0.
 
-@item O_APPEND   
+@item O_APPEND
 The file is opened in append mode.
 
-@item O_RDONLY   
+@item O_RDONLY
 The file is opened for reading only.
 
-@item O_WRONLY   
+@item O_WRONLY
 The file is opened for writing only.
 
-@item O_RDWR     
+@item O_RDWR
 The file is opened for reading and writing.
 
 @noindent
@@ -20659,22 +20984,22 @@ Each other bit is silently ignored.
 @code{mode} is the bitwise or of the following values:
 
 @table @code
-@item S_IRUSR    
+@item S_IRUSR
 User has read permission.
 
-@item S_IWUSR    
+@item S_IWUSR
 User has write permission.
 
-@item S_IRGRP    
+@item S_IRGRP
 Group has read permission.
 
-@item S_IWGRP    
+@item S_IWGRP
 Group has write permission.
 
-@item S_IROTH    
+@item S_IROTH
 Others have read permission.
 
-@item S_IWOTH    
+@item S_IWOTH
 Others have write permission.
 
 @noindent
@@ -20691,42 +21016,42 @@ occured.
 @end smallexample
 
 @table @code
-@item EEXIST     
+@item EEXIST
 pathname already exists and O_CREAT and O_EXCL were used.
 
-@item EISDIR     
+@item EISDIR
 pathname refers to a directory.
 
-@item EACCES     
+@item EACCES
 The requested access is not allowed.
 
 @item ENAMETOOLONG
 pathname was too long.
 
-@item ENOENT     
+@item ENOENT
 A directory component in pathname does not exist.
 
-@item ENODEV     
+@item ENODEV
 pathname refers to a device, pipe, named pipe or socket.
 
-@item EROFS      
+@item EROFS
 pathname refers to a file on a read-only filesystem and
 write access was requested.
 
-@item EFAULT     
+@item EFAULT
 pathname is an invalid pointer value.
 
-@item ENOSPC     
+@item ENOSPC
 No space on device to create the file.
 
-@item EMFILE     
+@item EMFILE
 The process already has the maximum number of files open.
 
-@item ENFILE     
+@item ENFILE
 The limit on the total number of files open on the system
 has been reached.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -20735,10 +21060,10 @@ The call was interrupted by the user.
 @cindex close, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int close(int fd);
 
-@exdent Request:     
+@exdent Request:
 Fclose,fd
 
 @exdent Return value:
@@ -20748,10 +21073,10 @@ close returns zero on success, or -1 if an error occurred.
 @end smallexample
 
 @table @code
-@item EBADF      
+@item EBADF
 fd isn't a valid open file descriptor.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -20760,29 +21085,29 @@ The call was interrupted by the user.
 @cindex read, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int read(int fd, void *buf, unsigned int count);
 
-@exdent Request:     
+@exdent Request:
 Fread,fd,bufptr,count
 
 @exdent Return value:
 On success, the number of bytes read is returned.
 Zero indicates end of file.  If count is zero, read
-returns zero as well.  On error, -1 is returned. 
+returns zero as well.  On error, -1 is returned.
 
 @exdent Errors:
 @end smallexample
 
 @table @code
-@item EBADF      
+@item EBADF
 fd is not a valid file descriptor or is not open for
 reading.
 
-@item EFAULT     
+@item EFAULT
 buf is an invalid pointer value.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -20791,10 +21116,10 @@ The call was interrupted by the user.
 @cindex write, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int write(int fd, const void *buf, unsigned int count);
 
-@exdent Request:     
+@exdent Request:
 Fwrite,fd,bufptr,count
 
 @exdent Return value:
@@ -20806,21 +21131,21 @@ is returned.
 @end smallexample
 
 @table @code
-@item EBADF      
+@item EBADF
 fd is not a valid file descriptor or is not open for
 writing.
 
-@item EFAULT     
+@item EFAULT
 buf is an invalid pointer value.
 
-@item EFBIG      
+@item EFBIG
 An attempt was made to write a file that exceeds the
 host specific maximum file size allowed.
 
-@item ENOSPC     
+@item ENOSPC
 No space on device to write the data.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -20829,24 +21154,24 @@ The call was interrupted by the user.
 @cindex lseek, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 long lseek (int fd, long offset, int flag);
 
-@exdent Request:     
+@exdent Request:
 Flseek,fd,offset,flag
 @end smallexample
 
 @code{flag} is one of:
 
 @table @code
-@item SEEK_SET   
+@item SEEK_SET
 The offset is set to offset bytes.
 
-@item SEEK_CUR   
+@item SEEK_CUR
 The offset is set to its current location plus offset
 bytes.
 
-@item SEEK_END   
+@item SEEK_END
 The offset is set to the size of the file plus offset
 bytes.
 @end table
@@ -20861,16 +21186,16 @@ value of -1 is returned.
 @end smallexample
 
 @table @code
-@item EBADF      
+@item EBADF
 fd is not a valid open file descriptor.
 
-@item ESPIPE     
+@item ESPIPE
 fd is associated with the @value{GDBN} console.
 
-@item EINVAL     
+@item EINVAL
 flag is not a proper value.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -20879,10 +21204,10 @@ The call was interrupted by the user.
 @cindex rename, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int rename(const char *oldpath, const char *newpath);
 
-@exdent Request:     
+@exdent Request:
 Frename,oldpathptr/len,newpathptr/len
 
 @exdent Return value:
@@ -20892,47 +21217,47 @@ On success, zero is returned.  On error, -1 is returned.
 @end smallexample
 
 @table @code
-@item EISDIR     
+@item EISDIR
 newpath is an existing directory, but oldpath is not a
 directory.
 
-@item EEXIST     
+@item EEXIST
 newpath is a non-empty directory.
 
-@item EBUSY      
+@item EBUSY
 oldpath or newpath is a directory that is in use by some
 process.
 
-@item EINVAL     
+@item EINVAL
 An attempt was made to make a directory a subdirectory
 of itself.
 
-@item ENOTDIR    
+@item ENOTDIR
 A  component used as a directory in oldpath or new
 path is not a directory.  Or oldpath is a directory
 and newpath exists but is not a directory.
 
-@item EFAULT     
+@item EFAULT
 oldpathptr or newpathptr are invalid pointer values.
 
-@item EACCES     
+@item EACCES
 No access to the file or the path of the file.
 
 @item ENAMETOOLONG
-             
+
 oldpath or newpath was too long.
 
-@item ENOENT     
+@item ENOENT
 A directory component in oldpath or newpath does not exist.
 
-@item EROFS      
+@item EROFS
 The file is on a read-only filesystem.
 
-@item ENOSPC     
+@item ENOSPC
 The device containing the file has no room for the new
 directory entry.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -20941,10 +21266,10 @@ The call was interrupted by the user.
 @cindex unlink, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int unlink(const char *pathname);
 
-@exdent Request:     
+@exdent Request:
 Funlink,pathnameptr/len
 
 @exdent Return value:
@@ -20954,32 +21279,32 @@ On success, zero is returned.  On error, -1 is returned.
 @end smallexample
 
 @table @code
-@item EACCES     
+@item EACCES
 No access to the file or the path of the file.
 
-@item EPERM      
+@item EPERM
 The system does not allow unlinking of directories.
 
-@item EBUSY      
+@item EBUSY
 The file pathname cannot be unlinked because it's
 being used by another process.
 
-@item EFAULT     
+@item EFAULT
 pathnameptr is an invalid pointer value.
 
 @item ENAMETOOLONG
 pathname was too long.
 
-@item ENOENT     
+@item ENOENT
 A directory component in pathname does not exist.
 
-@item ENOTDIR    
+@item ENOTDIR
 A component of the path is not a directory.
 
-@item EROFS      
+@item EROFS
 The file is on a read-only filesystem.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -20989,11 +21314,11 @@ The call was interrupted by the user.
 @cindex stat, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int stat(const char *pathname, struct stat *buf);
 int fstat(int fd, struct stat *buf);
 
-@exdent Request:     
+@exdent Request:
 Fstat,pathnameptr/len,bufptr
 Ffstat,fd,bufptr
 
@@ -21004,26 +21329,26 @@ On success, zero is returned.  On error, -1 is returned.
 @end smallexample
 
 @table @code
-@item EBADF      
+@item EBADF
 fd is not a valid open file.
 
-@item ENOENT     
+@item ENOENT
 A directory component in pathname does not exist or the
 path is an empty string.
 
-@item ENOTDIR    
+@item ENOTDIR
 A component of the path is not a directory.
 
-@item EFAULT     
+@item EFAULT
 pathnameptr is an invalid pointer value.
 
-@item EACCES     
+@item EACCES
 No access to the file or the path of the file.
 
 @item ENAMETOOLONG
 pathname was too long.
 
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -21032,10 +21357,10 @@ The call was interrupted by the user.
 @cindex gettimeofday, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int gettimeofday(struct timeval *tv, void *tz);
 
-@exdent Request:     
+@exdent Request:
 Fgettimeofday,tvptr,tzptr
 
 @exdent Return value:
@@ -21045,10 +21370,10 @@ On success, 0 is returned, -1 otherwise.
 @end smallexample
 
 @table @code
-@item EINVAL     
+@item EINVAL
 tz is a non-NULL pointer.
 
-@item EFAULT     
+@item EFAULT
 tvptr and/or tzptr is an invalid pointer value.
 @end table
 
@@ -21057,10 +21382,10 @@ tvptr and/or tzptr is an invalid pointer value.
 @cindex isatty, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int isatty(int fd);
 
-@exdent Request:     
+@exdent Request:
 Fisatty,fd
 
 @exdent Return value:
@@ -21070,7 +21395,7 @@ Returns 1 if fd refers to the @value{GDBN} console, 0 otherwise.
 @end smallexample
 
 @table @code
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -21079,10 +21404,10 @@ The call was interrupted by the user.
 @cindex system, file-i/o system call
 
 @smallexample
-@exdent Synopsis:    
+@exdent Synopsis:
 int system(const char *command);
 
-@exdent Request:     
+@exdent Request:
 Fsystem,commandptr/len
 
 @exdent Return value:
@@ -21096,7 +21421,7 @@ In case /bin/sh could not be executed, 127 is returned.
 @end smallexample
 
 @table @code
-@item EINTR      
+@item EINTR
 The call was interrupted by the user.
 @end table
 
@@ -21124,8 +21449,8 @@ int@r{,} unsigned int@r{,} long@r{,} unsigned long@r{,} mode_t @r{and} time_t
 @code{Int}, @code{unsigned int}, @code{mode_t} and @code{time_t} are
 implemented as 32 bit values in this protocol.
 
-@code{Long} and @code{unsigned long} are implemented as 64 bit types. 
-    
+@code{Long} and @code{unsigned long} are implemented as 64 bit types.
+
 @xref{Limits}, for corresponding MIN and MAX values (similar to those
 in @file{limits.h}) to allow range checking on host and target.
 
@@ -21233,7 +21558,7 @@ The buffer of type struct timeval used by the target and @value{GDBN}
 is defined as follows:
 
 @smallexample
-struct timeval @{ 
+struct timeval @{
     time_t tv_sec;  /* second */
     long   tv_usec; /* microsecond */
 @};
@@ -21409,7 +21734,9 @@ host is called:
 
 @include gpl.texi
 
+@raisesections
 @include fdl.texi
+@lowersections
 
 @node Index
 @unnumbered Index

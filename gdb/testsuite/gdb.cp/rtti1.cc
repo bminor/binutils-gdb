@@ -1,6 +1,6 @@
 /* Code to go along with tests in rtti.exp.
    
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
    Inc.
@@ -55,6 +55,43 @@ namespace n1 {
 
 } // n1
 
+// NOTE: carlton/2004-01-23: This call exists only to convince GCC to
+// keep around a reference to 'obj' in n2::func - GCC 3.4 had been
+// optimizing it away.
+void refer_to (n2::C2 *obj)
+{
+  // Do nothing.
+}
+
+void refer_to (n2::n3::C3 *obj)
+{
+  // Do nothing.
+}
+
+namespace n2
+{
+  void func ()
+  {
+    C2 *obj = create2 ();
+
+    refer_to (obj);		// func-constructs-done
+
+    return;
+  }
+
+  namespace n3
+  {
+    void func3 ()
+    {
+      C3 *obj3 = create3 ();
+
+      refer_to (obj3);		// func3-constructs-done
+
+      return;
+    }
+  }
+}
+
 int main()
 {
     using namespace n1;
@@ -63,5 +100,8 @@ int main()
     C1 *e1 = create1();
     C2 *e2 = create2();
 
-    return 0;				// constructs-done
+    n2::func();				// main-constructs-done
+    n2::n3::func3();
+
+    return 0;
 }

@@ -65,3 +65,5 @@ gdbasm_datavar	globalvar	11
 comment "A static variable"
 
 gdbasm_datavar	staticvar	5
+
+	.include "note.inc"

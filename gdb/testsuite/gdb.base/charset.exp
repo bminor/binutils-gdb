@@ -1,4 +1,6 @@
-# Copyright 2001 Free Software Foundation, Inc.
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 2001, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +17,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
+# bug-gdb@gnu.org
 
 # Test GDB's character set support.
 
@@ -439,7 +441,7 @@ foreach target_charset [all_charset_names] {
     
     # Compute a regexp matching the results we expect.  This is static,
     # but it's easier than writing it out.
-    regsub -all "." "abefnrtv" "(\\\\&|x)" escapes
+    regsub -all "." "abfnrtv" "(\\\\&|x)" escapes
     set uppercase "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     set lowercase "abcdefghijklmnopqrstuvwxyz"
     set digits "0123456789"
@@ -448,7 +450,7 @@ foreach target_charset [all_charset_names] {
     send_gdb "print $var_name\n"
     # ${escapes}${uppercase}${lowercase}${digits}${octal}${octal}
     gdb_expect {
-        -re ".* = \"(\\\\a|x)(\\\\b|x)(\\\\e|x)(\\\\f|x)(\\\\n|x)(\\\\r|x)(\\\\t|x)(\\\\v|x)${uppercase}${lowercase}${digits}(\\\\\[0-9\]\[0-9\]\[0-9\]|x)(\\\\\[0-9\]\[0-9\]\[0-9\]|x).*\"\[\r\n\]+$gdb_prompt $" {
+        -re ".* = \"(\\\\a|x)(\\\\b|x)(\\\\f|x)(\\\\n|x)(\\\\r|x)(\\\\t|x)(\\\\v|x)${uppercase}${lowercase}${digits}(\\\\\[0-9\]\[0-9\]\[0-9\]|x)(\\\\\[0-9\]\[0-9\]\[0-9\]|x).*\"\[\r\n\]+$gdb_prompt $" {
             pass "print string in $target_charset"
         }
         -re "$gdb_prompt $" {
@@ -465,7 +467,7 @@ foreach target_charset [all_charset_names] {
              "parse character literal in ${target_charset}"
 
     # Check that the character literal was encoded correctly.
-    gdb_test "print 'A' == $var_name\[8\]" \
+    gdb_test "print 'A' == $var_name\[7\]" \
              " = 1" \
              "check value of parsed character literal in ${target_charset}"
 
@@ -475,14 +477,14 @@ foreach target_charset [all_charset_names] {
              "parse string literal in ${target_charset}"
 
     # Check that the string literal was encoded correctly.
-    gdb_test "print \"q\"\[0\] == $var_name\[50\]" \
+    gdb_test "print \"q\"\[0\] == $var_name\[49\]" \
              " = 1" \
              "check value of parsed string literal in ${target_charset}"
 
     # Test handling of characters in the target charset which
     # can't be translated into the host charset.
     if {! [string compare $target_charset iso-8859-1]} {
-        gdb_test "print iso_8859_1_string\[70\]" \
+        gdb_test "print iso_8859_1_string\[69\]" \
                  " = \[0-9-\]+ '\\\\242'" \
                  "print character with no equivalent in host character set"
         gdb_test "print iso_8859_1_string + 70" \
@@ -493,7 +495,7 @@ foreach target_charset [all_charset_names] {
     # Make sure that we don't apply the ISO-8859-1 `print_literally'
     # function to ASCII.
     if {! [string compare $target_charset ascii]} {
-        gdb_test "print iso_8859_1_string\[70\]" \
+        gdb_test "print iso_8859_1_string\[69\]" \
                  " = \[0-9-\]+ '\\\\242'" \
                  "print ASCII unprintable character"
         gdb_test "print iso_8859_1_string + 70" \
@@ -502,7 +504,7 @@ foreach target_charset [all_charset_names] {
     }
 
     # Try printing characters with backslash escape equivalents.
-    set escapees {a b e f n r t v}
+    set escapees {a b f n r t v}
     for {set i 0} {$i < [llength $escapees]} {incr i} {
         set escape [lindex $escapees $i]
         send_gdb "print $var_name\[$i\]\n"
@@ -541,7 +543,7 @@ foreach target_charset [all_charset_names] {
     # get the unescaped character, in the target character set.
     gdb_test "print '\\q'" " = \[0-9-\]+ 'q'" \
              "print escape that doesn't exist in $target_charset"
-    gdb_test "print '\\q' == $var_name\[50\]" " = 1" \
+    gdb_test "print '\\q' == $var_name\[49\]" " = 1" \
              "check value of escape that doesn't exist in $target_charset"
 }
 
