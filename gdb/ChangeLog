@@ -1,3 +1,8 @@
+Wed Aug 24 13:17:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* remote-vx.c (vx_attach): Interpret the command argument as an
+	unsigned long.
+
 Wed Aug 24 13:08:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure.in: Change i[34]86 to i[345]86.

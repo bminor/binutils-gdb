@@ -1094,7 +1094,7 @@ vx_attach (args, from_tty)
      char *args;
      int from_tty;
 {
-  int pid;
+  unsigned long pid;
   char *cptr = 0;
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
@@ -1103,13 +1103,13 @@ vx_attach (args, from_tty)
   if (!args)
     error_no_arg ("process-id to attach");
 
-  pid = strtol (args, &cptr, 0);
+  pid = strtoul (args, &cptr, 0);
   if ((cptr == args) || (*cptr != '\0'))
     error ("Invalid process-id -- give a single number in decimal or 0xhex");
 
   if (from_tty)
-      printf_unfiltered ("Attaching pid %s.\n",
-	      local_hex_string((unsigned long) pid));
+    printf_unfiltered ("Attaching pid %s.\n",
+		       local_hex_string((unsigned long) pid));
 
   memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
   memset ((char *)&ptrace_out, '\0', sizeof (ptrace_out));
@@ -1126,6 +1126,9 @@ vx_attach (args, from_tty)
 
   /* It worked... */
   push_target (&vx_run_ops);
+  /* The unsigned long pid will get turned into a signed int here,
+     but it doesn't seem to matter.  inferior_pid must be signed
+     in order for other parts of GDB to work correctly.  */
   inferior_pid = pid;
   vx_running = 0;
 }
