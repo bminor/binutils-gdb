@@ -1,3 +1,7 @@
+Wed Jun  2 12:38:49 1999  Miodrag Vallat <miodrag@multimania.com>
+
+	* hosts/alphalinux.h (TRAD_CORE_EXTRA_SIZE_ALLOWED): Expand to 4096.
+
 Tue Jun  1 17:57:58 1999  Mark P. Mitchell  <mitchell@n02.acl.lanl.gov>
 
 	* reloc.c (BFD_RELOC_MIPS_SUB): New relocation.
