@@ -1,3 +1,7 @@
+2001-08-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-v850.h: Add missing prototypes.
+
 2001-08-12  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (s390_elf_cons): Correct fixups for PLT
