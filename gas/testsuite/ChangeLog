@@ -1,3 +1,12 @@
+Tue Nov 17 15:24:20 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/fr30/allinsn.s: Moved currently un-assembliable instructions
+	to end of file.
+
+	* gas/fr30/allinsn.d: Added disassembly of currently assembliable
+	opcodes.
+	
+
 Mon Nov 16 16:50:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: Fix syntax errors.
