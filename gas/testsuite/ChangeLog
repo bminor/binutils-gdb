@@ -1,3 +1,10 @@
+Tue Nov 10 14:54:47 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/fr30/allinsn.s: New file.
+	* gas/fr30/allinsn.d: New file.
+	* gas/fr30/allinsn.exp: New file.
+	* gas/fr30/fr30.exp: New file.
+
 Mon Nov  2 20:16:50 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/fslot.[sd]: New testcase.
