@@ -462,14 +462,6 @@ set_register_cached (int regnum, int state)
   current_regcache->register_valid_p[regnum] = state;
 }
 
-/* Return whether register REGNUM is a real register.  */
-
-static int
-real_register (int regnum)
-{
-  return regnum >= 0 && regnum < NUM_REGS;
-}
-
 /* Observer for the target_changed event.  */
 
 void
@@ -615,28 +607,6 @@ deprecated_read_register_bytes (int in_start, char *in_buf, int in_len)
 	  in_buf[byte - in_start] = reg_buf[byte - reg_start];
 	}
     }
-}
-
-/* Read register REGNUM into memory at MYADDR, which must be large
-   enough for REGISTER_RAW_BYTES (REGNUM).  Target byte-order.  If the
-   register is known to be the size of a CORE_ADDR or smaller,
-   read_register can be used instead.  */
-
-static void
-legacy_read_register_gen (int regnum, char *myaddr)
-{
-  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
-  if (! ptid_equal (registers_ptid, inferior_ptid))
-    {
-      registers_changed ();
-      registers_ptid = inferior_ptid;
-    }
-
-  if (!register_cached (regnum))
-    target_fetch_registers (regnum);
-
-  memcpy (myaddr, register_buffer (current_regcache, regnum),
-	  DEPRECATED_REGISTER_RAW_SIZE (regnum));
 }
 
 void
@@ -786,46 +756,6 @@ regcache_cooked_write_unsigned (struct regcache *regcache, int regnum,
   buf = alloca (regcache->descr->sizeof_register[regnum]);
   store_unsigned_integer (buf, regcache->descr->sizeof_register[regnum], val);
   regcache_cooked_write (regcache, regnum, buf);
-}
-
-/* Write register REGNUM at MYADDR to the target.  MYADDR points at
-   REGISTER_RAW_BYTES(REGNUM), which must be in target byte-order.  */
-
-static void
-legacy_write_register_gen (int regnum, const void *myaddr)
-{
-  int size;
-  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
-
-  /* On the sparc, writing %g0 is a no-op, so we don't even want to
-     change the registers array if something writes to this register.  */
-  if (CANNOT_STORE_REGISTER (regnum))
-    return;
-
-  if (! ptid_equal (registers_ptid, inferior_ptid))
-    {
-      registers_changed ();
-      registers_ptid = inferior_ptid;
-    }
-
-  size = DEPRECATED_REGISTER_RAW_SIZE (regnum);
-
-  if (real_register (regnum))
-    {
-      /* If we have a valid copy of the register, and new value == old
-	 value, then don't bother doing the actual store. */
-      if (register_cached (regnum)
-	  && (memcmp (register_buffer (current_regcache, regnum), myaddr, size)
-	      == 0))
-	return;
-      else
-	target_prepare_to_store ();
-    }
-
-  memcpy (register_buffer (current_regcache, regnum), myaddr, size);
-
-  set_register_cached (regnum, 1);
-  target_store_registers (regnum);
 }
 
 void

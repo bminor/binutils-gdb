@@ -1,5 +1,8 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* regcache.c (legacy_read_register_gen, real_register) 
+	(legacy_write_register_gen): Delete, not used.
+
 	* regcache.c (struct regcache_descr): Delete legacy_p.
 	(init_legacy_regcache_descr): Delete function.
 	(init_regcache_descr): Delete call to init_legacy_regcache_descr.
