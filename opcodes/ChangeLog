@@ -1,9 +1,20 @@
 start-sanitize-sky
+Thu Feb 19 02:11:39 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* dvp-opc.c (dma_operands): Rewrite.
+	(dma_operand_{count,addr}): New globals.
+	(dma_opcodes): Rewrite.  Add "dmaend" with no operands.
+	(insert_dma_addr): Insert value into insn.
+	(extract_dma_addr): Extract value from insn.
+
 Wed Feb 18 15:46:46 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-dis.c (print_vu): Handle loi insns.
 	(print_insn): Likewise.
 	* dvp-opc.c (vu_lower_opcodes): Add "loi".
+	(vu_operands): Make LDEST1 a FAKE operand.
+	(parse_dest1): Allow elided argument.
+	(print_dest1): Don't print the argument.
 
 Tue Feb 17 18:48:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
