@@ -1,3 +1,12 @@
+Fri Oct 13 15:04:05 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* wrapper.c (sim_set_callbacks): New.
+
+Thu Sep 28 19:45:56 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* armos.c (ARMul_OSHandleSWI): Result of read/write calls is
+	number of bytes not read/written (or -1).
+
 Wed Sep 20 13:35:54 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New synonym for realclean.
