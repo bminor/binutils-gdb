@@ -52,9 +52,12 @@
 #include "gdb_assert.h"
 #include <sys/types.h>
 
-/* Loaded secondary compilation units are kept in memory until they have not
-   been referenced for the processing of this many compilation units.  */
-#define MAX_CACHE_AGE 20
+/* Loaded secondary compilation units are kept in memory until they
+   have not been referenced for the processing of this many
+   compilation units.  Set this to zero to disable caching.  Cache
+   sizes of up to at least twenty will improve startup time for
+   typical inter-CU-reference binaries, at an obvious memory cost.  */
+#define MAX_CACHE_AGE 5
 
 #ifndef DWARF2_REG_TO_REGNUM
 #define DWARF2_REG_TO_REGNUM(REG) (REG)
@@ -336,6 +339,14 @@ struct dwarf2_cu
 
   /* Full DIEs if read in.  */
   struct die_info *dies;
+
+  /* A tree of pointers to dwarf2_per_cu_data objects for compilation
+     units referenced by this one.  Only set during full symbol processing;
+     partial symbol tables do not have dependencies.  */
+  splay_tree dependencies;
+
+  /* Mark used when releasing cached dies.  */
+  unsigned int mark : 1;
 };
 
 struct dwarf2_per_cu_data
@@ -976,6 +987,8 @@ static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
 static struct partial_symtab *dwarf2_find_comp_unit_psymtab
   (unsigned int offset, struct objfile *objfile);
 
+static void free_one_comp_unit (struct dwarf2_cu *);
+
 static void clear_per_cu_pointer (void *);
 
 static void free_cached_comp_units (void *);
@@ -997,6 +1010,13 @@ static struct dwarf2_cu *load_full_comp_unit (struct partial_symtab *,
 
 static void process_full_comp_unit (struct partial_symtab *,
 				    struct dwarf2_cu *);
+
+static void dwarf2_add_dependence (struct dwarf2_cu *,
+				   struct dwarf2_per_cu_data *);
+
+static void dwarf2_mark (struct dwarf2_cu *);
+
+static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
 
 /* Allocation function for the libiberty splay tree which uses an obstack.  */
 static void *
@@ -2347,11 +2367,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
       struct dwarf2_cu *cu;
       cu = load_full_comp_unit (pst, NULL);
       process_full_comp_unit (pst, cu);
-      /* FIXME: This is in two places now.  That's one too many.  */
-      obstack_free (&cu->partial_die_obstack, NULL);
-      if (cu->dies)
-	free_die_list (cu->dies);
-      xfree (cu);
+      free_one_comp_unit (cu);
     }
   else
     {
@@ -2369,20 +2385,10 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 
       process_queue (pst->objfile);
 
-      /* FIXME drow/2004-02-23: Obviously, this is bad.  We want to
-	 keep compilation units in memory.  The problem is that we do
-	 not currently store the dependence information, so CUs used
-	 by a cached CU may drop out of the cache before it does.
-	 Then we don't know to reload them, but we never should have
-	 let them go at all.  When some dependence graph is
-	 implemented, we can re-enable aging.  Be careful of cycles!
-
-         This is a very important performance improvement.  My testing
-         shows a factor of six loss from disabling the caching.  */
-#if 0
+      /* Aging is a very important performance improvement.  My
+         testing shows a factor of six loss from disabling the
+         caching.  */
       age_cached_comp_units (NULL);
-#endif
-      free_cached_comp_units (NULL);
     }
 }
 
@@ -5390,6 +5396,8 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
 	  struct dwarf2_per_cu_data *per_cu;
 	  per_cu = dwarf2_find_containing_comp_unit (DW_ADDR (&die->attrs[i]),
 						     cu);
+
+	  dwarf2_add_dependence (cu, per_cu);
 
 	  /* If it's already on the queue, we have nothing to do.  */
 	  if (per_cu->queued)
@@ -9087,6 +9095,17 @@ dwarf2_find_comp_unit_psymtab (unsigned int offset, struct objfile *objfile)
 		  offset);
 }
 
+/* Release one cached compilation unit, CU.  */
+
+static void
+free_one_comp_unit (struct dwarf2_cu *cu)
+{
+  obstack_free (&cu->partial_die_obstack, NULL);
+  if (cu->dies)
+    free_die_list (cu->dies);
+  xfree (cu);
+}
+
 /* Helper function for cleaning up the compilation unit cache.  Walk
    this objfile's read_in_chain.  If AGING, increase the age counter
    on each compilation unit, and free any that are too old.  Otherwise,
@@ -9098,6 +9117,19 @@ free_comp_units_worker (struct dwarf2_cu *target_cu, int aging)
 {
   struct dwarf2_per_cu_data *per_cu, **last_chain;
 
+  if (aging)
+    {
+      dwarf2_clear_marks (dwarf2_per_objfile->read_in_chain);
+      per_cu = dwarf2_per_objfile->read_in_chain;
+      while (per_cu != NULL)
+	{
+	  per_cu->cu->last_used ++;
+	  if (per_cu->cu->last_used <= MAX_CACHE_AGE)
+	    dwarf2_mark (per_cu->cu);
+	  per_cu = per_cu->cu->read_in_chain;
+	}
+    }
+
   per_cu = dwarf2_per_objfile->read_in_chain;
   last_chain = &dwarf2_per_objfile->read_in_chain;
   while (per_cu != NULL)
@@ -9106,14 +9138,11 @@ free_comp_units_worker (struct dwarf2_cu *target_cu, int aging)
 
       next_cu = per_cu->cu->read_in_chain;
 
-      if ((aging && per_cu->cu->last_used > MAX_CACHE_AGE)
+      if ((aging && !per_cu->cu->mark)
 	  || (target_cu && per_cu->cu == target_cu)
 	  || (!aging && target_cu == NULL))
 	{
-	  obstack_free (&per_cu->cu->partial_die_obstack, NULL);
-	  if (per_cu->cu->dies)
-	    free_die_list (per_cu->cu->dies);
-	  xfree (per_cu->cu);
+	  free_one_comp_unit (per_cu->cu);
 	  per_cu->cu = NULL;
 	  *last_chain = next_cu;
 	}
@@ -9244,6 +9273,64 @@ reset_die_and_siblings_types (struct die_info *start_die, struct dwarf2_cu *cu)
       die->type = get_die_type (die, type_hash, cu);
       if (die->child != NULL)
 	reset_die_and_siblings_types (die->child, cu);
+    }
+}
+
+/* Add a dependence relationship from CU to REF_PER_CU.  */
+
+static void
+dwarf2_add_dependence (struct dwarf2_cu *cu,
+		       struct dwarf2_per_cu_data *ref_per_cu)
+{
+  if (cu->dependencies == NULL)
+    cu->dependencies
+      = splay_tree_new_with_allocator (splay_tree_compare_ints,
+				       NULL, NULL,
+				       splay_tree_obstack_allocate,
+				       splay_tree_obstack_deallocate,
+				       &cu->partial_die_obstack);
+
+  if (splay_tree_lookup (cu->dependencies, ref_per_cu->offset) == NULL)
+    splay_tree_insert (cu->dependencies, ref_per_cu->offset, 
+		       (splay_tree_value) ref_per_cu);
+}
+
+/* Set the mark field in CU and in every other compilation unit in the
+   cache that we must keep because we are keeping CU.  */
+
+static int
+dwarf2_mark_helper (splay_tree_node node, void *data)
+{
+  struct dwarf2_per_cu_data *per_cu;
+
+  per_cu = (struct dwarf2_per_cu_data *) node->value;
+  if (per_cu->cu->mark)
+    return 0;
+  per_cu->cu->mark = 1;
+
+  if (per_cu->cu->dependencies != NULL)
+    splay_tree_foreach (per_cu->cu->dependencies, dwarf2_mark_helper, NULL);
+
+  return 0;
+}
+
+static void
+dwarf2_mark (struct dwarf2_cu *cu)
+{
+  if (cu->mark)
+    return;
+  cu->mark = 1;
+  if (cu->dependencies != NULL)
+    splay_tree_foreach (cu->dependencies, dwarf2_mark_helper, NULL);
+}
+
+static void
+dwarf2_clear_marks (struct dwarf2_per_cu_data *per_cu)
+{
+  while (per_cu)
+    {
+      per_cu->cu->mark = 0;
+      per_cu = per_cu->cu->read_in_chain;
     }
 }
 

@@ -1,5 +1,19 @@
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (MAX_CACHE_AGE): Lower to 5.
+	(struct dwarf2_cu): Add dependencies and mark fields.
+	(free_one_comp_unit): New function, broken out from
+	free_comp_units_worker.
+	(dwarf2_add_dependence, dwarf2_clear_marks, dwarf2_mark)
+	(dwarf2_mark_helper): New functions.
+	(psymtab_to_symtab_1): Call free_one_comp_unit.  Re-enable
+	aging.
+	(read_full_die): Call dwarf2_add_dependence.
+	(free_comp_units_worker): Call free_one_comp_unit.  Use
+	marking to free old comp units.
+
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct dwarf2_cu): Add dies.
 	(struct dwarf2_per_cu_data): Shrink length field to add new
 	queued flag.
