@@ -585,10 +585,10 @@ section:	NAME 		{ ldlex_expression(); }
 			lang_enter_output_section_statement($1,$3,typebits,0,0,0,$4);
 			}
 		statement_list_opt 	
- 		'}' {ldlex_expression();} fill_opt memspec_opt
+ 		'}' {ldlex_expression();} memspec_opt fill_opt
 		{
 		  ldlex_popstate();
-		  lang_leave_output_section_statement($11, $12);
+		  lang_leave_output_section_statement($12, $11);
 		}
 opt_comma
 
