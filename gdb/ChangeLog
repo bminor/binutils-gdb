@@ -1,3 +1,7 @@
+2002-12-13  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frame.h (frame_id_unwind_ftype): Fix typo in return type.
+
 2002-12-13  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/mips/tm-mips.h, config/mips/tm-irix3.h,

@@ -335,8 +335,8 @@ typedef CORE_ADDR (frame_pc_unwind_ftype) (struct frame_info *frame,
 /* Same as for registers above, but return the ID of the frame that
    called this one.  */
 
-typedef struct frame_info (frame_id_unwind_ftype) (struct frame_info *frame,
-						   void **unwind_cache);
+typedef struct frame_id (frame_id_unwind_ftype) (struct frame_info *frame,
+						 void **unwind_cache);
 
 /* Describe the saved registers of a frame.  */
 
