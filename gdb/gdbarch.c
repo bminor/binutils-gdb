@@ -697,1407 +697,1338 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_ADDR_BIT # %s\n",
                       XSTRING (TARGET_ADDR_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_ADDR_BIT = %d\n",
-                      TARGET_ADDR_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: addr_bit = %s\n",
+                      paddr_d (current_gdbarch->addr_bit));
 #ifdef ADDR_BITS_REMOVE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "ADDR_BITS_REMOVE(addr)",
                       XSTRING (ADDR_BITS_REMOVE (addr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: ADDR_BITS_REMOVE = <0x%08lx>\n",
-                      (long) current_gdbarch->addr_bits_remove
-                      /*ADDR_BITS_REMOVE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: addr_bits_remove = <0x%lx>\n",
+                      (long) current_gdbarch->addr_bits_remove);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_address_class_name_to_type_flags_p() = %d\n",
                       gdbarch_address_class_name_to_type_flags_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: address_class_name_to_type_flags = 0x%08lx\n",
+                      "gdbarch_dump: address_class_name_to_type_flags = <0x%lx>\n",
                       (long) current_gdbarch->address_class_name_to_type_flags);
 #ifdef ADDRESS_CLASS_TYPE_FLAGS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "ADDRESS_CLASS_TYPE_FLAGS_P()",
                       XSTRING (ADDRESS_CLASS_TYPE_FLAGS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: ADDRESS_CLASS_TYPE_FLAGS_P() = %d\n",
-                      ADDRESS_CLASS_TYPE_FLAGS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_address_class_type_flags_p() = %d\n",
+                      gdbarch_address_class_type_flags_p (current_gdbarch));
 #ifdef ADDRESS_CLASS_TYPE_FLAGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "ADDRESS_CLASS_TYPE_FLAGS(byte_size, dwarf2_addr_class)",
                       XSTRING (ADDRESS_CLASS_TYPE_FLAGS (byte_size, dwarf2_addr_class)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: ADDRESS_CLASS_TYPE_FLAGS = <0x%08lx>\n",
-                      (long) current_gdbarch->address_class_type_flags
-                      /*ADDRESS_CLASS_TYPE_FLAGS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: address_class_type_flags = <0x%lx>\n",
+                      (long) current_gdbarch->address_class_type_flags);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_address_class_type_flags_to_name_p() = %d\n",
                       gdbarch_address_class_type_flags_to_name_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: address_class_type_flags_to_name = 0x%08lx\n",
+                      "gdbarch_dump: address_class_type_flags_to_name = <0x%lx>\n",
                       (long) current_gdbarch->address_class_type_flags_to_name);
 #ifdef ADDRESS_TO_POINTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "ADDRESS_TO_POINTER(type, buf, addr)",
                       XSTRING (ADDRESS_TO_POINTER (type, buf, addr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: ADDRESS_TO_POINTER = <0x%08lx>\n",
-                      (long) current_gdbarch->address_to_pointer
-                      /*ADDRESS_TO_POINTER ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: address_to_pointer = <0x%lx>\n",
+                      (long) current_gdbarch->address_to_pointer);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
                       gdbarch_adjust_breakpoint_address_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: adjust_breakpoint_address = 0x%08lx\n",
+                      "gdbarch_dump: adjust_breakpoint_address = <0x%lx>\n",
                       (long) current_gdbarch->adjust_breakpoint_address);
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: BELIEVE_PCC_PROMOTION # %s\n",
                       XSTRING (BELIEVE_PCC_PROMOTION));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: BELIEVE_PCC_PROMOTION = %d\n",
-                      BELIEVE_PCC_PROMOTION);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: believe_pcc_promotion = %s\n",
+                      paddr_d (current_gdbarch->believe_pcc_promotion));
 #ifdef TARGET_ARCHITECTURE
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_ARCHITECTURE # %s\n",
                       XSTRING (TARGET_ARCHITECTURE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_ARCHITECTURE = %s\n",
-                      TARGET_ARCHITECTURE->printable_name);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: bfd_arch_info = %s\n",
+                      TARGET_ARCHITECTURE->printable_name);
 #ifdef TARGET_BFD_VMA_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_BFD_VMA_BIT # %s\n",
                       XSTRING (TARGET_BFD_VMA_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_BFD_VMA_BIT = %d\n",
-                      TARGET_BFD_VMA_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: bfd_vma_bit = %s\n",
+                      paddr_d (current_gdbarch->bfd_vma_bit));
 #ifdef BREAKPOINT_FROM_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "BREAKPOINT_FROM_PC(pcptr, lenptr)",
                       XSTRING (BREAKPOINT_FROM_PC (pcptr, lenptr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: BREAKPOINT_FROM_PC = <0x%08lx>\n",
-                      (long) current_gdbarch->breakpoint_from_pc
-                      /*BREAKPOINT_FROM_PC ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: breakpoint_from_pc = <0x%lx>\n",
+                      (long) current_gdbarch->breakpoint_from_pc);
 #ifdef TARGET_BYTE_ORDER
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_BYTE_ORDER # %s\n",
                       XSTRING (TARGET_BYTE_ORDER));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_BYTE_ORDER = %ld\n",
-                      (long) TARGET_BYTE_ORDER);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: byte_order = %s\n",
+                      paddr_d (current_gdbarch->byte_order));
 #ifdef CALL_DUMMY_LOCATION
   fprintf_unfiltered (file,
                       "gdbarch_dump: CALL_DUMMY_LOCATION # %s\n",
                       XSTRING (CALL_DUMMY_LOCATION));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_LOCATION = %d\n",
-                      CALL_DUMMY_LOCATION);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: call_dummy_location = %s\n",
+                      paddr_d (current_gdbarch->call_dummy_location));
 #ifdef CANNOT_FETCH_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "CANNOT_FETCH_REGISTER(regnum)",
                       XSTRING (CANNOT_FETCH_REGISTER (regnum)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CANNOT_FETCH_REGISTER = <0x%08lx>\n",
-                      (long) current_gdbarch->cannot_fetch_register
-                      /*CANNOT_FETCH_REGISTER ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: cannot_fetch_register = <0x%lx>\n",
+                      (long) current_gdbarch->cannot_fetch_register);
 #ifdef CANNOT_STEP_BREAKPOINT
   fprintf_unfiltered (file,
                       "gdbarch_dump: CANNOT_STEP_BREAKPOINT # %s\n",
                       XSTRING (CANNOT_STEP_BREAKPOINT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CANNOT_STEP_BREAKPOINT = %d\n",
-                      CANNOT_STEP_BREAKPOINT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: cannot_step_breakpoint = %s\n",
+                      paddr_d (current_gdbarch->cannot_step_breakpoint));
 #ifdef CANNOT_STORE_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "CANNOT_STORE_REGISTER(regnum)",
                       XSTRING (CANNOT_STORE_REGISTER (regnum)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CANNOT_STORE_REGISTER = <0x%08lx>\n",
-                      (long) current_gdbarch->cannot_store_register
-                      /*CANNOT_STORE_REGISTER ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: cannot_store_register = <0x%lx>\n",
+                      (long) current_gdbarch->cannot_store_register);
 #ifdef TARGET_CHAR_SIGNED
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_CHAR_SIGNED # %s\n",
                       XSTRING (TARGET_CHAR_SIGNED));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_CHAR_SIGNED = %d\n",
-                      TARGET_CHAR_SIGNED);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: char_signed = %s\n",
+                      paddr_d (current_gdbarch->char_signed));
 #ifdef COFF_MAKE_MSYMBOL_SPECIAL
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "COFF_MAKE_MSYMBOL_SPECIAL(val, msym)",
                       XSTRING (COFF_MAKE_MSYMBOL_SPECIAL (val, msym)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: COFF_MAKE_MSYMBOL_SPECIAL = <0x%08lx>\n",
-                      (long) current_gdbarch->coff_make_msymbol_special
-                      /*COFF_MAKE_MSYMBOL_SPECIAL ()*/);
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: construct_inferior_arguments = 0x%08lx\n",
+                      "gdbarch_dump: coff_make_msymbol_special = <0x%lx>\n",
+                      (long) current_gdbarch->coff_make_msymbol_special);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: construct_inferior_arguments = <0x%lx>\n",
                       (long) current_gdbarch->construct_inferior_arguments);
   fprintf_unfiltered (file,
-                      "gdbarch_dump: convert_from_func_ptr_addr = 0x%08lx\n",
+                      "gdbarch_dump: convert_from_func_ptr_addr = <0x%lx>\n",
                       (long) current_gdbarch->convert_from_func_ptr_addr);
 #ifdef CONVERT_REGISTER_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "CONVERT_REGISTER_P(regnum, type)",
                       XSTRING (CONVERT_REGISTER_P (regnum, type)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CONVERT_REGISTER_P = <0x%08lx>\n",
-                      (long) current_gdbarch->convert_register_p
-                      /*CONVERT_REGISTER_P ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: convert_register_p = <0x%lx>\n",
+                      (long) current_gdbarch->convert_register_p);
 #ifdef DECR_PC_AFTER_BREAK
   fprintf_unfiltered (file,
                       "gdbarch_dump: DECR_PC_AFTER_BREAK # %s\n",
                       XSTRING (DECR_PC_AFTER_BREAK));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
-                      (long) DECR_PC_AFTER_BREAK);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: decr_pc_after_break = 0x%s\n",
+                      paddr_nz (current_gdbarch->decr_pc_after_break));
 #ifdef DEPRECATED_DO_REGISTERS_INFO_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_DO_REGISTERS_INFO_P()",
                       XSTRING (DEPRECATED_DO_REGISTERS_INFO_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_DO_REGISTERS_INFO_P() = %d\n",
-                      DEPRECATED_DO_REGISTERS_INFO_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_do_registers_info_p() = %d\n",
+                      gdbarch_deprecated_do_registers_info_p (current_gdbarch));
 #ifdef DEPRECATED_DO_REGISTERS_INFO
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_DO_REGISTERS_INFO(reg_nr, fpregs)",
                       XSTRING (DEPRECATED_DO_REGISTERS_INFO (reg_nr, fpregs)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_DO_REGISTERS_INFO = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_do_registers_info
-                      /*DEPRECATED_DO_REGISTERS_INFO ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_do_registers_info = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_do_registers_info);
 #ifdef DEPRECATED_DUMMY_WRITE_SP_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_DUMMY_WRITE_SP_P()",
                       XSTRING (DEPRECATED_DUMMY_WRITE_SP_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_DUMMY_WRITE_SP_P() = %d\n",
-                      DEPRECATED_DUMMY_WRITE_SP_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_dummy_write_sp_p() = %d\n",
+                      gdbarch_deprecated_dummy_write_sp_p (current_gdbarch));
 #ifdef DEPRECATED_DUMMY_WRITE_SP
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_DUMMY_WRITE_SP(val)",
                       XSTRING (DEPRECATED_DUMMY_WRITE_SP (val)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_DUMMY_WRITE_SP = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_dummy_write_sp
-                      /*DEPRECATED_DUMMY_WRITE_SP ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_dummy_write_sp = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_dummy_write_sp);
 #ifdef DEPRECATED_EXTRACT_RETURN_VALUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf)",
                       XSTRING (DEPRECATED_EXTRACT_RETURN_VALUE (type, regbuf, valbuf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_EXTRACT_RETURN_VALUE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_extract_return_value
-                      /*DEPRECATED_EXTRACT_RETURN_VALUE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_extract_return_value = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_extract_return_value);
 #ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P()",
                       XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() = %d\n",
-                      DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_extract_struct_value_address_p() = %d\n",
+                      gdbarch_deprecated_extract_struct_value_address_p (current_gdbarch));
 #ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regcache)",
                       XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (regcache)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_extract_struct_value_address
-                      /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_extract_struct_value_address = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_extract_struct_value_address);
 #ifdef DEPRECATED_FP_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_FP_REGNUM # %s\n",
                       XSTRING (DEPRECATED_FP_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FP_REGNUM = %d\n",
-                      DEPRECATED_FP_REGNUM);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_fp_regnum = %s\n",
+                      paddr_d (current_gdbarch->deprecated_fp_regnum));
 #ifdef DEPRECATED_FRAME_ARGS_ADDRESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_ARGS_ADDRESS_P()",
                       XSTRING (DEPRECATED_FRAME_ARGS_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_ARGS_ADDRESS_P() = %d\n",
-                      DEPRECATED_FRAME_ARGS_ADDRESS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_frame_args_address_p() = %d\n",
+                      gdbarch_deprecated_frame_args_address_p (current_gdbarch));
 #ifdef DEPRECATED_FRAME_ARGS_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_ARGS_ADDRESS(fi)",
                       XSTRING (DEPRECATED_FRAME_ARGS_ADDRESS (fi)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_ARGS_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_frame_args_address
-                      /*DEPRECATED_FRAME_ARGS_ADDRESS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_frame_args_address = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_frame_args_address);
 #ifdef DEPRECATED_FRAME_CHAIN_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_CHAIN_P()",
                       XSTRING (DEPRECATED_FRAME_CHAIN_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_CHAIN_P() = %d\n",
-                      DEPRECATED_FRAME_CHAIN_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_frame_chain_p() = %d\n",
+                      gdbarch_deprecated_frame_chain_p (current_gdbarch));
 #ifdef DEPRECATED_FRAME_CHAIN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_CHAIN(frame)",
                       XSTRING (DEPRECATED_FRAME_CHAIN (frame)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_CHAIN = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_frame_chain
-                      /*DEPRECATED_FRAME_CHAIN ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_frame_chain = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_frame_chain);
 #ifdef DEPRECATED_FRAME_CHAIN_VALID_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_CHAIN_VALID_P()",
                       XSTRING (DEPRECATED_FRAME_CHAIN_VALID_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_CHAIN_VALID_P() = %d\n",
-                      DEPRECATED_FRAME_CHAIN_VALID_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_frame_chain_valid_p() = %d\n",
+                      gdbarch_deprecated_frame_chain_valid_p (current_gdbarch));
 #ifdef DEPRECATED_FRAME_CHAIN_VALID
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe)",
                       XSTRING (DEPRECATED_FRAME_CHAIN_VALID (chain, thisframe)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_CHAIN_VALID = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_frame_chain_valid
-                      /*DEPRECATED_FRAME_CHAIN_VALID ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_frame_chain_valid = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_frame_chain_valid);
 #ifdef DEPRECATED_FRAME_INIT_SAVED_REGS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_INIT_SAVED_REGS_P()",
                       XSTRING (DEPRECATED_FRAME_INIT_SAVED_REGS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_INIT_SAVED_REGS_P() = %d\n",
-                      DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_frame_init_saved_regs_p() = %d\n",
+                      gdbarch_deprecated_frame_init_saved_regs_p (current_gdbarch));
 #ifdef DEPRECATED_FRAME_INIT_SAVED_REGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_INIT_SAVED_REGS(frame)",
                       XSTRING (DEPRECATED_FRAME_INIT_SAVED_REGS (frame)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_INIT_SAVED_REGS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_frame_init_saved_regs
-                      /*DEPRECATED_FRAME_INIT_SAVED_REGS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_frame_init_saved_regs = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_frame_init_saved_regs);
 #ifdef DEPRECATED_FRAME_LOCALS_ADDRESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_LOCALS_ADDRESS_P()",
                       XSTRING (DEPRECATED_FRAME_LOCALS_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_LOCALS_ADDRESS_P() = %d\n",
-                      DEPRECATED_FRAME_LOCALS_ADDRESS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_frame_locals_address_p() = %d\n",
+                      gdbarch_deprecated_frame_locals_address_p (current_gdbarch));
 #ifdef DEPRECATED_FRAME_LOCALS_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_LOCALS_ADDRESS(fi)",
                       XSTRING (DEPRECATED_FRAME_LOCALS_ADDRESS (fi)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_LOCALS_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_frame_locals_address
-                      /*DEPRECATED_FRAME_LOCALS_ADDRESS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_frame_locals_address = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_frame_locals_address);
 #ifdef DEPRECATED_FRAME_SAVED_PC_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_SAVED_PC_P()",
                       XSTRING (DEPRECATED_FRAME_SAVED_PC_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_SAVED_PC_P() = %d\n",
-                      DEPRECATED_FRAME_SAVED_PC_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_frame_saved_pc_p() = %d\n",
+                      gdbarch_deprecated_frame_saved_pc_p (current_gdbarch));
 #ifdef DEPRECATED_FRAME_SAVED_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAME_SAVED_PC(fi)",
                       XSTRING (DEPRECATED_FRAME_SAVED_PC (fi)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAME_SAVED_PC = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_frame_saved_pc
-                      /*DEPRECATED_FRAME_SAVED_PC ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_frame_saved_pc = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_frame_saved_pc);
 #ifdef DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P()",
                       XSTRING (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P() = %d\n",
-                      DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_frameless_function_invocation_p() = %d\n",
+                      gdbarch_deprecated_frameless_function_invocation_p (current_gdbarch));
 #ifdef DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_FRAMELESS_FUNCTION_INVOCATION(fi)",
                       XSTRING (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (fi)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FRAMELESS_FUNCTION_INVOCATION = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_frameless_function_invocation
-                      /*DEPRECATED_FRAMELESS_FUNCTION_INVOCATION ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_frameless_function_invocation = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_frameless_function_invocation);
 #ifdef DEPRECATED_FUNCTION_START_OFFSET
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_FUNCTION_START_OFFSET # %s\n",
                       XSTRING (DEPRECATED_FUNCTION_START_OFFSET));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FUNCTION_START_OFFSET = %ld\n",
-                      (long) DEPRECATED_FUNCTION_START_OFFSET);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_function_start_offset = 0x%s\n",
+                      paddr_nz (current_gdbarch->deprecated_function_start_offset));
 #ifdef DEPRECATED_GET_SAVED_REGISTER_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_GET_SAVED_REGISTER_P()",
                       XSTRING (DEPRECATED_GET_SAVED_REGISTER_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_GET_SAVED_REGISTER_P() = %d\n",
-                      DEPRECATED_GET_SAVED_REGISTER_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_get_saved_register_p() = %d\n",
+                      gdbarch_deprecated_get_saved_register_p (current_gdbarch));
 #ifdef DEPRECATED_GET_SAVED_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval)",
                       XSTRING (DEPRECATED_GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_GET_SAVED_REGISTER = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_get_saved_register
-                      /*DEPRECATED_GET_SAVED_REGISTER ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_get_saved_register = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_get_saved_register);
 #ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_INIT_EXTRA_FRAME_INFO_P()",
                       XSTRING (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_INIT_EXTRA_FRAME_INFO_P() = %d\n",
-                      DEPRECATED_INIT_EXTRA_FRAME_INFO_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_init_extra_frame_info_p() = %d\n",
+                      gdbarch_deprecated_init_extra_frame_info_p (current_gdbarch));
 #ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame)",
                       XSTRING (DEPRECATED_INIT_EXTRA_FRAME_INFO (fromleaf, frame)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_INIT_EXTRA_FRAME_INFO = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_init_extra_frame_info
-                      /*DEPRECATED_INIT_EXTRA_FRAME_INFO ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_init_extra_frame_info = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_init_extra_frame_info);
 #ifdef DEPRECATED_INIT_FRAME_PC_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_INIT_FRAME_PC_P()",
                       XSTRING (DEPRECATED_INIT_FRAME_PC_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_INIT_FRAME_PC_P() = %d\n",
-                      DEPRECATED_INIT_FRAME_PC_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_init_frame_pc_p() = %d\n",
+                      gdbarch_deprecated_init_frame_pc_p (current_gdbarch));
 #ifdef DEPRECATED_INIT_FRAME_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_INIT_FRAME_PC(fromleaf, prev)",
                       XSTRING (DEPRECATED_INIT_FRAME_PC (fromleaf, prev)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_INIT_FRAME_PC = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_init_frame_pc
-                      /*DEPRECATED_INIT_FRAME_PC ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_init_frame_pc = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_init_frame_pc);
 #ifdef DEPRECATED_POP_FRAME_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_POP_FRAME_P()",
                       XSTRING (DEPRECATED_POP_FRAME_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_POP_FRAME_P() = %d\n",
-                      DEPRECATED_POP_FRAME_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_pop_frame_p() = %d\n",
+                      gdbarch_deprecated_pop_frame_p (current_gdbarch));
 #ifdef DEPRECATED_POP_FRAME
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_POP_FRAME(-)",
                       XSTRING (DEPRECATED_POP_FRAME (-)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_POP_FRAME = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_pop_frame
-                      /*DEPRECATED_POP_FRAME ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_pop_frame = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_pop_frame);
 #ifdef DEPRECATED_PUSH_ARGUMENTS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_PUSH_ARGUMENTS_P()",
                       XSTRING (DEPRECATED_PUSH_ARGUMENTS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PUSH_ARGUMENTS_P() = %d\n",
-                      DEPRECATED_PUSH_ARGUMENTS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_push_arguments_p() = %d\n",
+                      gdbarch_deprecated_push_arguments_p (current_gdbarch));
 #ifdef DEPRECATED_PUSH_ARGUMENTS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr)",
                       XSTRING (DEPRECATED_PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PUSH_ARGUMENTS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_push_arguments
-                      /*DEPRECATED_PUSH_ARGUMENTS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_push_arguments = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_push_arguments);
 #ifdef DEPRECATED_PUSH_RETURN_ADDRESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_PUSH_RETURN_ADDRESS_P()",
                       XSTRING (DEPRECATED_PUSH_RETURN_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PUSH_RETURN_ADDRESS_P() = %d\n",
-                      DEPRECATED_PUSH_RETURN_ADDRESS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_push_return_address_p() = %d\n",
+                      gdbarch_deprecated_push_return_address_p (current_gdbarch));
 #ifdef DEPRECATED_PUSH_RETURN_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_PUSH_RETURN_ADDRESS(pc, sp)",
                       XSTRING (DEPRECATED_PUSH_RETURN_ADDRESS (pc, sp)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PUSH_RETURN_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_push_return_address
-                      /*DEPRECATED_PUSH_RETURN_ADDRESS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_push_return_address = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_push_return_address);
 #ifdef DEPRECATED_REG_STRUCT_HAS_ADDR_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REG_STRUCT_HAS_ADDR_P()",
                       XSTRING (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REG_STRUCT_HAS_ADDR_P() = %d\n",
-                      DEPRECATED_REG_STRUCT_HAS_ADDR_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_reg_struct_has_addr_p() = %d\n",
+                      gdbarch_deprecated_reg_struct_has_addr_p (current_gdbarch));
 #ifdef DEPRECATED_REG_STRUCT_HAS_ADDR
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type)",
                       XSTRING (DEPRECATED_REG_STRUCT_HAS_ADDR (gcc_p, type)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REG_STRUCT_HAS_ADDR = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_reg_struct_has_addr
-                      /*DEPRECATED_REG_STRUCT_HAS_ADDR ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_reg_struct_has_addr = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_reg_struct_has_addr);
 #ifdef DEPRECATED_REGISTER_BYTE_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_BYTE_P()",
                       XSTRING (DEPRECATED_REGISTER_BYTE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_BYTE_P() = %d\n",
-                      DEPRECATED_REGISTER_BYTE_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_register_byte_p() = %d\n",
+                      gdbarch_deprecated_register_byte_p (current_gdbarch));
 #ifdef DEPRECATED_REGISTER_BYTE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_BYTE(reg_nr)",
                       XSTRING (DEPRECATED_REGISTER_BYTE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_BYTE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_byte
-                      /*DEPRECATED_REGISTER_BYTE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_register_byte = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_register_byte);
 #ifdef DEPRECATED_REGISTER_BYTES
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_BYTES # %s\n",
                       XSTRING (DEPRECATED_REGISTER_BYTES));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_BYTES = %d\n",
-                      DEPRECATED_REGISTER_BYTES);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_register_bytes = %s\n",
+                      paddr_d (current_gdbarch->deprecated_register_bytes));
 #ifdef DEPRECATED_REGISTER_RAW_SIZE_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_RAW_SIZE_P()",
                       XSTRING (DEPRECATED_REGISTER_RAW_SIZE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_RAW_SIZE_P() = %d\n",
-                      DEPRECATED_REGISTER_RAW_SIZE_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_register_raw_size_p() = %d\n",
+                      gdbarch_deprecated_register_raw_size_p (current_gdbarch));
 #ifdef DEPRECATED_REGISTER_RAW_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_RAW_SIZE(reg_nr)",
                       XSTRING (DEPRECATED_REGISTER_RAW_SIZE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_RAW_SIZE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_raw_size
-                      /*DEPRECATED_REGISTER_RAW_SIZE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_register_raw_size = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_register_raw_size);
 #ifdef DEPRECATED_REGISTER_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_SIZE # %s\n",
                       XSTRING (DEPRECATED_REGISTER_SIZE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_SIZE = %d\n",
-                      DEPRECATED_REGISTER_SIZE);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_register_size = %s\n",
+                      paddr_d (current_gdbarch->deprecated_register_size));
 #ifdef DEPRECATED_REGISTER_VIRTUAL_SIZE_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_VIRTUAL_SIZE_P()",
                       XSTRING (DEPRECATED_REGISTER_VIRTUAL_SIZE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_VIRTUAL_SIZE_P() = %d\n",
-                      DEPRECATED_REGISTER_VIRTUAL_SIZE_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_register_virtual_size_p() = %d\n",
+                      gdbarch_deprecated_register_virtual_size_p (current_gdbarch));
 #ifdef DEPRECATED_REGISTER_VIRTUAL_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_VIRTUAL_SIZE(reg_nr)",
                       XSTRING (DEPRECATED_REGISTER_VIRTUAL_SIZE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_VIRTUAL_SIZE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_virtual_size
-                      /*DEPRECATED_REGISTER_VIRTUAL_SIZE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_register_virtual_size = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_register_virtual_size);
 #ifdef DEPRECATED_REGISTER_VIRTUAL_TYPE_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_VIRTUAL_TYPE_P()",
                       XSTRING (DEPRECATED_REGISTER_VIRTUAL_TYPE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_VIRTUAL_TYPE_P() = %d\n",
-                      DEPRECATED_REGISTER_VIRTUAL_TYPE_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_register_virtual_type_p() = %d\n",
+                      gdbarch_deprecated_register_virtual_type_p (current_gdbarch));
 #ifdef DEPRECATED_REGISTER_VIRTUAL_TYPE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_REGISTER_VIRTUAL_TYPE(reg_nr)",
                       XSTRING (DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_VIRTUAL_TYPE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_virtual_type
-                      /*DEPRECATED_REGISTER_VIRTUAL_TYPE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_register_virtual_type = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_register_virtual_type);
 #ifdef DEPRECATED_SAVE_DUMMY_FRAME_TOS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_SAVE_DUMMY_FRAME_TOS_P()",
                       XSTRING (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_SAVE_DUMMY_FRAME_TOS_P() = %d\n",
-                      DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_save_dummy_frame_tos_p() = %d\n",
+                      gdbarch_deprecated_save_dummy_frame_tos_p (current_gdbarch));
 #ifdef DEPRECATED_SAVE_DUMMY_FRAME_TOS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_SAVE_DUMMY_FRAME_TOS(sp)",
                       XSTRING (DEPRECATED_SAVE_DUMMY_FRAME_TOS (sp)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_SAVE_DUMMY_FRAME_TOS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_save_dummy_frame_tos
-                      /*DEPRECATED_SAVE_DUMMY_FRAME_TOS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_save_dummy_frame_tos = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_save_dummy_frame_tos);
 #ifdef DEPRECATED_SAVED_PC_AFTER_CALL_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_SAVED_PC_AFTER_CALL_P()",
                       XSTRING (DEPRECATED_SAVED_PC_AFTER_CALL_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_SAVED_PC_AFTER_CALL_P() = %d\n",
-                      DEPRECATED_SAVED_PC_AFTER_CALL_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_saved_pc_after_call_p() = %d\n",
+                      gdbarch_deprecated_saved_pc_after_call_p (current_gdbarch));
 #ifdef DEPRECATED_SAVED_PC_AFTER_CALL
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_SAVED_PC_AFTER_CALL(frame)",
                       XSTRING (DEPRECATED_SAVED_PC_AFTER_CALL (frame)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_SAVED_PC_AFTER_CALL = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_saved_pc_after_call
-                      /*DEPRECATED_SAVED_PC_AFTER_CALL ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_saved_pc_after_call = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_saved_pc_after_call);
 #ifdef DEPRECATED_STACK_ALIGN_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_STACK_ALIGN_P()",
                       XSTRING (DEPRECATED_STACK_ALIGN_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_STACK_ALIGN_P() = %d\n",
-                      DEPRECATED_STACK_ALIGN_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_stack_align_p() = %d\n",
+                      gdbarch_deprecated_stack_align_p (current_gdbarch));
 #ifdef DEPRECATED_STACK_ALIGN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_STACK_ALIGN(sp)",
                       XSTRING (DEPRECATED_STACK_ALIGN (sp)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_STACK_ALIGN = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_stack_align
-                      /*DEPRECATED_STACK_ALIGN ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_stack_align = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_stack_align);
 #ifdef DEPRECATED_STORE_RETURN_VALUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_STORE_RETURN_VALUE(type, valbuf)",
                       XSTRING (DEPRECATED_STORE_RETURN_VALUE (type, valbuf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_STORE_RETURN_VALUE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_store_return_value
-                      /*DEPRECATED_STORE_RETURN_VALUE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_store_return_value = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_store_return_value);
 #ifdef DEPRECATED_STORE_STRUCT_RETURN_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_STORE_STRUCT_RETURN_P()",
                       XSTRING (DEPRECATED_STORE_STRUCT_RETURN_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_STORE_STRUCT_RETURN_P() = %d\n",
-                      DEPRECATED_STORE_STRUCT_RETURN_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_store_struct_return_p() = %d\n",
+                      gdbarch_deprecated_store_struct_return_p (current_gdbarch));
 #ifdef DEPRECATED_STORE_STRUCT_RETURN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_STORE_STRUCT_RETURN(addr, sp)",
                       XSTRING (DEPRECATED_STORE_STRUCT_RETURN (addr, sp)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_STORE_STRUCT_RETURN = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_store_struct_return
-                      /*DEPRECATED_STORE_STRUCT_RETURN ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_store_struct_return = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_store_struct_return);
 #ifdef DEPRECATED_TARGET_READ_FP_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_TARGET_READ_FP_P()",
                       XSTRING (DEPRECATED_TARGET_READ_FP_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_TARGET_READ_FP_P() = %d\n",
-                      DEPRECATED_TARGET_READ_FP_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_deprecated_target_read_fp_p() = %d\n",
+                      gdbarch_deprecated_target_read_fp_p (current_gdbarch));
 #ifdef DEPRECATED_TARGET_READ_FP
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_TARGET_READ_FP()",
                       XSTRING (DEPRECATED_TARGET_READ_FP ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_TARGET_READ_FP = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_target_read_fp
-                      /*DEPRECATED_TARGET_READ_FP ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_target_read_fp = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_target_read_fp);
 #ifdef DEPRECATED_USE_STRUCT_CONVENTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DEPRECATED_USE_STRUCT_CONVENTION(gcc_p, value_type)",
                       XSTRING (DEPRECATED_USE_STRUCT_CONVENTION (gcc_p, value_type)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_USE_STRUCT_CONVENTION = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_use_struct_convention
-                      /*DEPRECATED_USE_STRUCT_CONVENTION ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: deprecated_use_struct_convention = <0x%lx>\n",
+                      (long) current_gdbarch->deprecated_use_struct_convention);
 #ifdef TARGET_DOUBLE_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_DOUBLE_BIT # %s\n",
                       XSTRING (TARGET_DOUBLE_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_DOUBLE_BIT = %d\n",
-                      TARGET_DOUBLE_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: double_bit = %s\n",
+                      paddr_d (current_gdbarch->double_bit));
 #ifdef TARGET_DOUBLE_FORMAT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_DOUBLE_FORMAT # %s\n",
                       XSTRING (TARGET_DOUBLE_FORMAT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_DOUBLE_FORMAT = %s\n",
-                      (TARGET_DOUBLE_FORMAT)->name);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: double_format = %s\n",
+                      (TARGET_DOUBLE_FORMAT)->name);
 #ifdef DWARF2_REG_TO_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DWARF2_REG_TO_REGNUM(dwarf2_regnr)",
                       XSTRING (DWARF2_REG_TO_REGNUM (dwarf2_regnr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DWARF2_REG_TO_REGNUM = <0x%08lx>\n",
-                      (long) current_gdbarch->dwarf2_reg_to_regnum
-                      /*DWARF2_REG_TO_REGNUM ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: dwarf2_reg_to_regnum = <0x%lx>\n",
+                      (long) current_gdbarch->dwarf2_reg_to_regnum);
 #ifdef DWARF_REG_TO_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "DWARF_REG_TO_REGNUM(dwarf_regnr)",
                       XSTRING (DWARF_REG_TO_REGNUM (dwarf_regnr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DWARF_REG_TO_REGNUM = <0x%08lx>\n",
-                      (long) current_gdbarch->dwarf_reg_to_regnum
-                      /*DWARF_REG_TO_REGNUM ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: dwarf_reg_to_regnum = <0x%lx>\n",
+                      (long) current_gdbarch->dwarf_reg_to_regnum);
 #ifdef ECOFF_REG_TO_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "ECOFF_REG_TO_REGNUM(ecoff_regnr)",
                       XSTRING (ECOFF_REG_TO_REGNUM (ecoff_regnr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: ECOFF_REG_TO_REGNUM = <0x%08lx>\n",
-                      (long) current_gdbarch->ecoff_reg_to_regnum
-                      /*ECOFF_REG_TO_REGNUM ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: ecoff_reg_to_regnum = <0x%lx>\n",
+                      (long) current_gdbarch->ecoff_reg_to_regnum);
 #ifdef ELF_MAKE_MSYMBOL_SPECIAL
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "ELF_MAKE_MSYMBOL_SPECIAL(sym, msym)",
                       XSTRING (ELF_MAKE_MSYMBOL_SPECIAL (sym, msym)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: ELF_MAKE_MSYMBOL_SPECIAL = <0x%08lx>\n",
-                      (long) current_gdbarch->elf_make_msymbol_special
-                      /*ELF_MAKE_MSYMBOL_SPECIAL ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: elf_make_msymbol_special = <0x%lx>\n",
+                      (long) current_gdbarch->elf_make_msymbol_special);
 #ifdef EXTRACT_RETURN_VALUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "EXTRACT_RETURN_VALUE(type, regcache, valbuf)",
                       XSTRING (EXTRACT_RETURN_VALUE (type, regcache, valbuf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: EXTRACT_RETURN_VALUE = <0x%08lx>\n",
-                      (long) current_gdbarch->extract_return_value
-                      /*EXTRACT_RETURN_VALUE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: extract_return_value = <0x%lx>\n",
+                      (long) current_gdbarch->extract_return_value);
 #ifdef FETCH_POINTER_ARGUMENT_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "FETCH_POINTER_ARGUMENT_P()",
                       XSTRING (FETCH_POINTER_ARGUMENT_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FETCH_POINTER_ARGUMENT_P() = %d\n",
-                      FETCH_POINTER_ARGUMENT_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_fetch_pointer_argument_p() = %d\n",
+                      gdbarch_fetch_pointer_argument_p (current_gdbarch));
 #ifdef FETCH_POINTER_ARGUMENT
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "FETCH_POINTER_ARGUMENT(frame, argi, type)",
                       XSTRING (FETCH_POINTER_ARGUMENT (frame, argi, type)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FETCH_POINTER_ARGUMENT = <0x%08lx>\n",
-                      (long) current_gdbarch->fetch_pointer_argument
-                      /*FETCH_POINTER_ARGUMENT ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: fetch_pointer_argument = <0x%lx>\n",
+                      (long) current_gdbarch->fetch_pointer_argument);
 #ifdef TARGET_FLOAT_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_FLOAT_BIT # %s\n",
                       XSTRING (TARGET_FLOAT_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_FLOAT_BIT = %d\n",
-                      TARGET_FLOAT_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: float_bit = %s\n",
+                      paddr_d (current_gdbarch->float_bit));
 #ifdef TARGET_FLOAT_FORMAT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_FLOAT_FORMAT # %s\n",
                       XSTRING (TARGET_FLOAT_FORMAT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_FLOAT_FORMAT = %s\n",
-                      (TARGET_FLOAT_FORMAT)->name);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: float_format = %s\n",
+                      (TARGET_FLOAT_FORMAT)->name);
 #ifdef FP0_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: FP0_REGNUM # %s\n",
                       XSTRING (FP0_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FP0_REGNUM = %d\n",
-                      FP0_REGNUM);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: fp0_regnum = %s\n",
+                      paddr_d (current_gdbarch->fp0_regnum));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_frame_align_p() = %d\n",
                       gdbarch_frame_align_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: frame_align = 0x%08lx\n",
+                      "gdbarch_dump: frame_align = <0x%lx>\n",
                       (long) current_gdbarch->frame_align);
 #ifdef FRAME_ARGS_SKIP
   fprintf_unfiltered (file,
                       "gdbarch_dump: FRAME_ARGS_SKIP # %s\n",
                       XSTRING (FRAME_ARGS_SKIP));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_ARGS_SKIP = %ld\n",
-                      (long) FRAME_ARGS_SKIP);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: frame_args_skip = 0x%s\n",
+                      paddr_nz (current_gdbarch->frame_args_skip));
 #ifdef FRAME_NUM_ARGS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "FRAME_NUM_ARGS_P()",
                       XSTRING (FRAME_NUM_ARGS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_NUM_ARGS_P() = %d\n",
-                      FRAME_NUM_ARGS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_frame_num_args_p() = %d\n",
+                      gdbarch_frame_num_args_p (current_gdbarch));
 #ifdef FRAME_NUM_ARGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "FRAME_NUM_ARGS(frame)",
                       XSTRING (FRAME_NUM_ARGS (frame)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_NUM_ARGS = <0x%08lx>\n",
-                      (long) current_gdbarch->frame_num_args
-                      /*FRAME_NUM_ARGS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: frame_num_args = <0x%lx>\n",
+                      (long) current_gdbarch->frame_num_args);
 #ifdef FRAME_RED_ZONE_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: FRAME_RED_ZONE_SIZE # %s\n",
                       XSTRING (FRAME_RED_ZONE_SIZE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_RED_ZONE_SIZE = %d\n",
-                      FRAME_RED_ZONE_SIZE);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: frame_red_zone_size = %s\n",
+                      paddr_d (current_gdbarch->frame_red_zone_size));
 #ifdef GET_LONGJMP_TARGET_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "GET_LONGJMP_TARGET_P()",
                       XSTRING (GET_LONGJMP_TARGET_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: GET_LONGJMP_TARGET_P() = %d\n",
-                      GET_LONGJMP_TARGET_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_get_longjmp_target_p() = %d\n",
+                      gdbarch_get_longjmp_target_p (current_gdbarch));
 #ifdef GET_LONGJMP_TARGET
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "GET_LONGJMP_TARGET(pc)",
                       XSTRING (GET_LONGJMP_TARGET (pc)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: GET_LONGJMP_TARGET = <0x%08lx>\n",
-                      (long) current_gdbarch->get_longjmp_target
-                      /*GET_LONGJMP_TARGET ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: get_longjmp_target = <0x%lx>\n",
+                      (long) current_gdbarch->get_longjmp_target);
 #ifdef HAVE_NONSTEPPABLE_WATCHPOINT
   fprintf_unfiltered (file,
                       "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
                       XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT = %d\n",
-                      HAVE_NONSTEPPABLE_WATCHPOINT);
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
+                      "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
+                      paddr_d (current_gdbarch->have_nonsteppable_watchpoint));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: in_function_epilogue_p = <0x%lx>\n",
                       (long) current_gdbarch->in_function_epilogue_p);
 #ifdef IN_SOLIB_CALL_TRAMPOLINE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "IN_SOLIB_CALL_TRAMPOLINE(pc, name)",
                       XSTRING (IN_SOLIB_CALL_TRAMPOLINE (pc, name)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: IN_SOLIB_CALL_TRAMPOLINE = <0x%08lx>\n",
-                      (long) current_gdbarch->in_solib_call_trampoline
-                      /*IN_SOLIB_CALL_TRAMPOLINE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: in_solib_call_trampoline = <0x%lx>\n",
+                      (long) current_gdbarch->in_solib_call_trampoline);
 #ifdef IN_SOLIB_RETURN_TRAMPOLINE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "IN_SOLIB_RETURN_TRAMPOLINE(pc, name)",
                       XSTRING (IN_SOLIB_RETURN_TRAMPOLINE (pc, name)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: IN_SOLIB_RETURN_TRAMPOLINE = <0x%08lx>\n",
-                      (long) current_gdbarch->in_solib_return_trampoline
-                      /*IN_SOLIB_RETURN_TRAMPOLINE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: in_solib_return_trampoline = <0x%lx>\n",
+                      (long) current_gdbarch->in_solib_return_trampoline);
 #ifdef INNER_THAN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "INNER_THAN(lhs, rhs)",
                       XSTRING (INNER_THAN (lhs, rhs)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: INNER_THAN = <0x%08lx>\n",
-                      (long) current_gdbarch->inner_than
-                      /*INNER_THAN ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: inner_than = <0x%lx>\n",
+                      (long) current_gdbarch->inner_than);
 #ifdef TARGET_INT_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_INT_BIT # %s\n",
                       XSTRING (TARGET_INT_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_INT_BIT = %d\n",
-                      TARGET_INT_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: int_bit = %s\n",
+                      paddr_d (current_gdbarch->int_bit));
 #ifdef INTEGER_TO_ADDRESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "INTEGER_TO_ADDRESS_P()",
                       XSTRING (INTEGER_TO_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: INTEGER_TO_ADDRESS_P() = %d\n",
-                      INTEGER_TO_ADDRESS_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_integer_to_address_p() = %d\n",
+                      gdbarch_integer_to_address_p (current_gdbarch));
 #ifdef INTEGER_TO_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "INTEGER_TO_ADDRESS(type, buf)",
                       XSTRING (INTEGER_TO_ADDRESS (type, buf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: INTEGER_TO_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->integer_to_address
-                      /*INTEGER_TO_ADDRESS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: integer_to_address = <0x%lx>\n",
+                      (long) current_gdbarch->integer_to_address);
 #ifdef TARGET_LONG_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_BIT # %s\n",
                       XSTRING (TARGET_LONG_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_BIT = %d\n",
-                      TARGET_LONG_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: long_bit = %s\n",
+                      paddr_d (current_gdbarch->long_bit));
 #ifdef TARGET_LONG_DOUBLE_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_DOUBLE_BIT # %s\n",
                       XSTRING (TARGET_LONG_DOUBLE_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_DOUBLE_BIT = %d\n",
-                      TARGET_LONG_DOUBLE_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: long_double_bit = %s\n",
+                      paddr_d (current_gdbarch->long_double_bit));
 #ifdef TARGET_LONG_DOUBLE_FORMAT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT # %s\n",
                       XSTRING (TARGET_LONG_DOUBLE_FORMAT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT = %s\n",
-                      (TARGET_LONG_DOUBLE_FORMAT)->name);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: long_double_format = %s\n",
+                      (TARGET_LONG_DOUBLE_FORMAT)->name);
 #ifdef TARGET_LONG_LONG_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_LONG_BIT # %s\n",
                       XSTRING (TARGET_LONG_LONG_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_LONG_BIT = %d\n",
-                      TARGET_LONG_LONG_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: long_long_bit = %s\n",
+                      paddr_d (current_gdbarch->long_long_bit));
 #ifdef MEMORY_INSERT_BREAKPOINT
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "MEMORY_INSERT_BREAKPOINT(addr, contents_cache)",
                       XSTRING (MEMORY_INSERT_BREAKPOINT (addr, contents_cache)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: MEMORY_INSERT_BREAKPOINT = <0x%08lx>\n",
-                      (long) current_gdbarch->memory_insert_breakpoint
-                      /*MEMORY_INSERT_BREAKPOINT ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: memory_insert_breakpoint = <0x%lx>\n",
+                      (long) current_gdbarch->memory_insert_breakpoint);
 #ifdef MEMORY_REMOVE_BREAKPOINT
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "MEMORY_REMOVE_BREAKPOINT(addr, contents_cache)",
                       XSTRING (MEMORY_REMOVE_BREAKPOINT (addr, contents_cache)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: MEMORY_REMOVE_BREAKPOINT = <0x%08lx>\n",
-                      (long) current_gdbarch->memory_remove_breakpoint
-                      /*MEMORY_REMOVE_BREAKPOINT ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: memory_remove_breakpoint = <0x%lx>\n",
+                      (long) current_gdbarch->memory_remove_breakpoint);
 #ifdef NAME_OF_MALLOC
   fprintf_unfiltered (file,
                       "gdbarch_dump: NAME_OF_MALLOC # %s\n",
                       XSTRING (NAME_OF_MALLOC));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NAME_OF_MALLOC = %s\n",
-                      NAME_OF_MALLOC);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: name_of_malloc = %s\n",
+                      NAME_OF_MALLOC);
 #ifdef NUM_PSEUDO_REGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: NUM_PSEUDO_REGS # %s\n",
                       XSTRING (NUM_PSEUDO_REGS));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NUM_PSEUDO_REGS = %d\n",
-                      NUM_PSEUDO_REGS);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: num_pseudo_regs = %s\n",
+                      paddr_d (current_gdbarch->num_pseudo_regs));
 #ifdef NUM_REGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: NUM_REGS # %s\n",
                       XSTRING (NUM_REGS));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NUM_REGS = %d\n",
-                      NUM_REGS);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: num_regs = %s\n",
+                      paddr_d (current_gdbarch->num_regs));
 #ifdef TARGET_OSABI
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_OSABI # %s\n",
                       XSTRING (TARGET_OSABI));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_OSABI = %ld\n",
-                      (long) TARGET_OSABI);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: osabi = %s\n",
+                      paddr_d (current_gdbarch->osabi));
 #ifdef PC_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: PC_REGNUM # %s\n",
                       XSTRING (PC_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PC_REGNUM = %d\n",
-                      PC_REGNUM);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: pc_regnum = %s\n",
+                      paddr_d (current_gdbarch->pc_regnum));
 #ifdef POINTER_TO_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "POINTER_TO_ADDRESS(type, buf)",
                       XSTRING (POINTER_TO_ADDRESS (type, buf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: POINTER_TO_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->pointer_to_address
-                      /*POINTER_TO_ADDRESS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: pointer_to_address = <0x%lx>\n",
+                      (long) current_gdbarch->pointer_to_address);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_print_float_info_p() = %d\n",
                       gdbarch_print_float_info_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: print_float_info = 0x%08lx\n",
+                      "gdbarch_dump: print_float_info = <0x%lx>\n",
                       (long) current_gdbarch->print_float_info);
 #ifdef TARGET_PRINT_INSN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_PRINT_INSN(vma, info)",
                       XSTRING (TARGET_PRINT_INSN (vma, info)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_PRINT_INSN = <0x%08lx>\n",
-                      (long) current_gdbarch->print_insn
-                      /*TARGET_PRINT_INSN ()*/);
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: print_registers_info = 0x%08lx\n",
+                      "gdbarch_dump: print_insn = <0x%lx>\n",
+                      (long) current_gdbarch->print_insn);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: print_registers_info = <0x%lx>\n",
                       (long) current_gdbarch->print_registers_info);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_print_vector_info_p() = %d\n",
                       gdbarch_print_vector_info_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: print_vector_info = 0x%08lx\n",
+                      "gdbarch_dump: print_vector_info = <0x%lx>\n",
                       (long) current_gdbarch->print_vector_info);
 #ifdef PS_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: PS_REGNUM # %s\n",
                       XSTRING (PS_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PS_REGNUM = %d\n",
-                      PS_REGNUM);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: ps_regnum = %s\n",
+                      paddr_d (current_gdbarch->ps_regnum));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_read_p() = %d\n",
                       gdbarch_pseudo_register_read_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: pseudo_register_read = 0x%08lx\n",
+                      "gdbarch_dump: pseudo_register_read = <0x%lx>\n",
                       (long) current_gdbarch->pseudo_register_read);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_write_p() = %d\n",
                       gdbarch_pseudo_register_write_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: pseudo_register_write = 0x%08lx\n",
+                      "gdbarch_dump: pseudo_register_write = <0x%lx>\n",
                       (long) current_gdbarch->pseudo_register_write);
 #ifdef TARGET_PTR_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_PTR_BIT # %s\n",
                       XSTRING (TARGET_PTR_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_PTR_BIT = %d\n",
-                      TARGET_PTR_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: ptr_bit = %s\n",
+                      paddr_d (current_gdbarch->ptr_bit));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_push_dummy_call_p() = %d\n",
                       gdbarch_push_dummy_call_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: push_dummy_call = 0x%08lx\n",
+                      "gdbarch_dump: push_dummy_call = <0x%lx>\n",
                       (long) current_gdbarch->push_dummy_call);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_push_dummy_code_p() = %d\n",
                       gdbarch_push_dummy_code_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: push_dummy_code = 0x%08lx\n",
+                      "gdbarch_dump: push_dummy_code = <0x%lx>\n",
                       (long) current_gdbarch->push_dummy_code);
 #ifdef TARGET_READ_PC_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_READ_PC_P()",
                       XSTRING (TARGET_READ_PC_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_READ_PC_P() = %d\n",
-                      TARGET_READ_PC_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
+                      gdbarch_read_pc_p (current_gdbarch));
 #ifdef TARGET_READ_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_READ_PC(ptid)",
                       XSTRING (TARGET_READ_PC (ptid)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_READ_PC = <0x%08lx>\n",
-                      (long) current_gdbarch->read_pc
-                      /*TARGET_READ_PC ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: read_pc = <0x%lx>\n",
+                      (long) current_gdbarch->read_pc);
 #ifdef TARGET_READ_SP_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_READ_SP_P()",
                       XSTRING (TARGET_READ_SP_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_READ_SP_P() = %d\n",
-                      TARGET_READ_SP_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_read_sp_p() = %d\n",
+                      gdbarch_read_sp_p (current_gdbarch));
 #ifdef TARGET_READ_SP
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_READ_SP()",
                       XSTRING (TARGET_READ_SP ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_READ_SP = <0x%08lx>\n",
-                      (long) current_gdbarch->read_sp
-                      /*TARGET_READ_SP ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: read_sp = <0x%lx>\n",
+                      (long) current_gdbarch->read_sp);
 #ifdef REGISTER_BYTES_OK_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_BYTES_OK_P()",
                       XSTRING (REGISTER_BYTES_OK_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_BYTES_OK_P() = %d\n",
-                      REGISTER_BYTES_OK_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_register_bytes_ok_p() = %d\n",
+                      gdbarch_register_bytes_ok_p (current_gdbarch));
 #ifdef REGISTER_BYTES_OK
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_BYTES_OK(nr_bytes)",
                       XSTRING (REGISTER_BYTES_OK (nr_bytes)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_BYTES_OK = <0x%08lx>\n",
-                      (long) current_gdbarch->register_bytes_ok
-                      /*REGISTER_BYTES_OK ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: register_bytes_ok = <0x%lx>\n",
+                      (long) current_gdbarch->register_bytes_ok);
 #ifdef REGISTER_NAME
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_NAME(regnr)",
                       XSTRING (REGISTER_NAME (regnr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_NAME = <0x%08lx>\n",
-                      (long) current_gdbarch->register_name
-                      /*REGISTER_NAME ()*/);
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: register_reggroup_p = 0x%08lx\n",
+                      "gdbarch_dump: register_name = <0x%lx>\n",
+                      (long) current_gdbarch->register_name);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: register_reggroup_p = <0x%lx>\n",
                       (long) current_gdbarch->register_reggroup_p);
 #ifdef REGISTER_SIM_REGNO
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_SIM_REGNO(reg_nr)",
                       XSTRING (REGISTER_SIM_REGNO (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_SIM_REGNO = <0x%08lx>\n",
-                      (long) current_gdbarch->register_sim_regno
-                      /*REGISTER_SIM_REGNO ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: register_sim_regno = <0x%lx>\n",
+                      (long) current_gdbarch->register_sim_regno);
 #ifdef REGISTER_TO_VALUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_TO_VALUE(frame, regnum, type, buf)",
                       XSTRING (REGISTER_TO_VALUE (frame, regnum, type, buf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_TO_VALUE = <0x%08lx>\n",
-                      (long) current_gdbarch->register_to_value
-                      /*REGISTER_TO_VALUE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: register_to_value = <0x%lx>\n",
+                      (long) current_gdbarch->register_to_value);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_register_type_p() = %d\n",
                       gdbarch_register_type_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: register_type = 0x%08lx\n",
+                      "gdbarch_dump: register_type = <0x%lx>\n",
                       (long) current_gdbarch->register_type);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_regset_from_core_section_p() = %d\n",
                       gdbarch_regset_from_core_section_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: regset_from_core_section = 0x%08lx\n",
+                      "gdbarch_dump: regset_from_core_section = <0x%lx>\n",
                       (long) current_gdbarch->regset_from_core_section);
   fprintf_unfiltered (file,
-                      "gdbarch_dump: remote_translate_xfer_address = 0x%08lx\n",
+                      "gdbarch_dump: remote_translate_xfer_address = <0x%lx>\n",
                       (long) current_gdbarch->remote_translate_xfer_address);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_return_value_p() = %d\n",
                       gdbarch_return_value_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: return_value = 0x%08lx\n",
+                      "gdbarch_dump: return_value = <0x%lx>\n",
                       (long) current_gdbarch->return_value);
 #ifdef SDB_REG_TO_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "SDB_REG_TO_REGNUM(sdb_regnr)",
                       XSTRING (SDB_REG_TO_REGNUM (sdb_regnr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SDB_REG_TO_REGNUM = <0x%08lx>\n",
-                      (long) current_gdbarch->sdb_reg_to_regnum
-                      /*SDB_REG_TO_REGNUM ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: sdb_reg_to_regnum = <0x%lx>\n",
+                      (long) current_gdbarch->sdb_reg_to_regnum);
 #ifdef TARGET_SHORT_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_SHORT_BIT # %s\n",
                       XSTRING (TARGET_SHORT_BIT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_SHORT_BIT = %d\n",
-                      TARGET_SHORT_BIT);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: short_bit = %s\n",
+                      paddr_d (current_gdbarch->short_bit));
 #ifdef SKIP_PROLOGUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "SKIP_PROLOGUE(ip)",
                       XSTRING (SKIP_PROLOGUE (ip)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SKIP_PROLOGUE = <0x%08lx>\n",
-                      (long) current_gdbarch->skip_prologue
-                      /*SKIP_PROLOGUE ()*/);
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: skip_solib_resolver = 0x%08lx\n",
+                      "gdbarch_dump: skip_prologue = <0x%lx>\n",
+                      (long) current_gdbarch->skip_prologue);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: skip_solib_resolver = <0x%lx>\n",
                       (long) current_gdbarch->skip_solib_resolver);
 #ifdef SKIP_TRAMPOLINE_CODE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "SKIP_TRAMPOLINE_CODE(pc)",
                       XSTRING (SKIP_TRAMPOLINE_CODE (pc)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SKIP_TRAMPOLINE_CODE = <0x%08lx>\n",
-                      (long) current_gdbarch->skip_trampoline_code
-                      /*SKIP_TRAMPOLINE_CODE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: skip_trampoline_code = <0x%lx>\n",
+                      (long) current_gdbarch->skip_trampoline_code);
 #ifdef SMASH_TEXT_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "SMASH_TEXT_ADDRESS(addr)",
                       XSTRING (SMASH_TEXT_ADDRESS (addr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SMASH_TEXT_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->smash_text_address
-                      /*SMASH_TEXT_ADDRESS ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: smash_text_address = <0x%lx>\n",
+                      (long) current_gdbarch->smash_text_address);
 #ifdef SOFTWARE_SINGLE_STEP_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "SOFTWARE_SINGLE_STEP_P()",
                       XSTRING (SOFTWARE_SINGLE_STEP_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SOFTWARE_SINGLE_STEP_P() = %d\n",
-                      SOFTWARE_SINGLE_STEP_P ());
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_software_single_step_p() = %d\n",
+                      gdbarch_software_single_step_p (current_gdbarch));
 #ifdef SOFTWARE_SINGLE_STEP
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p)",
                       XSTRING (SOFTWARE_SINGLE_STEP (sig, insert_breakpoints_p)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SOFTWARE_SINGLE_STEP = <0x%08lx>\n",
-                      (long) current_gdbarch->software_single_step
-                      /*SOFTWARE_SINGLE_STEP ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: software_single_step = <0x%lx>\n",
+                      (long) current_gdbarch->software_single_step);
 #ifdef SP_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: SP_REGNUM # %s\n",
                       XSTRING (SP_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SP_REGNUM = %d\n",
-                      SP_REGNUM);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: sp_regnum = %s\n",
+                      paddr_d (current_gdbarch->sp_regnum));
 #ifdef STAB_REG_TO_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "STAB_REG_TO_REGNUM(stab_regnr)",
                       XSTRING (STAB_REG_TO_REGNUM (stab_regnr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: STAB_REG_TO_REGNUM = <0x%08lx>\n",
-                      (long) current_gdbarch->stab_reg_to_regnum
-                      /*STAB_REG_TO_REGNUM ()*/);
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: stabs_argument_has_addr = 0x%08lx\n",
+                      "gdbarch_dump: stab_reg_to_regnum = <0x%lx>\n",
+                      (long) current_gdbarch->stab_reg_to_regnum);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: stabs_argument_has_addr = <0x%lx>\n",
                       (long) current_gdbarch->stabs_argument_has_addr);
 #ifdef STORE_RETURN_VALUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "STORE_RETURN_VALUE(type, regcache, valbuf)",
                       XSTRING (STORE_RETURN_VALUE (type, regcache, valbuf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: STORE_RETURN_VALUE = <0x%08lx>\n",
-                      (long) current_gdbarch->store_return_value
-                      /*STORE_RETURN_VALUE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: store_return_value = <0x%lx>\n",
+                      (long) current_gdbarch->store_return_value);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_unwind_dummy_id_p() = %d\n",
                       gdbarch_unwind_dummy_id_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: unwind_dummy_id = 0x%08lx\n",
+                      "gdbarch_dump: unwind_dummy_id = <0x%lx>\n",
                       (long) current_gdbarch->unwind_dummy_id);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_unwind_pc_p() = %d\n",
                       gdbarch_unwind_pc_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: unwind_pc = 0x%08lx\n",
+                      "gdbarch_dump: unwind_pc = <0x%lx>\n",
                       (long) current_gdbarch->unwind_pc);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_unwind_sp_p() = %d\n",
                       gdbarch_unwind_sp_p (current_gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: unwind_sp = 0x%08lx\n",
+                      "gdbarch_dump: unwind_sp = <0x%lx>\n",
                       (long) current_gdbarch->unwind_sp);
 #ifdef VALUE_TO_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "VALUE_TO_REGISTER(frame, regnum, type, buf)",
                       XSTRING (VALUE_TO_REGISTER (frame, regnum, type, buf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: VALUE_TO_REGISTER = <0x%08lx>\n",
-                      (long) current_gdbarch->value_to_register
-                      /*VALUE_TO_REGISTER ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: value_to_register = <0x%lx>\n",
+                      (long) current_gdbarch->value_to_register);
 #ifdef TARGET_VIRTUAL_FRAME_POINTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_VIRTUAL_FRAME_POINTER(pc, frame_regnum, frame_offset)",
                       XSTRING (TARGET_VIRTUAL_FRAME_POINTER (pc, frame_regnum, frame_offset)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_VIRTUAL_FRAME_POINTER = <0x%08lx>\n",
-                      (long) current_gdbarch->virtual_frame_pointer
-                      /*TARGET_VIRTUAL_FRAME_POINTER ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: virtual_frame_pointer = <0x%lx>\n",
+                      (long) current_gdbarch->virtual_frame_pointer);
 #ifdef TARGET_WRITE_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_WRITE_PC(val, ptid)",
                       XSTRING (TARGET_WRITE_PC (val, ptid)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_WRITE_PC = <0x%08lx>\n",
-                      (long) current_gdbarch->write_pc
-                      /*TARGET_WRITE_PC ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: write_pc = <0x%lx>\n",
+                      (long) current_gdbarch->write_pc);
   if (current_gdbarch->dump_tdep != NULL)
     current_gdbarch->dump_tdep (current_gdbarch, file);
 }

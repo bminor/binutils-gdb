@@ -109,23 +109,6 @@ EOF
 		* ) test "${staticdefault}" || staticdefault=0 ;;
 	    esac
 
-	    # come up with a format, use a few guesses for variables
-	    case ":${class}:${fmt}:${print}:" in
-		:[vV]::: )
-		    if [ "${returntype}" = int ]
-		    then
-			fmt="%d"
-			print="${macro}"
-		    elif [ "${returntype}" = long ]
-		    then
-			fmt="%ld"
-			print="${macro}"
-		    fi
-		    ;;
-	    esac
-	    test "${fmt}" || fmt="%ld"
-	    test "${print}" || print="(long) ${macro}"
-
 	    case "${class}" in
 	    F | V | M )
 		case "${invalid_p}" in
@@ -1550,56 +1533,62 @@ do
     # First the predicate
     if class_is_predicate_p
     then
-	if class_is_multiarch_p
+	if test -n "${macro}"
 	then
-	    printf "  fprintf_unfiltered (file,\n"
-	    printf "                      \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
-	    printf "                      gdbarch_${function}_p (current_gdbarch));\n"
-	else
 	    printf "#ifdef ${macro}_P\n"
 	    printf "  fprintf_unfiltered (file,\n"
 	    printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
 	    printf "                      \"${macro}_P()\",\n"
 	    printf "                      XSTRING (${macro}_P ()));\n"
-	    printf "  fprintf_unfiltered (file,\n"
-	    printf "                      \"gdbarch_dump: ${macro}_P() = %%d\\\\n\",\n"
-	    printf "                      ${macro}_P ());\n"
 	    printf "#endif\n"
 	fi
-    fi
-    # multiarch functions don't have macros.
-    if class_is_multiarch_p
-    then
 	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: ${function} = 0x%%08lx\\\\n\",\n"
-	printf "                      (long) current_gdbarch->${function});\n"
-	continue
+	printf "                      \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
+	printf "                      gdbarch_${function}_p (current_gdbarch));\n"
     fi
     # Print the macro definition.
-    printf "#ifdef ${macro}\n"
-    if class_is_function_p
+    if test -n "${macro}"
     then
-	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
-	printf "                      \"${macro}(${actual})\",\n"
-	printf "                      XSTRING (${macro} (${actual})));\n"
-    else
-	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
-	printf "                      XSTRING (${macro}));\n"
+	printf "#ifdef ${macro}\n"
+	if class_is_function_p
+	then
+	    printf "  fprintf_unfiltered (file,\n"
+	    printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
+	    printf "                      \"${macro}(${actual})\",\n"
+	    printf "                      XSTRING (${macro} (${actual})));\n"
+	else
+	    printf "  fprintf_unfiltered (file,\n"
+	    printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
+	    printf "                      XSTRING (${macro}));\n"
+	fi
+	printf "#endif\n"
     fi
+    # Print the corresponding value.
     if class_is_function_p
     then
 	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: ${macro} = <0x%%08lx>\\\\n\",\n"
-	printf "                      (long) current_gdbarch->${function}\n"
-	printf "                      /*${macro} ()*/);\n"
+	printf "                      \"gdbarch_dump: ${function} = <0x%%lx>\\\\n\",\n"
+	printf "                      (long) current_gdbarch->${function});\n"
     else
+	# It is a variable
+	case "${fmt}:${print}:${returntype}" in
+	    ::CORE_ADDR )
+		fmt="0x%s"
+		print="paddr_nz (current_gdbarch->${function})"
+		;;
+	    ::* )
+	        fmt="%s"
+		print="paddr_d (current_gdbarch->${function})"
+		;;
+	    * )
+	        test "${fmt}" || fmt="%ld"
+		test "${print}" || print="(long) (current_gdbarch->${function})"
+		;;
+        esac
 	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: ${macro} = %s\\\\n\",\n" "${fmt}"
+	printf "                      \"gdbarch_dump: ${function} = %s\\\\n\",\n" "${fmt}"
 	printf "                      ${print});\n"
     fi
-    printf "#endif\n"
 done
 cat <<EOF
   if (current_gdbarch->dump_tdep != NULL)

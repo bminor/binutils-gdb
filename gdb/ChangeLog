@@ -1,5 +1,11 @@
 2004-06-21  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh: For gdbarch_dump, print the "function" rather than
+	macro name, and the function rather than macro value.  Only wrap
+	macro print statements in #ifdef.  Move format logic to where it
+	is needed.
+	* gdbarch.c: Re-generate.
+	
 	* gdbarch.sh (read): Delete "print_p" and "description", add
 	"garbage_at_eol".  Check for non-empty garbage at end-of-line.
 	Delete references to print_p.
