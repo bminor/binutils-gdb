@@ -375,28 +375,34 @@ tuiHorizontalSourceScroll (TuiWinInfoPtr winInfo,
 }				/* tuiHorizontalSourceScroll */
 
 
-/*
-   ** tuiSetHasExecPointAt().
-   **        Set or clear the hasBreak flag in the line whose line is lineNo.
- */
+/* Set or clear the hasBreak flag in the line whose line is lineNo.  */
 void
 tuiSetIsExecPointAt (TuiLineOrAddress l, TuiWinInfoPtr winInfo)
 {
+  int changed = 0;
   int i;
   TuiWinContent content = (TuiWinContent) winInfo->generic.content;
 
   i = 0;
   while (i < winInfo->generic.contentSize)
     {
+      int newState;
+
       if (content[i]->whichElement.source.lineOrAddr.addr == l.addr)
-	content[i]->whichElement.source.isExecPoint = TRUE;
+        newState = TRUE;
       else
-	content[i]->whichElement.source.isExecPoint = FALSE;
+	newState = FALSE;
+      if (newState != content[i]->whichElement.source.isExecPoint)
+        {
+          changed++;
+          content[i]->whichElement.source.isExecPoint = newState;
+          tui_show_source_line (winInfo, i + 1);
+        }
       i++;
     }
-
-  return;
-}				/* tuiSetIsExecPointAt */
+  if (changed)
+    tuiRefreshWin (&winInfo->generic);
+}
 
 /* Update the execution windows to show the active breakpoints.
    This is called whenever a breakpoint is inserted, removed or
