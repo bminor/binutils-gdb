@@ -544,6 +544,15 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    continue;
 	  }
 #endif
+
+	/* Is there some other (target cpu dependent) reason we can't adjust
+	   this one?  (E.g. relocations involving function addresses on 
+	   the PA.  */
+#ifdef tc_fix_adjustable
+	if (! tc_fix_adjustable (fixp))
+	  continue;
+#endif
+
 	/* If the section symbol isn't going to be output, the relocs
 	   at least should still work.  If not, figure out what to do
 	   when we run into that case.  */
@@ -858,6 +867,7 @@ relax_and_size_all_segments ()
   bss_address_frag.fr_address = (H_GET_TEXT_SIZE (&headers) +
 				 H_GET_DATA_SIZE (&headers));
 
+#endif /* ! OBJ_BOUT */
 
   /* Slide all the frags */
   if (bss_frag_root)
@@ -869,8 +879,6 @@ relax_and_size_all_segments ()
 	  fragP->fr_address += slide;
 	}			/* for each bss frag */
     }
-
-#endif /* ! OBJ_BOUT */
 
   if (bss_last_frag)
     H_SET_BSS_SIZE (&headers,
@@ -1865,6 +1873,7 @@ fixup_segment (fixP, this_segment_type)
 		add_symbolP = NULL;
 		fixP->fx_addsy = NULL;
 	      }
+#if !defined(SEG_DIFF_ALLOWED) && !defined (GLOBAL_DIFF_ALLOWED)
 	    else
 	      {
 		/* Different segments in subtraction. */
@@ -1896,6 +1905,14 @@ fixup_segment (fixP, this_segment_type)
 			    segment_name (S_GET_SEGMENT (sub_symbolP)),
 			    S_GET_NAME (sub_symbolP), buf);
 		  }
+#else
+                else
+                  {
+                    seg_reloc_count++;
+		    fixP->fx_addnumber = add_number;	/* Remember value for emit_reloc */
+                    continue;
+                  }		/* if absolute */
+#endif
 	      }
 	  }
 
@@ -1920,7 +1937,9 @@ fixup_segment (fixP, this_segment_type)
 		add_number += S_GET_VALUE (add_symbolP);
 		add_number -= md_pcrel_from (fixP);
 		pcrel = 0;	/* Lie. Don't want further pcrel processing. */
+#ifndef TC_HPPA
 		fixP->fx_addsy = NULL;	/* No relocations please. */
+#endif
 	      }
 	    else
 	      {
@@ -1994,10 +2013,14 @@ fixup_segment (fixP, this_segment_type)
 	    if ((add_number & mask) != 0
 		&& (add_number & mask) != mask)
 	      {
-		char buf[50];
+		char buf[50], buf2[50];
 		sprint_value (buf, fragP->fr_address + where);
-		as_bad ("Value of %ld too large for field of %d bytes at %s",
-			(long) add_number, size, buf);
+		if (add_number > 1000)
+		  sprint_value (buf2, add_number);
+		else
+		  sprintf (buf2, "%d", (long) add_number);
+		as_bad ("Value of %s too large for field of %d bytes at %s",
+			buf2, size, buf);
 	      }			/* generic error checking */
 #ifdef WARN_SIGNED_OVERFLOW_WORD
 	    /* Warn if a .word value is too large when treated as a signed

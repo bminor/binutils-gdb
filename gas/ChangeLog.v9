@@ -1,3 +1,9 @@
+Wed Oct 20 12:26:33 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip, label "immediate"): Convert relocs
+	operating on upper 32 bits of immediate constants to lower-half
+	relocs with adjusted constants.
+
 Fri Sep  3 18:17:32 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/obj-elf.h (elf_symbol): No longer special-cased on

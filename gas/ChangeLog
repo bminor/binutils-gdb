@@ -1,3 +1,86 @@
+Thu Oct 21 12:52:01 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config/tc-m68k.h: Don't define REGISTER_PREFIX or
+	OPTIONAL_REGISTER_PREFIX if either is already defined.
+
+	* config/tc-m68k.c (m68k_ip): Delete some code in "#if 0".
+
+	* configure.in: Set bfd_gas for all sparc targets.  Added facility
+	for keeping or rejecting configurations still under development;
+	default is to assume production environment, and reject configs
+	still being worked on.  Mark Elf configurations (except sparc and
+	i386) as developmental.  Deleted cases matching some generic names
+	in favor of more specific names.  (E.g., when we get Alpha
+	support, we'll still only support VMS for Vax.)
+
+	* config/tc-sparc.h (md_end): New macro.
+	* config/tc-sparc.c (md_end): Function deleted.
+	(BFD_RELOC_*): Delete macros that used to help keep the non-bfd
+	version compiling.  All sparc targets will use bfd now.
+	* tc.h (md_end): Don't declare if it's defined as a macro.
+
+	Changes from Jeff Law and Peter Hoogenboom:
+
+	* read.c (next_char_of_string): Limit octal character constants to
+	three digits.
+
+	* config/tc-hppa.h: Major cleanup.  Use GNU-style comments.  Warn
+	against placing additional object-file dependent code here.  Warn
+	against contaminating all of GAS with the internals of tc-hppa.c
+	through inclusion of tc-hppa.h.  Delete all forward declarations
+	for functions only used within tc-hppa.c, likewise for structures,
+	variables, and #defines.  Try to group OBJ_ELF and OBJ_SOM
+	conditional code in a few small places.
+
+	* config/tc-hppa.c: Major cleanup.  Use GNU-style comments.  Group
+	structures, global variables, forward declarations together.
+	Reduce (or in some cases eliminate) OBJ_ELF and OBJ_SOM
+	conditional code -- try to group conditional code together
+	into a few places.   Make all functions and variables which
+	are only used within tc-hppa.c static.  PARAMize all functions.
+	Add comments to functions.  Delete unused functions, variables,
+	#defines, etc.  Delete unused members within structures.  Delete
+	ldil;ble hacks -- it is believed they were installed to work
+	around old gas bugs.   Avoid using mixed case for local
+	functions, variables, and structures.  Fix formatting problems
+	not found by GNU-indent.  Add FIXME notices for things which
+	should be worked on the near future.  Delete lots of old
+	useless (1.36 PA-SOM) code.  
+
+	* config/tc-hppa.c: (fix_new_hppa): Initialize the fx_r_type
+	field of the fixS structure.  Needed to build unwind
+	descriptors correctly.
+
+	* write.c: (fixup_segment): Allow expressions such as
+	sym1-sym2+const as long as sym2 is $global$.
+
+	* write.c (adjust_reloc_syms): Provide a hook so that a target
+	cpu configuration can reject certain relocation reductions.
+	* tc-hppa.h (tc_fix_adjustable): New macro.  Only accept relocations
+	which do not involve function symbols.
+
+	* config/tc-hppa.h: Reindent with GNU-indent.  Delete references
+	to OBJ_OSFROSE.  Fix typos (OBJ_SOME -> OBJ_SOM).  Delete unused
+	STAB_FIXUP macro.
+	* config/tc-hppa.c: Likewise.
+
+	* config/tc-hppa.c (md_apply_fix_1): Use elf_symbol_type, instead
+	of elf32_symbol_type.
+	(pa_export_args): Likewise.
+	(elf_hppa_final_processing): Likewise.
+	(pa_desc): Do not call obj_elf_desc.  (Is pa_desc even needed
+	anymore?)
+	(hppa_tc_make_sections): Do not declare elf_get_symtab_map any
+	ore.
+
+	* config/tc-hppa.c: (md_section_align): Align all sections to
+	a multiple of the section alignment rather than always a
+	multiple of 8.
+
+	* config/tc-hppa.c (hppa_tc_symbol): If the argument relocation
+	bits are zero (eg they specify no relocations), then do not even
+	bother adding their entries to thesymextn section.
+
 Thu Oct 21 15:44:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-sparc.c (md_parse_option): Accept and ignore -sparc
