@@ -1,3 +1,9 @@
+1999-09-29  Mumit Khan  <khan@xraylith.wisc.edu>
+
+        * dlltool.c (scan_drectve_symbols): Handle type tags in exported
+        symbols.
+        (scan_filtered_symbols): Likewise.
+
 1999-09-19  Ian Lance Taylor  <ian@zembu.com>
 
 	* resrc.c (write_rc_rcdata): Fix local variable shadowing

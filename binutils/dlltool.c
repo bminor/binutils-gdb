@@ -1203,7 +1203,9 @@ scan_drectve_symbols (abfd)
   inform (_("Sucking in info from %s section in %s\n"),
 	  DRECTVE_SECTION_NAME, bfd_get_filename (abfd));
 
-  /* Search for -export: strings */
+  /* Search for -export: strings. The exported symbols can optionally
+     have type tags (eg., -export:foo,data), so handle those as well.
+     Currently only data tag is supported. */
   p = buf;
   e = buf + size;
   while (p < e)
@@ -1213,25 +1215,36 @@ scan_drectve_symbols (abfd)
 	{
 	  char * name;
 	  char * c;
+	  flagword flags = BSF_FUNCTION;
 	  
 	  p += 8;
 	  name = p;
-	  while (p < e && *p != ' ' && *p != '-')
+	  while (p < e && *p != ',' && *p != ' ' && *p != '-')
 	    p++;
 	  c = xmalloc (p - name + 1);
 	  memcpy (c, name, p - name);
 	  c[p - name] = 0;
+	  if (p < e && *p == ',')       /* found type tag. */
+	    {
+	      char *tag_start = ++p;
+	      while (p < e && *p != ' ' && *p != '-')
+		p++;
+	      if (strncmp (tag_start, "data", 4) == 0)
+		flags &= ~BSF_FUNCTION;
+	    }
+
 
 	  /* FIXME: The 5th arg is for the `constant' field.
 	     What should it be?  Not that it matters since it's not
 	     currently useful.  */
-	  def_exports (c, 0, -1, 0, 0, 0);
+	  def_exports (c, 0, -1, 0, 0, ! (flags & BSF_FUNCTION));
 
 	  if (add_stdcall_alias && strchr (c, '@'))
 	    {
 	      char *exported_name = xstrdup (c);
 	      char *atsym = strchr (exported_name, '@');
 	      *atsym = '\0';
+	      /* Note: stdcall alias symbols can never be data. */
 	      def_exports (exported_name, xstrdup (c), -1, 0, 0, 0);
 	    }
 	}
@@ -1273,13 +1286,15 @@ scan_filtered_symbols (abfd, minisyms, symcount, size)
       if (bfd_get_symbol_leading_char (abfd) == symbol_name[0])
 	++symbol_name;
 
-      def_exports (xstrdup (symbol_name) , 0, -1, 0, 0, 0);
+      def_exports (xstrdup (symbol_name) , 0, -1, 0, 0,
+                   ! (sym->flags & BSF_FUNCTION));
 
       if (add_stdcall_alias && strchr (symbol_name, '@'))
         {
 	  char *exported_name = xstrdup (symbol_name);
 	  char *atsym = strchr (exported_name, '@');
 	  *atsym = '\0';
+	  /* Note: stdcall alias symbols can never be data. */
 	  def_exports (exported_name, xstrdup (symbol_name), -1, 0, 0, 0);
 	}
     }
