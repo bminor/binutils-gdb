@@ -1628,10 +1628,10 @@ disassemble_data (abfd)
       asymbol *sym = NULL;
       long place = 0;
 
-      if ((section->flags & SEC_LOAD) == 0
-	  || (! disassemble_all
-	      && only == NULL
-	      && (section->flags & SEC_CODE) == 0))
+      /* Sections that do not contain machine code are not normally disassembled.  */
+      if (! disassemble_all
+	  && only == NULL
+	  && (section->flags & SEC_CODE) == 0)
 	continue;
 
       if (only != NULL)
@@ -1682,11 +1682,11 @@ disassemble_data (abfd)
 	    }
 	}
 
-      printf (_("Disassembly of section %s:\n"), section->name);
-
       datasize = bfd_get_section_size_before_reloc (section);
       if (datasize == 0)
 	continue;
+
+      printf (_("Disassembly of section %s:\n"), section->name);
 
       data = (bfd_byte *) xmalloc ((size_t) datasize);
 

@@ -1,5 +1,9 @@
 2003-07-24  Nick Clifton  <nickc@redhat.com>
 
+	* objdump.c (disassemble_data): Do not ignore sections without the
+	LOAD flag when disassemble_all is true.  Only print a message
+	about disassembling a section if it contains some data.
+
 	* po/fr.po: Updated French translation.
 
 2003-07-23  Nick Clifton  <nickc@redhat.com>
