@@ -15,12 +15,12 @@
 
 Do-first:
 
-r16_files="tc-r16.c tc-r16.h rce.mt"
+rce_files="tc-rce.c tc-rce.h rce.mt"
 
-if ( echo $* | grep keep\-r16 > /dev/null ) ; then
-	keep_these_too="${r16_files} ${keep_these_too}"
+if ( echo $* | grep keep\-rce > /dev/null ) ; then
+	keep_these_too="${rce_files} ${keep_these_too}"
 else
-	lose_these_too="${r16_files} ${lose_these_too}"
+	lose_these_too="${rce_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
