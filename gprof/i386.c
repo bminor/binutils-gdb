@@ -47,8 +47,14 @@ nltype	indirectchild = {
 	(arctype *) 0 			/* list of callee arcs */
     };
 
+#ifdef	__STDC__
 int
-iscall (unsigned char *ip) {
+iscall (unsigned char *ip)
+#else
+int iscall(ip)
+	unsigned char *ip;
+#endif	/* __STDC__ */
+{
   if (*ip == 0xeb || *ip == 0x9a) 
     return 1;
   return 0;

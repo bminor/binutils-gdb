@@ -230,7 +230,7 @@ bfd	*abfd;
     i = get_symtab_upper_bound (abfd);	/* This will probably give us more
 					 * than we need, but that's ok.
 					 */
-    syms = malloc (i);
+    syms = (asymbol**)malloc (i);
     nosyms = bfd_canonicalize_symtab (abfd, syms);
 
     nname = 0;
@@ -355,8 +355,8 @@ openpfile(filename)
 	done();
     }
     fread(&tmp, sizeof(struct hdr), 1, pfile);
-    tmp.lowpc = bfd_get_32 (abfd, &tmp.lowpc);
-    tmp.highpc = bfd_get_32 (abfd, &tmp.highpc);
+    tmp.lowpc = (char*)bfd_get_32 (abfd, &tmp.lowpc);
+    tmp.highpc = (char*)bfd_get_32 (abfd, &tmp.highpc);
     tmp.ncnt = bfd_get_32 (abfd, &tmp.ncnt);
 
     if ( s_highpc != 0 && ( tmp.lowpc != h.lowpc ||
