@@ -1,3 +1,14 @@
+2003-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_object_p): Delete.
+	(elf_backend_object_p): Don't define.
+	* elf32-s390.c (elf_s390_object_p): No need to alloc tdata here.
+	* elf32-sh.c (sh_elf_object_p): Likewise.
+	* elf32-sparc.c (elf32_sparc_object_p): Likewise.
+	* elf64-alpha.c (elf64_alpha_object_p): Likewise.
+	* elf64-s390.c (elf_s390_object_p): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_elf_object_p): Likewise.
+
 2003-12-03  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* archures.c (bfd_mach_m32r2): Add new machine type.

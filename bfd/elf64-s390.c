@@ -638,14 +638,6 @@ static bfd_boolean
 elf_s390_object_p (abfd)
      bfd *abfd;
 {
-  /* Allocate our special target data.  */
-  struct elf_s390_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct elf_s390_obj_tdata);
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
   /* Set the right machine number for an s390 elf32 file.  */
   return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_64);
 }

@@ -393,15 +393,6 @@ static bfd_boolean
 elf64_alpha_object_p (abfd)
      bfd *abfd;
 {
-  /* Allocate our special target data.  */
-  struct alpha_elf_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct alpha_elf_obj_tdata);
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
-
   /* Set the right machine number for an Alpha ELF file.  */
   return bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0);
 }

@@ -546,20 +546,6 @@ elf_i386_mkobject (bfd *abfd)
   return TRUE;
 }
 
-static bfd_boolean
-elf_i386_object_p (bfd *abfd)
-{
-  /* Allocate our special target data.  */
-  struct elf_i386_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct elf_i386_obj_tdata);
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
-  return TRUE;
-}
-
 /* i386 ELF linker hash table.  */
 
 struct elf_i386_link_hash_table
@@ -3253,7 +3239,6 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 #define elf_info_to_howto_rel		      elf_i386_info_to_howto_rel
 
 #define bfd_elf32_mkobject		      elf_i386_mkobject
-#define elf_backend_object_p		      elf_i386_object_p
 
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create

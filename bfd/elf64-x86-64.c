@@ -579,14 +579,6 @@ elf64_x86_64_mkobject (bfd *abfd)
 static bfd_boolean
 elf64_x86_64_elf_object_p (bfd *abfd)
 {
-  /* Allocate our special target data.  */
-  struct elf64_x86_64_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct elf64_x86_64_obj_tdata);
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
   /* Set the right machine number for an x86-64 elf64 file.  */
   bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64);
   return TRUE;

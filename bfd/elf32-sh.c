@@ -6960,19 +6960,7 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 static bfd_boolean
 sh_elf_object_p (bfd *abfd)
 {
-  struct sh_elf_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct sh_elf_obj_tdata);
-
-  if (!sh_elf_set_mach_from_flags (abfd))
-    return FALSE;
-
-  /* Allocate our special target data.  */
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
-  return TRUE;
+  return sh_elf_set_mach_from_flags (abfd);
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various
