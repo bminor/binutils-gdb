@@ -239,7 +239,6 @@ store_inferior_registers (regno)
 	      char *msg = alloca (strlen (err) + 128);
 	      sprintf (msg, "writing register %s: %s", reg_names[regno], err);
 	      warning (msg);
-	      errors_found = 1;
 	    }
 	  regaddr += sizeof(int);
 	}
