@@ -1,3 +1,8 @@
+Tue Jun  9 11:52:29 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips.igen (SWC1) : Correct the handling of ReverseEndian 
+	and BigEndianCPU.
+
 Tue Jun  9 11:40:57 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* configure.in (mips_fpu_bitsize) : Set this correctly for 32-bit mips

@@ -5213,14 +5213,14 @@
 	  {
 	    uword64 memval = 0;
 	    uword64 memval1 = 0;
-	    uword64 mask = 0x7;
+	    uword64 mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+	    address_word reverseendian = (ReverseEndian ?(mask ^ AccessLength_WORD): 0);
+	    address_word bigendiancpu = (BigEndianCPU ?(mask ^ AccessLength_WORD): 0);
 	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
-	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
+	    byte = ((vaddr & mask) ^ bigendiancpu);
 	    memval = (((uword64)COP_SW(((instruction >> 26) & 0x3),destreg)) << (8 * byte));
-	    {
-	      StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
+	    StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
 	  }
       }
   }
