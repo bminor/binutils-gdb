@@ -70,157 +70,75 @@ if ![runto_main] then {
     continue
 }
 
-send_gdb "break A::foo\n"
-gdb_expect {
-   -re "Breakpoint \[0-9\]* at $hex.*file .*method.cc, line 38*\\.\r\n$gdb_prompt $" {
-       pass "set breakpoint on A::foo"
-   }
-   -re ".*$gdb_prompt $" { fail "set breakpoint on A::foo" }
-   timeout { fail "(timeout) set breakpoint on A::foo" }
-}
+gdb_test "break A::foo" \
+  "Breakpoint \[0-9\]* at $hex.*file .*method.cc, line 38\\."
 
-send_gdb "continue\n"
-gdb_expect {
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::foo(\\(int\\)|) \\(this=$hex, arg=13\\) at .*method\\.cc:38\r\n38\[\t \]*x \\+= arg;\r\n$gdb_prompt $" {
-      pass "continued and got breakpoint in A::foo"
-   }
-   -re ".*$gdb_prompt $" { fail "continuing and breaking in A::foo" }
-   timeout { fail "(timeout) continue" }
-}
+gdb_test "continue" \
+  "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::foo(\\(int\\)|) \\(this=$hex, arg=13\\) at .*method\\.cc:38\r\n38\[\t \]*x \\+= arg;" \
+  "continue to A::foo"
 
 # Check ability to access this-relative stuff.
 
-send_gdb "print x\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 20\r\n$gdb_prompt $" {
-       pass "access this-relative x (in foo)"
-   }
-   -re ".*$gdb_prompt $" { fail "print x (in foo)" } 
-   timeout { fail "(timeout) print x (in foo)" }
-}
+gdb_test "print x" \
+   "\\$\[0-9\]* = 20" \
+   "print x in A::foo"
 
 # Check access to this pointer       
 
-send_gdb "print this\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = \\(A \\*\\) $hex\r\n$gdb_prompt $" {
-       pass "print this (in foo)"
-   }
-   -re ".*$gdb_prompt $" { fail "print this (in foo)" }
-   timeout { fail "(timeout) print this (in foo)" }
-}
+gdb_test "print this" \
+   "\\$\[0-9\]* = \\((class |)A *\\* *(const|)\\) $hex" \
+   "print this in A::foo"
 
 # Now do everything over again for A::bar, because sometimes processing one method
 # (the first one) is fine, but the second one's debug info gets munged beyond recognition.
 
-send_gdb "break A::bar\n"
-gdb_expect {
-   -re "Breakpoint \[0-9\]* at $hex.*file .*method.cc, line 44\\.\r\n$gdb_prompt $" {
-       pass "set breakpoint on A::bar"
-   }
-   -re ".*$gdb_prompt $" { fail "set breakpoint on A::bar" }
-   timeout { fail "(timeout) set breakpoint on A::bar" }
-}
+gdb_test "break A::bar" \
+  "Breakpoint \[0-9\]* at $hex.*file .*method.cc, line 44\\."
 
-send_gdb "continue\n"
-gdb_expect {
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::bar(\\(int\\) const|) \\(this=$hex, arg=15\\) at .*method\\.cc:44\r\n44\[\t \]*return arg \\+ 2 \\* x;\r\n$gdb_prompt $" {
-      pass "continued and got breakpoint in A::bar"
-   }
-   -re ".*$gdb_prompt $" { fail "continuing and breaking in A::bar" }
-   timeout { fail "(timeout) continue" }
-}
+gdb_test "continue" \
+  "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::bar(\\(int\\) const|) \\(this=$hex, arg=15\\) at .*method\\.cc:44\r\n44\[\t \]*return arg \\+ 2 \\* x;" \
+  "continue to A::bar"
 
 # Check ability to access this-relative stuff.
 
-send_gdb "print x\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 33\r\n$gdb_prompt $" {
-       pass "access this-relative x (in bar)"
-   }
-   -re ".*$gdb_prompt $" { fail "print x (in bar)" }
-   timeout { fail "(timeout) print x (in bar)" }
-}
+gdb_test "print x" \
+  "\\$\[0-9\]* = 33" \
+  "print x in A::bar"
 
 # Check access to this pointer       
 
-send_gdb "print this\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = \\(const class A \\*\\) $hex\r\n$gdb_prompt $" {
-     global gcc_compiled
-     if {$gcc_compiled} {
-       xfail "print this (in bar)"
-     } else {
-       pass "print this (in bar)"
-     }
-   }
-   -re "\\$\[0-9\]* = \\(A \\*\\) $hex\r\n$gdb_prompt $" {
-     global gcc_compiled
-     if {$gcc_compiled} {
-       pass "print this (in bar)"
-     } else {
-       xfail "print this (in bar)"
-     }
-   }
-   -re ".*$gdb_prompt $" { fail "print this (in bar)" }
-   timeout { fail "(timeout) print this (in bar)" }
-}
+gdb_test "print this" \
+  "\\$\[0-9\]* = \\((const |)(class |)A *\\* *(const|)\\) $hex" \
+  "print this in A::bar"
 
 # Check again with funk::getFunky (this is the original test case
 # for CHFts23426); sometimes having a constructor with no arguments
 # will nuke the debug info read in for other methods in the class.
 
-send_gdb "break funk::getFunky\n"
-gdb_expect {
-   -re "Breakpoint \[0-9\]* at $hex.*file .*method.cc, line 20\\.\r\n$gdb_prompt $" {
-       pass "set breakpoint on funk::getFunky"
-   }
-   -re ".*$gdb_prompt $" { fail "set breakpoint on funk::getfunky" }
-   timeout { fail "(timeout) set breakpoint on funk::getfunky" }
-}
+gdb_test "break 21" \
+  "Breakpoint \[0-9\]* at $hex.*file .*method.cc, line 21\\."
 
-send_gdb "continue\n"
-gdb_expect {
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, funk::getFunky(\\(int, int\\)|) \\(this=$hex, a=1, b=2\\) at .*method\\.cc:20\r\n20\[\t \]*res = a \\+ b - data_;\r\n$gdb_prompt $" {
-      pass "continued and got breakpoint in funk::getfunky"
-   }
-   -re ".*$gdb_prompt $" { fail "continuing and breaking in funk::getfunky" }
-   timeout { fail "(timeout) continue" }
-}
+gdb_test "continue" \
+  "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, funk::getFunky(\\(int, int\\)|) \\(this=$hex, a=1, b=2\\) at .*method\\.cc:21\r\n21\[\t \]*data_ = res;" \
+  "continue to 21"
 
 # Check ability to access this-relative stuff.
 
-send_gdb "print data_\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 33\r\n$gdb_prompt $" {
-       pass "access this-relative data_ in getFunky"
-   }
-   -re ".*$gdb_prompt $" { fail "print data_ in getFunky" }
-   timeout { fail "(timeout) print data_ in getFunky" }
-}
+gdb_test "print data_" \
+  "\\$\[0-9\]* = 33" \
+  "print data_ in funk::getFunky"
 
 # Check access to this pointer       
 
-send_gdb "print this\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = \\(funk \\*\\) $hex\r\n$gdb_prompt $" {
-       pass "print this in getFunky"
-   }
-   -re ".*$gdb_prompt $" { fail "print this in getfunky" }
-   timeout { fail "(timeout) print this in getfunky" }
-}
+gdb_test "print this" \
+  "\\$\[0-9\]* = \\((class |)funk *\\* *(const|)\\) $hex" \
+  "print this in funk::getFunky"
 
 # Check access to local variable
 
-send_gdb "print res\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = .\[0-9\]*\r\n$gdb_prompt $" {
-       pass "print res in getFunky"
-   }
-   -re ".*$gdb_prompt $" { fail "print res in getfunky" }
-   timeout { fail "(timeout) print res in getfunky" }
-}
-
+gdb_test "print res" \
+  "\\$\[0-9\]* = -30" \
+   "print res in funk::getFunky"
 
 # Check ptype of class -- should show const/volatile methods
 
@@ -242,12 +160,6 @@ gdb_expect {
    timeout { fail "(timeout) ptype A" }
 }
 
-send_gdb "cont\n"
-gdb_expect {
-    -re "Continuing.\r\n\r\nProgram exited normally.\r\n$gdb_prompt $" {
-        pass "finish program"
-    }
-    -re "$gdb_prompt $" { fail "finish program"  }
-    timeout { fail "(timeout) finish program"  }
-}
-
+gdb_test "cont" \
+  "Continuing.\r\n\r\nProgram exited normally." \
+  "finish program"

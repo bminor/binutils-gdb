@@ -1,3 +1,9 @@
+2002-04-07  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/method.exp: Use gdb_test instead of send_gdb/gdb_expect.
+	Accept "A * const" and "const A * const" as type of "this".
+	Fix spelling of getFunky throughout.  Make messages uniform.
+
 2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
 
         Work around for PR gdb/285:
