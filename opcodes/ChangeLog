@@ -1,3 +1,9 @@
+2002-01-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/da.po: New file: Spanish translation.
+	* configure.in (ALL_LINGUAS): Add da.
+	* configure: Regenerate.
+
 2002-01-22  Graydon Hoare  <graydon@redhat.com>
 
 	* fr30-asm.c: Regenerate.
