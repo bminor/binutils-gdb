@@ -230,18 +230,45 @@ static reloc_howto_type howto_table[] =
 
 #define BADMAG(x) A29KBADMAG(x)
 
-/* This macro translates an external r_type field into a pointer to an
-   entry in the above table */
+#define RELOC_PROCESSING(relent, reloc, symbols, abfd, section) \
+ reloc_processing(relent, reloc, symbols, abfd, section)
 
+void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
+	   arelent *relent AND
+	   struct internal_reloc *reloc AND
+	   asymbol **symbols AND
+	   bfd *abfd AND
+	   asection *section)
+{
+    relent->address = reloc->r_vaddr;		
+    relent->howto = howto_table + reloc->r_type;
+    if (reloc->r_type == R_IHCONST) 
+    {		
+	relent->addend = reloc->r_symndx;		
+	relent->sym_ptr_ptr= 0;
+    }
+    else 
+    {
+      asymbol *ptr;
+      relent->sym_ptr_ptr = symbols + obj_convert(abfd)[reloc->r_symndx];
 
-#define RTYPE2HOWTO(cache_ptr, dst) 				\
-	    if (dst.r_type == R_IHCONST) {			\
-		/* Add in the value which was stored in the symbol index */\
-		cache_ptr->addend += dst.r_symndx; 		\
-		/* Throw away the bogus symbol pointer */ 	\
-		cache_ptr->sym_ptr_ptr = 0; 			\
-	    } 							\
-	    cache_ptr->howto = howto_table + dst.r_type; 	\
+      ptr = *(relent->sym_ptr_ptr);
+
+      if (ptr 
+	  && ptr->the_bfd == abfd		
+	  && ptr->section != (asection *) NULL	
+	  && ((ptr->flags & BSF_OLD_COMMON)== 0))	
+      {						
+	  relent->addend = -(ptr->section->vma + ptr->value);	
+      }						
+      else
+      {					
+	  relent->addend = 0;			
+      }			
+      relent->address-= section->vma;
+      relent->section = 0;
+  }
+}
 
 #include "coffcode.h"
 

@@ -1,5 +1,9 @@
 Sat Nov 30 21:19:15 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
+	* coff-a29k.c: defined RELOC_PROCESSING to take the #ifdef out of
+	coffcode.h
+	* coffcode.h: use the new macro if available
+
 	* elf.c (elf_corefile_note): cast malloc to avoid warning.
 	* Makefile.in: Fixed dependencies due to file rename
 
