@@ -1,3 +1,7 @@
+2002-10-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* hppa-tdep.c (low_text_segment_addres): Fix a compilation warning.
+
 2002-10-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (i386v-nat.o): Add $(i386_tdep_h).

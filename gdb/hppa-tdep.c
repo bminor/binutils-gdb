@@ -300,7 +300,7 @@ static CORE_ADDR low_text_segment_address;
 static void
 record_text_segment_lowaddr (bfd *abfd, asection *section, void *ignored)
 {
-  if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
+  if (((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
        == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
       && section->vma < low_text_segment_address)
     low_text_segment_address = section->vma;
