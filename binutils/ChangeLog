@@ -1,3 +1,8 @@
+2001-11-29  H.J. Lu <hjl@gnu.org>
+
+	* bucomm.c (make_tempname): Revert the changes made on
+	2001-11-14 and 2001-11-12. They won't work with directories.
+
 2001-11-23  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* binutils/Makefile.am (check-DEJAGNU): Pass CC_FOR_TARGET and
