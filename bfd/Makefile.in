@@ -75,7 +75,7 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 # This is an independent variable so that targets can override it if
 # they want.  Until we get around to fixing the defaults for various targets,
 # default to all opcode tables.
-OPC = opc-sparc.o
+OPC = sparc-opc.o
 
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
@@ -121,7 +121,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c cpu-vax.c \
 	 cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c coff-h8300.c hppa.c \
 	 cpu-hppa.c coff-we32k.c cpu-we32k.c \
-	opc-sparc.c opc-i960.c
+	sparc-opc.c opc-i960.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -381,7 +381,7 @@ i386linux.o : i386linux.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
 bout.o : bout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
 
-opc-sparc.o : opc-sparc.c $(INCDIR)/opcode/sparc.h
+sparc-opc.o : sparc-opc.c $(INCDIR)/opcode/sparc.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 
