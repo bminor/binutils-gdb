@@ -391,6 +391,15 @@
 #ifndef elf_backend_ignore_discarded_relocs
 #define elf_backend_ignore_discarded_relocs	NULL
 #endif
+#ifndef elf_backend_can_make_relative_eh_frame
+#define elf_backend_can_make_relative_eh_frame	_bfd_elf_can_make_relative
+#endif
+#ifndef elf_backend_can_make_lsda_relative_eh_frame
+#define elf_backend_can_make_lsda_relative_eh_frame	_bfd_elf_can_make_relative
+#endif
+#ifndef elf_backend_encode_eh_address
+#define elf_backend_encode_eh_address		_bfd_elf_encode_eh_address
+#endif
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
 #endif
@@ -497,6 +506,9 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_reloc_type_class,
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,
+  elf_backend_can_make_relative_eh_frame,
+  elf_backend_can_make_lsda_relative_eh_frame,
+  elf_backend_encode_eh_address,
   elf_backend_write_section,
   elf_backend_mips_irix_compat,
   elf_backend_mips_rtype_to_howto,

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/frv.h"
+#include "elf/dwarf2.h"
 #include "hashtab.h"
 
 /* Forward declarations.  */
@@ -3700,6 +3701,57 @@ elf32_frv_finish_dynamic_symbol (bfd *output_bfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+/* Decide whether to attempt to turn absptr or lsda encodings in
+   shared libraries into pcrel within the given input section.  */
+
+static bfd_boolean
+frv_elf_use_relative_eh_frame (bfd *input_bfd,
+			       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			       asection *eh_frame_section ATTRIBUTE_UNUSED)
+{
+  /* We can't use PC-relative encodings in FDPIC binaries, in general.  */
+  if (elf_elfheader (input_bfd)->e_flags & EF_FRV_FDPIC)
+    return FALSE;
+
+  return TRUE;
+}
+
+/* Adjust the contents of an eh_frame_hdr section before they're output.  */
+
+static bfd_byte
+frv_elf_encode_eh_address (bfd *abfd,
+			   struct bfd_link_info *info,
+			   asection *osec, bfd_vma offset,
+			   asection *loc_sec, bfd_vma loc_offset,
+			   bfd_vma *encoded)
+{
+  struct elf_link_hash_entry *h;
+
+  /* Non-FDPIC binaries can use PC-relative encodings.  */
+  if (! (elf_elfheader (abfd)->e_flags & EF_FRV_FDPIC))
+    return _bfd_elf_encode_eh_address (abfd, info, osec, offset,
+				       loc_sec, loc_offset, encoded);
+
+  h = elf_hash_table (info)->hgot;
+  BFD_ASSERT (h && h->root.type == bfd_link_hash_defined);
+
+  if (! h || (_frv_osec_to_segment (abfd, osec)
+	      == _frv_osec_to_segment (abfd, loc_sec->output_section)))
+    return _bfd_elf_encode_eh_address (abfd, info, osec, offset,
+				       loc_sec, loc_offset, encoded);
+
+  BFD_ASSERT (_frv_osec_to_segment (abfd, osec)
+	      == _frv_osec_to_segment (abfd,
+				       h->root.u.def.section->output_section));
+
+  *encoded = osec->vma + offset
+    - (h->root.u.def.value
+       + h->root.u.def.section->output_section->vma
+       + h->root.u.def.section->output_offset);
+
+  return DW_EH_PE_datarel | DW_EH_PE_sdata4;
+}
+
 /* Look through the relocs for a section during the first phase.
 
    Besides handling virtual table relocs for gc, we have to deal with
@@ -4418,6 +4470,12 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_plt_header_size	0
+
+#define elf_backend_can_make_relative_eh_frame \
+		frv_elf_use_relative_eh_frame
+#define elf_backend_can_make_lsda_relative_eh_frame \
+		frv_elf_use_relative_eh_frame
+#define elf_backend_encode_eh_address	frv_elf_encode_eh_address
 
 #define elf_backend_may_use_rel_p       1
 #define elf_backend_may_use_rela_p      1

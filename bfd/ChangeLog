@@ -1,5 +1,30 @@
 2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
 
+	* elf-bfd.h (struct elf_backend_data): Added
+	elf_backend_can_make_relative_eh_frame,
+	elf_backend_can_make_lsda_relative_eh_frame and
+	elf_backend_encode_eh_address.
+	(_bfd_elf_encode_eh_address): Declare.
+	(_bfd_elf_can_make_relative): Declare.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use new
+	hooks to decide whether to attempt to make_relative and
+	make_lsda_relative.
+	(_bfd_elf_write_section_eh_frame_hdr): Call encode_eh_address.
+	(_bfd_elf_can_make_relative): New.
+	(_bfd_elf_encode_eh_address): New.
+	* elf32-frv.c (frv_elf_use_relative_eh_frame): New.
+	(frv_elf_encode_eh_address): New.
+	(elf_backend_can_make_relative_eh_frame): Define.
+	(elf_backend_can_make_lsda_relative_eh_frame): Define.
+	(elf_backend_encode_eh_address): Define.
+	* elfxx-target.h
+	(elf_backend_can_make_relative_eh_frame): Define.
+	(elf_backend_can_make_lsda_relative_eh_frame): Define.
+	(elf_backend_encode_eh_address): Define.
+	(elfNN_bed): Add them.
+
+2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
+
 	* elf32-frv.c (elf32_frv_howto_table) <R_FRV_LABEL16>: Set
 	complain_on_overflow to signed.
 
