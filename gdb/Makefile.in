@@ -17,10 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-prefix = /usr/local
+prefix = @prefix@
+exec_prefix = @exec_prefix@
 
-program_transform_name =
-exec_prefix = $(prefix)
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 tooldir = $(libdir)/$(target_alias)
@@ -42,13 +44,13 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
 AR = ar
 AR_FLAGS = qv
-RANLIB = ranlib
+RANLIB = @RANLIB@
 
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
@@ -59,11 +61,11 @@ TERMCAP = -ltermcap
 # -traditional flag.  Otherwise the ioctl calls in inflow.c
 # will be incorrectly compiled.  The "fixincludes" script in the gcc
 # distribution will fix your include files up.
-#CC=gcc -traditional
+CC=@CC@
 
-# Directory containing source files.  Don't clean up the spacing,
-# this exact string is matched for by the "configure" script.
-srcdir = .
+# Directory containing source files.
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 # If you use bison instead of yacc, it needs to include the "-y" argument.
 #BISON=bison -y
@@ -121,30 +123,25 @@ OPCODES = ../opcodes/libopcodes.a
 OP_INCLUDE = $(INCLUDE_DIR)/opcode
 OPCODES_CFLAGS = -I$(OP_INCLUDE)
 
+#start-sanitize-gdbtk
 # Where is the TCL library?  Typically in ../tcl.
-TCL_DIR = ../tcl
-TCL = -L$(TCL_DIR) -ltcl
-TCL_SRC = $(srcdir)/$(TCL_DIR)
-TCL_CFLAGS = -I$(TCL_SRC)
+TCL = @TCLLIB@
+TCL_CFLAGS = @TCLHDIR@
 
 # Where is the TK library?  Typically in ../tk.
-TK_DIR = ../tk
-TK = -L$(TK_DIR) -ltk
-TK_SRC = $(srcdir)/$(TK_DIR)
-TK_CFLAGS = -I$(TK_SRC)
+TK = @TKLIB@
+TK_CFLAGS = @TKHDIR@
 
-# A "-I" switch that can be used when compiling to make all of the
-# X11 include files accessible (the configure script will try to
-# set this value, and will cause it to be an empty string if the
-# include files are accessible via /usr/include).
-X11_INCLUDES =
-X11_CFLAGS = $(X11_INCLUDES)
+X11 = @X_LIBS@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@
+X11_CFLAGS = @X_CFLAGS@
 
-# Linker switch(es) to use to link with the X11 library archive (the
-# configure script will try to set this value automatically, but you
-# can override it).
-X11_LIB_SWITCHES =
-X11_LIBS = -lX11
+ENABLE_GDBTK= @ENABLE_GDBTK@
+#end-sanitize-gdbtk
+
+ENABLE_CFLAGS= @ENABLE_CFLAGS@
+ENABLE_CLIBS= @ENABLE_CLIBS@
+ENABLE_OBS= @ENABLE_OBS@
+
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
@@ -154,7 +151,8 @@ X11_LIBS = -lX11
 # It is also possible that you will need to add -I/usr/include/sys if
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config
+DEFS = @DEFS@
+GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config $(DEFS)
 
 # M{H,T}_CFLAGS, if defined, have host- and target-dependent CFLAGS
 # from the config directory.
@@ -229,12 +227,13 @@ SER_HARDWIRE=ser-unix.o
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
-REMOTE_O = remote.o dcache.o remote-utils.o
+REMOTE_OBS = remote.o dcache.o remote-utils.o
 
 ANNOTATE_OBS = annotate.o
 
 # Host and target-dependent makefile fragments come in here.
-####
+@host_makefile_frag@
+@target_makefile_frag@
 # End of host and target-dependent makefile fragments
 
 FLAGS_TO_PASS = \
@@ -349,7 +348,7 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	gdbtypes.c infcmd.c inflow.c infrun.c language.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
-	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
+	printcmd.c remote.c remote-nrom.c source.c stabsread.c stack.c symfile.c symmisc.c \
 	symtab.c target.c thread.c top.c \
 	typeprint.c utils.c valarith.c valops.c \
 	valprint.c values.c serial.c ser-unix.c mdebugread.c os9kread.c
@@ -445,8 +444,8 @@ TARDIRS = doc gdbserver sparclite
 # variables analogous to SER_HARDWIRE which get defaulted in this
 # Makefile.in
 
-DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) $(REMOTE_O) \
-	   $(ENABLE_DEPFILES)
+DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) $(REMOTE_OBS) \
+	   $(ENABLE_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
@@ -551,6 +550,11 @@ uninstall: force
 		  true ; \
 		fi ; \
 		rm -f $(bindir)/$$transformed_name $(man1dir)/$$transformed_name.1
+	# start-sanitize-gdbtk
+	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
+		rm -f $(libdir)/gdbtk.tcl ; \
+	fi
+	# end-sanitize-gdbtk
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
@@ -750,7 +754,7 @@ subdir_do: force
 		else true ; fi ; \
 	done
 
-Makefile: Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+Makefile: Makefile.in @host_makefile_frag_path@ @target_makefile_frag_path@
 	$(SHELL) config.status
 
 force:
@@ -1381,6 +1385,9 @@ remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(remote_utils_h)
 
 remote.o: remote.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
+	$(inferior_h) $(remote_utils_h) symfile.h terminal.h
+
+remote-nrom.o: remote-nrom.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h
 
 rom68k-rom.o: rom68k-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \

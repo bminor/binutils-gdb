@@ -10,6 +10,3 @@ NATDEPFILES= corelow.o core-svr4.o solib.o procfs.o fork-child.o
 # old termcap descriptions are incomplete.  So ensure that we use the
 # new terminfo interface and latest terminal descriptions.
 TERMCAP=-ltermlib
-
-# SVR4 puts the BSD compatible install in /usr/ucb.
-INSTALL = /usr/ucb/install -c

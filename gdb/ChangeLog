@@ -1,3 +1,15 @@
+Mon May 15 17:11:38 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* config/i386/{i386sol2.mh, i386v4.mh, ncr3000.mh},
+	  config/m68k/m68kv4.mh, config/mips/{irix4.mh, irix5.mh,
+	  mipsv4.mh}, config/sparc/sun4so2.mh (INSTALL): Removed, figured
+	  out by autoconf.
+	* config/apollo68v.mh (RANLIB): Removed, figured out by autoconf.
+
+	* Makefile.in, configure.in: Converted to use autoconf
+	* aclocal.m4: New file, local autoconf macro definitions.
+	* configure: New file, generated with autoconf 2.3.
+
 Mon May 15 14:46:41 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote.c (remote_kill): Add prototype.
