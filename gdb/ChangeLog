@@ -1,5 +1,11 @@
 Wed Nov  4 15:27:31 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* inflow.c (pass_signal, set_sigint_trap, clear_sigint_trap):  Add
+	new routines to deal with sending SIGINTs to attached processes
+	when the user interrupts the controlling GDB.
+	* inftarg.c (child_wait), procfs.c (procfs_wait):  Add calls to
+	the aforementioned routines when waiting for the attached process.
+
 	* elfread.c, mipsread.c:  Include <string.h>.
 	* i386-stub.c:  Include "ansidecl.h" to deal with prototypes.
 	* serial.h:  Add prototype for serial_restore().	
