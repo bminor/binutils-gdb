@@ -1,3 +1,13 @@
+start-sanitize-r5900
+Thu Mar 19 14:19:27 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (mips_ip): Handle opcodes which have the form
+	"name.completer" where only the name is actually in the opcode
+	table.  Allow various operands for base register in load/store
+	instructions.  Handle various new argument characters for the
+	cop2/vu0 co-processor.
+
+end-sanitize-r5900
 start-sanitize-sky
 	Wed Mar 18 13:54:04 1998  Frank Ch. Eigler  <fche@cygnus.com>
 

@@ -954,7 +954,7 @@ md_begin ()
                || mips_cpu == 4300
                /* start-sanitize-vr4320 */
                || mips_cpu == 4320
-               /* end-sanitize-4320 */
+               /* end-sanitize-vr4320 */
                || mips_cpu == 4600
                /* start-sanitize-tx49 */
                || mips_cpu == 4900
@@ -6962,19 +6962,56 @@ mips_ip (str, ip)
   unsigned int regno;
   unsigned int lastregno = 0;
   char *s_reset;
+  char save_c = 0;
 
   insn_error = NULL;
 
+  /* If the instruction contains a '.', we first try to match an instruction
+     including the '.'.  Then we try again without the '.'.  */
+  insn = NULL;
   for (s = str; *s != '\0' && !isspace(*s); ++s)
     continue;
-  if (isspace (*s))
-    *s++ = '\0';
 
-  if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
+  /* If we stopped on whitespace, then replace the whitespace with null for
+     the call to hash_find.  Save the character we replaced just in case we
+     have to re-parse the instruction.  */
+  if (isspace (*s))
     {
-      insn_error = "unrecognized opcode";
-      return;
+      save_c = *s;
+      *s++ = '\0';
     }
+	
+  insn = (struct mips_opcode *) hash_find (op_hash, str);
+
+  /* If we didn't find the instruction in the opcode table, try again, but
+     this time with just the instruction up to, but not including the
+     first '.'.  */
+  if (insn == NULL)
+    {
+      /* Restore the character we overwrite above (if any).  */ 
+      if (save_c)
+	*(--s) = save_c;
+
+      /* Scan up to the first '.' or whitespace.  */
+      for (s = str; *s != '\0' && *s != '.' && !isspace (*s); ++s)
+	continue;
+
+      /* If we did not find a '.', then we can quit now.  */
+      if (*s != '.')
+	{
+	  insn_error = "unrecognized opcode";
+	  return;
+	}
+
+      /* Lookup the instruction in the hash table.  */
+      *s++ = '\0';
+      if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
+	{
+	  insn_error = "unrecognized opcode";
+	  return;
+	}
+    }
+
   argsStart = s;
   for (;;)
     {
@@ -7085,12 +7122,13 @@ mips_ip (str, ip)
 	      break;
 
 	    case '(':
-	      /* handle optional base register.
+	      /* Handle optional base register.
 		 Either the base register is omitted or
 		 we must have a left paren. */
-	      /* this is dependent on the next operand specifier
-		 is a 'b' for base register */
-	      assert (args[1] == 'b');
+	      /* This is dependent on the next operand specifier
+		 is a base register specification.  */
+	      assert (args[1] == 'b' || args[1] == '5'
+		      || args[1] == '-' || args[1] == '4');
 	      if (*s == '\0')
 		return;
 
@@ -7099,6 +7137,10 @@ mips_ip (str, ip)
 	    case '[':
 	    case ']':
 	      /* end-sanitize-vr5400 */
+	      /* start-sanitize-r5900 */
+	    case '-':
+	    case '+':
+	      /* end-sanitize-r5900 */
 	      if (*s++ == *args)
 		continue;
 	      break;
@@ -7133,6 +7175,141 @@ mips_ip (str, ip)
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
+
+	    /* start-sanitize-r5900 */
+	    case '0':		/* 5 bit signed immediate at 6 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((c == '\0' && imm_expr.X_op != O_constant)
+		  || ((imm_expr.X_add_number < -16
+		       || imm_expr.X_add_number >= 16)
+		      && imm_expr.X_op == O_constant))
+		{
+		  if (imm_expr.X_op != O_constant
+		      && imm_expr.X_op != O_big)
+		    insn_error = "absolute expression required";
+		  else
+		    as_bad ("5 bit expression not in range -16..15");
+		}
+	      ip->insn_opcode |= (imm_expr.X_add_number) << 6;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '9':		/* vi19 for vcallmsr */
+	      if (strncmp (s, "vi19", 4) == 0)
+		s += 4;
+	      else
+		as_bad ("expected vi19");
+	      continue;
+
+	    case '%':		/* escape character */
+	      /* '%' specifies that we've got an optional suffix to this
+		 operand that must match exactly (if it exists).  */
+	      if (*s != '\0' && *s != ','
+		  && *s != ' ' && *s != '\t' && *s != '\n')
+		{
+		  if (*s == *(args + 1))
+		    {
+		      s++;
+		      args++;
+		      continue;
+		    }
+		  break;
+		}
+	      args++;
+	      continue;
+	      
+	    case 'K':		/* DEST operand completer (optional), must
+				   match previous dest if specified.  */
+	    case '&':		/* DEST instruction completer */
+	      {
+		int w,x,y,z;
+		static int last_h;
+
+		w = x = y = z = 0;
+
+		/* Parse the completer.  */
+	        s_reset = s;
+		while (*s != '\0' && *s != ' ' && *s != ',')
+		  {
+		    if (*s == 'w')
+		      w++;
+		    else if (*s == 'x')
+		      x++;
+		    else if (*s == 'y')
+		      y++;
+		    else if (*s == 'z')
+		      z++;
+		    else
+		      {
+			insn_error = "Invalid dest specification";
+			continue;
+		      }
+		    s++;
+		  }
+
+		/* Each completer can only appear once.  */
+		if (w > 1 || x > 1 || y > 1 || z > 1)
+		  {
+		    insn_error = "Invalid dest specification";
+		    continue;
+		  }
+
+		/* If this is the opcode completer, then we must insert
+		   the appropriate value into the insn.  */
+		if (*args == '&')
+		  {
+		    ip->insn_opcode |= ((w << 21) | (x << 24)
+					| (y << 23) | (z << 22));
+		    last_h = (w << 3) | (x << 0) | (y << 1) | (z << 2);
+		  }
+		else
+		  {
+		    int temp;
+
+		    /* This is the operand completer, make sure it matches
+		       the previous opcode completer.  */
+		    temp = (w << 3) | (x << 0) | (y << 1) | (z << 2);
+		    if (temp && temp != last_h)
+		      {
+			insn_error = "DEST field in operand does not match DEST field in instruction";
+			continue;
+		      }
+
+		  }
+	
+		continue;
+	      }
+
+	    case 'J':		/* vu0 I register */
+	      if (s[0] == 'I')
+		s += 1;
+	      else
+		insn_error = "operand `I' expected";
+	      continue;
+	
+	    case 'Q':		/* vu0 Q register */
+	      if (s[0] == 'Q')
+		s += 1;
+	      else
+		insn_error = "operand `Q' expected";
+	      continue;
+
+	    case 'X':		/* vu0 R register */
+	      if (s[0] == 'R')
+		s += 1;
+	      else
+		insn_error = "operand `R' expected";
+	      continue;
+
+	    case 'U':		/* vu0 ACC register */
+	      if (s[0] == 'A' && s[1] == 'C' && s[2] == 'C')
+		s += 3;
+	      else
+		insn_error = "operand `ACC' expected";
+	      continue;
+	    /* end-sanitize-r5900 */
 
 	    case 'k':		/* cache code */
 	    case 'h':		/* prefx code */
@@ -7376,6 +7553,16 @@ mips_ip (str, ip)
 	    case 'R':		/* floating point source register */
 	    case 'V':
 	    case 'W':
+	    /* start-sanitize-r5900 */
+	    case '1':		/* vu0 fp reg position 1 */
+	    case '2':		/* vu0 fp reg position 2 */
+	    case '3':		/* vu0 fp reg position 3 */
+	    case '4':		/* vu0 int reg position 1 */
+	    case '5':		/* vu0 int reg position 2 */
+	    case '6':		/* vu0 int reg position 3 */
+	    case '7':		/* vu0 fp reg with ftf modifier */
+	    case '8':		/* vu0 fp reg with fsf modifier */
+	    /* end-sanitize-r5900 */
 	      s_reset = s;
 	      if (s[0] == '$' && s[1] == 'f' && isdigit (s[2]))
 		{
@@ -7435,6 +7622,92 @@ mips_ip (str, ip)
 		  lastregno = regno;
 		  continue;
 		}
+
+	      /* start-sanitize-r5900 */
+	      /* Handle vf and vi regsiters for vu0.  */
+	      if (s[0] == 'v'
+		  && (s[1] == 'f' || s[1] == 'i')
+		  && isdigit (s[2]))
+		{
+		  s += 2;
+		  regno = 0;
+		  do
+		    {
+		      regno *= 10;
+		      regno += *s - '0';
+		      ++s;
+		    }
+		  while (isdigit (*s));
+
+		  if (regno > 31)
+		    as_bad ("Invalid vu0 register number (%d)", regno);
+
+		  c = *args;
+
+		  if (c == '7' || c == '8')
+		    {
+		      int value;
+
+		      switch (*s)
+			{
+			case 'w':
+			  value = 3;
+			  s++;
+			  ip->insn_opcode |= value << (c == '7' ? 23 : 21);
+			  break;
+			case 'x':
+			  value = 0;
+			  s++;
+			  ip->insn_opcode |= value << (c == '7' ? 23 : 21);
+			  break;
+			case 'y':
+			  value = 1;
+			  s++;
+			  ip->insn_opcode |= value << (c == '7' ? 23 : 21);
+			  break;
+			case 'z':
+			  value = 2;
+			  s++;
+			  ip->insn_opcode |= value << (c == '7' ? 23 : 21);
+			  break;
+			default:
+			  as_bad ("Invalid FSF/FTF specification");
+			}
+		    }
+
+		  if (*s == ' ')
+		    s++;
+		  if (args[1] != *s)
+		    {
+		      if (c == 'V' || c == 'W')
+			{
+			  regno = lastregno;
+			  s = s_reset;
+			  args++;
+			}
+		    }
+		  switch (c)
+		    {
+		    case '1':
+		    case '4':
+		    case '7':
+		      ip->insn_opcode |= regno << 16;
+		      break;
+		    case '2':
+		    case '5':
+		    case '8':
+		      ip->insn_opcode |= regno << 11;
+		      break;
+		    case '3':
+		    case '6':
+		      ip->insn_opcode |= regno << 6;
+		      break;
+		    }
+		  lastregno = regno;
+		  continue;
+		}
+	      /* end-sanitize-r5900 */
+
 	      switch (*args++)
 		{
 		case 'V':
