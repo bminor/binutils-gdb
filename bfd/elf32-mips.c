@@ -208,6 +208,9 @@ static int sort_dynamic_relocs
   PARAMS ((const void *, const void *));
 
 extern const bfd_target bfd_elf32_tradbigmips_vec;
+extern const bfd_target bfd_elf32_tradlittlemips_vec;
+extern const bfd_target bfd_elf64_tradbigmips_vec;
+extern const bfd_target bfd_elf64_tradlittlemips_vec;
 
 /* The level of IRIX compatibility we're striving for.  */
 
@@ -225,8 +228,7 @@ static bfd *reldyn_sorting_bfd;
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
 
-/* Nonzero if ABFD is using the 64-bit ABI.  FIXME: This is never
-   true, yet.  */
+/* Nonzero if ABFD is using the 64-bit ABI. */
 #define ABI_64_P(abfd) \
   ((elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64) != 0)
 
@@ -234,7 +236,10 @@ static bfd *reldyn_sorting_bfd;
    executables or "normal" MIPS ELF ABI executables.  */
 
 #define IRIX_COMPAT(abfd) \
-  (abfd->xvec == &bfd_elf32_tradbigmips_vec ? ict_none : \
+  (((abfd->xvec == &bfd_elf64_tradbigmips_vec) || \
+    (abfd->xvec == &bfd_elf64_tradlittlemips_vec) || \
+    (abfd->xvec == &bfd_elf32_tradbigmips_vec) || \
+    (abfd->xvec == &bfd_elf32_tradlittlemips_vec)) ? ict_none : \
   ((ABI_N32_P (abfd) || ABI_64_P (abfd)) ? ict_irix6 : ict_irix5))
 
 /* Whether we are trying to be compatible with IRIX at all.  */
@@ -2301,7 +2306,12 @@ mips_elf_sym_is_global (abfd, sym)
      bfd *abfd ATTRIBUTE_UNUSED;
      asymbol *sym;
 {
-  return (sym->flags & BSF_SECTION_SYM) == 0 ? true : false;
+  if (SGI_COMPAT(abfd))
+    return (sym->flags & BSF_SECTION_SYM) == 0 ? true : false;
+  else
+    return ((sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0
+            || bfd_is_und_section (bfd_get_section (sym))
+            || bfd_is_com_section (bfd_get_section (sym)));
 }
 
 /* Set the right machine number for a MIPS ELF file.  This is used for

@@ -2189,3 +2189,20 @@ const struct elf_size_info mips_elf64_size_info =
 				_bfd_archive_coff_update_armap_timestamp
 
 #include "elf64-target.h"
+
+/* Support for traditional mips targets */
+
+#define INCLUDED_TARGET_FILE            /* More a type of flag */
+
+#undef TARGET_LITTLE_SYM
+#undef TARGET_LITTLE_NAME
+#undef TARGET_BIG_SYM
+#undef TARGET_BIG_NAME
+
+#define TARGET_LITTLE_SYM               bfd_elf64_tradlittlemips_vec
+#define TARGET_LITTLE_NAME              "elf64-tradlittlemips"
+#define TARGET_BIG_SYM                  bfd_elf64_tradbigmips_vec
+#define TARGET_BIG_NAME                 "elf64-tradbigmips"
+
+/* Include the target file again for this target */
+#include "elf64-target.h"

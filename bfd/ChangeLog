@@ -1,3 +1,28 @@
+2001-04-05  Steven J. Hill  <sjhill@cotw.com>
+
+	* config.bfd (mips*el*-*-linux-gnu*): Use traditional little
+	endian MIPS ELF target.
+	* config.bfd (mips*-*-linux-gnu*): Use traditional big endian
+	MIPS ELF target.
+
+	* configure.in (bfd_elf64_tradbigmips_vec): New. Traditional
+	64bit big endian MIPS ELF target.
+	(bfd_elf64_tradlittlemips_vec): New. Traditional 64bit little 
+	endian MIPS ELF target.
+	* configure: Regenerated.
+
+	* elf32-mips.c (IRIX_COMPAT): Handle traditional 64bit and
+	little endian targets.
+	(mips_elf_sym_is_global): Handle traditional targets.
+
+	* elf64-mips.c (bfd_elf64_tradbigmips_vec): New. Traditional
+	64bit big endian MIPS ELF target.
+	(bfd_elf64_tradlittlemips_vec): New. Traditional 64bit little
+	endian MIPS ELF target.
+
+	* targets.c: (_bfd_target_vector): Add bfd_elf64_tradbigmips_vec
+	and bfd_elf64_tradlittlemips_vec.
+
 2001-04-05  David Mosberger  <davidm@hpl.hp.com>
 
 	* elf32-i386.c (elf_i386_fake_sections): Treat ".reloc" as an
