@@ -1,3 +1,9 @@
+1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* ldfile.c (ldfile_open_file_search): Skip libraries made for
+	incompatible architectures in the search path. Let the user know
+	about any such skips.
+
 Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 
         * configure.tgt (hppa*-linux-gnu*): New target.

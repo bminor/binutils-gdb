@@ -177,8 +177,35 @@ ldfile_open_file_search (arch, entry, lib, suffix)
 
       if (ldfile_try_open_bfd (string, entry))
 	{
-	  entry->filename = string;
-	  return true;
+	  bfd * arfile = NULL;
+
+	  if (bfd_check_format (entry->the_bfd, bfd_archive))
+	    {
+	      /* We treat an archive as compatible if it empty
+	         or has at least one compatible object.  */
+	      arfile = bfd_openr_next_archived_file (entry->the_bfd, NULL);
+
+	      if (!arfile)
+		arfile = output_bfd;
+	      else
+		while (arfile
+		       && !(bfd_check_format (arfile, bfd_object)
+			    && bfd_arch_get_compatible (arfile, output_bfd)))
+	          arfile = bfd_openr_next_archived_file (entry->the_bfd, arfile);
+	    }
+	  else if (bfd_arch_get_compatible (entry->the_bfd, output_bfd))
+	    arfile = output_bfd;
+	    
+	  if (arfile)
+	    {
+	      entry->filename = string;
+	      return true;
+	    }
+
+	  info_msg (_("%s is for an incompatible architecture -- skipped\n"),
+		    string);
+	  bfd_close(entry->the_bfd);
+	  entry->the_bfd = NULL;
 	}
 
       free (string);
