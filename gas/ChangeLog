@@ -1,3 +1,9 @@
+Wed Mar 19 11:06:29 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (load_register): In 32 bit mode, when not
+	dealing with a 64 bit number, permit the upper 32 bits to be set
+	even if bit 31 is not set.
+
 Tue Mar 18 23:30:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (potable): Add "equiv".
