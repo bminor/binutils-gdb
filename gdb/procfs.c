@@ -4535,10 +4535,7 @@ procfs_resume (ptid_t ptid, int step, enum target_signal signo)
     {
       /* Resume a specific thread, presumably suppressing the others. */
       thread = find_procinfo (PIDGET (ptid), TIDGET (ptid));
-      if (thread == NULL)
-	warning ("procfs: resume can't find thread %ld -- resuming all.",
-		 TIDGET (ptid));
-      else
+      if (thread != NULL)
 	{
 	  if (thread->tid != 0)
 	    {
