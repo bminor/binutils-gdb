@@ -373,8 +373,8 @@ struct elf_backend_data
 
    /* A function to set the type of the info field.  Processor-specific
      types should be handled here. */
-  int (*elf_backend_get_symbol_type) PARAMS (( Elf_Internal_Sym *, int)); 
- 
+  int (*elf_backend_get_symbol_type) PARAMS (( Elf_Internal_Sym *, int));
+
   /* A function to do additional processing on the ELF section header
      just before writing it out.  This is used to set the flags and
      type fields for some sections, or to actually write out data for
@@ -638,7 +638,7 @@ struct elf_backend_data
      both REL and RELA relocations, and this flag is set for those
      backends.)  */
   unsigned may_use_rel_p : 1;
-    
+
   /* Whether the backend may use RELA relocations.  (Some backends use
      both REL and RELA relocations, and this flag is set for those
      backends.)  */
@@ -647,8 +647,8 @@ struct elf_backend_data
   /* Whether the default relocation type is RELA.  If a backend with
      this flag set wants REL relocations for a particular section,
      it must note that explicitly.  Similarly, if this flag is clear,
-     and the backend wants RELA relocations for a particular 
-     section.  */   
+     and the backend wants RELA relocations for a particular
+     section.  */
   unsigned default_use_rela_p : 1;
 
   /* True if addresses "naturally" sign extend.  This is used when
@@ -1013,7 +1013,7 @@ extern boolean _bfd_elf_find_nearest_line PARAMS ((bfd *, asection *,
 #define _bfd_elf_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 extern int _bfd_elf_sizeof_headers PARAMS ((bfd *, boolean));
 extern boolean _bfd_elf_new_section_hook PARAMS ((bfd *, asection *));
-extern boolean _bfd_elf_init_reloc_shdr 
+extern boolean _bfd_elf_init_reloc_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *, boolean));
 
 /* If the target doesn't have reloc handling written yet:  */
@@ -1282,11 +1282,11 @@ extern boolean _bfd_mips_elf_finish_dynamic_symbol
 	   Elf_Internal_Sym *));
 extern boolean _bfd_mips_elf_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-extern asection * _bfd_mips_elf_gc_mark_hook 
+extern asection * _bfd_mips_elf_gc_mark_hook
   PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-extern boolean _bfd_mips_elf_gc_sweep_hook 
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, 
+extern boolean _bfd_mips_elf_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 extern boolean _bfd_mips_elf_always_size_sections
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -1297,7 +1297,7 @@ extern boolean _bfd_mips_elf_check_relocs
 	   const Elf_Internal_Rela *));
 extern struct bfd_link_hash_table *_bfd_mips_elf_link_hash_table_create
   PARAMS ((bfd *));
-extern boolean _bfd_mips_elf_print_private_bfd_data 
+extern boolean _bfd_mips_elf_print_private_bfd_data
   PARAMS ((bfd *, PTR));
 extern boolean _bfd_mips_elf_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,

@@ -23,7 +23,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* bfd.h -- The only header file required by users of the bfd library 
+/* bfd.h -- The only header file required by users of the bfd library
 
 The bfd.h file is generated from bfd-in.h and various .c files; if you
 change it, your changes will probably be lost.
@@ -109,7 +109,7 @@ typedef enum bfd_boolean {bfd_fffalse, bfd_tttrue} boolean;
 /* FIXME:  This should be using off_t from <sys/types.h>.
    For now, try to avoid breaking stuff by not including <sys/types.h> here.
    This will break on systems with 64-bit file offsets (e.g. 4.4BSD).
-   Probably the best long-term answer is to avoid using file_ptr AND off_t 
+   Probably the best long-term answer is to avoid using file_ptr AND off_t
    in this header file, and to handle this in the BFD implementation
    rather than in its interface.  */
 /* typedef off_t	file_ptr; */
@@ -284,11 +284,11 @@ typedef struct carsym {
   file_ptr file_offset;		/* look here to find the file */
 } carsym;			/* to make these you call a carsymogen */
 
-  
+
 /* Used in generating armaps (archive tables of contents).
    Perhaps just a forward definition would do? */
 struct orl {			/* output ranlib */
-  char **name;			/* symbol name */ 
+  char **name;			/* symbol name */
   file_ptr pos;			/* bfd* or file position */
   int namidx;			/* index into string table */
 };
@@ -296,7 +296,7 @@ struct orl {			/* output ranlib */
 
 /* Linenumber stuff */
 typedef struct lineno_cache_entry {
-  unsigned int line_number;	/* Linenumber from start of function*/  
+  unsigned int line_number;	/* Linenumber from start of function*/
   union {
     struct symbol_cache_entry *sym; /* Function name */
     unsigned long offset;	/* Offset into section */
@@ -327,15 +327,15 @@ typedef struct sec *sec_ptr;
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
 
-typedef struct stat stat_type; 
+typedef struct stat stat_type;
 
 typedef enum bfd_print_symbol
-{ 
+{
   bfd_print_symbol_name,
   bfd_print_symbol_more,
   bfd_print_symbol_all
 } bfd_print_symbol_type;
-    
+
 /* Information about a symbol that nm needs.  */
 
 typedef struct _symbol_info

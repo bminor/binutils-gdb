@@ -313,7 +313,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
 #endif
 
-
 /* Previously, backends could only use SHT_REL or SHT_RELA relocation
    sections, but not both.  They defined USE_REL to indicate SHT_REL
    sections, and left it undefined to indicated SHT_RELA sections.

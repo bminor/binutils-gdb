@@ -278,6 +278,10 @@ ALL_EMULATIONS = \
 	ei386pe.o \
 	ei386pe_posix.o \
 	elnk960.o \
+	em68hc11elf.o \
+	em68hc11elfb.o \
+	em68hc12elf.o \
+	em68hc12elfb.o \
 	em68k4knbsd.o \
 	em68kaout.o \
 	em68kaux.o \
@@ -436,7 +440,7 @@ ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1256,6 +1260,18 @@ ei386pe_posix.c: $(srcdir)/emulparams/i386pe_posix.sh \
 elnk960.c: $(srcdir)/emulparams/lnk960.sh \
   $(srcdir)/emultempl/lnk960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} lnk960 "$(tdir_lnk960)"
+em68hc11elf.c: $(srcdir)/emulparams/m68hc11elf.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68hc11elf "$(tdir_m68hc11)"
+em68hc11elfb.c: $(srcdir)/emulparams/m68hc11elfb.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68hc11elfb "$(tdir_m68hc11b)"
+em68hc12elf.c: $(srcdir)/emulparams/m68hc12elf.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68hc12elf "$(tdir_m68hc12)"
+em68hc12elfb.c: $(srcdir)/emulparams/m68hc12elfb.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68hc12elfb "$(tdir_m68hc12b)"
 em68k4knbsd.c:	$(srcdir)/emulparams/m68k4knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68k4knbsd "$(tdir_m68k4knbsd)"

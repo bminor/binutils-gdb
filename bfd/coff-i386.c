@@ -176,19 +176,17 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 }
 
 #ifdef COFF_WITH_PE
-
 /* Return true if this relocation should appear in the output .reloc
    section.  */
 
 static boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
 
 static boolean in_reloc_p (abfd, howto)
-     bfd *abfd ATTRIBUTE_UNUSED;
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type *howto;
 {
   return ! howto->pc_relative && howto->type != R_IMAGEBASE;
 }
-
 #endif /* COFF_WITH_PE */
 
 #ifndef PCRELOFFSET

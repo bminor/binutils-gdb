@@ -1,3 +1,12 @@
+2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* gas/m68k/all.exp: Don't execute tests if the target is m68hc11&12.
+	* gas/m68hc11/all.exp: Specific tests for m68hc11.
+	* gas/m68hc11/all_insns.[ds]: Check m68hc11 instructions.
+	* gas/m68hc11/insns[ds]: Another test.
+	* gas/m68hc11/lbranch.[ds]: Check branch optimization (gas relax).
+	* gas/m68hc11/opers12.[ds]: New files, check m68hc12 operands.
+
 2000-06-17  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/macros/strings.s: Don't start directives in first column

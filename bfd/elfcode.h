@@ -167,7 +167,7 @@ static void elf_swap_shdr_out
 
 #define section_from_elf_index bfd_section_from_elf_index
 
-static boolean elf_slurp_reloc_table_from_section 
+static boolean elf_slurp_reloc_table_from_section
   PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type,
 	   arelent *, asymbol **, boolean));
 
@@ -1224,7 +1224,7 @@ error_return:
   return -1;
 }
 
-/* Read  relocations for ASECT from REL_HDR.  There are RELOC_COUNT of 
+/* Read  relocations for ASECT from REL_HDR.  There are RELOC_COUNT of
    them.  */
 
 static boolean
@@ -1349,7 +1349,7 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
       rel_hdr = &d->rel_hdr;
       reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
       rel_hdr2 = d->rel_hdr2;
-      reloc_count2 = (rel_hdr2 
+      reloc_count2 = (rel_hdr2
 		      ? (rel_hdr2->sh_size / rel_hdr2->sh_entsize)
 		      : 0);
 
@@ -1373,8 +1373,8 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
       reloc_count2 = 0;
     }
 
-  relents = ((arelent *) 
-	     bfd_alloc (abfd, 
+  relents = ((arelent *)
+	     bfd_alloc (abfd,
 			(reloc_count + reloc_count2) * sizeof (arelent)));
   if (relents == NULL)
     return false;
@@ -1384,15 +1384,15 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
 					   relents,
 					   symbols, dynamic))
     return false;
-  
-  if (rel_hdr2 
+
+  if (rel_hdr2
       && !elf_slurp_reloc_table_from_section (abfd, asect,
 					      rel_hdr2, reloc_count2,
 					      relents + reloc_count,
 					      symbols, dynamic))
     return false;
 
-  
+
   asect->relocation = relents;
   return true;
 }

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-04-04 23:21+0930\n"
+"POT-Creation-Date: 2000-06-18 16:58-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -250,79 +250,73 @@ msgstr ""
 msgid "%s: bfd_vma has unexpected size of %ld bytes\n"
 msgstr ""
 
-#: gmon_io.c:87 gmon_io.c:182
+#: gmon_io.c:90 gmon_io.c:185
 #, c-format
 msgid "%s: file too short to be a gmon file\n"
 msgstr ""
 
-#: gmon_io.c:97 gmon_io.c:215
+#: gmon_io.c:100 gmon_io.c:218
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
 msgstr ""
 
-#: gmon_io.c:108
+#: gmon_io.c:111
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
 msgstr ""
 
-#: gmon_io.c:138
+#: gmon_io.c:141
 #, c-format
 msgid "%s: %s: found bad tag %d (file corrupted?)\n"
 msgstr ""
 
-#: gmon_io.c:203
+#: gmon_io.c:206
 #, c-format
 msgid "%s: profiling rate incompatible with first gmon file\n"
 msgstr ""
 
-#: gmon_io.c:232
+#: gmon_io.c:235
 #, c-format
 msgid "%s: incompatible with first gmon file\n"
 msgstr ""
 
-#: gmon_io.c:258
+#: gmon_io.c:261
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
 msgstr ""
 
-#: gmon_io.c:280
+#: gmon_io.c:283
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr ""
 
-#: gmon_io.c:315
+#: gmon_io.c:318
 msgid "time is in ticks, not seconds\n"
 msgstr ""
 
-#: gmon_io.c:321 gmon_io.c:461
+#: gmon_io.c:324 gmon_io.c:464
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
 msgstr ""
 
-#: gmon_io.c:328
+#: gmon_io.c:331
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
 msgstr ""
 
-#: gmon_io.c:330
+#: gmon_io.c:333
 #, c-format
 msgid "\t%d histogram record%s\n"
 msgstr ""
 
-#: gmon_io.c:332
+#: gmon_io.c:335
 #, c-format
 msgid "\t%d call-graph record%s\n"
 msgstr ""
 
-#: gmon_io.c:334
+#: gmon_io.c:337
 #, c-format
 msgid "\t%d basic-block count record%s\n"
-msgstr ""
-
-#: gprof.c:59
-msgid ""
-"@(#) Copyright (c) 1983 Regents of the University of California.\n"
-" All rights reserved.\n"
 msgstr ""
 
 #: gprof.c:144
@@ -461,12 +455,12 @@ msgstr ""
 msgid "Flat profile:\n"
 msgstr ""
 
-#: source.c:140
+#: source.c:155
 #, c-format
 msgid "%s: could not locate `%s'\n"
 msgstr ""
 
-#: source.c:200
+#: source.c:242
 #, c-format
 msgid "*** File %s:\n"
 msgstr ""

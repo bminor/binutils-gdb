@@ -54,6 +54,7 @@ CPU_TYPES = \
 	i860 \
 	i960 \
 	m32r \
+	m68hc11 \
 	m68k \
 	m88k \
 	mcore \
@@ -225,6 +226,7 @@ TARGET_CPU_CFILES = \
 	config/tc-i860.c \
 	config/tc-i960.c \
 	config/tc-m32r.c \
+	config/tc-m68hc11.c \
 	config/tc-m68k.c \
 	config/tc-m88k.c \
 	config/tc-mcore.c \
@@ -262,6 +264,7 @@ TARGET_CPU_HFILES = \
 	config/tc-i860.h \
 	config/tc-i960.h \
 	config/tc-m32r.h \
+	config/tc-m68hc11.h \
 	config/tc-m68k.h \
 	config/tc-m88k.h \
 	config/tc-mcore.h \
@@ -1087,6 +1090,11 @@ DEPTC_m32r_elf = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
   $(INCDIR)/symcat.h $(srcdir)/../opcodes/m32r-desc.h \
   $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/m32r-opc.h \
   cgen.h
+DEPTC_m68hc11_elf = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68hc11.h $(INCDIR)/obstack.h \
+  subsegs.h $(INCDIR)/opcode/m68hc11.h
 DEPTC_m68k_aout = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
   $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
@@ -1814,6 +1822,9 @@ DEP_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
 DEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h
+DEP_m68hc11_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68hc11.h
 DEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_m68k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m68k.h \

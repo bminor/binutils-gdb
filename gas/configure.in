@@ -122,6 +122,7 @@ changequote([,])dnl
 changequote(,)dnl
       i[456]86)		cpu_type=i386 ;;
       ia64)		cpu_type=ia64 ;;
+      m6811|m6812)	cpu_type=m68hc11 ;;
       m680[012346]0)	cpu_type=m68k ;;
 changequote([,])dnl
       m68008)		cpu_type=m68k ;;
@@ -273,6 +274,8 @@ changequote([,])dnl
       ia64-*-linux-gnu*)    fmt=elf em=linux ;;
 
       m32r-*-*)		    fmt=elf bfd_gas=yes ;;
+
+      m68hc11-*-*|m6811-*-*|m68hc12-*-*|m6812-*-*)fmt=elf bfd_gas=yes ;;
 
       m68k-*-vxworks* | m68k-ericsson-ose | m68k-*-sunos*)
 			    fmt=aout em=sun3 ;;

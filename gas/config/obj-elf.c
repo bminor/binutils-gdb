@@ -833,7 +833,7 @@ obj_elf_section (push)
       char mri_type;
 
 #ifdef md_flush_pending_output
-  md_flush_pending_output ();
+      md_flush_pending_output ();
 #endif
 
       previous_section = now_seg;

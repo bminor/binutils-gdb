@@ -2201,7 +2201,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 						 is.n_numaux, auxptr);
 			}
 
-			skipping = false;
+		      skipping = false;
 		    }
 
 		  iline.l_addr.l_symndx = indx;

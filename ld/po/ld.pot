@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-04-04 23:21+0930\n"
+"POT-Creation-Date: 2000-06-18 18:12-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,7 +217,7 @@ msgstr ""
 msgid "Errors encountered processing file %s for interworking"
 msgstr ""
 
-#: emultempl/pe.em:918 ldlang.c:1961 ldlang.c:4333 ldlang.c:4367 ldmain.c:996
+#: emultempl/pe.em:918 ldlang.c:1963 ldlang.c:4336 ldlang.c:4370 ldmain.c:1008
 msgid "%P%F: bfd_link_hash_lookup failed: %E\n"
 msgstr ""
 
@@ -256,11 +256,11 @@ msgstr ""
 msgid "%B%F: could not read symbols; %E\n"
 msgstr ""
 
-#: ldcref.c:445 ldmain.c:1064 ldmain.c:1068
+#: ldcref.c:445 ldmain.c:1076 ldmain.c:1080
 msgid "%B%F: could not read symbols: %E\n"
 msgstr ""
 
-#: ldcref.c:517 ldcref.c:524 ldmain.c:1114 ldmain.c:1121
+#: ldcref.c:517 ldcref.c:524 ldmain.c:1126 ldmain.c:1133
 msgid "%B%F: could not read relocs: %E\n"
 msgstr ""
 
@@ -522,101 +522,101 @@ msgstr ""
 msgid "%P%F: can not create link hash table: %E\n"
 msgstr ""
 
-#: ldlang.c:2084
+#: ldlang.c:2086
 msgid " load address 0x%V"
 msgstr ""
 
-#: ldlang.c:2214
+#: ldlang.c:2216
 msgid "%W (size before relaxing)\n"
 msgstr ""
 
-#: ldlang.c:2296
+#: ldlang.c:2298
 #, c-format
 msgid "Address of section %s set to "
 msgstr ""
 
-#: ldlang.c:2445
+#: ldlang.c:2447
 #, c-format
 msgid "Fail with %d\n"
 msgstr ""
 
-#: ldlang.c:2684
+#: ldlang.c:2686
 msgid "%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"
 msgstr ""
 
-#: ldlang.c:2718
+#: ldlang.c:2720
 msgid "%X%P: address 0x%v of %B section %s is not within region %s\n"
 msgstr ""
 
-#: ldlang.c:2726
+#: ldlang.c:2728
 msgid "%X%P: region %s is full (%B section %s)\n"
 msgstr ""
 
-#: ldlang.c:2775
+#: ldlang.c:2777
 msgid "%P%X: Internal error on COFF shared library section %s\n"
 msgstr ""
 
-#: ldlang.c:2816
+#: ldlang.c:2818
 msgid "%P: warning: no memory region specified for section `%s'\n"
 msgstr ""
 
-#: ldlang.c:2829
+#: ldlang.c:2831
 msgid "%P: warning: changing start of section %s by %u bytes\n"
 msgstr ""
 
-#: ldlang.c:2843
+#: ldlang.c:2845
 msgid "%F%S: non constant address expression for section %s\n"
 msgstr ""
 
-#: ldlang.c:2907
+#: ldlang.c:2909
 msgid "%X%P: use an absolute load address or a load memory region, not both\n"
 msgstr ""
 
-#: ldlang.c:3020
+#: ldlang.c:3022
 msgid "%P%F: can't relax section: %E\n"
 msgstr ""
 
-#: ldlang.c:3185
+#: ldlang.c:3187
 msgid "%F%P: invalid data statement\n"
 msgstr ""
 
-#: ldlang.c:3222
+#: ldlang.c:3224
 msgid "%F%P: invalid reloc statement\n"
 msgstr ""
 
-#: ldlang.c:3358
+#: ldlang.c:3360
 msgid "%P%F:%s: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:3371 ldlang.c:3388
+#: ldlang.c:3373 ldlang.c:3390
 msgid "%P%F: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:3383
+#: ldlang.c:3385
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
 msgstr ""
 
-#: ldlang.c:3393
+#: ldlang.c:3395
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
 msgstr ""
 
-#: ldlang.c:3435
+#: ldlang.c:3437
 msgid ""
 "%P: warning: %s architecture of input file `%B' is incompatible with %s "
 "output\n"
 msgstr ""
 
-#: ldlang.c:3453
+#: ldlang.c:3455
 msgid "%E%X: failed to merge target specific data of file %B\n"
 msgstr ""
 
-#: ldlang.c:3540
+#: ldlang.c:3542
 msgid ""
 "\n"
 "Allocating common symbols\n"
 msgstr ""
 
-#: ldlang.c:3541
+#: ldlang.c:3543
 msgid ""
 "Common symbol       size              file\n"
 "\n"
@@ -625,239 +625,239 @@ msgstr ""
 #. This message happens when using the
 #. svr3.ifile linker script, so I have
 #. disabled it.
-#: ldlang.c:3626
+#: ldlang.c:3628
 msgid "%P: no [COMMON] command, defaulting to .bss\n"
 msgstr ""
 
-#: ldlang.c:3686
+#: ldlang.c:3688
 msgid "%P%F: invalid syntax in flags\n"
 msgstr ""
 
-#: ldlang.c:4281
+#: ldlang.c:4284
 msgid "%P%Fmultiple STARTUP files\n"
 msgstr ""
 
-#: ldlang.c:4553
+#: ldlang.c:4556
 msgid "%F%P: bfd_record_phdr failed: %E\n"
 msgstr ""
 
-#: ldlang.c:4572
+#: ldlang.c:4575
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
 msgstr ""
 
-#: ldlang.c:4881
+#: ldlang.c:4884
 msgid "%X%P: unknown language `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:4930
+#: ldlang.c:4933
 msgid "%X%P: duplicate version tag `%s'\n"
 msgstr ""
 
-#: ldlang.c:4943 ldlang.c:4956
+#: ldlang.c:4946 ldlang.c:4959
 msgid "%X%P: duplicate expression `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:4993
+#: ldlang.c:4996
 msgid "%X%P: unable to find version dependency `%s'\n"
 msgstr ""
 
-#: ldlang.c:5015
+#: ldlang.c:5018
 msgid "%X%P: unable to read .exports section contents"
 msgstr ""
 
-#: ldmain.c:192
+#: ldmain.c:193
 msgid "%X%P: can't set BFD default target to `%s': %E\n"
 msgstr ""
 
-#: ldmain.c:262
+#: ldmain.c:264
 msgid "%P%F: -r and --mpc860c0 may not be used together\n"
 msgstr ""
 
-#: ldmain.c:264
+#: ldmain.c:266
 msgid "%P%F: --relax and -r may not be used together\n"
 msgstr ""
 
-#: ldmain.c:266
+#: ldmain.c:268
 msgid "%P%F: -r and -shared may not be used together\n"
 msgstr ""
 
-#: ldmain.c:295
+#: ldmain.c:297
 msgid "using internal linker script:\n"
 msgstr ""
 
-#: ldmain.c:314
+#: ldmain.c:316
 msgid "%P%F: no input files\n"
 msgstr ""
 
-#: ldmain.c:319
+#: ldmain.c:321
 msgid "%P: mode %s\n"
 msgstr ""
 
-#: ldmain.c:337
+#: ldmain.c:339
 msgid "%P%F: cannot open map file %s: %E\n"
 msgstr ""
 
-#: ldmain.c:383
+#: ldmain.c:387
 msgid "%P: link errors found, deleting executable `%s'\n"
 msgstr ""
 
-#: ldmain.c:394
+#: ldmain.c:398
 msgid "%F%B: final close failed: %E\n"
 msgstr ""
 
-#: ldmain.c:418
+#: ldmain.c:422
 msgid "%X%P: unable to open for source of copy `%s'\n"
 msgstr ""
 
-#: ldmain.c:420
+#: ldmain.c:424
 msgid "%X%P: unable to open for destination of copy `%s'\n"
 msgstr ""
 
-#: ldmain.c:426
+#: ldmain.c:430
 msgid "%P: Error writing file `%s'\n"
 msgstr ""
 
-#: ldmain.c:432 pe-dll.c:1082
+#: ldmain.c:436 pe-dll.c:1082
 #, c-format
 msgid "%P: Error closing file `%s'\n"
 msgstr ""
 
-#: ldmain.c:449
+#: ldmain.c:453
 #, c-format
 msgid "%s: total time in link: %ld.%06ld\n"
 msgstr ""
 
-#: ldmain.c:452
+#: ldmain.c:456
 #, c-format
 msgid "%s: data size %ld\n"
 msgstr ""
 
-#: ldmain.c:493
+#: ldmain.c:497
 msgid "%P%F: missing argument to -m\n"
 msgstr ""
 
-#: ldmain.c:607 ldmain.c:628 ldmain.c:659
+#: ldmain.c:619 ldmain.c:640 ldmain.c:671
 msgid "%P%F: bfd_hash_table_init failed: %E\n"
 msgstr ""
 
-#: ldmain.c:612 ldmain.c:631
+#: ldmain.c:624 ldmain.c:643
 msgid "%P%F: bfd_hash_lookup failed: %E\n"
 msgstr ""
 
-#: ldmain.c:646
+#: ldmain.c:658
 msgid "%X%P: error: duplicate retain-symbols-file\n"
 msgstr ""
 
-#: ldmain.c:690
+#: ldmain.c:702
 msgid "%P%F: bfd_hash_lookup for insertion failed: %E\n"
 msgstr ""
 
-#: ldmain.c:695
+#: ldmain.c:707
 msgid "%P: `-retain-symbols-file' overrides `-s' and `-S'\n"
 msgstr ""
 
-#: ldmain.c:772
+#: ldmain.c:784
 msgid "Archive member included"
 msgstr ""
 
-#: ldmain.c:773
+#: ldmain.c:785
 msgid "because of file (symbol)"
 msgstr ""
 
-#: ldmain.c:845
+#: ldmain.c:857
 msgid "%X%C: multiple definition of `%T'\n"
 msgstr ""
 
-#: ldmain.c:848
+#: ldmain.c:860
 msgid "%D: first defined here\n"
 msgstr ""
 
-#: ldmain.c:877
+#: ldmain.c:889
 msgid "%B: warning: definition of `%T' overriding common\n"
 msgstr ""
 
-#: ldmain.c:880
+#: ldmain.c:892
 msgid "%B: warning: common is here\n"
 msgstr ""
 
-#: ldmain.c:887
+#: ldmain.c:899
 msgid "%B: warning: common of `%T' overridden by definition\n"
 msgstr ""
 
-#: ldmain.c:890
+#: ldmain.c:902
 msgid "%B: warning: defined here\n"
 msgstr ""
 
-#: ldmain.c:897
+#: ldmain.c:909
 msgid "%B: warning: common of `%T' overridden by larger common\n"
 msgstr ""
 
-#: ldmain.c:900
+#: ldmain.c:912
 msgid "%B: warning: larger common is here\n"
 msgstr ""
 
-#: ldmain.c:904
+#: ldmain.c:916
 msgid "%B: warning: common of `%T' overriding smaller common\n"
 msgstr ""
 
-#: ldmain.c:907
+#: ldmain.c:919
 msgid "%B: warning: smaller common is here\n"
 msgstr ""
 
-#: ldmain.c:911
+#: ldmain.c:923
 msgid "%B: warning: multiple common of `%T'\n"
 msgstr ""
 
-#: ldmain.c:913
+#: ldmain.c:925
 msgid "%B: warning: previous common is here\n"
 msgstr ""
 
-#: ldmain.c:935 ldmain.c:974
+#: ldmain.c:947 ldmain.c:986
 msgid "%P: warning: global constructor %s used\n"
 msgstr ""
 
-#: ldmain.c:984
+#: ldmain.c:996
 msgid "%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n"
 msgstr ""
 
-#: ldmain.c:1171
+#: ldmain.c:1183
 msgid "%F%P: bfd_hash_table_init failed: %E\n"
 msgstr ""
 
-#: ldmain.c:1178
+#: ldmain.c:1190
 msgid "%F%P: bfd_hash_lookup failed: %E\n"
 msgstr ""
 
-#: ldmain.c:1198
+#: ldmain.c:1210
 msgid "%C: undefined reference to `%T'\n"
 msgstr ""
 
-#: ldmain.c:1204
+#: ldmain.c:1216
 msgid "%D: more undefined references to `%T' follow\n"
 msgstr ""
 
-#: ldmain.c:1211
+#: ldmain.c:1223
 msgid "%B: undefined reference to `%T'\n"
 msgstr ""
 
-#: ldmain.c:1217
+#: ldmain.c:1229
 msgid "%B: more undefined references to `%T' follow\n"
 msgstr ""
 
-#: ldmain.c:1238 ldmain.c:1260 ldmain.c:1280
+#: ldmain.c:1250 ldmain.c:1272 ldmain.c:1292
 msgid "%P%X: generated"
 msgstr ""
 
-#: ldmain.c:1241
+#: ldmain.c:1253
 msgid " relocation truncated to fit: %s %T"
 msgstr ""
 
-#: ldmain.c:1263
+#: ldmain.c:1275
 #, c-format
 msgid "dangerous relocation: %s\n"
 msgstr ""
 
-#: ldmain.c:1283
+#: ldmain.c:1295
 msgid " reloc refers to symbol `%T' which is not being output\n"
 msgstr ""
 
@@ -902,7 +902,7 @@ msgstr ""
 msgid "GNU ld version %s (with BFD %s)\n"
 msgstr ""
 
-#: ldver.c:42 lexsup.c:887
+#: ldver.c:42 lexsup.c:928
 msgid "  Supported emulations:\n"
 msgstr ""
 
@@ -919,521 +919,539 @@ msgstr ""
 msgid "%F%P: final link failed: %E\n"
 msgstr ""
 
-#: lexsup.c:155 lexsup.c:238 lexsup.c:244
+#: lexsup.c:156 lexsup.c:241 lexsup.c:247
 msgid "KEYWORD"
 msgstr ""
 
-#: lexsup.c:155
+#: lexsup.c:156
 msgid "Shared library control for HP/UX compatibility"
 msgstr ""
 
-#: lexsup.c:158
+#: lexsup.c:159
 msgid "ARCH"
 msgstr ""
 
-#: lexsup.c:158
+#: lexsup.c:159
 msgid "Set architecture"
 msgstr ""
 
-#: lexsup.c:160 lexsup.c:307
+#: lexsup.c:161 lexsup.c:310
 msgid "TARGET"
 msgstr ""
 
-#: lexsup.c:160
+#: lexsup.c:161
 msgid "Specify target for following input files"
 msgstr ""
 
-#: lexsup.c:162 lexsup.c:201 lexsup.c:211 lexsup.c:220 lexsup.c:291
-#: lexsup.c:314 lexsup.c:348
+#: lexsup.c:163 lexsup.c:202 lexsup.c:214 lexsup.c:223 lexsup.c:294
+#: lexsup.c:317 lexsup.c:353
 msgid "FILE"
 msgstr ""
 
-#: lexsup.c:162
+#: lexsup.c:163
 msgid "Read MRI format linker script"
 msgstr ""
 
-#: lexsup.c:164
+#: lexsup.c:165
 msgid "Force common symbols to be defined"
 msgstr ""
 
-#: lexsup.c:168 lexsup.c:338 lexsup.c:340 lexsup.c:342
+#: lexsup.c:169 lexsup.c:343 lexsup.c:345 lexsup.c:347
 msgid "ADDRESS"
 msgstr ""
 
-#: lexsup.c:168
+#: lexsup.c:169
 msgid "Set start address"
 msgstr ""
 
-#: lexsup.c:170
+#: lexsup.c:171
 msgid "Export all dynamic symbols"
 msgstr ""
 
-#: lexsup.c:172
+#: lexsup.c:173
 msgid "Link big-endian objects"
 msgstr ""
 
-#: lexsup.c:174
+#: lexsup.c:175
 msgid "Link little-endian objects"
 msgstr ""
 
-#: lexsup.c:176 lexsup.c:179
+#: lexsup.c:177 lexsup.c:180
 msgid "SHLIB"
 msgstr ""
 
-#: lexsup.c:176
+#: lexsup.c:177
 msgid "Auxiliary filter for shared object symbol table"
 msgstr ""
 
-#: lexsup.c:179
+#: lexsup.c:180
 msgid "Filter for shared object symbol table"
 msgstr ""
 
-#: lexsup.c:181
+#: lexsup.c:182
 msgid "Ignored"
 msgstr ""
 
-#: lexsup.c:183
+#: lexsup.c:184
 msgid "SIZE"
 msgstr ""
 
-#: lexsup.c:183
+#: lexsup.c:184
 msgid "Small data size (if no size, same as --shared)"
 msgstr ""
 
-#: lexsup.c:186
+#: lexsup.c:187
 msgid "FILENAME"
 msgstr ""
 
-#: lexsup.c:186
+#: lexsup.c:187
 msgid "Set internal name of shared library"
 msgstr ""
 
-#: lexsup.c:188
+#: lexsup.c:189
 msgid "LIBNAME"
 msgstr ""
 
-#: lexsup.c:188
+#: lexsup.c:189
 msgid "Search for library LIBNAME"
 msgstr ""
 
-#: lexsup.c:190
+#: lexsup.c:191
 msgid "DIRECTORY"
 msgstr ""
 
-#: lexsup.c:190
+#: lexsup.c:191
 msgid "Add DIRECTORY to library search path"
 msgstr ""
 
-#: lexsup.c:192
+#: lexsup.c:193
 msgid "EMULATION"
 msgstr ""
 
-#: lexsup.c:192
+#: lexsup.c:193
 msgid "Set emulation"
 msgstr ""
 
-#: lexsup.c:194
+#: lexsup.c:195
 msgid "Print map file on standard output"
 msgstr ""
 
-#: lexsup.c:196
+#: lexsup.c:197
 msgid "Do not page align data"
 msgstr ""
 
-#: lexsup.c:198
+#: lexsup.c:199
 msgid "Do not page align data, do not make text readonly"
 msgstr ""
 
-#: lexsup.c:201
+#: lexsup.c:202
 msgid "Set output file name"
 msgstr ""
 
-#: lexsup.c:203
+#: lexsup.c:204
 msgid "Optimize output file"
 msgstr ""
 
-#: lexsup.c:205
+#: lexsup.c:206
 msgid "Ignored for SVR4 compatibility"
 msgstr ""
 
-#: lexsup.c:207
+#: lexsup.c:210
 msgid "Generate relocateable output"
 msgstr ""
 
-#: lexsup.c:211
+#: lexsup.c:214
 msgid "Just link symbols (if directory, same as --rpath)"
 msgstr ""
 
-#: lexsup.c:214
+#: lexsup.c:217
 msgid "Strip all symbols"
 msgstr ""
 
-#: lexsup.c:216
+#: lexsup.c:219
 msgid "Strip debugging symbols"
 msgstr ""
 
-#: lexsup.c:218
+#: lexsup.c:221
 msgid "Trace file opens"
 msgstr ""
 
-#: lexsup.c:220
+#: lexsup.c:223
 msgid "Read linker script"
 msgstr ""
 
-#: lexsup.c:222 lexsup.c:234 lexsup.c:277 lexsup.c:289 lexsup.c:334
-#: lexsup.c:351 lexsup.c:368
+#: lexsup.c:225 lexsup.c:237 lexsup.c:280 lexsup.c:292 lexsup.c:337
+#: lexsup.c:356 lexsup.c:373
 msgid "SYMBOL"
 msgstr ""
 
-#: lexsup.c:222
+#: lexsup.c:225
 msgid "Start with undefined reference to SYMBOL"
 msgstr ""
 
-#: lexsup.c:224
+#: lexsup.c:227
 msgid "Build global constructor/destructor tables"
 msgstr ""
 
-#: lexsup.c:226
+#: lexsup.c:229
 msgid "Print version information"
 msgstr ""
 
-#: lexsup.c:228
+#: lexsup.c:231
 msgid "Print version and emulation information"
 msgstr ""
 
-#: lexsup.c:230
+#: lexsup.c:233
 msgid "Discard all local symbols"
 msgstr ""
 
-#: lexsup.c:232
+#: lexsup.c:235
 msgid "Discard temporary local symbols"
 msgstr ""
 
-#: lexsup.c:234
+#: lexsup.c:237
 msgid "Trace mentions of SYMBOL"
 msgstr ""
 
-#: lexsup.c:236 lexsup.c:316 lexsup.c:318
+#: lexsup.c:239 lexsup.c:319 lexsup.c:321
 msgid "PATH"
 msgstr ""
 
-#: lexsup.c:236
+#: lexsup.c:239
 msgid "Default search path for Solaris compatibility"
 msgstr ""
 
-#: lexsup.c:238
+#: lexsup.c:241
 msgid "Ignored for Solaris compatibility"
 msgstr ""
 
-#: lexsup.c:240
+#: lexsup.c:243
 msgid "Start a group"
 msgstr ""
 
-#: lexsup.c:242
+#: lexsup.c:245
 msgid "End a group"
 msgstr ""
 
-#: lexsup.c:244
+#: lexsup.c:247
 msgid "Ignored for SunOS compatibility"
 msgstr ""
 
-#: lexsup.c:246
+#: lexsup.c:249
 msgid "Link against shared libraries"
 msgstr ""
 
-#: lexsup.c:252
+#: lexsup.c:255
 msgid "Do not link against shared libraries"
 msgstr ""
 
-#: lexsup.c:260
+#: lexsup.c:263
 msgid "Bind global references locally"
 msgstr ""
 
-#: lexsup.c:262
+#: lexsup.c:265
 msgid "Check section addresses for overlaps (default)"
 msgstr ""
 
-#: lexsup.c:264
+#: lexsup.c:267
 msgid "Do not check section addresses for overlaps"
 msgstr ""
 
-#: lexsup.c:267
+#: lexsup.c:270
 msgid "Output cross reference table"
 msgstr ""
 
-#: lexsup.c:269
+#: lexsup.c:272
 msgid "SYMBOL=EXPRESSION"
 msgstr ""
 
-#: lexsup.c:269
+#: lexsup.c:272
 msgid "Define a symbol"
 msgstr ""
 
-#: lexsup.c:271
+#: lexsup.c:274
 msgid "Demangle symbol names"
 msgstr ""
 
-#: lexsup.c:273
+#: lexsup.c:276
 msgid "PROGRAM"
 msgstr ""
 
-#: lexsup.c:273
+#: lexsup.c:276
 msgid "Set the dynamic linker to use"
 msgstr ""
 
-#: lexsup.c:275
+#: lexsup.c:278
 msgid "Generate embedded relocs"
 msgstr ""
 
-#: lexsup.c:277
+#: lexsup.c:280
 msgid "Call SYMBOL at unload-time"
 msgstr ""
 
-#: lexsup.c:279
+#: lexsup.c:282
 msgid "Force generation of file with .exe suffix"
 msgstr ""
 
-#: lexsup.c:281
+#: lexsup.c:284
 msgid "Remove unused sections (on some targets)"
 msgstr ""
 
-#: lexsup.c:284
+#: lexsup.c:287
 msgid "Don't remove unused sections (default)"
 msgstr ""
 
-#: lexsup.c:287
+#: lexsup.c:290
 msgid "Print option help"
 msgstr ""
 
-#: lexsup.c:289
+#: lexsup.c:292
 msgid "Call SYMBOL at load-time"
 msgstr ""
 
-#: lexsup.c:291
+#: lexsup.c:294
 msgid "Write a map file"
 msgstr ""
 
-#: lexsup.c:293
+#: lexsup.c:296
 msgid "Do not demangle symbol names"
 msgstr ""
 
-#: lexsup.c:295
+#: lexsup.c:298
 msgid "Use less memory and more disk I/O"
 msgstr ""
 
-#: lexsup.c:297
+#: lexsup.c:300
 msgid "Allow no undefined symbols"
 msgstr ""
 
-#: lexsup.c:299
+#: lexsup.c:302
 msgid "Don't warn about mismatched input files"
 msgstr ""
 
-#: lexsup.c:301
+#: lexsup.c:304
 msgid "Turn off --whole-archive"
 msgstr ""
 
-#: lexsup.c:303
+#: lexsup.c:306
 msgid "Create an output file even if errors occur"
 msgstr ""
 
-#: lexsup.c:307
+#: lexsup.c:310
 msgid "Specify target of output file"
 msgstr ""
 
-#: lexsup.c:309
+#: lexsup.c:312
 msgid "Ignored for Linux compatibility"
 msgstr ""
 
-#: lexsup.c:311
+#: lexsup.c:314
 msgid "Relax branches on certain targets"
 msgstr ""
 
-#: lexsup.c:314
+#: lexsup.c:317
 msgid "Keep only symbols listed in FILE"
 msgstr ""
 
-#: lexsup.c:316
+#: lexsup.c:319
 msgid "Set runtime shared library search path"
 msgstr ""
 
-#: lexsup.c:318
+#: lexsup.c:321
 msgid "Set link time shared library search path"
 msgstr ""
 
-#: lexsup.c:320
+#: lexsup.c:323
 msgid "Create a shared library"
 msgstr ""
 
-#: lexsup.c:324
+#: lexsup.c:327
 msgid "Sort common symbols by size"
 msgstr ""
 
-#: lexsup.c:328
+#: lexsup.c:331
 msgid "Split output sections for each file"
 msgstr ""
 
-#: lexsup.c:330
+#: lexsup.c:333
 msgid "COUNT"
 msgstr ""
 
-#: lexsup.c:330
+#: lexsup.c:333
 msgid "Split output sections every COUNT relocs"
 msgstr ""
 
-#: lexsup.c:332
+#: lexsup.c:335
 msgid "Print memory usage statistics"
 msgstr ""
 
-#: lexsup.c:334
+#: lexsup.c:337
 msgid "Do task level linking"
 msgstr ""
 
-#: lexsup.c:336
+#: lexsup.c:339
 msgid "Use same format as native linker"
 msgstr ""
 
-#: lexsup.c:338
+#: lexsup.c:341
+msgid "SECTION=ADDRESS"
+msgstr ""
+
+#: lexsup.c:341
+msgid "Set address of named section"
+msgstr ""
+
+#: lexsup.c:343
 msgid "Set address of .bss section"
 msgstr ""
 
-#: lexsup.c:340
+#: lexsup.c:345
 msgid "Set address of .data section"
 msgstr ""
 
-#: lexsup.c:342
+#: lexsup.c:347
 msgid "Set address of .text section"
 msgstr ""
 
-#: lexsup.c:344
+#: lexsup.c:349
 msgid "Output lots of information during link"
 msgstr ""
 
-#: lexsup.c:348
+#: lexsup.c:353
 msgid "Read version information script"
 msgstr ""
 
-#: lexsup.c:351
+#: lexsup.c:356
 msgid ""
 "Take export symbols list from .exports, using\n"
 "\t\t\t\tSYMBOL as the version."
 msgstr ""
 
-#: lexsup.c:354
+#: lexsup.c:359
 msgid "Warn about duplicate common symbols"
 msgstr ""
 
-#: lexsup.c:356
+#: lexsup.c:361
 msgid "Warn if global constructors/destructors are seen"
 msgstr ""
 
-#: lexsup.c:359
+#: lexsup.c:364
 msgid "Warn if the multiple GP values are used"
 msgstr ""
 
-#: lexsup.c:361
+#: lexsup.c:366
 msgid "Warn only once per undefined symbol"
 msgstr ""
 
-#: lexsup.c:363
+#: lexsup.c:368
 msgid "Warn if start of section changes due to alignment"
 msgstr ""
 
-#: lexsup.c:366
+#: lexsup.c:371
 msgid "Include all objects from following archives"
 msgstr ""
 
-#: lexsup.c:368
+#: lexsup.c:373
 msgid "Use wrapper functions for SYMBOL"
 msgstr ""
 
-#: lexsup.c:370
+#: lexsup.c:375
 msgid "[=WORDS]"
 msgstr ""
 
-#: lexsup.c:370
+#: lexsup.c:375
 msgid ""
 "Modify problematic branches in last WORDS (1-10,\n"
 "\t\t\t\tdefault 5) words of a page"
 msgstr ""
 
-#: lexsup.c:520
+#: lexsup.c:525
 #, c-format
 msgid "%s: use the --help option for usage information\n"
 msgstr ""
 
-#: lexsup.c:540
+#: lexsup.c:545
 msgid "%P%F: unrecognized -a option `%s'\n"
 msgstr ""
 
-#: lexsup.c:553
+#: lexsup.c:558
 msgid "%P%F: unrecognized -assert option `%s'\n"
 msgstr ""
 
-#: lexsup.c:644
+#: lexsup.c:649
 msgid "%P%F: invalid number `%s'\n"
 msgstr ""
 
-#: lexsup.c:816
+#: lexsup.c:824
 msgid "%P%F: -shared not supported\n"
 msgstr ""
 
-#: lexsup.c:880
-msgid "Copyright 1997 Free Software Foundation, Inc.\n"
+#: lexsup.c:856
+#, c-format
+msgid "%s: Invalid argument to option \"--section-start\"\n"
 msgstr ""
 
-#: lexsup.c:881
+#: lexsup.c:867
+#, c-format
+msgid "%s: Missing argument(s) to option \"--section-start\"\n"
+msgstr ""
+
+#: lexsup.c:921
+msgid "Copyright 2000 Free Software Foundation, Inc.\n"
+msgstr ""
+
+#: lexsup.c:922
 msgid ""
 "This program is free software; you may redistribute it under the terms of\n"
 "the GNU General Public License.  This program has absolutely no warranty.\n"
 msgstr ""
 
-#: lexsup.c:972
+#: lexsup.c:1013
 #, c-format
 msgid "%s: may not nest groups (--help for usage)\n"
 msgstr ""
 
-#: lexsup.c:983
+#: lexsup.c:1024
 #, c-format
 msgid "%s: group ended before it began (--help for usage)\n"
 msgstr ""
 
-#: lexsup.c:1000
+#: lexsup.c:1041
 #, c-format
 msgid "%s: Invalid argument to option \"mpc860c0\"\n"
 msgstr ""
 
-#: lexsup.c:1056
+#: lexsup.c:1097
 msgid "%P%F: invalid hex number `%s'\n"
 msgstr ""
 
-#: lexsup.c:1068
+#: lexsup.c:1109
 #, c-format
 msgid "Usage: %s [options] file...\n"
 msgstr ""
 
-#: lexsup.c:1070
+#: lexsup.c:1111
 msgid "Options:\n"
 msgstr ""
 
 #. Note: Various tools (such as libtool) depend upon the
 #. format of the listings below - do not change them.
-#: lexsup.c:1149
+#: lexsup.c:1190
 #, c-format
 msgid "%s: supported targets:"
 msgstr ""
 
-#: lexsup.c:1157
+#: lexsup.c:1198
 #, c-format
 msgid "%s: supported emulations: "
 msgstr ""
 
-#: lexsup.c:1162
+#: lexsup.c:1203
 #, c-format
 msgid "%s: emulation specific options:\n"
 msgstr ""
 
-#: lexsup.c:1166
+#: lexsup.c:1207
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr ""

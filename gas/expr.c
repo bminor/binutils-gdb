@@ -541,8 +541,8 @@ integer_constant (radix, expressionP)
 	}
     }
 
-  if ((NUMBERS_WITH_SUFFIX || flag_m68k_mri) 
-      && suffix != NULL 
+  if ((NUMBERS_WITH_SUFFIX || flag_m68k_mri)
+      && suffix != NULL
       && input_line_pointer - 1 == suffix)
     c = *input_line_pointer++;
 
@@ -815,7 +815,7 @@ operand (expressionP)
     case '9':
       input_line_pointer--;
 
-      integer_constant ((NUMBERS_WITH_SUFFIX || flag_m68k_mri) 
+      integer_constant ((NUMBERS_WITH_SUFFIX || flag_m68k_mri)
                         ? 0 : 10,
                         expressionP);
       break;

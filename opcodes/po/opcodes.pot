@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-30 11:33-0700\n"
+"POT-Creation-Date: 2000-06-18 17:38-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -67,6 +67,19 @@ msgid ""
 "\n"
 "The following ARM specific disassembler options are supported for use with\n"
 "the -M switch:\n"
+msgstr ""
+
+#: avr-dis.c:106
+msgid " unknown register "
+msgstr ""
+
+#: avr-dis.c:168
+msgid "Internal disassembler error"
+msgstr ""
+
+#: avr-dis.c:208
+#, c-format
+msgid "unknown constraint `%c'"
 msgstr ""
 
 #: cgen-asm.c:224
@@ -171,12 +184,12 @@ msgstr ""
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
 
-#: h8300-dis.c:405
+#: h8300-dis.c:382
 #, c-format
 msgid "Hmmmm %x"
 msgstr ""
 
-#: h8300-dis.c:417
+#: h8300-dis.c:393
 #, c-format
 msgid "Don't understand %x \n"
 msgstr ""

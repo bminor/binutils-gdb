@@ -54,6 +54,8 @@ m32r-ibld.c
 m32r-opc.c
 m32r-opc.h
 m32r-opinst.c
+m68hc11-dis.c
+m68hc11-opc.c
 m68k-dis.c
 m68k-opc.c
 m88k-dis.c

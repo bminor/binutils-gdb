@@ -267,6 +267,11 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -jsri2bsr ] [ -sifilter ] [ -relax ]
  [ -mcpu=[210|340] ]
 @end ifset
+@ifset M68HC11
+ [ -m68hc11 | -m68hc12 ]
+ [ --force-long-branchs ] [ --short-branchs ] [ --strict-direct-mode ]
+ [ --print-insn-syntax ] [ --print-opcodes ] [ --generate-example ]
+@end ifset
 @ifset MIPS
  [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
  [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -m4650 ] [ -no-m4650 ]
@@ -554,6 +559,42 @@ Generate ``big endian'' format output.
 @cindex little endian output, PJ
 @item -ml
 Generate ``little endian'' format output.
+
+@end table
+@end ifset
+
+@ifset M68HC11
+The following options are available when @value{AS} is configured for the
+Motorola 68HC11 or 68HC12 series.
+
+@table @code
+
+@item -m68hc11 | -m68hc12
+Specify what processor is the target.  The default is
+defined by the configuration option when building the assembler.
+
+@item --force-long-branchs
+Relative branches are turned into absolute ones. This concerns
+conditional branches, unconditional branches and branches to a
+sub routine.
+
+@item -S | --short-branchs
+Do not turn relative branchs into absolute ones
+when the offset is out of range.
+
+@item --strict-direct-mode
+Do not turn the direct addressing mode into extended addressing mode
+when the instruction does not support direct addressing mode.
+
+@item --print-insn-syntax
+Print the syntax of instruction in case of error.
+
+@item --print-opcodes
+print the list of instructions with syntax and then exit.
+
+@item --generate-example
+print an example of instruction for each possible instruction and then exit.
+This option is only useful for testing @code{@value{AS}}.
 
 @end table
 @end ifset
@@ -1613,6 +1654,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset M680X0
 @samp{|} on the 680x0;
+@end ifset
+@ifset M68HC11
+@samp{#} on the 68HC11 and 68HC12;
 @end ifset
 @ifset VAX
 @samp{#} on the Vax;
@@ -4972,6 +5016,9 @@ subject, see the hardware manufacturer's manual.
 @ifset M680X0
 * M68K-Dependent::              M680x0 Dependent Features
 @end ifset
+@ifset M68HC11
+* M68HC11-Dependent::           M68HC11 and 68HC12 Dependent Features
+@end ifset
 @ifset MIPS
 * MIPS-Dependent::              MIPS Dependent Features
 @end ifset
@@ -5148,6 +5195,10 @@ family.
 
 @ifset M680X0
 @include c-m68k.texi
+@end ifset
+
+@ifset M68HC11
+@include c-m68hc11.texi
 @end ifset
 
 @ifset MIPS

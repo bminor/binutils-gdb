@@ -1882,6 +1882,9 @@ m32r_elf_section_change_hook ()
     (void) m32r_fill_insn (0);
 }
 
+/* Return true if can adjust the reloc to be relative to its section
+   (such as .data) instead of relative to some symbol. */
+
 boolean
 m32r_fix_adjustable (fixP)
    fixS *fixP;
@@ -1901,13 +1904,13 @@ m32r_fix_adjustable (fixP)
 
   if (fixP->fx_addsy == NULL)
     return 1;
-  
+
   /* Prevent all adjustments to global symbols. */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
-  
+
   /* We need the symbol name for the VTABLE entries */
   if (reloc_type == BFD_RELOC_VTABLE_INHERIT
       || reloc_type == BFD_RELOC_VTABLE_ENTRY)

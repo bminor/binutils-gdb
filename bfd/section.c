@@ -552,25 +552,25 @@ static const asymbol global_syms[] =
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; \
   const asection SEC = \
     /* name, index, next, flags, set_vma, reloc_done, linker_mark, gc_mark */ \
-    { NAME,  0,     0,    FLAGS, 0,       0,          0,           0,	      \
+    { NAME,  0,     NULL, FLAGS, 0,       0,          0,           0,	      \
 									      \
     /* vma, lma, _cooked_size, _raw_size, output_offset, output_section, */   \
        0,   0,   0,            0,         0,             (struct sec *) &SEC, \
 									      \
     /* alig..., reloc..., orel..., reloc_count, filepos, rel_..., line_... */ \
-       0,       0,        0,       0,           0,       0, 	   0,	      \
+       0,       NULL,     NULL,    0,           0,       0, 	   0,	      \
 									      \
     /* userdata, contents, lineno, lineno_count */ 			      \
-       0,        0,        0,      0,                      		      \
+       NULL,     NULL,     NULL,   0,                      		      \
 									      \
     /* comdat_info, moving_line_filepos, target_index, used_by_bfd,  */       \
-       NULL,        0,                   0,            0, 		      \
+       NULL,        0,                   0,            NULL, 		      \
 									      \
     /* cons..., owner, symbol */ 					      \
-       0,       0,     (struct symbol_cache_entry *) &global_syms[IDX],       \
+       NULL,    NULL,  (struct symbol_cache_entry *) &global_syms[IDX],       \
 									      \
     /* symbol_ptr_ptr,                      link_order_head, ..._tail */      \
-       (struct symbol_cache_entry **) &SYM, 0,               0                \
+       (struct symbol_cache_entry **) &SYM, NULL,            NULL             \
     }
 
 STD_SECTION (bfd_com_section, SEC_IS_COMMON, bfd_com_symbol,

@@ -84,6 +84,10 @@ i960-*-elf*)		targ_emul=elf32_i960 ;;
 ia64-*-elf*)		targ_emul=elf64_ia64 ;;
 ia64-*-linux*)		targ_emul=elf64_ia64 ;;
 m32r-*-*)		targ_emul=m32relf ;;
+m68hc11-*-*|m6811-*-*)	targ_emul=m68hc11elf 
+			targ_extra_emuls="m68hc11elfb m68hc12elf m68hc12elfb" ;;
+m68hc12-*-*|m6812-*-*)	targ_emul=m68hc12elf 
+			targ_extra_emuls="m68hc12elfb m68hc11elf m68hc11elfb" ;;
 m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;
 m68*-ericsson-ose)	targ_emul=sun3 ;;
@@ -257,7 +261,7 @@ alpha*-*-netbsd*)	targ_emul=elf64alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
 ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
-powerpc-*-linux-gnu*)	targ_emul=elf32ppclinux; 
+powerpc-*-linux-gnu*)	targ_emul=elf32ppclinux;
 			targ_extra_emuls="elf32ppc elf32ppcsim";
 			targ_extra_libpath=elf32ppc ;;
 pjl*-*-*)	        targ_emul=pjlelf ; targ_extra_emuls="elf_i386" ;;

@@ -1,3 +1,16 @@
+2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* doc/Makefile.am (CPU_DOCS): Added 68hc11 file.
+	* doc/c-m68hc11.texi: Document 68HC11 and 68HC12 port.
+	* doc/as.texinfo: Likewise.
+
+	* configure, Makefile.in: Regenerate.
+	* configure.in (emulations): Recognize m6811 and m6812.
+	* Makefile.am (CPU_TYPES, TARGET_CPU_CFILES, TARGET_CPU_HFILES):
+	Added files for 68hc11 and 68hc12 assembler.
+	* config/tc-m68hc11.c: Assembler for 68hc11 and 68hc12.
+	* config/tc-m68hc11.h: Header definition for that assembler.
+
 2000-06-18  Nick Clifton  <nickc@redhat.com>
 
 	* symbols.c (resolve_symbol_value): Use bfd_octets_per_byte

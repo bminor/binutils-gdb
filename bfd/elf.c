@@ -1333,8 +1333,10 @@ bfd_section_from_shdr (abfd, shindex)
 	/* If this reloc section does not use the main symbol table we
 	   don't treat it as a reloc section.  BFD can't adequately
 	   represent such a section, so at least for now, we don't
-	   try.  We just present it as a normal section.  */
-	if (hdr->sh_link != elf_onesymtab (abfd))
+	   try.  We just present it as a normal section.  We also 
+	   can't use it as a reloc section if it points to the null
+	   section. */
+	if (hdr->sh_link != elf_onesymtab (abfd) || hdr->sh_info == SHN_UNDEF)
 	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
@@ -3264,6 +3266,12 @@ prep_headers (abfd)
       break;
     case bfd_arch_ia64:
       i_ehdrp->e_machine = EM_IA_64;
+      break;
+    case bfd_arch_m68hc11:
+      i_ehdrp->e_machine = EM_68HC11;
+      break;
+    case bfd_arch_m68hc12:
+      i_ehdrp->e_machine = EM_68HC12;
       break;
     case bfd_arch_m68k:
       i_ehdrp->e_machine = EM_68K;

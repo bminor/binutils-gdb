@@ -1466,8 +1466,8 @@ static const unsigned int coff_section_alignment_table_size =
 
 static boolean
 coff_new_section_hook (abfd, section)
-     bfd *abfd;
-     asection *section;
+     bfd * abfd;
+     asection * section;
 {
   combined_entry_type *native;
 
@@ -3342,7 +3342,7 @@ coff_write_object_contents (abfd)
 	  && ! is_reloc_section)
 	hasdebug = true;
 
-#ifdef RS6000COFF_C 
+#ifdef RS6000COFF_C
 #ifndef XCOFF64
       /* Indicate the use of an XCOFF overflow section header.  */
       if (current->reloc_count >= 0xffff || current->lineno_count >= 0xffff)
@@ -3395,7 +3395,7 @@ coff_write_object_contents (abfd)
 	  SCNHDR buff;
 	  if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
 	      || bfd_write ((PTR) (&buff), 1, bfd_coff_scnhsz (abfd), abfd)
-	           != bfd_coff_scnhsz (abfd))
+	      != bfd_coff_scnhsz (abfd))
 	    return false;
 	}
 
@@ -3517,7 +3517,7 @@ coff_write_object_contents (abfd)
 	  scnhdr.s_flags = STYP_OVRFLO;
 	  if (coff_swap_scnhdr_out (abfd, &scnhdr, &buff) == 0
 	      || bfd_write ((PTR) &buff, 1, bfd_coff_scnhsz (abfd), abfd)
-	           != bfd_coff_scnhsz (abfd))
+	      != bfd_coff_scnhsz (abfd))
 	    return false;
 	}
     }
@@ -4438,7 +4438,7 @@ coff_slurp_symbol_table (abfd)
 #endif
 
 	    case C_BLOCK:	/* ".bb" or ".eb"		 */
-	    case C_FCN:		/* ".bf" or ".ef" (or PE ".lf")	 */
+	    case C_FCN:		/* ".bf" or ".ef" (or PE ".lf")  */
 	    case C_EFCN:	/* physical end of function	 */
 #if defined COFF_WITH_PE
 	      /* PE sets the symbol to a value relative to the start

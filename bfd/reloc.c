@@ -2881,6 +2881,23 @@ ENUMX
   BFD_RELOC_IA64_LDXMOV
 ENUMDOC
   Intel IA64 Relocations.
+
+ENUM
+  BFD_RELOC_M68HC11_HI8
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 8 bits high part of an absolute address.
+ENUM
+  BFD_RELOC_M68HC11_LO8
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 8 bits low part of an absolute address.
+ENUM
+  BFD_RELOC_M68HC11_3B
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 3 bits of a value.
+
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT

@@ -37,6 +37,8 @@ c54x*)	targ_archs=bfd_tic54x_arch ;;
 hppa*)	targ_archs=bfd_hppa_arch ;;
 i[3456]86) targ_archs=bfd_i386_arch ;;
 i370)   targ_archs=bfd_i370_arch ;;
+m6811*|m68hc11*) targ_archs="bfd_m68hc11_arch bfd_m68hc12_arch" ;;
+m6812*|m68hc12*) targ_archs="bfd_m68hc12_arch bfd_m68hc11_arch" ;;
 m68*)	targ_archs=bfd_m68k_arch ;;
 m88*)	targ_archs=bfd_m88k_arch ;;
 mips*)	targ_archs=bfd_mips_arch ;;
@@ -118,7 +120,7 @@ case "${targ}" in
     targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
     targ_underscore=yes
     ;;
-  arm-*-aout | armel-*-aout)	
+  arm-*-aout | armel-*-aout)
     targ_defvec=aout_arm_little_vec
     targ_selvecs=aout_arm_big_vec
     ;;
@@ -231,7 +233,7 @@ case "${targ}" in
   hppa*-*-*elf* | hppa*-*-linux-gnu* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
-#ifdef BFD64 
+#ifdef BFD64
   hppa*64*-*-hpux11*)
     targ_defvec=bfd_elf64_hppa_vec
     targ_cflags=-DHPUX_LARGE_AR_IDS
@@ -402,6 +404,15 @@ case "${targ}" in
 
   m32r-*-*)
     targ_defvec=bfd_elf32_m32r_vec
+    ;;
+
+  m68hc11-*-* | m6811-*-*)
+    targ_defvec=bfd_elf32_m68hc11_vec
+    targ_selvecs="bfd_elf32_m68hc11_vec bfd_elf32_m68hc12_vec"
+    ;;
+  m68hc12-*-* | m6812-*-*)
+    targ_defvec=bfd_elf32_m68hc12_vec
+    targ_selvecs="bfd_elf32_m68hc11_vec bfd_elf32_m68hc12_vec"
     ;;
 
   m68*-apollo-*)
@@ -740,7 +751,7 @@ case "${targ}" in
   sparc64-*-elf*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs=bfd_elf32_sparc_vec
-    ;;    
+    ;;
 #endif /* BFD64 */
   sparc*-*-coff*)
     targ_defvec=sparccoff_vec

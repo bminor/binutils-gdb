@@ -1,3 +1,17 @@
+2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* Makefile.am (ALL_EMULATIONS): Added new emulation for m68hc12
+	and m68hc11 (elf).
+	* Makefile.in: Rebuild.
+	* configure.tgt: Recognize m68hc12 and m68hc11.
+	* scripttempl/elfm68hc12.sc: New file.
+	* emulparams/m68hc12elfb: New emulation.
+	* emulparams/m68hc12elf: New emulation.
+	* emulparams/m68hc11elfb.sh: New file.	User configurable emulation
+	(includes a memory.x script to define the ROM and RAM banks).
+	* scripttempl/elfm68hc11.sc, emulparams/m68hc11elf.sh:
+	New configuration files for support of Motorola 68hc11
+
 2000-06-15  Alan Modra  <alan@linuxcare.com.au>
 
 	* ldmain.c (main): Only change SEC_READONLY for final link.

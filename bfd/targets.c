@@ -533,6 +533,8 @@ extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
 extern const bfd_target bfd_elf32_m32r_vec;
+extern const bfd_target bfd_elf32_m68hc11_vec;
+extern const bfd_target bfd_elf32_m68hc12_vec;
 extern const bfd_target bfd_elf32_m68k_vec;
 extern const bfd_target bfd_elf32_m88k_vec;
 extern const bfd_target bfd_elf32_mn10200_vec;
@@ -738,6 +740,8 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_m32r_vec,
 	&bfd_elf32_mn10200_vec,
 	&bfd_elf32_mn10300_vec,
+	&bfd_elf32_m68hc11_vec,
+	&bfd_elf32_m68hc12_vec,
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,

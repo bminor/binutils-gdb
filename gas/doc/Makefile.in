@@ -129,6 +129,7 @@ CPU_DOCS = \
 	c-i386.texi \
 	c-i960.texi \
 	c-m32r.texi \
+	c-m68hc11.texi \
 	c-m68k.texi \
 	c-mips.texi \
 	c-ns32k.texi \
@@ -164,7 +165,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:

@@ -37,6 +37,7 @@
 @set I80386
 @set I960
 @set M32R
+@set M68HC11
 @set M680X0
 @set MCORE
 @set MIPS

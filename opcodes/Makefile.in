@@ -183,6 +183,8 @@ CFILES = \
 	m32r-ibld.c \
 	m32r-opc.c \
 	m32r-opinst.c \
+	m68hc11-dis.c \
+	m68hc11-opc.c \
 	m68k-dis.c \
 	m68k-opc.c \
 	m88k-dis.c \
@@ -250,6 +252,8 @@ ALL_MACHINES = \
 	m32r-ibld.lo \
 	m32r-opc.lo \
 	m32r-opinst.lo \
+	m68hc11-dis.lo \
+	m68hc11-opc.lo \
 	m68k-dis.lo \
 	m68k-opc.lo \
 	m88k-dis.lo \
@@ -330,7 +334,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.o $(libopcodes_la_OBJECTS)
@@ -885,6 +889,10 @@ m32r-opc.lo: m32r-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 m32r-opinst.lo: m32r-opinst.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h
+m68hc11-dis.lo: m68hc11-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h \
+  $(INCDIR)/opcode/m68hc11.h
+m68hc11-opc.lo: m68hc11-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m68hc11.h
 m68k-dis.lo: m68k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/floatformat.h \
   opintl.h $(INCDIR)/opcode/m68k.h

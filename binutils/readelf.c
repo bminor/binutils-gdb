@@ -5934,6 +5934,9 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
 
   switch (form)
     {
+    default:
+      break;
+      
     case DW_FORM_ref_addr:
     case DW_FORM_addr:
       uvalue = byte_get (data, pointer_size);

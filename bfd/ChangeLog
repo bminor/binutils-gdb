@@ -1,3 +1,23 @@
+2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* Makefile.in, bfd-in2.h, libbfd.h, configure: Rebuild.
+	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES, BFD32_BACKENDS,
+	BFD32_BACKENDS_CFILES): Add 68hc12, 68hc11 files.
+	* configure.in (bfd_elf32_m68hc12_vec): Recognize.
+	(bfd_elf32_m68hc11_vec): Likewise.
+	* config.bfd (targ_cpu): Recognize 68hc12 and 68hc11. 
+	Supports 68hc11 & 68hc12  at the same time.
+	* targets.c (bfd_elf32_m68hc12_vec): Declare and put in
+	bfd_target_vector.
+	(bfd_elf32_m68hc11_vec): Likewise.
+	* elf.c (prep_headers): Recognize bfd_arch_m68hc12 and 68hc11.
+	* archures.c (bfd_m68hc12_arch): Define and register in global list
+	(bfd_m68hc11_arch): Likewise.
+	* reloc.c (BFD_RELOC_M68HC11_HI8, BFD_RELOC_M68HC11_LO8,
+	BFD_RELOC_M68HC11_3B): Define.
+	* cpu-m68hc12.c, elf32-m68hc12.c: New files for 68hc12 support.
+	* cpu-m68hc11.c, elf32-m68hc11.c: New files for 68hc11 support.
+
 2000-06-18  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* elf_bfd.h (struct elf_backend_data): Add info argument to

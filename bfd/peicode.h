@@ -69,7 +69,6 @@ static boolean (*pe_saved_coff_bfd_print_private_bfd_data)
 static boolean pe_print_private_bfd_data PARAMS ((bfd *, PTR));
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
 
-
 static boolean (*pe_saved_coff_bfd_copy_private_bfd_data)
     PARAMS ((bfd *, bfd *)) =
 #ifndef coff_bfd_copy_private_bfd_data
@@ -242,7 +241,6 @@ coff_swap_filehdr_in (abfd, src, dst)
 #else
 #define coff_swap_filehdr_out _bfd_pe_only_swap_filehdr_out
 #endif
-
 
 static void
 coff_swap_scnhdr_in (abfd, ext, in)

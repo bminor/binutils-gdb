@@ -99,9 +99,7 @@ elf_core_file_p (abfd)
 
   /* Check the magic number. */
   if (elf_file_p (&x_ehdr) == false)
-    {
-      goto wrong;
-    }
+    goto wrong;
 
   /* FIXME: Check EI_VERSION here ! */
 
