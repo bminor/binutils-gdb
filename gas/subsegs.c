@@ -601,7 +601,7 @@ subseg_text_p (segT sec)
    fr_fix == 0 one still contributes data.  Think of this as
    seg_definitely_not_empty_p.  */
 
-bfd_boolean
+int
 seg_not_empty_p (segT sec)
 {
   segment_info_type *seginfo = seg_info (sec);

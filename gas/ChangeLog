@@ -1,3 +1,8 @@
+2005-02-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* as.h (seg_not_empty_p): Return int, not bfd_boolean.
+	* subsegs.c (seg_not_empty_p): Likewise.
+
 2005-02-07  Inderpreet Singh <inderpreetb@noida.hcltech.com>
 
 	* config/tc-maxq.c (md_estimate_size_before_relax): Correct the
