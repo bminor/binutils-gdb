@@ -25,7 +25,4 @@
 extern int d10v_register_sim_regno (int reg);
 #define REGISTER_SIM_REGNO(NR) d10v_register_sim_regno((NR))
 
-extern CORE_ADDR d10v_stack_align (CORE_ADDR size);
-#define STACK_ALIGN(SIZE) (d10v_stack_align (SIZE))
-
 #define NO_EXTRA_ALIGNMENT_NEEDED 1

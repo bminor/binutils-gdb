@@ -18,9 +18,26 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define TARGET_SPARCLITE 1
+#define TARGET_SPARCLITE 1	/* Still needed for non-multi-arch case */
 
 #include "sparc/tm-sparc.h"
+
+/* Note: we are not defining GDB_MULTI_ARCH for the sparclet target
+   at this time, because we have not figured out how to detect the
+   sparclet target from the bfd structure.  */
+
+/* Sparclite regs, for debugging purposes */
+
+enum {
+  DIA1_REGNUM = 72,		/* debug instr address register 1 */
+  DIA2_REGNUM = 73,		/* debug instr address register 2 */
+  DDA1_REGNUM = 74,		/* debug data address register 1 */
+  DDA2_REGNUM = 75,		/* debug data address register 2 */
+  DDV1_REGNUM = 76,		/* debug data value register 1 */
+  DDV2_REGNUM = 77,		/* debug data value register 2 */
+  DCR_REGNUM  = 78,		/* debug control register */
+  DSR_REGNUM  = 79		/* debug status regsiter */
+};
 
 /* overrides of tm-sparc.h */
 
@@ -39,7 +56,13 @@
 
 #define DECR_PC_AFTER_HW_BREAK 4
 
-#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
+#if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
+/*
+ * The following defines must go away for MULTI_ARCH.
+ */
+
+#undef  FRAME_CHAIN_VALID
+#define FRAME_CHAIN_VALID(FP,FI) func_frame_chain_valid (FP, FI)
 
 #undef NUM_REGS
 #define NUM_REGS 80
@@ -70,6 +93,8 @@
 #define DDV2_REGNUM 77		/* debug data value register 2 */
 #define DCR_REGNUM 78		/* debug control register */
 #define DSR_REGNUM 79		/* debug status regsiter */
+
+#endif /* GDB_MULTI_ARCH */
 
 #define TARGET_HW_BREAK_LIMIT 2
 #define TARGET_HW_WATCH_LIMIT 2

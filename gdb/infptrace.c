@@ -34,7 +34,7 @@
 #endif
 
 #include <sys/param.h>
-#include <sys/dir.h>
+#include "gdb_dirent.h"
 #include <signal.h>
 #include <sys/ioctl.h>
 

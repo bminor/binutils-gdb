@@ -33,31 +33,29 @@ fetch_inferior_registers (regno)
      int regno;
 {
   struct regs inferior_registers;
-#ifdef FP0_REGNUM
   struct fp_status inferior_fp_registers;
-#endif
 
   registers_fetched ();
 
   ptrace (PTRACE_GETREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) & inferior_registers);
-#ifdef FP0_REGNUM
-  ptrace (PTRACE_GETFPREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) & inferior_fp_registers);
-#endif
+
+  if (FP0_REGNUM >= 0)
+    ptrace (PTRACE_GETFPREGS, inferior_pid,
+	    (PTRACE_ARG3_TYPE) & inferior_fp_registers);
 
   memcpy (registers, &inferior_registers, 16 * 4);
-#ifdef FP0_REGNUM
-  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	  sizeof inferior_fp_registers.fps_regs);
-#endif
+  if (FP0_REGNUM >= 0)
+    memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
+	    sizeof inferior_fp_registers.fps_regs);
+
   *(int *) &registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
   *(int *) &registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
-#ifdef FP0_REGNUM
-  memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	  &inferior_fp_registers.fps_control,
-      sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
-#endif
+  if (FP0_REGNUM >= 0)
+    memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	    &inferior_fp_registers.fps_control,
+	    sizeof inferior_fp_registers - 
+	    sizeof inferior_fp_registers.fps_regs);
 }
 
 /* Store our register values back into the inferior.
@@ -69,30 +67,27 @@ store_inferior_registers (regno)
      int regno;
 {
   struct regs inferior_registers;
-#ifdef FP0_REGNUM
   struct fp_status inferior_fp_registers;
-#endif
 
   memcpy (&inferior_registers, registers, 16 * 4);
-#ifdef FP0_REGNUM
-  memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	  sizeof inferior_fp_registers.fps_regs);
-#endif
+  if (FP0_REGNUM >= 0)
+    memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+	    sizeof inferior_fp_registers.fps_regs);
+
   inferior_registers.r_ps = *(int *) &registers[REGISTER_BYTE (PS_REGNUM)];
   inferior_registers.r_pc = *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
 
-#ifdef FP0_REGNUM
-  memcpy (&inferior_fp_registers.fps_control,
-	  &registers[REGISTER_BYTE (FPC_REGNUM)],
-      sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
-#endif
+  if (FP0_REGNUM >= 0)
+    memcpy (&inferior_fp_registers.fps_control,
+	    &registers[REGISTER_BYTE (FPC_REGNUM)],
+	    sizeof inferior_fp_registers - 
+	    sizeof inferior_fp_registers.fps_regs);
 
   ptrace (PTRACE_SETREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) & inferior_registers);
-#if FP0_REGNUM
-  ptrace (PTRACE_SETFPREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) & inferior_fp_registers);
-#endif
+  if (FP0_REGNUM >= 0)
+    ptrace (PTRACE_SETFPREGS, inferior_pid,
+	    (PTRACE_ARG3_TYPE) & inferior_fp_registers);
 }
 
 
@@ -125,18 +120,20 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 
       if (core_reg_size >= sizeof (struct fpu))
 	{
-#ifdef FP0_REGNUM
-	  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
-		  fpustruct->f_fpstatus.fps_regs,
-		  sizeof fpustruct->f_fpstatus.fps_regs);
-	  memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-		  &fpustruct->f_fpstatus.fps_control,
-		  sizeof fpustruct->f_fpstatus -
-		  sizeof fpustruct->f_fpstatus.fps_regs);
-#endif
+	  if (FP0_REGNUM >= 0)
+	    {
+	      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+		      fpustruct->f_fpstatus.fps_regs,
+		      sizeof fpustruct->f_fpstatus.fps_regs);
+	      memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+		      &fpustruct->f_fpstatus.fps_control,
+		      sizeof fpustruct->f_fpstatus -
+		      sizeof fpustruct->f_fpstatus.fps_regs);
+	    }
 	}
       else
-	fprintf_unfiltered (gdb_stderr, "Couldn't read float regs from core file\n");
+	fprintf_unfiltered (gdb_stderr, 
+			    "Couldn't read float regs from core file\n");
     }
 }
 

@@ -471,7 +471,7 @@ print_frame (struct frame_info *fi,
   struct cleanup *old_chain;
 
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
   func = find_pc_function (fi->pc);

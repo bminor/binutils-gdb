@@ -77,8 +77,7 @@ static int expressiondebug = 0;
 
 extern int hp_som_som_object_present;
 
-static void
-free_funcalls PARAMS ((void));
+static void free_funcalls (void *ignore);
 
 static void
 prefixify_expression PARAMS ((struct expression *));
@@ -177,7 +176,7 @@ end_arglist ()
    Used when there is an error inside parsing.  */
 
 static void
-free_funcalls ()
+free_funcalls (void *ignore)
 {
   register struct funcall *call, *next;
 
@@ -1165,7 +1164,7 @@ parse_exp_1 (stringptr, block, comma)
   if (lexptr == 0 || *lexptr == 0)
     error_no_arg ("expression to compute");
 
-  old_chain = make_cleanup ((make_cleanup_func) free_funcalls, 0);
+  old_chain = make_cleanup (free_funcalls, 0 /*ignore*/);
   funcall_chain = 0;
 
   expression_context_block = block ? block : get_selected_block ();
@@ -1176,7 +1175,7 @@ parse_exp_1 (stringptr, block, comma)
   expout = (struct expression *)
     xmalloc (sizeof (struct expression) + EXP_ELEM_TO_BYTES (expout_size));
   expout->language_defn = current_language;
-  make_cleanup ((make_cleanup_func) free_current_contents, &expout);
+  make_cleanup (free_current_contents, &expout);
 
   if (current_language->la_parser ())
     current_language->la_error (NULL);

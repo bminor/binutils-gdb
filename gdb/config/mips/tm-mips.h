@@ -58,7 +58,7 @@ struct value;
 #endif
 
 /* Floating point is IEEE compliant */
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* The name of the usual type of MIPS processor that is in the target
    system.  */
@@ -185,10 +185,8 @@ extern char *mips_register_name PARAMS ((int regnr));
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #if MIPS_EABI
 #define MIPS_LAST_ARG_REGNUM 11	/* EABI uses R4 through R11 for args */
-#define MIPS_NUM_ARG_REGS 8
 #else
 #define MIPS_LAST_ARG_REGNUM 7	/* old ABI uses R4 through R7 for args */
-#define MIPS_NUM_ARG_REGS 4
 #endif
 #define T9_REGNUM 25		/* Contains address of callee in PIC */
 #define SP_REGNUM 29		/* Contains address of top of stack */
@@ -203,10 +201,8 @@ extern char *mips_register_name PARAMS ((int regnr));
 #define FPA0_REGNUM (FP0_REGNUM+12)	/* First float argument register */
 #if MIPS_EABI			/* EABI uses F12 through F19 for args */
 #define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+19)
-#define MIPS_NUM_FP_ARG_REGS 8
 #else /* old ABI uses F12 through F15 for args */
 #define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+15)
-#define MIPS_NUM_FP_ARG_REGS 4
 #endif
 #define FCRCS_REGNUM 70		/* FP control/status */
 #define FCRIR_REGNUM 71		/* FP implementation/revision */
@@ -430,8 +426,10 @@ extern void mips_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-/* On Irix, $t9 ($25) contains the address of the callee (used for PIC).
-   It doesn't hurt to do this on other systems; $t9 will be ignored.  */
+/* When calling functions on Irix 5 (or any MIPS SVR4 ABI compliant
+   platform), $t9 ($25) (Dest_Reg) contains the address of the callee
+   (used for PIC).  It doesn't hurt to do this on other systems; $t9
+   will be ignored.  */
 #define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
     write_register(T9_REGNUM, fun)
 

@@ -42,27 +42,19 @@ struct gdb_wrapper_arguments
       } args[10];
   };
 
-int gdb_parse_exp_1 PARAMS ((char **, struct block *, 
-			     int, struct expression **));
-int wrap_parse_exp_1 PARAMS ((char *));
+static int wrap_parse_exp_1 PARAMS ((char *));
 
-int gdb_evaluate_expression PARAMS ((struct expression *, value_ptr *));
-int wrap_evaluate_expression PARAMS ((char *));
+static int wrap_evaluate_expression PARAMS ((char *));
 
-int gdb_value_fetch_lazy PARAMS ((value_ptr));
-int wrap_value_fetch_lazy PARAMS ((char *));
+static int wrap_value_fetch_lazy PARAMS ((char *));
 
-int gdb_value_equal PARAMS ((value_ptr, value_ptr, int *));
-int wrap_value_equal PARAMS ((char *));
+static int wrap_value_equal PARAMS ((char *));
 
-int gdb_value_subscript PARAMS ((value_ptr, value_ptr, value_ptr * rval));
-int wrap_value_subscript PARAMS ((char *));
+static int wrap_value_subscript PARAMS ((char *));
 
-int gdb_value_ind PARAMS ((value_ptr val, value_ptr * rval));
-int wrap_value_ind PARAMS ((char *opaque_arg));
+static int wrap_value_ind PARAMS ((char *opaque_arg));
 
-int gdb_parse_and_eval_type (char *, int, struct type **);
-int wrap_parse_and_eval_type (char *);
+static int wrap_parse_and_eval_type (char *);
 
 int
 gdb_parse_exp_1 (stringptr, block, comma, expression)
@@ -88,7 +80,7 @@ gdb_parse_exp_1 (stringptr, block, comma, expression)
   
 }
 
-int
+static int
 wrap_parse_exp_1 (argptr)
      char *argptr;
 {
@@ -119,7 +111,7 @@ gdb_evaluate_expression (exp, value)
   return 1;
 }
 
-int
+static int
 wrap_evaluate_expression (a)
      char *a;
 {
@@ -141,7 +133,7 @@ gdb_value_fetch_lazy (value)
 		       "", RETURN_MASK_ERROR);
 }
 
-int
+static int
 wrap_value_fetch_lazy (a)
      char *a;
 {
@@ -173,7 +165,7 @@ gdb_value_equal (val1, val2, result)
   return 1;
 }
 
-int
+static int
 wrap_value_equal (a)
      char *a;
 {
@@ -209,7 +201,7 @@ gdb_value_subscript (val1, val2, rval)
   return 1;
 }
 
-int
+static int
 wrap_value_subscript (a)
      char *a;
 {
@@ -243,7 +235,7 @@ gdb_value_ind (val, rval)
   return 1;
 }
 
-int
+static int
 wrap_value_ind (opaque_arg)
      char *opaque_arg;
 {
@@ -273,7 +265,7 @@ gdb_parse_and_eval_type (char *p, int length, struct type **type)
   return 1;
 }
 
-int
+static int
 wrap_parse_and_eval_type (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;

@@ -91,7 +91,10 @@ delta68_in_sigtramp (pc, name)
      CORE_ADDR pc;
      char *name;
 {
-  return strcmp (name, "_sigcode") == 0;
+  if (name != NULL)
+    return strcmp (name, "_sigcode") == 0;
+  else
+    return 0;
 }
 
 CORE_ADDR
@@ -503,6 +506,9 @@ lose:;
 #ifdef USE_PROC_FS		/* Target dependent support for /proc */
 
 #include <sys/procfs.h>
+
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 
 /*  The /proc interface divides the target machine's register set up into
    two different sets, the general register set (gregset) and the floating

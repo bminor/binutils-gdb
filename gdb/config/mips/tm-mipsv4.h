@@ -21,12 +21,6 @@
 #include "mips/tm-bigmips.h"
 #include "tm-sysv4.h"
 
-/* When calling functions on a MIPS SVR4 ABI compliant platform
-   $25 must hold the function address.  Dest_Reg is a macro
-   used in CALL_DUMMY in tm-mips.h.  */
-#undef Dest_Reg
-#define Dest_Reg 25
-
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))

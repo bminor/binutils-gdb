@@ -1939,7 +1939,7 @@ print_it_typical (bs)
   struct cleanup *old_chain;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
   /* bs->breakpoint_at can be NULL if it was a momentary breakpoint
      which has since been deleted.  */
@@ -4458,7 +4458,7 @@ mention (b)
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
   /* FIXME: This is misplaced; mention() is called by things (like hitting a
@@ -5752,10 +5752,9 @@ until_break_command (arg, from_tty)
   breakpoint = set_momentary_breakpoint (sal, selected_frame, bp_until);
 
   if (!event_loop_p || !target_can_async_p ())
-    old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, 
-			      breakpoint);
+    old_chain = make_cleanup_delete_breakpoint (breakpoint);
   else
-    old_chain = make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
 
   /* If we are running asynchronously, and the target supports async
      execution, we are not waiting for the target to stop, in the call
@@ -5786,9 +5785,9 @@ until_break_command (arg, from_tty)
       sal.pc = prev_frame->pc;
       breakpoint = set_momentary_breakpoint (sal, prev_frame, bp_until);
       if (!event_loop_p || !target_can_async_p ())
-	make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+	make_cleanup_delete_breakpoint (breakpoint);
       else
-	make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+	make_exec_cleanup_delete_breakpoint (breakpoint);
     }
 
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
@@ -7066,6 +7065,24 @@ delete_breakpoint (bpt)
   bpt->type = bp_none;
 
   free ((PTR) bpt);
+}
+
+static void
+do_delete_breakpoint_cleanup (void *b)
+{
+  delete_breakpoint (b);
+}
+
+struct cleanup *
+make_cleanup_delete_breakpoint (struct breakpoint *b)
+{
+  return make_cleanup (do_delete_breakpoint_cleanup, b);
+}
+
+struct cleanup *
+make_exec_cleanup_delete_breakpoint (struct breakpoint *b)
+{
+  return make_exec_cleanup (do_delete_breakpoint_cleanup, b);
 }
 
 void

@@ -2083,7 +2083,7 @@ The valid values are:\n");
   /* Add the disassembly-flavor command */
   new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
 			      valid_flavors,
-			      (char *) &disassembly_flavor,
+			      &disassembly_flavor,
 			      helptext,
 			      &setlist);
   new_cmd->function.sfunc = set_disassembly_flavor_sfunc;

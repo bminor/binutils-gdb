@@ -1618,7 +1618,7 @@ hppa_pop_frame ()
       breakpoint->silent = 1;
 
       /* So we can clean things up.  */
-      old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+      old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
       /* Start up the inferior.  */
       clear_proceed_status ();
@@ -2005,11 +2005,11 @@ find_stub_with_shl_get (function, handle)
   /* now prepare the arguments for the call */
 
   args[0] = value_from_longest (TYPE_FIELD_TYPE (ftype, 0), 12);
-  args[1] = value_from_longest (TYPE_FIELD_TYPE (ftype, 1), SYMBOL_VALUE_ADDRESS (msymbol));
-  args[2] = value_from_longest (TYPE_FIELD_TYPE (ftype, 2), endo_buff_addr);
+  args[1] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 1), SYMBOL_VALUE_ADDRESS (msymbol));
+  args[2] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 2), endo_buff_addr);
   args[3] = value_from_longest (TYPE_FIELD_TYPE (ftype, 3), TYPE_PROCEDURE);
-  args[4] = value_from_longest (TYPE_FIELD_TYPE (ftype, 4), value_return_addr);
-  args[5] = value_from_longest (TYPE_FIELD_TYPE (ftype, 5), errno_return_addr);
+  args[4] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 4), value_return_addr);
+  args[5] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 5), errno_return_addr);
 
   /* now call the function */
 

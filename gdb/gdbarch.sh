@@ -39,12 +39,31 @@ compare_new ()
 default_is_fallback_p ()
 {
     [ "${default}" != "" -a "${invalid_p}" = "0" ]
-    # FIXME: cagney - not until after 5.0
-    false
 }
 
 # Format of the input table
 read="class level macro returntype function formal actual attrib startup default invalid_p fmt print print_p description"
+
+class_is_variable_p ()
+{
+    [ "${class}" = "v" -o "${class}" = "V" ]
+}
+
+class_is_function_p ()
+{
+    [ "${class}" = "f" -o "${class}" = "F" ]
+}
+
+class_is_predicate_p ()
+{
+    [ "${class}" = "F" -o "${class}" = "V" ]
+}
+
+class_is_info_p ()
+{
+    [ "${class}" = "i" ]
+}
+
 
 do_read ()
 {
@@ -53,7 +72,19 @@ do_read ()
 	test "${startup}" || startup=0
 	test "${fmt}" || fmt="%ld"
 	test "${print}" || print="(long) ${macro}"
-	#test "${default}" || default=0
+	#FIXME:
+	#Should set DEFAULT to zero and force the user to provide
+	#an invalid_p=0
+	#test "${default}" || default=0 - NO
+	case "${invalid_p}" in
+	    0 ) valid_p=1 ;;
+	    "" ) test "${default}" && valid_p="gdbarch->${function} != ${default}"
+		#NOT_YET
+		#test "${default}" && invalid_p="gdbarch->${function} == ${default}"
+		;;
+	    * ) valid_p="!(${invalid_p})"
+	esac
+	#NOT YET:
 	:
     else
 	false
@@ -71,8 +102,12 @@ do
 	# # -> line disable
 	# f -> function
 	#   hiding a function
+	# F -> function + predicate
+	#   hiding a function + predicate to test function validity
 	# v -> variable
 	#   hiding a variable
+	# V -> variable + predicate
+	#   hiding a variable + predicate to test variables validity
 	# i -> set from info
 	#   hiding something from the ``struct info'' object
 
@@ -138,7 +173,7 @@ do
 	# returned if the code creating the new architecture failed to
 	# initialize the MEMBER or initialized the member to something
 	# invalid. By default, a check that the value is no longer
-	# equal to DEFAULT ips performed.  The equation ``0'' disables
+	# equal to DEFAULT is performed.  The equation ``0'' disables
 	# the invalid_p check.
 
     fmt ) : ;;
@@ -161,7 +196,6 @@ do
 	# An optional indicator for any predicte to wrap around the
 	# print member code.
 
-	#   # -> Wrap print up in ``#ifdef MACRO''
 	#   exp -> Wrap print up in ``if (${print_p}) ...
 	#   ``'' -> No predicate
 
@@ -193,6 +227,7 @@ v:1:TARGET_LONG_LONG_BIT:int:long_long_bit::::8 * sizeof (LONGEST):0
 v:1:TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):0
 v:1:TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):0
 v:1:TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):0
+v:1:IEEE_FLOAT:int:ieee_float::::0:0:0:::
 #
 f:1:TARGET_READ_PC:CORE_ADDR:read_pc:int pid:pid::0:0
 f:1:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, int pid:val, pid::0:0
@@ -205,6 +240,9 @@ v:2:NUM_REGS:int:num_regs::::0:-1
 v:2:SP_REGNUM:int:sp_regnum::::0:-1
 v:2:FP_REGNUM:int:fp_regnum::::0:-1
 v:2:PC_REGNUM:int:pc_regnum::::0:-1
+v:2:FP0_REGNUM:int:fp0_regnum::::0:-1:0
+v:2:NPC_REGNUM:int:npc_regnum::::0:-1:0
+v:2:NNPC_REGNUM:int:nnpc_regnum::::0:-1:0
 f:2:REGISTER_NAME:char *:register_name:int regnr:regnr:::legacy_register_name:0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
@@ -230,8 +268,8 @@ v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p::0:0
 #
-v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion::::0:::::#
-v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type::::0:::::#
+v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion::::0:::::
+v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type::::0:::::
 f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double:0
 f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval::generic_get_saved_register:0
 #
@@ -239,6 +277,10 @@ f:1:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_c
 f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0:0
 f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int regnum, char *from, char *to:type, regnum, from, to:::0:0
 #
+f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, char *buf:type, buf:::generic_pointer_to_address:0
+f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, char *buf, CORE_ADDR addr:type, buf, addr:::generic_address_to_pointer:0
+#
+f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not:0
 f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf::0:0
 f:1:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr::0:0
 f:2:PUSH_DUMMY_FRAME:void:push_dummy_frame:void:-:::0
@@ -248,10 +290,10 @@ f:2:POP_FRAME:void:pop_frame:void:-:::0
 # I wish that these would just go away....
 f:2:D10V_MAKE_DADDR:CORE_ADDR:d10v_make_daddr:CORE_ADDR x:x:::0:0
 f:2:D10V_MAKE_IADDR:CORE_ADDR:d10v_make_iaddr:CORE_ADDR x:x:::0:0
-f:2:D10V_DADDR_P:int:d10v_daddr_p:CORE_ADDR x:x:::0
-f:2:D10V_IADDR_P:int:d10v_iaddr_p:CORE_ADDR x:x:::0
-f:2:D10V_CONVERT_DADDR_TO_RAW:CORE_ADDR:d10v_convert_daddr_to_raw:CORE_ADDR x:x:::0
-f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:::0
+f:2:D10V_DADDR_P:int:d10v_daddr_p:CORE_ADDR x:x:::0:0
+f:2:D10V_IADDR_P:int:d10v_iaddr_p:CORE_ADDR x:x:::0:0
+f:2:D10V_CONVERT_DADDR_TO_RAW:CORE_ADDR:d10v_convert_daddr_to_raw:CORE_ADDR x:x:::0:0
+f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:::0:0
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf:::0
@@ -262,6 +304,7 @@ f:2:FRAME_INIT_SAVED_REGS:void:frame_init_saved_regs:struct frame_info *frame:fr
 f:2:INIT_EXTRA_FRAME_INFO:void:init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame:::0
 #
 f:2:SKIP_PROLOGUE:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip::0:0
+f:2:PROLOGUE_FRAMELESS_P:int:prologue_frameless_p:CORE_ADDR ip:ip::0:generic_prologue_frameless_p:0
 f:2:INNER_THAN:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs::0:0
 f:2:BREAKPOINT_FROM_PC:unsigned char *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr:::legacy_breakpoint_from_pc:0
 f:2:MEMORY_INSERT_BREAKPOINT:int:memory_insert_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_insert_breakpoint:0
@@ -281,6 +324,9 @@ f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi
 f:2:SAVED_PC_AFTER_CALL:CORE_ADDR:saved_pc_after_call:struct frame_info *frame:frame::0:0
 f:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame::0:0
 #
+F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
+F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
+F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
 EOF
   grep -v '^#'
 }
@@ -289,23 +335,30 @@ EOF
 # dump it out
 if true
 then
-  exec > new-gdbarch
-  function_list | while do_read # eval read $read
-  do
-    cat <<EOF
+    exec > new-gdbarch
+    function_list | while do_read # eval read $read
+    do
+	cat <<EOF
 ${class} ${macro}(${actual})
   ${returntype} ${function} ($formal)${attrib}
     level=${level}
     startup=${startup}
     default=${default}
     invalid_p=${invalid_p}
+    valid_p=${valid_p}
     fmt=${fmt}
     print=${print}
     print_p=${print_p}
     description=${description}
 EOF
-  done
-  exec 1>&2
+	if class_is_predicate_p && default_is_fallback_p
+	then
+	    echo "Error: predicate function can not have a non- multi-arch default" 1>&2
+	    kill $$
+	    exit 1
+	fi
+    done
+    exec 1>&2
 fi
 
 copyright ()
@@ -377,18 +430,6 @@ extern struct gdbarch *current_gdbarch;
    converted. */
 
 #if GDB_MULTI_ARCH
-#if defined (CALL_DUMMY)
-#error "CALL_DUMMY: replaced by CALL_DUMMY_WORDS/SIZEOF_CALL_DUMMY_WORDS"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
-#if defined (REGISTER_NAMES)
-#error "REGISTER_NAMES: replaced by REGISTER_NAME"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
 #if defined (EXTRA_FRAME_INFO)
 #error "EXTRA_FRAME_INFO: replaced by struct frame_extra_info"
 #endif
@@ -407,8 +448,8 @@ echo ""
 echo "/* The following are pre-initialized by GDBARCH. */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" )
+    if class_is_info_p
+    then
 	echo ""
 	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
 	echo "/* set_gdbarch_${function}() - not applicable - pre-initialized. */"
@@ -417,8 +458,7 @@ do
 	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
 	echo "#endif"
 	echo "#endif"
-	;;
-  esac
+    fi
 done
 
 # function typedef's
@@ -427,8 +467,35 @@ echo ""
 echo "/* The following are initialized by the target dependant code. */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "v" )
+    if class_is_predicate_p
+    then
+	echo ""
+	echo "#if defined (${macro})"
+	echo "/* Legacy for systems yet to multi-arch ${macro} */"
+#	echo "#if (GDB_MULTI_ARCH <= 2) && defined (${macro})"
+	echo "#define ${macro}_P() (1)"
+	echo "#endif"
+	echo ""
+	echo "/* Default predicate for non- multi-arch targets. */"
+	echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro}_P)"
+	echo "#define ${macro}_P() (0)"
+	echo "#endif"
+	echo ""
+	echo "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);"
+	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro}_P)"
+	echo "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))"
+	echo "#endif"
+    fi
+    if class_is_variable_p
+    then
+	if default_is_fallback_p || class_is_predicate_p
+	then
+	    echo ""
+	    echo "/* Default (value) for non- multi-arch platforms. */"
+	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
+	    echo "#define ${macro} (${default})"
+	    echo "#endif"
+	fi
 	echo ""
 	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});"
@@ -437,8 +504,22 @@ do
 	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
 	echo "#endif"
 	echo "#endif"
-	;;
-    "f" )
+    fi
+    if class_is_function_p
+    then
+	if default_is_fallback_p || class_is_predicate_p
+	then
+	    echo ""
+	    echo "/* Default (function) for non- multi-arch platforms. */"
+	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
+	    if [ "${default}" = "0" ]
+	    then
+		echo "#define ${macro}(${actual}) (internal_error (\"${macro}\"), 0)"
+	    else
+		echo "#define ${macro}(${actual}) (${default} (${actual}))"
+	    fi
+	    echo "#endif"
+	fi
 	echo ""
 	echo "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});"
 	if [ "${formal}" = "void" ]
@@ -448,10 +529,7 @@ do
 	  echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});"
 	fi
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});"
-	if ! default_is_fallback_p
-	then
-	    echo "#if GDB_MULTI_ARCH"
-	fi
+	echo "#if GDB_MULTI_ARCH"
 	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
 	if [ "${actual}" = "" ]
 	then
@@ -463,12 +541,8 @@ do
 	  echo "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
 	fi
 	echo "#endif"
-	if ! default_is_fallback_p
-	then
-	    echo "#endif"
-	fi
-	;;
-  esac
+	echo "#endif"
+    fi
 done
 
 # close it off
@@ -722,31 +796,6 @@ extern disassemble_info tm_print_insn_info;
    USE of these macro's is *STRONGLY* discouraged. */
 
 #define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
-#ifndef D10V_MAKE_DADDR
-#define D10V_MAKE_DADDR(X) (internal_error ("gdbarch: D10V_MAKE_DADDR"), 0)
-#endif
-#ifndef D10V_MAKE_IADDR
-#define D10V_MAKE_IADDR(X) (internal_error ("gdbarch: D10V_MAKE_IADDR"), 0)
-#endif
-
-
-/* Fallback definition of FRAMELESS_FUNCTION_INVOCATION */
-#ifndef FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI) (0)
-#endif
-
-
-/* Fallback definition of REGISTER_CONVERTIBLE etc */
-extern int generic_register_convertible_not (int reg_nr);
-#ifndef REGISTER_CONVERTIBLE
-#define REGISTER_CONVERTIBLE(x) (0)
-#endif
-#ifndef REGISTER_CONVERT_TO_VIRTUAL
-#define REGISTER_CONVERT_TO_VIRTUAL(x, y, z, a)
-#endif
-#ifndef REGISTER_CONVERT_TO_RAW
-#define REGISTER_CONVERT_TO_RAW(x, y, z, a)
-#endif
 
 
 /* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
@@ -757,14 +806,6 @@ extern int generic_register_convertible_not (int reg_nr);
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
 #endif
-#endif
-
-
-/* Fallback definition for REGISTER_NAME for systems still defining
-   REGISTER_NAMES. */
-#ifndef REGISTER_NAME
-extern char *gdb_register_names[];
-#define REGISTER_NAME(i) gdb_register_names[i]
 #endif
 
 
@@ -812,7 +853,7 @@ copyright
 cat <<EOF
 
 #include "defs.h"
-#include "gdbarch-utils.h"
+#include "arch-utils.h"
 
 #if GDB_MULTI_ARCH
 #include "gdbcmd.h"
@@ -870,9 +911,10 @@ echo "{"
 echo "  /* basic architectural information */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" ) echo "  ${returntype} ${function};" ;;
-  esac
+    if class_is_info_p
+    then
+	echo "  ${returntype} ${function};"
+    fi
 done
 echo ""
 echo "  /* target specific vector. */"
@@ -915,10 +957,13 @@ cat <<EOF
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "v" ) echo "  ${returntype} ${function};" ;;
-    "f" ) echo "  gdbarch_${function}_ftype *${function}${attrib};" ;;
-  esac
+    if class_is_variable_p
+    then
+	echo "  ${returntype} ${function};"
+    elif class_is_function_p
+    then
+	echo "  gdbarch_${function}_ftype *${function}${attrib};"
+    fi
 done
 echo "};"
 
@@ -936,11 +981,10 @@ echo "struct gdbarch startup_gdbarch = {"
 echo "  /* basic architecture information */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" ) 
-      echo "  ${startup},"
-    ;;
-  esac
+    if class_is_info_p
+    then
+	echo "  ${startup},"
+    fi
 done
 cat <<EOF
   /* target specific vector */
@@ -951,11 +995,10 @@ cat <<EOF
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" | "v" )
-      echo "  ${startup},"
-    ;;
-  esac
+    if class_is_function_p || class_is_variable_p
+    then
+	echo "  ${startup},"
+    fi
 done
 cat <<EOF
   /* startup_gdbarch() */
@@ -984,22 +1027,22 @@ EOF
 echo ""
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" ) echo "  gdbarch->${function} = info->${function};"
-  esac
+    if class_is_info_p
+    then
+	echo "  gdbarch->${function} = info->${function};"
+    fi
 done
 echo ""
 echo "  /* Force the explicit initialization of these. */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" | "v" )
+    if class_is_function_p || class_is_variable_p
+    then
 	if [ "${default}" != "" -a "${default}" != "0" ]
 	then
 	  echo "  gdbarch->${function} = ${default};"
 	fi
-	;;
-  esac
+    fi
 done
 cat <<EOF
   /* gdbarch_alloc() */
@@ -1046,11 +1089,14 @@ verify_gdbarch (struct gdbarch *gdbarch)
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" | "v" )
+    if class_is_function_p || class_is_variable_p
+    then
 	if [ "${invalid_p}" = "0" ]
 	then
 	    echo "  /* Skip verify of ${function}, invalid_p == 0 */"
+	elif class_is_predicate_p
+	then
+	    echo "  /* Skip verify of ${function}, has predicate */"
  	elif [ "${invalid_p}" ]
 	then
 	    echo "  if ((GDB_MULTI_ARCH >= ${level})"
@@ -1062,8 +1108,7 @@ do
 	    echo "      && (gdbarch->${function} == ${default}))"
 	    echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
 	fi
-	;;
-  esac
+    fi
 done
 cat <<EOF
 }
@@ -1081,22 +1126,15 @@ gdbarch_dump (void)
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" )
+    echo "#ifdef ${macro}"
+    if class_is_function_p
+    then
 	echo "  fprintf_unfiltered (gdb_stdlog,"
 	echo "                      \"gdbarch_update: ${macro} = 0x%08lx\\n\","
 	echo "                      (long) current_gdbarch->${function}"
 	echo "                      /*${macro} ()*/);"
-	;;
-    * )
-	if [ "${print_p}" = "#" ]
-	then
-	  echo "#ifdef ${macro}"
-	  echo "  fprintf_unfiltered (gdb_stdlog,"
-	  echo "                      \"gdbarch_update: ${macro} = ${fmt}\\n\","
-	  echo "                      ${print});"
-	  echo "#endif"
-	elif [ "${print_p}" ]
+    else
+	if [ "${print_p}" ]
 	then
 	  echo "  if (${print_p})"
 	  echo "    fprintf_unfiltered (gdb_stdlog,"
@@ -1107,10 +1145,15 @@ do
 	  echo "                      \"gdbarch_update: ${macro} = ${fmt}\\n\","
 	  echo "                      ${print});"
 	fi
-	;;
-  esac
+    fi
+    echo "#endif"
 done
-echo "}"
+cat <<EOF
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: GDB_MULTI_ARCH = %d\\n",
+                      GDB_MULTI_ARCH);
+}
+EOF
 
 
 # GET/SET
@@ -1127,8 +1170,22 @@ EOF
 echo ""
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" )
+    if class_is_predicate_p
+    then
+	echo ""
+	echo "int"
+	echo "gdbarch_${function}_p (struct gdbarch *gdbarch)"
+	echo "{"
+	if [ "${valid_p}" ]
+	then
+	    echo "  return ${valid_p};"
+	else
+	    echo "#error \"gdbarch_${function}_p: not defined\""
+	fi
+	echo "}"
+    fi
+    if class_is_function_p
+    then
 	echo ""
 	echo "${returntype}"
 	if [ "${formal}" = "void" ]
@@ -1138,19 +1195,6 @@ do
 	  echo "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})"
 	fi
 	echo "{"
-	if default_is_fallback_p && [ "${default}" != "0" ]
-	then
-	    echo "  if (GDB_MULTI_ARCH == 0)"
-	    if [ "${returntype}" = "void" ]
-	    then
-		echo "    {"
-		echo "      ${default} (${actual});"
-		echo "      return;"
-		echo "    }"
-	    else
-		echo "    return ${default} (${actual});"
-	    fi
-	fi
         echo "  if (gdbarch->${function} == 0)"
         echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
 	echo "  if (gdbarch_debug >= 2)"
@@ -1170,8 +1214,8 @@ do
 	echo "{"
 	echo "  gdbarch->${function} = ${function};"
 	echo "}"
-	;;
-    "v" )
+    elif class_is_variable_p
+    then
 	echo ""
 	echo "${returntype}"
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
@@ -1199,8 +1243,8 @@ do
 	echo "{"
 	echo "  gdbarch->${function} = ${function};"
 	echo "}"
-	;;
-    "i" )
+    elif class_is_info_p
+    then
 	echo ""
 	echo "${returntype}"
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
@@ -1209,8 +1253,7 @@ do
 	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
 	echo "  return gdbarch->${function};"
 	echo "}"
-	;;
-  esac
+    fi
 done
 
 # All the trailing guff
@@ -1953,6 +1996,7 @@ generic_register_convertible_not (num)
   return 0;
 }
   
+
 /* Disassembler */
 
 /* Pointer to the target-dependent disassembly function.  */
@@ -1979,13 +2023,6 @@ set_gdbarch_from_file (abfd)
   set_architecture_from_file (abfd);
   set_endian_from_file (abfd);
 }
-
-
-#if defined (CALL_DUMMY)
-/* FIXME - this should go away */
-LONGEST call_dummy_words[] = CALL_DUMMY;
-int sizeof_call_dummy_words = sizeof (call_dummy_words);
-#endif
 
 
 /* Initialize the current architecture.  */

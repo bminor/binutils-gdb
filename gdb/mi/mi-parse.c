@@ -237,7 +237,3 @@ void
 _initialize_mi_parse ()
 {
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

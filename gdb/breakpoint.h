@@ -543,6 +543,10 @@ extern void mark_breakpoints_out PARAMS ((void));
 
 extern void breakpoint_init_inferior PARAMS ((enum inf_context));
 
+extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
+
+extern struct cleanup *make_exec_cleanup_delete_breakpoint (struct breakpoint *);
+
 extern void delete_breakpoint PARAMS ((struct breakpoint *));
 
 extern void breakpoint_auto_delete PARAMS ((bpstat));

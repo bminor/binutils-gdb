@@ -64,10 +64,6 @@ struct psymbol_allocation_list
 #define MAX_SECTIONS 40
 struct section_addr_info 
 {
-  /* Sections whose names are always known to gdb. */
-  CORE_ADDR text_addr;
-  CORE_ADDR data_addr;
-  CORE_ADDR bss_addr;
   /* Sections whose names are file format dependant. */
   struct other_sections
   {

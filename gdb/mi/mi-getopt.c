@@ -73,8 +73,3 @@ mi_getopt (const char *prefix,
     }
   error ("%s: Unknown option ``%s''", prefix, arg + 1);
 }
-
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

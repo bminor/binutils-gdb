@@ -112,6 +112,8 @@
 
 #include <synch.h>		/* for UnixWare 2.x */
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 
 /* Whether to emit debugging output. */
 

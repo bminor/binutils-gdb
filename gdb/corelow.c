@@ -60,6 +60,8 @@ static void core_detach PARAMS ((char *, int));
 
 static void core_close PARAMS ((int));
 
+static void core_close_cleanup (void *ignore);
+
 static void get_core_registers PARAMS ((int));
 
 static void add_to_thread_list PARAMS ((bfd *, asection *, PTR));
@@ -207,6 +209,12 @@ core_close (quitting)
   core_vec = NULL;
 }
 
+static void
+core_close_cleanup (void *ignore)
+{
+  core_close (0/*ignored*/);
+}
+
 #ifdef SOLIB_ADD
 /* Stub function for catch_errors around shared library hacking.  FROM_TTYP
    is really an int * which points to from_tty.  */
@@ -295,7 +303,7 @@ core_open (filename, from_tty)
       /* FIXME: should be checking for errors from bfd_close (for one thing,
          on error it does not free all the storage associated with the
          bfd).  */
-      make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
+      make_cleanup_bfd_close (temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     filename, bfd_errmsg (bfd_get_error ()));
     }
@@ -305,7 +313,7 @@ core_open (filename, from_tty)
   discard_cleanups (old_chain);	/* Don't free filename any more */
   unpush_target (&core_ops);
   core_bfd = temp_bfd;
-  old_chain = make_cleanup ((make_cleanup_func) core_close, core_bfd);
+  old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
 
   /* Find a suitable core file handler to munch on core_bfd */
   core_vec = sniff_core_bfd (core_bfd);
@@ -317,6 +325,8 @@ core_open (filename, from_tty)
 			   &core_ops.to_sections_end))
     error ("\"%s\": Can't find sections: %s",
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
+
+  set_gdbarch_from_file (core_bfd);
 
   ontop = !push_target (&core_ops);
   discard_cleanups (old_chain);
@@ -491,7 +501,7 @@ core_file_to_sym_file (core)
       /* FIXME: should be checking for errors from bfd_close (for one thing,
          on error it does not free all the storage associated with the
          bfd).  */
-      make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
+      make_cleanup_bfd_close (temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     core, bfd_errmsg (bfd_get_error ()));
     }

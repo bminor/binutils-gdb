@@ -624,7 +624,7 @@ add_packet_config_cmd (config, name, title, set_func, show_func,
   asprintf (&full_name, "%s-packet", name);
   c = add_set_enum_cmd (full_name,
 			class_obscure, packet_support_enums,
-			(char *) &config->state,
+			&config->state,
 			set_doc, setlist);
   c->function.sfunc = set_func;
   add_cmd (full_name, class_obscure, show_func, show_doc, showlist);
@@ -1803,14 +1803,14 @@ get_offsets ()
   offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
   memcpy (offs, symfile_objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
 
-  ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
+  ANOFFSET (offs, SECT_OFF_TEXT (symfile_objfile)) = text_addr;
 
   /* This is a temporary kludge to force data and bss to use the same offsets
      because that's what nlmconv does now.  The real solution requires changes
      to the stub and remote.c that I don't have time to do right now.  */
 
-  ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
-  ANOFFSET (offs, SECT_OFF_BSS) = data_addr;
+  ANOFFSET (offs, SECT_OFF_DATA (symfile_objfile)) = data_addr;
+  ANOFFSET (offs, SECT_OFF_BSS (symfile_objfile)) = data_addr;
 
   objfile_relocate (symfile_objfile, offs);
 }
@@ -1918,9 +1918,9 @@ remote_cisco_objfile_relocate (text_off, data_off, bss_off)
       offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
       memcpy (offs, symfile_objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
 
-      ANOFFSET (offs, SECT_OFF_TEXT) = text_off;
-      ANOFFSET (offs, SECT_OFF_DATA) = data_off;
-      ANOFFSET (offs, SECT_OFF_BSS) = bss_off;
+      ANOFFSET (offs, SECT_OFF_TEXT (symfile_objfile)) = text_off;
+      ANOFFSET (offs, SECT_OFF_DATA (symfile_objfile)) = data_off;
+      ANOFFSET (offs, SECT_OFF_BSS (symfile_objfile)) = bss_off;
 
       /* First call the standard objfile_relocate.  */
       objfile_relocate (symfile_objfile, offs);
@@ -3595,11 +3595,6 @@ remote_read_bytes (memaddr, myaddr, len)
    transferring to or from debugger address BUFFER.  Write to inferior if
    SHOULD_WRITE is nonzero.  Returns length of data written or read; 0
    for error.  */
-
-#ifndef REMOTE_TRANSLATE_XFER_ADDRESS
-#define REMOTE_TRANSLATE_XFER_ADDRESS(MEM_ADDR, MEM_LEN, TARG_ADDR, TARG_LEN) \
-   (*(TARG_ADDR) = (MEM_ADDR), *(TARG_LEN) = (MEM_LEN))
-#endif
 
 /* ARGSUSED */
 static int

@@ -22,7 +22,7 @@
 
 #define GDB_TARGET_IS_W65
 
-#define IEEE_FLOAT 1
+#define IEEE_FLOAT (1)
 
 /* Define the bit, byte, and word ordering of the machine.  */
 

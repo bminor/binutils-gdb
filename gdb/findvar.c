@@ -42,9 +42,12 @@ const struct floatformat floatformat_unknown;
 #define CANNOT_STORE_REGISTER(regno) 0
 #endif
 
-static void write_register_gen PARAMS ((int, char *));
+void write_register_gen PARAMS ((int, char *));
 
-static int read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, char *myaddr, struct frame_info * frame));
+static int 
+read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, 
+						    char *myaddr, 
+						    struct frame_info *frame));
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -169,6 +172,20 @@ extract_long_unsigned_integer (void *addr, int orig_len, LONGEST *pval)
   return 0;
 }
 
+
+/* Treat the LEN bytes at ADDR as a target-format address, and return
+   that address.  ADDR is a buffer in the GDB process, not in the
+   inferior.
+
+   This function should only be used by target-specific code.  It
+   assumes that a pointer has the same representation as that thing's
+   address represented as an integer.  Some machines use word
+   addresses, or similarly munged things, for certain types of
+   pointers, so that assumption doesn't hold everywhere.
+
+   Common code should use extract_typed_address instead, or something
+   else based on POINTER_TO_ADDRESS.  */
+
 CORE_ADDR
 extract_address (void *addr, int len)
 {
@@ -176,6 +193,21 @@ extract_address (void *addr, int len)
      whether we want this to be true eventually.  */
   return (CORE_ADDR) extract_unsigned_integer (addr, len);
 }
+
+
+/* Treat the bytes at BUF as a pointer of type TYPE, and return the
+   address it represents.  */
+CORE_ADDR
+extract_typed_address (void *buf, struct type *type)
+{
+  if (TYPE_CODE (type) != TYPE_CODE_PTR
+      && TYPE_CODE (type) != TYPE_CODE_REF)
+    internal_error ("findvar.c (extract_typed_address): "
+		    "type is not a pointer or reference");
+
+  return POINTER_TO_ADDRESS (type, buf);
+}
+
 
 void
 store_signed_integer (void *addr, int len, LONGEST val)
@@ -231,14 +263,39 @@ store_unsigned_integer (void *addr, int len, ULONGEST val)
     }
 }
 
-/* Store the literal address "val" into
-   gdb-local memory pointed to by "addr"
-   for "len" bytes. */
+/* Store the address VAL as a LEN-byte value in target byte order at
+   ADDR.  ADDR is a buffer in the GDB process, not in the inferior.
+
+   This function should only be used by target-specific code.  It
+   assumes that a pointer has the same representation as that thing's
+   address represented as an integer.  Some machines use word
+   addresses, or similarly munged things, for certain types of
+   pointers, so that assumption doesn't hold everywhere.
+
+   Common code should use store_typed_address instead, or something else
+   based on ADDRESS_TO_POINTER.  */
 void
 store_address (void *addr, int len, LONGEST val)
 {
   store_unsigned_integer (addr, len, val);
 }
+
+
+/* Store the address ADDR as a pointer of type TYPE at BUF, in target
+   form.  */
+void
+store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
+{
+  if (TYPE_CODE (type) != TYPE_CODE_PTR
+      && TYPE_CODE (type) != TYPE_CODE_REF)
+    internal_error ("findvar.c (store_typed_address): "
+		    "type is not a pointer or reference");
+
+  ADDRESS_TO_POINTER (type, buf, addr);
+}
+
+
+
 
 /* Extract a floating-point number from a target-order byte-stream at ADDR.
    Returns the value as type DOUBLEST.
@@ -445,7 +502,8 @@ default_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 	  if (raw_buffer != NULL)
 	    {
 	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), (LONGEST) addr);
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+			     (LONGEST) addr);
 	    }
 	  if (addrp != NULL)
 	    *addrp = 0;
@@ -722,7 +780,7 @@ read_register_gen (regno, myaddr)
 /* Write register REGNO at MYADDR to the target.  MYADDR points at
    REGISTER_RAW_BYTES(REGNO), which must be in target byte-order.  */
 
-static void
+void
 write_register_gen (regno, myaddr)
      int regno;
      char *myaddr;
@@ -831,8 +889,9 @@ read_register (regno)
   if (!register_valid[regno])
     target_fetch_registers (regno);
 
-  return (CORE_ADDR) extract_address (&registers[REGISTER_BYTE (regno)],
-				      REGISTER_RAW_SIZE (regno));
+  return ((CORE_ADDR)
+	  extract_unsigned_integer (&registers[REGISTER_BYTE (regno)],
+				    REGISTER_RAW_SIZE (regno)));
 }
 
 CORE_ADDR
@@ -1023,14 +1082,10 @@ generic_target_write_pc (pc, pid)
 #ifdef PC_REGNUM
   if (PC_REGNUM >= 0)
     write_register_pid (PC_REGNUM, pc, pid);
-#ifdef NPC_REGNUM
   if (NPC_REGNUM >= 0)
     write_register_pid (NPC_REGNUM, pc + 4, pid);
-#ifdef NNPC_REGNUM
   if (NNPC_REGNUM >= 0)
     write_register_pid (NNPC_REGNUM, pc + 8, pid);
-#endif
-#endif
 #else
   internal_error ("generic_target_write_pc");
 #endif
@@ -1150,6 +1205,25 @@ write_fp (val)
 {
   TARGET_WRITE_FP (val);
 }
+
+
+/* Given a pointer of type TYPE in target form in BUF, return the
+   address it represents.  */
+CORE_ADDR
+generic_pointer_to_address (struct type *type, char *buf)
+{
+  return extract_address (buf, TYPE_LENGTH (type));
+}
+
+
+/* Given an address, store it as a pointer of type TYPE in target
+   format in BUF.  */
+void
+generic_address_to_pointer (struct type *type, char *buf, CORE_ADDR addr)
+{
+  store_address (buf, TYPE_LENGTH (type), addr);
+}
+
 
 /* Will calling read_var_value or locate_var_value on SYM end
    up caring what frame it is being evaluated relative to?  SYM must
@@ -1231,12 +1305,15 @@ read_var_value (var, frame)
     case LOC_LABEL:
       /* Put the constant back in target format.  */
       if (overlay_debugging)
-	store_address (VALUE_CONTENTS_RAW (v), len,
-	     (LONGEST) symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
-						 SYMBOL_BFD_SECTION (var)));
+	{
+	  CORE_ADDR addr
+	    = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
+					SYMBOL_BFD_SECTION (var));
+	  store_typed_address (VALUE_CONTENTS_RAW (v), type, addr);
+	}
       else
-	store_address (VALUE_CONTENTS_RAW (v), len,
-		       (LONGEST) SYMBOL_VALUE_ADDRESS (var));
+	store_typed_address (VALUE_CONTENTS_RAW (v), type,
+			      SYMBOL_VALUE_ADDRESS (var));
       VALUE_LVAL (v) = not_lval;
       return v;
 
@@ -1399,7 +1476,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 }
 
 /* Return a value of type TYPE, stored in register REGNUM, in frame
-   FRAME. 
+   FRAME.
 
    NOTE: returns NULL if register value is not available.
    Caller will check return value or die!  */
@@ -1423,7 +1500,8 @@ value_from_register (type, regnum, frame)
   CHECK_TYPEDEF (type);
   len = TYPE_LENGTH (type);
 
-  /* Pointers on D10V are really only 16 bits, but we lie to gdb elsewhere... */
+  /* Pointers on D10V are really only 16 bits, 
+     but we lie to gdb elsewhere... */
   if (GDB_TARGET_IS_D10V && TYPE_CODE (type) == TYPE_CODE_PTR)
     len = 2;
 
@@ -1626,25 +1704,20 @@ value_from_register (type, regnum, frame)
     }
 
   if (GDB_TARGET_IS_D10V
-      && TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+      && TYPE_CODE (type) == TYPE_CODE_PTR)
     {
-      /* pointer to function */
       unsigned long num;
       unsigned short snum;
-      snum = (unsigned short) extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
-      num = D10V_MAKE_IADDR (snum);
-      store_address (VALUE_CONTENTS_RAW (v), 4, num);
-    }
-  else if (GDB_TARGET_IS_D10V
-	   && TYPE_CODE (type) == TYPE_CODE_PTR)
-    {
-      /* pointer to data */
-      unsigned long num;
-      unsigned short snum;
-      snum = (unsigned short) extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
-      num = D10V_MAKE_DADDR (snum);
+
+      snum = (unsigned short)
+	extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
+
+      if (TYPE_TARGET_TYPE (type)	  /* pointer to function */
+	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+	num = D10V_MAKE_IADDR (snum);
+      else 				  /* pointer to data */
+	num = D10V_MAKE_DADDR (snum);
+
       store_address (VALUE_CONTENTS_RAW (v), 4, num);
     }
 
@@ -1678,7 +1751,7 @@ locate_var_value (var, frame)
       value_ptr val;
 
       addr = VALUE_ADDRESS (lazy_value);
-      val = value_from_longest (lookup_pointer_type (type), (LONGEST) addr);
+      val = value_from_pointer (lookup_pointer_type (type), addr);
       VALUE_BFD_SECTION (val) = VALUE_BFD_SECTION (lazy_value);
       return val;
     }

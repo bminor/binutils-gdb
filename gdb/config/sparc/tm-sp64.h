@@ -22,9 +22,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define GDB_TARGET_IS_SPARC64
+#define GDB_MULTI_ARCH 2
 
-struct value;
+#ifndef GDB_TARGET_IS_SPARC64
+#define GDB_TARGET_IS_SPARC64 1
+#endif
+
+#include "sparc/tm-sparc.h"
 
 /* Eeeew. Ok, we have to assume (for now) that the processor really is
    in sparc64 mode. While this is the same instruction sequence as
@@ -70,6 +74,57 @@ struct value;
    nop
  */
 
+#if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
+/*
+ * The following defines must go away for MULTI_ARCH.
+ */
+
+#ifndef DO_CALL_DUMMY_ON_STACK
+
+/*
+ * These defines will suffice for the AT_ENTRY_POINT call dummy method.
+ */
+
+#undef  CALL_DUMMY
+#define CALL_DUMMY {0}
+#undef  CALL_DUMMY_LENGTH
+#define CALL_DUMMY_LENGTH 0
+#undef  CALL_DUMMY_CALL_OFFSET
+#define CALL_DUMMY_CALL_OFFSET 0
+#undef  CALL_DUMMY_START_OFFSET
+#define CALL_DUMMY_START_OFFSET 0
+#undef  CALL_DUMMY_BREAKPOINT_OFFSET
+#define CALL_DUMMY_BREAKPOINT_OFFSET 0
+#undef  CALL_DUMMY_BREAKPOINT_OFFSET_P
+#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
+#undef  CALL_DUMMY_LOCATION 
+#define CALL_DUMMY_LOCATION AT_ENTRY_POINT
+#undef  CALL_DUMMY_STACK_ADJUST
+#define CALL_DUMMY_STACK_ADJUST 128
+#undef  SIZEOF_CALL_DUMMY_WORDS
+#define SIZEOF_CALL_DUMMY_WORDS 0
+#undef  CALL_DUMMY_ADDRESS
+#define CALL_DUMMY_ADDRESS() entry_point_address()
+#undef  FIX_CALL_DUMMY
+#define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) 
+#undef  PUSH_RETURN_ADDRESS
+#define PUSH_RETURN_ADDRESS(PC, SP) sparc_at_entry_push_return_address (PC, SP)
+extern CORE_ADDR 
+sparc_at_entry_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
+
+#undef  STORE_STRUCT_RETURN
+#define STORE_STRUCT_RETURN(ADDR, SP) \
+     sparc_at_entry_store_struct_return (ADDR, SP)
+extern void 
+sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
+
+
+#else
+/*
+ * Old call dummy method, with CALL_DUMMY on the stack.
+ */
+
+#undef  CALL_DUMMY
 #define CALL_DUMMY {		 0x9de3bec0fd3fa7f7LL, 0xf93fa7eff53fa7e7LL,\
 				 0xf13fa7dfed3fa7d7LL, 0xe93fa7cfe53fa7c7LL,\
 				 0xe13fa7bfdd3fa7b7LL, 0xd93fa7afd53fa7a7LL,\
@@ -86,28 +141,89 @@ struct value;
 
 /* 128 is to reserve space to write the %i/%l registers that will be restored
    when we resume. */
+#undef  CALL_DUMMY_STACK_ADJUST
 #define CALL_DUMMY_STACK_ADJUST 128
 
+/* Size of the call dummy in bytes. */
+#undef  CALL_DUMMY_LENGTH
 #define CALL_DUMMY_LENGTH 192
 
+/* Offset within CALL_DUMMY of the 'call' instruction. */
+#undef  CALL_DUMMY_START_OFFSET
 #define CALL_DUMMY_START_OFFSET 148
 
+/* Offset within CALL_DUMMY of the 'call' instruction. */
+#undef  CALL_DUMMY_CALL_OFFSET
 #define CALL_DUMMY_CALL_OFFSET (CALL_DUMMY_START_OFFSET + (5 * 4))
 
+/* Offset within CALL_DUMMY of the 'ta 1' instruction. */
+#undef  CALL_DUMMY_BREAKPOINT_OFFSET
 #define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (8 * 4))
 
-#include "sparc/tm-sparc.h"
+/* Let's GDB know that it can make a call_dummy breakpoint.  */
+#undef  CALL_DUMMY_BREAKPOINT_OFFSET_P
+#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
+
+/* Call dummy will be located on the stack.  */
+#undef  CALL_DUMMY_LOCATION
+#define CALL_DUMMY_LOCATION ON_STACK
+
+/* Insert the function address into the call dummy.  */
+#undef  FIX_CALL_DUMMY
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+ sparc_fix_call_dummy (dummyname, pc, fun, type, gcc_p)
+void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+                                   struct type * value_type, int using_gcc));
+
+
+/* The remainder of these will accept the default definition.  */
+#undef  SIZEOF_CALL_DUMMY_WORDS
+#undef  PUSH_RETURN_ADDRESS
+#undef  CALL_DUMMY_ADDRESS
+#undef  STORE_STRUCT_RETURN
+
+#endif
+
+/* Does the specified function use the "struct returning" convention
+   or the "value returning" convention?  The "value returning" convention
+   almost invariably returns the entire value in registers.  The
+   "struct returning" convention often returns the entire value in
+   memory, and passes a pointer (out of or into the function) saying
+   where the value (is or should go).
+
+   Since this sometimes depends on whether it was compiled with GCC,
+   this is also an argument.  This is used in call_function to build a
+   stack, and in value_being_returned to print return values. 
+
+   On Sparc64, we only pass pointers to structs if they're larger then
+   32 bytes. Otherwise they're stored in %o0-%o3 (floating-point
+   values go into %fp0-%fp3).  */
+
+#undef  USE_STRUCT_CONVENTION
+#define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 32)
+
+CORE_ADDR sparc64_push_arguments PARAMS ((int, 
+					  struct value **, 
+					  CORE_ADDR, 
+					  int,
+					  CORE_ADDR));
+#undef PUSH_ARGUMENTS
+#define PUSH_ARGUMENTS(A,B,C,D,E) \
+     (sparc64_push_arguments ((A), (B), (C), (D), (E)))
+
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function. */
+/* FIXME: V9 uses %o0 for this.  */
+
+#undef  STORE_STRUCT_RETURN
+#define STORE_STRUCT_RETURN(ADDR, SP) \
+  { target_write_memory ((SP)+(16*8), (char *)&(ADDR), 8); }
 
 /* Stack must be aligned on 128-bit boundaries when synthesizing
    function calls. */
 
 #undef  STACK_ALIGN
 #define STACK_ALIGN(ADDR) (((ADDR) + 15 ) & -16)
-
-/* Number of machine registers.  */
-
-#undef  NUM_REGS
-#define NUM_REGS 125
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
@@ -148,6 +264,25 @@ struct value;
   "icc", "xcc", "fcc0", "fcc1", "fcc2", "fcc3"			\
 }
 
+#undef REG_STRUCT_HAS_ADDR
+#define REG_STRUCT_HAS_ADDR(gcc_p,type) (TYPE_LENGTH (type) > 32)
+
+extern CORE_ADDR sparc64_read_sp ();
+extern CORE_ADDR sparc64_read_fp ();
+extern void sparc64_write_sp PARAMS ((CORE_ADDR));
+extern void sparc64_write_fp PARAMS ((CORE_ADDR));
+
+#define TARGET_READ_SP() (sparc64_read_sp ())
+#define TARGET_READ_FP() (sparc64_read_fp ())
+#define TARGET_WRITE_SP(X) (sparc64_write_sp (X))
+#define TARGET_WRITE_FP(X) (sparc64_write_fp (X))
+
+#undef EXTRACT_RETURN_VALUE
+#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+     sp64_extract_return_value(TYPE, REGBUF, VALBUF, 0)
+extern void
+sp64_extract_return_value PARAMS ((struct type *, char[], char *, int));
+
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,
@@ -155,7 +290,8 @@ struct value;
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-#if 0				/* defined in tm-sparc.h, replicated for doc purposes */
+#if 0				/* defined in tm-sparc.h, replicated
+				   for doc purposes */
 #define	G0_REGNUM 0		/* %g0 */
 #define	G1_REGNUM 1		/* %g1 */
 #define O0_REGNUM 8		/* %o0 */
@@ -172,7 +308,7 @@ struct value;
 #define	FP0_REGNUM 32		/* Floating point register 0 */
 #endif
 
-#define FP_MAX_REGNUM 80	/* 1 + last fp reg number */
+/*#define FP_MAX_REGNUM 80*/	/* 1 + last fp reg number */
 
 /* #undef v8 misc. regs */
 
@@ -187,7 +323,8 @@ struct value;
 
 /* v9 misc. and priv. regs */
 
-#define C0_REGNUM FP_MAX_REGNUM	/* Start of control registers */
+#define C0_REGNUM 80			/* Start of control registers */
+
 #define PC_REGNUM (C0_REGNUM + 0)	/* Current PC */
 #define NPC_REGNUM (C0_REGNUM + 1)	/* Next PC */
 #define CCR_REGNUM (C0_REGNUM + 2)	/* Condition Code Register (%xcc,%icc) */
@@ -219,6 +356,11 @@ struct value;
 #define FCC1_REGNUM (C0_REGNUM + 42)	/* fp cc reg 1 */
 #define FCC2_REGNUM (C0_REGNUM + 43)	/* fp cc reg 2 */
 #define FCC3_REGNUM (C0_REGNUM + 44)	/* fp cc reg 3 */
+
+/* Number of machine registers.  */
+
+#undef  NUM_REGS
+#define NUM_REGS 125
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.
@@ -291,40 +433,12 @@ struct value;
 #undef TARGET_LONG_LONG_BIT
 #define TARGET_LONG_LONG_BIT 64
 
-/* Does the specified function use the "struct returning" convention
-   or the "value returning" convention?  The "value returning" convention
-   almost invariably returns the entire value in registers.  The
-   "struct returning" convention often returns the entire value in
-   memory, and passes a pointer (out of or into the function) saying
-   where the value (is or should go).
-
-   Since this sometimes depends on whether it was compiled with GCC,
-   this is also an argument.  This is used in call_function to build a
-   stack, and in value_being_returned to print return values. 
-
-   On Sparc64, we only pass pointers to structs if they're larger then
-   32 bytes. Otherwise they're stored in %o0-%o3 (floating-point
-   values go into %fp0-%fp3).  */
-
-
-#undef  USE_STRUCT_CONVENTION
-#define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 32)
-
-#undef REG_STRUCT_HAS_ADDR
-#define REG_STRUCT_HAS_ADDR(gcc_p,type) (TYPE_LENGTH (type) > 32)
-
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
-/* FIXME: V9 uses %o0 for this.  */
-
-#undef  STORE_STRUCT_RETURN
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { target_write_memory ((SP)+(16*8), (char *)&(ADDR), 8); }
-
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #undef  FRAME_ARGS_SKIP
 #define FRAME_ARGS_SKIP 136
+
+#endif /* GDB_MULTI_ARCH */
 
 /* Offsets into jmp_buf.
    FIXME: This was borrowed from the v8 stuff and will probably have to change
@@ -342,36 +456,18 @@ struct value;
 #define JB_O0 7
 #define JB_WBCNT 8
 
-/* Figure out where the longjmp will land.  We expect that we have just entered
-   longjmp and haven't yet setup the stack frame, so the args are still in the
-   output regs.  %o0 (O0_REGNUM) points at the jmp_buf structure from which we
-   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
-   This routine returns true on success */
+/* Figure out where the longjmp will land.  We expect that we have
+   just entered longjmp and haven't yet setup the stack frame, so the
+   args are still in the output regs.  %o0 (O0_REGNUM) points at the
+   jmp_buf structure from which we extract the pc (JB_PC) that we will
+   land at.  The pc is copied into ADDR.  This routine returns true on
+   success */
 
 extern int
 get_longjmp_target PARAMS ((CORE_ADDR *));
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 
-extern CORE_ADDR sparc64_read_sp ();
-extern CORE_ADDR sparc64_read_fp ();
-extern void sparc64_write_sp PARAMS ((CORE_ADDR));
-extern void sparc64_write_fp PARAMS ((CORE_ADDR));
-
-#define TARGET_READ_SP() (sparc64_read_sp ())
-#define TARGET_READ_FP() (sparc64_read_fp ())
-#define TARGET_WRITE_SP(X) (sparc64_write_sp (X))
-#define TARGET_WRITE_FP(X) (sparc64_write_fp (X))
-
 #undef TM_PRINT_INSN_MACH
 #define TM_PRINT_INSN_MACH bfd_mach_sparc_v9a
 
-CORE_ADDR sp64_push_arguments PARAMS ((int, struct value **, CORE_ADDR, unsigned char, CORE_ADDR));
-#undef PUSH_ARGUMENTS
-#define PUSH_ARGUMENTS(A,B,C,D,E) (sp64_push_arguments ((A), (B), (C), (D), (E)))
-
-#undef EXTRACT_RETURN_VALUE
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  sparc64_extract_return_value(TYPE, REGBUF, VALBUF, 0)
-extern void
-sparc64_extract_return_value PARAMS ((struct type *, char[], char *, int));

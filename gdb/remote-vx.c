@@ -717,9 +717,9 @@ vx_add_symbols (name, from_tty, text_addr, data_addr, bss_addr)
   bfd_map_over_sections (objfile->obfd, find_sect, &ss);
 
   /* Both COFF and b.out frontends use these SECT_OFF_* values.  */
-  ANOFFSET (offs, SECT_OFF_TEXT) = text_addr - ss.text_start;
-  ANOFFSET (offs, SECT_OFF_DATA) = data_addr - ss.data_start;
-  ANOFFSET (offs, SECT_OFF_BSS) = bss_addr - ss.bss_start;
+  ANOFFSET (offs, SECT_OFF_TEXT (so->objfile)) = text_addr - ss.text_start;
+  ANOFFSET (offs, SECT_OFF_DATA (so->objfile)) = data_addr - ss.data_start;
+  ANOFFSET (offs, SECT_OFF_BSS (so->objfile)) = bss_addr - ss.bss_start;
   objfile_relocate (objfile, offs);
 }
 

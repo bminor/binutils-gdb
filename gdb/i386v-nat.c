@@ -229,12 +229,12 @@ i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
   int size;
   int rv;
 
-  static int size_try_array[16] =
+  static int size_try_array[4][4] =
   {
-    1, 1, 1, 1,			/* trying size one */
-    2, 1, 2, 1,			/* trying size two */
-    2, 1, 2, 1,			/* trying size three */
-    4, 1, 2, 1			/* trying size four */
+    { 1, 1, 1, 1 },		/* trying size one */
+    { 2, 1, 2, 1 },		/* trying size two */
+    { 2, 1, 2, 1 },		/* trying size three */
+    { 4, 1, 2, 1 }		/* trying size four */
   };
 
   rv = 0;
@@ -242,8 +242,7 @@ i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
     {
       align = addr % 4;
       /* Four is the maximum length for 386.  */
-      size = (len > 4) ? 3 : len - 1;
-      size = size_try_array[size * 4 + align];
+      size = size_try_array[len > 4 ? 3 : len - 1][align];
 
       rv = i386_insert_aligned_watchpoint (pid, waddr, addr, size, rw);
       if (rv)

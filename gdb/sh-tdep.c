@@ -86,6 +86,30 @@ static char *sh3e_reg_names[] = {
   "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
   "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
 };
+
+static char *sh_dsp_reg_names[] = {
+  "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
+  "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+  "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+  "",     "dsr",
+  "a0g",  "a0",   "a1g",  "a1",   "m0",   "m1",   "x0",   "x1",
+  "y0",   "y1",   "",     "",     "",     "",     "",     "mod",
+  "",     "",
+  "rs",   "re",   "",     "",     "",     "",     "",     "",
+  "",     "",     "",     "",     "",     "",     "",     "",
+};
+
+static char *sh3_dsp_reg_names[] = {
+  "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
+  "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+  "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+  "",     "dsr",
+  "a0g",  "a0",   "a1g",  "a1",   "m0",   "m1",   "x0",   "x1",
+  "y0",   "y1",   "",     "",     "",     "",     "",     "mod",
+  "ssr",  "spc",
+  "rs",   "re",   "",     "",     "",     "",     "",     "",
+  "r0b",  "r1b",  "r2b",  "r3b",  "r4b",  "r5b",  "r6b",  "r7b",
+};
 /* *INDENT-ON* */
 
 #ifdef _WIN32_WCE
@@ -110,7 +134,15 @@ sh_processor_type_table[] =
   }
   ,
   {
+    sh_dsp_reg_names, bfd_mach_sh_dsp
+  }
+  ,
+  {
     sh3_reg_names, bfd_mach_sh3
+  }
+  ,
+  {
+    sh3_dsp_reg_names, bfd_mach_sh3_dsp
   }
   ,
   {
@@ -648,18 +680,21 @@ sh_show_regs (args, from_tty)
   printf_filtered ("GBR=%08lx VBR=%08lx",
 		   (long) read_register (GBR_REGNUM),
 		   (long) read_register (VBR_REGNUM));
-  if (cpu == bfd_mach_sh3 || cpu == bfd_mach_sh3e)
+  if (cpu == bfd_mach_sh3 || cpu == bfd_mach_sh3e || cpu == bfd_mach_sh3_dsp
+      || cpu == bfd_mach_sh4)
     {
       printf_filtered (" SSR=%08lx SPC=%08lx",
 		       (long) read_register (SSR_REGNUM),
 		       (long) read_register (SPC_REGNUM));
-      if (cpu == bfd_mach_sh3e)
+      if (cpu == bfd_mach_sh3e || cpu == bfd_mach_sh4)
 	{
 	  printf_filtered (" FPUL=%08lx FPSCR=%08lx",
 			   (long) read_register (FPUL_REGNUM),
 			   (long) read_register (FPSCR_REGNUM));
 	}
     }
+  if (cpu == bfd_mach_sh_dsp || cpu == bfd_mach_sh3_dsp)
+    printf_filtered (" DSR=%08lx", (long) read_register (DSR_REGNUM));
 
   printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
 		   (long) read_register (0),
@@ -679,9 +714,13 @@ sh_show_regs (args, from_tty)
 		   (long) read_register (13),
 		   (long) read_register (14),
 		   (long) read_register (15));
-  if (cpu == bfd_mach_sh3e)
+  if (cpu == bfd_mach_sh3e || cpu == bfd_mach_sh4)
     {
-      printf_filtered ("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+      int pr = cpu == bfd_mach_sh4 && (read_register (FPSCR_REGNUM) & 0x80000);
+
+      printf_filtered ((pr
+			? "DR0-DR6  %08lx%08lx %08lx%08lx %08lx%08lx %08lx%08lx\n"
+			: "FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
 		       (long) read_register (FP0_REGNUM + 0),
 		       (long) read_register (FP0_REGNUM + 1),
 		       (long) read_register (FP0_REGNUM + 2),
@@ -690,7 +729,9 @@ sh_show_regs (args, from_tty)
 		       (long) read_register (FP0_REGNUM + 5),
 		       (long) read_register (FP0_REGNUM + 6),
 		       (long) read_register (FP0_REGNUM + 7));
-      printf_filtered ("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+      printf_filtered ((pr
+			? "DR8-DR14 %08lx%08lx %08lx%08lx %08lx%08lx %08lx%08lx\n"
+			: "FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
 		       (long) read_register (FP0_REGNUM + 8),
 		       (long) read_register (FP0_REGNUM + 9),
 		       (long) read_register (FP0_REGNUM + 10),
@@ -699,6 +740,25 @@ sh_show_regs (args, from_tty)
 		       (long) read_register (FP0_REGNUM + 13),
 		       (long) read_register (FP0_REGNUM + 14),
 		       (long) read_register (FP0_REGNUM + 15));
+    }
+  /* FIXME: sh4 has more registers */
+  if (cpu == bfd_mach_sh_dsp || cpu == bfd_mach_sh3_dsp)
+    {
+      printf_filtered ("A0G=%02lx A0=%08lx M0=%08lx X0=%08lx Y0=%08lx RS=%08lx MOD=%08lx\n",
+		       (long) read_register (A0G_REGNUM) & 0xff,
+		       (long) read_register (A0_REGNUM),
+		       (long) read_register (M0_REGNUM),
+		       (long) read_register (X0_REGNUM),
+		       (long) read_register (Y0_REGNUM),
+		       (long) read_register (RS_REGNUM),
+		       (long) read_register (MOD_REGNUM));
+      printf_filtered ("A1G=%02lx A1=%08lx M1=%08lx X1=%08lx Y1=%08lx RE=%08lx\n",
+		       (long) read_register (A1G_REGNUM) & 0xff,
+		       (long) read_register (A1_REGNUM),
+		       (long) read_register (M1_REGNUM),
+		       (long) read_register (X1_REGNUM),
+		       (long) read_register (Y1_REGNUM),
+		       (long) read_register (RE_REGNUM));
     }
 }
 

@@ -185,7 +185,7 @@ const_var_ref (var)
       return value_from_longest (type, (LONGEST) SYMBOL_VALUE (var));
 
     case LOC_LABEL:
-      return value_from_longest (type, (LONGEST) SYMBOL_VALUE_ADDRESS (var));
+      return value_from_pointer (type, (CORE_ADDR) SYMBOL_VALUE_ADDRESS (var));
 
     default:
       return 0;
@@ -1798,7 +1798,7 @@ expr_to_agent (expr, value)
   struct agent_expr *ax = new_agent_expr (0);
   union exp_element *pc;
 
-  old_chain = make_cleanup ((make_cleanup_func) free_agent_expr, ax);
+  old_chain = make_cleanup_free_agent_expr (ax);
 
   pc = expr->elts;
   trace_kludge = 0;
@@ -1854,7 +1854,7 @@ gen_trace_for_expr (scope, expr)
   union exp_element *pc;
   struct axs_value value;
 
-  old_chain = make_cleanup ((make_cleanup_func) free_agent_expr, ax);
+  old_chain = make_cleanup_free_agent_expr (ax);
 
   pc = expr->elts;
   trace_kludge = 1;
@@ -1923,9 +1923,9 @@ agent_command (exp, from_tty)
     error_no_arg ("expression to translate");
 
   expr = parse_expression (exp);
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
   agent = gen_trace_for_expr (fi->pc, expr);
-  make_cleanup ((make_cleanup_func) free_agent_expr, agent);
+  make_cleanup_free_agent_expr (agent);
   ax_print (gdb_stdout, agent);
 
   /* It would be nice to call ax_reqs here to gather some general info

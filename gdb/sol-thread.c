@@ -72,19 +72,8 @@ extern struct target_ops procfs_ops;	/* target vector for procfs.c */
 extern struct target_ops core_ops;	/* target vector for corelow.c */
 extern char *procfs_pid_to_str PARAMS ((int pid));
 
-/* Note that these prototypes differ slightly from those used in procfs.c
-   for of two reasons.  One, we can't use gregset_t, as that's got a whole
-   different meaning under Solaris (also, see above).  Two, we can't use the
-   pointer form here as these are actually arrays of ints (for Sparc's at
-   least), and are automatically coerced into pointers to ints when used as
-   parameters.  That makes it impossible to avoid a compiler warning when
-   passing pr{g fp}regset_t's from a parameter to an argument of one of
-   these functions.  */
-
-extern void supply_gregset PARAMS ((const prgregset_t));
-extern void fill_gregset PARAMS ((prgregset_t, int));
-extern void supply_fpregset PARAMS ((const prfpregset_t *));
-extern void fill_fpregset PARAMS ((prfpregset_t *, int));
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 
 /* This struct is defined by us, but mainly used for the proc_service interface.
    We don't have much use for it, except as a handy place to get a real pid
@@ -133,54 +122,59 @@ static void init_sol_core_ops PARAMS ((void));
 
 /* Pointers to routines from lithread_db resolved by dlopen() */
 
-static void
-  (*p_td_log) (const int on_off);
-static td_err_e
-  (*p_td_ta_new) (const struct ps_prochandle * ph_p, td_thragent_t ** ta_pp);
-static td_err_e
-  (*p_td_ta_delete) (td_thragent_t * ta_p);
-static td_err_e
-  (*p_td_init) (void);
-static td_err_e
-  (*p_td_ta_get_ph) (const td_thragent_t * ta_p, struct ps_prochandle ** ph_pp);
-static td_err_e
-  (*p_td_ta_get_nthreads) (const td_thragent_t * ta_p, int *nthread_p);
-static td_err_e
-  (*p_td_ta_tsd_iter) (const td_thragent_t * ta_p, td_key_iter_f * cb, void *cbdata_p);
-static td_err_e
-  (*p_td_ta_thr_iter) (const td_thragent_t * ta_p, td_thr_iter_f * cb, void *cbdata_p, td_thr_state_e state,
-	       int ti_pri, sigset_t * ti_sigmask_p, unsigned ti_user_flags);
-static td_err_e
-  (*p_td_thr_validate) (const td_thrhandle_t * th_p);
-static td_err_e
-  (*p_td_thr_tsd) (const td_thrhandle_t * th_p, const thread_key_t key, void **data_pp);
-static td_err_e
-  (*p_td_thr_get_info) (const td_thrhandle_t * th_p, td_thrinfo_t * ti_p);
-static td_err_e
-  (*p_td_thr_getfpregs) (const td_thrhandle_t * th_p, prfpregset_t * fpregset);
-static td_err_e
-  (*p_td_thr_getxregsize) (const td_thrhandle_t * th_p, int *xregsize);
-static td_err_e
-  (*p_td_thr_getxregs) (const td_thrhandle_t * th_p, const caddr_t xregset);
-static td_err_e
-  (*p_td_thr_sigsetmask) (const td_thrhandle_t * th_p, const sigset_t ti_sigmask);
-static td_err_e
-  (*p_td_thr_setprio) (const td_thrhandle_t * th_p, const int ti_pri);
-static td_err_e
-  (*p_td_thr_setsigpending) (const td_thrhandle_t * th_p, const uchar_t ti_pending_flag, const sigset_t ti_pending);
-static td_err_e
-  (*p_td_thr_setfpregs) (const td_thrhandle_t * th_p, const prfpregset_t * fpregset);
-static td_err_e
-  (*p_td_thr_setxregs) (const td_thrhandle_t * th_p, const caddr_t xregset);
-static td_err_e
-  (*p_td_ta_map_id2thr) (const td_thragent_t * ta_p, thread_t tid, td_thrhandle_t * th_p);
-static td_err_e
-  (*p_td_ta_map_lwp2thr) (const td_thragent_t * ta_p, lwpid_t lwpid, td_thrhandle_t * th_p);
-static td_err_e
-  (*p_td_thr_getgregs) (const td_thrhandle_t * th_p, prgregset_t regset);
-static td_err_e
-  (*p_td_thr_setgregs) (const td_thrhandle_t * th_p, const prgregset_t regset);
-
+static void     (*p_td_log)               (const int on_off);
+static td_err_e (*p_td_ta_new)            (const struct ps_prochandle * ph_p, 
+					   td_thragent_t ** ta_pp);
+static td_err_e (*p_td_ta_delete)         (td_thragent_t * ta_p);
+static td_err_e (*p_td_init)              (void);
+static td_err_e (*p_td_ta_get_ph)         (const td_thragent_t * ta_p, 
+					   struct ps_prochandle ** ph_pp);
+static td_err_e (*p_td_ta_get_nthreads)   (const td_thragent_t * ta_p, 
+					   int *nthread_p);
+static td_err_e (*p_td_ta_tsd_iter)       (const td_thragent_t * ta_p, 
+					   td_key_iter_f * cb, 
+					   void *cbdata_p);
+static td_err_e (*p_td_ta_thr_iter)       (const td_thragent_t * ta_p, 
+					   td_thr_iter_f * cb, 
+					   void *cbdata_p, 
+					   td_thr_state_e state,
+					   int ti_pri, 
+					   sigset_t * ti_sigmask_p, 
+					   unsigned ti_user_flags);
+static td_err_e (*p_td_thr_validate)      (const td_thrhandle_t * th_p);
+static td_err_e (*p_td_thr_tsd)           (const td_thrhandle_t * th_p, 
+					   const thread_key_t key, 
+					   void **data_pp);
+static td_err_e (*p_td_thr_get_info)      (const td_thrhandle_t * th_p, 
+					   td_thrinfo_t * ti_p);
+static td_err_e (*p_td_thr_getfpregs)     (const td_thrhandle_t * th_p, 
+					   prfpregset_t * fpregset);
+static td_err_e (*p_td_thr_getxregsize)   (const td_thrhandle_t * th_p, 
+					   int *xregsize);
+static td_err_e (*p_td_thr_getxregs)      (const td_thrhandle_t * th_p, 
+					   const caddr_t xregset);
+static td_err_e (*p_td_thr_sigsetmask)    (const td_thrhandle_t * th_p, 
+					   const sigset_t ti_sigmask);
+static td_err_e (*p_td_thr_setprio)       (const td_thrhandle_t * th_p, 
+					   const int ti_pri);
+static td_err_e (*p_td_thr_setsigpending) (const td_thrhandle_t * th_p, 
+					   const uchar_t ti_pending_flag, 
+					   const sigset_t ti_pending);
+static td_err_e (*p_td_thr_setfpregs)     (const td_thrhandle_t * th_p, 
+					   const prfpregset_t * fpregset);
+static td_err_e (*p_td_thr_setxregs)      (const td_thrhandle_t * th_p, 
+					   const caddr_t xregset);
+static td_err_e (*p_td_ta_map_id2thr)     (const td_thragent_t * ta_p, 
+					   thread_t tid, 
+					   td_thrhandle_t * th_p);
+static td_err_e (*p_td_ta_map_lwp2thr)    (const td_thragent_t * ta_p, 
+					   lwpid_t lwpid, 
+					   td_thrhandle_t * th_p);
+static td_err_e (*p_td_thr_getgregs)      (const td_thrhandle_t * th_p, 
+					   prgregset_t regset);
+static td_err_e (*p_td_thr_setgregs)      (const td_thrhandle_t * th_p, 
+					   const prgregset_t regset);
+
 /*
 
    LOCAL FUNCTION
@@ -390,7 +384,8 @@ lwp_to_thread (lwp)
 
   val = p_td_thr_validate (&th);
   if (val == TD_NOTHR)
-    return lwp;			/* libthread doesn't know about it, just return lwp */
+    return lwp;			/* libthread doesn't know about it;
+				   just return lwp */
   else if (val != TD_OK)
     error ("lwp_to_thread: td_thr_validate: %s.", td_err_string (val));
 
@@ -654,8 +649,8 @@ sol_thread_fetch_registers (regno)
    because the td routines call ps_lget* which affect the values stored in the
    registers array.  */
 
-  supply_gregset (gregset);
-  supply_fpregset (&fpregset);
+  supply_gregset  ((gdb_gregset_t *)  &gregset);
+  supply_fpregset ((gdb_fpregset_t *) &fpregset);
 
 #if 0
 /* thread_db doesn't seem to handle this right */
@@ -682,7 +677,7 @@ sol_thread_store_registers (regno)
   thread_t thread;
   td_thrhandle_t thandle;
   td_err_e val;
-  prgregset_t regset;
+  prgregset_t  gregset;
   prfpregset_t fpregset;
 #if 0
   int xregsize;
@@ -710,7 +705,7 @@ sol_thread_store_registers (regno)
       char old_value[REGISTER_SIZE];
       memcpy (old_value, &registers[REGISTER_BYTE (regno)], REGISTER_SIZE);
 
-      val = p_td_thr_getgregs (&thandle, regset);
+      val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)
 	error ("sol_thread_store_registers: td_thr_getgregs %s",
 	       td_err_string (val));
@@ -740,10 +735,10 @@ sol_thread_store_registers (regno)
 #endif
     }
 
-  fill_gregset (regset, regno);
-  fill_fpregset (&fpregset, regno);
+  fill_gregset  ((gdb_gregset_t *)  &gregset,  regno);
+  fill_fpregset ((gdb_fpregset_t *) &fpregset, regno);
 
-  val = p_td_thr_setgregs (&thandle, regset);
+  val = p_td_thr_setgregs (&thandle, gregset);
   if (val != TD_OK)
     error ("sol_thread_store_registers: td_thr_setgregs %s",
 	   td_err_string (val));
@@ -847,7 +842,8 @@ sol_thread_create_inferior (exec_file, allargs, env)
       if (inferior_pid == -1)
 	inferior_pid = main_ph.pid;
 
-      add_thread (inferior_pid);
+      if (!in_thread_list (inferior_pid))
+	add_thread (inferior_pid);
     }
 }
 
@@ -1156,7 +1152,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
     procfs_ops.to_fetch_registers (-1);
   else
     orig_core_ops.to_fetch_registers (-1);
-  fill_gregset (gregset, -1);
+  fill_gregset ((gdb_gregset_t *) gregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1175,7 +1171,7 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
 
-  supply_gregset (gregset);
+  supply_gregset ((gdb_gregset_t *) gregset);
   if (target_has_execution)
     procfs_ops.to_store_registers (-1);
   else
@@ -1288,7 +1284,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
     procfs_ops.to_fetch_registers (-1);
   else
     orig_core_ops.to_fetch_registers (-1);
-  fill_fpregset (fpregset, -1);
+  fill_fpregset ((gdb_fpregset_t *) fpregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1307,7 +1303,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
 
-  supply_fpregset (fpregset);
+  supply_fpregset ((gdb_fpregset_t *) fpregset);
   if (target_has_execution)
     procfs_ops.to_store_registers (-1);
   else
@@ -1632,7 +1628,13 @@ init_sol_core_ops ()
   sol_core_ops.to_has_registers = 1;
   sol_core_ops.to_has_execution = 0;
   sol_core_ops.to_has_thread_control = tc_none;
+  sol_core_ops.to_thread_alive = sol_thread_alive;
   sol_core_ops.to_pid_to_str = solaris_pid_to_str;
+  /* On Solaris/x86, when debugging a threaded core file from process <n>,
+     the following causes "info threads" to produce "procfs: couldn't find pid
+     <n> in procinfo list" where <n> is the pid of the process that produced
+     the core file.  Disable it for now. */
+  /* sol_core_ops.to_find_new_threads = sol_find_new_threads; */
   sol_core_ops.to_sections = 0;
   sol_core_ops.to_sections_end = 0;
   sol_core_ops.to_magic = OPS_MAGIC;

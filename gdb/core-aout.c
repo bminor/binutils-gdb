@@ -41,7 +41,7 @@
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
 #ifndef USG
-#include <sys/dir.h>
+#include "gdb_dirent.h"
 #include <sys/file.h>
 #include "gdb_stat.h"
 #include <sys/user.h>

@@ -455,6 +455,12 @@ nexti_command (count_string, from_tty)
 }
 
 static void
+disable_longjmp_breakpoint_cleanup (void *ignore)
+{
+  disable_longjmp_breakpoint ();
+}
+
+static void
 step_1 (skip_subroutines, single_inst, count_string)
      int skip_subroutines;
      int single_inst;
@@ -489,10 +495,9 @@ step_1 (skip_subroutines, single_inst, count_string)
     {
       enable_longjmp_breakpoint ();
       if (!event_loop_p || !target_can_async_p ())
-	cleanups = make_cleanup ((make_cleanup_func) disable_longjmp_breakpoint,
-				 0);
+	cleanups = make_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
       else
-        make_exec_cleanup ((make_cleanup_func) disable_longjmp_breakpoint, 0);
+        make_exec_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */
@@ -1194,9 +1199,9 @@ finish_command (arg, from_tty)
   breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
 
   if (!event_loop_p || !target_can_async_p ())
-    old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_cleanup_delete_breakpoint (breakpoint);
   else
-    old_chain = make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -1998,6 +2003,7 @@ use \"set args\" without arguments.");
   add_info ("registers", nofp_registers_info,
 	    "List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register.");
+  add_info_alias ("r", "registers", 1);
 
   if (xdb_commands)
     add_com ("lr", class_info, nofp_registers_info,

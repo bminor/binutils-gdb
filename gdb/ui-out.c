@@ -490,7 +490,7 @@ ui_out_set_flags (uiout, mask)
      struct ui_out *uiout;
      int mask;
 {
-  int oldflags;
+  int oldflags = uiout->flags;
 
   uiout->flags |= mask;
 
@@ -503,7 +503,7 @@ ui_out_clear_flags (uiout, mask)
      struct ui_out *uiout;
      int mask;
 {
-  int oldflags;
+  int oldflags = uiout->flags;
 
   uiout->flags &= ~mask;
 

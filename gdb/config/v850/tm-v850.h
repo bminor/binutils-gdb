@@ -82,7 +82,7 @@ extern char **v850_register_names;
 
 #define MAX_REGISTER_VIRTUAL_SIZE 4
 
-#define BREAKPOINT {0x40, 0xF8}	/* little-ended */
+#define BREAKPOINT {0x85, 0x05} /* little-ended */
 
 #define FUNCTION_START_OFFSET 0
 

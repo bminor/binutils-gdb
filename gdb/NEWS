@@ -1,16 +1,51 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB-4.18:
+*** Changes in GDB 5.0:
 
-* New features
+* Improved support for debugging FP programs on x86 targets
 
-On SVR4 native platforms (such as Solaris), if you attach to a process
-without first loading a symbol file, GDB will now attempt to locate and
-load symbols from the running process's executable file.
+Unified and much-improved support for debugging floating-point
+programs on all x86 targets.  In particular, ``info float'' now
+displays the FP registers in the same format on all x86 targets, with
+greater level of detail.
 
-C++ support has been greatly improved. Overload resolution now works properly
-in almost all cases. RTTI support is on the way.
+* Improvements and bugfixes in hardware-assisted watchpoints
+
+It is now possible to watch array elements, struct members, and
+bitfields with hardware-assisted watchpoints.  Data-read watchpoints
+on x86 targets no longer erroneously trigger when the address is
+written.
+
+* Improvements in the native DJGPP version of GDB
+
+The distribution now includes all the scripts and auxiliary files
+necessary to build the native DJGPP version on MS-DOS/MS-Windows
+machines ``out of the box''.
+
+The DJGPP version can now debug programs that use signals.  It is
+possible to catch signals that happened in the debuggee, deliver
+signals to it, interrupt it with Ctrl-C, etc.  (Previously, a signal
+would kill the program being debugged.)  Programs that hook hardware
+interrupts (keyboard, timer, etc.) can also be debugged.
+
+It is now possible to debug DJGPP programs that redirect their
+standard handles or switch them to raw (as opposed to cooked) mode, or
+even close them.  The command ``run < foo > bar'' works as expected,
+and ``info terminal'' reports useful information about the debuggee's
+terminal, including raw/cooked mode, redirection, etc.
+
+The DJGPP version now uses termios functions for console I/O, which
+enables debugging graphics programs.  Interrupting GDB with Ctrl-C
+also works.
+
+DOS-style file names with drive letters are now fully supported by
+GDB.
+
+It is now possible to debug DJGPP programs that switch their working
+directory.  It is also possible to rerun the debuggee any number of
+times without restarting GDB; thus, you can use the same setup,
+breakpoints, etc. for many debugging sessions.
 
 * New native configurations
 
@@ -31,6 +66,26 @@ Convex						c1-*-*, c2-*-*
 Pyramid						pyramid-*-*
 ARM RISCix					arm-*-* (as host)
 Tahoe						tahoe-*-*
+
+Configurations that have been declared obsolete will be commented out,
+but the code will be left in place.  If there is no activity to revive
+these configurations before the next release of GDB, the sources will
+be permanently REMOVED.
+
+* Gould support removed
+
+Support for the Gould PowerNode and NP1 has been removed.
+
+* New features for SVR4
+
+On SVR4 native platforms (such as Solaris), if you attach to a process
+without first loading a symbol file, GDB will now attempt to locate and
+load symbols from the running process's executable file.
+
+* Many C++ enhancements
+
+C++ support has been greatly improved. Overload resolution now works properly
+in almost all cases. RTTI support is on the way.
 
 * Remote targets can connect to a sub-program
 
@@ -68,6 +123,16 @@ accept a range of breakpoints, e.g. ``5-7''.  The tracepoint command
 The ``apropos'' command searches through command names and
 documentation strings, printing out matches, making it much easier to
 try to find a command that does what you are looking for.
+
+* New MI interface
+
+A new machine oriented interface (MI) has been added to GDB.  This
+interface is designed for debug environments running GDB as a separate
+process.  This is part of the long term libGDB project.  See the
+"GDB/MI" chapter of the GDB manual for further information.  It can be
+enabled by configuring with:
+
+	.../configure --enable-gdbmi
 
 *** Changes in GDB-4.18:
 

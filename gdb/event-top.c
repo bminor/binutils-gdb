@@ -487,7 +487,7 @@ command_handler (char *command)
   quit_flag = 0;
   if (instream == stdin && stdin_is_tty)
     reinitialize_more_filter ();
-  old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
+  old_chain = make_cleanup (command_loop_marker, 0);
 
 #if defined(TUI)
   insert_mode = 0;

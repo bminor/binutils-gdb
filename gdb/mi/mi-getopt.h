@@ -58,7 +58,3 @@ struct mi_opt
 struct mi_opt;
 
 #endif
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

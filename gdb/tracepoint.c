@@ -156,6 +156,7 @@ static void add_aexpr PARAMS ((struct collection_list *, struct agent_expr *));
 static unsigned char *mem2hex (unsigned char *, unsigned char *, int);
 static void add_register PARAMS ((struct collection_list * collection, 
 				  unsigned int regno));
+static struct cleanup *make_cleanup_free_actions (struct tracepoint *t);
 static void free_actions_list PARAMS ((char **actions_list));
 static void free_actions_list_cleanup_wrapper PARAMS ((void *));
 
@@ -268,11 +269,11 @@ set_traceframe_context (trace_pc)
       traceframe_sal.pc = traceframe_sal.line = 0;
       traceframe_sal.symtab = NULL;
       set_internalvar (lookup_internalvar ("trace_func"),
-		       value_from_longest (charstar, (LONGEST) 0));
+		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_file"),
-		       value_from_longest (charstar, (LONGEST) 0));
+		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_line"),
-		       value_from_longest (builtin_type_int, (LONGEST) - 1));
+		       value_from_pointer (builtin_type_int, (LONGEST) - 1));
       return;
     }
 
@@ -289,7 +290,7 @@ set_traceframe_context (trace_pc)
   if (traceframe_fun == NULL ||
       SYMBOL_NAME (traceframe_fun) == NULL)
     set_internalvar (lookup_internalvar ("trace_func"),
-		     value_from_longest (charstar, (LONGEST) 0));
+		     value_from_pointer (charstar, (LONGEST) 0));
   else
     {
       len = strlen (SYMBOL_NAME (traceframe_fun));
@@ -310,7 +311,7 @@ set_traceframe_context (trace_pc)
   if (traceframe_sal.symtab == NULL ||
       traceframe_sal.symtab->filename == NULL)
     set_internalvar (lookup_internalvar ("trace_file"),
-		     value_from_longest (charstar, (LONGEST) 0));
+		     value_from_pointer (charstar, (LONGEST) 0));
   else
     {
       len = strlen (traceframe_sal.symtab->filename);
@@ -854,7 +855,7 @@ read_actions (t)
 	signal (STOP_SIGNAL, stop_sig);
     }
 #endif
-  old_chain = make_cleanup ((make_cleanup_func) free_actions, (void *) t);
+  old_chain = make_cleanup_free_actions (t);
   while (1)
     {
       /* Make sure that all output has been output.  Some machines may let
@@ -977,8 +978,7 @@ validate_actionline (line, t)
 	      /* else fall thru, treat p as an expression and parse it! */
 	    }
 	  exp = parse_exp_1 (&p, block_for_pc (t->address), 1);
-	  old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				    &exp);
+	  old_chain = make_cleanup (free_current_contents, &exp);
 
 	  if (exp->elts[0].opcode == OP_VAR_VALUE)
 	    {
@@ -1000,7 +1000,7 @@ validate_actionline (line, t)
 	  /* we have something to collect, make sure that the expr to
 	     bytecode translator can handle it and that it's not too long */
 	  aexpr = gen_trace_for_expr (t->address, exp);
-	  (void) make_cleanup ((make_cleanup_func) free_agent_expr, aexpr);
+	  make_cleanup_free_agent_expr (aexpr);
 
 	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
 	    error ("expression too complicated, try simplifying");
@@ -1062,6 +1062,18 @@ free_actions (t)
       free (line);
     }
   t->actions = NULL;
+}
+
+static void
+do_free_actions_cleanup (void *t)
+{
+  free_actions (t);
+}
+
+static struct cleanup *
+make_cleanup_free_actions (struct tracepoint *t)
+{
+  return make_cleanup (do_free_actions_cleanup, t);
 }
 
 struct memrange
@@ -1588,8 +1600,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 		  struct agent_reqs areqs;
 
 		  exp = parse_exp_1 (&action_exp, block_for_pc (t->address), 1);
-		  old_chain = make_cleanup ((make_cleanup_func)
-					    free_current_contents, &exp);
+		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  switch (exp->elts[0].opcode)
 		    {
@@ -1618,8 +1629,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 		    default:	/* full-fledged expression */
 		      aexpr = gen_trace_for_expr (t->address, exp);
 
-		      old_chain1 = make_cleanup ((make_cleanup_func)
-						 free_agent_expr, aexpr);
+		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
 		      ax_reqs (aexpr, &areqs);
 		      if (areqs.flaw != agent_flaw_none)

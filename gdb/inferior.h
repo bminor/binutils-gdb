@@ -42,6 +42,8 @@ extern struct inferior_status *save_inferior_status PARAMS ((int));
 
 extern void restore_inferior_status PARAMS ((struct inferior_status *));
 
+extern struct cleanup *make_cleanup_restore_inferior_status (struct inferior_status *);
+
 extern void discard_inferior_status PARAMS ((struct inferior_status *));
 
 extern void write_inferior_status_register PARAMS ((struct inferior_status * inf_status, int regno, LONGEST val));
@@ -155,6 +157,11 @@ extern CORE_ADDR generic_target_read_fp PARAMS ((void));
 extern void write_fp PARAMS ((CORE_ADDR));
 
 extern void generic_target_write_fp PARAMS ((CORE_ADDR));
+
+extern CORE_ADDR generic_pointer_to_address (struct type *type, char *buf);
+
+extern void generic_address_to_pointer (struct type *type, char *buf,
+					CORE_ADDR addr);
 
 extern void wait_for_inferior PARAMS ((void));
 
@@ -421,29 +428,14 @@ extern int attach_flag;
 #define CALL_DUMMY_STACK_ADJUST_P (0)
 #endif
 
+/* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
+   shouldn't be necessary. */
+
 #if !defined (CALL_DUMMY_P)
 #if defined (CALL_DUMMY)
 #define CALL_DUMMY_P 1
 #else
 #define CALL_DUMMY_P 0
-#endif
-#endif
-
-#if !defined (CALL_DUMMY_WORDS)
-#if defined (CALL_DUMMY)
-extern LONGEST call_dummy_words[];
-#define CALL_DUMMY_WORDS (call_dummy_words)
-#else
-#define CALL_DUMMY_WORDS (internal_error ("CALL_DUMMY_WORDS"), (void*) 0)
-#endif
-#endif
-
-#if !defined (SIZEOF_CALL_DUMMY_WORDS)
-#if defined (CALL_DUMMY)
-extern int sizeof_call_dummy_words;
-#define SIZEOF_CALL_DUMMY_WORDS (sizeof_call_dummy_words)
-#else
-#define SIZEOF_CALL_DUMMY_WORDS (internal_error ("SIZEOF_CALL_DUMMY_WORDS"), 0)
 #endif
 #endif
 

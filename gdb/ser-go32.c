@@ -230,15 +230,15 @@ ports[4] =
   }
 };
 
-static int dos_open PARAMS ((serial_t scb, const char *name));
-static void dos_raw PARAMS ((serial_t scb));
-static int dos_readchar PARAMS ((serial_t scb, int timeout));
-static int dos_setbaudrate PARAMS ((serial_t scb, int rate));
-static int dos_write PARAMS ((serial_t scb, const char *str, int len));
-static void dos_close PARAMS ((serial_t scb));
-static serial_ttystate dos_get_tty_state PARAMS ((serial_t scb));
-static int dos_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
-static int dos_baudconv PARAMS ((int rate));
+static int dos_open (serial_t scb, const char *name);
+static void dos_raw (serial_t scb);
+static int dos_readchar (serial_t scb, int timeout);
+static int dos_setbaudrate (serial_t scb, int rate);
+static int dos_write (serial_t scb, const char *str, int len);
+static void dos_close (serial_t scb);
+static serial_ttystate dos_get_tty_state (serial_t scb);
+static int dos_set_tty_state (serial_t scb, serial_ttystate state);
+static int dos_baudconv (int rate);
 
 #define inb(p,a)	inportb((p)->base + (a))
 #define outb(p,a,v)	outportb((p)->base + (a), (v))

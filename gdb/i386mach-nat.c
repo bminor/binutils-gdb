@@ -129,11 +129,9 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       break;
 
     case 2:
-#ifdef FP0_REGNUM
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
 	      core_reg_sect,
 	      core_reg_size);	/* FIXME, probably bogus */
-#endif
 #ifdef FPC_REGNUM
       memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
 	      &corestr.c_fpu.f_fpstatus.f_ctrl,

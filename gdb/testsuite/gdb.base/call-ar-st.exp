@@ -32,6 +32,10 @@ set testfile "call-ar-st"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
+# Test depends on printf, which the sparclet stub doesn't support.  
+if { [istarget "sparclet-*-*"] } {
+    return 0;
+}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -568,4 +572,4 @@ gdb_expect {
 
 return
 
-~
+

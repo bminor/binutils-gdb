@@ -488,17 +488,17 @@ record_minimal_symbol (name, address, type, objfile)
     {
     case N_TEXT | N_EXT:
       ms_type = mst_text;
-      section = SECT_OFF_TEXT;
+      section = SECT_OFF_TEXT (objfile);
       bfd_section = DBX_TEXT_SECTION (objfile);
       break;
     case N_DATA | N_EXT:
       ms_type = mst_data;
-      section = SECT_OFF_DATA;
+      section = SECT_OFF_DATA (objfile);
       bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_BSS | N_EXT:
       ms_type = mst_bss;
-      section = SECT_OFF_BSS;
+      section = SECT_OFF_BSS (objfile);
       bfd_section = DBX_BSS_SECTION (objfile);
       break;
     case N_ABS | N_EXT:
@@ -509,7 +509,7 @@ record_minimal_symbol (name, address, type, objfile)
 #ifdef N_SETV
     case N_SETV | N_EXT:
       ms_type = mst_data;
-      section = SECT_OFF_DATA;
+      section = SECT_OFF_DATA (objfile);
       bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_SETV:
@@ -517,7 +517,7 @@ record_minimal_symbol (name, address, type, objfile)
          of going over many .o files, it doesn't make sense to have one
          file local.  */
       ms_type = mst_file_data;
-      section = SECT_OFF_DATA;
+      section = SECT_OFF_DATA (objfile);
       bfd_section = DBX_DATA_SECTION (objfile);
       break;
 #endif
@@ -526,7 +526,7 @@ record_minimal_symbol (name, address, type, objfile)
     case N_FN:
     case N_FN_SEQ:
       ms_type = mst_file_text;
-      section = SECT_OFF_TEXT;
+      section = SECT_OFF_TEXT (objfile);
       bfd_section = DBX_TEXT_SECTION (objfile);
       break;
     case N_DATA:
@@ -547,12 +547,12 @@ record_minimal_symbol (name, address, type, objfile)
 	if (VTBL_PREFIX_P ((tempstring)))
 	  ms_type = mst_data;
       }
-      section = SECT_OFF_DATA;
+      section = SECT_OFF_DATA (objfile);
       bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_BSS:
       ms_type = mst_file_bss;
-      section = SECT_OFF_BSS;
+      section = SECT_OFF_BSS (objfile);
       bfd_section = DBX_BSS_SECTION (objfile);
       break;
     default:
@@ -624,7 +624,7 @@ dbx_symfile_read (objfile, mainline)
   back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   /* Read stabs data from executable file and define symbols. */
 
@@ -1094,6 +1094,18 @@ free_bincl_list (objfile)
   bincls_allocated = 0;
 }
 
+static void
+do_free_bincl_list_cleanup (void *objfile)
+{
+  free_bincl_list (objfile);
+}
+
+static struct cleanup *
+make_cleanup_free_bincl_list (struct objfile *objfile)
+{
+  return make_cleanup (do_free_bincl_list_cleanup, objfile);
+}
+
 /* Scan a SunOs dynamic symbol table for symbols of interest and
    add them to the minimal symbol table.  */
 
@@ -1157,17 +1169,17 @@ read_dbx_dynamic_symtab (objfile)
 
 	  if (bfd_get_section_flags (abfd, sec) & SEC_CODE)
 	    {
-	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      type = N_TEXT;
 	    }
 	  else if (bfd_get_section_flags (abfd, sec) & SEC_DATA)
 	    {
-	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 	      type = N_DATA;
 	    }
 	  else if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
 	    {
-	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
 	      type = N_BSS;
 	    }
 	  else
@@ -1208,7 +1220,7 @@ read_dbx_dynamic_symtab (objfile)
     {
       arelent *rel = *relptr;
       CORE_ADDR address =
-      rel->address + ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+      rel->address + ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 
       switch (bfd_get_arch (abfd))
 	{
@@ -1295,7 +1307,7 @@ read_dbx_symtab (objfile)
 
   /* Init bincl list */
   init_bincl_list (20, objfile);
-  back_to = make_cleanup ((make_cleanup_func) free_bincl_list, objfile);
+  back_to = make_cleanup_free_bincl_list (objfile);
 
   last_source_file = NULL;
 
@@ -1382,7 +1394,7 @@ read_dbx_symtab (objfile)
       /* Don't set pst->texthigh lower than it already is.  */
       CORE_ADDR text_end =
       (lowest_text_address == (CORE_ADDR) -1
-       ? (text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT))
+       ? (text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)))
        : lowest_text_address)
       + text_size;
 
@@ -1558,6 +1570,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
       struct partial_symtab *subpst =
       allocate_psymtab (include_list[i], objfile);
 
+      /* Copy the sesction_offsets array from the main psymtab. */
       subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private =
 	(char *) obstack_alloc (&objfile->psymbol_obstack,
@@ -1738,6 +1751,10 @@ read_ofile_symtab (pst)
   sym_size = LDSYMLEN (pst);
   text_offset = pst->textlow;
   text_size = pst->texthigh - pst->textlow;
+  /* This cannot be simply objfile->section_offsets because of
+     elfstab_offset_sections() which initializes the psymtab section
+     offsets information in a special way, and that is different from
+     objfile->section_offsets. */ 
   section_offsets = pst->section_offsets;
 
   current_objfile = objfile;
@@ -1880,7 +1897,7 @@ read_ofile_symtab (pst)
   if (last_source_start_addr > text_offset)
     last_source_start_addr = text_offset;
 
-  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT);
+  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 
   /* Process items which we had to "process_later" due to dependancies 
      on other stabs.  */
@@ -1899,6 +1916,8 @@ read_ofile_symtab (pst)
    NAME is the symbol name, in our address space.
    SECTION_OFFSETS is a set of amounts by which the sections of this object
    file were relocated when it was loaded into memory.
+   Note that these section_offsets are not the 
+   objfile->section_offsets but the pst->section_offsets.
    All symbols that refer
    to memory locations need to be offset by these amounts.
    OBJFILE is the object file from which we are reading symbols.
@@ -1942,7 +1961,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   if (!block_address_function_relative)
     /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
        function start address, so just use the text offset.  */
-    function_start_offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
+    function_start_offset = ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 
   /* Something is wrong if we see real data before
      seeing a source file name.  */
@@ -1982,7 +2001,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	}
 
       /* Relocate for dynamic loading */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef SMASH_TEXT_ADDRESS
       SMASH_TEXT_ADDRESS (valu);
 #endif
@@ -2090,7 +2109,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_FN_SEQ:
       /* This kind of symbol indicates the start of an object file.  */
       /* Relocate for dynamic loading */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       break;
 
     case N_SO:
@@ -2099,7 +2118,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
          Finish the symbol table of the previous source file
          (if any) and start accumulating a new symbol table.  */
       /* Relocate for dynamic loading */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 
       n_opt_found = 0;
 
@@ -2126,7 +2145,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	      patch_subfile_names (current_subfile, name);
 	      break;		/* Ignore repeated SOs */
 	    }
-	  end_symtab (valu, objfile, SECT_OFF_TEXT);
+	  end_symtab (valu, objfile, SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 	}
 
@@ -2149,7 +2168,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
          included in the compilation of the main source file
          (whose name was given in the N_SO symbol.)  */
       /* Relocate for dynamic loading */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       start_subfile (name, current_subfile->dirname);
       break;
 
@@ -2227,7 +2246,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		   elfstab_offset_sections ever starts dealing with the
 		   text offset, and we still need to do this, we need to
 		   invent a SECT_OFF_ADDR_KLUDGE or something.  */
-		valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 		goto define_a_symbol;
 	      }
 	  }
@@ -2247,22 +2266,22 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
     case_N_STSYM:		/* Static symbol in data seg */
     case N_DSLINE:		/* Source line number, data seg */
-      valu += ANOFFSET (section_offsets, SECT_OFF_DATA);
+      valu += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
       goto define_a_symbol;
 
     case_N_LCSYM:		/* Static symbol in BSS seg */
     case N_BSLINE:		/* Source line number, bss seg */
       /*   N_BROWS:       overlaps with N_BSLINE */
-      valu += ANOFFSET (section_offsets, SECT_OFF_BSS);
+      valu += ANOFFSET (section_offsets, SECT_OFF_BSS (objfile));
       goto define_a_symbol;
 
     case_N_ROSYM:		/* Static symbol in Read-only data seg */
-      valu += ANOFFSET (section_offsets, SECT_OFF_RODATA);
+      valu += ANOFFSET (section_offsets, SECT_OFF_RODATA (objfile));
       goto define_a_symbol;
 
     case N_ENTRY:		/* Alternate entry point */
       /* Relocate for dynamic loading */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       goto define_a_symbol;
 
       /* The following symbol types we don't know how to process.  Handle
@@ -2314,7 +2333,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	      /* Deal with the SunPRO 3.0 compiler which omits the address
 	         from N_FUN symbols.  */
 	      if (type == N_FUN
-		  && valu == ANOFFSET (section_offsets, SECT_OFF_TEXT))
+		  && valu == ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile)))
 		valu = 
 		  find_stab_function_addr (name, last_source_file, objfile);
 #endif

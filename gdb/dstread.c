@@ -288,7 +288,7 @@ dst_symfile_read (objfile, mainline)
     error ("\"%s\": error reading debugging symbol tables\n", name);
 
   init_minimal_symbol_collection ();
-  make_cleanup (discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */

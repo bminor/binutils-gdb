@@ -62,14 +62,6 @@ DLLTOOL = @DLLTOOL@
 WINDRES = @WINDRES@
 MIG = @MIG@
 
-# If the user configured GDB to include the TUI, the name of the tui
-# library goes here.
-TUI_LIBRARY = @TUI_LIBRARY@
-
-# If the user configured GDB to include the TUI, the all-tui 
-# target goes here.
-BUILD_TUI = @BUILD_TUI@
-
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
 TERMCAP = @TERM_LIB@
@@ -117,7 +109,6 @@ MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
 # We are using our own version of REGEX now to be consistent across
 # machines.
 REGEX = @REGEX@
-REGEX_CFLAGS = @REGEX_CFLAGS@
 
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
@@ -143,11 +134,6 @@ INTL_DEPS = @INTLDEPS@
 INTL_SRC = $(srcdir)/$(INTL_DIR)
 INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 
-# Where is the TUI library?  Typically in tui/.
-TUI_DIR=tui
-TUI_SRC = $(srcdir)/$(TUI_DIR)
-TUI_CFLAGS= -I$(TUI_SRC)
-
 #
 # MI sub directory definitons
 #
@@ -172,6 +158,33 @@ SUBDIR_MI_ALL=
 SUBDIR_MI_CLEAN=
 SUBDIR_MI_INSTALL=
 SUBDIR_MI_UNINSTALL=
+
+#
+# TUI sub directory definitions
+#
+SUBDIR_TUI_OBS = \
+	tui.o tuiData.o tuiSource.o tuiStack.o tuiIO.o \
+	tuiGeneralWin.o tuiLayout.o tuiWin.o tuiCommand.o \
+	tuiDisassem.o tuiSourceWin.o tuiRegs.o tuiDataWin.o
+SUBDIR_TUI_SRCS = \
+	tui/tui.c tui/tuiData.c tui/tuiSource.c \
+	tui/tuiStack.c tui/tuiIO.c \
+	tui/tuiGeneralWin.c tui/tuiLayout.c \
+	tui/tuiWin.c tui/tuiCommand.c \
+	tui/tuiDisassem.c tui/tuiSourceWin.c \
+	tui/tuiRegs.c tui/tuiDataWin.c
+SUBDIR_TUI_DEPS =
+SUBDIR_TUI_INITS = \
+	$(SUBDIR_TUI_SRCS)
+SUBDIR_TUI_LDFLAGS=
+SUBDIR_TUI_CFLAGS= \
+	-DTUI=1 -I${srcdir}/tui
+SUBDIR_TUI_ALL=
+SUBDIR_TUI_CLEAN=
+SUBDIR_TUI_INSTALL=
+SUBDIR_TUI_UNINSTALL=
+
+
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -276,8 +289,8 @@ INTERNAL_WARN_CFLAGS = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) \
-	$(REGEX_CFLAGS) $(GDB_WARN_CFLAGS)
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS) \
+	$(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
@@ -311,7 +324,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 20000204
+VERSION = 5.0
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -838,13 +851,6 @@ kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
 	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
 	  -lc $(CLIBS)
 
-# Have the TUI library depend on a phony target, so we'll always
-# recurse and make sure it's up to date.  If it is, then the file will
-# be unchanged, and we won't rebuild it.
-# .PHONY: check-tui
-all-tui: 
-	@(cd tui; ${MAKE} ${FLAGS_TO_PASS} all)
-
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME: those
 # files go in twice; we should be removing them from the main list).
@@ -942,19 +948,12 @@ doc/gdb.dvi:
 doc/gdb.info:
 	cd doc; $(MAKE) gdb.info $(FLAGS_TO_PASS)
 
-# When DJGPP Make runs on MS-DOS, it downcases all file names, so
-# it doesn't find COPYING, and wants to make it...
-copying.txt:
-	test -f copying.txt || \
-	  (test "$$LN_S" = "ln -s" && \
-	    ln -s $(srcdir)/COPYING copying.txt;) || \
-	  cp -p $(srcdir)/COPYING copying.txt 2>/dev/null || \
-	  ln $(srcdir)/COPYING copying.txt 2>/dev/null || \
-	  cp $(srcdir)/COPYING copying.txt
-
 # Make copying.c from COPYING
-copying.c: copying.txt copying.awk
-	awk -f $(srcdir)/copying.awk < $(srcdir)/copying.txt > copying.c
+$(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ \
+		$(srcdir)/COPYING $(srcdir)/copying.awk
+	awk -f $(srcdir)/copying.awk \
+		< $(srcdir)/COPYING > $(srcdir)/copying.tmp
+	mv $(srcdir)/copying.tmp $(srcdir)/copying.c
 
 version.c: Makefile
 	rm -f version.c
@@ -1070,7 +1069,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	coff-solib.c convex-tdep.c convex-xdep.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
-	go32-nat.c gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
+	go32-nat.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c \
         hp-psymtab-read.c hp-symtab-read.c \
 	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c i386-linux-nat.c \
@@ -1078,7 +1077,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	i387-tdep.c \
 	i386-linux-tdep.c \
 	i960-tdep.c \
-	ia64-linux-nat.c ia64-tdep.c \
+	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c isi-xdep.c \
 	lynx-nat.c m3-nat.c \
 	m68k-tdep.c \
@@ -1201,7 +1200,9 @@ complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
 # OBSOLETE convex-xdep.o: convex-xdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 # OBSOLETE	$(inferior_h)
 
-copying.o: copying.c $(defs_h) $(gdbcmd_h)
+# Provide explicit rule/dependency - works for more makes.
+copying.o: $(srcdir)/copying.c $(defs_h) $(gdbcmd_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/copying.c
 
 core-aout.o: core-aout.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h)
 
@@ -1373,18 +1374,13 @@ arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
-	$(value_h) gdb_string.h
+	$(value_h) gdb_string.h wrapper.h
 
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
 	$(command_h) $(floatformat_h) target.h
 
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 	exc_request_U.h msg_U.h gnu-nat.h
-
-# OBSOLETE gould-tdep.o: gould-tdep.c $(OP_INCLUDE)/np1.h $(defs_h) $(frame_h) \
-# OBSOLETE	$(gdbcore_h) $(symtab_h)
-
-# OBSOLETE gould-xdep.o: gould-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h)
 
@@ -1440,8 +1436,10 @@ i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
 ia64-linux-nat.o: ia64-linux-nat.c  $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h)
 
+ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(arch_utils_h)
+
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) symfile.h $(gdbcore_h) \
-	$(floatformat_h) objfiles.h $(INCLUDE_DIR)/elf/common.h
+	$(arch_utils_h) $(floatformat_h) objfiles.h $(INCLUDE_DIR)/elf/common.h
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h gdb_string.h
@@ -1811,7 +1809,8 @@ sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	target.h
 
 sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) objfiles.h symfile.h target.h gdb_string.h
+	$(inferior_h) objfiles.h symfile.h target.h gdb_string.h \
+	$(arch_utils_h)
 
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) target.h
 
@@ -1952,7 +1951,7 @@ gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
 ui-out.o: ui-out.c $(defs_h) $(ui_out_h) expression.h language.h
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h)
 varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
-	$(language_h) valprint.h varobj.h
+	$(language_h) valprint.h varobj.h wrapper.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
 
@@ -1994,5 +1993,70 @@ mi-parse.o: $(srcdir)/mi/mi-parse.c $(defs_h) $(mi_parse_h) $(mi_cmds_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-parse.c
 mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(mi_getopt_h) $(defs_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-getopt.c
+
+#
+# TUI dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the mi directory.
+
+tui.o: $(srcdir)/tui/tui.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiIO.h \
+		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui.c
+tuiCommand.o: $(srcdir)/tui/tuiCommand.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiWin.h $(srcdir)/tui/tuiIO.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiCommand.c
+tuiData.o: $(srcdir)/tui/tuiData.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiData.c
+tuiDataWin.o: $(srcdir)/tui/tuiDataWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiRegs.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiDataWin.c
+tuiDisassem.o: $(srcdir)/tui/tuiDisassem.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiSourceWin.h \
+		$(srcdir)/tui/tuiStack.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiDisassem.c
+tuiGeneralWin.o: $(srcdir)/tui/tuiGeneralWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiGeneralWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiGeneralWin.c
+tuiIO.o: $(srcdir)/tui/tuiIO.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiIO.h $(srcdir)/tui/tuiCommand.h \
+		$(srcdir)/tui/tuiWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiIO.c
+tuiLayout.o: $(srcdir)/tui/tuiLayout.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiGeneralWin.h $(srcdir)/tui/tuiStack.h \
+		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiDisassem.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiLayout.c
+tuiRegs.o: $(srcdir)/tui/tuiRegs.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiRegs.c
+tuiSource.o: $(srcdir)/tui/tuiSource.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h \
+		$(srcdir)/tui/tuiSource.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiSource.c
+tuiSourceWin.o: $(srcdir)/tui/tuiSourceWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h \
+		$(srcdir)/tui/tuiSource.h $(srcdir)/tui/tuiDisassem.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiSourceWin.c
+tuiStack.o: $(srcdir)/tui/tuiStack.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiStack.c
+tuiWin.o: $(srcdir)/tui/tuiWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiGeneralWin.h $(srcdir)/tui/tuiStack.h \
+		$(srcdir)/tui/tuiSourceWin.h $(srcdir)/tui/tuiDataWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiWin.c
 
 ### end of the gdb Makefile.in.

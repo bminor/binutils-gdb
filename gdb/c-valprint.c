@@ -135,8 +135,9 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if we ARE using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
-	  print_address_demangle (extract_address (valaddr + embedded_offset, TYPE_LENGTH (type)),
-				  stream, demangle);
+	  CORE_ADDR addr
+	    = extract_typed_address (valaddr + embedded_offset, type);
+	  print_address_demangle (addr, stream, demangle);
 	  break;
 	}
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
@@ -249,10 +250,10 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 	}
       if (addressprint)
 	{
+	  CORE_ADDR addr
+	    = extract_typed_address (valaddr + embedded_offset, type);
 	  fprintf_filtered (stream, "@");
-	  print_address_numeric
-	    (extract_address (valaddr + embedded_offset,
-			      TARGET_PTR_BIT / HOST_CHAR_BIT), 1, stream);
+	  print_address_numeric (addr, 1, stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
 	}
@@ -295,11 +296,13 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if NOT using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_PTR.) */
-	  print_address_demangle (extract_address (
-						 valaddr + embedded_offset +
-			   TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8,
-		  TYPE_LENGTH (TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET))),
-				  stream, demangle);
+	  int offset = (embedded_offset +
+			TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8);
+	  struct type *field_type = TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET);
+	  CORE_ADDR addr
+	    = extract_typed_address (valaddr + offset, field_type);
+
+	  print_address_demangle (addr, stream, demangle);
 	}
       else
 	cp_print_value_fields (type, type, valaddr, embedded_offset, address, stream, format,

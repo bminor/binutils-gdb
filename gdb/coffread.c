@@ -205,6 +205,8 @@ static void enter_linenos PARAMS ((long, int, int, struct objfile *));
 
 static void free_linetab PARAMS ((void));
 
+static void free_linetab_cleanup (void *ignore);
+
 static int init_lineno PARAMS ((bfd *, long, int));
 
 static char *getsymname PARAMS ((struct internal_syment *));
@@ -212,6 +214,8 @@ static char *getsymname PARAMS ((struct internal_syment *));
 static char *coff_getfilename PARAMS ((union internal_auxent *));
 
 static void free_stringtab PARAMS ((void));
+
+static void free_stringtab_cleanup (void *ignore);
 
 static int init_stringtab PARAMS ((bfd *, long));
 
@@ -340,7 +344,7 @@ cs_to_section (cs, objfile)
 {
   asection *sect = NULL;
   struct find_targ_sec_arg args;
-  int off = SECT_OFF_TEXT;
+  int off = SECT_OFF_TEXT (objfile);
 
   args.targ_index = cs->c_secnum;
   args.resultp = &sect;
@@ -349,11 +353,11 @@ cs_to_section (cs, objfile)
     {
       /* This is the section.  Figure out what SECT_OFF_* code it is.  */
       if (bfd_get_section_flags (abfd, sect) & SEC_CODE)
-	off = SECT_OFF_TEXT;
+	off = SECT_OFF_TEXT (objfile);
       else if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
-	off = SECT_OFF_DATA;
+	off = SECT_OFF_DATA (objfile);
       else
-	off = SECT_OFF_BSS;
+	off = SECT_OFF_BSS (objfile);
     }
   return off;
 }
@@ -638,7 +642,7 @@ coff_symfile_read (objfile, mainline)
   temp_sym = (char *) xmalloc
     (cdata->local_symesz + cdata->local_auxesz);
   temp_aux = temp_sym + cdata->local_symesz;
-  back_to = make_cleanup ((make_cleanup_func) free_current_contents, &temp_sym);
+  back_to = make_cleanup (free_current_contents, &temp_sym);
 
   /* We need to know whether this is a PE file, because in PE files,
      unlike standard COFF files, symbol values are stored as offsets
@@ -656,7 +660,7 @@ coff_symfile_read (objfile, mainline)
   info->max_lineno_offset = 0;
   bfd_map_over_sections (abfd, find_linenos, (PTR) info);
 
-  make_cleanup ((make_cleanup_func) free_linetab, 0);
+  make_cleanup (free_linetab_cleanup, 0 /*ignore*/);
   val = init_lineno (abfd, info->min_lineno_offset,
 		     info->max_lineno_offset - info->min_lineno_offset);
   if (val < 0)
@@ -664,13 +668,13 @@ coff_symfile_read (objfile, mainline)
 
   /* Now read the string table, all at once.  */
 
-  make_cleanup ((make_cleanup_func) free_stringtab, 0);
+  make_cleanup (free_stringtab_cleanup, 0 /*ignore*/);
   val = init_stringtab (abfd, stringtab_offset);
   if (val < 0)
     error ("\"%s\": can't get string table", name);
 
   init_minimal_symbol_collection ();
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -843,7 +847,7 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
       if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
 	{
 	  /* Record all functions -- external and static -- in minsyms. */
-	  tmpaddr = cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	  tmpaddr = cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	  record_minimal_symbol (cs->c_name, tmpaddr, mst_text, objfile);
 
 	  fcn_line_ptr = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
@@ -908,7 +912,7 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 		     followed by a later file with no symbols.  */
 		  if (in_source_file)
 		    complete_symtab (filestring,
-		    cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT),
+		    cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)),
 				     main_aux.x_scn.x_scnlen);
 		  in_source_file = 0;
 		}
@@ -969,10 +973,8 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 		    || cs->c_sclass == C_THUMBEXT)
 		  tmpaddr += ANOFFSET (objfile->section_offsets, sec);
 
-		switch (sec)
+		if (sec == SECT_OFF_TEXT (objfile))
 		  {
-		  case SECT_OFF_TEXT:
-		  case SECT_OFF_RODATA:
 		    ms_type =
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
 		      || cs->c_sclass == C_THUMBEXT ?
@@ -981,21 +983,23 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 		    if (tmpaddr & 1)	/* FIXME: delete this line */
 		      SMASH_TEXT_ADDRESS (tmpaddr);
 #endif
-		    break;
-		  case SECT_OFF_DATA:
-		    ms_type =
-		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
-		      mst_data : mst_file_data;
-		    break;
-		  case SECT_OFF_BSS:
-		    ms_type =
-		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
-		      mst_data : mst_file_data;
-		    break;
-		  default:
-		    ms_type = mst_unknown;
-		    break;
 		  }
+		else
+		  if  (sec == SECT_OFF_DATA (objfile))
+		    {
+		    ms_type =
+		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
+		      mst_data : mst_file_data;
+		    }
+		  else
+		    if (sec == SECT_OFF_BSS (objfile))
+		      {
+		    ms_type =
+		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
+		      mst_data : mst_file_data;
+		      }
+		    else
+		      ms_type = mst_unknown;
 	      }
 
 	    if (cs->c_name[0] != '@' /* Skip tdesc symbols */ )
@@ -1099,11 +1103,11 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 	         of the epilogue.  */
 			    cs->c_value
 			    + FUNCTION_EPILOGUE_SIZE
-			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT),
+			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)),
 #else
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
-			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT),
+			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)),
 #endif
 			    objfile
 		);
@@ -1115,7 +1119,7 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 	  if (STREQ (cs->c_name, ".bb"))
 	    {
 	      tmpaddr = cs->c_value;
-	      tmpaddr += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	      tmpaddr += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      push_context (++depth, tmpaddr);
 	    }
 	  else if (STREQ (cs->c_name, ".eb"))
@@ -1135,7 +1139,7 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 	      if (local_symbols && context_stack_depth > 0)
 		{
 		  tmpaddr =
-		    cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		    cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		  /* Make a block for the local symbols within.  */
 		  finish_block (0, &local_symbols, new->old_blocks,
 				new->start_addr, tmpaddr, objfile);
@@ -1287,6 +1291,12 @@ free_stringtab ()
   stringtab = NULL;
 }
 
+static void
+free_stringtab_cleanup (void *ignore)
+{
+  free_stringtab ();
+}
+
 static char *
 getsymname (symbol_entry)
      struct internal_syment *symbol_entry;
@@ -1388,6 +1398,12 @@ free_linetab ()
   linetab = NULL;
 }
 
+static void
+free_linetab_cleanup (void *ignore)
+{
+  free_linetab ();
+}
+
 #if !defined (L_LNNO32)
 #define L_LNNO32(lp) ((lp)->l_lnno)
 #endif
@@ -1427,7 +1443,7 @@ enter_linenos (file_offset, first_line, last_line, objfile)
       if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
 	record_line (current_subfile, first_line + L_LNNO32 (&lptr),
 		     lptr.l_addr.l_paddr
-		     + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT));
+		     + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)));
       else
 	break;
     }
@@ -1547,7 +1563,7 @@ process_coff_symbol (cs, aux, objfile)
 
   if (ISFCN (cs->c_type))
     {
-      SYMBOL_VALUE (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+      SYMBOL_VALUE (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
       SYMBOL_TYPE (sym) =
 	lookup_function_type (decode_function_type (cs, cs->c_type, aux));
 
@@ -1577,7 +1593,7 @@ process_coff_symbol (cs, aux, objfile)
 	case C_EXT:
 	  SYMBOL_CLASS (sym) = LOC_STATIC;
 	  SYMBOL_VALUE_ADDRESS (sym) = (CORE_ADDR) cs->c_value;
-	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	  add_symbol_to_list (sym, &global_symbols);
 	  break;
 
@@ -1586,7 +1602,7 @@ process_coff_symbol (cs, aux, objfile)
 	case C_STAT:
 	  SYMBOL_CLASS (sym) = LOC_STATIC;
 	  SYMBOL_VALUE_ADDRESS (sym) = (CORE_ADDR) cs->c_value;
-	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	  if (within_function)
 	    {
 	      /* Static symbol of local scope */

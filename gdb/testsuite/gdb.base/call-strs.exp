@@ -37,6 +37,11 @@ set testfile "call-strs"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
+# Test depends on printf, which the sparclet stub doesn't support.  
+if { [istarget "sparclet-*-*"] } {
+    return 0;
+}
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
@@ -91,6 +96,7 @@ send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
 
+set timeout 120
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"

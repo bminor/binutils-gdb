@@ -1,5 +1,5 @@
-/* Native-dependent definitions for Intel 386 running BSD Unix, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1996 Free Software Foundation, Inc.
+/* Native-dependent definitions for FreeBSD/i386.
+   Copyright (C) 1986, 87, 89, 92, 96, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,11 +18,25 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_FREEBSD_H
-#define NM_FREEBSD_H
+#ifndef NM_FBSD_H
+#define NM_FBSD_H
 
-/* Be shared lib aware */
-#include "solib.h"
+/* Type of the third argument to the `ptrace' system call.  */
+#define PTRACE_ARG3_TYPE caddr_t
+
+/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
+#define FETCH_INFERIOR_REGISTERS
+
+/* We can attach and detach.  */
+#define ATTACH_DETACH
+
+
+/* Support for the user struct.  */
+
+/* Return the size of the user struct.  */
+
+#define KERNEL_U_SIZE kernel_u_size ()
+extern int kernel_u_size (void);
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
@@ -31,14 +45,27 @@
 #define KERNEL_U_ADDR USRSTACK
 
 #define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = i386_register_u_addr ((blockend),(regno));
+  (addr) = register_u_addr ((blockend), (regno))
+extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regno);
+
 
-extern int
-i386_register_u_addr PARAMS ((int, int));
+/* Shared library support.  */
 
-#define PTRACE_ARG3_TYPE char*
+/* The FreeBSD <link.h> uses the same condition to distinguish ELF
+   from a.out.  ELF implies SVR4 shared libraries.  */
+#if (defined (FREEBSD_ELF) || defined (__ELF__)) && !defined (FREEBSD_AOUT)
+#define SVR4_SHARED_LIBS
+#endif
 
-/* make structure definitions match up with those expected in solib.c */
+#include "solib.h"		/* Support for shared libraries. */
+#ifdef SVR4_SHARED_LIBS
+#include "elf/common.h"		/* Additional ELF shared library info. */
+#endif
+
+#ifndef SVR4_SHARED_LIBS
+
+/* Make structure definitions match up with those expected in `solib.c'.  */
+
 #define link_object	sod
 #define lo_name		sod_name
 #define lo_library	sod_library
@@ -91,9 +118,6 @@ i386_register_u_addr PARAMS ((int, int));
 #define ld_un		d_un
 #define ld_2		d_sdt
 
-/* Return sizeof user struct to callers in less machine dependent routines */
+#endif /* !SVR4_SHARED_LIBS */
 
-#define KERNEL_U_SIZE kernel_u_size()
-extern int kernel_u_size PARAMS ((void));
-
-#endif /* NM_FREEBSD_H */
+#endif /* NM_FBSD_H */

@@ -97,6 +97,12 @@ generic_frameless_function_invocation_not (struct frame_info *fi)
   return 0;
 }
 
+int
+generic_return_value_on_stack_not (struct type *type)
+{
+  return 0;
+}
+
 char *
 legacy_register_name (int i)
 {
@@ -126,6 +132,36 @@ generic_remote_translate_xfer_address (CORE_ADDR gdb_addr, int gdb_len,
   *rem_addr = gdb_addr;
   *rem_len = gdb_len;
 }
+
+int
+generic_prologue_frameless_p (CORE_ADDR ip)
+{
+#ifdef SKIP_PROLOGUE_FRAMELESS_P
+  return ip == SKIP_PROLOGUE_FRAMELESS_P (ip);
+#else
+  return ip == SKIP_PROLOGUE (ip);
+#endif
+}
+
+
+/* Helper functions for INNER_THAN */
+
+int
+core_addr_lessthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs < rhs);
+}
+
+int
+core_addr_greaterthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs > rhs);
+}
+
 
 /* */
 

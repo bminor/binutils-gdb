@@ -59,3 +59,8 @@ linuxthreads_prepare_to_proceed PARAMS ((int step));
 #define TIDGET(PID)           (((PID) & 0x7fffffff) >> 16)
 #define MERGEPID(PID, TID)    (((PID) & 0xffff) | ((TID) << 16))
 
+/* Use elf_gregset_t and elf_fpregset_t, rather than
+   gregset_t and fpregset_t.  */
+
+#define GDB_GREGSET_T  prgregset_t
+#define GDB_FPREGSET_T prfpregset_t

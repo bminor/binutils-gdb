@@ -57,6 +57,8 @@ static struct cmd_list_element *find_cmd PARAMS ((char *command,
 static void apropos_cmd_helper (struct ui_file *, struct cmd_list_element *, 
 		    		struct re_pattern_buffer *, char *);
 
+static void help_all (struct ui_file *stream);
+
 void apropos_command (char *, int);
 
 void _initialize_command PARAMS ((void));
@@ -283,13 +285,12 @@ empty_sfunc (args, from_tty, c)
    DOC is the documentation string.  */
 
 struct cmd_list_element *
-add_set_cmd (name, class, var_type, var, doc, list)
-     char *name;
-     enum command_class class;
-     var_types var_type;
-     char *var;
-     char *doc;
-     struct cmd_list_element **list;
+add_set_cmd (char *name,
+	     enum command_class class,
+	     var_types var_type,
+	     void *var,
+	     char *doc,
+	     struct cmd_list_element **list)
 {
   struct cmd_list_element *c
   = add_cmd (name, class, NO_FUNCTION, doc, list);
@@ -312,13 +313,12 @@ add_set_cmd (name, class, var_type, var, doc, list)
    DOC is the documentation string.  */
 
 struct cmd_list_element *
-add_set_enum_cmd (name, class, enumlist, var, doc, list)
-     char *name;
-     enum command_class class;
-     char *enumlist[];
-     char *var;
-     char *doc;
-     struct cmd_list_element **list;
+add_set_enum_cmd (char *name,
+		  enum command_class class,
+		  char *enumlist[],
+		  char **var,
+		  char *doc,
+		  struct cmd_list_element **list)
 {
   struct cmd_list_element *c
   = add_set_cmd (name, class, var_enum, var, doc, list);
@@ -510,6 +510,12 @@ help_cmd (command, stream)
       return;
     }
 
+  if (strcmp (command, "all") == 0)
+    {
+      help_all (stream);
+      return;
+    }
+
   c = lookup_cmd (&command, cmdlist, "", 0, 0);
 
   if (c == 0)
@@ -600,6 +606,26 @@ Type \"help%s\" followed by a class name for a list of commands in that class.",
 Type \"help%s\" followed by %scommand name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n",
 		    cmdtype1, cmdtype2);
+}
+
+static void
+help_all (struct ui_file *stream)
+{
+  struct cmd_list_element *c;
+  extern struct cmd_list_element *cmdlist;
+
+  for (c = cmdlist; c; c = c->next)
+    {
+      if (c->abbrev_flag)
+        continue;
+      /* If this is a prefix command, print it's subcommands */
+      if (c->prefixlist)
+        help_cmd_list (*c->prefixlist, all_commands, c->prefixname, 0, stream);
+    
+      /* If this is a class name, print all of the commands in the class */
+      else if (c->function.cfunc == NULL)
+        help_cmd_list (cmdlist, c->class, "", 0, stream);
+    }
 }
 
 /* Print only the first line of STR on STREAM.  */
@@ -1695,7 +1721,7 @@ do_setshow_command (arg, from_tty, c)
       int quote;
 
       stb = ui_out_stream_new (uiout);
-      old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+      old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
       /* Print doc minus "show" at start.  */

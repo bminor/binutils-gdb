@@ -31,7 +31,7 @@
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
 /* Floating point uses IEEE representations.  */
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* Recognize our magic number.  */
 #define BADMAG(x) ((x).f_magic != 0572)

@@ -1,3 +1,69 @@
+2000-05-18  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/annota1.exp (annotate-signal-handler-caller):
+	Relax the regular expression a little, make it pass on Solaris 8.
+
+2000-05-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/step-test.exp: On IA-64 targets, when stepping out of
+	a call, do not require that gdb stop on the line after the call. 
+	Instead, it is permissible for gdb to stop on the line of the
+	call itself.
+
+2000-05-12  Michael Snyder  <msnyder@.cygnus.com>
+
+	* gdb.base/break.exp (bp on small function, optimized file):
+	Add a second pass pattern.  The behavior differs here between stabs
+	and dwarf for one-line functions.  Stabs preserves two line symbols
+	(one before the prologue and one after) with the same line number,
+	but dwarf regards these as duplicates and discards one of them.
+	Therefore the address after the prologue (where the breakpoint is)
+	has no exactly matching line symbol, and GDB reports the breakpoint
+	as if it were in the middle of a line rather than at the beginning.
+
+2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/interrupt.exp: Make "pass" message say "send" 
+	rather than "send_gdb" (for consistancy).
+
+Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-04-28 Andreas Jaeger  <aj@suse.de>:
+	* gdb.c++/templates.cc: Properly check for GCC version number.
+	* lib/compiler.cc: Likewise
+
+2000-04-28  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/break.exp: When compiled with -O2 optimization, 
+	gdb may not stop at the first line of main, due to code motion.
+
+2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Bail out if target is sparclet.
+	This test depends on parsing the printf output from the target.
+	Since the sparclet stub doesn't do stdio, this will never work.
+	* gdb.base/call-rt-st.exp: ditto.
+	* gdb.base/call-strs: ditto.
+
+2000-04-24  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/miscexprs.exp: make sizeof long array test portable.
+
+	* gdb.base/ending-run.exp: After connecting to a remote target,
+	but before running, the target will appear to be in a random
+	location.  Specify both a file and a line for breakpoints.
+	Also, the function that calls main may be called 'init'
+	rather than 'start'.
+
+2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/help.exp: Update output for add-symbol-file command.
+
+2000-04-10  Fernando Nasser  <fnasser@cygnus.com>
+
+	From Franz Sirl <Franz.Sirl-kernel@lauterbach.com>
+	* gdb.base/structs2.c: Support platforms defaulting to a unsigned char.
+
 2000-04-07  J.T. Conklin  <jtc@redback.com>
 
 	* gdb.base/call-ar-st.exp: Relax patterns matching tab characters.

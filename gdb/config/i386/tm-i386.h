@@ -44,7 +44,7 @@ struct type;
 /* Used for example in valprint.c:print_floating() to enable checking
    for NaN's */
 
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  This is 2

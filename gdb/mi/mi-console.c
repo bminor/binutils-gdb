@@ -112,7 +112,3 @@ mi_console_file_flush (struct ui_file *file)
   ui_file_put (mi_console->buffer, mi_console_raw_packet, mi_console);
   ui_file_rewind (mi_console->buffer);
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

@@ -70,7 +70,6 @@ static enum mi_cmd_result mi_execute_async_cli_command (char *mi, char *args, in
 static void mi_execute_command_wrapper (char *cmd);
 
 void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
-static void free_and_reset (char **arg);
 
 static int register_changed_p (int regnum);
 static int get_register (int regnum, int format);
@@ -640,7 +639,7 @@ mi_cmd_data_assign (char *command, char **argv, int argc)
      01-12-1999: Need to decide what to do with this for libgdb purposes. */
 
   expr = parse_expression (argv[0]);
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
   evaluate_expression (expr);
   do_cleanups (old_chain);
   return MI_CMD_DONE;
@@ -669,7 +668,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 
   expr = parse_expression (argv[0]);
 
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
 
@@ -1199,7 +1198,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	    }
 	}
       last_async_command = xstrdup (parse->token);
-      make_exec_cleanup ((make_cleanup_func) free_and_reset, &last_async_command);
+      make_exec_cleanup (free_current_contents, &last_async_command);
       /* FIXME: DELETE THIS! */
       if (parse->cmd->args_func != NULL)
 	return parse->cmd->args_func (parse->args, 0 /*from_tty */ );
@@ -1224,13 +1223,6 @@ mi_cmd_execute (struct mi_parse *parse)
       fputs_unfiltered ("\"\n", raw_stdout);
       return MI_CMD_ERROR;
     }
-}
-
-void
-free_and_reset (char **arg)
-{
-  free (*arg);
-  *arg = NULL;
 }
 
 static void
@@ -1516,7 +1508,3 @@ _initialize_mi_main ()
   /* FIXME: Should we notify main that we are here as a possible
      interpreter? */
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

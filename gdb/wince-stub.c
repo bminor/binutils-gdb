@@ -28,12 +28,13 @@
 #include <winsock.h>
 #include "wince-stub.h"
 
-#define MALLOC(n) (void *) LocalAlloc (LMEM_MOVEABLE, (UINT)(n))
+#define MALLOC(n) (void *) LocalAlloc (LMEM_MOVEABLE | LMEM_ZEROINIT, (UINT)(n))
 #define REALLOC(s, n) (void *) LocalReAlloc ((HLOCAL)(s), (UINT)(n), LMEM_MOVEABLE)
+#define FREE(s) LocalFree ((HLOCAL)(s))
 
 static int skip_next_id = 0;	/* Don't read next API code from socket */
 
-/* v-style interface for handling varying argyment list error messages.
+/* v-style interface for handling varying argument list error messages.
    Displays the error message in a dialog box and exits when user clicks
    on OK. */
 static void
@@ -54,6 +55,27 @@ stub_error (LPCWSTR fmt, ...)
   va_list args;
   va_start (args, fmt);
   vstub_error (fmt, args);
+}
+
+/* Allocate a limited pool of memory, reallocating over unused
+   buffers.  This assumes that there will never be more than four
+   "buffers" required which, so far, is a safe assumption. */
+static LPVOID
+mempool (unsigned int len)
+{
+  static int outn = -1;
+  static LPWSTR outs[4] = {NULL, NULL, NULL, NULL};
+
+  if (++outn >= (sizeof (outs) / sizeof (outs[0])))
+    outn = 0;
+
+  /* Allocate space for the converted string, reusing any previously allocated
+     space, if applicable. */
+  if (outs[outn])
+    FREE (outs[outn]);
+  outs[outn] = (LPWSTR) MALLOC (len);
+
+  return outs[outn];
 }
 
 /* Standard "oh well" can't communicate error.  Someday this might attempt
@@ -86,28 +108,6 @@ sockwrite (LPCWSTR huh, int s, const void *str, size_t n)
 	return n;
       attempt_resync (huh, s);
     }
-}
-
-/* Allocate a limited pool of memory, reallocating over unused
-   buffers.  This assumes that there will never be more than four
-   "buffers" required which, so far, is a safe assumption. */
-static LPVOID
-mempool (gdb_wince_len len)
-{
-  static int n = -1;
-  static LPWSTR outs[4] = {NULL /*, NULL, etc. */};
-
-  if (++n >= (sizeof (outs) / sizeof (outs[0])))
-    n = 0;
-
-  /* Allocate space for the converted string, reusing any previously allocated
-     space, if applicable. */
-  if (outs[n])
-    outs[n] = (LPWSTR) REALLOC (outs[n], len);
-  else
-    outs[n] = (LPWSTR) MALLOC (len);
-
-  return outs[n];
 }
 
 /* Get a an ID (possibly) and a DWORD from the host gdb.
@@ -175,7 +175,7 @@ getmemory (LPCWSTR huh, int s, gdb_wince_id what, gdb_wince_len *inlen)
 
   *inlen = getlen (huh, s, what);
 
-  p = mempool (*inlen);		/* FIXME: check for error */
+  p = mempool ((unsigned int) *inlen);	/* FIXME: check for error */
 
   if ((gdb_wince_len) sockread (huh, s, p, *inlen) != *inlen)
     stub_error (L"error getting string from host.");
@@ -269,6 +269,49 @@ terminate_process (int s)
 	     &res, sizeof (res));
 }
 
+static int stepped = 0;
+/* Handle single step instruction.  FIXME: unneded? */
+static void
+flag_single_step (int s)
+{
+  stepped = 1;
+  skip_next_id = 0;
+}
+
+struct skipper
+{
+  wchar_t *s;
+  int nskip;
+} skippy[] =
+{
+  {L"Undefined Instruction:", 1},
+  {L"Data Abort:", 2},
+  {NULL, 0}
+};
+
+static int
+skip_message (DEBUG_EVENT *ev)
+{
+  char s[80];
+  DWORD nread;
+  struct skipper *skp;
+  int nbytes = ev->u.DebugString.nDebugStringLength;
+
+  if (nbytes > sizeof(s))
+    nbytes = sizeof(s);
+
+  memset (s, 0, sizeof (s));
+  if (!ReadProcessMemory (curproc, ev->u.DebugString.lpDebugStringData,
+			  s, nbytes, &nread))
+    return 0;
+
+  for (skp = skippy; skp->s != NULL; skp++)
+    if (wcsncmp ((wchar_t *) s, skp->s, wcslen (skp->s)) == 0)
+      return skp->nskip;
+
+  return 0;
+}
+
 /* Emulate WaitForDebugEvent.  Returns the debug event on success. */
 static void
 wait_for_debug_event (int s)
@@ -276,10 +319,32 @@ wait_for_debug_event (int s)
   DWORD ms = getdword (L"WaitForDebugEvent ms", s, GDB_WAITFORDEBUGEVENT);
   gdb_wince_result res;
   DEBUG_EVENT ev;
+  static int skip_next = 0;
 
-  res = WaitForDebugEvent (&ev, ms);
-  putresult (L"WaitForDebugEvent event", res, s, GDB_WAITFORDEBUGEVENT,
-	     &ev, sizeof (ev));
+  for (;;)
+    {
+      res = WaitForDebugEvent (&ev, ms);
+
+      if (ev.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
+	{
+	  if (skip_next)
+	    {
+	      skip_next--;
+	      goto ignore;
+	    }
+	  if (skip_next = skip_message (&ev))
+	    goto ignore;
+	}
+
+      putresult (L"WaitForDebugEvent event", res, s, GDB_WAITFORDEBUGEVENT,
+		 &ev, sizeof (ev));
+      break;
+
+    ignore:
+      ContinueDebugEvent (ev.dwProcessId, ev.dwThreadId, DBG_CONTINUE);
+    }
+
+  return;
 }
 
 /* Emulate GetThreadContext.  Returns CONTEXT structure on success. */
@@ -291,7 +356,7 @@ get_thread_context (int s)
   gdb_wince_result res;
 
   memset (&c, 0, sizeof (c));
-  c.ContextFlags = getdword (L"GetThreadContext handle", s, GDB_GETTHREADCONTEXT);
+  c.ContextFlags = getdword (L"GetThreadContext flags", s, GDB_GETTHREADCONTEXT);
 
   res = (gdb_wince_result) GetThreadContext (h, &c);
   putresult (L"GetThreadContext data", res, s, GDB_GETTHREADCONTEXT,
@@ -319,7 +384,7 @@ read_process_memory (int s)
   HANDLE h = gethandle (L"ReadProcessMemory handle", s, GDB_READPROCESSMEMORY);
   LPVOID p = getpvoid (L"ReadProcessMemory base", s, GDB_READPROCESSMEMORY);
   gdb_wince_len len = getlen (L"ReadProcessMemory size", s, GDB_READPROCESSMEMORY);
-  LPVOID buf = mempool ((gdb_wince_len) len);
+  LPVOID buf = mempool ((unsigned int) len);
   DWORD outlen;
   gdb_wince_result res;
 
@@ -400,12 +465,6 @@ close_handle (int s)
   putresult (L"CloseHandle result", res, s, GDB_CLOSEHANDLE, &res, sizeof (res));
 }
 
-/* Handle single step instruction */
-static void
-single_step (int s)
-{
-}
-
 /* Main loop for reading requests from gdb host on the socket. */
 static void
 dispatch (int s)
@@ -458,8 +517,8 @@ dispatch (int s)
 	  terminate_process (s);
 	  return;
 	case GDB_SINGLESTEP:
-	  single_step (s);
-	  return;
+	  flag_single_step (s);
+	  break;
 	default:
 	  {
 	    WCHAR buf[80];
@@ -494,8 +553,6 @@ WinMain (HINSTANCE hi, HINSTANCE hp, LPWSTR cmd, int show)
 
       wcstombs (host, whost, 80);	/* Convert from UNICODE to ascii */
     }
-
-  MessageBoxW (NULL, whost, L"GDB", MB_ICONERROR);
 
   /* Winsock initialization. */
   if (WSAStartup (MAKEWORD (1, 1), &wd))

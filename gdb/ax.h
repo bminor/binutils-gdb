@@ -143,6 +143,7 @@ extern struct agent_expr *new_agent_expr PARAMS ((CORE_ADDR));
 
 /* Free a agent expression.  */
 extern void free_agent_expr PARAMS ((struct agent_expr *));
+extern struct cleanup *make_cleanup_free_agent_expr (struct agent_expr *);
 
 /* Append a simple operator OP to EXPR.  */
 extern void ax_simple PARAMS ((struct agent_expr * EXPR, enum agent_op OP));

@@ -615,10 +615,6 @@ extern int
 target_read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
 extern int
-target_read_memory_section PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-				    asection * bfd_section));
-
-extern int
 target_write_memory PARAMS ((CORE_ADDR, char *, int));
 
 extern int
@@ -1337,10 +1333,6 @@ extern int default_memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 extern int default_memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
 extern breakpoint_from_pc_fn memory_breakpoint_from_pc;
-#ifndef BREAKPOINT_FROM_PC
-#define BREAKPOINT_FROM_PC(pcptr, lenptr) \
-     memory_breakpoint_from_pc (pcptr, lenptr)
-#endif
 
 
 /* From target.c */
@@ -1392,7 +1384,6 @@ extern int baud_rate;
 /* Timeout limit for response from target. */
 extern int remote_timeout;
 
-extern asection *target_memory_bfd_section;
 
 /* Functions for helping to write a native target.  */
 

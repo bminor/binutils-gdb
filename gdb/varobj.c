@@ -180,6 +180,8 @@ static struct varobj *new_root_variable PARAMS ((void));
 
 static void free_variable PARAMS ((struct varobj * var));
 
+static struct cleanup *make_cleanup_free_variable (struct varobj *var);
+
 static struct type *get_type PARAMS ((struct varobj * var));
 
 static struct type *get_type_deref PARAMS ((struct varobj * var));
@@ -416,7 +418,7 @@ varobj_create (char *objname,
 
   /* Fill out a varobj structure for the (root) variable being constructed. */
   var = new_root_variable ();
-  old_chain = make_cleanup ((make_cleanup_func) free_variable, var);
+  old_chain = make_cleanup_free_variable (var);
 
   if (expression != NULL)
     {
@@ -1371,6 +1373,18 @@ free_variable (var)
   FREEIF (var->name);
   FREEIF (var->obj_name);
   FREEIF (var);
+}
+
+static void
+do_free_variable_cleanup (void *var)
+{
+  free_variable (var);
+}
+
+static struct cleanup *
+make_cleanup_free_variable (struct varobj *var)
+{
+  return make_cleanup (do_free_variable_cleanup, var);
 }
 
 /* This returns the type of the variable. This skips past typedefs

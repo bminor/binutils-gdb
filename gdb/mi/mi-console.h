@@ -25,7 +25,3 @@
 extern struct ui_file *mi_console_file_new (struct ui_file *raw, const char *prefix);
 
 #endif
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

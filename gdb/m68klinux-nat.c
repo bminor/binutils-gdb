@@ -82,6 +82,9 @@ m68k_linux_register_u_addr (blockend, regnum)
 
 #ifndef USE_PROC_FS
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 void
 supply_gregset (gregsetp)
      gregset_t *gregsetp;

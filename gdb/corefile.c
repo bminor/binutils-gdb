@@ -270,21 +270,7 @@ read_memory (memaddr, myaddr, len)
     memory_error (status, memaddr);
 }
 
-void
-read_memory_section (memaddr, myaddr, len, bfd_section)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     asection *bfd_section;
-{
-  int status;
-  status = target_read_memory_section (memaddr, myaddr, len, bfd_section);
-  if (status != 0)
-    memory_error (status, memaddr);
-}
-
 /* Like target_read_memory, but slightly different parameters.  */
-
 int
 dis_asm_read_memory (memaddr, myaddr, len, info)
      bfd_vma memaddr;

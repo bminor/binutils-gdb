@@ -601,7 +601,7 @@ scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile
 					   LOC_BLOCK,	/* "I am a routine"        */
 					   &objfile->global_psymbols,
 					   (qPD[curr_pd].adrStart +	/* Starting address of rtn */
-				 ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)),
+				 ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))),
 					   0,	/* core addr?? */
 		      trans_lang ((enum hp_language) qPD[curr_pd].language),
 					   objfile);
@@ -614,7 +614,7 @@ scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile
 					   LOC_BLOCK,	/* "I am a routine"        */
 					   &objfile->static_psymbols,
 					   (qPD[curr_pd].adrStart +	/* Starting address of rtn */
-				 ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)),
+				 ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))),
 					   0,	/* core addr?? */
 		      trans_lang ((enum hp_language) qPD[curr_pd].language),
 					   objfile);
@@ -1628,7 +1628,7 @@ hpread_build_psymtabs (objfile, mainline)
     (struct partial_symtab **) alloca (dependencies_allocated *
 				       sizeof (struct partial_symtab *));
 
-  old_chain = make_cleanup ((make_cleanup_func) free_objfile, objfile);
+  old_chain = make_cleanup_free_objfile (objfile);
 
   last_source_file = 0;
 
@@ -1816,7 +1816,7 @@ hpread_build_psymtabs (objfile, mainline)
 		  past_first_source_file = 1;
 
 		valu = hpread_get_textlow (i, hp_symnum, objfile, symcount);
-		valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		pst = hpread_start_psymtab (objfile,
 					    namestring, valu,
 					    (hp_symnum
@@ -1850,7 +1850,7 @@ hpread_build_psymtabs (objfile, mainline)
 	      /* Now begin a new module and a new psymtab for it */
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      valu = hpread_get_textlow (i, hp_symnum, objfile, symcount);
-	      valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	      valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      if (!pst)
 		{
 		  pst = hpread_start_psymtab (objfile,
@@ -1869,11 +1869,11 @@ hpread_build_psymtabs (objfile, mainline)
 	      /* The beginning of a function.  DNTT_TYPE_ENTRY may also denote
 	         a secondary entry point.  */
 	      valu = dn_bufp->dfunc.hiaddr + ANOFFSET (objfile->section_offsets,
-						       SECT_OFF_TEXT);
+						       SECT_OFF_TEXT (objfile));
 	      if (valu > texthigh)
 		texthigh = valu;
 	      valu = dn_bufp->dfunc.lowaddr +
-		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      if (dn_bufp->dfunc.global)
 		add_psymbol_to_list (namestring, strlen (namestring),
@@ -1890,11 +1890,11 @@ hpread_build_psymtabs (objfile, mainline)
 
 	    case DNTT_TYPE_DOC_FUNCTION:
 	      valu = dn_bufp->ddocfunc.hiaddr + ANOFFSET (objfile->section_offsets,
-							  SECT_OFF_TEXT);
+							  SECT_OFF_TEXT (objfile));
 	      if (valu > texthigh)
 		texthigh = valu;
 	      valu = dn_bufp->ddocfunc.lowaddr +
-		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      if (dn_bufp->ddocfunc.global)
 		add_psymbol_to_list (namestring, strlen (namestring),
@@ -1984,7 +1984,7 @@ hpread_build_psymtabs (objfile, mainline)
 		valu = dn_bufp->dsvar.location;
 		/* Relocate in case it's in a shared library */
 		if (storage == LOC_STATIC)
-		  valu += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+		  valu += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 
 		/* Luckily, dvar, svar, typedef, and tagdef all
 		   have their "global" bit in the same place, so it works
@@ -2208,7 +2208,7 @@ hpread_start_psymtab (objfile,
      struct partial_symbol **global_syms;
      struct partial_symbol **static_syms;
 {
-  int offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+  int offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
   extern void hpread_psymtab_to_symtab ();
   struct partial_symtab *result =
   start_psymtab_common (objfile, objfile->section_offsets,
@@ -2246,7 +2246,7 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 {
   int i;
   struct objfile *objfile = pst->objfile;
-  int offset = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT);
+  int offset = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (objfile));
 
 #ifdef DUMPING
   /* Turn on to see what kind of a psymtab we've built. */

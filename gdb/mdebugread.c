@@ -384,7 +384,7 @@ static struct blockvector *
   new_bvect PARAMS ((int));
 
 static int
-parse_symbol PARAMS ((SYMR *, union aux_ext *, char *, int, struct section_offsets *));
+parse_symbol PARAMS ((SYMR *, union aux_ext *, char *, int, struct section_offsets *, struct objfile *));
 
 static struct type *
   parse_type PARAMS ((int, union aux_ext *, unsigned int, int *, int, char *));
@@ -716,12 +716,13 @@ add_pending (fh, sh, t)
    SYMR's handled (normally one).  */
 
 static int
-parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
+parse_symbol (sh, ax, ext_sh, bigend, section_offsets, objfile)
      SYMR *sh;
      union aux_ext *ax;
      char *ext_sh;
      int bigend;
      struct section_offsets *section_offsets;
+     struct objfile *objfile;
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (*const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *)) =
@@ -753,18 +754,18 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
          The value of a stBlock symbol is the displacement from the
          procedure address.  */
       if (sh->st != stEnd && sh->st != stBlock)
-	sh->value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	sh->value += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       break;
     case scData:
     case scSData:
     case scRData:
     case scPData:
     case scXData:
-      sh->value += ANOFFSET (section_offsets, SECT_OFF_DATA);
+      sh->value += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
       break;
     case scBss:
     case scSBss:
-      sh->value += ANOFFSET (section_offsets, SECT_OFF_BSS);
+      sh->value += ANOFFSET (section_offsets, SECT_OFF_BSS (objfile));
       break;
     }
 
@@ -2042,7 +2043,7 @@ parse_procedure (pr, search_symtab, pst)
          procedure descriptor in e->pdr.adr.
          As the address in the procedure descriptor is usually relative,
          we would have to relocate e->pdr.adr with cur_fdr->adr and
-         ANOFFSET (pst->section_offsets, SECT_OFF_TEXT).
+         ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (pst->objfile)).
          Unfortunately cur_fdr->adr and e->pdr.adr are both absolute
          in shared libraries on some systems, and on other systems
          e->pdr.adr is sometimes offset by a bogus value.
@@ -2102,13 +2103,14 @@ ecoff_relocate_efi (sym, delta)
 
    This routine clobbers top_stack->cur_block and ->cur_st. */
 
-static void parse_external PARAMS ((EXTR *, int, struct section_offsets *));
+static void parse_external PARAMS ((EXTR *, int, struct section_offsets *, struct objfile *));
 
 static void
-parse_external (es, bigend, section_offsets)
+parse_external (es, bigend, section_offsets, objfile)
      EXTR *es;
      int bigend;
      struct section_offsets *section_offsets;
+     struct objfile *objfile;
 {
   union aux_ext *ax;
 
@@ -2183,7 +2185,7 @@ parse_external (es, bigend, section_offsets)
 
       /* Note that the case of a symbol with indexNil must be handled
          anyways by parse_symbol().  */
-      parse_symbol (&es->asym, ax, (char *) NULL, bigend, section_offsets);
+      parse_symbol (&es->asym, ax, (char *) NULL, bigend, section_offsets, objfile);
       break;
     default:
       break;
@@ -2474,12 +2476,12 @@ parse_partial_symbols (objfile)
 	{
 	case stProc:
 	  /* Beginnning of Procedure */
-	  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	  break;
 	case stStaticProc:
 	  /* Load time only static procs */
 	  ms_type = mst_file_text;
-	  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	  break;
 	case stGlobal:
 	  /* External symbol */
@@ -2492,12 +2494,12 @@ parse_partial_symbols (objfile)
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
 	      ms_type = mst_data;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
 	      ms_type = mst_bss;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
 	    }
 	  else
 	    ms_type = mst_abs;
@@ -2507,17 +2509,17 @@ parse_partial_symbols (objfile)
 	  if (SC_IS_TEXT (ext_in->asym.sc))
 	    {
 	      ms_type = mst_file_text;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	    }
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
 	      ms_type = mst_file_data;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
 	      ms_type = mst_file_bss;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
 	    }
 	  else
 	    ms_type = mst_abs;
@@ -2561,7 +2563,7 @@ parse_partial_symbols (objfile)
 	{
 	  textlow = fh->adr;
 	  if (relocatable || textlow != 0)
-	    textlow += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	    textlow += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	}
       else
 	textlow = 0;
@@ -2649,7 +2651,7 @@ parse_partial_symbols (objfile)
 		      CORE_ADDR procaddr;
 		      long isym;
 
-		      sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		      sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		      if (sh.st == stStaticProc)
 			{
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
@@ -2657,7 +2659,7 @@ parse_partial_symbols (objfile)
 							       sh.value,
 							       mst_file_text,
 							       NULL,
-							       SECT_OFF_TEXT,
+							       SECT_OFF_TEXT (objfile),
 							       NULL,
 							       objfile);
 			}
@@ -2700,12 +2702,12 @@ parse_partial_symbols (objfile)
 			case scPData:
 			case scXData:
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+			  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 			  prim_record_minimal_symbol_and_info (namestring,
 							       sh.value,
 							       mst_file_data,
 							       NULL,
-							       SECT_OFF_DATA,
+							       SECT_OFF_DATA (objfile),
 							       NULL,
 							       objfile);
 			  break;
@@ -2714,12 +2716,12 @@ parse_partial_symbols (objfile)
 			  /* FIXME!  Shouldn't this use cases for bss, 
 			     then have the default be abs? */
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+			  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
 			  prim_record_minimal_symbol_and_info (namestring,
 							       sh.value,
 							       mst_file_bss,
 							       NULL,
-							       SECT_OFF_BSS,
+							       SECT_OFF_BSS (objfile),
 							       NULL,
 							       objfile);
 			  break;
@@ -2767,7 +2769,7 @@ parse_partial_symbols (objfile)
 #define CUR_SYMBOL_TYPE type_code
 #define CUR_SYMBOL_VALUE sh.value
 #define START_PSYMTAB(ofile,fname,low,symoff,global_syms,static_syms)\
-  pst = save_pst
+  (pst = save_pst)
 #define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set) (void)0
 #define HANDLE_RBRAC(val) \
   if ((val) > save_pst->texthigh) save_pst->texthigh = (val);
@@ -2818,18 +2820,18 @@ parse_partial_symbols (objfile)
 		  /* The value of a stEnd symbol is the displacement from the
 		     corresponding start symbol value, do not relocate it.  */
 		  if (sh.st != stEnd)
-		    sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		    sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		  break;
 		case scData:
 		case scSData:
 		case scRData:
 		case scPData:
 		case scXData:
-		  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+		  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 		  break;
 		case scBss:
 		case scSBss:
-		  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+		  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
 		  break;
 		}
 
@@ -2842,7 +2844,7 @@ parse_partial_symbols (objfile)
 		case stStaticProc:
 		  prim_record_minimal_symbol_and_info (name, sh.value,
 						       mst_file_text, NULL,
-						       SECT_OFF_TEXT, NULL,
+						       SECT_OFF_TEXT (objfile), NULL,
 						       objfile);
 
 		  /* FALLTHROUGH */
@@ -2915,13 +2917,13 @@ parse_partial_symbols (objfile)
 		  if (SC_IS_DATA (sh.sc))
 		    prim_record_minimal_symbol_and_info (name, sh.value,
 							 mst_file_data, NULL,
-							 SECT_OFF_DATA,
+							 SECT_OFF_DATA (objfile),
 							 NULL,
 							 objfile);
 		  else
 		    prim_record_minimal_symbol_and_info (name, sh.value,
 							 mst_file_bss, NULL,
-							 SECT_OFF_BSS,
+							 SECT_OFF_BSS (objfile),
 							 NULL,
 							 objfile);
 		  class = LOC_STATIC;
@@ -3026,18 +3028,18 @@ parse_partial_symbols (objfile)
 		{
 		case scText:
 		case scRConst:
-		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		  break;
 		case scData:
 		case scSData:
 		case scRData:
 		case scPData:
 		case scXData:
-		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 		  break;
 		case scBss:
 		case scSBss:
-		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
 		  break;
 		}
 
@@ -3435,7 +3437,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      else
 		{
 		  /* Handle encoded stab line number. */
-		  valu += ANOFFSET (pst->section_offsets, SECT_OFF_TEXT);
+		  valu += ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (pst->objfile));
 		  record_line (current_subfile, sh.index, valu);
 		}
 	    }
@@ -3446,7 +3448,7 @@ psymtab_to_symtab_1 (pst, filename)
 	  else
 	    complain (&stab_unknown_complaint, name);
 	}
-      st = end_symtab (pst->texthigh, pst->objfile, SECT_OFF_TEXT);
+      st = end_symtab (pst->texthigh, pst->objfile, SECT_OFF_TEXT (pst->objfile));
       end_stabs ();
 
       /* Sort the symbol table now, we are done adding symbols to it.
@@ -3561,7 +3563,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      (*swap_sym_in) (cur_bfd, sym_ptr, &sh);
 	      c = parse_symbol (&sh,
 				debug_info->external_aux + fh->iauxBase,
-				sym_ptr, fh->fBigendian, pst->section_offsets);
+				sym_ptr, fh->fBigendian, pst->section_offsets, pst->objfile);
 	      sym_ptr += c * external_sym_size;
 	    }
 
@@ -3629,7 +3631,7 @@ psymtab_to_symtab_1 (pst, filename)
 
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
-	parse_external (ext_ptr, fh->fBigendian, pst->section_offsets);
+	parse_external (ext_ptr, fh->fBigendian, pst->section_offsets, pst->objfile);
 
       /* If there are undefined symbols, tell the user.
          The alpha has an undefined symbol for every symbol that is

@@ -1389,7 +1389,7 @@ init_syscall_table (void)
 #if defined (SYS_yield)
   syscall_table[SYS_yield] = "yield";
 #endif
-};
+}
 
 /*
  * Prettyprint a single syscall by number.

@@ -191,18 +191,16 @@ record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
     {
     case mst_text:
     case mst_file_text:
-      section = SECT_OFF_TEXT;
+      section = bfd_section->index;
 #ifdef SMASH_TEXT_ADDRESS
       SMASH_TEXT_ADDRESS (address);
 #endif
       break;
     case mst_data:
     case mst_file_data:
-      section = SECT_OFF_DATA;
-      break;
     case mst_bss:
     case mst_file_bss:
-      section = SECT_OFF_BSS;
+      section = bfd_section->index;
       break;
     default:
       section = -1;
@@ -293,8 +291,7 @@ elf_symtab_read (objfile, dynamic)
       if (number_of_symbols < 0)
 	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
-      /* FIXME: Should use section specific offset, not SECT_OFF_TEXT. */
-      offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
@@ -305,6 +302,7 @@ elf_symtab_read (objfile, dynamic)
 	      continue;
 	    }
 
+          offset = ANOFFSET (objfile->section_offsets, sym->section->index);
 	  if (dynamic
 	      && sym->section == &bfd_und_section
 	      && (sym->flags & BSF_FUNCTION))
@@ -460,15 +458,15 @@ elf_symtab_read (objfile, dynamic)
 		      index = SECT_OFF_MAX;
 		      if (STREQ ("Bbss.bss", sym->name))
 			{
-			  index = SECT_OFF_BSS;
+			  index = SECT_OFF_BSS (objfile);
 			}
 		      else if (STREQ ("Ddata.data", sym->name))
 			{
-			  index = SECT_OFF_DATA;
+			  index = SECT_OFF_DATA (objfile);
 			}
 		      else if (STREQ ("Drodata.rodata", sym->name))
 			{
-			  index = SECT_OFF_RODATA;
+			  index = SECT_OFF_RODATA (objfile);
 			}
 		      if (index != SECT_OFF_MAX)
 			{
@@ -593,7 +591,7 @@ elf_symfile_read (objfile, mainline)
   CORE_ADDR offset;
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   memset ((char *) &ei, 0, sizeof (ei));
 

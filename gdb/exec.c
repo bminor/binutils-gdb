@@ -490,49 +490,6 @@ xfer_memory (memaddr, myaddr, len, write, target)
   xfer_fn = write ? bfd_set_section_contents : bfd_get_section_contents;
   nextsectaddr = memend;
 
-#if 0				/* Stu's implementation */
-/* If a section has been specified, try to use it.  Note that we cannot use the
-   specified section directly.  This is because it usually comes from the
-   symbol file, which may be different from the exec or core file.  Instead, we
-   have to lookup the specified section by name in the bfd associated with
-   to_sections.  */
-
-  if (target_memory_bfd_section)
-    {
-      asection *s;
-      bfd *abfd;
-      asection *target_section;
-      bfd *target_bfd;
-
-      s = target_memory_bfd_section;
-      abfd = s->owner;
-
-      target_bfd = target->to_sections->bfd;
-      target_section = bfd_get_section_by_name (target_bfd, bfd_section_name (abfd, s));
-
-      if (target_section)
-	{
-	  bfd_vma sec_addr;
-	  bfd_size_type sec_size;
-
-	  sec_addr = bfd_section_vma (target_bfd, target_section);
-	  sec_size = target_section->_raw_size;
-
-	  /* Make sure the requested memory starts inside the section.  */
-
-	  if (memaddr >= sec_addr
-	      && memaddr < sec_addr + sec_size)
-	    {
-	      /* Cut back length in case request overflows the end of the section. */
-	      len = min (len, sec_addr + sec_size - memaddr);
-
-	      res = xfer_fn (target_bfd, target_section, myaddr, memaddr - sec_addr, len);
-
-	      return res ? len : 0;
-	    }
-	}
-    }
-#endif /* 0, Stu's implementation */
   for (p = target->to_sections; p < target->to_sections_end; p++)
     {
       if (overlay_debugging && section && p->the_bfd_section &&

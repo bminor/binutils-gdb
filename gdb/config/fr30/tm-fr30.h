@@ -186,7 +186,7 @@ extern void fr30_store_return_value PARAMS ((struct type * type, char *valbuf));
 #define TARGET_FR30
 
 /* IEEE format floating point */
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* Define other aspects of the stack frame.  */
 

@@ -118,8 +118,8 @@ extern CORE_ADDR find_solib_trampoline_target (CORE_ADDR pc);
    need to skip over the dynamic linker call.  This function decides
    when to skip, and where to skip to.  See the comments for
    SKIP_SOLIB_RESOLVER at the top of infrun.c.  */
-extern CORE_ADDR arm_skip_solib_resolver (CORE_ADDR pc);
-#define SKIP_SOLIB_RESOLVER arm_skip_solib_resolver
+extern CORE_ADDR arm_linux_skip_solib_resolver (CORE_ADDR pc);
+#define SKIP_SOLIB_RESOLVER arm_linux_skip_solib_resolver
 
 /* When we call a function in a shared library, and the PLT sends us
    into the dynamic linker to find the function's real address, we

@@ -358,7 +358,7 @@ hpread_build_psymtabs (objfile, mainline)
     (struct partial_symtab **) alloca (dependencies_allocated *
 				       sizeof (struct partial_symtab *));
 
-  old_chain = make_cleanup (free_objfile, objfile);
+  old_chain = make_cleanup_free_objfile (objfile);
 
   last_source_file = 0;
 
@@ -466,7 +466,7 @@ hpread_build_psymtabs (objfile, mainline)
 		  past_first_source_file = 1;
 
 		valu = hpread_get_textlow (i, hp_symnum, objfile);
-		valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		pst = hpread_start_psymtab (objfile,
 					    namestring, valu,
 					    (hp_symnum
@@ -484,7 +484,7 @@ hpread_build_psymtabs (objfile, mainline)
 	         is supposed to be.  */
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      valu = hpread_get_textlow (i, hp_symnum, objfile);
-	      valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	      valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      if (!pst)
 		{
 		  pst = hpread_start_psymtab (objfile,
@@ -502,11 +502,11 @@ hpread_build_psymtabs (objfile, mainline)
 	      /* The beginning of a function.  DNTT_TYPE_ENTRY may also denote
 	         a secondary entry point.  */
 	      valu = dn_bufp->dfunc.hiaddr + ANOFFSET (objfile->section_offsets,
-						       SECT_OFF_TEXT);
+						       SECT_OFF_TEXT (objfile));
 	      if (valu > texthigh)
 		texthigh = valu;
 	      valu = dn_bufp->dfunc.lowaddr +
-		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      add_psymbol_to_list (namestring, strlen (namestring),
 				   VAR_NAMESPACE, LOC_BLOCK,
@@ -1775,7 +1775,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
   unsigned long desc;
   int type;
   CORE_ADDR valu;
-  int offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
+  int offset = ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
   union dnttentry *dn_temp;
   dnttpointer hp_type;
   struct symbol *sym;

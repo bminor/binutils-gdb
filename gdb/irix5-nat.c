@@ -33,6 +33,9 @@
 #include <sys/procfs.h>
 #include <setjmp.h>		/* For JB_XXX.  */
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 static void
 fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
 
@@ -852,7 +855,9 @@ symbol_add_stub (arg)
 	text_addr = bfd_section_vma (so->abfd, lowest_sect) + LM_OFFSET (so);
     }
 
-  section_addrs.text_addr = text_addr;
+
+  section_addrs.other[0].name = ".text";
+  section_addrs.other[0].addr = text_addr;
   so->objfile = symbol_file_add (so->so_name, so->from_tty,
 				 &section_addrs, 0, 0);
   return (1);
