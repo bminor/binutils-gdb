@@ -1,3 +1,10 @@
+2002-06-17  Tom Rix  <trix@redhat.com>
+
+	* emultempl/elf32.em: gld*_get_script:  Check for 
+	GENERATE_COMBRELOC_SCRIPT.
+	* scripttempl/elfd10v.sc : Fix STACK and INSN.
+	* emulparams/d10velf.sh : Fix TEXT_START_ADDR.
+
 Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* configure.tgt: Add support for sh[1234]*le*-*-elf, sh[1234]*-*-elf.

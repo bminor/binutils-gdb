@@ -1383,13 +1383,17 @@ echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}
 sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
+if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.shared && link_info.combreloc) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsc                    >> e${EMULATION_NAME}.c
+fi
 echo '  ; else if (link_info.shared) return'		   >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xs                     >> e${EMULATION_NAME}.c
 fi
+if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.combreloc) return'            >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xc                     >> e${EMULATION_NAME}.c
+fi
 echo '  ; else return'                                     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
 echo '; }'                                                 >> e${EMULATION_NAME}.c

@@ -66,14 +66,14 @@ ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 MEMORY
 {
   UNIFIED : org = 0,         len = 0x1000000
-  INSN    : org = 0x1000000, len = 0x40000
+  INSN    : org = 0x1014000, len = 0x40000
   DATA    : org = 0x2000004, len = 0x7FFC
-  STACK   : org = 0x2007FFE, len = 4
+  STACK   : org = 0x200BFFE, len = 4
 }
 
 SECTIONS
 {
-  .text :
+  .text ${RELOCATING+${TEXT_START_ADDR}} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     KEEP (*(.init))
