@@ -1,3 +1,7 @@
+Thu Apr 22 16:37:33 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* gdbint.texinfo: document FRAME_SAVED_PC and FRAME_CHAIN.
+
 Wed Apr 21 15:18:47 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stabs.texinfo (Parameters): More on "local parameters".
