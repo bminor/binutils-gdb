@@ -3762,7 +3762,8 @@ __asm__(".symver original_foo,foo@@VERS_1.1");
 in the C source file.  This renames the function @samp{original_foo} to
 be an alias for @samp{foo} bound to the version node @samp{VERS_1.1}.
 The @samp{local:} directive can be used to prevent the symbol
-@samp{original_foo} from being exported.
+@samp{original_foo} from being exported. A @samp{.symver} directive
+takes precedence over a version script.
 
 The second GNU extension is to allow multiple versions of the same
 function to appear in a given shared library.  In this way you can make
