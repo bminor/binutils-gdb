@@ -3070,7 +3070,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3093,7 +3093,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction, instruction_0);
@@ -3115,7 +3115,7 @@
 *mipsII:
 *mipsIII:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_branch_bug ();
   TRACE_BRANCH_INPUT (PREVCOC1());
   if (PREVCOC1() == TF)
@@ -3145,7 +3145,7 @@
 *vr5000:
 *r3900:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_branch_bug ();
   if (GETFCC(CC) == TF)
     {
@@ -3210,7 +3210,7 @@
 *mipsII:
 *mipsIII:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   do_c_cond_fmt (SD_, FMT, FT, FS, 0, COND, instruction_0);
 }
 
@@ -3223,7 +3223,7 @@
 *vr5000:
 *r3900:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   do_c_cond_fmt (SD_, FMT, FT, FS, CC, COND, instruction_0);
 }
 
@@ -3238,7 +3238,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3258,7 +3258,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
   if ((fmt != fmt_single) && (fmt != fmt_double))
    SignalException(ReservedInstruction,instruction_0);
@@ -3276,7 +3276,7 @@
 *mipsII:
 *mipsIII:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   if (X)
     {
       if (FS == 0)
@@ -3303,7 +3303,7 @@
 *vr5000:
 *r3900:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   if (X)
     {
       /* control to */
@@ -3358,7 +3358,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt == fmt_double) | 0)
       SignalException(ReservedInstruction,instruction_0);
@@ -3378,7 +3378,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt == fmt_long) | ((fmt == fmt_long) || (fmt == fmt_word)))
       SignalException(ReservedInstruction,instruction_0);
@@ -3403,7 +3403,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt == fmt_single) | 0)
       SignalException(ReservedInstruction,instruction_0);
@@ -3425,7 +3425,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt == fmt_word) | ((fmt == fmt_long) || (fmt == fmt_word)))
       SignalException(ReservedInstruction,instruction_0);
@@ -3447,7 +3447,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3463,7 +3463,7 @@
 "dm%s<X>c1 r<RT>, f<FS>"
 *mipsIII:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   if (X)
     {
@@ -3499,7 +3499,7 @@
 *vr5000:
 *r3900:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   if (X)
     {
@@ -3536,7 +3536,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3557,7 +3557,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3577,7 +3577,7 @@
 *vr5000:
 *r3900:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   COP_LD (1, FT, do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
@@ -3588,7 +3588,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   COP_LD (1, FD, do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX]));
 }
@@ -3606,7 +3606,7 @@
 *vr5000:
 *r3900:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   COP_LW (1, FT, do_load (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
@@ -3617,7 +3617,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   COP_LW (1, FD, do_load (SD_, AccessLength_WORD, GPR[BASE], GPR[INDEX]));
 }
@@ -3633,7 +3633,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     StoreFPR(FD,fmt_double,Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
   }
@@ -3646,7 +3646,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     StoreFPR(FD,fmt_single,Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
   }
@@ -3661,7 +3661,7 @@
 *mipsII:
 *mipsIII:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   if (X)
     { /*MTC1*/
       if (SizeFGR() == 64)
@@ -3687,7 +3687,7 @@
 *r3900:
 {
   int fs = FS;
-  check_fpu(SD_);
+  check_fpu (SD_);
   if (X)
     /*MTC1*/
     StoreFPR (FS, fmt_uninterpreted_32, VL4_8 (GPR[RT]));
@@ -3708,7 +3708,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   StoreFPR(FD,fmt,ValueFPR(FS,fmt));
 }
 
@@ -3721,7 +3721,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   if (GETFCC(CC) == TF)
     GPR[RD] = GPR[RS];
 }
@@ -3736,7 +3736,7 @@
 *vr5000:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
    if (GETFCC(CC) == TF)
      StoreFPR (FD, fmt, ValueFPR (FS, fmt));
@@ -3752,7 +3752,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   if (GPR[RT] != 0)
     StoreFPR (FD, FMT, ValueFPR (FS, FMT));
   else
@@ -3773,7 +3773,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   if (GPR[RT] == 0)
     StoreFPR (FD, FMT, ValueFPR (FS, FMT));
   else
@@ -3788,7 +3788,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   StoreFPR(FD,fmt_double,Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
 }
 
@@ -3800,7 +3800,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   StoreFPR(FD,fmt_single,Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
 }
 
@@ -3820,7 +3820,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3842,7 +3842,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3859,7 +3859,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   StoreFPR(FD,fmt_double,Negate(Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
 }
 
@@ -3871,7 +3871,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   StoreFPR(FD,fmt_single,Negate(Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
 }
 
@@ -3883,7 +3883,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   StoreFPR(FD,fmt_double,Negate(Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
 }
 
@@ -3895,7 +3895,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   StoreFPR(FD,fmt_single,Negate(Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
 }
 
@@ -3924,7 +3924,7 @@
 *vr5000:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
   if ((fmt != fmt_single) && (fmt != fmt_double))
    SignalException(ReservedInstruction,instruction_0);
@@ -3944,7 +3944,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -3965,7 +3965,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
   if ((fmt != fmt_single) && (fmt != fmt_double))
    SignalException(ReservedInstruction,instruction_0);
@@ -3982,7 +3982,7 @@
 *vr5000:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
   if ((fmt != fmt_single) && (fmt != fmt_double))
    SignalException(ReservedInstruction,instruction_0);
@@ -4002,7 +4002,7 @@
 *vr5000:
 *r3900:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), COP_SD (1, FT));
 }
 
@@ -4013,7 +4013,7 @@
 *mipsV:
 *vr5000:
 {
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX], COP_SD (1, FS));
 }
@@ -4030,7 +4030,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -4052,7 +4052,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
@@ -4076,7 +4076,7 @@
 {
   address_word base = GPR[BASE];
   address_word offset = EXTEND16 (OFFSET);
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
     address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
@@ -4114,7 +4114,7 @@
 
   address_word base = GPR[BASE];
   address_word index = GPR[INDEX];
-  check_fpu(SD_);
+  check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   {
    address_word vaddr = loadstore_ea (SD_, base, index);
@@ -4154,7 +4154,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
   if ((fmt != fmt_single) && (fmt != fmt_double))
    SignalException(ReservedInstruction,instruction_0);
@@ -4175,7 +4175,7 @@
 *r3900:
 {
   int fmt = FMT;
-  check_fpu(SD_);
+  check_fpu (SD_);
   {
   if ((fmt != fmt_single) && (fmt != fmt_double))
    SignalException(ReservedInstruction,instruction_0);
