@@ -248,10 +248,7 @@ extern int sparc_intreg_size (void);
 #define BELIEVE_PCC_PROMOTION 1
 
 /* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  SKIP_PROLOGUE_FRAMELESS_P advances
-   the PC past some of the prologue, but stops as soon as it
-   knows that the function has a frame.  Its result is equal
-   to its input PC if the function is frameless, unequal otherwise.  */
+   to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(PC) sparc_skip_prologue (PC, 0)
 
@@ -312,6 +309,10 @@ extern CORE_ADDR sparc32_stack_align (CORE_ADDR addr);
      sparc_reg_struct_has_addr (GCC_P, TYPE)
 extern int sparc_reg_struct_has_addr (int, struct type *);
 
+/* Is the prologue at PC frameless?  */
+#define PROLOGUE_FRAMELESS_P(PC) sparc_prologue_frameless_p (PC)
+extern int sparc_prologue_frameless_p (CORE_ADDR);
+
 #endif /* GDB_MULTI_ARCH */
 
 #if defined (GDB_MULTI_ARCH) && (GDB_MULTI_ARCH > 0)
@@ -332,15 +333,6 @@ extern int sparc_y_regnum (void);
 
 #define PC_ADJUST(PC) sparc_pc_adjust (PC)
 extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
-
-/* Advance PC across any function entry prologue instructions to reach
-   some "real" code.  SKIP_PROLOGUE_FRAMELESS_P advances the PC past
-   some of the prologue, but stops as soon as it knows that the
-   function has a frame.  Its result is equal to its input PC if the
-   function is frameless, unequal otherwise.  */
-
-#define SKIP_PROLOGUE_FRAMELESS_P(PC) sparc_skip_prologue (PC, 1)
-extern CORE_ADDR sparc_skip_prologue (CORE_ADDR, int);
 
 /* If an argument is declared "register", Sun cc will keep it in a register,
    never saving it onto the stack.  So we better not believe the "p" symbol

@@ -154,11 +154,7 @@ generic_remote_translate_xfer_address (CORE_ADDR gdb_addr, int gdb_len,
 int
 generic_prologue_frameless_p (CORE_ADDR ip)
 {
-#ifdef SKIP_PROLOGUE_FRAMELESS_P
-  return ip == SKIP_PROLOGUE_FRAMELESS_P (ip);
-#else
   return ip == SKIP_PROLOGUE (ip);
-#endif
 }
 
 /* New/multi-arched targets should use the correct gdbarch field

@@ -296,6 +296,14 @@ arc_skip_prologue (CORE_ADDR pc, int frameless_p)
   return codestream_tell ();
 }
 
+/* Is the prologue at PC frameless?  */
+
+int
+arc_prologue_frameless_p (CORE_ADDR pc)
+{
+  return (pc == arc_skip_prologue (pc, 1);
+}
+
 /* Return the return address for a frame.
    This is used to implement FRAME_SAVED_PC.
    This is taken from frameless_look_for_prologue.  */

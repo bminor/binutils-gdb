@@ -691,6 +691,14 @@ sparc_skip_prologue (CORE_ADDR start_pc, int frameless_p)
   return examine_prologue (start_pc, frameless_p, NULL, NULL);
 }
 
+/* Is the prologue at IP frameless?  */
+
+int
+sparc_prologue_frameless_p (CORE_ADDR ip)
+{
+  return ip == sparc_skip_prologue (ip, 1);
+}
+
 /* Check instruction at ADDR to see if it is a branch.
    All non-annulled instructions will go to NPC or will trap.
    Set *TARGET if we find a candidate branch; set to zero if not.
@@ -2777,10 +2785,7 @@ sparc64_register_byte (int regno)
 }
 
 /* Advance PC across any function entry prologue instructions to reach
-   some "real" code.  SKIP_PROLOGUE_FRAMELESS_P advances the PC past
-   some of the prologue, but stops as soon as it knows that the
-   function has a frame.  Its result is equal to its input PC if the
-   function is frameless, unequal otherwise.  */
+   some "real" code.  */
 
 static CORE_ADDR
 sparc_gdbarch_skip_prologue (CORE_ADDR ip)
@@ -2986,6 +2991,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_reg_struct_has_addr (gdbarch, sparc_reg_struct_has_addr);
   set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
   set_gdbarch_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
+  set_gdbarch_prologue_frameless_p (gdbarch, sparc_prologue_frameless_p);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_skip_prologue (gdbarch, sparc_gdbarch_skip_prologue);
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);

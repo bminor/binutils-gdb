@@ -1,3 +1,18 @@
+2002-04-21  David S. Miller  <davem@redhat.com>
+
+	* arch-utils.c (generic_prologue_frameless_p): Kill
+	SKIP_PROLOGUE_FRAMELESS_P code.
+	* config/arc/tm-arc.h (SKIP_PROLOGUE_FRAMELESS_P): Delete
+	references.
+	(PROLOGUE_FRAMELESS_P, arc_prologue_frameless_p): New.
+	* arc-tdep.c (arc_prologue_frameless_p): Implement.
+	* config/arc/tm-sparc.h (SKIP_PROLOGUE_FRAMELESS_P): Delete
+	references.
+	(PROLOGUE_FRAMELESS_P, sparc_prologue_frameless_p): New.
+	* sparc-tdep.c (sparc_prologue_frameless_p): Implement.
+	(sparc_gdbarch_init): Pass it to
+	set_gdbarch_prologue_frameless_p.
+	
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (ALLDEPFILES): Add alphabsd-nat.c.
