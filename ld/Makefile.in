@@ -9,9 +9,8 @@ srcdir = .
 destdir = /usr/local
 
 version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
-prefix = $(destdir)
-bindir = $(prefix)/bin
-libdir = $(prefix)/lib
+bindir = $(destdir)/H-$(host_alias)/T-$(target_alias)/bin
+libdir = $(destdir)/H-$(host_alias)/T-$(target_alias)/lib
 libsubdir = $(libdir)/gcc/$(target)/$(version)
 
 # Seach path to override the default search path for -lfoo libraries.
@@ -36,7 +35,7 @@ BISONFLAGS = -v
 
 SCRIPTS = ldgld68k.sc ldgld.sc \
 	ldlnk960.sc ldlnk960r.sc ldgld960.sc \
-	ldm88k.sc ldglda29k.sc news.sc h8300hds.sc
+	ldm88k.sc ldglda29k.sc news.sc h8300hds.sc ebmon29k.sc
 
 #### target and host dependent Makefile fragments come in here.
 ###
@@ -95,7 +94,7 @@ BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwarn.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o ldindr.o \
-	ldm88k.o ldglda29k.o news.o h8300hds.o \
+	ldm88k.o ldglda29k.o news.o h8300hds.o ebmon29k.o \
 	ldgld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h ldsym.h ldlang.h ldexp.h \
@@ -124,8 +123,8 @@ all: Makefile $(LD_PROG)
 ldgram.h ldgram.c: ldgram.y
 	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y -o ldgram.c
 #	These are in case BISON is really yacc (which ignores -o).
-	if [ -f y.tab.c -a ! -f ldgram.c ]; then mv y.tab.c ldgram.c; fi
-	if [ -f y.tab.h -a ! -f ldgram.h ]; then mv y.tab.h ldgram.h; fi
+	if [ -f y.tab.c -a ! -f ldgram.c ]; then mv y.tab.c ldgram.c; else true ; fi
+	if [ -f y.tab.h -a ! -f ldgram.h ]; then mv y.tab.h ldgram.h; else true ; fi
 
 ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c
@@ -137,6 +136,12 @@ ldgld.c: $(srcdir)/ldtemplate
 news.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/news/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"/news/g -e s/"<TARGET>"/NEWS/g <$< >$@
+
+ebmon29k.c: $(srcdir)/ldtemplate
+	sed -e s/"<ldtarget>"/ebmon29k/g -e s/"<arch>"/a29k/g \
+	-e s/"gld<target>"/ebmon29k/g -e s/"GLD<TARGET>"/EBMON29K/g \
+	-e s/"<ldtarget>.x"/ebmon.x/ <$< >$@
+
 ldgld68k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld68k/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"/68k/g -e s/"<TARGET>"/68K/g <$< >$@
@@ -150,6 +155,7 @@ ldm88k.c: $(srcdir)/ldtemplate
 # The .c files for these are generated from ldtemplete.
 ldgld.o: ./mkscript ldgld.x ldgld.xr ldgld.xu
 news.o: ./mkscript news.x news.xr news.xu
+ebmon29k.o: ./mkscript ebmon29k.x ebmon29k.xr ebmon29k.xu
 ldgld68k.o: ./mkscript ldgld68k.x ldgld68k.xr ldgld68k.xu
 ldglda29k.o: ./mkscript ldglda29k.x ldglda29k.xr ldglda29k.xu
 ldm88k.o: ./mkscript ldm88k.x ldm88k.xr ldm88k.xu
@@ -215,6 +221,10 @@ ldglda29k.x :ldglda29k.sc
 ldglda29kr.x :ldglda29kr.sc 
 ldglda29kUr.x :ldglda29kUr.sc 
 
+ebmon29k.x :ebmon29k.sc 
+ebmon29kr.x :ebmon29kr.sc 
+ebmon29kUr.x :ebmon29kUr.sc 
+
 stage1:	force
 	- mkdir stage1
 	- mv -f $(STAGESTUFF) stage1
@@ -277,7 +287,9 @@ release:
 objdump:objdump.c 
 
 install: $(LD_PROG)
-	$(INSTALL_PROGRAM) ld.new $(libsubdir)/ld
+#	$(INSTALL_PROGRAM) ld.new $(libsubdir)/ld
+	cp $(LD_PROG) $(bindir)/ld.new
+	mv -f $(bindir)/ld.new $(bindir)/ld
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
