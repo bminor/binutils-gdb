@@ -521,6 +521,27 @@ such as registers.
 @smallexample
 =architecture-changed
 @end smallexample
+
+@item register-update
+A register has been changed in the inferior. The event will include the
+@code{number} of the register that the UI needs to update.
+@smallexample
+=register-changed,number="3"
+@end smallexample
+
+@item selected-frame-level-changed
+This event is sent whenever the user changes @value{GDBN}'s selected frame.
+The event will include the newly selected frame level.
+@smallexample
+=selected-frame-level-changed,level="3"
+@end smallexample
+
+@item context-changed
+The user has changed @value{GDBN}'s current thread. The event will include
+the newly selected thread number.
+@smallexample
+=context-changed,thread="2"
+@end smallexample
 @end table
 
 
