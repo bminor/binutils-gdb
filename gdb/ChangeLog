@@ -1,5 +1,10 @@
 Wed Nov 10 09:31:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* dbxread.c (process_one_symbol, N_RBRAC): Don't clear
+	within_function just because local_symbols is NULL.  It appears
+	that this bug has existed since the 10 Apr 89 change which started
+	clearing within_function here.
+
 	* config/m68k/tm-m68k.h: Clean up CALL_DUMMY comment.
 	* config/m68k/{tm-hp300bsd.h,tm-hp300hpux.h,tm-m68k-em.h,
 	tm-monitor.h,tm-sun3.h,tm-vx68.h}, config/sparc/tm-sparc.h:
