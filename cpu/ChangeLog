@@ -1,3 +1,13 @@
+2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (u-commit): New modelling unit for fr500.
+	(mwtaccg): Use frv_ref_SI to reference ACC40Sk as an input operand.
+	(commit-r): Use u-commit model for fr500.
+	(commit): Ditto.
+	(conditional-float-binary-op): Take profiling data as an argument.
+	Update callers.
+	(ne-float-binary-op): Ditto.
+
 2003-09-19  Michael Snyder  <msnyder@redhat.com>
 
 	* frv.cpu (nldqi): Delete unimplemented instruction.

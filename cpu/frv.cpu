@@ -505,6 +505,14 @@
 	() ; outputs
 	() ; profile action (default)
 	)
+  ; commit unit
+  (unit u-commit "Commit Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRk INT -1) (FRk INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
 )
 
 ; Tomcat machine. Early version of fr500 machine
@@ -5798,7 +5806,7 @@
        (.str name "$pack $" reg "k")
        (+ pack (.sym reg k) op (rs-null) ope (GRj-null))
        (commit-semantics (index-of (.sym reg k)) is_float)
-       ()
+       ((fr500 (unit u-commit)))
   )
 )
 
@@ -5812,7 +5820,7 @@
        (.str name "$pack")
        (+ pack (rd-null) op (rs-null) ope (GRj-null))
        (commit-semantics -1 is_float)
-       ()
+       ((fr500 (unit u-commit)))
   )
 )
 
@@ -6118,7 +6126,7 @@
 (float-binary-op-d fmuld mul OP_7A OPE1_08 F-3 "mul double float")
 (float-binary-op-d fdivd div OP_7A OPE1_09 F-4 "div double float")
 
-(define-pmacro (conditional-float-binary-op name pipe attr operation op ope comment)
+(define-pmacro (conditional-float-binary-op name pipe attr operation op ope profile comment)
   (dni name
        (comment)
        (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv)
@@ -6127,16 +6135,24 @@
        (+ pack FRk op FRi CCi cond ope FRj)
        (if (eq CCi (or cond 2))
 	   (set FRk (operation FRi FRj)))
-       ((fr500 (unit u-float-arith)))
+       profile
   )
 )
 
-(conditional-float-binary-op cfadds FMALL ((FR500-MAJOR F-2)) add OP_6D OPE4_0 "cond add single")
-(conditional-float-binary-op cfsubs FMALL ((FR500-MAJOR F-2)) sub OP_6D OPE4_1 "cond sub single")
-(conditional-float-binary-op cfmuls FM01  ((FR500-MAJOR F-3)) mul OP_6E OPE4_0 "cond mul single")
-(conditional-float-binary-op cfdivs FM01  ((FR500-MAJOR F-4)) div OP_6E OPE4_1 "cond div single")
+(conditional-float-binary-op cfadds FMALL ((FR500-MAJOR F-2)) add OP_6D OPE4_0
+			     ((fr500 (unit u-float-arith)))
+			     "cond add single")
+(conditional-float-binary-op cfsubs FMALL ((FR500-MAJOR F-2)) sub OP_6D OPE4_1
+			     ((fr500 (unit u-float-arith)))
+			     "cond sub single")
+(conditional-float-binary-op cfmuls FM01  ((FR500-MAJOR F-3)) mul OP_6E OPE4_0
+			     ((fr500 (unit u-float-arith)))
+			     "cond mul single")
+(conditional-float-binary-op cfdivs FM01  ((FR500-MAJOR F-4)) div OP_6E OPE4_1
+			     ((fr500 (unit u-float-div)))
+			     "cond div single")
 
-(define-pmacro (ne-float-binary-op name pipe attr operation op ope comment)
+(define-pmacro (ne-float-binary-op name pipe attr operation op ope profile comment)
   (dni name
        (comment)
        (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv)
@@ -6146,14 +6162,22 @@
        (sequence ()
 		 (c-call VOID "@cpu@_set_ne_index" (index-of FRk))
 		 (set FRk (operation FRi FRj)))
-       ((fr500 (unit u-float-arith)))
+       profile
   )
 )
 
-(ne-float-binary-op nfadds FMALL ((FR500-MAJOR F-2)) add OP_79 OPE1_26 "ne add single")
-(ne-float-binary-op nfsubs FMALL ((FR500-MAJOR F-2)) sub OP_79 OPE1_27 "ne sub single")
-(ne-float-binary-op nfmuls FM01  ((FR500-MAJOR F-3)) mul OP_79 OPE1_28 "ne mul single")
-(ne-float-binary-op nfdivs FM01  ((FR500-MAJOR F-4)) div OP_79 OPE1_29 "ne div single")
+(ne-float-binary-op nfadds FMALL ((FR500-MAJOR F-2)) add OP_79 OPE1_26
+		    ((fr500 (unit u-float-arith)))
+		    "ne add single")
+(ne-float-binary-op nfsubs FMALL ((FR500-MAJOR F-2)) sub OP_79 OPE1_27
+		    ((fr500 (unit u-float-arith)))
+		    "ne sub single")
+(ne-float-binary-op nfmuls FM01  ((FR500-MAJOR F-3)) mul OP_79 OPE1_28
+		    ((fr500 (unit u-float-arith)))
+		    "ne mul single")
+(ne-float-binary-op nfdivs FM01  ((FR500-MAJOR F-4)) div OP_79 OPE1_29
+		    ((fr500 (unit u-float-div)))
+		    "ne div single")
 
 (define-pmacro (fcc-eq) 8)
 (define-pmacro (fcc-lt) 4)
@@ -8193,7 +8217,10 @@
      ((UNIT FM01) (FR500-MAJOR M-3) (FR400-MAJOR M-1))
      "mwtaccg$pack $FRinti,$ACCGk"
      (+ pack ACCGk OP_7B FRinti OPE1_3F (FRj-null))
-     (set ACCGk FRinti)
+     (sequence ()
+	       ; hack to get these referenced for profiling
+	       (c-raw-call VOID "frv_ref_SI" ACCGk)
+	       (set ACCGk FRinti))
      ((fr400 (unit u-media-4-accg))
       (fr500 (unit u-media)))
 )
