@@ -107,6 +107,7 @@ changequote([,])dnl
       a29k-nyu-sym1)        fmt=coff targ=ebmon29k ;;
       a29k-*-vxworks*)      fmt=coff ;;
 
+      alpha-*-*vms*)	    fmt=evax ;;
       alpha-*-netware*)     fmt=ecoff ;;
       alpha-*-osf*)         fmt=ecoff ;;
       alpha-*-linuxecoff*)  fmt=ecoff ;;
@@ -281,6 +282,8 @@ changequote([,])dnl
       sparc-*-elf | sparc-*-sysv4* | sparc-*-solaris*)
 			    fmt=elf ;;
       sparc-*-netbsd*)      fmt=aout em=nbsd bfd_gas=yes ;;
+
+      v850-*-*)		    fmt=elf bfd_gas=yes ;;
 
       vax-*-bsd* | vax-*-ultrix*)
 			    fmt=aout ;;

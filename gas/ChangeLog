@@ -1,3 +1,12 @@
+start-sanitize-v850
+Tue Aug 20 15:15:16 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* config/tc-v850.c: New file.
+	* config/tc-v850.h: New file.
+	* configure (v850-*-elf): New target.
+	* configure.in (v850-*-elf): New target.
+	
+end-sanitize-v850
 start-sanitize-d10v
 Wed Aug 21 15:50:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

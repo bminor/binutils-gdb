@@ -31,6 +31,15 @@ else
 	lose_these_too="${d10v_files} ${lose_these_too}"
 fi
 
+v850_files="tc-v850.c tc-v850.h"
+
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="${v850_files} ${keep_these_too}"
+else
+	lose_these_too="${v850_files} ${lose_these_too}"
+fi
+
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
