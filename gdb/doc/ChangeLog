@@ -1,3 +1,12 @@
+2003-03-18  J. Brobecker  <brobecker@gnat.com>
+
+	* gdbint.texinfo (Algorithms): Add new section describing the
+	Observer paradigm.
+	(Top): Add menu entry to new observer appendix.
+	* observer.texi: New file.
+	* Makefile.in (GDBINT_DOC_SOURCE_INCLUDES): Add dependency on
+	new observer.texi file.
+
 2003-03-17  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (DATE): Delete.  Remove date from titles.  Mention

@@ -94,6 +94,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Testsuite::
 * Hints::
 
+* GDB Observers::  @value{GDBN} Currently available observers
 * GNU Free Documentation License::  The license for this documentation
 * Index::
 @end menu
@@ -695,6 +696,29 @@ always sets watchpoints to be locally enabled, since global
 watchpoints might interfere with the underlying OS and are probably
 unavailable in many platforms.
 @end enumerate
+
+@section Observing changes in @value{GDBN} internals
+@cindex observer pattern interface
+@cindex notifications about changes in internals
+
+In order to function properly, several modules need to be notified when
+some changes occur in the @value{GDBN} internals.  Traditionally, these
+modules have relied on several paradigms, the most common ones being
+hooks and gdb-events.  Unfortunately, none of these paradigms was
+versatile enough to become the standard notification mechanism in
+@value{GDBN}.  The fact that they only supported one ``client'' was also
+a strong limitation.
+
+A new paradigm, based on the Observer pattern of the @cite{Design
+Patterns} book, has therefore been implemented.  The goal was to provide
+a new interface overcoming the issues with the notification mechanisms
+previously available.  This new interface needed to be strongly typed,
+easy to extend, and versatile enough to be used as the standard
+interface when adding new notifications.
+
+See @ref{GDB Observers} for a brief description of the observers
+currently implemented in GDB. The rationale for the current
+implementation is also briefly discussed.
 
 @node User Interface
 
@@ -6595,6 +6619,7 @@ is so old that it has never been converted to use BFD.  Now that's old!
 
 @end table
 
+@include observer.texi
 @include fdl.texi
 
 @node Index
