@@ -2558,7 +2558,7 @@ i386_immediate (imm_start)
 
   input_line_pointer = save_input_line_pointer;
 
-  if (exp->X_op == O_absent)
+  if (exp->X_op == O_absent || exp->X_op == O_big)
     {
       /* missing or bad expr becomes absolute 0 */
       as_bad (_("Missing or invalid immediate expression `%s' taken as 0"),
@@ -2567,9 +2567,9 @@ i386_immediate (imm_start)
       exp->X_add_number = 0;
       exp->X_add_symbol = (symbolS *) 0;
       exp->X_op_symbol = (symbolS *) 0;
-      i.types[this_operand] |= Imm;
     }
-  else if (exp->X_op == O_constant)
+
+  if (exp->X_op == O_constant)
     {
       int bigimm = Imm32;
       if (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0))
@@ -2807,6 +2807,17 @@ i386_displacement (disp_start, disp_end)
 #endif
   RESTORE_END_STRING (disp_end);
   input_line_pointer = save_input_line_pointer;
+
+  if (exp->X_op == O_absent || exp->X_op == O_big)
+    {
+      /* missing or bad expr becomes absolute 0 */
+      as_bad (_("Missing or invalid displacement expression `%s' taken as 0"),
+	      disp_start);
+      exp->X_op = O_constant;
+      exp->X_add_number = 0;
+      exp->X_add_symbol = (symbolS *) 0;
+      exp->X_op_symbol = (symbolS *) 0;
+    }
 
   if (exp->X_op == O_constant)
     {
