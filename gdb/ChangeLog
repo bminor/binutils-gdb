@@ -1,3 +1,8 @@
+2004-05-24  Jim Blandy  <jimb@redhat.com>
+
+	* MAINTAINERS (tracing bytecode stuff): Allow global maintainers
+	to approve changes.
+
 2004-05-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* symtab.c (fixup_section): Search section table when lookup by

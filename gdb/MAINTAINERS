@@ -230,6 +230,7 @@ generic symtabs		Jim Blandy		jimb@redhat.com
 			Please send tricky ones to the symtabs maintainers.
 
 tracing bytecode stuff  Jim Blandy              jimb@redhat.com
+                        (Global Maintainers)
 tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
