@@ -367,7 +367,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	  break;
 	}
 
-      read_register_gen ((fpreg + 8 - top) % 8 + FP0_REGNUM, raw);
+      deprecated_read_register_gen ((fpreg + 8 - top) % 8 + FP0_REGNUM, raw);
 
       fputs_filtered ("0x", file);
       for (i = 9; i >= 0; i--)

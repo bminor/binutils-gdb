@@ -184,9 +184,9 @@ extern void registers_fetched (void);
 
 extern void read_register_bytes (int regbyte, char *myaddr, int len);
 
-extern void read_register_gen (int regnum, char *myaddr);
+extern void deprecated_read_register_gen (int regnum, char *myaddr);
 
-extern void write_register_gen (int regnum, char *myaddr);
+extern void deprecated_write_register_gen (int regnum, char *myaddr);
 
 extern void write_register_bytes (int regbyte, char *myaddr, int len);
 

@@ -824,14 +824,14 @@ get_reg (char *reg, struct context *context, int regnum)
   switch (context->reg[regnum].how)
     {
     case REG_CTX_UNSAVED:
-      read_register_gen (regnum, reg);
+      deprecated_read_register_gen (regnum, reg);
       break;
     case REG_CTX_SAVED_OFFSET:
       target_read_memory (context->cfa + context->reg[regnum].loc.offset,
 			  reg, REGISTER_RAW_SIZE (regnum));
       break;
     case REG_CTX_SAVED_REG:
-      read_register_gen (context->reg[regnum].loc.reg, reg);
+      deprecated_read_register_gen (context->reg[regnum].loc.reg, reg);
       break;
     case REG_CTX_SAVED_ADDR:
       target_read_memory (context->reg[regnum].loc.addr,
@@ -1688,7 +1688,7 @@ cfi_write_fp (CORE_ADDR val)
   if (fs->cfa_how == CFA_REG_OFFSET)
     {
       val -= fs->cfa_offset;
-      write_register_gen (fs->cfa_reg, (char *) &val);
+      deprecated_write_register_gen (fs->cfa_reg, (char *) &val);
     }
   else
     warning ("Can't write fp.");
@@ -1819,7 +1819,7 @@ cfi_get_saved_register (char *raw_buffer,
 
   if (!frame->next)
     {
-      read_register_gen (regnum, raw_buffer);
+      deprecated_read_register_gen (regnum, raw_buffer);
       if (lval != NULL)
 	*lval = lval_register;
       if (addrp != NULL)
@@ -1831,7 +1831,7 @@ cfi_get_saved_register (char *raw_buffer,
       switch (UNWIND_CONTEXT (frame)->reg[regnum].how)
 	{
 	case REG_CTX_UNSAVED:
-	  read_register_gen (regnum, raw_buffer);
+	  deprecated_read_register_gen (regnum, raw_buffer);
 	  if (lval != NULL)
 	    *lval = not_lval;
 	  if (optimized != NULL)
@@ -1849,8 +1849,8 @@ cfi_get_saved_register (char *raw_buffer,
 	      UNWIND_CONTEXT (frame)->reg[regnum].loc.offset;
 	  break;
 	case REG_CTX_SAVED_REG:
-	  read_register_gen (UNWIND_CONTEXT (frame)->reg[regnum].loc.reg,
-			     raw_buffer);
+	  deprecated_read_register_gen (UNWIND_CONTEXT (frame)->reg[regnum].loc.reg,
+					raw_buffer);
 	  if (lval != NULL)
 	    *lval = lval_register;
 	  if (addrp != NULL)

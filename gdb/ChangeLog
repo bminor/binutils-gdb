@@ -1,3 +1,32 @@
+2002-11-02  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.h (deprecated_read_register_gen): Rename
+	read_register_gen.
+	(deprecated_write_register_gen): Rename write_register_gen.
+	* i387-tdep.c: Update.
+	* x86-64-linux-nat.c: Update
+	* wince.c: Update.
+	* thread-db.c: Update.
+	* win32-nat.c: Update.
+	* mips-tdep.c: Update.
+	* d10v-tdep.c: Update.
+	* cris-tdep.c: Update.
+	* remote-sim.c: Update.
+	* remote-rdi.c: Update.
+	* remote-rdp.c: Update.
+	* frame.c: Update.
+	* target.c: Update.
+	* blockframe.c: Update.
+	* x86-64-tdep.c: Update.
+	* xstormy16-tdep.c: Update.
+	* sh-tdep.c: Update.
+	* s390-tdep.c: Update.
+	* rs6000-tdep.c: Update.
+	* sparc-tdep.c: Update.
+	* i386-tdep.c: Update.
+	* dwarf2cfi.c: Update.
+	* regcache.c: Update.
+
 2002-11-01  Joel Brobecker  <brobecker@gnat.com>
 
 	New interix-specific files:

@@ -604,7 +604,7 @@ read_register_bytes (int in_start, char *in_buf, int in_len)
 
       if (REGISTER_NAME (regnum) != NULL && *REGISTER_NAME (regnum) != '\0')
 	/* Force the cache to fetch the entire register.  */
-	read_register_gen (regnum, reg_buf);
+	deprecated_read_register_gen (regnum, reg_buf);
       else
 	/* Legacy note: even though this register is ``invalid'' we
            still need to return something.  It would appear that some
@@ -748,7 +748,7 @@ regcache_raw_write_unsigned (struct regcache *regcache, int regnum,
 }
 
 void
-read_register_gen (int regnum, char *buf)
+deprecated_read_register_gen (int regnum, char *buf)
 {
   gdb_assert (current_regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
@@ -894,7 +894,7 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
 }
 
 void
-write_register_gen (int regnum, char *buf)
+deprecated_write_register_gen (int regnum, char *buf)
 {
   gdb_assert (current_regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
@@ -947,7 +947,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 
       /* Is this register completely within the range the user is writing?  */
       else if (myregstart <= regstart && regend <= myregend)
-	write_register_gen (regnum, myaddr + (regstart - myregstart));
+	deprecated_write_register_gen (regnum, myaddr + (regstart - myregstart));
 
       /* The register partially overlaps the range being written.  */
       else
@@ -960,7 +960,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 
 	  /* We may be doing a partial update of an invalid register.
 	     Update it from the target before scribbling on it.  */
-	  read_register_gen (regnum, regbuf);
+	  deprecated_read_register_gen (regnum, regbuf);
 
 	  memcpy (registers + overlapstart,
 		  myaddr + (overlapstart - myregstart),
@@ -1147,7 +1147,7 @@ ULONGEST
 read_register (int regnum)
 {
   char *buf = alloca (REGISTER_RAW_SIZE (regnum));
-  read_register_gen (regnum, buf);
+  deprecated_read_register_gen (regnum, buf);
   return (extract_unsigned_integer (buf, REGISTER_RAW_SIZE (regnum)));
 }
 
@@ -1178,7 +1178,7 @@ LONGEST
 read_signed_register (int regnum)
 {
   void *buf = alloca (REGISTER_RAW_SIZE (regnum));
-  read_register_gen (regnum, buf);
+  deprecated_read_register_gen (regnum, buf);
   return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
 }
 
@@ -1212,7 +1212,7 @@ write_register (int regnum, LONGEST val)
   size = REGISTER_RAW_SIZE (regnum);
   buf = alloca (size);
   store_signed_integer (buf, size, (LONGEST) val);
-  write_register_gen (regnum, buf);
+  deprecated_write_register_gen (regnum, buf);
 }
 
 void

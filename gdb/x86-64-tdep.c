@@ -692,30 +692,30 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		case X86_64_NO_CLASS:
 		  break;
 		case X86_64_INTEGER_CLASS:
-		  write_register_gen (int_parameter_registers
-				      [(intreg + 1) / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (int_parameter_registers
+						 [(intreg + 1) / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  intreg += 2;
 		  break;
 		case X86_64_INTEGERSI_CLASS:
-		  write_register_gen (int_parameter_registers[intreg / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (int_parameter_registers[intreg / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  intreg++;
 		  break;
 		case X86_64_SSEDF_CLASS:
 		case X86_64_SSESF_CLASS:
 		case X86_64_SSE_CLASS:
-		  write_register_gen (sse_parameter_registers
-				      [(ssereg + 1) / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (sse_parameter_registers
+						 [(ssereg + 1) / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  ssereg += 2;
 		  break;
 		case X86_64_SSEUP_CLASS:
-		  write_register_gen (sse_parameter_registers[ssereg / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (sse_parameter_registers[ssereg / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  ssereg++;
 		  break;

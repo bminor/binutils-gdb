@@ -829,7 +829,7 @@ thread_db_store_registers (int regno)
     {
       char raw[MAX_REGISTER_RAW_SIZE];
 
-      read_register_gen (regno, raw);
+      deprecated_read_register_gen (regno, raw);
       thread_db_fetch_registers (-1);
       supply_register (regno, raw);
     }

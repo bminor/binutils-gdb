@@ -115,7 +115,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
          available?  */
       *realnump = regnum;
       if (bufferp)
-	read_register_gen (regnum, bufferp);
+	deprecated_read_register_gen (regnum, bufferp);
       return;
     }
 

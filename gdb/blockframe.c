@@ -1619,7 +1619,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
   if (addrp)
     *addrp = REGISTER_BYTE (regnum);
   if (raw_buffer)
-    read_register_gen (regnum, raw_buffer);
+    deprecated_read_register_gen (regnum, raw_buffer);
 }
 
 void

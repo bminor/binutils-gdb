@@ -1874,7 +1874,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
   if (addrp)
     *addrp = REGISTER_BYTE (live_regnum);
   if (raw_buffer)
-    read_register_gen (live_regnum, raw_buffer);
+    deprecated_read_register_gen (live_regnum, raw_buffer);
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -2223,7 +2223,8 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      if (float_arg_index <= tdep->FLOAT_ARGLAST_REGNUM)
 		{
 		  /* Goes in FR0...FR11 */
-		  write_register_gen (FP0_REGNUM + float_arg_index, val);
+		  deprecated_write_register_gen (FP0_REGNUM + float_arg_index,
+						 val);
 		  fp_args[float_arg_index] = 1;
 		  /* Skip the corresponding general argument register. */
 		  int_argreg ++;
@@ -2266,7 +2267,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		       call the gdbarch function to do register
 		       writes, and that will properly know how to deal
 		       with pseudoregs. */
-		    write_register_gen (regnum, val);
+		    deprecated_write_register_gen (regnum, val);
 		    fp_args[double_arg_index] = 1;
 		    fp_args[double_arg_index + 1] = 1;
 		    /* Skip the corresponding general argument register. */
@@ -2501,7 +2502,7 @@ sh64_store_return_value (struct type *type, char *valbuf)
       if (len == 4)
 	{
 	  /* Return value stored in FP0_REGNUM */
-	  write_register_gen (FP0_REGNUM, valbuf);
+	  deprecated_write_register_gen (FP0_REGNUM, valbuf);
 	}
       if (len == 8)
 	{
@@ -2524,10 +2525,10 @@ sh64_store_return_value (struct type *type, char *valbuf)
 	    offset = REGISTER_RAW_SIZE (return_register) - len;
 
 	  memcpy (buf + offset, valbuf, len);
-	  write_register_gen (return_register, buf);
+	  deprecated_write_register_gen (return_register, buf);
 	}
       else
-	write_register_gen (return_register, valbuf);
+	deprecated_write_register_gen (return_register, valbuf);
     }
 }
 

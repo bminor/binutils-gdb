@@ -838,7 +838,7 @@ i386_do_pop_frame (struct frame_info *frame)
       if (addr)
 	{
 	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
-	  write_register_gen (regnum, regbuf);
+	  deprecated_write_register_gen (regnum, regbuf);
 	}
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));

@@ -387,7 +387,7 @@ xstormy16_store_return_value (struct type *type, char *valbuf)
       /* Add leading zeros to the value. */
       memset (buf, 0, xstormy16_reg_size);
       memcpy (buf, valbuf, 1);
-      write_register_gen (E_1ST_ARG_REGNUM, buf);
+      deprecated_write_register_gen (E_1ST_ARG_REGNUM, buf);
     }
   else if (xstormy16_type_is_scalar (type) &&
 	   TYPE_LENGTH (type) <= E_MAX_RETTYPE_SIZE_IN_REGS)

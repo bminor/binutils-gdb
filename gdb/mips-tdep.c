@@ -3718,7 +3718,7 @@ mips_push_register (CORE_ADDR * sp, int regno)
       offset = 0;
     }
   *sp -= regsize;
-  read_register_gen (regno, buffer);
+  deprecated_read_register_gen (regno, buffer);
   write_memory (*sp, buffer + offset, regsize);
 }
 

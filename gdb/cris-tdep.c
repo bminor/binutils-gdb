@@ -3706,8 +3706,8 @@ cris_fpless_backtrace (char *noargs, int from_tty)
      function (since there's no push srp in that case).  */
   int innermost_frame = 1;
   
-  read_register_gen (PC_REGNUM, (char *) &pc);
-  read_register_gen (SP_REGNUM, (char *) &sp);
+  deprecated_read_register_gen (PC_REGNUM, (char *) &pc);
+  deprecated_read_register_gen (SP_REGNUM, (char *) &sp);
   
   /* We make an explicit return when we can't find an outer frame.  */
   while (1)
@@ -3846,7 +3846,7 @@ cris_fpless_backtrace (char *noargs, int from_tty)
           /* We couldn't find a push srp in the prologue, so this must be
              a leaf function, and thus we use the srp register directly.
              This should happen at most once, for the innermost function.  */
-          read_register_gen (SRP_REGNUM, (char *) &pc);
+          deprecated_read_register_gen (SRP_REGNUM, (char *) &pc);
         }
       else
         {
