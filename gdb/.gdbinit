@@ -8,8 +8,5 @@ commands
 	return
 end
 
-define rr
-    run
-end
-
 set prompt (top-gdb)
+set complaints 1
