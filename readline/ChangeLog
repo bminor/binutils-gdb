@@ -1,3 +1,13 @@
+Fri Sep 29 15:19:23 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	Fixes for when the host WIN32, but not MSC.
+	* complete.c: Sometimes have pwd.h
+	* parens.c: WIN32 has similar restrictions to __GO32__.
+	* readline.c (__GO32__): Some of this moved into rldefs.h
+	* signals.c (__GO32__): Likewise.
+	* rldefs.h (MSDOS||WIN32) becomes MSDOS||MSC.
+	(WIN32&&!WIN32): New definitions.
+
 Wed Sep 20 12:57:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New synonym for realclean.
