@@ -1,3 +1,9 @@
+2002-01-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.tgt: Mark a29k-*-aout*, a29k-*-coff*, a29k-*-elf*,
+	a29k-*-ebmon*, a29k-*-kern*, a29k-*-none*, a29k-*-udi* and
+	a29k-*-vxworks* targets as obsolete.
+
 2002-01-14  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-proc.c (linux_do_thread_registers): Ignore fpxregs
