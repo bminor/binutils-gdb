@@ -5815,13 +5815,22 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      is sitting on?  */
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
-  /* Hook in OS ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
-
   set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_stub);
 
-  set_gdbarch_in_solib_call_trampoline (gdbarch, mips_in_call_stub);
-  set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_return_stub);
+  /* NOTE drow/2004-02-11: We overload the core solib trampoline code
+     to support MIPS16.  This is a bad thing.  Make sure not to do it
+     if we have an OS ABI that actually supports shared libraries, since
+     shared library support is more important.  If we have an OS someday
+     that supports both shared libraries and MIPS16, we'll have to find
+     a better place for these.  */
+  if (info.osabi == GDB_OSABI_UNKNOWN)
+    {
+      set_gdbarch_in_solib_call_trampoline (gdbarch, mips_in_call_stub);
+      set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_return_stub);
+    }
+
+  /* Hook in OS ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }

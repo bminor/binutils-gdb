@@ -1,3 +1,18 @@
+2004-02-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-linux-tdep.c: Include "frame.h".
+	(mips_linux_in_dynsym_stub, mips_linux_in_dynsym_resolve_code)
+	(mips_linux_skip_resolver): New functions.
+	(mips_linux_init_abi): Call set_gdbarch_skip_solib_resolver
+	and set_gdbarch_in_solib_call_trampoline.
+	* mips-tdep.c (mips_gdbarch_init): Move gdbarch_init_osabi call
+	to after set_gdbarch_in_solib_return_trampoline.  Only set the
+	solib hooks to mips16 functions if the OS ABI is unknown.
+	* config/mips/tm-linux.h (IN_SOLIB_CALL_TRAMPOLINE): Undefine after
+	including "config/tm-linux.h".
+	(IN_SOLIB_DYNSYM_RESOLVE_CODE): Define.
+	* Makefile.in (mips-linux-tdep.o): Update.
+
 2004-02-11  David Carlton  <carlton@kealia.com>
 
 	* linespec.c (decode_compound): Only look for a class symbol when

@@ -1,6 +1,6 @@
 /* Target-dependent definitions for GNU/Linux MIPS.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,7 +26,6 @@
 
 /* We don't want to inherit tm-mips.h's shared library trampoline code.  */
 
-#undef IN_SOLIB_CALL_TRAMPOLINE
 #undef IN_SOLIB_RETURN_TRAMPOLINE
 #undef SKIP_TRAMPOLINE_CODE
 #undef IGNORE_HELPER_CALL
@@ -49,5 +48,15 @@
 
 #undef  IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name)	(0)
+
+#undef IN_SOLIB_DYNSYM_RESOLVE_CODE
+#define IN_SOLIB_DYNSYM_RESOLVE_CODE(PC) mips_linux_in_dynsym_resolve_code (PC)
+int mips_linux_in_dynsym_resolve_code (CORE_ADDR pc);
+
+/* We don't want all of tm-sysv4.h's shared library trampoline code either.
+   Note that by undefining IN_SOLIB_CALL_TRAMPOLINE here we will use the
+   gdbarch vector's version instead.  */
+
+#undef IN_SOLIB_CALL_TRAMPOLINE
 
 #endif /* TM_MIPSLINUX_H */
