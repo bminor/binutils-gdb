@@ -1,5 +1,11 @@
 Fri Apr 26 18:00:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecoff.c (ecoff_compute_section_file_positions): Track the real
+	file position and the virtual file position separately.  Set
+	filepos information bsaed on the real file position.
+	(_bfd_ecoff_set_section_contents): Handle .lib sections like the
+	Jan 23 change to coffcode.h.
+
 	* som.c (som_slurp_symbol_table): Set the symbol count to the
 	number of BFD symbols created.
 

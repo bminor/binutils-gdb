@@ -1822,12 +1822,9 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
     {
       ecoff_data (abfd)->find_line_info =
 	((struct ecoff_find_line *)
-	 bfd_alloc (abfd, sizeof (struct ecoff_find_line)));
+	 bfd_zalloc (abfd, sizeof (struct ecoff_find_line)));
       if (ecoff_data (abfd)->find_line_info == NULL)
 	return false;
-      ecoff_data (abfd)->find_line_info->find_buffer = NULL;
-      ecoff_data (abfd)->find_line_info->fdrtab_len = 0;
-      ecoff_data (abfd)->find_line_info->fdrtab = NULL;
     }
   line_info = ecoff_data (abfd)->find_line_info;
 
@@ -2043,7 +2040,7 @@ static boolean
 ecoff_compute_section_file_positions (abfd)
      bfd *abfd;
 {
-  file_ptr sofar;
+  file_ptr sofar, file_sofar;
   asection **sorted_hdrs;
   asection *current;
   unsigned int i;
@@ -2052,6 +2049,7 @@ ecoff_compute_section_file_positions (abfd)
   const bfd_vma round = ecoff_backend (abfd)->round;
 
   sofar = _bfd_ecoff_sizeof_headers (abfd, false);
+  file_sofar = sofar;
 
   /* Sort the sections by VMA.  */
   sorted_hdrs = (asection **) bfd_malloc (abfd->section_count
@@ -2074,10 +2072,6 @@ ecoff_compute_section_file_positions (abfd)
       unsigned int alignment_power;
 
       current = sorted_hdrs[i];
-
-      /* Only deal with sections which have contents */
-      if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) == 0)
-	continue;
 
       /* For the Alpha ECOFF .pdata section the lnnoptr field is
 	 supposed to indicate the number of .pdata entries that are
@@ -2107,6 +2101,7 @@ ecoff_compute_section_file_positions (abfd)
 	  && strcmp (current->name, _RCONST) != 0)
 	{
 	  sofar = (sofar + round - 1) &~ (round - 1);
+	  file_sofar = (file_sofar + round - 1) &~ (round - 1);
 	  first_data = false;
 	}
       else if (strcmp (current->name, _LIB) == 0)
@@ -2116,6 +2111,7 @@ ecoff_compute_section_file_positions (abfd)
 	     page boundary.  */
 
 	  sofar = (sofar + round - 1) &~ (round - 1);
+	  file_sofar = (file_sofar + round - 1) &~ (round - 1);
 	}
       else if (first_nonalloc
 	       && (current->flags & SEC_ALLOC) == 0
@@ -2126,31 +2122,42 @@ ecoff_compute_section_file_positions (abfd)
              for the .bss section.  */
 	  first_nonalloc = false;
 	  sofar = (sofar + round - 1) &~ (round - 1);
+	  file_sofar = (file_sofar + round - 1) &~ (round - 1);
 	}
 
       /* Align the sections in the file to the same boundary on
 	 which they are aligned in virtual memory.  */
-      old_sofar = sofar;
       sofar = BFD_ALIGN (sofar, 1 << alignment_power);
+      if ((current->flags & SEC_HAS_CONTENTS) != 0)
+	file_sofar = BFD_ALIGN (file_sofar, 1 << alignment_power);
 
       if ((abfd->flags & D_PAGED) != 0
 	  && (current->flags & SEC_ALLOC) != 0)
-	sofar += (current->vma - sofar) % round;
+	{
+	  sofar += (current->vma - sofar) % round;
+	  if ((current->flags & SEC_HAS_CONTENTS) != 0)
+	    file_sofar += (current->vma - file_sofar) % round;
+	}
 
-      current->filepos = sofar;
+      if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) != 0)
+	current->filepos = file_sofar;
 
       sofar += current->_raw_size;
+      if ((current->flags & SEC_HAS_CONTENTS) != 0)
+	file_sofar += current->_raw_size;
 
       /* make sure that this section is of the right size too */
       old_sofar = sofar;
       sofar = BFD_ALIGN (sofar, 1 << alignment_power);
+      if ((current->flags & SEC_HAS_CONTENTS) != 0)
+	file_sofar = BFD_ALIGN (file_sofar, 1 << alignment_power);
       current->_raw_size += sofar - old_sofar;
     }
 
   free (sorted_hdrs);
   sorted_hdrs = NULL;
 
-  ecoff_data (abfd)->reloc_filepos = sofar;
+  ecoff_data (abfd)->reloc_filepos = file_sofar;
 
   return true;
 }
@@ -2230,11 +2237,22 @@ _bfd_ecoff_set_section_contents (abfd, section, location, offset, count)
 	return false;
     }
 
-  /* If this is a .lib section, bump the vma address so that it winds
-     up being the number of .lib sections output.  This is right for
-     Irix 4.  Ian Taylor <ian@cygnus.com>.  */
+  /* Handle the .lib section specially so that Irix 4 shared libraries
+     work out.  See coff_set_section_contents in coffcode.h.  */
   if (strcmp (section->name, _LIB) == 0)
-    ++section->vma;
+    {
+      bfd_byte *rec, *recend;
+
+      rec = (bfd_byte *) location;
+      recend = rec + count;
+      while (rec < recend)
+	{
+	  ++section->lma;
+	  rec += bfd_get_32 (abfd, rec) * 4;
+	}
+
+      BFD_ASSERT (rec == recend);
+    }
 
   if (count == 0)
     return true;
@@ -3407,6 +3425,7 @@ ecoff_link_add_archive_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
   const bfd_byte *raw_armap;
   struct bfd_link_hash_entry **pundef;
   unsigned int armap_count;
@@ -3528,7 +3547,7 @@ ecoff_link_add_archive_symbols (abfd, info)
 	  hash = srch;
 	}
 
-      element = _bfd_get_elt_at_filepos (abfd, file_offset);
+      element = (*backend->get_elt_at_filepos) (abfd, file_offset);
       if (element == (bfd *) NULL)
 	return false;
 
@@ -3959,6 +3978,14 @@ static boolean ecoff_reloc_link_order
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   struct bfd_link_order *));
 
+/* Structure used to pass information to ecoff_link_write_external.  */
+
+struct extsym_info
+{
+  bfd *abfd;
+  struct bfd_link_info *info;
+};
+
 /* ECOFF final link routine.  This looks through all the input BFDs
    and gathers together all the debugging information, and then
    processes all the link order information.  This may cause it to
@@ -3976,6 +4003,7 @@ _bfd_ecoff_bfd_final_link (abfd, info)
   register bfd *input_bfd;
   asection *o;
   struct bfd_link_order *p;
+  struct extsym_info einfo;
 
   /* We accumulate the debugging information counts in the symbolic
      header.  */
@@ -4046,9 +4074,11 @@ _bfd_ecoff_bfd_final_link (abfd, info)
     }
 
   /* Write out the external symbols.  */
+  einfo.abfd = abfd;
+  einfo.info = info;
   ecoff_link_hash_traverse (ecoff_hash_table (info),
 			    ecoff_link_write_external,
-			    (PTR) abfd);
+			    (PTR) &einfo);
 
   if (info->relocateable)
     {
@@ -4269,11 +4299,24 @@ ecoff_link_write_external (h, data)
      struct ecoff_link_hash_entry *h;
      PTR data;
 {
-  bfd *output_bfd = (bfd *) data;
+  struct extsym_info *einfo = (struct extsym_info *) data;
+  bfd *output_bfd = einfo->abfd;
+  boolean strip;
 
-  /* FIXME: We should check if this symbol is being stripped.  */
+  /* We need to check if this symbol is being stripped. */
+  if (h->root.type == bfd_link_hash_undefined
+      || h->root.type == bfd_link_hash_undefweak)
+    strip = false;
+  else if (einfo->info->strip == strip_all
+	   || (einfo->info->strip == strip_some
+	       && bfd_hash_lookup (einfo->info->keep_hash,
+				   h->root.root.string,
+				   false, false) == NULL))
+    strip = true;
+  else
+    strip = false;
 
-  if (h->written)
+  if (strip || h->written)
     return true;
 
   if (h->abfd == (bfd *) NULL)
@@ -4556,8 +4599,9 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 
       /* Treat a reloc against a defined symbol as though it were
          actually against the section.  */
-      h = bfd_link_hash_lookup (info->hash, link_order->u.reloc.p->u.name,
-				false, false, false);
+      h = bfd_wrapped_link_hash_lookup (output_bfd, info,
+					link_order->u.reloc.p->u.name,
+					false, false, false);
       if (h != NULL
 	  && (h->type == bfd_link_hash_defined
 	      || h->type == bfd_link_hash_defweak))
@@ -4633,9 +4677,10 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
     {
       struct ecoff_link_hash_entry *h;
 
-      h = ecoff_link_hash_lookup (ecoff_hash_table (info),
-				  link_order->u.reloc.p->u.name,
-				  false, false, true);
+      h = ((struct ecoff_link_hash_entry *)
+	   bfd_wrapped_link_hash_lookup (output_bfd, info,
+					 link_order->u.reloc.p->u.name,
+					 false, false, true));
       if (h != (struct ecoff_link_hash_entry *) NULL
 	  && h->indx != -1)
 	in.r_symndx = h->indx;
