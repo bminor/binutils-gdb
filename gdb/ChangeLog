@@ -1,3 +1,15 @@
+Wed May 20 10:12:11 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* m32r-tdep.c: (decode_prologue): Handle frames compiled with -Os.
+        Split out as separate function called by skip prologue and scan
+        prologue. new formula handles optimization in which the prologue
+        is interleaved with the body of the function. Also recognizes new
+        variations of prologue encoding.  Use of frame pointer is
+        essential to debugging, -fno-omit-frame-pointer
+        (m32r_skip_prologue): Call decode prologue, ignore line info
+        (m32r_scan_prologue): Call decode prologue, ignore line info.
+
+
 Tue May 19 17:23:54 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* w89k-rom.c (_initialize_w89k ): Call new init function
