@@ -14,7 +14,6 @@ Thu Oct  8 22:18:10 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
 	* aout-target.h (*_backend_data): cleare exec_header_not_counted
 	by default in MY(backend_data).
 
-
 Thu Oct  8 18:12:49 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* aout-target.h (callback): Don't define this function if it won't be
@@ -45,6 +44,7 @@ Thu Oct  8 18:12:49 1992  Ken Raeburn  (raeburn@cygnus.com)
 Thu Oct  8 17:33:39 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in:  Undo some brain damage in the host section.
+	* configure.in:  Reformat the target section, test many configs.
 	* Makefile.in (make):  Remove obsolete `make make'.
 	* aoutx.h (some_aout_object_p):  Make defines line up.
 
