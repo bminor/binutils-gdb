@@ -1,3 +1,8 @@
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/gdbserver.exp (gdbserver_gdb_load): Wait for a complete
+	line of output.
+
 2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/relocate.c (dummy): Initialize.
