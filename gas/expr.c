@@ -1862,19 +1862,6 @@ expr (rankarg, resultP)
 	    resultP->X_add_number += right.X_add_number;
 	  else if (op_left == O_subtract)
 	    resultP->X_add_number -= right.X_add_number;
-	  if (retval == rightseg
-	      && (op_left == O_subtract
-		  || op_left == O_eq
-		  || op_left == O_ne
-		  || op_left == O_lt
-		  || op_left == O_le
-		  || op_left == O_ge
-		  || op_left == O_gt))
-	    {
-	      /* For subtractive operations on symbols within a
-		 segment, the result will absolute.  */
-	      retval = absolute_section;
-	    }
 	}
       else
 	{
