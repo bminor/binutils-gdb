@@ -21,9 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef symtab_h
 #define symtab_h
 
-#include "bfd.h"
-#include "gprof.h"
-
 /* For a profile to be intelligible to a human user, it is necessary
    to map code-addresses into source-code information.  Source-code
    information can be any combination of: (i) function-name, (ii)
@@ -31,8 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    The symbol table is used to map addresses into source-code
    information.  */
-
-#include "source.h"
 
 #define NBBS 10
 

@@ -21,10 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef source_h
 #define source_h
 
-#include <stdio.h>
-#include "gprof.h"
-#include "search_list.h"
-
 typedef struct source_file
   {
     struct source_file *next;

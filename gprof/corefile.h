@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef corefile_h
 #define corefile_h
 
-#include "bfd.h"
-
 extern bfd *core_bfd;		/* BFD for core-file.  */
 extern int core_num_syms;	/* # of entries in symbol-table.  */
 extern asymbol **core_syms;	/* Symbol table in a.out.  */

@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef sym_ids_h
 #define sym_ids_h
 
-#include "symtab.h"
-
 typedef enum
   {
     INCL_GRAPH = 0, EXCL_GRAPH,

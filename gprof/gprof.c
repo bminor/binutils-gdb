@@ -19,6 +19,9 @@
 #include "getopt.h"
 #include "libiberty.h"
 #include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "basic_blocks.h"
 #include "call_graph.h"
 #include "cg_arcs.h"
@@ -27,7 +30,6 @@
 #include "gmon_io.h"
 #include "hertz.h"
 #include "hist.h"
-#include "source.h"
 #include "sym_ids.h"
 #include "demangle.h"
 

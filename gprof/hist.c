@@ -19,14 +19,15 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include <stdio.h>
 #include "libiberty.h"
 #include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "corefile.h"
 #include "gmon_io.h"
 #include "gmon_out.h"
 #include "hist.h"
-#include "symtab.h"
 #include "sym_ids.h"
 #include "utils.h"
 

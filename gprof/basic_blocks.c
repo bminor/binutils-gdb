@@ -21,18 +21,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include <stdio.h>
+#include "libiberty.h"
+#include "gprof.h"
 #include "basic_blocks.h"
 #include "corefile.h"
 #include "gmon_io.h"
 #include "gmon_out.h"
-#include "gprof.h"
-#include "libiberty.h"
+#include "search_list.h"
 #include "source.h"
+#include "symtab.h"
 #include "sym_ids.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 /* Default option values:  */
 bool bb_annotate_all_lines = FALSE;

@@ -1,3 +1,58 @@
+2002-01-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* alpha.c (alpha_Instruction): Don't use.
+	(alpha_find_call): Avoid use of bitfields and casts between
+	pointers and integers of different sizes.  Avoid endian problems
+	when cross-compiling.
+	* vax.c (vax_find_call): Likewise.
+	(struct modebyte): Don't use.
+	(vax_operandmode): Pass in an unsigned char *.
+	(vax_operandlength): Likewise.
+	(vax_reladdr): Rename to vax_offset and return relative offset
+	rather than address.
+	* i386.c (i386_find_call): Avoid casts between pointers and
+	integers of different sizes.
+	* sparc.c (sparc_find_call): Likewise.  Avoid endian problems.
+	* tahoe.c (tahoe_find_call): Likewise.
+	(tahoe_reladdr): Rename to tahoe_offset and return relative offset
+	rather than address.
+
+	* basic_blocks.h: Don't include headers here.
+	* call_graph.h: Likewise.
+	* cg_arcs.h: Likewise.
+	* cg_print.h: Likewise.
+	* corefile.h: Likewise.
+	* gmon_io.h: Likewise.
+	* gmon_out.h: Likewise.
+	* hertz.h: Likewise.
+	* hist.h: Likewise.
+	* source.h: Likewise.
+	* sym_ids.h: Likewise.
+	* symtab.h: Likewise.
+	* gprof.h: Don't include ansidecl.h, do include bfd.h.
+	(bool): Don't typedef.
+	* alpha.c: Adjust #include's for above header changes.
+	* basic_blocks.c: Likewise.
+	* call_graph.c: Likewise.
+	* cg_arcs.c: Likewise.
+	* cg_dfn.c: Likewise.
+	* cg_print.c: Likewise.
+	* corefile.c: Likewise.
+	* gmon_io.c: Likewise.
+	* gprof.c: Likewise.
+	* hertz.c: Likewise.
+	* hist.c: Likewise.
+	* i386.c: Likewise.
+	* mips.c: Likewise.
+	* sparc.c: Likewise.
+	* sym_ids.c: Likewise.
+	* symtab.c: Likewise.
+	* tahoe.c: Likewise.
+	* utils.c: Likewise.
+	* vax.c: Likewise.
+
+	* po/POTFILES.in: Regenerate.
+
 2002-01-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure: Regenerated.

@@ -21,10 +21,9 @@
 #ifndef gprof_h
 #define gprof_h
 
-#include "ansidecl.h"
-
 /* Include the BFD sysdep.h file.  */
 #include "sysdep.h"
+#include "bfd.h"
 
 /* Undefine the BFD PACKAGE and VERSION macros before including the
    gprof config.h file.  */
@@ -109,7 +108,6 @@ typedef enum
   }
 File_Format;
 
-typedef int bool;
 typedef unsigned char UNIT[2];	/* unit of profiling */
 
 extern const char *whoami;	/* command-name, for error messages */

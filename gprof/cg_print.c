@@ -20,6 +20,10 @@
    02111-1307, USA.  */
 
 #include "libiberty.h"
+#include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "cg_arcs.h"
 #include "cg_print.h"
 #include "hist.h"

@@ -19,15 +19,17 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
+#include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "cg_arcs.h"
 #include "basic_blocks.h"
-#include "bfd.h"
 #include "corefile.h"
 #include "call_graph.h"
 #include "gmon_io.h"
 #include "gmon_out.h"
 #include "gmon.h"		/* Fetch header for old format.  */
-#include "gprof.h"
 #include "hertz.h"
 #include "hist.h"
 #include "libiberty.h"

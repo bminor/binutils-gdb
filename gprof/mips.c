@@ -17,10 +17,12 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 #include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "cg_arcs.h"
 #include "corefile.h"
 #include "hist.h"
-#include "symtab.h"
 
 static Sym indirect_child;
 

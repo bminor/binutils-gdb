@@ -21,9 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef gmon_io_h
 #define gmon_io_h
 
-#include "bfd.h"
-#include "gmon.h"
-
 /* Some platforms need to put stdin into binary mode, to read
    binary files.  */
 #include "sysdep.h"

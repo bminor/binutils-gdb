@@ -21,8 +21,10 @@
 
 #include "libiberty.h"
 #include "gprof.h"
-#include "corefile.h"
+#include "search_list.h"
+#include "source.h"
 #include "symtab.h"
+#include "corefile.h"
 
 bfd *core_bfd;
 int core_num_syms;

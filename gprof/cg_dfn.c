@@ -16,12 +16,13 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-#include <stdio.h>
 #include "libiberty.h"
 #include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "cg_arcs.h"
 #include "cg_dfn.h"
-#include "symtab.h"
 #include "utils.h"
 
 #define	DFN_INCR_DEPTH (128)

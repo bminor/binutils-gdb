@@ -20,11 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef basic_blocks_h
 #define basic_blocks_h
 
-#include <stdio.h>
-#include "gprof.h"
-#include "source.h"
-#include "symtab.h"
-
 /* Options:  */
 extern bool bb_annotate_all_lines;	/* Force annotation of all lines?  */
 extern int bb_table_length;		/* Length of most-used bb table.  */

@@ -18,6 +18,9 @@
  */
 #include "libiberty.h"
 #include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "call_graph.h"
 #include "cg_arcs.h"
 #include "cg_dfn.h"

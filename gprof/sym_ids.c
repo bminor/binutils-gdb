@@ -21,6 +21,10 @@
 
 #include "libiberty.h"
 #include "safe-ctype.h"
+#include "gprof.h"
+#include "search_list.h"
+#include "source.h"
+#include "symtab.h"
 #include "cg_arcs.h"
 #include "sym_ids.h"
 
