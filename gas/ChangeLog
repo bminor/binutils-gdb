@@ -1,5 +1,9 @@
 2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (s_cpsetup): Fix comment.
+
+2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (md_begin): Add $ra as alias name for $31.
 	(mips_ip): Likewise.
 	(mips16_ip): Likewise.

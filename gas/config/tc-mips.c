@@ -11841,15 +11841,15 @@ s_cpload (ignore)
    If offset is given, this results in:
      sd		$gp, offset($sp)
      lui	$gp, %hi(%neg(%gp_rel(label)))
-     daddiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
-     addu	$gp, $gp, $reg1
+     addiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
+     daddu	$gp, $gp, $reg1
 
    If $reg2 is given, this results in:
      daddu	$reg2, $gp, $0
      lui	$gp, %hi(%neg(%gp_rel(label)))
-     daddiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
-     addu	$gp, $gp, $reg1
- */
+     addiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
+     daddu	$gp, $gp, $reg1
+   $reg1 is normally $25 == $t9.  */
 static void
 s_cpsetup (ignore)
      int ignore ATTRIBUTE_UNUSED;
