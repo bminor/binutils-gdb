@@ -1,3 +1,11 @@
+2000-06-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h: Add forward declaration of `struct value'.
+	(FIX_CALL_DUMMY): Redefined to call i386_fix_call_dummy.
+	(i386_fix_call_dummy): Add prototype.
+	* i386-tdep.c (i386_fix_call_dummy): New function based on the
+	code from the old FIX_CALL_DUMMY macro.
+
 2000-06-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* procfs.c, remote.c: Eliminate use of PARAMS from these files.

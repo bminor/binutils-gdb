@@ -21,9 +21,10 @@
 #ifndef TM_I386_H
 #define TM_I386_H 1
 
-/* Forward decl's for prototypes */
+/* Forward declarations for prototypes.  */
 struct frame_info;
 struct frame_saved_regs;
+struct value;
 struct type;
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
@@ -408,19 +409,13 @@ extern void i386_pop_frame (void);
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \
-{ \
-	int from, to, delta, loc; \
-	loc = (int)(read_register (SP_REGNUM) - CALL_DUMMY_LENGTH); \
-	from = loc + 5; \
-	to = (int)(fun); \
-	delta = to - from; \
-	*((char *)(dummyname) + 1) = (delta & 0xff); \
-	*((char *)(dummyname) + 2) = ((delta >> 8) & 0xff); \
-	*((char *)(dummyname) + 3) = ((delta >> 16) & 0xff); \
-	*((char *)(dummyname) + 4) = ((delta >> 24) & 0xff); \
-}
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+  i386_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
+extern void i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+				 int nargs, struct value **args,
+				 struct type *type, int gcc_p);
 
+/* FIXME: kettenis/2000-06-12: These do not belong here.  */
 extern void print_387_control_word (unsigned int);
 extern void print_387_status_word (unsigned int);
 

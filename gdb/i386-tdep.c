@@ -638,6 +638,26 @@ i386_push_dummy_frame ()
   write_register (SP_REGNUM, sp);
 }
 
+/* Insert the (relative) function address into the call sequence
+   stored at DYMMY.  */
+
+void
+i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+		     value_ptr *args, struct type *type, int gcc_p)
+{
+  int from, to, delta, loc;
+
+  loc = (int)(read_register (SP_REGNUM) - CALL_DUMMY_LENGTH);
+  from = loc + 5;
+  to = (int)(fun);
+  delta = to - from;
+
+  *((char *)(dummy) + 1) = (delta & 0xff);
+  *((char *)(dummy) + 2) = ((delta >> 8) & 0xff);
+  *((char *)(dummy) + 3) = ((delta >> 16) & 0xff);
+  *((char *)(dummy) + 4) = ((delta >> 24) & 0xff);
+}
+
 void
 i386_pop_frame ()
 {
