@@ -1,3 +1,8 @@
+Wed Mar 30 15:30:44 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in (BFD_MACHINES): Set to a default value.
+	* mpw-make.in (BFD_MACHINES): Remove wired-in value.
+
 Mon Feb  7 15:53:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (CSEARCH): Add extra-include to search path.

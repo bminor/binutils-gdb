@@ -87,8 +87,6 @@ ALL_MACHINES = a29k-dis.o alpha-dis.o h8300-dis.o h8500-dis.o ¶
 
 # BFD_MACHINES is set by configure.in.
 
-BFD_MACHINES = "{o}"mips-dis.c.o "{o}"mips-opc.c.o
-
 OFILES = {BFD_MACHINES} "{o}"dis-buf.c.o
 
 #### host and target dependent Makefile fragments come in here.

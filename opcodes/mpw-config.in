@@ -1,3 +1,5 @@
 # Configuration fragment for opcodes.
 
 forward-include "{srcroot}"bfd:hosts:mpw.h sysdep.h
+
+Set BFD_MACHINES " "
