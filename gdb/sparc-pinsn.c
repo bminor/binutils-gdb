@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "opcode/sparc.h"
 #include "gdbcore.h"
-#include "string.h"
+#include <string.h>
 #include "target.h"
 
 #define	freg_names	(&reg_names[4 * 8])

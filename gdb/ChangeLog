@@ -1,3 +1,12 @@
+Sat Jun 27 12:12:20 1992  Fred Fish  (fnf@cygnus.com)
+
+	* sparc-pinsn.c:  Use <string.h> rather than "string.h", for
+	consistency with all other gdb files.
+	* cadillac.c:  Use <string.h> rather than <strings.h>.
+	* cadillac.c (kernel_dispatch):  Convert rindex usage to strrchr.
+	* Makefile.in (MAKE):  Remove definition for consistency with
+	other Makefile.in files and to fix problem with recursive makes.
+
 Fri Jun 26 19:03:23 1992  John Gilmore  (gnu at cygnus.com)
 
 	* hppahpux-xdep.c (child_xfer_memory):  Avoid PT_WDUSER because it

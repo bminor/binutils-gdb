@@ -76,7 +76,6 @@ srcdir = .
 
 BISON=yacc
 YACC=$(BISON)
-MAKE=make
 
 # Documentation (gdb.dvi) needs either GNU m4 or SysV m4; 
 # Berkeley/Sun don't have quite enough. 

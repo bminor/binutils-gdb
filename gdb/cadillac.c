@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <sys/errno.h>
 #include <termios.h>
-#include <strings.h>
+#include <string.h>
 
 /* Non-zero means that we're doing the cadillac interface. */
 int cadillac = 0;
@@ -949,7 +949,7 @@ kernel_dispatch(queue)
 	    char *tail;
 	    int skipped;
 
-	    tail = rindex(req->newBreakpoint.fileName.text, '/');
+	    tail = strrchr(req->newBreakpoint.fileName.text, '/');
 	    if (!tail)
 	      tail = req->newBreakpoint.fileName.text;
 	    else
