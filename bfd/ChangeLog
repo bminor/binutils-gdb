@@ -1,3 +1,7 @@
+2000-07-03  Kazu Hirata  <kazu@hxi.com>
+
+	* reloc16.c: Fix formatting.
+
 2000-07-01  Koundinya K  <kk@ddeorg.soft.net>
 
         * config.bfd: Change targ_defvec and targ_selvecs for mips*-*-sysv4*

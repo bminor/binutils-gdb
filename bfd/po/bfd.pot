@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-06-26 18:29-0700\n"
+"POT-Creation-Date: 2000-07-03 10:46-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -360,7 +360,7 @@ msgstr ""
 msgid "uncertain calling convention for non-COFF symbol"
 msgstr ""
 
-#: cofflink.c:518 elflink.h:1623
+#: cofflink.c:518 elflink.h:1567
 #, c-format
 msgid "Warning: type of symbol `%s' changed from %d to %d in %s"
 msgstr ""
@@ -1244,37 +1244,37 @@ msgstr ""
 msgid "%s: Section %s is already to large to put hole of %ld bytes in"
 msgstr ""
 
-#: elflink.h:1443
+#: elflink.h:1387
 #, c-format
 msgid "%s: %s: invalid version %u (max %d)"
 msgstr ""
 
-#: elflink.h:1484
+#: elflink.h:1428
 #, c-format
 msgid "%s: %s: invalid needed version %d"
 msgstr ""
 
-#: elflink.h:1601
+#: elflink.h:1545
 #, c-format
 msgid "Warning: size of symbol `%s' changed from %lu to %lu in %s"
 msgstr ""
 
-#: elflink.h:1845
+#: elflink.h:1789
 #, c-format
 msgid "%s: warning: unexpected redefinition of `%s'"
 msgstr ""
 
-#: elflink.h:3552
+#: elflink.h:3496
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
 msgstr ""
 
-#: elflink.h:3824
+#: elflink.h:3768
 #, c-format
 msgid "%s: undefined versioned symbol name %s"
 msgstr ""
 
-#: elflink.h:5068
+#: elflink.h:5012
 #, c-format
 msgid "%s: could not find output section %s for input section %s"
 msgstr ""
@@ -1409,39 +1409,39 @@ msgid "Unhandled OSF/1 core file section type %d\n"
 msgstr ""
 
 #. XXX code yet to be written.
-#: peicode.h:804
+#: peicode.h:809
 #, c-format
 msgid "%s: Unhandled import type; %x"
 msgstr ""
 
-#: peicode.h:809
+#: peicode.h:814
 #, c-format
 msgid "%s: Unrecognised import type; %x"
 msgstr ""
 
-#: peicode.h:823
+#: peicode.h:828
 #, c-format
 msgid "%s: Unrecognised import name type; %x"
 msgstr ""
 
-#: peicode.h:1180
+#: peicode.h:1185
 #, c-format
 msgid "%s: Unrecognised machine type (0x%x) in Import Library Format archive"
 msgstr ""
 
-#: peicode.h:1192
+#: peicode.h:1197
 #, c-format
 msgid ""
 "%s: Recognised but unhandled machine type (0x%x) in Import Library Format "
 "archive"
 msgstr ""
 
-#: peicode.h:1209
+#: peicode.h:1214
 #, c-format
 msgid "%s: size field is zero in Import Library Format header"
 msgstr ""
 
-#: peicode.h:1237
+#: peicode.h:1242
 #, c-format
 msgid "%s: string not null terminated in ILF object file."
 msgstr ""
