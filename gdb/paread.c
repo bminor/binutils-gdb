@@ -18,20 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/************************************************************************
- *									*
- *				NOTICE					*
- *									*
- * This file is still under construction.  When it is complete, this	*
- * notice will be removed.  Until then, direct any questions or changes	*
- * to Fred Fish at Cygnus Support (fnf@cygnus.com)			*
- *									* 
- * FIXME	Still needs support for shared libraries.		*
- * FIXME	Still needs support for core files.			*
- * FIXME	The ".debug" and ".line" section names are hardwired.	*
- *									*
- ************************************************************************/
-
 #include "defs.h"
 #include "bfd.h"
 #include "libbfd.h"
@@ -55,6 +41,9 @@ pa_symfile_init PARAMS ((struct objfile *));
 
 static void
 pa_new_init PARAMS ((struct objfile *));
+
+static void
+read_unwind_info PARAMS ((struct objfile *));
 
 static void
 pa_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
@@ -174,6 +163,44 @@ pa_symtab_read (abfd, addr, objfile)
   install_minimal_symbols (objfile);
 }
 
+/* Read in the backtrace information stored in the `$UNWIND_START$' section of
+   the object file.  This info is used mainly by find_unwind_entry() to find
+   out the stack frame size and frame pointer used by procedures.  We put
+   everything on the psymbol obstack in the objfile so that it automatically
+   gets freed when the objfile is destroyed.  */
+
+static void
+read_unwind_info (objfile)
+     struct objfile *objfile;
+{
+  asection *unwind_sec;
+  struct obj_unwind_info *ui;
+
+  ui = obstack_alloc (&objfile->psymbol_obstack,
+		      sizeof (struct obj_unwind_info));
+
+  ui->table = NULL;
+  ui->cache = NULL;
+  ui->last = -1;
+
+  unwind_sec = bfd_get_section_by_name (objfile->obfd,
+					"$UNWIND_START$");
+  if (unwind_sec)
+    {
+      int size;
+      int i, *ip;
+
+      size = bfd_section_size (objfile->obfd, unwind_sec);
+      ui->table = obstack_alloc (&objfile->psymbol_obstack, size);
+      ui->last = size / sizeof (struct unwind_table_entry) - 1;
+
+      bfd_get_section_contents (objfile->obfd, unwind_sec, ui->table,
+				0, size);
+
+      OBJ_UNWIND_INFO (objfile) = ui;
+    }
+}
+
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to pa_symfile_init, which 
    currently does nothing.
@@ -229,6 +256,8 @@ pa_symfile_read (objfile, section_offsets, mainline)
      special PA sections.  */
 
   pastab_build_psymtabs (objfile, section_offsets, mainline);
+
+  read_unwind_info(objfile);
 
   do_cleanups (back_to);
 }

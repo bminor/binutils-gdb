@@ -574,3 +574,16 @@ struct unwind_table_entry {
   unsigned int reserved4             :  2;
   unsigned int Total_frame_size      : 27;
 };
+
+/* Info about the unwind table associated with an object file.  This is hung
+   off of the objfile->obj_private pointer, and is allocated in the objfile's
+   psymbol obstack.  This allows us to have unique unwind info for each
+   executable and shared library that we are debugging.  */
+
+struct obj_unwind_info {
+  struct unwind_table_entry *table; /* Pointer to unwind info */
+  struct unwind_table_entry *cache; /* Pointer to last entry we found */
+  int last;			/* Index of last entry */
+};
+
+#define OBJ_UNWIND_INFO(obj) ((struct obj_unwind_info *)obj->obj_private)

@@ -87,9 +87,10 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
 {
-  unsigned int insn, i, op;
+  long insn;
+  unsigned int i, op;
 
-  read_memory (memaddr, &insn, sizeof (insn));
+  insn = read_memory_integer (memaddr, sizeof (insn));
 
   for (i = 0; i < NUMOPCODES; ++i)
     {
@@ -354,14 +355,15 @@ print_insn (memaddr, stream)
 	  if (op == 0x38 /* be */ || op == 0x39 /* ble */)
 	    {
 	      CORE_ADDR target_address;
-	      unsigned int prev_insn;
+	      long prev_insn;
 	      int basereg, basereg_prev;
 
 	      target_address = extract_17 (insn);
 	      basereg = GET_FIELD (insn, 6, 10);
 	      if (basereg != 0)
 		{
-		  read_memory (memaddr - 4, &prev_insn, sizeof(prev_insn));
+		  prev_insn = read_memory_integer (memaddr - 4,
+						   sizeof(prev_insn));
 		  basereg_prev = GET_FIELD (prev_insn, 6, 10);
 
 		  if ((prev_insn & 0xfc000000) == 0x20000000 /* ldil */

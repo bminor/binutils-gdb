@@ -56,6 +56,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 
 /* Routines to extract various sized constants out of hppa 
@@ -218,55 +220,58 @@ extract_17 (word)
 		      (word & 0x1) << 16, 17) << 2;
 }
 
-int use_unwind = 0;
+static int use_unwind = 0;
+
+/* Lookup the unwind (stack backtrace) info for the given PC.  We search all
+   of the objfiles seeking the unwind table entry for this PC.  Each objfile
+   contains a sorted list of struct unwind_table_entry.  Since we do a binary
+   search of the unwind tables, we depend upon them to be sorted.  */
 
 static struct unwind_table_entry *
 find_unwind_entry(pc)
      CORE_ADDR pc;
 {
-  static struct unwind_table_entry *unwind = NULL;
-  static int unwind_last;
-  static int unwind_cache = -1;
   int first, middle, last;
+  struct objfile *objfile;
 
-  if (!unwind)
+  ALL_OBJFILES (objfile)
     {
-      asection *unwind_sec;
+      struct obj_unwind_info *ui;
 
-      unwind_sec = bfd_get_section_by_name (exec_bfd, "$UNWIND_START$");
-      if (unwind_sec)
+      ui = OBJ_UNWIND_INFO (objfile);
+
+      if (!ui)
+	continue;
+
+      /* First, check the cache */
+
+      if (ui->cache
+	  && pc >= ui->cache->region_start
+	  && pc <= ui->cache->region_end)
+	return ui->cache;
+
+      /* Not in the cache, do a binary search */
+
+      first = 0;
+      last = ui->last;
+
+      while (first <= last)
 	{
-	  int size;
+	  middle = (first + last) / 2;
+	  if (pc >= ui->table[middle].region_start
+	      && pc <= ui->table[middle].region_end)
+	    {
+	      ui->cache = &ui->table[middle];
+	      return &ui->table[middle];
+	    }
 
-	  size = bfd_section_size (exec_bfd, unwind_sec);
-	  unwind = malloc (size);
-	  unwind_last = size / sizeof (struct unwind_table_entry) - 1;
-
-	  bfd_get_section_contents (exec_bfd, unwind_sec, unwind, 0, size);
+	  if (pc < ui->table[middle].region_start)
+	    last = middle - 1;
+	  else
+	    first = middle + 1;
 	}
-    }
-
-  if (unwind_cache > 0
-      && pc >= unwind[unwind_cache].region_start
-      && pc <= unwind[unwind_cache].region_end)
-    return &unwind[unwind_cache];
-
-  first = 0;
-  last = unwind_last;
-
-  while (first <= last)
-    {
-      middle = (first + last) / 2;
-      if (pc >= unwind[middle].region_start
-	  && pc <= unwind[middle].region_end)
-	return &unwind[middle];
-
-      if (pc < unwind[middle].region_start)
-	last = middle - 1;
-      else
-	first = middle + 1;
-    }
-    return NULL;
+    }				/* ALL_OBJFILES() */
+  return NULL;
 }
 
 static int
@@ -819,7 +824,7 @@ skip_prologue(pc)
   int inst;
   int status;
 
-  status = target_read_memory (pc, &inst, 4);
+  status = target_read_memory (pc, (char *)&inst, 4);
   SWAP_TARGET_AND_HOST (&inst, sizeof (inst));
   if (status != 0)
     return pc;
