@@ -16,23 +16,23 @@ SECTIONS
 	{ 					
 	  *(.text) 				
 	  *(.strings)
-   	  _etext = .;
+   	  ${RELOCATING+_etext = .;}
 	} ${RELOCATING+ > ram}
 .data  :
 	{
 	*(.data)
-	_edata = .;
+	${RELOCATING+_edata = .;}
 	} ${RELOCATING+ > ram}
 .bss  :
 	{
-	${RELOCATING+ _bss_start = .};
+	${RELOCATING+ _bss_start = .;}
 	*(.bss)
 	*(COMMON)
 	${RELOCATING+ _end = .};
 	} ${RELOCATING+ >ram}
 .stack : 
 	{
-	_stack = .;
+	${RELOCATING+_stack = .;}
 	*(.stack)
 	} ${RELOCATING+ > topram}
 }
