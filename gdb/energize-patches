@@ -52,7 +52,7 @@ diff -c -r1.162 Makefile.in
   ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
   
-  VERSION = 4.5.7
+  VERSION = 4.6
   DIST=gdb
 --- 160,172 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
@@ -66,36 +66,31 @@ diff -c -r1.162 Makefile.in
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
 ! 	   ${ENERGIZE_LIB}
   
-  VERSION = 4.5.7
+  VERSION = 4.6
   DIST=gdb
 ***************
-*** 176,182 ****
-  # demangling.  For other demangling styles, such as the Annotated C++
-  # Reference Manual (section 7.2.1c) style, set this define in the target-
-  # dependent makefile fragment.
-! DEMANGLE_OPTS=
+*** 175,181 ****
+  # selection of the style unless you do an explicit "set demangle auto".
+  # To select one of these as the default, set DEMANGLING_STYLE in the
+  # appropriate target dependent makefile fragment.
+! DEMANGLING_STYLE = "gnu"
   
-  # Host and target-dependent makefile fragments come in here.
-  ####
---- 182,193 ----
-  # demangling.  For other demangling styles, such as the Annotated C++
-  # Reference Manual (section 7.2.1c) style, set this define in the target-
-  # dependent makefile fragment.
-! #
-! # For Energize, default to using style specified in the Annotated C++
-! # Reference Manual, section 7.2.1c, which is what is used by the Lucid C++
-! # compiler for most things.  But there are places where Lucid varies from
-! # the ARM, so select the Lucid specific code also.
-! DEMANGLE_OPTS=-DARM_DEMANGLING -DLUCID_DEMANGLING
+  # Select demangler to use.
+  DEMANGLER = cplus-dem
+--- 181,187 ----
+  # selection of the style unless you do an explicit "set demangle auto".
+  # To select one of these as the default, set DEMANGLING_STYLE in the
+  # appropriate target dependent makefile fragment.
+! DEMANGLING_STYLE = "lucid"
   
-  # Host and target-dependent makefile fragments come in here.
-  ####
+  # Select demangler to use.
+  DEMANGLER = cplus-dem
 ***************
-*** 194,200 ****
+*** 199,205 ****
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
-! 	 minsyms.c mipsread.c
+! 	 minsyms.c mipsread.c maint.c
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
@@ -103,16 +98,16 @@ diff -c -r1.162 Makefile.in
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
-! 	 minsyms.c mipsread.c energize.c
+! 	 minsyms.c mipsread.c maint.c energize.c
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
 ***************
-*** 280,286 ****
+*** 285,291 ****
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
-!     buildsym.o objfiles.o minsyms.o \
+!     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
   
   RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
@@ -120,12 +115,12 @@ diff -c -r1.162 Makefile.in
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
-!     buildsym.o objfiles.o minsyms.o energize.o \
+!     buildsym.o objfiles.o minsyms.o maint.o demangle.o energize.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
   
   RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 ***************
-*** 293,299 ****
+*** 298,304 ****
   
   NTSSTART = kdb-start.o
   
@@ -142,7 +137,7 @@ diff -c -r1.162 Makefile.in
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
 ***************
-*** 347,352 ****
+*** 352,357 ****
 --- 358,377 ----
   	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
   	echo "Load .c corresponding to:" $(DEPFILES)
@@ -165,7 +160,7 @@ diff -c -r1.162 Makefile.in
   # This is useful when debugging GDB, because some Unix's don't let you run GDB
   # on itself without copying the executable.  So "make gdb1" will make
 ***************
-*** 695,700 ****
+*** 700,705 ****
 --- 720,728 ----
   
   ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
@@ -907,7 +902,7 @@ RCS file: /local/cvsfiles/devo/gdb/config/amix.mh,v
 retrieving revision 1.4
 diff -c -r1.4 amix.mh
 *** 1.4	1992/06/10 02:05:16
---- amix.mh	1992/07/05 17:47:19
+--- config/amix.mh	1992/07/05 17:47:19
 ***************
 *** 22,24 ****
 --- 22,31 ----
@@ -926,7 +921,7 @@ RCS file: /local/cvsfiles/devo/gdb/config/ncr3000.mh,v
 retrieving revision 1.4
 diff -c -r1.4 ncr3000.mh
 *** 1.4	1992/06/15 19:25:13
---- ncr3000.mh	1992/07/05 17:49:34
+--- config/ncr3000.mh	1992/07/05 17:49:34
 ***************
 *** 38,40 ****
 --- 38,47 ----
