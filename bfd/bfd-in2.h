@@ -756,6 +756,12 @@ typedef struct sec
            discarded. */
 #define SEC_DEBUGGING 0x10000
 
+         /* The contents of this section are held in memory pointed to
+           by the contents field.  This is checked by
+           bfd_get_section_contents, and the data is retrieved from
+           memory if appropriate.  */
+#define SEC_IN_MEMORY 0x20000
+
 	 /*  End of section flags.  */
 
         /*  The virtual memory address of the section - where it will be
@@ -835,7 +841,9 @@ typedef struct sec
 
    PTR userdata;
 
-   struct lang_output_section *otheruserdata;
+         /* If the SEC_IN_MEMORY flag is set, this points to the actual
+           contents.  */
+   unsigned char *contents;
 
          /* Attached line number information */
 
@@ -1924,8 +1932,24 @@ core_file_matches_executable_p
 
 #define BFD_SEND(bfd, message, arglist) \
                ((*((bfd)->xvec->message)) arglist)
+
+#ifdef DEBUG_BFD_SEND
+#undef BFD_SEND
+#define BFD_SEND(bfd, message, arglist) \
+  (((bfd) && (bfd)->xvec && (bfd)->xvec->message) ? \
+    ((*((bfd)->xvec->message)) arglist) : \
+    (bfd_assert (__FILE__,__LINE__), NULL))
+#endif
 #define BFD_SEND_FMT(bfd, message, arglist) \
             (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
+
+#ifdef DEBUG_BFD_SEND
+#undef BFD_SEND_FMT
+#define BFD_SEND_FMT(bfd, message, arglist) \
+  (((bfd) && (bfd)->xvec && (bfd)->xvec->message) ? \
+   (((bfd)->xvec->message[(int)((bfd)->format)]) arglist) : \
+   (bfd_assert (__FILE__,__LINE__), NULL))
+#endif
 enum bfd_flavour {
   bfd_target_unknown_flavour,
   bfd_target_aout_flavour,

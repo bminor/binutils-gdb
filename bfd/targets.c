@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -102,11 +102,27 @@ DESCRIPTION
 
 .#define BFD_SEND(bfd, message, arglist) \
 .               ((*((bfd)->xvec->message)) arglist)
+.
+.#ifdef DEBUG_BFD_SEND
+.#undef BFD_SEND
+.#define BFD_SEND(bfd, message, arglist) \
+.  (((bfd) && (bfd)->xvec && (bfd)->xvec->message) ? \
+.    ((*((bfd)->xvec->message)) arglist) : \
+.    (bfd_assert (__FILE__,__LINE__), NULL))
+.#endif
 
 	For operations which index on the BFD format:
 
 .#define BFD_SEND_FMT(bfd, message, arglist) \
 .            (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
+.
+.#ifdef DEBUG_BFD_SEND
+.#undef BFD_SEND_FMT
+.#define BFD_SEND_FMT(bfd, message, arglist) \
+.  (((bfd) && (bfd)->xvec && (bfd)->xvec->message) ? \
+.   (((bfd)->xvec->message[(int)((bfd)->format)]) arglist) : \
+.   (bfd_assert (__FILE__,__LINE__), NULL))
+.#endif
 
 	This is the structure which defines the type of BFD this is.  The
 	<<xvec>> member of the struct <<bfd>> itself points here.  Each
@@ -353,6 +369,7 @@ extern bfd_target bfd_elf32_little_generic_vec;
 extern bfd_target bfd_elf32_littlemips_vec;
 extern bfd_target bfd_elf32_m68k_vec;
 extern bfd_target bfd_elf32_m88k_vec;
+extern bfd_target bfd_elf32_powerpc_vec;
 extern bfd_target bfd_elf32_sparc_vec;
 extern bfd_target bfd_elf64_big_generic_vec;
 extern bfd_target bfd_elf64_little_generic_vec;
@@ -389,6 +406,9 @@ extern bfd_target newsos3_vec;
 extern bfd_target nlm32_i386_vec;
 extern bfd_target nlm32_sparc_vec;
 extern bfd_target nlm32_alpha_vec;
+/*start-sanitize-powerpc-netware*/
+extern bfd_target nlm32_powerpc_vec;
+/*end-sanitize-powerpc-netware*/
 extern bfd_target oasys_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target shcoff_vec;

@@ -1,5 +1,9 @@
 Sun Feb 27 15:22:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* targets.c (BFD_SEND, BFD_SEND_FMT): Add debugging versions that
+	check all the pointer dereferences.  Enabled via DEBUG_BFD_SEND.
+	* bfd-in2.h: Rebuilt.
+
 	* srec.c (hex_value): Always set to a size of 256 bytes.
 	(srec_init): Cosmetic changes.
 
