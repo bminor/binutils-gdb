@@ -788,7 +788,7 @@ static int symbuf_end;
    completed after all the stabs are read.  */
 struct cont_elem
   {
-    /* sym and stabsstring for continuing information in cfront */
+    /* sym and stabstring for continuing information in cfront */
     struct symbol *sym;
     char *stabs;
     /* state dependencies (statics that must be preserved) */

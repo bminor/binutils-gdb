@@ -1164,8 +1164,8 @@ alpha_pop_frame (void)
    LENIENT, then we must skip everything which is involved in setting
    up the frame (it's OK to skip more, just so long as we don't skip
    anything which might clobber the registers which are being saved.
-   Currently we must not skip more on the alpha, but we might the lenient
-   stuff some day.  */
+   Currently we must not skip more on the alpha, but we might need the
+   lenient stuff some day.  */
 
 CORE_ADDR
 alpha_skip_prologue (CORE_ADDR pc, int lenient)

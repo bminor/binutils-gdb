@@ -1,3 +1,10 @@
+2000-12-08  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* alpha-tdep.c: Fix typo in comment.
+	* dbxread.c: Fix typo in comment.
+	* fr30-tdep.c: Fix typo: newline missing after comment.
+	* mcore-tdep.c: Fix typo in comment.	
+
 2000-12-07  J.T. Conklin  <jtc@redback.com>
 
 	* gdbserver/low-hppabsd.c (buf2, environ, quit, quit_flag):

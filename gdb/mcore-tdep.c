@@ -217,7 +217,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   return dummy;
 }
 
-/* Function prologues on the Motorol MCore processors consist of:
+/* Function prologues on the Motorola MCore processors consist of:
 
    - adjustments to the stack pointer (r1 used as scratch register)
    - store word/multiples that use r0 as the base address

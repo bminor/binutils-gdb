@@ -476,10 +476,11 @@ fr30_init_extra_frame_info (struct frame_info *fi)
     fi->frame = read_register (fi->framereg);
   else
     /* not the innermost frame */
-    /* If we have an FP,  the callee saved it. */ if (fi->framereg == FP_REGNUM)
-    if (fi->next->fsr.regs[fi->framereg] != 0)
-      fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
-				       4);
+    /* If we have an FP,  the callee saved it. */
+    if (fi->framereg == FP_REGNUM)
+      if (fi->next->fsr.regs[fi->framereg] != 0)
+	fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg], 4);
+
   /* Calculate actual addresses of saved registers using offsets determined
      by fr30_scan_prologue.  */
   for (reg = 0; reg < NUM_REGS; reg++)
