@@ -1,5 +1,9 @@
 2003-05-25  Andreas Schwab  <schwab@suse.de>
 
+	* m68k-tdep.c (m68k_gdbarch_init): Set parm_boundary instead of
+	stack_align and deprecated_extra_stack_alignment_needed.
+	(m68k_stack_align): Delete.
+
 	* m68k-tdep.c (m68k_register_raw_size): Remove cast.
 	(m68k_register_virtual_size): Likewise.
 	(altos_skip_prologue): Remove obsolete function.
