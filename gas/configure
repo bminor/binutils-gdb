@@ -671,6 +671,7 @@ for this_target in $target $canon_targets ; do
 			      *)	targ=arm-lit ;;
 			    esac
 			    ;;
+      arm-*-coff)           fmt=coff ;;
       arm-*-riscix*)        fmt=aout ;;
       arm-*-pe)             fmt=coff targ=armcoff em=pe ;;
 
