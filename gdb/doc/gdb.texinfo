@@ -164,6 +164,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 @ifclear BARETARGET
 * Sample Session::              A sample @value{GDBN} session
 @end ifclear
+
 * Invocation::                  Getting in and out of @value{GDBN}
 * Commands::                    @value{GDBN} commands
 * Running::                     Running programs under @value{GDBN}
@@ -188,6 +189,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 @ifclear DOSHOST
 * Emacs::                       Using @value{GDBN} under GNU Emacs
 @end ifclear
+
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 @ifset NOVEL
 * Renamed Commands::
@@ -199,6 +201,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 @ifclear AGGLOMERATION
 * Copying::                     GNU GENERAL PUBLIC LICENSE
 @end ifclear
+
 * Index::                       Index
 @end menu
 @end ifinfo
@@ -1914,6 +1917,7 @@ no effect on your program until you enable it again.
 @ifclear CONLY
 * Exception Handling::          Breakpoints and exceptions
 @end ifclear
+
 * Delete Breaks::               Deleting breakpoints
 * Disabling::                   Disabling breakpoints
 * Conditions::                  Break conditions
@@ -3199,6 +3203,7 @@ Emacs}.
 @ifclear DOSHOST
 * Search::                      Searching source files
 @end ifclear
+
 * Source Path::                 Specifying source directories
 * Machine Code::                Source and machine code
 @end menu
@@ -3697,17 +3702,17 @@ scope resolution operator in @value{GDBN} expressions.
 @cindex variable values, wrong
 @quotation
 @emph{Warning:} Occasionally, a local variable may appear to have the
-wrong value at certain points in a function---just after entry to the
-function, and just before exit.  You may see this problem when you are
-stepping by machine instructions.  This is because on most machines, it
-takes more than one instruction to set up a stack frame (including local
-variable definitions); if you are stepping by machine instructions,
-variables may appear to have the wrong values until the stack frame is
-completely built.  On function exit, it usually also takes more than one
-machine instruction to destroy a stack frame; after you begin stepping
-through that group of instructions, local variable definitions may be
-gone.
+wrong value at certain points in a function---just after entry to a new
+scope, and just before exit.
 @end quotation
+You may see this problem when you are stepping by machine instructions.
+This is because on most machines, it takes more than one instruction to
+set up a stack frame (including local variable definitions); if you are
+stepping by machine instructions, variables may appear to have the wrong
+values until the stack frame is completely built.  On exit, it usually
+also takes more than one machine instruction to destroy a stack frame;
+after you begin stepping through that group of instructions, local
+variable definitions may be gone.
 
 @node Arrays
 @section Artificial arrays
@@ -6044,6 +6049,7 @@ its caller.
 @ifclear BARETARGET
 * Signaling::                   Giving your program a signal
 @end ifclear
+
 * Returning::                   Returning from a function
 * Calling::                     Calling your program's functions
 * Patching::                    Patching your program
