@@ -1421,7 +1421,7 @@ skip_prologue(pc)
 
   u = find_unwind_entry (pc);
   if (!u)
-    return 0;
+    return pc;
 
   /* This is how much of a frame adjustment we need to account for.  */
   stack_remaining = u->Total_frame_size << 3;

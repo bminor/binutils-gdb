@@ -1,5 +1,8 @@
 Fri Mar 25 10:14:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (skip_prologue): Return "pc" not zero
+	if no unwind descriptor is found.
+
 	* tm-hppa.h (NUM_REGS): Bump to 128 registers.
 	(REGISTER_NAMES): Add entries for "right-half" of FP registers.
 	(REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE): Do not treat FP regs
