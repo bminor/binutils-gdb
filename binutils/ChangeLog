@@ -1,3 +1,7 @@
+2004-10-26  Jakub Jelinek  <jakub@redhat.com>
+
+	* ar.c (extract_file): Set atime to mtime for ar xo.
+
 2004-10-25  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* stabs.c (stab_demangle_v3_arglist): New static function, broken

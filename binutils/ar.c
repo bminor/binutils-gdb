@@ -935,7 +935,12 @@ extract_file (bfd *abfd)
   chmod (bfd_get_filename (abfd), buf.st_mode);
 
   if (preserve_dates)
-    set_times (bfd_get_filename (abfd), &buf);
+    {
+      /* Set access time to modification time.  Only st_mtime is
+	 initialized by bfd_stat_arch_elt.  */
+      buf.st_atime = buf.st_mtime;
+      set_times (bfd_get_filename (abfd), &buf);
+    }
 
   free (cbuf);
 }
