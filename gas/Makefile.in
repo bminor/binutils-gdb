@@ -450,7 +450,7 @@ distclean realclean: clean-here
 	else true; fi
 	-rm -f config.status Makefile targ-env.h targ-cpu.h \
 		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
-		config-stamp config.h
+		config-stamp config.h conf config.log config.cache
 
 # Entry points `install', `includes' and `uninstall'.
 
