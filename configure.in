@@ -361,6 +361,9 @@ case "${host}" in
   i[345]86-*-win32)
      noconfigdirs="patch diff flex make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
     ;;
+  ppc*-*-pe)
+     noconfigdirs="patch diff flex make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
+    ;;
 esac
 
 
@@ -419,9 +422,7 @@ case "${target}" in
     # Can't build gdb for win32 if not native.
     # make/glob's configure uses some AC_TRY_RUN type tests
     target_configdirs="$target_configdirs target-winsup"
-    if [ x${is_cross_compiler} = xyes ]; then
-	    noconfigdirs="$noconfigdirs gdb tk make"
-    fi
+    noconfigdirs="$noconfigdirs gdb tcl tk make"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;    
@@ -454,8 +455,11 @@ case "${target}" in
     # copied from rs6000-*-* entry
     noconfigdirs="$noconfigdirs gprof cvs"
     ;;
-  powerpc*-*-winnt* | powerpc*-*-pe*)
-    noconfigdirs="$noconfigdirs gdb"
+  powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
+    target_configdirs="$target_configdirs target-winsup"
+    noconfigdirs="$noconfigdirs gdb tcl tk make expect"
+    # always build newlib.
+    skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000

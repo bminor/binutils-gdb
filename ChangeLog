@@ -1,3 +1,10 @@
+Mon Dec 11 15:31:58 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (host==powerpc-pe): Add many directories to noconfigdirs
+	for powerpc-pe native.
+	(target==i386-win32): add tcl, make to noconfigdirs if canadian cross.
+	(target==powerpc-pe): duplicate i386-win32 entry.
+
 Sat Dec  9 14:58:28 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* configure.in (noconfigdirs): Exclude target-newlib for all versions
