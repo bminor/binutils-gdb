@@ -315,3 +315,7 @@ typedef struct mips_extra_func_info {
    mips_extra_func_info_t's off of this.  */
 
 #define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+
+/* Convert a dbx stab register number (from `r' declaration) to a gdb REGNUM */
+
+#define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-38)

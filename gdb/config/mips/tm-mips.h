@@ -377,4 +377,6 @@ typedef struct mips_extra_func_info {
    and equivalence between CORE_ADDR and FRAME_ADDR. */
 extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
-#define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
+/* Convert a dbx stab register number (from `r' declaration) to a gdb REGNUM */
+
+#define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-38)
