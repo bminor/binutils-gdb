@@ -1,5 +1,9 @@
 2004-08-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* defs.h: Remove out-of-date comment.
+	[!FCLOSE_PROVIDED] (fclose): Remove prototype.
+	[!GETENV_PROVIDED] (getenv): Remove prototype.
+
 	* standalone.c: Remove file.
 	* Makefile.in (standalone.o): Remove dependency.
 

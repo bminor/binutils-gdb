@@ -1072,10 +1072,6 @@ enum gdb_osabi
    Libiberty thingies are no longer declared here.  We include libiberty.h
    above, instead.  */
 
-#ifndef GETENV_PROVIDED
-extern char *getenv (const char *);
-#endif
-
 /* From other system libraries */
 
 #ifdef HAVE_STDDEF_H
@@ -1092,15 +1088,6 @@ extern char *getenv (const char *);
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-
-/* We take the address of fclose later, but some stdio's forget
-   to declare this.  We can't always declare it since there's
-   no way to declare the parameters without upsetting some compiler
-   somewhere. */
-
-#ifndef FCLOSE_PROVIDED
-extern int fclose (FILE *);
-#endif
 
 #ifndef atof
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
