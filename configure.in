@@ -913,7 +913,7 @@ esac
 
 # start-sanitize-cygnus
 # Only configure cgen if --enable-cgen-maint.
-if [ x$"enable_cgen_maint" != xyes ] ; then
+if [ "x$enable_cgen_maint" != xyes ] ; then
   noconfigdirs="$noconfigdirs cgen"
 fi
 
