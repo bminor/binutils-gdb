@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.1:
 
+* New ``start'' command.
+
+This command runs the program until the begining of the main procedure.
+
 * Signal trampoline code overhauled
 
 Many generic problems with GDB's signal handling code have been fixed.
