@@ -1,3 +1,8 @@
+2001-08-31  Eric Christopher  <echristo@redhat.com>
+	    Jason Eckhardt  <jle@redhat.com>
+
+	* ldmain.c (get_emulation): Add support for -mips32 and -mips64.
+
 2001-08-31  Andreas Jaeger  <aj@suse.de>
 
 	* emultempl/pe.em: Add missing prototypes.
@@ -7,7 +12,7 @@
 
 2001-08-29  Joel Sherrill <joel@OARcorp.com>
 
-	* configure.tgt (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
+	* configure.tgt (i[3456]86-*-rtems*, m68*-*-rtems*): Change
 	default from coff to elf.
 
 2001-08-29  Jeff Law <law@redhat.com>

@@ -539,6 +539,8 @@ get_emulation (argc, argv)
 	  else if (strcmp (argv[i], "-mips1") == 0
 		   || strcmp (argv[i], "-mips2") == 0
 		   || strcmp (argv[i], "-mips3") == 0
+		   || strcmp (argv[i], "-mips32") == 0
+		   || strcmp (argv[i], "-mips64") == 0
 		   || strcmp (argv[i], "-mips4") == 0
 		   || strcmp (argv[i], "-mips5") == 0)
 	    {
