@@ -104,6 +104,7 @@ parse_args (argc, argv)
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
     {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
     {"stats", no_argument, NULL, OPTION_STATS},
+    {"static", no_argument, NULL, OPTION_NON_SHARED},
     {"Tbss", required_argument, NULL, OPTION_TBSS},
     {"Tdata", required_argument, NULL, OPTION_TDATA},
     {"Ttext", required_argument, NULL, OPTION_TTEXT},
