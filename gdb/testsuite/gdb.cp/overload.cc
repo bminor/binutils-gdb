@@ -53,6 +53,31 @@ int intToChar (char c)
 void marker1()
 {}
 
+// Now test how overloading and namespaces interact.
+
+class dummyClass {};
+
+dummyClass dummyInstance;
+
+int overloadNamespace(int i)
+{
+  return 1;
+}
+
+int overloadNamespace(dummyClass d)
+{
+  return 2;
+}
+
+namespace XXX {
+  int overloadNamespace (char c)
+  {
+    return 3;
+  }
+
+  void marker2() {}
+}
+
 int main () 
 {
     char arg2 = 2;
@@ -81,7 +106,8 @@ int main ()
     intToChar(1);
 
     marker1(); // marker1-returns-here
-    return 0; // marker1-returns-here
+    XXX::marker2(); // marker1-returns-here
+    return 0;
 }
 
 foo::foo  (int i)                  { ifoo = i; ccpfoo = NULL; }

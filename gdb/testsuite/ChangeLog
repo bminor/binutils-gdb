@@ -1,3 +1,10 @@
+2004-02-02  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/overload.exp: Add overloadNamespace tests.
+	* gdb.cp/overload.cc (dummyClass, dummyInstance): New.
+	(overloadNamespace, XXX): New.
+	(main): Call XXX::marker2.
+
 2004-02-01  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/dump.exp: Use runto_main instead of "runto main".

@@ -1,3 +1,21 @@
+2004-02-02  David Carlton  <carlton@kealia.com>
+
+	* valops.c (enum oload_classification): New.
+	(find_overload_match): Break implementation into separate
+	functions; delete #if 0'd code; look for symbols within
+	namespaces.
+	(find_oload_champ_namespace,find_oload_champ_namespace_loop)
+	(find_oload_champ,oload_method_static,classify_oload_match): New.
+	* cp-support.h: Add declaration for cp_func_name; update
+	declaration for make_symbol_overload_list.
+	* cp-support.c (cp_func_name): New.
+	(overload_list_add_symbol): Fix comment, use
+	SYMBOL_LINKAGE_NAME and SYMBOL_NATURAL_NAME.
+	(make_symbol_overload_list): Take a function name and a namespace
+	instead of a symbol; change implementation.
+	(make_symbol_overload_list_using): New.
+	(make_symbol_overload_list_qualified, read_in_psymtabs): New.
+
 2004-02-02  Fred Fish  <fnf@redhat.com>
 
 	* main.c (gdb_stdtarg): Move definition to group with other

@@ -60,7 +60,10 @@ extern unsigned int cp_find_first_component (const char *name);
 
 extern unsigned int cp_entire_prefix_len (const char *name);
 
-extern struct symbol **make_symbol_overload_list (struct symbol *);
+extern char *cp_func_name (const char *full_name);
+
+extern struct symbol **make_symbol_overload_list (const char *,
+						  const char *);
 
 extern struct type *cp_lookup_rtti_type (const char *name,
 					 struct block *block);
