@@ -208,7 +208,7 @@ print_version_id ()
 
 #ifdef BFD_ASSEMBLER
   fprintf (stderr, _("GNU assembler version %s (%s) using BFD version %s"),
-	   VERSION, TARGET_ALIAS, BFD_VERSION);
+	   VERSION, TARGET_ALIAS, BFD_VERSION_STRING);
 #else
   fprintf (stderr, _("GNU assembler version %s (%s)"), VERSION, TARGET_ALIAS);
 #endif

@@ -1,3 +1,11 @@
+2001-10-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* as.c (print_version_id): Use BFD_VERSION_STRING in place of
+	BFD_VERSION.
+	* Makefile.am (Makefile): Depend on bfd/configure.in.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2001-09-30  H.J. Lu  <hjl@gnu.org>
 
 	* config/obj-elf.c (obj_elf_parse_section_letters): Accept "am"
