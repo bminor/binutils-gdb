@@ -42,7 +42,7 @@ case "${host}" in
 
   alpha-*-osf*)			gas_host=ansi		;;
 
-  hppa*-hp-hpux*)		gas_host=hppahpux	;;
+  hppa*-hp-hpux*)		gas_host=hpux		;;
   hppa*-hp-bsd*)		gas_host=hppabsd	;;
   hppa*-hp-osf*)		gas_host=hppaosf	;;
 
@@ -97,7 +97,7 @@ emulation=generic
 # check for architecture variants
 case ${target_cpu} in
   sparclite*)   cpu_type=sparc ;;
-  sparc64)	cpu_type=sparc obj_format=aout ;;
+  sparc64)	cpu_type=sparc obj_format=aout ;; # v9
   m680[01234]0) cpu_type=m68k ;;
   m683??)       cpu_type=m68k ;;
   i486)		cpu_type=i386 ;;
@@ -144,6 +144,8 @@ case ${generic_target} in
   mips-*-ecoffl*)	obj_format=ecoff gas_target=mips-lit ;;
   mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-irix*)		obj_format=ecoff gas_target=mips-big emulation=irix ;;
+
+  sparc*-*-sunos4*)	bfd_gas=preferred obj_format=aout emulation=sun3 ;;
 
   sparclite*-fujitsu-none)
 			obj_format=aout ;;
@@ -206,17 +208,22 @@ case ${bfd_gas}-${obj_format} in
   *)		;;
 esac
 
-case ${with_bfd_assembler} in
-  "")
-    # User specified nothing.
-    ;;
-  "${bfd_gas}")
+case ${with_bfd_assembler}-${bfd_gas} in
+  yes-yes | no-no)
     # We didn't override user's choice.
     ;;
-  no)
-    # ... but we overrode it.
+  no-yes)
     echo '*** Use of BFD is required for ${target}; overriding config options'\
 		1>&2
+    ;;
+  no-preferred)
+    bfd_gas=no
+    ;;
+  *-preferred)
+    bfd_gas=yes
+    ;;
+  -*)
+    # User specified nothing.
     ;;
 esac
 

@@ -1,3 +1,11 @@
+Thu Jun 24 16:33:53 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: set host config to hpux for hppa*-hp-hpux
+
+Mon Jun 21 17:37:59 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: make installation & builds work again for crosses
+
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
 	
 	* Makefile.in: canonicalize install.sh; for use within
