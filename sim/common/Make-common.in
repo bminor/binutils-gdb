@@ -148,6 +148,7 @@ SIM_NEW_COMMON_OBJS = \
 	sim-module.o \
 	sim-options.o \
 	sim-profile.o \
+	sim-signal.o \
 	sim-trace.o \
 	sim-utils.o \
 	sim-watch.o
@@ -279,6 +280,7 @@ sim-fpu_h = $(srccom)/sim-fpu.h
 sim-io_h = $(srccom)/sim-io.h
 sim-options_h = $(srccom)/sim-options.h
 sim-break_h = $(srccom)/sim-break.h
+sim-signal_h = $(srccom)/sim-signal.h
 
 # FIXME: If this complicated way of building .o files from ../common is
 # necessary, the reason should be documented here.
@@ -354,6 +356,9 @@ sim-resume.o: $(srccom)/sim-resume.c $(sim_main_headers)
 
 sim-run.o: $(srccom)/sim-run.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-run.c $(ALL_CFLAGS)
+
+sim-signal.o: $(srccom)/sim-signal.c $(sim_main_headers) $(sim-signal_h)
+	$(CC) -c $(srccom)/sim-signal.c $(ALL_CFLAGS)
 
 sim-stop.o: $(srccom)/sim-stop.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-stop.c $(ALL_CFLAGS)

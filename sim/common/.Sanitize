@@ -93,6 +93,8 @@ sim-profile.h
 sim-reason.c
 sim-resume.c
 sim-run.c
+sim-signal.c
+sim-signal.h
 sim-stop.c
 sim-trace.c
 sim-trace.h

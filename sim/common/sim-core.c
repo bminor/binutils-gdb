@@ -25,15 +25,6 @@
 #include "sim-main.h"
 #include "sim-assert.h"
 
-#include <signal.h>
-
-/* for Windows builds.  signal numbers used by MSVC are mostly
-   the same as non-linux unixen. */
-#ifndef SIGBUS
-# define SIGBUS 10
-#endif
-
-
 /* "core" module install handler.
 
    This is called via sim_module_install to install the "core" subsystem
@@ -114,12 +105,12 @@ sim_core_signal (SIM_DESC sd,
     case sim_core_unmapped_signal:
       sim_io_eprintf (sd, "core: %d byte %s to unmaped address 0x%lx at 0x%lx\n",
 		      nr_bytes, copy, (unsigned long) addr, (unsigned long) ip);
-      sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIGSEGV);
+      sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIM_SIGSEGV);
       break;
     case sim_core_unaligned_signal:
       sim_io_eprintf (sd, "core: %d byte misaligned %s to address 0x%lx at 0x%lx\n",
 		      nr_bytes, copy, (unsigned long) addr, (unsigned long) ip);
-      sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIGBUS);
+      sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIM_SIGBUS);
       break;
     default:
       sim_engine_abort (sd, cpu, cia,

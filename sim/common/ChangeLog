@@ -1,5 +1,26 @@
 Tue Nov 18 15:53:45 1997  Doug Evans  <devans@canuck.cygnus.com>
 
+	* sim-signal.c, sim-signal.h: New files.
+	* Make-common.in (sim-signal.o): Add rule for.
+	(SIM_NEW_COMMON_OBJS): Add sim-signal.o.
+	* sim-abort.c: Don't include <signal.h>.
+	* sim-basics.h: #include "sim-signal.h".
+	* sim-break.c: Don't include <signal.h>.
+	(sim_handle_breakpoint): Replace SIGTRAP with SIM_SIGTRAP.
+	* sim-core.c: Don't include <signal.h>.
+	(SIGBUS): Delete definition.
+	(sim_core_signal): Replace SIGSEGV,SIGBUS with SIM_SIGSEGV,SIM_SIGBUS.
+	* sim-engine.c: Don't include <signal.h>.
+	(sim_engine_abort): Replace SIGABRT with SIM_SIGABRT.
+	* sim-reason.c (sim_stop_reason): Call sim_signal_to_host.
+	* sim-resume.c: Don't include <signal.h>.
+	(SIGTRAP): Delete definition.
+	(has_stepped): Replace SIGTRAP with SIM_SIGTRAP.
+	* sim-stop.c: Don't include <signal.h>.
+	(control_c_simulation): Replace SIGINT with SIM_SIGINT.
+	* sim-watch.c: Don't include <signal.h>.
+	(handle_watchpoint): Replace SIGINT with SIM_SIGINT.
+
 	* Make-common.in (SIM_NEW_COMMON_OBJS): New variable.
 
 	* sim-base.h (CIA_ADDR): Provide default definition.

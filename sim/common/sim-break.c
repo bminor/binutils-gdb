@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <signal.h>
 
 #include "sim-main.h"
 #include "sim-assert.h"
@@ -104,7 +103,7 @@ sim_handle_breakpoint (sd, cpu, cia)
   if (!bp || !(bp->flags & SIM_BREAK_INSERTED))
     return;
 
-  sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia, sim_stopped, SIGTRAP);
+  sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia, sim_stopped, SIM_SIGTRAP);
 }
 
 /* Handler functions for simulator resume and suspend events. */
