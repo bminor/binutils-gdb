@@ -1,3 +1,7 @@
+Mon Oct  4 10:42:18 1993  Tom Lord  (lord@rtl.cygnus.com)
+
+	* libgdb.texinfo: new file.  Spec for the gdb library.
+
 Sun Oct  3 15:26:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Include Files): Fix typo (start -> end).
