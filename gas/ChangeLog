@@ -1,8 +1,24 @@
 Thu Aug 10 00:38:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (potable): Add spc, ttl, xcom, xref.
+	(s_mri_sect): New function.
+	* read.h (s_mri_sect): Declare.
+	* config/obj-coff.c (obj_coff_section) (both versions): In MRI
+	mode, call s_mri_sect.
+	(obj_pseudo_table): Add sect.s and section.s.  Move sect outside
+	of ifndef BFD_ASSEMBLER.
+	* config/obj-elf.c (elf_pseudo_table): Add section.s, sect,
+	sect.s.
+	(obj_elf_section): In MRI mode, call s_mri_sect.
+	* config/tc-m68k.c (md_pseudo_table): Add restore, save.
+	(struct save_opts): Define.
+	(save_stack): New static variable.
+	(s_save, s_restore): New static functions.
+
 	* read.c (s_set): Remove unused local ptr.
 	(hex_float): Check target_big_endian.
 	(equals): Remove unused local p.
+
 	* config/tc-a29k.h (TARGET_BYTES_BIG_ENDIAN): Define.
 	* config/tc-h8500.h (TARGET_BYTES_BIG_ENDIAN): Define.
 	* config/tc-hppa.h (TARGET_BYTES_BIG_ENDIAN): Define.

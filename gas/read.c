@@ -327,6 +327,7 @@ static const pseudo_typeS potable[] =
   {"single", float_cons, 'f'},
 /* size */
   {"space", s_space, 0},
+  {"spc", s_ignore, 0},
   {"stabd", s_stab, 'd'},
   {"stabn", s_stab, 'n'},
   {"stabs", s_stab, 's'},
@@ -346,10 +347,13 @@ static const pseudo_typeS potable[] =
   {"this_gcc_requires_the_gnu_assembler", s_ignore, 0},
 
   {"title", listing_title, 0},	/* Listing title */
+  {"ttl", listing_title, 0},
 /* type */
 /* use */
 /* val */
+  {"xcom", s_comm, 0},
   {"xdef", s_globl, 0},
+  {"xref", s_ignore, 0},
   {"xstabs", s_xstab, 's'},
   {"word", cons, 2},
   {"zero", s_space, 0},
@@ -1642,6 +1646,94 @@ s_org (ignore)
 
   demand_empty_rest_of_line ();
 }				/* s_org() */
+
+/* Handle parsing for the MRI SECT/SECTION pseudo-op.  This should be
+   called by the obj-format routine which handles section changing
+   when in MRI mode.  It will create a new section, and return it.  It
+   will set *TYPE to the section type: one of '\0' (unspecified), 'C'
+   (code), 'D' (data), 'M' (mixed), or 'R' (romable).  If
+   BFD_ASSEMBLER is defined, the flags will be set in the section.  */
+
+void
+s_mri_sect (type)
+     char *type;
+{
+  char *name;
+  char c;
+  segT seg;
+
+  SKIP_WHITESPACE ();
+  
+  name = input_line_pointer;
+  if (! isdigit ((unsigned char) *name))
+    c = get_symbol_end ();
+  else
+    {
+      do
+	{
+	  ++input_line_pointer;
+	}
+      while (isdigit ((unsigned char) *input_line_pointer));
+      c = *input_line_pointer;
+      *input_line_pointer = '\0';
+    }
+
+  name = strdup (name);
+  if (name == NULL)
+    as_fatal ("virtual memory exhausted");
+
+  *input_line_pointer = c;
+
+  seg = subseg_new (name, 0);
+
+  if (*input_line_pointer == ',')
+    {
+      int align;
+
+      ++input_line_pointer;
+      align = get_absolute_expression ();
+      record_alignment (seg, align);
+    }
+
+  *type = '\0';
+  if (*input_line_pointer == ',')
+    {
+      c = *++input_line_pointer;
+      c = toupper ((unsigned char) c);
+      if (c == 'C' || c == 'D' || c == 'M' || c == 'R')
+	*type = c;
+      else
+	as_bad ("unrecognized section type");
+      ++input_line_pointer;
+
+#ifdef BFD_ASSEMBLER
+      {
+	flagword flags;
+
+	flags = SEC_NO_FLAGS;
+	if (type == 'C')
+	  flags = SEC_CODE;
+	else if (type == 'D')
+	  flags = SEC_DATA;
+	else if (type == 'R')
+	  flags = SEC_ROM;
+	if (flags != SEC_NO_FLAGS)
+	  {
+	    if (! bfd_set_section_flags (stdoutput, seg, flags))
+	      as_warn ("error setting flags for \"%s\": %s",
+		       bfd_section_name (stdoutput, sec),
+		       bfd_errmsg (bfd_get_error ()));
+	  }
+      }
+#endif
+    }
+
+  /* Ignore the HP type.  */
+  if (*input_line_pointer == ',')
+    input_line_pointer += 2;
+
+  demand_empty_rest_of_line ();
+}
 
 void 
 s_set (ignore)

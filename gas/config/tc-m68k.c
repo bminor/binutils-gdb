@@ -295,6 +295,8 @@ static void s_chip PARAMS ((int));
 static void s_fopt PARAMS ((int));
 static void s_opt PARAMS ((int));
 static void s_reg PARAMS ((int));
+static void s_restore PARAMS ((int));
+static void s_save PARAMS ((int));
 
 static int current_architecture;
 
@@ -427,6 +429,8 @@ CONST pseudo_typeS md_pseudo_table[] =
   {"mask2", s_ignore, 0},
   {"opt", s_opt, 0},
   {"reg", s_reg, 0},
+  {"restore", s_restore, 0},
+  {"save", s_save, 0},
 
   {0, 0, 0}
 };
@@ -4429,6 +4433,85 @@ s_reg (ignore)
   S_SET_SEGMENT (mri_line_label, absolute_section);
   S_SET_VALUE (mri_line_label, mask);
   mri_line_label->sy_frag = &zero_address_frag;
+
+  demand_empty_rest_of_line ();
+}
+
+/* This structure is used for the MRI SAVE and RESTORE pseudo-ops.  */
+
+struct save_opts
+{
+  struct save_opts *next;
+  int abspcadd;
+  int symbols_case_sensitive;
+  int keep_locals;
+  int short_refs;
+  int architecture;
+  int quick;
+  int rel32;
+  int listing;
+  int no_warnings;
+  /* FIXME: We don't save OPT S.  */
+};
+
+/* This variable holds the stack of saved options.  */
+
+static struct save_opts *save_stack;
+
+/* The MRI SAVE pseudo-op.  */
+
+static void
+s_save (ignore)
+     int ignore;
+{
+  struct save_opts *s;
+
+  s = (struct save_opts *) xmalloc (sizeof (struct save_opts));
+  s->abspcadd = m68k_abspcadd;
+  s->symbols_case_sensitive = symbols_case_sensitive;
+  s->keep_locals = flag_keep_locals;
+  s->short_refs = flag_short_refs;
+  s->architecture = current_architecture;
+  s->quick = m68k_quick;
+  s->rel32 = m68k_rel32;
+  s->listing = listing;
+  s->no_warnings = flag_no_warnings;
+
+  s->next = save_stack;
+  save_stack = s;
+
+  demand_empty_rest_of_line ();
+}
+
+/* The MRI RESTORE pseudo-op.  */
+
+static void
+s_restore (ignore)
+     int ignore;
+{
+  struct save_opts *s;
+
+  if (save_stack == NULL)
+    {
+      as_bad ("restore without save");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  s = save_stack;
+  save_stack = s->next;
+
+  m68k_abspcadd = s->abspcadd;
+  symbols_case_sensitive = s->symbols_case_sensitive;
+  flag_keep_locals = s->keep_locals;
+  flag_short_refs = s->short_refs;
+  current_architecture = s->architecture;
+  m68k_quick = s->quick;
+  m68k_rel32 = s->rel32;
+  listing = s->listing;
+  flag_no_warnings = s->no_warnings;
+
+  free (s);
 
   demand_empty_rest_of_line ();
 }
