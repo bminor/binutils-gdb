@@ -20,7 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This module provides three functions: mipscoff_symfile_init,
-   which initializes to read a symbol file; mipscoff_new_init, which 
+   which initializes to read a symbol file; mipscoff_new_init, which
    discards existing cached information when all symbols are being
    discarded; and mipscoff_symfile_read, which reads a symbol table
    from a file.
@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
    This module can read all four of the known byte-order combinations,
    on any type of host.  However, it does make (and check) the assumption
-   that the external form of a symbol table structure (on disk) 
+   that the external form of a symbol table structure (on disk)
    occupies the same number of bytes as the internal form (in a struct).
    Fixing this is possible but requires larger structural changes.  */
 
@@ -57,18 +57,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "obstack.h"
 #include "buildsym.h"
+
+#ifdef USG
+#include <sys/types.h>
+#define L_SET 0
+#define L_INCR 1
+#endif
+
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 
-#include "coff/mips.h"
-#include "coff/sym.h"
-#include "coff/symconst.h"
+#include "coff/mips.h"		/* COFF-like aspects of ecoff files */
+#include "coff/sym.h"		/* Symbol structures in ecoff files */
+#include "coff/symconst.h"	/* Manifest constants in ecoff sym structures */
+#include "coff/ecoff-ext.h"	/* External forms of ecoff sym structures */
 
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
 #include "aout/aout64.h"
-#include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
-#include "coff/ecoff-ext.h"
+#include "aout/stab_gnu.h"	/* STABS information */
 
 struct coff_exec {
 	struct external_filehdr f;
@@ -107,37 +114,59 @@ struct symloc {
 /* Things we import explicitly from other modules */
 
 extern int	     info_verbose;
-extern struct block *block_for_pc();
-extern void	     sort_symtab_syms();
 
 /* Various complaints about symbol reading that don't abort the process */
-   
-struct complaint bad_file_number_complaint = 
+
+struct complaint bad_file_number_complaint =
 	{"bad file number %d", 0, 0};
 
-struct complaint unknown_ext_complaint = 
+struct complaint index_complaint =
+	{"bad aux index at symbol %s", 0, 0};
+
+struct complaint aux_index_complaint =
+	{"bad proc end in aux found from symbol %s", 0, 0};
+
+struct complaint unknown_ext_complaint =
 	{"unknown external symbol %s", 0, 0};
 
-struct complaint unknown_sym_complaint = 
+struct complaint unknown_sym_complaint =
 	{"unknown local symbol %s", 0, 0};
 
-struct complaint unknown_st_complaint = 
+struct complaint unknown_st_complaint =
 	{"with type %d", 0, 0};
 
-struct complaint block_overflow_complaint = 
+struct complaint block_overflow_complaint =
 	{"block containing %s overfilled", 0, 0};
 
-struct complaint basic_type_complaint = 
+struct complaint basic_type_complaint =
 	{"cannot map MIPS basic type 0x%x", 0, 0};
 
-struct complaint unknown_type_qual_complaint = 
+struct complaint unknown_type_qual_complaint =
 	{"unknown type qualifier 0x%x", 0, 0};
 
-struct complaint array_bitsize_complaint = 
+struct complaint array_bitsize_complaint =
 	{"size of array target type not known, assuming %d bits", 0, 0};
 
-struct complaint bad_tag_guess_complaint = 
-	{"guessed tag type incorrectly", 0, 0};
+struct complaint bad_tag_guess_complaint =
+	{"guessed tag type of %s incorrectly", 0, 0};
+
+struct complaint block_member_complaint =
+	{"declaration block contains unhandled symbol type %d", 0, 0};
+
+struct complaint stEnd_complaint =
+	{"stEnd with storage class %d not handled", 0, 0};
+
+struct complaint unknown_mips_symtype_complaint =
+	{"unknown symbol type 0x%x", 0, 0};
+
+struct complaint stab_unknown_complaint =
+	{"unknown stabs symbol %s", 0, 0};
+
+struct complaint pdr_for_nonsymbol_complaint =
+	{"PDR for %s, but no symbol", 0, 0};
+
+struct complaint pdr_static_symbol_complaint =
+	{"can't handle PDR for static proc at 0x%x", 0, 0};
 
 /* Macros and extra defs */
 
@@ -160,10 +189,6 @@ struct complaint bad_tag_guess_complaint =
 #define UNSAFE_DATA_ADDR(p)	((unsigned)p < SAFE_DATA_ADDR || (unsigned)p > 2*SAFE_DATA_ADDR)
 
 /* Things that really are local to this module */
-
-/* GDB symtable for the current compilation unit */
-
-static struct symtab *cur_stab;
 
 /* MIPS symtab header for the current file */
 
@@ -206,10 +231,10 @@ static void
 fixup_symtab PARAMS ((HDRR *, char *, int, bfd *));
 
 static void
-read_mips_symtab PARAMS ((struct objfile *, int));
+read_mips_symtab PARAMS ((struct objfile *));
 
 static void
-read_the_mips_symtab PARAMS ((bfd *, int, CORE_ADDR *));
+read_the_mips_symtab PARAMS ((bfd *, CORE_ADDR *));
 
 static int
 upgrade_type PARAMS ((struct type **, int, union aux_ext *, int));
@@ -318,11 +343,6 @@ mipscoff_symfile_read (objfile, addr, mainline)
      int mainline;
 {
   bfd *abfd = objfile -> obfd;
-  int desc;
-
-/* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-   desc = fileno ((FILE *)(abfd->iostream));	/* Raw file descriptor */
-/* End of warning */
 
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
@@ -330,14 +350,14 @@ mipscoff_symfile_read (objfile, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  read_mips_symtab(objfile, desc);
+  read_mips_symtab(objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
 }
-  
+
 /* Perform any local cleanups required when we are done with a particular
    objfile.  I.E, we are in the process of discarding all symbol information
    for an objfile, freeing up all memory held for it, and unlinking the
@@ -419,13 +439,12 @@ in_sigtramp(pc, ignore)
 
 /* File-level interface functions */
 
-/* Read the symtab information from file FSYM into memory.  Also,
+/* Read the symtab information from file ABFD into memory.  Also,
    return address just past end of our text segment in *END_OF_TEXT_SEGP.  */
 
 static void
-read_the_mips_symtab(abfd, fsym, end_of_text_segp)
+read_the_mips_symtab(abfd, end_of_text_segp)
 	bfd		*abfd;
-	int		fsym;
 	CORE_ADDR	*end_of_text_segp;
 {
 	int             stsize, st_hdrsize;
@@ -434,10 +453,11 @@ read_the_mips_symtab(abfd, fsym, end_of_text_segp)
 	HDRR            st_hdr;
 	/* Header for executable/object file we read symbols from */
 	struct coff_exec filhdr;
+	int val;
 
 	/* We need some info from the initial headers */
-	lseek(fsym, 0L, 0);
-	myread(fsym, (char *)&filhdr, sizeof filhdr);
+	val = bfd_seek(abfd, 0L, L_SET);
+	val = bfd_read((PTR)&filhdr, sizeof filhdr, 1, abfd);
 
 	if (end_of_text_segp)
 		*end_of_text_segp =
@@ -450,12 +470,12 @@ read_the_mips_symtab(abfd, fsym, end_of_text_segp)
 	if (st_filptr == 0)
 		return;
 
-	lseek(fsym, st_filptr, L_SET);
+	bfd_seek (abfd, st_filptr, L_SET);
 	if (st_hdrsize != sizeof (hdr_ext)) {	/* Profanity check */
 		error ("Wrong header size: %d, not %d", st_hdrsize,
 			sizeof (hdr_ext));
 	}
-	if (read(fsym, &hdr_ext, st_hdrsize) != st_hdrsize)
+	if (bfd_read((PTR)&hdr_ext, st_hdrsize, 1, abfd) != st_hdrsize)
 		goto readerr;
 	ecoff_swap_hdr_in (abfd, &hdr_ext, &st_hdr);
 
@@ -467,7 +487,7 @@ read_the_mips_symtab(abfd, fsym, end_of_text_segp)
 	cur_hdr = (HDRR *) xmalloc(stsize + st_hdrsize);
 
 	memcpy((PTR)cur_hdr, (PTR)&hdr_ext, st_hdrsize);
-	if (read(fsym, (char *) cur_hdr + st_hdrsize, stsize) != stsize)
+	if (bfd_read((char *)cur_hdr + st_hdrsize, stsize, 1, abfd) != stsize)
 		goto readerr;
 
 	/* Fixup file_pointers in it */
@@ -678,17 +698,16 @@ fdr_name(name)
 
 
 /* Read in and parse the symtab of the file DESC. INCREMENTAL says
-   whether we are adding to the general symtab or not. 
+   whether we are adding to the general symtab or not.
    FIXME:  INCREMENTAL is currently always zero, though it should not be. */
 
 static void
-read_mips_symtab (objfile, desc)
+read_mips_symtab (objfile)
 	struct objfile *objfile;
-	int desc;
 {
 	CORE_ADDR end_of_text_seg;
 
-	read_the_mips_symtab(objfile->obfd, desc, &end_of_text_seg);
+	read_the_mips_symtab(objfile->obfd, &end_of_text_seg);
 
 	parse_partial_symbols(end_of_text_seg, objfile);
 
@@ -948,7 +967,7 @@ data:		/* Common code for symbols describing data */
 		name = (char*)sh->iss;
 		/* Special GNU C++ name.  */
 		if (name[0] == CPLUS_MARKER && name[1] == 't' && name[2] == 0)
-		    name = "this";
+		    name = "this";	/* FIXME, not alloc'd in obstack */
 		s = new_symbol(name);
 
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
@@ -1002,8 +1021,8 @@ data:		/* Common code for symbols describing data */
 		/* Make a type for the procedure itself */
 #if 0
 		/* FIXME:  This has not been tested yet!  See dbxread.c */
-		/* Generate a template for the type of this function.  The 
-		   types of the arguments will be added as we read the symbol 
+		/* Generate a template for the type of this function.  The
+		   types of the arguments will be added as we read the symbol
 		   table. */
 		bcopy(SYMBOL_TYPE(s),lookup_function_type(t),sizeof(struct type));
 #else
@@ -1033,168 +1052,182 @@ data:		/* Common code for symbols describing data */
 		sh->value = (long) SYMBOL_TYPE(s);
 		break;
 
+	    /* Beginning of code for structure, union, and enum definitions.
+	       They all share a common set of local variables, defined here.  */
+	    {
+		enum type_code type_code;
+		SYMR *tsym;
+		int nfields;
+		long max_value;
+		struct field *f;
 
-#ifndef btVoid  /* btVoid was added late. */
-#define btVoid 26
-#endif				
-/* These new symbol types have been recently added to SGI machines. */
-#ifndef stStruct
-#define stStruct 26
-#endif
-#ifndef stUnion
-#define stUnion 27
-#endif
-#ifndef stEnum
-#define stEnum 28
-#endif
-	    case stStruct:
-	    case stUnion:
-	    case stEnum:
+	    case stStruct:	/* Start a block defining a struct type */
+		type_code = TYPE_CODE_STRUCT;
+		goto structured_common;
+
+	    case stUnion:	/* Start a block defining a union type */
+		type_code = TYPE_CODE_UNION;
+		goto structured_common;
+
+	    case stEnum:	/* Start a block defining an enum type */
+		type_code = TYPE_CODE_ENUM;
+		goto structured_common;
 
 	    case stBlock:	/* Either a lexical block, or some type */
+		if (sh->sc != scInfo)
+		  goto case_stBlock_code;	/* Lexical block */
+
+		type_code = TYPE_CODE_UNDEF;	/* We have a type.  */
+
+	    /* Common code for handling struct, union, enum, and/or as-yet-
+	       unknown-type blocks of info about structured data.  `type_code'
+	       has been set to the proper TYPE_CODE, if we know it.  */
+	    structured_common:
 		push_parse_stack();
 		top_stack->blocktype = stBlock;
-		if (sh->sc == scInfo) {	/* structure/union/enum def */
-		    enum type_code type_code =
-		        sh->st == stStruct ? TYPE_CODE_STRUCT
-		      : sh->st == stUnion ? TYPE_CODE_UNION
-		      : sh->st == stEnum ? TYPE_CODE_ENUM
-		      : TYPE_CODE_UNDEF;
-		    int nfields = 0;
-		    SYMR *tsym;
-		    long max_value = 0;
-		    struct field *f;
 
-		    s = new_symbol((char *)sh->iss);
-		    SYMBOL_NAMESPACE(s) = STRUCT_NAMESPACE;
-		    SYMBOL_CLASS(s) = LOC_TYPEDEF;
-		    SYMBOL_VALUE(s) = 0;
-		    add_symbol(s, top_stack->cur_block);
+		s = new_symbol((char *)sh->iss);
+		SYMBOL_NAMESPACE(s) = STRUCT_NAMESPACE;
+		SYMBOL_CLASS(s) = LOC_TYPEDEF;
+		SYMBOL_VALUE(s) = 0;
+		add_symbol(s, top_stack->cur_block);
 
-		    /* First count the number of fields. */
-		    for (tsym = sh+1; tsym->st != stEnd; tsym++)
-			if (tsym->st == stMember) {
-			    if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
-				/* If the type of the member is Nil (or Void)
-				   assume the tag is an enumeration. */
-				if (tsym->index == indexNil)
+		/* First count the number of fields and the highest value. */
+		nfields = 0;
+		max_value = 0;
+		for (tsym = sh+1; tsym->st != stEnd; tsym++)
+		  {
+		    if (tsym->st == stMember) {
+			if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
+			    /* If the type of the member is Nil (or Void),
+			       assume the tag is an enumeration. */
+			    if (tsym->index == indexNil)
+				type_code = TYPE_CODE_ENUM;
+			    else {
+				ecoff_swap_tir_in (bigend,
+						   &ax[tsym->index].a_ti,
+						   &tir);
+				if (tir.bt == btNil || tir.bt == btVoid)
 				    type_code = TYPE_CODE_ENUM;
-				else {
-				    ecoff_swap_tir_in (bigend,
-						       &ax[tsym->index].a_ti,
-						       &tir);
-				    if (tir.bt == btNil || tir.bt == btVoid)
-					type_code = TYPE_CODE_ENUM;
-				}
-			    nfields++;
-			    if (tsym->value > max_value)
-				max_value = tsym->value;
-			}
-			else if (tsym->st == stBlock
-				 || tsym->st == stUnion
-				 || tsym->st == stEnum
-				 || tsym->st == stStruct
-				 || tsym->st == stParsed) {
-			    if (tsym->sc == scVariant) ; /*UNIMPLEMENTED*/
-			    if (tsym->index != 0)
-				tsym = ((SYMR*)cur_fdr->isymBase)
-				    + tsym->index-1;
-			}
-		    
-		    /* There is no guaranteed way to distinguish struct,
-		       unions, and enums at this point.  This is a bug in the
-		       original design (that has been fixed with the
-		       recent addition of the stStruct, stUnion, and stEnum
-		       symbol types.)  The way you can tell is if/when you
-		       see a variable or field of that type:  In that case
-		       the variable's type (in the AUX table) says if the
-		       type is struct, union, or enum,
-		       and points back to the stBlock here.
-		       So you can patch the tag kind up later - but only
-		       if there actually is a variable or field of that type.
-
-		       So until we know for sure, we will guess at this point.
-		       The heuristic is:
-		       If the first member has index==indexNil or a void type,
-		       assume we have an enumeration.
-		       Otherwise, if there is more than one member, and all
-		       the members have offset 0, assume we have a union.
-		       Otherwise, assume we have a struct.
-
-		       The heuristic could guess wrong in the case of
-		       of an enumeration with no members or a union
-		       with one (or zero) members, or when all except the
-		       last field of a struct have width zero.
-		       These are uncommon and/or illegal situations, and
-		       in any case guessing wrong probably doesn't matter much.
-
-		       But if we later do find out we were wrong,
-		       we fixup the tag kind.  Members of an enumeration
-		       must be handled differently from struct/union fields,
-		       and that is harder to patch up, but luckily we
-		       shouldn't need to.  (If there are any enumeration
-		       members, we can tell for sure it's an enum here.) */
-
-		    if (type_code == TYPE_CODE_UNDEF)
-			if (nfields > 1 && max_value == 0)
-			  type_code = TYPE_CODE_UNION;
-			else
-			  type_code = TYPE_CODE_STRUCT;
-		    
-		    /* If this type was expected, use its partial definition */
-		    if (pend)
-			t = is_pending_symbol(cur_fdr, sh)->t;
-		    else
-			t = new_type(prepend_tag_kind((char *)sh->iss,
-						      type_code));
-
-		    TYPE_CODE(t) = type_code;
-		    TYPE_LENGTH(t) = sh->value;
-		    TYPE_NFIELDS(t) = nfields;
-		    TYPE_FIELDS(t) = f = (struct field*)
-		      obstack_alloc (&current_objfile -> type_obstack,
-				     nfields * sizeof (struct field));
-		    
-		    if (type_code == TYPE_CODE_ENUM) {
-			/* This is a non-empty enum. */
-			for (tsym = sh + 1; tsym->st == stMember; tsym++) {
-			    struct symbol *enum_sym;
-			    f->bitpos = tsym->value;
-			    f->type = t;
-			    f->name = (char*)tsym->iss;
-			    f->bitsize = 0;
-			    
-			    enum_sym = (struct symbol *)
-				obstack_alloc (&current_objfile->symbol_obstack,
-					       sizeof (struct symbol));
-			    memset ((PTR)enum_sym, 0, sizeof (struct symbol));
-			    SYMBOL_NAME (enum_sym) = f->name;
-			    SYMBOL_CLASS (enum_sym) = LOC_CONST;
-			    SYMBOL_TYPE (enum_sym) = t;
-			    SYMBOL_NAMESPACE (enum_sym) = VAR_NAMESPACE;
-			    SYMBOL_VALUE (enum_sym) = tsym->value;
-			    add_symbol(enum_sym, top_stack->cur_block);
-			    
-			    /* Skip the stMembers that we've handled. */
-			    count++;
-			    f++;
-			}
+			    }
+			nfields++;
+			if (tsym->value > max_value)
+			    max_value = tsym->value;
 		    }
-		    SYMBOL_TYPE(s) = t;
-		    /* make this the current type */
-		    top_stack->cur_type = t;
-		    top_stack->cur_field = 0;
-		    /* Mark that symbol has a type, and say which one */
-		    sh->value = (long) t;
-		} else {
-			/* beginnning of (code) block. Value of symbol
-			   is the displacement from procedure start */
-			b = new_block(top_stack->maxsyms);
-			BLOCK_START(b) = sh->value + top_stack->procadr;
-			BLOCK_SUPERBLOCK(b) = top_stack->cur_block;
-			top_stack->cur_block = b;
-			add_block(b, top_stack->cur_st);
+		    else if (tsym->st == stBlock
+			     || tsym->st == stUnion
+			     || tsym->st == stEnum
+			     || tsym->st == stStruct
+			     || tsym->st == stParsed) {
+			if (tsym->sc == scVariant) ; /*UNIMPLEMENTED*/
+			if (tsym->index != 0)
+			    tsym = ((SYMR*)cur_fdr->isymBase)
+				+ tsym->index-1;
+		    }
+		    else complain (&block_member_complaint, (char *)tsym->st);
+		  }
+		
+		/* In an stBlock, there is no way to distinguish structs,
+		   unions, and enums at this point.  This is a bug in the
+		   original design (that has been fixed with the
+		   recent addition of the stStruct, stUnion, and stEnum
+		   symbol types.)  The way you can tell is if/when you
+		   see a variable or field of that type.  In that case
+		   the variable's type (in the AUX table) says if the
+		   type is struct, union, or enum,
+		   and points back to the stBlock here.
+		   So you can patch the tag kind up later - but only
+		   if there actually is a variable or field of that type.
+
+		   So until we know for sure, we will guess at this point.
+		   The heuristic is:
+		   If the first member has index==indexNil or a void type,
+		   assume we have an enumeration.
+		   Otherwise, if there is more than one member, and all
+		   the members have offset 0, assume we have a union.
+		   Otherwise, assume we have a struct.
+
+		   The heuristic could guess wrong in the case of
+		   of an enumeration with no members or a union
+		   with one (or zero) members, or when all except the
+		   last field of a struct have width zero.
+		   These are uncommon and/or illegal situations, and
+		   in any case guessing wrong probably doesn't matter much.
+
+		   But if we later do find out we were wrong,
+		   we fixup the tag kind.  Members of an enumeration
+		   must be handled differently from struct/union fields,
+		   and that is harder to patch up, but luckily we
+		   shouldn't need to.  (If there are any enumeration
+		   members, we can tell for sure it's an enum here.) */
+
+		if (type_code == TYPE_CODE_UNDEF)
+		    if (nfields > 1 && max_value == 0)
+		      type_code = TYPE_CODE_UNION;
+		    else
+		      type_code = TYPE_CODE_STRUCT;
+		
+		/* If this type was expected, use its partial definition */
+		if (pend)
+		    t = is_pending_symbol(cur_fdr, sh)->t;
+		else
+		    t = new_type(prepend_tag_kind((char *)sh->iss,
+						  type_code));
+
+		TYPE_CODE(t) = type_code;
+		TYPE_LENGTH(t) = sh->value;
+		TYPE_NFIELDS(t) = nfields;
+		TYPE_FIELDS(t) = f = (struct field*)
+		  obstack_alloc (&current_objfile -> type_obstack,
+				 nfields * sizeof (struct field));
+		
+		if (type_code == TYPE_CODE_ENUM) {
+		    /* This is a non-empty enum. */
+		    for (tsym = sh + 1; tsym->st == stMember; tsym++) {
+			struct symbol *enum_sym;
+			f->bitpos = tsym->value;
+			f->type = t;
+			f->name = (char*)tsym->iss;
+			f->bitsize = 0;
+			
+			enum_sym = (struct symbol *)
+			    obstack_alloc (&current_objfile->symbol_obstack,
+					   sizeof (struct symbol));
+			memset ((PTR)enum_sym, 0, sizeof (struct symbol));
+			SYMBOL_NAME (enum_sym) = f->name;
+			SYMBOL_CLASS (enum_sym) = LOC_CONST;
+			SYMBOL_TYPE (enum_sym) = t;
+			SYMBOL_NAMESPACE (enum_sym) = VAR_NAMESPACE;
+			SYMBOL_VALUE (enum_sym) = tsym->value;
+			add_symbol(enum_sym, top_stack->cur_block);
+			
+			/* Skip the stMembers that we've handled. */
+			count++;
+			f++;
+		    }
 		}
+		SYMBOL_TYPE(s) = t;
+		/* make this the current type */
+		top_stack->cur_type = t;
+		top_stack->cur_field = 0;
+		/* Mark that symbol has a type, and say which one */
+		sh->value = (long) t;
+		break;
+
+	    /* End of local variables shared by struct, union, enum, and
+	       block (as yet unknown struct/union/enum) processing.  */
+	    }
+
+	    case_stBlock_code:
+		/* beginnning of (code) block. Value of symbol
+		   is the displacement from procedure start */
+		push_parse_stack();
+		top_stack->blocktype = stBlock;
+		b = new_block(top_stack->maxsyms);
+		BLOCK_START(b) = sh->value + top_stack->procadr;
+		BLOCK_SUPERBLOCK(b) = top_stack->cur_block;
+		top_stack->cur_block = b;
+		add_block(b, top_stack->cur_st);
 		break;
 
 	    case stEnd:		/* end (of anything) */
@@ -1245,7 +1278,8 @@ data:		/* Common code for symbols describing data */
 			   address of the end of this block. */
 			BLOCK_END(top_stack->cur_block) = sh->value + top_stack->procadr;
 			(void) shrink_block(top_stack->cur_block, top_stack->cur_st);
-		}
+		} else complain (&stEnd_complaint, (char *)sh->sc);
+
 		pop_parse_stack();	/* restore previous lexical context */
 		break;
 
@@ -1280,7 +1314,8 @@ data:		/* Common code for symbols describing data */
 	    case stConstant:
 		break;		/* constant */
 	    default:
-		error("Unknown symbol type %x.", sh->st);
+		complain(&unknown_mips_symtype_complaint, (char *)sh->st);
+		break;
 	}
 	sh->st = stParsed;
 	return count;
@@ -1327,6 +1362,8 @@ parse_type(ax, bs, bigend)
 		 0,				/* btBit */
 		 0,				/* btPicture */
 		 &builtin_type_void,		/* btVoid */
+		 &builtin_type_long_long,	/* btLongLong */
+		 &builtin_type_unsigned_long_long,/* btULongLong */
 	};
 
 	TIR            t[1];
@@ -1421,7 +1458,7 @@ parse_type(ax, bs, bigend)
 		/* Usually, TYPE_CODE(tp) is already type_code.  The main
 		   exception is if we guessed wrong re struct/union/enum. */
 		if (TYPE_CODE(tp) != type_code) {
-		    complain (&bad_tag_guess_complaint, 0);
+		    complain (&bad_tag_guess_complaint, name);
 		    TYPE_CODE(tp) = type_code;
 		}
 		if (TYPE_NAME(tp) == NULL || strcmp(TYPE_NAME(tp), name) != 0)
@@ -1564,6 +1601,10 @@ upgrade_type(tpp, tq, ax, bigend)
 		/* Volatile -- currently ignored */
 		return 0;
 
+	case tqConst:
+		/* Const -- currently ignored */
+		return 0;
+
 	default:
 		complain (&unknown_type_qual_complaint, (char *)tq);
 		return 0;
@@ -1572,67 +1613,69 @@ upgrade_type(tpp, tq, ax, bigend)
 
 
 /* Parse a procedure descriptor record PR.  Note that the procedure
-   is parsed _after_ the local symbols, now we just make up the
-   extra information we need into a special symbol that we insert
-   in the procedure's main block.  Note also that images that
+   is parsed _after_ the local symbols, now we just insert the extra
+   information we need into a special ".gdbinfo." symbol that has already
+   been placed in the procedure's main block.  Note also that images that
    have been partially stripped (ld -x) have been deprived
    of local symbols, and we have to cope with them here.
    The procedure's code ends at BOUND */
 
 static void
-parse_procedure(pr, bound, have_stabs)
+parse_procedure (pr, bound, have_stabs)
 	PDR *pr;
 	int bound;
 	int have_stabs;
 {
-	struct symbol *s, *i;
-	SYMR *sh = (SYMR*)pr->isym;
-	struct block *b;
-	struct mips_extra_func_info *e;
-	char name[100];
-	char *sh_name;
+    struct symbol *s, *i;
+    SYMR *sh = (SYMR*)pr->isym;
+    struct block *b;
+    struct mips_extra_func_info *e;
+    char name[100];
+    char *sh_name;
 
-	/* Make up a name for static procedures. Sigh. */
-	if (sh == (SYMR*)-1) {
-	    sprintf(name,".static_procedure@%x",pr->adr);
-	    sh_name = savestring(name, strlen(name));
-	    s = NULL;
-	}
-	else {
-	    sh_name = (char*)sh->iss;
-	    if (have_stabs)
-		s = lookup_symbol(sh_name, NULL, VAR_NAMESPACE, 0, NULL);
-	    else
-		s = mylookup_symbol(sh_name, top_stack->cur_block,
-				    VAR_NAMESPACE, LOC_BLOCK);
-	}
-	if (s != 0) {
-		b = SYMBOL_BLOCK_VALUE(s);
-	} else {
-		s = new_symbol(sh_name);
-		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
-		SYMBOL_CLASS(s) = LOC_BLOCK;
-		/* Donno its type, hope int is ok */
-		SYMBOL_TYPE(s) = lookup_function_type (builtin_type_int);
-		add_symbol(s, top_stack->cur_block);
-		/* Wont have symbols for this one */
-		b = new_block(2);
-		SYMBOL_BLOCK_VALUE(s) = b;
-		BLOCK_FUNCTION(b) = s;
-		BLOCK_START(b) = pr->adr;
-		BLOCK_END(b) = bound;
-		BLOCK_SUPERBLOCK(b) = top_stack->cur_block;
-		add_block(b, top_stack->cur_st);
-	}
+    /* Static procedure at address pr->adr.  Sigh. */
+    if (sh == (SYMR*)-1) {
+	complain (&pdr_static_symbol_complaint, (char *)pr->adr);
+	return;
+    }
+    sh_name = (char*)sh->iss;
+    if (have_stabs)
+	s = lookup_symbol(sh_name, NULL, VAR_NAMESPACE, 0, NULL);
+    else
+	s = mylookup_symbol(sh_name, top_stack->cur_block,
+			    VAR_NAMESPACE, LOC_BLOCK);
 
-	i = mylookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, LOC_CONST);
+    if (s != 0) {
+	    b = SYMBOL_BLOCK_VALUE(s);
+    } else {
+	    complain (&pdr_for_nonsymbol_complaint, sh_name);
+#if 0
+/* FIXME -- delete.  We can't do symbol allocation now; it's all done.  */
+	    s = new_symbol(sh_name);
+	    SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
+	    SYMBOL_CLASS(s) = LOC_BLOCK;
+	    /* Donno its type, hope int is ok */
+	    SYMBOL_TYPE(s) = lookup_function_type (builtin_type_int);
+	    add_symbol(s, top_stack->cur_block);
+	    /* Wont have symbols for this one */
+	    b = new_block(2);
+	    SYMBOL_BLOCK_VALUE(s) = b;
+	    BLOCK_FUNCTION(b) = s;
+	    BLOCK_START(b) = pr->adr;
+	    BLOCK_END(b) = bound;
+	    BLOCK_SUPERBLOCK(b) = top_stack->cur_block;
+	    add_block(b, top_stack->cur_st);
+#endif
+    }
 
-	if (i)
-	  {
-	    e = (struct mips_extra_func_info *)SYMBOL_VALUE(i);
-	    e->pdr = *pr;
-	    e->pdr.isym = (long)s;
-	  }
+    i = mylookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, LOC_CONST);
+
+    if (i)
+      {
+	e = (struct mips_extra_func_info *)SYMBOL_VALUE(i);
+	e->pdr = *pr;
+	e->pdr.isym = (long)s;
+      }
 }
 
 /* Parse the external symbol ES. Just call parse_symbol() after
@@ -1660,9 +1703,6 @@ parse_external(es, skip_procedures, bigend)
 		cur_fdr = (FDR*)(cur_hdr->cbFdOffset);
 		ax = 0;
 	}
-	top_stack->cur_st = cur_stab;
-	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),
-						 GLOBAL_BLOCK);
 
 	/* Reading .o files */
 	if (es->asym.sc == scUndefined || es->asym.sc == scNil) {
@@ -1675,9 +1715,10 @@ parse_external(es, skip_procedures, bigend)
 		default :	what = "symbol";                      break;
 		}
 		n_undef_symbols++;
+		/* FIXME:  Turn this into a complaint? */
 		if (info_verbose)
-			printf_filtered("Warning: %s `%s' is undefined (in %s)\n", what,
-				es->asym.iss, fdr_name((char *)cur_fdr->rss));
+		    printf_filtered("Warning: %s `%s' is undefined (in %s)\n",
+			 what, es->asym.iss, fdr_name((char *)cur_fdr->rss));
 		return;
 	}
 
@@ -1768,7 +1809,6 @@ parse_lines(fh, lt)
 		}
 	}
 }
-
 
 /* Master parsing procedure for first-pass reading of file symbols
    into a partial_symtab.
@@ -1778,21 +1818,20 @@ parse_lines(fh, lt)
    the symtab we are reading.  */
 
 static void
-parse_partial_symbols(end_of_text_seg, objfile)
+parse_partial_symbols (end_of_text_seg, objfile)
      int end_of_text_seg;
      struct objfile *objfile;
 {
-    int             f_idx, s_idx;
-/*	int  stat_idx, h_max;*/
+    int			 f_idx, s_idx;
     HDRR		*hdr = cur_hdr;
     /* Running pointers */
-    FDR		*fh;
+    FDR			*fh;
     register EXTR	*esh;
     register SYMR	*sh;
     struct partial_symtab *pst;
-    
+
     int past_first_source_file = 0;
-    
+
     /* List of current psymtab's include files */
     char **psymtab_include_list;
     int includes_allocated;
@@ -1803,36 +1842,36 @@ parse_partial_symbols(end_of_text_seg, objfile)
     struct partial_symtab **dependency_list;
     int dependencies_used, dependencies_allocated;
     struct cleanup *old_chain;
-    
+
     extern_tab = (EXTR**)obstack_alloc (&objfile->psymbol_obstack,
 					sizeof(EXTR *) * hdr->iextMax);
-   
+
     includes_allocated = 30;
     includes_used = 0;
     psymtab_include_list = (char **) alloca (includes_allocated *
 					     sizeof (char *));
     next_symbol_text_func = mips_next_symbol_text;
-    
+
     dependencies_allocated = 30;
     dependencies_used = 0;
     dependency_list =
 	(struct partial_symtab **) alloca (dependencies_allocated *
 					   sizeof (struct partial_symtab *));
-    
+
     last_source_file = 0;
 
     /*
-     * Big plan: 
+     * Big plan:
      *
      * Only parse the Local and External symbols, and the Relative FDR.
      * Fixup enough of the loader symtab to be able to use it.
      * Allocate space only for the file's portions we need to
      * look at. (XXX)
      */
-    
+
     max_gdbinfo = 0;
     max_glevel = MIN_GLEVEL;
-    
+
     /* Allocate the map FDR -> PST.
        Minor hack: -O3 images might claim some global data belongs
        to FDR -1. We`ll go along with that */
@@ -1844,13 +1883,13 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	fdr_to_pst[-1].pst = pst;
 	FDR_IDX(pst) = -1;
     }
-    
+
     /* Pass 1 over external syms: Presize and partition the list */
     for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
 	esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
 	fdr_to_pst[esh->ifd].n_globals++;
     }
-    
+
     /* Pass 1.5 over files:  partition out global symbol space */
     s_idx = 0;
     for (f_idx = -1; f_idx < hdr->ifdMax; f_idx++) {
@@ -1859,101 +1898,100 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	fdr_to_pst[f_idx].n_globals = 0;
     }
 
-/* Pass 2 over external syms: fill in external symbols */
-	for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
-		enum minimal_symbol_type ms_type = mst_text;
-		esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
+    /* Pass 2 over external syms: fill in external symbols */
+    for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
+	enum minimal_symbol_type ms_type = mst_text;
+	esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
 
-		extern_tab[fdr_to_pst[esh->ifd].globals_offset
-			   + fdr_to_pst[esh->ifd].n_globals++] = esh;
+	extern_tab[fdr_to_pst[esh->ifd].globals_offset
+		   + fdr_to_pst[esh->ifd].n_globals++] = esh;
 
-		if (esh->asym.sc == scUndefined || esh->asym.sc == scNil)
-			continue;
-
-		switch (esh->asym.st) {
-		case stProc:
-			break;
-		case stGlobal:
-			ms_type = mst_data;
-			break;
-		case stLabel:
-			break;
-		default:
-			ms_type = mst_unknown;
-			complain (&unknown_ext_complaint,
-				  (char *)(esh->asym.iss));
-		}
-		prim_record_minimal_symbol ((char *)esh->asym.iss,
-					    esh->asym.value,
-					    ms_type);
-	}
-
-	/* Pass 3 over files, over local syms: fill in static symbols */
-	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
-	    struct partial_symtab *save_pst;
-	    EXTR **ext_ptr;
-	    cur_fdr = fh = f_idx + (FDR *)(cur_hdr->cbFdOffset);
-
-	    if (fh->csym == 0) {
-		fdr_to_pst[f_idx].pst = NULL;
+	if (esh->asym.sc == scUndefined || esh->asym.sc == scNil)
 		continue;
-	    }
-	    pst = start_psymtab_common (objfile, 0, (char*)fh->rss,
-					fh->cpd ? fh->adr : 0,
-					objfile->global_psymbols.next,
-					objfile->static_psymbols.next);
-	    pst->read_symtab_private = (char *)
-		obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
 
-	    save_pst = pst;
-	    /* Make everything point to everything. */
-	    FDR_IDX(pst) = f_idx;
-	    fdr_to_pst[f_idx].pst = pst;
-	    fh->ioptBase = (int)pst;
-	    
-	    CUR_HDR(pst) = cur_hdr;
-	    
-	    /* The way to turn this into a symtab is to call... */
-	    pst->read_symtab = mipscoff_psymtab_to_symtab;
-	    
-	    pst->texthigh = pst->textlow;
-	    
+	switch (esh->asym.st) {
+	case stProc:
+		break;
+	case stGlobal:
+		ms_type = mst_data;
+		break;
+	case stLabel:
+		break;
+	default:
+		ms_type = mst_unknown;
+		complain (&unknown_ext_complaint, (char *)esh->asym.iss);
+	}
+	prim_record_minimal_symbol ((char *)esh->asym.iss,
+				    esh->asym.value,
+				    ms_type);
+    }
+
+    /* Pass 3 over files, over local syms: fill in static symbols */
+    for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
+	struct partial_symtab *save_pst;
+	EXTR **ext_ptr;
+	cur_fdr = fh = f_idx + (FDR *)(cur_hdr->cbFdOffset);
+
+	if (fh->csym == 0) {
+	    fdr_to_pst[f_idx].pst = NULL;
+	    continue;
+	}
+	pst = start_psymtab_common (objfile, 0, (char*)fh->rss,
+				    fh->cpd ? fh->adr : 0,
+				    objfile->global_psymbols.next,
+				    objfile->static_psymbols.next);
+	pst->read_symtab_private = (char *)
+	    obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
+
+	save_pst = pst;
+	/* Make everything point to everything. */
+	FDR_IDX(pst) = f_idx;
+	fdr_to_pst[f_idx].pst = pst;
+	fh->ioptBase = (int)pst;
+	
+	CUR_HDR(pst) = cur_hdr;
+	
+	/* The way to turn this into a symtab is to call... */
+	pst->read_symtab = mipscoff_psymtab_to_symtab;
+	
+	pst->texthigh = pst->textlow;
+	
 #if 0	    /* This is done in start_psymtab_common */
-	    pst->globals_offset = global_psymbols.next - global_psymbols.list;
-	    pst->statics_offset = static_psymbols.next - static_psymbols.list;
-	    
-	    pst->n_global_syms = 0;
-	    pst->n_static_syms = 0;
+	pst->globals_offset = global_psymbols.next - global_psymbols.list;
+	pst->statics_offset = static_psymbols.next - static_psymbols.list;
+	
+	pst->n_global_syms = 0;
+	pst->n_static_syms = 0;
 #endif
-	    
-	    /* The second symbol must be @stab.
-	       This symbol is emitted by mips-tfile to signal
-	       that the current object file uses encapsulated stabs
-	       instead of mips ecoff for local symbols.
-	       (It is the second symbol because the first symbol is
-	       the stFile used to signal the start of a file). */
-	    if (fh->csym >= 2
-		&& strcmp((char *)(((SYMR *)fh->isymBase)[1].iss),
-			  stabs_symbol) == 0) {
-		for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++) {
-		    int type_code;
-		    char *namestring;
-		    sh = cur_sdx + (SYMR *) fh->isymBase;
-		    type_code = MIPS_UNMARK_STAB(sh->index);
-		    if (!MIPS_IS_STAB(sh)) {
-			if (sh->st == stProc || sh->st == stStaticProc) {
-			    long procaddr = sh->value;
-			    sh = AUX_GET_ISYM (fh->fBigendian,
-				   sh->index + (union aux_ext *)(fh->iauxBase))
-				+ (SYMR *) fh->isymBase - 1;
-			    if (sh->st == stEnd) {
-				long high = procaddr + sh->value;
-				if (high > pst->texthigh)
-				    pst->texthigh = high;
-			    }
+	
+	/* The second symbol must be @stab.
+	   This symbol is emitted by mips-tfile to signal
+	   that the current object file uses encapsulated stabs
+	   instead of mips ecoff for local symbols.
+	   (It is the second symbol because the first symbol is
+	   the stFile used to signal the start of a file). */
+	if (fh->csym >= 2
+	    && strcmp((char *)(((SYMR *)fh->isymBase)[1].iss),
+		      stabs_symbol) == 0) {
+	    for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++) {
+		int type_code;
+		char *namestring;
+		sh = cur_sdx + (SYMR *) fh->isymBase;
+		type_code = MIPS_UNMARK_STAB(sh->index);
+		if (!MIPS_IS_STAB(sh)) {
+		    if (sh->st == stProc || sh->st == stStaticProc) {
+			long procaddr = sh->value;
+			sh = AUX_GET_ISYM (fh->fBigendian,
+			       sh->index + (union aux_ext *)(fh->iauxBase))
+			    + (SYMR *) fh->isymBase - 1;
+			if (sh->st == stEnd) {
+			    long high = procaddr + sh->value;
+			    if (high > pst->texthigh)
+				pst->texthigh = high;
 			}
-			continue;
 		    }
+		    continue;
+		}
 #define SET_NAMESTRING() namestring = (char*)sh->iss
 #define CUR_SYMBOL_TYPE type_code
 #define CUR_SYMBOL_VALUE sh->value
@@ -1965,137 +2003,163 @@ parse_partial_symbols(end_of_text_seg, objfile)
   if ((val) > save_pst->texthigh) save_pst->texthigh = (val);
 #include "partial-stab.h"
 #undef addr
-		}
 	    }
-	    else {
-		register struct partial_symbol *psym;
-		for (cur_sdx = 0; cur_sdx < fh->csym; ) {
-		    char *name;
-		    enum address_class class;
-		    sh = cur_sdx + (SYMR *) fh->isymBase;
-		    
-		    if (MIPS_IS_STAB(sh)) {
-			cur_sdx++;
-			continue;
-		    }
+	}
+	else {
+	    for (cur_sdx = 0; cur_sdx < fh->csym; ) {
+		char *name;
+		enum address_class class;
+		sh = cur_sdx + (SYMR *) fh->isymBase;
+		
+		if (MIPS_IS_STAB(sh)) {
+		    cur_sdx++;
+		    continue;
+		}
 
-		    if (sh->sc == scUndefined || sh->sc == scNil ||
-			sh->index == 0xfffff) {
-			/* FIXME, premature? */
-			cur_sdx++;
-			continue;
-		    }
-		    
-		    name = (char *)(sh->iss);
-		    
-		    switch (sh->st) {
-			long high;
-			long procaddr;
-		      case stProc:		/* Asm labels apparently */
-		      case stStaticProc:		/* Function */
-			ADD_PSYMBOL_TO_LIST(name, strlen(name),
-					    VAR_NAMESPACE, LOC_BLOCK,
-					    objfile->static_psymbols, sh->value);
-			/* Skip over procedure to next one. */
-			cur_sdx = AUX_GET_ISYM (fh->fBigendian,
-				  sh->index + (union aux_ext *)fh->iauxBase);
-			procaddr = sh->value;
-			
-			sh = cur_sdx + (SYMR *) fh->isymBase - 1;
-			if (sh->st != stEnd)
-			    continue;
-			high = procaddr + sh->value;
-			if (high > pst->texthigh)
-			    pst->texthigh = high;
-			continue;
-		      case stStatic:			/* Variable */
-			class = LOC_STATIC;
-			break;
-		      case stTypedef:			/* Typedef */
-			class = LOC_TYPEDEF;
-			break;
-		      case stConstant:		/* Constant decl */
-			class = LOC_CONST;
-			break;
-		      case stUnion:
-		      case stStruct:
-		      case stEnum:
-		      case stBlock:			/* { }, str, un, enum*/
-			if (sh->sc == scInfo) {
-			    ADD_PSYMBOL_TO_LIST(name, strlen(name),
-						STRUCT_NAMESPACE, LOC_TYPEDEF,
-						objfile->static_psymbols, sh->value);
-			}
-			/* Skip over the block */
-			cur_sdx = sh->index;
-			continue;
-		      case stFile:			/* File headers */
-		      case stLabel:			/* Labels */
-		      case stEnd:			/* Ends of files */
-			goto skip;
-		      default:
-			/* Both complaints are valid:  one gives symbol name,
-			   the other the offending symbol type.  */
-			complain (&unknown_sym_complaint, (char *)sh->iss);
-			complain (&unknown_st_complaint, (char *)sh->st);
-			cur_sdx++;
-			continue;
-		    }
-		    /* Use this gdb symbol */
+		if (sh->sc == scUndefined || sh->sc == scNil ||
+		    sh->index == 0xfffff) {
+		    /* FIXME, premature? */
+		    cur_sdx++;
+		    continue;
+		}
+		
+		name = (char *)(sh->iss);
+		
+		switch (sh->st) {
+		    long high;
+		    long procaddr;
+		    int new_sdx;
+
+		  case stProc:		/* Asm labels apparently */
+		  case stStaticProc:		/* Function */
 		    ADD_PSYMBOL_TO_LIST(name, strlen(name),
-					VAR_NAMESPACE, class,
+					VAR_NAMESPACE, LOC_BLOCK,
 					objfile->static_psymbols, sh->value);
-		  skip:
-		    cur_sdx++;		/* Go to next file symbol */
-		}
+		    /* Skip over procedure to next one. */
+		    if (sh->index >= hdr->iauxMax)
+		      {
+			/* Should not happen, but does when cross-compiling
+			   with the MIPS compiler.  FIXME -- pull later.  */
+			complain (&index_complaint, name);
+			new_sdx = cur_sdx+1;	/* Don't skip at all */
+		      }
+		    else
+		      new_sdx = AUX_GET_ISYM (fh->fBigendian,
+				sh->index + (union aux_ext *)fh->iauxBase);
+		    procaddr = sh->value;
 
-		/* Now do enter the external symbols. */
-		ext_ptr = &extern_tab[fdr_to_pst[f_idx].globals_offset];
-		cur_sdx = fdr_to_pst[f_idx].n_globals;
-		PST_PRIVATE(save_pst)->extern_count = cur_sdx;
-		PST_PRIVATE(save_pst)->extern_tab = ext_ptr;
-		for (; --cur_sdx >= 0; ext_ptr++) {
-		    enum address_class class;
-		    if ((*ext_ptr)->ifd != f_idx)
-			abort();
-		    sh = &(*ext_ptr)->asym;
-		    switch (sh->st) {
-		      case stProc:
-			class = LOC_BLOCK;
-			break;
-		      case stLabel:
-			class = LOC_LABEL;
-			break;
-		      default:
-			complain (&unknown_ext_complaint, (char *)sh->iss);
-		      case stGlobal:
-			class = LOC_STATIC;
-			break;
+		    if (new_sdx <= cur_sdx)
+		      {
+			/* This should not happen either... FIXME.  */
+			complain (&aux_index_complaint, name);
+			new_sdx = cur_sdx + 1;	/* Don't skip backward */
+		      }
+
+		    cur_sdx = new_sdx;
+		    sh = cur_sdx + (SYMR *) fh->isymBase - 1;
+		    if (sh->st != stEnd)
+			continue;
+		    high = procaddr + sh->value;
+		    if (high > pst->texthigh)
+			pst->texthigh = high;
+		    continue;
+
+		  case stStatic:			/* Variable */
+		    class = LOC_STATIC;
+		    break;
+
+		  case stTypedef:			/* Typedef */
+		    class = LOC_TYPEDEF;
+		    break;
+
+		  case stConstant:		/* Constant decl */
+		    class = LOC_CONST;
+		    break;
+
+		  case stUnion:
+		  case stStruct:
+		  case stEnum:
+		  case stBlock:			/* { }, str, un, enum*/
+		    if (sh->sc == scInfo) {
+			ADD_PSYMBOL_TO_LIST(name, strlen(name),
+					    STRUCT_NAMESPACE, LOC_TYPEDEF,
+					    objfile->static_psymbols, sh->value);
 		    }
-		    if (objfile->global_psymbols.next >=
-			objfile->global_psymbols.list + objfile->global_psymbols.size)
-			extend_psymbol_list (&objfile->global_psymbols, objfile);
-		    psym = objfile->global_psymbols.next++;
-		    SYMBOL_NAME (psym) = (char*)sh->iss;
-		    SYMBOL_NAMESPACE (psym) = VAR_NAMESPACE;
-		    SYMBOL_CLASS (psym) = class;
-		    SYMBOL_VALUE_ADDRESS (psym) = (CORE_ADDR)sh->value;
+		    /* Skip over the block */
+		    cur_sdx = sh->index;
+		    continue;
+
+		  case stFile:			/* File headers */
+		  case stLabel:			/* Labels */
+		  case stEnd:			/* Ends of files */
+		    goto skip;
+
+		  default:
+		    /* Both complaints are valid:  one gives symbol name,
+		       the other the offending symbol type.  */
+		    complain (&unknown_sym_complaint, (char *)sh->iss);
+		    complain (&unknown_st_complaint, (char *)sh->st);
+		    cur_sdx++;
+		    continue;
 		}
+		/* Use this gdb symbol */
+		ADD_PSYMBOL_TO_LIST(name, strlen(name),
+				    VAR_NAMESPACE, class,
+				    objfile->static_psymbols, sh->value);
+	      skip:
+		cur_sdx++;		/* Go to next file symbol */
 	    }
 
-	    end_psymtab (save_pst, psymtab_include_list, includes_used,
-			 -1, save_pst->texthigh,
-			 dependency_list, dependencies_used);
-	    if (objfile -> ei.entry_point >= save_pst->textlow &&
-		objfile -> ei.entry_point <  save_pst->texthigh)
-	      {
-		objfile -> ei.entry_file_lowpc = save_pst->textlow;
-		objfile -> ei.entry_file_highpc = save_pst->texthigh;
-	      }
+	    /* Now do enter the external symbols. */
+	    ext_ptr = &extern_tab[fdr_to_pst[f_idx].globals_offset];
+	    cur_sdx = fdr_to_pst[f_idx].n_globals;
+	    PST_PRIVATE(save_pst)->extern_count = cur_sdx;
+	    PST_PRIVATE(save_pst)->extern_tab = ext_ptr;
+	    for (; --cur_sdx >= 0; ext_ptr++) {
+		register struct partial_symbol *psym;
+		enum address_class class;
+
+		if ((*ext_ptr)->ifd != f_idx)
+		    abort();
+		sh = &(*ext_ptr)->asym;
+		switch (sh->st) {
+		  case stProc:
+		    class = LOC_BLOCK;
+		    break;
+		  case stLabel:
+		    class = LOC_LABEL;
+		    break;
+		  default:
+		    complain (&unknown_ext_complaint, (char *)sh->iss);
+		    /* Fall through, pretend it's global.  */
+		  case stGlobal:
+		    class = LOC_STATIC;
+		    break;
+		}
+		if (objfile->global_psymbols.next >=
+		    objfile->global_psymbols.list + objfile->global_psymbols.size)
+		    extend_psymbol_list (&objfile->global_psymbols, objfile);
+		psym = objfile->global_psymbols.next++;
+		SYMBOL_NAME (psym) = (char*)sh->iss;
+		SYMBOL_NAMESPACE (psym) = VAR_NAMESPACE;
+		SYMBOL_CLASS (psym) = class;
+		SYMBOL_VALUE_ADDRESS (psym) = (CORE_ADDR)sh->value;
+	    }
 	}
 
-        /* Mark the last code address, and remember it for later */
-	hdr->cbDnOffset = end_of_text_seg;
+	end_psymtab (save_pst, psymtab_include_list, includes_used,
+		     -1, save_pst->texthigh,
+		     dependency_list, dependencies_used);
+	if (objfile -> ei.entry_point >= save_pst->textlow &&
+	    objfile -> ei.entry_point <  save_pst->texthigh)
+	  {
+	    objfile -> ei.entry_file_lowpc = save_pst->textlow;
+	    objfile -> ei.entry_file_highpc = save_pst->texthigh;
+	  }
+    }
+
+    /* Mark the last code address, and remember it for later */
+    hdr->cbDnOffset = end_of_text_seg;
 
     /* Now scan the FDRs for dependencies */
     for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
@@ -2216,61 +2280,31 @@ mips_next_symbol_text ()
    for turning the partial symtab PST into a symtab, recurring
    first on all dependent psymtabs.  The argument FILENAME is
    only passed so we can see in debug stack traces what file
-   is being read. */
+   is being read.
+
+   This function has a split personality, based on whether the
+   symbol table contains ordinary ecoff symbols, or stabs-in-ecoff.
+   The flow of control and even the memory allocation differs.  FIXME.  */
 
 static void
 psymtab_to_symtab_1(pst, filename)
      struct partial_symtab *pst;
      char *filename;
 {
-    int have_stabs;
-    int i, f_max;
+    int i;
     struct symtab  *st;
     FDR *fh;
-    int maxlines;
     struct linetable *lines;
+    int bound;
 
     if (pst->readin)
 	return;
     pst->readin = 1;
-    
-    /* How many symbols will we need */
-    /* FIXME, this does not count enum values. */
-    f_max = pst->n_global_syms + pst->n_static_syms;
-    if (FDR_IDX(pst) == -1) {
-	fh = 0;
-	maxlines = 0;
-    } else {
-	fh = (FDR *) (cur_hdr->cbFdOffset) + FDR_IDX(pst);
-	f_max += fh->csym + fh->cpd;
-	maxlines = 2 * fh->cline;
-    }
 
-    /* See comment in parse_partial_symbols about the @stabs sentinel. */
-    have_stabs =
-	fh && fh->csym >= 2
-	    && strcmp((char *)(((SYMR *)fh->isymBase)[1].iss), stabs_symbol)
-	        == 0;
-
-    if (!have_stabs) {
-	if (fh)
-	    st = new_symtab (pst->filename, 2 * f_max, maxlines,
-			     pst->objfile);
-	else
-	    st = new_symtab ("unknown", f_max, 0, pst->objfile);
-	lines = LINETABLE(st);
-	pending_list = (struct mips_pending **) cur_hdr->cbOptOffset;
-	if (pending_list == 0) {
-	    pending_list = (struct mips_pending **)
-		xzalloc(cur_hdr->ifdMax * sizeof(struct mips_pending *));
-	    cur_hdr->cbOptOffset = (int)pending_list;
-	}
-    }
-    
     /* Read in all partial symbtabs on which this one is dependent.
        NOTE that we do have circular dependencies, sigh.  We solved
        that by setting pst->readin before this point.  */
-    
+
     for (i = 0; i < pst->number_of_dependencies; i++)
 	if (!pst->dependencies[i]->readin) {
 	    /* Inform about additional files to be read in.  */
@@ -2286,23 +2320,121 @@ psymtab_to_symtab_1(pst, filename)
 		    fflush (stdout);
 		}
 	    /* We only pass the filename for debug purposes */
-	    psymtab_to_symtab_1(pst->dependencies[i], 
+	    psymtab_to_symtab_1(pst->dependencies[i],
 				pst->dependencies[i]->filename);
 	}
-    
-    cur_fdr = fh;
+
     /* Now read the symbols for this symtab */
-    
-    current_objfile = pst -> objfile;
-    if (!have_stabs) {
-	cur_fd = FDR_IDX(pst);
-	cur_stab = st;
+
+    current_objfile = pst->objfile;
+    cur_fd = FDR_IDX(pst);
+    fh = (cur_fd == -1) ? 0 : (FDR *) (cur_hdr->cbFdOffset) + FDR_IDX(pst);
+    cur_fdr = fh;
+
+    /* BOUND is the highest core address of this file's procedures */
+    bound = (cur_fd == cur_hdr->ifdMax - 1) ?
+		    cur_hdr->cbDnOffset :
+		    fh[1].adr;
+
+    /* See comment in parse_partial_symbols about the @stabs sentinel. */
+    if (fh && fh->csym >= 2
+	    && strcmp((char *)(((SYMR *)fh->isymBase)[1].iss), stabs_symbol)
+	        == 0) {
+
+	/*
+	 * This symbol table contains stabs-in-ecoff entries.
+	 */
+
+	SYMR *sh;
+	PDR *pr;
 	
+	/* Parse local symbols first */
+
+	if (fh->csym <= 2)	/* FIXME, this blows psymtab->symtab ptr */
+	  {
+	    current_objfile = NULL;
+	    return;
+	  }
+	for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++) {
+	    register SYMR	*sh = cur_sdx + (SYMR *) fh->isymBase;
+	    char *name = (char*)sh->iss;
+	    CORE_ADDR valu = sh->value;
+	    if (MIPS_IS_STAB(sh)) {
+		int type_code = MIPS_UNMARK_STAB(sh->index);
+		process_one_symbol (type_code, 0, valu, name, /*FIXME*/ 0,
+				    pst->objfile);
+		if (type_code == N_FUN) {
+		    /* Make up special symbol to contain
+		       procedure specific info */
+		    struct mips_extra_func_info *e =
+		      (struct mips_extra_func_info *)
+			obstack_alloc(&current_objfile->symbol_obstack,
+				      sizeof(struct mips_extra_func_info));
+		    struct symbol *s = new_symbol(".gdbinfo.");
+		    SYMBOL_NAMESPACE(s) = LABEL_NAMESPACE;
+		    SYMBOL_CLASS(s) = LOC_CONST;
+		    SYMBOL_TYPE(s) = builtin_type_void;
+		    SYMBOL_VALUE(s) = (int)e;
+		    add_symbol_to_list (s, &local_symbols);
+		}
+	    }
+	    else if (sh->st == stLabel && sh->index != indexNil) {
+		/* Handle encoded stab line number. */
+		record_line (current_subfile, sh->index, valu);
+	    }
+	    else complain (&stab_unknown_complaint, (char *)sh->iss);
+	}
+	st = end_symtab (pst->texthigh, 0, 0, pst->objfile);
+
+	/* Sort the symbol table now, we are done adding symbols to it.
+	   We must do this before parse_procedure calls lookup_symbol.  */
+	sort_symtab_syms(st);
+
+	/* This may not be necessary for stabs symtabs.  FIXME.  */
+	sort_blocks (st);
+
+	/* Fill in procedure info next.  We need to look-ahead to
+	   find out where each procedure's code ends.  */
+
+	for (i = 0; i <= fh->cpd-1; i++) {
+	    pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
+	    parse_procedure (pr, i < fh->cpd-1 ? pr[1].adr : bound, 1);
+	}
+    } else {
+
+	/*
+	 * This symbol table contains ordinary ecoff entries.
+	 */
+
+	int f_max;
+	int maxlines;
+	EXTR **ext_ptr;
+
+	/* How many symbols will we need */
+	/* FIXME, this does not count enum values. */
+	f_max = pst->n_global_syms + pst->n_static_syms;
+	if (fh == 0) {
+	    maxlines = 0;
+	    st = new_symtab ("unknown", f_max, 0, pst->objfile);
+	} else {
+	    f_max += fh->csym + fh->cpd;
+	    maxlines = 2 * fh->cline;
+	    st = new_symtab (pst->filename, 2 * f_max, maxlines, pst->objfile);
+	}
+
+	lines = LINETABLE(st);
+	pending_list = (struct mips_pending **) cur_hdr->cbOptOffset;
+	if (pending_list == 0) {
+	    pending_list = (struct mips_pending **)
+		xzalloc(cur_hdr->ifdMax * sizeof(struct mips_pending *));
+	    cur_hdr->cbOptOffset = (int)pending_list;
+	}
+
 	/* Get a new lexical context */
 	
 	push_parse_stack();
-	top_stack->cur_st = cur_stab;
-	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(cur_stab),
+	top_stack->cur_st = st;
+	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(st),
 						 STATIC_BLOCK);
 	BLOCK_START(top_stack->cur_block) = fh ? fh->adr : 0;
 	BLOCK_END(top_stack->cur_block) = 0;
@@ -2311,86 +2443,42 @@ psymtab_to_symtab_1(pst, filename)
 	top_stack->cur_type = 0;
 	top_stack->procadr = 0;
 	top_stack->numargs = 0;
-    }
-    
-    /* Parse locals and procedures */
-    if (fh) {
-	SYMR *sh;
-	PDR *pr;
-	
-	/* BOUND is the highest core address of this file's procedures */
-	int bound =  cur_fd == cur_hdr->ifdMax - 1 ? cur_hdr->cbDnOffset
-	    : fh[1].adr;
 
-	/* Parse local symbols first */
-	
-	if (have_stabs) {
-	    if (fh->csym <= 2)
-	      {
-		current_objfile = NULL;
-		return;
-	      }
-	    for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++) {
-		register SYMR	*sh = cur_sdx + (SYMR *) fh->isymBase;
-		char *name = (char*)sh->iss;
-		CORE_ADDR valu = sh->value;
-		if (MIPS_IS_STAB(sh)) {
-		    int type_code = MIPS_UNMARK_STAB(sh->index);
-		    process_one_symbol (type_code, 0, valu, name, /*FIXME*/ 0,
-					pst->objfile);
-		    if (type_code == N_FUN) {
-			/* Make up special symbol to contain
-			   procedure specific info */
-			struct mips_extra_func_info *e =
-			  (struct mips_extra_func_info *)
-			    obstack_alloc(&current_objfile->symbol_obstack,
-					  sizeof(struct mips_extra_func_info));
-			struct symbol *s = new_symbol(".gdbinfo.");
-			SYMBOL_NAMESPACE(s) = LABEL_NAMESPACE;
-			SYMBOL_CLASS(s) = LOC_CONST;
-			SYMBOL_TYPE(s) = builtin_type_void;
-			SYMBOL_VALUE(s) = (int)e;
-			add_symbol_to_list (s, &local_symbols);
-		    }
-		}
-		else if (sh->st == stLabel && sh->index != indexNil) {
-		    /* Handle encoded stab line number. */
-		    record_line (current_subfile, sh->index, valu);
-		}
-	    }
-	    st = end_symtab (pst->texthigh, 0, 0, pst->objfile);
-	}
-	else {
+	if (fh) {
+	    SYMR *sh;
+	    PDR *pr;
+
+	    /* Parse local symbols first */
+
 	    for (cur_sdx = 0; cur_sdx < fh->csym; ) {
 		sh = (SYMR *) (fh->isymBase) + cur_sdx;
 		cur_sdx += parse_symbol(sh, (union aux_ent *)fh->iauxBase,
 					fh->fBigendian);
 	    }
 
-	    /* Linenumbers. At the end, check if we can save memory */
+	    /* Linenumbers.  At the end, check if we can save memory */
+
 	    parse_lines(fh, lines);
 	    if (lines->nitems < fh->cline)
 		lines = shrink_linetable(lines);
+
+	    /* Fill in procedure info next.  We need to look-ahead to
+	       find out where each procedure's code ends.  */
+
+	    for (i = 0; i <= fh->cpd-1; i++) {
+		pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
+		parse_procedure(pr, i < fh->cpd-1 ? pr[1].adr : bound, 0);
+	    }
 	}
 
-	/* Procedures next, note we need to look-ahead to
-	   find out where the procedure's code ends */
-
-	for (i = 0; i <= fh->cpd-1; i++) {
-	    pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
-	    parse_procedure(pr,
-			    i < fh->cpd-1 ? pr[1].adr : bound,
-			    have_stabs);
-	}
-    }
-    if (!have_stabs) {
-	EXTR **ext_ptr;
 	LINETABLE(st) = lines;
-    
+
 	/* .. and our share of externals.
-	   XXX use the global list to speed up things here. how ? 
+	   XXX use the global list to speed up things here. how?
 	   FIXME, Maybe quit once we have found the right number of ext's? */
-	/* parse_external clobbers top_stack->cur_block and ->cur_st here. */
+	top_stack->cur_st = st;
+	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),
+						 GLOBAL_BLOCK);
 	top_stack->blocktype = stFile;
 	top_stack->maxsyms =
 	    cur_hdr->isymMax + cur_hdr->ipdMax + cur_hdr->iextMax;
@@ -2398,7 +2486,7 @@ psymtab_to_symtab_1(pst, filename)
 	ext_ptr = PST_PRIVATE(pst)->extern_tab;
 	for (i = PST_PRIVATE(pst)->extern_count; --i >= 0; ext_ptr++)
 	    parse_external(*ext_ptr, 1, fh->fBigendian);
-    
+
 	/* If there are undefined, tell the user */
 	if (n_undef_symbols) {
 	    printf_filtered("File %s contains %d unresolved references:",
@@ -2409,13 +2497,13 @@ psymtab_to_symtab_1(pst, filename)
 
 	}
 	pop_parse_stack();
-    }
-    
-    /* Sort the symbol table now, we are done adding symbols to it.*/
-    sort_symtab_syms(st);
 
-    sort_blocks (st);
-    
+	/* Sort the symbol table now, we are done adding symbols to it.*/
+	sort_symtab_syms(st);
+
+	sort_blocks (st);
+    }
+
     /* Now link the psymtab and the symtab.  */
     pst->symtab = st;
 
@@ -2456,7 +2544,7 @@ cross_ref(ax, tpp, type_code, pname, bigend)
 		*pname = "<undefined>";
 	} else {
 		/*
-		 * Find the relative file descriptor and the symbol in it 
+		 * Find the relative file descriptor and the symbol in it
 		 */
 		FDR            *fh = get_rfd(cur_fd, rf);
 		SYMR           *sh;
@@ -2468,7 +2556,7 @@ cross_ref(ax, tpp, type_code, pname, bigend)
 		 * it in a list of pending symbols, to be processed later when
 		 * the file f will be.  In any event, we collect the name for
 		 * the type here. Which is why we made a first pass at
-		 * strings. 
+		 * strings.
 		 */
 		sh = (SYMR *) (fh->isymBase) + rn->index;
 
@@ -2666,7 +2754,7 @@ sort_blocks(s)
 	BLOCK_START(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK)) =
 		BLOCK_START(BLOCKVECTOR_BLOCK(bv,FIRST_LOCAL_BLOCK));
 
-	BLOCK_START(BLOCKVECTOR_BLOCK(bv,STATIC_BLOCK)) = 
+	BLOCK_START(BLOCKVECTOR_BLOCK(bv,STATIC_BLOCK)) =
 		BLOCK_START(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK));
 	BLOCK_END  (BLOCKVECTOR_BLOCK(bv,STATIC_BLOCK)) =
 		BLOCK_END  (BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK));
@@ -2709,17 +2797,17 @@ new_psymtab(name, objfile)
 	struct objfile *objfile;
 {
   struct partial_symtab *psymtab;
-  
+
   /* FIXME -- why (char *) -1 rather than NULL? */
   psymtab = allocate_psymtab (name == (char *) -1 ? "<no name>" : name,
 			      objfile);
-  
+
   /* Keep a backpointer to the file's symbols */
 
   psymtab -> read_symtab_private = (char *)
     obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
   CUR_HDR(psymtab) = cur_hdr;
-  
+
   /* The way to turn this into a symtab is to call... */
   psymtab->read_symtab = mipscoff_psymtab_to_symtab;
   return (psymtab);
@@ -2727,7 +2815,7 @@ new_psymtab(name, objfile)
 
 
 /* Allocate a linetable array of the given SIZE.  Since the struct
-   already includes one item, we subtract one when calculating the 
+   already includes one item, we subtract one when calculating the
    proper size to allocate.  */
 
 static struct linetable *
@@ -2753,7 +2841,7 @@ shrink_linetable(lt)
 	struct linetable * lt;
 {
 
-	return (struct linetable *) xrealloc ((PTR)lt, 
+	return (struct linetable *) xrealloc ((PTR)lt,
 					sizeof(struct linetable)
 					+ (lt->nitems - 1) * sizeof(lt->item));
 }
@@ -2821,7 +2909,7 @@ static struct symbol *
 new_symbol(name)
 	char *name;
 {
-	struct symbol *s = (struct symbol *) 
+	struct symbol *s = (struct symbol *)
 		obstack_alloc (&current_objfile->symbol_obstack, sizeof (struct symbol));
 
 	memset ((PTR)s, 0, sizeof (*s));

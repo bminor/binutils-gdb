@@ -1,3 +1,21 @@
+Sat Apr 11 23:14:36 1992  John Gilmore  (gnu at cygnus.com)
+
+	* mipsread.c (parse_partial_symbols):  Complain when sh->index is
+	too high or when skipping `forwards' moves us backwards.
+	(parse_type):  Print mis-guessed tag name in complaint.
+	(parse_external):  Eliminate cur_stab and obscure top_stack clobbers.
+	(parse_procedure):  Do not attempt to create symbols; just fill in
+	the SYMBOL_VALUE field of a .gdbinfo. symbol if we can find one.
+	(psymtab_to_symtab_1):  Split up `stabs' from `native ecoff' code
+	for clarity.  Set top_stack before calling parse_external.  In
+	stabs, sort symbols before calling parse_procedure.
+	* mipsread.c:  Lint.
+	* symmisc.c (std_in, std_out, std_err):  Add vars to access std
+	FILE *'s when debugging GDB (e.g. as args to dump_symtab).
+	* Makefile.in:  Remove stage* targets.  Avoid echo on recursive
+	makes.  Eliminate doc/Makefile from tar.Z file if doc/Makefile.in
+	exists.
+
 Fri Apr 10 23:47:37 1992  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in (VERSION):  Set to 4.5.1.
