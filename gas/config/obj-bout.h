@@ -181,6 +181,10 @@ struct relocation_info
 
 /* True if symbol has been defined, ie is in N_{TEXT,DATA,BSS,ABS} or N_EXT */
 #define S_IS_DEFINED(s)		((S_GET_TYPE(s) != N_UNDF) || (S_GET_DESC(s) != 0))
+
+#define S_IS_COMMON(s) \
+  (S_GET_TYPE (s) == N_UNDF && S_GET_VALUE (s) != 0)
+
 #define S_IS_REGISTER(s)	((s)->sy_symbol.n_type == N_REGISTER)
 
 /* True if a debug special symbol entry */
