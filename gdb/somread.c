@@ -20,8 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "bfd.h"
-#include "som.h"
-#include "libhppa.h"
 #include <syms.h>
 #include "symtab.h"
 #include "symfile.h"
@@ -32,7 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "complaints.h"
 #include "gdb_string.h"
 #include "demangle.h"
-#include <sys/file.h>
+#include "som.h"
+#include "libhppa.h"
 
 /* Various things we might complain about... */
 

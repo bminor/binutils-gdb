@@ -1,3 +1,8 @@
+Thu Aug  8 10:12:36 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* somread.c:  Rearrange order of includes to fix warnings under
+	hpux-10.10.  Also don't include sys/file.h.
+
 Wed Aug  7 21:45:52 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dbxread.c:  Don't include param.h or sys/file.h.
