@@ -250,7 +250,7 @@ usage (help)
   if (! is_ranlib)
     {
       /* xgettext:c-format */
-      fprintf (s, _("Usage: %s [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"),
+      fprintf (s, _("Usage: %s [-X32_64] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"),
 	       program_name);
       /* xgettext:c-format */
       fprintf (s, _("       %s -M [<mri-script]\n"), program_name);
@@ -276,6 +276,7 @@ usage (help)
       fprintf (s, _("  [S]          - do not build a symbol table\n"));
       fprintf (s, _("  [v]          - be verbose\n"));
       fprintf (s, _("  [V]          - display the version number\n"));
+      fprintf (s, _("  [-X32_64]    - (ignored)\n"));
     }
   else
     /* xgettext:c-format */
@@ -430,6 +431,17 @@ main (argc, argv)
   show_version = 0;
 
   xatexit (remove_output);
+
+  /* Ignored for (partial) AIX compatibility.  On AIX,
+     the -X option can be used to ignore certain kinds
+     of object files in the archive (the 64-bit objects
+     or the 32-bit objects).  GNU ar always looks at all
+     kinds of objects in an archive.  */
+  while (strcmp (argv[1], "-X32_64") == 0)
+    {
+      argv++;
+      argc--;
+    }
 
   if (is_ranlib)
     {

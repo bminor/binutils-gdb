@@ -321,6 +321,7 @@ usage (stream, status)
       --target=BFDNAME   Specify the target object format as BFDNAME\n\
   -u, --undefined-only   Display only undefined symbols\n\
   -V, --version          Display this program's version number\n\
+  -X 32_64               (ignored)\n\
 \n"));
   list_supported_targets (program_name, stream);
   if (status == 0)
@@ -409,7 +410,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:glnopPrst:uvV",
+  while ((c = getopt_long (argc, argv, "aABCDef:glnopPrst:uvVX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -479,6 +480,17 @@ main (argc, argv)
 	  break;
 	case 'V':
 	  show_version = 1;
+	  break;
+	case 'X':
+	  /* Ignored for (partial) AIX compatibility.  On AIX, the
+	     argument has values 32, 64, or 32_64, and specfies that
+	     only 32-bit, only 64-bit, or both kinds of objects should
+	     be examined.  The default is 32.  So plain AIX nm on a
+	     library archive with both kinds of objects will ignore
+	     the 64-bit ones.  For GNU nm, the default is and always
+	     has been -X 32_64, and other options are not supported.  */
+	  if (strcmp (optarg, "32_64") != 0)
+	    fatal (_("Only -X 32_64 is supported"));
 	  break;
 
 	case OPTION_TARGET:	/* --target */

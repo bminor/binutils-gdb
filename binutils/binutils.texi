@@ -234,7 +234,7 @@ program.
 @section Controlling @code{ar} on the command line
 
 @smallexample
-ar [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
+ar [-X32_64] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
 @end smallexample
 
 @cindex Unix compatibility, @code{ar}
@@ -451,6 +451,12 @@ when the modifier @samp{v} is appended.
 This modifier shows the version number of @code{ar}.
 @end table
 
+@code{ar} ignores an initial option spelt @code{-X32_64}, for
+compatibility with AIX.  The behaviour produced by this option is the
+default for GNU @code{ar}.  @code{ar} does not support any of the other
+@code{-X} options; in particular, it does not support @code{-X32}
+which is the default for AIX @code{ar}.
+
 @node ar scripts
 @section Controlling @code{ar} with a script
 
@@ -636,8 +642,8 @@ nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ -r | --reverse-sort ]  [ --size-sort ] [ -u | --undefined-only ]
    [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
    [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
-   [ --defined-only ] [-l | --line-numbers ]
-   [ --no-demangle ] [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
+   [ --defined-only ] [-l | --line-numbers ]  [ --no-demangle ]
+   [ -V | --version ]  [ -X 32_64 ]  [ --help ]  [ @var{objfile}@dots{} ]
 @end smallexample
 
 @sc{gnu} @code{nm} lists the symbols from object files @var{objfile}@dots{}.
@@ -854,6 +860,12 @@ Display only defined symbols for each object file.
 @item -V
 @itemx --version
 Show the version number of @code{nm} and exit.
+
+@item -X
+This option is ignored for compatibility with the AIX version of
+@code{nm}.  It takes one parameter which must be the string
+@code{32_64}.  The default mode of AIX @code{nm} corresponds
+to @code{-X 32}, which is not supported by @sc{gnu} @code{nm}.
 
 @item --help
 Show a summary of the options to @code{nm} and exit.
