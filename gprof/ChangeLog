@@ -1,3 +1,12 @@
+2004-06-15  Ben Elliston  <bje@au.ibm.com>
+
+	* configure.in: Run through autoupdate.
+	* configure: Regenerate with autoconf 2.59.
+	* Makefile.am (install-local): Rename from this ..
+	(install-data-local): .. to this.
+	* Makefile.in: Regenerate with automake 1.8.5.
+	* aclocal.m4: Regenerate with aclocal 1.8.5.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* corefile.c (core_init): Use bfd_get_section_size
