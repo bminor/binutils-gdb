@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 
-AUTOMAKE_OPTIONS = dejagnu
+AUTOMAKE_OPTIONS = cygnus dejagnu
 
 tooldir = $(exec_prefix)/$(target_alias)
 
@@ -114,6 +114,9 @@ ALL_EMULATIONS = \
 	eelf32ebmip.o \
 	eelf32elmip.o \
 	eelf32l4300.o \
+	$(start-sanitize-r5900) \
+	eelf32l5900.o \
+	$(end-sanitize-r5900) \
 	eelf32lmip.o \
 	eelf32lppc.o \
 	eelf32ppc.o \
@@ -311,6 +314,11 @@ eelf32elmip.c: $(srcdir)/emulparams/elf32elmip.sh \
 eelf32l4300.c: $(srcdir)/emulparams/elf32l4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32l4300 "$(tdir_elf32l4300)"
+start-sanitize-r5900:
+eelf32l5900.c: $(srcdir)/emulparams/elf32l5900.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32l5900 "$(tdir_elf32l5900)"
+end-sanitize-r5900:
 eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lmip "$(tdir_elf32lmip)"
@@ -663,10 +671,12 @@ ld.dvi: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
 bfdsumm.texi: Makefile
 	echo @include $(BFDDIR)/doc/bfdsumm.texi > bfdsumm.texi
 
+# We want to reconfigure if configure.host or configure.tgt changes.
+Makefile: configure.host configure.tgt
+
 MOSTCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h tmpdir crtbegin.o crtend.o
 CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
-DISTCLEANFILES = ldscripts
 
 .PHONY: install-exec-local install-data-local
 
@@ -680,14 +690,23 @@ install-exec-local: ld-new$(EXEEXT)
 	done
 	rm -f $(tooldir)/bin/ld$(EXEEXT)
 	n=`echo ld | sed '$(transform)'`; \
-	ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
-	  || $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(tooldir)/bin/ld$(EXEEXT)
+	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/ld$(EXEEXT)" ]; then \
+	  ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
+	  || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(tooldir)/bin/ld$(EXEEXT); \
+	fi
 
 install-data-local:
 	$(mkinstalldirs) $(scriptdir)
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
+
+# Stuff that should be included in a distribution.  The diststuff
+# target is run by the taz target in ../Makefile.in.
+LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
+diststuff: $(LDDISTSTUFF) info
+
+DISTCLEANFILES = ldscripts
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).

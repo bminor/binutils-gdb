@@ -1,5 +1,10 @@
 Wed Mar 25 11:34:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patch from H.J. Lu  <hjl@gnu.org>:
+	* Makefile.am (LDDISTSTUFF): New variable.
+	(diststuff): New target.
+	* Makefile.in: Rebuild.
+
 	* scripttempl/pe.sc: Only include .idata\$[0-7] in .idata when
 	relocating.
 
