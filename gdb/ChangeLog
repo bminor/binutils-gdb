@@ -1,3 +1,9 @@
+2003-09-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* frame.c (deprecated_safe_get_selected_frame): New function.
+	* frame.h (deprecated_safe_get_selected_frame): Add prototype.
+	* findvar.c (read_var_value): Call it.
+
 2003-09-08  Corinna Vinschen  <vinschen@redhat.com>
 
 	* Makefile.in (ALLDEPFILES): Add sh64-tdep.c.

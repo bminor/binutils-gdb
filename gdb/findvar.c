@@ -404,8 +404,11 @@ read_var_value (register struct symbol *var, struct frame_info *frame)
 
   len = TYPE_LENGTH (type);
 
+
+  /* FIXME drow/2003-09-06: this call to the selected frame should be
+     pushed upwards to the callers.  */
   if (frame == NULL)
-    frame = deprecated_selected_frame;
+    frame = deprecated_safe_get_selected_frame ();
 
   switch (SYMBOL_CLASS (var))
     {
