@@ -322,6 +322,9 @@ sim_create_inferior (SIM_DESC sd,
   }
   CIA_SET (STATE_CPU (sd, 0), (unsigned64) PC);
 
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33_2)
+    PSW |= PSW_FE;
+
   return SIM_RC_OK;
 }
 
@@ -545,4 +548,570 @@ mn10300_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception)
       sim_io_eprintf(sd, "Warning, ignoring spontanous exception signal (%d)\n", exception); 
     }
   State.exc_suspended = 0; 
+}
+
+/* This is called when an FP instruction is issued when the FP unit is
+   disabled, i.e., the FE bit of PSW is zero.  It raises interrupt
+   code 0x1c0.  */
+void
+fpu_disabled_exception (SIM_DESC sd, sim_cpu *cpu, sim_cia cia)
+{
+  sim_io_eprintf(sd, "FPU disabled exception\n");
+  program_interrupt (sd, cpu, cia, SIM_SIGFPE);
+}
+
+/* This is called when the FP unit is enabled but one of the
+   unimplemented insns is issued.  It raises interrupt code 0x1c8.  */
+void
+fpu_unimp_exception (SIM_DESC sd, sim_cpu *cpu, sim_cia cia)
+{
+  sim_io_eprintf(sd, "Unimplemented FPU instruction exception\n");
+  program_interrupt (sd, cpu, cia, SIM_SIGFPE);
+}
+
+/* This is called at the end of any FP insns that may have triggered
+   FP exceptions.  If no exception is enabled, it returns immediately.
+   Otherwise, it raises an exception code 0x1d0.  */
+void
+fpu_check_signal_exception (SIM_DESC sd, sim_cpu *cpu, sim_cia cia)
+{
+  if ((FPCR & EC_MASK) == 0)
+    return;
+
+  sim_io_eprintf(sd, "FPU %s%s%s%s%s exception\n",
+		 (FPCR & EC_V) ? "V" : "",
+		 (FPCR & EC_Z) ? "Z" : "",
+		 (FPCR & EC_O) ? "O" : "",
+		 (FPCR & EC_U) ? "U" : "",
+		 (FPCR & EC_I) ? "I" : "");
+  program_interrupt (sd, cpu, cia, SIM_SIGFPE);
+}
+
+/* Convert a 32-bit single-precision FP value in the target platform
+   format to a sim_fpu value.  */
+static void
+reg2val_32 (const void *reg, sim_fpu *val)
+{
+  FS2FPU (*(reg_t *)reg, *val);
+}
+
+/* Round the given sim_fpu value to single precision, following the
+   target platform rounding and denormalization conventions.  On
+   AM33/2.0, round_near is the only rounding mode.  */
+static int
+round_32 (sim_fpu *val)
+{
+  return sim_fpu_round_32 (val, sim_fpu_round_near, sim_fpu_denorm_zero);
+}
+
+/* Convert a sim_fpu value to the 32-bit single-precision target
+   representation.  */
+static void
+val2reg_32 (const sim_fpu *val, void *reg)
+{
+  FPU2FS (*val, *(reg_t *)reg);
+}
+
+/* Define the 32-bit single-precision conversion and rounding uniform
+   interface.  */
+const struct fp_prec_t
+fp_single_prec = {
+  reg2val_32, round_32, val2reg_32
+};
+
+/* Convert a 64-bit double-precision FP value in the target platform
+   format to a sim_fpu value.  */
+static void
+reg2val_64 (const void *reg, sim_fpu *val)
+{
+  FD2FPU (*(dword *)reg, *val);
+}
+
+/* Round the given sim_fpu value to double precision, following the
+   target platform rounding and denormalization conventions.  On
+   AM33/2.0, round_near is the only rounding mode.  */
+int
+round_64 (sim_fpu *val)
+{
+  return sim_fpu_round_64 (val, sim_fpu_round_near, sim_fpu_denorm_zero);
+}
+
+/* Convert a sim_fpu value to the 64-bit double-precision target
+   representation.  */
+static void
+val2reg_64 (const sim_fpu *val, void *reg)
+{
+  FPU2FD (*val, *(dword *)reg);
+}
+
+/* Define the 64-bit single-precision conversion and rounding uniform
+   interface.  */
+const struct fp_prec_t
+fp_double_prec = {
+  reg2val_64, round_64, val2reg_64
+};
+
+/* Define shortcuts to the uniform interface operations.  */
+#define REG2VAL(reg,val) (*ops->reg2val) (reg,val)
+#define ROUND(val) (*ops->round) (val)
+#define VAL2REG(val,reg) (*ops->val2reg) (val,reg)
+
+/* Check whether overflow, underflow or inexact exceptions should be
+   raised.  */
+int
+fpu_status_ok (sim_fpu_status stat)
+{
+  if ((stat & sim_fpu_status_overflow)
+      && (FPCR & EE_O))
+    FPCR |= EC_O;
+  else if ((stat & (sim_fpu_status_underflow | sim_fpu_status_denorm))
+	   && (FPCR & EE_U))
+    FPCR |= EC_U;
+  else if ((stat & (sim_fpu_status_inexact | sim_fpu_status_rounded))
+	   && (FPCR & EE_I))
+    FPCR |= EC_I;
+  else if (stat & ~ (sim_fpu_status_overflow
+		     | sim_fpu_status_underflow
+		     | sim_fpu_status_denorm
+		     | sim_fpu_status_inexact
+		     | sim_fpu_status_rounded))
+    abort ();
+  else
+    return 1;
+  return 0;
+}
+
+/* Implement a 32/64 bit reciprocal square root, signaling FP
+   exceptions when appropriate.  */
+void
+fpu_rsqrt (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	   const void *reg_in, void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu in, med, out;
+
+  REG2VAL (reg_in, &in);
+  ROUND (&in);
+  FPCR &= ~ EC_MASK;
+  switch (sim_fpu_is (&in))
+    {
+    case SIM_FPU_IS_SNAN:
+    case SIM_FPU_IS_NNUMBER:
+    case SIM_FPU_IS_NINF:
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+      break;
+	    
+    case SIM_FPU_IS_QNAN:
+      VAL2REG (&sim_fpu_qnan, reg_out);
+      break;
+
+    case SIM_FPU_IS_PINF:
+      VAL2REG (&sim_fpu_zero, reg_out);
+      break;
+
+    case SIM_FPU_IS_PNUMBER:
+      {
+	/* Since we don't have a function to compute rsqrt directly,
+	   use sqrt and inv.  */
+	sim_fpu_status stat = 0;
+	stat |= sim_fpu_sqrt (&med, &in);
+	stat |= sim_fpu_inv (&out, &med);
+	stat |= ROUND (&out);
+	if (fpu_status_ok (stat))
+	  VAL2REG (&out, reg_out);
+      }
+      break;
+
+    case SIM_FPU_IS_NZERO:
+    case SIM_FPU_IS_PZERO:
+      if (FPCR & EE_Z)
+	FPCR |= EC_Z;
+      else
+	{
+	  /* Generate an INF with the same sign.  */
+	  sim_fpu_inv (&out, &in);
+	  VAL2REG (&out, reg_out);
+	}
+      break;
+
+    default:
+      abort ();
+    }
+
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+static inline reg_t
+cmp2fcc (int res)
+{
+  switch (res)
+    {
+    case SIM_FPU_IS_SNAN:
+    case SIM_FPU_IS_QNAN:
+      return FCC_U;
+      
+    case SIM_FPU_IS_NINF:
+    case SIM_FPU_IS_NNUMBER:
+    case SIM_FPU_IS_NDENORM:
+      return FCC_L;
+      
+    case SIM_FPU_IS_PINF:
+    case SIM_FPU_IS_PNUMBER:
+    case SIM_FPU_IS_PDENORM:
+      return FCC_G;
+      
+    case SIM_FPU_IS_NZERO:
+    case SIM_FPU_IS_PZERO:
+      return FCC_E;
+      
+    default:
+      abort ();
+    }
+}
+
+/* Implement a 32/64 bit FP compare, setting the FPCR status and/or
+   exception bits as specified.  */
+void
+fpu_cmp (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	 const void *reg_in1, const void *reg_in2,
+	 const struct fp_prec_t *ops)
+{
+  sim_fpu m, n;
+
+  REG2VAL (reg_in1, &m);
+  REG2VAL (reg_in2, &n);
+  FPCR &= ~ EC_MASK;
+  FPCR &= ~ FCC_MASK;
+  ROUND (&m);
+  ROUND (&n);
+  if (sim_fpu_is_snan (&m) || sim_fpu_is_snan (&n))
+    {
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	FPCR |= FCC_U;
+    }
+  else
+    FPCR |= cmp2fcc (sim_fpu_cmp (&m, &n));
+
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP add, setting FP exception bits when
+   appropriate.  */
+void
+fpu_add (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	 const void *reg_in1, const void *reg_in2,
+	 void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m, n, r;
+
+  REG2VAL (reg_in1, &m);
+  REG2VAL (reg_in2, &n);
+  ROUND (&m);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is (&m) == SIM_FPU_IS_PINF
+	  && sim_fpu_is (&n) == SIM_FPU_IS_NINF)
+      || (sim_fpu_is (&m) == SIM_FPU_IS_NINF
+	  && sim_fpu_is (&n) == SIM_FPU_IS_PINF))
+    {
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else
+    {
+      sim_fpu_status stat = sim_fpu_add (&r, &m, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP sub, setting FP exception bits when
+   appropriate.  */
+void
+fpu_sub (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	 const void *reg_in1, const void *reg_in2,
+	 void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m, n, r;
+
+  REG2VAL (reg_in1, &m);
+  REG2VAL (reg_in2, &n);
+  ROUND (&m);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is (&m) == SIM_FPU_IS_PINF
+	  && sim_fpu_is (&n) == SIM_FPU_IS_PINF)
+      || (sim_fpu_is (&m) == SIM_FPU_IS_NINF
+	  && sim_fpu_is (&n) == SIM_FPU_IS_NINF))
+    {
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else
+    {
+      sim_fpu_status stat = sim_fpu_sub (&r, &m, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP mul, setting FP exception bits when
+   appropriate.  */
+void
+fpu_mul (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	 const void *reg_in1, const void *reg_in2,
+	 void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m, n, r;
+
+  REG2VAL (reg_in1, &m);
+  REG2VAL (reg_in2, &n);
+  ROUND (&m);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is_infinity (&m) && sim_fpu_is_zero (&n))
+      || (sim_fpu_is_zero (&m) && sim_fpu_is_infinity (&n)))
+    {
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else
+    {
+      sim_fpu_status stat = sim_fpu_mul (&r, &m, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP div, setting FP exception bits when
+   appropriate.  */
+void
+fpu_div (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	 const void *reg_in1, const void *reg_in2,
+	 void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m, n, r;
+
+  REG2VAL (reg_in1, &m);
+  REG2VAL (reg_in2, &n);
+  ROUND (&m);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is_infinity (&m) && sim_fpu_is_infinity (&n))
+      || (sim_fpu_is_zero (&m) && sim_fpu_is_zero (&n)))
+    {
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else if (sim_fpu_is_number (&m) && sim_fpu_is_zero (&n)
+	   && (FPCR & EE_Z))
+    FPCR |= EC_Z;
+  else
+    {
+      sim_fpu_status stat = sim_fpu_div (&r, &m, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP madd, setting FP exception bits when
+   appropriate.  */
+void
+fpu_fmadd (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	   const void *reg_in1, const void *reg_in2, const void *reg_in3,
+	   void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m1, m2, m, n, r;
+
+  REG2VAL (reg_in1, &m1);
+  REG2VAL (reg_in2, &m2);
+  REG2VAL (reg_in3, &n);
+  ROUND (&m1);
+  ROUND (&m2);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m1) || sim_fpu_is_snan (&m2) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is_infinity (&m1) && sim_fpu_is_zero (&m2))
+      || (sim_fpu_is_zero (&m1) && sim_fpu_is_infinity (&m2)))
+    {
+    invalid_operands:
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else
+    {
+      sim_fpu_status stat = sim_fpu_mul (&m, &m1, &m2);
+
+      if (sim_fpu_is_infinity (&m) && sim_fpu_is_infinity (&n)
+	  && sim_fpu_sign (&m) != sim_fpu_sign (&n))
+	goto invalid_operands;
+
+      stat |= sim_fpu_add (&r, &m, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP msub, setting FP exception bits when
+   appropriate.  */
+void
+fpu_fmsub (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	   const void *reg_in1, const void *reg_in2, const void *reg_in3,
+	   void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m1, m2, m, n, r;
+
+  REG2VAL (reg_in1, &m1);
+  REG2VAL (reg_in2, &m2);
+  REG2VAL (reg_in3, &n);
+  ROUND (&m1);
+  ROUND (&m2);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m1) || sim_fpu_is_snan (&m2) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is_infinity (&m1) && sim_fpu_is_zero (&m2))
+      || (sim_fpu_is_zero (&m1) && sim_fpu_is_infinity (&m2)))
+    {
+    invalid_operands:
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else
+    {
+      sim_fpu_status stat = sim_fpu_mul (&m, &m1, &m2);
+
+      if (sim_fpu_is_infinity (&m) && sim_fpu_is_infinity (&n)
+	  && sim_fpu_sign (&m) == sim_fpu_sign (&n))
+	goto invalid_operands;
+
+      stat |= sim_fpu_sub (&r, &m, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP nmadd, setting FP exception bits when
+   appropriate.  */
+void
+fpu_fnmadd (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	    const void *reg_in1, const void *reg_in2, const void *reg_in3,
+	    void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m1, m2, m, mm, n, r;
+
+  REG2VAL (reg_in1, &m1);
+  REG2VAL (reg_in2, &m2);
+  REG2VAL (reg_in3, &n);
+  ROUND (&m1);
+  ROUND (&m2);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m1) || sim_fpu_is_snan (&m2) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is_infinity (&m1) && sim_fpu_is_zero (&m2))
+      || (sim_fpu_is_zero (&m1) && sim_fpu_is_infinity (&m2)))
+    {
+    invalid_operands:
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else
+    {
+      sim_fpu_status stat = sim_fpu_mul (&m, &m1, &m2);
+
+      if (sim_fpu_is_infinity (&m) && sim_fpu_is_infinity (&n)
+	  && sim_fpu_sign (&m) == sim_fpu_sign (&n))
+	goto invalid_operands;
+
+      stat |= sim_fpu_neg (&mm, &m);
+      stat |= sim_fpu_add (&r, &mm, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
+}
+
+/* Implement a 32/64 bit FP nmsub, setting FP exception bits when
+   appropriate.  */
+void
+fpu_fnmsub (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
+	    const void *reg_in1, const void *reg_in2, const void *reg_in3,
+	    void *reg_out, const struct fp_prec_t *ops)
+{
+  sim_fpu m1, m2, m, mm, n, r;
+
+  REG2VAL (reg_in1, &m1);
+  REG2VAL (reg_in2, &m2);
+  REG2VAL (reg_in3, &n);
+  ROUND (&m1);
+  ROUND (&m2);
+  ROUND (&n);
+  FPCR &= ~ EC_MASK;
+  if (sim_fpu_is_snan (&m1) || sim_fpu_is_snan (&m2) || sim_fpu_is_snan (&n)
+      || (sim_fpu_is_infinity (&m1) && sim_fpu_is_zero (&m2))
+      || (sim_fpu_is_zero (&m1) && sim_fpu_is_infinity (&m2)))
+    {
+    invalid_operands:
+      if (FPCR & EE_V)
+	FPCR |= EC_V;
+      else
+	VAL2REG (&sim_fpu_qnan, reg_out);
+    }
+  else
+    {
+      sim_fpu_status stat = sim_fpu_mul (&m, &m1, &m2);
+
+      if (sim_fpu_is_infinity (&m) && sim_fpu_is_infinity (&n)
+	  && sim_fpu_sign (&m) != sim_fpu_sign (&n))
+	goto invalid_operands;
+
+      stat |= sim_fpu_neg (&mm, &m);
+      stat |= sim_fpu_sub (&r, &mm, &n);
+      stat |= ROUND (&r);
+      if (fpu_status_ok (stat))
+	VAL2REG (&r, reg_out);
+    }
+  
+  fpu_check_signal_exception (sd, cpu, cia);
 }

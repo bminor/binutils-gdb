@@ -1,5 +1,74 @@
 2004-06-26  Alexandre Oliva  <aoliva@redhat.com>
 
+	2000-08-07  Graham Stott  <grahams@cygnus.co.uk>
+	* am33-2.igen (fmadd, fmsub, fmnadd, fmnsub): Correct typo.
+	2000-05-29  Alexandre Oliva  <aoliva@cygnus.com>
+	* interp.c (fpu_disabled_exception, fpu_unimp_exception,
+	fpu_check_signal_exception): Take additional state arguments.
+	Print exception type and call program_interrupt.  Adjust callers.
+	(fpu_rsqrt, fpu_cmp, fpu_add, fpu_sub, fpu_mul, fpu_div,
+	fpu_fmadd, fpu_fmsub, fpu_fnmadd, fpu_fnmsub): Take additional
+	arguments.
+	* mn10300_sim.h (fpu_disabled_exception, fpu_unimp_exception,
+	fpu_check_signal_exception): Adjust prototypes.
+	(fpu_rsqrt, fpu_cmp, fpu_add, fpu_sub, fpu_mul, fpu_div,
+	fpu_fmadd, fpu_fmsub, fpu_fnmadd, fpu_fnmsub): Likewise.
+	* am33-2.igen: Adjust calls.
+	2000-05-19  Alexandre Oliva  <aoliva@cygnus.com>
+	* op_utils.c (cmp2fcc): Moved...
+	* interp.c: ... here.
+	2000-05-18  Alexandre Oliva  <aoliva@cygnus.com>
+	* am33-2.igen: Use `unsigned32', `signed32', `unsigned64' or
+	`signed64' where type width is relevant.
+	2000-05-15  Alexandre Oliva  <aoliva@cygnus.com>
+	* mn10300_sim.h: Include sim-fpu.h.
+	(FD2FPU, FPU2FD): Enclose the FD argument in parentheses.
+	(fpu_check_signal_exception): Declare.
+	(struct fp_prec_t, fp_single_prec, fp_double_prec): Likewise.
+	(FP_SINGLE, FP_DOUBLE): Shorthands for fp_*_prec.
+	(fpu_rsqrt, fpu_cmp, fpu_add, fpu_sub, fpu_mul, fpu_div,
+	fpu_fmadd, fpu_fmsub, fpu_fnmadd, fpu_fnmsub): Declare.
+	* interp.c (fpu_disabled_exception): Document.
+	(fpu_unimp_exception): Likewise.
+	(fpu_check_signal_exception): Define.
+	(reg2val_32, round_32, val2reg_32, fp_single_prec): Likewise.
+	(reg2val_64, round_64, val2reg_64, fp_double_prec): Likewise.
+	(REG2VAL, ROUND, VAL2REG): Define shorthands.
+	(fpu_status_ok): Define.
+	(fpu_rsqrt, fpu_cmp, fpu_add, fpu_sub, fpu_mul, fpu_div,
+	fpu_fmadd, fpu_fmsub, fpu_fnmadd, fpu_fnmsub): Define.
+	* am33-2.igen (frsqrt, fcmp, fadd, fsub, fmul, fdiv,
+	fmadd, fmsub, fnmadd, fnmsub): Use new functions.
+	2000-04-27  Alexandre Oliva  <aoliva@cygnus.com>
+	* interp.c (sim_create_inferior): Set PSW bit to enable FP insns
+	if architecture is AM33/2.0.
+	* am33.igen: Include am33-2.igen.
+	2000-04-23  Alexandre Oliva  <aoliva@cygnus.com>
+	* mn10300.igen (movm, call, ret, retf): Check for am33_2 too.
+	* am33.igen (movm): Likewise.
+	2000-04-19  Alexandre Oliva  <aoliva@cygnus.com>
+	* am33.igen: Added `*am33_2' to some instructions that were
+	missing it.
+	2000-04-07  Alexandre Oliva  <aoliva@cygnus.com>
+	* am33-2.igen: New file.  All insns implemented, but FP flags are
+	only set for fcmp, exceptional conditions are not handled yet.
+	* Makefile.in (IGEN_INSN): Added am33-2.igen.
+	(tmp-igen): Added -M am33_2.
+	* mn10300.igen, am33.igen: Added `*am33_2' to all insns.
+	* gencode.c: Support FMT_D3.
+	* mn10300_sim.h (dword): New type.
+	(struct _state): Added fpregs.
+	(REG_FPCR, FPCR): New define.  All assorted bitmaps.
+	(XS2FS, AS2FS, Xf2FD): New macros.
+	(FS2FPU, FD2FPU, FPU2FS, FPU2FD): Likewise.
+	(load_dword, store_dword): New functions or macros.
+	(u642dw, dw2u64): New functions.
+	(fpu_disabled_exception, fpu_unimp_exception): Declared.
+	* interp.c (fpu_disabled_exception): Defined; no actual
+	implementation.
+	(fpu_unimp_exception): Likewise.
+	* op_utils.c (cmp2fcc): New function.
+
 	* interp.c, mn10300_sim.h, op_utils.c: Convert function prototypes
 	and definitions to ISO C.
 
