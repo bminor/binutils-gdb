@@ -1,3 +1,8 @@
+Thu Mar 31 18:07:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/alpha.sc: Clean up section alignment to ensure that
+	sections never overlap when using -r.
+
 Wed Mar 30 15:51:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldmisc.c (vfinfo): Change symbol reading slightly for recent BFD
