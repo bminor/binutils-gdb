@@ -1,5 +1,28 @@
 2003-05-04  H.J. Lu <hjl@gnu.org>
 
+	* elf32-i386.c (allocate_dynrelocs): Don't allocate dynamic
+	relocation entries for weak undefined symbols with non-default
+	visibility.
+	(elf_i386_relocate_section): Initialize the GOT entries and
+	skip R_386_32/R_386_PC32 for weak undefined symbols with
+	non-default visibility.
+ 
+	* elfxx-ia64.c (allocate_fptr): Don't allocate function
+	descriptors for weak undefined symbols with non-default
+	visibility.
+	(allocate_dynrel_entries): Don't allocate relocation entries
+	for symbols resolved to 0.
+	(set_got_entry): Don't install dynamic relocation for weak
+	undefined symbols with non-default visibility.
+	(set_pltoff_entry): Likewise.
+
+	* elflink.h (elf_fix_symbol_flags): Hide weak undefined symbols
+	with non-default visibility.
+	(elf_link_output_extsym): Don't make weak undefined symbols
+	with non-default visibility dynamic.
+
+2003-05-04  H.J. Lu <hjl@gnu.org>
+
 	* elflink.h (elf_merge_symbol): Correctly handle weak definiton.
 
 2003-05-04  H.J. Lu <hjl@gnu.org>

@@ -1569,8 +1569,10 @@ allocate_dynrelocs (h, inf)
 	    return FALSE;
 	}
 
-      if (info->shared
-	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
+      if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	   || h->root.type != bfd_link_hash_undefweak)
+	  && (info->shared
+	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h)))
 	{
 	  asection *s = htab->splt;
 
@@ -1656,8 +1658,10 @@ allocate_dynrelocs (h, inf)
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
       else if (tls_type == GOT_TLS_GD)
 	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rel);
-      else if (info->shared
-	       || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+      else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		|| h->root.type != bfd_link_hash_undefweak)
+	       && (info->shared
+		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
     }
   else
@@ -2298,7 +2302,9 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && (info->symbolic
 			  || h->dynindx == -1
 			  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+		  || (ELF_ST_VISIBILITY (h->other)
+		      && h->root.type == bfd_link_hash_undefweak))
 		{
 		  /* This is actually a static link, or it is a
 		     -Bsymbolic link and the symbol is defined
@@ -2422,6 +2428,9 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    break;
 
 	  if ((info->shared
+	       && (h == NULL
+		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || h->root.type != bfd_link_hash_undefweak)
 	       && (r_type != R_386_PC32
 		   || (h != NULL
 		       && h->dynindx != -1

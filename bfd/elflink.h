@@ -4151,6 +4151,16 @@ elf_fix_symbol_flags (h, eif)
       (*bed->elf_backend_hide_symbol) (eif->info, h, force_local);
     }
 
+  /* If a weak undefined symbol has non-default visibility, we also
+     hide it from the dynamic linker.  */
+  if (ELF_ST_VISIBILITY (h->other)
+      && h->root.type == bfd_link_hash_undefweak)
+    {
+      struct elf_backend_data *bed;
+      bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
+      (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
+    }
+
   /* If this is a weak defined symbol in a dynamic object, and we know
      the real definition in the dynamic object, copy interesting flags
      over to the real definition.  */
@@ -6546,7 +6556,9 @@ elf_link_output_extsym (h, data)
      forced local syms when non-shared is due to a historical quirk.  */
   if ((h->dynindx != -1
        || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
-      && (finfo->info->shared
+      && ((finfo->info->shared
+	   && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       || h->root.type != bfd_link_hash_undefweak))
 	  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {

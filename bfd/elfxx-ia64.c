@@ -2635,7 +2635,10 @@ allocate_fptr (dyn_i, data)
 	       || h->root.type == bfd_link_hash_warning)
 	  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      if (x->info->shared
+      if ((x->info->shared
+	   && (!h
+	       || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       || h->root.type != bfd_link_hash_undefweak))
 	  /* AIX needs an FPTR in this case. */
 	  || (elfNN_ia64_aix_vec (x->info->hash->creator)
 	      && (!h
@@ -2760,15 +2763,18 @@ allocate_dynrel_entries (dyn_i, data)
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
   struct elfNN_ia64_link_hash_table *ia64_info;
   struct elfNN_ia64_dyn_reloc_entry *rent;
-  bfd_boolean dynamic_symbol, shared;
+  bfd_boolean dynamic_symbol, shared, resolved_zero;
 
   ia64_info = elfNN_ia64_hash_table (x->info);
   dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
     || (elfNN_ia64_aix_vec (x->info->hash->creator)
 	/* Don't allocate an entry for __GLOB_DATA_PTR */
 	&& (!dyn_i->h || strcmp (dyn_i->h->root.root.string,
-	  "__GLOB_DATA_PTR") != 0));
+				 "__GLOB_DATA_PTR") != 0));
   shared = x->info->shared;
+  resolved_zero = (dyn_i->h
+		   && ELF_ST_VISIBILITY (dyn_i->h->other)
+		   && dyn_i->h->root.type == bfd_link_hash_undefweak);
 
   /* Take care of the normal data relocations.  */
 
@@ -2813,8 +2819,12 @@ allocate_dynrel_entries (dyn_i, data)
 
   /* Take care of the GOT and PLT relocations.  */
 
-  if (((dynamic_symbol || shared) && (dyn_i->want_got || dyn_i->want_gotx))
-      || (dyn_i->want_ltoff_fptr && dyn_i->h && dyn_i->h->dynindx != -1))
+  if ((!resolved_zero
+       && (dynamic_symbol || shared)
+       && (dyn_i->want_got || dyn_i->want_gotx))
+      || (dyn_i->want_ltoff_fptr
+	  && dyn_i->h
+	  && dyn_i->h->dynindx != -1))
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
   if ((dynamic_symbol || shared) && dyn_i->want_tprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
@@ -2823,7 +2833,7 @@ allocate_dynrel_entries (dyn_i, data)
   if (dynamic_symbol && dyn_i->want_dtprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
 
-  if (dyn_i->want_pltoff)
+  if (!resolved_zero && dyn_i->want_pltoff)
     {
       bfd_size_type t = 0;
 
@@ -3431,7 +3441,11 @@ set_got_entry (abfd, info, dyn_i, dynindx, addend, value, dyn_r_type)
       bfd_put_64 (abfd, value, got_sec->contents + got_offset);
 
       /* Install a dynamic relocation if needed.  */
-      if ((info->shared && dyn_r_type != R_IA64_DTPREL64LSB)
+      if ((info->shared
+	   && (!dyn_i->h
+	       || ELF_ST_VISIBILITY (dyn_i->h->other) == STV_DEFAULT
+	       || dyn_i->h->root.type != bfd_link_hash_undefweak)
+	   && dyn_r_type != R_IA64_DTPREL64LSB)
           || elfNN_ia64_dynamic_symbol_p (dyn_i->h, info)
 	  || elfNN_ia64_aix_vec (abfd->xvec)
 	  || (dynindx != -1 && dyn_r_type == R_IA64_FPTR64LSB))
@@ -3552,7 +3566,11 @@ set_pltoff_entry (abfd, info, dyn_i, value, is_plt)
       bfd_put_64 (abfd, gp, pltoff_sec->contents + dyn_i->pltoff_offset + 8);
 
       /* Install dynamic relocations if needed.  */
-      if (!is_plt && info->shared)
+      if (!is_plt
+	  && info->shared
+	  && (!dyn_i->h
+	      || ELF_ST_VISIBILITY (dyn_i->h->other) == STV_DEFAULT
+	      || dyn_i->h->root.type != bfd_link_hash_undefweak))
 	{
 	  unsigned int dyn_r_type;
 

@@ -1,5 +1,10 @@
 2003-05-04  H.J. Lu <hjl@gnu.org>
 
+	* ld-elfvsb/main.c: Updated.
+	* ld-elfvsb/sh1.c: Likewise.
+
+2003-05-04  H.J. Lu <hjl@gnu.org>
+
 	* ld-elfvers/vers18.dsym: Updated for weak definiton change.
 	* ld-elfvers/vers18.ver: Likewise.
 	* ld-elfvers/vers19.ver: Likewise.
