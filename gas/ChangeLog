@@ -1,3 +1,8 @@
+Mon Dec  9 16:48:20 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c: Flesh out assembler support for MN10200.
+	* config/tc-mn10200.h: Likewise.
+
 Mon Dec  9 17:09:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips16_extended_frag): Avoid an infinite loop
