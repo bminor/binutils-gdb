@@ -28,7 +28,7 @@ tooldir = $(exec_prefix)/$(target)
 
 program_transform_name =
 
-datadir = $(prefix)/lib
+datadir = $(prefix)/share
 mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
@@ -142,7 +142,8 @@ OTHERS =
 TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup
 
 # Target libraries are put under this directory:
-TARGET_SUBDIR = . # Changed by configure to $(target_alias) if cross.
+# Changed by configure to $(target_alias) if cross.
+TARGET_SUBDIR = .
 
 # This is set by the configure script to the arguments passed to configure.
 CONFIG_ARGUMENTS = 
