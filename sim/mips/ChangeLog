@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Thu Oct 29 11:06:30 EST 1998  Frank Ch. Eigler <fche@cygnus.com>
+
+	* r5900.igen: Fix PSRLVW, MULTU1, PADSBH instructions,
+	as per customer patch.
+
+end-sanitize-r5900
 Fri Oct  9 18:02:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* interp.c: #include "itable.h" if WITH_IGEN.
