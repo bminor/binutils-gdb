@@ -1128,9 +1128,10 @@ scope.
      N_LSYM, NIL, NIL, NIL
 @end display
 
-@example
-105 .stabs "u_tag:T23=u4u_int:1,0,32;u_float:12,0,32;u_char:21,0,32;;",128,0,0,0
-@end example
+@smallexample
+105 .stabs "u_tag:T23=u4u_int:1,0,32;u_float:12,0,32;u_char:21,0,32;;",
+           128,0,0,0
+@end smallexample
 
 The symbol descriptor, T, following the name: means that the stab
 describes an enumeration struct or type tag.  The type descriptor u,
@@ -1831,12 +1832,18 @@ public:
 Class stabs similar to the ones described earlier are generated for
 each base class.  
 
+@c FIXME!!! the linebreaks in the following example probably make the
+@c examples literally unusable, but I don't know any other way to get
+@c them on the page.
 @smallexample
-.stabs "A:T20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
+.stabs "A:T20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;
+        A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
 
-.stabs "B:Tt25=s8Bdat:1,0,32;$vf25:21,32;B_virt::26=##1;:i;2A*-2147483647;25;;;~%25;",128,0,0,0
+.stabs "B:Tt25=s8Bdat:1,0,32;$vf25:21,32;B_virt::26=##1;
+        :i;2A*-2147483647;25;;;~%25;",128,0,0,0
 
-.stabs "C:Tt28=s8Cdat:1,0,32;$vf28:21,32;C_virt::29=##1;:i;2A*-2147483647;28;;;~%28;",128,0,0,0
+.stabs "C:Tt28=s8Cdat:1,0,32;$vf28:21,32;C_virt::29=##1;
+        :i;2A*-2147483647;28;;;~%28;",128,0,0,0
 @end smallexample
 
 In the stab describing derived class D below, the information about
@@ -1853,8 +1860,12 @@ the derivation of this class is encoded as follows.
 	base_class_type_ref(C); @dots{}
 @end display
 	
+@c FIXME! fake linebreaks.
 @smallexample
-.stabs "D:Tt31=s32!3,000,20;100,25;0264,28;$vb25:24,128;Ddat:1,160,32;A_virt::32=##1;:i;2A*-2147483647;20;;B_virt::32:i;2A*-2147483647;25;;C_virt::32:i;2A*-2147483647;28;;D_virt::32:i;2A*-2147483646;31;;;~%20;",128,0,0,0
+.stabs "D:Tt31=s32!3,000,20;100,25;0264,28;$vb25:24,128;Ddat:
+        1,160,32;A_virt::32=##1;:i;2A*-2147483647;20;;B_virt:
+        :32:i;2A*-2147483647;25;;C_virt::32:i;2A*-2147483647;
+        28;;D_virt::32:i;2A*-2147483646;31;;;~%20;",128,0,0,0
 @end smallexample
 
 @node Virtual Base Classes
@@ -1880,8 +1891,12 @@ name is $vb followed by a type reference to the virtual base class.
 Since the type id for B in this example is 25, the vbase pointer name
 is $vb25.
 
+@c FIXME!! fake linebreaks below
 @smallexample
-.stabs "D:Tt31=s32!3,000,20;100,25;0264,28;$vb25:24,128;Ddat:1,160,32;A_virt::32=##1;:i;2A*-2147483647;20;;B_virt::32:i;2A*-2147483647;25;;C_virt::32:i;2A*-2147483647;28;;D_virt::32:i;2A*-2147483646;31;;;~%20;",128,0,0,0
+.stabs "D:Tt31=s32!3,000,20;100,25;0264,28;$vb25:24,128;Ddat:1,
+       160,32;A_virt::32=##1;:i;2A*-2147483647;20;;B_virt::32:i;
+       2A*-2147483647;25;;C_virt::32:i;2A*-2147483647;28;;D_virt:
+       :32:i;2A*-2147483646;31;;;~%20;",128,0,0,0
 @end smallexample
 
 Following the name and a semicolon is a type reference describing the
@@ -1993,7 +2008,9 @@ description in the class stab shows this ordering.
 27 	.align 4
 28 _s_g_repeat:
 29 	.word 2
-30 .stabs "s_tag:T16=s20s_int:1,0,32;s_float:12,32,32;s_char_vec:17=ar1;0;7;2,64,64;s_next:18=*16,128,32;;",128,0,0,0
+@c FIXME! fake linebreak in line 30
+30 .stabs "s_tag:T16=s20s_int:1,0,32;s_float:12,32,32;s_char_vec:
+           17=ar1;0;7;2,64,64;s_next:18=*16,128,32;;",128,0,0,0
 31 .stabs "s_typedef:t16",128,0,0,0
 32 .stabs "char_vec:G19=ar1;0;2;2",32,0,0,0
 33 	.global _char_vec
@@ -2068,7 +2085,9 @@ description in the class stab shows this ordering.
 102 .stabn 224,0,0,LBE3
 103 .stabn 224,0,0,LBE2
 104 .stabs "e_places:T22=efirst:0,second:3,last:4,;",128,0,0,0
-105 .stabs "u_tag:T23=u4u_int:1,0,32;u_float:12,0,32;u_char:21,0,32;;",128,0,0,0
+@c FIXME: fake linebreak in line 105
+105 .stabs "u_tag:T23=u4u_int:1,0,32;u_float:12,0,32;u_char:21,0,32;;",
+128,0,0,0
 106 	.align 4
 107 	.proc 1
 108 _s_proc:
@@ -2127,7 +2146,7 @@ devo/include/aout/stab.def
 @smallexample
 type   type     #define   used to describe
 dec    hex      name      source program feature
--------------------------------------------------------------------------------
+------------------------------------------------
 32     0x20 	N_GYSM	  global symbol
 34     0X22 	N_FNAME   function name (for BSD Fortran)
 36     0x24    	N_FUN	  function name or text segment variable for C
@@ -2187,7 +2206,7 @@ The #define names for these n_types values are defined in
 @smallexample
 dec	hex	#define
 n_type	n_type  name      used to describe
------------------------------------------------------------------------------
+------------------------------------------
 1	0x0	N_UNDF	  undefined symbol
 2	0x2	N_ABS	  absolute symbol -- defined at a particular address
 3	0x3		extern " (vs. file scope)
@@ -2816,7 +2835,7 @@ fields present in a.out stabs are missing in xcoff stabs.  For N_GSYM
 the value field is the name of the symbol.
 
 @item
-BSD a.out stab types map to AIX xcoff storage classes. In general the
+BSD a.out stab types correspond to AIX xcoff storage classes. In general the
 mapping is N_STABTYPE becomes C_STABTYPE.  Some stab types in a.out
 are not supported in xcoff. See Table E. for full mappings.
 
