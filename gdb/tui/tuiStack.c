@@ -113,7 +113,7 @@ tuiShowLocatorContent (void)
  */
 void
 tuiSetLocatorInfo (char *fname, char *procname, int lineNo,
-                   Opaque addr, TuiLocatorElementPtr element)
+                   CORE_ADDR addr, TuiLocatorElementPtr element)
 {
 #ifdef COMMENT
   /* first free the old info */
@@ -137,7 +137,7 @@ tuiSetLocatorInfo (char *fname, char *procname, int lineNo,
   strcat_to_buf (element->procName, MAX_LOCATOR_ELEMENT_LEN, procname);
 #endif
   element->lineNo = lineNo;
-  element->addr = (Opaque) addr;
+  element->addr = addr;
 
   return;
 }				/* tuiSetLocatorInfo */
@@ -198,7 +198,7 @@ tuiSwitchFilename (char *fileName)
   tuiSetLocatorInfo (fileName,
 		     (char *) NULL,
 		     0,
-		     (Opaque) NULL,
+		     (CORE_ADDR) 0,
 	   &((TuiWinElementPtr) locator->content[0])->whichElement.locator);
 
   tuiShowLocatorContent ();
@@ -251,13 +251,13 @@ tuiUpdateLocatorInfoFromFrame (struct frame_info *frameInfo,
     tuiSetLocatorInfo (symtabAndLine.symtab->filename,
 		       _getFuncNameFromFrame (frameInfo),
 		       symtabAndLine.line,
-		       (Opaque) frameInfo->pc,
+		       frameInfo->pc,
 		       element);
   else
     tuiSetLocatorInfo ((char *) NULL,
 		       _getFuncNameFromFrame (frameInfo),
 		       0,
-		       (Opaque) frameInfo->pc,
+		       frameInfo->pc,
 		       element);
 
   return;
@@ -292,7 +292,7 @@ tuiSetLocatorContent (struct frame_info *frameInfo)
     tuiSetLocatorInfo ((char *) NULL,
 		       (char *) NULL,
 		       0,
-		       (Opaque) NULL,
+		       (CORE_ADDR) 0,
 	   &((TuiWinElementPtr) locator->content[0])->whichElement.locator);
   return;
 }				/* tuiSetLocatorContent */
@@ -354,7 +354,7 @@ tuiShowFrameInfo (struct frame_info *fi)
 	      if (find_pc_partial_function (fi->pc, (char **) NULL, &low, (CORE_ADDR) NULL) == 0)
 		error ("No function contains program counter for selected frame.\n");
 	      else
-		low = (CORE_ADDR) tuiGetLowDisassemblyAddress ((Opaque) low, (Opaque) fi->pc);
+		low = tuiGetLowDisassemblyAddress (low, fi->pc);
 	    }
 
 	  if (winInfo == srcWin)

@@ -58,7 +58,7 @@ static void _tuiToggleLayout_command (char *, int);
 static void _tui_vToggleLayout_command (va_list);
 static void _tuiToggleSplitLayout_command (char *, int);
 static void _tui_vToggleSplitLayout_command (va_list);
-static Opaque _extractDisplayStartAddr (void);
+static CORE_ADDR _extractDisplayStartAddr (void);
 static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
 static TuiStatus _tuiSetLayoutTo (char *);
 
@@ -152,7 +152,7 @@ tuiSetLayout (TuiLayoutType layoutType,
     {
       TuiLayoutType curLayout = currentLayout (), newLayout = UNDEFINED_LAYOUT;
       int regsPopulate = FALSE;
-      Opaque addr = _extractDisplayStartAddr ();
+      CORE_ADDR addr = _extractDisplayStartAddr ();
       TuiWinInfoPtr newWinWithFocus = (TuiWinInfoPtr) NULL, winWithFocus = tuiWinWithFocus ();
       TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
 
@@ -581,11 +581,11 @@ _tuiSetLayoutTo (char *layoutName)
 }				/* _tuiSetLayoutTo */
 
 
-static Opaque
+static CORE_ADDR
 _extractDisplayStartAddr (void)
 {
   TuiLayoutType curLayout = currentLayout ();
-  Opaque addr;
+  CORE_ADDR addr;
   CORE_ADDR pc;
 
   switch (curLayout)
@@ -595,7 +595,7 @@ _extractDisplayStartAddr (void)
       find_line_pc (current_source_symtab,
 		    srcWin->detail.sourceInfo.startLineOrAddr.lineNo,
 		    &pc);
-      addr =(Opaque) pc;
+      addr = pc;
       break;
     case DISASSEM_COMMAND:
     case SRC_DISASSEM_COMMAND:
@@ -603,7 +603,7 @@ _extractDisplayStartAddr (void)
       addr = disassemWin->detail.sourceInfo.startLineOrAddr.addr;
       break;
     default:
-      addr = (Opaque) NULL;
+      addr = 0;
       break;
     }
 

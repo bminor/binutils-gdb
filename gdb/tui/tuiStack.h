@@ -25,7 +25,7 @@
    ** This header file supports
  */
 
-extern void tuiSetLocatorInfo (char *, char *, int, Opaque,
+extern void tuiSetLocatorInfo (char *, char *, int, CORE_ADDR,
 			       TuiLocatorElementPtr);
 extern void tuiUpdateLocatorFilename (char *);
 extern void tui_vUpdateLocatorFilename (va_list);

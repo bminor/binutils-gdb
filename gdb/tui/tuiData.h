@@ -142,7 +142,7 @@ TuiRegisterDisplayType, *TuiRegisterDisplayTypePtr;
 typedef union _TuiLineOrAddress
   {
     int lineNo;
-    Opaque addr;
+    CORE_ADDR addr;
   }
 TuiLineOrAddress, *TuiLineOrAddressPtr;
 
@@ -195,7 +195,7 @@ typedef struct _TuiLocatorElement
     char fileName[MAX_LOCATOR_ELEMENT_LEN];
     char procName[MAX_LOCATOR_ELEMENT_LEN];
     int lineNo;
-    Opaque addr;
+    CORE_ADDR addr;
   }
 TuiLocatorElement, *TuiLocatorElementPtr;
 

@@ -31,11 +31,11 @@
 /*****************************************
 ** PUBLIC FUNCTION EXTERNAL DECLS        **
 ******************************************/
-extern TuiStatus tuiSetDisassemContent (struct symtab *, Opaque);
-extern void tuiShowDisassem (Opaque);
+extern TuiStatus tuiSetDisassemContent (struct symtab *, CORE_ADDR);
+extern void tuiShowDisassem (CORE_ADDR);
 extern void tuiShowDisassemAndUpdateSource (Opaque);
 extern void tuiVerticalDisassemScroll (TuiScrollDirection, int);
-extern Opaque tuiGetBeginAsmAddress (void);
+extern CORE_ADDR tuiGetBeginAsmAddress (void);
 
 #endif
 /*_TUI_DISASSEM_H*/

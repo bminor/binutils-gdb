@@ -27,7 +27,7 @@ extern void tuiUpdateSourceWindow (TuiWinInfoPtr, struct symtab *, Opaque,
 				   int);
 extern void tuiUpdateSourceWindowAsIs (TuiWinInfoPtr, struct symtab *, Opaque,
 				       int);
-extern void tuiUpdateSourceWindowsWithAddr (Opaque);
+extern void tuiUpdateSourceWindowsWithAddr (CORE_ADDR);
 extern void tui_vUpdateSourceWindowsWithAddr (va_list);
 extern void tuiUpdateSourceWindowsWithLine (struct symtab *, int);
 extern void tui_vUpdateSourceWindowsWithLine (va_list);

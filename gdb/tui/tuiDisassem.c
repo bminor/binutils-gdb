@@ -49,12 +49,12 @@ static struct breakpoint *_hasBreak (CORE_ADDR);
    **        Function to set the disassembly window's content.
  */
 TuiStatus
-tuiSetDisassemContent (struct symtab *s, Opaque startAddr)
+tuiSetDisassemContent (struct symtab *s, CORE_ADDR startAddr)
 {
   TuiStatus ret = TUI_FAILURE;
   struct ui_file *gdb_dis_out;
 
-  if (startAddr != (Opaque) NULL)
+  if (startAddr != 0)
     {
       register int i, desc;
 
@@ -83,7 +83,7 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
 	  disassemWin->detail.sourceInfo.startLineOrAddr.addr = startAddr;
 
 	  /* Now construct each line */
-	  for (curLine = 0, pc = (CORE_ADDR) startAddr; (curLine < maxLines);)
+	  for (curLine = 0, pc = startAddr; (curLine < maxLines);)
 	    {
 	      TuiWinElementPtr element = (TuiWinElementPtr) disassemWin->generic.content[curLine];
 	      struct breakpoint *bp;
@@ -142,9 +142,9 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
    **        Function to display the disassembly window with disassembled code.
  */
 void
-tuiShowDisassem (Opaque startAddr)
+tuiShowDisassem (CORE_ADDR startAddr)
 {
-  struct symtab *s = find_pc_symtab ((CORE_ADDR) startAddr);
+  struct symtab *s = find_pc_symtab (startAddr);
   TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
 
   tuiAddWinToLayout (DISASSEM_WIN);
@@ -165,7 +165,7 @@ tuiShowDisassem (Opaque startAddr)
    **        Function to display the disassembly window.
  */
 void
-tuiShowDisassemAndUpdateSource (Opaque startAddr)
+tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
 {
   struct symtab_and_line sal;
 
@@ -177,7 +177,7 @@ tuiShowDisassemAndUpdateSource (Opaque startAddr)
          ** Update what is in the source window if it is displayed too,
          ** note that it follows what is in the disassembly window and visa-versa
        */
-      sal = find_pc_line ((CORE_ADDR) startAddr, 0);
+      sal = find_pc_line (startAddr, 0);
       current_source_symtab = sal.symtab;
       tuiUpdateSourceWindow (srcWin, sal.symtab, (Opaque) sal.line, TRUE);
       tuiUpdateLocatorFilename (sal.symtab->filename);
@@ -211,24 +211,24 @@ tuiShowDisassemAsIs (Opaque addr)
 /*
    ** tuiGetBeginAsmAddress().
  */
-Opaque
+CORE_ADDR
 tuiGetBeginAsmAddress (void)
 {
   TuiGenWinInfoPtr locator;
   TuiLocatorElementPtr element;
-  Opaque addr;
+  CORE_ADDR addr;
 
   locator = locatorWinInfoPtr ();
   element = &((TuiWinElementPtr) locator->content[0])->whichElement.locator;
 
-  if (element->addr == (Opaque) 0)
+  if (element->addr == 0)
     {
       /*the target is not executing, because the pc is 0 */
 
-      addr = (Opaque) parse_and_eval_address ("main");
+      addr = parse_and_eval_address ("main");
 
-      if (addr == (Opaque) 0)
-	addr = (Opaque) parse_and_eval_address ("MAIN");
+      if (addr == 0)
+	addr = parse_and_eval_address ("MAIN");
 
     }
   else				/* the target is executing */

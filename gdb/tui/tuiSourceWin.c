@@ -28,6 +28,8 @@
 #include "tui.h"
 #include "tuiData.h"
 #include "tuiStack.h"
+#include "tuiWin.h"
+#include "tuiGeneralWin.h"
 #include "tuiSourceWin.h"
 #include "tuiSource.h"
 #include "tuiDisassem.h"
@@ -93,13 +95,13 @@ tuiDisplayMainFunction (void)
       CORE_ADDR addr;
 
       addr = parse_and_eval_address ("main");
-      if (addr <= (CORE_ADDR) 0)
+      if (addr == (CORE_ADDR) 0)
 	addr = parse_and_eval_address ("MAIN");
-      if (addr > (CORE_ADDR) 0)
+      if (addr != (CORE_ADDR) 0)
 	{
 	  struct symtab_and_line sal;
 
-	  tuiUpdateSourceWindowsWithAddr ((Opaque) addr);
+	  tuiUpdateSourceWindowsWithAddr (addr);
 	  sal = find_pc_line (addr, 0);
 	  tuiSwitchFilename (sal.symtab->filename);
 	}
@@ -178,9 +180,9 @@ tuiUpdateSourceWindowAsIs (TuiWinInfoPtr winInfo, struct symtab *s,
    **        reflect the input address.
  */
 void
-tuiUpdateSourceWindowsWithAddr (Opaque addr)
+tuiUpdateSourceWindowsWithAddr (CORE_ADDR addr)
 {
-  if (addr > (Opaque) NULL)
+  if (addr != 0)
     {
       struct symtab_and_line sal;
 
@@ -194,10 +196,8 @@ tuiUpdateSourceWindowsWithAddr (Opaque addr)
 	  tuiShowDisassemAndUpdateSource (addr);
 	  break;
 	default:
-	  sal = find_pc_line ((CORE_ADDR) addr, 0);
-	  tuiShowSource (sal.symtab,
-			 (Opaque) sal.line,
-			 FALSE);
+	  sal = find_pc_line (addr, 0);
+	  tuiShowSource (sal.symtab, sal.line, FALSE);
 	  break;
 	}
     }
@@ -248,14 +248,14 @@ tuiUpdateSourceWindowsWithLine (struct symtab *s, int line)
     case DISASSEM_COMMAND:
     case DISASSEM_DATA_COMMAND:
       find_line_pc (s, line, &pc);
-      tuiUpdateSourceWindowsWithAddr ((Opaque) pc);
+      tuiUpdateSourceWindowsWithAddr (pc);
       break;
     default:
-      tuiShowSource (s, (Opaque) line, FALSE);
+      tuiShowSource (s, line, FALSE);
       if (currentLayout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);
-	  tuiShowDisassem ((Opaque) pc);
+	  tuiShowDisassem (pc);
 	}
       break;
     }
@@ -527,7 +527,7 @@ tuiSetHasBreakAt (struct breakpoint *bp, TuiWinInfoPtr winInfo, int hasBreak)
 	}
       else
 	gotIt = (content[i]->whichElement.source.lineOrAddr.addr
-		 == (Opaque) bp->address);
+		 == bp->address);
       if (gotIt)
 	{
 	  content[i]->whichElement.source.hasBreak = hasBreak;
