@@ -111,6 +111,13 @@ main(argc, argv)
 	case 'z':
 	    zflag = TRUE;
 	    break;
+	default:
+	    fprintf (stderr, "usage:  gproff [-a] [-b] [-c] [-d[num]] \
+[-E function-name] [-e function-name] \
+[-F function-name] [-f function-name] \
+[-k from to] [-s] [-T] [-z] [image-file] \
+[profile file]\n");
+	    exit (1);
 	}
 	argv++;
     }
