@@ -1,3 +1,20 @@
+2003-03-31  David Heine  <dlheine@suif.stanford.edu>
+
+	* aoutx.h (aout_link_hash_table_create): Use bfd_malloc instead of
+	bfd_alloc.
+	* dwarf2.c (concat_filename): Always allocate space for the
+	returned filename.
+	(decode_line_info): Free the allocated filename returned by
+	concat_filename.
+	* elf-eh-frame.c (bfd_elf_write_section_eh_frame): Fix memory leaks.
+	* elf.c (copy_private_bfd_data): Likewise.
+	(_bfd_elf_slurp_version_tables): Fix bug freeing contents pointer.
+	* elflink.h (elf_link_sort_relocs): Fix memory leak.
+	* format.c (bfd_check_format_matches): Likewise.
+	* linker.c (bfd_generic_final_link): Likewise.
+	* opncls.c (find_separate_debug_info): Likewise.
+	* simple.c (bfd_simple_get_relocated_section_contents): Likewise.
+	
 2003-03-28  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_object_symbols): Correctly combine

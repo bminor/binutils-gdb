@@ -672,22 +672,25 @@ set_scripts_dir ()
 {
   char *end, *dir;
   size_t dirlen;
+  bfd_boolean found;
 
   dir = make_relative_prefix (program_name, BINDIR, SCRIPTDIR);
-  if (dir && check_for_scripts_dir (dir))
-    /* Success.  Don't free dir.  */
-    return;
-
   if (dir)
-    free (dir);
+    {
+      found = check_for_scripts_dir (dir);
+      free (dir);
+      if (found)
+	return;
+    }
 
   dir = make_relative_prefix (program_name, TOOLBINDIR, SCRIPTDIR);
-  if (dir && check_for_scripts_dir (dir))
-    /* Success.  Don't free dir.  */
-    return;
-
   if (dir)
-    free (dir);
+    {
+      found = check_for_scripts_dir (dir);
+      free (dir);
+      if (found)
+	return;
+    }
 
   if (check_for_scripts_dir (SCRIPTDIR))
     /* We've been installed normally.  */
@@ -718,15 +721,14 @@ set_scripts_dir ()
   dir[dirlen] = '\0';
 
   if (check_for_scripts_dir (dir))
-    /* Don't free dir.  */
-    return;
+    {
+      free (dir);
+      return;
+    }
 
   /* Look for "ldscripts" in <the dir where our binary is>/../lib.  */
   strcpy (dir + dirlen, "/../lib");
-  if (check_for_scripts_dir (dir))
-    return;
-
-  /* Well, we tried.  */
+  check_for_scripts_dir (dir);
   free (dir);
 }
 
@@ -832,6 +834,7 @@ add_keepsyms_file (filename)
   if (link_info.strip != strip_none)
     einfo (_("%P: `-retain-symbols-file' overrides `-s' and `-S'\n"));
 
+  free (buf);
   link_info.strip = strip_some;
 }
 

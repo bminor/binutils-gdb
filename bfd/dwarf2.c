@@ -1,5 +1,5 @@
 /* DWARF 2 support.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
@@ -911,6 +911,9 @@ add_line_info (table, address, filename, line, column, end_sequence)
   info->end_sequence = end_sequence;
 }
 
+/* Extract a fully qualified filename from a line info table.
+   The returned string has been xmalloc'ed.  */
+
 static char *
 concat_filename (table, file)
      struct line_info_table* table;
@@ -922,12 +925,13 @@ concat_filename (table, file)
     {
       (*_bfd_error_handler)
 	(_("Dwarf Error: mangled line number section (bad file number)."));
-      return "<unknown>";
+      return concat ("<unknown>");
     }
 
   filename = table->files[file - 1].name;
-  if (IS_ABSOLUTE_PATH(filename))
-    return filename;
+
+  if (IS_ABSOLUTE_PATH (filename))
+    return concat (filename);
   else
     {
       char* dirname = (table->files[file - 1].dir
@@ -937,9 +941,9 @@ concat_filename (table, file)
       /* Not all tools set DW_AT_comp_dir, so dirname may be unknown.  The
 	 best we can do is return the filename part.  */
       if (dirname == NULL)
-	return filename;
+	return concat (filename);
       else
-	return (char*) concat (dirname, "/", filename, NULL);
+	return concat (dirname, "/", filename, NULL);
     }
 }
 
@@ -1272,6 +1276,7 @@ decode_line_info (unit, stash)
 		   based, the references are 1 based.  */
 		file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 		line_ptr += bytes_read;
+		free (filename);
 		filename = concat_filename (table, file);
 		break;
 	      }
@@ -1296,6 +1301,7 @@ decode_line_info (unit, stash)
 	    default:
 	      {
 		int i;
+
 		/* Unknown standard opcode, ignore it.  */
 		for (i = 0; i < lh.standard_opcode_lengths[op_code]; i++)
 		  {
@@ -1305,6 +1311,8 @@ decode_line_info (unit, stash)
 	      }
 	    }
 	}
+
+      free (filename);
     }
 
   return table;

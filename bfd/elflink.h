@@ -4855,6 +4855,7 @@ elf_link_sort_relocs (abfd, info, psec)
 	  }
       }
 
+  free (sort);
   *psec = reldyn;
   return ret;
 }

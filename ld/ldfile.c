@@ -106,32 +106,38 @@ is_sysrooted_pathname (name, notsame)
   return result;
 }
 
+/* Adds NAME to the library search path.
+   Makes a copy of NAME using xmalloc().  */
+
 void
 ldfile_add_library_path (name, cmdline)
      const char *name;
      bfd_boolean cmdline;
 {
   search_dirs_type *new;
+  char *newname;
 
   if (!cmdline && config.only_cmd_line_lib_dirs)
     return;
 
   new = (search_dirs_type *) xmalloc (sizeof (search_dirs_type));
   new->next = NULL;
-  new->name = name;
   new->cmdline = cmdline;
   *search_tail_ptr = new;
   search_tail_ptr = &new->next;
 
   /* If a directory is marked as honoring sysroot, prepend the sysroot path
      now.  */
-  if (new->name[0] == '=')
+  if (name[0] == '=')
     {
-      new->name = concat (ld_sysroot, &new->name[1], NULL);
+      new->name = concat (ld_sysroot, name + 1, NULL);
       new->sysrooted = TRUE;
     }
   else
-    new->sysrooted = is_sysrooted_pathname (new->name, FALSE);
+    {
+      new->name = xstrdup (name);
+      new->sysrooted = is_sysrooted_pathname (name, FALSE);
+    }
 }
 
 /* Try to open a BFD for a lang_input_statement.  */

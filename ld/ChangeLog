@@ -1,3 +1,15 @@
+2003-03-31  David Heine  <dlheine@suif.stanford.edu>
+
+	* ldfile.c (ldfile_add_library_path): Always allocate space for
+	the filename.
+	* ldlang.c (lang_register_vers_node): Free the node if it cannot
+	be used.
+	* ldmain.c (set_scripts_dir): Always free the constructed
+	directory name.
+	(add_keepsyms_file): Fix memory leak.
+	* ldmisc.c (vfinfo): Likewise.
+	* lexsup.c (parse_args): Likewise	
+
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 	    

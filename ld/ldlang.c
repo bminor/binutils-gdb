@@ -5276,6 +5276,7 @@ lang_register_vers_node (name, version, deps)
       || (lang_elf_version_info && lang_elf_version_info->name[0] == '\0'))
     {
       einfo (_("%X%P: anonymous version tag cannot be combined with other version tags\n"));
+      free (version);
       return;
     }
 

@@ -1,5 +1,5 @@
 /* simple.c -- BFD simple client routines
-   Copyright 2002
+   Copyright 2002, 2003
    Free Software Foundation, Inc.
    Contributed by MontaVista Software, Inc.
 
@@ -135,7 +135,7 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
   struct bfd_link_order link_order;
   struct bfd_link_callbacks callbacks;
   bfd_byte *contents, *data;
-  int storage_needed, number_of_symbols;
+  int storage_needed;
   asymbol **symbol_table;
 
   if (! (sec->flags & SEC_RELOC))
@@ -187,7 +187,7 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
 
   storage_needed = bfd_get_symtab_upper_bound (abfd);
   symbol_table = (asymbol **) bfd_malloc (storage_needed);
-  number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+  bfd_canonicalize_symtab (abfd, symbol_table);
 
   contents = bfd_get_relocated_section_contents (abfd,
 						 &link_info,
@@ -208,5 +208,6 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
 
   bfd_link_hash_table_free (abfd, link_info.hash);
 
+  free (symbol_table);
   return contents;
 }

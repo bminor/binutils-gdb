@@ -1116,6 +1116,8 @@ parse_args (argc, argv)
 	case 'Y':
 	  if (strncmp (optarg, "P,", 2) == 0)
 	    optarg += 2;
+	  if (default_dirlist != NULL)
+	    free (default_dirlist);
 	  default_dirlist = xstrdup (optarg);
 	  break;
 	case 'y':
@@ -1193,8 +1195,10 @@ parse_args (argc, argv)
     lang_leave_group ();
 
   if (default_dirlist != NULL)
-    set_default_dirlist (default_dirlist);
-
+    {
+      set_default_dirlist (default_dirlist);
+      free (default_dirlist);
+    }
 }
 
 /* Add the (colon-separated) elements of DIRLIST_PTR to the
