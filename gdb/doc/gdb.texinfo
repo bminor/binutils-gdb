@@ -169,14 +169,16 @@ INTERACTION: GDB now uses the GNU @code{readline} interface to read its
 input; this provides inline editing of commands, using the familiar
 Emacs or VI keymaps, and command-history support. The user interface
 to GDB's control variables has been simplified and consolidated in two
-commands, @samp{set} and @samp{show}. 
+commands, @samp{set} and @samp{show}.  Output lines are now broken at
+readable places, rather than overflowing onto the next line.
 
 @item
 SOURCE LANGUAGE: GDB now understands C++ source as well as C. Multiple
 inheritance is supported when used with G++ 2.0. There is also limited
 support for C++ exception handling: GDB can break when an exception is
 raised, before the stack is peeled back to the exception handler's
-context.
+context.  You can suppress output of machine-level addresses,
+displaying only source language information.
 
 @item
 PORTS: GDB has been ported to the following new architectures: 
@@ -714,6 +716,11 @@ the termcap data base together with the value of the @code{TERM}
 environment variable and the @code{stty rows} and @code{stty cols}
 settings. If this is not correct, you can override it with
 the @samp{set screen-height} and @samp{set screen-width} commands:
+
+GDB also uses the screen width setting to determine when to wrap lines
+of output.  Depending what is being printed, it tries to break the
+line at a readable place, rather than simply letting it overflow onto
+the following line.
 
 @table @code
 @item set screen-height @var{lpp}
@@ -2777,7 +2784,7 @@ after you had printed it out.)
 @section Format options
 
 @cindex format options
-GDB provides a few ways to control how arrays and structures are
+GDB provides a few ways to control how arrays, structures, and symbols are
 printed.  
 
 @table @code
@@ -2806,6 +2813,29 @@ Return to compressed format for arrays.
 Show whether compressed or pretty format is selected for displaying
 arrays. 
 
+@item set demangle 
+@itemx set demangle on 
+@kindex set demangle
+Print C++ names in their source form rather than in the mangled form
+in which they are passed to the assembler and linker for type-safe linkage.
+The default is on.
+
+@item show demangle
+@kindex show demangle
+Show whether C++ names will be printed in mangled or demangled form.
+
+@item set asm-demangle 
+@itemx set asm-demangle on 
+@kindex set asm-demangle
+Print C++ names in their source form rather than their mangled form, even
+in assembler code printouts such as instruction disassemblies.
+The default is off.
+
+@item show asm_demangle
+@kindex show asm_demangle
+Show whether C++ names in assembly listings will be printed in mangled
+or demangled form.
+
 @item set vtblprint 
 @itemx set vtblprint on 
 @kindex set vtblprint
@@ -2821,8 +2851,8 @@ Show whether C++ virtual function tables are pretty printed, or not.
 @item set addressprint
 @item set addressprint on
 @kindex set addressprint
-GDB will print memory addresses in stack traces and structure values.
-The default is on.
+GDB will print memory addresses in stack traces, structure values, pointer
+values, breakpoints, etc.  The default is on.
 
 @item set addressprint off
 Do not print addresses.
