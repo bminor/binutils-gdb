@@ -1,3 +1,9 @@
+Mon Apr 21 15:05:42 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/a2-run.exp: Add arm-*-coff setup_xfails for cases
+	where the test executable is run with explicit args.
+	* gdb.base/default.exp: Handle arm-*-coff case for "info float".
+
 Mon Apr 21 13:38:58 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/run.c: Use FAKEARGV to build test executable that
