@@ -1,5 +1,8 @@
 2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* d10v-dis.c (print_operand): Apply REGISTER_MASK to `num' of
+	unmatched register.
+
 	* d10v-dis.c (print_operand): Disregard OPERAND_SP in register
 	predefined value.
 

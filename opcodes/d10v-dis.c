@@ -145,7 +145,7 @@ print_operand (oper, insn, op, memaddr, info)
 	    (*info->fprintf_func) (info->stream, "cr");
 	  else if (oper->flags & OPERAND_REG)
 	    (*info->fprintf_func) (info->stream, "r");
-	  (*info->fprintf_func) (info->stream, "%d", num);
+	  (*info->fprintf_func) (info->stream, "%d", num & REGISTER_MASK);
 	}
     }
   else
