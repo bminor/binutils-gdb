@@ -3,122 +3,151 @@
 
 *** Changes in GDB-4.7:
 
- * New native hosts
+ * Host/native/target split
 
-some 386 support
+GDB has had some major internal surgery to untangle the support for
+hosts and remote targets.  Now, when you configure GDB for a remote
+target, it will no longer load in all of the support for debugging
+local programs on the host.  When fully completed and tested, this will
+ensure that arbitrary host/target combinations are possible.
 
- * New cross target hosts
+The primary conceptual shift is to separate the non-portable code in
+GDB into three categories.  Host specific code is required any time GDB
+is compiled on that host, regardless of the target.  Target specific
+code relates to the peculiarities of the target, but can be compiled on
+any host.  Native specific code is everything else:  it can only be
+built when the host and target are the same system.  Child process
+handling and core file support are two common `native' examples.
 
-HP/Apollo 68k (under the BSD domain)
+GDB's use of /proc for controlling Unix child processes is now cleaner.
+It has been split out into a single module under the `target_ops' vector,
+plus two native-dependent functions for each system that uses /proc.
 
- * New cross targets
+ * New hosts supported
 
-Fujitsu SparcLite - This is a Sparc without floating-point intended for
-imbedded applications.
+HP/Apollo 68k (under the BSD domain)	m68k-apollo-bsd  or  apollo68bsd
+386 CPUs running various BSD ports	i386-unknown-bsd  or  386bsd
+386 CPUs running SCO Unix		i386-unknown-scosysv322  or  i386sco
 
- * G++/C++ support
+ * New targets supported
 
-As always, G++ support keeps on impoving.  We now deal with Cfront style
-name mangling, and can even extract type info from mangled symbols.
+Fujitsu SPARClite 			sparclite-fujitsu-none  or  sparclite
+68030 and CPU32				m68030-*-*, m68332-*-*
 
-Calling of virtual functions and inferior methods has been improved as well.
+ * New native hosts supported
 
-GDB can now automatically figure out which symbol mangling style your C++
-compiler uses.
+386 CPUs running various BSD ports	i386-unknown-bsd  or  386bsd
+    (386bsd is not well tested yet)
+386 CPUs running SCO Unix		i386-unknown-scosysv322  or  sco
+
+ * New file formats supported
+
+BFD now supports COFF files for the Zilog Z8000 microprocessor.  It
+supports reading of `a.out.adobe' object files, which are an a.out
+format extended with minimal information about multiple sections.
+
+ * New commands
+
+`show copying' is the same as the old `info copying'.
+`show warranty' is the same as `info warrantee'.
+These were renamed for consistency.  The old commands continue to work.
+
+`info handle' is a new alias for `info signals'.
+
+You can now define pre-command hooks, which attach arbitrary command
+scripts to any command.  The commands in the hook will be executed
+prior to the user's command.  You can also create a hook which will be
+executed whenever the program stops.  See gdb.texinfo.
+
+ * C++ improvements
+
+We now deal with Cfront style name mangling, and can even extract type
+info from mangled symbols.  GDB can automatically figure out which
+symbol mangling style your C++ compiler uses.
+
+Calling of methods and virtual functions has been improved as well.
 
  * Major bug fixes
 
-The crash that was occuring when debugging Sun Ansi-C compiled binaries has
-been fixed.  This was due mishandling of the extra SO stabs that the
-compiler was outputting.
+The crash that occured when debugging Sun Ansi-C compiled binaries is
+fixed.  This was due to mishandling of the extra N_SO stabs output
+by the compiler.
 
-We also finally got Ultrix 4.2 up and running in house, and were able to
-really fix core file support!
+We also finally got Ultrix 4.2 running in house, and fixed core file
+support, with help from a dozen people on the net.
 
-It was discovered that the reason that single-stepping was so slow on all
-of the Mips based platforms (primarily SGI and DEC) was that we were trying
-to demangle and lookup a symbol used for internal purposes on every instruction
-that was being stepped through.  Changing the name of that symbol so that it
-couldn't be mistaken for a C++ mangled symbol sped things up a great deal.
+John M. Farrell discovered that the reason that single-stepping was so
+slow on all of the Mips based platforms (primarily SGI and DEC) was
+that we were trying to demangle and lookup a symbol used for internal
+purposes on every instruction that was being stepped through.  Changing
+the name of that symbol so that it couldn't be mistaken for a C++
+mangled symbol sped things up a great deal.
 
-We also sped up symbol lookups in general by getting much smarter about
-when symbol mangling was necessary.
+Rich Pixley sped up symbol lookups in general by getting much smarter
+about when C++ symbol mangling is necessary.  This should make symbol
+completion (TAB on the command line) much faster.  It's not as fast as
+we'd like, but it's significantly faster than gdb-4.6.
 
- * 29k support
+ * AMD 29k support
 
-A bunch of work has been done to improve the general 29k support.  In
-particular, a new user controllable variable 'call_scratch_address' can be
-used to specify the location of a scratch area to be used when GDB needs to
-call a function in the target.  This was necessary because the usual method
-of putting the scratch area on the stack was not feasible for systems that
-have seperate instruction and data spaces.
+A new user controllable variable 'call_scratch_address' can
+specify the location of a scratch area to be used when GDB
+calls a function in the target.  This is necessary because the
+usual method of putting the scratch area on the stack does not work
+in systems that have separate instruction and data spaces.
 
-We also did a bunch of work on the 29k UDI (Universal Debugger Interface)
-code, but at the last minute we discovered that we didn't have all of the
-appropriate copyright paperwork, and had to yank it all out.  We are working
-with AMD to resolve this, and hope to have it available soon.
+We integrated changes to support the 29k UDI (Universal Debugger
+Interface), but discovered at the last minute that we didn't have all
+of the appropriate copyright paperwork.  We are working with AMD to
+resolve this, and hope to have it available soon.
 
- * Remote stuff
+ * Remote interfaces
 
-We have made some improvements in the remote serial line protocol which should
-speed up things a great deal (especially for targets with lots of registers).
-The remote code now supports a new `expedited status' ('T') message which
-replaces the old 'S' status message.  This message has a much more flexible
-format which allows the remote stub to send an arbitrary set of registers
-whenever the stub takes control.  This greatly speeds up stepping, as the
-stub can supply only the registers GDB requires during this process.  It
-eliminates the need to fetch the entire register set for each instruction being
-stepped through.
+We have sped up the remote serial line protocol, especially for targets
+with lots of registers.  It now supports a new `expedited status' ('T')
+message which can be used in place of the existing 'S' status message.
+This allows the remote stub to send only the registers that GDB
+needs to make a quick decision about single-stepping or conditional
+breakpoints, eliminating the need to fetch the entire register set for
+each instruction being stepped through.
 
-GDB was also made a bit smarter about reading registers from the target.  It
-now makes much more use of the cache.  In effect, it now implements a
-write-through cache, and only reads the registers when if the target has run.
+The GDB remote serial protocol now implements a write-through cache for
+registers, only re-reading the registers if the target has run.
 
-There is also a new remote stub for Sparc processors.  You can find it in
-gdb-4.7/gdb/sparc-stub.c.  This was written to support the SparcLite product,
-but actually contains no SparcLite specific code.  It should run on any
-stand-alone Sparc processor with a serial port that can be dedicated to GDB
-for remote debugging.
+There is also a new remote serial stub for SPARC processors.  You can
+find it in gdb-4.7/gdb/sparc-stub.c.  This was written to support the
+Fujitsu SPARClite processor, but will run on any stand-alone SPARC
+processor with a serial port.
 
- * Host/native/target split
+ * Configuration
 
-GDB has had some major internal surgery recently in order to untangle some
-of the mess related to supporting hosts and remote targets.  Now, when you
-configure GDB for a remote target, it may no longer load in all of the host
-support for debugging local programs.  This means that if you make a GDB to
-debug a remote vxWorks target from a Sun4 host, you will no longer get
-ptrace() or Sun4 core file support.  This surgery was necessary to ensure
-that arbitrary host/target combinations were possible.  In particular, it
-makes it much more practical to build new configurations for remote targets
-that in the past were only hosts.
+Configure.in files have become much easier to read and modify.  A new
+`table driven' format makes it more obvious what configurations are
+supported, and what files each one uses.
 
-The primary concept behind the detanglement was to seperate the code into
-one of three categories.  The host category is for code that is host
-specific, and can only be compiled for a particular host configuration.
-The target category is for code which is target specific, but can be
-compiled on any host.  The native category is for the situation where the
-host and target are the same system (this usually means that you are going
-to debug an inferior process).
+ * Library changes
 
- * General
+There is a new opcodes library which will eventually contain all of the
+disassembly routines and opcode tables.  At present, it only contains
+Sparc and Z8000 routines.  This will allow the assembler, debugger, and
+disassembler (binutils/objdump) to share these routines.
 
-There is a new opcodes library which will contain all of the disassembly
-routines, and opcode tables at some point in the future.  At present, it
-only contains Sparc and Z8000 routines.  This was done in order to get the
-assembler and the debugger to share these routines.
+The libiberty library is now copylefted under the GNU Library General
+Public License.  This allows more liberal use, and was done so libg++
+can use it.  This makes no difference to GDB, since the Library License
+grants all the rights from the General Public License.
 
-The file gdb-4.7/gdb/doc/stabs.texinfo is a (relatively) complete reference
-to the stabs symbol info used by the debugger.  It is (as far as we know)
-the only published document on this fascinating topic.
+ * Documentation
 
-There are now pre-command hooks that are used to attach arbitrary commands
-to any command.  The commands in the hook will be executed prior to the
-users command.  You can creat a hook which will be executed whenever the
-program stops.
-
-BFD now supports the Zilog Z8000 microprocessor.
+The file gdb-4.7/gdb/doc/stabs.texinfo is a (relatively) complete
+reference to the stabs symbol info used by the debugger.  It is (as far
+as we know) the only published document on this fascinating topic.  We
+encourage you to read it, compare it to the stabs information on your
+system, and send improvements on the document in general (to
+bug-gdb@prep.ai.mit.edu).
 
 And, of course, many bugs have been fixed.
+
 
 *** Changes in GDB-4.6:
 
