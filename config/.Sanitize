@@ -28,6 +28,7 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 tmake-a29k
+hmake-dgux
 
 Do-last:
 
@@ -36,7 +37,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 17:05:04  rich
+# Revision 1.2  1991/06/14 22:21:28  steve
+# *** empty log message ***
+#
+# Revision 1.1  1991/05/23  17:05:04  rich
 # Initial revision
 #
 #
