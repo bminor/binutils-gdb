@@ -1,3 +1,8 @@
+Fri Nov 27 17:51:38 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elflink.h (compute_bucket_count): Don't allow minsize==0, it
+	causes division by zero later on.
+
 Thu Nov 26 11:19:35 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* elf32-fr30.c (fr30_elf_pc9_reloc,fr30_elf_pc12_reloc): Not

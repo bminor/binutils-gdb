@@ -2259,6 +2259,8 @@ compute_bucket_count (info)
 	 that the hashing table must at least have NSYMS/4 and at most
 	 2*NSYMS buckets.  */
       minsize = nsyms / 4;
+      if (minsize == 0)
+	minsize = 1;
       best_size = maxsize = nsyms * 2;
 
       /* Create array where we count the collisions in.  We must use bfd_malloc
