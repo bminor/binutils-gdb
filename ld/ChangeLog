@@ -1,3 +1,9 @@
+2004-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 51.
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Set
+	link_info.wrap_char.
+
 2004-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lexsup.c (parse_args): Don't set unresolved_syms_in_objects
@@ -76,7 +82,7 @@
 2004-02-23  Alan Modra <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_tree): Follow indirect symbols.
-	
+
 2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldgram.y (exp): Add two operand ALIGN.
