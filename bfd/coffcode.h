@@ -650,7 +650,7 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
       in->x_sym.x_tvndx = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
-      if (ISARY(type) || class == C_BLOCK) {
+      if (ISARY(type)) {
 #if DIMNUM != E_DIMNUM
 	  -> Error, we need to cope with truncating or extending DIMNUM!;
 #else
@@ -660,8 +660,10 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
 	  in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
 #endif
 	}
-      in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
-      in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
+      if (class == C_BLOCK || ISFCN(type) || ISTAG(type)) {
+	in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
+	in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
+      }
 
       if (ISFCN(type)) {
 	  in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
@@ -735,14 +737,16 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
     bfd_h_put_16(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
-    PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
-    PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
+    if (class == C_BLOCK || ISFCN(type) || ISTAG(type)) {
+      PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
+      PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
+    }
 
     if (ISFCN(type)) {
       PUTWORD(abfd, in->x_sym.x_misc.x_fsize, (bfd_byte *)  ext->x_sym.x_misc.x_fsize);
     }
     else {
-      if (ISARY(type) || class == C_BLOCK) {
+      if (ISARY(type)) {
 #if DIMNUM != E_DIMNUM
 	-> Error, we need to cope with truncating or extending DIMNUM!;
 #else

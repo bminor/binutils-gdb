@@ -1,3 +1,10 @@
+Wed Nov  4 13:40:23 1992  Sean Eric Fagan  (sef@cygnus.com)
+
+	* coffcode.h (coff_swap_aux_out, coff_swap_aux_in):  check for
+	symbol type before blindly modifying the auxent.  Specifically,
+	only modify the endndx fields for types that need it, and don't
+	set the array information for non-arrays.
+
 Wed Nov  4 09:30:50 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* aoutx.h (some_aout_object_p): Section list should be set up
