@@ -346,7 +346,6 @@ static int mips_32bitmode = 0;
    || mips_opts.arch == CPU_R10000                    \
    || mips_opts.arch == CPU_R12000                    \
    || mips_opts.arch == CPU_RM7000                    \
-   || mips_opts.arch == CPU_SB1                       \
    || mips_opts.arch == CPU_VR5500                    \
    )
 
@@ -357,8 +356,6 @@ static int mips_32bitmode = 0;
    level I.  */
 #define gpr_interlocks \
   (mips_opts.isa != ISA_MIPS1  \
-   || mips_opts.arch == CPU_VR5400  \
-   || mips_opts.arch == CPU_VR5500  \
    || mips_opts.arch == CPU_R3900)
 
 /* Whether the processor uses hardware interlocks to avoid delays
@@ -374,9 +371,6 @@ static int mips_32bitmode = 0;
     && mips_opts.isa != ISA_MIPS2                     \
     && mips_opts.isa != ISA_MIPS3)                    \
    || mips_opts.arch == CPU_R4300                     \
-   || mips_opts.arch == CPU_VR5400                    \
-   || mips_opts.arch == CPU_VR5500                    \
-   || mips_opts.arch == CPU_SB1                       \
    )
 
 /* Whether the processor uses hardware interlocks to protect reads
