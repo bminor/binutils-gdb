@@ -1786,6 +1786,7 @@ pa_ip (str)
 		/* Handle a short load/store completer.  */
 		case 'm':
 		case 'q':
+		case 'J':
 		  {
 		    int a = 0;
 		    int m = 0;
@@ -1810,8 +1811,8 @@ pa_ip (str)
 			s += 2;
 		      }
 
-		   /* 'm' and 'q' are the same, except for where they encode
-		       the before/after field.  */
+		   /* 'J', 'm' and 'q' are the same, except for where they
+		       encode the before/after field.  */
 		   if (*args == 'm')
 		      {
 			opcode |= m << 5;
@@ -1820,6 +1821,11 @@ pa_ip (str)
 		    else if (*args == 'q')
 		      {
 			opcode |= m << 3;
+			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
+		      }
+		    else if (*args == 'J')
+		      {
+		        /* M bit is explicit in the major opcode.  */
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
 		      }
 		  }
@@ -3605,6 +3611,21 @@ pa_ip (str)
 		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 11);
 		  }
 
+		/* Handle L/R register halves like 'x'.  */
+		case 'e':
+		  {
+		    struct pa_11_fp_reg_struct result;
+
+		    if (strict && *s != '%')
+		      break;
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    opcode |= (result.number_part & 0x1f) << 16;
+		    if (need_pa11_opcode (&the_insn, &result))
+		      {
+			opcode |= (result.l_r_select & 1) << 1;
+		      }
+		    continue;
 		default:
 		  abort ();
 		}
