@@ -257,47 +257,47 @@ test_set "set variable v_unsigned_char_array\[0\]='h'" "set variable v_unsigned_
 #
 # test "set variable" for "short array[2]"
 #
-test_set "set variable v_short_array\[0\]=123" "set variable v_short_array\[1\]=-456" "print v_short_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable short array" 
+test_set "set variable v_short_array\[0\]=123" "set variable v_short_array\[1\]=-456" "print v_short_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable short array" 
 #
 # test "set variable" for "signed short array[2]"
 #
-test_set "set variable v_signed_short_array\[0\]=123" "set variable v_signed_short_array\[1\]=-456" "print v_signed_short_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable signed short array" 
+test_set "set variable v_signed_short_array\[0\]=123" "set variable v_signed_short_array\[1\]=-456" "print v_signed_short_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable signed short array" 
 #
 # test "set variable" for "unsigned short array[2]"
 #
-test_set "set variable v_unsigned_short_array\[0\]=123" "set variable v_unsigned_short_array\[1\]=-456" "print v_unsigned_short_array" ".*.\[0-9\]* =.*\{123,.*65080\}"        "set variable unsigned short array" 
+test_set "set variable v_unsigned_short_array\[0\]=123" "set variable v_unsigned_short_array\[1\]=-456" "print v_unsigned_short_array" ".*.\[0-9\]* =.*\\{123,.*65080\\}"        "set variable unsigned short array" 
 #
 # test "set variable" for "int array[2]"
 #
-test_set "set variable v_int_array\[0\]=123" "set variable v_int_array\[1\]=-456" "print v_int_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable int array" 
+test_set "set variable v_int_array\[0\]=123" "set variable v_int_array\[1\]=-456" "print v_int_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable int array" 
 #
 # test "set variable" for "signed int array[2]"
 #
-test_set "set variable v_signed_int_array\[0\]=123" "set variable v_signed_int_array\[1\]=-456" "print v_signed_int_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable signed int array" 
+test_set "set variable v_signed_int_array\[0\]=123" "set variable v_signed_int_array\[1\]=-456" "print v_signed_int_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable signed int array" 
 #
 # test "set variable" for "unsigned int array[2]"
 #
-test_set "set variable v_unsigned_int_array\[0\]=123" "set variable v_unsigned_int_array\[1\]=-456" "print v_unsigned_int_array" ".*.\[0-9\]* =.*\{123,.*(4294966840|65080)\}"        "set variable unsigned int array" 
+test_set "set variable v_unsigned_int_array\[0\]=123" "set variable v_unsigned_int_array\[1\]=-456" "print v_unsigned_int_array" ".*.\[0-9\]* =.*\\{123,.*(4294966840|65080)\\}"        "set variable unsigned int array" 
 #
 # test "set variable" for "long array[2]"
 #
-test_set "set variable v_long_array\[0\]=123" "set variable v_long_array\[1\]=-456" "print v_long_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable long array" 
+test_set "set variable v_long_array\[0\]=123" "set variable v_long_array\[1\]=-456" "print v_long_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable long array" 
 #
 # test "set variable" for "signed long array[2]"
 #
-test_set "set variable v_signed_long_array\[0\]=123" "set variable v_signed_long_array\[1\]=-456" "print v_signed_long_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable signed long array" 
+test_set "set variable v_signed_long_array\[0\]=123" "set variable v_signed_long_array\[1\]=-456" "print v_signed_long_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable signed long array" 
 #
 # test "set variable" for "unsigned long array[2]"
 #
-test_set "set variable v_unsigned_long_array\[0\]=123" "set variable v_unsigned_long_array\[1\]=-456" "print v_unsigned_long_array" ".*.\[0-9\]* =.*\{123,.*$ulong_minus_456\}"        "set variable unsigned long array" 
+test_set "set variable v_unsigned_long_array\[0\]=123" "set variable v_unsigned_long_array\[1\]=-456" "print v_unsigned_long_array" ".*.\[0-9\]* =.*\\{123,.*$ulong_minus_456\\}"        "set variable unsigned long array" 
 #
 # test "set variable" for "float array[2]"
 #
-test_set "set variable v_float_array\[0\]=123.0" "set variable v_float_array\[1\]=-456.0" "print v_float_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable float array" 
+test_set "set variable v_float_array\[0\]=123.0" "set variable v_float_array\[1\]=-456.0" "print v_float_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable float array" 
 #
 # test "set variable" for "double array[2]"
 #
-test_set "set variable v_double_array\[0\]=123.0" "set variable v_double_array\[1\]=-456.0" "print v_double_array" ".*.\[0-9\]* =.*\{123,.*-456\}"        "set variable double array" 
+test_set "set variable v_double_array\[0\]=123.0" "set variable v_double_array\[1\]=-456.0" "print v_double_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"        "set variable double array" 
 #
 # test "set variable" for type "char *"
 #
@@ -313,7 +313,7 @@ test_set "set v_unsigned_char_pointer=v_unsigned_char_array" "set variable *(v_u
 #
 # test "set variable" for type "short *"
 #
-test_set "set v_short_pointer=v_short_array" "set variable *(v_short_pointer)=123" "set variable *(v_short_pointer+1)=-456" "print v_short_array" ".*.\[0-9\]* =.*\{123,.*-456\}"  "print *(v_short_pointer+1)" ".*.\[0-9\]* = -456"     "set variable short pointer" 
+test_set "set v_short_pointer=v_short_array" "set variable *(v_short_pointer)=123" "set variable *(v_short_pointer+1)=-456" "print v_short_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"  "print *(v_short_pointer+1)" ".*.\[0-9\]* = -456"     "set variable short pointer" 
 #
 # test "set variable" for type "signed short *"
 #
@@ -339,36 +339,36 @@ gdb_test "print *(v_unsigned_short_pointer+1)" ".\[0-9\]* = 65080"
 #
 # test "set variable" for type "int *"
 #
-test_set "set v_int_pointer=v_int_array" "set variable *(v_int_pointer)=123" "set variable *(v_int_pointer+1)=-456" "print v_int_array" ".*.\[0-9\]* =.*\{123,.*-456\}"  "print *(v_int_pointer+1)" ".*.\[0-9\]* = -456"     "set variable int pointer" 
+test_set "set v_int_pointer=v_int_array" "set variable *(v_int_pointer)=123" "set variable *(v_int_pointer+1)=-456" "print v_int_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"  "print *(v_int_pointer+1)" ".*.\[0-9\]* = -456"     "set variable int pointer" 
 #
 # test "set variable" for type "signed int *"
 #
-test_set "set v_signed_int_pointer=v_signed_int_array" "set variable *(v_signed_int_pointer)=123" "set variable *(v_signed_int_pointer+1)=-456" "print v_signed_int_array" ".*.\[0-9\]* =.*\{123,.*-456\}"  "print *(v_signed_int_pointer+1)" ".*.\[0-9\]* = -456"     "set variable signed int pointer" 
+test_set "set v_signed_int_pointer=v_signed_int_array" "set variable *(v_signed_int_pointer)=123" "set variable *(v_signed_int_pointer+1)=-456" "print v_signed_int_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"  "print *(v_signed_int_pointer+1)" ".*.\[0-9\]* = -456"     "set variable signed int pointer" 
 #
 # test "set variable" for type "unsigned int *"
 #
-test_set "set v_unsigned_int_pointer=v_unsigned_int_array" "set variable *(v_unsigned_int_pointer)=123" "set variable *(v_unsigned_int_pointer+1)=-456" "print v_unsigned_int_array" ".*.\[0-9\]* =.*\{123,.*(4294966840|65080)\}" "set variable unsigned int pointer"
+test_set "set v_unsigned_int_pointer=v_unsigned_int_array" "set variable *(v_unsigned_int_pointer)=123" "set variable *(v_unsigned_int_pointer+1)=-456" "print v_unsigned_int_array" ".*.\[0-9\]* =.*\\{123,.*(4294966840|65080)\\}" "set variable unsigned int pointer"
 test_set "" "print *(v_unsigned_int_pointer+1)" ".*.\[0-9\]* = (4294966840|65080)"     "print variable unsigned int pointer+1"
 #
 # test "set variable" for type "long *"
 #
-test_set "set v_long_pointer=v_long_array" "set variable *(v_long_pointer)=123" "set variable *(v_long_pointer+1)=-456" "print v_long_array" ".*.\[0-9\]* =.*\{123,.*-456\}"  "print *(v_long_pointer+1)" ".*.\[0-9\]* = -456"     "set variable long pointer" 
+test_set "set v_long_pointer=v_long_array" "set variable *(v_long_pointer)=123" "set variable *(v_long_pointer+1)=-456" "print v_long_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"  "print *(v_long_pointer+1)" ".*.\[0-9\]* = -456"     "set variable long pointer" 
 #
 # test "set variable" for type "signed long *"
 #
-test_set "set v_signed_long_pointer=v_signed_long_array" "set variable *(v_signed_long_pointer)=123" "set variable *(v_signed_long_pointer+1)=-456" "print v_signed_long_array" ".*.\[0-9\]* =.*\{123,.*-456\}"  "print *(v_signed_long_pointer+1)" ".*.\[0-9\]* = -456"     "set variable signed long pointer" 
+test_set "set v_signed_long_pointer=v_signed_long_array" "set variable *(v_signed_long_pointer)=123" "set variable *(v_signed_long_pointer+1)=-456" "print v_signed_long_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"  "print *(v_signed_long_pointer+1)" ".*.\[0-9\]* = -456"     "set variable signed long pointer" 
 #
 # test "set variable" for type "unsigned long *"
 #
-test_set "set v_unsigned_long_pointer=v_unsigned_long_array" "set variable *(v_unsigned_long_pointer)=123" "set variable *(v_unsigned_long_pointer+1)=-456" "print v_unsigned_long_array" ".*.\[0-9\]* =.*\{123,.*$ulong_minus_456\}"  "print *(v_unsigned_long_pointer+1)" ".*.\[0-9\]* = $ulong_minus_456"     "set variable unsigned long pointer" 
+test_set "set v_unsigned_long_pointer=v_unsigned_long_array" "set variable *(v_unsigned_long_pointer)=123" "set variable *(v_unsigned_long_pointer+1)=-456" "print v_unsigned_long_array" ".*.\[0-9\]* =.*\\{123,.*$ulong_minus_456\\}"  "print *(v_unsigned_long_pointer+1)" ".*.\[0-9\]* = $ulong_minus_456"     "set variable unsigned long pointer" 
 #
 # test "set variable" for type "float *"
 #
-test_set "set v_float_pointer=v_float_array" "set variable *(v_float_pointer)=123.0" "set variable *(v_float_pointer+1)=-456.0" "print v_float_array" ".*.\[0-9\]* =.*\{123,.*-456\}"  "print *(v_float_pointer+1)" ".*.\[0-9\]* = -456"     "set variable float pointer" 
+test_set "set v_float_pointer=v_float_array" "set variable *(v_float_pointer)=123.0" "set variable *(v_float_pointer+1)=-456.0" "print v_float_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"  "print *(v_float_pointer+1)" ".*.\[0-9\]* = -456"     "set variable float pointer" 
 #
 # test "set variable" for type "double *"
 #
-test_set "set v_double_pointer=v_double_array" "set variable *(v_double_pointer)=123.0" "set variable *(v_double_pointer+1)=-456.0" "print v_double_array" ".*.\[0-9\]* =.*\{123,.*-456\}"  "print *(v_double_pointer+1)" ".*.\[0-9\]* = -456"     "set variable double pointer" 
+test_set "set v_double_pointer=v_double_array" "set variable *(v_double_pointer)=123.0" "set variable *(v_double_pointer+1)=-456.0" "print v_double_array" ".*.\[0-9\]* =.*\\{123,.*-456\\}"  "print *(v_double_pointer+1)" ".*.\[0-9\]* = -456"     "set variable double pointer" 
 #
 # test "set variable" for struct members
 #
@@ -400,17 +400,17 @@ set timeout 60;
 # Change the values
 test_set "set variable v_struct1 = {32, 33, 34, 35, 36, 37}" \
   "print v_struct1" \
-  ".*.\[0-9\]* = \{.*v_char_member = 32 \' \',.*v_short_member = 33,\
+  ".*.\[0-9\]* = \\{.*v_char_member = 32 \' \',.*v_short_member = 33,\
 .*v_int_member = 34,.*\
-v_long_member = 35,.*v_float_member = 36,.*v_double_member = 37.*\}" \
+v_long_member = 35,.*v_float_member = 36,.*v_double_member = 37.*\\}" \
   "set print structure #2"
 
 # Change them back
 test_set "set variable v_struct1 = {'h', 1, 2, 3, 4.0, 5.0}" \
   "print v_struct1" \
-  ".*.\[0-9\]* = \{.*v_char_member = 104 \'h\',.*v_short_member = 1,\
+  ".*.\[0-9\]* = \\{.*v_char_member = 104 \'h\',.*v_short_member = 1,\
 .*v_int_member = 2,.*\
-v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
+v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\\}" \
   "set print structure #3"
 
 # Test printing of enumeration bitfields.
