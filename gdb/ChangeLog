@@ -1,3 +1,16 @@
+Thu Sep 28 17:43:39 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* defs.h (enum language):  Add language_scm.
+	* expression.h (enum exp_code):  Added OP_EXPRSTRING.
+	* scm-lang.c:  Preliminary support for Guile /SCM dialect of Scheme.
+	* expprint.c (print_subexp):  Add OP_EXPRSTRING support.
+	* parse.c (length_of_subexp, prefixify_subexp):  Likewise.
+	* valops.c (find_function_in_inferior):  New function.
+	(value_allocate_space_in_inferior):  New function.
+	(allocate_space_in_inferior):  Redefine using previous function.
+	* Makefile.in (SFILES):  Add scm-lang.c.
+	(COMMON_OBS):  Add scm-lang.o
+
 Thu Sep 28 14:32:11 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* callback.[ch]: New files.

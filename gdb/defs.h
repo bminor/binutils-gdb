@@ -115,7 +115,8 @@ enum language
    language_chill,		/* Chill */
    language_fortran,		/* Fortran */
    language_m2,			/* Modula-2 */
-   language_asm			/* Assembly language */
+   language_asm,		/* Assembly language */
+   language_scm			/* Scheme / Guile */
 };
 
 /* the cleanup list records things that have to be undone

@@ -512,6 +512,7 @@ length_of_subexp (expr, endpos)
       /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
+    case OP_EXPRSTRING:
       oplen = longest_to_int (expr->elts[endpos - 2].longconst);
       oplen = 4 + BYTES_TO_EXP_ELEM (oplen + 1);
       break;
@@ -649,6 +650,7 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
+    case OP_EXPRSTRING:
       oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
       oplen = 4 + BYTES_TO_EXP_ELEM (oplen + 1);
       break;

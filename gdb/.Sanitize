@@ -286,6 +286,7 @@ rs6000-nat.c
 rs6000-tdep.c
 rom68k-rom.c
 saber.suppress
+scm-lang.c
 ser-e7kpc.c
 ser-go32.c
 ser-mac.c
