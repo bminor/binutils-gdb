@@ -671,6 +671,10 @@ operand (expressionP)
   SKIP_WHITESPACE ();		/*->1st char after operand. */
   know (*input_line_pointer != ' ');
 
+  /* The PA port needs this information.  */
+  if (expressionP->X_add_symbol)
+    expressionP->X_add_symbol->sy_used = 1;
+
   switch (expressionP->X_op)
     {
     default:
@@ -979,6 +983,10 @@ expr (rank, resultP)
 	  
       op_left = op_right;
     }				/* While next operator is >= this rank. */
+
+  /* The PA port needs this information.  */
+  if (resultP->X_add_symbol)
+    resultP->X_add_symbol->sy_used = 1;
 
   return resultP->X_op == O_constant ? absolute_section : retval;
 }

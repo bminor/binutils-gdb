@@ -1,5 +1,11 @@
 Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* struc-symbol.h: Add new "sy_used" field to the symbol structure.
+	* expr.c (operand): Set sy_used for any symbol used as an operand.
+	(expr): Likewise for any symbol used in an expression.
+	* config/tc-hppa.h (tc_frob_symbol): Define.  Punt imported
+	symbols which are never used and absolute symbols which local scope.
+
 	* config/obj-som.h (obj_frob_file): Define.
 	* config/obj-som.c (obj_som_init_stab_section): Set alignment
 	of stab sections.  Make space for the special stab entry.
