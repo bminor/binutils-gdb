@@ -114,6 +114,9 @@ static void find_sym_fns (struct objfile *);
 
 static void decrement_reading_symtab (void *);
 
+static void psymbol_init_demangled_name (struct partial_symbol *psymbol,
+					 struct bcache *bcache);
+
 static void overlay_invalidate_all (void);
 
 static int overlay_is_mapped (struct obj_section *);
@@ -2319,7 +2322,12 @@ start_psymtab_common (struct objfile *objfile,
 /* Add a symbol with a long value to a psymtab.
    Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
 
-void
+/* NOTE: carlton/2002-12-18: I've modified this function to return the
+   partial symbol in question.  But pay heed to the 'const' qualifier
+   in front: these partial symbols are stored in a bcache, and bad
+   things will happen if you modify them.  */
+
+const struct partial_symbol *
 add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
 		     enum address_class class,
 		     struct psymbol_allocation_list *list, long val,	/* Value as a long */
@@ -2350,7 +2358,7 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
   SYMBOL_LANGUAGE (&psymbol) = language;
   PSYMBOL_NAMESPACE (&psymbol) = namespace;
   PSYMBOL_CLASS (&psymbol) = class;
-  SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
+  psymbol_init_demangled_name (&psymbol, objfile->psymbol_cache);
 
   /* Stash the partial symbol away in the cache */
   psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
@@ -2362,6 +2370,53 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
     }
   *list->next++ = psym;
   OBJSTAT (objfile, n_psyms++);
+
+  return psym;
+}
+
+/* Initialize the demangled name for PSYMBOL, using bcache CACHE to
+   store the demangle name if necessary.  */
+
+static void
+psymbol_init_demangled_name (struct partial_symbol *psymbol,
+			     struct bcache *cache)
+{
+  const char *mangled = SYMBOL_NAME (psymbol);
+  char *demangled = NULL;
+
+  SYMBOL_CPLUS_DEMANGLED_NAME (psymbol) = NULL;
+
+  if (SYMBOL_LANGUAGE (psymbol) == language_unknown)
+    SYMBOL_LANGUAGE (psymbol) = language_auto;
+
+  switch (SYMBOL_LANGUAGE (psymbol))
+    {
+    case language_cplus:
+    case language_auto:
+      demangled = cplus_demangle (SYMBOL_NAME (psymbol),
+				  DMGL_PARAMS | DMGL_ANSI);
+      if (demangled != NULL)
+	{
+	  SYMBOL_LANGUAGE (psymbol) = language_cplus;
+	  SYMBOL_CPLUS_DEMANGLED_NAME (psymbol)
+	    = bcache (demangled, strlen (demangled) + 1, cache);
+	  xfree (demangled);
+	}
+      break;
+    case language_java:
+      demangled =
+	cplus_demangle (SYMBOL_NAME (psymbol),
+			DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);
+      if (demangled != NULL)
+	{
+	  SYMBOL_LANGUAGE (psymbol) = language_java;
+	  SYMBOL_CPLUS_DEMANGLED_NAME (psymbol)
+	    = bcache (demangled, strlen (demangled) + 1, cache);
+	  xfree (demangled);
+	}
+    default:
+      break;
+    }
 }
 
 /* Add a symbol with a long value to a psymtab. This differs from

@@ -109,22 +109,13 @@ get_java_class_symtab (void)
       BLOCKVECTOR (class_symtab) = bv;
 
       /* Allocate dummy STATIC_BLOCK. */
-      bl = (struct block *)
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
-      BLOCK_START (bl) = 0;
-      BLOCK_END (bl) = 0;
-      BLOCK_FUNCTION (bl) = NULL;
-      BLOCK_SUPERBLOCK (bl) = NULL;
+      bl = allocate_block (&objfile->symbol_obstack);
       BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
 					    NULL);
-      BLOCK_NAMESPACE (bl) = NULL;
-      BLOCK_GCC_COMPILED (bl) = 0;
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
       /* Allocate GLOBAL_BLOCK.  */
-      bl = (struct block *)
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
-      *bl = *BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+      bl = allocate_block (&objfile->symbol_obstack);
       BLOCK_DICT (bl) = dict_create_linear_expandable ();
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
       class_symtab->free_func = free_class_block;

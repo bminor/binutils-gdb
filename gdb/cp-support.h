@@ -100,3 +100,7 @@ struct using_direct_node *cp_copy_usings (struct using_direct_node *tocopy,
 extern void cp_free_usings (struct using_direct_node *using);
 
 extern struct symbol *cp_check_namespace_symbol (const char *name, int len);
+
+extern void cp_check_possible_namespace_symbols (const char *name);
+
+extern struct symbol *cp_lookup_possible_namespace_symbol (const char *name);

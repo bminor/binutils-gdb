@@ -205,3 +205,29 @@ block_using_iterator_next (struct block_using_iterator *iterator)
       return NULL;
     }
 }
+
+/* This allocates a block on OBSTACK, and initializes its elements to
+   zero/NULL.  This is useful for creating "dummy" blocks that don't
+   correspond to actual source files.
+
+   Warning: it sets the block's BLOCK_DICT to NULL, which isn't a
+   valid value.  If you don't want the block to have a dictiionary,
+   then you should subsequently set its BLOCK_DICT to
+   dict_create_linear (obstack, NULL).  */
+
+struct block *
+allocate_block (struct obstack *obstack)
+{
+  struct block *bl = obstack_alloc (obstack, sizeof (struct block));
+
+  BLOCK_START (bl) = 0;
+  BLOCK_END (bl) = 0;
+  BLOCK_FUNCTION (bl) = NULL;
+  BLOCK_SUPERBLOCK (bl) = NULL;
+  BLOCK_DICT (bl) = NULL;
+  BLOCK_NAMESPACE (bl) = NULL;
+  BLOCK_GCC_COMPILED (bl) = 0;
+
+  return bl;
+}
+

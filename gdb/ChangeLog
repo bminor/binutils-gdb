@@ -1,3 +1,37 @@
+2002-12-18  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux_file): Call
+	cp_lookup_possible_namespace_symbol.
+	* dwarf2read.c (add_partial_symbol): Sometimes check for possible
+	namespace symbols.
+	* cp-support.c (maintenance_print_namespace): Handle
+	possible_namespace_block, too.
+	(cp_lookup_possible_namespace_symbol): New function.
+	* cp-support.h: Declare cp_check_possible_namespace_symbols,
+	cp_lookup_possible_namespace_symbol.
+	* cp-support.c (check_one_possible_namespace_symbol): New
+	function.
+	(cp_check_possible_namespace_symbols): New function.
+	(check_possible_namespace_symbols_loop): New function.
+	* symfile.h: Update declaration for add_psymbol_to_list.
+	* symfile.c (psymbol_init_demangled_name): New function.
+	(add_psymbol_to_list): Change SYMBOL_INIT_LANGUAGE_SPECIFIC to
+	psymbol_init_demangled_name.
+	(add_psymbol_to_list): Return a const struct psymbol *.
+	* Makefile.in (dwarf2read.o): Don't depend on bcache_h.
+	* dwarf2read.c: Don't #include "bcache.h"
+	* cp-support.c (get_namespace_block): Allocate blocks via
+	allocate_block.
+	(initialize_namespace_blocks): New function.
+	New variable possible_namespace_block.
+	(get_namespace_block): Call initialize_namespace_blocks.
+	(free_namespace_blocks): Rename from free_namespace_block; handle
+	possible_namespace_block, too.
+	(get_possible_namespace_block): New function.
+	* jv-lang.c (get_java_class_symtab): Ditto.
+	* block.c (allocate_block): New function.
+	* block.h: Declare allocate_block.
+
 2002-12-17  David Carlton  <carlton@math.stanford.edu>
 
 	* c-exp.y (yylex): Modify the #if 1 block to handle nested types

@@ -1100,8 +1100,34 @@ lookup_symbol_aux_file (const char *name,
 	return sym;
     }
 
-  return lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
-				     namespace, symtab);
+  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
+				    namespace, symtab);
+
+  if (sym != NULL)
+    return sym;
+
+  /* Now call "cp_lookup_possible_namespace_symbol".  Symbols in here
+     claim to be associated to namespaces, whereas the names in
+     question might actually correspond to either namespaces or to
+     classes.  But if they correspond to classes, then we should have
+     found a match to them above.  So if we find them now, they should
+     be genuine.  */
+
+  /* FIXME: carlton/2002-12-18: This is a hack and should eventually
+     be deleted: see cp-support.c.  */
+
+  if (namespace == VAR_NAMESPACE)
+    {
+      sym = cp_lookup_possible_namespace_symbol (name);
+      if (sym != NULL)
+	{
+	  if (symtab != NULL)
+	    *symtab = NULL;
+	  return sym;
+	}
+    }
+
+  return NULL;
 }
 
 

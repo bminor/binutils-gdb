@@ -183,3 +183,8 @@ using_direct *block_using_iterator_first (const struct block *block,
 extern struct
 using_direct *block_using_iterator_next (struct block_using_iterator
 					 *iterator);
+
+/* Allocate a dummy block.  See warnings before the source code of
+   this function about using it correctly.  */
+
+extern struct block *allocate_block (struct obstack *obstack);

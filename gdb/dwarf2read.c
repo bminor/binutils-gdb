@@ -41,7 +41,6 @@
 
 #include "language.h"
 #include "complaints.h"
-#include "bcache.h"
 #include <fcntl.h>
 #include "gdb_string.h"
 #include "gdb_assert.h"
@@ -1468,6 +1467,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 {
   CORE_ADDR addr = 0;
   char *actual_name = pdi->name;
+  const struct partial_symbol *psym = NULL;
 
   /* If we're not in the global namespace and if the namespace name
      isn't encoded in a mangled actual_name, add it.  */
@@ -1487,19 +1487,21 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	{
 	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_text, objfile); */
-	  add_psymbol_to_list (actual_name, strlen (actual_name),
-			       VAR_NAMESPACE, LOC_BLOCK,
-			       &objfile->global_psymbols,
-			    0, pdi->lowpc + baseaddr, cu_language, objfile);
+	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+				      VAR_NAMESPACE, LOC_BLOCK,
+				      &objfile->global_psymbols,
+				      0, pdi->lowpc + baseaddr,
+				      cu_language, objfile);
 	}
       else
 	{
 	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_file_text, objfile); */
-	  add_psymbol_to_list (actual_name, strlen (actual_name),
-			       VAR_NAMESPACE, LOC_BLOCK,
-			       &objfile->static_psymbols,
-			    0, pdi->lowpc + baseaddr, cu_language, objfile);
+	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+				      VAR_NAMESPACE, LOC_BLOCK,
+				      &objfile->static_psymbols,
+				      0, pdi->lowpc + baseaddr,
+				      cu_language, objfile);
 	}
       break;
     case DW_TAG_variable:
@@ -1521,10 +1523,11 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	  if (pdi->locdesc)
 	    addr = decode_locdesc (pdi->locdesc, objfile, cu_header);
 	  if (pdi->locdesc || pdi->has_type)
-	    add_psymbol_to_list (actual_name, strlen (actual_name),
-				 VAR_NAMESPACE, LOC_STATIC,
-				 &objfile->global_psymbols,
-				 0, addr + baseaddr, cu_language, objfile);
+	    psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+					VAR_NAMESPACE, LOC_STATIC,
+					&objfile->global_psymbols,
+					0, addr + baseaddr,
+					cu_language, objfile);
 	}
       else
 	{
@@ -1584,6 +1587,18 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
     default:
       break;
     }
+
+  /* Check to see if we should scan the name for possible namespace
+     info.  Only do this if this is C++, if we don't have namespace
+     debugging info in the file, if the psym is of an appropriate type
+     (otherwise we'll have psym == NULL), and if we actually had a
+     mangled name to begin with.  */
+
+  if (cu_language == language_cplus
+      && namespace == NULL
+      && psym != NULL
+      && SYMBOL_CPLUS_DEMANGLED_NAME (psym) != NULL)
+    cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym));
 }
 
 static int
