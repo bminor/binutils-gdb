@@ -1,3 +1,13 @@
+2002-07-07  Mark Mitchell  <mark@codesourcery.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* cofflink.c (_bfd_coff_final_link): On PE COFF systems, take into
+	account the impact of relocation count overflow when computing
+	section offsets.
+	* coffcode.h (coff_write_relocs): Use obj_pe when deciding whether
+	or not to apply the PE COFF reloc overflow handling.  Fix a
+	fencepost error in deciding whether or not to use that technique.
+
 2002-07-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_reloc_cookie): Remove locsym_shndx,

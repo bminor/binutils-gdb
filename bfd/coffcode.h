@@ -2394,7 +2394,7 @@ coff_write_relocs (abfd, first_undef)
 	return false;
 
 #ifdef COFF_WITH_PE
-      if (s->reloc_count > 0xffff)
+      if (obj_pe (abfd) && s->reloc_count >= 0xffff)
 	{
 	  /* encode real count here as first reloc */
 	  struct internal_reloc n;
@@ -3420,7 +3420,7 @@ coff_write_object_contents (abfd)
     {
 #ifdef COFF_WITH_PE
       /* we store the actual reloc count in the first reloc's addr */
-      if (current->reloc_count > 0xffff)
+      if (obj_pe (abfd) && current->reloc_count >= 0xffff)
 	reloc_count ++;
 #endif
       reloc_count += current->reloc_count;
@@ -3451,7 +3451,7 @@ coff_write_object_contents (abfd)
 	  reloc_base += current->reloc_count * bfd_coff_relsz (abfd);
 #ifdef COFF_WITH_PE
 	  /* extra reloc to hold real count */
-	  if (current->reloc_count > 0xffff)
+	  if (obj_pe (abfd) && current->reloc_count >= 0xffff)
 	    reloc_base += bfd_coff_relsz (abfd);
 #endif
 	}
