@@ -1,4 +1,16 @@
+Wed Aug 18 15:30:29 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (append_insn): Don't swap branch instructions
+	if .set nobopt or .set volatile.
+	(gp_reference): .lit8 and .lit4 are accessed via the GP register.
+	(macro): Added cases M_LI_S, M_LI_SS.  Fixed M_LI_D and M_LI_DD.
+	(mips_ip): Added cases 'F', 'L', 'f', 'l' for floating point.
+	* config/obj-ecoff.c: Renamed some variables to avoid shadow
+	warnings.
+
 Mon Aug 16 14:16:02 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config/obj-coff.h (S_IS_COMMON): add missing backslash
 
 	* configure.in (z8k-*-{coff,sim}): use coffbfd for this target
 

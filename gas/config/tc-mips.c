@@ -165,7 +165,7 @@ static void macro_build_lui PARAMS ((int *counter, expressionS * ep,
 static void set_at PARAMS ((int *counter, int reg));
 static void set_at_unsigned PARAMS ((int *counter, int reg));
 static void check_absolute_expr PARAMS ((struct mips_cl_insn * ip,
-					 expressionS * expr));
+					 expressionS *));
 static void load_register PARAMS ((int *counter,
 				   struct mips_cl_insn * ip,
 				   int reg, expressionS * ep));
@@ -635,6 +635,11 @@ append_insn (ip, address_expr, reloc_type)
 	  || (ip->insn_mo->pinfo & INSN_COND_BRANCH_DELAY))
 	{
 	  if (mips_optimize < 2
+	      /* If we have seen .set nobopt, don't optimize.  */
+	      || mips_nobopt != 0
+	      /* If we have seen .set volatile or .set nomove, don't
+		 optimize.  */
+	      || mips_nomove != 0
 	      /* If we had to emit any NOP instructions, then we
 		 already know we can not swap.  */
 	      || nops != 0
@@ -878,7 +883,9 @@ gp_reference (ep)
     return 1;
   segname = segment_name (S_GET_SEGMENT (ep->X_add_symbol));
   return (strcmp (segname, ".sdata") == 0
-	  || strcmp (segname, ".sbss") == 0);
+	  || strcmp (segname, ".sbss") == 0
+	  || strcmp (segname, ".lit8") == 0
+	  || strcmp (segname, ".lit4") == 0);
 #else /* ! defined (OBJ_ECOFF) */
   /* The GP register is only used for ECOFF.  */
   return 0;
@@ -1147,12 +1154,11 @@ set_at_unsigned (counter, reg)
 }
 
 static void
-check_absolute_expr (ip, expr)
+check_absolute_expr (ip, ex)
      struct mips_cl_insn *ip;
-     expressionS *expr;
+     expressionS *ex;
 {
-
-  if (expr->X_op != O_constant)
+  if (ex->X_op != O_constant)
     as_warn ("Instruction %s requires absolute expression", ip->insn_mo->name);
 }
 
@@ -1672,6 +1678,7 @@ macro (ip)
       s = "lwc0";
       goto ld;
     case M_LWC1_AB:
+    case M_LI_SS:
       s = "lwc1";
       goto ld;
     case M_LWC2_AB:
@@ -1686,7 +1693,12 @@ macro (ip)
     case M_LWR_AB:
       s = "lwr";
     ld:
-      if (breg == treg || mask == M_LWC1_AB)
+      if (breg == treg
+	  || mask == M_LWC0_AB
+	  || mask == M_LWC1_AB
+	  || mask == M_LI_SS
+	  || mask == M_LWC2_AB
+	  || mask == M_LWC3_AB)
 	{
 	  tempreg = AT;
 	  used_at = 1;
@@ -1727,8 +1739,15 @@ macro (ip)
       tempreg = AT;
       used_at = 1;
     ld_st:
-      if (mask == M_LWC1_AB || mask == M_SWC1_AB)
+      if (mask == M_LWC1_AB || mask == M_SWC1_AB || mask == M_LI_SS)
 	fmt = "T,o(b)";
+      else if (mask == M_LWC0_AB
+	       || mask == M_LWC2_AB
+	       || mask == M_LWC3_AB
+	       || mask == M_SWC0_AB
+	       || mask == M_SWC2_AB
+	       || mask == M_SWC3_AB)
+	fmt = "E,o(b)";
       else
 	fmt = "t,o(b)";
       if (gp_reference (&offset_expr))
@@ -1753,21 +1772,18 @@ macro (ip)
       return;
 
     case M_LI:
+    case M_LI_S:
       load_register (&icnt, ip, treg, &imm_expr);
       return;
 
     case M_LI_D:
-      /*
-	0x400370 <main>:	lui $at,%hi(foo)
-	0x400374 <main+4>:	lw $v0,%lo(foo)($at)
-	0x400378 <main+8>:	lw $v1,%lo(foo+4)($at)
-				.data
-		 <foo>:
-				.float 3.133435
-	*/
-      /* FIXME: I don't think this is used at present, because the 'F'
-	 format character is not supported.  When this is supported,
-	 it should use the GP register.  */
+      /*  lui $at,%hi(foo)
+	  lw $v0,%lo(foo)($at)
+	  lw $v1,%lo(foo+4)($at)
+	  .rdata
+	 foo:
+	  .double 3.133435
+	 */
       macro_build_lui (&icnt, &offset_expr, AT);
       macro_build (&icnt, &offset_expr, "lw", "t,o(b)", treg, AT);
       offset_expr.X_add_number = 4;
@@ -1775,18 +1791,9 @@ macro (ip)
       break;
 
     case M_LI_DD:
-      /*
-	0x4003a0 <main>:	lwc1 $f0,-32752($gp)
-	0x4003a4 <main+4>:	lwc1 $f1,-32748($gp)
-	0x4003a8 <main+8>:	nop
-	*/
-      /* FIXME: This is nonsense.  It isn't used anyhow.  */
-      sreg = (ip->insn_opcode >> 11) & 0x1f;	/* Fs reg */
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)", treg, AT);
-      offset_expr.X_add_number = 4;
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)", treg + 1, AT);
-      break;
-
+      /* Load a floating point number from the .lit8 section.  */
+      breg = GP;
+      /* Fall through.  */
     case M_L_DOB:
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  */
@@ -2671,7 +2678,104 @@ mips_ip (str, ip)
 	      continue;
 
 	    case 'F':
-	      as_bad ("Floating point constants only implemented for pseudo ops.");
+	    case 'L':
+	    case 'f':
+	    case 'l':
+	      {
+		int f64;
+		char *save_in;
+		char *err;
+		unsigned char temp[8];
+		int length;
+		segT seg;
+		subsegT subseg;
+		char *p;
+
+		/* These only appear as the last operand in an
+		   instruction, and every instruction that accepts
+		   them in any variant accepts them in all variants.
+		   This means we don't have to worry about backing out
+		   any changes if the instruction does not match.
+
+		   The difference between them is the size of the
+		   floating point constant and where it goes.  For 'F'
+		   and 'L' the constant is 64 bits; for 'f' and 'l' it
+		   is 32 bits.  Where the constant is placed is based
+		   on how the MIPS assembler does things:
+		    F -- .rdata
+		    L -- .lit8
+		    f -- immediate value
+		    l -- .lit4
+		   */
+
+		f64 = *args == 'F' || *args == 'L';
+
+		save_in = input_line_pointer;
+		input_line_pointer = s;
+		err = md_atof (f64 ? 'd' : 'f', (char *) temp, &length);
+		s = input_line_pointer;
+		input_line_pointer = save_in;
+		if (err != NULL && *err != '\0')
+		  {
+		    as_bad ("Bad floating point constant: %s", err);
+		    memset (temp, '\0', sizeof temp);
+		    length = f64 ? 8 : 4;
+		  }
+
+		assert (length == (f64 ? 8 : 4));
+
+		if (*args == 'f')
+		  {
+		    imm_expr.X_op = O_constant;
+		    if (byte_order == LITTLE_ENDIAN)
+		      imm_expr.X_add_number =
+			(((((((int) temp[3] << 8)
+			     | temp[2]) << 8)
+			   | temp[1]) << 8)
+			 | temp[0]);
+		    else
+		      imm_expr.X_add_number =
+			(((((((int) temp[0] << 8)
+			     | temp[1]) << 8)
+			   | temp[2]) << 8)
+			 | temp[3]);
+		  }
+		else
+		  {
+		    /* Switch to the right section.  */
+		    seg = now_seg;
+		    subseg = now_subseg;
+		    switch (*args)
+		      {
+		      case 'F':
+			subseg_new (".rdata", (subsegT) 0);
+			break;
+		      case 'L':
+			subseg_new (".lit8", (subsegT) 0);
+			break;
+		      case 'l':
+			subseg_new (".lit4", (subsegT) 0);
+			break;
+		      }
+		    if (seg == now_seg)
+		      as_bad ("Can't use floating point insn in this section");
+
+		    /* Set the argument to the current address in the
+		       .rdata section.  */
+		    offset_expr.X_op = O_symbol;
+		    offset_expr.X_add_symbol =
+		      symbol_new ("L0\001", now_seg,
+				  (valueT) frag_now_fix (), frag_now);
+		    offset_expr.X_add_number = 0;
+
+		    /* Put the floating point number into the section.  */
+		    p = frag_more (length);
+		    memcpy (p, temp, length);
+
+		    /* Switch back to the original section.  */
+		    subseg_set (seg, subseg);
+		  }
+	      }
 	      continue;
 
 	    case 'i':		/* 16 bit unsigned immediate */
