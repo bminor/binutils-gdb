@@ -2,10 +2,7 @@
 /\/\*:init.c\*\//r init.ip
 /\/\*:libbfd.c\*\//r libbfd.ip
 /\/\*:cache.c\*\//r cache.ip
-/\/\*:howto.c\*\//r howto.ip
 /\/\*:cpu-h8300.c\*\//r cpu-h8300.ip
 /\/\*:cpu-i960.c\*\//r cpu-i960.ip
 /\/\*:cpu-empty.c\*\//r cpu-empty.ip
 /\/\*:archures.c\*\//r archures.ip
-
-
