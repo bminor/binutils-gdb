@@ -814,8 +814,7 @@ typedef struct
 #define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
         ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
          (obfd, info, ibfd, sec, rel, adjustedp))
-#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section,\
-                                     value, string, cp, coll, hashp)\
+#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section, value, string, cp, coll, hashp)\
         ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
          (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 
