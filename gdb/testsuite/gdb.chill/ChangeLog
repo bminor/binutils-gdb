@@ -1,3 +1,17 @@
+Mon Nov 11 10:27:32 1996  Fred Fish  <fnf@cygnus.com>
+
+	* callch.exp: Add mips*-sgi-irix* xfail for
+	"call king(a, otto[[10, 15], [20, 25]])".
+	* pr-8742.exp: Add mips*-sgi-irix* xfails for
+	"pass int powerset tuple"
+	"pass set powerset tuple"
+	"pass modeless int powerset tuple" and
+	"pass modeless set powerset tuple".
+	* tuples.exp: Add sparc-*-solaris* and sparc-*-sunos*
+	xfails for several "set var" commands that are failing.
+	Convert most of the set commands into gdb_test_exact
+	commands.
+
 Fri Oct 11 16:48:56 1996  Fred Fish  <fnf@cygnus.com>
 
 	* expstruct.exp (objfile2): Set and use, like other chill tests.

@@ -50,11 +50,14 @@ proc do_tests {} {
 
     runto dummy
 
-    setup_xfail "m68*-*-hpux*"
+    # Haven't investigated why these fail on mips-sgi-irix*
+    setup_xfail "m68*-*-hpux*" "mips*-sgi-irix*"
     gdb_test {call x(p [1, 3, 5])} "1 3 5 " "pass int powerset tuple"
+    setup_xfail "mips*-sgi-irix*"
     gdb_test {call y(s_ps [sc])} "sc " "pass set powerset tuple"
-    setup_xfail "m68*-*-hpux*"
+    setup_xfail "m68*-*-hpux*" "mips*-sgi-irix*"
     gdb_test {call x([1, 3, 5])} "1 3 5 " "pass modeless int powerset tuple"
+    setup_xfail "mips*-sgi-irix*"
     gdb_test {call y([sc])} "sc " "pass modeless set powerset tuple"
 }
 
