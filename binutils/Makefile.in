@@ -160,15 +160,30 @@ binutils.dvi: binutils.texinfo
 binutils.info: binutils.texinfo
 	makeinfo binutils.texinfo
 
-# roff output (-ms)
-#   edit instances of "ms" to "me" or "mm" to suit your preferences.
+#   different targets for -ms, -mm, -me
 #   (we don't use a variable because we don't trust all makes to handle
 #   a var in the target name right).
+# roff output (-ms)
 binutils.ms: binutils.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		binutils.texinfo | \
 	texi2roff -ms >binutils.ms 
+
+# roff output (-mm)
+binutils.mm: binutils.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		binutils.texinfo | \
+	texi2roff -mm >binutils.mm 
+
+# roff output (-me)
+binutils.me: binutils.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		binutils.texinfo | \
+	texi2roff -me >binutils.me 
+
 
 ######################################################################
 
