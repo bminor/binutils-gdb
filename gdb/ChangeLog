@@ -1,3 +1,11 @@
+2002-06-21  Jim Blandy  <jimb@redhat.com>
+
+	Remove some vestiges of Harris 88k support.
+	* dwarf2read.c (decode_locdesc): Remove `#if' block for Harris 88k
+	register numbering quirk.
+	* elfread.c (elf_symtab_read): Remove `#if' block for skipping
+	odd symbols occurring in Harris 88k ELF targets.
+
 2002-06-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb_locale.h: New file.

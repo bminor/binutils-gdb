@@ -6235,12 +6235,6 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  isreg = 1;
 	  unsnd = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
 	  i += bytes_read;
-#if defined(HARRIS_TARGET) && defined(_M88K)
-	  /* The Harris 88110 gdb ports have long kept their special reg
-	     numbers between their gp-regs and their x-regs.  This is
-	     not how our dwarf is generated.  Punt. */
-	  unsnd += 6;
-#endif
 	  stack[++stacki] = unsnd;
 	  break;
 
