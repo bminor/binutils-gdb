@@ -1,3 +1,7 @@
+2004-12-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/readelf.ss: Allow for both .rel and .rela sections.
+
 2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* binutils-all/objdump.exp (cpus_expected): Append cris.
