@@ -23,6 +23,8 @@
 #include "regcache.h"
 
 #include "gdb_assert.h"
+#include <signal.h>
+#include <stddef.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
@@ -198,7 +200,8 @@ store_inferior_registers (int regno)
 
   fill_gregset (&gregs, regno);
 
-  if (ptrace (PT_SETREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+  if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
+	      (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
     perror_with_name ("Couldn't write registers");
 
   if (regno == -1 || regno >= FP0_REGNUM)
@@ -279,7 +282,7 @@ i386bsd_dr_get_status (void)
   /* FIXME: kettenis/2001-03-31: Calling perror_with_name if the
      ptrace call fails breaks debugging remote targets.  The correct
      way to fix this is to add the hardware breakpoint and watchpoint
-     stuff to the target vectore.  For now, just return zero if the
+     stuff to the target vector.  For now, just return zero if the
      ptrace call fails.  */
   if (ptrace (PT_GETDBREGS, PIDGET (inferior_ptid),
 	      (PTRACE_ARG3_TYPE) & dbregs, 0) == -1)
@@ -315,4 +318,46 @@ int
 kernel_u_size (void)
 {
   return (sizeof (struct user));
+}
+
+/* See i386bsd-tdep.c.  */
+extern int i386bsd_sigcontext_pc_offset;
+
+#include <sys/sysctl.h>
+
+void
+_initialize_i386bsd_nat (void)
+{
+  /* To support the recognition of signal handlers, i386bsd-tdep.c
+     hardcodes some constants.  Inclusion of this file means that we
+     are compiling a native debugger, which means that we can use the
+     system header files and sysctl(3) to get at the relevant
+     information.  */
+
+  /* Override the default value for the offset of the program counter
+     in the sigcontext structure.  */
+  i386bsd_sigcontext_pc_offset = offsetof (struct sigcontext, sc_pc);
+
+  /* FreeBSD provides a kern.ps_strings sysctl that we can use to
+     locate the sigtramp.  That way we can still recognize a sigtramp
+     if it's location is changed in a new kernel.  Of course this is
+     still based on the assumption that the sigtramp is placed
+     directly under the location where the program arguments and
+     environment can be found.  */
+#ifdef KERN_PS_STRINGS
+  {
+    int mib[2];
+    int ps_strings;
+    size_t len;
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PS_STRINGS;
+    len = sizeof (ps_strings);
+    if (sysctl (mib, 2, &ps_strings, &len, NULL, 0) == 0)
+      {
+	i386bsd_sigtramp_start = ps_strings - 128;
+	i386bsd_sigtramp_end = ps_strings;
+      }
+  }
+#endif
 }

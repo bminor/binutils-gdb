@@ -1,5 +1,5 @@
 /* Target-dependent definitions for FreeBSD/i386.
-   Copyright 1997, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,21 +40,31 @@
 /* Figure out where the longjmp will land.  Store the address that
    longjmp will jump to in *ADDR, and return non-zero if successful.  */
 
-extern int get_longjmp_target (CORE_ADDR *addr);
 #define GET_LONGJMP_TARGET(addr) get_longjmp_target (addr)
+extern int get_longjmp_target (CORE_ADDR *addr);
 
 
 /* Support for signal handlers.  */
 
-/* The sigtramp is above the user stack and immediately below
-   the user area.  Using constants here allows for cross debugging.
-   These are tested for FreeBSD 3.4.  */
+#define IN_SIGTRAMP(pc, name) i386bsd_in_sigtramp (pc, name)
+extern int i386bsd_in_sigtramp (CORE_ADDR pc, char *name);
 
-#define SIGTRAMP_START(pc)	0xbfbfdf20
-#define SIGTRAMP_END(pc)	0xbfbfdff0
+/* These defines allow the recognition of sigtramps as a function name
+   <sigtramp>.
 
-/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
-#define SIGCONTEXT_PC_OFFSET 20
+   FIXME: kettenis/2001-07-13: These should be added to the target
+   vector and turned into functions when we go "multi-arch".  */
+
+#define SIGTRAMP_START(pc) i386bsd_sigtramp_start
+#define SIGTRAMP_END(pc) i386bsd_sigtramp_end
+extern CORE_ADDR i386bsd_sigtramp_start;
+extern CORE_ADDR i386bsd_sigtramp_end;
+
+/* Override FRAME_SAVED_PC to enable the recognition of signal handlers.  */
+
+#undef FRAME_SAVED_PC
+#define FRAME_SAVED_PC(frame) i386bsd_frame_saved_pc (frame)
+extern CORE_ADDR i386bsd_frame_saved_pc (struct frame_info *frame);
 
 
 /* Shared library support.  */

@@ -1,3 +1,20 @@
+2001-07-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c: Include <signal.h>, <stddef.h> and
+	<sys/sysctl.h>.
+	(store_inferior_registers): Wrap long line.
+	(i386bsd_dr_get_status): Fix typo in comment.
+	(_initialize_i386bsd_nat): New function.  * i386bsd-tdep.c: New
+	file.  * config/i386/tm-fbsd.h (IN_SIGTRAMP): New define.
+	(i386bsd_in_sigtramp): New prototype.
+	(SIGTRAMP_START, SIGTRAMP_END): Redefine in terms...
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): ...these new
+	(external) variables.
+	(SIGCONTEXT_PC_OFFSET): Removed.
+	(FRAME_SAVED_PC): New define.
+	(i386bsd_frame_saved_pc): New function.  * config/i386/fbsd.mt
+	(TDEPFILES): Add i386bsd-tdep.o.
+
 2001-07-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-linux-tdep.c (_initialize_mips_linux_tdep):  Use ISO C
