@@ -1,3 +1,8 @@
+2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sparc-dis.c (print_insn_sparc): Make sure 0xFFFFFFFF is not
+	sign-extended.
+
 2002-02-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: "make dep-am".
