@@ -1,5 +1,17 @@
 2000-11-17  Kevin Buettner  <kevinb@redhat.com>
 
+	* rs6000-tdep.c (refine_prologue_limit): New function.
+	(skip_prologue): When zero, attempt to obtain value for
+	lim_pc by calling refine_prologue_limit().  Also, fix
+	fencepost error regarding the limit in the loop.
+
+	From Peter Schauer:
+	* rs6000-tdep.c (skip_prologue):  Handle optimizer code motions into
+	the prologue by continuing the prologue search, if we have no valid
+	frame yet or if the return address is not yet saved in the frame.
+
+2000-11-17  Kevin Buettner  <kevinb@redhat.com>
+
 	* wrapper.c (gdb_value_assign, wrap_value_assign): Protoize.
 
 2000-11-16  Christopher Faylor  <cgf@redhat.com>

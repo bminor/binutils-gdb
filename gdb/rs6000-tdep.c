@@ -380,11 +380,63 @@ rs6000_software_single_step (unsigned int signal, int insert_breakpoints_p)
 
 #define GET_SRC_REG(x) (((x) >> 21) & 0x1f)
 
+/* Limit the number of skipped non-prologue instructions, as the examining
+   of the prologue is expensive.  */
+static int max_skip_non_prologue_insns = 10;
+
+/* Given PC representing the starting address of a function, and
+   LIM_PC which is the (sloppy) limit to which to scan when looking
+   for a prologue, attempt to further refine this limit by using
+   the line data in the symbol table.  If successful, a better guess
+   on where the prologue ends is returned, otherwise the previous
+   value of lim_pc is returned.  */
+static CORE_ADDR
+refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc)
+{
+  struct symtab_and_line prologue_sal;
+
+  prologue_sal = find_pc_line (pc, 0);
+  if (prologue_sal.line != 0)
+    {
+      int i;
+      CORE_ADDR addr = prologue_sal.end;
+
+      /* Handle the case in which compiler's optimizer/scheduler
+         has moved instructions into the prologue.  We scan ahead
+	 in the function looking for address ranges whose corresponding
+	 line number is less than or equal to the first one that we
+	 found for the function.  (It can be less than when the
+	 scheduler puts a body instruction before the first prologue
+	 instruction.)  */
+      for (i = 2 * max_skip_non_prologue_insns; 
+           i > 0 && (lim_pc == 0 || addr < lim_pc);
+	   i--)
+        {
+	  struct symtab_and_line sal;
+
+	  sal = find_pc_line (addr, 0);
+	  if (sal.line == 0)
+	    break;
+	  if (sal.line <= prologue_sal.line 
+	      && sal.symtab == prologue_sal.symtab)
+	    {
+	      prologue_sal = sal;
+	    }
+	  addr = sal.end;
+	}
+
+      if (lim_pc == 0 || prologue_sal.end < lim_pc)
+	lim_pc = prologue_sal.end;
+    }
+  return lim_pc;
+}
+
+
 static CORE_ADDR
 skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 {
   CORE_ADDR orig_pc = pc;
-  CORE_ADDR last_prologue_pc;
+  CORE_ADDR last_prologue_pc = pc;
   char buf[4];
   unsigned long op;
   long offset = 0;
@@ -394,6 +446,22 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   int framep = 0;
   int minimal_toc_loaded = 0;
   int prev_insn_was_prologue_insn = 1;
+  int num_skip_non_prologue_insns = 0;
+
+  /* Attempt to find the end of the prologue when no limit is specified.
+     Note that refine_prologue_limit() has been written so that it may
+     be used to "refine" the limits of non-zero PC values too, but this
+     is only safe if we 1) trust the line information provided by the
+     compiler and 2) iterate enough to actually find the end of the
+     prologue.  
+     
+     It may become a good idea at some point (for both performance and
+     accuracy) to unconditionally call refine_prologue_limit().  But,
+     until we can make a clear determination that this is beneficial,
+     we'll play it safe and only use it to obtain a limit when none
+     has been specified.  */
+  if (lim_pc == 0)
+    lim_pc = refine_prologue_limit (pc, lim_pc);
 
   memset (fdata, 0, sizeof (struct rs6000_framedata));
   fdata->saved_gpr = -1;
@@ -402,19 +470,22 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   fdata->frameless = 1;
   fdata->nosavedpc = 1;
 
-  pc -= 4;
-  while (lim_pc == 0 || pc < lim_pc - 4)
+  for (;; pc += 4)
     {
-      pc += 4;
-
       /* Sometimes it isn't clear if an instruction is a prologue
          instruction or not.  When we encounter one of these ambiguous
 	 cases, we'll set prev_insn_was_prologue_insn to 0 (false).
 	 Otherwise, we'll assume that it really is a prologue instruction. */
       if (prev_insn_was_prologue_insn)
 	last_prologue_pc = pc;
+
+      /* Stop scanning if we've hit the limit.  */
+      if (lim_pc != 0 && pc >= lim_pc)
+	break;
+
       prev_insn_was_prologue_insn = 1;
 
+      /* Fetch the instruction and convert it to an integer.  */
       if (target_read_memory (pc, buf, 4))
 	break;
       op = extract_signed_integer (buf, 4);
@@ -628,7 +699,31 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	}
       else
 	{
-	  break;
+	  /* Not a recognized prologue instruction.
+	     Handle optimizer code motions into the prologue by continuing
+	     the search if we have no valid frame yet or if the return
+	     address is not yet saved in the frame.  */
+	  if (fdata->frameless == 0
+	      && (lr_reg == -1 || fdata->nosavedpc == 0))
+	    break;
+
+	  if (op == 0x4e800020		/* blr */
+	      || op == 0x4e800420)	/* bctr */
+	    /* Do not scan past epilogue in frameless functions or
+	       trampolines.  */
+	    break;
+	  if ((op & 0xf4000000) == 0x40000000) /* bxx */
+	    /* Never skip branches. */
+	    break;
+
+	  if (num_skip_non_prologue_insns++ > max_skip_non_prologue_insns)
+	    /* Do not scan too many insns, scanning insns is expensive with
+	       remote targets.  */
+	    break;
+
+	  /* Continue scanning.  */
+	  prev_insn_was_prologue_insn = 0;
+	  continue;
 	}
     }
 
