@@ -1299,21 +1299,55 @@ yylex ()
 			 VAR_NAMESPACE,
 			 &is_a_field_of_this,
 			 (struct symtab **) NULL);
-    /* second chance uppercased ! */
+    /* second chance uppercased (as Free Pascal does).  */
     if (!sym)
       {
-       for (i = 0;i <= namelen;i++)
+       for (i = 0; i <= namelen; i++)
          {
-           if ((tmp[i]>='a' && tmp[i]<='z'))
+           if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
              tmp[i] -= ('a'-'A');
-           /* I am not sure that copy_name gives excatly the same result ! */
-           if ((tokstart[i]>='a' && tokstart[i]<='z'))
-             tokstart[i] -= ('a'-'A');
          }
-        sym = lookup_symbol (tmp, expression_context_block,
-			 VAR_NAMESPACE,
-			 &is_a_field_of_this,
-			 (struct symtab **) NULL);
+       sym = lookup_symbol (tmp, expression_context_block,
+                        VAR_NAMESPACE,
+                        &is_a_field_of_this,
+                        (struct symtab **) NULL);
+       if (sym)
+         for (i = 0; i <= namelen; i++)
+           {
+             if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
+               tokstart[i] -= ('a'-'A');
+           }
+      }
+    /* Third chance Capitalized (as GPC does).  */
+    if (!sym)
+      {
+       for (i = 0; i <= namelen; i++)
+         {
+           if (i == 0)
+             {
+              if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
+                tmp[i] -= ('a'-'A');
+             }
+           else
+           if ((tmp[i] >= 'A' && tmp[i] <= 'Z'))
+             tmp[i] -= ('A'-'a');
+          }
+       sym = lookup_symbol (tmp, expression_context_block,
+                         VAR_NAMESPACE,
+                         &is_a_field_of_this,
+                         (struct symtab **) NULL);
+        if (sym)
+          for (i = 0; i <= namelen; i++)
+            {
+              if (i == 0)
+                {
+                  if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
+                    tokstart[i] -= ('a'-'A');
+                }
+              else
+                if ((tokstart[i] >= 'A' && tokstart[i] <= 'Z'))
+                  tokstart[i] -= ('A'-'a');
+            }
       }
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the

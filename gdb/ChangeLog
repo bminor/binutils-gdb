@@ -1,3 +1,8 @@
+2001-11-06 Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y (yylex): Only change case of expression if symbol is found.
+	Also check for GPC standard name form.
+
 2001-11-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c (internal_verror): Restore calls to abort().
