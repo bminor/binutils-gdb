@@ -1,3 +1,16 @@
+2000-04-14  Geoff Keating  <geoffk@cygnus.com>
+
+	* scripttempl/elfppc.sc: Remove.
+	* emulparams/elf32ppc.sh: Use elf.sc.
+	* emulparams/elf32lppc.sh: Use elf.sc.
+	* emulparams/elf32ppclinux.sh: Use elf.sc.
+	* emulparams/elf32ppcsim.sh: New file.
+	* emulparams/elf32lppcsim.sh: New file.
+	* Makefile.am: Update dependencies.  Add elf32ppcsim ad elf32lppcsim.
+	(ALL_EMULATIONS): Add elf32ppcsim ad elf32lppcsim.
+	* Makefile.in: Regenerate.
+	* configure.tgt (powerpc-*): Add elf32ppcsim and elf32lppcsim.
+
 2000-04-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_section): Process

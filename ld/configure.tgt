@@ -253,16 +253,17 @@ alpha*-*-netbsd*)	targ_emul=elf64alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
 ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
-powerpc-*-linux-gnu*)	targ_emul=elf32ppclinux; targ_extra_emuls=elf32ppc;
+powerpc-*-linux-gnu*)	targ_emul=elf32ppclinux; 
+			targ_extra_emuls="elf32ppc elf32ppcsim";
 			targ_extra_libpath=elf32ppc ;;
 pjl*-*-*)	        targ_emul=pjlelf ; targ_extra_emuls="elf_i386" ;;
 pj*-*-*)	        targ_emul=pjelf ;;
 powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-sysv* \
   | powerpc-*-netbsd* | powerpc-*-vxworks*)
-	targ_emul=elf32ppc ;;
+	targ_emul=elf32ppc targ_extra_emuls="elf32ppclinux elf32ppcsim";;
 powerpcle-*-elf* | powerpcle-*-eabi* | powerpcle-*-solaris* \
   | powerpcle-*-sysv* | powerpcle-*-vxworks*)
-	targ_emul=elf32lppc ;;
+	targ_emul=elf32lppc targ_extra_emuls="elf32ppcsim";;
 powerpcle-*-rtems*)	targ_emul=elf32leppc ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
