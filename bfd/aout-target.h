@@ -43,6 +43,10 @@ MY(callback) (abfd)
   obj_datasec (abfd)->vma = N_DATADDR(*execp);
   obj_bsssec  (abfd)->vma = N_BSSADDR(*execp);
 
+  obj_textsec (abfd)->lma = obj_textsec (abfd)->vma;
+  obj_datasec (abfd)->lma = obj_datasec (abfd)->vma;
+  obj_bsssec (abfd)->lma = obj_bsssec (abfd)->vma;
+
   /* The file offsets of the sections */
   obj_textsec (abfd)->filepos = N_TXTOFF (*execp);
   obj_datasec (abfd)->filepos = N_DATOFF (*execp);
@@ -349,6 +353,9 @@ MY_bfd_final_link (abfd, info)
 #ifndef	MY_openr_next_archived_file
 #define	MY_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #endif
+#ifndef MY_get_elt_at_index
+#define MY_get_elt_at_index		_bfd_generic_get_elt_at_index
+#endif
 #ifndef	MY_generic_stat_arch_elt
 #define	MY_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #endif
@@ -415,6 +422,9 @@ MY_bfd_final_link (abfd, info)
 #endif
 #ifndef MY_get_section_contents
 #define MY_get_section_contents NAME(aout,get_section_contents)
+#endif
+#ifndef MY_get_section_contents_in_window
+#define MY_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
 #endif
 #ifndef MY_new_section_hook
 #define MY_new_section_hook NAME(aout,new_section_hook)
@@ -547,11 +557,11 @@ const bfd_target MY(vec) =
   TARGETNAME,		/* name */
   bfd_target_aout_flavour,
 #ifdef TARGET_IS_BIG_ENDIAN_P
-  true,				/* target byte order (big) */
-  true,				/* target headers byte order (big) */
+  BFD_ENDIAN_BIG,		/* target byte order (big) */
+  BFD_ENDIAN_BIG,		/* target headers byte order (big) */
 #else
-  false,			/* target byte order (little) */
-  false,			/* target headers byte order (little) */
+  BFD_ENDIAN_LITTLE,		/* target byte order (little) */
+  BFD_ENDIAN_LITTLE,		/* target headers byte order (little) */
 #endif
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |

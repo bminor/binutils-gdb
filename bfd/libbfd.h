@@ -36,6 +36,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    do casts, and casting to the left of assignment isn't portable.  */
 #define set_tdata(bfd, v) ((bfd)->tdata.any = (PTR) (v))
 
+/* If BFD_IN_MEMORY is set for a BFD, then the iostream fields points
+   to an instance of this structure.  */
+
+struct bfd_in_memory
+{
+  /* Size of buffer.  */
+  bfd_size_type size;
+  /* Buffer holding contents of BFD.  */
+  bfd_byte *buffer;
+};
+
 /* tdata for an archive.  For an input archive, cache
    needs to be free()'d.  For an output archive, symdefs do.  */
 
@@ -70,16 +81,16 @@ struct areltdata {
 
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
 
-char *bfd_zmalloc PARAMS ((bfd_size_type size));
+extern PTR bfd_malloc PARAMS ((size_t));
+extern PTR bfd_realloc PARAMS ((PTR, size_t));
+extern PTR bfd_zmalloc PARAMS ((size_t));
 
 extern bfd_error_handler_type _bfd_error_handler;
 
-/* These routines allocate and free things on the BFD's obstack.  Note
-   that realloc can never occur in place.  */
+/* These routines allocate and free things on the BFD's obstack.  */
 
 PTR	bfd_alloc PARAMS ((bfd *abfd, size_t size));
 PTR	bfd_zalloc PARAMS ((bfd *abfd, size_t size));
-PTR	bfd_realloc PARAMS ((bfd *abfd, PTR orig, size_t size));
 void	bfd_alloc_grow PARAMS ((bfd *abfd, PTR thing, size_t size));
 PTR	bfd_alloc_finish PARAMS ((bfd *abfd));
 PTR	bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t wanted));
@@ -101,6 +112,7 @@ extern boolean _bfd_construct_extended_name_table
 boolean	_bfd_write_archive_contents PARAMS ((bfd *abfd));
 boolean _bfd_compute_and_write_armap PARAMS ((bfd *, unsigned int elength));
 bfd *_bfd_get_elt_at_filepos PARAMS ((bfd *archive, file_ptr filepos));
+extern bfd *_bfd_generic_get_elt_at_index PARAMS ((bfd *, symindex));
 bfd * _bfd_new_bfd PARAMS ((void));
 
 boolean	bfd_false PARAMS ((bfd *ignore));
@@ -130,13 +142,15 @@ boolean	coff_write_armap PARAMS ((bfd *arch, unsigned int elength,
 
 extern PTR _bfd_generic_read_ar_hdr PARAMS ((bfd *));
 
+extern PTR _bfd_generic_read_ar_hdr_mag PARAMS ((bfd *, const char *));
+
 bfd *	bfd_generic_openr_next_archived_file PARAMS ((bfd *archive,
 						     bfd *last_file));
 
 int	bfd_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 
 #define _bfd_read_ar_hdr(abfd) \
-  BFD_SEND (abfd, _bfd_read_ar_hdr, (abfd))
+  BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
 
 /* Generic routines to use for BFD_JUMP_TABLE_GENERIC.  Use
    BFD_JUMP_TABLE_GENERIC (_bfd_generic).  */
@@ -148,6 +162,8 @@ int	bfd_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 extern boolean _bfd_generic_get_section_contents
   PARAMS ((bfd *, asection *, PTR location, file_ptr offset,
 	   bfd_size_type count));
+extern boolean _bfd_generic_get_section_contents_in_window
+  PARAMS ((bfd *, asection *, bfd_window *, file_ptr, bfd_size_type));
 
 /* Generic routines to use for BFD_JUMP_TABLE_COPY.  Use
    BFD_JUMP_TABLE_COPY (_bfd_generic).  */
@@ -163,7 +179,7 @@ extern boolean _bfd_generic_get_section_contents
 #define _bfd_generic_bfd_copy_private_symbol_data \
   ((boolean (*) PARAMS ((bfd *, asymbol *, bfd *, asymbol *))) bfd_true)
 #define _bfd_generic_bfd_print_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, void  *))) bfd_true)
+  ((boolean (*) PARAMS ((bfd *, PTR))) bfd_true)
 
 /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
@@ -190,6 +206,8 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
 #define _bfd_noarchive_read_ar_hdr bfd_nullvoidptr
 #define _bfd_noarchive_openr_next_archived_file \
   ((bfd *(*) PARAMS ((bfd *, bfd *))) bfd_nullvoidptr)
+#define _bfd_noarchive_get_elt_at_index \
+  ((bfd *(*) PARAMS ((bfd *, symindex))) bfd_nullvoidptr)
 #define _bfd_noarchive_generic_stat_arch_elt bfd_generic_stat_arch_elt
 #define _bfd_noarchive_update_armap_timestamp bfd_false
 
@@ -206,6 +224,7 @@ extern boolean _bfd_archive_bsd_construct_extended_name_table
 #define _bfd_archive_bsd_read_ar_hdr _bfd_generic_read_ar_hdr
 #define _bfd_archive_bsd_openr_next_archived_file \
   bfd_generic_openr_next_archived_file
+#define _bfd_archive_bsd_get_elt_at_index _bfd_generic_get_elt_at_index
 #define _bfd_archive_bsd_generic_stat_arch_elt \
   bfd_generic_stat_arch_elt
 extern boolean _bfd_archive_bsd_update_armap_timestamp PARAMS ((bfd *));
@@ -223,6 +242,7 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
 #define _bfd_archive_coff_read_ar_hdr _bfd_generic_read_ar_hdr
 #define _bfd_archive_coff_openr_next_archived_file \
   bfd_generic_openr_next_archived_file
+#define _bfd_archive_coff_get_elt_at_index _bfd_generic_get_elt_at_index
 #define _bfd_archive_coff_generic_stat_arch_elt \
   bfd_generic_stat_arch_elt
 #define _bfd_archive_coff_update_armap_timestamp bfd_true
@@ -400,6 +420,9 @@ extern bfd_reloc_status_type _bfd_relocate_contents
 
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init PARAMS ((void));
+
+/* Create an XCOFF .debug section style string table.  */
+extern struct bfd_strtab_hash *_bfd_xcoff_stringtab_init PARAMS ((void));
 
 /* Free a string table.  */
 extern void _bfd_stringtab_free PARAMS ((struct bfd_strtab_hash *));

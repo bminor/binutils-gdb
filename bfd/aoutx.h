@@ -598,7 +598,8 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
         the default text start (obj_textsec(abfd)->vma) and
         (obj_textsec(abfd)->vma) + text size.  This is not just a mach
         issue.  Many kernels are loaded at non standard addresses.  */
-      if (abfd->iostream
+      if (abfd->iostream != NULL
+	  && (abfd->flags & BFD_IN_MEMORY) == 0
 	  && (fstat(fileno((FILE *) (abfd->iostream)), &stat_buf) == 0)
 	  && ((stat_buf.st_mode & 0111) != 0))
 	abfd->flags |= EXEC_P;
@@ -1986,7 +1987,7 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
     }
 
   /* now the fun stuff */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
       natptr->r_index[0] = r_index >> 16;
       natptr->r_index[1] = r_index >> 8;
       natptr->r_index[2] = r_index;
@@ -2065,7 +2066,7 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
     }
 
   /* now the fun stuff */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     natptr->r_index[0] = r_index >> 16;
     natptr->r_index[1] = r_index >> 8;
     natptr->r_index[2] = r_index;
@@ -2142,7 +2143,7 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
   cache_ptr->address = (GET_SWORD (abfd, bytes->r_address));
 
   /* now the fun stuff */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     r_index =  (bytes->r_index[0] << 16)
 	     | (bytes->r_index[1] << 8)
 	     |  bytes->r_index[2];
@@ -2198,7 +2199,7 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
   cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
 
   /* now the fun stuff */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     r_index =  (bytes->r_index[0] << 16)
       | (bytes->r_index[1] << 8)
 	|  bytes->r_index[2];
@@ -2495,6 +2496,7 @@ NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
 	  stab_name = buf;
 	}
       ret->type = '-';
+      ret->stab_type = type_code;
       ret->stab_other = (unsigned)(aout_symbol(symbol)->other & 0xff);
       ret->stab_desc = (unsigned)(aout_symbol(symbol)->desc & 0xffff);
       ret->stab_name = stab_name;
@@ -4598,8 +4600,8 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
   check_dynamic_reloc = aout_backend_info (output_bfd)->check_dynamic_reloc;
 
   BFD_ASSERT (obj_reloc_entry_size (input_bfd) == RELOC_STD_SIZE);
-  BFD_ASSERT (input_bfd->xvec->header_byteorder_big_p
-	      == output_bfd->xvec->header_byteorder_big_p);
+  BFD_ASSERT (input_bfd->xvec->header_byteorder
+	      == output_bfd->xvec->header_byteorder);
 
   relocateable = finfo->info->relocateable;
   syms = obj_aout_external_syms (input_bfd);
@@ -4633,7 +4635,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	int r_length;
 	unsigned int howto_idx;
 
-	if (input_bfd->xvec->header_byteorder_big_p)
+	if (bfd_header_big_endian (input_bfd))
 	  {
 	    r_index   =  ((rel->r_index[0] << 16)
 			  | (rel->r_index[1] << 8)
@@ -4687,7 +4689,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		  asection *output_section;
 
 		  /* Change the r_extern value.  */
-		  if (output_bfd->xvec->header_byteorder_big_p)
+		  if (bfd_header_big_endian (output_bfd))
 		    rel->r_type[0] &=~ RELOC_STD_BITS_EXTERN_BIG;
 		  else
 		    rel->r_type[0] &=~ RELOC_STD_BITS_EXTERN_LITTLE;
@@ -4752,7 +4754,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		}
 
 	      /* Write out the new r_index value.  */
-	      if (output_bfd->xvec->header_byteorder_big_p)
+	      if (bfd_header_big_endian (output_bfd))
 		{
 		  rel->r_index[0] = r_index >> 16;
 		  rel->r_index[1] = r_index >> 8;
@@ -4937,8 +4939,8 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
   check_dynamic_reloc = aout_backend_info (output_bfd)->check_dynamic_reloc;
 
   BFD_ASSERT (obj_reloc_entry_size (input_bfd) == RELOC_EXT_SIZE);
-  BFD_ASSERT (input_bfd->xvec->header_byteorder_big_p
-	      == output_bfd->xvec->header_byteorder_big_p);
+  BFD_ASSERT (input_bfd->xvec->header_byteorder
+	      == output_bfd->xvec->header_byteorder);
 
   relocateable = finfo->info->relocateable;
   syms = obj_aout_external_syms (input_bfd);
@@ -4962,7 +4964,7 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 
       r_addr = GET_SWORD (input_bfd, rel->r_address);
 
-      if (input_bfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (input_bfd))
 	{
 	  r_index  = ((rel->r_index[0] << 16)
 		      | (rel->r_index[1] << 8)
@@ -5002,7 +5004,7 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		  asection *output_section;
 
 		  /* Change the r_extern value.  */
-		  if (output_bfd->xvec->header_byteorder_big_p)
+		  if (bfd_header_big_endian (output_bfd))
 		    rel->r_type[0] &=~ RELOC_EXT_BITS_EXTERN_BIG;
 		  else
 		    rel->r_type[0] &=~ RELOC_EXT_BITS_EXTERN_LITTLE;
@@ -5080,7 +5082,7 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		}
 
 	      /* Write out the new r_index value.  */
-	      if (output_bfd->xvec->header_byteorder_big_p)
+	      if (bfd_header_big_endian (output_bfd))
 		{
 		  rel->r_index[0] = r_index >> 16;
 		  rel->r_index[1] = r_index >> 8;
@@ -5389,7 +5391,7 @@ aout_link_reloc_link_order (finfo, o, p)
 	r_length = howto->size;
 
 	PUT_WORD (finfo->output_bfd, p->offset, srel.r_address);
-	if (finfo->output_bfd->xvec->header_byteorder_big_p)
+	if (bfd_header_big_endian (finfo->output_bfd))
 	  {
 	    srel.r_index[0] = r_index >> 16;
 	    srel.r_index[1] = r_index >> 8;
@@ -5472,7 +5474,7 @@ aout_link_reloc_link_order (finfo, o, p)
     {
       PUT_WORD (finfo->output_bfd, p->offset, erel.r_address);
 
-      if (finfo->output_bfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (finfo->output_bfd))
 	{
 	  erel.r_index[0] = r_index >> 16;
 	  erel.r_index[1] = r_index >> 8;

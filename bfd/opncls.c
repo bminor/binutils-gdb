@@ -40,6 +40,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
 
+#ifndef HAVE_GETPAGESIZE
+#define getpagesize()	2048
+#endif
+
+long _bfd_chunksize = -1;
+
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
 
 bfd *
@@ -49,12 +55,20 @@ _bfd_new_bfd ()
 
   nbfd = (bfd *)bfd_zmalloc (sizeof (bfd));
   if (!nbfd)
+    return 0;
+
+  if (_bfd_chunksize <= 0)
     {
-      bfd_set_error (bfd_error_no_memory);
-      return 0;
+      _bfd_chunksize = getpagesize ();
+      if (_bfd_chunksize <= 0)
+	_bfd_chunksize = 2048;
+      /* Leave some slush space, since many malloc implementations
+	 prepend a header, and may wind up wasting another page
+	 because of it.  */
+      _bfd_chunksize -= 32;
     }
 
-  if (!obstack_begin(&nbfd->memory, 128))
+  if (!obstack_begin(&nbfd->memory, _bfd_chunksize))
     {
       bfd_set_error (bfd_error_no_memory);
       return 0;
@@ -129,10 +143,8 @@ bfd_openr (filename, target)
   const bfd_target *target_vec;
 
   nbfd = _bfd_new_bfd();
-  if (nbfd == NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (nbfd == NULL)
     return NULL;
-  }
 
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL) {
@@ -197,7 +209,6 @@ bfd_fdopenr (filename, target, fd)
   int fdflags;
 
   bfd_set_error (bfd_error_system_call);
-
 #if ! defined(HAVE_FCNTL) || ! defined(F_GETFL)
   fdflags = O_RDWR;			/* Assume full access */
 #else
@@ -207,24 +218,22 @@ bfd_fdopenr (filename, target, fd)
 
   nbfd = _bfd_new_bfd();
 
-  if (nbfd == NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (nbfd == NULL)
     return NULL;
-  }
 
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL) {
     bfd_set_error (bfd_error_invalid_target);
     return NULL;
   }
-#if defined(VMS) || defined(__GO32__) || defined (WIN32)
-  nbfd->iostream = (char *)fopen(filename, FOPEN_RB);
+#if defined(VMS) || defined(__GO32__) || defined (WINGDB)
+  nbfd->iostream = (PTR)fopen(filename, FOPEN_RB);
 #else
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
   switch (fdflags & (O_ACCMODE)) {
-  case O_RDONLY: nbfd->iostream = (char *) fdopen (fd, FOPEN_RB);   break;
-  case O_WRONLY: nbfd->iostream = (char *) fdopen (fd, FOPEN_RUB);  break;
-  case O_RDWR:   nbfd->iostream = (char *) fdopen (fd, FOPEN_RUB);  break;
+  case O_RDONLY: nbfd->iostream = (PTR) fdopen (fd, FOPEN_RB);   break;
+  case O_WRONLY: nbfd->iostream = (PTR) fdopen (fd, FOPEN_RUB);  break;
+  case O_RDWR:   nbfd->iostream = (PTR) fdopen (fd, FOPEN_RUB);  break;
   default: abort ();
   }
 #endif
@@ -278,10 +287,7 @@ bfd_openstreamr (filename, target, stream)
 
   nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL)
@@ -290,7 +296,7 @@ bfd_openstreamr (filename, target, stream)
       return NULL;
     }
 
-  nbfd->iostream = (char *) stream;
+  nbfd->iostream = (PTR) stream;
   nbfd->filename = filename;
   nbfd->direction = read_direction;
 				
@@ -334,10 +340,8 @@ bfd_openw (filename, target)
      reclaim it correctly. */
 
   nbfd = _bfd_new_bfd();
-  if (nbfd == NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (nbfd == NULL)
     return NULL;
-  }
 
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL) return NULL;
@@ -521,10 +525,8 @@ bfd_create (filename, templ)
      bfd *templ;
 {
   bfd *nbfd = _bfd_new_bfd();
-  if (nbfd == (bfd *)NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (nbfd == (bfd *)NULL)
     return (bfd *)NULL;
-  }
   nbfd->filename = filename;
   if(templ) {
     nbfd->xvec = templ->xvec;
@@ -552,7 +554,12 @@ bfd_alloc_by_size_t (abfd, size)
      bfd *abfd;
      size_t size;
 {
-  return obstack_alloc(&(abfd->memory), size);
+  PTR ret;
+
+  ret = obstack_alloc (&(abfd->memory), size);
+  if (ret == NULL)
+    bfd_set_error (bfd_error_no_memory);
+  return ret;
 }
 
 void
@@ -568,7 +575,12 @@ PTR
 bfd_alloc_finish (abfd)
      bfd *abfd;
 {
-  return obstack_finish(&(abfd->memory));
+  PTR ret;
+
+  ret = obstack_finish (&(abfd->memory));
+  if (ret == NULL)
+    bfd_set_error (bfd_error_no_memory);
+  return ret;
 }
 
 PTR

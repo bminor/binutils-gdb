@@ -355,10 +355,17 @@ PTR
 _bfd_generic_read_ar_hdr (abfd)
      bfd *abfd;
 {
-#ifndef errno
-  extern int errno;
-#endif
+  return _bfd_generic_read_ar_hdr_mag (abfd, (const char *) NULL);
+}
 
+/* Alpha ECOFF uses an optional different ARFMAG value, so we have a
+   variant of _bfd_generic_read_ar_hdr which accepts a magic string.  */
+
+PTR
+_bfd_generic_read_ar_hdr_mag (abfd, mag)
+     bfd *abfd;
+     const char *mag;
+{
   struct ar_hdr hdr;
   char *hdrp = (char *) &hdr;
   unsigned int parsed_size;
@@ -375,7 +382,9 @@ _bfd_generic_read_ar_hdr (abfd)
 	bfd_set_error (bfd_error_no_more_archived_files);
       return NULL;
     }
-  if (strncmp (hdr.ar_fmag, ARFMAG, 2))
+  if (strncmp (hdr.ar_fmag, ARFMAG, 2) != 0
+      && (mag == NULL
+	  || strncmp (hdr.ar_fmag, mag, 2) != 0))
     {
       bfd_set_error (bfd_error_malformed_archive);
       return NULL;
@@ -521,23 +530,13 @@ _bfd_get_elt_at_filepos (archive, filepos)
   return NULL;
 }
 
-/*
-FUNCTION
-	bfd_get_elt_at_index
+/* Return the BFD which is referenced by the symbol in ABFD indexed by
+   INDEX.  INDEX should have been returned by bfd_get_next_mapent.  */
 
-SYNOPSIS
-	bfd *bfd_get_elt_at_index(bfd *archive, int index);
-
-DESCRIPTION
-	Return the BFD which is referenced by the symbol in @var{archive}
-	indexed by @var{index}.  @var{index} should have been returned by
-	<<bfd_get_next_mapent>> (q.v.).
-
-*/
 bfd *
-bfd_get_elt_at_index (abfd, index)
+_bfd_generic_get_elt_at_index (abfd, index)
      bfd *abfd;
-     int index;
+     symindex index;
 {
   carsym *entry;
 
@@ -1724,9 +1723,9 @@ _bfd_compute_and_write_armap (arch, elength)
     elength += sizeof (struct ar_hdr);
   elength += elength % 2;
 
-  map = (struct orl *) malloc (orl_max * sizeof (struct orl));
+  map = (struct orl *) bfd_malloc (orl_max * sizeof (struct orl));
   if (map == NULL)
-    goto no_memory_return;
+    goto error_return;
 
   /* We put the symbol names on the arch obstack, and then discard
      them when done.  */
@@ -1763,9 +1762,9 @@ _bfd_compute_and_write_armap (arch, elength)
 		  if (syms_max > 0)
 		    free (syms);
 		  syms_max = storage;
-		  syms = (asymbol **) malloc ((size_t) syms_max);
+		  syms = (asymbol **) bfd_malloc ((size_t) syms_max);
 		  if (syms == NULL)
-		    goto no_memory_return;
+		    goto error_return;
 		}
 	      symcount = bfd_canonicalize_symtab (current, syms);
 	      if (symcount < 0)
@@ -1790,11 +1789,11 @@ _bfd_compute_and_write_armap (arch, elength)
 		      if (orl_count == orl_max)
 			{
 			  orl_max *= 2;
-			  new_map = ((struct orl *)
-				     realloc ((PTR) map,
-					      orl_max * sizeof (struct orl)));
+			  new_map =
+			    ((struct orl *)
+			     bfd_realloc (map, orl_max * sizeof (struct orl)));
 			  if (new_map == (struct orl *) NULL)
-			    goto no_memory_return;
+			    goto error_return;
 
 			  map = new_map;
 			}
@@ -1837,9 +1836,6 @@ _bfd_compute_and_write_armap (arch, elength)
     bfd_release (arch, first_name);
 
   return ret;
-
- no_memory_return:
-  bfd_set_error (bfd_error_no_memory);
 
  error_return:
   if (syms_max > 0)

@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/symconst.h"
 #include "coff/ecoff.h"
 #include "coff/alpha.h"
+#include "aout/ar.h"
 #include "libcoff.h"
 #include "libecoff.h"
 
@@ -57,6 +58,10 @@ static boolean alpha_relocate_section PARAMS ((bfd *, struct bfd_link_info *,
 					       bfd_byte *, PTR));
 static boolean alpha_adjust_headers
   PARAMS ((bfd *, struct internal_filehdr *, struct internal_aouthdr *));
+static PTR alpha_ecoff_read_ar_hdr PARAMS ((bfd *));
+static bfd *alpha_ecoff_get_elt_at_filepos PARAMS ((bfd *, file_ptr));
+static bfd *alpha_ecoff_openr_next_archived_file PARAMS ((bfd *, bfd *));
+static bfd *alpha_ecoff_get_elt_at_index PARAMS ((bfd *, symindex));
 
 /* ECOFF has COFF sections, but the debugging information is stored in
    a completely different format.  ECOFF targets use some of the
@@ -525,7 +530,7 @@ alpha_ecoff_swap_reloc_in (abfd, ext_ptr, intern)
   intern->r_vaddr = bfd_h_get_64 (abfd, (bfd_byte *) ext->r_vaddr);
   intern->r_symndx = bfd_h_get_32 (abfd, (bfd_byte *) ext->r_symndx);
 
-  BFD_ASSERT (abfd->xvec->header_byteorder_big_p == false);
+  BFD_ASSERT (bfd_header_little_endian (abfd));
 
   intern->r_type = ((ext->r_bits[0] & RELOC_BITS0_TYPE_LITTLE)
 		    >> RELOC_BITS0_TYPE_SH_LITTLE);
@@ -598,7 +603,7 @@ alpha_ecoff_swap_reloc_out (abfd, intern, dst)
   bfd_h_put_64 (abfd, intern->r_vaddr, (bfd_byte *) ext->r_vaddr);
   bfd_h_put_32 (abfd, symndx, (bfd_byte *) ext->r_symndx);
 
-  BFD_ASSERT (abfd->xvec->header_byteorder_big_p == false);
+  BFD_ASSERT (bfd_header_little_endian (abfd));
 
   ext->r_bits[0] = ((intern->r_type << RELOC_BITS0_TYPE_SH_LITTLE)
 		    & RELOC_BITS0_TYPE_LITTLE);
@@ -914,15 +919,11 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	  /* This marks the ldah of an ldah/lda pair which loads the
 	     gp register with the difference of the gp value and the
 	     current location.  The second of the pair is r_size bytes
-	     ahead, and is marked with an ALPHA_R_IGNORE reloc.  */
+	     ahead; it used to be marked with an ALPHA_R_IGNORE reloc,
+	     but that no longer happens in OSF/1 3.2.  */
 	  {
 	    unsigned long insn1, insn2;
 	    bfd_vma addend;
-
-	    BFD_ASSERT (reloc_vector[1] != NULL
-			&& reloc_vector[1]->howto->type == ALPHA_R_IGNORE
-			&& (rel->address + rel->addend
-			    == reloc_vector[1]->address));
 
 	    /* Get the two instructions.  */
 	    insn1 = bfd_get_32 (input_bfd, data + rel->address);
@@ -945,7 +946,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	    /* The existing addend includes the different between the
 	       gp of the input BFD and the address in the input BFD.
 	       Subtract this out.  */
-	    addend -= (reloc_vector[1]->addend
+	    addend -= (ecoff_data (input_bfd)->gp
 		       - (input_section->vma + rel->address));
 
 	    /* Now add in the final gp value, and subtract out the
@@ -1364,7 +1365,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
      bfd_byte *contents;
      PTR external_relocs;
 {
-  asection **symndx_to_section;
+  asection **symndx_to_section, *lita_sec;
   struct ecoff_link_hash_entry **sym_hashes;
   bfd_vma gp;
   boolean gp_undefined;
@@ -1422,14 +1423,79 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 
   sym_hashes = ecoff_data (input_bfd)->sym_hashes;
 
-  gp = ecoff_data (output_bfd)->gp;
-  if (gp == 0)
-    gp_undefined = true;
-  else
-    gp_undefined = false;
+  /* On the Alpha, the .lita section must be addressable by the global
+     pointer.  To support large programs, we need to allow multiple
+     global pointers.  This works as long as each input .lita section
+     is <64KB big.  This implies that when producing relocatable
+     output, the .lita section is limited to 64KB. . */
 
-  BFD_ASSERT (output_bfd->xvec->header_byteorder_big_p == false);
-  BFD_ASSERT (input_bfd->xvec->header_byteorder_big_p == false);
+  lita_sec = symndx_to_section[RELOC_SECTION_LITA];
+  gp = ecoff_data (output_bfd)->gp;
+  if (! info->relocateable && lita_sec != NULL)
+    {
+      struct ecoff_section_tdata *lita_sec_data;
+
+      /* Make sure we have a section data structure to which we can
+	 hang on to the gp value we pick for the section.  */
+      lita_sec_data = ecoff_section_data (input_bfd, lita_sec);
+      if (lita_sec_data == NULL)
+	{
+	  lita_sec_data = ((struct ecoff_section_tdata *)
+			   bfd_zalloc (input_bfd,
+				       sizeof (struct ecoff_section_tdata)));
+	  ecoff_section_data (input_bfd, lita_sec) = lita_sec_data;
+	}
+
+      if (lita_sec_data->gp != 0)
+	{
+	  /* If we already assigned a gp to this section, we better
+	     stick with that value.  */
+	  gp = lita_sec_data->gp;
+	}
+      else
+	{
+	  bfd_vma lita_vma;
+	  bfd_size_type lita_size;
+
+	  lita_vma = lita_sec->output_offset + lita_sec->output_section->vma;
+	  lita_size = lita_sec->_cooked_size;
+	  if (lita_size == 0)
+	    lita_size = lita_sec->_raw_size;
+
+	  if (gp == 0
+	      || lita_vma <  gp - 0x8000
+	      || lita_vma + lita_size >= gp + 0x8000)
+	    {
+	      /* Either gp hasn't been set at all or the current gp
+		 cannot address this .lita section.  In both cases we
+		 reset the gp to point into the "middle" of the
+		 current input .lita section.  For now, we issue a
+		 warning when redefining the gp value (probably should
+		 be made optional). */
+	      if (gp && !ecoff_data (output_bfd)->issued_multiple_gp_warning)
+		{
+		  (*_bfd_error_handler) 
+		    ("%s: warning: using multiple gp values",
+		     bfd_get_filename (output_bfd));
+		  ecoff_data (output_bfd)->issued_multiple_gp_warning = true;
+		}
+	      if (lita_vma < gp - 0x8000)
+		gp = lita_vma + lita_size - 0x8000;
+	      else
+		gp = lita_vma + 0x8000;
+
+	    }
+
+	  lita_sec_data->gp = gp;
+	}
+
+      ecoff_data (output_bfd)->gp = gp;
+    }
+
+  gp_undefined = (gp == 0);
+
+  BFD_ASSERT (bfd_header_little_endian (output_bfd));
+  BFD_ASSERT (bfd_header_little_endian (input_bfd));
 
   ext_rel = (struct external_reloc *) external_relocs;
   ext_rel_end = ext_rel + input_section->reloc_count;
@@ -1469,12 +1535,12 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  abort ();
 
 	case ALPHA_R_IGNORE:
-	  /* This reloc appears after a GPDISP reloc.  It marks the
-	     position of the second instruction to be altered by the
-	     GPDISP reloc, but is not otherwise used for anything.
-	     For some reason, the address of the relocation does not
-	     appear to include the section VMA, unlike the other
-	     relocation types.  */
+	  /* This reloc appears after a GPDISP reloc.  On earlier
+	     versions of OSF/1, It marked the position of the second
+	     instruction to be altered by the GPDISP reloc, but it is
+	     not otherwise used for anything.  For some reason, the
+	     address of the relocation does not appear to include the
+	     section VMA, unlike the other relocation types.  */
 	  if (info->relocateable)
 	    bfd_h_put_64 (input_bfd,
 			  input_section->output_offset + r_vaddr,
@@ -1544,18 +1610,10 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* This marks the ldah of an ldah/lda pair which loads the
 	     gp register with the difference of the gp value and the
 	     current location.  The second of the pair is r_symndx
-	     bytes ahead, and is also marked with an ALPHA_R_IGNORE
-	     reloc.  */
+	     bytes ahead.  It used to be marked with an ALPHA_R_IGNORE
+	     reloc, but OSF/1 3.2 no longer does that.  */
 	  {
 	    unsigned long insn1, insn2;
-
-	    BFD_ASSERT (ext_rel + 1 < ext_rel_end
-			&& (((ext_rel + 1)->r_bits[0]
-			     & RELOC_BITS0_TYPE_LITTLE)
-			    >> RELOC_BITS0_TYPE_SH_LITTLE) == ALPHA_R_IGNORE
-			&& (bfd_h_get_64 (input_bfd,
-					  (bfd_byte *) (ext_rel + 1)->r_vaddr)
-			    == r_vaddr - input_section->vma + r_symndx));
 
 	    /* Get the two instructions.  */
 	    insn1 = bfd_get_32 (input_bfd,
@@ -1949,6 +2007,234 @@ alpha_adjust_headers (abfd, fhdr, ahdr)
   return true;
 }
 
+/* Archive handling.  In OSF/1 (or Digital Unix) v3.2, Digital
+   introduced archive packing, in which the elements in an archive are
+   optionally compressed using a simple dictionary scheme.  We know
+   how to read such archives, but we don't write them.  */
+
+#define alpha_ecoff_slurp_armap _bfd_ecoff_slurp_armap
+#define alpha_ecoff_slurp_extended_name_table \
+  _bfd_ecoff_slurp_extended_name_table
+#define alpha_ecoff_construct_extended_name_table \
+  _bfd_ecoff_construct_extended_name_table
+#define alpha_ecoff_truncate_arname _bfd_ecoff_truncate_arname
+#define alpha_ecoff_write_armap _bfd_ecoff_write_armap
+#define alpha_ecoff_generic_stat_arch_elt _bfd_ecoff_generic_stat_arch_elt
+#define alpha_ecoff_update_armap_timestamp _bfd_ecoff_update_armap_timestamp
+
+/* A compressed file uses this instead of ARFMAG.  */
+
+#define ARFZMAG "Z\012"
+
+/* Read an archive header.  This is like the standard routine, but it
+   also accepts ARFZMAG.  */
+
+static PTR
+alpha_ecoff_read_ar_hdr (abfd)
+     bfd *abfd;
+{
+  struct areltdata *ret;
+  struct ar_hdr *h;
+
+  ret = (struct areltdata *) _bfd_generic_read_ar_hdr_mag (abfd, ARFZMAG);
+  if (ret == NULL)
+    return NULL;
+
+  h = (struct ar_hdr *) ret->arch_header;
+  if (strncmp (h->ar_fmag, ARFZMAG, 2) == 0)
+    {
+      bfd_byte ab[8];
+
+      /* This is a compressed file.  We must set the size correctly.
+         The size is the eight bytes after the dummy file header.  */
+      if (bfd_seek (abfd, FILHSZ, SEEK_CUR) != 0
+	  || bfd_read (ab, 1, 8, abfd) != 8
+	  || bfd_seek (abfd, - (FILHSZ + 8), SEEK_CUR) != 0)
+	return NULL;
+
+      ret->parsed_size = bfd_h_get_64 (abfd, ab);
+    }
+
+  return (PTR) ret;
+}
+
+/* Get an archive element at a specified file position.  This is where
+   we uncompress the archive element if necessary.  */
+
+static bfd *
+alpha_ecoff_get_elt_at_filepos (archive, filepos)
+     bfd *archive;
+     file_ptr filepos;
+{
+  bfd *nbfd = NULL;
+  struct areltdata *tdata;
+  struct ar_hdr *hdr;
+  bfd_byte ab[8];
+  bfd_size_type size;
+  bfd_byte *buf, *p;
+  struct bfd_in_memory *bim;
+
+  nbfd = _bfd_get_elt_at_filepos (archive, filepos);
+  if (nbfd == NULL)
+    goto error_return;
+
+  if ((nbfd->flags & BFD_IN_MEMORY) != 0)
+    {
+      /* We have already expanded this BFD.  */
+      return nbfd;
+    }
+
+  tdata = (struct areltdata *) nbfd->arelt_data;
+  hdr = (struct ar_hdr *) tdata->arch_header;
+  if (strncmp (hdr->ar_fmag, ARFZMAG, 2) != 0)
+    return nbfd;
+
+  /* We must uncompress this element.  We do this by copying it into a
+     memory buffer, and making bfd_read and bfd_seek use that buffer.
+     This can use a lot of memory, but it's simpler than getting a
+     temporary file, making that work with the file descriptor caching
+     code, and making sure that it is deleted at all appropriate
+     times.  It can be changed if it ever becomes important.  */
+
+  /* The compressed file starts with a dummy ECOFF file header.  */
+  if (bfd_seek (nbfd, FILHSZ, SEEK_SET) != 0)
+    goto error_return;
+
+  /* The next eight bytes are the real file size.  */
+  if (bfd_read (ab, 1, 8, nbfd) != 8)
+    goto error_return;
+  size = bfd_h_get_64 (nbfd, ab);
+
+  if (size == 0)
+    buf = NULL;
+  else
+    {
+      bfd_size_type left;
+      bfd_byte dict[4096];
+      unsigned int h;
+      bfd_byte b;
+
+      buf = (bfd_byte *) bfd_alloc (nbfd, size);
+      if (buf == NULL)
+	goto error_return;
+      p = buf;
+
+      left = size;
+
+      /* I don't know what the next eight bytes are for. */
+      if (bfd_read (ab, 1, 8, nbfd) != 8)
+	goto error_return;
+
+      /* This is the uncompression algorithm.  It's a simple
+	 dictionary based scheme in which each character is predicted
+	 by a hash of the previous three characters.  A control byte
+	 indicates whether the character is predicted or whether it
+	 appears in the input stream; each control byte manages the
+	 next eight bytes in the output stream.  */
+      memset (dict, 0, sizeof dict);
+      h = 0;
+      while (bfd_read (&b, 1, 1, nbfd) == 1)
+	{
+	  unsigned int i;
+
+	  for (i = 0; i < 8; i++, b >>= 1)
+	    {
+	      bfd_byte n;
+
+	      if ((b & 1) == 0)
+		n = dict[h];
+	      else
+		{
+		  if (! bfd_read (&n, 1, 1, nbfd))
+		    goto error_return;
+		  dict[h] = n;
+		}
+
+	      *p++ = n;
+
+	      --left;
+	      if (left == 0)
+		break;
+
+	      h <<= 4;
+	      h ^= n;
+	      h &= sizeof dict - 1;
+	    }
+
+	  if (left == 0)
+	    break;
+	}
+    }
+
+  /* Now the uncompressed file contents are in buf.  */
+  bim = ((struct bfd_in_memory *)
+	 bfd_alloc (nbfd, sizeof (struct bfd_in_memory)));
+  if (bim == NULL)
+    goto error_return;
+  bim->size = size;
+  bim->buffer = buf;
+
+  nbfd->mtime_set = true;
+  nbfd->mtime = strtol (hdr->ar_date, (char **) NULL, 10);
+
+  nbfd->flags |= BFD_IN_MEMORY;
+  nbfd->iostream = (PTR) bim;
+  BFD_ASSERT (! nbfd->cacheable);
+
+  return nbfd;
+
+ error_return:
+  if (nbfd != NULL)
+    bfd_close (nbfd);
+  return NULL;  
+}
+
+/* Open the next archived file.  */
+
+static bfd *
+alpha_ecoff_openr_next_archived_file (archive, last_file)
+     bfd *archive;
+     bfd *last_file;
+{
+  file_ptr filestart;
+
+  if (last_file == NULL)
+    filestart = bfd_ardata (archive)->first_file_filepos;
+  else
+    {
+      struct areltdata *t;
+      struct ar_hdr *h;
+      bfd_size_type size;
+
+      /* We can't use arelt_size here, because that uses parsed_size,
+         which is the uncompressed size.  We need the compressed size.  */
+      t = (struct areltdata *) last_file->arelt_data;
+      h = (struct ar_hdr *) t->arch_header;
+      size = strtol (h->ar_size, (char **) NULL, 10);
+
+      /* Pad to an even boundary...
+	 Note that last_file->origin can be odd in the case of
+	 BSD-4.4-style element with a long odd size. */
+      filestart = last_file->origin + size;
+      filestart += filestart % 2;
+    }
+
+  return alpha_ecoff_get_elt_at_filepos (archive, filestart);
+}
+
+/* Open the archive file given an index into the armap.  */
+
+static bfd *
+alpha_ecoff_get_elt_at_index (abfd, index)
+     bfd *abfd;
+     symindex index;
+{
+  carsym *entry;
+
+  entry = bfd_ardata (abfd)->symdefs + index;
+  return alpha_ecoff_get_elt_at_filepos (abfd, entry->file_offset);
+}
+
 /* This is the ECOFF backend structure.  The backend field of the
    target vector points to this.  */
 
@@ -2038,7 +2324,9 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
   /* Relocate section contents while linking.  */
   alpha_relocate_section,
   /* Do final adjustments to filehdr and aouthdr.  */
-  alpha_adjust_headers
+  alpha_adjust_headers,
+  /* Read an element from an archive at a given file position.  */
+  alpha_ecoff_get_elt_at_filepos
 };
 
 /* Looking up a reloc type is Alpha specific.  */
@@ -2059,8 +2347,8 @@ const bfd_target ecoffalpha_little_vec =
 {
   "ecoff-littlealpha",		/* name */
   bfd_target_ecoff_flavour,
-  false,			/* data byte order is little */
-  false,			/* header byte order is little */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
@@ -2087,7 +2375,7 @@ const bfd_target ecoffalpha_little_vec =
      BFD_JUMP_TABLE_GENERIC (_bfd_ecoff),
      BFD_JUMP_TABLE_COPY (_bfd_ecoff),
      BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_ecoff),
+     BFD_JUMP_TABLE_ARCHIVE (alpha_ecoff),
      BFD_JUMP_TABLE_SYMBOLS (_bfd_ecoff),
      BFD_JUMP_TABLE_RELOCS (_bfd_ecoff),
      BFD_JUMP_TABLE_WRITE (_bfd_ecoff),

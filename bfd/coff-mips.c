@@ -396,12 +396,12 @@ mips_ecoff_bad_format_hook (abfd, filehdr)
     case MIPS_MAGIC_BIG:
     case MIPS_MAGIC_BIG2:
     case MIPS_MAGIC_BIG3:
-      return abfd->xvec->byteorder_big_p;
+      return bfd_big_endian (abfd);
 
     case MIPS_MAGIC_LITTLE:
     case MIPS_MAGIC_LITTLE2:
     case MIPS_MAGIC_LITTLE3:
-      return abfd->xvec->byteorder_big_p == false;
+      return bfd_little_endian (abfd);
 
     default:
       return false;
@@ -423,7 +423,7 @@ mips_ecoff_swap_reloc_in (abfd, ext_ptr, intern)
   const RELOC *ext = (RELOC *) ext_ptr;
 
   intern->r_vaddr = bfd_h_get_32 (abfd, (bfd_byte *) ext->r_vaddr);
-  if (abfd->xvec->header_byteorder_big_p != false)
+  if (bfd_header_big_endian (abfd))
     {
       intern->r_symndx = (((int) ext->r_bits[0]
 			   << RELOC_BITS0_SYMNDX_SH_LEFT_BIG)
@@ -500,7 +500,7 @@ mips_ecoff_swap_reloc_out (abfd, intern, dst)
     }
 
   bfd_h_put_32 (abfd, intern->r_vaddr, (bfd_byte *) ext->r_vaddr);
-  if (abfd->xvec->header_byteorder_big_p != false)
+  if (bfd_header_big_endian (abfd))
     {
       ext->r_bits[0] = r_symndx >> RELOC_BITS0_SYMNDX_SH_LEFT_BIG;
       ext->r_bits[1] = r_symndx >> RELOC_BITS1_SYMNDX_SH_LEFT_BIG;
@@ -1190,8 +1190,8 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
   boolean got_lo;
   struct internal_reloc lo_int_rel;
 
-  BFD_ASSERT (input_bfd->xvec->header_byteorder_big_p
-	      == output_bfd->xvec->header_byteorder_big_p);
+  BFD_ASSERT (input_bfd->xvec->header_byteorder
+	      == output_bfd->xvec->header_byteorder);
 
   /* We keep a table mapping the symndx found in an internal reloc to
      the appropriate section.  This is faster than looking up the
@@ -1927,7 +1927,7 @@ mips_relax_section (abfd, sec, info, again)
 	continue;
 
       /* Quickly check that this reloc is external PCREL16.  */
-      if (abfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (abfd))
 	{
 	  if ((ext_rel->r_bits[3] & RELOC_BITS3_EXTERN_BIG) == 0
 	      || (((ext_rel->r_bits[3] & RELOC_BITS3_TYPE_BIG)
@@ -2488,7 +2488,9 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
   /* Relocate section contents while linking.  */
   mips_relocate_section,
   /* Do final adjustments to filehdr and aouthdr.  */
-  NULL
+  NULL,
+  /* Read an element from an archive at a given file position.  */
+  _bfd_get_elt_at_filepos
 };
 
 /* Looking up a reloc type is MIPS specific.  */
@@ -2509,8 +2511,8 @@ const bfd_target ecoff_little_vec =
 {
   "ecoff-littlemips",		/* name */
   bfd_target_ecoff_flavour,
-  false,			/* data byte order is little */
-  false,			/* header byte order is little */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
@@ -2551,8 +2553,8 @@ const bfd_target ecoff_big_vec =
 {
   "ecoff-bigmips",		/* name */
   bfd_target_ecoff_flavour,
-  true,				/* data byte order is big */
-  true,				/* header byte order is big */
+  BFD_ENDIAN_BIG,		/* data byte order is big */
+  BFD_ENDIAN_BIG,		/* header byte order is big */
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |

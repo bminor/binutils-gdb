@@ -155,27 +155,60 @@ _bfd_dummy_target (ignore_abfd)
   return 0;
 }
 
+/* Allocate memory using malloc.  */
 
-#ifndef bfd_zmalloc
-/* allocate and clear storage */
-
-char *
-bfd_zmalloc (size)
-     bfd_size_type size;
+PTR
+bfd_malloc (size)
+     size_t size;
 {
-  char *ptr = (char *) malloc ((size_t) size);
+  PTR ptr;
+
+  ptr = (PTR) malloc (size);
+  if (ptr == NULL && size != 0)
+    bfd_set_error (bfd_error_no_memory);
+  return ptr;
+}
+
+/* Reallocate memory using realloc.  */
+
+PTR
+bfd_realloc (ptr, size)
+     PTR ptr;
+     size_t size;
+{
+  PTR ret;
+
+  if (ptr == NULL)
+    ret = malloc (size);
+  else
+    ret = realloc (ptr, size);
+
+  if (ret == NULL)
+    bfd_set_error (bfd_error_no_memory);
+
+  return ret;
+}
+
+/* Allocate memory using malloc and clear it.  */
+
+PTR
+bfd_zmalloc (size)
+     size_t size;
+{
+  PTR ptr;
+
+  ptr = (PTR) malloc (size);
 
   if (size != 0)
     {
       if (ptr == NULL)
 	bfd_set_error (bfd_error_no_memory);
       else
-	memset (ptr, 0, (size_t) size);
+	memset (ptr, 0, size);
     }
 
   return ptr;
 }
-#endif /* bfd_zmalloc */
 
 /* Some IO code */
 
@@ -208,6 +241,24 @@ bfd_read (ptr, size, nitems, abfd)
      bfd *abfd;
 {
   int nread;
+
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    {
+      struct bfd_in_memory *bim;
+      bfd_size_type get;
+
+      bim = (struct bfd_in_memory *) abfd->iostream;
+      get = size * nitems;
+      if (abfd->where + get > bim->size)
+	{
+	  get = bim->size - abfd->where;
+	  bfd_set_error (bfd_error_file_truncated);
+	}
+      memcpy (ptr, bim->buffer + abfd->where, get);
+      abfd->where += get;
+      return get;
+    }
+
   nread = real_read (ptr, 1, (size_t)(size*nitems), bfd_cache_lookup(abfd));
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
   if (nread > 0)
@@ -350,7 +401,9 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
       i->data = 0;
     }
 #ifdef HAVE_MMAP
-  if (ok_to_map && (i->data == 0 || i->mapped == 1))
+  if (ok_to_map
+      && (i->data == 0 || i->mapped == 1)
+      && (abfd->flags & BFD_IN_MEMORY) == 0)
     {
       file_ptr file_offset, offset2;
       size_t real_size;
@@ -429,10 +482,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
   if (debug_windows)
     fprintf (stderr, "\n\t%s(%6ld)",
 	     i->data ? "realloc" : " malloc", (long) size_to_alloc);
-  if (i->data)
-    i->data = (PTR) realloc (i->data, size_to_alloc);
-  else
-    i->data = (PTR) malloc (size_to_alloc);
+  i->data = (PTR) bfd_realloc (i->data, size_to_alloc);
   if (debug_windows)
     fprintf (stderr, "\t-> %p\n", i->data);
   i->refcount = 1;
@@ -470,8 +520,13 @@ bfd_write (ptr, size, nitems, abfd)
      bfd_size_type nitems;
      bfd *abfd;
 {
-  long nwrote = fwrite (ptr, 1, (size_t) (size * nitems),
-			bfd_cache_lookup (abfd));
+  long nwrote;
+
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    abort ();
+
+  nwrote = fwrite (ptr, 1, (size_t) (size * nitems),
+		   bfd_cache_lookup (abfd));
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
   if (nwrote > 0)
     abfd->where += nwrote;
@@ -517,6 +572,9 @@ bfd_tell (abfd)
 {
   file_ptr ptr;
 
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    return abfd->where;
+
   ptr = ftell (bfd_cache_lookup(abfd));
 
   if (abfd->my_archive)
@@ -529,6 +587,8 @@ int
 bfd_flush (abfd)
      bfd *abfd;
 {
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    return 0;
   return fflush (bfd_cache_lookup(abfd));
 }
 
@@ -541,6 +601,10 @@ bfd_stat (abfd, statbuf)
 {
   FILE *f;
   int result;
+
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    abort ();
+
   f = bfd_cache_lookup (abfd);
   if (f == NULL)
     {
@@ -573,6 +637,16 @@ bfd_seek (abfd, position, direction)
 
   if (direction == SEEK_CUR && position == 0)
     return 0;
+
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    {
+      if (direction == SEEK_SET)
+	abfd->where = position;
+      else
+	abfd->where += position;
+      return 0;
+    }
+
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
   if (abfd->format != bfd_archive && abfd->my_archive == 0)
     {
@@ -1044,7 +1118,7 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
       w->i = (bfd_window_internal *) bfd_zmalloc (sizeof (bfd_window_internal));
       if (w->i == NULL)
 	return false;
-      w->i->data = (PTR) malloc ((size_t) count);
+      w->i->data = (PTR) bfd_malloc ((size_t) count);
       if (w->i->data == NULL)
 	{
 	  free (w->i);

@@ -349,7 +349,7 @@ riscix_swap_std_reloc_out (abfd, g, natptr)
     }
 
   /* now the fun stuff */
-  if (abfd->xvec->header_byteorder_big_p != false)
+  if (bfd_header_big_endian (abfd))
     {
       natptr->r_index[0] = r_index >> 16;
       natptr->r_index[1] = r_index >> 8;
@@ -580,7 +580,8 @@ riscix_some_aout_object_p (abfd, execp, callback_to_real_object_p)
    */
   {
     struct stat stat_buf;
-    if (abfd->iostream
+    if (abfd->iostream != NULL
+	&& (abfd->flags & BFD_IN_MEMORY) == 0
         && (fstat(fileno((FILE *) (abfd->iostream)), &stat_buf) == 0)
         && ((stat_buf.st_mode & 0111) != 0))
       abfd->flags |= EXEC_P;

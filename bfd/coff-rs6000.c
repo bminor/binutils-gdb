@@ -658,6 +658,10 @@ struct xcoff_ar_hdr
    bfd_false)
 #define xcoff_truncate_arname bfd_dont_truncate_arname
 
+/* We can use the standard get_elt_at_index routine.  */
+
+#define xcoff_get_elt_at_index _bfd_generic_get_elt_at_index
+
 /* XCOFF archives do not have a timestamp.  */
 
 #define xcoff_update_armap_timestamp bfd_true
@@ -1346,8 +1350,8 @@ const bfd_target
   "aixcoff-rs6000",		/* name */
 #endif
   bfd_target_coff_flavour,	
-  true,				/* data byte order is big */
-  true,				/* header byte order is big */
+  BFD_ENDIAN_BIG,		/* data byte order is big */
+  BFD_ENDIAN_BIG,		/* header byte order is big */
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG | DYNAMIC |

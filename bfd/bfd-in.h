@@ -235,6 +235,10 @@ typedef enum bfd_format {
    writing out an a.out object the symbols not be hashed to eliminate
    duplicates.  */
 #define BFD_TRADITIONAL_FORMAT 0x400
+
+/* This flag indicates that the BFD contents are actually cached in
+   memory.  If this is set, iostream points to a bfd_in_memory struct.  */
+#define BFD_IN_MEMORY 0x800
 
 /* symbols and relocation */
 
@@ -324,9 +328,10 @@ typedef struct _symbol_info
   symvalue value;
   char type;
   CONST char *name;            /* Symbol name.  */
-  char stab_other;             /* Unused. */
-  short stab_desc;             /* Info for N_TYPE.  */
-  CONST char *stab_name;
+  unsigned char stab_type;     /* Stab type.  */
+  char stab_other;             /* Stab other. */
+  short stab_desc;             /* Stab desc.  */
+  CONST char *stab_name;       /* String for stab type.  */
 } symbol_info;
 
 /* Hash table routines.  There is no way to free up a hash table.  */
@@ -464,6 +469,12 @@ extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)
 #define bfd_get_flavour(abfd) ((abfd)->xvec->flavour)
+#define bfd_big_endian(abfd) ((abfd)->xvec->byteorder == BFD_ENDIAN_BIG)
+#define bfd_little_endian(abfd) ((abfd)->xvec->byteorder == BFD_ENDIAN_LITTLE)
+#define bfd_header_big_endian(abfd) \
+  ((abfd)->xvec->header_byteorder == BFD_ENDIAN_BIG)
+#define bfd_header_little_endian(abfd) \
+  ((abfd)->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
 #define bfd_get_file_flags(abfd) ((abfd)->flags)
 #define bfd_applicable_file_flags(abfd) ((abfd)->xvec->object_flags)
 #define bfd_applicable_section_flags(abfd) ((abfd)->xvec->section_flags)

@@ -44,8 +44,10 @@ CODE_FRAGMENT
 .       includes `<<bfd.h>>', IOSTREAM has been declared as a "char
 .       *", and MTIME as a "long".  Their correct types, to which they
 .       are cast when used, are "FILE *" and "time_t".    The iostream
-.       is the result of an fopen on the filename. *}
-.    char *iostream;
+.       is the result of an fopen on the filename.  However, if the
+.       BFD_IN_MEMORY flag is set, then iostream is actually a pointer
+.       to a bfd_in_memory struct.  *}
+.    PTR iostream;
 .
 .    {* Is the file descriptor being cached?  That is, can it be closed as
 .       needed, and re-opened when accessed later?  *}
@@ -158,6 +160,7 @@ CODE_FRAGMENT
 .      struct ieee_data_struct *ieee_data;
 .      struct ieee_ar_data_struct *ieee_ar_data;
 .      struct srec_data_struct *srec_data;
+.      struct ihex_data_struct *ihex_data;
 .      struct tekhex_data_struct *tekhex_data;
 .      struct elf_obj_tdata *elf_obj_data;
 .      struct nlm_obj_tdata *nlm_obj_data;
@@ -746,6 +749,9 @@ bfd_get_size (abfd)
 {
   FILE *fp;
   struct stat buf;
+
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    return ((struct bfd_in_memory *) abfd->iostream)->size;
 
   fp = bfd_cache_lookup (abfd);
   if (0 != fstat (fileno (fp), &buf))

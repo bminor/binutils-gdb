@@ -1,4 +1,84 @@
+Tue Jan  9 15:22:53 1996  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* coff-alpha.c (alpha_relocate_section): During final link, allow
+ 	output .lita section to be bigger than 64k by adjusting gp value
+ 	on a per-input section basis.
+	* libecoff.h (struct ecoff_tdata): Add issued_multiple_gp_warning
+	field.
+	(struct ecoff_section_tdata): Add gp field.
+
 Tue Jan  9 12:00:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Handle Alpha ECOFF changes in OSF/1 3.2.
+	* libecoff.h (struct ecoff_backend_data): Add get_elt_at_filepos
+	field.
+	* coff-alpha.c: Include "aout/ar.h".
+	(alpha_ecoff_get_relocated_section_contents): Don't require an
+	ALPHA_R_IGNORE reloc after an ALPHA_R_GPDISP reloc, since OSF/1
+	3.2 doesn't generate one.
+	(alpha_relocate_section): Likewise.
+	(alpha_ecoff_slurp_armap): Define.
+	(alpha_ecoff_slurp_extended_name_table): Define.
+	(alpha_ecoff_construct_extended_name_table): Define.
+	(alpha_ecoff_truncate_arname): Define.
+	(alpha_ecoff_write_armap): Define.
+	(alpha_ecoff_generic_stat_arch_elt): Define.
+	(alpha_ecoff_update_armap_timestamp): Define.
+	(ARFZMAG): Define.
+	(alpha_ecoff_read_ar_hdr): New static function.
+	(alpha_ecoff_get_elt_at_filepos): New static function.
+	(alpha_ecoff_openr_next_archived_file): New static function.
+	(alpha_ecoff_get_elt_at_index): New static function.
+	(alpha_ecoff_backend_data): Initialize get_elt_at_filepos field.
+	(ecoffalpha_little_vec): Change BFD_JUMP_TABLE_ARCHIVE from
+	_bfd_ecoff to alpha_ecoff.
+	* ecoff.c (ecoff_link_add_archive_symbols): Use get_elt_at_filepos
+	field from backend structure, rather than always calling
+	_bfd_get_elt_at_filepos.
+	* coff-mips.c (mips_ecoff_backend_data): Initialize
+	get_elt_at_filepos field.
+	* archive.c (_bfd_generic_read_ar_hdr_mag): New function, copied
+	from _bfd_generic_read_ar_hdr with minor changes.
+	(_bfd_generic_read_ar_hdr): Use _bfd_generic_read_ar_hdr_mag.
+	* libbfd-in.h (_bfd_generic_read_ar_hdr_mag): Declare.
+	* libbfd.h: Rebuild.
+
+	* bfd-in.h (BFD_IN_MEMORY): Define.
+	* libbfd-in.h (struct bfd_in_memory): Define.
+	* libbfd.c (bfd_read): Handle BFD_IN_MEMORY flag.
+	(bfd_get_file_window): Don't try to map a BFD_IN_MEMORY file.
+	(bfd_write, bfd_stat): Abort if BFD_IN_MEMORY is set.
+	(bfd_tell, bfd_flush, bfd_seek): Handle BFD_IN_MEMORY flag.
+	* bfd.c (struct _bfd): Change iostream field from char * to PTR.
+	(bfd_get_size): Handle BFD_IN_MEMORY flag.
+	* cache.c (bfd_cache_close): Ignore BFD_IN_MEMORY files.
+	(bfd_open_file): Cast to PTR, not char *, when setting iostream.
+	(bfd_cache_lookup_worker): Abort if BFD_IN_MEMORY is set.
+	* opncls.c (bfd_fdopenr): Cast to PTR, not char *, when setting
+	iostream.
+	(bfd_openstreamr): Likewise.
+	* aoutx.h (NAME(aout,some_aout_object_p)): Only fstat iostream if
+	BFD_IN_MEMORY is not set.
+	* riscix.c (riscix_some_aout_object_p): Likewise.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
+	* targets.c (bfd_target): Add _bfd_get_elt_at_index field.
+	(BFD_JUMP_TABLE_ARCHIVE): Add _get_elt_at_index.
+	(bfd_get_elt_at_index): Define.
+	* archive.c (_bfd_generic_get_elt_at_index): Rename from
+	bfd_get_elt_at_index.  Change index parameter from int to
+	symindex.
+	* libbfd-in.h (_bfd_generic_get_elt_at_index): Declare.
+	(_bfd_noarchive_get_elt_at_index): Define.
+	(_bfd_archive_bsd_get_elt_at_index): Define.
+	(_bfd_archive_coff_get_elt_at_index): Define.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* aout-target.h (MY_get_elt_at_index): Define if not defined.
+	* coff-rs6000.c (xcoff_get_elt_at_index): Define.
+	* ieee.c (ieee_get_elt_at_index): Define.
+	* libecoff.h (_bfd_ecoff_get_elt_at_index): Define.
+	* oasys.c (oasys_get_elt_at_index): Define.
+	* som.c (som_get_elt_at_index): Define.
 
 	* ecoff.c (_bfd_ecoff_find_nearest_line): Don't restrict line
 	numbers to the .text section.

@@ -1455,6 +1455,7 @@ oasys_sizeof_headers (abfd, exec)
     PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
    bfd_true)
 #define oasys_read_ar_hdr bfd_nullvoidptr
+#define oasys_get_elt_at_index _bfd_generic_get_elt_at_index
 #define oasys_update_armap_timestamp bfd_true
 
 #define oasys_bfd_is_local_label bfd_generic_is_local_label
@@ -1483,8 +1484,8 @@ const bfd_target oasys_vec =
 {
   "oasys",			/* name */
   bfd_target_oasys_flavour,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+  BFD_ENDIAN_BIG,		/* target byte order */
+  BFD_ENDIAN_BIG,		/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),

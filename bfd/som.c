@@ -5846,6 +5846,7 @@ som_bfd_link_split_section (abfd, sec)
 
 #define som_read_ar_hdr			_bfd_generic_read_ar_hdr
 #define som_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define som_get_elt_at_index		_bfd_generic_get_elt_at_index
 #define som_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define som_truncate_arname		bfd_bsd_truncate_arname
 #define som_slurp_extended_name_table	_bfd_slurp_extended_name_table
@@ -5871,8 +5872,8 @@ const bfd_target som_vec =
 {
   "som",			/* name */
   bfd_target_som_flavour,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+  BFD_ENDIAN_BIG,		/* target byte order */
+  BFD_ENDIAN_BIG,		/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED | DYNAMIC),

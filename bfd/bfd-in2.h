@@ -235,6 +235,10 @@ typedef enum bfd_format {
    writing out an a.out object the symbols not be hashed to eliminate
    duplicates.  */
 #define BFD_TRADITIONAL_FORMAT 0x400
+
+/* This flag indicates that the BFD contents are actually cached in
+   memory.  If this is set, iostream points to a bfd_in_memory struct.  */
+#define BFD_IN_MEMORY 0x800
 
 /* symbols and relocation */
 
@@ -324,9 +328,10 @@ typedef struct _symbol_info
   symvalue value;
   char type;
   CONST char *name;            /* Symbol name.  */
-  char stab_other;             /* Unused. */
-  short stab_desc;             /* Info for N_TYPE.  */
-  CONST char *stab_name;
+  unsigned char stab_type;     /* Stab type.  */
+  char stab_other;             /* Stab other. */
+  short stab_desc;             /* Stab desc.  */
+  CONST char *stab_name;       /* String for stab type.  */
 } symbol_info;
 
 /* Hash table routines.  There is no way to free up a hash table.  */
@@ -464,6 +469,12 @@ extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)
 #define bfd_get_flavour(abfd) ((abfd)->xvec->flavour)
+#define bfd_big_endian(abfd) ((abfd)->xvec->byteorder == BFD_ENDIAN_BIG)
+#define bfd_little_endian(abfd) ((abfd)->xvec->byteorder == BFD_ENDIAN_LITTLE)
+#define bfd_header_big_endian(abfd) \
+  ((abfd)->xvec->header_byteorder == BFD_ENDIAN_BIG)
+#define bfd_header_little_endian(abfd) \
+  ((abfd)->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
 #define bfd_get_file_flags(abfd) ((abfd)->flags)
 #define bfd_applicable_file_flags(abfd) ((abfd)->xvec->object_flags)
 #define bfd_applicable_section_flags(abfd) ((abfd)->xvec->section_flags)
@@ -1814,8 +1825,10 @@ struct _bfd
        includes `<<bfd.h>>', IOSTREAM has been declared as a "char
        *", and MTIME as a "long".  Their correct types, to which they
        are cast when used, are "FILE *" and "time_t".    The iostream
-       is the result of an fopen on the filename. */
-    char *iostream;
+       is the result of an fopen on the filename.  However, if the
+       BFD_IN_MEMORY flag is set, then iostream is actually a pointer
+       to a bfd_in_memory struct.  */
+    PTR iostream;
 
      /* Is the file descriptor being cached?  That is, can it be closed as
        needed, and re-opened when accessed later?  */
@@ -2119,9 +2132,6 @@ boolean
 bfd_set_archive_head PARAMS ((bfd *output, bfd *new_head));
 
 bfd *
-bfd_get_elt_at_index PARAMS ((bfd *archive, int index));
-
-bfd *
 bfd_openr_next_archived_file PARAMS ((bfd *archive, bfd *previous));
 
 CONST char *
@@ -2172,6 +2182,8 @@ enum bfd_flavour {
   bfd_target_msdos_flavour
 };
 
+enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
+
  /* Forward declaration.  */
 typedef struct bfd_link_info _bfd_link_info;
 
@@ -2179,8 +2191,8 @@ typedef struct bfd_target
 {
   char *name;
   enum bfd_flavour flavour;
-  boolean byteorder_big_p;
-  boolean header_byteorder_big_p;
+  enum bfd_endian byteorder;
+  enum bfd_endian header_byteorder;
   flagword object_flags;       
   flagword section_flags;
   char symbol_leading_char;
@@ -2275,6 +2287,7 @@ CAT(NAME,_truncate_arname),\
 CAT(NAME,_write_armap),\
 CAT(NAME,_read_ar_hdr),\
 CAT(NAME,_openr_next_archived_file),\
+CAT(NAME,_get_elt_at_index),\
 CAT(NAME,_generic_stat_arch_elt),\
 CAT(NAME,_update_armap_timestamp)
   boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
@@ -2289,6 +2302,8 @@ CAT(NAME,_update_armap_timestamp)
                               int stridx));
   PTR (*_bfd_read_ar_hdr_fn) PARAMS ((bfd *));
   bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
+#define bfd_get_elt_at_index(b,i) BFD_SEND(b, _bfd_get_elt_at_index, (b,i))
+  bfd *    (*_bfd_get_elt_at_index) PARAMS ((bfd *, symindex));
   int      (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
   boolean  (*_bfd_update_armap_timestamp) PARAMS ((bfd *));
 
