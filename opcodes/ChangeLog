@@ -1,3 +1,17 @@
+2002-02-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c (powerpc_dialect): Handle power4 option.
+	* ppc-opc.c (insert_bdm): Correct description of "at" branch
+	hints.  Test PPC_OPCODE_POWER4 to determine branch hint flavour.
+	(extract_bdm, insert_bdp, extract_bdp, valid_bo): Likewise.
+	(BOFM64, BOFP64, BOTM64, BOFP64): Rename to BOFM4, BOFP4 etc.
+	(BODNZM64, BODNZP64, BODZM64, BODZP64): Likewise.
+	(PPCCOM32, PPCCOM64): Delete.
+	(NOPOWER4, POWER4): Define.
+	(powerpc_opcodes): Replace occurences of PPCCOM32 with NOPOWER4,
+	and PPCCOM4 with POWER4 so that "at" style branch hint opcodes
+	are enabled for power4 rather than ppc64.
+
 2002-02-20  Tom Rix  <trix@redhat.com>
 
 	* ppc-opc.c (powerpc_operands): Add WS feild.  Use for tlbre, tlbwe.
