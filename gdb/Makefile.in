@@ -956,6 +956,34 @@ check: force
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check; \
 	else true; fi
 
+# The idea is to parallelize testing of multilibs, for example:
+#   make -j3 check//sh-hms-sim/{-m1,-m2,-m3,-m3e,-m4}/{,-nofpu}
+# will run 3 concurrent sessions of check, eventually testing all 10
+# combinations.  GNU make is required for the % pattern to work, as is
+# a shell that expands alternations within braces.  If GNU make is not
+# used, this rule will harmlessly fail to match.
+check//%: force
+	@if [ -f testsuite/config.status ]; then \
+	  rootme=`pwd`; export rootme; \
+	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
+	  target=`echo "$@" | sed 's,//.*,,'`; \
+	  variant=`echo "$@" | sed 's,^[^/]*//,,'`; \
+	  vardots=`echo "$$variant" | sed 's,/,.,g'`; \
+	  testdir=testsuite.$$vardots; \
+	  if [ ! -f $$testdir/Makefile ]; then \
+	    (cd testsuite && find . -name config.status) | \
+	    sed s,/config.status$$,, | sort | while read subdir; do \
+	      $(SHELL) $(srcdir)/../mkinstalldirs $$testdir/$$subdir && \
+	      (cd $$testdir/$$subdir && \
+	       $(SHELL) $$rootme/testsuite/$$subdir/config.status \
+		 --recheck && \
+	       $(SHELL) ./config.status); done; \
+	  else :; fi && cd $$testdir && \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) \
+	    RUNTESTFLAGS="--target_board=$$variant $(RUNTESTFLAGS)" \
+	    "$$target"; \
+	else true; fi
+
 info dvi install-info clean-info html install-html: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
