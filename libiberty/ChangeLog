@@ -1,3 +1,20 @@
+2001-07-30  Andreas Jaeger  <aj@suse.de>
+
+	* regex.c: Declare wcs functions only if compiling with
+	MBS_SUPPORT.
+	Don't use #elif for traditional C.
+
+2001-07-23  Ulrich Drepper  <drepper@redhat.com>
+
+	* regex.c: Revamp memory allocation for WCHAR functions to
+	not use too much stack.
+
+2001-07-30  Andreas Jaeger  <aj@suse.de>
+
+	* regex.c: Declare wcs functions only if compiling with
+	MBS_SUPPORT.
+	Don't use #elif for traditional C.
+
 2001-07-25  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (regex.o): Add dependency on config.h.
