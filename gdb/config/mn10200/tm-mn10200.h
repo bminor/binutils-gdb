@@ -25,21 +25,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define REGISTER_SIZE 4
 
 #define MAX_REGISTER_RAW_SIZE REGISTER_SIZE
-#define NUM_REGS 12
+#define NUM_REGS 11
 
 #define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
 
 #define REGISTER_NAMES \
-{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", \
-  "sp", "pc", "mdr", "psw"}
+{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "sp", \
+  "pc", "mdr", "psw"}
 
 #define FP_REGNUM 6
 #define SP_REGNUM 7
-#define PC_REGNUM 9
-#define MDR_REGNUM 10
-#define PSW_REGNUM 11
-#define LIR_REGNUM 12
-#define LAR_REGNUM 13
+#define PC_REGNUM 8
+#define MDR_REGNUM 9
+#define PSW_REGNUM 10
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
 
