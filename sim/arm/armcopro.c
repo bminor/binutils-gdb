@@ -479,7 +479,14 @@ XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
 
   /* Check alignment fault enable/disable.  */
   if ((read_cp15_reg (1, 0, 0) & ARMul_CP15_R1_ALIGN) && (* address & 3))
-    ARMul_Abort (state, ARMul_DataAbortV);
+    {
+      /* Set the FSR and FAR.
+	 Do not use XScale_set_fsr_far as this checks the DCSR register.  */
+      write_cp15_reg (state, 5, 0, 0, ARMul_CP15_R5_MMU_EXCPT);
+      write_cp15_reg (state, 6, 0, 0, * address);
+
+      ARMul_Abort (state, ARMul_DataAbortV);
+    }
 
   if (XScale_debug_moe (state, -1))
     return;

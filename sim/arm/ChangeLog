@@ -1,3 +1,8 @@
+2002-05-29  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armcopro.c (XScale_check_memacc): Set the FSR and FAR registers
+	if a Data Abort is detected.
+
 2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armvirt.c (GetWord): Only perform access checks if 'check'
