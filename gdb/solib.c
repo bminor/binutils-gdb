@@ -269,7 +269,7 @@ solib_add (arg_string, from_tty, target)
 	      so->symbols_loaded = 1;
 	      so->from_tty = from_tty;
        	      catch_errors (symbol_add_stub, (char *)so,
-		    "Error while reading shared library symbols; continuing.");
+		    "Error while reading shared library symbols:\n");
 	  }
       }
   }
@@ -378,7 +378,7 @@ solib_create_inferior_hook()
   int in_debugger;
   CORE_ADDR in_debugger_addr;
   CORE_ADDR breakpoint_addr;
-  int i;
+  int i, j;
 
   /* FIXME:  We should look around in the executable code to find _DYNAMIC,
      if it isn't in the symbol table.  It's not that hard to find... 
@@ -386,11 +386,16 @@ solib_create_inferior_hook()
   i = lookup_misc_func ("_DYNAMIC");
   if (i < 0)			/* Can't find shared lib ptr. */
     return;
+  if (misc_function_vector[i].address == 0)	/* statically linked program */
+    return;
 
   /* Get link_dynamic structure */
-  read_memory(misc_function_vector[i].address,
+  j = target_read_memory(misc_function_vector[i].address,
 	      &inferior_dynamic_cpy,
 	      sizeof(struct link_dynamic));
+  if (j)					/* unreadable */
+    return;
+
   /* Calc address of debugger interface structure */
   inferior_debug_addr = (CORE_ADDR)inferior_dynamic_cpy.ldd;
   /* Calc address of `in_debugger' member of debugger interface structure */

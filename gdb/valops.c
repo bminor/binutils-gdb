@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -60,7 +60,7 @@ value_cast (type, arg2)
     return value_from_double (type, value_as_double (arg2));
   else if ((code1 == TYPE_CODE_INT || code1 == TYPE_CODE_ENUM)
 	   && (scalar || code2 == TYPE_CODE_PTR))
-    return value_from_long (type, value_as_long (arg2));
+    return value_from_longest (type, value_as_long (arg2));
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (VALUE_TYPE (arg2)))
     {
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
@@ -401,14 +401,14 @@ value_of_variable (var)
 }
 
 /* Given a value which is an array, return a value which is
-   a pointer to its first element.  */
+   a pointer to its first (actually, zeroth) element. 
+   FIXME, this should be subtracting the array's lower bound. */
 
 value
 value_coerce_array (arg1)
      value arg1;
 {
   register struct type *type;
-  register value val;
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
@@ -421,12 +421,8 @@ value_coerce_array (arg1)
        Its type is the type of the elements, not an array type.  */
     type = VALUE_TYPE (arg1);
 
-  /* Get the type of the result.  */
-  type = lookup_pointer_type (type);
-  val = value_from_long (builtin_type_long,
+  return value_from_longest (lookup_pointer_type (type),
 		       (LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
-  VALUE_TYPE (val) = type;
-  return val;
 }
 
 /* Given a value which is a function, return a value which is a pointer
@@ -436,18 +432,12 @@ value
 value_coerce_function (arg1)
      value arg1;
 {
-  register struct type *type;
-  register value val;
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  /* Get the type of the result.  */
-  type = lookup_pointer_type (VALUE_TYPE (arg1));
-  val = value_from_long (builtin_type_long,
+  return value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
 		(LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
-  VALUE_TYPE (val) = type;
-  return val;
 }  
 
 /* Return a pointer value for the object for which ARG1 is the contents.  */
@@ -456,12 +446,8 @@ value
 value_addr (arg1)
      value arg1;
 {
-  register struct type *type;
-  register value val;
 
   COERCE_REF(arg1);
-  /* Taking the address of an array is really a no-op
-     once the array is coerced to a pointer to its first element.  */
   if (VALUE_REPEATED (arg1)
       || TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_ARRAY)
     return value_coerce_array (arg1);
@@ -471,12 +457,8 @@ value_addr (arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  /* Get the type of the result.  */
-  type = lookup_pointer_type (VALUE_TYPE (arg1));
-  val = value_from_long (builtin_type_long,
+  return value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
 		(LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
-  VALUE_TYPE (val) = type;
-  return val;
 }
 
 /* Given a value of a pointer type, apply the C unary * operator to it.  */
@@ -825,7 +807,8 @@ call_function_by_hand (function, nargs, args)
 #endif
 	    /* The value we're going to pass is the address of the thing
 	       we just pushed.  */
-	    args[i] = value_from_long (builtin_type_long, (LONGEST) addr);
+	    args[i] = value_from_longest (lookup_pointer_type (value_type),
+				       (LONGEST) addr);
 	  }
   }
 #endif /* REG_STRUCT_HAS_ADDR.  */
@@ -940,17 +923,17 @@ value_string (ptr, len)
   else
     {
       register int j;
-      for (j = 0; j < misc_function_count; j++)
-	if (!strcmp (misc_function_vector[j].name, "malloc"))
-	  break;
-      if (j < misc_function_count)
-	val = value_from_long (builtin_type_long,
-			     (LONGEST) misc_function_vector[j].address);
+      j = lookup_misc_func ("malloc");
+      if (j >= 0)
+	val = value_from_longest (
+		lookup_pointer_type (lookup_function_type (
+		  		      lookup_pointer_type (builtin_type_char))),
+			       (LONGEST) misc_function_vector[j].address);
       else
 	error ("String constants require the program to have a function \"malloc\".");
     }
 
-  blocklen = value_from_long (builtin_type_int, (LONGEST) (len + 1));
+  blocklen = value_from_longest (builtin_type_int, (LONGEST) (len + 1));
   val = target_call_function (val, 1, &blocklen);
   if (value_zerop (val))
     error ("No memory available for string constant.");
@@ -1333,19 +1316,17 @@ value_struct_elt_for_address (domain, intype, name)
 		  struct symbol *sym =
 		      lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
 		  if (! sym) error ("Internal error: could not find physical static variable named %s", phys_name);
-		  v = value_from_long(builtin_type_long,
-				      (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
-		  VALUE_TYPE(v) = lookup_pointer_type (TYPE_FIELD_TYPE (t, i));
-		  return v;
+		  return value_from_longest (
+			lookup_pointer_type (TYPE_FIELD_TYPE (t, i)),
+				      (LONGEST)SYMBOL_BLOCK_VALUE (sym));
 	        }
 	      if (TYPE_FIELD_PACKED (t, i))
 		error ("pointers to bitfield members not allowed");
 
-	      v = value_from_long (builtin_type_int,
+	      return value_from_longest (
+		    lookup_pointer_type (
+		      lookup_member_type (TYPE_FIELD_TYPE (t, i), baseclass)),
 				   (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
-	      VALUE_TYPE (v)
-		= lookup_pointer_type (lookup_member_type (TYPE_FIELD_TYPE (t, i), baseclass));
-	      return v;
 	    }
 	}
 
@@ -1394,7 +1375,10 @@ value_struct_elt_for_address (domain, intype, name)
 	      check_stub_method (t, i, j);
 	      if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 		{
-		  v = value_from_long (builtin_type_long,
+		  return value_from_longest (
+	                lookup_pointer_type (
+			  lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
+					      baseclass)),
 				       (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
 		}
 	      else
@@ -1402,9 +1386,9 @@ value_struct_elt_for_address (domain, intype, name)
 		  struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 						    0, VAR_NAMESPACE, 0, NULL);
 		  v = locate_var_value (s, 0);
+	          VALUE_TYPE (v) = lookup_pointer_type (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j), baseclass));
+	          return v;
 		}
-	      VALUE_TYPE (v) = lookup_pointer_type (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j), baseclass));
-	      return v;
 	    }
 	}
 

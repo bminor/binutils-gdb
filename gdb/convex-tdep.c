@@ -339,12 +339,12 @@ value_of_trapped_internalvar (var)
 
   if (!strcmp (name, "vl"))
     {
-      val = value_from_long (builtin_type_int,
+      val = value_from_longest (builtin_type_int,
 			     (LONGEST) *read_vector_register_1 (VL_REGNUM));
     }
   else if (!strcmp (name, "vs"))
     {
-      val = value_from_long (builtin_type_int,
+      val = value_from_longest (builtin_type_int,
 			     (LONGEST) *read_vector_register_1 (VS_REGNUM));
     }
   else if (!strcmp (name, "vm"))
@@ -376,10 +376,10 @@ value_of_trapped_internalvar (var)
     }
 
   else if (name[0] == 'c')
-    val = value_from_long (builtin_type_int,
+    val = value_from_longest (builtin_type_int,
 			   read_comm_register (atoi (&name[1])));
   else if (name[0] == 'C')
-    val = value_from_long (builtin_type_long_long,
+    val = value_from_longest (builtin_type_long_long,
 			   read_comm_register (atoi (&name[1])));
 
   VALUE_LVAL (val) = lval_internalvar;

@@ -130,7 +130,7 @@ set_breakpoint_count (num)
 {
   breakpoint_count = num;
   set_internalvar (lookup_internalvar ("bpnum"),
-		   value_from_long (builtin_type_int, (LONGEST) num));
+		   value_from_longest (builtin_type_int, (LONGEST) num));
 }
 
 /* Default address, symtab and line to put a breakpoint at
@@ -824,7 +824,8 @@ which its expression is valid.\n", b->number);
 	      select_frame (get_current_frame (), 0);
 	      value_is_zero
 		= catch_errors (breakpoint_cond_eval, (char *)(b->cond),
-				"Error occurred in testing breakpoint condition.");
+				"Error in testing breakpoint condition:\n");
+				/* FIXME-someday, should give breakpoint # */
 	      free_all_values ();
 	    }
 	  if (b->cond && value_is_zero)
@@ -2032,7 +2033,7 @@ breakpoint_re_set ()
     {
       b->symtab = 0;		/* Be sure we don't point to old dead symtab */
       (void) catch_errors (breakpoint_re_set_one, (char *) b, 
-			   "Error in re-setting breakpoint");
+			   "Error in re-setting breakpoint:\n");
     }
 
   /* Blank line to finish off all those mention() messages we just printed.  */
