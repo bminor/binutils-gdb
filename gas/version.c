@@ -18,10 +18,10 @@ dummy3 ()
 
 #endif
 
-#if (__STDC__ == 1) || defined(const)
+#if defined (__STDC__) || defined (const)
 const
 #endif
 
-char version_string[] = "GNU assembler version 1.91.03 (Cygnus Support pre-release)\n";
+char version_string[] = "GNU assembler version 1.93 (alpha release)\n";
 
 /* end of version.c */
