@@ -1,3 +1,11 @@
+2003-03-04  Dmitry Diky  <diwil@mail.ru>
+
+	* Makefile.am: Add new devices x1122 x1132 emulation
+	* configure.tgt: Likewise.
+	* Makefile.in: Regenerate.
+	* emulparams/msp430x1122.sh: New file.
+	* emulparams/msp430x1132.sh: New file.
+
 2003-03-03  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ldmain.c (set_scripts_dir): Look for relative to TOOLBINDIR as
