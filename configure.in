@@ -597,7 +597,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ]; then
   done
 fi
 if [ -z "${norecursion}" -a -n "${target_configdirs}" ]; then
-  for i in `echo ${target_configdirs} | sed -e s/target-//` ; do
+  for i in `echo ${target_configdirs} | sed -e s/target-//g` ; do
     rm -f ${target_subdir}/$i/Makefile
   done
 fi
