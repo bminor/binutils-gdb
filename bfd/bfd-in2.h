@@ -1,8 +1,10 @@
 /* Main header file for the bfd library -- portable access to object files.
-   ==> The bfd.h file is generated from bfd-in.h and various .c files; if you
-   ==> change it, your changes will probably be lost.
    Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
+
+** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
+** instead, change bfd-in.h or the other BFD source files processed to
+** generate these files.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1276,6 +1278,16 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_HPPA_UNWIND_ENTRY,
   BFD_RELOC_HPPA_UNWIND_ENTRIES,
 
+   /* i386/elf relocations */
+  BFD_RELOC_386_GOT32,
+  BFD_RELOC_386_PLT32,
+  BFD_RELOC_386_COPY,
+  BFD_RELOC_386_GLOB_DAT,
+  BFD_RELOC_386_JUMP_SLOT,
+  BFD_RELOC_386_RELATIVE,
+  BFD_RELOC_386_GOTOFF,
+  BFD_RELOC_386_GOTPC,
+
    /* this must be the highest numeric value */
   BFD_RELOC_UNUSED
  } bfd_reloc_code_real_type;
@@ -1338,7 +1350,8 @@ typedef struct symbol_cache_entry
 #define BSF_KEEP        0x20
 #define BSF_KEEP_G      0x40
 
-	 /* ... document me ... */
+	 /* A weak global symbol, overridable without warnings by
+	   a regular global symbol of the same name.  */
 #define BSF_WEAK        0x80
 
         /* This symbol was created to point to a section, e.g. ELF's
@@ -1535,7 +1548,7 @@ struct _bfd
       struct sun_core_struct *sun_core_data;
       struct trad_core_struct *trad_core_data;
       struct hppa_data_struct *hppa_data;
-      struct hppa_core_struct *hppa_core_data;
+      struct hpux_core_struct *hpux_core_data;
       struct sgi_core_struct *sgi_core_data;
       PTR any;
       } tdata;
