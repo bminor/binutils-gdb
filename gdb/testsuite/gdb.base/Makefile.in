@@ -1,5 +1,5 @@
-# Makefile for regression testing the GNU debugger.
-#   Copyright (C) 1992, 93, 1994 Free Software Foundation, Inc.
+# Makefile for the base tests for GDB.
+# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -50,52 +50,50 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
 CFLAGS = -g
-# start-sanitize-chill
-CHILLFLAGS = $(CFLAGS)
-# end-sanitize-chill
-# This should probably be consistent with the top-level Makefile.in,
-# gdb/Makefile.in, and gdb/testsuite/gdb.t2*/Makefile.in, so that "make check"
-# has the same effect no matter where it is run.
-CXXFLAGS = -g -O
+
+RUNTESTFLAGS = 
 
 LINK=		ln -s
 
-RUNTEST = runtest
+EXPECT = ` \
+  if [ -f $${rootme}/../../../expect/expect ] ; then \
+    echo $${rootme}/../../../expect/expect ; \
+  else \
+    echo expect ; \
+  fi`
 
-EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
-          echo $${rootme}/../../expect/expect ; \
-          else echo expect ; fi`
-
-RUNTEST_FOR_TARGET = ` \
+RUNTEST = ` \
   if [ -f $${rootme}/../../dejagnu/site.exp ] ; then \
     echo $${rootme}/../../dejagnu/runtest ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(RUNTEST); \
+      echo runtest; \
     else \
       t='$(program_transform_name)'; echo runtest | sed -e '' $$t; \
     fi; \
   fi`
 
-RUNTESTFLAGS = 
-
-CC_FOR_TARGET = ` \
-  if [ -f $${rootme}/../../gcc/xgcc ] ; then \
-    echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
+CC = ` \
+  if [ -f $${rootme}/../../../gcc/xgcc ] ; then \
+    echo $${rootme}/../../../gcc/xgcc -B$${rootme}/../../../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
+      echo gcc; \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
 
-CFLAGS_FOR_TARGET = $(CFLAGS)
 
 GDB = ` \
-  if [ -f $${rootme}/../gdb ] ; \
-    then echo $${rootme}|sed -e 's@/[^/]*$$@@'|sed -e 's@$$@/gdb@' ; \
-    else echo gdb; \
+  if [ -f $${rootme}/../../gdb ] ; then \
+    echo $${rootme}/../../gdb ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo gdb; \
+    else \
+      t='$(program_transform_name)'; echo gdb | sed -e '' $$t; \
+    fi; \
   fi`
 
 GDBFLAGS = -nx
@@ -110,6 +108,7 @@ EXECUTABLES =  \
 	exprs  \
 	funcargs  \
 	interrupt  \
+	langs  \
 	list  \
 	mips_pro  \
 	nodebug  \
@@ -122,8 +121,8 @@ EXECUTABLES =  \
 	run  \
 	scope  \
 	setvar  \
+	sigall \
 	signals  \
-	t10  \
 	twice  \
 	watchpoint  \
 	whatis  \
@@ -143,119 +142,74 @@ CROSS_EXECUTABLES =  \
 	sparc-aout  \
 	sparc-elf
 
-all:	$(EXECUTABLES) corefile
+.c.o:
+	$(CC) -c $(CFLAGS) $<
 
-CC_CFLAGS_LD_FOR_TARGET = $(CC_FOR_TARGET) $(CFLAGS) $(LDFLAGS_FOR_TARGET)
 
-CC_CFLAGS_FOR_TARGET = $(CC_FOR_TARGET) $(CFLAGS_FOR_TARGET)
+all:	$(EXECUTABLES)
 
 run: run.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o run run.o $(LIBS)
-
-run.o: run.c
-	$(CC_FOR_TARGET) $(CFLAGS) -c $(srcdir)/run.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o run run.o $(LIBS)
 
 # We want to make sure comp-info.exp reflects the way that whatis was compiled;
 # that's why this isn't a separate rule.
 
 whatis whatis-info.exp: whatis.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o whatis.tmp whatis.o $(LIBS)
-	$(CC_FOR_TARGET) $(CFLAGS) -E $(srcdir)/whatis-info.c >whatis-info.tmp
+	$(CC) $(CFLAGS) $(LDFLAGS) -o whatis.tmp whatis.o $(LIBS)
+	$(CC) $(CFLAGS) -E $(srcdir)/whatis-info.c >whatis-info.tmp
 	mv whatis-info.tmp whatis-info.exp
 	mv whatis.tmp whatis
 
 .PRECIOUS: whatis whatis-info.exp
 
-whatis.o: whatis.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/whatis.c
-
 ptype: ptype.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o ptype ptype.o $(LIBS)
-
-ptype.o: ptype.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/ptype.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o ptype ptype.o $(LIBS)
 
 setvar: setvar.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o setvar setvar.o $(LIBS)
-
-setvar.o: setvar.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/setvar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o setvar setvar.o $(LIBS)
 
 exprs: exprs.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o exprs exprs.o $(LIBS)
-
-exprs.o: exprs.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/exprs.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o exprs exprs.o $(LIBS)
 
 break: break.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o break break.o $(LIBS)
-
-break.o: break.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/break.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o break break.o $(LIBS)
 
 signals: signals.o
-	${CC} ${CFLAGS} ${LDFLAGS_FOR_TARGET} -o signals signals.o ${LIBS}
+	$(CC) $(CFLAGS) $(LDFLAGS) -o signals signals.o $(LIBS)
 
-signals.o: signals.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/signals.c
+sigall: sigall.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o sigall sigall.o $(LIBS)
 
 twice: twice.c
 	echo '#include "twice.c"' >twice-tmp.c
-	$(CC_CFLAGS_LD_FOR_TARGET) -I$(srcdir) -o twice twice-tmp.c $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(srcdir) -o twice twice-tmp.c $(LIBS)
 	rm -f twice-tmp.c
 
 watchpoint: watchpoint.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o watchpoint watchpoint.o $(LIBS)
-
-watchpoint.o: watchpoint.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/watchpoint.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o watchpoint watchpoint.o $(LIBS)
 
 recurse: recurse.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o recurse recurse.o $(LIBS)
-
-recurse.o: recurse.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/recurse.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o recurse recurse.o $(LIBS)
 
 # We want to make sure opaque-info.exp reflects the way that opaque
 # was compiled; that's why this isn't a separate rule.
 
 opaque opaque-info.exp: opaque0.o opaque1.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o opaque.tmp opaque0.o opaque1.o $(LIBS)
-	$(CC_CFLAGS_FOR_TARGET) -E $(srcdir)/opaque-info.c >opaque-info.tmp
+	$(CC) $(CFLAGS) $(LDFLAGS) -o opaque.tmp opaque0.o opaque1.o $(LIBS)
+	$(CC) $(CFLAGS) -E $(srcdir)/opaque-info.c >opaque-info.tmp
 	mv opaque-info.tmp opaque-info.exp
 	mv opaque.tmp opaque
 
-opaque0.o: opaque0.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/opaque0.c
-
-opaque1.o: opaque1.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/opaque1.c
-
 coremaker: coremaker.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o coremaker coremaker.o $(LIBS)
-
-coremaker.o: coremaker.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/coremaker.c
-
-# Create a core file named "corefile" rather than just "core", to
-# avoid problems with sys admin types that like to regularly prune all
-# files named "core" from the system.
-# bsd 386 systems append the name of the program to the corefile name.
-
-corefile: coremaker
-	-rm -f core
-	-echo Expect a coredump from this next command...
-	-./coremaker >/dev/null 2>&1 || true
-	-if [ -f core ]; then mv core corefile; else true; fi
-	-if [ -f core.coremaker ]; then mv core.coremaker corefile; else true; fi
+	$(CC) $(CFLAGS) $(LDFLAGS) -o coremaker coremaker.o $(LIBS)
 
 nodebug: nodebug.o
-	$(CC_FOR_TARGET) $(LDFLAGS_FOR_TARGET) -o nodebug nodebug.o $(LIBS)
+	$(CC) $(LDFLAGS) $(NODEBUG_FLAGS) -o nodebug nodebug.o $(LIBS)
 
 # This gets compiled *without* -g, so don't add CFLAGS here.
 
 nodebug.o: nodebug.c
-	$(CC_FOR_TARGET) -c $(srcdir)/nodebug.c
+	$(CC) -c $(srcdir)/nodebug.c
 
 # For VPATH and Sun Make, we have to make explicit dependencies.
 # DEC make doesn't seem to understand the ".u" dependency w/VPATH either.
@@ -284,76 +238,47 @@ i860-elf: $(srcdir)/i860-elf.u
 sparc-elf: $(srcdir)/sparc-elf.u
 	uudecode $(srcdir)/sparc-elf.u
 
-t10: t10.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o t10 t10.o $(LIBS)
-
 list: list0.o list1.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o list list0.o list1.o $(LIBS)
-
-list0.o: list0.c list0.h
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/list0.c
-
-list1.o: list1.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/list1.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o list list0.o list1.o $(LIBS)
 
 scope: scope0.o scope1.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o scope scope0.o scope1.o $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o scope scope0.o scope1.o $(LIBS)
 
-scope0.o: scope0.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/scope0.c
-
-scope1.o: scope1.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/scope1.c
+langs: langs0.o langs1.o langs2.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o langs langs0.o langs1.o langs2.o $(LIBS)
 
 bitfields: bitfields.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o bitfields.tmp bitfields.o $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o bitfields.tmp bitfields.o $(LIBS)
 	mv bitfields.tmp bitfields
 
 .PRECIOUS: bitfields
 
-bitfields.o: bitfields.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/bitfields.c
-
 funcargs: funcargs.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o funcargs funcargs.o $(LIBS)
-
-funcargs.o: funcargs.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/funcargs.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o funcargs funcargs.o $(LIBS)
 
 return: return.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o return return.o $(LIBS)
-
-return.o: return.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/return.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o return return.o $(LIBS)
 
 mips_pro: mips_pro.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o mips_pro mips_pro.o $(LIBS)
-
-mips_pro.o: mips_pro.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/mips_pro.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o mips_pro mips_pro.o $(LIBS)
 
 printcmds: printcmds.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o printcmds printcmds.o $(LIBS)
-
-printcmds.o: printcmds.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/printcmds.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o printcmds printcmds.o $(LIBS)
 
 callfuncs: callfuncs.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o callfuncs callfuncs.o $(LIBS)
-
-callfuncs.o: callfuncs.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/callfuncs.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o callfuncs callfuncs.o $(LIBS)
 
 interrupt: interrupt.o
-	$(CC_CFLAGS_LD_FOR_TARGET) -o interrupt interrupt.o $(LIBS)
-
-interrupt.o: interrupt.c
-	$(CC_CFLAGS_FOR_TARGET) -c $(srcdir)/interrupt.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o interrupt interrupt.o $(LIBS)
 
 .NOEXPORT:
+
 INFODIRS=doc
+
 info:
+
 install-info:
+
 dvi:
 
 install:
@@ -369,14 +294,6 @@ site.exp: ./config.status Makefile
 	@echo "# Do not edit here. If you wish to override these values" >> ./tmp0
 	@echo "# add them to the last section" >> ./tmp0
 	@echo "set GDBFLAGS \"${GDBFLAGS}\"" >> ./tmp0
-	@echo "set host_os ${host_os}" >> ./tmp0
-	@echo "set host_alias ${host_alias}" >> ./tmp0
-	@echo "set host_cpu ${host_cpu}" >> ./tmp0
-	@echo "set host_vendor ${host_vendor}" >> ./tmp0
-	@echo "set target_os ${target_os}" >> ./tmp0
-	@echo "set target_alias ${target_alias}" >> ./tmp0
-	@echo "set target_cpu ${target_cpu}" >> ./tmp0
-	@echo "set target_vendor ${target_vendor}" >> ./tmp0
 	@echo "set host_triplet ${host_canonical}" >> ./tmp0
 	@echo "set target_triplet ${target_canonical}" >> ./tmp0
 	@echo "set srcdir ${srcdir}" >> ./tmp0
@@ -397,11 +314,11 @@ just-check:
 	if [ -f $${rootme}/../../expect/expect ] ; then  \
 	  TCL_LIBRARY=$${srcdir}/../../tcl/library ; \
 	  export TCL_LIBRARY ; fi ; \
-	$(RUNTEST_FOR_TARGET) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB) --srcdir $(srcdir)
+	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB) --srcdir $(srcdir)
 
 clean mostlyclean:
 	-rm -f *~ *.o a.out xgdb *.x $(EXECUTABLES)
-	-rm -f core core.coremaker corefile
+	-rm -f core core.coremaker coremaker.core corefile
 
 distclean realclean: clean
 	-rm -f *~ core *.log *.plog *.sum *.psum site.*

@@ -93,9 +93,14 @@ CHILL_LIB = ` \
   fi`
 
 GDB = ` \
-  if [ -f $${rootme}../../gdb ] ; \
-    then echo $${rootme}../../gdb; \
-    else echo gdb; \
+  if [ -f $${rootme}/../../gdb ] ; then \
+    echo $${rootme}/../../gdb ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo gdb; \
+    else \
+      t='$(program_transform_name)'; echo gdb | sed -e '' $$t; \
+    fi; \
   fi`
 
 GDBFLAGS = -nx

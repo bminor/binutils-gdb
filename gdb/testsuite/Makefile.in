@@ -83,7 +83,7 @@ RUNTEST_FOR_TARGET = `\
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/../../gcc/xgcc ] ; then \
     if [ -f $${rootme}/../../newlib/Makefile ]; then \
-      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -idirafter $${rootme}/../../newlib/targ-include -idirafter $${rootsrc}/../../newlib/libc/include -nostdinc; \
+      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -idirafter $${rootme}/../../newlib/targ-include -idirafter $${rootsrc}/../../newlib/libc/include -nostdinc -L$${rootme}/../../newlib -B$${rootme}/../../newlib/; \
     else \
       echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
     fi; \
@@ -99,7 +99,7 @@ CXX = gcc
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/../../gcc/xgcc ] ; then \
     if [ -f $${rootme}/../../newlib/Makefile ]; then \
-      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -idirafter $${rootme}/../../newlib/targ-include -idirafter $${rootsrc}/../../newlib/libc/include -nostdinc; \
+      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -idirafter $${rootme}/../../newlib/targ-include -idirafter $${rootsrc}/../../newlib/libc/include -nostdinc -L$${rootme}/../../newlib -B$${rootme}/../../newlib/; \
     else \
       echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
     fi; \
@@ -136,9 +136,14 @@ CHILL_LIB = ` \
 # end-sanitize-chill
 
 GDB = ` \
-  if [ -f $${rootme}/../gdb ] ; \
-    then echo $${rootme}|sed -e 's@/[^/]*$$@@'|sed -e 's@$$@/gdb@' ; \
-    else echo gdb; \
+  if [ -f $${rootme}/../gdb ] ; then \
+    echo $${rootme}/../gdb ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo gdb; \
+    else \
+      t='$(program_transform_name)'; echo gdb | sed -e '' $$t; \
+    fi; \
   fi`
 
 GDBFLAGS = -nx
@@ -195,7 +200,9 @@ site.exp: ./config.status Makefile
 	@echo "# Do not edit here. If you wish to override these values" >> ./tmp0
 	@echo "# add them to the last section" >> ./tmp0
 	@echo "set GDBFLAGS \"${GDBFLAGS}\"" >> ./tmp0
+	@echo "set host_alias $(host_alias)" >> ./tmp0
 	@echo "set host_triplet ${host_canonical}" >> ./tmp0
+	@echo "set target_alias $(target_alias)" >> ./tmp0
 	@echo "set target_triplet ${target_canonical}" >> ./tmp0
 	@echo "set srcdir ${srcdir}" >> ./tmp0
 	@echo "set tool gdb" >> ./tmp0

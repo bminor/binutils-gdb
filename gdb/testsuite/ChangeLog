@@ -1,5 +1,10 @@
 Wed Feb 15 14:23:28 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* Makefile.in, gdb.{base,c++,chill}/Makefile.in (GDB): If a gdb
+	  executable is not in the tree and host != target, use sed and
+	  program_transform_name to determine the gdb name used by the
+	  target.
+
 	* configure.in, gdb.{base,c++,chill}/configure.in: changed so
 	  *-*-vxworks* matches vxworks and *-*-netware* matches NetWare.
 
