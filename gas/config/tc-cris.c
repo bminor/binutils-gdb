@@ -36,6 +36,12 @@
    that could clash with a current or future binutils or GAS function get
    a "cris_" prefix.  */
 
+#define SYNTAX_RELAX_REG_PREFIX "no_register_prefix"
+#define SYNTAX_ENFORCE_REG_PREFIX "register_prefix"
+#define SYNTAX_USER_SYM_LEADING_UNDERSCORE "leading_underscore"
+#define SYNTAX_USER_SYM_NO_LEADING_UNDERSCORE "no_leading_underscore"
+#define REGISTER_PREFIX_CHAR '$'
+
 /* This might be CRIS_INSN_NONE if we're assembling a prefix-insn only.
    Note that some prefix-insns might be assembled as CRIS_INSN_NORMAL.  */
 enum cris_insn_kind
@@ -118,12 +124,27 @@ static void gen_cond_branch_32 PARAMS ((char *, char *, fragS *,
 static void cris_number_to_imm PARAMS ((char *, long, int, fixS *));
 static void cris_create_short_jump PARAMS ((char *, addressT, addressT,
 					    fragS *, symbolS *));
+static void s_syntax PARAMS ((int));
+
+/* All the .syntax functions.  */
+static void cris_force_reg_prefix PARAMS ((void));
+static void cris_relax_reg_prefix PARAMS ((void));
+static void cris_sym_leading_underscore PARAMS ((void));
+static void cris_sym_no_leading_underscore PARAMS ((void));
+
 /* Handle to the opcode hash table.  */
 static struct hash_control *op_hash = NULL;
+
+/* Whether we demand that registers have a `$' prefix.  Default here.  */
+static boolean demand_register_prefix = false;
+
+/* Whether global user symbols have a leading underscore.  Default here.  */
+static boolean symbols_have_leading_underscore = true;
 
 const pseudo_typeS md_pseudo_table[] =
 {
   {"dword", cons, 4},
+  {"syntax", s_syntax, 0},
   {NULL, 0, 0}
 };
 
@@ -240,6 +261,10 @@ const relax_typeS md_cris_relax_table[] =
    in 2.9.1 and CVS of 2000-02-16.  */
 struct option md_longopts[] =
 {
+#define OPTION_NO_US (OPTION_MD_BASE + 0)
+  {"no-underscore", no_argument, NULL, OPTION_NO_US},
+#define OPTION_US (OPTION_MD_BASE + 1)
+  {"underscore", no_argument, NULL, OPTION_US},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -260,7 +285,8 @@ const char *md_shortopts = "hHN";
 const int md_short_jump_size = 6;
 const int md_long_jump_size = 6;
 
-/* Report output format.  */
+/* Report output format.  Small changes in output format (like elf
+   variants below) can happen until all options are parsed.  */
 
 const char *
 cris_target_format ()
@@ -271,6 +297,8 @@ cris_target_format ()
       return "a.out-cris";
 
     case bfd_target_elf_flavour:
+      if (symbols_have_leading_underscore)
+	return "elf32-us-cris";
       return "elf32-cris";
 
     default:
@@ -1472,6 +1500,12 @@ get_gen_reg (cPP, regnop)
   char *oldp;
   oldp = *cPP;
 
+  /* Handle a sometimes-mandatory dollar sign as register prefix.  */
+  if (**cPP == REGISTER_PREFIX_CHAR)
+    (*cPP)++;
+  else if (demand_register_prefix)
+    return 0;
+
   switch (**cPP)
     {
     case 'P':
@@ -1565,14 +1599,21 @@ get_spec_reg (cPP, sregpp)
 {
   char *s1;
   const char *s2;
+  char *name_begin = *cPP;
 
   const struct cris_spec_reg *sregp;
+
+  /* Handle a sometimes-mandatory dollar sign as register prefix.  */
+  if (*name_begin == REGISTER_PREFIX_CHAR)
+    name_begin++;
+  else if (demand_register_prefix)
+    return 0;
 
   /* Loop over all special registers.  */
   for (sregp = cris_spec_regs; sregp->name != NULL; sregp++)
     {
       /* Start over from beginning of the supposed name.  */
-      s1 = *cPP;
+      s1 = name_begin;
       s2 = sregp->name;
 
       while (*s2 != '\0'
@@ -2459,10 +2500,9 @@ cris_number_to_imm (bufp, val, n, fixP)
 	  && !S_IS_DEFINED (fixP->fx_addsy)
 	  && !S_IS_WEAK (fixP->fx_addsy))
 	S_SET_WEAK (fixP->fx_addsy);
-      /* FALLTHROUGH.  */
+      /* Fall through.  */
+
     case BFD_RELOC_VTABLE_ENTRY:
-      /* FIXME: I'm not sure why we do this (as does other ports), but it
-	 might be that this relocation can only be finished at link time.  */
       fixP->fx_done = 0;
       break;
 
@@ -2484,12 +2524,26 @@ md_parse_option (arg, argp)
     {
     case 'H':
     case 'h':
+      printf (_("Please use --help to see usage and options for this assembler.\n"));
       md_show_usage (stdout);
-      /* Don't continue.  */
-      exit (0);
+      exit (EXIT_SUCCESS);
 
     case 'N':
       warn_for_branch_expansion = 1;
+      return 1;
+
+    case OPTION_NO_US:
+      demand_register_prefix = true;
+
+      if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
+	as_bad (_("--no-underscore is invalid with a.out format"), arg);
+      else
+	symbols_have_leading_underscore = false;
+      return 1;
+
+    case OPTION_US:
+      demand_register_prefix = false;
+      symbols_have_leading_underscore = true;
       return 1;
 
     default:
@@ -2614,22 +2668,19 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf (stream, _("\n--  GNU as for CRIS\n"));
-  fprintf (stream, "\n");
-  fprintf (stream,
-	   _("*** Usage: as-cris [switches] [-o objectfile] [files...]\n"));
-  fprintf (stream, _("Target-specific switches:\n"));
-  fprintf (stream, _("  -h, -H : Don't execute, print this help text.\n"));
-  fprintf (stream,
-	   _("  -N     : Warn when branches are expanded to jumps.\n\n"));
-  fprintf (stream, _("Use as-cris --help to see more options.\n"));
-  fprintf (stream, _("objectfile	: Output file in the a.out format %s"),
-	   _("described in the users manual.\n"));
-  fprintf (stream, _("		  Default output file is \"a.out\".\n"));
-  fprintf (stream, _("files ...	: Input files in the source format %s"),
-	   _(" described in the users manual.\n"));
-  fprintf (stream, _("		  Default input file is standard input.\n"));
-  fprintf (stream, _("Description	: Assembler for the CRIS processor.\n"));
+  fprintf (stream, _("CRIS-specific options:\n"));
+  fprintf (stream, "%s",
+	   _("  -h, -H                  Don't execute, print this help text.  Deprecated.\n"));
+  fprintf (stream, "%s",
+	   _("  -N                      Warn when branches are expanded to jumps.\n"));
+  fprintf (stream, "%s",
+	   _("  --underscore            User symbols are normally prepended with underscore.\n"));
+  fprintf (stream, "%s",
+	   _("                          Registers will not need any prefix.\n"));
+  fprintf (stream, "%s",
+	   _("  --no-underscore         User symbols do not have any prefix.\n"));
+  fprintf (stream, "%s",
+	   _("                          Registers will require a `$'-prefix.\n"));
 }
 
 /* Apply a fixS (fixup of an instruction or data that we didn't have
@@ -2729,6 +2780,79 @@ tc_cris_check_adjusted_broken_word (new_offset, brokwP)
     as_bad_where (brokwP->frag->fr_file, brokwP->frag->fr_line,
 		  _("Adjusted signed .word (%ld) overflows: `switch'-statement too large."),
 		  (long) new_offset);
+}
+
+/* Make a leading REGISTER_PREFIX_CHAR mandatory for all registers.  */
+
+static void cris_force_reg_prefix ()
+{
+  demand_register_prefix = true;
+}
+
+/* Do not demand a leading REGISTER_PREFIX_CHAR for all registers.  */
+
+static void cris_relax_reg_prefix ()
+{
+  demand_register_prefix = false;
+}
+
+/* Adjust for having a leading '_' on all user symbols.  */
+
+static void cris_sym_leading_underscore ()
+{
+  /* We can't really do anything more than assert that what the program
+     thinks symbol starts with agrees with the command-line options, since
+     the bfd is already created.  */
+
+  if (symbols_have_leading_underscore == false)
+    as_bad (".syntax %s requires command-line option `--underscore'",
+	    SYNTAX_USER_SYM_LEADING_UNDERSCORE);
+}
+
+/* Adjust for not having any particular prefix on user symbols.  */
+
+static void cris_sym_no_leading_underscore ()
+{
+  if (symbols_have_leading_underscore == true)
+    as_bad (".syntax %s requires command-line option `--no-underscore'",
+	    SYNTAX_USER_SYM_NO_LEADING_UNDERSCORE);
+}
+
+/* Handle the .syntax pseudo, which takes an argument that decides what
+   syntax the assembly code has.  */
+
+static void
+s_syntax (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  static const struct syntaxes
+  {
+    const char *operand;
+    void (*fn) PARAMS ((void));
+  } syntax_table[] = 
+    {{SYNTAX_ENFORCE_REG_PREFIX, cris_force_reg_prefix},
+     {SYNTAX_RELAX_REG_PREFIX, cris_relax_reg_prefix},
+     {SYNTAX_USER_SYM_LEADING_UNDERSCORE, cris_sym_leading_underscore},
+     {SYNTAX_USER_SYM_NO_LEADING_UNDERSCORE, cris_sym_no_leading_underscore}};
+
+  const struct syntaxes *sp;
+
+  for (sp = syntax_table;
+       sp < syntax_table + sizeof (syntax_table) / sizeof (syntax_table[0]);
+       sp++)
+    {
+      if (strncmp (input_line_pointer, sp->operand,
+		   strlen (sp->operand)) == 0)
+	{
+	  (sp->fn)();
+
+	  input_line_pointer += strlen (sp->operand);
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+    }
+
+  as_bad (_("Unknown .syntax operand"));
 }
 
 /*

@@ -1,3 +1,27 @@
+2000-09-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	Changes to handle varying register prefix and user symbol prefix.
+	* config/tc-cris.c (SYNTAX_RELAX_REG_PREFIX,
+	SYNTAX_ENFORCE_REG_PREFIX, SYNTAX_USER_SYM_LEADING_UNDERSCORE,
+	SYNTAX_USER_SYM_NO_LEADING_UNDERSCORE, REGISTER_PREFIX_CHAR): New.
+	(s_syntax, cris_force_reg_prefix, cris_relax_reg_prefix,
+	cris_sym_leading_underscore, cris_sym_no_leading_underscore): New.
+	(demand_register_prefix): New variable.
+	(md_pseudo_table): New pseudo ".syntax".
+	(md_longopts): New options --no-underscore and --underscore.
+	(cris_target_format): Return elf32-us-cris or elf32-cris depending
+	on symbols_have_leading_underscore.
+	(get_gen_reg): Accept or require REGISTER_PREFIX_CHAR.
+	(get_spec_reg): Ditto.
+	(cris_number_to_imm) <case BFD_RELOC_VTABLE_ENTRY>: Remove FIXME.
+	Fix formatting.
+	(md_parse_option) <case 'h' 'H'>: Deprecate; add reference to
+	--help.
+	<case OPTION_NO_US, case OPTION_US>: New.
+	(md_show_usage): Be brief and reformat to match continuation of
+	--help.
+	* po/gas.pot: Regenerate.
+
 2000-09-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (hppa_force_relocation): If OBJ_SOM, don't
