@@ -1,3 +1,7 @@
+2004-12-31  Paul Brook  <paul@copdesourcery.com>
+
+	* elf32-arm.c (elf32_arm_symbian_plt_entry): Fix comment typo.
+
 2004-12-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* reloc.c (BFD_RELOC_AVR_LDI, BFD_RELOC_AVR_6, BFD_RELOC_AVR_6_ADIW):

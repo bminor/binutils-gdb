@@ -1075,7 +1075,7 @@ static const bfd_vma elf32_arm_plt_thumb_stub [] =
    address spaces.  */
 static const bfd_vma elf32_arm_symbian_plt_entry [] = 
   {
-    0xe51ff004,         /* ldr   pr, [pc, #-4] */
+    0xe51ff004,         /* ldr   pc, [pc, #-4] */
     0x00000000,         /* dcd   R_ARM_GLOB_DAT(X) */
   };
 
