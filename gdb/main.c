@@ -1,8 +1,8 @@
 /* Top level stuff for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -143,7 +143,7 @@ captured_main (void *data)
   int ndir;
 
   struct stat homebuf, cwdbuf;
-  char *homedir, *homeinit;
+  char *homedir;
 
   int i;
 
@@ -600,11 +600,7 @@ extern int gdbtk_test (char *);
   homedir = getenv ("HOME");
   if (homedir)
     {
-      homeinit = (char *) alloca (strlen (homedir) +
-				  strlen (gdbinit) + 10);
-      strcpy (homeinit, homedir);
-      strcat (homeinit, "/");
-      strcat (homeinit, gdbinit);
+      char *homeinit = xstrprintf ("%s/%s", homedir, gdbinit);
 
       if (!inhibit_gdbinit)
 	{
@@ -622,6 +618,7 @@ extern int gdbtk_test (char *);
       stat (homeinit, &homebuf);
       stat (gdbinit, &cwdbuf);	/* We'll only need this if
 				   homedir was set.  */
+      xfree (homeinit);
     }
 
   /* Now perform all the actions indicated by the arguments.  */

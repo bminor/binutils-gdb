@@ -1,3 +1,8 @@
+2005-04-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* main.c: Update copyright year.
+	(captured_main): Avois using strcpy and strcat.
+
 2005-04-01  Michael Snyder  <msnyder@redhat.com>
 
 	* dummy-frame.c (dummy_frame_sniffer): Optimization: don't bother
