@@ -1,3 +1,16 @@
+Sun Apr  6 18:47:57 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* Makefile.in (all.normal): Ensure that gcc is built after all
+	the x11 - ie gdb - targets.
+
+Tue Apr  1 16:28:50 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Don't run conf-a-gas.
+
+Mon Mar 31 16:26:55 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * configure.in (hppa1.1-*-rtems*): New target, like hppa-*-*elf*.
+
 start-sanitize-tic80
 Sun Mar 30 12:38:27 1997  Fred Fish  <fnf@cygnus.com>
 

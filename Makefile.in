@@ -1,6 +1,6 @@
 #
 # Makefile for directory with subdirs to build.
-#   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation
+#   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -416,6 +416,7 @@ EXTRA_GCC_FLAGS = \
 	`if test x"$(LIMITS_H_TEST)" != x; then echo "LIMITS_H_TEST=$(LIMITS_H_TEST)"; fi` \
 	`if test x"$(LIBGCC1_TEST)" != x; then echo "LIBGCC1_TEST=$(LIBGCC1_TEST)"; fi` \
 	`if test x"$(LIBGCC2_CFLAGS)" != x; then echo "LIBGCC2_CFLAGS=$(LIBGCC2_CFLAGS)"; fi` \
+	`if test x"$(LIBGCC2_DEBUG_CFLAGS)" != x; then echo "LIBGCC2_DEBUG_CFLAGS=$(LIBGCC2_DEBUG_CFLAGS)"; fi` \
 	`if test x"$(LIBGCC2_INCLUDES)" != x; then echo "LIBGCC2_INCLUDES=$(LIBGCC2_INCLUDES)"; fi` \
 	`if test x"$(ENQUIRE)" != x; then echo "ENQUIRE=$(ENQUIRE)"; fi` \
 	`if test x"$(BOOT_CFLAGS)" != x; then echo "BOOT_CFLAGS=$(BOOT_CFLAGS)"; fi`
@@ -469,6 +470,7 @@ ALL_MODULES = \
 	all-send-pr \
 	all-shellutils \
 	all-sim \
+	all-sn \
 	all-tar \
 	all-tcl \
 	all-texinfo \
@@ -527,6 +529,7 @@ CROSS_CHECK_MODULES = \
 	check-sed \
 	check-send-pr \
 	check-shellutils \
+	check-sn \
 	check-sim \
 	check-tar \
 	check-tcl \
@@ -585,6 +588,7 @@ INSTALL_MODULES = \
 	install-send-pr \
 	install-shellutils \
 	install-sim \
+	install-sn \
 	install-tar \
 	install-tcl \
 	install-texinfo \
@@ -614,8 +618,7 @@ CHECK_X11_MODULES = \
 	check-guile \
 	check-expect \
 	check-gash \
-	check-tclX \
-	check-tk
+	check-tclX
 
 # This is a list of the install targets for all the modules which are
 # compiled using $(X11_FLAGS_TO_PASS).
@@ -722,6 +725,7 @@ CLEAN_MODULES = \
 	clean-send-pr \
 	clean-shellutils \
 	clean-sim \
+	clean-sn \
 	clean-tar \
 	clean-tcl \
 	clean-texinfo \
@@ -762,8 +766,8 @@ all: all.normal
 .PHONY: all.normal
 all.normal: \
 	$(ALL_MODULES) \
-	$(ALL_TARGET_MODULES) \
 	$(ALL_X11_MODULES) \
+	$(ALL_TARGET_MODULES) \
 	all-gcc
 
 # Do a target for all the subdirectories.  A ``make do-X'' will do a
@@ -855,7 +859,7 @@ local-clean:
 	-rm -f *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 local-distclean:
-	-rm -f Makefile config.status
+	-rm -f Makefile config.status config.cache
 	-if [ "$(TARGET_SUBDIR)" != "." ]; then \
 	  rm -rf $(TARGET_SUBDIR); \
 	else true; fi
@@ -1294,6 +1298,7 @@ all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-byacc
 all-byacc:
 all-cvs:
+all-db:
 all-dejagnu: all-tcl all-expect all-tk
 all-diff: all-libiberty
 all-emacs:
@@ -1353,6 +1358,7 @@ all-sed: all-libiberty
 all-send-pr: all-prms
 all-shellutils:
 all-sim: all-libiberty all-bfd all-opcodes
+all-sn: all-tcl all-tk all-itcl all-db
 all-tar: all-libiberty
 all-tcl:
 all-tclX: all-tcl all-tk
@@ -1377,7 +1383,8 @@ MAKEDIRS= \
 	$(exec_prefix)
 .PHONY: install-dirs
 install-dirs:
-	@for i in $(MAKEDIRS) ; do \
+	@for i in .. $(MAKEDIRS) ; do \
+	    if [ x$$i != x.. ]; then \
 		echo Making $$i... ; \
 		parent=`echo $$i | sed -e 's@/[^/]*$$@@' | sed -e 's@^$$@/@'`; \
 		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi ; \
@@ -1390,8 +1397,8 @@ install-dirs:
 		else \
 			true ; \
 		fi ; \
+	    else true; fi; \
 	done
-
 
 dir.info: do-install-info
 	if [ -f $(srcdir)/texinfo/gen-info-dir ] ; then \
@@ -1524,14 +1531,14 @@ TEXINFO_SUPPORT= texinfo/texinfo.tex texinfo/gpl.texinfo texinfo/lgpl.texinfo
 DIST_SUPPORT= $(DEVO_SUPPORT) $(TEXINFO_SUPPORT)
 
 .PHONY: gas.tar.gz
-GAS_SUPPORT_DIRS= bfd include libiberty opcodes make-all.com setup.com
+GAS_SUPPORT_DIRS= bfd include libiberty opcodes setup.com makefile.vms
 gas.tar.gz: $(DIST_SUPPORT) $(GAS_SUPPORT_DIRS) gas
 	$(MAKE) -f Makefile.in taz TOOL=gas \
 		SUPPORT_FILES="$(GAS_SUPPORT_DIRS)"
 
 # The FSF "binutils" release includes gprof and ld.
 .PHONY: binutils.tar.gz
-BINUTILS_SUPPORT_DIRS= bfd gas include libiberty opcodes ld gprof make-all.com setup.com
+BINUTILS_SUPPORT_DIRS= bfd gas include libiberty opcodes ld gprof setup.com makefile.vms
 binutils.tar.gz: $(DIST_SUPPORT) $(BINUTILS_SUPPORT_DIRS) binutils
 	$(MAKE) -f Makefile.in taz TOOL=binutils \
 		SUPPORT_FILES="$(BINUTILS_SUPPORT_DIRS) makeall.bat configure.bat"
