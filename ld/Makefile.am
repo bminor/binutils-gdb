@@ -601,7 +601,7 @@ em68kaux.c: $(srcdir)/emulparams/m68kaux.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kaux.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kaux "$(tdir_m68kaux)"
 em68kcoff.c: $(srcdir)/emulparams/m68kcoff.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/m68kcoff.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kcoff "$(tdir_m68kcoff)"
 em68kelf.c: $(srcdir)/emulparams/m68kelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

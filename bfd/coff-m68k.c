@@ -1,5 +1,5 @@
 /* BFD back-end for Motorola 68000 COFF binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -419,6 +419,97 @@ m68kcoff_common_addend_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 #endif /* ! defined (coff_rtype_to_howto) */
 
 #endif /* COFF_COMMON_ADDEND */
+
+#if !defined ONLY_DECLARE_RELOCS && ! defined STATIC_RELOCS
+/* Given a .data section and a .emreloc in-memory section, store
+   relocation information into the .emreloc section which can be
+   used at runtime to relocate the section.  This is called by the
+   linker when the --embedded-relocs switch is used.  This is called
+   after the add_symbols entry point has been called for all the
+   objects, and before the final_link entry point is called.  */
+
+boolean
+bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *datasec;
+     asection *relsec;
+     char **errmsg;
+{
+  char *extsyms;
+  bfd_size_type symesz;
+  struct internal_reloc *irel, *irelend;
+  bfd_byte *p;
+
+  BFD_ASSERT (! info->relocateable);
+
+  *errmsg = NULL;
+
+  if (datasec->reloc_count == 0)
+    return true;
+
+  extsyms = obj_coff_external_syms (abfd);
+  symesz = bfd_coff_symesz (abfd);
+
+  irel = _bfd_coff_read_internal_relocs (abfd, datasec, true, NULL, false,
+					 NULL);
+  irelend = irel + datasec->reloc_count;
+
+  relsec->contents = (bfd_byte *) bfd_alloc (abfd, datasec->reloc_count * 12);
+  if (relsec->contents == NULL)
+    return false;
+
+  p = relsec->contents;
+
+  for (; irel < irelend; irel++, p += 12)
+    {
+      asection *targetsec;
+
+      /* We are going to write a four byte longword into the runtime
+       reloc section.  The longword will be the address in the data
+       section which must be relocated.  It is followed by the name
+       of the target section NUL-padded or truncated to 8
+       characters.  */
+
+      /* We can only relocate absolute longword relocs at run time.  */
+      if (irel->r_type != R_RELLONG)
+	{
+	  *errmsg = _("unsupported reloc type");
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      if (irel->r_symndx == -1)
+	targetsec = bfd_abs_section_ptr;
+      else
+	{
+	  struct coff_link_hash_entry *h;
+	  
+	  h = obj_coff_sym_hashes (abfd)[irel->r_symndx];
+	  if (h == NULL)
+	    {
+	      struct internal_syment isym;
+	      
+	      bfd_coff_swap_sym_in (abfd, extsyms + symesz * irel->r_symndx,
+				    &isym);
+	      targetsec = coff_section_from_bfd_index (abfd, isym.n_scnum);
+	    }
+	  else if (h->root.type == bfd_link_hash_defined
+		   || h->root.type == bfd_link_hash_defweak)
+	    targetsec = h->root.u.def.section;
+	  else
+	    targetsec = NULL;
+	}
+      
+      bfd_put_32 (abfd,
+		  (irel->r_vaddr - datasec->vma + datasec->output_offset), p);
+      memset (p + 4, 0, 8);
+      strncpy (p + 4, targetsec->output_section->name, 8);
+    }
+  
+  return true;
+}
+#endif /* neither ONLY_DECLARE_RELOCS not STATIC_RELOCS  */
 
 #define coff_bfd_is_local_label_name m68k_coff_is_local_label_name
 

@@ -1,3 +1,11 @@
+2000-07-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* emultempl/m68kcoff.em: New file.
+	* emulparams/m68kcoff.sh (TEMPLATE_NAME): Use m68kcoff template.
+	* Makefile.am (em68kcoff.c): Depend on m68kcoff.em rather than
+	generic.em.
+	* Makefile.in: Regenerate.
+
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/elf32.em (longopts): Duplicate "disable-new-dtags"
