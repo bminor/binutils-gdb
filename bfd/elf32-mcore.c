@@ -350,7 +350,6 @@ mcore_elf_merge_private_bfd_data (ibfd, obfd)
 
 /* Don't pretend we can deal with unsupported relocs.  */
 
-/*ARGSUSED*/
 static bfd_reloc_status_type
 mcore_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 			   output_bfd, error_message)

@@ -1324,7 +1324,6 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
    in regular objects.  We allocated space for them in the check_relocs
    routine, but we won't fill them in in the relocate_section routine.  */
 
-/*ARGSUSED*/
 static boolean
 elf_m68k_discard_copies (h, ignore)
      struct elf_m68k_link_hash_entry *h;

@@ -1,3 +1,17 @@
+2000-12-08  Kazu Hirata  <kazu@hxi.com>
+
+	* coffgen.c: Fix formatting.
+	* elf32-i386.c: Likewise.
+	* elf32-i960.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf-m10300.c: Likewise.
+
 2000-12-07  Kazu Hirata  <kazu@hxi.com>
 
 	* elf32-ppc.c: Fix formatting.

@@ -2566,7 +2566,6 @@ ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
 /* Hook called by the linker routine which adds symbols from an object
    file.  We use it to put .comm items in .sbss, and not .bss.  */
 
-/*ARGSUSED*/
 static boolean
 ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;

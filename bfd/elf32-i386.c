@@ -1257,7 +1257,6 @@ elf_i386_size_dynamic_sections (output_bfd, info)
    check_relocs routine, but we won't fill them in in the
    relocate_section routine.  */
 
-/*ARGSUSED*/
 static boolean
 elf_i386_discard_copies (h, inf)
      struct elf_i386_link_hash_entry *h;

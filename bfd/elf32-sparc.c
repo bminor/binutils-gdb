@@ -129,7 +129,6 @@ static reloc_howto_type elf32_sparc_vtinherit_howto =
 static reloc_howto_type elf32_sparc_vtentry_howto =
   HOWTO (R_SPARC_GNU_VTENTRY, 0,2,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_SPARC_GNU_VTENTRY", false,0,0, false);
 
-
 struct elf_reloc_map {
   bfd_reloc_code_real_type bfd_reloc_val;
   unsigned char elf_reloc_val;
@@ -188,7 +187,7 @@ elf32_sparc_reloc_type_lookup (abfd, code)
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
-  
+
   switch (code)
     {
     case BFD_RELOC_VTABLE_INHERIT:
@@ -1068,11 +1067,9 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
   return true;
 }
 
-
 #define SET_SEC_DO_RELAX(section) do { elf_section_data(section)->tdata = (void *)1; } while (0)
 #define SEC_DO_RELAX(section) (elf_section_data(section)->tdata == (void *)1)
 
-/*ARGSUSED*/
 static boolean
 elf32_sparc_relax_section (abfd, section, link_info, again)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -1139,7 +1136,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_type = ELF32_R_TYPE (rel->r_info);
 
-      if (r_type == R_SPARC_GNU_VTINHERIT 
+      if (r_type == R_SPARC_GNU_VTINHERIT
           || r_type == R_SPARC_GNU_VTENTRY)
         continue;
 
@@ -1621,7 +1618,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || ((reloc | 0x7fffff) == ~(bfd_vma)0)))
 		    {
 		      reloc >>= 2;
-		
+
 		      /* Check whether it fits into simm19 on v9.  */
 		      if (((reloc & 0x3c0000) == 0
 			   || (reloc & 0x3c0000) == 0x3c0000)
@@ -1670,7 +1667,6 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				      contents, rel->r_offset,
 				      relocation, rel->r_addend);
-
 
       if (r != bfd_reloc_ok)
 	{

@@ -2886,7 +2886,6 @@ elf_mn10300_mach (flags)
    file.  This gets the MN10300 architecture right based on the machine
    number.  */
 
-/*ARGSUSED*/
 void
 _bfd_mn10300_elf_final_write_processing (abfd, linker)
      bfd *abfd;

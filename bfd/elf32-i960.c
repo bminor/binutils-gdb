@@ -102,7 +102,6 @@ elf32_i960_info_to_howto_rel (abfd, cache_ptr, dst)
    function.  It just short circuits the reloc if producing
    relocateable output against an external symbol.  */
 
-/*ARGSUSED*/
 bfd_reloc_status_type
 elf32_i960_relocate (abfd,
 		       reloc_entry,

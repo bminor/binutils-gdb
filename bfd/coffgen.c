@@ -557,7 +557,6 @@ coff_count_linenumbers (abfd)
 /* Takes a bfd and a symbol, returns a pointer to the coff specific
    area of the symbol if there is one.  */
 
-/*ARGSUSED*/
 coff_symbol_type *
 coff_symbol_from (ignore_abfd, symbol)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
@@ -1375,7 +1374,6 @@ coff_write_linenumbers (abfd)
   return true;
 }
 
-/*ARGSUSED */
 alent *
 coff_get_lineno (ignore_abfd, symbol)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
@@ -1908,7 +1906,6 @@ coff_bfd_make_debug_symbol (abfd, ptr, sz)
   return &new->symbol;
 }
 
-/*ARGSUSED */
 void
 coff_get_symbol_info (abfd, symbol, ret)
      bfd *abfd;
@@ -2161,7 +2158,7 @@ _bfd_coff_is_local_label_name (abfd, name)
 /* Provided a BFD, a section and an offset (in bytes, not octets) into the
    section, calculate and return the name of the source file and the line
    nearest to the wanted location.  */
-/*ARGSUSED*/
+
 boolean
 coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 			functionname_ptr, line_ptr)
