@@ -1474,6 +1474,7 @@ execute_command (p, from_tty)
   register struct cmd_list_element *c;
   register enum language flang;
   static int warned = 0;
+  char *line;
   /* FIXME: These should really be in an appropriate header file */
   extern void serial_log_command PARAMS ((const char *));
 
@@ -1494,7 +1495,8 @@ execute_command (p, from_tty)
   if (*p)
     {
       char *arg;
-
+      line = p;
+      
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
 
       /* If the target is running, we allow only a limited set of
@@ -1517,10 +1519,13 @@ execute_command (p, from_tty)
 	    p--;
 	  *(p + 1) = '\0';
 	}
-
+      
       /* If this command has been hooked, run the hook first. */
       if (c->hook)
 	execute_user_command (c->hook, (char *) 0);
+
+      if (c->flags & DEPRECATED_WARN_USER)
+      deprecated_cmd_warning (&line);
 
       if (c->class == class_user)
 	execute_user_command (c, arg);
@@ -2892,24 +2897,24 @@ free_command_lines (lptr)
 
 /* Add an element to the list of info subcommands.  */
 
-void
+struct cmd_list_element *
 add_info (name, fun, doc)
      char *name;
      void (*fun) PARAMS ((char *, int));
      char *doc;
 {
-  add_cmd (name, no_class, fun, doc, &infolist);
+  return add_cmd (name, no_class, fun, doc, &infolist);
 }
 
 /* Add an alias to the list of info subcommands.  */
 
-void
+struct cmd_list_element *
 add_info_alias (name, oldname, abbrev_flag)
      char *name;
      char *oldname;
      int abbrev_flag;
 {
-  add_alias_cmd (name, oldname, 0, abbrev_flag, &infolist);
+  return add_alias_cmd (name, oldname, 0, abbrev_flag, &infolist);
 }
 
 /* The "info" command is defined as a prefix, with allow_unknown = 0.
@@ -2965,26 +2970,26 @@ show_command (arg, from_tty)
 
 /* Add an element to the list of commands.  */
 
-void
+struct cmd_list_element *
 add_com (name, class, fun, doc)
      char *name;
      enum command_class class;
      void (*fun) PARAMS ((char *, int));
      char *doc;
 {
-  add_cmd (name, class, fun, doc, &cmdlist);
+  return add_cmd (name, class, fun, doc, &cmdlist);
 }
 
 /* Add an alias or abbreviation command to the list of commands.  */
 
-void
+struct cmd_list_element *
 add_com_alias (name, oldname, class, abbrev_flag)
      char *name;
      char *oldname;
      enum command_class class;
      int abbrev_flag;
 {
-  add_alias_cmd (name, oldname, class, abbrev_flag, &cmdlist);
+  return add_alias_cmd (name, oldname, class, abbrev_flag, &cmdlist);
 }
 
 void

@@ -82,6 +82,15 @@ var_types;
 
 /* This structure records one command'd definition.  */
 
+
+/* This flag is used by the code executing commands to warn the user 
+   the first time a deprecated command is used, see the 'flags' field in
+   the following struct.
+*/
+#define CMD_DEPRECATED            0x1
+#define DEPRECATED_WARN_USER      0x2
+#define MALLOCED_REPLACEMENT      0x4
+
 struct cmd_list_element
   {
     /* Points to next command in this list.  */
@@ -114,6 +123,31 @@ struct cmd_list_element
        the full documentation.  First line should end with a period.
        Entire string should also end with a period, not a newline.  */
     char *doc;
+
+    /* flags : a bitfield 
+       
+       bit 0: (LSB) CMD_DEPRECATED, when 1 indicated that this command
+       is deprecated. It may be removed from gdb's command set in the
+       future.
+
+       bit 1: DEPRECATED_WARN_USER, the user needs to be warned that
+       this is a deprecated command.  The user should only be warned
+       the first time a command is used.
+        
+       bit 2: MALLOCED_REPLACEMENT, when functions are deprecated at
+       compile time (this is the way it should, in general, be done)
+       the memory comtaining the replacement string is statically
+       allocated.  In some cases it makes sense to deprecate commands
+       at runtime (the testsuite is one example).  In this case the
+       memory for replacement is malloc'ed.  When a command is
+       undeprecated or re-deprecated at runtime we don't want to risk
+       calling free on statically allocated memory, so we check this
+       flag.  
+     */
+    int flags;
+
+    /* if this command is deprecated, this is the replacement name */
+    char *replacement;
 
     /* Hook for another command to be executed before this command.  */
     struct cmd_list_element *hook;
@@ -208,18 +242,30 @@ extern struct cmd_list_element *
   lookup_cmd_1 PARAMS ((char **, struct cmd_list_element *,
 			struct cmd_list_element **, int));
 
+extern struct cmd_list_element *
+  deprecate_cmd (struct cmd_list_element *, char * );
+
 extern void
-add_com PARAMS ((char *, enum command_class, void (*fun) (char *, int),
+  deprecated_cmd_warning (char **);
+
+extern int
+  lookup_cmd_composition (char *text,
+                        struct cmd_list_element **alias,
+                        struct cmd_list_element **prefix_cmd,
+                        struct cmd_list_element **cmd);
+
+extern struct cmd_list_element *
+  add_com PARAMS ((char *, enum command_class, void (*fun) (char *, int),
 		 char *));
 
-extern void
-add_com_alias PARAMS ((char *, char *, enum command_class, int));
+extern struct cmd_list_element *
+  add_com_alias PARAMS ((char *, char *, enum command_class, int));
 
-extern void
-add_info PARAMS ((char *, void (*fun) (char *, int), char *));
+extern struct cmd_list_element *
+  add_info PARAMS ((char *, void (*fun) (char *, int), char *));
 
-extern void
-add_info_alias PARAMS ((char *, char *, int));
+extern struct cmd_list_element *
+  add_info_alias PARAMS ((char *, char *, int));
 
 extern char **
   complete_on_cmdlist PARAMS ((struct cmd_list_element *, char *, char *));

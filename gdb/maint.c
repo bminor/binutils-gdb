@@ -358,6 +358,119 @@ maintenance_translate_address (arg, from_tty)
   return;
 }
 
+
+/* When a comamnd is deprecated the user will be warned the first time
+   the command is used.  If possible, a replacement will be offered. */
+
+static void
+maintenance_deprecate (char *args, int from_tty)
+{
+  if (args == NULL || *args == '\0')
+    {
+      printf_unfiltered ("\"maintenance deprecate\" takes an argument, \n\
+the command you want to deprecate, and optionally the replacement command \n\
+enclosed in quotes.\n");
+    }
+  
+  maintenance_do_deprecate (args, 1);
+
+}
+
+
+static void
+maintenance_undeprecate (char *args, int from_tty)
+{
+  if (args == NULL || *args == '\0')
+    {
+      printf_unfiltered ("\"maintenance undeprecate\" takes an argument, \n\
+the command you want to undeprecate.\n");
+    }
+  
+  maintenance_do_deprecate (args, 0);
+  
+}
+
+/*  
+    You really shouldn't be using this. It is just for the testsuite.
+    Rather, you should use deprecate_cmd() when the command is created
+    in _initialize_blah().
+  
+    This function deprecates a command and optionally assigns it a 
+    replacement.
+*/
+
+static void maintenance_do_deprecate(char *text, int deprecate){
+
+  struct cmd_list_element *alias=NULL; 
+  struct cmd_list_element *prefix_cmd=NULL; 
+  struct cmd_list_element *cmd=NULL;
+  
+  char *start_ptr=NULL; 
+  char *end_ptr=NULL;
+  int len;
+  char *replacement=NULL;
+
+
+  if (!lookup_cmd_composition (text, &alias, &prefix_cmd, &cmd)){
+    printf_filtered ("Can't find command '%s' to deprecate.\n", text);
+    return;
+  }
+  
+  if (deprecate)
+    {
+      /* look for a replacement command */
+      if (start_ptr = strchr (text, '\"'))
+      {
+        start_ptr++;
+        if(end_ptr = strrchr (start_ptr, '\"'))
+          {
+            len = end_ptr-start_ptr;
+            start_ptr[len]='\0';
+            replacement = xstrdup (start_ptr);
+          }
+      }
+    }
+  
+  if (!start_ptr || !end_ptr)
+    replacement = NULL;
+  
+    
+  /* If they used an alias, we only want to deprecate the alias.
+     
+     Note the MALLOCED_REPLACEMENT test.  If the command's replacement
+     string was allocated at compile time we don't want to free the
+     memory.  
+  */
+  if (alias)
+    {
+      
+      if (alias->flags & MALLOCED_REPLACEMENT)
+      free (alias->replacement);
+      
+      if (deprecate)
+      alias->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
+      else
+      alias->flags &= ~(DEPRECATED_WARN_USER | CMD_DEPRECATED);
+      alias->replacement=replacement;
+      alias->flags |= MALLOCED_REPLACEMENT;
+      return;
+    }
+  else if (cmd)
+    {
+      if (cmd->flags & MALLOCED_REPLACEMENT)
+      free (cmd->replacement);
+
+      if (deprecate)
+      cmd->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
+      else
+      cmd->flags &= ~(DEPRECATED_WARN_USER | CMD_DEPRECATED);
+      cmd->replacement=replacement;
+      cmd->flags |= MALLOCED_REPLACEMENT;
+      return;
+    }
+}
+
+
 void
 _initialize_maint_cmds ()
 {
@@ -455,6 +568,19 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
   add_cmd ("translate-address", class_maintenance, maintenance_translate_address,
 	   "Translate a section name and address to a symbol.",
 	   &maintenancelist);
+
+  add_cmd ("deprecate", class_maintenance, maintenance_deprecate,
+         "Deprecate a command.  Note that this is just in here so the \n\
+testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
+rather you should use the C function deprecate_cmd().  If you decide you \n\
+want to use it: maintenance deprecate 'commandname' \"replacement\". The \n\ 
+replacement is optional.", &maintenancelist);
+
+  add_cmd ("undeprecate", class_maintenance, maintenance_undeprecate,
+         "Undeprecate a command.  Note that this is just in here so the \n\
+testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
+If you decide you want to use it: maintenance undeprecate 'commandname'", 
+         &maintenancelist);
 
   add_show_from_set (
 		      add_set_cmd ("watchdog", class_maintenance, var_zinteger, (char *) &watchdog,

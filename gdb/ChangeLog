@@ -1,3 +1,39 @@
+2000-03-23  Fernando Nasser  <fnasser@cygnus.com>
+
+	From David Whedon <dwhedon@gordian.com>
+
+	* top.c (execute_command): Checks all commands beore executing
+	to see if the user needs to be warned that the command is
+	deprecated, warns user if appropriate.
+	(add_info), (add_info_alias), (add_com) , (add_com_alias): Changed
+	return values from void to struct cmd_list_element *.
+	* command.c (lookup_cmd_1): Check aliases before following link 
+	in case user needs to be warned about a deprecated alias.
+	(deprecate_cmd): new exported function for command deprecation,
+	sets flags and posibly a replacement string.
+	(deprecated_cmd_warning): New exported funciton to warn user about
+	a deprecated command. 
+	(lookup_cmd_composition): New exported function that determines
+	alias, prefix_command, and cmd based on a string.  This is useful
+	is we want to full name of a command.
+	* command.h : Added prototypes for deprecate_cmd,
+	deprecated_warn_user and lookup_cmd_composition, added flags to
+	the cmd_list_element structure, changed return values for
+	add_com_* and add_info_* from void to cmd_list_element.
+	* maint.c : (maintenance_deprecate): New function to deprecate a
+	command.  This exists only so that the testsuite can deprecate
+	commands at runtime and check the warning behavior.
+	(maintenance_undeprecate) : New function, drops deprecated flags.
+	(maintenance_do_deprecate): Actually does the (un)deprecation.
+	(initialize_maint_cmds): Added the above new deprecate commands.
+
+2000-03-22  Daniel Berlin  <dan@cgsoftware.com>
+	* command.c (apropos_cmd_helper): New function, meat of the
+	apropos command.
+	(apropos_command): New apropos command to search command
+	names/documentation for regular expressions.
+	(_initialize_command): Add the apropos command.
+
 2000-03-23  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* sol-thread.c (ps_pglobal_lookup): Change argument type from
@@ -39,13 +75,6 @@
 	`use_poll'.
 	(delete_file_handler, handle_file_event): Likewise.
 	(gdb_wait_for_event, poll_timers): Likewise.
-
-2000-03-22  Daniel Berlin  <dan@cgsoftware.com>
-	* command.c (apropos_cmd_helper): New function, meat of the
-	apropos command.
-	(apropos_command): New apropos command to search command
-	names/documentation for regular expressions.
-	(_initialize_command): Add the apropos command.
 
 2000-03-22  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
