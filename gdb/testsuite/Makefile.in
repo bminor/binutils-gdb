@@ -106,21 +106,8 @@ CXX_FOR_TARGET = ` \
 CHILLFLAGS = $(CFLAGS)
 CHILL = gcc
 CHILL_FOR_TARGET = ` \
-  if [ -f $${rootme}/../../gcc/xgcc ] ; then \
-    echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -L$${rootme}/../../chillrt/; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
-    else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
-    fi; \
-  fi`
-
-CHILL_LIB = -lchill
-
-CHILL = ` \
   if [ -f $${rootme}/../../gcc/Makefile ] ; then \
-    echo $${rootme}/../../gcc/xgcc -B$${rootme}../../gcc/ -L$${rootme}../../chillrt/; \
+    echo $${rootme}/../../gcc/xgcc -B$${rootme}../../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo gcc; \
@@ -128,6 +115,17 @@ CHILL = ` \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
+CHILL = $(CHILL_FOR_TARGET)
+
+CHILL_LIB = ` \
+  if [ -f $${rootme}/../../gcc/ch/runtime/libchill.a ] ; then \
+    echo $${rootme}/../../gcc/ch/runtime/chillrt0.o \
+      $${rootme}/../../gcc/ch/runtime/libchill.a; \
+  else \
+      echo -lchill; \
+  fi`
+
+CHILL_LIB = -lchill
 # end-sanitize-chill
 
 GDB = ` \

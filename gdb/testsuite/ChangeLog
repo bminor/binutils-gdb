@@ -1,3 +1,11 @@
+Sun May 29 22:31:42 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* Makefile.in:  Fix bit-rot in definitions of CHILL,
+	CHILL_FOR_TARGET and Chill_LIB.
+	* gdb.t31/gdbme.ch:  Fix syntax of nested array tuples.
+	* gdb.t31/Makefile.in:  Add definitions for CHILLFLAGS,
+	CHILL, and CHILL_LIB.
+
 Wed May 25 17:10:38 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* Makefile.in (TARGET_FLAGS_TO_PASS): Fix syntax of
