@@ -1,3 +1,8 @@
+2005-01-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Be sure to invoke config.sub using the shell.
+	* configure: Regenerate.
+
 2005-01-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.host: Correct sed patterns for last change.
