@@ -17,7 +17,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#define VERSION "0.0"
+#define VERSION "5.6 (Cygnus)"
 
 #ifndef lint
 char copyright[] =
