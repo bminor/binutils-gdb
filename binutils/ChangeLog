@@ -1,3 +1,8 @@
+2000-07-01  Eric Fifer  <EFifer@sanwaint.com>
+
+	* dllwrap.c: Changed mistaken dyn_string_append() calls
+	to dyn_string_append_cstr().
+
 2000-07-01  Alexander Aganichev <AAganichev@hypercom.com>
 
 	* stabs.c (parse_stab_type): Divide size in bits by 8 as binutils
