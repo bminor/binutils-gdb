@@ -1368,6 +1368,12 @@ files.  This is normally used to turn an archive file into a shared
 library, forcing every object to be included in the resulting shared
 library.  This option may be used more than once.
 
+Two notes when using this option from gcc: First, gcc doesn't know
+about this option, so you have to use @code{-Wl,-whole-archive}.
+Second, don't forget to use @code{-Wl,-no-whole-archive} after your
+list of archives, because gcc will add its own list of archives to
+your link and you may not want this flag to affect those as well.
+
 @kindex --wrap
 @item --wrap @var{symbol}
 Use a wrapper function for @var{symbol}.  Any undefined reference to
