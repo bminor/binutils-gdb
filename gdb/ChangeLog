@@ -1,5 +1,10 @@
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
+	* PROBLEMS: Mention threads/1650.
+	* NEWS: Mention the NPTL fix.
+
+2004-07-28  Andrew Cagney  <cagney@gnu.org>
+
 	* cli/cli-decode.c (add_setshow_cmd): Delete function.
 	(add_setshow_cmd_full): Make static.
 	* command.h (add_setshow_cmd, add_setshow_cmd_full): Delete.
