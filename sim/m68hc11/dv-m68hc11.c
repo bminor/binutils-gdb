@@ -321,6 +321,13 @@ attach_m68hc11_regs (struct hw *me,
       cpu->cpu_frequency = 8*1000*1000;
     }
 
+  if (hw_find_property (me, "use_bank") != NULL)
+    hw_attach_address (hw_parent (me), 0,
+                       exec_map,
+                       0x08000,
+                       0x04000,
+                       me);
+
   cpu_mode = "expanded";
   if (hw_find_property (me, "mode") != NULL)
     cpu_mode = hw_find_string_property (me, "mode");
@@ -836,6 +843,14 @@ m68hc11cpu_io_read_buffer (struct hw *me,
   sd  = hw_system (me);
   cpu = STATE_CPU (sd, 0);
 
+  if (base >= 0x8000 && base < 0xc000)
+    {
+      address_word virt_addr = phys_to_virt (cpu, base);
+      if (virt_addr != base)
+        return sim_core_read_buffer (sd, cpu, space, dest,
+                                     virt_addr, nr_bytes);
+    }
+
   /* Handle reads for the sub-devices.  */
   base -= controller->attach_address;
   result = sim_core_read_buffer (sd, cpu,
@@ -1075,6 +1090,14 @@ m68hc11cpu_io_write_buffer (struct hw *me,
 
   sd = hw_system (me); 
   cpu = STATE_CPU (sd, 0);  
+
+  if (base >= 0x8000 && base < 0xc000)
+    {
+      address_word virt_addr = phys_to_virt (cpu, base);
+      if (virt_addr != base)
+        return sim_core_write_buffer (sd, cpu, space, source,
+                                      virt_addr, nr_bytes);
+    }
   base -= controller->attach_address;
   result = sim_core_write_buffer (sd, cpu,
 				  io_map, source, base, nr_bytes);

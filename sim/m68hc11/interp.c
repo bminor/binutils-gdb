@@ -242,11 +242,14 @@ sim_hw_configure (SIM_DESC sd)
 	{
 	  /* Allocate core external memory.  */
 	  sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
-			   0x8000, M6811_RAM_LEVEL, 0x8000);
+			   0xC000, M6811_RAM_LEVEL, 0x4000);
 	  sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
+			   M6811_RAM_LEVEL);
+	  sim_do_commandf (sd, "memory region 0x01000000@%d,0x100000",
 			   M6811_RAM_LEVEL);
 
 	  sim_hw_parse (sd, "/m68hc12/reg 0x0 0x3FF");
+	  sim_hw_parse (sd, "/m68hc12/use_bank 1");
 	}
 
       if (!hw_tree_find_property (device_tree, "/m68hc12/m68hc12sio@1/reg"))
