@@ -1,3 +1,10 @@
+Tue Aug  4 21:12:29 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* cdtest-main.cc, cdtest-func.cc, cdtest-foo.h, cdtest-foo.cc,
+	cdtest.exp:  A test program (copied from libg++/test-install)
+	that tests that constructor and destructors are handled
+	corrrectly.
+
 Mon Aug  3 14:58:19 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in (install): install from ld.new, renaming during the

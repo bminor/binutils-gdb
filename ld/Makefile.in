@@ -64,6 +64,8 @@ version=
 
 # Seach path to override the default search path for -lfoo libraries.
 # If LIB_PATH is empty, the ones in the script (if any) are left alone.
+# (The default is usually /lib:usr/lib:/usr/local/lib, unless building
+# a cross-linker, in which case the default is empty.  See genscripts.sh.)
 # Otherwise, they are replaced with the ones given in LIB_PATH,
 # which may have the form: LIB_PATH=/lib:/usr/local/lib
 LIB_PATH =
@@ -90,15 +92,20 @@ HOSTING_CRT0=/lib/crt0.o
 HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else echo $(libdir)/libgcc.a; fi`  -lc
 HOSTING_EMU=LDEMULATION=$(EMUL); export LDEMULATION
 
+C++ = g++ -fgnu-linker
+
 ### Host, target, and site specific Makefile fragments come in here.
 ###
 
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
-.SUFFIXES: .y .x .xr .xu .xn .xbn .sc .scu .scr .scn $(SUFFIXES)
+.SUFFIXES: .y .x .xr .xu .xn .xbn .sc .scu .scr .scn $(SUFFIXES) .cc
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $<
+
+.cc.o:
+	$(C++) -c $(CFLAGS) -I$(srcdir) $<
 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
@@ -145,7 +152,7 @@ STAGESTUFF = *.x *.x[runN] *.sc[runN] $(GENERATED_SOURCES) $(GENERATED_HEADERS) 
 
 all: Makefile $(LD_PROG)
 
-check: bootstrap
+check: bootstrap check-cdtest
 info: ld.info
 
 ldgram.h ldgram.c: ldgram.y
@@ -251,6 +258,14 @@ ld3: ld2
 
 bootstrap: ld3
 	cmp ld2 ld3
+
+cdtest: cdtest-main.o cdtest-func.o cdtest-foo.o
+	$(HOSTING_EMU); ./ld.new -o cdtest $(HOSTING_CRT0) \
+	  cdtest-main.o cdtest-func.o cdtest-foo.o $(HOSTING_LIBS)
+
+check-cdtest: cdtest $(srcdir)/cdtest.exp
+	./cdtest >cdtest.out
+	diff $(srcdir)/cdtest.exp cdtest.out
 
 ######################################################################
 # DOCUMENTATION TARGETS
@@ -391,7 +406,7 @@ de-stage3: force
 clean:
 	-rm -f TAGS $(STAGESTUFF)
 	-rm -f ld.?? ld.??? ldlex.[qp]
-	-rm -f ld ld1 ld2 ld3 *.o y.output
+	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out
 
 lintlog:$(SOURCES) Makefile
 	$(LINT) -abhxzn  $(LINTFLAGS)  $(LINTSOURCES) \

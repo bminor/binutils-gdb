@@ -34,6 +34,11 @@ README
 a29k.sc-sh
 a29k.sh
 aout.sc-sh
+cdtest-foo.cc
+cdtest-foo.h
+cdtest-func.cc
+cdtest-main.cc
+cdtest.exp
 config
 config.h
 configure.bat
@@ -117,7 +122,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.37  1992/05/02 02:08:16  sac
+# Revision 1.38  1992/08/05 04:15:24  bothner
+# 	* cdtest-main.cc, cdtest-func.cc, cdtest-foo.h, cdtest-foo.cc,
+# 	cdtest.exp:  A test program (copied from libg++/test-install)
+# 	that tests that constructor and destructors are handled
+# 	corrrectly.
+#
+# Revision 1.37  1992/05/02  02:08:16  sac
 # New stuff for 29200
 #
 # Revision 1.36  1992/05/01  22:08:40  sac
