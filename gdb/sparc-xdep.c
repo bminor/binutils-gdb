@@ -37,6 +37,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern char register_valid[];
 
+/* We don't store all registers immediately when requested, since they
+   get sent over in large chunks anyway.  Instead, we accumulate most
+   of the changes and send them over once.  "deferred_stores" keeps
+   track of which sets of registers we have locally-changed copies of,
+   so we only need send the groups that have changed.  */
+
+#define	INT_REGS	1
+#define	STACK_REGS	2
+#define	FP_REGS		4
+
 int deferred_stores = 0;	/* Cumulates stores we want to do eventually. */
 
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
@@ -129,10 +139,6 @@ fetch_inferior_registers (regno)
 /* Store our register values back into the inferior.
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
-
-#define	INT_REGS	1
-#define	STACK_REGS	2
-#define	FP_REGS		4
 
 int
 store_inferior_registers (regno)
