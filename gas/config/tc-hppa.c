@@ -2626,6 +2626,9 @@ tc_gen_reloc (section, fixp)
       /* Now, do any processing that is dependent on the relocation type.  */
       switch (code)
 	{
+	case R_PARISC_DLTREL21L:
+	case R_PARISC_DLTREL14R:
+	case R_PARISC_DLTREL14F:
 	case R_PARISC_PLABEL32:
 	case R_PARISC_PLABEL21L:
 	case R_PARISC_PLABEL14R:
@@ -2633,7 +2636,11 @@ tc_gen_reloc (section, fixp)
 	     relocation should be either 0 (no static link) or 2
 	     (static link required).
 
-	     FIXME: We always assume no static link!  */
+	     FIXME: We always assume no static link!
+
+	     We also slam a zero addend into the DLT relative relocs;
+	     it doesn't make a lot of sense to use any addend since
+	     it gets you a different (eg unknown) DLT entry.  */
 	  reloc->addend = 0;
 	  break;
 
@@ -2673,13 +2680,18 @@ tc_gen_reloc (section, fixp)
 	  relocs[i]->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
 	  break;
 
+	case R_DLT_REL:
 	case R_DATA_PLABEL:
 	case R_CODE_PLABEL:
 	  /* For plabel relocations, the addend of the
 	     relocation should be either 0 (no static link) or 2
 	     (static link required).
 
-	     FIXME: We always assume no static link!  */
+	     FIXME: We always assume no static link! 
+
+	     We also slam a zero addend into the DLT relative relocs;
+	     it doesn't make a lot of sense to use any addend since
+	     it gets you a different (eg unknown) DLT entry.  */
 	  relocs[i]->addend = 0;
 	  break;
 
@@ -6138,6 +6150,20 @@ pa_text (unused)
    adjusted.  This so that the linker can know when/how to create argument
    relocation stubs for indirect calls and calls to static functions.
 
+   "T" field selectors create DLT relative fixups for accessing
+   globals and statics in PIC code; each DLT relative fixup creates
+   an entry in the DLT table.  The entries contain the address of
+   the final target (eg accessing "foo" would create a DLT entry
+   with the address of "foo").
+
+   Unfortunately, the HP linker doesn't take into account any addend
+   when generating the DLT; so accessing $LIT$+8 puts the address of
+   $LIT$ into the DLT rather than the address of $LIT$+8.
+
+   The end result is we can't perform relocation symbol reductions for
+   any fixup which creates entries in the DLT (eg they use "T" field
+   selectors).
+
    FIXME.  Also reject R_HPPA relocations which are 32 bits
    wide.  Helps with code lables in arrays for SOM.  (SOM BFD code
    needs to generate relocations to push the addend and symbol value
@@ -6152,9 +6178,17 @@ hppa_fix_adjustable (fixp)
 
   hppa_fix = (struct hppa_fix_struct *) fixp->tc_fix_data;
 
+  /* Reject reductions of symbols in 32bit plabel relocs.  */
   if (fixp->fx_r_type == R_HPPA && hppa_fix->fx_r_format == 32)
     return 0;
 
+  /* Reject reductions of symbols in DLT relative relocs.  */
+  if (hppa_fix->fx_r_field == e_tsel
+      || hppa_fix->fx_r_field == e_ltsel
+      || hppa_fix->fx_r_field == e_rtsel)
+    return 0;
+
+  /* Reject reductions of function symbols.  */
   if (fixp->fx_addsy == 0
       || (fixp->fx_addsy->bsym->flags & BSF_FUNCTION) == 0)
     return 1;

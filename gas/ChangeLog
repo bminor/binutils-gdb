@@ -1,3 +1,9 @@
+Thu Jul  7 11:31:32 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (hppa_fix_adjustable): Reject reductions for
+	symbols in DLT relative relocs.
+	(tc_gen_reloc): Zero out the addend field for DLT relative relocs.
+
 Wed Jul  6 01:07:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-ppc.c (ppc_tc): If not OBJ_COFF, force TOC entry to
