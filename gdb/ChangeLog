@@ -1,3 +1,9 @@
+Wed May 26 13:46:16 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbserver/{remote-gutils.c remote-server.c Makefile.in
+	configure.in remote-inflow.c remote-utils.c}:  New files to
+	support GDB remote server.  Currently only works for Lynx.
+
 Wed May 26 10:28:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c (define_symbol, case 't'): Only set the name if it
