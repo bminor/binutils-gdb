@@ -28,6 +28,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "complaints.h"
 #include "gdbcmd.h"
+#include "bfd.h" /* Required by objfiles.h.  */
+#include "symfile.h" /* Required by objfiles.h.  */
+#include "objfiles.h"
+#include "gdb-stabs.h"
 
 #include <string.h>
 #include <errno.h>
@@ -92,91 +96,91 @@ static char *find_white_space ();
 
 static int
 net_load (filename, pTextAddr, pDataAddr, pBssAddr)
-    char *filename;
-    CORE_ADDR *pTextAddr;
-    CORE_ADDR *pDataAddr;
-    CORE_ADDR *pBssAddr;
+     char *filename;
+     CORE_ADDR *pTextAddr;
+     CORE_ADDR *pDataAddr;
+     CORE_ADDR *pBssAddr;
+{
+  enum clnt_stat status;
+  struct ldfile ldstruct;
+  struct timeval load_timeout;
+
+  memset ((char *) &ldstruct, '\0', sizeof (ldstruct));
+
+  /* We invoke clnt_call () here directly, instead of through
+     net_clnt_call (), because we need to set a large timeout value.
+     The load on the target side can take quite a while, easily
+     more than 10 seconds.  The user can kill this call by typing
+     CTRL-C if there really is a problem with the load.  
+
+     Do not change the tv_sec value without checking -- select() imposes
+     a limit of 10**8 on it for no good reason that I can see...  */
+
+  load_timeout.tv_sec = 99999999;   /* A large number, effectively inf. */
+  load_timeout.tv_usec = 0;
+ 
+  status = clnt_call (pClient, VX_LOAD, xdr_wrapstring, &filename, xdr_ldfile,
+		      &ldstruct, load_timeout);
+
+  if (status == RPC_SUCCESS)
     {
-    enum clnt_stat status;
-    struct ldfile ldstruct;
-    struct timeval load_timeout;
- 
-    memset ((char *) &ldstruct, '\0', sizeof (ldstruct));
-
-    /* We invoke clnt_call () here directly, instead of through
-       net_clnt_call (), because we need to set a large timeout value.
-       The load on the target side can take quite a while, easily
-       more than 10 seconds.  The user can kill this call by typing
-       CTRL-C if there really is a problem with the load.  
-
-       Do not change the tv_sec value without checking -- select() imposes
-       a limit of 10**8 on it for no good reason that I can see...  */
-
-    load_timeout.tv_sec = 99999999;   /* A large number, effectively inf. */
-    load_timeout.tv_usec = 0;
- 
-    status = clnt_call (pClient, VX_LOAD, xdr_wrapstring, &filename, xdr_ldfile,
-			&ldstruct, load_timeout);
-
-    if (status == RPC_SUCCESS)
-      {
-        if (*ldstruct.name == 0)	/* load failed on VxWorks side */
-          return -1;
-	*pTextAddr = ldstruct.txt_addr;
-	*pDataAddr = ldstruct.data_addr;
-	*pBssAddr = ldstruct.bss_addr;
-	return 0;
-      }
-    else
-        return -1;
+      if (*ldstruct.name == 0)	/* load failed on VxWorks side */
+	return -1;
+      *pTextAddr = ldstruct.txt_addr;
+      *pDataAddr = ldstruct.data_addr;
+      *pBssAddr = ldstruct.bss_addr;
+      return 0;
     }
-      
+  else
+    return -1;
+}
+
 /* returns 0 if successful, errno if RPC failed or VxWorks complains. */
 
 static int
 net_break (addr, procnum)
-    int addr;
-    u_long procnum;
-    {
-    enum clnt_stat status;
-    int break_status;
-    Rptrace ptrace_in;  /* XXX This is stupid.  It doesn't need to be a ptrace
-                           structure.  How about something smaller? */
+     int addr;
+     u_long procnum;
+{
+  enum clnt_stat status;
+  int break_status;
+  Rptrace ptrace_in;  /* XXX This is stupid.  It doesn't need to be a ptrace
+			 structure.  How about something smaller? */
 
-    memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
-    break_status = 0;
+  memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
+  break_status = 0;
 
-    ptrace_in.addr = addr;
-    ptrace_in.pid = inferior_pid;
+  ptrace_in.addr = addr;
+  ptrace_in.pid = inferior_pid;
 
-    status = net_clnt_call (procnum, xdr_rptrace, &ptrace_in, xdr_int,
-			    &break_status);
+  status = net_clnt_call (procnum, xdr_rptrace, &ptrace_in, xdr_int,
+			  &break_status);
 
-    if (status != RPC_SUCCESS)
-	return errno;
+  if (status != RPC_SUCCESS)
+      return errno;
 
-    if (break_status == -1)
-      return ENOMEM;
-    return break_status;	/* probably (FIXME) zero */
-    }
- 
+  if (break_status == -1)
+    return ENOMEM;
+  return break_status;	/* probably (FIXME) zero */
+}
+
 /* returns 0 if successful, errno otherwise */
 
 static int
 vx_insert_breakpoint (addr)
-    int addr;
-    {
-    return net_break (addr, VX_BREAK_ADD);
-    }
+     int addr;
+{
+  return net_break (addr, VX_BREAK_ADD);
+}
 
 /* returns 0 if successful, errno otherwise */
 
 static int
 vx_remove_breakpoint (addr)
-    int addr;
-    {
-    return net_break (addr, VX_BREAK_DELETE);
-    }
+     int addr;
+{
+  return net_break (addr, VX_BREAK_DELETE);
+}
 
 /* Start an inferior process and sets inferior_pid to its pid.
    EXEC_FILE is the file to run.
@@ -333,7 +337,8 @@ net_wait (pEvent)
     memset ((char *) pEvent, '\0', sizeof (RDB_EVENT));
 
     pid = inferior_pid;
-    status = net_clnt_call (PROCESS_WAIT, xdr_int, &pid, xdr_RDB_EVENT, pEvent);
+    status = net_clnt_call (PROCESS_WAIT, xdr_int, &pid, xdr_RDB_EVENT,
+			    pEvent);
 
     return (status == RPC_SUCCESS)? pEvent->status: -1;
 }
@@ -344,21 +349,21 @@ net_wait (pEvent)
 static int
 net_quit ()
 {
-    int pid;
-    int quit_status;
-    enum clnt_stat status;
+  int pid;
+  int quit_status;
+  enum clnt_stat status;
 
-    quit_status = 0;
+  quit_status = 0;
 
-    /* don't let rdbTask suspend itself by passing a pid of 0 */
+  /* don't let rdbTask suspend itself by passing a pid of 0 */
 
-    if ((pid = inferior_pid) == 0)
-	return -1;
+  if ((pid = inferior_pid) == 0)
+    return -1;
 
-    status = net_clnt_call (VX_TASK_SUSPEND, xdr_int, &pid, xdr_int,
-			    &quit_status);
+  status = net_clnt_call (VX_TASK_SUSPEND, xdr_int, &pid, xdr_int,
+			  &quit_status);
 
-    return (status == RPC_SUCCESS)? quit_status: -1;
+  return (status == RPC_SUCCESS)? quit_status: -1;
 }
 
 /* Read a register or registers from the remote system.  */
@@ -395,10 +400,10 @@ vx_read_register (regno)
     }
   
 #ifdef VX_SIZE_FPREGS
-    /* If the target has floating point registers, fetch them.
-       Otherwise, zero the floating point register values in
-       registers[] for good measure, even though we might not
-       need to.  */
+  /* If the target has floating point registers, fetch them.
+     Otherwise, zero the floating point register values in
+     registers[] for good measure, even though we might not
+     need to.  */
 
   if (target_has_fp)
     {
@@ -437,7 +442,7 @@ vx_prepare_to_store ()
 /* Store our register values back into the inferior.
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
-   /* FIXME, look at REGNO to save time here */
+/* FIXME, look at REGNO to save time here */
 
 static void
 vx_write_register (regno)
@@ -464,7 +469,7 @@ vx_write_register (regno)
   /* XXX change second param to be a proc number */
   status = net_ptrace_clnt_call (PTRACE_SETREGS, &ptrace_in, &ptrace_out);
   if (status)
-      error (rpcerr);
+    error (rpcerr);
   if (ptrace_out.status == -1)
     {
       errno = ptrace_out.errno;
@@ -484,7 +489,8 @@ vx_write_register (regno)
       in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
       in_data.len = VX_SIZE_FPREGS;
 
-      status = net_ptrace_clnt_call (PTRACE_SETFPREGS, &ptrace_in, &ptrace_out);
+      status = net_ptrace_clnt_call (PTRACE_SETFPREGS, &ptrace_in,
+				     &ptrace_out);
       if (status)
 	  error (rpcerr);
       if (ptrace_out.status == -1)
@@ -533,7 +539,8 @@ vx_xfer_memory (memaddr, myaddr, len, write, target)
       data.len   = len;			/* How many bytes (again, for XDR) */
 
       /* XXX change second param to be a proc number */
-      status = net_ptrace_clnt_call (PTRACE_WRITEDATA, &ptrace_in, &ptrace_out);
+      status = net_ptrace_clnt_call (PTRACE_WRITEDATA, &ptrace_in,
+				     &ptrace_out);
     }
   else
     {
@@ -599,7 +606,7 @@ vx_resume (pid, step, siggnal)
   status = net_ptrace_clnt_call (step? PTRACE_SINGLESTEP: PTRACE_CONT,
 				 &ptrace_in, &ptrace_out);
   if (status)
-      error (rpcerr);
+    error (rpcerr);
   if (ptrace_out.status == -1)
     {
       errno = ptrace_out.errno;
@@ -615,17 +622,84 @@ vx_mourn_inferior ()
 }
 
 
+static void vx_add_symbols PARAMS ((char *, int, CORE_ADDR, CORE_ADDR,
+				    CORE_ADDR));
+
+struct find_sect_args {
+  CORE_ADDR text_start;
+  CORE_ADDR data_start;
+  CORE_ADDR bss_start;
+};
+
+static void find_sect PARAMS ((bfd *, asection *, void *));
+
+static void
+find_sect (abfd, sect, obj)
+     bfd *abfd;
+     asection *sect;
+     PTR obj;
+{
+  struct find_sect_args *args = (struct find_sect_args *)obj;
+
+  if (bfd_get_section_flags (abfd, sect) & (SEC_CODE & SEC_READONLY))
+    args->text_start = bfd_get_section_vma (abfd, sect);
+  else if (bfd_get_section_flags (abfd, sect) & SEC_ALLOC)
+    {
+      if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
+	{
+	  /* Exclude .ctor and .dtor sections which have SEC_CODE set but not
+	     SEC_DATA.  */
+	  if (bfd_get_section_flags (abfd, sect) & SEC_DATA)
+	    args->data_start = bfd_get_section_vma (abfd, sect);
+	}
+      else
+	args->bss_start = bfd_get_section_vma (abfd, sect);
+    }
+}
+
+static void
+vx_add_symbols (name, from_tty, text_addr, data_addr, bss_addr)
+     char *name;
+     int from_tty;
+     CORE_ADDR text_addr;
+     CORE_ADDR data_addr;
+     CORE_ADDR bss_addr;
+{
+  struct section_offsets *offs;
+  struct objfile *objfile;
+  struct find_sect_args ss;
+
+  objfile = symbol_file_add (name, from_tty, 0, 0, 0, 0);
+  offs = (struct section_offsets *)
+    alloca (sizeof (struct section_offsets)
+	    + objfile->num_sections * sizeof (offs->offsets));
+  memcpy (offs, objfile->section_offsets,
+	  sizeof (struct section_offsets)
+	  + objfile->num_sections * sizeof (offs->offsets));
+
+  ss.text_start = 0;
+  ss.data_start = 0;
+  ss.bss_start = 0;
+  bfd_map_over_sections (objfile->obfd, find_sect, &ss);
+
+  /* Both COFF and b.out frontends use these SECT_OFF_* values.  */
+  ANOFFSET (offs, SECT_OFF_TEXT) = text_addr - ss.text_start;
+  ANOFFSET (offs, SECT_OFF_DATA) = data_addr - ss.data_start;
+  ANOFFSET (offs, SECT_OFF_BSS) = bss_addr - ss.bss_start;
+  objfile_relocate (objfile, offs);
+}
+
 /* This function allows the addition of incrementally linked object files.  */
 
 static void
 vx_load_command (arg_string, from_tty)
-     char* arg_string;
+     char *arg_string;
      int from_tty;
 {
   CORE_ADDR text_addr;
   CORE_ADDR data_addr;
   CORE_ADDR bss_addr;
-  
+
   if (arg_string == 0)
     error ("The load command takes a file name");
 
@@ -640,8 +714,7 @@ vx_load_command (arg_string, from_tty)
     error ("Load failed on target machine");
   immediate_quit--;
 
-  /* FIXME, for now we ignore data_addr and bss_addr.  */
-  symbol_file_add (arg_string, from_tty, text_addr, 0, 0, 0);
+  vx_add_symbols (arg_string, from_tty, text_addr, data_addr, bss_addr);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
@@ -757,10 +830,11 @@ vx_lookup_symbol (name, pAddr)
 
   status = net_clnt_call (VX_SYMBOL_INQ, xdr_wrapstring, &name,
 			  xdr_SYMBOL_ADDR, &symbolAddr);
-  if (status != RPC_SUCCESS) {
+  if (status != RPC_SUCCESS)
+    {
       complain (&cant_contact_target);
       return -1;
-  }
+    }
 
   *pAddr = symbolAddr.addr;
   return symbolAddr.status;
@@ -778,7 +852,7 @@ net_check_for_fp ()
 
   status = net_clnt_call (VX_FP_INQUIRE, xdr_void, 0, xdr_bool, &fp);
   if (status != RPC_SUCCESS)
-      error (rpcerr);
+    error (rpcerr);
 
    return (int) fp;
 }
@@ -793,7 +867,7 @@ net_connect (host)
   struct sockaddr_in destAddr;
   struct hostent *destHost;
   unsigned long addr;
-  
+
   /* Get the internet address for the given host.  Allow a numeric
      IP address or a hostname.  */
 
@@ -802,6 +876,9 @@ net_connect (host)
     {
       destHost = (struct hostent *) gethostbyname (host);
       if (destHost == NULL)
+	/* FIXME: Probably should include hostname here in quotes.
+	   For example if the user types "target vxworks vx960 " it should
+	   say "Invalid host `vx960 '." not just "Invalid hostname".  */
 	error ("Invalid hostname.  Couldn't find remote host address.");
       addr = * (unsigned long *) destHost->h_addr;
     }
@@ -818,8 +895,9 @@ net_connect (host)
 
   ptraceSock = RPC_ANYSOCK;
   pClient = clnttcp_create (&destAddr, RDBPROG, RDBVERS, &ptraceSock, 0, 0);
-  /* FIXME, here is where we deal with different version numbers of the proto */
-  
+  /* FIXME, here is where we deal with different version numbers of the
+     proto */
+
   if (pClient == NULL)
     {
       clnt_pcreateerror ("\tnet_connect");
@@ -843,23 +921,12 @@ sleep_ms (ms)
   select_timeout.tv_sec = 0;
   select_timeout.tv_usec = ms * 1000;
 
-  status = select (0, (fd_set *) 0, (fd_set *) 0, (fd_set *) 0, &select_timeout);
+  status = select (0, (fd_set *) 0, (fd_set *) 0, (fd_set *) 0,
+		   &select_timeout);
 
   if (status < 0 && errno != EINTR)
     perror_with_name ("select");
 }
-
-/* Wait for control to return from inferior to debugger.
-   If inferior gets a signal, we may decide to start it up again
-   instead of returning.  That is why there is a loop in this function.
-   When this function actually returns it means the inferior
-   should be left stopped and GDB should read more commands.  */
-
-/* For network debugging with VxWorks.
- * VxWorks knows when tasks hit breakpoints, receive signals, exit, etc,
- * so vx_wait() receives this information directly from
- * VxWorks instead of trying to figure out what happenned via a wait() call.
- */
 
 static int
 vx_wait (pid_to_wait_for, status)
@@ -984,7 +1051,8 @@ add_symbol_stub (arg)
   struct ldfile *pLoadFile = (struct ldfile *)arg;
 
   printf_unfiltered("\t%s: ", pLoadFile->name);
-  symbol_file_add (pLoadFile->name, 0, pLoadFile->txt_addr, 0, 0, 0);
+  vx_add_symbols (pLoadFile->name, 0, pLoadFile->txt_addr,
+		  pLoadFile->data_addr, pLoadFile->bss_addr);
   printf_unfiltered ("ok\n");
   return 1;
 }
@@ -1042,13 +1110,19 @@ vx_open (args, from_tty)
   bootFile = NULL;
   if (!net_get_boot_file (&bootFile))
     {
-      if (*bootFile) {
-	printf_filtered ("\t%s: ", bootFile);
-	if (catch_errors
-	    (symbol_stub, bootFile,
-	     "Error while reading symbols from boot file:\n", RETURN_MASK_ALL))
-	  puts_filtered ("ok\n");
-      } else if (from_tty)
+      if (*bootFile)
+	{
+	  printf_filtered ("\t%s: ", bootFile);
+	  /* This assumes that the kernel is never relocated.  Hope that is an
+	     accurate assumption.  */
+	  if (catch_errors
+	      (symbol_stub,
+	       bootFile,
+	       "Error while reading symbols from boot file:\n",
+	       RETURN_MASK_ALL))
+	    puts_filtered ("ok\n");
+	}
+      else if (from_tty)
 	printf_unfiltered ("VxWorks kernel symbols not loaded.\n");
     }
   else
@@ -1079,9 +1153,10 @@ vx_open (args, from_tty)
     do_cleanups (old_chain);
   }
 #else
-      /* Botches, FIXME:
-	 (1)  Searches the PATH, not the source path.
-	 (2)  data and bss are assumed to be at the usual offsets from text.  */
+      /* FIXME: Is there something better to search than the PATH? (probably
+	 not the source path, since source might be in different directories
+	 than objects.  */
+
       if (catch_errors (add_symbol_stub, (char *)pLoadFile, (char *)0,
 			RETURN_MASK_ALL))
 	symbols_added = 1;
@@ -1282,65 +1357,64 @@ vx_proc_open (name, from_tty)
 /* Target ops structure for accessing memory and such over the net */
 
 struct target_ops vx_ops = {
-	"vxworks", "VxWorks target memory via RPC over TCP/IP",
-	"Use VxWorks target memory.  \n\
+  "vxworks", "VxWorks target memory via RPC over TCP/IP",
+  "Use VxWorks target memory.  \n\
 Specify the name of the machine to connect to.",
-	vx_open, vx_close, vx_attach, 0, /* vx_detach, */
-	0, 0, /* resume, wait */
-	0, 0, /* read_reg, write_reg */
-	0, /* prep_to_store, */
-	vx_xfer_memory, vx_files_info,
-	0, 0, /* insert_breakpoint, remove_breakpoint */
-	0, 0, 0, 0, 0,	/* terminal stuff */
-	0, /* vx_kill, */
-	vx_load_command,
-	vx_lookup_symbol,
-	vx_create_inferior, 0,  /* mourn_inferior */
-	0, /* can_run */
-	0, /* notice_signals */
-	core_stratum, 0, /* next */
-	1, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
-	0, 0,			/* Section pointers */
-	OPS_MAGIC,		/* Always the last thing */
+  vx_open, vx_close, vx_attach, 0, /* vx_detach, */
+  0, 0, /* resume, wait */
+  0, 0, /* read_reg, write_reg */
+  0, /* prep_to_store, */
+  vx_xfer_memory, vx_files_info,
+  0, 0, /* insert_breakpoint, remove_breakpoint */
+  0, 0, 0, 0, 0,	/* terminal stuff */
+  0, /* vx_kill, */
+  vx_load_command,
+  vx_lookup_symbol,
+  vx_create_inferior, 0,  /* mourn_inferior */
+  0, /* can_run */
+  0, /* notice_signals */
+  core_stratum, 0, /* next */
+  1, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
+  0, 0,			/* Section pointers */
+  OPS_MAGIC,		/* Always the last thing */
 };
 
 /* Target ops structure for accessing VxWorks child processes over the net */
 
 struct target_ops vx_run_ops = {
-	"vxprocess", "VxWorks process",
-	"VxWorks process, started by the \"run\" command.",
-	vx_proc_open, vx_proc_close, 0, vx_detach, /* vx_attach */
-	vx_resume, vx_wait,
-	vx_read_register, vx_write_register,
-	vx_prepare_to_store,
-	vx_xfer_memory, vx_run_files_info,
-	vx_insert_breakpoint, vx_remove_breakpoint,
-	0, 0, 0, 0, 0,	/* terminal stuff */
-	vx_kill,
-	vx_load_command,
-	vx_lookup_symbol,
-	0, vx_mourn_inferior,
-	0,  /* can_run */
-	0, /* notice_signals */
-	process_stratum, 0, /* next */
-	0, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
-			/* all_mem is off to avoid spurious msg in "i files" */
-	0, 0,			/* Section pointers */
-	OPS_MAGIC,		/* Always the last thing */
+  "vxprocess", "VxWorks process",
+  "VxWorks process, started by the \"run\" command.",
+  vx_proc_open, vx_proc_close, 0, vx_detach, /* vx_attach */
+  vx_resume, vx_wait,
+  vx_read_register, vx_write_register,
+  vx_prepare_to_store,
+  vx_xfer_memory, vx_run_files_info,
+  vx_insert_breakpoint, vx_remove_breakpoint,
+  0, 0, 0, 0, 0,	/* terminal stuff */
+  vx_kill,
+  vx_load_command,
+  vx_lookup_symbol,
+  0, vx_mourn_inferior,
+  0, /* can_run */
+  0, /* notice_signals */
+  process_stratum, 0, /* next */
+  0, /* all_mem--off to avoid spurious msg in "i files" */
+  1, 1, 1, 1,	/* mem, stack, regs, exec */
+  0, 0,			/* Section pointers */
+  OPS_MAGIC,		/* Always the last thing */
 };
 /* ==> Remember when reading at end of file, there are two "ops" structs here. */
 
 void
 _initialize_vx ()
 {
-  
- add_show_from_set
+  add_show_from_set
     (add_set_cmd ("vxworks-timeout", class_support, var_uinteger,
 		  (char *) &rpcTimeout.tv_sec,
 		  "Set seconds to wait for rpc calls to return.\n\
 Set the number of seconds to wait for rpc calls to return.", &setlist),
      &showlist);
 
-   add_target (&vx_ops);
+  add_target (&vx_ops);
   add_target (&vx_run_ops);
 }

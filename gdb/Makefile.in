@@ -203,6 +203,8 @@ SER_HARDWIRE=ser-unix.o
 # but not all (e.g. 960)
 REMOTE_O = remote.o dcache.o remote-utils.o
 
+ANNOTATE_OBS = annotate.o
+
 # Host and target-dependent makefile fragments come in here.
 ####
 # End of host and target-dependent makefile fragments
@@ -287,9 +289,6 @@ NLMCONV_FOR_TARGET = ` \
     fi; \
   fi`
 
-NWSOURCE = /gaunt/grossman/unsupported/Novell
-NWINCLUDES = $(NWSOURCE)/novh40
-
 LD_FOR_TARGET = ` \
   if [ -f $${rootme}/../ld/ld.new ] ; then \
     echo $${rootme}/../ld/ld.new; \
@@ -334,8 +333,10 @@ TARGET_FLAGS_TO_PASS = \
 SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	c-typeprint.c c-valprint.c ch-exp.y ch-lang.c ch-typeprint.c \
 	ch-valprint.c coffread.c command.c complaints.c core.c cp-valprint.c \
-	dbxread.c demangle.c dwarfread.c elfread.c environ.c eval.c expprint.c \
-	findvar.c gdbtypes.c infcmd.c inflow.c infrun.c language.c \
+	dbxread.c demangle.c dwarfread.c \
+	elfread.c environ.c eval.c expprint.c \
+	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c \
+	gdbtypes.c infcmd.c inflow.c infrun.c language.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
@@ -402,7 +403,8 @@ HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
 	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
-	c-lang.h ch-lang.h m2-lang.h complaints.h ns32k-opcode.h valprint.h \
+	c-lang.h ch-lang.h f-lang.h m2-lang.h \
+	complaints.h valprint.h \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
 	nindy-share/env.h nindy-share/stop.h \
@@ -448,13 +450,16 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
 	expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
-	objfiles.o minsyms.o maint.o demangle.o dbxread.o coffread.o elfread.o \
-	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
-	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
-	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
-	serial.o mdebugread.o os9kread.o top.o utils.o
+	exec.o objfiles.o minsyms.o maint.o demangle.o \
+	dbxread.o coffread.o elfread.o \
+	dwarfread.o mipsread.o stabsread.o core.o \
+	c-lang.o ch-lang.o f-lang.o m2-lang.o \
+	complaints.o typeprint.o \
+	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
+	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
+	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o
 
-OBS = $(COMMON_OBS) main.o annotate.o
+OBS = $(COMMON_OBS) $(ANNOTATE_OBS) main.o
 
 LIBGDB_OBS = 
 
@@ -467,8 +472,8 @@ NTSSTART = kdb-start.o
 SUBDIRS = doc testsuite nlm
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
-YYFILES = c-exp.tab.c m2-exp.tab.c ch-exp.tab.c
-YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
+YYFILES = c-exp.tab.c f-exp.tab.c m2-exp.tab.c ch-exp.tab.c
+YYOBJ = c-exp.tab.o f-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 
 # Things which need to be built when making a distribution.
 
@@ -571,20 +576,6 @@ gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
 	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
-
-prelude.o: $(NWSOURCE)/prelude.c
-	rootme=`pwd`; export rootme; rootsrc=`cd $(srcdir); pwd`; export rootsrc; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(NWSOURCE)/prelude.c
-
-i386-nlmstub.o: $(srcdir)/i386-nlmstub.c
-	rootme=`pwd`; export rootme; rootsrc=`cd $(srcdir); pwd`; export rootsrc; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(srcdir)/i386-nlmstub.c
-
-nlmstub.o: prelude.o i386-nlmstub.o
-	rootme=`pwd`; export rootme; $(LD_FOR_TARGET) -r -o nlmstub.o prelude.o i386-nlmstub.o
-
-nlmstub.nlm: nlmstub.o $(srcdir)/nlmstub.def
-	rootme=`pwd`; export rootme; $(NLMCONV_FOR_TARGET) -T $(srcdir)/nlmstub.def nlmstub.o nlmstub.nlm
-
-nlmstub: nlmstub.nlm
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
@@ -713,7 +704,8 @@ distclean: clean
 
 realclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
-	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS $(INFOFILES)
+	rm -f c-exp.tab.c f-exp.tab.c m2-exp.tab.c ch-exp.tab.c
+	rm -f TAGS $(INFOFILES)
 	rm -f nm.h tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f Makefile
@@ -789,15 +781,28 @@ c-exp.tab.c: c-exp.y
 	-rm y.tab.c
 	mv c-exp.new ./c-exp.tab.c
 
+f-exp.tab.o: f-exp.tab.c
+f-exp.tab.c: f-exp.y c-exp.tab.c
+	$(YACC) $(YFLAGS) $(srcdir)/f-exp.y
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	  < y.tab.c > f-exp.new
+	-rm y.tab.c
+	mv f-exp.new ./f-exp.tab.c
+
 # ch-exp.tab.c is generated in objdir from ch-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to ch-exp.tab.o.
 # Remove bogus decls for malloc/realloc/free which conflict with everything
 # else.
 ch-exp.tab.o: ch-exp.tab.c
-# the dependency here on c-exp.tab.c is artificial.  Without this
+# the dependency here on f-exp.tab.c is artificial.  Without this
 # dependency, a parallel make will attempt to build both at the same
 # time and the second yacc will pollute the first y.tab.c file.
-ch-exp.tab.c: ch-exp.y c-exp.tab.c
+ch-exp.tab.c: ch-exp.y f-exp.tab.c
 	$(YACC) $(YFLAGS) $(srcdir)/ch-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
@@ -830,7 +835,7 @@ m2-exp.tab.c: m2-exp.y ch-exp.tab.c
 	mv m2-exp.new ./m2-exp.tab.c
 
 # These files are updated atomically, so make never has to remove them
-.PRECIOUS: m2-exp.tab.c ch-exp.tab.c c-exp.tab.c
+.PRECIOUS: m2-exp.tab.c ch-exp.tab.c f-exp.tab.c c-exp.tab.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
@@ -899,7 +904,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	tahoe-pinsn.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
 	vax-pinsn.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
-	xcoffexec.c xcoffread.c xcoffsolib.c z8k-tdep.c
+	xcoffread.c xcoffsolib.c z8k-tdep.c
 
 ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \
@@ -1007,6 +1012,16 @@ c-typeprint.o: c-typeprint.c c-lang.h $(defs_h) $(expression_h) \
 	typeprint.h $(value_h)
 
 c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h $(symtab_h) valprint.h $(value_h)
+
+f-lang.o: f-lang.c f-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h parser-defs.h $(symtab_h)
+
+f-typeprint.o: f-typeprint.c f-lang.h $(defs_h) $(expression_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
+	typeprint.h $(value_h)
+
+f-valprint.o: f-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(symtab_h) valprint.h $(value_h)
 
 ch-lang.o: ch-lang.c ch-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
@@ -1185,8 +1200,6 @@ top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 
 main.o: main.c top.h $(defs_h)
 
-annotate.o: annotate.c annotate.h $(defs_h) value.h target.h $(gdbtypes_h)
-
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h)
 
@@ -1233,8 +1246,7 @@ ttyflush.o: nindy-share/ttyflush.c
 
 nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h) 
 
-ns32k-pinsn.o: ns32k-pinsn.c $(defs_h) $(gdbcore_h) ns32k-opcode.h \
-	$(symtab_h)
+ns32k-pinsn.o: ns32k-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 
 objfiles.o: objfiles.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
 	$(symtab_h)
@@ -1419,9 +1431,6 @@ xdr_ptrace.o: vx-share/xdr_ptrace.c $(defs_h) vx-share/vxTypes.h \
 xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_rdb.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
-
-xcoffexec.o: xcoffexec.c $(BFD_SRC)/libbfd.h $(defs_h) $(gdbcmd_h) \
-	$(gdbcore_h) $(inferior_h) objfiles.h symfile.h target.h xcoffsolib.h
 
 xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h $(INCLUDE_DIR)/coff/internal.h \

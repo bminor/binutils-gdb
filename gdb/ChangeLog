@@ -1,3 +1,24 @@
+Mon Oct 17 10:29:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (ALLDEPFILES): Remove xcoffexec.c.
+	* Makefile.in: Remove xcoffexec.o rule.
+
+	* exec.c (exec_file_command): Add comment.
+
+	Fix data and bss relocation for VxWorks 5.1:
+	* remote-vx.c (vx_add_symbols): New function.
+	(vx_load_command, add_symbol_stub): Call it instead of
+	symbol_file_add.
+	(vx_wait): Remove comment which was wrong to useless.
+	* remote-vx.c: Reindent much of file.
+	* coffread.c (cs_to_section, find_targ_sec): New functions.
+	(process_coff_symbol): Set SYMBOL_SECTION to result
+	from cs_to_section.
+	(coff_symtab_read): Call cs_to_section and deal appropriate
+	rather than assuming sections are in a certain order.  Deal with
+	BSS.
+	* coffread.c: Remove text_bfd_scnum variable.
+
 Sat Oct 15 16:55:48 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* corelow.c: Format to standard.

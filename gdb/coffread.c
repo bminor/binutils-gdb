@@ -284,6 +284,48 @@ coff_locate_sections (ignore_abfd, sectp, csip)
     }
 }
 
+/* Return the section_offsets* that CS points to.  */
+static int cs_to_section PARAMS ((struct coff_symbol *, struct objfile *));
+
+struct find_targ_sec_arg {
+  int targ_index;
+  int *resultp;
+};
+
+static void find_targ_sec PARAMS ((bfd *, asection *, void *));
+
+static void find_targ_sec (abfd, sect, obj)
+     bfd *abfd;
+     asection *sect;
+     PTR obj;
+{
+  struct find_targ_sec_arg *args = (struct find_targ_sec_arg *)obj;
+  if (sect->target_index == args->targ_index)
+    {
+      /* This is the section.  Figure out what SECT_OFF_* code it is.  */
+      if (bfd_get_section_flags (abfd, sect) & SEC_CODE)
+	*args->resultp = SECT_OFF_TEXT;
+      else if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
+	*args->resultp = SECT_OFF_DATA;
+      else
+	*args->resultp = SECT_OFF_BSS;
+    }
+}
+
+/* Return the section number (SECT_OFF_*) that CS points to.  */
+static int
+cs_to_section (cs, objfile)
+     struct coff_symbol *cs;
+     struct objfile *objfile;
+{
+  int off = SECT_OFF_TEXT;
+  struct find_targ_sec_arg args;
+  args.targ_index = cs->c_secnum;
+  args.resultp = &off;
+  bfd_map_over_sections (objfile->obfd, find_targ_sec, &args);
+  return off;
+}
+
 /* Look up a coff type-number index.  Return the address of the slot
    where the type for that index is stored.
    The type-number is in INDEX. 
@@ -482,13 +524,10 @@ record_minimal_symbol (name, address, type, objfile)
 
    The ultimate result is a new symtab (or, FIXME, eventually a psymtab).  */
 
-static int text_bfd_scnum;
-
 static void
 coff_symfile_init (objfile)
      struct objfile *objfile;
 {
-  asection	*section;
   bfd *abfd = objfile->obfd;
 
   /* Allocate struct to keep track of stab reading. */
@@ -504,13 +543,6 @@ coff_symfile_init (objfile)
   memset (objfile->sym_private, 0, sizeof (struct coff_symfile_info));
 
   init_entry_point_info (objfile);
-
-  /* Save the section number for the text section */
-  section = bfd_get_section_by_name (abfd, ".text");
-  if (section)
-    text_bfd_scnum = section->index;
-  else
-    text_bfd_scnum = -1;
 }
 
 /* This function is called for every section; it finds the outer limits
@@ -867,36 +899,39 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	      break;
 	    /* fall in for static symbols that don't start with '.' */
 	  case C_EXT:
-	    /* Record it in the minimal symbols regardless of SDB_TYPE.
-	       This parallels what we do for other debug formats, and
-	       probably is needed to make print_address_symbolic work right
-	       without the (now gone) "set fast-symbolic-addr off" kludge.  */
+	    {
+	      /* Record it in the minimal symbols regardless of
+		 SDB_TYPE.  This parallels what we do for other debug
+		 formats, and probably is needed to make
+		 print_address_symbolic work right without the (now
+		 gone) "set fast-symbolic-addr off" kludge.  */
 
-	    /* FIXME: This bogusly assumes the sections are in a certain
-	       order, text (SEC_CODE) sections are before data sections,
-	       etc.  */
-	    if (cs->c_secnum <= text_bfd_scnum+1)
-	      {
-		/* text or absolute.  (FIXME, should use mst_abs if
-		   absolute).  */
-		tmpaddr = cs->c_value;
-		if (cs->c_sclass != C_STAT)
-		  tmpaddr += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-		record_minimal_symbol
-		  (cs->c_name, tmpaddr,
-		   cs->c_sclass == C_STAT ? mst_file_text : mst_text,
-		   objfile);
-	      }
-	    else
-	      {
-		tmpaddr = cs->c_value;
-		if (cs->c_sclass != C_STAT)
-		  tmpaddr += ANOFFSET (section_offsets, SECT_OFF_DATA);
-		record_minimal_symbol
-		  (cs->c_name, tmpaddr,
-		   cs->c_sclass == C_STAT ? mst_file_data : mst_data,
-		   objfile);
-	      }
+	      /* FIXME: should use mst_abs, and not relocate, if absolute.  */
+	      enum minimal_symbol_type ms_type;
+	      int sec = cs_to_section (cs, objfile);
+	      tmpaddr = cs->c_value;
+	      if (cs->c_sclass != C_STAT)
+		tmpaddr += ANOFFSET (section_offsets, sec);
+	      switch (sec)
+		{
+		case SECT_OFF_TEXT:
+		case SECT_OFF_RODATA:
+		  ms_type = cs->c_sclass == C_STAT ? mst_file_text : mst_text;
+		  break;
+		case SECT_OFF_DATA:
+		  ms_type = cs->c_sclass == C_STAT ? mst_file_data : mst_data;
+		  break;
+		case SECT_OFF_BSS:
+		  ms_type = cs->c_sclass == C_STAT ? mst_file_bss : mst_bss;
+		  break;
+		default:
+		  ms_type = mst_unknown;
+		  break;
+		}
+
+	      record_minimal_symbol (cs->c_name, tmpaddr, ms_type, objfile);
+	    }
+
 	    if (SDB_TYPE (cs->c_type))
 	      process_coff_symbol (cs, &main_aux, section_offsets, objfile);
 	    break;
@@ -1362,6 +1397,7 @@ process_coff_symbol (cs, aux, section_offsets, objfile)
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
   SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+  SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 
   if (ISFCN (cs->c_type))
     {
@@ -1443,22 +1479,24 @@ process_coff_symbol (cs, aux, section_offsets, objfile)
 	    add_param_to_type(&in_function_type,sym);
 #endif
 	    add_symbol_to_list (sym, &local_symbols);
-#if !defined (BELIEVE_PCC_PROMOTION) && (TARGET_BYTE_ORDER == BIG_ENDIAN)
-	    {
-	      /* If PCC says a parameter is a short or a char,
-		 aligned on an int boundary, realign it to the "little end"
-		 of the int.  */
-	      struct type *temptype;
-	      temptype = lookup_fundamental_type (current_objfile, FT_INTEGER);
-	      if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (temptype)
-		  && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT
-		  && 0 == SYMBOL_VALUE (sym) % TYPE_LENGTH (temptype))
-		{
-		  SYMBOL_VALUE (sym) +=
-		    TYPE_LENGTH (temptype)
-		      - TYPE_LENGTH (SYMBOL_TYPE (sym));
-		}
-	    }
+#if !defined (BELIEVE_PCC_PROMOTION)
+	    if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	      {
+		/* If PCC says a parameter is a short or a char,
+		   aligned on an int boundary, realign it to the
+		   "little end" of the int.  */
+		struct type *temptype;
+		temptype = lookup_fundamental_type (current_objfile,
+						    FT_INTEGER);
+		if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (temptype)
+		    && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT
+		    && 0 == SYMBOL_VALUE (sym) % TYPE_LENGTH (temptype))
+		  {
+		    SYMBOL_VALUE (sym) +=
+		      TYPE_LENGTH (temptype)
+			- TYPE_LENGTH (SYMBOL_TYPE (sym));
+		  }
+	      }
 #endif
 	    break;
 

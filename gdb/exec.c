@@ -103,22 +103,29 @@ exec_close (quitting)
 	  need_symtab_cleanup = 1;
 	}
       else if (vp->bfd != exec_bfd)
-	bfd_close (vp->bfd);
+	/* FIXME-leak: We should be freeing vp->name too, I think.  */
+	if (!bfd_close (vp->bfd))
+	  warning ("cannot close \"%s\": %s",
+		   vp->name, bfd_errmsg (bfd_get_error ()));
 
       /* FIXME: This routine is #if 0'd in symfile.c.  What should we
 	 be doing here?  Should we just free everything in
-	 vp->objfile->symtabs?  Should free_objfile do that?  */
+	 vp->objfile->symtabs?  Should free_objfile do that?
+	 FIXME-as-well: free_objfile already free'd vp->name, so it isn't
+	 valid here.  */
       free_named_symtabs (vp->name);
       free (vp);
     }
-  
+
   vmap = NULL;
 
   if (exec_bfd)
     {
       char *name = bfd_get_filename (exec_bfd);
 
-      bfd_close (exec_bfd);
+      if (!bfd_close (exec_bfd))
+	warning ("cannot close \"%s\": %s",
+		 name, bfd_errmsg (bfd_get_error ()));
       free (name);
       exec_bfd = NULL;
     }
@@ -229,6 +236,8 @@ exec_file_command (args, from_tty)
 	/* Set text_start to the lowest address of the start of any
 	   readonly code section and set text_end to the highest
 	   address of the end of any readonly code section.  */
+	/* FIXME: The comment above does not match the code.  The code
+	   checks for sections with are either code *or* readonly.  */
 
 	text_start = ~(CORE_ADDR)0;
 	text_end = (CORE_ADDR)0;
@@ -366,7 +375,7 @@ map_vmap (abfd, arch)
   struct vmap_and_bfd vmap_bfd;
   struct vmap *vp, **vpp;
 
-  vp = (PTR) xmalloc (sizeof (*vp));
+  vp = (struct vmap *) xmalloc (sizeof (*vp));
   memset ((char *) vp, '\0', sizeof (*vp));
   vp->nxt = 0;
   vp->bfd = abfd;
