@@ -1,5 +1,10 @@
 2002-11-05  Andrew Cagney  <ac131313@redhat.com>
 
+	* infcmd.c (default_print_registers_info): Do not call
+	PRINT_REGISTER_HOOK.
+
+2002-11-05  Andrew Cagney  <ac131313@redhat.com>
+
 	* sparc-tdep.c (sparc_print_register_hook): Make static.
 	(sparc_print_registers_info): New function.
 	(sparc_do_registers_info): New function.

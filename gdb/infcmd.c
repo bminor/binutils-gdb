@@ -1663,12 +1663,6 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	    }
 	}
 
-      /* The SPARC wants to print even-numbered float regs as doubles
-         in addition to printing them as floats.  */
-#ifdef PRINT_REGISTER_HOOK
-      PRINT_REGISTER_HOOK (i);
-#endif
-
       fprintf_filtered (file, "\n");
     }
 }
