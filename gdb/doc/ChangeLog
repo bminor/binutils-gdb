@@ -1,3 +1,13 @@
+2000-05-01  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* annotate.texi: Remove "@syncodeindex fn cp", it causes grief in
+	TeX.
+
+	* gdb.texinfo: Add "@syncodeindex fn cp".  Convert all entries
+	"@kindex f" into "@kindex f (foo)", otherwise we get index entries
+	like `n' and `s' which look weird.  Convert some of the @kindex to
+	@vindex, when they refer to variables, not commands.
+
 Sat Apr 29 17:01:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (Hints): Do not use @value{GDBN in @nodes.
