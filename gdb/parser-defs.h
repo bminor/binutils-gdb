@@ -159,6 +159,8 @@ extern int pop_type_int (void);
 
 extern int length_of_subexp (struct expression *, int);
 
+extern void operator_length (struct expression *, int, int *, int *);
+
 extern struct type *follow_types (struct type *);
 
 /* During parsing of a C expression, the pointer to the next character

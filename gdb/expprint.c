@@ -548,6 +548,7 @@ op_string (enum exp_opcode op)
    form.  */
 
 static char *op_name (int opcode);
+static int dump_subexp_body (struct expression *exp, struct ui_file *, int);
 
 static char *
 op_name (int opcode)
@@ -737,8 +738,8 @@ op_name (int opcode)
 }
 
 void
-dump_prefix_expression (struct expression *exp, struct ui_file *stream,
-			char *note)
+dump_raw_expression (struct expression *exp, struct ui_file *stream,
+		     char *note)
 {
   int elt;
   char *opcode_name;
@@ -747,11 +748,6 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream,
 
   fprintf_filtered (stream, "Dump of expression @ ");
   gdb_print_host_address (exp, stream);
-  fprintf_filtered (stream, ", %s:\nExpression: `", note);
-  if (exp->elts[0].opcode != OP_TYPE)
-    print_expression (exp, stream);
-  else
-    fprintf_filtered (stream, "Type printing not yet supported....");
   fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
 		    exp->language_defn->la_name, exp->nelts,
 		    (long) sizeof (union exp_element));
@@ -778,10 +774,11 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream,
     }
 }
 
-static int dump_subexp (struct expression *exp, struct ui_file *stream,
-			int elt);
+/* Dump the subexpression of prefix expression EXP whose operator is at
+   position ELT onto STREAM.  Returns the position of the next 
+   subexpression in EXP.  */
 
-static int
+int
 dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 {
   static int indent = 0;
@@ -796,7 +793,23 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 
   fprintf_filtered (stream, "%-20s  ", op_name (exp->elts[elt].opcode));
 
-  switch (exp->elts[elt++].opcode)
+  elt = dump_subexp_body (exp, stream, elt);
+
+  indent -= 2;
+
+  return elt;
+}
+
+/* Dump the operands of prefix expression EXP whose opcode is at
+   position ELT onto STREAM.  Returns the position of the next 
+   subexpression in EXP.  */
+
+static int
+dump_subexp_body (struct expression *exp, struct ui_file *stream, int elt)
+{
+  int opcode = exp->elts[elt++].opcode;
+
+  switch (opcode)
     {
     case TERNOP_COND:
     case TERNOP_SLICE:
@@ -914,7 +927,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
       break;
     case OP_FUNCALL:
       {
-	int nargs;
+	int i, nargs;
 
 	nargs = longest_to_int (exp->elts[elt].longconst);
 
@@ -1006,20 +1019,17 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
       fprintf_filtered (stream, "Unknown format");
     }
 
-  indent -= 2;
-
   return elt;
 }
 
 void
-dump_postfix_expression (struct expression *exp, struct ui_file *stream,
-			 char *note)
+dump_prefix_expression (struct expression *exp, struct ui_file *stream)
 {
   int elt;
 
   fprintf_filtered (stream, "Dump of expression @ ");
   gdb_print_host_address (exp, stream);
-  fprintf_filtered (stream, ", %s:\nExpression: `", note);
+  fputs_filtered (", after conversion to prefix form:\nExpression: `", stream);
   if (exp->elts[0].opcode != OP_TYPE)
     print_expression (exp, stream);
   else

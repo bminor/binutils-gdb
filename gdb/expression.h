@@ -393,11 +393,7 @@ extern void print_expression (struct expression *, struct ui_file *);
 
 extern char *op_string (enum exp_opcode);
 
-extern void dump_prefix_expression (struct expression *,
-				    struct ui_file *,
-				    char *);
-extern void dump_postfix_expression (struct expression *,
-				     struct ui_file *,
-				     char *);
+extern void dump_raw_expression (struct expression *, struct ui_file *, char *);
+extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 #endif /* !defined (EXPRESSION_H) */

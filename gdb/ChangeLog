@@ -1,3 +1,35 @@
+2003-09-23  Paul N. Hilfinger  <hilfingr@nile.gnat.com>
+
+	* parser-defs.h (operator_length): Declare.
+	
+	* parse.c (length_of_subexp): Use operator_length to get operator
+	lengths and arities for operators.
+	Move most code to new operator_length function.
+	(operator_length): New function absorbing most code from 
+	length_of_subexp.
+	(prefixify_subexp): Remove large case and use operator_length instead.
+	(parse_exp_1): Use renamings:
+	dump_prefix_expression => dump_raw_expression and 
+	dump_postfix_expression => dump_prefix_expression.
+	
+	* expression.h (dump_prefix_expression): Rename to ...
+	(dump_raw_expression): New name.
+	(dump_postfix_expression): Rename to ...
+	(dump_prefix_expression): New name.
+	
+	* expprint.c (dump_subexp): Make global.  Add comment.
+	Move most existing code to dump_subexp_body.
+	(dump_subexp_body): New function.
+	(dump_prefix_expression): Rename to dump_raw_expression.
+	Remove attempt to print the expression via print_expression: it can't 
+	work before the expression is prefixified.
+	(dump_raw_expression): Renamed from dump_prefix_expression.
+	(dump_postfix_expression): Rename to dump_prefix_expression, since 
+	that's what it does.
+	Remove 'note' parameter, since this routine must be used on 
+	prefixified expression.
+	(dump_prefix_expression): Renamed from dump_postfix_expression.
+	
 2003-09-22  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (read_array_type): When building the type for an
