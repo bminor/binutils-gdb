@@ -775,7 +775,7 @@ clean mostlyclean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f *.o $(ADD_FILES) *~ init.c-tmp
 	rm -f init.c version.c
-	rm -f gdb core make.log
+	rm -f gdb core make.log libgdb-files
 	rm -f gdb[0-9]
 
 # This used to depend on c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS

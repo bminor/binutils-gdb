@@ -1,3 +1,7 @@
+Mon Jul 25 15:38:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (clean): Remove libgdb-files.
+
 Mon Jul 25 11:50:57 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* coredep.c: Include inferior.h.
