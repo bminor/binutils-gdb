@@ -1,5 +1,5 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
-   Copyright 1995, 1996, 1998, 2000, 2001
+   Copyright 1995, 1996, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -150,7 +150,7 @@ in_eval_c (void)
 static struct value *
 scm_lookup_name (char *str)
 {
-  value_ptr args[3];
+  struct value *args[3];
   int len = strlen (str);
   struct value *func;
   struct value *val;

@@ -1,6 +1,6 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2002.
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -41,7 +41,7 @@ void _initialize_values (void);
 
 /* Prototypes for local functions. */
 
-static value_ptr value_headof (value_ptr, struct type *, struct type *);
+static struct value *value_headof (struct value *, struct type *, struct type *);
 
 static void show_values (char *, int);
 
@@ -59,7 +59,7 @@ static void show_convenience (char *, int);
 struct value_history_chunk
   {
     struct value_history_chunk *next;
-    value_ptr values[VALUE_HISTORY_CHUNK];
+    struct value *values[VALUE_HISTORY_CHUNK];
   };
 
 /* Chain of chunks now in use.  */
@@ -72,14 +72,14 @@ static int value_history_count;	/* Abs number of last entry stored */
    (except for those released by calls to release_value)
    This is so they can be freed after each command.  */
 
-static value_ptr all_values;
+static struct value *all_values;
 
 /* Allocate a  value  that has the correct length for type TYPE.  */
 
-value_ptr
+struct value *
 allocate_value (struct type *type)
 {
-  register value_ptr val;
+  struct value *val;
   struct type *atype = check_typedef (type);
 
   val = (struct value *) xmalloc (sizeof (struct value) + TYPE_LENGTH (atype));
@@ -106,7 +106,7 @@ allocate_value (struct type *type)
 /* Allocate a  value  that has the correct length
    for COUNT repetitions type TYPE.  */
 
-value_ptr
+struct value *
 allocate_repeat_value (struct type *type, int count)
 {
   int low_bound = current_language->string_lower_bound;		/* ??? */
@@ -124,7 +124,7 @@ allocate_repeat_value (struct type *type, int count)
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
    if a subsequent value_free_to_mark is passed the mark.  */
-value_ptr
+struct value *
 value_mark (void)
 {
   return all_values;
@@ -133,9 +133,10 @@ value_mark (void)
 /* Free all values allocated since MARK was obtained by value_mark
    (except for those released).  */
 void
-value_free_to_mark (value_ptr mark)
+value_free_to_mark (struct value *mark)
 {
-  value_ptr val, next;
+  struct value *val;
+  struct value *next;
 
   for (val = all_values; val && val != mark; val = next)
     {
@@ -151,7 +152,8 @@ value_free_to_mark (value_ptr mark)
 void
 free_all_values (void)
 {
-  register value_ptr val, next;
+  struct value *val;
+  struct value *next;
 
   for (val = all_values; val; val = next)
     {
@@ -166,9 +168,9 @@ free_all_values (void)
    so it will not be freed automatically.  */
 
 void
-release_value (register value_ptr val)
+release_value (struct value *val)
 {
-  register value_ptr v;
+  struct value *v;
 
   if (all_values == val)
     {
@@ -187,10 +189,11 @@ release_value (register value_ptr val)
 }
 
 /* Release all values up to mark  */
-value_ptr
-value_release_to_mark (value_ptr mark)
+struct value *
+value_release_to_mark (struct value *mark)
 {
-  value_ptr val, next;
+  struct value *val;
+  struct value *next;
 
   for (val = next = all_values; next; next = VALUE_NEXT (next))
     if (VALUE_NEXT (next) == mark)
@@ -207,11 +210,11 @@ value_release_to_mark (value_ptr mark)
    It contains the same contents, for same memory address,
    but it's a different block of storage.  */
 
-value_ptr
-value_copy (value_ptr arg)
+struct value *
+value_copy (struct value *arg)
 {
   register struct type *encl_type = VALUE_ENCLOSING_TYPE (arg);
-  register value_ptr val = allocate_value (encl_type);
+  struct value *val = allocate_value (encl_type);
   VALUE_TYPE (val) = VALUE_TYPE (arg);
   VALUE_LVAL (val) = VALUE_LVAL (arg);
   VALUE_ADDRESS (val) = VALUE_ADDRESS (arg);
@@ -243,7 +246,7 @@ value_copy (value_ptr arg)
    value history index of this new item.  */
 
 int
-record_latest_value (value_ptr val)
+record_latest_value (struct value *val)
 {
   int i;
 
@@ -265,7 +268,7 @@ record_latest_value (value_ptr val)
   i = value_history_count % VALUE_HISTORY_CHUNK;
   if (i == 0)
     {
-      register struct value_history_chunk *new
+      struct value_history_chunk *new
       = (struct value_history_chunk *)
       xmalloc (sizeof (struct value_history_chunk));
       memset (new->values, 0, sizeof new->values);
@@ -283,10 +286,10 @@ record_latest_value (value_ptr val)
 
 /* Return a copy of the value in the history with sequence number NUM.  */
 
-value_ptr
+struct value *
 access_value_history (int num)
 {
-  register struct value_history_chunk *chunk;
+  struct value_history_chunk *chunk;
   register int i;
   register int absnum = num;
 
@@ -324,9 +327,9 @@ access_value_history (int num)
 void
 clear_value_history (void)
 {
-  register struct value_history_chunk *next;
+  struct value_history_chunk *next;
   register int i;
-  register value_ptr val;
+  struct value *val;
 
   while (value_history_chain)
     {
@@ -344,7 +347,7 @@ static void
 show_values (char *num_exp, int from_tty)
 {
   register int i;
-  register value_ptr val;
+  struct value *val;
   static int num = 1;
 
   if (num_exp)
@@ -415,10 +418,10 @@ lookup_internalvar (char *name)
   return var;
 }
 
-value_ptr
+struct value *
 value_of_internalvar (struct internalvar *var)
 {
-  register value_ptr val;
+  struct value *val;
 
 #ifdef IS_TRAPPED_INTERNALVAR
   if (IS_TRAPPED_INTERNALVAR (var->name))
@@ -435,7 +438,7 @@ value_of_internalvar (struct internalvar *var)
 
 void
 set_internalvar_component (struct internalvar *var, int offset, int bitpos,
-			   int bitsize, value_ptr newval)
+			   int bitsize, struct value *newval)
 {
   register char *addr = VALUE_CONTENTS (var->value) + offset;
 
@@ -452,9 +455,9 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 }
 
 void
-set_internalvar (struct internalvar *var, value_ptr val)
+set_internalvar (struct internalvar *var, struct value *val)
 {
-  value_ptr newval;
+  struct value *newval;
 
 #ifdef IS_TRAPPED_INTERNALVAR
   if (IS_TRAPPED_INTERNALVAR (var->name))
@@ -538,7 +541,7 @@ use \"set\" as in \"set $foo = 5\" to define them.\n");
    Does not deallocate the value.  */
 
 LONGEST
-value_as_long (register value_ptr val)
+value_as_long (struct value *val)
 {
   /* This coerces arrays and functions, which is necessary (e.g.
      in disassemble_command).  It also dereferences references, which
@@ -548,7 +551,7 @@ value_as_long (register value_ptr val)
 }
 
 DOUBLEST
-value_as_double (register value_ptr val)
+value_as_double (struct value *val)
 {
   DOUBLEST foo;
   int inv;
@@ -562,7 +565,7 @@ value_as_double (register value_ptr val)
    Note that val's type may not actually be a pointer; value_as_long
    handles all the cases.  */
 CORE_ADDR
-value_as_address (value_ptr val)
+value_as_address (struct value *val)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -784,7 +787,7 @@ unpack_pointer (struct type *type, char *valaddr)
 
 /* Get the value of the FIELDN'th field (which must be static) of TYPE. */
 
-value_ptr
+struct value *
 value_static_field (struct type *type, int fieldno)
 {
   CORE_ADDR addr;
@@ -836,8 +839,8 @@ value_static_field (struct type *type, int fieldno)
    than the old enclosing type, you have to allocate more space for the data.  
    The return value is a pointer to the new version of this value structure. */
 
-value_ptr
-value_change_enclosing_type (value_ptr val, struct type *new_encl_type)
+struct value *
+value_change_enclosing_type (struct value *val, struct type *new_encl_type)
 {
   if (TYPE_LENGTH (new_encl_type) <= TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val))) 
     {
@@ -846,10 +849,10 @@ value_change_enclosing_type (value_ptr val, struct type *new_encl_type)
     }
   else
     {
-      value_ptr new_val;
-      register value_ptr prev;
+      struct value *new_val;
+      struct value *prev;
       
-      new_val = (value_ptr) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
+      new_val = (struct value *) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
       
       /* We have to make sure this ends up in the same place in the value
 	 chain as the original copy, so it's clean-up behavior is the same. 
@@ -877,11 +880,11 @@ value_change_enclosing_type (value_ptr val, struct type *new_encl_type)
    extract and return the value of one of its (non-static) fields.
    FIELDNO says which field. */
 
-value_ptr
-value_primitive_field (register value_ptr arg1, int offset,
+struct value *
+value_primitive_field (struct value *arg1, int offset,
 		       register int fieldno, register struct type *arg_type)
 {
-  register value_ptr v;
+  struct value *v;
   register struct type *type;
 
   CHECK_TYPEDEF (arg_type);
@@ -947,8 +950,8 @@ value_primitive_field (register value_ptr arg1, int offset,
    extract and return the value of one of its (non-static) fields.
    FIELDNO says which field. */
 
-value_ptr
-value_field (register value_ptr arg1, register int fieldno)
+struct value *
+value_field (struct value *arg1, register int fieldno)
 {
   return value_primitive_field (arg1, 0, fieldno, VALUE_TYPE (arg1));
 }
@@ -961,11 +964,11 @@ value_field (register value_ptr arg1, register int fieldno)
    full symbol or a minimal symbol.
  */
 
-value_ptr
-value_fn_field (value_ptr *arg1p, struct fn_field *f, int j, struct type *type,
+struct value *
+value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *type,
 		int offset)
 {
-  register value_ptr v;
+  struct value *v;
   register struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   struct symbol *sym;
@@ -1022,11 +1025,12 @@ value_fn_field (value_ptr *arg1p, struct fn_field *f, int j, struct type *type,
    by value_rtti_type efficiently.
    Consider it gone for 5.1. */
 
-static value_ptr
-value_headof (value_ptr in_arg, struct type *btype, struct type *dtype)
+static struct value *
+value_headof (struct value *in_arg, struct type *btype, struct type *dtype)
 {
   /* First collect the vtables we must look at for this object.  */
-  value_ptr arg, vtbl;
+  struct value *arg;
+  struct value *vtbl;
   struct symbol *sym;
   char *demangled_name;
   struct minimal_symbol *msymbol;
@@ -1083,8 +1087,8 @@ value_headof (value_ptr in_arg, struct type *btype, struct type *dtype)
    of its baseclasses) to figure out the most derived type that ARG
    could actually be a pointer to.  */
 
-value_ptr
-value_from_vtable_info (value_ptr arg, struct type *type)
+struct value *
+value_from_vtable_info (struct value *arg, struct type *type)
 {
   /* Take care of preliminaries.  */
   if (TYPE_VPTR_FIELDNO (type) < 0)
@@ -1290,10 +1294,10 @@ modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize)
 
 /* Convert C numbers into newly allocated values */
 
-value_ptr
+struct value *
 value_from_longest (struct type *type, register LONGEST num)
 {
-  register value_ptr val = allocate_value (type);
+  struct value *val = allocate_value (type);
   register enum type_code code;
   register int len;
 retry:
@@ -1327,10 +1331,10 @@ retry:
 
 /* Create a value representing a pointer of type TYPE to the address
    ADDR.  */
-value_ptr
+struct value *
 value_from_pointer (struct type *type, CORE_ADDR addr)
 {
-  value_ptr val = allocate_value (type);
+  struct value *val = allocate_value (type);
   store_typed_address (VALUE_CONTENTS_RAW (val), type, addr);
   return val;
 }
@@ -1341,10 +1345,10 @@ value_from_pointer (struct type *type, CORE_ADDR addr)
    This is analogous to value_from_longest, which also does not
    use inferior memory.  String shall NOT contain embedded nulls.  */
 
-value_ptr
+struct value *
 value_from_string (char *ptr)
 {
-  value_ptr val;
+  struct value *val;
   int len = strlen (ptr);
   int lowbound = current_language->string_lower_bound;
   struct type *rangetype =
@@ -1361,10 +1365,10 @@ value_from_string (char *ptr)
   return val;
 }
 
-value_ptr
+struct value *
 value_from_double (struct type *type, DOUBLEST num)
 {
-  register value_ptr val = allocate_value (type);
+  struct value *val = allocate_value (type);
   struct type *base_type = check_typedef (type);
   register enum type_code code = TYPE_CODE (base_type);
   register int len = TYPE_LENGTH (base_type);
@@ -1394,10 +1398,10 @@ value_from_double (struct type *type, DOUBLEST num)
    means returning pointer to where structure is vs. returning value). */
 
 /* ARGSUSED */
-value_ptr
+struct value *
 value_being_returned (struct type *valtype, char *retbuf, int struct_return)
 {
-  register value_ptr val;
+  struct value *val;
   CORE_ADDR addr;
 
   /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
@@ -1451,7 +1455,7 @@ generic_use_struct_convention (int gcc_p, struct type *value_type)
 
 /* ARGSUSED */
 int
-using_struct_return (value_ptr function, CORE_ADDR funcaddr,
+using_struct_return (struct value *function, CORE_ADDR funcaddr,
 		     struct type *value_type, int gcc_p)
 {
   register enum type_code code = TYPE_CODE (value_type);
@@ -1473,7 +1477,7 @@ using_struct_return (value_ptr function, CORE_ADDR funcaddr,
    function wants to return.  */
 
 void
-set_return_value (value_ptr val)
+set_return_value (struct value *val)
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
   register enum type_code code = TYPE_CODE (type);

@@ -1,3 +1,8 @@
+2002-01-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	value_ptr with struct value pointer.
+
 2002-01-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Free Software): Fix wording.
