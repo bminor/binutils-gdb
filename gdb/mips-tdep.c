@@ -442,17 +442,6 @@ static struct type *mips_double_register_type (void);
 static struct cmd_list_element *setmipscmdlist = NULL;
 static struct cmd_list_element *showmipscmdlist = NULL;
 
-/* FIXME: brobecker/2004-10-15: I suspect these two declarations can
-   be removed by a better ordering of the functions below.  But I want
-   to do that as a separate change later in order to separate real
-   changes and changes that just move some code around.  */
-static CORE_ADDR mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-                                       struct frame_info *next_frame,
-                                       struct mips_frame_cache *this_cache);
-static CORE_ADDR mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-                                       struct frame_info *next_frame,
-                                       struct mips_frame_cache *this_cache);
-
 /* Integer registers 0 thru 31 are handled explicitly by
    mips_register_name().  Processor specific registers 32 and above
    are listed in the followign tables.  */
@@ -1721,6 +1710,262 @@ mips_mdebug_frame_base_sniffer (struct frame_info *next_frame)
     return NULL;
 }
 
+/* Set a register's saved stack address in temp_saved_regs.  If an
+   address has already been set for this register, do nothing; this
+   way we will only recognize the first save of a given register in a
+   function prologue.
+
+   For simplicity, save the address in both [0 .. NUM_REGS) and
+   [NUM_REGS .. 2*NUM_REGS).  Strictly speaking, only the second range
+   is used as it is only second range (the ABI instead of ISA
+   registers) that comes into play when finding saved registers in a
+   frame.  */
+
+static void
+set_reg_offset (struct mips_frame_cache *this_cache, int regnum,
+		CORE_ADDR offset)
+{
+  if (this_cache != NULL
+      && this_cache->saved_regs[regnum].addr == -1)
+    {
+      this_cache->saved_regs[regnum + 0 * NUM_REGS].addr = offset;
+      this_cache->saved_regs[regnum + 1 * NUM_REGS].addr = offset;
+    }
+}
+
+
+/* Fetch the immediate value from a MIPS16 instruction.
+   If the previous instruction was an EXTEND, use it to extend
+   the upper bits of the immediate value.  This is a helper function
+   for mips16_scan_prologue.  */
+
+static int
+mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
+		unsigned short inst,	/* current instruction */
+		int nbits,	/* number of bits in imm field */
+		int scale,	/* scale factor to be applied to imm */
+		int is_signed)	/* is the imm field signed? */
+{
+  int offset;
+
+  if ((prev_inst & 0xf800) == 0xf000)	/* prev instruction was EXTEND? */
+    {
+      offset = ((prev_inst & 0x1f) << 11) | (prev_inst & 0x7e0);
+      if (offset & 0x8000)	/* check for negative extend */
+	offset = 0 - (0x10000 - (offset & 0xffff));
+      return offset | (inst & 0x1f);
+    }
+  else
+    {
+      int max_imm = 1 << nbits;
+      int mask = max_imm - 1;
+      int sign_bit = max_imm >> 1;
+
+      offset = inst & mask;
+      if (is_signed && (offset & sign_bit))
+	offset = 0 - (max_imm - offset);
+      return offset * scale;
+    }
+}
+
+
+/* Analyze the function prologue from START_PC to LIMIT_PC. Builds
+   the associated FRAME_CACHE if not null.
+   Return the address of the first instruction past the prologue.  */
+
+static CORE_ADDR
+mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
+                      struct frame_info *next_frame,
+                      struct mips_frame_cache *this_cache)
+{
+  CORE_ADDR cur_pc;
+  CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer */
+  CORE_ADDR sp;
+  long frame_offset = 0;        /* Size of stack frame.  */
+  long frame_adjust = 0;        /* Offset of FP from SP.  */
+  int frame_reg = MIPS_SP_REGNUM;
+  unsigned short prev_inst = 0;	/* saved copy of previous instruction */
+  unsigned inst = 0;		/* current instruction */
+  unsigned entry_inst = 0;	/* the entry instruction */
+  int reg, offset;
+
+  int extend_bytes = 0;
+  int prev_extend_bytes;
+  CORE_ADDR end_prologue_addr = 0;
+
+  /* Can be called when there's no process, and hence when there's no
+     NEXT_FRAME.  */
+  if (next_frame != NULL)
+    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
+  else
+    sp = 0;
+
+  if (limit_pc > start_pc + 200)
+    limit_pc = start_pc + 200;
+
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
+    {
+      /* Save the previous instruction.  If it's an EXTEND, we'll extract
+         the immediate offset extension from it in mips16_get_imm.  */
+      prev_inst = inst;
+
+      /* Fetch and decode the instruction.   */
+      inst = (unsigned short) mips_fetch_instruction (cur_pc);
+
+      /* Normally we ignore extend instructions.  However, if it is
+         not followed by a valid prologue instruction, then this
+         instruction is not part of the prologue either.  We must
+         remember in this case to adjust the end_prologue_addr back
+         over the extend.  */
+      if ((inst & 0xf800) == 0xf000)    /* extend */
+        {
+          extend_bytes = MIPS16_INSTLEN;
+          continue;
+        }
+
+      prev_extend_bytes = extend_bytes;
+      extend_bytes = 0;
+
+      if ((inst & 0xff00) == 0x6300	/* addiu sp */
+	  || (inst & 0xff00) == 0xfb00)	/* daddiu sp */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 1);
+	  if (offset < 0)	/* negative stack adjustment? */
+	    frame_offset -= offset;
+	  else
+	    /* Exit loop if a positive stack adjustment is found, which
+	       usually means that the stack cleanup code in the function
+	       epilogue is reached.  */
+	    break;
+	}
+      else if ((inst & 0xf800) == 0xd000)	/* sw reg,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
+	  reg = mips16_to_32_reg[(inst & 0x700) >> 8];
+	  set_reg_offset (this_cache, reg, sp + offset);
+	}
+      else if ((inst & 0xff00) == 0xf900)	/* sd reg,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
+	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
+	  set_reg_offset (this_cache, reg, sp + offset);
+	}
+      else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
+	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
+	}
+      else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
+	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
+	}
+      else if (inst == 0x673d)	/* move $s1, $sp */
+	{
+	  frame_addr = sp;
+	  frame_reg = 17;
+	}
+      else if ((inst & 0xff00) == 0x0100)	/* addiu $s1,sp,n */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
+	  frame_addr = sp + offset;
+	  frame_reg = 17;
+	  frame_adjust = offset;
+	}
+      else if ((inst & 0xFF00) == 0xd900)	/* sw reg,offset($s1) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 5, 4, 0);
+	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
+	  set_reg_offset (this_cache, reg, frame_addr + offset);
+	}
+      else if ((inst & 0xFF00) == 0x7900)	/* sd reg,offset($s1) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
+	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
+	  set_reg_offset (this_cache, reg, frame_addr + offset);
+	}
+      else if ((inst & 0xf81f) == 0xe809
+               && (inst & 0x700) != 0x700)	/* entry */
+	entry_inst = inst;	/* save for later processing */
+      else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
+	cur_pc += MIPS16_INSTLEN;	/* 32-bit instruction */
+      else if ((inst & 0xff1c) == 0x6704)	/* move reg,$a0-$a3 */
+        {
+          /* This instruction is part of the prologue, but we don't
+             need to do anything special to handle it.  */
+        }
+      else
+        {
+          /* This instruction is not an instruction typically found
+             in a prologue, so we must have reached the end of the
+             prologue.  */
+          if (end_prologue_addr == 0)
+            end_prologue_addr = cur_pc - prev_extend_bytes;
+        }
+    }
+
+  /* The entry instruction is typically the first instruction in a function,
+     and it stores registers at offsets relative to the value of the old SP
+     (before the prologue).  But the value of the sp parameter to this
+     function is the new SP (after the prologue has been executed).  So we
+     can't calculate those offsets until we've seen the entire prologue,
+     and can calculate what the old SP must have been. */
+  if (entry_inst != 0)
+    {
+      int areg_count = (entry_inst >> 8) & 7;
+      int sreg_count = (entry_inst >> 6) & 3;
+
+      /* The entry instruction always subtracts 32 from the SP.  */
+      frame_offset += 32;
+
+      /* Now we can calculate what the SP must have been at the
+         start of the function prologue.  */
+      sp += frame_offset;
+
+      /* Check if a0-a3 were saved in the caller's argument save area.  */
+      for (reg = 4, offset = 0; reg < areg_count + 4; reg++)
+	{
+	  set_reg_offset (this_cache, reg, sp + offset);
+	  offset += mips_abi_regsize (current_gdbarch);
+	}
+
+      /* Check if the ra register was pushed on the stack.  */
+      offset = -4;
+      if (entry_inst & 0x20)
+	{
+	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
+	  offset -= mips_abi_regsize (current_gdbarch);
+	}
+
+      /* Check if the s0 and s1 registers were pushed on the stack.  */
+      for (reg = 16; reg < sreg_count + 16; reg++)
+	{
+	  set_reg_offset (this_cache, reg, sp + offset);
+	  offset -= mips_abi_regsize (current_gdbarch);
+	}
+    }
+
+  if (this_cache != NULL)
+    {
+      this_cache->base =
+        (frame_unwind_register_signed (next_frame, NUM_REGS + frame_reg)
+         + frame_offset - frame_adjust);
+      /* FIXME: brobecker/2004-10-10: Just as in the mips32 case, we should
+         be able to get rid of the assignment below, evetually. But it's
+         still needed for now.  */
+      this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
+        = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
+    }
+
+  /* If we didn't reach the end of the prologue when scanning the function
+     instructions, then set end_prologue_addr to the address of the
+     instruction immediately after the last one we scanned.  */
+  if (end_prologue_addr == 0)
+    end_prologue_addr = cur_pc;
+
+  return end_prologue_addr;
+}
+
 /* Heuristic unwinder for 16-bit MIPS instruction set (aka MIPS16).
    Procedures that use the 32-bit instruction set are handled by the
    mips_insn32 unwinder.  */
@@ -1820,6 +2065,223 @@ mips_insn16_frame_base_sniffer (struct frame_info *next_frame)
     return &mips_insn16_frame_base;
   else
     return NULL;
+}
+
+/* Mark all the registers as unset in the saved_regs array
+   of THIS_CACHE.  Do nothing if THIS_CACHE is null.  */
+
+void
+reset_saved_regs (struct mips_frame_cache *this_cache)
+{
+  if (this_cache == NULL || this_cache->saved_regs == NULL)
+    return;
+
+  {
+    const int num_regs = NUM_REGS;
+    int i;
+
+    for (i = 0; i < num_regs; i++)
+      {
+        this_cache->saved_regs[i].addr = -1;
+      }
+  }
+}
+
+/* Analyze the function prologue from START_PC to LIMIT_PC. Builds
+   the associated FRAME_CACHE if not null.  
+   Return the address of the first instruction past the prologue.  */
+
+static CORE_ADDR
+mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
+                      struct frame_info *next_frame,
+                      struct mips_frame_cache *this_cache)
+{
+  CORE_ADDR cur_pc;
+  CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
+  CORE_ADDR sp;
+  long frame_offset;
+  int  frame_reg = MIPS_SP_REGNUM;
+
+  CORE_ADDR end_prologue_addr = 0;
+  int seen_sp_adjust = 0;
+  int load_immediate_bytes = 0;
+
+  /* Can be called when there's no process, and hence when there's no
+     NEXT_FRAME.  */
+  if (next_frame != NULL)
+    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
+  else
+    sp = 0;
+
+  if (limit_pc > start_pc + 200)
+    limit_pc = start_pc + 200;
+
+restart:
+
+  frame_offset = 0;
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
+    {
+      unsigned long inst, high_word, low_word;
+      int reg;
+
+      /* Fetch the instruction.   */
+      inst = (unsigned long) mips_fetch_instruction (cur_pc);
+
+      /* Save some code by pre-extracting some useful fields.  */
+      high_word = (inst >> 16) & 0xffff;
+      low_word = inst & 0xffff;
+      reg = high_word & 0x1f;
+
+      if (high_word == 0x27bd	/* addiu $sp,$sp,-i */
+	  || high_word == 0x23bd	/* addi $sp,$sp,-i */
+	  || high_word == 0x67bd)	/* daddiu $sp,$sp,-i */
+	{
+	  if (low_word & 0x8000)	/* negative stack adjustment? */
+            frame_offset += 0x10000 - low_word;
+	  else
+	    /* Exit loop if a positive stack adjustment is found, which
+	       usually means that the stack cleanup code in the function
+	       epilogue is reached.  */
+	    break;
+          seen_sp_adjust = 1;
+	}
+      else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
+	{
+	  set_reg_offset (this_cache, reg, sp + low_word);
+	}
+      else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
+	{
+	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra.  */
+	  set_reg_offset (this_cache, reg, sp + low_word);
+	}
+      else if (high_word == 0x27be)	/* addiu $30,$sp,size */
+	{
+	  /* Old gcc frame, r30 is virtual frame pointer.  */
+	  if ((long) low_word != frame_offset)
+	    frame_addr = sp + low_word;
+	  else if (frame_reg == MIPS_SP_REGNUM)
+	    {
+	      unsigned alloca_adjust;
+
+	      frame_reg = 30;
+	      frame_addr = read_next_frame_reg (next_frame, NUM_REGS + 30);
+	      alloca_adjust = (unsigned) (frame_addr - (sp + low_word));
+	      if (alloca_adjust > 0)
+		{
+                  /* FP > SP + frame_size. This may be because of
+                     an alloca or somethings similar.  Fix sp to
+                     "pre-alloca" value, and try again.  */
+		  sp += alloca_adjust;
+                  /* Need to reset the status of all registers.  Otherwise,
+                     we will hit a guard that prevents the new address
+                     for each register to be recomputed during the second
+                     pass.  */
+                  reset_saved_regs (this_cache);
+		  goto restart;
+		}
+	    }
+	}
+      /* move $30,$sp.  With different versions of gas this will be either
+         `addu $30,$sp,$zero' or `or $30,$sp,$zero' or `daddu 30,sp,$0'.
+         Accept any one of these.  */
+      else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
+	{
+	  /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
+	  if (frame_reg == MIPS_SP_REGNUM)
+	    {
+	      unsigned alloca_adjust;
+
+	      frame_reg = 30;
+	      frame_addr = read_next_frame_reg (next_frame, NUM_REGS + 30);
+	      alloca_adjust = (unsigned) (frame_addr - sp);
+	      if (alloca_adjust > 0)
+	        {
+                  /* FP > SP + frame_size. This may be because of
+                     an alloca or somethings similar.  Fix sp to
+                     "pre-alloca" value, and try again.  */
+	          sp = frame_addr;
+                  /* Need to reset the status of all registers.  Otherwise,
+                     we will hit a guard that prevents the new address
+                     for each register to be recomputed during the second
+                     pass.  */
+                  reset_saved_regs (this_cache);
+	          goto restart;
+	        }
+	    }
+	}
+      else if ((high_word & 0xFFE0) == 0xafc0)	/* sw reg,offset($30) */
+	{
+	  set_reg_offset (this_cache, reg, frame_addr + low_word);
+	}
+      else if ((high_word & 0xFFE0) == 0xE7A0 /* swc1 freg,n($sp) */
+               || (high_word & 0xF3E0) == 0xA3C0 /* sx reg,n($s8) */
+               || (inst & 0xFF9F07FF) == 0x00800021 /* move reg,$a0-$a3 */
+               || high_word == 0x3c1c /* lui $gp,n */
+               || high_word == 0x279c /* addiu $gp,$gp,n */
+               || inst == 0x0399e021 /* addu $gp,$gp,$t9 */
+               || inst == 0x033ce021 /* addu $gp,$t9,$gp */
+              )
+       {
+         /* These instructions are part of the prologue, but we don't
+            need to do anything special to handle them.  */
+       }
+      /* The instructions below load $at or $t0 with an immediate
+         value in preparation for a stack adjustment via
+         subu $sp,$sp,[$at,$t0]. These instructions could also
+         initialize a local variable, so we accept them only before
+         a stack adjustment instruction was seen.  */
+      else if (!seen_sp_adjust
+               && (high_word == 0x3c01 /* lui $at,n */
+                   || high_word == 0x3c08 /* lui $t0,n */
+                   || high_word == 0x3421 /* ori $at,$at,n */
+                   || high_word == 0x3508 /* ori $t0,$t0,n */
+                   || high_word == 0x3401 /* ori $at,$zero,n */
+                   || high_word == 0x3408 /* ori $t0,$zero,n */
+                  ))
+       {
+          load_immediate_bytes += MIPS_INSTLEN;     /* FIXME!! */
+       }
+      else
+       {
+         /* This instruction is not an instruction typically found
+            in a prologue, so we must have reached the end of the
+            prologue.  */
+         /* FIXME: brobecker/2004-10-10: Can't we just break out of this
+            loop now?  Why would we need to continue scanning the function
+            instructions?  */
+         if (end_prologue_addr == 0)
+           end_prologue_addr = cur_pc;
+       }
+    }
+
+  if (this_cache != NULL)
+    {
+      this_cache->base = 
+        (frame_unwind_register_signed (next_frame, NUM_REGS + frame_reg)
+         + frame_offset);
+      /* FIXME: brobecker/2004-09-15: We should be able to get rid of
+         this assignment below, eventually.  But it's still needed
+         for now.  */
+      this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
+        = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
+    }
+
+  /* If we didn't reach the end of the prologue when scanning the function
+     instructions, then set end_prologue_addr to the address of the
+     instruction immediately after the last one we scanned.  */
+  /* brobecker/2004-10-10: I don't think this would ever happen, but
+     we may as well be careful and do our best if we have a null
+     end_prologue_addr.  */
+  if (end_prologue_addr == 0)
+    end_prologue_addr = cur_pc;
+     
+  /* In a frameless function, we might have incorrectly
+     skipped some load immediate instructions. Undo the skipping
+     if the load immediate was not followed by a stack adjustment.  */
+  if (load_immediate_bytes && !seen_sp_adjust)
+    end_prologue_addr -= load_immediate_bytes;
+
+  return end_prologue_addr;
 }
 
 /* Heuristic unwinder for procedures using 32-bit instructions (covers
@@ -2092,30 +2554,6 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 
 static struct mips_extra_func_info temp_proc_desc;
 
-/* Set a register's saved stack address in temp_saved_regs.  If an
-   address has already been set for this register, do nothing; this
-   way we will only recognize the first save of a given register in a
-   function prologue.
-
-   For simplicity, save the address in both [0 .. NUM_REGS) and
-   [NUM_REGS .. 2*NUM_REGS).  Strictly speaking, only the second range
-   is used as it is only second range (the ABI instead of ISA
-   registers) that comes into play when finding saved registers in a
-   frame.  */
-
-static void
-set_reg_offset (struct mips_frame_cache *this_cache, int regnum,
-		CORE_ADDR offset)
-{
-  if (this_cache != NULL
-      && this_cache->saved_regs[regnum].addr == -1)
-    {
-      this_cache->saved_regs[regnum + 0 * NUM_REGS].addr = offset;
-      this_cache->saved_regs[regnum + 1 * NUM_REGS].addr = offset;
-    }
-}
-
-
 /* Test whether the PC points to the return instruction at the
    end of a function. */
 
@@ -2227,455 +2665,6 @@ heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
       }
 
   return start_pc;
-}
-
-/* Fetch the immediate value from a MIPS16 instruction.
-   If the previous instruction was an EXTEND, use it to extend
-   the upper bits of the immediate value.  This is a helper function
-   for mips16_scan_prologue.  */
-
-static int
-mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
-		unsigned short inst,	/* current instruction */
-		int nbits,	/* number of bits in imm field */
-		int scale,	/* scale factor to be applied to imm */
-		int is_signed)	/* is the imm field signed? */
-{
-  int offset;
-
-  if ((prev_inst & 0xf800) == 0xf000)	/* prev instruction was EXTEND? */
-    {
-      offset = ((prev_inst & 0x1f) << 11) | (prev_inst & 0x7e0);
-      if (offset & 0x8000)	/* check for negative extend */
-	offset = 0 - (0x10000 - (offset & 0xffff));
-      return offset | (inst & 0x1f);
-    }
-  else
-    {
-      int max_imm = 1 << nbits;
-      int mask = max_imm - 1;
-      int sign_bit = max_imm >> 1;
-
-      offset = inst & mask;
-      if (is_signed && (offset & sign_bit))
-	offset = 0 - (max_imm - offset);
-      return offset * scale;
-    }
-}
-
-
-/* Analyze the function prologue from START_PC to LIMIT_PC. Builds
-   the associated FRAME_CACHE if not null.
-   Return the address of the first instruction past the prologue.  */
-
-static CORE_ADDR
-mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-                      struct frame_info *next_frame,
-                      struct mips_frame_cache *this_cache)
-{
-  CORE_ADDR cur_pc;
-  CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer */
-  CORE_ADDR sp;
-  long frame_offset = 0;        /* Size of stack frame.  */
-  long frame_adjust = 0;        /* Offset of FP from SP.  */
-  int frame_reg = MIPS_SP_REGNUM;
-  unsigned short prev_inst = 0;	/* saved copy of previous instruction */
-  unsigned inst = 0;		/* current instruction */
-  unsigned entry_inst = 0;	/* the entry instruction */
-  int reg, offset;
-
-  int extend_bytes = 0;
-  int prev_extend_bytes;
-  CORE_ADDR end_prologue_addr = 0;
-
-  /* Can be called when there's no process, and hence when there's no
-     NEXT_FRAME.  */
-  if (next_frame != NULL)
-    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
-  else
-    sp = 0;
-
-  if (limit_pc > start_pc + 200)
-    limit_pc = start_pc + 200;
-
-  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
-    {
-      /* Save the previous instruction.  If it's an EXTEND, we'll extract
-         the immediate offset extension from it in mips16_get_imm.  */
-      prev_inst = inst;
-
-      /* Fetch and decode the instruction.   */
-      inst = (unsigned short) mips_fetch_instruction (cur_pc);
-
-      /* Normally we ignore extend instructions.  However, if it is
-         not followed by a valid prologue instruction, then this
-         instruction is not part of the prologue either.  We must
-         remember in this case to adjust the end_prologue_addr back
-         over the extend.  */
-      if ((inst & 0xf800) == 0xf000)    /* extend */
-        {
-          extend_bytes = MIPS16_INSTLEN;
-          continue;
-        }
-
-      prev_extend_bytes = extend_bytes;
-      extend_bytes = 0;
-
-      if ((inst & 0xff00) == 0x6300	/* addiu sp */
-	  || (inst & 0xff00) == 0xfb00)	/* daddiu sp */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 1);
-	  if (offset < 0)	/* negative stack adjustment? */
-	    frame_offset -= offset;
-	  else
-	    /* Exit loop if a positive stack adjustment is found, which
-	       usually means that the stack cleanup code in the function
-	       epilogue is reached.  */
-	    break;
-	}
-      else if ((inst & 0xf800) == 0xd000)	/* sw reg,n($sp) */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
-	  reg = mips16_to_32_reg[(inst & 0x700) >> 8];
-	  set_reg_offset (this_cache, reg, sp + offset);
-	}
-      else if ((inst & 0xff00) == 0xf900)	/* sd reg,n($sp) */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
-	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
-	  set_reg_offset (this_cache, reg, sp + offset);
-	}
-      else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
-	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
-	}
-      else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
-	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
-	}
-      else if (inst == 0x673d)	/* move $s1, $sp */
-	{
-	  frame_addr = sp;
-	  frame_reg = 17;
-	}
-      else if ((inst & 0xff00) == 0x0100)	/* addiu $s1,sp,n */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
-	  frame_addr = sp + offset;
-	  frame_reg = 17;
-	  frame_adjust = offset;
-	}
-      else if ((inst & 0xFF00) == 0xd900)	/* sw reg,offset($s1) */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 5, 4, 0);
-	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
-	  set_reg_offset (this_cache, reg, frame_addr + offset);
-	}
-      else if ((inst & 0xFF00) == 0x7900)	/* sd reg,offset($s1) */
-	{
-	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
-	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
-	  set_reg_offset (this_cache, reg, frame_addr + offset);
-	}
-      else if ((inst & 0xf81f) == 0xe809
-               && (inst & 0x700) != 0x700)	/* entry */
-	entry_inst = inst;	/* save for later processing */
-      else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
-	cur_pc += MIPS16_INSTLEN;	/* 32-bit instruction */
-      else if ((inst & 0xff1c) == 0x6704)	/* move reg,$a0-$a3 */
-        {
-          /* This instruction is part of the prologue, but we don't
-             need to do anything special to handle it.  */
-        }
-      else
-        {
-          /* This instruction is not an instruction typically found
-             in a prologue, so we must have reached the end of the
-             prologue.  */
-          if (end_prologue_addr == 0)
-            end_prologue_addr = cur_pc - prev_extend_bytes;
-        }
-    }
-
-  /* The entry instruction is typically the first instruction in a function,
-     and it stores registers at offsets relative to the value of the old SP
-     (before the prologue).  But the value of the sp parameter to this
-     function is the new SP (after the prologue has been executed).  So we
-     can't calculate those offsets until we've seen the entire prologue,
-     and can calculate what the old SP must have been. */
-  if (entry_inst != 0)
-    {
-      int areg_count = (entry_inst >> 8) & 7;
-      int sreg_count = (entry_inst >> 6) & 3;
-
-      /* The entry instruction always subtracts 32 from the SP.  */
-      frame_offset += 32;
-
-      /* Now we can calculate what the SP must have been at the
-         start of the function prologue.  */
-      sp += frame_offset;
-
-      /* Check if a0-a3 were saved in the caller's argument save area.  */
-      for (reg = 4, offset = 0; reg < areg_count + 4; reg++)
-	{
-	  set_reg_offset (this_cache, reg, sp + offset);
-	  offset += mips_abi_regsize (current_gdbarch);
-	}
-
-      /* Check if the ra register was pushed on the stack.  */
-      offset = -4;
-      if (entry_inst & 0x20)
-	{
-	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
-	  offset -= mips_abi_regsize (current_gdbarch);
-	}
-
-      /* Check if the s0 and s1 registers were pushed on the stack.  */
-      for (reg = 16; reg < sreg_count + 16; reg++)
-	{
-	  set_reg_offset (this_cache, reg, sp + offset);
-	  offset -= mips_abi_regsize (current_gdbarch);
-	}
-    }
-
-  if (this_cache != NULL)
-    {
-      this_cache->base =
-        (frame_unwind_register_signed (next_frame, NUM_REGS + frame_reg)
-         + frame_offset - frame_adjust);
-      /* FIXME: brobecker/2004-10-10: Just as in the mips32 case, we should
-         be able to get rid of the assignment below, evetually. But it's
-         still needed for now.  */
-      this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
-        = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
-    }
-
-  /* If we didn't reach the end of the prologue when scanning the function
-     instructions, then set end_prologue_addr to the address of the
-     instruction immediately after the last one we scanned.  */
-  if (end_prologue_addr == 0)
-    end_prologue_addr = cur_pc;
-
-  return end_prologue_addr;
-}
-
-/* Mark all the registers as unset in the saved_regs array
-   of THIS_CACHE.  Do nothing if THIS_CACHE is null.  */
-
-void
-reset_saved_regs (struct mips_frame_cache *this_cache)
-{
-  if (this_cache == NULL || this_cache->saved_regs == NULL)
-    return;
-
-  {
-    const int num_regs = NUM_REGS;
-    int i;
-
-    for (i = 0; i < num_regs; i++)
-      {
-        this_cache->saved_regs[i].addr = -1;
-      }
-  }
-}
-
-/* Analyze the function prologue from START_PC to LIMIT_PC. Builds
-   the associated FRAME_CACHE if not null.  
-   Return the address of the first instruction past the prologue.  */
-
-static CORE_ADDR
-mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-                      struct frame_info *next_frame,
-                      struct mips_frame_cache *this_cache)
-{
-  CORE_ADDR cur_pc;
-  CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
-  CORE_ADDR sp;
-  long frame_offset;
-  int  frame_reg = MIPS_SP_REGNUM;
-
-  CORE_ADDR end_prologue_addr = 0;
-  int seen_sp_adjust = 0;
-  int load_immediate_bytes = 0;
-
-  /* Can be called when there's no process, and hence when there's no
-     NEXT_FRAME.  */
-  if (next_frame != NULL)
-    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
-  else
-    sp = 0;
-
-  if (limit_pc > start_pc + 200)
-    limit_pc = start_pc + 200;
-
-restart:
-
-  frame_offset = 0;
-  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
-    {
-      unsigned long inst, high_word, low_word;
-      int reg;
-
-      /* Fetch the instruction.   */
-      inst = (unsigned long) mips_fetch_instruction (cur_pc);
-
-      /* Save some code by pre-extracting some useful fields.  */
-      high_word = (inst >> 16) & 0xffff;
-      low_word = inst & 0xffff;
-      reg = high_word & 0x1f;
-
-      if (high_word == 0x27bd	/* addiu $sp,$sp,-i */
-	  || high_word == 0x23bd	/* addi $sp,$sp,-i */
-	  || high_word == 0x67bd)	/* daddiu $sp,$sp,-i */
-	{
-	  if (low_word & 0x8000)	/* negative stack adjustment? */
-            frame_offset += 0x10000 - low_word;
-	  else
-	    /* Exit loop if a positive stack adjustment is found, which
-	       usually means that the stack cleanup code in the function
-	       epilogue is reached.  */
-	    break;
-          seen_sp_adjust = 1;
-	}
-      else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
-	{
-	  set_reg_offset (this_cache, reg, sp + low_word);
-	}
-      else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
-	{
-	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra.  */
-	  set_reg_offset (this_cache, reg, sp + low_word);
-	}
-      else if (high_word == 0x27be)	/* addiu $30,$sp,size */
-	{
-	  /* Old gcc frame, r30 is virtual frame pointer.  */
-	  if ((long) low_word != frame_offset)
-	    frame_addr = sp + low_word;
-	  else if (frame_reg == MIPS_SP_REGNUM)
-	    {
-	      unsigned alloca_adjust;
-
-	      frame_reg = 30;
-	      frame_addr = read_next_frame_reg (next_frame, NUM_REGS + 30);
-	      alloca_adjust = (unsigned) (frame_addr - (sp + low_word));
-	      if (alloca_adjust > 0)
-		{
-                  /* FP > SP + frame_size. This may be because of
-                     an alloca or somethings similar.  Fix sp to
-                     "pre-alloca" value, and try again.  */
-		  sp += alloca_adjust;
-                  /* Need to reset the status of all registers.  Otherwise,
-                     we will hit a guard that prevents the new address
-                     for each register to be recomputed during the second
-                     pass.  */
-                  reset_saved_regs (this_cache);
-		  goto restart;
-		}
-	    }
-	}
-      /* move $30,$sp.  With different versions of gas this will be either
-         `addu $30,$sp,$zero' or `or $30,$sp,$zero' or `daddu 30,sp,$0'.
-         Accept any one of these.  */
-      else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
-	{
-	  /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
-	  if (frame_reg == MIPS_SP_REGNUM)
-	    {
-	      unsigned alloca_adjust;
-
-	      frame_reg = 30;
-	      frame_addr = read_next_frame_reg (next_frame, NUM_REGS + 30);
-	      alloca_adjust = (unsigned) (frame_addr - sp);
-	      if (alloca_adjust > 0)
-	        {
-                  /* FP > SP + frame_size. This may be because of
-                     an alloca or somethings similar.  Fix sp to
-                     "pre-alloca" value, and try again.  */
-	          sp = frame_addr;
-                  /* Need to reset the status of all registers.  Otherwise,
-                     we will hit a guard that prevents the new address
-                     for each register to be recomputed during the second
-                     pass.  */
-                  reset_saved_regs (this_cache);
-	          goto restart;
-	        }
-	    }
-	}
-      else if ((high_word & 0xFFE0) == 0xafc0)	/* sw reg,offset($30) */
-	{
-	  set_reg_offset (this_cache, reg, frame_addr + low_word);
-	}
-      else if ((high_word & 0xFFE0) == 0xE7A0 /* swc1 freg,n($sp) */
-               || (high_word & 0xF3E0) == 0xA3C0 /* sx reg,n($s8) */
-               || (inst & 0xFF9F07FF) == 0x00800021 /* move reg,$a0-$a3 */
-               || high_word == 0x3c1c /* lui $gp,n */
-               || high_word == 0x279c /* addiu $gp,$gp,n */
-               || inst == 0x0399e021 /* addu $gp,$gp,$t9 */
-               || inst == 0x033ce021 /* addu $gp,$t9,$gp */
-              )
-       {
-         /* These instructions are part of the prologue, but we don't
-            need to do anything special to handle them.  */
-       }
-      /* The instructions below load $at or $t0 with an immediate
-         value in preparation for a stack adjustment via
-         subu $sp,$sp,[$at,$t0]. These instructions could also
-         initialize a local variable, so we accept them only before
-         a stack adjustment instruction was seen.  */
-      else if (!seen_sp_adjust
-               && (high_word == 0x3c01 /* lui $at,n */
-                   || high_word == 0x3c08 /* lui $t0,n */
-                   || high_word == 0x3421 /* ori $at,$at,n */
-                   || high_word == 0x3508 /* ori $t0,$t0,n */
-                   || high_word == 0x3401 /* ori $at,$zero,n */
-                   || high_word == 0x3408 /* ori $t0,$zero,n */
-                  ))
-       {
-          load_immediate_bytes += MIPS_INSTLEN;     /* FIXME!! */
-       }
-      else
-       {
-         /* This instruction is not an instruction typically found
-            in a prologue, so we must have reached the end of the
-            prologue.  */
-         /* FIXME: brobecker/2004-10-10: Can't we just break out of this
-            loop now?  Why would we need to continue scanning the function
-            instructions?  */
-         if (end_prologue_addr == 0)
-           end_prologue_addr = cur_pc;
-       }
-    }
-
-  if (this_cache != NULL)
-    {
-      this_cache->base = 
-        (frame_unwind_register_signed (next_frame, NUM_REGS + frame_reg)
-         + frame_offset);
-      /* FIXME: brobecker/2004-09-15: We should be able to get rid of
-         this assignment below, eventually.  But it's still needed
-         for now.  */
-      this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
-        = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
-    }
-
-  /* If we didn't reach the end of the prologue when scanning the function
-     instructions, then set end_prologue_addr to the address of the
-     instruction immediately after the last one we scanned.  */
-  /* brobecker/2004-10-10: I don't think this would ever happen, but
-     we may as well be careful and do our best if we have a null
-     end_prologue_addr.  */
-  if (end_prologue_addr == 0)
-    end_prologue_addr = cur_pc;
-     
-  /* In a frameless function, we might have incorrectly
-     skipped some load immediate instructions. Undo the skipping
-     if the load immediate was not followed by a stack adjustment.  */
-  if (load_immediate_bytes && !seen_sp_adjust)
-    end_prologue_addr -= load_immediate_bytes;
-
-  return end_prologue_addr;
 }
 
 static mips_extra_func_info_t

@@ -1,3 +1,14 @@
+2004-10-15  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips32_scan_prologue): Move the implementation up
+	a bit to avoid the necessity of an advance declaration. Remove
+	declaration.
+	(set_reg_offset): Move implemenation up.
+	(mips16_get_imm): Likewise.
+	(mips16_scan_prologue): Likewise.
+	(reset_saved_regs): Likewise.
+	(mips32_scan_prologue): Likewise.
+
 2004-10-14  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c (mips32_scan_prologue): Add advance declaration.
