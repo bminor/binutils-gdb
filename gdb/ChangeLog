@@ -1,3 +1,7 @@
+2003-06-25  David Carlton  <carlton@kealia.com>
+
+	* MAINTAINERS: Update e-mail address.
+
 2003-06-24  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-tdep.c: More "Linux" -> "GNU/Linux".
