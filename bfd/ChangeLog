@@ -1,5 +1,9 @@
 Fri Mar 28 11:56:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-mips.c (mips_ecoff_backend_data): Initialize new
+	bfd_coff_backend_data field.
+	* coff-alpha.c (alpha_ecoff_backend_data): Likewise.
+
 	* config.bfd: Add bfd_elf64_{big,little}mips_vec to targ_selvecs
 	for mips*el*-*-linux* and mips*-*-linux*.  From H.J. Lu
 	<hjl@lucon.org> and Ralf Baechle <ralf@gnu.ai.mit.edu>.
