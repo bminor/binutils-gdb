@@ -43,6 +43,7 @@ configure.in
 configure.man
 configure.texi
 cvs
+deja-gnu
 diff
 emacs
 flex
