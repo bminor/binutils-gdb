@@ -34,18 +34,15 @@
 
 extern int alpha_force_relocation PARAMS ((struct fix *));
 extern int alpha_fix_adjustable PARAMS ((struct fix *));
-extern int alpha_frob_symbol PARAMS ((struct symbol *));
-extern int alpha_validate_fix PARAMS ((struct fix *, segT));
 
 extern unsigned long alpha_gprmask, alpha_fprmask;
+extern valueT alpha_gp_value;
 
 #define TC_FORCE_RELOCATION(FIXP)	alpha_force_relocation (FIXP)
 #define tc_fix_adjustable(FIXP)		alpha_fix_adjustable (FIXP)
 #define RELOC_REQUIRES_SYMBOL
-#define tc_frob_symbol(S,P)		((P) = alpha_frob_symbol (S))
-#define TC_VALIDATE_FIX(F,S,L)		if(alpha_validate_fix(F,S))goto L;
 
-#define md_convert_frag(b,s,f)		{as_fatal ("alpha convert_frag\n");}
+#define md_convert_frag(b,s,f)		as_fatal ("alpha convert_frag\n")
 #define md_create_long_jump(p,f,t,fr,s)	as_fatal("alpha_create_long_jump")
 #define md_create_short_jump(p,f,t,fr,s) as_fatal("alpha_create_short_jump")
 #define md_estimate_size_before_relax(f,s) \
@@ -55,13 +52,13 @@ extern unsigned long alpha_gprmask, alpha_fprmask;
 extern unsigned long md_section_align PARAMS ((segT, unsigned long));
 
 #define md_undefined_symbol(name)	(0)
-extern void alpha_end ();
-#define md_end()			alpha_end ()
 
-extern int alpha_local_label PARAMS ((const char *));
-#define LOCAL_LABEL(name)		alpha_local_label (name)
+#define LOCAL_LABEL(name)		((name)[0] == 'L')
 
 #define md_number_to_chars		number_to_chars_littleendian
 
 extern int alpha_do_align ();
 #define md_do_align(n,fill,l)	if (alpha_do_align(n,fill)) goto l
+
+extern void alpha_frob_file ();
+#define tc_frob_file		alpha_frob_file
