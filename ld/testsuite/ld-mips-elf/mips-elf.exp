@@ -42,5 +42,8 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "mips16-1"
 
 	run_dump_test "region1"
+
+	run_dump_test "branch-misc-1"
+	run_dump_test "branch-misc-2"
     }
 }
