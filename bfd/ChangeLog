@@ -1,5 +1,12 @@
 2003-07-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_install_value): Tidy.
+	(ppc_elf_relax_section): Remove dead code.  Remove unnecessary casts.
+	Formatting.
+	* elfxx-target.h: Remove PARAMS macro.  Formatting.
+
+2003-07-30  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (bfd_section_from_r_symndx): Test for SHN_UNDEF.
 	* elf64-ppc.c (get_fdh): New function, split out from
 	ppc64_elf_edit_opd.

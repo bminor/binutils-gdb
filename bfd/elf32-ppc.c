@@ -1615,7 +1615,10 @@ ppc_elf_howto_init (void)
 }
 
 static bfd_reloc_status_type
-ppc_elf_install_value (bfd *abfd, bfd_byte *hit_addr, bfd_vma v, unsigned int r_type)
+ppc_elf_install_value (bfd *abfd,
+		       bfd_byte *hit_addr,
+		       bfd_vma v,
+		       unsigned int r_type)
 {
   bfd_vma t0, t1;
 #ifdef BFD_HOST_U_64_BIT
@@ -1633,13 +1636,12 @@ ppc_elf_install_value (bfd *abfd, bfd_byte *hit_addr, bfd_vma v, unsigned int r_
 
       /* We're clearing the bits for R_PPC_ADDR16_HA
 	 and R_PPC_ADDR16_LO here.  */
-      t0 &= ~(0xffff);
-      t1 &= ~(0xffff);
+      t0 &= ~0xffff;
+      t1 &= ~0xffff;
 
       /* t0 is HA, t1 is lo */
       t0 |= ((val + 0x8000) >> 16) & 0xffff;
-      /*      t0 |= (((val >> 16) + ((val & 0x8000) ? 1 : 0)) & 0xffff); */
-      t1 |= (val & 0xffff);
+      t1 |= val & 0xffff;
 
       bfd_put_32 (abfd, t0, hit_addr);
       bfd_put_32 (abfd, t1, hit_addr + 4);
@@ -1647,8 +1649,8 @@ ppc_elf_install_value (bfd *abfd, bfd_byte *hit_addr, bfd_vma v, unsigned int r_
 
     case R_PPC_REL24:
       t0 = bfd_get_32 (abfd, hit_addr);
-      t0 &= ~(0x3fffffc);
-      t0 |= (val & 0x3fffffc);
+      t0 &= ~0x3fffffc;
+      t0 |= val & 0x3fffffc;
       bfd_put_32 (abfd, t0, hit_addr);
       break;
 
@@ -1656,16 +1658,16 @@ ppc_elf_install_value (bfd *abfd, bfd_byte *hit_addr, bfd_vma v, unsigned int r_
     case R_PPC_REL14_BRTAKEN:
     case R_PPC_REL14_BRNTAKEN:
       t0 = bfd_get_32 (abfd, hit_addr);
-      t0 &= ~(0xfffc);
-      t0 |= (val & 0xfffc);
+      t0 &= ~0xfffc;
+      t0 |= val & 0xfffc;
       bfd_put_32 (abfd, t0, hit_addr);
       break;
 
     case R_PPC_LOCAL24PC:
     case R_PPC_PLTREL24:
       t0 = bfd_get_32 (abfd, hit_addr);
-      t0 &= ~(0x3fffffc);
-      t0 |= (val & 0x3fffffc);
+      t0 &= ~0x3fffffc;
+      t0 |= val & 0x3fffffc;
       bfd_put_32 (abfd, t0, hit_addr);
       break;
 
@@ -1716,24 +1718,20 @@ ppc_elf_relax_section (bfd *abfd,
   Elf_Internal_Shdr *symtab_hdr;
   bfd_byte *contents = NULL;
   Elf_Internal_Sym *isymbuf = NULL;
-  bfd_byte *free_contents = NULL;
   Elf_Internal_Rela *internal_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
-  Elf_Internal_Rela *free_relocs = NULL;
   struct one_fixup *fixups = NULL;
   bfd_boolean changed_contents = FALSE;
   bfd_boolean changed_relocs = FALSE;
   struct ppc_elf_link_hash_table *ppc_info;
 
-  /* We never have to do this more than once per input section.  */
   *again = FALSE;
 
-  /* Nothing to do if there are no relocations or there is no need for
+  /* Nothing to do if there are no relocations and no need for
      the relax finalize pass.  */
   if ((isec->flags & SEC_RELOC) == 0
       || isec->reloc_count == 0
-      || (link_info->relax_finalizing
-	  && isec->need_finalize_relax == 0))
+      || link_info->relax_finalizing)
     return TRUE;
 
   /* If needed, initialize this section's cooked size.  */
@@ -1743,44 +1741,38 @@ ppc_elf_relax_section (bfd *abfd,
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Get a copy of the native relocations.  */
-  internal_relocs
-    = _bfd_elf_link_read_relocs (abfd, isec, (PTR) NULL,
-				 (Elf_Internal_Rela *) NULL,
-				 link_info->keep_memory);
+  internal_relocs = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL,
+					       link_info->keep_memory);
   if (internal_relocs == NULL)
     goto error_return;
-  if (! link_info->keep_memory)
-    free_relocs = internal_relocs;
 
   ppc_info = ppc_elf_hash_table (link_info);
   irelend = internal_relocs + isec->reloc_count;
 
-      /* Get the section contents.  */
-      /* Get cached copy if it exists.  */
-      if (elf_section_data (isec)->this_hdr.contents != NULL)
-	contents = elf_section_data (isec)->this_hdr.contents;
-      else
-	{
-	  /* Go get them off disk.  */
-	  contents = bfd_malloc (isec->_raw_size);
-	  if (contents == NULL)
-	    goto error_return;
-	  free_contents = contents;
+  /* Get the section contents.  */
+  /* Get cached copy if it exists.  */
+  if (elf_section_data (isec)->this_hdr.contents != NULL)
+    contents = elf_section_data (isec)->this_hdr.contents;
+  else
+    {
+      /* Go get them off disk.  */
+      contents = bfd_malloc (isec->_raw_size);
+      if (contents == NULL)
+	goto error_return;
 
-	  if (! bfd_get_section_contents (abfd, isec, contents,
-					  (file_ptr) 0, isec->_raw_size))
-	    goto error_return;
-	}
+      if (!bfd_get_section_contents (abfd, isec, contents, 0, isec->_raw_size))
+	goto error_return;
+    }
 
   for (irel = internal_relocs; irel < irelend; irel++)
     {
       unsigned long r_type = ELF32_R_TYPE (irel->r_info);
-      bfd_boolean is_branch;
       bfd_vma symaddr, reladdr, trampoff, toff, roff;
       asection *tsec;
       bfd_size_type amt;
       struct one_fixup *f;
       size_t insn_offset = 0;
+      bfd_vma max_branch_offset;
 
       switch (r_type)
 	{
@@ -1790,9 +1782,6 @@ ppc_elf_relax_section (bfd *abfd,
 	case R_PPC_REL14_BRTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_PLTREL24:
-	  if (link_info->relax_finalizing)
-	     continue;
-	  is_branch = TRUE;
 	  break;
 
 	default:
@@ -1823,7 +1812,7 @@ ppc_elf_relax_section (bfd *abfd,
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym->st_shndx == SHN_COMMON)
 	    tsec = bfd_com_section_ptr;
-	   else
+	  else
 	    tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 
 	  toff = isym->st_value;
@@ -1846,7 +1835,7 @@ ppc_elf_relax_section (bfd *abfd,
 	      Elf_Internal_Sym *isym;
 
 	      if (h->plt.offset == (bfd_vma) -1
-		   || ppc_info->plt == NULL)
+		  || ppc_info->plt == NULL)
 		{
 
 		  /* Read this BFD's local symbols.  */
@@ -1863,7 +1852,8 @@ ppc_elf_relax_section (bfd *abfd,
 		  isym = isymbuf + ELF32_R_SYM (irel->r_info);
 
 		  if (isym->st_shndx == SHN_UNDEF)
-		    continue;	/* We can't do anthing with undefined symbols.  */
+		    /* We can't do anthing with undefined symbols.  */
+		    continue;
 		  else if (isym->st_shndx == SHN_ABS)
 		    tsec = bfd_abs_section_ptr;
 		  else if (isym->st_shndx == SHN_COMMON)
@@ -1893,8 +1883,7 @@ ppc_elf_relax_section (bfd *abfd,
       if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
 	toff = _bfd_merged_section_offset (abfd, &tsec,
 					   elf_section_data (tsec)->sec_info,
-					   toff + irel->r_addend,
-					   (bfd_vma) 0);
+					   toff + irel->r_addend, 0);
       else
 	toff += irel->r_addend;
 
@@ -1902,104 +1891,93 @@ ppc_elf_relax_section (bfd *abfd,
 
       roff = irel->r_offset;
 
-      if (is_branch)
+      reladdr = (isec->output_section->vma
+		 + isec->output_offset
+		 + roff) & (bfd_vma) -4;
+
+      /* If the branch is in range, no need to do anything.  */
+      max_branch_offset = 1 << 25;
+      if (r_type != R_PPC_REL24
+	  && r_type != R_PPC_LOCAL24PC
+	  && r_type != R_PPC_PLTREL24)
+	max_branch_offset = 1 << 15;
+
+      if ((bfd_vma) (symaddr - reladdr) + max_branch_offset
+	  <= 2 * max_branch_offset)
+	continue;
+
+      /* If the branch and target are in the same section, you have
+	 no hope.  We'll error out later.  */
+      if (tsec == isec)
+	continue;
+
+      /* Look for an existing fixup to this address.  */
+      for (f = fixups; f ; f = f->next)
+	if (f->tsec == tsec && f->toff == toff)
+	  break;
+
+      if (f == NULL)
 	{
-	  bfd_vma max_branch_offset;
+	  size_t size;
 
-	  reladdr = (isec->output_section->vma
-		     + isec->output_offset
-		     + roff) & (bfd_vma) -4;
-
-	  /* If the branch is in range, no need to do anything.  */
-	  max_branch_offset = 1 << 25;
-	  if (r_type != R_PPC_REL24
-	      && r_type != R_PPC_LOCAL24PC
-	      && r_type != R_PPC_PLTREL24)
-	    max_branch_offset = 1 << 15;
-
-	  if ((bfd_vma) (symaddr - reladdr) + max_branch_offset <= 2 * max_branch_offset)
-	    continue;
-
-	  /* If the branch and target are in the same section, you have
-	     no hope. We'll error out later.  */
-	  if (tsec == isec)
-	    continue;
-
-	  /* Look for an existing fixup to this address.  */
-	  for (f = fixups; f ; f = f->next)
-	    if (f->tsec == tsec && f->toff == toff)
-	      break;
-
-	  if (f == NULL)
+	  if (link_info->shared
+	      || tsec == ppc_info->plt
+	      || r_type == R_PPC_LOCAL24PC)
 	    {
-	      size_t size;
-
-	      if (link_info->shared
-		  || tsec == ppc_info->plt
-		  || r_type == R_PPC_LOCAL24PC)
-		{
-		  size = sizeof (shared_stub_entry);
-		  insn_offset = 16;
-		}
-	      else
-		{
-		  size = sizeof (stub_entry);
-		  insn_offset = 4;
-		}
-
-	      /* Resize the current section to make room for the new branch.  */
-	      trampoff = (isec->_cooked_size + 3) & (bfd_vma) - 4;
-	      amt = trampoff + size;
-	      contents = (bfd_byte *) bfd_realloc (contents, amt);
-	      if (contents == NULL)
-		abort ();
-
-	      isec->_cooked_size = amt;
-
-	      if (link_info->shared
-		  || tsec == ppc_info->plt
-		  || r_type == R_PPC_LOCAL24PC)
-		{
-		  memcpy (contents + trampoff, shared_stub_entry, size);
-		  /* Hijack the old relocation. Since we need two
-		     relocations for this use a "composite" reloc.  */
-		  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-					       R_PPC_RELAX32);
-		  irel->r_offset = trampoff + insn_offset;
-		}
-	      else
-		{
-		  memcpy (contents + trampoff, stub_entry, size);
-		  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-					       R_PPC_RELAX32);
-		  irel->r_offset = trampoff + insn_offset;
-		}
-
-	      /* Record the fixup so we don't do it again this section.  */
-	      f = (struct one_fixup *)
-		bfd_malloc ((bfd_size_type) sizeof (*f));
-	      f->next = fixups;
-	      f->tsec = tsec;
-	      f->toff = toff;
-	      f->trampoff = trampoff;
-	      fixups = f;
+	      size = sizeof (shared_stub_entry);
+	      insn_offset = 16;
 	    }
 	  else
 	    {
-	      /* Nop out the reloc, since we're finalizing things here.  */
-	      irel->r_info = ELF32_R_INFO (0, R_PPC_NONE);
+	      size = sizeof (stub_entry);
+	      insn_offset = 4;
 	    }
 
-	  /* Fix up the existing branch to hit the trampoline. Hope like
-	     hell this doesn't overflow too.  */
-	  if (ppc_elf_install_value (abfd, contents + roff,
-				     f->trampoff - (roff & (bfd_vma) -3) + 4,
-				     r_type) != bfd_reloc_ok)
+	  /* Resize the current section to make room for the new branch.  */
+	  trampoff = (isec->_cooked_size + 3) & (bfd_vma) - 4;
+	  amt = trampoff + size;
+	  contents = bfd_realloc (contents, amt);
+	  if (contents == NULL)
 	    abort ();
 
-	  changed_contents = TRUE;
-	  changed_relocs = TRUE;
+	  isec->_cooked_size = amt;
+
+	  if (link_info->shared
+	      || tsec == ppc_info->plt
+	      || r_type == R_PPC_LOCAL24PC)
+	    memcpy (contents + trampoff, shared_stub_entry, size);
+	  else
+	    memcpy (contents + trampoff, stub_entry, size);
+
+	  /* Hijack the old relocation.  Since we need two
+	     relocations for this use a "composite" reloc.  */
+	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+				       R_PPC_RELAX32);
+	  irel->r_offset = trampoff + insn_offset;
+
+	  /* Record the fixup so we don't do it again this section.  */
+	  f = bfd_malloc (sizeof (*f));
+	  f->next = fixups;
+	  f->tsec = tsec;
+	  f->toff = toff;
+	  f->trampoff = trampoff;
+	  fixups = f;
 	}
+      else
+	{
+	  /* Nop out the reloc, since we're finalizing things here.  */
+	  irel->r_info = ELF32_R_INFO (0, R_PPC_NONE);
+	}
+
+      /* Fix up the existing branch to hit the trampoline.  Hope like
+	 hell this doesn't overflow too.  */
+      if (ppc_elf_install_value (abfd, contents + roff,
+				 f->trampoff - (roff & (bfd_vma) -3) + 4,
+				 r_type) != bfd_reloc_ok)
+	abort ();
+
+      changed_contents = TRUE;
+      changed_relocs = TRUE;
     }
 
   /* Clean up.  */
@@ -2040,9 +2018,6 @@ ppc_elf_relax_section (bfd *abfd,
       else
 	elf_section_data (isec)->relocs = internal_relocs;
     }
-
-  if (link_info->relax_finalizing)
-    isec->need_finalize_relax = 0;
 
   *again = changed_contents || changed_relocs;
   return TRUE;

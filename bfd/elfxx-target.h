@@ -32,7 +32,8 @@
 #define bfd_elfNN_get_section_contents _bfd_generic_get_section_contents
 #endif
 
-#define bfd_elfNN_canonicalize_dynamic_symtab _bfd_elf_canonicalize_dynamic_symtab
+#define bfd_elfNN_canonicalize_dynamic_symtab \
+  _bfd_elf_canonicalize_dynamic_symtab
 #ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
 #endif
@@ -41,7 +42,8 @@
 #endif
 #define bfd_elfNN_read_minisymbols	_bfd_elf_read_minisymbols
 #define bfd_elfNN_minisymbol_to_symbol	_bfd_elf_minisymbol_to_symbol
-#define bfd_elfNN_get_dynamic_symtab_upper_bound _bfd_elf_get_dynamic_symtab_upper_bound
+#define bfd_elfNN_get_dynamic_symtab_upper_bound \
+  _bfd_elf_get_dynamic_symtab_upper_bound
 #define bfd_elfNN_get_lineno		_bfd_elf_get_lineno
 #ifndef bfd_elfNN_get_reloc_upper_bound
 #define bfd_elfNN_get_reloc_upper_bound _bfd_elf_get_reloc_upper_bound
@@ -51,9 +53,6 @@
 #endif
 #define bfd_elfNN_get_symtab		_bfd_elf_get_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
-#if 0 /* done in elf-bfd.h */
-#define bfd_elfNN_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
-#endif
 #define bfd_elfNN_make_empty_symbol	_bfd_elf_make_empty_symbol
 #ifndef bfd_elfNN_new_section_hook
 #define bfd_elfNN_new_section_hook	_bfd_elf_new_section_hook
@@ -100,11 +99,11 @@
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
 #define bfd_elfNN_bfd_debug_info_accumulate \
-  (void (*) PARAMS ((bfd*, struct sec *))) bfd_void
+  ((void (*) (bfd*, struct sec *)) bfd_void)
 
 #ifndef bfd_elfNN_bfd_get_relocated_section_contents
 #define bfd_elfNN_bfd_get_relocated_section_contents \
- bfd_generic_get_relocated_section_contents
+  bfd_generic_get_relocated_section_contents
 #endif
 
 #ifndef bfd_elfNN_bfd_relax_section
@@ -141,7 +140,7 @@
 
 #ifndef bfd_elfNN_bfd_make_debug_symbol
 #define bfd_elfNN_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+  ((asymbol * (*) (bfd *, void *, unsigned long)) bfd_nullvoidptr)
 #endif
 
 #ifndef bfd_elfNN_bfd_copy_private_symbol_data
@@ -163,11 +162,11 @@
 #endif
 #ifndef bfd_elfNN_bfd_merge_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \
-  ((bfd_boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_set_private_flags
 #define bfd_elfNN_bfd_set_private_flags \
-  ((bfd_boolean (*) PARAMS ((bfd *, flagword))) bfd_true)
+  ((bfd_boolean (*) (bfd *, flagword)) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_is_local_label_name
 #define bfd_elfNN_bfd_is_local_label_name _bfd_elf_is_local_label_name
@@ -600,19 +599,19 @@ const bfd_target TARGET_BIG_SYM =
     bfd_elfNN_write_corefile_contents,
   },
 
-      BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
-      BFD_JUMP_TABLE_COPY (bfd_elfNN),
-      BFD_JUMP_TABLE_CORE (bfd_elfNN),
+  BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
+  BFD_JUMP_TABLE_COPY (bfd_elfNN),
+  BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
-      BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+  BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
 #else
-      BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
-      BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
-      BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
-      BFD_JUMP_TABLE_WRITE (bfd_elfNN),
-      BFD_JUMP_TABLE_LINK (bfd_elfNN),
-      BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
+  BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
+  BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
+  BFD_JUMP_TABLE_WRITE (bfd_elfNN),
+  BFD_JUMP_TABLE_LINK (bfd_elfNN),
+  BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
   /* Alternative endian target.  */
 #ifdef TARGET_LITTLE_SYM
@@ -696,19 +695,19 @@ const bfd_target TARGET_LITTLE_SYM =
     bfd_elfNN_write_corefile_contents,
   },
 
-      BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
-      BFD_JUMP_TABLE_COPY (bfd_elfNN),
-      BFD_JUMP_TABLE_CORE (bfd_elfNN),
+  BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
+  BFD_JUMP_TABLE_COPY (bfd_elfNN),
+  BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
-      BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+  BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
 #else
-      BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
-      BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
-      BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
-      BFD_JUMP_TABLE_WRITE (bfd_elfNN),
-      BFD_JUMP_TABLE_LINK (bfd_elfNN),
-      BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
+  BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
+  BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
+  BFD_JUMP_TABLE_WRITE (bfd_elfNN),
+  BFD_JUMP_TABLE_LINK (bfd_elfNN),
+  BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
   /* Alternative endian target.  */
 #ifdef TARGET_BIG_SYM
