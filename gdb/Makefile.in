@@ -802,7 +802,8 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 # why they are separate from the lists of files above.
 
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
-	a29k-pinsn.c a29k-tdep.c a68v-nat.c altos-xdep.c arm-convert.s \
+	a29k-pinsn.c a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
+	altos-xdep.c arm-convert.s \
 	arm-pinsn.c arm-tdep.c arm-xdep.c coff-solib.c convex-pinsn.c \
 	convex-tdep.c \
 	convex-xdep.c core-svr4.c coredep.c corelow.c dcache.c delta68-nat.c \
@@ -810,13 +811,14 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
-	i386aix-nat.c i386v4-nat.c i386lynx-nat.c i386lynx-tdep.c i387-tdep.c \
+	i386aix-nat.c i386v4-nat.c i386lynx-nat.c i386ly-tdep.c i387-tdep.c \
 	i960-pinsn.c i960-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c isi-xdep.c m68k-pinsn.c m68k-tdep.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
 	mips-tdep.c news-xdep.c nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
-	ns32k-pinsn.c paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
+	ns32k-pinsn.c osfsolib.c \
+	paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-eb.c remote-es.c remote-hms.c remote-mips.c \
 	remote-mm.c remote-mon.c remote-nindy.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
@@ -829,6 +831,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 
 ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/a29k/tm-ultra3.h config/a29k/xm-ultra3.h \
+	config/alpha/nm-alpha.h config/alpha/tm-alpha.h \
 	config/alpha/xm-alpha.h config/arm/tm-arm.h \
 	config/arm/xm-arm.h config/convex/tm-convex.h \
 	config/convex/xm-convex.h config/gould/tm-np1.h config/gould/tm-pn.h \
@@ -897,7 +900,7 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 
 ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \
-	config/alpha/alpha-osf1.mh \
+	config/alpha/alpha-osf1.mh config/alpha/alpha-osf1.mt \
 	config/arm/arm.mh config/arm/arm.mt config/convex/convex.mh \
 	config/convex/convex.mt config/gould/np1.mh config/gould/np1.mt \
 	config/gould/pn.mh config/gould/pn.mt config/h8300/h8300hms.mt \
@@ -956,6 +959,12 @@ udr.o: 29k-share/udi/udr.c $(udiheaders)
 a29k-pinsn.o: a29k-pinsn.c $(bfd_h) $(dis-asm_h)
 a29k-tdep.o: a29k-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h)
 a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
+
+alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
+
+alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
+	$(inferior_h) $(symtab_h) $(dis-asm.h)
+
 altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 arm-pinsn.o: arm-pinsn.c $(OP_INCLUDE)/arm.h $(defs_h) $(symtab_h)
 
@@ -1086,7 +1095,7 @@ i386-pinsn.o: i386-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 i386-tdep.o: i386-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 i386b-nat.o: i386b-nat.c $(defs_h) 
 i386lynx-nat.o: i386lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
-i386lynx-tdep.o: i386lynx-tdep.c $(defs_h) $(inferior_h) target.h
+i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(inferior_h) target.h
 i386mach-nat.o: i386mach-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
 i386v-nat.o: i386v-nat.c $(ieee-float_h) $(defs_h) $(gdbcore_h) \
@@ -1183,6 +1192,9 @@ ns32k-pinsn.o: ns32k-pinsn.c $(defs_h) $(gdbcore_h) ns32k-opcode.h \
 
 objfiles.o: objfiles.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
 	$(symtab_h)
+
+osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
+	objfiles.h regex.h symfile.h target.h language.h
 
 paread.o: paread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)

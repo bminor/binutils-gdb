@@ -42,6 +42,8 @@ TODO
 a29k-pinsn.c
 a29k-tdep.c
 a68v-nat.c
+alpha-nat.c
+alpha-tdep.c
 altos-xdep.c
 arm-convert.s
 arm-pinsn.c
@@ -174,6 +176,7 @@ ns32k-opcode.h
 ns32k-pinsn.c
 objfiles.c
 objfiles.h
+osfsolib.c
 paread.c
 parse.c
 parser-defs.h

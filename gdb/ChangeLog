@@ -1,3 +1,43 @@
+Tue Oct  5 12:17:40 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+			  Jim Kingdon  (kingdon@cygnus.com)
+			  Stu Grossman  (grossman@cygnus.com)
+
+	Changes to support alpha OSF/1 in native mode.
+	* alpha-nat.c, alpha-tdep.c, config/alpha/alpha-osf1.mt,
+	  config/alpha/nm-alpha.h, config/alpha/tm-alpha.h, osfsolib.c:
+	New files.
+	* Makefile.in:  Add new files and dependencies.
+	* configure.in:  Add alpha target.
+	* config/alpha/alpha-osf1.mh (NATDEPFILES):  Add osfsolib.o
+	* config/alpha/alpha-osf1.mh (MH_CFLAGS):  Remove, we can handle
+	shared libraries now.
+	* config/alpha/xm-alpha.h:  Cleanup, get MAKEVA_* defines right.
+
+	* defs.h (CORE_ADDR):  Make its type overridable via CORE_ADDR_TYPE,
+	provide `unsigned int' default.
+	* breakpoint.c (breakpoint_auto_delete):  Delete only if we really
+	stopped for the breakpoint.
+	* stabsread.c, stabsread.h (define_symbol):  Change valu parameter
+	to a CORE_ADDR.
+	* stabsread.c (read_range_type):  Handle the case where the lower
+	bound overflows and the upper doesn't and the range is legal.
+	* infrun.c (resume):  Do not step a breakpoint instruction if
+	CANNOT_STEP_BREAKPOINT is defined.
+
+	* inferior.h (CALL_DUMMY_LOCATION):  New variant AT_ENTRY_POINT.
+	Now that we have the bp_call_dummy breakpoint the call dummy code
+	is no longer needed. PUSH_DUMMY_FRAME, PUSH_ARGUMENTS and
+	FIX_CALL_DUMMY can be used to set up everything for the dummy.
+	The breakpoint for the dummy is set at the entry point and thats it.
+	* blockframe.c (inside_entry_file, inside_entry_func):  Do not stop
+	backtraces if pc is in the call dummy at the entry point.
+	* infcmd.c (run_stack_dummy):  Handle AT_ENTRY_POINT case. Use
+	the expected breakpoint pc when setting up the frame for
+	set_momentary_breakpoint.
+	* symfile.c (entry_point_address):  New function for AT_ENTRY_POINT
+	support.
+	* valops.c (call_function_by_hand):  Handle AT_ENTRY_POINT case.
+
 Tue Oct  5 11:37:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Recognize hppa*-*-hiux* (currently synonym for hpux).

@@ -467,7 +467,7 @@ static char *type_synonym_name;
 /* ARGSUSED */
 struct symbol *
 define_symbol (valu, string, desc, type, objfile)
-     unsigned int valu;
+     CORE_ADDR valu;
      char *string;
      int desc;
      int type;
@@ -3228,8 +3228,12 @@ read_range_type (pp, typenums, objfile)
 	  nbits = n3bits;
 	}
       /* Range from <large number> to <large number>-1 is a large signed
-	 integral type.  */
-      else if (n2bits != 0 && n3bits != 0 && n2bits == n3bits + 1)
+	 integral type.  Take care of the case where <large number> doesn't
+	 fit in a long but <large number>-1 does.  */
+      else if ((n2bits != 0 && n3bits != 0 && n2bits == n3bits + 1)
+	       || (n2bits != 0 && n3bits == 0
+		   && (n2bits == sizeof (long) * HOST_CHAR_BIT)
+		   && n3 == LONG_MAX))
 	{
 	  got_signed = 1;
 	  nbits = n2bits;

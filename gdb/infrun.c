@@ -283,6 +283,14 @@ resume (step, sig)
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   QUIT;
 
+#ifdef CANNOT_STEP_BREAKPOINT
+  /* Most targets can step a breakpoint instruction, thus executing it
+     normally.  But if this one cannot, just continue and we will hit
+     it anyway.  */
+  if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
+    step = 0;
+#endif
+
 #ifdef NO_SINGLE_STEP
   if (step) {
     single_step(sig);	/* Do it the hard way, w/temp breakpoints */
@@ -1255,6 +1263,8 @@ step_into_function:
 	  /* I'm not sure when this following segment applies.  I do know, now,
 	     that we shouldn't rewrite the regs when we were stopped by a
 	     random signal from the inferior process.  */
+	  /* FIXME: Shouldn't this be based on the valid bit of the SXIP?
+	     (this is only used on the 88k).  */
 
           if (!bpstat_explains_signal (stop_bpstat)
 	      && (stop_signal != SIGCLD) 

@@ -152,7 +152,7 @@ extern void
 add_undefined_type PARAMS ((struct type *));
 
 extern struct symbol *
-define_symbol PARAMS ((unsigned int, char *, int, int, struct objfile *));
+define_symbol PARAMS ((CORE_ADDR, char *, int, int, struct objfile *));
 
 extern void
 stabsread_init PARAMS ((void));

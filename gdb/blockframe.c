@@ -45,6 +45,12 @@ inside_entry_file (addr)
     return 1;
   if (symfile_objfile == 0)
     return 0;
+#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+  /* Do not stop backtracing if the pc is in the call dummy
+     at the entry point.  */
+  if (PC_IN_CALL_DUMMY (addr, 0, 0))
+    return 0;
+#endif
   return (addr >= symfile_objfile -> ei.entry_file_lowpc &&
 	  addr <  symfile_objfile -> ei.entry_file_highpc);
 }
@@ -85,6 +91,12 @@ CORE_ADDR pc;
     return 1;
   if (symfile_objfile == 0)
     return 0;
+#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+  /* Do not stop backtracing if the pc is in the call dummy
+     at the entry point.  */
+  if (PC_IN_CALL_DUMMY (pc, 0, 0))
+    return 0;
+#endif
   return (symfile_objfile -> ei.entry_func_lowpc  <= pc &&
 	  symfile_objfile -> ei.entry_func_highpc > pc);
 }
@@ -653,23 +665,26 @@ find_pc_partial_function (pc, name, address, endaddr)
 	      goto return_cached_value;
 	    }
 	}
-
-      /* Now that static symbols go in the minimal symbol table, perhaps
-	 we could just ignore the partial symbols.  But at least for now
-	 we use the partial or minimal symbol, whichever is larger.  */
-      psb = find_pc_psymbol (pst, pc);
-
-      if (psb
-	  && (msymbol == NULL ||
-	      (SYMBOL_VALUE_ADDRESS (psb) >= SYMBOL_VALUE_ADDRESS (msymbol))))
+      else
 	{
-	  /* This case isn't being cached currently. */
-	  if (address)
-	    *address = SYMBOL_VALUE_ADDRESS (psb);
-	  if (name)
-	    *name = SYMBOL_NAME (psb);
-	  /* endaddr non-NULL can't happen here.  */
-	  return 1;
+	  /* Now that static symbols go in the minimal symbol table, perhaps
+	     we could just ignore the partial symbols.  But at least for now
+	     we use the partial or minimal symbol, whichever is larger.  */
+	  psb = find_pc_psymbol (pst, pc);
+
+	  if (psb
+	      && (msymbol == NULL ||
+		  (SYMBOL_VALUE_ADDRESS (psb)
+		   >= SYMBOL_VALUE_ADDRESS (msymbol))))
+	    {
+	      /* This case isn't being cached currently. */
+	      if (address)
+		*address = SYMBOL_VALUE_ADDRESS (psb);
+	      if (name)
+		*name = SYMBOL_NAME (psb);
+	      /* endaddr non-NULL can't happen here.  */
+	      return 1;
+	    }
 	}
     }
 

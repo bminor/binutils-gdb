@@ -494,11 +494,11 @@ remove_breakpoints ()
 	b->inserted = 0;
 #ifdef BREAKPOINT_DEBUG
 	printf ("Removed breakpoint at %s",
-		local_hex_string(b->address));
+		local_hex_string((unsigned long) b->address));
 	printf (", shadow %s",
-		local_hex_string(b->shadow_contents[0]));
+		local_hex_string((unsigned long) b->shadow_contents[0]));
 	printf (", %s.\n",
-		local_hex_string(b->shadow_contents[1]));
+		local_hex_string((unsigned long) b->shadow_contents[1]));
 #endif /* BREAKPOINT_DEBUG */
       }
 
@@ -945,8 +945,8 @@ watchpoint_check (p)
     {
       /* We use value_{,free_to_}mark because it could be a
          *long* time before we return to the command level and
-	 call free_all_values.  */
-      /* But couldn't we just call free_all_values instead?  */
+	 call free_all_values.  We can't call free_all_values because
+	 we might be in the middle of evaluating a function call.  */
 
       value mark = value_mark ();
       value new_val = evaluate_expression (bs->breakpoint_at->exp);
@@ -1252,6 +1252,8 @@ bpstat_what (bs)
   enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
   struct bpstat_what retval;
 
+  retval.call_dummy = 0;
+  retval.step_resume = 0;
   for (; bs != NULL; bs = bs->next)
     {
       enum class bs_class = no_effect;
@@ -1396,7 +1398,7 @@ breakpoint_1 (bnum, allflag)
 	  case bp_step_resume:
 	  case bp_call_dummy:
 	    if (addressprint)
-	      printf_filtered ("%s ", local_hex_string_custom(b->address, "08"));
+	      printf_filtered ("%s ", local_hex_string_custom ((unsigned long) b->address, "08l"));
 
 	    last_addr = b->address;
 	    if (b->source_file)
@@ -1421,7 +1423,7 @@ breakpoint_1 (bnum, allflag)
 
 	if (b->frame)
 	  printf_filtered ("\tstop only in stack frame at %s\n",
-			   local_hex_string(b->frame));
+			   local_hex_string((unsigned long) b->frame));
 	if (b->cond)
 	  {
 	    printf_filtered ("\tstop only if ");
@@ -1510,7 +1512,7 @@ describe_other_breakpoints (pc)
 		    (b->enable == disabled) ? " (disabled)" : "",
 		    (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
-      printf ("also set at pc %s.\n", local_hex_string(pc));
+      printf ("also set at pc %s.\n", local_hex_string((unsigned long) pc));
     }
 }
 
@@ -1744,7 +1746,7 @@ mention (b)
       break;
     case bp_breakpoint:
       printf_filtered ("Breakpoint %d at %s", b->number,
-		       local_hex_string(b->address));
+		       local_hex_string((unsigned long) b->address));
       if (b->source_file)
 	printf_filtered (": file %s, line %d.",
 			 b->source_file, b->line_number);
@@ -2503,7 +2505,8 @@ breakpoint_auto_delete (bs)
      bpstat bs;
 {
   for (; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->disposition == delete)
+    if (bs->breakpoint_at && bs->breakpoint_at->disposition == delete
+	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at);
 }
 

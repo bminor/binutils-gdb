@@ -130,6 +130,7 @@ hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <${srcdir}/config/${gdb_host_cpu}/
 
 case "${target_cpu}" in
 
+alpha)			gdb_target_cpu=alpha ;;
 c[12])			gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[34]86)		gdb_target_cpu=i386 ;;
@@ -158,6 +159,8 @@ a29k-*-kern)		gdb_target=a29k-kern ;;
 a29k-*-none)		gdb_target=a29k ;;
 a29k-*-sym1)		gdb_target=ultra3 ;;
 a29k-*-udi)		gdb_target=a29k-udi ;;
+
+alpha-*-osf*)		gdb_target=alpha-osf1 ;;
 
 arm-*-*)		gdb_target=arm ;;
 

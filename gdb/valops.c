@@ -896,8 +896,8 @@ call_function_by_hand (function, nargs, args)
 
 #if CALL_DUMMY_LOCATION == ON_STACK
   write_memory (start_sp, (char *)dummy1, sizeof dummy);
+#endif /* On stack.  */
 
-#else /* Not on stack.  */
 #if CALL_DUMMY_LOCATION == BEFORE_TEXT_END
   /* Convex Unix prohibits executing in the stack segment. */
   /* Hope there is empty room at the top of the text segment. */
@@ -913,7 +913,9 @@ call_function_by_hand (function, nargs, args)
     real_pc = text_end - sizeof dummy;
     write_memory (real_pc, (char *)dummy1, sizeof dummy);
   }
-#else /* After text_end.  */
+#endif /* Before text_end.  */
+
+#if CALL_DUMMY_LOCATION == AFTER_TEXT_END
   {
     extern CORE_ADDR text_end;
     int errcode;
@@ -924,7 +926,10 @@ call_function_by_hand (function, nargs, args)
       error ("Cannot write text segment -- call_function failed");
   }
 #endif /* After text_end.  */
-#endif /* Not on stack.  */
+
+#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+  real_pc = funaddr;
+#endif /* At entry point.  */
 
 #ifdef lint
   sp = old_sp;		/* It really is used, for some ifdef's... */
@@ -1056,7 +1061,7 @@ call_function_by_hand (function, nargs, args)
 	char format[80];
 	sprintf (format, "at %s", local_hex_format ());
 	name = alloca (80);
-	sprintf (name, format, funaddr);
+	sprintf (name, format, (unsigned long) funaddr);
       }
 
     /* Execute the stack dummy routine, calling FUNCTION.
@@ -1349,7 +1354,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 /* Helper function used by value_struct_elt to recurse through baseclasses.
    Look for a field NAME in ARG1. Adjust the address of ARG1 by OFFSET bytes,
    and search in it assuming it has (class) type TYPE.
-   If found, return value, else if name matched and args not return -1, 
+   If found, return value, else if name matched and args not return (value)-1,
    else return NULL. */
 
 static value
@@ -1409,7 +1414,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
         }
       v = search_struct_method (name, arg1p, args, base_offset + offset,
 				static_memfuncp, TYPE_BASECLASS (type, i));
-      if (v == -1)
+      if (v == (value) -1)
 	{
 	  name_matched = 1;
 	}
@@ -1420,7 +1425,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 	  return v;
         }
     }
-  if (name_matched) return -1;
+  if (name_matched) return (value) -1;
   else return NULL;
 }
 
@@ -1519,7 +1524,7 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
   else
     v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
-  if (v == -1)
+  if (v == (value) -1)
     {
 	error("Argument list of %s mismatch with component in the structure.", name);
     }
