@@ -1,3 +1,10 @@
+Wed Oct  5 00:08:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-coff.c (coff_frob_section): Remove assert about
+	section alignment.
+	* config/tc-sparc.c (md_section_align): Use section alignment, not
+	xvec align_power_min field.
+
 Fri Sep 30 19:05:20 1994  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* vmsconf.sh (make-gas.com): handle DCL verification to enable
