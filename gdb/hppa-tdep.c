@@ -428,35 +428,6 @@ frame_chain_valid (chain, thisframe)
     return 1;
 }
 
-#if 0
-/* Some helper functions. gcc_p returns 1 if the function beginning at 
-   pc appears to have been compiled with gcc. hpux_cc_p returns 1 if
-   fn was compiled with hpux cc. gcc functions look like :
-
-   stw     rp,-0x14(sp) ; optional
-   or      r4,r0,r1
-   or      sp,r0,r4
-   stwm    r1,framesize(sp)
-
-   hpux cc functions look like:
-
-   stw     rp,-0x14(sp) ; optional.
-   stwm    r3,framesiz(sp)
-   */
-
-gcc_p (pc)
-     CORE_ADDR pc;
-{
-  if (read_memory_integer (pc, 4) == 0x6BC23FD9)			
-    pc = pc + 4;							
-      
-  if (read_memory_integer (pc, 4) == 0x8040241
-      && read_memory_integer (pc + 4, 4) == 0x81E0244)
-    return 1;
-  return 0;
-}
-#endif
-
 /*
  * These functions deal with saving and restoring register state
  * around a function call in the inferior. They keep the stack
