@@ -3,63 +3,11 @@
 # and then Sanitize.
 
 ===================================================================
-*** 1.4	1992/06/10 02:05:16
---- config/amix.mh	1992/07/21 20:18:16
+*** 2.71	1992/09/25 17:04:36
+--- .Sanitize	1992/09/25 23:47:40
 ***************
-*** 22,24 ****
---- 22,38 ----
-  
-  # SVR4 puts the BSD compatible install in /usr/ucb.
-  INSTALL = /usr/ucb/install -c
-+ 
-+ # These are the libs that are needed for the Energize version of gdb on
-+ # SVR4.  Note that we MUST include the standard C library before libucb.a,
-+ # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
-+ 
-+ # These are the libs that are needed for the Energize version of gdb on
-+ # SVR4.  Note that we MUST include the standard C library before libucb.a,
-+ # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
-===================================================================
-*** 1.4	1992/06/15 19:25:13
---- config/ncr3000.mh	1992/09/15 01:51:32
-***************
-*** 38,40 ****
---- 38,59 ----
-  # The /usr/ucb/install program is incompatible (complains about unknown
-  # group staff).  Use good old cp...
-  INSTALL = cp
-+ 
-+ # These are the libs that are needed for the Energize version of gdb on
-+ # SVR4.  Note that we MUST include the standard C library before libucb.a,
-+ # otherwise we get lots of broken stuff we don't want.
-+ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lnsl -lc
-+ 
-+ # These are the libs that are needed for the Energize version of gdb on
-+ # SVR4.  Note that we MUST include the standard C library before libucb.a,
-+ # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
-+ 
-+ # These are the libs that are needed for the Energize version of gdb on
-+ # SVR4.  Note that we MUST include the standard C library before libucb.a,
-+ # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
-===================================================================
-diff -c -r2.70 .Sanitize
-*** 2.70	1992/09/03 16:25:59
---- .Sanitize	1992/09/15 05:19:46
-***************
-*** 73,78 ****
---- 73,81 ----
+*** 74,79 ****
+--- 74,82 ----
   doc
   dwarfread.c
   elfread.c
@@ -70,8 +18,8 @@ diff -c -r2.70 .Sanitize
   environ.h
   eval.c
 ===================================================================
-*** 1.181	1992/09/08 22:33:31
---- Makefile.in	1992/09/15 05:21:40
+*** 1.186	1992/09/25 17:03:18
+--- Makefile.in	1992/09/26 00:20:58
 ***************
 *** 123,128 ****
 --- 123,135 ----
@@ -89,35 +37,24 @@ diff -c -r2.70 .Sanitize
   # -I. for config files.
   # -I${srcdir} possibly for regex.h also.
 ***************
-*** 159,170 ****
+*** 158,164 ****
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
-  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
-! 	${XM_CLIBS} ${TM_CLIBS}
-  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
-  	${RL_LIB} ${MMALLOC_LIB}
+  CLIBS = ${BFD_LIB} ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
+! 	${XM_CLIBS} ${TM_CLIBS} ${NAT_CLIBS}
+  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
+  	${BFD_LIB} ${RL_LIB}            ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY}
   
-  ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
-! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
-  
-  VERSION = 4.6.6
-  DIST=gdb
---- 166,178 ----
+--- 165,171 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
-  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
-! 	${ENERGIZE_LIB}	${XM_CLIBS} ${TM_CLIBS}
-  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
-  	${RL_LIB} ${MMALLOC_LIB}
+  CLIBS = ${BFD_LIB} ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
+! 	${ENERGIZE_LIB}	${XM_CLIBS} ${TM_CLIBS} ${NAT_CLIBS}
+  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
+  	${BFD_LIB} ${RL_LIB}            ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY}
   
-  ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
-! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
-! 	   ${ENERGIZE_LIB}
-  
-  VERSION = 4.6.6
-  DIST=gdb
 ***************
-*** 201,207 ****
+*** 200,206 ****
   	 mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
@@ -125,7 +62,7 @@ diff -c -r2.70 .Sanitize
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
---- 209,215 ----
+--- 207,213 ----
   	 mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
@@ -134,24 +71,24 @@ diff -c -r2.70 .Sanitize
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
 ***************
-*** 287,293 ****
+*** 289,295 ****
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
-      stabsread.o
+      stabsread.o core.o
   
---- 295,301 ----
+--- 296,302 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o energize.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
-      stabsread.o
+      stabsread.o core.o
   
 ***************
-*** 301,307 ****
+*** 303,309 ****
   
   NTSSTART = kdb-start.o
   
@@ -159,7 +96,7 @@ diff -c -r2.70 .Sanitize
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
---- 309,315 ----
+--- 310,316 ----
   
   NTSSTART = kdb-start.o
   
@@ -168,8 +105,8 @@ diff -c -r2.70 .Sanitize
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
 ***************
-*** 363,368 ****
---- 371,390 ----
+*** 365,370 ****
+--- 372,391 ----
   	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
   	echo "Load .c corresponding to:" $(DEPFILES)
   
@@ -191,8 +128,8 @@ diff -c -r2.70 .Sanitize
   # This is useful when debugging GDB, because some Unix's don't let you run GDB
   # on itself without copying the executable.  So "make gdb1" will make
 ===================================================================
-*** 1.46	1992/09/15 06:27:18
---- breakpoint.c	1992/09/15 06:33:37
+*** 1.47	1992/09/19 11:47:08
+--- breakpoint.c	1992/09/25 23:47:48
 ***************
 *** 273,278 ****
 --- 273,279 ----
@@ -214,26 +151,8 @@ diff -c -r2.70 .Sanitize
   	      error ("Junk at end of expression");
   	  }
 ***************
-*** 316,327 ****
-    ALL_BREAKPOINTS (b)
-      if (b->number == bnum)
-        {
-! 	if (from_tty && input_from_terminal_p ())
-  	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
-  End with a line saying just \"end\".\n", bnum);
-  	l = read_command_lines ();
-  	free_command_lines (&b->commands);
-  	b->commands = l;
-  	return;
-        }
-    error ("No breakpoint number %d.", bnum);
---- 318,330 ----
-    ALL_BREAKPOINTS (b)
-      if (b->number == bnum)
-        {
-! 	if ((from_tty && input_from_terminal_p ()) || energize)
-  	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
-  End with a line saying just \"end\".\n", bnum);
+*** 322,327 ****
+--- 324,330 ----
   	l = read_command_lines ();
   	free_command_lines (&b->commands);
   	b->commands = l;
@@ -327,7 +246,7 @@ diff -c -r2.70 .Sanitize
     if (xgdb_verbose && bpt->type == bp_breakpoint)
 ===================================================================
 *** 1.18	1992/07/10 17:22:30
---- command.c	1992/07/23 01:42:36
+--- command.c	1992/09/18 19:23:13
 ***************
 *** 1093,1098 ****
 --- 1093,1100 ----
@@ -352,24 +271,24 @@ diff -c -r2.70 .Sanitize
       }
   
     if (pid != -1)
-!     while ((rc = energize_wait (&status)) != pid && rc != -1)
+!     while ((rc = energize_shell_wait (&status)) != pid && rc != -1)
         ;
     else
       error ("Fork failed");
 ===================================================================
-*** 1.63	1992/09/03 16:26:02
---- configure.in	1992/09/15 05:19:56
+*** 1.67	1992/09/21 20:01:00
+--- configure.in	1992/09/25 23:47:53
 ***************
 *** 1,4 ****
 ! configdirs="doc"
   srcname="GDB"
   srctrigger=main.c
-  target_dependent=true
+  
 --- 1,4 ----
 ! configdirs="energize doc"
   srcname="GDB"
   srctrigger=main.c
-  target_dependent=true
+  
 ===================================================================
 *** 1.48	1992/09/15 08:55:59
 --- defs.h	1992/09/15 08:54:35
@@ -403,10 +322,10 @@ diff -c -r2.70 .Sanitize
   
   /* String name for the current demangling style.  Set by the "set demangling"
 ===================================================================
-*** 1.28	1992/07/23 04:41:45
---- inflow.c	1992/08/27 22:43:15
+*** 1.29	1992/09/25 19:19:00
+--- inflow.c	1992/09/25 23:48:13
 ***************
-*** 89,95 ****
+*** 87,93 ****
   static short pgrp_inferior;
   static short pgrp_ours;
   # else /* not def SHORT_PGRP */
@@ -414,7 +333,7 @@ diff -c -r2.70 .Sanitize
   static int pgrp_ours;
   # endif /* not def SHORT_PGRP */
   #else /* not def TIOCGPGRP */
---- 89,95 ----
+--- 87,93 ----
   static short pgrp_inferior;
   static short pgrp_ours;
   # else /* not def SHORT_PGRP */
@@ -423,33 +342,10 @@ diff -c -r2.70 .Sanitize
   # endif /* not def SHORT_PGRP */
   #else /* not def TIOCGPGRP */
 ===================================================================
-*** 1.54	1992/09/02 09:22:09
---- infrun.c	1992/09/15 05:20:09
+*** 1.14	1992/09/25 19:19:08
+--- inftarg.c	1992/09/26 00:25:51
 ***************
-*** 633,638 ****
---- 633,639 ----
-     Here we must get it up to actual execution of the real program.  */
-  
-    inferior_pid = pid;		/* Needed for wait_for_inferior stuff below */
-+   energize_new_process();
-  
-    clear_proceed_status ();
-  
-***************
-*** 771,776 ****
---- 772,778 ----
-  
-    attach (pid);
-    inferior_pid = pid;
-+   energize_new_process();
-    push_target (&child_ops);
-  
-    mark_breakpoints_out ();
-===================================================================
-*** 1.11	1992/03/29 23:21:27
---- inftarg.c	1992/09/15 06:37:01
-***************
-*** 55,65 ****
+*** 76,86 ****
     int pid;
   
     do {
@@ -461,7 +357,7 @@ diff -c -r2.70 .Sanitize
       if (pid == -1)		/* No more children to wait for */
         {
   	fprintf (stderr, "Child process unexpectedly missing.\n");
---- 55,61 ----
+--- 76,82 ----
     int pid;
   
     do {
@@ -469,12 +365,32 @@ diff -c -r2.70 .Sanitize
       if (pid == -1)		/* No more children to wait for */
         {
   	fprintf (stderr, "Child process unexpectedly missing.\n");
-===================================================================
-*** 1.52	1992/09/15 06:27:10
---- main.c	1992/09/15 06:30:03
 ***************
-*** 426,431 ****
---- 426,432 ----
+*** 138,143 ****
+--- 134,140 ----
+  
+    attach (pid);
+    inferior_pid = pid;
++   energize_new_process();
+    push_target (&child_ops);
+  
+    mark_breakpoints_out ();
+***************
+*** 394,399 ****
+--- 391,397 ----
+     Here we must get it up to actual execution of the real program.  */
+  
+    inferior_pid = pid;		/* Needed for wait_for_inferior stuff below */
++   energize_new_process();
+  
+    clear_proceed_status ();
+  
+===================================================================
+*** 1.56	1992/09/22 05:23:29
+--- main.c	1992/09/25 23:48:21
+***************
+*** 441,446 ****
+--- 441,447 ----
     char *corearg = NULL;
     char *cdarg = NULL;
     char *ttyarg = NULL;
@@ -483,8 +399,8 @@ diff -c -r2.70 .Sanitize
     /* Pointers to all arguments of +command option.  */
     char **cmdarg;
 ***************
-*** 524,529 ****
---- 525,531 ----
+*** 539,544 ****
+--- 540,546 ----
   	{"tty", required_argument, 0, 't'},
   	{"baud", required_argument, 0, 'b'},
   	{"b", required_argument, 0, 'b'},
@@ -493,8 +409,8 @@ diff -c -r2.70 .Sanitize
   #ifdef ADDITIONAL_OPTIONS
   	ADDITIONAL_OPTIONS
 ***************
-*** 556,561 ****
---- 558,566 ----
+*** 571,576 ****
+--- 573,581 ----
   	  case 11:
   	    cdarg = optarg;
   	    break;
@@ -505,8 +421,8 @@ diff -c -r2.70 .Sanitize
   	    symarg = optarg;
   	    break;
 ***************
-*** 664,669 ****
---- 669,677 ----
+*** 679,684 ****
+--- 684,692 ----
   
     /* Run the init function of each source file */
   
@@ -517,7 +433,7 @@ diff -c -r2.70 .Sanitize
     initialize_all_files ();
     initialize_main ();		/* But that omits this file!  Do it now */
 ***************
-*** 850,856 ****
+*** 853,859 ****
         if (!setjmp (to_top_level))
   	{
   	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
@@ -525,7 +441,7 @@ diff -c -r2.70 .Sanitize
             quit_command ((char *)0, instream == stdin);
   	}
       }
---- 858,867 ----
+--- 861,870 ----
         if (!setjmp (to_top_level))
   	{
   	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
@@ -537,7 +453,7 @@ diff -c -r2.70 .Sanitize
   	}
       }
 ***************
-*** 912,918 ****
+*** 915,921 ****
         else if (c->function.cfunc == NO_FUNCTION)
   	error ("That is not a command, just a help topic.");
         else
@@ -545,7 +461,7 @@ diff -c -r2.70 .Sanitize
      }
   
     /* Tell the user if the language has changed (except first time).  */
---- 923,929 ----
+--- 926,932 ----
         else if (c->function.cfunc == NO_FUNCTION)
   	error ("That is not a command, just a help topic.");
         else
@@ -554,7 +470,7 @@ diff -c -r2.70 .Sanitize
   
     /* Tell the user if the language has changed (except first time).  */
 ***************
-*** 1564,1570 ****
+*** 1570,1576 ****
     while (1)
       {
         dont_repeat ();
@@ -562,7 +478,7 @@ diff -c -r2.70 .Sanitize
         if (p == NULL)
   	/* Treat end of file like "end".  */
   	break;
---- 1575,1581 ----
+--- 1581,1587 ----
     while (1)
       {
         dont_repeat ();
@@ -624,8 +540,8 @@ diff -c -r2.70 .Sanitize
       }
   
 ===================================================================
-*** 1.34	1992/09/11 09:11:04
---- stack.c	1992/09/15 05:20:25
+*** 1.35	1992/09/18 09:20:00
+--- stack.c	1992/09/25 23:48:37
 ***************
 *** 159,165 ****
         if (addressprint)
@@ -706,11 +622,11 @@ diff -c -r2.70 .Sanitize
     wrap_here ("   ");
     if (sal.symtab)
 ===================================================================
-*** 1.57	1992/09/15 06:27:08
---- symfile.c	1992/09/15 06:30:09
+*** 1.58	1992/09/19 16:55:36
+--- symfile.c	1992/09/25 23:48:39
 ***************
-*** 611,616 ****
---- 611,618 ----
+*** 614,619 ****
+--- 614,621 ----
         fflush (stdout);
       }
   
@@ -720,8 +636,8 @@ diff -c -r2.70 .Sanitize
   }
   
 ===================================================================
-*** 1.60	1992/09/15 06:26:56
---- utils.c	1992/09/15 08:57:41
+*** 1.62	1992/09/18 09:21:36
+--- utils.c	1992/09/25 23:48:47
 ***************
 *** 700,720 ****
         fflush (stdout);
@@ -789,8 +705,8 @@ diff -c -r2.70 .Sanitize
   }
   
 ***************
-*** 988,993 ****
---- 1000,1011 ----
+*** 1000,1005 ****
+--- 1012,1023 ----
     if (linebuffer == 0)
       return;
     
@@ -876,3 +792,54 @@ diff -c -r2.70 .Sanitize
   		}
   	      if (i < len)
   		fprintf_filtered (stream, "...");
+===================================================================
+*** 1.4	1992/06/10 02:05:16
+--- config/amix.mh	1992/07/21 20:18:16
+***************
+*** 22,24 ****
+--- 22,38 ----
+  
+  # SVR4 puts the BSD compatible install in /usr/ucb.
+  INSTALL = /usr/ucb/install -c
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
+===================================================================
+*** 1.4	1992/06/15 19:25:13
+--- config/ncr3000.mh	1992/09/15 01:51:32
+***************
+*** 38,40 ****
+--- 38,59 ----
+  # The /usr/ucb/install program is incompatible (complains about unknown
+  # group staff).  Use good old cp...
+  INSTALL = cp
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lnsl -lc
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
