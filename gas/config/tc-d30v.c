@@ -31,6 +31,14 @@ const char *md_shortopts = "OnNcC";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 #define NOP_MULTIPLY 1
 #define NOP_ALL 2
 static int warn_nops = 0;
@@ -236,29 +244,35 @@ check_range (num, bits, flags)
   int retval=0;
 
   /* don't bother checking 32-bit values */
-  if (bits == 32)
+  if (bits == 32 && sizeof(unsigned long) * CHAR_BIT == 32)
     return 0;
+
+  /* Sign extend signed values to unsigned long */
+  if ((flags & OPERAND_SIGNED) && (num & ((unsigned long)1 << (bits - 1))))
+    num |= ((long)-1 << (bits - 1));
 
   if (flags & OPERAND_SHIFT)
     {
       /* We know that all shifts are right by three bits.... */
       
       if (flags & OPERAND_SIGNED)
-	num = (unsigned long) (((/*signed*/ long) num) >> 3);
+	num = (unsigned long) ( (long) num >= 0) 
+		? ( ((long) num) >> 3 )
+		: ( (num >> 3) | ((unsigned long)-1 << (32 - 3)) );
       else
 	num >>= 3;
     }
 
   if (flags & OPERAND_SIGNED)
     {
-      max = (1 << (bits - 1))-1; 
-      min = - (1 << (bits - 1));
+      max = ((unsigned long)1 << (bits - 1)) - 1; 
+      min = - ((unsigned long)1 << (bits - 1));
       if (((long)num > max) || ((long)num < min))
 	retval = 1;
     }
   else
     {
-      max = (1 << bits) - 1;
+      max = ((unsigned long)1 << bits) - 1;
       min = 0;
       if ((num > max) || (num < min))
 	retval = 1;

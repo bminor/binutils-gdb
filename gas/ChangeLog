@@ -1,3 +1,9 @@
+Thu Oct  7 00:23:53 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+
+	* config/tc-d30v.c (CHAR_BIT): Define.
+	(check_range): Fix bit operations to support integers bigger than
+	32 bits.
+
 Thu Oct  7 00:11:50 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* config/tc-d10v.c (check_range): Check range for RESTRICTED_NUM3
