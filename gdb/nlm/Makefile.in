@@ -77,11 +77,6 @@ AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
 
-# System V: If you compile gdb with a compiler which uses the coff
-# encapsulation feature (this is a function of the compiler used, NOT
-# of the m-?.h file selected by config.gdb), you must make sure that
-# the GNU nm is the one that is used by munch.
-
 # If you are compiling with GCC, make sure that either 1) You use the
 # -traditional flag, or 2) You have the fixed include files where GCC
 # can reach them.  Otherwise the ioctl calls in inflow.c

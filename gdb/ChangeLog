@@ -1,3 +1,7 @@
+Tue Apr 11 09:35:20 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* nlm/Makefile.in: Remove comments discussing munch.
+
 Tue Apr 11 11:07:12 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* gdbtk.c (gdbtk_init): If SIOCSPGRP is not available, but
