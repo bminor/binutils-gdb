@@ -1,3 +1,26 @@
+Thu Aug 31 17:01:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_memory_region_lookup): Don't use the first region
+	as the default region.  Create a new region instead.
+
+Tue Aug 29 14:21:41 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* ldemul.c (ldemul_set_symbols): New function.
+	* ldemul.h (ld_emulation_xfer_struct): Add set_symbols.
+	* ldmain.c (main): Add call to ldemul_set_symbols.
+	* lexsup.c (set_pe_value): New args.
+	(set_pe_name): New.
+	(parse_args): Cope with new set_pe_value args.
+	* emultempl/pe.em (set_symbols): New function.
+	(ld_emulation_xfer_struct): Add set_symbols.
+	* scripttempl/pe.sc: Use new symbols.
+
+Thu Aug 24 18:12:18 1995  Ian Lance Taylor  (ian@cygnus.com)
+
+	* lexsup.c (parse_args): Don't call set_default_dirlist for -O.
+	For -Y, ignore a leading `P,', and only call set_default_dirlist
+	after processing all the other arguments.
+
 Tue Aug 22 07:36:58 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* scripttempl/pe.sc: Keep .edata, don't base stabs at 0.
