@@ -1077,9 +1077,9 @@ same thing, the difference is that @samp{P} is a GNU invention and
 handle either one.  Symbol type @samp{C_RPSYM} is used with @samp{R} and
 @samp{N_RSYM} is used with @samp{P}.
 
-AIX, according to the documentation, uses @samp{D} for a parameter
-passed in a floating point register.  This strikes me as incredibly
-bogus---why doesn't it just use @samp{R} with a register number which
+According to the AIX documentation symbol descriptor @samp{D} is for a
+parameter passed in a floating point register.  This seems
+unnecessary---why not just use @samp{R} with a register number which
 indicates that it's a floating point register?  I haven't verified
 whether the system actually does what the documentation indicates.
 

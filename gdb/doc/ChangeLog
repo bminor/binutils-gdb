@@ -1,3 +1,8 @@
+Tue Jun 22 16:31:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Express disapproval of 'D' symbol descriptor
+	politely rather than rudely.
+
 Mon Jun 21 12:31:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* snapshots.readme: Tell people to always report missing files.
