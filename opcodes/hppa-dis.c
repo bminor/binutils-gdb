@@ -305,7 +305,7 @@ print_insn_hppa (memaddr, info)
 	  
 	  (*info->fprintf_func) (info->stream, "%s", opcode->name);
 
-	  if (!strchr ("cfCY<?!@-+&U>~nHNZFIMadu|", opcode->args[0]))
+	  if (!strchr ("cfCY?-+nHNZFIu", opcode->args[0]))
 	    (*info->fprintf_func) (info->stream, " ");
 	  for (s = opcode->args; *s != '\0'; ++s)
 	    {
@@ -403,54 +403,77 @@ print_insn_hppa (memaddr, info)
 		  (*info->fprintf_func) (info->stream, "%s ",
 				    short_bytes_compl_names[GET_COMPL (insn)]);
 		  break;
-		/* these four conditions are for the set of instructions
-		   which distinguish true/false conditions by opcode rather
-		   than by the 'f' bit (sigh): comb, comib, addb, addib */
-		case '<':
-		  fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)],
-				  info);
-		  break;
+
+		/* Handle conditions.  */
 		case '?':
-		  fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)
-				  + GET_FIELD (insn, 4, 4) * 8], info);
-		  break;
-		case '@':
-		  fputs_filtered (add_cond_names[GET_FIELD (insn, 16, 18)
-				  + GET_FIELD (insn, 4, 4) * 8], info);
-		  break;
-		case 'a':
-		  (*info->fprintf_func) (info->stream, "%s ",
-					 compare_cond_names[GET_COND (insn)]);
-		  break;
-		case 'd':
-		  (*info->fprintf_func) (info->stream, "%s ",
-					 add_cond_names[GET_COND (insn)]);
-		  break;
-		case '!':
-		  (*info->fprintf_func) (info->stream, "%s",
-				    add_cond_names[GET_FIELD (insn, 16, 18)]);
-		  break;
+		  {
+		    s++;
+		    switch (*s)
+		      {
+		      case 'f':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       float_comp_names[GET_FIELD
+							       (insn, 27, 31)]);
+			break;
 
-		case '&':
-		  (*info->fprintf_func) (info->stream, "%s ",
-				    logical_cond_names[GET_COND (insn)]);
-		  break;
-		case 'U':
-		  (*info->fprintf_func) (info->stream, "%s ",
-				    unit_cond_names[GET_COND (insn)]);
-		  break;
-		case '|':
-		case '>':
-		case '~':
-		  (*info->fprintf_func)
-		    (info->stream, "%s",
-		     shift_cond_names[GET_FIELD (insn, 16, 18)]);
+		      /* these four conditions are for the set of instructions
+			   which distinguish true/false conditions by opcode
+			   rather than by the 'f' bit (sigh): comb, comib,
+			   addb, addib */
+		      case 't':
+			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16,
+								      18)],
+					info);
+			break;
+		      case 'n':
+			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16,
+								      18)
+					+ GET_FIELD (insn, 4, 4) * 8], info);
+			break;
+		      case '@':
+			fputs_filtered (add_cond_names[GET_FIELD (insn, 16, 18)
+					+ GET_FIELD (insn, 4, 4) * 8], info);
+			break;
+		      case 's':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       compare_cond_names[GET_COND (insn)]);
+			break;
+		      case 'a':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       add_cond_names[GET_COND (insn)]);
+			break;
+		      case 'd':
+			(*info->fprintf_func) (info->stream, "%s",
+					       add_cond_names[GET_FIELD (insn,
+									 16,
+									 18)]);
+			break;
 
-		  /* If the next character in args is 'n', it will handle
-		     putting out the space.  */
-		  if (s[1] != 'n')
-		    (*info->fprintf_func) (info->stream, " ");
-		  break;
+		      case 'l':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       logical_cond_names[GET_COND (insn)]);
+			break;
+		      case 'u':
+			(*info->fprintf_func) (info->stream, "%s ",
+					       unit_cond_names[GET_COND (insn)]);
+			break;
+		      case 'y':
+		      case 'x':
+		      case 'b':
+			(*info->fprintf_func)
+			  (info->stream, "%s",
+			   shift_cond_names[GET_FIELD (insn, 16, 18)]);
+
+			/* If the next character in args is 'n', it will handle
+			   putting out the space.  */
+			if (s[1] != 'n')
+			  (*info->fprintf_func) (info->stream, " ");
+			break;
+
+		      }
+		    break;
+		  }
+
 		case 'V':
 		  fput_const (extract_5_store (insn), info);
 		  break;
@@ -565,7 +588,7 @@ print_insn_hppa (memaddr, info)
 		case 'F':
 		  /* if no destination completer and not before a completer
 		     for fcmp, need a space here */
-		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == 'M')
+		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == '?')
 		    fputs_filtered (float_format_names[GET_FIELD (insn, 19, 20)],
 				    info);
 		  else
@@ -589,7 +612,7 @@ print_insn_hppa (memaddr, info)
 		case 'I':
 		  /* if no destination completer and not before a completer
 		     for fcmp, need a space here */
-		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == 'M')
+		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == '?')
 		    fputs_filtered (float_format_names[GET_FIELD (insn, 20, 20)],
 				    info);
 		  else
@@ -609,11 +632,6 @@ print_insn_hppa (memaddr, info)
 		      fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
 		  else
 		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
-		  break;
-		case 'M':
-		    (*info->fprintf_func) (info->stream, "%s ",
-					   float_comp_names[GET_FIELD
-							      (insn, 27, 31)]);
 		  break;
 		default:
 		  (*info->fprintf_func) (info->stream, "%c", *s);
