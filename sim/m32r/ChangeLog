@@ -1,3 +1,11 @@
+Thu Jun 11 23:39:53 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (stamp-{arch,cpu,decode}): Pass CGEN_FLAGS_TO_PASS
+	to recursive makes.
+start-sanitize-m32rx
+	(stamp-{xcpu,xdecode}): Ditto.
+end-sanitize-m32rx
+
 Wed Jun 10 17:39:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* traps.c: New file.  Trap support moved here from sim-if.c.
