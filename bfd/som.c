@@ -1585,15 +1585,6 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 	  final_types[5] = NULL;
 	  break;
 	}
-      else if (field == e_esel)
-	{
-	  final_types[0] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
-	  *final_types[0] = R_COMP2;
-	  final_types[1] = final_type;
-	  *final_types[1] = R_DATA_EXPR;
-	  final_types[2] = NULL;
-	  break;;
-	}
       /* PLABELs get their own relocation type.  */
       else if (field == e_psel
 	  || field == e_lpsel
@@ -2843,7 +2834,6 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		  break;
 
 		case R_CODE_EXPR:
-		case R_DATA_EXPR:
 		  /* The only time we generate R_COMP1, R_COMP2 and 
 		     R_CODE_EXPR relocs is for the difference of two
 		     symbols.  Hence we can cheat here.  */
@@ -3739,16 +3729,22 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 	  info->arg_reloc = som_symbol_data (sym)->tc_data.hppa_arg_reloc;
 	}
 
-      /* If the type is unknown at this point, it should be ST_DATA or
-	 ST_CODE (function/ST_ENTRY symbols were handled  as special
-	 cases above). */
+      /* For unknown symbols, set their type to ST_DATA.
+
+	 We used to set the symbol type based on the section this symbol
+	 was in (ST_DATA for DATA sections, ST_CODE for CODE sections).
+	 Strictly speaking, this is the right approach.  However, the
+	 linker chokes if we have an R_DATA_ONE_SYMBOL reloc involving
+	 an ST_CODE symbol in a shared library, which happens for
+	 exception handling tables.
+
+	 I tried an alternate approach to generating exception handling
+	 tables using PUSH_SYM and DATA_EXPR relocs, but that fails to
+	 relocate exception handling tables in shared libraries.
+
+	 What a pain.  */
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN)
-	{
-	  if (sym->section->flags & SEC_CODE)
-	    info->symbol_type = ST_CODE;
-	  else
-	    info->symbol_type = ST_DATA;
-	}
+	info->symbol_type = ST_DATA;
 
       /* From now on it's a very simple mapping.  */
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_ABSOLUTE)

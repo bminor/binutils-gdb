@@ -1,3 +1,11 @@
+Thu Aug  1 22:43:08 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* libhppa.h: Remove "esel" changes.  Not the right approach.
+	* som.c: Corresponding changes.
+	(som_bfd_derive_misc_symbol_info): Use ST_DATA for symbols
+	which don't have a SOM symbol type associated with them.
+	Reverses a 1994 change.
+
 Wed Jul 31 15:50:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Make ld -N more reasonable for ELF:
