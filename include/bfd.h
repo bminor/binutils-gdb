@@ -972,7 +972,8 @@ typedef struct symbol_cache_entry
 #define BSF_WEAK        0x100000
 #define BSF_CTOR        0x200000 
 
-        /* This symbol was created to point to a section */
+        /* This symbol was created to point to a section, e.g. ELF's
+	   STT_SECTION symbols.  */
 #define BSF_SECTION_SYM 0x400000 
 
 	 /* The symbol used to be a common symbol, but now it is
@@ -1002,7 +1003,11 @@ typedef struct symbol_cache_entry
 	 /* Signal that the symbol is indirect. The value of the symbol
 	   is a pointer to an undefined asymbol which contains the
 	   name to use instead. */
-#define BSF_INDIRECT     0x4000000
+#define BSF_INDIRECT      0x4000000
+
+	 /* BSF_FILE marks symbols that contain a file name.  This is used
+	   for ELF STT_FILE symbols.  */
+#define BSF_FILE          0x08000000
 
   flagword flags;
 
