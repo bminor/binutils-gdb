@@ -14,6 +14,9 @@ Changes in version 2.10:
 
 * Added ASSERT to the linker script language.
 
+* Added EXCLUDE_FILE to the linker script language for further control over
+  wildcard file names.
+
 * Added -O option to optimize linker output (as of this writing, this only
 affects ELF shared library generation).
 
