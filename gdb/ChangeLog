@@ -1,5 +1,8 @@
 Thu Dec 29 18:18:31 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
+	* hppa-tdep.c (pa_print_registers): Extract register values stored
+	in big endian format on big and little endian hosts.
+
 	* array-rom.c: Support for Array Tech LSI33k based RAID disk
 	controller board.
 	* configure.in: Recognize "mips*-*-ecoff*" rather than

@@ -55,6 +55,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
+#define SWAP_TARGET_AND_HOST(buffer,len) 				\
+  do									\
+    {									\
+      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)				\
+	{								\
+	  char tmp;							\
+	  char *p = (char *)(buffer);					\
+	  char *q = ((char *)(buffer)) + len - 1;		   	\
+	  for (; p < q; p++, q--)				 	\
+	    {								\
+	      tmp = *q;							\
+	      *q = *p;							\
+	      *p = tmp;							\
+	    }								\
+	}								\
+    }									\
+  while (0)
+
 static int restore_pc_queue PARAMS ((struct frame_saved_regs *));
 
 static int hppa_alignof PARAMS ((struct type *));
@@ -1562,8 +1580,9 @@ target_read_pc (pid)
 {
   int flags = read_register (FLAGS_REGNUM);
 
-  if (flags & 2)
+  if (flags & 2) {
     return read_register (31) & ~0x3;
+  }
   return read_register (PC_REGNUM) & ~0x3;
 }
 
@@ -1647,19 +1666,20 @@ pa_print_registers (raw_regs, regnum, fpregs)
      int regnum;
      int fpregs;
 {
-  int i;
+  int i,j;
+  long val;
 
   for (i = 0; i < 18; i++)
-    printf_unfiltered ("%8.8s: %8x  %8.8s: %8x  %8.8s: %8x  %8.8s: %8x\n",
-	    reg_names[i],
-	    *(int *)(raw_regs + REGISTER_BYTE (i)),
-	    reg_names[i + 18],
-	    *(int *)(raw_regs + REGISTER_BYTE (i + 18)),
-	    reg_names[i + 36],
-	    *(int *)(raw_regs + REGISTER_BYTE (i + 36)),
-	    reg_names[i + 54],
-	    *(int *)(raw_regs + REGISTER_BYTE (i + 54)));
-
+    {
+      for (j = 0; j < 4; j++)
+	{
+	  val = *(int *)(raw_regs + REGISTER_BYTE (i+(j*18)));
+	  SWAP_TARGET_AND_HOST (&val, 4);
+	  printf_unfiltered ("%8.8s: %8x  ", reg_names[i+(j*18)], val);
+	}
+      printf_unfiltered ("\n");
+    }
+  
   if (fpregs)
     for (i = 72; i < NUM_REGS; i++)
       pa_print_fp_reg (i);
