@@ -1,3 +1,66 @@
+2000-04-14  Jim Blandy  <jimb@redhat.com>
+
+	Provide the hooks needed to support architectures on which
+	pointers are not always simple byte addresses.
+
+	* gdbarch.sh (POINTER_TO_ADDRESS, ADDRESS_TO_POINTER): Two new
+	functions which architectures can redefine, defaulting to
+	generic_pointer_to_address and generic_address_to_pointer.
+	* findvar.c (extract_typed_address, store_typed_address,
+	generic_pointer_to_address, generic_address_to_pointer): New
+	functions.
+	(POINTER_TO_ADDRESS, ADDRESS_TO_POINTER): Provide default
+	definitions.
+	(extract_address, store_address): Doc fixes.
+	* values.c (value_as_pointer): Doc fix.
+	(value_from_pointer): New function.
+	* defs.h (extract_typed_address, store_typed_address): New
+	declarations.
+	* inferior.h (generic_address_to_pointer,
+	generic_pointer_to_address): New declarations.
+	* value.h (value_from_pointer): New declaration.
+	
+	The following changes are all of the general form "Use these
+	functions instead of these other functions."  In each case, the
+	change is because the new calls provide enough information to do
+	the appropriate address / pointer conversions, where the old calls
+	did not, or because the new functions are more appropriately named
+	for the operation being performed.
+	
+	* ax-gdb.c (const_var_ref): Use value_from_pointer, not
+	value_from_longest.
+	* blockframe.c (generic_push_dummy_frame): Use read_pc and
+	read_sp, not read_register.
+	* c-valprint.c (c_val_print): Use extract_typed_address instead of
+	extract_address to extract vtable entries and references.
+	* cp-valprint.c (cp_print_value_fields): Use value_from_pointer
+	instead of value_from_longest to extract the vtable's address.
+	* eval.c (evaluate_subexp_standard): Use value_from_pointer
+	instead of value_from_longest to compute `this', and for doing
+	pointer-to-member dereferencing.
+	* findvar.c (read_register): Use extract_unsigned_integer, not
+	extract_address.
+	(read_var_value): Use store_typed_address instead of store_address
+	for building label values.
+	(locate_var_value): Use value_from_pointer instead of
+	value_from_longest.
+	* hppa-tdep.c (find_stub_with_shl_get): Use value_from_pointer,
+	instead of value_from_longest, to build arguments to __d_shl_get.
+	* printcmd.c (set_next_address): Use value_from_pointer, not
+	value_from_longest.
+	(x_command): Use value_from_pointer, not value_from_longest.
+	* tracepoint.c (set_traceframe_context): Use value_from_pointer,
+	not value_from_longest.
+	* valarith.c (value_add, value_sub): Use value_from_pointer, not
+	value_from_longest.
+	* valops.c (find_function_in_inferior, value_coerce_array,
+	value_coerce_function, value_addr, hand_function_call): Same.
+	* value.h (COERCE_REF): Use unpack_pointer, not unpack_long. 
+	* values.c (unpack_long): Use extract_typed_address to produce
+	addresses from pointers and references, not extract_address.
+	(value_from_longest): Use store_typed_address instead of
+	store_address to produce pointer and reference values.
+
 2000-04-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* acconfig.h (HAVE_PRGREGSET_T, HAVE_PRFPREGSET_T, HAVE_LWPID_T,

@@ -1,3 +1,10 @@
+2000-04-14  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (Pointers Are Not Always Addresses): New manual
+	section.
+	(Target Conditionals): Document ADDRESS_TO_POINTER,
+	POINTER_TO_ADDRESS.
+
 2000-04-11  Daniel Berlin  <dan@cgsoftware.com>
 
 	* gdbint.texinfo: Replaced GDB with @value{GDBN}, @include
