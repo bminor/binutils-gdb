@@ -3630,6 +3630,7 @@ main (argc, argv)
 	case 'I':
 	  {
 	    include_path *p = (include_path *) xmalloc (sizeof (include_path));
+	    p->next = NULL;
 	    sb_new (&p->path);
 	    sb_add_string (&p->path, optarg);
 	    if (paths_tail)

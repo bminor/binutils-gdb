@@ -1,3 +1,11 @@
+Thu Apr  2 16:36:47 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp.c (main): Set next field of new include_path structure to
+	NULL.  From Avery Pennarun <averyp@gdc.ca>.
+
+	* read.c (s_mri_sect): Call as_bad rather than abort for an
+	unsupported MRI target.
+
 Wed Apr  1 11:08:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (arm_validate_fix): New function.  Determine if
