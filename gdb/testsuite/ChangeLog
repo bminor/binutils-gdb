@@ -1,3 +1,8 @@
+2004-06-18  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/charset.exp: Only send a control-C if we see a new
+	prompt and incomplete command.
+
 2004-06-18  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/pr-574.cc: Add copyright notice.
