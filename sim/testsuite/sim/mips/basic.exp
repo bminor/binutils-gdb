@@ -62,4 +62,6 @@ if {[istarget mips*-elf] && [board_info target exists is_simulator]} {
 	run_hilo_test hilo-hazard-2.s $models $nops
     }
     run_hilo_test hilo-hazard-3.s $models 2
+
+    run_sim_test fpu64-ps.s $submodels
 }

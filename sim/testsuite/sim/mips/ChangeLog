@@ -1,3 +1,8 @@
+2004-04-10  Chris Demetriou  <cgd@broadcom.com>
+
+	* fpu64-ps.s: New file.
+	* basic.exp: Run fpu64-ps.s.
+
 2004-03-29  Richard Sandiford  <rsandifo@redhat.com>
 
 	* hilo-hazard-[123].s: New files.
