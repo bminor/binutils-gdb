@@ -43,6 +43,7 @@ for.d
 for.s
 if.d
 if.s
+immconst.d
 label.d
 label.s
 mri.exp
