@@ -1,3 +1,7 @@
+2003-06-03  Kris Warkentin  <kewarken@qnx.com>
+
+	* solib.c (solib_open): Update comment to reflect actual search order.
+
 2003-06-03  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_frame_memory_signed): New function.

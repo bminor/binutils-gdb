@@ -91,6 +91,7 @@ static char *solib_search_path = NULL;
    * If path is absolute, look in SOLIB_ABSOLUTE_PREFIX.
    * If path is absolute or relative, look for it literally (unmodified).
    * Look in SOLIB_SEARCH_PATH.
+   * If available, use target defined search function.
    * Look in inferior's $PATH.
    * Look in inferior's $LD_LIBRARY_PATH.
 
