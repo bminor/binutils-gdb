@@ -1,3 +1,4 @@
+start-sanitize-fr30
 Mon Nov  9 18:22:55 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* po/opcodes.pot: Regenerate.
@@ -5,6 +6,7 @@ Mon Nov  9 18:22:55 1998  Dave Brolley  <brolley@cygnus.com>
 	* fr30-opc.c: Regenerate.
 	* fr30-opc.h: Regenerate.
 
+end-sanitize-fr30
 Fri Nov  6 17:21:38 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-asm.c: Regenerate.
