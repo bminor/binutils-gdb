@@ -13,7 +13,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-Copyright @copyright{} 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -48,10 +48,10 @@ into another language, under the above conditions for modified versions.
 @c
 
 @setchapternewpage odd
-@settitle GNU Binary Utilities
+@settitle @sc{gnu} Binary Utilities
 @titlepage
 @finalout
-@title The GNU Binary Utilities
+@title The @sc{gnu} Binary Utilities
 @subtitle Version @value{VERSION}
 @sp 1
 @subtitle May 1993
@@ -66,7 +66,7 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -85,7 +85,7 @@ into another language, under the above conditions for modified versions.
 @top Introduction
 
 @cindex version
-This brief manual contains preliminary documentation for the GNU binary
+This brief manual contains preliminary documentation for the @sc{gnu} binary
 utilities (collectively version @value{VERSION}): 
 
 @iftex
@@ -148,7 +148,7 @@ ar [-]@var{p}[@var{mod} [@var{relpos}]] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
-The GNU @code{ar} program creates, modifies, and extracts from
+The @sc{gnu} @code{ar} program creates, modifies, and extracts from
 archives.  An @dfn{archive} is a single file holding a collection of
 other files in a structure that makes it possible to retrieve
 the original individual files (called @dfn{members} of the archive).
@@ -158,7 +158,7 @@ group are preserved in the archive, and can be restored on
 extraction.  
 
 @cindex name length
-GNU @code{ar} can maintain archives whose members have names of any
+@sc{gnu} @code{ar} can maintain archives whose members have names of any
 length; however, depending on how @code{ar} is configured on your
 system, a limit on member-name length may be imposed for compatibility
 with archive formats maintained with other tools.  If it exists, the
@@ -185,7 +185,7 @@ table.  If an archive lacks the table, another form of @code{ar} called
 
 @cindex compatibility, @code{ar}
 @cindex @code{ar} compatibility
-GNU @code{ar} is designed to be compatible with two different
+@sc{gnu} @code{ar} is designed to be compatible with two different
 facilities.  You can control its activity using command-line options,
 like the different varieties of @code{ar} on Unix systems; or, if you
 specify the single command-line option @samp{-M}, you can control it
@@ -214,7 +214,7 @@ arguments to execute: one keyletter specifying the @emph{operation}
 Most operations can also accept further @var{member} arguments,
 specifying particular files to operate on.
 
-GNU @code{ar} allows you to mix the operation code @var{p} and modifier
+@sc{gnu} @code{ar} allows you to mix the operation code @var{p} and modifier
 flags @var{mod} in any order, within the first command-line argument.
 
 If you wish, you may begin the first command-line argument with a
@@ -346,7 +346,7 @@ issued unless you specify in advance that you expect to create it, by
 using this modifier.
 
 @item f
-Truncate names in the archive.  GNU @code{ar} will normally permit file
+Truncate names in the archive.  @sc{gnu} @code{ar} will normally permit file
 names of any length.  This will cause it to create archives which are
 not compatible with the native @code{ar} program on some systems.  If
 this is a concern, the @samp{f} modifier may be used to truncate file
@@ -361,7 +361,7 @@ member must be present as the @var{relpos} argument, before the
 @item l
 This modifier is accepted but not used.
 @c whaffor ar l modifier??? presumably compat; with
-@c what???---pesch@@cygnus.com, 25jan91 
+@c what???---doc@@cygnus.com, 25jan91 
 
 @item o
 @cindex dates in archive
@@ -416,7 +416,7 @@ on any error.
 The @code{ar} command language is @emph{not} designed to be equivalent
 to the command-line options; in fact, it provides somewhat less control
 over archives.  The only purpose of the command language is to ease the
-transition to GNU @code{ar} for developers who already have scripts
+transition to @sc{gnu} @code{ar} for developers who already have scripts
 written for the MRI ``librarian'' program.
 
 The syntax for the @code{ar} command language is straightforward:
@@ -526,7 +526,7 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 @item LIST
 Display full contents of the current archive, in ``verbose'' style
 regardless of the state of @code{VERBOSE}.  The effect is like @samp{ar
-tv @var{archive}}).  (This single command is a GNU @code{ld}
+tv @var{archive}}).  (This single command is a @sc{gnu} @code{ld}
 enhancement, rather than present for MRI compatibility.)
 
 Requires prior use of @code{OPEN} or @code{CREATE}.
@@ -563,8 +563,8 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 @chapter ld
 @cindex linker
 @kindex ld
-The GNU linker @code{ld} is now described in a separate manual.
-@xref{Top,, Overview,, Using LD: the GNU linker}.
+The @sc{gnu} linker @code{ld} is now described in a separate manual.
+@xref{Top,, Overview,, Using LD: the @sc{gnu} linker}.
 @end iftex
 
 @node nm
@@ -583,7 +583,7 @@ nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ --no-demangle ] [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
 @end smallexample
 
-GNU @code{nm} lists the symbols from object files @var{objfile}@dots{}.
+@sc{gnu} @code{nm} lists the symbols from object files @var{objfile}@dots{}.
 If no object files are listed as arguments, @code{nm} assumes
 @file{a.out}.
 
@@ -1170,7 +1170,7 @@ An archive with such an index speeds up linking to the library and
 allows routines in the library to call each other without regard to
 their placement in the archive.
 
-The GNU @code{ranlib} program is another form of GNU @code{ar}; running
+The @sc{gnu} @code{ranlib} program is another form of @sc{gnu} @code{ar}; running
 @code{ranlib} is completely equivalent to executing @samp{ar -s}.
 @xref{ar}.
 
@@ -1193,7 +1193,7 @@ size [ -A | -B | --format=@var{compatibility} ]
      @var{objfile}@dots{}
 @end smallexample
 
-The GNU @code{size} utility lists the section sizes---and the total
+The @sc{gnu} @code{size} utility lists the section sizes---and the total
 size---for each of the object or archive files @var{objfile} in its
 argument list.  By default, one line of output is generated for each
 object file or each module in an archive.
@@ -1207,7 +1207,7 @@ The command line options have the following meanings:
 @itemx -B
 @itemx --format=@var{compatibility}
 @cindex @code{size} display format
-Using one of these options, you can choose whether the output from GNU
+Using one of these options, you can choose whether the output from @sc{gnu}
 @code{size} resembles output from System V @code{size} (using @samp{-A},
 or @samp{--format=sysv}), or Berkeley @code{size} (using @samp{-B}, or
 @samp{--format=berkeley}).  The default is the one-line format similar to
@@ -1289,7 +1289,7 @@ strings [-afov] [-@var{min-len}] [-n @var{min-len}] [-t @var{radix}] [-]
         [--help] [--version] @var{file}@dots{}
 @end smallexample
 
-For each @var{file} given, GNU @code{strings} prints the printable
+For each @var{file} given, @sc{gnu} @code{strings} prints the printable
 character sequences that are at least 4 characters long (or the number
 given with the options below) and are followed by an unprintable
 character.  By default, it only prints the strings from the initialized
@@ -1361,7 +1361,7 @@ strip [ -F @var{bfdname} | --target=@var{bfdname} | --target=@var{bfdname} ]
       @var{objfile}@dots{}
 @end smallexample
 
-GNU @code{strip} discards all symbols from object files
+@sc{gnu} @code{strip} discards all symbols from object files
 @var{objfile}.  The list of object files may include archives.
 At least one object file must be given.
 
@@ -1487,13 +1487,13 @@ Do not remove the initial underscore.
 
 @item -s @var{format}
 @itemx --format=@var{format}
-GNU @code{nm} can decode three different methods of mangling, used by
+@sc{gnu} @code{nm} can decode three different methods of mangling, used by
 different C++ compilers.  The argument to this option selects which
 method it uses:
 
 @table @code
 @item gnu
-the one used by the GNU compiler (the default method)
+the one used by the @sc{gnu} compiler (the default method)
 @item lucid
 the one used by the Lucid compiler
 @item arm
