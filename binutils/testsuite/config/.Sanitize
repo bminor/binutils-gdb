@@ -24,13 +24,16 @@ Do-first:
 
 Things-to-keep:
 
-abug.exp
-aout.exp
-coff.exp
-nind.exp
-udi.exp
+default.exp
 unix.exp
-vx.exp
+mt-a29k-udi
+mt-i386-aout
+mt-i960-nindy
+mt-lynx
+mt-m68k
+mt-mips-ecoff
+mt-sparc-aout
+mt-vxworks
 
 Things-to-lose:
 
