@@ -390,13 +390,13 @@ static struct m88k_opcode m88k_opcodes[] =
   _MC88xxx (0x48000000, "mask",		"d,1,I")
   _MC88xxx (0x4c000000, "mask.u",	"d,1,I")
   _MC88110 (0x8400c000, "mov.s",	"d,x2")
-  _MC88110 (0x84008200, "mov.s",	"xd,2")
+  _MC88110 (0x84004200, "mov.s",	"xd,2")
   _MC88110 (0x8400c080, "mov.d",	"d,x2")
-  _MC88110 (0x84008280, "mov.d",	"xd,2")
+  _MC88110 (0x84004280, "mov.d",	"xd,2")
   _MC88110 (0x8400c300, "mov",		"xd,x2")
   _MC88xxx (0xf4006c00, "mul",		"d,1,2")
   _MC88xxx (0x6c000000, "mul",		"d,1,I")
-  _MC88xxx (0xf4006c00, "muls",		"d,1,2")
+  _MC88xxx (0xf4006e00, "muls",		"d,1,2")
   _MC88xxx (0x6c000000, "muls",		"d,1,I")
   _MC88xxx (0xf4006c00, "mulu",		"d,1,2")	/* synonym for mul */
   _MC88xxx (0x6c000000, "mulu",		"d,1,I")	/* synonym for mul */
