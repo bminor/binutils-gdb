@@ -37,6 +37,7 @@
 #include "target.h"
 #include "annotate.h"
 #endif
+#include "regcache.h"
 
 #include "version.h"
 
