@@ -4,6 +4,7 @@ Thu Dec  5 14:06:23 1996  Doug Evans  <dje@canuck.cygnus.com>
 	(TARGET_BYTE_ORDER_SELECTABLE): Define.
 	(BREAKPOINT): Undef.
 	({BIG,LITTLE}_BREAKPOINT): Define.
+	(TM_PRINT_INSN_MACH): Redefine for sparclet.
 
 Wed Dec  4 16:34:05 1996  Geoffrey Noer  <noer@cygnus.com>
 
