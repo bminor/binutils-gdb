@@ -1,3 +1,9 @@
+Mon Aug 30 11:13:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Many minor cleanups.
+
+	* stabs.texinfo: Remove @deffn except from Expanded Reference node.
+
 Sat Aug 28 12:08:09 1993  David J. MacKenzie  (djm@edison.eng.umd.edu)
 
 	* stabs.texinfo: Remove full description of big example.

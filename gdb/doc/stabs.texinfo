@@ -373,7 +373,6 @@ blocks of code.
 @node Main program
 @section Main program
 
-@deffn @code{.stabs} N_MAIN
 @findex N_MAIN
 Most languages allow the main program to have any name.  The
 @code{N_MAIN} stab type tells the debugger the name that is used in this
@@ -382,12 +381,10 @@ a function which is the main program.  Most C compilers do not use this
 stab (they expect the debugger to assume that the name is @code{main}),
 but some C compilers emit an @code{N_MAIN} stab for the @code{main}
 function.
-@end deffn
 
 @node Source files
 @section Paths and names of the source files
 
-@deffn @code{.stabs} N_SO
 @findex N_SO
 Before any other stabs occur, there must be a stab specifying the source
 file.  This information is contained in a symbol of stab type
@@ -415,7 +412,6 @@ For example:
         .text
 Ltext0:
 @end example
-@end deffn
 
 Instead of @code{N_SO} symbols, XCOFF uses a @code{.file} assembler
 directive which assembles to a standard COFF @code{.file} symbol;
@@ -429,7 +425,6 @@ traditional @code{N_SOL} approach, Sun's @code{N_BINCL} approach, and the
 XCOFF @code{C_BINCL} approach (which despite the similar name has little in
 common with @code{N_BINCL}).
 
-@deffn @code{.stabs} N_SOL
 @findex N_SOL
 An @code{N_SOL} symbol specifies which include file subsequent symbols
 refer to.  The @var{string} field is the name of the file and the
@@ -437,33 +432,27 @@ refer to.  The @var{string} field is the name of the file and the
 previous include file and the start of this one.  To specify the main
 source file again, use an @code{N_SOL} symbol with the name of the main
 source file.
-@end deffn
 
-@deffn @code{.stabs} N_BINCL
-@deffnx @code{.stabs} N_EINCL
-@deffnx {} N_EXCL
 @findex N_BINCL
 @findex N_EINCL
 @findex N_EXCL
-On Suns, an @code{N_BINCL} symbol specifies the start of an include file.
-In an object file, only the @var{string} is significant; the Sun linker
-puts data into some of the other fields.  The end of the include file is
-marked by an @code{N_EINCL} symbol (which has no @var{string} field).  In
-an object file, there is no significant data in the @code{N_EINCL}
-symbol; the Sun linker puts data into some of the fields.
-@code{N_BINCL} and @code{N_EINCL} can be nested.
+The @code{N_BINCL} approach works as follows.  An @code{N_BINCL} symbol
+specifies the start of an include file.  In an object file, only the
+@var{string} is significant; the Sun linker puts data into some of the
+other fields.  The end of the include file is marked by an
+@code{N_EINCL} symbol (which has no @var{string} field).  In an object
+file, there is no significant data in the @code{N_EINCL} symbol; the Sun
+linker puts data into some of the fields.  @code{N_BINCL} and
+@code{N_EINCL} can be nested.
 
-If the linker detects that two source files have identical stabs with an
-@code{N_BINCL} and @code{N_EINCL} pair (as will generally be the case
+If the linker detects that two source files have identical stabs between
+an @code{N_BINCL} and @code{N_EINCL} pair (as will generally be the case
 for a header file), then it only puts out the stabs once.  Each
 additional occurance is replaced by an @code{N_EXCL} symbol.  I believe
 the Sun (SunOS4, not sure about Solaris) linker is the only one which
 supports this feature.
 @c What do the fields of N_EXCL contain? -djm
-@end deffn
 
-@deffn @code{.bi} C_BINCL
-@deffnx @code{.ei} C_EINCL
 @findex C_BINCL
 @findex C_EINCL
 For the start of an include file in XCOFF, use the @file{.bi} assembler
@@ -476,22 +465,17 @@ and linker, is the offset into the executable of the beginning
 (inclusive, as you'd expect) or end (inclusive, as you would not expect)
 of the portion of the COFF line table that corresponds to this include
 file.  @code{C_BINCL} and @code{C_EINCL} do not nest.
-@end deffn
 
 @node Line numbers
 @section Line numbers
 
-@deffn @code{.stabn} N_SLINE
 @findex N_SLINE
 An @code{N_SLINE} symbol represents the start of a source line.  The
 @var{desc} field contains the line number and the @var{value} field
 contains the code address for the start of that source line.  On most
 machines the address is absolute; for Sun's stabs-in-ELF, it is relative
 to the function in which the @code{N_SLINE} symbol occurs.
-@end deffn
 
-@deffn @code{.stabn} N_DSLINE
-@deffnx @code{.stabn} N_BSLINE
 @findex N_DSLINE
 @findex N_BSLINE
 GNU documents @code{N_DSLINE} and @code{N_BSLINE} symbols for line
@@ -502,7 +486,6 @@ declaration, but I believe that GCC2 actually puts the line number in
 the @var{desc} field of the stab for the variable itself.  GDB has been
 ignoring these symbols (unless they contain a @var{string} field) since
 at least GDB 3.5.
-@end deffn
 
 For single source lines that generate discontiguous code, such as flow
 of control statements, there may be more than one line number entry for
@@ -510,42 +493,54 @@ the same source line.  In this case there is a line number entry at the
 start of each code range, each with the same line number.
 
 XCOFF uses COFF line numbers, which are outside the scope of this
-document.
+document, ammeliorated by adequate marking of include files
+(@pxref{Include files}).
 
 @node Procedures
 @section Procedures
 
-@deffn @code{.stabs} N_FUN
 @findex N_FUN
-All of the following stabs use the @code{N_FUN} symbol type.
+@findex N_FNAME
+@findex N_STSYM, for functions (Sun acc)
+@findex N_GSYM, for functions (Sun acc)
+All of the following stabs normally use the @code{N_FUN} symbol type.
+However, Sun's @code{acc} compiler on SunOS4 uses @code{N_GSYM} and
+@code{N_STSYM}, which means that the value of the stab for the function
+is useless and the debugger must get the address of the function from
+the non-stab symbols instead.  BSD Fortran is said to use @code{N_FNAME}
+with the same restriction; the value of the symbol is not useful (I'm
+not sure it really does use this, because GDB doesn't handle this and no
+one has complained).
 
 A function is represented by an @samp{F} symbol descriptor for a global
-(extern) function, and @samp{f} for a static (local) function.  (The next
-@code{N_SLINE} symbol gives the line number of the start
-of the function.)  The @var{value} field is the address of the start of the
-function (absolute for @code{a.out}; relative to the start of the file
-for Sun's stabs-in-ELF).  The type information of the stab represents
-the return type of the function; thus @samp{foo:f5} means that foo is a
-function returning type 5.
+(extern) function, and @samp{f} for a static (local) function.  The
+@var{value} field is the address of the start of the function (absolute
+for @code{a.out}; relative to the start of the file for Sun's
+stabs-in-ELF).  The type information of the stab represents the return
+type of the function; thus @samp{foo:f5} means that foo is a function
+returning type 5.  There is no need to try to get the line number of the
+start of the function from the stab for the function; it is in the next
+@code{N_SLINE} symbol.
 
-@c What determines whether the option here v   is taken? -djm
-The type information of the stab is optionally followed by type
-information for each argument, with each argument preceded by @samp{;}.
-An argument type of 0 means that additional arguments are being passed,
-whose types and number may vary (@samp{...} in ANSI C).  This extension
-is used by Sun's Solaris compiler.  GDB has tolerated it (parsed the
-syntax, if not necessarily used the information) since at least version
-4.8; I don't know whether all versions of dbx tolerate it.  The
-argument types given here are not redundant with the symbols for the
-arguments themselves (@pxref{Parameters}); they are the types of the
-arguments as they are passed, before any conversions might take place.
-For example, if a C function which is declared without a prototype takes
-a @code{float} argument, the value is passed as a @code{double} but then
-converted to a @code{float}.  Debuggers need to use the types given in
-the arguments when printing values, but if calling the function they
-need to use the types given in the symbol defining the function.
-@c Are the "arguments themselves" referred to above the actual
-@c or formal parameters?  I'm confused.  -djm
+@c FIXME: verify whether the "I suspect" below is true or not.
+Some compilers (such as Sun's Solaris compiler) support an extension for
+specifying the types of the arguments.  I suspect this extension is not
+used for old (non-prototyped) function definitions in C.  If the
+extension is in use, the type information of the stab for the function
+is followed by type information for each argument, with each argument
+preceded by @samp{;}.  An argument type of 0 means that additional
+arguments are being passed, whose types and number may vary (@samp{...}
+in ANSI C).  GDB has tolerated this extension (parsed the syntax, if not
+necessarily used the information) since at least version 4.8; I don't
+know whether all versions of dbx tolerate it.  The argument types given
+here are not redundant with the symbols for the formal parameters
+(@pxref{Parameters}); they are the types of the arguments as they are
+passed, before any conversions might take place.  For example, if a C
+function which is declared without a prototype takes a @code{float}
+argument, the value is passed as a @code{double} but then converted to a
+@code{float}.  Debuggers need to use the types given in the arguments
+when printing values, but when calling the function they need to use the
+types given in the symbol defining the function.
 
 If the return type and types of arguments of a function which is defined
 in another source file are specified (i.e., a function prototype in ANSI
@@ -572,31 +567,13 @@ necessary), but the AIX documentation defines @samp{I}, @samp{P}, and
 These symbol descriptors are unusual in that they are not followed by
 type information.
 
-Here is an exploded summary (with whitespace added for clarity):
+The following example shows a stab for a function @code{main} which
+returns type number @code{1}.  The @code{_main} specified for the value
+is a reference to an assembler label which is used to fill in the start
+address of the function.
 
 @example
-.stabs "@var{name}:
-        @var{desc}  @r{(global proc @samp{F})}
-        @var{return_type_ref}  @r{(int)}
-       ",N_FUN, NIL, NIL,
-       @var{address}
-@end example
-
-Going back to our ``hello world'' example program,
-
-@example
-48      ret
-49      restore
-@end example
-
-@noindent
-The @code{.stabs} entry after this code fragment shows the @var{name} of
-the procedure (@code{main}); the type descriptor @var{desc} (@code{F},
-for a global procedure); a reference to the predefined type @code{int}
-for the return type; and the starting @var{address} of the procedure.
-
-@example
-50 .stabs "main:F1",36,0,0,_main
+.stabs "main:F1",36,0,0,_main      # @r{36 is N_FUN}
 @end example
 
 The stab representing a procedure is located immediately following the
@@ -604,18 +581,17 @@ code of the procedure.  This stab is in turn directly followed by a
 group of other stabs describing elements of the procedure.  These other
 stabs describe the procedure's parameters, its block local variables, and
 its block structure.
-@end deffn
 
 @node Nested procedures
 @section Nested procedures
 
-For any of the @code{N_FUN} symbol descriptors, after the symbol
-descriptor and the type information is optionally a scope specifier.
-This consists of a comma, the name of the procedure, another comma, and
-the name of the enclosing procedure.  The first name is local to the
-scope specified, and seems to be redundant with the name of the symbol
-(before the @samp{:}).  This feature is used by GCC, and presumably
-Pascal, Modula-2, etc., compilers, for nested functions.
+For any of the symbol descriptors representing procedures, after the
+symbol descriptor and the type information is optionally a scope
+specifier.  This consists of a comma, the name of the procedure, another
+comma, and the name of the enclosing procedure.  The first name is local
+to the scope specified, and seems to be redundant with the name of the
+symbol (before the @samp{:}).  This feature is used by GCC, and
+presumably Pascal, Modula-2, etc., compilers, for nested functions.
 
 If procedures are nested more than one level deep, only the immediately
 containing scope is specified.  For example, this code:
@@ -648,8 +624,6 @@ produces the stabs:
 @node Block structure
 @section Block structure
 
-@deffn @code{.stabn} N_LBRAC
-@deffnx @code{.stabn} N_RBRAC
 @findex N_LBRAC
 @findex N_RBRAC
 The program's block structure is represented by the @code{N_LBRAC} (left
@@ -672,7 +646,6 @@ Sun documents the @var{desc} field of @code{N_LBRAC} and
 @code{N_RBRAC} symbols as containing the nesting level of the block.
 However, dbx seems to not care, and GCC always sets @var{desc} to
 zero.
-@end deffn
 
 @node Constants
 @chapter Constants
@@ -765,16 +738,15 @@ long as that function executes (C calls such variables
 @dfn{automatic}), it can be allocated in a register (@pxref{Register
 variables}) or on the stack.
 
-@deffn @code{.stabs} N_LSYM
 @findex N_LSYM
-Each variable allocated on the stack has a stab of type @code{N_LSYM},
-with the symbol descriptor omitted.  Since type information should begin
-with a digit, @samp{-}, or @samp{(}, only those characters precluded
-from being used for symbol descriptors.  However, the Acorn RISC machine
-(ARM) is said to get this wrong: it puts out a mere type definition
-here, without the preceding @samp{@var{type-number}=}.  This is a bad
-idea; there is no guarantee that type descriptors are distinct from
-symbol descriptors.
+Each variable allocated on the stack has a stab with the symbol
+descriptor omitted.  Since type information should begin with a digit,
+@samp{-}, or @samp{(}, only those characters precluded from being used
+for symbol descriptors.  However, the Acorn RISC machine (ARM) is said
+to get this wrong: it puts out a mere type definition here, without the
+preceding @samp{@var{type-number}=}.  This is a bad idea; there is no
+guarantee that type descriptors are distinct from symbol descriptors.
+Stabs for stack variables use the @code{N_LSYM} stab type.
 
 The @var{value} of the stab is the offset of the variable within the
 local variables.  On most machines this is an offset from the frame
@@ -803,12 +775,10 @@ produces the following stabs:
 @xref{Procedures} for more information on the @code{N_FUN} stab, and
 @ref{Block structure} for more information on the @code{N_LBRAC} and
 @code{N_RBRAC} stabs.
-@end deffn
 
 @node Global variables
 @section Global variables
 
-@deffn @code{.stabs} N_GSYM
 @findex N_GSYM
 A variable whose scope is not specific to just one source file is
 represented by the @samp{G} symbol descriptor.  These stabs use the
@@ -837,12 +807,10 @@ contained in the @code{N_GSYM} stab.  The debugger gets this information
 from the external symbol for the global variable.  In the example above,
 the @code{.global _g_foo} and @code{_g_foo:} lines tell the assembler to
 produce an external symbol.
-@end deffn
 
 @node Register variables
 @section Register variables
 
-@deffn @code{.stabn} N_RSYM
 @findex N_RSYM
 @c According to an old version of this manual, AIX uses C_RPSYM instead
 @c of C_RSYM.  I am skeptical; this should be verified.
@@ -866,7 +834,6 @@ register int g_bar asm ("%g5");
 @noindent
 then the stab may be emitted at the end of the object file, with
 the other bss symbols.
-@end deffn
 
 @node Common blocks
 @section Common blocks
@@ -875,17 +842,13 @@ A common block is a statically allocated section of memory which can be
 referred to by several source files.  It may contain several variables.
 I believe Fortran is the only language with this feature.
 
-@deffn @code{.stabs} N_BCOMM
-@deffnx @code{.stabs} N_ECOMM
 @findex N_BCOMM
 @findex N_ECOMM
 A @code{N_BCOMM} stab begins a common block and an @code{N_ECOMM} stab
 ends it.  The only field that is significant in these two stabs is the
 @var{string}, which names a normal (non-debugging) symbol that gives the
 address of the common block.
-@end deffn
 
-@deffn @code{.stabn} N_ECOML
 @findex N_ECOML
 Each stab between the @code{N_BCOMM} and the @code{N_ECOMM} specifies a
 member of that common block; its @var{value} is the offset within the
@@ -895,7 +858,6 @@ documented for this purpose, but Sun's Fortran compiler uses
 local to a function and it used the @samp{V} symbol descriptor; I assume
 one would use @samp{S} if not local to a function (that is, if a common
 block @emph{can} be anything other than local to a function).
-@end deffn
 
 @node Statics
 @section Static variables
@@ -910,8 +872,6 @@ Initialized static variables are represented by the @samp{S} and
 @c (although GCC
 @c 2.4.5 has a bug in that it uses @code{N_FUN}, so neither dbx nor GDB can
 @c find the variables)
-@deffn @code{.stabs} N_STSYM
-@deffnx @code{.stabs} N_LCSYM
 @findex N_STSYM
 @findex N_LCSYM
 In a.out files, @code{N_STSYM} means the data segment, @code{N_FUN}
@@ -935,7 +895,6 @@ yield the following stabs:
 @dots{}
 .stabs "var_noinit:S1",40,0,0,_var_noinit    # @r{40 is N_LCSYM}
 @end example
-@end deffn
 
 In XCOFF files, each symbol has a section number, so the stab type
 need not indicate the segment.
@@ -952,13 +911,12 @@ stab type need not indicate the segment.
 @node Parameters
 @section Parameters
 
-Actual parameters to a function are represented by a stab (or sometimes
+Formal parameters to a function are represented by a stab (or sometimes
 two; see below) for each parameter.  The stabs are in the order in which
 the debugger should print the parameters (i.e., the order in which the
 parameters are declared in the source file).  The exact form of the stab
 depends on how the parameter is being passed.
 
-@deffn @code{.stabs} N_PSYM
 @findex N_PSYM
 Parameters passed on the stack use the symbol descriptor @samp{p} and
 the @code{N_PSYM} symbol type.  The @var{value} of the symbol is an offset
@@ -985,7 +943,19 @@ produces the stabs:
 The type definition of @code{argv} is interesting because it contains
 several type definitions.  Type 21 is pointer to type 2 (char) and
 @code{argv} (type 20) is pointer to type 21.
-@end deffn
+
+@c FIXME: figure out what these mean and describe them coherently.
+The following are also said to go with @code{N_PSYM}:
+
+@example
+"name" -> "param_name:#type"
+                       -> pP (<<??>>)
+                       -> pF Fortran function parameter
+                       -> X  (function result variable)
+                       -> b  (based variable)
+
+value -> offset from the argument pointer (positive).
+@end example
 
 @menu
 * Register parameters::
@@ -1008,8 +978,8 @@ two symbols for each argument:
 Debuggers use the second one to find the value, and the first one to
 know that it is an argument.
 
-@deffn @code{.stabs} C_RPSYM
 @findex C_RPSYM
+@findex N_RSYM, for parameters
 Because that approach is kind of ugly, some compilers use symbol
 descriptor @samp{P} or @samp{R} to indicate an argument which is in a
 register.  Symbol type @code{C_RPSYM} is used with @samp{R} and
@@ -1017,7 +987,6 @@ register.  Symbol type @code{C_RPSYM} is used with @samp{R} and
 the register number.  @samp{P} and @samp{R} mean the same thing; the
 difference is that @samp{P} is a GNU invention and @samp{R} is an IBM
 (XCOFF) invention.  As of version 4.9, GDB should handle either one.
-@end deffn
 
 There is at least one case where GCC uses a @samp{p} and @samp{r} pair
 rather than @samp{P}; this is where the argument is passed in the
@@ -1029,6 +998,8 @@ unnecessary---why not just use @samp{R} with a register number which
 indicates that it's a floating point register?  I haven't verified
 whether the system actually does what the documentation indicates.
 
+@c FIXME: On the hppa this is for any type > 8 bytes, I think, and not
+@c for small structures (investigate).
 On the sparc and hppa, for a @samp{P} symbol whose type is a structure
 or union, the register contains the address of the structure.  On the
 sparc, this is also true of a @samp{p} and @samp{r} pair (using Sun
@@ -1052,6 +1023,7 @@ happens when the argument was passed in a register and then the compiler
 stores it as a local variable.  If possible, the compiler should claim
 that it's in a register, but this isn't always done.
 
+@findex N_LSYM, for parameter
 Some compilers use the pair of symbols approach described above
 (@samp{@var{arg}:p} followed by @samp{@var{arg}:}); this includes GCC1
 (not GCC2) on the sparc when passing a small structure and GCC2
@@ -1171,19 +1143,17 @@ the type is an unsigned integral type whose bounds are too
 big to describe in an @code{int}.  Traditionally this is only used for
 @code{unsigned int} and @code{unsigned long}:
 
-@c FIXME: Update this for the 2.4.5 output, not 2.3.3
 @example
 .stabs "unsigned int:t4=r1;0;-1;",128,0,0,0
-.stabs "long long int:t7=r1;0;-1;",128,0,0,0
 @end example
 
-For larger types, GCC
-2.4.5 puts out bounds in octal, with a leading 0.  In this case a
-negative bound consists of a number which is a 1 bit followed by a bunch
-of 0 bits, and a positive bound is one in which a bunch of bits are 1.
-All known versions of dbx and GDB version 4 accept this, but GDB 3.5
-refuses to read the whole file containing such symbols.  So GCC 2.3.3
-did not output the proper size for these types.
+For larger types, GCC 2.4.5 puts out bounds in octal, with a leading 0.
+In this case a negative bound consists of a number which is a 1 bit
+followed by a bunch of 0 bits, and a positive bound is one in which a
+bunch of bits are 1.  All known versions of dbx and GDB version 4 accept
+this, but GDB 3.5 refuses to read the whole file containing such
+symbols.  So GCC 2.3.3 did not output the proper size for these types.
+@c FIXME: How about an example?
 
 If the lower bound of a subrange is 0 and the upper bound is negative,
 the type is an unsigned integral type whose size in bytes is the
@@ -1282,7 +1252,7 @@ them as Fortran @code{complex}, @code{double complex}, and
 precision?  Double precison?).
 
 @item 6 (NF_LDOUBLE)
-@code{long double}.  This should probably only be used for Sun format
+Long double.  This should probably only be used for Sun format
 @code{long double}, and new codes should be used for other floating
 point formats (@code{NF_DOUBLE} can be used if a @code{long double} is
 really just an IEEE double, of course).
@@ -1457,9 +1427,6 @@ Unicode?).
 @node Miscellaneous types
 @section Miscellaneous types
 
-These type descriptors are for types that are built into languages and
-are derived from the fundamental types.
-
 @table @code
 @item b @var{type-information} ; @var{bytes}
 Pascal space type.  This is documented by IBM; what does it mean?
@@ -1470,9 +1437,9 @@ descriptors}) because the character following the type descriptor is
 always a digit, @samp{(}, or @samp{-}.
 
 @item B @var{type-information}
-A @code{volatile}-qualified version of @var{type-information}.  This is
+A volatile-qualified version of @var{type-information}.  This is
 a Sun extension.  References and stores to a variable with a
-@code{volatile}-qualified type must not be optimized or cached; they
+volatile-qualified type must not be optimized or cached; they
 must occur as the user specifies them.
 
 @item d @var{type-information}
@@ -1480,9 +1447,8 @@ File of type @var{type-information}.  As far as I know this is only used
 by Pascal.
 
 @item k @var{type-information}
-A @code{const}-qualified version of @var{type-information}.  This is a
-Sun extension.  A variable with a @code{const}-qualified type cannot be
-modified.
+A const-qualified version of @var{type-information}.  This is a Sun
+extension.  A variable with a const-qualified type cannot be modified.
 
 @item M @var{type-information} ; @var{length}
 Multiple instance type.  The type seems to composed of @var{length}
@@ -1603,12 +1569,12 @@ gives @samp{ar1;1;10;ar1;1;10;4} as a legitimate way to express a two
 dimensional array.  According to AIX documentation, the element type
 must be type information.  GDB accepts either.
 
-The type of the index is often a range type, expressed as the letter @samp{r}
-and some parameters.  It defines the size of the array.  In the example
-below, the range @samp{r1;0;2;} defines an index type which is a
-subrange of type 1 (integer), with a lower bound of 0 and an upper bound
-of 2.  This defines the valid range of subscripts of a three-element C
-array.
+The type of the index is often a range type, expressed as the type
+descriptor @samp{r} and some parameters.  It defines the size of the
+array.  In the example below, the range @samp{r1;0;2;} defines an index
+type which is a subrange of type 1 (integer), with a lower bound of 0
+and an upper bound of 2.  This defines the valid range of subscripts of
+a three-element C array.
 
 For example, the definition:
 
@@ -1722,7 +1688,7 @@ structure, enumeration, or union tag.  The type descriptor @samp{e},
 following the @samp{22=} of the type definition narrows it down to an
 enumeration type.  Following the @samp{e} is a list of the elements of
 the enumeration.  The format is @samp{@var{name}:@var{value},}.  The
-list of elements ends with a @samp{;}.
+list of elements ends with @samp{;}.
 
 There is no standard way to specify the size of an enumeration type; it
 is determined by the architecture (normally all enumerations types are
@@ -1758,26 +1724,18 @@ typedef struct s_tag s_typedef;
 The structure tag has an @code{N_LSYM} stab type because, like the
 enumeration, the symbol has file scope.  Like the enumeration, the
 symbol descriptor is @samp{T}, for enumeration, structure, or tag type.
-The symbol descriptor @samp{s} following the @samp{16=} of the type
+The type descriptor @samp{s} following the @samp{16=} of the type
 definition narrows the symbol type to structure.
 
-Following the structure symbol descriptor is the number of bytes the
+Following the @samp{s} type descriptor is the number of bytes the
 structure occupies, followed by a description of each structure element.
 The structure element descriptions are of the form @var{name:type, bit
 offset from the start of the struct, number of bits in the element}.
 
-@display
-.stabs "name:sym_desc(struct tag) Type_def(16)=type_desc(struct type)
-        struct_bytes
-        elem_name:type_ref(int),bit_offset,field_bits;
-        elem_name:type_ref(float),bit_offset,field_bits;
-        elem_name:type_def(17)=type_desc(array)
-        index_type(range of int from 0 to 7);
-        element_type(char),bit_offset,field_bits;;",
-       N_LSYM,NIL,NIL,NIL
-@end display
-
+@c FIXME: phony line break.  Can probably be fixed by using an example
+@c with fewer fields.
 @example
+# @r{128 is N_LSYM}
 .stabs "s_tag:T16=s20s_int:1,0,32;s_float:12,32,32;
         s_char_vec:17=ar1;0;7;2,64,64;s_next:18=*16,128,32;;",128,0,0,0
 @end example
@@ -1800,11 +1758,11 @@ is specified by the type information (@pxref{String field}) for the stab.
 For example,
 
 @example
-.stabs "s_typedef:t16",128,0,0,0
+.stabs "s_typedef:t16",128,0,0,0     # @r{128 is N_LSYM}
 @end example
 
 specifies that @code{s_typedef} refers to type number 16.  Such stabs
-have symbol type @code{N_LSYM} (or @code{C_DECL} on AIX).
+have symbol type @code{N_LSYM} (or @code{C_DECL} for XCOFF).
 
 If you are specifying the tag name for a structure, union, or
 enumeration, use the @samp{T} symbol descriptor instead.  I believe C is
@@ -1845,16 +1803,10 @@ type @code{s_tag}.  This is not true.  The contents and position of the stab
 for @code{u_type} do not convey any infomation about its procedure local
 scope.
 
-@display
-.stabs "name:sym_desc(union tag)type_def(22)=type_desc(union)
-        byte_size(4)
-        elem_name:type_ref(int),bit_offset(0),bit_size(32);
-        elem_name:type_ref(float),bit_offset(0),bit_size(32);
-        elem_name:type_ref(ptr to char),bit_offset(0),bit_size(32);;"
-       N_LSYM, NIL, NIL, NIL
-@end display
-
+@c FIXME: phony line break.  Can probably be fixed by using an example
+@c with fewer fields.
 @smallexample
+# @r{128 is N_LSYM}
 .stabs "u_tag:T23=u4u_int:1,0,32;u_float:12,0,32;u_char:21,0,32;;",
        128,0,0,0
 @end smallexample
@@ -1869,13 +1821,12 @@ union, number of bytes for the element;}.
 
 The stab for the union variable is:
 
-@display
-.stabs "name:type_ref(u_tag)", N_LSYM, NIL, NIL, frame_ptr_offset
-@end display
-
 @example
-.stabs "an_u:23",128,0,0,-20
+.stabs "an_u:23",128,0,0,-20     # @r{128 is N_LSYM}
 @end example
+
+@samp{-20} specifies where the variable is stored (@pxref{Stack
+variables}).
 
 @node Function types
 @section Function types
@@ -1894,14 +1845,15 @@ extensions to specify these, using the @samp{f}, @samp{F}, @samp{p}, and
 @samp{R} type descriptors.
 
 First comes the type descriptor.  If it is @samp{f} or @samp{F}, this
-type involves a function, and the type information for the return type
-of the function follows, followed by a comma.  Then comes the number of
-parameters to the function and a semicolon.  Then, for each parameter,
-there is the name of the parameter followed by a colon (this is only
-present for type descriptors @samp{R} and @samp{F} which represent
-Pascal function or procedure parameters), type information for the
-parameter, a comma, 0 if passed by reference or 1 if passed by value,
-and a semicolon.  The type definition ends with a semicolon.
+type involves a function rather than a procedure, and the type
+information for the return type of the function follows, followed by a
+comma.  Then comes the number of parameters to the function and a
+semicolon.  Then, for each parameter, there is the name of the parameter
+followed by a colon (this is only present for type descriptors @samp{R}
+and @samp{F} which represent Pascal function or procedure parameters),
+type information for the parameter, a comma, 0 if passed by reference or
+1 if passed by value, and a semicolon.  The type definition ends with a
+semicolon.
 
 For example, this variable definition:
 
@@ -1977,9 +1929,11 @@ debugging information, unsorted.  For stab entries the columns are:
 assembler and linker symbols, the columns are: @var{value}, @var{type},
 @var{string}.
 
-Where the @var{value} field of a stab contains a frame pointer offset,
-or a register number, that @var{value} is unchanged by the rest of the
-build.
+The low 5 bits of the stab type tell the linker how to relocate the
+value of the stab.  Thus for stab types like @code{N_RSYM} and
+@code{N_LSYM}, where the value is an offset or a register number, the
+low 5 bits are @code{N_ABS}, which tells the linker not to relocate the
+value.
 
 Where the @var{value} field of a stab contains an assembly language label,
 it is transformed by each build step.  The assembler turns it into a
@@ -2800,7 +2754,7 @@ languages other than C.
 Global symbol; see @ref{Global variables}.
 
 @item 0x22     N_FNAME
-Function name (for BSD Fortran); see @ref{N_FNAME}.
+Function name (for BSD Fortran); see @ref{Procedures}.
 
 @item 0x24     N_FUN
 Function name (@pxref{Procedures}) or text segment variable
@@ -2969,8 +2923,8 @@ Parameter passed by reference in register; see @ref{Reference parameters}.
 Constant; see @ref{Constants}.
 
 @item C
-Conformant array bound (Pascal, maybe other languages); @ref{Reference
-parameters}.  Name of a caught exception (GNU C++).  These can be
+Conformant array bound (Pascal, maybe other languages); @ref{Conformant
+arrays}.  Name of a caught exception (GNU C++).  These can be
 distinguished because the latter uses @code{N_CATCH} and the former uses
 another symbol type.
 
@@ -3209,7 +3163,6 @@ significant stab field.  @samp{#} stands in for the type descriptor.
 Finally, any further information.
 
 @menu
-* N_FNAME::			Function name (BSD Fortran)
 * N_PC::			Pascal global symbol
 * N_NSYMS::			Number of symbols
 * N_NOMAP::			No DST map
@@ -3225,21 +3178,6 @@ Finally, any further information.
 * Gould::			non-base register symbols used on Gould systems
 * N_LENG::			Length of preceding entry
 @end menu
-
-@node N_FNAME
-@section N_FNAME
-
-@deffn @code{.stabs} N_FNAME
-@findex N_FNAME
-Function name (for BSD Fortran).
-
-@example
-"name" -> "function_name"
-@end example
-
-Only the @var{string} field is significant.  The location of the symbol is
-obtained from the corresponding extern symbol.
-@end deffn
 
 @node N_PC
 @section N_PC
@@ -3528,11 +3466,11 @@ Mapping of a.out stab types to XCOFF storage classes:
 stab type       storage class
 -------------------------------
 N_GSYM          C_GSYM
-N_FNAME         unknown
+N_FNAME         unused
 N_FUN           C_FUN
 N_STSYM         C_STSYM
 N_LCSYM         C_STSYM
-N_MAIN          unkown
+N_MAIN          unknown
 N_PC            unknown
 N_RSYM          C_RSYM
 unknown         C_RPSYM
