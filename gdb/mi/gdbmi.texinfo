@@ -110,7 +110,7 @@ Elena Zannoni.
 * GDB/MI Breakpoint Table Commands::
 * GDB/MI Data Manipulation::
 * GDB/MI Program Control::
-* GDB/MI Misc Commands::
+* GDB/MI Miscellaneous Commands::
 * GDB/MI Stack Manipulation::
 * GDB/MI Symbol Query::
 * GDB/MI Target Manipulation::
@@ -215,8 +215,8 @@ We want it to be easy to spot a @sc{mi} operation.
 @cindex output syntax of @sc{gdb/mi}
 @cindex @sc{gdb/mi}, output syntax
 The output from @sc{gdb/mi} consists of zero or more out-of-band records
-followed, optionally, by a single result record.  The result record
-being for the most recent command.  The sequence of output records is
+followed, optionally, by a single result record.  This result record
+is for the most recent command.  The sequence of output records is
 terminated by @samp{(gdb)}.
 
 If an input command was prefixed with a @code{@var{token}} then the
@@ -405,7 +405,7 @@ Here's what happens if you pass a non-existent command:
 
 @cindex compatibility, @sc{gdb/mi} and CLI
 @cindex @sc{gdb/mi}, compatibility with CLI
-To help users familiar with the GDB's existing CLI interface, @sc{gdb/mi}
+To help users familiar with GDB's existing CLI interface, @sc{gdb/mi}
 accepts existing CLI commands.  As specified by the syntax, such
 commands can be directly entered into the @sc{gdb/mi} interface and GDB will
 respond.
@@ -891,7 +891,7 @@ Here's an example of the result when there are no breakpoints:
 @end example
 
 Create a watchpoint.  With the @samp{-a} option it will create an
-@dfn{access} watchpoint, i.e. a watchpoints that triggers either on a
+@dfn{access} watchpoint, i.e. a watchpoint that triggers either on a
 read from or on a write to the memory location.  With the @samp{-r}
 option, the watchpoint created is a @dfn{read} watchpoint, i.e. it will
 trigger only when the memory location is accessed for reading.  Without
@@ -1039,9 +1039,9 @@ is the name of the file to disassemble
 is the line number to disassemble around
 @item @var{lines}
 is the the number of disassembly lines to be produced.  If it is -1,
-the whole function will be disassembled, in case no @var{end-add} is
+the whole function will be disassembled, in case no @var{end-addr} is
 specified.  If @var{end-addr} is specified as a non-zero value, and
-@var{lines} is lower that the number of disassembly lines between
+@var{lines} is lower than the number of disassembly lines between
 @var{start-addr} and @var{end-addr}, only @var{lines} lines are
 displayed; if @var{lines} is higher than the number of lines between
 @var{start-addr} and @var{end-addr}, only the lines up to @var{end-addr}
@@ -1109,7 +1109,7 @@ inst="sethi %hi(0x11800), %o2"@},
 (gdb)
 @end smallexample
 
-Disassemble 3 instruction from the start of @code{main}:
+Disassemble 3 instructions from the start of @code{main}:
 
 @smallexample
 (gdb)
@@ -1124,7 +1124,7 @@ inst="sethi  %hi(0x11800), %o2"@}@}
 (gdb)
 @end smallexample
 
-Disassemble 3 instruction from the start of @code{main} in mixed mode:
+Disassemble 3 instructions from the start of @code{main} in mixed mode:
 
 @smallexample
 (gdb)
@@ -1163,7 +1163,7 @@ If the expression contains spaces, it must be enclosed in double quotes.
 @subsubheading GDB Command
 
 The corresponding GDB commands are @samp{print}, @samp{output}, and
-@code{call}.  In @code{gdbtk} only, there's a corresponding
+@samp{call}.  In @code{gdbtk} only, there's a corresponding
 @samp{gdb_eval} command.
 
 @subsubheading Example
@@ -1274,8 +1274,8 @@ For the PPC MBX board:
  -data-list-register-values @var{fmt} [ ( @var{regno} )*]
 @end example
 
-Display the registers contents.  @var{fmt} is the format according to
-which the registers contents are to be returned, followed by an optional
+Display the registers' contents.  @var{fmt} is the format according to
+which the registers' contents are to be returned, followed by an optional
 list of numbers specifying the registers to display.  A missing list of
 numbers indicates that the contents of all the registers must be returned.
 
@@ -1400,9 +1400,9 @@ An offset to add to the @var{address} before fetching memory.
 This command displays memory contents as a table of @var{nr-rows} by
 @var{nr-cols} words, each word being @var{word-size} bytes.  In total,
 @code{@var{nr-rows} * @var{nr-cols} * @var{word-size}} bytes are read
-(returned as @samp{total-bytes}.  Should less then the requested number
+(returned as @samp{total-bytes}).  Should less then the requested number
 of bytes be returned by the target, the missing words are identified
-using @samp{N/A}.  The number of bytes read  from the target is returned
+using @samp{N/A}.  The number of bytes read from the target is returned
 in @samp{nr-bytes} and the starting address used to read memory in
 @samp{addr}.
 
@@ -1499,7 +1499,7 @@ Disable display @var{number}.
 
 @subsubheading GDB Command
 
-the corresponding GDB command is @samp{disable display}.
+The corresponding GDB command is @samp{disable display}.
 
 @subsubheading Example
 N.A.
@@ -1575,7 +1575,7 @@ Set GDB's working directory.
 
 @subsubheading GDB Command
 
-the corresponding GDB command is @samp{cd}.
+The corresponding GDB command is @samp{cd}.
 
 @subsubheading Example
 
@@ -1984,7 +1984,7 @@ encountered or the program exits.
 
 @subsubheading GDB Command
 
-The corresponding GDB command is @samp{run}
+The corresponding GDB command is @samp{run}.
 
 @subsubheading Example
 
@@ -2075,9 +2075,10 @@ Regular stepping:
 @end example
 
 Asynchronous command.  Resumes the inferior which executes one machine
-instruction.  The output, once stop, will vary depend on whether we have
-stopped in the middle of a source line or not.  In the former case, the
-address at which the program stopped will be printed as well.
+instruction.  The output, once GDB has stopped, will vary depending on
+whether we have stopped in the middle of a source line or not.  In the
+former case, the address at which the program stopped will be printed as
+well.
 
 @subsubheading GDB Command
 
@@ -2154,7 +2155,7 @@ Specify the executable file to be debugged.  This file is the one from
 which the symbol table is also read.  If no file is specified, the
 command clears the executable and symbol information.  If breakpoints
 are set when using this command with no arguments, gdb will produce
-error messages.  Oterwise, no output is produced, except a completion
+error messages.  Otherwise, no output is produced, except a completion
 notification.
 
 @subsubheading GDB Command
@@ -2254,7 +2255,7 @@ List the shared libraries in the program.
 
 @subsubheading GDB Command
 
-The corresponding GDB command os @samp{info shared}.
+The corresponding GDB command is @samp{info shared}.
 
 @subsubheading Example
 N.A.
@@ -2289,7 +2290,7 @@ N.A.
 @end example
 
 Read symbol table info from the specified @var{file} argument.  When
-used without arguments, clears GDB'S symbol table info.  No output is
+used without arguments, clears GDB's symbol table info.  No output is
 produced, except for a completion notification.
 
 @subsubheading GDB Command
@@ -2306,8 +2307,8 @@ The corresponding GDB command is @samp{symbol-file}.
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Misc Commands
-@section Misc GDB commands in @sc{gdb/mi}
+@node GDB/MI Miscellaneous Commands
+@section Miscellaneous GDB commands in @sc{gdb/mi}
 
 @c @subheading -gdb-complete
 
@@ -2552,7 +2553,7 @@ stack.
 
 The @var{show-values} argument must have a value of 0 or 1.  A value of
 0 means that only the names of the arguments are listed, a value of 1
-means that both names and values of the argumetns are printed.
+means that both names and values of the arguments are printed.
 
 @subsubheading GDB Command
 
@@ -2720,7 +2721,7 @@ Show a single frame:
  -stack-list-locals @var{print-values}
 @end example
 
-Display the local variables names for the current frame.  With an
+Display the local variable names for the current frame.  With an
 argument of 0 prints only the names of the variables, with argument of 1
 prints also their values.
 
@@ -2786,7 +2787,7 @@ Describe where @var{symbol} is stored.
 
 @subsubheading GDB Command
 
-the corresponding GDB command is @samp{info address}.
+The corresponding GDB command is @samp{info address}.
 
 @subsubheading Example
 N.A.
@@ -3086,7 +3087,7 @@ The corresponding GDB command is @samp{load}.
 @subsubheading Example
 
 Note: each status message appears on a single line.  Here the messages
-have been broken down, so they can fit into a page.
+have been broken down so that they can fit onto a page.
 
 @smallexample
 (gdb)
@@ -3419,7 +3420,7 @@ The tracepoint commands are not yet implemented.
 @subheading Motivation for Variable Objects in @sc{gdb/mi}
 
 For the implementation of a variable debugger window (locals, watched
-expressions, etc.), we are proposing the adaptation of the existent code
+expressions, etc.), we are proposing the adaptation of the existing code
 used by @code{Insight}.
 
 The two main reasons for that are:
@@ -3466,7 +3467,7 @@ Appropriate language differences are handled for C, C@t{++} and Java.
 When returning the actual values of the objects, this facility allows
 for the individual selection of the display format used in the result
 creation.  It can be chosen among: binary, decimal, hexadecimal, octal
-and natural.  Natural refers to the a default format automatically
+and natural.  Natural refers to a default format automatically
 chosen based on the variable type (like decimal for an @code{int}, hex
 for pointers, etc.).
 
@@ -3532,7 +3533,7 @@ The frame under which the expression should be evaluated can be
 specified by @var{frame-addr}.  A @samp{*} indicates that the current
 frame should be used.
 
-Expression is any expression valid on the current language set (must not
+@var{expression} is any expression valid on the current language set (must not
 begin with a @samp{*}), or one of the following:
 
 @itemize @bullet
@@ -3763,8 +3764,8 @@ What follows is a draft revision to the output specification that
 addresses this problem.
 
 The output from @sc{gdb/mi} consists of zero or more out-of-band records
-optionally followed by a single result record.  The result record being
-for the most recent command input.  The sequence being terminated by
+optionally followed by a single result record, the result record being
+for the most recent command input.  The sequence is terminated by
 ``(gdb)''.
 
 Asynchronous @sc{gdb/mi} output is similar.
@@ -3879,7 +3880,7 @@ handle (new breakpoint information). All notify output is prefixed by
 the prefix `='.
 
 @item
-@var{console-stream-output} is output that should be displayed as is in the
+@var{console-stream-output} is output that should be displayed as is, in the
 console.  It is the textual response to a CLI command. All the console
 output is prefixed by the prefix ``~''.
 
