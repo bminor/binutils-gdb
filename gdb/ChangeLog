@@ -1,3 +1,7 @@
+Fri Mar 14 15:44:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (elfread.o): Depend upon elf-bfd.h and elf/mips.h.
+
 start-sanitize-gdbtk
 Fri Mar 14 10:01:29 1997  Tom Tromey  <tromey@cygnus.com>
 
@@ -7,8 +11,8 @@ Fri Mar 14 10:01:29 1997  Tom Tromey  <tromey@cygnus.com>
 end-sanitize-gdbtk
 Thu Mar 13 22:51:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
-	* utils.c(pollquit, notice_quit): If _WIN32, limit test for cntl-C 
-	to wingdb.
+	* utils.c (pollquit, notice_quit): If _WIN32, limit test for
+	cntl-C to wingdb.
 	(initialize_utils): If _WIN32, don't call ScreenRows and ScreenCols 
 	except under wingdb.  (Contributed by Martin Hunt).
 
