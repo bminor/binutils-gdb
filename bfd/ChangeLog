@@ -1,3 +1,11 @@
+2002-03-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* cpu-mips.c (mips_compatible): New.  Don't check bits_per_word.
+	(N): Use the above.
+	* elflink.h (elf_bfd_final_link): Revert last change.  Instead,
+	ensure reloc size matches before calling elf_link_input_bfd.
+	Add an assert to check reloc size when counting output relocs.
+
 2002-03-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* mmo.c (mmo_get_loc): Return NULL rather than false.

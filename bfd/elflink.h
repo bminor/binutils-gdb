@@ -5086,10 +5086,20 @@ elf_bfd_final_link (abfd, info)
 		= elf_section_data (output_section);
 	      unsigned int *rel_count;
 	      unsigned int *rel_count2;
+	      bfd_size_type entsize;
+	      bfd_size_type entsize2;
 
-	      /* We must be careful to add the relocation froms the
+	      /* We must be careful to add the relocations from the
 		 input section to the right output count.  */
-	      if (esdi->rel_hdr.sh_entsize == esdo->rel_hdr.sh_entsize)
+	      entsize = esdi->rel_hdr.sh_entsize;
+	      entsize2 = esdi->rel_hdr2 ? esdi->rel_hdr2->sh_entsize : 0;
+	      BFD_ASSERT ((entsize == sizeof (Elf_External_Rel)
+			   || entsize == sizeof (Elf_External_Rela))
+			  && entsize2 != entsize
+			  && (entsize2 == 0
+			      || entsize2 == sizeof (Elf_External_Rel)
+			      || entsize2 == sizeof (Elf_External_Rela)));
+	      if (entsize == esdo->rel_hdr.sh_entsize)
 		{
 		  rel_count = &esdo->rel_count;
 		  rel_count2 = &esdo->rel_count2;
@@ -5319,12 +5329,21 @@ elf_bfd_final_link (abfd, info)
     {
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
+	  Elf_Internal_Shdr *rhdr;
+
 	  if (p->type == bfd_indirect_link_order
-	      && (bfd_get_flavour ((sub = p->u.indirect.section->owner))
+	      && (bfd_get_flavour (p->u.indirect.section->owner)
 		  == bfd_target_elf_flavour)
-	      && (sub->arch_info->bits_per_word
-		  == abfd->arch_info->bits_per_word))
+	      && (((rhdr = &elf_section_data (p->u.indirect.section)->rel_hdr)
+		   ->sh_entsize == 0)
+		  || rhdr->sh_entsize == sizeof (Elf_External_Rel)
+		  || rhdr->sh_entsize == sizeof (Elf_External_Rela))
+	      && (((rhdr = elf_section_data (p->u.indirect.section)->rel_hdr2)
+		   == NULL)
+		  || rhdr->sh_entsize == sizeof (Elf_External_Rel)
+		  || rhdr->sh_entsize == sizeof (Elf_External_Rela)))
 	    {
+	      sub = p->u.indirect.section->owner;
 	      if (! sub->output_has_begun)
 		{
 		  if (! elf_link_input_bfd (&finfo, sub))
