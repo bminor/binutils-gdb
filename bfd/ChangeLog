@@ -5,6 +5,8 @@ Mon Oct  4 17:49:45 1999  Nick Clifton  <nickc@cygnus.com>
 	* elf32-m32r.c (m32r_elf_object_p): Recognize E_M32RX_ARCH.
 	(m32r_elf_print_private_bfd_data): Ditto.
 	(m32r_elf_final_write_processing): Handle bfd_mach_m32rx.
+	* archures.c (bfd_mach_m32rx): Define it.
+	* bfd-in2.h: Rebuild.
 
 1999-09-28  Fred Fish  <fnf@cygnus.com>
 
