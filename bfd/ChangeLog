@@ -1,4 +1,4 @@
-2001-12-17  Tom Rix  <trix@porter.hsv.redhat.com>
+2001-12-17  Tom Rix  <trix@redhat.com>
 
 	* coffcode.h (sec_to_styp_flags): Add STYP_EXCEPT and STYP_TYPCHK for 
 	xcoff.
