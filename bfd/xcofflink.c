@@ -3238,6 +3238,48 @@ _bfd_xcoff_bfd_final_link (abfd, info)
   if (finfo.strtab == NULL)
     goto error_return;
 
+  /* Count the line number and relocation entries required for the
+     output file.  Determine a few maximum sizes.  */
+  max_contents_size = 0;
+  max_lineno_count = 0;
+  max_reloc_count = 0;
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      o->reloc_count = 0;
+      o->lineno_count = 0;
+      for (p = o->link_order_head; p != NULL; p = p->next)
+	{
+	  if (p->type == bfd_indirect_link_order)
+	    {
+	      asection *sec;
+
+	      sec = p->u.indirect.section;
+
+	      if (info->strip == strip_none
+		  || info->strip == strip_some)
+		o->lineno_count += sec->lineno_count;
+
+	      o->reloc_count += sec->reloc_count;
+
+	      if (sec->_raw_size > max_contents_size)
+		max_contents_size = sec->_raw_size;
+	      if (sec->lineno_count > max_lineno_count)
+		max_lineno_count = sec->lineno_count;
+	      if (coff_section_data (sec->owner, sec) != NULL
+		  && xcoff_section_data (sec->owner, sec) != NULL
+		  && (xcoff_section_data (sec->owner, sec)->lineno_count
+		      > max_lineno_count))
+		max_lineno_count =
+		  xcoff_section_data (sec->owner, sec)->lineno_count;
+	      if (sec->reloc_count > max_reloc_count)
+		max_reloc_count = sec->reloc_count;
+	    }
+	  else if (p->type == bfd_section_reloc_link_order
+		   || p->type == bfd_symbol_reloc_link_order)
+	    ++o->reloc_count;
+	}
+    }
+
   /* Compute the file positions for all the sections.  */
   if (abfd->output_has_begun)
     {
@@ -3303,6 +3345,9 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	  sofar = bfd_coff_filhsz (abfd);
 	  sofar += bfd_coff_aoutsz (abfd);
 	  sofar += abfd->section_count * bfd_coff_scnhsz (abfd);
+	  for (o = abfd->sections; o != NULL; o = o->next)
+	    if (o->reloc_count >= 0xffff || o->lineno_count >= 0xffff)
+	      sofar += bfd_coff_scnhsz (abfd);
 
 	  for (o = abfd->sections; o != NULL; o = o->next)
 	    {
@@ -3331,58 +3376,6 @@ _bfd_xcoff_bfd_final_link (abfd, info)
       bfd_coff_compute_section_file_positions (abfd);
     }
 
-  /* Count the line numbers and relocation entries required for the
-     output file.  Set the file positions for the relocs.  */
-  rel_filepos = obj_relocbase (abfd);
-  relsz = bfd_coff_relsz (abfd);
-  max_contents_size = 0;
-  max_lineno_count = 0;
-  max_reloc_count = 0;
-  for (o = abfd->sections; o != NULL; o = o->next)
-    {
-      o->reloc_count = 0;
-      o->lineno_count = 0;
-      for (p = o->link_order_head; p != NULL; p = p->next)
-	{
-	  if (p->type == bfd_indirect_link_order)
-	    {
-	      asection *sec;
-
-	      sec = p->u.indirect.section;
-
-	      if (info->strip == strip_none
-		  || info->strip == strip_some)
-		o->lineno_count += sec->lineno_count;
-
-	      o->reloc_count += sec->reloc_count;
-
-	      if (sec->_raw_size > max_contents_size)
-		max_contents_size = sec->_raw_size;
-	      if (sec->lineno_count > max_lineno_count)
-		max_lineno_count = sec->lineno_count;
-	      if (coff_section_data (sec->owner, sec) != NULL
-		  && xcoff_section_data (sec->owner, sec) != NULL
-		  && (xcoff_section_data (sec->owner, sec)->lineno_count
-		      > max_lineno_count))
-		max_lineno_count =
-		  xcoff_section_data (sec->owner, sec)->lineno_count;
-	      if (sec->reloc_count > max_reloc_count)
-		max_reloc_count = sec->reloc_count;
-	    }
-	  else if (p->type == bfd_section_reloc_link_order
-		   || p->type == bfd_symbol_reloc_link_order)
-	    ++o->reloc_count;
-	}
-      if (o->reloc_count == 0)
-	o->rel_filepos = 0;
-      else
-	{
-	  o->flags |= SEC_RELOC;
-	  o->rel_filepos = rel_filepos;
-	  rel_filepos += o->reloc_count * relsz;
-	}
-    }
-
   /* Allocate space for the pointers we need to keep for the relocs.  */
   {
     unsigned int i;
@@ -3405,24 +3398,20 @@ _bfd_xcoff_bfd_final_link (abfd, info)
       }
   }
 
-  /* We now know the size of the relocs, so we can determine the file
-     positions of the line numbers.  */
-  line_filepos = rel_filepos;
-  finfo.line_filepos = line_filepos;
-  linesz = bfd_coff_linesz (abfd);
+  /* Set the file positions for the relocs.  */
+  rel_filepos = obj_relocbase (abfd);
+  relsz = bfd_coff_relsz (abfd);
   max_output_reloc_count = 0;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      if (o->lineno_count == 0)
-	o->line_filepos = 0;
+      if (o->reloc_count == 0)
+	o->rel_filepos = 0;
       else
 	{
-	  o->line_filepos = line_filepos;
-	  line_filepos += o->lineno_count * linesz;
-	}
+	  o->flags |= SEC_RELOC;
+	  o->rel_filepos = rel_filepos;
+	  rel_filepos += o->reloc_count * relsz;
 
-      if (o->reloc_count != 0)
-	{
 	  /* We don't know the indices of global symbols until we have
              written out all the local symbols.  For each section in
              the output file, we keep an array of pointers to hash
@@ -3452,6 +3441,22 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 
 	  if (o->reloc_count > max_output_reloc_count)
 	    max_output_reloc_count = o->reloc_count;
+	}
+    }
+
+  /* We now know the size of the relocs, so we can determine the file
+     positions of the line numbers.  */
+  line_filepos = rel_filepos;
+  finfo.line_filepos = line_filepos;
+  linesz = bfd_coff_linesz (abfd);
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      if (o->lineno_count == 0)
+	o->line_filepos = 0;
+      else
+	{
+	  o->line_filepos = line_filepos;
+	  line_filepos += o->lineno_count * linesz;
 	}
 
       /* Reset the reloc and lineno counts, so that we can use them to

@@ -1,5 +1,16 @@
 Thu Nov  9 13:01:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_set_alignment_hook): Write RS6000COFF_C version
+	which checks for STYP_OVRFLO sections.
+	(coff_compute_section_file_positions): If RS6000COFF_C, handle
+	reloc and lineno count overflows.
+	(coff_write_object_contents): Call coff_count_linenumbers before
+	coff_compute_section_file_positions.  If RS6000COFF_C, handle
+	reloc and lineno count overflows.
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): Count line numbers and
+	relocs before dealing with .pad sections.  Count overflow section
+	headers when handling .pad sections.
+
 	* coffcode.h (coff_write_object_contents): Set a.out vstamp to 1
 	if RS6000COFF_C.
 
