@@ -1,3 +1,9 @@
+2003-09-25  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c: Include "dwarf2-frame.h".
+	(m68k_gdbarch_init): Add the DWARF CFI frame unwinder.
+	* Makefile.in (m68k-tdep.o): Update dependencies.
+
 2003-09-25  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (struct frame_extra_info): Remove.
