@@ -21,6 +21,7 @@ NATIVE  = native
 GCC	 = gcc -O 
 CFLAGS	 = -g
 CXXFLAGS = -g -O
+MAKEINFOFLAGS =
 
 log	= 1>$(canonhost)-build-log 2>&1
 tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
@@ -120,6 +121,9 @@ build := $(shell $(TREE)/config.guess)
 endif
 CC = i386-go32-gcc
 GCC = i386-go32-gcc -O
+CFLAGS =
+CXXFLAGS = -O
+MAKEINFOFLAGS = --no-split
 all: all-cross
 endif
 
@@ -129,6 +133,7 @@ FLAGS_TO_PASS := \
 	"CFLAGS=$(CFLAGS)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"host=$(canonhost)" \
+	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"RELEASE_TAG=$(RELEASE_TAG)"
 
 all-emacs:

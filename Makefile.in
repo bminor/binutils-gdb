@@ -80,6 +80,10 @@ LEX = `if [ -f $${rootme}/flex/flex ] ; \
 MAKEINFO = `if [ -f $${rootme}/texinfo/makeinfo/makeinfo ] ; \
 	then echo $${rootme}/texinfo/makeinfo/makeinfo ; \
 	else echo makeinfo ; fi`
+# This just becomes part of the MAKEINFO definition passed down to
+# sub-makes.  It lets flags be given on the command line while still
+# using the makeinfo from the object tree.
+MAKEINFOFLAGS =
 
 EXPECT = `if [ -f $${rootme}/expect/expect ] ; \
 	then echo $${rootme}/expect/expect ; \
@@ -223,7 +227,7 @@ BASE_FLAGS_TO_PASS = \
 	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
-	'GCC_FOR_TARGET=$$(CC_FOR_TARGET)' \
+	"GCC_FOR_TARGET=$$(CC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -231,7 +235,7 @@ BASE_FLAGS_TO_PASS = \
 	"LDFLAGS=$(LDFLAGS)" \
 	"LEX=$(LEX)" \
 	"LOADLIBES=$(LOADLIBES)" \
-	"MAKEINFO=$(MAKEINFO)" \
+	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
 	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"PRMS=$(PRMS)" \
@@ -968,7 +972,8 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
 DEVO_SUPPORT= README Makefile.in configure configure.in \
-	config.guess config.sub config move-if-change
+	config.guess config.sub config move-if-change \
+	COPYING COPYING.LIB install.sh
 ETC_SUPPORT= Makefile.in cfg-paper.texi configure.in configure.man \
 	configure.texi standards.texi make-stds.texi
 GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob sim

@@ -1,3 +1,14 @@
+Tue Jun 29 12:50:57 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (MAKEINFOFLAGS): New variable.
+	(FLAGS_TO_PASS): Pass MAKEINFO as MAKEINFO MAKEINFOFLAGS.
+	* build-all.mk, test-build.mk: Pass down --no-split as
+	MAKEINFOFLAGS when hosted on DOS.  Compile DOS hosted without -g.
+
+Thu Jun 24 13:39:11 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in (DEVO_SUPPORT):  Add COPYING COPYING.LIB install.sh.
+
 Wed Jun 23 12:59:21 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in (libg++.tar.z):  New rule.
