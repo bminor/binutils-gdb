@@ -232,7 +232,6 @@ Options:\n\
                       	  m      include macro expansions\n\
                       	  n      omit forms processing\n\
                       	  s      include symbols\n\
-                      	  L      include line debug statistics (if applicable)\n\
                       	  =FILE  list to FILE (must be last sub-option)\n"));
 
   fprintf (stream, _("\
