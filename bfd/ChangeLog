@@ -1,3 +1,13 @@
+2003-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Compute ps and ss
+	differently for object files and executables.
+	* peicode.h (coff_swap_scnhdr_in): Only set the s_size field
+	for object files or for executables who have not already
+	initialised the field.
+	* libpei.h (bfd_pe_executable_p): New macro.  Return true if
+	the PE format bfd is an executable.
+
 2003-04-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't use SYMBOL_REFERENCES_LOCAL
