@@ -1,3 +1,8 @@
+2000-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo: Add GNU Free Documentation License.
+	* ldint.texinfo: Add GNU Free Documentation License.
+
 2000-11-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* ldlex.l (yy_create_string_buffer): Init yy_is_our_buffer,
