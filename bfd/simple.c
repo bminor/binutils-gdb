@@ -138,6 +138,21 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
   int storage_needed, number_of_symbols;
   asymbol **symbol_table;
 
+  if (! (sec->flags & SEC_RELOC))
+    {
+      bfd_size_type size = bfd_section_size (abfd, sec);
+
+      if (outbuf == NULL)
+	contents = bfd_malloc (size);
+      else
+	contents = outbuf;
+
+      if (contents)
+	bfd_get_section_contents (abfd, sec, contents, 0, size);
+
+      return contents;
+    }
+
   /* In order to use bfd_get_relocated_section_contents, we need
      to forge some data structures that it expects.  */
 

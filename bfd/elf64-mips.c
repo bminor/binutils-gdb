@@ -2073,7 +2073,7 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
 	  rela.r_addend = 0;
 	}
 
-      /* Each entry represents up to three actual relocations.  */
+      /* Each entry represents exactly three actual relocations.  */
 
       used_sym = false;
       used_ssym = false;
@@ -2093,27 +2093,6 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
 	      break;
 	    case 2:
 	      type = (enum elf_mips_reloc_type) rela.r_type3;
-	      break;
-	    }
-
-	  if (type == R_MIPS_NONE)
-	    {
-	      /* There are no more relocations in this entry.  If this
-                 is the first entry, we need to generate a dummy
-                 relocation so that the generic linker knows that
-                 there has been a break in the sequence of relocations
-                 applying to a particular address.  */
-	      if (ir == 0)
-		{
-		  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-		  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
-		    relent->address = rela.r_offset;
-		  else
-		    relent->address = rela.r_offset - asect->vma;
-		  relent->addend = 0;
-		  relent->howto = &howto_table[(int) R_MIPS_NONE];
-		  ++relent;
-		}
 	      break;
 	    }
 
@@ -2194,7 +2173,7 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
 	}
     }
 
-  asect->reloc_count += relent - relents;
+  asect->reloc_count += (relent - relents) / 3;
 
   if (allocated != NULL)
     free (allocated);

@@ -233,7 +233,6 @@ BFD32_BACKENDS = \
 	elf32-or32.lo \
 	elf32-pj.lo \
 	elf32-ppc.lo \
-	elf32-qnx.lo \
 	elf32-s390.lo \
 	elf32-sh.lo \
 	elf32-sh64.lo \
@@ -267,6 +266,7 @@ BFD32_BACKENDS = \
 	m68klynx.lo \
 	m68knetbsd.lo \
 	m88kmach3.lo \
+	mach-o.lo \
 	mipsbsd.lo \
 	newsos3.lo \
 	nlm.lo \
@@ -278,6 +278,7 @@ BFD32_BACKENDS = \
 	oasys.lo \
 	pc532-mach.lo \
 	pdp11.lo \
+	pef.lo \
 	pe-arm.lo \
 	pei-arm.lo \
 	pe-i386.lo \
@@ -307,7 +308,8 @@ BFD32_BACKENDS = \
 	vms-hdr.lo \
 	vms-misc.lo \
 	vms-tir.lo \
-	xcofflink.lo
+	xcofflink.lo \
+	xsym.lo
 
 BFD32_BACKENDS_CFILES = \
 	aout-adobe.c \
@@ -388,7 +390,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-or32.c \
 	elf32-pj.c \
 	elf32-ppc.c \
-	elf32-qnx.c \
 	elf32-sh64.c \
 	elf32-sh64-com.c \
 	elf32-s390.c \
@@ -422,6 +423,7 @@ BFD32_BACKENDS_CFILES = \
 	m68klynx.c \
 	m68knetbsd.c \
 	m88kmach3.c \
+	mach-o.c \
 	mipsbsd.c \
 	newsos3.c \
 	nlm.c \
@@ -433,6 +435,7 @@ BFD32_BACKENDS_CFILES = \
 	oasys.c \
 	pc532-mach.c \
 	pdp11.c \
+	pef.c \
 	pe-arm.c \
 	pei-arm.c \
 	pe-i386.c \
@@ -461,7 +464,8 @@ BFD32_BACKENDS_CFILES = \
 	vms-hdr.c \
 	vms-misc.c \
 	vms-tir.c \
-	xcofflink.c
+	xcofflink.c \
+	xsym.c
 
 # The .o files needed by all of the 64 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all
@@ -561,13 +565,14 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
-	elf-bfd.h elf-hppa.h elf32-arm.h elf32-hppa.h elf32-qnx.h \
+	elf-bfd.h elf-hppa.h elf32-arm.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h elflink.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
-	libnlm.h liboasys.h libpei.h libxcoff.h \
+	libnlm.h liboasys.h libpei.h libxcoff.h mach-o.h \
 	netbsd.h nlm-target.h nlmcode.h nlmswap.h ns32k.h \
-	peicode.h som.h version.h vms.h xcoff-target.h
+	pef.h pef-traceback.h peicode.h som.h version.h \
+	vms.h xcoff-target.h xsym.h
 
 ## ... and all .h files which are in the build tree.
 BUILD_HFILES = \
@@ -654,10 +659,10 @@ targmatch.h: config.bfd targmatch.sed
 # When compiling archures.c and targets.c, supply the default target
 # info from configure.
 
-targets.lo: targets.c config.status
+targets.lo: targets.c Makefile
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $(TDEFAULTS) $(srcdir)/targets.c
 
-archures.lo: archures.c config.status
+archures.lo: archures.c Makefile
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $(TDEFAULTS) $(srcdir)/archures.c
 
 elf32-target.h : elfxx-target.h
@@ -1099,7 +1104,7 @@ elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
 elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/filenames.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf32-arm.h elf32-target.h elf32-qnx.h
+  elf32-arm.h elf32-target.h
 elf32-avr.lo: elf32-avr.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h \
@@ -1146,7 +1151,7 @@ elf32-i370.lo: elf32-i370.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-i386.lo: elf32-i386.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h elf32-qnx.h
+  elf32-target.h
 elf32-i860.lo: elf32-i860.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/i860.h $(INCDIR)/elf/reloc-macros.h \
@@ -1217,10 +1222,7 @@ elf32-pj.lo: elf32-pj.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-ppc.lo: elf32-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h elf32-qnx.h
-elf32-qnx.lo: elf32-qnx.c $(INCDIR)/filenames.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h elf32-qnx.h
+  elf32-target.h
 elf32-sh64.lo: elf32-sh64.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/../opcodes/sh64-opc.h \
@@ -1237,7 +1239,7 @@ elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h elf32-qnx.h
+  elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \
@@ -1332,6 +1334,8 @@ m68knetbsd.lo: m68knetbsd.c netbsd.h $(INCDIR)/filenames.h \
 m88kmach3.lo: m88kmach3.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+mach-o.lo: mach-o.c mach-o.h $(INCDIR)/filenames.h \
+  $(INCDIR)/libiberty.h mach-o-target.c
 mipsbsd.lo: mipsbsd.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -1363,6 +1367,8 @@ pc532-mach.lo: pc532-mach.c $(INCDIR)/filenames.h libaout.h \
 pdp11.lo: pdp11.c $(INCDIR)/filenames.h libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h $(INCDIR)/safe-ctype.h
+pef.lo: pef.c pef.h pef-traceback.h $(INCDIR)/filenames.h \
+  $(INCDIR)/libiberty.h
 pe-arm.lo: pe-arm.c $(INCDIR)/filenames.h coff-arm.c \
   $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
@@ -1455,6 +1461,7 @@ vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h libcoff.h \
   libxcoff.h
+xsym.lo: xsym.c xsym.h $(INCDIR)/filenames.h
 aix5ppc-core.lo: aix5ppc-core.c
 aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \

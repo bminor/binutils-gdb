@@ -29,6 +29,8 @@
 int
 mips_linux_cannot_fetch_register (int regno)
 {
+  if (REGISTER_NAME (regno)[0] == 0)
+    return 1;
   if (regno == PS_REGNUM)
     return 1;
   else if (regno == ZERO_REGNUM)
@@ -40,6 +42,8 @@ mips_linux_cannot_fetch_register (int regno)
 int
 mips_linux_cannot_store_register (int regno)
 {
+  if (REGISTER_NAME (regno)[0] == 0)
+    return 1;
   if (regno == PS_REGNUM)
     return 1;
   else if (regno == ZERO_REGNUM)

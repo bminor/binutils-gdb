@@ -972,7 +972,7 @@ cris_abi_original_store_return_value (struct type *type, char *valbuf)
   int len = TYPE_LENGTH (type);
   
   if (len <= REGISTER_SIZE) 
-    write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+    deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_store_return_value: type length too large.");
 }
@@ -987,7 +987,8 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
   if (len <= 2 * REGISTER_SIZE)
     {
       /* Note that this works since R10 and R11 are consecutive registers.  */
-      write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+      deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf,
+				       len);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_store_return_value: type length too large.");
@@ -3706,8 +3707,8 @@ cris_fpless_backtrace (char *noargs, int from_tty)
      function (since there's no push srp in that case).  */
   int innermost_frame = 1;
   
-  read_register_gen (PC_REGNUM, (char *) &pc);
-  read_register_gen (SP_REGNUM, (char *) &sp);
+  deprecated_read_register_gen (PC_REGNUM, (char *) &pc);
+  deprecated_read_register_gen (SP_REGNUM, (char *) &sp);
   
   /* We make an explicit return when we can't find an outer frame.  */
   while (1)
@@ -3846,7 +3847,7 @@ cris_fpless_backtrace (char *noargs, int from_tty)
           /* We couldn't find a push srp in the prologue, so this must be
              a leaf function, and thus we use the srp register directly.
              This should happen at most once, for the innermost function.  */
-          read_register_gen (SRP_REGNUM, (char *) &pc);
+          deprecated_read_register_gen (SRP_REGNUM, (char *) &pc);
         }
       else
         {
@@ -4289,7 +4290,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   
   /* No register requires conversion from raw format to virtual format.  */
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);

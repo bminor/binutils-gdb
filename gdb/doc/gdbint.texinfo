@@ -3218,12 +3218,6 @@ Similarly, for hardware breakpoints.
 If defined, this should evaluate to 1 if @var{addr} is in a shared
 library in which breakpoints cannot be set and so should be disabled.
 
-@item DO_REGISTERS_INFO
-@findex DO_REGISTERS_INFO
-If defined, use this to print the value of a register or all registers.
-
-This method is deprecated.
-
 @item PRINT_FLOAT_INFO()
 @findex PRINT_FLOAT_INFO
 If defined, then the @samp{info float} command will print information about

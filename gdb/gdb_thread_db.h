@@ -63,7 +63,8 @@ typedef enum
   TD_NOTSD,	  /* No thread-specific data available.  */
   TD_MALLOC,	  /* Out of memory.  */
   TD_PARTIALREG,  /* Not entire register set was read or written.  */
-  TD_NOXREGS	  /* X register set not available for given thread.  */
+  TD_NOXREGS,	  /* X register set not available for given thread.  */
+  TD_NOTALLOC	  /* TLS memory not yet allocated.  */
 } td_err_e;
 
 

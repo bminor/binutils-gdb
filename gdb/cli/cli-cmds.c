@@ -27,10 +27,13 @@
 #include "gdb_string.h"
 #include "linespec.h"
 #include "expression.h"
+#include "frame.h"
+#include "value.h"
 #include "language.h"
 #include "filenames.h"		/* for DOSish file names */
 #include "objfiles.h"
 #include "source.h"
+#include "disasm.h"
 
 #include "ui-out.h"
 
@@ -819,6 +822,92 @@ list_command (char *arg, int from_tty)
 			0);
 }
 
+/* Dump a specified section of assembly code.  With no command line
+   arguments, this command will dump the assembly code for the
+   function surrounding the pc value in the selected frame.  With one
+   argument, it will dump the assembly code surrounding that pc value.
+   Two arguments are interpeted as bounds within which to dump
+   assembly.  */
+
+/* ARGSUSED */
+static void
+disassemble_command (char *arg, int from_tty)
+{
+  CORE_ADDR low, high;
+  char *name;
+  CORE_ADDR pc, pc_masked;
+  char *space_index;
+#if 0
+  asection *section;
+#endif
+
+  name = NULL;
+  if (!arg)
+    {
+      if (!selected_frame)
+	error ("No frame selected.\n");
+
+      pc = get_frame_pc (selected_frame);
+      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
+	error ("No function contains program counter for selected frame.\n");
+#if defined(TUI)
+      else if (tui_version)
+	low = tuiGetLowDisassemblyAddress (low, pc);
+#endif
+      low += FUNCTION_START_OFFSET;
+    }
+  else if (!(space_index = (char *) strchr (arg, ' ')))
+    {
+      /* One argument.  */
+      pc = parse_and_eval_address (arg);
+      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
+	error ("No function contains specified address.\n");
+#if defined(TUI)
+      else if (tui_version)
+	low = tuiGetLowDisassemblyAddress (low, pc);
+#endif
+      low += FUNCTION_START_OFFSET;
+    }
+  else
+    {
+      /* Two arguments.  */
+      *space_index = '\0';
+      low = parse_and_eval_address (arg);
+      high = parse_and_eval_address (space_index + 1);
+    }
+
+#if defined(TUI)
+  if (!tui_is_window_visible (DISASSEM_WIN))
+#endif
+    {
+      printf_filtered ("Dump of assembler code ");
+      if (name != NULL)
+	{
+	  printf_filtered ("for function %s:\n", name);
+	}
+      else
+	{
+	  printf_filtered ("from ");
+	  print_address_numeric (low, 1, gdb_stdout);
+	  printf_filtered (" to ");
+	  print_address_numeric (high, 1, gdb_stdout);
+	  printf_filtered (":\n");
+	}
+
+      /* Dump the specified range.  */
+      gdb_disassembly (uiout, 0, 0, 0, -1, low, high);
+
+      printf_filtered ("End of assembler dump.\n");
+      gdb_flush (gdb_stdout);
+    }
+#if defined(TUI)
+  else
+    {
+      tui_show_assembly (low);
+    }
+#endif
+}
+
 static void
 make_command (char *arg, int from_tty)
 {
@@ -1157,6 +1246,14 @@ With two args if one is empty it stands for ten lines away from the other arg.",
   if (dbx_commands)
     add_com_alias ("file", "list", class_files, 1);
 
+  c = add_com ("disassemble", class_vars, disassemble_command,
+	       "Disassemble a specified section of memory.\n\
+Default is the function surrounding the pc of the selected frame.\n\
+With a single argument, the function surrounding that address is dumped.\n\
+Two arguments are taken as a range of memory to dump.");
+  set_cmd_completer (c, location_completer);
+  if (xdb_commands)
+    add_com_alias ("va", "disassemble", class_xdb, 0);
 
   /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
      be a really useful feature.  Unfortunately, the below wont do

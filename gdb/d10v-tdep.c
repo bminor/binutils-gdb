@@ -486,15 +486,15 @@ d10v_store_return_value (struct type *type, char *valbuf)
   if (TYPE_LENGTH (type) == 1
       && TYPE_CODE (type) == TYPE_CODE_INT)
     {
-      write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
-			    &tmp, 1);	/* zero the high byte */
-      write_register_bytes (REGISTER_BYTE (RET1_REGNUM) + 1,
-			    valbuf, 1);	/* copy the low byte */
+      /* zero the high byte */
+      deprecated_write_register_bytes (REGISTER_BYTE (RET1_REGNUM), &tmp, 1);
+      /* copy the low byte */
+      deprecated_write_register_bytes (REGISTER_BYTE (RET1_REGNUM) + 1,
+				       valbuf, 1);
     }
   else
-    write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
-			  valbuf,
-			  TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
+				     valbuf, TYPE_LENGTH (type));
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -558,7 +558,8 @@ do_d10v_pop_frame (struct frame_info *fi)
       if (fi->saved_regs[regnum])
 	{
 	  read_memory (fi->saved_regs[regnum], raw_buffer, REGISTER_RAW_SIZE (regnum));
-	  write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, REGISTER_RAW_SIZE (regnum));
+	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,
+					   REGISTER_RAW_SIZE (regnum));
 	}
     }
   for (regnum = 0; regnum < SP_REGNUM; regnum++)
@@ -977,7 +978,7 @@ show_regs (char *args, int from_tty)
       char num[MAX_REGISTER_RAW_SIZE];
       int i;
       printf_filtered ("  ");
-      read_register_gen (a, (char *) &num);
+      deprecated_read_register_gen (a, (char *) &num);
       for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
 	{
 	  printf_filtered ("%02x", (num[i] & 0xff));

@@ -154,7 +154,6 @@ struct symbol *lookup_symbol_aux_minsyms (int block_index,
 					  const namespace_enum namespace,
 					  struct symtab **symtab);
 
-
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
 /* This flag is used in hppa-tdep.c, and set in hp-symtab-read.c */
@@ -844,6 +843,52 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 				 symtab, &static_block);
   if (sym != NULL)
     return sym;
+
+#if 0
+  /* NOTE: carlton/2002-11-05: At the time that this code was
+     #ifdeffed out, the value of 'block' was always NULL at this
+     point, hence the bemused comments below.  */
+
+  /* FIXME: this code is never executed--block is always NULL at this
+     point.  What is it trying to do, anyway?  We already should have
+     checked the STATIC_BLOCK above (it is the superblock of top-level
+     blocks).  Why is VAR_NAMESPACE special-cased?  */
+  /* Don't need to mess with the psymtabs; if we have a block,
+     that file is read in.  If we don't, then we deal later with
+     all the psymtab stuff that needs checking.  */
+  /* Note (RT): The following never-executed code looks unnecessary to me also.
+   * If we change the code to use the original (passed-in)
+   * value of 'block', we could cause it to execute, but then what
+   * would it do? The STATIC_BLOCK of the symtab containing the passed-in
+   * 'block' was already searched by the above code. And the STATIC_BLOCK's
+   * of *other* symtabs (those files not containing 'block' lexically)
+   * should not contain 'block' address-wise. So we wouldn't expect this
+   * code to find any 'sym''s that were not found above. I vote for 
+   * deleting the following paragraph of code.
+   */
+  if (namespace == VAR_NAMESPACE && block != NULL)
+    {
+      struct block *b;
+      /* Find the right symtab.  */
+      ALL_SYMTABS (objfile, s)
+      {
+	bv = BLOCKVECTOR (s);
+	b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	if (BLOCK_START (b) <= BLOCK_START (block)
+	    && BLOCK_END (b) > BLOCK_START (block))
+	  {
+	    sym = lookup_block_symbol (b, name, mangled_name, VAR_NAMESPACE);
+	    if (sym)
+	      {
+		block_found = b;
+		if (symtab != NULL)
+		  *symtab = s;
+		return fixup_symbol_section (sym, objfile);
+	      }
+	  }
+      }
+    }
+#endif /* 0 */
 
   /* C++: If requested to do so by the caller, 
      check to see if NAME is a field of `this'. */
@@ -1929,95 +1974,6 @@ find_pc_symtab (CORE_ADDR pc)
   return find_pc_sect_symtab (pc, find_pc_mapped_section (pc));
 }
 
-
-#if 0
-
-/* Find the closest symbol value (of any sort -- function or variable)
-   for a given address value.  Slow but complete.  (currently unused,
-   mainly because it is too slow.  We could fix it if each symtab and
-   psymtab had contained in it the addresses ranges of each of its
-   sections, which also would be required to make things like "info
-   line *0x2345" cause psymtabs to be converted to symtabs).  */
-
-struct symbol *
-find_addr_symbol (CORE_ADDR addr, struct symtab **symtabp,
-		  CORE_ADDR *symaddrp)
-{
-  struct symtab *symtab, *best_symtab;
-  struct objfile *objfile;
-  struct dict_iterator iter;
-  register struct symbol *sym;
-  register CORE_ADDR sym_addr;
-  struct block *block;
-  int blocknum;
-
-  /* Info on best symbol seen so far */
-
-  register CORE_ADDR best_sym_addr = 0;
-  struct symbol *best_sym = 0;
-
-  /* FIXME -- we should pull in all the psymtabs, too!  */
-  ALL_SYMTABS (objfile, symtab)
-  {
-    /* Search the global and static blocks in this symtab for
-       the closest symbol-address to the desired address.  */
-
-    for (blocknum = GLOBAL_BLOCK; blocknum <= STATIC_BLOCK; blocknum++)
-      {
-	QUIT;
-	block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), blocknum);
-	ALL_BLOCK_SYMBOLS (block, iter, sym)
-	{
-	  switch (SYMBOL_CLASS (sym))
-	    {
-	    case LOC_STATIC:
-	    case LOC_LABEL:
-	      sym_addr = SYMBOL_VALUE_ADDRESS (sym);
-	      break;
-
-	    case LOC_INDIRECT:
-	      sym_addr = SYMBOL_VALUE_ADDRESS (sym);
-	      /* An indirect symbol really lives at *sym_addr,
-	       * so an indirection needs to be done.
-	       * However, I am leaving this commented out because it's
-	       * expensive, and it's possible that symbolization
-	       * could be done without an active process (in
-	       * case this read_memory will fail). RT
-	       sym_addr = read_memory_unsigned_integer
-	       (sym_addr, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-	       */
-	      break;
-
-	    case LOC_BLOCK:
-	      sym_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-	      break;
-
-	    default:
-	      continue;
-	    }
-
-	  if (sym_addr <= addr)
-	    if (sym_addr > best_sym_addr)
-	      {
-		/* Quit if we found an exact match.  */
-		best_sym = sym;
-		best_sym_addr = sym_addr;
-		best_symtab = symtab;
-		if (sym_addr == addr)
-		  goto done;
-	      }
-	}
-      }
-  }
-
-done:
-  if (symtabp)
-    *symtabp = best_symtab;
-  if (symaddrp)
-    *symaddrp = best_sym_addr;
-  return best_sym;
-}
-#endif /* 0 */
 
 /* Find the source file and line number for a given PC value and SECTION.
    Return a structure containing a symtab pointer, a line number,
@@ -3246,29 +3202,6 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
 
       printf_filtered (";\n");
     }
-  else
-    {
-#if 0
-      /* Tiemann says: "info methods was never implemented."  */
-      char *demangled_name;
-      c_type_print_base (TYPE_FN_FIELD_TYPE (t, block), gdb_stdout, 0, 0);
-      c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (t, block),
-				   gdb_stdout, 0);
-      if (TYPE_FN_FIELD_STUB (t, block))
-	check_stub_method (TYPE_DOMAIN_TYPE (type), j, block);
-      demangled_name =
-	cplus_demangle (TYPE_FN_FIELD_PHYSNAME (t, block),
-			DMGL_ANSI | DMGL_PARAMS);
-      if (demangled_name == NULL)
-	fprintf_filtered (stream, "<badly mangled name %s>",
-			  TYPE_FN_FIELD_PHYSNAME (t, block));
-      else
-	{
-	  fputs_filtered (demangled_name, stream);
-	  xfree (demangled_name);
-	}
-#endif
-    }
 }
 
 /* This help function for symtab_symbol_info() prints information
@@ -3353,15 +3286,6 @@ types_info (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_NAMESPACE, from_tty);
 }
-
-#if 0
-/* Tiemann says: "info methods was never implemented."  */
-static void
-methods_info (char *regexp)
-{
-  symtab_symbol_info (regexp, METHODS_NAMESPACE, 0, from_tty);
-}
-#endif /* 0 */
 
 /* Breakpoint all functions matching regular expression. */
 
@@ -4306,14 +4230,8 @@ _initialize_symtab (void)
      there is much disagreement "info types" can be fixed).  */
   add_info ("types", types_info, "All type names, or those matching REGEXP.");
 
-#if 0
-  add_info ("methods", methods_info,
-	    "All method names, or those matching REGEXP::REGEXP.\n\
-If the class qualifier is omitted, it is assumed to be the current scope.\n\
-If the first REGEXP is omitted, then all methods matching the second REGEXP\n\
-are listed.");
-#endif
-  add_info ("sources", sources_info, "Source files in the program.");
+  add_info ("sources", sources_info,
+	    "Source files in the program.");
 
   add_com ("rbreak", class_breakpoint, rbreak_command,
 	   "Set a breakpoint for all functions matching REGEXP.");

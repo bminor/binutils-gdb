@@ -1,3 +1,12 @@
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
+	* run.c (main): Remove SIM_HAVE_ENVIRONMENT from #endif.
+
+2002-11-06  Richard Sandiford  <rsandifo@redhat.com>
+
+	* Make-common.in (SIM_EXTRA_DISTCLEAN): New macro.
+	(distclean): Depend on it.
+
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* cgen-trace.h: Test __BFD_H_SEEN__ rather than BFD_VERSION.

@@ -2170,8 +2170,11 @@ _bfd_mmix_finalize_linker_allocated_gregs (abfd, link_info)
 
   n_gregs = gregdata->n_allocated_bpo_gregs;
 
+  /* We need to have a _raw_size contents even though there's only
+     _cooked_size worth of data, since the generic relocation machinery
+     will allocate and copy that much temporarily.  */
   bpo_gregs_section->contents
-    = contents = bfd_alloc (bpo_greg_owner, bpo_gregs_section->_cooked_size);
+    = contents = bfd_alloc (bpo_greg_owner, bpo_gregs_section->_raw_size);
   if (contents == NULL)
     return false;
 

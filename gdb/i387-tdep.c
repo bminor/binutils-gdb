@@ -321,26 +321,35 @@ void
 i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		       struct frame_info *frame, const char *args)
 {
-  unsigned int fctrl;
-  unsigned int fstat;
-  unsigned int ftag;
-  unsigned int fiseg;
-  unsigned int fioff;
-  unsigned int foseg;
-  unsigned int fooff;
-  unsigned int fop;
+  char buf[4];
+  ULONGEST fctrl;
+  ULONGEST fstat;
+  ULONGEST ftag;
+  ULONGEST fiseg;
+  ULONGEST fioff;
+  ULONGEST foseg;
+  ULONGEST fooff;
+  ULONGEST fop;
   int fpreg;
   int top;
 
-  fctrl = read_register (FCTRL_REGNUM);
-  fstat = read_register (FSTAT_REGNUM);
-  ftag  = read_register (FTAG_REGNUM);
-  fiseg = read_register (FCS_REGNUM);
-  fioff = read_register (FCOFF_REGNUM);
-  foseg = read_register (FDS_REGNUM);
-  fooff = read_register (FDOFF_REGNUM);
-  fop   = read_register (FOP_REGNUM);
-  
+  frame_register_read (frame, FCTRL_REGNUM, buf);
+  fctrl = extract_unsigned_integer (buf, 4);
+  frame_register_read (frame, FSTAT_REGNUM, buf);
+  fstat = extract_unsigned_integer (buf, 4);
+  frame_register_read (frame, FTAG_REGNUM, buf);
+  ftag = extract_unsigned_integer (buf, 4);
+  frame_register_read (frame, FISEG_REGNUM, buf);
+  fiseg = extract_unsigned_integer (buf, 4);
+  frame_register_read (frame, FIOFF_REGNUM, buf);
+  fioff = extract_unsigned_integer (buf, 4);
+  frame_register_read (frame, FOSEG_REGNUM, buf);
+  foseg = extract_unsigned_integer (buf, 4);
+  frame_register_read (frame, FOOFF_REGNUM, buf);
+  fooff = extract_unsigned_integer (buf, 4);
+  frame_register_read (frame, FOP_REGNUM, buf);
+  fop = extract_unsigned_integer (buf, 4);
+
   top = ((fstat >> 11) & 7);
 
   for (fpreg = 7; fpreg >= 0; fpreg--)
@@ -367,7 +376,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	  break;
 	}
 
-      read_register_gen ((fpreg + 8 - top) % 8 + FP0_REGNUM, raw);
+      frame_register_read (frame, (fpreg + 8 - top) % 8 + FP0_REGNUM, raw);
 
       fputs_filtered ("0x", file);
       for (i = 9; i >= 0; i--)
@@ -379,7 +388,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
       fputs_filtered ("\n", file);
     }
 
-  puts_filtered ("\n");
+  fputs_filtered ("\n", file);
 
   print_i387_status_word (fstat, file);
   print_i387_control_word (fctrl, file);
@@ -435,6 +444,12 @@ static int fsave_offset[] =
 void
 i387_supply_register (int regnum, char *fsave)
 {
+  if (fsave == NULL)
+    {
+      supply_register (regnum, NULL);
+      return;
+    }
+
   /* Most of the FPU control registers occupy only 16 bits in
      the fsave area.  Give those a special treatment.  */
   if (regnum >= FPC_REGNUM
@@ -555,6 +570,12 @@ i387_supply_fxsave (char *fxsave)
 
   for (i = FP0_REGNUM; i <= last_regnum; i++)
     {
+      if (fxsave == NULL)
+	{
+	  supply_register (i, NULL);
+	  continue;
+	}
+
       /* Most of the FPU control registers occupy only 16 bits in
 	 the fxsave area.  Give those a special treatment.  */
       if (i >= FPC_REGNUM && i < XMM0_REGNUM
@@ -621,7 +642,7 @@ i387_fill_fxsave (char *fxsave, int regnum)
 	/* Most of the FPU control registers occupy only 16 bits in
            the fxsave area.  Give those a special treatment.  */
 	if (i >= FPC_REGNUM && i < XMM0_REGNUM
-	    && i != FIOFF_REGNUM && i != FDOFF_REGNUM)
+	    && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
 	  {
 	    unsigned char buf[4];
 

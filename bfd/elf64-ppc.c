@@ -1658,6 +1658,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 {
   /* Check if we have the same endianess.  */
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
       const char *msg;
@@ -1785,19 +1786,19 @@ struct ppc_dyn_relocs
    ppc_stub_plt_branch:
    Similar to the above, but a 24 bit branch in the stub section won't
    reach its destination.
-   .	addis	%r12,%r2,xxx@ha
-   .	ld	%r11,xxx@l(%r12)
+   .	addis	%r12,%r2,xxx@toc@ha
+   .	ld	%r11,xxx@toc@l(%r12)
    .	mtctr	%r11
    .	bctr
 
    ppc_stub_plt_call:
    Used to call a function in a shared library.
-   .	addis	%r12,%r2,xxx@ha
+   .	addis	%r12,%r2,xxx@toc@ha
    .	std	%r2,40(%r1)
-   .	ld	%r11,xxx+0@l(%r12)
-   .	ld	%r2,xxx+8@l(%r12)
+   .	ld	%r11,xxx+0@toc@l(%r12)
+   .	ld	%r2,xxx+8@toc@l(%r12)
    .	mtctr	%r11
-   .	ld	%r11,xxx+16@l(%r12)
+   .	ld	%r11,xxx+16@toc@l(%r12)
    .	bctr
 */
 
@@ -1971,8 +1972,6 @@ static boolean ppc64_elf_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static void ppc64_elf_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
-static boolean edit_opd
-  PARAMS ((bfd *, struct bfd_link_info *));
 static boolean allocate_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean readonly_dynrelocs
@@ -3538,8 +3537,8 @@ ppc64_elf_hide_symbol (info, h, force_local)
     }
 }
 
-static boolean
-edit_opd (obfd, info)
+boolean
+ppc64_elf_edit_opd (obfd, info)
      bfd *obfd;
      struct bfd_link_info *info;
 {
@@ -3556,6 +3555,7 @@ edit_opd (obfd, info)
       Elf_Internal_Sym *local_syms;
       struct elf_link_hash_entry **sym_hashes;
       bfd_vma offset;
+      bfd_size_type amt;
       long *adjust;
       boolean need_edit;
 
@@ -3563,9 +3563,16 @@ edit_opd (obfd, info)
       if (sec == NULL)
 	continue;
 
+      amt = sec->_raw_size * sizeof (long) / 24;
       adjust = (long *) elf_section_data (sec)->tdata;
-      BFD_ASSERT (adjust != NULL);
-      memset (adjust, 0, (size_t) sec->_raw_size * sizeof (long) / 24);
+      if (adjust == NULL)
+	{
+	  /* Must be a ld -r link.  ie. check_relocs hasn't been
+	     called.  */
+	  adjust = (long *) bfd_zalloc (obfd, amt);
+	  elf_section_data (sec)->tdata = adjust;
+	}
+      memset (adjust, 0, (size_t) amt);
 
       if (sec->output_section == bfd_abs_section_ptr)
 	continue;
@@ -3768,14 +3775,29 @@ edit_opd (obfd, info)
 			{
 			  /* Arrange for the function descriptor sym
 			     to be dropped.  */
-			  struct elf_link_hash_entry *fdh;
+			  struct ppc_link_hash_entry *fdh;
 			  struct ppc_link_hash_entry *fh;
 
 			  fh = (struct ppc_link_hash_entry *) h;
-			  BFD_ASSERT (fh->is_func);
-			  fdh = fh->oh;
-			  fdh->root.u.def.value = 0;
-			  fdh->root.u.def.section = sym_sec;
+			  fdh = (struct ppc_link_hash_entry *) fh->oh;
+			  if (fdh == NULL)
+			    {
+			      const char *fd_name;
+			      struct ppc_link_hash_table *htab;
+
+			      fd_name = h->root.root.string + 1;
+			      htab = ppc_hash_table (info);
+			      fdh = (struct ppc_link_hash_entry *)
+				elf_link_hash_lookup (&htab->elf, fd_name,
+						      false, false, false);
+			      fdh->is_func_descriptor = 1;
+			      fdh->oh = &fh->elf;
+			      fh->is_func = 1;
+			      fh->oh = &fdh->elf;
+			    }
+
+			  fdh->elf.root.u.def.value = 0;
+			  fdh->elf.root.u.def.section = sym_sec;
 			}
 		    }
 		  else
@@ -3788,13 +3810,28 @@ edit_opd (obfd, info)
 			     to this location in the opd section.
 			     We've checked above that opd relocs are
 			     ordered.  */
-			  struct elf_link_hash_entry *fdh;
+			  struct ppc_link_hash_entry *fdh;
 			  struct ppc_link_hash_entry *fh;
 
 			  fh = (struct ppc_link_hash_entry *) h;
-			  BFD_ASSERT (fh->is_func);
-			  fdh = fh->oh;
-			  fdh->root.u.def.value = wptr - sec->contents;
+			  fdh = (struct ppc_link_hash_entry *) fh->oh;
+			  if (fdh == NULL)
+			    {
+			      const char *fd_name;
+			      struct ppc_link_hash_table *htab;
+
+			      fd_name = h->root.root.string + 1;
+			      htab = ppc_hash_table (info);
+			      fdh = (struct ppc_link_hash_entry *)
+				elf_link_hash_lookup (&htab->elf, fd_name,
+						      false, false, false);
+			      fdh->is_func_descriptor = 1;
+			      fdh->oh = &fh->elf;
+			      fh->is_func = 1;
+			      fh->oh = &fdh->elf;
+			    }
+
+			  fdh->elf.root.u.def.value = wptr - sec->contents;
 			}
 		      else
 			{
@@ -4143,9 +4180,6 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	    *local_got = (bfd_vma) -1;
 	}
     }
-
-  if (!edit_opd (output_bfd, info))
-    return false;
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */

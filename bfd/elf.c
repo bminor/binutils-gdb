@@ -2671,18 +2671,17 @@ assign_section_numbers (abfd)
   /* Set up the list of section header pointers, in agreement with the
      indices.  */
   amt = section_number * sizeof (Elf_Internal_Shdr *);
-  i_shdrp = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
+  i_shdrp = (Elf_Internal_Shdr **) bfd_zalloc (abfd, amt);
   if (i_shdrp == NULL)
     return false;
 
   amt = sizeof (Elf_Internal_Shdr);
-  i_shdrp[0] = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
+  i_shdrp[0] = (Elf_Internal_Shdr *) bfd_zalloc (abfd, amt);
   if (i_shdrp[0] == NULL)
     {
       bfd_release (abfd, i_shdrp);
       return false;
     }
-  memset (i_shdrp[0], 0, sizeof (Elf_Internal_Shdr));
 
   elf_elfsections (abfd) = i_shdrp;
 
@@ -3450,10 +3449,9 @@ map_sections_to_segments (abfd)
 
   /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
      segment.  */
-  eh_frame_hdr = NULL;
-  if (elf_tdata (abfd)->eh_frame_hdr)
-    eh_frame_hdr = bfd_get_section_by_name (abfd, ".eh_frame_hdr");
-  if (eh_frame_hdr != NULL && (eh_frame_hdr->flags & SEC_LOAD))
+  eh_frame_hdr = elf_tdata (abfd)->eh_frame_hdr;
+  if (eh_frame_hdr != NULL
+      && (eh_frame_hdr->output_section->flags & SEC_LOAD) != 0)
     {
       amt = sizeof (struct elf_segment_map);
       m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
@@ -3462,7 +3460,7 @@ map_sections_to_segments (abfd)
       m->next = NULL;
       m->p_type = PT_GNU_EH_FRAME;
       m->count = 1;
-      m->sections[0] = eh_frame_hdr;
+      m->sections[0] = eh_frame_hdr->output_section;
 
       *pm = m;
       pm = &m->next;
@@ -3960,11 +3958,6 @@ Error: First section in segment (%s) starts at 0x%x whereas the segment starts a
 	}
     }
 
-  /* If additional nonloadable filepos adjustments are required,
-     do them now. */
-  if (bed->set_nonloadable_filepos)
-    (*bed->set_nonloadable_filepos) (abfd, phdrs);
-
   /* Clear out any program headers we allocated but did not use.  */
   for (; count < alloc; count++, p++)
     {
@@ -4038,8 +4031,7 @@ get_program_header_size (abfd)
       ++segs;
     }
 
-  if (elf_tdata (abfd)->eh_frame_hdr
-      && bfd_get_section_by_name (abfd, ".eh_frame_hdr") != NULL)
+  if (elf_tdata (abfd)->eh_frame_hdr)
     {
       /* We need a PT_GNU_EH_FRAME segment.  */
       ++segs;
@@ -4560,13 +4552,6 @@ copy_private_bfd_data (ibfd, obfd)
    && (section->lma + section->_raw_size				\
        <= SEGMENT_END (segment, base)))
 
-  /* Returns true if the given section is contained within the
-     given segment.  Filepos addresses are compared in an elf
-     backend function. */
-#define IS_CONTAINED_BY_FILEPOS(sec, seg, bed)				\
-  (bed->is_contained_by_filepos						\
-   && (*bed->is_contained_by_filepos) (sec, seg))
-
   /* Special case: corefile "NOTE" section containing regs, prpsinfo etc.  */
 #define IS_COREFILE_NOTE(p, s)						\
   (p->p_type == PT_NOTE							\
@@ -4602,9 +4587,7 @@ copy_private_bfd_data (ibfd, obfd)
       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
       : IS_CONTAINED_BY_VMA (section, segment))				\
      && (section->flags & SEC_ALLOC) != 0)				\
-    || IS_COREFILE_NOTE (segment, section)				\
-    || (IS_CONTAINED_BY_FILEPOS (section, segment, bed)			\
-        && (section->flags & SEC_ALLOC) == 0))				\
+    || IS_COREFILE_NOTE (segment, section))				\
    && section->output_section != NULL					\
    && ! section->segment_mark)
 
@@ -4849,7 +4832,6 @@ copy_private_bfd_data (ibfd, obfd)
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
 	      if (IS_CONTAINED_BY_LMA (output_section, segment, map->p_paddr)
-		  || IS_CONTAINED_BY_FILEPOS (section, segment, bed)
 		  || IS_COREFILE_NOTE (segment, section)
 		  || (bed->want_p_paddr_set_to_zero &&
 		      IS_CONTAINED_BY_VMA (output_section, segment))
@@ -5086,7 +5068,6 @@ copy_private_bfd_data (ibfd, obfd)
 #undef SEGMENT_END
 #undef IS_CONTAINED_BY_VMA
 #undef IS_CONTAINED_BY_LMA
-#undef IS_CONTAINED_BY_FILEPOS
 #undef IS_COREFILE_NOTE
 #undef IS_SOLARIS_PT_INTERP
 #undef INCLUDE_SECTION_IN_SEGMENT
@@ -5106,26 +5087,12 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
      asection *osec;
 {
   Elf_Internal_Shdr *ihdr, *ohdr;
-  const struct elf_backend_data *bed = get_elf_backend_data (ibfd);
 
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return true;
 
-  /* Copy over private BFD data if it has not already been copied.
-     This must be done here, rather than in the copy_private_bfd_data
-     entry point, because the latter is called after the section
-     contents have been set, which means that the program headers have
-     already been worked out.  The backend function provides a way to
-     override the test conditions and code path for the call to
-     copy_private_bfd_data.  */
-  if (bed->copy_private_bfd_data_p)
-    {
-      if ((*bed->copy_private_bfd_data_p) (ibfd, isec, obfd, osec))
-        if (! copy_private_bfd_data (ibfd, obfd))
-          return false;
-    }
-  else if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
+  if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
     {
 	asection *s;
 
@@ -7358,9 +7325,9 @@ _bfd_elf_section_offset (abfd, info, sec, offset)
   switch (sec_data->sec_info_type)
     {
     case ELF_INFO_TYPE_STABS:
-      return _bfd_stab_section_offset
-	(abfd, &elf_hash_table (info)->merge_info, sec, &sec_data->sec_info,
-	 offset);
+      return _bfd_stab_section_offset (abfd,
+				       &elf_hash_table (info)->merge_info,
+				       sec, &sec_data->sec_info, offset);
     case ELF_INFO_TYPE_EH_FRAME:
       return _bfd_elf_eh_frame_section_offset (abfd, sec, offset);
     default:

@@ -666,6 +666,7 @@ update_current_target (void)
       INHERIT (to_async_mask_value, t);
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
+      INHERIT (to_get_thread_local_address, t);
       INHERIT (to_magic, t);
 
 #undef INHERIT
@@ -1733,7 +1734,7 @@ debug_print_register (const char * func, int regno)
     {
       int i;
       unsigned char *buf = alloca (MAX_REGISTER_RAW_SIZE);
-      read_register_gen (regno, buf);
+      deprecated_read_register_gen (regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
 	{

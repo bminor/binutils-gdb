@@ -30,7 +30,7 @@
 #include "gdbcore.h"
 #include "command.h"
 #include "symtab.h"
-#include "symfile.h"		/* for struct complaint */
+#include "symfile.h"
 #include "regcache.h"
 
 #include "gdb_string.h"
@@ -85,10 +85,13 @@ vx_read_register (int regno)
 
   net_read_registers (mc68k_greg_packet, MC68K_GREG_PLEN, PTRACE_GETREGS);
 
-  bcopy (&mc68k_greg_packet[MC68K_R_D0], registers, 16 * MC68K_GREG_SIZE);
-  bcopy (&mc68k_greg_packet[MC68K_R_SR], &registers[REGISTER_BYTE (PS_REGNUM)],
+  bcopy (&mc68k_greg_packet[MC68K_R_D0], deprecated_registers,
+	 16 * MC68K_GREG_SIZE);
+  bcopy (&mc68k_greg_packet[MC68K_R_SR],
+	 &deprecated_registers[REGISTER_BYTE (PS_REGNUM)],
 	 MC68K_GREG_SIZE);
-  bcopy (&mc68k_greg_packet[MC68K_R_PC], &registers[REGISTER_BYTE (PC_REGNUM)],
+  bcopy (&mc68k_greg_packet[MC68K_R_PC],
+	 &deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
 	 MC68K_GREG_SIZE);
 
   /* Get floating-point registers, if the target system has them.
@@ -100,23 +103,23 @@ vx_read_register (int regno)
 			  PTRACE_GETFPREGS);
 
       bcopy (&mc68k_fpreg_packet[MC68K_R_FP0],
-	     &registers[REGISTER_BYTE (FP0_REGNUM)],
+	     &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	     MC68K_FPREG_SIZE * 8);
       bcopy (&mc68k_fpreg_packet[MC68K_R_FPCR],
-	     &registers[REGISTER_BYTE (FPC_REGNUM)],
+	     &deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
 	     MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
     }
   else
     {
-      bzero (&registers[REGISTER_BYTE (FP0_REGNUM)],
+      bzero (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	     MC68K_FPREG_SIZE * 8);
-      bzero (&registers[REGISTER_BYTE (FPC_REGNUM)],
+      bzero (&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
 	     MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
     }
 
   /* Mark the register cache valid.  */
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Store a register or registers into the VxWorks target.
@@ -131,10 +134,11 @@ vx_write_register (int regno)
 
   /* Store general-purpose registers.  */
 
-  bcopy (registers, &mc68k_greg_packet[MC68K_R_D0], 16 * MC68K_GREG_SIZE);
-  bcopy (&registers[REGISTER_BYTE (PS_REGNUM)],
+  bcopy (deprecated_registers, &mc68k_greg_packet[MC68K_R_D0],
+	 16 * MC68K_GREG_SIZE);
+  bcopy (&deprecated_registers[REGISTER_BYTE (PS_REGNUM)],
 	 &mc68k_greg_packet[MC68K_R_SR], MC68K_GREG_SIZE);
-  bcopy (&registers[REGISTER_BYTE (PC_REGNUM)],
+  bcopy (&deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
 	 &mc68k_greg_packet[MC68K_R_PC], MC68K_GREG_SIZE);
 
   net_write_registers (mc68k_greg_packet, MC68K_GREG_PLEN, PTRACE_SETREGS);
@@ -143,10 +147,10 @@ vx_write_register (int regno)
 
   if (target_has_fp)
     {
-      bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	     &mc68k_fpreg_packet[MC68K_R_FP0],
 	     MC68K_FPREG_SIZE * 8);
-      bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
 	     &mc68k_fpreg_packet[MC68K_R_FPCR],
 	     MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
 

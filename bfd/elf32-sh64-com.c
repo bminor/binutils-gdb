@@ -127,7 +127,7 @@ sh64_address_in_cranges (cranges, addr, rangep)
   else
     {
       cranges_contents
-	= bfd_malloc (cranges->_cooked_size == 0
+	= bfd_malloc (cranges->_cooked_size != 0
 		      ? cranges->_cooked_size : cranges->_raw_size);
       if (cranges_contents == NULL)
 	return false;

@@ -1,3 +1,7 @@
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
+	* simops.c: Include <string.h>.
+
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v_sim.h (SET_PSW_BIT): Add cast to avoid inverting an enum.

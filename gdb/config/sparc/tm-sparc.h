@@ -736,14 +736,9 @@ extern void sparc_software_single_step (enum target_signal, int);
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
 extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 
-/* To print every pair of float registers as a double, we use this hook.
-   We also print the condition code registers in a readable format
-   (FIXME: can expand this to all control regs).  */
-
-#undef 	PRINT_REGISTER_HOOK
-#define	PRINT_REGISTER_HOOK(regno)	\
-  sparc_print_register_hook (regno)
-extern void sparc_print_register_hook (int regno);
+extern void sparc_do_registers_info (int regnum, int all);
+#undef DEPRECATED_DO_REGISTERS_INFO
+#define DEPRECATED_DO_REGISTERS_INFO(REGNUM,ALL) sparc_do_registers_info (REGNUM, ALL)
 
 /* Optimization for storing registers to the inferior.  The hook
    DO_DEFERRED_STORES

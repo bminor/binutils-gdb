@@ -41,7 +41,7 @@ fetch_inferior_registers (int ignored)
   ptrace_$init_control (&inferior_control_registers);
   inferior_fp_registers.size = sizeof (inferior_fp_registers);
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 
   ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers,
@@ -61,11 +61,14 @@ fetch_inferior_registers (int ignored)
 	  (PTRACE_ARG3_TYPE) & inferior_control_registers,
 	  ptrace_$control_set_m68k);
 
-  bcopy (&inferior_registers, registers, 16 * 4);
-  bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+  bcopy (&inferior_registers, &deprecated_registers[0], 16 * 4);
+  bcopy (&inferior_fp_registers,
+	 &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	 sizeof inferior_fp_registers.regs);
-  *(int *) &registers[REGISTER_BYTE (PS_REGNUM)] = inferior_control_registers.sr;
-  *(int *) &registers[REGISTER_BYTE (PC_REGNUM)] = inferior_control_registers.pc;
+  *(int *) &deprecated_registers[REGISTER_BYTE (PS_REGNUM)]
+    = inferior_control_registers.sr;
+  *(int *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)]
+    = inferior_control_registers.pc;
 }
 
 /* Store our register values back into the inferior.
@@ -94,13 +97,16 @@ store_inferior_registers (int regno)
 	  (PTRACE_ARG3_TYPE) & inferior_control_registers,
 	  ptrace_$control_set_m68k);
 
-  bcopy (registers, &inferior_registers, sizeof (inferior_registers));
+  bcopy (&deprecated_registers[0], &inferior_registers,
+	 sizeof (inferior_registers));
 
-  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], inferior_fp_registers.regs,
-	 sizeof inferior_fp_registers.regs);
+  bcopy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	 inferior_fp_registers.regs, sizeof inferior_fp_registers.regs);
 
-  inferior_control_registers.sr = *(int *) &registers[REGISTER_BYTE (PS_REGNUM)];
-  inferior_control_registers.pc = *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
+  inferior_control_registers.sr
+    = *(int *) &deprecated_registers[REGISTER_BYTE (PS_REGNUM)];
+  inferior_control_registers.pc
+    = *(int *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
 
   ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers,

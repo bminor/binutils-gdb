@@ -19,6 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 boolean ppc64_elf_mark_entry_syms
   PARAMS ((struct bfd_link_info *));
+boolean ppc64_elf_edit_opd
+  PARAMS ((bfd *, struct bfd_link_info *));
 bfd_vma ppc64_elf_toc
   PARAMS ((bfd *));
 int ppc64_elf_setup_section_lists

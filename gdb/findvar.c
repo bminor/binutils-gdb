@@ -545,14 +545,6 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_THREAD_LOCAL_STATIC:
       {
-#if 0
-	/* FIXME: ezannoni 2002-10-21: Temporarly disable the code
-           below, until the rest of the TLS support code is checked
-           in.  */
-
-        /* We want to let the target / ABI-specific code construct
-           this value for us, so we need to dispose of the value
-           allocated for us above.  */
         if (target_get_thread_local_address_p ())
           addr = target_get_thread_local_address (inferior_ptid,
                                                   SYMBOL_OBJFILE (var),
@@ -561,7 +553,6 @@ addresses have not been bound by the dynamic loader. Try again when executable i
            finding TLS is an ABI-specific thing.  But we don't do that
            yet.  */
         else
-#endif
           error ("Cannot find thread-local variables on this target");
         break;
       }

@@ -1,3 +1,34 @@
+2002-11-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb792.cc: New file to test patch for PR gdb/792.
+	* gdb792.exp: Ditto.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-console.exp: Use mi_runto, mi_run_to_main, mi_next_to,
+	mi_step_to wherever possible.  Update copyright notices.
+	* mi-disassemble.exp: Ditto.
+	* mi-eval.exp: Ditto.
+	* mi-read-memory.exp: Ditto.
+	* mi-regs.exp: Ditto.
+	* mi-return.exp: Ditto.
+	* mi-stack.exp: Ditto.
+	* mi-stepi.exp: Ditto.
+	* mi-var-block.exp: Ditto.
+	* mi-var-cmd.exp: Ditto.
+	* mi-watch.exp: Ditto.
+	* mi1-console.exp: Ditto.
+	* mi1-disassemble.exp: Ditto.
+	* mi1-eval.exp: Ditto.
+	* mi1-read-memory.exp: Ditto.
+	* mi1-regs.exp: Ditto.
+	* mi1-return.exp: Ditto.
+	* mi1-stack.exp: Ditto.
+	* mi1-stepi.exp: Ditto.
+	* mi1-var-block.exp: Ditto.
+	* mi1-var-cmd.exp: Ditto.
+        * mi1-watch.exp: Ditto.
+
 2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* mi-var-cmd.exp: Add tests to verify that a -var-assign that changes

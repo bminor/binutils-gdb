@@ -1,6 +1,7 @@
 /* Parameters for execution on a H8/500 series machine.
-   Copyright 1993, 1994, 1995, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -169,7 +170,7 @@ extern struct type *h8500_register_virtual_type (int regno);
    of type TYPE, given in virtual format.  */
 
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
+  deprecated_write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -253,8 +254,9 @@ extern CORE_ADDR h8500_addr_bits_remove (CORE_ADDR);
 
 #define read_memory_short(x)  (read_memory_integer(x,2) & 0xffff)
 
-#define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
-extern void print_register_hook (int);
+extern void h8500_do_registers_info (int regnum, int all);
+#define DEPRECATED_DO_REGISTERS_INFO(REGNUM,ALL) \
+	h8500_do_registers_info (REGNUM, ALL)
 
 extern int minimum_mode;
 

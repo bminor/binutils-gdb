@@ -234,7 +234,8 @@ static int search_field;
 start   :	{ current_type = NULL;
 		  search_field = 0;
 		}
-		normal_start;
+		normal_start {}
+	;
 
 normal_start	:
 		exp1
@@ -258,11 +259,13 @@ exp	:	exp '^'   %prec UNARY
 			{ write_exp_elt_opcode (UNOP_IND);
 			  if (current_type) 
 			    current_type = TYPE_TARGET_TYPE (current_type); }
+	;
 
 exp	:	'@' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_ADDR); 
 			  if (current_type)
 			    current_type = TYPE_POINTER_TYPE (current_type); }
+	;
 
 exp	:	'-' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_NEG); }
@@ -318,6 +321,7 @@ exp	:	exp '['
 			  write_exp_elt_opcode (BINOP_SUBSCRIPT);
 			  if (current_type)
 			    current_type = TYPE_TARGET_TYPE (current_type); }
+	;
 
 exp	:	exp '('
 			/* This is to save the value of arglist_len
@@ -646,7 +650,7 @@ variable:	name_not_typename
 			      if (this_type)
 				current_type = lookup_struct_elt_type (
 				  this_type,
-				  $1.stoken.ptr, false);
+				  copy_name($1.stoken), false);
 			      else
 				current_type = NULL; 
 			    }

@@ -123,7 +123,26 @@ proc mi_gdb_start { } {
 	return 1;
     }
     gdb_expect {
-	-re ".*$mi_gdb_prompt$" {
+	-re "~\"GNU.*\r\n~\".*$mi_gdb_prompt$" {
+	    # We have a new format mi startup prompt.  If we are
+	    # running mi1, then this is an error as we should be
+	    # using the old-style prompt.
+	    if { $MIFLAGS == "-i=mi1" } {
+	        perror "(mi startup) Got unexpected new mi prompt."
+	        remote_close host;
+	        return -1;
+	    }
+	    verbose "GDB initialized."
+	}
+	-re "\[^~\].*$mi_gdb_prompt$" {
+	    # We have an old format mi startup prompt.  If we are
+	    # not running mi1, then this is an error as we should be
+	    # using the new-style prompt.
+	    if { $MIFLAGS != "-i=mi1" } {
+	        perror "(mi startup) Got unexpected old mi prompt."
+	        remote_close host;
+	        return -1;
+	    }
 	    verbose "GDB initialized."
 	}
 	-re ".*$gdb_prompt $" {

@@ -466,7 +466,7 @@ static void
 vx_prepare_to_store (void)
 {
   /* Fetch all registers, if any of them are not yet fetched.  */
-  read_register_bytes (0, NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, NULL, REGISTER_BYTES);
 }
 
 /* Copy LEN bytes to or from remote inferior's memory starting at MEMADDR
@@ -820,7 +820,7 @@ net_get_symbols (ldtabl *pLoadTable)
    Returns status of symbol read on target side (0=success, -1=fail)
    Returns -1 and complain()s if rpc fails.  */
 
-struct complaint cant_contact_target =
+struct deprecated_complaint cant_contact_target =
 {"Lost contact with VxWorks target", 0, 0};
 
 static int

@@ -397,22 +397,25 @@ struct main_type
 
       CORE_ADDR physaddr;
       char *physname;
-
-      /* For a function or member type, this is 1 if the argument is marked
-	 artificial.  Artificial arguments should not be shown to the
-	 user.  */
-      int artificial;
     }
     loc;
 
+    /* For a function or member type, this is 1 if the argument is marked
+       artificial.  Artificial arguments should not be shown to the
+       user.  */
+    unsigned int artificial : 1;
+
+    /* This flag is zero for non-static fields, 1 for fields whose location
+       is specified by the label loc.physname, and 2 for fields whose location
+       is specified by loc.physaddr.  */
+
+    unsigned int static_kind : 2;
+
     /* Size of this field, in bits, or zero if not packed.
        For an unpacked field, the field's type's length
-       says how many bytes the field occupies.
-       A value of -1 or -2 indicates a static field;  -1 means the location
-       is specified by the label loc.physname;  -2 means that loc.physaddr
-       specifies the actual address. */
+       says how many bytes the field occupies.  */
 
-    int bitsize;
+    unsigned int bitsize : 29;
 
     /* In a struct or union type, type of this field.
        In a function or member type, type of this argument.
@@ -809,14 +812,15 @@ extern void allocate_cplus_struct_type (struct type *);
 #define FIELD_TYPE(thisfld) ((thisfld).type)
 #define FIELD_NAME(thisfld) ((thisfld).name)
 #define FIELD_BITPOS(thisfld) ((thisfld).loc.bitpos)
-#define FIELD_ARTIFICIAL(thisfld) ((thisfld).loc.artificial)
+#define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
+#define FIELD_STATIC_KIND(thisfld) ((thisfld).static_kind)
 #define FIELD_PHYSNAME(thisfld) ((thisfld).loc.physname)
 #define FIELD_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
 #define SET_FIELD_PHYSNAME(thisfld, name) \
-  ((thisfld).bitsize = -1, FIELD_PHYSNAME(thisfld) = (name))
+  ((thisfld).static_kind = 1, FIELD_PHYSNAME(thisfld) = (name))
 #define SET_FIELD_PHYSADDR(thisfld, name) \
-  ((thisfld).bitsize = -2, FIELD_PHYSADDR(thisfld) = (name))
+  ((thisfld).static_kind = 2, FIELD_PHYSADDR(thisfld) = (name))
 #define TYPE_FIELD(thistype, n) TYPE_MAIN_TYPE(thistype)->fields[n]
 #define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE(TYPE_FIELD(thistype, n))
 #define TYPE_FIELD_NAME(thistype, n) FIELD_NAME(TYPE_FIELD(thistype, n))
@@ -856,8 +860,9 @@ extern void allocate_cplus_struct_type (struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n)))
 
-#define TYPE_FIELD_STATIC(thistype, n) (TYPE_MAIN_TYPE (thistype)->fields[n].bitsize < 0)
-#define TYPE_FIELD_STATIC_HAS_ADDR(thistype, n) (TYPE_MAIN_TYPE (thistype)->fields[n].bitsize == -2)
+#define TYPE_FIELD_STATIC(thistype, n) (TYPE_MAIN_TYPE (thistype)->fields[n].static_kind != 0)
+#define TYPE_FIELD_STATIC_KIND(thistype, n) TYPE_MAIN_TYPE (thistype)->fields[n].static_kind
+#define TYPE_FIELD_STATIC_HAS_ADDR(thistype, n) (TYPE_MAIN_TYPE (thistype)->fields[n].static_kind == 2)
 #define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_PHYSNAME(TYPE_FIELD(thistype, n))
 #define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_PHYSADDR(TYPE_FIELD(thistype, n))
 

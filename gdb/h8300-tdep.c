@@ -34,6 +34,7 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 #include "gdbcmd.h"
+#include "gdb_assert.h"
 
 /* Extra info which is saved in each frame_info. */
 struct frame_extra_info
@@ -864,28 +865,38 @@ h8300_register_name (int regno)
 }
 
 static void
-h8300_print_register (int regno)
+h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
+		      struct frame_info *frame, int regno)
 {
-  long val = read_register (regno);
+  ULONGEST rval;
+  long val;
   const char *name = h8300_register_name (regno);
 
   if (!name || !*name)
     return;
 
-  printf_filtered ("%-14s ", name);
+  /* FIXME: cagney/2002-10-22: The code below assumes that VAL is at
+     least 4 bytes (32 bits) in size and hence is large enough to hold
+     the largest h8300 register.  Should instead be using ULONGEST and
+     the phex() functions.  */
+  gdb_assert (sizeof (val) >= 4);
+  frame_read_unsigned_register (frame, regno, &rval);
+  val = rval;
+
+  fprintf_filtered (file, "%-14s ", name);
   if (h8300hmode)
     {
       if (val)
-	printf_filtered ("0x%08lx   %-8ld", val, val);
+	fprintf_filtered (file, "0x%08lx   %-8ld", val, val);
       else
-	printf_filtered ("0x%-8lx   %-8ld", val, val);
+	fprintf_filtered (file, "0x%-8lx   %-8ld", val, val);
     }
   else
     {
       if (val)
-	printf_filtered ("0x%04lx   %-4ld", val, val);
+	fprintf_filtered (file, "0x%04lx   %-4ld", val, val);
       else
-	printf_filtered ("0x%-4lx   %-4ld", val, val);
+	fprintf_filtered (file, "0x%-4lx   %-4ld", val, val);
     }
   if (regno == E_CCR_REGNUM)
     {
@@ -895,39 +906,39 @@ h8300_print_register (int regno)
       unsigned char l;
       frame_register_read (selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (E_CCR_REGNUM) - 1];
-      printf_unfiltered ("\t");
-      printf_unfiltered ("I-%d ", (l & 0x80) != 0);
-      printf_unfiltered ("UI-%d ", (l & 0x40) != 0);
-      printf_unfiltered ("H-%d ", (l & 0x20) != 0);
-      printf_unfiltered ("U-%d ", (l & 0x10) != 0);
+      fprintf_filtered (file, "\t");
+      fprintf_filtered (file, "I-%d ", (l & 0x80) != 0);
+      fprintf_filtered (file, "UI-%d ", (l & 0x40) != 0);
+      fprintf_filtered (file, "H-%d ", (l & 0x20) != 0);
+      fprintf_filtered (file, "U-%d ", (l & 0x10) != 0);
       N = (l & 0x8) != 0;
       Z = (l & 0x4) != 0;
       V = (l & 0x2) != 0;
       C = (l & 0x1) != 0;
-      printf_unfiltered ("N-%d ", N);
-      printf_unfiltered ("Z-%d ", Z);
-      printf_unfiltered ("V-%d ", V);
-      printf_unfiltered ("C-%d ", C);
+      fprintf_filtered (file, "N-%d ", N);
+      fprintf_filtered (file, "Z-%d ", Z);
+      fprintf_filtered (file, "V-%d ", V);
+      fprintf_filtered (file, "C-%d ", C);
       if ((C | Z) == 0)
-	printf_unfiltered ("u> ");
+	fprintf_filtered (file, "u> ");
       if ((C | Z) == 1)
-	printf_unfiltered ("u<= ");
+	fprintf_filtered (file, "u<= ");
       if ((C == 0))
-	printf_unfiltered ("u>= ");
+	fprintf_filtered (file, "u>= ");
       if (C == 1)
-	printf_unfiltered ("u< ");
+	fprintf_filtered (file, "u< ");
       if (Z == 0)
-	printf_unfiltered ("!= ");
+	fprintf_filtered (file, "!= ");
       if (Z == 1)
-	printf_unfiltered ("== ");
+	fprintf_filtered (file, "== ");
       if ((N ^ V) == 0)
-	printf_unfiltered (">= ");
+	fprintf_filtered (file, ">= ");
       if ((N ^ V) == 1)
-	printf_unfiltered ("< ");
+	fprintf_filtered (file, "< ");
       if ((Z | (N ^ V)) == 0)
-	printf_unfiltered ("> ");
+	fprintf_filtered (file, "> ");
       if ((Z | (N ^ V)) == 1)
-	printf_unfiltered ("<= ");
+	fprintf_filtered (file, "<= ");
     }
   else if (regno == E_EXR_REGNUM && h8300smode)
     {
@@ -936,23 +947,24 @@ h8300_print_register (int regno)
       unsigned char l;
       frame_register_read (selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (E_EXR_REGNUM) - 1];
-      printf_unfiltered ("\t");
-      printf_unfiltered ("T-%d - - - ", (l & 0x80) != 0);
-      printf_unfiltered ("I2-%d ", (l & 4) != 0);
-      printf_unfiltered ("I1-%d ", (l & 2) != 0);
-      printf_unfiltered ("I0-%d", (l & 1) != 0);
+      fprintf_filtered (file, "\t");
+      fprintf_filtered (file, "T-%d - - - ", (l & 0x80) != 0);
+      fprintf_filtered (file, "I2-%d ", (l & 4) != 0);
+      fprintf_filtered (file, "I1-%d ", (l & 2) != 0);
+      fprintf_filtered (file, "I0-%d", (l & 1) != 0);
     }
-  printf_filtered ("\n");
+  fprintf_filtered (file, "\n");
 }
 
 static void
-h8300_do_registers_info (int regno, int cpregs)
+h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
+			    struct frame_info *frame, int regno, int cpregs)
 {
   if (regno < 0)
     for (regno = 0; regno < E_NUM_REGS; ++regno)
-      h8300_print_register (regno);
+      h8300_print_register (gdbarch, file, frame, regno);
   else
-    h8300_print_register (regno);
+    h8300_print_register (gdbarch, file, frame, regno);
 }
 
 static CORE_ADDR
@@ -1085,7 +1097,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_virtual_size (gdbarch, h8300_register_raw_size);
   set_gdbarch_max_register_virtual_size (gdbarch, h8300h_reg_size);
   set_gdbarch_register_virtual_type (gdbarch, h8300_register_virtual_type);
-  set_gdbarch_do_registers_info (gdbarch, h8300_do_registers_info);
+  set_gdbarch_print_registers_info (gdbarch, h8300_print_registers_info);
   set_gdbarch_print_float_info (gdbarch, h8300_print_float_info);
 
   /*

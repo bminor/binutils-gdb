@@ -528,7 +528,16 @@ extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
 
 extern int breakpoint_inserted_here_p (CORE_ADDR);
 
-extern int frame_in_dummy (struct frame_info *);
+/* FIXME: cagney/2002-11-10: The current [generic] dummy-frame code
+   implements a functional superset of this function.  The only reason
+   it hasn't been removed is because some architectures still don't
+   use the new framework.  Once they have been fixed, this can go.  */
+/* FIXME: cagney/2002-11-10: There should be a function (hmm,
+   something like, enum { NORMAL_FRAME, DUMMY_FRAME, SIGTRAMP_FRAME }
+   get_frame_type() ...) that the caller can use to determine the
+   frame's type.  This could replace this function, PC_IN_CALL_DUMMY,
+   and fi->signal_handler_caller.  */
+extern int deprecated_frame_in_dummy (struct frame_info *);
 
 extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 

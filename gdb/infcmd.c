@@ -42,6 +42,8 @@
 #include "event-top.h"
 #include "parser-defs.h"
 #include "regcache.h"
+#include "reggroups.h"
+#include <ctype.h>
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -1572,10 +1574,9 @@ default_print_registers_info (struct gdbarch *gdbarch,
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
   char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
 
-  /* FIXME: cagney/2002-03-08: This should be deprecated.  */
-  if (DO_REGISTERS_INFO_P ())
+  if (DEPRECATED_DO_REGISTERS_INFO_P ())
     {
-      DO_REGISTERS_INFO (regnum, print_all);
+      DEPRECATED_DO_REGISTERS_INFO (regnum, print_all);
       return;
     }
 
@@ -1585,11 +1586,14 @@ default_print_registers_info (struct gdbarch *gdbarch,
          specific reg.  */
       if (regnum == -1)
 	{
-	  if (!print_all)
+	  if (print_all)
 	    {
-	      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+	      if (!gdbarch_register_reggroup_p (gdbarch, i, all_reggroup))
 		continue;
-	      if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)))
+	    }
+	  else
+	    {
+	      if (!gdbarch_register_reggroup_p (gdbarch, i, general_reggroup))
 		continue;
 	    }
 	}
@@ -1665,12 +1669,6 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	    }
 	}
 
-      /* The SPARC wants to print even-numbered float regs as doubles
-         in addition to printing them as floats.  */
-#ifdef PRINT_REGISTER_HOOK
-      PRINT_REGISTER_HOOK (i);
-#endif
-
       fprintf_filtered (file, "\n");
     }
 }
@@ -1693,35 +1691,89 @@ registers_info (char *addr_exp, int fpregs)
       return;
     }
 
-  do
+  while (*addr_exp != '\0')
     {
+      char *start;
+      const char *end;
+
+      /* Keep skipping leading white space.  */
+      if (isspace ((*addr_exp)))
+	{
+	  addr_exp++;
+	  continue;
+	}
+
+      /* Discard any leading ``$''.  Check that there is something
+         resembling a register following it.  */
       if (addr_exp[0] == '$')
 	addr_exp++;
+      if (isspace ((*addr_exp)) || (*addr_exp) == '\0')
+	error ("Missing register name");
+
+      /* Find the start/end of this register name/num/group.  */
+      start = addr_exp;
+      while ((*addr_exp) != '\0' && !isspace ((*addr_exp)))
+	addr_exp++;
       end = addr_exp;
-      while (*end != '\0' && *end != ' ' && *end != '\t')
-	++end;
-      numregs = NUM_REGS + NUM_PSEUDO_REGS;
+      
+      /* Figure out what we've found and display it.  */
 
-      regnum = frame_map_name_to_regnum (addr_exp, end - addr_exp);
-      if (regnum >= 0)
-	goto found;
+      /* A register name?  */
+      {
+	int regnum = frame_map_name_to_regnum (start, end - start);
+	if (regnum >= 0)
+	  {
+	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
+					  selected_frame, regnum, fpregs);
+	    continue;
+	  }
+      }
+	
+      /* A register number?  (how portable is this one?).  */
+      {
+	char *endptr;
+	int regnum = strtol (start, &endptr, 0);
+	if (endptr == end
+	    && regnum >= 0
+	    && regnum < NUM_REGS + NUM_PSEUDO_REGS)
+	  {
+	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
+					  selected_frame, regnum, fpregs);
+	    continue;
+	  }
+      }
 
-      regnum = numregs;
+      /* A register group?  */
+      {
+	struct reggroup *const *group;
+	for (group = reggroups (current_gdbarch);
+	     (*group) != NULL;
+	     group++)
+	  {
+	    /* Don't bother with a length check.  Should the user
+	       enter a short register group name, go with the first
+	       group that matches.  */
+	    if (strncmp (start, reggroup_name ((*group)), end - start) == 0)
+	      break;
+	  }
+	if ((*group) != NULL)
+	  {
+	    int regnum;
+	    for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	      {
+		if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
+						 (*group)))
+		  gdbarch_print_registers_info (current_gdbarch,
+						gdb_stdout, selected_frame,
+						regnum, fpregs);
+	      }
+	    continue;
+	  }
+      }
 
-      if (*addr_exp >= '0' && *addr_exp <= '9')
-	regnum = atoi (addr_exp);	/* Take a number */
-      if (regnum >= numregs)	/* Bad name, or bad number */
-	error ("%.*s: invalid register", (int) (end - addr_exp), addr_exp);
-
-    found:
-      gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
-				    selected_frame, regnum, fpregs);
-
-      addr_exp = end;
-      while (*addr_exp == ' ' || *addr_exp == '\t')
-	++addr_exp;
+      /* Nothing matched.  */
+      error ("Invalid register `%.*s'", (int) (end - start), start);
     }
-  while (*addr_exp != '\0');
 }
 
 void
@@ -1740,6 +1792,11 @@ static void
 print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
 		   struct frame_info *frame, const char *args)
 {
+  if (!target_has_registers)
+    error ("The program has no registers now.");
+  if (selected_frame == NULL)
+    error ("No selected frame.");
+
   if (gdbarch_print_vector_info_p (gdbarch))
     gdbarch_print_vector_info (gdbarch, file, frame, args);
   else
@@ -1747,14 +1804,9 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
       int regnum;
       int printed_something = 0;
 
-      if (!target_has_registers)
-	error ("The program has no registers now.");
-      if (selected_frame == NULL)
-	error ("No selected frame.");
-
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
 	{
-	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (regnum)))
+	  if (gdbarch_register_reggroup_p (gdbarch, regnum, vector_reggroup))
 	    {
 	      printed_something = 1;
 	      gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);
@@ -1907,6 +1959,11 @@ static void
 print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		  struct frame_info *frame, const char *args)
 {
+  if (!target_has_registers)
+    error ("The program has no registers now.");
+  if (selected_frame == NULL)
+    error ("No selected frame.");
+
   if (gdbarch_print_float_info_p (gdbarch))
     gdbarch_print_float_info (gdbarch, file, frame, args);
   else
@@ -1920,14 +1977,9 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
       int regnum;
       int printed_something = 0;
 
-      if (!target_has_registers)
-	error ("The program has no registers now.");
-      if (selected_frame == NULL)
-	error ("No selected frame.");
-
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
 	{
-	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	  if (gdbarch_register_reggroup_p (gdbarch, regnum, float_reggroup))
 	    {
 	      printed_something = 1;
 	      gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);

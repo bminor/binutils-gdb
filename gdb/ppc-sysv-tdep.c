@@ -175,7 +175,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     {
       char val_buf[4];
       store_address (val_buf, 4, struct_addr);
-      memcpy (&registers[REGISTER_BYTE (greg)], val_buf, 4);
+      memcpy (&deprecated_registers[REGISTER_BYTE (greg)], val_buf, 4);
       greg++;
     }
   /* Now fill in the registers and stack... */
@@ -192,7 +192,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      if (len > 8)
 		printf_unfiltered (
 				   "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
-	      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM + freg)],
+	      memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + freg)],
 		      VALUE_CONTENTS (arg), len);
 	      freg++;
 	    }
@@ -222,9 +222,9 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      if ((greg & 1) == 0)
 		greg++;
 
-	      memcpy (&registers[REGISTER_BYTE (greg)],
+	      memcpy (&deprecated_registers[REGISTER_BYTE (greg)],
 		      VALUE_CONTENTS (arg), 4);
-	      memcpy (&registers[REGISTER_BYTE (greg + 1)],
+	      memcpy (&deprecated_registers[REGISTER_BYTE (greg + 1)],
 		      VALUE_CONTENTS (arg) + 4, 4);
 	      greg += 2;
 	    }
@@ -247,7 +247,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    }
 	  if (greg <= 10)
 	    {
-	      memcpy (&registers[REGISTER_BYTE (greg)], val_buf, 4);
+	      memcpy (&deprecated_registers[REGISTER_BYTE (greg)], val_buf, 4);
 	      greg++;
 	    }
 	  else
@@ -268,7 +268,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      memcpy (v_val_buf, VALUE_CONTENTS (arg), len);
 	      if (vreg <= 13)
 		{
-		  memcpy (&registers[REGISTER_BYTE (tdep->ppc_vr0_regnum
+		  memcpy (&deprecated_registers[REGISTER_BYTE (tdep->ppc_vr0_regnum
 						    + vreg)],
 			  v_val_buf, 16);
 		  vreg++;

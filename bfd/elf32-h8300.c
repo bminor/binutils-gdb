@@ -2,21 +2,21 @@
    Copyright 1993, 1995, 1998, 1999, 2001, 2002
    Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -61,8 +61,7 @@ static bfd_reloc_status_type special
 /* This does not include any relocation information, but should be
    good enough for GDB or objdump to read the file.  */
 
-static reloc_howto_type h8_elf_howto_table[] =
-{
+static reloc_howto_type h8_elf_howto_table[] = {
 #define R_H8_NONE_X 0
   HOWTO (R_H8_NONE,		/* type */
 	 0,			/* rightshift */
@@ -221,16 +220,14 @@ static reloc_howto_type h8_elf_howto_table[] =
 
 /* This structure is used to map BFD reloc codes to H8 ELF relocs.  */
 
-struct elf_reloc_map
-{
+struct elf_reloc_map {
   bfd_reloc_code_real_type bfd_reloc_val;
   unsigned char howto_index;
 };
 
 /* An array mapping BFD reloc codes to SH ELF relocs.  */
 
-static const struct elf_reloc_map h8_reloc_map[] =
-{
+static const struct elf_reloc_map h8_reloc_map[] = {
   { BFD_RELOC_NONE, R_H8_NONE_X },
   { BFD_RELOC_32, R_H8_DIR32_X },
   { BFD_RELOC_16, R_H8_DIR16_X },
@@ -271,7 +268,7 @@ elf32_h8_info_to_howto (abfd, bfd_reloc, elf_reloc)
 
   r = ELF32_R_TYPE (elf_reloc->r_info);
   for (i = 0; i < sizeof (h8_elf_howto_table) / sizeof (reloc_howto_type); i++)
-    if (h8_elf_howto_table[i].type== r)
+    if (h8_elf_howto_table[i].type == r)
       {
 	bfd_reloc->howto = &h8_elf_howto_table[i];
 	return;
@@ -830,14 +827,34 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
 
+		/* Get the instruction code being relaxed.  */
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+
 		/* If the previous instruction conditionally jumped around
 		   this instruction, we may be able to reverse the condition
 		   and redirect the previous instruction to the target of
 		   this instruction.
 
 		   Such sequences are used by the compiler to deal with
-		   long conditional branches.  */
-		if ((int) gap <= 130
+		   long conditional branches.
+
+		   Only perform this optimisation for jumps (code 0x5a) not
+		   subroutine calls, as otherwise it could transform:
+		   
+		   	             mov.w   r0,r0
+		   	             beq     .L1
+		         	     jsr     @_bar
+		              .L1:   rts
+		              _bar:  rts
+		   into:
+		   	             mov.w   r0,r0
+			             bne     _bar
+			             rts
+			      _bar:  rts
+
+		   which changes the call (jsr) into a branch (bne).  */
+		if (code == 0x5a
+		    && (int) gap <= 130
 		    && (int) gap >= -128
 		    && last_reloc
 		    && ELF32_R_TYPE (last_reloc->r_info) == R_H8_PCREL8
@@ -870,11 +887,10 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 			  = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					  ELF32_R_TYPE (R_H8_NONE));
 
-		        last_reloc->r_info
+			last_reloc->r_info
 			  = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-					ELF32_R_TYPE (R_H8_PCREL8));
-		        last_reloc->r_addend = irel->r_addend;
-
+					  ELF32_R_TYPE (R_H8_PCREL8));
+			last_reloc->r_addend = irel->r_addend;
 
 			code = bfd_get_8 (abfd,
 					  contents + last_reloc->r_offset - 1);
@@ -893,9 +909,6 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 			break;
 		      }
 		  }
-
-		/* We could not eliminate this jump, so just shorten it.  */
-		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
 		if (code == 0x5e)
 		  bfd_put_8 (abfd, 0x55, contents + irel->r_offset - 1);
@@ -938,18 +951,18 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	    /* If the distance is within -126..+130 inclusive, then we can
 	       relax this jump.  +130 is valid since the target will move
 	       two bytes closer if we do relax this branch.  */
-	    if ((int)gap >= -126 && (int)gap <= 130)
+	    if ((int) gap >= -126 && (int) gap <= 130)
 	      {
-	        unsigned char code;
+		unsigned char code;
 
-	        /* Note that we've changed the relocs, section contents,
+		/* Note that we've changed the relocs, section contents,
 		   etc.  */
-	        elf_section_data (sec)->relocs = internal_relocs;
-	        elf_section_data (sec)->this_hdr.contents = contents;
+		elf_section_data (sec)->relocs = internal_relocs;
+		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
 
-	        /* Get the opcode.  */
-	        code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+		/* Get the opcode.  */
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
 
 		if (code == 0x58)
 		  {
@@ -967,18 +980,18 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		  abort ();
 
 		/* Fix the relocation's type.  */
-	        irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					     R_H8_PCREL8);
-	        irel->r_offset--;
+		irel->r_offset--;
 
-	        /* Delete two bytes of data.  */
-	        if (!elf32_h8_relax_delete_bytes (abfd, sec,
+		/* Delete two bytes of data.  */
+		if (!elf32_h8_relax_delete_bytes (abfd, sec,
 						  irel->r_offset + 1, 2))
 		  goto error_return;
 
-	        /* That will change things, so, we should relax again.
+		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */
-	        *again = true;
+		*again = true;
 	      }
 	    break;
 	  }
@@ -990,53 +1003,53 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	    bfd_vma value = symval + irel->r_addend;
 
 	    if ((bfd_get_mach (abfd) == bfd_mach_h8300
-	         && value >= 0xff00
-	         && value <= 0xffff)
-	        || ((bfd_get_mach (abfd) == bfd_mach_h8300h
+		 && value >= 0xff00
+		 && value <= 0xffff)
+		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
 		     || bfd_get_mach (abfd) == bfd_mach_h8300s)
 		    && value >= 0xffff00
 		    && value <= 0xffffff))
 	      {
-	        unsigned char code;
+		unsigned char code;
 
-	        /* Note that we've changed the relocs, section contents,
+		/* Note that we've changed the relocs, section contents,
 		   etc.  */
-	        elf_section_data (sec)->relocs = internal_relocs;
-	        elf_section_data (sec)->this_hdr.contents = contents;
+		elf_section_data (sec)->relocs = internal_relocs;
+		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
 
-	        /* Get the opcode.  */
-	        code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+		/* Get the opcode.  */
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
 
-	        /* Sanity check.  */
-	        if (code != 0x6a)
+		/* Sanity check.  */
+		if (code != 0x6a)
 		  abort ();
 
-	        code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
-	        if ((code & 0xf0) == 0x00)
+		if ((code & 0xf0) == 0x00)
 		  bfd_put_8 (abfd,
 			     (code & 0xf) | 0x20,
-			      contents + irel->r_offset - 2);
-	        else if ((code & 0xf0) == 0x80)
+			     contents + irel->r_offset - 2);
+		else if ((code & 0xf0) == 0x80)
 		  bfd_put_8 (abfd,
 			     (code & 0xf) | 0x30,
-			      contents + irel->r_offset - 2);
-	        else
+			     contents + irel->r_offset - 2);
+		else
 		  abort ();
 
-	        /* Fix the relocation's type.  */
-	        irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+		/* Fix the relocation's type.  */
+		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					     R_H8_DIR8);
 
-	        /* Delete two bytes of data.  */
-	        if (!elf32_h8_relax_delete_bytes (abfd, sec,
+		/* Delete two bytes of data.  */
+		if (!elf32_h8_relax_delete_bytes (abfd, sec,
 						  irel->r_offset + 1, 2))
 		  goto error_return;
 
-	        /* That will change things, so, we should relax again.
+		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */
-	        *again = true;
+		*again = true;
 	      }
 	    break;
 	  }
@@ -1048,52 +1061,52 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	    bfd_vma value = symval + irel->r_addend;
 
 	    if ((bfd_get_mach (abfd) == bfd_mach_h8300
-	         && value >= 0xff00
-	         && value <= 0xffff)
-	        || ((bfd_get_mach (abfd) == bfd_mach_h8300h
+		 && value >= 0xff00
+		 && value <= 0xffff)
+		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
 		     || bfd_get_mach (abfd) == bfd_mach_h8300s)
 		    && value >= 0xffff00
 		    && value <= 0xffffff))
 	      {
-	        unsigned char code;
+		unsigned char code;
 
-	        /* Note that we've changed the relocs, section contents,
+		/* Note that we've changed the relocs, section contents,
 		   etc.  */
-	        elf_section_data (sec)->relocs = internal_relocs;
-	        elf_section_data (sec)->this_hdr.contents = contents;
+		elf_section_data (sec)->relocs = internal_relocs;
+		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
 
-	        /* Get the opcode.  */
-	        code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+		/* Get the opcode.  */
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
 
-	        /* Sanity check.  */
-	        if (code != 0x6a)
+		/* Sanity check.  */
+		if (code != 0x6a)
 		  abort ();
 
-	        code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
-	        if ((code & 0xf0) == 0x00)
+		if ((code & 0xf0) == 0x00)
 		  bfd_put_8 (abfd,
 			     (code & 0xf) | 0x20,
-			      contents + irel->r_offset - 2);
-	        else if ((code & 0xf0) == 0x80)
+			     contents + irel->r_offset - 2);
+		else if ((code & 0xf0) == 0x80)
 		  bfd_put_8 (abfd,
 			     (code & 0xf) | 0x30,
-			      contents + irel->r_offset - 2);
-	        else
+			     contents + irel->r_offset - 2);
+		else
 		  abort ();
 
-	        /* Fix the relocation's type.  */
-	        irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+		/* Fix the relocation's type.  */
+		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					     R_H8_DIR8);
 
-	        /* Delete two bytes of data.  */
-	        if (!elf32_h8_relax_delete_bytes (abfd, sec, irel->r_offset, 2))
+		/* Delete two bytes of data.  */
+		if (!elf32_h8_relax_delete_bytes (abfd, sec, irel->r_offset, 2))
 		  goto error_return;
 
-	        /* That will change things, so, we should relax again.
+		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */
-	        *again = true;
+		*again = true;
 	      }
 	  }
 
@@ -1107,34 +1120,34 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 
 	    if (value <= 0x7fff || value >= 0xff8000)
 	      {
-	        unsigned char code;
+		unsigned char code;
 
-	        /* Note that we've changed the relocs, section contents,
+		/* Note that we've changed the relocs, section contents,
 		   etc.  */
-	        elf_section_data (sec)->relocs = internal_relocs;
-	        elf_section_data (sec)->this_hdr.contents = contents;
+		elf_section_data (sec)->relocs = internal_relocs;
+		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
 
-	        /* Get the opcode.  */
-	        code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		/* Get the opcode.  */
+		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
-	        /* We just need to turn off bit 0x20.  */
-	        code &= ~0x20;
+		/* We just need to turn off bit 0x20.  */
+		code &= ~0x20;
 
-	        bfd_put_8 (abfd, code, contents + irel->r_offset - 1);
+		bfd_put_8 (abfd, code, contents + irel->r_offset - 1);
 
-	        /* Fix the relocation's type.  */
-	        irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+		/* Fix the relocation's type.  */
+		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					     R_H8_DIR16A8);
 
-	        /* Delete two bytes of data.  */
-	        if (!elf32_h8_relax_delete_bytes (abfd, sec,
+		/* Delete two bytes of data.  */
+		if (!elf32_h8_relax_delete_bytes (abfd, sec,
 						  irel->r_offset + 1, 2))
 		  goto error_return;
 
-	        /* That will change things, so, we should relax again.
+		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */
-	        *again = true;
+		*again = true;
 	      }
 	    break;
 	  }

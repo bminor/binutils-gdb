@@ -1168,14 +1168,39 @@ gdb_setup_readline (void)
     }
 }
 
+/* Disable command input through the standard CLI channels.  Used in
+   the suspend proc for interpreters that use the standard gdb readline
+   interface, like the cli & the mi.  */
+void
+gdb_disable_readline (void)
+{
+  if (event_loop_p)
+    {
+      /* FIXME - It is too heavyweight to delete and remake these
+         every time you run an interpreter that needs readline.
+         It is probably better to have the interpreters cache these,
+         which in turn means that this needs to be moved into interpreter
+         specific code. */
+
+#if 0
+      ui_file_delete (gdb_stdout);
+      ui_file_delete (gdb_stderr);
+      gdb_stdlog = NULL;
+      gdb_stdtarg = NULL;
+#endif
+
+      rl_callback_handler_remove ();
+      delete_file_handler (input_fd);
+    }
+}
+
 void
 _initialize_event_loop (void)
 {
   gdb_setup_readline ();
 
+  /* Tell gdb to use the cli_command_loop as the main loop. */
   if (event_loop_p && command_loop_hook == NULL)
-    {
-      /* Tell gdb to use the cli_command_loop as the main loop. */
-      command_loop_hook = cli_command_loop;
-    }
+    command_loop_hook = cli_command_loop;
 }
+

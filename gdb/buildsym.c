@@ -31,7 +31,7 @@
 #include "gdb_obstack.h"
 #include "symtab.h"
 #include "block.h"
-#include "symfile.h"		/* Needed for "struct complaint", obsavestring */
+#include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
 #include "complaints.h"
@@ -91,19 +91,19 @@ static struct using_direct_node *copy_usings_to_obstack (struct
 
 /* Complaints about the symbols we have encountered.  */
 
-struct complaint block_end_complaint =
+struct deprecated_complaint block_end_complaint =
 {"block end address less than block start address in %s (patched it)", 0, 0};
 
-struct complaint anon_block_end_complaint =
+struct deprecated_complaint anon_block_end_complaint =
 {"block end address 0x%lx less than block start address 0x%lx (patched it)", 0, 0};
 
-struct complaint innerblock_complaint =
+struct deprecated_complaint innerblock_complaint =
 {"inner block not inside outer block in %s", 0, 0};
 
-struct complaint innerblock_anon_complaint =
+struct deprecated_complaint innerblock_anon_complaint =
 {"inner block (0x%lx-0x%lx) not inside outer block (0x%lx-0x%lx)", 0, 0};
 
-struct complaint blockvector_complaint =
+struct deprecated_complaint blockvector_complaint =
 {"block at %s out of order", 0, 0};
 
 /* maintain the lists of symbols and blocks */
@@ -981,7 +981,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	     same.  FIXME: Find out why it is happening.  This is not
 	     believed to happen in most cases (even for coffread.c);
 	     it used to be an abort().  */
-	  static struct complaint msg =
+	  static struct deprecated_complaint msg =
 	  {"Context stack not empty in end_symtab", 0, 0};
 	  complain (&msg);
 	  context_stack_depth = 0;

@@ -966,7 +966,7 @@ rs6000_pop_frame (void)
     }
 
   /* Make sure that all registers are valid.  */
-  read_register_bytes (0, NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, NULL, REGISTER_BYTES);
 
   /* Figure out previous %pc value.  If the function is frameless, it is 
      still in the link register, otherwise walk the frames and retrieve the
@@ -995,7 +995,8 @@ rs6000_pop_frame (void)
       addr = prev_sp + fdata.gpr_offset;
       for (ii = fdata.saved_gpr; ii <= 31; ++ii)
 	{
-	  read_memory (addr, &registers[REGISTER_BYTE (ii)], wordsize);
+	  read_memory (addr, &deprecated_registers[REGISTER_BYTE (ii)],
+		       wordsize);
 	  addr += wordsize;
 	}
     }
@@ -1005,7 +1006,7 @@ rs6000_pop_frame (void)
       addr = prev_sp + fdata.fpr_offset;
       for (ii = fdata.saved_fpr; ii <= 31; ++ii)
 	{
-	  read_memory (addr, &registers[REGISTER_BYTE (ii + FP0_REGNUM)], 8);
+	  read_memory (addr, &deprecated_registers[REGISTER_BYTE (ii + FP0_REGNUM)], 8);
 	  addr += 8;
 	}
     }
@@ -1122,7 +1123,7 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    printf_unfiltered (
 				"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	  memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
 		  VALUE_CONTENTS (arg),
 		  len);
 	  ++f_argno;
@@ -1134,8 +1135,9 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
-	      memcpy (&registers[REGISTER_BYTE (ii + 3)],
+	      memset (&deprecated_registers[REGISTER_BYTE (ii + 3)], 0,
+		      reg_size);
+	      memcpy (&deprecated_registers[REGISTER_BYTE (ii + 3)],
 		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
 		      (len - argbytes) > reg_size
 		        ? reg_size : len - argbytes);
@@ -1151,8 +1153,8 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	{
 	  /* Argument can fit in one register.  No problem.  */
 	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
-	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
-	  memcpy ((char *)&registers[REGISTER_BYTE (ii + 3)] + adj, 
+	  memset (&deprecated_registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
+	  memcpy ((char *)&deprecated_registers[REGISTER_BYTE (ii + 3)] + adj, 
 	          VALUE_CONTENTS (arg), len);
 	}
       ++argno;
@@ -1234,7 +1236,7 @@ ran_out_of_registers_for_arguments:
 		printf_unfiltered (
 				    "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	      memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
 		      VALUE_CONTENTS (arg),
 		      len);
 	      ++f_argno;
@@ -2014,7 +2016,7 @@ e500_store_return_value (struct type *type, char *valbuf)
 
       memcpy (reg_val_buf, valbuf + copied, reg_size);
       copied += reg_size;
-      write_register_gen (regnum, reg_val_buf);
+      deprecated_write_register_gen (regnum, reg_val_buf);
       i++;
     }
 }
@@ -2030,19 +2032,19 @@ rs6000_store_return_value (struct type *type, char *valbuf)
        Say a double_double_double type could be returned in
        FPR1/FPR2/FPR3 triple.  */
 
-    write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
-			  TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
+				     TYPE_LENGTH (type));
   else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       if (TYPE_LENGTH (type) == 16
           && TYPE_VECTOR (type))
-	write_register_bytes (REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
-			      valbuf, TYPE_LENGTH (type));
+	deprecated_write_register_bytes (REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+					 valbuf, TYPE_LENGTH (type));
     }
   else
     /* Everything else is returned in GPR3 and up.  */
-    write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
-			  valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
+				     valbuf, TYPE_LENGTH (type));
 }
 
 /* Extract from an array REGBUF containing the (raw) register state

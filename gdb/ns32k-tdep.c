@@ -470,8 +470,9 @@ ns32k_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 static void
 ns32k_store_return_value (struct type *valtype, char *valbuf)
 {
-  write_register_bytes (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
-			FP0_REGNUM : 0, valbuf, TYPE_LENGTH (valtype));
+  deprecated_write_register_bytes (TYPE_CODE (valtype) == TYPE_CODE_FLT
+				   ? FP0_REGNUM : 0, valbuf,
+				   TYPE_LENGTH (valtype));
 }
 
 static CORE_ADDR

@@ -50,9 +50,15 @@ extern void clear_complaints (struct complaints **complaints,
 			      int less_verbose, int noisy);
 
 
-/* Legacy interfaces to keep the old code working (until it is all
-   converted to the above).  While the structure below contains a
-   number of fields, all but .message are ignored.
+/* Deprecated interfaces to keep the old code working (until it is all
+   converted to the above).  Existing code such as:
+
+     struct deprecated_complaint msg = { "msg", 0, 0 };
+     complaint (&msg);
+
+   should be replaced by:
+
+     complaint (&symtab_complaints, __FILE__, __LINE__, "msg");
 
    Support for complaining about things in the symbol file that aren't
    catastrophic.
@@ -61,13 +67,13 @@ extern void clear_complaints (struct complaints **complaints,
    during a symbol read, we report it.  At the end of symbol reading,
    if verbose, we report how many of each problem we had.  */
 
-struct complaint
+struct deprecated_complaint
 {
   const char *message;
   unsigned counter_ignored;
-  struct complaint *next_ignored;
+  struct deprecated_complaint *next_ignored;
 };
 
-extern void complain (struct complaint *, ...);
+extern void complain (struct deprecated_complaint *, ...);
 
 #endif /* !defined (COMPLAINTS_H) */

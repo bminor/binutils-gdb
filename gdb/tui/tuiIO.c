@@ -124,6 +124,10 @@ static FILE *tui_old_rl_outstream;
 static int tui_readline_pipe[2];
 #endif
 
+/* The last gdb prompt that was registered in readline.
+   This may be the main gdb prompt or a secondary prompt.  */
+static char *tui_rl_saved_prompt;
+
 static unsigned int _tuiHandleResizeDuringIO (unsigned int);
 
 static void
@@ -194,7 +198,7 @@ tui_redisplay_readline (void)
   if (tui_current_key_mode == tui_single_key_mode)
     prompt = "";
   else
-    prompt = get_prompt ();
+    prompt = tui_rl_saved_prompt;
   
   c_pos = -1;
   c_line = -1;
@@ -256,10 +260,15 @@ tui_redisplay_readline (void)
 }
 
 /* Readline callback to prepare the terminal.  It is called once
-   each time we enter readline.  There is nothing to do in curses mode.  */
+   each time we enter readline.  Terminal is already setup in curses mode.  */
 static void
 tui_prep_terminal (void)
 {
+  /* Save the prompt registered in readline to correctly display it.
+     (we can't use gdb_prompt() due to secondary prompts and can't use
+     rl_prompt because it points to an alloca buffer).  */
+  xfree (tui_rl_saved_prompt);
+  tui_rl_saved_prompt = xstrdup (rl_prompt);
 }
 
 /* Readline callback to restore the terminal.  It is called once
@@ -600,7 +609,7 @@ tui_initialize_io ()
       fprintf_unfiltered (gdb_stderr, "Cannot redirect readline output");
       exit (1);
     }
-  setlinebuf (tui_rl_outstream);
+  setvbuf (tui_rl_outstream, (char*) NULL, _IOLBF, 0);
 
 #ifdef O_NONBLOCK
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NONBLOCK);

@@ -352,7 +352,7 @@ tuiShowFrameInfo (struct frame_info *fi)
       sal = find_pc_line (fi->pc,
                           (fi->next != (struct frame_info *) NULL &&
                            !fi->next->signal_handler_caller &&
-                           !frame_in_dummy (fi->next)));
+                           !deprecated_frame_in_dummy (fi->next)));
 
       sourceAlreadyDisplayed = sal.symtab != 0
         && tuiSourceIsDisplayed (sal.symtab->filename);

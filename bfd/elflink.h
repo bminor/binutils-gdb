@@ -2208,10 +2208,9 @@ elf_link_add_object_symbols (abfd, info)
 	}
     }
 
-  /* If this is a non-traditional, non-relocateable link, try to
-     optimize the handling of the .stab/.stabstr sections.  */
+  /* If this is a non-traditional link, try to optimize the handling
+     of the .stab/.stabstr sections.  */
   if (! dynamic
-      && ! info->relocateable
       && ! info->traditional_format
       && info->hash->creator->flavour == bfd_target_elf_flavour
       && is_elf_hash_table (info)
@@ -2342,6 +2341,7 @@ elf_link_create_dynamic_sections (abfd, info)
 	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return false;
+      elf_hash_table (info)->eh_info.hdr_sec = s;
     }
 
   /* Create sections to hold version informations.  These are removed
@@ -4494,6 +4494,8 @@ struct elf_final_link_info
   size_t symbuf_count;
   /* Number of symbols which fit in symbuf.  */
   size_t symbuf_size;
+  /* And same for symshndxbuf.  */
+  size_t shndxbuf_size;
 };
 
 static boolean elf_link_output_sym
@@ -4919,6 +4921,7 @@ elf_bfd_final_link (abfd, info)
   Elf_Internal_Sym elfsym;
   unsigned int i;
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *symtab_shndx_hdr;
   Elf_Internal_Shdr *symstrtab_hdr;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_outext_info eoinfo;
@@ -4972,6 +4975,7 @@ elf_bfd_final_link (abfd, info)
   finfo.symbuf = NULL;
   finfo.symshndxbuf = NULL;
   finfo.symbuf_count = 0;
+  finfo.shndxbuf_size = 0;
   finfo.first_tls_sec = NULL;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     if ((o->flags & SEC_THREAD_LOCAL) != 0
@@ -5192,9 +5196,7 @@ elf_bfd_final_link (abfd, info)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   /* sh_name is set in prep_headers.  */
   symtab_hdr->sh_type = SHT_SYMTAB;
-  symtab_hdr->sh_flags = 0;
-  symtab_hdr->sh_addr = 0;
-  symtab_hdr->sh_size = 0;
+  /* sh_flags, sh_addr and sh_size all start off zero.  */
   symtab_hdr->sh_entsize = sizeof (Elf_External_Sym);
   /* sh_link is set in assign_section_numbers.  */
   /* sh_info is set below.  */
@@ -5221,9 +5223,11 @@ elf_bfd_final_link (abfd, info)
     goto error_return;
   if (elf_numsections (abfd) > SHN_LORESERVE)
     {
-      amt = finfo.symbuf_size;
+      /* Wild guess at number of output symbols.  realloc'd as needed.  */
+      amt = 2 * max_sym_count + elf_numsections (abfd) + 1000;
+      finfo.shndxbuf_size = amt;
       amt *= sizeof (Elf_External_Sym_Shndx);
-      finfo.symshndxbuf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+      finfo.symshndxbuf = (Elf_External_Sym_Shndx *) bfd_zmalloc (amt);
       if (finfo.symshndxbuf == NULL)
 	goto error_return;
     }
@@ -5283,7 +5287,7 @@ elf_bfd_final_link (abfd, info)
 	  if (! elf_link_output_sym (&finfo, (const char *) NULL,
 				     &elfsym, o))
 	    goto error_return;
-	  if (i == SHN_LORESERVE)
+	  if (i == SHN_LORESERVE - 1)
 	    i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	}
     }
@@ -5557,6 +5561,24 @@ elf_bfd_final_link (abfd, info)
 
   /* Now we know the size of the symtab section.  */
   off += symtab_hdr->sh_size;
+
+  symtab_shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  if (symtab_shndx_hdr->sh_name != 0)
+    {
+      symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
+      symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
+      symtab_shndx_hdr->sh_addralign = sizeof (Elf_External_Sym_Shndx);
+      amt = bfd_get_symcount (abfd) * sizeof (Elf_External_Sym_Shndx);
+      symtab_shndx_hdr->sh_size = amt;
+
+      off = _bfd_elf_assign_file_position_for_section (symtab_shndx_hdr,
+						       off, true);
+
+      if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
+	  || (bfd_bwrite ((PTR) finfo.symshndxbuf, amt, abfd) != amt))
+	return false;
+    }
+
 
   /* Finish up and write out the symbol string table (.strtab)
      section.  */
@@ -5832,17 +5854,10 @@ elf_bfd_final_link (abfd, info)
 	goto error_return;
     }
 
-  if (info->eh_frame_hdr && elf_hash_table (info)->dynobj)
+  if (info->eh_frame_hdr)
     {
-      o = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
-				   ".eh_frame_hdr");
-      if (o
-	  && (elf_section_data (o)->sec_info_type
-	      == ELF_INFO_TYPE_EH_FRAME_HDR))
-	{
-	  if (! _bfd_elf_write_section_eh_frame_hdr (abfd, o))
-	    goto error_return;
-	}
+      if (! _bfd_elf_write_section_eh_frame_hdr (abfd, info))
+	goto error_return;
     }
 
   if (finfo.symstrtab != NULL)
@@ -5866,7 +5881,7 @@ elf_bfd_final_link (abfd, info)
   if (finfo.symbuf != NULL)
     free (finfo.symbuf);
   if (finfo.symshndxbuf != NULL)
-    free (finfo.symbuf);
+    free (finfo.symshndxbuf);
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       if ((o->flags & SEC_RELOC) != 0
@@ -5900,7 +5915,7 @@ elf_bfd_final_link (abfd, info)
   if (finfo.symbuf != NULL)
     free (finfo.symbuf);
   if (finfo.symshndxbuf != NULL)
-    free (finfo.symbuf);
+    free (finfo.symshndxbuf);
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       if ((o->flags & SEC_RELOC) != 0
@@ -5959,11 +5974,24 @@ elf_link_output_sym (finfo, name, elfsym, input_sec)
   dest = finfo->symbuf + finfo->symbuf_count;
   destshndx = finfo->symshndxbuf;
   if (destshndx != NULL)
-    destshndx += finfo->symbuf_count;
-  elf_swap_symbol_out (finfo->output_bfd, elfsym, (PTR) dest, (PTR) destshndx);
-  ++finfo->symbuf_count;
+    {
+      if (bfd_get_symcount (finfo->output_bfd) >= finfo->shndxbuf_size)
+	{
+	  bfd_size_type amt;
 
-  ++ bfd_get_symcount (finfo->output_bfd);
+	  amt = finfo->shndxbuf_size * sizeof (Elf_External_Sym_Shndx);
+	  finfo->symshndxbuf = destshndx = bfd_realloc (destshndx, amt * 2);
+	  if (destshndx == NULL)
+	    return false;
+	  memset ((char *) destshndx + amt, 0, amt);
+	  finfo->shndxbuf_size *= 2;
+	}
+      destshndx += bfd_get_symcount (finfo->output_bfd);
+    }
+
+  elf_swap_symbol_out (finfo->output_bfd, elfsym, (PTR) dest, (PTR) destshndx);
+  finfo->symbuf_count += 1;
+  bfd_get_symcount (finfo->output_bfd) += 1;
 
   return true;
 }
@@ -5988,20 +6016,6 @@ elf_link_flush_output_syms (finfo)
 	return false;
 
       hdr->sh_size += amt;
-
-      if (finfo->symshndxbuf != NULL)
-	{
-	  hdr = &elf_tdata (finfo->output_bfd)->symtab_shndx_hdr;
-	  pos = hdr->sh_offset + hdr->sh_size;
-	  amt = finfo->symbuf_count * sizeof (Elf_External_Sym_Shndx);
-	  if (bfd_seek (finfo->output_bfd, pos, SEEK_SET) != 0
-	      || (bfd_bwrite ((PTR) finfo->symshndxbuf, amt, finfo->output_bfd)
-		  != amt))
-	    return false;
-
-	  hdr->sh_size += amt;
-	}
-
       finfo->symbuf_count = 0;
     }
 
@@ -6818,12 +6832,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	     from discarded sections and section symbols from
 	     removed link-once sections.  Complain about relocs
 	     against discarded sections.  Zero relocs against removed
-	     link-once sections.  We should really complain if
-	     anything in the final link tries to use it, but
-	     DWARF-based exception handling might have an entry in
-	     .eh_frame to describe a routine in the linkonce section,
-	     and it turns out to be hard to remove the .eh_frame
-	     entry too.  FIXME.  */
+	     link-once sections.  */
 	  if (!finfo->info->relocateable
 	      && !elf_section_ignore_discarded_relocs (o))
 	    {
@@ -6970,6 +6979,16 @@ elf_link_input_bfd (finfo, input_bfd)
 		    {
 		      rel_hash++;
 		      next_erel = 0;
+		    }
+
+		  irela->r_offset = _bfd_elf_section_offset (output_bfd,
+							     finfo->info, o,
+							     irela->r_offset);
+		  if (irela->r_offset >= (bfd_vma) -2)
+		    {
+		      /* This is a reloc for a deleted entry or somesuch.  */
+		      memset (irela, 0, sizeof (*irela));
+		      continue;
 		    }
 
 		  irela->r_offset += o->output_offset;
@@ -7145,19 +7164,14 @@ elf_link_input_bfd (finfo, input_bfd)
 	    return false;
 	  break;
 	case ELF_INFO_TYPE_MERGE:
-	  if (! (_bfd_write_merged_section
-		 (output_bfd, o, elf_section_data (o)->sec_info)))
+	  if (! _bfd_write_merged_section (output_bfd, o,
+					   elf_section_data (o)->sec_info))
 	    return false;
 	  break;
 	case ELF_INFO_TYPE_EH_FRAME:
 	  {
-	    asection *ehdrsec;
-
-	    ehdrsec
-	      = bfd_get_section_by_name (elf_hash_table (finfo->info)->dynobj,
-					 ".eh_frame_hdr");
-	    if (! (_bfd_elf_write_section_eh_frame (output_bfd, o, ehdrsec,
-						    contents)))
+	    if (! _bfd_elf_write_section_eh_frame (output_bfd, finfo->info,
+						   o, contents))
 	      return false;
 	  }
 	  break;
@@ -8329,13 +8343,17 @@ elf_reloc_symbol_deleted_p (offset, cookie)
 
   for (; rcookie->rel < rcookie->relend; rcookie->rel++)
     {
-      unsigned long r_symndx = ELF_R_SYM (rcookie->rel->r_info);
+      unsigned long r_symndx;
 
       if (! rcookie->bad_symtab)
 	if (rcookie->rel->r_offset > offset)
 	  return false;
       if (rcookie->rel->r_offset != offset)
 	continue;
+
+      r_symndx = ELF_R_SYM (rcookie->rel->r_info);
+      if (r_symndx == SHN_UNDEF)
+	return true;
 
       if (r_symndx >= rcookie->locsymcount
 	  || ELF_ST_BIND (rcookie->locsyms[r_symndx].st_info) != STB_LOCAL)
@@ -8388,23 +8406,17 @@ elf_bfd_discard_info (output_bfd, info)
      struct bfd_link_info *info;
 {
   struct elf_reloc_cookie cookie;
-  asection *stab, *eh, *ehdr;
+  asection *stab, *eh;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_backend_data *bed;
   bfd *abfd;
+  unsigned int count;
   boolean ret = false;
-  boolean strip = info->strip == strip_all || info->strip == strip_debugger;
 
-  if (info->relocateable
-      || info->traditional_format
+  if (info->traditional_format
       || info->hash->creator->flavour != bfd_target_elf_flavour
       || ! is_elf_hash_table (info))
     return false;
-
-  ehdr = NULL;
-  if (elf_hash_table (info)->dynobj != NULL)
-    ehdr = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
-				    ".eh_frame_hdr");
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
     {
@@ -8416,27 +8428,22 @@ elf_bfd_discard_info (output_bfd, info)
       if ((abfd->flags & DYNAMIC) != 0)
 	continue;
 
-      eh = NULL;
-      if (ehdr)
-	{
-	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
-	  if (eh && (eh->_raw_size == 0
-		     || bfd_is_abs_section (eh->output_section)))
-	    eh = NULL;
-	}
+      eh = bfd_get_section_by_name (abfd, ".eh_frame");
+      if (eh != NULL
+	  && (eh->_raw_size == 0
+	      || bfd_is_abs_section (eh->output_section)))
+	eh = NULL;
 
-      stab = NULL;
-      if (!strip)
-	{
-	  stab = bfd_get_section_by_name (abfd, ".stab");
-	  if (stab && (stab->_raw_size == 0
-		       || bfd_is_abs_section (stab->output_section)))
-	    stab = NULL;
-	}
-      if ((! stab
-	   || elf_section_data(stab)->sec_info_type != ELF_INFO_TYPE_STABS)
-	  && ! eh
-	  && (strip || ! bed->elf_backend_discard_info))
+      stab = bfd_get_section_by_name (abfd, ".stab");
+      if (stab != NULL
+	  && (stab->_raw_size == 0
+	      || bfd_is_abs_section (stab->output_section)
+	      || elf_section_data (stab)->sec_info_type != ELF_INFO_TYPE_STABS))
+	stab = NULL;
+
+      if (stab == NULL
+	  && eh == NULL
+	  && bed->elf_backend_discard_info == NULL)
 	continue;
 
       symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -8445,8 +8452,7 @@ elf_bfd_discard_info (output_bfd, info)
       cookie.bad_symtab = elf_bad_symtab (abfd);
       if (cookie.bad_symtab)
 	{
-	  cookie.locsymcount =
-	    symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+	  cookie.locsymcount = symtab_hdr->sh_size / sizeof (Elf_External_Sym);
 	  cookie.extsymoff = 0;
 	}
       else
@@ -8465,16 +8471,19 @@ elf_bfd_discard_info (output_bfd, info)
 	    return false;
 	}
 
-      if (stab)
+      if (stab != NULL)
 	{
-	  cookie.rels = (NAME(_bfd_elf,link_read_relocs)
-			 (abfd, stab, (PTR) NULL, (Elf_Internal_Rela *) NULL,
-			  info->keep_memory));
-	  if (cookie.rels)
+	  cookie.rels = NULL;
+	  count = stab->reloc_count;
+	  if (count != 0)
+	    cookie.rels = (NAME(_bfd_elf,link_read_relocs)
+			   (abfd, stab, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+			    info->keep_memory));
+	  if (cookie.rels != NULL)
 	    {
 	      cookie.rel = cookie.rels;
-	      cookie.relend =
-		cookie.rels + stab->reloc_count * bed->s->int_rels_per_ext_rel;
+	      cookie.relend = cookie.rels;
+	      cookie.relend += count * bed->s->int_rels_per_ext_rel;
 	      if (_bfd_discard_section_stabs (abfd, stab,
 					      elf_section_data (stab)->sec_info,
 					      elf_reloc_symbol_deleted_p,
@@ -8485,39 +8494,32 @@ elf_bfd_discard_info (output_bfd, info)
 	    }
 	}
 
-      if (eh)
+      if (eh != NULL)
 	{
 	  cookie.rels = NULL;
-	  cookie.rel = NULL;
-	  cookie.relend = NULL;
-	  if (eh->reloc_count)
+	  count = eh->reloc_count;
+	  if (count != 0)
 	    cookie.rels = (NAME(_bfd_elf,link_read_relocs)
 			   (abfd, eh, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 			    info->keep_memory));
-	  if (cookie.rels)
-	    {
-	      cookie.rel = cookie.rels;
-	      cookie.relend =
-		cookie.rels + eh->reloc_count * bed->s->int_rels_per_ext_rel;
-	    }
-	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh, ehdr,
+	  cookie.rel = cookie.rels;
+	  cookie.relend = cookie.rels;
+	  if (cookie.rels != NULL)
+	    cookie.relend += count * bed->s->int_rels_per_ext_rel;
+
+	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh,
 						 elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    {
-	      /* Relocs have been edited.  Ensure edited version is
-		 used later in relocate_section.  */
-	      elf_section_data (eh)->relocs = cookie.rels;
-	      ret = true;
-	    }
-	  if (cookie.rels && elf_section_data (eh)->relocs != cookie.rels)
+	    ret = true;
+
+	  if (cookie.rels != NULL
+	      && elf_section_data (eh)->relocs != cookie.rels)
 	    free (cookie.rels);
 	}
 
-      if (bed->elf_backend_discard_info)
-	{
-	  if (bed->elf_backend_discard_info (abfd, &cookie, info))
-	    ret = true;
-	}
+      if (bed->elf_backend_discard_info != NULL
+	  && (*bed->elf_backend_discard_info) (abfd, &cookie, info))
+	ret = true;
 
       if (cookie.locsyms != NULL
 	  && symtab_hdr->contents != (unsigned char *) cookie.locsyms)
@@ -8529,8 +8531,10 @@ elf_bfd_discard_info (output_bfd, info)
 	}
     }
 
-  if (ehdr && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info, ehdr))
+  if (info->eh_frame_hdr
+      && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
     ret = true;
+
   return ret;
 }
 

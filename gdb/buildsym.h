@@ -192,6 +192,9 @@ EXTERN int context_stack_size;
 
 #define	pop_context() (&context_stack[--context_stack_depth]);
 
+/* Non-zero if the context stack is empty.  */
+#define outermost_context_p() (context_stack_depth == 0)
+
 /* Nonzero if within a function (so symbols should be local, if
    nothing says specifically).  */
 

@@ -30,6 +30,7 @@
 #include "value.h"
 #include "regcache.h"
 #include "completer.h"
+#include "language.h"
 
 /* For argument passing to the inferior */
 #include "symtab.h"
@@ -130,6 +131,21 @@ static void pa_register_look_aside (char *, int, long *);
 static void pa_print_fp_reg (int);
 static void pa_strcat_fp_reg (int, struct ui_file *, enum precision_type);
 static void record_text_segment_lowaddr (bfd *, asection *, void *);
+/* FIXME: brobecker 2002-11-07: We will likely be able to make the
+   following functions static, once we hppa is partially multiarched.  */
+int hppa_reg_struct_has_addr (int gcc_p, struct type *type);
+int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
+CORE_ADDR hppa_stack_align (CORE_ADDR sp);
+int hppa_pc_requires_run_before_use (CORE_ADDR pc);
+int hppa_instruction_nullified (void);
+int hppa_register_byte (int reg_nr);
+struct type * hppa_register_virtual_type (int reg_nr);
+void hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
+int hppa_cannot_store_register (int regnum);
+CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
+CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
+CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
+int hppa_coerce_float_to_double (struct type *formal, struct type *actual);
 
 typedef struct
   {
@@ -149,10 +165,8 @@ extern int hp_som_som_object_present;
 /* In breakpoint.c */
 extern int exception_catchpoints_are_fragile;
 
-/* This is defined in valops.c. */
-extern struct value *find_function_in_inferior (char *);
-
 /* Should call_function allocate stack space for a struct return?  */
+
 int
 hppa_use_struct_convention (int gcc_p, struct type *type)
 {
@@ -300,7 +314,7 @@ static CORE_ADDR low_text_segment_address;
 static void
 record_text_segment_lowaddr (bfd *abfd, asection *section, void *ignored)
 {
-  if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
+  if (((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
        == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
       && section->vma < low_text_segment_address)
     low_text_segment_address = section->vma;
@@ -812,6 +826,11 @@ frameless_function_invocation (struct frame_info *frame)
 
   return (u->Total_frame_size == 0 && u->stub_unwind.stub_type == 0);
 }
+
+/* Immediately after a function call, return the saved pc.
+   Can't go through the frames for this because on some machines
+   the new frame is not set up until the new function executes
+   some instructions.  */
 
 CORE_ADDR
 saved_pc_after_call (struct frame_info *frame)
@@ -1450,7 +1469,8 @@ push_dummy_frame (struct inferior_status *inf_status)
 
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)
     {
-      read_register_bytes (REGISTER_BYTE (regnum), (char *) &freg_buffer, 8);
+      deprecated_read_register_bytes (REGISTER_BYTE (regnum),
+				      (char *) &freg_buffer, 8);
       sp = push_bytes (sp, (char *) &freg_buffer, 8);
     }
   sp = push_word (sp, read_register (IPSW_REGNUM));
@@ -1529,7 +1549,8 @@ hppa_pop_frame (void)
     if (fsr.regs[regnum])
       {
 	read_memory (fsr.regs[regnum], (char *) &freg_buffer, 8);
-	write_register_bytes (REGISTER_BYTE (regnum), (char *) &freg_buffer, 8);
+	deprecated_write_register_bytes (REGISTER_BYTE (regnum),
+					 (char *) &freg_buffer, 8);
       }
 
   if (fsr.regs[IPSW_REGNUM])
@@ -4677,6 +4698,221 @@ hppa_skip_permanent_breakpoint (void)
   /* We can leave the tail's space the same, since there's no jump.  */
 }
 
+/* Copy the function value from VALBUF into the proper location
+   for a function return.
+
+   Called only in the context of the "return" command.  */
+
+void
+hppa_store_return_value (struct type *type, char *valbuf)
+{
+  /* For software floating point, the return value goes into the
+     integer registers.  But we do not have any flag to key this on,
+     so we always store the value into the integer registers.
+
+     If its a float value, then we also store it into the floating
+     point registers.  */
+  deprecated_write_register_bytes (REGISTER_BYTE (28)
+				   + (TYPE_LENGTH (type) > 4
+				      ? (8 - TYPE_LENGTH (type))
+				      : (4 - TYPE_LENGTH (type))),
+				   valbuf, TYPE_LENGTH (type));
+  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
+    deprecated_write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
+				     valbuf, TYPE_LENGTH (type));
+}
+
+/* Copy the function's return value into VALBUF.
+
+   This function is called only in the context of "target function calls",
+   ie. when the debugger forces a function to be called in the child, and
+   when the debugger forces a fucntion to return prematurely via the
+   "return" command.  */
+
+void
+hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+{
+  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
+    memcpy (valbuf,
+	    (char *)regbuf + REGISTER_BYTE (FP4_REGNUM),
+	    TYPE_LENGTH (type));
+  else
+    memcpy (valbuf,
+	    ((char *)regbuf
+	     + REGISTER_BYTE (28)
+	     + (TYPE_LENGTH (type) > 4
+		? (8 - TYPE_LENGTH (type))
+		: (4 - TYPE_LENGTH (type)))),
+	    TYPE_LENGTH (type));
+}
+
+int
+hppa_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  /* On the PA, any pass-by-value structure > 8 bytes is actually passed
+     via a pointer regardless of its type or the compiler used.  */
+  return (TYPE_LENGTH (type) > 8);
+}
+
+int
+hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs)
+{
+  /* Stack grows upward */
+  return (lhs > rhs);
+}
+
+CORE_ADDR
+hppa_stack_align (CORE_ADDR sp)
+{
+  /* elz: adjust the quantity to the next highest value which is
+     64-bit aligned.  This is used in valops.c, when the sp is adjusted.
+     On hppa the sp must always be kept 64-bit aligned */
+  return ((sp % 8) ? (sp + 7) & -8 : sp);
+}
+
+int
+hppa_pc_requires_run_before_use (CORE_ADDR pc)
+{
+  /* Sometimes we may pluck out a minimal symbol that has a negative address.
+  
+     An example of this occurs when an a.out is linked against a foo.sl.
+     The foo.sl defines a global bar(), and the a.out declares a signature
+     for bar().  However, the a.out doesn't directly call bar(), but passes
+     its address in another call.
+  
+     If you have this scenario and attempt to "break bar" before running,
+     gdb will find a minimal symbol for bar() in the a.out.  But that
+     symbol's address will be negative.  What this appears to denote is
+     an index backwards from the base of the procedure linkage table (PLT)
+     into the data linkage table (DLT), the end of which is contiguous
+     with the start of the PLT.  This is clearly not a valid address for
+     us to set a breakpoint on.
+  
+     Note that one must be careful in how one checks for a negative address.
+     0xc0000000 is a legitimate address of something in a shared text
+     segment, for example.  Since I don't know what the possible range
+     is of these "really, truly negative" addresses that come from the
+     minimal symbols, I'm resorting to the gross hack of checking the
+     top byte of the address for all 1's.  Sigh.  */
+
+  return (!target_has_stack && (pc & 0xFF000000));
+}
+
+int
+hppa_instruction_nullified (void)
+{
+  /* brobecker 2002/11/07: Couldn't we use a ULONGEST here? It would
+     avoid the type cast.  I'm leaving it as is for now as I'm doing
+     semi-mechanical multiarching-related changes.  */
+  const int ipsw = (int) read_register (IPSW_REGNUM);
+  const int flags = (int) read_register (FLAGS_REGNUM);
+
+  return ((ipsw & 0x00200000) && !(flags & 0x2));
+}
+
+/* Index within the register vector of the first byte of the space i
+   used for register REG_NR.  */
+
+int
+hppa_register_byte (int reg_nr)
+{
+  return reg_nr * 4;
+}
+
+/* Return the GDB type object for the "standard" data type of data
+   in register N.  */
+
+struct type *
+hppa_register_virtual_type (int reg_nr)
+{
+   if (reg_nr < FP4_REGNUM)
+     return builtin_type_int;
+   else
+     return builtin_type_float;
+}
+
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function.  */
+
+void
+hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  write_register (28, addr);
+}
+
+/* Return True if REGNUM is not a register available to the user
+   through ptrace().  */
+
+int
+hppa_cannot_store_register (int regnum)
+{
+  return (regnum == 0
+          || regnum == PCSQ_HEAD_REGNUM
+          || (regnum >= PCSQ_TAIL_REGNUM && regnum < IPSW_REGNUM)
+          || (regnum > IPSW_REGNUM && regnum < FP4_REGNUM));
+
+}
+
+CORE_ADDR
+hppa_frame_args_address (struct frame_info *fi)
+{
+  return fi->frame;
+}
+
+CORE_ADDR
+hppa_frame_locals_address (struct frame_info *fi)
+{
+  return fi->frame;
+}
+
+CORE_ADDR
+hppa_smash_text_address (CORE_ADDR addr)
+{
+  /* The low two bits of the PC on the PA contain the privilege level.
+     Some genius implementing a (non-GCC) compiler apparently decided
+     this means that "addresses" in a text section therefore include a
+     privilege level, and thus symbol tables should contain these bits.
+     This seems like a bonehead thing to do--anyway, it seems to work
+     for our purposes to just ignore those bits.  */
+
+  return (addr &= ~0x3);
+}
+
+int
+hppa_coerce_float_to_double (struct type *formal, struct type *actual)
+{
+   /* FIXME: For the pa, it appears that the debug info marks the
+      parameters as floats regardless of whether the function is
+      prototyped, but the actual values are passed as doubles for the
+      non-prototyped case and floats for the prototyped case.  Thus we
+      choose to make the non-prototyped case work for C and break the
+      prototyped case, since the non-prototyped case is probably much
+      more common.  */
+  return (current_language -> la_language == language_c);
+}
+
+static struct gdbarch *
+hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch *gdbarch;
+
+  /* find a candidate among the list of pre-declared architectures.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return (arches->gdbarch);
+
+  /* If none found, then allocate and initialize one.  */
+  gdbarch = gdbarch_alloc (&info, NULL);
+
+  return gdbarch;
+}
+
+static void
+hppa_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+   /* Nothing to print for the moment.  */
+}
+
 void
 _initialize_hppa_tdep (void)
 {
@@ -4685,6 +4921,7 @@ _initialize_hppa_tdep (void)
   void tbreak_at_finish_command (char *arg, int from_tty);
   void break_at_finish_at_depth_command (char *arg, int from_tty);
 
+  gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
   tm_print_insn = print_insn_hppa;
 
   add_cmd ("unwind", class_maintenance, unwind_command,
@@ -4722,52 +4959,3 @@ be no argument or the argument must be a depth.\n"), NULL);
 be no argument or the argument must be a depth.\n"), NULL);
 }
 
-/* Copy the function value from VALBUF into the proper location
-   for a function return.
-
-   Called only in the context of the "return" command.  */
-
-void
-hppa_store_return_value (struct type *type, char *valbuf)
-{
-  /* For software floating point, the return value goes into the
-     integer registers.  But we do not have any flag to key this on,
-     so we always store the value into the integer registers.
-
-     If its a float value, then we also store it into the floating
-     point registers.  */
-  write_register_bytes (REGISTER_BYTE (28)
-		        + (TYPE_LENGTH (type) > 4
-			   ? (8 - TYPE_LENGTH (type))
-			   : (4 - TYPE_LENGTH (type))),
-			valbuf,
-			TYPE_LENGTH (type));
-  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
-    write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
-			  valbuf,
-			  TYPE_LENGTH (type));
-}
-
-/* Copy the function's return value into VALBUF.
-
-   This function is called only in the context of "target function calls",
-   ie. when the debugger forces a function to be called in the child, and
-   when the debugger forces a fucntion to return prematurely via the
-   "return" command.  */
-
-void
-hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf)
-{
-  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
-    memcpy (valbuf,
-	    (char *)regbuf + REGISTER_BYTE (FP4_REGNUM),
-	    TYPE_LENGTH (type));
-  else
-    memcpy (valbuf,
-	    ((char *)regbuf
-	     + REGISTER_BYTE (28)
-	     + (TYPE_LENGTH (type) > 4
-		? (8 - TYPE_LENGTH (type))
-		: (4 - TYPE_LENGTH (type)))),
-	    TYPE_LENGTH (type));
-}

@@ -85,7 +85,7 @@ register_u_addr (CORE_ADDR blockend, int regnum)
   struct user u;
   CORE_ADDR fpstate;
 
-  if (FP_REGNUM_P (regnum))
+  if (i386_fp_regnum_p (regnum))
     {
 #ifdef KSTKSZ			/* SCO, and others?  */
       blockend += 4 * (SS + 1) - KSTKSZ;

@@ -119,8 +119,9 @@ bfd_check_format_matches (abfd, format, matching)
      char ***matching;
 {
   extern const bfd_target binary_vec;
-  const bfd_target * const *target, *save_targ, *right_targ, *ar_right_targ;
-  char **matching_vector = NULL;
+  const bfd_target * const *target;
+  const bfd_target **matching_vector = NULL;
+  const bfd_target *save_targ, *right_targ, *ar_right_targ;
   int match_count;
   int ar_match_index;
 
@@ -145,8 +146,8 @@ bfd_check_format_matches (abfd, format, matching)
       bfd_size_type amt;
 
       *matching = NULL;
-      amt = sizeof (char *) * 2 * _bfd_target_vector_entries;
-      matching_vector = (char **) bfd_malloc (amt);
+      amt = sizeof (*matching_vector) * 2 * _bfd_target_vector_entries;
+      matching_vector = (const bfd_target **) bfd_malloc (amt);
       if (!matching_vector)
 	return false;
     }
@@ -170,7 +171,7 @@ bfd_check_format_matches (abfd, format, matching)
 	  abfd->xvec = right_targ;	/* Set the target as returned.  */
 
 	  if (matching)
-	    free (matching_vector);
+	    free ((PTR) matching_vector);
 
 	  return true;			/* File position has moved, BTW.  */
 	}
@@ -193,7 +194,7 @@ bfd_check_format_matches (abfd, format, matching)
 	  abfd->format = bfd_unknown;
 
 	  if (matching)
-	    free (matching_vector);
+	    free ((PTR) matching_vector);
 
 	  bfd_set_error (bfd_error_file_not_recognized);
 
@@ -236,7 +237,7 @@ bfd_check_format_matches (abfd, format, matching)
 	    }
 
 	  if (matching)
-	    matching_vector[match_count] = temp->name;
+	    matching_vector[match_count] = temp;
 
 	  match_count++;
 
@@ -259,7 +260,7 @@ bfd_check_format_matches (abfd, format, matching)
 	  if (ar_right_targ != bfd_default_vector[0])
 	    ar_right_targ = *target;
 	  if (matching)
-	    matching_vector[ar_match_index] = (*target)->name;
+	    matching_vector[ar_match_index] = *target;
 	  ar_match_index++;
 	}
       else if (err != bfd_error_wrong_format)
@@ -268,7 +269,7 @@ bfd_check_format_matches (abfd, format, matching)
 	  abfd->format = bfd_unknown;
 
 	  if (matching)
-	    free (matching_vector);
+	    free ((PTR) matching_vector);
 
 	  return false;
 	}
@@ -289,7 +290,27 @@ bfd_check_format_matches (abfd, format, matching)
 	    {
 	      memcpy (matching_vector,
 		      matching_vector + _bfd_target_vector_entries,
-		      sizeof (char *) * match_count);
+		      sizeof (*matching_vector) * match_count);
+	    }
+	}
+    }
+
+  if (match_count > 1 && bfd_associated_vector != NULL)
+    {
+      const bfd_target * const *assoc = bfd_associated_vector;
+
+      while ((right_targ = *assoc++) != NULL)
+	{
+	  int i = match_count;
+
+	  while (--i >= 0)
+	    if (matching_vector[i] == right_targ)
+	      break;
+
+	  if (i >= 0)
+	    {
+	      match_count = 1;
+	      break;
 	    }
 	}
     }
@@ -299,7 +320,7 @@ bfd_check_format_matches (abfd, format, matching)
       abfd->xvec = right_targ;		/* Change BFD's target permanently.  */
 
       if (matching)
-	free (matching_vector);
+	free ((PTR) matching_vector);
 
       return true;			/* File position has moved, BTW.  */
     }
@@ -312,7 +333,7 @@ bfd_check_format_matches (abfd, format, matching)
       bfd_set_error (bfd_error_file_not_recognized);
 
       if (matching)
-	free (matching_vector);
+	free ((PTR) matching_vector);
     }
   else
     {
@@ -320,8 +341,15 @@ bfd_check_format_matches (abfd, format, matching)
 
       if (matching)
 	{
-	  *matching = matching_vector;
+	  *matching = (char **) matching_vector;
 	  matching_vector[match_count] = NULL;
+	  /* Return target names.  This is a little nasty.  Maybe we
+	     should do another bfd_malloc?  */
+	  while (--match_count >= 0)
+	    {
+	      const char *name = matching_vector[match_count]->name;
+	      *(const char **) &matching_vector[match_count] = name;
+	    }
 	}
     }
 

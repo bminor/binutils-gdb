@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -180,6 +180,11 @@ CODE_FRAGMENT
 .      struct cisco_core_struct *cisco_core_data;
 .      struct versados_data_struct *versados_data;
 .      struct netbsd_core_struct *netbsd_core_data;
+.      struct mach_o_data_struct *mach_o_data;
+.      struct mach_o_fat_data_struct *mach_o_fat_data;
+.      struct bfd_pef_data_struct *pef_data;
+.      struct bfd_pef_xlib_data_struct *pef_xlib_data;
+.      struct bfd_sym_data_struct *sym_data;
 .      PTR any;
 .    }
 .  tdata;
@@ -1386,4 +1391,134 @@ bfd_alt_mach_code (abfd, alternative)
     }
 
   return false;
+}
+
+/*
+CODE_FRAGMENT
+
+.struct bfd_preserve
+.{
+.  PTR marker;
+.  PTR tdata;
+.  flagword flags;
+.  const struct bfd_arch_info *arch_info;
+.  struct sec *sections;
+.  struct sec **section_tail;
+.  unsigned int section_count;
+.  struct bfd_hash_table section_htab;
+.};
+.
+*/
+
+/*
+FUNCTION
+	bfd_preserve_save
+
+SYNOPSIS
+	boolean bfd_preserve_save (bfd *, struct bfd_preserve *);
+
+DESCRIPTION
+	When testing an object for compatibility with a particular
+	target back-end, the back-end object_p function needs to set
+	up certain fields in the bfd on successfully recognizing the
+	object.  This typically happens in a piecemeal fashion, with
+	failures possible at many points.  On failure, the bfd is
+	supposed to be restored to its initial state, which is
+	virtually impossible.  However, restoring a subset of the bfd
+	state works in practice.  This function stores the subset and
+	reinitializes the bfd.
+
+*/
+
+boolean
+bfd_preserve_save (abfd, preserve)
+     bfd *abfd;
+     struct bfd_preserve *preserve;
+{
+  preserve->tdata = abfd->tdata.any;
+  preserve->arch_info = abfd->arch_info;
+  preserve->flags = abfd->flags;
+
+  preserve->sections = abfd->sections;
+  preserve->section_tail = abfd->section_tail;
+  preserve->section_count = abfd->section_count;
+  preserve->section_htab = abfd->section_htab;
+
+  if (! bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc))
+    return false;
+
+  abfd->tdata.any = NULL;
+  abfd->arch_info = &bfd_default_arch_struct;
+  abfd->flags = 0;
+
+  abfd->sections = NULL;
+  abfd->section_tail = &abfd->sections;
+  abfd->section_count = 0;
+
+  return true;
+}
+
+/*
+FUNCTION
+	bfd_preserve_restore
+
+SYNOPSIS
+	void bfd_preserve_restore (bfd *, struct bfd_preserve *);
+
+DESCRIPTION
+	This function restores bfd state saved by bfd_preserve_save.
+	If MARKER is non-NULL in struct bfd_preserve then that block
+	and all subsequently bfd_alloc'd memory is freed.
+
+*/
+
+void
+bfd_preserve_restore (abfd, preserve)
+     bfd *abfd;
+     struct bfd_preserve *preserve;
+{
+  bfd_hash_table_free (&abfd->section_htab);
+
+  abfd->tdata.any = preserve->tdata;
+  abfd->arch_info = preserve->arch_info;
+  abfd->flags = preserve->flags;
+
+  abfd->section_htab = preserve->section_htab;
+  abfd->sections = preserve->sections;
+  abfd->section_tail = preserve->section_tail;
+  abfd->section_count = preserve->section_count;
+
+  /* bfd_release frees all memory more recently bfd_alloc'd than
+     its arg, as well as its arg.  */
+  if (preserve->marker != NULL)
+    {
+      bfd_release (abfd, preserve->marker);
+      preserve->marker = NULL;
+    }
+}
+
+/*
+FUNCTION
+	bfd_preserve_finish
+
+SYNOPSIS
+	void bfd_preserve_finish (bfd *, struct bfd_preserve *);
+
+DESCRIPTION
+	This function should be called when the bfd state saved by
+	bfd_preserve_save is no longer needed.  ie. when the back-end
+	object_p function returns with success.
+
+*/
+
+void
+bfd_preserve_finish (abfd, preserve)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_preserve *preserve;
+{
+  /* It would be nice to be able to free more memory here, eg. old
+     tdata, but that's not possible since these blocks are sitting
+     inside bfd_alloc'd memory.  The section hash is on a separate
+     objalloc.  */
+  bfd_hash_table_free (&preserve->section_htab);
 }

@@ -126,37 +126,37 @@ static struct symbol *opaque_type_chain[HASHSIZE];
 
 /* Complaints about various problems in the file being read  */
 
-struct complaint ef_complaint =
+struct deprecated_complaint ef_complaint =
 {"Unmatched .ef symbol(s) ignored starting at symnum %d", 0, 0};
 
-struct complaint ef_stack_complaint =
+struct deprecated_complaint ef_stack_complaint =
 {"`.ef' symbol without matching `.bf' symbol ignored starting at symnum %d", 0, 0};
 
-struct complaint eb_stack_complaint =
+struct deprecated_complaint eb_stack_complaint =
 {"`.eb' symbol without matching `.bb' symbol ignored starting at symnum %d", 0, 0};
 
-struct complaint bf_no_aux_complaint =
+struct deprecated_complaint bf_no_aux_complaint =
 {"`.bf' symbol %d has no aux entry", 0, 0};
 
-struct complaint ef_no_aux_complaint =
+struct deprecated_complaint ef_no_aux_complaint =
 {"`.ef' symbol %d has no aux entry", 0, 0};
 
-struct complaint lineno_complaint =
+struct deprecated_complaint lineno_complaint =
 {"Line number pointer %d lower than start of line numbers", 0, 0};
 
-struct complaint unexpected_type_complaint =
+struct deprecated_complaint unexpected_type_complaint =
 {"Unexpected type for symbol %s", 0, 0};
 
-struct complaint bad_sclass_complaint =
+struct deprecated_complaint bad_sclass_complaint =
 {"Bad n_sclass for symbol %s", 0, 0};
 
-struct complaint misordered_blocks_complaint =
+struct deprecated_complaint misordered_blocks_complaint =
 {"Blocks out of order at address %x", 0, 0};
 
-struct complaint tagndx_bad_complaint =
+struct deprecated_complaint tagndx_bad_complaint =
 {"Symbol table entry for %s has bad tagndx value", 0, 0};
 
-struct complaint eb_complaint =
+struct deprecated_complaint eb_complaint =
 {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
 /* Simplified internal version of coff symbol table information */
@@ -1990,6 +1990,7 @@ coff_read_struct_type (int index, int length, int lastsym)
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
 	  FIELD_BITPOS (list->field) = 8 * ms->c_value;
 	  FIELD_BITSIZE (list->field) = 0;
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  nfields++;
 	  break;
 
@@ -2008,6 +2009,7 @@ coff_read_struct_type (int index, int length, int lastsym)
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
 	  FIELD_BITPOS (list->field) = ms->c_value;
 	  FIELD_BITSIZE (list->field) = sub_aux.x_sym.x_misc.x_lnsz.x_size;
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  nfields++;
 	  break;
 
@@ -2128,6 +2130,7 @@ coff_read_enum_type (int index, int length, int lastsym)
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
       if (syms == osyms)
 	break;

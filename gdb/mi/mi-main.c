@@ -36,7 +36,7 @@
 #include "event-loop.h"
 #include "event-top.h"
 #include "gdbcore.h"		/* for write_memory() */
-#include "value.h"		/* for write_register_bytes() */
+#include "value.h"		/* for deprecated_write_register_bytes() */
 #include "regcache.h"
 #include "gdb.h"
 #include "frame.h"
@@ -632,7 +632,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  old_chain = make_cleanup (xfree, buffer);
 	  store_signed_integer (buffer, REGISTER_SIZE, value);
 	  /* Write it down */
-	  write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
+	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
 	  /* Free the buffer.  */
 	  do_cleanups (old_chain);
 	}
@@ -1464,12 +1464,16 @@ mi_load_progress (const char *section_name,
 static void
 mi_command_loop (int mi_version)
 {
-  /* HACK: Force stdout/stderr to point at the console.  This avoids
-     any potential side effects caused by legacy code that is still
-     using the TUI / fputs_unfiltered_hook */
-  raw_stdout = stdio_fileopen (stdout);
-  /* Route normal output through the MIx */
-  gdb_stdout = mi_console_file_new (raw_stdout, "~");
+  if (mi_version <= 1)
+    {
+      /* HACK: Force stdout/stderr to point at the console.  This avoids
+         any potential side effects caused by legacy code that is still
+         using the TUI / fputs_unfiltered_hook */
+      raw_stdout = stdio_fileopen (stdout);
+      /* Route normal output through the MIx */
+      gdb_stdout = mi_console_file_new (raw_stdout, "~");
+    }
+
   /* Route error and log output through the MI */
   gdb_stderr = mi_console_file_new (raw_stdout, "&");
   gdb_stdlog = gdb_stderr;
@@ -1541,8 +1545,16 @@ setup_architecture_data (void)
 static void
 mi_init_ui (char *arg0)
 {
-  /* Eventually this will contain code that takes control of the
-     console. */
+  if (strlen (interpreter_p) <= 2 ||
+      interpreter_p[2] > '1')
+    {
+      /* HACK: Force stdout/stderr to point at the console.  This avoids
+         any potential side effects caused by legacy code that is still
+         using the TUI / fputs_unfiltered_hook */
+      raw_stdout = stdio_fileopen (stdout);
+      /* Route normal output through the MIx */
+      gdb_stdout = mi_console_file_new (raw_stdout, "~");
+    }
 }
 
 void

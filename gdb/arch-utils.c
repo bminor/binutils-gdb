@@ -99,7 +99,7 @@ legacy_extract_return_value (struct type *type, struct regcache *regcache,
 {
   char *registers = deprecated_grub_regcache_for_registers (regcache);
   bfd_byte *buf = valbuf;
-  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf);
+  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf); /* OK */
 }
 
 /* Implementation of store return value that grubs the register cache.

@@ -122,14 +122,14 @@ static int reg_offset[] =
  * Caller knows that the regs handled in one transaction are of same size.
  */
 #define FETCH_REGS(state, regnum, count) \
-  memcpy (&registers[REGISTER_BYTE (regnum)], \
+  memcpy (&deprecated_registers[REGISTER_BYTE (regnum)], \
 	  (char *)state+reg_offset[ regnum ], \
 	  count*REGISTER_SIZE)
 
 /* Store COUNT contiguous registers to thread STATE starting from REGNUM */
 #define STORE_REGS(state, regnum, count) \
   memcpy ((char *)state+reg_offset[ regnum ], \
-	  &registers[REGISTER_BYTE (regnum)], \
+	  &deprecated_registers[REGISTER_BYTE (regnum)], \
 	  count*REGISTER_SIZE)
 
 #define REGS_ALL    -1
@@ -204,7 +204,7 @@ fetch_inferior_registers (int regno)
 	}
 
       /* ZERO_REGNUM is always zero */
-      *(int *) registers = 0;
+      *(int *) deprecated_registers = 0;
 
       /* Copy thread saved regs 1..31 to gdb's reg value array
        * Luckily, they are contiquous
@@ -259,7 +259,7 @@ fetch_inferior_registers (int regno)
       /* If the thread does not have saved COPROC1, set regs to zero */
 
       if (!(exc_state.coproc_state & MIPS_STATUS_USE_COP1))
-	bzero (&registers[REGISTER_BYTE (FP0_REGNUM)],
+	bzero (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	       sizeof (struct mips_float_state));
       else
 	{
@@ -282,7 +282,7 @@ fetch_inferior_registers (int regno)
     }
 
   /* All registers are valid, if not returned yet */
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Store gdb's view of registers to the thread.
@@ -324,7 +324,7 @@ store_inferior_registers (register int regno)
       /* Don't allow these to change */
 
       /* ZERO_REGNUM */
-      *(int *) registers = 0;
+      *(int *) deprecated_registers = 0;
 
       fetch_inferior_registers (PS_REGNUM);
       fetch_inferior_registers (BADVADDR_REGNUM);
@@ -342,8 +342,8 @@ store_inferior_registers (register int regno)
        *     should go to threads frame pointer. If not true, this
        *     fails badly!!!!!
        */
-      memcpy (&registers[REGISTER_BYTE (MACH_FP_REGNUM)],
-	      &registers[REGISTER_BYTE (FP_REGNUM)],
+      memcpy (&deprecated_registers[REGISTER_BYTE (MACH_FP_REGNUM)],
+	      &deprecated_registers[REGISTER_BYTE (FP_REGNUM)],
 	      REGISTER_RAW_SIZE (FP_REGNUM));
 #endif
 

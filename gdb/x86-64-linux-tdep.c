@@ -189,9 +189,3 @@ x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
   else
     cfi_init_frame_pc (fromleaf, fi);
 }
-
-void
-x86_64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
-{
-  cfi_init_extra_frame_info (fromleaf, fi);
-}

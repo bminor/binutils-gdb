@@ -3719,7 +3719,7 @@ mips_push_register (CORE_ADDR * sp, int regno)
       offset = 0;
     }
   *sp -= regsize;
-  read_register_gen (regno, buffer);
+  deprecated_read_register_gen (regno, buffer);
   write_memory (*sp, buffer + offset, regsize);
 }
 
@@ -4667,17 +4667,15 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  write_register_bytes (REGISTER_BYTE (lo.reg),
-			raw_buffer,
-			REGISTER_RAW_SIZE (lo.reg));
+  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      write_register_bytes (REGISTER_BYTE (hi.reg),
-			    raw_buffer,
-			    REGISTER_RAW_SIZE (hi.reg));
+      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+				       REGISTER_RAW_SIZE (hi.reg));
     }
 }
 
@@ -4691,17 +4689,15 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  write_register_bytes (REGISTER_BYTE (lo.reg),
-			raw_buffer,
-			REGISTER_RAW_SIZE (lo.reg));
+  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      write_register_bytes (REGISTER_BYTE (hi.reg),
-			    raw_buffer,
-			    REGISTER_RAW_SIZE (hi.reg));
+      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+				       REGISTER_RAW_SIZE (hi.reg));
     }
 }
 
@@ -6061,7 +6057,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
 
-  set_gdbarch_do_registers_info (gdbarch, mips_do_registers_info);
+  set_gdbarch_deprecated_do_registers_info (gdbarch, mips_do_registers_info);
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
@@ -6194,9 +6190,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: CAUSE_REGNUM = %d\n",
 		      CAUSE_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: DO_REGISTERS_INFO # %s\n",
-		      XSTRING (DO_REGISTERS_INFO));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: DWARF_REG_TO_REGNUM # %s\n",
 		      XSTRING (DWARF_REG_TO_REGNUM (REGNUM)));

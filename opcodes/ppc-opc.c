@@ -544,15 +544,15 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The other UIMM field in a half word EVX form instruction. */
 #define EVUIMM_2 EVUIMM + 1
-  { 5, 11, insert_ev2, extract_ev2, PPC_OPERAND_PARENS },
+  { 32, 11, insert_ev2, extract_ev2, PPC_OPERAND_PARENS },
 
   /* The other UIMM field in a word EVX form instruction. */
 #define EVUIMM_4 EVUIMM_2 + 1
-  { 5, 11, insert_ev4, extract_ev4, PPC_OPERAND_PARENS },
+  { 32, 11, insert_ev4, extract_ev4, PPC_OPERAND_PARENS },
 
   /* The other UIMM field in a double EVX form instruction. */
 #define EVUIMM_8 EVUIMM_4 + 1
-  { 8, 11, insert_ev8, extract_ev8, PPC_OPERAND_PARENS },
+  { 32, 11, insert_ev8, extract_ev8, PPC_OPERAND_PARENS },
 
   /* The WS field.  */
 #define WS EVUIMM_8 + 1
@@ -2124,10 +2124,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "evsrwiu",   VX(4, 546), VX_MASK,	PPCSPE,		{ RD, RA, EVUIMM } },
 { "evsplati",  VX(4, 553), VX_MASK,	PPCSPE,		{ RD, SIMM } },
 { "evsplatfi", VX(4, 555), VX_MASK,	PPCSPE,		{ RD, SIMM } },
-{ "evmergehi", VX(4, 556), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmergelo", VX(4, 557), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmergehilo",VX(4,558), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmergelohi",VX(4,559), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmergehi", VX(4, 556), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmergelo", VX(4, 557), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmergehilo",VX(4,558), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmergelohi",VX(4,559), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
 { "evcmpgts",  VX(4, 561), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evcmpgtu",  VX(4, 560), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },

@@ -36,7 +36,7 @@ fetch_inferior_registers (int regno)
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 
   ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers);
@@ -45,15 +45,15 @@ fetch_inferior_registers (int regno)
     ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
 	    (PTRACE_ARG3_TYPE) & inferior_fp_registers);
 
-  memcpy (registers, &inferior_registers, 16 * 4);
+  memcpy (deprecated_registers, &inferior_registers, 16 * 4);
   if (FP0_REGNUM >= 0)
-    memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	    sizeof inferior_fp_registers.fps_regs);
+    memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	    &inferior_fp_registers, sizeof inferior_fp_registers.fps_regs);
 
-  *(int *) &registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
-  *(int *) &registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
+  *(int *) &deprecated_registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
+  *(int *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
   if (FP0_REGNUM >= 0)
-    memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+    memcpy (&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
 	    &inferior_fp_registers.fps_control,
 	    sizeof inferior_fp_registers - 
 	    sizeof inferior_fp_registers.fps_regs);
@@ -69,17 +69,18 @@ store_inferior_registers (int regno)
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
 
-  memcpy (&inferior_registers, registers, 16 * 4);
+  memcpy (&inferior_registers, deprecated_registers, 16 * 4);
   if (FP0_REGNUM >= 0)
-    memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+    memcpy (&inferior_fp_registers,
+	    &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	    sizeof inferior_fp_registers.fps_regs);
 
-  inferior_registers.r_ps = *(int *) &registers[REGISTER_BYTE (PS_REGNUM)];
-  inferior_registers.r_pc = *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
+  inferior_registers.r_ps = *(int *) &&deprecated_registers[REGISTER_BYTE (PS_REGNUM)];
+  inferior_registers.r_pc = *(int *) &&deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
 
   if (FP0_REGNUM >= 0)
     memcpy (&inferior_fp_registers.fps_control,
-	    &registers[REGISTER_BYTE (FPC_REGNUM)],
+	    &&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
 	    sizeof inferior_fp_registers - 
 	    sizeof inferior_fp_registers.fps_regs);
 
@@ -116,7 +117,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size < sizeof (struct regs))
 	  error ("Can't find registers in core file");
 
-      memcpy (registers, (char *) regs, 16 * 4);
+      memcpy (&deprecated_registers, (char *) regs, 16 * 4);
       supply_register (PS_REGNUM, (char *) &regs->r_ps);
       supply_register (PC_REGNUM, (char *) &regs->r_pc);
 
@@ -130,10 +131,10 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	{
 	  if (FP0_REGNUM >= 0)
 	    {
-	      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+	      memcpy (&&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 		      fpustruct->f_fpstatus.fps_regs,
 		      sizeof fpustruct->f_fpstatus.fps_regs);
-	      memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	      memcpy (&&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
 		      &fpustruct->f_fpstatus.fps_control,
 		      sizeof fpustruct->f_fpstatus -
 		      sizeof fpustruct->f_fpstatus.fps_regs);

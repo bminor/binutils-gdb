@@ -2401,13 +2401,14 @@ arm_store_return_value (struct type *type, char *valbuf)
 	case ARM_FLOAT_FPA:
 
 	  convert_to_extended (valbuf, buf);
-	  write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
-				FP_REGISTER_RAW_SIZE);
+	  deprecated_write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
+					   FP_REGISTER_RAW_SIZE);
 	  break;
 
 	case ARM_FLOAT_SOFT:
 	case ARM_FLOAT_SOFT_VFP:
-	  write_register_bytes (ARM_A1_REGNUM, valbuf, TYPE_LENGTH (type));
+	  deprecated_write_register_bytes (ARM_A1_REGNUM, valbuf,
+					   TYPE_LENGTH (type));
 	  break;
 
 	default:
@@ -2418,7 +2419,8 @@ arm_store_return_value (struct type *type, char *valbuf)
 	}
     }
   else
-    write_register_bytes (ARM_A1_REGNUM, valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (ARM_A1_REGNUM, valbuf,
+				     TYPE_LENGTH (type));
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -2858,7 +2860,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
 #endif
 
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
   set_gdbarch_coerce_float_to_double (gdbarch,
 				      standard_coerce_float_to_double);

@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -155,7 +155,11 @@ DESCRIPTION
 .  bfd_target_msdos_flavour,
 .  bfd_target_ovax_flavour,
 .  bfd_target_evax_flavour,
-.  bfd_target_mmo_flavour
+.  bfd_target_mmo_flavour,
+.  bfd_target_mach_o_flavour,
+.  bfd_target_pef_flavour,
+.  bfd_target_pef_xlib_flavour,
+.  bfd_target_sym_flavour
 .};
 .
 .enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
@@ -508,7 +512,6 @@ extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_oabi_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
-extern const bfd_target bfd_elf32_bigarmqnx_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf32_cris_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
@@ -522,7 +525,6 @@ extern const bfd_target bfd_elf32_hppa_vec;
 extern const bfd_target bfd_elf32_i370_vec;
 extern const bfd_target bfd_elf32_i386_freebsd_vec;
 extern const bfd_target bfd_elf32_i386_vec;
-extern const bfd_target bfd_elf32_i386qnx_vec;
 extern const bfd_target bfd_elf32_i860_little_vec;
 extern const bfd_target bfd_elf32_i860_vec;
 extern const bfd_target bfd_elf32_i960_vec;
@@ -533,7 +535,6 @@ extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlearc_vec;
 extern const bfd_target bfd_elf32_littlearm_oabi_vec;
 extern const bfd_target bfd_elf32_littlearm_vec;
-extern const bfd_target bfd_elf32_littlearmqnx_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
 extern const bfd_target bfd_elf32_m32r_vec;
 extern const bfd_target bfd_elf32_m68hc11_vec;
@@ -554,8 +555,6 @@ extern const bfd_target bfd_elf32_pj_vec;
 extern const bfd_target bfd_elf32_pjl_vec;
 extern const bfd_target bfd_elf32_powerpc_vec;
 extern const bfd_target bfd_elf32_powerpcle_vec;
-extern const bfd_target bfd_elf32_powerpcleqnx_vec;
-extern const bfd_target bfd_elf32_powerpcqnx_vec;
 extern const bfd_target bfd_elf32_s390_vec;
 extern const bfd_target bfd_elf32_sh64_vec;
 extern const bfd_target bfd_elf32_sh64l_vec;
@@ -568,9 +567,7 @@ extern const bfd_target bfd_elf32_shblin_vec;
 extern const bfd_target bfd_elf32_shl_vec;
 extern const bfd_target bfd_elf32_shlin_vec;
 extern const bfd_target bfd_elf32_shlnbsd_vec;
-extern const bfd_target bfd_elf32_shlqnx_vec;
 extern const bfd_target bfd_elf32_shnbsd_vec;
-extern const bfd_target bfd_elf32_shqnx_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
 extern const bfd_target bfd_elf32_tradbigmips_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_vec;
@@ -652,6 +649,9 @@ extern const bfd_target m68knetbsd_vec;
 extern const bfd_target m68ksysvcoff_vec;
 extern const bfd_target m88kbcs_vec;
 extern const bfd_target m88kmach3_vec;
+extern const bfd_target mach_o_be_vec;
+extern const bfd_target mach_o_le_vec;
+extern const bfd_target mach_o_fat_vec;
 extern const bfd_target mcore_pe_big_vec;
 extern const bfd_target mcore_pe_little_vec;
 extern const bfd_target mcore_pei_big_vec;
@@ -668,6 +668,8 @@ extern const bfd_target or32coff_big_vec;
 extern const bfd_target pc532machaout_vec;
 extern const bfd_target pc532netbsd_vec;
 extern const bfd_target pdp11_aout_vec;
+extern const bfd_target pef_vec;
+extern const bfd_target pef_xlib_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
@@ -687,6 +689,7 @@ extern const bfd_target sparclynx_aout_vec;
 extern const bfd_target sparclynx_coff_vec;
 extern const bfd_target sparcnetbsd_vec;
 extern const bfd_target sunos_big_vec;
+extern const bfd_target sym_vec;
 extern const bfd_target tic30_aout_vec;
 extern const bfd_target tic30_coff_vec;
 extern const bfd_target tic4x_coff0_beh_vec;
@@ -793,7 +796,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_bigarc_vec,
 	&bfd_elf32_bigarm_oabi_vec,
 	&bfd_elf32_bigarm_vec,
-	&bfd_elf32_bigarmqnx_vec,
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_cris_vec,
 	&bfd_elf32_d10v_vec,
@@ -807,7 +809,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_i370_vec,
 	&bfd_elf32_i386_freebsd_vec,
 	&bfd_elf32_i386_vec,
-	&bfd_elf32_i386qnx_vec,
 	&bfd_elf32_i860_little_vec,
 	&bfd_elf32_i860_vec,
 	&bfd_elf32_i960_vec,
@@ -820,7 +821,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_littlearc_vec,
 	&bfd_elf32_littlearm_oabi_vec,
 	&bfd_elf32_littlearm_vec,
-	&bfd_elf32_littlearmqnx_vec,
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m32r_vec,
 	&bfd_elf32_m68hc11_vec,
@@ -843,22 +843,20 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_pjl_vec,
 	&bfd_elf32_powerpc_vec,
 	&bfd_elf32_powerpcle_vec,
-	&bfd_elf32_powerpcleqnx_vec,
-	&bfd_elf32_powerpcqnx_vec,
 	&bfd_elf32_s390_vec,
         &bfd_elf32_sh_vec,
         &bfd_elf32_shblin_vec,
         &bfd_elf32_shl_vec,
         &bfd_elf32_shlin_vec,
 	&bfd_elf32_shlnbsd_vec,
-	&bfd_elf32_shlqnx_vec,
 	&bfd_elf32_shnbsd_vec,
-	&bfd_elf32_shqnx_vec,
 #ifdef BFD64
 	&bfd_elf32_sh64_vec,
 	&bfd_elf32_sh64l_vec,
 	&bfd_elf32_sh64lnbsd_vec,
 	&bfd_elf32_sh64nbsd_vec,
+	&bfd_elf32_sh64lin_vec,
+	&bfd_elf32_sh64blin_vec,
 #endif
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_tradbigmips_vec,
@@ -889,6 +887,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_sh64l_vec,
 	&bfd_elf64_sh64lnbsd_vec,
 	&bfd_elf64_sh64nbsd_vec,
+	&bfd_elf64_sh64lin_vec,
+	&bfd_elf64_sh64blin_vec,
 #if 0
 	&bfd_elf64_sparc_vec,
 #endif
@@ -967,6 +967,9 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&m68ksysvcoff_vec,
 	&m88kbcs_vec,
 	&m88kmach3_vec,
+	&mach_o_be_vec,
+	&mach_o_le_vec,
+	&mach_o_fat_vec,
 	&mcore_pe_big_vec,
 	&mcore_pe_little_vec,
 	&mcore_pei_big_vec,
@@ -994,6 +997,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&pc532machaout_vec,
 	&pc532netbsd_vec,
 	&pdp11_aout_vec,
+	&pef_vec,
+	&pef_xlib_vec,
 #if 0
 	/* This has the same magic number as RS/6000.  */
 	&pmac_xcoff_vec,
@@ -1023,6 +1028,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,
 	&sunos_big_vec,
+	&sym_vec,
 	&tic30_aout_vec,
 	&tic30_coff_vec,
 	&tic54x_coff0_beh_vec,
@@ -1105,6 +1111,17 @@ const bfd_target *bfd_default_vector[] = {
 #endif
 	NULL
 };
+
+/* bfd_associated_vector[] contains the associated target vectors used
+   to reduce the ambiguity in bfd_check_format_matches.  */
+
+static const bfd_target *_bfd_associated_vector[] = {
+#ifdef ASSOCIATED_VECS
+	ASSOCIATED_VECS,
+#endif
+	NULL
+};
+const bfd_target * const *bfd_associated_vector = _bfd_associated_vector;
 
 /* When there is an ambiguous match, bfd_check_format_matches puts the
    names of the matching targets in an array.  This variable is the maximum

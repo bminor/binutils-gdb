@@ -47,6 +47,7 @@ struct value;
 struct objfile;
 struct minimal_symbol;
 struct regcache;
+struct reggroup;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -778,40 +779,40 @@ extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-#if defined (DO_REGISTERS_INFO)
-/* Legacy for systems yet to multi-arch DO_REGISTERS_INFO */
-#if !defined (DO_REGISTERS_INFO_P)
-#define DO_REGISTERS_INFO_P() (1)
+#if defined (DEPRECATED_DO_REGISTERS_INFO)
+/* Legacy for systems yet to multi-arch DEPRECATED_DO_REGISTERS_INFO */
+#if !defined (DEPRECATED_DO_REGISTERS_INFO_P)
+#define DEPRECATED_DO_REGISTERS_INFO_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (DO_REGISTERS_INFO_P)
-#define DO_REGISTERS_INFO_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_DO_REGISTERS_INFO_P)
+#define DEPRECATED_DO_REGISTERS_INFO_P() (0)
 #endif
 
-extern int gdbarch_do_registers_info_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DO_REGISTERS_INFO_P)
-#error "Non multi-arch definition of DO_REGISTERS_INFO"
+extern int gdbarch_deprecated_do_registers_info_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DO_REGISTERS_INFO_P)
+#error "Non multi-arch definition of DEPRECATED_DO_REGISTERS_INFO"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DO_REGISTERS_INFO_P)
-#define DO_REGISTERS_INFO_P() (gdbarch_do_registers_info_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_DO_REGISTERS_INFO_P)
+#define DEPRECATED_DO_REGISTERS_INFO_P() (gdbarch_deprecated_do_registers_info_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (DO_REGISTERS_INFO)
-#define DO_REGISTERS_INFO(reg_nr, fpregs) (internal_error (__FILE__, __LINE__, "DO_REGISTERS_INFO"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_DO_REGISTERS_INFO)
+#define DEPRECATED_DO_REGISTERS_INFO(reg_nr, fpregs) (internal_error (__FILE__, __LINE__, "DEPRECATED_DO_REGISTERS_INFO"), 0)
 #endif
 
-typedef void (gdbarch_do_registers_info_ftype) (int reg_nr, int fpregs);
-extern void gdbarch_do_registers_info (struct gdbarch *gdbarch, int reg_nr, int fpregs);
-extern void set_gdbarch_do_registers_info (struct gdbarch *gdbarch, gdbarch_do_registers_info_ftype *do_registers_info);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DO_REGISTERS_INFO)
-#error "Non multi-arch definition of DO_REGISTERS_INFO"
+typedef void (gdbarch_deprecated_do_registers_info_ftype) (int reg_nr, int fpregs);
+extern void gdbarch_deprecated_do_registers_info (struct gdbarch *gdbarch, int reg_nr, int fpregs);
+extern void set_gdbarch_deprecated_do_registers_info (struct gdbarch *gdbarch, gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DO_REGISTERS_INFO)
+#error "Non multi-arch definition of DEPRECATED_DO_REGISTERS_INFO"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DO_REGISTERS_INFO)
-#define DO_REGISTERS_INFO(reg_nr, fpregs) (gdbarch_do_registers_info (current_gdbarch, reg_nr, fpregs))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_DO_REGISTERS_INFO)
+#define DEPRECATED_DO_REGISTERS_INFO(reg_nr, fpregs) (gdbarch_deprecated_do_registers_info (current_gdbarch, reg_nr, fpregs))
 #endif
 #endif
 
@@ -1209,9 +1210,29 @@ extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch
 #endif
 #endif
 
+#if defined (GET_SAVED_REGISTER)
+/* Legacy for systems yet to multi-arch GET_SAVED_REGISTER */
+#if !defined (GET_SAVED_REGISTER_P)
+#define GET_SAVED_REGISTER_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (GET_SAVED_REGISTER_P)
+#define GET_SAVED_REGISTER_P() (0)
+#endif
+
+extern int gdbarch_get_saved_register_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_SAVED_REGISTER_P)
+#error "Non multi-arch definition of GET_SAVED_REGISTER"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_SAVED_REGISTER_P)
+#define GET_SAVED_REGISTER_P() (gdbarch_get_saved_register_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (GET_SAVED_REGISTER)
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval))
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (internal_error (__FILE__, __LINE__, "GET_SAVED_REGISTER"), 0)
 #endif
 
 typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
@@ -2659,6 +2680,12 @@ extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
 typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
 extern int gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
 extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags);
+
+/* Is a register in a group */
+
+typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 

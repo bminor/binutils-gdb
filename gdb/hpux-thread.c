@@ -357,18 +357,19 @@ hpux_thread_store_registers (int regno)
 	  else if (regno == SP_REGNUM)
 	    {
 	      write_memory ((CORE_ADDR) & tcb_ptr->static_ctx.sp,
-			    registers + REGISTER_BYTE (regno),
+			    &deprecated_registers[REGISTER_BYTE (regno)],
 			    REGISTER_RAW_SIZE (regno));
 	      tcb_ptr->static_ctx.sp = (cma__t_hppa_regs *)
-		(extract_address (registers + REGISTER_BYTE (regno), REGISTER_RAW_SIZE (regno)) + 160);
+		(extract_address (&deprecated_registers[REGISTER_BYTE (regno)],
+				  REGISTER_RAW_SIZE (regno)) + 160);
 	    }
 	  else if (regno == PC_REGNUM)
 	    write_memory (sp - 20,
-			  registers + REGISTER_BYTE (regno),
+			  &deprecated_registers[REGISTER_BYTE (regno)],
 			  REGISTER_RAW_SIZE (regno));
 	  else
 	    write_memory (sp + regmap[regno],
-			  registers + REGISTER_BYTE (regno),
+			  &deprecated_registers[REGISTER_BYTE (regno)],
 			  REGISTER_RAW_SIZE (regno));
 	}
     }

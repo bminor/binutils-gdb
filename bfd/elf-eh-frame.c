@@ -26,74 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define EH_FRAME_HDR_SIZE 8
 
-struct cie_header
-{
-  unsigned int length;
-  unsigned int id;
-};
-
-struct cie
-{
-  struct cie_header hdr;
-  unsigned char version;
-  unsigned char augmentation[20];
-  unsigned int code_align;
-  int data_align;
-  unsigned int ra_column;
-  unsigned int augmentation_size;
-  struct elf_link_hash_entry *personality;
-  unsigned char per_encoding;
-  unsigned char lsda_encoding;
-  unsigned char fde_encoding;
-  unsigned char initial_insn_length;
-  unsigned char make_relative;
-  unsigned char make_lsda_relative;
-  unsigned char initial_instructions[50];
-};
-
-struct eh_cie_fde
-{
-  unsigned int offset;
-  unsigned int size;
-  asection *sec;
-  unsigned int new_offset;
-  unsigned char fde_encoding;
-  unsigned char lsda_encoding;
-  unsigned char lsda_offset;
-  unsigned char cie : 1;
-  unsigned char removed : 1;
-  unsigned char make_relative : 1;
-  unsigned char make_lsda_relative : 1;
-  unsigned char per_encoding_relative : 1;
-};
-
-struct eh_frame_sec_info
-{
-  unsigned int count;
-  unsigned int alloced;
-  struct eh_cie_fde entry[1];
-};
-
-struct eh_frame_array_ent
-{
-  bfd_vma initial_loc;
-  bfd_vma fde;
-};
-
-struct eh_frame_hdr_info
-{
-  struct cie last_cie;
-  asection *last_cie_sec;
-  unsigned int last_cie_offset;
-  unsigned int fde_count, array_count;
-  struct eh_frame_array_ent *array;
-  /* TRUE if .eh_frame_hdr should contain the sorted search table.
-     We build it if we successfully read all .eh_frame input sections
-     and recognize them.  */
-  boolean table;
-  boolean strip;
-};
-
 static bfd_vma read_unsigned_leb128
   PARAMS ((bfd *, char *, unsigned int *));
 static bfd_signed_vma read_signed_leb128
@@ -282,11 +214,11 @@ int cie_compare (c1, c2)
    deleted.  */
 
 boolean
-_bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
+_bfd_elf_discard_section_eh_frame (abfd, info, sec,
 				   reloc_symbol_deleted_p, cookie)
      bfd *abfd;
      struct bfd_link_info *info;
-     asection *sec, *ehdrsec;
+     asection *sec;
      boolean (*reloc_symbol_deleted_p) PARAMS ((bfd_vma, PTR));
      struct elf_reloc_cookie *cookie;
 {
@@ -294,12 +226,12 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
   bfd_byte *last_cie, *last_fde;
   struct cie_header hdr;
   struct cie cie;
+  struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
   struct eh_frame_sec_info *sec_info = NULL;
   unsigned int leb128_tmp;
   unsigned int cie_usage_count, last_cie_ndx, i, offset;
   unsigned int make_relative, make_lsda_relative;
-  Elf_Internal_Rela *rel;
   bfd_size_type new_size;
   unsigned int ptr_size;
 
@@ -317,10 +249,8 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
       return false;
     }
 
-  BFD_ASSERT (elf_section_data (ehdrsec)->sec_info_type
-	      == ELF_INFO_TYPE_EH_FRAME_HDR);
-  hdr_info = (struct eh_frame_hdr_info *)
-	     elf_section_data (ehdrsec)->sec_info;
+  htab = elf_hash_table (info);
+  hdr_info = &htab->eh_info;
 
   /* Read the frame unwind information from abfd.  */
 
@@ -414,7 +344,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	    /* 64-bit .eh_frame is not supported.  */
 	    goto free_no_table;
 	  buf += 4;
-	  if ((buf - ehbuf) + hdr.length > sec->_raw_size)
+	  if ((bfd_size_type) (buf - ehbuf) + hdr.length > sec->_raw_size)
 	    /* CIE/FDE not contained fully in this .eh_frame input section.  */
 	    goto free_no_table;
 
@@ -555,10 +485,9 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 			       + ((buf - ehbuf + per_width - 1)
 				  & ~((bfd_size_type) per_width - 1)));
 		      ENSURE_NO_RELOCS (buf);
-		      rel = GET_RELOC (buf);
 		      /* Ensure we have a reloc here, against
 			 a global symbol.  */
-		      if (rel != NULL)
+		      if (GET_RELOC (buf) != NULL)
 			{
 			  unsigned long r_symndx;
 
@@ -626,8 +555,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	    goto free_no_table;
 
 	  ENSURE_NO_RELOCS (buf);
-	  rel = GET_RELOC (buf);
-	  if (rel == NULL)
+	  if (GET_RELOC (buf) == NULL)
 	    /* This should not happen.  */
 	    goto free_no_table;
 	  if ((*reloc_symbol_deleted_p) (buf - ehbuf, cookie))
@@ -636,7 +564,6 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 		 be deleted.  */
 	      new_size -= hdr.length + 4;
 	      sec_info->entry[sec_info->count].removed = 1;
-	      memset (rel, 0, sizeof (*rel));
 	    }
 	  else
 	    {
@@ -654,7 +581,6 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	      cie_usage_count++;
 	      hdr_info->fde_count++;
 	    }
-	  cookie->rel = rel;
 	  if (cie.lsda_encoding != DW_EH_PE_omit)
 	    {
 	      unsigned int dummy;
@@ -745,36 +671,27 @@ free_no_table:
    input sections.  It finalizes the size of .eh_frame_hdr section.  */
 
 boolean
-_bfd_elf_discard_section_eh_frame_hdr (abfd, info, sec)
+_bfd_elf_discard_section_eh_frame_hdr (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
-     asection *sec;
 {
+  struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
-  unsigned int ptr_size;
+  asection *sec;
 
-  ptr_size = (elf_elfheader (abfd)->e_ident[EI_CLASS]
-	      == ELFCLASS64) ? 8 : 4;
-
-  if ((elf_section_data (sec)->sec_info_type
-       != ELF_INFO_TYPE_EH_FRAME_HDR)
-      || ! info->eh_frame_hdr)
-    {
-      _bfd_strip_section_from_output (info, sec);
-      return false;
-    }
-
-  hdr_info = (struct eh_frame_hdr_info *)
-	     elf_section_data (sec)->sec_info;
-  if (hdr_info->strip)
+  htab = elf_hash_table (info);
+  hdr_info = &htab->eh_info;
+  sec = hdr_info->hdr_sec;
+  if (sec == NULL)
     return false;
+
   sec->_cooked_size = EH_FRAME_HDR_SIZE;
   if (hdr_info->table)
     sec->_cooked_size += 4 + hdr_info->fde_count * 8;
 
   /* Request program headers to be recalculated.  */
   elf_tdata (abfd)->program_header_size = 0;
-  elf_tdata (abfd)->eh_frame_hdr = true;
+  elf_tdata (abfd)->eh_frame_hdr = sec;
   return true;
 }
 
@@ -787,21 +704,21 @@ boolean
 _bfd_elf_maybe_strip_eh_frame_hdr (info)
      struct bfd_link_info *info;
 {
-  asection *sec, *o;
+  asection *o;
   bfd *abfd;
+  struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
 
-  sec = bfd_get_section_by_name (elf_hash_table (info)->dynobj, ".eh_frame_hdr");
-  if (sec == NULL || bfd_is_abs_section (sec->output_section))
+  htab = elf_hash_table (info);
+  hdr_info = &htab->eh_info;
+  if (hdr_info->hdr_sec == NULL)
     return true;
 
-  hdr_info
-    = bfd_zmalloc (sizeof (struct eh_frame_hdr_info));
-  if (hdr_info == NULL)
-    return false;
-
-  elf_section_data (sec)->sec_info = hdr_info;
-  elf_section_data (sec)->sec_info_type = ELF_INFO_TYPE_EH_FRAME_HDR;
+  if (bfd_is_abs_section (hdr_info->hdr_sec->output_section))
+    {
+      hdr_info->hdr_sec = NULL;
+      return true;
+    }
 
   abfd = NULL;
   if (info->eh_frame_hdr)
@@ -816,11 +733,12 @@ _bfd_elf_maybe_strip_eh_frame_hdr (info)
 
   if (abfd == NULL)
     {
-      _bfd_strip_section_from_output (info, sec);
-      hdr_info->strip = true;
+      _bfd_strip_section_from_output (info, hdr_info->hdr_sec);
+      hdr_info->hdr_sec = NULL;
+      return true;
     }
-  else
-    hdr_info->table = true;
+
+  hdr_info->table = true;
   return true;
 }
 
@@ -878,9 +796,8 @@ _bfd_elf_eh_frame_section_offset (output_bfd, sec, offset)
      for run-time relocation against LSDA field.  */
   if (sec_info->entry[mid].make_lsda_relative
       && ! sec_info->entry[mid].cie
-      && (offset
-	  == (sec_info->entry[mid].offset + 8
-	      + sec_info->entry[mid].lsda_offset)))
+      && (offset == (sec_info->entry[mid].offset + 8
+		     + sec_info->entry[mid].lsda_offset)))
     return (bfd_vma) -2;
 
   return (offset + sec_info->entry[mid].new_offset
@@ -891,12 +808,14 @@ _bfd_elf_eh_frame_section_offset (output_bfd, sec, offset)
    contents.  */
 
 boolean
-_bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
+_bfd_elf_write_section_eh_frame (abfd, info, sec, contents)
      bfd *abfd;
-     asection *sec, *ehdrsec;
+     struct bfd_link_info *info;
+     asection *sec;
      bfd_byte *contents;
 {
   struct eh_frame_sec_info *sec_info;
+  struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
   unsigned int i;
   bfd_byte *p, *buf;
@@ -914,19 +833,13 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 				     sec->_raw_size);
   sec_info = (struct eh_frame_sec_info *)
 	     elf_section_data (sec)->sec_info;
-  hdr_info = NULL;
-  if (ehdrsec
-      && (elf_section_data (ehdrsec)->sec_info_type
-	  == ELF_INFO_TYPE_EH_FRAME_HDR))
-    {
-      hdr_info = (struct eh_frame_hdr_info *)
-		 elf_section_data (ehdrsec)->sec_info;
-      if (hdr_info->table && hdr_info->array == NULL)
-	hdr_info->array
-	  = bfd_malloc (hdr_info->fde_count * sizeof(*hdr_info->array));
-      if (hdr_info->array == NULL)
-        hdr_info = NULL;
-    }
+  htab = elf_hash_table (info);
+  hdr_info = &htab->eh_info;
+  if (hdr_info->table && hdr_info->array == NULL)
+    hdr_info->array
+      = bfd_malloc (hdr_info->fde_count * sizeof(*hdr_info->array));
+  if (hdr_info->array == NULL)
+    hdr_info = NULL;
 
   p = contents;
   for (i = 0; i < sec_info->count; ++i)
@@ -1174,24 +1087,21 @@ vma_compare (a, b)
 				 sorted by increasing initial_loc)  */
 
 boolean
-_bfd_elf_write_section_eh_frame_hdr (abfd, sec)
+_bfd_elf_write_section_eh_frame_hdr (abfd, info)
      bfd *abfd;
-     asection *sec;
+     struct bfd_link_info *info;
 {
+  struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
-  unsigned int ptr_size;
+  asection *sec;
   bfd_byte *contents;
   asection *eh_frame_sec;
   bfd_size_type size;
 
-  ptr_size = (elf_elfheader (sec->owner)->e_ident[EI_CLASS]
-	      == ELFCLASS64) ? 8 : 4;
-
-  BFD_ASSERT (elf_section_data (sec)->sec_info_type
-	      == ELF_INFO_TYPE_EH_FRAME_HDR);
-  hdr_info = (struct eh_frame_hdr_info *)
-	     elf_section_data (sec)->sec_info;
-  if (hdr_info->strip)
+  htab = elf_hash_table (info);
+  hdr_info = &htab->eh_info;
+  sec = hdr_info->hdr_sec;
+  if (sec == NULL)
     return true;
 
   size = EH_FRAME_HDR_SIZE;
