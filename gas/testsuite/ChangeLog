@@ -1,3 +1,8 @@
+2004-07-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel7.d: Expect relocations against bar to refer to bar.
+	* gas/mips/elf-refl19.d: Likewise L2.
+
 2004-07-03  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (HAVE_IN_PLACE_ADDENDS): New macro.

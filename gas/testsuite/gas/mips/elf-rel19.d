@@ -10,10 +10,10 @@ Disassembly of section \.text:
 # Relocation agsinst .rodata.str1.1
 #
 .*:	8f840000 	lw	a0,0\(gp\)
-			.*: R_MIPS_GOT16	\.rodata\.str1\.1
+			.*: R_MIPS_GOT16	L2
 .*:	00000000 	nop
-.*:	24840004 	addiu	a0,a0,4
-			.*: R_MIPS_LO16	\.rodata\.str1\.1
+.*:	24840000 	addiu	a0,a0,0
+			.*: R_MIPS_LO16	L2
 #
 # Relocation agsinst L2 + 2
 #

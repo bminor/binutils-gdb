@@ -12733,15 +12733,13 @@ md_estimate_size_before_relax (fragS *fragp, asection *segtype)
 }
 
 /* This is called to see whether a reloc against a defined symbol
-   should be converted into a reloc against a section.  Don't adjust
-   MIPS16 jump relocations, so we don't have to worry about the format
-   of the offset in the .o file.  Don't adjust relocations against
-   mips16 symbols, so that the linker can find them if it needs to set
-   up a stub.  */
+   should be converted into a reloc against a section.  */
 
 int
 mips_fix_adjustable (fixS *fixp)
 {
+  /* Don't adjust MIPS16 jump relocations, so we don't have to worry
+     about the format of the offset in the .o file. */
   if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
     return 0;
 
@@ -12752,7 +12750,28 @@ mips_fix_adjustable (fixS *fixp)
   if (fixp->fx_addsy == NULL)
     return 1;
 
+  /* If symbol SYM is in a mergeable section, relocations of the form
+     SYM + 0 can usually be made section-relative.  The mergeable data
+     is then identified by the section offset rather than by the symbol.
+
+     However, if we're generating REL LO16 relocations, the offset is split
+     between the LO16 and parterning high part relocation.  The linker will
+     need to recalculate the complete offset in order to correctly identify
+     the merge data.
+
+     The linker has traditionally not looked for the parterning high part
+     relocation, and has thus allowed orphaned R_MIPS_LO16 relocations to be
+     placed anywhere.  Rather than break backwards compatibility by changing
+     this, it seems better not to force the issue, and instead keep the
+     original symbol.  This will work with either linker behavior.  */
+  if ((fixp->fx_r_type == BFD_RELOC_LO16 || reloc_needs_lo_p (fixp->fx_r_type))
+      && HAVE_IN_PLACE_ADDENDS
+      && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)
+    return 0;
+
 #ifdef OBJ_ELF
+  /* Don't adjust relocations against mips16 symbols, so that the linker
+     can find them if it needs to set up a stub.  */
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour
       && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
       && fixp->fx_subsy == NULL)

@@ -1,3 +1,10 @@
+2004-07-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (mips_fix_adjustable): If the full addend is
+	going to be split into more than one in-place addend, return 0
+	for relocations against mergeable sections.  Associate comments
+	with code.
+
 2004-07-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* Makefile.am (CPU_TYPES): Add crx.
