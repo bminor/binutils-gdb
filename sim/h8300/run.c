@@ -18,9 +18,11 @@
 
 */
 
+#include <varargs.h>
 #include <stdio.h>
 #include "bfd.h"
 #include "sysdep.h"
+#include "remote-sim.h"
 
 int
 main (ac, av)
@@ -34,6 +36,7 @@ main (ac, av)
   int verbose = 0;
   int trace = 0;
   char *name = "";
+
   for (i = 1; i < ac; i++)
     {
       if (strcmp(av[i],"-v") == 0)
@@ -49,7 +52,7 @@ main (ac, av)
 	  i++;
 	}
       else if (strcmp(av[i],"-h") == 0) 
-	set_h8300h ();
+	set_h8300h (1);
       else 
 	name = av[i];
     }
@@ -63,7 +66,7 @@ main (ac, av)
       if (bfd_check_format(abfd, bfd_object)) 
 	{
 	  if (abfd->arch_info->mach == bfd_mach_h8300h)
-	    set_h8300h ();
+	    set_h8300h (1);
 
 	  for (s = abfd->sections; s; s=s->next) 
 	    {
@@ -73,13 +76,26 @@ main (ac, av)
 	    }
 
 	  start_address = bfd_get_start_address(abfd);
-	  sim_set_pc (start_address);
+	  sim_create_inferior (start_address, NULL, NULL);
 	  sim_resume(0,0);
 	  if (verbose)
-	    sim_info (printf, verbose - 1);
+	    sim_info (verbose - 1);
 	  return 0;
 	}
     }
 
   return 1;
+}
+
+void
+printf_filtered (va_alist)
+     va_dcl
+{
+  char *msg;
+  va_list args;
+
+  va_start (args);
+  msg = va_arg (args, char *);
+  vfprintf (stdout, msg, args);
+  va_end (args);
 }
