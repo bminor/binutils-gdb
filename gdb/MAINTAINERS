@@ -172,40 +172,8 @@ All recognized developers can make mechanical changes (by virtue of
 the obvious fix rule) to ``maintenance only'' targets.  The change
 shall be sanity checked by compiling with one of the listed targets.
 
-The Bourne shell script:
-
-cat MAINTAINERS | tr -s '[\t]' '[ ]' | sed -n '
-/^[ ]*[-a-z0-9\.]*[ ]*[(]*--target=.*/ !d
-s/^.*--target=//
-s/).*$//
-h
-:loop
-  g
-  /^[^ ]*,/ !b end
-  s/,[^ ]*//
-  p
-  g
-  s/^[^,]*,//
-  h
-b loop
-:end
-p
-'
-
-can be used to generate a list of buildable targets.  The list
-containing values for the configure options --target=,
---enable-gdb-build-warnings= and optionally
---enable-sim-build-warnings vis:
-
-	arc-elf ,-Werror
-	...
-	m68hc11-elf ,-Werror ,
-	...
-	hppa1.1-hp-proelf broken
-	...
-
-While the ``broken'' targets are included in the listing, the are not
-expected to build.
+The Bourne shell script gdb_mbuild.sh can be used to rebuild all the
+above targets.
 
 
 Host/Native:
