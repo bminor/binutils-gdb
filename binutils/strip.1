@@ -12,9 +12,9 @@ strip \- Discard symbols from object files.
 
 .SH SYNOPSIS
 .B strip
-.RB "[\|" "\-F \fIformat\fP" | \-\-format=\fIformat\fP | \-\-target=\fIformat\fP "\|]"
-.RB "[\|" "\-I \fIformat\fP" | \-\-input\-format=\fIformat\fP "\|]"
-.RB "[\|" "\-O \fIformat\fP" | \-\-output\-format=\fIformat\fP "\|]"
+.RB "[\|" "\-F \fIbfdname\fP" | \-\-target=\fIbfdname\fP "\|]"
+.RB "[\|" "\-I \fIbfdname\fP" | \-\-input\-target=\fIbfdname\fP "\|]"
+.RB "[\|" "\-O \fIbfdname\fP" | \-\-output\-target=\fIbfdname\fP "\|]"
 .RB "[\|" \-s | \-\-strip\-all "\|]"
 .RB "[\|" \-S | -g | \-\-strip\-debug "\|]"
 .RB "[\|" \-x | \-\-discard\-all "\|]"
@@ -40,13 +40,11 @@ rather than writing modified copies under different names.
 
 .SH OPTIONS
 .TP
-.B "\-F \fIformat"
+.B "\-F \fIbfdname"
 .TP
-.B "\-\-format=\fIformat"
-.TP
-.B "\-\-target=\fIformat"
+.B "\-\-target=\fIbfdname"
 Treat the original \fIobjfile\fP as a file with the object
-code format \fIformat\fP, and rewrite it in the same format.
+code format \fIbfdname\fP, and rewrite it in the same format.
 
 .TP
 .B \-\-help
@@ -55,17 +53,17 @@ Show a summary of the options to
 and exit.
 
 .TP
-.B "\-I \fIformat
+.B "\-I \fIbfdname
 .TP
-.B "\-\-input\-format=\fIformat"
+.B "\-\-input\-target=\fIbfdname"
 Treat the original \fIobjfile\fP as a file with the object
-code format \fIformat\fP.
+code format \fIbfdname\fP.
 
 .TP
-.B "\-O \fIformat\fP"
+.B "\-O \fIbfdname\fP"
 .TP
-.B "\-\-output\-format=\fIformat"
-Replace \fIobjfile\fP with a file in the output format \fIformat\fP.
+.B "\-\-output\-target=\fIbfdname"
+Replace \fIobjfile\fP with a file in the output format \fIbfdname\fP.
 
 .TP
 .B \-s

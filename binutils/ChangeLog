@@ -1,3 +1,28 @@
+Thu Jan  6 06:18:15 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* binutils.texi: Add a chapter summarizing the ways to select
+	aspects of the target for each program.
+
+	* objdump.c (long_options, usage): Add long equivalents for all
+	remaining short options that lacked them.
+	* binutils.texi objdump.1: Document them.
+
+	* size.c (usage): Tweak usage message.
+	* size.1: Add missing `=' in examples.
+
+	* binutils.texi strip.1 objcopy.1 nlmconv.1 objcopy.c nlmconv.c:
+	Use "--target=bfdname" as the option to select the BFD target,
+	like nm and size already do.
+	Reserve "--format=format" for textual output selection options, but
+	for now keep old option names as obsolete for backward compatibility.
+
+	* strings.c (main, strings_object_file, usage): Add --target option.
+	* binutils.texi strings.1: Document it.
+
+Sat Jan  1 13:58:24 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ar.c (main): Add \n in error message.
+
 Thu Dec 23 12:23:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	gcc -Wall lint:

@@ -29,6 +29,7 @@ strings \- print the strings of printable characters in files
 \&\|]
 .RB "[\|" \-t
 .I {o,x,d}\c
+.RB "[\|" "\-\-target=\fIbfdname" "\|]"
 .RB | "\-\-radix="\c
 .I {o,x,d}\c
 \&\|]
@@ -100,6 +101,14 @@ characters long, instead of the default 4.
 Print the offset within the file before each string.  The single
 character argument specifies the radix of the offset\(emoctal,
 hexadecimal, or decimal.
+
+.TP
+.BI "\-\-target=" "bfdname"\c
+\&
+Specify an object code format other than your system's default format.
+See 
+.BR objdump ( 1 ),
+for information on listing available formats.
 
 .TP
 .B \-o

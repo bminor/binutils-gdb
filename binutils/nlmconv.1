@@ -15,8 +15,8 @@ nlmconv\(em\&converts object code into an NLM
 .na
 .TP
 .B nlmconv
-.RB "[\|" \-I\ \fIformat\fB\ |\ \-\-input\-format=\fIformat\fR "\|]" 
-.RB "[\|" \-O\ \fIformat\fB\ |\ \-\-output\-format=\fIformat\fR "\|]" 
+.RB "[\|" \-I\ \fIbfdname\fB\ |\ \-\-input\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-O\ \fIbfdname\fB\ |\ \-\-output\-target=\fIbfdname\fR "\|]" 
 .RB "[\|" \-T\ \fIheaderfile\fB\ |\ \-\-header\-file=\fIheaderfile\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
 .RB "[\|" \-\-help\fR "\|]" 
@@ -47,14 +47,14 @@ uses the GNU Binary File Descriptor library to read
 .IR infile .
 .SH OPTIONS
 .TP
-.B \-I \fIformat\fR, \fB\-\-input\-format=\fIformat
+.B \-I \fIbfdname\fR, \fB\-\-input\-target=\fIbfdname
 Consider the source file's object format to be 
-.IR format ,
+.IR bfdname ,
 rather than attempting to deduce it.
 .TP
-.B \-O \fIformat\fR, \fB\-\-output\-format=\fIformat
+.B \-O \fIbfdname\fR, \fB\-\-output\-target=\fIbfdname
 Write the output file using the object format 
-.IR format .
+.IR bfdname .
 .B nlmconv
 infers the output format based on the input format, e.g. for an i386
 input file the output format is

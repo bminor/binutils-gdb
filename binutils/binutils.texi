@@ -81,7 +81,8 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions.
 @end titlepage
 
-@node Top, ar, (dir), (dir)
+@node Top
+@top
 @chapter Introduction
 
 @cindex version
@@ -106,19 +107,24 @@ Display information from object files
 Generate index to archive contents
 
 @item size
-List section sizes and total size
+List file section sizes and total size
 
 @item strings
 List printable strings from files
 
 @item strip
 Discard symbols
+
+@item c++filt
+Demangle encoded C++ symbols
+
+@item nlmconv
+Convert object code into a Netware Loadable Module
 @end table
 @end iftex
 
 @menu
 * ar::                          Create, modify, and extract from archives
-* ld:(ld)Overview.              Combine object and archive files
 * nm::                          List symbols from object files
 * objcopy::			Copy and translate object files
 * objdump::                     Display information from object files
@@ -128,10 +134,11 @@ Discard symbols
 * strip::                       Discard symbols
 * c++filt::			Filter to demangle encoded C++ symbols
 * nlmconv::                     Converts object code into an NLM
+* Selecting The Target System:: How these utilities determine the target.
 * Index::                       
 @end menu
 
-@node ar, nm, Top, Top
+@node ar
 @chapter ar
 
 @kindex ar
@@ -187,12 +194,12 @@ with a script supplied via standard input, like the MRI ``librarian''
 program.
 
 @menu
-* ar-cmdline::                  Controlling @code{ar} on the command line
-* ar-scripts::                  Controlling @code{ar} with a script
+* ar cmdline::                  Controlling @code{ar} on the command line
+* ar scripts::                  Controlling @code{ar} with a script
 @end menu
 
 @page
-@node ar-cmdline, ar-scripts, ar, ar
+@node ar cmdline
 @section Controlling @code{ar} on the command line
 
 @smallexample
@@ -382,7 +389,7 @@ when the modifier @samp{v} is appended.
 This modifier shows the version number of @code{ar}.
 @end table
 
-@node ar-scripts,  , ar-cmdline, ar
+@node ar scripts
 @section Controlling @code{ar} with a script
 
 @smallexample
@@ -554,7 +561,7 @@ The GNU linker @code{ld} is now described in a separate manual.
 @xref{Top,, Overview,, Using LD: the GNU linker}.
 @end iftex
 
-@node nm, objcopy, ar, Top
+@node nm
 @chapter nm
 @cindex symbols
 @kindex nm
@@ -699,7 +706,7 @@ Use @var{radix} as the radix for printing the symbol values.  It must be
 @item --target=@var{bfdname}
 @cindex object code format
 Specify an object code format other than your system's default format.
-@xref{objdump}, for information on listing available formats.
+@xref{Target Selection}, for more information.
 
 @item -u
 @itemx --undefined-only 
@@ -715,13 +722,13 @@ Show the version number of @code{nm} and exit.
 Show a summary of the options to @code{nm} and exit.
 @end table
 
-@node objcopy, objdump, nm, Top
+@node objcopy
 @chapter objcopy
 
 @smallexample
-objcopy [ -F @var{format} | --format=@var{format} ]
-        [ -I @var{format} | --input-format=@var{format} ]
-        [ -O @var{format} | --output-format=@var{format} ]
+objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
+        [ -I @var{bfdname} | --input-target=@var{bfdname} ]
+        [ -O @var{bfdname} | --output-target=@var{bfdname} ]
         [ -S | --strip-all ]  [ -g | --strip-debug ]
         [ -x | --discard-all ]  [ -X | --discard-locals ]
         [ -v | --verbose ]  [ -V | --version ]  [ --help ]
@@ -738,7 +745,7 @@ different from that of the source object file.  The exact behavior of
 deletes them afterward.  @code{objcopy} uses BFD to do all its
 translation work; it knows about all the formats BFD knows about, and
 thus is able to recognize most formats without being told explicitly.
-@xref{BFD,,BFD,ld.info,Using LD, the GNU linker}.
+@xref{BFD,,BFD,ld.info,Using LD}.
 
 @table @code
 @item @var{infile}
@@ -748,20 +755,21 @@ If you do not specify @var{outfile}, @code{objcopy} creates a
 temporary file and destructively renames the result with
 the name of the input file.
 
-@item -I @var{format}	
-@itemx --input-format=@var{format}
-Consider the source file's object format to be @var{format}, rather than
-attempting to deduce it.
+@item -I @var{bfdname}	
+@itemx --input-target=@var{bfdname}
+Consider the source file's object format to be @var{bfdname}, rather than
+attempting to deduce it.  @xref{Target Selection}, for more information.
 
-@item -O @var{format}
-@itemx --output-format=@var{format}
-Write the output file using the object format @var{format}.
+@item -O @var{bfdname}
+@itemx --output-target=@var{bfdname}
+Write the output file using the object format @var{bfdname}.
+@xref{Target Selection}, for more information.
 
-@item -F @var{format}
-@itemx --format=@var{format}
-Use @var{format} as the object format for both the input and the output
-file; i.e. simply transfer data from source to destination with no
-translation.
+@item -F @var{bfdname}
+@itemx --target=@var{bfdname}
+Use @var{bfdname} as the object format for both the input and the output
+file; i.e., simply transfer data from source to destination with no
+translation.  @xref{Target Selection}, for more information.
 
 @item -S
 @itemx --strip-all
@@ -794,17 +802,20 @@ archives, @samp{objcopy -V} lists all members of the archive.
 Show a summary of the options to @code{objcopy}.
 @end table
 
-@node objdump, ranlib, objcopy, Top
+@node objdump
 @chapter objdump
 
 @cindex object file information
 @kindex objdump
 
 @smallexample
-objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]
-        [ -h | --header ]  [ -i ]  [ -j @var{section} ]  [ -l ]
-        [ -m @var{machine} ]  [ -r | --reloc ]  [ -s ]  [ --stabs ]
-        [ -t | --syms ]  [ -x ]  [ --version ]  [ --help ]
+objdump [ -a | --archive-headers ]  [ -b @var{bfdname} | --target=@var{bfdname} ]
+        [ -d | --disassemble ]  [ -f | --file-headers ]
+        [ -h | --section-headers | --headers ]  [ -i | --info ]
+        [ -j @var{section} | --section=@var{section} ]  [ -l | --line-numbers ]
+        [ -m @var{machine} | --architecture=@var{machine} ]  [ -r | --reloc ]
+        [ -s | --full-contents ]  [ --stabs ] [ -t | --syms ]
+        [ -x | --all-headers ]  [ --version ]  [ --help ]
         @var{objfile}@dots{}
 @end smallexample
 
@@ -823,15 +834,15 @@ equivalent.  At least one option besides @samp{-l} must be given.
 
 @table @code
 @item -a
-@c print_arelt_descr
+@itemx --archive-header
 @cindex archive headers
 If any of the @var{objfile} files are archives, display the archive
 header information (in a format similar to @samp{ls -l}).  Besides the
 information you could list with @samp{ar tv}, @samp{objdump -a} shows
 the object file format of each archive member.
 
-@c suggest longname --target or --format or --bfd
 @item -b @var{bfdname}
+@itemx --target=@var{bfdname}
 @cindex object code format
 Specify that the object-code format for the object files is
 @var{bfdname}.  This option may not be necessary; @var{objdump} can
@@ -846,46 +857,52 @@ displays summary information from the section headers (@samp{-h}) of
 @file{fu.o}, which is explicitly identified (@samp{-m}) as a VAX object
 file in the format produced by Oasys compilers.  You can list the
 formats available with the @samp{-i} option.
+@xref{Target Selection}, for more information.
 
 @item -d
+@itemx --disassemble
 @cindex disassembling object code
 @cindex machine instructions
-Disassemble.  Display the assembler mnemonics for the machine
+Display the assembler mnemonics for the machine
 instructions from @var{objfile}.
 
 @item -f
+@itemx --file-header
 @cindex object file header
-File header.  Display summary information from the overall header of
+Display summary information from the overall header of
 each of the @var{objfile} files.
 
 @item -h
+@itemx --section-header
 @itemx --header
 @cindex section headers
-Header.  Display summary information from the section headers of the
+Display summary information from the section headers of the
 object file.
 
 @item --help
 Print a summary of the options to @code{objdump} and exit.
 
 @item -i
+@itemx --info
 @cindex architectures available
 @cindex object formats available
 Display a list showing all architectures and object formats available
 for specification with @samp{-b} or @samp{-m}.
 
-@c suggest longname --section
 @item -j @var{name}
+@itemx --section=@var{name}
 @cindex section information
 Display information only for section @var{name}.
 
-@c suggest longname --label or --linespec
 @item -l
+@itemx --line-numbers
 @cindex source filenames for object files
-Label the display (using debugging information) with the source filename
-and line numbers corresponding to the object code shown.
+Label the display (using debugging information) with the filename
+and source line numbers corresponding to the object code shown.
+Only useful with @samp{-d}.
 
-@c suggest longname --architecture
 @item -m @var{machine}
+@itemx --architecture=@var{machine}
 @cindex architecture
 Specify that the object files @var{objfile} are for architecture
 @var{machine}.  You can list available architectures using the @samp{-i}
@@ -894,9 +911,10 @@ option.
 @item -r
 @itemx --reloc
 @cindex relocation entries, in object file
-Relocation.  Print the relocation entries of the file.
+Print the relocation entries of the file.
 
 @item -s
+@itemx --full-contents
 @cindex sections, full contents
 @cindex object file sections
 Display the full contents of any sections requested.
@@ -917,13 +935,14 @@ output.
 @item -t
 @itemx --syms
 @cindex symbol table entries, printing
-Symbol Table.  Print the symbol table entries of the file.
+Print the symbol table entries of the file.
 This is similar to the information provided by the @samp{nm} program.
 
 @item --version
 Print the version number of @code{objdump} and exit.
 
 @item -x
+@itemx --all-header
 @cindex all header information, object file
 @cindex header information, all
 Display all available header information, including the symbol table and
@@ -931,7 +950,7 @@ relocation entries.  Using @samp{-x} is equivalent to specifying all of
 @samp{-a -f -h -r -t}.
 @end table
 
-@node ranlib, size, objdump, Top
+@node ranlib
 @chapter ranlib
 
 @kindex ranlib
@@ -962,7 +981,7 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 Show the version number of @code{ranlib}.
 @end table
 
-@node size, strings, ranlib, Top
+@node size
 @chapter size
 
 @kindex size
@@ -1001,7 +1020,7 @@ Berkeley's.
 Here is an example of the Berkeley (default) format of output from
 @code{size}: 
 @smallexample
-size --format Berkeley ranlib size
+size --format=Berkeley ranlib size
 text    data    bss     dec     hex     filename
 294880  81920   11592   388392  5ed28   ranlib
 294880  81920   11888   388688  5ee50   size
@@ -1011,7 +1030,7 @@ text    data    bss     dec     hex     filename
 This is the same data, but displayed closer to System V conventions:
 
 @smallexample
-size --format SysV ranlib size
+size --format=SysV ranlib size
 ranlib  :
 section         size         addr
 .text         294880         8192       
@@ -1049,15 +1068,15 @@ octal and hexadecimal if you're using @samp{-o}.
 @cindex object code format
 Specify that the object-code format for @var{objfile} is
 @var{bfdname}.  This option may not be necessary; @code{size} can
-automatically recognize many formats.  @xref{objdump}, for information
-on listing available formats.
+automatically recognize many formats.
+@xref{Target Selection}, for more information.
 
 @item -V
 @itemx --version
 Display the version number of @code{size}.
 @end table
 
-@node strings, strip, size, Top
+@node strings
 @chapter strings
 @kindex strings
 @cindex listings strings
@@ -1067,7 +1086,8 @@ Display the version number of @code{size}.
 @smallexample
 strings [-afov] [-@var{min-len}] [-n @var{min-len}] [-t @var{radix}] [-]
         [--all] [--print-file-name] [--bytes=@var{min-len}]
-        [--radix=@var{radix}] [--help] [--version] @var{file}@dots{}
+        [--radix=@var{radix}] [--target=@var{bfdname}]
+        [--help] [--version] @var{file}@dots{}
 @end smallexample
 
 For each @var{file} given, GNU @code{strings} prints the printable
@@ -1111,12 +1131,17 @@ Print the offset within the file before each string.  The single
 character argument specifies the radix of the offset---@samp{o} for
 octal, @samp{x} for hexadecimal, or @samp{d} for decimal.
 
+@item --target=@var{bfdname}
+@cindex object code format
+Specify an object code format other than your system's default format.
+@xref{Target Selection}, for more information.
+
 @item -v
 @itemx --version
 Print the program version number on the standard output and exit.
 @end table
 
-@node strip, c++filt, strings, Top
+@node strip
 @chapter strip
 
 @kindex strip
@@ -1125,9 +1150,9 @@ Print the program version number on the standard output and exit.
 @cindex symbols, discarding
 
 @smallexample
-strip [ -F @var{format} | --format=@var{format} | --target=@var{format} ]
-      [ -I @var{format} | --input-format=@var{format} ]
-      [ -O @var{format} | --output-format=@var{format} ]
+strip [ -F @var{bfdname} | --target=@var{bfdname} | --target=@var{bfdname} ]
+      [ -I @var{bfdname} | --input-target=@var{bfdname} ]
+      [ -O @var{bfdname} | --output-target=@var{bfdname} ]
       [ -s | --strip-all ] [ -S | -g | --strip-debug ]
       [ -x | --discard-all ] [ -X | --discard-locals ]
       [ -v | --verbose ]  [ -V | --version ]  [ --help ]
@@ -1142,23 +1167,25 @@ At least one object file must be given.
 rather than writing modified copies under different names.
 
 @table @code
-@item -F @var{format}
-@itemx --format=@var{format}
-@itemx --target=@var{format}
+@item -F @var{bfdname}
+@itemx --target=@var{bfdname}
 Treat the original @var{objfile} as a file with the object
-code format @var{format}, and rewrite it in the same format.
+code format @var{bfdname}, and rewrite it in the same format.
+@xref{Target Selection}, for more information.
 
 @item --help
 Show a summary of the options to @code{strip} and exit.
 
-@item -I @var{format}	
-@itemx --input-format=@var{format}
+@item -I @var{bfdname}	
+@itemx --input-target=@var{bfdname}
 Treat the original @var{objfile} as a file with the object
-code format @var{format}.
+code format @var{bfdname}.
+@xref{Target Selection}, for more information.
 
-@item -O @var{format}
-@itemx --output-format=@var{format}
-Replace @var{objfile} with a file in the output format @var{format}.
+@item -O @var{bfdname}
+@itemx --output-target=@var{bfdname}
+Replace @var{objfile} with a file in the output format @var{bfdname}.
+@xref{Target Selection}, for more information.
 
 @item -s
 @itemx --strip-all
@@ -1188,7 +1215,7 @@ Verbose output: list all object files modified.  In the case of
 archives, @samp{strip -v} lists all members of the archive.
 @end table
 
-@node c++filt, nlmconv, strip, Top
+@node c++filt
 @chapter c++filt
 
 @kindex c++filt
@@ -1270,7 +1297,7 @@ c++filt @var{option} @var{symbol}
 @end example
 @end quotation
 
-@node nlmconv, Index, c++filt, Top
+@node nlmconv
 @chapter nlmconv
 
 @code{nlmconv} converts a relocatable object file into a NetWare
@@ -1287,8 +1314,8 @@ utilities, since it is only useful for NLM targets.
 @end quotation
 
 @smallexample
-nlmconv [ -I @var{format} | --input-format=@var{format} ]
-        [ -O @var{format} | --output-format=@var{format} ]
+nlmconv [ -I @var{bfdname} | --input-target=@var{bfdname} ]
+        [ -O @var{bfdname} | --output-target=@var{bfdname} ]
         [ -T @var{headerfile} | --header-file=@var{headerfile} ]
         [ -h | --help ]  [ -V | --version ]
         @var{infile} @var{outfile}
@@ -1302,23 +1329,22 @@ on writing the NLM command file language used in header files, see the
 Development and Tools Overview}, which is part of the NLM Software
 Developer's Kit (``NLM SDK''), available from Novell, Inc.
 @code{nlmconv} uses the @sc{gnu} Binary File Descriptor library to read
-@var{infile}; see @ref{BFD,,BFD,ld.info,Using LD, the GNU linker}, for
+@var{infile}; see @ref{BFD,,BFD,ld.info,Using LD}, for
 more information.
 
 @table @code
-@item -I @var{format}
-@itemx --input-format=@var{format}
+@item -I @var{bfdname}
+@itemx --input-target=@var{bfdname}
 Object format of the input file.  @code{nlmconv} can usually determine
-the format of a given file (so no default is necessary).  @var{format}
-arguments are normal BFD names; for a list of these, run
-@w{@samp{objdump -i}}.
+the format of a given file (so no default is necessary).
+@xref{Target Selection}, for more information.
 
-@item -O @var{format}
-@itemx --output-format=@var{format}
+@item -O @var{bfdname}
+@itemx --output-target=@var{bfdname}
 Object format of the output file.  @code{nlmconv} infers the output
 format based on the input format, e.g. for a @samp{i386} input file the
-output format is @samp{nlm32-i386}.  @var{format} arguments are normal
-BFD names; for a list of these, run @w{@samp{objdump -i}}.
+output format is @samp{nlm32-i386}.
+@xref{Target Selection}, for more information.
 
 @item -T @var{headerfile}
 @itemx --header-file=@var{headerfile}
@@ -1337,7 +1363,274 @@ Prints a usage summary.
 Prints the version number for @code{nlmconv}.
 @end table
 
-@node Index,  , nlmconv, Top
+@node Selecting The Target System
+@chapter Selecting the target system
+
+You can specify three aspects of the target system to the GNU binary
+file utilities, each in several ways.  The three aspects of the target
+system that you can specify are
+
+@itemize @bullet
+@item
+the target,
+
+@item
+the architecture, and
+
+@item
+the linker emulation (which applies to the linker only).
+@end itemize
+
+In the following summaries, the lists of ways to specify values are in
+order of decreasing precedence.  In other words, the ways listed earlier
+override the ways listed later.
+
+The commands to list valid values only list the values that the programs
+you are running were configured for.  If they were configured with
+@samp{--with-targets=all}, the commands list most of the available
+values, but a few are left out; not all targets can be configured in at
+once because some of them can only be compiled ``native'' (on hosts with
+the same type as the target system).
+
+@menu
+* Target Selection::            
+* Architecture Selection::      
+* Linker Emulation Selection::  
+@end menu
+
+@node Target Selection
+@section Target selection
+
+A @dfn{target} is an object file format.  A given target may be
+supported for multiple architectures (@pxref{Architecture Selection}).
+It may also have variations for different operating systems or architectures.
+
+Command to list valid values: @samp{objdump -i} (first column).
+
+Sample values: @samp{a.out-hp300bsd}, @samp{ecoff-littlemips}, @samp{a.out-sunos-big}.
+
+@menu
+* objdump Target::              
+* objcopy strip Input Target::  
+* objcopy strip Output Target::  
+* nm size strings Target::  
+* Linker Input Target::         
+* Linker Output Target::        
+@end menu
+
+@node objdump Target
+@subsection @code{objdump} target
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{-b}, @samp{--target}
+
+@item
+environment variable @code{GNUTARGET}
+
+@item
+deduced from the input file
+@end enumerate
+
+@node objcopy strip Input Target
+@subsection @code{objcopy} and @code{strip} input target
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{-I}, @samp{--input-target}, @samp{-F}, @samp{--target}
+
+@item
+environment variable @code{GNUTARGET}
+
+@item
+deduced from the input file
+@end enumerate
+
+@node objcopy strip Output Target
+@subsection @code{objcopy} and @code{strip} output target
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{-O}, @samp{-F}, @samp{--output-target}, @samp{--target}
+
+@item
+the input target (@pxref{objcopy strip Input Target})
+
+@item
+environment variable @code{GNUTARGET}
+
+@item
+deduced from the input file
+@end enumerate
+
+@node nm size strings Target
+@subsection @code{nm}, @code{size}, and @code{strings} target
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{--target}
+
+@item
+environment variable @code{GNUTARGET}
+
+@item
+deduced from the input file
+@end enumerate
+
+@node Linker Input Target
+@subsection Linker input target
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{-b}, @samp{-format}
+(@pxref{Options,,Options,ld.info,Using LD})
+
+@item
+script command @code{TARGET}
+(@pxref{Option Commands,,Option Commands,ld.info,Using LD})
+
+@item
+environment variable @code{GNUTARGET}
+(@pxref{Environment,,Environment,ld.info,Using LD})
+
+@item
+the default target of the selected linker emulation
+(@pxref{Linker Emulation Selection})
+@end enumerate
+
+@node Linker Output Target
+@subsection Linker output target
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{-oformat}
+(@pxref{Options,,Options,ld.info,Using LD})
+
+@item
+script command @code{OUTPUT_FORMAT}
+(@pxref{Option Commands,,Option Commands,ld.info,Using LD})
+
+@item
+the linker input target (@pxref{Linker Input Target})
+@end enumerate
+
+@node Architecture Selection
+@section Architecture selection
+
+An @dfn{architecture} is a type of CPU on which an object file is to
+run.  Its name may contain a colon, separating the name of the
+processor family from the name of the particular CPU.
+
+Command to list valid values: @samp{objdump -i} (second column).
+
+Sample values: @samp{m68k:68020}, @samp{mips:3000}, @samp{sparc}.
+
+@menu
+* objdump Architecture::        
+* objcopy nm size strings Architecture::  
+* Linker Input Architecture::  
+* Linker Output Architecture::  
+@end menu
+
+@node objdump Architecture
+@subsection @code{objdump} architecture
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{-m}, @samp{--architecture}
+
+@item
+deduced from the input file
+@end enumerate
+
+@node objcopy nm size strings Architecture
+@subsection @code{objcopy}, @code{nm}, @code{size}, @code{strings} architecture
+
+Ways to specify:
+
+@enumerate
+@item
+deduced from the input file
+@end enumerate
+
+@node Linker Input Architecture
+@subsection Linker input architecture
+
+Ways to specify:
+
+@enumerate
+@item
+deduced from the input file
+@end enumerate
+
+@node Linker Output Architecture
+@subsection Linker output architecture
+
+Ways to specify:
+
+@enumerate
+@item
+script command @code{OUTPUT_ARCH}
+(@pxref{Option Commands,,Option Commands,ld.info,Using LD})
+
+@item
+the default architecture from the linker output target
+(@pxref{Linker Output Target})
+@end enumerate
+
+@node Linker Emulation Selection
+@section Linker emulation selection
+
+A linker @dfn{emulation} is a ``personality'' of the linker, which gives
+the linker default values for the other aspects of the target system.
+In particular, it consists of
+
+@itemize @bullet
+@item
+the linker script,
+
+@item
+the target, and
+
+@item
+several ``hook'' functions that are run at certain stages of the linking
+process to do special things that some targets require.
+@end itemize
+
+Command to list valid values: @samp{ld -V}.
+
+Sample values: @samp{hp300bsd}, @samp{mipslit}, @samp{sun4}.
+
+Ways to specify:
+
+@enumerate
+@item
+command line option @samp{-m}
+(@pxref{Options,,Options,ld.info,Using LD})
+
+@item
+environment variable @code{LDEMULATION}
+
+@item
+compiled-in @code{DEFAULT_EMULATION} from @file{Makefile},
+which comes from @code{EMUL} in @file{config/@var{target}.mt}
+@end enumerate
+
+@node Index
 @unnumbered Index
 
 @printindex cp

@@ -15,9 +15,9 @@ objcopy\(em\&copy and translate object files
 .na
 .TP
 .B objcopy
-.RB "[\|" \-F\ \fIformat\fB\ |\ \-\-format=\fIformat\fR "\|]" 
-.RB "[\|" \-I\ \fIformat\fB\ |\ \-\-input\-format=\fIformat\fR "\|]" 
-.RB "[\|" \-O\ \fIformat\fB\ |\ \-\-output\-format=\fIformat\fR "\|]" 
+.RB "[\|" \-F\ \fIbfdname\fB\ |\ \-\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-I\ \fIbfdname\fB\ |\ \-\-input\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-O\ \fIbfdname\fB\ |\ \-\-output\-target=\fIbfdname\fR "\|]" 
 .RB "[\|" \-S\ |\ \-\-strip\-all\fR "\|]" 
 .RB "[\|" \-g\ |\ \-\-strip\-debug\fR "\|]" 
 .RB "[\|" \-x\ |\ \-\-discard\-all\fR "\|]" 
@@ -57,18 +57,18 @@ name of the input file.
 
 .SH OPTIONS
 .TP
-.B \-I \fIformat\fR, \fB\-\-input\-format=\fIformat
+.B \-I \fIbfdname\fR, \fB\-\-input\-target=\fIbfdname
 Consider the source file's object format to be 
-.IR format ,
+.IR bfdname ,
 rather than attempting to deduce it.
 .TP
-.B \-O \fIformat\fR, \fB\-\-output\-format=\fIformat
+.B \-O \fIbfdname\fR, \fB\-\-output\-target=\fIbfdname
 Write the output file using the object format 
-.IR format .
+.IR bfdname .
 .TP
-.B \-F \fIformat\fR, \fB\-\-format=\fIformat
+.B \-F \fIbfdname\fR, \fB\-\-target=\fIbfdname
 Use 
-.I format
+.I bfdname
 as the object format for both the input and the output file; i.e.
 simply transfer data from source to destination with no translation.
 .TP
