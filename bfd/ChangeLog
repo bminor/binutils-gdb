@@ -1,3 +1,20 @@
+Wed Nov 20 16:31:31 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10300.c: Rough cut at relocs for the mn10300.
+
+start-sanitize-d10v
+Wed Nov 13 08:12:38 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (elf32-d10v.o): Don't depend on elf/d10v.h
+	anymore.
+
+end-sanitize-d10v
+Tue Nov 12 13:30:00 1996  Dawn Perchik  <dawn@cygnus.com>
+
+	* filemode.c: Include sysdep.h.
+	* ihex.c: Add casts to eliminate compiler warnings.
+	* sunos.c: Add casts to eliminate compiler warnings.
+
 Mon Nov 11 10:37:02 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Create .got.plt
