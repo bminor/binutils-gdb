@@ -1,3 +1,9 @@
+Thu May  6 23:13:39 1999  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-i386.c (i386_immediate): Skip whitespace before
+	complaining about junk after expression.
+	(i386_displacement): Likewise.
+
 Thu May  6 19:50:14 1999  Richard Henderson  <rth@cygnus.com>
 
 	* symbols.c (symbol_find_base): Use memcpy instead of strcpy.

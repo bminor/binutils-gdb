@@ -2602,6 +2602,7 @@ i386_immediate (imm_start)
 
   exp_seg = expression (exp);
 
+  SKIP_WHITESPACE ();
   if (*input_line_pointer)
     as_bad (_("Ignoring junk `%s' after expression"), input_line_pointer);
 
@@ -2847,6 +2848,7 @@ i386_displacement (disp_start, disp_end)
       }
 #endif
 
+     SKIP_WHITESPACE ();
      if (*input_line_pointer)
        as_bad (_("Ignoring junk `%s' after expression"),
                input_line_pointer);
