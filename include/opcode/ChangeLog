@@ -1,3 +1,27 @@
+Mon Nov 23 10:47:25 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* vax.h (bb*): Use "v" (bitfield type), not "a" (address operand)
+	for operand 2; from John Carr, jfc@dsg.dec.com.
+
+Wed Nov  4 07:36:49 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* m68k.h: Define FIXED_SIZE_BRANCH, so bsr and bra instructions
+	always use 16-bit offsets.  Makes calculated-size jump tables
+	feasible.
+
+Fri Oct 16 22:52:43 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* i386.h: Fix one-operand forms of in* and out* patterns.
+
+Tue Sep 22 14:08:14 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* m68k.h: Added CPU32 support.
+
+Tue Sep 22 00:38:41 1992  John Gilmore  (gnu@cygnus.com)
+
+	* mips.h (break):  Disassemble the argument.  Patch from
+	jonathan@cs.stanford.edu (Jonathan Stone).
+
 Wed Sep  9 11:25:28 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* m68k.h: merged Motorola and MIT syntax.
