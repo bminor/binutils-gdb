@@ -1,3 +1,14 @@
+Wed Apr  1 11:47:02 1992  Fred Fish  (fnf@cygnus.com)
+
+	* mcalloc.c, mfree.c, mmalloc.c, mrealloc.c:  Minor comment
+	change.
+	* mmalloc.h:  Add ugly kludge to band-aid over problems with
+	bogus vendor <stdlib.h> files.
+
+Sun Mar 29 12:41:31 1992  John Gilmore  (gnu at cygnus.com)
+
+	* attach.c, mmalloc.c, mmcheck.c:  Lint.
+
 Thu Mar 26 17:06:04 1992  Fred Fish  (fnf@cygnus.com)
 
 	* attach.c (reuse):  Explicitly discard return value of mmcheck.
