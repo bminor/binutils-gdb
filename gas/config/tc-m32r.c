@@ -1382,6 +1382,14 @@ md_assemble (str)
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
       on_32bit_boundary_p = prev_insn.insn == NULL;
 
+      /* Change a frag to, if each insn to swap is in a different frag.
+         It must keep only one instruction in a frag.  */
+      if (parallel() && on_32bit_boundary_p)
+        {
+          frag_wane (frag_now);
+          frag_new (0);
+        }
+
       /* Look to see if this instruction can be combined with the
 	 previous instruction to make one, parallel, 32 bit instruction.
 	 If the previous instruction (potentially) changed the flow of
@@ -1442,13 +1450,25 @@ md_assemble (str)
 	  else if (insn.frag->fr_opcode == insn.addr)
 	    insn.frag->fr_opcode = prev_insn.addr;
 
-	  /* Update the addresses in any fixups.
-	     Note that we don't have to handle the case where each insn is in
-	     a different frag as we ensure they're in the same frag above.  */
-	  for (i = 0; i < prev_insn.num_fixups; ++i)
-	    prev_insn.fixups[i]->fx_where += 2;
-	  for (i = 0; i < insn.num_fixups; ++i)
-	    insn.fixups[i]->fx_where -= 2;
+          /* Change a frag to, if each insn is in a different frag.
+	     It must keep only one instruction in a frag.  */
+          if (prev_insn.frag != insn.frag)
+            {
+              for (i = 0; i < prev_insn.num_fixups; ++i)
+                prev_insn.fixups[i]->fx_frag = insn.frag;
+              for (i = 0; i < insn.num_fixups; ++i)
+                insn.fixups[i]->fx_frag = prev_insn.frag;
+            }
+          else
+	    {
+	      /* Update the addresses in any fixups.
+		 Note that we don't have to handle the case where each insn is in
+		 a different frag as we ensure they're in the same frag above.  */
+	      for (i = 0; i < prev_insn.num_fixups; ++i)
+		prev_insn.fixups[i]->fx_where += 2;
+	      for (i = 0; i < insn.num_fixups; ++i)
+		insn.fixups[i]->fx_where -= 2;
+	    }
 	}
 
       /* Keep track of whether we've seen a pair of 16 bit insns.

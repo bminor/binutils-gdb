@@ -1,3 +1,8 @@
+2004-04-13  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* gas/m32r/parallel-2.s, gas/m32r/parallel-2.d: Add a new test
+	case for parallel code.
+
 2004-04-01  Asgari Jinia  <asgarij@kpitcummins.com>
 
 	* gas/sh/renesas-1.s, gas/sh/renesas-1.d: New test for -renesas
