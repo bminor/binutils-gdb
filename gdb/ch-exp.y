@@ -153,43 +153,12 @@ yyerror PARAMS ((char *));
     int *ivec;
   }
 
-%token <voidval> FIXME_01
-%token <voidval> FIXME_02
-%token <voidval> FIXME_03
-%token <voidval> FIXME_04
-%token <voidval> FIXME_05
-%token <voidval> FIXME_06
-%token <voidval> FIXME_07
-%token <voidval> FIXME_08
-%token <voidval> FIXME_09
-%token <voidval> FIXME_10
-%token <voidval> FIXME_11
-%token <voidval> FIXME_12
-%token <voidval> FIXME_13
-%token <voidval> FIXME_14
-%token <voidval> FIXME_15
-%token <voidval> FIXME_16
-%token <voidval> FIXME_17
-%token <voidval> FIXME_18
-%token <voidval> FIXME_19
-%token <voidval> FIXME_20
-%token <voidval> FIXME_21
-%token <voidval> FIXME_22
-%token <voidval> FIXME_24
-%token <voidval> FIXME_25
-%token <voidval> FIXME_26
-%token <voidval> FIXME_27
-%token <voidval> FIXME_28
-%token <voidval> FIXME_29
-%token <voidval> FIXME_30
-
 %token <typed_val>	INTEGER_LITERAL
 %token <ulval>		BOOLEAN_LITERAL
 %token <typed_val>	CHARACTER_LITERAL
 %token <dval>		FLOAT_LITERAL
 %token <ssym>		GENERAL_PROCEDURE_NAME
 %token <ssym>		LOCATION_NAME
-%token <voidval>	SET_LITERAL
 %token <voidval>	EMPTINESS_LITERAL
 %token <sval>		CHARACTER_STRING_LITERAL
 %token <sval>		BIT_STRING_LITERAL
@@ -242,6 +211,7 @@ yyerror PARAMS ((char *));
 %token <voidval>	CARD
 %token <voidval>	MAX_TOKEN
 %token <voidval>	MIN_TOKEN
+%token <voidval>	ADDR_TOKEN
 %token <voidval>	SIZE
 %token <voidval>	UPPER
 %token <voidval>	LOWER
@@ -264,20 +234,13 @@ yyerror PARAMS ((char *));
 %type <voidval>		tuple
 %type <voidval>		slice
 %type <voidval>		expression_conversion
-%type <voidval>		value_procedure_call
 %type <voidval>		value_built_in_routine_call
-%type <voidval>		chill_value_built_in_routine_call
-%type <voidval>		start_expression
-%type <voidval>		zero_adic_operator
 %type <voidval>		parenthesised_expression
 %type <voidval>		value
-%type <voidval>		undefined_value
 %type <voidval>		expression
 %type <voidval>		conditional_expression
 %type <voidval>		then_alternative
 %type <voidval>		else_alternative
-%type <voidval>		sub_expression
-%type <voidval>		value_case_alternative
 %type <voidval>		operand_0
 %type <voidval>		operand_1
 %type <voidval>		operand_2
@@ -285,23 +248,18 @@ yyerror PARAMS ((char *));
 %type <voidval>		operand_4
 %type <voidval>		operand_5
 %type <voidval>		operand_6
-%type <voidval>		synonym_name
-%type <voidval>		value_enumeration_name
-%type <voidval>		value_do_with_name
-%type <voidval>		value_receive_name
 %type <voidval>		expression_list
 %type <tval>		mode_argument
-%type <voidval>		array_mode_name
-%type <voidval>		string_mode_name
-%type <voidval>		variant_structure_mode_name
-%type <voidval>		boolean_expression
-%type <voidval>		case_selector_list
-%type <voidval>		subexpression
-%type <voidval>		case_label_specification
-%type <voidval>		buffer_location
 %type <voidval>		single_assignment_action
 %type <tsym>		mode_name
 %type <lval>		rparen
+
+/* Not implemented:
+%type <voidval>		undefined_value
+%type <voidval>		array_mode_name
+%type <voidval>		string_mode_name
+%type <voidval>		variant_structure_mode_name
+*/
 
 %%
 
@@ -315,19 +273,10 @@ start	:	value { }
 	;
 
 value		:	expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
+/*
 		|	undefined_value
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-undefined_value	:	FIXME_01
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ ??? }
+*/
 		;
 
 /* Z.200, 4.2.2 */
@@ -356,10 +305,6 @@ access_name	:	LOCATION_NAME
 			  write_exp_elt_opcode (OP_INTERNALVAR);
 			  write_exp_elt_intern ($1);
 			  write_exp_elt_opcode (OP_INTERNALVAR); 
-			}
-  		|	FIXME_03
-			{
-			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -420,66 +365,23 @@ primitive_value	:
 			  write_exp_elt_opcode (UNOP_IND);
 			}
                 |	value_name
-			{
-			  $$ = 0;	/* FIXME */
-			}
                 |	literal
-			{
-			  $$ = 0;	/* FIXME */
-			}
                 |	tuple
-			{
-			  $$ = 0;	/* FIXME */
-			}
                 |	slice
-			{
-			  $$ = 0;	/* FIXME */
-			}
                 |	expression_conversion
-			{
-			  $$ = 0;	/* FIXME */
-			}
-                |	value_procedure_call
-			{
-			  $$ = 0;	/* FIXME */
-			}
                 |	value_built_in_routine_call
-			{
-			  $$ = 0;	/* FIXME */
-			}
+/*
                 |	start_expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ ??? }
                 |	zero_adic_operator
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ ??? }
+*/
                 |	parenthesised_expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		;
 
 /* Z.200, 5.2.3 */
 
-value_name	:	synonym_name
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	value_enumeration_name
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	value_do_with_name
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	value_receive_name
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	GENERAL_PROCEDURE_NAME
+value_name	:	GENERAL_PROCEDURE_NAME
 			{
 			  write_exp_elt_opcode (OP_VAR_VALUE);
 			  write_exp_elt_block (NULL);
@@ -516,10 +418,6 @@ literal		:	INTEGER_LITERAL
 			  write_exp_elt_type (builtin_type_double);
 			  write_exp_elt_dblcst ($1);
 			  write_exp_elt_opcode (OP_DOUBLE);
-			}
-		|	SET_LITERAL
-			{
-			  $$ = 0;	/* FIXME */
 			}
 		|	EMPTINESS_LITERAL
 			{
@@ -641,113 +539,44 @@ expression_conversion:	mode_name parenthesised_expression
 			}
 		;
 
-/* Z.200, 5.2.12 */
-
-value_procedure_call:	FIXME_05
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-/* Z.200, 5.2.13 */
-
-value_built_in_routine_call:	chill_value_built_in_routine_call
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-/* Z.200, 5.2.14 */
-
-start_expression:	FIXME_06
-			{
-			  $$ = 0;	/* FIXME */
-			}	/* Not in GNU-Chill */
-		;
-
-/* Z.200, 5.2.15 */
-
-zero_adic_operator:	FIXME_07
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
 /* Z.200, 5.2.16 */
 
 parenthesised_expression:	'(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		;
 
 /* Z.200, 5.3.2 */
 
 expression	:	operand_0
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	single_assignment_action
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	conditional_expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		;
 
-conditional_expression : IF boolean_expression then_alternative else_alternative FI
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	CASE case_selector_list OF value_case_alternative ELSE sub_expression ESAC
-			{
-			  $$ = 0;	/* FIXME */
-			}
+conditional_expression : IF expression then_alternative else_alternative FI
+			{ write_exp_elt_opcode (TERNOP_COND); }
+/*
+		|	CASE case_selector_list OF value_case_alternative ELSE expression ESAC
+			{ error ("not implemented:  CASE expression" }
+*/
 		;
 
-then_alternative:	THEN subexpression
-			{
-			  $$ = 0;	/* FIXME */
-			}
+then_alternative:	THEN expression
 		;
 
-else_alternative:	ELSE subexpression
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	ELSIF boolean_expression then_alternative else_alternative
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-sub_expression	:	expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-value_case_alternative:	case_label_specification ':' sub_expression ';'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+else_alternative:	ELSE expression
+		|	ELSIF expression then_alternative else_alternative
+			{ write_exp_elt_opcode (TERNOP_COND); }
 		;
 
 /* Z.200, 5.3.3 */
 
 operand_0	:	operand_1
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	operand_0 LOGIOR operand_1
 			{
 			  write_exp_elt_opcode (BINOP_BITWISE_IOR);
 			}
 		|	operand_0 ORIF operand_1
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (BINOP_LOGICAL_OR);
 			}
 		|	operand_0 LOGXOR operand_1
 			{
@@ -758,25 +587,19 @@ operand_0	:	operand_1
 /* Z.200, 5.3.4 */
 
 operand_1	:	operand_2
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	operand_1 LOGAND operand_2
 			{
 			  write_exp_elt_opcode (BINOP_BITWISE_AND);
 			}
 		|	operand_1 ANDIF operand_2
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (BINOP_LOGICAL_AND);
 			}
 		;
 
 /* Z.200, 5.3.5 */
 
 operand_2	:	operand_3
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	operand_2 '=' operand_3
 			{
 			  write_exp_elt_opcode (BINOP_EQUAL);
@@ -811,9 +634,6 @@ operand_2	:	operand_3
 /* Z.200, 5.3.6 */
 
 operand_3	:	operand_4
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	operand_3 '+' operand_4
 			{
 			  write_exp_elt_opcode (BINOP_ADD);
@@ -831,9 +651,6 @@ operand_3	:	operand_4
 /* Z.200, 5.3.7 */
 
 operand_4	:	operand_5
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	operand_4 '*' operand_5
 			{
 			  write_exp_elt_opcode (BINOP_MUL);
@@ -855,9 +672,6 @@ operand_4	:	operand_5
 /* Z.200, 5.3.8 */
 
 operand_5	:	operand_6
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		|	'-' operand_6
 			{
 			  write_exp_elt_opcode (UNOP_NEG);
@@ -880,14 +694,9 @@ operand_6	:	POINTER primitive_value
 			{
 			  write_exp_elt_opcode (UNOP_ADDR);
 			}
-		|	RECEIVE buffer_location
-			{
-			  $$ = 0;	/* FIXME */
-			}
+		|	RECEIVE expression
+			{ error ("not implemented:  RECEIVE expression"); }
 		|	primitive_value
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		;
 
 
@@ -902,35 +711,27 @@ single_assignment_action :
 
 /* Z.200, 6.20.3 */
 
-chill_value_built_in_routine_call :
+value_built_in_routine_call :
 			NUM '(' expression ')'
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type (builtin_type_int);
+			  write_exp_elt_opcode (UNOP_CAST);
 			}
 		|	PRED '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ error ("not implemented:  PRED builtin function"); }
 		|	SUCC '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ error ("not implemented:  SUCC builtin function"); }
+		|	ADDR_TOKEN '(' expression ')'
+			{ write_exp_elt_opcode (UNOP_ADDR); }
 		|	ABS '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ error ("not implemented:  ABS builtin function"); }
 		|	CARD '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ error ("not implemented:  CARD builtin function"); }
 		|	MAX_TOKEN '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ error ("not implemented:  MAX builtin function"); }
 		|	MIN_TOKEN '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ error ("not implemented:  MIN builtin function"); }
 		|	SIZE '(' expression ')'
 			{ write_exp_elt_opcode (UNOP_SIZEOF); }
 		|	SIZE '(' mode_argument ')'
@@ -954,37 +755,18 @@ mode_argument :		mode_name
 			{
 			  $$ = $1.type;
 			}
+/*
 		|	array_mode_name '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ ??? }
 		|	string_mode_name '(' expression ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ ??? }
 		|	variant_structure_mode_name '(' expression_list ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ ??? }
+*/
 		;
 
 mode_name :		TYPENAME
 		;
-
-/* Things which still need productions... */
-
-array_mode_name	 	:	FIXME_08 { $$ = 0; }
-string_mode_name 	:	FIXME_09 { $$ = 0; }
-variant_structure_mode_name:	FIXME_10 { $$ = 0; }
-synonym_name	 	:	FIXME_11 { $$ = 0; }
-value_enumeration_name 	:	FIXME_12 { $$ = 0; }
-value_do_with_name 	:	FIXME_13 { $$ = 0; }
-value_receive_name 	:	FIXME_14 { $$ = 0; }
-boolean_expression 	:	FIXME_26 { $$ = 0; }
-case_selector_list 	:	FIXME_27 { $$ = 0; }
-subexpression 		:	FIXME_28 { $$ = 0; }
-case_label_specification:	FIXME_29 { $$ = 0; }
-buffer_location 	:	FIXME_30 { $$ = 0; }
 
 %%
 
@@ -1752,6 +1534,7 @@ static const struct token idtokentab[] =
     { "in", IN },
     { "or", LOGIOR },
     { "up", UP },
+    { "addr", ADDR_TOKEN },
     { "null", EMPTINESS_LITERAL }
 };
 
