@@ -1,3 +1,9 @@
+2001-12-04  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* go32-nat.c (go32_fetch_registers): Remove call to register_buffer
+	(which is now a static function in regcache.c)
+	and use regcache_collect instead.
+
 2001-12-05  Andrew Cagney  <cagney@redhat.com>
 
 	* target.c (cleanup_target): Do not initialize to_query to

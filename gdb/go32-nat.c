@@ -492,12 +492,8 @@ go32_fetch_registers (int regno)
 static void
 store_register (int regno)
 {
-  void *rp;
-  void *v = (void *) register_buffer (regno);
-
   if (regno < FP0_REGNUM)
-    memcpy ((char *) &a_tss + regno_mapping[regno].tss_ofs,
-	    v, regno_mapping[regno].size);
+    regcache_collect (regno, (void *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (regno <= LAST_FPU_CTRL_REGNUM)
     i387_fill_fsave ((char *)&npx, regno);
   else
