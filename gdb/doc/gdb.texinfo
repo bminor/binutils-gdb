@@ -10746,6 +10746,19 @@ target> gdbserver @var{comm} --attach @var{pid}
 @var{pid} is the process ID of a currently running process.  It isn't necessary
 to point @code{gdbserver} at a binary for the running process.
 
+@pindex pidof
+@cindex attach to a program by name
+You can debug processes by name instead of process ID if your target has the
+@code{pidof} utility:
+
+@smallexample
+target> gdbserver @var{comm} --attach `pidof @var{PROGRAM}`
+@end smallexample
+
+In case more than one copy of @var{PROGRAM} is running, or @var{PROGRAM}
+has multiple threads, most versions of @code{pidof} support the
+@code{-s} option to only return the first process ID.
+
 @item On the host machine,
 connect to your target (@pxref{Connecting,,Connecting to a remote target}).
 For TCP connections, you must start up @code{gdbserver} prior to using
