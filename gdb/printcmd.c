@@ -1106,9 +1106,9 @@ address_info (char *exp, int from_tty)
 				   current_language->la_language, DMGL_ANSI);
 	  printf_filtered ("\" is a field of the local class variable ");
 	  if (current_language->la_language == language_objc)
-	    printf_filtered ("'self'\n");	/* ObjC equivalent of "this" */
+	    printf_filtered ("`self'\n");	/* ObjC equivalent of "this" */
 	  else
-	    printf_filtered ("'this'\n");
+	    printf_filtered ("`this'\n");
 	  return;
 	}
 

@@ -3330,7 +3330,7 @@ value_of_local (const char *name, int complain)
   if (!func)
     {
       if (complain)
-	error ("no %s in nameless context", name);
+	error ("no `%s' in nameless context", name);
       else
 	return 0;
     }
@@ -3340,7 +3340,7 @@ value_of_local (const char *name, int complain)
   if (i <= 0)
     {
       if (complain)
-	error ("no args, no '%s'", name);
+	error ("no args, no `%s'", name);
       else
 	return 0;
     }
@@ -3351,14 +3351,14 @@ value_of_local (const char *name, int complain)
   if (sym == NULL)
     {
       if (complain)
-	error ("current stack frame does not contain a variable named \"%s\"", name);
+	error ("current stack frame does not contain a variable named `%s'", name);
       else
 	return NULL;
     }
 
   ret = read_var_value (sym, selected_frame);
   if (ret == 0 && complain)
-    error ("%s argument unreadable", name);
+    error ("`%s' argument unreadable", name);
   return ret;
 }
 
