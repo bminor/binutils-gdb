@@ -1,5 +1,9 @@
 2001-07-25  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/consecutive.exp: New file.  Test stepping over
+	breakpoints on consecutive instructions.
+	* gdb.base/consecutive.c: New file.
+
 	* gdb.base/call-rt-st.exp: Use double-backslash to quote
 	curly braces in regular expressions.
 
