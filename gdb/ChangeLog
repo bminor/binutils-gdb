@@ -1,3 +1,8 @@
+Fri Jul 29 09:59:05 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET): If using newlib,
+	  set the -L and -B directory prefixes so we can link with it.
+
 Thu Jul 28 14:37:36 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (INSTALLED_LIBS, CLIBS, DEPFILES):  Add support for
