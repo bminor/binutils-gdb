@@ -1,3 +1,9 @@
+2005-01-20  Nick Hudson  <skrll@netbsd.org>
+
+	PR ld/676
+	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):
+	Handle bfd_elf32_hppa_nbsd_vec.
+
 2005-01-19  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ldmain.h (ld_sysroot): Change type to a constant string.
