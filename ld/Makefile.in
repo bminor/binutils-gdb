@@ -28,7 +28,7 @@ BISONFLAGS = -v
 
 SCRIPTS = ldgld68k.sc ldgld.sc \
 	ldlnk960.sc ldlnk960r.sc ldgld960.sc \
-	ldm88k.sc ldglda29k.sc news.sc
+	ldm88k.sc ldglda29k.sc news.sc h8300hds.sc
 
 #### target and host dependent Makefile fragments come in here.
 ###
@@ -82,7 +82,7 @@ BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwarn.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o ldindr.o \
-	ldm88k.o ldglda29k.o news.o \
+	ldm88k.o ldglda29k.o news.o h8300hds.o \
 	ldgld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h ldsym.h ldlang.h ldexp.h \
