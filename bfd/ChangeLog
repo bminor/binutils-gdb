@@ -5,6 +5,11 @@ Thu Sep 28 15:30:44 1995  Kim Knuttila  <krk@nellie>
 
 Thu Sep 28 11:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* hp300hpux.c (convert_sym_type): Treat secondary symbols as weak
+	symbols rather than as indirect symbols.
+	(MY(slurp_symbol_table)): Don't do anything special about
+	secondary symbols.
+
 	* coffcode.h (coff_new_section_hook): Make sure that the alignment
 	of .ctors and .dtors sections is no larger than 2.
 
