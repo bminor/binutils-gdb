@@ -1,3 +1,26 @@
+Tue Jun 18 13:19:51 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* config/tc-h8300.c (parse_reg): Tweak error messages.
+	(build_bytes): Likewise.
+	(skip_colonthing): Handle :32 suffix.
+	(get_specific): Promote L_24 to L_32 if it makes a match.
+	Don't always promote L_8 to L_16.
+	(do_a_fix_imm): Clean up L_32 and L_24 handling.
+
+start-sanitize-h8s
+	* config/tc-h8300.c (Smode): New variable.
+	(h8300hmode): Turn off Hmode.
+	(h8300smode): New function.  Turn on Smode and Hmode.
+	(md_pseudo_table): New ".h8300s" pseudo-op.
+	(parse_reg): Handle "exr" register.
+	(get_operand): Handle bizarre syntax for "stm.l" and "ldm.l".
+	Handle "mach" and "machl" operands for ldmac.
+	(get_specific): Handle "stm.l" and "ldm.l".
+	(build_bytes): Handle "stm.l" and "ldm.l"; handle MACREG operands.
+	* config/tc-h8300.h (COFF_MAGIC): Handle H8/S magic number.
+	(Smode): Declare.
+
+end-sanitize-h8s
 Mon Jun 17 15:50:53 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* doc/as.texinfo: Reorder chapter of machine dependent options so
