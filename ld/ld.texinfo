@@ -1303,6 +1303,7 @@ big for the region, the linker will issue an error message.
 
 @node SECTIONS
 @section Specifying Output Sections
+
 @kindex SECTIONS
 The @code{SECTIONS} command controls exactly where input sections are
 placed into output sections, their order in the output file, and to
@@ -1311,11 +1312,14 @@ which output sections they are allocated.
 You may use at most one @code{SECTIONS} command in a script file,
 but you can have as many statements within it as you wish.  Statements
 within the @code{SECTIONS} command can do one of three things:
+
 @itemize @bullet
 @item 
 define the entry point;
+
 @item 
 assign a value to a symbol;
+
 @item 
 describe the placement of a named output section, and which input
 sections go into it.
@@ -1327,7 +1331,7 @@ Point}, and @pxref{Assignment}.  They are permitted here as well for
 your convenience in reading the script, so that symbols and the entry
 point can be defined at meaningful points in your output-file layout.
 
-When no @code{SECTIONS} command is given, the linker places each input
+If you do not use a @code{SECTIONS} command, the linker places each input
 section into an identically named output section in the order that the
 sections are first encountered in the input files.  If all input sections
 are present in the first file, for example, the order of sections in the
@@ -1377,12 +1381,13 @@ sequence of characters, but any name which does not conform to the standard
 
 @node Section Placement
 @subsection Section Placement
+
 @cindex contents of a section
-In a section definition, you can specify the contents of an output section by
-listing particular input files, by listing particular input-file
-sections, or by a combination of the two.  You can also place arbitrary
-data in the section, and define symbols relative to the beginning of the
-section. 
+In a section definition, you can specify the contents of an output
+section by listing particular input files, by listing particular
+input-file sections, or by a combination of the two.  You can also place
+arbitrary data in the section, and define symbols relative to the
+beginning of the section.
 
 The @var{contents} of a section definition may include any of the
 following kinds of statement.  You can include as many of these as you
@@ -1512,15 +1517,16 @@ SECTIONS @{
 
 @node Section Data Expressions
 @subsection Section Data Expressions
+
 @cindex expressions in a section
-The foregoing statements
-arrange, in your output file, data originating from your input files.
-You can also place data directly in an output section from the link
-command script.  Most of these additional statements involve
-expressions; @pxref{Expressions}.  Although these statements are shown
-separately here for ease of presentation, no such segregation is needed
-within a section definition in the @code{SECTIONS} command; you can
-intermix them freely with any of the statements we've just described.
+The foregoing statements arrange, in your output file, data originating
+from your input files.  You can also place data directly in an output
+section from the link command script.  Most of these additional
+statements involve expressions; @pxref{Expressions}.  Although these
+statements are shown separately here for ease of presentation, no such
+segregation is needed within a section definition in the @code{SECTIONS}
+command; you can intermix them freely with any of the statements we've
+just described.
 
 @table @code
 @item CREATE_OBJECT_SYMBOLS
@@ -1649,16 +1655,17 @@ optional portions:
 @smallexample
 SECTIONS @{
 @dots{}
-@var{secname} @var{start} BLOCK(@var{align}) (NOLOAD) : @{ @var{contents} @} =@var{fill} >@var{region}
+@var{secname} @var{start} BLOCK(@var{align}) (NOLOAD) : AT ( @var{ldadr} )
+                  @{ @var{contents} @} =@var{fill} >@var{region}
 @dots{}
 @}
 @end smallexample
 
 @var{secname} and @var{contents} are required.  @xref{Section
-Definition}, and @pxref{Section Placement} for details on @var{contents}.
-The remaining elements---@var{start}, @code{BLOCK(@var{align)}},
-@code{(NOLOAD)} @code{=@var{fill}}, and @code{>@var{region}}---are all
-optional.
+Definition}, and @pxref{Section Placement} for details on
+@var{contents}.  The remaining elements---@var{start},
+@code{BLOCK(@var{align)}}, @code{(NOLOAD)}, @code{AT ( @var{ldadr} )},
+@code{=@var{fill}}, and @code{>@var{region}}---are all optional.
 
 @table @code
 @item @var{start} 
@@ -1689,18 +1696,64 @@ the location counter @code{.} prior to the beginning of the section, so
 that the section will begin at the specified alignment.  @var{align} is
 an expression.
 
-@item (NOLOAD)
 @kindex NOLOAD
 @cindex prevent unnecessary loading
+@cindex loading, preventing
+@item (NOLOAD)
 Use @samp{(NOLOAD)} to prevent a section from being loaded into memory
 each time it is accessed.  For example, in the script sample below, the
 @code{ROM} segment is addressed at memory location @samp{0} and does not
 need to be loaded into each object file:
+
 @example
 SECTIONS @{
         ROM  0  (NOLOAD)  : @{ @dots{} @}
         @dots{}
 @}
+@end example
+
+@kindex AT ( @var{ldadr} )
+@cindex specify load address
+@cindex load address, specifying
+@item AT ( @var{ldadr} )
+The expression @var{ldadr} that follows the @code{AT} keyword specifies
+the load address of the section.  The default (if you do not use the
+@code{AT} keyword) is to make the load address the same as the
+relocation address.  This feature is designed to make it easy to build a
+ROM image.  For example, this @code{SECTIONS} definition creates two
+output sections: one called @samp{.text}, which starts at @code{0x1000},
+and one called @samp{.mdata}, which is loaded at the end of the
+@samp{.text} section even though its relocation address is
+@code{0x2000}.  The symbol @code{_data} is defined with the value
+@code{0x2000}:
+
+@smallexample
+SECTIONS
+	@{
+	.text 0x1000 : @{ *(.text) _etext = . ; @}
+	.mdata 0x2000 :  AT ( ADDR(.text) + SIZEOF ( .text ) )
+	     @{ _data = . ; *(.data); _edata = . ;  @}
+	.bss 0x3000 : @{ _bstart = . ;  *(.bss) *(COMMON) ; _bend = . ;@}
+@}
+@end smallexample
+
+The run-time initialization code (for C programs, usually @code{crt0})
+for use with a ROM generated this way has to include something like
+the following, to copy the initialized data from the ROM image to its runtime
+address:
+
+@example
+/* ROM has data glommed at end of text; copy it. */
+char *src = _etext;
+char *dst = _data;
+
+while (dst < _edata) @{
+	*dst++ = *src++;
+@}
+
+/* Zero bss */
+for (dst = _bstart; dst< _bend; dst++)
+	*dst = 0;
 @end example
 
 @item =@var{fill}
