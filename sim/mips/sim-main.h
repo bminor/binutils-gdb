@@ -328,6 +328,7 @@ struct _sim_cpu {
 #define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
 #define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
 
+#ifndef ENGINE_ISSUE_PREFIX_HOOK
 #define ENGINE_ISSUE_PREFIX_HOOK() \
   { \
     /* Perform any pending writes */ \
@@ -343,6 +344,7 @@ struct _sim_cpu {
     else \
      STATE &= ~simPCOC0; \
   }
+#endif /* ENGINE_ISSUE_PREFIX_HOOK */
 
 
 /* This is nasty, since we have to rely on matching the register

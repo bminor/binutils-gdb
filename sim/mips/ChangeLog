@@ -1,3 +1,8 @@
+2001-02-23  Ben Elliston  <bje@redhat.com>
+
+	* sim-main.h (ENGINE_ISSUE_PREFIX_HOOK): Only define if not
+	already defined elsewhere.
+
 2001-02-19  Ben Elliston  <bje@redhat.com>
 
 	* sim-main.h (sim_monitor): Return an int.
