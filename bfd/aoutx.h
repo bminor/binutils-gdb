@@ -134,6 +134,12 @@ DESCRIPTION
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 
+static boolean translate_symbol_table PARAMS ((bfd *, aout_symbol_type *,
+					       struct external_nlist *,
+					       bfd_size_type, char *,
+					       bfd_size_type,
+					       boolean dynamic));
+
 /*
 SUBSECTION
 	Relocations
@@ -430,12 +436,17 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   obj_datasec (abfd)->_raw_size = execp->a_data;
   obj_bsssec (abfd)->_raw_size = execp->a_bss;
 
-  obj_textsec (abfd)->flags = (execp->a_trsize != 0 ?
-       (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS | SEC_RELOC) :
-       (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS));
-  obj_datasec (abfd)->flags = (execp->a_drsize != 0 ?
-       (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS | SEC_RELOC) :
-       (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS));
+  /* If this object is dynamically linked, we assume that both
+     sections have relocs.  This does no real harm, even though it may
+     not be true.  */
+  obj_textsec (abfd)->flags =
+    (execp->a_trsize != 0 || (abfd->flags & DYNAMIC) != 0
+     ? (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS | SEC_RELOC)
+     : (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS));
+  obj_datasec (abfd)->flags =
+    (execp->a_drsize != 0 || (abfd->flags & DYNAMIC) != 0
+     ? (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS | SEC_RELOC)
+     : (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS));
   obj_bsssec (abfd)->flags = SEC_ALLOC;
 
 #ifdef THIS_IS_ONLY_DOCUMENTATION
@@ -1273,7 +1284,7 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 	    {
 	      cache_ptr->symbol.flags = BSF_GLOBAL | BSF_EXPORT;
 	    }
-	  else
+	  else if (! sym_is_undefined (cache_ptr))
 	    {
 	      cache_ptr->symbol.flags = BSF_LOCAL;
 	    }
@@ -1366,9 +1377,6 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
 
 /* Native-level interface to symbols. */
 
-/* We read the symbols into a buffer, which is discarded when this
-function exits.  We read the strings into a buffer large enough to
-hold them all plus all the cached symbol entries. */
 
 asymbol *
 DEFUN(NAME(aout,make_empty_symbol),(abfd),
@@ -1381,6 +1389,51 @@ DEFUN(NAME(aout,make_empty_symbol),(abfd),
   return &new->symbol;
 }
 
+/* Translate a set of internal symbols into external symbols.  */
+
+static boolean
+translate_symbol_table (abfd, in, ext, count, str, strsize, dynamic)
+     bfd *abfd;
+     aout_symbol_type *in;
+     struct external_nlist *ext;
+     bfd_size_type count;
+     char *str;
+     bfd_size_type strsize;
+     boolean dynamic;
+{
+  struct external_nlist *ext_end;
+
+  ext_end = ext + count;
+  for (; ext < ext_end; ext++, in++)
+    {
+      bfd_vma x;
+
+      x = GET_WORD (abfd, ext->e_strx);
+      in->symbol.the_bfd = abfd;
+      if (x < strsize)
+	in->symbol.name = str + x;
+      else
+	return false;
+
+      in->symbol.value = GET_SWORD (abfd,  ext->e_value);
+      in->desc = bfd_h_get_16 (abfd, ext->e_desc);
+      in->other = bfd_h_get_8 (abfd, ext->e_other);
+      in->type = bfd_h_get_8 (abfd,  ext->e_type);
+      in->symbol.udata = 0;
+
+      translate_from_native_sym_flags (ext, in, abfd);
+
+      if (dynamic)
+	in->symbol.flags |= BSF_DYNAMIC;
+    }
+
+  return true;
+}
+
+/* We read the symbols into a buffer, which is discarded when this
+   function exits.  We read the strings into a buffer large enough to
+   hold them all plus all the cached symbol entries. */
+
 boolean
 DEFUN(NAME(aout,slurp_symbol_table),(abfd),
       bfd *abfd)
@@ -1391,6 +1444,10 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
   struct external_nlist *syms;
   char *strings;
   aout_symbol_type *cached;
+  bfd_size_type dynsym_count = 0;
+  struct external_nlist *dynsyms = NULL;
+  char *dynstrs = NULL;
+  bfd_size_type dynstr_size;
 
   /* If there's no work to be done, don't do any */
   if (obj_aout_symbols (abfd) != (aout_symbol_type *)NULL) return true;
@@ -1406,12 +1463,24 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
     return false;
   string_size = GET_WORD (abfd, string_chars);
 
-  strings =(char *) bfd_alloc(abfd, string_size + 1);
-  cached = (aout_symbol_type *)
-    bfd_zalloc(abfd, (bfd_size_type)(bfd_get_symcount (abfd) * sizeof(aout_symbol_type)));
+  /* If this is a dynamic object, see if we can get the dynamic symbol
+     table.  */
+  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
+      && aout_backend_info (abfd)->read_dynamic_symbols)
+    {
+      dynsym_count = ((*aout_backend_info (abfd)->read_dynamic_symbols)
+		      (abfd, &dynsyms, &dynstrs, &dynstr_size));
+      if (dynsym_count == (bfd_size_type) -1)
+	return false;
+    }
 
-  /* malloc this, so we can free it if simply. The symbol caching
-     might want to allocate onto the bfd's obstack  */
+  strings = (char *) bfd_alloc (abfd, string_size + 1);
+  cached = ((aout_symbol_type *)
+	    bfd_zalloc (abfd,
+			((bfd_get_symcount (abfd) + dynsym_count)
+			 * sizeof (aout_symbol_type))));
+
+  /* Don't allocate on the obstack, so we can free it easily.  */
   syms = (struct external_nlist *) bfd_xmalloc(symbol_size);
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size)
@@ -1434,32 +1503,18 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
   strings[string_size] = 0; /* Just in case. */
 
   /* OK, now walk the new symtable, cacheing symbol properties */
-  {
-    register struct external_nlist *sym_pointer;
-    register struct external_nlist *sym_end = syms + bfd_get_symcount (abfd);
-    register aout_symbol_type *cache_ptr = cached;
+  if (! translate_symbol_table (abfd, cached, syms, bfd_get_symcount (abfd),
+				strings, string_size, false))
+    goto bailout;
+  if (dynsym_count > 0)
+    {
+      if (! translate_symbol_table (abfd, cached + bfd_get_symcount (abfd),
+				    dynsyms, dynsym_count, dynstrs,
+				    dynstr_size, true))
+	goto bailout;
 
-    /* Run through table and copy values */
-    for (sym_pointer = syms, cache_ptr = cached;
-	 sym_pointer < sym_end; sym_pointer ++, cache_ptr++)
-      {
-	long x = GET_WORD(abfd, sym_pointer->e_strx);
-	cache_ptr->symbol.the_bfd = abfd;
-	if (x == 0)
-	  cache_ptr->symbol.name = "";
-	else if (x >= 0 && x < string_size)
-	  cache_ptr->symbol.name = x + strings;
-	else
-	  goto bailout;
-
-	cache_ptr->symbol.value = GET_SWORD(abfd,  sym_pointer->e_value);
-	cache_ptr->desc = bfd_h_get_16(abfd, sym_pointer->e_desc);
-	cache_ptr->other = bfd_h_get_8(abfd, sym_pointer->e_other);
-	cache_ptr->type = bfd_h_get_8(abfd,  sym_pointer->e_type);
-	cache_ptr->symbol.udata = 0;
-	translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd);
-      }
-  }
+      bfd_get_symcount (abfd) += dynsym_count;
+    }
 
   obj_aout_symbols (abfd) =  cached;
   free((PTR)syms);
@@ -2233,71 +2288,129 @@ DEFUN(NAME(aout,slurp_reloc_table),(abfd, asect, symbols),
   unsigned int count;
   bfd_size_type reloc_size;
   PTR relocs;
+  bfd_size_type dynrel_count = 0;
+  PTR dynrels = NULL;
   arelent *reloc_cache;
   size_t each_size;
+  unsigned int counter = 0;
+  arelent *cache_ptr;
 
   if (asect->relocation) return true;
 
   if (asect->flags & SEC_CONSTRUCTOR) return true;
 
-  if (asect == obj_datasec (abfd)) {
+  if (asect == obj_datasec (abfd))
     reloc_size = exec_hdr(abfd)->a_drsize;
-  } else if (asect == obj_textsec (abfd)) {
+  else if (asect == obj_textsec (abfd))
     reloc_size = exec_hdr(abfd)->a_trsize;
-  } else {
-    bfd_error = invalid_operation;
-    return false;
-  }
+  else
+    {
+      bfd_error = invalid_operation;
+      return false;
+    }
+
+  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
+      && aout_backend_info (abfd)->read_dynamic_relocs)
+    {
+      dynrel_count = ((*aout_backend_info (abfd)->read_dynamic_relocs)
+		      (abfd, &dynrels));
+      if (dynrel_count == (bfd_size_type) -1)
+	return false;
+    }
 
   bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
   each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;
 
-
-  reloc_cache = (arelent *) bfd_zalloc (abfd, (size_t)(count * sizeof
-						       (arelent)));
-  if (!reloc_cache) {
-nomem:
-    bfd_error = no_memory;
-    return false;
-  }
+  reloc_cache = ((arelent *)
+		 bfd_zalloc (abfd,
+			     (size_t) ((count + dynrel_count)
+				       * sizeof (arelent))));
+  if (!reloc_cache)
+    {
+    nomem:
+      bfd_error = no_memory;
+      return false;
+    }
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);
-  if (!relocs) {
-    bfd_release (abfd, reloc_cache);
-    goto nomem;
-  }
-
-  if (bfd_read (relocs, 1, reloc_size, abfd) != reloc_size) {
-    bfd_release (abfd, relocs);
-    bfd_release (abfd, reloc_cache);
-    bfd_error = system_call_error;
-    return false;
-  }
-
-  if (each_size == RELOC_EXT_SIZE) {
-    register struct reloc_ext_external *rptr = (struct reloc_ext_external *) relocs;
-    unsigned int counter = 0;
-    arelent *cache_ptr = reloc_cache;
-
-    for (; counter < count; counter++, rptr++, cache_ptr++) {
-      NAME(aout,swap_ext_reloc_in)(abfd, rptr, cache_ptr, symbols);
-    }
-  } else {
-    register struct reloc_std_external *rptr = (struct reloc_std_external *) relocs;
-    unsigned int counter = 0;
-    arelent *cache_ptr = reloc_cache;
-
-    for (; counter < count; counter++, rptr++, cache_ptr++) {
-      NAME(aout,swap_std_reloc_in)(abfd, rptr, cache_ptr, symbols);
+  if (!relocs)
+    {
+      bfd_release (abfd, reloc_cache);
+      goto nomem;
     }
 
-  }
+  if (bfd_read (relocs, 1, reloc_size, abfd) != reloc_size)
+    {
+      bfd_release (abfd, relocs);
+      bfd_release (abfd, reloc_cache);
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  cache_ptr = reloc_cache;
+  if (each_size == RELOC_EXT_SIZE)
+    {
+      register struct reloc_ext_external *rptr =
+	(struct reloc_ext_external *) relocs;
+
+      for (; counter < count; counter++, rptr++, cache_ptr++)
+	NAME(aout,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols);
+    }
+  else
+    {
+      register struct reloc_std_external *rptr
+	= (struct reloc_std_external *) relocs;
+
+      for (; counter < count; counter++, rptr++, cache_ptr++)
+	NAME(aout,swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols);
+    }
+
+  if (dynrel_count > 0)
+    {
+      asymbol **dynsyms;
+
+      /* The dynamic symbols are at the end of the symbol table.  */
+      for (dynsyms = symbols;
+	   *dynsyms != NULL && ((*dynsyms)->flags & BSF_DYNAMIC) == 0;
+	   ++dynsyms)
+	;
+
+      /* Swap in the dynamic relocs.  These relocs may be for either
+	 section, so we must discard ones we don't want.  */
+      counter = 0;
+      if (each_size == RELOC_EXT_SIZE)
+	{
+	  register struct reloc_ext_external *rptr
+	    = (struct reloc_ext_external *) dynrels;
+
+	  for (; counter < dynrel_count; counter++, rptr++, cache_ptr++)
+	    {
+	      NAME(aout,swap_ext_reloc_in) (abfd, rptr, cache_ptr, dynsyms);
+	      cache_ptr->address -= bfd_get_section_vma (abfd, asect);
+	      if (cache_ptr->address >= bfd_section_size (abfd, asect))
+		--cache_ptr;
+	    }
+	}
+      else
+	{
+	  register struct reloc_std_external *rptr
+	    = (struct reloc_std_external *) dynrels;
+
+	  for (; counter < dynrel_count; counter++, rptr++, cache_ptr++)
+	    {
+	      NAME(aout,swap_std_reloc_in) (abfd, rptr, cache_ptr, dynsyms);
+	      cache_ptr->address -= bfd_get_section_vma (abfd, asect);
+	      if (cache_ptr->address >= bfd_section_size (abfd, asect))
+		--cache_ptr;
+	    }
+	}
+    }
 
   bfd_release (abfd,relocs);
   asect->relocation = reloc_cache;
-  asect->reloc_count = count;
+  asect->reloc_count = cache_ptr - reloc_cache;
   return true;
 }
 
@@ -2393,6 +2506,8 @@ DEFUN(NAME(aout,get_reloc_upper_bound),(abfd, asect),
      bfd *abfd AND
      sec_ptr asect)
 {
+  bfd_size_type dynrel_count = 0;
+
   if (bfd_get_format (abfd) != bfd_object) {
     bfd_error = invalid_operation;
     return 0;
@@ -2401,16 +2516,26 @@ DEFUN(NAME(aout,get_reloc_upper_bound),(abfd, asect),
     return (sizeof (arelent *) * (asect->reloc_count+1));
   }
 
+  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
+      && aout_backend_info (abfd)->read_dynamic_relocs)
+    {
+      PTR dynrels;
+
+      dynrel_count = ((*aout_backend_info (abfd)->read_dynamic_relocs)
+		      (abfd, &dynrels));
+      if (dynrel_count == (bfd_size_type) -1)
+	return 0;
+    }
 
   if (asect == obj_datasec (abfd))
     return (sizeof (arelent *) *
-            ((exec_hdr(abfd)->a_drsize / obj_reloc_entry_size (abfd))
-             +1));
+	    ((exec_hdr(abfd)->a_drsize / obj_reloc_entry_size (abfd))
+	     + dynrel_count + 1));
 
   if (asect == obj_textsec (abfd))
     return (sizeof (arelent *) *
-            ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
-             +1));
+	    ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
+	     + dynrel_count + 1));
 
   bfd_error = invalid_operation;
   return 0;

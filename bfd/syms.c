@@ -249,6 +249,9 @@ CODE_FRAGMENT
 .	   for ELF STT_FILE symbols.  *}
 .#define BSF_FILE          0x4000
 .
+.	{* Symbol is from dynamic linking information.  *}
+.#define BSF_DYNAMIC	   0x8000
+.
 .  flagword flags;
 .
 .	{* A pointer to the section to which this symbol is 
@@ -352,10 +355,11 @@ DESCRIPTION
 	stream @var{file}.
 */
 void
-DEFUN(bfd_print_symbol_vandf,(file, symbol),
-FILE *file AND
+DEFUN(bfd_print_symbol_vandf,(arg, symbol),
+PTR arg AND
 asymbol *symbol)
 {
+  FILE *file = (FILE *) arg;
   flagword type = symbol->flags;
   if (symbol->section != (asection *)NULL)
       {
@@ -365,6 +369,9 @@ asymbol *symbol)
       {
 	fprintf_vma(file, symbol->value);
       }
+
+  /* This presumes that a symbol can not be both BSF_DEBUGGING and
+     BSF_DYNAMIC.  */
   fprintf(file," %c%c%c%c%c%c%c",
 	  (type & BSF_LOCAL)  ? 'l':' ',
 	  (type & BSF_GLOBAL) ? 'g' : ' ',
@@ -372,8 +379,8 @@ asymbol *symbol)
 	  (type & BSF_CONSTRUCTOR) ? 'C' : ' ',
 	  (type & BSF_WARNING) ? 'W' : ' ',
 	  (type & BSF_INDIRECT) ? 'I' : ' ',
-	  (type & BSF_DEBUGGING) ? 'd' :' ');
-
+	  (type & BSF_DEBUGGING) ? 'd'
+	  : (type & BSF_DYNAMIC) ? 'D' : ' ');
 }
 
 

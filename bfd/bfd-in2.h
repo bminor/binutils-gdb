@@ -1637,6 +1637,9 @@ typedef struct symbol_cache_entry
 	   for ELF STT_FILE symbols.  */
 #define BSF_FILE          0x4000
 
+	 /* Symbol is from dynamic linking information.  */
+#define BSF_DYNAMIC	   0x8000
+
   flagword flags;
 
 	 /* A pointer to the section to which this symbol is 

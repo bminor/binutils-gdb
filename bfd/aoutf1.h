@@ -195,7 +195,70 @@ DEFUN(NAME(aout,sunos4_write_object_contents),
      */
   N_SET_FLAGS (*execp, 1);
 #endif
-    
+
+  N_SET_DYNAMIC(*execp, bfd_get_file_flags(abfd) & DYNAMIC);
+
+  /* At least for SunOS, the dynamic symbols and relocs are embedded
+     in the .text section, and we do not want to write them out with
+     the symbol table.  FIXME: This may be right if there is any other
+     form of a.out shared libraries.  */
+  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
+      && bfd_get_outsymbols (abfd) != (asymbol **) NULL)
+    {
+      bfd_size_type i;
+      asymbol **sym_ptr_ptr;
+      bfd_size_type count;
+      arelent **rel_ptr_ptr;
+
+      sym_ptr_ptr = bfd_get_outsymbols (abfd);
+      count = bfd_get_symcount (abfd);
+      for (i = 0; i < count; i++, sym_ptr_ptr++)
+	{
+	  if (((*sym_ptr_ptr)->flags & BSF_DYNAMIC) != 0)
+	    {
+	      /* This assumes that all dynamic symbols follow all
+		 non-dynamic symbols, which is what slurp_symbol_table
+		 does.  */
+	      *sym_ptr_ptr = NULL;
+	      bfd_get_symcount (abfd) = i;
+	      break;
+	    }
+	}
+
+      if (obj_textsec (abfd)->reloc_count > 0)
+	{
+	  rel_ptr_ptr = obj_textsec (abfd)->orelocation;
+	  count = obj_textsec (abfd)->reloc_count;
+	  for (i = 0; i < count; i++, rel_ptr_ptr++)
+	    {
+	      if (((*(*rel_ptr_ptr)->sym_ptr_ptr)->flags & BSF_DYNAMIC) != 0)
+		{
+		  /* This assumes that all relocs against dynamic
+		     symbols follow all relocs against other symbols,
+		     which is what slurp_reloc_table does.  */
+		  *rel_ptr_ptr = NULL;
+		  obj_textsec (abfd)->reloc_count = i;
+		  break;
+		}
+	    }
+	}
+
+      if (obj_datasec (abfd)->reloc_count > 0)
+	{
+	  rel_ptr_ptr = obj_datasec (abfd)->orelocation;
+	  count = obj_datasec (abfd)->reloc_count;
+	  for (i = 0; i < count; i++, rel_ptr_ptr++)
+	    {
+	      if (((*(*rel_ptr_ptr)->sym_ptr_ptr)->flags & BSF_DYNAMIC) != 0)
+		{
+		  *rel_ptr_ptr = NULL;
+		  obj_datasec (abfd)->reloc_count = i;
+		  break;
+		}
+	    }
+	}
+    }
+
   WRITE_HEADERS(abfd, execp);
 
   return true;
@@ -586,8 +649,21 @@ DEFUN (sunos4_set_sizes, (abfd),
     }
 }
 
+#ifndef MY_read_dynamic_symbols
+#define MY_read_dynamic_symbols 0
+#endif
+#ifndef MY_read_dynamic_relocs
+#define MY_read_dynamic_relocs 0
+#endif
+
 static CONST struct aout_backend_data sunos4_aout_backend = {
-  0, 1, 0, sunos4_set_sizes, 0,
+  0,				/* zmagic files are not contiguous */
+  1,				/* text includes header */
+  0,				/* default text vma */
+  sunos4_set_sizes,
+  0,				/* header is counted in zmagic text */
+  MY_read_dynamic_symbols,
+  MY_read_dynamic_relocs
 };
 
 #define	MY_core_file_failing_command 	sunos4_core_file_failing_command

@@ -1,3 +1,36 @@
+Fri Jan 21 01:11:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* syms.c (BSF_DYNAMIC): New symbol flag.
+	(bfd_print_symbol_vandf): Print it.
+	* bfd-in2.h: Rebuilt.
+	* libaout.h (struct aout_backend_data): New read_dynamic_symbols
+	and read_dynamic_relocs fields.
+	(struct aoutdata): New dynamic_info field.
+	(obj_aout_dynamic_info): New accessor macro.
+	* sunos.c (struct sunos_dynamic_info): New structure.
+	(sunos_read_dynamic_info, MY(read_dynamic_symbols),
+	MY(read_dynamic_relocs)): New functions to read dynamic symbols
+	and relocs.
+	* aoutx.h (NAME(aout,some_aout_object_p)): If the object is
+	dynamically linked, set SEC_RELOC for both the .text and .data
+	sections.
+	(translate_from_native_sym_flags): Don't set BSF_LOCAL for an
+	undefined symbol.
+	(translate_symbol_table): New function, split out of
+	slurp_symbol_table; set the BSF_DYNAMIC flag appropriately.
+	(NAME(aout,slurp_symbol_table)): Read dynamic symbols, if any.
+	(NAME(aout,slurp_reloc_table)): Read dynamic relocs, if any.
+	(NAME(aout,get_reloc_upper_bound)): Include dynamic reloc count in
+	return value.
+	* aoutf1.h (NAME(aout,sunos4_write_object_contents)): Don't write
+	out dynamic symbols or relocs against reloc symbols, since they
+	are already in the .text section and we wouldn't know where to
+	write them anyhow.
+	(sunos4_aout_backend): Initialize read_dynamic_symbols and
+	read_dynamic_relocs fields.
+	* aout-target.h (MY(backend_data)): Initialize
+	read_dynamic_symbols and read_dynamic_relocs fields.
+
 Thu Jan 20 20:57:27 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* hosts/alphaosf.h (uint64e_type, uint64_type, int64_type): Delete
