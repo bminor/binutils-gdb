@@ -1,3 +1,11 @@
+Sat Dec  4 19:40:32 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	Fri Dec  3 09:55:17 1993  Pete Hoogenboom  (hoogen@cs.utah.edu)
+
+	* hppa_stubs.h: (BLE_N_XXX_0_31):  New instruction used in
+	linker stub code. 
+	(COPY_2_31):  Likewise.
+
 Fri Dec  3 18:40:58 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/solaris2.mh (HDEFINES): Remove -Dconst=

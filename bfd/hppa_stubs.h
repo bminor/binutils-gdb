@@ -44,11 +44,13 @@
 #define BLE_XXX_0_0        	0xe4000000	/* ble         0(sr0,0) */
 #define BLE_N_XXX_0_0      	0xe4000002	/* ble,n       0(sr0,0) */
 #define BLE_XXX_0_31       	0xe7e00000	/* ble         0(sr0,r31) */
+#define BLE_N_XXX_0_31     	0xe7e00002	/* ble,n       0(sr0,r31) */
 #define BE_N_XXX_0_31      	0xe3e00002	/* be,n        0(sr0,r31) */
 #define BE_XXX_0_31        	0xe3e00000	/* be          0(sr0,r31) */
 #define COPY_31_2          	0x081f0242	/* copy        r31,r2 */
 #define COPY_31_1          	0x081f0241	/* copy        r31,r1 */
 #define COPY_1_31          	0x0801025f	/* copy        r1,r31 */
+#define COPY_2_31          	0x0802025f	/* copy        r2,r31 */
 #define LDIL_XXX_31        	0x23e00000	/* ldil        0,r31 */
 #define LDSID_31_1         	0x03e010a1	/* ldsid       (r31),r1 */
 #define MTSP_1_SR0         	0x00011820	/* mtsp        r1,sr0 */
