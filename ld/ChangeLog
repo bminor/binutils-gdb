@@ -1,3 +1,7 @@
+Thu Feb  1 10:50:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldexp.c (exp_fold_tree): Correct handling of ABSOLUTE.
+
 Wed Jan 31 17:30:19 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.tgt (i[345]86-*-cygwin32, powerpcle-*-cygwin32): New.
