@@ -212,8 +212,7 @@ compare_symbols (const PTR s1p, const PTR s2p)
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
-
-  return (STRCMP (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2)));
+  return (STRCMP (SYMBOL_SOURCE_NAME (*s1), SYMBOL_SOURCE_NAME (*s2)));
 }
 
 /*
@@ -241,8 +240,14 @@ compare_symbols (const PTR s1p, const PTR s2p)
 static int
 compare_psymbols (const PTR s1p, const PTR s2p)
 {
-  register char *st1 = SYMBOL_NAME (*(struct partial_symbol **) s1p);
-  register char *st2 = SYMBOL_NAME (*(struct partial_symbol **) s2p);
+  register struct partial_symbol **s1, **s2;
+  register char *st1, *st2;
+
+  s1 = (struct partial_symbol **) s1p;
+  s2 = (struct partial_symbol **) s2p;
+  st1 = SYMBOL_SOURCE_NAME (*s1);
+  st2 = SYMBOL_SOURCE_NAME (*s2);
+
 
   if ((st1[0] - st2[0]) || !st1[0])
     {

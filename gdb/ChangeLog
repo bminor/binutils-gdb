@@ -1,3 +1,23 @@
+2000-10-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Daniel Berlin <dberlin@redhat.com> :
+
+	* symtab.c (lookup_symbol_aux): New function. Renamed from
+ 	lookup_symbol. Move code to do demangling/case sensitivity to
+ 	lookup_symbol().
+  	(lookup_symbol): Now wrapper for lookup_symbol_aux, so we can
+ 	perform case sensitivity/demangling without leaking memory.  Move
+ 	code to do demangling/case sensitivity from old_lookup_symbol to
+ 	here.
+	(lookup_partial_symbol): Use SYMBOL_SOURCE_NAME instead of
+ 	SYMBOL_NAME.
+	(lookup_block_symbol): Use SYMBOL_SOURCE_NAME instead of
+ 	SYMBOL_NAME. Don't do linear search in case of C++.
+
+  	* symfile.c (compare_symbols): Use SYMBOL_SOURCE_NAME instead of
+ 	SYMBOL_NAME.
+  	(compare_psymbols): Same here.
+
 2000-10-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-nindy.c (non_dle, nindy_xfer_inferior_memory): Protoize.

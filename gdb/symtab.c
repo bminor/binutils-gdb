@@ -83,6 +83,13 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 
 static struct symtab *lookup_symtab_1 (char *);
 
+static struct symbol *lookup_symbol_aux (const char *name, const
+					 struct block *block, const
+					 namespace_enum namespace, int
+					 *is_a_field_of_this, struct
+					 symtab **symtab);
+
+
 static void cplusplus_hint (char *);
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
@@ -572,17 +579,14 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
    can probably assume it will never hit the C++ code).  */
 
 struct symbol *
-lookup_symbol (const char *name, register const struct block *block,
+lookup_symbol (const char *name, const struct block *block,
 	       const namespace_enum namespace, int *is_a_field_of_this,
 	       struct symtab **symtab)
 {
-  register struct symbol *sym;
-  register struct symtab *s = NULL;
-  register struct partial_symtab *ps;
-  struct blockvector *bv;
-  register struct objfile *objfile = NULL;
-  register struct block *b;
-  register struct minimal_symbol *msymbol;
+  char *modified_name = NULL;
+  char *modified_name2 = NULL;
+  int needtofreename = 0;
+  struct symbol *returnval;
 
   if (case_sensitivity == case_sensitive_off)
     {
@@ -594,8 +598,44 @@ lookup_symbol (const char *name, register const struct block *block,
       for (i= 0; i < len; i++)
         copy[i] = tolower (name[i]);
       copy[len] = 0;
-      name = copy;
+      modified_name = copy;
     }
+  else 
+      modified_name = (char *) name;
+
+  /* If we are using C++ language, demangle the name before doing a lookup, so
+     we can always binary search. */
+  if (current_language->la_language == language_cplus)
+    {
+      modified_name2 = cplus_demangle (modified_name, DMGL_ANSI | DMGL_PARAMS);
+      if (modified_name2)
+	{
+	  modified_name = modified_name2;
+	  needtofreename = 1;
+	}
+    }
+
+  returnval = lookup_symbol_aux (modified_name, block, namespace,
+				 is_a_field_of_this, symtab);
+  if (needtofreename)
+    free (modified_name2);
+
+  return returnval;	 
+}
+
+static struct symbol *
+lookup_symbol_aux (const char *name, const struct block *block,
+	       const namespace_enum namespace, int *is_a_field_of_this,
+	       struct symtab **symtab)
+{
+  register struct symbol *sym;
+  register struct symtab *s = NULL;
+  register struct partial_symtab *ps;
+  register struct blockvector *bv;
+  register struct objfile *objfile = NULL;
+  register struct block *b;
+  register struct minimal_symbol *msymbol;
+
 
   /* Search specified block and its superiors.  */
 
@@ -987,7 +1027,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (STRCMP (SYMBOL_NAME (*center), name) >= 0)
+	  if (STRCMP (SYMBOL_SOURCE_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1190,9 +1230,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
     {
       /* Reset the linear search flag so if the binary search fails, we
          won't do the linear search once unless we find some reason to
-         do so, such as finding a C++ symbol during the binary search.
-         Note that for C++ modules, ALL the symbols in a block should
-         end up marked as C++ symbols. */
+         do so */
 
       do_linear_search = 0;
       top = BLOCK_NSYMS (block);
@@ -1210,22 +1248,19 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    }
 	  inc = (inc >> 1) + bot;
 	  sym = BLOCK_SYM (block, inc);
-	  if (!do_linear_search
-	      && (SYMBOL_LANGUAGE (sym) == language_cplus
-		  || SYMBOL_LANGUAGE (sym) == language_java
-	      ))
+	  if (!do_linear_search && (SYMBOL_LANGUAGE (sym) == language_java))
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (SYMBOL_NAME (sym)[0] < name[0])
+	  if (SYMBOL_SOURCE_NAME (sym)[0] < name[0])
 	    {
 	      bot = inc;
 	    }
-	  else if (SYMBOL_NAME (sym)[0] > name[0])
+	  else if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
 	    {
 	      top = inc;
 	    }
-	  else if (STRCMP (SYMBOL_NAME (sym), name) < 0)
+	  else if (STRCMP (SYMBOL_SOURCE_NAME (sym), name) < 0)
 	    {
 	      bot = inc;
 	    }
@@ -1247,19 +1282,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
-	  inc = SYMBOL_NAME (sym)[0] - name[0];
-	  if (inc == 0)
-	    {
-	      inc = STRCMP (SYMBOL_NAME (sym), name);
-	    }
-	  if (inc == 0 && SYMBOL_NAMESPACE (sym) == namespace)
-	    {
-	      return (sym);
-	    }
-	  if (inc > 0)
-	    {
-	      break;
-	    }
+	  if (SYMBOL_MATCHES_NAME (sym, name))
+	    return sym;
 	  bot++;
 	}
     }
