@@ -1,0 +1,809 @@
+# quicksort.exp -- Expect script to test gdb with quicksort.c
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# use this to debug:
+#
+#log_user 1
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+if { ![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"] } {
+    verbose "HPUX thread test ignored for non-hppa or pre-HP/UX-10.30 targets."
+    return 0
+}
+
+set testfile quicksort
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+# To build the executable we need to link against the thread library.
+#
+#     cc -Ae -g -o quicksort -lpthread quicksort.c
+#
+#compile "${srcfile} -Ae -g -lpthread -o ${binfile}"
+
+if {$gcc_compiled == 0} {
+    set additional_flags "additional_flags=-Ae"
+} else {
+    set additional_flags ""
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${testfile}.c" "${binfile}.o" object [list debug $additional_flags]] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+remote_exec build "ld /usr/ccs/lib/crt0.o ${binfile}.o -lcl -lpthread  -lc /opt/langtools/lib/end.o -o ${binfile}"
+
+
+# Thread stuff is _slow_; prepare for long waits.
+#
+set oldtimeout $timeout
+set timeout [expr "$timeout + 300"]
+set oldverbose $verbose
+#set verbose 40
+
+# Further, this test has some "null" lines designed
+# to consume output from gdb that was too late to be
+# matched (sequence is "gdb_test" sends; timeout and
+# on to next send; result finally comes in; mismatch).
+#
+# The null command is 'gdb_test "p \$pc" ".*" ""'
+#
+# NOTE: to pass a literal "$", "/" or "*" (etc.) to gdb_test, 
+#       remember that the pattern will be escaped once and 
+#       $-evaluated twice:
+#
+#          "\\\*" matches "\*"
+#          "\$"  matches "$"
+#
+proc fix_timeout {} {
+    gdb_test "p \$pc" ".*" ""
+}
+
+#=========================
+#
+# Simple sanity test first.
+#
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+gdb_test "tb 122" ".*Breakpoint.*" ""
+gdb_test "r" ".*122.*" ""
+gdb_test "thr 99" ".*Thread ID 99 not known.*" "Check too-big thread number"
+gdb_test "tb 145 thr 3" ".*Breakpoint.*" "set thread-specific bp 145"
+gdb_test "tb 146 thr 4" ".*Breakpoint.*" "set thread-specific bp 146"
+gdb_test "c" ".*Switched to thread.*145.*" "auto switch"
+gdb_test "c" ".*Switched to thread.*146.*" "auto switch 2"
+gdb_test "c" ".*Program exited normally.*" ""
+
+#=========================
+#
+# Test that you can't do a thread select after a program runs.
+#
+gdb_test "thread" ".*No stack.*" "No live thread after run"
+gdb_test "thr 2"  ".*No stack.*" "Can't set thread after run"
+
+#=========================
+#
+# Test thread command changes, look for frame level reset bug.
+#
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+gdb_test "b 122" ".*" ""
+gdb_test "r" ".*122.*" ""
+
+# Prep for frame level test--go up/info thread/check frame
+#
+gdb_test "up" ".*quick_sort.*" ""
+gdb_test "up" ".*main.*"       ""
+
+send_gdb "i th\n"
+gdb_expect {
+  -re ".*7 thread.* in .* from .* in .* from .* 6 thread.*$gdb_prompt $" {
+      fail "old thread command, says things twice"
+  }
+  -re ".*7 system thread.*6 system th.*5 sys.*4.*3.*2.*1.*work_init.*$gdb_prompt $" {
+      pass "info threads"
+  }
+  -re ".*$gdb_prompt $"  { fail "no info thread command" }
+  timeout { fail "timeout" }
+}
+
+# We should have been restored two frames up--check.
+#
+send_gdb "up\n"
+gdb_expect {
+    -re ".*Initial frame selected.*$gdb_prompt $" {
+        pass "Frame correctly reset after 'info threads'"
+    }
+    -re ".*quick_sort.*$gdb_prompt $" {
+        fail "Old gdb bug; should be fixed someday"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "real bug--FIX!"
+    }
+    timeout { fail "timeout" }
+}
+
+# Do it again, only just go to a middle frame, and use another thread.
+#
+gdb_test "thr 5" ".*" ""
+gdb_test "bt" ".* ___ksleep.*_lwp_cond_timedwait.*pthread_cond_wait.*worker.*__pthread_create_system.*" ""
+gdb_test "up" ".*1.*_lwp_cond_timedwait.*" ""
+gdb_test "up" ".*2.*pthread_cond_wait.*"   ""
+gdb_test "up" ".*3.*worker.*"              ""
+gdb_test "i th" ".*7.*6.*work_init.*"      ""
+gdb_test "f"  ".*3.*worker.*"              "Frame restored"
+gdb_test "p wp->max_pile" ".*= 128.*"      "can see vars in frame"
+
+# Thread command changes
+#
+gdb_test "thr"    ".*Current thread is 5.*"   "threads-no-num"
+gdb_test "thr 6"  ".*Switching to thread 6.*" "new switch"
+gdb_test "thr"    ".*Current thread is 6.*"   "check switch"
+#gdb_test "thr 6"  ".*Current thread is already 6.*" "dup, no switch"
+gdb_test "thr app all p x" ".*No symbol.*"    ""
+gdb_test "thr"    ".*Current thread is 6.*"   "restore current thread"
+
+#=========================
+#
+# Test new stepping
+#
+
+proc get_hit { } {
+    global hit2
+    global hit3
+    global hit4
+    global hit5
+    global hit6
+    global hit7
+    global gdb_prompt
+
+    send_gdb "cont\n"
+    gdb_expect {
+        -re ".*Breakpoint.*145.*$gdb_prompt $" {
+            send_gdb "thr\n"
+            gdb_expect {
+                -re ".*is 7.*$gdb_prompt $" {
+                    set hit7 [expr "$hit7 + 1"]
+                }
+                -re ".*is 6.*$gdb_prompt $" {
+                    set hit6 [expr "$hit6 + 1"]
+                }
+                -re ".*is 5.*$gdb_prompt $" {
+                    set hit5 [expr "$hit5 + 1"]
+                }
+                -re ".*is 4.*$gdb_prompt $" {
+                    set hit4 [expr "$hit4 + 1"]
+                }
+                -re ".*is 3.*$gdb_prompt $" {
+                    set hit3 [expr "$hit3 + 1"]
+                }
+                -re ".*is 2.*$gdb_prompt $" {
+                    set hit2 [expr "$hit2 + 1"]
+                }
+                -re ".*$gdb_prompt $" {
+                    fail "can't see which thread"
+                }
+                timeout { fail "timeout" }
+            }
+        }
+        -re ".*$gdb_prompt $" {
+            fail "thread command"
+        }
+        timeout { fail "timeout" }
+    }
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+gdb_test "break 122" ".*" ""
+gdb_test "run"      ".*122.*" ""
+
+# Make sure we hit a bp on every thread.
+#
+# Try one, via thread-specific bps
+#
+gdb_test "break 145 thr 2" ".*" "set thread-specific bp thr 2"
+gdb_test "break 145 thr 3" ".*" "set thread-specific bp thr 3"
+gdb_test "break 145 thr 4" ".*" "set thread-specific bp thr 4"
+gdb_test "break 145 thr 5" ".*" "set thread-specific bp thr 5"
+gdb_test "break 145 thr 6" ".*" "set thread-specific bp thr 6"
+gdb_test "break 145 thr 7" ".*" "set thread-specific bp thr 7"
+
+set hit2 0
+set hit3 0
+set hit4 0
+set hit5 0
+set hit6 0
+set hit7 0
+
+get_hit
+get_hit
+get_hit
+get_hit
+get_hit
+get_hit
+
+if { [expr "$hit2 == 1"] 
+  && [expr "$hit3 == 1"]
+  && [expr "$hit4 == 1"]
+  && [expr "$hit5 == 1"]
+  && [expr "$hit6 == 1"]
+  && [expr "$hit7 == 1"] } {
+    pass "thread-specific bps 1"
+} else {
+    fail "thread-specific bps 1"
+}
+
+#====================
+#
+# Now use generic bps
+#
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+gdb_test "b 122" ".*" ""
+gdb_test "r" ".*122.*" ""
+
+# Make sure we hit a bp on every thread.
+#
+# Try two, via non-thread-specific bp
+#
+gdb_test "b 145" ".*" "b 145"
+
+set hit2 0
+set hit3 0
+set hit4 0
+set hit5 0
+set hit6 0
+set hit7 0
+
+get_hit
+get_hit
+get_hit
+get_hit
+get_hit
+get_hit
+
+if { [expr "$hit2 == 1"] 
+  && [expr "$hit3 == 1"]
+  && [expr "$hit4 == 1"]
+  && [expr "$hit5 == 1"]
+  && [expr "$hit6 == 1"]
+  && [expr "$hit7 == 1"] } {
+    pass "thread-specific bps 2"
+} else {
+    fail "thread-specific bps 2"
+}
+
+#====================
+#
+# Complicated (original) test next.
+#
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if ![runto_main] then {
+   fail "Can't run to main"
+   return 0
+}
+
+# OK, we're at "main", there should be one thread.
+#
+gdb_test "info thread" ".*\\\* 1 system thread .*main.*" "initial thread"
+ 
+# Try to see the threads being created: set a breakpoint 
+# after the creation and go around the loop a few times.
+#
+gdb_test "break 109" "Breakpoint.*109.*" "set bpt"
+
+gdb_test "c" ".*New thread.*Breakpoint.*109.*" "first continue"
+fix_timeout
+
+# Make sure we don't wait (waiting is for attach test)
+#
+gdb_test "set wait_here = 0" ".*" ""
+
+send_gdb "info thr\n"
+gdb_expect {
+    -re ".*2 system th.*1 sy.*109.*$gdb_prompt $" { pass "saw thread create" }
+    -re ".*1 system thread.*87.*$gdb_prompt $"    { fail "didn't see thread create" }
+    -re ".*$gdb_prompt $"                         { fail "no info thread command" }
+    timeout { fail "timeout" }
+}
+
+gdb_test "c"      ".*New thread.*Breakpoint.*109.*" "continue"
+fix_timeout
+
+send_gdb "info thr\n"
+gdb_expect {
+    -re ".*3 system thread.*2 sys.*\\\* 1 system thread.*109.*$gdb_prompt $" { 
+        pass "saw thread create" }
+    -re ".*2 system thread.*1 sys.*109.*$gdb_prompt $" { 
+        fail "didn't see thread create" 
+    }
+    -re ".*1 system thread.*109.*$gdb_prompt $" {
+        fail "didn't see thread create" 
+    }
+    -re ".*$gdb_prompt $" {
+        fail "no info thread command" 
+    }
+    timeout { fail "timeout" }
+}
+
+fix_timeout
+gdb_test "clear" ".*Deleted breakpoint.*" ""
+
+# Now go on to the end of thread creation.
+#
+gdb_test "b 122"  ".*"     "set bpt 122"
+gdb_test "c"     ".*New thread.*New thread.*New thread.*122.*" ""
+gdb_test "p \$pc" ".*" ""
+gdb_test "clear" ".*Deleted breakpoint.*" ""
+
+send_gdb "info thr\n"
+gdb_expect {
+    -re ".*7 system thread.*6 sys.*5.*1 system thread.*122.*$gdb_prompt $" 
+        { pass "saw thread creates" }
+    -re ".*$gdb_prompt $"                           
+        { fail "no info thread command" }
+    timeout { fail "timeout" }
+}
+
+# Try a thread-specific breakpoint; we expect the other threads to
+# be waiting at this point.
+#
+gdb_test "thr 3"  ".*Switching to thread.*ksleep.*" "thread switch"
+gdb_test "i th"   ".*\\\* 3 system thread.*"        "show new current thread"
+
+gdb_test "up"     ".*lwp_cond_timedwait.*" ""
+gdb_test "up"     ".*pthread_cond_wait.*"  ""
+gdb_test "up"     ".*worker.*144.*"        ""
+
+gdb_test "b 145 th 3" ".*Breakpoint.*145.*" "set thread-specific bp"
+gdb_test "i b"    ".*breakpoint.*breakpoint.*145 thread 3.*" "show thread-specific bp"
+
+gdb_test "c"      ".*Breakpoint.*145.*145.*" "hit thread-specific bp"
+gdb_test "p \$pc" ".*" ""
+
+# Test thread apply command on thread specific data.
+#
+gdb_test "thre app all p \$pc" ".*Thread 7.*Thread 6.*Thread 5.*Thread 4.*Thread 3.*Thread 2.*Thread 1.*" "thread apply all"
+gdb_test "thr ap 1 3 5 p \$pc" ".*Thread 1.*Thread 3.*Thread 5.*" "thr app 1 3 5"
+
+# Switch again, and test that others continue on a "next"
+# This test _could_ fail due to timing issues, but that's
+# unlikely.
+#
+gdb_test "thr 7" ".*Switching to thread.*" ""
+
+# Make sure that "up" stops at __pthread_exit, or
+# __pthread_create, the pseudo-roots, and that we 
+# only see that pseudo-root once.
+#
+send_gdb "bt\n"
+gdb_expect {
+    -re ".*Error accessing memory address.*" { fail "bt" }
+    -re ".*pthread_create.*pthread_create.*" { fail "bt" }
+    -re ".*worker.*pthread_create.*"         { pass "bt" }
+    -re ".*pthread_exit.*"                   { pass "bt" }
+    timeout { fail "timeout on bt" }
+}
+
+gdb_test "up" ".*"           ""
+gdb_test "up" ".*"           ""
+gdb_test "up" ".*144.*"      "Up 3"
+gdb_test "up" ".*pthread_.*" "Up 4"
+gdb_test "up" ".*Initial frame selected; you cannot go up.*" "catch end of thread stack"
+
+#=====================
+#
+# Things get iffy here; when we step, sometimes the step
+# completes, sometimes it doesn't.  When it doesn't, we
+# hit a bp somewhere else and the step never completes
+# (wait_for_inferior just evaporates it). 
+#
+# I think the right answer is that any failures here
+# should stick around to trigger later fixing.
+#
+#  Here's the plan: 
+#
+#  Bps at 148 (5) and 154 (6) on thread 7 (two bps so we 
+#     see the difference between going around the loop and
+#     reporting the same bp hit twice).
+#
+#  Bp at 144 on thread 3.
+#
+#  Step out of a library routine.
+#
+# Either the step will finish or a bp will hit.  Try to
+# handle all the cases.
+#
+gdb_test "b 148 thr 7" ".*Breakpoint.*148.*" ""
+gdb_test "b 154 thr 7" ".*Breakpoint.*154.*" "set bpt 2"
+
+set hit_154_bp 0
+set hit_148_bp 0
+set hit_145_bp 0
+set step_completed 0
+
+# Expect zero hits
+#
+gdb_test "i b" ".*" ""
+
+send_gdb "n\n"
+gdb_expect {
+    -re ".*Single stepping.*_lwp_cond_timedwait.*$gdb_prompt $" {
+        send_gdb "thr\n"
+        gdb_expect {
+            -re ".*is 7.*$gdb_prompt $" {
+                set step_completed 1
+                pass "completed step in library code"
+            }
+            -re ".*$gdb_prompt $" {
+                fail "completed step in library code, but in wrong thread"
+            }
+            timeout { fail "timeout" }
+        }
+    }
+    -re ".*Single stepping.*Switched to thread 3.*Breakpoint.*$gdb_prompt $" {
+        pass "step cancelled; hit bp due to thread parallelism"
+        set hit_145_bp 1
+    }
+    -re ".*Single stepping.*Switched to thread 7.*Breakpoint.*148.*$gdb_prompt $" {
+        pass "step cancelled; hit bp due to thread parallelism"
+        set hit_148_bp 1
+    }
+    -re ".*Single stepping.*Switched to thread 7.*Breakpoint.*154.*$gdb_prompt $" {
+        pass "step cancelled; hit bp due to thread parallelism"
+        set hit_154_bp 1
+    }
+    -re ".*$gdb_prompt $" {
+        send_gdb "thr\n"
+        gdb_expect {
+            -re ".*is 7.*$gdb_prompt $" {
+                fail "No event?"
+            }
+            -re ".*$gdb_prompt $" {
+                fail "No event"
+            }
+            timeout { fail "timeout" }
+        }
+    }
+    timeout { fail "timeout" }
+}
+
+# Sometimes used to get SIGTRAP here; that should be fixed
+#
+
+# Expect appropriate hits of bpt; too much work to parse
+# result and check...
+#
+gdb_test "i b" ".*" ""
+
+send_gdb "c\n"
+gdb_expect {
+    -re ".*SIGTRAP.*$gdb_prompt $" {
+        fail "got SIGTRAP"
+    }
+    -re ".*Switched to thread 7.*Breakpoint.*154.*$gdb_prompt $" {
+        if { $hit_154_bp == 1 } {
+            fail "re-hit old bp"
+        } else {
+            pass "continue; hit parallel event after continue"
+        }
+        set hit_154_bp 1
+    }
+    -re ".*Switched to thread 7.*Breakpoint.*148.*$gdb_prompt $" {
+        if { $hit_148_bp == 1 } {
+            fail "re-hit old bp"
+        } else {
+            pass "continue; hit parallel event after continue"
+        }
+        set hit_148_bp 1
+    }
+    -re ".*Breakpoint.*154.*$gdb_prompt $" {
+        if { $hit_154_bp == 1 } {
+            fail "re-hit old bp"
+        } else {
+            send_gdb "thr\n"
+            gdb_expect {
+                -re ".*is 7.*$gdb_prompt $" {
+                    pass "continue; hit parallel event after continue"
+                }
+                -re ".*$gdb_prompt $" {
+                    fail "hit bp in wrong thread"
+                }
+                timeout { fail "timeout" }
+            }
+        }
+        set hit_154_bp 1
+    }
+    -re ".*Breakpoint.*148.*$gdb_prompt $" {
+        if { $hit_148_bp == 1 } {
+            fail "re-hit old bp"
+        } else {
+            send_gdb "thr\n"
+            gdb_expect {
+                -re ".*is 7.*$gdb_prompt $" {
+                    pass "continue; hit parallel event after continue"
+                }
+                -re ".*$gdb_prompt $" {
+                    fail "hit bp in wrong thread"
+                }
+                timeout { fail "timeout" }
+            }
+        }
+        set hit_148_bp 1
+    }
+    -re ".*Breakpoint.*145.*$gdb_prompt $" {
+        if { $hit_145_bp == 1 } {
+            fail "re-hit old bp"
+        } else {
+            send_gdb "thr\n"
+            gdb_expect {
+                -re ".*is 3.*$gdb_prompt $" {
+                    pass "continue; hit parallel event after continue"
+                }
+                -re ".*$gdb_prompt $" {
+                    fail "hit bp in wrong thread"
+                }
+                timeout { fail "timeout" }
+            }
+        }
+        set hit_145_bp 1
+    }
+    -re ".*_lwp_cond_timedwait.*$gdb_prompt $" {
+        pass "continue; hit step completion after continue"
+    }
+    -re ".*Program exited normally.*" {
+        fail "Program ended? HOW?"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "Unexpected event"
+    }
+    timeout { fail "timeout" }
+}
+
+# There are a number of places we _could_ be now;
+# this is the price of really running in parallel.
+#
+send_gdb "n\n"
+gdb_expect {
+    -re ".*Switched to thread 7.*pthread_cond_wait.*$gdb_prompt $" {
+        if { $step_completed } {
+            fail "step already completed"
+        } else {
+            pass "finish step"
+        }
+    }
+    -re ".*pthread_cond_wait.*$gdb_prompt $" {
+        #
+        # Unlikely, but we might finish the range step from inside
+        # ksleep, before anything else.
+        #
+        if { $step_completed } {
+            fail "step already completed"
+        } else {
+            send_gdb "thr\n"
+            gdb_expect {
+                -re ".*is 7.*$gdb_prompt $" {
+                    pass "finish step"
+                }
+                -re ".*$gdb_prompt $" {
+                    fail "step in wrong thread"
+                }
+                timeout { fail "timeout" }
+            }
+        }
+    }
+    -re ".*Switched to thread.*Breakpoint.*145.*$gdb_prompt $" {
+        pass "auto-switch thread" 
+    }
+    -re ".*Breakpoint.*145.*$gdb_prompt $" {
+        pass "auto-switch not needed, ok" 
+    }
+    -re ".*140.*while.*n_pile.*$gdb_prompt $" {
+        #
+        # This is just going around the loop from the 154 bp.
+        #
+        send_gdb "thr\n"
+        gdb_expect {
+            -re ".*is 7.*$gdb_prompt $" {
+                pass "finish step"
+            }
+            -re ".*$gdb_prompt $" {
+                fail "step in wrong thread"
+            }
+            timeout { fail "timeout" }
+        }
+    }
+    -re ".*149.*ptr = wp.*pile.*$gdb_prompt $" {
+        #
+        # This is just going around the loop from the 148 bp.
+        #
+        if { $hit_154_bp } {
+            send_gdb "thr\n"
+            gdb_expect {
+                -re ".*is 7.*$gdb_prompt $" {
+                    pass "finish step"
+                }
+                -re ".*$gdb_prompt $" {
+                    fail "step in wrong thread"
+                } 
+                timeout { fail "timeout" }
+            }
+        } else {
+            pass "step from 149 but didn't hit it first"
+        }
+    }
+    -re ".*Breakpoint 5.*154.*$gdb_prompt $" {
+        gdb_test "i b" ".*" ""
+        if { $hit_154_bp } {
+            fail "hit bp again?"
+        } else {
+            pass "hit bp"
+        }
+    }
+    -re ".*Breakpoint 5.*148.*$gdb_prompt $" {
+        gdb_test "i b" ".*" ""
+        if { $hit_148_bp } {
+            fail "hit bp again?"
+        } else {
+            pass "hit bp"
+        }
+    }
+    -re ".*$gdb_prompt $" {
+        fail "no step finished"
+    }
+    timeout { fail "timeout on 'next'" }
+}
+
+# Let's get into some kind of known state again.
+#
+gdb_test "thr 7" ".*" ""
+gdb_test "info thread" ".*" ""
+#gdb_test "i b" ".*" ""
+
+# Leave breakpoint "154 thr 7" as only live bp.
+# 
+gdb_test "d 1"   ".*" "del main bp"
+gdb_test "d 4"   ".*" "thread-specific bpt delete"
+gdb_test "d 5"   ".*" "other bp delete"
+send_gdb "i b\n"
+gdb_expect {
+    -re ".*breakpoint.*breakpoint.*$gdb_prompt $" {
+        fail "more than one bp left"
+    }
+    -re ".*breakpoint.*154.*thread.*7.*$gdb_prompt $" {
+        pass "Only one bp left"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "Wrong or no bp left"
+    }
+    timeout { fail "timeout on info b" }
+}
+
+send_gdb "c\n" 
+gdb_expect {
+    -re ".*SIGTRAP.*Switched to thread.*$gdb_prompt $" {
+        fail "SIGTRAP error; lost thread-specific bpt"
+    }
+    -re ".*SIGTRAP.*Switched to thread.*154.*$gdb_prompt $" {
+        fail "SIGTRAP, but hit right thread-specific bpt"
+    }
+    -re ".*Switched to thread.*Breakpoint.*154.*$gdb_prompt $" {
+        pass "auto-switch back"
+    }
+    -re ".*Breakpoint.*154.*$gdb_prompt $" {
+        pass "step to bp"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "auto-switch back" 
+    }
+    -re ".*Program exited normally.*$gdb_prompt $" {
+        fail "step lost"
+    }
+    timeout {
+        fail "timeout"
+    }
+}
+fix_timeout
+
+gdb_test "cle"   ".*Deleted breakpoint.*" "delete last breakpoint"
+
+# Sometimes get SIGTRAP here.  Continue sometimes gets another...
+#
+send_gdb "c\n"
+gdb_expect {
+    -re ".*SIGTRAP.*154.*154.*$gdb_prompt $" {
+        fail "SIGTRAP on deleted bp 154 "
+        send_gdb "c\n" 
+        gdb_expect {
+            -re ".*$gdb_prompt $" { pass "fixup"}
+            timeout { fail "fixup" }
+        }
+   }
+    -re ".*SIGTRAP.*144.*145.*$gdb_prompt $" {
+        fail "SIGTRAP on deleted bp 145 "
+        send_gdb "c\n"
+        gdb_expect {
+            -re ".*$gdb_prompt $" { pass "fixup"}
+            timeout { fail "fixup" }
+        }
+    }
+    -re ".*SIGTRAP.*148.*148.*$gdb_prompt $" {
+        fail "SIGTRAP on deleted bp 148 "
+        send_gdb "c\n"
+        gdb_expect {
+            -re ".*$gdb_prompt $" { pass "fixup"}
+            timeout { fail "fixup" }
+        }
+    }
+    -re ".*SIGTRAP.*$gdb_prompt $" {
+        fail "unknown SIGTRAP"
+        send_gdb "c\n"
+        gdb_expect {
+            -re ".*$gdb_prompt $" { pass "fixup"}
+            timeout { fail "fixup" }
+        }
+    }
+    -re ".*Program exited.*$gdb_prompt $" {
+        pass "run to end"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "run to end"
+        send_gdb "c\n"
+        gdb_expect {
+            -re ".*$gdb_prompt $" { pass "fixup"}
+            timeout { fail "fixup" }
+        }
+    }
+    timeout { fail "timeout" }
+}
+
+gdb_test "p \$pc" ".*No registers.*" "program done"
+
+# Done!
+#
+gdb_exit
+
+set timeout $oldtimeout
+set verbose $oldverbose
+
+# execute_anywhere "rm -f ${binfile}"
+#
+return 0
+

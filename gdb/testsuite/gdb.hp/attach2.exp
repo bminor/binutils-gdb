@@ -1,0 +1,263 @@
+# attach.exp -- Expect script to test attaching to a threaded pgm
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# use this to debug:
+#
+#log_user 1
+
+# Temporarily comment out - hanging
+#return 0
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+# Thread stuff is _slow_; prepare for long waits.
+#
+# Further, this test has some "null" lines designed
+# to consume output from gdb that was too late to be
+# matched (sequence is "gdb_test" sends; timeout and
+# on to next send; result finally comes in; mismatch).
+#
+# The null command is 'gdb_test "p \$pc" ".*" ""'
+# NOTE: this command undoes any up/down stuff!
+#
+proc pre_timeout { how_long } {
+    global timeout
+
+    set timeout [expr "$timeout + $how_long"]
+}
+
+proc post_timeout {} {
+    global timeout
+    global oldtimeout
+
+    set timeout $oldtimeout
+    gdb_test "p \$pc" ".*" ""
+}
+
+if { ![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"] } {
+    verbose "HPUX thread test ignored for non-hppa or pre-HP/UX-10.30 targets."
+    return 0
+}
+
+# We used to wait 5 seconds , but tiamat is faster than
+# hydra...or is it that the OS allocates time differently(?).
+#
+set delay 5
+if { ![istarget "hppa*-*-hpux11.*"] } {
+    set delay 45
+}
+
+set testfile quicksort
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+set oldtimeout $timeout
+#set timeout [expr "$timeout + 100"]
+set oldverbose $verbose
+#set verbose 40
+
+# To build the executable we need to link against the thread library.
+#
+#     cc -Ae -g -o quicksort -lpthread quicksort.c
+#
+#remote_exec build "${srcfile} -Ae -g -lpthread -o ${binfile}"
+#gdb_compile "${srcfile} -Ae -g -lpthread -o ${binfile}"
+
+if {$gcc_compiled == 0} {
+    set additional_flags "additional_flags=-Ae"
+} else {
+    set additional_flags ""
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${testfile}.c" "${binfile}.o" object [list debug $additional_flags]] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+remote_exec build "ld /usr/ccs/lib/crt0.o ${binfile}.o -lcl -lpthread  -lc /opt/langtools/lib/end.o -o ${binfile}"
+
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+# Start the application running and get its pid.
+# Then we wait for it to get started and attach.
+# 
+set testpid [eval exec $binfile 1 &]
+exec sleep $delay
+
+# Now attach to the file.
+#
+pre_timeout 100
+gdb_test "attach $testpid" ".*Attaching to process.*Reading symbols from.*done.*" "attach to target"
+post_timeout
+
+# Wait for things to quiesce.
+#
+exec sleep 0
+
+send_gdb "bt\n" 
+
+set do_return 0
+set do_go_to_118 0
+pre_timeout 400
+gdb_expect {
+    -re ".*sleep.*work_init.*main.*$gdb_prompt $"   { 
+        pass "at expected location" 
+    }
+    -re ".*drand48.*$gdb_prompt $" {
+        set do_go_to_118 1
+    }
+    -re ".*pthread_mutex_lock.*$gdb_prompt $" {
+        set do_go_to_118 1
+    }
+    -re ".*pthread_mutex_unlock.*$gdb_prompt $" {
+        set do_go_to_118 1
+    }
+    -re ".*main.*$gdb_prompt $" {
+        set do_go_to_118 1
+    }
+    -re ".*No stack.*$gdb_prompt $" {
+        fail "Failed attach, change wait amount down, rest would fail"
+        set do_return 1
+    }
+    -re ".*$gdb_prompt $" {
+        # Who knows?
+        #
+        set do_go_to_118 1
+    }
+    timeout { 
+        set do_return 1
+        fail "timeout on bt, avoiding rest of test" 
+    }
+}
+post_timeout
+
+# Too late; just give up.
+#
+if { $do_return } {
+    set timeout $oldtimeout
+    set verbose $oldverbose
+    return 0
+}
+
+# Maybe too early--set a temp break and continue.
+# We have to set this on both paths, so that we can
+# know what numbers breakpoints will be.
+#
+gdb_test "tb 118" ".*Breakpoint 1.*118.*" ""
+if { $do_go_to_118 } {
+    pre_timeout 100
+    send_gdb "c\n"
+    gdb_expect {
+        -re ".*at.*118.*118.*$gdb_prompt $" {
+            # Ok, just keep going
+        }
+        -re ".*Program exited.*$gdb_prompt $" {
+            fail "Attached too late, set wait amount downwards"
+            set timeout $oldtimeout
+            set verbose $oldverbose
+            return 0
+        }
+        -re ".*$gdb_prompt $" {
+            fail "Unexpected result on attach" 
+            set timeout $oldtimeout
+            set verbose $oldverbose
+            return 0
+        }
+        timeout { 
+            fail "timeout on continue " 
+        }
+    }
+    post_timeout
+}
+
+# Look at the threads.
+#
+pre_timeout 100
+gdb_test "info thread" ".*7.*6.*5.*4.*3.*2.*\\\* 1.*thread.*" "first info thread"
+post_timeout
+
+# We expect to be inside the "sleep" call, so check that.
+#
+if { [expr "!$do_go_to_118"] } {
+    gdb_test "up" ".*\#1.*nanosleep.*" "up 1" 
+    gdb_test "up" ".*\#2.*sleep.*"     "up 2" 
+    pre_timeout 100
+    gdb_test "up" ".*\#3.*work_init.*$testfile.*c:118.*sleep.*" "up 3" 
+    post_timeout
+} else {
+    send_user "Skipped three tests\n"
+}
+
+# Get out of that call.
+#
+gdb_test "b 120" ".*Breakpoint 2.*120.*" "set bp"
+pre_timeout 100
+gdb_test "c"     ".*Breakpoint 2.*at.*120.*" "hit bp"
+post_timeout
+
+# Look at the threads.
+#
+pre_timeout 100
+gdb_test "info thread" ".*7.*6.*5.*4.*3.*2.*1.*thread.*$testfile.*c*120.*" "2nd info thread"
+post_timeout
+
+# Do some more stuff, to make sure we can
+#
+gdb_test "thread 3" ".*Switching to.*thread.*ksleep.*" "switch thread"
+
+gdb_test "up" ".*_lwp_cond_timedwait.*"   "up 5"
+gdb_test "up" ".*pthread_cond_wait.*"     "up 6"
+gdb_test "up" ".*\#3.*worker.*144.*"      "up 7"
+gdb_test "up" ".*__pthread_exit.*"        "up 8"
+gdb_test "up" ".*Initial.*cannot go up.*" "found thread base"
+
+gdb_test "b 145 thr 3" ".*Breakpoint 3.*145.*"             "thread-specific bp"
+gdb_test "i b"         ".*2.*breakpoint.*at.*120.*3.*breakpoint.*at.*145 thread 3.*" "show thread-specific bp"
+gdb_test "del 2" ".*" ""
+
+gdb_test "c" ".*Breakpoint 3.*145.*" "hit thread-specific bp"
+gdb_test "i th" ".*\\\* 3.*145.*" "at correct thread"
+
+pre_timeout 100
+gdb_test "n" ".*146.*" "next from thread-specific bp"
+post_timeout
+
+gdb_test "d 3" ".*" ""
+gdb_test "c"   ".*Program exited normally\..*" "run to finish"
+
+# Done!
+#
+gdb_exit
+
+set timeout $oldtimeout
+set verbose $oldverbose
+
+# execute_anywhere "rm -f ${binfile}"
+#
+return 0
+
+

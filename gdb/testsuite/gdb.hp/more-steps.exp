@@ -1,0 +1,152 @@
+# more-steps.exp -- Expect script to test gdb's ability to step threaded pgms
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# use this to debug:
+#
+#log_user 1
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+#if { ![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"] } {
+#    verbose "HPUX thread test ignored for non-hppa or pre-HP/UX-10.30 targets."
+#    return 0
+#}
+
+set testfile more-steps
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+# To build the executable we need to link against the thread library.
+#
+#     cc -Ae -g -o more-steps -lpthread more-steps.c
+#
+#compile "${srcfile} -Ae -g -lpthread -o ${binfile}"
+
+if {$gcc_compiled == 0} {
+    set additional_flags "additional_flags=-Ae"
+} else {
+    set additional_flags ""
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${testfile}.c" "${binfile}.o" object [list debug $additional_flags]] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if { ![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"] } {
+    if { [gdb_compile "${binfile}.o" "${binfile}" executable  {debug "additional_flags=-lpthread"}] != ""} {
+	gdb_suppress_entire_file "Testcase link failed, so all tests in this file will automatically fail."
+    }
+} else {
+    remote_exec build "ld /usr/ccs/lib/crt0.o ${binfile}.o -lcl -lpthread  -lc /opt/langtools/lib/end.o -o ${binfile}"
+}
+#remote_exec build "ld /usr/ccs/lib/crt0.o ${binfile}.o -lcl -lpthread  -lc /opt/langtools/lib/end.o -o ${binfile}"
+
+
+
+# Thread stuff is _slow_; prepare for long waits.
+#
+set oldtimeout $timeout
+set timeout [expr "$timeout + 300"]
+set oldverbose $verbose
+#set verbose 40
+
+# Further, this test has some "null" lines designed
+# to consume output from gdb that was too late to be
+# matched (sequence is "gdb_test" sends; timeout and
+# on to next send; result finally comes in; mismatch).
+#
+# The null command is 'gdb_test "p \$pc" ".*" ""'
+#
+# NOTE: to pass a literal "$", "/" or "*" (etc.) to gdb_test, 
+#       remember that the pattern will be escaped once and 
+#       $-evaluated twice:
+#
+#          "\\\*" matches "\*"
+#          "\$"  matches "$"
+#
+proc fix_timeout {} {
+    gdb_test "p \$pc" ".*" ""
+}
+
+#=========================
+#
+# Simple sanity test first.
+#
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+# First, step in the main thread.
+#
+gdb_test "b do_pass" ".*Breakpoint 1.*" ""
+gdb_test "r" ".*Breakpoint 1.*do_pass.*" ""
+
+# Breaks as well as nexts to make
+# sure we can handle simultaneous hit
+# of bpt and step, as well as stepping
+# past bpts.
+#
+gdb_test "tb 87" ".*Breakpoint 2.*" ""
+gdb_test "tb 91" ".*Breakpoint 3.*" ""
+gdb_test "tb 96" ".*Breakpoint 4.*" ""
+gdb_test "tb 113" ".*Breakpoint 5.*" ""
+gdb_test "c" ".*do_pass.*87.*" "87"
+gdb_test "n" ".*do_pass.*91.*" "n"
+
+# This only gets a number, as it doesn't
+# hit a bpt.
+#
+gdb_test "n" ".*95.*" "n"
+
+gdb_test "n" ".*do_pass.*96.*" "n"
+gdb_test "c" ".*do_pass.*113.*" "c"
+gdb_test "c" ".*Program exited normally.*" "c"
+
+# Now step in a thread
+#
+gdb_test "r" ".*Breakpoint.*do_pass.*" "do_pass"
+gdb_test "until 87" ".*do_pass.*87.*" "until"
+gdb_test "thr 4" ".*Switching to thread 4.*spin.*56.*" "switch"
+gdb_test "tb 60 thr 4" ".*Breakpoint.*" ""
+
+# If we do "next" now, all the other threads 
+# can finish!
+#
+gdb_test "n"    ".*spin.*60.*" ""
+gdb_test "i th" ".*\\\* 4 sys.*spin.*1 sys.*do_pass.*" "still in 4"
+
+# Done!
+#
+gdb_exit
+
+set timeout $oldtimeout
+set verbose $oldverbose
+
+# execute_anywhere "rm -f ${binfile}"
+#
+return 0
+
