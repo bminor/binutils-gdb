@@ -1,3 +1,9 @@
+2000-06-20  DJ Delorie  <dj@cygnus.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Revert change from
+	Sept 1999; RVA relocs need to be treated more like DIR32 relocs
+	for cygwin import libraries to work properly.
+
 2000-06-20  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am: Rebuild dependency.
