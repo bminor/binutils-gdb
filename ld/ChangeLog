@@ -13,9 +13,11 @@ Wed Dec  1 14:04:20 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 Wed Dec  1 12:19:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* ldgram.y (OPTION_call_shared, OPTION_non_shared): New tokens.
+	* ldgram.y (OPTION_call_shared, OPTION_non_shared, OPTION_Oval):
+	New tokens.
 	(command_line_option): Accept and ignore them (for now).
-	* ldlex.l (<COMMAND>): Handle -non_shared and -call_shared.
+	* ldlex.l (<COMMAND>): Handle -non_shared, -call_shared, and -On
+	where n is a number.
 
 Mon Nov 22 14:14:29 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
