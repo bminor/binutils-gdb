@@ -1,5 +1,7 @@
 2004-04-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (vaxbsd-nat.o): New dependency.
+
 	* vax-tdep.h (vax_regnum): Add VAX_R0_REGNUM and VAX_R1_REGNUM.
 	* vax-tdep.c (vax_store_arguments): Remove struct_return and
 	struct_addr arguments.  Don't push return value address.
