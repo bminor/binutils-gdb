@@ -1,3 +1,7 @@
+2004-10-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.c (id_delayed): Remove prototype.
+
 2004-10-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* mips-tdep.h: Add MIPS_ZERO_REGNUM, MIPS_AT_REGNUM,

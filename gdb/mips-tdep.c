@@ -4943,8 +4943,6 @@ mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 
 /* Is this a branch with a delay slot?  */
 
-static int is_delayed (unsigned long);
-
 static int
 is_delayed (unsigned long insn)
 {
