@@ -1159,12 +1159,10 @@ m68k_ip_op (str, opP)
 		  case 'w':
 		  case 'W':
 		    opP->isiz = 2;
-		    strend -= 2;
 		    break;
 		  case 'l':
 		  case 'L':
 		    opP->isiz = 3;
-		    strend -= 2;
 		    break;
 		  }
 	      }
