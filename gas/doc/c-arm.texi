@@ -131,6 +131,7 @@ names are recognized:
 @code{armv5txm},
 @code{armv5te},
 @code{armv5texp},
+@code{armv6},
 @code{armv6j},
 @code{iwmmxt}
 and

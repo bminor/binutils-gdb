@@ -1,6 +1,7 @@
 2003-23-12  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_archs): Add armv6.
+	* doc/c-arm.texi: Document -march=armv6.
 
 2003-12-20  Nick Clifton  <nickc@redhat.com>
 
