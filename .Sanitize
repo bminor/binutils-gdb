@@ -52,7 +52,7 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	emacs emacs19 examples expect fileutils findutils flex
 	gas gawk gcc gdb gdbm gdbtest glob gperf gprof grep grez groff guile gzip
 	include inet install-sh ispell
-	ld less libg++ libgcc libgloss libiberty libio librx libstdc++
+	ld less libg++ libgcc libgloss libiberty libide libio librx libstdc++
 	m4 make mkinstalldirs mmalloc move-if-change newlib ncurses opcodes
 	pagas patch perl prms
 	rcs readline sed send-pr shellutils sim tar textutils time
@@ -106,7 +106,7 @@ else
 	keep_these_too="${keep_these_too} ${inet_files}"
 fi
 
-ide_files="libide vmake"
+ide_files="vmake"
 
 if (echo $* | grep keep\-ide > /dev/null); then
 	keep_these_too="${keep_these_too} ${ide_files}"

@@ -1,3 +1,9 @@
+Tue Dec  2 09:04:13 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (host_libs): Build libide all of the time, remove ide
+	sanitization for it.
+	(noconfigdirs): Remove libide from all places that set noconfigdirs.
+
 Mon Dec  1 10:53:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* configure: add all-libide to GDB_TK
