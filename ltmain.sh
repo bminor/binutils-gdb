@@ -1662,6 +1662,7 @@ fi\
 	addlibs="$convenience"
 	build_libtool_libs=no
       else
+	oldobjs="$objs"`$echo "X$libobjs " | $Xsed -e 's/[^   ]*\.a //g' -e 's/[^   ]*\.lib //g' -e "$los2o" -e 's/ $//g'`
 	addlibs="$old_convenience"
       fi
 
