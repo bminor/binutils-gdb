@@ -1,3 +1,8 @@
+Mon Jun 30 15:30:38 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* mips-tdep.c (mips_push_arguments): tweak alignment of small
+	structs passed in registers for little-endian non-EABI mode.
+
 Mon Jun 30 13:05:39 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* breakpoint.c (frame_in_dummy): use generic dummy if available.

@@ -1349,15 +1349,23 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		{
 		  CORE_ADDR regval = extract_address (val, partial_len);
 
-		  /* It's a simple argument being passed in a general
-		     register.
-		     If the argument length is smaller than the register size,
-		     we have to adjust the argument on big endian targets.
+		  /* A simple argument being passed in a general register.
+		     If the length is smaller than the register size, we
+		     have to adjust the alignment on big endian targets.  
+
+		     For structs, it appears that we have to 
+		     do the same even in little endian mode.
+
 		     But don't do this adjustment on EABI targets. */
-		  if (TARGET_BYTE_ORDER == BIG_ENDIAN
-		      && partial_len < MIPS_REGSIZE
-		      && !MIPS_EABI)
-		    regval <<= ((MIPS_REGSIZE - partial_len) * TARGET_CHAR_BIT);
+
+		  if (!MIPS_EABI &&
+		      TYPE_LENGTH (arg_type) < MIPS_REGSIZE &&
+		      (TARGET_BYTE_ORDER == BIG_ENDIAN ||
+		       typecode == TYPE_CODE_STRUCT    ||
+		       typecode == TYPE_CODE_UNION))
+		    regval <<= ((MIPS_REGSIZE - partial_len) * 
+				TARGET_CHAR_BIT);
+
 		  write_register (argreg, regval);
 		  argreg++;
     
@@ -1384,7 +1392,6 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 			      typecode == TYPE_CODE_UNION) &&
 			     len < MIPS_REGSIZE)
 		      longword_offset = MIPS_REGSIZE - len;
-
 		  write_memory (sp + stack_offset + longword_offset, 
 				val, partial_len);
 		  stack_offset += ROUND_UP (partial_len, MIPS_REGSIZE);
