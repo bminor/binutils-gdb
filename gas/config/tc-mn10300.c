@@ -152,12 +152,18 @@ static const struct reg_name r_registers[] =
   { "a1", 9 },
   { "a2", 10 },
   { "a3", 11 },
-  { "a0", 12 },
+  { "d0", 12 },
   { "d1", 13 },
   { "d2", 14 },
   { "d3", 15 },
   { "e0", 0 },
   { "e1", 1 },
+  { "e10", 10 },
+  { "e11", 11 },
+  { "e12", 12 },
+  { "e13", 13 },
+  { "e14", 14 },
+  { "e15", 15 },
   { "e2", 2 },
   { "e3", 3 },
   { "e4", 4 },
@@ -918,7 +924,7 @@ md_assemble (str)
 
   for(;;)
     {
-      const char *errmsg = NULL;
+      const char *errmsg = "Invalid opcode/operands";
       int op_idx;
       char *hold;
       int extra_shift = 0;
@@ -953,8 +959,6 @@ md_assemble (str)
 	      operand = &mn10300_operands[next_opindex];
 	      next_opindex = 0;
 	    }
-
-	  errmsg = NULL;
 
 	  while (*str == ' ' || *str == ',')
 	    ++str;
@@ -1256,6 +1260,20 @@ md_assemble (str)
 	      str = hold;
 	      goto error;
 	    }
+	  /* start-sanitize-am33 */
+	  else if (r_register_name (&ex))
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
+	    }
+	  else if (xr_register_name (&ex))
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
+	    }
+	  /* end-sanitize-am33 */
 	  else if (*str == ')' || *str == '(')
 	    {
 	      input_line_pointer = hold;
