@@ -125,6 +125,8 @@ DCL charmatrix ARRAY (0:255) CHAR INIT := [
   'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a'
 ];
 
+DCL xptr PTR INIT := ->int_high;
+
 booleans: PROC ();
 
 	DCL val1 BOOL := TRUE;

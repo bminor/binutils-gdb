@@ -61,6 +61,8 @@ proc do_tests {} {
     test_arrays
     test_strings
     test_structs
+
+    test_ptr
 }
 
 proc test_BOOL {} {
@@ -282,6 +284,11 @@ proc test_structs {} {
 	"type = STRUCT \\(+.*abool (BOOL|bool),.*nstruct simple_struct,.*aint (INT|int).*\\)+"
     gdb_test "print struct2" \
 	".* = \\\[.abool: TRUE, \.nstruct: \\\[\.abool: FALSE, \.aint: 456, \.astring: \"deadbeef\"\\\], \.aint: 789\\\]"
+}
+
+proc test_ptr {} {
+    # This is to test Cygnus PR 6932
+    gdb_test "print xptr->int" ".* = 32767"
 }
 
 # Check to see if we have an executable to test.  If not, then either we

@@ -1,3 +1,8 @@
+Wed Jun  7 17:52:38 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* chillvars.ch (xptr):  Declare new variable.
+	* chillvars.exp (test_ptr):  New function to test EXPR->MODENAME.
+
 Tue Mar 28 17:13:13 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* pr-6632.ch, pr-6632-grt.ch, pr-6632.exp, Makefile.in:  New test case.
