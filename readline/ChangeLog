@@ -1,3 +1,8 @@
+Thu Nov 16 15:39:05 1995  Geoffrey Noer <noer@cygnus.com>
+
+	* complete.c: Change WIN32 to __WIN32__, added #else return NULL
+	to end of that define.
+
 Tue Oct 31 10:38:58 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* display.c, parens.c, readline.c, rldefs.h: Change use of
