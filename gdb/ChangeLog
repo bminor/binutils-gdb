@@ -1,6 +1,8 @@
 Sun Mar 14 02:54:15 1993  John Gilmore  (gnu@cygnus.com)
 
-	* configure.in (m68k-adobe-*):  New config.
+	Support 68000 series without floating point.
+
+	* configure.in (m68000-*-{aout,elf,coff}):  New configs.
 	* tm-68k-nofp.h:  New file, lacks 68881 support.
 	* config/m68k-nofp.mt:  New file.
 
