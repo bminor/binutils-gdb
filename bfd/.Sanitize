@@ -113,7 +113,6 @@ syms.c
 targets.c
 tekhex.c
 trad-core.c
-trad-core.h
 
 Do-last:
 
