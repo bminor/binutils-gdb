@@ -38,27 +38,6 @@ cplus-dem.c
 go32.mh
 h8300.mt
 h8500.mt
-ho-ansi.h
-ho-decstatn.h
-ho-generic.h
-ho-go32.h
-ho-hppabsd.h
-ho-hppaosf.h
-ho-hpux.h
-ho-i386.h
-ho-i386aix.h
-ho-irix.h
-ho-mach3.h
-ho-mipsbsd.h
-ho-rs6000.h
-ho-sun3.h
-ho-sun386.h
-ho-sun4.h
-ho-sunos.h
-ho-sysv.h
-ho-vax.h
-ho-vsta.h
-ho-vms.h
 i386coff.mt
 m68k.mt
 m68kcoff.mt
@@ -145,6 +124,7 @@ te-sco386.h
 te-sun3.h
 te-sysv32.h
 vax-inst.h
+vms-conf.h
 z8k.mt
 
 Things-to-lose:
