@@ -116,6 +116,9 @@ static void set_asm_state PARAMS ((asm_state));
 static dvp_cpu cur_cpu;
 /* Record the current mach type.  */
 static void record_mach PARAMS ((dvp_cpu, int));
+/* Force emission of mach type label at next insn.
+   This isn't static as TC_START_LABEL uses it.  */
+int force_mach_label PARAMS ((void));
 /* Given a dvp_cpu value, return the STO_DVP value to use.  */
 static int cpu_sto PARAMS ((dvp_cpu, const char **));
 
@@ -235,9 +238,8 @@ md_begin ()
      This involves computing the hash chains.  */
   dvp_opcode_init_tables (0);
 
-  /* Set the current mach to an illegal value to force a label for the
-     first insn.  */
-  cur_cpu = DVP_UNKNOWN;
+  /* Force a mach type label for the first insn.  */
+  force_mach_label ();
 
   /* Initialize the parsing state.  */
   cur_state_index = 0;
@@ -1076,6 +1078,17 @@ record_mach (cpu, force_next_p)
     cur_cpu = cpu;
 }
 
+/* Force emission of mach type label at next insn.
+   This isn't static as TC_START_LABEL uses it.
+   The result is the value of TC_START_LABEL.  */
+
+int
+force_mach_label ()
+{
+  cur_cpu = DVP_UNKNOWN;
+  return 1;
+}
+
 /* Push/pop the current parsing state.  */
 
 static void
@@ -1601,7 +1614,7 @@ create_label (prefix, name)
 /* Create a label named by concatenating PREFIX to NAME,
    and define it as `.'.
    STO, if non-zero, is the st_other value to assign to this label.
-   If STO is zero `cur_cpu' is set to DVP_UNKNOWN to force record_mach to
+   If STO is zero `cur_cpu', call force_mach_label to force record_mach to
    emit a cpu label.  Otherwise the disassembler gets confused.  */
 
 static symbolS *
@@ -1621,7 +1634,7 @@ create_colon_label (sto, prefix, name)
   if (sto)
     S_SET_OTHER (result, sto);
   else
-    cur_cpu = DVP_UNKNOWN;
+    force_mach_label ();
   free (fullname);
   return result;
 }
@@ -2102,6 +2115,9 @@ s_dmadata (ignore)
   line_label = colon (name);	/* user-defined label */
   dma_data_name = S_GET_NAME (line_label);
   *input_line_pointer = c;
+
+  /* Force emission of a machine type label for the next insn.  */
+  force_mach_label ();
 
   demand_empty_rest_of_line ();
 }
