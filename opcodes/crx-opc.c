@@ -357,7 +357,7 @@ const inst crx_instruction[] =
   /* opc12 r rbase ridx scl2 disps22 */							 \
   {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH, {{rbase_ridx_scl2_dispu22,0}, {regr,16}}}
 
-  LD_REG_INST ("loadb", 0x0, 0x0,   DISPUB4),
+  LD_REG_INST ("loadb", 0x0, 0x0, DISPUB4),
   LD_REG_INST ("loadw", 0x1, 0x1, DISPUW4),
   LD_REG_INST ("loadd", 0x2, 0x2, DISPUD4),
 
@@ -439,42 +439,44 @@ const inst crx_instruction[] =
   CSTBIT_INST ("cbitw", i4, 0x382, 0x10, 20, 0xBD),
   CSTBIT_INST ("cbitd", i5, 0x1C3, 0x8,  21, 0x7B),
   {"cbitd",   2, 0x300838,  8, CSTBIT_INS, {{regr,4}, {regr,0}}},
-  {"cbitd",   2, 0x18047B,  9, CSTBIT_INS, {{i5,4},	 {regr,0}}},
+  {"cbitd",   2, 0x18047B,  9, CSTBIT_INS, {{i5,4}, {regr,0}}},
 
   CSTBIT_INST ("sbitb", i3, 0x701, 0x20, 19, 0x1FD),
   CSTBIT_INST ("sbitw", i4, 0x383, 0x10, 20, 0xBE),
   CSTBIT_INST ("sbitd", i5, 0x1C4, 0x8,  21, 0x7C),
   {"sbitd",   2, 0x300839,  8, CSTBIT_INS, {{regr,4}, {regr,0}}},
-  {"sbitd",   2, 0x18047C,  9, CSTBIT_INS, {{i5,4},	 {regr,0}}},
+  {"sbitd",   2, 0x18047C,  9, CSTBIT_INS, {{i5,4}, {regr,0}}},
 
   CSTBIT_INST ("tbitb", i3, 0x702, 0x20, 19, 0x1FE),
   CSTBIT_INST ("tbitw", i4, 0x384, 0x10, 20, 0xBF),
   CSTBIT_INST ("tbitd", i5, 0x1C5, 0x8,  21, 0x7D),
   {"tbitd",   2, 0x30083A,  8, CSTBIT_INS, {{regr,4}, {regr,0}}},
-  {"tbitd",   2, 0x18047D,  9, CSTBIT_INS, {{i5,4},	 {regr,0}}},
+  {"tbitd",   2, 0x18047D,  9, CSTBIT_INS, {{i5,4}, {regr,0}}},
 
 /* Instructions including a register list (opcode is represented as a mask).  */
 #define  REGLIST_INST(NAME, OPC) \
   /* opc12 r mask16 */					  \
   {NAME,  2, OPC, 20, REG_LIST, {{regr,16}, {i16,0}}}
 
-  REG1_INST ("getrfid",	 0xFF9),
-  REG1_INST ("setrfid",   0xFFA),
+  REG1_INST ("getrfid",	0xFF9),
+  REG1_INST ("setrfid",	0xFFA),
 
   REGLIST_INST ("push",	 0x346),
   REG1_INST ("push",	 0xFFB),
+  REGLIST_INST ("pushx", 0x347),
 
   REGLIST_INST ("pop",	 0x324),
   REG1_INST ("pop",	 0xFFC),
+  REGLIST_INST ("popx",	 0x327),
 
   REGLIST_INST ("popret", 0x326),
   REG1_INST ("popret",    0xFFD),
 
-  REGLIST_INST ("loadm",	 0x324),
+  REGLIST_INST ("loadm", 0x324),
   REGLIST_INST ("loadma", 0x325),
-  REGLIST_INST ("popma",	 0x325),
+  REGLIST_INST ("popma", 0x325),
 
-  REGLIST_INST ("storm",	 0x344),
+  REGLIST_INST ("storm", 0x344),
   REGLIST_INST ("storma", 0x345),
   REGLIST_INST ("pushma", 0x345),
 
@@ -560,7 +562,7 @@ const reg_entry crx_regtab[] =
   REG(ra, 0xe, CRX_R_REGTYPE),
   REG(sp, 0xf, CRX_R_REGTYPE),
 
-/* Build a user register ur<N>.  */
+/* Build a user register u<N>.  */
 #define REG_U(N)    REG(CONCAT2(u,N), 0x80 + N, CRX_U_REGTYPE)
 
   REG_U(0),  REG_U(1),  REG_U(2),  REG_U(3),
@@ -607,7 +609,7 @@ const reg_entry crx_copregtab[] =
   REG_C(8),  REG_C(9),	REG_C(10), REG_C(11),
   REG_C(12), REG_C(13), REG_C(14), REG_C(15),
 
-/* Build a Coprocessor Special register c<N>.  */
+/* Build a Coprocessor Special register cs<N>.  */
 #define REG_CS(N)    REG(CONCAT2(cs,N), N, CRX_CS_REGTYPE)
 
   REG_CS(0),  REG_CS(1),  REG_CS(2),  REG_CS(3),

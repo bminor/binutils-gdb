@@ -77,7 +77,10 @@ static const struct crx_reloc_map crx_reloc_map[R_CRX_MAX] =
   {BFD_RELOC_CRX_NUM16,	    R_CRX_NUM16},
   {BFD_RELOC_CRX_NUM32,	    R_CRX_NUM32},
   {BFD_RELOC_CRX_IMM16,	    R_CRX_IMM16},
-  {BFD_RELOC_CRX_IMM32,	    R_CRX_IMM32}
+  {BFD_RELOC_CRX_IMM32,	    R_CRX_IMM32},
+  {BFD_RELOC_CRX_SWITCH8,   R_CRX_SWITCH8},
+  {BFD_RELOC_CRX_SWITCH16,  R_CRX_SWITCH16},
+  {BFD_RELOC_CRX_SWITCH32,  R_CRX_SWITCH32}
 };
 
 static reloc_howto_type crx_elf_howto_table[] =
@@ -332,7 +335,58 @@ static reloc_howto_type crx_elf_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,  		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE)			/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
+ 
+  /* An 8 bit switch table entry.  This is generated for an expression
+     such as ``.byte L1 - L2''.  The offset holds the difference
+     between the reloc address and L2.  */
+  HOWTO (R_CRX_SWITCH8,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_CRX_SWITCH8",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xff,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  /* A 16 bit switch table entry.  This is generated for an expression
+     such as ``.word L1 - L2''.  The offset holds the difference
+     between the reloc address and L2.  */
+  HOWTO (R_CRX_SWITCH16,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_CRX_SWITCH16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  /* A 32 bit switch table entry.  This is generated for an expression
+     such as ``.long L1 - L2''.  The offset holds the difference
+     between the reloc address and L2.  */
+  HOWTO (R_CRX_SWITCH32,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_CRX_SWITCH32",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE)			/* pcrel_offset */
 };
 
 /* Retrieve a howto ptr using a BFD reloc_code.  */
@@ -406,6 +460,13 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
        return bfd_reloc_ok;
        break;
 
+     case R_CRX_SWITCH8:
+     case R_CRX_SWITCH16:
+     case R_CRX_SWITCH32:
+       /* We only care about the addend, where the difference between 
+	  expressions is kept.  */
+       Rvalue = 0;
+       
      default:
        break;
     }
@@ -483,7 +544,7 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
 	 Rvalue |= (((bfd_get_16 (input_bfd, hit_data) << 16) |
 		      bfd_get_16 (input_bfd, hit_data + 2)) & ~howto->dst_mask);
 
-       if (r_type == R_CRX_NUM32)
+       if (r_type == R_CRX_NUM32 || r_type == R_CRX_SWITCH32)
 	 /* Relocation on DATA is purely little-endian, that is, for a
 	    multi-byte datum, the lowest address in memory contains the
 	    little end of the datum, that is, the least significant byte.
@@ -562,7 +623,40 @@ elf32_crx_relax_delete_bytes (bfd *abfd, asection *sec,
       if (isym->st_shndx == sec_shndx
 	  && isym->st_value > addr
 	  && isym->st_value < toaddr)
-	isym->st_value -= count;
+	{
+	  /* Adjust the addend of SWITCH relocations in this section, 
+	     which reference this local symbol.  */
+	  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
+	    {
+	      unsigned long r_symndx;
+	      Elf_Internal_Sym *rsym;
+	      bfd_vma addsym, subsym;
+
+	      /* Skip if not a SWITCH relocation.  */
+	      if (ELF32_R_TYPE (irel->r_info) != (int) R_CRX_SWITCH8
+		  && ELF32_R_TYPE (irel->r_info) != (int) R_CRX_SWITCH16
+		  && ELF32_R_TYPE (irel->r_info) != (int) R_CRX_SWITCH32)
+		  continue;
+
+	      r_symndx = ELF32_R_SYM (irel->r_info);
+	      rsym = (Elf_Internal_Sym *) symtab_hdr->contents + r_symndx;
+
+	      /* Skip if not the local adjusted symbol.  */
+	      if (rsym != isym)
+		continue;
+
+	      addsym = isym->st_value;
+	      subsym = addsym - irel->r_addend;
+
+	      /* Fix the addend only when -->> (addsym > addr >= subsym).  */
+	      if (subsym <= addr)
+		irel->r_addend -= count;
+	      else
+		continue;
+	    }
+
+	  isym->st_value -= count;
+	}
     }
 
   /* Now adjust the global symbols defined in this section.  */

@@ -1918,9 +1918,8 @@ ppc_frob_file_before_adjust ()
       free (dotname);
       if (dotsym != NULL && (symbol_used_p (dotsym)
 			     || symbol_used_in_reloc_p (dotsym)))
-	{
-	  symbol_mark_used (symp);
-	}
+	symbol_mark_used (symp);
+
     }
 
   /* Don't emit .TOC. symbol.  */
@@ -4843,7 +4842,7 @@ ppc_frob_symbol (sym)
      table.  */
   if (! symbol_used_in_reloc_p (sym)
       && ((symbol_get_bfdsym (sym)->flags & BSF_SECTION_SYM) != 0
-	  || (! S_IS_EXTERNAL (sym)
+	  || (! (S_IS_EXTERNAL (sym) || S_IS_WEAK (sym))
 	      && ! symbol_get_tc (sym)->output
 	      && S_GET_STORAGE_CLASS (sym) != C_FILE)))
     return 1;
@@ -4909,7 +4908,7 @@ ppc_frob_symbol (sym)
 	}
     }
 
-  if (! S_IS_EXTERNAL (sym)
+  if (! (S_IS_EXTERNAL (sym) || S_IS_WEAK (sym))
       && (symbol_get_bfdsym (sym)->flags & BSF_SECTION_SYM) == 0
       && S_GET_STORAGE_CLASS (sym) != C_FILE
       && S_GET_STORAGE_CLASS (sym) != C_FCN

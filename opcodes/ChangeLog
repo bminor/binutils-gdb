@@ -1,3 +1,7 @@
+2004-07-27  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-opc.c: Add popx,pushx insns. Indent code, fix comments.
+
 2004-07-22  Nick Clifton  <nickc@redhat.com>
 
 	PR/280

@@ -48,6 +48,10 @@ extern const struct relax_type md_relax_table[];
    linker relaxations easier.  */
 #define tc_fix_adjustable(fixP)	0
 
+/* We need to force out some relocations when relaxing.  */
+#define TC_FORCE_RELOCATION(FIXP) crx_force_relocation (FIXP)
+extern int crx_force_relocation (struct fix *);
+
 /* Fixup debug sections since we will never relax them.  */
 #define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_ALLOC)
 
@@ -58,8 +62,8 @@ extern const struct relax_type md_relax_table[];
 /* This is called by emit_expr when creating a reloc for a cons.
    We could use the definition there, except that we want to handle 
    the CRX reloc type specially, rather than the BFD_RELOC type.  */
-#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) \
-      fix_new_exp (FRAG, OFF, (int)LEN, EXP, 0, \
+#define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP) \
+      fix_new_exp (FRAG, OFF, (int) LEN, EXP, 0, \
 	LEN == 1 ? BFD_RELOC_CRX_NUM8 \
 	: LEN == 2 ? BFD_RELOC_CRX_NUM16 \
 	: LEN == 4 ? BFD_RELOC_CRX_NUM32 \

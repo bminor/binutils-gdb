@@ -292,6 +292,34 @@ reset_vars (char *op, ins *crx_ins)
   strcpy (ins_parse, op);
 }
 
+/* This macro decides whether a particular reloc is an entry in a
+   switch table.  It is used when relaxing, because the linker needs
+   to know about all such entries so that it can adjust them if
+   necessary.  */
+
+#define SWITCH_TABLE(fix)				  \
+  (   (fix)->fx_addsy != NULL				  \
+   && (fix)->fx_subsy != NULL				  \
+   && S_GET_SEGMENT ((fix)->fx_addsy) ==		  \
+      S_GET_SEGMENT ((fix)->fx_subsy)			  \
+   && S_GET_SEGMENT (fix->fx_addsy) != undefined_section  \
+   && (   (fix)->fx_r_type == BFD_RELOC_CRX_NUM8	  \
+       || (fix)->fx_r_type == BFD_RELOC_CRX_NUM16	  \
+       || (fix)->fx_r_type == BFD_RELOC_CRX_NUM32))
+
+/* See whether we need to force a relocation into the output file.
+   This is used to force out switch and PC relative relocations when
+   relaxing.  */
+
+int
+crx_force_relocation (fixS *fix)
+{
+  if (generic_force_reloc (fix) || SWITCH_TABLE (fix))
+    return 1;
+
+  return 0;
+}
+
 /* Generate a relocation entry for a fixup.  */
 
 arelent *
@@ -306,15 +334,42 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
   reloc->addend = fixP->fx_offset;
 
   if (fixP->fx_subsy != NULL)
-    /* We don't resolve difference expressions.  */
-    as_bad_where (fixP->fx_file, fixP->fx_line,
-		  _("can't resolve `%s' {%s section} - `%s' {%s section}"),
-		  fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
-		  segment_name (fixP->fx_addsy
-				? S_GET_SEGMENT (fixP->fx_addsy)
-				: absolute_section),
-		  S_GET_NAME (fixP->fx_subsy),
-		  segment_name (S_GET_SEGMENT (fixP->fx_addsy)));
+    {
+      if (SWITCH_TABLE (fixP))
+	{
+	  /* Keep the current difference in the addend.  */
+	  reloc->addend = (S_GET_VALUE (fixP->fx_addsy)
+			   - S_GET_VALUE (fixP->fx_subsy) + fixP->fx_offset);
+      
+	  switch (fixP->fx_r_type)
+	    {
+	    case BFD_RELOC_CRX_NUM8:
+	      fixP->fx_r_type = BFD_RELOC_CRX_SWITCH8;
+	      break;
+	    case BFD_RELOC_CRX_NUM16:
+	      fixP->fx_r_type = BFD_RELOC_CRX_SWITCH16;
+	      break;
+	    case BFD_RELOC_CRX_NUM32:
+	      fixP->fx_r_type = BFD_RELOC_CRX_SWITCH32;
+	      break;
+	    default:
+	      abort ();
+	      break;
+	    }
+	}
+      else
+	{
+	  /* We only resolve difference expressions in the same section.  */
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("can't resolve `%s' {%s section} - `%s' {%s section}"),
+			fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
+			segment_name (fixP->fx_addsy
+				      ? S_GET_SEGMENT (fixP->fx_addsy)
+				      : absolute_section),
+			S_GET_NAME (fixP->fx_subsy),
+			segment_name (S_GET_SEGMENT (fixP->fx_addsy)));
+	}
+    }
 
   assert ((int) fixP->fx_r_type > 0);
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);

@@ -1,3 +1,11 @@
+2004-07-27  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* reloc.c: Add BFD_RELOC_CRX_SWITCH8, BFD_RELOC_CRX_SWITCH16,
+	BFD_RELOC_CRX_SWITCH32.
+	* bfd-in2.h: Regenerate.
+	* elf32-crx.c: Support relocation/relaxation of
+	BFD_RELOC_CRX_SWITCH* types.
+
 2004-07-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c: Correct "Linker stubs" comment.

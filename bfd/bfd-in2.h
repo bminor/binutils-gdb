@@ -3463,6 +3463,9 @@ This is the 5 bits of a value.  */
   BFD_RELOC_CRX_NUM32,
   BFD_RELOC_CRX_IMM16,
   BFD_RELOC_CRX_IMM32,
+  BFD_RELOC_CRX_SWITCH8,
+  BFD_RELOC_CRX_SWITCH16,
+  BFD_RELOC_CRX_SWITCH32,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */

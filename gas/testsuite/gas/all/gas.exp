@@ -85,12 +85,13 @@ proc do_930509a {} {
     if !$x then { fail $testname }
 }
 
-# This test is meaningless for the PA; the difference of two symbols
+# This test is meaningless for the PA and CRX; the difference of two symbols
 # must not be resolved by the assembler.
 # C54x assembler (for compatibility) does not allow differences between
 # forward references
 # C30 counts a four byte offset as a difference of one.
 if { ![istarget hppa*-*-*] &&
+     ![istarget  crx*-*-*] &&
      ![istarget *c30*-*-*] &&
      ![istarget *c4x*-*-*] &&
      ![istarget *c54x*-*-*] } then {

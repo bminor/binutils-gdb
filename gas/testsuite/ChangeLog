@@ -1,3 +1,7 @@
+2004-07-27  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* gas/all/gas.exp (do_930509a): Disable test for crx.
+
 2004-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/x86-64-inval.l: Remove the leading `+'.
