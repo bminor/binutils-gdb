@@ -1,3 +1,11 @@
+Tue Jul  7 00:24:52 1992  Fred Fish  (fnf@cygnus.com)
+
+	* config.sub:  Add es1800 (m68k-ericsson-es1800).
+
+Mon Jun 22 23:43:48 1992  Per Bothner  (bothner@cygnus.com)
+
+	* configure:  Minor $subdir-related fixes.
+
 Mon Jun 22 18:30:26 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* configure: fix various problems with propogating
