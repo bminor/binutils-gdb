@@ -1,3 +1,8 @@
+2005-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (display_debug_loc): Print out offset for end of
+	list.
+
 2005-02-18  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (TOOL_PROGS): Add objdump.

@@ -9490,7 +9490,10 @@ display_debug_loc (Elf_Internal_Shdr *section,
 	      start += pointer_size;
 
 	      if (begin == 0 && end == 0)
-		break;
+		{
+		  printf (_("    %8.8lx <End of list>\n"), offset);
+		  break;
+		}
 
 	      /* Check base address specifiers.  */
 	      if (begin == -1UL && end != -1UL)
@@ -9524,8 +9527,6 @@ display_debug_loc (Elf_Internal_Shdr *section,
 
 	      start += length;
 	    }
-
-	  fputs (_("  <End of list>\n"), stdout);
 	}
     }
   return 1;
