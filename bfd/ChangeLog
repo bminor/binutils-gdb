@@ -1,3 +1,14 @@
+Fri Oct 11 12:33:36 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* bfd-in.h: Added more macros to COFF_SWAP_TABLE.
+	* bfd.c: Added macros to enable gas to swap coff records.
+	* coffcode.h: Make the coff_swap_*_out routines return the number
+	of bytes swapped, and cleaned up their prototypes.
+	* configure.in: Added ebmon/coff support
+	* ecoff.c: Changed null definitions of coff_swap_*_out to conform
+	to new prototypes
+	* targets.c: Added new entry points for coff swapping
+
 Fri Oct 11 03:01:52 1991  John Gilmore  (gnu at cygnus.com)
 
 	Restructure configuration scheme for bfd, binutils, ld.

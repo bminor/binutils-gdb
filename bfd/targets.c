@@ -277,6 +277,46 @@ $       bfd            *abfd,
 $       PTR            ext,
 $       PTR             in));
 $
+
+Special entry points for gas to swap coff parts
+
+$ SDEF(unsigned int, _bfd_coff_swap_aux_out,(
+$       bfd   	*abfd,
+$       PTR	in,
+$       int    	type,
+$       int    	class,
+$       PTR    	ext));
+$
+$ SDEF(unsigned int, _bfd_coff_swap_sym_out,(
+$      bfd      *abfd,
+$      PTR	in,
+$      PTR	ext));
+$
+$ SDEF(unsigned int, _bfd_coff_swap_lineno_out,(
+$      	bfd   	*abfd,
+$      	PTR	in,
+$	PTR	ext));
+$
+$ SDEF(unsigned int, _bfd_coff_swap_reloc_out,(
+$      	bfd     *abfd,
+$     	PTR	src,
+$	PTR	dst));
+$
+$ SDEF(unsigned int, _bfd_coff_swap_filehdr_out,(
+$      	bfd  	*abfd,
+$	PTR 	in,
+$	PTR 	out));
+$
+$ SDEF(unsigned int, _bfd_coff_swap_aouthdr_out,(
+$      	bfd 	*abfd,
+$	PTR 	in,
+$	PTR	out));
+$
+$ SDEF(unsigned int, _bfd_coff_swap_scnhdr_out,(
+$      	bfd  	*abfd,
+$      	PTR	in,
+$	PTR	out));
+$
 $} bfd_target;
 
 *---
