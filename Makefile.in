@@ -45,7 +45,7 @@ GDB_NLM_DEPS =
 
 SHELL = /bin/sh
 
-INSTALL = $$s/install.sh -c
+INSTALL = $$s/install-sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
@@ -162,7 +162,7 @@ REALLY_SET_LIB_PATH = \
   export $(RPATH_ENVVAR);
 
 ALL = all.normal
-INSTALL_TARGET = install-dirs \
+INSTALL_TARGET = installdirs \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
@@ -954,7 +954,7 @@ inet-install:
 # the fixed header files.
 .PHONY: install-no-fixedincludes
 install-no-fixedincludes: \
-	install-dirs \
+	installdirs \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
@@ -1031,7 +1031,7 @@ $(CROSS_CHECK_MODULES):
 # This rule is used to install the modules which use FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
 .PHONY: $(INSTALL_MODULES)
-$(INSTALL_MODULES): install-dirs
+$(INSTALL_MODULES): installdirs
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
@@ -1169,7 +1169,7 @@ $(CHECK_TARGET_MODULES):
 # TARGET_FLAGS_TO_PASS.  To build a target install-X means to cd to X
 # and make install.
 .PHONY: $(INSTALL_TARGET_MODULES)
-$(INSTALL_TARGET_MODULES): install-dirs
+$(INSTALL_TARGET_MODULES): installdirs
 	@dir=`echo $@ | sed -e 's/install-target-//'`; \
 	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
@@ -1276,7 +1276,7 @@ install-gcc:
 # This rule is used to install the modules which use FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
 .PHONY: install-dosrel
-install-dosrel: install-dirs info
+install-dosrel: installdirs info
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
@@ -1381,24 +1381,9 @@ install-target: $(INSTALL_TARGET_MODULES)
 MAKEDIRS= \
 	$(prefix) \
 	$(exec_prefix)
-.PHONY: install-dirs
-install-dirs:
-	@for i in .. $(MAKEDIRS) ; do \
-	    if [ x$$i != x.. ]; then \
-		echo Making $$i... ; \
-		parent=`echo $$i | sed -e 's@/[^/]*$$@@' | sed -e 's@^$$@/@'`; \
-		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi ; \
-		if [ ! -d $$i ] ; then \
-			if mkdir $$i ; then \
-				true ; \
-			else \
-				exit 1 ; \
-			fi ; \
-		else \
-			true ; \
-		fi ; \
-	    else true; fi; \
-	done
+.PHONY: installdirs
+installdirs: mkinstalldirs
+	$(srcdir)/mkinstalldirs $(MAKEDIRS)
 
 dir.info: do-install-info
 	if [ -f $(srcdir)/texinfo/gen-info-dir ] ; then \
@@ -1435,7 +1420,7 @@ Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 DEVO_SUPPORT= README Makefile.in configure configure.in \
 	config.guess config.sub config move-if-change \
 	mpw-README mpw-build.in mpw-config.in mpw-configure \
-	COPYING COPYING.LIB install.sh config-ml.in symlink-tree
+	COPYING COPYING.LIB install-sh config-ml.in symlink-tree
 
 # Files in devo/etc used in any net release.
 # ChangeLog omitted because it may refer to files which are not in this

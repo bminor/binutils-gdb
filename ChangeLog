@@ -1,4 +1,14 @@
+Tue Apr 15 12:21:07 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mkinstalldirs: New file, copied from automake.
+	* Makefile.in (installdirs): Rename from install-dirs.  Use
+	mkinstalldirs.  Change all users.
+
 Mon Apr 14 11:21:38 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* install-sh: Rename from install.sh.
+	* Makefile.in (INSTALL): Change install.sh to install-sh.
+	(DEVO_SUPPORT): Likewise.
 
 	* configure: Use ${config_shell} with ${moveifchange}.  From Thomas
 	Graichen <graichen@rzpd.de>.
