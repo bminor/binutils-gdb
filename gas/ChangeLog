@@ -1,3 +1,10 @@
+Sun Mar 16 13:49:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (symbol_new): Don't call debug_verify_symchain.
+	(symbol_append): Set sy_next and sy_previous when adding a single
+	symbol to an empty list.  Call debug_verify_symchain.
+	(verify_symbol_chain): Use assert, not know.
+
 Sat Mar 15 20:27:12 1997  Fred Fish  <fnf@cygnus.com>
 
 	* NEWS: Note BeOS support.
