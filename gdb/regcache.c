@@ -1707,10 +1707,10 @@ void
 _initialize_regcache (void)
 {
   regcache_descr_handle = register_gdbarch_data (init_regcache_descr);
-  REGISTER_GDBARCH_SWAP (current_regcache);
-  register_gdbarch_swap (&deprecated_registers, sizeof (deprecated_registers), NULL);
-  register_gdbarch_swap (&deprecated_register_valid, sizeof (deprecated_register_valid), NULL);
-  register_gdbarch_swap (NULL, 0, build_regcache);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (current_regcache);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_registers);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_register_valid);
+  deprecated_register_gdbarch_swap (NULL, 0, build_regcache);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   "Force gdb to flush its register cache (maintainer command)");

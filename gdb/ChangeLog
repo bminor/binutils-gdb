@@ -1,5 +1,17 @@
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (deprecated_register_gdbarch_swap): Rename
+	register_gdbarch_swap.
+	(DEPRECATED_REGISTER_GDBARCH_SWAP): Rename REGISTER_GDBARCH_SWAP.
+	* f-lang.c (_initialize_f_language): Update, use
+	DEPRECATED_REGISTER_GDBARCH_SWAP.
+	* remote.c (_initialize_remote): Ditto.
+	* regcache.c (_initialize_regcache): Ditto.
+	* parse.c (_initialize_parse): Ditto.
+	* infrun.c (_initialize_infrun): Ditto.
+	* mi/mi-main.c (_initialize_mi_main): Ditto.
+	* gdbtypes.c (_initialize_gdbtypes): Ditto.
+	
 	* solib.c (solib_map_sections): Use bfd_set_cacheable instead of
 	poking .cacheable directly.
 	* symfile.c (symfile_bfd_open): Ditto.

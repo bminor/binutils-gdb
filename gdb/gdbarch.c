@@ -5483,9 +5483,9 @@ struct gdbarch_swap_registry gdbarch_swap_registry =
 };
 
 void
-register_gdbarch_swap (void *data,
-		       unsigned long sizeof_data,
-		       gdbarch_swap_ftype *init)
+deprecated_register_gdbarch_swap (void *data,
+		                  unsigned long sizeof_data,
+		                  gdbarch_swap_ftype *init)
 {
   struct gdbarch_swap_registration **rego;
   for (rego = &gdbarch_swap_registry.registrations;

@@ -1489,6 +1489,6 @@ mi_setup_architecture_data (void)
 void
 _initialize_mi_main (void)
 {
-  register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
-  register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (old_regs);
+  deprecated_register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }

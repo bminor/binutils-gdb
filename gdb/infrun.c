@@ -3997,8 +3997,8 @@ _initialize_infrun (void)
   int numsigs;
   struct cmd_list_element *c;
 
-  register_gdbarch_swap (&stop_registers, sizeof (stop_registers), NULL);
-  register_gdbarch_swap (NULL, 0, build_infrun);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (stop_registers);
+  deprecated_register_gdbarch_swap (NULL, 0, build_infrun);
 
   add_info ("signals", signals_info,
 	    "What debugger does when program gets various signals.\n\
