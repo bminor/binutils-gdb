@@ -66,17 +66,16 @@ srcdir = .
 # Common prefix for installation directories.
 # NOTE: This directory must exist when you start installation.
 destdir = /usr/local
-prefix = $(destdir)
 # Directory in which to put the executable for the command `gcc'
-bindir = $(prefix)/bin
+bindir = $(destdir)/H-$(host_alias)/T-$(target_alias)/bin
 # Directory in which to put the directories used by the compiler.
-libdir = $(prefix)/lib
+libdir = $(destdir)/H-$(host_alias)/T-$(target_alias)/lib
 # Directory in which the compiler finds executables, libraries, etc.
 libsubdir = $(libdir)/gcc/$(target)/$(version)
 # Number to put in man-page filename.
 manext = 1
 # Directory in which to put man pages.
-mandir = $(prefix)/man/man$(manext)
+mandir = $(destdir)/H-independent/man/man$(manext)
 
 # Additional system libraries to link with.
 CLIB=
@@ -451,7 +450,9 @@ realclean: cleanconfig
 
 # Copy the files into directories where they will be run.
 install: $(ALL)
-	$(INSTALL_PROGRAM) $(ALL) $(libsubdir)/as
+#	$(INSTALL_PROGRAM) $(ALL) $(libsubdir)/as
+	cp $(ALL) $(bindir)/as.new
+	mv -f $(bindir)/as.new $(bindir)/as
 
 # Create the installation directory.
 install-dir:
