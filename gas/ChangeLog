@@ -1,3 +1,10 @@
+Mon Feb 24 01:04:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* as.c: Remove -t option.
+	* configure, configure.in: Move itbl-cpu.h to mips specific configure.
+	* itbl-ops.h: Include itbl-cpu.h only if HAVE_ITBL_CPU is defined.
+	* config/tc-mips.h: Define HAVE_ITBL_CPU.
+
 Sun Feb 23 18:01:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* itbl-ops.c: Don't define DEBUG.

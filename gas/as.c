@@ -143,7 +143,7 @@ Options:\n\
 --statistics		print various measured statistics from execution\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
--t,--itbl INSTTBL	extend instruction set to include instructions\n\
+--itbl INSTTBL		extend instruction set to include instructions\n\
 			matching the specifications defined in file INSTTBL\n\
 -w			ignored\n\
 -X			ignored\n\

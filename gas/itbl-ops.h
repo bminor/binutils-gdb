@@ -21,7 +21,10 @@
 /* External functions, constants and defines for itbl support */
 
 #include "ansidecl.h"
+#include "targ-cpu.h"
+#ifdef HAVE_ITBL_CPU
 #include "itbl-cpu.h"
+#endif
 
 /* Defaults for definitions required by generic code */
 #ifndef ITBL_NUMBER_OF_PROCESSORS
