@@ -808,13 +808,6 @@ syms_from_objfile (struct objfile *objfile,
 
   (*objfile->sf->sym_read) (objfile, mainline);
 
-  if (!have_partial_symbols () && !have_full_symbols ())
-    {
-      wrap_here ("");
-      printf_filtered ("(no debugging symbols found)...");
-      wrap_here ("");
-    }
-
   /* Don't allow char * to have a typename (else would get caddr_t).
      Ditto void *.  FIXME: Check whether this is now done by all the
      symbol readers themselves (many of them now do), and if so remove
@@ -976,14 +969,6 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
   debugfile = find_separate_debug_file (objfile);
   if (debugfile)
     {
-      if (from_tty || info_verbose)
-        {
-          printf_filtered ("loading separate debug info from '%s'",
-                           debugfile);
-          wrap_here ("");
-          gdb_flush (gdb_stdout);
-        }
-
       if (addrs != NULL)
 	{
 	  objfile->separate_debug_objfile
@@ -1004,6 +989,13 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
       xfree (debugfile);
     }
   
+  if (!have_partial_symbols () && !have_full_symbols ())
+    {
+      wrap_here ("");
+      printf_filtered ("(no debugging symbols found)...");
+      wrap_here ("");
+    }
+
   if (from_tty || info_verbose)
     {
       if (post_add_symbol_hook)

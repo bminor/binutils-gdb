@@ -1,3 +1,13 @@
+2003-01-23  Jim Blandy  <jimb@redhat.com>
+
+	* symfile.c (syms_from_objfile): Don't print the "(no debugging
+	symbols found)" message here; we haven't checked for a separate
+	debug info file yet, so we don't know yet.
+	(symbol_file_add_with_addrs_or_offsets): Print it here, after
+	we've looked everywhere.  Also, there's no need to print a special
+	message when we're loading the separate debug info file: the one
+	symbol_file_add prints is fine.
+
 2003-01-23  Alexander Larsson <alexl@redhat.com>
 	    Jim Blandy  <jimb@redhat.com>
 
