@@ -7,6 +7,12 @@ Tue Jul  7 00:24:52 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config.sub:  Add es1800 (m68k-ericsson-es1800).
 
+Tue Jun 30 20:24:41 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* configure: Add program_suffix (parallel to program_prefix)
+	* Makefile.in: adjust directory-creting script for losing decstation
+	* .Sanitize: don't nuke byacc!
+
 Mon Jun 22 23:43:48 1992  Per Bothner  (bothner@cygnus.com)
 
 	* configure:  Minor $subdir-related fixes.
