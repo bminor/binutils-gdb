@@ -949,102 +949,13 @@ static int
 match_integer_literal ()
 {
   char *tokptr = lexptr;
-  int ival = 0;
-  int base = 0;
-  int digits = 0;
-  int temp;
+  int ival;
   
-  /* Look for an explicit base specifier, which is optional. */
-  
-  switch (*tokptr)
-    {
-    case 'd':
-    case 'D':
-      base = 10;
-      tokptr++;
-      break;
-    case 'b':
-    case 'B':
-      base = 2;
-      tokptr++;
-      break;
-    case 'h':
-    case 'H':
-      base = 16;
-      tokptr++;
-      break;
-    case 'o':
-    case 'O':
-      base = 8;
-      tokptr++;
-      break;
-    }
-  
-  /* If we found no explicit base then default to 10, otherwise ensure
-     that the character after the explicit base is a single quote. */
-  
-  if (base == 0)
-    {
-      base = 10;
-    }
-  else
-    {
-      if (*tokptr++ != '\'')
-	{
-	  return (0);
-	}
-    }
-  
-  /* Start looking for a value composed of valid digits as set by the base
-     in use.  Note that '_' characters are valid anywhere, in any quantity,
-     and are simply ignored.  Since we must find at least one valid digit,
-     or reject this token as an integer literal, we keep track of how many
-     digits we have encountered. */
-  
-  while (*tokptr != '\0')
-    {
-      temp = tolower (*tokptr);
-      tokptr++;
-      switch (temp)
-	{
-	case '_':
-	  continue;
-	case '0':  case '1':  case '2':  case '3':  case '4':
-	case '5':  case '6':  case '7':  case '8':  case '9':
-	  temp -= '0';
-	  break;
-	case 'a':  case 'b':  case 'c':  case 'd':  case 'e': case 'f':
-	  temp -= 'a';
-	  temp += 10;
-	  break;
-	default:
-	  temp = base;
-	  break;
-	}
-      if (temp < base)
-	{
-	  digits++;
-	  ival *= base;
-	  ival += temp;
-	}
-      else
-	{
-	  /* Found something not in domain for current base. */
-	  tokptr--;	/* Unconsume what gave us indigestion. */
-	  break;
-	}
-    }
-  
-  /* If we didn't find any digits, then we don't have a valid integer
-     literal, so reject the entire token.  Otherwise, set up the parser
-     variables, advance the current lexical scan pointer, and return the
-     INTEGER_LITERAL token. */
-  
-  if (digits == 0)
+  if (!decode_integer_literal (&ival, &tokptr))
     {
       return (0);
     }
-  else
+  else 
     {
       yylval.typed_val.val = ival;
       yylval.typed_val.type = builtin_type_int;
@@ -1173,7 +1084,6 @@ yylex ()
        token, such as a character literal. */
     switch (*lexptr)
       {
-	case '^':
 	case '\'':
 	  token = match_character_literal ();
 	  if (token != 0)
