@@ -1,5 +1,10 @@
 2003-05-02  Andrew Cagney  <cagney@redhat.com>
 
+	* std-regs.c (value_of_builtin_frame_pc_reg): Delete #ifdef
+	PC_REGNUM, re-indent.
+	* stack.c (frame_info): Use "pc" for the name of get_frame_pc when
+	PC_REGNUM isn't set.
+
 	* gdbarch.sh (REGISTER_SIZE, REGISTER_BYTES): Make optional.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* d10v-tdep.c (d10v_gdbarch_init): Do not set register_size,
