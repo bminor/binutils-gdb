@@ -1,3 +1,9 @@
+Wed Aug 12 15:50:57 1992  John Gilmore  (gnu@cygnus.com)
+
+	* readline.c (last_readline_init_file):  Fix typo made by Steve
+	Chamberlain/DJ Delorie.  Proper control file name is ~/.inputrc,
+	not ~/inputrc.
+
 Thu Jun 25 16:15:27 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.in:  Make bsd based systems use sysdep-obsd.h.
