@@ -1,3 +1,7 @@
+Thu Jan 25 11:21:46 1996  Raymond Jou  <rjou@mexican.cygnus.com>
+
+	* mpw-make.sed: Add a "stamps" target.
+
 Thu Jan 25 13:51:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (dump_headers, dump_section_header): Change objdump -h

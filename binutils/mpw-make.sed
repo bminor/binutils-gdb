@@ -69,6 +69,10 @@
 # Fix an over-eagerness.
 /echo.*WARNING.*This file/s/'.*'/' '/
 
+# Add a "stamps" target.
+$a\
+stamps \\Option-f stamp-under\
+
 /^install \\Option-f /,/^$/c\
 install \\Option-f  all install-only\
 \
