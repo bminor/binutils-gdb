@@ -1,5 +1,9 @@
 Thu Mar 31 11:52:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* reloc.c (bfd_reloc_code_real_type): Added BFD_RELOC_26 (from sef
+	and raeburn).
+	* bfd-in2.h: Rebuilt.
+
 	* nlm32-i386.c (nlm_i386_read_import): Null terminate the symbol
 	name.
 	* nlm32-alpha.c (nlm_alpha_read_import): Likewise.
