@@ -1,3 +1,7 @@
+Mon Aug  2 11:58:52 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* README:  Elaborate on gdb C++ support and cfront support.
+
 Mon Aug  2 11:30:57 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* i386lynx-nat.c, thread.c, thread.h:  Update copyrights.
