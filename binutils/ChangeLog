@@ -1,3 +1,8 @@
+2002-08-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_dynamic_segment): Put a newline after display
+	an unknown dynamic type.
+
 2002-08-16  Sivaguru Sankaridurg  <siva@eternal-systems.com>
 
 	* stabs.c (parse_stab_argtype): Pass length of physname to

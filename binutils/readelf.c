@@ -3850,13 +3850,13 @@ dump_ia64_unwind (aux)
       print_vma (tp->start.offset, PREFIX_HEX);
       fputc ('-', stdout);
       print_vma (tp->end.offset, PREFIX_HEX);
-      printf ("), info at +0x%lx\n",
+      printf ("], info at +0x%lx\n",
 	      (unsigned long) (tp->info.offset - aux->seg_base));
 
       head = aux->info + (tp->info.offset - aux->info_addr);
       stamp = BYTE_GET8 ((unsigned char *) head);
 
-      printf ("  v%u, flags=0x%lx (%s%s ), len=%lu bytes\n",
+      printf ("  v%u, flags=0x%lx (%s%s), len=%lu bytes\n",
 	      (unsigned) UNW_VER (stamp),
 	      (unsigned long) ((stamp & UNW_FLAG_MASK) >> 32),
 	      UNW_FLAG_EHANDLER (stamp) ? " ehandler" : "",
@@ -4650,11 +4650,13 @@ process_dynamic_segment (file)
 	  if (do_dynamic)
 	    {
 	      printf (_("Flags:"));
+
 	      if (entry->d_un.d_val == 0)
 		printf (_(" None\n"));
 	      else
 		{
 		  unsigned long int val = entry->d_un.d_val;
+
 		  if (val & DTF_1_PARINIT)
 		    {
 		      printf (" PARINIT");
@@ -4676,11 +4678,13 @@ process_dynamic_segment (file)
 	  if (do_dynamic)
 	    {
 	      printf (_("Flags:"));
+
 	      if (entry->d_un.d_val == 0)
 		printf (_(" None\n"));
 	      else
 		{
 		  unsigned long int val = entry->d_un.d_val;
+
 		  if (val & DF_P1_LAZYLOAD)
 		    {
 		      printf (" LAZYLOAD");
@@ -4707,6 +4711,7 @@ process_dynamic_segment (file)
 	      else
 		{
 		  unsigned long int val = entry->d_un.d_val;
+
 		  if (val & DF_1_NOW)
 		    {
 		      printf (" NOW");
@@ -4951,6 +4956,8 @@ process_dynamic_segment (file)
 		  putchar ('\n');
 		}
 	    }
+	  else
+	    putchar ('\n');
 	  break;
 	}
     }
