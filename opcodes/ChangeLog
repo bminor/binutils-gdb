@@ -1,3 +1,8 @@
+2002-02-15  Richard Henderson  <rth@redhat.com>
+
+	* alpha-opc.c (alpha_opcodes): Add simple pseudos for
+	lda, ldah, jmp, ret.
+
 2002-02-13  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* configure.in <bfd_sh_arc>: For sh-* and shl-*, enable sh64
