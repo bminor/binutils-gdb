@@ -1,9 +1,9 @@
 Wed Oct 27 11:48:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* config/tc-mips.c (macro_build): Handle '>' case (shift amount
-	between 32 and 63 for double shift instruction).
-	(mips_ip): Likewise.
-	(printInsn): Likewise.
+	* config/tc-mips.c (mips_ip): Handle '>' case (shift amount
+	between 32 and 63 for double shift instruction).  Do & 0x1f rather
+	than % 32.
+	(printInsn): Handle '>'.
 
 Tue Oct 26 16:58:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
