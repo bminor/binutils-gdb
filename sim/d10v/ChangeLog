@@ -1,3 +1,12 @@
+Mon Dec 16 13:39:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* interp.c (xfer_mem): Change unified memory to 0x0.
+
+Thu Nov 28 20:42:56 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_3E01): Fix tracing information.
+	(OP_300{0,1}): Do not propigate sign.
+
 Mon Nov 25 19:47:40 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config.in (WORDS_BIGENDIAN): Add.
