@@ -1,3 +1,229 @@
+Wed Nov  1 20:18:08 1995  Fred Fish  <fnf@cygnus.com>
+
+	* config/i386/tm-i386.h: New file containing generic i*86 target
+	definitions.
+	(TARGET_BYTE_ORDER): Moved here from tm-i386v.h.
+	(IEEE_FLOAT): Moved here from tm-i386v.h.
+	(START_INFERIOR_TRAPS_EXPECTED): Define default as 2.
+	(FUNCTION_START_OFFSET): Moved here from tm-i386v.h.
+	(SKIP_PROLOGUE): Moved here from tm-i386v.h.
+	(SAVED_PC_AFTER_CALL): Moved here from tm-i386v.h.
+	(INNER_THAN): Moved here from tm-i386v.h.
+	(BREAKPOINT): Moved here from tm-i386v.h.
+	(DECR_PC_AFTER_BREAK): Moved here from tm-i386v.h.
+	(ABOUT_TO_RETURN): Moved here from tm-i386v.h.
+	(REGISTER_SIZE): Moved here from tm-i386v.h.
+	(NUM_REGS): Moved here from tm-i386v.h.
+	(REGISTER_NAMES): Moved here from tm-i386v.h.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Moved here from tm-i386v.h.
+	(FP_REGNUM): Moved here from tm-i386v.h.
+	(SP_REGNUM): Moved here from tm-i386v.h.
+	(PC_REGNUM): Moved here from tm-i386v.h.
+	(PS_REGNUM): Moved here from tm-i386v.h.
+	(FP0_REGNUM):  Moved here from tm-i386aix.h.
+	(FPC_REGNUM):  Moved here from tm-sun386.h.
+	(REGISTER_BYTES):  Moved here from tm-i386aix.h.
+	(REGISTER_BYTE): Moved here from tm-i386aix.h.
+	(REGISTER_RAW_SIZE): Moved here from tm-i386aix.h.
+	(MAX_REGISTER_RAW_SIZE): Moved here from tm-i386aix.h.
+	(REGISTER_VIRTUAL_SIZE): Moved here from tm-i386aix.h.
+	(MAX_REGISTER_VIRTUAL_SIZE): Moved here from tm-i386aix.h.
+	(EXTRACT_RETURN_VALUE): Moved here from tm-i386aix.h.
+	(STORE_RETURN_VALUE):  Moved here from tm-i386aix.h.
+	(REGISTER_VIRTUAL_TYPE): Moved here from tm-i386v.h.
+	(STORE_STRUCT_RETURN): Moved here from tm-i386v.h.
+	(FRAME_CHAIN): Moved here from tm-i386v4.h.
+	(FRAMELESS_FUNCTION_INVOCATION): Moved here from tm-i386v4.h.
+	(FRAME_SAVED_PC): Moved here from tm-i386os9k.h
+	(FRAME_ARGS_ADDRESS): Moved here from tm-i386v.h.
+	(FRAME_LOCALS_ADDRESS): Moved here from tm-i386v.h.
+	(FRAME_NUM_ARGS): Moved here from tm-i386sun.h.
+	(FRAME_ARGS_SKIP): Moved here from tm-i386v.h.
+	(FRAME_FIND_SAVED_REGS): Moved here from tm-i386v.h.
+	(PUSH_DUMMY_FRAME): Moved here from tm-i386v.h.
+	(POP_FRAME): Moved here from tm-i386v.h.
+	(CALL_DUMMY, CALL_DUMMY_LENGTH, CALL_DUMMY_START_OFFSET, 
+	CALL_DUMMY_BREAKPOINT_OFFSET, FIX_CALL_DUMMY): Moved here from
+	tm-i386v.h
+	(print_387_control_word, print_387_status_word): Declare prototypes.
+	(struct frame_info, struct frame_saved_regs): Forward decls for
+	prototypes.
+	(SP_ARG0): Moved here from tm-i386v.h.
+
+	* config/i386/tm-i386v.h:
+	(i386/tm-i386.h): Include.
+	(TARGET_BYTE_ORDER): Remove.
+	(IEEE_FLOAT): Remove.
+	(START_INFERIOR_TRAPS_EXPECTED): Undef before redefine to 4.
+	(FUNCTION_START_OFFSET): Remove.
+	(SKIP_PROLOGUE): Remove.
+	(i386_skip_prologue): Remove prototype.
+	(SAVED_PC_AFTER_CALL): Remove.
+	(INNER_THAN): Remove.
+	(BREAKPOINT): Remove.
+	(DECR_PC_AFTER_BREAK): Remove.
+	(ABOUT_TO_RETURN): Remove.
+	(REGISTER_SIZE): Remove.
+	(NUM_REGS): Undef before redefine to 16 (no FP support).
+	(REGISTER_NAMES): Undef before redefine.
+	(FP_REGNUM, SP_REGNUM, PC_REGNUM, PS_REGNUM): Remove.
+	(REGISTER_BYTES): Undef before redefine.
+	(REGISTER_BYTE): Undef before redefine.
+	(REGISTER_RAW_SIZE): Undef before redefine.
+	(REGISTER_VIRTUAL_SIZE): Undef before redefine.
+	(MAX_REGISTER_RAW_SIZE): Undef before redefine.
+	(MAX_REGISTER_VIRTUAL_SIZE): Undef before redefine.
+	(REGISTER_VIRTUAL_TYPE): Undef before redefine.
+	(STORE_STRUCT_RETURN): Undef before redefine.
+	(EXTRACT_RETURN_VALUE): Undef before redefine.
+	(STORE_RETURN_VALUE): Undef before redefine.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Remove.
+	(FRAME_CHAIN): Undef before redefine.
+	(FRAMELESS_FUNCTION_INVOCATION): Undef before redefine.
+	(FRAME_SAVED_PC): Undef before redefine.
+	(FRAME_ARGS_ADDRESS): Remove.
+	(FRAME_LOCALS_ADDRESS): Remove.
+	(FRAME_NUM_ARGS): Undef before redefine.
+	(FRAME_ARGS_SKIP): Remove.
+	(FRAME_FIND_SAVED_REGS): Remove.
+	(PUSH_DUMMY_FRAME): Remove.
+	(POP_FRAME): Remove.
+	(CALL_DUMMY): Remove.
+	(CALL_DUMMY_LENGTH): Remove.
+	(CALL_DUMMY_START_OFFSET): Remove.
+	(CALL_DUMMY_BREAKPOINT_OFFSET): Remove
+	(FIX_CALL_DUMMY): Remove.
+	(print_387_control_word): Remove.
+	(print_387_status_word): Remove.
+	(SP_ARG0): Remove.
+
+	* config/i386/tm-symmetry.h: 
+	(TM_SYMMETRY_H): Enclose file in test for define & define if needed.
+	(START_INFERIOR_TRAPS_EXPECTED): Move to after inclusion of
+	tm-i386v4.h or tm-i386v.h, #undef, and #define back to 2.
+	(DECR_PC_AFTER_BREAK): Move to after inclusion of tm-i386v4.h
+	or tm-i386v.h, #undef, and #define to 0.
+	(MAX_REGISTER_RAW_SIZE): Remove.
+	(FRAME_CHAIN): Remove.
+	(FRAMELESS_FUNCTION_INVOCATION): Remove.
+	(FRAME_SAVED_PC): Remove.
+	(print_387_control_word, print_387_status_word): Remove prototypes.
+
+	* config/i386/tm-ptx.h: 
+	(TM_PTX_H): Enclose file in test for define & define if needed.
+	(START_INFERIOR_TRAPS_EXPECTED): Move to after inclusion of
+	tm-i386v4.h or tm-i386v.h, #undef, and #define back to 2.
+	(DECR_PC_AFTER_BREAK): Move to after inclusion of tm-i386v4.h
+	or tm-i386v.h, #undef, and #define to 0.
+	(SDB_REG_TO_REGNUM):  Remove obsolete commented out define.
+	(print_387_control_word, print_387_status_word): Remove prototypes.
+
+	* config/i386/tm-linux.h:
+	(TM_LINUX_H): Enclose file in test for define & define if needed.
+	(i386/tm-i386.h): Include instead of tm-i386v.h.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove.
+
+	* config/i386/tm-i386v4.h: 
+	(TM_I386V4_H): Enclose file in test for define & define if needed.
+	(i386/tm-i386.h): Include instead of tm-i386v.h.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove.
+	(FRAME_CHAIN):  Moved to tm-i386.h.
+	(FRAMELESS_FUNCTION_INVOCATION): Moved to tm-i386.h.
+	(FRAME_SAVED_PC): Remove.
+	(sigtramp_saved_pc):  Define as i386v4_sigtramp_saved_pc.
+	(FRAME_NUM_ARGS): Remove.
+
+	* config/i386/tm-i386os9k.h: 
+	(TM_I386OS9K_H): Enclose file in test for define & define if needed.
+	(i386/tm-i386.h): Include instead of tm-i386v.h.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove.
+	(NUM_REGS):  Undefine before redefining.
+	(FRAME_CHAIN): Remove.
+	(FRAMELESS_FUNCTION_INVOCATION): Remove.
+	(FRAME_SAVED_PC): Move to tm-i386.h.
+
+	* config/i386/tm-i386nw.h: 
+	(TM_I386NW_H): Enclose file in test for define & define if needed.
+	(i386/tm-i386.h): Include instead of tm-i386v.h.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove.
+
+	* config/i386/tm-i386bsd.h:
+	(TM_I386BSD_H): Enclose file in test for define & define if needed.
+	(i386/tm-i386.h): Include instead of tm-i386v.h.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove.
+	(FRAMELESS_FUNCTION_INVOCATION): Remove.
+	(FRAME_SAVED_PC): Remove.
+
+	* config/i386/tm-i386aix.h:
+	(i386/tm-i386.h): Include instead of tm-i386v.h.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove.
+	(FP_REGNUM): Remove.
+	(SP_REGNUM): Remove.
+	(PC_REGNUM): Remove.
+	(PS_REGNUM): Remove.
+	(FP0_REGNUM):  Moved to tm-i386.h.
+	(NUM_REGS): Remove.
+	(REGISTER_NAMES): Remove.
+	(REGISTER_BYTES): Moved to tm-i386.h.
+	(REGISTER_BYTE): Moved to tm-i386.h.
+	(REGISTER_RAW_SIZE): Moved to tm-i386.h.
+	(MAX_REGISTER_RAW_SIZE): Moved to tm-i386.h.
+	(REGISTER_VIRTUAL_SIZE): Moved to tm-i386.h.
+	(REGISTER_VIRTUAL_TYPE): Removed.
+	(EXTRACT_RETURN_VALUE): Moved to tm-i386.h.
+	(STORE_RETURN_VALUE):  Moved to tm-i386.h.
+
+	* config/i386/tm-sun386.h:
+	(TM_SUN386_H): Enclose file in test for define & define if needed.
+	(i386/tm-i386.h): Include.
+	(TARGET_BYTE_ORDER): Remove.
+	(FUNCTION_START_OFFSET): Remove.
+	(SKIP_PROLOGUE): Remove.
+	(SAVED_PC_AFTER_CALL): Remove.
+	(INNER_THAN): Remove.
+	(BREAKPOINT): Remove.
+	(DECR_PC_AFTER_BREAK): Remove.
+	(ABOUT_TO_RETURN): Remove.
+	(REGISTER_SIZE): Remove.
+	(NUM_REGS): Undefine before defining.
+	(REGISTER_NAMES): Undefine before redefining.
+	(REGISTER_BYTES): Undefine before redefining.
+	(REGISTER_BYTE): Undefine before defining.
+	(FP_REGNUM): Undefine before defining.
+	(PC_REGNUM): Undefine before defining.
+	(FPC_REGNUM):  Undefine before defining.
+	(REGISTER_RAW_SIZE):  Undefine before defining.
+	(FRAME_CHAIN): Undefine before defining.
+	(FRAMELESS_FUNCTION_INVOCATION): Undefine before defining.
+	(FRAME_SAVED_PC): Undefine before defining.
+	(FRAME_NUM_ARGS): Moved to tm-i386.h.
+	(MAX_REGISTER_RAW_SIZE): Remove.
+	(MAX_REGISTER_VIRTUAL_SIZE): Remove.
+	(STORE_STRUCT_RETURN): Remove.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Remove.
+	(FRAME_ARGS_ADDRESS): Remove.
+	(FRAME_LOCALS_ADDRESS): Remove.
+	(FRAME_NUM_ARGS): Undefine before defining.
+	(FRAME_ARGS_SKIP): Remove.
+	(FRAME_FIND_SAVED_REGS): Remove.
+	(PUSH_DUMMY_FRAME): Remove.
+	(POP_FRAME): Remove.
+	(CALL_DUMMY, CALL_DUMMY_LENGTH, CALL_DUMMY_START_OFFSET): Remove.
+	(struct frame_info, struct frame_saved_regs): Remove forward decls
+	for prototypes.
+
+	* config/i386/tm-i386lynx.h (i386/tm-i386.h): Include instead of
+	tm-i386v.h.
+	* config/i386/tm-i386m3.h (i386/tm-i386.h): Include instead of
+ 	tm-i386v.h.
+
+	* i386-tdep.c (i386_extract_return_value):  Make function visible
+	for all i386 targets, but only assume floating point values returned
+	in floating point registers for I386_AIX_TARGET.
+
+	* i386v-nat.c (i386_register_u_addr):  Enable code to locate
+	floating point regs in user struct.
+	
 Wed Nov  1 15:32:57 1995  Fred Fish  <fnf@cygnus.com>
 
 	* breakpoint.c (breakpoint_re_set): Fix typo in comment.
