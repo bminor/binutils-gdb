@@ -146,8 +146,8 @@ struct gdbarch
   gdbarch_read_sp_ftype *read_sp;
   gdbarch_write_sp_ftype *write_sp;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
-  gdbarch_register_read_ftype *register_read;
-  gdbarch_register_write_ftype *register_write;
+  gdbarch_pseudo_register_read_ftype *pseudo_register_read;
+  gdbarch_pseudo_register_write_ftype *pseudo_register_write;
   int num_regs;
   int num_pseudo_regs;
   int sp_regnum;
@@ -602,8 +602,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of read_sp, invalid_p == 0 */
   /* Skip verify of write_sp, invalid_p == 0 */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
-  /* Skip verify of register_read, has predicate */
-  /* Skip verify of register_write, has predicate */
+  /* Skip verify of pseudo_register_read, has predicate */
+  /* Skip verify of pseudo_register_write, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->num_regs == -1))
     fprintf_unfiltered (log, "\n\tnum_regs");
@@ -820,12 +820,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->in_function_epilogue_p);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: register_read = 0x%08lx\n",
-                        (long) current_gdbarch->register_read);
+                        "gdbarch_dump: pseudo_register_read = 0x%08lx\n",
+                        (long) current_gdbarch->pseudo_register_read);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: register_write = 0x%08lx\n",
-                        (long) current_gdbarch->register_write);
+                        "gdbarch_dump: pseudo_register_write = 0x%08lx\n",
+                        (long) current_gdbarch->pseudo_register_write);
 #ifdef ADDRESS_TO_POINTER
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -2554,55 +2554,55 @@ set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_register_read_p (struct gdbarch *gdbarch)
+gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->register_read != 0;
+  return gdbarch->pseudo_register_read != 0;
 }
 
 void
-gdbarch_register_read (struct gdbarch *gdbarch, int regnum, char *buf)
+gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->register_read == 0)
+  if (gdbarch->pseudo_register_read == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_register_read invalid");
+                    "gdbarch: gdbarch_pseudo_register_read invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_read called\n");
-  gdbarch->register_read (gdbarch, regnum, buf);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_pseudo_register_read called\n");
+  gdbarch->pseudo_register_read (gdbarch, regcache, cookednum, buf);
 }
 
 void
-set_gdbarch_register_read (struct gdbarch *gdbarch,
-                           gdbarch_register_read_ftype register_read)
+set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch,
+                                  gdbarch_pseudo_register_read_ftype pseudo_register_read)
 {
-  gdbarch->register_read = register_read;
+  gdbarch->pseudo_register_read = pseudo_register_read;
 }
 
 int
-gdbarch_register_write_p (struct gdbarch *gdbarch)
+gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->register_write != 0;
+  return gdbarch->pseudo_register_write != 0;
 }
 
 void
-gdbarch_register_write (struct gdbarch *gdbarch, int regnum, char *buf)
+gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->register_write == 0)
+  if (gdbarch->pseudo_register_write == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_register_write invalid");
+                    "gdbarch: gdbarch_pseudo_register_write invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_write called\n");
-  gdbarch->register_write (gdbarch, regnum, buf);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_pseudo_register_write called\n");
+  gdbarch->pseudo_register_write (gdbarch, regcache, cookednum, buf);
 }
 
 void
-set_gdbarch_register_write (struct gdbarch *gdbarch,
-                            gdbarch_register_write_ftype register_write)
+set_gdbarch_pseudo_register_write (struct gdbarch *gdbarch,
+                                   gdbarch_pseudo_register_write_ftype pseudo_register_write)
 {
-  gdbarch->register_write = register_write;
+  gdbarch->pseudo_register_write = pseudo_register_write;
 }
 
 int

@@ -143,8 +143,8 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   /* If an old style architecture, construct the register cache
      description using all the register macros.  */
-  if (!gdbarch_register_read_p (gdbarch)
-      && !gdbarch_register_write_p (gdbarch))
+  if (!gdbarch_pseudo_register_read_p (gdbarch)
+      && !gdbarch_pseudo_register_write_p (gdbarch))
     return init_legacy_regcache_descr (gdbarch);
 
   descr = XMALLOC (struct regcache_descr);
@@ -724,7 +724,8 @@ read_register_gen (int regnum, char *buf)
   if (regnum < current_regcache->descr->nr_raw_registers)
     regcache_raw_read (current_regcache, regnum, buf);
   else
-    gdbarch_register_read (current_gdbarch, regnum, buf);
+    gdbarch_pseudo_register_read (current_gdbarch, current_regcache,
+			          regnum, buf);
 }
 
 
@@ -838,7 +839,8 @@ write_register_gen (int regnum, char *buf)
   if (regnum < current_regcache->descr->nr_raw_registers)
     regcache_raw_write (current_regcache, regnum, buf);
   else
-    gdbarch_register_write (current_gdbarch, regnum, buf);
+    gdbarch_pseudo_register_write (current_gdbarch, current_regcache,
+				   regnum, buf);
 }
 
 /* Copy INLEN bytes of consecutive data from memory at MYADDR
@@ -1024,7 +1026,7 @@ supply_register (int regnum, const void *val)
   /* NOTE: cagney/2001-03-16: The macro CLEAN_UP_REGISTER_VALUE is
      going to be deprecated.  Instead architectures will leave the raw
      register value as is and instead clean things up as they pass
-     through the method gdbarch_register_read() clean up the
+     through the method gdbarch_pseudo_register_read() clean up the
      values. */
 
 #ifdef DEPRECATED_CLEAN_UP_REGISTER_VALUE

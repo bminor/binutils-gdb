@@ -1,3 +1,28 @@
+2002-08-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (pseudo_register_read, pseudo_register_write):
+	Replace the architecture methods register_read and register_write.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* regcache.c (init_regcache_descr): Update.
+	(read_register_gen): Update.
+	(write_register_gen): Update.
+	(supply_register): Update comment.
+
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	(sh_pseudo_register_read, sh64_pseudo_register_read): Add
+	`regcache' and `gdbarch' parameters.  Make `buffer' a void
+	pointer.  Update code.
+	(sh_pseudo_register_write, sh64_pseudo_register_write): Add
+	`regcache' and `gdbarch' parameters.  Make `buffer' a constant
+	void pointer.  Update code.
+	(sh64_register_write): Delete.
+	(sh4_register_read): Delete.
+	(sh64_register_read): Delete.
+	(sh4_register_write): Delete.
+	(sh_sh4_register_convert_to_raw): Make `from' parameter a constant
+	void pointer, `to' parameter a void pointer.
+	(sh_sh64_register_convert_to_raw): Ditto.
+
 2002-08-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_register_virtual_type): Use architecture
@@ -149,7 +174,6 @@
 	* configure.host (gdb_host): Set to aix432 on AIX 4.3.2+.
 	* config/powerpc/aix432.mh: New file.
 
->>>>>>> 1.2978
 2002-07-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ppc-linux-tdep.c (ELF_NGREG, ELF_NFPREG, ELF_NVRREG)

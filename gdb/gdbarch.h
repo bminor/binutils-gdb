@@ -415,17 +415,17 @@ extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-extern int gdbarch_register_read_p (struct gdbarch *gdbarch);
+extern int gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_register_read_ftype) (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void gdbarch_register_read (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void set_gdbarch_register_read (struct gdbarch *gdbarch, gdbarch_register_read_ftype *register_read);
+typedef void (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf);
+extern void gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf);
+extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_ftype *pseudo_register_read);
 
-extern int gdbarch_register_write_p (struct gdbarch *gdbarch);
+extern int gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_register_write_ftype) (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void gdbarch_register_write (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void set_gdbarch_register_write (struct gdbarch *gdbarch, gdbarch_register_write_ftype *register_write);
+typedef void (gdbarch_pseudo_register_write_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf);
+extern void gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf);
+extern void set_gdbarch_pseudo_register_write (struct gdbarch *gdbarch, gdbarch_pseudo_register_write_ftype *pseudo_register_write);
 
 extern int gdbarch_num_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
