@@ -626,19 +626,19 @@ case "${target}" in
   arm-*-coff*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# start-sanitize-armelf
+# CYGNUS LOCAL clm/arm-elf
   arm-*-elf*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# end-sanitize-armelf
+# END CYGNUS LOCAL 
   thumb-*-coff)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# start-sanitize-armelf
+# CYGNUS LOCAL clm/arm-elf
   thumb-*-elf)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# end-sanitize-armelf
+# END CYGNUS LOCAL
   thumb-*-pe) # CYGNUS LOCAL nickc/thumb
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
