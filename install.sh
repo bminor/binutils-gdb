@@ -152,7 +152,7 @@ if [ x"$transformarg" = x ]
 then
 	dstfile=`basename $dst`
 else
-	dstfile=`basename $dst $transformbasename | sed $transformarg`
+	dstfile=`basename $dst $transformbasename | sed $transformarg`$transformbasename
 fi
 
 # don't allow the sed command to completely eliminate the filename
