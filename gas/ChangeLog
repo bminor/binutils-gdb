@@ -1,3 +1,8 @@
+Thu Aug 21 11:00:36 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* app.c (do_scrub_chars): Support a double dash as starting a
+	comment that extends to end of line.
+
 start-sanitize-v850
 Thu Aug 21 10:54:27 1997  Nick Clifton  <nickc@cygnus.com>
 
