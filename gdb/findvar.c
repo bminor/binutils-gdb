@@ -306,6 +306,7 @@ read_register (regno)
   unsigned short sval;
   unsigned int ival;
   unsigned long lval;
+  LONGEST llval;
 
   int size;
   
@@ -334,6 +335,12 @@ read_register (regno)
       SWAP_TARGET_AND_HOST (&lval, sizeof (lval));
       return lval;
     }
+  else if (size == sizeof (llval))
+    {
+      memcpy (&llval, &registers[REGISTER_BYTE (regno)], sizeof (llval));
+      SWAP_TARGET_AND_HOST (&llval, sizeof (llval));
+      return llval;
+    }
   else
     {
       error ("GDB Internal Error in read_register() for register %d, size %d",
@@ -358,6 +365,7 @@ write_register (regno, val)
   unsigned short sval;
   unsigned int ival;
   unsigned long lval;
+  LONGEST llval;
   int size;
   PTR ptr;
   
@@ -391,15 +399,20 @@ write_register (regno, val)
       ptr = (PTR) &lval;
       lval = val;
     }
-  else 
+  else if (size == sizeof(llval))
+    {
+      ptr = (PTR) &llval;
+      llval = val;
+    }
+  else
     {
       error ("GDB Internal Error in write_register() for register %d, size %d",
 	     regno, size);
     }
   
+  SWAP_TARGET_AND_HOST (ptr, size);
   if (register_valid [regno]) 
     {
-      SWAP_TARGET_AND_HOST (ptr, size);
       if (memcmp (&registers[REGISTER_BYTE (regno)],
 		  ptr, size) == 0)
 	return;

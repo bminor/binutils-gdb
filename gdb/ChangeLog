@@ -1,3 +1,8 @@
+Thu Jul  8 08:22:05 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* findvar.c (read_register): Provide some support for 64 bit regs.
+	(write_register): Ditto.
+
 Wed Jul  7 14:30:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mips/nm-riscos.h: machine/machparam.h is always the right
