@@ -75,5 +75,5 @@ The inferior has stopped for real.
 @end deftypefun
 
 @deftypefun void target_changed (struct target_ops *@var{target})
-The target's register contents has changed.
+The target's register contents have changed.
 @end deftypefun
