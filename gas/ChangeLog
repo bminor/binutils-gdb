@@ -3,6 +3,19 @@ Thu Dec 16 16:07:56 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* read.c (lex_type): No longer make '[' a valid character for
 	symbol names.
 
+	* config/tc-vax.c (tc_aout_fix_to_chars): Local variable
+	NBYTES_R_LENGTH now const.
+
+	* config/obj-*.c, config/tc-*.c: Omit superfluous "return"
+	statements at ends of functions.  Don't check for null return from
+	hash_new, since it won't return at all if there's no memory
+	available.  Also, check for null return from hash_insert, rather
+	than zero-length string, as success indicator.
+
+	* subsegs.c (section_symbol): New function.
+	* subsegs.h (section_symbol): Declare.
+	* write.c (adjust_reloc_syms): Use it.
+
 Wed Dec 15 15:39:53 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in (RUNTEST): New variable.
