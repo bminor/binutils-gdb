@@ -1,3 +1,7 @@
+2004-05-21  Joel Brobecker  <brobecker@gnat.com>
+
+	* config/djgpp/fnchange.lst: Undo previous change, was useless.
+
 2004-05-21  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2expr.c (execute_stack_op): Add 'break' statements after
