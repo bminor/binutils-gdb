@@ -1,5 +1,10 @@
 2002-09-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* rs6000-tdep.c (rs6000_frame_chain): Don't chain past the dummy
+	frame.
+
+2002-09-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* rs6000-tdep.c (rs6000_extract_struct_value_address): Return 0.
 	(rs6000_struct_return_address): Delete variable.
 	(rs6000_store_struct_return): Update.

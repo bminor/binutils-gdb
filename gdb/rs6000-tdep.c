@@ -1741,7 +1741,9 @@ rs6000_frame_chain (struct frame_info *thisframe)
   int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
 
   if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
-    return thisframe->frame;	/* dummy frame same as caller's frame */
+    /* A dummy frame always correctly chains back to the previous
+       frame.  */
+    return read_memory_addr ((thisframe)->frame, wordsize);
 
   if (inside_entry_file (thisframe->pc) ||
       thisframe->pc == entry_point_address ())
@@ -1758,13 +1760,6 @@ rs6000_frame_chain (struct frame_info *thisframe)
     fp = FRAME_FP (thisframe);
   else
     fp = read_memory_addr ((thisframe)->frame, wordsize);
-
-  lr = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
-  if (lr == entry_point_address ())
-    if (fp != 0 && (fpp = read_memory_addr (fp, wordsize)) != 0)
-      if (PC_IN_CALL_DUMMY (lr, fpp, fpp))
-	return fpp;
-
   return fp;
 }
 
