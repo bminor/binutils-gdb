@@ -1,3 +1,11 @@
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (SFILES_INCLUDED): Add agentexpr.texi.
+	* agentexpr.texi: Retitle section, and change it to an appendix.
+	Comment out texinfo initialization.  Factor a @var{} into two
+	pieces to prevent makeinfo warnings.
+	* gdb.texinfo: Add Agent Expressions appendix.
+
 2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbint.texinfo (Native Conditionals): Remove PREPARE_TO_PROCEED.
