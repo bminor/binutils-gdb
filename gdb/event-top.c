@@ -514,8 +514,10 @@ command_handler (char *command)
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg1->next = arg2;
       arg2->next = NULL;
-      arg1->data.integer = time_at_cmd_start;
-      arg2->data.integer = space_at_cmd_start;
+      arg1->data.longint = time_at_cmd_start;
+#ifdef HAVE_SBRK
+      arg2->data.longint = space_at_cmd_start;
+#endif
       add_continuation (command_line_handler_continuation, arg1);
     }
 

@@ -1,3 +1,9 @@
+2002-06-20  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-top.c (command_handler): Don't use space_at_cmd_start
+	unless there is sbrk() on the host. Assign time and space data
+	to union fields of the appropriate length.
+
 2002-06-20  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_register_nr2name): Rename to 
