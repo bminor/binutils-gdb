@@ -1,5 +1,7 @@
 Wed Aug 19 10:23:27 1992  Ian Lance Taylor  (ian@cygnus.com)
 
+	* m68k-pinsn.c: handle new operand type 'r', introduced for cas2.
+
 	* remote-vx.c: redefine malloc to avoid buggy declaration on
 	RS/6000 <rpc/types.h>.
 	xm-rs6000.h: include <sys/select.h> to define fd_set for
