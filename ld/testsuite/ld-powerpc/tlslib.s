@@ -1,4 +1,5 @@
 	.global .__tls_get_addr,__tls_get_addr,gd,ld
+	.type .__tls_get_addr,@function
 
 	.section ".opd","aw",@progbits
 __tls_get_addr:

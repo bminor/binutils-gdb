@@ -7,7 +7,7 @@
 .*: +file format elf64-powerpc
 
 Contents of section \.tdata:
- 10010390 12345678 9abcdef0 23456789 abcdef01  .*
- 100103a0 3456789a bcdef012 456789ab cdef0123  .*
- 100103b0 56789abc def01234 6789abcd ef012345  .*
- 100103c0 789abcde f0123456                    .*
+ 10010410 12345678 9abcdef0 23456789 abcdef01  .*
+ 10010420 3456789a bcdef012 456789ab cdef0123  .*
+ 10010430 56789abc def01234 6789abcd ef012345  .*
+ 10010440 789abcde f0123456                    .*

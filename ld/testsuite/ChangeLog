@@ -1,3 +1,16 @@
+2003-02-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlslib.s: Give .__tls_get_addr function type.
+	* ld-powerpc/tlsexe.d: Update for changed handling of (invalid) ld var
+	in dynamic lib.
+	* ld-powerpc/tlsexe.g: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexe.t: Likewise.
+	* ld-powerpc/tlsexetoc.d: Likewise.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsexetoc.t: Likewise.
+
 2003-02-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/powerpc.exp (supports_ppc64): New.
