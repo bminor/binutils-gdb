@@ -1,3 +1,9 @@
+Fri Feb 11 15:35:32 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.host:  Add Lynx/rs6000 support.
+	* config/i386-nlm.mt:  Enable a.out file support.
+	* config/rs6000lynx.mh:  Lynx/rs6000 host support.
+
 Fri Feb 11 17:25:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* archive.c (compute_and_write_armap): Rewrite somewhat to improve
