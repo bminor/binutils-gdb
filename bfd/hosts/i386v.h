@@ -15,7 +15,7 @@
 #define SEEK_CUR 1
 #endif
 
-#define	POSIX_UTIME
+#define USE_UTIME
 
 /* Some things that need to be defined in order to make code written for
    BSD Unix compile under System V Unix.  */

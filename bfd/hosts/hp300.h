@@ -12,6 +12,8 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+#define USE_UTIME
+
 void free();
 
 /* Some things that need to be defined in order to make code written for

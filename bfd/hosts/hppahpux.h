@@ -20,6 +20,8 @@ void free();
 #define NATIVE_HPPAHPUX_COMPILER
 #endif
 
+#define USE_UTIME
+
 #if 0
 static int
 rename(from, to)

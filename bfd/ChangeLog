@@ -1,3 +1,11 @@
+Mon Nov  2 12:36:14 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/delta88.mh, config/hp300.mh, config/hppahpux.mh,
+	config/i386v.mh: removed -DUSG from HDEFINES.
+	hosts/delta88.h, hosts/hp300.h, hosts/hppahpux.h, hosts/i386v.h:
+	defined USE_UTIME.
+	hosts/i386v.h: don't define POSIX_UTIME.
+
 Fri Oct 30 16:13:52 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ieee.c (ieee_slurp_sections): make a private copy of the

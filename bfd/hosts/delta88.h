@@ -10,6 +10,8 @@
 
 #include <stdio.h>
 
+#define USE_UTIME
+
 #ifndef DONTDECLARE_MALLOC
 extern PTR  EXFUN(malloc,(unsigned));
 extern PTR  EXFUN(realloc, (PTR, unsigned));
@@ -52,7 +54,7 @@ extern char *ctime();
 extern int _flsbuf();
 extern int fclose();
 extern int time();
-extern int utimes();
+extern int utime();
 extern int vfprintf();
 extern long atol();
 extern char *getenv();
