@@ -1,3 +1,9 @@
+2002-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* srec.c (srec_write_symbols): Restore '$' prefix to address
+	accidentally removed in 2002-04-04 change.
+	(srec_get_symtab): Use 0 instead of `(long) FALSE'.
+
 2002-11-27  David O'Brien  <obrien@FreeBSD.org>
 
         * elf.c (_bfd_elf_copy_private_section_data): Don't define bed.

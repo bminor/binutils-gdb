@@ -239,7 +239,7 @@ srec_mkobject (abfd)
   tdata = (tdata_type *) bfd_alloc (abfd, amt);
   if (tdata == NULL)
     return false;
-    
+
   abfd->tdata.srec_data = tdata;
   tdata->type = 1;
   tdata->head = NULL;
@@ -356,7 +356,7 @@ srec_scan (abfd)
   while ((c = srec_get_byte (abfd, &error)) != EOF)
     {
       /* We only build sections from contiguous S-records, so if this
-         is not an S-record, then stop building a section.  */
+	 is not an S-record, then stop building a section.  */
       if (c != 'S' && c != '\r' && c != '\n')
 	sec = NULL;
 
@@ -542,7 +542,7 @@ srec_scan (abfd)
 	      case '0':
 	      case '5':
 		/* Prologue--ignore the file name, but stop building a
-                   section at this point.  */
+		   section at this point.  */
 		sec = NULL;
 		break;
 
@@ -567,7 +567,7 @@ srec_scan (abfd)
 		    && sec->vma + sec->_raw_size == address)
 		  {
 		    /* This data goes at the end of the section we are
-                       currently building.  */
+		       currently building.  */
 		    sec->_raw_size += bytes;
 		  }
 		else
@@ -735,7 +735,7 @@ srec_read_section (abfd, section, contents)
 	continue;
 
       /* This is called after srec_scan has already been called, so we
-         ought to know the exact format.  */
+	 ought to know the exact format.  */
       BFD_ASSERT (c == 'S');
 
       if (bfd_bread (hdr, (bfd_size_type) 3, abfd) != 3)
@@ -912,7 +912,7 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
       entry->size = bytes_to_do;
 
       /* Sort the records by address.  Optimize for the common case of
-         adding a record to the end of the list.  */
+	 adding a record to the end of the list.  */
       if (tdata->tail != NULL
 	  && entry->where >= tdata->tail->where)
 	{
@@ -1095,24 +1095,25 @@ srec_write_symbols (abfd)
 	      && (s->flags & BSF_DEBUGGING) == 0)
 	    {
 	      /* Just dump out non debug symbols.  */
-	      char buf[42], *p;
+	      char buf[43], *p;
 
 	      len = strlen (s->name);
 	      if (bfd_bwrite ("  ", (bfd_size_type) 2, abfd) != 2
 		  || bfd_bwrite (s->name, len, abfd) != len)
 		return false;
 
-	      sprintf_vma (buf + 1, (s->value
+	      sprintf_vma (buf + 2, (s->value
 				     + s->section->output_section->lma
 				     + s->section->output_offset));
-	      p = buf + 1;
+	      p = buf + 2;
 	      while (p[0] == '0' && p[1] != 0)
 		p++;
 	      len = strlen (p);
 	      p[len] = '\r';
 	      p[len + 1] = '\n';
+	      *--p = '$';
 	      *--p = ' ';
-	      len += 3;
+	      len += 4;
 	      if (bfd_bwrite (p, len, abfd) != len)
 		return false;
 	    }
@@ -1203,7 +1204,7 @@ srec_get_symtab (abfd, alocation)
 
       csymbols = (asymbol *) bfd_alloc (abfd, symcount * sizeof (asymbol));
       if (csymbols == NULL && symcount != 0)
-	return (long) false;
+	return 0;
       abfd->tdata.srec_data->csymbols = csymbols;
 
       for (s = abfd->tdata.srec_data->symbols, c = csymbols;
