@@ -1,3 +1,14 @@
+2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/op-0-1.d, gas/mmix/pushj-c.d, gas/mmix/weak1.d: Add
+	--no-pushj-stubs option.
+	* gas/mmix/reloclab-r.d, gas/mmix/reloclab.d: Add --no-stubs
+	option.
+	* gas/mmix/reloclab.l: Adjust for PUSHJ stub.
+	* gas/mmix/pushj-cs.d, gas/mmix/reloclab-s.d, gas/mmix/relax2.s,
+	gas/mmix/relax2.d, gas/mmix/op-0-1s.d, gas/mmix/reloclab-rs.d,
+	gas/mmix/weak1-s.d: New tests.
+
 2003-10-17  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* gas/arm/iwmmxt-bad.s: New file.
