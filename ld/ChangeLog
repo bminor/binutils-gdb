@@ -1,3 +1,14 @@
+Tue Sep  1 17:45:51 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: added Solaris 2 and Irix 4 host support.
+
+Mon Aug 31 19:27:11 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: remove -S flag from the FLEX definition
+
+	* configure.in: rewrote, using new style case statement.  use
+	m68k.mt for m68k-aout systems
+
 Sun Aug 30 21:38:53 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: map "ld" through program_transform_name when

@@ -56,7 +56,7 @@ MAKEINFO = makeinfo
 RANLIB = ranlib
 HOST_CC=$(CC)
 BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
-LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
 
 #version=/`./../gcc/gcc -dumpversion`
 version=
