@@ -1,3 +1,7 @@
+Fri Dec 27 16:26:47 1991  K. Richard Pixley  (rich at cygnus.com)
+
+	* configure: be less sensitive to spaces in Makefile.in.
+
 Thu Dec 26 16:30:26 1991  K. Richard Pixley  (rich at cygnus.com)
 
 	* cfg-paper.texi: some changes suggested by rms.

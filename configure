@@ -658,27 +658,27 @@ for host in ${hosts} ; do
 			mv Makefile.tem ${Makefile}
 
 			# set srcdir
-			sed "s@^srcdir = \.@srcdir = ${srcdir}@" ${Makefile} > Makefile.tem
+			sed "s@^srcdir[ 	]*=.*$@srcdir = ${srcdir}@" ${Makefile} > Makefile.tem
 			mv Makefile.tem ${Makefile}
 
 			# set prefix
 			if [ -n "${prefix}" ] ; then
-				sed "s:^prefix =.*$:prefix = ${prefix}:" ${Makefile} > Makefile.tem
+				sed "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" ${Makefile} > Makefile.tem
 				mv Makefile.tem ${Makefile}
 			fi
 
 			# set datadir
 			if [ -n "${datadir}" ] ; then
-				sed "s:^datadir =.*$:datadir = ${datadir}:" ${Makefile} > Makefile.tem
+				sed "s:^datadir[ 	]*=.*$:datadir = ${datadir}:" ${Makefile} > Makefile.tem
 				mv Makefile.tem ${Makefile}
 			fi
 
 			# reset SUBDIRS
-			sed "s:^SUBDIRS =.*$:SUBDIRS = ${configdirs}:" ${Makefile} > Makefile.tem
+			sed "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" ${Makefile} > Makefile.tem
 			mv Makefile.tem ${Makefile}
 
 			# reset NONSUBDIRS
-			sed "s:^NONSUBDIRS =.*$:NONSUBDIRS = ${noconfigdirs}:" ${Makefile} > Makefile.tem
+			sed "s:^NONSUBDIRS[ 	]*=.*$:NONSUBDIRS = ${noconfigdirs}:" ${Makefile} > Makefile.tem
 			mv Makefile.tem ${Makefile}
 
 			# remove any form feeds.
