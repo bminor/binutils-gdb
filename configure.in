@@ -488,7 +488,7 @@ case "${target}" in
     ;;
 # start-sanitize-m32r
   m32r-*-*)
-    noconfigdirs="$noconfigdirs target-libgloss libio libstdc++ libg++ gdb"
+    noconfigdirs="$noconfigdirs target-libio target-libstdc++ target-libg++ gdb"
     ;;
 # end-sanitize-m32r
   mn10200-*-*)
