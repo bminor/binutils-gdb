@@ -85,6 +85,9 @@ case $1 in
 	mips64vr5xxx-elf)
 		set mips64vr5000-elf
                 ;;
+	mips64vr5xxxel-elf)
+		set mips64vr5000el-elf
+                ;;
 # end-sanitize-cygnus
 # start-sanitize-sky
 	vpu-elf)
@@ -207,7 +210,7 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 	m88110 | m680[012346]0 | m683?2 | m68360 | m5200 | z8k | v70 \
-		| h8500 | w65 | fr30) # CYGNUS LOCAL
+		| h8500 | w65 | fr30 | tiny2j) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	thumb)

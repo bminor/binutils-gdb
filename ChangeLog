@@ -1,3 +1,14 @@
+start-sanitize-tinyj
+1998-12-17  Anthony Green  <green@cygnus.com>
+
+	* config.sub, configure.in: Add tiny2j-*-* target.
+
+end-sanitize-tinyj
+Tue Dec 15 17:02:58 1998  Bob Manson  <manson@charmed.cygnus.com>
+
+	* configure.in: Add cygmon for x86-coff and x86-elf. Configure
+ 	cygmon for all sparclite targets, regardless of object format.
+
 1998-12-15  Mark Salter  <msalter@cygnus.com>
 
 	* configure.in: Added target-bsp for several target architectures.
