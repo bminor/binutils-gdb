@@ -196,7 +196,7 @@ struct txvu_operand {
 #define TXVU_SHIFT_FTREG 16
 #define TXVU_SHIFT_FSREG 11
 #define TXVU_SHIFT_FDREG 6
-#define TXVU_MASK_REG 31
+#define TXVU_MASK_VFREG 31
 #define TXVU_DEST_X 8
 #define TXVU_DEST_Y 4
 #define TXVU_DEST_Z 2
