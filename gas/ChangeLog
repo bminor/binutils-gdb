@@ -1,3 +1,22 @@
+Thu Oct 14 11:33:25 1993  Michael Meissner  (meissner@osf.org)
+
+	* config/tc-i386.c: (md_begin): Do not zero static arrays.  Don't
+	call strchr for each character to see if it is a special char,
+	instead add a second loop over special_chars.  Set alignment
+	of text, data and bss sections to 4.
+	(pi, te, pt, pe, ps): Add declarations so that DEBUG386 can be
+	used again.
+	(reloc): Don't return 8 and 16 bit non-PC relative relocations on
+	ELF, since the ELF object format does not have these type of
+	relocations.  Change the abort into as as_bad and return
+	BFD_RELOC_NONE to silence compiler warnings.
+	(md_assemble): Keep track of the instruction size.  Allow white
+	space between the $ and the constant for compatibility with older
+	gases and other assemblers.
+	(i386_operand): Skip spaces between $ and expression.
+	(tc_gen_reloc): Don't allow anything but 32 bit relocations on
+	ELF.  Convert abort into an as_bad and assert into as_fatal.
+
 Wed Oct 13 16:50:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/obj-coffbfd.c (fixup_segment) [DIFF_EXPR_OK]: If
