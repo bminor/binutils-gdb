@@ -1,5 +1,13 @@
 2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-ia64.c (unwind_diagnostic): Return -1 for warning
+	and 0 for error.
+	(in_procedure): Return -1 for warning.
+	(in_prologue): Likewise.
+	(in_body): Likewise.
+
+2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	(dot_xdata): Undo the last change. Section name is used by
 	set_section.
 	(dot_float_cons): Likewise.

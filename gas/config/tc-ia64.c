@@ -3055,17 +3055,28 @@ dot_special_section (which)
   set_section ((char *) special_section_name[which]);
 }
 
-static void
+/* Return -1 for warning and 0 for error.  */
+
+static int
 unwind_diagnostic (const char * region, const char *directive)
 {
   if (md.unwind_check == unwind_check_warning)
-    as_warn (".%s outside of %s", directive, region);
+    {
+      as_warn (".%s outside of %s", directive, region);
+      return -1;
+    }
   else
     {
       as_bad (".%s outside of %s", directive, region);
       ignore_rest_of_line ();
+      return 0;
     }
 }
+
+/* Return 1 if a directive is in a procedure, -1 if a directive isn't in
+   a procedure but the unwind directive check is set to warning, 0 if
+   a directive isn't in a procedure and the unwind directive check is set
+   to error.  */
 
 static int
 in_procedure (const char *directive)
@@ -3073,32 +3084,51 @@ in_procedure (const char *directive)
   if (unwind.proc_start
       && (!unwind.saved_text_seg || strcmp (directive, "endp") == 0))
     return 1;
-  unwind_diagnostic ("procedure", directive);
-  return 0;
+  return unwind_diagnostic ("procedure", directive);
 }
+
+/* Return 1 if a directive is in a prologue, -1 if a directive isn't in
+   a prologue but the unwind directive check is set to warning, 0 if
+   a directive isn't in a prologue and the unwind directive check is set
+   to error.  */
 
 static int
 in_prologue (const char *directive)
 {
-  if (in_procedure (directive))
+  int in = in_procedure (directive);
+  if (in)
     {
       /* We are in a procedure. Check if we are in a prologue.  */
       if (unwind.prologue)
 	return 1;
-      unwind_diagnostic ("prologue", directive);
+      /* We only want to issue one message.  */
+      if (in == 1)
+	return unwind_diagnostic ("prologue", directive);
+      else
+	return -1;
     }
   return 0;
 }
 
+/* Return 1 if a directive is in a body, -1 if a directive isn't in
+   a body but the unwind directive check is set to warning, 0 if
+   a directive isn't in a body and the unwind directive check is set
+   to error.  */
+
 static int
 in_body (const char *directive)
 {
-  if (in_procedure (directive))
+  int in = in_procedure (directive);
+  if (in)
     {
       /* We are in a procedure. Check if we are in a body.  */
       if (unwind.body)
 	return 1;
-      unwind_diagnostic ("body region", directive);
+      /* We only want to issue one message.  */
+      if (in == 1)
+	return unwind_diagnostic ("body region", directive);
+      else
+	return -1;
     }
   return 0;
 }
