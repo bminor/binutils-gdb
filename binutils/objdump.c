@@ -86,6 +86,9 @@ dump_symbols PARAMS ((bfd *abfd));
 
 static void
 display_bfd PARAMS ((bfd *abfd));
+
+static void
+objdump_print_address PARAMS ((bfd_vma, struct disassemble_info *));
 
 void
 usage (stream, status)
@@ -250,7 +253,7 @@ compare_symbols (ap, bp)
 
 /* Print VMA symbolically to INFO if possible.  */
 
-void
+static void
 objdump_print_address (vma, info)
      bfd_vma vma;
      struct disassemble_info *info;
@@ -266,54 +269,41 @@ objdump_print_address (vma, info)
   /* Indices in `syms'.  */
   unsigned int min = 0;
   unsigned int max = symcount;
-  unsigned int thisplace = 1;
-  unsigned int oldthisplace;
+  unsigned int thisplace;
 
-  int vardiff;
+  bfd_signed_vma vardiff;
 
   fprintf_vma (info->stream, vma);
 
   if (symcount < 1)
     return;
 
-  /* Perform a binary search looking for the closest symbol to
-     the required value.  */
-  while (true)
+  /* Perform a binary search looking for the closest symbol to the
+     required value.  We are searching the range (min, max].  */
+  while (min + 1 < max)
     {
       asymbol *sym;
-#if 0
-      asection *sym_sec;
-#endif
-      oldthisplace = thisplace;
+
       thisplace = (max + min) / 2;
-      if (thisplace == oldthisplace)
-	break;
       sym = syms[thisplace];
+
       vardiff = sym->value - vma;
-#if 0
-      sym_sec = sym->section;
-#endif
 
       if (vardiff > 0)
 	max = thisplace;
       else if (vardiff < 0)
 	min = thisplace;
       else
-	goto found;
-    }
-  /* We've run out of places to look; see whether this or the
-     symbol before this describes this location the best.  */
-
-  if (thisplace != 0)
-    {
-      if (syms[thisplace - 1]->value - vma < syms[thisplace]->value - vma)
 	{
-	  /* Previous symbol is in correct section and is closer.  */
-	  thisplace--;
+	  min = thisplace;
+	  break;
 	}
     }
 
- found:
+  /* The symbol we want is now in min, the low end of the range we
+     were searching.  */
+  thisplace = min;
+
   {
     /* If this symbol isn't global, search for one with the same value
        that is.  */
@@ -364,14 +354,21 @@ objdump_print_address (vma, info)
 	&& syms[thisplace]->section != aux->sec)
       {
 	for (i = thisplace + 1; i < symcount; i++)
-	  if (syms[i]->value != syms[thisplace]->value)
-	    break;
-	while (--i >= 0)
-	  if (syms[i]->section == aux->sec)
-	    {
-	      thisplace = i;
-	      break;
-	    }
+	  {
+	    if (syms[i]->value != syms[thisplace]->value)
+	      {
+		i--;
+		break;
+	      }
+	  }
+	for (; i >= 0; i--)
+	  {
+	    if (syms[i]->section == aux->sec)
+	      {
+		thisplace = i;
+		break;
+	      }
+	  }
       }
   }
   fprintf (info->stream, " <%s", syms[thisplace]->name);
@@ -405,6 +402,7 @@ objdump_print_address (vma, info)
 #define ARCH_m68k
 #define ARCH_m88k
 #define ARCH_mips
+#define ARCH_powerpc
 #define ARCH_rs6000
 #define ARCH_sh
 #define ARCH_sparc
@@ -525,6 +523,14 @@ disassemble_data (abfd)
 	    disassemble = print_insn_big_mips;
 	  else
 	    disassemble = print_insn_little_mips;
+	  break;
+#endif
+#ifdef ARCH_powerpc
+	case bfd_arch_powerpc:
+	  if (abfd->xvec->byteorder_big_p)
+	    disassemble = print_insn_big_powerpc;
+	  else
+	    disassemble = print_insn_little_powerpc;
 	  break;
 #endif
 #ifdef ARCH_rs6000
@@ -908,7 +914,7 @@ display_bfd (abfd)
   if (!bfd_check_format_matches (abfd, bfd_object, &matching))
     {
       bfd_nonfatal (bfd_get_filename (abfd));
-      if (bfd_error == file_ambiguously_recognized)
+      if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	{
 	  list_matching_formats (matching);
 	  free (matching);
@@ -959,24 +965,32 @@ display_file (filename, target)
 
   if (bfd_check_format (file, bfd_archive) == true)
     {
+      bfd *last_arfile = NULL;
+
       printf ("In archive %s:\n", bfd_get_filename (file));
       for (;;)
 	{
-	  bfd_error = no_error;
+	  bfd_set_error (bfd_error_no_error);
 
 	  arfile = bfd_openr_next_archived_file (file, arfile);
 	  if (arfile == NULL)
 	    {
-	      if (bfd_error != no_more_archived_files)
+	      if (bfd_get_error () != bfd_error_no_more_archived_files)
 		{
 		  bfd_nonfatal (bfd_get_filename (file));
 		}
-	      return;
+	      break;
 	    }
 
 	  display_bfd (arfile);
-	  /* Don't close the archive elements; we need them for next_archive */
+
+	  if (last_arfile != NULL)
+	    bfd_close (last_arfile);
+	  last_arfile = arfile;
 	}
+
+      if (last_arfile != NULL)
+	bfd_close (last_arfile);
     }
   else
     display_bfd (file);
@@ -1322,8 +1336,10 @@ main (argc, argv)
   char *target = default_target;
   boolean seenflag = false;
 
-  bfd_init ();
   program_name = *argv;
+  xmalloc_set_program_name (program_name);
+
+  bfd_init ();
 
   while ((c = getopt_long (argc, argv, "ib:m:Vdlfahrtxsj:", long_options,
 			   (int *) 0))

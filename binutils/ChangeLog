@@ -2,6 +2,7 @@ Tue Mar 29 14:59:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nm.c (display_archive): Close each archive element after it has
 	been displayed.
+	* objdump.c (display_file): Likewise.
 
 Mon Mar 28 13:04:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
