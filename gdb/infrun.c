@@ -3908,31 +3908,32 @@ to the user would be loading/unloading of a new library."),
 			    &setlist, &showlist);
 #endif
 
-  c = add_set_enum_cmd ("follow-fork-mode",
-			class_run,
-			follow_fork_mode_kind_names, &follow_fork_mode_string,
-			"Set debugger response to a program call of fork \
-or vfork.\n\
+  add_setshow_enum_cmd ("follow-fork-mode", class_run,
+			follow_fork_mode_kind_names,
+			&follow_fork_mode_string, _("\
+Set debugger response to a program call of fork or vfork."), _("\
+Show debugger response to a program call of fork or vfork."), _("\
 A fork or vfork creates a new process.  follow-fork-mode can be:\n\
   parent  - the original process is debugged after a fork\n\
   child   - the new process is debugged after a fork\n\
 The unfollowed process will continue to run.\n\
-By default, the debugger will follow the parent process.", &setlist);
-  deprecated_add_show_from_set (c, &showlist);
+By default, the debugger will follow the parent process."),
+			NULL,
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 
-  c = add_set_enum_cmd ("scheduler-locking", class_run, 
-			scheduler_enums,	/* array of string names */
-			&scheduler_mode,	/* current mode  */
-			"Set mode for locking scheduler during execution.\n\
+  add_setshow_enum_cmd ("scheduler-locking", class_run, 
+			scheduler_enums, &scheduler_mode, _("\
+Set mode for locking scheduler during execution."), _("\
+Show mode for locking scheduler during execution."), _("\
 off  == no locking (threads may preempt at any time)\n\
 on   == full locking (no thread except the current thread may run)\n\
 step == scheduler locked during every single-step operation.\n\
 	In this mode, no other thread may run during a step command.\n\
-	Other threads may run while stepping over a function call ('next').", 
-			&setlist);
-
-  set_cmd_sfunc (c, set_schedlock_func);	/* traps on target vector */
-  deprecated_add_show_from_set (c, &showlist);
+	Other threads may run while stepping over a function call ('next')."), 
+			set_schedlock_func,	/* traps on target vector */
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 
   add_setshow_boolean_cmd ("step-mode", class_run, &step_stop_if_no_debug, _("\
 Set mode of the step operation."), _("\

@@ -695,12 +695,13 @@ by gdbserver."),
 			    NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_enum_cmd ("remotelogbase", no_class,
-		       logbase_enums, &serial_logbase,
-		       "Set numerical base for remote session logging",
-		       &setlist),
-     &showlist);
+  add_setshow_enum_cmd ("remotelogbase", no_class, logbase_enums,
+			&serial_logbase, _("\
+Set numerical base for remote session logging"), _("\
+Show numerical base for remote session logging"), NULL,
+			NULL,
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 
   add_setshow_zinteger_cmd ("serial", class_maintenance,
 			    &global_serial_debug_p, _("\

@@ -1,5 +1,9 @@
 2005-02-20  Andrew Cagney  <cagney@gnu.org>
 
+	Use add_setshow_enum_cmd through out.
+	* arch-utils.c, charset.c, demangle.c, i386-tdep.c: Update.
+	* infrun.c, mips-tdep.c, osabi.c, serial.c, tui/tui-win.c: Update.
+	
 	* mi/mi-main.c (captured_mi_execute_command): Use
 	mi_cmd_interpreter_exec.
 

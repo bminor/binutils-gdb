@@ -369,20 +369,23 @@ static const char *set_endian_string;
 /* Called by ``show endian''.  */
 
 static void
-show_endian (char *args, int from_tty)
+show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+	     const char *value)
 {
   if (target_byte_order_auto)
     if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-      printf_unfiltered (_("The target endianness is set automatically "
-			   "(currently big endian)\n"));
+      fprintf_unfiltered (file, _("The target endianness is set automatically "
+				  "(currently big endian)\n"));
     else
-      printf_unfiltered (_("The target endianness is set automatically "
+      fprintf_unfiltered (file, _("The target endianness is set automatically "
 			   "(currently little endian)\n"));
   else
     if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-      printf_unfiltered (_("The target is assumed to be big endian\n"));
-  else
-      printf_unfiltered (_("The target is assumed to be little endian\n"));
+      fprintf_unfiltered (file,
+			  _("The target is assumed to be big endian\n"));
+    else
+      fprintf_unfiltered (file,
+			  _("The target is assumed to be little endian\n"));
 }
 
 static void
@@ -413,7 +416,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
   else
     internal_error (__FILE__, __LINE__,
 		    _("set_endian: bad value"));
-  show_endian (NULL, from_tty);
+  show_endian (gdb_stdout, from_tty, NULL, NULL);
 }
 
 /* Functions to manipulate the architecture of the target */
@@ -437,14 +440,17 @@ selected_architecture_name (void)
    argument. */
 
 static void
-show_architecture (char *args, int from_tty)
+show_architecture (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
 {
   const char *arch;
   arch = TARGET_ARCHITECTURE->printable_name;
   if (target_architecture_auto)
-    printf_filtered (_("The target architecture is set automatically (currently %s)\n"), arch);
+    fprintf_filtered (file, _("\
+The target architecture is set automatically (currently %s)\n"), arch);
   else
-    printf_filtered (_("The target architecture is assumed to be %s\n"), arch);
+    fprintf_filtered (file, _("\
+The target architecture is assumed to be %s\n"), arch);
 }
 
 
@@ -472,7 +478,7 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	printf_unfiltered (_("Architecture `%s' not recognized.\n"),
 			   set_architecture_string);
     }
-  show_architecture (NULL, from_tty);
+  show_architecture (gdb_stdout, from_tty, NULL, NULL);
 }
 
 /* Try to select a global architecture that matches "info".  Return
@@ -642,21 +648,13 @@ initialize_current_architecture (void)
     arches = xrealloc (arches, sizeof (char*) * (nr + 2));
     arches[nr + 0] = "auto";
     arches[nr + 1] = NULL;
-    /* FIXME: add_set_enum_cmd() uses an array of ``char *'' instead
-       of ``const char *''.  We just happen to know that the casts are
-       safe. */
-    c = add_set_enum_cmd ("architecture", class_support,
-			  arches, &set_architecture_string,
-			  _("Set architecture of target."),
-			  &setlist);
-    set_cmd_sfunc (c, set_architecture);
+    add_setshow_enum_cmd ("architecture", class_support,
+			  arches, &set_architecture_string, _("\
+Set architecture of target."), _("\
+Show architecture of target."), NULL,
+			  set_architecture, show_architecture,
+			  &setlist, &showlist);
     add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
-    /* Don't use set_from_show - need to print both auto/manual and
-       current setting. */
-    /* FIXME: i18n: add_setshow_enum_cmd uses a print function so
-       fancy printing is possible.  */
-    add_cmd ("architecture", class_support, show_architecture,
-	     _("Show the current target architecture"), &showlist);
   }
 }
 
@@ -731,15 +729,10 @@ void
 _initialize_gdbarch_utils (void)
 {
   struct cmd_list_element *c;
-  c = add_set_enum_cmd ("endian", class_support,
-			endian_enum, &set_endian_string,
-			_("Set endianness of target."),
-			&setlist);
-  set_cmd_sfunc (c, set_endian);
-  /* Don't use set_from_show - need to print both auto/manual and
-     current setting. */
-  /* FIXME: i18n: add_setshow_enum_cmd uses a print function so
-     fancy printing is possible.  */
-  add_cmd ("endian", class_support, show_endian,
-	   _("Show the current byte-order"), &showlist);
+  add_setshow_enum_cmd ("endian", class_support,
+			endian_enum, &set_endian_string, _("\
+Set endianness of target."), _("\
+Show endianness of target."), NULL,
+			set_endian, show_endian,
+			&setlist, &showlist);
 }

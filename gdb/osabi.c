@@ -597,18 +597,20 @@ set_osabi (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 static void
-show_osabi (char *args, int from_tty)
+show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+	    const char *value)
 {
   if (user_osabi_state == osabi_auto)
-    printf_filtered (_("The current OS ABI is \"auto\" (currently \"%s\").\n"),
-		     gdbarch_osabi_name (gdbarch_osabi (current_gdbarch)));
+    fprintf_filtered (file,
+		      _("The current OS ABI is \"auto\" (currently \"%s\").\n"),
+		      gdbarch_osabi_name (gdbarch_osabi (current_gdbarch)));
   else
-    printf_filtered (_("The current OS ABI is \"%s\".\n"),
-		     gdbarch_osabi_name (user_selected_osabi));
+    fprintf_filtered (file, _("The current OS ABI is \"%s\".\n"),
+		      gdbarch_osabi_name (user_selected_osabi));
 
   if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
-    printf_filtered (_("The default OS ABI is \"%s\".\n"),
-		     gdbarch_osabi_name (GDB_OSABI_DEFAULT));
+    fprintf_filtered (file, _("The default OS ABI is \"%s\".\n"),
+		      gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
 
 extern initialize_file_ftype _initialize_gdb_osabi; /* -Wmissing-prototype */
@@ -629,11 +631,12 @@ _initialize_gdb_osabi (void)
 				  generic_elf_osabi_sniffer);
 
   /* Register the "set osabi" command.  */
-  c = add_set_enum_cmd ("osabi", class_support, gdb_osabi_available_names,
-			&set_osabi_string, "Set OS ABI of target.", &setlist);
-
-  set_cmd_sfunc (c, set_osabi);
-  add_cmd ("osabi", class_support, show_osabi, _("Show OS/ABI of target."),
-	   &showlist);
+  add_setshow_enum_cmd ("osabi", class_support, gdb_osabi_available_names,
+			&set_osabi_string, _("\
+Set OS ABI of target."), _("\
+Show OS ABI of target."), NULL,
+			set_osabi,
+			show_osabi,
+			&setlist, &showlist);
   user_osabi_state = osabi_auto;
 }

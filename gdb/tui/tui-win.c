@@ -374,46 +374,49 @@ XDB compatibility command for setting the height of a command window.\n\
 Usage: w <#lines>\n"));
 
   /* Define the tui control variables.  */
-  c = add_set_enum_cmd
-    ("border-kind", no_class,
-     tui_border_kind_enums, &tui_border_kind,
-     "Set the kind of border for TUI windows.\n"
-     "This variable controls the border of TUI windows:\n"
-     "space           use a white space\n"
-     "ascii           use ascii characters + - | for the border\n"
-     "acs             use the Alternate Character Set\n",
-     &tui_setlist);
-  deprecated_add_show_from_set (c, &tui_showlist);
+  add_setshow_enum_cmd ("border-kind", no_class, tui_border_kind_enums,
+			&tui_border_kind, _("\
+Set the kind of border for TUI windows."), _("\
+Show the kind of border for TUI windows."), _("\
+This variable controls the border of TUI windows:\n\
+space           use a white space\n\
+ascii           use ascii characters + - | for the border\n\
+acs             use the Alternate Character Set"),
+			NULL,
+			NULL, /* FIXME: i18n: */
+			&tui_setlist, &tui_showlist);
 
-  c = add_set_enum_cmd
-    ("border-mode", no_class,
-     tui_border_mode_enums, &tui_border_mode,
-     "Set the attribute mode to use for the TUI window borders.\n"
-     "This variable controls the attributes to use for the window borders:\n"
-     "normal          normal display\n"
-     "standout        use highlight mode of terminal\n"
-     "reverse         use reverse video mode\n"
-     "half            use half bright\n"
-     "half-standout   use half bright and standout mode\n"
-     "bold            use extra bright or bold\n"
-     "bold-standout   use extra bright or bold with standout mode\n",
-     &tui_setlist);
-  deprecated_add_show_from_set (c, &tui_showlist);
+  add_setshow_enum_cmd ("border-mode", no_class, tui_border_mode_enums,
+			&tui_border_mode, _("\
+Set the attribute mode to use for the TUI window borders."), _("\
+Show the attribute mode to use for the TUI window borders."), _("\
+This variable controls the attributes to use for the window borders:\n\
+normal          normal display\n\
+standout        use highlight mode of terminal\n\
+reverse         use reverse video mode\n\
+half            use half bright\n\
+half-standout   use half bright and standout mode\n\
+bold            use extra bright or bold\n\
+bold-standout   use extra bright or bold with standout mode"),
+			NULL,
+			NULL, /* FIXME: i18n: */
+			&tui_setlist, &tui_showlist);
 
-  c = add_set_enum_cmd
-    ("active-border-mode", no_class,
-     tui_border_mode_enums, &tui_active_border_mode,
-     "Set the attribute mode to use for the active TUI window border.\n"
-     "This variable controls the attributes to use for the active window border:\n"
-     "normal          normal display\n"
-     "standout        use highlight mode of terminal\n"
-     "reverse         use reverse video mode\n"
-     "half            use half bright\n"
-     "half-standout   use half bright and standout mode\n"
-     "bold            use extra bright or bold\n"
-     "bold-standout   use extra bright or bold with standout mode\n",
-     &tui_setlist);
-  deprecated_add_show_from_set (c, &tui_showlist);
+  add_setshow_enum_cmd ("active-border-mode", no_class, tui_border_mode_enums,
+			&tui_active_border_mode, _("\
+Set the attribute mode to use for the active TUI window border."), _("\
+Show the attribute mode to use for the active TUI window border."), _("\
+This variable controls the attributes to use for the active window border:\n\
+normal          normal display\n\
+standout        use highlight mode of terminal\n\
+reverse         use reverse video mode\n\
+half            use half bright\n\
+half-standout   use half bright and standout mode\n\
+bold            use extra bright or bold\n\
+bold-standout   use extra bright or bold with standout mode"),
+			NULL,
+			NULL, /* FIXME: i18n: */
+			&tui_setlist, &tui_showlist);
 }
 
 /* Update gdb's knowledge of the terminal size.  */

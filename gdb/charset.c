@@ -1075,19 +1075,19 @@ set_target_charset_sfunc (char *charset, int from_tty,
 
 /* sfunc for the 'show charset' command.  */
 static void
-show_charset (char *arg, int from_tty)
+show_charset (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+	      const char *name)
 {
   if (current_host_charset == current_target_charset)
-    {
-      printf_filtered (_("The current host and target character set is `%s'.\n"),
-                       host_charset ());
-    }
+    fprintf_filtered (file,
+		      _("The current host and target character set is `%s'.\n"),
+		      host_charset ());
   else
     {
-      printf_filtered (_("The current host character set is `%s'.\n"),
-                       host_charset ());
-      printf_filtered (_("The current target character set is `%s'.\n"),
-                       target_charset ());
+      fprintf_filtered (file, _("The current host character set is `%s'.\n"),
+			host_charset ());
+      fprintf_filtered (file, _("The current target character set is `%s'.\n"),
+			target_charset ());
     }
 }
 
@@ -1218,60 +1218,43 @@ _initialize_charset (void)
   set_host_charset (host_charset_name);
   set_target_charset (target_charset_name);
 
-  new_cmd = add_set_enum_cmd ("charset",
-			      class_support,
-			      host_charset_enum,
-			      &host_charset_name,
-                              _("Set the host and target character sets.\n\
+  add_setshow_enum_cmd ("charset", class_support,
+			host_charset_enum, &host_charset_name, _("\
+Set the host and target character sets."), _("\
+Show the host and target character sets."), _("\
 The `host character set' is the one used by the system GDB is running on.\n\
 The `target character set' is the one used by the program being debugged.\n\
 You may only use supersets of ASCII for your host character set; GDB does\n\
 not support any others.\n\
 To see a list of the character sets GDB supports, type `set charset <TAB>'."),
-			      &setlist);
+			/* Note that the sfunc below needs to set
+			   target_charset_name, because the 'set
+			   charset' command sets two variables.  */
+			set_charset_sfunc,
+			show_charset,
+			&setlist, &showlist);
 
-  /* Note that the sfunc below needs to set target_charset_name, because 
-     the 'set charset' command sets two variables.  */
-  set_cmd_sfunc (new_cmd, set_charset_sfunc);
-  /* Don't use set_from_show - need to print some extra info. */
-  add_cmd ("charset", class_support, show_charset,
-	   _("Show the host and target character sets.\n\
-The `host character set' is the one used by the system GDB is running on.\n\
-The `target character set' is the one used by the program being debugged.\n\
-You may only use supersets of ASCII for your host character set; GDB does\n\
-not support any others.\n\
-To see a list of the character sets GDB supports, type `set charset <TAB>'."),
-	   &showlist);
-
-
-  new_cmd = add_set_enum_cmd ("host-charset",
-			      class_support,
-			      host_charset_enum,
-			      &host_charset_name,
-			      _("Set the host character set.\n\
+  add_setshow_enum_cmd ("host-charset", class_support,
+			host_charset_enum, &host_charset_name, _("\
+Set the host character set."), _("\
+Show the host character set."), _("\
 The `host character set' is the one used by the system GDB is running on.\n\
 You may only use supersets of ASCII for your host character set; GDB does\n\
 not support any others.\n\
 To see a list of the character sets GDB supports, type `set host-charset <TAB>'."),
-			      &setlist);
+			set_host_charset_sfunc,
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 
-  set_cmd_sfunc (new_cmd, set_host_charset_sfunc);
-
-  deprecated_add_show_from_set (new_cmd, &showlist);
-
-
-
-  new_cmd = add_set_enum_cmd ("target-charset",
-			      class_support,
-			      target_charset_enum,
-			      &target_charset_name,
-			      _("Set the target character set.\n\
+  add_setshow_enum_cmd ("target-charset", class_support,
+			target_charset_enum, &target_charset_name, _("\
+Set the target character set."), _("\
+Show the target character set."), _("\
 The `target character set' is the one used by the program being debugged.\n\
 GDB translates characters and strings between the host and target\n\
 character sets as needed.\n\
 To see a list of the character sets GDB supports, type `set target-charset'<TAB>"),
-			      &setlist);
-
-  set_cmd_sfunc (new_cmd, set_target_charset_sfunc);
-  deprecated_add_show_from_set (new_cmd, &showlist);
+			set_target_charset_sfunc,
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 }

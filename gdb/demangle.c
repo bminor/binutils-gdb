@@ -189,14 +189,19 @@ _initialize_demangler (void)
     demangling_style_names[i] =
       xstrdup (libiberty_demanglers[i].demangling_style_name);
 
-  set = add_set_enum_cmd ("demangle-style", class_support,
-			  demangling_style_names,
-			  (const char **) &current_demangling_style_string,
-			  "Set the current C++ demangling style.\n\
-Use `set demangle-style' without arguments for a list of demangling styles.",
-			  &setlist);
-  show = deprecated_add_show_from_set (set, &showlist);
-  set_cmd_sfunc (set, set_demangling_command);
+  /* FIXME: cagney/2005-02-20: The code implementing this variable are
+     malloc-ing and free-ing current_demangling_style_string when it
+     should instead just point to an element of
+     demangling_style_names.  */
+  add_setshow_enum_cmd ("demangle-style", class_support,
+			demangling_style_names,
+			(const char **) &current_demangling_style_string, _("\
+Set the current C++ demangling style."), _("\
+Show the current C++ demangling style."), _("\
+Use `set demangle-style' without arguments for a list of demangling styles."),
+			set_demangling_command,
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 
   /* Set the default demangling style chosen at compilation time. */
   set_demangling_style (DEFAULT_DEMANGLING_STYLE);

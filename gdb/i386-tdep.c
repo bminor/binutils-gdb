@@ -2275,32 +2275,26 @@ _initialize_i386_tdep (void)
   register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
 
   /* Add the variable that controls the disassembly flavor.  */
-  {
-    struct cmd_list_element *new_cmd;
-
-    new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
-				valid_flavors,
-				&disassembly_flavor,
-				"\
-Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
-and the default value is \"att\".",
-				&setlist);
-    deprecated_add_show_from_set (new_cmd, &showlist);
-  }
+  add_setshow_enum_cmd ("disassembly-flavor", no_class, valid_flavors,
+			&disassembly_flavor, _("\
+Set the disassembly flavor."), _("\
+Show the disassembly flavor."), _("\
+The valid values are \"att\" and \"intel\", and the default value is \"att\"."),
+			NULL,
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 
   /* Add the variable that controls the convention for returning
      structs.  */
-  {
-    struct cmd_list_element *new_cmd;
-
-    new_cmd = add_set_enum_cmd ("struct-convention", no_class,
-				valid_conventions,
-				&struct_convention, "\
-Set the convention for returning small structs, valid values \
-are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
-                                &setlist);
-    deprecated_add_show_from_set (new_cmd, &showlist);
-  }
+  add_setshow_enum_cmd ("struct-convention", no_class, valid_conventions,
+			&struct_convention, _("\
+Set the convention for returning small structs."), _("\
+Show the convention for returning small structs."), _("\
+Valid values are \"default\", \"pcc\" and \"reg\", and the default value\n\
+is \"default\"."),
+			NULL,
+			NULL, /* FIXME: i18n: */
+			&setlist, &showlist);
 
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
 				  i386_coff_osabi_sniffer);

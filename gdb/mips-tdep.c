@@ -5210,16 +5210,21 @@ This option can be set to one of:\n\
 			&setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the ABI. */
-  c = add_set_enum_cmd
-    ("abi", class_obscure, mips_abi_strings, &mips_abi_string,
-     "Set the ABI used by this program.\n"
-     "This option can be set to one of:\n"
-     "  auto  - the default ABI associated with the current binary\n"
-     "  o32\n"
-     "  o64\n" "  n32\n" "  n64\n" "  eabi32\n" "  eabi64", &setmipscmdlist);
-  set_cmd_sfunc (c, mips_abi_update);
-  add_cmd ("abi", class_obscure, show_mips_abi,
-	   _("Show ABI in use by MIPS target"), &showmipscmdlist);
+  add_setshow_enum_cmd ("abi", class_obscure, mips_abi_strings,
+			&mips_abi_string, _("\
+Set the MIPS ABI used by this program."), _("\
+Show the MIPS ABI used by this program."), _("\
+This option can be set to one of:\n\
+  auto  - the default ABI associated with the current binary\n\
+  o32\n\
+  o64\n\
+  n32\n\
+  n64\n\
+  eabi32\n\
+  eabi64"),
+			mips_abi_update,
+			show_mips_abi,
+			&setmipscmdlist, &showmipscmdlist);
 
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
