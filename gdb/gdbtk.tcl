@@ -1452,6 +1452,7 @@ proc update_assembly {linespec} {
 			-after .asm.scroll
 		.asm.scroll configure -command "$win yview"
 		set line [pc_to_line $pclist($cfunc) $pc]
+		update
 		$win yview [expr $line - $asm_screen_height / 2]
 		}
 
