@@ -6,6 +6,7 @@
 * New native configurations
 
 NetBSD/vax					vax-*-netbsd*
+OpenBSD/vax					vax-*-openbsd*
 
 * REMOVED configurations and files
 

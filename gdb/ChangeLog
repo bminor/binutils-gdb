@@ -1,5 +1,10 @@
 2004-04-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS (New native configurations): Mention OpenBSD/vax.
+	* configure.host: Add vax-*-openbsd*.
+	* config/vax/obsd.mh: New file.
+	* config/vax/nm-obsd.h: New file.
+
 	* vax-tdep.c: Include "regset.h".
 	(vax_supply_gregset): New function.
 	(vax_gregset): New variable.
