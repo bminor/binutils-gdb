@@ -1,3 +1,12 @@
+Tue Apr 15 15:20:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_XFORM, INSTALL_XFORM1): Remove.
+
+Mon Apr 14 16:29:34 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Change install.sh to install-sh.
+
 Wed Apr  2 18:51:20 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gen-support.c (gen_support_c): sim-state.h renamed to sim-main.h.
