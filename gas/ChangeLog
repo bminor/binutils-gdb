@@ -1,5 +1,10 @@
 2003-06-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* read.c (emit_expr): Set dot_value.
+	* dw2gencfi.c (output_fde): Remove pcrel reloc hack.
+
+2003-06-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* macro.c (sub_actual): Don't lose string if it turns out that
 	&string wasn't an arg.
 
@@ -24,8 +29,8 @@
 	* configure: Regenerate.
 
 2003-05-29  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
-	
-        * config/tc-m32r.c: Amend comment to refer to Renesas
+
+	* config/tc-m32r.c: Amend comment to refer to Renesas
 
 2003-05-27  Richard Henderson  <rth@redhat.com>
 
@@ -99,12 +104,12 @@
 
 2003-05-07  Eric Christopher  <echristo@redhat.com>
 
-        * config/tc-mips.c (mips_abicalls): New variable.
-        (md_parse_option): Use.
-        (s_option): Ditto.
-        (s_abicalls): Ditto.
-        (mips_elf_final_processing): Set EF_MIPS_PIC and
-        EF_MIPS_CPIC dependent on above.
+	* config/tc-mips.c (mips_abicalls): New variable.
+	(md_parse_option): Use.
+	(s_option): Ditto.
+	(s_abicalls): Ditto.
+	(mips_elf_final_processing): Set EF_MIPS_PIC and
+	EF_MIPS_CPIC dependent on above.
 
 2003-05-21  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
@@ -112,34 +117,34 @@
 
 2003-05-21  Nick Clifton  <nickc@redhat.com>
 
-        * config/obj-elf.c: Include dwarf2dbg.h.
-        (elf_pseudo_tab): Add .file and .loc.
-        * config/tc-arc.c (md_pseudo_table): Remove .file and .loc.
-        * config/tc-arm.c: Likewise.
-        * config/tc-h8300.c: Likewise.
-        * config/tc-hppa.c: Likewise.
-        * config/tc-ia64.c: Likewise.
-        * config/tc-m68hc11.c: Likewise.
-        * config/tc-m68k.c: Likewise.
-        * config/tc-mmix.c: Likewise.
-        * config/tc-mn10300.c: Likewise.
-        * config/tc-ppc.c: Likewise.
-        * config/tc-sh.c: Likewise.
-        * config/tc-sparc.c: Likewise.
-        * config/tc-v850.c: Likewise.
-        * config/tc-frv.c: Likewise, and remove redundant inclusion of
-        dwarf2dbg.h.
-        * config/tc-ip2k.c: Likewise.
-        * config/tc-iq2000.c: Likewise.
-        * config/tc-xstormy16.c: Likewise.
-        * config/tc-xtensa.c: Likewise.
+	* config/obj-elf.c: Include dwarf2dbg.h.
+	(elf_pseudo_tab): Add .file and .loc.
+	* config/tc-arc.c (md_pseudo_table): Remove .file and .loc.
+	* config/tc-arm.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mmix.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-frv.c: Likewise, and remove redundant inclusion of
+	dwarf2dbg.h.
+	* config/tc-ip2k.c: Likewise.
+	* config/tc-iq2000.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
 	* Makefile.am: Regenerate dependencies.
-        * Makefile.in: Regenerate.
-        * aclocal.m4: Regenerate.
-        * config.in: Regenerate.
-        * configure: Regenerate.
-        * po/POTFILES.in: Regenerate.
-        * po/gas.pot: Regenerate.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/gas.pot: Regenerate.
 
 2003-05-21  Nick Clifton  <nickc@redhat.com>
 

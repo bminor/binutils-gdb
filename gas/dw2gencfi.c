@@ -666,17 +666,9 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   exp.X_op_symbol = cie->start_address;
   emit_expr (&exp, 4);				/* CIE offset */
   
-  /* ??? Unsure why this works and the following doesn't.  
-     Symptom was incorrect addends to the relocation.  */
-#if 1
-  memset (frag_more (4), 0, 4);			/* Code offset */
-  fix_new (frag_now, frag_now_fix () - 4, 4,
-	   fde->start_address, 0, 1, BFD_RELOC_32);
-#else
   exp.X_add_symbol = fde->start_address;
   exp.X_op_symbol = symbol_temp_new_now ();
-  emit_expr (&exp, 4);
-#endif
+  emit_expr (&exp, 4);				/* Code offset */
 
   exp.X_add_symbol = fde->end_address;
   exp.X_op_symbol = fde->start_address;		/* Code length */

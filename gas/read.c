@@ -3444,6 +3444,8 @@ emit_expr (exp, nbytes)
   if (need_pass_2)
     return;
 
+  dot_value = frag_now_fix ();
+
 #ifndef NO_LISTING
 #ifdef OBJ_ELF
   /* When gcc emits DWARF 1 debugging pseudo-ops, a line number will
