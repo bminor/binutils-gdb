@@ -1,3 +1,8 @@
+2004-09-30  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips_insn16_frame_cache): Remove dead code or
+	conditions that will always be true.
+
 2004-09-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* vaxbsd-nat.c: Include "target,h" and "inf-ptrace.h".

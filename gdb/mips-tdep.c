@@ -1850,24 +1850,14 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
 
       /* If the address is odd, assume this is MIPS16 code.  */
       addr = PROC_LOW_ADDR (proc_desc);
-      mips16 = pc_is_mips16 (addr);
 
       /* Scan through this function's instructions preceding the
          current PC, and look for those that save registers.  */
       while (addr < frame_pc_unwind (next_frame))
 	{
-	  if (mips16)
-	    {
-	      mips16_decode_reg_save (mips16_fetch_instruction (addr),
-				      &gen_save_found);
-	      addr += MIPS16_INSTLEN;
-	    }
-	  else
-	    {
-	      mips32_decode_reg_save (mips32_fetch_instruction (addr),
-				      &gen_save_found, &float_save_found);
-	      addr += MIPS_INSTLEN;
-	    }
+          mips16_decode_reg_save (mips16_fetch_instruction (addr),
+                                  &gen_save_found);
+          addr += MIPS16_INSTLEN;
 	}
       gen_mask = gen_save_found;
       float_mask = float_save_found;
@@ -1891,7 +1881,6 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
      order of that normally used by gcc.  Therefore, we have to fetch
      the first instruction of the function, and if it's an entry
      instruction that saves $s0 or $s1, correct their saved addresses.  */
-  if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
     {
       ULONGEST inst = mips16_fetch_instruction (PROC_LOW_ADDR (proc_desc));
       if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)
