@@ -1053,9 +1053,6 @@ match_simple_name_string ()
       yylval.sval.length = tokptr - lexptr;
       lexptr = tokptr;
       result = copy_name (yylval.sval);
-      for (tokptr = result; *tokptr; tokptr++)
-	if (isupper (*tokptr))
-	  *tokptr = tolower(*tokptr);
       return result;
     }
   return (NULL);
@@ -1776,7 +1773,7 @@ yylex ()
 {
     unsigned int i;
     int token;
-    char *simplename;
+    char *inputname;
     struct symbol *sym;
 
     /* Skip over any leading whitespace. */
@@ -1888,10 +1885,16 @@ yylex ()
        the token from lexptr, so we can't back out if we later find that
        we can't classify what sort of name it is. */
 
-    simplename = match_simple_name_string ();
+    inputname = match_simple_name_string ();
 
-    if (simplename != NULL)
+    if (inputname != NULL)
       {
+	char *simplename = (char*) alloca (strlen (inputname));
+
+	char *dptr = simplename, *sptr = inputname;
+	for (; *sptr; sptr++)
+	  *dptr++ = isupper (*sptr) ? tolower(*sptr) : *sptr;
+
 	/* See if it is a reserved identifier. */
 	for (i = 0; i < sizeof (idtokentab) / sizeof (idtokentab[0]); i++)
 	    {
@@ -1913,9 +1916,15 @@ yylex ()
 		return (BOOLEAN_LITERAL);
 	    }
 
-	sym = lookup_symbol (simplename, expression_context_block,
+	sym = lookup_symbol (inputname, expression_context_block,
 			     VAR_NAMESPACE, (int *) NULL,
 			     (struct symtab **) NULL);
+	if (sym == NULL && strcmp (inputname, simplename) != 0)
+	  {
+	    sym = lookup_symbol (simplename, expression_context_block,
+				 VAR_NAMESPACE, (int *) NULL,
+				 (struct symtab **) NULL);
+	  }
 	if (sym != NULL)
 	  {
 	    yylval.ssym.stoken.ptr = NULL;
@@ -1956,7 +1965,7 @@ yylex ()
 	      case LOC_UNDEF:
 	      case LOC_CONST_BYTES:
 	      case LOC_OPTIMIZED_OUT:
-		error ("Symbol \"%s\" names no location.", simplename);
+		error ("Symbol \"%s\" names no location.", inputname);
 		break;
 	      }
 	  }
@@ -1966,7 +1975,7 @@ yylex ()
 	  }
 	else
 	  {
-	    error ("No symbol \"%s\" in current context.", simplename);
+	    error ("No symbol \"%s\" in current context.", inputname);
 	  }
       }
 
@@ -1978,8 +1987,8 @@ yylex ()
 	case '.':			/* Not float for example. */
 	  lexptr++;
 	  while (isspace (*lexptr)) lexptr++;
-	  simplename = match_simple_name_string ();
-	  if (!simplename)
+	  inputname = match_simple_name_string ();
+	  if (!inputname)
 	    return '.';
 	  return FIELD_NAME;
       }
