@@ -55,3 +55,5 @@ GDBFLAGS = -nx
 DIFF = diff
 DIFFFLAGS = 
 
+RUNTEST=i386-aout-runtest
+RUNTESTFLAGS=

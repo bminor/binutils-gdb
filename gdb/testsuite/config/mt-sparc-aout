@@ -55,3 +55,5 @@ GDBFLAGS = -nx
 DIFF = diff
 DIFFFLAGS = 
 
+RUNTESTFLAGS=sparc-aout-runtest
+RUNTESTFLAGS=

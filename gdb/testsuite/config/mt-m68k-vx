@@ -1,9 +1,6 @@
-RUNTEST = m68k-vxworks-runtest
-RUNTESTFLAGS = 
-
 # compilers and assemblers
 CC = m68k-vxworks-gcc
-CFLAGS = -g -r -D${target_os} -I/cygint/limbo/unsupported/packages/vxworks/vx68/5.0.3/h
+CFLAGS = -g -r -D${target_os} -I/unsupported/packages/vxworks/vx68/5.0.3/h -I/s1/packages/vx68/h
 C++ = ${CC}
 C++FLAGS = ${CFLAGS}
 CXX = ${CC}
@@ -58,3 +55,5 @@ GDBFLAGS = -nx
 DIFF = diff
 DIFFFLAGS = 
 
+RUNTEST=m68k-vxworks-runtest
+RUNTESTFLAGS=

@@ -19,6 +19,8 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
+load_lib gdb.exp
+
 # variables that need to set up
 #
 if ![info exists prompt] then {
@@ -163,19 +165,19 @@ proc gdb_start {} {
     if $verbose>1 then {
 	send_user "Spawning $GDB $GDBFLAGS\n"
     }
-
+    
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
     if [ llength $GDBFLAGS ] then {
 	if {[which $GDB] != 0} then {
-	spawn $GDB $GDBFLAGS
-    } else {
+	    spawn $GDB $GDBFLAGS
+	} else {
 	    error "$GDB does not exist."
 	    exit 1
 	}
     } else {
 	if {[which $GDB] != 0} then {
-	spawn $GDB
+	    spawn $GDB
 	} else {
 	    error "$GDB does not exist."
 	    exit 1
@@ -185,8 +187,8 @@ proc gdb_start {} {
 	-re ".*$prompt $"	{
 	    if $verbose>1 then {
 		send_user "GDB initialized for native mode\n"
+	    }
 	}
-    }
 	-re "$prompt $"	{
 	    error "GDB never initialized."
 	    return -1
@@ -215,12 +217,16 @@ proc gdb_start {} {
 	-re ".*$prompt $" {
 	    if $verbose>2 then {
 		send_user "Seting width to 0.\n"
-}
+	    }
 	}
 	timeout {
 	    warning "Couldn't set the width to 0."
-}
+	}
     }
+}
+
+proc gdb_exit { } {
+    default_gdb_exit
 }
 
 # These only need to be uncommented for debugging test cases. They exist
@@ -235,7 +241,6 @@ proc gdb_start {} {
 #    "Undefined command"	   { error "send string probably wrong." }
 #}
 
-load_lib gdb.exp
 
 set binpath /s1/users/rob/vxworks/bin/somewhere-bogus-that-needs-configuring
 set bin $GDB

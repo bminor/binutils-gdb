@@ -23,6 +23,9 @@
 # load support libraries
 #
 load_lib remote.exp
+load_lib gdb.exp
+load_lib vxworks.exp
+
 set shell_prompt "->"
 
 # these need to be initialized only if site.exp doesn't set them
@@ -134,26 +137,32 @@ proc gdb_start { } {
 
     # reboot vxworks to get a clean start
     if $reboot then {
-	send_user "Rebooting VxWorks, Please wait...\n"
+	verbose "Rebooting VxWorks, Please wait...\n"
 
 	send -i $shell_id "\CX"
 	set timeout 120
 	expect {
 	    -i $shell_id -re "Connection closed.*$" {
-		verbose "\nVxWorks has closed the shell" 1
+		verbose "\nVxWorks has closed the shell"
 		}
-	    eof         { error "(eof) never disconnected from VxWorks shell."; return -1 }
-	    timeout     { error "(timeout) never disconnected from VxWorks shell."; return -1 }
+	    -i $shell_id eof {
+		error "(eof) never disconnected from VxWorks shell."
+		return -1
+	    }
+	    -i $shell_id timeout {
+		error "(timeout) never disconnected from VxWorks shell."
+		return -1
+	    }
 	}
-	close -i $shell_id
+	catch "close -i $shell_id" tmp
+	wait -i $shell_id
+#	exec sleep 30
 
-	exec sleep 30
-
-	set timeout 60
-	set shell_id [ eval $connectmode "$targetname" ]
-	if $shell_id<0 then {
-	    error "Couldn't connect to $targetname."
-	}
+#	set timeout 60
+#	set shell_id [ eval $connectmode "$targetname" ]
+#	if $shell_id<0 then {
+#	    error "Couldn't connect to $targetname."
+#	}
     }
     set timeout 10
 
@@ -170,17 +179,32 @@ proc spawn_vxgdb { } {
 
     # start GDB
     if [ llength $GDBFLAGS ] then {
-	spawn $GDB $GDBFLAGS
+	if {[which $GDB] != 0} then {
+	    spawn $GDB $GDBFLAGS
+	} else {
+            error "$GDB does not exist."
+            exit 1
+        }
     } else {
-	spawn $GDB
+        if {[which $GDB] != 0} then {
+	    spawn $GDB
+        } else {
+            error "$GDB does not exist."
+            exit 1
+        }
     }
     expect  {
-	-re ".*$prompt $"   {
-	    verbose "$GDB initialized for cross mode to Vxworks\n" 1
+	-re ".*$prompt $" {
+	    verbose "$GDB initialized for cross mode to Vxworks\n"
 	}
-	-re "$prompt $"     { error "GDB never initialized."; return -1 }
-	timeout             { error "(timeout) GDB never initialized.";
-	    return -1 }
+	-re "$prompt $" {
+	    error "GDB never initialized."
+	    return -1
+	}
+	timeout {
+	    error "(timeout) GDB never initialized."
+	    return -1
+	}
     }
 
     # force the height to "unlimited", so no pagers get used
@@ -217,6 +241,12 @@ proc spawn_vxgdb { } {
     set timeout 10
 }
 
+proc gdb_exit { } {
+    global shell_id
+    exit_remote_shell $shell_id
+    default_gdb_exit
+}
+
 #expect_after {
 #    "<return>"		   { send "\n"; error "Window too small." }
 #    -re "\(y or n\) " 	   { send "n\n"; error "Got interactive prompt." }
@@ -227,14 +257,5 @@ proc spawn_vxgdb { } {
 #    "Undefined command"	   { error "send string probably wrong." }
 #}
 
-load_lib gdb.exp
-
 gdb_start
-
-# make sure gdb has actually started, otherwise if the first test
-# timesout, DejaGnu crashes
-#send "\n"
-#expect {
-#    -re "$prompt"
-#    }
 

@@ -9,7 +9,7 @@ AS = m68k-coff-as
 ASFLAGS = 
 FC =
 FCFLAGS = 
-LD = m68k-coff-ld
+LD = ld
 LDFLAGS =
 LIBS = 
 
@@ -55,3 +55,5 @@ GDBFLAGS = -nx
 DIFF = diff
 DIFFFLAGS = 
 
+RUNTEST=m68k-coff-runtest
+RUNTESTFLAGS=
