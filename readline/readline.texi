@@ -5,9 +5,13 @@
 @comment %**end of header (This is for running Texinfo on a region.)
 @synindex fn vr
 
-@c start-menu
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
 * Readline: (readline).		The GNU Readline Library.
-@c end-menu
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
 
 @iftex
 @comment finalout

@@ -1,9 +1,13 @@
 \input texinfo.tex
 @setfilename history.info
 
-@c start-menu
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
 * History: (history).		The GNU History library.
-@c end-menu
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
 
 @ifinfo
 This file documents the GNU History library.
