@@ -506,14 +506,19 @@ stop_wait_callback (struct lwp_info *lp, void *data)
       if (WIFEXITED (status) || WIFSIGNALED (status))
 	{
 	  gdb_assert (num_lwps > 1);
-	  gdb_assert (! is_cloned (lp->pid));
 
-	  gdb_assert (in_thread_list (lp->pid));
-	  if (lp->pid != inferior_pid)
-	    delete_thread (lp->pid);
-	  printf_unfiltered ("[%s exited]\n",
-			     target_pid_to_str (lp->pid));
-
+	  if (in_thread_list (lp->pid))
+	    {
+	      /* Core GDB cannot deal with us deleting the current
+		 thread.  */
+	      if (lp->pid != inferior_pid)
+		delete_thread (lp->pid);
+	      printf_unfiltered ("[%s exited]\n",
+				 target_pid_to_str (lp->pid));
+	    }
+#if DEBUG
+	  printf ("%s exited.\n", target_pid_to_str (lp->pid));
+#endif
 	  delete_lwp (lp->pid);
 	  return 0;
 	}
@@ -708,7 +713,7 @@ lin_lwp_wait (int pid, struct target_waitstatus *ourstatus)
 	    {
 	      if (in_thread_list (lp->pid))
 		{
-		  /* Core GDB cannot deal with us deeting the current
+		  /* Core GDB cannot deal with us deleting the current
                      thread.  */
 		  if (lp->pid != inferior_pid)
 		    delete_thread (lp->pid);

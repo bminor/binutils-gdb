@@ -1,3 +1,9 @@
+2000-09-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* lin-lwp.c (stop_wait_callback): Remove bogus assertions in the
+	code that deals with exiting/signalled threads.  Replace with
+	code similar to what's done in lin_lwp_wait.
+
 2000-09-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-linux-nat.c (fill_gregset, fill_fpregset): New functions.
