@@ -165,42 +165,34 @@ load_memory (SIM_DESC SD,
     {
     case AccessLength_QUADWORD :
       {
-	unsigned_16 val = sim_core_read_aligned_16 (CPU, NULL_CIA, read_map, pAddr);
+	unsigned_16 val = sim_core_read_aligned_16 (CPU, cia, read_map, pAddr);
 	value1 = VH8_16 (val);
 	value = VL8_16 (val);
 	break;
       }
     case AccessLength_DOUBLEWORD :
-      value = sim_core_read_aligned_8 (CPU, NULL_CIA,
-				       read_map, pAddr);
+      value = sim_core_read_aligned_8 (CPU, cia, read_map, pAddr);
       break;
     case AccessLength_SEPTIBYTE :
-      value = sim_core_read_misaligned_7 (CPU, NULL_CIA,
-					  read_map, pAddr);
+      value = sim_core_read_misaligned_7 (CPU, cia, read_map, pAddr);
       break;
     case AccessLength_SEXTIBYTE :
-      value = sim_core_read_misaligned_6 (CPU, NULL_CIA,
-					  read_map, pAddr);
+      value = sim_core_read_misaligned_6 (CPU, cia, read_map, pAddr);
       break;
     case AccessLength_QUINTIBYTE :
-      value = sim_core_read_misaligned_5 (CPU, NULL_CIA,
-					  read_map, pAddr);
+      value = sim_core_read_misaligned_5 (CPU, cia, read_map, pAddr);
       break;
     case AccessLength_WORD :
-      value = sim_core_read_aligned_4 (CPU, NULL_CIA,
-				       read_map, pAddr);
+      value = sim_core_read_aligned_4 (CPU, cia, read_map, pAddr);
       break;
     case AccessLength_TRIPLEBYTE :
-      value = sim_core_read_misaligned_3 (CPU, NULL_CIA,
-					  read_map, pAddr);
+      value = sim_core_read_misaligned_3 (CPU, cia, read_map, pAddr);
       break;
     case AccessLength_HALFWORD :
-      value = sim_core_read_aligned_2 (CPU, NULL_CIA,
-				       read_map, pAddr);
+      value = sim_core_read_aligned_2 (CPU, cia, read_map, pAddr);
       break;
     case AccessLength_BYTE :
-      value = sim_core_read_aligned_1 (CPU, NULL_CIA,
-				       read_map, pAddr);
+      value = sim_core_read_aligned_1 (CPU, cia, read_map, pAddr);
       break;
     default:
       abort ();
@@ -303,40 +295,32 @@ store_memory (SIM_DESC SD,
     case AccessLength_QUADWORD :
       {
 	unsigned_16 val = U16_8 (MemElem1, MemElem);
-	sim_core_write_aligned_16 (CPU, NULL_CIA, write_map, pAddr, val);
+	sim_core_write_aligned_16 (CPU, cia, write_map, pAddr, val);
 	break;
       }
     case AccessLength_DOUBLEWORD :
-      sim_core_write_aligned_8 (CPU, NULL_CIA,
-				write_map, pAddr, MemElem);
+      sim_core_write_aligned_8 (CPU, cia, write_map, pAddr, MemElem);
       break;
     case AccessLength_SEPTIBYTE :
-      sim_core_write_misaligned_7 (CPU, NULL_CIA,
-				   write_map, pAddr, MemElem);
+      sim_core_write_misaligned_7 (CPU, cia, write_map, pAddr, MemElem);
       break;
     case AccessLength_SEXTIBYTE :
-      sim_core_write_misaligned_6 (CPU, NULL_CIA,
-				   write_map, pAddr, MemElem);
+      sim_core_write_misaligned_6 (CPU, cia, write_map, pAddr, MemElem);
       break;
     case AccessLength_QUINTIBYTE :
-      sim_core_write_misaligned_5 (CPU, NULL_CIA,
-				   write_map, pAddr, MemElem);
+      sim_core_write_misaligned_5 (CPU, cia, write_map, pAddr, MemElem);
       break;
     case AccessLength_WORD :
-      sim_core_write_aligned_4 (CPU, NULL_CIA,
-				write_map, pAddr, MemElem);
+      sim_core_write_aligned_4 (CPU, cia, write_map, pAddr, MemElem);
       break;
     case AccessLength_TRIPLEBYTE :
-      sim_core_write_misaligned_3 (CPU, NULL_CIA,
-				   write_map, pAddr, MemElem);
+      sim_core_write_misaligned_3 (CPU, cia, write_map, pAddr, MemElem);
       break;
     case AccessLength_HALFWORD :
-      sim_core_write_aligned_2 (CPU, NULL_CIA,
-				write_map, pAddr, MemElem);
+      sim_core_write_aligned_2 (CPU, cia, write_map, pAddr, MemElem);
       break;
     case AccessLength_BYTE :
-      sim_core_write_aligned_1 (CPU, NULL_CIA,
-				write_map, pAddr, MemElem);
+      sim_core_write_aligned_1 (CPU, cia, write_map, pAddr, MemElem);
       break;
     default:
       abort ();
