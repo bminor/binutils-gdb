@@ -1109,7 +1109,7 @@ print_return_value (int struct_return, struct type *value_type)
 	  internal_error (__FILE__, __LINE__, "bad switch");
 	}
     }
-  else if (!struct_return && DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+  else if (struct_return && DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
     {
       CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
       if (!addr)

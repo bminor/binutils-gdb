@@ -1,5 +1,8 @@
 2004-06-13  Andrew Cagney  <cagney@gnu.org>
 
+	* infcmd.c (print_return_value): Fix logic, allow
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS when struct_return.
+
 	* gdbarch.sh: For predicates, do not check GDB_MULTI_ARCH when
 	defining any macros.
 	* gdbarch.h: Re-generate.
