@@ -45,6 +45,7 @@ emacs
 gas
 gcc
 gdb
+gdbtest
 gdbm
 glob
 grep
