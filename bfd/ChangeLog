@@ -1,5 +1,8 @@
 Thu Oct  3 16:57:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.c (_bfd_elf_create_linker_section): Only use an existing
+	section if the flags are compatible.
+
 	* configure.in: Add havevecs, and put it in tdefaults.
 	* mpw-config.in: Likewise.
 	* configure: Rebuild.
