@@ -1569,7 +1569,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	          if (info->shared
 	              && (
 	              	  (!info->symbolic && h->dynindx != -1)
-	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR == 0)
+	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
 			  )
 	              && ((input_section->flags & SEC_ALLOC) != 0)
 		      )
