@@ -218,9 +218,9 @@ install.cross: install-dirs install-libiberty install-mmalloc \
 
 ### autoconf
 all-autoconf: force
-	if [ -f ./autoconf/Makefile ] ; then \
+	@if [ -f ./autoconf/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./autoconf; echo "XX" $${rootme} "XXX" ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+		(cd ./autoconf; $(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
