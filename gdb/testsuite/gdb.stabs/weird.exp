@@ -12,13 +12,6 @@ proc do_tests {} {
 	global binfile
 	global prompt
 
-	# Do this first because the bug only exhibits itself before partial
-	# symbols have been expanded.
-	setup_xfail "*-*-*"
-	# xcoffread.c doesn't (yet) use partial symbol tables.
-	clear_xfail "rs*-*-aix*"
-	gdb_test "ptype red" "type = enum \{red, green, blue\}" "ptype unnamed enum"
-
 	# Mips/alpha targets that use gcc with mips-tfile put out the stabs
 	# assembler directives embedded in comments. If the assembler
 	# file is then processed with native cc, all stabs directives
@@ -142,8 +135,8 @@ proc do_tests {} {
 	gdb_test "ptype inttype" "type = (unsigned int|inttype)" "ptype on inttype"
 	gdb_test "p sizeof (float72type)" " = 9" "unrecognized floating point type"
 
-	gdb_test "p/x int256var" " = 0x0*2a0000002b0000002c0000002d\
-0000002d0000002c0000002b0000002a" "print very big integer"
+	# This big number needs to be kept as one piece
+	gdb_test "p/x int256var" " = 0x0*2a0000002b0000002c0000002d0000002d0000002c0000002b0000002a" "print very big integer"
 
 	gdb_test "whatis consth" "type = inttype" "whatis consth"
 	gdb_test "whatis consth2" "type = inttype" "whatis consth2"
@@ -176,7 +169,7 @@ field3 = 0x77888877\}" "print struct constant"
 	    "whatis two_var test 2"
 
 	setup_xfail "*-*-*"
-	gdb_test "whatis pointer_to_int_var" "type = int \*"
+	gdb_test "whatis pointer_to_int_var" "type = int \[*\]"
 	setup_xfail "*-*-*"
 	gdb_test "whatis intp_var" "type = intp"
 
@@ -193,9 +186,8 @@ field3 = 0x77888877\}" "print struct constant"
 	setup_xfail "*-*-*"
 	gdb_test "p common0var2" "= 22"
 
-	gdb_test "p v_comb" "{<> = \
-{<> = {x = 42}, \[_a-zA-Z$\]* = \[0-9xa-fA-F\]*, a = 43}, \
-<> = {\[_a-zA-Z$\]* = \[0-9xa-fA-F\]*, b = 44}, comb = 45}"
+	# this long line must be continous, not with "/" escaping the newline
+	gdb_test "p v_comb" "{<> = {<> = {x = 42}, \[_a-zA-Z$.\]* = \[0-9xa-fA-F\]*, a = 43}, <> = {\[_a-zA-Z$.\]* = \[0-9xa-fA-F\]*, b = 44}, comb = 45}"
 }
 
 proc print_weird_var { var } {

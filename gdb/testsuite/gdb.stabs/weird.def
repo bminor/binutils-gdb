@@ -276,15 +276,7 @@ attr69:
 .stabs "attr33:G333=@! !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,0,0, 0
 .stabs "attr35:G334=@# !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,0,0, 0
 
-.stabs "primary:G200=ered:0,green:1,blue:2,;", N_GSYM,0,0, 0
-
 .stabs "attr36:G335=@$ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,0,0, 0
-
-.globl primary
-.data
-.align_it
-primary:
-.long 42
 
 .stabs "attr37:G337=@% !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,0,0, 0
 
@@ -301,11 +293,10 @@ primary:
 
 .stabs "bad_neg0:G201", N_GSYM,0,0, 0
 
-# First .long is 42.  
 .globl bad_neg0
 .data
 .align_it
-ad_neg0:
+bad_neg0:
 .long 42
      .long 43, 44, 45
 
@@ -353,12 +344,13 @@ ad_neg0:
 
 .stabs "attr93:G393=@] !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,0,0, 0
 
-# Provide one of each, so this wins regardless of whether names have
-# underscores.  
+# Do with and without underscore, so this wins regardless of whether
+# names have underscores.
+
 .globl _common0
 .data
 .align_it
- _common0:
+_common0:
 .long 42
      .long 24
      .long 22

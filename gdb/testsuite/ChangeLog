@@ -1,3 +1,14 @@
+Thu Feb  3 12:04:49 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Move test with enums and partial symbols back to
+	gdb.t03/{ptype.exp,gdbme.c} from gdb.stabs/{weird.def,weird.exp}.
+	Reverts the change of 26 May 93.  Per today's change to
+	stabs.texinfo, the behavior that weird.exp was expecting was
+	unreasonable; what is important is that the compiler+gdb get
+	things right, which happens with a recent gcc.  Also fix the test
+	to deal with native compilers which put out the stab gdb can't
+	deal with.
+
 Mon Jan 31 15:40:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t24/demangle.exp: Remove a bunch of tests which differ only
