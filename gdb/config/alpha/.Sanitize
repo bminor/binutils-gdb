@@ -23,9 +23,11 @@ Things-to-keep:
 
 alpha-osf1.mh
 alpha-osf1.mt
+alpha-osf2.mh
 alpha-nw.mt
 gdbserve.mt
-nm-alpha.h
+nm-osf.h
+nm-osf2.h
 tm-alpha.h
 tm-alphanw.h
 xm-alpha.h
