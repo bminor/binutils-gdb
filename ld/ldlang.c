@@ -74,7 +74,7 @@ static void lang_for_each_statement_worker
 	   lang_statement_union_type *s));
 static lang_input_statement_type *new_afile
   PARAMS ((const char *name, lang_input_file_enum_type file_type,
-	   const char *target));
+	   const char *target, boolean add_to_list));
 static void print_flags PARAMS ((int *ignore_flags));
 static void init_os PARAMS ((lang_output_section_statement_type *s));
 static void wild_doit PARAMS ((lang_statement_list_type *ptr,
@@ -87,8 +87,8 @@ static void wild_section PARAMS ((lang_wild_statement_type *ptr,
 				  const char *section,
 				  lang_input_statement_type *file,
 				  lang_output_section_statement_type *output));
-static lang_input_statement_type *lookup_name PARAMS ((const char *name,
-						       int force_load));
+static lang_input_statement_type *lookup_name PARAMS ((const char *name));
+static void load_symbols PARAMS ((lang_input_statement_type *entry));
 static void wild PARAMS ((lang_wild_statement_type *s,
 			  const char *section, const char *file,
 			  const char *target,
@@ -300,14 +300,22 @@ new_statement (type, size, list)
 
  */
 static lang_input_statement_type *
-new_afile (name, file_type, target)
+new_afile (name, file_type, target, add_to_list)
      CONST char *name;
      lang_input_file_enum_type file_type;
      CONST char *target;
+     boolean add_to_list;
 {
+  lang_input_statement_type *p;
 
-  lang_input_statement_type *p = new_stat (lang_input_statement,
-					   stat_ptr);
+  if (add_to_list)
+    p = new_stat (lang_input_statement, stat_ptr);
+  else
+    {
+      p = ((lang_input_statement_type *)
+	   stat_alloc (sizeof (lang_input_statement_type)));
+      p->header.next = NULL;
+    }
 
   lang_has_input_file = true;
   p->target = target;
@@ -338,8 +346,15 @@ new_afile (name, file_type, target)
       p->just_syms_flag = false;
       p->search_dirs_flag = true;
       break;
-    case lang_input_file_is_search_file_enum:
     case lang_input_file_is_marker_enum:
+      p->filename = name;
+      p->is_archive = false;
+      p->real = false;
+      p->local_sym_name = name;
+      p->just_syms_flag = false;
+      p->search_dirs_flag = true;
+      break;
+    case lang_input_file_is_search_file_enum:
       p->filename = name;
       p->is_archive = false;
       p->real = true;
@@ -358,6 +373,7 @@ new_afile (name, file_type, target)
     default:
       FAIL ();
     }
+  p->the_bfd = (bfd *) NULL;
   p->asymbols = (asymbol **) NULL;
   p->superfile = (lang_input_statement_type *) NULL;
   p->next_real_file = (lang_statement_union_type *) NULL;
@@ -396,7 +412,7 @@ lang_add_input_file (name, file_type, target)
 
     }
 #endif
-  return new_afile (name, file_type, target);
+  return new_afile (name, file_type, target, true);
 }
 
 /* Build enough state so that the parser can build its tree */
@@ -745,11 +761,9 @@ wild_section (ptr, section, file, output)
    not define anything we need at the time, they won't have all their
    symbols read. If we need them later, we'll have to redo it.
    */
-static
-lang_input_statement_type *
-lookup_name (name, force_load)
+static lang_input_statement_type *
+lookup_name (name)
      CONST char *name;
-     int force_load;
 {
   lang_input_statement_type *search;
 
@@ -766,50 +780,52 @@ lookup_name (name, force_load)
     }
 
   if (search == (lang_input_statement_type *) NULL)
-    {
-      /* There isn't an afile entry for this file yet, this must be
-	 because the name has only appeared inside a load script and
-	 not on the command line */
-      search = new_afile (name, lang_input_file_is_file_enum, default_target);
-    }
+    search = new_afile (name, lang_input_file_is_file_enum, default_target,
+			false);
 
   /* If we have already added this file, or this file is not real
      (FIXME: can that ever actually happen?) or the name is NULL
      (FIXME: can that ever actually happen?) don't add this file.  */
-  if ((search->loaded && ! force_load)
+  if (search->loaded
       || ! search->real
       || search->filename == (const char *) NULL)
     return search;
-/* start-sanitize-mpw */
-#ifdef MPW
-  /* I hate adding code that works, but for reasons I don't know. */
-  search->the_bfd = NULL;
-#endif
-/* end-sanitize-mpw */
 
-  ldfile_open_file (search);
+  load_symbols (search);
 
-  if (bfd_check_format (search->the_bfd, bfd_object))
+  return search;
+}
+
+/* Get the symbols for an input file.  */
+
+static void
+load_symbols (entry)
+     lang_input_statement_type *entry;
+{
+  if (entry->loaded)
+    return;
+
+  ldfile_open_file (entry);
+
+  if (bfd_check_format (entry->the_bfd, bfd_object))
     {
-      ldlang_add_file (search);
+      ldlang_add_file (entry);
       if (trace_files || trace_file_tries)
-	info_msg ("%I\n", search);
+	info_msg ("%I\n", entry);
     }
-  else if (bfd_check_format (search->the_bfd, bfd_archive))
+  else if (bfd_check_format (entry->the_bfd, bfd_archive))
     {
       /* There is nothing to do here; the add_symbols routine will
 	 call ldlang_add_file (via the add_archive_element callback)
 	 for each element of the archive which is used.  */
     }
   else
-    einfo ("%F%B: file not recognized: %E\n", search->the_bfd);
+    einfo ("%F%B: file not recognized: %E\n", entry->the_bfd);
 
-  if (bfd_link_add_symbols (search->the_bfd, &link_info) == false)
-    einfo ("%F%B: could not read symbols: %E\n", search->the_bfd);
+  if (bfd_link_add_symbols (entry->the_bfd, &link_info) == false)
+    einfo ("%F%B: could not read symbols: %E\n", entry->the_bfd);
 
-  search->loaded = true;
-
-  return search;
+  entry->loaded = true;
 }
 
 static void
@@ -835,7 +851,7 @@ wild (s, section, file, target, output)
   else
     {
       /* Perform the iteration over a single file */
-      wild_section (s, section, lookup_name (file, 0), output);
+      wild_section (s, section, lookup_name (file), output);
     }
   if (section != (char *) NULL
       && strcmp (section, "COMMON") == 0
@@ -938,14 +954,14 @@ open_input_bfds (statement)
       /* Maybe we should load the file's symbols */
       if (statement->wild_statement.filename)
 	{
-	  (void) lookup_name (statement->wild_statement.filename, 1);
+	  (void) lookup_name (statement->wild_statement.filename);
 	}
       break;
     case lang_input_statement_enum:
       if (statement->input_statement.real == true)
 	{
 	  statement->input_statement.target = current_target;
-	  lookup_name (statement->input_statement.filename, 1);
+	  load_symbols (&statement->input_statement);
 	}
       break;
     default:
@@ -1613,11 +1629,12 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
   return dot;
 }
 
-/* Sizing happens in two passes, first pass we allocate worst case
-   stuff. The second pass (if relaxing), we use what we learnt to
-   change the size of some relocs from worst case to better
-   */
-static boolean had_relax;
+/* This variable indicates whether bfd_relax_section should be called
+   again.  */
+
+static boolean relax_again;
+
+/* Set the sizes for all the output sections.  */
 
 bfd_vma
 lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
@@ -1800,50 +1817,26 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      case lang_target_statement_enum:
       break;
      case lang_input_section_enum:
-      if (relax)
       {
-	lang_input_section_type *is;
 	asection *i;
 
-	is = &(*prev)->input_section;
-	i = is->section;
-
-	/* FIXME: The interface to bfd_relax_section should be changed
-	   to not require the generic symbols to be read.  Changing
-	   this would require changing both b_out_relax_section and
-	   bfd_coff_relax16_section.  */
-	if (is->ifile->asymbols == (asymbol **) NULL)
+	i = (*prev)->input_section.section;
+	if (! relax)
+	  i->_cooked_size = i->_raw_size;
+	else
 	  {
-	    unsigned int symsize;
+	    boolean again;
 
-	    symsize = get_symtab_upper_bound (i->owner);
-	    is->ifile->asymbols = (asymbol **) xmalloc (symsize);
-	    is->ifile->symbol_count =
-	      bfd_canonicalize_symtab (i->owner, is->ifile->asymbols);
-
-	    /* The generic linker code in BFD requires that these
-	       symbols be stored in the outsymbols and symcount
-	       fields.  When the bfd_relax_section is interface is
-	       fixed this should also be fixed.  */
-	    i->owner->outsymbols = is->ifile->asymbols;
-	    i->owner->symcount = is->ifile->symbol_count;
+	    if (! bfd_relax_section (i->owner, i, &link_info, &again))
+	      einfo ("%P%F: can't relax section: %E\n");
+	    if (again)
+	      relax_again = true;
 	  }
-
-	bfd_set_error (bfd_error_no_error);
-	if (bfd_relax_section (i->owner, i, &link_info, is->ifile->asymbols))
-	  had_relax = true;
-	else if (bfd_get_error () != bfd_error_no_error)
-	  einfo ("%P%F: can't relax section: %E");
+	dot = size_input_section (prev,
+				  output_section_statement,
+				  output_section_statement->fill,
+				  dot, relax);
       }
-      else  {
-	(*prev)->input_section.section->_cooked_size = 
-	 (*prev)->input_section.section->_raw_size ;
-
-      }
-      dot = size_input_section (prev,
-				output_section_statement,
-				output_section_statement->fill,
-				dot, relax);
       break;
      case lang_input_statement_enum:
       break;
@@ -2529,49 +2522,36 @@ lang_process ()
 
   ldemul_before_allocation ();
 
-
-#if 0
-  had_relax = true;
-  while (had_relax)
-    {
-
-      had_relax = false;
-
-      lang_size_sections (statement_list.head,
-			  (lang_output_section_statement_type *) NULL,
-			  &(statement_list.head), 0, (bfd_vma) 0, true);
-      /* FIXME. Until the code in relax is fixed so that it only reads in
-         stuff once, we cant iterate since there is no way for the linker to
-         know what has been patched and what hasn't */
-      break;
-
-    }
-#endif
-
   /* Now run around and relax if we can */
   if (command_line.relax)
     {
       /* First time round is a trial run to get the 'worst case'
 	 addresses of the objects if there was no relaxing.  */
       lang_size_sections (statement_list.head,
-			  (lang_output_section_statement_type *) NULL,
+			  abs_output_section,
 			  &(statement_list.head), 0, (bfd_vma) 0, false);
 
 
       reset_memory_regions ();
 
-      /* Do all the assignments, now that we know the final resting
-	 places of all the symbols.  */
+      /* Keep relaxing until bfd_relax_section gives up.  */
+      do
+	{
+	  relax_again = false;
 
-      lang_do_assignments (statement_list.head,
-			   abs_output_section,
-			   (fill_type) 0, (bfd_vma) 0);
+	  /* Do all the assignments with our current guesses as to
+	     section sizes.  */
+	  lang_do_assignments (statement_list.head,
+			       abs_output_section,
+			       (fill_type) 0, (bfd_vma) 0);
 
-      /* Perform another relax pass - this time we know where the
-	 globals are, so can make better guess.  */
-      lang_size_sections (statement_list.head,
-			  (lang_output_section_statement_type *) NULL,
-			  &(statement_list.head), 0, (bfd_vma) 0, true);
+	  /* Perform another relax pass - this time we know where the
+	     globals are, so can make better guess.  */
+	  lang_size_sections (statement_list.head,
+			      abs_output_section,
+			      &(statement_list.head), 0, (bfd_vma) 0, true);
+	}
+      while (relax_again);
     }
   else
     {
@@ -2749,6 +2729,7 @@ lang_startup (name)
     }
   first_file->filename = name;
   first_file->local_sym_name = name;
+  first_file->real = true;
 
   startup_file = name;
 }

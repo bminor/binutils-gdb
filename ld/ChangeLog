@@ -1,4 +1,28 @@
+Thu Mar 24 15:20:47 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (new_afile): Add new argument add_to_list.  Don't set
+	real to true for lang_input_file_is_marker_enum.  Clear the_bfd.
+	(lang_add_input_file): Pass true to new_afile for add_to_list.
+	(lookup_name): Remove force_load argument.  Changed all callers.
+	Pass false to new_afile for add_to_list.  Split loading of symbols
+	out into separate function.
+	(load_symbols): New function split out of lookup_name.  Don't load
+	the symbols if they are already loaded.
+	(open_input_bfds): For lang_input_statement_enum call load_symbols
+	rather than lookup_name.
+	(lang_process): Pass abs_output_section rather than NULL to
+	lang_size_sections.
+	(lang_startup): Set real field of first_file to true.
+
 Wed Mar 23 14:15:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (had_relax): Removed.
+	(relax_again): New static variable.
+	(lang_size_sections): Change call to bfd_relax_section to
+	correspond to BFD changes.  Set relax_again appropriately.
+	(lang_process): Remove #if 0 code.  When relaxing, keep calling
+	lang_do_assignments and lang_size_sections until relax_again
+	becomes false.
 
 	* emultemp/gld960.em: Include libiberty.h
 	(gld960_before_parse): Pass NULL as final argument to concat.
