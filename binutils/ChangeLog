@@ -1,3 +1,8 @@
+Mon Feb 22 10:27:24 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* objdump.c (dump_data): Free up section contents each time
+	through the loop.  Reported by minyard@bnr.ca.
+
 Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
 	* binutils/testsuite: Initial creation of binutils/testsuite.

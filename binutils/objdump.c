@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Diddler.
 
@@ -61,27 +61,28 @@ boolean disassemble;		/* -d */
 boolean info;			/* -i */
 char *only;
 
-PROTO (void, display_file, (char *filename, char *target));
-PROTO (void, dump_data, (bfd * abfd));
-PROTO (void, dump_relocs, (bfd * abfd));
-PROTO (void, dump_symbols, (bfd * abfd));
-PROTO (void, print_arelt_descr, (FILE *, bfd * abfd, boolean verbose));
-
-
-
-
-
-
-
 char *machine = (char *) NULL;
 asymbol **syms;
 asymbol **syms2;
-
 
 unsigned int storage;
 
 unsigned int symcount = 0;
 
+/* Forward declarations.  */
+
+static void
+display_file PARAMS ((char *filename, char *target));
+
+static void
+dump_data PARAMS ((bfd *abfd));
+
+static void
+dump_relocs PARAMS ((bfd *abfd));
+
+static void
+dump_symbols PARAMS ((bfd *abfd));
+
 void
 usage ()
 {
@@ -179,13 +180,18 @@ comp (ap, bp)
   asymbol *a = *(asymbol **)ap;
   asymbol *b = *(asymbol **)bp;
   int diff;
+  bfd *a_bfd, *b_bfd;
 
   if (a->name == (char *) NULL || (a->flags & (BSF_DEBUGGING)))
-    a->the_bfd = 0;
+    a_bfd = 0;
+  else
+    a_bfd = bfd_asymbol_bfd(a);
   if (b->name == (char *) NULL || (b->flags & (BSF_DEBUGGING)))
-    b->the_bfd = 0;
+    b_bfd = 0;
+  else
+    b_bfd = bfd_asymbol_bfd(b);
 
-  diff = a->the_bfd - b->the_bfd;
+  diff = a_bfd - b_bfd;
   if (diff)
     {
       return -diff;
@@ -229,7 +235,11 @@ print_address (vma, stream)
 	    break;
 	  vardiff = syms[thisplace]->value - vma;
 
-	  if (vardiff)
+	  if (vardiff
+	      /* Check that the value isn't merely a coincidence.
+	         (if not checked, we might print some undefined symbol
+		 for the address 0 rather than "main", for example.  */
+	      || !(syms[thisplace]->flags & (BSF_GLOBAL|BSF_LOCAL)))
 	    {
 	      if (vardiff > 0)
 		{
@@ -297,10 +307,13 @@ disassemble_data (abfd)
   unsigned int (*print) ()= 0;
   unsigned int print_insn_m68k ();
   unsigned int print_insn_a29k ();
+  unsigned int print_insn_z8001 ();
+  unsigned int print_insn_z8002 ();
   unsigned int print_insn_i960 ();
   unsigned int print_insn_sparc ();
   unsigned int print_insn_i386 ();
   unsigned int print_insn_h8300 ();
+  unsigned int print_insn_mips ();
   enum bfd_architecture a;
 
   asection *section;
@@ -325,7 +338,8 @@ disassemble_data (abfd)
 
     for (i = 0; i < symcount; i++)
       {
-	if (syms[i]->the_bfd == 0)
+	if (syms[i]->name == (char *) NULL
+	    || (syms[i]->flags & BSF_DEBUGGING) != 0)
 	  {
 	    symcount = i;
 	    break;
@@ -361,6 +375,12 @@ disassemble_data (abfd)
 	case bfd_arch_sparc:
 	  print = print_insn_sparc;
 	  break;
+        case bfd_arch_z8k:
+	  if (bfd_get_mach(abfd) == bfd_mach_z8001)
+	   print = print_insn_z8001;
+	  else 
+	   print = print_insn_z8002;
+	  break;
 	case bfd_arch_i386:
 	  print = print_insn_i386;
 	  break;
@@ -372,6 +392,10 @@ disassemble_data (abfd)
 	  break;
 	case bfd_arch_i960:
 	  print = print_insn_i960;
+	  break;
+	case bfd_arch_mips:
+	  /* MIPS is handled specially, because we need to pass an
+	     additional endianness argument.  */
 	  break;
 	default:
 	  fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
@@ -429,15 +453,17 @@ disassemble_data (abfd)
 		      CONST char *functionname;
 		      unsigned int line;
 
-		      bfd_find_nearest_line (abfd,
-					     section,
-					     syms,
-					     section->vma + i,
-					     &filename,
-					     &functionname,
-					     &line);
-
-		      if (filename && functionname && line && line != prevline)
+		      if (bfd_find_nearest_line (abfd,
+						 section,
+						 syms,
+						 section->vma + i,
+						 &filename,
+						 &functionname,
+						 &line)
+			  && filename
+			  && functionname
+			  && line
+			  && line != prevline)
 			{
 			  printf ("%s:%u\n", filename, line);
 			  prevline = line;
@@ -446,9 +472,18 @@ disassemble_data (abfd)
 		  print_address (section->vma + i, stdout);
 		  printf (" ");
 
-		  i += print (section->vma + i,
-			      data + i,
-			      stdout);
+		  if (a != bfd_arch_mips)
+		    i += print (section->vma + i,
+				data + i,
+				stdout);
+		  else
+		    {
+		      /* The endianness of the MIPS can vary.  */
+		      i += print_insn_mips (section->vma + i,
+					    data + i,
+					    stdout,
+					    (int) abfd->xvec->byteorder_big_p);
+		    }
 		  putchar ('\n');
 		}
 	    }
@@ -546,7 +581,7 @@ dump_elf_stabs_1 (abfd, name1, name2)
   strtab = (char *)		     xmalloc (stabstr_hdr->sh_size);
   stabs_end = (struct internal_nlist *) (stab_hdr->sh_size + (char *)stabs);
   
-  if (bfd_seek (abfd, stab_hdr->sh_offset, L_SET) < 0 ||
+  if (bfd_seek (abfd, stab_hdr->sh_offset, SEEK_SET) < 0 ||
       stab_hdr->sh_size != bfd_read ((PTR)stabs, stab_hdr->sh_size, 1, abfd))
     {
       fprintf (stderr, "%s: reading %s section of %s failed.\n",
@@ -555,7 +590,7 @@ dump_elf_stabs_1 (abfd, name1, name2)
       return;
     }
 
-  if (bfd_seek (abfd, stabstr_hdr->sh_offset, L_SET) < 0 ||
+  if (bfd_seek (abfd, stabstr_hdr->sh_offset, SEEK_SET) < 0 ||
       stabstr_hdr->sh_size != bfd_read ((PTR)strtab, stabstr_hdr->sh_size,
 					1, abfd))
     {
@@ -675,7 +710,7 @@ display_bfd (abfd)
     disassemble_data (abfd);
 }
 
-void
+static void
 display_file (filename, target)
      char *filename;
      char *target;
@@ -716,7 +751,7 @@ display_file (filename, target)
 
 /* Actually display the various requested regions */
 
-void
+static void
 dump_data (abfd)
      bfd *abfd;
 {
@@ -775,14 +810,14 @@ dump_data (abfd)
 		    }
 		  putchar ('\n');
 		}
+	      free (data);
 	    }
 	}
-      free (data);
     }
 }
 
 /* Should perhaps share code and display with nm? */
-void
+static void
 dump_symbols (abfd)
      bfd *abfd;
 {
@@ -795,13 +830,16 @@ dump_symbols (abfd)
   for (count = 0; count < symcount; count++)
     {
 
-      if (*current && (*current)->the_bfd)
+      if (*current)
 	{
-	  bfd_print_symbol ((*current)->the_bfd,
-			    stdout,
-			    *current, bfd_print_symbol_all);
-
-	  printf ("\n");
+	  bfd *cur_bfd = bfd_asymbol_bfd(*current);
+	  if (cur_bfd)
+	    {
+	      bfd_print_symbol (cur_bfd,
+				stdout,
+				*current, bfd_print_symbol_all);
+	      printf ("\n");
+	    }
 
 	}
       current++;
@@ -810,7 +848,7 @@ dump_symbols (abfd)
   printf ("\n");
 }
 
-void
+static void
 dump_relocs (abfd)
      bfd *abfd;
 {
@@ -824,7 +862,7 @@ dump_relocs (abfd)
 	continue;
       if (a == &bfd_und_section)
 	continue;
-      if (a == &bfd_com_section)
+      if (bfd_is_com_section (a))
 	continue;
 
       printf ("RELOCATION RECORDS FOR [%s]:", a->name);
