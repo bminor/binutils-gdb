@@ -2311,27 +2311,29 @@ coff_slurp_symbol_table (abfd)
 		}
 	      else
 		{
-		  /*
-	    Base the value as an index from the base of the
-	    section
-	    */
+		  /* Base the value as an index from the base of the
+		     section */
 
 		  dst->symbol.flags = BSF_EXPORT | BSF_GLOBAL;
-		  dst->symbol.value = src->u.syment.n_value - dst->symbol.section->vma;
+		  dst->symbol.value = (src->u.syment.n_value
+				       - dst->symbol.section->vma);
 
 		  if (ISFCN ((src->u.syment.n_type)))
 		    {
-		      /*
-	      A function ext does not go at the end of a file
-	      */
+		      /* A function ext does not go at the end of a
+			 file.  */
 		      dst->symbol.flags |= BSF_NOT_AT_END | BSF_FUNCTION;
 		    }
 		}
 
 #ifdef RS6000COFF_C
-	      /* If this symbol has a csect aux of type LD, the scnlen field
-	   is actually the index of the containing csect symbol.  We
-	   need to pointerize it.  */
+	      /* A C_HIDEXT symbol is not global.  */
+	      if (src->u.syment.n_sclass == C_HIDEXT)
+		dst->symbol.flags = BSF_LOCAL;
+
+	      /* If this symbol has a csect aux of type LD, the scnlen
+		 field is actually the index of the containing csect
+		 symbol.  We need to pointerize it.  */
 	      if (src->u.syment.n_numaux > 0)
 		{
 		  combined_entry_type *aux;
