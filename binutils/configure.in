@@ -287,7 +287,7 @@ else
 fi
 AC_SUBST(UNDERSCORE)
 
-AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
+AC_OUTPUT(Makefile doc/Makefile po/Makefile.in:po/Make-in,
 [
 case "x$CONFIG_FILES" in
 *) sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile ;;

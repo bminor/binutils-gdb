@@ -33,11 +33,10 @@ noinst_HEADERS = \
 	corefile.h gmon.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h
 
-EXTRA_DIST = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c bbconv.pl
-
 BUILT_SOURCES = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
+EXTRA_DIST    = $(BUILT_SOURCES) bbconv.pl $(man_MANS)
 
-diststuff: $(BUILT_SOURCES) info
+diststuff: $(BUILT_SOURCES) info $(man_MANS)
 
 .m.c:
 	awk -f $(srcdir)/gen-c-prog.awk > ./$*.c \
@@ -61,13 +60,13 @@ man_MANS = gprof.1
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-$(srcdir)/gprof.1: $(srcdir)/gprof.texi
-	touch $(srcdir)/gprof.1
+gprof.1: $(srcdir)/gprof.texi
+	touch $@
 	-$(TEXI2POD) $(MANCONF) -Dgprof < $(srcdir)/gprof.texi > gprof.pod
 	-($(POD2MAN) gprof.pod | \
-		sed -e '/^.if n .na/d' > $(srcdir)/gprof.1.T$$$$ && \
-		mv -f $(srcdir)/gprof.1.T$$$$ $(srcdir)/gprof.1) || \
-		(rm -f $(srcdir)/gprof.1.T$$$$ && exit 1)
+	       sed -e '/^.if n .na/d' > $@.T$$$$ && \
+	       mv -f $@.T$$$$ $@) || \
+	       (rm -f $@.T$$$$ && exit 1)
 	rm -f gprof.pod
 
 # Targets to rebuild dependencies in this Makefile.

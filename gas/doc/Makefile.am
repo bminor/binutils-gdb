@@ -65,14 +65,17 @@ MAINTAINERCLEANFILES = gasver.texi
 
 # Maintenance
 
+# We need it for the taz target in ../../Makefile.in.
+info: $(MANS)
+
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-$(srcdir)/as.1: $(srcdir)/as.texinfo
-	touch $(srcdir)/as.1
+as.1: $(srcdir)/as.texinfo
+	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/as.texinfo > as.pod
 	-($(POD2MAN) as.pod | \
-		sed -e '/^.if n .na/d' > $(srcdir)/as.1.T$$$$ && \
-		mv -f $(srcdir)/as.1.T$$$$ $(srcdir)/as.1) || \
-		(rm -f $(srcdir)/as.1.T$$$$ && exit 1)
-
+	        sed -e '/^.if n .na/d' > $@.T$$$$ && \
+	        mv -f $@.T$$$$ $@) || \
+	        (rm -f $@.T$$$$ && exit 1)
+	rm -f as.pod

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-05-30 12:04+0100\n"
+"POT-Creation-Date: 2001-06-13 12:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -185,7 +185,7 @@ msgstr ""
 msgid "internal error -- this option not implemented"
 msgstr ""
 
-#: ar.c:824 ar.c:876 ar.c:1322 objcopy.c:1266
+#: ar.c:824 ar.c:876 ar.c:1322 objcopy.c:1282
 #, c-format
 msgid "internal stat error on %s"
 msgstr ""
@@ -1616,167 +1616,172 @@ msgstr ""
 msgid "supported flags: %s"
 msgstr ""
 
-#: objcopy.c:556 objcopy.c:2082
+#: objcopy.c:558 objcopy.c:2098
 #, c-format
 msgid "cannot stat: %s: %s"
 msgstr ""
 
-#: objcopy.c:563 objcopy.c:2100
+#: objcopy.c:565 objcopy.c:2116
 #, c-format
 msgid "cannot open: %s: %s"
 msgstr ""
 
-#: objcopy.c:566 objcopy.c:2104
+#: objcopy.c:568 objcopy.c:2120
 #, c-format
 msgid "%s: fread failed"
 msgstr ""
 
-#: objcopy.c:846
+#: objcopy.c:641
+#, c-format
+msgid "Ignoring rubbish found on line %d of %s"
+msgstr ""
+
+#: objcopy.c:862
 #, c-format
 msgid "%s: Multiple redefinition of symbol \"%s\""
 msgstr ""
 
-#: objcopy.c:853
+#: objcopy.c:869
 #, c-format
 msgid "%s: Symbol \"%s\" is target of more than one redefinition"
 msgstr ""
 
-#: objcopy.c:906
+#: objcopy.c:922
 msgid "Unable to change endianness of input file(s)"
 msgstr ""
 
-#: objcopy.c:914
+#: objcopy.c:930
 #, c-format
 msgid "copy from %s(%s) to %s(%s)\n"
 msgstr ""
 
-#: objcopy.c:933
+#: objcopy.c:949
 #, c-format
 msgid "Warning: Output file cannot represent architecture %s"
 msgstr ""
 
-#: objcopy.c:960
+#: objcopy.c:976
 #, c-format
 msgid "can't create section `%s': %s"
 msgstr ""
 
-#: objcopy.c:1046
+#: objcopy.c:1062
 #, c-format
 msgid "Can't fill gap after %s: %s"
 msgstr ""
 
-#: objcopy.c:1071
+#: objcopy.c:1087
 #, c-format
 msgid "Can't add padding to %s: %s"
 msgstr ""
 
-#: objcopy.c:1210
+#: objcopy.c:1226
 #, c-format
 msgid "%s: error copying private BFD data: %s"
 msgstr ""
 
-#: objcopy.c:1244
+#: objcopy.c:1260
 #, c-format
 msgid "cannot mkdir %s for archive copying (error: %s)"
 msgstr ""
 
-#: objcopy.c:1433
+#: objcopy.c:1449
 msgid "making"
 msgstr ""
 
-#: objcopy.c:1442
+#: objcopy.c:1458
 msgid "size"
 msgstr ""
 
-#: objcopy.c:1456
+#: objcopy.c:1472
 msgid "vma"
 msgstr ""
 
-#: objcopy.c:1482
+#: objcopy.c:1498
 msgid "alignment"
 msgstr ""
 
-#: objcopy.c:1491
+#: objcopy.c:1507
 msgid "flags"
 msgstr ""
 
-#: objcopy.c:1505
+#: objcopy.c:1521
 msgid "private data"
 msgstr ""
 
-#: objcopy.c:1513
+#: objcopy.c:1529
 #, c-format
 msgid "%s: section `%s': error in %s: %s"
 msgstr ""
 
-#: objcopy.c:1787
+#: objcopy.c:1803
 #, c-format
 msgid "%s: can't create debugging section: %s"
 msgstr ""
 
-#: objcopy.c:1802
+#: objcopy.c:1818
 #, c-format
 msgid "%s: can't set debugging section contents: %s"
 msgstr ""
 
-#: objcopy.c:1811
+#: objcopy.c:1827
 #, c-format
 msgid "%s: don't know how to write debugging information for %s"
 msgstr ""
 
-#: objcopy.c:1917
+#: objcopy.c:1933
 #, c-format
 msgid "%s: cannot stat: %s"
 msgstr ""
 
-#: objcopy.c:1968
+#: objcopy.c:1984
 msgid "byte number must be non-negative"
 msgstr ""
 
-#: objcopy.c:1978
+#: objcopy.c:1994
 msgid "interleave must be positive"
 msgstr ""
 
-#: objcopy.c:1998 objcopy.c:2006
+#: objcopy.c:2014 objcopy.c:2022
 #, c-format
 msgid "%s both copied and removed"
 msgstr ""
 
-#: objcopy.c:2079 objcopy.c:2149 objcopy.c:2250 objcopy.c:2278
+#: objcopy.c:2095 objcopy.c:2165 objcopy.c:2266 objcopy.c:2294
 #, c-format
 msgid "bad format for %s"
 msgstr ""
 
-#: objcopy.c:2218
+#: objcopy.c:2234
 #, c-format
 msgid "Warning: truncating gap-fill from 0x%s to 0x%x"
 msgstr ""
 
-#: objcopy.c:2340
+#: objcopy.c:2356
 msgid "byte number must be less than interleave"
 msgstr ""
 
-#: objcopy.c:2367
+#: objcopy.c:2383
 #, c-format
 msgid "architecture %s unknown"
 msgstr ""
 
-#: objcopy.c:2371
+#: objcopy.c:2387
 msgid ""
 "Warning: input target 'binary' required for binary architecture parameter."
 msgstr ""
 
-#: objcopy.c:2372
+#: objcopy.c:2388
 #, c-format
 msgid " Argument %s ignored"
 msgstr ""
 
-#: objcopy.c:2378
+#: objcopy.c:2394
 #, c-format
 msgid "Cannot stat: %s: %s"
 msgstr ""
 
-#: objcopy.c:2417 objcopy.c:2431
+#: objcopy.c:2433 objcopy.c:2447
 #, c-format
 msgid "%s %s%c0x%s never used"
 msgstr ""

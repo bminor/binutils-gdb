@@ -79,23 +79,23 @@
 #include "bucomm.h"
 #include "getopt.h"
 
-char *	program_name = "readelf";
-unsigned int	dynamic_addr;
+char *			program_name = "readelf";
+unsigned int		dynamic_addr;
 bfd_size_type		dynamic_size;
-unsigned int	rela_addr;
-unsigned int	rela_size;
-char *	dynamic_strings;
+unsigned int		rela_addr;
+unsigned int		rela_size;
+char *			dynamic_strings;
 char *			string_table;
 unsigned long		string_table_length;
 unsigned long           num_dynamic_syms;
 Elf_Internal_Sym *	dynamic_symbols;
 Elf_Internal_Syminfo *	dynamic_syminfo;
-unsigned long	dynamic_syminfo_offset;
+unsigned long		dynamic_syminfo_offset;
 unsigned int		dynamic_syminfo_nent;
-char	program_interpreter [64];
-int	dynamic_info[DT_JMPREL + 1];
-int	version_info[16];
-int	loadaddr = 0;
+char			program_interpreter [64];
+int			dynamic_info[DT_JMPREL + 1];
+int			version_info[16];
+int			loadaddr = 0;
 Elf_Internal_Ehdr       elf_header;
 Elf_Internal_Shdr *     section_headers;
 Elf_Internal_Dyn *      dynamic_segment;
@@ -1259,32 +1259,32 @@ get_machine_name (e_machine)
 
   switch (e_machine)
     {
-    case EM_NONE:	return _("None");
-    case EM_M32:	return "WE32100";
-    case EM_SPARC:	return "Sparc";
-    case EM_386:	return "Intel 80386";
-    case EM_68K:	return "MC68000";
-    case EM_88K:	return "MC88000";
-    case EM_486:	return "Intel 80486";
-    case EM_860:	return "Intel 80860";
-    case EM_MIPS:	return "MIPS R3000";
-    case EM_S370:	return "IBM System/370";
+    case EM_NONE:		return _("None");
+    case EM_M32:		return "WE32100";
+    case EM_SPARC:		return "Sparc";
+    case EM_386:		return "Intel 80386";
+    case EM_68K:		return "MC68000";
+    case EM_88K:		return "MC88000";
+    case EM_486:		return "Intel 80486";
+    case EM_860:		return "Intel 80860";
+    case EM_MIPS:		return "MIPS R3000";
+    case EM_S370:		return "IBM System/370";
     case EM_MIPS_RS3_LE:	return "MIPS R4000 big-endian";
     case EM_OLD_SPARCV9:	return "Sparc v9 (old)";
-    case EM_PARISC:	return "HPPA";
+    case EM_PARISC:		return "HPPA";
     case EM_PPC_OLD:		return "Power PC (old)";
     case EM_SPARC32PLUS:	return "Sparc v8+" ;
-    case EM_960:	return "Intel 90860";
-    case EM_PPC:	return "PowerPC";
-    case EM_V800:	return "NEC V800";
-    case EM_FR20:	return "Fujitsu FR20";
-    case EM_RH32:	return "TRW RH32";
+    case EM_960:		return "Intel 90860";
+    case EM_PPC:		return "PowerPC";
+    case EM_V800:		return "NEC V800";
+    case EM_FR20:		return "Fujitsu FR20";
+    case EM_RH32:		return "TRW RH32";
     case EM_MCORE:	        return "MCORE";
     case EM_ARM:		return "ARM";
     case EM_OLD_ALPHA:		return "Digital Alpha (old)";
     case EM_SH:			return "Hitachi SH";
-    case EM_SPARCV9:	return "Sparc v9";
-    case EM_TRICORE:	return "Siemens Tricore";
+    case EM_SPARCV9:		return "Sparc v9";
+    case EM_TRICORE:		return "Siemens Tricore";
     case EM_ARC:		return "ARC";
     case EM_H8_300:		return "Hitachi H8/300";
     case EM_H8_300H:		return "Hitachi H8/300H";
@@ -1294,7 +1294,7 @@ get_machine_name (e_machine)
     case EM_MIPS_X:		return "Stanford MIPS-X";
     case EM_COLDFIRE:		return "Motorola Coldfire";
     case EM_68HC12:		return "Motorola M68HC12";
-    case EM_ALPHA:	return "Alpha";
+    case EM_ALPHA:		return "Alpha";
     case EM_CYGNUS_D10V:        return "d10v";
     case EM_CYGNUS_D30V:        return "d30v";
     case EM_CYGNUS_ARC:		return "ARC";
@@ -1324,12 +1324,12 @@ get_machine_name (e_machine)
     case EM_VAX:		return "Digital VAX";
     case EM_AVR:                return "Atmel AVR 8-bit microcontroller";
     case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
-    case EM_JAVELIN:	return "Infineon Technologies 32-bit embedded cpu";
-    case EM_FIREPATH:	return "Element 14 64-bit DSP processor";
-    case EM_ZSP:	return "LSI Logic's 16-bit DSP processor";
+    case EM_JAVELIN:		return "Infineon Technologies 32-bit embedded cpu";
+    case EM_FIREPATH:		return "Element 14 64-bit DSP processor";
+    case EM_ZSP:		return "LSI Logic's 16-bit DSP processor";
     case EM_MMIX:	        return "Donald Knuth's educational 64-bit processor";
-    case EM_HUANY:	return "Harvard Universitys's machine-independent object format";
-    case EM_PRISM:	return "SiTera Prism";
+    case EM_HUANY:		return "Harvard Universitys's machine-independent object format";
+    case EM_PRISM:		return "SiTera Prism";
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
     case EM_S390_OLD:
     case EM_S390:               return "IBM S/390";

@@ -552,9 +552,7 @@ noinst_PROGRAMS = as-new gasp-new
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 
-EXTRA_DIST = make-gas.com
-
-DISTSTUFF = make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
+EXTRA_DIST = make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
 
 DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-desc.h
 
@@ -2008,7 +2006,7 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES) $(gasp_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS) $(gasp_new_OBJECTS)
@@ -2407,7 +2405,7 @@ stamp-mk.com: vmsconf.sh Makefile
 	sh $(srcdir)/vmsconf.sh $(GENERIC_OBJS) > new-make.com
 	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
 	touch stamp-mk.com
-diststuff: $(DISTSTUFF) info
+diststuff: $(EXTRA_DIST) info
 
 $(OBJS): @ALL_OBJ_DEPS@
 

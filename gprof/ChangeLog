@@ -1,3 +1,11 @@
+2001-06-18  H.J. Lu <hjl@gnu.org>
+
+        * Makefile.am (diststuff): Add $(MANS).
+        (gprof.1): Remove the prefix `$(srcdir)/'.
+        * Makefile.in: Regenerated.
+
+        * gprof.1: Removed.
+
 2001-06-12  Ben Elliston  <bje@redhat.com>
 
 	* gprof.texi (File Format): Profile data files are stored in

@@ -1,3 +1,30 @@
+2001-06-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* readelf.c: Restore formatting.
+
+2001-06-18  H.J. Lu <hjl@gnu.org> & Nick Clifton <nickc@redhat.com>
+
+        * Makefile.am: Move documentation into doc subdirectory.
+        * Makefile.in: Regenerated.
+	* binutils.texi: Move into doc subdirectory.
+        * addr2line.1: Removed.
+        * ar.1: Likewise.
+        * dlltool.1: Likewise.
+        * nlmconv.1: Likewise.
+        * nm.1: Likewise.
+        * objcopy.1: Likewise.
+        * objdump.1: Likewise.
+        * ranlib.1: Likewise.
+        * readelf.1: Likewise.
+        * size.1: Likewise.
+        * strings.1: Likewise.
+        * strip.1: Likewise.
+        * windres.1: Likewise.
+        * cxxfilt.man: Likewise.
+	* doc: New Directory.
+	* doc/Makefile.am: New file.
+	* doc/Makefile.in: Generate.
+
 2001-06-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Fix a typo.  Mention hppa64-elf.  Add binutils-2.11 marker.

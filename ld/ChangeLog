@@ -1,3 +1,11 @@
+2001-06-18  H.J. Lu <hjl@gnu.org>
+
+        * Makefile.am (ld.1): Remove the prefix `$(srcdir)/'.
+        (diststuff): Add $(MANS).
+        * Makefile.in: Regenerated.
+
+        * ld.1: Removed.
+
 2001-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):

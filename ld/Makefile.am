@@ -934,13 +934,14 @@ ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-$(srcdir)/ld.1: $(srcdir)/ld.texinfo
-	touch $(srcdir)/ld.1
+ld.1: $(srcdir)/ld.texinfo
+	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
 	-($(POD2MAN) ld.pod | \
-		sed -e '/^.if n .na/d' > $(srcdir)/ld.1.T$$$$ && \
-		mv -f $(srcdir)/ld.1.T$$$$ $(srcdir)/ld.1) || \
-		(rm -f $(srcdir)/ld.1.T$$$$ && exit 1)
+	        sed -e '/^.if n .na/d' > $@.T$$$$ && \
+	        mv -f $@.T$$$$ $@) || \
+	        (rm -f $@.T$$$$ && exit 1)
+	rm -f ld.pod
 
 MAINTAINERCLEANFILES = ldver.texi
 
@@ -979,8 +980,8 @@ install-data-local:
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
-LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
-diststuff: $(LDDISTSTUFF) info
+EXTRA_DIST = ldgram.c ldgram.h ldlex.c $(man_MANS)
+diststuff: info $(EXTRA_DIST)
 
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 distclean-local:

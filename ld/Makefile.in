@@ -431,7 +431,7 @@ CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
-LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
+EXTRA_DIST = ldgram.c ldgram.h ldlex.c $(man_MANS)
 
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -475,7 +475,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1637,13 +1637,14 @@ ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-$(srcdir)/ld.1: $(srcdir)/ld.texinfo
-	touch $(srcdir)/ld.1
+ld.1: $(srcdir)/ld.texinfo
+	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
 	-($(POD2MAN) ld.pod | \
-		sed -e '/^.if n .na/d' > $(srcdir)/ld.1.T$$$$ && \
-		mv -f $(srcdir)/ld.1.T$$$$ $(srcdir)/ld.1) || \
-		(rm -f $(srcdir)/ld.1.T$$$$ && exit 1)
+	        sed -e '/^.if n .na/d' > $@.T$$$$ && \
+	        mv -f $@.T$$$$ $@) || \
+	        (rm -f $@.T$$$$ && exit 1)
+	rm -f ld.pod
 
 # We want to reconfigure if configure.host or configure.tgt changes.
 config.status: $(srcdir)/configure $(srcdir)/configure.host $(srcdir)/configure.tgt
@@ -1673,7 +1674,7 @@ install-data-local:
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
-diststuff: $(LDDISTSTUFF) info
+diststuff: info $(EXTRA_DIST)
 distclean-local:
 	rm -rf ldscripts
 

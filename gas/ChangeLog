@@ -1,3 +1,11 @@
+2001-06-18  H.J. Lu <hjl@gnu.org>
+
+        * doc/Makefile.am (info): Depend on $(MANS).
+        (as.1): Remove the prefix `$(srcdir)/'.
+        * doc/Makefile.in: Regenerated.
+
+        * as.1: Removed.
+
 2001-06-18  Philip Blundell  <philb@gnu.org>
 
 	* config/tc-arm.c (do_msr): Remove restriction on usage of
