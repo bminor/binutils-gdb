@@ -3,6 +3,11 @@ Wed Apr 22 12:48:42 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* ldlex.l: added CMDFILENAMECHAR state so that you can lex
 	different sorts of filenames on the command line than in a script.
 
+Mon Apr 20 22:37:04 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: rework CFLAGS so that they can be passed on the
+	  make command line.  Remove MINUS_G.  Default CFLAGS to -g.
+
 Fri Apr 17 08:57:17 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* relax.c: added handling for new "padding" seclet type, used to
