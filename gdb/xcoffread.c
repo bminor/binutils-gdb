@@ -45,6 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
+#include "stabsread.h"
 #include "gdb-stabs.h"
 
 #include "coff/internal.h"	/* FIXME, internal data from BFD */
@@ -113,9 +114,6 @@ static char *symtbl;
 /* initial symbol-table-debug-string vector length */
 
 #define	INITIAL_STABVECTOR_LENGTH	40
-
-struct pending_stabs *global_stabs;
-
 
 /* Nonzero if within a function (so symbols should be local,
    if nothing says specifically).  */
@@ -1040,11 +1038,12 @@ read_xcoff_symtab (objfile, nsyms)
   N_BTSHFT = coff_data (abfd)->local_n_btshft;
   local_symesz = coff_data (abfd)->local_symesz;
 
-  last_source_file = 0;
+  last_source_file = NULL;
   last_csect_name = 0;
   last_csect_val = 0;
   misc_func_recorded = 0;
 
+  start_stabs ();
   start_symtab (filestring, (char *)NULL, file_start_addr);
   symnum = 0;
   first_object_file_end = 0;
@@ -1126,8 +1125,12 @@ read_xcoff_symtab (objfile, nsyms)
 
     if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE) {
       if (last_source_file)
-	end_symtab (cur_src_end_addr, 1, 0, objfile);
+	{
+	  end_symtab (cur_src_end_addr, 1, 0, objfile);
+	  end_stabs ();
+	}
 
+      start_stabs ();
       start_symtab ("_globals_", (char *)NULL, (CORE_ADDR)0);
       cur_src_end_addr = first_object_file_end;
       /* done with all files, everything from here on is globals */
@@ -1191,6 +1194,8 @@ read_xcoff_symtab (objfile, nsyms)
 		  complete_symtab (filestring, file_start_addr);
 		  cur_src_end_addr = file_end_addr;
 		  end_symtab (file_end_addr, 1, 0, objfile);
+		  end_stabs ();
+		  start_stabs ();
 		  start_symtab ((char *)NULL, (char *)NULL, (CORE_ADDR)0);
 		}
 
@@ -1366,13 +1371,15 @@ function_entry_point:
       /* complete symbol table for last object file containing
 	 debugging information. */
 
-      /* Whether or not there was a csect in the previous file, we have 
-	 to call `end_symtab' and `start_symtab' to reset type_vector, 
+      /* Whether or not there was a csect in the previous file, we have to call
+	 `end_stabs' and `start_stabs' to reset type_vector, 
 	 line_vector, etc. structures. */
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
       end_symtab (file_end_addr, 1, 0, objfile);
+      end_stabs ();
+      start_stabs ();
       start_symtab (cs->c_name, (char *)NULL, (CORE_ADDR)0);
       last_csect_name = 0;
 
@@ -1582,7 +1589,10 @@ function_entry_point:
   } /* while */
 
   if (last_source_file)
-    end_symtab (cur_src_end_addr, 1, 0, objfile);
+    {
+      end_symtab (cur_src_end_addr, 1, 0, objfile);
+      end_stabs ();
+    }
 
   free (symtbl);
   current_objfile = NULL;

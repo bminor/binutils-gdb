@@ -183,6 +183,8 @@ source.c
 sparc-pinsn.c
 sparc-tdep.c
 sparc-xdep.c
+stabsread.c
+stabsread.h
 stack.c
 standalone.c
 stuff.c

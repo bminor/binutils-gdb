@@ -542,6 +542,7 @@ static void
 elf_new_init (ignore)
      struct objfile *ignore;
 {
+  stabsread_new_init ();
   buildsym_new_init ();
 }
 

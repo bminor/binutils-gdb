@@ -2073,6 +2073,7 @@ psymtab_to_symtab_1 (pst)
      struct partial_symtab *pst;
 {
   int i;
+  struct cleanup *old_chain;
   
   if (pst != NULL)
     {
@@ -2105,6 +2106,8 @@ psymtab_to_symtab_1 (pst)
 	    }	  
 	  if (DBLENGTH (pst))		/* Otherwise it's a dummy */
 	    {
+	      buildsym_init ();
+	      old_chain = make_cleanup (really_free_pendings, 0);
 	      pst -> symtab = read_ofile_symtab (pst);
 	      if (info_verbose)
 		{
@@ -2113,6 +2116,7 @@ psymtab_to_symtab_1 (pst)
 		  fflush (stdout);
 		}
 	      sort_symtab_syms (pst -> symtab);
+	      do_cleanups (old_chain);
 	    }
 	  pst -> readin = 1;
 	}

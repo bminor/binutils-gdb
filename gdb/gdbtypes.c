@@ -1222,7 +1222,7 @@ dump_fn_fieldlists (type, spaces)
 			    TYPE_FN_FIELD_PROTECTED (f, overload_idx));
 	  printfi_filtered (spaces + 8, "is_stub %d\n",
 			    TYPE_FN_FIELD_STUB (f, overload_idx));
-	  printfi_filtered (spaces + 8, "voffset %d\n",
+	  printfi_filtered (spaces + 8, "voffset %u\n",
 			    TYPE_FN_FIELD_VOFFSET (f, overload_idx));
 	}
     }
@@ -1235,8 +1235,6 @@ print_cplus_stuff (type, spaces)
 {
   int bitno;
 
-  printfi_filtered (spaces, "cplus_stuff 0x%x\n",
-		    TYPE_CPLUS_SPECIFIC (type));
   printfi_filtered (spaces, "n_baseclasses %d\n",
 		    TYPE_N_BASECLASSES (type));
   printfi_filtered (spaces, "nfn_fields %d\n",
@@ -1245,7 +1243,7 @@ print_cplus_stuff (type, spaces)
 		    TYPE_NFN_FIELDS_TOTAL (type));
   if (TYPE_N_BASECLASSES (type) > 0)
     {
-      printfi_filtered (spaces, "virtual_field_bits %d 0x%x",
+      printfi_filtered (spaces, "virtual_field_bits (%d bits at *0x%x)",
 			TYPE_N_BASECLASSES (type),
 			TYPE_FIELD_VIRTUAL_BITS (type));
       print_bit_vector (TYPE_FIELD_VIRTUAL_BITS (type),
@@ -1256,7 +1254,7 @@ print_cplus_stuff (type, spaces)
     {
       if (TYPE_FIELD_PRIVATE_BITS (type) != NULL)
 	{
-	  printfi_filtered (spaces, "private_field_bits %d 0x%x",
+	  printfi_filtered (spaces, "private_field_bits (%d bits at *0x%x)",
 			    TYPE_NFIELDS (type),
 			    TYPE_FIELD_PRIVATE_BITS (type));
 	  print_bit_vector (TYPE_FIELD_PRIVATE_BITS (type),
@@ -1265,7 +1263,7 @@ print_cplus_stuff (type, spaces)
 	}
       if (TYPE_FIELD_PROTECTED_BITS (type) != NULL)
 	{
-	  printfi_filtered (spaces, "protected_field_bits %d 0x%x",
+	  printfi_filtered (spaces, "protected_field_bits (%d bits at *0x%x)",
 			    TYPE_NFIELDS (type),
 			    TYPE_FIELD_PROTECTED_BITS (type));
 	  print_bit_vector (TYPE_FIELD_PROTECTED_BITS (type),
@@ -1415,8 +1413,24 @@ recursive_dump_type (type, spaces)
 	break;
 
       case TYPE_CODE_STRUCT:
+	printfi_filtered (spaces, "cplus_stuff 0x%x\n",
+			  TYPE_CPLUS_SPECIFIC (type));
 	print_cplus_stuff (type, spaces);
 	break;
+
+      default:
+	/* We have to pick one of the union types to be able print and test
+	   the value.  Pick cplus_struct_type, even though we know it isn't
+	   any particular one. */
+	printfi_filtered (spaces, "type_specific 0x%x",
+			  TYPE_CPLUS_SPECIFIC (type));
+	if (TYPE_CPLUS_SPECIFIC (type) != NULL)
+	  {
+	    printf_filtered (" (unknown data form)");
+	  }
+	printf_filtered ("\n");
+	break;
+
     }
 }
 
