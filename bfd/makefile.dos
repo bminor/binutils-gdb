@@ -25,7 +25,6 @@ OBJS = \
 	syms.o \
 	reloc.o \
 	init.o \
-	ctor.o \
 	coffgen.o \
 	srec.o \
 	hash.o \
@@ -38,6 +37,8 @@ OBJS = \
 	i386aout.o \
 	cpu-i386.o \
 	coff-go32.o \
+	cofflink.o \
+	elf32.o \
 	$E
 
 libbfd.a : $(OBJS)
