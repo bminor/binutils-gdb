@@ -56,7 +56,11 @@ TEXI2ROFF=texi2roff
 # Traditionally readline is in .. or .
 READLINE_DIR = ${gdbdir}/../readline/doc
 
-SET_TEXINPUTS = TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$$TEXINPUTS
+# The GDB/MI docs come from a sibling directory ../mi
+GDBMI_DIR = ${gdbdir}/mi
+
+SET_TEXINPUTS = \
+   TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$(GDBMI_DIR):$$TEXINPUTS
 
 # There may be alternate predefined collections of switches to configure
 # the GDB manual.  Normally this is not done in synch with the software
@@ -93,7 +97,7 @@ SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/annotate.texi
 
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 
-SFILES_DOC = $(SFILES_LOCAL) \
+SFILES_DOC = $(SFILES_LOCAL) $(GDBMI_DIR)/gdbmi.texinfo \
                 $(READLINE_DIR)/rluser.texinfo $(READLINE_DIR)/inc-hist.texinfo
 
 #### Host, target, and site specific Makefile fragments come in here.
@@ -233,10 +237,10 @@ gdb.ps: gdb.dvi
 	$(DVIPS) -o $@ $?
 
 # GDB MANUAL: info file
-# We're using texinfo2, and older makeinfo's may not be able to
+# We're using texinfo 3.12; older makeinfo's may not be able to
 # cope with all the markup.  
 gdb.info: ${SFILES_DOC}
-	$(MAKEINFO) -I ${READLINE_DIR} -I $(srcdir) -o ./gdb.info gdb.texinfo
+	$(MAKEINFO) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) -o ./gdb.info gdb.texinfo
 
 # GDB MANUAL: roff translations
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.
@@ -275,8 +279,14 @@ inc-hist.texinfo: ${READLINE_DIR}/inc-hist.texinfo
 	ln ${READLINE_DIR}/inc-hist.texinfo . || \
 	cp ${READLINE_DIR}/inc-hist.texinfo .
 
+gdbmi.texinfo: ${GDBMI_DIR}/gdbmi.texinfo
+	(test "$$LN_S" = "ln -s" && \
+	 ln -s ${GDBMI_DIR}/gdbmi.texinfo .) || \
+	ln ${GDBMI_DIR}/gdbmi.texinfo . || \
+	cp ${GDBMI_DIR}/gdbmi.texinfo .
+
 # gdb manual suitable for [gtn]roff -me
-gdb.me: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
+gdb.me: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo gdbmi.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -291,7 +301,7 @@ gdb.me: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
 	>gdb.me 
 
 # gdb manual suitable for [gtn]roff -ms
-gdb.ms: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
+gdb.ms: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo gdbmi.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -308,7 +318,7 @@ gdb.ms: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
 # gdb manual suitable for [tn]roff -mm
 # '@noindent's removed due to texi2roff-2 mm bug; if yours is newer, 
 #   try leaving them in
-gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
+gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo gdbmi.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -326,7 +336,7 @@ gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
 # GDB MANUAL: HTML file
 
 gdb_toc.html: ${SFILES_DOC}
-	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
+	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
 
 # GDB GUI MANUAL: TeX dvi file
 gdbgui.dvi : gdbgui.texinfo ${SFILES_DOC}

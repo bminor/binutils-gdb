@@ -1,3 +1,8 @@
+2000-04-23  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbmi.texinfo: Lots of changes, to include this document as part
+	of the GDB manual.
+
 2000-03-13  James Ingham  <jingham@leda.cygnus.com>
 
 	* mi-cmd-var.c (mi_cmd_var_create): Add special frame cookie "@"

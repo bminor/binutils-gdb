@@ -124,9 +124,9 @@ try to find a command that does what you are looking for.
 
 A new machine oriented interface (MI) has been added to GDB.  This
 interface is designed for debug environments running GDB as a separate
-process.  This is part of the long term libGDB project.  See
-gdb/mi/gdbmi.texinfo for further information.  It can be enabled by
-configuring with:
+process.  This is part of the long term libGDB project.  See the
+"GDB/MI" chapter of the GDB manual for further information.  It can be
+enabled by configuring with:
 
 	.../configure --enable-gdbmi
 

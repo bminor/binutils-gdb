@@ -24,6 +24,9 @@
 @c readline appendices use @vindex
 @syncodeindex vr cp
 
+@c gdbmi uses @findex
+@syncodeindex fn cp
+
 @c !!set GDB manual's edition---not the same as GDB version!
 @set EDITION Eighth
 
@@ -142,6 +145,7 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Sequences::                   Canned sequences of commands
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * Annotations::                 @value{GDBN}'s annotation interface.
+* GDB/MI::                      @value{GDBN}'s Machine Interface.
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 * Formatting Documentation::    How to format and print @value{GDBN} documentation
@@ -1040,9 +1044,7 @@ Use the interpreter @var{interp} for interface with the controlling
 program or device.  This option is meant to be set by programs which
 communicate with @value{GDBN} using it as a back end.  For example,
 @samp{--interpreter=mi} causes @value{GDBN} to use the @dfn{gdbmi
-interface}.
-@c FIXME: There should be an @xref here to the GDB/MI docs, but
-@c gdbmi.texi doesn't have a single node to reference!
+interface} (@pxref{GDB/MI, , The @sc{gdb/mi} Interface}).
 
 @item -write
 @cindex @code{--write}
@@ -12207,6 +12209,7 @@ each value is printed in its own window.
 @end ignore
 
 @include annotate.texi
+@include gdbmi.texinfo
 
 @node GDB Bugs
 @chapter Reporting Bugs in @value{GDBN}

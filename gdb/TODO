@@ -140,24 +140,6 @@ Mark
 
 --
 
-MI documentation in GDB user guide. (Andrew Cagney, Elena Zannoni,
-Stan Shebs, anyone else?)
-
-> (Are there plans to make gdbmi.texi be part of the manual as well?)
-
-I'd like to see it go in there sooner rather than later too.  Otherwise
-you're introducing discrepancies between the manual and the documentation,
-and everybody is confused - witness the lack of doc for the tracing
-commands still, some two years after they were added...
-
-Discussion on MI can be found on the thread: [PATCH] GDB command-line
-switches and annotations docs
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00639.html
-
-MI documentation can be found in the file gdb/mi/gdbmi.texinfo
-
---
-
 Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
 http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
 
