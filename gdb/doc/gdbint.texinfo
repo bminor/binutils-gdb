@@ -13,7 +13,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
 
-Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 Contributed by Cygnus Support.  Written by John Gilmore.
 
 Permission is granted to make and distribute verbatim copies of
@@ -51,7 +51,7 @@ regarded as a program in the language TeX).
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright @copyright{} 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -201,17 +201,17 @@ Good luck!
 
 @node Debugging GDB
 @chapter Debugging GDB with itself
-If gdb is limping on your machine, this is the preferred way to get it
+If GDB is limping on your machine, this is the preferred way to get it
 fully functional.  Be warned that in some ancient Unix systems, like
 Ultrix 4.2, a program can't be running in one process while it is being
 debugged in another.  Rather than typing the command @code{@w{./gdb
 ./gdb}}, which works on Suns and such, you can copy @file{gdb} to
 @file{gdb2} and then type @code{@w{./gdb ./gdb2}}.
 
-When you run gdb in the gdb source directory, it will read a
+When you run GDB in the GDB source directory, it will read a
 @file{.gdbinit} file that sets up some simple things to make debugging
 gdb easier.  The @code{info} command, when executed without a subcommand
-in a gdb being debugged by gdb, will pop you back up to the top level
+in a GDB being debugged by gdb, will pop you back up to the top level
 gdb.  See @file{.gdbinit} for details.
 
 If you use emacs, you will probably want to do a @code{make TAGS} after
@@ -219,7 +219,7 @@ you configure your distribution; this will put the machine dependent
 routines for your local machine where they will be accessed first by
 @kbd{M-.}
 
-Also, make sure that you've either compiled gdb with your local cc, or
+Also, make sure that you've either compiled GDB with your local cc, or
 have run @code{fixincludes} if you are compiling with gcc.
 
 @node New Architectures
@@ -933,14 +933,14 @@ more work.
 
 Fundamental Types (e.g., FT_VOID, FT_BOOLEAN).
 
-These are the fundamental types that gdb uses internally.  Fundamental
+These are the fundamental types that GDB uses internally.  Fundamental
 types from the various debugging formats (stabs, ELF, etc) are mapped into
 one of these.  They are basically a union of all fundamental types that
-gdb knows about for all the languages that gdb knows about.
+gdb knows about for all the languages that GDB knows about.
 
 Type Codes (e.g., TYPE_CODE_PTR, TYPE_CODE_ARRAY).
 
-Each time gdb builds an internal type, it marks it with one of these
+Each time GDB builds an internal type, it marks it with one of these
 types.  The type may be a fundamental type, such as TYPE_CODE_INT, or
 a derived type, such as TYPE_CODE_PTR which is a pointer to another
 type.  Typically, several FT_* types map to one TYPE_CODE_* type, and
@@ -950,7 +950,7 @@ the type is signed or unsigned, and how many bits it uses.
 Builtin Types (e.g., builtin_type_void, builtin_type_char).
 
 These are instances of type structs that roughly correspond to fundamental
-types and are created as global types for gdb to use for various ugly
+types and are created as global types for GDB to use for various ugly
 historical reasons.  We eventually want to eliminate these.  Note for
 example that builtin_type_int initialized in gdbtypes.c is basically the
 same as a TYPE_CODE_INT type that is initialized in c-lang.c for an
@@ -997,7 +997,7 @@ string table, etc.
 @chapter Symbol Reading
 
 GDB reads symbols from "symbol files".  The usual symbol file is the
-file containing the program which gdb is debugging.  GDB can be directed
+file containing the program which GDB is debugging.  GDB can be directed
 to use a different file for symbols (with the ``symbol-file''
 command), and it can also read more symbols via the ``add-file'' and ``load''
 commands, or while reading symbols from shared libraries.
@@ -1528,8 +1528,6 @@ main.c
 main.c
 @item ADDITIONAL_OPTION_HELP
 main.c
-@item ADDR_BITS_REMOVE
-defs.h
 @item AIX_BUGGY_PTRACE_CONTINUE
 infptrace.c
 @item ALIGN_STACK_ON_STARTUP
@@ -1548,14 +1546,8 @@ main.c
 coffread.c
 @item BELIEVE_PCC_PROMOTION_TYPE
 stabsread.c
-@item BITS_BIG_ENDIAN
-defs.h
-@item BKPT_AT_MAIN
-solib.c
 @item BLOCK_ADDRESS_ABSOLUTE
 dbxread.c
-@item BPT_VECTOR
-tm-m68k.h
 
 @item BROKEN_LARGE_ALLOCA
 Avoid large @code{alloca}'s.  For example, on sun's, Large alloca's fail
@@ -1570,10 +1562,6 @@ valops.c
 inferior.h
 @item CALL_DUMMY_STACK_ADJUST
 valops.c
-@item CANNOT_FETCH_REGISTER
-hppabsd-xdep.c
-@item CANNOT_STORE_REGISTER
-findvar.c
 @item CFRONT_PRODUCER
 dwarfread.c
 @item CHILD_PREPARE_TO_STORE
@@ -1590,16 +1578,12 @@ symm-tdep.c
 stack.c
 @item CPLUS_MARKER
 cplus-dem.c
-@item C_ALLOCA
-regex.c
 @item C_GLBLREG
 coffread.c
 @item DBXREAD_ONLY
 partial-stab.h
 @item DBX_PARM_SYMBOL_CLASS
 stabsread.c
-@item DEBUG
-remote-adapt.c
 @item DEBUG_INFO
 partial-stab.h
 @item DEBUG_PTRACE
@@ -1628,10 +1612,6 @@ infcmd.c
 tm-m68k.h
 @item EXTRACT_STRUCT_VALUE_ADDRESS
 values.c
-@item EXTRA_FRAME_INFO
-frame.h
-@item EXTRA_SYMTAB_INFO
-symtab.h
 @item FILES_INFO_HOOK
 target.c
 @item FLOAT_INFO
@@ -1673,42 +1653,32 @@ arm-tdep.c
 xm-rtbsd.h
 @item HOST_BYTE_ORDER
 findvar.c
-@item HPUX_ASM
-xm-hp300hpux.h
-@item HPUX_VERSION_5
-hp300ux-xdep.c
 @item HP_OS_BUG
 infrun.c
-@item I80960
-remote-vx.c
 @item IEEE_FLOAT
 valprint.c
 @item IGNORE_SYMBOL
 dbxread.c
-@item INIT_EXTRA_FRAME_INFO
-blockframe.c
-@item INIT_EXTRA_SYMTAB_INFO
-symfile.c
-@item INIT_FRAME_PC
-blockframe.c
-@item INNER_THAN
-valops.c
+
 @item INT_MAX
-defs.h
 @item INT_MIN
-defs.h
+@item LONG_MAX
+@item UINT_MAX
+@item ULONG_MAX
+Values for host-side constants.
+
 @item IN_GDB
 i960-pinsn.c
 @item IN_SIGTRAMP
 infrun.c
 @item IN_SOLIB_TRAMPOLINE
 infrun.c
+
 @item ISATTY
-main.c
+Substitute for isatty, if not available.
+
 @item IS_TRAPPED_INTERNALVAR
 values.c
-@item KERNELDEBUG
-dbxread.c
 @item KERNEL_DEBUGGING
 tm-ultra3.h
 
@@ -1733,16 +1703,20 @@ directory.
 dwarfread.c
 @item LOG_FILE
 remote-adapt.c
-@item LONGERNAMES
-cplus-dem.c
+
 @item LONGEST
-defs.h
+This is the longest integer type available on the host.
+If not defined, it will default to @code{long long} or @code{long},
+depending on @code{CC_HAS_LONG_LONG}.
+
 @item CC_HAS_LONG_LONG
-defs.h
+Define this if the host C compiler supports ``long long''.
+This will be defined automatically if GNU CC is used to compile GDB.
+
 @item PRINTF_HAS_LONG_LONG
-defs.h
-@item LONG_MAX
-defs.h
+Define this if the host can handle printing of long long integers via a
+format directive ``ll''.
+
 @item LSEEK_NOT_LINEAR
 source.c
 @item L_LNNO32
@@ -1784,18 +1758,21 @@ altos-xdep.c
 infrun.c
 @item NEED_TEXT_START_END
 exec.c
-@item NFAILURES
-regex.c
 
 @item NORETURN
-(in defs.h - is this really useful to define/undefine?)
+If defined, this should be one or more tokens, such as @code{volatile},
+that can be used in both the declaration and definition of functions
+to indicate that they never return.  The default is already set
+correctly if compiling with GCC. 
+This will almost never need to be defined.
 
-@item NOTDEF
-regex.c
-@item NOTDEF
-remote-adapt.c
-@item NOTDEF
-remote-mm.c
+@item ATTR_NORETURN
+If defined, this should be one or more tokens, such as
+@code{__attribute__ ((noreturn))}, that can be used in the declarations
+of functions to indicate that they never return.  The default is already
+set correctly if compiling with GCC.
+This will almost never need to be defined.
+
 @item NOTICE_SIGNAL_HANDLING_CHANGE
 infrun.c
 @item NO_HIF_SUPPORT
@@ -1821,8 +1798,6 @@ of checking the heap with @code{mmcheck}.
 
 @item NO_SIGINTERRUPT
 remote-adapt.c
-@item NO_SINGLE_STEP
-infptrace.c
 @item NS32K_SVC_IMMED_OPERANDS
 ns32k-opcode.h
 @item NUMERIC_REG_NAMES
@@ -1831,8 +1806,6 @@ mips-tdep.c
 dbxread.c
 @item N_SET_MAGIC
 hppabsd-tdep.c
-@item NaN
-tm-umax.h
 @item ONE_PROCESS_WRITETEXT
 breakpoint.c
 @item O_BINARY
@@ -1875,8 +1848,6 @@ tm-a29k.h
 exec.c
 @item REG_STRUCT_HAS_ADDR
 findvar.c
-@item RE_NREGS
-regex.h
 @item R_FP
 dwarfread.c
 @item R_OK
@@ -1902,14 +1873,8 @@ infrun.c
 infrun.c
 @item SHIFT_INST_REGS
 breakpoint.c
-@item SIGN_EXTEND_CHAR
-regex.c
 @item SIGTRAP_STOP_AFTER_LOAD
 infrun.c
-@item SKIP_TRAMPOLINE_CODE
-infrun.c
-@item SOLIB_ADD
-core.c
 @item STACK_ALIGN
 valops.c
 @item START_INFERIOR_TRAPS_EXPECTED
@@ -1922,16 +1887,8 @@ infrun.c
 dbxread.c
 @item SVR4_SHARED_LIBS
 solib.c
-@item SWITCH_ENUM_BUG
-regex.c
-@item SYM1
-tm-ultra3.h
 @item SYMBOL_RELOADING_DEFAULT
 symfile.c
-@item SYNTAX_TABLE
-regex.c
-@item Sword
-regex.c
 @item TIOCGETC
 inflow.c
 @item TIOCGLTC
@@ -1944,81 +1901,51 @@ inflow.c
 inflow.c
 @item TIOCNOTTY
 inflow.c
-@item T_ARG
-coffread.c
-@item T_VOID
-coffread.c
-@item UINT_MAX
-defs.h
 @item UPAGES
 altos-xdep.c
-@item USER
-m88k-tdep.c
-@item USE_GAS
-xm-news.h
 @item USE_O_NOCTTY
 inflow.c
-@item USE_STRUCT_CONVENTION
-values.c
 
 @item USG
 Means that System V (prior to SVR4) include files are in use.
 (FIXME:  This symbol is abused in @file{infrun.c}, @file{regex.c},
 @file{remote-nindy.c}, and @file{utils.c} for other things, at the moment.)
 
-@item USIZE
-xm-m88k.h
-@item U_FPSTATE
-i386-xdep.c
-@item VARIABLES_INSIDE_BLOCK
-dbxread.c
 @item WRS_ORIG
 remote-vx.c
-@item __GNUC__
-news-xdep.c
-@item __GO32__
-inflow.c
-@item __HPUX_ASM__
-xm-hp300hpux.h
-@item __INT_VARARGS_H
-printcmd.c
-@item __not_on_pyr_yet
-pyr-xdep.c
 @item alloca
 defs.h
 @item const
 defs.h
-@item GOULD_PN
-gould-pinsn.c
-@item hp800
-xm-hppabsd.h
-@item hpux
-hppabsd-core.c
+
 @item lint
-valarith.c
-@item longest_to_int
-defs.h
-@item mc68020
-m68k-stub.c
-@item notdef
-gould-pinsn.c
-@item ns32k_opcodeT
-ns32k-opcode.h
-@item sgi
-mips-tdep.c
+Define this to help lint in some stupid way.
+
+@item volatile
+Define this to override the defaults of @code{__volatile__} or @code{/**/}.
+
+@end table
+
+Regex conditionals.
+
+@item C_ALLOCA
+regex.c
+@item NFAILURES
+regex.c
+@item RE_NREGS
+regex.h
+@item SIGN_EXTEND_CHAR
+regex.c
+@item SWITCH_ENUM_BUG
+regex.c
+@item SYNTAX_TABLE
+regex.c
+@item Sword
+regex.c
 @item sparc
 regex.c
-@item sun
-m68k-tdep.c
-@item sun386
-tm-sun386.h
 @item test
 regex.c
-@item ultrix
-xm-mips.h
-@item volatile
-defs.h
-@end table
 
 @node Target Conditionals
 @chapter Target Conditionals
@@ -2056,8 +1983,16 @@ main.c
 main.c
 @item ADDITIONAL_OPTION_HELP
 main.c
-@item ADDR_BITS_REMOVE
-defs.h
+
+@item ADDR_BITS_REMOVE (addr)
+If a raw machine address includes any bits that are not really part
+of the address, then define this macro to expand into an expression
+that zeros those bits in @var{addr}.  For example, the two low-order
+bits of a Motorola 88K address may be used by some kernels for their
+own purposes, since addresses must always be 4-byte aligned, and so
+are of no use for addressing.  Those bits should be filtered out with
+an expression such as @code{((addr) & ~3)}.
+
 @item ALIGN_STACK_ON_STARTUP
 main.c
 @item ALTOS
@@ -2072,14 +2007,15 @@ tm-delta88.h
 coffread.c
 @item BELIEVE_PCC_PROMOTION_TYPE
 stabsread.c
+
 @item BITS_BIG_ENDIAN
-defs.h
-@item BKPT_AT_MAIN
-solib.c
+Define this if the numbering of bits in the targets does *not* match
+the endianness of the target byte order.
+A value of 1 means that the bits are numbered in a big-endian order,
+0 means little-endian.
+
 @item BLOCK_ADDRESS_ABSOLUTE
 dbxread.c
-@item BPT_VECTOR
-tm-m68k.h
 @item BREAKPOINT
 tm-m68k.h
 @item CALL_DUMMY
@@ -2088,10 +2024,19 @@ valops.c
 inferior.h
 @item CALL_DUMMY_STACK_ADJUST
 valops.c
-@item CANNOT_FETCH_REGISTER
-hppabsd-xdep.c
-@item CANNOT_STORE_REGISTER
-findvar.c
+
+@item CANNOT_FETCH_REGISTER (regno)
+A C expression that should be nonzero if @var{regno} cannot be
+fetched from an inferior process.
+This is only relevant if @code{FETCH_INFERIOR_REGISTERS} is not
+defined.
+
+@item CANNOT_STORE_REGISTER (regno)
+A C expression that should be nonzero if @var{regno} should not be
+written to the target.  This is often the case for program counters,
+status words, and other special registers.  If this is not defined,
+GDB will assume that all registers may be written.
+
 @item CFRONT_PRODUCER
 dwarfread.c
 @item CHILD_PREPARE_TO_STORE
@@ -2114,8 +2059,6 @@ coffread.c
 partial-stab.h
 @item DBX_PARM_SYMBOL_CLASS
 stabsread.c
-@item DEBUG
-remote-adapt.c
 @item DEBUG_INFO
 partial-stab.h
 @item DEBUG_PTRACE
@@ -2145,10 +2088,15 @@ This is an expression that should designate the end of the text section
 tm-m68k.h
 @item EXTRACT_STRUCT_VALUE_ADDRESS
 values.c
+
 @item EXTRA_FRAME_INFO
-frame.h
+If defined, this must be a list of slots that may be inserted into
+the @code{frame_info} structure defined in @code{frame.h}.
+
 @item EXTRA_SYMTAB_INFO
-symtab.h
+If defined, this must be a list of slots that may be inserted into
+the @code{symtab} structure defined in @code{symtab.h}.
+
 @item FILES_INFO_HOOK
 target.c
 @item FLOAT_INFO
@@ -2247,14 +2195,8 @@ inflow.c
 arm-tdep.c
 @item HOSTING_ONLY
 xm-rtbsd.h
-@item HPUX_ASM
-xm-hp300hpux.h
-@item HPUX_VERSION_5
-hp300ux-xdep.c
 @item HP_OS_BUG
 infrun.c
-@item I80960
-remote-vx.c
 
 @item IBM6000_TARGET
 Shows that we are configured for an IBM RS/6000 target.  This conditional
@@ -2265,46 +2207,36 @@ It was introduced in haste and we are repenting at leisure.
 valprint.c
 @item IGNORE_SYMBOL
 dbxread.c
-@item INIT_EXTRA_FRAME_INFO
-blockframe.c
+
+@item INIT_EXTRA_FRAME_INFO (fromleaf, fci)
+If defined, this should be a C expression or statement that fills
+in the @code{EXTRA_FRAME_INFO} slots of the given frame @var{fci}.
+
 @item INIT_EXTRA_SYMTAB_INFO
 symfile.c
-@item INIT_FRAME_PC
-blockframe.c
+
+@item INIT_FRAME_PC (fromleaf, prev)
+This is a C statement that sets the pc of the frame pointed
+to by @var{prev}.  [By default...]
+
 @item INNER_THAN
-valops.c
-@item INT_MAX
-defs.h
-@item INT_MIN
-defs.h
+Define this to be either @code{<} if the target's stack grows
+downward in memory, or @code{>} is the stack grows upwards.
+
 @item IN_GDB
 i960-pinsn.c
 @item IN_SIGTRAMP
 infrun.c
 @item IN_SOLIB_TRAMPOLINE
 infrun.c
-@item ISATTY
-main.c
 @item IS_TRAPPED_INTERNALVAR
 values.c
-@item KERNELDEBUG
-dbxread.c
 @item KERNEL_DEBUGGING
 tm-ultra3.h
 @item LCC_PRODUCER
 dwarfread.c
 @item LOG_FILE
 remote-adapt.c
-@item LONGERNAMES
-cplus-dem.c
-@item LONGEST
-defs.h
-@item CC_HAS_LONG_LONG
-defs.h
-@item PRINTF_HAS_LONG_LONG
-defs.h
-@item LONG_MAX
-defs.h
 @item L_LNNO32
 coffread.c
 @item MACHKERNELDEBUG
@@ -2321,22 +2253,21 @@ altos-xdep.c
 infrun.c
 @item NEED_TEXT_START_END
 exec.c
-@item NNPC_REGNUM
-infrun.c
-@item NOTDEF
-remote-adapt.c
-@item NOTDEF
-remote-mm.c
 @item NOTICE_SIGNAL_HANDLING_CHANGE
 infrun.c
 @item NO_HIF_SUPPORT
 remote-mm.c
 @item NO_SIGINTERRUPT
 remote-adapt.c
+
 @item NO_SINGLE_STEP
-infptrace.c
-@item NPC_REGNUM
-infcmd.c
+Define this if the target does not support single-stepping.
+If this is defined, you must supply, in @code{*-tdep.c}, the function
+@code{single_step}, which takes a pid as argument and returns nothing.
+It must insert breakpoints at each possible destinations of the next
+instruction.  See @code{sparc-tdep.c} and @code{rs6000-tdep.c}
+for examples.
+
 @item NS32K_SVC_IMMED_OPERANDS
 ns32k-opcode.h
 @item NUMERIC_REG_NAMES
@@ -2345,8 +2276,6 @@ mips-tdep.c
 dbxread.c
 @item N_SET_MAGIC
 hppabsd-tdep.c
-@item NaN
-tm-umax.h
 @item ONE_PROCESS_WRITETEXT
 breakpoint.c
 @item PC
@@ -2357,8 +2286,19 @@ dbxread.c
 inferior.h
 @item PC_LOAD_SEGMENT
 stack.c
+
 @item PC_REGNUM
-parse.c
+If the program counter is kept in a register, then define this macro
+to be the number of that register.
+This need be defined only if @code{TARGET_WRITE_PC} is not defined.
+
+@item NPC_REGNUM
+The number of the ``next program counter'' register, if defined.
+
+@item NNPC_REGNUM
+The number of the ``next next program counter'' register, if defined.
+Currently, this is only defined for the Motorola 88K.
+
 @item PRINT_RANDOM_SIGNAL
 infcmd.c
 @item PRINT_REGISTER_HOOK
@@ -2390,7 +2330,7 @@ xm-altos.h
 
 @item SDB_REG_TO_REGNUM
 Define this to convert sdb register numbers
-into gdb regnums.  If not defined, no conversion will be done.
+into GDB regnums.  If not defined, no conversion will be done.
 
 @item SEEK_END
 state.c
@@ -2416,16 +2356,17 @@ A C statement that should behave similarly, but that can stop
 as soon as the function is known to have a frame.
 If not defined, @code{SKIP_PROLOGUE} will be used instead.
 
-@item SKIP_TRAMPOLINE_CODE
-infrun.c
-@item SOLIB_ADD
-core.c
+@item SKIP_TRAMPOLINE_CODE (pc)
+If the target machine has trampoline code that sits between callers
+and the functions being called, then define this macro to return
+a new PC that is at the start of the real function.
+
 @item SP_REGNUM
 parse.c
 
 @item STAB_REG_TO_REGNUM
 Define this to convert stab register numbers (as gotten from `r' declarations)
-into gdb regnums.  If not defined, no conversion will be done.
+into GDB regnums.  If not defined, no conversion will be done.
 
 @item STACK_ALIGN
 valops.c
@@ -2444,8 +2385,6 @@ infrun.c
 dbxread.c
 @item SVR4_SHARED_LIBS
 solib.c
-@item SYM1
-tm-ultra3.h
 @item SYMBOL_RELOADING_DEFAULT
 symfile.c
 
@@ -2488,7 +2427,7 @@ Number of bits in a pointer; defaults to @code{TARGET_INT_BIT}.
 Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 
 @item TARGET_READ_PC
-@item TARGET_WRITE_PC
+@item TARGET_WRITE_PC (val, pid)
 @item TARGET_READ_SP
 @item TARGET_WRITE_SP
 @item TARGET_READ_FP
@@ -2502,55 +2441,44 @@ These macros are useful when a target keeps one of these registers in a
 hard to get at place;  for example, part in a segment register and part
 in an ordinary register.
 
-@item T_ARG
-coffread.c
-@item T_VOID
-coffread.c
-@item UINT_MAX
-defs.h
-@item USER
-m88k-tdep.c
-@item USE_GAS
-xm-news.h
-@item USE_STRUCT_CONVENTION
-values.c
-@item USIZE
-xm-m88k.h
-@item U_FPSTATE
-i386-xdep.c
-@item VARIABLES_INSIDE_BLOCK
-dbxread.c
+@item USE_STRUCT_CONVENTION (gcc_p, type)
+If defined, this must be an expression that is nonzero if a value
+of the given @var{type} being returned from a function must have
+space allocated for it on the stack.  @var{gcc_p} is true if the
+function being considered is known to have been compiled by GCC;
+this is helpful for systems where GCC is known to use different calling
+convention than other compilers.
+
+@item VARIABLES_INSIDE_BLOCK (desc, gcc_p)
+For dbx-style debugging information, if the compiler puts variable
+declarations inside LBRAC/RBRAC blocks, this should be defined
+to be nonzero.  @var{desc} is the value of @code{n_desc} from the
+@code{N_RBRAC} symbol, and @var{gcc_p} is true if GDB has noticed
+the presence of either the @code{GCC_COMPILED_SYMBOL} or the
+@code{GCC2_COMPILED_SYMBOL}.
+By default, this is 0.
+
+@item OS9K_VARIABLES_INSIDE_BLOCK (desc, gcc_p)
+Similarly, for OS/9000.  Defaults to 1.
+
 @item WRS_ORIG
 remote-vx.c
-@item __GO32__
-inflow.c
-@item __HPUX_ASM__
-xm-hp300hpux.h
-@item __INT_VARARGS_H
-printcmd.c
-@item __not_on_pyr_yet
-pyr-xdep.c
-@item GOULD_PN
-gould-pinsn.c
-@item hp800
-xm-hppabsd.h
-@item hpux
-hppabsd-core.c
-@item longest_to_int
-defs.h
-@item mc68020
-m68k-stub.c
-@item ns32k_opcodeT
-ns32k-opcode.h
-@item sgi
-mips-tdep.c
-@item sun
-m68k-tdep.c
-@item sun386
-tm-sun386.h
 
 @item test
 (Define this to enable testing code in regex.c.)
+
+@end table
+
+Motorola M68K target conditionals.
+
+@table
+
+@item BPT_VECTOR
+Define this to be the 4-bit location of the breakpoint trap vector.
+If not defined, it will default to @code{0xf}.
+
+@item REMOTE_BPT_VECTOR
+Defaults to @code{1}.
 
 @end table
 
@@ -2565,7 +2493,7 @@ in @file{nm-@var{system}.h}.
 @table @code
 
 @item ATTACH_DETACH
-If defined, then gdb will include support for the @code{attach} and
+If defined, then GDB will include support for the @code{attach} and
 @code{detach} commands.
 
 @item FETCH_INFERIOR_REGISTERS
@@ -2601,6 +2529,10 @@ and is different from @code{int}.
 
 @item REGISTER_U_ADDR
 Defines the offset of the registers in the ``u area''; @pxref{Host}.
+
+@item SOLIB_ADD (filename, from_tty, targ)
+Define this to expand into an expression that will cause the symbols
+in @var{filename} to be added to GDB's symbol table.
 
 @item SOLIB_CREATE_INFERIOR_HOOK
 Define this to expand into any shared-library-relocation code

@@ -1,3 +1,8 @@
+Tue Jul 26 18:32:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* gdbint.texinfo: Removed mentions of many obsolete conditionals,
+	described or fixed the descriptions of many others.
+
 Sun Jul 17 14:14:03 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* gdb.texinfo: Add some more credits.
