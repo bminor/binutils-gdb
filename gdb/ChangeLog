@@ -1,3 +1,11 @@
+Fri Apr 21 12:57:53 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* minsyms.c: add new function lookup_minimal_symbol_text, to look
+	for text symbol only.
+	* breakpoint.c (create_longjmp_breakpoint): call
+	lookup_minimal_symbol_text instead of lookup_minimal_symbol.
+	* symtab.h: add lookup_minimal_symbol_text prototype.
+
 Fri Apr 21 12:03:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* sh-tdep.c (sh-opc.h): Don't include.
