@@ -774,15 +774,15 @@ do_tests
 
 
 # set a breakpoint and go there
-send_gdb "break 498\n"   
+send_gdb "break 503\n"   
 gdb_expect {   
-   -re "Breakpoint \[0-9\] at.*$gdb_prompt $" { pass "set break 498" }
-   -re "$gdb_prompt $"                     { fail "set break 498" }
-   timeout                             { fail "(timeout) set break 498" }
+   -re "Breakpoint \[0-9\] at.*$gdb_prompt $" { pass "set break 503" }
+   -re "$gdb_prompt $"                     { fail "set break 503" }
+   timeout                             { fail "(timeout) set break 503" }
 }
 send_gdb "continue\n"   
 gdb_expect {   
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, main....at.*misc\\.cc:498\r\n498.*\r\n$gdb_prompt $" { pass "continue" }
+   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, main....at.*misc\\.cc:503\r\n503.*\r\n$gdb_prompt $" { pass "continue" }
    -re "$gdb_prompt $"                     { fail "continue" }
    timeout                             { fail "(timeout) continue" }
 }
@@ -818,9 +818,12 @@ gdb_expect {
 }
 
 # ptype on the enum member
+# The second success case is a little dubious, but it's not clear what
+# ought to be required of a ptype on a private enum... -sts 19990324
 send_gdb "ptype obj_with_enum.priv_enum\n"   
 gdb_expect {   
    -re "type = enum ClassWithEnum::PrivEnum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
+   -re "type = enum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
    -re "$gdb_prompt $"                     { fail "ptype obj_with_enum.priv_enum" }
    timeout                             { fail "(timeout) ptype obj_with_enum.priv_enum" }
 }

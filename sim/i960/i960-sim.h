@@ -10,6 +10,11 @@
 #define FP0_REGNUM 36   /* First floating point register */
 /* Some registers have more than one name */
 #define PC_REGNUM  IP_REGNUM    /* GDB refers to ip as the Program Counter */
+
+SI a_i960_h_gr_get (SIM_CPU *, UINT);
+void a_i960_h_gr_set (SIM_CPU *, UINT, SI);
+IADDR a_i960_h_pc_get (SIM_CPU *);
+void a_i960_h_pc_set (SIM_CPU *, IADDR);
 
 #define GETTWI GETTSI
 #define SETTWI SETTSI

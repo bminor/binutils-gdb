@@ -670,11 +670,4 @@ gdb_test "info break" \
         timeout { fail "(timeout) continue to bp overloaded : double"  }
     }
 
-    send_gdb "cont\n"
-    gdb_expect {
-        -re "Continuing.\r\n\r\nProgram exited normally.\r\n$gdb_prompt $" {
-            pass "finish program"
-        }
-        -re "$gdb_prompt $" { fail "finish program"  }
-        timeout { fail "(timeout) finish program"  }
-    }
+    gdb_continue_to_end "finish program"

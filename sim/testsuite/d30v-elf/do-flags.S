@@ -224,8 +224,22 @@
 	assert r60, 0x80000000
 	assert r61, 0x80000000
 	
-			
-							
+
+	# PR 19224
+
+	add r7,r0,0x80000000
+	add r2,r0,r0            || nop
+	add r1,r0,0x1           || nop
+	# confirm that these insns do not kill the add in the right container
+	mvtsys psw,r7           -> add r2,r2,r1
+	mvtsys pswh,r7          -> add r2,r2,r1
+	mvtsys pswl,r7          -> add r2,r2,r1	
+	mvtsys f0,r7            -> add r2,r2,r1			
+	mvtsys mod_s,r7         -> add r2,r2,r1							
+
+	assert r2, 0x5
+
+									
 	# all okay
 
 	bra	ok

@@ -370,13 +370,11 @@ extern void print_expression PARAMS ((struct expression *, GDB_FILE *));
 
 extern char *op_string PARAMS ((enum exp_opcode));
 
-#ifdef MAINTENANCE_CMDS
 extern void dump_prefix_expression PARAMS ((struct expression *,
 					    GDB_FILE *,
 					    char *));
 extern void dump_postfix_expression PARAMS ((struct expression *,
 					     GDB_FILE *,
 					     char *));
-#endif /* MAINTENANCE_CMDS */
 
 #endif	/* !defined (EXPRESSION_H) */

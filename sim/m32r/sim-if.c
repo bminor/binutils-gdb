@@ -155,8 +155,8 @@ sim_open (kind, callback, abfd, argv)
 
   /* Open a copy of the cpu descriptor table.  */
   {
-    CGEN_CPU_DESC cd = m32r_cgen_cpu_open (STATE_ARCHITECTURE (sd)->mach,
-					   CGEN_ENDIAN_BIG);
+    CGEN_CPU_DESC cd = m32r_cgen_cpu_open_1 (STATE_ARCHITECTURE (sd)->printable_name,
+					     CGEN_ENDIAN_BIG);
     for (i = 0; i < MAX_NR_PROCESSORS; ++i)
       {
 	SIM_CPU *cpu = STATE_CPU (sd, i);

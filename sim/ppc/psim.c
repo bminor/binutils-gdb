@@ -220,7 +220,7 @@ psim_usage(int verbose)
 }
 
 /* Test "string" for containing a string of digits that form a number
-between "min" and "max".  The return value is the number of "err". */
+between "min" and "max".  The return value is the number or "err". */
 static
 int is_num( char *string, int min, int max, int err)
 {
@@ -316,7 +316,6 @@ psim_options(device *root,
 	break;
       case 'o':
 	param = find_arg("Missing <dev-spec> option for -o\n", &argp, argv);
-#ifdef WITH_OPTION_MPC860C0
 	if (memcmp(param, "mpc860c0", 8) == 0)
         {
           if (param[8] == '\0')
@@ -328,7 +327,6 @@ psim_options(device *root,
           else error("Invalid mpc860c0 option for -o\n");
         }
 	else
-#endif // WITH_OPTION_MPC860C0
           current = tree_parse(current, "%s", param);
 	break;
       case 'r':
@@ -354,9 +352,10 @@ psim_options(device *root,
 	       NULL, 0,
 	       device_ioctl_set_trace);
 
-#ifdef WITH_OPTION_MPC860C0
-  semantic_init(root);
-#endif // WITH_OPTION_MPC860C0
+  {
+    void semantic_init(device* root);
+    semantic_init(root);
+  }
 
   /* return where the options end */
   return argv + argp;

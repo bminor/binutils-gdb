@@ -234,7 +234,7 @@ arc_get_frame_setup (pc)
 	  /* This sequence is used to get the address of the return
 	     buffer for a function that returns a structure.  */
 	  insn = codestream_peek ();
-	  if (insn & OPMASK == 0x60000000)
+	  if ((insn & OPMASK) == 0x60000000)
 	    codestream_get ();
 	}
       /* Frameless fn.  */

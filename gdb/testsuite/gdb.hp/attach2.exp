@@ -29,6 +29,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+if { [skip_hp_tests] } then { continue }
+
 # Thread stuff is _slow_; prepare for long waits.
 #
 # Further, this test has some "null" lines designed

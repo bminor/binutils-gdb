@@ -154,6 +154,34 @@ union sem_fields {
       SI * i_dst;
       unsigned char out_dst;
     } fmt_not3;
+    struct { /* e.g. shlo $src1, $src2, $dst */
+      SI * i_src1;
+      SI * i_src2;
+      SI * i_dst;
+      unsigned char in_src1;
+      unsigned char in_src2;
+      unsigned char out_dst;
+    } fmt_shlo;
+    struct { /* e.g. shlo $lit1, $src2, $dst */
+      UINT f_src1;
+      SI * i_src2;
+      SI * i_dst;
+      unsigned char in_src2;
+      unsigned char out_dst;
+    } fmt_shlo1;
+    struct { /* e.g. shlo $src1, $lit2, $dst */
+      UINT f_src2;
+      SI * i_src1;
+      SI * i_dst;
+      unsigned char in_src1;
+      unsigned char out_dst;
+    } fmt_shlo2;
+    struct { /* e.g. shlo $lit1, $lit2, $dst */
+      UINT f_src1;
+      UINT f_src2;
+      SI * i_dst;
+      unsigned char out_dst;
+    } fmt_shlo3;
     struct { /* e.g. emul $src1, $src2, $dst */
       UINT f_srcdst;
       SI * i_src1;
@@ -162,7 +190,7 @@ union sem_fields {
       unsigned char in_src1;
       unsigned char in_src2;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_emul;
     struct { /* e.g. emul $lit1, $src2, $dst */
       UINT f_srcdst;
@@ -171,7 +199,7 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_src2;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_emul1;
     struct { /* e.g. emul $src1, $lit2, $dst */
       UINT f_srcdst;
@@ -180,7 +208,7 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_src1;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_emul2;
     struct { /* e.g. emul $lit1, $lit2, $dst */
       UINT f_srcdst;
@@ -188,67 +216,67 @@ union sem_fields {
       UINT f_src2;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_emul3;
     struct { /* e.g. movl $src1, $dst */
       UINT f_src1;
       UINT f_srcdst;
       SI * i_src1;
       SI * i_dst;
-      unsigned char in_h_gr_add__VM_index_of_src1_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_src1_1;
       unsigned char in_src1;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_movl;
     struct { /* e.g. movl $lit1, $dst */
       UINT f_srcdst;
       UINT f_src1;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_movl1;
     struct { /* e.g. movt $src1, $dst */
       UINT f_src1;
       UINT f_srcdst;
       SI * i_src1;
       SI * i_dst;
-      unsigned char in_h_gr_add__VM_index_of_src1_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_src1_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_src1_1;
+      unsigned char in_h_gr_add__VM_index_of_src1_2;
       unsigned char in_src1;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_movt;
     struct { /* e.g. movt $lit1, $dst */
       UINT f_srcdst;
       UINT f_src1;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_movt1;
     struct { /* e.g. movq $src1, $dst */
       UINT f_src1;
       UINT f_srcdst;
       SI * i_src1;
       SI * i_dst;
-      unsigned char in_h_gr_add__VM_index_of_src1_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_src1_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_src1_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_src1_1;
+      unsigned char in_h_gr_add__VM_index_of_src1_2;
+      unsigned char in_h_gr_add__VM_index_of_src1_3;
       unsigned char in_src1;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_movq;
     struct { /* e.g. movq $lit1, $dst */
       UINT f_srcdst;
       UINT f_src1;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_movq1;
     struct { /* e.g. modpc $src1, $src2, $dst */
       SI * i_src2;
@@ -603,7 +631,7 @@ union sem_fields {
       UINT f_offset;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_offset;
     struct { /* e.g. ldl $offset($abase), $dst */
       UINT f_srcdst;
@@ -612,7 +640,7 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_indirect_offset;
     struct { /* e.g. ldl ($abase), $dst */
       UINT f_srcdst;
@@ -620,7 +648,7 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_indirect;
     struct { /* e.g. ldl ($abase)[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -631,14 +659,14 @@ union sem_fields {
       unsigned char in_abase;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_indirect_index;
     struct { /* e.g. ldl $optdisp, $dst */
       UINT f_srcdst;
       UINT f_optdisp;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_disp;
     struct { /* e.g. ldl $optdisp($abase), $dst */
       UINT f_srcdst;
@@ -647,7 +675,7 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_indirect_disp;
     struct { /* e.g. ldl $optdisp[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -657,7 +685,7 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_index_disp;
     struct { /* e.g. ldl $optdisp($abase)[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -669,15 +697,15 @@ union sem_fields {
       unsigned char in_abase;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
     } fmt_ldl_indirect_index_disp;
     struct { /* e.g. ldt $offset, $dst */
       UINT f_srcdst;
       UINT f_offset;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_offset;
     struct { /* e.g. ldt $offset($abase), $dst */
       UINT f_srcdst;
@@ -686,8 +714,8 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_indirect_offset;
     struct { /* e.g. ldt ($abase), $dst */
       UINT f_srcdst;
@@ -695,8 +723,8 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_indirect;
     struct { /* e.g. ldt ($abase)[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -707,16 +735,16 @@ union sem_fields {
       unsigned char in_abase;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_indirect_index;
     struct { /* e.g. ldt $optdisp, $dst */
       UINT f_srcdst;
       UINT f_optdisp;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_disp;
     struct { /* e.g. ldt $optdisp($abase), $dst */
       UINT f_srcdst;
@@ -725,8 +753,8 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_indirect_disp;
     struct { /* e.g. ldt $optdisp[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -736,8 +764,8 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_index_disp;
     struct { /* e.g. ldt $optdisp($abase)[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -749,17 +777,17 @@ union sem_fields {
       unsigned char in_abase;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
     } fmt_ldt_indirect_index_disp;
     struct { /* e.g. ldq $offset, $dst */
       UINT f_srcdst;
       UINT f_offset;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_offset;
     struct { /* e.g. ldq $offset($abase), $dst */
       UINT f_srcdst;
@@ -768,9 +796,9 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_indirect_offset;
     struct { /* e.g. ldq ($abase), $dst */
       UINT f_srcdst;
@@ -778,9 +806,9 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_indirect;
     struct { /* e.g. ldq ($abase)[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -791,18 +819,18 @@ union sem_fields {
       unsigned char in_abase;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_indirect_index;
     struct { /* e.g. ldq $optdisp, $dst */
       UINT f_srcdst;
       UINT f_optdisp;
       SI * i_dst;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_disp;
     struct { /* e.g. ldq $optdisp($abase), $dst */
       UINT f_srcdst;
@@ -811,9 +839,9 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_abase;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_indirect_disp;
     struct { /* e.g. ldq $optdisp[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -823,9 +851,9 @@ union sem_fields {
       SI * i_dst;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_index_disp;
     struct { /* e.g. ldq $optdisp($abase)[$index*S$scale], $dst */
       UINT f_srcdst;
@@ -837,9 +865,9 @@ union sem_fields {
       unsigned char in_abase;
       unsigned char in_index;
       unsigned char out_dst;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_1;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_2;
-      unsigned char out_h_gr_add__VM_index_of_dst_const__WI_3;
+      unsigned char out_h_gr_add__VM_index_of_dst_1;
+      unsigned char out_h_gr_add__VM_index_of_dst_2;
+      unsigned char out_h_gr_add__VM_index_of_dst_3;
     } fmt_ldq_indirect_index_disp;
     struct { /* e.g. st $st_src, $offset */
       UINT f_offset;
@@ -1016,7 +1044,7 @@ union sem_fields {
       UINT f_srcdst;
       UINT f_offset;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_st_src;
     } fmt_stl_offset;
     struct { /* e.g. stl $st_src, $offset($abase) */
@@ -1025,7 +1053,7 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_st_src;
     } fmt_stl_indirect_offset;
     struct { /* e.g. stl $st_src, ($abase) */
@@ -1033,7 +1061,7 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_st_src;
     } fmt_stl_indirect;
     struct { /* e.g. stl $st_src, ($abase)[$index*S$scale] */
@@ -1043,7 +1071,7 @@ union sem_fields {
       SI * i_index;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stl_indirect_index;
@@ -1051,7 +1079,7 @@ union sem_fields {
       UINT f_srcdst;
       UINT f_optdisp;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_st_src;
     } fmt_stl_disp;
     struct { /* e.g. stl $st_src, $optdisp($abase) */
@@ -1060,7 +1088,7 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_st_src;
     } fmt_stl_indirect_disp;
     struct { /* e.g. stl $st_src, $optdisp[$index*S$scale */
@@ -1069,7 +1097,7 @@ union sem_fields {
       UINT f_scale;
       SI * i_index;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stl_index_disp;
@@ -1081,7 +1109,7 @@ union sem_fields {
       SI * i_index;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stl_indirect_index_disp;
@@ -1089,8 +1117,8 @@ union sem_fields {
       UINT f_srcdst;
       UINT f_offset;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_st_src;
     } fmt_stt_offset;
     struct { /* e.g. stt $st_src, $offset($abase) */
@@ -1099,8 +1127,8 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_st_src;
     } fmt_stt_indirect_offset;
     struct { /* e.g. stt $st_src, ($abase) */
@@ -1108,8 +1136,8 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_st_src;
     } fmt_stt_indirect;
     struct { /* e.g. stt $st_src, ($abase)[$index*S$scale] */
@@ -1119,8 +1147,8 @@ union sem_fields {
       SI * i_index;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stt_indirect_index;
@@ -1128,8 +1156,8 @@ union sem_fields {
       UINT f_srcdst;
       UINT f_optdisp;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_st_src;
     } fmt_stt_disp;
     struct { /* e.g. stt $st_src, $optdisp($abase) */
@@ -1138,8 +1166,8 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_st_src;
     } fmt_stt_indirect_disp;
     struct { /* e.g. stt $st_src, $optdisp[$index*S$scale */
@@ -1148,8 +1176,8 @@ union sem_fields {
       UINT f_scale;
       SI * i_index;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stt_index_disp;
@@ -1161,8 +1189,8 @@ union sem_fields {
       SI * i_index;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stt_indirect_index_disp;
@@ -1170,9 +1198,9 @@ union sem_fields {
       UINT f_srcdst;
       UINT f_offset;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_st_src;
     } fmt_stq_offset;
     struct { /* e.g. stq $st_src, $offset($abase) */
@@ -1181,9 +1209,9 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_st_src;
     } fmt_stq_indirect_offset;
     struct { /* e.g. stq $st_src, ($abase) */
@@ -1191,9 +1219,9 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_st_src;
     } fmt_stq_indirect;
     struct { /* e.g. stq $st_src, ($abase)[$index*S$scale] */
@@ -1203,9 +1231,9 @@ union sem_fields {
       SI * i_index;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stq_indirect_index;
@@ -1213,9 +1241,9 @@ union sem_fields {
       UINT f_srcdst;
       UINT f_optdisp;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_st_src;
     } fmt_stq_disp;
     struct { /* e.g. stq $st_src, $optdisp($abase) */
@@ -1224,9 +1252,9 @@ union sem_fields {
       SI * i_abase;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_st_src;
     } fmt_stq_indirect_disp;
     struct { /* e.g. stq $st_src, $optdisp[$index*S$scale */
@@ -1235,9 +1263,9 @@ union sem_fields {
       UINT f_scale;
       SI * i_index;
       SI * i_st_src;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stq_index_disp;
@@ -1249,9 +1277,9 @@ union sem_fields {
       SI * i_index;
       SI * i_st_src;
       unsigned char in_abase;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_1;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_2;
-      unsigned char in_h_gr_add__VM_index_of_st_src_const__WI_3;
+      unsigned char in_h_gr_add__VM_index_of_st_src_1;
+      unsigned char in_h_gr_add__VM_index_of_st_src_2;
+      unsigned char in_h_gr_add__VM_index_of_st_src_3;
       unsigned char in_index;
       unsigned char in_st_src;
     } fmt_stq_indirect_index_disp;

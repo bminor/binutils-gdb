@@ -58,7 +58,7 @@ int main ()
     float arg11 =100.0;
     double arg12 = 200.0;
 
-    char *str = "A";
+    char *str = (char *) "A";
     foo foo_instance1(111);
     foo foo_instance2(222, str);
     foo foo_instance3(foo_instance2);

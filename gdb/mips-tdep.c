@@ -36,8 +36,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "opcode/mips.h"
 
-/* Some MIPS boards don't support floating point, so we permit the
-   user to turn it off.  */
+/* Some MIPS boards don't support floating point while others only
+   support single-precision floating-point operations.  See also
+   FP_REGISTER_DOUBLE. */
 
 enum mips_fpu_type
 {
@@ -53,11 +54,17 @@ static int mips_fpu_type_auto = 1;
 static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
 #define MIPS_FPU_TYPE mips_fpu_type
 
-
-#define VM_MIN_ADDRESS (CORE_ADDR)0x400000
+#ifndef MIPS_SAVED_REGSIZE
+#define MIPS_SAVED_REGSIZE MIPS_REGSIZE
+#endif
 
 /* Do not use "TARGET_IS_MIPS64" to test the size of floating point registers */
+#ifndef FP_REGISTER_DOUBLE
 #define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
+#endif
+
+
+#define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
 #if 0
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
@@ -223,7 +230,7 @@ mips_use_struct_convention (gcc_p, type)
      struct type *type;
 {
   if (MIPS_EABI)
-    return (TYPE_LENGTH (type) > 2 * MIPS_REGSIZE);
+    return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
   else
     return 1; /* Structures are returned by ref in extra arg0 */
 }
@@ -933,7 +940,7 @@ mips_find_saved_regs (fci)
     if (gen_mask & 0x80000000)
       {
 	fci->saved_regs[ireg] = reg_position;
-	reg_position -= MIPS_REGSIZE;
+	reg_position -= MIPS_SAVED_REGSIZE;
       }
 
   /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse order
@@ -951,13 +958,13 @@ mips_find_saved_regs (fci)
 	  /* Check if the ra register was pushed on the stack.  */
 	  reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
 	  if (inst & 0x20)
-	    reg_position -= MIPS_REGSIZE;
+	    reg_position -= MIPS_SAVED_REGSIZE;
 
 	  /* Check if the s0 and s1 registers were pushed on the stack.  */
 	  for (reg = 16; reg < sreg_count+16; reg++)
 	    {
 	      fci->saved_regs[reg] = reg_position;
-	      reg_position -= MIPS_REGSIZE;
+	      reg_position -= MIPS_SAVED_REGSIZE;
 	    }
 	}
     }
@@ -969,7 +976,7 @@ mips_find_saved_regs (fci)
   /* The freg_offset points to where the first *double* register
      is saved.  So skip to the high-order word. */
   if (! GDB_TARGET_IS_MIPS64)
-    reg_position += MIPS_REGSIZE;
+    reg_position += MIPS_SAVED_REGSIZE;
 
   /* Fill in the offsets for the float registers which float_mask says
      were saved.  */
@@ -977,7 +984,7 @@ mips_find_saved_regs (fci)
     if (float_mask & 0x80000000)
       {
 	fci->saved_regs[FP0_REGNUM+ireg] = reg_position;
-	reg_position -= MIPS_REGSIZE;
+	reg_position -= MIPS_SAVED_REGSIZE;
       }
 
   fci->saved_regs[PC_REGNUM] = fci->saved_regs[RA_REGNUM];
@@ -999,7 +1006,7 @@ read_next_frame_reg(fi, regno)
 	  if (fi->saved_regs == NULL)
 	    mips_find_saved_regs (fi);
 	  if (fi->saved_regs[regno])
-	    return read_memory_integer(fi->saved_regs[regno], MIPS_REGSIZE);
+	    return read_memory_integer(fi->saved_regs[regno], MIPS_SAVED_REGSIZE);
 	}
     }
   return read_register (regno);
@@ -1065,9 +1072,9 @@ mips_frame_saved_pc(frame)
 	      : (proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM);
 
   if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
-    saved_pc = read_memory_integer(frame->frame - MIPS_REGSIZE, MIPS_REGSIZE);
+    saved_pc = read_memory_integer (frame->frame - MIPS_SAVED_REGSIZE, MIPS_SAVED_REGSIZE);
   else
-    saved_pc = read_next_frame_reg(frame, pcreg);
+    saved_pc = read_next_frame_reg (frame, pcreg);
 
   return ADDR_BITS_REMOVE (saved_pc);
 }
@@ -1359,7 +1366,7 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  {
 	    PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
 	    set_reg_offset (reg, sp + offset);
-	    offset += MIPS_REGSIZE;
+	    offset += MIPS_SAVED_REGSIZE;
 	  }
 
 	/* Check if the ra register was pushed on the stack.  */
@@ -1368,7 +1375,7 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  {
 	    PROC_REG_MASK(&temp_proc_desc) |= 1 << RA_REGNUM;
 	    set_reg_offset (RA_REGNUM, sp + offset);
-	    offset -= MIPS_REGSIZE;
+	    offset -= MIPS_SAVED_REGSIZE;
 	  }
 
 	/* Check if the s0 and s1 registers were pushed on the stack.  */
@@ -1376,7 +1383,7 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  {
 	    PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
 	    set_reg_offset (reg, sp + offset);
-	    offset -= MIPS_REGSIZE;
+	    offset -= MIPS_SAVED_REGSIZE;
 	  }
       }
 }
@@ -1754,7 +1761,7 @@ setup_arbitrary_frame (argc, argv)
 #define STACK_ARGSIZE 8
 #else
 #define MIPS_NABI32   0
-#define STACK_ARGSIZE MIPS_REGSIZE
+#define STACK_ARGSIZE MIPS_SAVED_REGSIZE
 #endif
 
 CORE_ADDR
@@ -1782,13 +1789,13 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
      On at least one MIPS variant, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment. */
   sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, MIPS_REGSIZE);
+  struct_addr = ROUND_DOWN (struct_addr, MIPS_SAVED_REGSIZE);
       
   /* Now make space on the stack for the args. We allocate more
      than necessary for EABI, because the first few arguments are
      passed in registers, but that's OK. */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH(VALUE_TYPE(args[argnum])), MIPS_REGSIZE);
+    len += ROUND_UP (TYPE_LENGTH(VALUE_TYPE(args[argnum])), MIPS_SAVED_REGSIZE);
   sp -= ROUND_UP (len, 16);
 
   /* Initialize the integer and float register pointers.  */
@@ -1813,12 +1820,12 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 
       /* The EABI passes structures that do not fit in a register by
 	 reference. In all other cases, pass the structure by value.  */
-      if (MIPS_EABI && len > MIPS_REGSIZE &&
+      if (MIPS_EABI && len > MIPS_SAVED_REGSIZE &&
 	  (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
-	  store_address (valbuf, MIPS_REGSIZE, VALUE_ADDRESS (arg));
+	  store_address (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
-	  len = MIPS_REGSIZE;
+	  len = MIPS_SAVED_REGSIZE;
 	  val = valbuf;
 	}
       else
@@ -1887,11 +1894,11 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	     where gcc sometimes puts them on the stack.  For maximum
 	     compatibility, we will put them in both places.  */
 
-	  int odd_sized_struct = ((len > MIPS_REGSIZE) && 
-				  (len % MIPS_REGSIZE != 0));
+	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) && 
+				  (len % MIPS_SAVED_REGSIZE != 0));
 	  while (len > 0)
 	    {
-	      int partial_len = len < MIPS_REGSIZE ? len : MIPS_REGSIZE;
+	      int partial_len = len < MIPS_SAVED_REGSIZE ? len : MIPS_SAVED_REGSIZE;
 
 	      if (argreg > MIPS_LAST_ARG_REGNUM || odd_sized_struct)
 		{
@@ -1901,16 +1908,18 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 
 		  int longword_offset = 0;
 		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-		    if (STACK_ARGSIZE == 8 &&
-			(typecode == TYPE_CODE_INT ||
-			 typecode == TYPE_CODE_PTR ||
-			 typecode == TYPE_CODE_FLT) && len <= 4)
-		      longword_offset = STACK_ARGSIZE - len;
-		    else if ((typecode == TYPE_CODE_STRUCT ||
-			      typecode == TYPE_CODE_UNION) &&
-			     TYPE_LENGTH (arg_type) < STACK_ARGSIZE)
-		      longword_offset = STACK_ARGSIZE - len;
-
+		    {
+		      if (STACK_ARGSIZE == 8 &&
+			  (typecode == TYPE_CODE_INT ||
+			   typecode == TYPE_CODE_PTR ||
+			   typecode == TYPE_CODE_FLT) && len <= 4)
+			longword_offset = STACK_ARGSIZE - len;
+		      else if ((typecode == TYPE_CODE_STRUCT ||
+				typecode == TYPE_CODE_UNION) &&
+			       TYPE_LENGTH (arg_type) < STACK_ARGSIZE)
+			longword_offset = STACK_ARGSIZE - len;
+		    }
+		  
 		  write_memory (sp + stack_offset + longword_offset, 
 				val, partial_len);
 		}
@@ -1934,12 +1943,12 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		     binaries. */
 
 		  if (!MIPS_EABI
-		      && (MIPS_REGSIZE < 8)
+		      && MIPS_SAVED_REGSIZE < 8
 		      && TARGET_BYTE_ORDER == BIG_ENDIAN
-		      && (partial_len < MIPS_REGSIZE)
+		      && partial_len < MIPS_SAVED_REGSIZE
 		      && (typecode == TYPE_CODE_STRUCT ||
 			  typecode == TYPE_CODE_UNION))
-		    regval <<= ((MIPS_REGSIZE - partial_len) * 
+		    regval <<= ((MIPS_SAVED_REGSIZE - partial_len) * 
 				TARGET_CHAR_BIT);
 
 		  write_register (argreg, regval);
@@ -1981,21 +1990,33 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 }
 
 static void
-mips_push_register(CORE_ADDR *sp, int regno)
+mips_push_register (CORE_ADDR *sp, int regno)
 {
   char buffer[MAX_REGISTER_RAW_SIZE];
-  int regsize = REGISTER_RAW_SIZE (regno);
-
+  int regsize;
+  int offset;
+  if (MIPS_SAVED_REGSIZE < REGISTER_RAW_SIZE (regno))
+    {
+      regsize = MIPS_SAVED_REGSIZE;
+      offset = (TARGET_BYTE_ORDER == BIG_ENDIAN
+		? REGISTER_RAW_SIZE (regno) - MIPS_SAVED_REGSIZE
+		: 0);
+    }
+  else
+    {
+      regsize = REGISTER_RAW_SIZE (regno);
+      offset = 0;
+    }
   *sp -= regsize;
   read_register_gen (regno, buffer);
-  write_memory (*sp, buffer, regsize);
+  write_memory (*sp, buffer + offset, regsize);
 }
 
 /* MASK(i,j) == (1<<i) + (1<<(i+1)) + ... + (1<<j)). Assume i<=j<(MIPS_NUMREGS-1). */
 #define MASK(i,j) (((1 << ((j)+1))-1) ^ ((1 << (i))-1))
 
 void
-mips_push_dummy_frame()
+mips_push_dummy_frame ()
 {
   int ireg;
   struct linked_proc_info *link = (struct linked_proc_info*)
@@ -2046,7 +2067,7 @@ mips_push_dummy_frame()
   /* Save general CPU registers */
   PROC_REG_MASK(proc_desc) = GEN_REG_SAVE_MASK;
   /* PROC_REG_OFFSET is the offset of the first saved register from FP.  */
-  PROC_REG_OFFSET(proc_desc) = sp - old_sp - MIPS_REGSIZE;
+  PROC_REG_OFFSET(proc_desc) = sp - old_sp - MIPS_SAVED_REGSIZE;
   for (ireg = 32; --ireg >= 0; )
     if (PROC_REG_MASK(proc_desc) & (1 << ireg))
       mips_push_register (&sp, ireg);
@@ -2091,7 +2112,7 @@ mips_pop_frame()
 	  && frame->saved_regs[regnum])
 	write_register (regnum,
 			read_memory_integer (frame->saved_regs[regnum],
-					     MIPS_REGSIZE)); 
+					     MIPS_SAVED_REGSIZE)); 
     }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
@@ -2119,12 +2140,15 @@ mips_pop_frame()
       free (pi_ptr);
 
       write_register (HI_REGNUM,
-	        read_memory_integer (new_sp - 2*MIPS_REGSIZE, MIPS_REGSIZE));
+		      read_memory_integer (new_sp - 2*MIPS_SAVED_REGSIZE,
+					   MIPS_SAVED_REGSIZE));
       write_register (LO_REGNUM,
-	        read_memory_integer (new_sp - 3*MIPS_REGSIZE, MIPS_REGSIZE));
+		      read_memory_integer (new_sp - 3*MIPS_SAVED_REGSIZE,
+					   MIPS_SAVED_REGSIZE));
       if (MIPS_FPU_TYPE != MIPS_FPU_NONE)
 	write_register (FCRCS_REGNUM,
-	        read_memory_integer (new_sp - 4*MIPS_REGSIZE, MIPS_REGSIZE));
+			read_memory_integer (new_sp - 4*MIPS_SAVED_REGSIZE,
+					     MIPS_SAVED_REGSIZE));
     }
 }
 
@@ -2614,14 +2638,143 @@ mips_in_lenient_prologue (startaddr, pc)
 }
 #endif
 
-/* Given a return value in `regbuf' with a type `valtype', 
-   extract and copy its value into `valbuf'.  */
+/* Determine how a return value is stored within the MIPS register
+   file, given the return type `valtype'. */
+
+struct return_value_word
+{
+  int len;
+  int reg;
+  int reg_offset;
+  int buf_offset;
+};
+
+static void return_value_location PARAMS ((struct type *, struct return_value_word *, struct return_value_word *));
+
+static void
+return_value_location (valtype, hi, lo)
+     struct type *valtype;
+     struct return_value_word *hi;
+     struct return_value_word *lo;
+{
+  int len = TYPE_LENGTH (valtype);
+  
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
+      && ((MIPS_FPU_TYPE == MIPS_FPU_DOUBLE && (len == 4 || len == 8))
+	  || (MIPS_FPU_TYPE == MIPS_FPU_SINGLE && len == 4)))
+    {
+      if (!FP_REGISTER_DOUBLE && len == 8)
+	{
+	  /* We need to break a 64bit float in two 32 bit halves and
+             spread them across a floating-point register pair. */
+	  lo->buf_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 4 : 0;
+	  hi->buf_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 0 : 4;
+	  lo->reg_offset = ((TARGET_BYTE_ORDER == BIG_ENDIAN
+			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8)
+			    ? 4 : 0);
+	  hi->reg_offset = lo->reg_offset;
+	  lo->reg = FP0_REGNUM + 0;
+	  hi->reg = FP0_REGNUM + 1;
+	  lo->len = 4;
+	  hi->len = 4;
+	}
+      else
+	{
+	  /* The floating point value fits in a single floating-point
+             register. */
+	  lo->reg_offset = ((TARGET_BYTE_ORDER == BIG_ENDIAN
+			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8
+			     && len == 4)
+			    ? 4 : 0);
+	  lo->reg = FP0_REGNUM;
+	  lo->len = len;
+	  lo->buf_offset = 0;
+	  hi->len = 0;
+	  hi->reg_offset = 0;
+	  hi->buf_offset = 0;
+	  hi->reg = 0;
+	}
+    }
+  else
+    {
+      /* Locate a result possibly spread across two registers. */
+      int regnum = 2;
+      lo->reg = regnum + 0;
+      hi->reg = regnum + 1;
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN
+	  && len < MIPS_SAVED_REGSIZE)
+	{
+	  /* "un-left-justify" the value in the low register */
+	  lo->reg_offset = MIPS_SAVED_REGSIZE - len;
+	  lo->len = len;
+	  hi->reg_offset = 0;
+	  hi->len = 0;
+	}
+      else if (TARGET_BYTE_ORDER == BIG_ENDIAN
+	       && len > MIPS_SAVED_REGSIZE	/* odd-size structs */
+	       && len < MIPS_SAVED_REGSIZE * 2
+	       && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT ||
+		   TYPE_CODE (valtype) == TYPE_CODE_UNION))
+	{
+	  /* "un-left-justify" the value spread across two registers. */
+	  lo->reg_offset = 2 * MIPS_SAVED_REGSIZE - len;
+	  lo->len = MIPS_SAVED_REGSIZE - lo->reg_offset;
+	  hi->reg_offset = 0;
+	  hi->len = len - lo->len;
+	}
+      else
+	{
+	  /* Only perform a partial copy of the second register. */
+	  lo->reg_offset = 0;
+	  hi->reg_offset = 0;
+	  if (len > MIPS_SAVED_REGSIZE)
+	    {
+	      lo->len = MIPS_SAVED_REGSIZE;
+	      hi->len = len - MIPS_SAVED_REGSIZE;
+	    }
+	  else
+	    {
+	      lo->len = len;
+	      hi->len = 0;
+	    }
+	}
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN
+	  && REGISTER_RAW_SIZE (regnum) == 8
+	  && MIPS_SAVED_REGSIZE == 4)
+	{
+	  /* Account for the fact that only the least-signficant part
+             of the register is being used */
+	  lo->reg_offset += 4;
+	  hi->reg_offset += 4;
+	}
+      lo->buf_offset = 0;
+      hi->buf_offset = lo->len;
+    }
+}
+
+/* Given a return value in `regbuf' with a type `valtype', extract and
+   copy its value into `valbuf'. */
+
 void
 mips_extract_return_value (valtype, regbuf, valbuf)
     struct type *valtype;
     char regbuf[REGISTER_BYTES];
     char *valbuf;
 {
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &lo, &hi);
+
+  memcpy (valbuf + lo.buf_offset,
+	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  lo.len);
+
+  if (hi.len > 0)
+    memcpy (valbuf + hi.buf_offset,
+	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    hi.len);
+
+#if 0
   int regnum;
   int offset = 0;
   int len = TYPE_LENGTH (valtype);
@@ -2645,15 +2798,38 @@ mips_extract_return_value (valtype, regbuf, valbuf)
     }
   memcpy (valbuf, regbuf + REGISTER_BYTE (regnum) + offset, len);
   REGISTER_CONVERT_TO_TYPE (regnum, valtype, valbuf);
+#endif
 }
 
-/* Given a return value in `regbuf' with a type `valtype', 
-   write it's value into the appropriate register.  */
+/* Given a return value in `valbuf' with a type `valtype', write it's
+   value into the appropriate register. */
+
 void
 mips_store_return_value (valtype, valbuf)
     struct type *valtype;
     char *valbuf;
 {
+  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &lo, &hi);
+
+  memset (raw_buffer, 0, sizeof (raw_buffer));
+  memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
+  write_register_bytes (REGISTER_BYTE (lo.reg),
+			raw_buffer,
+			REGISTER_RAW_SIZE (lo.reg));
+  
+  if (hi.len > 0)
+    {
+      memset (raw_buffer, 0, sizeof (raw_buffer));
+      memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
+      write_register_bytes (REGISTER_BYTE (hi.reg),
+			    raw_buffer,
+			    REGISTER_RAW_SIZE (hi.reg));
+    }
+
+#if 0
   int regnum;
   int offset = 0;
   int len = TYPE_LENGTH (valtype);
@@ -2681,6 +2857,7 @@ mips_store_return_value (valtype, valbuf)
   write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, 
 		       len > REGISTER_RAW_SIZE (regnum) ? 
 		       len : REGISTER_RAW_SIZE (regnum));
+#endif
 }
 
 /* Exported procedure: Is PC in the signal trampoline code */

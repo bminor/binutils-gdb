@@ -84,31 +84,31 @@ ldub:
 	add_h_gr	r8,r14
 
 	set_cc          0x0f		; condition codes should not change
-	lduh		@(r14,0x7f),r7
+	ldub		@(r14,0x7f),r7
 	test_cc		1 1 1 1
 	test_h_gr  	0xde,r7
 
-	inci_h_gr	0x3e,r14
+	inci_h_gr	0x3f,r14
 	set_cc          0x07		; condition codes should not change
-	lduh    	@(r14,0x40),r7
+	ldub    	@(r14,0x40),r7
 	test_cc		0 1 1 1
 	test_h_gr  	0xde,r7
 
 	inci_h_gr	0x40,r14
 	set_cc          0x0b		; condition codes should not change
-	lduh		@(r14,0x0),r7
+	ldub		@(r14,0x0),r7
 	test_cc		1 0 1 1
 	test_h_gr  	0xde,r7
 
 	inci_h_gr	0x40,r14
 	set_cc          0x0d		; condition codes should not change
-	lduh      	@(r14,-0x40),r7
+	ldub      	@(r14,-0x40),r7
 	test_cc		1 1 0 1
 	test_h_gr  	0xde,r7
 
 	inci_h_gr	0x40,r14
 	set_cc          0x0e		; condition codes should not change
-	lduh		@(r14,-0x80),r7
+	ldub		@(r14,-0x80),r7
 	test_cc		1 1 1 0
 	test_h_gr  	0xde,r7
 

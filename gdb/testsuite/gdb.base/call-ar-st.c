@@ -994,7 +994,7 @@ int main ()  {
   for (index = 0; index < 120; index++) {
       if ((index%2) == 0) char_array[index] = 'Z';
 	 else char_array[index] = 'a';
-  } /* call-ar-st.exp uses line numbers everywhere */ char_array[120] = '\0';
+  } char_array[120] = '\0'; /* call-ar-st.exp uses line numbers everywhere */
 
   for (index = 0; index < 100; index++) {
       double_array[index] = index*23.4567;

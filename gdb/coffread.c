@@ -84,21 +84,6 @@ static CORE_ADDR current_source_end_addr;
 static bfd *nlist_bfd_global;
 static int nlist_nsyms_global;
 
-/* Vector of line number information.  */
-
-static struct linetable *line_vector;
-
-/* Index of next entry to go in line_vector_index.  */
-
-static int line_vector_index;
-
-/* Last line number recorded in the line vector.  */
-
-static int prev_line_number;
-
-/* Number of elements allocated for line_vector currently.  */
-
-static int line_vector_length;
 
 /* Pointers to scratch storage, used for reading raw symbols and auxents.  */
 
@@ -251,8 +236,6 @@ static void coff_end_symtab PARAMS ((struct objfile *));
 static void complete_symtab PARAMS ((char *, CORE_ADDR, unsigned int));
 
 static void coff_start_symtab PARAMS ((char *));
-
-static void coff_record_line PARAMS ((int, CORE_ADDR));
 
 static struct type *coff_alloc_type PARAMS ((int));
 
@@ -440,30 +423,6 @@ coff_alloc_type (index)
   return type;
 }
 
-/* Record a line number entry for line LINE at address PC.
-   FIXME:  Use record_line instead.  */
-
-static void
-coff_record_line (line, pc)
-     int line;
-     CORE_ADDR pc;
-{
-  struct linetable_entry *e;
-  /* Make sure line vector is big enough.  */
-
-  if (line_vector_index + 2 >= line_vector_length)
-    {
-      line_vector_length *= 2;
-      line_vector = (struct linetable *)
-	xrealloc ((char *) line_vector, sizeof (struct linetable)
-		  + (line_vector_length
-		     * sizeof (struct linetable_entry)));
-    }
-
-  e = line_vector->item + line_vector_index++;
-  e->line = line; e->pc = pc;
-}
-
 /* Start a new symtab for a new source file.
    This is called when a COFF ".file" symbol is seen;
    it indicates the start of data for one original source file.  */
@@ -484,17 +443,6 @@ coff_start_symtab (name)
 		   last_source_start_addr in coff_end_symtab.  */
 		0);
   record_debugformat ("COFF");
-
-  /* Initialize the source file line number information for this file.  */
-
-  if (line_vector)		/* Unlikely, but maybe possible? */
-    free ((PTR)line_vector);
-  line_vector_index = 0;
-  line_vector_length = 1000;
-  prev_line_number = -2;	/* Force first line number to be explicit */
-  line_vector = (struct linetable *)
-    xmalloc (sizeof (struct linetable)
-	     + line_vector_length * sizeof (struct linetable_entry));
 }
 
 /* Save the vital information from when starting to read a file,
@@ -535,26 +483,12 @@ coff_end_symtab (objfile)
 
   last_source_start_addr = current_source_start_addr;
 
-  /* For no good reason, this file stores the number of entries in a
-     separate variable instead of in line_vector->nitems.  Fix it.  */
-  if (line_vector)
-    line_vector->nitems = line_vector_index;
-
-  /* For COFF, we only have one subfile, so we can just look at
-     subfiles and not worry about there being other elements in the
-     chain.  We fill in various fields now because we didn't know them
-     before (or because doing it now is simply an artifact of how this
-     file used to be written).  */
-  subfiles->line_vector = line_vector;
-
   symtab = end_symtab (current_source_end_addr, objfile, 0);
 
   if (symtab != NULL)
     free_named_symtabs (symtab->filename);
 
   /* Reinitialize for beginning of new file. */
-  line_vector = 0;
-  line_vector_length = -1;
   last_source_file = NULL;
 }
 
@@ -683,7 +617,6 @@ coff_symfile_read (objfile, section_offsets, mainline)
 
   /* Set a few file-statics that give us specific information about
      the particular COFF file format we're reading.  */
-  local_linesz   = cdata->local_linesz;
   local_n_btmask = cdata->local_n_btmask;
   local_n_btshft = cdata->local_n_btshft;
   local_n_tmask  = cdata->local_n_tmask;
@@ -1086,6 +1019,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		new->name =
 		  process_coff_symbol (&fcn_cs_saved, &fcn_aux_saved,
 				       section_offsets, objfile);
+	        record_line (current_subfile, fcn_first_line, cs->c_value);
 	      }
 	    else if (STREQ (cs->c_name, ".ef"))
 	      {
@@ -1458,7 +1392,7 @@ enter_linenos (file_offset, first_line, last_line, section_offsets)
     rawptr += local_linesz;
     /* The next function, or the sentinel, will have L_LNNO32 zero; we exit. */
     if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
-      coff_record_line (first_line + L_LNNO32 (&lptr),
+      record_line (current_subfile, first_line + L_LNNO32 (&lptr),
 			lptr.l_addr.l_paddr
 			+ ANOFFSET (section_offsets, SECT_OFF_TEXT));
     else

@@ -277,6 +277,12 @@ if { [lindex $exec_output 0] != 0 } {
     return -1
 }
 
+# HP's assembler has no idea of what to do with .stab directives; detect the
+# use of HP compilers and escape from here.  (No doubt a better heuristic
+# could be devised.)
+
+if { [ info exists CC ] && [ string first "/opt/ansic/bin/cc" "$CC" ] >= 0 } then { continue }
+
 if  { [gdb_compile "${srcfile}" "${binfile}" object ""] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }

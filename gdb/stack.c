@@ -65,6 +65,8 @@ static void up_silently_command PARAMS ((char *, int));
 
 void frame_command PARAMS ((char *, int));
 
+static void current_frame_command PARAMS ((char *, int));
+
 static void select_frame_command PARAMS ((char *, int));
 
 static void print_frame_arg_vars PARAMS ((struct frame_info *, GDB_FILE *));
@@ -134,9 +136,10 @@ static int print_stack_frame_base_stub PARAMS ((char *));
 
 /* Show and print the frame arguments.
    Pass the args the way catch_errors wants them.  */
+static int show_and_print_stack_frame_stub PARAMS ((void *args));
 static int
 show_and_print_stack_frame_stub (args)
-     char *args;
+     void *args;
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *)args;
 
@@ -152,9 +155,10 @@ show_and_print_stack_frame_stub (args)
 
 /* Show or print the frame arguments.
    Pass the args the way catch_errors wants them.  */
+static int print_stack_frame_stub PARAMS ((void *args));
 static int
 print_stack_frame_stub (args)
-     char *args;
+     void *args;
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *)args;
 
@@ -182,9 +186,10 @@ print_stack_frame_base_stub (args)
 
 /* print the frame arguments to the terminal.  
    Pass the args the way catch_errors wants them.  */
+static int print_only_stack_frame_stub PARAMS ((void *));
 static int
 print_only_stack_frame_stub (args)
-     char *args;
+     void *args;
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *)args;
 
@@ -215,7 +220,7 @@ print_stack_frame_base (fi, level, source)
   args.source = source;
   args.args = 1;
 
-  catch_errors (print_stack_frame_stub, (char *)&args, "", RETURN_MASK_ALL);
+  catch_errors (print_stack_frame_stub, &args, "", RETURN_MASK_ALL);
 }
 
 /* Show and print a stack frame briefly.  FRAME_INFI should be the frame info
@@ -241,7 +246,7 @@ show_and_print_stack_frame (fi, level, source)
   args.source = source;
   args.args = 1;
 
-  catch_errors (show_and_print_stack_frame_stub, (char *)&args, "", RETURN_MASK_ALL);
+  catch_errors (show_and_print_stack_frame_stub, &args, "", RETURN_MASK_ALL);
 }
 
 
@@ -294,8 +299,7 @@ print_only_stack_frame (fi, level, source)
   args.source = source;
   args.args = 1;
 
-  catch_errors (print_only_stack_frame_stub, 
-                (char *)&args, "", RETURN_MASK_ALL);
+  catch_errors (print_only_stack_frame_stub, &args, "", RETURN_MASK_ALL);
 }
 
 struct print_args_args {
@@ -574,6 +578,7 @@ print_frame_info_base (fi, level, source, args)
 }
 
 
+#if 0
 void
 stack_publish_stopped_with_no_frame()
 {
@@ -581,6 +586,7 @@ stack_publish_stopped_with_no_frame()
 
   return;
 }
+#endif
 
 /* Show or print the frame info.  If this is the tui, it will be shown in 
    the source display */
@@ -971,6 +977,7 @@ backtrace_limit_info (arg, from_tty)
 
 /* Print briefly all stack frames or just the innermost COUNT frames.  */
 
+static void backtrace_command_1 PARAMS ((char *count_exp, int show_locals, int from_tty));
 static void
 backtrace_command_1 (count_exp, show_locals, from_tty)
      char *count_exp;
@@ -1080,7 +1087,7 @@ backtrace_command (arg, from_tty)
       int i;
 
       argv = buildargv(arg);
-      old_chain = make_cleanup ((make_cleanup_func) freeargv, (char *)argv);
+      old_chain = make_cleanup_freeargv (argv);
       argc = 0;
       for (i = 0; (argv[i] != (char *)NULL); i++)
         {
@@ -1089,7 +1096,7 @@ backtrace_command (arg, from_tty)
           for (j = 0; (j < strlen(argv[i])); j++)
             argv[i][j] = tolower(argv[i][j]);
 
-          if (argIndicatingFullTrace < 0 && subsetCompare(argv[i], "full"))
+          if (argIndicatingFullTrace < 0 && subset_compare (argv[i], "full"))
             argIndicatingFullTrace = argc;
           else
             {
@@ -1132,6 +1139,7 @@ backtrace_command (arg, from_tty)
     do_cleanups(old_chain);
 }
 
+static void backtrace_full_command PARAMS ((char *arg, int from_tty));
 static void
 backtrace_full_command (arg, from_tty)
      char *arg;
@@ -1522,6 +1530,7 @@ select_and_print_frame(fi, level)
 
 /* Select frame FI, noting that its stack level is LEVEL.  Be silent if
    not the TUI */
+#if 0
 void
 select_and_maybe_print_frame (fi, level)
      struct frame_info *fi;
@@ -1532,6 +1541,7 @@ select_and_maybe_print_frame (fi, level)
   else
     select_and_print_frame(fi, level);
 }
+#endif
 
 
 /* Store the selected frame and its level into *FRAMEP and *LEVELP.
@@ -1652,15 +1662,15 @@ frame_command (level_exp, from_tty)
 
 /* The XDB Compatibility command to print the current frame. */
 
-void
+static void
 current_frame_command (level_exp, from_tty)
      char *level_exp;
      int from_tty;
 {
   if (target_has_stack == 0 || selected_frame == 0)
     error ("No stack."); 
- print_only_stack_frame (selected_frame, selected_frame_level, 1);
-  }
+  print_only_stack_frame (selected_frame, selected_frame_level, 1);
+}
 
 /* Select the frame up one or COUNT stack levels
    from the previously selected frame, and print it briefly.  */
@@ -1846,6 +1856,7 @@ struct function_bounds
   CORE_ADDR low, high;
 };
 
+static void func_command PARAMS ((char *arg, int from_tty));
 static void
 func_command (arg, from_tty)
      char *arg;

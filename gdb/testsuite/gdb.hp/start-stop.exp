@@ -54,6 +54,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+if { [skip_hp_tests] } then { continue }
+
 if { ![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"] } {
     verbose "HPUX thread test ignored for non-hppa or pre-HP/UX-10.30 targets."
     return 0

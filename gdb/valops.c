@@ -51,10 +51,8 @@ extern int hp_som_som_object_present;
 
 static int typecmp PARAMS ((int staticp, struct type *t1[], value_ptr t2[]));
 
-#ifdef CALL_DUMMY
 static CORE_ADDR find_function_addr PARAMS ((value_ptr, struct type **));
 static value_ptr value_arg_coerce PARAMS ((value_ptr, struct type *, int));
-#endif
 
 
 #ifndef PUSH_ARGUMENTS
@@ -77,6 +75,8 @@ static int check_field_in PARAMS ((struct type *, const char *));
 static CORE_ADDR allocate_space_in_inferior PARAMS ((int));
 
 static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
+
+static struct fn_field *find_method_list PARAMS ((value_ptr *argp, char * method, int offset, int * static_memfuncp, struct type * type, int * num_fns, struct type ** basetype, int * boffset));
 
 void _initialize_valops PARAMS ((void));
 
@@ -443,8 +443,8 @@ value_at (type, addr, sect)
 
   val = allocate_value (type);
 
-#ifdef GDB_TARGET_IS_D10V
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
+  if (GDB_TARGET_IS_D10V
+      && TYPE_CODE (type) == TYPE_CODE_PTR
       && TYPE_TARGET_TYPE (type)
       && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
     {
@@ -452,20 +452,20 @@ value_at (type, addr, sect)
       unsigned long num;
       unsigned short snum;
       snum = read_memory_unsigned_integer (addr, 2);
-      num = D10V_MAKE_IADDR(snum);
-      store_address ( VALUE_CONTENTS_RAW (val), 4, num);
+      num = D10V_MAKE_IADDR (snum);
+      store_address (VALUE_CONTENTS_RAW (val), 4, num);
     }
-  else if (TYPE_CODE(type) == TYPE_CODE_PTR)
+  else if (GDB_TARGET_IS_D10V
+	   && TYPE_CODE(type) == TYPE_CODE_PTR)
     {
       /* pointer to data */
       unsigned long num;
       unsigned short snum;
       snum = read_memory_unsigned_integer (addr, 2);
-      num = D10V_MAKE_DADDR(snum);
-      store_address ( VALUE_CONTENTS_RAW (val), 4, num); 
+      num = D10V_MAKE_DADDR (snum);
+      store_address (VALUE_CONTENTS_RAW (val), 4, num); 
     }
   else
-#endif
     read_memory_section (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type), sect);
 
   VALUE_LVAL (val) = lval_memory;
@@ -517,9 +517,9 @@ value_fetch_lazy (val)
   CORE_ADDR addr = VALUE_ADDRESS (val) + VALUE_OFFSET (val);
   int length = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val));
 
-#ifdef GDB_TARGET_IS_D10V
   struct type *type = VALUE_TYPE(val);
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
+  if (GDB_TARGET_IS_D10V
+      && TYPE_CODE (type) == TYPE_CODE_PTR
       && TYPE_TARGET_TYPE (type)
       && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
     {
@@ -530,7 +530,8 @@ value_fetch_lazy (val)
       num = D10V_MAKE_IADDR(snum);
       store_address ( VALUE_CONTENTS_RAW (val), 4, num);
     }
-  else if (TYPE_CODE(type) == TYPE_CODE_PTR)
+  else if (GDB_TARGET_IS_D10V
+	   && TYPE_CODE(type) == TYPE_CODE_PTR)
     {
       /* pointer to data */
       unsigned long num;
@@ -539,10 +540,7 @@ value_fetch_lazy (val)
       num = D10V_MAKE_DADDR(snum);
       store_address ( VALUE_CONTENTS_RAW (val), 4, num); 
     }
-  else
-#endif
-
-  if (length)
+  else if (length)
     read_memory_section (addr, VALUE_CONTENTS_ALL_RAW (val), length,
 			 VALUE_BFD_SECTION (val));
   VALUE_LAZY (val) = 0;
@@ -1101,7 +1099,6 @@ value_push (sp, arg)
 
 #endif	/* !PUSH_ARGUMENTS */
 
-#ifdef CALL_DUMMY
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.
 
@@ -1261,8 +1258,9 @@ find_function_addr (function, retval_type)
 
    ARGS is modified to contain coerced values. */
 
-value_ptr
-call_function_by_hand (function, nargs, args)
+static value_ptr hand_function_call PARAMS ((value_ptr function, int nargs, value_ptr *args));
+static value_ptr
+hand_function_call (function, nargs, args)
      value_ptr function;
      int nargs;
      value_ptr *args;
@@ -1279,15 +1277,19 @@ call_function_by_hand (function, nargs, args)
            sequence of instructions.  But CISC machines will have
            to pack the instructions into REGISTER_SIZE units (and
            so will RISC machines for which INSTRUCTION_SIZE is not
-           REGISTER_SIZE). */
+           REGISTER_SIZE).
 
-  static ULONGEST dummy[] = CALL_DUMMY;
-  char dummy1[REGISTER_SIZE * sizeof dummy / sizeof (ULONGEST)];
+     NOTE: This is pretty stupid.  CALL_DUMMY should be in strict
+           target byte order. */
+
+  static ULONGEST *dummy;
+  int sizeof_dummy1;
+  char *dummy1;
   CORE_ADDR old_sp;
   struct type *value_type;
   unsigned char struct_return;
   CORE_ADDR struct_addr = 0;
-  struct inferior_status inf_status;
+  struct inferior_status *inf_status;
   struct cleanup *old_chain;
   CORE_ADDR funaddr;
   int using_gcc;	/* Set to version of gcc in use, or zero if not gcc */
@@ -1295,12 +1297,17 @@ call_function_by_hand (function, nargs, args)
   struct type *param_type = NULL;
   struct type *ftype = check_typedef (SYMBOL_TYPE (function));
 
+  dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
+  sizeof_dummy1 = REGISTER_SIZE * SIZEOF_CALL_DUMMY_WORDS / sizeof (ULONGEST);
+  dummy1 = alloca (sizeof_dummy1);
+  memcpy (dummy, CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS);
+
   if (!target_has_execution)
     noprocess();
 
-  save_inferior_status (&inf_status, 1);
+  inf_status = save_inferior_status (1);
   old_chain = make_cleanup ((make_cleanup_func) restore_inferior_status, 
-                            &inf_status);
+                            inf_status);
 
   /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
      (and POP_FRAME for restoring them).  (At least on most machines)
@@ -1312,14 +1319,14 @@ call_function_by_hand (function, nargs, args)
   if (INNER_THAN (1, 2))
     {
       /* Stack grows down */
-      sp -= sizeof dummy1;
+      sp -= sizeof_dummy1;
       start_sp = sp;
     }
   else
     {
       /* Stack grows up */
       start_sp = sp;
-      sp += sizeof dummy1;
+      sp += sizeof_dummy1;
     }
 
   funaddr = find_function_addr (function, &value_type);
@@ -1339,7 +1346,7 @@ call_function_by_hand (function, nargs, args)
 
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
-  for (i = 0; i < (int) (sizeof (dummy) / sizeof (dummy[0])); i++)
+  for (i = 0; i < (int) (SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0])); i++)
     store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
 			    REGISTER_SIZE,
 			    (ULONGEST)dummy[i]);
@@ -1353,42 +1360,42 @@ call_function_by_hand (function, nargs, args)
   real_pc = start_sp;
 #endif
 
-#if CALL_DUMMY_LOCATION == ON_STACK
-  write_memory (start_sp, (char *)dummy1, sizeof dummy1);
-#endif /* On stack.  */
+  if (CALL_DUMMY_LOCATION == ON_STACK)
+    {
+      write_memory (start_sp, (char *)dummy1, sizeof_dummy1);
+    }
 
-#if CALL_DUMMY_LOCATION == BEFORE_TEXT_END
-  /* Convex Unix prohibits executing in the stack segment. */
-  /* Hope there is empty room at the top of the text segment. */
-  {
-    extern CORE_ADDR text_end;
-    static checked = 0;
-    if (!checked)
-      for (start_sp = text_end - sizeof dummy1; start_sp < text_end; ++start_sp)
-	if (read_memory_integer (start_sp, 1) != 0)
-	  error ("text segment full -- no place to put call");
-    checked = 1;
-    sp = old_sp;
-    real_pc = text_end - sizeof dummy1;
-    write_memory (real_pc, (char *)dummy1, sizeof dummy1);
-  }
-#endif /* Before text_end.  */
+  if (CALL_DUMMY_LOCATION == BEFORE_TEXT_END)
+    {
+      /* Convex Unix prohibits executing in the stack segment. */
+      /* Hope there is empty room at the top of the text segment. */
+      extern CORE_ADDR text_end;
+      static checked = 0;
+      if (!checked)
+	for (start_sp = text_end - sizeof_dummy1; start_sp < text_end; ++start_sp)
+	  if (read_memory_integer (start_sp, 1) != 0)
+	    error ("text segment full -- no place to put call");
+      checked = 1;
+      sp = old_sp;
+      real_pc = text_end - sizeof_dummy1;
+      write_memory (real_pc, (char *)dummy1, sizeof_dummy1);
+    }
+  
+  if (CALL_DUMMY_LOCATION == AFTER_TEXT_END)
+    {
+      extern CORE_ADDR text_end;
+      int errcode;
+      sp = old_sp;
+      real_pc = text_end;
+      errcode = target_write_memory (real_pc, (char *)dummy1, sizeof_dummy1);
+      if (errcode != 0)
+	error ("Cannot write text segment -- call_function failed");
+    }
 
-#if CALL_DUMMY_LOCATION == AFTER_TEXT_END
-  {
-    extern CORE_ADDR text_end;
-    int errcode;
-    sp = old_sp;
-    real_pc = text_end;
-    errcode = target_write_memory (real_pc, (char *)dummy1, sizeof dummy1);
-    if (errcode != 0)
-      error ("Cannot write text segment -- call_function failed");
-  }
-#endif /* After text_end.  */
-
-#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-  real_pc = funaddr;
-#endif /* At entry point.  */
+  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+    {
+      real_pc = funaddr;
+    }
 
 #ifdef lint
   sp = old_sp;		/* It really is used, for some ifdef's... */
@@ -1555,9 +1562,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
       for (i = nargs - 1; i >= 0; i--)
 	len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
-#ifdef CALL_DUMMY_STACK_ADJUST
-      len += CALL_DUMMY_STACK_ADJUST;
-#endif
+      if (CALL_DUMMY_STACK_ADJUST_P)
+	len += CALL_DUMMY_STACK_ADJUST;
       sp -= STACK_ALIGN (len) - len;
     }
 #endif /* STACK_ALIGN */
@@ -1588,9 +1594,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     {
       /* If stack grows up, we must leave a hole at the bottom, note
 	 that sp already has been advanced for the arguments!  */
-#ifdef CALL_DUMMY_STACK_ADJUST
-      sp += CALL_DUMMY_STACK_ADJUST;
-#endif
+      if (CALL_DUMMY_STACK_ADJUST_P)
+	sp += CALL_DUMMY_STACK_ADJUST;
       sp = STACK_ALIGN (sp);
     }
 #endif /* STACK_ALIGN */
@@ -1600,13 +1605,12 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   /* MVS 11/22/96: I think at least some of this stack_align code is
      really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
      a target-defined manner.  */
-#ifdef CALL_DUMMY_STACK_ADJUST
-  if (INNER_THAN (1, 2))
-    {
-      /* stack grows downward */
-      sp -= CALL_DUMMY_STACK_ADJUST;
-    }
-#endif /* CALL_DUMMY_STACK_ADJUST */
+  if (CALL_DUMMY_STACK_ADJUST_P)
+    if (INNER_THAN (1, 2))
+      {
+	/* stack grows downward */
+	sp -= CALL_DUMMY_STACK_ADJUST;
+      }
 
   /* Store the address at which the structure is supposed to be
      written.  Note that this (and the code which reserved the space
@@ -1663,13 +1667,12 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       {
 	/* We stopped somewhere besides the call dummy.  */
 
-	/* If we did the cleanups, we would print a spurious error message
-	   (Unable to restore previously selected frame), would write the
-	   registers from the inf_status (which is wrong), and would do other
-	   wrong things (like set stop_bpstat to the wrong thing).  */
+	/* If we did the cleanups, we would print a spurious error
+	   message (Unable to restore previously selected frame),
+	   would write the registers from the inf_status (which is
+	   wrong), and would do other wrong things.  */
 	discard_cleanups (old_chain);
-	/* Prevent memory leak.  */
-	bpstat_clear (&inf_status.stop_bpstat);
+	discard_inferior_status (inf_status);
 
 	/* The following error message used to say "The expression
 	   which contained the function call has been discarded."  It
@@ -1706,16 +1709,23 @@ the function call).", name);
     return value_being_returned (value_type, retbuf, struct_return);
   }
 }
-#else /* no CALL_DUMMY.  */
+
 value_ptr
 call_function_by_hand (function, nargs, args)
      value_ptr function;
      int nargs;
      value_ptr *args;
 {
-  error ("Cannot invoke functions on this machine.");
+  if (CALL_DUMMY_P)
+    {
+      return hand_function_call (function, nargs, args);
+    }
+  else
+    {
+      error ("Cannot invoke functions on this machine.");
+    }
 }
-#endif /* no CALL_DUMMY.  */
+
 
 
 /* Create a value for an array by allocating space in the inferior, copying
@@ -2420,16 +2430,16 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
  * BASETYPE is set to the actual type of the subobject where the method is found
  * BOFFSET is the offset of the base subobject where the method is found */
 
-struct fn_field *
+static struct fn_field *
 find_method_list (argp, method, offset, static_memfuncp, type, num_fns, basetype, boffset)
-  value_ptr *argp;
-  char * method;
-  int offset;
-  int * static_memfuncp;
-  struct type * type;
-  int * num_fns;
-  struct type ** basetype;
-  int * boffset;
+     value_ptr *argp;
+     char * method;
+     int offset;
+     int * static_memfuncp;
+     struct type * type;
+     int * num_fns;
+     struct type ** basetype;
+     int * boffset;
 {
   int i;
   struct fn_field * f;

@@ -380,12 +380,12 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   length = sim_core_read_buffer (sd, cpu, read_map, &insn_buf, pc,
 				 insn_length);
 
-  switch (min (CGEN_BASE_INSN_SIZE, insn_length))
+  switch (min (cd->base_insn_bitsize, insn_bit_length))
     {
     case 0 : return; /* fake insn, typically "compile" (aka "invalid") */
-    case 1 : insn_value = insn_buf.bytes[0]; break;
-    case 2 : insn_value = T2H_2 (insn_buf.shorts[0]); break;
-    case 4 : insn_value = T2H_4 (insn_buf.words[0]); break;
+    case 8 : insn_value = insn_buf.bytes[0]; break;
+    case 16 : insn_value = T2H_2 (insn_buf.shorts[0]); break;
+    case 32 : insn_value = T2H_4 (insn_buf.words[0]); break;
     default: abort ();
     }
 

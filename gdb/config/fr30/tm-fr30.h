@@ -1,4 +1,5 @@
 /* Parameters for execution on a Fujitsu FR30 processor.
+   Copyright 1999, Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -95,7 +96,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern void fr30_pop_frame PARAMS ((void));
 #define POP_FRAME fr30_pop_frame()
 
-#define USE_GENERIC_DUMMY_FRAMES
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -129,7 +130,7 @@ extern void fr30_pop_frame PARAMS ((void));
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { write_register (RETVAL_REG, (ADDR)); }
 
-#define FRAME_ARGS_ADDRESS(fi) (fi->frame)
+#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 
 /* Return number of args passed to a frame.
@@ -160,11 +161,14 @@ extern CORE_ADDR fr30_frame_saved_pc   PARAMS ((struct frame_info *));
 extern CORE_ADDR fr30_skip_prologue PARAMS ((CORE_ADDR pc));
 #define SKIP_PROLOGUE(pc) pc = fr30_skip_prologue (pc)
 
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
+/* Write into appropriate registers a function return value of type
+   TYPE, given in virtual format.  VALBUF is in the target byte order;
+   it's typically the VALUE_CONTENTS of some struct value, and those
+   are in the target's byte order.  */
+extern void fr30_store_return_value PARAMS ((struct type *type, char *valbuf));
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-    write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
+  (fr30_store_return_value ((TYPE), (VALBUF)))
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -211,7 +215,7 @@ fr30_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = fr30_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 
 /* Fujitsu's ABI requires all structs to be passed using a pointer.
    That is obviously not very efficient, so I am leaving the definitions
@@ -230,3 +234,12 @@ fr30_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 #endif
 /* alway return struct by value by input pointer */
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE)	1
+
+/* The stack should always be aligned on a four-word boundary.  */
+#define STACK_ALIGN(len) (((len) + 3) & ~3)
+
+/* I think the comment about this in value_arg_coerce is wrong; this
+   should be true on any system where you can rely on the prototyping
+   information.  When this is true, value_arg_coerce will promote
+   floats to doubles iff the function is not prototyped.  */
+#define COERCE_FLOAT_TO_DOUBLE 1

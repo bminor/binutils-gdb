@@ -110,7 +110,7 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
 	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7", \
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15", \
 	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",\
-	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",\
+	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "fpcr",\
 	"pc",	"vfp",						\
     }
 
@@ -132,6 +132,7 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
 #define ZERO_REGNUM 31		/* Read-only register, always 0 */
 #define FP0_REGNUM 32           /* Floating point register 0 */
 #define FPA0_REGNUM 48          /* First float arg during a subr call */
+#define FPCR_REGNUM 63		/* Floating point control register */
 #define PC_REGNUM 64		/* Contains program counter */
 #define FP_REGNUM 65		/* Virtual frame pointer */
 
@@ -176,7 +177,7 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
       memory format is an integer with 4 bytes or less, as the representation
       of integers in floating point registers is different. */
 
-#define REGISTER_CONVERTIBLE(N) ((N) >= FP0_REGNUM && (N) < FP0_REGNUM + 32)
+#define REGISTER_CONVERTIBLE(N) ((N) >= FP0_REGNUM && (N) < FP0_REGNUM + 31)
 
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
@@ -198,7 +199,7 @@ alpha_register_convert_to_raw PARAMS ((struct type *, int, char *, char *));
    of data in register N.  */
 
 #define REGISTER_VIRTUAL_TYPE(N) \
-	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32)  \
+	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+31)  \
 	 ? builtin_type_double : builtin_type_long) \
 
 /* Store the address of the place in which to copy the structure the

@@ -50,17 +50,8 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 
-arm-*-* | thumb-*-* | strongarm-*-*)	gdb_target=arm
-
-			# rdi doesn't work for wingdb yet
-			case $gdb_host in
-			windows) ;;
-			*)
-			    configdirs="$configdirs rdi-share"
-			    CONFIG_OBS="$CONFIG_OBS remote-rdi.o rdi-share/libangsd.a"
-			    ;;
-			esac
-			;;
+arm-*-* | thumb-*-* | strongarm-*-*)
+			gdb_target=arm ;;
 
 c1-*-*)			gdb_target=convex ;;
 c2-*-*)			gdb_target=convex ;;
@@ -94,13 +85,14 @@ i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
 i[3456]86-*-netbsd*)	gdb_target=nbsd ;;
 i[3456]86-*-os9k)	gdb_target=i386os9k ;;
 i[3456]86-*-go32*)	gdb_target=i386aout ;;
+i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
 i[3456]86-*-lynxos*)	gdb_target=i386lynx
 		configdirs="${configdirs} gdbserver" ;;
 i[3456]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[3456]86-*-sunos*)	gdb_target=sun386 ;;
-i[3456]86-*-sysv4.2MP)	gdb_target=i386v42mp ;;
-i[3456]86-*-sysv4.2uw2*)	gdb_target=i386v42mp ;;
+i[3456]86-*-sysv4.2*)	gdb_target=i386v42mp ;;
 i[3456]86-*-sysv4*)	gdb_target=i386v4 ;;
+i[3456]86-*-sysv5*)	gdb_target=i386v42mp ;;
 i[3456]86-*-unixware2*)	gdb_target=i386v42mp ;;
 i[3456]86-*-unixware*)	gdb_target=i386v4 ;;
 i[3456]86-*-sco3.2v4*)	gdb_target=i386sco4 ;;
@@ -118,12 +110,12 @@ i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
 i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
+
 i960-*-bout*)		gdb_target=vxworks960 ;;
 i960-nindy-coff*)	gdb_target=nindy960 ;;
 i960-*-coff*)		gdb_target=mon960 ;;
 i960-nindy-elf*)	gdb_target=nindy960 ;;
 i960-*-elf*)		gdb_target=mon960 ;;
-
 i960-*-nindy*)		gdb_target=nindy960 ;;
 i960-*-vxworks*)	gdb_target=vxworks960 ;;
 
@@ -266,6 +258,8 @@ sparc64-*-*)		gdb_target=sp64 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
 
+tic80-*-*)		gdb_target=tic80
+			configdirs="${configdirs} gdbserver" ;;
 
 vax-*-*)		gdb_target=vax ;;
 

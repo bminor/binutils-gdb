@@ -19,11 +19,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include <setjmp.h>
 #include "top.h"
 #include "target.h"
 #include "inferior.h"
 #include "call-cmds.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "getopt.h"
 

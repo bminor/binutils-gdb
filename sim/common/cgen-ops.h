@@ -1,5 +1,5 @@
 /* Semantics ops support for CGEN-based simulators.
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This file is part of the GNU Simulators.
@@ -22,6 +22,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifndef CGEN_SEM_OPS_H
 #define CGEN_SEM_OPS_H
+
+#if defined (__GNUC__) && ! defined (SEMOPS_DEFINE_INLINE)
+#define SEMOPS_DEFINE_INLINE
+#define SEMOPS_INLINE extern inline
+#else
+#define SEMOPS_INLINE
+#endif
 
 /* Semantic operations.
    At one point this file was machine generated.  Maybe it will be again.  */
@@ -357,6 +364,7 @@ extern DI EXTSIDI PARAMS ((SI));
 #else
 #define EXTSIDI(x) ((DI) (SI) (x))
 #endif
+
 #if defined (SF_FN_SUPPORT) || defined (DF_FN_SUPPORT)
 extern DF EXTSFDF PARAMS ((SF));
 #else
@@ -387,6 +395,7 @@ extern TF EXTXFTF PARAMS ((XF));
 #else
 #define EXTXFTF(x) ((TF) (XF) (x))
 #endif
+
 #define ZEXTBIQI(x) ((QI) (BI) (x))
 #define ZEXTBIHI(x) ((HI) (BI) (x))
 #define ZEXTBISI(x) ((SI) (BI) (x))
@@ -413,6 +422,7 @@ extern DI ZEXTSIDI PARAMS ((SI));
 #else
 #define ZEXTSIDI(x) ((DI) (USI) (x))
 #endif
+
 #define TRUNCQIBI(x) ((BI) (QI) (x))
 #define TRUNCHIBI(x) ((BI) (HI) (x))
 #define TRUNCHIQI(x) ((QI) (HI) (x))
@@ -439,6 +449,7 @@ extern SI TRUNCDISI PARAMS ((DI));
 #else
 #define TRUNCDISI(x) ((SI) (DI) (x))
 #endif
+
 #if defined (DF_FN_SUPPORT) || defined (SF_FN_SUPPORT)
 extern SF TRUNCDFSF PARAMS ((DF));
 #else
@@ -469,6 +480,7 @@ extern XF TRUNCTFXF PARAMS ((TF));
 #else
 #define TRUNCTFXF(x) ((XF) (TF) (x))
 #endif
+
 #if defined (SF_FN_SUPPORT)
 extern SF FLOATQISF PARAMS ((QI));
 #else
@@ -549,6 +561,7 @@ extern TF FLOATDITF PARAMS ((DI));
 #else
 #define FLOATDITF(x) ((TF) (DI) (x))
 #endif
+
 #if defined (SF_FN_SUPPORT)
 extern SF UFLOATQISF PARAMS ((QI));
 #else
@@ -629,6 +642,7 @@ extern TF UFLOATDITF PARAMS ((DI));
 #else
 #define UFLOATDITF(x) ((TF) (UDI) (x))
 #endif
+
 #if defined (SF_FN_SUPPORT)
 extern BI FIXSFBI PARAMS ((SF));
 #else
@@ -729,6 +743,7 @@ extern DI FIXTFDI PARAMS ((TF));
 #else
 #define FIXTFDI(x) ((DI) (TF) (x))
 #endif
+
 #if defined (SF_FN_SUPPORT)
 extern QI UFIXSFQI PARAMS ((SF));
 #else
@@ -810,15 +825,118 @@ extern DI UFIXTFDI PARAMS ((TF));
 #define UFIXTFDI(x) ((UDI) (TF) (x))
 #endif
 
-/* Semantic support utilities.  */
-
-#ifdef __GNUC__
+/* Composing/decomposing the various types.  */
 
 #ifdef SEMOPS_DEFINE_INLINE
-#define SEMOPS_INLINE
+
+SEMOPS_INLINE SF
+SUBWORDSISF (SIM_CPU *cpu, SI in)
+{
+  union { SI in; SF out; } x;
+  x.in = in;
+  return x.out;
+}
+
+SEMOPS_INLINE SI
+SUBWORDSFSI (SIM_CPU *cpu, SF in)
+{
+  union { SF in; SI out; } x;
+  x.in = in;
+  return x.out;
+}
+
+SEMOPS_INLINE SI
+SUBWORDDISI (SIM_CPU *cpu, DI in, int word)
+{
+  /* ??? endianness issues undecided */
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    {
+      if (word == 0)
+	return (UDI) in >> 32;
+      else
+	return in;
+    }
+  else
+    {
+      if (word == 1)
+	return (UDI) in >> 32;
+      else
+	return in;
+    }
+}
+
+SEMOPS_INLINE SI
+SUBWORDDFSI (SIM_CPU *cpu, DF in, int word)
+{
+  /* ??? endianness issues undecided */
+  union { DF in; SI out[2]; } x;
+  x.in = in;
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return x.out[word];
+  else
+    return x.out[!word];
+}
+
+SEMOPS_INLINE SI
+SUBWORDTFSI (SIM_CPU *cpu, TF in, int word)
+{
+  /* ??? endianness issues undecided */
+  union { TF in; SI out[4]; } x;
+  x.in = in;
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return x.out[word];
+  else
+    return x.out[word ^ 3];
+}
+
+SEMOPS_INLINE DI
+JOINSIDI (SIM_CPU *cpu, SI x0, SI x1)
+{
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return MAKEDI (x0, x1);
+  else
+    return MAKEDI (x1, x0);
+}
+
+SEMOPS_INLINE DF
+JOINSIDF (SIM_CPU *cpu, SI x0, SI x1)
+{
+  union { SI in[2]; DF out; } x;
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    x.in[0] = x0, x.in[1] = x1;
+  else
+    x.in[1] = x0, x.in[0] = x1;
+  return x.out;
+}
+
+SEMOPS_INLINE TF
+JOINSITF (SIM_CPU *cpu, SI x0, SI x1, SI x2, SI x3)
+{
+  union { SI in[4]; TF out; } x;
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    x.in[0] = x0, x.in[1] = x1, x.in[2] = x2, x.in[3] = x3;
+  else
+    x.in[3] = x0, x.in[2] = x1, x.in[1] = x2, x.in[0] = x3;
+  return x.out;
+}
+
 #else
-#define SEMOPS_INLINE extern inline
-#endif
+
+SF SUBWORDSISF (SIM_CPU *, SI);
+SI SUBWORDSFSI (SIM_CPU *, SF);
+SI SUBWORDDISI (SIM_CPU *, DI, int);
+SI SUBWORDDFSI (SIM_CPU *, DF, int);
+SI SUBWORDTFSI (SIM_CPU *, TF, int);
+
+DI JOINSIDI (SIM_CPU *, SI, SI);
+DF JOINSIDF (SIM_CPU *, SI, SI);
+TF JOINSITF (SIM_CPU *, SI, SI, SI, SI);
+
+#endif /* SUBWORD,JOIN */
+
+/* Semantic support utilities.  */
+
+#ifdef SEMOPS_DEFINE_INLINE
 
 SEMOPS_INLINE SI
 ADDCSI (SI a, SI b, BI c)
@@ -877,21 +995,5 @@ UBI SUBCFSI (SI, SI, BI);
 UBI SUBOFSI (SI, SI, BI);
 
 #endif
-
-/* DI mode support if "long long" doesn't exist.
-   At one point CGEN supported K&R C compilers, and ANSI C compilers without
-   "long long".  One can argue the various merits of keeping this in or
-   throwing it out.  I went to the trouble of adding it so for the time being
-   I'm leaving it in.  */
-
-#ifdef DI_FN_SUPPORT
-
-DI make_struct_di (SI, SI);
-/* FIXME: needed? */
-DI CONVHIDI (HI);
-DI CONVSIDI (SI);
-SI CONVDISI (DI);
-
-#endif /* DI_FN_SUPPORT */
 
 #endif /* CGEN_SEM_OPS_H */

@@ -1,5 +1,5 @@
-/* Target-dependent code for the Acorn Risc Machine, for GDB, the GNU Debugger.
-   Copyright (C) 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999
+/* Target-dependent code for the Acorn Risc Machine (ARM).
+   Copyright (C) 1988, 1989, 1991, 1992, 1993, 1995-1999
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -479,7 +479,7 @@ arm_scan_prologue (fi)
     {
       /* Get address of the stmfd in the prologue of the callee; the saved
          PC is the address of the stmfd + 12.  */
-      prologue_start = (read_memory_integer (fi->frame, 4) & 0x03fffffc) - 12;
+      prologue_start = ADDR_BITS_REMOVE(read_memory_integer (fi->frame, 4)) - 12;
       prologue_end = prologue_start + 40; /* FIXME: should be big enough */
     }
 
@@ -974,14 +974,16 @@ arm_pop_frame ()
 {
   struct frame_info *frame = get_current_frame();
   int regnum;
+  CORE_ADDR old_SP;
 
+  old_SP = read_register (frame->framereg);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (frame->fsr.regs[regnum] != 0)
       write_register (regnum, 
 		      read_memory_integer (frame->fsr.regs[regnum], 4));
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-  write_register (SP_REGNUM, read_register (frame->framereg));
+  write_register (SP_REGNUM, old_SP);
 
   flush_cached_frames ();
 }

@@ -56,6 +56,7 @@ i[3456]86-*-dgux*)	gdb_host=i386dgux ;;
 i[3456]86-*-freebsd*)	gdb_host=fbsd ;;
 i[3456]86-*-netbsd*)	gdb_host=nbsd ;;
 i[3456]86-*-go32*)	gdb_host=go32 ;;
+i[3456]86-*-msdosdjgpp*) gdb_host=go32 ;;
 i[3456]86-*-linux*)	gdb_host=linux ;;
 i[3456]86-*-lynxos*)	gdb_host=i386lynx ;;
 i[3456]86-*-mach3*)	gdb_host=i386m3 ;;
@@ -104,7 +105,7 @@ m88*-motorola-sysv4*)	gdb_host=delta88v4 ;;
 m88*-motorola-sysv*)	gdb_host=delta88 ;;
 m88*-*-*)		gdb_host=m88k ;;
 
-mips-dec-mach3*)	gdb_host=mach3 ;;
+mips-dec-mach3*)	gdb_host=mipsm3 ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3*)	gdb_host=irix3 ;;

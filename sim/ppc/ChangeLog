@@ -1,3 +1,21 @@
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* sim_calls.c (POLL_QUIT_INTERVAL): Define. Used to tweak
+	the frequency at which the poll_quit callback is called.
+	(poll_quit_count): New global.
+	(sim_io_poll_quit): Only call the poll_quit callback
+	after the specified POLL_QUIT_INTERVAL.
+
+1999-02-22  Jim Lemke  <jlemke@cygnus.com>
+
+	* dc-complex: Force expansion on all bits of field BO.
+	Previously, the least-significant (prediction) bit was ignored.
+	* ppc-instructions (conditional branches): Implement mpc860c0 option.
+	* igen.c (gen_semantics_[ch]): Setup for mpc860c0 option.
+	* psim.c (is_num, psim_options): Added parsing for mpc860c0 option.
+	* interrupts.h: Added "mpc860c0_instruction_program_interrupt".
+	* interrupts.c (program_interrupt): Added handling for above interrupt.
+
 1999-02-01  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	Make the simulator compatible with the MPC750.  It would be nicer

@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 load_lib gdb.exp
-
+puts "***** DID USE MONITOR ******"
 #
 # gdb_target_monitor
 # Set gdb to target the monitor
@@ -34,6 +34,9 @@ proc gdb_target_monitor { exec_file } {
     }
     if [target_info exists baud] {
 	gdb_test "set remotebaud [target_info baud]" "" ""
+    }
+    if [target_info exists binarydownload] {
+	gdb_test "set remotebinarydownload [target_info binarydownload]" "" ""
     }
     if [target_info exists gdb_serial] {
        set serialport "[target_info gdb_serial]";

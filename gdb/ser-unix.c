@@ -85,9 +85,7 @@ static int hardwire_setstopbits PARAMS ((serial_t, int));
 
 void _initialize_ser_hardwire PARAMS ((void));
 
-#ifdef __CYGWIN32__
-extern void (*ui_loop_hook) PARAMS ((int));
-#endif
+extern int (*ui_loop_hook) PARAMS ((int));
 
 /* Open up a real live device for serial I/O */
 
@@ -434,10 +432,6 @@ wait_for(scb, timeout)
      serial_t scb;
      int timeout;
 {
-#ifndef __CYGWIN32__
-  scb->timeout_remaining = 0;
-#endif
-
 #ifdef HAVE_SGTTY
   {
     struct timeval tv;
@@ -550,32 +544,40 @@ hardwire_readchar (scb, timeout)
      serial_t scb;
      int timeout;
 {
-  int status;
-#ifdef __CYGWIN32__
-  int t;
-#endif
+  int status, delta;
+  int detach = 0;
 
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;
 
-#ifdef __CYGWIN32__
   if (timeout > 0)
     timeout++;
-#endif
 
+  /* We have to be able to keep the GUI alive here, so we break the original
+     timeout into steps of 1 second, running the "keep the GUI alive" hook 
+     each time through the loop.
+     Also, timeout = 0 means to poll, so we just set the delta to 0, so we
+     will only go through the loop once. */
+   
+  delta = (timeout == 0 ? 0 : 1);
   while (1)
     {
-#ifdef __CYGWIN32__
-      t = timeout == 0 ? 0 : 1;
-      scb->timeout_remaining = timeout < 0 ? timeout : timeout - t;
-      status = wait_for (scb, t);
 
-      /* -2 means disable timer */
+      /* N.B. The UI may destroy our world (for instance by calling
+         remote_stop,) in which case we want to get out of here as
+         quickly as possible.  It is not safe to touch scb, since
+         someone else might have freed it.  The ui_loop_hook signals that 
+         we should exit by returning 1. */
+
       if (ui_loop_hook)
-        ui_loop_hook (-2);
-#else
-      status = wait_for (scb, timeout);
-#endif
+        detach = ui_loop_hook (0);
+
+      if (detach)
+	return SERIAL_TIMEOUT;
+
+      scb->timeout_remaining = (timeout < 0 ? timeout : timeout - delta);
+      status = wait_for (scb, delta);
+
       if (status < 0)
 	return status;
 
@@ -592,10 +594,8 @@ hardwire_readchar (scb, timeout)
 		  timeout = scb->timeout_remaining;
 		  continue;
 		}
-#ifdef __CYGWIN32__
           else if (scb->timeout_remaining < 0)
             continue;
-#endif
 	      else
 		return SERIAL_TIMEOUT;
 	    }

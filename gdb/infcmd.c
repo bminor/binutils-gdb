@@ -94,9 +94,7 @@ void _initialize_infcmd PARAMS ((void));
 
 #define GO_USAGE   "Usage: go <location>\n"
 
-#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
 static void breakpoint_auto_delete_contents PARAMS ((PTR));
-#endif
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
@@ -570,8 +568,6 @@ signal_command (signum_exp, from_tty)
 /* Call breakpoint_auto_delete on the current contents of the bpstat
    pointed to by arg (which is really a bpstat *).  */
 
-#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
-
 static void
 breakpoint_auto_delete_contents (arg)
      PTR arg;
@@ -579,7 +575,6 @@ breakpoint_auto_delete_contents (arg)
   breakpoint_auto_delete (*(bpstat *)arg);
 }
 
-#endif	/* CALL_DUMMY_BREAKPOINT_OFFSET */
 
 /* Execute a "stack dummy", a piece of code stored in the stack
    by the debugger to be executed in the inferior.
@@ -604,7 +599,7 @@ static int stack_dummy_testing = 0;
 int
 run_stack_dummy (addr, buffer)
      CORE_ADDR addr;
-     char buffer[REGISTER_BYTES];
+     char *buffer;
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
 
@@ -615,43 +610,45 @@ run_stack_dummy (addr, buffer)
       POP_FRAME;
       return(0);
     }
-#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
-  {
-    struct breakpoint *bpt;
-    struct symtab_and_line sal;
-
-    INIT_SAL (&sal);	/* initialize to zeroes */
-#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
-    sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
-#else
-    sal.pc = CALL_DUMMY_ADDRESS ();
-#endif
-    sal.section = find_pc_overlay (sal.pc);
-
-    /* Set up a FRAME for the dummy frame so we can pass it to
-       set_momentary_breakpoint.  We need to give the breakpoint a
-       frame in case there is only one copy of the dummy (e.g.
-       CALL_DUMMY_LOCATION == AFTER_TEXT_END).  */
-    flush_cached_frames ();
-    set_current_frame (create_new_frame (read_fp (), sal.pc));
-
-    /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
-       a breakpoint instruction.  If not, the call dummy already has the
-       breakpoint instruction in it.
-
-       addr is the address of the call dummy plus the CALL_DUMMY_START_OFFSET,
-       so we need to subtract the CALL_DUMMY_START_OFFSET.  */
-    bpt = set_momentary_breakpoint (sal,
-				    get_current_frame (),
-				    bp_call_dummy);
-    bpt->disposition = del;
-
-    /* If all error()s out of proceed ended up calling normal_stop (and
-       perhaps they should; it already does in the special case of error
-       out of resume()), then we wouldn't need this.  */
-    make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
-  }
-#endif /* CALL_DUMMY_BREAKPOINT_OFFSET.  */
+  if (CALL_DUMMY_BREAKPOINT_OFFSET_P)
+    {
+      struct breakpoint *bpt;
+      struct symtab_and_line sal;
+      
+      INIT_SAL (&sal);	/* initialize to zeroes */
+      if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+	{
+	  sal.pc = CALL_DUMMY_ADDRESS ();
+	}
+      else
+	{
+	  sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
+	}
+      sal.section = find_pc_overlay (sal.pc);
+      
+      /* Set up a FRAME for the dummy frame so we can pass it to
+	 set_momentary_breakpoint.  We need to give the breakpoint a
+	 frame in case there is only one copy of the dummy (e.g.
+	 CALL_DUMMY_LOCATION == AFTER_TEXT_END).  */
+      flush_cached_frames ();
+      set_current_frame (create_new_frame (read_fp (), sal.pc));
+      
+      /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
+	 a breakpoint instruction.  If not, the call dummy already has the
+	 breakpoint instruction in it.
+	 
+	 addr is the address of the call dummy plus the CALL_DUMMY_START_OFFSET,
+	 so we need to subtract the CALL_DUMMY_START_OFFSET.  */
+      bpt = set_momentary_breakpoint (sal,
+				      get_current_frame (),
+				      bp_call_dummy);
+      bpt->disposition = del;
+      
+      /* If all error()s out of proceed ended up calling normal_stop (and
+	 perhaps they should; it already does in the special case of error
+	 out of resume()), then we wouldn't need this.  */
+      make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
+    }
 
   disable_watchpoints_before_interactive_call_start ();
   proceed_to_finish = 1;	/* We want stop_registers, please... */
@@ -665,7 +662,7 @@ run_stack_dummy (addr, buffer)
 
   /* On return, the stack dummy has been popped already.  */
 
-  memcpy (buffer, stop_registers, sizeof stop_registers);
+  memcpy (buffer, stop_registers, REGISTER_BYTES);
   return 0;
 }
 

@@ -167,7 +167,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
       if (WITH_CALLBACK_MEMORY && mapping->device != NULL)
 	{
 	  unsigned_M data;
-	  if (device_io_read_buffer (mapping->device, &data, mapping->space, addr, N, cpu, cia) != N)
+	  if (device_io_read_buffer (mapping->device, &data, mapping->space, addr, N, CPU_STATE (cpu), cpu, cia) != N)
 	    device_error (mapping->device, "internal error - %s - io_read_buffer should not fail",
 			  XSTRING (sim_core_read_aligned_N));
 	  val = T2H_M (data);
@@ -298,7 +298,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
       if (WITH_CALLBACK_MEMORY && mapping->device != NULL)
 	{
 	  unsigned_M data = H2T_M (val);
-	  if (device_io_write_buffer (mapping->device, &data, mapping->space, addr, N, cpu, cia) != N)
+	  if (device_io_write_buffer (mapping->device, &data, mapping->space, addr, N, CPU_STATE (cpu), cpu, cia) != N)
 	    device_error (mapping->device, "internal error - %s - io_write_buffer should not fail",
 			  XSTRING (sim_core_write_aligned_N));
 	  break;

@@ -137,7 +137,7 @@ extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
 extern void v850_pop_frame PARAMS ((struct frame_info *frame));
 #define POP_FRAME v850_pop_frame (get_current_frame ())
 
-#define USE_GENERIC_DUMMY_FRAMES
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -160,14 +160,15 @@ v850_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)
 
 
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 
 extern use_struct_convention_fn v850_use_struct_convention;
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) v850_use_struct_convention (GCC_P, TYPE);
 
 /* override the default get_saved_register function with
    one that takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Define this for Wingdb */
 

@@ -42,7 +42,7 @@ struct frame_saved_regs
    frame_info".  The innermost one gets allocated (in
    wait_for_inferior) each time the inferior stops; current_frame
    points to it.  Additional frames get allocated (in
-   get_prev_frame_info) as needed, and are chained through the next
+   get_prev_frame) as needed, and are chained through the next
    and prev fields.  Any time that the frame cache becomes invalid
    (most notably when we execute something, but also if we change how
    we interpret the frames (e.g. "set heuristic-fence-post" in
@@ -106,20 +106,6 @@ struct frame_info
 extern void *frame_obstack_alloc PARAMS ((unsigned long size));
 extern void frame_saved_regs_zalloc PARAMS ((struct frame_info *));
 
-/* Dummy frame.  This saves the processor state just prior to setting up the
-   inferior function call.  On most targets, the registers are saved on the
-   target stack, but that really slows down function calls.  */
-
-struct dummy_frame
-{
-  struct dummy_frame *next;
-
-  CORE_ADDR pc;
-  CORE_ADDR fp;
-  CORE_ADDR sp;
-  char regs[REGISTER_BYTES];
-};
-
 /* Return the frame address from FR.  Except in the machine-dependent
    *FRAME* macros, a frame address has no defined meaning other than
    as a magic cookie which identifies a frame over calls to the
@@ -171,8 +157,6 @@ extern struct frame_info *selected_frame;
 
 extern int selected_frame_level;
 
-extern struct frame_info *get_prev_frame_info PARAMS ((struct frame_info *));
-
 extern struct frame_info *create_new_frame PARAMS ((CORE_ADDR, CORE_ADDR));
 
 extern void flush_cached_frames PARAMS ((void));
@@ -218,6 +202,8 @@ extern void print_frame_args PARAMS ((struct symbol *, struct frame_info *,
 
 extern struct frame_info *find_relative_frame PARAMS ((struct frame_info *, int*));
 
+extern void show_and_print_stack_frame PARAMS ((struct frame_info *fi, int level, int source));
+
 extern void print_stack_frame PARAMS ((struct frame_info *, int, int));
 
 extern void print_only_stack_frame PARAMS ((struct frame_info *, int, int));
@@ -250,6 +236,7 @@ extern void      generic_pop_current_frame   PARAMS ((void (*) (struct frame_inf
 extern void      generic_pop_dummy_frame     PARAMS ((void));
 
 extern int       generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc, 
+						      CORE_ADDR sp, 
 						      CORE_ADDR fp));
 extern char *    generic_find_dummy_frame    PARAMS ((CORE_ADDR pc, 
 						      CORE_ADDR fp));

@@ -1,3 +1,28 @@
+1999-04-16  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (program_interrupt): Detect undesired recursion using
+ 	static flag.  Set NMIRC register's SYSEF flag during
+ 	--board=stdeval1 mode.
+	* dv-mn103-int.c (write_icr): Add backdoor address to allow CPU to
+	set SYSEF flag.
+
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Define a POLL_QUIT_INTERVAL
+	for use in the simulator so that the poll_quit callback is
+	not called too often.
+
+Tue Mar  9 21:26:41 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-mn103int.c (mn103int_ioctl): Return something.
+	* dv-mn103tim.c (write_tm6md): GCC suggested parentheses around &&
+ 	within ||.
+
+Tue Feb 16 23:57:17 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.igen (retf): Fix return address computation and store
+	the new pc value into nia.
+
 1998-12-29  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* Makefile.in (WITH_COMMON_OBJS): Build also dv-sockser.o.

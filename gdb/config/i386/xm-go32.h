@@ -1,5 +1,5 @@
-/* Definitions for hosting on GO32, for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+/* Host-dependent definitions for Intel x86 running DJGPP.
+   Copyright 1993-1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,14 +18,20 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
+
 #include "fopen-bin.h"
 
-/* Define this lseek(n) != nth byte of file */
-#define LSEEK_NOT_LINEAR
-
-#define CANT_FORK
-
-#undef QUIT
-#define QUIT  { pollquit(); }
-
 #define GDBINIT_FILENAME "gdb.ini"
+
+#define SLASH_P(X) ((X)=='\\' || (X) == '/')
+
+#define ROOTED_P(X) ((SLASH_P((X)[0]))|| ((X)[1] ==':'))
+
+#define SLASH_CHAR '/'
+#define SLASH_STRING "/"
+
+#define CRLF_SOURCE_FILES
+
+#define DIRNAME_SEPARATOR ';'
+
+#define HOST_I386

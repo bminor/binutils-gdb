@@ -1,51 +1,344 @@
-1999-04-07  Jim Blandy  <jimb@zwingli.cygnus.com>
+1999-04-22  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * README: Note that readline is not installed as a part of
+        make install.
+
+Thu Apr 22 21:02:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* value.h (get_saved_register): Cleanup prototype.
+	* findvar.c (default_get_saved_register): Rename function
+ 	get_saved_register.
+	(GET_SAVED_REGISTER): Define as default_get_saved_register when
+ 	undefined.
+	(get_saved_register): Always declare. Call GET_SAVED_REGISTER.
+
+	* sparc-tdep.c (sparc_get_saved_register): Rename function
+ 	get_saved_register.
+	* config/sparc/tm-sparc.h (GET_SAVED_REGISTER): Update.
+	* a29k-tdep.c (a29k_get_saved_register): Rename function
+ 	get_saved_register.
+	* config/a29k/tm-a29k.h (GET_SAVED_REGISTER): Update.
+
+	* config/d10v/tm-d10v.h, config/powerpc/tm-ppc-eabi.h,
+ 	config/h8300/tm-h8300.h, config/m32r/tm-m32r.h,
+ 	config/mn10200/tm-mn10200.h, config/mn10300/tm-mn10300.h,
+ 	config/sh/tm-sh.h, config/tic80/tm-tic80.h, config/v850/tm-v850.h:
+ 	Update macro GET_SAVED_REGISTER so that it calls
+ 	generic_get_saved_register.
+	* v850-tdep.c, tic80-tdep.c, sh-tdep.c, mn10300-tdep.c,
+ 	mn10200-tdep.c, m32r-tdep.c, h8300-tdep.c, rs6000-tdep.c: Delete
+ 	function get_saved_register.
+
+Thu Apr 22 11:07:21 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/v850/tm-v850.h, config/tic80/tm-tic80.h,
+ 	config/sh/tm-sh.h, config/powerpc/tm-ppc-eabi.h,
+ 	config/mn10300/tm-mn10300.h, config/mn10200/tm-mn10200.h,
+ 	config/m32r/tm-m32r.h, config/h8300/tm-h8300.h,
+ 	config/fr30/tm-fr30.h, config/d10v/tm-d10v.h: Give the
+ 	USE_GENERIC_DUMMY_FRAMES macro the value one.
+	* inferior.h (USE_GENERIC_DUMMY_FRAMES): Default to a value of
+ 	zero.
+
+	* blockframe.c (generic_find_dummy_frame,
+ 	generic_pc_in_call_dummy, generic_read_register_dummy,
+ 	generic_push_dummy_frame, generic_pop_current_frame,
+ 	generic_pop_dummy_frame, generic_frame_chain_valid,
+ 	generic_get_saved_register): Always define.
+
+	* breakpoint.c (frame_in_dummy): Convert #ifdef
+ 	USE_GENERIC_DUMMY_FRAMES to runtime test.
+
+	* rs6000-tdep.c (pop_frame, push_arguments, push_arguments,
+ 	push_arguments, frame_saved_pc, rs6000_frame_chain,
+ 	rs6000_frame_chain): Convert #ifdef USE_GENERIC_DUMMY_FRAMES to
+ 	runtime test.
+	(get_saved_register): Always define.
+
+Wed Apr 21 14:45:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c (enum set_arch): Declare.
+	(set_arch): Add type parameter.  Only disable
+ 	``target_architecture_auto'' when set_arch_manual.
+	(set_architecture, set_architecture_from_arch_mach,
+ 	set_architecture_from_file): Update.
+
+Wed Apr 21 10:48:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* frame.h (generic_pc_in_call_dummy):  Make signature consistent
+ 	with other pc_in_call_dummy functions by adding SP parameter.
+	* blockframe.c (generic_pc_in_call_dummy): Update.  Pass SP and
+ 	not FP to generic_find_dummy_frame().
+	* breakpoint.c (frame_in_dummy): Update.
+	* config/v850/tm-v850.h, config/tic80/tm-tic80.h,
+ 	config/sh/tm-sh.h, config/mn10300/tm-mn10300.h,
+ 	config/mn10200/tm-mn10200.h, config/m32r/tm-m32r.h,
+ 	config/h8300/tm-h8300.h, config/fr30/tm-fr30.h,
+ 	config/d10v/tm-d10v.h: Update PC_IN_CALL_DUMMY definition.
+
+Tue Apr 20 12:15:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d10v/tm-d10v.h (GDB_TARGET_IS_D10V): Move from here.
+	* gdbarch.h (GDB_TARGET_IS_D10V): To here.  Implement using
+ 	TARGET_ARCHITECTURE.
+	(D10V_MAKE_DADDR, D10V_MAKE_IADDR): Provide fatal default
+ 	definitions.
+
+	* valops.c (value_at): Replace #ifdef GDB_TARGET_IS_D10V code with
+ 	runtime test.
+	(value_fetch_lazy): Ditto.
+	* values.c (unpack_long): Ditto.
+	* printcmd.c (print_frame_args): Ditto.
+
+1999-04-15  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (wait_for_inferior) [HAVE_STEPPABLE_WATCHPOINT,
+ 	HAVE_NONSTEPPABLE_WATCHPOINT, HAVE_CONTINUABLE_WATCHPOINT]: Test
+ 	at runtime instead of compile time.
+
+1999-04-14  Philippe De Muyter  <phdm@macqel.be>
+
+	* breakpoint.c (maintenance_info_breakpoints): Function made
+ 	static to match previous prototype.
+
+	* coffread.c (coff_record_line): Static function removed.
+	(enter_linenos): Call `record_line' instead of `coff_record_line'.
+	(FILE-LEVEL, coff_start_symtab, coff_end_symtab): `coff_record_line'
+	-related stuff removed.
+	(coff_symfile_read): Redundant statement removed.
+	(coff_symtab_read): `record_line' is now called with the first line
+	number of each function, given by the ".bf" symbol.  This solves
+	the line-number bug for one-line functions.
+
+Wed Apr 14 11:09:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* stabsread.c (BELIEVE_PCC_PROMOTION_TYPE): Provide default.
+	(define_symbol): Change #if BELIEVE_PCC_PROMOTION_TYPE and #if
+ 	BELIEVE_PCC_PROMOTION to if().
+
+1999-04-13  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in (HAVE_MULTIPLE_PROC_FDS): Don't define if we're
+	on a Solaris host (of any architecture).
+	* configure: Regenerated.
+
+1999-04-13  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* rom68k-rom.c (init_rom68k_cmds): Fix an accidental substitution
+	in monitor command strings, fix some formatting mistakes.
+
+1999-04-13  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.tgt (arm-*-*): Whack another vestige of wingdb.
+
+1999-04-12  James Ingham  <jingham@cygnus.com>
+
+	* arm-tdep.c (arm_pop_frame): don't clobber the previous frame's
+	stack pointer (stored in frame->framereg's register) BEFORE
+	reading it.  This was causing "return" to behave very oddly.
+
+1999-04-12  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* NEWS: Mention tic80.
+
+1999-04-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* a68v-nat.c: Remove reference to 'extern char registers[]' throughout.
+	* altos-xdep.c: Ditto.
+	* arm-xdep.c: Ditto.
+	* convex-xdep.c:  Ditto.
+	* cxux-nat.c: Ditto.
+	* hp300ux-nat.c: Ditto.
+	* hppab-nat.c: Ditto.
+	* i386aix-nat.c: Ditto.
+	* i386mach-nat.c: Ditto.
+	* m88k-nat.c: Ditto.
+	* ptx4-nat.c: Ditto.
+	* pyr-xdep.c: Ditto.
+	* rs6000-nat.c: Ditto.
+	* sun3-nat.c: Ditto.
+	* sun386-nat.c: Ditto.
+	* symm-nat.c: Ditto.
+	* umax-xdep.c: Ditto.
+	* i386v4-nat.c: Ditto. Also include inferior.h.
+	* m68k-tdep.c: Ditto. Also include inferior.h.
+
+Mon Apr 12 15:57:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* inferior.h (CALL_DUMMY_STACK_ADJUST, CALL_DUMMY_STACK_ADJUST_P):
+ 	Provide default definitions.
+	* valops.c (hand_function_call): Replace #ifdef
+ 	CALL_DUMMY_STACK_ADJUST with if (CALL_DUMMY_STACK_ADJUST_P).
+
+1999-04-09  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c, ax-gdb.h, ax-general.c, ax.h: Remove RCS Id strings.
+	They're a pain.
 
 	* GDB 4.18 released.
+	* Makefile.in (VERSION): Bump to 4.18.1.
 
-1999-04-06  Jim Blandy  <jimb@zwingli.cygnus.com>
+Thu Apr  8 16:04:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* README: Change revision numbers in text to "4.18".
-	* Makefile.in (VERSION): Set to 4.18.
+	* inferior.h (CALL_DUMMY_P, CALL_DUMMY_WORDS,
+ 	SIZEOF_CALL_DUMMY_WORDS): Define macros.
+	(PUSH_DUMMY_FRAME, FIX_CALL_DUMMY, STORE_STRUCT_RETURN): Provide
+ 	fatal default.
+
+	* inferior.h, gdbarch.c (call_dummy_words,
+ 	sizeof_call_dummy_words): Declare/Define variables.
+	* valops.c (value_arg_coerce, find_function_addr,
+ 	call_function_by_hand): Always define.
+	(hand_function_call): Rename CALL_DUMMY version of
+ 	call_function_by_hand.  Make static.  Add prototype.
+	(hand_function_call): Update.  Allocate space for *dummy and
+ 	*dummy1 using alloca.
+	* breakpoint.c (frame_in_dummy): Update.
+
+1999-04-08  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* monitor.c (monitor_read_memory): If a MO_GETMEM_NEEDS_RANGE 
+	monitor, increase the end address by one byte.
+
+1999-04-08  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* dbug-rom.c (init_dbug_cmds): Fix strings in 
+        dbug_cmds.{step,clr_break,clr_all_break,fill} to send correct
+	commands to the monitor.
+
+1999-04-08  Keith Seitz  <keiths@cygnus.com>
+
+	* m32r-stub.c (branchDestination): Undo overly ambitious
+	sed script's conversion of cast from "char" to "unsigned char".
+	Return offset should now be properly computed.
+
+Thu Apr  8 14:13:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* inferior.h (CALL_DUMMY_BREAKPOINT_OFFSET_P): New macro.
+  	Non-zero when CALL_DUMMY_BREAKPOINT_OFFSET is valid.
+
+	* infcmd.c (breakpoint_auto_delete_contents): Always define.
+	(run_stack_dummy): Update.
+	* infrun.c (wait_for_inferior): Update
+
+1999-04-07  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* MAINTAINERS: Mark Alexander can no longer maintain
+	h8300 and other embedded targets, sniff.
 
 1999-04-06  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* inftarg.c (child_wait): Initialize execd_pathname.
+	* target.c (debug_to_has_execd): Handle NULL execd_pathname.
 
 	* solib.c (clear_solib): Don't call disable_breakpoints_in_shlibs,
 	this breaks rerunning on sun4 native.
 
-1999-04-05  Stan Shebs  <shebs@andros.cygnus.com>
+1999-04-06  Jim Blandy  <jimb@zwingli.cygnus.com>
 
-	* NEWS: Incorporate suggestions from David Taylor and Jason Molenda.
-	
-1999-04-02  Jim Blandy  <jimb@zwingli.cygnus.com>
+	* config/sparc/nm-linux.h: Don't redefine PT_ATTACH to use the
+ 	deprecated PTRACE_SUNATTACH compatibility commands.  The
+	definitions from <sys/ptrace.h> are fine.
+
+1999-04-06  Martin Hunt  <hunt@cygnus.com>
+
+	* annotate.h: Declare annotate_signal_hook.
+
+	* annotate.c (annotate_signal): Add a call to 
+	annotate_signal_hook().
+
+1999-04-06  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Don't call record_line when
+	we hit a DW_LNE_end_sequence instruction.
 
 	* README: Note that GDB requires an ANSI C compiler, and explain
 	how to get GCC.
 
 	* README: Update.
-	It says we provide HTML documentation, but we don't.
-	The instructions for building the .info files were wrong.
-	It didn't mention that texinfo.tex was provided with GDB.
-	It didn't mention the intl, texinfo, etc, or util directories.
-	(Perhaps util would be best left unmentioned.)
-	It didn't mention the --enable-build-warnings flag, or the --host
-	    flag.
-	It didn't mention remote-array.c or remote-d10v.c.
-	It had an old address for reporting bugs.  It's now gdb@gnu.org.
-	It mentioned xxgdb, which is obsolete, but didn't mention DDD.	
 
-	* config/sparc/nm-linux.h: Don't redefine PT_ATTACH to use the
- 	deprecated PTRACE_SUNATTACH compatibility commands.  The
- 	definitions from <sys/ptrace.h> are fine.
-
-1999-04-01  Stan Shebs  <shebs@andros.cygnus.com>
+1999-04-05  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* NEWS: Add more notes about user-visible changes.
+
+Mon Apr  5 14:56:59 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* target.c (target_signal_to_string): check for signal
+	number in range; otherwise if the target board returns
+	a bogus signal number we might core dump (per David Taylor).
+
+1999-04-05  David Taylor  <taylor@ryobi.cygnus.com>
+
+	* utils.c (fputs_maybe_filtered): test value of
+	pagination_enabled before paginating.
+
+1999-04-02  James Ingham  <jingham@cygnus.com>
+
+	* blockframe.c (get_prev_frame): Remove the redundant
+	get_prev_frame_info.  It is now exactly the same as
+	get_prev_frame, so there is no reason to have both functions.
+ 	
+	* rs6000-tdep.c (rs6000_init_extra_frame_info): 
+	  frame.h: 
+	  a29k-tdep.c (init_extra_frame_info): 
+	  config/a29k/tm-a29k.h: 
+	  i386-tdep.c:
+        Change all references to get_prev_frame_info to get_prev_frame.
+	
+1999-04-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* bcache.c, bcache.h, breakpoint.c, defs.h, expprint.c,
+ 	expression.h, gdbarch.c, gdbtypes.c, gdbtypes.h, gnu-nat.c,
+ 	gnu-nat.h, hppa-tdep.c, maint.c, monitor.c, objfiles.h, parse.c,
+ 	remote-mips.c, remote-sds.c, remote.c, sol-thread.c, symmisc.c,
+ 	symtab.h, target.c, top.c, typeprint.c, config/nm-gnu.h: Evaporate
+ 	the unused MAINTENANCE_CMDS conditional.
+
+1999-04-02  James Ingham  <jingham@cygnus.com>
+
+	* config/arm/tm-arm.h: (EXTRACT_STRUCT_VALUE_ADDRESS): This needs
+	to call extract_address, not just cast the first 4 bytes, since
+	the result will be passed to value_at which expects host-byte
+	order. 
+
+	* arm-tdep.c (arm_scan_prologue): The prologue_start address was
+	directly &'ed with 0x03fffffc, rather than using
+	ADDR_BITS_REMOVE.  This would cause inferior function calls to
+	report the stack incorrectly on return.
+
+
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* top.c (ui_loop_hook): Change declaration. Now returns an int.
+	* win32-nat.c (child_wait): Timeout WaitForDebugEvent and call
+	the ui_loop_hook if there was no debug event.
+	* top.c (ui_loop_hook): Change to return an int and include
+	on all non-Cygwin builds.
+	* v850ice.c: Change prototype of ui_loop_hook.
+	(v850ice_wait): Update call to ui_loop_hook.
+	* ser-unix.c (hardwire_readchar): Enable ui_loop_hook callbacks
+	for non-Cygwin builds. Check return status of ui_loop_hook and
+	return a timeout if told to detach. Add more documentation.
+	* ser-tcp.c (tcp_readchar): Break up timeouts into one second
+	intervals and call ui_loop_hook so that other UIs can
+	keep up to date. If ui_loop_hook returns non-zero, then
+	return SERIAL_TIMEOUT to facilitate detaching from the
+	target.
+	* remote.c (remote_interrupted_already): Remove.
+	(remote_interrupt_twice): Revive.
+	(remote_interrupt): Call remote_stop to interrupt the target
+	and install remote_interrupt_twice to take more severe
+	actions if this fails.
+	(remote_stop): Only attempt to stop the target. This separates
+	the command line from other UIs.
+	* remote-sim.c (gdb_os_poll_quit): Add a call to ui_loop_hook,
+	if it is defined.
 
 1999-04-01  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	Fix for cross-debugging on an AIX host from Johanna Svenningsson:
 	* ax-gdb.h (enum axs_lvalue_kind): Remove trailing comma from enum.
-	* ax.h (enum agent_op, enum agent_flaws): Same.
+	* ax.h (enum agent_op): Same.
 	* tracepoint.h (enum actionline_type): Same.
 	* config/xm-aix4.h: Add declaration for termdef.
 
@@ -54,9 +347,10 @@
 	* jv-lang.h (dynamics_objfile): Remove decl, conflicts with static
 	decl in jv-lang.c.
 
-1999-03-31  Jim Blandy  <jimb@zwingli.cygnus.com>
+	* infrun.c (follow_inferior_fork): Add ifdefs around
+ 	SOLIB_REMOVE_INFERIOR_HOOK.
 
-	Mon Mar 29 14:40:44 1999  David Taylor  <taylor@ryobi.cygnus.com>
+Wed Mar 31 11:39:49 1999  David Taylor  <taylor@ryobi.cygnus.com>
 
 	* valops.c (search_struct_field): revert HP merge change
 	to this function -- it causes messages to be printed about
@@ -64,13 +358,153 @@
 	(search_struct_field_aux): delete -- added as part of HP merge
 	change; with aforementioned change it is no longer called.
 
-1999-03-26  Jim Blandy  <jimb@zwingli.cygnus.com>
+1999-03-30  Stan Shebs  <shebs@andros.cygnus.com>
 
-	Merged change from Keith Seitz:
+	Make more HPUX-specific code generic.
+	* infrun.c: Include top.h.
+	(MAY_SWITCH_FROM_INFERIOR_PID, MAY_FOLLOW_EXEC,
+ 	USE_THREAD_STEP_NEEDED): New native macros.
+	(may_switch_from_inferior_pid, may_follow_exec,
+	use_thread_step_needed): New globals.
+	(follow_inferior_fork): Remove HPUXHPPA ifdef.
+	(follow_exec): Ditto, also save run target and re-push instead of
+ 	always pushing child_ops, add ifdefs around SOLIB_RESTART and
+ 	SOLIB_CREATE_INFERIOR_HOOK.
+	(wait_for_inferior): Use new globals instead of ifdefing HPUXHPPA,
+	always use printf_filtered to report new threads.
+	(normal_stop): Ditto.
+	* target.h, target.c (find_run_target): New function.
+	* config/pa/nm-hppah.h: Define new macros.
+
+1999-03-29  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* top.h: Include setjmp.h here.
+	* main.c, top.c: Don't include it here.
+
+1999-03-29  Keith Seitz  <keiths@cygnus.com>
+
+	* symtab.c (decode_line_1): Take out change which breaks symbols
+ 	which include class names and methods, e.g., "Foo::bar".
+
+1999-03-26  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.tgt (i[3456]86-*-sysv4.2MP, i[3456]86-*-sysv4.2uw2*):
+	Recognize both, as i[3456]86-*-sysv4.2*.
+	(i[3456]86-*-sysv5*): Recognize.
+
+	* infrun.c (wait_for_inferior): Remove most #if 0 segments.
+
+Fri Mar 26 17:27:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* blockframe.c (pc_in_call_dummy_on_stack): Fix.  Had copied code
+ 	from at_entry_point.
+
+Thu Mar 25 19:30:02 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* gdbarch.c: Include all headers.
+
+	* inferior.h, blockframe.c (pc_in_call_dummy_before_text_end,
+ 	pc_in_call_dummy_after_text_end, pc_in_call_dummy_on_stack,
+ 	pc_in_call_dummy_at_entry_point): Convert PC_IN_CALL_DUMMY macro's
+ 	into functions.
+
+Tue Mar 23 17:22:57 1999  Philippe De Muyter  <phdm@macqel.be>
+
+	* remote.c, parse.c: Include ctype.h.
+
+1999-03-24  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.host (mips-dec-mach3*): Use mipsm3 not mach3.
+
+	Attempt to sort out SCO-related configs.
+	* configure.host (i[3456]86-*-sysv4.2*): Use instead of
+	i[3456]86-*-sysv4.2MP and i[3456]86-*-sysv4.2uw2*.
+	(i[3456]86-*-sysv5*): Recognize.
+	* configure.tgt (i[3456]86-*-sco3.2v5*, i[3456]86-*-sco3.2v4*):
+ 	Recognize.
+
+Wed Mar 24 16:19:01 1999  Christopher Faylor <cgf@cygnus.com>
+
+	* MAINTAINERS: Add DJ Delorie (dj@cygnus.com) as the djgpp
+	maintainer.
+
+Wed Mar 24 21:19:57 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* target.h (enum target_signal): Do not hardwire values of MACH
+ 	signals.
+
+1999-03-14  Ken Raeburn  <raeburn@raeburn.org>
+
+	* target.h (enum target_signal): Add TARGET_SIGNAL_INFO.
+	* target.c (signals): Add SIGINFO description.
+	(target_signal_from_host, target_signal_to_host): Translate
+	SIGINFO to/from TARGET_SIGNAL_INFO.
+
+Wed Mar 24 01:01:27 1999  Andrew Cagney  <cagney@sludge.cygnus.com>
+
+	* rs6000-tdep.c (rs6000_software_single_step): Change SIGNAL to
+ 	unsigned int.
+
+	From Rodney Brown <rodneybrown@pmsc.com>
+	* target.h (enum thread_control_capabilities), breakpoint.h (enum
+ 	bptype), breakpoint.c (enum insertion_state_t): Strict ISO-C
+ 	doesn't allow trailing comma in enum definition.
 	
-	1999-03-16  Keith Seitz  <keiths@cygnus.com>
+Mon Mar 22 15:56:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
-        * remote.c (reomte_binary_checked): New file global.
+	* blockframe.c (inside_entry_file, inside_entry_func): Convert #if
+ 	CALL_DUMMY_LOCATION to if.
+	* valops.c (call_function_by_hand): Ditto.
+	* infcmd.c (run_stack_dummy): Ditto.
+	* inferior.h (CALL_DUMMY_ADDRESS, CALL_DUMMY_START_OFFSET,
+ 	CALL_DUMMY_BREAKPOINT_OFFSET): Provide default.
+
+1999-03-23  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* hppa-tdep.c (pa_register_look_aside): Remove CPU_HPPA_RISC_20
+	check, test for presence of struct save_state_t and the ss_wide 
+	member directly.
+	* configure.in:  Remove CPU_HPPA_RISC_20 test.  Add tests for
+	HAVE_STRUCT_SAVE_STATE_T and HAVE_STRUCT_MEMBER_SS_WIDE.
+	* acconfig.h: Add HAVE_STRUCT_SAVE_STATE_T HAVE_STRUCT_MEMBER_SS_WIDE.
+	* configure, config.in: Regenerated.
+
+Mon Mar 22 13:25:13 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* infttrace.c (proc_wait): rename to ptrace_wait.
+
+1999-03-18  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* dwarf2read.c: Correctly recognize location expressions that
+	designate LOC_REF_ARG arguments.  Doc fixes.
+	(isderef): New global.  (Yuck.)
+	(dwarf2_complex_location_expr): New complaint.
+	(read_func_scope): Reject frame_base attributes that use the
+	`deref' opcode as too complex.
+	(new_symbol): If both regoff and isderef are set, and the base
+	register is the frame pointer, then it's a LOC_REF_ARG argument.
+	(decode_locdesc): Recognize the `deref' opcode in location
+	expressions.  Complain if it's not the last op in the expression.
+
+	* config/fr30/tm-fr30.h (COERCE_FLOAT_TO_DOUBLE): #define this to
+	be true, or else value_arg_coere won't respect the (accurate)
+	information we have about whether a function is prototyped.
+
+1999-03-17  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* config/fr30/tm-fr30.h (STACK_ALIGN): Define this here, so
+ 	calling functions by hand with odd-sized arguments doesn't munge
+ 	the stack.
+
+1999-03-17  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in (HAVE_MULTIPLE_PROC_FDS): Don't define for Solaris
+	hosts--gdb doesn't support this yet.
+	* configure: Regenerated.
+
+1999-03-16  Keith Seitz  <keiths@cygnus.com>
+
+        * remote.c (remote_binary_checked): New file global.
         (check_binary_download): New function to check if
         stub supports binary downloading that works with
         stubs that are not eight bit clean.
@@ -82,110 +516,247 @@
 	Use xor to escape trouble characters.
 	* m32r-stub.c (bin2mem): Follow escape char convention change.
 
-	Applied patch from Stu Grossman:
-
-	Mon Feb 22 12:32:19 1999  Per Bothner  <bothner@cygnus.com>
-
-	* jv-valprint.c (java_val_print):  Restore line that somehow got lost.
-
-1999-03-24  Stan Shebs  <shebs@andros.cygnus.com>
-
-	* Makefile (VERSION): Bump to 4.17.87.
-
-	Attempt to sort out SCO-related configs.
-	* configure.host (i[3456]86-*-sysv4.2*): Use instead of
-	i[3456]86-*-sysv4.2MP and i[3456]86-*-sysv4.2uw2*.
-	(i[3456]86-*-sysv5*): Recognize.
-	* configure.tgt (i[3456]86-*-sco3.2v5*, i[3456]86-*-sco3.2v4*):
- 	Recognize.
-
-Wed Mar 24 01:01:27 1999  Andrew Cagney  <cagney@sludge.cygnus.com>
-
-	* rs6000-tdep.c (rs6000_software_single_step): Change SIGNAL to
- 	unsigned int.
-
-	From Rodney Brown <rodneybrown@pmsc.com>:
-	* target.h (enum thread_control_capabilities), breakpoint.h (enum
- 	bptype), breakpoint.c (enum insertion_state_t): Strict ISO-C
- 	doesn't allow trailing comma in enum definition.
-	
-1999-03-23  Jason Molenda  (jsm@bugshack.cygnus.com)
-
-        * hppa-tdep.c (pa_register_look_aside): Remove CPU_HPPA_RISC_20
-        check, test for presence of struct save_state_t and the ss_wide 
-        member directly.
-        * configure.in:  Remove CPU_HPPA_RISC_20 test.  Add tests for
-        HAVE_STRUCT_SAVE_STATE_T and HAVE_STRUCT_MEMBER_SS_WIDE.
-        * acconfig.h: Add HAVE_STRUCT_SAVE_STATE_T HAVE_STRUCT_MEMBER_SS_WIDE.
-        * configure, config.in: Regenerated.
-
-Tue Mar 23 17:22:57 1999  Philippe De Muyter  <phdm@macqel.be>
-
-	* remote.c, parse.c: Include ctype.h.
-
-Mon Mar 22 13:25:13 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
-
-	* infttrace.c (proc_wait): rename to ptrace_wait.
-
-1999-03-17  Jason Molenda  (jsm@bugshack.cygnus.com)
-
-	* configure.in (HAVE_MULTIPLE_PROC_FDS): Don't define for Solaris
-	hosts--gdb doesn't support this yet.
-	* configure: Regenerated.
-
 Tue Mar 16 01:11:33 1999  Andrew Cagney  <cagney@rhino.cygnus.com>
 
 	* target.h (struct target_ops), target.c (debug_to_query),
  	remote.c (pack_hex_byte, remote_query): Promote char parameters to
  	int.  Stops compile problems with pedantic ISO-C compilers.
-
+	
 Tue Mar 16 15:29:04 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* go32-xdep.c: Remove, no longer used by anything.
+	* Makefile.in: Remove references.
 
 	* jv-lang.c, jv-lang.h (java_primitive_type): Declare argument
 	as int instead of char.
 
-1999-03-15  Jim Blandy  <jimb@zwingli.cygnus.com>
+Mon Mar 15 11:42:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	Merged changes for binary downloads from Michael Snyder:
+	* d10v-tdep.c (push_stack_item, pop_stack_item): New function.
+ 	(d10v_push_arguments): Use.
 	
-	Fri Mar 12 13:11:48 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+	From Martin M. Hunt  <hunt@cygnus.com>:
+	* d10v-tdep.c (d10v_push_arguments): When arguments
+	must be pushed onto the stack, they go on in
+	reverse order.
 
-        * remote.c (remote_write_bytes): fix 'X' packet protocol so that it
-        can't overwrite the end of its buffer with escaped characters.
+1999-03-16  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* symtab.c (make_symbol_overload_list): Don't try to stuff minimal
+ 	or partial symbols into the overload list; we don't know their
+ 	types.  (Thanks to Rajiv Mirani.)
+
+1999-03-15  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* acinclude.m4 (--with-itclconfig, --with-itkconfig, --with-tixconfig):
+	Fix whitespace so --help messages line up.
+	* configure.in (--with-cpu): Fix capitalization for --help messages.
+	* configure, aclocal.m4: Regenerated.
+
+Mon Mar 15 11:39:03 1999  Ian Carmichael  <iancarm@cygnus.com>
+
+        Support building gdb w/o simulator:
+        * configure.in: Support --disable-sim. Check for sim directory.
+        * Makefile.in (IGNORE_SIM, IGNORE_SIM_OBS): New.
+        * acconfig.h (WITH_SIM): Define.
+        * configure, config.in: Regenerate.
+
+Mon Mar 15 08:01:33 1999  Elena Zannoni  <ezannoni@cygnus.com>
+
+        Patch from Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* top.c (read_command_lines): Reset control_level to 0.
+	(define_command): Don't do it here.
+
+Sun Mar 14 16:12:15 1999  Andrew Cagney  <cagney@rhino.cygnus.com>
+
+	* hppah-nat.c (store_inferior_registers): Delete extern
+ 	registers[] declaration.
+
+Sun Mar 14 19:17:30 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* infrun.c (write_inferior_status_register): New function. Provide
+ 	update access to an inf_status register buffer.  Only used by HP.
+	* inferior.h (write_inferior_status_register): Add prototype.
+
+	* hppa-tdep.c (push_dummy_frame): Use
+ 	write_inferior_status_register when hacking around a sleeping
+ 	inferior.  Accidently fix byte-order problem.
+
+Sun Mar 14 16:40:10 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/pa/tm-hppa.h (PUSH_DUMMY_FRAME): Fix parameter. Address
+ 	not needed.
+
+Fri Mar 12 13:11:48 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* remote.c (remote_write_bytes): fix 'X' packet protocol so that it
+	can't overwrite the end of its buffer with escaped characters.
 
 1999-03-12  Jim Blandy  <jimb@zwingli.cygnus.com>
 
-	Merged changes for HP/UX 9 from Jason Molenda:
+        Alpha patches from Richard Henderson:
 
-	1999-03-08  Jason Molenda  (jsm@bugshack.cygnus.com)
+	* alpha-tdep.c (alpha_skip_prologue): Recognize subq.
 
-	* infttrace.c (hppa_get_process_events): Removed. Function only 
-	usable on HPUX 10 and above.  It is not called by any other part
-	of GDB.
-	* hppah-nat.c (hppa_get_process_events): Ditto.
-	(child_pid_to_exec_file): Only call ptrace with PT_GET_PROCESS_PATHNAME
-	if that symbol has been defined.
-	* config/pa/nm-hppah.h: Don't set up prototypes et al for 
-	hppa_get_process_events.
+	* config/alpha/tm-alpha.h (REGISTER_NAMES): No f31, but fpcr.
+	(FPCR_REGNUM): New.
+	(REGISTER_CONVERTIBLE): Don't convert fpcr.
+	(REGISTER_VIRTUAL_TYPE): Don't make fpcr a double.
 
-	* config/pa/hppahpux.mh (TERM_LIB): Do not initialize, let autoconf
-	determine best library automatically.
-	* config/pa/hpux1020.mh: Ditto.
-	* config/pa/hpux1100.mh: Ditto.
-	* configure.in (TERM_LIB): Also check for libHcurses.
-	* configure: Regenerated.
+	* stabsread.c (define_symbol): Only consider live range extension
+	if we have an open parenthesis.
 
-	Merged changes to accomodate the Hurd:
-	
-        Thu Mar 11 18:05:11 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+1999-03-11  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* monitor.c (monitor_fetch_register): Print RDEBUG info correctly
+ 	when the register name is null.
+
+Thu Mar 11 19:33:07 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (wait_for_inferior): Change #if DECR_PC_AFTER_BREAK
+	uses to expressions, remove redundant extern decls.
+
+Thu Mar 11 18:05:11 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* infptrace.c (proc_wait): Rename to ptrace_wait.
 	* inftarg.c (child_wait): call ptrace_wait instead of proc_wait.
 	* inferior.h: Declare ptrace_wait instead of proc_wait.
 
-1999-03-11  Jim Blandy  <jimb@zwingli.cygnus.com>
+Thu Mar 11 11:46:25 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
-	* Makefile.in (VERSION): click to 4.17.86, for next snapshot.
+	* breakpoint.c (create_solib_load_unload_event_breakpoint,
+ 	create_fork_vfork_event_catchpoint, tcatch_command,
+ 	create_exception_catchpoint, break_at_finish_at_depth_command_1,
+ 	catch_fork_command_1, ep_skip_leading_whitespace,
+ 	break_at_finish_command_1, catch_exec_command_1,
+ 	catch_exception_command_1, stop_command, stopin_command,
+ 	stopat_command, ep_parse_optional_filename,
+ 	ep_find_event_name_end, ep_parse_optional_if_clause,
+ 	catch_fork_command_1), stack.c (show_and_print_stack_frame_stub,
+ 	print_stack_frame_stub, print_only_stack_frame_stub,
+ 	backtrace_command_1, backtrace_full_command, func_command),
+ 	valprint.c (print_decimal), source.c (print_source_lines_base):
+ 	Add prototype.
+
+	* stack.c (print_stack_frame_stub, show_and_print_stack_frame_stub,
+ 	print_only_stack_frame_stub): Make param void*.
+
+Wed Mar 10 19:33:28 1999  Geoffrey Noer  <noer@cygnus.com>
+
+	* win32-nat.c: If old Cygwin Win32 API headers aren't being used,
+	 define some gdb-specific defines that shouldn't have been in the
+	 global headers.
+
+Wed Mar 10 21:20:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* findvar.c (registers, register_valid): Replace array with pointer.
+	(build_findvar): New function.  Allocate space for REGISTERS and
+ 	REGISTER_VALID.
+	(_initialize_findvar): Call build_findvar.
+	
+	* inferior.h (registers, register_valid): Replace array with
+ 	pointer.
+
+	* inferior.h (struct inferior_status): Move definition from here.
+
+  	* infrun.c (struct inferior_status): To here.
+	(struct inferior_status): Change ``stop_registers'' and
+ 	``registers'' to pointers.
+	(xmalloc_inferior_status, free_inferior_status): New functions.
+	(restore_inferior_status): Call free_inferior_status.
+	(save_inferior_status): Call xmalloc_inferior_status.
+	(discard_inferior_status): New function, discard inf_status
+ 	buffer.  Call free_inferior_status.
+	
+	* inferior.h (stop_registers): Replace array with pointer.
+	* infrun.c (stop_registers): Update.
+	(build_infrun): Initialize stop_registers.
+	(_initialize_infrun): Call build_infrun.
+
+Wed Mar 10 14:50:42 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* alpha-tdep.c (alpha_linux_sigtramp_offset): Only compile when
+ 	LINUXALPHA target. Hack.
+
+	* infrun.c (set_follow_fork_mode_command): Make static.  Add
+ 	prototype.
+	* tracepoint.c (add_register): Ditto.
+	* valprint.c (strcat_longest): Comment out.  Does not appear to be
+ 	used.
+	* valops.c (find_method_list): Make static.  Add prototype.
+	* thread.c (target_find_new_threads): Make static.  Add prototype.
+	* stack.c (stack_publish_stopped_with_no_frame,
+ 	select_and_maybe_print_frame): Comment out.  Does not appear to be
+ 	used.
+	(current_frame_command): Add prototype.
+	* breakpoint.c (break_at_finish_command,
+ 	break_at_finish_at_depth_command, tbreak_at_finish_command): Make
+ 	static.  Add prototype.
+	* findvar.c (read_relative_register_raw_bytes_for_frame): Ditto.
+
+Wed Mar 10 23:38:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+ 	* corefile.c (registers): Delete redundant variable declaration.
+	* inferior.h (run_stack_dummy): Change array argument to pointer.
+	* infcmd.c (run_stack_dummy): Update.
+	* value.h (value_being_returned): Change RETBUF to a pointer.
+	* values.c (value_being_returned): Update.
+
+Wed Mar 10 11:08:16 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* source.c (list_command): GCC suggested explicit braces to avoid
+ 	ambiguous `else'.
+
+	* jv-typeprint.c: Include "c-lang.h".
+	* Makefile.in (jv-typeprint.o): Add dependency.
+	* jv-valprint.c: Include "gdbcore.h", "annotate.h".
+	* Makefile.in (jv-valprint.o): Add dependencies.
+	* objfiles.c: Include "breakpoint.h".
+	* Makefile.in (objfiles.o): Add dependency.
+	* main.c: Include <unistd.h>.
+	* parse.c: Include <ctype.h>.
+	* remote.c: Include <ctype.h>.
+	* ser-tcp.c: Include <unistd.h>.
+	* ax-general.c: Include "value.h".
+	* Makefile.in (ax-general.o): Add dependency.
+
+	* alpha-tdep.c (alpha_push_arguments): Make ``i'' an int instead
+ 	of a register.
+	* frame.h (show_and_print_stack_frame): Add function prototype.
+	* language.h (language_enum): Add function prototype.
+	* value.h (find_overload_match): Add function prototype.
+
+	* defs.h, utils.c (subset_compare): Rename subsetCompare. Add
+ 	prototype.
+	* stack.c (backtrace_command): Update.
+
+Wed Mar 10 13:58:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (AC_CHECK_HEADERS): Check for <sys/select.h>
+	* configure, config.in: Re-generate.
+	* inflow.c: Conditionally include <sys/select.h>.
+
+Wed Mar 10 13:44:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* frame.h (struct dummy_frame): Move from here.
+	* blockframe.c (struct dummy_frame): To here.
+
+	* blockframe.c (struct dummy_frame): Replace ``regs'' with pointer
+ 	``registers''.
+	(generic_pop_dummy_frame): Free it.
+	(generic_push_dummy_frame): Allocate dummy frame register buffer.
+
+Wed Mar 10 11:08:16 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* thread.c (_initialize_thread): Delete redundant ``extern struct
+ 	cmd_list_element *cmdlist''.
+	* printcmd.c (print_command_1): Ditto for ``objectprint'';
+
+1999-03-09  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* MAINTAINERS: New file, list of maintainers and areas they
+ 	maintain.
 
 1999-03-09  Rodney Brown  <RodneyBrown@pmsc.com>
 
@@ -201,11 +772,185 @@ Tue Mar 16 15:29:04 1999  Stan Shebs  <shebs@andros.cygnus.com>
 	* config/i386/tm-i386v42mp.h: Remove HAVE_PSTATUS_T,
  	HAVE_NO_PRRUN_T; now set by configure.
 
+Tue Mar  9 16:29:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* i386-tdep.c (gdb_print_insn_i386): Abort when disassembly_flavor
+ 	undefined..
+
+	* fr30-tdep.c (_initialize_fr30_tdep): Add prototype.  Fix
+	coding style.
+
+	* target.c (debug_to_enable_exception_callback,
+ 	debug_to_get_current_exception_event): Return result of call to
+ 	debug_target().
+
+1999-03-09  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Another HURD fix from Mark Kettenis:
+	* gnu-nat.c: Include <string.h>.  Remove declaration of strerror.
+	Include <bits/waitflags.h> instead of <waitflags.h> and define
+	_SYS_WAIT_H to prevent the warning that we should not include it.
+	(gnu_create_inferior): Change return type of attach_to_child to
+	void.  Do not return INFERIOR_PID.
+	(gnu_pid_to_exec_file): Change return type to char *.
+	Return NULL.
+
+	Fix for the HURD from Mark Kettenis:
+	* configure.in: Add AC_PROG_AWK.  Needed by the	machine-dependent
+	makefile fragments for the Hurd.
+	* Makefile.in (AWK): Add.  Set by configure.
+	* configure: Regenerated.
+
+1999-03-08  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* infttrace.c (hppa_get_process_events): Removed. Function only
+ 	usable on HPUX 10 and above.  It is not called by any other part
+ 	of GDB.
+	* hppah-nat.c (hppa_get_process_events): Ditto.
+	(child_pid_to_exec_file): Only call ptrace with
+ 	PT_GET_PROCESS_PATHNAME if that symbol has been defined.
+	* config/pa/nm-hppah.h: Don't set up prototypes et al for 
+	hppa_get_process_events.
+
+	* config/pa/hppahpux.mh (TERM_LIB): Do not initialize, let autoconf
+	determine best library automatically.
+	* config/pa/hpux1020.mh: Ditto.
+	* config/pa/hpux1100.mh: Ditto.
+	* configure.in (TERM_LIB): Also check for libHcurses.
+	* configure: Regenerated.
+
+Thu Mar  4 17:16:04 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* m32r-stub.c: add support for crc "Compare" command.
+
 1999-03-04  Jim Blandy  <jimb@zwingli.cygnus.com>
 
-	Merged changes from Jason Molenda:
+	* fr30-tdep.c (fr30_store_return_value): Allocate zeroes
+ 	dynamically, to save BSS space, and to remove assumptions about
+	the size of the largest value we'll return.
+
+	* config/fr30/tm-fr30.h (fr30_store_return_value): Use PARAMS in
+	prototype.
+
+Thu Mar  4 08:37:35 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sh3-rom.c (sh3_supply_register, sh3_supply_register),
+ 	mips-tdep.c (mips_push_arguments), m32r-rom.c
+ 	(m32r_upload_command), m32r-tdep.c (decode_prologue), monitor.c
+ 	(longlong_hexchars), tracepoint.c (validate_actionline,
+ 	read_actions), mdebugread.c
+ 	(parse_symbol), jv-typeprint.c
+ 	(java_type_print_base, java_type_print_base), mdebugread.c
+ 	(parse_symbol), top.c (source_command), utils.c
+ 	(floatformat_to_doublest): GCC suggest explicit braces to avoid
+ 	ambiguous `else'.
 	
-	1999-02-24  Jason Molenda  (jsm@bugshack.cygnus.com)
+	* tracepoint.c (map_args_over_tracepoints, trace_actions_command),
+ 	m32r-rom.c (m32r_supply_register), win32-nat.c
+ 	(handle_output_debug_string, child_continue), i960-tdep.c
+ 	(pop_frame), m32r-rom.c (m32r_upload_command): GCC suggested
+ 	parentheses around assignment used as truth value.
+
+	* remote-sds.c (sds_wait), monitor.c (monitor_fetch_register),
+ 	ser-e7kpc.c, (dosasync_write), arc-tdep.c (arc_get_frame_setup):
+ 	GCC suggested parentheses around operands.
+
+	* c-typeprint.c (c_type_print_base): GCC suggested enclosing
+ 	"while" expression in paren.
+
+Wed Mar  3 18:14:33 1999  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* sol-thread.c (save_inferior_pid): Cast the saved pid to void*.
+	(restore_inferior_pid): Takes void* as required by make_cleanup.
+  	Casts pid back to an int.
+
+	* procfs.c (make_cleanup_close_proc_file,
+ 	close_proc_file_cleanup): Create a proc_file cleanup.
+	(info_proc): Use.
+
+	* defs.h (make_cleanup_freeargv): Helper function.  Establish
+ 	cleanup using freeargv.  Can not just typecast/pass freeargv as it
+ 	violates ISO-C.
+	* utils.c (do_freeargv): Helper.
+	(make_cleanup_freeargv): New function.
+
+	* symmisc.c (maintenance_print_symbols,
+ 	maintenance_print_psymbols, maintenance_print_msymbols), symfile.c
+ 	(symbol_file_command), stack.c (backtrace_command), remote-sim.c
+ 	(gdbsim_create_inferior, gdbsim_open), remote-mips.c
+ 	(common_open), procfs.c (info_proc), infrun.c (handle_command,
+ 	xdb_handle_command), exec.c (exec_file_attach): Call
+ 	make_cleanup_freeargv.
+
+1999-03-03  James Ingham  <jingham@cygnus.com>
+
+	* i386-tdep.c (_initialize_i386_tdep): Set the inital value for
+	disassembly flavor at startup, rather than hardcoding it.
+
+1999-03-03  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Put return values in the right place.
+	* fr30-tdep.c (fr30_store_return_value): New function.
+	* config/fr30/tm-fr30.h (STORE_RETURN_VALUE): Call
+	fr30_store_return_value.
+
+Wed Mar  3 18:10:55 1999  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* gdbtypes.c (virtual_base_list_aux): Return void.  Add prototype.
+
+	* breakpoint.c (map_catch_names): Comment out unused function.
+
+1999-03-02  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* hppa-tdep.c (pa_register_look_aside): Only refer to save_state_t
+	structure on PA 2.0 systems.
+
+1999-03-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Gary Thomas  <gthomas@cygnus.co.uk>:
+	* arm-tdep.c (ARM_LE_BREAKPOINT, ARM_BE_BREAKPOINT,
+	THUMB_LE_BREAKPOINT, THUMB_BE_BREAKPOINT): Use illegal instruction
+	instead of SWI 24.
+	* config/arm/tm-arm.h (CALL_DUMMY): Ditto.
+	(IN_SIGTRAMP): Define.
+
+1999-03-02  Nick Clifton  <nickc@cygnus.com>
+
+	* findvar.c (store_address): Delete incorrect big endian
+        code. 
+
+Tue Mar  2 18:02:42 1999  Andrew Cagney  <cagney@chook>
+
+	* configure.in (gdb_cv_os_cygwin): Compat.  Continue to reconize
+ 	__CYGWIN32__.
+
+1999-03-01  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Move setting of gdb_cv_os_cygwin to before
+	setting of TERM_LIB.  Check for __CYGWIN__ instead of __CYGWIN32__.
+	* configure: Regenerated.
+
+1999-03-01  DJ Delorie  <dj@cygnus.com>
+
+	* configure.in: Change -cygwin32* to -cygwin*.
+	* configure: Ditto.
+
+1999-02-25  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* breakpoint.c (SOLIB_LOADED_LIBRARY_PATHNAME,
+ 	SOLIB_UNLOADED_LIBRARY_PATHNAME, SOLIB_CREATE_CATCH_LOAD_HOOK,
+ 	SOLIB_CREATE_CATCH_UNLOAD_HOOK): Supply default definitions.
+	* infrun.c (SOLIB_IN_DYNAMIC_LINKER): Ditto.
+
+1999-02-25  Keith Seitz  <keiths@cygnus.com>
+
+	* corelow.c (core_close): Clear out solib state before
+	closing the bfd associated with the core file.
+	* solib.c (clear_solib): Mention that clear_solib requires
+	an open BFD in order for disable_breakpoints_in_shlibs to
+	determine whether breakpoints live in shared libraries.
+
+1999-02-24  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * configure.in: Set CPU_HPPA_RISC_20 if the host CPU is a PA 2.0 
         processor.
@@ -215,15 +960,90 @@ Tue Mar 16 15:29:04 1999  Stan Shebs  <shebs@andros.cygnus.com>
         structure elements if we are on a PA2.0 system.
         * defs.h: Include limits.h.
 
-	Merged changes from Stu Grossman:
+Tue Feb 23 14:37:08 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* infrun.c (wait_for_inferior): Check scheduler_locking state 
+	before resuming after a thread-specific breakpoint.
+
+1999-02-23  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* aclocal.m4, config.in, configure: Regenerated with latest
+	autotools.
+
+Mon Feb 22 12:32:19 1999  Per Bothner  <bothner@cygnus.com>
+
+	* jv-valprint.c (java_val_print):  Restore line that somehow got lost.
+
+	* jv-valprint.c (java_print_value_fields):  Check for NULL type.
+
+1999-02-21  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* tm-h8500.h, i386lynx-nat.c: Removed.  These files are long
+	dead; it seems that they only appeared due to some CVS weirdness.
+	If they appear again, we may need to distribute garlic and holy
+	water.
+
+1999-02-19  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in (TERM_LIB): Move checking for TERM_LIB, substituting.
+	* configure: Regenerated.
+
+1999-02-19 Robert Hoehne (robert.hoehne@gmx.net)
+
+        * configure.host (i[3456]86-*-msdosdjgpp*): New host.
+        * configure.tgt (i[3456]86-*-msdosdjgpp*): New target.
+        * go32-nat.c: New file, native DJGPP support.
+        * config/i386/go32.mh: Rewrite for DJGPP (go32) host.
+        * config/i386/go32.mt: New file, DJGPP (go32) target.
+        * config/i386/nm-go32.h: New file.
+        * config/i386/tm-go32.h: New file.
+        * config/i386/xm-go32.h: Rewritten for current DJGPP.
+
+1999-02-18  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* reply_mig_hack.awk, config/nm-gnu.h, config/alpha/nm-linux.h
+	config/alpha/xm-alphalinux.h, config/alpha/xm-alphaosf.h
+	config/i386/nm-i386sco5.h, config/i386/tm-fbsd.h, config/i386/tm-i386.h
+	config/powerpc/nm-aix.h, config/powerpc/tm-macos.h
+	config/powerpc/tm-ppc-aix.h, config/powerpc/xm-aix.h
+	config/rs6000/tm-rs6000-aix4.h, testsuite/gdb.chill/tests1.ch
+	testsuite/gdb.chill/tests2.ch, testsuite/gdb.chill/tests2.exp:
+	Update FSF address in copyright notices.
+
+1999-02-18  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Quote "$GCC" correctly.
+	* configure: Regenerated.
+
+1999-02-18  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* dbxread.c (elfstab_build_psymtabs): Don't assume that there's a
+	section named ".text", which has all the code in it.  Instead, look
+	at all the sections in the file with the `code' flag set.
+	(find_text_range): New function, that does all the work.
+
+Thu Feb 18 17:50:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (FP_REGISTER_DOUBLE): Conditionally define.
+
+Fri Jan 29 16:51:11 1999  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* mips-tdep.c (return_value_location): New function. Merge/rewrite
+ 	of return-value code in mips_extract_return_value,
+ 	mips_store_return_value.  Stop buffer overflow when 64 bit value
+ 	in 32 bit registers.  Extract 64bit float from 32 bit register
+ 	pair of correct order.
+	(mips_extract_return_value, mips_store_return_value): Call
+ 	return_value_location.  For store, ensure that remainder of
+ 	register is zero.
 	
-	Wed Feb 17 10:10:27 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
+Wed Feb 17 10:10:27 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* gdbtypes.h (get_discrete_bounds):  Remove duplicate decl.
 
 	* jv-typeprint.c (java_type_print_base):  Change fputs => fputs_filtered.
 	
-	Mon Jan 25 18:30:57 1999  Per Bothner  <bothner@cygnus.com>
+Mon Jan 25 18:30:57 1999  Per Bothner  <bothner@cygnus.com>
 
 	* jv-lang.h (JAVA_OBJECT_SIZE):  Change from hard-wired constant.
 	(java_primitive_type_from_name, get_java_object_header_size):  Declare.
@@ -247,7 +1067,7 @@ Tue Mar 16 15:29:04 1999  Stan Shebs  <shebs@andros.cygnus.com>
 	is a waste of effort.  Also, handle TYPE_CODE_INT, to make sure
 	Java bytes as not printed as C chars.
 
-	Fri Jan  8 16:58:22 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
+Fri Jan  8 16:58:22 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* blockframe.c (find_pc_sect_partial_function):  Search full symtabs as
 	a last ditch effort (after the partial & minimal symtabs).
@@ -263,7 +1083,7 @@ Tue Mar 16 15:29:04 1999  Stan Shebs  <shebs@andros.cygnus.com>
 	* values.c (value_virtual_fn_field):  Fixes code to handle new vtable
 	debug info format.  Patch from marka.
 	
-	Wed Dec 16 23:11:25 1998  Stu Grossman  <grossman@fencer.cygnus.com>
+Wed Dec 16 23:11:25 1998  Stu Grossman  <grossman@fencer.cygnus.com>
 
 	* jv-lang.c (java_class_from_object java_class_is_primitive
 	is_object_type):  Change dtable to vtable.
@@ -271,13 +1091,13 @@ Tue Mar 16 15:29:04 1999  Stan Shebs  <shebs@andros.cygnus.com>
 	* (_initialize_java_language):  Make java_char_type be unsigned.
 	* jv-lang.h:  Fixup prototypes.
 	
-	Mon Dec  7 19:02:15 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
+Mon Dec  7 19:02:15 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* jv-valprint.c (java_value_print):  Fix printing of values where
 	run time type != compile time type.
 
-	Fri Dec  4 15:23:38 1998  Stu Grossman  <grossman@fencer.cygnus.com>
-  
+Fri Dec  4 15:23:38 1998  Stu Grossman  <grossman@fencer.cygnus.com>
+
 	* Makefile.in:  Whack out m2-typeprint.c.
 	* c-typeprint.c (c_type_print_varspec_suffix) typeprint.h:  Make this
 	global.  It's needed by Java.
@@ -296,71 +1116,37 @@ Tue Mar 16 15:29:04 1999  Stan Shebs  <shebs@andros.cygnus.com>
 	* jv-valprint.c (java_val_print):  Minor formatting.
 	* m2-lang.c (m2_language_d):  Change m2_print_type to c_print_type.
 	* stabsread.c (read_member_functions):  Save public and static attributes.
+	
+Wed Feb 17 15:32:57 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-1999-03-02  Stan Shebs  <shebs@andros.cygnus.com>
-
-	From Gary Thomas  <gthomas@cygnus.co.uk>:
-	* arm-tdep.c (ARM_LE_BREAKPOINT, ARM_BE_BREAKPOINT,
-	THUMB_LE_BREAKPOINT, THUMB_BE_BREAKPOINT): Use illegal instruction
-	instead of SWI 24.
-	* config/arm/tm-arm.h (CALL_DUMMY): Ditto.
-	(IN_SIGTRAMP): Define.
-
-1999-03-01  Jim Blandy  <jimb@zwingli.cygnus.com>
-
-	* configure.in (TERM_LIB): Move the code which sets this to a
-	better place.
-
-1999-02-25  Stan Shebs  <shebs@andros.cygnus.com>
-
-	* breakpoint.c (SOLIB_LOADED_LIBRARY_PATHNAME,
- 	SOLIB_UNLOADED_LIBRARY_PATHNAME, SOLIB_CREATE_CATCH_LOAD_HOOK,
- 	SOLIB_CREATE_CATCH_UNLOAD_HOOK): Supply default definitions.
-	* infrun.c (SOLIB_IN_DYNAMIC_LINKER): Ditto.
-
-1999-02-23  Jim Blandy  <jimb@zwingli.cygnus.com>
-
-	Patch from Jason Molenda  (jsm@bugshack.cygnus.com)
-        * configure.in (TERM_LIB): Move checking for TERM_LIB, substituting.
-        * configure, aclocal.m4, config.in: Regenerated.
-
-1999-02-22  Jim Blandy  <jimb@zwingli.cygnus.com>
-
-	* Makefile.in (VERSION): Bump to 4.17.85, for the release process.
-
-	Patch from Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	* breakpoint.c (watch_command_1): Reformat comment.
 
-	Patch from Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	* c-typeprint.c (c_type_print_base): Reformat comments.
 
-	Patch from Edith Epstein  <eepstein@sophia.cygnus.com>:
+1999-02-17  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* Makefile.in (VERSION): Bump version to 4.17.2.
+
+Tue Feb 16 15:48:20 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
+ 
         * config/pa/nm-hppah.h: Added prototype declarations for
         hppa_enable_page_protection_events and 
         hppa_disable_page_protection_events.
-
-	Patch from Edith Epstein  <eepstein@sophia.cygnus.com>:
+ 
+        * inftarg.c (child_wait): Fixed code that checks whether
+        or not the target program has done a fork/vfork. 
+        related_pid  does not have a value unless the target 
+        program has forked/vforked.
+ 
         * infttrace.c (hppa_insert_hw_watchpoint): Make sure that
         function always returns a value.
         (hppa_remove_hw_watchpoint): Make sure that function always
         returns a value.
 
-	Patch from Edith Epstein  <eepstein@sophia.cygnus.com>:
-        * inftarg.c (child_wait): Fixed code that checks whether
-        or not the target program has done a fork/vfork. 
-        related_pid  does not have a value unless the target 
-        program has forked/vforked.
-	
-1999-02-22  Jim Blandy  <jimb@zwingli.cygnus.com>
+Tue Feb 16 06:31:58 1999  Keith Seitz  <keiths@cygnus.com>
 
-	* tm-h8500.h, i386lynx-nat.c: Removed.  These files are long
-	dead; it seems that they only appeared due to some CVS weirdness.
-	If they appear again, we may need to distribute garlic and holy
-	water.
-
-1999-02-16  Jim Blandy  <jimb@zwingli.cygnus.com>
-
-	* Makefile.in (VERSION): Bump to 4.17.2.
+	* config/powerpc/tm-ppc-eabi.h: Do not define PC_IN_CALL_DUMMY,
+	let the generic call dummy infrastructure do it.
 
 Sun Feb 14 18:21:08 1999  Mark Alexander  <marka@cygnus.com>
 

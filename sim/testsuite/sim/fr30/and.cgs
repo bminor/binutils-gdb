@@ -42,10 +42,16 @@ and:
 	test_cc		1 0 0 0
 	test_h_mem 	0xaaaa0000,sp
 
-	mvi_h_mem  	0xffff,sp
-	set_cc          0x0d		; Set mask opposite of expected
+	mvr_h_gr	sp,r9
+	inci_h_gr	4,r9
+	mvi_h_mem  	0xffffffff,sp
+	mvi_h_mem  	0xffff0000,r9
+	inci_h_gr	1,sp		; test unaligned access
+	set_cc          0x05		; Set mask opposite of expected
 	and		r7,@sp
-	test_cc		0 0 0 1
-	test_h_mem 	0xaaaa,sp
+	test_cc		1 0 0 1
+	inci_h_gr	-1,sp
+	test_h_mem 	0xaaaaaaaa,sp
+	test_h_mem 	0xffff0000,r9
 
 	pass

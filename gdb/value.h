@@ -345,8 +345,9 @@ extern value_ptr value_struct_elt_for_reference PARAMS ((struct type *domain,
 
 extern value_ptr value_static_field PARAMS ((struct type *type, int fieldno));
 
-extern struct fn_field *
-value_find_oload_method_list PARAMS ((value_ptr *, char *, int, int *, int *, struct type **, int *));
+extern struct fn_field *value_find_oload_method_list PARAMS ((value_ptr *, char *, int, int *, int *, struct type **, int *));
+
+extern int find_overload_match PARAMS ((struct type ** arg_types, int nargs, char * name, int method, int lax, value_ptr obj, struct symbol *fsym, value_ptr *valp, struct symbol **symp, int *staticp));
 
 extern value_ptr value_field PARAMS ((value_ptr arg1, int fieldno));
 
@@ -375,7 +376,7 @@ extern value_ptr value_from_vtable_info PARAMS ((value_ptr arg,
 						 struct type *type));
 
 extern value_ptr value_being_returned PARAMS ((struct type *valtype, 
-					       char retbuf[REGISTER_BYTES],
+					       char *retbuf,
 					       int struct_return));
 
 extern value_ptr value_in PARAMS ((value_ptr element, value_ptr set));
@@ -484,10 +485,10 @@ write_register_pid PARAMS ((int regno, CORE_ADDR val, int pid));
 extern void
 supply_register PARAMS ((int regno, char *val));
 
-extern void
-get_saved_register PARAMS ((char *raw_buffer, int *optimized,
-			    CORE_ADDR *addrp, struct frame_info *frame,
-			    int regnum, enum lval_type *lval));
+extern void get_saved_register PARAMS ((char *raw_buffer, int *optimized,
+					CORE_ADDR *addrp,
+					struct frame_info *frame,
+					int regnum, enum lval_type *lval));
 
 extern void
 modify_field PARAMS ((char *addr, LONGEST fieldval, int bitpos, int bitsize));

@@ -672,7 +672,6 @@ mips_readchar (timeout)
   static int state = 0;
   int mips_monitor_prompt_len = strlen (mips_monitor_prompt);
 
-#ifdef MAINTENANCE_CMDS
   {
     int i;
 
@@ -680,18 +679,17 @@ mips_readchar (timeout)
     if (i == -1 && watchdog > 0)
      i = watchdog;
   }
-#endif
 
   if (state == mips_monitor_prompt_len)
     timeout = 1;
   ch = SERIAL_READCHAR (mips_desc, timeout);
-#ifdef MAINTENANCE_CMDS
+
   if (ch == SERIAL_TIMEOUT && timeout == -1) /* Watchdog went off */
     {
       target_mourn_inferior ();
       error ("Watchdog has expired.  Target detached.\n");
     }
-#endif
+
   if (ch == SERIAL_EOF)
     mips_error ("End of file from remote");
   if (ch == SERIAL_ERROR)
@@ -1561,7 +1559,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
      optional local TFTP name.  */
   if ((argv = buildargv (name)) == NULL)
     nomem(0);
-  make_cleanup ((make_cleanup_func) freeargv, argv);
+  make_cleanup_freeargv (argv);
 
   serial_port_name = strsave (argv[0]);
   if (argv[1])				/* remote TFTP name specified? */

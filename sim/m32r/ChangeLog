@@ -1,3 +1,45 @@
+Fri Apr 16 16:47:43 1999  Doug Evans  <devans@charmed.cygnus.com>
+
+	* devices.c (device_io_read_buffer): New arg `sd'.
+	(device_io_write_buffer): New arg `sd'.
+	(device_error): Give proper arg spec.
+
+1999-04-10  Doug Evans  <devans@casey.cygnus.com>
+
+	* sem-switch.c,sem.c: Rebuild.
+
+1999-03-27  Doug Evans  <devans@casey.cygnus.com>
+
+	* decode.c: Rebuild.
+
+1999-03-26  Doug Evans  <devans@casey.cygnus.com>
+
+	* m32r-sim.h (M32R_DEVICE_LEN): Fix off by one error.
+
+1999-03-22  Doug Evans  <devans@casey.cygnus.com>
+
+	* arch.c,arch.h,model.c: Rebuild.
+	* m32r-sim.h (a_m32r_h_gr_get,a_m32r_h_gr_set): Declare.
+	(a_m32r_h_cr_get,a_m32r_h_cr_set): Declare.
+	* m32r.c (m32rbf_fetch_register): Replace calls to a_m32r_h_pc_get,
+	a_m32r_h_accum_get with appropriate calls to m32rbf_*.
+	(m32rbf_store_register): Ditto.
+	(a_m32r_h_gr_get,a_m32r_h_gr_set): New functions.
+	(a_m32r_h_cr_get,a_m32r_h_cr_set): Ditto.
+	* sim-if.c (sim_open): Update call to m32r_cgen_cpu_open.
+	* traps.c (m32r_core_signal): Replace calls to a_m32r_h_*,
+	with appropriate calls to m32rbf_*.
+
+1999-03-11  Doug Evans  <devans@casey.cygnus.com>
+
+	* arch.c,arch.h,cpu.c,cpu.h,sem.c,sem-switch.c: Rebuild.
+	* m32r-sim.h (GET_H_*,SET_H_*, except GET_H_SM): Delete.
+	* sim-if.c (sim_open): Update call to m32r_cgen_cpu_open.
+
+1999-02-25  Doug Evans  <devans@casey.cygnus.com>
+
+	* cpu.c,cpu.h: Rebuild.
+
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in (SIM_EXTRA_DEPS): Add m32r-desc.h, delete cpu-opc.h.

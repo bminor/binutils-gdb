@@ -1333,7 +1333,8 @@ OP_6601 ()
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
-  INC_ADDR (OP[1], -4);
+  if (OP[0] != OP[1])
+    INC_ADDR (OP[1], -4);
   trace_output_32 (tmp);
 }
 
@@ -1346,7 +1347,8 @@ OP_6201 ()
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
-  INC_ADDR (OP[1], 4);
+  if (OP[0] != OP[1])
+    INC_ADDR (OP[1], 4);
   trace_output_32 (tmp);
 }
 
@@ -3124,6 +3126,7 @@ OP_5F00 ()
 	    trace_output_void ();
 	    break;
 
+#ifdef TARGET_SYS_stat
 	  case TARGET_SYS_stat:
 	    trace_input ("<stat>", OP_R0, OP_R1, OP_VOID);
 	    /* stat system call */
@@ -3152,6 +3155,7 @@ OP_5F00 ()
 	    }
 	    trace_output_16 (result);
 	    break;
+#endif
 
 	  case TARGET_SYS_chown:
 	    trace_input ("<chown>", OP_R0, OP_R1, OP_R2);

@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright 1986, 89, 90, 91, 92, 95, 1998 Free Software Foundation, Inc.
+   Copyright 1986, 89, 90, 91, 92, 95, 98, 1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -34,6 +34,7 @@ static void breakpoint_changed PARAMS ((struct breakpoint *));
 void (*annotate_starting_hook) PARAMS ((void));
 void (*annotate_stopped_hook) PARAMS ((void));
 void (*annotate_signalled_hook) PARAMS ((void));
+void (*annotate_signal_hook) PARAMS ((void));
 void (*annotate_exited_hook) PARAMS ((void));
 
 static void
@@ -161,6 +162,9 @@ annotate_signal_string_end ()
 void
 annotate_signal ()
 {
+  if (annotate_signal_hook)
+    annotate_signal_hook ();
+
   if (annotation_level > 1)
     printf_filtered ("\n\032\032signal\n");
 }

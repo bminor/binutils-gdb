@@ -913,7 +913,7 @@ c_type_print_base (type, stream, show, level)
 		      char *p;
 		      char *demangled_no_class = demangled_name;
 		      
-		      while (p = strchr (demangled_no_class, ':'))
+		      while ((p = strchr (demangled_no_class, ':')))
 			{
 			  demangled_no_class = p;
 			  if (*++demangled_no_class == ':')

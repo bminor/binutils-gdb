@@ -96,6 +96,7 @@ struct {
   { sh_reg_names, bfd_mach_sh },
   { sh3_reg_names, bfd_mach_sh3 },
   { sh3e_reg_names, bfd_mach_sh3e },
+  { sh3e_reg_names, bfd_mach_sh4 },
   { NULL, 0 }
 };
 
@@ -578,22 +579,6 @@ sh_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 }
 #endif
 
-/* Function: get_saved_register
-   Just call the generic_get_saved_register function.  */
-
-void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-     char *raw_buffer;
-     int *optimized;
-     CORE_ADDR *addrp;
-     struct frame_info *frame;
-     int regnum;
-     enum lval_type *lval;
-{
-  generic_get_saved_register (raw_buffer, optimized, addrp, 
-			      frame, regnum, lval);
-}
-
 
 /* Modify the actual processor type. */
 
@@ -630,6 +615,10 @@ sh_show_regs (args, from_tty)
     cpu = TARGET_ARCHITECTURE->mach;
   else
     cpu = 0;
+
+  /* FIXME: sh4 has more registers */
+  if (cpu == bfd_mach_sh4)
+    cpu = bfd_mach_sh3;
 
   printf_filtered ("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
 		   read_register (PC_REGNUM),

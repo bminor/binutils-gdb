@@ -574,12 +574,18 @@ gdb_expect {
 }
 
 # Verify that GDB responds gracefully to a request to "finish" from
-# the outermost frame.
+# the outermost frame.  On a stub that never exits, this will just
+# run to the stubs routine, so we don't get this error...  Thus the 
+# second condition.
 #
+
 send_gdb "finish\n"
 gdb_expect {
   -re "\"finish\" not meaningful in the outermost frame.\r\n$gdb_prompt $"\
           {pass "finish from outermost frame disallowed"}
+  -re "Run till exit from.*" {
+     pass "finish from outermost frame disallowed"
+  }
   -re "$gdb_prompt $"\
           {fail "finish from outermost frame disallowed"}
   timeout {fail "(timeout) finish from outermost frame disallowed"}
@@ -743,18 +749,8 @@ proc test_next_with_recursion {} {
     if { $result != 0 } { gdb_suppress_tests }
 
     if [target_info exists gdb,noresults] { gdb_suppress_tests }
-    if [target_info exists use_gdb_stub] {
-	gdb_breakpoint "exit"
-	gdb_test "continue" "Continuing..*Breakpoint .*exit \[(\].*=0\[)\].*" "continue until exit in recursive next test"
-    } else {
-    # Continue until we exit.  Should not stop again.
-    # Don't bother to check the output of the program, that may be
-    # extremely tough for some remote systems.
-	gdb_test "continue"\
-		"Continuing.\[\r\n0-9\]+Program exited normally\\..*"\
-		"continue until exit in recursive next test"
-    }
-    gdb_stop_suppressing_tests;
+  gdb_continue_to_end "recursive next test"
+   gdb_stop_suppressing_tests;
 }
 
 test_clear_command

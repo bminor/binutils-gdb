@@ -1,6 +1,13 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB-4.18:
+
+* New targets
+
+TI TMS320C80					tic80-*-*
+
+
 *** Changes in GDB-4.18:
 
 * New native configurations

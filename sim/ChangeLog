@@ -1,23 +1,17 @@
+1999-04-08  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in: Add support for MCore target.
+	* configure: Regenerate.
+
 1999-03-14  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in (FLAGS_TO_PASS, TARGET_FLAGS_TO_PASS): Remove
  	RUNTEST instead of commenting out, fixes portability problem.
 
-1999-02-10  Doug Evans  <devans@casey.cygnus.com>
-
-	* configure.in (sparc*): Configure sparc subdir if --with-cgen or
-	--with-cgen-sim.
-	* configure: Rebuild.
-
 1999-02-08  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in: Add support for StrongARM target.
 	* configure: Regenerate.
-
-1999-02-02  Doug Evans  <devans@casey.cygnus.com>
-
-	* configure.in (sparc*): Configure sparc subdir if --with-cgen.
-	* configure: Rebuild.
 
 1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
@@ -40,8 +34,8 @@ Fri Sep 25 10:12:19 1998  Christopher Faylor <cgf@cygnus.com>
 
 Thu May 28 14:59:46 1998 Jillian Ye <jillian@cygnus.com>
 
-        * Makefile.in: Take RUNTEST out of FLAG_TO_PASS
-                       so that make check can be invoked recursively.
+        * Makefile.in: Take RUNTEST out of FLAGS_TO_PASS so that make
+ 	check can be invoked recursively.
 
 Wed Apr 29 12:38:53 1998  Mark Alexander  <marka@cygnus.com>
 

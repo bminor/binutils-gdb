@@ -1,3 +1,9 @@
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* compile.c (POLL_QUIT_INTERVAL): Define. Used to tweak the
+	frequency at which the poll_quit callback is used.
+	(sim_resume): Use POLL_QUIT_INTERVAL instead of hard-coded value.
+
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure: Regenerated to track ../common/aclocal.m4 changes.

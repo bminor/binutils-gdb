@@ -78,6 +78,8 @@ static void print_bit_vector PARAMS ((B_TYPE *, int));
 static void print_arg_types PARAMS ((struct type **, int));
 static void dump_fn_fieldlists PARAMS ((struct type *, int));
 static void print_cplus_stuff PARAMS ((struct type *, int));
+static void virtual_base_list_aux PARAMS ((struct type *dclass));
+
 
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
@@ -1719,15 +1721,15 @@ static struct vbase * current_vbase_list = NULL;
    Note: the list goes backward, right-to-left. virtual_base_list()
    copies the items out in reverse order.  */
 
-struct vbase *
+static void
 virtual_base_list_aux (dclass)
-  struct type * dclass;
+     struct type * dclass;
 {
   struct vbase * tmp_vbase;
   register int i;
 
   if (TYPE_CODE(dclass) != TYPE_CODE_CLASS)
-    return NULL;
+    return;
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
     {
@@ -2390,10 +2392,6 @@ rank_one_type (parm, arg)
  
 /* End of functions for overload resolution */ 
 
-
-
-#if MAINTENANCE_CMDS
-
 static void
 print_bit_vector (bits, nbits)
      B_TYPE *bits;
@@ -2765,9 +2763,6 @@ recursive_dump_type (type, spaces)
   if (spaces == 0)
     obstack_free (&dont_print_type_obstack, NULL);
 }
-
-#endif	/* MAINTENANCE_CMDS */
-
 
 static void build_gdbtypes PARAMS ((void));
 static void

@@ -1520,11 +1520,11 @@ _BRA,01110,00,6.CR,6.RB,6.ID:BRA:short:mu:MVTSYS
 	  else
 	    {
 	      unsigned32 value = Rb;
+	      CPU->mvtsys_left_p = 1;
 	      if (CR == processor_status_word_cr)
 		{
 		  unsigned32 ds = PSW & BIT32 (PSW_DS);	/* preserve ds */
 		  value = ds | (value & PSW_VALID);
-		  CPU->left_kills_right_p = 1;
 		}
 	      else if (CR == backup_processor_status_word_cr
 		       || CR == debug_backup_processor_status_word_cr)
@@ -1537,19 +1537,16 @@ _BRA,01110,00,6.CR,6.RB,6.ID:BRA:short:mu:MVTSYS
 	case 1:			/* PSWL */
 	  WRITE32_QUEUE_MASK (&PSW, EXTRACTED32(Rb, 16, 31),
 			      PSW_VALID & 0x0000ffff);
-	  CPU->left_kills_right_p = 1;
 	  break;
 	case 2:			/* PSWH */
 	  {
 	    unsigned32 ds = PSW & BIT32 (PSW_DS);	/* preserve ds */
 	    WRITE32_QUEUE_MASK (&PSW, (EXTRACTED32(Rb, 16, 31) << 16) | ds,
 				(PSW_VALID | ds) & 0xffff0000);
-	    CPU->left_kills_right_p = 1;
 	  }
 	  break;
 	case 3:			/* FLAG */
 	  PSW_FLAG_SET_QUEUE(CR, Rb & 1);
-	  CPU->left_kills_right_p = 1;
 	  break;
 	default:
 	  sim_engine_abort (SD, CPU, cia, "FIXME - illegal ID");
@@ -1745,7 +1742,7 @@ void::function::do_sath:signed32 *ra, signed32 rb, signed32 src, int high, int u
 	if (updates_f4)
 	  {
 	    /* if MU instruction was a MVTSYS (lkr), unqueue register writes now */
-	    if(STATE_CPU (sd, 0)->left_kills_right_p)
+	    if(STATE_CPU (sd, 0)->mvtsys_left_p)
 	      unqueue_writes (sd, STATE_CPU (sd, 0), cia);
 	    PSW_FLAG_SET_QUEUE(PSW_S_FLAG, PSW_FLAG_VAL(PSW_S_FLAG) ^ (value & 1));
 	  }

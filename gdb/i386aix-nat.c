@@ -253,7 +253,6 @@ store_register (regno)
      int regno;
 {
   char buf[80];
-  extern char registers[];
   errno = 0;
   if (regno < FP0_REGNUM)
     ptrace (PT_WRITE_GPR, inferior_pid, PT_REG(regmap[regno]),

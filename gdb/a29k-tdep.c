@@ -510,7 +510,7 @@ init_extra_frame_info (frame)
        but there isn't any way to tell the difference.  */
     init_frame_info (1, frame);
   else {
-      /* We're in get_prev_frame_info.
+      /* We're in get_prev_frame.
          Take care of everything in init_frame_pc.  */
       ;
     }
@@ -668,7 +668,7 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
    The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
+a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
      char *raw_buffer;
      int *optimized;
      CORE_ADDR *addrp;

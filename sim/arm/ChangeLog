@@ -1,3 +1,25 @@
+1999-04-06  Keith Seitz  <keiths@cygnus.com>
+
+	* wrapper.c (stop_simulator): New global.
+	(sim_stop): Set sim state to STOP and set
+	stop_simulator.
+	(sim_resume): Reset stop_simulator.
+	(sim_stop_reason): If stop_simulator is set, tell gdb
+	that the we took SIGINT.
+	* armemu.c (ARMul_Emulate26): Don't loop forever. Stop if
+	stop_simulator is set.
+
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): If NEED_UI_LOOP_HOOK, call ui_loop_hook
+	whenever the counter expires.
+	* Makefile.in (SIM_EXTRA_CFLAGS): Include define NEED_UI_LOOP_HOOK.
+
+1999-03-24  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): Handle new breakpoint value.
+	* thumbemu.c (ARMul_ThumbDecode): Handle new breakpoint value.
+
 Mon Sep 14 09:00:05 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* wrapper.c (sim_open): Set endianness according to BFD or command

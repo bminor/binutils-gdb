@@ -750,6 +750,7 @@ sim_store_register (sd,rn,memory,length)
 
   if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
     {
+      cpu->fpr_state[rn - FGRIDX] = fmt_uninterpreted;
       if (cpu->register_widths[rn] == 32)
 	{
 	  cpu->fgr[rn - FGRIDX] = T2H_4 (*(unsigned32*)memory);

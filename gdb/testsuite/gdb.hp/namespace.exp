@@ -31,13 +31,10 @@ if $tracelevel then {
         strace $tracelevel
         }
 
-
-#
-# test running programs
-#
-
 set prms_id 0
 set bug_id 0
+
+if { [skip_hp_tests] } then { continue }
 
 set testfile "namespace"
 set srcfile ${testfile}.cc
@@ -46,9 +43,8 @@ set binfile ${objdir}/${subdir}/${testfile}
 if [get_compiler_info ${binfile}] {
     return -1;
 }
- 
- 
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+
+if { $gcc_compiled } then { continue }
 
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {

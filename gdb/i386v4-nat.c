@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "value.h"
+#include "inferior.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -127,7 +128,6 @@ fill_gregset (gregsetp, regno)
 {
   int regi;
   register greg_t *regp = (greg_t *) gregsetp;
-  extern char registers[];
   extern int regmap[];
 
   for (regi = 0 ; regi < (NUM_REGS - NUM_FREGS) ; regi++)

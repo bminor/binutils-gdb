@@ -177,7 +177,7 @@ extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR));
 extern void mn10200_pop_frame PARAMS ((struct frame_info *));
 #define POP_FRAME mn10200_pop_frame (get_current_frame ())
 
-#define USE_GENERIC_DUMMY_FRAMES
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -196,7 +196,7 @@ mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 
 #define REG_STRUCT_HAS_ADDR(gcc_p,TYPE) \
   	(TYPE_LENGTH (TYPE) > 8)
@@ -206,7 +206,8 @@ extern use_struct_convention_fn mn10200_use_struct_convention;
 
 /* Override the default get_saved_register function with
    one that takes account of generic CALL_DUMMY frames.  */
-#define GET_SAVED_REGISTER
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Define this for Wingdb */
 #define TARGET_MN10200

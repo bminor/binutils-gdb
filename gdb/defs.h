@@ -1,5 +1,5 @@
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986, 89, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright (C) 1986, 89, 91, 92, 93, 94, 95, 96, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -252,6 +252,8 @@ extern void notice_quit PARAMS ((void));
 
 extern int strcmp_iw PARAMS ((const char *, const char *));
 
+extern int subset_compare PARAMS ((char *, char *));
+
 extern char *safe_strerror PARAMS ((int));
 
 extern char *safe_strsignal PARAMS ((int));
@@ -272,6 +274,8 @@ extern void discard_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 typedef void (*make_cleanup_func) PARAMS ((void *));
 
 extern struct cleanup *make_cleanup PARAMS ((make_cleanup_func, void *));
+
+extern struct cleanup *make_cleanup_freeargv PARAMS ((char **));
 
 extern struct cleanup *make_final_cleanup PARAMS ((make_cleanup_func, void *));
 
@@ -1019,24 +1023,7 @@ extern CORE_ADDR push_bytes PARAMS ((CORE_ADDR, char *, int));
 
 extern CORE_ADDR push_word PARAMS ((CORE_ADDR, ULONGEST));
 
-/* Some parts of gdb might be considered optional, in the sense that they
-   are not essential for being able to build a working, usable debugger
-   for a specific environment.  For example, the maintenance commands
-   are there for the benefit of gdb maintainers.  As another example,
-   some environments really don't need gdb's that are able to read N
-   different object file formats.  In order to make it possible (but
-   not necessarily recommended) to build "stripped down" versions of
-   gdb, the following defines control selective compilation of those
-   parts of gdb which can be safely left out when necessary.  Note that
-   the default is to include everything. */
-
-#ifndef MAINTENANCE_CMDS
-#define MAINTENANCE_CMDS 1
-#endif
-
-#ifdef MAINTENANCE_CMDS
 extern int watchdog;
-#endif
 
 /* Hooks for alternate command interfaces.  */
 

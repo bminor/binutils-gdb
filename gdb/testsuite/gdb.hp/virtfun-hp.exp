@@ -25,6 +25,8 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+if { [skip_hp_tests] } then { continue }
+
 set testfile "virtfun-hp"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
@@ -32,9 +34,8 @@ set binfile ${objdir}/${subdir}/${testfile}
 if [get_compiler_info ${binfile} "c++"] {
     return -1;
 }
- 
- 
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+
+if { $gcc_compiled } then { continue }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."

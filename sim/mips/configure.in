@@ -32,6 +32,7 @@ mips_endian=
 default_endian=
 case "${target}" in
   mips64el*-*-*)	mips_endian=LITTLE_ENDIAN ;;
+  mips64vr*el-*-*)      default_endian=LITTLE_ENDIAN ;;
   mips64*-*-*)          default_endian=BIG_ENDIAN ;;
   mips16*-*-*)          default_endian=BIG_ENDIAN ;;
   mips*-*-*)            default_endian=BIG_ENDIAN ;;

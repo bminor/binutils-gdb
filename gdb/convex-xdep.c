@@ -123,9 +123,6 @@ static struct user u;
 static thread_t th;
 static proc_t pr;
 
-/* The registers of the currently selected thread.  */
-
-extern char registers[REGISTER_BYTES];
 
 /* Vector and communication registers from core dump or from inferior.
    These are read on demand, ie, not normally valid.  */

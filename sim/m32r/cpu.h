@@ -46,20 +46,29 @@ typedef struct {
 #define SET_H_GR(a1, x) (CPU (h_gr)[a1] = (x))
   /* control registers */
   USI h_cr[16];
-/* GET_H_CR macro user-written */
-/* SET_H_CR macro user-written */
+#define GET_H_CR(index) m32rbf_h_cr_get_handler (current_cpu, index)
+#define SET_H_CR(index, x) \
+do { \
+m32rbf_h_cr_set_handler (current_cpu, (index), (x));\
+} while (0)
   /* accumulator */
   DI h_accum;
-/* GET_H_ACCUM macro user-written */
-/* SET_H_ACCUM macro user-written */
+#define GET_H_ACCUM() m32rbf_h_accum_get_handler (current_cpu)
+#define SET_H_ACCUM(x) \
+do { \
+m32rbf_h_accum_set_handler (current_cpu, (x));\
+} while (0)
   /* condition bit */
   BI h_cond;
 #define GET_H_COND() CPU (h_cond)
 #define SET_H_COND(x) (CPU (h_cond) = (x))
   /* psw part of psw */
   UQI h_psw;
-/* GET_H_PSW macro user-written */
-/* SET_H_PSW macro user-written */
+#define GET_H_PSW() m32rbf_h_psw_get_handler (current_cpu)
+#define SET_H_PSW(x) \
+do { \
+m32rbf_h_psw_set_handler (current_cpu, (x));\
+} while (0)
   /* backup psw */
   UQI h_bpsw;
 #define GET_H_BPSW() CPU (h_bpsw)
@@ -85,8 +94,6 @@ USI m32rbf_h_cr_get (SIM_CPU *, UINT);
 void m32rbf_h_cr_set (SIM_CPU *, UINT, USI);
 DI m32rbf_h_accum_get (SIM_CPU *);
 void m32rbf_h_accum_set (SIM_CPU *, DI);
-DI m32rbf_h_accums_get (SIM_CPU *, UINT);
-void m32rbf_h_accums_set (SIM_CPU *, UINT, DI);
 BI m32rbf_h_cond_get (SIM_CPU *);
 void m32rbf_h_cond_set (SIM_CPU *, BI);
 UQI m32rbf_h_psw_get (SIM_CPU *);

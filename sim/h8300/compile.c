@@ -74,6 +74,10 @@ void sim_set_simcache_size PARAMS ((int));
 
 #include "inst.h"
 
+/* The rate at which to call the host's poll_quit callback. */
+
+#define POLL_QUIT_INTERVAL 0x80000
+
 #define LOW_BYTE(x) ((x) & 0xff)
 #define HIGH_BYTE(x) (((x)>>8) & 0xff)
 #define P(X,Y) ((X<<8) | Y)
@@ -1726,7 +1730,7 @@ sim_resume (sd, step, siggnal)
 
       if (--poll_count < 0)
 	{
-	  poll_count = 100;
+	  poll_count = POLL_QUIT_INTERVAL;
 	  if ((*sim_callback->poll_quit) != NULL
 	      && (*sim_callback->poll_quit) (sim_callback))
 	    sim_stop (sd);

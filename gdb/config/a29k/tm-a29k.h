@@ -429,7 +429,7 @@ long read_register_stack_integer ();
 
 /* Because INIT_FRAME_PC gets passed fromleaf, that's where we init
    not only ->pc and ->frame, but all the extra stuff, when called from
-   get_prev_frame_info, that is.  */
+   get_prev_frame, that is.  */
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  init_extra_frame_info(fci)
 void init_extra_frame_info ();
 
@@ -506,7 +506,13 @@ extern CORE_ADDR frame_locals_address ();
 /* Provide our own get_saved_register.  HAVE_REGISTER_WINDOWS is insufficient
    because registers get renumbered on the a29k without getting saved.  */
 
-#define GET_SAVED_REGISTER
+#ifdef __STDC__
+enum lval_type;
+struct frame_info;
+#endif
+void a29k_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lvalp));
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+      a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Call function stuff.  */
 

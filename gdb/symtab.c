@@ -2852,6 +2852,14 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
       while (*p == ' ' || *p == '\t') p++;
       *argptr = p;
     }
+#if 0
+  /* No one really seems to know why this was added. It certainly
+     breaks the command line, though, whenever the passed
+     name is of the form ClassName::Method. This bit of code
+     singles out the class name, and if funfirstline is set (for
+     example, you are setting a breakpoint at this function),
+     you get an error. This did not occur with earlier
+     verions, so I am ifdef'ing this out. 3/29/99 */
   else {
     /* Check if what we have till now is a symbol name */
 
@@ -2880,6 +2888,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
     /* Otherwise fall out from here and go to file/line spec
        processing, etc. */ 
   }
+#endif
 
   /* S is specified file's symtab, or 0 if no file specified.
      arg no longer contains the file name.  */
@@ -4374,6 +4383,16 @@ make_symbol_overload_list (fsym)
   sym_return_val = (struct symbol **) xmalloc ((sym_return_val_size + 1) * sizeof (struct symbol *));
   sym_return_val[0] = NULL;
 
+  /* Comment and #if 0 from Rajiv Mirani <mirani@cup.hp.com>.
+     However, leaving #if 0's around is uncool.  We need to figure out
+     what this is really trying to do, decide whether we want that,
+     and either fix it or delete it.  --- Jim Blandy, Mar 1999 */
+
+  /* ??? RM: What in hell is this? overload_list_add_symbol expects a symbol,
+   * not a partial_symbol or a minimal_symbol. And it looks at the type field
+   * of the symbol, and we don't know the type of minimal and partial symbols
+   */
+#if 0
   /* Look through the partial symtabs for all symbols which begin
      by matching OLOAD_NAME.  Add each one that you find to the list.  */
 
@@ -4413,6 +4432,7 @@ make_symbol_overload_list (fsym)
       QUIT;
       overload_list_add_symbol (msymbol, oload_name);
     }
+#endif
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */

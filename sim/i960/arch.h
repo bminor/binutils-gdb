@@ -27,14 +27,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define TARGET_BIG_ENDIAN 1
 
-/* Cover fns for register access.  */
-USI a_i960_h_pc_get (SIM_CPU *);
-void a_i960_h_pc_set (SIM_CPU *, USI);
-SI a_i960_h_gr_get (SIM_CPU *, UINT);
-void a_i960_h_gr_set (SIM_CPU *, UINT, SI);
-SI a_i960_h_cc_get (SIM_CPU *);
-void a_i960_h_cc_set (SIM_CPU *, SI);
-
 /* Enum declaration for model types.  */
 typedef enum model_type {
   MODEL_I960KA, MODEL_I960CA, MODEL_MAX

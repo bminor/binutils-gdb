@@ -927,6 +927,7 @@ e7000_fetch_registers ()
       {
       case bfd_mach_sh3:
       case bfd_mach_sh3e:
+      case bfd_mach_sh4:
 	wanted = want_sh3;
       }
 #else
@@ -2079,6 +2080,7 @@ e7000_wait (pid, status)
       {
       case bfd_mach_sh3:
       case bfd_mach_sh3e:
+      case bfd_mach_sh4:
 	wanted_nopc = want_sh3_nopc;
       }
 #else

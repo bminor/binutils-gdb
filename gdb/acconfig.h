@@ -88,6 +88,9 @@
    name, as a C string.  */
 #undef TARGET_CPU_DEFAULT
 
+/* Define if the simulator is being linked in.  */
+#undef WITH_SIM
+
 /* Set to true if the save_state_t structure is present */
 #define HAVE_STRUCT_SAVE_STATE_T 0
 

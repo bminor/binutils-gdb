@@ -50,21 +50,27 @@ typedef struct {
 #define SET_H_CR(a1, x) (CPU (h_cr)[a1] = (x))
   /* dedicated registers */
   SI h_dr[6];
-/* GET_H_DR macro user-written */
-/* SET_H_DR macro user-written */
-  /* program status */
+#define GET_H_DR(index) fr30bf_h_dr_get_handler (current_cpu, index)
+#define SET_H_DR(index, x) \
+do { \
+fr30bf_h_dr_set_handler (current_cpu, (index), (x));\
+} while (0)
+  /* processor status */
   USI h_ps;
-/* GET_H_PS macro user-written */
-/* SET_H_PS macro user-written */
-  /* General Register 13 explicitely required */
+#define GET_H_PS() fr30bf_h_ps_get_handler (current_cpu)
+#define SET_H_PS(x) \
+do { \
+fr30bf_h_ps_set_handler (current_cpu, (x));\
+} while (0)
+  /* General Register 13 explicitly required */
   SI h_r13;
 #define GET_H_R13() CPU (h_r13)
 #define SET_H_R13(x) (CPU (h_r13) = (x))
-  /* General Register 14 explicitely required */
+  /* General Register 14 explicitly required */
   SI h_r14;
 #define GET_H_R14() CPU (h_r14)
 #define SET_H_R14(x) (CPU (h_r14) = (x))
-  /* General Register 15 explicitely required */
+  /* General Register 15 explicitly required */
   SI h_r15;
 #define GET_H_R15() CPU (h_r15)
 #define SET_H_R15(x) (CPU (h_r15) = (x))
@@ -88,10 +94,13 @@ typedef struct {
   BI h_ibit;
 #define GET_H_IBIT() CPU (h_ibit)
 #define SET_H_IBIT(x) (CPU (h_ibit) = (x))
-  /* stack            bit */
+  /* stack bit */
   BI h_sbit;
-/* GET_H_SBIT macro user-written */
-/* SET_H_SBIT macro user-written */
+#define GET_H_SBIT() fr30bf_h_sbit_get_handler (current_cpu)
+#define SET_H_SBIT(x) \
+do { \
+fr30bf_h_sbit_set_handler (current_cpu, (x));\
+} while (0)
   /* trace trap       bit */
   BI h_tbit;
 #define GET_H_TBIT() CPU (h_tbit)
@@ -104,18 +113,27 @@ typedef struct {
   BI h_d1bit;
 #define GET_H_D1BIT() CPU (h_d1bit)
 #define SET_H_D1BIT(x) (CPU (h_d1bit) = (x))
-  /* condition code   bits */
+  /* condition code bits */
   UQI h_ccr;
-/* GET_H_CCR macro user-written */
-/* SET_H_CCR macro user-written */
+#define GET_H_CCR() fr30bf_h_ccr_get_handler (current_cpu)
+#define SET_H_CCR(x) \
+do { \
+fr30bf_h_ccr_set_handler (current_cpu, (x));\
+} while (0)
   /* system condition bits */
   UQI h_scr;
-/* GET_H_SCR macro user-written */
-/* SET_H_SCR macro user-written */
-  /* interrupt level  mask */
+#define GET_H_SCR() fr30bf_h_scr_get_handler (current_cpu)
+#define SET_H_SCR(x) \
+do { \
+fr30bf_h_scr_set_handler (current_cpu, (x));\
+} while (0)
+  /* interrupt level mask */
   UQI h_ilm;
-/* GET_H_ILM macro user-written */
-/* SET_H_ILM macro user-written */
+#define GET_H_ILM() fr30bf_h_ilm_get_handler (current_cpu)
+#define SET_H_ILM(x) \
+do { \
+fr30bf_h_ilm_set_handler (current_cpu, (x));\
+} while (0)
   } hardware;
 #define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
 } FR30BF_CPU_DATA;
@@ -918,9 +936,9 @@ struct scache {
   f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
   f_i20_4 = EXTRACT_UINT (insn, 16, 8, 4); \
   f_i20_16 = (0|(EXTRACT_UINT (word_1, 16, 0, 16) << 0)); \
-do {\
+{\
   f_i20 = ((((f_i20_4) << (16))) | (f_i20_16));\
-} while (0);\
+}\
   f_op2 = EXTRACT_UINT (insn, 16, 4, 4); \
   f_Ri = EXTRACT_UINT (insn, 16, 12, 4); \
 
@@ -933,12 +951,14 @@ do {\
   UINT f_Ri; \
   /* Contents of trailing part of insn.  */ \
   UINT word_1; \
+  UINT word_2; \
   unsigned int length;
 #define EXTRACT_IFMT_LDI32_CODE \
   length = 6; \
-  word_1 = GETIMEMUSI (current_cpu, pc + 2); \
+  word_1 = GETIMEMUHI (current_cpu, pc + 2); \
+  word_2 = GETIMEMUHI (current_cpu, pc + 4); \
   f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
-  f_i32 = (0|(EXTRACT_UINT (word_1, 32, 0, 32) << 0)); \
+  f_i32 = (0|(EXTRACT_UINT (word_2, 16, 0, 16) << 0)|(EXTRACT_UINT (word_1, 16, 0, 16) << 16)); \
   f_op2 = EXTRACT_UINT (insn, 16, 4, 4); \
   f_op3 = EXTRACT_UINT (insn, 16, 8, 4); \
   f_Ri = EXTRACT_UINT (insn, 16, 12, 4); \

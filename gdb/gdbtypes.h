@@ -1112,10 +1112,7 @@ rank_function PARAMS ((struct type **, int, struct type **, int));
 extern int
 rank_one_type PARAMS ((struct type *, struct type *));
 
-
-#if MAINTENANCE_CMDS
 extern void recursive_dump_type PARAMS ((struct type *, int));
-#endif
 
 /* printcmd.c */
 
@@ -1124,9 +1121,7 @@ print_scalar_formatted PARAMS ((char *, struct type *, int, int, GDB_FILE *));
 
 extern int can_dereference PARAMS ((struct type *));
 
-#if MAINTENANCE_CMDS
 extern void maintenance_print_type PARAMS ((char *, int));
-#endif
 
 /* typeprint.c */
 

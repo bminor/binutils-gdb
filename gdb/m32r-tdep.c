@@ -265,25 +265,25 @@ static void decode_prologue (start_pc, scan_limit,
   if (current_pc >= scan_limit)
     {
       if (pl_endptr) 
+	{
 #if 1
-	if (after_stack_adjust != 0)
-	  /* We did not find a "mv fp,sp", but we DID find
-	     a stack_adjust.  Is it safe to use that as the
-	     end of the prologue?  I just don't know. */
-	  {
-	    *pl_endptr = after_stack_adjust;
-	    if (framelength)
-	      *framelength = framesize;
-	  }
-	else
+	  if (after_stack_adjust != 0)
+	    /* We did not find a "mv fp,sp", but we DID find
+	       a stack_adjust.  Is it safe to use that as the
+	       end of the prologue?  I just don't know. */
+	    {
+	      *pl_endptr = after_stack_adjust;
+	      if (framelength)
+		*framelength = framesize;
+	    }
+	  else
 #endif
-      /* We reached the end of the loop without finding the end
-	 of the prologue.  No way to win -- we should report failure.  
-	 The way we do that is to return the original start_pc.
-	 GDB will set a breakpoint at the start of the function (etc.) */
-
-	*pl_endptr = start_pc;
-	
+	    /* We reached the end of the loop without finding the end
+	       of the prologue.  No way to win -- we should report failure.  
+	       The way we do that is to return the original start_pc.
+	       GDB will set a breakpoint at the start of the function (etc.) */
+	    *pl_endptr = start_pc;
+	}	
       return;
     }
   if (after_prologue == 0) 
@@ -701,22 +701,6 @@ m32r_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 {
   /* ld24 r8, <(imm24) fun> */
   *(unsigned long *) (dummy) = (fun & 0x00ffffff) | 0xe8000000;
-}
-
-/* Function: get_saved_register
-   Just call the generic_get_saved_register function.  */
-
-void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-     char *raw_buffer;
-     int *optimized;
-     CORE_ADDR *addrp;
-     struct frame_info *frame;
-     int regnum;
-     enum lval_type *lval;
-{
-  generic_get_saved_register (raw_buffer, optimized, addrp, 
-			      frame, regnum, lval);
 }
 
 

@@ -205,6 +205,6 @@ gdb_test "continue" \
     "Continuing.*Program received signal SIGTERM.*" \
     "get signal TERM"
 gdb_test "continue" "Breakpoint.*handle_TERM.*" "send signal TERM"
-gdb_test "continue" "Program exited normally\\." "continue to sigall exit"
+gdb_continue_to_end "continue to sigall exit"
 
 return 0

@@ -41,26 +41,19 @@ extern int m32r_decode_gdb_ctrl_regnum (int);
    FIXME: Eventually move to cgen.  */
 #define GET_H_SM() ((CPU (h_psw) & 0x80) != 0)
 
+extern SI a_m32r_h_gr_get (SIM_CPU *, UINT);
+extern void a_m32r_h_gr_set (SIM_CPU *, UINT, SI);
+extern USI a_m32r_h_cr_get (SIM_CPU *, UINT);
+extern void a_m32r_h_cr_set (SIM_CPU *, UINT, USI);
+
 extern USI m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
 extern void m32rbf_h_cr_set_handler (SIM_CPU *, UINT, USI);
-#define GET_H_CR(regno) \
-  XCONCAT2 (WANT_CPU,_h_cr_get_handler) (current_cpu, (regno))
-#define SET_H_CR(regno, val) \
-  XCONCAT2 (WANT_CPU,_h_cr_set_handler) (current_cpu, (regno), (val))
 
 extern UQI m32rbf_h_psw_get_handler (SIM_CPU *);
 extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
-#define GET_H_PSW() \
-  XCONCAT2 (WANT_CPU,_h_psw_get_handler) (current_cpu)
-#define SET_H_PSW(val) \
-  XCONCAT2 (WANT_CPU,_h_psw_set_handler) (current_cpu, (val))
 
 extern DI m32rbf_h_accum_get_handler (SIM_CPU *);
 extern void m32rbf_h_accum_set_handler (SIM_CPU *, DI);
-#define GET_H_ACCUM() \
-  XCONCAT2 (WANT_CPU,_h_accum_get_handler) (current_cpu)
-#define SET_H_ACCUM(val) \
-  XCONCAT2 (WANT_CPU,_h_accum_set_handler) (current_cpu, (val))
 
 
 /* Misc. profile data.  */
@@ -189,7 +182,7 @@ do { \
 
 /* Start address and length of all device support.  */
 #define M32R_DEVICE_ADDR	0xff000000
-#define M32R_DEVICE_LEN		0x00ffffff
+#define M32R_DEVICE_LEN		0x01000000
 
 /* sim_core_attach device argument.  */
 extern device m32r_devices;

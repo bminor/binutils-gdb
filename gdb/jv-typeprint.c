@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "jv-lang.h"
 #include "gdb_string.h"
 #include "typeprint.h"
+#include "c-lang.h"
 
 static void
 java_type_print_derivation_info (stream, type)
@@ -147,10 +148,12 @@ java_type_print_base (type, stream, show, level)
 	  
 	  fprintf_filtered (stream, "{\n");
 	  if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
-	    if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
-	      fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
-	    else
-	      fprintfi_filtered (level + 4, stream, "<no data fields>\n");
+	    {
+	      if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+		fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
+	      else
+		fprintfi_filtered (level + 4, stream, "<no data fields>\n");
+	    }
 
 	  /* If there is a base class for this type,
 	     do not print the field that it occupies.  */
@@ -171,12 +174,14 @@ java_type_print_base (type, stream, show, level)
 	      print_spaces_filtered (level + 4, stream);
 
 	      if (HAVE_CPLUS_STRUCT (type))
-		if (TYPE_FIELD_PROTECTED (type, i))
-		  fprintf_filtered (stream, "protected ");
-		else if (TYPE_FIELD_PRIVATE (type, i))
-		  fprintf_filtered (stream, "private ");
-		else
-		  fprintf_filtered (stream, "public ");
+		{
+		  if (TYPE_FIELD_PROTECTED (type, i))
+		    fprintf_filtered (stream, "protected ");
+		  else if (TYPE_FIELD_PRIVATE (type, i))
+		    fprintf_filtered (stream, "private ");
+		  else
+		    fprintf_filtered (stream, "public ");
+		}
 
 	      if (TYPE_FIELD_STATIC (type, i))
 		fprintf_filtered (stream, "static ");
@@ -312,6 +317,9 @@ java_type_print_base (type, stream, show, level)
 }
 
 /* LEVEL is the depth to indent lines by.  */
+
+extern void
+c_type_print_varspec_suffix PARAMS ((struct type *, GDB_FILE *, int, int, int));
 
 void
 java_print_type (type, varstring, stream, show, level)

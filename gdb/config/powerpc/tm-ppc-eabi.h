@@ -46,8 +46,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* FIXME: This just checks for the end of the stack, which is broken
    for things like stepping through gcc nested function stubs.  */
 #undef PC_IN_CALL_DUMMY
-#define	PC_IN_CALL_DUMMY(STOP_PC, STOP_SP, STOP_FRAME_ADDR)	\
-	(STOP_SP < STOP_PC)
 
 /* generic dummy frame stuff */
 
@@ -71,9 +69,10 @@ extern CORE_ADDR rs6000_push_arguments PARAMS ((int nargs,
 
 /* override the standard get_saved_register function with 
    one that takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
-#define USE_GENERIC_DUMMY_FRAMES
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()

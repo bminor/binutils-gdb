@@ -46,17 +46,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FAST(fn)
 #endif
 
+/* The INSN_ prefix is not here and is instead part of the `insn' argument
+   to avoid collisions with header files (e.g. `AND' in ansidecl.h).  */
+#define IDX(insn) CONCAT2 (I960BASE_,insn)
+#define TYPE(insn) CONCAT2 (I960_,insn)
+
 /* The instruction descriptor array.
    This is computed at runtime.  Space for it is not malloc'd to save a
    teensy bit of cpu in the decoder.  Moving it to malloc space is trivial
    but won't be done until necessary (we don't currently support the runtime
    addition of instructions nor an SMP machine with different cpus).  */
 static IDESC i960base_insn_data[I960BASE_INSN_MAX];
-
-/* The INSN_ prefix is not here and is instead part of the `insn' argument
-   to avoid collisions with header files (e.g. `AND' in ansidecl.h).  */
-#define IDX(insn) CONCAT2 (I960BASE_,insn)
-#define TYPE(insn) CONCAT2 (I960_,insn)
 
 /* Commas between elements are contained in the macros.
    Some of these are conditionally compiled out.  */
@@ -129,10 +129,18 @@ static const struct insn_sem i960base_insn_sem[] =
   { TYPE (INSN_NOR1), IDX (INSN_NOR1), FULL (nor1) FAST (nor1) },
   { TYPE (INSN_NOR2), IDX (INSN_NOR2), FULL (nor2) FAST (nor2) },
   { TYPE (INSN_NOR3), IDX (INSN_NOR3), FULL (nor3) FAST (nor3) },
+  { TYPE (INSN_XNOR), IDX (INSN_XNOR), FULL (xnor) FAST (xnor) },
+  { TYPE (INSN_XNOR1), IDX (INSN_XNOR1), FULL (xnor1) FAST (xnor1) },
+  { TYPE (INSN_XNOR2), IDX (INSN_XNOR2), FULL (xnor2) FAST (xnor2) },
+  { TYPE (INSN_XNOR3), IDX (INSN_XNOR3), FULL (xnor3) FAST (xnor3) },
   { TYPE (INSN_NOT), IDX (INSN_NOT), FULL (not) FAST (not) },
   { TYPE (INSN_NOT1), IDX (INSN_NOT1), FULL (not1) FAST (not1) },
   { TYPE (INSN_NOT2), IDX (INSN_NOT2), FULL (not2) FAST (not2) },
   { TYPE (INSN_NOT3), IDX (INSN_NOT3), FULL (not3) FAST (not3) },
+  { TYPE (INSN_ORNOT), IDX (INSN_ORNOT), FULL (ornot) FAST (ornot) },
+  { TYPE (INSN_ORNOT1), IDX (INSN_ORNOT1), FULL (ornot1) FAST (ornot1) },
+  { TYPE (INSN_ORNOT2), IDX (INSN_ORNOT2), FULL (ornot2) FAST (ornot2) },
+  { TYPE (INSN_ORNOT3), IDX (INSN_ORNOT3), FULL (ornot3) FAST (ornot3) },
   { TYPE (INSN_CLRBIT), IDX (INSN_CLRBIT), FULL (clrbit) FAST (clrbit) },
   { TYPE (INSN_CLRBIT1), IDX (INSN_CLRBIT1), FULL (clrbit1) FAST (clrbit1) },
   { TYPE (INSN_CLRBIT2), IDX (INSN_CLRBIT2), FULL (clrbit2) FAST (clrbit2) },
@@ -359,6 +367,9 @@ static const struct insn_sem i960base_insn_sem_invalid =
   VIRTUAL_INSN_X_INVALID, IDX (INSN_X_INVALID), FULL (x_invalid) FAST (x_invalid)
 };
 
+#undef FMT
+#undef FULL
+#undef FAST
 #undef IDX
 #undef TYPE
 
@@ -420,80 +431,6 @@ i960base_init_idesc_table (SIM_CPU *cpu)
   CPU_IDESC (cpu) = table;
 }
 
-/* Enum declaration for all instruction semantic formats.  */
-typedef enum sfmt {
-  FMT_EMPTY, FMT_MULO, FMT_MULO1, FMT_MULO2
- , FMT_MULO3, FMT_NOTBIT, FMT_NOTBIT1, FMT_NOTBIT2
- , FMT_NOTBIT3, FMT_NOT, FMT_NOT1, FMT_NOT2
- , FMT_NOT3, FMT_EMUL, FMT_EMUL1, FMT_EMUL2
- , FMT_EMUL3, FMT_MOVL, FMT_MOVL1, FMT_MOVT
- , FMT_MOVT1, FMT_MOVQ, FMT_MOVQ1, FMT_MODPC
- , FMT_LDA_OFFSET, FMT_LDA_INDIRECT_OFFSET, FMT_LDA_INDIRECT, FMT_LDA_INDIRECT_INDEX
- , FMT_LDA_DISP, FMT_LDA_INDIRECT_DISP, FMT_LDA_INDEX_DISP, FMT_LDA_INDIRECT_INDEX_DISP
- , FMT_LD_OFFSET, FMT_LD_INDIRECT_OFFSET, FMT_LD_INDIRECT, FMT_LD_INDIRECT_INDEX
- , FMT_LD_DISP, FMT_LD_INDIRECT_DISP, FMT_LD_INDEX_DISP, FMT_LD_INDIRECT_INDEX_DISP
- , FMT_LDOB_OFFSET, FMT_LDOB_INDIRECT_OFFSET, FMT_LDOB_INDIRECT, FMT_LDOB_INDIRECT_INDEX
- , FMT_LDOB_DISP, FMT_LDOB_INDIRECT_DISP, FMT_LDOB_INDEX_DISP, FMT_LDOB_INDIRECT_INDEX_DISP
- , FMT_LDOS_OFFSET, FMT_LDOS_INDIRECT_OFFSET, FMT_LDOS_INDIRECT, FMT_LDOS_INDIRECT_INDEX
- , FMT_LDOS_DISP, FMT_LDOS_INDIRECT_DISP, FMT_LDOS_INDEX_DISP, FMT_LDOS_INDIRECT_INDEX_DISP
- , FMT_LDIB_OFFSET, FMT_LDIB_INDIRECT_OFFSET, FMT_LDIB_INDIRECT, FMT_LDIB_INDIRECT_INDEX
- , FMT_LDIB_DISP, FMT_LDIB_INDIRECT_DISP, FMT_LDIB_INDEX_DISP, FMT_LDIB_INDIRECT_INDEX_DISP
- , FMT_LDIS_OFFSET, FMT_LDIS_INDIRECT_OFFSET, FMT_LDIS_INDIRECT, FMT_LDIS_INDIRECT_INDEX
- , FMT_LDIS_DISP, FMT_LDIS_INDIRECT_DISP, FMT_LDIS_INDEX_DISP, FMT_LDIS_INDIRECT_INDEX_DISP
- , FMT_LDL_OFFSET, FMT_LDL_INDIRECT_OFFSET, FMT_LDL_INDIRECT, FMT_LDL_INDIRECT_INDEX
- , FMT_LDL_DISP, FMT_LDL_INDIRECT_DISP, FMT_LDL_INDEX_DISP, FMT_LDL_INDIRECT_INDEX_DISP
- , FMT_LDT_OFFSET, FMT_LDT_INDIRECT_OFFSET, FMT_LDT_INDIRECT, FMT_LDT_INDIRECT_INDEX
- , FMT_LDT_DISP, FMT_LDT_INDIRECT_DISP, FMT_LDT_INDEX_DISP, FMT_LDT_INDIRECT_INDEX_DISP
- , FMT_LDQ_OFFSET, FMT_LDQ_INDIRECT_OFFSET, FMT_LDQ_INDIRECT, FMT_LDQ_INDIRECT_INDEX
- , FMT_LDQ_DISP, FMT_LDQ_INDIRECT_DISP, FMT_LDQ_INDEX_DISP, FMT_LDQ_INDIRECT_INDEX_DISP
- , FMT_ST_OFFSET, FMT_ST_INDIRECT_OFFSET, FMT_ST_INDIRECT, FMT_ST_INDIRECT_INDEX
- , FMT_ST_DISP, FMT_ST_INDIRECT_DISP, FMT_ST_INDEX_DISP, FMT_ST_INDIRECT_INDEX_DISP
- , FMT_STOB_OFFSET, FMT_STOB_INDIRECT_OFFSET, FMT_STOB_INDIRECT, FMT_STOB_INDIRECT_INDEX
- , FMT_STOB_DISP, FMT_STOB_INDIRECT_DISP, FMT_STOB_INDEX_DISP, FMT_STOB_INDIRECT_INDEX_DISP
- , FMT_STOS_OFFSET, FMT_STOS_INDIRECT_OFFSET, FMT_STOS_INDIRECT, FMT_STOS_INDIRECT_INDEX
- , FMT_STOS_DISP, FMT_STOS_INDIRECT_DISP, FMT_STOS_INDEX_DISP, FMT_STOS_INDIRECT_INDEX_DISP
- , FMT_STL_OFFSET, FMT_STL_INDIRECT_OFFSET, FMT_STL_INDIRECT, FMT_STL_INDIRECT_INDEX
- , FMT_STL_DISP, FMT_STL_INDIRECT_DISP, FMT_STL_INDEX_DISP, FMT_STL_INDIRECT_INDEX_DISP
- , FMT_STT_OFFSET, FMT_STT_INDIRECT_OFFSET, FMT_STT_INDIRECT, FMT_STT_INDIRECT_INDEX
- , FMT_STT_DISP, FMT_STT_INDIRECT_DISP, FMT_STT_INDEX_DISP, FMT_STT_INDIRECT_INDEX_DISP
- , FMT_STQ_OFFSET, FMT_STQ_INDIRECT_OFFSET, FMT_STQ_INDIRECT, FMT_STQ_INDIRECT_INDEX
- , FMT_STQ_DISP, FMT_STQ_INDIRECT_DISP, FMT_STQ_INDEX_DISP, FMT_STQ_INDIRECT_INDEX_DISP
- , FMT_CMPOBE_REG, FMT_CMPOBE_LIT, FMT_CMPOBL_REG, FMT_CMPOBL_LIT
- , FMT_BBC_REG, FMT_BBC_LIT, FMT_CMPI, FMT_CMPI1
- , FMT_CMPI2, FMT_CMPI3, FMT_CMPO, FMT_CMPO1
- , FMT_CMPO2, FMT_CMPO3, FMT_TESTNO_REG, FMT_BNO
- , FMT_B, FMT_BX_INDIRECT_OFFSET, FMT_BX_INDIRECT, FMT_BX_INDIRECT_INDEX
- , FMT_BX_DISP, FMT_BX_INDIRECT_DISP, FMT_CALLX_DISP, FMT_CALLX_INDIRECT
- , FMT_CALLX_INDIRECT_OFFSET, FMT_RET, FMT_CALLS, FMT_FMARK
- , FMT_FLUSHREG
-} SFMT;
-
-/* The decoder uses this to record insns and direct extraction handling.  */
-
-typedef struct {
-  const IDESC *idesc;
-#ifdef __GNUC__
-  void *sfmt;
-#else
-  enum sfmt sfmt;
-#endif
-} DECODE_DESC;
-
-/* Macro to go from decode phase to extraction phase.  */
-
-#ifdef __GNUC__
-#define GOTO_EXTRACT(id) goto *(id)->sfmt
-#else
-#define GOTO_EXTRACT(id) goto extract
-#endif
-
-/* The decoder needs a slightly different computed goto switch control.  */
-#ifdef __GNUC__
-#define DECODE_SWITCH(N, X) goto *labels_##N[X];
-#else
-#define DECODE_SWITCH(N, X) switch (X)
-#endif
-
 /* Given an instruction, return a pointer to its IDESC entry.  */
 
 const IDESC *
@@ -501,1409 +438,981 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
               CGEN_INSN_INT base_insn,
               ARGBUF *abuf)
 {
-  /* Result of decoder, used by extractor.  */
-  const DECODE_DESC *idecode;
-
-  /* First decode the instruction.  */
+  /* Result of decoder.  */
+  I960BASE_INSN_TYPE itype;
 
   {
-#define I(insn) & i960base_insn_data[CONCAT2 (I960BASE_,insn)]
-#ifdef __GNUC__
-#define E(fmt) && case_ex_##fmt
-#else
-#define E(fmt) fmt
-#endif
     CGEN_INSN_INT insn = base_insn;
-    static const DECODE_DESC idecode_invalid = { I (INSN_X_INVALID), E (FMT_EMPTY) };
 
     {
-#ifdef __GNUC__
-      static const void *labels_0[256] = {
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_48, && case_0_49, && case_0_50, && case_0_51, 
-        && case_0_52, && case_0_53, && case_0_54, && case_0_55, 
-        && default_0, && case_0_57, && case_0_58, && case_0_59, 
-        && case_0_60, && case_0_61, && case_0_62, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_88, && case_0_89, && case_0_90, && default_0, 
-        && case_0_92, && case_0_93, && case_0_94, && case_0_95, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && case_0_102, && case_0_103, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_112, && default_0, && default_0, && default_0, 
-        && case_0_116, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_128, && default_0, && case_0_130, && default_0, 
-        && case_0_132, && default_0, && case_0_134, && default_0, 
-        && case_0_136, && default_0, && case_0_138, && default_0, 
-        && case_0_140, && default_0, && default_0, && default_0, 
-        && case_0_144, && default_0, && case_0_146, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_152, && default_0, && case_0_154, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_160, && default_0, && case_0_162, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_176, && default_0, && case_0_178, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_192, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && case_0_200, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-      };
-#endif
-      static const DECODE_DESC insns[256] = {
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_B), E (FMT_B) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_RET), E (FMT_RET) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_BNO), E (FMT_BNO) }, { I (INSN_BG), E (FMT_BNO) }, 
-        { I (INSN_BE), E (FMT_BNO) }, { I (INSN_BGE), E (FMT_BNO) }, 
-        { I (INSN_BL), E (FMT_BNO) }, { I (INSN_BNE), E (FMT_BNO) }, 
-        { I (INSN_BLE), E (FMT_BNO) }, { I (INSN_BO), E (FMT_BNO) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_TESTNO_REG), E (FMT_TESTNO_REG) }, { I (INSN_TESTG_REG), E (FMT_TESTNO_REG) }, 
-        { I (INSN_TESTE_REG), E (FMT_TESTNO_REG) }, { I (INSN_TESTGE_REG), E (FMT_TESTNO_REG) }, 
-        { I (INSN_TESTL_REG), E (FMT_TESTNO_REG) }, { I (INSN_TESTNE_REG), E (FMT_TESTNO_REG) }, 
-        { I (INSN_TESTLE_REG), E (FMT_TESTNO_REG) }, { I (INSN_TESTO_REG), E (FMT_TESTNO_REG) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { 0 }, 
-        { 0 }, { 0 }, 
-        { 0 }, { 0 }, 
-        { 0 }, { 0 }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { 0 }, 
-        { 0 }, { 0 }, 
-        { 0 }, { 0 }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { 0 }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { 0 }, 
-        { 0 }, { 0 }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_MODAC), E (FMT_MODPC) }, { I (INSN_MODPC), E (FMT_MODPC) }, 
-        { 0 }, { 0 }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-      };
-      unsigned int val;
-      val = (((insn >> 24) & (255 << 0)));
-      DECODE_SWITCH (0, val)
+      unsigned int val = (((insn >> 24) & (255 << 0)));
+      switch (val)
+      {
+      case 8 : itype = I960BASE_INSN_B; goto extract_fmt_b;
+      case 10 : itype = I960BASE_INSN_RET; goto extract_fmt_ret;
+      case 16 : itype = I960BASE_INSN_BNO; goto extract_fmt_bno;
+      case 17 : itype = I960BASE_INSN_BG; goto extract_fmt_bno;
+      case 18 : itype = I960BASE_INSN_BE; goto extract_fmt_bno;
+      case 19 : itype = I960BASE_INSN_BGE; goto extract_fmt_bno;
+      case 20 : itype = I960BASE_INSN_BL; goto extract_fmt_bno;
+      case 21 : itype = I960BASE_INSN_BNE; goto extract_fmt_bno;
+      case 22 : itype = I960BASE_INSN_BLE; goto extract_fmt_bno;
+      case 23 : itype = I960BASE_INSN_BO; goto extract_fmt_bno;
+      case 32 : itype = I960BASE_INSN_TESTNO_REG; goto extract_fmt_testno_reg;
+      case 33 : itype = I960BASE_INSN_TESTG_REG; goto extract_fmt_testno_reg;
+      case 34 : itype = I960BASE_INSN_TESTE_REG; goto extract_fmt_testno_reg;
+      case 35 : itype = I960BASE_INSN_TESTGE_REG; goto extract_fmt_testno_reg;
+      case 36 : itype = I960BASE_INSN_TESTL_REG; goto extract_fmt_testno_reg;
+      case 37 : itype = I960BASE_INSN_TESTNE_REG; goto extract_fmt_testno_reg;
+      case 38 : itype = I960BASE_INSN_TESTLE_REG; goto extract_fmt_testno_reg;
+      case 39 : itype = I960BASE_INSN_TESTO_REG; goto extract_fmt_testno_reg;
+      case 48 :
         {
-        CASE (0, 48) :
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
           {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_BBC_REG), E (FMT_BBC_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_BBC_LIT), E (FMT_BBC_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
+          case 0 : itype = I960BASE_INSN_BBC_REG; goto extract_fmt_bbc_reg;
+          case 4 : itype = I960BASE_INSN_BBC_LIT; goto extract_fmt_bbc_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
           }
-        CASE (0, 49) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPOBG_REG), E (FMT_CMPOBL_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPOBG_LIT), E (FMT_CMPOBL_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 50) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPOBE_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPOBE_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 51) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPOBGE_REG), E (FMT_CMPOBL_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPOBGE_LIT), E (FMT_CMPOBL_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 52) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPOBL_REG), E (FMT_CMPOBL_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPOBL_LIT), E (FMT_CMPOBL_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 53) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPOBNE_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPOBNE_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 54) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPOBLE_REG), E (FMT_CMPOBL_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPOBLE_LIT), E (FMT_CMPOBL_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 55) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_BBS_REG), E (FMT_BBC_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_BBS_LIT), E (FMT_BBC_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 57) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPIBG_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPIBG_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 58) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPIBE_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPIBE_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 59) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPIBGE_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPIBGE_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 60) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPIBL_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPIBL_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 61) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPIBNE_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPIBNE_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 62) :
-          {
-            static const DECODE_DESC insns[8] = {
-              { I (INSN_CMPIBLE_REG), E (FMT_CMPOBE_REG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CMPIBLE_LIT), E (FMT_CMPOBE_LIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 88) :
-          {
-#ifdef __GNUC__
-            static const void *labels_0_88[16] = {
-              && case_0_88_0, && case_0_88_1, && case_0_88_2, && case_0_88_3, 
-              && case_0_88_4, && case_0_88_5, && case_0_88_6, && case_0_88_7, 
-              && default_0_88, && default_0_88, && default_0_88, && default_0_88, 
-              && default_0_88, && default_0_88, && default_0_88, && default_0_88, 
-            };
-#endif
-            static const DECODE_DESC insns[16] = {
-              { 0 }, { 0 }, 
-              { 0 }, { 0 }, 
-              { 0 }, { 0 }, 
-              { 0 }, { 0 }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val;
-            val = (((insn >> 10) & (15 << 0)));
-            DECODE_SWITCH (0_88, val)
-              {
-              CASE (0_88, 0) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOTBIT), E (FMT_NOTBIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_AND), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_ANDNOT), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SETBIT), E (FMT_NOTBIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOTAND), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_XOR), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_OR), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_88, 1) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOR), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOT), E (FMT_NOT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CLRBIT), E (FMT_NOTBIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_88, 2) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOTBIT1), E (FMT_NOTBIT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_AND1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_ANDNOT1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SETBIT1), E (FMT_NOTBIT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOTAND1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_XOR1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_OR1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_88, 3) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOR1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOT1), E (FMT_NOT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CLRBIT1), E (FMT_NOTBIT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_88, 4) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOTBIT2), E (FMT_NOTBIT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_AND2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_ANDNOT2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SETBIT2), E (FMT_NOTBIT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOTAND2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_XOR2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_OR2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_88, 5) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOR2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOT2), E (FMT_NOT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CLRBIT2), E (FMT_NOTBIT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_88, 6) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOTBIT3), E (FMT_NOTBIT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_AND3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_ANDNOT3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SETBIT3), E (FMT_NOTBIT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOTAND3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_XOR3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_OR3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_88, 7) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_NOR3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_NOT3), E (FMT_NOT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CLRBIT3), E (FMT_NOTBIT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              DEFAULT (0_88) :
-                idecode = &insns[val];
-                GOTO_EXTRACT (idecode);
-              }
-            ENDSWITCH (0_88)
-          }
-        CASE (0, 89) :
-          {
-#ifdef __GNUC__
-            static const void *labels_0_89[16] = {
-              && case_0_89_0, && case_0_89_1, && case_0_89_2, && case_0_89_3, 
-              && case_0_89_4, && case_0_89_5, && case_0_89_6, && case_0_89_7, 
-              && default_0_89, && default_0_89, && default_0_89, && default_0_89, 
-              && default_0_89, && default_0_89, && default_0_89, && default_0_89, 
-            };
-#endif
-            static const DECODE_DESC insns[16] = {
-              { 0 }, { 0 }, 
-              { 0 }, { 0 }, 
-              { 0 }, { 0 }, 
-              { 0 }, { 0 }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val;
-            val = (((insn >> 10) & (15 << 0)));
-            DECODE_SWITCH (0_89, val)
-              {
-              CASE (0_89, 0) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_ADDO), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SUBO), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_89, 1) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_SHRO), E (FMT_NOTBIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHRI), E (FMT_NOTBIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLO), E (FMT_NOTBIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLI), E (FMT_NOTBIT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_89, 2) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_ADDO1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SUBO1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_89, 3) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_SHRO1), E (FMT_NOTBIT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHRI1), E (FMT_NOTBIT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLO1), E (FMT_NOTBIT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLI1), E (FMT_NOTBIT1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_89, 4) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_ADDO2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SUBO2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_89, 5) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_SHRO2), E (FMT_NOTBIT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHRI2), E (FMT_NOTBIT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLO2), E (FMT_NOTBIT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLI2), E (FMT_NOTBIT2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_89, 6) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_ADDO3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SUBO3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_89, 7) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_SHRO3), E (FMT_NOTBIT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHRI3), E (FMT_NOTBIT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLO3), E (FMT_NOTBIT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_SHLI3), E (FMT_NOTBIT3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              DEFAULT (0_89) :
-                idecode = &insns[val];
-                GOTO_EXTRACT (idecode);
-              }
-            ENDSWITCH (0_89)
-          }
-        CASE (0, 90) :
-          {
-#ifdef __GNUC__
-            static const void *labels_0_90[16] = {
-              && default_0_90, && default_0_90, && default_0_90, && default_0_90, 
-              && default_0_90, && default_0_90, && default_0_90, && default_0_90, 
-              && case_0_90_8, && default_0_90, && case_0_90_10, && default_0_90, 
-              && case_0_90_12, && default_0_90, && case_0_90_14, && default_0_90, 
-            };
-#endif
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { 0 }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val;
-            val = (((insn >> 10) & (15 << 0)));
-            DECODE_SWITCH (0_90, val)
-              {
-              CASE (0_90, 8) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_CMPO), E (FMT_CMPO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CMPI), E (FMT_CMPI) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_90, 10) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_CMPO1), E (FMT_CMPO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CMPI1), E (FMT_CMPI1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_90, 12) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_CMPO2), E (FMT_CMPO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CMPI2), E (FMT_CMPI2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_90, 14) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_CMPO3), E (FMT_CMPO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_CMPI3), E (FMT_CMPI3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              DEFAULT (0_90) :
-                idecode = &insns[val];
-                GOTO_EXTRACT (idecode);
-              }
-            ENDSWITCH (0_90)
-          }
-        CASE (0, 92) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOV), E (FMT_NOT2) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOV1), E (FMT_NOT3) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 93) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOVL), E (FMT_MOVL) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOVL1), E (FMT_MOVL1) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 94) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOVT), E (FMT_MOVT) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOVT1), E (FMT_MOVT1) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 95) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOVQ), E (FMT_MOVQ) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MOVQ1), E (FMT_MOVQ1) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 102) :
-          {
-#ifdef __GNUC__
-            static const void *labels_0_102[16] = {
-              && default_0_102, && default_0_102, && default_0_102, && default_0_102, 
-              && default_0_102, && default_0_102, && default_0_102, && default_0_102, 
-              && default_0_102, && default_0_102, && default_0_102, && default_0_102, 
-              && default_0_102, && default_0_102, && default_0_102, && case_0_102_15, 
-            };
-#endif
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CALLS), E (FMT_CALLS) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { 0 }, 
-            };
-            unsigned int val;
-            val = (((insn >> 10) & (15 << 0)));
-            DECODE_SWITCH (0_102, val)
-              {
-              CASE (0_102, 15) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_FMARK), E (FMT_FMARK) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_FLUSHREG), E (FMT_FLUSHREG) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              DEFAULT (0_102) :
-                idecode = &insns[val];
-                GOTO_EXTRACT (idecode);
-              }
-            ENDSWITCH (0_102)
-          }
-        CASE (0, 103) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_EMUL), E (FMT_EMUL) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_EMUL1), E (FMT_EMUL1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_EMUL2), E (FMT_EMUL2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_EMUL3), E (FMT_EMUL3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 112) :
-          {
-#ifdef __GNUC__
-            static const void *labels_0_112[16] = {
-              && default_0_112, && case_0_112_1, && default_0_112, && case_0_112_3, 
-              && default_0_112, && case_0_112_5, && default_0_112, && case_0_112_7, 
-              && default_0_112, && default_0_112, && default_0_112, && default_0_112, 
-              && default_0_112, && default_0_112, && default_0_112, && default_0_112, 
-            };
-#endif
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_MULO), E (FMT_MULO) }, { 0 }, 
-              { I (INSN_MULO1), E (FMT_MULO1) }, { 0 }, 
-              { I (INSN_MULO2), E (FMT_MULO2) }, { 0 }, 
-              { I (INSN_MULO3), E (FMT_MULO3) }, { 0 }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val;
-            val = (((insn >> 10) & (15 << 0)));
-            DECODE_SWITCH (0_112, val)
-              {
-              CASE (0_112, 1) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMO), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVO), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_112, 3) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMO1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVO1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_112, 5) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMO2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVO2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_112, 7) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMO3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVO3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              DEFAULT (0_112) :
-                idecode = &insns[val];
-                GOTO_EXTRACT (idecode);
-              }
-            ENDSWITCH (0_112)
-          }
-        CASE (0, 116) :
-          {
-#ifdef __GNUC__
-            static const void *labels_0_116[16] = {
-              && default_0_116, && case_0_116_1, && default_0_116, && case_0_116_3, 
-              && default_0_116, && case_0_116_5, && default_0_116, && case_0_116_7, 
-              && default_0_116, && default_0_116, && default_0_116, && default_0_116, 
-              && default_0_116, && default_0_116, && default_0_116, && default_0_116, 
-            };
-#endif
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { 0 }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { 0 }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { 0 }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { 0 }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val;
-            val = (((insn >> 10) & (15 << 0)));
-            DECODE_SWITCH (0_116, val)
-              {
-              CASE (0_116, 1) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMI), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVI), E (FMT_MULO) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_116, 3) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMI1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVI1), E (FMT_MULO1) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_116, 5) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMI2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVI2), E (FMT_MULO2) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              CASE (0_116, 7) :
-                {
-                  static const DECODE_DESC insns[16] = {
-                    { I (INSN_REMI3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_DIVI3), E (FMT_MULO3) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                    { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-                  };
-                  unsigned int val = (((insn >> 6) & (15 << 0)));
-                  idecode = &insns[val];
-                  GOTO_EXTRACT (idecode);
-                }
-              DEFAULT (0_116) :
-                idecode = &insns[val];
-                GOTO_EXTRACT (idecode);
-              }
-            ENDSWITCH (0_116)
-          }
-        CASE (0, 128) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDOB_OFFSET), E (FMT_LDOB_OFFSET) }, { I (INSN_LDOB_OFFSET), E (FMT_LDOB_OFFSET) }, 
-              { I (INSN_LDOB_OFFSET), E (FMT_LDOB_OFFSET) }, { I (INSN_LDOB_OFFSET), E (FMT_LDOB_OFFSET) }, 
-              { I (INSN_LDOB_INDIRECT), E (FMT_LDOB_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDOB_INDIRECT_INDEX), E (FMT_LDOB_INDIRECT_INDEX) }, 
-              { I (INSN_LDOB_INDIRECT_OFFSET), E (FMT_LDOB_INDIRECT_OFFSET) }, { I (INSN_LDOB_INDIRECT_OFFSET), E (FMT_LDOB_INDIRECT_OFFSET) }, 
-              { I (INSN_LDOB_INDIRECT_OFFSET), E (FMT_LDOB_INDIRECT_OFFSET) }, { I (INSN_LDOB_INDIRECT_OFFSET), E (FMT_LDOB_INDIRECT_OFFSET) }, 
-              { I (INSN_LDOB_DISP), E (FMT_LDOB_DISP) }, { I (INSN_LDOB_INDIRECT_DISP), E (FMT_LDOB_INDIRECT_DISP) }, 
-              { I (INSN_LDOB_INDEX_DISP), E (FMT_LDOB_INDEX_DISP) }, { I (INSN_LDOB_INDIRECT_INDEX_DISP), E (FMT_LDOB_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 130) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_STOB_OFFSET), E (FMT_STOB_OFFSET) }, { I (INSN_STOB_OFFSET), E (FMT_STOB_OFFSET) }, 
-              { I (INSN_STOB_OFFSET), E (FMT_STOB_OFFSET) }, { I (INSN_STOB_OFFSET), E (FMT_STOB_OFFSET) }, 
-              { I (INSN_STOB_INDIRECT), E (FMT_STOB_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_STOB_INDIRECT_INDEX), E (FMT_STOB_INDIRECT_INDEX) }, 
-              { I (INSN_STOB_INDIRECT_OFFSET), E (FMT_STOB_INDIRECT_OFFSET) }, { I (INSN_STOB_INDIRECT_OFFSET), E (FMT_STOB_INDIRECT_OFFSET) }, 
-              { I (INSN_STOB_INDIRECT_OFFSET), E (FMT_STOB_INDIRECT_OFFSET) }, { I (INSN_STOB_INDIRECT_OFFSET), E (FMT_STOB_INDIRECT_OFFSET) }, 
-              { I (INSN_STOB_DISP), E (FMT_STOB_DISP) }, { I (INSN_STOB_INDIRECT_DISP), E (FMT_STOB_INDIRECT_DISP) }, 
-              { I (INSN_STOB_INDEX_DISP), E (FMT_STOB_INDEX_DISP) }, { I (INSN_STOB_INDIRECT_INDEX_DISP), E (FMT_STOB_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 132) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_BX_INDIRECT), E (FMT_BX_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_BX_INDIRECT_INDEX), E (FMT_BX_INDIRECT_INDEX) }, 
-              { I (INSN_BX_INDIRECT_OFFSET), E (FMT_BX_INDIRECT_OFFSET) }, { I (INSN_BX_INDIRECT_OFFSET), E (FMT_BX_INDIRECT_OFFSET) }, 
-              { I (INSN_BX_INDIRECT_OFFSET), E (FMT_BX_INDIRECT_OFFSET) }, { I (INSN_BX_INDIRECT_OFFSET), E (FMT_BX_INDIRECT_OFFSET) }, 
-              { I (INSN_BX_DISP), E (FMT_BX_DISP) }, { I (INSN_BX_INDIRECT_DISP), E (FMT_BX_INDIRECT_DISP) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 134) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CALLX_INDIRECT), E (FMT_CALLX_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_CALLX_INDIRECT_OFFSET), E (FMT_CALLX_INDIRECT_OFFSET) }, { I (INSN_CALLX_INDIRECT_OFFSET), E (FMT_CALLX_INDIRECT_OFFSET) }, 
-              { I (INSN_CALLX_INDIRECT_OFFSET), E (FMT_CALLX_INDIRECT_OFFSET) }, { I (INSN_CALLX_INDIRECT_OFFSET), E (FMT_CALLX_INDIRECT_OFFSET) }, 
-              { I (INSN_CALLX_DISP), E (FMT_CALLX_DISP) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 136) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDOS_OFFSET), E (FMT_LDOS_OFFSET) }, { I (INSN_LDOS_OFFSET), E (FMT_LDOS_OFFSET) }, 
-              { I (INSN_LDOS_OFFSET), E (FMT_LDOS_OFFSET) }, { I (INSN_LDOS_OFFSET), E (FMT_LDOS_OFFSET) }, 
-              { I (INSN_LDOS_INDIRECT), E (FMT_LDOS_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDOS_INDIRECT_INDEX), E (FMT_LDOS_INDIRECT_INDEX) }, 
-              { I (INSN_LDOS_INDIRECT_OFFSET), E (FMT_LDOS_INDIRECT_OFFSET) }, { I (INSN_LDOS_INDIRECT_OFFSET), E (FMT_LDOS_INDIRECT_OFFSET) }, 
-              { I (INSN_LDOS_INDIRECT_OFFSET), E (FMT_LDOS_INDIRECT_OFFSET) }, { I (INSN_LDOS_INDIRECT_OFFSET), E (FMT_LDOS_INDIRECT_OFFSET) }, 
-              { I (INSN_LDOS_DISP), E (FMT_LDOS_DISP) }, { I (INSN_LDOS_INDIRECT_DISP), E (FMT_LDOS_INDIRECT_DISP) }, 
-              { I (INSN_LDOS_INDEX_DISP), E (FMT_LDOS_INDEX_DISP) }, { I (INSN_LDOS_INDIRECT_INDEX_DISP), E (FMT_LDOS_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 138) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_STOS_OFFSET), E (FMT_STOS_OFFSET) }, { I (INSN_STOS_OFFSET), E (FMT_STOS_OFFSET) }, 
-              { I (INSN_STOS_OFFSET), E (FMT_STOS_OFFSET) }, { I (INSN_STOS_OFFSET), E (FMT_STOS_OFFSET) }, 
-              { I (INSN_STOS_INDIRECT), E (FMT_STOS_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_STOS_INDIRECT_INDEX), E (FMT_STOS_INDIRECT_INDEX) }, 
-              { I (INSN_STOS_INDIRECT_OFFSET), E (FMT_STOS_INDIRECT_OFFSET) }, { I (INSN_STOS_INDIRECT_OFFSET), E (FMT_STOS_INDIRECT_OFFSET) }, 
-              { I (INSN_STOS_INDIRECT_OFFSET), E (FMT_STOS_INDIRECT_OFFSET) }, { I (INSN_STOS_INDIRECT_OFFSET), E (FMT_STOS_INDIRECT_OFFSET) }, 
-              { I (INSN_STOS_DISP), E (FMT_STOS_DISP) }, { I (INSN_STOS_INDIRECT_DISP), E (FMT_STOS_INDIRECT_DISP) }, 
-              { I (INSN_STOS_INDEX_DISP), E (FMT_STOS_INDEX_DISP) }, { I (INSN_STOS_INDIRECT_INDEX_DISP), E (FMT_STOS_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 140) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDA_OFFSET), E (FMT_LDA_OFFSET) }, { I (INSN_LDA_OFFSET), E (FMT_LDA_OFFSET) }, 
-              { I (INSN_LDA_OFFSET), E (FMT_LDA_OFFSET) }, { I (INSN_LDA_OFFSET), E (FMT_LDA_OFFSET) }, 
-              { I (INSN_LDA_INDIRECT), E (FMT_LDA_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDA_INDIRECT_INDEX), E (FMT_LDA_INDIRECT_INDEX) }, 
-              { I (INSN_LDA_INDIRECT_OFFSET), E (FMT_LDA_INDIRECT_OFFSET) }, { I (INSN_LDA_INDIRECT_OFFSET), E (FMT_LDA_INDIRECT_OFFSET) }, 
-              { I (INSN_LDA_INDIRECT_OFFSET), E (FMT_LDA_INDIRECT_OFFSET) }, { I (INSN_LDA_INDIRECT_OFFSET), E (FMT_LDA_INDIRECT_OFFSET) }, 
-              { I (INSN_LDA_DISP), E (FMT_LDA_DISP) }, { I (INSN_LDA_INDIRECT_DISP), E (FMT_LDA_INDIRECT_DISP) }, 
-              { I (INSN_LDA_INDEX_DISP), E (FMT_LDA_INDEX_DISP) }, { I (INSN_LDA_INDIRECT_INDEX_DISP), E (FMT_LDA_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 144) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LD_OFFSET), E (FMT_LD_OFFSET) }, { I (INSN_LD_OFFSET), E (FMT_LD_OFFSET) }, 
-              { I (INSN_LD_OFFSET), E (FMT_LD_OFFSET) }, { I (INSN_LD_OFFSET), E (FMT_LD_OFFSET) }, 
-              { I (INSN_LD_INDIRECT), E (FMT_LD_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LD_INDIRECT_INDEX), E (FMT_LD_INDIRECT_INDEX) }, 
-              { I (INSN_LD_INDIRECT_OFFSET), E (FMT_LD_INDIRECT_OFFSET) }, { I (INSN_LD_INDIRECT_OFFSET), E (FMT_LD_INDIRECT_OFFSET) }, 
-              { I (INSN_LD_INDIRECT_OFFSET), E (FMT_LD_INDIRECT_OFFSET) }, { I (INSN_LD_INDIRECT_OFFSET), E (FMT_LD_INDIRECT_OFFSET) }, 
-              { I (INSN_LD_DISP), E (FMT_LD_DISP) }, { I (INSN_LD_INDIRECT_DISP), E (FMT_LD_INDIRECT_DISP) }, 
-              { I (INSN_LD_INDEX_DISP), E (FMT_LD_INDEX_DISP) }, { I (INSN_LD_INDIRECT_INDEX_DISP), E (FMT_LD_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 146) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_ST_OFFSET), E (FMT_ST_OFFSET) }, { I (INSN_ST_OFFSET), E (FMT_ST_OFFSET) }, 
-              { I (INSN_ST_OFFSET), E (FMT_ST_OFFSET) }, { I (INSN_ST_OFFSET), E (FMT_ST_OFFSET) }, 
-              { I (INSN_ST_INDIRECT), E (FMT_ST_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_ST_INDIRECT_INDEX), E (FMT_ST_INDIRECT_INDEX) }, 
-              { I (INSN_ST_INDIRECT_OFFSET), E (FMT_ST_INDIRECT_OFFSET) }, { I (INSN_ST_INDIRECT_OFFSET), E (FMT_ST_INDIRECT_OFFSET) }, 
-              { I (INSN_ST_INDIRECT_OFFSET), E (FMT_ST_INDIRECT_OFFSET) }, { I (INSN_ST_INDIRECT_OFFSET), E (FMT_ST_INDIRECT_OFFSET) }, 
-              { I (INSN_ST_DISP), E (FMT_ST_DISP) }, { I (INSN_ST_INDIRECT_DISP), E (FMT_ST_INDIRECT_DISP) }, 
-              { I (INSN_ST_INDEX_DISP), E (FMT_ST_INDEX_DISP) }, { I (INSN_ST_INDIRECT_INDEX_DISP), E (FMT_ST_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 152) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDL_OFFSET), E (FMT_LDL_OFFSET) }, { I (INSN_LDL_OFFSET), E (FMT_LDL_OFFSET) }, 
-              { I (INSN_LDL_OFFSET), E (FMT_LDL_OFFSET) }, { I (INSN_LDL_OFFSET), E (FMT_LDL_OFFSET) }, 
-              { I (INSN_LDL_INDIRECT), E (FMT_LDL_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDL_INDIRECT_INDEX), E (FMT_LDL_INDIRECT_INDEX) }, 
-              { I (INSN_LDL_INDIRECT_OFFSET), E (FMT_LDL_INDIRECT_OFFSET) }, { I (INSN_LDL_INDIRECT_OFFSET), E (FMT_LDL_INDIRECT_OFFSET) }, 
-              { I (INSN_LDL_INDIRECT_OFFSET), E (FMT_LDL_INDIRECT_OFFSET) }, { I (INSN_LDL_INDIRECT_OFFSET), E (FMT_LDL_INDIRECT_OFFSET) }, 
-              { I (INSN_LDL_DISP), E (FMT_LDL_DISP) }, { I (INSN_LDL_INDIRECT_DISP), E (FMT_LDL_INDIRECT_DISP) }, 
-              { I (INSN_LDL_INDEX_DISP), E (FMT_LDL_INDEX_DISP) }, { I (INSN_LDL_INDIRECT_INDEX_DISP), E (FMT_LDL_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 154) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_STL_OFFSET), E (FMT_STL_OFFSET) }, { I (INSN_STL_OFFSET), E (FMT_STL_OFFSET) }, 
-              { I (INSN_STL_OFFSET), E (FMT_STL_OFFSET) }, { I (INSN_STL_OFFSET), E (FMT_STL_OFFSET) }, 
-              { I (INSN_STL_INDIRECT), E (FMT_STL_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_STL_INDIRECT_INDEX), E (FMT_STL_INDIRECT_INDEX) }, 
-              { I (INSN_STL_INDIRECT_OFFSET), E (FMT_STL_INDIRECT_OFFSET) }, { I (INSN_STL_INDIRECT_OFFSET), E (FMT_STL_INDIRECT_OFFSET) }, 
-              { I (INSN_STL_INDIRECT_OFFSET), E (FMT_STL_INDIRECT_OFFSET) }, { I (INSN_STL_INDIRECT_OFFSET), E (FMT_STL_INDIRECT_OFFSET) }, 
-              { I (INSN_STL_DISP), E (FMT_STL_DISP) }, { I (INSN_STL_INDIRECT_DISP), E (FMT_STL_INDIRECT_DISP) }, 
-              { I (INSN_STL_INDEX_DISP), E (FMT_STL_INDEX_DISP) }, { I (INSN_STL_INDIRECT_INDEX_DISP), E (FMT_STL_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 160) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDT_OFFSET), E (FMT_LDT_OFFSET) }, { I (INSN_LDT_OFFSET), E (FMT_LDT_OFFSET) }, 
-              { I (INSN_LDT_OFFSET), E (FMT_LDT_OFFSET) }, { I (INSN_LDT_OFFSET), E (FMT_LDT_OFFSET) }, 
-              { I (INSN_LDT_INDIRECT), E (FMT_LDT_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDT_INDIRECT_INDEX), E (FMT_LDT_INDIRECT_INDEX) }, 
-              { I (INSN_LDT_INDIRECT_OFFSET), E (FMT_LDT_INDIRECT_OFFSET) }, { I (INSN_LDT_INDIRECT_OFFSET), E (FMT_LDT_INDIRECT_OFFSET) }, 
-              { I (INSN_LDT_INDIRECT_OFFSET), E (FMT_LDT_INDIRECT_OFFSET) }, { I (INSN_LDT_INDIRECT_OFFSET), E (FMT_LDT_INDIRECT_OFFSET) }, 
-              { I (INSN_LDT_DISP), E (FMT_LDT_DISP) }, { I (INSN_LDT_INDIRECT_DISP), E (FMT_LDT_INDIRECT_DISP) }, 
-              { I (INSN_LDT_INDEX_DISP), E (FMT_LDT_INDEX_DISP) }, { I (INSN_LDT_INDIRECT_INDEX_DISP), E (FMT_LDT_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 162) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_STT_OFFSET), E (FMT_STT_OFFSET) }, { I (INSN_STT_OFFSET), E (FMT_STT_OFFSET) }, 
-              { I (INSN_STT_OFFSET), E (FMT_STT_OFFSET) }, { I (INSN_STT_OFFSET), E (FMT_STT_OFFSET) }, 
-              { I (INSN_STT_INDIRECT), E (FMT_STT_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_STT_INDIRECT_INDEX), E (FMT_STT_INDIRECT_INDEX) }, 
-              { I (INSN_STT_INDIRECT_OFFSET), E (FMT_STT_INDIRECT_OFFSET) }, { I (INSN_STT_INDIRECT_OFFSET), E (FMT_STT_INDIRECT_OFFSET) }, 
-              { I (INSN_STT_INDIRECT_OFFSET), E (FMT_STT_INDIRECT_OFFSET) }, { I (INSN_STT_INDIRECT_OFFSET), E (FMT_STT_INDIRECT_OFFSET) }, 
-              { I (INSN_STT_DISP), E (FMT_STT_DISP) }, { I (INSN_STT_INDIRECT_DISP), E (FMT_STT_INDIRECT_DISP) }, 
-              { I (INSN_STT_INDEX_DISP), E (FMT_STT_INDEX_DISP) }, { I (INSN_STT_INDIRECT_INDEX_DISP), E (FMT_STT_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 176) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDQ_OFFSET), E (FMT_LDQ_OFFSET) }, { I (INSN_LDQ_OFFSET), E (FMT_LDQ_OFFSET) }, 
-              { I (INSN_LDQ_OFFSET), E (FMT_LDQ_OFFSET) }, { I (INSN_LDQ_OFFSET), E (FMT_LDQ_OFFSET) }, 
-              { I (INSN_LDQ_INDIRECT), E (FMT_LDQ_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDQ_INDIRECT_INDEX), E (FMT_LDQ_INDIRECT_INDEX) }, 
-              { I (INSN_LDQ_INDIRECT_OFFSET), E (FMT_LDQ_INDIRECT_OFFSET) }, { I (INSN_LDQ_INDIRECT_OFFSET), E (FMT_LDQ_INDIRECT_OFFSET) }, 
-              { I (INSN_LDQ_INDIRECT_OFFSET), E (FMT_LDQ_INDIRECT_OFFSET) }, { I (INSN_LDQ_INDIRECT_OFFSET), E (FMT_LDQ_INDIRECT_OFFSET) }, 
-              { I (INSN_LDQ_DISP), E (FMT_LDQ_DISP) }, { I (INSN_LDQ_INDIRECT_DISP), E (FMT_LDQ_INDIRECT_DISP) }, 
-              { I (INSN_LDQ_INDEX_DISP), E (FMT_LDQ_INDEX_DISP) }, { I (INSN_LDQ_INDIRECT_INDEX_DISP), E (FMT_LDQ_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 178) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_STQ_OFFSET), E (FMT_STQ_OFFSET) }, { I (INSN_STQ_OFFSET), E (FMT_STQ_OFFSET) }, 
-              { I (INSN_STQ_OFFSET), E (FMT_STQ_OFFSET) }, { I (INSN_STQ_OFFSET), E (FMT_STQ_OFFSET) }, 
-              { I (INSN_STQ_INDIRECT), E (FMT_STQ_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_STQ_INDIRECT_INDEX), E (FMT_STQ_INDIRECT_INDEX) }, 
-              { I (INSN_STQ_INDIRECT_OFFSET), E (FMT_STQ_INDIRECT_OFFSET) }, { I (INSN_STQ_INDIRECT_OFFSET), E (FMT_STQ_INDIRECT_OFFSET) }, 
-              { I (INSN_STQ_INDIRECT_OFFSET), E (FMT_STQ_INDIRECT_OFFSET) }, { I (INSN_STQ_INDIRECT_OFFSET), E (FMT_STQ_INDIRECT_OFFSET) }, 
-              { I (INSN_STQ_DISP), E (FMT_STQ_DISP) }, { I (INSN_STQ_INDIRECT_DISP), E (FMT_STQ_INDIRECT_DISP) }, 
-              { I (INSN_STQ_INDEX_DISP), E (FMT_STQ_INDEX_DISP) }, { I (INSN_STQ_INDIRECT_INDEX_DISP), E (FMT_STQ_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 192) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDIB_OFFSET), E (FMT_LDIB_OFFSET) }, { I (INSN_LDIB_OFFSET), E (FMT_LDIB_OFFSET) }, 
-              { I (INSN_LDIB_OFFSET), E (FMT_LDIB_OFFSET) }, { I (INSN_LDIB_OFFSET), E (FMT_LDIB_OFFSET) }, 
-              { I (INSN_LDIB_INDIRECT), E (FMT_LDIB_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDIB_INDIRECT_INDEX), E (FMT_LDIB_INDIRECT_INDEX) }, 
-              { I (INSN_LDIB_INDIRECT_OFFSET), E (FMT_LDIB_INDIRECT_OFFSET) }, { I (INSN_LDIB_INDIRECT_OFFSET), E (FMT_LDIB_INDIRECT_OFFSET) }, 
-              { I (INSN_LDIB_INDIRECT_OFFSET), E (FMT_LDIB_INDIRECT_OFFSET) }, { I (INSN_LDIB_INDIRECT_OFFSET), E (FMT_LDIB_INDIRECT_OFFSET) }, 
-              { I (INSN_LDIB_DISP), E (FMT_LDIB_DISP) }, { I (INSN_LDIB_INDIRECT_DISP), E (FMT_LDIB_INDIRECT_DISP) }, 
-              { I (INSN_LDIB_INDEX_DISP), E (FMT_LDIB_INDEX_DISP) }, { I (INSN_LDIB_INDIRECT_INDEX_DISP), E (FMT_LDIB_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 200) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDIS_OFFSET), E (FMT_LDIS_OFFSET) }, { I (INSN_LDIS_OFFSET), E (FMT_LDIS_OFFSET) }, 
-              { I (INSN_LDIS_OFFSET), E (FMT_LDIS_OFFSET) }, { I (INSN_LDIS_OFFSET), E (FMT_LDIS_OFFSET) }, 
-              { I (INSN_LDIS_INDIRECT), E (FMT_LDIS_INDIRECT) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_LDIS_INDIRECT_INDEX), E (FMT_LDIS_INDIRECT_INDEX) }, 
-              { I (INSN_LDIS_INDIRECT_OFFSET), E (FMT_LDIS_INDIRECT_OFFSET) }, { I (INSN_LDIS_INDIRECT_OFFSET), E (FMT_LDIS_INDIRECT_OFFSET) }, 
-              { I (INSN_LDIS_INDIRECT_OFFSET), E (FMT_LDIS_INDIRECT_OFFSET) }, { I (INSN_LDIS_INDIRECT_OFFSET), E (FMT_LDIS_INDIRECT_OFFSET) }, 
-              { I (INSN_LDIS_DISP), E (FMT_LDIS_DISP) }, { I (INSN_LDIS_INDIRECT_DISP), E (FMT_LDIS_INDIRECT_DISP) }, 
-              { I (INSN_LDIS_INDEX_DISP), E (FMT_LDIS_INDEX_DISP) }, { I (INSN_LDIS_INDIRECT_INDEX_DISP), E (FMT_LDIS_INDIRECT_INDEX_DISP) }, 
-            };
-            unsigned int val = (((insn >> 10) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        DEFAULT (0) :
-          idecode = &insns[val];
-          GOTO_EXTRACT (idecode);
         }
-      ENDSWITCH (0)
+      case 49 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPOBG_REG; goto extract_fmt_cmpobl_reg;
+          case 4 : itype = I960BASE_INSN_CMPOBG_LIT; goto extract_fmt_cmpobl_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 50 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPOBE_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPOBE_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 51 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPOBGE_REG; goto extract_fmt_cmpobl_reg;
+          case 4 : itype = I960BASE_INSN_CMPOBGE_LIT; goto extract_fmt_cmpobl_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 52 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPOBL_REG; goto extract_fmt_cmpobl_reg;
+          case 4 : itype = I960BASE_INSN_CMPOBL_LIT; goto extract_fmt_cmpobl_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 53 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPOBNE_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPOBNE_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 54 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPOBLE_REG; goto extract_fmt_cmpobl_reg;
+          case 4 : itype = I960BASE_INSN_CMPOBLE_LIT; goto extract_fmt_cmpobl_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 55 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_BBS_REG; goto extract_fmt_bbc_reg;
+          case 4 : itype = I960BASE_INSN_BBS_LIT; goto extract_fmt_bbc_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 57 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPIBG_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPIBG_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 58 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPIBE_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPIBE_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 59 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPIBGE_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPIBGE_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 60 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPIBL_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPIBL_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 61 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPIBNE_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPIBNE_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 62 :
+        {
+          unsigned int val = (((insn >> 11) & (1 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_CMPIBLE_REG; goto extract_fmt_cmpobe_reg;
+          case 4 : itype = I960BASE_INSN_CMPIBLE_LIT; goto extract_fmt_cmpobe_lit;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 88 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOTBIT; goto extract_fmt_notbit;
+              case 2 : itype = I960BASE_INSN_AND; goto extract_fmt_mulo;
+              case 4 : itype = I960BASE_INSN_ANDNOT; goto extract_fmt_mulo;
+              case 6 : itype = I960BASE_INSN_SETBIT; goto extract_fmt_notbit;
+              case 8 : itype = I960BASE_INSN_NOTAND; goto extract_fmt_mulo;
+              case 12 : itype = I960BASE_INSN_XOR; goto extract_fmt_mulo;
+              case 14 : itype = I960BASE_INSN_OR; goto extract_fmt_mulo;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 1 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOR; goto extract_fmt_mulo;
+              case 2 : itype = I960BASE_INSN_XNOR; goto extract_fmt_mulo;
+              case 4 : itype = I960BASE_INSN_NOT; goto extract_fmt_not;
+              case 6 : itype = I960BASE_INSN_ORNOT; goto extract_fmt_mulo;
+              case 8 : itype = I960BASE_INSN_CLRBIT; goto extract_fmt_notbit;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 2 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOTBIT1; goto extract_fmt_notbit1;
+              case 2 : itype = I960BASE_INSN_AND1; goto extract_fmt_mulo1;
+              case 4 : itype = I960BASE_INSN_ANDNOT1; goto extract_fmt_mulo1;
+              case 6 : itype = I960BASE_INSN_SETBIT1; goto extract_fmt_notbit1;
+              case 8 : itype = I960BASE_INSN_NOTAND1; goto extract_fmt_mulo1;
+              case 12 : itype = I960BASE_INSN_XOR1; goto extract_fmt_mulo1;
+              case 14 : itype = I960BASE_INSN_OR1; goto extract_fmt_mulo1;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 3 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOR1; goto extract_fmt_mulo1;
+              case 2 : itype = I960BASE_INSN_XNOR1; goto extract_fmt_mulo1;
+              case 4 : itype = I960BASE_INSN_NOT1; goto extract_fmt_not1;
+              case 6 : itype = I960BASE_INSN_ORNOT1; goto extract_fmt_mulo1;
+              case 8 : itype = I960BASE_INSN_CLRBIT1; goto extract_fmt_notbit1;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 4 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOTBIT2; goto extract_fmt_notbit2;
+              case 2 : itype = I960BASE_INSN_AND2; goto extract_fmt_mulo2;
+              case 4 : itype = I960BASE_INSN_ANDNOT2; goto extract_fmt_mulo2;
+              case 6 : itype = I960BASE_INSN_SETBIT2; goto extract_fmt_notbit2;
+              case 8 : itype = I960BASE_INSN_NOTAND2; goto extract_fmt_mulo2;
+              case 12 : itype = I960BASE_INSN_XOR2; goto extract_fmt_mulo2;
+              case 14 : itype = I960BASE_INSN_OR2; goto extract_fmt_mulo2;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 5 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOR2; goto extract_fmt_mulo2;
+              case 2 : itype = I960BASE_INSN_XNOR2; goto extract_fmt_mulo2;
+              case 4 : itype = I960BASE_INSN_NOT2; goto extract_fmt_not2;
+              case 6 : itype = I960BASE_INSN_ORNOT2; goto extract_fmt_mulo2;
+              case 8 : itype = I960BASE_INSN_CLRBIT2; goto extract_fmt_notbit2;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 6 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOTBIT3; goto extract_fmt_notbit3;
+              case 2 : itype = I960BASE_INSN_AND3; goto extract_fmt_mulo3;
+              case 4 : itype = I960BASE_INSN_ANDNOT3; goto extract_fmt_mulo3;
+              case 6 : itype = I960BASE_INSN_SETBIT3; goto extract_fmt_notbit3;
+              case 8 : itype = I960BASE_INSN_NOTAND3; goto extract_fmt_mulo3;
+              case 12 : itype = I960BASE_INSN_XOR3; goto extract_fmt_mulo3;
+              case 14 : itype = I960BASE_INSN_OR3; goto extract_fmt_mulo3;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 7 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_NOR3; goto extract_fmt_mulo3;
+              case 2 : itype = I960BASE_INSN_XNOR3; goto extract_fmt_mulo3;
+              case 4 : itype = I960BASE_INSN_NOT3; goto extract_fmt_not3;
+              case 6 : itype = I960BASE_INSN_ORNOT3; goto extract_fmt_mulo3;
+              case 8 : itype = I960BASE_INSN_CLRBIT3; goto extract_fmt_notbit3;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 89 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_ADDO; goto extract_fmt_mulo;
+              case 4 : itype = I960BASE_INSN_SUBO; goto extract_fmt_mulo;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 1 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_SHRO; goto extract_fmt_shlo;
+              case 6 : itype = I960BASE_INSN_SHRI; goto extract_fmt_shlo;
+              case 8 : itype = I960BASE_INSN_SHLO; goto extract_fmt_shlo;
+              case 12 : itype = I960BASE_INSN_SHLI; goto extract_fmt_shlo;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 2 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_ADDO1; goto extract_fmt_mulo1;
+              case 4 : itype = I960BASE_INSN_SUBO1; goto extract_fmt_mulo1;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 3 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_SHRO1; goto extract_fmt_shlo1;
+              case 6 : itype = I960BASE_INSN_SHRI1; goto extract_fmt_shlo1;
+              case 8 : itype = I960BASE_INSN_SHLO1; goto extract_fmt_shlo1;
+              case 12 : itype = I960BASE_INSN_SHLI1; goto extract_fmt_shlo1;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 4 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_ADDO2; goto extract_fmt_mulo2;
+              case 4 : itype = I960BASE_INSN_SUBO2; goto extract_fmt_mulo2;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 5 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_SHRO2; goto extract_fmt_shlo2;
+              case 6 : itype = I960BASE_INSN_SHRI2; goto extract_fmt_shlo2;
+              case 8 : itype = I960BASE_INSN_SHLO2; goto extract_fmt_shlo2;
+              case 12 : itype = I960BASE_INSN_SHLI2; goto extract_fmt_shlo2;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 6 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_ADDO3; goto extract_fmt_mulo3;
+              case 4 : itype = I960BASE_INSN_SUBO3; goto extract_fmt_mulo3;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 7 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_SHRO3; goto extract_fmt_shlo3;
+              case 6 : itype = I960BASE_INSN_SHRI3; goto extract_fmt_shlo3;
+              case 8 : itype = I960BASE_INSN_SHLO3; goto extract_fmt_shlo3;
+              case 12 : itype = I960BASE_INSN_SHLI3; goto extract_fmt_shlo3;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 90 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 8 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_CMPO; goto extract_fmt_cmpo;
+              case 2 : itype = I960BASE_INSN_CMPI; goto extract_fmt_cmpi;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 10 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_CMPO1; goto extract_fmt_cmpo1;
+              case 2 : itype = I960BASE_INSN_CMPI1; goto extract_fmt_cmpi1;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 12 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_CMPO2; goto extract_fmt_cmpo2;
+              case 2 : itype = I960BASE_INSN_CMPI2; goto extract_fmt_cmpi2;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 14 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_CMPO3; goto extract_fmt_cmpo3;
+              case 2 : itype = I960BASE_INSN_CMPI3; goto extract_fmt_cmpi3;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 92 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 5 : itype = I960BASE_INSN_MOV; goto extract_fmt_not2;
+          case 7 : itype = I960BASE_INSN_MOV1; goto extract_fmt_not3;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 93 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 5 : itype = I960BASE_INSN_MOVL; goto extract_fmt_movl;
+          case 7 : itype = I960BASE_INSN_MOVL1; goto extract_fmt_movl1;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 94 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 5 : itype = I960BASE_INSN_MOVT; goto extract_fmt_movt;
+          case 7 : itype = I960BASE_INSN_MOVT1; goto extract_fmt_movt1;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 95 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 5 : itype = I960BASE_INSN_MOVQ; goto extract_fmt_movq;
+          case 7 : itype = I960BASE_INSN_MOVQ1; goto extract_fmt_movq1;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 100 : itype = I960BASE_INSN_MODAC; goto extract_fmt_modpc;
+      case 101 : itype = I960BASE_INSN_MODPC; goto extract_fmt_modpc;
+      case 102 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 12 : itype = I960BASE_INSN_CALLS; goto extract_fmt_calls;
+          case 15 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 8 : itype = I960BASE_INSN_FMARK; goto extract_fmt_fmark;
+              case 10 : itype = I960BASE_INSN_FLUSHREG; goto extract_fmt_flushreg;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 103 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_EMUL; goto extract_fmt_emul;
+          case 2 : itype = I960BASE_INSN_EMUL1; goto extract_fmt_emul1;
+          case 4 : itype = I960BASE_INSN_EMUL2; goto extract_fmt_emul2;
+          case 6 : itype = I960BASE_INSN_EMUL3; goto extract_fmt_emul3;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 112 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : itype = I960BASE_INSN_MULO; goto extract_fmt_mulo;
+          case 1 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMO; goto extract_fmt_mulo;
+              case 6 : itype = I960BASE_INSN_DIVO; goto extract_fmt_mulo;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 2 : itype = I960BASE_INSN_MULO1; goto extract_fmt_mulo1;
+          case 3 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMO1; goto extract_fmt_mulo1;
+              case 6 : itype = I960BASE_INSN_DIVO1; goto extract_fmt_mulo1;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 4 : itype = I960BASE_INSN_MULO2; goto extract_fmt_mulo2;
+          case 5 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMO2; goto extract_fmt_mulo2;
+              case 6 : itype = I960BASE_INSN_DIVO2; goto extract_fmt_mulo2;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 6 : itype = I960BASE_INSN_MULO3; goto extract_fmt_mulo3;
+          case 7 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMO3; goto extract_fmt_mulo3;
+              case 6 : itype = I960BASE_INSN_DIVO3; goto extract_fmt_mulo3;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 116 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 1 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMI; goto extract_fmt_mulo;
+              case 6 : itype = I960BASE_INSN_DIVI; goto extract_fmt_mulo;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 3 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMI1; goto extract_fmt_mulo1;
+              case 6 : itype = I960BASE_INSN_DIVI1; goto extract_fmt_mulo1;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 5 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMI2; goto extract_fmt_mulo2;
+              case 6 : itype = I960BASE_INSN_DIVI2; goto extract_fmt_mulo2;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          case 7 :
+            {
+              unsigned int val = (((insn >> 6) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : itype = I960BASE_INSN_REMI3; goto extract_fmt_mulo3;
+              case 6 : itype = I960BASE_INSN_DIVI3; goto extract_fmt_mulo3;
+              default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+              }
+            }
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 128 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDOB_OFFSET; goto extract_fmt_ldob_offset;
+          case 4 : itype = I960BASE_INSN_LDOB_INDIRECT; goto extract_fmt_ldob_indirect;
+          case 7 : itype = I960BASE_INSN_LDOB_INDIRECT_INDEX; goto extract_fmt_ldob_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDOB_INDIRECT_OFFSET; goto extract_fmt_ldob_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDOB_DISP; goto extract_fmt_ldob_disp;
+          case 13 : itype = I960BASE_INSN_LDOB_INDIRECT_DISP; goto extract_fmt_ldob_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDOB_INDEX_DISP; goto extract_fmt_ldob_index_disp;
+          case 15 : itype = I960BASE_INSN_LDOB_INDIRECT_INDEX_DISP; goto extract_fmt_ldob_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 130 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_STOB_OFFSET; goto extract_fmt_stob_offset;
+          case 4 : itype = I960BASE_INSN_STOB_INDIRECT; goto extract_fmt_stob_indirect;
+          case 7 : itype = I960BASE_INSN_STOB_INDIRECT_INDEX; goto extract_fmt_stob_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_STOB_INDIRECT_OFFSET; goto extract_fmt_stob_indirect_offset;
+          case 12 : itype = I960BASE_INSN_STOB_DISP; goto extract_fmt_stob_disp;
+          case 13 : itype = I960BASE_INSN_STOB_INDIRECT_DISP; goto extract_fmt_stob_indirect_disp;
+          case 14 : itype = I960BASE_INSN_STOB_INDEX_DISP; goto extract_fmt_stob_index_disp;
+          case 15 : itype = I960BASE_INSN_STOB_INDIRECT_INDEX_DISP; goto extract_fmt_stob_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 132 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 4 : itype = I960BASE_INSN_BX_INDIRECT; goto extract_fmt_bx_indirect;
+          case 7 : itype = I960BASE_INSN_BX_INDIRECT_INDEX; goto extract_fmt_bx_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_BX_INDIRECT_OFFSET; goto extract_fmt_bx_indirect_offset;
+          case 12 : itype = I960BASE_INSN_BX_DISP; goto extract_fmt_bx_disp;
+          case 13 : itype = I960BASE_INSN_BX_INDIRECT_DISP; goto extract_fmt_bx_indirect_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 134 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 4 : itype = I960BASE_INSN_CALLX_INDIRECT; goto extract_fmt_callx_indirect;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_CALLX_INDIRECT_OFFSET; goto extract_fmt_callx_indirect_offset;
+          case 12 : itype = I960BASE_INSN_CALLX_DISP; goto extract_fmt_callx_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 136 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDOS_OFFSET; goto extract_fmt_ldos_offset;
+          case 4 : itype = I960BASE_INSN_LDOS_INDIRECT; goto extract_fmt_ldos_indirect;
+          case 7 : itype = I960BASE_INSN_LDOS_INDIRECT_INDEX; goto extract_fmt_ldos_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDOS_INDIRECT_OFFSET; goto extract_fmt_ldos_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDOS_DISP; goto extract_fmt_ldos_disp;
+          case 13 : itype = I960BASE_INSN_LDOS_INDIRECT_DISP; goto extract_fmt_ldos_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDOS_INDEX_DISP; goto extract_fmt_ldos_index_disp;
+          case 15 : itype = I960BASE_INSN_LDOS_INDIRECT_INDEX_DISP; goto extract_fmt_ldos_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 138 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_STOS_OFFSET; goto extract_fmt_stos_offset;
+          case 4 : itype = I960BASE_INSN_STOS_INDIRECT; goto extract_fmt_stos_indirect;
+          case 7 : itype = I960BASE_INSN_STOS_INDIRECT_INDEX; goto extract_fmt_stos_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_STOS_INDIRECT_OFFSET; goto extract_fmt_stos_indirect_offset;
+          case 12 : itype = I960BASE_INSN_STOS_DISP; goto extract_fmt_stos_disp;
+          case 13 : itype = I960BASE_INSN_STOS_INDIRECT_DISP; goto extract_fmt_stos_indirect_disp;
+          case 14 : itype = I960BASE_INSN_STOS_INDEX_DISP; goto extract_fmt_stos_index_disp;
+          case 15 : itype = I960BASE_INSN_STOS_INDIRECT_INDEX_DISP; goto extract_fmt_stos_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 140 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDA_OFFSET; goto extract_fmt_lda_offset;
+          case 4 : itype = I960BASE_INSN_LDA_INDIRECT; goto extract_fmt_lda_indirect;
+          case 7 : itype = I960BASE_INSN_LDA_INDIRECT_INDEX; goto extract_fmt_lda_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDA_INDIRECT_OFFSET; goto extract_fmt_lda_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDA_DISP; goto extract_fmt_lda_disp;
+          case 13 : itype = I960BASE_INSN_LDA_INDIRECT_DISP; goto extract_fmt_lda_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDA_INDEX_DISP; goto extract_fmt_lda_index_disp;
+          case 15 : itype = I960BASE_INSN_LDA_INDIRECT_INDEX_DISP; goto extract_fmt_lda_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 144 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LD_OFFSET; goto extract_fmt_ld_offset;
+          case 4 : itype = I960BASE_INSN_LD_INDIRECT; goto extract_fmt_ld_indirect;
+          case 7 : itype = I960BASE_INSN_LD_INDIRECT_INDEX; goto extract_fmt_ld_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LD_INDIRECT_OFFSET; goto extract_fmt_ld_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LD_DISP; goto extract_fmt_ld_disp;
+          case 13 : itype = I960BASE_INSN_LD_INDIRECT_DISP; goto extract_fmt_ld_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LD_INDEX_DISP; goto extract_fmt_ld_index_disp;
+          case 15 : itype = I960BASE_INSN_LD_INDIRECT_INDEX_DISP; goto extract_fmt_ld_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 146 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_ST_OFFSET; goto extract_fmt_st_offset;
+          case 4 : itype = I960BASE_INSN_ST_INDIRECT; goto extract_fmt_st_indirect;
+          case 7 : itype = I960BASE_INSN_ST_INDIRECT_INDEX; goto extract_fmt_st_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_ST_INDIRECT_OFFSET; goto extract_fmt_st_indirect_offset;
+          case 12 : itype = I960BASE_INSN_ST_DISP; goto extract_fmt_st_disp;
+          case 13 : itype = I960BASE_INSN_ST_INDIRECT_DISP; goto extract_fmt_st_indirect_disp;
+          case 14 : itype = I960BASE_INSN_ST_INDEX_DISP; goto extract_fmt_st_index_disp;
+          case 15 : itype = I960BASE_INSN_ST_INDIRECT_INDEX_DISP; goto extract_fmt_st_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 152 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDL_OFFSET; goto extract_fmt_ldl_offset;
+          case 4 : itype = I960BASE_INSN_LDL_INDIRECT; goto extract_fmt_ldl_indirect;
+          case 7 : itype = I960BASE_INSN_LDL_INDIRECT_INDEX; goto extract_fmt_ldl_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDL_INDIRECT_OFFSET; goto extract_fmt_ldl_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDL_DISP; goto extract_fmt_ldl_disp;
+          case 13 : itype = I960BASE_INSN_LDL_INDIRECT_DISP; goto extract_fmt_ldl_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDL_INDEX_DISP; goto extract_fmt_ldl_index_disp;
+          case 15 : itype = I960BASE_INSN_LDL_INDIRECT_INDEX_DISP; goto extract_fmt_ldl_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 154 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_STL_OFFSET; goto extract_fmt_stl_offset;
+          case 4 : itype = I960BASE_INSN_STL_INDIRECT; goto extract_fmt_stl_indirect;
+          case 7 : itype = I960BASE_INSN_STL_INDIRECT_INDEX; goto extract_fmt_stl_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_STL_INDIRECT_OFFSET; goto extract_fmt_stl_indirect_offset;
+          case 12 : itype = I960BASE_INSN_STL_DISP; goto extract_fmt_stl_disp;
+          case 13 : itype = I960BASE_INSN_STL_INDIRECT_DISP; goto extract_fmt_stl_indirect_disp;
+          case 14 : itype = I960BASE_INSN_STL_INDEX_DISP; goto extract_fmt_stl_index_disp;
+          case 15 : itype = I960BASE_INSN_STL_INDIRECT_INDEX_DISP; goto extract_fmt_stl_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 160 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDT_OFFSET; goto extract_fmt_ldt_offset;
+          case 4 : itype = I960BASE_INSN_LDT_INDIRECT; goto extract_fmt_ldt_indirect;
+          case 7 : itype = I960BASE_INSN_LDT_INDIRECT_INDEX; goto extract_fmt_ldt_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDT_INDIRECT_OFFSET; goto extract_fmt_ldt_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDT_DISP; goto extract_fmt_ldt_disp;
+          case 13 : itype = I960BASE_INSN_LDT_INDIRECT_DISP; goto extract_fmt_ldt_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDT_INDEX_DISP; goto extract_fmt_ldt_index_disp;
+          case 15 : itype = I960BASE_INSN_LDT_INDIRECT_INDEX_DISP; goto extract_fmt_ldt_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 162 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_STT_OFFSET; goto extract_fmt_stt_offset;
+          case 4 : itype = I960BASE_INSN_STT_INDIRECT; goto extract_fmt_stt_indirect;
+          case 7 : itype = I960BASE_INSN_STT_INDIRECT_INDEX; goto extract_fmt_stt_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_STT_INDIRECT_OFFSET; goto extract_fmt_stt_indirect_offset;
+          case 12 : itype = I960BASE_INSN_STT_DISP; goto extract_fmt_stt_disp;
+          case 13 : itype = I960BASE_INSN_STT_INDIRECT_DISP; goto extract_fmt_stt_indirect_disp;
+          case 14 : itype = I960BASE_INSN_STT_INDEX_DISP; goto extract_fmt_stt_index_disp;
+          case 15 : itype = I960BASE_INSN_STT_INDIRECT_INDEX_DISP; goto extract_fmt_stt_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 176 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDQ_OFFSET; goto extract_fmt_ldq_offset;
+          case 4 : itype = I960BASE_INSN_LDQ_INDIRECT; goto extract_fmt_ldq_indirect;
+          case 7 : itype = I960BASE_INSN_LDQ_INDIRECT_INDEX; goto extract_fmt_ldq_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDQ_INDIRECT_OFFSET; goto extract_fmt_ldq_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDQ_DISP; goto extract_fmt_ldq_disp;
+          case 13 : itype = I960BASE_INSN_LDQ_INDIRECT_DISP; goto extract_fmt_ldq_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDQ_INDEX_DISP; goto extract_fmt_ldq_index_disp;
+          case 15 : itype = I960BASE_INSN_LDQ_INDIRECT_INDEX_DISP; goto extract_fmt_ldq_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 178 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_STQ_OFFSET; goto extract_fmt_stq_offset;
+          case 4 : itype = I960BASE_INSN_STQ_INDIRECT; goto extract_fmt_stq_indirect;
+          case 7 : itype = I960BASE_INSN_STQ_INDIRECT_INDEX; goto extract_fmt_stq_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_STQ_INDIRECT_OFFSET; goto extract_fmt_stq_indirect_offset;
+          case 12 : itype = I960BASE_INSN_STQ_DISP; goto extract_fmt_stq_disp;
+          case 13 : itype = I960BASE_INSN_STQ_INDIRECT_DISP; goto extract_fmt_stq_indirect_disp;
+          case 14 : itype = I960BASE_INSN_STQ_INDEX_DISP; goto extract_fmt_stq_index_disp;
+          case 15 : itype = I960BASE_INSN_STQ_INDIRECT_INDEX_DISP; goto extract_fmt_stq_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 192 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDIB_OFFSET; goto extract_fmt_ldib_offset;
+          case 4 : itype = I960BASE_INSN_LDIB_INDIRECT; goto extract_fmt_ldib_indirect;
+          case 7 : itype = I960BASE_INSN_LDIB_INDIRECT_INDEX; goto extract_fmt_ldib_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDIB_INDIRECT_OFFSET; goto extract_fmt_ldib_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDIB_DISP; goto extract_fmt_ldib_disp;
+          case 13 : itype = I960BASE_INSN_LDIB_INDIRECT_DISP; goto extract_fmt_ldib_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDIB_INDEX_DISP; goto extract_fmt_ldib_index_disp;
+          case 15 : itype = I960BASE_INSN_LDIB_INDIRECT_INDEX_DISP; goto extract_fmt_ldib_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 200 :
+        {
+          unsigned int val = (((insn >> 10) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 2 : /* fall through */
+          case 3 : itype = I960BASE_INSN_LDIS_OFFSET; goto extract_fmt_ldis_offset;
+          case 4 : itype = I960BASE_INSN_LDIS_INDIRECT; goto extract_fmt_ldis_indirect;
+          case 7 : itype = I960BASE_INSN_LDIS_INDIRECT_INDEX; goto extract_fmt_ldis_indirect_index;
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 11 : itype = I960BASE_INSN_LDIS_INDIRECT_OFFSET; goto extract_fmt_ldis_indirect_offset;
+          case 12 : itype = I960BASE_INSN_LDIS_DISP; goto extract_fmt_ldis_disp;
+          case 13 : itype = I960BASE_INSN_LDIS_INDIRECT_DISP; goto extract_fmt_ldis_indirect_disp;
+          case 14 : itype = I960BASE_INSN_LDIS_INDEX_DISP; goto extract_fmt_ldis_index_disp;
+          case 15 : itype = I960BASE_INSN_LDIS_INDIRECT_INDEX_DISP; goto extract_fmt_ldis_indirect_index_disp;
+          default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      default : itype = I960BASE_INSN_X_INVALID; goto extract_fmt_empty;
+      }
     }
-#undef I
-#undef E
   }
 
   /* The instruction has been decoded, now extract the fields.  */
 
- extract:
+ extract_fmt_empty:
   {
-#ifndef __GNUC__
-    switch (idecode->sfmt)
-#endif
-      {
-
-  CASE (ex, FMT_EMPTY) :
-  {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
   EXTRACT_IFMT_EMPTY_VARS /* */
@@ -1914,11 +1423,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_empty", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MULO) :
+ extract_fmt_mulo:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulo.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -1941,11 +1451,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MULO1) :
+ extract_fmt_mulo1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulo1.f
   EXTRACT_IFMT_MULO1_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -1967,11 +1478,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MULO2) :
+ extract_fmt_mulo2:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulo2.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -1993,11 +1505,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MULO3) :
+ extract_fmt_mulo3:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulo3.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2018,11 +1531,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOTBIT) :
+ extract_fmt_notbit:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_notbit.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2045,11 +1559,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOTBIT1) :
+ extract_fmt_notbit1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_notbit1.f
   EXTRACT_IFMT_MULO1_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2071,11 +1586,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOTBIT2) :
+ extract_fmt_notbit2:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_notbit2.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2097,11 +1613,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOTBIT3) :
+ extract_fmt_notbit3:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_notbit3.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2122,11 +1639,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOT) :
+ extract_fmt_not:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_not.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2147,11 +1665,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOT1) :
+ extract_fmt_not1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_not1.f
   EXTRACT_IFMT_MULO1_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2171,11 +1690,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOT2) :
+ extract_fmt_not2:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_not2.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2196,11 +1716,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOT3) :
+ extract_fmt_not3:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_not3.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2220,11 +1741,120 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EMUL) :
+ extract_fmt_shlo:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
+    CGEN_INSN_INT insn = base_insn;
+#define FLD(f) abuf->fields.fmt_shlo.f
+  EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
+
+  EXTRACT_IFMT_MULO_CODE
+
+  /* Record the fields for the semantic handler.  */
+  FLD (i_src1) = & CPU (h_gr)[f_src1];
+  FLD (i_src2) = & CPU (h_gr)[f_src2];
+  FLD (i_dst) = & CPU (h_gr)[f_srcdst];
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_shlo", "src1 0x%x", 'x', f_src1, "src2 0x%x", 'x', f_src2, "dst 0x%x", 'x', f_srcdst, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_src1) = f_src1;
+      FLD (in_src2) = f_src2;
+      FLD (out_dst) = f_srcdst;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_fmt_shlo1:
+  {
+    const IDESC *idesc = &i960base_insn_data[itype];
+    CGEN_INSN_INT insn = base_insn;
+#define FLD(f) abuf->fields.fmt_shlo1.f
+  EXTRACT_IFMT_MULO1_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
+
+  EXTRACT_IFMT_MULO1_CODE
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_src1) = f_src1;
+  FLD (i_src2) = & CPU (h_gr)[f_src2];
+  FLD (i_dst) = & CPU (h_gr)[f_srcdst];
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_shlo1", "f_src1 0x%x", 'x', f_src1, "src2 0x%x", 'x', f_src2, "dst 0x%x", 'x', f_srcdst, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_src2) = f_src2;
+      FLD (out_dst) = f_srcdst;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_fmt_shlo2:
+  {
+    const IDESC *idesc = &i960base_insn_data[itype];
+    CGEN_INSN_INT insn = base_insn;
+#define FLD(f) abuf->fields.fmt_shlo2.f
+  EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
+
+  EXTRACT_IFMT_MULO2_CODE
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_src2) = f_src2;
+  FLD (i_src1) = & CPU (h_gr)[f_src1];
+  FLD (i_dst) = & CPU (h_gr)[f_srcdst];
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_shlo2", "f_src2 0x%x", 'x', f_src2, "src1 0x%x", 'x', f_src1, "dst 0x%x", 'x', f_srcdst, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_src1) = f_src1;
+      FLD (out_dst) = f_srcdst;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_fmt_shlo3:
+  {
+    const IDESC *idesc = &i960base_insn_data[itype];
+    CGEN_INSN_INT insn = base_insn;
+#define FLD(f) abuf->fields.fmt_shlo3.f
+  EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
+
+  EXTRACT_IFMT_MULO3_CODE
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_src1) = f_src1;
+  FLD (f_src2) = f_src2;
+  FLD (i_dst) = & CPU (h_gr)[f_srcdst];
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_shlo3", "f_src1 0x%x", 'x', f_src1, "f_src2 0x%x", 'x', f_src2, "dst 0x%x", 'x', f_srcdst, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (out_dst) = f_srcdst;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_fmt_emul:
+  {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_emul.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2245,15 +1875,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_src1) = f_src1;
       FLD (in_src2) = f_src2;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EMUL1) :
+ extract_fmt_emul1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_emul1.f
   EXTRACT_IFMT_MULO1_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2273,15 +1904,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_src2) = f_src2;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EMUL2) :
+ extract_fmt_emul2:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_emul2.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2301,15 +1933,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EMUL3) :
+ extract_fmt_emul3:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_emul3.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2328,15 +1961,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVL) :
+ extract_fmt_movl:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movl.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2354,18 +1988,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_src1_const__WI_1) = ((FLD (f_src1)) + (1));
+      FLD (in_h_gr_add__VM_index_of_src1_1) = ((FLD (f_src1)) + (1));
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVL1) :
+ extract_fmt_movl1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movl1.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2383,15 +2018,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVT) :
+ extract_fmt_movt:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movt.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2409,20 +2045,21 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_src1_const__WI_1) = ((FLD (f_src1)) + (1));
-      FLD (in_h_gr_add__VM_index_of_src1_const__WI_2) = ((FLD (f_src1)) + (2));
+      FLD (in_h_gr_add__VM_index_of_src1_1) = ((FLD (f_src1)) + (1));
+      FLD (in_h_gr_add__VM_index_of_src1_2) = ((FLD (f_src1)) + (2));
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVT1) :
+ extract_fmt_movt1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movt1.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2440,16 +2077,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVQ) :
+ extract_fmt_movq:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movq.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2467,22 +2105,23 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_src1_const__WI_1) = ((FLD (f_src1)) + (1));
-      FLD (in_h_gr_add__VM_index_of_src1_const__WI_2) = ((FLD (f_src1)) + (2));
-      FLD (in_h_gr_add__VM_index_of_src1_const__WI_3) = ((FLD (f_src1)) + (3));
+      FLD (in_h_gr_add__VM_index_of_src1_1) = ((FLD (f_src1)) + (1));
+      FLD (in_h_gr_add__VM_index_of_src1_2) = ((FLD (f_src1)) + (2));
+      FLD (in_h_gr_add__VM_index_of_src1_3) = ((FLD (f_src1)) + (3));
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVQ1) :
+ extract_fmt_movq1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movq1.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2500,17 +2139,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MODPC) :
+ extract_fmt_modpc:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_modpc.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -2531,11 +2171,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_OFFSET) :
+ extract_fmt_lda_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -2555,11 +2196,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_INDIRECT_OFFSET) :
+ extract_fmt_lda_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -2581,11 +2223,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_INDIRECT) :
+ extract_fmt_lda_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2606,11 +2249,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_INDIRECT_INDEX) :
+ extract_fmt_lda_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2634,11 +2278,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_DISP) :
+ extract_fmt_lda_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2658,11 +2303,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_INDIRECT_DISP) :
+ extract_fmt_lda_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2684,11 +2330,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_INDEX_DISP) :
+ extract_fmt_lda_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2711,11 +2358,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDA_INDIRECT_INDEX_DISP) :
+ extract_fmt_lda_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lda_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2740,11 +2388,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_OFFSET) :
+ extract_fmt_ld_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -2764,11 +2413,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_INDIRECT_OFFSET) :
+ extract_fmt_ld_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -2790,11 +2440,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_INDIRECT) :
+ extract_fmt_ld_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2815,11 +2466,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_INDIRECT_INDEX) :
+ extract_fmt_ld_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2843,11 +2495,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_DISP) :
+ extract_fmt_ld_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2867,11 +2520,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_INDIRECT_DISP) :
+ extract_fmt_ld_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2893,11 +2547,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_INDEX_DISP) :
+ extract_fmt_ld_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2920,11 +2575,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD_INDIRECT_INDEX_DISP) :
+ extract_fmt_ld_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -2949,11 +2605,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_OFFSET) :
+ extract_fmt_ldob_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -2973,11 +2630,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_INDIRECT_OFFSET) :
+ extract_fmt_ldob_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -2999,11 +2657,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_INDIRECT) :
+ extract_fmt_ldob_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3024,11 +2683,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_INDIRECT_INDEX) :
+ extract_fmt_ldob_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3052,11 +2712,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_DISP) :
+ extract_fmt_ldob_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3076,11 +2737,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_INDIRECT_DISP) :
+ extract_fmt_ldob_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3102,11 +2764,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_INDEX_DISP) :
+ extract_fmt_ldob_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3129,11 +2792,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOB_INDIRECT_INDEX_DISP) :
+ extract_fmt_ldob_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldob_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3158,11 +2822,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_OFFSET) :
+ extract_fmt_ldos_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3182,11 +2847,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_INDIRECT_OFFSET) :
+ extract_fmt_ldos_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3208,11 +2874,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_INDIRECT) :
+ extract_fmt_ldos_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3233,11 +2900,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_INDIRECT_INDEX) :
+ extract_fmt_ldos_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3261,11 +2929,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_DISP) :
+ extract_fmt_ldos_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3285,11 +2954,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_INDIRECT_DISP) :
+ extract_fmt_ldos_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3311,11 +2981,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_INDEX_DISP) :
+ extract_fmt_ldos_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3338,11 +3009,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDOS_INDIRECT_INDEX_DISP) :
+ extract_fmt_ldos_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldos_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3367,11 +3039,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_OFFSET) :
+ extract_fmt_ldib_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3391,11 +3064,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_INDIRECT_OFFSET) :
+ extract_fmt_ldib_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3417,11 +3091,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_INDIRECT) :
+ extract_fmt_ldib_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3442,11 +3117,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_INDIRECT_INDEX) :
+ extract_fmt_ldib_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3470,11 +3146,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_DISP) :
+ extract_fmt_ldib_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3494,11 +3171,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_INDIRECT_DISP) :
+ extract_fmt_ldib_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3520,11 +3198,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_INDEX_DISP) :
+ extract_fmt_ldib_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3547,11 +3226,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIB_INDIRECT_INDEX_DISP) :
+ extract_fmt_ldib_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldib_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3576,11 +3256,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_OFFSET) :
+ extract_fmt_ldis_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3600,11 +3281,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_INDIRECT_OFFSET) :
+ extract_fmt_ldis_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3626,11 +3308,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_INDIRECT) :
+ extract_fmt_ldis_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3651,11 +3334,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_INDIRECT_INDEX) :
+ extract_fmt_ldis_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3679,11 +3363,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_DISP) :
+ extract_fmt_ldis_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3703,11 +3388,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_INDIRECT_DISP) :
+ extract_fmt_ldis_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3729,11 +3415,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_INDEX_DISP) :
+ extract_fmt_ldis_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3756,11 +3443,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDIS_INDIRECT_INDEX_DISP) :
+ extract_fmt_ldis_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldis_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3785,11 +3473,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_OFFSET) :
+ extract_fmt_ldl_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3807,15 +3496,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_INDIRECT_OFFSET) :
+ extract_fmt_ldl_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -3835,15 +3525,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_INDIRECT) :
+ extract_fmt_ldl_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3862,15 +3553,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_INDIRECT_INDEX) :
+ extract_fmt_ldl_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3892,15 +3584,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_DISP) :
+ extract_fmt_ldl_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3918,15 +3611,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_INDIRECT_DISP) :
+ extract_fmt_ldl_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3946,15 +3640,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_INDEX_DISP) :
+ extract_fmt_ldl_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -3975,15 +3670,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDL_INDIRECT_INDEX_DISP) :
+ extract_fmt_ldl_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldl_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4006,15 +3702,16 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_OFFSET) :
+ extract_fmt_ldt_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4032,16 +3729,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_INDIRECT_OFFSET) :
+ extract_fmt_ldt_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4061,16 +3759,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_INDIRECT) :
+ extract_fmt_ldt_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4089,16 +3788,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_INDIRECT_INDEX) :
+ extract_fmt_ldt_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4120,16 +3820,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_DISP) :
+ extract_fmt_ldt_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4147,16 +3848,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_INDIRECT_DISP) :
+ extract_fmt_ldt_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4176,16 +3878,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_INDEX_DISP) :
+ extract_fmt_ldt_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4206,16 +3909,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDT_INDIRECT_INDEX_DISP) :
+ extract_fmt_ldt_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldt_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4238,16 +3942,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_OFFSET) :
+ extract_fmt_ldq_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4265,17 +3970,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_INDIRECT_OFFSET) :
+ extract_fmt_ldq_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4295,17 +4001,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_INDIRECT) :
+ extract_fmt_ldq_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4324,17 +4031,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_INDIRECT_INDEX) :
+ extract_fmt_ldq_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4356,17 +4064,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_DISP) :
+ extract_fmt_ldq_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4384,17 +4093,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_INDIRECT_DISP) :
+ extract_fmt_ldq_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4414,17 +4124,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_INDEX_DISP) :
+ extract_fmt_ldq_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4445,17 +4156,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDQ_INDIRECT_INDEX_DISP) :
+ extract_fmt_ldq_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldq_indirect_index_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4478,17 +4190,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_OFFSET) :
+ extract_fmt_st_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4508,11 +4221,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_INDIRECT_OFFSET) :
+ extract_fmt_st_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_indirect_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4534,11 +4248,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_INDIRECT) :
+ extract_fmt_st_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_indirect.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4559,11 +4274,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_INDIRECT_INDEX) :
+ extract_fmt_st_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_indirect_index.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4587,11 +4303,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_DISP) :
+ extract_fmt_st_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4611,11 +4328,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_INDIRECT_DISP) :
+ extract_fmt_st_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_indirect_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4637,11 +4355,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_INDEX_DISP) :
+ extract_fmt_st_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4664,11 +4383,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST_INDIRECT_INDEX_DISP) :
+ extract_fmt_st_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st_indirect_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4693,11 +4413,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_OFFSET) :
+ extract_fmt_stob_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4717,11 +4438,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_INDIRECT_OFFSET) :
+ extract_fmt_stob_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_indirect_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4743,11 +4465,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_INDIRECT) :
+ extract_fmt_stob_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_indirect.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4768,11 +4491,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_INDIRECT_INDEX) :
+ extract_fmt_stob_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_indirect_index.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4796,11 +4520,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_DISP) :
+ extract_fmt_stob_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4820,11 +4545,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_INDIRECT_DISP) :
+ extract_fmt_stob_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_indirect_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4846,11 +4572,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_INDEX_DISP) :
+ extract_fmt_stob_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4873,11 +4600,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOB_INDIRECT_INDEX_DISP) :
+ extract_fmt_stob_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stob_indirect_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4902,11 +4630,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_OFFSET) :
+ extract_fmt_stos_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4926,11 +4655,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_INDIRECT_OFFSET) :
+ extract_fmt_stos_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_indirect_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -4952,11 +4682,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_INDIRECT) :
+ extract_fmt_stos_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_indirect.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -4977,11 +4708,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_INDIRECT_INDEX) :
+ extract_fmt_stos_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_indirect_index.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5005,11 +4737,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_DISP) :
+ extract_fmt_stos_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5029,11 +4762,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_INDIRECT_DISP) :
+ extract_fmt_stos_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_indirect_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5055,11 +4789,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_INDEX_DISP) :
+ extract_fmt_stos_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5082,11 +4817,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STOS_INDIRECT_INDEX_DISP) :
+ extract_fmt_stos_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stos_indirect_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5111,11 +4847,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_OFFSET) :
+ extract_fmt_stl_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -5132,16 +4869,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_INDIRECT_OFFSET) :
+ extract_fmt_stl_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_indirect_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -5160,16 +4898,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_INDIRECT) :
+ extract_fmt_stl_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_indirect.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5187,16 +4926,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_INDIRECT_INDEX) :
+ extract_fmt_stl_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_indirect_index.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5216,17 +4956,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_DISP) :
+ extract_fmt_stl_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5243,16 +4984,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_INDIRECT_DISP) :
+ extract_fmt_stl_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_indirect_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5271,16 +5013,17 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_INDEX_DISP) :
+ extract_fmt_stl_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5299,17 +5042,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STL_INDIRECT_INDEX_DISP) :
+ extract_fmt_stl_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stl_indirect_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5330,17 +5074,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_OFFSET) :
+ extract_fmt_stt_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -5357,17 +5102,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_INDIRECT_OFFSET) :
+ extract_fmt_stt_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_indirect_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -5386,17 +5132,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_INDIRECT) :
+ extract_fmt_stt_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_indirect.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5414,17 +5161,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_INDIRECT_INDEX) :
+ extract_fmt_stt_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_indirect_index.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5444,18 +5192,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_DISP) :
+ extract_fmt_stt_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5472,17 +5221,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_INDIRECT_DISP) :
+ extract_fmt_stt_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_indirect_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5501,17 +5251,18 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_INDEX_DISP) :
+ extract_fmt_stt_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5530,18 +5281,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STT_INDIRECT_INDEX_DISP) :
+ extract_fmt_stt_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stt_indirect_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5562,18 +5314,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_OFFSET) :
+ extract_fmt_stq_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -5590,18 +5343,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_INDIRECT_OFFSET) :
+ extract_fmt_stq_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_indirect_offset.f
   EXTRACT_IFMT_ST_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -5620,18 +5374,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_INDIRECT) :
+ extract_fmt_stq_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_indirect.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5649,18 +5404,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_INDIRECT_INDEX) :
+ extract_fmt_stq_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_indirect_index.f
   EXTRACT_IFMT_ST_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5680,19 +5436,20 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_DISP) :
+ extract_fmt_stq_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5709,18 +5466,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_INDIRECT_DISP) :
+ extract_fmt_stq_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_indirect_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5739,18 +5497,19 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_INDEX_DISP) :
+ extract_fmt_stq_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5769,19 +5528,20 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STQ_INDIRECT_INDEX_DISP) :
+ extract_fmt_stq_indirect_index_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stq_indirect_index_disp.f
   EXTRACT_IFMT_ST_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -5802,19 +5562,20 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_const__WI_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPOBE_REG) :
+ extract_fmt_cmpobe_reg:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
   EXTRACT_IFMT_CMPOBE_REG_VARS /* f-opcode f-br-src1 f-br-src2 f-br-m1 f-br-disp f-br-zero */
@@ -5837,11 +5598,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPOBE_LIT) :
+ extract_fmt_cmpobe_lit:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
   EXTRACT_IFMT_CMPOBE_LIT_VARS /* f-opcode f-br-src1 f-br-src2 f-br-m1 f-br-disp f-br-zero */
@@ -5863,11 +5625,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPOBL_REG) :
+ extract_fmt_cmpobl_reg:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
   EXTRACT_IFMT_CMPOBE_REG_VARS /* f-opcode f-br-src1 f-br-src2 f-br-m1 f-br-disp f-br-zero */
@@ -5890,11 +5653,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPOBL_LIT) :
+ extract_fmt_cmpobl_lit:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
   EXTRACT_IFMT_CMPOBE_LIT_VARS /* f-opcode f-br-src1 f-br-src2 f-br-m1 f-br-disp f-br-zero */
@@ -5916,11 +5680,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BBC_REG) :
+ extract_fmt_bbc_reg:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bbc_reg.f
   EXTRACT_IFMT_CMPOBE_REG_VARS /* f-opcode f-br-src1 f-br-src2 f-br-m1 f-br-disp f-br-zero */
@@ -5943,11 +5708,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BBC_LIT) :
+ extract_fmt_bbc_lit:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bbc_lit.f
   EXTRACT_IFMT_CMPOBE_LIT_VARS /* f-opcode f-br-src1 f-br-src2 f-br-m1 f-br-disp f-br-zero */
@@ -5969,11 +5735,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPI) :
+ extract_fmt_cmpi:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpi.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -5994,11 +5761,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPI1) :
+ extract_fmt_cmpi1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpi1.f
   EXTRACT_IFMT_MULO1_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6018,11 +5786,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPI2) :
+ extract_fmt_cmpi2:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpi2.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6042,11 +5811,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPI3) :
+ extract_fmt_cmpi3:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpi3.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6065,11 +5835,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPO) :
+ extract_fmt_cmpo:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpo.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6090,11 +5861,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPO1) :
+ extract_fmt_cmpo1:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpo1.f
   EXTRACT_IFMT_MULO1_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6114,11 +5886,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPO2) :
+ extract_fmt_cmpo2:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpo2.f
   EXTRACT_IFMT_MULO2_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6138,11 +5911,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPO3) :
+ extract_fmt_cmpo3:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpo3.f
   EXTRACT_IFMT_MULO3_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6161,11 +5935,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_TESTNO_REG) :
+ extract_fmt_testno_reg:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_testno_reg.f
   EXTRACT_IFMT_CMPOBE_REG_VARS /* f-opcode f-br-src1 f-br-src2 f-br-m1 f-br-disp f-br-zero */
@@ -6184,11 +5959,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BNO) :
+ extract_fmt_bno:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bno.f
   EXTRACT_IFMT_BNO_VARS /* f-opcode f-ctrl-disp f-ctrl-zero */
@@ -6207,11 +5983,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_B) :
+ extract_fmt_b:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_b.f
   EXTRACT_IFMT_BNO_VARS /* f-opcode f-ctrl-disp f-ctrl-zero */
@@ -6230,11 +6007,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BX_INDIRECT_OFFSET) :
+ extract_fmt_bx_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -6255,11 +6033,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BX_INDIRECT) :
+ extract_fmt_bx_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -6279,11 +6058,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BX_INDIRECT_INDEX) :
+ extract_fmt_bx_indirect_index:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_index.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -6306,11 +6086,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BX_DISP) :
+ extract_fmt_bx_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bx_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -6329,11 +6110,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BX_INDIRECT_DISP) :
+ extract_fmt_bx_indirect_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -6354,11 +6136,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CALLX_DISP) :
+ extract_fmt_callx_disp:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_callx_disp.f
   EXTRACT_IFMT_LDA_DISP_VARS /* f-opcode f-optdisp f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -6411,11 +6194,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CALLX_INDIRECT) :
+ extract_fmt_callx_indirect:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_callx_indirect.f
   EXTRACT_IFMT_LDA_INDIRECT_VARS /* f-opcode f-srcdst f-abase f-modeb f-scale f-zerob f-index */
@@ -6469,11 +6253,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CALLX_INDIRECT_OFFSET) :
+ extract_fmt_callx_indirect_offset:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_callx_indirect_offset.f
   EXTRACT_IFMT_LDA_OFFSET_VARS /* f-opcode f-srcdst f-abase f-modea f-zeroa f-offset */
@@ -6528,11 +6313,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_RET) :
+ extract_fmt_ret:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_ret.f
   EXTRACT_IFMT_BNO_VARS /* f-opcode f-ctrl-disp f-ctrl-zero */
@@ -6570,11 +6356,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CALLS) :
+ extract_fmt_calls:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_calls.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6594,11 +6381,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_FMARK) :
+ extract_fmt_fmark:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_fmark.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6616,11 +6404,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_FLUSHREG) :
+ extract_fmt_flushreg:
   {
+    const IDESC *idesc = &i960base_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_flushreg.f
   EXTRACT_IFMT_MULO_VARS /* f-opcode f-srcdst f-src2 f-m3 f-m2 f-m1 f-opcode2 f-zero f-src1 */
@@ -6631,14 +6420,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_flushreg", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-
-      }
-    ENDSWITCH (ex)
-
-  }
-
-  return idecode->idesc;
 }

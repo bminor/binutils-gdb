@@ -39,6 +39,17 @@ static char *add_commas PARAMS ((char *buf, int sizeof_buf, unsigned long value)
 extern void sim_set_profile PARAMS ((int n));
 extern void sim_set_profile_size PARAMS ((int n));
 
+#ifdef NEED_UI_LOOP_HOOK
+/* How often to run the ui_loop update, when in use */
+#define UI_LOOP_POLL_INTERVAL 0x14000
+
+/* Counter for the ui_loop_hook update */
+static long ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
+
+/* Actual hook to call to run through gdb's gui event loop */
+extern int (*ui_loop_hook) PARAMS ((int signo));
+#endif /* NEED_UI_LOOP_HOOK */
+
 #ifndef INLINE
 #if defined(__GNUC__) && defined(__OPTIMIZE__)
 #define INLINE __inline__
@@ -784,6 +795,13 @@ sim_resume (sd, step, siggnal)
       /* Writeback all the DATA / PC changes */
       SLOT_FLUSH ();
 
+#ifdef NEED_UI_LOOP_HOOK
+      if (ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
+	{
+	  ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
+	  ui_loop_hook (0);
+	}
+#endif /* NEED_UI_LOOP_HOOK */
     }
   while ( !State.exception && !stop_simulator);
   

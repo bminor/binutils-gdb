@@ -582,6 +582,10 @@ static int open_proc_file PARAMS ((int, struct procinfo *, int, int));
 
 static void close_proc_file PARAMS ((struct procinfo *));
 
+static void close_proc_file_cleanup PARAMS ((void*));
+
+static struct cleanup *make_cleanup_close_proc_file PARAMS ((struct procinfo *));
+
 static void unconditionally_kill_inferior PARAMS ((struct procinfo *));
 
 static NORETURN void proc_init_failed PARAMS ((struct procinfo *, char *, int)) ATTR_NORETURN;
@@ -4024,6 +4028,20 @@ close_proc_file (pip)
     }
 }
 
+static void
+close_proc_file_cleanup (pip)
+     void *pip;
+{
+  close_proc_file ((struct procinfo *) pip);
+}
+
+static struct cleanup *
+make_cleanup_close_proc_file (pip)
+     struct procinfo *pip;
+{
+  return make_cleanup (close_proc_file_cleanup, pip);
+}
+
 /*
 
 LOCAL FUNCTION
@@ -4760,7 +4778,7 @@ info_proc (args, from_tty)
 	{
 	  nomem (0);
 	}
-      make_cleanup (freeargv, (char *) argv);
+      make_cleanup_freeargv (argv);
 
       while (*argv != NULL)
 	{
@@ -4822,7 +4840,7 @@ info_proc (args, from_tty)
 		  /* NOTREACHED */
 		}
 	      pid = pip->pid;
-	      make_cleanup (close_proc_file, pip);
+	      make_cleanup_close_proc_file (pip);
 	    }
 	  else if (**argv != '\000')
 	    {
@@ -4874,7 +4892,7 @@ No process.  Start debugging a program or specify an explicit process ID.");
 	  if (!open_proc_file ((*lwps << 16) | pid, pip, O_RDONLY, 0))
 	    continue;
 
-	  make_cleanup (close_proc_file, pip);
+	  make_cleanup_close_proc_file (pip);
 
 	  if (!procfs_read_status (pip))
 	    {

@@ -207,13 +207,15 @@ enum target_signal {
   TARGET_SIGNAL_REALTIME_63 = 75,
 #if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
-  TARGET_EXC_BAD_ACCESS = 76,
-  TARGET_EXC_BAD_INSTRUCTION = 77,
-  TARGET_EXC_ARITHMETIC = 78,
-  TARGET_EXC_EMULATION = 79,
-  TARGET_EXC_SOFTWARE = 80,
-  TARGET_EXC_BREAKPOINT = 81,
+  TARGET_EXC_BAD_ACCESS,
+  TARGET_EXC_BAD_INSTRUCTION,
+  TARGET_EXC_ARITHMETIC,
+  TARGET_EXC_EMULATION,
+  TARGET_EXC_SOFTWARE,
+  TARGET_EXC_BREAKPOINT,
 #endif
+  TARGET_SIGNAL_INFO,
+
   /* Some signal we don't know about.  */
   TARGET_SIGNAL_UNKNOWN,
 
@@ -1211,6 +1213,8 @@ find_default_create_inferior PARAMS ((char *, char *, char **));
 
 void
 find_default_clone_and_follow_inferior PARAMS ((int, int *));
+
+extern struct target_ops *find_run_target PARAMS ((void));
 
 extern struct target_ops *
 find_core_target PARAMS ((void));

@@ -842,7 +842,7 @@ write_tm6md (struct hw *me,
 
   unsigned_word offset = address - timers->block[0].base;
   
-  if ( offset != 0x84 && nr_bytes > 1 || nr_bytes > 2 )
+  if ((offset != 0x84 && nr_bytes > 1) || nr_bytes > 2 )
     {
       hw_abort (me, "Bad write size of %d bytes to TM6MD", nr_bytes);
     }

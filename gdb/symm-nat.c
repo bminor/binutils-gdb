@@ -57,7 +57,6 @@ int regno;
 {
   struct pt_regset regs;
   int i;
-  extern char registers[];
 
   /* FIXME: Fetching the registers is a kludge to initialize all elements
      in the fpu and fpa status. This works for normal debugging, but
@@ -98,7 +97,6 @@ fetch_inferior_registers (regno)
 {
   int i;
   struct pt_regset regs;
-  extern char registers[];
 
   registers_fetched ();
 

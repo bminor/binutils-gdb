@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
+#include "gdbcore.h"
 #include "expression.h"
 #include "value.h"
 #include "demangle.h"
@@ -27,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "jv-lang.h"
 #include "c-lang.h"
+#include "annotate.h"
 
 int
 java_value_print (val, stream, format, pretty)
@@ -402,6 +404,8 @@ java_print_value_fields (type, valaddr, address, stream,
 				 stream, format, 0, recurse+1, pretty);
 		    }
 		}
+	      else if (TYPE_FIELD_TYPE (type, i) == NULL)
+		fputs_filtered ("<unknown type>", stream);
 	      else
 		{
 	           val_print (TYPE_FIELD_TYPE (type, i), 

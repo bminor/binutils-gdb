@@ -1,4 +1,5 @@
-# Copyright (C) 1998 Free Software Foundation, Inc.
+# Tests for reference types with elementary type variables in GDB.
+# Copyright (C) 1998, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +19,6 @@
 # bug-gdb@prep.ai.mit.edu
 
 # written by Elena Zannoni (ezannoni@cygnus.com)
-
-# This file is part of the gdb testsuite
-#
-# tests for reference types
-# with elementary type variables.
-# 
 
 if $tracelevel then {
         strace $tracelevel
@@ -140,6 +135,7 @@ gdb_expect {
 send_gdb "ptype US\n"
 gdb_expect {
     -re "type = unsigned short.*$gdb_prompt $"  { pass "ptype US" }
+    -re "type = short unsigned.*$gdb_prompt $"  { pass "ptype US" }
     -re ".*$gdb_prompt $"   {  fail "ptype US" }
     timeout             { fail "(timeout) ptype US" }
 }
@@ -212,6 +208,7 @@ gdb_expect {
 send_gdb "ptype UL\n"
 gdb_expect {
     -re "type = unsigned long.*$gdb_prompt $"  { pass "ptype UL" }
+    -re "type = long unsigned.*$gdb_prompt $"  { pass "ptype UL" }
     -re ".*$gdb_prompt $"   {  fail "ptype UL" }
     timeout             { fail "(timeout) ptype UL" }
 }
@@ -284,6 +281,7 @@ gdb_expect {
 send_gdb "ptype rS\n"
 gdb_expect {
     -re "type = short &.*$gdb_prompt $"  { pass "ptype rS" }
+    -re "type = short int &.*$gdb_prompt $"  { pass "ptype rS" }
     -re ".*$gdb_prompt $"   {  fail "ptype rS" }
     timeout             { fail "(timeout) ptype rS" }
 }
@@ -293,6 +291,7 @@ gdb_expect {
 send_gdb "ptype rUS\n"
 gdb_expect {
     -re "type = unsigned short &.*$gdb_prompt $"  { pass "ptype rUS" }
+    -re "type = short unsigned int &.*$gdb_prompt $"  { pass "ptype rUS" }
     -re ".*$gdb_prompt $"   {  fail "ptype rUS" }
     timeout             { fail "(timeout) ptype rUS" }
 }
@@ -319,6 +318,7 @@ gdb_expect {
 send_gdb "ptype rL\n"
 gdb_expect {
     -re "type = long &.*$gdb_prompt $"  { pass "ptype rL" }
+    -re "type = long int &.*$gdb_prompt $"  { pass "ptype rL" }
     -re ".*$gdb_prompt $"   {  fail "ptype rL" }
     timeout             { fail "(timeout) ptype rL" }
 }
@@ -327,6 +327,7 @@ gdb_expect {
 send_gdb "ptype rUL\n"
 gdb_expect {
     -re "type = unsigned long &.*$gdb_prompt $"  { pass "ptype rUL" }
+    -re "type = long unsigned int &.*$gdb_prompt $"  { pass "ptype rUL" }
     -re ".*$gdb_prompt $"   {  fail "ptype rUL" }
     timeout             { fail "(timeout) ptype rUL" }
 }
@@ -372,7 +373,10 @@ send_gdb "print rS\n"
 gdb_expect {
     -re ".\[0-9\]* = \\(short &\\) @$hex: -14.*$gdb_prompt $" {
         pass "print value of rS"
-      }
+    }
+    -re ".\[0-9\]* = \\(short int &\\) @$hex: -14.*$gdb_prompt $" {
+        pass "print value of rS"
+    }
     -re ".*$gdb_prompt $" { fail "print value of rS" }
     timeout           { fail "(timeout) print value of rS" }
   }
@@ -382,7 +386,10 @@ send_gdb "print rUS\n"
 gdb_expect {
     -re ".\[0-9\]* = \\(unsigned short &\\) @$hex: 7.*$gdb_prompt $" {
         pass "print value of rUS"
-      }
+    }
+    -re ".\[0-9\]* = \\(short unsigned int &\\) @$hex: 7.*$gdb_prompt $" {
+        pass "print value of rUS"
+    }
     -re ".*$gdb_prompt $" { fail "print value of rUS" }
     timeout           { fail "(timeout) print value of rUS" }
   }
@@ -412,7 +419,10 @@ send_gdb "print rL\n"
 gdb_expect {
     -re ".\[0-9\]* = \\(long &\\) @$hex: -234.*$gdb_prompt $" {
         pass "print value of rL"
-      }
+    }
+    -re ".\[0-9\]* = \\(long int &\\) @$hex: -234.*$gdb_prompt $" {
+        pass "print value of rL"
+    }
     -re ".*$gdb_prompt $" { fail "print value of rL" }
     timeout           { fail "(timeout) print value of rL" }
   }
@@ -423,7 +433,10 @@ send_gdb "print rUL\n"
 gdb_expect {
     -re ".\[0-9\]* = \\(unsigned long &\\) @$hex: 234.*$gdb_prompt $" {
         pass "print value of rUL"
-      }
+    }
+    -re ".\[0-9\]* = \\(long unsigned int &\\) @$hex: 234.*$gdb_prompt $" {
+        pass "print value of rUL"
+    }
     -re ".*$gdb_prompt $" { fail "print value of rUL" }
     timeout           { fail "(timeout) print value of rUL" }
   }

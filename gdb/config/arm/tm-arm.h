@@ -1,5 +1,5 @@
 /* Definitions to make GDB target for an ARM
-   Copyright 1986, 1987, 1989, 1991, 1993, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1986-1989, 1991, 1993-1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -268,7 +268,8 @@ extern use_struct_convention_fn arm_use_struct_convention;
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  (extract_address ((PTR) (REGBUF), REGISTER_RAW_SIZE(0)))
 
 /* Specify that for the native compiler variables for a particular
    lexical context are listed after the beginning LBRAC instead of

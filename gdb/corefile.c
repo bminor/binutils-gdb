@@ -37,8 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
-extern char registers[];
-
 /* Local function declarations.  */
 
 static void call_extra_exec_file_hooks PARAMS ((char *filename));

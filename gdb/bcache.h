@@ -62,11 +62,7 @@ struct bcache {
 extern void *
 bcache PARAMS ((void *bytes, int count, struct bcache *bcachep));
 
-#if MAINTENANCE_CMDS
-
 extern void
 print_bcache_statistics PARAMS ((struct bcache *, char *));
-
-#endif	/* MAINTENANCE_CMDS */
 
 #endif /* BCACHE_H */

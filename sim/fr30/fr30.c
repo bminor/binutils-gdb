@@ -48,15 +48,15 @@ int
 fr30bf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 {
   if (rn < 16)
-    SETTWI (buf, a_fr30_h_gr_get (current_cpu, rn));
+    SETTWI (buf, fr30bf_h_gr_get (current_cpu, rn));
   else
     switch (rn)
       {
       case PC_REGNUM :
-	SETTWI (buf, a_fr30_h_pc_get (current_cpu));
+	SETTWI (buf, fr30bf_h_pc_get (current_cpu));
 	break;
       case PS_REGNUM :
-	SETTWI (buf, a_fr30_h_ps_get (current_cpu));
+	SETTWI (buf, fr30bf_h_ps_get (current_cpu));
 	break;
       case TBR_REGNUM :
       case RP_REGNUM :
@@ -64,7 +64,7 @@ fr30bf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
       case USP_REGNUM :
       case MDH_REGNUM :
       case MDL_REGNUM :
-	SETTWI (buf, a_fr30_h_dr_get (current_cpu,
+	SETTWI (buf, fr30bf_h_dr_get (current_cpu,
 				      decode_gdb_dr_regnum (rn)));
 	break;
       default :
@@ -80,15 +80,15 @@ int
 fr30bf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 {
   if (rn < 16)
-    a_fr30_h_gr_set (current_cpu, rn, GETTWI (buf));
+    fr30bf_h_gr_set (current_cpu, rn, GETTWI (buf));
   else
     switch (rn)
       {
       case PC_REGNUM :
-	a_fr30_h_pc_set (current_cpu, GETTWI (buf));
+	fr30bf_h_pc_set (current_cpu, GETTWI (buf));
 	break;
       case PS_REGNUM :
-	a_fr30_h_ps_set (current_cpu, GETTWI (buf));
+	fr30bf_h_ps_set (current_cpu, GETTWI (buf));
 	break;
       case TBR_REGNUM :
       case RP_REGNUM :
@@ -96,7 +96,7 @@ fr30bf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
       case USP_REGNUM :
       case MDH_REGNUM :
       case MDL_REGNUM :
-	a_fr30_h_dr_set (current_cpu,
+	fr30bf_h_dr_set (current_cpu,
 			 decode_gdb_dr_regnum (rn),
 			 GETTWI (buf));
 	break;

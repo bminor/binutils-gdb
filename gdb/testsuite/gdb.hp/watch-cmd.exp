@@ -27,17 +27,14 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+if { [skip_hp_tests] } then { continue }
+
 set testfile "run-hp"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 
-}
-
-# are we on a target board
-if ![isnative] then {
-    return
 }
 
 if {![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"]} {
@@ -48,7 +45,7 @@ if {![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"]} {
 if [get_compiler_info ${binfile}] {
     return -1;
 }
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+if { $gcc_compiled } then { continue }
 
 
 gdb_exit

@@ -50,6 +50,7 @@ if $tracelevel then {
         strace $tracelevel
         }
 
+if { [skip_hp_tests] } then { continue }
 
 #
 # test running programs
@@ -67,7 +68,7 @@ if [get_compiler_info ${binfile} "c++"] {
 }
  
  
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+if { $gcc_compiled } then { continue }
 
 set cmdline "$CXX ${srcdir}/${subdir}/${srcfile} +A -Wl,-a,archive -g -o ${binfile}"
 

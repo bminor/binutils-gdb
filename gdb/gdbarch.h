@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
-
 /* The target-system-dependant byte order is dynamic */
 
 /* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
@@ -97,6 +96,21 @@ extern disassemble_info tm_print_insn_info;
 #ifndef TARGET_PRINT_INSN_INFO
 #define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
 #endif
+
+
+
+/* Explicit test for D10V architecture.
+   USE of these macro's is *STRONGLY* discouraged. */
+
+#define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
+#ifndef D10V_MAKE_DADDR
+#define D10V_MAKE_DADDR(X) (abort (), 0)
+#endif
+#ifndef D10V_MAKE_IADDR
+#define D10V_MAKE_IADDR(X) (abort (), 0)
+#endif
+
+
 
 
 

@@ -1,4 +1,4 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
 # Free Software Foundation, Inc.
 
 # This file is part of GDB.
@@ -46,6 +46,8 @@ top_builddir = .
 
 SHELL = @SHELL@
 EXEEXT = @EXEEXT@
+
+AWK = @AWK@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -215,7 +217,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION=4.18
+VERSION = 19990422
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -248,6 +250,13 @@ ANNOTATE_OBS = annotate.o
 @host_makefile_frag@
 @target_makefile_frag@
 # End of host and target-dependent makefile fragments
+
+# Possibly ignore the simulator.  If the simulator is being ignored, 
+# these expand into SIM= and SIM_OBJ=, overriding the entries from 
+# target_makefile_frag
+#
+@IGNORE_SIM@
+@IGNORE_SIM_OBS@
 
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
@@ -919,7 +928,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	convex-tdep.c convex-xdep.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
-	go32-xdep.c gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
+	gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c \
         hp-psymtab-read.c hp-symtab-read.c \
 	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
@@ -1117,8 +1126,6 @@ gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 	exc_request_U.h msg_U.h gnu-nat.h
 
-go32-xdep.o: go32-xdep.c
-
 # OBSOLETE gould-tdep.o: gould-tdep.c $(OP_INCLUDE)/np1.h $(defs_h) $(frame_h) \
 # OBSOLETE	$(gdbcore_h) $(symtab_h)
 
@@ -1196,11 +1203,11 @@ jv-lang.o: jv-lang.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 
 jv-typeprint.o: jv-typeprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(INCLUDE_DIR)/demangle.h jv-lang.h gdb_string.h \
-	typeprint.h
+	typeprint.h c-lang.h
 
 jv-valprint.o: jv-valprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(value_h) $(INCLUDE_DIR)/demangle.h valprint.h \
-	language.h jv-lang.h c-lang.h
+	language.h jv-lang.h c-lang.h gdbcore.h annotate.h
 
 language.o: language.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) language.h parser-defs.h $(symtab_h) \
@@ -1297,7 +1304,7 @@ nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h)  $(gdbcore_h)
 ns32k-tdep.o: ns32k-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h)
 
 objfiles.o: objfiles.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
-	$(symtab_h) gdb_string.h
+	$(symtab_h) gdb_string.h $(breakpoint_h)
 
 osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h gnu-regex.h symfile.h target.h language.h gdb_string.h
@@ -1504,7 +1511,7 @@ stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	language.h target.h gdb_string.h
 
-ax-general.o: ax-general.c $(ax_h) $(defs_h)
+ax-general.o: ax-general.c $(ax_h) $(defs_h) $(value_h)
 ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) symfile.h $(gdbtypes_h) \
 	$(value_h) $(expression_h) $(command_h) $(ax_h) $(gdbcmd_h) ax-gdb.h
 
@@ -1532,6 +1539,8 @@ symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 
 tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 	$(symtab_h)
+
+tic80-tdep.o: tic80-tdep.c $(defs_h)
 
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h gdb_string.h

@@ -104,7 +104,9 @@ static void prune_threads PARAMS ((void));
 
 static struct target_thread_vector *target_thread_functions;
 
-int
+static int target_find_new_threads PARAMS ((void));
+
+static int
 target_find_new_threads ()
 {
   int retval = 0;
@@ -698,7 +700,6 @@ void
 _initialize_thread ()
 {
   static struct cmd_list_element *thread_apply_list = NULL;
-  extern struct cmd_list_element *cmdlist;
 
   add_info ("threads", info_threads_command,
 	    "IDs of currently known threads.");

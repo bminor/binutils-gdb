@@ -24,10 +24,7 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-# are we on a target board
-if ![isnative] then {
-    return
-}
+if { [skip_hp_tests] } then { continue }
 
 if { ![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"] } {
     verbose "HPUX h/w watch test ignored for non-hppa or pre-HP/UX-10.30 targets."

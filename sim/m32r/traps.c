@@ -59,9 +59,18 @@ m32r_core_signal (SIM_DESC sd, SIM_CPU *current_cpu, sim_cia cia,
     {
       a_m32r_h_cr_set (current_cpu, H_CR_BBPC,
 		       a_m32r_h_cr_get (current_cpu, H_CR_BPC));
-      a_m32r_h_bpsw_set (current_cpu, a_m32r_h_psw_get (current_cpu));
-      /* sm not changed */
-      a_m32r_h_psw_set (current_cpu, a_m32r_h_psw_get (current_cpu) & 0x80);
+      if (MACH_NUM (CPU_MACH (current_cpu)) == MACH_M32R)
+	{
+	  m32rbf_h_bpsw_set (current_cpu, m32rbf_h_psw_get (current_cpu));
+	  /* sm not changed */
+	  m32rbf_h_psw_set (current_cpu, m32rbf_h_psw_get (current_cpu) & 0x80);
+	}
+      else
+	{
+	  m32rxf_h_bpsw_set (current_cpu, m32rxf_h_psw_get (current_cpu));
+	  /* sm not changed */
+	  m32rxf_h_psw_set (current_cpu, m32rxf_h_psw_get (current_cpu) & 0x80);
+	}
       a_m32r_h_cr_set (current_cpu, H_CR_BPC, cia);
 
       sim_engine_restart (CPU_STATE (current_cpu), current_cpu, NULL,

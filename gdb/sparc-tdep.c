@@ -673,7 +673,7 @@ isbranch (instruction, addr, target)
    The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+sparc_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      char *raw_buffer;
      int *optimized;
      CORE_ADDR *addrp;

@@ -63,7 +63,6 @@ extern int have_symbol_file_p();
 extern jmp_buf stack_jmp;
 
 extern int errno;
-extern char registers[REGISTER_BYTES];
 
 void
 fetch_inferior_registers (regno)
@@ -310,7 +309,6 @@ fill_gregset (gregsetp, regno)
 {
     int regi;
     register greg_t *regp = (greg_t *) gregsetp;
-    extern char registers[];
 
     for (regi = 0 ; regi <= R_R31 ; regi++)
 	if ((regno == -1) || (regno == regi))

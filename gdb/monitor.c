@@ -492,7 +492,7 @@ readchar (timeout)
     return c;
 
   if (c == SERIAL_TIMEOUT)
-#if 0 /* MAINTENANCE_CMDS */
+#if 0
     /* I fail to see how detaching here can be useful */
     if (in_monitor_wait)	/* Watchdog went off */
       {
@@ -1055,7 +1055,7 @@ monitor_wait (pid, status)
   old_chain = make_cleanup (monitor_wait_cleanup, &old_timeout);
   RDEBUG(("MON wait\n"))
 
-#if 0 /* MAINTENANCE_CMDS */
+#if 0
     /* This is somthing other than a maintenance command */
   in_monitor_wait = 1;
   timeout = watchdog > 0 ? watchdog : -1;
@@ -1133,10 +1133,11 @@ monitor_fetch_register (regno)
   int i;
 
   name = current_monitor->regnames[regno];
-  RDEBUG(("MON fetchreg %d '%s'\n",regno,name)) 
+  RDEBUG(("MON fetchreg %d '%s'\n", regno, name ? name : "(null name)")) 
 
   if (!name || (*name == '\0'))
-    { RDEBUG(("No register known for %d\n",regno))
+    {
+      RDEBUG (("No register known for %d\n", regno))
       supply_register (regno, zerobuf);
       return;
     }
@@ -1155,8 +1156,8 @@ monitor_fetch_register (regno)
       monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
       /* Handle case of first 32 registers listed in pairs.  */
       if (current_monitor->flags & MO_32_REGS_PAIRED
-	  && regno & 1 == 1 && regno < 32)
-	{ RDEBUG(("EXP getreg.resp_delim\n")) ;
+	  && (regno & 1) != 0 && regno < 32)
+ 	{ RDEBUG(("EXP getreg.resp_delim\n")) ;
 	  monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
 	}
     }
@@ -1538,14 +1539,19 @@ static char * longlong_hexchars(unsigned long long value,
       }
       longlongendswap(disbuf) ; /* FIXME: ONly on big endian hosts */
       while (scan < limit)
-	{ c = *scan++ ; /* a byte of our long long value */
+	{
+	  c = *scan++; /* a byte of our long long value */
 	  if (leadzero)
-	    if (c == 0) continue ;
-	    else leadzero = 0 ; /* henceforth we print even zeroes */
-	  nib = c >> 4 ;        /* high nibble bits */
-	  *outbuff++ = hexlate[nib] ;
-	  nib = c & 0x0f ;      /* low nibble bits */
-	  *outbuff++ = hexlate[nib] ;
+	    {
+	      if (c == 0)
+		continue;
+	      else
+		leadzero = 0; /* henceforth we print even zeroes */
+	    }
+	  nib = c >> 4;        /* high nibble bits */
+	  *outbuff++ = hexlate[nib];
+	  nib = c & 0x0f;      /* low nibble bits */
+	  *outbuff++ = hexlate[nib];
 	}
       return outbuff ;
     }
@@ -1808,7 +1814,7 @@ monitor_read_memory (memaddr, myaddr, len)
   /* send the memory examine command */
 
   if (current_monitor->flags & MO_GETMEM_NEEDS_RANGE)
-    monitor_printf (current_monitor->getmem.cmdb, memaddr, memaddr + len - 1);
+    monitor_printf (current_monitor->getmem.cmdb, memaddr, memaddr + len);
   else if (current_monitor->flags & MO_GETMEM_16_BOUNDARY)
     monitor_printf (current_monitor->getmem.cmdb, dumpaddr);
   else

@@ -498,6 +498,8 @@ main()
 
   /* Class with enumeration inside it */ 
   ClassWithEnum obj_with_enum;
+  obj_with_enum.priv_enum = ClassWithEnum::red;
+  obj_with_enum.x = 0;
   obj_with_enum.priv_enum = ClassWithEnum::green;
 
   return foo.*pmi;

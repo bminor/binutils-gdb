@@ -189,6 +189,7 @@ static void stash_registers(void);
 static void restore_registers(void);
 static int  prepare_to_step(int);
 static int  finish_from_step(void);
+static unsigned long crc32 (unsigned char *, int, unsigned long);
 
 static void gdb_error(char *, char *);
 static int  gdb_putchar(int), gdb_puts(char *), gdb_write(char *, int);
@@ -486,9 +487,11 @@ handle_exception(int exceptionVector)
 	    if ((registers[PC] & 2) != 0)
 	      prepare_to_step(1);
 	  }
+
 	return;
 
       case 'D':	/* Detach */
+#if 0
 	/* I am interpreting this to mean, release the board from control 
 	   by the remote stub.  To do this, I am restoring the original
 	   (or at least previous) exception vectors.
@@ -497,6 +500,32 @@ handle_exception(int exceptionVector)
 	  exceptionHandler (i, save_vectors[i]);
 	putpacket ("OK");
 	return;		/* continue the inferior */
+#else
+	strcpy(remcomOutBuffer,"OK");
+	break;
+#endif
+    case 'q':
+      ptr = &remcomInBuffer[1];
+      if (*ptr++ == 'C' &&
+	  *ptr++ == 'R' &&
+	  *ptr++ == 'C' &&
+	  *ptr++ == ':')
+	{
+	  unsigned long start, len, our_crc;
+
+	  if (hexToInt (&ptr, (int *) &start) &&
+	      *ptr++ == ','                   &&
+	      hexToInt (&ptr, (int *) &len))
+	    {
+	      remcomOutBuffer[0] = 'C';
+	      our_crc = crc32 ((unsigned char *) start, len, 0xffffffff);
+	      mem2hex ((char *) &our_crc, 
+		       &remcomOutBuffer[1], 
+		       sizeof (long), 
+		       0); 
+	    } /* else do nothing */
+	} /* else do nothing */
+      break;
 
       case 'k': /* kill the program */
 	continue;
@@ -505,6 +534,39 @@ handle_exception(int exceptionVector)
     /* reply to the request */
     putpacket(remcomOutBuffer);
   }
+}
+
+/* qCRC support */
+
+/* Table used by the crc32 function to calcuate the checksum. */
+static unsigned long crc32_table[256] = {0, 0};
+
+static unsigned long
+crc32 (buf, len, crc)
+     unsigned char *buf;
+     int len;
+     unsigned long crc;
+{
+  if (! crc32_table[1])
+    {
+      /* Initialize the CRC table and the decoding table. */
+      int i, j;
+      unsigned long c;
+
+      for (i = 0; i < 256; i++)
+	{
+	  for (c = i << 24, j = 8; j > 0; --j)
+	    c = c & 0x80000000 ? (c << 1) ^ 0x04c11db7 : (c << 1);
+	  crc32_table[i] = c;
+	}
+    }
+
+  while (len--)
+    {
+      crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ *buf) & 255];
+      buf++;
+    }
+  return crc;
 }
 
 static int 
@@ -756,7 +818,7 @@ bin2mem (buf, mem, count, may_fault)
             case 0x4:  /* $ */
             case 0x5d: /* escape char */
               buf++;
-              *buf += 0x20;
+              *buf |= 0x20;
               break;
             default:
               /* nothing */
@@ -985,13 +1047,13 @@ branchDestination(instr, branchCode)
   case 2: 					/* JL or JMP */ 
     return registers[instr[1] & 0x0F] & ~3;	/* jump thru a register */ 
   case 3: 		/* BC, BNC, BL, BRA (short, 8-bit relative offset) */ 
-    return (((int) instr) & ~3) + ((unsigned char) instr[1] << 2);
+    return (((int) instr) & ~3) + ((char) instr[1] << 2);
   case 4: 		/* BC, BNC, BL, BRA (long, 24-bit relative offset) */ 
     return ((int) instr + 
-	    ((((unsigned char) instr[1] << 16) | (instr[2] << 8) | (instr[3])) << 2)); 
+	    ((((char) instr[1] << 16) | (instr[2] << 8) | (instr[3])) << 2)); 
   case 5: 		/* BNE, BEQ (16-bit relative offset) */ 
   case 6: 		/* BNEZ, BLTZ, BLEZ, BGTZ, BGEZ ,BEQZ (ditto) */ 
-    return ((int) instr + ((((unsigned char) instr[2] << 8) | (instr[3])) << 2)); 
+    return ((int) instr + ((((char) instr[2] << 8) | (instr[3])) << 2)); 
   }
 
   /* An explanatory note: in the last three return expressions, I have

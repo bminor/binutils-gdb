@@ -29,6 +29,7 @@ if $tracelevel then {
         strace $tracelevel
 }
 
+if { [skip_hp_tests] } then { continue }
 
 # Check to see if we have an executable to test.  If not, then either we
 # haven't tried to compile one, or the compilation failed for some reason.
@@ -44,9 +45,8 @@ set binfile ${objdir}/${subdir}/${testfile}
 if [get_compiler_info ${binfile} "c++"] {
     return -1;
 }
- 
- 
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+
+if { $gcc_compiled } then { continue }
 
 #if  { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1} ${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}" "${binfile}" executable {debug c++}] != "" } {
 #     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."

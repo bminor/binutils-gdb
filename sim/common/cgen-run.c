@@ -93,9 +93,13 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	 way to identify this case.  */
       int max_insns = (step
 		       ? 1
-		       : (nr_cpus == 1 /*&& wip:no-events*/)
+		       : (nr_cpus == 1
+			  /*&& wip:no-events*/
+			  /* Don't do this if running under gdb, need to
+			     poll ui for events.  */
+			  && STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
 		       ? 0
-		       : 4); /*FIXME: magic number*/
+		       : 8); /*FIXME: magic number*/
       int fast_p = STATE_RUN_FAST_P (sd);
 
       sim_events_preprocess (sd, last_cpu_nr >= nr_cpus, next_cpu_nr >= nr_cpus);

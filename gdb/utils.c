@@ -166,6 +166,7 @@ make_final_cleanup (function, arg)
 {
     return make_my_cleanup (&final_cleanup_chain, function, arg);
 }
+
 struct cleanup *
 make_run_cleanup (function, arg)
      void (*function) PARAMS ((PTR));
@@ -173,6 +174,21 @@ make_run_cleanup (function, arg)
 {
     return make_my_cleanup (&run_cleanup_chain, function, arg);
 }
+
+static void
+do_freeargv (arg)
+     void *arg;
+{
+  freeargv ((char**) arg);
+}
+
+struct cleanup *
+make_cleanup_freeargv (arg)
+     char **arg;
+{
+  return make_my_cleanup (&cleanup_chain, do_freeargv, arg);
+}
+
 struct cleanup *
 make_my_cleanup (pmy_chain, function, arg)
      struct cleanup **pmy_chain;
@@ -1714,7 +1730,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
     return;
 
   /* Don't do any filtering if it is disabled.  */
-  if (stream != gdb_stdout
+  if ((stream != gdb_stdout) || !pagination_enabled
    || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
     {
       fputs_unfiltered (linebuffer, stream);
@@ -2300,42 +2316,40 @@ strcmp_iw (string1, string2)
 
 
 /*
-** subsetCompare()
-**    Answer whether stringToCompare is a full or partial match to
-**    templateString.  The partial match must be in sequence starting
+** subset_compare()
+**    Answer whether string_to_compare is a full or partial match to
+**    template_string.  The partial match must be in sequence starting
 **    at index 0.
 */
 int
-#ifdef _STDC__
-subsetCompare(
-    char *stringToCompare,
-    char *templateString)
-#else
-subsetCompare(stringToCompare, templateString)
-    char *stringToCompare;
-    char *templateString;
-#endif
+subset_compare (string_to_compare, template_string)
+    char *string_to_compare;
+    char *template_string;
 {
-    int    match = 0;
+  int match;
+  if (template_string != (char *)NULL && string_to_compare != (char *)NULL &&
+      strlen(string_to_compare) <= strlen(template_string))
+    match = (strncmp(template_string,
+		     string_to_compare,
+		     strlen(string_to_compare)) == 0);
+  else
+    match = 0;
+  return match;
+}
 
-    if (templateString != (char *)NULL && stringToCompare != (char *)NULL &&
-	strlen(stringToCompare) <= strlen(templateString))
-      match = (strncmp(templateString,
-		       stringToCompare,
-		       strlen(stringToCompare)) == 0);
 
-    return match;
-} /* subsetCompare */
-
-
-void pagination_on_command(arg, from_tty)
+static void pagination_on_command PARAMS ((char *arg, int from_tty));
+static void
+pagination_on_command (arg, from_tty)
   char *arg;
   int from_tty;
 {
   pagination_enabled = 1;
 }
 
-void pagination_off_command(arg, from_tty)
+static void pagination_on_command PARAMS ((char *arg, int from_tty));
+static void
+pagination_off_command (arg, from_tty)
   char *arg;
   int from_tty;
 {
@@ -2560,10 +2574,12 @@ floatformat_to_doublest (fmt, from, to)
    increment the exponent by one to account for the integer bit.  */
 
   if (!special_exponent)
-    if (fmt->intbit == floatformat_intbit_no)
-      dto = ldexp (1.0, exponent);
-    else
-      exponent++;
+    {
+      if (fmt->intbit == floatformat_intbit_no)
+	dto = ldexp (1.0, exponent);
+      else
+	exponent++;
+    }
 
   while (mant_bits_left > 0)
     {

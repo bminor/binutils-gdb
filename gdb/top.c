@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "terminal.h" /* For job_control.  */
 #include "annotate.h"
-#include <setjmp.h>
 #include "top.h"
 
 /* readline include files */
@@ -245,21 +244,15 @@ struct cmd_list_element *unsethistlist;
 
 /* Chain containing all defined maintenance subcommands. */
 
-#if MAINTENANCE_CMDS
 struct cmd_list_element *maintenancelist;
-#endif
 
 /* Chain containing all defined "maintenance info" subcommands. */
 
-#if MAINTENANCE_CMDS
 struct cmd_list_element *maintenanceinfolist;
-#endif
 
 /* Chain containing all defined "maintenance print" subcommands. */
 
-#if MAINTENANCE_CMDS
 struct cmd_list_element *maintenanceprintlist;
-#endif
 
 struct cmd_list_element *setprintlist;
 
@@ -367,9 +360,12 @@ static void stop_sig PARAMS ((int));
    command file.  */
 
 void (*init_ui_hook) PARAMS ((char *argv0));
-#ifdef __CYGWIN32__
-void (*ui_loop_hook) PARAMS ((int));
-#endif
+
+/* This hook is called from within gdb's many mini-event loops which could
+   steal control from a real user interface's event loop. It returns
+   non-zero if the user is requesting a detach, zero otherwise. */
+
+int (*ui_loop_hook) PARAMS ((int));
 
 /* Called instead of command_loop at top level.  Can be invoked via
    return_to_top_level.  */
@@ -2471,6 +2467,7 @@ int from_tty;
   enum command_control_type ret;
   enum misc_command_type val;
 
+  control_level = 0; 
   if (readline_begin_hook)
     {
       /* Note - intentional to merge messages with no newline */
@@ -2769,7 +2766,6 @@ define_command (comname, from_tty)
   for (tem = comname; *tem; tem++)
     if (isupper(*tem)) *tem = tolower(*tem);
 
-  control_level = 0;
   sprintf (tmpbuf, "Type commands for definition of \"%s\".", comname);
   cmds = read_command_lines (tmpbuf, from_tty);
 
@@ -3151,10 +3147,12 @@ source_command (args, from_tty)
 
   stream = fopen (file, FOPEN_RT);
   if (!stream)
-    if (from_tty)
-      perror_with_name (file);
-    else
-      return;
+    {
+      if (from_tty)
+	perror_with_name (file);
+      else
+	return;
+    }
 
   make_cleanup ((make_cleanup_func) fclose, stream);
 
@@ -3405,11 +3403,9 @@ init_cmd_lists ()
   sethistlist = NULL;
   showhistlist = NULL;
   unsethistlist = NULL;
-#if MAINTENANCE_CMDS
   maintenancelist = NULL;
   maintenanceinfolist = NULL;
   maintenanceprintlist = NULL;
-#endif
   setprintlist = NULL;
   showprintlist = NULL;
   setchecklist = NULL;

@@ -197,7 +197,7 @@ gdb_expect {
 
 send_gdb "print res\n"
 gdb_expect {
-   -re "\\$\[0-9\]* = \[0-9\]*\r\n$gdb_prompt $" {
+   -re "\\$\[0-9\]* = .\[0-9\]*\r\n$gdb_prompt $" {
        pass "print res in getFunky"
    }
    -re ".*$gdb_prompt $" { fail "print res in getfunky" }

@@ -449,6 +449,10 @@ sim_memory_uninstall (SIM_DESC sd)
 
       /* delete it and its aliases */
       alias = *entry;
+
+      /* next victim */
+      *entry = (*entry)->next;
+
       while (alias != NULL)
 	{
 	  sim_memopt *dead = alias;
@@ -456,9 +460,6 @@ sim_memory_uninstall (SIM_DESC sd)
 	  sim_core_detach (sd, NULL, dead->level, dead->space, dead->addr);
 	  zfree (dead);
 	}
-
-      /* next victim */
-      *entry = (*entry)->next;
     }
 }
 

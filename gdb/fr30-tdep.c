@@ -56,6 +56,48 @@ fr30_pop_frame ()
   flush_cached_frames ();
 }
 
+
+/* Function: fr30_store_return_value
+   Put a value where a caller expects to see it.  Used by the 'return'
+   command.  */
+void
+fr30_store_return_value (struct type *type,
+			 char *valbuf)
+{
+  /* Here's how the FR30 returns values (gleaned from gcc/config/
+     fr30/fr30.h):
+
+     If the return value is 32 bits long or less, it goes in r4.
+
+     If the return value is 64 bits long or less, it goes in r4 (most
+     significant word) and r5 (least significant word.
+
+     If the function returns a structure, of any size, the caller
+     passes the function an invisible first argument where the callee
+     should store the value.  But GDB doesn't let you do that anyway.
+
+     If you're returning a value smaller than a word, it's not really
+     necessary to zero the upper bytes of the register; the caller is
+     supposed to ignore them.  However, the FR30 typically keeps its
+     values extended to the full register width, so we should emulate
+     that.  */
+
+  /* The FR30 is big-endian, so if we return a small value (like a
+     short or a char), we need to position it correctly within the
+     register.  We round the size up to a register boundary, and then
+     adjust the offset so as to place the value at the right end.  */
+  int value_size = TYPE_LENGTH (type);
+  int returned_size = (value_size + FR30_REGSIZE - 1) & ~(FR30_REGSIZE - 1);
+  int offset = (REGISTER_BYTE (RETVAL_REG)
+		+ (returned_size - value_size));
+  char *zeros = alloca (returned_size);
+  memset (zeros, 0, returned_size);
+
+  write_register_bytes (REGISTER_BYTE (RETVAL_REG), zeros, returned_size);
+  write_register_bytes (offset, valbuf, value_size);
+}
+
+
 /* Function: skip_prologue
    Return the address of the first code past the prologue of the function.  */
 
@@ -180,11 +222,13 @@ fr30_push_arguments(nargs, args, sp, struct_return, struct_addr)
   return sp;
 }
 
-_initialize_fr30_tdep()
-{
-	extern int print_insn_fr30(bfd_vma, disassemble_info *);
+void _initialize_fr30_tdep PARAMS ((void));
 
-	tm_print_insn = print_insn_fr30;
+void
+_initialize_fr30_tdep ()
+{
+  extern int print_insn_fr30(bfd_vma, disassemble_info *);
+  tm_print_insn = print_insn_fr30;
 }
 
 /* Function: check_prologue_cache

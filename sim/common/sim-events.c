@@ -39,15 +39,6 @@
 
 #include <signal.h> /* For SIGPROCMASK et.al. */
 
-#if __CYGWIN32__
-/* The ui_loop_hook is called to keep the GUI alive while the simulator
-   is running.  The counter is to make sure we do not wake it too often.
-*/
-
-extern void (*ui_loop_hook) PARAMS ((int));
-static unsigned int ui_loop_hook_counter = 0;
-#endif
-
 typedef enum {
   watch_invalid,
 
@@ -1171,18 +1162,6 @@ sim_events_process (SIM_DESC sd)
 
   /* this round of processing complete */
   events->nr_ticks_to_process = 0;
-
-#if __CYGWIN32__
-  /* Now call the ui_loop_hook to give the gui a chance to
-     process events. */
-  
-  if (ui_loop_hook != NULL)
-    {
-      /* attempt to limit calls to 1-10 per second */
-      if (! (ui_loop_hook_counter++ & 0xf))
-	(*ui_loop_hook) (-2); /* magic */
-    }
-#endif
 }
 
 #endif

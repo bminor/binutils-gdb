@@ -3486,7 +3486,7 @@
   PC = cia;
   State.regs[REG_SP] += IMM8;
   sp = State.regs[REG_SP];
-  State.regs[REG_PC] = State.regs[REG_MDR] - 3;
+  State.regs[REG_PC] = State.regs[REG_MDR];
 
   offset = -4;
   mask = REGS;
@@ -3533,5 +3533,6 @@
       State.regs[REG_LAR] = load_word (sp + offset);
       offset -= 4;
     }
+  nia = PC;
 }
 

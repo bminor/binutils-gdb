@@ -1440,6 +1440,90 @@ SEM_FN_NAME (i960base,nor3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
+/* xnor: xnor $src1, $src2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,xnor) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = INVSI (XORSI (* FLD (i_src1), * FLD (i_src2)));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* xnor1: xnor $lit1, $src2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,xnor1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo1.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = INVSI (XORSI (FLD (f_src1), * FLD (i_src2)));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* xnor2: xnor $src1, $lit2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,xnor2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo2.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = INVSI (XORSI (* FLD (i_src1), FLD (f_src2)));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* xnor3: xnor $lit1, $lit2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,xnor3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo3.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = INVSI (XORSI (FLD (f_src1), FLD (f_src2)));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
 /* not: not $src1, $src2, $dst */
 
 SEM_PC
@@ -1516,6 +1600,90 @@ SEM_FN_NAME (i960base,not3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
   {
     SI opval = INVSI (FLD (f_src1));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* ornot: ornot $src1, $src2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,ornot) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = ORSI (* FLD (i_src2), INVSI (* FLD (i_src1)));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* ornot1: ornot $lit1, $src2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,ornot1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo1.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = ORSI (* FLD (i_src2), INVSI (FLD (f_src1)));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* ornot2: ornot $src1, $lit2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,ornot2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo2.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = ORSI (FLD (f_src2), INVSI (* FLD (i_src1)));
+    * FLD (i_dst) = opval;
+    TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* ornot3: ornot $lit1, $lit2, $dst */
+
+SEM_PC
+SEM_FN_NAME (i960base,ornot3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_mulo3.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = ORSI (FLD (f_src2), INVSI (FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1613,14 +1781,14 @@ SEM_FN_NAME (i960base,clrbit3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.fmt_shlo.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (* FLD (i_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (0) : (SLLSI (* FLD (i_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1634,14 +1802,14 @@ SEM_FN_NAME (i960base,shlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shlo1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.fmt_shlo1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (* FLD (i_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (0) : (SLLSI (* FLD (i_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1655,14 +1823,14 @@ SEM_FN_NAME (i960base,shlo1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shlo2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.fmt_shlo2.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (FLD (f_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (0) : (SLLSI (FLD (f_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1676,14 +1844,14 @@ SEM_FN_NAME (i960base,shlo2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shlo3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.fmt_shlo3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (FLD (f_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (0) : (SLLSI (FLD (f_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1697,14 +1865,14 @@ SEM_FN_NAME (i960base,shlo3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shro) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.fmt_shlo.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRLSI (* FLD (i_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (0) : (SRLSI (* FLD (i_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1718,14 +1886,14 @@ SEM_FN_NAME (i960base,shro) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shro1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.fmt_shlo1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRLSI (* FLD (i_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (0) : (SRLSI (* FLD (i_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1739,14 +1907,14 @@ SEM_FN_NAME (i960base,shro1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shro2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.fmt_shlo2.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRLSI (FLD (f_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (0) : (SRLSI (FLD (f_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1760,14 +1928,14 @@ SEM_FN_NAME (i960base,shro2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shro3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.fmt_shlo3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRLSI (FLD (f_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (0) : (SRLSI (FLD (f_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1781,14 +1949,14 @@ SEM_FN_NAME (i960base,shro3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.fmt_shlo.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (* FLD (i_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (0) : (SLLSI (* FLD (i_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1802,14 +1970,14 @@ SEM_FN_NAME (i960base,shli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shli1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.fmt_shlo1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (* FLD (i_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (0) : (SLLSI (* FLD (i_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1823,14 +1991,14 @@ SEM_FN_NAME (i960base,shli1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shli2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.fmt_shlo2.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (FLD (f_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (0) : (SLLSI (FLD (f_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1844,14 +2012,14 @@ SEM_FN_NAME (i960base,shli2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shli3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.fmt_shlo3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SLLSI (FLD (f_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (0) : (SLLSI (FLD (f_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1865,14 +2033,14 @@ SEM_FN_NAME (i960base,shli3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shri) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.fmt_shlo.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRASI (* FLD (i_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (SRASI (* FLD (i_src2), 31)) : (SRASI (* FLD (i_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1886,14 +2054,14 @@ SEM_FN_NAME (i960base,shri) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shri1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.fmt_shlo1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRASI (* FLD (i_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (SRASI (* FLD (i_src2), 31)) : (SRASI (* FLD (i_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1907,14 +2075,14 @@ SEM_FN_NAME (i960base,shri1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shri2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.fmt_shlo2.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRASI (FLD (f_src2), * FLD (i_src1));
+    SI opval = (GEUSI (* FLD (i_src1), 32)) ? (SRASI (FLD (f_src2), 31)) : (SRASI (FLD (f_src2), * FLD (i_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1928,14 +2096,14 @@ SEM_FN_NAME (i960base,shri2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (i960base,shri3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.fmt_shlo3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = SRASI (FLD (f_src2), FLD (f_src1));
+    SI opval = (GEUSI (FLD (f_src1), 32)) ? (SRASI (FLD (f_src2), 31)) : (SRASI (FLD (f_src2), FLD (f_src1)));
     * FLD (i_dst) = opval;
     TRACE_RESULT (current_cpu, abuf, "dst", 'x', opval);
   }
@@ -1955,9 +2123,9 @@ SEM_FN_NAME (i960base,emul) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   DI tmp_temp;
+  SI tmp_dregno;
   tmp_temp = MULDI (ZEXTSIDI (* FLD (i_src1)), ZEXTSIDI (* FLD (i_src2)));
   tmp_dregno = FLD (f_srcdst);
   {
@@ -1968,9 +2136,9 @@ do {
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -1987,9 +2155,9 @@ SEM_FN_NAME (i960base,emul1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   DI tmp_temp;
+  SI tmp_dregno;
   tmp_temp = MULDI (ZEXTSIDI (FLD (f_src1)), ZEXTSIDI (* FLD (i_src2)));
   tmp_dregno = FLD (f_srcdst);
   {
@@ -2000,9 +2168,9 @@ do {
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2019,9 +2187,9 @@ SEM_FN_NAME (i960base,emul2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   DI tmp_temp;
+  SI tmp_dregno;
   tmp_temp = MULDI (ZEXTSIDI (* FLD (i_src1)), ZEXTSIDI (FLD (f_src2)));
   tmp_dregno = FLD (f_srcdst);
   {
@@ -2032,9 +2200,9 @@ do {
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2051,9 +2219,9 @@ SEM_FN_NAME (i960base,emul3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   DI tmp_temp;
+  SI tmp_dregno;
   tmp_temp = MULDI (ZEXTSIDI (FLD (f_src1)), ZEXTSIDI (FLD (f_src2)));
   tmp_dregno = FLD (f_srcdst);
   {
@@ -2064,9 +2232,9 @@ do {
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2125,9 +2293,9 @@ SEM_FN_NAME (i960base,movl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_sregno;
+{
   SI tmp_dregno;
+  SI tmp_sregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_sregno = FLD (f_src1);
   {
@@ -2138,9 +2306,9 @@ do {
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2157,7 +2325,7 @@ SEM_FN_NAME (i960base,movl1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   {
@@ -2168,9 +2336,9 @@ do {
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2187,9 +2355,9 @@ SEM_FN_NAME (i960base,movt) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_sregno;
+{
   SI tmp_dregno;
+  SI tmp_sregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_sregno = FLD (f_src1);
   {
@@ -2200,14 +2368,14 @@ do {
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (2))]);
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2224,7 +2392,7 @@ SEM_FN_NAME (i960base,movt1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   {
@@ -2235,14 +2403,14 @@ do {
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2259,9 +2427,9 @@ SEM_FN_NAME (i960base,movq) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_sregno;
+{
   SI tmp_dregno;
+  SI tmp_sregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_sregno = FLD (f_src1);
   {
@@ -2272,19 +2440,19 @@ do {
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (2))]);
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (3))]);
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -2301,7 +2469,7 @@ SEM_FN_NAME (i960base,movq1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   {
@@ -2312,19 +2480,19 @@ do {
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3391,9 +3559,9 @@ SEM_FN_NAME (i960base,ldl_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = FLD (f_offset);
   {
@@ -3404,9 +3572,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3423,9 +3591,9 @@ SEM_FN_NAME (i960base,ldl_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_offset), * FLD (i_abase));
   {
@@ -3436,9 +3604,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3455,9 +3623,9 @@ SEM_FN_NAME (i960base,ldl_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = * FLD (i_abase);
   {
@@ -3468,9 +3636,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3487,9 +3655,9 @@ SEM_FN_NAME (i960base,ldl_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))));
   {
@@ -3500,9 +3668,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3519,9 +3687,9 @@ SEM_FN_NAME (i960base,ldl_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = FLD (f_optdisp);
   {
@@ -3532,9 +3700,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3551,9 +3719,9 @@ SEM_FN_NAME (i960base,ldl_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), * FLD (i_abase));
   {
@@ -3564,9 +3732,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3583,9 +3751,9 @@ SEM_FN_NAME (i960base,ldl_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))));
   {
@@ -3596,9 +3764,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3615,9 +3783,9 @@ SEM_FN_NAME (i960base,ldl_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))));
   {
@@ -3628,9 +3796,9 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3647,9 +3815,9 @@ SEM_FN_NAME (i960base,ldt_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = FLD (f_offset);
   {
@@ -3660,14 +3828,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3684,9 +3852,9 @@ SEM_FN_NAME (i960base,ldt_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_offset), * FLD (i_abase));
   {
@@ -3697,14 +3865,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3721,9 +3889,9 @@ SEM_FN_NAME (i960base,ldt_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = * FLD (i_abase);
   {
@@ -3734,14 +3902,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3758,9 +3926,9 @@ SEM_FN_NAME (i960base,ldt_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))));
   {
@@ -3771,14 +3939,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3795,9 +3963,9 @@ SEM_FN_NAME (i960base,ldt_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = FLD (f_optdisp);
   {
@@ -3808,14 +3976,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3832,9 +4000,9 @@ SEM_FN_NAME (i960base,ldt_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), * FLD (i_abase));
   {
@@ -3845,14 +4013,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3869,9 +4037,9 @@ SEM_FN_NAME (i960base,ldt_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))));
   {
@@ -3882,14 +4050,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3906,9 +4074,9 @@ SEM_FN_NAME (i960base,ldt_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))));
   {
@@ -3919,14 +4087,14 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3943,9 +4111,9 @@ SEM_FN_NAME (i960base,ldq_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = FLD (f_offset);
   {
@@ -3956,19 +4124,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -3985,9 +4153,9 @@ SEM_FN_NAME (i960base,ldq_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_offset), * FLD (i_abase));
   {
@@ -3998,19 +4166,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4027,9 +4195,9 @@ SEM_FN_NAME (i960base,ldq_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = * FLD (i_abase);
   {
@@ -4040,19 +4208,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4069,9 +4237,9 @@ SEM_FN_NAME (i960base,ldq_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))));
   {
@@ -4082,19 +4250,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4111,9 +4279,9 @@ SEM_FN_NAME (i960base,ldq_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = FLD (f_optdisp);
   {
@@ -4124,19 +4292,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4153,9 +4321,9 @@ SEM_FN_NAME (i960base,ldq_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), * FLD (i_abase));
   {
@@ -4166,19 +4334,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4195,9 +4363,9 @@ SEM_FN_NAME (i960base,ldq_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))));
   {
@@ -4208,19 +4376,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4237,9 +4405,9 @@ SEM_FN_NAME (i960base,ldq_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
-  SI tmp_dregno;
+{
   SI tmp_temp;
+  SI tmp_dregno;
   tmp_dregno = FLD (f_srcdst);
   tmp_temp = ADDSI (FLD (f_optdisp), ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))));
   {
@@ -4250,19 +4418,19 @@ do {
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-const:-WI-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4783,7 +4951,7 @@ SEM_FN_NAME (i960base,stl_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -4796,7 +4964,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (FLD (f_offset), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4813,7 +4981,7 @@ SEM_FN_NAME (i960base,stl_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -4826,7 +4994,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_offset), * FLD (i_abase)), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4843,7 +5011,7 @@ SEM_FN_NAME (i960base,stl_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -4856,7 +5024,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (* FLD (i_abase), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4873,7 +5041,7 @@ SEM_FN_NAME (i960base,stl_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -4886,7 +5054,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4903,7 +5071,7 @@ SEM_FN_NAME (i960base,stl_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -4916,7 +5084,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (FLD (f_optdisp), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4933,7 +5101,7 @@ SEM_FN_NAME (i960base,stl_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -4946,7 +5114,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), * FLD (i_abase)), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4963,7 +5131,7 @@ SEM_FN_NAME (i960base,stl_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -4976,7 +5144,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -4993,7 +5161,7 @@ SEM_FN_NAME (i960base,stl_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5006,7 +5174,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))))), 4), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5023,7 +5191,7 @@ SEM_FN_NAME (i960base,stt_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5041,7 +5209,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (FLD (f_offset), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5058,7 +5226,7 @@ SEM_FN_NAME (i960base,stt_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5076,7 +5244,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_offset), * FLD (i_abase)), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5093,7 +5261,7 @@ SEM_FN_NAME (i960base,stt_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5111,7 +5279,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (* FLD (i_abase), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5128,7 +5296,7 @@ SEM_FN_NAME (i960base,stt_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5146,7 +5314,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5163,7 +5331,7 @@ SEM_FN_NAME (i960base,stt_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5181,7 +5349,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (FLD (f_optdisp), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5198,7 +5366,7 @@ SEM_FN_NAME (i960base,stt_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5216,7 +5384,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), * FLD (i_abase)), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5233,7 +5401,7 @@ SEM_FN_NAME (i960base,stt_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5251,7 +5419,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5268,7 +5436,7 @@ SEM_FN_NAME (i960base,stt_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5286,7 +5454,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))))), 8), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5303,7 +5471,7 @@ SEM_FN_NAME (i960base,stq_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5326,7 +5494,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (FLD (f_offset), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5343,7 +5511,7 @@ SEM_FN_NAME (i960base,stq_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5366,7 +5534,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_offset), * FLD (i_abase)), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5383,7 +5551,7 @@ SEM_FN_NAME (i960base,stq_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5406,7 +5574,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (* FLD (i_abase), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5423,7 +5591,7 @@ SEM_FN_NAME (i960base,stq_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5446,7 +5614,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5463,7 +5631,7 @@ SEM_FN_NAME (i960base,stq_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5486,7 +5654,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (FLD (f_optdisp), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5503,7 +5671,7 @@ SEM_FN_NAME (i960base,stq_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5526,7 +5694,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), * FLD (i_abase)), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5543,7 +5711,7 @@ SEM_FN_NAME (i960base,stq_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5566,7 +5734,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale)))), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -5583,7 +5751,7 @@ SEM_FN_NAME (i960base,stq_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_sregno;
   tmp_sregno = FLD (f_srcdst);
   {
@@ -5606,7 +5774,7 @@ do {
     SETMEMSI (current_cpu, pc, ADDSI (ADDSI (FLD (f_optdisp), ADDSI (* FLD (i_abase), MULSI (* FLD (i_index), SLLSI (1, FLD (f_scale))))), 12), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-} while (0);
+}
 
   return vpc;
 #undef FLD
@@ -6382,7 +6550,7 @@ SEM_FN_NAME (i960base,cmpi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTSI (* FLD (i_src1), * FLD (i_src2))) ? (4) : (EQSI (* FLD (i_src1), * FLD (i_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -6403,7 +6571,7 @@ SEM_FN_NAME (i960base,cmpi1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTSI (FLD (f_src1), * FLD (i_src2))) ? (4) : (EQSI (FLD (f_src1), * FLD (i_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -6424,7 +6592,7 @@ SEM_FN_NAME (i960base,cmpi2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTSI (* FLD (i_src1), FLD (f_src2))) ? (4) : (EQSI (* FLD (i_src1), FLD (f_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -6445,7 +6613,7 @@ SEM_FN_NAME (i960base,cmpi3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTSI (FLD (f_src1), FLD (f_src2))) ? (4) : (EQSI (FLD (f_src1), FLD (f_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -6466,7 +6634,7 @@ SEM_FN_NAME (i960base,cmpo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTUSI (* FLD (i_src1), * FLD (i_src2))) ? (4) : (EQSI (* FLD (i_src1), * FLD (i_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -6487,7 +6655,7 @@ SEM_FN_NAME (i960base,cmpo1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTUSI (FLD (f_src1), * FLD (i_src2))) ? (4) : (EQSI (FLD (f_src1), * FLD (i_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -6508,7 +6676,7 @@ SEM_FN_NAME (i960base,cmpo2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTUSI (* FLD (i_src1), FLD (f_src2))) ? (4) : (EQSI (* FLD (i_src1), FLD (f_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -6529,7 +6697,7 @@ SEM_FN_NAME (i960base,cmpo3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = (LTUSI (FLD (f_src1), FLD (f_src2))) ? (4) : (EQSI (FLD (f_src1), FLD (f_src2))) ? (2) : (1);
     CPU (h_cc) = opval;
-    TRACE_RESULT (current_cpu, abuf, "cc-0", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "cc", 'x', opval);
   }
 
   return vpc;
@@ -7070,7 +7238,7 @@ SEM_FN_NAME (i960base,callx_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_BRANCH_INIT
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
-do {
+{
   SI tmp_temp;
   tmp_temp = ANDSI (ADDSI (CPU (h_gr[((UINT) 1)]), 63), INVSI (63));
   {
@@ -7130,7 +7298,7 @@ CPU (h_gr[((UINT) 15)]) = 0xdeadbeef;
     CPU (h_gr[((UINT) 1)]) = opval;
     TRACE_RESULT (current_cpu, abuf, "gr-1", 'x', opval);
   }
-} while (0);
+}
 
   SEM_BRANCH_FINI (vpc);
   return vpc;
@@ -7149,7 +7317,7 @@ SEM_FN_NAME (i960base,callx_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_BRANCH_INIT
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_temp;
   tmp_temp = ANDSI (ADDSI (CPU (h_gr[((UINT) 1)]), 63), INVSI (63));
   {
@@ -7209,7 +7377,7 @@ CPU (h_gr[((UINT) 15)]) = 0xdeadbeef;
     CPU (h_gr[((UINT) 1)]) = opval;
     TRACE_RESULT (current_cpu, abuf, "gr-1", 'x', opval);
   }
-} while (0);
+}
 
   SEM_BRANCH_FINI (vpc);
   return vpc;
@@ -7228,7 +7396,7 @@ SEM_FN_NAME (i960base,callx_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_
   SEM_BRANCH_INIT
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   SI tmp_temp;
   tmp_temp = ANDSI (ADDSI (CPU (h_gr[((UINT) 1)]), 63), INVSI (63));
   {
@@ -7288,7 +7456,7 @@ CPU (h_gr[((UINT) 15)]) = 0xdeadbeef;
     CPU (h_gr[((UINT) 1)]) = opval;
     TRACE_RESULT (current_cpu, abuf, "gr-1", 'x', opval);
   }
-} while (0);
+}
 
   SEM_BRANCH_FINI (vpc);
   return vpc;
@@ -7307,7 +7475,7 @@ SEM_FN_NAME (i960base,ret) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_BRANCH_INIT
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do {
+{
   {
     SI opval = CPU (h_gr[((UINT) 0)]);
     CPU (h_gr[((UINT) 31)]) = opval;
@@ -7334,7 +7502,7 @@ CPU (h_gr[((UINT) 15)]) = GETMEMSI (current_cpu, pc, ADDSI (CPU (h_gr[((UINT) 31
     SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, opval, vpc);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
-} while (0);
+}
 
   SEM_BRANCH_FINI (vpc);
   return vpc;

@@ -100,10 +100,10 @@ extern DI make_struct_di (SI, SI);
 
 /* FIXME: Need to provide libraries if these aren't appropriate for target,
    or user's needs.  */
-typedef float SF;
-typedef double DF;
-typedef double XF; /* FIXME: configure, provide library */
-typedef double TF; /* FIXME: configure, provide library */
+typedef float SF;  /* FIXME: struct */
+typedef double DF; /* FIXME: struct */
+typedef struct { SI parts[3]; } XF; /* FIXME: configure, provide library */
+typedef struct { SI parts[4]; } TF; /* FIXME: configure, provide library */
 
 /* These are used to record extracted raw data from an instruction, among other
    things.  It must be a host data type, and not a target one.  */

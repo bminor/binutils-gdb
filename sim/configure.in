@@ -61,6 +61,7 @@ case "${target}" in
   h8500-*-*)		sim_target=h8500 ;;
   i960-*-*)		sim_target=i960 ;;
   m32r-*-*)		sim_target=m32r ;;
+  mcore-*-*)		sim_target=mcore ;;
   mips*-*-*)
 	# The MIPS simulator can only be compiled by gcc.
 	sim_target=mips
@@ -111,35 +112,20 @@ case "${target}" in
   z8k*-*-*)		sim_target=z8k ;;
   sparc64-*-*)
 	only_if_gcc=yes
-	if test "x${with_cgen}" = xyes -o "x${with_cgen_sim}" = xyes ; then
-		sim_target=sparc
-		extra_subdirs="${extra_subdirs} testsuite"
-	else
-		sim_target=none # Don't build erc32 if sparc64.
-	fi
+	sim_target=none # Don't build erc32 if sparc64.
 	;;
   sparclite*-*-* | sparc86x*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	only_if_gcc=yes
-	if test "x${with_cgen}" = xyes -o "x${with_cgen_sim}" = xyes ; then
-		sim_target=sparc
-		extra_subdirs="${extra_subdirs} testsuite"
-	else
-		sim_target=erc32
-	fi
+	sim_target=erc32
 	;;
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	only_if_gcc=yes
-	if test "x${with_cgen}" = xyes -o "x${with_cgen_sim}" = xyes ; then
-		sim_target=sparc
-		extra_subdirs="${extra_subdirs} testsuite"
-	else
-		# Unfortunately erc32 won't build on many hosts, so only enable
-		# it if the user really really wants it.
-		only_if_enabled=yes
-		sim_target=erc32
-	fi
+	# Unfortunately erc32 won't build on many hosts, so only enable
+	# it if the user really really wants it.
+	only_if_enabled=yes
+	sim_target=erc32
 	;;
   *)			sim_target=none ;;
 esac

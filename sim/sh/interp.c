@@ -56,11 +56,19 @@
 #define DEFINE_TABLE
 #define DISASSEMBLER_TABLE
 
+/* Define the rate at which the simulator should poll the host
+   for a quit. */
+#define POLL_QUIT_INTERVAL 0x60000
+
 typedef union
 {
 
   struct
   {
+    /* On targets like sparc-sun-solaris, fregs will be aligned on a 64 bit
+       boundary (because of the d member).  To avoid padding between
+       registers - which whould make the job of sim_fetch_register harder,
+       we add padding at the start.  */
     int pad_dummy;
     int regs[16];
     int pc;
@@ -84,7 +92,7 @@ typedef union
 	double d[8];
 	int i[16];
       }
-    fregs;
+    fregs[2];
 
     int ssr;
     int spc;
@@ -221,15 +229,55 @@ set_sr (new_sr)
 
 /* Manipulate FPSCR */
 
-#define set_fpscr1(x)
-#define SET_FPSCR(x) (saved_state.asregs.fpscr = (x))
+#define FPSCR_MASK_FR (1 << 21)
+#define FPSCR_MASK_SZ (1 << 20)
+#define FPSCR_MASK_PR (1 << 19)
+
+#define FPSCR_FR  ((GET_FPSCR() & FPSCR_MASK_FR) != 0)
+#define FPSCR_SZ  ((GET_FPSCR() & FPSCR_MASK_SZ) != 0)
+#define FPSCR_PR  ((GET_FPSCR() & FPSCR_MASK_PR) != 0)
+
+static void
+set_fpscr1 (x)
+	int x;
+{
+  int old = saved_state.asregs.fpscr;
+  saved_state.asregs.fpscr = (x);
+  /* swap the floating point register banks */
+  if ((saved_state.asregs.fpscr ^ old) & FPSCR_MASK_FR)
+    {
+      union fregs_u tmpf = saved_state.asregs.fregs[0];
+      saved_state.asregs.fregs[0] = saved_state.asregs.fregs[1];
+      saved_state.asregs.fregs[1] = tmpf;
+    }
+}
+
 #define GET_FPSCR()  (saved_state.asregs.fpscr)
+#define SET_FPSCR(x) \
+do { \
+  set_fpscr1 (x); \
+} while (0)
 
 
 int 
 fail ()
 {
   abort ();
+}
+
+int
+special_address (addr, bits_written, data)
+     void *addr;
+     int bits_written, data;
+{
+  if ((unsigned) addr >> 24 == 0xf0 && bits_written == 32 && (data & 1) == 0)
+    /* This invalidates (if not associative) or might invalidate
+       (if associative) an instruction cache line.  This is used for
+       trampolines.  Since we don't simulate the cache, this is a no-op
+       as far as the simulator is concerned.  */
+    return 1;
+  /* We can't do anything useful with the other stuff, so fail.  */
+  return 0;
 }
 
 /* This function exists solely for the purpose of setting a breakpoint to
@@ -244,8 +292,14 @@ bp_holder ()
    being implemented by ../common/sim_resume.c and the below should
    make a call to sim_engine_halt */
 
-#define BUSERROR(addr, mask) \
-  if (addr & ~mask) { saved_state.asregs.exception = SIGBUS;  bp_holder (); }
+#define BUSERROR(addr, mask, bits_written, data) \
+  if (addr & ~mask) \
+    { \
+      if (special_address (addr, bits_written, data)) \
+	return; \
+      saved_state.asregs.exception = SIGBUS; \
+      bp_holder (); \
+    }
 
 /* Define this to enable register lifetime checking.
    The compiler generates "add #0,rn" insns to mark registers as invalid,
@@ -276,15 +330,98 @@ static host_callback *callback;
 
 /* Floating point registers */
 
-#define FI(n) (saved_state.asregs.fregs.i[(n)])
-#define FR(n) (saved_state.asregs.fregs.f[(n)])
+#define DR(n) (get_dr (n))
+static double
+get_dr (n)
+     int n;
+{
+  n = (n & ~1);
+  if (host_little_endian)
+    {
+      union
+      {
+	int i[2];
+	double d;
+      } dr;
+      dr.i[1] = saved_state.asregs.fregs[0].i[n + 0];
+      dr.i[0] = saved_state.asregs.fregs[0].i[n + 1];
+      return dr.d;
+    }
+  else
+    return (saved_state.asregs.fregs[0].d[n >> 1]);
+}
 
-#define SET_FI(n,EXP) (saved_state.asregs.fregs.i[(n)] = (EXP))
-#define SET_FR(n,EXP) (saved_state.asregs.fregs.f[(n)] = (EXP))
+#define SET_DR(n, EXP) set_dr ((n), (EXP))
+static void
+set_dr (n, exp)
+     int n;
+     double exp;
+{
+  n = (n & ~1);
+  if (host_little_endian)
+    {
+      union
+      {
+	int i[2];
+	double d;
+      } dr;
+      dr.d = exp;
+      saved_state.asregs.fregs[0].i[n + 0] = dr.i[1];
+      saved_state.asregs.fregs[0].i[n + 1] = dr.i[0];
+    }
+  else
+    saved_state.asregs.fregs[0].d[n >> 1] = exp;
+}
 
-#define FP_OP(n, OP, m) (SET_FR(n, (FR(n) OP FR(m))))
-#define FP_UNARY(n, OP) (SET_FR(n, (OP (FR(n)))))
-#define FP_CMP(n, OP, m) SET_SR_T(FR(n) OP FR(m))
+#define SET_FI(n,EXP) (saved_state.asregs.fregs[0].i[(n)] = (EXP))
+#define FI(n) (saved_state.asregs.fregs[0].i[(n)])
+
+#define FR(n) (saved_state.asregs.fregs[0].f[(n)])
+#define SET_FR(n,EXP) (saved_state.asregs.fregs[0].f[(n)] = (EXP))
+
+#define XD_TO_XF(n) ((((n) & 1) << 5) | ((n) & 0x1e))
+#define XF(n) (saved_state.asregs.fregs[(n) >> 5].i[(n) & 0x1f])
+#define SET_XF(n,EXP) (saved_state.asregs.fregs[(n) >> 5].i[(n) & 0x1f] = (EXP))
+
+
+#define FP_OP(n, OP, m) \
+{ \
+  if (FPSCR_PR) \
+    { \
+      if (((n) & 1) || ((m) & 1)) \
+	saved_state.asregs.exception = SIGILL; \
+      else \
+	SET_DR(n, (DR(n) OP DR(m))); \
+    } \
+  else \
+    SET_FR(n, (FR(n) OP FR(m))); \
+} while (0)
+
+#define FP_UNARY(n, OP) \
+{ \
+  if (FPSCR_PR) \
+    { \
+      if ((n) & 1) \
+	saved_state.asregs.exception = SIGILL; \
+      else \
+	SET_DR(n, (OP (DR(n)))); \
+    } \
+  else \
+    SET_FR(n, (OP (FR(n)))); \
+} while (0)
+
+#define FP_CMP(n, OP, m) \
+{ \
+  if (FPSCR_PR) \
+    { \
+      if (((n) & 1) || ((m) & 1)) \
+	saved_state.asregs.exception = SIGILL; \
+      else \
+	SET_SR_T (DR(n) OP DR(m)); \
+    } \
+  else \
+    SET_SR_T (FR(n) OP FR(m)); \
+} while (0)
 
 
 
@@ -294,7 +431,7 @@ wlat_little (memory, x, value, maskl)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
+  BUSERROR(x, maskl, 32, v);
   p[3] = v >> 24;
   p[2] = v >> 16;
   p[1] = v >> 8;
@@ -307,7 +444,7 @@ wwat_little (memory, x, value, maskw)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, 16, v);
 
   p[1] = v >> 8;
   p[0] = v;
@@ -320,7 +457,7 @@ wbat_any (memory, x, value, maskb)
   unsigned char *p = memory + (x & maskb);
   if (x > 0x5000000)
     IOMEM (x, 1, value);
-  BUSERROR(x, maskb);
+  BUSERROR(x, maskb, 8, value);
 
   p[0] = value;
 }
@@ -331,7 +468,7 @@ wlat_big (memory, x, value, maskl)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
+  BUSERROR(x, maskl, 32, v);
 
   p[0] = v >> 24;
   p[1] = v >> 16;
@@ -345,7 +482,7 @@ wwat_big (memory, x, value, maskw)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, 16, v);
 
   p[0] = v >> 8;
   p[1] = v;
@@ -356,7 +493,7 @@ wbat_big (memory, x, value, maskb)
      unsigned char *memory;
 {
   unsigned char *p = memory + (x & maskb);
-  BUSERROR(x, maskb);
+  BUSERROR(x, maskb, 8, value);
 
   if (x > 0x5000000)
     IOMEM (x, 1, value);
@@ -370,7 +507,7 @@ rlat_little (memory, x, maskl)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
+  BUSERROR(x, maskl, -32, -1);
 
   return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
 }
@@ -380,7 +517,7 @@ rwat_little (memory, x, maskw)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, -16, -1);
 
   return (p[1] << 8) | p[0];
 }
@@ -390,7 +527,7 @@ rbat_any (memory, x, maskb)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskb);
-  BUSERROR(x, maskb);
+  BUSERROR(x, maskb, -8, -1);
 
   return p[0];
 }
@@ -400,7 +537,7 @@ rlat_big (memory, x, maskl)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
+  BUSERROR(x, maskl, -32, -1);
 
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
@@ -410,7 +547,7 @@ rwat_big (memory, x, maskw)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, -16, -1);
 
   return (p[0] << 8) | p[1];
 }
@@ -426,7 +563,59 @@ rwat_big (memory, x, maskw)
 #define RSWAT(x)  ((short)(RWAT(x)))
 #define RSBAT(x)  (SEXT(RBAT(x)))
 
+#define RDAT(x, n) (do_rdat (memory, (x), (n), (little_endian)))
+static int
+do_rdat (memory, x, n, little_endian)
+     char *memory;
+     int x;
+     int n;
+     int little_endian;
+{
+  int f0;
+  int f1;
+  int i = (n & 1);
+  int j = (n & ~1);
+  if (little_endian)
+    {
+      f0 = rlat_little (memory, x + 0, maskl);
+      f1 = rlat_little (memory, x + 4, maskl);
+    }
+  else
+    {
+      f0 = rlat_big (memory, x + 0, maskl);
+      f1 = rlat_big (memory, x + 4, maskl);
+    }
+  saved_state.asregs.fregs[i].i[(j + 0)] = f0;
+  saved_state.asregs.fregs[i].i[(j + 1)] = f1;
+  return 0;
+}
 
+#define WDAT(x, n) (do_wdat (memory, (x), (n), (little_endian)))
+static int
+do_wdat (memory, x, n, little_endian)
+     char *memory;
+     int x;
+     int n;
+     int little_endian;
+{
+  int f0;
+  int f1;
+  int i = (n & 1);
+  int j = (n & ~1);
+  f0 = saved_state.asregs.fregs[i].i[(j + 0)];
+  f1 = saved_state.asregs.fregs[i].i[(j + 1)];
+  if (little_endian)
+    {
+      wlat_little (memory, (x + 0), f0, maskl);
+      wlat_little (memory, (x + 4), f1, maskl);
+    }
+  else
+    {
+      wlat_big (memory, (x + 0), f0, maskl);
+      wlat_big (memory, (x + 4), f1, maskl);
+    }
+  return 0;
+}
 
 
 #define MA(n) do { memstalls += (((pc & 3) != 0) ? (n) : ((n) - 1)); } while (0)
@@ -1070,7 +1259,7 @@ sim_resume (sd, step, siggnal)
 
       if (--pollcount < 0)
 	{
-	  pollcount = 1000;
+	  pollcount = POLL_QUIT_INTERVAL;
 	  if ((*callback->poll_quit) != NULL
 	      && (*callback->poll_quit) (callback))
 	    {

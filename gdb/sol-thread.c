@@ -106,7 +106,7 @@ static td_thragent_t *main_ta;
 static int sol_thread_active = 0;
 
 static struct cleanup * save_inferior_pid PARAMS ((void));
-static void restore_inferior_pid PARAMS ((int pid));
+static void restore_inferior_pid PARAMS ((void *pid));
 static char *td_err_string PARAMS ((td_err_e errcode));
 static char *td_state_string PARAMS ((td_thr_state_e statecode));
 static int  thread_to_lwp PARAMS ((int thread_id, int default_lwp));
@@ -428,14 +428,14 @@ NOTES
 static struct cleanup *
 save_inferior_pid ()
 {
-  return make_cleanup (restore_inferior_pid, inferior_pid);
+  return make_cleanup (restore_inferior_pid, (void*) inferior_pid);
 }
 
 static void
 restore_inferior_pid (pid)
-     int pid;
+     void *pid;
 {
-  inferior_pid = pid;
+  inferior_pid = (int) pid;
 }
 
 
@@ -1436,7 +1436,6 @@ sol_core_files_info (t)
   orig_core_ops.to_files_info (t);
 }
 
-#ifdef MAINTENANCE_CMDS
 /* Worker bee for info sol-thread command.  This is a callback function that
    gets called once for each Solaris thread (ie. not kernel thread) in the 
    inferior.  Print anything interesting that we can think of.  */
@@ -1501,7 +1500,6 @@ info_solthreads (args, from_tty)
 		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
 }
-#endif /* MAINTENANCE_CMDS */
 
 static int
 ignore (addr, contents)
@@ -1648,10 +1646,8 @@ _initialize_sol_thread ()
 
   procfs_suppress_run = 1;
 
-#ifdef MAINTENANCE_CMDS
   add_cmd ("sol-threads", class_maintenance, info_solthreads, 
 	    "Show info on Solaris user threads.\n", &maintenanceinfolist);
-#endif /* MAINTENANCE_CMDS */
 
   memcpy(&orig_core_ops, &core_ops, sizeof (struct target_ops));
   memcpy(&core_ops, &sol_core_ops, sizeof (struct target_ops));

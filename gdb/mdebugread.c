@@ -988,26 +988,28 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 
 	      case stMember:
 		if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
-		  /* If the type of the member is Nil (or Void),
-		     without qualifiers, assume the tag is an
-		     enumeration.
-		     Alpha cc -migrate enums are recognized by a zero
-		     index and a zero symbol value.
-		     DU 4.0 cc enums are recognized by a member type of
-		     btEnum without qualifiers and a zero symbol value.  */
-		  if (tsym.index == indexNil
-		      || (tsym.index == 0 && sh->value == 0))
-		    type_code = TYPE_CODE_ENUM;
-		  else
-		    {
-		      (*debug_swap->swap_tir_in) (bigend,
-						  &ax[tsym.index].a_ti,
-						  &tir);
-		      if ((tir.bt == btNil || tir.bt == btVoid
-			   || (tir.bt == btEnum && sh->value == 0))
-			  && tir.tq0 == tqNil)
-			type_code = TYPE_CODE_ENUM;
-		    }
+		  {
+		    /* If the type of the member is Nil (or Void),
+		       without qualifiers, assume the tag is an
+		       enumeration.
+		       Alpha cc -migrate enums are recognized by a zero
+		       index and a zero symbol value.
+		       DU 4.0 cc enums are recognized by a member type of
+		       btEnum without qualifiers and a zero symbol value.  */
+		    if (tsym.index == indexNil
+			|| (tsym.index == 0 && sh->value == 0))
+		      type_code = TYPE_CODE_ENUM;
+		    else
+		      {
+			(*debug_swap->swap_tir_in) (bigend,
+						    &ax[tsym.index].a_ti,
+						    &tir);
+			if ((tir.bt == btNil || tir.bt == btVoid
+			     || (tir.bt == btEnum && sh->value == 0))
+			    && tir.tq0 == tqNil)
+			  type_code = TYPE_CODE_ENUM;
+		      }
+		  }
 		nfields++;
 		if (tsym.value > max_value)
 		  max_value = tsym.value;
@@ -1090,10 +1092,12 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	   here.) */
 
 	if (type_code == TYPE_CODE_UNDEF)
-	  if (nfields > 1 && max_value == 0)
-	    type_code = TYPE_CODE_UNION;
-	  else
-	    type_code = TYPE_CODE_STRUCT;
+	  {
+	    if (nfields > 1 && max_value == 0)
+	      type_code = TYPE_CODE_UNION;
+	    else
+	      type_code = TYPE_CODE_STRUCT;
+	  }
 
 	/* Create a new type or use the pending type.  */
 	pend = is_pending_symbol (cur_fdr, ext_sh);

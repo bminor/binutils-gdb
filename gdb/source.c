@@ -976,10 +976,12 @@ identify_source_line (s, line, mid_statement, pc)
 /* Print source lines from the file of symtab S,
    starting with line number LINE and stopping before line number STOPLINE. */
 
+static void print_source_lines_base PARAMS ((struct symtab *s, int line, int stopline, int noerror));
 static void
 print_source_lines_base (s, line, stopline, noerror)
      struct symtab *s;
-     int line, stopline;
+     int line;
+     int stopline;
      int noerror;
 {
   register int c;
@@ -1284,19 +1286,21 @@ list_command (arg, from_tty)
   else if (sal.symtab == 0)
     error ("No default source file yet.  Do \"help list\".");
   else if (no_end)
-    if (lines_to_list % 2 == 0) 
-      print_source_lines (sal.symtab,
-			  max (sal.line - (lines_to_list / 2), 1),
-			  sal.line + (lines_to_list / 2), 0);
-    else
-      /* If lines_to_list is odd, then we round down in
-       * one of the lines_to_list/2 computations, round up in
-       * the other, so the total window size around the specified
-       * line comes out right.
-       */
-      print_source_lines (sal.symtab,
-			max (sal.line - (lines_to_list / 2), 1),
-			sal.line + ((1+lines_to_list) / 2), 0);
+    {
+      if (lines_to_list % 2 == 0) 
+	print_source_lines (sal.symtab,
+			    max (sal.line - (lines_to_list / 2), 1),
+			    sal.line + (lines_to_list / 2), 0);
+      else
+	/* If lines_to_list is odd, then we round down in
+	 * one of the lines_to_list/2 computations, round up in
+	 * the other, so the total window size around the specified
+	 * line comes out right.
+	 */
+	print_source_lines (sal.symtab,
+			    max (sal.line - (lines_to_list / 2), 1),
+			    sal.line + ((1+lines_to_list) / 2), 0);
+    }
   else
     print_source_lines (sal.symtab, sal.line,
 			(dummy_end

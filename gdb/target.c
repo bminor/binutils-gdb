@@ -208,14 +208,11 @@ static struct cmd_list_element *targetlist = NULL;
 
 int attach_flag;
 
-#ifdef MAINTENANCE_CMDS
 /* Non-zero if we want to see trace of target level stuff.  */
 
 static int targetdebug = 0;
 
 static void setup_target_debug PARAMS ((void));
-
-#endif
 
 /* The user just typed 'target' without the name of a target.  */
 
@@ -608,10 +605,8 @@ push_target (t)
 
   cleanup_target (&current_target); /* Fill in the gaps */
 
-#ifdef MAINTENANCE_CMDS
   if (targetdebug)
     setup_target_debug ();
-#endif
 
   return prev != 0;
 }
@@ -1105,6 +1100,30 @@ return_one ()
   return 1;
 }
 
+/* Find a single runnable target in the stack and return it.  If for
+   some reason there is more than one, return NULL.  */
+
+struct target_ops *
+find_run_target ()
+{
+  struct target_ops **t;
+  struct target_ops *runable = NULL;
+  int count;
+  
+  count = 0;
+  
+  for (t = target_structs; t < target_structs + target_struct_size; ++t)
+    {
+      if ((*t)->to_can_run && target_can_run(*t))
+	{
+	  runable = *t;
+	  ++count;
+	}
+    }
+  
+  return (count == 1 ? runable : NULL);
+}
+
 struct target_ops *
 find_core_target ()
 {
@@ -1248,6 +1267,8 @@ static struct {
   {"EXC_SOFTWARE", "Software generated exception"},
   {"EXC_BREAKPOINT", "Breakpoint"},
 #endif
+  {"SIGINFO", "Information request"},
+
   {NULL, "Unknown signal"},
   {NULL, "Internal error: printing TARGET_SIGNAL_DEFAULT"},
 
@@ -1260,7 +1281,10 @@ char *
 target_signal_to_string (sig)
      enum target_signal sig;
 {
-  return signals[sig].string;
+  if ((sig >= TARGET_SIGNAL_FIRST) && (sig <= TARGET_SIGNAL_LAST))
+    return signals[sig].string;
+  else
+    return signals[TARGET_SIGNAL_UNKNOWN].string;
 }
 
 /* Return the name for a signal.  */
@@ -1466,6 +1490,10 @@ target_signal_from_host (hostsig)
   if (hostsig == _NSIG + EXC_BREAKPOINT) return TARGET_EXC_BREAKPOINT;
 #endif
 
+#if defined (SIGINFO)
+  if (hostsig == SIGINFO) return TARGET_SIGNAL_INFO;
+#endif
+
 #if defined (REALTIME_LO)
   if (hostsig >= REALTIME_LO && hostsig < REALTIME_HI)
     return (enum target_signal)
@@ -1640,6 +1668,10 @@ target_signal_to_host (oursig)
     case TARGET_EXC_BREAKPOINT: return _NSIG + EXC_BREAKPOINT;
 #endif
 
+#if defined (SIGINFO)
+    case TARGET_SIGNAL_INFO: return SIGINFO;
+#endif
+
     default:
 #if defined (REALTIME_LO)
       if (oursig >= TARGET_SIGNAL_REALTIME_33
@@ -1768,7 +1800,6 @@ init_dummy_target ()
 }
 
 
-#ifdef MAINTENANCE_CMDS
 static struct target_ops debug_target;
 
 static void
@@ -2308,7 +2339,8 @@ debug_to_has_execd (pid, execd_pathname)
   has_execd = debug_target.to_has_execd (pid, execd_pathname);
 
   fprintf_unfiltered (gdb_stderr, "target_has_execd (%d, %s) = %d\n",
-                      pid, *execd_pathname, has_execd);
+                      pid, (*execd_pathname ? *execd_pathname : "<NULL>"),
+		      has_execd);
 
   return has_execd;
 }
@@ -2447,19 +2479,21 @@ debug_to_enable_exception_callback (kind, enable)
   enum exception_event_kind kind;
   int enable;
 {
-  debug_target.to_enable_exception_callback (kind, enable);
-
+  struct symtab_and_line *result;
+  result = debug_target.to_enable_exception_callback (kind, enable);
   fprintf_unfiltered (gdb_stderr,
 		      "target get_exception_callback_sal (%d, %d)\n",
 		      kind, enable);
+  return result;
 }
 
 static struct exception_event_record *
 debug_to_get_current_exception_event ()
 {
-  debug_target.to_get_current_exception_event();
-
+  struct exception_event_record *result;
+  result = debug_target.to_get_current_exception_event();
   fprintf_unfiltered (gdb_stderr, "target get_current_exception_event ()\n");
+  return result;
 }
 
 static char *
@@ -2551,7 +2585,7 @@ setup_target_debug ()
   current_target.to_core_file_to_sym_file = debug_to_core_file_to_sym_file;
 
 }
-#endif /* MAINTENANCE_CMDS */
+
 
 static char targ_desc[] = 
     "Names of targets and files being debugged.\n\
@@ -2567,14 +2601,12 @@ initialize_targets ()
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);
 
-#ifdef MAINTENANCE_CMDS
   add_show_from_set (
      add_set_cmd ("targetdebug", class_maintenance, var_zinteger,
 		  (char *)&targetdebug,
 		 "Set target debugging.\n\
 When non-zero, target debugging is enabled.", &setlist),
 		     &showlist);
-#endif
 
   if (!STREQ (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC"))
     abort ();

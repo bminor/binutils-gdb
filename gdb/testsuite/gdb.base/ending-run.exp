@@ -1,4 +1,4 @@
-# Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -61,7 +61,11 @@ gdb_test "b 26" ".*Breakpoint.*3.*" ""
 # Expect to hit the bp at line "1", but symbolize this
 # as line "8".  Then try to clear it--this should work.
 #
-gdb_test "r" ".*Breakpoint.*1.*callee.*8.*" ""
+if [target_info exists use_gdb_stub] {
+  gdb_test "continue" ".*Breakpoint.*1.*callee.*8.*" ""
+} else {
+  gdb_test "r" ".*Breakpoint.*1.*callee.*8.*" ""
+}
 gdb_test "cle" ".*Deleted breakpoints 2 1.*" "clear worked"
 send_gdb "i b\n"
 gdb_expect {
@@ -147,24 +151,30 @@ gdb_expect {
     -re ".*in.*start.*$gdb_prompt $" { 
         pass "step out of main"
     }
+  -re ".*Program received signal SIGTRAP.*$gdb_prompt $" {
+        pass "Cygmon stopped in ending trap."
+  }
     timeout { fail "hang or timeout on step at end 1" }
 }
 
-gdb_test "n" ".*Single.*Program exited.*" "step to end of run"
-set timeout $old_timeout
-
-gdb_test "n" ".*The program is not being run.*" "don't step after run"
-
-set exec_output [remote_exec host "ls core"]
-
-if [ regexp "core not found" $exec_output]  {
+if {![target_info exists use_cygmon] || ![target_info use_cygmon]} {
+  gdb_test "n" ".*Single.*Program exited.*" "step to end of run"
+  set timeout $old_timeout
+  
+  gdb_test "n" ".*The program is not being run.*" "don't step after run"
+  
+  set exec_output [remote_exec host "ls core"]
+  
+  
+  if [ regexp "core not found" $exec_output]  {
     pass "No core dumped on quit"
-} else {
-  if [ regexp "No such file or directory" $exec_output] {
-      pass "ls: core: No core dumped on quit"
   } else {
+    if [ regexp "No such file or directory" $exec_output] {
+      pass "ls: core: No core dumped on quit"
+    } else {
       remote_exec build "rm -f core"
       fail "Core dumped on quit"
+    }
   }
 }
 

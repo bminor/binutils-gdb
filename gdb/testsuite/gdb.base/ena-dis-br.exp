@@ -1,4 +1,4 @@
-#   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+#   Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
 
 
 # This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,30 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+proc rerun_to_main {} {
+  global gdb_prompt
+
+  if [target_info exists use_gdb_stub] {
+    gdb_run_cmd
+    gdb_expect {
+      -re ".*Breakpoint .*main .*$gdb_prompt $"\
+	      {pass "rerun to main" ; return 0}
+      -re "$gdb_prompt $"\
+	      {fail "rerun to main" ; return 0}
+      timeout {fail "(timeout) rerun to main" ; return 0}
+    }
+  } else {
+    send_gdb "run\n"
+    gdb_expect {
+      -re "Starting program.*$gdb_prompt $"\
+	      {pass "rerun to main" ; return 0}
+      -re "$gdb_prompt $"\
+	      {fail "rerun to main" ; return 0}
+      timeout {fail "(timeout) rerun to main" ; return 0}
+    }
+  }
 }
 
 gdb_exit
@@ -137,32 +161,9 @@ gdb_expect {
 
 # Verify that we don't stop at a disabled breakpoint.
 #
-send_gdb "continue\n"
-gdb_expect {
-  -re ".*Program exited normally.*$gdb_prompt $"\
-          {pass "no stop"}
-  -re "$gdb_prompt $"\
-          {fail "no stop"}
-  timeout {fail "(timeout) no stop"}
-}
-
-send_gdb "run\n"
-gdb_expect {
-  -re "Starting program.*$gdb_prompt $"\
-          {pass "rerun to main"}
-  -re "$gdb_prompt $"\
-          {fail "rerun to main"}
-  timeout {fail "(timeout) rerun to main"}
-}
-
-send_gdb "continue\n"
-gdb_expect {
-  -re ".*Program exited normally.*$gdb_prompt $"\
-          {pass "no stop at auto-disabled break marker2"}
-  -re "$gdb_prompt $"\
-          {fail "no stop at auto-disabled break marker2"}
-  timeout {fail "(timeout) no stop at auto-disabled break marker2"}
-}
+gdb_continue_to_end "no stop"
+rerun_to_main
+gdb_continue_to_end "no stop at auto-disabled break marker2"
 
 # Verify that we can set a breakpoint to be self-deleting after
 # the first time it triggers.
@@ -321,23 +322,8 @@ gdb_expect {
   timeout {fail "(timeout) info ignored break marker1"}
 }
 
-send_gdb "continue\n"
-gdb_expect {
-  -re ".*Program exited normally.*$gdb_prompt $"\
-          {pass "no stop at ignored break marker1"}
-  -re "$gdb_prompt $"\
-          {fail "no stop at ignored break marker1"}
-  timeout {fail "(timeout) no stop at ignored break marker1"}
-}
-
-send_gdb "run\n"
-gdb_expect {
-  -re "Starting program.*$gdb_prompt $"\
-          {pass "rerun to main"}
-  -re "$gdb_prompt $"\
-          {fail "rerun to main"}
-  timeout {fail "(timeout) rerun to main"}
-}
+gdb_continue_to_end "no stop at ignored break marker1"
+rerun_to_main
 
 send_gdb "continue\n"
 gdb_expect {
@@ -386,23 +372,8 @@ gdb_expect {
   timeout {fail "(timeout) info break marker2"}
 }
 
-send_gdb "continue\n"
-gdb_expect {
-  -re ".*Program exited normally.*$gdb_prompt $"\
-          {pass "no stop at ignored & auto-deleted break marker1"}
-  -re "$gdb_prompt $"\
-          {fail "no stop at ignored & auto-deleted break marker1"}
-  timeout {fail "(timeout) no stop at ignored & auto-deleted break marker1"}
-}
-
-send_gdb "run\n"
-gdb_expect {
-  -re "Starting program.*$gdb_prompt $"\
-          {pass "rerun to main"}
-  -re "$gdb_prompt $"\
-          {fail "rerun to main"}
-  timeout {fail "(timeout) rerun to main"}
-}
+gdb_continue_to_end "no stop at ignored & auto-deleted break marker1"
+rerun_to_main
 
 send_gdb "continue\n"
 gdb_expect {
@@ -445,23 +416,8 @@ gdb_expect {
   timeout {fail "(timeout) disable break marker1"}
 }
 
-send_gdb "continue\n"
-gdb_expect {
-  -re ".*Program exited normally.*$gdb_prompt $"\
-          {pass "no stop at ignored & disabled break marker1"}
-  -re "$gdb_prompt $"\
-          {fail "no stop at ignored & disabled break marker1"}
-  timeout {fail "(timeout) no stop at ignored & disabled break marker1"}
-}
-
-send_gdb "run\n"
-gdb_expect {
-  -re "Starting program.*$gdb_prompt $"\
-          {pass "rerun to main"}
-  -re "$gdb_prompt $"\
-          {fail "rerun to main"}
-  timeout {fail "(timeout) rerun to main"}
-}
+gdb_continue_to_end "no stop at ignored & disabled break marker1"
+rerun_to_main
 
 send_gdb "info break $expect_out(1,string)\n"
 gdb_expect {

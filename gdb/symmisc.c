@@ -154,8 +154,6 @@ free_symtab (s)
   mfree (s -> objfile -> md, (PTR) s);
 }
 
-#if MAINTENANCE_CMDS
-
 void
 print_symbol_bcache_statistics ()
 {
@@ -525,7 +523,7 @@ Arguments missing: an output file name and an optional symbol file name");
     {
       nomem (0);
     }
-  cleanups = make_cleanup ((make_cleanup_func) freeargv, (char *) argv);
+  cleanups = make_cleanup_freeargv (argv);
 
   if (argv[0] != NULL)
     {
@@ -762,7 +760,7 @@ maintenance_print_psymbols (args, from_tty)
     {
       nomem (0);
     }
-  cleanups = make_cleanup ((make_cleanup_func) freeargv, (char *) argv);
+  cleanups = make_cleanup_freeargv (argv);
 
   if (argv[0] != NULL)
     {
@@ -910,7 +908,7 @@ maintenance_print_msymbols (args, from_tty)
     {
       nomem (0);
     }
-  cleanups = make_cleanup ((make_cleanup_func) freeargv, argv);
+  cleanups = make_cleanup_freeargv (argv);
 
   if (argv[0] != NULL)
     {
@@ -1054,8 +1052,6 @@ block_depth (block)
     }
   return i;
 }
-
-#endif	/* MAINTENANCE_CMDS */
 
 
 /* Increase the space allocated for LISTP, which is probably

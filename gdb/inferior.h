@@ -27,42 +27,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* For enum target_signal.  */
 #include "target.h"
 
-/* Structure in which to save the status of the inferior.  Save
+/* Structure in which to save the status of the inferior.  Create/Save
    through "save_inferior_status", restore through
    "restore_inferior_status".
+
    This pair of routines should be called around any transfer of
    control to the inferior which you don't want showing up in your
    control variables.  */
 
-struct inferior_status
-  {
-    enum target_signal stop_signal;
-    CORE_ADDR stop_pc;
-    bpstat stop_bpstat;
-    int stop_step;
-    int stop_stack_dummy;
-    int stopped_by_random_signal;
-    int trap_expected;
-    CORE_ADDR step_range_start;
-    CORE_ADDR step_range_end;
-    CORE_ADDR step_frame_address;
-    int step_over_calls;
-    CORE_ADDR step_resume_break_address;
-    int stop_after_trap;
-    int stop_soon_quietly;
-    CORE_ADDR selected_frame_address;
-    char stop_registers[REGISTER_BYTES];
+#ifdef __STDC__
+struct inferior_status;
+#endif
 
-    /* These are here because if call_function_by_hand has written some
-     registers and then decides to call error(), we better not have changed
-     any registers.  */
-    char registers[REGISTER_BYTES];
+extern struct inferior_status *save_inferior_status PARAMS ((int));
 
-    int selected_level;
-    int breakpoint_proceeded;
-    int restore_stack_info;
-    int proceed_to_finish;
-  };
+extern void restore_inferior_status PARAMS ((struct inferior_status *));
+
+extern void discard_inferior_status PARAMS ((struct inferior_status *));
+
+extern void write_inferior_status_register PARAMS ((struct inferior_status *inf_status, int regno, LONGEST val));
 
 /* This macro gives the number of registers actually in use by the
    inferior.  This may be less than the total number of registers,
@@ -71,10 +54,6 @@ struct inferior_status
 #ifndef ARCH_NUM_REGS
 #define ARCH_NUM_REGS NUM_REGS
 #endif
-
-extern void save_inferior_status PARAMS ((struct inferior_status *, int));
-
-extern void restore_inferior_status PARAMS ((struct inferior_status *));
 
 extern void set_sigint_trap PARAMS ((void));
 
@@ -117,15 +96,15 @@ extern int inferior_ignoring_leading_exec_events;
 
 extern struct environ *inferior_environ;
 
-/* Character array containing an image of the inferior programs' registers.  */
+/* Character array containing an image of the inferior programs'
+   registers. */
 
-extern char registers[];
+extern char *registers;
 
-/* Array of validity bits (one per register).  Nonzero at position XXX_REGNUM
-   means that `registers' contains a valid copy of inferior register XXX.
-   -1 if register value is not available. */
+/* Character array containing the current state of each register
+   (unavailable<0, valid=0, invalid>0). */
 
-extern SIGNED char register_valid[NUM_REGS];
+extern signed char *register_valid;
 
 extern void clear_proceed_status PARAMS ((void));
 
@@ -137,7 +116,7 @@ extern void generic_mourn_inferior PARAMS ((void));
 
 extern void terminal_ours PARAMS ((void));
 
-extern int run_stack_dummy PARAMS ((CORE_ADDR, char[REGISTER_BYTES]));
+extern int run_stack_dummy PARAMS ((CORE_ADDR, char*));
 
 extern CORE_ADDR read_pc PARAMS ((void));
 
@@ -202,6 +181,7 @@ extern int attach PARAMS ((int));
 
 extern void detach PARAMS ((int));
 
+/* PTRACE method of waiting for inferior process.  */
 int ptrace_wait PARAMS ((int, int *));
 
 extern void child_resume PARAMS ((int, int, enum target_signal));
@@ -340,7 +320,7 @@ extern int proceed_to_finish;
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 
-extern char stop_registers[REGISTER_BYTES];
+extern char *stop_registers;
 
 /* Nonzero if the child process in inferior_pid was attached rather
    than forked.  */
@@ -376,57 +356,103 @@ extern int attach_flag;
 #define AFTER_TEXT_END 3
 #define AT_ENTRY_POINT 4
 
+#if !defined (USE_GENERIC_DUMMY_FRAMES)
+#define USE_GENERIC_DUMMY_FRAMES 0
+#endif
+
 #if !defined (CALL_DUMMY_LOCATION)
 #define CALL_DUMMY_LOCATION ON_STACK
 #endif /* No CALL_DUMMY_LOCATION.  */
 
-/* Are we in a call dummy?  The code below which allows DECR_PC_AFTER_BREAK
-   below is for infrun.c, which may give the macro a pc without that
-   subtracted out.  */
-#if !defined (PC_IN_CALL_DUMMY)
-#if CALL_DUMMY_LOCATION == BEFORE_TEXT_END
-extern CORE_ADDR text_end;
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
-  ((pc) >= text_end - CALL_DUMMY_LENGTH         \
-   && (pc) <= text_end + DECR_PC_AFTER_BREAK)
+#if !defined (CALL_DUMMY_ADDRESS)
+#define CALL_DUMMY_ADDRESS() (abort (), 0) /* anything to abort GDB */
+#endif
+#if !defined (CALL_DUMMY_START_OFFSET)
+#define CALL_DUMMY_START_OFFSET (abort (), 0) /* anything to abort GDB */
+#endif
+#if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
+#define CALL_DUMMY_BREAKPOINT_OFFSET_P (0)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (abort (), 0) /* anything to abort GDB */
+#endif
+#if !defined CALL_DUMMY_BREAKPOINT_OFFSET_P
+#define CALL_DUMMY_BREAKPOINT_OFFSET_P (1)
+#endif
+#if !defined (CALL_DUMMY_LENGTH)
+#define CALL_DUMMY_LENGTH (abort (), 0) /* anything to abort GDB */
+#endif
+
+#if defined (CALL_DUMMY_STACK_ADJUST)
+#if !defined (CALL_DUMMY_STACK_ADJUST_P)
+#define CALL_DUMMY_STACK_ADJUST_P (1)
+#endif
+#endif
+#if !defined (CALL_DUMMY_STACK_ADJUST)
+#define CALL_DUMMY_STACK_ADJUST (abort (), 0)
+#endif
+#if !defined (CALL_DUMMY_STACK_ADJUST_P)
+#define CALL_DUMMY_STACK_ADJUST_P (0)
+#endif
+
+#if !defined (CALL_DUMMY_P)
+#if defined (CALL_DUMMY)
+#define CALL_DUMMY_P 1
+#else
+#define CALL_DUMMY_P 0
+#endif
+#endif
+
+#if !defined (CALL_DUMMY_WORDS)
+#if defined (CALL_DUMMY)
+extern LONGEST call_dummy_words[];
+#define CALL_DUMMY_WORDS (call_dummy_words)
+#else
+#define CALL_DUMMY_WORDS (abort (), (void*) 0) /* anything to abort GDB */
+#endif
+#endif
+
+#if !defined (SIZEOF_CALL_DUMMY_WORDS)
+#if defined (CALL_DUMMY)
+extern int sizeof_call_dummy_words;
+#define SIZEOF_CALL_DUMMY_WORDS (sizeof_call_dummy_words)
+#else
+#define SIZEOF_CALL_DUMMY_WORDS (abort (), 0) /* anything to abort GDB */
+#endif
+#endif
+
+#if !defined PUSH_DUMMY_FRAME
+#define PUSH_DUMMY_FRAME (abort ())
+#endif
+
+#if !defined FIX_CALL_DUMMY
+#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (abort ())
+#endif
+
+#if !defined STORE_STRUCT_RETURN
+#define STORE_STRUCT_RETURN(a1,a2) (abort ())
+#endif
+
+
+/* Are we in a call dummy? */
+
+extern int pc_in_call_dummy_before_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == BEFORE_TEXT_END
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_before_text_end (pc, sp, frame_address)
 #endif /* Before text_end.  */
 
-#if CALL_DUMMY_LOCATION == AFTER_TEXT_END
-extern CORE_ADDR text_end;
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
-  ((pc) >= text_end   \
-   && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK)
-#endif /* After text_end.  */
+extern int pc_in_call_dummy_after_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AFTER_TEXT_END
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_after_text_end (pc, sp, frame_address) 
+#endif
 
-#if CALL_DUMMY_LOCATION == ON_STACK
-/* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
-   top of the stack frame which we are checking, where "bottom" and
-   "top" refer to some section of memory which contains the code for
-   the call dummy.  Calls to this macro assume that the contents of
-   SP_REGNUM and FP_REGNUM (or the saved values thereof), respectively,
-   are the things to pass.
+extern int pc_in_call_dummy_on_stack PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == ON_STACK
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_on_stack (pc, sp, frame_address)
+#endif
 
-   This won't work on the 29k, where SP_REGNUM and FP_REGNUM don't
-   have that meaning, but the 29k doesn't use ON_STACK.  This could be
-   fixed by generalizing this scheme, perhaps by passing in a frame
-   and adding a few fields, at least on machines which need them for
-   PC_IN_CALL_DUMMY.
-
-   Something simpler, like checking for the stack segment, doesn't work,
-   since various programs (threads implementations, gcc nested function
-   stubs, etc) may either allocate stack frames in another segment, or
-   allocate other kinds of code on the stack.  */
-
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
-  (INNER_THAN ((sp), (pc)) && (frame_address != 0) && INNER_THAN ((pc), (frame_address)))
-#endif /* On stack.  */
-
-#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address)			\
-  ((pc) >= CALL_DUMMY_ADDRESS ()				\
-   && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK))
-#endif /* At entry point.  */
-#endif /* No PC_IN_CALL_DUMMY.  */
+extern int pc_in_call_dummy_at_entry_point PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
+#endif
 
 /* It's often not enough for our clients to know whether the PC is merely
    somewhere within the call dummy.  They may need to know whether the

@@ -88,13 +88,14 @@ inside_entry_file (addr)
     return 1;
   if (symfile_objfile == 0)
     return 0;
-#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-  /* Do not stop backtracing if the pc is in the call dummy
-     at the entry point.  */
-/* FIXME: Won't always work with zeros for the last two arguments */
-  if (PC_IN_CALL_DUMMY (addr, 0, 0))	
-    return 0;
-#endif
+  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+    {
+      /* Do not stop backtracing if the pc is in the call dummy
+	 at the entry point.  */
+      /* FIXME: Won't always work with zeros for the last two arguments */
+      if (PC_IN_CALL_DUMMY (addr, 0, 0))	
+	return 0;
+    }
   return (addr >= symfile_objfile -> ei.entry_file_lowpc &&
 	  addr <  symfile_objfile -> ei.entry_file_highpc);
 }
@@ -148,19 +149,20 @@ CORE_ADDR pc;
 
 int
 inside_entry_func (pc)
-CORE_ADDR pc;
+     CORE_ADDR pc;
 {
   if (pc == 0)
     return 1;
   if (symfile_objfile == 0)
     return 0;
-#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-  /* Do not stop backtracing if the pc is in the call dummy
-     at the entry point.  */
-/* FIXME: Won't always work with zeros for the last two arguments */
-  if (PC_IN_CALL_DUMMY (pc, 0, 0))
-    return 0;
-#endif
+  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+    {
+      /* Do not stop backtracing if the pc is in the call dummy
+	 at the entry point.  */
+      /* FIXME: Won't always work with zeros for the last two arguments */
+      if (PC_IN_CALL_DUMMY (pc, 0, 0))
+	return 0;
+    }
   return (symfile_objfile -> ei.entry_func_lowpc  <= pc &&
 	  symfile_objfile -> ei.entry_func_highpc > pc);
 }
@@ -243,16 +245,6 @@ create_new_frame (addr, pc)
 #endif
 
   return fi;
-}
-
-/* Return the frame that called FI.
-   If FI is the original frame (it has no caller), return 0.  */
-
-struct frame_info *
-get_prev_frame (frame)
-     struct frame_info *frame;
-{
-  return get_prev_frame_info (frame);
 }
 
 /* Return the frame that FRAME calls (NULL if FRAME is the innermost
@@ -352,7 +344,7 @@ frameless_look_for_prologue (frame)
    if there is no such frame.  */
 
 struct frame_info *
-get_prev_frame_info (next_frame)
+get_prev_frame (next_frame)
      struct frame_info *next_frame;
 {
   CORE_ADDR address = 0;
@@ -1034,7 +1026,72 @@ sigtramp_saved_pc (frame)
 }
 #endif /* SIGCONTEXT_PC_OFFSET */
 
-#ifdef USE_GENERIC_DUMMY_FRAMES
+
+/* Are we in a call dummy?  The code below which allows DECR_PC_AFTER_BREAK
+   below is for infrun.c, which may give the macro a pc without that
+   subtracted out.  */
+
+extern CORE_ADDR text_end;
+
+int
+pc_in_call_dummy_before_text_end (pc, sp, frame_address)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+     CORE_ADDR frame_address;
+{
+  return ((pc) >= text_end - CALL_DUMMY_LENGTH
+	  && (pc) <= text_end + DECR_PC_AFTER_BREAK);
+}
+
+int
+pc_in_call_dummy_after_text_end (pc, sp, frame_address)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+     CORE_ADDR frame_address;
+{
+  return ((pc) >= text_end
+	  && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK);
+}
+
+/* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
+   top of the stack frame which we are checking, where "bottom" and
+   "top" refer to some section of memory which contains the code for
+   the call dummy.  Calls to this macro assume that the contents of
+   SP_REGNUM and FP_REGNUM (or the saved values thereof), respectively,
+   are the things to pass.
+
+   This won't work on the 29k, where SP_REGNUM and FP_REGNUM don't
+   have that meaning, but the 29k doesn't use ON_STACK.  This could be
+   fixed by generalizing this scheme, perhaps by passing in a frame
+   and adding a few fields, at least on machines which need them for
+   PC_IN_CALL_DUMMY.
+
+   Something simpler, like checking for the stack segment, doesn't work,
+   since various programs (threads implementations, gcc nested function
+   stubs, etc) may either allocate stack frames in another segment, or
+   allocate other kinds of code on the stack.  */
+
+int
+pc_in_call_dummy_on_stack (pc, sp, frame_address)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+     CORE_ADDR frame_address;
+{
+  return (INNER_THAN ((sp), (pc))
+	  && (frame_address != 0)
+	  && INNER_THAN ((pc), (frame_address)));
+}
+
+int
+pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+     CORE_ADDR frame_address;
+{
+  return ((pc) >= CALL_DUMMY_ADDRESS ()
+	  && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK));
+}
+
 
 /*
  * GENERIC DUMMY FRAMES
@@ -1052,6 +1109,20 @@ sigtramp_saved_pc (frame)
  * to define PUSH_RETURN_ADDRESS, because no call instruction will be
  * being executed by the target.  Also FRAME_CHAIN_VALID as
  * generic_frame_chain_valid.  */
+
+/* Dummy frame.  This saves the processor state just prior to setting
+   up the inferior function call.  Older targets save the registers
+   target stack (but that really slows down function calls).  */
+
+struct dummy_frame
+{
+  struct dummy_frame *next;
+
+  CORE_ADDR pc;
+  CORE_ADDR fp;
+  CORE_ADDR sp;
+  char *registers;
+};
 
 static struct dummy_frame *dummy_frame_stack = NULL;
 
@@ -1073,7 +1144,7 @@ generic_find_dummy_frame (pc, fp)
        dummyframe = dummyframe->next)
     if (fp == dummyframe->fp || fp == dummyframe->sp)
       /* The frame in question lies between the saved fp and sp, inclusive */
-      return dummyframe->regs;
+      return dummyframe->registers;
 
   return 0;
 }
@@ -1082,12 +1153,14 @@ generic_find_dummy_frame (pc, fp)
    Return true if this is a dummy frame created by gdb for an inferior call */
 
 int
-generic_pc_in_call_dummy (pc, fp)
+generic_pc_in_call_dummy (pc, sp, fp)
      CORE_ADDR pc;
+     CORE_ADDR sp;
      CORE_ADDR fp;
 {
   /* if find_dummy_frame succeeds, then PC is in a call dummy */
-  return (generic_find_dummy_frame (pc, fp) != 0);
+  /* Note: SP and not FP is passed on. */
+  return (generic_find_dummy_frame (pc, sp) != 0);
 }
 
 /* Function: read_register_dummy 
@@ -1137,10 +1210,12 @@ generic_push_dummy_frame ()
       dummy_frame = dummy_frame->next;
 
   dummy_frame = xmalloc (sizeof (struct dummy_frame));
+  dummy_frame->registers = xmalloc (REGISTER_BYTES);
+
   dummy_frame->pc   = read_register (PC_REGNUM);
   dummy_frame->sp   = read_register (SP_REGNUM);
   dummy_frame->fp   = fp;
-  read_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
+  read_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
 }
@@ -1174,8 +1249,10 @@ generic_pop_dummy_frame ()
   if (!dummy_frame)
     error ("Can't pop dummy frame!");
   dummy_frame_stack = dummy_frame->next;
-  write_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
+  write_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
   flush_cached_frames ();
+
+  free (dummy_frame->registers);
   free (dummy_frame);
 }
 
@@ -1292,7 +1369,6 @@ generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
   if (raw_buffer)
     read_register_gen (regnum, raw_buffer);
 }
-#endif /* USE_GENERIC_DUMMY_FRAMES */
 
 void
 _initialize_blockframe ()

@@ -20,9 +20,9 @@
 array,normal:        0: 5: 0: 5:
 array,normal:       21:31:32:-1:OE,LR,AA,Rc,LK:
 ##
-## Branch Conditional instruction - Expand BO{0:4} only, ignore BO{5}
+## Branch Conditional instruction - Expand BO{0:4}
 ##
-array,expand-forced: 6: 9: 6: 9:BO:            0xfc000000:0x40000000
+array,expand-forced: 6:10: 6:10:BO:            0xfc000000:0x40000000
 ##
 ## Expand RA on equality with 0 in Add instructions were if(RA==0) appears.
 ##

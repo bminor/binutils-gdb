@@ -1425,20 +1425,16 @@ push_dummy_frame (inf_status)
     {
       unsigned int sid;
       int_buffer &= ~0x2;
-      memcpy (inf_status->registers, &int_buffer, 4);
-      memcpy (inf_status->registers + REGISTER_BYTE (PCOQ_HEAD_REGNUM), &pc, 4);
-      pc += 4;
-      memcpy (inf_status->registers + REGISTER_BYTE (PCOQ_TAIL_REGNUM), &pc, 4);
-      pc -= 4;
+      write_inferior_status_register (inf_status, 0, int_buffer);
+      write_inferior_status_register (inf_status, PCOQ_HEAD_REGNUM, pc + 0);
+      write_inferior_status_register (inf_status, PCOQ_TAIL_REGNUM, pc + 4);
       sid = (pc >> 30) & 0x3;
       if (sid == 0)
 	pcspace = read_register (SR4_REGNUM);
       else
 	pcspace = read_register (SR4_REGNUM + 4 + sid);
-      memcpy (inf_status->registers + REGISTER_BYTE (PCSQ_HEAD_REGNUM),
-	      &pcspace, 4);
-      memcpy (inf_status->registers + REGISTER_BYTE (PCSQ_TAIL_REGNUM),
-	      &pcspace, 4);
+      write_inferior_status_register (inf_status, PCSQ_HEAD_REGNUM, pcspace);
+      write_inferior_status_register (inf_status, PCSQ_TAIL_REGNUM, pcspace);
     }
   else
     pcspace = read_register (PCSQ_HEAD_REGNUM);
@@ -2428,6 +2424,13 @@ pa_register_look_aside(raw_regs, regnum, raw_val)
          Note that to avoid "C" doing typed pointer arithmetic, we
          have to cast away the type in our offset calculation:
          otherwise we get an offset of 1! */
+
+      /* NB: save_state_t is not available before HPUX 9.
+	 The ss_wide field is not available previous to HPUX 10.20,
+         so to avoid compile-time warnings, we only compile this for
+         PA 2.0 processors.  This control path should only be followed
+         if we're debugging a PA 2.0 processor, so this should not cause
+         problems. */
 
       /* #if the following code out so that this file can still be
          compiled on older HPUX boxes (< 10.20) which don't have
@@ -4276,9 +4279,6 @@ child_get_current_exception_event ()
   return &current_ex_event;
 }
 
-
-#ifdef MAINTENANCE_CMDS
-
 static void
 unwind_command (exp, from_tty)
      char *exp;
@@ -4350,7 +4350,6 @@ unwind_command (exp, from_tty)
   pin (Entry_GR);
   pin (Total_frame_size);
 }
-#endif /* MAINTENANCE_CMDS */
 
 #ifdef PREPARE_TO_PROCEED
 
@@ -4437,9 +4436,7 @@ _initialize_hppa_tdep ()
 {
   tm_print_insn = print_insn_hppa;
 
-#ifdef MAINTENANCE_CMDS
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   "Print unwind table entry at given address.",
 	   &maintenanceprintlist);
-#endif /* MAINTENANCE_CMDS */
 }

@@ -422,11 +422,11 @@ extern struct type * lang_bool_type PARAMS ((void));
 
 /* Misc:  The string representing a particular enum language.  */
 
-extern const struct language_defn *
-language_def PARAMS ((enum language));
+extern enum language language_enum PARAMS ((char *str));
 
-extern char *
-language_str PARAMS ((enum language));
+extern const struct language_defn *language_def PARAMS ((enum language));
+
+extern char *language_str PARAMS ((enum language));
 
 /* Add a language to the set known by GDB (at initialization time).  */
 

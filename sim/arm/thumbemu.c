@@ -29,6 +29,7 @@ existing ARM simulator.  */
 
 #include "armdefs.h"
 #include "armemu.h"
+#include "armos.h"
 
 /* Decode a 16bit Thumb instruction.  The instruction is in the low
    16-bits of the tinstr field, with the following Thumb instruction
@@ -356,6 +357,9 @@ ARMul_ThumbDecode (state,pc,tinstr,ainstr)
 	  /* Breakpoint must be handled specially.  */
 	  if ((tinstr & 0x00FF) == 0x18)
 	    *ainstr |= ((tinstr & 0x00FF) << 16);
+	  /* New breakpoint value.  See gdb/arm-tdep.c  */
+	  else if ((tinstr & 0x00FF) == 0xFE)
+	    * ainstr |= SWI_Breakpoint;
 	  else
 	    *ainstr |= (tinstr & 0x00FF);
         }

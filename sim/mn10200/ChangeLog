@@ -1,3 +1,18 @@
+1999-04-06  Keith Seitz  <keiths@cygnus.com>
+
+	* interp.c (sim_stop): Set the sim's exception
+	to SIGINT.
+
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* interp.c (UI_LOOP_POLL_INTERVAL): Define. Used to tweak the
+	frequency at which ui_loop_hook is called.
+	(ui_loop_hook_counter): New global defined when NEED_UI_LOOP_HOOK
+	is defined.
+	(sim_resume): Call ui_loop_hook (if defined) when the interval
+	passes.
+	* Makefile.in (SIM_EXTRA_CFLAGS): Include NEED_UI_LOOP_HOOK.
+
 Wed Jun 17 11:37:59 1998  Mark Alexander  <marka@cygnus.com>
 
 	* Makefile.in: Define NL_TARGET so that targ-vals.h will be used

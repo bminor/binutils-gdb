@@ -1357,8 +1357,6 @@ decode_line_spec_1 PARAMS ((char *, int));
 extern struct symtabs_and_lines
 decode_line_1 PARAMS ((char **, int, struct symtab *, int, char ***));
 
-#if MAINTENANCE_CMDS
-
 /* Symmisc.c */
 
 void
@@ -1380,8 +1378,6 @@ maintenance_check_symtabs PARAMS ((char *, int));
 
 void
 maintenance_print_statistics PARAMS ((char *, int));
-
-#endif
 
 extern void
 free_symtab PARAMS ((struct symtab *));

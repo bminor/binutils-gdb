@@ -33,6 +33,13 @@
 #include <unistd.h>
 #endif
 
+/* Define the rate at which the simulator should poll the host
+   for a quit. */
+#ifndef POLL_QUIT_INTERVAL
+#define POLL_QUIT_INTERVAL 0x10
+#endif
+
+static int poll_quit_count = POLL_QUIT_INTERVAL;
 
 /* See the file include/callbacks.h for a description */
 
@@ -304,9 +311,12 @@ sim_io_error(SIM_DESC sd,
 void
 sim_io_poll_quit(SIM_DESC sd)
 {
-  if (STATE_CALLBACK (sd)->poll_quit != NULL)
-    if (STATE_CALLBACK (sd)->poll_quit (STATE_CALLBACK (sd)))
-      sim_stop (sd);
+  if (STATE_CALLBACK (sd)->poll_quit != NULL && poll_quit_count-- < 0)
+    {
+      poll_quit_count = POLL_QUIT_INTERVAL;
+      if (STATE_CALLBACK (sd)->poll_quit (STATE_CALLBACK (sd)))
+	sim_stop (sd);
+    }
 }
 
 

@@ -3482,7 +3482,7 @@ else
 fi
 fi
 
-wire_alignment="NONSTRICT_ALIGNMENT"
+wire_alignment="FORCED_ALIGNMENT"
 default_alignment=""
 
 # Check whether --enable-sim-alignment or --disable-sim-alignment was given.

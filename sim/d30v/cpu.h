@@ -115,6 +115,7 @@ struct _sim_cpu {
   int trace_trap_p;			/* If unknown traps dump out the regs */
   int trace_action;			/* trace bits at end of instructions */
   int left_kills_right_p;               /* left insn kills insn in right slot of -> */
+  int mvtsys_left_p;			/* left insn was mvtsys */
   int did_trap;				/* we did a trap & need to finish it */
   struct _write32 write32;		/* queued up 32-bit writes */
   struct _write64 write64;		/* queued up 64-bit writes */

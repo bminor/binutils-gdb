@@ -302,13 +302,28 @@ static struct partial_die_info zeroed_partial_die;
    in buildsym.c.  */
 static struct pending **list_in_scope = &file_symbols;
 
-/* FIXME: The following variables pass additional information from
-   decode_locdesc to the caller.  */
-static int optimized_out;	/* Kludge to identify optimized out variables */
-static int isreg;		/* Kludge to identify register variables */
-static int offreg;		/* Kludge to identify basereg references */
-static int basereg;		/* Which base register is it relative to?  */
-static int islocal;		/* Kludge to identify local variables */
+/* FIXME: decode_locdesc sets these variables to describe the location
+   to the caller.  These ought to be a structure or something.   If
+   none of the flags are set, the object lives at the address returned
+   by decode_locdesc.  */
+
+static int optimized_out;	/* No ops in location in expression,
+				   so object was optimized out.  */
+static int isreg;		/* Object lives in register.
+				   decode_locdesc's return value is
+				   the register number.  */
+static int offreg;		/* Object's address is the sum of the
+				   register specified by basereg, plus
+				   the offset returned.  */
+static int basereg;	        /* See `offreg'.  */
+static int isderef;		/* Value described by flags above is
+				   the address of a pointer to the object.  */
+static int islocal;		/* Variable is at the returned offset
+				   from the frame start, but there's
+				   no identified frame pointer for
+				   this function, so we can't say
+				   which register it's relative to;
+				   use LOC_LOCAL.  */
 
 /* DW_AT_frame_base values for the current function.
    frame_base_reg is -1 if DW_AT_frame_base is missing, otherwise it
@@ -463,6 +478,10 @@ static struct complaint dwarf2_unsupported_die_ref_attr =
 static struct complaint dwarf2_unsupported_stack_op =
 {
   "unsupported stack op: '%s'", 0, 0
+};
+static struct complaint dwarf2_complex_location_expr =
+{
+  "location expression too complex", 0, 0
 };
 static struct complaint dwarf2_unsupported_tag =
 {
@@ -1595,7 +1614,9 @@ read_func_scope (die, objfile)
   if (attr)
     {
       CORE_ADDR addr = decode_locdesc (DW_BLOCK (attr), objfile);
-      if (isreg)
+      if (isderef)
+	complain (&dwarf2_unsupported_at_frame_base, name);
+      else if (isreg)
 	frame_base_reg = addr;
       else if (offreg)
 	{
@@ -3922,7 +3943,12 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-		  record_line (current_subfile, line, address);
+		  /* Don't call record_line here.  The end_sequence
+		     instruction provides the address of the first byte
+		     *after* the last line in the sequence; it's not the
+		     address of any real source line.  However, the GDB
+		     linetable structure only records the starts of lines,
+		     not the ends.  This is a weakness of GDB.  */
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr) + baseaddr;
@@ -4238,8 +4264,17 @@ new_symbol (die, type, objfile)
 		}
 	      else if (offreg)
 		{
-		  SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
-		  SYMBOL_BASEREG (sym) = basereg;
+		  if (isderef)
+		    {
+		      if (basereg != frame_base_reg)
+			complain (&dwarf2_complex_location_expr);
+		      SYMBOL_CLASS (sym) = LOC_REF_ARG;
+		    }
+		  else
+		    {
+		      SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
+		      SYMBOL_BASEREG (sym) = basereg;
+		    }
 		}
 	      else
 		{
@@ -5643,6 +5678,7 @@ decode_locdesc (blk, objfile)
   stack[stacki] = 0;
   isreg = 0;
   offreg = 0;
+  isderef = 0;
   islocal = 0;
   optimized_out = 1;
 
@@ -5814,6 +5850,14 @@ decode_locdesc (blk, objfile)
 	case DW_OP_minus:
 	  stack[stacki - 1] = stack[stacki] - stack[stacki - 1];
 	  stacki--;
+	  break;
+
+	case DW_OP_deref:
+	  isderef = 1;
+	  /* If we're not the last op, then we definitely can't encode
+             this using GDB's address_class enum.  */
+	  if (i < size)
+	    complain (&dwarf2_complex_location_expr);
 	  break;
 
 	default:

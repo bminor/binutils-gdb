@@ -143,6 +143,12 @@ Thu Dec 11 13:40:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* dwarf2read.c (dwarf_decode_lines): Change type of address to
  	CORE_ADDR.
 
+Thu Dec 11 22:39:02 1997  Mark Alexander  <marka@cygnus.com>
+
+	From change made to branch by Bob Manson <manson@cygnus.com>:
+	* tic80-tdep.c (tic80_push_arguments): The compiler always
+	passes structs by reference.
+
 Thu Dec 11 14:28:01 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c (trace_find_command): don't error if going
@@ -1016,6 +1022,10 @@ Sat Aug  9 01:50:14 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Fri Aug  8 21:35:44 1997  Mark Alexander  <marka@cygnus.com>
 
+	* config/tic80/tic80.mt:
+	(GDBSERVER-DEPFILES, GDBSERVER_LIBS): Define for gdbserver.
+	(SIM): Remove -lm to prevent make errors.
+	* configure.tgt: add gdbserver to configdirs for tic80.
 	* gdbserver/utils.c (error): Change prototype to match defs.h.
 	* gdbserver/low-sim.c: Change simulator calls to use new interface.
 	* remote.c (remote_write_bytes): Include '$' at start of packet
@@ -1151,6 +1161,11 @@ Wed Aug  6 16:15:31 1997  Geoffrey Noer  <noer@cygnus.com>
 	(_initialize_bdm_ppc): new
 	* config/powerpc/tm-ppc-eabi.h: add necessary CPU32 BDM defines
 
+Tue Aug  5 23:56:14 1997  Mark Alexander  <marka@cygnus.com>
+
+	* tic80-tdep.c (tic80_init_extra_frame_info): Allow zero
+	as a valid SP-relative offset of a saved register.
+	
 Wed Aug  6 00:24:08 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* hpread.c (hpread_read_struct_type): Use accessor macros rather
@@ -1654,6 +1669,15 @@ Wed May 14 08:58:55 1997  Jeffrey A Law  (law@cygnus.com)
 	symbols to find the end of the prologue.
 	* mn10300-tdep.c (mn10300_skip_prologue): Likewise.
 
+Wed May 14 12:04:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tic80/tm-tic80.h (NUM_REGS): 38 not 37.
+
+Mon May 12 11:35:04 1997  Mark Alexander  <marka@cygnus.com>
+
+	* tic80-tdep.c, config/tic80/tm-tic80.h: First cut at getting
+	basic C80 features working.
+
 Thu May  8 08:42:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (AC_TYPE_SIGNAL): Add
@@ -1694,6 +1718,10 @@ Thu May  1 02:28:21 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* printcmd.c (disassemble_command):  Adjust low function bound
 	by FUNCTION_START_OFFSET.
+
+Wed Apr 30 15:23:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tic80/tm-tic80.h (BREAKPOINT): Set it to trap 73.
 
 Mon Apr 28 21:25:32 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -1762,6 +1790,15 @@ Thu Apr 24 13:31:10 1997  Jeffrey A Law  (law@cygnus.com)
 	* mn10300-tdep.c (mn10300_analyze_prologue): Check for a return
 	insn at "pc", not "fi->pc".
 
+Thu Apr 24 16:11:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tic80/tm-tic80.h (NUM_REGS): Four 64bit accumulators.
+	(REGISTER_BYTE, REGISTER_RAW_SIZE, REGISTER_SIZE,
+ 	MAX_REGISTER_RAW_SIZE, REGISTER_VIRTUAL_TYPE): Adjust.
+	(NPC_REGNUM): Tic80 has a delay slot.
+	(R0_REGNUM, Rn_REGNUM, An_REGNUM): For sim, provide base/bound for
+ 	register blocks.
+
 Wed Apr 23 11:18:45 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/mn10200/tm-mn10200.h (STORE_RETURN_VALUE): Pointers are
@@ -1779,6 +1816,10 @@ Tue Apr 22 11:58:15 1997  Fred Fish  <fnf@cygnus.com>
 	the same as floatformat_little.
 	(floatformat_from_doublest): Postswap output words for
 	the floatformat_littlebyte_bigwords format.
+
+Mon Apr 21 22:44:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tic80/tic80.mt (SIM): Link in simulator.
 
 Tue Apr 22 09:02:10 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
@@ -2102,6 +2143,11 @@ Mon Mar 31 14:55:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.in: Generate .gdbinit from gdbinit.in.
 	* configure: Rebuild.
 
+Sun Mar 30 12:28:24 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tic80/tic80.mt: Disable using the simulator
+	until it is ready.
+
 Sat Mar 29 13:57:20 1997  Fred Fish  <fnf@cygnus.com>
 
 	* COPYING: Install new version of file from FSF.
@@ -2110,6 +2156,10 @@ Sat Mar 29 13:57:20 1997  Fred Fish  <fnf@cygnus.com>
 Fri Mar 28 18:33:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (distclean): Remove .gdbinit.
+
+Fri Mar 28 15:37:30 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tic80/tm-tic80.h (NAMES_HAVE_UNDERSCORE): Define.
 
 Fri Mar 28 15:38:04 1997  Mike Meissner  <meissner@cygnus.com>
 
@@ -2167,6 +2217,10 @@ Sat Mar 22 16:41:35 1997  Fred Fish  <fnf@cygnus.com>
 
 	* remote-sim.c (simulator_command): Add comment about dealing with
 	NULL or empty args.
+	* Makefile.in (tic80-tdep.o): Add target.
+	* configure.tgt: Add tic80 case.
+	* tic80-tdep.c: New file.
+	* config/tic80/{tic80.mt, tm-tic80.h}: New files.
 
 Sat Mar 22 02:48:11 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 

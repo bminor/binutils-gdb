@@ -40,6 +40,8 @@ gdb_expect {
 			{ pass "attach" }
     -re "You can't do that when your target is `None'.*$gdb_prompt $"\
 			{ pass "attach" }
+    -re "You can't do that without a process to debug.*$gdb_prompt $"\
+			{ pass "attach" }
     -re "Don't know how to attach.  Try \"help target\"..*$gdb_prompt $"\
 			{ pass "attach" }
     -re "Kill it. .y or n." {
@@ -294,6 +296,8 @@ gdb_test "info files" "" "info files"
 if [istarget "arm-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } elseif [istarget "thumb-*-*"] then {
+    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
+} elseif [istarget "strongarm-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } else {
     gdb_test "info float" "No floating point info available for this processor." "info float"

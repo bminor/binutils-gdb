@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992, 1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -101,4 +101,5 @@ extern void annotate_array_section_end PARAMS ((void));
 extern void (*annotate_starting_hook) PARAMS ((void));
 extern void (*annotate_stopped_hook) PARAMS ((void));
 extern void (*annotate_signalled_hook) PARAMS ((void));
+extern void (*annotate_signal_hook) PARAMS ((void));
 extern void (*annotate_exited_hook) PARAMS ((void));

@@ -1,10 +1,143 @@
+1999-04-20  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.c++/demangle.exp (test_gnu_style_demangling): Add tests for
+	Marcus Daniel's and Dale Hawkins's demangler crashes.
+
+	* gdb.c++/demangle.exp (test_gnu_style_demangling,
+ 	test_lucid_style_demangling, test_arm_style_demangling,
+ 	test_hp_style_demangling): Try Tom Tromey's core-dumping
+ 	identifier under each demangling style.
+
+1999-04-07  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.c++/demangle.exp: Include the current demangling style
+	in all test names.
+	(current_demangling_style): New global variable.
+	(set_demangling_style, test_demangling_core, test_demangling,
+	test_demangling_exact): New functions.
+	(test_gnu_style_demangling, test_lucid_style_demangling,
+	test_arm_style_demangling, test_hp_style_demangling): Use those,
+	instead of calling gdb_test and gdb_test_exact directly.
+	(catch_demangling_errors): New function, which reports errors
+	signalled by the demangling test functions in an orderly way.
+	(do_tests): Use catch_demangling_errors.
+
+1999-04-06  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.base/signals.exp (test_handle_all_print): Use () for
+ 	grouping in expressions, not {}.
+
+	* gdb.base/smoke.exp: Test value of x, not y.  The latter isn't
+ 	initialized yet.
+
+1999-04-01  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.c++/derivation.exp: Pass ptype tests if synthesized methods
+	are listed.
+
+1999-03-26  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.stabs/weird.exp: Test for CC being defined before
+	looking at its value.
+
+1999-03-25  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Remove stray '#'.
+	* gdb.base/miscexprs.exp: Allow "short" and "long" as well as
+	"short int" and "long int".
+	* gdb.c++/overload.cc: Cast the string added in the previous
+ 	change, to mollify finicky HP compiler.
+	* gdb.hp/reg-test.exp (testfile): Fix file name.
+	* gdb.stabs/weird.exp: Don't try to run if HP compiler in use.
+	
+	* gdb.c++/misc.cc (main): Initialize obj_with_enum.
+	* gdb.c++/classes.exp: Fix test of obj_with_enum values, allow
+	alternate form of enum ptype.
+
 1999-03-23  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* lib/gdb.exp (skip_hp_tests): Remove gcc_used argument.
+	* gdb.hp/*.exp: Change all to run compiler probe only after
+ 	passing skip_hp_tests, so as not to waste time on guaranteed
+ 	failure.
 
 	* gdb.c++/overload.cc: Pass string instead of char addr, always
 	init ccpfoo.
 	* gdb.c++/templates.cc: Fix syntax error.
 
-1999-03-09  Jim Blandy  <jimb@zwingli.cygnus.com>
+Tue Mar 23 14:56:36 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/commands.exp: Add test for correct position of '>'
+	when issuing the 'commands' command after a 'while' or 'if' 
+	command.
+
+1999-03-18  James Ingham  <jingham@cygnus.com>
+
+	* gdb.c++/ovldbreak.exp: Use gdb_continue_to_end
+
+	* gdb.c++/method.exp: It was testing an uninitialized int on the
+	stack and assuming it was positive.
+
+	* gdb.base/watchpoint.exp: Use gdb_continue_to_end.
+
+	* gdb.base/step-test.exp: Catch a case where finish is broken and
+	keep it from killing the rest of the tests. 
+	Use gdb_continue_to_end.
+
+	* gdb.base/sigall.exp: use gdb_continue_to_end.
+
+	* gdb.base/ena-dis-br.exp: use gdb_continue_to_end.
+
+	* gdb.base/display.exp: use runto_main, not run.
+
+	* gdb.base/default.exp: Check for the current error message in the 
+	r abbreviation test.  
+	Add strongarm to the targets that know info float.
+
+	* gdb.base/condbreak.exp: Use the gdb_run command rather than just 
+	run which doesn't work with monitors.
+
+	* gdb.base/call-ar-st.exp: fixed bogus regexp in continuing to 1034 test.
+
+	* gdb.base/break.exp: use the gdb_continue_to_end proc.
+
+	* lib/gdb.exp: I had added gdb_continue_to_end used to run to the end of a
+	program.  Traps the case (in Cygmon) when the program never really 
+	exits.  Same as Mark's continue_to_exit, but I had put it in a lot 
+	more places, so I used my name.  Sorry Mark...
+
+	* config/monitor.exp (gdb_target_monitor): added another
+	target_info parameter: remotebinarydownload.  This will set the
+	remotebinarydownload flag if this is causing some boards trouble.
+
+1999-03-18  Mark Salter  <msalter@cygnus.com>
+
+	* lib/gdb.exp (continue_to_exit): New function.
+
+	* gdb.base/ena-dis-br.exp: Clean up for remote targets.
+	* gdb.base/ending-run.exp: Ditto.
+	* gdb.base/step-test.exp: Ditto.
+
+1999-03-16  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/miscexprs.c: Clean up file, clear cbig.c[0] explicitly
+	(suggested by Art Haas <ahaas@neosoft.com>).
+
+1999-03-16  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+ 	* gdb.base/signals.exp: Filter out *-*-linux* before matching *-*-gnu*.
+
+Fri Mar 12 18:06:21 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.c++/ref-types.exp, ref-types2.exp: Allow alternate
+ 	descriptions of types (short unsigned int vs unsigned short, etc).
+
+1999-03-12  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.base/call-strs.exp: Don't assume that `step' will step over
+	a call to strlen; sometimes we do have sources.
+
+1999-03-08  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* gdb.base/call-ar-st.c (main): Terminate char_array with a null
  	character, so GDB won't print garbage after its end.
@@ -26,21 +159,28 @@
 	* gdb.base/step-test.exp: Rewrite `stepi' and `nexti' tests to be
 	more portable.
 
+1999-03-08  Jim Blandy  <jimb@zwingli.cygnus.com>
+
 	* lib/gdb.exp: Doc fixes.
+
+1999-03-05  Nick Clifton  <nickc@cygnus.com>
+
+	* gdb.base/a2-run.exp: Add expected fails for strongarm-coff. 
+
+1999-03-04  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* gdb.base/display.exp: Don't exercise the "detach" and "kill"
  	commands.  They're not germane to this test, and they don't work
  	that way on remote targets.
 
+1999-02-25  Felix Lee  <flee@cygnus.com>
+
+	* lib/gdb.exp (debug_format): initialize
+
 1999-02-25  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* gdb.base/call-ar-st.c: Include string.h, not strings.h.
 	* gdb.base/call-rt-st.c: Ditto.
-
-1999-02-23  Jim Blandy  <jimb@zwingli.cygnus.com>
-
-	* configure.in: Formatting fix.
-	* configure: Regenerated.
 
 1999-02-13  Jim Blandy  <jimb@zwingli.cygnus.com>
 
@@ -263,6 +403,7 @@ Wed Jan  6 18:41:15 1999  David Taylor  <taylor@texas.cygnus.com>
 	* gdb.base/varargs.exp: new file.
 	* gdb.base/volatile.exp: new file.
 	* gdb.base/whatis-exp.exp: new file.
+	* gdb.base/display.exp: new file.
 	* gdb.c++/derivation.exp: new file.
 	* gdb.c++/local.exp: new file.
 	* gdb.c++/member-ptr.exp: new file.
@@ -548,6 +689,7 @@ Thurs Jul 9 11:08:31 1998  Dawn Perchik  <dawn@cygnus.com>
 
 	* gdb.base/commands.exp: Break up infrun_breakpoint_command_test 
 	into two parts to get around a synchronization problem in expect.
+
 
 Fri Jun 26 14:52:47 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 

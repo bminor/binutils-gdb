@@ -34,15 +34,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define HAVE_CPU_I960BASE
 
 #define CGEN_INSN_LSB0_P 0
-#define CGEN_WORD_BITSIZE 32
-#define CGEN_DEFAULT_INSN_BITSIZE 32
-#define CGEN_BASE_INSN_BITSIZE 32
-#define CGEN_MIN_INSN_BITSIZE 32
-#define CGEN_MAX_INSN_BITSIZE 64
-#define CGEN_DEFAULT_INSN_SIZE (CGEN_DEFAULT_INSN_BITSIZE / 8)
-#define CGEN_BASE_INSN_SIZE (CGEN_BASE_INSN_BITSIZE / 8)
-#define CGEN_MIN_INSN_SIZE (CGEN_MIN_INSN_BITSIZE / 8)
-#define CGEN_MAX_INSN_SIZE (CGEN_MAX_INSN_BITSIZE / 8)
+
+/* Maximum size of any insn (in bytes).  */
+#define CGEN_MAX_INSN_SIZE 8
+
 #define CGEN_INT_INSN_P 0
 
 /* FIXME: Need to compute CGEN_MAX_SYNTAX_BYTES.  */
@@ -193,24 +188,6 @@ typedef enum insn_ctrl_zero {
   CTRL_ZERO_0
 } INSN_CTRL_ZERO;
 
-/* Enum declaration for general registers.  */
-typedef enum h_gr {
-  H_GR_FP = 31, H_GR_SP = 1, H_GR_R0 = 0, H_GR_R1 = 1
- , H_GR_R2 = 2, H_GR_R3 = 3, H_GR_R4 = 4, H_GR_R5 = 5
- , H_GR_R6 = 6, H_GR_R7 = 7, H_GR_R8 = 8, H_GR_R9 = 9
- , H_GR_R10 = 10, H_GR_R11 = 11, H_GR_R12 = 12, H_GR_R13 = 13
- , H_GR_R14 = 14, H_GR_R15 = 15, H_GR_G0 = 16, H_GR_G1 = 17
- , H_GR_G2 = 18, H_GR_G3 = 19, H_GR_G4 = 20, H_GR_G5 = 21
- , H_GR_G6 = 22, H_GR_G7 = 23, H_GR_G8 = 24, H_GR_G9 = 25
- , H_GR_G10 = 26, H_GR_G11 = 27, H_GR_G12 = 28, H_GR_G13 = 29
- , H_GR_G14 = 30, H_GR_G15 = 31
-} H_GR;
-
-/* Enum declaration for condition code.  */
-typedef enum h_cc {
-  H_CC_CC
-} H_CC;
-
 /* Attributes.  */
 
 /* Enum declaration for machine type selection.  */
@@ -218,7 +195,13 @@ typedef enum mach_attr {
   MACH_BASE, MACH_I960_KA_SA, MACH_I960_CA, MACH_MAX
 } MACH_ATTR;
 
+/* Enum declaration for instruction set selection.  */
+typedef enum isa_attr {
+  ISA_I960, ISA_MAX
+} ISA_ATTR;
+
 /* Number of architecture variants.  */
+#define MAX_ISAS  1
 #define MAX_MACHS ((int) MACH_MAX)
 
 /* Ifield support.  */
@@ -229,13 +212,13 @@ extern const struct cgen_ifld i960_cgen_ifld_table[];
 
 /* Enum declaration for cgen_ifld attrs.  */
 typedef enum cgen_ifld_attr {
-  CGEN_IFLD_MACH, CGEN_IFLD_NBOOLS, CGEN_IFLD_START_BOOL = 31, CGEN_IFLD_VIRTUAL
- , CGEN_IFLD_UNSIGNED, CGEN_IFLD_PCREL_ADDR, CGEN_IFLD_ABS_ADDR, CGEN_IFLD_RESERVED
- , CGEN_IFLD_SIGN_OPT
+  CGEN_IFLD_VIRTUAL, CGEN_IFLD_PCREL_ADDR, CGEN_IFLD_ABS_ADDR, CGEN_IFLD_RESERVED
+ , CGEN_IFLD_SIGN_OPT, CGEN_IFLD_SIGNED, CGEN_IFLD_END_BOOLS, CGEN_IFLD_START_NBOOLS = 31
+ , CGEN_IFLD_MACH, CGEN_IFLD_END_NBOOLS
 } CGEN_IFLD_ATTR;
 
-/* Number of non-boolean elements in cgen_ifld.  */
-#define CGEN_IFLD_NBOOL_ATTRS ((int) CGEN_IFLD_NBOOLS)
+/* Number of non-boolean elements in cgen_ifld_attr.  */
+#define CGEN_IFLD_NBOOL_ATTRS (CGEN_IFLD_END_NBOOLS - CGEN_IFLD_START_NBOOLS - 1)
 
 /* Enum declaration for i960 ifield types.  */
 typedef enum ifield_type {
@@ -254,20 +237,19 @@ typedef enum ifield_type {
 
 /* Enum declaration for cgen_hw attrs.  */
 typedef enum cgen_hw_attr {
-  CGEN_HW_MACH, CGEN_HW_NBOOLS, CGEN_HW_START_BOOL = 31, CGEN_HW_VIRTUAL
- , CGEN_HW_UNSIGNED, CGEN_HW_SIGNED, CGEN_HW_CACHE_ADDR, CGEN_HW_FUN_ACCESS
- , CGEN_HW_PC, CGEN_HW_PROFILE
+  CGEN_HW_VIRTUAL, CGEN_HW_CACHE_ADDR, CGEN_HW_PC, CGEN_HW_PROFILE
+ , CGEN_HW_END_BOOLS, CGEN_HW_START_NBOOLS = 31, CGEN_HW_MACH, CGEN_HW_END_NBOOLS
 } CGEN_HW_ATTR;
 
-/* Number of non-boolean elements in cgen_hw.  */
-#define CGEN_HW_NBOOL_ATTRS ((int) CGEN_HW_NBOOLS)
+/* Number of non-boolean elements in cgen_hw_attr.  */
+#define CGEN_HW_NBOOL_ATTRS (CGEN_HW_END_NBOOLS - CGEN_HW_START_NBOOLS - 1)
 
 /* Enum declaration for i960 hardware types.  */
-typedef enum hw_type {
-  HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
- , HW_H_ADDR, HW_H_IADDR, HW_H_GR, HW_H_CC
+typedef enum cgen_hw_type {
+  HW_H_MEMORY, HW_H_SINT, HW_H_UINT, HW_H_ADDR
+ , HW_H_IADDR, HW_H_PC, HW_H_GR, HW_H_CC
  , HW_MAX
-} HW_TYPE;
+} CGEN_HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
 
@@ -275,13 +257,13 @@ typedef enum hw_type {
 
 /* Enum declaration for cgen_operand attrs.  */
 typedef enum cgen_operand_attr {
-  CGEN_OPERAND_MACH, CGEN_OPERAND_NBOOLS, CGEN_OPERAND_START_BOOL = 31, CGEN_OPERAND_VIRTUAL
- , CGEN_OPERAND_UNSIGNED, CGEN_OPERAND_PCREL_ADDR, CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_SIGN_OPT
- , CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_RELAX, CGEN_OPERAND_SEM_ONLY
+  CGEN_OPERAND_VIRTUAL, CGEN_OPERAND_PCREL_ADDR, CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_SIGN_OPT
+ , CGEN_OPERAND_SIGNED, CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_RELAX, CGEN_OPERAND_SEM_ONLY
+ , CGEN_OPERAND_END_BOOLS, CGEN_OPERAND_START_NBOOLS = 31, CGEN_OPERAND_MACH, CGEN_OPERAND_END_NBOOLS
 } CGEN_OPERAND_ATTR;
 
-/* Number of non-boolean elements in cgen_operand.  */
-#define CGEN_OPERAND_NBOOL_ATTRS ((int) CGEN_OPERAND_NBOOLS)
+/* Number of non-boolean elements in cgen_operand_attr.  */
+#define CGEN_OPERAND_NBOOL_ATTRS (CGEN_OPERAND_END_NBOOLS - CGEN_OPERAND_START_NBOOLS - 1)
 
 /* Enum declaration for i960 operand types.  */
 typedef enum cgen_operand_type {
@@ -302,20 +284,21 @@ typedef enum cgen_operand_type {
 
 /* Enum declaration for cgen_insn attrs.  */
 typedef enum cgen_insn_attr {
-  CGEN_INSN_MACH, CGEN_INSN_NBOOLS, CGEN_INSN_START_BOOL = 31, CGEN_INSN_ALIAS
- , CGEN_INSN_VIRTUAL, CGEN_INSN_UNCOND_CTI, CGEN_INSN_COND_CTI, CGEN_INSN_SKIP_CTI
- , CGEN_INSN_DELAY_SLOT, CGEN_INSN_RELAXABLE, CGEN_INSN_RELAX, CGEN_INSN_NO_DIS
- , CGEN_INSN_PBB
+  CGEN_INSN_ALIAS, CGEN_INSN_VIRTUAL, CGEN_INSN_UNCOND_CTI, CGEN_INSN_COND_CTI
+ , CGEN_INSN_SKIP_CTI, CGEN_INSN_DELAY_SLOT, CGEN_INSN_RELAXABLE, CGEN_INSN_RELAX
+ , CGEN_INSN_NO_DIS, CGEN_INSN_PBB, CGEN_INSN_END_BOOLS, CGEN_INSN_START_NBOOLS = 31
+ , CGEN_INSN_MACH, CGEN_INSN_END_NBOOLS
 } CGEN_INSN_ATTR;
 
-/* Number of non-boolean elements in cgen_insn.  */
-#define CGEN_INSN_NBOOL_ATTRS ((int) CGEN_INSN_NBOOLS)
+/* Number of non-boolean elements in cgen_insn_attr.  */
+#define CGEN_INSN_NBOOL_ATTRS (CGEN_INSN_END_NBOOLS - CGEN_INSN_START_NBOOLS - 1)
 
 /* cgen.h uses things we just defined.  */
 #include "opcode/cgen.h"
 
 /* Attributes.  */
-extern const CGEN_ATTR_TABLE i960_cgen_hw_attr_table[];
+extern const CGEN_ATTR_TABLE i960_cgen_hardware_attr_table[];
+extern const CGEN_ATTR_TABLE i960_cgen_ifield_attr_table[];
 extern const CGEN_ATTR_TABLE i960_cgen_operand_attr_table[];
 extern const CGEN_ATTR_TABLE i960_cgen_insn_attr_table[];
 
@@ -324,18 +307,6 @@ extern const CGEN_ATTR_TABLE i960_cgen_insn_attr_table[];
 extern CGEN_KEYWORD i960_cgen_opval_h_gr;
 extern CGEN_KEYWORD i960_cgen_opval_h_cc;
 
-#define CGEN_INIT_PARSE(od) \
-{\
-}
-#define CGEN_INIT_INSERT(od) \
-{\
-}
-#define CGEN_INIT_EXTRACT(od) \
-{\
-}
-#define CGEN_INIT_PRINT(od) \
-{\
-}
 
 
 

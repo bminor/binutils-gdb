@@ -236,6 +236,55 @@ proc user_defined_command_test {} {
    gdb_test "show user mycommand" "while.*set.*if.*p/x.*else.*p/x.*end.*" "display user command in user_defined_command_test"
 }
 
+
+
+proc test_command_prompt_position {} {
+    global gdb_prompt
+
+    if [target_info exists noargs] { 
+        verbose "Skipping test_command_prompt_position because of noargs."
+        return
+    }
+
+    if { ![runto factorial] } then { gdb_suppress_tests; }
+    # Don't depend upon argument passing, since most simulators don't currently
+    # support it.  Bash value variable to be what we want.
+    delete_breakpoints
+    gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #2"
+    gdb_test "p value=5" "" "set value to 5 in test_command_prompt_position"
+    # All this test should do is print 0xdeadbeef once.
+    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xdeadbeef" "if test in test_command_prompt_position"
+
+# Now let's test for the correct position of the '>' in gdb's prompt for commands.
+# It should be at the beginning of the line, and not after one space.
+
+    send_gdb "commands\n"
+    gdb_expect {
+	    -re "Type commands.*End with.*\[\r\n\]>$" \
+                { send_gdb "printf \"Now the value is %d\\n\", value\n"
+	          gdb_expect {
+                          -re "^printf.*value\r\n>$" \
+			       { send_gdb "end\n"
+                                 gdb_expect {
+			               -re "^end\r\n$gdb_prompt $" { pass "> OK in test_command_prompt_position" }
+				       -re ".*$gdb_prompt $" { fail "some other message in test_command_prompt_position" }
+				       timeout  { fail "(timeout) 1 in test_command_prompt_position" }
+				 }
+			       }
+			   -re "^ >$" { fail "> not OK in test_command_prompt_position" }
+			   -re ".*$gdb_prompt $"   { fail "wrong message in test_command_prompt_position" }
+			   timeout    { fail "(timeout) 2 in test_command_prompt_position " }
+		       }
+		 }
+		 -re "Type commands.*End with.*\[\r\n\] >$" { fail "prompt not OK in test_command_prompt_position" }
+	   -re ".*$gdb_prompt $" { fail "commands in test_command_prompt_position" }
+	   timeout { fail "(timeout) 3 commands in test_command_prompt_position" }
+	}
+
+    gdb_stop_suppressing_tests;
+}
+
+
 gdbvar_simple_if_test
 gdbvar_simple_while_test
 gdbvar_complex_if_while_test
@@ -246,3 +295,8 @@ if_while_breakpoint_command_test
 infrun_breakpoint_command_test
 breakpoint_command_test
 user_defined_command_test
+test_command_prompt_position
+
+
+
+

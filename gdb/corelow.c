@@ -95,15 +95,18 @@ core_close (quitting)
     {
       inferior_pid = 0;		/* Avoid confusion from thread stuff */
 
+      /* Clear out solib state while the bfd is still open. See
+	 comments in clear_solib in solib.c. */
+#ifdef CLEAR_SOLIB
+      CLEAR_SOLIB ();
+#endif
+
       name = bfd_get_filename (core_bfd);
       if (!bfd_close (core_bfd))
 	warning ("cannot close \"%s\": %s",
 		 name, bfd_errmsg (bfd_get_error ()));
       free (name);
       core_bfd = NULL;
-#ifdef CLEAR_SOLIB
-      CLEAR_SOLIB ();
-#endif
       if (core_ops.to_sections)
 	{
 	  free ((PTR)core_ops.to_sections);

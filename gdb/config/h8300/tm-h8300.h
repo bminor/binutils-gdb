@@ -271,7 +271,7 @@ typedef unsigned short INSN_WORD;
  * CALL_DUMMY stuff:
  */
 
-#define USE_GENERIC_DUMMY_FRAMES
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY			{0}
 #define CALL_DUMMY_LENGTH		(0)
 #define CALL_DUMMY_ADDRESS()		entry_point_address ()
@@ -286,7 +286,7 @@ extern CORE_ADDR h8300_push_arguments PARAMS ((int nargs,
 					       CORE_ADDR struct_addr));
 extern CORE_ADDR h8300_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 
-#define PC_IN_CALL_DUMMY(PC, SP, FP)	generic_pc_in_call_dummy (PC, SP)
+#define PC_IN_CALL_DUMMY(PC, SP, FP)	generic_pc_in_call_dummy (PC, SP, FP)
 #define FIX_CALL_DUMMY(DUMMY, START_SP, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = h8300_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
@@ -298,6 +298,8 @@ extern CORE_ADDR h8300_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 
 /* override the standard get_saved_register function with 
    one that takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+
 
 

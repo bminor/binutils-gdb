@@ -505,7 +505,7 @@ AC_DEFUN(CY_AC_PATH_ITCLCONFIG, [
 if test x"${no_itcl}" = x ; then
   # we reset no_itcl in case something fails here
   no_itcl=true
-  AC_ARG_WITH(itclconfig, [  --with-itclconfig           directory containing itcl configuration (itclConfig.sh)],
+  AC_ARG_WITH(itclconfig, [  --with-itclconfig       Directory containing itcl configuration (itclConfig.sh)],
          with_itclconfig=${withval})
   AC_MSG_CHECKING([for Itcl configuration])
   AC_CACHE_VAL(ac_cv_c_itclconfig,[
@@ -631,7 +631,7 @@ AC_DEFUN(CY_AC_PATH_ITKCONFIG, [
 if test x"${no_itk}" = x ; then
   # we reset no_itk in case something fails here
   no_itk=true
-  AC_ARG_WITH(itkconfig, [  --with-itkconfig           directory containing itk configuration (itkConfig.sh)],
+  AC_ARG_WITH(itkconfig, [  --with-itkconfig        Directory containing itk configuration (itkConfig.sh)],
          with_itkconfig=${withval})
   AC_MSG_CHECKING([for Itk configuration])
   AC_CACHE_VAL(ac_cv_c_itkconfig,[
@@ -777,7 +777,7 @@ AC_DEFUN(CY_AC_PATH_TIXCONFIG, [
 if test x"${no_tix}" = x ; then
   # we reset no_tix in case something fails here
   no_tix=true
-  AC_ARG_WITH(tixconfig, [  --with-tixconfig           directory containing tix configuration (tixConfig.sh)],
+  AC_ARG_WITH(tixconfig, [  --with-tixconfig        Directory containing tix configuration (tixConfig.sh)],
          with_tixconfig=${withval})
   AC_MSG_CHECKING([for Tix configuration])
   AC_CACHE_VAL(ac_cv_c_tixconfig,[

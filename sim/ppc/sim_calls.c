@@ -45,6 +45,13 @@
 #include "callback.h"
 #include "remote-sim.h"
 
+/* Define the rate at which the simulator should poll the host
+   for a quit. */
+#ifndef POLL_QUIT_INTERVAL
+#define POLL_QUIT_INTERVAL 0x20
+#endif
+
+static int poll_quit_count = POLL_QUIT_INTERVAL;
 
 /* Structures used by the simulator, for gdb just have static structures */
 
@@ -324,8 +331,9 @@ sim_do_command (SIM_DESC sd, char *cmd)
 void
 sim_io_poll_quit (void)
 {
-  if (callbacks->poll_quit != NULL)
+  if (callbacks->poll_quit != NULL && poll_quit_count-- < 0)
     {
+      poll_quit_count = POLL_QUIT_INTERVAL;
       if (callbacks->poll_quit (callbacks))
 	psim_stop (simulator);
     }

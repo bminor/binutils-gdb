@@ -1,11 +1,7 @@
 @c								-*- Texinfo -*-
 @c Copyright (c) 1990 1991 1992 1993 Free Software Foundation, Inc.
 @c This file is part of the source for the GDB manual.
-@c This text diverted to "Remote Debugging" section in general case;
-@c however, if we're doing a manual specifically for one of these, it
-@c belongs up front (in "Getting In and Out" chapter).
 
-@ifset REMOTESTUB
 @node Remote Serial
 @subsection The @value{GDBN} remote serial protocol
 
@@ -47,11 +43,9 @@ you must link with your program a few special-purpose subroutines that
 implement the @value{GDBN} remote serial protocol.  The file containing these
 subroutines is called  a @dfn{debugging stub}.
 
-@ifset GDBSERVER
 On certain remote targets, you can use an auxiliary program
 @code{gdbserver} instead of linking a stub into your program.
 @xref{Server,,Using the @code{gdbserver} program}, for details.
-@end ifset
 @end table
 
 The debugging stub is specific to the architecture of the remote
@@ -102,12 +96,8 @@ recently added stubs.
 * Bootstrapping::       What you must do for the stub
 * Debug Session::       Putting it all together
 * Protocol::            Outline of the communication protocol
-@ifset GDBSERVER
 * Server::		Using the `gdbserver' program
-@end ifset
-@ifset GDBSERVE
 * NetWare::		Using the `gdbserve.nlm' program
-@end ifset
 @end menu
 
 @node Stub Contents
@@ -221,7 +211,7 @@ should be a simple jump, not a jump to subroutine.
 For the 386, @var{exception_address} should be installed as an interrupt
 gate so that interrupts are masked while the handler runs.  The gate
 should be at privilege level 0 (the most privileged level).  The
-@sc{sparc} and 68k stubs are able to mask interrup themselves without
+@sc{sparc} and 68k stubs are able to mask interrupts themselves without
 help from @code{exceptionHandler}.
 
 @item void flush_i_cache()
@@ -460,7 +450,6 @@ packet-debugging information is printed on the @value{GDBN} standard output
 stream.  @code{set remotedebug off} turns it off, and @code{show
 remotedebug} shows you its current state.
 
-@ifset GDBSERVER
 @node Server
 @subsubsection Using the @code{gdbserver} program
 
@@ -562,9 +551,7 @@ the @code{target remote} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
 @samp{Connection refused}.
 @end table
-@end ifset
 
-@ifset GDBSERVE
 @node NetWare
 @subsubsection Using the @code{gdbserve.nlm} program
 
@@ -621,11 +608,7 @@ argument is a device name (usually a serial device, like
 @noindent
 communications with the server via serial line @file{/dev/ttyb}.
 @end table
-@end ifset
 
-@end ifset
-
-@ifset I960
 @node i960-Nindy Remote
 @subsection @value{GDBN} with a remote i960 (Nindy)
 
@@ -728,9 +711,7 @@ circuit to perform a hard reset (or some other interesting action) when
 a break is detected.
 @end table
 @c @end group
-@end ifset
 
-@ifset AMD29K
 @node UDI29K Remote
 @subsection The UDI protocol for AMD29K
 
@@ -943,9 +924,6 @@ of the commands sent to it.  Running @samp{tail -f} on this file in
 another window often helps to understand trouble with @code{EBMON}, or
 unexpected events on the PC side of the connection.
 
-@end ifset
-
-@ifset ST2000
 @node ST2000 Remote
 @subsection @value{GDBN} with a Tandem ST2000
 
@@ -991,11 +969,10 @@ sequences gets you back to the @value{GDBN} command prompt:
 @kbd{@key{RET}~.} (Return, followed by tilde and period) or
 @kbd{@key{RET}~@key{C-d}} (Return, followed by tilde and control-D).
 @end table
-@end ifset
 
-@ifset VXWORKS
 @node VxWorks Remote
 @subsection @value{GDBN} and VxWorks
+
 @cindex VxWorks
 
 @value{GDBN} enables developers to spawn and debug tasks running on networked
@@ -1141,9 +1118,7 @@ follows:
 where @var{task} is the VxWorks hexadecimal task ID.  The task can be running
 or suspended when you attach to it.  Running tasks are suspended at
 the time of attachment.
-@end ifset
 
-@ifset SPARCLET
 @node Sparclet Remote
 @subsection @value{GDBN} and Sparclet
 @cindex Sparclet
@@ -1292,9 +1267,6 @@ Breakpoint 1, main (argc=1, argv=0xeffff21c) at prog.c:3
 (gdbslet)                           
 @end example
 
-@end ifset
-
-@ifset H8
 @node Hitachi Remote
 @subsection @value{GDBN} and Hitachi microprocessors
 @value{GDBN} needs to know these things to talk to your
@@ -1312,11 +1284,8 @@ H8/300, or H8/500.)
 what serial device connects your host to your Hitachi board (the first
 serial device available on your host is the default).
 
-@ifclear H8EXCLUSIVE
-@c this is only for Unix hosts, not of interest to Hitachi
 @item
 what speed to use over the serial device.
-@end ifclear
 @end enumerate
 
 @menu
@@ -1328,7 +1297,6 @@ what speed to use over the serial device.
 @node Hitachi Boards
 @subsubsection Connecting to Hitachi boards
 
-@ifclear H8EXCLUSIVE
 @c only for Unix hosts
 @kindex device
 @cindex serial device, Hitachi micros
@@ -1348,13 +1316,11 @@ com2:9600,n,8,1,p}} for a 9600 bps connection).
 The @samp{device} and @samp{speed} commands are available only when you
 use a Unix host to debug your Hitachi microprocessor programs.  If you
 use a DOS host,
-@end ifclear
 @value{GDBN} depends on an auxiliary terminate-and-stay-resident program
 called @code{asynctsr} to communicate with the development board
 through a PC serial port.  You must also use the DOS @code{mode} command
 to set up the serial port on the DOS side.
 
-@ifset DOSHOST
 The following sample session illustrates the steps needed to start a
 program under @value{GDBN} control on an H8/300.  The example uses a
 sample H8/300 program called @file{t.x}.  The procedure is the same for
@@ -1440,7 +1406,6 @@ to detect program completion.
 
 In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
-@end ifset
 
 @node Hitachi ICE
 @subsubsection Using the E7000 in-circuit emulator
@@ -1487,9 +1452,6 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @code{big}, @code{medium}, and @code{compact}.
 @end table
 
-@end ifset
-
-@ifset MIPS
 @node MIPS Remote
 @subsection @value{GDBN} and remote MIPS boards
 
@@ -1622,13 +1584,10 @@ is waiting for your program to stop.  In that case, @value{GDBN} waits
 forever because it has no way of knowing how long the program is going
 to run before stopping.
 @end table
-@end ifset
 
-@ifset SIMS
 @node Simulator
 @subsection Simulated CPU target
 
-@ifset GENERIC
 @cindex simulator
 @cindex simulator, Z8000
 @cindex Z8000 simulator
@@ -1642,33 +1601,16 @@ can use instead of a hardware CPU to debug your programs.
 Currently, simulators are available for ARM, D10V, D30V, FR30, H8/300,
 H8/500, i960, M32R, MIPS, MN10200, MN10300, PowerPC, SH, Sparc, V850,
 W65, and Z8000.
-@end ifset
 
-@ifclear GENERIC
-@ifset H8
-@cindex simulator, H8/300 or H8/500
-@cindex Hitachi H8/300 or H8/500 simulator
-@cindex simulator, Hitachi SH
-@cindex Hitachi SH simulator
-When configured for debugging Hitachi microprocessor targets,
-@value{GDBN} includes a CPU simulator for the target chip (a Hitachi SH,
-H8/300, or H8/500).
-@end ifset
-
-@ifset Z8K
 @cindex simulator, Z8000
 @cindex Zilog Z8000 simulator
 When configured for debugging Zilog Z8000 targets, @value{GDBN} includes
 a Z8000 simulator.
-@end ifset
-@end ifclear
 
-@ifset Z8K
 For the Z8000 family, @samp{target sim} simulates either the Z8002 (the
 unsegmented variant of the Z8000 architecture) or the Z8001 (the
 segmented variant).  The simulator recognizes which architecture is
 appropriate by inspecting the object code.
-@end ifset
 
 @table @code
 @item target sim @var{args}
@@ -1703,6 +1645,5 @@ You can refer to these values in @value{GDBN} expressions with the usual
 conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
 conditional breakpoint that suspends only after at least 5000
 simulated clock ticks.
-@end ifset
 
 @c need to add much more detail about sims!

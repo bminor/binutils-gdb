@@ -35,7 +35,6 @@ fetch_inferior_registers (ignored)
   struct ptrace_$data_regs_m68k inferior_registers;
   struct ptrace_$floating_regs_m68k inferior_fp_registers;
   struct ptrace_$control_regs_m68k inferior_control_registers;
-  extern char registers[];
 
   ptrace_$init_control(&inferior_control_registers);
   inferior_fp_registers.size = sizeof(inferior_fp_registers);
@@ -78,7 +77,6 @@ store_inferior_registers (regno)
   struct ptrace_$data_regs_m68k inferior_registers;
   struct ptrace_$floating_regs_m68k inferior_fp_registers;
   struct ptrace_$control_regs_m68k inferior_control_registers;
-  extern char registers[];
 
   ptrace_$init_control(&inferior_control_registers);
   inferior_fp_registers.size = sizeof(inferior_fp_registers);

@@ -1,3 +1,41 @@
+Thu Apr 22 13:07:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (USE_GENERIC_DUMMY_FRAMES): Document.
+	(GET_SAVED_REGISTER): Update, not just the a29k uses this.
+
+Wed Apr 21 13:59:01 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* gdbint.texinfo: Fix typos: $ -> @.
+
+Tue Apr 20 11:59:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (REGISTER_NAMES, BREAKPOINT, BIG_BREAKPOINT,
+ 	LITTLE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT,
+ 	BIG_REMOTE_BREAKPOINT): Deprecate in favor of REGISTER_NAME and
+ 	BREAKPOINT_FROM_PC.
+	
+Mon Apr 12 16:00:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (CALL_DUMMY_STACK_ADJUST_P,
+ 	CALL_DUMMY_STACK_ADJUST): Document.
+
+Thu Apr  8 17:23:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (CALL_DUMMY_P, CALL_DUMMY_WORDS,
+ 	SIZEOF_CALL_DUMMY_WORDS, CALL_DUMMY): Define.
+
+1999-04-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbint.texinfo (MAINTENANCE_CMDS): Remove ref, since it no
+	longer exists.
+
+Tue Mar  9 19:25:11 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.texinfo, remote.texi, all-cfg.texi, HPPA-cfg.texi: Remove
+ 	nearly all @ifset/@ifclear conditionals; nobody uses them, and
+ 	they make the manual source incomprehensible.
+	* h8-cfg.texi: Remove, hasn't been used in years.
+
 Thu Feb 11 18:00:59 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo: Update the credits.

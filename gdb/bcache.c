@@ -138,8 +138,6 @@ bcache (bytes, count, bcachep)
   return (location);
 }
 
-#if MAINTENANCE_CMDS
-
 void
 print_bcache_statistics (bcachep, id)
      struct bcache *bcachep;
@@ -215,5 +213,3 @@ print_bcache_statistics (bcachep, id)
     }
   printf_filtered ("    Maximum chain length %d at %d:%d\n", lmax, lmaxt, lmaxh);
 }
-
-#endif	/* MAINTENANCE_CMDS */

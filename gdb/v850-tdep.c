@@ -811,19 +811,6 @@ v850_frame_saved_pc (fi)
     return v850_find_callers_reg (fi, RP_REGNUM);
 }
 
-void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-     char *raw_buffer;
-     int *optimized;
-     CORE_ADDR *addrp;
-     struct frame_info *frame;
-     int regnum;
-     enum lval_type *lval;
-{
-  generic_get_saved_register (raw_buffer, optimized, addrp, 
-			      frame, regnum, lval);
-}
-
 
 /* Function: fix_call_dummy
    Pokes the callee function's address into the CALL_DUMMY assembly stub.

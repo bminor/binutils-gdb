@@ -147,7 +147,7 @@ child_wait (pid, ourstatus)
 {
   int save_errno;
   int status;
-  char *  execd_pathname;
+  char *execd_pathname = NULL;
   int  exit_status;
   int  related_pid;
   int  syscall_id;

@@ -1,3 +1,10 @@
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* interp.c (POLL_QUIT_INTERVAL): Define. Used to tweak the
+	frequency at which the poll_quit callback is called.
+	(sim_resume): Use POLL_QUIT_INTERVAL instead of a
+	hard-coded value.
+
 Thu Sep 10 02:16:39 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* interp.c (saved_state.asregs): Add new member pad_dummy.
@@ -143,16 +150,51 @@ Mon Jun 23 15:49:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
  	FP's around.
 	(set_dr): Ditto.
 	
+Mon Jun 23 15:02:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (XD, SET_XD): Delete.
+  	(XF, SET_XF, XD_TO_XF): Define, move around registers in either
+ 	FP bank.
+	
+	* gencode.c (fmov): Update.
+
 Sun Jun 22 19:33:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (set_fpscr1): From J"orn Rennecke
  	<amylaar@cygnus.co.uk>, Fix typo. Ditto for comment.
 	
+Tue Aug 12 00:19:11 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* interp.c (special_address): New function.
+	(BUSERROR): Call it.  Added parameters bits_written and data.
+	Changed all callers.
+	* gencode.c (tab): Fixed ocbwb and pref.
+
+Fri Jun 20 22:03:18 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* interp.c (do_wdat, do_wdat): Fix bug in register number calculation.
+
 Thu Jun 19 00:28:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_create_inferior): Clear registers each time an
  	inferior is started.
 
+Mon Jun 16 14:01:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (*FP, FP_OP, FP_CMP, FP_UNARY): Provide a hook for
+ 	when a host doesn't support IEEE FP.
+	(*DP): Provide alternative definition that supports 64bit floating
+ 	point.
+	(target_little_endian): Combine little_endian and little_endian_p.
+	(saved_state_type): Make fpscr and sr simple integers.
+	(SET_FPSCR, GET_FPSCR): Use macros to update fpscr register.
+	(set_fpscr1): New function.  Handle swapping when PR / FR bits
+ 	changed. Call via *_FPSCR macro.
+	(SET_SR*, GET_SR*): Use macro's to access the SR bits - avoids
+ 	endian problems.
+
+	* gencode.c (tab): Update.
+	
 Sun Jun 15 15:22:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gencode.c (main): Perform basic checks on tab entries.
@@ -185,9 +227,21 @@ Fri Jun 13 15:33:53 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* interp.c (init_pointers): Fix little endian test.
 
+Thu Jun  5 12:56:08 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* interp.c (init_pointers): SH4 hardware is always WORDS_BIT_ENDIAN.
+	* gencode (fmov from/to memory): take endian_mismatch into account
+	for 32 bit moves too.
+
 Wed May 28 23:42:35 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
         * gencode.c (swap.b): Fix treatment of high word.
+
+Wed May 28 23:42:35 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+        * sh/gencode.c,
+        * interp.c: experimental SH4 support.
+        DFmode moves are probaly broken for target little endian.
 
 Tue May 20 10:23:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

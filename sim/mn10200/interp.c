@@ -4,6 +4,17 @@
 
 #include "mn10200_sim.h"
 
+#ifdef NEED_UI_LOOP_HOOK
+/* How often to run the ui_loop update, when in use */
+#define UI_LOOP_POLL_INTERVAL 0x60000
+
+/* Counter for the ui_loop_hook update */
+static long ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
+
+/* Actual hook to call to run through gdb's gui event loop */
+extern int (*ui_loop_hook) (int);
+#endif /* NEED_UI_LOOP_HOOK */
+
 host_callback *mn10200_callback;
 int mn10200_debug;
 static SIM_OPEN_KIND sim_kind;
@@ -292,7 +303,8 @@ int
 sim_stop (sd)
      SIM_DESC sd;
 {
-  return 0;
+  State.exception = SIGINT;
+  return 1;
 }
 
 void
@@ -312,6 +324,14 @@ sim_resume (sd, step, siggnal)
   do
     {
       unsigned long insn, extension;
+
+#ifdef NEED_UI_LOOP_HOOK
+    if (ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
+      {
+	ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
+	ui_loop_hook (0);
+      }
+#endif /* NEED_UI_LOOP_HOOK */
 
       /* Fetch the current instruction, fetch a double word to
 	 avoid redundant fetching for the common cases below.  */

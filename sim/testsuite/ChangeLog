@@ -1,3 +1,15 @@
+1999-04-21  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/m32r/nop.cgs: Add missing nop insn.
+
+Mon Mar 22 13:28:56 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/stb.cgs: Correct for unaligned access.
+	* sim/fr30/sth.cgs: Correct for unaligned access.
+	* sim/fr30/ldub.cgs: Fix typo: lduh->ldub. Correct
+	for unaligned access.
+	* sim/fr30/and.cgs: Test unaligned access.
+
 Fri Feb  5 12:41:11 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 	* lib/sim-defs.exp (sim_run): Print simulator arguments log message.
@@ -140,6 +152,11 @@ Tue Sep 15 14:56:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* sim/m32r/rte.cgs: Test bbpc,bbpsw.
 	* sim/m32r/trap.cgs: Test bbpc,bbpsw.
 
+Fri Jul 31 17:49:13 1998  Felix Lee  <flee@cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): remote_spawn, use writeto instead of
+ 	writeonly.
+
 Fri Jul 24 09:40:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (clean,mostlyclean): Change leading spaces to a tab.
@@ -147,6 +164,15 @@ Fri Jul 24 09:40:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 Wed Jul  1 15:57:54 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim/m32r/hw-trap.ms: New testcase.
+
+Tue Jun 16 15:44:01 1998 Jillian Ye <jillian@cygnus.com>
+
+	* lib/sim-defs.exp: Print out timeout setting info when "-v" is used.
+
+Thu Jun 11 15:24:53 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): Argument env_vals renamed to options,
+	which is now a list of options controlling the behaviour of sim_run.
 
 Wed Jun 10 10:53:20 1998  Doug Evans  <devans@seba.cygnus.com>
 

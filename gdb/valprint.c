@@ -236,6 +236,7 @@ val_print_type_code_int (type, valaddr, stream)
    */
 
 #if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
+static void print_decimal PARAMS ((GDB_FILE *stream, char *sign, int use_local, ULONGEST val_ulong));
 static void
 print_decimal (stream, sign, use_local, val_ulong)
      GDB_FILE *stream;
@@ -425,6 +426,7 @@ print_longest (stream, format, use_local, val_long)
 #endif /* CC_HAS_LONG_LONG || PRINTF_HAS_LONG_LONG */
 }
 
+#if 0
 void
 strcat_longest (format, use_local, val_long, buf, buflen)
      int format;
@@ -528,6 +530,7 @@ strcat_longest (format, use_local, val_long, buf, buflen)
     
 #endif /* !PRINTF_HAS_LONG_LONG */
 }
+#endif
 
 /* This used to be a macro, but I don't think it is called often enough
    to merit such treatment.  */

@@ -24,10 +24,7 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-# are we on a target board
-if ![isnative] then {
-    return
-}
+if { [skip_hp_tests] } then { continue }
 
 set testfile "so-thresh"
 set srcfile ${testfile}.c

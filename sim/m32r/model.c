@@ -4160,7 +4160,7 @@ m32r_init_cpu (SIM_CPU *cpu)
 
 const MACH m32r_mach =
 {
-  "m32r", "m32r",
+  "m32r", "m32r", MACH_M32R,
   32, 32, & m32r_models[0], & m32rbf_imp_properties,
   m32r_init_cpu,
   m32rbf_prepare_run

@@ -106,7 +106,6 @@ store_inferior_registers (regno)
 {
   register unsigned int regaddr;
   char buf[80];
-  extern char registers[];
   register int i;
   unsigned int offset = U_REGS_OFFSET;
   int scratch;

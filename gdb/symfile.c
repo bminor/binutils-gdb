@@ -839,7 +839,7 @@ symbol_file_command (args, from_tty)
 	{
 	  nomem (0);
 	}
-      cleanups = make_cleanup ((make_cleanup_func) freeargv, (char *) argv);
+      cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
 	{
 	  if (STREQ (*argv, "-mapped"))

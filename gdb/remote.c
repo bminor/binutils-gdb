@@ -203,6 +203,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "dcache.h"
 
+#include <ctype.h>
 #ifdef USG
 #include <sys/types.h>
 #endif
@@ -267,6 +268,8 @@ static int tohex PARAMS ((int nib));
 static void remote_detach PARAMS ((char *args, int from_tty));
 
 static void remote_interrupt PARAMS ((int signo));
+
+static void remote_interrupt_twice PARAMS ((int signo));
 
 static void interrupt_query PARAMS ((void));
 
@@ -429,11 +432,6 @@ extern int remote_timeout;
    preferable instead.  */
 
 static int remote_break;
-
-/* Has the user attempted to interrupt the target? If so, then offer
-   the user the opportunity to bail out completely if he interrupts
-   again. */
-static int interrupted_already = 0;
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
@@ -1613,37 +1611,49 @@ remote_resume (pid, step, siggnal)
 
 static void (*ofunc) PARAMS ((int));
 
+/* The command line interface's stop routine. This function is installed
+   as a signal handler for SIGINT. The first time a user requests a
+   stop, we call remote_stop to send a break or ^C. If there is no
+   response from the target (it didn't stop when the user requested it),
+   we ask the user if he'd like to detach from the target. */
 static void
 remote_interrupt (signo)
      int signo;
 {
-  remote_stop ();
+  /* If this doesn't work, try more severe steps. */
+  signal (signo, remote_interrupt_twice);
+
+  if (remote_debug)
+    printf_unfiltered ("remote_interrupt called\n");
+
+  target_stop ();
+}
+
+/* The user typed ^C twice.  */
+
+static void
+remote_interrupt_twice (signo)
+     int signo;
+{
+  signal (signo, ofunc);
+  interrupt_query ();
   signal (signo, remote_interrupt);
 }
-  
+
+/* This is the generic stop called via the target vector. When a target
+   interrupt is requested, either by the command line or the GUI, we
+   will eventually end up here. */
 static void
 remote_stop ()
 {
-  if (!interrupted_already)
-    {
-      /* Send a break or a ^C, depending on user preference.  */
-      interrupted_already = 1;
+  /* Send a break or a ^C, depending on user preference.  */
+  if (remote_debug)
+    printf_unfiltered ("remote_stop called\n");
 
-      if (remote_debug)
-        printf_unfiltered ("remote_stop called\n");
-
-      if (remote_break)
-        SERIAL_SEND_BREAK (remote_desc);
-      else
-        SERIAL_WRITE (remote_desc, "\003", 1);
-    }
+  if (remote_break)
+    SERIAL_SEND_BREAK (remote_desc);
   else
-    {
-      signal (SIGINT, ofunc);
-      interrupt_query ();
-      signal (SIGINT, remote_interrupt);
-      interrupted_already = 0;
-    }
+    SERIAL_WRITE (remote_desc, "\003", 1);
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -1705,7 +1715,6 @@ remote_wait (pid, status)
     {
       unsigned char *p;
 
-      interrupted_already = 0;
       ofunc = signal (SIGINT, remote_interrupt);
       getpkt ((char *) buf, 1);
       signal (SIGINT, ofunc);
@@ -2093,7 +2102,10 @@ remote_address_masked (addr)
    This is accomplished by sending a no-op memory write of zero length
    to the target at the specified address. It does not suffice to send
    the whole packet, since many stubs strip the eighth bit and subsequently
-   compute a wrong checksum, which causes real havoc with remote_write_bytes. */
+   compute a wrong checksum, which causes real havoc with remote_write_bytes.
+
+   NOTE: This can still lose if the serial line is not eight-bit clean. In
+   cases like this, the user should clear "remotebinarydownload". */
 static void
 check_binary_download (addr)
      CORE_ADDR addr;
@@ -2153,7 +2165,7 @@ remote_write_bytes (memaddr, myaddr, len)
   if (remote_register_buf_size != 0)
     max_buf_size = min (max_buf_size, remote_register_buf_size);
 
-  /* Subtract header overhead from max payload size - $M<memaddr>,<len>:#nn */
+  /* Subtract header overhead from max payload size -  $M<memaddr>,<len>:#nn */
   max_buf_size -= 2 + hexnumlen (memaddr + len - 1) + 1 + hexnumlen (len) + 4;
 
   origlen = len;
@@ -2182,7 +2194,7 @@ remote_write_bytes (memaddr, myaddr, len)
       p += hexnumstr (p, (ULONGEST) memaddr);
       *p++ = ',';
 
-      plen = p;		/* remember where len field goes */
+      plen = p;			/* remember where len field goes */
       p += hexnumstr (p, (ULONGEST) todo);
       *p++ = ':';
       *p = '\0';
@@ -2192,10 +2204,10 @@ remote_write_bytes (memaddr, myaddr, len)
 	 binary character).  */
       if (remote_binary_download)
 	{
-          int escaped = 0;
-          for (i = 0; 
+	  int escaped = 0;
+          for (i = 0;
 	       (i < todo) && (i + escaped) < (max_buf_size - 2);
-	       i++) 
+	       i++)
             {
               switch (myaddr[i] & 0xff)
                 {
@@ -2213,18 +2225,18 @@ remote_write_bytes (memaddr, myaddr, len)
                 }
             }
 
-	  if (i < todo)
-	    {
-	      /* Escape chars have filled up the buffer prematurely, 
-		 and we have actually sent fewer bytes than planned.
-		 Fix-up the length field of the packet.  */
+          if (i < todo)
+            {
+              /* Escape chars have filled up the buffer prematurely, 
+                 and we have actually sent fewer bytes than planned.
+                 Fix-up the length field of the packet.  */
 
 	      /* FIXME: will fail if new len is a shorter string than 
 		 old len.  */
 
-	      plen += hexnumstr (plen, (ULONGEST) i);
-	      *plen++ = ':';
-	    }
+              plen += hexnumstr (plen, (ULONGEST) i);
+              *plen++ = ':';
+            }
 	}
       else
 	{
@@ -2731,11 +2743,7 @@ getpkt (buf, forever)
 
   if (forever)
     {
-#ifdef MAINTENANCE_CMDS
       timeout = watchdog > 0 ? watchdog : -1;
-#else
-      timeout = -1;
-#endif
     }
 
   else
@@ -2759,13 +2767,11 @@ getpkt (buf, forever)
 
 	  if (c == SERIAL_TIMEOUT)
 	    {
-#ifdef MAINTENANCE_CMDS
 	      if (forever)	/* Watchdog went off.  Kill the target. */
 		{
 		  target_mourn_inferior ();
 		  error ("Watchdog has expired.  Target detached.\n");
 		}
-#endif
 	      if (remote_debug)
 		puts_filtered ("Timed out.\n");
 	      goto retry;
@@ -2810,7 +2816,7 @@ remote_kill ()
 
   /* Use catch_errors so the user can quit from gdb even when we aren't on
      speaking terms with the remote system.  */
-  catch_errors ((catch_errors_ftype *) putpkt, "k", "", RETURN_MASK_ERROR);
+  catch_errors ((catch_errors_ftype*) putpkt, "k", "", RETURN_MASK_ERROR);
 
   /* Don't wait for it to die.  I'm not really sure it matters whether
      we do or not.  For the existing stubs, kill is a noop.  */

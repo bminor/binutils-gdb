@@ -31,10 +31,8 @@ device fr30_devices;
 int
 device_io_read_buffer (device *me, void *source, int space,
 		       address_word addr, unsigned nr_bytes,
-		       SIM_CPU *cpu, sim_cia cia)
+		       SIM_DESC sd, SIM_CPU *cpu, sim_cia cia)
 {
-  SIM_DESC sd = CPU_STATE (cpu);
-
   if (STATE_ENVIRONMENT (sd) != OPERATING_ENVIRONMENT)
     return nr_bytes;
 
@@ -69,10 +67,8 @@ device_io_read_buffer (device *me, void *source, int space,
 int
 device_io_write_buffer (device *me, const void *source, int space,
 			address_word addr, unsigned nr_bytes,
-			SIM_CPU *cpu, sim_cia cia)
+			SIM_DESC sd, SIM_CPU *cpu, sim_cia cia)
 {
-  SIM_DESC sd = CPU_STATE (cpu);
-
 #if WITH_SCACHE
   if (addr == MCCR_ADDR)
     {
@@ -96,4 +92,7 @@ device_io_write_buffer (device *me, const void *source, int space,
   return nr_bytes;
 }
 
-void device_error () {}
+void
+device_error (device *me, char *message, ...)
+{
+}

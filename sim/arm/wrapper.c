@@ -50,6 +50,8 @@ static int verbosity;
 /* Non-zero to set big endian mode.  */
 static int big_endian;
 
+int stop_simulator;
+
 static void 
 init ()
 {
@@ -154,7 +156,9 @@ int
 sim_stop (sd)
      SIM_DESC sd;
 {
-  return 0;
+  state->Emulate = STOP;
+  stop_simulator = 1;
+  return 1;
 }
 
 void
@@ -163,6 +167,7 @@ sim_resume (sd, step, siggnal)
      int step, siggnal;
 {
   state->EndCondition = 0;
+  stop_simulator = 0;
 
   if (step)
     {
@@ -435,7 +440,12 @@ sim_stop_reason (sd, reason, sigrc)
      enum sim_stop *reason;
      int *sigrc;
 {
-  if (state->EndCondition == 0)
+  if (stop_simulator)
+    {
+      *reason = sim_stopped;
+      *sigrc = SIGINT;
+    }
+  else if (state->EndCondition == 0)
     {
       *reason = sim_exited;
       *sigrc = state->Reg[0] & 255;

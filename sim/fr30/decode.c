@@ -46,17 +46,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FAST(fn)
 #endif
 
+/* The INSN_ prefix is not here and is instead part of the `insn' argument
+   to avoid collisions with header files (e.g. `AND' in ansidecl.h).  */
+#define IDX(insn) CONCAT2 (FR30BF_,insn)
+#define TYPE(insn) CONCAT2 (FR30_,insn)
+
 /* The instruction descriptor array.
    This is computed at runtime.  Space for it is not malloc'd to save a
    teensy bit of cpu in the decoder.  Moving it to malloc space is trivial
    but won't be done until necessary (we don't currently support the runtime
    addition of instructions nor an SMP machine with different cpus).  */
 static IDESC fr30bf_insn_data[FR30BF_INSN_MAX];
-
-/* The INSN_ prefix is not here and is instead part of the `insn' argument
-   to avoid collisions with header files (e.g. `AND' in ansidecl.h).  */
-#define IDX(insn) CONCAT2 (FR30BF_,insn)
-#define TYPE(insn) CONCAT2 (FR30_,insn)
 
 /* Commas between elements are contained in the macros.
    Some of these are conditionally compiled out.  */
@@ -241,6 +241,9 @@ static const struct insn_sem fr30bf_insn_sem_invalid =
   VIRTUAL_INSN_X_INVALID, IDX (INSN_X_INVALID), FULL (x_invalid) FAST (x_invalid)
 };
 
+#undef FMT
+#undef FULL
+#undef FAST
 #undef IDX
 #undef TYPE
 
@@ -302,64 +305,6 @@ fr30bf_init_idesc_table (SIM_CPU *cpu)
   CPU_IDESC (cpu) = table;
 }
 
-/* Enum declaration for all instruction semantic formats.  */
-typedef enum sfmt {
-  FMT_EMPTY, FMT_ADD, FMT_ADDI, FMT_ADD2
- , FMT_ADDC, FMT_ADDN, FMT_ADDNI, FMT_ADDN2
- , FMT_CMP, FMT_CMPI, FMT_CMP2, FMT_AND
- , FMT_ANDM, FMT_ANDH, FMT_ANDB, FMT_BANDL
- , FMT_BTSTL, FMT_MUL, FMT_MULU, FMT_MULH
- , FMT_DIV0S, FMT_DIV0U, FMT_DIV1, FMT_DIV2
- , FMT_DIV3, FMT_DIV4S, FMT_LSL, FMT_LSLI
- , FMT_LDI8, FMT_LDI20, FMT_LDI32, FMT_LD
- , FMT_LDUH, FMT_LDUB, FMT_LDR13, FMT_LDR13UH
- , FMT_LDR13UB, FMT_LDR14, FMT_LDR14UH, FMT_LDR14UB
- , FMT_LDR15, FMT_LDR15GR, FMT_LDR15DR, FMT_LDR15PS
- , FMT_ST, FMT_STH, FMT_STB, FMT_STR13
- , FMT_STR13H, FMT_STR13B, FMT_STR14, FMT_STR14H
- , FMT_STR14B, FMT_STR15, FMT_STR15GR, FMT_STR15DR
- , FMT_STR15PS, FMT_MOV, FMT_MOVDR, FMT_MOVPS
- , FMT_MOV2DR, FMT_MOV2PS, FMT_JMP, FMT_CALLR
- , FMT_CALL, FMT_RET, FMT_INT, FMT_INTE
- , FMT_RETI, FMT_BRAD, FMT_BNOD, FMT_BEQD
- , FMT_BCD, FMT_BND, FMT_BVD, FMT_BLTD
- , FMT_BLED, FMT_BLSD, FMT_DMOVR13, FMT_DMOVR13H
- , FMT_DMOVR13B, FMT_DMOVR13PI, FMT_DMOVR13PIH, FMT_DMOVR13PIB
- , FMT_DMOVR15PI, FMT_DMOV2R13, FMT_DMOV2R13H, FMT_DMOV2R13B
- , FMT_DMOV2R13PI, FMT_DMOV2R13PIH, FMT_DMOV2R13PIB, FMT_DMOV2R15PD
- , FMT_LDRES, FMT_COPOP, FMT_COPLD, FMT_COPST
- , FMT_NOP, FMT_ANDCCR, FMT_STILM, FMT_ADDSP
- , FMT_EXTSB, FMT_EXTUB, FMT_EXTSH, FMT_EXTUH
- , FMT_LDM0, FMT_LDM1, FMT_STM0, FMT_STM1
- , FMT_ENTER, FMT_LEAVE, FMT_XCHB
-} SFMT;
-
-/* The decoder uses this to record insns and direct extraction handling.  */
-
-typedef struct {
-  const IDESC *idesc;
-#ifdef __GNUC__
-  void *sfmt;
-#else
-  enum sfmt sfmt;
-#endif
-} DECODE_DESC;
-
-/* Macro to go from decode phase to extraction phase.  */
-
-#ifdef __GNUC__
-#define GOTO_EXTRACT(id) goto *(id)->sfmt
-#else
-#define GOTO_EXTRACT(id) goto extract
-#endif
-
-/* The decoder needs a slightly different computed goto switch control.  */
-#ifdef __GNUC__
-#define DECODE_SWITCH(N, X) goto *labels_##N[X];
-#else
-#define DECODE_SWITCH(N, X) switch (X)
-#endif
-
 /* Given an instruction, return a pointer to its IDESC entry.  */
 
 const IDESC *
@@ -367,309 +312,342 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
               CGEN_INSN_INT base_insn,
               ARGBUF *abuf)
 {
-  /* Result of decoder, used by extractor.  */
-  const DECODE_DESC *idecode;
-
-  /* First decode the instruction.  */
+  /* Result of decoder.  */
+  FR30BF_INSN_TYPE itype;
 
   {
-#define I(insn) & fr30bf_insn_data[CONCAT2 (FR30BF_,insn)]
-#ifdef __GNUC__
-#define E(fmt) && case_ex_##fmt
-#else
-#define E(fmt) fmt
-#endif
     CGEN_INSN_INT insn = base_insn;
-    static const DECODE_DESC idecode_invalid = { I (INSN_X_INVALID), E (FMT_EMPTY) };
 
     {
-#ifdef __GNUC__
-      static const void *labels_0[256] = {
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && case_0_7, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && case_0_23, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && case_0_151, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && case_0_159, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-        && default_0, && default_0, && default_0, && default_0, 
-      };
-#endif
-      static const DECODE_DESC insns[256] = {
-        { I (INSN_LDR13), E (FMT_LDR13) }, { I (INSN_LDR13UH), E (FMT_LDR13UH) }, 
-        { I (INSN_LDR13UB), E (FMT_LDR13UB) }, { I (INSN_LDR15), E (FMT_LDR15) }, 
-        { I (INSN_LD), E (FMT_LD) }, { I (INSN_LDUH), E (FMT_LDUH) }, 
-        { I (INSN_LDUB), E (FMT_LDUB) }, { 0 }, 
-        { I (INSN_DMOV2R13), E (FMT_DMOV2R13) }, { I (INSN_DMOV2R13H), E (FMT_DMOV2R13H) }, 
-        { I (INSN_DMOV2R13B), E (FMT_DMOV2R13B) }, { I (INSN_DMOV2R15PD), E (FMT_DMOV2R15PD) }, 
-        { I (INSN_DMOV2R13PI), E (FMT_DMOV2R13PI) }, { I (INSN_DMOV2R13PIH), E (FMT_DMOV2R13PIH) }, 
-        { I (INSN_DMOV2R13PIB), E (FMT_DMOV2R13PIB) }, { I (INSN_ENTER), E (FMT_ENTER) }, 
-        { I (INSN_STR13), E (FMT_STR13) }, { I (INSN_STR13H), E (FMT_STR13H) }, 
-        { I (INSN_STR13B), E (FMT_STR13B) }, { I (INSN_STR15), E (FMT_STR15) }, 
-        { I (INSN_ST), E (FMT_ST) }, { I (INSN_STH), E (FMT_STH) }, 
-        { I (INSN_STB), E (FMT_STB) }, { 0 }, 
-        { I (INSN_DMOVR13), E (FMT_DMOVR13) }, { I (INSN_DMOVR13H), E (FMT_DMOVR13H) }, 
-        { I (INSN_DMOVR13B), E (FMT_DMOVR13B) }, { I (INSN_DMOVR15PI), E (FMT_DMOVR15PI) }, 
-        { I (INSN_DMOVR13PI), E (FMT_DMOVR13PI) }, { I (INSN_DMOVR13PIH), E (FMT_DMOVR13PIH) }, 
-        { I (INSN_DMOVR13PIB), E (FMT_DMOVR13PIB) }, { I (INSN_INT), E (FMT_INT) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_LDR14), E (FMT_LDR14) }, { I (INSN_LDR14), E (FMT_LDR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_STR14), E (FMT_STR14) }, { I (INSN_STR14), E (FMT_STR14) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_LDR14UH), E (FMT_LDR14UH) }, { I (INSN_LDR14UH), E (FMT_LDR14UH) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_STR14H), E (FMT_STR14H) }, { I (INSN_STR14H), E (FMT_STR14H) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_LDR14UB), E (FMT_LDR14UB) }, { I (INSN_LDR14UB), E (FMT_LDR14UB) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_STR14B), E (FMT_STR14B) }, { I (INSN_STR14B), E (FMT_STR14B) }, 
-        { I (INSN_BANDL), E (FMT_BANDL) }, { I (INSN_BANDH), E (FMT_BANDL) }, 
-        { I (INSN_AND), E (FMT_AND) }, { I (INSN_ANDCCR), E (FMT_ANDCCR) }, 
-        { I (INSN_ANDM), E (FMT_ANDM) }, { I (INSN_ANDH), E (FMT_ANDH) }, 
-        { I (INSN_ANDB), E (FMT_ANDB) }, { I (INSN_STILM), E (FMT_STILM) }, 
-        { I (INSN_BTSTL), E (FMT_BTSTL) }, { I (INSN_BTSTH), E (FMT_BTSTL) }, 
-        { I (INSN_XCHB), E (FMT_XCHB) }, { I (INSN_MOV), E (FMT_MOV) }, 
-        { I (INSN_LDM0), E (FMT_LDM0) }, { I (INSN_LDM1), E (FMT_LDM1) }, 
-        { I (INSN_STM0), E (FMT_STM0) }, { I (INSN_STM1), E (FMT_STM1) }, 
-        { I (INSN_BORL), E (FMT_BANDL) }, { I (INSN_BORH), E (FMT_BANDL) }, 
-        { I (INSN_OR), E (FMT_AND) }, { I (INSN_ORCCR), E (FMT_ANDCCR) }, 
-        { I (INSN_ORM), E (FMT_ANDM) }, { I (INSN_ORH), E (FMT_ANDH) }, 
-        { I (INSN_ORB), E (FMT_ANDB) }, { 0 }, 
-        { I (INSN_BEORL), E (FMT_BANDL) }, { I (INSN_BEORH), E (FMT_BANDL) }, 
-        { I (INSN_EOR), E (FMT_AND) }, { I (INSN_LDI20), E (FMT_LDI20) }, 
-        { I (INSN_EORM), E (FMT_ANDM) }, { I (INSN_EORH), E (FMT_ANDH) }, 
-        { I (INSN_EORB), E (FMT_ANDB) }, { 0 }, 
-        { I (INSN_ADDNI), E (FMT_ADDNI) }, { I (INSN_ADDN2), E (FMT_ADDN2) }, 
-        { I (INSN_ADDN), E (FMT_ADDN) }, { I (INSN_ADDSP), E (FMT_ADDSP) }, 
-        { I (INSN_ADDI), E (FMT_ADDI) }, { I (INSN_ADD2), E (FMT_ADD2) }, 
-        { I (INSN_ADD), E (FMT_ADD) }, { I (INSN_ADDC), E (FMT_ADDC) }, 
-        { I (INSN_CMPI), E (FMT_CMPI) }, { I (INSN_CMP2), E (FMT_CMP2) }, 
-        { I (INSN_CMP), E (FMT_CMP) }, { I (INSN_MULU), E (FMT_MULU) }, 
-        { I (INSN_SUB), E (FMT_ADD) }, { I (INSN_SUBC), E (FMT_ADDC) }, 
-        { I (INSN_SUBN), E (FMT_ADDN) }, { I (INSN_MUL), E (FMT_MUL) }, 
-        { I (INSN_LSRI), E (FMT_LSLI) }, { I (INSN_LSR2), E (FMT_LSLI) }, 
-        { I (INSN_LSR), E (FMT_LSL) }, { I (INSN_MOV2DR), E (FMT_MOV2DR) }, 
-        { I (INSN_LSLI), E (FMT_LSLI) }, { I (INSN_LSL2), E (FMT_LSLI) }, 
-        { I (INSN_LSL), E (FMT_LSL) }, { I (INSN_MOVDR), E (FMT_MOVDR) }, 
-        { I (INSN_ASRI), E (FMT_LSLI) }, { I (INSN_ASR2), E (FMT_LSLI) }, 
-        { I (INSN_ASR), E (FMT_LSL) }, { I (INSN_MULUH), E (FMT_MULH) }, 
-        { I (INSN_LDRES), E (FMT_LDRES) }, { I (INSN_STRES), E (FMT_LDRES) }, 
-        { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_MULH), E (FMT_MULH) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_LDI8), E (FMT_LDI8) }, { I (INSN_LDI8), E (FMT_LDI8) }, 
-        { I (INSN_CALL), E (FMT_CALL) }, { I (INSN_CALL), E (FMT_CALL) }, 
-        { I (INSN_CALL), E (FMT_CALL) }, { I (INSN_CALL), E (FMT_CALL) }, 
-        { I (INSN_CALL), E (FMT_CALL) }, { I (INSN_CALL), E (FMT_CALL) }, 
-        { I (INSN_CALL), E (FMT_CALL) }, { I (INSN_CALL), E (FMT_CALL) }, 
-        { I (INSN_CALLD), E (FMT_CALL) }, { I (INSN_CALLD), E (FMT_CALL) }, 
-        { I (INSN_CALLD), E (FMT_CALL) }, { I (INSN_CALLD), E (FMT_CALL) }, 
-        { I (INSN_CALLD), E (FMT_CALL) }, { I (INSN_CALLD), E (FMT_CALL) }, 
-        { I (INSN_CALLD), E (FMT_CALL) }, { I (INSN_CALLD), E (FMT_CALL) }, 
-        { I (INSN_BRA), E (FMT_BRAD) }, { I (INSN_BNO), E (FMT_BNOD) }, 
-        { I (INSN_BEQ), E (FMT_BEQD) }, { I (INSN_BNE), E (FMT_BEQD) }, 
-        { I (INSN_BC), E (FMT_BCD) }, { I (INSN_BNC), E (FMT_BCD) }, 
-        { I (INSN_BN), E (FMT_BND) }, { I (INSN_BP), E (FMT_BND) }, 
-        { I (INSN_BV), E (FMT_BVD) }, { I (INSN_BNV), E (FMT_BVD) }, 
-        { I (INSN_BLT), E (FMT_BLTD) }, { I (INSN_BGE), E (FMT_BLTD) }, 
-        { I (INSN_BLE), E (FMT_BLED) }, { I (INSN_BGT), E (FMT_BLED) }, 
-        { I (INSN_BLS), E (FMT_BLSD) }, { I (INSN_BHI), E (FMT_BLSD) }, 
-        { I (INSN_BRAD), E (FMT_BRAD) }, { I (INSN_BNOD), E (FMT_BNOD) }, 
-        { I (INSN_BEQD), E (FMT_BEQD) }, { I (INSN_BNED), E (FMT_BEQD) }, 
-        { I (INSN_BCD), E (FMT_BCD) }, { I (INSN_BNCD), E (FMT_BCD) }, 
-        { I (INSN_BND), E (FMT_BND) }, { I (INSN_BPD), E (FMT_BND) }, 
-        { I (INSN_BVD), E (FMT_BVD) }, { I (INSN_BNVD), E (FMT_BVD) }, 
-        { I (INSN_BLTD), E (FMT_BLTD) }, { I (INSN_BGED), E (FMT_BLTD) }, 
-        { I (INSN_BLED), E (FMT_BLED) }, { I (INSN_BGTD), E (FMT_BLED) }, 
-        { I (INSN_BLSD), E (FMT_BLSD) }, { I (INSN_BHID), E (FMT_BLSD) }, 
-      };
-      unsigned int val;
-      val = (((insn >> 8) & (255 << 0)));
-      DECODE_SWITCH (0, val)
+      unsigned int val = (((insn >> 8) & (255 << 0)));
+      switch (val)
+      {
+      case 0 : itype = FR30BF_INSN_LDR13; goto extract_fmt_ldr13;
+      case 1 : itype = FR30BF_INSN_LDR13UH; goto extract_fmt_ldr13uh;
+      case 2 : itype = FR30BF_INSN_LDR13UB; goto extract_fmt_ldr13ub;
+      case 3 : itype = FR30BF_INSN_LDR15; goto extract_fmt_ldr15;
+      case 4 : itype = FR30BF_INSN_LD; goto extract_fmt_ld;
+      case 5 : itype = FR30BF_INSN_LDUH; goto extract_fmt_lduh;
+      case 6 : itype = FR30BF_INSN_LDUB; goto extract_fmt_ldub;
+      case 7 :
         {
-        CASE (0, 7) :
+          unsigned int val = (((insn >> 4) & (15 << 0)));
+          switch (val)
           {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_LDR15GR), E (FMT_LDR15GR) }, { I (INSN_MOV2PS), E (FMT_MOV2PS) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_LDR15DR), E (FMT_LDR15DR) }, { I (INSN_LDR15PS), E (FMT_LDR15PS) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 4) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
+          case 0 : itype = FR30BF_INSN_LDR15GR; goto extract_fmt_ldr15gr;
+          case 1 : itype = FR30BF_INSN_MOV2PS; goto extract_fmt_mov2ps;
+          case 8 : itype = FR30BF_INSN_LDR15DR; goto extract_fmt_ldr15dr;
+          case 9 : itype = FR30BF_INSN_LDR15PS; goto extract_fmt_ldr15ps;
+          default : itype = FR30BF_INSN_X_INVALID; goto extract_fmt_empty;
           }
-        CASE (0, 23) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_STR15GR), E (FMT_STR15GR) }, { I (INSN_MOVPS), E (FMT_MOVPS) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_STR15DR), E (FMT_STR15DR) }, { I (INSN_STR15PS), E (FMT_STR15PS) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 4) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 151) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_JMP), E (FMT_JMP) }, { I (INSN_CALLR), E (FMT_CALLR) }, 
-              { I (INSN_RET), E (FMT_RET) }, { I (INSN_RETI), E (FMT_RETI) }, 
-              { I (INSN_DIV0S), E (FMT_DIV0S) }, { I (INSN_DIV0U), E (FMT_DIV0U) }, 
-              { I (INSN_DIV1), E (FMT_DIV1) }, { I (INSN_DIV2), E (FMT_DIV2) }, 
-              { I (INSN_EXTSB), E (FMT_EXTSB) }, { I (INSN_EXTUB), E (FMT_EXTUB) }, 
-              { I (INSN_EXTSH), E (FMT_EXTSH) }, { I (INSN_EXTUH), E (FMT_EXTUH) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-            };
-            unsigned int val = (((insn >> 4) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        CASE (0, 159) :
-          {
-            static const DECODE_DESC insns[16] = {
-              { I (INSN_JMPD), E (FMT_JMP) }, { I (INSN_CALLRD), E (FMT_CALLR) }, 
-              { I (INSN_RET_D), E (FMT_RET) }, { I (INSN_INTE), E (FMT_INTE) }, 
-              { I (INSN_X_INVALID), E (FMT_EMPTY) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_DIV3), E (FMT_DIV3) }, { I (INSN_DIV4S), E (FMT_DIV4S) }, 
-              { I (INSN_LDI32), E (FMT_LDI32) }, { I (INSN_LEAVE), E (FMT_LEAVE) }, 
-              { I (INSN_NOP), E (FMT_NOP) }, { I (INSN_X_INVALID), E (FMT_EMPTY) }, 
-              { I (INSN_COPOP), E (FMT_COPOP) }, { I (INSN_COPLD), E (FMT_COPLD) }, 
-              { I (INSN_COPST), E (FMT_COPST) }, { I (INSN_COPSV), E (FMT_COPST) }, 
-            };
-            unsigned int val = (((insn >> 4) & (15 << 0)));
-            idecode = &insns[val];
-            GOTO_EXTRACT (idecode);
-          }
-        DEFAULT (0) :
-          idecode = &insns[val];
-          GOTO_EXTRACT (idecode);
         }
-      ENDSWITCH (0)
+      case 8 : itype = FR30BF_INSN_DMOV2R13; goto extract_fmt_dmov2r13;
+      case 9 : itype = FR30BF_INSN_DMOV2R13H; goto extract_fmt_dmov2r13h;
+      case 10 : itype = FR30BF_INSN_DMOV2R13B; goto extract_fmt_dmov2r13b;
+      case 11 : itype = FR30BF_INSN_DMOV2R15PD; goto extract_fmt_dmov2r15pd;
+      case 12 : itype = FR30BF_INSN_DMOV2R13PI; goto extract_fmt_dmov2r13pi;
+      case 13 : itype = FR30BF_INSN_DMOV2R13PIH; goto extract_fmt_dmov2r13pih;
+      case 14 : itype = FR30BF_INSN_DMOV2R13PIB; goto extract_fmt_dmov2r13pib;
+      case 15 : itype = FR30BF_INSN_ENTER; goto extract_fmt_enter;
+      case 16 : itype = FR30BF_INSN_STR13; goto extract_fmt_str13;
+      case 17 : itype = FR30BF_INSN_STR13H; goto extract_fmt_str13h;
+      case 18 : itype = FR30BF_INSN_STR13B; goto extract_fmt_str13b;
+      case 19 : itype = FR30BF_INSN_STR15; goto extract_fmt_str15;
+      case 20 : itype = FR30BF_INSN_ST; goto extract_fmt_st;
+      case 21 : itype = FR30BF_INSN_STH; goto extract_fmt_sth;
+      case 22 : itype = FR30BF_INSN_STB; goto extract_fmt_stb;
+      case 23 :
+        {
+          unsigned int val = (((insn >> 4) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : itype = FR30BF_INSN_STR15GR; goto extract_fmt_str15gr;
+          case 1 : itype = FR30BF_INSN_MOVPS; goto extract_fmt_movps;
+          case 8 : itype = FR30BF_INSN_STR15DR; goto extract_fmt_str15dr;
+          case 9 : itype = FR30BF_INSN_STR15PS; goto extract_fmt_str15ps;
+          default : itype = FR30BF_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 24 : itype = FR30BF_INSN_DMOVR13; goto extract_fmt_dmovr13;
+      case 25 : itype = FR30BF_INSN_DMOVR13H; goto extract_fmt_dmovr13h;
+      case 26 : itype = FR30BF_INSN_DMOVR13B; goto extract_fmt_dmovr13b;
+      case 27 : itype = FR30BF_INSN_DMOVR15PI; goto extract_fmt_dmovr15pi;
+      case 28 : itype = FR30BF_INSN_DMOVR13PI; goto extract_fmt_dmovr13pi;
+      case 29 : itype = FR30BF_INSN_DMOVR13PIH; goto extract_fmt_dmovr13pih;
+      case 30 : itype = FR30BF_INSN_DMOVR13PIB; goto extract_fmt_dmovr13pib;
+      case 31 : itype = FR30BF_INSN_INT; goto extract_fmt_int;
+      case 32 : /* fall through */
+      case 33 : /* fall through */
+      case 34 : /* fall through */
+      case 35 : /* fall through */
+      case 36 : /* fall through */
+      case 37 : /* fall through */
+      case 38 : /* fall through */
+      case 39 : /* fall through */
+      case 40 : /* fall through */
+      case 41 : /* fall through */
+      case 42 : /* fall through */
+      case 43 : /* fall through */
+      case 44 : /* fall through */
+      case 45 : /* fall through */
+      case 46 : /* fall through */
+      case 47 : itype = FR30BF_INSN_LDR14; goto extract_fmt_ldr14;
+      case 48 : /* fall through */
+      case 49 : /* fall through */
+      case 50 : /* fall through */
+      case 51 : /* fall through */
+      case 52 : /* fall through */
+      case 53 : /* fall through */
+      case 54 : /* fall through */
+      case 55 : /* fall through */
+      case 56 : /* fall through */
+      case 57 : /* fall through */
+      case 58 : /* fall through */
+      case 59 : /* fall through */
+      case 60 : /* fall through */
+      case 61 : /* fall through */
+      case 62 : /* fall through */
+      case 63 : itype = FR30BF_INSN_STR14; goto extract_fmt_str14;
+      case 64 : /* fall through */
+      case 65 : /* fall through */
+      case 66 : /* fall through */
+      case 67 : /* fall through */
+      case 68 : /* fall through */
+      case 69 : /* fall through */
+      case 70 : /* fall through */
+      case 71 : /* fall through */
+      case 72 : /* fall through */
+      case 73 : /* fall through */
+      case 74 : /* fall through */
+      case 75 : /* fall through */
+      case 76 : /* fall through */
+      case 77 : /* fall through */
+      case 78 : /* fall through */
+      case 79 : itype = FR30BF_INSN_LDR14UH; goto extract_fmt_ldr14uh;
+      case 80 : /* fall through */
+      case 81 : /* fall through */
+      case 82 : /* fall through */
+      case 83 : /* fall through */
+      case 84 : /* fall through */
+      case 85 : /* fall through */
+      case 86 : /* fall through */
+      case 87 : /* fall through */
+      case 88 : /* fall through */
+      case 89 : /* fall through */
+      case 90 : /* fall through */
+      case 91 : /* fall through */
+      case 92 : /* fall through */
+      case 93 : /* fall through */
+      case 94 : /* fall through */
+      case 95 : itype = FR30BF_INSN_STR14H; goto extract_fmt_str14h;
+      case 96 : /* fall through */
+      case 97 : /* fall through */
+      case 98 : /* fall through */
+      case 99 : /* fall through */
+      case 100 : /* fall through */
+      case 101 : /* fall through */
+      case 102 : /* fall through */
+      case 103 : /* fall through */
+      case 104 : /* fall through */
+      case 105 : /* fall through */
+      case 106 : /* fall through */
+      case 107 : /* fall through */
+      case 108 : /* fall through */
+      case 109 : /* fall through */
+      case 110 : /* fall through */
+      case 111 : itype = FR30BF_INSN_LDR14UB; goto extract_fmt_ldr14ub;
+      case 112 : /* fall through */
+      case 113 : /* fall through */
+      case 114 : /* fall through */
+      case 115 : /* fall through */
+      case 116 : /* fall through */
+      case 117 : /* fall through */
+      case 118 : /* fall through */
+      case 119 : /* fall through */
+      case 120 : /* fall through */
+      case 121 : /* fall through */
+      case 122 : /* fall through */
+      case 123 : /* fall through */
+      case 124 : /* fall through */
+      case 125 : /* fall through */
+      case 126 : /* fall through */
+      case 127 : itype = FR30BF_INSN_STR14B; goto extract_fmt_str14b;
+      case 128 : itype = FR30BF_INSN_BANDL; goto extract_fmt_bandl;
+      case 129 : itype = FR30BF_INSN_BANDH; goto extract_fmt_bandl;
+      case 130 : itype = FR30BF_INSN_AND; goto extract_fmt_and;
+      case 131 : itype = FR30BF_INSN_ANDCCR; goto extract_fmt_andccr;
+      case 132 : itype = FR30BF_INSN_ANDM; goto extract_fmt_andm;
+      case 133 : itype = FR30BF_INSN_ANDH; goto extract_fmt_andh;
+      case 134 : itype = FR30BF_INSN_ANDB; goto extract_fmt_andb;
+      case 135 : itype = FR30BF_INSN_STILM; goto extract_fmt_stilm;
+      case 136 : itype = FR30BF_INSN_BTSTL; goto extract_fmt_btstl;
+      case 137 : itype = FR30BF_INSN_BTSTH; goto extract_fmt_btstl;
+      case 138 : itype = FR30BF_INSN_XCHB; goto extract_fmt_xchb;
+      case 139 : itype = FR30BF_INSN_MOV; goto extract_fmt_mov;
+      case 140 : itype = FR30BF_INSN_LDM0; goto extract_fmt_ldm0;
+      case 141 : itype = FR30BF_INSN_LDM1; goto extract_fmt_ldm1;
+      case 142 : itype = FR30BF_INSN_STM0; goto extract_fmt_stm0;
+      case 143 : itype = FR30BF_INSN_STM1; goto extract_fmt_stm1;
+      case 144 : itype = FR30BF_INSN_BORL; goto extract_fmt_bandl;
+      case 145 : itype = FR30BF_INSN_BORH; goto extract_fmt_bandl;
+      case 146 : itype = FR30BF_INSN_OR; goto extract_fmt_and;
+      case 147 : itype = FR30BF_INSN_ORCCR; goto extract_fmt_andccr;
+      case 148 : itype = FR30BF_INSN_ORM; goto extract_fmt_andm;
+      case 149 : itype = FR30BF_INSN_ORH; goto extract_fmt_andh;
+      case 150 : itype = FR30BF_INSN_ORB; goto extract_fmt_andb;
+      case 151 :
+        {
+          unsigned int val = (((insn >> 4) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : itype = FR30BF_INSN_JMP; goto extract_fmt_jmp;
+          case 1 : itype = FR30BF_INSN_CALLR; goto extract_fmt_callr;
+          case 2 : itype = FR30BF_INSN_RET; goto extract_fmt_ret;
+          case 3 : itype = FR30BF_INSN_RETI; goto extract_fmt_reti;
+          case 4 : itype = FR30BF_INSN_DIV0S; goto extract_fmt_div0s;
+          case 5 : itype = FR30BF_INSN_DIV0U; goto extract_fmt_div0u;
+          case 6 : itype = FR30BF_INSN_DIV1; goto extract_fmt_div1;
+          case 7 : itype = FR30BF_INSN_DIV2; goto extract_fmt_div2;
+          case 8 : itype = FR30BF_INSN_EXTSB; goto extract_fmt_extsb;
+          case 9 : itype = FR30BF_INSN_EXTUB; goto extract_fmt_extub;
+          case 10 : itype = FR30BF_INSN_EXTSH; goto extract_fmt_extsh;
+          case 11 : itype = FR30BF_INSN_EXTUH; goto extract_fmt_extuh;
+          default : itype = FR30BF_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 152 : itype = FR30BF_INSN_BEORL; goto extract_fmt_bandl;
+      case 153 : itype = FR30BF_INSN_BEORH; goto extract_fmt_bandl;
+      case 154 : itype = FR30BF_INSN_EOR; goto extract_fmt_and;
+      case 155 : itype = FR30BF_INSN_LDI20; goto extract_fmt_ldi20;
+      case 156 : itype = FR30BF_INSN_EORM; goto extract_fmt_andm;
+      case 157 : itype = FR30BF_INSN_EORH; goto extract_fmt_andh;
+      case 158 : itype = FR30BF_INSN_EORB; goto extract_fmt_andb;
+      case 159 :
+        {
+          unsigned int val = (((insn >> 4) & (15 << 0)));
+          switch (val)
+          {
+          case 0 : itype = FR30BF_INSN_JMPD; goto extract_fmt_jmp;
+          case 1 : itype = FR30BF_INSN_CALLRD; goto extract_fmt_callr;
+          case 2 : itype = FR30BF_INSN_RET_D; goto extract_fmt_ret;
+          case 3 : itype = FR30BF_INSN_INTE; goto extract_fmt_inte;
+          case 6 : itype = FR30BF_INSN_DIV3; goto extract_fmt_div3;
+          case 7 : itype = FR30BF_INSN_DIV4S; goto extract_fmt_div4s;
+          case 8 : itype = FR30BF_INSN_LDI32; goto extract_fmt_ldi32;
+          case 9 : itype = FR30BF_INSN_LEAVE; goto extract_fmt_leave;
+          case 10 : itype = FR30BF_INSN_NOP; goto extract_fmt_nop;
+          case 12 : itype = FR30BF_INSN_COPOP; goto extract_fmt_copop;
+          case 13 : itype = FR30BF_INSN_COPLD; goto extract_fmt_copld;
+          case 14 : itype = FR30BF_INSN_COPST; goto extract_fmt_copst;
+          case 15 : itype = FR30BF_INSN_COPSV; goto extract_fmt_copst;
+          default : itype = FR30BF_INSN_X_INVALID; goto extract_fmt_empty;
+          }
+        }
+      case 160 : itype = FR30BF_INSN_ADDNI; goto extract_fmt_addni;
+      case 161 : itype = FR30BF_INSN_ADDN2; goto extract_fmt_addn2;
+      case 162 : itype = FR30BF_INSN_ADDN; goto extract_fmt_addn;
+      case 163 : itype = FR30BF_INSN_ADDSP; goto extract_fmt_addsp;
+      case 164 : itype = FR30BF_INSN_ADDI; goto extract_fmt_addi;
+      case 165 : itype = FR30BF_INSN_ADD2; goto extract_fmt_add2;
+      case 166 : itype = FR30BF_INSN_ADD; goto extract_fmt_add;
+      case 167 : itype = FR30BF_INSN_ADDC; goto extract_fmt_addc;
+      case 168 : itype = FR30BF_INSN_CMPI; goto extract_fmt_cmpi;
+      case 169 : itype = FR30BF_INSN_CMP2; goto extract_fmt_cmp2;
+      case 170 : itype = FR30BF_INSN_CMP; goto extract_fmt_cmp;
+      case 171 : itype = FR30BF_INSN_MULU; goto extract_fmt_mulu;
+      case 172 : itype = FR30BF_INSN_SUB; goto extract_fmt_add;
+      case 173 : itype = FR30BF_INSN_SUBC; goto extract_fmt_addc;
+      case 174 : itype = FR30BF_INSN_SUBN; goto extract_fmt_addn;
+      case 175 : itype = FR30BF_INSN_MUL; goto extract_fmt_mul;
+      case 176 : itype = FR30BF_INSN_LSRI; goto extract_fmt_lsli;
+      case 177 : itype = FR30BF_INSN_LSR2; goto extract_fmt_lsli;
+      case 178 : itype = FR30BF_INSN_LSR; goto extract_fmt_lsl;
+      case 179 : itype = FR30BF_INSN_MOV2DR; goto extract_fmt_mov2dr;
+      case 180 : itype = FR30BF_INSN_LSLI; goto extract_fmt_lsli;
+      case 181 : itype = FR30BF_INSN_LSL2; goto extract_fmt_lsli;
+      case 182 : itype = FR30BF_INSN_LSL; goto extract_fmt_lsl;
+      case 183 : itype = FR30BF_INSN_MOVDR; goto extract_fmt_movdr;
+      case 184 : itype = FR30BF_INSN_ASRI; goto extract_fmt_lsli;
+      case 185 : itype = FR30BF_INSN_ASR2; goto extract_fmt_lsli;
+      case 186 : itype = FR30BF_INSN_ASR; goto extract_fmt_lsl;
+      case 187 : itype = FR30BF_INSN_MULUH; goto extract_fmt_mulh;
+      case 188 : itype = FR30BF_INSN_LDRES; goto extract_fmt_ldres;
+      case 189 : itype = FR30BF_INSN_STRES; goto extract_fmt_ldres;
+      case 191 : itype = FR30BF_INSN_MULH; goto extract_fmt_mulh;
+      case 192 : /* fall through */
+      case 193 : /* fall through */
+      case 194 : /* fall through */
+      case 195 : /* fall through */
+      case 196 : /* fall through */
+      case 197 : /* fall through */
+      case 198 : /* fall through */
+      case 199 : /* fall through */
+      case 200 : /* fall through */
+      case 201 : /* fall through */
+      case 202 : /* fall through */
+      case 203 : /* fall through */
+      case 204 : /* fall through */
+      case 205 : /* fall through */
+      case 206 : /* fall through */
+      case 207 : itype = FR30BF_INSN_LDI8; goto extract_fmt_ldi8;
+      case 208 : /* fall through */
+      case 209 : /* fall through */
+      case 210 : /* fall through */
+      case 211 : /* fall through */
+      case 212 : /* fall through */
+      case 213 : /* fall through */
+      case 214 : /* fall through */
+      case 215 : itype = FR30BF_INSN_CALL; goto extract_fmt_call;
+      case 216 : /* fall through */
+      case 217 : /* fall through */
+      case 218 : /* fall through */
+      case 219 : /* fall through */
+      case 220 : /* fall through */
+      case 221 : /* fall through */
+      case 222 : /* fall through */
+      case 223 : itype = FR30BF_INSN_CALLD; goto extract_fmt_call;
+      case 224 : itype = FR30BF_INSN_BRA; goto extract_fmt_brad;
+      case 225 : itype = FR30BF_INSN_BNO; goto extract_fmt_bnod;
+      case 226 : itype = FR30BF_INSN_BEQ; goto extract_fmt_beqd;
+      case 227 : itype = FR30BF_INSN_BNE; goto extract_fmt_beqd;
+      case 228 : itype = FR30BF_INSN_BC; goto extract_fmt_bcd;
+      case 229 : itype = FR30BF_INSN_BNC; goto extract_fmt_bcd;
+      case 230 : itype = FR30BF_INSN_BN; goto extract_fmt_bnd;
+      case 231 : itype = FR30BF_INSN_BP; goto extract_fmt_bnd;
+      case 232 : itype = FR30BF_INSN_BV; goto extract_fmt_bvd;
+      case 233 : itype = FR30BF_INSN_BNV; goto extract_fmt_bvd;
+      case 234 : itype = FR30BF_INSN_BLT; goto extract_fmt_bltd;
+      case 235 : itype = FR30BF_INSN_BGE; goto extract_fmt_bltd;
+      case 236 : itype = FR30BF_INSN_BLE; goto extract_fmt_bled;
+      case 237 : itype = FR30BF_INSN_BGT; goto extract_fmt_bled;
+      case 238 : itype = FR30BF_INSN_BLS; goto extract_fmt_blsd;
+      case 239 : itype = FR30BF_INSN_BHI; goto extract_fmt_blsd;
+      case 240 : itype = FR30BF_INSN_BRAD; goto extract_fmt_brad;
+      case 241 : itype = FR30BF_INSN_BNOD; goto extract_fmt_bnod;
+      case 242 : itype = FR30BF_INSN_BEQD; goto extract_fmt_beqd;
+      case 243 : itype = FR30BF_INSN_BNED; goto extract_fmt_beqd;
+      case 244 : itype = FR30BF_INSN_BCD; goto extract_fmt_bcd;
+      case 245 : itype = FR30BF_INSN_BNCD; goto extract_fmt_bcd;
+      case 246 : itype = FR30BF_INSN_BND; goto extract_fmt_bnd;
+      case 247 : itype = FR30BF_INSN_BPD; goto extract_fmt_bnd;
+      case 248 : itype = FR30BF_INSN_BVD; goto extract_fmt_bvd;
+      case 249 : itype = FR30BF_INSN_BNVD; goto extract_fmt_bvd;
+      case 250 : itype = FR30BF_INSN_BLTD; goto extract_fmt_bltd;
+      case 251 : itype = FR30BF_INSN_BGED; goto extract_fmt_bltd;
+      case 252 : itype = FR30BF_INSN_BLED; goto extract_fmt_bled;
+      case 253 : itype = FR30BF_INSN_BGTD; goto extract_fmt_bled;
+      case 254 : itype = FR30BF_INSN_BLSD; goto extract_fmt_blsd;
+      case 255 : itype = FR30BF_INSN_BHID; goto extract_fmt_blsd;
+      default : itype = FR30BF_INSN_X_INVALID; goto extract_fmt_empty;
+      }
     }
-#undef I
-#undef E
   }
 
   /* The instruction has been decoded, now extract the fields.  */
 
- extract:
+ extract_fmt_empty:
   {
-#ifndef __GNUC__
-    switch (idecode->sfmt)
-#endif
-      {
-
-  CASE (ex, FMT_EMPTY) :
-  {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
   EXTRACT_IFMT_EMPTY_VARS /* */
@@ -680,11 +658,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_empty", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADD) :
+ extract_fmt_add:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_add.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -706,11 +685,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADDI) :
+ extract_fmt_addi:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addi.f
   EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
@@ -731,11 +711,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADD2) :
+ extract_fmt_add2:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_add2.f
   EXTRACT_IFMT_ADD2_VARS /* f-op1 f-op2 f-m4 f-Ri */
@@ -756,11 +737,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADDC) :
+ extract_fmt_addc:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addc.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -782,11 +764,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADDN) :
+ extract_fmt_addn:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addn.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -808,11 +791,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADDNI) :
+ extract_fmt_addni:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addni.f
   EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
@@ -833,11 +817,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADDN2) :
+ extract_fmt_addn2:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addn2.f
   EXTRACT_IFMT_ADD2_VARS /* f-op1 f-op2 f-m4 f-Ri */
@@ -858,11 +843,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMP) :
+ extract_fmt_cmp:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmp.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -883,11 +869,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMPI) :
+ extract_fmt_cmpi:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpi.f
   EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
@@ -907,11 +894,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CMP2) :
+ extract_fmt_cmp2:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmp2.f
   EXTRACT_IFMT_ADD2_VARS /* f-op1 f-op2 f-m4 f-Ri */
@@ -931,11 +919,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_AND) :
+ extract_fmt_and:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_and.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -957,11 +946,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ANDM) :
+ extract_fmt_andm:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andm.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -982,11 +972,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ANDH) :
+ extract_fmt_andh:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andh.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1007,11 +998,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ANDB) :
+ extract_fmt_andb:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andb.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1032,11 +1024,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BANDL) :
+ extract_fmt_bandl:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_bandl.f
   EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
@@ -1056,11 +1049,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BTSTL) :
+ extract_fmt_btstl:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_btstl.f
   EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
@@ -1080,11 +1074,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MUL) :
+ extract_fmt_mul:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mul.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1105,11 +1100,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MULU) :
+ extract_fmt_mulu:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulu.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1130,11 +1126,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MULH) :
+ extract_fmt_mulh:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulh.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1155,11 +1152,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DIV0S) :
+ extract_fmt_div0s:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div0s.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -1178,11 +1176,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DIV0U) :
+ extract_fmt_div0u:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div0u.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -1193,11 +1192,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_div0u", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DIV1) :
+ extract_fmt_div1:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div1.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -1216,11 +1216,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DIV2) :
+ extract_fmt_div2:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div2.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -1239,11 +1240,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DIV3) :
+ extract_fmt_div3:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div3.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -1254,11 +1256,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_div3", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DIV4S) :
+ extract_fmt_div4s:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div4s.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -1269,11 +1272,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_div4s", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LSL) :
+ extract_fmt_lsl:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lsl.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1295,11 +1299,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LSLI) :
+ extract_fmt_lsli:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lsli.f
   EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
@@ -1320,11 +1325,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDI8) :
+ extract_fmt_ldi8:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldi8.f
   EXTRACT_IFMT_LDI8_VARS /* f-op1 f-i8 f-Ri */
@@ -1344,11 +1350,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDI20) :
+ extract_fmt_ldi20:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldi20.f
   EXTRACT_IFMT_LDI20_VARS /* f-op1 f-i20 f-op2 f-Ri */
@@ -1368,11 +1375,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDI32) :
+ extract_fmt_ldi32:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldi32.f
   EXTRACT_IFMT_LDI32_VARS /* f-op1 f-i32 f-op2 f-op3 f-Ri */
@@ -1392,11 +1400,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LD) :
+ extract_fmt_ld:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1417,11 +1426,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDUH) :
+ extract_fmt_lduh:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lduh.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1442,11 +1452,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDUB) :
+ extract_fmt_ldub:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldub.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1467,11 +1478,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR13) :
+ extract_fmt_ldr13:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr13.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1493,11 +1505,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR13UH) :
+ extract_fmt_ldr13uh:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr13uh.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1519,11 +1532,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR13UB) :
+ extract_fmt_ldr13ub:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr13ub.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1545,11 +1559,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR14) :
+ extract_fmt_ldr14:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr14.f
   EXTRACT_IFMT_LDR14_VARS /* f-op1 f-disp10 f-Ri */
@@ -1570,11 +1585,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR14UH) :
+ extract_fmt_ldr14uh:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr14uh.f
   EXTRACT_IFMT_LDR14UH_VARS /* f-op1 f-disp9 f-Ri */
@@ -1595,11 +1611,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR14UB) :
+ extract_fmt_ldr14ub:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr14ub.f
   EXTRACT_IFMT_LDR14UB_VARS /* f-op1 f-disp8 f-Ri */
@@ -1620,11 +1637,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR15) :
+ extract_fmt_ldr15:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15.f
   EXTRACT_IFMT_LDR15_VARS /* f-op1 f-op2 f-udisp6 f-Ri */
@@ -1645,11 +1663,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR15GR) :
+ extract_fmt_ldr15gr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15gr.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -1671,11 +1690,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR15DR) :
+ extract_fmt_ldr15dr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15dr.f
   EXTRACT_IFMT_LDR15DR_VARS /* f-op1 f-op2 f-op3 f-Rs2 */
@@ -1695,11 +1715,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDR15PS) :
+ extract_fmt_ldr15ps:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15ps.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -1718,11 +1739,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ST) :
+ extract_fmt_st:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1743,11 +1765,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STH) :
+ extract_fmt_sth:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_sth.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1768,11 +1791,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STB) :
+ extract_fmt_stb:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stb.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1793,11 +1817,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR13) :
+ extract_fmt_str13:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str13.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1819,11 +1844,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR13H) :
+ extract_fmt_str13h:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str13h.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1845,11 +1871,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR13B) :
+ extract_fmt_str13b:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str13b.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -1871,11 +1898,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR14) :
+ extract_fmt_str14:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str14.f
   EXTRACT_IFMT_LDR14_VARS /* f-op1 f-disp10 f-Ri */
@@ -1896,11 +1924,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR14H) :
+ extract_fmt_str14h:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str14h.f
   EXTRACT_IFMT_LDR14UH_VARS /* f-op1 f-disp9 f-Ri */
@@ -1921,11 +1950,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR14B) :
+ extract_fmt_str14b:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str14b.f
   EXTRACT_IFMT_LDR14UB_VARS /* f-op1 f-disp8 f-Ri */
@@ -1946,11 +1976,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR15) :
+ extract_fmt_str15:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15.f
   EXTRACT_IFMT_LDR15_VARS /* f-op1 f-op2 f-udisp6 f-Ri */
@@ -1971,11 +2002,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR15GR) :
+ extract_fmt_str15gr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15gr.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -1996,11 +2028,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR15DR) :
+ extract_fmt_str15dr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15dr.f
   EXTRACT_IFMT_LDR15DR_VARS /* f-op1 f-op2 f-op3 f-Rs2 */
@@ -2020,11 +2053,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STR15PS) :
+ extract_fmt_str15ps:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15ps.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -2043,11 +2077,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOV) :
+ extract_fmt_mov:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mov.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -2068,11 +2103,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVDR) :
+ extract_fmt_movdr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movdr.f
   EXTRACT_IFMT_MOVDR_VARS /* f-op1 f-op2 f-Rs1 f-Ri */
@@ -2092,11 +2128,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOVPS) :
+ extract_fmt_movps:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movps.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -2115,11 +2152,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOV2DR) :
+ extract_fmt_mov2dr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mov2dr.f
   EXTRACT_IFMT_MOVDR_VARS /* f-op1 f-op2 f-Rs1 f-Ri */
@@ -2139,11 +2177,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_MOV2PS) :
+ extract_fmt_mov2ps:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mov2ps.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -2162,11 +2201,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_JMP) :
+ extract_fmt_jmp:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_jmp.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -2186,11 +2226,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CALLR) :
+ extract_fmt_callr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_callr.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -2210,11 +2251,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_CALL) :
+ extract_fmt_call:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_call.f
   EXTRACT_IFMT_CALL_VARS /* f-op1 f-op5 f-rel12 */
@@ -2233,11 +2275,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_RET) :
+ extract_fmt_ret:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_ret.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -2255,11 +2298,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_INT) :
+ extract_fmt_int:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_int.f
   EXTRACT_IFMT_INT_VARS /* f-op1 f-op2 f-u8 */
@@ -2278,11 +2322,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_INTE) :
+ extract_fmt_inte:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_inte.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -2300,11 +2345,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_RETI) :
+ extract_fmt_reti:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_reti.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -2322,11 +2368,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BRAD) :
+ extract_fmt_brad:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_brad.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2345,11 +2392,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BNOD) :
+ extract_fmt_bnod:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_bnod.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2360,11 +2408,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_bnod", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BEQD) :
+ extract_fmt_beqd:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_beqd.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2383,11 +2432,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BCD) :
+ extract_fmt_bcd:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bcd.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2406,11 +2456,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BND) :
+ extract_fmt_bnd:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bnd.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2429,11 +2480,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BVD) :
+ extract_fmt_bvd:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bvd.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2452,11 +2504,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BLTD) :
+ extract_fmt_bltd:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bltd.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2475,11 +2528,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BLED) :
+ extract_fmt_bled:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bled.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2498,11 +2552,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_BLSD) :
+ extract_fmt_blsd:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_blsd.f
   EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
@@ -2521,11 +2576,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOVR13) :
+ extract_fmt_dmovr13:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13.f
   EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
@@ -2544,11 +2600,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOVR13H) :
+ extract_fmt_dmovr13h:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13h.f
   EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
@@ -2567,11 +2624,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOVR13B) :
+ extract_fmt_dmovr13b:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13b.f
   EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
@@ -2590,11 +2648,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOVR13PI) :
+ extract_fmt_dmovr13pi:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13pi.f
   EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
@@ -2614,11 +2673,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOVR13PIH) :
+ extract_fmt_dmovr13pih:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13pih.f
   EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
@@ -2638,11 +2698,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOVR13PIB) :
+ extract_fmt_dmovr13pib:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13pib.f
   EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
@@ -2662,11 +2723,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOVR15PI) :
+ extract_fmt_dmovr15pi:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr15pi.f
   EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
@@ -2686,11 +2748,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOV2R13) :
+ extract_fmt_dmov2r13:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13.f
   EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
@@ -2709,11 +2772,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOV2R13H) :
+ extract_fmt_dmov2r13h:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13h.f
   EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
@@ -2732,11 +2796,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOV2R13B) :
+ extract_fmt_dmov2r13b:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13b.f
   EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
@@ -2755,11 +2820,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOV2R13PI) :
+ extract_fmt_dmov2r13pi:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13pi.f
   EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
@@ -2779,11 +2845,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOV2R13PIH) :
+ extract_fmt_dmov2r13pih:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13pih.f
   EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
@@ -2803,11 +2870,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOV2R13PIB) :
+ extract_fmt_dmov2r13pib:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13pib.f
   EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
@@ -2827,11 +2895,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_DMOV2R15PD) :
+ extract_fmt_dmov2r15pd:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r15pd.f
   EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
@@ -2851,11 +2920,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDRES) :
+ extract_fmt_ldres:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldres.f
   EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
@@ -2875,11 +2945,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_COPOP) :
+ extract_fmt_copop:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_copop.f
   EXTRACT_IFMT_COPOP_VARS /* f-op1 f-ccc f-op2 f-op3 f-CRj f-u4c f-CRi */
@@ -2890,11 +2961,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_copop", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_COPLD) :
+ extract_fmt_copld:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_copld.f
   EXTRACT_IFMT_COPLD_VARS /* f-op1 f-ccc f-op2 f-op3 f-Rjc f-u4c f-CRi */
@@ -2905,11 +2977,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_copld", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_COPST) :
+ extract_fmt_copst:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_copst.f
   EXTRACT_IFMT_COPST_VARS /* f-op1 f-ccc f-op2 f-op3 f-CRj f-u4c f-Ric */
@@ -2920,11 +2993,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_copst", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_NOP) :
+ extract_fmt_nop:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_nop.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -2935,11 +3009,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_nop", (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ANDCCR) :
+ extract_fmt_andccr:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andccr.f
   EXTRACT_IFMT_INT_VARS /* f-op1 f-op2 f-u8 */
@@ -2951,11 +3026,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_andccr", "f_u8 0x%x", 'x', f_u8, (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STILM) :
+ extract_fmt_stilm:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stilm.f
   EXTRACT_IFMT_INT_VARS /* f-op1 f-op2 f-u8 */
@@ -2967,11 +3043,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_stilm", "f_u8 0x%x", 'x', f_u8, (char *) 0));
 
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ADDSP) :
+ extract_fmt_addsp:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addsp.f
   EXTRACT_IFMT_ADDSP_VARS /* f-op1 f-op2 f-s10 */
@@ -2991,11 +3068,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EXTSB) :
+ extract_fmt_extsb:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extsb.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -3015,11 +3093,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EXTUB) :
+ extract_fmt_extub:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extub.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -3039,11 +3118,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EXTSH) :
+ extract_fmt_extsh:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extsh.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -3063,11 +3143,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_EXTUH) :
+ extract_fmt_extuh:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extuh.f
   EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
@@ -3087,11 +3168,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDM0) :
+ extract_fmt_ldm0:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldm0.f
   EXTRACT_IFMT_LDM0_VARS /* f-op1 f-op2 f-reglist_low_ld */
@@ -3119,11 +3201,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LDM1) :
+ extract_fmt_ldm1:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldm1.f
   EXTRACT_IFMT_LDM1_VARS /* f-op1 f-op2 f-reglist_hi_ld */
@@ -3150,11 +3233,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STM0) :
+ extract_fmt_stm0:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stm0.f
   EXTRACT_IFMT_STM0_VARS /* f-op1 f-op2 f-reglist_low_st */
@@ -3182,11 +3266,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_STM1) :
+ extract_fmt_stm1:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stm1.f
   EXTRACT_IFMT_STM1_VARS /* f-op1 f-op2 f-reglist_hi_st */
@@ -3213,11 +3298,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_ENTER) :
+ extract_fmt_enter:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_enter.f
   EXTRACT_IFMT_ENTER_VARS /* f-op1 f-op2 f-u10 */
@@ -3239,11 +3325,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_LEAVE) :
+ extract_fmt_leave:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_leave.f
   EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
@@ -3264,11 +3351,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-  CASE (ex, FMT_XCHB) :
+ extract_fmt_xchb:
   {
+    const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_xchb.f
   EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
@@ -3290,14 +3378,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     }
 #endif
 #undef FLD
-  BREAK (ex);
+    return idesc;
   }
 
-
-      }
-    ENDSWITCH (ex)
-
-  }
-
-  return idecode->idesc;
 }

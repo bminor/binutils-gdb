@@ -1,4 +1,4 @@
-# Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,6 +46,9 @@ if ![runto_main] then {
    return 0
 }
 
+# Set a breakpoint at line 45, if stepi then finish fails, we would
+# run to the end of the program, which would mess up the rest of the tests.
+  
 # Vanilla step/next
 #
 gdb_test "next" ".*${decimal}.*x = 1;.*" "next 1"
@@ -127,8 +130,41 @@ test_i "stepi to next line" "stepi" \
        ".*${decimal}.*callee.*STEPI"
 test_i "stepi into function" "stepi" \
        ".*${decimal}.*callee.*STEPI" \
-       ".*callee \\(\\) at .*step-test\\.c"
-gdb_test "finish"  ".*${decimal}.*callee.*NEXTI.*" "stepi: finish call"
+       ".*callee \\(\\) at .*step-test\\.c" 
+# Have to be careful here, if the finish does not work, 
+# then we may run to the end of the program, which
+# will cause erroneous failures in the rest of the tests
+
+send_gdb "finish\n"
+gdb_expect {
+  -re ".*(Program received|Program exited).*$gdb_prompt $" {
+    puts "*** Matched Program recieved"
+    # Oops... We ran to the end of the program...  Better reset     
+    if {![runto_main]} then {
+      fail "Can't run to main"
+      return 0
+    }
+    if {![runto step-test.c:45]} {
+      fail "Can't run to line 45"
+      return 0
+    }
+    fail "stepi: finish call"
+  }
+  -re ".*${decimal}.*callee.*NEXTI.*$gdb_prompt $" {
+    puts "*** Matched success..."
+    pass "stepi: finish call"
+  }
+  -re "$gdb_prompt $" {
+    # We got something else.  Fail.
+    fail "stepi: finish call"
+    return
+  }
+  timeout {
+    fail "stepi: finish call"
+    return
+  }
+}
+
 test_i "nexti over function" "nexti" \
        ".*${decimal}.*callee.*NEXTI" \
        ".*${decimal}.*y = w \\+ z;"
@@ -148,6 +184,6 @@ gdb_test "step" \
          ".*step-test.exp: arrive here 1.*" \
          "large struct by value"
 
-gdb_test "continue" ".*Program exited normally.*" "run to finish"
+gdb_continue_to_end "step-test.exp"
 
 return 0

@@ -148,7 +148,6 @@ store_inferior_register (regno, regaddr)
 #endif /* not HPUX_VERSION_5 */
     {
       register int i;
-      extern char registers[];
       
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{

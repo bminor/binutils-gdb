@@ -1017,10 +1017,6 @@ This macro is used as the argument to lseek (or, most commonly,
 bfd_seek).  FIXME, should be replaced by SEEK_SET instead, which is the
 POSIX equivalent.
 
-@item MAINTENANCE_CMDS
-If the value of this is 1, then a number of optional maintenance
-commands are compiled in.
-
 @item MALLOC_INCOMPATIBLE
 Define this if the system's prototype for @code{malloc} differs from the
 @sc{ANSI} definition.
@@ -1047,6 +1043,10 @@ If defined, this should be one or more tokens, such as
 of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
+
+@item USE_GENERIC_DUMMY_FRAMES
+Define this to 1 if the target is using the generic inferior function
+call code.  See @code{blockframe.c} for more information.
 
 @item USE_MMALLOC
 GDB will use the @code{mmalloc} library for memory allocation for symbol
@@ -1198,14 +1198,23 @@ instruction for a breakpoint, it's not required; for instance, the bit
 pattern could be an invalid instruction.  The breakpoint must be no
 longer than the shortest instruction of the architecture.
 
+@var{BREAKPOINT} has been deprecated in favour of
+@var{BREAKPOINT_FROM_PC}.
+
 @item BIG_BREAKPOINT
 @item LITTLE_BREAKPOINT
 Similar to BREAKPOINT, but used for bi-endian targets.
+
+@var{BIG_BREAKPOINT} and @var{LITTLE_BREAKPOINT} have been deprecated in
+favour of @var{BREAKPOINT_FROM_PC}.
 
 @item REMOTE_BREAKPOINT
 @item LITTLE_REMOTE_BREAKPOINT
 @item BIG_REMOTE_BREAKPOINT
 Similar to BREAKPOINT, but used for remote targets.
+
+@var{BIG_REMOTE_BREAKPOINT} and @var{LITTLE_REMOTE_BREAKPOINT} have been
+deprecated in favour of @var{BREAKPOINT_FROM_PC}.
 
 @item BREAKPOINT_FROM_PC (pcptr, lenptr)
 
@@ -1220,14 +1229,40 @@ not required; for instance, the bit pattern could be an invalid
 instruction.  The breakpoint must be no longer than the shortest
 instruction of the architecture.
 
-Replaces all the other BREAKPOINTs.
+Replaces all the other @var{BREAKPOINT} macros.
+
+@item CALL_DUMMY_P
+A C expresson that is non-zero when the target suports inferior function
+calls.
+
+@item CALL_DUMMY_WORDS
+Pointer to an array of @var{LONGEST} words of data containing
+host-byte-ordered @var{REGISTER_BYTES} sized values that partially
+specify the sequence of instructions needed for an inferior function
+call.
+
+Should be deprecated in favour of a macro that uses target-byte-ordered
+data.
+
+@item SIZEOF_CALL_DUMMY_WORDS
+The size of @var{CALL_DUMMY_WORDS}.  When @var{CALL_DUMMY_P} this must
+return a positive value.  See also @var{CALL_DUMMY_LENGTH}.
 
 @item CALL_DUMMY
-valops.c
+A static initializer for @var{CALL_DUMMY_WORDS}.  Deprecated.
+
 @item CALL_DUMMY_LOCATION
 inferior.h
+
 @item CALL_DUMMY_STACK_ADJUST
-valops.c
+Stack adjustment needed when performing an inferior function call.
+
+Should be deprecated in favor of something like @var{STACK_ALIGN}.
+
+@item CALL_DUMMY_STACK_ADJUST_P
+Predicate for use of @var{CALL_DUMMY_STACK_ADJUST}.
+
+Should be deprecated in favor of something like @var{STACK_ALIGN}.
 
 @item CANNOT_FETCH_REGISTER (regno)
 A C expression that should be nonzero if @var{regno} cannot be fetched
@@ -1375,7 +1410,7 @@ pointer.  It examines the current state of the machine as needed.
 
 @item GET_SAVED_REGISTER
 Define this if you need to supply your own definition for the function
-@code{get_saved_register}.  Currently this is only done for the a29k.
+@code{get_saved_register}.
 
 @item HAVE_REGISTER_WINDOWS
 Define this if the target has register windows.
@@ -1506,6 +1541,9 @@ register state.
 @item REGISTER_NAME(i)
 Return the name of register @var{i} as a string.  May return @var{NULL}
 or @var{NUL} to indicate that register @var{i} is not valid.
+
+@item REGISTER_NAMES
+Deprecated in favor of @var{REGISTER_NAME}.
 
 @item REG_STRUCT_HAS_ADDR (gcc_p, type)
 Define this to return 1 if the given type will be passed by pointer

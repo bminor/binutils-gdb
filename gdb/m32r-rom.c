@@ -221,7 +221,8 @@ m32r_supply_register (regname, regnamelen, val, vallen)
   if (regno == ACCL_REGNUM)
     { /* special handling for 64-bit acc reg */
       monitor_supply_register (ACCH_REGNUM, val);
-      if (val = (char *) strchr(val, ':'))  /* skip past ':' to get 2nd word */
+      val = strchr (val, ':'); /* skip past ':' to get 2nd word */
+      if (val != NULL)
 	monitor_supply_register (ACCL_REGNUM, val + 1);
     }
   else
@@ -525,10 +526,12 @@ m32r_upload_command (args, from_tty)
     args = get_exec_file (1);
 
   if (args[0] != '/' && download_path == 0)
-    if (current_directory)
-      download_path = strsave (current_directory);
-    else
-      error ("Need to know default download path (use 'set download-path')");
+    {
+      if (current_directory)
+	download_path = strsave (current_directory);
+      else
+	error ("Need to know default download path (use 'set download-path')");
+    }
 
   start_time = time (NULL);
   monitor_printf ("uhip %s\r", server_addr);
@@ -553,7 +556,8 @@ m32r_upload_command (args, from_tty)
     printf_filtered (" -- Ethernet load complete.\n");
 
   end_time = time (NULL);
-  if (abfd = bfd_openr (args, 0))
+  abfd = bfd_openr (args, 0);
+  if (abfd != NULL)
     { /* Download is done -- print section statistics */
       if (bfd_check_format (abfd, bfd_object) == 0)
 	{

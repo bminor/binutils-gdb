@@ -209,8 +209,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     if [target_info exists gdb,noresults] { return }
 
-    gdb_test "cont" "Continuing.*Program exited normally.*" \
-	"continue to exit in test_simple_watchpoint"
+    gdb_continue_to_end "continue to exit in test_simple_watchpoint"
 }
 
 # Test disabling watchpoints.
@@ -280,8 +279,7 @@ proc test_disabling_watchpoints {} {
     
     if [target_info exists gdb,noresults] { return }
 
-    gdb_test "cont" "Continuing.*Program exited normally.*" \
-	"continue to exit in test_disabling_watchpoints"
+    gdb_continue_to_end "continue to exit in test_disabling_watchpoints"
 }
 
 # Test stepping and other mundane operations with watchpoints enabled
@@ -475,8 +473,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 
 	if [target_info exists gdb,noresults] { return }
 
-	gdb_test "cont" "Continuing.*Program exited normally.*" \
-	    "continue to exit in test_watchpoint_triggered_in_syscall"
+	gdb_continue_to_end "continue to exit in test_watchpoint_triggered_in_syscall"
     }
 }
 
@@ -504,8 +501,7 @@ proc test_complex_watchpoint {} {
 	if [target_info exists gdb,noresults] { return }
 
 
-	gdb_test "cont" "Continuing.*Program exited normally.*" \
-	    "continue to exit in test_complex_watchpoint"
+        gdb_continue_to_end "continue to exit in test_complex_watchpoint"
     }
 }
 

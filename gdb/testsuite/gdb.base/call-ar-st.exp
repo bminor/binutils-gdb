@@ -123,6 +123,7 @@ gdb_expect {
 
 
 #call print_char_array(char_array)
+
 send_gdb "print print_char_array(char_array)\n"
 gdb_expect {
     -re "array_c :\[ \t\r\n\]+=========\[ \t\r\n\]+\[ \t\r\n\]+Z\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZa\[ \t\r\n\]+\[ \t\r\n\]+.*\[ \t\r\n\]+.*$gdb_prompt $" {
@@ -222,7 +223,7 @@ gdb_expect {
 #step -over
     send_gdb "next\n"
     gdb_expect {
-        -re "BYE BYE FOR NOW\[ \t\r\n\]+1035\[ \t\r\n\]+printf\\(.VERY GREEN GRASS.n.\\);\[ \t\r\n\]+.*$gdb_prompt $" { pass "next to 1035"}
+        -re "BYE BYE FOR NOW\[ \t\r\n\]main.*+1035\[ \t\r\n\]+printf\\(.VERY GREEN GRASS.n.\\);\[ \t\r\n\]+.*$gdb_prompt $" { pass "next to 1035"}
         -re ".*$gdb_prompt $" { fail "next to 1035" }
         timeout { fail "next to 1035(timeout)" }
     }
@@ -235,7 +236,7 @@ gdb_expect {
         pass "print print_array_rep(*list1, *list2, *list3)"
       }
     -re ".*$gdb_prompt $" { fail "print print_array_rep(*list1, *list2, *list3)" }
-    timeout           { fail "(timeout) print print_array_rep(*list1, *list2, *list3)"# }
+    timeout           { fail "(timeout) print print_array_rep(*list1, *list2, *list3)" }
   }
 
 

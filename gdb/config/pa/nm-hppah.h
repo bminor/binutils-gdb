@@ -279,3 +279,10 @@ extern char *hpux_pid_to_str PARAMS ((int pid));
 #endif /* HAVE_HPUX_THREAD_SUPPORT */
 
 #define HPUXHPPA
+
+#define MAY_SWITCH_FROM_INFERIOR_PID (1)
+
+#define MAY_FOLLOW_EXEC (1)
+
+#define USE_THREAD_STEP_NEEDED (1)
+

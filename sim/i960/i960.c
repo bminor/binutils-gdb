@@ -68,6 +68,70 @@ i960base_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf,
   return -1; /*FIXME*/
 }
 
+/* Cover fns for mach independent register accesses.  */
+
+SI
+a_i960_h_gr_get (SIM_CPU *current_cpu, UINT regno)
+{
+  switch (MACH_NUM (CPU_MACH (current_cpu)))
+    {
+#ifdef HAVE_CPU_I960BASE
+    case MACH_I960_KA_SA :
+    case MACH_I960_CA :
+      return i960base_h_gr_get (current_cpu, regno);
+#endif
+    default :
+      abort ();
+    }
+}
+
+void
+a_i960_h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
+{
+  switch (MACH_NUM (CPU_MACH (current_cpu)))
+    {
+#ifdef HAVE_CPU_I960BASE
+    case MACH_I960_KA_SA :
+    case MACH_I960_CA :
+      i960base_h_gr_set (current_cpu, regno, newval);
+      break;
+#endif
+    default :
+      abort ();
+    }
+}
+
+IADDR
+a_i960_h_pc_get (SIM_CPU *current_cpu)
+{
+  switch (MACH_NUM (CPU_MACH (current_cpu)))
+    {
+#ifdef HAVE_CPU_I960BASE
+    case MACH_I960_KA_SA :
+    case MACH_I960_CA :
+      return i960base_h_pc_get (current_cpu);
+#endif
+    default :
+      abort ();
+    }
+}
+
+void
+a_i960_h_pc_set (SIM_CPU *current_cpu, IADDR newval)
+{
+  switch (MACH_NUM (CPU_MACH (current_cpu)))
+    {
+#ifdef HAVE_CPU_I960BASE
+    case MACH_I960_KA_SA :
+    case MACH_I960_CA :
+      i960base_h_pc_set (current_cpu, newval);
+      break;
+#endif
+    default :
+      abort ();
+    }
+}
+
 #if WITH_PROFILE_MODEL_P
 
 /* FIXME: Some of these should be inline or macros.  Later.  */

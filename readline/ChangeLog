@@ -1,3 +1,24 @@
+1999-04-22  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* Makefile.in (install): Make comment about this change more explicit.
+
+1999-04-22  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * Makefile.in (install): Don't install the final libreadline.a
+        or .h files.
+
+Tue Mar 23 10:56:08 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	Patches from Robert Hoehne <robert.hoehne@gmx.net>:
+ 	
+	* display.c: Change some terminal calls to work on DJGPP.
+	* terminal.c: Likewise.
+	* Makefile.in: Remove . from the VPATH directive.
+	
+Tue Mar  9 14:58:13 1999  Geoffrey Noer  <noer@cygnus.com>
+
+	* support/config.sub: Recognize cygwin*, not just cygwin32.
+
 Tue Feb  9 10:38:57 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* configure.in: Do not use the ./support directory.

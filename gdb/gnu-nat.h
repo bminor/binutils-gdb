@@ -81,13 +81,10 @@ extern thread_state_t proc_get_state (struct proc *proc, int will_modify);
        debug ("{proc %d/%d %p}: " msg, \
 	      __proc_pid (__proc), __proc->tid, __proc , ##args); } while (0)
 
-#if MAINTENANCE_CMDS
 extern int gnu_debug_flag;
+
 #define debug(msg, args...) \
  do { if (gnu_debug_flag) \
         fprintf (stderr, "%s: " msg "\r\n", __FUNCTION__ , ##args); } while (0)
-#else
-#define debug(msg, args...) (void)0
-#endif
 
 #endif /* __GNU_NAT_H__ */

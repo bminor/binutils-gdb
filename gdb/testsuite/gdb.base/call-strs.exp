@@ -107,11 +107,11 @@ gdb_expect {
 
 
 #step
-send_gdb "step\n"
+send_gdb "next\n"
 gdb_expect {
-        -re ".*str_func\\(\"abcd\", \"efgh\", \"ijkl\", \"mnop\", \"qrst\", \"uvwx\", \"yz12\"\\);.*$gdb_prompt $" {pass "step after strcpy"}
-        -re ".*$gdb_prompt $" { fail "step after strcpy" }
-        timeout { fail "step after strcpy (timeout)" }
+        -re ".*str_func\\(\"abcd\", \"efgh\", \"ijkl\", \"mnop\", \"qrst\", \"uvwx\", \"yz12\"\\);.*$gdb_prompt $" {pass "next over strcpy"}
+        -re ".*$gdb_prompt $" { fail "next over strcpy" }
+        timeout { fail "next over strcpy (timeout)" }
     }
 
 #print buf

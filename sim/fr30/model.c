@@ -3996,7 +3996,7 @@ fr30_init_cpu (SIM_CPU *cpu)
 
 const MACH fr30_mach =
 {
-  "fr30", "fr30",
+  "fr30", "fr30", MACH_FR30,
   32, 32, & fr30_models[0], & fr30bf_imp_properties,
   fr30_init_cpu,
   fr30bf_prepare_run

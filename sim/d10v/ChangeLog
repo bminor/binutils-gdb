@@ -1,3 +1,24 @@
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* interp.c (ui_loop_hook_counter): New global (when NEED_UI_LOOP_HOOK
+	defined).
+	(sim_resume): If the counter has expired, call the ui_loop_hook,
+	if defined.
+	(UI_LOOP_POLL_INTERVAL): Define. Used to tweak the frequency of
+	ui_loop_hook calls.
+	* Makefile.in (SIM_EXTRA_CFLAGS): Include NEED_UI_LOOP_HOOK.
+
+Wed Mar 10 19:32:13 1999  Nick Clifton  <nickc@cygnus.com>
+
+	* simops.c: If load instruction with auto increment/decrement
+	addressing is used when the destination register is the same as
+	the address register, then ignore the auto increment/decrement.
+
+Wed Mar 10 19:32:13 1999  Martin M. Hunt  <hunt@cygnus.com>
+
+	* simops.c (OP_5F00): Ifdef SYS_stat case because
+	not all systems have it defined.
+
 1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* simops.c (OP_5607): Correct saturation comparison/assignment.

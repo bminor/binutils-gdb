@@ -1,3 +1,44 @@
+Fri Apr 16 16:50:31 1999  Doug Evans  <devans@charmed.cygnus.com>
+
+	* devices.c (device_io_read_buffer): New arg `sd'.
+	(device_io_write_buffer): New arg `sd'.
+	(device_error): Give proper arg spec.
+
+1999-04-10  Doug Evans  <devans@casey.cygnus.com>
+
+	* cpu.h,sem-switch.c,sem.c: Rebuild.
+
+1999-03-27  Doug Evans  <devans@casey.cygnus.com>
+
+	* decode.c: Rebuild.
+
+1999-03-22  Doug Evans  <devans@casey.cygnus.com>
+
+	* arch.c,arch.h,model.c: Rebuild.
+	* fr30.c (fr30bf_fetch_register): Replace calls to a_fr30_h_* with
+	calls to fr30bf_h_*.
+	(fr30bf_store_register): Ditto.
+	* traps.c (setup_int): Ditto.
+	* sim-if.c (sim_open): Update call to fr30_cgen_cpu_open.
+
+Mon Mar 22 13:13:05 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* configure.in: Use SIM_AC_OPTION_ALIGNMENT(FORCED_ALIGNMENT).
+	* configure: Regenerate.
+	* cpu.h: Regenerate.
+
+1999-03-11  Doug Evans  <devans@casey.cygnus.com>
+
+	* arch.c,arch.h,cpu.c,cpu.h: Rebuild.
+	* fr30-sim.h (GET_H_SBIT,SET_H_SBIT): Delete.
+	(GET_H_CCR,SET_H_CCR,GET_H_SCR,SET_H_SCR,GET_H_ILM,SET_H_ILM): Delete.
+	(GET_H_PS,SET_H_PS,GET_H_DR,SET_H_DR): Delete.
+	* sim-if.c (sim_open): Update call to fr30_cgen_cpu_open.
+
+1999-02-25  Doug Evans  <devans@casey.cygnus.com>
+
+	* cpu.h: Rebuild.
+
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in (SIM_EXTRA_DEPS): Add fr30-desc.h, delete cpu-opc.h.

@@ -1,3 +1,56 @@
+Fri Apr 16 16:43:22 1999  Doug Evans  <devans@charmed.cygnus.com>
+
+	* sim-core.c (device_error,device_io_read_buffer,
+	device_io_write_buffer): Delete decls.
+	* sim-core.h: Put them here.
+
+	* sim-core.c (sim_core_read_buffer): Pass sd to device_io_read_buffer.
+	(sim_core_write_buffer): Pass sd to device_io_write_buffer.
+	* sim-n-core.h (sim_core_read_aligned_N): Ditto.
+	(sim_core_write_aligned_N): Ditto.
+
+1999-04-14  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* sim-memopt.c (sim_memory_uninstall): Don't look into
+	free()d memory.
+
+1999-04-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-utils.scm (virtual_insn_entries): Update attribute definition.
+
+1999-04-13  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim-core.c (sim_core_read_buffer): Handle NULL cpu when WITH_DEVICES.
+	(sim_core_write_buffer): Ditto.
+
+1999-04-02  Keith Seitz  <keiths@cygnus.com>
+
+	* sim-io.c (sim_io_poll_quit): Only call the poll_quit callback
+	after the interval counter has expired.
+	(POLL_QUIT_INTERVAL): Define. Used to tweak the frequency of
+	poll_quit callbacks. May be overridden by Makefile.
+	(poll_quit_counter): New global.
+	* sim-events.c: Remove all mentions of ui_loop_hook. The
+	host callback "poll_quit" will serve the purpose.
+	* run.c: Add definition of ui_loop_hook when NEED_UI_LOOP_HOOK
+	is defined.
+	* nrun.c: Remove declaration of ui_loop_hook.
+
+Wed Mar 31 18:55:41 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen-run.c (sim_resume): Don't tell main loop to run "forever"
+	if being used by gdb.
+
+1999-03-22  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-types.h (XF,TF): Tweak.
+	* cgen-ops.h: Redo inline support.  Delete DI_FN_SUPPORT,
+	in cgen-types.h.
+	(SUBWORD*,JOIN*): Define.
+	* cgen-trace.c (sim_cgen_disassemble_insn): Update, base_insn_bitsize
+	moved into cpu descriptor.
+	* sim-model.h (MACH): New member `num'.
+
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* Make-common.in (CGEN_READ_SCM): Renamed from CGEN_MAIN_SCM.

@@ -206,7 +206,13 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
    outs change into ins in different frames.  HAVE_REGISTER_WINDOWS can't
    deal with this case and also handle flat frames at the same time.  */
 
-#define GET_SAVED_REGISTER 1
+#ifdef __STDC__
+struct frame_info;
+enum lval_type;
+#endif
+void sparc_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lvalp));
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+      sparc_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */

@@ -469,7 +469,7 @@ hppa_frame_find_saved_regs PARAMS ((struct frame_info *,
 
 /* Push an empty stack frame, to record the current PC, etc. */
 
-#define PUSH_DUMMY_FRAME push_dummy_frame (&inf_status)
+#define PUSH_DUMMY_FRAME push_dummy_frame (inf_status)
 extern void push_dummy_frame PARAMS ((struct inferior_status *));
 
 /* Discard from the stack the innermost frame, 

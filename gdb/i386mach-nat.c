@@ -44,7 +44,6 @@ fetch_inferior_registers (regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
-  extern char registers[];
 
   registers_fetched ();
 
@@ -73,7 +72,6 @@ store_inferior_registers (regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
-  extern char registers[];
 
   memcpy (&inferior_registers, registers, 20 * 4);
 
@@ -121,7 +119,6 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      CORE_ADDR reg_addr;	/* Unused in this version */
 {
   int val;
-  extern char registers[];
 
   switch (which) {
   case 0:

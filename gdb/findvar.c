@@ -43,6 +43,8 @@ const struct floatformat floatformat_unknown;
 
 static void write_register_gen PARAMS ((int, char *));
 
+static int read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, char *myaddr, struct frame_info *frame));
+
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
 
@@ -252,25 +254,6 @@ store_address (addr, len, val)
      int len;
      LONGEST val;
 {
-  if( TARGET_BYTE_ORDER == BIG_ENDIAN
-      &&  len != sizeof( LONGEST )) {
-    /* On big-endian machines (e.g., HPPA 2.0, narrow mode)
-     * just letting this fall through to the call below will
-     * lead to the wrong bits being stored.
-     *
-     * Only the simplest case is fixed here, the others just
-     * get the old behavior.
-     */
-    if( (len == sizeof( CORE_ADDR ))
-	&&  (sizeof( LONGEST ) == 2 * sizeof( CORE_ADDR ))) {
-      /* Watch out!  The high bits are garbage! */
-      CORE_ADDR coerce[2];
-      *(LONGEST*)&coerce = val;
-
-      store_unsigned_integer (addr, len, coerce[1] ); /* BIG_ENDIAN code! */
-      return;
-    }
-  }
   store_unsigned_integer (addr, len, val);
 }
 
@@ -393,7 +376,6 @@ store_floating (addr, len, val)
     }
 }
 
-#if !defined (GET_SAVED_REGISTER)
 
 /* Return the address in which frame FRAME's value of register REGNUM
    has been saved in memory.  Or return zero if it has not been saved.
@@ -477,7 +459,7 @@ find_saved_register (frame, regnum)
    The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+default_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      char *raw_buffer;
      int *optimized;
      CORE_ADDR *addrp;
@@ -523,7 +505,22 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
   if (addrp != NULL)
     *addrp = addr;
 }
-#endif /* GET_SAVED_REGISTER.  */
+
+#if !defined (GET_SAVED_REGISTER)
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+  default_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
+#endif
+void
+get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
+{
+  GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval);
+}
 
 /* Copy the bytes of register REGNUM, relative to the input stack frame,
    into our memory at MYADDR, in target byte order.
@@ -531,7 +528,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
    Returns 1 if could not be read, 0 if could.  */
 
-int
+static int
 read_relative_register_raw_bytes_for_frame (regnum, myaddr, frame)
      int regnum;
      char *myaddr;
@@ -627,15 +624,14 @@ value_of_register (regnum)
    or it will get garbage.  (a change from GDB version 3, in which
    the caller got the value from the last stop).  */
 
-/* Contents of the registers in target byte order.
-   We allocate some extra slop since we do a lot of memcpy's around 
-   `registers', and failing-soft is better than failing hard.  */
+/* Contents and state of the registers (in target byte order). */
 
-char registers[REGISTER_BYTES + /* SLOP */ 256];
+char *registers;
 
-/* Nonzero if that register has been fetched,
-   -1 if register value not available. */
-SIGNED char register_valid[NUM_REGS];
+/* VALID_REGISTER is non-zero if it has been fetched, -1 if the
+   register value was not available. */
+
+signed char *register_valid;
 
 /* The thread/process associated with the current set of registers.  For now,
    -1 is special, and means `no current process'.  */
@@ -1627,4 +1623,26 @@ locate_var_value (var, frame)
       break;
     }
   return 0;  /* For lint -- never reached */
+}
+
+
+static void build_findvar PARAMS ((void));
+static void
+build_findvar ()
+{
+  /* We allocate some extra slop since we do a lot of memcpy's around
+     `registers', and failing-soft is better than failing hard.  */
+  int sizeof_registers = REGISTER_BYTES + /* SLOP */ 256;
+  int sizeof_register_valid = NUM_REGS * sizeof (*register_valid);
+  registers = xmalloc (sizeof_registers);
+  memset (registers, 0, sizeof_registers);
+  register_valid = xmalloc (sizeof_register_valid);
+  memset (register_valid, 0, sizeof_register_valid);
+}
+
+void _initialize_findvar PARAMS ((void));
+void
+_initialize_findvar ()
+{
+  build_findvar ();
 }

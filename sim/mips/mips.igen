@@ -1551,7 +1551,7 @@
 *vr5000:
 *r3900:
 {
-  GPR[RT] = EXTEND32 (do_load_left (SD_, AccessLength_WORD, GPR[BASE], EXTEND32 (OFFSET), GPR[RT]));
+  GPR[RT] = EXTEND32 (do_load_left (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]));
 }
 
 
@@ -3737,6 +3737,14 @@
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr4100:
 *vr5000:
+
+010000,01000,00000,16.OFFSET:COP0:32::BC0F
+"bc0f <OFFSET>"
+// stub needed for eCos as tx39 hardware bug workaround
+*r3900:
+{
+  /* do nothing */
+}
 
 
 010000,01000,00010,16.OFFSET:COP0:32::BC0FL

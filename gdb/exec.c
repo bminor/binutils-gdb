@@ -191,7 +191,7 @@ exec_file_attach (args, from_tty)
       if (argv == NULL)
 	nomem (0);
 
-      make_cleanup ((make_cleanup_func) freeargv, (char *) argv);
+      make_cleanup_freeargv (argv);
 
       for (; (*argv != NULL) && (**argv == '-'); argv++) {;}
       if (*argv == NULL)

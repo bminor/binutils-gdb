@@ -79,6 +79,9 @@ typedef struct {
   /* This is the argument to bfd_scan_arch.  */
   const char *bfd_name;
 #define MACH_BFD_NAME(m) ((m)->bfd_name)
+  enum mach_attr num;
+#define MACH_NUM(m) ((m)->num)
+
   int word_bitsize;
 #define MACH_WORD_BITSIZE(m) ((m)->word_bitsize)
   int addr_bitsize;

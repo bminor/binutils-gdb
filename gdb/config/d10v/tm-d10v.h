@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Martin Hunt, hunt@cygnus.com */
 
-#define GDB_TARGET_IS_D10V
+/* #define GDB_TARGET_IS_D10V - moved to gdbarch.h */
 
 /* Define the bit, byte, and word ordering of the machine.  */
 
@@ -262,7 +262,7 @@ extern void d10v_frame_find_saved_regs PARAMS ((struct frame_info *, struct fram
 extern void d10v_pop_frame PARAMS ((struct frame_info *frame));
 #define POP_FRAME generic_pop_current_frame (d10v_pop_frame)
 
-#define USE_GENERIC_DUMMY_FRAMES
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -272,15 +272,15 @@ extern void d10v_pop_frame PARAMS ((struct frame_info *frame));
 extern CORE_ADDR d10v_push_return_address PARAMS ((CORE_ADDR pc, CORE_ADDR sp));
 #define PUSH_RETURN_ADDRESS(PC, SP)  d10v_push_return_address (PC, SP)
 
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 /* #define PC_IN_CALL_DUMMY(pc, sp, frame_address) ( pc == IMEM_START + 4 ) */
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
 /* override the default get_saved_register function with one that
    takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER
-#define get_saved_register generic_get_saved_register
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+	generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
     sp = d10v_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))

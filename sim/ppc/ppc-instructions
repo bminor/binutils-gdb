@@ -1440,7 +1440,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
-	/* WITH_OPTION_MPC860C0
+	/* option_mpc860c0:
 	No problem here because this branch is predicted taken (unconditional). */
 	if (AA) NIA = IEA(EXTS(LI_0b00));
 	else    NIA = IEA(CIA + EXTS(LI_0b00));
@@ -1469,9 +1469,8 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	#ifdef WITH_OPTION_MPC860C0
-	if (option_mpc860c0 && (BO{0} && BO{2} || !BO{4})) {
-	  /* This branch is predicted as not-taken.
+	if (option_mpc860c0 && (!BO{0} || !BO{2}) && !BO{4}) {
+	  /* This branch is predicted as "normal".
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
 	  if (succeed && NIA > CIA) {
@@ -1479,7 +1478,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
-	#endif // WITH_OPTION_MPC860C0
 	if (CURRENT_MODEL_ISSUE > 0)
 	  model_branches(cpu_model(processor), succeed, BO);
 	if (! BO{0}) {
@@ -1513,8 +1511,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	#ifdef WITH_OPTION_MPC860C0
-	if (option_mpc860c0 && (BO{0} && BO{2} || !BO{4})) {
+	if (option_mpc860c0 && (!BO{0} || !BO{2}) && !BO{4}) {
 	  /* This branch is predicted as not-taken.
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
@@ -1523,7 +1520,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
-	#endif // WITH_OPTION_MPC860C0
 	if (CURRENT_MODEL_ISSUE > 0) {
 	  model_branches(cpu_model(processor), succeed, BO);
 	  if (! BO{0})
@@ -1546,8 +1542,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	#ifdef WITH_OPTION_MPC860C0
-	if (option_mpc860c0 && (BO{0} && BO{2} || !BO{4})) {
+	if (option_mpc860c0 && (!BO{0} || !BO{2}) && !BO{4}) {
 	  /* This branch is predicted as not-taken.
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
@@ -1556,7 +1551,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
-	#endif // WITH_OPTION_MPC860C0
 	if (CURRENT_MODEL_ISSUE > 0) {
 	  model_branches(cpu_model(processor), succeed, BO);
 	  if (! BO{0})

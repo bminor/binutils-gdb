@@ -315,12 +315,10 @@ program_interrupt(cpu *processor,
       cpu_error(processor, cia, "program interrupt - %s",
 		"illegal instruction (optional instruction not supported)");
       break;
-#ifdef WITH_OPTION_MPC860C0
     case mpc860c0_instruction_program_interrupt:
       cpu_error(processor, cia, "program interrupt - %s",
         	"problematic branch detected, see MPC860 C0 errata");
       break;
-#endif // WITH_OPTION_MPC860C0
     default:
       error("internal error - program_interrupt - reason %d not implemented", reason);
     }
@@ -342,13 +340,11 @@ program_interrupt(cpu *processor,
       case trap_program_interrupt:
 	srr1_set = srr1_trap;
 	break;
-#ifdef WITH_OPTION_MPC860C0
       case mpc860c0_instruction_program_interrupt:
         srr1_set = 0;
-        error(processor, cia, "program interrupt - %s",
+        cpu_error(processor, cia, "program interrupt - %s",
               "problematic branch detected, see MPC860 C0 errata");
         break;
-#endif // WITH_OPTION_MPC860C0
       default:
 	srr1_set = 0;
 	error("internal error - program_interrupt - reason %d not implemented", reason);

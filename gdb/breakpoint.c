@@ -88,8 +88,13 @@ watch_command PARAMS ((char *, int));
 static int
 can_use_hardware_watchpoint PARAMS ((struct value *));
 
+static void break_at_finish_command PARAMS ((char *, int));
+static void break_at_finish_at_depth_command PARAMS ((char *, int));
+
 void
 tbreak_command PARAMS ((char *, int));
+
+static void tbreak_at_finish_command PARAMS ((char *, int));
 
 static void
 break_command_1 PARAMS ((char *, int, int));
@@ -181,6 +186,36 @@ static void rwatch_command PARAMS ((char *, int));
 static void awatch_command PARAMS ((char *, int));
 
 static void do_enable_breakpoint PARAMS ((struct breakpoint *, enum bpdisp));
+
+static void create_solib_load_unload_event_breakpoint PARAMS ((char *hookname, int  tempflag, char *dll_pathname, char *cond_string, enum bptype bp_kind));
+
+static void create_fork_vfork_event_catchpoint PARAMS ((int  tempflag, char *  cond_string, enum bptype bp_kind));
+
+static void break_at_finish_at_depth_command_1 PARAMS ((char *arg, int flag, int from_tty));
+
+static void break_at_finish_command_1 PARAMS ((char *arg, int flag, int from_tty));
+
+static void stop_command PARAMS ((char *arg, int from_tty));
+
+static void stopin_command PARAMS ((char *arg, int from_tty));
+
+static void stopat_command PARAMS ((char *arg, int from_tty));
+
+static char *ep_find_event_name_end PARAMS ((char *arg));
+
+static char *ep_parse_optional_if_clause PARAMS ((char **arg));
+
+static char *ep_parse_optional_filename PARAMS ((char **arg));
+
+static void catch_exec_command_1 PARAMS ((char *arg, int tempflag, int from_tty));
+
+static void create_exception_catchpoint PARAMS ((int tempflag, char *cond_string, enum exception_event_kind ex_event, struct symtab_and_line *sal));
+
+static void catch_exception_command_1 PARAMS ((enum exception_event_kind ex_event, char *arg, int tempflag, int from_tty));
+
+static void tcatch_command PARAMS ((char *arg, int from_tty));
+
+static void ep_skip_leading_whitespace PARAMS ((char **s));
 
 /* Prototypes for exported functions. */
 
@@ -1327,29 +1362,26 @@ int
 frame_in_dummy (frame)
      struct frame_info *frame;
 {
-#ifdef CALL_DUMMY
-#ifdef USE_GENERIC_DUMMY_FRAMES 
-  return generic_pc_in_call_dummy (frame->pc, frame->frame);
-#else
   struct breakpoint *b;
 
+  if (! CALL_DUMMY_P)
+    return 0;
+
+  if (USE_GENERIC_DUMMY_FRAMES)
+    return generic_pc_in_call_dummy (frame->pc, frame->frame, frame->frame);
+  
   ALL_BREAKPOINTS (b)
     {
-      static ULONGEST dummy[] = CALL_DUMMY;
-
       if (b->type == bp_call_dummy
 	  && b->frame == frame->frame
-
 	  /* We need to check the PC as well as the frame on the sparc,
 	     for signals.exp in the testsuite.  */
 	  && (frame->pc
 	      >= (b->address
-		  - sizeof (dummy) / sizeof (LONGEST) * REGISTER_SIZE))
+		  - SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * REGISTER_SIZE))
 	  && frame->pc <= b->address)
 	return 1;
     }
-#endif	/* GENERIC_DUMMY_FRAMES */
-#endif /* CALL_DUMMY */
   return 0;
 }
 
@@ -2932,10 +2964,8 @@ breakpoints_info (bnum_exp, from_tty)
   breakpoint_1 (bnum, 0);
 }
 
-#if MAINTENANCE_CMDS
-
 /* ARGSUSED */
-void
+static void
 maintenance_info_breakpoints (bnum_exp, from_tty)
      char *bnum_exp;
      int from_tty;
@@ -2947,8 +2977,6 @@ maintenance_info_breakpoints (bnum_exp, from_tty)
 
   breakpoint_1 (bnum, 1);
 }
-
-#endif
 
 /* Print a message describing any breakpoints set at PC.  */
 
@@ -3241,11 +3269,11 @@ re_enable_breakpoints_in_shlibs ()
 
 static void
 create_solib_load_unload_event_breakpoint (hookname, tempflag, dll_pathname, cond_string, bp_kind)
-  char *  hookname;
-  int  tempflag;
-  char *  dll_pathname;
-  char *  cond_string;
-  enum bptype  bp_kind;
+     char *hookname;
+     int tempflag;
+     char *dll_pathname;
+     char *cond_string;
+     enum bptype bp_kind;
 {
   struct breakpoint *  b;
   struct symtabs_and_lines sals;
@@ -3351,9 +3379,9 @@ create_solib_unload_event_breakpoint (hookname, tempflag, dll_pathname, cond_str
 
 static void
 create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_kind)
-  int  tempflag;
-  char *  cond_string;
-  enum bptype  bp_kind;
+     int tempflag;
+     char *cond_string;
+     enum bptype bp_kind;
 {
   struct symtab_and_line  sal;
   struct breakpoint *  b;
@@ -4092,7 +4120,7 @@ break_command (arg, from_tty)
   break_command_1 (arg, 0, from_tty);
 }
 
-void
+static void
 break_at_finish_command (arg, from_tty)
      char *arg;
      int from_tty;
@@ -4100,7 +4128,7 @@ break_at_finish_command (arg, from_tty)
   break_at_finish_command_1 (arg, 0, from_tty);
 }
 
-void
+static void
 break_at_finish_at_depth_command (arg, from_tty)
      char *arg;
      int from_tty;
@@ -4116,7 +4144,7 @@ tbreak_command (arg, from_tty)
   break_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
-void
+static void
 tbreak_at_finish_command (arg, from_tty)
      char *arg;
      int from_tty;
@@ -4531,6 +4559,7 @@ struct sal_chain
   struct symtab_and_line sal;
 };
 
+#if 0
 /* Not really used -- invocation in handle_gnu_4_16_catch_command
    had been commented out in the v.4.16 sources, and stays
    disabled there now because "catch NAME" syntax isn't allowed.
@@ -4594,6 +4623,7 @@ map_catch_names (args, function)
       while (*p == ' ' || *p == '\t') p++;
     }
 }
+#endif
 
 /* This shares a lot of code with `print_frame_label_vars' from stack.c.  */
 
@@ -4711,7 +4741,7 @@ get_catch_sals (this_level_only)
 
 static void
 ep_skip_leading_whitespace (s)
-    char **  s;
+     char **s;
 {
    if ((s == NULL) || (*s == NULL))
        return;
@@ -4725,7 +4755,7 @@ ep_skip_leading_whitespace (s)
    the token is returned.  Else, NULL is returned. */
 static char *
 ep_find_event_name_end (arg)
-  char *  arg;
+     char *arg;
 {
   char *  s = arg;
   char *  event_name_end = NULL;
@@ -4758,7 +4788,7 @@ ep_find_event_name_end (arg)
    if clause in the arg string. */
 static char *
 ep_parse_optional_if_clause (arg)
-  char **  arg;
+     char **arg;
 {
   char *  cond_string;
  
@@ -4791,7 +4821,7 @@ ep_parse_optional_if_clause (arg)
    future access should copy it to their own buffers. */
 static char *
 ep_parse_optional_filename (arg)
-  char **  arg;
+     char **arg;
 {
   static char  filename [1024];
   char *  arg_p = *arg;
@@ -4821,12 +4851,14 @@ ep_parse_optional_filename (arg)
  
 typedef enum {catch_fork, catch_vfork} catch_fork_kind;
  
+static void catch_fork_command_1 PARAMS ((catch_fork_kind fork_kind, char *arg, int tempflag, int from_tty));
+
 static void
 catch_fork_command_1 (fork_kind, arg, tempflag, from_tty)
-  catch_fork_kind  fork_kind;
-  char *  arg;
-  int  tempflag;
-  int  from_tty;
+     catch_fork_kind fork_kind;
+     char *arg;
+     int tempflag;
+     int from_tty;
 {
   char *  cond_string = NULL;
  
@@ -4859,9 +4891,9 @@ catch_fork_command_1 (fork_kind, arg, tempflag, from_tty)
 
 static void
 catch_exec_command_1 (arg, tempflag, from_tty)
-  char *  arg;
-  int  tempflag;
-  int  from_tty;
+     char *arg;
+     int tempflag;
+     int from_tty;
 {
   char *  cond_string = NULL;
 
@@ -4979,10 +5011,10 @@ catch_unload_command_1 (arg, tempflag, from_tty)
 
 static void
 create_exception_catchpoint (tempflag, cond_string, ex_event, sal)
-  int tempflag;
-  char * cond_string;
-  enum exception_event_kind ex_event;
-  struct symtab_and_line * sal;
+     int tempflag;
+     char *cond_string;
+     enum exception_event_kind ex_event;
+     struct symtab_and_line *sal;
 {
   struct breakpoint *  b;
   int  i;
@@ -5020,10 +5052,10 @@ create_exception_catchpoint (tempflag, cond_string, ex_event, sal)
 
 static void
 catch_exception_command_1 (ex_event, arg, tempflag, from_tty)
-  enum exception_event_kind ex_event;
-  char *  arg;
-  int  tempflag;
-  int  from_tty;
+     enum exception_event_kind ex_event;
+     char *arg;
+     int tempflag;
+     int from_tty;
 {
   char * cond_string = NULL;
   struct symtab_and_line * sal = NULL;
@@ -6587,8 +6619,6 @@ are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set.", NULL));
 
-#if MAINTENANCE_CMDS
-
   add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints,
 	    concat ("Status of all breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
@@ -6607,8 +6637,6 @@ are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set.", NULL),
 	   &maintenanceinfolist);
-
-#endif	/* MAINTENANCE_CMDS */
 
   add_com ("catch", class_breakpoint, catch_command,
          "Set catchpoints to catch events.\n\

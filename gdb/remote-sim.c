@@ -39,6 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes */
 
+extern int (*ui_loop_hook) PARAMS ((int signo));
+
 static void dump_mem PARAMS ((char *buf, int len));
 
 static void init_callbacks PARAMS ((void));
@@ -478,7 +480,7 @@ gdbsim_create_inferior (exec_file, args, env)
       strcat (arg_buf, " ");
       strcat (arg_buf, args);
       argv = buildargv (arg_buf);
-      make_cleanup ((make_cleanup_func) freeargv, argv);
+      make_cleanup_freeargv (argv);
     }
   else
     argv = NULL;
@@ -559,7 +561,7 @@ gdbsim_open (args, from_tty)
   argv = buildargv (arg_buf);
   if (argv == NULL)
     error ("Insufficient memory available to allocate simulator arg list.");
-  make_cleanup ((make_cleanup_func) freeargv, argv);
+  make_cleanup_freeargv (argv);
 
   init_callbacks ();
   gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, argv);
@@ -668,6 +670,9 @@ static int
 gdb_os_poll_quit (p)
      host_callback *p;
 {
+  if (ui_loop_hook != NULL)
+    ui_loop_hook (0);
+
   notice_quit ();
   if (quit_flag) /* gdb's idea of quit */
     {

@@ -104,15 +104,15 @@ syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
 static void
 setup_int (SIM_CPU *current_cpu, PCADDR pc)
 {
-  USI ssp = a_fr30_h_dr_get (current_cpu, H_DR_SSP);
-  USI ps = a_fr30_h_ps_get (current_cpu);
+  USI ssp = fr30bf_h_dr_get (current_cpu, H_DR_SSP);
+  USI ps = fr30bf_h_ps_get (current_cpu);
 
   ssp -= 4;
   SETMEMSI (current_cpu, pc, ssp, ps);
   ssp -= 4;
   SETMEMSI (current_cpu, pc, ssp, pc + 2);
-  a_fr30_h_dr_set (current_cpu, H_DR_SSP, ssp);
-  a_fr30_h_sbit_set (current_cpu, 0);
+  fr30bf_h_dr_set (current_cpu, H_DR_SSP, ssp);
+  fr30bf_h_sbit_set (current_cpu, 0);
 }
 
 /* Trap support.
@@ -143,9 +143,9 @@ fr30_int (SIM_CPU *current_cpu, PCADDR pc, int num)
 	 We assume there's a branch there to some handler.  */
       USI new_pc;
       setup_int (current_cpu, pc);
-      a_fr30_h_ibit_set (current_cpu, 0);
+      fr30bf_h_ibit_set (current_cpu, 0);
       new_pc = GETMEMSI (current_cpu, pc,
-			 a_fr30_h_dr_get (current_cpu, H_DR_TBR)
+			 fr30bf_h_dr_get (current_cpu, H_DR_TBR)
 			 + 1024 - ((num + 1) * 4));
       return new_pc;
     }
@@ -158,10 +158,10 @@ fr30_int (SIM_CPU *current_cpu, PCADDR pc, int num)
 	CB_SYSCALL s;
 
 	CB_SYSCALL_INIT (&s);
-	s.func = a_fr30_h_gr_get (current_cpu, 0);
-	s.arg1 = a_fr30_h_gr_get (current_cpu, 4);
-	s.arg2 = a_fr30_h_gr_get (current_cpu, 5);
-	s.arg3 = a_fr30_h_gr_get (current_cpu, 6);
+	s.func = fr30bf_h_gr_get (current_cpu, 0);
+	s.arg1 = fr30bf_h_gr_get (current_cpu, 4);
+	s.arg2 = fr30bf_h_gr_get (current_cpu, 5);
+	s.arg3 = fr30bf_h_gr_get (current_cpu, 6);
 
 	if (s.func == TARGET_SYS_exit)
 	  {
@@ -173,9 +173,9 @@ fr30_int (SIM_CPU *current_cpu, PCADDR pc, int num)
 	s.read_mem = syscall_read_mem;
 	s.write_mem = syscall_write_mem;
 	cb_syscall (cb, &s);
-	a_fr30_h_gr_set (current_cpu, 2, s.errcode); /* TODO: check this one */
-	a_fr30_h_gr_set (current_cpu, 4, s.result);
-	a_fr30_h_gr_set (current_cpu, 1, s.result2); /* TODO: check this one */
+	fr30bf_h_gr_set (current_cpu, 2, s.errcode); /* TODO: check this one */
+	fr30bf_h_gr_set (current_cpu, 4, s.result);
+	fr30bf_h_gr_set (current_cpu, 1, s.result2); /* TODO: check this one */
 	break;
       }
 
@@ -188,9 +188,9 @@ fr30_int (SIM_CPU *current_cpu, PCADDR pc, int num)
       {
 	USI new_pc;
 	setup_int (current_cpu, pc);
-	a_fr30_h_ibit_set (current_cpu, 0);
+	fr30bf_h_ibit_set (current_cpu, 0);
 	new_pc = GETMEMSI (current_cpu, pc,
-			   a_fr30_h_dr_get (current_cpu, H_DR_TBR)
+			   fr30bf_h_dr_get (current_cpu, H_DR_TBR)
 			   + 1024 - ((num + 1) * 4));
 	return new_pc;
       }
@@ -209,9 +209,9 @@ fr30_inte (SIM_CPU *current_cpu, PCADDR pc, int num)
      We assume there's a branch there to some handler.  */
   USI new_pc;
   setup_int (current_cpu, pc);
-  a_fr30_h_ilm_set (current_cpu, 4);
+  fr30bf_h_ilm_set (current_cpu, 4);
   new_pc = GETMEMSI (current_cpu, pc,
-		     a_fr30_h_dr_get (current_cpu, H_DR_TBR)
+		     fr30bf_h_dr_get (current_cpu, H_DR_TBR)
 		     + 1024 - ((9 + 1) * 4));
   return new_pc;
 }

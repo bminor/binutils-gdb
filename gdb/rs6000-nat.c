@@ -92,7 +92,6 @@ fetch_inferior_registers (regno)
   int regno;
 {
   int ii;
-  extern char registers[];
 
   if (regno < 0) {			/* for all registers */
 
@@ -152,7 +151,6 @@ void
 store_inferior_registers (regno)
      int regno;
 {
-  extern char registers[];
 
   errno = 0;
 

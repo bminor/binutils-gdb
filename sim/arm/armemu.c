@@ -18,6 +18,7 @@
 
 #include "armdefs.h"
 #include "armemu.h"
+#include "armos.h"
 
 static ARMword GetDPRegRHS(ARMul_State *state, ARMword instr) ;
 static ARMword GetDPSRegRHS(ARMul_State *state, ARMword instr) ;
@@ -42,6 +43,19 @@ static unsigned MultiplyAdd64(ARMul_State *state, ARMword instr,int signextend,i
 #define LSIGNED   (1)   /* signed operation */
 #define LDEFAULT  (0)   /* default : do nothing */
 #define LSCC      (1)   /* set condition codes on result */
+
+#ifdef NEED_UI_LOOP_HOOK
+/* How often to run the ui_loop update, when in use */
+#define UI_LOOP_POLL_INTERVAL 0x32000
+
+/* Counter for the ui_loop_hook update */
+static long ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
+
+/* Actual hook to call to run through gdb's gui event loop */
+extern int (*ui_loop_hook) (int);
+#endif /* NEED_UI_LOOP_HOOK */
+
+extern int stop_simulator;
 
 /***************************************************************************\
 *               short-hand macros for LDR/STR                               *
@@ -2166,10 +2180,20 @@ mainswitch:
              break ;
 
           case 0x7f : /* Load Byte, WriteBack, Pre Inc, Reg */
-             if (BIT(4)) {
-                ARMul_UndefInstr(state,instr) ;
-                break ;
-                }
+             if (BIT(4))
+	       {
+		 /* Check for the special breakpoint opcode.
+		    This value should correspond to the value defined
+		    as ARM_BE_BREAKPOINT in gdb/arm-tdep.c.  */
+		 if (BITS (0,19) == 0xfdefe)
+		   {
+		     if (! ARMul_OSHandleSWI (state, SWI_Breakpoint))
+		       ARMul_Abort (state, ARMul_SWIV);
+		   }
+		 else
+		   ARMul_UndefInstr(state,instr) ;
+		 break ;
+	       }
              UNDEF_LSRBaseEQOffWb ;
              UNDEF_LSRBaseEQDestWb ;
              UNDEF_LSRPCBaseWb ;
@@ -2549,11 +2573,19 @@ mainswitch:
 donext:
 #endif
 
+#ifdef NEED_UI_LOOP_HOOK
+    if (ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
+      {
+	ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
+	ui_loop_hook (0);
+      }
+#endif /* NEED_UI_LOOP_HOOK */
+
     if (state->Emulate == ONCE)
         state->Emulate = STOP;
     else if (state->Emulate != RUN)
         break;
-    } while (1) ; /* do loop */
+    } while (!stop_simulator) ; /* do loop */
 
  state->decoded = decoded ;
  state->loaded = loaded ;

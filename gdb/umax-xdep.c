@@ -44,7 +44,6 @@ core_file_command (filename, from_tty)
      int from_tty;
 {
   int val;
-  extern char registers[];
 
   /* Discard all vestiges of any previous core file
      and mark data and stack spaces as empty.  */

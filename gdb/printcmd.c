@@ -860,7 +860,6 @@ print_command_1 (exp, inspect, voidprint)
 
   if (exp && *exp)
     {
-      extern int objectprint;
       struct type *type;
       expr = parse_expression (exp);
       old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
@@ -1897,10 +1896,9 @@ print_frame_args (func, fi, num, stream)
 
       if (val)
 	{
-#ifdef GDB_TARGET_IS_D10V
-	  if (SYMBOL_CLASS(sym) == LOC_REGPARM && TYPE_CODE(VALUE_TYPE(val)) == TYPE_CODE_PTR)
+	  if (GDB_TARGET_IS_D10V
+	      && SYMBOL_CLASS(sym) == LOC_REGPARM && TYPE_CODE(VALUE_TYPE(val)) == TYPE_CODE_PTR)
 	    TYPE_LENGTH(VALUE_TYPE(val)) = 2;
-#endif
 	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
 	             VALUE_ADDRESS (val),
                    stream, 0, 0, 2, Val_no_prettyprint);

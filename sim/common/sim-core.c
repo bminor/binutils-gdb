@@ -29,13 +29,6 @@
 #include "sim-hw.h"
 #endif
 
-#if (WITH_DEVICES)
-/* TODO: create sim/common/device.h */
-void device_error (device *me, char* message, ...);
-int device_io_read_buffer(device *me, void *dest, int space, address_word addr, unsigned nr_bytes, sim_cpu *processor, sim_cia cia);
-int device_io_write_buffer(device *me, const void *source, int space, address_word addr, unsigned nr_bytes, sim_cpu *processor, sim_cia cia);
-#endif
-
 /* "core" module install handler.
 
    This is called via sim_module_install to install the "core"
@@ -534,6 +527,7 @@ sim_core_read_buffer (SIM_DESC sd,
     if (mapping->device != NULL)
       {
 	int nr_bytes = len - count;
+	sim_cia cia = cpu ? CIA_GET (cpu) : NULL_CIA;
 	if (raddr + nr_bytes - 1> mapping->bound)
 	  nr_bytes = mapping->bound - raddr + 1;
 	if (device_io_read_buffer (mapping->device,
@@ -541,8 +535,9 @@ sim_core_read_buffer (SIM_DESC sd,
 				   mapping->space,
 				   raddr,
 				   nr_bytes, 
+				   sd,
 				   cpu, 
-				   CIA_GET (cpu)) != nr_bytes)
+				   cia) != nr_bytes)
 	  break;
 	count += nr_bytes;
 	continue;
@@ -599,6 +594,7 @@ sim_core_write_buffer (SIM_DESC sd,
 	  && mapping->device != NULL)
 	{
 	  int nr_bytes = len - count;
+	  sim_cia cia = cpu ? CIA_GET (cpu) : NULL_CIA;
 	  if (raddr + nr_bytes - 1 > mapping->bound)
 	    nr_bytes = mapping->bound - raddr + 1;
 	  if (device_io_write_buffer (mapping->device,
@@ -606,8 +602,9 @@ sim_core_write_buffer (SIM_DESC sd,
 				      mapping->space,
 				      raddr,
 				      nr_bytes,
+				      sd,
 				      cpu, 
-				      CIA_GET(cpu)) != nr_bytes)
+				      cia) != nr_bytes)
 	    break;
 	  count += nr_bytes;
 	  continue;

@@ -585,6 +585,12 @@ write_icr (struct hw *me,
 		     group->gid, val));
 	  group->request &= ~EXTRACT_ID (val);
 	  break;
+	  /* Special backdoor access to SYSEF flag from CPU.  See
+             interp.c:program_interrupt(). */
+	case 3:
+	  HW_TRACE ((me, "write-icr-special group=%d:0 nmi 0x%02x",
+		     group->gid, val));
+	  group->request |= EXTRACT_ID (val);
 	default:
 	  break;
 	}
@@ -815,6 +821,7 @@ mn103int_ioctl(struct hw *me,
   struct mn103int *controller = (struct mn103int *)hw_data(me);
   controller->group[0].request = EXTRACT_ID(4);
   mn103int_port_event(me, 2 /* nmi_port(syserr) */, NULL, 0, 0);
+  return 0;
 }
 
 

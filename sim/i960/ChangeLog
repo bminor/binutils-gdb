@@ -1,3 +1,51 @@
+Fri Apr 16 16:50:31 1999  Doug Evans  <devans@charmed.cygnus.com>
+
+	* devices.c (device_io_read_buffer): New arg `sd'.
+	(device_io_write_buffer): New arg `sd'.
+	(device_error): Give proper arg spec.
+
+1999-04-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* i960-desc.c,i960-desc.h: Rebuild.
+
+Sun Apr 11 00:25:17 1999  Jim Wilson  <wilson@cygnus.com>
+
+	* TODO: Document more toolchain problems.
+	* cpu.h, decode.c, model.c, sem-switch.c, sem.c: Rebuild.
+
+1999-04-10  Doug Evans  <devans@casey.cygnus.com>
+
+	* cpu.h,decode.c,sem-switch.c,sem.c: Rebuild.
+
+Fri Apr  9 19:30:05 1999  Jim Wilson  <wilson@cygnus.com>
+
+	* README, TODO: Clean up and update.
+	* sim-if.c: s/m32r/i960.  s/sparc32/i960.
+	* decode.c, decode.h, i960-desc.c, i960-desc.h, i960-opc.h, model.c,
+	sem-switch.c, sem.c: Rebuild.
+
+1999-03-27  Doug Evans  <devans@casey.cygnus.com>
+
+	* decode.c: Rebuild.
+
+1999-03-22  Doug Evans  <devans@casey.cygnus.com>
+
+	* arch.c,arch.h,model.c,i960-desc.c,i960-desc.h,i960-opc.h: Rebuild.
+	* i960-sim.h (a_i960_h_gr_get,a_i960_h_gr_set): Declare.
+	(a_i960_h_pc_get,a_i960_h_pc_set): Declare.
+	* i960.c (a_i960_h_gr_get,a_i960_h_gr_set): New functions.
+	(a_i960_h_pc_get,a_i960_h_pc_set): Ditto.
+	* sim-if.c (sim_open): Update call to i960_cgen_cpu_open.
+
+1999-03-11  Doug Evans  <devans@casey.cygnus.com>
+
+	* arch.c,arch.h,cpu.c,i960-desc.c,i960-desc.h: Rebuild.
+	* sim-if.c (sim_open): Update call to i960_cgen_cpu_open.
+
+1999-02-25  Doug Evans  <devans@casey.cygnus.com>
+
+	* i960-desc.c,i960-desc.h: Rebuild.
+
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in (I960_OBJS): Add i960-desc.o.

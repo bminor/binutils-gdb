@@ -23,6 +23,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+if { [skip_hp_tests] } then { continue }
+
 set prms_id 0
 set bug_id 0
 
@@ -36,7 +38,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 if [get_compiler_info ${binfile}] {
     return -1;
 }
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+if { $gcc_compiled } then { continue }
 
 # Prepare for watchpoint tests by setting up two breakpoints and one
 # watchpoint.

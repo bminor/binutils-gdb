@@ -300,7 +300,7 @@ dosasync_write (fd, buf, len)
   ((short *)dummy)[3] = 0;
   for (i = 0; i < len ; i++) 
     {
-      dummy[8 + i ^ 1] = buf[i];
+      dummy[(8 + i) ^ 1] = buf[i];
     }
 
   /* Wait for the card to get ready */

@@ -33,33 +33,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern BI fr30bf_h_sbit_get_handler (SIM_CPU *);
 extern void fr30bf_h_sbit_set_handler (SIM_CPU *, BI);
-#define GET_H_SBIT() fr30bf_h_sbit_get_handler (current_cpu)
-#define SET_H_SBIT(val) fr30bf_h_sbit_set_handler (current_cpu, (val))
 
 extern UQI fr30bf_h_ccr_get_handler (SIM_CPU *);
 extern void fr30bf_h_ccr_set_handler (SIM_CPU *, UQI);
-#define GET_H_CCR() fr30bf_h_ccr_get_handler (current_cpu)
-#define SET_H_CCR(val) fr30bf_h_ccr_set_handler (current_cpu, (val))
 
 extern UQI fr30bf_h_scr_get_handler (SIM_CPU *);
 extern void fr30bf_h_scr_set_handler (SIM_CPU *, UQI);
-#define GET_H_SCR() fr30bf_h_scr_get_handler (current_cpu)
-#define SET_H_SCR(val) fr30bf_h_scr_set_handler (current_cpu, (val))
 
 extern UQI fr30bf_h_ilm_get_handler (SIM_CPU *);
 extern void fr30bf_h_ilm_set_handler (SIM_CPU *, UQI);
-#define GET_H_ILM() fr30bf_h_ilm_get_handler (current_cpu)
-#define SET_H_ILM(val) fr30bf_h_ilm_set_handler (current_cpu, (val))
 
 extern USI fr30bf_h_ps_get_handler (SIM_CPU *);
 extern void fr30bf_h_ps_set_handler (SIM_CPU *, USI);
-#define GET_H_PS() fr30bf_h_ps_get_handler (current_cpu)
-#define SET_H_PS(val) fr30bf_h_ps_set_handler (current_cpu, (val))
 
 extern SI fr30bf_h_dr_get_handler (SIM_CPU *, UINT);
 extern void fr30bf_h_dr_set_handler (SIM_CPU *, UINT, SI);
-#define GET_H_DR(regno) fr30bf_h_dr_get_handler (current_cpu, (regno))
-#define SET_H_DR(regno, val) fr30bf_h_dr_set_handler (current_cpu, (regno), (val))
 
 #define GETTWI GETTSI
 #define SETTWI SETTSI

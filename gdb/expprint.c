@@ -497,8 +497,6 @@ op_string(op)
   return NULL;
 }
 
-#ifdef MAINTENANCE_CMDS
-
 /* Support for dumping the raw data from expressions in a human readable
    form.  */
 
@@ -899,5 +897,3 @@ dump_postfix_expression (exp, stream, note)
     elt = dump_subexp (exp, stream, elt);
   fputs_filtered ("\n", stream);
 }
-
-#endif	/* MAINTENANCE_CMDS */

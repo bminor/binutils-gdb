@@ -870,19 +870,6 @@ mn10200_frame_saved_pc (fi)
   return (read_memory_integer (fi->frame, REGISTER_SIZE) & 0xffffff);
 }
 
-void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-     char *raw_buffer;
-     int *optimized;
-     CORE_ADDR *addrp;
-     struct frame_info *frame;
-     int regnum;
-     enum lval_type *lval;
-{
-  generic_get_saved_register (raw_buffer, optimized, addrp, 
-			      frame, regnum, lval);
-}
-
 /* Function: init_extra_frame_info
    Setup the frame's frame pointer, pc, and frame addresses for saved
    registers.  Most of the work is done in mn10200_analyze_prologue().

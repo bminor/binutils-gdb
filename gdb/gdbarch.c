@@ -18,9 +18,23 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "bfd.h"
-#include "gdbcmd.h"
 
+/* Just include everything in sight so that the every old definition
+   of macro is visible. */
+#include "gdb_string.h"
+#include <ctype.h>
+#include "symtab.h"
+#include "frame.h"
+#include "inferior.h"
+#include "breakpoint.h"
+#include "wait.h"
+#include "gdbcore.h"
+#include "gdbcmd.h"
+#include "target.h"
+#include "gdbthread.h"
+#include "annotate.h"
+#include "symfile.h"		/* for overlay functions */
+#include "symcat.h"
 
 
 /* Non-zero if we want to trace architecture code.  */
@@ -40,6 +54,7 @@ int gdbarch_debug = GDBARCH_DEBUG;
 #define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
 #endif
 #endif
+#if !TARGET_BYTE_ORDER_SELECTABLE_P
 #ifndef TARGET_BYTE_ORDER_DEFAULT
 /* compat - Catch old non byte-order selectable targets that do not
    define TARGET_BYTE_ORDER_DEFAULT and instead expect
@@ -47,6 +62,10 @@ int gdbarch_debug = GDBARCH_DEBUG;
    defined neither TARGET_BYTE_ORDER nor TARGET_BYTE_ORDER_DEFAULT the
    below will get a strange compiler warning. */
 #define TARGET_BYTE_ORDER_DEFAULT TARGET_BYTE_ORDER
+#endif
+#endif
+#ifndef TARGET_BYTE_ORDER_DEFAULT
+#define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN /* arbitrary */
 #endif
 int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
 int target_byte_order_auto = 1;
@@ -177,20 +196,37 @@ const struct bfd_arch_info *target_architecture = &bfd_default_arch_struct;
 int (*target_architecture_hook) PARAMS ((const struct bfd_arch_info *ap));
 
 /* Do the real work of changing the current architecture */
+enum set_arch { set_arch_auto, set_arch_manual };
 static void
-set_arch (arch)
+set_arch (arch, type)
      const struct bfd_arch_info *arch;
+     enum set_arch type;
 {
-  /* FIXME: Is it compatible with gdb? */
-  /* Check with the target on the setting */
-  if (target_architecture_hook != NULL
-      && !target_architecture_hook (arch))
-    printf_unfiltered ("Target does not support `%s' architecture.\n",
-		       arch->printable_name);
-  else
+  /* FIXME: Should be performing the more basic check that the binary
+     is compatible with GDB. */
+  /* Check with the target that the architecture is valid. */
+  int arch_valid = (target_architecture_hook != NULL
+		    && !target_architecture_hook (arch));
+  switch (type)
     {
-      target_architecture_auto = 0;
+    case set_arch_auto:
+      if (!arch_valid)
+	warning ("Target may not support %s architecture",
+		 arch->printable_name);
       target_architecture = arch;
+      break;
+    case set_arch_manual:
+      if (!arch_valid)
+	{
+	  printf_unfiltered ("Target does not support `%s' architecture.\n",
+			     arch->printable_name);
+	}
+      else
+	{
+	  target_architecture_auto = 0;
+	  target_architecture = arch;
+	}
+      break;
     }
 }
 
@@ -229,7 +265,7 @@ set_architecture (args, from_tty)
     {
       const struct bfd_arch_info *arch = bfd_scan_arch (args);
       if (arch != NULL)
-	set_arch (arch);
+	set_arch (arch, set_arch_manual);
       else
 	printf_unfiltered ("Architecture `%s' not reconized.\n", args);
     }
@@ -268,7 +304,7 @@ set_architecture_from_arch_mach (arch, mach)
 {
   const struct bfd_arch_info *wanted = bfd_lookup_arch (arch, mach);
   if (wanted != NULL)
-    set_arch (wanted);
+    set_arch (wanted, set_arch_manual);
   else
     fatal ("hardwired architecture/machine not reconized");
 }
@@ -282,11 +318,7 @@ set_architecture_from_file (abfd)
   const struct bfd_arch_info *wanted = bfd_get_arch_info (abfd);
   if (target_architecture_auto)
     {
-      if (target_architecture_hook != NULL
-	  && !target_architecture_hook (wanted))
-	warning ("Target may not support %s architecture",
-		 wanted->printable_name);
-      target_architecture = wanted;
+      set_arch (wanted, set_arch_auto);
     }
   else if (wanted != target_architecture)
     {
@@ -316,6 +348,13 @@ set_gdbarch_from_file (abfd)
   set_architecture_from_file (abfd);
   set_endian_from_file (abfd);
 }
+
+
+#if defined (CALL_DUMMY)
+/* FIXME - this should go away */
+LONGEST call_dummy_words[] = CALL_DUMMY;
+int sizeof_call_dummy_words = sizeof (call_dummy_words);
+#endif
 
 
 extern void _initialize_gdbarch PARAMS ((void));
@@ -348,7 +387,6 @@ _initialize_gdbarch ()
   tm_print_insn_info.memory_error_func = dis_asm_memory_error;
   tm_print_insn_info.print_address_func = dis_asm_print_address;
 
-#ifdef MAINTENANCE_CMDS
   add_show_from_set (add_set_cmd ("archdebug",
 				  class_maintenance,
 				  var_zinteger,
@@ -356,5 +394,4 @@ _initialize_gdbarch ()
 				  "Set architecture debugging.\n\
 When non-zero, architecture debugging is enabled.", &setlist),
 		     &showlist);
-#endif
 }

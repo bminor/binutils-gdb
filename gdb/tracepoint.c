@@ -641,7 +641,8 @@ map_args_over_tracepoints (args, from_tty, opcode)
     while (*args)
       {
 	QUIT;		/* give user option to bail out with ^C */
-	if (t = get_tracepoint_by_number (&args))
+	t = get_tracepoint_by_number (&args);
+	if (t)
 	  tracepoint_operation (t, from_tty, opcode);
 	while (*args == ' ' || *args == '\t')
 	  args++;
@@ -783,7 +784,8 @@ trace_actions_command (args, from_tty)
   char tmpbuf[128];
   char *end_msg = "End with a line saying just \"end\".";
 
-  if (t = get_tracepoint_by_number (&args))
+  t = get_tracepoint_by_number (&args);
+  if (t)
     {
       sprintf (tmpbuf, "Enter actions for tracepoint %d, one per line.",
 	       t->number);
@@ -865,28 +867,32 @@ read_actions (t)
 	}
 
       if (linetype == STEPPING)	/* begin "while-stepping" */
-	if (prompt == prompt2)
-	  {
-	    warning ("Already processing 'while-stepping'");
-	    continue;
-	  }
-	else
-	  prompt = prompt2;	/* change prompt for stepping actions */
+	{
+	  if (prompt == prompt2)
+	    {
+	      warning ("Already processing 'while-stepping'");
+	      continue;
+	    }
+	  else
+	    prompt = prompt2;	/* change prompt for stepping actions */
+	}
       else if (linetype == END)
-	if (prompt == prompt2)
-	  {
-	    prompt = prompt1;	/* end of single-stepping actions */
-	  }
-	else
-	  { /* end of actions */
-	    if (t->actions->next == NULL)
-	      {
-		/* an "end" all by itself with no other actions means
-		   this tracepoint has no actions.  Discard empty list. */
-		free_actions (t);
-	      }
-	    break;
-	  }
+	{
+	  if (prompt == prompt2)
+	    {
+	      prompt = prompt1;	/* end of single-stepping actions */
+	    }
+	  else
+	    { /* end of actions */
+	      if (t->actions->next == NULL)
+		{
+		  /* an "end" all by itself with no other actions means
+		     this tracepoint has no actions.  Discard empty list. */
+		  free_actions (t);
+		}
+	      break;
+	    }
+	}
     }
 #ifdef STOP_SIGNAL
   if (job_control)
@@ -954,19 +960,21 @@ validate_actionline (line, t)
                                   &exp);
 
 	if (exp->elts[0].opcode == OP_VAR_VALUE)
-	  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
-	    {
-	      warning ("%s is constant (value %d): will not be collected.",
-		       SYMBOL_NAME (exp->elts[2].symbol),
-		       SYMBOL_VALUE (exp->elts[2].symbol));
-	      return BADLINE;
-	    }
-	  else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
-	    {
-	      warning ("%s is optimized away and cannot be collected.",
-		       SYMBOL_NAME (exp->elts[2].symbol));
-	      return BADLINE;
-	    }
+	  {
+	    if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
+	      {
+		warning ("%s is constant (value %d): will not be collected.",
+			 SYMBOL_NAME (exp->elts[2].symbol),
+			 SYMBOL_VALUE (exp->elts[2].symbol));
+		return BADLINE;
+	      }
+	    else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
+	      {
+		warning ("%s is optimized away and cannot be collected.",
+			 SYMBOL_NAME (exp->elts[2].symbol));
+		return BADLINE;
+	      }
+	  }
 
 	/* we have something to collect, make sure that the expr to
 	   bytecode translator can handle it and that it's not too long */

@@ -51,7 +51,6 @@ fill_gregset (gregsetp, regno)
      int regno;
 {
   int regi;
-  extern char registers[];
 
   for (regi = 0 ; regi < NUM_REGS ; regi++)
     {
@@ -89,7 +88,6 @@ fill_fpregset (fpregsetp, regno)
   int regi;
   char *to;
   char *from;
-  extern char registers[];
 
   /* FIXME: see m68k-tdep.c for an example, for the m68k. */
 }

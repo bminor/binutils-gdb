@@ -25,6 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef __CYGWIN32__
 #include <netinet/tcp.h>
@@ -32,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "signals.h"
 #include "gdb_string.h"
+
+extern int (*ui_loop_hook) PARAMS ((int));
 
 struct tcp_ttystate
 {
@@ -234,11 +239,54 @@ tcp_readchar (scb, timeout)
      int timeout;
 {
   int status;
+  int delta;
 
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;
 
-  status = wait_for(scb, timeout);
+  /* We have to be able to keep the GUI alive here, so we break the original
+     timeout into steps of 1 second, running the "keep the GUI alive" hook 
+     each time through the loop.
+
+     Also, timeout = 0 means to poll, so we just set the delta to 0, so we
+     will only go through the loop once. */
+   
+  delta = (timeout == 0 ? 0 : 1);
+  while (1)
+    {
+
+      /* N.B. The UI may destroy our world (for instance by calling
+	 remote_stop,) in which case we want to get out of here as
+	 quickly as possible.  It is not safe to touch scb, since
+	 someone else might have freed it.  The ui_loop_hook signals that 
+	 we should exit by returning 1. */
+
+      if (ui_loop_hook)
+	{
+	  if (ui_loop_hook (0))
+	    return SERIAL_TIMEOUT;
+	}
+
+      status = wait_for (scb, delta);
+      timeout -= delta;
+
+      /* If we got a character or an error back from wait_for, then we can 
+         break from the loop before the timeout is completed. */
+      
+      if (status != SERIAL_TIMEOUT)
+	{
+	  break;
+	}
+
+      /* If we have exhausted the original timeout, then generate
+	 a SERIAL_TIMEOUT, and pass it out of the loop. */
+      
+      else if (timeout == 0)
+	{
+	  status == SERIAL_TIMEOUT;
+	  break;
+	}
+    }
 
   if (status < 0)
     return status;

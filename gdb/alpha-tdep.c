@@ -154,8 +154,14 @@ struct linked_proc_info
    think this will be a problem in praxis, though.
 */
 
+#ifndef TM_LINUXALPHA_H
+/* HACK: Provide a prototype when compiling this file for non
+   linuxalpha targets. */
+long alpha_linux_sigtramp_offset PARAMS ((CORE_ADDR pc));
+#endif
 long
-alpha_linux_sigtramp_offset (CORE_ADDR pc)
+alpha_linux_sigtramp_offset (pc)
+     CORE_ADDR pc;
 {
   unsigned int i[3], w;
   long off;
@@ -903,7 +909,7 @@ alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int struct_return;
      CORE_ADDR struct_addr;
 {
-  register i;
+  int i;
   int accumulate_size = struct_return ? 8 : 0;
   int arg_regs_size = ALPHA_NUM_ARG_REGS * 8;
   struct alpha_arg { char *contents; int len; int offset; };
@@ -1209,18 +1215,21 @@ alpha_skip_prologue (pc, lenient)
 	    continue;
 	if ((inst & 0xffff0000) == 0x23de0000)	/* lda $sp,n($sp) */
 	    continue;
-	else if ((inst & 0xfc1f0000) == 0xb41e0000
-		 && (inst & 0xffff0000) != 0xb7fe0000)
+	if ((inst & 0xffe01fff) == 0x43c0153e)  /* subq $sp,n,$sp */
+	    continue;
+
+	if ((inst & 0xfc1f0000) == 0xb41e0000
+	    && (inst & 0xffff0000) != 0xb7fe0000)
 	    continue;				/* stq reg,n($sp) */
 						/* reg != $zero */
-	else if ((inst & 0xfc1f0000) == 0x9c1e0000
-		 && (inst & 0xffff0000) != 0x9ffe0000)
+	if ((inst & 0xfc1f0000) == 0x9c1e0000
+	    && (inst & 0xffff0000) != 0x9ffe0000)
 	    continue;				/* stt reg,n($sp) */
 						/* reg != $zero */
-	else if (inst == 0x47de040f)		/* bis sp,sp,fp */
+	if (inst == 0x47de040f)			/* bis sp,sp,fp */
 	    continue;
-	else
-	    break;
+
+	break;
     }
     return pc + offset;
 }
@@ -1383,6 +1392,7 @@ alpha_call_dummy_address ()
     return SYMBOL_VALUE_ADDRESS (sym) + 4;
 }
 
+void _initialize_alpha_tdep PARAMS ((void));
 void
 _initialize_alpha_tdep ()
 {

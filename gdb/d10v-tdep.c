@@ -552,6 +552,45 @@ d10v_push_return_address (pc, sp)
 }
  
 
+/* When arguments must be pushed onto the stack, they go on in reverse
+   order.  The below implements a FILO (stack) to do this. */
+
+struct stack_item
+{
+  int len;
+  struct stack_item *prev;
+  void *data;
+};
+
+static struct stack_item *push_stack_item PARAMS ((struct stack_item *prev, void *contents, int len));
+static struct stack_item *
+push_stack_item (prev, contents, len)
+     struct stack_item *prev;
+     void *contents;
+     int len;
+{
+  struct stack_item *si;
+  si = xmalloc (sizeof (struct stack_item));
+  si->data = xmalloc (len);
+  si->len = len;
+  si->prev = prev;
+  memcpy (si->data, contents, len);
+  return si;
+}
+
+static struct stack_item *pop_stack_item PARAMS ((struct stack_item *si));
+static struct stack_item *
+pop_stack_item (si)
+     struct stack_item *si;
+{
+  struct stack_item *dead = si;
+  si = si->prev;
+  free (dead->data);
+  free (dead);
+  return si;
+}
+
+
 CORE_ADDR
 d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
@@ -562,6 +601,7 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 {
   int i;
   int regnum = ARG1_REGNUM;
+  struct stack_item *si = NULL;
   
   /* Fill in registers and arg lists */
   for (i = 0; i < nargs; i++)
@@ -598,9 +638,9 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	  else
 	    {
 	      char ptr[2];
-	      sp -= 2;
+	      /* arg will go onto stack */
 	      store_address (ptr, val & 0xffff, 2);
-	      write_memory (sp, ptr, 2);
+	      si = push_stack_item (si, ptr, 2);
 	    }
 	}
       else
@@ -631,13 +671,20 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	    }
 	  else
 	    {
-	      /* arg goes straight on stack */
-	      regnum = ARGN_REGNUM + 1;
-	      sp = (sp - len) & ~1;
-	      write_memory (sp, contents, len);
+	      /* arg will go onto stack */
+	      regnum = ARGN_REGNUM + 1; 
+	      si = push_stack_item (si, contents, len);
 	    }
 	}
     }
+
+  while (si)
+    {
+      sp = (sp - si->len) & ~1;
+      write_memory (sp, si->data, si->len);
+      si = pop_stack_item (si);
+    }
+  
   return sp;
 }
 

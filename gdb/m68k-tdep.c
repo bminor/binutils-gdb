@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "value.h"
 #include "gdb_string.h"
+#include "inferior.h"
 
 
 /* Push an empty stack frame, to record the current PC, etc.  */
@@ -372,7 +373,6 @@ int regno;
 {
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
-  extern char registers[];
 
   for (regi = 0 ; regi < R_PC ; regi++)
     {
@@ -427,7 +427,6 @@ int regno;
   int regi;
   char *to;
   char *from;
-  extern char registers[];
 
   for (regi = FP0_REGNUM ; regi < FPC_REGNUM ; regi++)
     {

@@ -581,7 +581,8 @@ pop_frame ()
   get_frame_saved_regs (current_fi, &fsr);
   for (i = G0_REGNUM; i < G14_REGNUM; i++)
     {
-      if (save_addr = fsr.regs[i])
+      save_addr = fsr.regs[i];
+      if (save_addr != 0)
 	write_register (i, read_memory_integer (save_addr, 4));
     }
 

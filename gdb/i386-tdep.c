@@ -56,6 +56,12 @@ static char *valid_flavors[] = {
 };
 static char *disassembly_flavor = att_flavor;
 
+/* This is used to keep the bfd arch_info in sync with the disassembly flavor.  */
+static void set_disassembly_flavor_sfunc PARAMS ((char *, int, struct cmd_list_element *));
+static void set_disassembly_flavor ();
+
+void (*disassembly_flavor_hook) PARAMS((char *args, int from_tty));
+
 /* Stdio style buffering was used to minimize calls to ptrace, but this
    buffering did not take into account that the code section being accessed
    may not be an even number of buffers long (even if the buffer is only
@@ -366,7 +372,7 @@ i386_frame_num_args (fi)
        nameless arguments.  */
     return -1;
 
-  pfi = get_prev_frame_info (fi);			
+  pfi = get_prev_frame (fi);			
   if (pfi == 0)
     {
       /* Note:  this can happen if we are looking at the frame for
@@ -772,23 +778,58 @@ gdb_print_insn_i386 (memaddr, info)
     return print_insn_i386_att (memaddr, info);
   else if (disassembly_flavor == intel_flavor)
     return print_insn_i386_intel (memaddr, info);
+  /* Never reached - disassembly_flavour is always either att_flavor
+     or intel_flavor */
+  abort ();
+}
+
+/* If the disassembly mode is intel, we have to also switch the
+   bfd mach_type.  This function is run in the set disassembly_flavor
+   command, and does that.  */
+
+static void
+set_disassembly_flavor_sfunc (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  set_disassembly_flavor ();
+  
+  if (disassembly_flavor_hook != NULL)
+    disassembly_flavor_hook(args, from_tty);
+}
+
+static void
+set_disassembly_flavor ()
+{
+  if (disassembly_flavor == att_flavor)
+    set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386);
+  else if (disassembly_flavor == intel_flavor)
+    set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386_intel_syntax);
 }
 
 void
 _initialize_i386_tdep ()
 {
+  struct cmd_list_element *new_cmd;
+  
   tm_print_insn = gdb_print_insn_i386;
   tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 0)->mach;
 
   /* Add the variable that controls the disassembly flavor */
-  add_show_from_set(
-	    add_set_enum_cmd ("disassembly-flavor", no_class,
+
+  new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
 				  valid_flavors,
 				  (char *) &disassembly_flavor,
 				  "Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
 and the default value is \"att\".",
-				  &setlist),
-	    &showlist);
+				  &setlist);
+  new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
+  add_show_from_set(new_cmd, &showlist);
+  
+  /* Finally, initialize the disassembly flavor to the default given
+     in the disassembly_flavor variable */
 
+  set_disassembly_flavor ();
   
 }

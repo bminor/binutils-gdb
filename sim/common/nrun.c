@@ -206,9 +206,3 @@ usage ()
   fprintf (stderr, "Run `%s --help' for full list of options.\n", myname);
   exit (1);
 }
-
-
-#ifdef __CYGWIN32__
-/* no-op GUI update hook for standalone sim */
-void (*ui_loop_hook) PARAMS ((int)) = NULL;
-#endif

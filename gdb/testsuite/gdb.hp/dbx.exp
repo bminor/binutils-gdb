@@ -22,6 +22,7 @@ if $tracelevel then {
         strace $tracelevel
 }
 
+if { [skip_hp_tests] } then { continue }
 
 set testfile1 "average"
 set testfile2 "sum"
@@ -47,7 +48,7 @@ if  { [gdb_compile "${binfile1}.o ${binfile2}.o" ${binfile} executable {debug}] 
 if [get_compiler_info ${binfile}] {
     return -1;
 }
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+if { $gcc_compiled } then { continue }
 
 proc dbx_reinitialize_dir { subdir } {
     global gdb_prompt

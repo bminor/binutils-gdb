@@ -262,8 +262,6 @@ print_type_scalar (type, val, stream)
   gdb_flush (stream);
 }
 
-#if MAINTENANCE_CMDS
-
 /* Dump details of a type specified either directly or indirectly.
    Uses the same sort of type lookup mechanism as ptype_command()
    and whatis_command(). */
@@ -301,8 +299,6 @@ maintenance_print_type (typename, from_tty)
     do_cleanups (old_chain);
   }
 }
-
-#endif	/* MAINTENANCE_CMDS */
 
 
 void

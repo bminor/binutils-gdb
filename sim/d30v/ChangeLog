@@ -1,3 +1,16 @@
+1999-03-16  Martin Hunt  <hunt@cygnus.com>
+	From Frank Ch. Eigler  <fche@cygnus.com>
+
+        * cpu.h (mvtsys_left_p): New flag for MVTSYS instruction history.
+        * d30v-insns (mvtsys): Set this flag instead of left_kills_right_p.
+        (do_sath): Detect MVTSYS by new flag.
+        * engine.c (unqueue_writes): Detect MVTSYS by new flag.
+        (do_2_short, do_parallel): Initialize new flag.
+       
+1999-02-26  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* tconfig.in (SIM_HANDLES_LMA): Make it so.
+
 1999-01-12  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* engine.c (unqueue_writes): Make PSW conflict resolution code

@@ -176,13 +176,10 @@ typedef struct {
 } ExportEntry;
 
 
-
 /* The "objstats" structure provides a place for gdb to record some
    interesting information about its internal state at runtime, on a
    per objfile basis, such as information about the number of symbols
    read, size of string table (if any), etc. */
-
-#if MAINTENANCE_CMDS
 
 struct objstats {
   int n_minsyms;	/* Number of minimal symbols read */
@@ -197,13 +194,6 @@ struct objstats {
 #define OBJSTATS struct objstats stats
 extern void print_objfile_statistics PARAMS ((void));
 extern void print_symbol_bcache_statistics PARAMS ((void));
-
-#else
-
-#define OBJSTAT(objfile, expr)	/* Nothing */
-#define OBJSTATS		/* Nothing */
-
-#endif	/* MAINTENANCE_CMDS */
 
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.

@@ -336,7 +336,9 @@ proc test_handle_all_print {} {
     set oldtimeout $timeout
     set timeout [expr "$timeout + 360"]
     verbose "Timeout is now $timeout seconds" 2
-    if { [istarget "*-*-gnu*"] || [istarget "*-*-mach*"] } {
+    if { ![istarget "*-*-linux*"]
+         && ( [istarget "*-*-gnu*"]
+              || [istarget "*-*-mach*"] ) } {
 	gdb_test "handle all print" "Signal\[ 	\]+Stop\[ 	\]+Print\[ 	\]+Pass to program\[ 	\]+Description\r\nSIGHUP\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Hangup.*SIG63\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Real-time event 63.*EXC_BREAKPOINT\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Breakpoint"
     } else {
 	gdb_test "handle all print" "Signal\[ 	\]+Stop\[ 	\]+Print\[ 	\]+Pass to program\[ 	\]+Description\r\nSIGHUP\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Hangup.*SIG63\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Real-time event 63"

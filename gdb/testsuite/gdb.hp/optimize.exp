@@ -29,6 +29,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+if { [skip_hp_tests] } then { continue }
+
 set testfile optimize
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
@@ -38,7 +40,7 @@ if [get_compiler_info ${binfile}] {
 }
 
  
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+if { $gcc_compiled } then { continue }
 
 
 # Vanilla -O, which is the same as +O2

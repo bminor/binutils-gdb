@@ -750,22 +750,6 @@ h8300_store_return_value (type, valbuf)
   }
 }
 
-/* Function: get_saved_register
-   Just call the generic_get_saved_register function.  */
-
-void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-     char *raw_buffer;
-     int *optimized;
-     CORE_ADDR *addrp;
-     struct frame_info *frame;
-     int regnum;
-     enum lval_type *lval;
-{
-  generic_get_saved_register (raw_buffer, optimized, addrp, 
-			      frame, regnum, lval);
-}
-
 struct cmd_list_element *setmemorylist;
 
 static void

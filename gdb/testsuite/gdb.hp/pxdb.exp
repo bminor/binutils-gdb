@@ -31,6 +31,8 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+if { [skip_hp_tests] } then { continue }
+
 set testfile pxdb
 set srcfile ${testfile}.c
 set objfile ${objdir}/${subdir}/${testfile}.o
@@ -39,9 +41,8 @@ set binfile ${objdir}/${subdir}/${testfile}
 if [get_compiler_info ${binfile} "c++"] {
     return -1;
 }
- 
- 
-if {[skip_hp_tests $gcc_compiled]} then { continue }
+
+if { $gcc_compiled } then { continue }
 
 # To build a non-pxdb-ed file, use
 #

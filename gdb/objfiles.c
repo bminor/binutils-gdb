@@ -35,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "obstack.h"
 #include "gdb_string.h"
 
+#include "breakpoint.h"
+
 /* Prototypes for local functions */
 
 #if defined(USE_MMALLOC) && defined(HAVE_MMAP)

@@ -3048,7 +3048,7 @@ the derivation of this class is encoded as follows.
 @node Virtual Base Classes
 @section Virtual Base Classes
 
-A derived class object consists of a concatination in memory of the data
+A derived class object consists of a concatenation in memory of the data
 areas defined by each base class, starting with the leftmost and ending
 with the rightmost in the list of base classes.  The exception to this
 rule is for virtual inheritence.  In the example above, class @code{D}

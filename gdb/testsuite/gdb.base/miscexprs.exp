@@ -114,18 +114,24 @@ gdb_expect {
 
 send_gdb "print &sbig.s\[0\]\n"
 gdb_expect {
+    -re ".\[0-9\]* = \\(short \\*\\) $hex.*$gdb_prompt $" {
+        pass "print value of &sbig.s\[0\]"
+    }
     -re ".\[0-9\]* = \\(short int \\*\\) $hex.*$gdb_prompt $" {
         pass "print value of &sbig.s\[0\]"
-      }
+    }
     -re ".*$gdb_prompt $" { fail "print value of &sbig.s\[0\]" }
     timeout           { fail "(timeout) print value of &sbig.s\[0\]" }
   }
 
 send_gdb "print &lbig.l\[0\]\n"
 gdb_expect {
+    -re ".\[0-9\]* = \\(long \\*\\) $hex.*$gdb_prompt $" {
+        pass "print value of &lbig.l\[0\]"
+    }
     -re ".\[0-9\]* = \\(long int \\*\\) $hex.*$gdb_prompt $" {
         pass "print value of &lbig.l\[0\]"
-      }
+    }
     -re ".*$gdb_prompt $" { fail "print value of &lbig.l\[0\]" }
     timeout           { fail "(timeout) print value of &lbig.l\[0\]" }
   }

@@ -118,11 +118,11 @@ gdb_test "info break" \
 
 
 #
-# run until the breakpoint at main is hit. For non-stubs-using targets.
+# run until the breakpoint at main is hit.
 #
-gdb_test "run" \
-    "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:60.*60\[\t \]+if .argc.* \{.*" \
-"run until function breakpoint"
+
+
+gdb_run_cmd
 
 #
 # run until the breakpoint at a line number

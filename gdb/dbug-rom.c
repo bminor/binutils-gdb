@@ -1,5 +1,5 @@
 /* Remote debugging interface to dBUG ROM monitor for GDB, the GNU debugger.
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1999 Free Software Foundation, Inc.
 
    Written by Stan Shebs of Cygnus Support.
 
@@ -97,12 +97,12 @@ init_dbug_cmds(void)
   dbug_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR;
   dbug_cmds.init =   dbug_inits;			/* Init strings */
   dbug_cmds.cont =   "go\r";			/* continue command */
-  dbug_cmds.step =   "step\r";			/* single step */
+  dbug_cmds.step =   "trace\r";			/* single step */
   dbug_cmds.stop =   NULL;				/* interrupt command */
   dbug_cmds.set_break =   "br %x\r";			/* set a breakpoint */
-  dbug_cmds.clr_break =   "br -c %x\r";			/* clear a breakpoint */
-  dbug_cmds.clr_all_break =   "br -c\r";			/* clear all breakpoints */
-  dbug_cmds.fill =   "bf.b %x %x %x";		/* fill (start end val) */
+  dbug_cmds.clr_break =   "br -r %x\r";			/* clear a breakpoint */
+  dbug_cmds.clr_all_break =   "br -r\r";			/* clear all breakpoints */
+  dbug_cmds.fill =   "bf.b %x %x %x\r";		/* fill (start end val) */
   dbug_cmds.setmem.cmdb =     "mm.b %x %x\r";		/* setmem.cmdb (addr, value) */
   dbug_cmds.setmem.cmdw =     "mm.w %x %x\r";		/* setmem.cmdw (addr, value) */
   dbug_cmds.setmem.cmdl =     "mm.l %x %x\r";		/* setmem.cmdl (addr, value) */

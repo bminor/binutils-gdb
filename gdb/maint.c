@@ -20,9 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 #include "defs.h"
-
-#if MAINTENANCE_CMDS	/* Entire rest of file goes away if not including maint cmds */
-
 #include <ctype.h>
 #include <signal.h>
 #include "command.h"
@@ -342,12 +339,9 @@ maintenance_translate_address (arg, from_tty)
   return;
 }
 
-#endif	/* MAINTENANCE_CMDS */
-
 void
 _initialize_maint_cmds ()
 {
-#if MAINTENANCE_CMDS	/* Entire file goes away if not including maint cmds */
   add_prefix_cmd ("maintenance", class_maintenance, maintenance_command,
 		  "Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
@@ -445,5 +439,4 @@ When non-zero, this timeout is used instead of waiting forever for a target to\n
 finish a low-level step or continue operation.  If the specified amount of time\n\
 passes without a response from the target, an error occurs.", &setlist),
 		     &showlist);
-#endif	/* MAINTENANCE_CMDS */
 }

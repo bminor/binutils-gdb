@@ -35,7 +35,6 @@ fetch_inferior_registers (regno)
 #ifdef FP0_REGNUM
   struct fp_status inferior_fp_registers;
 #endif
-  extern char registers[];
 
   registers_fetched ();
   
@@ -72,7 +71,6 @@ store_inferior_registers (regno)
 #ifdef FP0_REGNUM
   struct fp_status inferior_fp_registers;
 #endif
-  extern char registers[];
 
   memcpy (&inferior_registers, registers, 16 * 4);
 #ifdef FP0_REGNUM
@@ -107,7 +105,6 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      int which;
      CORE_ADDR reg_addr;	/* Unused in this version */
 {
-  extern char registers[];
   struct regs *regs = (struct regs *) core_reg_sect;
 
   if (which == 0) {

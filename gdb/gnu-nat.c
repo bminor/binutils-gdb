@@ -23,6 +23,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include <signal.h>
 #include <assert.h>
@@ -32,7 +33,8 @@
 
 /* We include this because we don't need the access macros and they conflict
    with gdb's definitions (ick).  This is very non standard!  */
-#include <waitflags.h>
+#define _SYS_WAIT_H		/* Inhibit warning from <bits/waitflags.h>.  */
+#include <bits/waitflags.h>
 
 #include <mach.h>
 #include <mach/message.h>
@@ -84,7 +86,6 @@ int gnu_debug_flag = 0;
 /* Forward decls */
 
 extern struct target_ops gnu_ops;
-extern char *strerror();
 
 int inf_update_procs (struct inf *inf);
 struct inf *make_inf ();
@@ -1911,7 +1912,7 @@ gnu_create_inferior (exec_file, allargs, env)
       if (ptrace (PTRACE_TRACEME) != 0)
 	error ("ptrace (PTRACE_TRACEME) failed!");
     }
-  int attach_to_child (int pid)
+  void attach_to_child (int pid)
     {
       /* Attach to the now stopped child, which is actually a shell...  */
       inf_debug (inf, "attaching to child: %d", pid);
@@ -1930,13 +1931,12 @@ gnu_create_inferior (exec_file, allargs, env)
       inferior_pid = inf_pick_first_thread ();
 
       startup_inferior (inf->pending_execs);
-
-      return inferior_pid;
     }
 
   inf_debug (inf, "creating inferior");
 
-    fork_inferior (exec_file, allargs, env, trace_me, attach_to_child, NULL, NULL);
+  fork_inferior (exec_file, allargs, env, trace_me, attach_to_child,
+		 NULL, NULL);
 
   inf_update_signal_thread (inf);
   inf_set_traced (inf, inf->want_signals);
@@ -2082,10 +2082,11 @@ gnu_stop ()
   error ("to_stop target function not implemented");
 }
 
-static void
+static char *
 gnu_pid_to_exec_file ()
 {
   error ("to_pid_to_exec_file target function not implemented");
+  return NULL;
 }
  
 
@@ -3169,11 +3170,9 @@ _initialize_gnu_nat ()
   add_task_commands ();
   add_thread_commands ();
 
-#if MAINTENANCE_CMDS
   add_set_cmd ("gnu-debug", class_maintenance,
 	       var_boolean, (char *)&gnu_debug_flag,
 	       "Set debugging output for the gnu backend.", &maintenancelist);
-#endif
 }
 
 #ifdef	FLUSH_INFERIOR_CACHE

@@ -58,7 +58,7 @@ gdb_test "r" ".*Starting program.*main.*15.*"   "hit bp"
 gdb_test "hel r" ".*Start debugged program.*without arguments.*" "help"
 gdb_test "n" ".*x = 1;.*" "next"
 gdb_test "s" ".*y = 2;.*" "step"
-gdb_test "p/t y" ".* = 1.*" "print y in binary"
+gdb_test "p/t x" ".* = 1.*" "print x in binary"
 gdb_test "p 1+2*3+4" ".* = 11.*" "calculate"
 gdb_test "p/t 1+2*3+4" ".* = 1011.*" "binary"
 

@@ -1,3 +1,8 @@
+1999-03-03  DJ Delorie  <dj@cygnus.com>
+
+	* configure.in: add termcap and -luser32 for host=cygwin
+	* configure: regenerate
+	
 1999-02-11  Hugo Tyson  <hmt@cygnus.co.uk>
 
 	* exec.c (dispatch_instruction): 

@@ -471,8 +471,8 @@ sds_wait (pid, status)
 	  retlen = sds_send (buf, 1);
 	  if (remote_debug)
 	    {
-	      fprintf_unfiltered (gdb_stderr, "Signals: %04x %02x %02x\n",
-				  ((int) buf[0]) << 8 + buf[1],
+	      fprintf_unfiltered (gdb_stderr, "Signals: %02x%02x %02x %02x\n",
+				  buf[0], buf[1],
 				  buf[2], buf[3]);
 	    }
 	  message_pending = 0;
@@ -925,11 +925,7 @@ getmessage (buf, forever)
 
   if (forever)
     {
-#ifdef MAINTENANCE_CMDS
       timeout = watchdog > 0 ? watchdog : -1;
-#else
-      timeout = -1;
-#endif
     }
 
   else
@@ -953,13 +949,11 @@ getmessage (buf, forever)
 
 	  if (c == SERIAL_TIMEOUT)
 	    {
-#ifdef MAINTENANCE_CMDS
 	      if (forever)	/* Watchdog went off.  Kill the target. */
 		{
 		  target_mourn_inferior ();
 		  error ("Watchdog has expired.  Target detached.\n");
 		}
-#endif
 	      if (remote_debug)
 		puts_filtered ("Timed out.\n");
 	      goto retry;

@@ -239,7 +239,7 @@ extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
 					    unsigned char struct_return,
 					    CORE_ADDR struct_addr));
 
-#define USE_GENERIC_DUMMY_FRAMES
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)
@@ -255,13 +255,14 @@ extern CORE_ADDR sh_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_CHAIN(FRAME)           sh_frame_chain(FRAME)
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
 #define FRAME_CHAIN_VALID(FP, FRAME) generic_frame_chain_valid (FP, FRAME)
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
     (SP) = sh_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
 /* override the standard get_saved_register function with 
    one that takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */

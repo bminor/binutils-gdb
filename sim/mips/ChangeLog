@@ -1,3 +1,24 @@
+1999-04-21  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips.igen (bc0f): For the TX39 only, decode this as a no-op stub.
+
+Thu Apr 15 14:15:17 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* configure.in: Any mips64vr5*-*-* target should have
+ 	-DTARGET_ENABLE_FR=1.
+	(default_endian): Any mips64vr*el-*-* target should default to
+	LITTLE_ENDIAN.
+	* configure: Re-generate.
+
+1999-02-19  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips.igen (ldl): Extend from _16_, not 32.
+
+Wed Jan 27 18:51:38 1999  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* interp.c (sim_store_register): Force registers written to by GDB
+ 	into an un-interpreted state.
+
 1999-02-05  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-tx3904sio.c (tx3904sio_tickle): After a polled I/O from the

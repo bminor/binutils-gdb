@@ -197,6 +197,51 @@ struct complaint repeated_header_complaint =
 struct complaint unclaimed_bincl_complaint =
   {"N_BINCL %s not in entries for any file, at symtab pos %d", 0, 0};
 
+/* find_text_range --- find start and end of loadable code sections
+
+   The find_text_range function finds the shortest address range that
+   encloses all sections containing executable code, and stores it in
+   objfile's text_addr and text_size members.
+
+   dbx_symfile_read will use this to finish off the partial symbol
+   table, in some cases.  */
+
+static void
+find_text_range (bfd *sym_bfd, struct objfile *objfile)
+{
+  asection *sec;
+  int found_any = 0;
+  CORE_ADDR start, end;
+  
+  for (sec = sym_bfd->sections; sec; sec = sec->next)
+    if (bfd_get_section_flags (sym_bfd, sec) & SEC_CODE)
+      {
+	CORE_ADDR sec_start = bfd_section_vma (sym_bfd, sec);
+	CORE_ADDR sec_end = sec_start + bfd_section_size (sym_bfd, sec);
+
+	if (found_any)
+	  {
+	    if (sec_start < start) start = sec_start;
+	    if (sec_end > end) end = sec_end;
+	  }
+	else
+	  {
+	    start = sec_start;
+	    end = sec_end;
+	  }
+
+	found_any = 1;
+      }
+
+  if (! found_any)
+    error ("Can't find any code sections in symbol file");
+
+  DBX_TEXT_ADDR (objfile) = start;
+  DBX_TEXT_SIZE (objfile) = end - start;
+}
+
+
+
 /* During initial symbol readin, we need to have a structure to keep
    track of which psymtabs have which bincls in them.  This structure
    is used during readin to setup the list of dependencies within each
@@ -2589,11 +2634,9 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
      It might even contain some info from the ELF symtab to help us.  */
   info = objfile->sym_stab_info;
 
-  text_sect = bfd_get_section_by_name (sym_bfd, ".text");
-  if (!text_sect)
-    error ("Can't find .text section in symbol file");
-  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
-  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
+  /* Find the first and last text address.  dbx_symfile_read seems to
+     want this.  */
+  find_text_range (sym_bfd, objfile);
 
 #define	ELF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
   DBX_SYMBOL_SIZE    (objfile) = ELF_STABS_SYMBOL_SIZE;

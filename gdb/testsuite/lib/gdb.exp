@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994, 1995, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1995, 1997, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -312,6 +312,7 @@ proc runto_main { } {
 
     return 1
 }
+
 
 # gdb_test COMMAND PATTERN MESSAGE -- send a command to gdb; test the result.
 #
@@ -834,13 +835,11 @@ proc skip_chill_tests {} {
     return $skip_chill
 }
 
-# skip all the tests in the file if you are not on an hppa running hpux target.
-# and you compiled with gcc
-proc skip_hp_tests {gcc_used} {
-  #  if ![info exists do_hp_tests] {
-  #	return 1;
-  #  }
-    eval set skip_hp [expr ![isnative] || ![istarget "hppa*-*-hpux*"] || $gcc_used!=0 ]
+# Skip all the tests in the file if you are not on an hppa running
+# hpux target.
+
+proc skip_hp_tests {} {
+    eval set skip_hp [ expr ![isnative] || ![istarget "hppa*-*-hpux*"] ]
     verbose "Skip hp tests is $skip_hp"
     return $skip_hp
 }
@@ -1160,6 +1159,7 @@ proc gdb_finish { } {
 }
 
 global debug_format
+set debug_format "unknown"
 
 # Run the gdb command "info source" and extract the debugging format
 # information from the output and save it in debug_format.
@@ -1331,4 +1331,51 @@ proc gdb_get_line_number {text {file /omitted/}} {
     return $result;
 }
 
+# gdb_continue_to_end:
+#	The case where the target uses stubs has to be handled specially. If a
+#       stub is used, we set a breakpoint at exit because we cannot rely on
+#       exit() behavior of a remote target.
+# 
+# mssg is the error message that gets printed.
+
+proc gdb_continue_to_end {mssg} {
+  if [target_info exists use_gdb_stub] {
+    if {![gdb_breakpoint "exit"]} {
+      return 0
+    }
+    gdb_test "continue" "Continuing..*Breakpoint .*exit.*" \
+      "continue until exit at $mssg"
+  } else {
+    # Continue until we exit.  Should not stop again.
+    # Don't bother to check the output of the program, that may be
+    # extremely tough for some remote systems.
+    gdb_test "continue"\
+      "Continuing.\[\r\n0-9\]+Program exited normally\\..*"\
+      "continue until exit at $mssg"
+  }
+}
+
+proc rerun_to_main {} {
+  global gdb_prompt
+
+  if [target_info exists use_gdb_stub] {
+    gdb_run_cmd
+    gdb_expect {
+      -re ".*Breakpoint .*main .*$gdb_prompt $"\
+	      {pass "rerun to main" ; return 0}
+      -re "$gdb_prompt $"\
+	      {fail "rerun to main" ; return 0}
+      timeout {fail "(timeout) rerun to main" ; return 0}
+    }
+  } else {
+    send_gdb "run\n"
+    gdb_expect {
+      -re "Starting program.*$gdb_prompt $"\
+	      {pass "rerun to main" ; return 0}
+      -re "$gdb_prompt $"\
+	      {fail "rerun to main" ; return 0}
+      timeout {fail "(timeout) rerun to main" ; return 0}
+    }
+  }
+}
 

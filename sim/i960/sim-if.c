@@ -31,7 +31,7 @@ static void free_state (SIM_DESC);
    disassembler.  */
 static CGEN_DISASSEMBLER i960_disassemble_insn;
 
-/* Records simulator descriptor so utilities like m32r_dump_regs can be
+/* Records simulator descriptor so utilities like i960_dump_regs can be
    called from gdb.  */
 SIM_DESC current_state;
 
@@ -145,8 +145,8 @@ sim_open (kind, callback, abfd, argv)
 
   /* Open a copy of the cpu descriptor table.  */
   {
-    CGEN_CPU_DESC cd = i960_cgen_cpu_open (STATE_ARCHITECTURE (sd)->mach,
-					   CGEN_ENDIAN_LITTLE);
+    CGEN_CPU_DESC cd = i960_cgen_cpu_open_1 (STATE_ARCHITECTURE (sd)->printable_name,
+					     CGEN_ENDIAN_LITTLE);
     for (i = 0; i < MAX_NR_PROCESSORS; ++i)
       {
 	SIM_CPU *cpu = STATE_CPU (sd, i);
@@ -156,10 +156,10 @@ sim_open (kind, callback, abfd, argv)
   }
 
   /* Initialize various cgen things not done by common framework.
-     Must be done after m32r_cgen_cpu_open.  */
+     Must be done after i960_cgen_cpu_open.  */
   cgen_init (sd);
 
-  /* Store in a global so things like sparc32_dump_regs can be invoked
+  /* Store in a global so things like i960_dump_regs can be invoked
      from the gdb command line.  */
   current_state = sd;
 

@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WANT_CPU_FR30BF
 
 #include "sim-main.h"
+#include "cgen-ops.h"
 
 /* Get the value of h-pc.  */
 

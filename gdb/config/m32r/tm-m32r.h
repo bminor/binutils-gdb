@@ -193,7 +193,7 @@ extern use_struct_convention_fn m32r_use_struct_convention;
 /* generic dummy frame stuff */
 
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 
 
 /* target-specific dummy_frame stuff */
@@ -222,9 +222,11 @@ extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs,
 
 /* override the standard get_saved_register function with 
    one that takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
-#define USE_GENERIC_DUMMY_FRAMES
+
+#define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)

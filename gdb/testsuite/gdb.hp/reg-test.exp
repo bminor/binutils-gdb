@@ -26,12 +26,9 @@ if $tracelevel then {
 	strace $tracelevel
 	}
 
-if ![istarget "hppa*-*-*"] {
-    verbose "Wide register test ignored for non-hppa targets."
-    return
-}
+if { [skip_hp_tests] } then { continue }
 
-set testfile "reg_test"
+set testfile "reg-test"
 set srcfile ${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
 

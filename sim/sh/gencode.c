@@ -244,9 +244,40 @@ op tab[] =
     "FP_CMP (n, >, m);",
   },
 
+  /* sh4 */
+  { "", "", "fcnvds <DR_N>,FPUL", "1111nnnn10111101",
+    "if (! FPSCR_PR || n & 1)",
+    "  saved_state.asregs.exception = SIGILL;",
+    "else",
+    "{",
+    "  char buf[4];",
+    "  *(float *)buf = DR(n);",
+    "  FPUL = *(int *)buf;",
+    "}",
+  },
+
+  /* sh4 */
+  { "", "", "fcnvsd FPUL,<DR_N>", "1111nnnn10101101",
+    "if (! FPSCR_PR || n & 1)",
+    "  saved_state.asregs.exception = SIGILL;",
+    "else",
+    "{",
+    "  char buf[4];",
+    "  *(int *)buf = FPUL;",
+    "  SET_DR(n, *(float *)buf);",
+    "}",
+  },
+
   /* sh3e */
   { "", "", "fdiv <FREG_M>,<FREG_N>", "1111nnnnmmmm0011",
     "FP_OP (n, /, m);",
+    "/* FIXME: check for DP and (n & 1) == 0? */",
+  },
+
+  /* sh4 */
+  { "", "", "fipr <FV_M>,<FV_N>", "1111nnmm11101101",
+    "/* FIXME: not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
@@ -271,6 +302,10 @@ op tab[] =
 
   /* sh3e */
   { "", "", "float FPUL,<FREG_N>", "1111nnnn00101101",
+    /* sh4 */
+    "if (FPSCR_PR)",
+    "  SET_DR (n, (double)FPUL);",
+    "else",
     "{",
     "  SET_FR (n, (float)FPUL);",
     "}",
@@ -284,12 +319,26 @@ op tab[] =
 
   /* sh3e */
   { "", "", "fmov <FREG_M>,<FREG_N>", "1111nnnnmmmm1100",
+    /* sh4 */
+    "if (FPSCR_SZ) {",
+    "  int ni = XD_TO_XF (n);",
+    "  int mi = XD_TO_XF (m);",
+    "  SET_XF (ni + 0, XF (mi + 0));",
+    "  SET_XF (ni + 1, XF (mi + 1));",
+    "}",
+    "else",
     "{",
     "  SET_FR (n, FR (m));",
     "}",
   },
   /* sh3e */
   { "", "", "fmov.s <FREG_M>,@<REG_N>", "1111nnnnmmmm1010",
+    /* sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  WDAT (R[n], m);",
+    "}",
+    "else",
     "{",
     "  MA (1);",
     "  WLAT (R[n], FI(m));",
@@ -297,6 +346,12 @@ op tab[] =
   },
   /* sh3e */
   { "", "", "fmov.s @<REG_M>,<FREG_N>", "1111nnnnmmmm1000",
+    /* sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  RDAT (R[m], n);",
+    "}",
+    "else",
     "{",
     "  MA (1);",
     "  SET_FI(n, RLAT(R[m]));",
@@ -304,6 +359,13 @@ op tab[] =
   },
   /* sh3e */
   { "", "", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
+    /* sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  RDAT (R[m], n);",
+    "  R[m] += 8;",
+    "}",
+    "else",
     "{",
     "  MA (1);",
     "  SET_FI (n, RLAT (R[m]));",
@@ -312,6 +374,13 @@ op tab[] =
   },
   /* sh3e */
   { "", "", "fmov.s <FREG_M>,@-<REG_N>", "1111nnnnmmmm1011",
+    /* sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  R[n] -= 8;",
+    "  WDAT (R[n], m);",
+    "}",
+    "else",
     "{",
     "  MA (1);",
     "  R[n] -= 4;",
@@ -320,6 +389,12 @@ op tab[] =
   },
   /* sh3e */
   { "", "", "fmov.s @(R0,<REG_M>),<FREG_N>", "1111nnnnmmmm0110",
+    /* sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  RDAT (R[0]+R[m], n);",
+    "}",
+    "else",
     "{",
     "  MA (1);",
     "  SET_FI(n, RLAT(R[0] + R[m]));",
@@ -327,11 +402,19 @@ op tab[] =
   },
   /* sh3e */
   { "", "", "fmov.s <FREG_M>,@(R0,<REG_N>)", "1111nnnnmmmm0111",
+    /* sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  WDAT (R[0]+R[n], m);",
+    "}",
+    "else",
     "{",
     "  MA (1);",
     "  WLAT((R[0]+R[n]), FI(m));",
     "}",
   },
+
+  /* sh4: See fmov instructions above for move to/from extended fp registers */
 
   /* sh3e */
   { "", "", "fmul <FREG_M>,<FREG_N>", "1111nnnnmmmm0010",
@@ -341,6 +424,16 @@ op tab[] =
   /* sh3e */
   { "", "", "fneg <FREG_N>", "1111nnnn01001101",
     "FP_UNARY(n, -);",
+  },
+
+  /* sh4 */
+  { "", "", "frchg", "1111101111111101",
+    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_FR);",
+  },
+
+  /* sh4 */
+  { "", "", "fschg", "1111001111111101",
+    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_SZ);",
   },
 
   /* sh3e */
@@ -355,16 +448,20 @@ op tab[] =
 
   /* sh3e */
   { "", "", "ftrc <FREG_N>, FPUL", "1111nnnn00111101",
+    /* sh4 */
+    "if (FPSCR_PR) {",
+    "  if (DR(n) != DR(n)) /* NaN */",
+    "    FPUL = 0x80000000;",
+    "  else",
+    "    FPUL =  (int)DR(n);",
+    "}",
+    "else",
     "if (FR(n) != FR(n)) /* NaN */",
     "  FPUL = 0x80000000;",
     "else",
     "  FPUL = (int)FR(n);",
   },
 
-  /* sh3e */
-  { "", "", "ftst/nan <FREG_N>", "1111nnnn01111101",
-    "SET_SR_T (isnan (FR(n)));",
-  },
   /* sh3e */
   { "", "", "fsts FPUL,<FREG_N>", "1111nnnn00001101",
     "char buf[4];",
@@ -405,6 +502,12 @@ op tab[] =
     "SPC = R[n];",
     "/* FIXME: user mode */",
   },
+#if 0
+  { "", "n", "ldc <REG_N>,DBR", "0100nnnn11111010",
+    "DBR = R[n];",
+    "/* FIXME: user mode */",
+  },
+#endif
   { "", "n", "ldc <REG_N>,R0_BANK", "0100nnnn10001110",
     "SET_Rn_BANK (0, R[n]);",
     "/* FIXME: user mode */",
@@ -467,6 +570,14 @@ op tab[] =
     "R[n] += 4;",
     "/* FIXME: user mode */",
   },
+#if 0
+  { "", "n", "ldc.l @<REG_N>+,DBR", "0100nnnn11110110",
+    "MA (1);",
+    "DBR = RLAT (R[n]);",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+#endif
   { "", "n", "ldc.l @<REG_N>+,R0_BANK", "0100nnnn10000111",
     "MA (1);",
     "SET_Rn_BANK (0, RLAT (R[n]));",
@@ -740,6 +851,11 @@ op tab[] =
     "R0 = ((i + 4 + PC) & ~0x3);",
   },
 
+  { "0", "", "movca.l @R0, <REG_N>", "0000nnnn11000011",
+    "/* FIXME: Not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
+  },
+
   { "n", "", "movt <REG_N>", "0000nnnn00101001",
     "R[n] = T;",
   },
@@ -781,6 +897,21 @@ op tab[] =
 
   { "n", "m", "not <REG_M>,<REG_N>", "0110nnnnmmmm0111",
     "R[n] = ~R[m];",
+  },
+
+  { "0", "", "ocbi @<REG_N>", "0000nnnn10010011",
+    "/* FIXME: Not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
+  },
+
+  { "0", "", "ocbp @<REG_N>", "0000nnnn10100011",
+    "/* FIXME: Not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
+  },
+
+  { "", "n", "ocbwb @<REG_N>", "0000nnnn10110011",
+    "RSBAT (R[n]); /* Take exceptions like byte load.  */",
+    "/* FIXME: Cache not implemented */",
   },
 
   { "0", "", "or #<imm>,R0", "11001011i8*1....",
@@ -920,6 +1051,14 @@ op tab[] =
   { "n", "", "stc SPC,<REG_N>", "0000nnnn01000010",
     "R[n] = SPC;",
   },
+#if 0
+  { "n", "", "stc SGR,<REG_N>", "0000nnnn00111010",
+    "R[n] = SGR;",
+  },
+  { "n", "", "stc DBR,<REG_N>", "0000nnnn11111010",
+    "R[n] = DBR;",
+  },
+#endif
   { "n", "", "stc R0_BANK,<REG_N>", "0000nnnn10000010",
     "R[n] = Rn_BANK (0);",
   },
@@ -969,6 +1108,18 @@ op tab[] =
     "R[n] -= 4;",
     "WLAT (R[n], SPC);",
   },
+#if 0
+  { "n", "n", "stc.l SGR,@-<REG_N>", "0100nnnn00110010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], SGR);",
+  },
+  { "n", "n", "stc.l DBR,@-<REG_N>", "0100nnnn11110010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], DBR);",
+  },
+#endif
   { "n", "", "stc R0_BANK,@-<REG_N>", "0100nnnn10000010",
     "MA (1);",
     "R[n] -= 4;",
@@ -1152,6 +1303,15 @@ op tab[] =
     "R[n] = (((R[n] >> 16) & 0xffff)",
     "        | ((R[m] << 16) & 0xffff0000));",
   },
+
+#if 0
+  { "divs.l <REG_M>,<REG_N>", "0100nnnnmmmm1110",
+    "divl(0,R[n],R[m]);",
+  },
+  { "divu.l <REG_M>,<REG_N>", "0100nnnnmmmm1101",
+    "divl(0,R[n],R[m]);",
+  },
+#endif
 
   {0, 0}};
 

@@ -134,9 +134,9 @@ unqueue_writes (SIM_DESC sd,
 
       if (ptr == psw_addr)
        {
-	  /* If MU instruction was not a MVTSYS (lkr), resolve PSW
+	 /* If MU instruction was not a MVTSYS, resolve PSW
              contention in favour of IU. */
-	  if(! STATE_CPU (sd, 0)->left_kills_right_p)
+	  if(! STATE_CPU (sd, 0)->mvtsys_left_p)
 	    {
 	      /* Detect contention in parallel writes to the same PSW flags.
 		 The hardware allows the updates from IU to prevail over
@@ -249,6 +249,7 @@ do_2_short (SIM_DESC sd,
   /* run the first instruction */
   STATE_CPU (sd, 0)->unit = unit;
   STATE_CPU (sd, 0)->left_kills_right_p = 0;
+  STATE_CPU (sd, 0)->mvtsys_left_p = 0;
   nia = s_idecode_issue(sd,
 			insn1,
 			cia);
@@ -267,6 +268,7 @@ do_2_short (SIM_DESC sd,
   }
 
   STATE_CPU (sd, 0)->left_kills_right_p = 0;
+  STATE_CPU (sd, 0)->mvtsys_left_p = 0;
   return nia;
 }
 
@@ -283,6 +285,7 @@ do_parallel (SIM_DESC sd,
   /* run the first instruction */
   STATE_CPU (sd, 0)->unit = memory_unit;
   STATE_CPU (sd, 0)->left_kills_right_p = 0;
+  STATE_CPU (sd, 0)->mvtsys_left_p = 0;
   nia_left = s_idecode_issue(sd,
 			     left_insn,
 			     cia);

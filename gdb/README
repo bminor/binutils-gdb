@@ -4,8 +4,8 @@
 This is GDB, the GNU source-level debugger.
 A summary of new features is in the file `NEWS'.
 
-See the GDB home page at http://www.cygnus.com/gdb/ for up to date
-release information, mailing list links and archives, etc.
+See the GDB home page at http://sourceware.cygnus.com/gdb/ for up to
+date release information, mailing list links and archives, etc.
 
 
 Unpacking and Installation -- quick overview
@@ -152,6 +152,8 @@ directory.  That directory contains:
 
 `gdb-4.18/readline'
      source for the GNU command-line interface
+     NOTE:  The readline library is compiled for use by GDB, but will
+     not be installed on your system when "make install" is issued.
 
 `gdb-4.18/sim'
      source for some simulators (ARM, D10V, SPARC, M32R, MIPS, PPC, V850, etc)

@@ -49,8 +49,10 @@ gdb_load ${binfile}
 
 # Ok, on to real life
 #
-gdb_test "b main"     ".*Breakpoint 1.*" "break main"
-gdb_test "r"          ".*Breakpoint 1, main.*" "get to main"
+
+if {![runto main]} {
+  fail "Could not run to main - other tests will fail."
+}
 gdb_test "b 14" ".*Breakpoint 2.*" "break do_loops"
 gdb_test "c"          ".*Breakpoint 2, do_loops.*" "get to do_loops"
 

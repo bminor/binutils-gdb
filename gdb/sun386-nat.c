@@ -49,7 +49,6 @@ core_file_command (filename, from_tty)
      int from_tty;
 {
   int val;
-  extern char registers[];
 
   /* Discard all vestiges of any previous core file
      and mark data and stack spaces as empty.  */
@@ -189,7 +188,6 @@ fetch_inferior_registers (regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
-  extern char registers[];
 
   registers_fetched ();
 
@@ -217,7 +215,6 @@ store_inferior_registers (regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
-  extern char registers[];
 
   memcpy (&inferior_registers, registers, 20 * 4);
 

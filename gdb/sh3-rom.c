@@ -65,10 +65,12 @@ sh3_supply_register (regname, regnamelen, val, vallen)
 	case 'G':
 	case 'V':
 	  if (regname[1] == 'B' && regname[2] == 'R')
-	    if (regname[0] == 'G')
-	      regno = VBR_REGNUM;
-	    else
-	      regno = GBR_REGNUM;
+	    {
+	      if (regname[0] == 'G')
+		regno = VBR_REGNUM;
+	      else
+		regno = GBR_REGNUM;
+	    }
 	  break;
 	case 'S':
 	  if (regname[1] == 'S' && regname[2] == 'R')
@@ -84,10 +86,12 @@ sh3_supply_register (regname, regnamelen, val, vallen)
 	{
 	case 'M':
 	  if (regname[1] == 'A' && regname[2] == 'C')
-	    if (regname[3] == 'H')
-	      regno = MACH_REGNUM;
-	    else if (regname[3] == 'L')
-	      regno = MACL_REGNUM;
+	    {
+	      if (regname[3] == 'H')
+		regno = MACH_REGNUM;
+	      else if (regname[3] == 'L')
+		regno = MACL_REGNUM;
+	    }
 	  break;
 	case 'R':
 	  if (regname[1] == '0' && regname[2] == '-' && regname[3] == '7')
