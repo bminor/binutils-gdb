@@ -119,20 +119,19 @@ long	memaddr;
 long	insn_word;
 int	insn_no;
 {
-  char buf [BUFSIZ];
+  char buf [20];
   char *qq = buf;
   char *pp = rs6k_ops[insn_no].opr_ext;
   int tmp;
   int nocomma = 0;			/* true if no comma needed */
 
-  *qq = '\0';
   if (pp) {
     while (*pp) {
 
       switch ( *pp ) {
 	case '.':
 	  if (insn_word & 0x1)
-	   *qq++ = '.';
+	    *qq++ = '.';
 	  break;
 
 	case 'l':
@@ -177,9 +176,9 @@ int	insn_no;
       ++pp;
     }
   }
+  *qq = '\0';
 
-  /* tab between operator and operand */
-  *qq++ = '\t';
+  fprintf (stream, "%s%s\t", rs6k_ops[insn_no].operator, buf);
 
   /* parse the operand now. */
   pp = rs6k_ops[insn_no].oprnd_format;
@@ -187,21 +186,21 @@ int	insn_no;
   while (1) {
     switch (*pp) {
       case TO	:
-	sprintf (qq, "%d", (insn_word >> 21) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case RT	:
       case RS	:
-	sprintf (qq, "r%d", (insn_word >> 21) & 0x1f);
+	fprintf (stream, "r%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case LI	:
 	tmp  = (insn_word >> 16) & 0x1f;
 	if (tmp > 11) {
-	  fprintf (stderr, "Internal error: unknown cond code: 0x%x\n", insn_word);
+	  fprintf (stream, "{unknown cond code: 0x%x}", insn_word);
 	  tmp = 0;
 	}
-	sprintf (qq, "%s", cond_code [tmp]);
+	fprintf (stream, "%s", cond_code [tmp]);
 	break;
 
       case A2	:
@@ -213,7 +212,7 @@ int	insn_no;
 	if ((insn_word & 0x2) == 0)	/* if AA not set	*/
 	  tmp += memaddr;
 
-	sprintf (qq, "0x%x", tmp);
+        print_address (tmp, stream);
 	break;
 
       case TA24	:
@@ -224,101 +223,99 @@ int	insn_no;
 	if ((insn_word & 0x2) == 0)		/* if no AA bit set */
 	  tmp += memaddr;
 
-	sprintf (qq, "0x%x", tmp);
+        print_address (tmp, stream);
 	break;
 
       case LEV	:			/* for svc only */
 	if (insn_word & 0x2) {		/* SA is set	*/
 	  nocomma = 1;
-	  *qq = '\0';
 	}
 	else
-          sprintf (qq, "%d", (insn_word >> 5) & 0x7f);
+          fprintf (stream, "%d", (insn_word >> 5) & 0x7f);
 	break;
 
       case FL1	:			/* for svc only */
 	if (insn_word & 0x2) {		/* SA is set	*/
 	  nocomma = 1;
-	  *qq = '\0';
 	}
 	else
-          sprintf (qq, "%d", (insn_word >> 12) & 0xf);
+          fprintf (stream, "%d", (insn_word >> 12) & 0xf);
 	break;
 
       case FL2	:			/* for svc only	*/
 	nocomma = 0;
 	if (insn_word & 0x2)		/* SA is set	*/
-	  sprintf (qq, "%d", (insn_word >> 2) & 0x3fff);
+	  fprintf (stream, "%d", (insn_word >> 2) & 0x3fff);
 	else
-          sprintf (qq, "%d", (insn_word >> 2) & 0x7);
+          fprintf (stream, "%d", (insn_word >> 2) & 0x7);
 	break;
 
       case RA	:
 	if (nocomma) {
-	  sprintf (qq, "r%d)", (insn_word >> 16) & 0x1f);
+	  fprintf (stream, "r%d)", (insn_word >> 16) & 0x1f);
 	  nocomma = 0;
 	}
 	else
-	  sprintf (qq, "r%d", (insn_word >> 16) & 0x1f);
+	  fprintf (stream, "r%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case RB	:
-	sprintf (qq, "r%d", (insn_word >> 11) & 0x1f);
+	fprintf (stream, "r%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case SI	:
 	tmp = insn_word & 0xffff;
 	if (tmp & 0x8000)
 	  tmp -= 0x10000;
-	sprintf (qq, "%d", tmp);
+	fprintf (stream, "%d", tmp);
 	break;
 
       case UI	:
-	sprintf (qq, "%d", insn_word & 0xffff);
+	fprintf (stream, "%d", insn_word & 0xffff);
 	break;
 
       case BF	:
-	sprintf (qq, "%d", (insn_word >> 23) & 0x7);
+	fprintf (stream, "%d", (insn_word >> 23) & 0x7);
 	break;
 
       case BFA	:
-	sprintf (qq, "%d", (insn_word >> 18) & 0x7);
+	fprintf (stream, "%d", (insn_word >> 18) & 0x7);
 	break;
 
       case BT	:
-	sprintf (qq, "%d", (insn_word >> 21) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case BA	:
-	sprintf (qq, "%d", (insn_word >> 16) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case BB	:
-	sprintf (qq, "%d", (insn_word >> 11) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case BO	:
-	sprintf (qq, "%d", (insn_word >> 21) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case BI	:
-	sprintf (qq, "%d", (insn_word >> 16) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case SH	:
-	sprintf (qq, "%d", (insn_word >> 11) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case MB	:
-	sprintf (qq, "0x%x", (insn_word >> 6) & 0x1f);
+	fprintf (stream, "0x%x", (insn_word >> 6) & 0x1f);
 	break;
 
       case ME	:
-	sprintf (qq, "0x%x", (insn_word >> 1) & 0x1f);
+	fprintf (stream, "0x%x", (insn_word >> 1) & 0x1f);
 	break;
 
       case SPR	:
-	sprintf (qq, "%d", (insn_word >> 16) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case DIS	:
@@ -326,56 +323,52 @@ int	insn_no;
 	tmp = insn_word & 0xffff;
 	if (tmp & 0x8000)
 	  tmp -= 0x10000;
-	sprintf (qq, "%d(", tmp);
+	fprintf (stream, "%d(", tmp);
 	break;
 
       case FXM	:
-	sprintf (qq, "0x%x", (insn_word >> 12) & 0xff);
+	fprintf (stream, "0x%x", (insn_word >> 12) & 0xff);
 	break;
 
       case FRT	:
       case FRS	:
-	sprintf (qq, "f%d", (insn_word >> 21) & 0x1f);
+	fprintf (stream, "f%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case FRA	:
-	sprintf (qq, "f%d", (insn_word >> 16) & 0x1f);
+	fprintf (stream, "f%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case FRB	:
-	sprintf (qq, "f%d", (insn_word >> 11) & 0x1f);
+	fprintf (stream, "f%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case FRC	:
-	sprintf (qq, "f%d", (insn_word >> 6) & 0x1f);
+	fprintf (stream, "f%d", (insn_word >> 6) & 0x1f);
 	break;
 
       case FLM	:
-	sprintf (qq, "0x%x", (insn_word >> 17) & 0xff);
+	fprintf (stream, "0x%x", (insn_word >> 17) & 0xff);
 	break;
 
       case NB	:
-	sprintf (qq, "%d", (insn_word >> 11) & 0x1f);
+	fprintf (stream, "%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case I	:
-	sprintf (qq, "%d", (insn_word >> 12) & 0xf);
+	fprintf (stream, "%d", (insn_word >> 12) & 0xf);
 	break;
 
       default	:
-	sprintf (qq, "Unknown operand format identifier %d????", *pp);
-	abort ();
+	fprintf (stream,
+		 "{Internal error: Unknown operand format identifier %d}",
+		 *pp);
     }
-    while (*qq) ++qq;		/* Walk to end of string printed so far.  */
     ++pp;
 
     if (*pp == '\0')
       break;
     else if (!nocomma)
-      *qq++ = ',';
+      fputc(',', stream);
   }
-  *qq = '\0';
-    
-  fprintf (stream, "0x%08x\t%s%s", 
-  	insn_word, rs6k_ops[insn_no].operator, buf);
 }
