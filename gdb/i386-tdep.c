@@ -1,5 +1,5 @@
-/* Intel 386 stuff.
-   Copyright (C) 1988, 1989 Free Software Foundation, Inc.
+/* Intel 386 target-dependent stuff.
+   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -46,15 +46,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 
-/* I don't know whether this is right for cross-debugging even if you
-   do somehow manage to get the right include file.  */
-#if defined (USE_MACHINE_REG_H)
-#include <machine/reg.h>
-#else
-#include <sys/reg.h>
-#endif
-
-/* helper functions for m-i386.h */
+/* helper functions for tm-i386.h */
 
 /* stdio style buffering to minimize calls to ptrace */
 static CORE_ADDR codestream_next_addr;
@@ -133,7 +125,9 @@ i386_follow_jump ()
       if (data16)
 	{
 	  codestream_read ((unsigned char *)&short_delta, 2);
-	  pos += short_delta + 3; /* include size of jmp inst */
+
+	  /* include size of jmp inst (including the 0x66 prefix).  */
+	  pos += short_delta + 4; 
 	}
       else
 	{
@@ -147,7 +141,7 @@ i386_follow_jump ()
       pos += byte_delta + 2;
       break;
     }
-  codestream_seek (pos + data16);
+  codestream_seek (pos);
 }
 
 /*
@@ -252,6 +246,7 @@ i386_get_frame_setup (pc)
 	    }
 	  /* subl with 32 bit immediate */
 	  codestream_read ((unsigned char *)&locals, 4);
+	  SWAP_TARGET_AND_HOST (&locals, 4);
 	  return (locals);
 	}
       else
@@ -264,6 +259,7 @@ i386_get_frame_setup (pc)
       /* enter instruction: arg is 16 bit unsigned immed */
       unsigned short slocals;
       codestream_read ((unsigned char *)&slocals, 2);
+      SWAP_TARGET_AND_HOST (&slocals, 2);
       codestream_get (); /* flush final byte of enter instruction */
       return (slocals);
     }

@@ -267,8 +267,9 @@ read_register_bytes (regbyte, myaddr, len)
 }
 
 /* Read register REGNO into memory at MYADDR, which must be large enough
-   for REGISTER_RAW_BYTES (REGNO).  If the register is known to be the
-   size of a CORE_ADDR or smaller, read_register can be used instead.  */
+   for REGISTER_RAW_BYTES (REGNO).  Target byte-order.
+   If the register is known to be the size of a CORE_ADDR or smaller,
+   read_register can be used instead.  */
 void
 read_register_gen (regno, myaddr)
      int regno;

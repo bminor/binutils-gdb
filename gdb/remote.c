@@ -187,7 +187,6 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (from_tty)
     printf ("Remote debugging using %s\n", name);
   push_target (&remote_ops);	/* Switch to using remote target now */
-  start_remote ();		/* Initialize gdb process mechanisms */
 
 #ifndef HAVE_TERMIO
 #ifndef NO_SIGINTERRUPT
@@ -201,7 +200,11 @@ device is attached to the remote system (e.g. /dev/ttya).");
     perror ("remote_open: error in signal");
 #endif
 
+  /* Ack any packet which the remote side has already sent.  */
+  write (remote_desc, "+", 1);
   putpkt ("?");			/* initiate a query from remote machine */
+
+  start_remote ();		/* Initialize gdb process mechanisms */
 }
 
 /* remote_detach()

@@ -511,6 +511,7 @@ push_word (sp, buffer)
 {
   register int len = sizeof (REGISTER_TYPE);
 
+  SWAP_TARGET_AND_HOST (&buffer, len);
 #if 1 INNER_THAN 2
   sp -= len;
   write_memory (sp, (char *)&buffer, len);
@@ -671,6 +672,9 @@ call_function_by_hand (function, nargs, args)
   register CORE_ADDR sp;
   register int i;
   CORE_ADDR start_sp;
+  /* CALL_DUMMY is an array of words (REGISTER_TYPE), but each word
+     in in host byte order.  It is switched to target byte order before calling
+     FIX_CALL_DUMMY.  */
   static REGISTER_TYPE dummy[] = CALL_DUMMY;
   REGISTER_TYPE dummy1[sizeof dummy / sizeof (REGISTER_TYPE)];
   CORE_ADDR old_sp;
@@ -717,6 +721,8 @@ call_function_by_hand (function, nargs, args)
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
   bcopy (dummy, dummy1, sizeof dummy);
+  for (i = 0; i < sizeof dummy / sizeof (REGISTER_TYPE); i++)
+    SWAP_TARGET_AND_HOST (&dummy1[i], sizeof (REGISTER_TYPE));
   FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
 		  value_type, using_gcc);
 
@@ -1104,7 +1110,9 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
     {
       arg1_as_ptr = *argp;
       *argp = value_ind (*argp);
-      COERCE_ARRAY (*argp);
+      /* Don't coerce fn pointer to fn and then back again!  */
+      if (TYPE_CODE (VALUE_TYPE (*argp)) != TYPE_CODE_FUNC)
+	COERCE_ARRAY (*argp);
       t = VALUE_TYPE (*argp);
     }
 

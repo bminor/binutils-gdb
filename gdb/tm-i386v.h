@@ -191,8 +191,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
-
-#define REGISTER_VIRTUAL_TYPE(N) (builtin_type_int)
+/* Perhaps si and di should go here, but potentially they could be
+   used for things other than address.  */
+#define REGISTER_VIRTUAL_TYPE(N) \
+  ((N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM ?         \
+   lookup_pointer_type (builtin_type_void) : builtin_type_int)
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
@@ -308,5 +311,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	from = loc + 5; \
 	to = (int)(fun); \
 	delta = to - from; \
-	*(int *)((char *)(dummyname) + 1) = delta; \
+	*((char *)(dummyname) + 1) = (delta & 0xff); \
+	*((char *)(dummyname) + 2) = ((delta >> 8) & 0xff); \
+	*((char *)(dummyname) + 3) = ((delta >> 16) & 0xff); \
+	*((char *)(dummyname) + 4) = ((delta >> 24) & 0xff); \
 }

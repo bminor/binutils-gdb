@@ -119,6 +119,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
 
     if (core_reg_size >= sizeof (struct fpu))
       {
+#ifdef FP0_REGNUM
 	bcopy (fpustruct->f_fpstatus.fps_regs,
 	      &registers[REGISTER_BYTE (FP0_REGNUM)],
 	      sizeof fpustruct->f_fpstatus.fps_regs);
@@ -126,6 +127,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
 	      &registers[REGISTER_BYTE (FPC_REGNUM)],
 	      sizeof fpustruct->f_fpstatus - 
 		sizeof fpustruct->f_fpstatus.fps_regs);
+#endif
       }
     else
       fprintf (stderr, "Couldn't read float regs from core file\n");
