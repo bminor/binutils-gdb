@@ -39,8 +39,6 @@ ld.d
 ld.s
 math.s
 math.d
-mul64.s
-mul64.d
 sshift.s
 sshift.d
 st.s
