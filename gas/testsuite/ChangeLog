@@ -1,3 +1,7 @@
+2001-06-13  Andreas Jaeger  <aj@suse.de>
+
+	* gas/vtable/vtable.exp (run_list_test): Don't run on sparc64.
+
 2001-06-06  Peter Jakubek <pjak@snafu.de>
 
 	* gas/mri/for.d: Correct for swapped operands.
@@ -421,7 +425,7 @@
 
 2001-02-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
-	* gas/mri/mri.exp: Don't execute the M68K specific tests 
+	* gas/mri/mri.exp: Don't execute the M68K specific tests
 	on m6811-elf and m6812-elf targets, still run the generic MRI tests.
 
 2001-02-04  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
@@ -453,39 +457,39 @@
 	* gas/arc/arc.exp: Simplified test process for base case
 	instruction set by adding run_dump_test cases for all base
 	instructions.
- 	* gas/arc/adc.s, gas/arc/adc.d: New test cases and dump.
- 	* gas/arc/add.s, gas/arc/add.d: Likewise.
- 	* gas/arc/and.s, gas/arc/and.d: Likewise.
- 	* gas/arc/asl.s, gas/arc/asl.d: Likewise.
- 	* gas/arc/asr.s, gas/arc/asr.d: Likewise.
- 	* gas/arc/b.s, gas/arc/b.d: Likewise.
- 	* gas/arc/bic.s, gas/arc/bic.d: Likewise.
- 	* gas/arc/bl.s, gas/arc/bl.d: Likewise.
- 	* gas/arc/brk.s, gas/arc/brk.d: Likewise.
- 	* gas/arc/extb.s, gas/arc/extb.d: Likewise.
- 	* gas/arc/extw.s, gas/arc/extw.d: Likewise.
- 	* gas/arc/flag.s, gas/arc/flag.d: Likewise.
- 	* gas/arc/j.s, gas/arc/j.d: Likewise.
- 	* gas/arc/jl.s, gas/arc/jl.d: Likewise.
- 	* gas/arc/ld.s, gas/arc/ld.d: Likewise.
- 	* gas/arc/ld2.s, gas/arc/ld2.d: Likewise.
- 	* gas/arc/lp.s, gas/arc/lp.d: Likewise.
- 	* gas/arc/lsr.s, gas/arc/lsr.d: Likewise.
- 	* gas/arc/mov.s, gas/arc/mov.d: Likewise.
- 	* gas/arc/nop.s, gas/arc/nop.d: Likewise.
- 	* gas/arc/or.s, gas/arc/or.d: Likewise.
- 	* gas/arc/rlc.s, gas/arc/rlc.d: Likewise.
- 	* gas/arc/ror.s, gas/arc/ror.d: Likewise.
- 	* gas/arc/rrc.s, gas/arc/rrc.d: Likewise.
- 	* gas/arc/sbc.s, gas/arc/sbc.d: Likewise.
- 	* gas/arc/sexb.s, gas/arc/sexb.d: Likewise.
- 	* gas/arc/sexw.s, gas/arc/sexw.d: Likewise.
- 	* gas/arc/sleep.s, gas/arc/sleep.d: Likewise.
- 	* gas/arc/add.s, gas/arc/add.d: Likewise.
- 	* gas/arc/st.s, gas/arc/st.d: Likewise.
- 	* gas/arc/sub.s, gas/arc/sub.d: Likewise.
- 	* gas/arc/swi.s, gas/arc/swi.d: Likewise.
- 	* gas/arc/xor.s, gas/arc/xor.d: Likewise.
+	* gas/arc/adc.s, gas/arc/adc.d: New test cases and dump.
+	* gas/arc/add.s, gas/arc/add.d: Likewise.
+	* gas/arc/and.s, gas/arc/and.d: Likewise.
+	* gas/arc/asl.s, gas/arc/asl.d: Likewise.
+	* gas/arc/asr.s, gas/arc/asr.d: Likewise.
+	* gas/arc/b.s, gas/arc/b.d: Likewise.
+	* gas/arc/bic.s, gas/arc/bic.d: Likewise.
+	* gas/arc/bl.s, gas/arc/bl.d: Likewise.
+	* gas/arc/brk.s, gas/arc/brk.d: Likewise.
+	* gas/arc/extb.s, gas/arc/extb.d: Likewise.
+	* gas/arc/extw.s, gas/arc/extw.d: Likewise.
+	* gas/arc/flag.s, gas/arc/flag.d: Likewise.
+	* gas/arc/j.s, gas/arc/j.d: Likewise.
+	* gas/arc/jl.s, gas/arc/jl.d: Likewise.
+	* gas/arc/ld.s, gas/arc/ld.d: Likewise.
+	* gas/arc/ld2.s, gas/arc/ld2.d: Likewise.
+	* gas/arc/lp.s, gas/arc/lp.d: Likewise.
+	* gas/arc/lsr.s, gas/arc/lsr.d: Likewise.
+	* gas/arc/mov.s, gas/arc/mov.d: Likewise.
+	* gas/arc/nop.s, gas/arc/nop.d: Likewise.
+	* gas/arc/or.s, gas/arc/or.d: Likewise.
+	* gas/arc/rlc.s, gas/arc/rlc.d: Likewise.
+	* gas/arc/ror.s, gas/arc/ror.d: Likewise.
+	* gas/arc/rrc.s, gas/arc/rrc.d: Likewise.
+	* gas/arc/sbc.s, gas/arc/sbc.d: Likewise.
+	* gas/arc/sexb.s, gas/arc/sexb.d: Likewise.
+	* gas/arc/sexw.s, gas/arc/sexw.d: Likewise.
+	* gas/arc/sleep.s, gas/arc/sleep.d: Likewise.
+	* gas/arc/add.s, gas/arc/add.d: Likewise.
+	* gas/arc/st.s, gas/arc/st.d: Likewise.
+	* gas/arc/sub.s, gas/arc/sub.d: Likewise.
+	* gas/arc/swi.s, gas/arc/swi.d: Likewise.
+	* gas/arc/xor.s, gas/arc/xor.d: Likewise.
 	* gas/arc/warn.s: Removed warning test case for setting of flags
 	followed by conditional branch, an arc5 only feature.
 
@@ -621,7 +625,7 @@ Sat Jan  6 13:34:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	generate a reloc.
 	* gas/mips/empic.s: Likewise.  Also, correct typo in comment
 	about expected relocs.
-	
+
         * gas/mips/mips32.s, gas/mips/mips32.d: New files for MIPS32
         instruction assembly test.
         * gas/mips/mips.exp: Add the test mentioned above.
@@ -747,7 +751,7 @@ Sat Jan  6 13:34:07 MET 2001  Jan Hubicka  <jh@suse.cz>
         * gas/ia64/dv-entry-err.s: Add stop to avoid DV error on cmp.eq.
         * gas/ia64/dv-imply.s: Add stops to avoid DV errors on cmp.REL.
         Test still fails due to insn opcode pattern changes.
-	
+
 2000-08-21  H.J. Lu <hjl@gnu.org>
 
 	* gas/all/cofftag.d: Support the strict COFF.
@@ -831,7 +835,7 @@ Sat Jan  6 13:34:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* gas/tic54x/*: New tests for tic54x.  NOTE: load page has been
 	moved into the LMA and is not printed separately by objdump any
 	longer.  This still needs to be tested.
-	
+
 2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
 
 	* gas/m68k/all.exp: Don't execute tests if the target is m68hc11&12.
@@ -861,7 +865,7 @@ Sat Jan  6 13:34:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* gas/macros/strings.s: New test: String expansion inside
 	macros.
 	* gas/macros/strings.d: New test results.
-	
+
 2000-06-04  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/prefix.s: Modify so we have at least one x86 test that
@@ -905,8 +909,8 @@ Sun May 21 10:08:08 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 2000-05-01  Nick Clifton  <nickc@cygnus.com>
 
-	* gasp/macro.out: Fix label numbers to remove leading zeroes. 
-	* gasp/mdouble.out: Fix label numbers to remove leading zeroes. 
+	* gasp/macro.out: Fix label numbers to remove leading zeroes.
+	* gasp/mdouble.out: Fix label numbers to remove leading zeroes.
 
 2000-04-25  Alan Modra  <alan@linuxcare.com.au>
 
@@ -921,10 +925,10 @@ Mon Apr 24 16:35:08 2000  Jim Wilson  <wilson@cygnus.com>
 	tnat.nz.orcm, tnat.nz.andcm inputs.
 	* gas/ia64/opc-i.pl: Insert padding nops before last dep.
 	* gas/ia64/opc-i.s: Regenerate.
-	
+
 	* gas/ia64/opc-i.s: Regenerate.
 	* gas/ia64/opc-f.pl: Add explicit stop at end.
-	
+
 2000-04-22  Timothy Wall  <twall@cygnus.com>
 
 	* gas/ia64/opc-f.d: Disassemble zeroes to verify break.f.
@@ -937,7 +941,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 
 	* gas/vtable/vtable.exp: Disable for ia64.
 	* gas/ia64: New testsuite directory.
-	
+
 2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/general.s: Check 16-bit immediates, and move call/jump
@@ -1050,7 +1054,7 @@ Tue Nov 30 23:02:01 1999  Jeffrey A Law  (law@cygnus.com)
 	Some ARM targets (eg PE) generate a reloc based on the label,
 	whilst others (eg ELF) generate a reloc based on the section
 	symbol.  This meant that the disassembled outputs would differ.
-	
+
 	* gas/arm/inst.s: Change test of BLPL instruction.
 	* gas/arm/inst.d: Change expected decode of BLPL instruction.
 	* gas/arm/arm7t.s: Remove use of .LC0 label in .word directive.
@@ -1068,7 +1072,7 @@ Tue Nov 30 23:02:01 1999  Jeffrey A Law  (law@cygnus.com)
 Mon Oct 11 13:37:51 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* lib/gas-defs.exp (regexp_diff): Allow '#...' to mean "some
- 	indeterminate number of extra lines here".
+	indeterminate number of extra lines here".
 
 	* gas/elf/elf.exp: Remove XFAILs.
 	* gas/elf/section0.d: Make pass on MIPS (and hopefully alpha).
@@ -1121,10 +1125,10 @@ Mon Oct  4 18:25:49 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/vtable/vtable.exp: Add [istarget "strongarm*-*-*"] to run
 	dump  test "entry0" instead of "entry1".
-	
+
 1999-09-01  Scott Bambrough  <scottb@netwinder.org>
- 
-        * gas/vtable/vtable.exp: Added [istarget "arm*-*-*"] to run dump 
+
+        * gas/vtable/vtable.exp: Added [istarget "arm*-*-*"] to run dump
         test "entry0" instead of "entry1".  ARM targets use REL relocs,
         and should use the test entry0.
 
@@ -1271,7 +1275,7 @@ Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 1999-06-03  Philip Blundell  <philb@gnu.org>
 
 	* gas/arm/arm7t.d, gas/arm/inst.d: Update to match current gas,
- 	bfd and opcodes.
+	bfd and opcodes.
 
 1999-05-28  Ian Lance Taylor  <ian@zembu.com>
 
@@ -1299,7 +1303,7 @@ Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 1999-05-02  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/mcore/allinsn.d: Update to match latest assembler
-	operations. 
+	operations.
 
 1999-04-16  DJ Delorie  <dj@cygnus.com>
 
@@ -1371,33 +1375,33 @@ Wed Apr 14 13:43:06 1999  Jeffrey A Law  (law@cygnus.com)
         to keep things from parallelizing where we don't want them to.
 
 	* gas/d30v/reloc.s: Fix warning.
-        
+
 	* gas/d30v/opt.d, reloc.d, inst.d: Rebuild.
 
-	* gas/d30v/label.s: New test. Check that labels are aligned 
+	* gas/d30v/label.s: New test. Check that labels are aligned
         on 8-byte boundaries.
 
 	* gas/d30v/guard-debug.s: New test. Test output with "-g".
 
-	* gas/d30v/serial.s: New test. Check for warnings with 
+	* gas/d30v/serial.s: New test. Check for warnings with
         illegal serial instructions.
 
 	* gas/d30v/warn_oddreg.s: New test. CHeck for warnings when
         odd-numbered registers are used for some instructions.
 
-	* gas/d30v/bittest.s: New test. Check for bit operation 
+	* gas/d30v/bittest.s: New test. Check for bit operation
         instructions (BCLR, BNOT, BSET, BTST) in the IU.
 
 	* gas/d30v/mul.s: New test. Check for restricted sequences
         in a bunch of different multiply instructions.
-	
+
 	* gas/vtable/vtable.exp (run_list_test): Don't
 	run test on D30V.
 
 1999-03-05  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/all/gas.exp: Expect strongarm-coff target to fail cofftag
-	test. 
+	test.
 
 1999-02-13  Jim Blandy  <jimb@zwingli.cygnus.com>
 
@@ -1407,7 +1411,7 @@ Wed Apr 14 13:43:06 1999  Jeffrey A Law  (law@cygnus.com)
 	* gas/mips/elf_e_flags.c, gas/mips/elf_e_flags.s: New files.
 
 	* lib/gas-defs.exp (run_dump_test): Document.  It's not
- 	really trivial.
+	really trivial.
 
 	* lib/gas-defs.exp (run_dump_test): Clean up logic for guessing
 	$program (the dump tool).
@@ -1572,17 +1576,17 @@ Sun Jun 21 12:44:43 1998  Nick Clifton  <nickc@cygnus.com>
 Wed Jun 17 14:02:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/delay.d: Add -mcpu=NNNN to gas flags to let test case
- 	run on differently targeted assembler.
+	run on differently targeted assembler.
 	* gas/mips/{ld-ilocks-addr32,ld-svr4pic.d}: Ditto.
 	* gas/mips/{ld-xgot.d,lif-svr4pic.d,lif-xgot.d}: Same.
 	* gas/mips/{mips16.d,mips4.d,nodelay.d}: Again.
 	* gas/mips/{trunc.d,uld.d,ulh-xgot.d,usd.d}: And then some.
-	
+
 	* gas/mips/ld-ilocks.d: Removed disassembler flags to let target
- 	defaults go unmodified.  Replaced $f4/$f5 with $fp[45], as the
+	defaults go unmodified.  Replaced $f4/$f5 with $fp[45], as the
 	original `ld.d' had.  Find `ld.s'.
 	* gas/mips/mul-ilocks.d: Nearly ditto.
-	
+
 Thu Jun 11 16:50:46 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/inst.d: Expect repeati instrucitons to be combined.
@@ -1594,7 +1598,7 @@ Mon Jun  8 18:47:11 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/array.d: Updated to match latest assembler results.
 	* gas/d30v/reloc.d: Partially updated to match latest assembler
-	results. 
+	results.
 
 Fri Jun  5 19:15:59 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
@@ -1614,7 +1618,7 @@ Mon Jun  1 17:00:22 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mips/div-ilocks.d: Handle both "break" instruction variants.
 	* gas/mips/{div.d, mul-ilocks.d, mul.d}: Likewise.
-	
+
 Fri May 29 12:07:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/mips.exp: Adjust ilocks initialization to match current
@@ -1648,8 +1652,8 @@ Tue May 19 18:17:10 1998  Ian Lance Taylor  <ian@cygnus.com>
 Mon May 18 13:11:45 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/{div,ld,mul}.d: Add assembler -mcpu= flag to match
- 	disassembler.
-	
+	disassembler.
+
 Fri May 15 14:51:01 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* gas/mips/mips.exp: Distinguish chains with 32-bit addresses.
@@ -1662,16 +1666,16 @@ Wed May 13 15:06:31 1998  Doug Evans  <devans@canuck.cygnus.com>
 Thu May  7 13:05:25 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/break20.[sd]: New tests for 20-bit operand break and
- 	sddbp instructions. 
+	sddbp instructions.
 	* gas/mips/trap20.[sd]: New tests for 20-bit operand trap
- 	instructions. 
+	instructions.
 	* gas/mips/mips.exp: Run them.
 
 Thu Apr 30 11:55:01 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/d30v/{inst,array,opt,reloc}.d: Accept <symbol+offset> labels
- 	in disassembly, where the offset is in hex and has a "0x" prefix.
-	
+	in disassembly, where the offset is in hex and has a "0x" prefix.
+
 Tue Apr 28 16:38:34 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/lineno.[sd]: Assembly source line number test.
@@ -1687,14 +1691,14 @@ Mon Mar 23 10:47:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* gas/all/align.s: Back out ".section text" change below;
 	use ".text" again.
 	* gas/macros/semi.s: Ditto.
-	
+
 Fri Mar 20 18:51:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/all/align.s: Identify ".text" section explicitly.
 	* gas/macros/semi.s: Ditto.
-	
-	
-	
+
+
+
 Mon Mar  2 13:30:40 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* gas/m32r/allinsn.[sd] (ldi8a,ldi16a): Delete.
@@ -1857,29 +1861,29 @@ Tue Sep 16 15:27:08 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge changes from Martin Hunt:
 
-	* gas/d30v/inst.s: Add some new tests. 
+	* gas/d30v/inst.s: Add some new tests.
 
- 	* gas/d30v/{inst, opt, reloc}.d: Update results with
- 	new disassembler changes.
+	* gas/d30v/{inst, opt, reloc}.d: Update results with
+	new disassembler changes.
 
-	* gas/d30v/inst.[sd]: Update examples for d*i instructions. 
+	* gas/d30v/inst.[sd]: Update examples for d*i instructions.
 
 	* gas/d30v/*.d: Update all test results because
- 	of new ".s" and ".l" extensions.
+	of new ".s" and ".l" extensions.
 
 	* gas/d30v/inst.[sd]: Correct entry for mulx2h.
-	* gas/d30v/opt.[sd]: Correct st2w instruction. 
+	* gas/d30v/opt.[sd]: Correct st2w instruction.
 
 	* gas/d30v/align.d: Change expected output.
 
-	* gas/d30v/reloc.[sd]: Add test case. 
+	* gas/d30v/reloc.[sd]: Add test case.
 
 	* gas/d30v/array.[sd]: New test case.
 
-	* gas/d30v/opt.[sd]: Added more test cases. 
+	* gas/d30v/opt.[sd]: Added more test cases.
 
 	* gas/d30v/opt.s: Add test cases.
-	* gas/d30v/reloc.s: Fix a test case.	
+	* gas/d30v/reloc.s: Fix a test case.
 	* gas/d30v/{opt,reloc}.d: Regenerate.
 
 Mon Sep  8 14:21:23 1997  Doug Evans  <dje@canuck.cygnus.com>
@@ -1939,7 +1943,7 @@ Mon Jun  2 12:09:02 1997  Gavin Koch  <gavin@cygnus.com>
 
 Mon Jun  2 12:03:32 1997  Gavin Koch  <gavin@.cygnus.com>
 
-	* gas/mips/mul.{d,s}: End the tests with no-ops. 
+	* gas/mips/mul.{d,s}: End the tests with no-ops.
 
 Mon Jun  2 11:48:58 1997  Gavin Koch  <gavin@cygnus.com>
 
@@ -2026,7 +2030,7 @@ Thu Feb 27 15:21:46 1997  Fred Fish  <fnf@cygnus.com>
 	* gas/tic80/{align.d, align.lst, align.s} New test for the
 	".align" pseudop.
 	* gas/tic80/tic80.exp: Run the align test.
-	
+
 Wed Feb 26 20:36:46 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gas/tic80/{float.d, float.lst, float.s}: New tests for
@@ -2036,7 +2040,7 @@ Wed Feb 26 20:36:46 1997  Fred Fish  <fnf@cygnus.com>
 Wed Feb 26 15:16:04 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gas/tic80/{regops2.d, regops2.lst, regops2.s, regops3.d,
- 	regops3.lst, regops3.s, regops4.d, regops4.lst, regops4.s}:
+	regops3.lst, regops3.s, regops4.d, regops4.lst, regops4.s}:
 	New tests for :m and :s operand modifiers.
 	* gas/tic80/tic80.exp: Run the regops2, regops3, and regops4 tests.
 
@@ -2056,7 +2060,7 @@ Mon Feb 24 10:52:12 1997  Bob Manson  <manson@charmed.cygnus.com>
 Mon Feb 24 10:40:28 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gas/tic80/{add.d, bitnum.d, ccode.d, cregops.d, endmask.d,
-	regops.d, relocs1.d, 
+	regops.d, relocs1.d,
 	(relocs1.c): Add file for reference.
 	(relocs1b.d): Split reloc table contents test to different test file.
 	(relocs2.c): Add test that uses various types (char, short, int, ...) of
@@ -2086,7 +2090,7 @@ Sun Feb 23 17:22:00 1997  Dawn Perchik  <dawn@cygnus.com>
 Sat Feb 22 20:24:23 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gas/tic80/{add.lst, bitnum.lst, ccode.lst, cregops.lst,
- 	endmask.lst, regops.lst}: Remove ^M's from end of lines.
+	endmask.lst, regops.lst}: Remove ^M's from end of lines.
 	* gas/tic80/bitnum.s: Add comment to each line showing value
 	that symbolic BITNUM assembles to.  Add coverage for raw
 	numeric values for the BITNUM operand.
@@ -2115,7 +2119,7 @@ Tue Feb 18 13:37:06 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/unsorted/unsorted.exp (align4 tests): Tweak expected
 	output.
-	
+
 Fri Feb 14 17:56:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/align.d, gas/all/align.s: New test.
@@ -2138,7 +2142,7 @@ Wed Feb 12 12:33:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 Tue Feb 11 14:45:39 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gas/tic80/{add.d, add.lst, add.s, bitnum.d, bitnum.lst, bitnum.s,
- 	ccode.d, ccode.lst, ccode.s, cregops.d, cregops.lst, cregops.s,
+	ccode.d, ccode.lst, ccode.s, cregops.d, cregops.lst, cregops.s,
 	endmask.d, endmask.lst, endmask.s, regops.d, regops.lst, regops.s,
 	tic80.exp}: New files for TIc80 test cases.
 
@@ -2148,11 +2152,11 @@ Tue Feb 11 15:46:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 Mon Feb 10 22:24:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
-        * gas/mips/itbl-test.c: Add copyright message and fix indentation.   
+        * gas/mips/itbl-test.c: Add copyright message and fix indentation.
 
 Mon Feb 10 17:54:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
-	* gas/mips/itbl-test.c: New file.  Stand-alone assembler and 
+	* gas/mips/itbl-test.c: New file.  Stand-alone assembler and
 	dissassembler for itbl support.
 
 Mon Feb 10 17:20:00 1997  Dawn Perchik  <dawn@cygnus.com>
@@ -2398,7 +2402,7 @@ Sat Aug 31 01:25:03 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/basic.exp (do_branch): Check offsets in branch insns.
 	(do_jumps): Likewise.
-	
+
 Fri Aug 30 00:37:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/misc.s: Tweak register numbers for better testing.
@@ -2433,10 +2437,10 @@ Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/basic.exp (do_branch): Test instruction bit patterns,
 	but not displacements (yet).
-	
+
 	* gas/v850/basic.exp (do_bit): Test instruction bit patterns.
 
-	* gas/v850/basic.exp (do_arith): Test instruction bit patterns.	
+	* gas/v850/basic.exp (do_arith): Test instruction bit patterns.
 	* gas/v850/arith.s: Tweak constants for better testing.
 
 	* gas/v850/basic.exp (do_misc): No longer expect failures
@@ -2462,7 +2466,7 @@ Thu Aug 15 16:25:05 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/arm/arm.exp: Change inst.s test to check objdump.
 	* gas/arm/inst.d: Added.
-	
+
 Thu Aug 15 16:06:02 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/arm/thumb.s: Added.
@@ -2511,10 +2515,10 @@ Thu Jul  4 14:23:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 Thu Jul  4 14:01:46 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/mips/mips.exp: Add new tests for processors with interlocks
- 	on div and mul.
+	on div and mul.
 	* gas/mips/div-ilocks.d: Added.
 	* gas/mips/mul-ilocks.d: Added.
-	
+
 Wed Jul  3 14:20:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/gas.exp: Remove setup_xfail for h8300*-*-* for two tests
@@ -2656,7 +2660,7 @@ Wed Jan 10 12:40:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 Wed Jan  3 22:59:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/ulh-svr4pic.d: Update for tc-mips.c load_address
- 	change.
+	change.
 
 Fri Nov 17 10:32:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -2892,7 +2896,7 @@ Tue Aug  1 11:41:30 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 Mon Jul 31 18:19:26 1995  steve chamberlain  <sac@slash.cygnus.com>
 
- 	* gasp/*: New.
+	* gasp/*: New.
 	* Makefile.in: Use gasp tests.
 	* config/default.exp: Add gasp stuff.
 
@@ -2921,13 +2925,13 @@ Sun May 21 20:26:18 1995  Jeff Law  (law@snake.cs.utah.edu)
 	* gas/hppa/unsorted/unsorted.exp: Disable align4 tests for
 	ELF targets.
 
-Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)	
+Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
 
 	* arm/arm7dm.s: New file -- tests for ARM7DM instructions.
 	* arm/arm6.s: Correct bogus tests.
 	* arm/gas.exp (arm6.s): Is now a valid test.
 	(arm7dm.s): New test.
-	* arm/float.s: Add load/store multiple floating point instruction 
+	* arm/float.s: Add load/store multiple floating point instruction
 	tests.
 
 Wed May  3 13:14:44 1995  Jeff Law  (law@snake.cs.utah.edu)
@@ -3090,7 +3094,7 @@ Mon Nov 28 00:40:26 1994  Jeff Law  (law@snake.cs.utah.edu)
 Tue Nov 22 23:38:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/reloc.exp: Minor tweaks to match current PA ELF
-	output. 
+	output.
 
 Fri Nov 18 17:56:57 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
@@ -3419,7 +3423,7 @@ Sun Dec  5 19:24:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 Wed Dec  1 10:44:18 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/reloc.exp: Run the first half of bogus R_EXIT
-	test for ELF.  
+	test for ELF.
 
 Tue Nov 30 13:43:21 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
@@ -3496,7 +3500,7 @@ Mon Nov  1 23:37:58 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/reloc.exp (reloc_reduce): Correct offsets at
 	which specific relocations are expected to be found.
-	
+
 Sat Oct 30 14:12:31 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/unsorted/unsorted.exp (ss_align): Remove OSF xfail.
