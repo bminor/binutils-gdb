@@ -1,3 +1,8 @@
+Wed Oct 12 10:08:19 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* partial-stab.h (N_TEXT): Delete GDB_TARGET_IS_HPPA kludge; they
+	are no longer needed as of gcc-2.6.0.
+
 Tue Oct 11 15:51:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* lynx-nat.c (child_wait): Correct handling of byte reversed SPARC

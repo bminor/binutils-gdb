@@ -79,20 +79,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring [(nsl = strlen (namestring)) - 1] == 'o'
 		  && namestring [nsl - 2] == '.')
-#ifdef GDB_TARGET_IS_HPPA
-              /* some cooperation from gcc to get around ld stupidity */
-              || (namestring[0] == 'e' && STREQ (namestring, "end_file."))
-#endif
 	      )
 	    {
-#ifndef GDB_TARGET_IS_HPPA
 	      if (objfile -> ei.entry_point <  CUR_SYMBOL_VALUE &&
 		  objfile -> ei.entry_point >= last_o_file_start)
 		{
 		  objfile -> ei.entry_file_lowpc = last_o_file_start;
 		  objfile -> ei.entry_file_highpc = CUR_SYMBOL_VALUE;
 		}
-#endif
 	      if (past_first_source_file && pst
 		  /* The gould NP1 uses low values for .o and -l symbols
 		     which are not the address.  */
