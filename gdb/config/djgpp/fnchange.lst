@@ -177,6 +177,8 @@
 @V@/gdb/testsuite/gdb.c++/method.exp @V@/gdb/testsuite/gdb.cxx/method.exp
 @V@/gdb/testsuite/gdb.c++/misc.cc @V@/gdb/testsuite/gdb.cxx/misc.cc
 @V@/gdb/testsuite/gdb.c++/misc.exp @V@/gdb/testsuite/gdb.cxx/misc.exp
+@V@/gdb/testsuite/gdb.c++/namespace.cc @V@/gdb/testsuite/gdb.cxx/namespace.cc
+@V@/gdb/testsuite/gdb.c++/namespace.exp @V@/gdb/testsuite/gdb.cxx/namespace.exp
 @V@/gdb/testsuite/gdb.c++/overload.cc @V@/gdb/testsuite/gdb.cxx/overload.cc
 @V@/gdb/testsuite/gdb.c++/overload.exp @V@/gdb/testsuite/gdb.cxx/overload.exp
 @V@/gdb/testsuite/gdb.c++/ovldbreak.cc @V@/gdb/testsuite/gdb.cxx/ovldbreak.cc

@@ -126,6 +126,12 @@ export DEFAULT_LEX=flex
 # Define explicitly the .exe extension because on W95 with LFN=y
 # the check might fail
 export am_cv_exeext=.exe
+# ltconfig wants to compute the maximum command-line length, but
+# Bash 2.04 doesn't like that (it doesn't have any limit ;-), and
+# reboots the system.  We know our limit in advance, so we don't
+# need all that crap.  Assuming that the environment size is less
+# than 4KB, we can afford 12KB of command-line arguments.
+export lt_cv_sys_max_cmd_len=12288
 
 # The configure script needs to see the `install-sh' script, otherwise
 # it decides the source installation is broken.  But "make install" will
