@@ -1,3 +1,9 @@
+2002-01-14   Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/armv1-bad.s gas/arm/armv1-bad.l: New files.
+	* gas/arm/arm.exp (run_error_test): New proc.
+	(armv1-bad): New error test.
+
 2002-01-11   Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/ldconst.s gas/arm/ldconst.d: New files.  Test ldr with

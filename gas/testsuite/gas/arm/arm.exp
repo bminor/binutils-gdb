@@ -1,10 +1,25 @@
 #
 # Some ARM tests
 #
+proc run_errors_test { name opts tname} {
+    global srcdir subdir
+    set testname "$tname"
+    set file $srcdir/$subdir/$name
+    gas_run ${name}.s $opts ">&${name}.out"
+    if { [regexp_diff "${name}.out" "${file}.l"] } then {
+        fail $testname
+        verbose "output is [file_contents "${name}.out"]" 2
+        return
+    }
+    pass $testname
+}
+
 if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "inst"
 
     run_dump_test "ldconst"
+
+    run_errors_test "armv1-bad" "-marm1" "ARM v1 errors"
 
     gas_test "arm3.s" "-marm3" $stdoptlist "Arm 3 instructions"
 
