@@ -7,5 +7,5 @@
 # The headers in the directory hp-include override system headers
 # and tell GDB to use BSD executable file format (hence -Ihp-include)
 MT_CFLAGS=-Ihp-include
-TDEPFILES= exec.o m68k-pinsn.o
+TDEPFILES= m68k-pinsn.o
 TM_FILE= tm-hp300hpux.h

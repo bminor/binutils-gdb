@@ -1,5 +1,22 @@
 Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	hp300 native support (hp300hpux untested).
+
+	* hp300ux-xdep.c: removed.
+	* xm-hp300bsd.h (REGISTER_U_ADDR): removed.
+	* xm-hp300hpux.h: updated copyright.
+	  (ATTACH_DETACH, FETCH_INFERIOR_REGISTERS): removed.
+	* nm-hp300bsd.h, nm-hp300hpux.h, hp300ux-nat.c: new files.
+	* Makefile.in (HFILES): added nm-hp300bsd.h and nm-hp300hpux.h.
+	* config/hp300bsd.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o coredep.o corelow.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/hp300bsd.mt (TDEPFILES): removed exec.o.
+	* config/hp300hpux.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/hp300hpux.mt (TDEPFILES): removed exec.o.
+
 	Vax ultrix native support.
 
 	* nm-vax.h: new file.

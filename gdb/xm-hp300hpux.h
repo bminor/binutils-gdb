@@ -1,5 +1,5 @@
-/* Parameters for execution on an HP 9000 model 320, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+/* Parameters for HP 9000 model 320 hosting, for GDB, the GNU debugger.
+   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -24,9 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Define this to indicate problems with traps after continuing.  */
 #define HP_OS_BUG
-
-/* fetch_inferior_registers is in hp300hpux-dep.c.  */
-#define FETCH_INFERIOR_REGISTERS
 
 /* Set flag to indicate whether HP's assembler is in use. */
 #ifdef __GNUC__
@@ -80,10 +77,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
      ? (&u.u_pcb.pcb_mc68881[FMC68881_R0 + (((regno) - FP0_REGNUM) * 3)]) \
      : (&u.u_pcb.pcb_mc68881[FMC68881_C + ((regno) - FPC_REGNUM)])))	\
    - ((char *) (& u)))
-
-/* Do implement the attach and detach commands.  */
-
-#define ATTACH_DETACH
 
 /* Interface definitions for kernel debugger KDB.  */
 

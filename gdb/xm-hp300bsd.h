@@ -37,30 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Get kernel u area address at run-time using BSD style nlist ().  */
 #define KERNEL_U_ADDR_BSD
 
-/* This is a piece of magic that is given a register number REGNO
-   and as BLOCKEND the address in the system of the end of the user structure
-   and stores in ADDR the address in the kernel or core dump
-   of that register.  */
-
-#define REGISTER_U_ADDR(addr, blockend, regno)				\
-{									\
-  if (regno < PS_REGNUM)						\
-    addr = (int) &((struct frame *)(blockend))->f_regs[regno];		\
-  else if (regno == PS_REGNUM)						\
-    addr = (int) &((struct frame *)(blockend))->f_stackadj;		\
-  else if (regno == PC_REGNUM)						\
-    addr = (int) &((struct frame *)(blockend))->f_pc;			\
-  else if (regno < FPC_REGNUM)						\
-    addr = (int)							\
-      &((struct user *)0)->u_pcb.pcb_fpregs.fpf_regs[((regno)-FP0_REGNUM)*3];\
-  else if (regno == FPC_REGNUM)						\
-    addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpcr;	\
-  else if (regno == FPS_REGNUM)						\
-    addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpsr;	\
-  else									\
-    addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpiar;	\
-}
-
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 

@@ -95,7 +95,7 @@ go32-xdep.c
 gould-pinsn.c
 gould-xdep.c
 h8300-tdep.c
-hp300ux-xdep.c
+hp300ux-nat.c
 hppa-pinsn.c
 hppab-core.c
 hppab-nat.c
@@ -147,6 +147,8 @@ nindy-tdep.c
 nm-apollo68b.h
 nm-apollo68v.h
 nm-delta88.h
+nm-hp300bsd.h
+nm-hp300hpux.h
 nm-hppab.h
 nm-hppah.h
 nm-i386bsd.h
