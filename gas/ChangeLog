@@ -1,3 +1,7 @@
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* sb.c: Include <stdlib.h> if exists for abort ().
+
 2000-07-19  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (hppa_fix_adjustable): Correct LR%/RR% comment.
