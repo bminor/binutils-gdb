@@ -661,6 +661,13 @@ md_begin ()
 	  if (mips_4010 == -1)
 	    mips_4010 = 1;
 	}
+      else if (strcmp (cpu, "r5000") == 0
+	       || strcmp (cpu, "mips64vr5000") == 0)
+	{
+	  mips_isa = 4;
+	  if (mips_cpu == -1)
+	    mips_cpu = 5000;
+	}
       else if (strcmp (cpu, "r8000") == 0
 	       || strcmp (cpu, "mips4") == 0)
 	{
@@ -694,12 +701,16 @@ md_begin ()
   if (mips_4100 < 0)
     mips_4100 = 0;
 
-  if (mips_4650 || mips_4010 || mips_4100 || mips_cpu == 4300)
+  if (mips_4650
+      || mips_4010
+      || mips_4100
+      || mips_cpu == 4300
+      || mips_cpu == 5000)
     interlocks = 1;
   else
     interlocks = 0;
 
-  if (mips_cpu == 4300)
+  if (mips_cpu == 4300 || mips_cpu == 5000)
     cop_interlocks = 1;
   else
     cop_interlocks = 0;
@@ -1097,8 +1108,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	{
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
-	     insert two NOPS.  The R4650, VR4100 and VR4300 have
-	     interlocks.  */
+	     insert two NOPS.  Some newer processors have interlocks.  */
 	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
@@ -1108,8 +1118,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	{
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
-	     insert a NOP.  The R4650, VR4100 and VR4300 have
-	     interlocks.  */
+	     insert a NOP.  Some newer processors have interlocks.  */
 	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
@@ -1120,11 +1129,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	 instructions: 1) setting the condition codes using a move to
 	 coprocessor instruction which requires a general coprocessor
 	 delay and then reading the condition codes 2) reading the HI
-	 or LO register and then writing to it (except on the R4650,
-	 VR4100, and VR4300 which have interlocks).  If we are not
-	 already emitting a NOP instruction, we must check for these
-	 cases compared to the instruction previous to the previous
-	 instruction.  */
+	 or LO register and then writing to it (except on processors
+	 which have interlocks).  If we are not already emitting a NOP
+	 instruction, we must check for these cases compared to the
+	 instruction previous to the previous instruction.  */
       if (nops == 0
 	  && ((mips_isa < 4
 	       && (prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
@@ -5222,7 +5230,15 @@ mips_ip (str, ip)
 	      ++insn;
 	      continue;
 	    }
-	  insn_error = "opcode not supported on this processor";
+	  if (insn_isa <= mips_isa)
+	    insn_error = "opcode not supported on this processor";
+	  else
+	    {
+	      static char buf[100];
+
+	      sprintf (buf, "opcode requires -mips%d or greater", insn_isa);
+	      insn_error = buf;
+	    }
 	  return;
 	}
 
@@ -6294,6 +6310,13 @@ md_parse_option (c, arg)
 		  }
 		break;
 
+	      case '5':
+		if (strcmp (p, "5000") == 0
+		    || strcmp (p, "5k") == 0
+		    || strcmp (p, "5K") == 0)
+		  mips_cpu = 5000;
+		break;
+
 	      case '6':
 		if (strcmp (p, "6000") == 0
 		    || strcmp (p, "6k") == 0
@@ -6314,7 +6337,7 @@ md_parse_option (c, arg)
 		break;
 	      }
 
-	    if (sv && mips_cpu != 4300 && mips_cpu != 4100)
+	    if (sv && mips_cpu != 4300 && mips_cpu != 4100 && mips_cpu != 5000)
 	      {
 		as_bad ("ignoring invalid leading 'v' in -mcpu=%s switch", arg);
 		return 0;

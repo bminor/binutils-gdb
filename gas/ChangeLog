@@ -1,3 +1,19 @@
+Mon Sep  9 10:57:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Recognize r5000 for cpu.  If
+	mips_cpu is 5000, set interlocks and cop_interlocks.
+	(mips_ip): Give a better error message if the ISA level is wrong.
+	(md_parse_option): Recognize -mcpu=[v][r]5000.
+
+Sat Sep  7 13:25:55 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-mips.c (COUNT_TOP_ZEROES): Added macro to count
+ 	leading zeroes.
+	(load_register): Ensure hi32 bits are not lost during lo32bit
+ 	processing. Fix shift offset that was overflowing into the next
+ 	instruction field. Add code to generate shorter sequences for
+ 	constants with a single contiguous seqeuence of ones.
+
 start-sanitize-d10v
 Fri Sep  6 17:07:12 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
