@@ -1,18 +1,18 @@
 /* coff object file format
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
-   
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+
    This file is part of GAS.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
@@ -28,9 +28,8 @@
 #include "bfd.h"
 #include "coff/a29k.h"
 
-/* This internal_lineno crap is to stop namespace pollution from the bfd internal 
+/* This internal_lineno crap is to stop namespace pollution from the bfd internal
    coff headerfile. */
-
 
 #define internal_lineno bfd_internal_lineno
 #include "coff/internal.h"
@@ -46,7 +45,7 @@
   #define SYMENT struct internal_syment
   #define AUXENT union internal_auxent
   #define SCNHDR struct internal_scnhdr
-  #define LINENO struct bfd_internal_lineno 
+  #define LINENO struct bfd_internal_lineno
   #define AOUTHDR struct internal_aouthdr
   #define FILHDR struct internal_filehdr
   #define AOUTHDRSZ sizeof(struct external_aouthdr)
@@ -55,13 +54,22 @@
   #define x_tagndx x_tagndx.l*/
 #define TARGET_FORMAT "coff-a29k-big"
 extern bfd *stdoutput;
-#else
-help me
-#endif
-#else
-#include "coff.gnu.h"
-#endif
-    
+
+#endif /* TC_A29K */
+
+#ifdef TC_I386
+#  include "bfd.h"
+#  include "coff/i386.h"
+#  define internal_lineno bfd_internal_lineno
+#  include "coff/internal.h"
+#  undef internal_lineno
+#  define TARGET_FORMAT "coff-i386"
+extern bfd *stdoutput;
+
+#endif /* TC_I386 */
+
+#else /* not BFD_HEADERS */
+
 #ifdef USE_NATIVE_HEADERS
 #include <filehdr.h>
 #include <aouthdr.h>
@@ -71,51 +79,58 @@ help me
 #include <syms.h>
 #include <reloc.h>
 #include <sys/types.h>
-#endif /* USE_NATIVE_HEADERS */
-    
-    /* Define some processor dependent values according to the processor we are
-       on. */
+#else /* not USE_NATIVE_HEADERS */
+#include "coff_gnu.h"
+#endif /* not USE_NATIVE_HEADERS */
+
+#endif /* not BFD_HEADERS */
+
+/* Define some processor dependent values according to the processor we are on. */
 #ifdef TC_M68K
-    
-#define BYTE_ORDERING		F_AR32W    /* See filehdr.h for more info. */
-#ifndef FILE_HEADER_MAGIC
-#define FILE_HEADER_MAGIC	MC68MAGIC  /* ... */
-#endif /* FILE_HEADER_MAGIC */
-    
-#elif defined(TC_I386)
 
-#define BYTE_ORDERING		F_AR32WR   /* See filehdr.h for more info. */
+#define BYTE_ORDERING		F_AR32W	/* See filehdr.h for more info. */
 #ifndef FILE_HEADER_MAGIC
-#define FILE_HEADER_MAGIC	I386MAGIC  /* ... */
+#define FILE_HEADER_MAGIC	MC68MAGIC	/* ... */
 #endif /* FILE_HEADER_MAGIC */
 
-#elif defined(TC_I960)
+#endif /* TC_M68K */
 
-#define BYTE_ORDERING		F_AR32WR   /* See filehdr.h for more info. */
+#if defined(TC_I386)
+
+#define BYTE_ORDERING		F_AR32WR	/* See filehdr.h for more info. */
 #ifndef FILE_HEADER_MAGIC
-#define FILE_HEADER_MAGIC	I960ROMAGIC  /* ... */
+#define FILE_HEADER_MAGIC	I386MAGIC	/* ... */
 #endif /* FILE_HEADER_MAGIC */
 
-#elif defined(TC_A29K)
+#endif /* TC_I386 */
+
+#if defined(TC_I960)
+
+#define BYTE_ORDERING		F_AR32WR	/* See filehdr.h for more info. */
+#ifndef FILE_HEADER_MAGIC
+#define FILE_HEADER_MAGIC	I960ROMAGIC	/* ... */
+#endif /* FILE_HEADER_MAGIC */
+
+#endif /* TC_I960 */
+
+#if defined(TC_A29K)
 
 #define BYTE_ORDERING		F_AR32W	/* big endian. */
 #ifndef FILE_HEADER_MAGIC
 #define FILE_HEADER_MAGIC	SIPFBOMAGIC
 #endif /* FILE_HEADER_MAGIC */
 
-#else
-you lose
-#endif 
-    
+#endif /* TC_A29K */
+
 #ifndef OBJ_COFF_MAX_AUXENTRIES
 #define OBJ_COFF_MAX_AUXENTRIES 1
 #endif /* OBJ_COFF_MAX_AUXENTRIES */
-    
-    extern const short seg_N_TYPE[];
-extern const segT  N_TYPE_seg[];
+
+extern const short seg_N_TYPE[];
+extern const segT N_TYPE_seg[];
 
 /* Magic number of paged executable. */
-#define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE	(OMAGIC)
+#define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE	(FILE_HEADER_MAGIC)
 
 #ifndef BFD_HEADERS
 
@@ -134,23 +149,26 @@ extern const segT  N_TYPE_seg[];
 
 /* Symbol table entry data type */
 
-typedef struct {
+typedef struct
+  {
 #ifdef BFD_HEADERS
-	struct internal_syment  ost_entry;       /* Basic symbol */
-	union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES];      /* Auxiliary entry. */
+    struct internal_syment ost_entry;	/* Basic symbol */
+    union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES];	/* Auxiliary entry. */
 #else
-	SYMENT ost_entry;       /* Basic symbol */
-	AUXENT ost_auxent[OBJ_COFF_MAX_AUXENTRIES];      /* Auxiliary entry. */
+    SYMENT ost_entry;		/* Basic symbol */
+    AUXENT ost_auxent[OBJ_COFF_MAX_AUXENTRIES];	/* Auxiliary entry. */
 #endif
-	unsigned int ost_flags; /* obj_coff internal use only flags */
-} obj_symbol_type;
+    unsigned int ost_flags;	/* obj_coff internal use only flags */
+  }
+
+obj_symbol_type;
 
 #define DO_NOT_STRIP	0
 #define DO_STRIP	1
 
 /* Symbol table macros and constants */
 
-/* Possible and usefull section number in symbol table 
+/* Possible and usefull section number in symbol table
  * The values of TEXT, DATA and BSS may not be portable.
  */
 
@@ -204,7 +222,7 @@ typedef struct {
 /* The zeroes if symbol name is longer than 8 chars */
 #define S_GET_ZEROES(s)		((s)->sy_symbol.ost_entry.n_zeroes)
 /* The value of the symbol */
-#define S_GET_VALUE(s)		((unsigned) ((s)->sy_symbol.ost_entry.n_value))	
+#define S_GET_VALUE(s)		((unsigned) ((s)->sy_symbol.ost_entry.n_value))
 /* The numeric value of the segment */
 #define S_GET_SEGMENT(s)        (N_TYPE_seg[(s)->sy_symbol.ost_entry.n_scnum+4])
 /* The data type */
@@ -290,27 +308,27 @@ typedef struct {
  * differently.
  */
 
-#define SF_I960_MASK	(0x000001ff) /* Bits 0-8 are used by the i960 port. */
-#define SF_SYSPROC	(0x0000003f) 	     /* bits 0-5 are used to store the sysproc number */
-#define SF_IS_SYSPROC	(0x00000040)	     /* bit 6 marks symbols that are sysprocs */
-#define SF_BALNAME	(0x00000080)	     /* bit 7 marks BALNAME symbols */
-#define SF_CALLNAME	(0x00000100)	     /* bit 8 marks CALLNAME symbols */
+#define SF_I960_MASK	(0x000001ff)	/* Bits 0-8 are used by the i960 port. */
+#define SF_SYSPROC	(0x0000003f)	/* bits 0-5 are used to store the sysproc number */
+#define SF_IS_SYSPROC	(0x00000040)	/* bit 6 marks symbols that are sysprocs */
+#define SF_BALNAME	(0x00000080)	/* bit 7 marks BALNAME symbols */
+#define SF_CALLNAME	(0x00000100)	/* bit 8 marks CALLNAME symbols */
 
-#define SF_NORMAL_MASK	(0x0000ffff) /* bits 12-15 are general purpose. */
+#define SF_NORMAL_MASK	(0x0000ffff)	/* bits 12-15 are general purpose. */
 
-#define SF_STATICS	(0x00001000)	     /* Mark the .text & all symbols */
-#define SF_DEFINED	(0x00002000)	     /* Symbol is defined in this file */
-#define SF_STRING	(0x00004000)	     /* Symbol name length > 8 */
-#define SF_LOCAL	(0x00008000)	     /* Symbol must not be emitted */
+#define SF_STATICS	(0x00001000)	/* Mark the .text & all symbols */
+#define SF_DEFINED	(0x00002000)	/* Symbol is defined in this file */
+#define SF_STRING	(0x00004000)	/* Symbol name length > 8 */
+#define SF_LOCAL	(0x00008000)	/* Symbol must not be emitted */
 
-#define SF_DEBUG_MASK	(0xffff0000) /* bits 16-31 are debug info */
+#define SF_DEBUG_MASK	(0xffff0000)	/* bits 16-31 are debug info */
 
-#define SF_FUNCTION	(0x00010000)	     /* The symbol is a function */
-#define SF_PROCESS	(0x00020000)	     /* Process symbol before write */
-#define SF_TAGGED	(0x00040000)	     /* Is associated with a tag */
-#define SF_TAG		(0x00080000)	     /* Is a tag */
-#define SF_DEBUG	(0x00100000)	     /* Is in debug or abs section */
-#define SF_GET_SEGMENT	(0x00200000)	     /* Get the section of the forward symbol. */
+#define SF_FUNCTION	(0x00010000)	/* The symbol is a function */
+#define SF_PROCESS	(0x00020000)	/* Process symbol before write */
+#define SF_TAGGED	(0x00040000)	/* Is associated with a tag */
+#define SF_TAG		(0x00080000)	/* Is a tag */
+#define SF_DEBUG	(0x00100000)	/* Is in debug or abs section */
+#define SF_GET_SEGMENT	(0x00200000)	/* Get the section of the forward symbol. */
 /* All other bits are unused. */
 
 /* Accessors */
@@ -328,11 +346,11 @@ typedef struct {
 #define SF_GET_TAGGED(s)	((s)->sy_symbol.ost_flags & SF_TAGGED)
 #define SF_GET_TAG(s)		((s)->sy_symbol.ost_flags & SF_TAG)
 #define SF_GET_GET_SEGMENT(s)	((s)->sy_symbol.ost_flags & SF_GET_SEGMENT)
-#define SF_GET_I960(s)		((s)->sy_symbol.ost_flags & SF_I960_MASK) /* used by i960 */
-#define SF_GET_BALNAME(s)	((s)->sy_symbol.ost_flags & SF_BALNAME) /* used by i960 */
-#define SF_GET_CALLNAME(s)	((s)->sy_symbol.ost_flags & SF_CALLNAME) /* used by i960 */
-#define SF_GET_IS_SYSPROC(s)	((s)->sy_symbol.ost_flags & SF_IS_SYSPROC) /* used by i960 */
-#define SF_GET_SYSPROC(s)	((s)->sy_symbol.ost_flags & SF_SYSPROC) /* used by i960 */
+#define SF_GET_I960(s)		((s)->sy_symbol.ost_flags & SF_I960_MASK)	/* used by i960 */
+#define SF_GET_BALNAME(s)	((s)->sy_symbol.ost_flags & SF_BALNAME)	/* used by i960 */
+#define SF_GET_CALLNAME(s)	((s)->sy_symbol.ost_flags & SF_CALLNAME)	/* used by i960 */
+#define SF_GET_IS_SYSPROC(s)	((s)->sy_symbol.ost_flags & SF_IS_SYSPROC)	/* used by i960 */
+#define SF_GET_SYSPROC(s)	((s)->sy_symbol.ost_flags & SF_SYSPROC)	/* used by i960 */
 
 /* Modifiers */
 #define SF_SET(s,v)		((s)->sy_symbol.ost_flags = (v))
@@ -350,11 +368,11 @@ typedef struct {
 #define SF_SET_TAGGED(s)	((s)->sy_symbol.ost_flags |= SF_TAGGED)
 #define SF_SET_TAG(s)		((s)->sy_symbol.ost_flags |= SF_TAG)
 #define SF_SET_GET_SEGMENT(s)	((s)->sy_symbol.ost_flags |= SF_GET_SEGMENT)
-#define SF_SET_I960(s,v)	((s)->sy_symbol.ost_flags |= ((v) & SF_I960_MASK)) /* used by i960 */
-#define SF_SET_BALNAME(s)	((s)->sy_symbol.ost_flags |= SF_BALNAME) /* used by i960 */
-#define SF_SET_CALLNAME(s)	((s)->sy_symbol.ost_flags |= SF_CALLNAME) /* used by i960 */
-#define SF_SET_IS_SYSPROC(s)	((s)->sy_symbol.ost_flags |= SF_IS_SYSPROC) /* used by i960 */
-#define SF_SET_SYSPROC(s,v)	((s)->sy_symbol.ost_flags |= ((v) & SF_SYSPROC)) /* used by i960 */
+#define SF_SET_I960(s,v)	((s)->sy_symbol.ost_flags |= ((v) & SF_I960_MASK))	/* used by i960 */
+#define SF_SET_BALNAME(s)	((s)->sy_symbol.ost_flags |= SF_BALNAME)	/* used by i960 */
+#define SF_SET_CALLNAME(s)	((s)->sy_symbol.ost_flags |= SF_CALLNAME)	/* used by i960 */
+#define SF_SET_IS_SYSPROC(s)	((s)->sy_symbol.ost_flags |= SF_IS_SYSPROC)	/* used by i960 */
+#define SF_SET_SYSPROC(s,v)	((s)->sy_symbol.ost_flags |= ((v) & SF_SYSPROC))	/* used by i960 */
 
 /* File header macro and type definition */
 
@@ -461,116 +479,125 @@ typedef struct {
 /* Segment flipping */
 #define segment_name(v)	(seg_name[(int) (v)])
 
-typedef struct {
+typedef struct
+  {
 #ifdef BFD_HEADERS
-	struct internal_aouthdr	   aouthdr;             /* a.out header */
-	struct internal_filehdr	   filehdr;		/* File header, not machine dep. */
+    struct internal_aouthdr aouthdr;	/* a.out header */
+    struct internal_filehdr filehdr;	/* File header, not machine dep. */
 #else
-	AOUTHDR	   aouthdr;             /* a.out header */
-	FILHDR	   filehdr;		/* File header, not machine dep. */
+    AOUTHDR aouthdr;		/* a.out header */
+    FILHDR filehdr;		/* File header, not machine dep. */
 #endif
-	long       string_table_size;   /* names + '\0' + sizeof(int) */
-	long	   relocation_size;	/* Cumulated size of relocation
+    long string_table_size;	/* names + '\0' + sizeof(int) */
+    long relocation_size;	/* Cumulated size of relocation
 					   information for all sections in
 					   bytes. */
-	long	   lineno_size;		/* Size of the line number information
+    long lineno_size;		/* Size of the line number information
 					   table in bytes */
-} object_headers;
+  }
+
+object_headers;
 
 /* --------------  Line number handling ------- */
-extern int		text_lineno_number;
+extern int text_lineno_number;
 
 /* line numbering stuff. */
 
-typedef struct internal_lineno {
+typedef struct internal_lineno
+  {
 #ifdef BFD_HEADERS
-	struct bfd_internal_lineno line;
+    struct bfd_internal_lineno line;
 #else
-	LINENO line;			/* The lineno structure itself */
+    LINENO line;		/* The lineno structure itself */
 #endif
-	char* frag;				/* Frag to which the line number is related */
-	struct internal_lineno* next;	/* Forward chain pointer */
-} lineno;
+    char *frag;			/* Frag to which the line number is related */
+    struct internal_lineno *next;	/* Forward chain pointer */
+  } lineno;
 
 extern lineno *lineno_lastP;
 extern lineno *lineno_rootP;
 #define OBJ_EMIT_LINENO(a, b, c)	obj_emit_lineno((a),(b),(c))
 
-#ifdef __STDC__
-void obj_emit_lineno(char **where, lineno *line, char *file_start);
-#else /* __STDC__ */
-void obj_emit_lineno();
-#endif /* __STDC__ */
+#if __STDC__ == 1
+void obj_emit_lineno (char **where, lineno * line, char *file_start);
+#else /* not __STDC__ */
+void obj_emit_lineno ();
+#endif /* not __STDC__ */
 
 /* stack stuff */
-typedef struct {
-	unsigned long chunk_size;
-	unsigned long element_size;
-	unsigned long size;
-	char*	  data;
-	unsigned long pointer;
-} stack;
+typedef struct
+  {
+    unsigned long chunk_size;
+    unsigned long element_size;
+    unsigned long size;
+    char *data;
+    unsigned long pointer;
+  }
 
-#ifdef __STDC__
+stack;
 
-char *stack_pop(stack *st);
-char *stack_push(stack *st, char *element);
-char *stack_top(stack *st);
-stack *stack_init(unsigned long chunk_size, unsigned long element_size);
-void c_dot_file_symbol(char *filename);
-void obj_extra_stuff(object_headers *headers);
-void stack_delete(stack *st);
+#if __STDC__ == 1
+
+char *stack_pop (stack * st);
+char *stack_push (stack * st, char *element);
+char *stack_top (stack * st);
+stack *stack_init (unsigned long chunk_size, unsigned long element_size);
+void c_dot_file_symbol (char *filename);
+void obj_extra_stuff (object_headers * headers);
+void stack_delete (stack * st);
 
 #ifndef tc_headers_hook
-void tc_headers_hook(object_headers *headers);
+void tc_headers_hook (object_headers * headers);
 #endif /* tc_headers_hook */
 
 #ifndef tc_coff_symbol_emit_hook
-void tc_coff_symbol_emit_hook(); /* really tc_coff_symbol_emit_hook(symbolS *symbolP) */
+void tc_coff_symbol_emit_hook ();	/* really tc_coff_symbol_emit_hook(symbolS *symbolP) */
 #endif /* tc_coff_symbol_emit_hook */
 
-void c_section_header(
+void c_section_header (
 #ifdef BFD_HEADERS
-		      struct internal_scnhdr *header,
+			struct internal_scnhdr *header,
 #else
-		      SCNHDR *header,
+			SCNHDR * header,
 #endif
-		      
-		      char *name,
-		      long core_address,
-		      long size,
-		      long data_ptr,
-		      long reloc_ptr,
-		      long lineno_ptr,
-		      long reloc_number,
-		      long lineno_number,
-		      long alignment);
 
-#else /* __STDC__ */
+			char *name,
+			long core_address,
+			long size,
+			long data_ptr,
+			long reloc_ptr,
+			long lineno_ptr,
+			long reloc_number,
+			long lineno_number,
+			long alignment);
 
-char *stack_pop();
-char *stack_push();
-char *stack_top();
-stack *stack_init();
-void c_dot_file_symbol();
-void c_section_header();
-void obj_extra_stuff();
-void stack_delete();
-void tc_headers_hook();
-void tc_coff_symbol_emit_hook();
+#else /* not __STDC__ */
 
-#endif /* __STDC__ */
+char *stack_pop ();
+char *stack_push ();
+char *stack_top ();
+stack *stack_init ();
+void c_dot_file_symbol ();
+void c_section_header ();
+void obj_extra_stuff ();
+void stack_delete ();
+#ifndef tc_headers_hook
+void tc_headers_hook ();
+#endif
+void tc_coff_symbol_emit_hook ();
+
+#endif /* not __STDC__ */
 
 
 /* sanity check */
 
 #ifdef TC_I960
 #ifndef C_LEAFSTAT
-hey!  Where is the C_LEAFSTAT definition?  i960-coff support is depending on it.
+hey ! Where is the C_LEAFSTAT definition ? i960 - coff support is depending on it.
 #endif /* no C_LEAFSTAT */
 #endif /* TC_I960 */
 #ifdef BFD_HEADERS
-    extern struct internal_scnhdr data_section_header;
+extern struct internal_scnhdr data_section_header;
 extern struct internal_scnhdr text_section_header;
 #else
 extern SCNHDR data_section_header;
