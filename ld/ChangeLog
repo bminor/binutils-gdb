@@ -1034,7 +1034,7 @@ Wed Jan  5 08:02:12 2000  Catherine Moore  <clm@cygnus.com>
 	(lang_add_wild): Likewise.
 	* ldlang.h (lang_wild_statement_type): Likewise.
 	* scripttempl/elf.sc (OTHER_EXCLUDE_FILES): Support.
-	
+
 2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* pe-dll.c (pe_dll_warn_dup_exports): New variable.
@@ -1195,7 +1195,7 @@ Wed Sep 15 02:47:43 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparms/elf64hppa.sh (TEXT_DYNAMIC): Define.
 
-	* emulparms/elf64hppa.h (OTHER_READWRITE_SECTIONS):  No longer combine
+	* emulparms/elf64hppa.sh (OTHER_READWRITE_SECTIONS):  No longer combine
 	the .plt, .dlt, .opd  into a single output section.  Provide values
 	for __gp and __hp_load_map.
 
@@ -1348,7 +1348,7 @@ Wed Sep  8 00:07:39 1999  Jeffrey A Law  (law@cygnus.com)
 
 1999-09-03  Scott Bambrough  <scottb@netwinder.org>
 
-	* ld/configure.host: Added HOSTING_CRT0, HOSTING_LIBS for 
+	* ld/configure.host: Added HOSTING_CRT0, HOSTING_LIBS for
 	target "arm*-*-linux-gnu*"
 
 1999-09-04  Steve Chamberlain  <sac@pobox.com>
@@ -1531,7 +1531,7 @@ Mon Jul 19 14:19:14 1999  Mark P. Mitchell  <mark@codesourcery.com>
 	(get_first_input_target): New function: Find the target format
 	of the first of the linker's input file.
 	(open_output): Be more clever about deciding the output target
-	format. 
+	format.
 
 1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
 
@@ -1590,7 +1590,7 @@ Thu Jul 15 15:55:15 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 
-        * configure.tgt (hppa*-linux-gnu*): New target.
+	* configure.tgt (hppa*-linux-gnu*): New target.
 
 1999-07-07  Mark Mitchell  <mark@codesourcery.com>
 
@@ -1603,11 +1603,11 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 1999-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* emultempl/pe.em (after_open): Abort if input format is ARM and
-	output format is not. 
+	output format is not.
 	* emultempl/armcoff.em (after_open): Abort if input format is ARM
-	and output format is not. 
+	and output format is not.
 	* emultempl/armelf.em (after_open): Abort if input format is ARM
-	and output format is not. 
+	and output format is not.
 
 1999-07-02  Ian Lance Taylor  <ian@zembu.com>
 
@@ -1621,7 +1621,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 	* configure.tgt (mips-sgi-irix6*): Make n32 the default
 	emulation.
 	* emulparams/elf32bmipn32.sh: New file.
-	
+
 1999-06-28  Jim Pick <jim@jimpick.com>
 
 	* emultempl/armelf.em: Added code so that .xs linker scripts are
@@ -1657,7 +1657,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 	* emultempl/pe.em: Add new command line switch --thumb-entry.
 	* emultempl/armelf.em: Add new command line switch --thumb-entry.
 	* emultempl/armcoff.em: Add new command line switch --thumb-entry.
-	* ld.texinfo: Document new ARM command line switch: --thumb-entry.	
+	* ld.texinfo: Document new ARM command line switch: --thumb-entry.
 1999-06-20  H.J. Lu  <hjl@gnu.org>
 
 	* configure.in (all_libpath): Accumulate across all enabled targets.
@@ -1738,7 +1738,7 @@ Mon Jun 14 10:38:36 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	option.
 	(..._before_allocation): Pass the value of the new variable
 	no_pipeline_knowledge to bfd_elf32_arm_process_before_allocation.
-	
+
 	* emultemp/armelf_oabi.em (..._before_allocation): Pass zero as
 	the third parameter to bfd_elf32_arm_process_before_allocation.
 
@@ -1756,7 +1756,7 @@ Mon Jun 14 10:38:36 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 1999-05-26  Nick Clifton  <nickc@cygnus.com>
 
-	* emulparams/armelf_oabi.sh (TEMPLATE_NAME): Set to armelf_oabi. 
+	* emulparams/armelf_oabi.sh (TEMPLATE_NAME): Set to armelf_oabi.
 
 1999-05-24  Philip Blundell  <philb@gnu.org>
 
@@ -1827,7 +1827,7 @@ Thu May 13 09:48:09 1999  Joel Sherrill (joel@OARcorp.com)
 
 1999-04-12  Philip Blundell  <pb@nexus.co.uk>
 
-	* emulparams/armelf_linux.sh: New file.  Support for ARM 
+	* emulparams/armelf_linux.sh: New file.  Support for ARM
 	GNU/Linux ELF ABI.
 	* emulparams/armelf_linux26.sh: New file. APCS-26 version of above.
 	* configure.tgt: For arm*-*-linux-gnu*, set default emulation to
@@ -1928,7 +1928,7 @@ Thu May 13 09:48:09 1999  Joel Sherrill (joel@OARcorp.com)
 	* emulparams/arm_epoc_pe.sh: New file.
 
 	* configure.tgt: Add 'targ_extra_ofiles' for ARM based PE
-	targets. 
+	targets.
 
 1999-03-31  Philip Blundell  <pb@nexus.co.uk>
 
@@ -1943,7 +1943,7 @@ Thu May 13 09:48:09 1999  Joel Sherrill (joel@OARcorp.com)
 Fri Mar 26 12:05:51 1999  Catherine Moore  <clm@cygnus.com>
 
 	* ld.h (wildcard_spec): Add exclude_name.
-        * ldgram.y (EXCLUDE_FILE): New token.
+	* ldgram.y (EXCLUDE_FILE): New token.
 	(wildcard_spec): Set exclude_name.
 	(file_NAME_list): Recognize EXCLUDE_FILE.
         * ldlang.c (wild_section): Check for excluded files.
