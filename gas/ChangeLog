@@ -1,3 +1,7 @@
+Wed Mar 20 17:05:16 1996  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* config/alpha-opcode.h: Added cvtst instruction.
+
 Mon Mar 18 13:12:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (ecoff_stab): Don't try to make a symbol out of the stab

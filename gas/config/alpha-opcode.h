@@ -439,7 +439,7 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "mf_fpcr",    0x5c0004a0, 1, "E" },
 { "mt_fpcr",    0x5c000480, 1, "E" },
 
-/* Vax subset (opcode 0x15) */
+/* VAX subset (opcode 0x15) */
 { "addf",       0x54001000, 1, "e,f,g" },
 { "addf/c",     0x54000000, 1, "e,f,g" },
 { "addf/u",     0x54003000, 1, "e,f,g" },
@@ -653,6 +653,8 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "cvtqt/suic", 0x5be0e7c0, 1, "f,g" },
 { "cvtqt/suim", 0x5be0efc0, 1, "f,g" },
 { "cvtqt/suid", 0x5be0ffc0, 1, "f,g" },
+{ "cvtst",      0x5be05580, 1, "f,g" },	/* note: floatop is same as cvtts! */
+{ "cvtst/s",    0x5be0d580, 1, "f,g" },	/* note: floatop is same as cvtts! */
 { "cvtts",      0x5be01580, 1, "f,g" },
 { "cvtts/c",    0x5be00580, 1, "f,g" },
 { "cvtts/m",    0x5be00d80, 1, "f,g" },
