@@ -3258,14 +3258,17 @@ elf64_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = true;
-	  else if (info->shared && !info->symbolic && !info->no_undefined)
+	  else if (info->shared && !info->symbolic
+		   && !info->no_undefined
+		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;
 	  else
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined))))
+		      (!info->shared || info->no_undefined
+		       || ELF_ST_VISIBILITY (h->other)))))
 		return false;
 	      ret_val = false;
 	      continue;

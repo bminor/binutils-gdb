@@ -1,3 +1,19 @@
+2000-05-23  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_relocate_section): Don't allow the
+	undefined symbol with the non-default visibility attributes.
+	* elf-hppa.h (elf_hppa_relocate_section): Likewise.
+	* elf32-arm.h (elf32_arm_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_calculate_relocation): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-ia64.c (elf64_ia64_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+
 2000-05-22  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-ia64.c (ia64_howto_table): Add PCREL60B, PCREL21BI,
