@@ -677,16 +677,12 @@ build_insn (opcode, opers)
 	case O_big:
 	  extended++;
 	  {
-	    union {
-	      unsigned long l;
-	      LITTLENUM_TYPE words[10];
-	    } u;
-	    gen_to_words (u.words, 2, 8L);	/* FIXME: magic numbers */
-	    /* FIXME: More magic, swap the littlenums */
-	    u.words[2] = u.words[0];
-	    u.words[0] = u.words [1];
-	    u.words[1] = u.words [2];
-	    insn[1] = u.l;
+	    int precision = 2;
+	    long exponent_bits = 8L;
+	    LITTLENUM_TYPE words[2];
+	    /* Value is still in generic_floating_point_number */
+	    gen_to_words (words, precision, exponent_bits);
+	    insn[1] = (words[0] << 16) | words[1];
 	  }
 	  break;
 	case O_illegal:
