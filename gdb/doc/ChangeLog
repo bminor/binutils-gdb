@@ -1,3 +1,7 @@
+Fri Aug 14 21:08:47 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Add section on partial symbol tables.
+
 Sat Jun 20 16:31:10 1992  John Gilmore  (gnu at cygnus.com)
 
 	* gdb.texinfo:  document `set remotedebug' and `set
