@@ -197,6 +197,7 @@ arm-*-coff)		targ_emul=armcoff ;;
 arm-*-vxworks)		targ_emul=armcoff ;;
 arm-*-freebsd*)		targ_emul=armelf ;;
 arm-*-netbsd*)		targ_emul=armnbsd ;;
+arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-rtems*)		targ_emul=armelf ;;
 arm-*-elf)		targ_emul=armelf ;;
 arm-*-oabi)		targ_emul=armelf_oabi ;;

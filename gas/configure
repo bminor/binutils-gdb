@@ -2327,7 +2327,7 @@ for this_target in $target $canon_targets ; do
       arm-*-linux*aout*)	        fmt=aout em=linux ;;
       arm*-*-linux-gnu* | arm*-*-uclinux*)	
 					fmt=elf  em=linux ;;
-      arm-*-netbsd*)	                fmt=aout em=nbsd ;;
+      arm-*-netbsd* | arm-*-openbsd*)   fmt=aout em=nbsd ;;
       arm-*-oabi | thumb-*-oabi)        fmt=elf ;;
       arm-epoc-pe | thumb-epoc-pe)      fmt=coff em=epoc-pe ;;
       arm-*-wince)			fmt=coff em=wince-pe ;;
@@ -2489,7 +2489,7 @@ EOF
       mips-*-irix*)         fmt=ecoff ;;
       mips-*-lnews*)        fmt=ecoff em=lnews ;;
       mips-*-riscos*)       fmt=ecoff ;;
-      mips-*-linux-gnu*)
+      mips*-*-linux*)
 			    fmt=elf em=tmips
 			    cat >> confdefs.h <<\EOF
 #define MIPS_STABS_ELF 1
@@ -2766,7 +2766,7 @@ EOF
 
     case ${generic_target}-${fmt} in
       mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
-      mips-*-linux-gnu*-*) case "$endian" in
+      mips*-*-linux*-*) case "$endian" in
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
