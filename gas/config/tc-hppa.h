@@ -31,7 +31,7 @@
    already far too much object file format dependent code in this file.
    In theory this file should contain only exported functions, structures
    and data declarations common to all PA assemblers.  */
-   
+
 #ifndef _TC_HPPA_H
 #define _TC_HPPA_H
 
@@ -47,7 +47,7 @@
 #include "../bfd/elf32-hppa.h"
 #define TARGET_FORMAT "elf32-hppa"
 #endif
-  
+
 #ifdef OBJ_SOM
 #include "../bfd/som.h"
 #define TARGET_FORMAT "som"
@@ -64,10 +64,9 @@
 #define FAKE_LABEL_NAME "L$0\001"
 #define ASEC_NULL (asection *)0
 
-/* sym1 - sym2 is valid on the PA as long as sym2 is $global$.  */
+/* Labels are not required to have a colon for a suffix.  */
+#define LABELS_WITHOUT_COLONS
 
-#define SEG_DIFF_ALLOWED
-  
 /* FIXME.  */
 #ifdef OBJ_ELF
 extern void elf_hppa_final_processing PARAMS ((void));
@@ -120,5 +119,14 @@ extern void cons_fix_new_hppa ();
 #define TC_EOL_IN_INSN(PTR)	(is_end_of_line[*(PTR)] && (PTR)[-1] == ',')
 
 #define tc_fix_adjustable hppa_fix_adjustable
+
+/* If a symbol is imported, but never used, then the symbol should
+   *not* end up in the symbol table.  Likewise for absolute symbols
+   with local scope.  */
+#define tc_frob_symbol(sym,punt) \
+    if ((S_GET_SEGMENT (sym) == &bfd_und_section && sym->sy_used == 0) \
+	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
+	    && (sym->bsym->flags & BSF_EXPORT) == 0)) \
+      punt = 1
 
 #endif /* _TC_HPPA_H */
