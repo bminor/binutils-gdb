@@ -1,3 +1,21 @@
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	From Catherine Moore, Michael Meissner, Dave Brolley:
+	* po/SRC-POTFILES.in: Add cpu-frv.c and elf32-frv.c
+	* targets.c: Support bfd_elf32_frv_vec.
+	* reloc.c: Add FRV relocs.
+	* configure.in: Add support for bfd-elf32-frv-vec.
+	* config.bfd (targ_cpu): Add support for frv-*-elf.
+	* archures.c: Add frv arch and machines.
+	* Makefile.am (ALL_MACHINES): Add cpu-frv.lo.
+	(ALL_MACHINES_CFILES): Add cpu-frv.c.
+	(BFD32_BACKENDS): Add elf32-frv.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-frv.c
+	(cpu-frv.lo): New target.
+	(elf32-frv.lo): New target.
+	* cpu-frv.c: New file.
+	* elf32-frv.c: New file.
+
 2002-06-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfcode.h (elf_object_p): Sanity check eh_shoff == 0 implies
