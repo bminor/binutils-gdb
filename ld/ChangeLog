@@ -1,3 +1,10 @@
+2002-09-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64ppc.sh (DATA_ADDR): Define.
+	* emulparams/elf64_aix.sh (DATA_ADDR): Don't use a fixed address
+	for start of .data, instead align up to 256M boundary.
+	* scripttempl/aix.sc: Likewise.
+
 2002-09-22  Mark Elbrecht  <snowball3@softhome.net>
 
 	* scripttempl/i386go32.sc: Handle bss unique sections.
