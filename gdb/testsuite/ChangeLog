@@ -1,3 +1,10 @@
+2003-04-09  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
+	gdb.c++/userdef.exp: If GDB fails to restore the selected frame
+	after an inferior function call, report the failure, but allow the
+	test to continue.
+
 2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.base/break.exp: marker4() is defined at line 46 when compiled
