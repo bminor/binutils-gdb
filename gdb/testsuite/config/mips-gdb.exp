@@ -203,6 +203,12 @@ expect_after {
     "Undefined command"	   { error "send string probably wrong." }
 }
 
+proc gdb_exit { } {
+    global shell_id
+    exit_remote_shell $shell_id
+    catch default_gdb_exit
+}
+
 gdb_start
 
 # make sure gdb has actually started, otherwise if the first test
