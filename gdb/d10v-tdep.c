@@ -1557,8 +1557,19 @@ d10v_frame_register_unwind (struct frame_info *frame,
 			    int *realnump, void *bufferp)
 {
   struct d10v_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
-  saved_regs_unwinder (frame, info->saved_regs, regnum, optimizedp,
-		       lvalp, addrp, realnump, bufferp);
+  if (regnum == PC_REGNUM)
+    {
+      /* The call instruction saves the caller's PC in LR.  The
+	 function prologue of the callee may then save the LR on the
+	 stack.  Find that possibly saved LR value and return it.  */
+      saved_regs_unwinder (frame, info->saved_regs, LR_REGNUM, optimizedp,
+			   lvalp, addrp, realnump, bufferp);
+    }
+  else
+    {
+      saved_regs_unwinder (frame, info->saved_regs, regnum, optimizedp,
+			   lvalp, addrp, realnump, bufferp);
+    }
 }
 
 
@@ -1587,7 +1598,7 @@ d10v_frame_pop (struct frame_info *fi, void **unwind_cache,
   frame_unwind_register (fi, PSW_REGNUM, raw_buffer);
   regcache_cooked_write (regcache, PSW_REGNUM, raw_buffer);
 
-  frame_unwind_register (fi, LR_REGNUM, raw_buffer);
+  frame_unwind_register (fi, PC_REGNUM, raw_buffer);
   regcache_cooked_write (regcache, PC_REGNUM, raw_buffer);
 
   store_unsigned_integer (raw_buffer,

@@ -1,3 +1,10 @@
+2003-03-10  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_frame_register_unwind): Correctly unwind the
+	PC.
+	(d10v_frame_pop): Unwind the PC, and not the LR, when restoring
+	the PC register.
+
 2003-03-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbarch.sh (save_dummy_frame_tos): Add comment.
