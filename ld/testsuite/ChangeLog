@@ -1,3 +1,10 @@
+2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-mips-elf/mips-elf.exp: Added...
+	* ld-mips-elf/relax-jalr.s, ld-mips-elf/relax-jalr-n32.d,
+	ld-mips-elf/relax-jalr-n32-shared.d, ld-mips-elf/relax-jalr-n64.d,
+	ld-mips-elf/relax-jalr-n64-shared.d: New tests.
+
 2003-03-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-mips-elf/mips-elf.exp (linux_gnu): New variable.  Add:

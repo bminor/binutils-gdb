@@ -33,6 +33,11 @@ if { [istarget mips*-*-*] } then {
 
 	# Test multi-got link.
 	run_dump_test "multi-got-1"
+ 
+	run_dump_test "relax-jalr-n32"
+	run_dump_test "relax-jalr-n32-shared"
+	run_dump_test "relax-jalr-n64"
+	run_dump_test "relax-jalr-n64-shared"
     }
 
     if { $linux_gnu } {
