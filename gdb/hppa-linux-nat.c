@@ -22,8 +22,10 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "gdb_string.h"
+#include "inferior.h"
 
 #include <sys/procfs.h>
+#include <sys/ptrace.h>
 #include <string.h>
 #include <asm/offsets.h>
 
@@ -201,6 +203,99 @@ static const int greg_map[] =
     HPPA_CCR_REGNUM, HPPA_EIEM_REGNUM,
   };
 
+
+
+/* Fetch one register.  */
+
+static void
+fetch_register (int regno)
+{
+  int tid;
+  int val;
+
+  if (CANNOT_FETCH_REGISTER (regno))
+    {
+      supply_register (regno, NULL);
+      return;
+    }
+
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+  errno = 0;
+  val = ptrace (PTRACE_PEEKUSER, tid, register_addr (regno, 0), 0);
+  if (errno != 0)
+    error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regno),
+	   regno, safe_strerror (errno));
+
+  regcache_raw_supply (current_regcache, regno, &val);
+}
+
+/* Store one register. */
+
+static void
+store_register (int regno)
+{
+  int tid;
+  int val;
+
+  if (CANNOT_STORE_REGISTER (regno))
+    return;
+
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+  errno = 0;
+  regcache_raw_collect (current_regcache, regno, &val);
+  ptrace (PTRACE_POKEUSER, tid, register_addr (regno, 0), val);
+  if (errno != 0)
+    error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regno),
+	   regno, safe_strerror (errno));
+}
+
+/* Fetch registers from the child process.  Fetch all registers if
+   regno == -1, otherwise fetch all general registers or all floating
+   point registers depending upon the value of regno.  */
+
+void
+fetch_inferior_registers (int regno)
+{
+  if (-1 == regno)
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+        fetch_register (regno);
+    }
+  else 
+    {
+      fetch_register (regno);
+    }
+}
+
+/* Store registers back into the inferior.  Store all registers if
+   regno == -1, otherwise store all general registers or all floating
+   point registers depending upon the value of regno.  */
+
+void
+store_inferior_registers (int regno)
+{
+  if (-1 == regno)
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	store_register (regno);
+    }
+  else
+    {
+      store_register (regno);
+    }
+}
+
+/* Fill GDB's register array with the general-purpose register values
+   in *gregsetp.  */
+
 void
 supply_gregset (gdb_gregset_t *gregsetp)
 {
@@ -210,28 +305,26 @@ supply_gregset (gdb_gregset_t *gregsetp)
   for (i = 0; i < sizeof (greg_map) / sizeof (greg_map[0]); i++, regp++)
     {
       int regno = greg_map[i];
-      int size = register_size (current_gdbarch, regno);
-      /* When running a 64 bit kernel, a greg_t may be larger than the
-	 actual register, so just pick off the LS bits of big-endian word.  */
-      supply_register (regno, ((char *) (regp + 1)) - size);
+      supply_register (regno, regp);
     }
 }
+
+/* Fill register regno (if it is a general-purpose register) in
+   *gregsetp with the appropriate value from GDB's register array.
+   If regno is -1, do this for all registers.  */
 
 void
 fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
   int i;
-  greg_t *regp = (greg_t *) gregsetp;
 
-  memset (gregsetp, 0, sizeof (*gregsetp));
-  for (i = 0; i < sizeof (greg_map) / sizeof (greg_map[0]); i++, regp++)
+  for (i = 0; i < sizeof (greg_map) / sizeof (greg_map[0]); i++)
     {
-      int regi = greg_map[i];
+      int mregno = greg_map[i];
 
-      if (regno == -1 || regi == regno)
+      if (regno == -1 || regno == mregno)
 	{
-	  int rawsize = register_size (current_gdbarch, regi);
-	  regcache_collect (regi, ((char *) (regp + 1)) - rawsize);
+          regcache_collect(mregno, &(*gregsetp)[i]);
 	}
     }
 }
@@ -264,16 +357,13 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
   int i;
 
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = HPPA_FP0_REGNUM; i < HPPA_FP0_REGNUM + 32 * 2; i++)
    {
-    if (regno == -1 || regno == i)
-      {
-        /* Gross.  fpregset_t is double, registers[x] has single
-	   precision reg.  */
-        char *to = (char *) &((*fpregsetp)[(i - HPPA_FP0_REGNUM) / 2]);
-        if ((i - HPPA_FP0_REGNUM) & 1)
-	  to += 4;
-        regcache_collect (i, to);
-      }
+      /* Gross.  fpregset_t is double, registers[x] has single
+	 precision reg.  */
+      char *to = (char *) &((*fpregsetp)[(i - HPPA_FP0_REGNUM) / 2]);
+      if ((i - HPPA_FP0_REGNUM) & 1)
+	to += 4;
+      regcache_collect (i, to);
    }
 }

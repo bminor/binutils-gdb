@@ -1,5 +1,18 @@
 2004-05-07  Randolph Chung  <tausq@debian.org>
 
+	* Makefile.in (ALLDEPFILES): Add hppa-linux-tdep.c and
+	hppa-linux-nat.c.
+	(hppa-linux-tdep.o, hppa-linux-nat.o): Define rules.
+	* hppa-linux-nat.c (fetch_register, store_register): Define.
+	(fetch_inferior_registers, store_inferior_registers): Define.
+	(supply_gregset): Add comment and clean up some unneeded code.
+	(fill_gregset): Add comment and fix so that it saves registers in
+	the right place in the gregset.
+	(fill_fpregset): Fix buffer overrun problem.
+	* config/pa/nm-linux.h (FETCH_INFERIOR_REGISTERS): Define.
+
+2004-05-07  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_frame_prev_register_helper): New function to 
 	do common handling of the pcoqt register.
 	(hppa_frame_prev_register, hppa_stub_frame_prev_register): Convert

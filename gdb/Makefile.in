@@ -1329,6 +1329,7 @@ ALLDEPFILES = \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
 	hppah-nat.c hpread.c \
+	hppa-linux-tdep.c hppa-linux-nat.c \
 	i386-tdep.c i386v-nat.c i386-linux-nat.c \
 	i386v4-nat.c i386ly-tdep.c i386-cygwin-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c i386fbsd-tdep.c \
@@ -1837,6 +1838,12 @@ hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
 	$(frame_base_h) $(a_out_encap_h) $(gdb_stat_h) $(gdb_wait_h) \
 	$(gdbcore_h) $(gdbcmd_h) $(target_h) $(symfile_h) $(objfiles_h) \
 	$(hppa_tdep_h)
+hppa-linux-tdep.o: hppa-linux-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
+	$(target_h) $(objfiles_h) $(solib_svr4_h) $(glibc_tdep_h) \
+	$(frame_unwind_h) $(trad_frame_h) $(dwarf2_frame_h) $(hppa_tdep_h) \
+	$(elf_common_h) 
+hppa-linux-nat.o: hppa-linux-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(gdb_string_h) $(inferior_h)
 hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 	$(syms_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
 	$(complaints_h) $(gdb_stabs_h) $(gdbtypes_h) $(demangle_h) \
