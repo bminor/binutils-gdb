@@ -254,7 +254,7 @@ proc run_sim_test { name requested_machs } {
 
 	if ![string match "" $comp_output] {
 	    verbose -log "$comp_output" 3
-	    fail "$mach $testname"
+	    fail "$mach $testname (assembling)"
 	    continue
 	}
 
@@ -266,7 +266,7 @@ proc run_sim_test { name requested_machs } {
 
 	if ![string match "" $comp_output] {
 	    verbose -log "$comp_output" 3
-	    fail "$mach $testname"
+	    fail "$mach $testname (linking)"
 	    continue
 	}
 
@@ -292,22 +292,22 @@ proc run_sim_test { name requested_machs } {
 		} else {
 		    verbose -log "output:  $output" 3
 		    verbose -log "pattern: $opts(output)" 3
-		    fail "$mach $testname"
+		    fail "$mach $testname (execution)"
 		}
 	    } else {
 		verbose -log "`pass' return code when expecting failure" 3
-		fail "$mach $testname"
+		fail "$mach $testname (execution)"
 	    }
 	} elseif { "$status" == "fail" } {
 	    if { "$opts(xerror)" == "no" } {
-		fail "$mach $testname"
+		fail "$mach $testname (execution)"
 	    } else {
 		if [string match $opts(output) $output] {
 		    pass "$mach $testname"
 		} else {
 		    verbose -log "output:  $output" 3
 		    verbose -log "pattern: $opts(output)" 3
-		    fail "$mach $testname"
+		    fail "$mach $testname (execution)"
 		}
 	    }
 	} else {
