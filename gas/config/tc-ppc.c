@@ -1753,6 +1753,8 @@ ppc_csect (ignore)
       sym->sy_tc.align = get_absolute_expression ();
     }
 
+  ppc_current_csect = sym;
+
   demand_empty_rest_of_line ();
 }
 
@@ -2266,6 +2268,8 @@ ppc_toc (ignore)
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
       symbol_append (sym, list->sy_tc.within, &symbol_rootP, &symbol_lastP);
     }
+
+  ppc_current_csect = ppc_toc_csect;
 
   demand_empty_rest_of_line ();
 }
