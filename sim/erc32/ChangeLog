@@ -1,3 +1,10 @@
+Thu Apr 17 03:03:56 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* interf.c (sim_open): Ignore -E arg.
+	(start_address): New static local.
+	(sim_load): Return SIM_RC.  New arg abfd.  Set start_address from bfd.
+	(sim_create_inferior): Return SIM_RC.  Delete arg start_address.
+
 Tue Apr 15 15:16:11 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (install-sis): Depend upon installdirs.  Use

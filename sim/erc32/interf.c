@@ -115,6 +115,9 @@ run_sim(sregs, go, icount, dis)
 			if (sis_verbose)
 			    (*sim_callback->printf_filtered) (sim_callback,
 							      "SW BP hit at %x\n", sregs->pc);
+			sim_stop();
+			restore_stdio();
+			clearerr(stdin);
 			return (BPT_HIT);
 		    } else
 			dispatch_instruction(sregs);
@@ -152,7 +155,8 @@ run_sim(sregs, go, icount, dis)
 }
 
 void
-sim_set_callbacks (ptr)
+sim_set_callbacks (sd, ptr)
+     SIM_DESC sd;
      host_callback *ptr;
 {
   sim_callback = ptr;
@@ -164,26 +168,26 @@ sim_size (memsize)
 {
 }
 
-void
-sim_open(args)
-     char *args;
+SIM_DESC
+sim_open(kind, argv)
+     SIM_OPEN_KIND kind;
+     char **argv;
 {
 
     int             argc = 0;
-    char          **argv;
     int             cont = 1;
-    int             stat = 0;
+    int             stat = 1;
     int             grdl = 0;
     int             freq = 15;
 
     (*sim_callback->printf_filtered) (sim_callback, "\n SIS - SPARC instruction simulator %s\n", sis_version);
     (*sim_callback->printf_filtered) (sim_callback, " Bug-reports to Jiri Gaisler ESA/ESTEC (jgais@wd.estec.esa.nl)\n");
-    argv = buildargv(args);
-    if (argv != NULL)
-	while (argv[argc])
-	    argc++;
+    while (argv[argc])
+      argc++;
     while (stat < argc) {
 	if (argv[stat][0] == '-') {
+	    if (strcmp(argv[stat], "-E") == 0)
+	      ++stat; /* ignore endian spec */
 	    if (strcmp(argv[stat], "-v") == 0) {
 		sis_verbose = 1;
 	    } else
@@ -225,20 +229,25 @@ sim_open(args)
 	    bfd_load(argv[stat]);
 	stat++;
     }
-    freeargv(argv);
     sregs.freq = freq;
     termsave = fcntl(0, F_GETFL, 0);
     INIT_DISASSEMBLE_INFO(dinfo, stdout,(fprintf_ftype)fprintf);
+    dinfo.endian = BFD_ENDIAN_BIG;
     init_signals();
     reset_all();
     ebase.simtime = 0;
     init_sim();
     init_bpt(&sregs);
     reset_stat(&sregs);
+
+    /* Fudge our descriptor for now.  */
+    return (SIM_DESC) 1;
 }
 
 void
-sim_close(int quitting)
+sim_close(sd, quitting)
+     SIM_DESC sd;
+     int quitting;
 {
 
     exit_sim();
@@ -246,25 +255,23 @@ sim_close(int quitting)
 
 };
 
-/* Return non-zero if the caller should handle the load. Zero if
-     we have loaded the image. */
+/* For communication from sim_load to sim_create_inferior.  */
+static bfd_vma start_address;
 
-int sim_load PARAMS ((char *prog, int from_tty));
-
-int
-sim_load(prog, from_tty)
+SIM_RC
+sim_load(sd, prog, abfd, from_tty)
+     SIM_DESC sd;
      char *prog;
+     bfd *abfd;
      int from_tty;
 {
-    bfd_load(prog);
+    start_address = bfd_load (prog);
     return (0);
 }
 
-void sim_create_inferior PARAMS ((SIM_ADDR start_address, char **argv, char **env));
-
-void
-sim_create_inferior(start_address, argv, env)
-     SIM_ADDR start_address;
+SIM_RC
+sim_create_inferior(sd, argv, env)
+     SIM_DESC sd;
      char **argv;
      char **env;
 {
@@ -273,11 +280,12 @@ sim_create_inferior(start_address, argv, env)
     reset_stat(&sregs);
     sregs.pc = start_address & ~3;
     sregs.npc = sregs.pc + 4;
-
+    return SIM_RC_OK;
 }
 
 void
-sim_store_register(regno, value)
+sim_store_register(sd, regno, value)
+     SIM_DESC sd;
     int             regno;
     unsigned char  *value;
 {
@@ -288,7 +296,8 @@ sim_store_register(regno, value)
 
 
 void
-sim_fetch_register(regno, buf)
+sim_fetch_register(sd, regno, buf)
+     SIM_DESC sd;
     int             regno;
     unsigned char  *buf;
 {
@@ -296,7 +305,8 @@ sim_fetch_register(regno, buf)
 }
 
 int
-sim_write(mem, buf, length)
+sim_write(sd, mem, buf, length)
+     SIM_DESC sd;
     SIM_ADDR             mem;
     unsigned char  *buf;
     int             length;
@@ -304,10 +314,9 @@ sim_write(mem, buf, length)
     return (sis_memory_write(mem, buf, length));
 }
 
-int sim_read PARAMS ((SIM_ADDR mem, unsigned char *buf, int length));
-
 int
-sim_read(mem, buf, length)
+sim_read(sd, mem, buf, length)
+     SIM_DESC sd;
      SIM_ADDR mem;
      unsigned char *buf;
      int length;
@@ -316,17 +325,20 @@ sim_read(mem, buf, length)
 }
 
 void
-sim_info(int verbose)
+sim_info(sd, verbose)
+     SIM_DESC sd;
+     int verbose;
 {
     show_stat(&sregs);
-
-
 }
 
 int             simstat = OK;
 
 void
-sim_stop_reason(enum sim_stop * reason, int *sigrc)
+sim_stop_reason(sd, reason, sigrc)
+     SIM_DESC sd;
+     enum sim_stop * reason;
+     int *sigrc;
 {
 
     switch (simstat) {
@@ -403,7 +415,7 @@ flush_windows ()
 }
 
 void
-sim_resume(int step, int siggnal)
+sim_resume(SIM_DESC sd, int step, int siggnal)
 {
     simstat = run_sim(&sregs, 1, 0, 0);
 
@@ -411,20 +423,22 @@ sim_resume(int step, int siggnal)
 }
 
 int
-sim_trace ()
+sim_trace (sd)
+     SIM_DESC sd;
 {
   /* FIXME: unfinished */
-  sim_resume (0, 0);
+  sim_resume (sd, 0, 0);
   return 1;
 }
 
 void
-sim_kill(void)
+sim_kill(SIM_DESC sd)
 {
 }
 
 void
-sim_do_command(cmd)
+sim_do_command(sd, cmd)
+     SIM_DESC sd;
     char           *cmd;
 {
     exec_cmd(&sregs, cmd);
