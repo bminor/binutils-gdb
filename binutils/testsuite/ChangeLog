@@ -1,3 +1,7 @@
+2000-10-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* binutils-all/readelf.exp (-wi test): Add cris-*-* to xfails.
+
 2000-10-19  Chris Demetriou  <cgd@sibyte.com>
 
         * binutils-all/readelf.exp (readelf_test): Work properly

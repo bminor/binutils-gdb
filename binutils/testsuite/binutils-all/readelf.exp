@@ -254,4 +254,4 @@ if [is_remote host] {
 # The xfail targets here do not default to DWARF2 format debug information
 # The symptom is that the output of 'readelf -wi' is empty.
 
-readelf_test -wi $tempfile readelf.wi {v850*-*-*}
+readelf_test -wi $tempfile readelf.wi {v850*-*-* cris-*-*}
