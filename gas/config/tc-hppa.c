@@ -422,6 +422,9 @@ struct hppa_fix_struct
 
     /* The unwind descriptor associated with this fixup.  */
     char fx_unwind[8];
+
+    /* The segment this fixup appears in.  */
+    segT segment;
   };
 
 /* Structure to hold information about predefined registers.  */
@@ -724,7 +727,7 @@ static label_symbol_struct *label_symbols_rootp = NULL;
 static int hppa_field_selector;
 
 /* A dummy bfd symbol so that all relocations have symbols of some kind.  */
-static asymbol *dummy_symbol;
+static symbolS *dummy_symbol;
 
 /* Nonzero if errors are to be printed.  */
 static int print_errors = 1;
@@ -1211,6 +1214,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
   hppa_fix->fx_r_field = r_field;
   hppa_fix->fx_r_format = r_format;
   hppa_fix->fx_arg_reloc = arg_reloc;
+  hppa_fix->segment = now_seg;
   if (unwind_desc)
     {
       bcopy (unwind_desc, hppa_fix->fx_unwind, 8);
@@ -1329,7 +1333,7 @@ md_begin ()
   subseg_set (text_section, 0);
 
   dummy_symbol = symbol_find_or_make ("L$dummy");
-  dummy_symbol->section = text_section;
+  S_SET_SEGMENT (dummy_symbol, text_section);
 }
 
 /* Assemble a single instruction storing it into a frag.  */
@@ -2739,7 +2743,7 @@ tc_gen_reloc (section, fixp)
 	case R_LSEL:
 	case R_RSEL:
 	  /* There is no symbol or addend associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = dummy_symbol;
+	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
 	  relocs[i]->addend = 0;
 	  break;
 
@@ -2904,10 +2908,17 @@ md_apply_fix (fixP, valp)
       fixP->fx_addnumber = val;
 
       /* Check if this is an undefined symbol.  No relocation can
-         possibly be performed in this case.  */
+	 possibly be performed in this case.
+
+	 Also avoid doing anything for pc-relative fixups in which the
+	 fixup is in a different space than the symbol it references.  */
       if ((fixP->fx_addsy && fixP->fx_addsy->bsym->section == &bfd_und_section)
 	  || (fixP->fx_subsy
-	      && fixP->fx_subsy->bsym->section == &bfd_und_section))
+	      && fixP->fx_subsy->bsym->section == &bfd_und_section)
+	  || (fixP->fx_addsy
+	      && S_GET_SEGMENT (fixP->fx_addsy) != hppa_fixP->segment)
+	  || (fixP->fx_subsy
+	      && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
 	return 1;
 
       /* PLABEL field selectors should not be passed to hppa_field_adjust.  */
@@ -4864,6 +4875,7 @@ pa_procend (unused)
 
   within_procedure = FALSE;
   demand_empty_rest_of_line ();
+  pa_undefine_label ();
 }
 
 /* Parse the parameters to a .SPACE directive; if CREATE_FLAG is nonzero,
