@@ -32,7 +32,7 @@ open bfd.
 The arch information is provided by each architecture package.  The
 set of default architectures is selected by the #define
 @code{SELECT_ARCHITECTURES}.  This is normally set up in the
-@ital{config/h-} file of your choice.  If the name is not defined,
+@code{config\/h\-} file of your choice.  If the name is not defined,
 then all the architectures supported are included.
 
 When BFD starts up, all the architectures are called with an
@@ -155,7 +155,7 @@ DEFUN(bfd_printable_arch_mach,(arch, machine),
       unsigned long machine)
 {
   bfd_arch_info_struct_type *ap;
-  
+  bfd_check_init();  
   for (ap = bfd_arch_info_list; 
        ap !=  (bfd_arch_info_struct_type *)NULL;
        ap = ap->next) {

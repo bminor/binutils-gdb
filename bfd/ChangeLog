@@ -1,3 +1,13 @@
+Tue Oct  1 11:24:31 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* archures.c: removed texinfo error
+
+	* init.c: added texinfo hooks, and removed initialization error
+	message.
+
+	* libcoff-in.h, libbfd-in.h removed $id field so cvs can merge
+	without complaints.
+
 Tue Oct  1 05:02:53 1991  John Gilmore  (gnu at cygnus.com)
 
 	* cpu-i960.c:  Avoid numerical count of initializers.
@@ -9,6 +19,9 @@ Tue Oct  1 05:02:53 1991  John Gilmore  (gnu at cygnus.com)
 	* config/h-vaxult:  New host system.
 
 Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* bfd-in.h VERSION, change version number to 0.18, this makes a
+	gap, but now is the same as the linker version number.
 
 	* cpu-a29k.c, cpu-i386.c, cpu-m68k.c, cpu-mips.c, cpu-vax.c,
 	cpu-h8300.c, cpu-i960.c, cpu-m88k.c, cpu-sparc.c: added. These
