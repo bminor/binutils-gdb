@@ -1,3 +1,7 @@
+2002-05-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gregset.h: Say "GNU/Linux".
+
 2002-05-08  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdbtypes.c : Add new builtin type for 64 bit vectors.

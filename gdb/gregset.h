@@ -53,7 +53,7 @@ extern void fill_gregset (gdb_gregset_t *gregs, int regno);
 extern void fill_fpregset (gdb_fpregset_t *fpregs, int regno);
 
 #ifdef FILL_FPXREGSET
-/* Linux/i386: Copy register values between GDB's internal register cache
+/* GNU/Linux i386: Copy register values between GDB's internal register cache
    and the i386 extended floating point registers.  */
 
 #ifndef GDB_FPXREGSET_T
