@@ -1,3 +1,9 @@
+2003-04-08  Nick Clifton  <nickc@redhat.com>
+
+	* gas/ia64/dependency-1.s: New file: Test read before write dependency.
+	* gas/ia64/dependency-1.d: New file: Expected assembly results.
+	* gas/ia64/ia64.exp: Run the new test.
+
 2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gas/m68hc11/bug-1825.d (_table): Update.
