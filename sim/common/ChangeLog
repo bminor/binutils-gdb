@@ -1,5 +1,7 @@
 Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* run.c (main): Check return value of sim_open.
+
 	* Make-common.in (sim-options.o, sim-load.o): Add rules for.
 	(sim_main_headers): Add sim-trace.h.
 	* run.c (exec_bfd, target_byte_order): Delete.

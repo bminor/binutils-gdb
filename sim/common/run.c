@@ -198,6 +198,8 @@ main (ac, av)
   /* Ensure that any run-time initialisation that needs to be
      performed by the simulator can occur. */
   sd = sim_open (SIM_OPEN_STANDALONE, sim_argv);
+  if (sd == 0)
+    exit (1);
 
   if (sim_load (sd, name, abfd, 0) == SIM_RC_FAIL)
     exit (1);
