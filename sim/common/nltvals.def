@@ -180,7 +180,6 @@
  { "O_WRONLY", 1  },
 /* end open target macros */
 #endif
-/* start-sanitize-d30v */
 #ifdef NL_TARGET_d30v
 #ifdef sys_defs
 /* from syscall.h */
@@ -205,7 +204,30 @@
 /* end d30v sys target macros */
 #endif
 #endif
-/* end-sanitize-d30v */
+#ifdef NL_TARGET_fr30
+#ifdef sys_defs
+/* from syscall.h */
+/* begin fr30 sys target macros */
+ { "SYS_argv", 13  },
+ { "SYS_argvlen", 12  },
+ { "SYS_chdir", 14  },
+ { "SYS_chmod", 16  },
+ { "SYS_close", 3  },
+ { "SYS_exit", 1  },
+ { "SYS_fstat", 10  },
+ { "SYS_getpid", 8  },
+ { "SYS_kill", 9  },
+ { "SYS_lseek", 6  },
+ { "SYS_open", 2  },
+ { "SYS_read", 4  },
+ { "SYS_stat", 15  },
+ { "SYS_time", 18  },
+ { "SYS_unlink", 7  },
+ { "SYS_utime", 17  },
+ { "SYS_write", 5  },
+/* end fr30 sys target macros */
+#endif
+#endif
 #ifdef NL_TARGET_m32r
 #ifdef sys_defs
 /* from syscall.h */
@@ -276,5 +298,29 @@
  { "SYS_utime", 17  },
  { "SYS_write", 5  },
 /* end mn10300 sys target macros */
+#endif
+#endif
+#ifdef NL_TARGET_mn10200
+#ifdef sys_defs
+/* from syscall.h */
+/* begin mn10200 sys target macros */
+ { "SYS_argv", 13  },
+ { "SYS_argvlen", 12  },
+ { "SYS_chdir", 14  },
+ { "SYS_chmod", 16  },
+ { "SYS_close", 3  },
+ { "SYS_exit", 1  },
+ { "SYS_fstat", 10  },
+ { "SYS_getpid", 8  },
+ { "SYS_kill", 9  },
+ { "SYS_lseek", 6  },
+ { "SYS_open", 2  },
+ { "SYS_read", 4  },
+ { "SYS_stat", 15  },
+ { "SYS_time", 18  },
+ { "SYS_unlink", 7  },
+ { "SYS_utime", 17  },
+ { "SYS_write", 5  },
+/* end mn10200 sys target macros */
 #endif
 #endif

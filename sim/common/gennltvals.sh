@@ -29,13 +29,13 @@ $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
 # Note that there is a standard syscall.h file (libgloss/syscall.h) now which
 # hopefully more targets can use.
 
-# start-sanitize-d30v
 dir=libgloss target=d30v
-echo "/* start-sanitize-${target} */"
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
-echo "/* end-sanitize-${target} */"
-# end-sanitize-d30v
+
+dir=libgloss target=fr30
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
 dir=libgloss target=m32r
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
@@ -46,5 +46,9 @@ $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
 dir=libgloss target=mn10300
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+
+dir=libgloss target=mn10200
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"

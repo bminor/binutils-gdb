@@ -1,3 +1,8 @@
+1998-11-18  Doug Evans  <devans@casey.cygnus.com>
+
+	* gennltvals.sh: Add fr30 support.
+	* nltvals.def: Rebuild.
+
 Wed Nov 18 10:22:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-types.h: Re-do type system so that GCC's attribute and mode
