@@ -1,3 +1,8 @@
+Sun Jan 12 13:08:36 1992  Per Bothner  (bothner at cygnus.com)
+
+	* mips-tdep.c (mips_skip_prologue):  Add some number of
+	'sw' instructions before 'addiu' adjusts the stack.
+
 Fri Jan 10 13:47:06 1992  Fred Fish  (fnf at cygnus.com)
 
 	* dwarfread.c (start_symtab, end_symtab, scopecount, openscope,
