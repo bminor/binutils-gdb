@@ -10598,6 +10598,7 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @item target mon960 @var{dev}
 MON960 monitor for Intel i960.
 
+@kindex target nindy
 @item target nindy @var{devicename}
 An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
 the name of the serial device to use for the connection, e.g.
@@ -10622,12 +10623,6 @@ By responding to a prompt on startup;
 @item
 By using the @code{target} command at any point during your @value{GDBN}
 session.  @xref{Target Commands, ,Commands for managing targets}.
-
-@kindex target nindy
-@item target nindy @var{devicename}
-An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
-the name of the serial device to use for the connection, e.g.
-@file{/dev/ttya}.
 
 @end itemize
 
@@ -11004,7 +10999,7 @@ both the Unix host and on the Sparclet target.  The program
 @code{@value{GDBP}} is installed and executed on the Unix host.
 
 @table @code
-@item timeout @var{args}
+@item remotetimeout @var{args}
 @kindex remotetimeout
 @value{GDBN} supports the option @code{remotetimeout}.
 This option is set by the user, and  @var{args} represents the number of
