@@ -1,3 +1,7 @@
+Tue Apr 28 18:11:24 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Change alpha to alpha* in several places.
+
 Tue Apr 28 07:42:00 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config.sub: Recognize sparc86x.
