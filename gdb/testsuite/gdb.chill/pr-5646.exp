@@ -1,0 +1,57 @@
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Per Bothner. (bothner@cygnus.com)
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+proc do_tests {} {
+    global prms_id bug_id subdir objdir srcdir binfile prompt
+
+    set prms_id 0
+    set bug_id 0
+
+    # Start with a fresh gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+
+    send "set language chill\n" ; expect -re "$prompt $"
+
+    runto p
+    send "next\n" ;  expect -re "$prompt $"
+    gdb_test_exact "print xx" {= [a:b]}
+}
+
+# Check to see if we have an executable to test.  If not, then either we
+# haven't tried to compile one, or the compilation failed for some reason.
+# In either case, just notify the user and skip the tests in this file.
+
+set binfile "pr-5646.exe"
+set srcfile $binfile.ch
+
+if ![file exists $objdir/$subdir/$binfile] then {
+    warning "$binfile does not exist; tests suppressed."
+} else {
+    do_tests
+}
