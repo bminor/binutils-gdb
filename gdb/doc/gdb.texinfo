@@ -19963,17 +19963,20 @@ Reserved for future use.
 
 @item @code{O} --- reserved
 
-Reserved for future use.
-
-@item @code{p}@var{n@dots{}} --- read reg @strong{(reserved)}
+@item @code{p}@var{hex number of register} --- read register packet
 @cindex @code{p} packet
 
-@xref{write register packet}.
+@xref{read registers packet}, for a description of how the returned
+register value is encoded.
 
 Reply:
 @table @samp
-@item @var{r@dots{}.}
-The hex encoded value of the register in target byte order.
+@item @var{XX@dots{}}
+the register's value
+@item E@var{NN}
+for an error
+@item
+Indicating an unrecognized @var{query}.
 @end table
 
 @item @code{P}@var{n@dots{}}@code{=}@var{r@dots{}} --- write register
