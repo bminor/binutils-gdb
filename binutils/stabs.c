@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright (C) 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1822,7 +1822,7 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
 	  else if (n3 == (bfd_signed_vma) 0xffffffff)
 	    return debug_make_int_type (dhandle, 4, true);
 #ifdef BFD64
-	  else if (n3 == ((((bfd_vma) 0xffffffff) << 32) | 0xffffffff))
+	  else if (n3 == ((((bfd_signed_vma) 0xffffffff) << 32) | 0xffffffff))
 	    return debug_make_int_type (dhandle, 8, true);
 #endif
 	}

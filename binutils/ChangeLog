@@ -1,3 +1,18 @@
+2000-07-10  David Huggins-Daines  <dhd@linuxcare.com>
+
+	* stabs.c (parse_stab_range_type): Cast to proper type to fix
+	warning.
+
+2000-07-10  Ryan Bradetich  <rbradetich@uswest.net>
+
+	* readelf.c (get_dynamic_data): Add casts and use unsigned chars
+	to fix warnings.
+	(process_symbol_table): Ditto.
+	(procesS_extended_line_op): Ditto.
+	(display_debug_lines): Ditto.
+	(display_debug_pubnames): Ditto.
+	(read_and_display_attr): Ditto.
+
 2000-07-09  Nick Clifton  <nickc@cygnus.com>
 
 	* MAINTAINERS: Add several more port specific maintainers.

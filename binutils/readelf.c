@@ -4230,10 +4230,10 @@ get_dynamic_data (file, number)
      FILE *       file;
      unsigned int number;
 {
-  char * e_data;
+  unsigned char * e_data;
   int *  i_data;
 
-  e_data = (char *) malloc (number * 4);
+  e_data = (unsigned char *) malloc (number * 4);
 
   if (e_data == NULL)
     {
@@ -4270,8 +4270,8 @@ process_symbol_table (file)
      FILE * file;
 {
   Elf32_Internal_Shdr *   section;
-  char   nb [4];
-  char   nc [4];
+  unsigned char   nb [4];
+  unsigned char   nc [4];
   int    nbuckets = 0;
   int    nchains = 0;
   int *  buckets = NULL;
@@ -4885,7 +4885,7 @@ process_extended_line_op (data, is_stmt, pointer_size)
 
       printf (_("   %d\t"), ++ state_machine_regs.last_file_entry);
       name = data;
-      data += strlen (data) + 1;
+      data += strlen ((char *) data) + 1;
       printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
       data += bytes_read;
       printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
@@ -4990,7 +4990,7 @@ display_debug_lines (section, start, file)
 	    {
 	      printf (_("  %s\n"), data);
 
-	      data += strlen (data) + 1;
+	      data += strlen ((char *) data) + 1;
 	    }
 	}
 
@@ -5007,13 +5007,13 @@ display_debug_lines (section, start, file)
 
 	  while (* data != 0)
 	    {
-	      char * name;
+	      unsigned char * name;
 	      int bytes_read;
 
 	      printf (_("  %d\t"), ++ state_machine_regs.last_file_entry);
 	      name = data;
 
-	      data += strlen (data) + 1;
+	      data += strlen ((char *) data) + 1;
 
 	      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
 	      data += bytes_read;
@@ -5183,7 +5183,7 @@ display_debug_pubnames (section, start, file)
 	    {
 	      data += 4;
 	      printf ("    %ld\t\t%s\n", offset, data);
-	      data += strlen (data) + 1;
+	      data += strlen ((char *) data) + 1;
 	    }
 	}
       while (offset != 0);
@@ -6008,7 +6008,7 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
 
     case DW_FORM_string:
       printf (" %s", data);
-      data += strlen (data) + 1;
+      data += strlen ((char *) data) + 1;
       break;
 
     case DW_FORM_block:
