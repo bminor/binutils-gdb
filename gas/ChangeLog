@@ -1,3 +1,32 @@
+Tue Mar  8 21:17:12 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/obj-coff.c: Minor formatting/stylistic changes, plus:
+	(obj_coff_section): Declare.
+	(obj_pseudo_table): Make it available only if MANY_SECTIONS.
+	(obj_symbol_to_chars) [CROSS_COMPILE]: Some attemps to make this
+	work.  It still doesn't.  It now fails to compile, instead of
+	silently compiling to do nothing.
+	* config/obj-coff.h (SEPARATE_STAB_SECTIONS): Define only if
+	MANY_SECTIONS.
+	(OBJ_PROCESS_STAB) [! MANY_SECTIONS]: New macro, just emits
+	warning.
+
+	Handle Alpha load-immediate-FP pseudo-instructions:
+	* config/alpha-opcode.h (ldif, ldig, ldis, ldit): New patterns.
+	* config/tc-alpha.c (lit8_sec, lit4_sec, lit8_sym, lit4_sym): New
+	variables.
+	(create_literal_section): New function.
+	(create_lita_section): Now a macro.
+	(get_lit8_offset, get_lit4_offset): New functions.
+	(maybe_set_gp): New function.
+	(select_gp_value): Call it.
+	(load_expression): Preserve addend if symbol is a section symbol.
+	(alpha_ip): Handle new operand type `F' for floating-point
+	constants; store them in .lit{4,8} sections.
+	(alpha_ip, case 'G'): Emit LITUSE relocations for symbol exprs.
+
+	* config/tc-i386.c (smallest_imm_type): Never return Imm1.
+
 Tue Mar  8 14:18:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* config/obj-coffbfd.c (w_strings): Only copy strings out if
