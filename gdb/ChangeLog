@@ -1,5 +1,7 @@
 2004-02-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/obsd.mh (MH_FLAGS): Remove.
+
 	Fix PR build/1549.
 	* i386obsd-tdep.c: Update copyright years.  Include
 	"solib-svr4.h".
