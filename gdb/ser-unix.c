@@ -49,7 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <unistd.h>
 #endif
 #ifdef HAVE_TERMIO
-#include <sys/termio.h>
+#include <termio.h>
 #endif
 #ifdef HAVE_SGTTY
 #include <sgtty.h>

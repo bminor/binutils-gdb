@@ -1,4 +1,4 @@
-/* Intel 386 native support.
+/* Intel 386 native support for SYSV systems (pre-SVR4).
    Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -37,7 +37,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 
+#ifndef NO_SYS_REG_H
 #include <sys/reg.h>
+#endif
+
 #include "ieee-float.h"
 
 #include "target.h"
