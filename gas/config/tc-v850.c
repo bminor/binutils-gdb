@@ -31,7 +31,7 @@
 const char comment_chars[] = "#";
 
 /* Characters which start a comment at the beginning of a line.  */
-const char line_comment_chars[] = "#";
+const char line_comment_chars[] = ";#";
 
 /* Characters which may be used to separate multiple commands on a 
    single line.  */
@@ -359,14 +359,43 @@ get_operands (exp)
       if (*p==0 || *p=='\n' || *p=='\r')
         break;
 
-      input_line_pointer = p;
+      /* skip trailing parens */
+      if (*p == ')' || *p == ']')
+	{
+	  p++;
+	  continue;
+	}
 
-      if (!register_name(&exp[numops]))
-	expression(&exp[numops]);
+      if (*p == '[') 
+	{
+	  p++;
+	  input_line_pointer = p;
+	  register_name(&exp[numops]);
+	}
+      else if (strncmp(p, "lo(", 3) == 0)
+	{
+	  p += 3;
+	  input_line_pointer = p;
+	  expression(&exp[numops]);
+	}
+      else if (strncmp(p, "hi(", 3) == 0)
+	{
+	  p += 3;
+	  input_line_pointer = p;
+	  expression(&exp[numops]);
+	}
+      else
+	{
+	  input_line_pointer = p;
+	  if (!register_name(&exp[numops]))
+	    expression(&exp[numops]);
+	}
 
-      numops++;
       p = input_line_pointer;
+      numops++;
     }
+
+  input_line_pointer = p;
 
   exp[numops].X_op = 0;
   return (numops);
@@ -473,8 +502,16 @@ md_assemble (str)
 #endif
 
   /* Write out the instruction.  */
-  f = frag_more (2);
-  md_number_to_chars (f, insn, 2);
+  if ((insn & 0x0600) == 0x0600)
+    {
+      f = frag_more (4);
+      md_number_to_chars (f, insn, 4);
+    }
+  else
+    {
+      f = frag_more (2);
+      md_number_to_chars (f, insn, 2);
+    }
 }
 
 
