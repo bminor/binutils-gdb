@@ -1338,21 +1338,25 @@ reg_required_here (str, shift)
      char **str;
      int shift;
 {
+  static char buff [128]; /* XXX */
   int reg;
   char *start = *str;
 
   if ((reg = arm_reg_parse (str)) != FAIL && int_register (reg))
     {
-      inst.instruction |= reg << shift;
+      if (shift >= 0)
+	inst.instruction |= reg << shift;
       return reg;
     }
 
-  /* In the few cases where we might be able to accept something else
-     this error can be overridden */
-  inst.error = _("Register expected");
-
   /* Restore the start point, we may have got a reg of the wrong class.  */
   *str = start;
+  
+  /* In the few cases where we might be able to accept something else
+     this error can be overridden */
+  sprintf (buff, _("Register expected, not '%.100s'"), start);
+  inst.error = buff;
+
   return FAIL;
 }
 
@@ -1564,10 +1568,7 @@ cp_address_required_here (str)
 	p++;
 
       if ((reg = reg_required_here (&p, 16)) == FAIL)
-	{
-	  inst.error = _("Register required");
-	  return FAIL;
-	}
+	return FAIL;
 
       while (*p == ' ')
 	p++;
@@ -2588,10 +2589,7 @@ ldst_extend (str, hwse)
       (*str)++;	/* and fall through */
     default:
       if (reg_required_here (str, 0) == FAIL)
-	{
-	  inst.error = _("Register expected");
-	  return FAIL;
-	}
+	return FAIL;
 
       if (hwse)
         inst.instruction |= add;
@@ -2640,11 +2638,7 @@ do_ldst (str, flags)
     str++;
     
   if ((conflict_reg = reg_required_here (&str, 12)) == FAIL)
-    {
-      if (!inst.error)
-	inst.error = bad_args;
-      return;
-    }
+    return;
 
   if (skip_past_comma (&str) == FAIL)
     {
@@ -2661,10 +2655,7 @@ do_ldst (str, flags)
 	str++;
 
       if ((reg = reg_required_here (&str, 16)) == FAIL)
-	{
-	  inst.error = _("Register required");
-	  return;
-	}
+	return;
 
       conflict_reg = (((conflict_reg == reg)
 		       && (inst.instruction & LOAD_BIT))
@@ -2843,12 +2834,9 @@ reg_list (strp)
 	      while (*str == ' ')
 		str++;
 
-	      if ((reg = arm_reg_parse (&str)) == FAIL || !int_register (reg))
-		{
-		  inst.error = _("Register expected");
-		  return FAIL;
-		}
-
+	      if ((reg = reg_required_here (& str, -1)) == FAIL)
+		return FAIL;
+	      
 	      if (in_range)
 		{
 		  int i;
@@ -2960,11 +2948,7 @@ do_ldmstm (str, flags)
     str++;
 
   if ((base_reg = reg_required_here (&str, 16)) == FAIL)
-    {
-      if (!inst.error)
-	inst.error = bad_args;
-      return;
-    }
+    return;
 
   if (base_reg == REG_PC)
     {
@@ -3430,10 +3414,7 @@ do_fp_ldmstm (str, flags)
 	str++;
 
       if ((reg = reg_required_here (&str, 16)) == FAIL)
-	{
-	  inst.error = _("Register required");
-	  return;
-	}
+	return;
 
       while (*str == ' ')
 	str++;
@@ -3666,11 +3647,7 @@ do_fp_to_reg (str, flags)
     str++;
 
   if (reg_required_here (&str, 12) == FAIL)
-    {
-      if (! inst.error)
-	inst.error = bad_args;
-      return;
-    }
+    return;
 
   if (skip_past_comma (&str) == FAIL
       || fp_reg_required_here (&str, 0) == FAIL)
@@ -3699,11 +3676,8 @@ thumb_reg (strp, hi_lo)
 {
   int reg;
 
-  if ((reg = arm_reg_parse (strp)) == FAIL || ! int_register (reg))
-    {
-      inst.error = _("Register expected");
-      return FAIL;
-    }
+  if ((reg = reg_required_here (strp, -1)) == FAIL)
+    return FAIL;
 
   switch (hi_lo)
     {
@@ -6334,10 +6308,14 @@ arm_frob_label (sym)
 /* Adjust the symbol table.  This marks Thumb symbols as distinct from
    ARM ones.  */
 
+#ifdef OBJ_ELF
+#define S_GET_STORAGE_CLASS(S)   (elf_symbol ((S)->bsym)->internal_elf_sym.st_other)
+#define S_SET_STORAGE_CLASS(S,V) (elf_symbol ((S)->bsym)->internal_elf_sym.st_other = (V))
+#endif
 void
 arm_adjust_symtab ()
 {
-#if defined OBJ_COFF 
+#if defined OBJ_COFF || defined OBJ_ELF
   symbolS * sym;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
@@ -6370,13 +6348,37 @@ arm_adjust_symtab ()
                 break;
             }
         }
-      
+
+#ifdef OBJ_COFF
       if (ARM_IS_INTERWORK (sym))
 	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
+#endif
     }
 #endif
 }
 
+#ifdef OBJ_ELF
+void
+armelf_frob_symbol (symp, puntp)
+    symbolS *symp;
+    int *puntp;
+
+{
+   elf_frob_symbol (symp, puntp);
+
+   if (S_IS_EXTERNAL (symp))
+      S_SET_STORAGE_CLASS(symp, C_EXT);
+
+   if (S_GET_STORAGE_CLASS (symp) == C_NULL)
+     {
+     if (S_GET_SEGMENT (symp) == text_section
+              && symp != seg_info (text_section)->sym)
+            S_SET_STORAGE_CLASS (symp, C_LABEL);
+          else
+            S_SET_STORAGE_CLASS (symp, C_STAT);
+      }
+} 
+#endif
 int
 arm_data_in_code ()
 {

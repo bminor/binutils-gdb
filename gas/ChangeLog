@@ -4,6 +4,14 @@ Wed Aug 12 13:25:03 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 	prefixes.
 	(i386_operand): Fix an error message.
 
+Tue Aug 11 14:44:32 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-arm.texi (ARM Directives): Document .req directive.
+
+	* config/tc-arm.c (reg_required_here): Display erroneous string if
+	the register name could not be decoded.
+	Do not set inst.instruction if the sift is -1.
+
 Mon Aug 10 15:39:56 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (tc_gen_reloc): Bias WEAK symbols just as
