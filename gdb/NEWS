@@ -97,6 +97,12 @@ These commands allow data to be copied from target memory
 to a bfd-format or binary file (dump and append), and back
 from a file into memory (restore).
 
+* Improved "next/step" support on multi-processor Alpha Tru64.
+
+The previous single-step mechanism could cause unpredictable problems,
+including the random appearance of SIGSEGV or SIGTRAP signals. The use
+of a software single-step mechanism prevents this.
+
 *** Changes in GDB 5.2.1:
 
 * New targets.

@@ -1,3 +1,8 @@
+2002-08-21  Joel Brobecker  <brobecker@gnat.com>
+
+	* NEWS: Add an entry regarding the improvement of the next/step
+	operation on Alpha Tru64 multi-processor machines.
+
 2002-08-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in: Update dependencies for mi/ cli/ and tui/
