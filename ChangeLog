@@ -1,3 +1,7 @@
+Mon Aug 18 17:20:10 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (all-autoconf): Depends on all-texinfo.
+
 Fri Aug 15 23:09:26 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* config-ml.in ({powerpc,rs6000}*-*-*): Update to current AIX and

@@ -105,10 +105,18 @@ GZIPPROG = gzip
 DEFAULT_YACC = yacc
 DEFAULT_LEX = lex
 
-# BISON: This line sed'ed to BISON = bison -y for FSF releases, don't remove.
-BISON = `if [ -f $$r/byacc/byacc ] ; \
-	    then echo $$r/byacc/byacc ; \
-	    else echo ${DEFAULT_YACC} ; \
+BISON = `if [ -f $$r/bison/bison ] ; then \
+	    echo $$r/bison/bison ; \
+	 else \
+	    echo bison ; \
+	 fi`
+
+YACC = `if [ -f $$r/bison/bison ] ; then \
+	    echo $$r/bison/bison -y ; \
+	elif [ -f $$r/byacc/byacc ] ; then \
+	    echo $$r/byacc/byacc ; \
+	else \
+	    echo ${DEFAULT_YACC} ; \
 	fi`
 
 LEX = `if [ -f $$r/flex/flex ] ; \
@@ -360,7 +368,7 @@ BASE_FLAGS_TO_PASS = \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"WINDRES_FOR_TARGET=$(WINDRES_FOR_TARGET)" \
-	"YACC=$(BISON)" \
+	"YACC=$(YACC)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
 	"tooldir=$(tooldir)" 
@@ -455,6 +463,7 @@ ALL_MODULES = \
 	all-bash \
 	all-bfd \
 	all-binutils \
+	all-bison \
 	all-byacc \
 	all-cvs \
 	all-db \
@@ -524,6 +533,7 @@ ALL_MODULES = \
 # are tested as part of the host's native tool-chain, and not
 # tested in a cross configuration.
 NATIVE_CHECK_MODULES = \
+	check-bison \
 	check-byacc \
 	check-flex
 
@@ -606,6 +616,7 @@ INSTALL_MODULES = \
 	install-bfd \
 	install-opcodes \
 	install-binutils \
+	install-bison \
 	install-byacc \
 	install-cvs \
 	install-db \
@@ -763,6 +774,7 @@ CLEAN_MODULES = \
 	clean-bash \
 	clean-bfd \
 	clean-binutils \
+	clean-bison \
 	clean-byacc \
 	clean-cvs \
 	clean-db \
@@ -1385,18 +1397,19 @@ install-dosrel-fake:
 
 # This is a list of inter-dependencies among modules.
 all-apache:
-all-autoconf: all-m4
+all-autoconf: all-m4 all-texinfo
 all-automake:
 all-bash:
 all-bfd:
-all-binutils: all-libiberty all-opcodes all-bfd all-flex all-byacc
+all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc
+all-bison:
 all-byacc:
 all-cvs:
 all-db:
 all-dejagnu: all-tcl all-expect all-tk
 all-diff: all-libiberty
 all-emacs:
-all-emacs19: all-byacc
+all-emacs19: all-bison all-byacc
 all-etc:
 configure-target-examples: $(ALL_GCC)
 all-target-examples: configure-target-examples
@@ -1404,15 +1417,15 @@ all-expect: all-tcl all-tk
 all-fileutils: all-libiberty
 all-findutils:
 all-find:
-all-flex: all-libiberty all-byacc
+all-flex: all-libiberty all-bison all-byacc
 all-gas: all-libiberty all-opcodes all-bfd
 all-gash: all-tcl
 all-gawk:
 ALL_GCC = all-gcc
-all-gcc: all-byacc all-binutils all-gas all-ld
-all-bootstrap: all-libiberty all-byacc all-binutils all-gas all-ld
+all-gcc: all-bison all-byacc all-binutils all-gas all-ld
+all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
 GDB_TK = all-tk all-tcl all-itcl all-tix
-all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
+all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
 all-target-gperf: configure-target-gperf all-target-libiberty all-target-libg++
@@ -1433,7 +1446,7 @@ all-itcl: all-tcl all-tk
 # start-sanitize-ide
 all-jstools: all-tcl all-tk all-libide
 # end-sanitize-ide
-all-ld: all-libiberty all-bfd all-opcodes all-byacc all-flex
+all-ld: all-libiberty all-bfd all-opcodes all-bison all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
 all-target-libg++: configure-target-libg++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-librx all-target-libstdc++
 configure-target-libgloss: $(ALL_GCC)
@@ -1550,8 +1563,6 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	# Take out texinfo from a few places; make simple BISON=bison line.
 	sed -e '/^all\.normal: /s/\all-texinfo //' \
 	    -e '/^	install-texinfo /d' \
-	    -e '/^BISON = `if/,/^$$/d' \
-	    -e '/^# BISON:/s/.*/BISON = $(DEFAULT_YACC)/' \
 	<Makefile.in >tmp
 	mv -f tmp Makefile.in
 	#
