@@ -1,5 +1,11 @@
 Tue Jun 22 03:15:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* procfs.c (procfs_resume): Don't pass a SIGTSTP whose action
+	is SIG_DFL.
+
+	* procfs.c (procfs_resume): Skip the unnecessary PRSVADDR on all
+	systems, not just Solaris.
+
 	* stabsread.c: Include <ctype.h>.
 
 Mon Jun 21 16:09:46 1993  Jim Kingdon  (kingdon@cygnus.com)

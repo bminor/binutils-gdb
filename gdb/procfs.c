@@ -2150,49 +2150,28 @@ set_proc_siginfo (pip, signo)
     }
 }
 
-/*
-
-LOCAL FUNCTION
-
-	procfs_resume -- resume execution of the inferior process
-
-SYNOPSIS
-
-	void procfs_resume (int step, int signo)
-
-DESCRIPTION
-
-	Resume execution of the inferior process.  If STEP is nozero, then
-	just single step it.  If SIGNAL is nonzero, restart it with that
-	signal activated.
-
-NOTE
-
-	It may not be absolutely necessary to specify the PC value for
-	restarting, but to be safe we use the value that gdb considers
-	to be current.  One case where this might be necessary is if the
-	user explicitly changes the PC value that gdb considers to be
-	current.  FIXME:  Investigate if this is necessary or not.
-
-	When attaching to a child process, if we forced it to stop with
-	a PIOCSTOP, then we will have set the nopass_next_sigstop flag.
-	Upon resuming the first time after such a stop, we explicitly
-	inhibit sending it another SIGSTOP, which would be the normal
-	result of default signal handling.  One potential drawback to
-	this is that we will also ignore any attempt to by the user
-	to explicitly continue after the attach with a SIGSTOP.  Ultimately
-	this problem should be dealt with by making the routines that
-	deal with the inferior a little smarter, and possibly even allow
-	an inferior to continue running at the same time as gdb.  (FIXME?)
- */
+/* Resume execution of the inferior process.  If STEP is nozero, then
+   just single step it.  If SIGNAL is nonzero, restart it with that
+   signal activated.  */
 
 static void
 procfs_resume (step, signo)
      int step;
      int signo;
 {
+  int signal_to_pass;
+
   errno = 0;
   pi.prrun.pr_flags = PRSTRACE | PRSFAULT | PRCFAULT;
+
+#if 0
+  /* It should not be necessary.  If the user explicitly changes the value,
+     value_assign calls write_register_bytes, which writes it.  */
+/*	It may not be absolutely necessary to specify the PC value for
+	restarting, but to be safe we use the value that gdb considers
+	to be current.  One case where this might be necessary is if the
+	user explicitly changes the PC value that gdb considers to be
+	current.  FIXME:  Investigate if this is necessary or not.  */
 
 #ifdef PRSVADDR_BROKEN
 /* Can't do this under Solaris running on a Sparc, as there seems to be no
@@ -2203,10 +2182,45 @@ procfs_resume (step, signo)
   pi.prrun.pr_vaddr = (caddr_t) *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
   pi.prrun.pr_flags != PRSVADDR;
 #endif
+#endif
 
-  if (signo && !(signo == SIGSTOP && pi.nopass_next_sigstop))
+  if (signo == SIGSTOP && pi.nopass_next_sigstop)
+    /* When attaching to a child process, if we forced it to stop with
+       a PIOCSTOP, then we will have set the nopass_next_sigstop flag.
+       Upon resuming the first time after such a stop, we explicitly
+       inhibit sending it another SIGSTOP, which would be the normal
+       result of default signal handling.  One potential drawback to
+       this is that we will also ignore any attempt to by the user
+       to explicitly continue after the attach with a SIGSTOP.  Ultimately
+       this problem should be dealt with by making the routines that
+       deal with the inferior a little smarter, and possibly even allow
+       an inferior to continue running at the same time as gdb.  (FIXME?)  */
+    signal_to_pass = 0;
+  else if (signo == SIGTSTP
+	   && pi.prstatus.pr_cursig == SIGTSTP
+	   && pi.prstatus.pr_action.sa_handler == SIG_DFL)
+
+    /* We are about to pass the inferior a SIGTSTP whose action is
+       SIG_DFL.  The SIG_DFL action for a SIGTSTP is to stop
+       (notifying the parent via wait()), and then keep going from the
+       same place when the parent is ready for you to keep going.  So
+       under the debugger, it should do nothing (as if the program had
+       been stopped and then later resumed.  Under ptrace, this
+       happens for us, but under /proc, the system obligingly stops
+       the process, and wait_for_inferior would have no way of
+       distinguishing that type of stop (which indicates that we
+       should just start it again), with a stop due to the pr_trace
+       field of the prrun_t struct.
+
+       Note that if the SIGTSTP is being caught, we *do* need to pass it,
+       because the handler needs to get executed.  */
+    signal_to_pass = 0;
+  else
+    signal_to_pass = signo;
+
+  if (signal_to_pass)
     {
-      set_proc_siginfo (&pi, signo);
+      set_proc_siginfo (&pi, signal_to_pass);
     }
   else
     {
