@@ -110,7 +110,7 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
     }				/* for each fixup  */
 }
 
-/* Aout file generation & utilities . */
+/* Aout file generation & utilities .  */
 
 /* Convert a lvalue to machine dependent data.  */
 

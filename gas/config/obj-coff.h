@@ -39,7 +39,7 @@
 #include "bfd.h"
 
 /* This internal_lineno crap is to stop namespace pollution from the
-   bfd internal coff headerfile. */
+   bfd internal coff headerfile.  */
 #define internal_lineno bfd_internal_lineno
 #include "coff/internal.h"
 #undef internal_lineno
@@ -255,7 +255,7 @@ extern void obj_coff_section PARAMS ((int));
 /* The number of auxiliary entries */
 #define S_SET_NUMBER_AUXILIARY(s,v)	(S_GET_NUMBER_AUXILIARY (s) = (v))
 
-/* True if a symbol name is in the string table, i.e. its length is > 8. */
+/* True if a symbol name is in the string table, i.e. its length is > 8.  */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
 
 extern int S_SET_DATA_TYPE PARAMS ((symbolS *, int));
@@ -299,13 +299,13 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
  * differently.
  */
 
-#define SF_I960_MASK	(0x000001ff)	/* Bits 0-8 are used by the i960 port. */
+#define SF_I960_MASK	(0x000001ff)	/* Bits 0-8 are used by the i960 port.  */
 #define SF_SYSPROC	(0x0000003f)	/* bits 0-5 are used to store the sysproc number */
 #define SF_IS_SYSPROC	(0x00000040)	/* bit 6 marks symbols that are sysprocs */
 #define SF_BALNAME	(0x00000080)	/* bit 7 marks BALNAME symbols */
 #define SF_CALLNAME	(0x00000100)	/* bit 8 marks CALLNAME symbols */
 
-#define SF_NORMAL_MASK	(0x0000ffff)	/* bits 12-15 are general purpose. */
+#define SF_NORMAL_MASK	(0x0000ffff)	/* bits 12-15 are general purpose.  */
 
 #define SF_STATICS	(0x00001000)	/* Mark the .text & all symbols */
 #define SF_DEFINED	(0x00002000)	/* Symbol is defined in this file */
@@ -319,8 +319,8 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 #define SF_TAGGED	(0x00040000)	/* Is associated with a tag */
 #define SF_TAG		(0x00080000)	/* Is a tag */
 #define SF_DEBUG	(0x00100000)	/* Is in debug or abs section */
-#define SF_GET_SEGMENT	(0x00200000)	/* Get the section of the forward symbol. */
-/* All other bits are unused. */
+#define SF_GET_SEGMENT	(0x00200000)	/* Get the section of the forward symbol.  */
+/* All other bits are unused.  */
 
 /* Accessors */
 #define SF_GET(s)		(*symbol_get_obj (s))
@@ -372,7 +372,6 @@ extern int coff_n_line_nos;
 
 #define obj_emit_lineno(WHERE,LINE,FILE_START)	abort ()
 extern void coff_add_linesym PARAMS ((symbolS *));
-
 
 void c_dot_file_symbol PARAMS ((const char *filename));
 #define obj_app_file c_dot_file_symbol
@@ -435,9 +434,8 @@ hey ! Where is the C_LEAFSTAT definition ? i960 - coff support is depending on i
 
 extern const segT N_TYPE_seg[];
 
-/* Magic number of paged executable. */
+/* Magic number of paged executable.  */
 #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE	0x8300
-
 
 /* SYMBOL TABLE */
 
@@ -447,7 +445,7 @@ typedef struct
 {
   /* Basic symbol */
   struct internal_syment ost_entry;
-  /* Auxiliary entry. */
+  /* Auxiliary entry.  */
   union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES];
   /* obj_coff internal use only flags */
   unsigned int ost_flags;
@@ -507,7 +505,7 @@ typedef struct
  */
 #define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
 				 && S_GET_VALUE (s) != 0)
-/* True if a symbol name is in the string table, i.e. its length is > 8. */
+/* True if a symbol name is in the string table, i.e. its length is > 8.  */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
 
 /* True if a symbol is defined as weak.  */
@@ -596,13 +594,13 @@ typedef struct
  * differently.
  */
 
-#define SF_I960_MASK	(0x000001ff)	/* Bits 0-8 are used by the i960 port. */
+#define SF_I960_MASK	(0x000001ff)	/* Bits 0-8 are used by the i960 port.  */
 #define SF_SYSPROC	(0x0000003f)	/* bits 0-5 are used to store the sysproc number */
 #define SF_IS_SYSPROC	(0x00000040)	/* bit 6 marks symbols that are sysprocs */
 #define SF_BALNAME	(0x00000080)	/* bit 7 marks BALNAME symbols */
 #define SF_CALLNAME	(0x00000100)	/* bit 8 marks CALLNAME symbols */
 
-#define SF_NORMAL_MASK	(0x0000ffff)	/* bits 12-15 are general purpose. */
+#define SF_NORMAL_MASK	(0x0000ffff)	/* bits 12-15 are general purpose.  */
 
 #define SF_STATICS	(0x00001000)	/* Mark the .text & all symbols */
 #define SF_DEFINED	(0x00002000)	/* Symbol is defined in this file */
@@ -616,9 +614,9 @@ typedef struct
 #define SF_TAGGED	(0x00040000)	/* Is associated with a tag */
 #define SF_TAG		(0x00080000)	/* Is a tag */
 #define SF_DEBUG	(0x00100000)	/* Is in debug or abs section */
-#define SF_GET_SEGMENT	(0x00200000)	/* Get the section of the forward symbol. */
+#define SF_GET_SEGMENT	(0x00200000)	/* Get the section of the forward symbol.  */
 #define SF_ADJ_LNNOPTR	(0x00400000)	/* Has a lnnoptr */
-/* All other bits are unused. */
+/* All other bits are unused.  */
 
 /* Accessors */
 #define SF_GET(s)		((s)->sy_symbol.ost_flags)
@@ -772,16 +770,14 @@ typedef struct
 typedef struct
 {
   struct internal_aouthdr aouthdr;	/* a.out header */
-  struct internal_filehdr filehdr;	/* File header, not machine dep. */
+  struct internal_filehdr filehdr;	/* File header, not machine dep.  */
   long string_table_size;	/* names + '\0' + sizeof(int) */
   long relocation_size;	/* Cumulated size of relocation
 			   information for all sections in
-			   bytes. */
+			   bytes.  */
   long lineno_size;		/* Size of the line number information
 				   table in bytes */
 } object_headers;
-
-
 
 struct lineno_list
 {
@@ -789,9 +785,6 @@ struct lineno_list
   char *frag;			/* Frag to which the line number is related */
   struct lineno_list *next;	/* Forward chain pointer */
 };
-
-
-
 
 #define obj_segment_name(i) (segment_info[(int) (i)].scnhdr.s_name)
 

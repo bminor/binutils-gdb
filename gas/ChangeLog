@@ -3,6 +3,12 @@
 	* as.h: Fix formatting.
 	* asintl.h: Likewise.
 	* bit_fix.h: Likewise.
+	* config/obj-aout.c: Likewise.
+	* config/obj-aout.h: Likewise.
+	* config/obj-bout.c: Likewise.
+	* config/obj-bout.h: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-coff.h: Likewise.
 	* dwarf2dbg.h: Likewise.
 	* expr.h: Likewise.
 	* flonum.h: Likewise.

@@ -1,5 +1,5 @@
 /* b.out object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public
    License along with GAS; see the file COPYING.  If not, write
    to the Free Software Foundation, 59 Temple Place - Suite 330, Cambridge, MA
-   02139, USA. */
+   02139, USA.  */
 
 /*
  * This file is a modified version of 'a.out.h'.  It is to be used in all GNU
@@ -55,7 +55,6 @@
  *	  off to the NINDY monitor in the target systems.  Symbols and
  *	  relocation info are never sent to the target.
  */
-
 
 #define OBJ_BOUT 1
 
@@ -297,7 +296,7 @@ typedef struct
 
 object_headers;
 
-/* unused hooks. */
+/* unused hooks.  */
 #define OBJ_EMIT_LINENO(a, b, c)	{;}
 #define obj_pre_write_hook(a)		{;}
 
@@ -312,5 +311,3 @@ extern void tc_bout_fix_to_chars PARAMS ((char *where,
 					  relax_addressT segment_address));
 
 #define AOUT_STABS
-
-/* end of obj-bout.h */

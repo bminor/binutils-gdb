@@ -17,7 +17,7 @@ the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA. */
+02111-1307, USA.  */
 
 #define OBJ_HEADER "obj-aout.h"
 
@@ -98,7 +98,6 @@ const pseudo_typeS aout_pseudo_table[] =
 
   {NULL, NULL, 0}		/* end sentinel */
 };				/* aout_pseudo_table */
-
 
 #ifdef BFD_ASSEMBLER
 
@@ -223,7 +222,7 @@ obj_aout_frob_file ()
 
 #else /* ! BFD_ASSEMBLER */
 
-/* Relocation. */
+/* Relocation.  */
 
 /*
  *		emit_relocations()
@@ -233,7 +232,7 @@ obj_aout_frob_file ()
 void
 obj_emit_relocations (where, fixP, segment_address_in_file)
      char **where;
-     fixS *fixP;		/* Fixup chain for this segment. */
+     fixS *fixP;		/* Fixup chain for this segment.  */
      relax_addressT segment_address_in_file;
 {
   for (; fixP; fixP = fixP->fx_next)
@@ -322,13 +321,13 @@ obj_emit_symbols (where, symbol_rootP)
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
       /* Used to save the offset of the name. It is used to point
-	 to the string in memory but must be a file offset. */
+	 to the string in memory but must be a file offset.  */
       register char *temp;
 
       temp = S_GET_NAME (symbolP);
       S_SET_OFFSET (symbolP, symbolP->sy_name_offset);
 
-      /* Any symbol still undefined and is not a dbg symbol is made N_EXT. */
+      /* Any symbol still undefined and is not a dbg symbol is made N_EXT.  */
       if (!S_IS_DEBUG (symbolP) && !S_IS_DEFINED (symbolP))
 	S_SET_EXTERNAL (symbolP);
 
@@ -359,7 +358,7 @@ obj_aout_line (ignore)
 {
   /* Assume delimiter is part of expression.
      BSD4.2 as fails with delightful bug, so we
-     are not being incompatible here. */
+     are not being incompatible here.  */
   new_logical_line ((char *) NULL, (int) (get_absolute_expression ()));
   demand_empty_rest_of_line ();
 }				/* obj_aout_line() */
@@ -450,7 +449,7 @@ obj_crawl_symbol_chain (headers)
 
   tc_crawl_symbol_chain (headers);
 
-  symbolPP = &symbol_rootP;	/*->last symbol chain link. */
+  symbolPP = &symbol_rootP;	/*->last symbol chain link.  */
   while ((symbolP = *symbolPP) != NULL)
     {
       if (symbolP->sy_mri_common)
@@ -491,8 +490,7 @@ obj_crawl_symbol_chain (headers)
 	 switch was passed to gas.
 
 	 All other symbols are output.  We complain if a deleted
-	 symbol was marked external. */
-
+	 symbol was marked external.  */
 
       if (!S_IS_REGISTER (symbolP)
 	  && (!S_GET_NAME (symbolP)
@@ -508,11 +506,11 @@ obj_crawl_symbol_chain (headers)
 			   end of each string */
 	  if (!S_IS_STABD (symbolP))
 	    {
-	      /* Ordinary case. */
+	      /* Ordinary case.  */
 	      symbolP->sy_name_offset = string_byte_count;
 	      string_byte_count += strlen (S_GET_NAME (symbolP)) + 1;
 	    }
-	  else			/* .Stabd case. */
+	  else			/* .Stabd case.  */
 	    symbolP->sy_name_offset = 0;
 	  symbolPP = &symbolP->sy_next;
 	}
@@ -524,7 +522,7 @@ obj_crawl_symbol_chain (headers)
 	       register names...  */
 	    {
 	      as_bad (_("Local symbol %s never defined."), decode_local_label_name (S_GET_NAME (symbolP)));
-	    }			/* oops. */
+	    }			/* oops.  */
 
 	  /* Unhook it from the chain */
 	  *symbolPP = symbol_next (symbolP);
@@ -757,5 +755,3 @@ const struct format_ops aout_format_ops =
   0 	/* symbol_new_hook */
 };
 #endif BFD_ASSEMBLER
-
-/* end of obj-aout.c */
