@@ -1,3 +1,13 @@
+Wed Jan  3 19:49:54 1996  steve chamberlain  <sac@slash.cygnus.com>
+
+	* symtab.h (namespace enum): becomes typedef to avoid namespace
+	collision in C++. 
+	* infcmd.c (path_command): Use empty string if PATH name not set.
+	* i386-tdep.c (skip_trampoline_code): New function.
+	* srec.c: Renamed dsrec.c to avoid filename collision.
+	* Makefile.in: Cope with renaming.
+	Update copyrights to 1996.
+	
 Wed Jan  3 13:09:04 1996  Fred Fish  <fnf@cygnus.com>
 
 	* symmisc.c (print_objfile_statistics): Print memory use statistics

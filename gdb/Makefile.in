@@ -1,4 +1,4 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
 # Free Software Foundation, Inc.
 
 # This file is part of GDB.
@@ -888,7 +888,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c isi-xdep.c \
 	lynx-nat.c m3-nat.c \
 	m68k-tdep.c \
-	m88k-nat.c m88k-tdep.c mips-nat.c \
+	m88k-nat.c m88k-tdep.c mac-nat.c mips-nat.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
@@ -1218,9 +1218,7 @@ m88k-nat.o: m88k-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
-top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
-	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	$(remote_utils_h)
+mac-nat.o: mac-nat.c $(defs_h)
 
 main.o: main.c top.h $(defs_h)
 
@@ -1294,6 +1292,9 @@ hpread.o: hpread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h)
+
+ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
+	$(inferior_h) target.h serial.h terminal.h
 
 printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
@@ -1413,6 +1414,8 @@ sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) target.h
 
+dsrec.o: dsrec.c $(defs_h) srec.h
+
 stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h buildsym.h complaints.h $(defs_h) \
 	$(gdbtypes_h) objfiles.h stabsread.h symfile.h $(symtab_h)
@@ -1445,6 +1448,10 @@ target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h
 
 thread.o: thread.c $(defs_h) thread.h $(gdbcmd_h)
+
+top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
+	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
+	$(remote_utils_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \

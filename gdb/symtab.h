@@ -1,5 +1,5 @@
 /* Symbol table definitions for GDB.
-   Copyright 1986, 1989, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -432,8 +432,8 @@ struct block
 
 /* Different name spaces for symbols.  Looking up a symbol specifies a
    namespace and ignores symbol definitions in other name spaces. */
-
-enum namespace
+ 
+typedef enum 
 {
   /* UNDEF_NAMESPACE is used when a namespace has not been discovered or
      none of the following apply.  This usually indicates an error either
@@ -456,7 +456,7 @@ enum namespace
      currently it is not used and labels are not recorded at all.  */
 
   LABEL_NAMESPACE
-};
+} namespace_enum;
 
 /* An address-class says where to find the value of a symbol.  */
 
@@ -559,6 +559,18 @@ enum address_class
 
   LOC_BASEREG_ARG,
 
+  /* Value is at fixed address, but the address of the variable has
+     to be determined from the minimal symbol table whenever the
+     variable is referenced.
+     This happens if debugging information for a global symbol is
+     emitted and the corresponding minimal symbol is defined
+     in another object file or runtime common storage.
+     The linker might even remove the minimal symbol if the global
+     symbol is never referenced, in which case the symbol remains
+     unresolved.  */
+
+  LOC_UNRESOLVED,
+
   /* The variable does not actually exist in the program.
      The value is ignored.  */
 
@@ -578,7 +590,7 @@ struct symbol
 
   /* Name space code.  */
 
-  enum namespace namespace BYTE_BITFIELD;
+  namespace_enum namespace BYTE_BITFIELD;
 
   /* Address class */
 
@@ -623,7 +635,7 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  enum namespace namespace BYTE_BITFIELD;
+  namespace_enum namespace BYTE_BITFIELD;
 
   /* Address class (for info_symbols) */
 
@@ -961,11 +973,11 @@ lookup_symtab PARAMS ((char *));
 
 extern struct symbol *
 lookup_symbol PARAMS ((const char *, const struct block *,
-		       const enum namespace, int *, struct symtab **));
+		       const namespace_enum, int *, struct symtab **));
 
 extern struct symbol *
 lookup_block_symbol PARAMS ((const struct block *, const char *,
-			     const enum namespace));
+ 			     const namespace_enum));
 
 extern struct type *
 lookup_struct PARAMS ((char *, struct block *));

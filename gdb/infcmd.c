@@ -1,5 +1,5 @@
 /* Memory-access and commands for "inferior" process, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1995 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -731,7 +731,7 @@ finish_command (arg, from_tty)
       val = value_being_returned (value_type, stop_registers,
 	      using_struct_return (value_of_variable (function, NULL),
 				   funcaddr,
-				   value_type,
+				   check_typedef (value_type),
 		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function))));
 
       printf_filtered ("Value returned is $%d = ", record_latest_value (val));
@@ -922,9 +922,13 @@ path_command (dirname, from_tty)
      int from_tty;
 {
   char *exec_path;
-
+  char *env;
   dont_repeat ();
-  exec_path = strsave (get_in_environ (inferior_environ, path_var_name));
+  env = get_in_environ (inferior_environ, path_var_name);
+  /* Can be null if path is not set */
+  if (!env)
+    env = "";
+  exec_path = strsave (env);
   mod_path (dirname, &exec_path);
   set_in_environ (inferior_environ, path_var_name, exec_path);
   free (exec_path);
@@ -1056,6 +1060,8 @@ registers_info (addr_exp, fpregs)
 
   if (!target_has_registers)
     error ("The program has no registers now.");
+  if (selected_frame == NULL)
+    error ("No selected frame.");
 
   if (!addr_exp)
     {
@@ -1126,6 +1132,8 @@ attach_command (args, from_tty)
      char *args;
      int from_tty;
 {
+  extern int auto_solib_add_at_startup;
+
   dont_repeat ();			/* Not for the faint of heart */
 
   if (target_has_execution)
