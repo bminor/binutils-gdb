@@ -1872,6 +1872,34 @@ pa_ip (str)
 		    INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
 		  }
 
+		/* Handle a branch gate completer.  */
+		case 'g':
+		  if (strncasecmp (s, ",gate", 5) != 0)
+		    break;
+		  s += 5;
+		  continue;
+
+		/* Handle a branch link and push completer.  */
+		case 'p':
+		  if (strncasecmp (s, ",l,push", 7) != 0)
+		    break;
+		  s += 7;
+		  continue;
+
+		/* Handle a branch link completer.  */
+		case 'l':
+		  if (strncasecmp (s, ",l", 2) != 0)
+		    break;
+		  s += 2;
+		  continue;
+
+		/* Handle a branch pop completer.  */
+		case 'P':
+		  if (strncasecmp (s, ",pop", 4) != 0)
+		    break;
+		  s += 4;
+		  continue;
+
 		/* Handle a local processor completer.  */
 		case 'L':
 		  if (strncasecmp (s, ",l", 2) != 0)
@@ -2720,38 +2748,6 @@ pa_ip (str)
 	      nullif = pa_parse_nullif (&s);
 	      INSERT_FIELD_AND_CONTINUE (opcode, nullif, 5);
 
-	    /* Handle ,gate completer for new syntax branches.  */
-	    case 'g':
-	      if (*s == ',' && strncasecmp (s + 1, "gate", 4) == 0)
-		s += 5;
-	      else
-		break;
-	      continue;
-
-	    /* Handle ,l completer for new syntax branches.  */
-	    case 'l':
-	      if (*s == ',' && strncasecmp (s + 1, "l", 1) == 0)
-		s += 2;
-	      else
-		break;
-	      continue;
-
-	    /* Handle ,push completer for new syntax branches.  */
-	    case 'M':
-	      if (*s == ',' && strncasecmp (s + 1, "push", 4) == 0)
-		s += 5;
-	      else
-		break;
-	      continue;
-
-	    /* Handle ,pop completer for new syntax branches.  */
-	    case 'B':
-	      if (*s == ',' && strncasecmp (s + 1, "pop", 3) == 0)
-		s += 4;
-	      else
-		break;
-	      continue;
-
 	    /* Handle ,%r2 completer for new syntax branches.  */
 	    case 'L':
 	      if (*s == ',' && strncasecmp (s + 1, "%r2", 3) == 0)
@@ -3145,6 +3141,13 @@ pa_ip (str)
 		}
 	      else
 	        break;
+
+	    /* Handle '%sr0,%r31' implicit operand of be,l instruction.  */
+	    case 'Y':
+	      if (strncasecmp (s, "%sr0,%r31", 9) != 0)
+		break;
+	      s += 9;
+	      continue;
 
 	    /* Handle a 2 bit shift count at 25.  */
 	    case '.':
