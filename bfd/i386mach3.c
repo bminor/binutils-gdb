@@ -23,14 +23,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    from i386aout or i386bsd.  So this target is only useful if it is the
    default target.  */
 
-#define	PAGE_SIZE	1 /* 4096 */
-#define	SEGMENT_SIZE	0 /* PAGE_SIZE*/
-#define TEXT_START_ADDR	0x10020
+#define	PAGE_SIZE	1
+#define	SEGMENT_SIZE	0
+#define TEXT_START_ADDR	0x10000
 #define ARCH 32
 #define BYTES_IN_WORD 4
-#define N_HEADER_IN_TEXT(x)	1 		/* (N_MAGIC(x) == ZMAGIC) */
+/* This macro is only relevant when N_MAGIC(x) == ZMAGIC.  */
+#define N_HEADER_IN_TEXT(x)	1
 
-#define N_TXTADDR(x) 0x10000
 #define N_TXTSIZE(x)	((x).a_text)
 
 #include "bfd.h"

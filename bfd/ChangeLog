@@ -1,3 +1,8 @@
+Fri Dec 31 11:46:13 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* i386mach3.c (N_TXTADDR): Don't define after all.
+	(TEXT_START_ADDR): Don't include exec header size in value.
+
 Thu Dec 30 15:47:54 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* i386mach3.c (N_TXTADDR): Define.
