@@ -1,3 +1,7 @@
+2001-02-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* target.h (target_fetch_registers): Fix comment.
+
 2001-02-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* f-exp.y: Include <ctype.h>.

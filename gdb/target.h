@@ -599,7 +599,7 @@ extern void target_detach (char *, int);
 #define target_post_wait(pid, status) \
      (*current_target.to_post_wait) (pid, status)
 
-/* Fetch register REGNO, or all regs if regno == -1.  No result.  */
+/* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
 #define	target_fetch_registers(regno)	\
      (*current_target.to_fetch_registers) (regno)
