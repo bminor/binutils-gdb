@@ -951,7 +951,7 @@ struct thumb_opcode
 
   int size;
 
-  /* Which CPU variants this exists for. */
+  /* Which CPU variants this exists for.  */
   unsigned long variants;
 
   /* Function to call to parse args.  */
@@ -1220,7 +1220,7 @@ add_to_lit_pool ()
 
 static void
 symbol_locate (symbolP, name, segment, valu, frag)
-     symbolS *    symbolP; 
+     symbolS *    symbolP;
      CONST char * name;		/* It is copied, the caller can modify.  */
      segT         segment;	/* Segment identifier (SEG_<something>).  */
      valueT       valu;		/* Symbol value.  */
@@ -1530,7 +1530,7 @@ s_thumb_set (equiv)
 	{
 	  extern struct list_info_struct * listing_tail;
 	  fragS * dummy_frag = (fragS *) xmalloc (sizeof (fragS));
-	  
+
 	  memset (dummy_frag, 0, sizeof (fragS));
 	  dummy_frag->fr_type = rs_fill;
 	  dummy_frag->line = listing_tail;
@@ -2550,7 +2550,7 @@ decode_shift (str, unrestrict)
   * p = '\0';
   shift = (const struct asm_shift_name *) hash_find (arm_shift_hsh, * str);
   * p = c;
-  
+
   if (shift == NULL)
     {
       inst.error = _("Shift expression expected");
@@ -2558,7 +2558,7 @@ decode_shift (str, unrestrict)
     }
 
   assert (shift->properties->index == shift_properties[shift->properties->index].index);
-  
+
   if (shift->properties->index == SHIFT_RRX)
     {
       * str = p;
@@ -2582,13 +2582,13 @@ decode_shift (str, unrestrict)
       * str = p;
       return FAIL;
     }
-    
+
   inst.error = NULL;
   p ++;
-  
+
   if (my_get_expression (& inst.reloc.exp, & p))
     return FAIL;
-  
+
   /* Validate some simple #expressions.  */
   if (inst.reloc.exp.X_op == O_constant)
     {
@@ -2623,7 +2623,7 @@ decode_shift (str, unrestrict)
 	 support it.  */
       if (num == 32)
 	num = 0;
-      
+
       inst.instruction |= (num << 7) | shift->properties->bit_field;
     }
   else
@@ -2632,7 +2632,7 @@ decode_shift (str, unrestrict)
       inst.reloc.pc_rel = 0;
       inst.instruction |= shift->properties->bit_field;
     }
-  
+
   * str = p;
   return SUCCESS;
 }

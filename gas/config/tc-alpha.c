@@ -1,5 +1,5 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright (C) 1989, 93-98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93-98, 1999, 2000 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -108,7 +108,7 @@ struct alpha_macro
   enum alpha_macro_arg argsets[16];
 };
 
-/* Extra expression types. */
+/* Extra expression types.  */
 
 #define O_pregister	O_md1	/* O_register, in parentheses */
 #define O_cpregister	O_md2	/* + a leading comma */
@@ -126,7 +126,6 @@ struct alpha_macro
 
 #define USER_RELOC_P(R) ((R) >= O_literal && (R) <= O_gprellow)
 #endif
-
 
 /* Macros for extracting the type and number of encoded register tokens */
 
@@ -376,7 +375,7 @@ static segT alpha_dtors_section;
 #endif
 static segT alpha_lit8_section;
 
-/* Symbols referring to said sections. */
+/* Symbols referring to said sections.  */
 #ifdef OBJ_ECOFF
 static symbolS *alpha_lita_symbol;
 static symbolS *alpha_lit4_symbol;
@@ -580,7 +579,7 @@ static const struct cpu_type
 } cpu_types[] =
 {
   /* Ad hoc convention: cpu number gets palcode, process code doesn't.
-     This supports usage under DU 4.0b that does ".arch ev4", and 
+     This supports usage under DU 4.0b that does ".arch ev4", and
      usage in MILO that does -m21064.  Probably something more
      specific like -m21064-pal should be used, but oh well.  */
 
@@ -1078,7 +1077,7 @@ md_parse_option (c, arg)
       break;
 
 #ifdef OBJ_EVAX
-    case '+':			/* For g++.  Hash any name > 63 chars long. */
+    case '+':			/* For g++.  Hash any name > 63 chars long.  */
       alpha_flag_hash_long_names = 1;
       break;
 
@@ -2002,7 +2001,7 @@ tokenize_arguments (str, tok, ntok)
 	  {
 	    char *hold = input_line_pointer++;
 
-	    /* First try for parenthesized register ... */
+	    /* First try for parenthesized register ...  */
 	    expression (tok);
 	    if (*input_line_pointer == ')' && tok->X_op == O_register)
 	      {
@@ -2489,7 +2488,7 @@ emit_insn (insn)
       else switch (fixup->reloc)
 	{
 #ifdef OBJ_ELF
-	  /* These relocation types are only used internally. */
+	  /* These relocation types are only used internally.  */
 	case BFD_RELOC_ALPHA_GPDISP_HI16:
 	case BFD_RELOC_ALPHA_GPDISP_LO16:
 	  size = 2;
@@ -3058,7 +3057,7 @@ load_expression (targreg, exp, pbasereg, poffset, explicit_reloc)
 
     case O_subtract:
       /* Assume that this difference expression will be resolved to an
-	 absolute value and that that value will fit in 16 bits. */
+	 absolute value and that that value will fit in 16 bits.  */
 
       assert (explicit_reloc == (const expressionS *)0);
       set_tok_reg (newtok[0], targreg);
@@ -4309,7 +4308,7 @@ s_alpha_comm (ignore)
     {
       offsetT align;
 
-      input_line_pointer++;      
+      input_line_pointer++;
       align = get_absolute_expression ();
       bfd_set_section_alignment (stdoutput, new_seg, align);
     }
@@ -4324,7 +4323,7 @@ s_alpha_comm (ignore)
 
 #ifdef OBJ_EVAX
   if (bfd_section_size (stdoutput, new_seg) > 0)
-    { 
+    {
       if (bfd_section_size (stdoutput, new_seg) != temp)
 	as_bad (_("Length of .comm \"%s\" is already %ld. Not changed to %ld."),
 		S_GET_NAME (symbolP),
@@ -4343,7 +4342,7 @@ s_alpha_comm (ignore)
 #endif
   else
     {
-#ifdef OBJ_EVAX 
+#ifdef OBJ_EVAX
       subseg_set (new_seg, 0);
       p = frag_more (temp);
       new_seg->flags |= SEC_IS_COMMON;
@@ -4567,7 +4566,7 @@ s_alpha_prologue (ignore)
       default:
 	as_bad (_("Invalid argument %d to .prologue."), arg);
 	break;
-    }  
+    }
 }
 
 static void
@@ -4600,9 +4599,9 @@ s_alpha_coff_wrapper (which)
 #endif /* OBJ_ELF */
 
 #ifdef OBJ_EVAX
-  
+
 /* Handle the section specific pseudo-op.  */
-  
+
 static void
 s_alpha_section (secid)
      int secid;
@@ -4625,7 +4624,6 @@ s_alpha_section (secid)
   alpha_auto_align_on = 1;
   alpha_current_align = 0;
 }
-
 
 /* Parse .ent directives.  */
 
@@ -4663,7 +4661,6 @@ s_alpha_ent (ignore)
   demand_empty_rest_of_line ();
   return;
 }
-
 
 /* Parse .frame <framreg>,<framesize>,RA,<rsa_offset> directives.  */
 
@@ -4853,7 +4850,6 @@ s_alpha_pdesc (ignore)
   return;
 }
 
-
 /* Support for crash debug on vms.  */
 
 static void
@@ -4894,7 +4890,6 @@ s_alpha_name (ignore)
   return;
 }
 
-
 static void
 s_alpha_linkage (ignore)
      int ignore;
@@ -4922,7 +4917,6 @@ s_alpha_linkage (ignore)
 
   return;
 }
-
 
 static void
 s_alpha_code_address (ignore)
@@ -4952,7 +4946,6 @@ s_alpha_code_address (ignore)
   return;
 }
 
-
 static void
 s_alpha_fp_save (ignore)
      int ignore;
@@ -4963,7 +4956,6 @@ s_alpha_fp_save (ignore)
   demand_empty_rest_of_line ();
   return;
 }
-
 
 static void
 s_alpha_mask (ignore)
@@ -4985,7 +4977,6 @@ s_alpha_mask (ignore)
 
   return;
 }
-
 
 static void
 s_alpha_fmask (ignore)
@@ -5021,7 +5012,6 @@ s_alpha_end (ignore)
 
   return;
 }
-
 
 static void
 s_alpha_file (ignore)

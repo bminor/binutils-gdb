@@ -149,7 +149,7 @@ static symbolS *last_label_seen = NULL;
 /* This ensures that all new labels are unique.  */
 static int local_label_id;
 
-static struct hash_control *subsym_recurse_hash; /* Prevent infinite recurse. */
+static struct hash_control *subsym_recurse_hash; /* Prevent infinite recurse.  */
 static struct hash_control *math_hash; /* Built-in math functions.  */
 /* Allow maximum levels of macro nesting; level 0 is the main substitution
    symbol table.  The other assembler only does 32 levels, so there!  */
@@ -1595,7 +1595,7 @@ tic54x_stringer (type)
   md_flush_pending_output ();
 #endif
 
-  c = ',';			/* Do loop. */
+  c = ',';			/* Do loop.  */
   while (c == ',')
     {
       SKIP_WHITESPACE ();

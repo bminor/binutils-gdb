@@ -1,3 +1,20 @@
+2000-09-14  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-a29k.c: Fix formatting.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arc.h: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-arm.h: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-avr.h: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic30.h: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-tic54x.h: Likewise.
+	* config/tc-tic80.c: Likewise.
+	* config/tc-tic80.h: Likewise.
+
 2000-09-14  Timothy Wall  <twall@cygnus.com>
 
 	* config/tc-ia64.c (specify_resource): For PR%/PR63, note types of

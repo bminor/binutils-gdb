@@ -1,5 +1,5 @@
 /* tc-tic80.c -- Assemble for the TI TMS320C80 (MV)
-   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -789,7 +789,7 @@ md_assemble (str)
     str++;
 
   /* Isolate the mnemonic from the rest of the string by finding the first
-     whitespace character and zapping it to a null byte. */
+     whitespace character and zapping it to a null byte.  */
   for (scan = str; *scan != '\000' && !isspace (*scan); scan++)
     ;
 

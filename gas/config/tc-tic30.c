@@ -1,5 +1,5 @@
 /* tc-c30.c -- Assembly code for the Texas Instruments TMS320C30
-   Copyright (C) 1998, 1999 Free Software Foundation.
+   Copyright (C) 1998, 1999, 2000 Free Software Foundation.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of GAS, the GNU Assembler.
@@ -317,7 +317,7 @@ md_assemble (line)
       return;
     }
   /* Check if instruction is a parallel instruction by seeing if the first
-     character is a q. */
+     character is a q.  */
   if (*token_start == 'q')
     {
       if (tic30_parallel_insn (token_start))
@@ -444,7 +444,7 @@ md_assemble (line)
       int numops = insn.tm->operands;
       /* If operands are not the same, then see if any of the operands are not
          required.  Then recheck with number of given operands.  If they are still not
-         the same, then give an error, otherwise carry on. */
+         the same, then give an error, otherwise carry on.  */
       for (i = 0; i < insn.tm->operands; i++)
 	if (insn.tm->operand_types[i] & NotReq)
 	  numops--;
@@ -465,7 +465,7 @@ md_assemble (line)
 	  if (insn.tm->opcode_modifier == AddressMode)
 	    {
 	      int addr_insn = 0;
-	      /* Store instruction uses the second operand for the address mode. */
+	      /* Store instruction uses the second operand for the address mode.  */
 	      if ((insn.tm->operand_types[1] & (Indirect | Direct)) == (Indirect | Direct))
 		addr_insn = 1;
 	      if (insn.operand_type[addr_insn]->op_type & (AllReg))
@@ -484,11 +484,11 @@ md_assemble (line)
 	  return;
 	}
     }
-  /* Now set the addressing mode for 3 operand instructions. */
+  /* Now set the addressing mode for 3 operand instructions.  */
   if ((insn.tm->operand_types[0] & op3T1) && (insn.tm->operand_types[1] & op3T2))
     {
       /* Set the addressing mode to the values used for 2 operand instructions in the
-         G addressing field of the opcode. */
+         G addressing field of the opcode.  */
       char *p;
       switch (insn.operand_type[0]->op_type)
 	{
@@ -522,7 +522,7 @@ md_assemble (line)
 	}
       /* Now make up the opcode for the 3 operand instructions.  As in parallel
          instructions, there will be no unresolved values, so they can be fully formed
-         and added to the frag table. */
+         and added to the frag table.  */
       insn.opcode = insn.tm->base_opcode;
       if (insn.operand_type[0]->op_type & Indirect)
 	{
@@ -549,7 +549,7 @@ md_assemble (line)
       char *p;
       int am_insn = -1;
       insn.opcode = insn.tm->base_opcode;
-      /* Create frag for instruction - all instructions are 4 bytes long. */
+      /* Create frag for instruction - all instructions are 4 bytes long.  */
       p = frag_more (INSN_SIZE);
       if ((insn.operands > 0) && (insn.tm->opcode_modifier == AddressMode))
 	{
@@ -746,7 +746,7 @@ md_assemble (line)
 		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
 		  fix = fix_new_exp (frag_now, p + 3 - (frag_now->fr_literal), 1, &insn.operand_type[0]->direct.direct_expr, 0, 0);
 		  /* Ensure that the assembler doesn't complain about fitting a 24-bit
-		     address into 8 bits. */
+		     address into 8 bits.  */
 		  fix->fx_no_overflow = 1;
 		}
 	    }
@@ -790,12 +790,12 @@ md_assemble (line)
 	}
       else if (insn.tm->operand_types[0] & NotReq)
 	{
-	  /* Check for NOP instruction without arguments. */
+	  /* Check for NOP instruction without arguments.  */
 	  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
 	}
       else if (insn.tm->operands == 0)
 	{
-	  /* Check for instructions without operands. */
+	  /* Check for instructions without operands.  */
 	  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
 	}
     }
@@ -819,7 +819,7 @@ struct tic30_par_insn
   int operands[2];		/* Number of given operands for each insn */
   /* Type of operand given in instruction */
   operand *operand_type[2][MAX_OPERANDS];
-  int swap_operands;		/* Whether to swap operands around. */
+  int swap_operands;		/* Whether to swap operands around.  */
   unsigned p_field;		/* Value of p field in multiply add/sub instructions */
   unsigned opcode;		/* Final opcode */
 };
@@ -1039,7 +1039,7 @@ tic30_parallel_insn (char *token)
 	    /* Get number of R register and indirect reference contained within the first
 	       two operands of each instruction.  This is required for the multiply
 	       parallel instructions which require two R registers and two indirect
-	       references, but not in any particular place. */
+	       references, but not in any particular place.  */
 	    if ((p_insn.operand_type[count][i]->op_type & Rn) && i < 2)
 	      num_rn++;
 	    else if ((p_insn.operand_type[count][i]->op_type & Indirect) && i < 2)
@@ -1109,7 +1109,7 @@ tic30_parallel_insn (char *token)
   debug ("P field: %08X\n", p_insn.p_field);
   /* Finalise opcode.  This is easier for parallel instructions as they have to be
      fully resolved, there are no memory addresses allowed, except through indirect
-     addressing, so there are no labels to resolve. */
+     addressing, so there are no labels to resolve.  */
   {
     p_insn.opcode = p_insn.tm->base_opcode;
     switch (p_insn.tm->oporder)
@@ -1201,7 +1201,7 @@ tic30_parallel_insn (char *token)
 	  }
 	break;
       }
-  }				/* Opcode is finalised at this point for all parallel instructions. */
+  }				/* Opcode is finalised at this point for all parallel instructions.  */
   {				/* Output opcode */
     char *p;
     p = frag_more (INSN_SIZE);
@@ -1303,7 +1303,7 @@ tic30_operand (token)
 	  if (*(token + count) == '(')
 	    {
 	      /* Parenthesis found, so check if a displacement value is inside.  If so, get
-	         the value and remove it from the buffer. */
+	         the value and remove it from the buffer.  */
 	      if (is_digit_char (*(token + count + 1)))
 		{
 		  char disp[10];
@@ -1543,7 +1543,7 @@ tic30_find_parallel_insn (current_line, next_line)
 #undef END_OPERANDS
 
 /* In order to get gas to ignore any | chars at the start of a line,
-   this function returns true if a | is found in a line. */
+   this function returns true if a | is found in a line.  */
 
 int
 tic30_unrecognized_line (c)
@@ -1588,7 +1588,7 @@ md_apply_fix (fixP, valP)
     char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
     value /= INSN_SIZE;
     if (fixP->fx_size == 1)
-      {				/* Special fix for LDP instruction. */
+      {				/* Special fix for LDP instruction.  */
 	value = (value & 0x00FF0000) >> 16;
       }
     debug ("new value = %ld\n", (long) value);
@@ -1650,7 +1650,7 @@ md_pcrel_from (fixP)
   debug ("fx_size = %d\n", fixP->fx_size);
   /* Find the opcode that represents the current instruction in the fr_literal
      storage area, and check bit 21.  Bit 21 contains whether the current instruction
-     is a delayed one or not, and then set the offset value appropriately. */
+     is a delayed one or not, and then set the offset value appropriately.  */
   if (fixP->fx_frag->fr_literal[fixP->fx_where - fixP->fx_size + 1] & 0x20)
     offset = 3;
   else

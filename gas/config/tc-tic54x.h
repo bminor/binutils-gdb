@@ -23,7 +23,7 @@
 #define _TC_TIC54X_H_
 
 /* select the proper coff format (see obj-coff.h) */
-#define TC_TIC54X 
+#define TC_TIC54X
 
 #define TARGET_BYTES_BIG_ENDIAN	0
 #define OCTETS_PER_BYTE_POWER 1
@@ -36,19 +36,19 @@
 #define MAX_OPERANDS 4
 #define PARALLEL_SEPARATOR '|'
 #define LABELS_WITHOUT_COLONS 1
-/* accept 0FFFFh, 1010b, etc. */
+/* accept 0FFFFh, 1010b, etc.  */
 #define NUMBERS_WITH_SUFFIX 1
 /* $ is section program counter */
 #define DOLLAR_DOT 1
 /* accept parallel lines like
-       add #1,a  ||  ld #1, b  
+       add #1,a  ||  ld #1, b
        (may also be split across lines)
 */
 #define DOUBLEBAR_PARALLEL 1
 /* affects preprocessor */
 #define KEEP_WHITE_AROUND_COLON 1
 
-/* We need the extra field in the fixup struct to put the relocation in. */
+/* We need the extra field in the fixup struct to put the relocation in.  */
 
 #define NEED_FX_R_TYPE
 
@@ -101,7 +101,7 @@ extern void tic54x_macro_info PARAMS((void *macro));
 #define tc_frob_label(sym) tic54x_define_label (sym)
 extern void tic54x_define_label PARAMS((symbolS *));
 
-#define md_start_line_hook() tic54x_start_line_hook() 
+#define md_start_line_hook() tic54x_start_line_hook()
 extern void tic54x_start_line_hook ();
 
 #define md_estimate_size_before_relax(f,s) \
@@ -114,11 +114,11 @@ extern int tic54x_relax_frag(fragS *, long);
 #define md_convert_frag(b,s,f)	tic54x_convert_frag(b,s,f)
 extern void tic54x_convert_frag(bfd *, segT, fragS *);
 
-/* Other things we don't support... */
+/* Other things we don't support...  */
 
 /* Define away the call to md_operand in the expression parsing code.
    This is called whenever the expression parser can't parse the input
-   and gives the assembler backend a chance to deal with it instead. */
+   and gives the assembler backend a chance to deal with it instead.  */
 
 #define md_operand(X)
 

@@ -1,5 +1,6 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright (C) 1994, 1995, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1997, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -17,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -59,9 +60,9 @@ const char comment_chars[] = "#;";
    .line and .file directives will appear in the pre-processed output */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output. */
+   #NO_APP at the beginning of its output.  */
 /* Also note that comments started like this one will always
-   work if '/' isn't otherwise defined. */
+   work if '/' isn't otherwise defined.  */
 const char line_comment_chars[] = "#";
 
 const char line_separator_chars[] = "";
@@ -1038,7 +1039,7 @@ md_number_to_chars (buf, val, n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-/* Round up a section size to the appropriate boundary. */
+/* Round up a section size to the appropriate boundary.  */
 
 valueT
 md_section_align (segment, size)
@@ -1082,7 +1083,7 @@ md_convert_frag (abfd, sec, fragp)
    to achieve the same effect.  Perhaps put a special cookie in X_add_number
    to mark the expression as special.  */
 
-void 
+void
 md_operand (expressionP)
      expressionS *expressionP;
 {
@@ -1100,7 +1101,7 @@ md_operand (expressionP)
       ++input_line_pointer;
       if (expressionP->X_op == O_symbol
 	  && expressionP->X_add_number == 0
-	  /* I think this test is unnecessary but just as a sanity check... */
+	  /* I think this test is unnecessary but just as a sanity check...  */
 	  && expressionP->X_op_symbol == NULL)
 	{
 	  expressionS two;
@@ -1192,7 +1193,7 @@ arc_cons_fix_new (frag, where, nbytes, exp)
 /* The location from which a PC relative jump should be calculated,
    given a PC relative reloc.  */
 
-long 
+long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
