@@ -2863,8 +2863,11 @@ ia64_estimate_size_before_relax (fragS *frag,
   pad = len % md.pointer_size;
   if (pad != 0)
     len += md.pointer_size - pad;
-  /* Add 8 for the header + a pointer for the personality offset.  */
-  size = len + 8 + md.pointer_size;
+  /* Add 8 for the header.  */
+  size = len + 8;
+  /* Add a pointer for the personality offset.  */
+  if (frag->fr_offset)
+    size += md.pointer_size;
 
   /* fr_var carries the max_chars that we created the fragment with.
      We must, of course, have allocated enough memory earlier.  */
@@ -2891,8 +2894,11 @@ ia64_convert_frag (fragS *frag)
   pad = len % md.pointer_size;
   if (pad != 0)
     len += md.pointer_size - pad;
-  /* Add 8 for the header + a pointer for the personality offset.  */
-  size = len + 8 + md.pointer_size;
+  /* Add 8 for the header.  */
+  size = len + 8;
+  /* Add a pointer for the personality offset.  */
+  if (frag->fr_offset)
+    size += md.pointer_size;
 
   /* fr_var carries the max_chars that we created the fragment with.
      We must, of course, have allocated enough memory earlier.  */
@@ -3454,9 +3460,11 @@ generate_unwind_image (const segT text_seg)
       pad = size % md.pointer_size;
       if (pad != 0)
 	size += md.pointer_size - pad;
-      /* Add 8 for the header + a pointer for the personality
-	 offset.  */
-      size += 8 + md.pointer_size;
+      /* Add 8 for the header.  */
+      size += 8;
+      /* Add a pointer for the personality offset.  */
+      if (unwind.personality_routine)
+	size += md.pointer_size;
     }
 
   /* If there are unwind records, switch sections, and output the info.  */

@@ -20,9 +20,9 @@ Section Headers:
   \[ 8\] .text +PROGBITS +40+1000 0+1000 0+140 00 +AX +0 +0 4096
   \[ 9\] .IA_64.unwind_inf +.*
   \[10\] .IA_64.unwind +.*
-  \[11\] .tdata +PROGBITS +60+1170 0+1170 0+60 00 WAT +0 +0 +4
-  \[12\] .tbss +NOBITS +60+11d0 0+11d0 0+40 00 WAT +0 +0 +1
-  \[13\] .dynamic +DYNAMIC +60+11d0 0+11d0 0+150 10 +WA +4 +0 +8
+  \[11\] .tdata +PROGBITS +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
+  \[12\] .tbss +NOBITS +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+40 00 WAT +0 +0 +1
+  \[13\] .dynamic +DYNAMIC +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+150 10 +WA +4 +0 +8
   \[14\] .data +.*
   \[15\] .got +PROGBITS +60+2000 0+2000 0+48 00 WAp +0 +0 +8
   \[16\] .IA_64.pltoff +.*
@@ -42,10 +42,10 @@ Program Headers:
   PHDR +0x0+40 0x40+40 0x40+40 0x0+188 0x0+188 R E 0x8
   INTERP +0x0+1c8 0x40+1c8 0x40+1c8 0x[0-9a-f]+ 0x[0-9a-f]+ R +0x1
 .*Requesting program interpreter.*
-  LOAD +0x0+ 0x40+ 0x40+ 0x0+1170 0x0+1170 R E 0x10000
-  LOAD +0x0+1170 0x60+1170 0x60+1170 0x0+ef0 0x0+ef0 RW +0x10000
-  DYNAMIC +0x0+11d0 0x60+11d0 0x60+11d0 0x0+150 0x0+150 RW +0x8
-  TLS +0x0+1170 0x60+1170 0x60+1170 0x0+60 0x0+a0 R +0x4
+  LOAD +0x0+ 0x40+ 0x40+ 0x0+1[0-9a-f]+ 0x0+1[0-9a-f]+ R E 0x10000
+  LOAD +0x0+1[0-9a-f]+ 0x60+1[0-9a-f]+ 0x60+1[0-9a-f]+ 0x0+0[0-9a-f]+ 0x0+0[0-9a-f]+ RW +0x10000
+  DYNAMIC +0x0+1[0-9a-f]+ 0x60+1[0-9a-f]+ 0x60+1[0-9a-f]+ 0x0+150 0x0+150 RW +0x8
+  TLS +0x0+1[0-9a-f]+ 0x60+1[0-9a-f]+ 0x60+1[0-9a-f]+ 0x0+60 0x0+a0 R +0x4
   IA_64_UNWIND .* R +0x8
 #...
 
@@ -62,7 +62,7 @@ Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries
 Symbol table '.dynsym' contains 8 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
- +1: 60+11d0 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
+ +1: 60+1[0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +2: 0+ +0 TLS +GLOBAL DEFAULT +UND sG2
  +3: 0+ +16 FUNC +GLOBAL DEFAULT +UND __tls_get_addr
  +4: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
@@ -114,7 +114,7 @@ Symbol table '.symtab' contains 72 entries:
  +39: 0+7c +0 TLS +GLOBAL DEFAULT +12 bg8
  +40: 0+74 +0 TLS +GLOBAL DEFAULT +12 bg6
  +41: 0+68 +0 TLS +GLOBAL DEFAULT +12 bg3
- +42: 60+11d0 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
+ +42: 60+1[0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +43: 0+8 +0 TLS +GLOBAL DEFAULT +11 sg3
  +44: 0+48 +0 TLS +GLOBAL HIDDEN +11 sh3
  +45: 0+ +0 TLS +GLOBAL DEFAULT +UND sG2

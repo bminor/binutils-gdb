@@ -19,9 +19,9 @@ Section Headers:
   \[ 7\] .text +PROGBITS +0+1000 0+1000 0+110 00 +AX +0 +0 4096
   \[ 8\] .IA_64.unwind_inf +.*
   \[ 9\] .IA_64.unwind +.*
-  \[10\] .tdata +PROGBITS +0+11140 0+1140 0+60 00 WAT +0 +0 +4
-  \[11\] .tbss +NOBITS +0+111a0 0+11a0 0+20 00 WAT +0 +0 +1
-  \[12\] .dynamic +DYNAMIC +0+111a0 0+11a0 0+140 10 +WA +3 +0 +8
+  \[10\] .tdata +PROGBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
+  \[11\] .tbss +NOBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+20 00 WAT +0 +0 +1
+  \[12\] .dynamic +DYNAMIC +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+140 10 +WA +3 +0 +8
   \[13\] .data +.*
   \[14\] .got +PROGBITS +0+12000 0+2000 0+50 00 WAp +0 +0 +8
   \[15\] .IA_64.pltoff +.*
@@ -39,11 +39,11 @@ There are 5 program headers, starting at offset [0-9]+
 
 Program Headers:
   Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
-  LOAD +0x0+ 0x0+ 0x0+ 0x0+1140 0x0+1140 R E 0x10000
-  LOAD +0x0+1140 0x0+11140 0x0+11140 0x0+f20 0x0+f20 RW +0x10000
-  DYNAMIC +0x0+11a0 0x0+111a0 0x0+111a0 0x0+140 0x0+140 RW +0x8
-  TLS +0x0+1140 0x0+11140 0x0+11140 0x0+60 0x0+80 R +0x4
-  IA_64_UNWIND +0x0+1128 0x0+1128 0x0+1128 0x0+18 0x0+18 R +0x8
+  LOAD +0x0+ 0x0+ 0x0+ 0x0+1[0-9a-f]+ 0x0+1[0-9a-f]+ R E 0x10000
+  LOAD +0x0+1[0-9a-f]+ 0x0+11[0-9a-f]+ 0x0+11[0-9a-f]+ 0x0+0[0-9a-f]+ 0x0+0[0-9a-f]+ RW +0x10000
+  DYNAMIC +0x0+1[0-9a-f]+ 0x0+11[0-9a-f]+ 0x0+11[0-9a-f]+ 0x0+140 0x0+140 RW +0x8
+  TLS +0x0+1[0-9a-f]+ 0x0+11[0-9a-f]+ 0x0+11[0-9a-f]+ 0x0+60 0x0+80 R +0x4
+  IA_64_UNWIND +0x0+1[0-9a-f]+ 0x0+1[0-9a-f]+ 0x0+1[0-9a-f]+ 0x0+18 0x0+18 R +0x8
 #...
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 6 entries:
@@ -71,7 +71,7 @@ Symbol table '.dynsym' contains 23 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +17 *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +10 sg8
- +[0-9]+: 0+111a0 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
+ +[0-9]+: 0+11[0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +10 sg3
  +[0-9]+: 0+c +0 TLS +GLOBAL DEFAULT +10 sg4
  +[0-9]+: 0+10 +0 TLS +GLOBAL DEFAULT +10 sg5
@@ -134,7 +134,7 @@ Symbol table '.symtab' contains 60 entries:
  +[0-9]+: 0+44 +0 TLS +LOCAL +HIDDEN +10 sh2
  +[0-9]+: 0+54 +0 TLS +LOCAL +HIDDEN +10 sh6
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +10 sg8
- +[0-9]+: 0+111a0 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
+ +[0-9]+: 0+11[0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +10 sg3
  +[0-9]+: 0+c +0 TLS +GLOBAL DEFAULT +10 sg4
  +[0-9]+: 0+10 +0 TLS +GLOBAL DEFAULT +10 sg5

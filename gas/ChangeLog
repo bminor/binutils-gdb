@@ -1,3 +1,10 @@
+2005-01-28  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (ia64_estimate_size_before_relax): Allocate space
+	for personality routine pointer only if there is one.
+	(ia64_convert_frag): Likewise.
+	(generate_unwind_image): Likewise.
+
 2005-01-27  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (INSERT): Remove, not used anywhere.
