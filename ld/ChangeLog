@@ -1,3 +1,7 @@
+Wed May 29 13:13:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo: Clarify the CONSTRUCTORS command.
+
 Thu May 23 16:07:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_read_file): Initialize
