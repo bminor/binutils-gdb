@@ -57,6 +57,8 @@ coff-rs6000.c
 coff-we32k.c
 coff-z8k.c
 coffcode.h
+coffgen.c
+coffswap.h
 config
 configure.bat
 configure.in
@@ -102,6 +104,7 @@ newsos3.c
 oasys.c
 opncls.c
 reloc.c
+reloc16.c
 rs6000-core.c
 sco-core.c
 seclet.c
