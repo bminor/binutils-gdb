@@ -1,3 +1,21 @@
+Thu Sep 17 16:03:28 1998  Richard Henderson  <rth@cygnus.com>
+
+        * elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Don't
+        transform a defweak into a plt entry.
+        (elf64_alpha_calc_dynrel_sizes): Allow room for secondary
+        plt entry references to receive a RELATIVE reloc.
+        (elf64_alpha_finish_dynamic_symbol): Fill them in.
+        (elf64_alpha_relocate_section): Assert we don't overrun
+        the allocated relocation space.
+
+Wed Sep 16 10:34:13 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_symbol_processing): Move symbols in
+	sections with v850 common section attributes into named v850
+	common sections.
+	(v850_elf_add_symbol_hook): Move symbols in sections with v850
+	common section attributes into named v850 common sections.
+	
 Wed Sep 16 11:26:49 CDT 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-arm.c (elf32_arm_gc_mark_hook):  Remove print 
