@@ -1,3 +1,16 @@
+2001-03-26  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (tc_s390_fix_adjustable): Add test for
+	BFD_RELOC_390_GOTENT.
+	* config/tc-s390.h (TC_RELOC_RTSYM_LOC_FIXUP): Add test for
+	BFD_RELOC_390_GOTENT.
+
+2001-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-s390.h (TC_FORCE_RELOCATION): Define.
+	* config/tc-s390.c (s390_force_relocation): New function: Force
+	relocations for VTINHERIT relocs.
+
 2001-03-23  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* doc/as.texinfo: Put @c man begin to generate the as man page.

@@ -313,13 +313,18 @@ init_default_arch ()
 {
   if (current_arch_requested)
     return;
-  if (strcmp(default_arch, "s390") == 0) {
-    s390_arch_size = 32;
-    current_architecture = S390_OPCODE_ESA;
-  } else if (strcmp(default_arch, "s390x") == 0) {
-    s390_arch_size = 64;
-    current_architecture = S390_OPCODE_ESAME;
-  } else
+
+  if (strcmp(default_arch, "s390") == 0)
+    {
+      s390_arch_size = 32;
+      current_architecture = S390_OPCODE_ESA;
+    }
+  else if (strcmp(default_arch, "s390x") == 0)
+    {
+      s390_arch_size = 64;
+      current_architecture = S390_OPCODE_ESAME;
+    }
+  else
     as_fatal ("Invalid default architecture, broken assembler.");
   current_arch_mask = 1 << current_architecture;
 }
@@ -341,49 +346,55 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  switch (c) {
-    /* -k: Ignore for FreeBSD compatibility.  */
-  case 'k':
-    break;
-  case 'm':
-    if (arg != NULL && strcmp (arg, "regnames") == 0)
-      reg_names_p = true;
+  switch (c)
+    {
+      /* -k: Ignore for FreeBSD compatibility.  */
+    case 'k':
+      break;
+    case 'm':
+      if (arg != NULL && strcmp (arg, "regnames") == 0)
+	reg_names_p = true;
     
-    else if (arg != NULL && strcmp (arg, "no-regnames") == 0)
-      reg_names_p = false;
+      else if (arg != NULL && strcmp (arg, "no-regnames") == 0)
+	reg_names_p = false;
     
-    else {
-      as_bad (_("invalid switch -m%s"), arg);
+      else
+	{
+	  as_bad (_("invalid switch -m%s"), arg);
+	  return 0;
+	}
+      break;
+    
+    case 'A':
+      if (arg != NULL && strcmp (arg, "esa") == 0)
+	{
+	  current_architecture = S390_OPCODE_ESA;
+	  s390_arch_size = 32;
+	}
+      else if (arg != NULL && strcmp (arg, "esame") == 0)
+	{
+	  current_architecture = S390_OPCODE_ESAME;
+	  s390_arch_size = 64;
+	}
+      else
+	as_bad ("invalid architecture -A%s", arg);
+      current_arch_mask = 1 << current_architecture;
+      current_arch_requested = 1;
+      break;
+
+      /* -V: SVR4 argument to print version ID.  */
+    case 'V':
+      print_version_id ();
+      break;
+    
+      /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
+	 should be emitted or not.  FIXME: Not implemented.  */
+    case 'Q':
+      break;
+      
+    default:
       return 0;
     }
-    break;
-    
-  case 'A':
-    if (arg != NULL && strcmp (arg, "esa") == 0) {
-      current_architecture = S390_OPCODE_ESA;
-      s390_arch_size = 32;
-    } else if (arg != NULL && strcmp (arg, "esame") == 0) {
-      current_architecture = S390_OPCODE_ESAME;
-      s390_arch_size = 64;
-    } else
-      as_bad ("invalid architecture -A%s", arg);
-    current_arch_mask = 1 << current_architecture;
-    current_arch_requested = 1;
-    break;
-
-    /* -V: SVR4 argument to print version ID.  */
-  case 'V':
-    print_version_id ();
-    break;
-    
-    /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
-       should be emitted or not.  FIXME: Not implemented.  */
-  case 'Q':
-    break;
-    
-  default:
-    return 0;
-  }
   
   return 1;
 }
@@ -392,11 +403,11 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, _("\
+  fprintf (stream, _("\
           S390 options:\n\
           -mregnames   \tAllow symbolic names for registers\n\
           -mno-regnames\tDo not allow symbolic names for registers\n"));
-  fprintf(stream, _("\
+  fprintf (stream, _("\
           -V       \tprint assembler version number\n\
           -Qy, -Qn \tignored\n"));
 }
@@ -421,29 +432,31 @@ md_begin ()
   s390_opformat_hash = hash_new ();
 
   op_end = s390_opformats + s390_num_opformats;
-  for (op = s390_opformats; op < op_end; op++) {
-    retval = hash_insert (s390_opformat_hash, op->name, (PTR) op);
-    if (retval != (const char *) NULL)
-      {
-	as_bad (_("Internal assembler error for instruction format %s"),
-		op->name);
-	dup_insn = true;
-      }
-  }
+  for (op = s390_opformats; op < op_end; op++)
+    {
+      retval = hash_insert (s390_opformat_hash, op->name, (PTR) op);
+      if (retval != (const char *) NULL)
+	{
+	  as_bad (_("Internal assembler error for instruction format %s"),
+		  op->name);
+	  dup_insn = true;
+	}
+    }
 
   /* Insert the opcodes into a hash table.  */
   s390_opcode_hash = hash_new ();
 
   op_end = s390_opcodes + s390_num_opcodes;
-  for (op = s390_opcodes; op < op_end; op++) {
-    retval = hash_insert (s390_opcode_hash, op->name, (PTR) op);
-    if (retval != (const char *) NULL)
-      {
-	as_bad (_("Internal assembler error for instruction %s"), op->name);
-	dup_insn = true;
-      }
-  }
-  
+  for (op = s390_opcodes; op < op_end; op++)
+    {
+      retval = hash_insert (s390_opcode_hash, op->name, (PTR) op);
+      if (retval != (const char *) NULL)
+	{
+	  as_bad (_("Internal assembler error for instruction %s"), op->name);
+	  dup_insn = true;
+	}
+    }
+
   if (dup_insn)
     abort ();
 
@@ -457,11 +470,10 @@ md_begin ()
 void
 s390_md_end ()
 {
-  if (s390_arch_size == 64) {
+  if (s390_arch_size == 64)
     bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_esame);
-  } else {
+  else
     bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_esa);
-  }
 }
 
 void
@@ -470,10 +482,11 @@ s390_align_code (fragP, count)
      int count;
 {
   /* We use nop pattern 0x0707.  */
-  if (count > 0) {
-    memset(fragP->fr_literal + fragP->fr_fix, 0x07, count);
-    fragP->fr_var = count;
-  }
+  if (count > 0)
+    {
+      memset(fragP->fr_literal + fragP->fr_fix, 0x07, count);
+      fragP->fr_var = count;
+    }
 }
 
 /* Insert an operand value into an instruction.  */
@@ -489,86 +502,97 @@ s390_insert_operand (insn, operand, val, file, line)
   addressT uval;
   int offset;
 
-  if (operand->flags & (S390_OPERAND_SIGNED|S390_OPERAND_PCREL)) {
-    offsetT min, max;
+  if (operand->flags & (S390_OPERAND_SIGNED|S390_OPERAND_PCREL))
+    {
+      offsetT min, max;
 
-    max = ((offsetT) 1 << (operand->bits - 1)) - 1;
-    min = - ((offsetT) 1 << (operand->bits - 1));
-    /* Halve PCREL operands.  */
-    if (operand->flags & S390_OPERAND_PCREL)
-      val >>= 1;
-    /* Check for underflow / overflow.  */
-    if (val < min || val > max) {
-      const char *err =
-       "operand out of range (%s not between %ld and %ld)";
-      char buf[100];
+      max = ((offsetT) 1 << (operand->bits - 1)) - 1;
+      min = - ((offsetT) 1 << (operand->bits - 1));
+      /* Halve PCREL operands.  */
+      if (operand->flags & S390_OPERAND_PCREL)
+	val >>= 1;
+      /* Check for underflow / overflow.  */
+      if (val < min || val > max)
+	{
+	  const char *err =
+	    "operand out of range (%s not between %ld and %ld)";
+	  char buf[100];
 
-      if (operand->flags & S390_OPERAND_PCREL) {
-        val <<= 1;
-        min <<= 1;
-        max <<= 1;
-      }
-      sprint_value (buf, val);
-      if (file == (char *) NULL)
-        as_bad (err, buf, (int) min, (int) max);
-      else
-        as_bad_where (file, line, err, buf, (int) min, (int) max);
-      return;
+	  if (operand->flags & S390_OPERAND_PCREL)
+	    {
+	      val <<= 1;
+	      min <<= 1;
+	      max <<= 1;
+	    }
+	  sprint_value (buf, val);
+	  if (file == (char *) NULL)
+	    as_bad (err, buf, (int) min, (int) max);
+	  else
+	    as_bad_where (file, line, err, buf, (int) min, (int) max);
+	  return;
+	}
+      /* val is ok, now restrict it to operand->bits bits.  */
+      uval = (addressT) val & ((((addressT) 1 << (operand->bits-1)) << 1) - 1);
     }
-    /* val is ok, now restrict it to operand->bits bits.  */
-    uval = (addressT) val & ((((addressT) 1 << (operand->bits-1)) << 1) - 1);
-  } else {
-    addressT min, max;
-
-    max = (((addressT) 1 << (operand->bits - 1))<<1) - 1;
-    min = (offsetT) 0;
-    uval = (addressT) val;
-    /* Length x in an instructions has real length x+1.  */
-    if (operand->flags & S390_OPERAND_LENGTH)
-      uval--;
-    /* Check for underflow / overflow.  */
-    if (uval < min || uval > max) {
-      const char *err =
-        "operand out of range (%s not between %ld and %ld)";
-      char buf[100];
+  else
+    {
+      addressT min, max;
+      
+      max = (((addressT) 1 << (operand->bits - 1))<<1) - 1;
+      min = (offsetT) 0;
+      uval = (addressT) val;
+      /* Length x in an instructions has real length x+1.  */
+      if (operand->flags & S390_OPERAND_LENGTH)
+	uval--;
+      /* Check for underflow / overflow.  */
+      if (uval < min || uval > max)
+	{
+	  const char *err =
+	    "operand out of range (%s not between %ld and %ld)";
+	  char buf[100];
     
-      if (operand->flags & S390_OPERAND_LENGTH) {
-        uval++;
-        min++;
-        max++;
-      }
-      sprint_value (buf, uval);
-      if (file == (char *) NULL)
-	as_bad (err, buf, (int) min, (int) max);
-      else
-	as_bad_where (file, line, err, buf, (int) min, (int) max);
-      return;
+	  if (operand->flags & S390_OPERAND_LENGTH)
+	    {
+	      uval++;
+	      min++;
+	      max++;
+	    }
+	  sprint_value (buf, uval);
+	  if (file == (char *) NULL)
+	    as_bad (err, buf, (int) min, (int) max);
+	  else
+	    as_bad_where (file, line, err, buf, (int) min, (int) max);
+	  return;
+	}
     }
-  }
 
   /* Insert fragments of the operand byte for byte.  */
   offset = operand->shift + operand->bits;
   uval <<= (-offset) & 7;
   insn += (offset - 1)/8;
-  while (uval != 0) {
-    *insn-- |= uval;
-    uval >>= 8;
-  }
+  while (uval != 0)
+    {
+      *insn-- |= uval;
+      uval >>= 8;
+    }
 }
 
 /* Structure used to hold suffixes.  */
-typedef enum {
-  ELF_SUFFIX_NONE = 0,
-  ELF_SUFFIX_GOT,
-  ELF_SUFFIX_PLT,
-  ELF_SUFFIX_GOTENT
-} elf_suffix_type;
+typedef enum
+  {
+    ELF_SUFFIX_NONE = 0,
+    ELF_SUFFIX_GOT,
+    ELF_SUFFIX_PLT,
+    ELF_SUFFIX_GOTENT
+  }
+elf_suffix_type;
 
-struct map_bfd {
-  char *string;
-  int length;
-  elf_suffix_type suffix;
-};
+struct map_bfd
+  {
+    char *string;
+    int length;
+    elf_suffix_type suffix;
+  };
 
 /* Parse @got/@plt/@gotoff. and return the desired relocation.  */
 static elf_suffix_type
@@ -576,7 +600,8 @@ s390_elf_suffix (str_p, exp_p)
      char **str_p;
      expressionS *exp_p;
 {
-  static struct map_bfd mapping[] = {
+  static struct map_bfd mapping[] =
+  {
     { "got", 3, ELF_SUFFIX_GOT  },
     { "got12", 5, ELF_SUFFIX_GOT  },
     { "plt", 3, ELF_SUFFIX_PLT  },
@@ -599,65 +624,69 @@ s390_elf_suffix (str_p, exp_p)
 
   for (ptr = &mapping[0]; ptr->length > 0; ptr++)
     if (len == ptr->length &&
-	strncasecmp(ident, ptr->string, ptr->length) == 0) {
-      if (exp_p->X_add_number != 0)
-	as_warn (_("identifier+constant@%s means identifier@%s+constant"),
-		 ptr->string, ptr->string);
-      /* Now check for identifier@suffix+constant.  */
-      if (*str == '-' || *str == '+') {
-	  char *orig_line = input_line_pointer;
-	  expressionS new_exp;
+	strncasecmp(ident, ptr->string, ptr->length) == 0)
+      {
+	if (exp_p->X_add_number != 0)
+	  as_warn (_("identifier+constant@%s means identifier@%s+constant"),
+		   ptr->string, ptr->string);
+	/* Now check for identifier@suffix+constant.  */
+	if (*str == '-' || *str == '+')
+	  {
+	    char *orig_line = input_line_pointer;
+	    expressionS new_exp;
 
-	  input_line_pointer = str;
-	  expression (&new_exp);
+	    input_line_pointer = str;
+	    expression (&new_exp);
 
-          switch (new_exp.X_op) {
-	  case O_constant: /* X_add_number (a constant expression).  */
-	    exp_p->X_add_number += new_exp.X_add_number;
-	    str = input_line_pointer;
-	    break;
-	  case O_symbol:   /* X_add_symbol + X_add_number.  */
-	    /* this case is used for e.g. xyz@PLT+.Label.  */
-	    exp_p->X_add_number += new_exp.X_add_number;
-	    exp_p->X_op_symbol = new_exp.X_add_symbol;
-	    exp_p->X_op = O_add;
-	    str = input_line_pointer;
-	    break;
-	  case O_uminus:   /* (- X_add_symbol) + X_add_number.  */
-	    /* this case is used for e.g. xyz@PLT-.Label.  */
-	    exp_p->X_add_number += new_exp.X_add_number;
-	    exp_p->X_op_symbol = new_exp.X_add_symbol;
-	    exp_p->X_op = O_subtract;
-	    str = input_line_pointer;
-	    break;
-	  default:
-	    break;
+	    switch (new_exp.X_op)
+	      {
+	      case O_constant: /* X_add_number (a constant expression).  */
+		exp_p->X_add_number += new_exp.X_add_number;
+		str = input_line_pointer;
+		break;
+	      case O_symbol:   /* X_add_symbol + X_add_number.  */
+		/* this case is used for e.g. xyz@PLT+.Label.  */
+		exp_p->X_add_number += new_exp.X_add_number;
+		exp_p->X_op_symbol = new_exp.X_add_symbol;
+		exp_p->X_op = O_add;
+		str = input_line_pointer;
+		break;
+	      case O_uminus:   /* (- X_add_symbol) + X_add_number.  */
+		/* this case is used for e.g. xyz@PLT-.Label.  */
+		exp_p->X_add_number += new_exp.X_add_number;
+		exp_p->X_op_symbol = new_exp.X_add_symbol;
+		exp_p->X_op = O_subtract;
+		str = input_line_pointer;
+		break;
+	      default:
+		break;
+	      }
+
+	    /* If s390_elf_suffix has not been called with
+	       &input_line_pointer as first parameter, we have
+	       clobbered the input_line_pointer. We have to
+	       undo that.  */
+	    if (&input_line_pointer != str_p)
+	      input_line_pointer = orig_line;
 	  }
-
-	  /* If s390_elf_suffix has not been called with
-	     &input_line_pointer as first parameter, we have
-	     clobbered the input_line_pointer. We have to
-	     undo that.  */
-	  if (&input_line_pointer != str_p)
-	    input_line_pointer = orig_line;
+	*str_p = str;
+	return ptr->suffix;
       }
-      *str_p = str;
-      return ptr->suffix;
-    }
 
   return BFD_RELOC_UNUSED;
 }
 
 /* Structure used to hold a literal pool entry.  */
-struct s390_lpe {
-  struct s390_lpe *next;
-  expressionS ex;
-  FLONUM_TYPE floatnum;     /* used if X_op == O_big && X_add_number <= 0 */
-  LITTLENUM_TYPE bignum[4]; /* used if X_op == O_big && X_add_number > 0  */
-  int nbytes;
-  bfd_reloc_code_real_type reloc;
-  symbolS *sym;
-};
+struct s390_lpe
+  {
+    struct s390_lpe *next;
+    expressionS ex;
+    FLONUM_TYPE floatnum;     /* used if X_op == O_big && X_add_number <= 0 */
+    LITTLENUM_TYPE bignum[4]; /* used if X_op == O_big && X_add_number > 0  */
+    int nbytes;
+    bfd_reloc_code_real_type reloc;
+    symbolS *sym;
+  };
 
 static struct s390_lpe *lpe_free_list = NULL;
 static struct s390_lpe *lpe_list = NULL;
@@ -674,45 +703,46 @@ s390_exp_compare(exp1, exp2)
   if (exp1->X_op != exp2->X_op)
     return 0;
 
-  switch (exp1->X_op) {
-  case O_constant:   /* X_add_number must be equal.  */
-  case O_register:
-    return exp1->X_add_number == exp2->X_add_number;
+  switch (exp1->X_op)
+    {
+    case O_constant:   /* X_add_number must be equal.  */
+    case O_register:
+      return exp1->X_add_number == exp2->X_add_number;
 
-  case O_big:
-    as_bad(_("Can't handle O_big in s390_exp_compare")); 
+    case O_big:
+      as_bad(_("Can't handle O_big in s390_exp_compare")); 
 
-  case O_symbol:     /* X_add_symbol & X_add_number must be equal.  */
-  case O_symbol_rva:
-  case O_uminus:
-  case O_bit_not:
-  case O_logical_not:
-    return (exp1->X_add_symbol == exp2->X_add_symbol) &&
-           (exp1->X_add_number == exp2->X_add_number);
+    case O_symbol:     /* X_add_symbol & X_add_number must be equal.  */
+    case O_symbol_rva:
+    case O_uminus:
+    case O_bit_not:
+    case O_logical_not:
+      return (exp1->X_add_symbol == exp2->X_add_symbol) &&
+	(exp1->X_add_number == exp2->X_add_number);
 
-  case O_multiply:   /* X_add_symbol,X_op_symbol&X_add_number must be equal.  */
-  case O_divide:
-  case O_modulus:
-  case O_left_shift:
-  case O_right_shift:
-  case O_bit_inclusive_or:
-  case O_bit_or_not:
-  case O_bit_exclusive_or:
-  case O_bit_and:
-  case O_add:
-  case O_subtract:
-  case O_eq:
-  case O_ne:
-  case O_lt:
-  case O_le:
-  case O_ge:
-  case O_gt:
-  case O_logical_and:
-  case O_logical_or:
-    return (exp1->X_add_symbol == exp2->X_add_symbol) &&
-           (exp1->X_op_symbol == exp2->X_op_symbol) &&
-           (exp1->X_add_number == exp2->X_add_number);
-  default:
+    case O_multiply:   /* X_add_symbol,X_op_symbol&X_add_number must be equal.  */
+    case O_divide:
+    case O_modulus:
+    case O_left_shift:
+    case O_right_shift:
+    case O_bit_inclusive_or:
+    case O_bit_or_not:
+    case O_bit_exclusive_or:
+    case O_bit_and:
+    case O_add:
+    case O_subtract:
+    case O_eq:
+    case O_ne:
+    case O_lt:
+    case O_le:
+    case O_ge:
+    case O_gt:
+    case O_logical_and:
+    case O_logical_or:
+      return (exp1->X_add_symbol == exp2->X_add_symbol) &&
+	     (exp1->X_op_symbol == exp2->X_op_symbol) &&
+	     (exp1->X_add_number == exp2->X_add_number);
+    default:
     return 0;
   }
 }
@@ -746,84 +776,109 @@ s390_lit_suffix (str_p, exp_p, suffix)
   nbytes = ident[3] - '0';
 
   reloc = BFD_RELOC_UNUSED;
-  if (suffix == ELF_SUFFIX_GOT) {
-    if (nbytes == 2)
-      reloc = BFD_RELOC_390_GOT16;
-    else if (nbytes == 4)
-      reloc = BFD_RELOC_32_GOT_PCREL;
-    else if (nbytes == 8)
-      reloc = BFD_RELOC_390_GOT64;
-  } else if (suffix == ELF_SUFFIX_PLT) {
-    if (nbytes == 4)
-      reloc = BFD_RELOC_390_PLT32;
-    else if (nbytes == 8)
-      reloc = BFD_RELOC_390_PLT64;
-  }
+  if (suffix == ELF_SUFFIX_GOT)
+    {
+      if (nbytes == 2)
+	reloc = BFD_RELOC_390_GOT16;
+      else if (nbytes == 4)
+	reloc = BFD_RELOC_32_GOT_PCREL;
+      else if (nbytes == 8)
+	reloc = BFD_RELOC_390_GOT64;
+    }
+  else if (suffix == ELF_SUFFIX_PLT)
+    {
+      if (nbytes == 4)
+	reloc = BFD_RELOC_390_PLT32;
+      else if (nbytes == 8)
+	reloc = BFD_RELOC_390_PLT64;
+    }
 
-  if (suffix != ELF_SUFFIX_NONE && reloc == BFD_RELOC_UNUSED) {
+  if (suffix != ELF_SUFFIX_NONE && reloc == BFD_RELOC_UNUSED)
     as_bad (_("Invalid suffix for literal pool entry"));
-  }
 
   /* Search the pool if the new entry is a duplicate.  */
-  if (exp_p->X_op == O_big) {
-    /* Special processing for big numbers.  */
-    for (lpe = lpe_list; lpe != NULL; lpe = lpe->next) {
-      if (lpe->ex.X_op == O_big) {
-        if (exp_p->X_add_number <= 0 && lpe->ex.X_add_number <= 0) {
-          if (memcmp(&generic_floating_point_number, &lpe->floatnum,
-                     sizeof(FLONUM_TYPE)) == 0)
-            break;
-        } else if (exp_p->X_add_number == lpe->ex.X_add_number) {
-          if (memcmp(generic_bignum, lpe->bignum,
-              sizeof(LITTLENUM_TYPE)*exp_p->X_add_number) == 0)
-            break;
-        }
-      }
+  if (exp_p->X_op == O_big)
+    {
+      /* Special processing for big numbers.  */
+      for (lpe = lpe_list; lpe != NULL; lpe = lpe->next)
+	{
+	  if (lpe->ex.X_op == O_big)
+	    {
+	      if (exp_p->X_add_number <= 0 && lpe->ex.X_add_number <= 0)
+		{
+		  if (memcmp (&generic_floating_point_number, &lpe->floatnum,
+			      sizeof (FLONUM_TYPE)) == 0)
+		    break;
+		}
+	      else if (exp_p->X_add_number == lpe->ex.X_add_number)
+		{
+		  if (memcmp (generic_bignum, lpe->bignum,
+			      sizeof (LITTLENUM_TYPE)*exp_p->X_add_number) == 0)
+		    break;
+		}
+	    }
+	}
     }
-  } else {
-    /* Processing for 'normal' data types.  */
-    for (lpe = lpe_list; lpe != NULL; lpe = lpe->next)
-      if (lpe->nbytes == nbytes && lpe->reloc == reloc &&
-          s390_exp_compare(exp_p, &lpe->ex) != 0)
-        break;
-  }
-  if (lpe == NULL) {   /* A new literal.  */
-    if (lpe_free_list != NULL) {
-      lpe = lpe_free_list;
-      lpe_free_list = lpe_free_list->next;
-    } else {
-      lpe = (struct s390_lpe *) xmalloc(sizeof(struct s390_lpe));
+  else
+    {
+      /* Processing for 'normal' data types.  */
+      for (lpe = lpe_list; lpe != NULL; lpe = lpe->next)
+	if (lpe->nbytes == nbytes && lpe->reloc == reloc &&
+	    s390_exp_compare(exp_p, &lpe->ex) != 0)
+	  break;
     }
-    lpe->ex = *exp_p;
-    if (exp_p->X_op == O_big) {
-      if (exp_p->X_add_number <= 0)
-        lpe->floatnum = generic_floating_point_number;
-      else if (exp_p->X_add_number <= 4)
-        memcpy(lpe->bignum, generic_bignum,
-               exp_p->X_add_number*sizeof(LITTLENUM_TYPE));
-      else
-        as_bad(_("Big number is too big"));
-    }
-    lpe->nbytes = nbytes;
-    lpe->reloc = reloc;
-    /* Literal pool name defined ?  */
-    if (lp_sym == NULL) {
-      sprintf(tmp_name, ".L\001%i", lp_count);
-      lp_sym = symbol_make(tmp_name);
-    }
-    /* Make name for literal pool entry.  */
-    sprintf(tmp_name, ".L\001%i\002%i", lp_count, lpe_count);
-    lpe_count++;
-    lpe->sym = symbol_make(tmp_name);
-    /* Add to literal pool list.  */
-    lpe->next = NULL;
-    if (lpe_list_tail != NULL) {
-      lpe_list_tail->next = lpe;
-      lpe_list_tail = lpe;
-    } else
-      lpe_list = lpe_list_tail = lpe;
-  }
 
+  if (lpe == NULL)
+    {
+      /* A new literal.  */
+      if (lpe_free_list != NULL)
+	{
+	  lpe = lpe_free_list;
+	  lpe_free_list = lpe_free_list->next;
+	}
+      else
+	{
+	  lpe = (struct s390_lpe *) xmalloc(sizeof(struct s390_lpe));
+	}
+
+      lpe->ex = *exp_p;
+
+      if (exp_p->X_op == O_big)
+	{
+	  if (exp_p->X_add_number <= 0)
+	    lpe->floatnum = generic_floating_point_number;
+	  else if (exp_p->X_add_number <= 4)
+	    memcpy (lpe->bignum, generic_bignum,
+		    exp_p->X_add_number*sizeof(LITTLENUM_TYPE));
+	  else
+	    as_bad (_("Big number is too big"));
+	}
+
+      lpe->nbytes = nbytes;
+      lpe->reloc = reloc;
+      /* Literal pool name defined ?  */
+      if (lp_sym == NULL)
+	{
+	  sprintf(tmp_name, ".L\001%i", lp_count);
+	  lp_sym = symbol_make(tmp_name);
+	}
+
+      /* Make name for literal pool entry.  */
+      sprintf(tmp_name, ".L\001%i\002%i", lp_count, lpe_count);
+      lpe_count++;
+      lpe->sym = symbol_make(tmp_name);
+
+      /* Add to literal pool list.  */
+      lpe->next = NULL;
+      if (lpe_list_tail != NULL)
+	{
+	  lpe_list_tail->next = lpe;
+	  lpe_list_tail = lpe;
+	}
+      else
+	lpe_list = lpe_list_tail = lpe;
+    }
+  
   /* Now change exp_p to the offset into the literal pool.
      Thats the expression: .L^Ax^By-.L^Ax   */
   exp_p->X_add_symbol = lpe->sym;
@@ -847,48 +902,57 @@ s390_elf_cons (nbytes)
   expressionS exp;
   elf_suffix_type suffix;
 
-  if (is_it_end_of_statement ()) {
-    demand_empty_rest_of_line ();
-    return;
-  }
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
 
-  do {
-    expression (&exp);
-    if (exp.X_op == O_symbol && *input_line_pointer == '@' &&
-        (suffix=s390_elf_suffix(&input_line_pointer, &exp))!=ELF_SUFFIX_NONE) {
-      bfd_reloc_code_real_type reloc;
-      reloc_howto_type *reloc_howto;
-      int size;
-      char *where;
+  do
+    {
+      expression (&exp);
 
-      if (nbytes == 2 && suffix == ELF_SUFFIX_GOT)
-        reloc = BFD_RELOC_390_GOT16;
-      else if (nbytes == 4 && suffix == ELF_SUFFIX_GOT)
-        reloc = BFD_RELOC_32_GOT_PCREL;
-      else if (nbytes == 8 && suffix == ELF_SUFFIX_GOT)
-        reloc = BFD_RELOC_390_GOT64;
-      else if (nbytes == 4 && suffix == ELF_SUFFIX_PLT)
-        reloc = BFD_RELOC_390_PLT32;
-      else if (nbytes == 8 && suffix == ELF_SUFFIX_PLT)
-        reloc = BFD_RELOC_390_PLT64;
+      if (exp.X_op == O_symbol
+	  && *input_line_pointer == '@'
+	  && (suffix = s390_elf_suffix (&input_line_pointer, &exp)) != ELF_SUFFIX_NONE)
+	{
+	  bfd_reloc_code_real_type reloc;
+	  reloc_howto_type *reloc_howto;
+	  int size;
+	  char *where;
+
+	  if (nbytes == 2 && suffix == ELF_SUFFIX_GOT)
+	    reloc = BFD_RELOC_390_GOT16;
+	  else if (nbytes == 4 && suffix == ELF_SUFFIX_GOT)
+	    reloc = BFD_RELOC_32_GOT_PCREL;
+	  else if (nbytes == 8 && suffix == ELF_SUFFIX_GOT)
+	    reloc = BFD_RELOC_390_GOT64;
+	  else if (nbytes == 4 && suffix == ELF_SUFFIX_PLT)
+	    reloc = BFD_RELOC_390_PLT32;
+	  else if (nbytes == 8 && suffix == ELF_SUFFIX_PLT)
+	    reloc = BFD_RELOC_390_PLT64;
+	  else
+	    reloc = BFD_RELOC_UNUSED;
+
+	  if (reloc != BFD_RELOC_UNUSED)
+	    {
+	      reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
+	      size = bfd_get_reloc_size (reloc_howto);
+	      if (size > nbytes)
+		as_bad (_("%s relocations do not fit in %d bytes"),
+			reloc_howto->name, nbytes);
+	      where = frag_more(nbytes);
+	      md_number_to_chars (where, 0, size);
+	      fix_new_exp (frag_now, where - frag_now->fr_literal, 
+			   size, &exp, reloc_howto->pc_relative, reloc);
+	    }
+	  else
+	    as_bad (_("relocation not applicable"));
+	}
       else
-        reloc = BFD_RELOC_UNUSED;
-
-      if (reloc != BFD_RELOC_UNUSED) {
-        reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
-        size = bfd_get_reloc_size (reloc_howto);
-        if (size > nbytes)
-          as_bad (_("%s relocations do not fit in %d bytes"),
-                  reloc_howto->name, nbytes);
-        where = frag_more(nbytes);
-        md_number_to_chars (where, 0, size);
-        fix_new_exp (frag_now, where - frag_now->fr_literal, 
-                     size, &exp, reloc_howto->pc_relative, reloc);
-     } else
-       as_bad (_("relocation not applicable"));
-   } else
-     emit_expr (&exp, (unsigned int) nbytes);
-  } while (*input_line_pointer++ == ',');
+	emit_expr (&exp, (unsigned int) nbytes);
+    }
+  while (*input_line_pointer++ == ',');
 
   input_line_pointer--;		/* Put terminator back into stream. */
   demand_empty_rest_of_line ();
@@ -899,11 +963,11 @@ s390_elf_cons (nbytes)
    that would screw up references to ``.''.  */
 
 struct s390_fixup
-{
-  expressionS exp;
-  int opindex;
-  bfd_reloc_code_real_type reloc;
-};
+  {
+    expressionS exp;
+    int opindex;
+    bfd_reloc_code_real_type reloc;
+  };
 
 #define MAX_INSN_FIXUPS (4)
 
@@ -932,170 +996,203 @@ md_gather_operands (str, insn, opcode)
 
   /* Gather the operands.  */
   fc = 0;
-  for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++) {
-    expressionS ex;
-    char *hold;
+  for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
+    {
+      expressionS ex;
+      char *hold;
+
+      operand = s390_operands + *opindex_ptr;
     
-    operand = s390_operands + *opindex_ptr;
+      if (skip_optional && (operand->flags & S390_OPERAND_INDEX))
+	{
+	  /* We do an early skip. For D(X,B) constructions the index
+	     register is skipped (X is optional). For D(L,B) the base  
+	     register will be the skipped operand, because L is NOT
+	     optional.  */
+	  skip_optional = 0;
+	  continue;
+	}
     
-    if (skip_optional && (operand->flags & S390_OPERAND_INDEX)) {
-      /* We do an early skip. For D(X,B) constructions the index
-         register is skipped (X is optional). For D(L,B) the base  
-         register will be the skipped operand, because L is NOT
-         optional.  */
-      skip_optional = 0;
-      continue;
-    }
+      /* Gather the operand.  */
+      hold = input_line_pointer;
+      input_line_pointer = str;
+
+      if (! register_name (&ex))    /* parse the operand */
+	expression (&ex);
     
-    /* Gather the operand.  */
-    hold = input_line_pointer;
-    input_line_pointer = str;
+      str = input_line_pointer;
+      input_line_pointer = hold;
     
-    if (! register_name (&ex))    /* parse the operand */
-      expression (&ex);
-    
-    str = input_line_pointer;
-    input_line_pointer = hold;
-    
-    /* Write the operand to the insn.  */
-    if (ex.X_op == O_illegal)
-      as_bad (_("illegal operand"));
-    else if (ex.X_op == O_absent)
-      as_bad (_("missing operand"));
-    else if (ex.X_op == O_register || ex.X_op == O_constant) {
-	s390_lit_suffix (&str, &ex, ELF_SUFFIX_NONE);
-	if (ex.X_op != O_register && ex.X_op != O_constant) {
-	  /* We need to generate a fixup for the
-	     expression returned by s390_lit_suffix.  */
+      /* Write the operand to the insn.  */
+      if (ex.X_op == O_illegal)
+	as_bad (_("illegal operand"));
+      else if (ex.X_op == O_absent)
+	as_bad (_("missing operand"));
+      else if (ex.X_op == O_register || ex.X_op == O_constant)
+	{
+	  s390_lit_suffix (&str, &ex, ELF_SUFFIX_NONE);
+
+	  if (ex.X_op != O_register && ex.X_op != O_constant)
+	    {
+	      /* We need to generate a fixup for the
+		 expression returned by s390_lit_suffix.  */
+	      if (fc >= MAX_INSN_FIXUPS)
+		as_fatal (_("too many fixups"));
+	      fixups[fc].exp = ex;
+	      fixups[fc].opindex = *opindex_ptr;
+	      fixups[fc].reloc = BFD_RELOC_UNUSED;
+	      ++fc;
+	    }
+	  else
+	    {
+	      if ((operand->flags & S390_OPERAND_INDEX) && ex.X_add_number == 0)
+		as_warn("index register specified but zero");
+	      if ((operand->flags & S390_OPERAND_BASE) && ex.X_add_number == 0)
+		as_warn("base register specified but zero");
+	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
+	    }
+	}
+      else
+	{
+	  suffix = s390_elf_suffix (&str, &ex);
+	  suffix = s390_lit_suffix (&str, &ex, suffix);
+	  reloc = BFD_RELOC_UNUSED;
+
+	  if (suffix == ELF_SUFFIX_GOT)
+	    {
+	      if (operand->flags & S390_OPERAND_DISP)
+		reloc = BFD_RELOC_390_GOT12;
+	      else if ((operand->flags & S390_OPERAND_SIGNED) &&
+		       (operand->bits == 16))
+		reloc = BFD_RELOC_390_GOT16;
+	      else if ((operand->flags & S390_OPERAND_PCREL) &&
+		       (operand->bits == 32))
+		reloc = BFD_RELOC_390_GOTENT;
+	    }
+	  else if (suffix == ELF_SUFFIX_PLT)
+	    {
+	      if ((operand->flags & S390_OPERAND_PCREL) &&
+		  (operand->bits == 16))
+		reloc = BFD_RELOC_390_PLT16DBL;
+	      else if ((operand->flags & S390_OPERAND_PCREL) &&
+		       (operand->bits == 32))
+		reloc = BFD_RELOC_390_PLT32DBL;
+	    }
+	  else if (suffix == ELF_SUFFIX_GOTENT)
+	    {
+	      if ((operand->flags & S390_OPERAND_PCREL) &&
+		  (operand->bits == 32))
+		reloc = BFD_RELOC_390_GOTENT;
+	    }
+
+	  if (suffix != ELF_SUFFIX_NONE && reloc == BFD_RELOC_UNUSED)
+	    as_bad (_("invalid operand suffix"));
+	  /* We need to generate a fixup of type 'reloc' for this
+	     expression.  */
 	  if (fc >= MAX_INSN_FIXUPS)
 	    as_fatal (_("too many fixups"));
 	  fixups[fc].exp = ex;
 	  fixups[fc].opindex = *opindex_ptr;
-	  fixups[fc].reloc = BFD_RELOC_UNUSED;
+	  fixups[fc].reloc = reloc;
 	  ++fc;
-	} else {
-          if ((operand->flags & S390_OPERAND_INDEX) && ex.X_add_number == 0)
-            as_warn("index register specified but zero");
-          if ((operand->flags & S390_OPERAND_BASE) && ex.X_add_number == 0)
-            as_warn("base register specified but zero");
-	  s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
-        }
-    } else {
-      suffix = s390_elf_suffix (&str, &ex);
-      suffix = s390_lit_suffix (&str, &ex, suffix);
-      reloc = BFD_RELOC_UNUSED;
-      if (suffix == ELF_SUFFIX_GOT) {
-        if (operand->flags & S390_OPERAND_DISP)
-          reloc = BFD_RELOC_390_GOT12;
-        else if ((operand->flags & S390_OPERAND_SIGNED) &&
-                 (operand->bits == 16))
-          reloc = BFD_RELOC_390_GOT16;
-	else if ((operand->flags & S390_OPERAND_PCREL) &&
-		 (operand->bits == 32))
-	  reloc = BFD_RELOC_390_GOTENT;
-      } else if (suffix == ELF_SUFFIX_PLT) {
-        if ((operand->flags & S390_OPERAND_PCREL) &&
-            (operand->bits == 16))
-          reloc = BFD_RELOC_390_PLT16DBL;
-        else if ((operand->flags & S390_OPERAND_PCREL) &&
-                 (operand->bits == 32))
-          reloc = BFD_RELOC_390_PLT32DBL;
-      } else if (suffix == ELF_SUFFIX_GOTENT) {
-        if ((operand->flags & S390_OPERAND_PCREL) &&
-            (operand->bits == 32))
-          reloc = BFD_RELOC_390_GOTENT;
-      }
-
-      if (suffix != ELF_SUFFIX_NONE && reloc == BFD_RELOC_UNUSED)
-        as_bad (_("invalid operand suffix"));
-      /* We need to generate a fixup of type 'reloc' for this
-         expression.  */
-      if (fc >= MAX_INSN_FIXUPS)
-	as_fatal (_("too many fixups"));
-      fixups[fc].exp = ex;
-      fixups[fc].opindex = *opindex_ptr;
-      fixups[fc].reloc = reloc;
-      ++fc;
-    }
- 
-    /* Check the next character. The call to expression has advanced
-       str past any whitespace.  */
-    if (operand->flags & S390_OPERAND_DISP) {
-      /* After a displacement a block in parentheses can start.  */
-      if (*str != '(') {
-	/* Check if parethesed block can be skipped. If the next
-	   operand is neiter an optional operand nor a base register
-	   then we have a syntax error.  */
-	operand = s390_operands + *(++opindex_ptr);
-	if (!(operand->flags & (S390_OPERAND_INDEX|S390_OPERAND_BASE)))
-	  as_bad (_("syntax error; missing '(' after displacement"));
-	
-	/* Ok, skip all operands until S390_OPERAND_BASE.  */
-	while (!(operand->flags & S390_OPERAND_BASE))
-	  operand = s390_operands + *(++opindex_ptr);
-	
-	/* If there is a next operand it must be seperated by a comma.  */
-	if (opindex_ptr[1] != '\0') {
-	  if (*str++ != ',')
-	    as_bad(_("syntax error; expected ,"));
 	}
-      } else { /* We found an opening parentheses.  */
-	str++;
-	for (f = str; *f != '\0'; f++)
-	  if (*f == ',' || *f == ')')
-	    break;
-	/* If there is no comma until the closing parentheses OR
-           there is a comma right after the opening parentheses,
-	   we have to skip optional operands.  */
-        if (*f == ',' && f == str) {  /* comma directly after '(' ? */
-          skip_optional = 1;
-          str++;
-        } else
-          skip_optional = (*f != ',');
-      }
-    } else if (operand->flags & S390_OPERAND_BASE) {
-      /* After the base register the parenthesed block ends.  */
-      if (*str++ != ')')
-	as_bad(_("syntax error; missing ')' after base register"));
-      skip_optional = 0;
-      /* If there is a next operand it must be seperated by a comma.  */
-      if (opindex_ptr[1] != '\0') {
-	if (*str++ != ',')
-	  as_bad(_("syntax error; expected ,"));
-      }
-    } else {
-      /* We can find an 'early' closing parentheses in e.g. D(L) instead
-         of D(L,B).  In this case the base register has to be skipped.  */
-      if (*str == ')') {
-	operand = s390_operands + *(++opindex_ptr);
-	if (!(operand->flags & S390_OPERAND_BASE))
-	  as_bad (_("syntax error; ')' not allowed here"));
-	str++;
-      }
-      /* If there is a next operand it must be seperated by a comma.  */
-      if (opindex_ptr[1] != '\0') {
-	if (*str++ != ',')
-	  as_bad(_("syntax error; expected ,"));
-      }
+ 
+      /* Check the next character. The call to expression has advanced
+	 str past any whitespace.  */
+      if (operand->flags & S390_OPERAND_DISP)
+	{
+	  /* After a displacement a block in parentheses can start.  */
+	  if (*str != '(')
+	    {
+	      /* Check if parethesed block can be skipped. If the next
+		 operand is neiter an optional operand nor a base register
+		 then we have a syntax error.  */
+	      operand = s390_operands + *(++opindex_ptr);
+	      if (!(operand->flags & (S390_OPERAND_INDEX|S390_OPERAND_BASE)))
+		as_bad (_("syntax error; missing '(' after displacement"));
+
+	      /* Ok, skip all operands until S390_OPERAND_BASE.  */
+	      while (!(operand->flags & S390_OPERAND_BASE))
+		operand = s390_operands + *(++opindex_ptr);
+	
+	      /* If there is a next operand it must be seperated by a comma.  */
+	      if (opindex_ptr[1] != '\0')
+		{
+		  if (*str++ != ',')
+		    as_bad(_("syntax error; expected ,"));
+		}
+	    }
+	  else
+	    {
+	      /* We found an opening parentheses.  */
+	      str++;
+	      for (f = str; *f != '\0'; f++)
+		if (*f == ',' || *f == ')')
+		  break;
+	      /* If there is no comma until the closing parentheses OR
+		 there is a comma right after the opening parentheses,
+		 we have to skip optional operands.  */
+	      if (*f == ',' && f == str)
+		{
+		  /* comma directly after '(' ? */
+		  skip_optional = 1;
+		  str++;
+		}
+	      else
+		skip_optional = (*f != ',');
+	    }
+	}
+      else if (operand->flags & S390_OPERAND_BASE)
+	{
+	  /* After the base register the parenthesed block ends.  */
+	  if (*str++ != ')')
+	    as_bad (_("syntax error; missing ')' after base register"));
+	  skip_optional = 0;
+	  /* If there is a next operand it must be seperated by a comma.  */
+	  if (opindex_ptr[1] != '\0')
+	    {
+	      if (*str++ != ',')
+		as_bad (_("syntax error; expected ,"));
+	    }
+	}
+      else
+	{
+	  /* We can find an 'early' closing parentheses in e.g. D(L) instead
+	     of D(L,B).  In this case the base register has to be skipped.  */
+	  if (*str == ')')
+	    {
+	      operand = s390_operands + *(++opindex_ptr);
+
+	      if (!(operand->flags & S390_OPERAND_BASE))
+		as_bad (_("syntax error; ')' not allowed here"));
+	      str++;
+	    }
+	  /* If there is a next operand it must be seperated by a comma.  */
+	  if (opindex_ptr[1] != '\0')
+	    {
+	      if (*str++ != ',')
+		as_bad(_("syntax error; expected ,"));
+	    }
+	}
     }
-  }
 
   while (isspace (*str))
     ++str;
 
-  if (*str != '\0') {
-    char *linefeed;
+  if (*str != '\0')
+    {
+      char *linefeed;
 
-    if ((linefeed = strchr(str, '\n')) != NULL)
-      *linefeed = '\0';
-    as_bad (_("junk at end of line: `%s'"), str);
-    if (linefeed != NULL)
-      *linefeed = '\n';
-  }
+      if ((linefeed = strchr(str, '\n')) != NULL)
+	*linefeed = '\0';
+      as_bad (_("junk at end of line: `%s'"), str);
+      if (linefeed != NULL)
+	*linefeed = '\n';
+    }
 
   /* Write out the instruction.  */
   f = frag_more (opcode->oplen);
-  memcpy(f, insn, opcode->oplen);
+  memcpy (f, insn, opcode->oplen);
 
   /* Create any fixups.  At this point we do not use a
      bfd_reloc_code_real_type, but instead just use the
@@ -1103,39 +1200,42 @@ md_gather_operands (str, insn, opcode)
      handle fixups for any operand type, although that is admittedly
      not a very exciting feature.  We pick a BFD reloc type in
      md_apply_fix3.  */
-  for (i = 0; i < fc; i++) {
-    operand = s390_operands + fixups[i].opindex;
+  for (i = 0; i < fc; i++)
+    {
+      operand = s390_operands + fixups[i].opindex;
 
-    if (fixups[i].reloc != BFD_RELOC_UNUSED) {
-      reloc_howto_type *reloc_howto;
-      fixS *fixP;
-      int size;
+      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+	{
+	  reloc_howto_type *reloc_howto;
+	  fixS *fixP;
+	  int size;
       
-      reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
-      if (!reloc_howto)
-	abort ();
+	  reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
+	  if (!reloc_howto)
+	    abort ();
       
-      size = bfd_get_reloc_size (reloc_howto);
+	  size = bfd_get_reloc_size (reloc_howto);
+
+	  if (size < 1 || size > 4)
+	    abort ();
       
-      if (size < 1 || size > 4)
-	abort();
-      
-      fixP = fix_new_exp (frag_now, 
-			  f - frag_now->fr_literal + (operand->shift/8), 
-			  size, &fixups[i].exp, reloc_howto->pc_relative,
-			  fixups[i].reloc);
-      /* Turn off overflow checking in fixup_segment. This is necessary
-         because fixup_segment will signal an overflow for large 4 byte
-         quantities for GOT12 relocations.  */
-      if (fixups[i].reloc == BFD_RELOC_390_GOT12 ||
-          fixups[i].reloc == BFD_RELOC_390_GOT16)
-        fixP->fx_no_overflow = 1;
-    } else
-      fix_new_exp (frag_now, f - frag_now->fr_literal, 4, &fixups[i].exp,
-		   (operand->flags & S390_OPERAND_PCREL) != 0,
-		   ((bfd_reloc_code_real_type)
-		    (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
-  }
+	  fixP = fix_new_exp (frag_now, 
+			      f - frag_now->fr_literal + (operand->shift/8), 
+			      size, &fixups[i].exp, reloc_howto->pc_relative,
+			      fixups[i].reloc);
+	  /* Turn off overflow checking in fixup_segment. This is necessary
+	     because fixup_segment will signal an overflow for large 4 byte
+	     quantities for GOT12 relocations.  */
+	  if (fixups[i].reloc == BFD_RELOC_390_GOT12 ||
+	      fixups[i].reloc == BFD_RELOC_390_GOT16)
+	    fixP->fx_no_overflow = 1;
+	}
+      else
+	fix_new_exp (frag_now, f - frag_now->fr_literal, 4, &fixups[i].exp,
+		     (operand->flags & S390_OPERAND_PCREL) != 0,
+		     ((bfd_reloc_code_real_type)
+		      (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+    }
   return str;
 }
 
@@ -1157,16 +1257,19 @@ md_assemble (str)
 
   /* Look up the opcode in the hash table.  */
   opcode = (struct s390_opcode *) hash_find (s390_opcode_hash, str);
-  if (opcode == (const struct s390_opcode *) NULL) {
-    as_bad (_("Unrecognized opcode: `%s'"), str);
-    return;
-  } else if (!(opcode->architecture & current_arch_mask)) {
-    as_bad("Opcode %s not available in this architecture", str);
-    return;
-  }
+  if (opcode == (const struct s390_opcode *) NULL)
+    {
+      as_bad (_("Unrecognized opcode: `%s'"), str);
+      return;
+    }
+  else if (!(opcode->architecture & current_arch_mask))
+    {
+      as_bad("Opcode %s not available in this architecture", str);
+      return;
+    }
 
-  memcpy(insn, opcode->opcode, sizeof(insn));
-  md_gather_operands(s, insn, opcode);
+  memcpy (insn, opcode->opcode, sizeof(insn));
+  md_gather_operands (s, insn, opcode);
 }
 
 #ifndef WORKING_DOT_WORD
@@ -1225,28 +1328,35 @@ s390_insn(ignore)
   /* Look up the opcode in the hash table.  */
   opformat = (struct s390_opcode *)
     hash_find (s390_opformat_hash, input_line_pointer);
-  if (opformat == (const struct s390_opcode *) NULL) {
-    as_bad (_("Unrecognized opcode format: `%s'"), input_line_pointer);
-    return;
-  }
+  if (opformat == (const struct s390_opcode *) NULL)
+    {
+      as_bad (_("Unrecognized opcode format: `%s'"), input_line_pointer);
+      return;
+    }
   input_line_pointer = s;
   expression (&exp);
-  if (exp.X_op == O_constant) {
-    if (opformat->oplen == 4 ||
-	(opformat->oplen == 2 && exp.X_op < 0x10000))
-      md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
-    else
-      as_bad(_("Invalid .insn format\n"));
-  } else if (exp.X_op == O_big) {
-    if (exp.X_add_number > 0 && 
-	opformat->oplen == 6 &&
-	generic_bignum[3] == 0) {
-      md_number_to_chars (insn, generic_bignum[2], 2);
-      md_number_to_chars (&insn[2], generic_bignum[1], 2);
-      md_number_to_chars (&insn[4], generic_bignum[0], 2);
-    } else
-      as_bad(_("Invalid .insn format\n"));
-  } else
+  if (exp.X_op == O_constant)
+    {
+      if (opformat->oplen == 4 ||
+	  (opformat->oplen == 2 && exp.X_op < 0x10000))
+	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
+      else
+	as_bad(_("Invalid .insn format\n"));
+    }
+  else if (exp.X_op == O_big)
+    {
+      if (exp.X_add_number > 0 && 
+	  opformat->oplen == 6 &&
+	  generic_bignum[3] == 0)
+	{
+	  md_number_to_chars (insn, generic_bignum[2], 2);
+	  md_number_to_chars (&insn[2], generic_bignum[1], 2);
+	  md_number_to_chars (&insn[4], generic_bignum[0], 2);
+	}
+      else
+	as_bad(_("Invalid .insn format\n"));
+    }
+  else
     as_bad (_("second operand of .insn not a constant\n"));
   if (*input_line_pointer++ != ',')
     as_bad (_("missing comma after insn constant\n"));
@@ -1312,41 +1422,46 @@ s390_literals (ignore)
   S_SET_VALUE (lp_sym, (valueT) frag_now_fix ());
   lp_sym->sy_frag = frag_now;
 
-  while (lpe_list) {
-    lpe = lpe_list;
-    lpe_list = lpe_list->next;
-    S_SET_SEGMENT (lpe->sym, now_seg);
-    S_SET_VALUE (lpe->sym, (valueT) frag_now_fix ());
-    lpe->sym->sy_frag = frag_now;
+  while (lpe_list)
+    {
+      lpe = lpe_list;
+      lpe_list = lpe_list->next;
+      S_SET_SEGMENT (lpe->sym, now_seg);
+      S_SET_VALUE (lpe->sym, (valueT) frag_now_fix ());
+      lpe->sym->sy_frag = frag_now;
 
-    /* Emit literal pool entry.  */
-    if (lpe->reloc != BFD_RELOC_UNUSED) {
-      reloc_howto_type *reloc_howto = 
-              bfd_reloc_type_lookup (stdoutput, lpe->reloc);
-      int size = bfd_get_reloc_size (reloc_howto);
-      char *where;
+      /* Emit literal pool entry.  */
+      if (lpe->reloc != BFD_RELOC_UNUSED)
+	{
+	  reloc_howto_type *reloc_howto = 
+	    bfd_reloc_type_lookup (stdoutput, lpe->reloc);
+	  int size = bfd_get_reloc_size (reloc_howto);
+	  char *where;
 
-      if (size > lpe->nbytes)
-        as_bad (_("%s relocations do not fit in %d bytes"),
-                reloc_howto->name, lpe->nbytes);
-      where = frag_more(lpe->nbytes);
-      md_number_to_chars (where, 0, size);
-      fix_new_exp (frag_now, where - frag_now->fr_literal,
-                   size, &lpe->ex, reloc_howto->pc_relative, lpe->reloc);
-   } else {
-      if (lpe->ex.X_op == O_big) {
-        if (lpe->ex.X_add_number <= 0)
-          generic_floating_point_number = lpe->floatnum;
-        else
-          memcpy(generic_bignum, lpe->bignum,
-                 lpe->ex.X_add_number*sizeof(LITTLENUM_TYPE));
-     }
-     emit_expr (&lpe->ex, lpe->nbytes);
-   }
+	  if (size > lpe->nbytes)
+	    as_bad (_("%s relocations do not fit in %d bytes"),
+		    reloc_howto->name, lpe->nbytes);
+	  where = frag_more(lpe->nbytes);
+	  md_number_to_chars (where, 0, size);
+	  fix_new_exp (frag_now, where - frag_now->fr_literal,
+		       size, &lpe->ex, reloc_howto->pc_relative, lpe->reloc);
+	}
+      else
+	{
+	  if (lpe->ex.X_op == O_big)
+	    {
+	      if (lpe->ex.X_add_number <= 0)
+		generic_floating_point_number = lpe->floatnum;
+	      else
+		memcpy (generic_bignum, lpe->bignum,
+			lpe->ex.X_add_number*sizeof(LITTLENUM_TYPE));
+	    }
+	  emit_expr (&lpe->ex, lpe->nbytes);
+	}
 
-    lpe->next = lpe_free_list;
-    lpe_free_list = lpe;
-  }
+      lpe->next = lpe_free_list;
+      lpe_free_list = lpe;
+    }
   lpe_list_tail = NULL;
   lp_sym = NULL;
   lp_count++;
@@ -1488,6 +1603,7 @@ tc_s390_fix_adjustable(fixP)
       || fixP->fx_r_type == BFD_RELOC_390_GOT16
       || fixP->fx_r_type == BFD_RELOC_32_GOT_PCREL
       || fixP->fx_r_type == BFD_RELOC_390_GOT64
+      || fixP->fx_r_type == BFD_RELOC_390_GOTENT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
@@ -1515,203 +1631,228 @@ md_apply_fix3 (fixp, valuep, seg)
   value = *valuep;
   where = fixp->fx_frag->fr_literal + fixp->fx_where;
 
-  if (fixp->fx_subsy != NULL) {
-    if (!S_IS_DEFINED (fixp->fx_subsy))
-      as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("unresolved fx_subsy symbol that must be resolved"));
-    value -= S_GET_VALUE(fixp->fx_subsy);
-  }
-
-  if (fixp->fx_addsy != NULL) {
-    /* `*valuep' may contain the value of the symbol on which the reloc
-       will be based; we have to remove it.  */
-    if (fixp->fx_addsy->sy_used_in_reloc
-	&& S_GET_SEGMENT (fixp->fx_addsy) != absolute_section
-	&& S_GET_SEGMENT (fixp->fx_addsy) != undefined_section
-	&& ! bfd_is_com_section (S_GET_SEGMENT (fixp->fx_addsy)))
-      value -= S_GET_VALUE (fixp->fx_addsy);
-
-    if (fixp->fx_pcrel)
-      value += fixp->fx_frag->fr_address + fixp->fx_where;
-  } else {
-    fixp->fx_done = 1;
-  }
-
-  if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED) {
-    const struct s390_operand *operand;
-    int opindex;
-    
-    opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
-    operand = &s390_operands[opindex];
-    
-    if (fixp->fx_done) {
-      /* Insert the fully resolved operand value.  */
-      s390_insert_operand (where, operand, (offsetT) value,
-			   fixp->fx_file, fixp->fx_line);
-      return 1;
+  if (fixp->fx_subsy != NULL)
+    {
+      if (!S_IS_DEFINED (fixp->fx_subsy))
+	as_bad_where (fixp->fx_file, fixp->fx_line,
+		      _("unresolved fx_subsy symbol that must be resolved"));
+      value -= S_GET_VALUE(fixp->fx_subsy);
     }
-    
-    /* Determine a BFD reloc value based on the operand information.
-       We are only prepared to turn a few of the operands into
-       relocs.  */
-    fixp->fx_offset = value;
-    if (operand->bits == 12 && operand->shift == 20) {
-      fixp->fx_size = 2;
-      fixp->fx_where += 2;
-      fixp->fx_r_type = BFD_RELOC_390_12;
-    } else if (operand->bits == 12 && operand->shift == 36) {
-      fixp->fx_size = 2;
-      fixp->fx_where += 4;
-      fixp->fx_r_type = BFD_RELOC_390_12;
-    } else if (operand->bits == 8 && operand->shift == 8) {
-      fixp->fx_size = 1;
-      fixp->fx_where += 1;
-      fixp->fx_r_type = BFD_RELOC_8;
-    } else if (operand->bits == 16 && operand->shift == 16) {
-      fixp->fx_size = 2;
-      fixp->fx_where += 2;
-      if (operand->flags & S390_OPERAND_PCREL) {
-        fixp->fx_r_type = BFD_RELOC_390_PC16DBL;
-        fixp->fx_offset += 2;
-      } else
-	fixp->fx_r_type = BFD_RELOC_16;
-    } else if (operand->bits == 32 && operand->shift == 16 &&
-              (operand->flags & S390_OPERAND_PCREL)) {
-      fixp->fx_size = 4;
-      fixp->fx_where += 2;
-      fixp->fx_offset += 2;
-      fixp->fx_r_type = BFD_RELOC_390_PC32DBL;
-    } else {
-      char *sfile;
-      unsigned int sline;
+
+  if (fixp->fx_addsy != NULL)
+    {
+      /* `*valuep' may contain the value of the symbol on which the reloc
+	 will be based; we have to remove it.  */
+      if (fixp->fx_addsy->sy_used_in_reloc
+	  && S_GET_SEGMENT (fixp->fx_addsy) != absolute_section
+	  && S_GET_SEGMENT (fixp->fx_addsy) != undefined_section
+	  && ! bfd_is_com_section (S_GET_SEGMENT (fixp->fx_addsy)))
+	value -= S_GET_VALUE (fixp->fx_addsy);
       
-      /* Use expr_symbol_where to see if this is an expression
-	 symbol.  */
-      if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
-	as_bad_where (fixp->fx_file, fixp->fx_line,
-		      _("unresolved expression that must be resolved"));
-      else
-	as_bad_where (fixp->fx_file, fixp->fx_line,
-		      _("unsupported relocation type"));
-      fixp->fx_done = 1;
-      return 1;
-    }
-  } else {
-    switch (fixp->fx_r_type) {
-    case BFD_RELOC_8:
       if (fixp->fx_pcrel)
-        abort ();
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 1);
-      break;
-    case BFD_RELOC_390_12:
-    case BFD_RELOC_390_GOT12:
-      if (fixp->fx_done) {
-        unsigned short mop;
-        mop = bfd_getb16 ((unsigned char *) where);
-        mop |= (unsigned short) (value & 0xfff);
-        bfd_putb16 ((bfd_vma) mop, (unsigned char *) where);
-      } 
-      break;
+	value += fixp->fx_frag->fr_address + fixp->fx_where;
+    }
+  else
+    fixp->fx_done = 1;
+
+  if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED)
+    {
+      const struct s390_operand *operand;
+      int opindex;
     
-    case BFD_RELOC_16:
-    case BFD_RELOC_GPREL16:
-    case BFD_RELOC_16_GOT_PCREL:
-    case BFD_RELOC_16_GOTOFF:
-      if (fixp->fx_pcrel)
-        as_bad_where (fixp->fx_file, fixp->fx_line,
-                      "cannot emit PC relative %s relocation%s%s",
-                      bfd_get_reloc_code_name (fixp->fx_r_type),
-                      fixp->fx_addsy != NULL ? " against " : "",
-                      (fixp->fx_addsy != NULL
-                       ? S_GET_NAME (fixp->fx_addsy)
-                       : ""));
+      opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
+      operand = &s390_operands[opindex];
+      
       if (fixp->fx_done)
-        md_number_to_chars (where, value, 2);
-      break;
-    case BFD_RELOC_390_GOT16:
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 2);
-      break;
-    case BFD_RELOC_390_PC16DBL:
-    case BFD_RELOC_390_PLT16DBL:
-      value += 2;
-      if (fixp->fx_done)
-        md_number_to_chars (where, (offsetT) value >> 1, 2);
-      break;
+	{
+	  /* Insert the fully resolved operand value.  */
+	  s390_insert_operand (where, operand, (offsetT) value,
+			       fixp->fx_file, fixp->fx_line);
 
-    case BFD_RELOC_32:
-      if (fixp->fx_pcrel)
-	fixp->fx_r_type = BFD_RELOC_32_PCREL;
+	  return 1;
+	}
+    
+      /* Determine a BFD reloc value based on the operand information.
+	 We are only prepared to turn a few of the operands into
+	 relocs.  */
+      fixp->fx_offset = value;
+      if (operand->bits == 12 && operand->shift == 20)
+	{
+	  fixp->fx_size = 2;
+	  fixp->fx_where += 2;
+	  fixp->fx_r_type = BFD_RELOC_390_12;
+	}
+      else if (operand->bits == 12 && operand->shift == 36)
+	{
+	  fixp->fx_size = 2;
+	  fixp->fx_where += 4;
+	  fixp->fx_r_type = BFD_RELOC_390_12;
+	}
+      else if (operand->bits == 8 && operand->shift == 8)
+	{
+	  fixp->fx_size = 1;
+	  fixp->fx_where += 1;
+	  fixp->fx_r_type = BFD_RELOC_8;
+	}
+      else if (operand->bits == 16 && operand->shift == 16)
+	{
+	  fixp->fx_size = 2;
+	  fixp->fx_where += 2;
+	  if (operand->flags & S390_OPERAND_PCREL)
+	    {
+	      fixp->fx_r_type = BFD_RELOC_390_PC16DBL;
+	      fixp->fx_offset += 2;
+	    }
+	  else
+	    fixp->fx_r_type = BFD_RELOC_16;
+	}
+      else if (operand->bits == 32 && operand->shift == 16 &&
+	       (operand->flags & S390_OPERAND_PCREL))
+	{
+	  fixp->fx_size = 4;
+	  fixp->fx_where += 2;
+	  fixp->fx_offset += 2;
+	  fixp->fx_r_type = BFD_RELOC_390_PC32DBL;
+	}
       else
-	fixp->fx_r_type = BFD_RELOC_32;
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 4);
-      break;
-    case BFD_RELOC_32_PCREL:
-    case BFD_RELOC_32_BASEREL:
-      fixp->fx_r_type = BFD_RELOC_32_PCREL;
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 4);
-      break;
-    case BFD_RELOC_32_GOT_PCREL:
-    case BFD_RELOC_390_PLT32:
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 4);
-      break;
-    case BFD_RELOC_390_PC32DBL:
-    case BFD_RELOC_390_PLT32DBL:
-    case BFD_RELOC_390_GOTPCDBL:
-    case BFD_RELOC_390_GOTENT:
-      value += 2;
-      if (fixp->fx_done)
-        md_number_to_chars (where, (offsetT) value >> 1, 4);
-      break;
-
-    case BFD_RELOC_32_GOTOFF:
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, sizeof(int));
-      break;
-
-    case BFD_RELOC_390_GOT64:
-    case BFD_RELOC_390_PLT64:
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 8);
-      break;
-
-    case BFD_RELOC_64:
-      if (fixp->fx_pcrel)
-        fixp->fx_r_type = BFD_RELOC_64_PCREL;
-      else
-        fixp->fx_r_type = BFD_RELOC_64;
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 8);
-      break;
-
-    case BFD_RELOC_64_PCREL:
-      fixp->fx_r_type = BFD_RELOC_64_PCREL;
-      if (fixp->fx_done)
-        md_number_to_chars (where, value, 8);
-      break;
-
-    case BFD_RELOC_VTABLE_INHERIT:
-    case BFD_RELOC_VTABLE_ENTRY:
-      fixp->fx_done = 0;
-      return 1;
-
-    default: {
-	const char *reloc_name = bfd_get_reloc_code_name(fixp->fx_r_type);
-	if (reloc_name != NULL)
-	  fprintf(stderr, "Gas failure, reloc type %s\n", reloc_name);
-	else
-	  fprintf(stderr, "Gas failure, reloc type #%i\n", fixp->fx_r_type);
-	fflush(stderr);
-	abort ();
-      }
+	{
+	  char *sfile;
+	  unsigned int sline;
+      
+	  /* Use expr_symbol_where to see if this is an expression
+	     symbol.  */
+	  if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  _("unresolved expression that must be resolved"));
+	  else
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  _("unsupported relocation type"));
+	  fixp->fx_done = 1;
+	  return 1;
+	}
     }
+  else
+    {
+      switch (fixp->fx_r_type)
+	{
+	case BFD_RELOC_8:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 1);
+	  break;
+	case BFD_RELOC_390_12:
+	case BFD_RELOC_390_GOT12:
+	  if (fixp->fx_done)
+	    {
+	      unsigned short mop;
 
-    fixp->fx_offset = value;
-  }
+	      mop = bfd_getb16 ((unsigned char *) where);
+	      mop |= (unsigned short) (value & 0xfff);
+	      bfd_putb16 ((bfd_vma) mop, (unsigned char *) where);
+	    } 
+	  break;
+    
+	case BFD_RELOC_16:
+	case BFD_RELOC_GPREL16:
+	case BFD_RELOC_16_GOT_PCREL:
+	case BFD_RELOC_16_GOTOFF:
+	  if (fixp->fx_pcrel)
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  "cannot emit PC relative %s relocation%s%s",
+			  bfd_get_reloc_code_name (fixp->fx_r_type),
+			  fixp->fx_addsy != NULL ? " against " : "",
+			  (fixp->fx_addsy != NULL
+			   ? S_GET_NAME (fixp->fx_addsy)
+			   : ""));
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 2);
+	  break;
+	case BFD_RELOC_390_GOT16:
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 2);
+	  break;
+	case BFD_RELOC_390_PC16DBL:
+	case BFD_RELOC_390_PLT16DBL:
+	  value += 2;
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, (offsetT) value >> 1, 2);
+	  break;
+
+	case BFD_RELOC_32:
+	  if (fixp->fx_pcrel)
+	    fixp->fx_r_type = BFD_RELOC_32_PCREL;
+	  else
+	    fixp->fx_r_type = BFD_RELOC_32;
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 4);
+	  break;
+	case BFD_RELOC_32_PCREL:
+	case BFD_RELOC_32_BASEREL:
+	  fixp->fx_r_type = BFD_RELOC_32_PCREL;
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 4);
+	  break;
+	case BFD_RELOC_32_GOT_PCREL:
+	case BFD_RELOC_390_PLT32:
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 4);
+	  break;
+	case BFD_RELOC_390_PC32DBL:
+	case BFD_RELOC_390_PLT32DBL:
+	case BFD_RELOC_390_GOTPCDBL:
+	case BFD_RELOC_390_GOTENT:
+	  value += 2;
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, (offsetT) value >> 1, 4);
+	  break;
+
+	case BFD_RELOC_32_GOTOFF:
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, sizeof(int));
+	  break;
+
+	case BFD_RELOC_390_GOT64:
+	case BFD_RELOC_390_PLT64:
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 8);
+	  break;
+
+	case BFD_RELOC_64:
+	  if (fixp->fx_pcrel)
+	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
+	  else
+	    fixp->fx_r_type = BFD_RELOC_64;
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 8);
+	  break;
+
+	case BFD_RELOC_64_PCREL:
+	  fixp->fx_r_type = BFD_RELOC_64_PCREL;
+	  if (fixp->fx_done)
+	    md_number_to_chars (where, value, 8);
+	  break;
+
+	case BFD_RELOC_VTABLE_INHERIT:
+	case BFD_RELOC_VTABLE_ENTRY:
+	  fixp->fx_done = 0;
+	  return 1;
+
+	default:
+	  {
+	    const char *reloc_name = bfd_get_reloc_code_name (fixp->fx_r_type);
+	    
+	    if (reloc_name != NULL)
+	      fprintf (stderr, "Gas failure, reloc type %s\n", reloc_name);
+	    else
+	      fprintf (stderr, "Gas failure, reloc type #%i\n", fixp->fx_r_type);
+	    fflush (stderr);
+	    abort ();
+	  }
+	}
+
+      fixp->fx_offset = value;
+    }
 
   return 1;
 }
@@ -1727,13 +1868,14 @@ tc_gen_reloc (seg, fixp)
   arelent *reloc;
 
   code = fixp->fx_r_type;
-  if (GOT_symbol && fixp->fx_addsy == GOT_symbol) {
-    if ((s390_arch_size == 32 && code == BFD_RELOC_32_PCREL) ||
-        (s390_arch_size == 64 && code == BFD_RELOC_64_PCREL))
-      code = BFD_RELOC_390_GOTPC;
-    if (code == BFD_RELOC_390_PC32DBL)
-      code = BFD_RELOC_390_GOTPCDBL;
-  }
+  if (GOT_symbol && fixp->fx_addsy == GOT_symbol)
+    {
+      if ((s390_arch_size == 32 && code == BFD_RELOC_32_PCREL) ||
+	  (s390_arch_size == 64 && code == BFD_RELOC_64_PCREL))
+	code = BFD_RELOC_390_GOTPC;
+      if (code == BFD_RELOC_390_PC32DBL)
+	code = BFD_RELOC_390_GOTPCDBL;
+    }
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
@@ -1752,5 +1894,16 @@ tc_gen_reloc (seg, fixp)
   reloc->addend = fixp->fx_offset;
 
   return reloc;
+}
+
+int
+s390_force_relocation (fixp)
+     struct fix * fixp;
+{
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  return 0;
 }
 

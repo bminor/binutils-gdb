@@ -36,12 +36,13 @@ struct fix;
    checked here.  I am not sure if some of the others are ever used with
    pcrel, but it is easier to be safe than sorry. */
 
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)  \
-  ((FIX)->fx_addsy == NULL \
-   || (! S_IS_EXTERNAL ((FIX)->fx_addsy) \
-       && ! S_IS_WEAK ((FIX)->fx_addsy) \
-       && S_IS_DEFINED ((FIX)->fx_addsy) \
-       && ! S_IS_COMMON ((FIX)->fx_addsy)))
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)        \
+  ((FIX)->fx_r_type != BFD_RELOC_390_GOTENT  \
+   && ((FIX)->fx_addsy == NULL               \
+       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)      \
+           && ! S_IS_WEAK ((FIX)->fx_addsy)  \
+           && S_IS_DEFINED ((FIX)->fx_addsy)      \
+           && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
 #define tc_fix_adjustable(X)  tc_s390_fix_adjustable(X)
 extern int tc_s390_fix_adjustable PARAMS ((struct fix *));
@@ -52,6 +53,7 @@ extern enum bfd_architecture s390_arch PARAMS ((void));
 
 /* The target BFD format.  */
 #define TARGET_FORMAT s390_target_format()
+extern const char * s390_target_format PARAMS ((void));
 
 /* Set the endianness we are using. */
 #define TARGET_BYTES_BIG_ENDIAN 1
@@ -111,3 +113,6 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 extern void s390_md_end PARAMS ((void));
 #define md_end() s390_md_end ()
+
+# define TC_FORCE_RELOCATION(fixp) s390_force_relocation (fixp)
+extern int s390_force_relocation PARAMS ((struct fix *));
