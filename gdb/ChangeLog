@@ -1,3 +1,9 @@
+2001-07-16  Orjan Friberg  <orjanf@axis.com>
+
+	* configure.tgt: Recognise the CRIS architecture.
+	* config/cris/cris.mt: New file for CRIS target.
+	* cris-tdep.c: New file for CRIS target.
+	
 2001-07-15  Elena Zannoni  <ezannoni@redhat.com>
 
 	* top.c (quit_cover, float_handler): Move definition up before use.
