@@ -73,30 +73,99 @@ DEP = mkdep
 
 TARGETLIB = libopcodes.a
 
-# To circumvent a Sun make VPATH bug, each file listed here
-# should also have a foo.o: foo.c line further along in this file.
+# This is where bfd.h lives.
+BFD_H = ../bfd/bfd.h
 
-ALL_MACHINES = a29k-dis.o alpha-dis.o alpha-opc.o h8300-dis.o h8500-dis.o \
+# Header files.
+HFILES = \
+	arm-opc.h \
+	h8500-opc.h \
+	sh-opc.h \
+	sysdep.h \
+	w65-opc.h \
+	z8k-opc.h
+
+# C source files that correspond to .o's.
+CFILES = \
+	a29k-dis.c \
+	alpha-dis.c \
+	alpha-opc.c \
+	arm-dis.c \
+	d10v-dis.c \
+	d10v-opc.c \
+	dis-buf.c \
+	disassemble.c \
+	h8300-dis.c \
+	h8500-dis.c \
+	hppa-dis.c \
+	i386-dis.c \
+	i960-dis.c \
+	m68k-dis.c \
+	m68k-opc.c \
+	m88k-dis.c \
+	mips-dis.c \
+	mips-opc.c \
+	mips16-opc.c \
+	mn10200-dis.c \
+	mn10200-opc.c \
+	mn10300-dis.c \
+	mn10300-opc.c \
+	ns32k-dis.c \
+	ppc-dis.c \
+	ppc-opc.c \
+	sh-dis.c \
+	sparc-dis.c \
+	sparc-opc.c \
+	w65-dis.c \
+	z8k-dis.c \
+	z8kgen.c
+
+ALL_MACHINES = \
+	a29k-dis.o \
+	alpha-dis.o \
+	alpha-opc.o \
 	$(start-sanitize-arc) \
-	arc-dis.o arc-opc.o \
+	arc-dis.o \
+	arc-opc.o \
 	$(end-sanitize-arc) \
-	$(start-sanitize-d10v) \
-	d10v-dis.o d10v-opc.o \
-	$(end-sanitize-d10v) \
+	arm-dis.o \
+	d10v-dis.o \
+	d10v-opc.o \
 	$(start-sanitize-d30v) \
-	d30v-dis.o d30v-opc.o \
+	d30v-dis.o \
+	d30v-opc.o \
 	$(end-sanitize-d30v) \
-	hppa-dis.o i386-dis.o i960-dis.o m68k-dis.o m68k-opc.o \
-	m88k-dis.o mn10200-dis.o mn10200-opc.o mn10300-dis.o \
-	mn10300-opc.o mips-dis.o mips-opc.o mips16-opc.o sh-dis.o \
-	sparc-dis.o sparc-opc.o z8k-dis.o ns32k-dis.o ppc-dis.o ppc-opc.o \
-	$(start-sanitize-v850) \
-	v850-dis.o v850-opc.o \
-	$(end-sanitize-v850) \
+	h8300-dis.o \
+	h8500-dis.o \
+	hppa-dis.o \
+	i386-dis.o \
+	i960-dis.o \
+	m68k-dis.o \
+	m68k-opc.o \
+	m88k-dis.o \
+	mn10200-dis.o \
+	mn10200-opc.o \
+	mn10300-dis.o \
+	mn10300-opc.o \
+	mips-dis.o \
+	mips-opc.o \
+	mips16-opc.o \
+	ppc-dis.o \
+	ppc-opc.o \
+	ns32k-dis.o \
+	sh-dis.o \
+	sparc-dis.o \
+	sparc-opc.o \
 	$(start-sanitize-tic80) \
-	tic80-dis.o tic80-opc.o \
+	tic80-dis.o \
+	tic80-opc.o \
 	$(end-sanitize-tic80) \
-	arm-dis.o w65-dis.o
+	$(start-sanitize-v850) \
+	v850-dis.o \
+	v850-opc.o \
+	$(end-sanitize-v850) \
+	w65-dis.o \
+	z8k-dis.o
 
 OFILES = @BFD_MACHINES@ dis-buf.o disassemble.o
 
@@ -120,9 +189,6 @@ ALL_CFLAGS = -D_GNU_SOURCE $(CSEARCH) @HDEFINES@ $(CFLAGS)
 	else true; fi
 	$(CC) -c $(ALL_CFLAGS) $<
 
-# C source files that correspond to .o's.
-CFILES = i386-dis.c z8k-dis.c m68k-dis.c mips-dis.c ns32k-dis.c ppc-dis.c
-
 all: $(ALLLIBS)
 
 .NOEXPORT:
@@ -135,7 +201,6 @@ install-info:
 dvi:
 
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
-
 
 $(TARGETLIB): $(OFILES)
 	 rm -f $(TARGETLIB)
@@ -177,10 +242,10 @@ $(SHLINK): $(SHLIB)
 	fi; \
 	if [ "$$ts" != "$(SHLIB)" ]; then \
 	  rm -f $$ts; \
-	  ln -sf `echo $(SHLIB) | sed -e 's,^\.\./bfd/,,'` $$ts; \
+	  ln -s `echo $(SHLIB) | sed -e 's,^\.\./bfd/,,'` $$ts; \
 	else true; fi
 	rm -f $(SHLINK)
-	ln -sf `echo $(SHLIB) | sed -e 's,^\.\./bfd/,,'` $(SHLINK)
+	ln -s `echo $(SHLIB) | sed -e 's,^\.\./bfd/,,'` $(SHLINK)
 
 # This target creates libTARGET-opcodes.so.VERSION as a symlink to
 # libopcodes.so.VERSION.  It is used on SunOS, which does not have SONAME.
@@ -191,13 +256,13 @@ stamp-tshlink: $(SHLIB)
 	fi; \
 	if [ "$$tf" != "$(SHLIB)" ]; then \
 	  rm -f $$tf; \
-	  ln -sf $(SHLIB) $$tf; \
+	  ln -s $(SHLIB) $$tf; \
 	else true; fi
 	if [ "$(COMMON_SHLIB)" = "yes" ]; then \
 	  tf=lib`echo $(TARGETLIB) | sed -e 's/^lib//' | sed '$(program_transform_name)'`; \
 	  if [ "$$tf" != "$(TARGETLIB)" ]; then \
 	    rm -f $$tf; \
-	    ln -sf $(TARGETLIB) $$tf; \
+	    ln -s $(TARGETLIB) $$tf; \
 	  else true; fi; \
 	else true; fi
 	touch stamp-tshlink
@@ -210,41 +275,11 @@ disassemble.o: disassemble.c $(INCDIR)/dis-asm.h
 	else true; fi
 	$(CC) -c @archdefs@ $(ALL_CFLAGS) $(srcdir)/disassemble.c
 
-a29k-dis.o: a29k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/a29k.h
-dis-buf.o: dis-buf.c $(INCDIR)/dis-asm.h ../bfd/bfd.h
-h8500-dis.o: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
-h8300-dis.o: h8300-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
-	$(INCDIR)/opcode/h8300.h
-i386-dis.o: i386-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h
-i960-dis.o: i960-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h
-w65-dis.o: w65-dis.c
-m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
-	$(INCDIR)/floatformat.h $(INCDIR)/opcode/m68k.h
-m68k-opc.o: m68k-opc.c $(INCDIR)/opcode/m68k.h
-mips-dis.o: mips-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/mips.h
-mips-opc.o: mips-opc.c $(INCDIR)/opcode/mips.h
-mips16-opc.o: mips16-opc.c $(INCDIR)/opcode/mips.h
-ppc-dis.o: ppc-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/ppc.h
-ppc-opc.o: ppc-opc.c $(INCDIR)/opcode/ppc.h
-sparc-dis.o: sparc-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
-	$(INCDIR)/opcode/sparc.h
-sparc-opc.o: sparc-opc.c $(INCDIR)/opcode/sparc.h
-z8k-dis.o: z8k-dis.c z8k-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
-ns32k-dis.o: ns32k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
-	$(INCDIR)/opcode/ns32k.h
-sh-dis.o: sh-dis.c sh-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
-alpha-dis.o: alpha-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
-	$(INCDIR)/opcode/alpha.h
-alpha-opc.o: alpha-opc.c $(INCDIR)/opcode/alpha.h ../bfd/bfd.h
-hppa-dis.o: hppa-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/hppa.h
-m88k-dis.o: m88k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/m88k.h
-arm-dis.o: arm-dis.c arm-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
 # start-sanitize-tic80
 tic80-dis.o: tic80-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
 	$(INCDIR)/opcode/tic80.h
 tic80-opc.o: tic80-opc.c $(INCDIR)/opcode/tic80.h
 # end-sanitize-tic80
-
 
 tags etags: TAGS
 
@@ -265,8 +300,6 @@ clobber realclean maintainer-clean: distclean
 # sysdep.h might actually move backwards if we reconfig and relink it
 # to a different hosts/h-xxx.h file.  This will force a recompile anyway.
 RECONFIG = config.status
-
-
 
 # This target should be invoked before building a new release.
 # 'VERSION' file must be present and contain a string of the form "x.y"
@@ -293,7 +326,7 @@ install: $(ALLLIBS)
 	  rm -f $(libdir)/$$tf; \
 	  if [ "$$f" = "$(SHLINK)" ]; then \
 	    ts=lib`echo $(SHLIB) | sed -e 's,^\.\./bfd/,,' -e 's/^lib//' | sed '$(program_transform_name)'`; \
-	    ln -sf $$ts $(libdir)/$$tf; \
+	    ln -s $$ts $(libdir)/$$tf; \
 	  elif [ "$$f" = "$(SHLIB)" ]; then \
 	    @INSTALL_SHLIB@ \
 	  else \
@@ -313,20 +346,104 @@ stamp-h: config.in config.status
 config.status: configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config.bfd $(srcdir)/../bfd/VERSION
 	$(SHELL) config.status --recheck
 
-dep: $(CFILES)
-	mkdep $(ALL_CFLAGS) $?
-
 stamp-picdir:
 	if [ -n "$(PICFLAG)" ] && [ ! -d pic ]; then \
 	  mkdir pic; \
 	else true; fi
 	touch stamp-picdir
 
+# This dependency stuff is copied from BFD.
+
+.dep: dep.sed $(CFILES) $(HFILES) config.h
+	rm -f .dep1
+	$(MAKE) DEP=$(DEP) .dep1
+	sed -f dep.sed < .dep1 > .dep
+
+.dep1: $(CFILES)
+	rm -f .dep2 .dep2a
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
+	echo > .dep2a
+	$(DEP) -f .dep2a $(ALL_CFLAGS) $?
+	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < .dep2a >> .dep2
+	rm -f .dep2a
+	$(srcdir)/../move-if-change .dep2 .dep1
+
+dep.sed: dep-in.sed config.status
+	sed <$(srcdir)/dep-in.sed >dep.sed	\
+		-e 's!@BFD_H@!$(BFD_H)!'	\
+		-e 's!@INCDIR@!$(INCDIR)!'	\
+		-e 's!@BFDDIR@!$(BFDDIR)!'	\
+		-e 's!@SRCDIR@!$(srcdir)!'
+
+dep: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
+	cat .dep >> tmp-Makefile
+	$(srcdir)/../move-if-change tmp-Makefile Makefile
+
+dep-in: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
+	cat .dep >> tmp-Makefile.in
+	$(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
+
 # What appears below is generated by a hacked mkdep using gcc -MM.
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-
-
+a29k-dis.o: a29k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/a29k.h
+alpha-dis.o: alpha-dis.c $(INCDIR)/ansidecl.h sysdep.h \
+  config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/alpha.h
+alpha-opc.o: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
+  $(BFD_H)
+arm-dis.o: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h \
+  arm-opc.h
+d10v-dis.o: d10v-dis.c $(INCDIR)/opcode/d10v.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h
+d10v-opc.o: d10v-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h
+dis-buf.o: dis-buf.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H)
+disassemble.o: disassemble.c $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h \
+  $(BFD_H)
+h8300-dis.o: h8300-dis.c $(INCDIR)/opcode/h8300.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h
+h8500-dis.o: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h
+hppa-dis.o: hppa-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h
+i386-dis.o: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h sysdep.h config.h
+i960-dis.o: i960-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h
+m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h $(INCDIR)/opcode/m68k.h
+m68k-opc.o: m68k-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m68k.h
+m88k-dis.o: m88k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m88k.h
+mips-dis.o: mips-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/opcode/mips.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h
+mips-opc.o: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
+mips16-opc.o: mips16-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
+mn10200-dis.o: mn10200-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10200.h \
+  $(INCDIR)/dis-asm.h $(BFD_H)
+mn10200-opc.o: mn10200-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10200.h
+mn10300-dis.o: mn10300-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10300.h \
+  $(INCDIR)/dis-asm.h $(BFD_H)
+mn10300-opc.o: mn10300-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10300.h
+ns32k-dis.o: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
+  sysdep.h config.h $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h
+ppc-dis.o: ppc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
+  config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/ppc.h
+ppc-opc.o: ppc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/ppc.h
+sh-dis.o: sh-dis.c sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h
+sparc-dis.o: sparc-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/sparc.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/libiberty.h
+sparc-opc.o: sparc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/sparc.h
+w65-dis.o: w65-dis.c w65-opc.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h
+z8k-dis.o: z8k-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) z8k-opc.h
+z8kgen.o: z8kgen.c sysdep.h config.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
-

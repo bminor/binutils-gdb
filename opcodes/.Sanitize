@@ -70,6 +70,7 @@ configure.bat
 configure.in
 d10v-dis.c
 d10v-opc.c
+dep-in.sed
 dis-buf.c
 disassemble.c
 h8300-dis.c

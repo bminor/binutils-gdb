@@ -1,3 +1,12 @@
+Fri Mar 21 14:37:52 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (BFD_H): New variable.
+	(HFILES): New variable.
+	(CFILES): Add all C files.
+	(.dep, .dep1, dep.sed, dep, dep-in): New targets.
+	Delete old dependencies, and build new ones.
+	* dep-in.sed: New file.
+
 Thu Mar 20 19:03:30 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* m68k-opc.c (m68k_opcode_aliases): Added blo and blo{s,b,w,l}.
