@@ -7,6 +7,16 @@
 
 Thu Dec 20 09:54:36 2001  Jeffrey A Law  (law@redhat.com)
 
+	* gdb.hp/gdb.defects/bs15503.exp: Only run this test if compiling
+	with HP's compiler.
+	* gdb.hp/gdb.objdbg/objdbg01.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg02.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg03.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg04.exp: Likewise.
+
+	* gdb.hp/gdb.defects/solib-d.exp: Update to handle building with
+	either HP's compilers or GCC.
+
 	* gdb.hp/gdb.base-hp/hwwatchbus.exp: Allow inferior to get either
 	a SIGBUS or SIGSEGV.
 

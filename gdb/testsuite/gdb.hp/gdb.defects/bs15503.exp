@@ -27,6 +27,18 @@ set testfile "bs15503"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+# The testcode is non-conforming and rejected by GCC.  So bypass this
+# test completely unless we're compiling with HP's compiler.
+if {!$hp_aCC_compiler && !$hp_cc_compiler} {
+  return 0
+}
+    
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug c++"] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1

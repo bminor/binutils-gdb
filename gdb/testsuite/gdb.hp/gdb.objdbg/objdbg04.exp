@@ -14,6 +14,16 @@ set binfile ${objdbgdir}/${testfile}
 set toolssubdir ${srcdir}/${subdir}/tools
 set symaddrfile ${toolssubdir}/symaddr
 
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+if {!$hp_aCC_compiler && !$hp_cc_compiler} {
+  return 0
+}
+
 if { [gdb_compile "${toolssubdir}/test-objdbg.cc" "${objdbgdir}/test-objdbg.o" object "debug c++ {additional_flags=-I${toolssubdir} +objdebug}"] != "" } {
     gdb_suppress_entire_file "WARNING: +objdebug option is not supported in this compiler version, test ignored."
 }

@@ -75,16 +75,32 @@ set testfile2 ${objdir}/${subdir}/${testfile}2.o
 set libfile1 ${objdir}/${subdir}/${testfile}1.sl
 set libfile2 ${objdir}/${subdir}/${testfile}2.sl
 
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+
+# set up appropriate compile option to recognize long double
+if {$hp_aCC_compiler || $hp_cc_compiler} {
+    set picflag "+z"
+    set ansiflag "-Ae"
+} else {
+    set picflag "-fpic"
+    set ansiflag ""
+}
+
+
 # Build the shared libraries this test case needs.
 #
 #cd ${subdir}
 
-if { [gdb_compile "${srcdir}/${subdir}/${testfile}1.c" "${testfile1}" object {debug additional_flags=+z}] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${testfile}1.c" "${testfile1}" object "{debug additional_flags=${picflag}}"] != "" } {
     perror "Couldn't compile ${testfile}1.c"
     return -1
 }
 
-if { [gdb_compile "${srcdir}/${subdir}/${testfile}2.c" "${testfile2}" object {debug additional_flags=+z}] != ""} {
+if { [gdb_compile "${srcdir}/${subdir}/${testfile}2.c" "${testfile2}" object "{debug additional_flags=${picflag}}"] != ""} {
     perror "Couldn't compile ${testfile}2.c"
     return -1
 }
@@ -94,7 +110,7 @@ remote_exec build "ld -b ${testfile2} -o ${libfile2}"
 
 # Build the test case
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${libfile1} ${libfile2}" "${binfile}" executable {debug additional_flags=-Ae -Wl,-aarchive}] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${libfile1} ${libfile2}" "${binfile}" executable "{debug additional_flags=${ansiflag} -Wl,-aarchive}"] != "" } {
     perror "Couldn't build ${binfile}"
     return -1
 }
