@@ -1,3 +1,9 @@
+2000-02-22  Ian Lance Taylor  <ian@zembu.com>
+
+	From Brad Lucier <lucier@math.purdue.edu>:
+	* dwarf2dbg.c (print_stats): Add cast to force printf argument to
+	match format.
+
 2000-02-21  Catherine Moore  <clm@cygnus.com>
 
 	* config/tc-mips.c (MF_HILO_INSN): Define.

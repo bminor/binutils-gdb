@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright (C) 1999 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -639,7 +639,8 @@ print_stats (total_size)
       j = SPECIAL_LINE (i);
       if (j == DWARF2_LINE_BASE)
 	fprintf (stderr, "\n%4u: ",
-		 DWARF2_LINE_MIN_INSN_LENGTH*SPECIAL_ADDR (i));
+		 ((unsigned int)
+		  DWARF2_LINE_MIN_INSN_LENGTH * SPECIAL_ADDR (i)));
       fprintf (stderr, " %2u", ls.opcode_hist[i]);
     }
   fprintf (stderr, "\n");
