@@ -75,6 +75,9 @@ static unsigned short modtype = ('1' << 8) | 'L';
    permitted).  */
 static int textro;
 
+/* Whether to implement Unix like linker semantics.  */
+static int unix_ld;
+
 /* Structure used to hold import file list.  */
 
 struct filelist
@@ -128,7 +131,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 #define OPTION_EROK (OPTION_ERNOTOK + 1)
 #define OPTION_EXPORT (OPTION_EROK + 1)
 #define OPTION_IMPORT (OPTION_EXPORT + 1)
-#define OPTION_MAXDATA (OPTION_IMPORT + 1)
+#define OPTION_LOADMAP (OPTION_IMPORT + 1)
+#define OPTION_MAXDATA (OPTION_LOADMAP + 1)
 #define OPTION_MAXSTACK (OPTION_MAXDATA + 1)
 #define OPTION_MODTYPE (OPTION_MAXSTACK + 1)
 #define OPTION_NOAUTOIMP (OPTION_MODTYPE + 1)
@@ -136,6 +140,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 #define OPTION_PD (OPTION_NOSTRCMPCT + 1)
 #define OPTION_PT (OPTION_PD + 1)
 #define OPTION_STRCMPCT (OPTION_PT + 1)
+#define OPTION_UNIX (OPTION_STRCMPCT + 1)
 
   static struct option longopts[] = {
     {"basis", no_argument, NULL, OPTION_IGNORE},
@@ -155,6 +160,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"bhalt", required_argument, NULL, OPTION_IGNORE},
     {"bI", required_argument, NULL, OPTION_IMPORT},
     {"bimport", required_argument, NULL, OPTION_IMPORT},
+    {"bl", required_argument, NULL, OPTION_LOADMAP},
+    {"bloadmap", required_argument, NULL, OPTION_LOADMAP},
     {"bmaxdata", required_argument, NULL, OPTION_MAXDATA},
     {"bmaxstack", required_argument, NULL, OPTION_MAXSTACK},
     {"bM", required_argument, NULL, OPTION_MODTYPE},
@@ -174,6 +181,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"bstrcmpct", no_argument, NULL, OPTION_STRCMPCT},
     {"btextro", no_argument, &textro, 1},
     {"static", no_argument, NULL, OPTION_NOAUTOIMP},
+    {"unix", no_argument, NULL, OPTION_UNIX},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -291,6 +299,10 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       }
       break;
 
+    case OPTION_LOADMAP:
+      config.map_filename = optarg;
+      break;
+
     case OPTION_MAXDATA:
       val = strtoul (optarg, &end, 0);
       if (*end != '\0')
@@ -377,6 +389,10 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_STRCMPCT:
       config.traditional_format = false;
       break;
+
+    case OPTION_UNIX:
+      unix_ld = true;
+      break;
     }
 
   return 1;
@@ -393,9 +409,11 @@ gld${EMULATION_NAME}_after_open ()
   /* Call ldctor_build_sets, after pretending that this is a
      relocateable link.  We do this because AIX requires relocation
      entries for all references to symbols, even in a final
-     executable.  */
+     executable.  Of course, we only want to do this if we are
+     producing an XCOFF output file.  */
   r = link_info.relocateable;
-  link_info.relocateable = true;
+  if (strstr (bfd_get_target (output_bfd), "xcoff") != NULL)
+    link_info.relocateable = true;
   ldctor_build_sets ();
   link_info.relocateable = r;
 
@@ -433,6 +451,7 @@ gld${EMULATION_NAME}_before_allocation ()
   struct filelist *fl;
   struct export_symbol_list *el;
   char *libpath;
+  boolean export_defineds;
   asection *special_sections[6];
   int i;
 
@@ -483,13 +502,20 @@ gld${EMULATION_NAME}_before_allocation ()
 	}
     }
 
+  /* If we are emulating the Unix linker, we want to export all
+     defined symbols, unless an explicit -bE option was used.  */
+  export_defineds = false;
+  if (unix_ld && export_symbols == NULL)
+    export_defineds = true;
+
   /* Let the XCOFF backend set up the .loader section.  */
   if (! bfd_xcoff_size_dynamic_sections (output_bfd, &link_info, libpath,
 					 entry_symbol, file_align,
 					 maxstack, maxdata,
-					 gc ? true : false,
+					 gc && ! unix_ld ? true : false,
 					 modtype,
 					 textro ? true : false,
+					 export_defineds,
 					 special_sections))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 

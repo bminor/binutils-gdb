@@ -1,3 +1,9 @@
+Tue Dec 19 17:35:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_after_open): Only set
+	relocateable before calling ldctor_build_sets if the output file
+	is in an XCOFF format.
+
 Fri Dec 15 16:34:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldwrite.c (build_link_order): When handling a data statement, if
