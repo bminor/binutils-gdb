@@ -678,7 +678,7 @@ proc asm_window_button_1 {win x y xrel yrel} {
 #
 # Local procedure:
 #
-#	do_nothing - Does absoultely nothing.
+#	do_nothing - Does absolutely nothing.
 #
 # Description:
 #
@@ -690,6 +690,21 @@ proc asm_window_button_1 {win x y xrel yrel} {
 proc do_nothing {} {}
 
 #
+# Local procedure:
+#
+#	not_implemented_yet - warn that a feature is unavailable
+#
+# Description:
+#
+#	This procedure warns that something doesn't actually work yet.
+#
+
+proc not_implemented_yet {message} {
+	tk_dialog .unimpl "gdb : unimpl" "$message: not implemented yet" \
+		{} 1 "OK"
+}
+
+##
 # Local procedure:
 #
 #	create_expr_win - Creat expression display window
@@ -723,7 +738,7 @@ proc create_expr_win {} {
 #
 # Description:
 #
-#	Display EXPRESSION and it's value in the expression display window.
+#	Display EXPRESSION and its value in the expression display window.
 #
 
 proc display_expression {expression} {
@@ -1557,12 +1572,43 @@ proc build_framework {win {title GDBtk} {label {}}} {
 		-menu ${win}.menubar.file.menu -underline 0
 
 	menu ${win}.menubar.file.menu
+	${win}.menubar.file.menu add command -label File... \
+		-command {
+		  set filename [FSBox "File" "a.out"]
+		  gdb_cmd "file $filename"
+		  update_ptr
+	      }
+	${win}.menubar.file.menu add command -label Target... \
+		-command { gdb_cmd not_implemented_yet "target" }
 	${win}.menubar.file.menu add command -label Edit \
 		-command {exec $editor +[expr ($screen_top + $screen_bot)/2] $cfile &}
+	${win}.menubar.file.menu add separator
+	${win}.menubar.file.menu add command -label "Exec File..." \
+		-command {
+		  set filename [FSBox "Exec File" "a.out"]
+		  gdb_cmd "exec-file $filename"
+		  update_ptr
+	      }
+	${win}.menubar.file.menu add command -label "Symbol File..." \
+		-command {
+		  set filename [FSBox "Symbol File" "a.out"]
+		  gdb_cmd "symbol-file $filename"
+		  update_ptr
+	      }
+	${win}.menubar.file.menu add command -label "Add Symbol File..." \
+		-command { not_implemented_yet "menu item, add symbol file" }
+	${win}.menubar.file.menu add command -label "Core File..." \
+		-command {
+		  set filename [FSBox "Core File" "core"]
+		  gdb_cmd "core-file $filename"
+		  update_ptr
+	      }
+	${win}.menubar.file.menu add separator
 	${win}.menubar.file.menu add command -label Close \
 		-command "destroy ${win}"
+	${win}.menubar.file.menu add separator
 	${win}.menubar.file.menu add command -label Quit \
-		-command {catch {gdb_cmd quit}}
+		-command { catch { gdb_cmd quit } }
 
 	menubutton ${win}.menubar.view -padx 12 -text View \
 		-menu ${win}.menubar.view.menu -underline 0
@@ -1740,6 +1786,660 @@ proc create_command_window {} {
 		set command_line {}
 	}
 }
+
+#
+# fileselect.tcl --
+# simple file selector.
+#
+# Mario Jorge Silva			          msilva@cs.Berkeley.EDU
+# University of California Berkeley                 Ph:    +1(510)642-8248
+# Computer Science Division, 571 Evans Hall         Fax:   +1(510)642-5775
+# Berkeley CA 94720                                 
+# 
+#
+# Copyright 1993 Regents of the University of California
+# Permission to use, copy, modify, and distribute this
+# software and its documentation for any purpose and without
+# fee is hereby granted, provided that this copyright
+# notice appears in all copies.  The University of California
+# makes no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without
+# express or implied warranty.
+#
+
+
+# names starting with "fileselect" are reserved by this module
+# no other names used.
+# Hack - FSBox is defined instead of fileselect for backwards compatibility
+
+
+# this is the proc that creates the file selector box
+# purpose - comment string
+# defaultName - initial value for name
+# cmd - command to eval upon OK
+# errorHandler - command to eval upon Cancel
+# If neither cmd or errorHandler are specified, the return value
+# of the FSBox procedure is the selected file name.
+
+proc FSBox {{purpose "Select file:"} {defaultName ""} {cmd ""} {errorHandler 
+""}} {
+    global fileselect
+    set w .fileSelect
+    if [Exwin_Toplevel $w "Select File" FileSelect] {
+	# path independent names for the widgets
+	
+	set fileselect(list) $w.file.sframe.list
+	set fileselect(scroll) $w.file.sframe.scroll
+	set fileselect(direntry) $w.file.f1.direntry
+	set fileselect(entry) $w.file.f2.entry
+	set fileselect(ok) $w.but.ok
+	set fileselect(cancel) $w.but.cancel
+	set fileselect(msg) $w.label
+	
+	set fileselect(result) ""	;# value to return if no callback procedures
+
+	# widgets
+	Widget_Label $w label {top fillx pady 10 padx 20} -anchor w -width 24
+	Widget_Frame $w file Dialog {left expand fill} -bd 10
+	
+	Widget_Frame $w.file f1 Exmh {top fillx}
+	Widget_Label $w.file.f1 label {left} -text "Dir"
+	Widget_Entry $w.file.f1 direntry {right fillx expand}  -width 30
+	
+	Widget_Frame $w.file sframe
+
+	scrollbar $w.file.sframe.yscroll -relief sunken \
+		-command [list $w.file.sframe.list yview]
+	listbox $w.file.sframe.list -relief sunken \
+		-yscroll [list $w.file.sframe.yscroll set] -setgrid 1
+	pack append $w.file.sframe \
+		$w.file.sframe.yscroll {right filly} \
+		$w.file.sframe.list {left expand fill} 
+	
+	Widget_Frame $w.file f2 Exmh {top fillx}
+	Widget_Label $w.file.f2 label {left} -text Name
+	Widget_Entry $w.file.f2 entry {right fillx expand}
+	
+	# buttons
+	$w.but.quit configure -text Cancel \
+		-command [list fileselect.cancel.cmd $w]
+	
+	Widget_AddBut $w.but ok OK \
+		[list fileselect.ok.cmd $w $cmd $errorHandler] {left padx 1}
+	
+	Widget_AddBut $w.but list List \
+		[list fileselect.list.cmd $w] {left padx 1}    
+	Widget_CheckBut $w.but listall "List all" fileselect(pattern)
+	$w.but.listall configure -onvalue "{*,.*}" -offvalue "*" \
+	    -command {fileselect.list.cmd $fileselect(direntry)}
+	$w.but.listall deselect
+
+	# Set up bindings for the browser.
+	foreach ww [list $w $fileselect(entry)] {
+	    bind $ww <Return> [list $fileselect(ok) invoke]
+	    bind $ww <Control-c> [list $fileselect(cancel) invoke]
+	}
+	bind $fileselect(direntry) <Return> [list fileselect.list.cmd %W]
+	bind $fileselect(direntry) <Tab> [list fileselect.tab.dircmd]
+	bind $fileselect(entry) <Tab> [list fileselect.tab.filecmd]
+    
+	tk_listboxSingleSelect $fileselect(list)
+    
+    
+	bind $fileselect(list) <Button-1> {
+	    # puts stderr "button 1 release"
+	    %W select from [%W nearest %y]
+	    $fileselect(entry) delete 0 end
+	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
+	}
+    
+	bind $fileselect(list) <Key> {
+	    %W select from [%W nearest %y]
+	    $fileselect(entry) delete 0 end
+	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
+	}
+    
+	bind $fileselect(list) <Double-ButtonPress-1> {
+	    # puts stderr "double button 1"
+	    %W select from [%W nearest %y]
+	    $fileselect(entry) delete 0 end
+	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
+	    $fileselect(ok) invoke
+	}
+    
+	bind $fileselect(list) <Return> {
+	    %W select from [%W nearest %y]
+	    $fileselect(entry) delete 0 end
+	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
+	    $fileselect(ok) invoke
+	}
+    }
+    set fileselect(text) $purpose
+    $fileselect(msg) configure -text $purpose
+    $fileselect(entry) delete 0 end
+    $fileselect(entry) insert 0 [file tail $defaultName]
+
+    if {[info exists fileselect(lastDir)] && ![string length $defaultName]} {
+	set dir $fileselect(lastDir)
+    } else {
+	set dir [file dirname $defaultName]
+    }
+    set fileselect(pwd) [pwd]
+    fileselect.cd $dir
+    $fileselect(direntry) delete 0 end
+    $fileselect(direntry) insert 0 [pwd]/
+
+    $fileselect(list) delete 0 end
+    $fileselect(list) insert 0 "Big directory:"
+    $fileselect(list) insert 1 $dir
+    $fileselect(list) insert 2 "Press Return for Listing"
+
+    fileselect.list.cmd $fileselect(direntry) startup
+
+    # set kbd focus to entry widget
+
+#    Exwin_ToplevelFocus $w $fileselect(entry)
+
+    # Wait for button hits if no callbacks are defined
+
+    if {"$cmd" == "" && "$errorHandler" == ""} {
+	# wait for the box to be destroyed
+	update idletask
+	grab $w
+	tkwait variable fileselect(result)
+	grab release $w
+
+	set path $fileselect(result)
+	set fileselect(lastDir) [pwd]
+	fileselect.cd $fileselect(pwd)
+	return [string trimright [string trim $path] /]
+    }
+    fileselect.cd $fileselect(pwd)
+    return ""
+}
+
+proc fileselect.cd { dir } {
+    global fileselect
+    if [catch {cd $dir} err] {
+	fileselect.yck $dir
+	cd
+    }
+}
+# auxiliary button procedures
+
+proc fileselect.yck { {tag {}} } {
+    global fileselect
+    $fileselect(msg) configure -text "Yck! $tag"
+}
+proc fileselect.ok {} {
+    global fileselect
+    $fileselect(msg) configure -text $fileselect(text)
+}
+
+proc fileselect.cancel.cmd {w} {
+    global fileselect
+    set fileselect(result) {}
+}
+
+proc fileselect.list.cmd {w {state normal}} {
+    global fileselect
+    set seldir [$fileselect(direntry) get]
+    if {[catch {glob $seldir} dir]} {
+	fileselect.yck "glob failed"
+	return
+    }
+    if {[llength $dir] > 1} {
+	set dir [file dirname $seldir]
+	set pat [file tail $seldir]
+    } else {
+	set pat $fileselect(pattern)
+    }
+    fileselect.ok
+    update idletasks
+    if [file isdirectory $dir] {
+	fileselect.getfiles $dir $pat $state
+	focus $fileselect(entry)
+    } else {
+	fileselect.yck "not a dir"
+    }
+}
+
+proc fileselect.ok.cmd {w cmd errorHandler} {
+    global fileselect
+    set selname [$fileselect(entry) get]
+    set seldir [$fileselect(direntry) get]
+
+    if [string match /* $selname] {
+	set selected $selname
+    } else {
+	if [string match ~* $selname] {
+	    set selected $selname
+	} else {
+	    set selected $seldir/$selname
+	}
+    }
+
+    # some nasty file names may cause "file isdirectory" to return an error
+    if [catch {file isdirectory $selected} isdir] {
+	fileselect.yck "isdirectory failed"
+	return
+    }
+    if [catch {glob $selected} globlist] {
+	if ![file isdirectory [file dirname $selected]] {
+	    fileselect.yck "bad pathname"
+	    return
+	}
+	set globlist $selected
+    }
+    fileselect.ok
+    update idletasks
+
+    if {[llength $globlist] > 1} {
+	set dir [file dirname $selected]
+	set pat [file tail $selected]
+	fileselect.getfiles $dir $pat
+	return
+    } else {
+	set selected $globlist
+    }
+    if [file isdirectory $selected] {
+	fileselect.getfiles $selected $fileselect(pattern)
+	$fileselect(entry) delete 0 end
+	return
+    }
+
+    if {$cmd != {}} {
+	$cmd $selected
+    } else {
+	set fileselect(result) $selected
+    }
+}
+
+proc fileselect.getfiles { dir {pat *} {state normal} } {
+    global fileselect
+    $fileselect(msg) configure -text Listing...
+    update idletasks
+
+    set currentDir [pwd]
+    fileselect.cd $dir
+    if [catch {set files [lsort [glob -nocomplain $pat]]} err] {
+	$fileselect(msg) configure -text $err
+	$fileselect(list) delete 0 end
+	update idletasks
+	return
+    }
+    switch -- $state {
+	normal {
+	    # Normal case - show current directory
+	    $fileselect(direntry) delete 0 end
+	    $fileselect(direntry) insert 0 [pwd]/
+	}
+	opt {
+	    # Directory already OK (tab related)
+	}
+	newdir {
+	    # Changing directory (tab related)
+	    fileselect.cd $currentDir
+	}
+	startup {
+	    # Avoid listing huge directories upon startup.
+	    $fileselect(direntry) delete 0 end
+	    $fileselect(direntry) insert 0 [pwd]/
+	    if {[llength $files] > 32} {
+		fileselect.ok
+		return
+	    }
+	}
+    }
+
+    # build a reordered list of the files: directories are displayed first
+    # and marked with a trailing "/"
+    if [string compare $dir /] {
+	fileselect.putfiles $files [expr {($pat == "*") ? 1 : 0}]
+    } else {
+	fileselect.putfiles $files
+    }
+    fileselect.ok
+}
+
+proc fileselect.putfiles {files {dotdot 0} } {
+    global fileselect
+
+    $fileselect(list) delete 0 end
+    if {$dotdot} {
+	$fileselect(list) insert end "../"
+    }
+    foreach i $files {
+        if {[file isdirectory $i]} {
+	    $fileselect(list) insert end $i/
+	} else {
+	    $fileselect(list) insert end $i
+	}
+    }
+}
+
+proc FileExistsDialog { name } {
+    set w .fileExists
+    global fileExists
+    set fileExists(ok) 0
+    {
+	message $w.msg -aspect 1000
+	pack $w.msg -side top -fill both -padx 20 -pady 20
+	$w.but.quit config -text Cancel -command {FileExistsCancel}
+	button $w.but.ok -text OK -command {FileExistsOK}
+	pack $w.but.ok -side left
+	bind $w.msg <Return> {FileExistsOK}
+    }
+    $w.msg config -text "Warning: file exists
+$name
+OK to overwrite it?"
+
+    set fileExists(focus) [focus]
+    focus $w.msg
+    grab $w
+    tkwait variable fileExists(ok)
+    grab release $w
+    return $fileExists(ok)
+}
+proc FileExistsCancel {} {
+    global fileExists
+    set fileExists(ok) 0
+}
+proc FileExistsOK {} {
+    global fileExists
+    set fileExists(ok) 1
+}
+
+proc fileselect.getfiledir { dir {basedir [pwd]} } {
+    global fileselect
+
+    set path [$fileselect(direntry) get]
+    set returnList {}
+
+    if {$dir != 0} {
+	if {[string index $path 0] == "~"} {
+	    set path $path/
+	}
+    } else {
+	set path [$fileselect(entry) get]
+    }
+    if [catch {set listFile [glob -nocomplain $path*]}] {
+	return  $returnList
+    }
+    foreach el $listFile {
+	if {$dir != 0} {
+	    if [file isdirectory $el] {
+		lappend returnList [file tail $el]
+	    }
+	} elseif ![file isdirectory $el] {
+	    lappend returnList [file tail $el]
+	}	    
+    }
+    
+    return $returnList
+}
+
+proc fileselect.gethead { list } {
+    set returnHead ""
+
+    for {set i 0} {[string length [lindex $list 0]] > $i}\
+	{incr i; set returnHead $returnHead$thisChar} {
+	    set thisChar [string index [lindex $list 0] $i]
+	    foreach el $list {
+		if {[string length $el] < $i} {
+		    return $returnHead
+		}
+		if {$thisChar != [string index $el $i]} {
+		    return $returnHead
+		}
+	    }
+	}
+    return $returnHead
+}
+	
+proc fileselect.expand.tilde { } {
+    global fileselect
+
+    set entry [$fileselect(direntry) get]
+    set dir [string range $entry 1 [string length $entry]]
+
+    if {$dir == ""} {
+	return
+    }
+
+    set listmatch {}
+
+    ## look in /etc/passwd
+    if [file exists /etc/passwd] {
+	if [catch {set users [exec cat /etc/passwd | sed s/:.*//]} err] {
+	    puts "Error\#1 $err"
+	    return
+	}
+	set list [split $users "\n"]
+    }
+    if {[lsearch -exact $list "+"] != -1} {
+	if [catch {set users [exec ypcat passwd | sed s/:.*//]} err] {
+	    puts "Error\#2 $err"
+	    return
+	}
+	set list [concat $list [split $users "\n"]]
+    }
+    $fileselect(list) delete 0 end
+    foreach el $list {
+	if [string match $dir* $el] {
+	    lappend listmatch $el
+	    $fileselect(list) insert end $el
+	}
+    }
+    set addings [fileselect.gethead $listmatch]
+    if {$addings == ""} {
+	return
+    }
+    $fileselect(direntry) delete 0 end
+    if {[llength $listmatch] == 1} {
+	$fileselect(direntry) insert 0 [file dirname ~$addings/]
+	fileselect.getfiles [$fileselect(direntry) get]
+    } else {
+	$fileselect(direntry) insert 0 ~$addings
+    }
+}
+
+proc fileselect.tab.dircmd { } {
+    global fileselect
+
+    set dir [$fileselect(direntry) get]
+    if {$dir == ""} {
+	$fileselect(direntry) delete 0 end
+	    $fileselect(direntry) insert 0 [pwd]
+	if [string compare [pwd] "/"] {
+	    $fileselect(direntry) insert end /
+	}
+	return
+    }
+    if [catch {set tmp [file isdirectory [file dirname $dir]]}] {
+	if {[string index $dir 0] == "~"} {
+	    fileselect.expand.tilde
+	}
+	return
+    }
+    if {!$tmp} {
+	return
+    }
+    set dirFile [fileselect.getfiledir 1 $dir]
+    if ![llength $dirFile] {
+	return
+    }
+    if {[llength $dirFile] == 1} {
+	$fileselect(direntry) delete 0 end
+	$fileselect(direntry) insert 0 [file dirname $dir]
+	if [string compare [file dirname $dir] /] {
+	    $fileselect(direntry) insert end /[lindex $dirFile 0]/
+	} else {
+	    $fileselect(direntry) insert end [lindex $dirFile 0]/
+	}
+	fileselect.getfiles [$fileselect(direntry) get] \
+	    "[file tail [$fileselect(direntry) get]]$fileselect(pattern)" opt
+	return
+    }
+    set headFile [fileselect.gethead $dirFile]
+    $fileselect(direntry) delete 0 end
+    $fileselect(direntry) insert 0 [file dirname $dir]
+    if [string compare [file dirname $dir] /] {
+	$fileselect(direntry) insert end /$headFile
+    } else {
+	$fileselect(direntry) insert end $headFile
+    }
+    if {$headFile == "" && [file isdirectory $dir]} {
+	fileselect.getfiles $dir\
+	    "[file tail [$fileselect(direntry) get]]$fileselect(pattern)" opt
+    } else {
+	fileselect.getfiles [file dirname $dir]\
+	    "[file tail [$fileselect(direntry) get]]*" newdir
+    }
+}
+
+proc fileselect.tab.filecmd { } {
+    global fileselect
+
+    set dir [$fileselect(direntry) get]
+    if {$dir == ""} {
+	set dir [pwd]
+    }
+    if {![file isdirectory $dir]} {
+	error "dir $dir doesn't exist"
+    }
+    set listFile [fileselect.getfiledir 0 $dir]
+    puts $listFile
+    if ![llength $listFile] {
+	return
+    }
+    if {[llength $listFile] == 1} {
+	$fileselect(entry) delete 0 end
+	$fileselect(entry) insert 0 [lindex $listFile 0]
+	return
+    }
+    set headFile [fileselect.gethead $listFile]
+    $fileselect(entry) delete 0 end
+    $fileselect(entry) insert 0 $headFile
+    fileselect.getfiles $dir "[$fileselect(entry) get]$fileselect(pattern)" opt
+}
+
+proc Exwin_Toplevel { path name {class Dialog} {dismiss yes}} {
+    global exwin
+    if [catch {wm state $path} state] {
+	set t [Widget_Toplevel $path $name $class]
+	if ![info exists exwin(toplevels)] {
+	    set exwin(toplevels) [option get . exwinPaths {}]
+	}
+	set ix [lsearch $exwin(toplevels) $t]
+	if {$ix < 0} {
+	    lappend exwin(toplevels) $t
+	}
+	if {$dismiss == "yes"} {
+	    set f [Widget_Frame $t but Menubar {top fill}]
+	    Widget_AddBut $f quit "Dismiss" [list Exwin_Dismiss $path]
+	}
+	return 1
+    } else {
+	if {$state != "normal"} {
+	    catch {
+		wm geometry $path $exwin(geometry,$path)
+#		Exmh_Debug Exwin_Toplevel $path $exwin(geometry,$path)
+	    }
+	    wm deiconify $path
+	} else {
+	    catch {raise $path}
+	}
+	return 0
+    }
+}
+
+proc Exwin_Dismiss { path {geo ok} } {
+    global exwin
+    case $geo {
+	"ok" {
+	    set exwin(geometry,$path) [wm geometry $path]
+	}
+	"nosize" {
+	    set exwin(geometry,$path) [string trimleft [wm geometry $path] 0123456789x]
+	}
+	default {
+	    catch {unset exwin(geometry,$path)}
+	}
+    }
+    wm withdraw $path
+}
+
+proc Widget_Toplevel { path name {class Dialog} {x {}} {y {}} } {
+    set self [toplevel $path -class $class]
+    set usergeo [option get $path position Position]
+    if {$usergeo != {}} {
+	if [catch {wm geometry $self $usergeo} err] {
+#	    Exmh_Debug Widget_Toplevel $self $usergeo => $err
+	}
+    } else {
+	if {($x != {}) && ($y != {})} {
+#	    Exmh_Debug Event position $self +$x+$y
+	    wm geometry $self +$x+$y
+	}
+    }
+    wm title $self $name
+    wm group $self .
+    return $self
+}
+
+proc Widget_Frame {par child {class GDB} {where {top expand fill}} args } {
+    if {$par == "."} {
+	set self .$child
+    } else {
+	set self $par.$child
+    }
+    eval {frame $self -class $class} $args
+    pack append $par $self $where
+    return $self
+}
+
+proc Widget_AddBut {par but txt cmd {where {right padx 1}} } {
+    # Create a Packed button.  Return the button pathname
+    set cmd2 [list button $par.$but -text $txt -command $cmd]
+    if [catch $cmd2 t] {
+	puts stderr "Widget_AddBut (warning) $t"
+	eval $cmd2 {-font fixed}
+    }
+    pack append $par $par.$but $where
+    return $par.$but
+}
+proc Widget_CheckBut {par but txt var {where {right padx 1}} } {
+    # Create a check button.  Return the button pathname
+    set cmd [list checkbutton $par.$but -text $txt -variable $var]
+    if [catch $cmd t] {
+	puts stderr "Widget_CheckBut (warning) $t"
+	eval $cmd {-font fixed}
+    }
+    pack append $par $par.$but $where
+    return $par.$but
+}
+
+proc Widget_Label { frame {name label} {where {left fill}} args} {
+    set cmd [list label $frame.$name ]
+    if [catch [concat $cmd $args] t] {
+	puts stderr "Widget_Label (warning) $t"
+	eval $cmd $args {-font fixed}
+    }
+    pack append $frame $frame.$name $where
+    return $frame.$name
+}
+proc Widget_Entry { frame {name entry} {where {left fill}} args} {
+    set cmd [list entry $frame.$name ]
+    if [catch [concat $cmd $args] t] {
+	puts stderr "Widget_Entry (warning) $t"
+	eval $cmd $args {-font fixed}
+    }
+    pack append $frame $frame.$name $where
+    return $frame.$name
+}
+
+# End of fileselect.tcl.
 
 # Setup the initial windows
 

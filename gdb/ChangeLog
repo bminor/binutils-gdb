@@ -1,3 +1,11 @@
+start-sanitize-gdbtk
+Fri Dec 30 15:49:00 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.tcl (FSBox): New proc, File Selection Box code from exmh.
+	(not_implemented_yet): New proc.
+	(build_framework): Add various file commands to file menu.
+end-sanitize-gdbtk
+
 Thu Dec 29 22:40:00 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Allow up to 10 whitespace separated arguments to user defined
