@@ -1,5 +1,5 @@
 /* ELF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -4393,7 +4393,7 @@ elf_bfd_final_link (abfd, info)
   /* That wrote out all the local symbols.  Finish up the symbol table
      with the global symbols.  */
 
-  if (info->strip != strip_all && info->shared)
+  if (info->shared)
     {
       /* Output any global symbols that got converted to local in a
          version script.  We do this in a separate step since ELF
@@ -4928,8 +4928,10 @@ elf_link_output_extsym (h, data)
     strip = false;
 
   /* If we're stripping it, and it's not a dynamic symbol, there's
-     nothing else to do.  */
-  if (strip && h->dynindx == -1)
+     nothing else to do unless it is a forced local symbol.  */
+  if (strip
+      && h->dynindx == -1
+      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
     return true;
 
   sym.st_value = 0;
