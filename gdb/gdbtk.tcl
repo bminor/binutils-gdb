@@ -233,8 +233,15 @@ proc add_breakpoint_frame bpnum {
 
 		label $f.id -text "#$bpnum     $file:$line    ($pc)" \
 			-relief flat -bd 2 -anchor w
-		label $f.hit_count -text "Hit count: $hit_count" -relief flat \
+		frame $f.hit_count
+		label $f.hit_count.label -text "Hit count:" -relief flat \
+			-bd 2 -anchor w -width 11
+		label $f.hit_count.val -text $hit_count -relief flat \
 			-bd 2 -anchor w
+		checkbutton $f.hit_count.enabled -text Enabled \
+			-variable enabled -anchor w -relief flat
+		pack $f.hit_count.label $f.hit_count.val -side left
+		pack $f.hit_count.enabled -side right
 
 		frame $f.thread
 		label $f.thread.label -text "Thread: " -relief flat -bd 2 \
@@ -262,8 +269,8 @@ proc add_breakpoint_frame bpnum {
 
 		frame $f.disps
 
-		checkbutton $f.disps.enabled -text "Enabled " \
-			-variable enabled -anchor w -relief flat
+		label $f.disps.label -text "Disposition: " -relief flat -bd 2 \
+			-anchor w -width 11
 
 		radiobutton $f.disps.delete -text Delete \
 			-variable disposition -anchor w -relief flat
@@ -274,9 +281,8 @@ proc add_breakpoint_frame bpnum {
 		radiobutton $f.disps.donttouch -text "Leave alone" \
 				 -variable disposition -anchor w -relief flat
 
-		pack  $f.disps.delete $f.disps.disable $f.disps.donttouch \
-			-side left -anchor w
-		pack $f.disps.enabled -side right -anchor e
+		pack $f.disps.label $f.disps.delete $f.disps.disable \
+			$f.disps.donttouch -side left -anchor w
 		text $f.commands -relief sunken -bd 2 -setgrid true \
 			-cursor hand2 -height 3 -width 30
 
@@ -294,6 +300,8 @@ proc add_breakpoint_frame bpnum {
 	set bbox [.breakpoints.c bbox $tag]
 
 	set bpframe_lasty [lindex $bbox 3]
+
+	.breakpoints.c configure -width [lindex $bbox 2]
 }
 
 # Delete a breakpoint frame
@@ -1109,6 +1117,15 @@ proc create_file_win {filename debug_file} {
 	bind $win <1> do_nothing
 	bind $win <B1-Motion> do_nothing
 
+	bind $win <Key-Alt_R> do_nothing
+	bind $win <Key-Alt_L> do_nothing
+	bind $win <Key-Prior> "$win yview {@0,0 - 10 lines}"
+	bind $win <Key-Next> "$win yview {@0,0 + 10 lines}"
+	bind $win <Key-Up> "$win yview {@0,0 - 1 lines}"
+	bind $win <Key-Down> "$win yview {@0,0 + 1 lines}"
+	bind $win <Key-Home> {update_listing [gdb_loc]}
+	bind $win <Key-End> "$win yview -pickplace end"
+
 	bind $win n {interactive_cmd next}
 	bind $win s {interactive_cmd step}
 	bind $win c {interactive_cmd continue}
@@ -1222,6 +1239,16 @@ proc create_asm_win {funcname pc} {
 	bind $win <Enter> {focus %W}
 	bind $win <1> {asm_window_button_1 %W %X %Y %x %y}
 	bind $win <B1-Motion> do_nothing
+
+	bind $win <Key-Alt_R> do_nothing
+	bind $win <Key-Alt_L> do_nothing
+	bind $win <Key-Prior> "$win yview {@0,0 - 10 lines}"
+	bind $win <Key-Next> "$win yview {@0,0 + 10 lines}"
+	bind $win <Key-Up> "$win yview {@0,0 - 1 lines}"
+	bind $win <Key-Down> "$win yview {@0,0 + 1 lines}"
+	bind $win <Key-Home> {update_assembly [gdb_loc]}
+	bind $win <Key-End> "$win yview -pickplace end"
+
 	bind $win n {interactive_cmd nexti}
 	bind $win s {interactive_cmd stepi}
 	bind $win c {interactive_cmd continue}
@@ -2009,8 +2036,8 @@ proc build_framework {win {title GDBtk} {label {}}} {
 		-command create_expr_window
 	${win}.menubar.window.menu add command -label "Auto Command" \
 		-command create_autocmd_window
-#	${win}.menubar.window.menu add command -label Breakpoints \
-#		-command create_breakpoints_window
+	${win}.menubar.window.menu add command -label Breakpoints \
+		-command create_breakpoints_window
 
 #	${win}.menubar.window.menu add separator
 #	${win}.menubar.window.menu add command -label Files \
@@ -2046,6 +2073,15 @@ proc build_framework {win {title GDBtk} {label {}}} {
 
 	scrollbar ${win}.scroll -orient vertical -command "${win}.text yview" \
 		-relief sunken
+
+	bind $win <Key-Alt_R> do_nothing
+	bind $win <Key-Alt_L> do_nothing
+	bind $win <Key-Prior> "$win yview {@0,0 - 10 lines}"
+	bind $win <Key-Next> "$win yview {@0,0 + 10 lines}"
+	bind $win <Key-Up> "$win yview {@0,0 - 1 lines}"
+	bind $win <Key-Down> "$win yview {@0,0 + 1 lines}"
+	bind $win <Key-Home> "$win yview -pickplace end"
+	bind $win <Key-End> "$win yview -pickplace end"
 
 	pack ${win}.label -side bottom -fill x -in ${win}.info
 	pack ${win}.scroll -side right -fill y -in ${win}.info
@@ -2169,9 +2205,43 @@ proc create_autocmd_window {} {
 	pack .autocmd.entryframe -side bottom -fill x -before .autocmd.info
 }
 
+# Return the longest common prefix in SLIST.  Can be empty string.
+
+proc find_lcp slist {
+# Handle trivial cases where list is empty or length 1
+	if {[llength $slist] <= 1} {return [lindex $slist 0]}
+
+	set prefix [lindex $slist 0]
+	set prefixlast [expr [string length $prefix] - 1]
+
+	foreach str [lrange $slist 1 end] {
+		set test_str [string range $str 0 $prefixlast]
+		while {[string compare $test_str $prefix] != 0} {
+			decr prefixlast
+			set prefix [string range $prefix 0 $prefixlast]
+			set test_str [string range $str 0 $prefixlast]
+		}
+		if {$prefixlast < 0} break
+	}
+	return $prefix
+}
+
+# Look through COMPLETIONS to generate the suffix needed to do command
+# completion on CMD.
+
+proc find_completion {cmd completions} {
+# Get longest common prefix
+	set lcp [find_lcp $completions]
+	set cmd_len [string length $cmd]
+# Return suffix beyond end of cmd
+	return [string range $lcp $cmd_len end]
+}
+
 proc create_command_window {} {
 	global command_line
+	global saw_tab
 
+	set saw_tab 0
 	if [winfo exists .cmd] {raise .cmd ; return}
 
 	build_framework .cmd Command "* Command Buffer *"
@@ -2185,17 +2255,22 @@ proc create_command_window {} {
 	bind .cmd.text <Enter> {focus %W}
 	bind .cmd.text <Delete> {delete_char %W}
 	bind .cmd.text <BackSpace> {delete_char %W}
+	bind .cmd.text <Control-c> gdb_stop
 	bind .cmd.text <Control-u> {delete_line %W}
 	bind .cmd.text <Any-Key> {
 		global command_line
+		global saw_tab
 
+		set saw_tab 0
 		%W insert end %A
 		%W yview -pickplace end
 		append command_line %A
 		}
 	bind .cmd.text <Key-Return> {
 		global command_line
+		global saw_tab
 
+		set saw_tab 0
 		%W insert end \n
 		interactive_cmd $command_line
 
@@ -2213,6 +2288,47 @@ proc create_command_window {} {
 		%W insert end [selection get]
 		%W yview -pickplace end
 		append command_line [selection get]
+	}
+	bind .cmd.text <Key-Tab> {
+		global command_line
+		global saw_tab
+		global choices
+
+		set choices [gdb_cmd "complete $command_line"]
+		set choices [string trimright $choices \n]
+		set choices [split $choices \n]
+
+# Just do completion if this is the first tab
+		if !$saw_tab {
+			set saw_tab 1
+			set completion [find_completion $command_line $choices]
+			append command_line $completion
+# Here is where the completion is actually done.  If there is one match,
+# complete the command and print a space.  If two or more matches, complete the
+# command and beep.  If no match, just beep.
+			switch -exact [llength $choices] {
+			0	{}
+			1	{%W insert end "$completion "
+				 append command_line " "
+				 return }
+			default	{%W insert end "$completion"}
+			}
+			puts -nonewline stdout \007
+			flush stdout
+			%W yview -pickplace end
+		} else {
+# User hit another consecutive tab.  List the choices.  Note that at this
+# point, choices may contain commands with spaces.  We have to lop off
+# everything before (and including) the last space so that the completion
+# list only shows the possibilities for the last token.
+
+			set choices [lsort $choices]
+			if [regexp ".* " $command_line prefix] {
+				regsub -all $prefix $choices {} choices
+			}
+			%W insert end "\n[join $choices { }]\n(gdb) $command_line"
+			%W yview -pickplace end
+		}
 	}
 	proc delete_char {win} {
 		global command_line
