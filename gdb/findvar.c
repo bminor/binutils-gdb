@@ -42,9 +42,12 @@ const struct floatformat floatformat_unknown;
 #define CANNOT_STORE_REGISTER(regno) 0
 #endif
 
-static void write_register_gen PARAMS ((int, char *));
+void write_register_gen PARAMS ((int, char *));
 
-static int read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, char *myaddr, struct frame_info * frame));
+static int 
+read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, 
+						    char *myaddr, 
+						    struct frame_info *frame));
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -777,7 +780,7 @@ read_register_gen (regno, myaddr)
 /* Write register REGNO at MYADDR to the target.  MYADDR points at
    REGISTER_RAW_BYTES(REGNO), which must be in target byte-order.  */
 
-static void
+void
 write_register_gen (regno, myaddr)
      int regno;
      char *myaddr;

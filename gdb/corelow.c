@@ -318,6 +318,8 @@ core_open (filename, from_tty)
     error ("\"%s\": Can't find sections: %s",
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
 
+  set_gdbarch_from_file (core_bfd);
+
   ontop = !push_target (&core_ops);
   discard_cleanups (old_chain);
 

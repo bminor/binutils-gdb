@@ -1,3 +1,13 @@
+2000-04-27  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* jv-valprint.c (java_val_print): Add arg declaration, 
+	fix compiler warning.
+	* corelow.c (core_open): Call set_gdbarch_from_file so that 
+	gdbarch becomes aware of the architecture encoded in the 
+	corefile.
+	* findvar.c (write_register_gen): Export this useful interface.
+	* value.h (write_register_gen): Declare.
+
 2000-04-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* cxux-nat.c (add_shared_symbol_files): Don't treat .text section
@@ -17,13 +27,13 @@ Thu Apr 27 10:06:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* utils.c (internal_verror): Call target_terminal_ours.
-	* wrapper.h: fix minor comment typo.
+	* wrapper.h: Fix minor comment typo.
 	* proc-api.c (write_with_trace): Change 'arg' from long to int.
 	Treat 'off_t' and 'size_t' as unsigned long in printfs.
 	(lseek_with_trace): Treat 'off_t' as unsigned long in printf.
 	* procfs.c (comments): Eliminate "???" in comments, which GCC
 	wants to interpret as a trigraph.  (fill_gregset, supply_gregset,
-	fill_fpregset, supply_fpregset): declare.
+	fill_fpregset, supply_fpregset): Declare.
 	(procfs_wait): Sysargs is a long, change printf format to match.
 	(test-mapping, mapping_test, test_mapping_cmd) Remove (test only).
 

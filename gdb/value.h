@@ -464,6 +464,9 @@ extern void write_register_bytes PARAMS ((int regbyte, char *myaddr, int len));
 extern void
 read_register_gen PARAMS ((int regno, char *myaddr));
 
+extern void
+write_register_gen PARAMS ((int regno, char *myaddr));
+
 extern CORE_ADDR
   read_register PARAMS ((int regno));
 
