@@ -40,7 +40,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "arch5tej"
 
-    gas_test "copro.s" "" $stdoptlist "Co processor instructions"
+    run_dump_test "copro"
 
     gas_test "immed.s" "" $stdoptlist "immediate expressions"
 

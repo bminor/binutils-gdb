@@ -3329,22 +3329,96 @@ cp_address_required_here (str, wb_ok)
 	{
 	  p++;
 
-	  if (wb_ok && skip_past_comma (& p) == SUCCESS)
-	    {
-	      /* [Rn], #expr  */
-	      write_back = WRITE_BACK;
+	  skip_whitespace (p);
 
-	      if (reg == REG_PC)
+	  if (*p == '\0')
+	    {
+	      /* As an extension to the official ARM syntax we allow:
+		 
+		   [Rn]
+		   
+	         as a short hand for:
+
+		   [Rn,#0]  */
+	      inst.instruction |= PRE_INDEX | INDEX_UP;
+	      *str = p;
+	      return SUCCESS;
+	    }
+	  
+	  if (skip_past_comma (& p) == FAIL)
+	    {
+	      inst.error = _("comma expected after closing square bracket");
+	      return FAIL;
+	    }
+
+	  skip_whitespace (p);
+
+	  if (*p == '#')
+	    {
+	      if (wb_ok)
 		{
-		  inst.error = _("pc may not be used in post-increment");
+		  /* [Rn], #expr  */
+		  write_back = WRITE_BACK;
+
+		  if (reg == REG_PC)
+		    {
+		      inst.error = _("pc may not be used in post-increment");
+		      return FAIL;
+		    }
+
+		  if (cp_address_offset (& p) == FAIL)
+		    return FAIL;
+		}
+	      else
+		pre_inc = PRE_INDEX | INDEX_UP;
+	    }
+	  else if (*p == '{')
+	    {
+	      int option;
+
+	      /* [Rn], {<expr>}  */
+	      p++;
+
+	      skip_whitespace (p);
+
+	      if (my_get_expression (& inst.reloc.exp, & p))
+		return FAIL;
+
+	      if (inst.reloc.exp.X_op == O_constant)
+		{
+		  option = inst.reloc.exp.X_add_number;
+
+		  if (option > 255 || option < 0)
+		    {
+		      inst.error = _("'option' field too large");
+		      return FAIL;
+		    }
+
+		  skip_whitespace (p);
+
+		  if (*p != '}')
+		    {
+		      inst.error = _("'}' expected at end of 'option' field");
+		      return FAIL;
+		    }
+		  else
+		    {
+		      p++;
+		      inst.instruction |= option;
+		      inst.instruction |= INDEX_UP;
+		    }
+		}
+	      else
+		{
+		  inst.error = _("non-constant expressions for 'option' field not supported");
 		  return FAIL;
 		}
-
-	      if (cp_address_offset (& p) == FAIL)
-		return FAIL;
 	    }
 	  else
-	    pre_inc = PRE_INDEX | INDEX_UP;
+	    {
+	      inst.error = _("# or { expected after comma");
+	      return FAIL;	      
+	    }
 	}
       else
 	{

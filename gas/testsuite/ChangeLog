@@ -1,3 +1,9 @@
+2003-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/copro.s: Add tests of Addressing Mode 5 (Unindexed).
+	* gas/arm/arm.exp: Run copro.s as a dump test.
+	* gas/arm/copro.d: New file: expected disassembly of copro.s
+
 2003-08-16  Jason Eckhardt  <jle@rice.edu>
 
 	* gas/i860/pseudo-ops01.{s,d}: New files.

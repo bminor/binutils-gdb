@@ -1,3 +1,8 @@
+2003-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (print_insn_arm: case 'A'): Add code to
+	disassemble unindexed form of Addressing Mode 5.
+
 2003-08-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (PPC440): Define.
