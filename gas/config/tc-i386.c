@@ -1331,6 +1331,9 @@ md_assemble (line)
 		  break;
 		}
 	  }
+	else if (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0))
+	  guess_suffix = WORD_MNEM_SUFFIX;
+
 	for (op = i.operands; --op >= 0; )
 	  if ((i.types[op] & Imm)
 	      && i.op[op].imms->X_op == O_constant)
@@ -2584,10 +2587,7 @@ i386_immediate (imm_start)
 
   if (exp->X_op == O_constant)
     {
-      int bigimm = Imm32;
-      if (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0))
-	bigimm = Imm16;
-      i.types[this_operand] |= bigimm;
+      i.types[this_operand] |= Imm32;	/* Size it properly later.  */
     }
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
   else if (
