@@ -180,7 +180,7 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   if ((internal_f->f_flags & F_EXEC) != 0)
     abfd->flags |= D_PAGED;
 
-  bfd_get_symcount(abfd) = internal_f->f_nsyms;
+  obj_conv_table_size (abfd) = bfd_get_symcount(abfd) = internal_f->f_nsyms;
   if (internal_f->f_nsyms)
     abfd->flags |= HAS_SYMS;
 
@@ -781,9 +781,10 @@ coff_write_alien_symbol (abfd, symbol, written)
     }
   else if (symbol->flags & BSF_DEBUGGING)
     {
-      /* Remove the symbol name so that it does not take up any space.
-	 COFF won't know what to do with it anyhow.  */
-      symbol->name = "";
+      /* There isn't much point to writing out a debugging symbol
+         unless we are prepared to convert it into COFF debugging
+         format.  So, we just ignore them.  */
+      return true;
     }
   else
     {
@@ -1351,7 +1352,8 @@ coff_get_normalized_symtab (abfd)
   for (internal_ptr = internal; internal_ptr < internal_end;
        internal_ptr ++)
   {
-    if (internal_ptr->u.syment.n_sclass == C_FILE) {
+    if (internal_ptr->u.syment.n_sclass == C_FILE
+	&& internal_ptr->u.syment.n_numaux > 0) {
 	/* make a file symbol point to the name in the auxent, since
 	   the text ".file" is redundant */
 	if ((internal_ptr+1)->u.auxent.x_file.x_n.x_zeroes == 0) {
@@ -1609,10 +1611,11 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
   static CONST char *cache_function;
   static unsigned int    line_base = 0;
 
-  unsigned int    i = 0;
+  unsigned int i;
   coff_data_type *cof = coff_data(abfd);
   /* Run through the raw syments if available */
   combined_entry_type *p;
+  combined_entry_type *pend;
   alent          *l;
 
 
@@ -1627,16 +1630,52 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
   if (cof == NULL)
     return false;
 
+  /* Find the first C_FILE symbol.  */
   p = cof->raw_syments;
-
-  for (i = 0; i < cof->raw_syment_count; i++) {
-    if (p->u.syment.n_sclass == C_FILE) {
-      /* File name has been moved into symbol */
-      *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
-      break;
+  pend = p + cof->raw_syment_count;
+  while (p < pend)
+    {
+      if (p->u.syment.n_sclass == C_FILE)
+	break;
+      p += 1 + p->u.syment.n_numaux;
     }
-    p += 1 +  p->u.syment.n_numaux;
-  }
+
+  if (p < pend)
+    {
+      /* Look through the C_FILE symbols to find the best one.  */
+      *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
+      i = 0;
+      while (1)
+	{
+	  combined_entry_type *p2;
+
+	  /* Avoid endless loops on erroneous files by ensuring that
+	     we always move forward in the file.  */
+	  if (i >= p->u.syment.n_value)
+	    break;
+
+	  i = p->u.syment.n_value;
+	  if (i >= cof->raw_syment_count)
+	    break;
+
+	  p = cof->raw_syments + i;
+	  if (p->u.syment.n_sclass != C_FILE)
+	    break;
+	  
+	  for (p2 = p; p2 < pend; p2 += 1 + p2->u.syment.n_numaux)
+	    {
+	      if (section ==
+		  coff_section_from_bfd_index (abfd, p2->u.syment.n_scnum))
+		break;
+	    }
+	  if (p2 < pend
+	      && offset < p2->u.syment.n_value)
+	    break;
+
+	  *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
+	}
+    }
+
   /* Now wander though the raw linenumbers of the section */
   /*
     If this is the same BFD as we were previously called with and this is
@@ -1664,6 +1703,12 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
       if (coff->native) {
 	combined_entry_type  *s = coff->native;
 	s = s + 1 + s->u.syment.n_numaux;
+
+	/* In XCOFF a debugging symbol can follow the function
+	   symbol.  */
+ 	if (s->u.syment.n_scnum == N_DEBUG)
+	  s = s + 1 + s->u.syment.n_numaux;
+
 	/*
 	  S should now point to the .bf of the function
 	  */
@@ -1678,7 +1723,7 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
       }
     }
     else {
-      if (l->u.offset > offset)
+      if (l->u.offset + bfd_get_section_vma (abfd, section) > offset)
 	break;
       *line_ptr = l->line_number + line_base - 1;
     }

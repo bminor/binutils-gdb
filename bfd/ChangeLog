@@ -1,5 +1,10 @@
 Wed Aug 24 11:49:19 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* coffgen.c (coff_real_object_p): Set obj_conv_table_size here,
+	rather than waiting until coff_slurp_symbol_table.
+	(coff_write_alien_symbol): Just ignore BSF_DEBUGGING symbols.
+	From Antti.Miettinen@ntc.nokia.com.
+
 	* section.c (bfd_make_section_anyway): Fix failure check of
 	bfd_make_empty_symbol.  From Antti.Miettinen@ntc.nokia.com.
 
