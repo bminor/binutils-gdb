@@ -2198,8 +2198,8 @@ For example,
 
 On HP-UX systems:
 
-@cindex thread number
-@cindex thread identifier (GDB)
+@cindex debugging multithreaded programs (on HP-UX)
+@cindex thread identifier (GDB), on HP-UX
 For debugging purposes, @value{GDBN} associates its own thread
 number---a small integer assigned in thread-creation order---with each
 thread in your program.
@@ -2223,7 +2223,7 @@ HP-UX, you see
 when @value{GDBN} notices a new thread.
 
 @table @code
-@kindex info threads
+@kindex info threads (HP-UX)
 @item info threads
 Display a summary of all threads currently in your
 program.  @value{GDBN} displays for each thread (in this order):
@@ -2275,7 +2275,6 @@ As with the @samp{[New @dots{}]} message, the form of the text after
 @samp{Switching to} depends on your system's conventions for identifying
 threads.
 
-@kindex thread apply
 @item thread apply [@var{threadno}] [@var{all}]  @var{args}
 The @code{thread apply} command allows you to apply a command to one or
 more threads.  Specify the numbers of the threads that you want affected
@@ -2898,34 +2897,30 @@ shared library.  Use the @code{catch} command to set a catchpoint.
 Stop when @var{event} occurs.  @var{event} can be any of the following:
 @table @code
 @item throw
-@kindex catch throw
+@cindex stop on C@t{++} exceptions
 The throwing of a C@t{++} exception.
 
 @item catch
-@kindex catch catch
 The catching of a C@t{++} exception.
 
 @item exec
-@kindex catch exec
+@cindex break on fork/exec
 A call to @code{exec}.  This is currently only available for HP-UX.
 
 @item fork
-@kindex catch fork
 A call to @code{fork}.  This is currently only available for HP-UX.
 
 @item vfork
-@kindex catch vfork
 A call to @code{vfork}.  This is currently only available for HP-UX.
 
 @item load
 @itemx load @var{libname}
-@kindex catch load
+@cindex break on load/unload of shared library
 The dynamic loading of any shared library, or the loading of the library
 @var{libname}.  This is currently only available for HP-UX.
 
 @item unload
 @itemx unload @var{libname}
-@kindex catch unload
 The unloading of any dynamically loaded shared library, or the unloading
 of the library @var{libname}.  This is currently only available for HP-UX.
 @end table
@@ -3038,8 +3033,7 @@ confirm off}).  You can abbreviate this command as @code{d}.
 @node Disabling
 @subsection Disabling breakpoints
 
-@kindex disable breakpoints
-@kindex enable breakpoints
+@cindex enable/disable a breakpoint
 Rather than deleting a breakpoint, watchpoint, or catchpoint, you might
 prefer to @dfn{disable} it.  This makes the breakpoint inoperative as if
 it had been deleted, but remembers the information on the breakpoint so
@@ -3073,7 +3067,6 @@ You can use the following commands to enable or disable breakpoints,
 watchpoints, and catchpoints:
 
 @table @code
-@kindex disable breakpoints
 @kindex disable
 @kindex dis @r{(@code{disable})}
 @item disable @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
@@ -3083,7 +3076,6 @@ options such as ignore-counts, conditions and commands are remembered in
 case the breakpoint is enabled again later.  You may abbreviate
 @code{disable} as @code{dis}.
 
-@kindex enable breakpoints
 @kindex enable
 @item enable @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
 Enable the specified breakpoints (or all defined breakpoints).  They
@@ -4082,7 +4074,6 @@ Similar, but print only the outermost @var{n} frames.
 
 @kindex where
 @kindex info stack
-@kindex info s @r{(@code{info stack})}
 The names @code{where} and @code{info stack} (abbreviated @code{info s})
 are additional aliases for @code{backtrace}.
 
@@ -4112,11 +4103,6 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
-@kindex set backtrace past-main
-@kindex show backtrace past-main
-@kindex set backtrace limit
-@kindex show backtrace limit
-
 Most programs have a standard user entry point---a place where system
 libraries and startup code transition into user code.  For C this is
 @code{main}.  When @value{GDBN} finds the entry function in a backtrace
@@ -4129,6 +4115,7 @@ in a backtrace, you can change this behavior:
 @table @code
 @item set backtrace past-main
 @itemx set backtrace past-main on
+@kindex set backtrace
 Backtraces will continue past the user entry point.
 
 @item set backtrace past-main off
@@ -4136,6 +4123,7 @@ Backtraces will stop when they encounter the user entry point.  This is the
 default.
 
 @item show backtrace past-main
+@kindex show backtrace
 Display the current user entry point backtrace policy.
 
 @item set backtrace limit @var{n}
@@ -5320,9 +5308,10 @@ and symbols are printed.
 These settings are useful for debugging programs in any language:
 
 @table @code
-@kindex set print address
+@kindex set print
 @item set print address
 @itemx set print address on
+@cindex print/don't print memory addresses
 @value{GDBN} prints memory addresses showing the location of stack
 traces, structure values, pointer values, breakpoints, and so forth,
 even when it also displays the contents of those addresses.  The default
@@ -5356,7 +5345,7 @@ dependent displays from the @value{GDBN} interface.  For example, with
 @code{print address off}, you should get the same text for backtraces on
 all machines---whether or not they involve pointer arguments.
 
-@kindex show print address
+@kindex show print
 @item show print address
 Show whether or not addresses are to be printed.
 @end table
@@ -5370,8 +5359,8 @@ you can set @value{GDBN} to print the source file and line number when
 it prints a symbolic address:
 
 @table @code
-@kindex set print symbol-filename
 @item set print symbol-filename on
+@cindex closest symbol and offset for an address
 Tell @value{GDBN} to print the source file name and line number of a
 symbol in the symbolic form of an address.
 
@@ -5379,7 +5368,6 @@ symbol in the symbolic form of an address.
 Do not print source file name and line number of a symbol.  This is the
 default.
 
-@kindex show print symbol-filename
 @item show print symbol-filename
 Show whether or not @value{GDBN} will print the source file name and
 line number of a symbol in the symbolic form of an address.
@@ -5393,14 +5381,13 @@ Also, you may wish to see the symbolic form only if the address being
 printed is reasonably close to the closest earlier symbol:
 
 @table @code
-@kindex set print max-symbolic-offset
 @item set print max-symbolic-offset @var{max-offset}
+@cindex maximum value for offset of closest symbol
 Tell @value{GDBN} to only display the symbolic form of an address if the
 offset between the closest earlier symbol and the address is less than
 @var{max-offset}.  The default is 0, which tells @value{GDBN}
 to always print the symbolic form of an address if any symbol precedes it.
 
-@kindex show print max-symbolic-offset
 @item show print max-symbolic-offset
 Ask how large the maximum offset is that @value{GDBN} prints in a
 symbolic address.
@@ -5430,22 +5417,21 @@ the appropriate @code{set print} options turned on.
 Other settings control how different kinds of objects are printed:
 
 @table @code
-@kindex set print array
 @item set print array
 @itemx set print array on
+@cindex pretty print arrays
 Pretty print arrays.  This format is more convenient to read,
 but uses more space.  The default is off.
 
 @item set print array off
 Return to compressed format for arrays.
 
-@kindex show print array
 @item show print array
 Show whether compressed or pretty format is selected for displaying
 arrays.
 
-@kindex set print elements
 @item set print elements @var{number-of-elements}
+@cindex number of array elements to print
 Set a limit on how many elements of an array @value{GDBN} will print.
 If @value{GDBN} is printing a large array, it stops printing after it has
 printed the number of elements set by the @code{set print elements} command.
@@ -5453,19 +5439,17 @@ This limit also applies to the display of strings.
 When @value{GDBN} starts, this limit is set to 200.
 Setting  @var{number-of-elements} to zero means that the printing is unlimited.
 
-@kindex show print elements
 @item show print elements
 Display the number of elements of a large array that @value{GDBN} will print.
 If the number is 0, then the printing is unlimited.
 
-@kindex set print null-stop
 @item set print null-stop
+@cindex @sc{null} elements in arrays
 Cause @value{GDBN} to stop printing the characters of an array when the first
 @sc{null} is encountered.  This is useful when large arrays actually
 contain only short strings.
 The default is off.
 
-@kindex set print pretty
 @item set print pretty on
 Cause @value{GDBN} to print structures in an indented format with one member
 per line, like this:
@@ -5496,12 +5480,12 @@ meat = 0x54 "Pork"@}
 @noindent
 This is the default format.
 
-@kindex show print pretty
 @item show print pretty
 Show which format @value{GDBN} is using to print structures.
 
-@kindex set print sevenbit-strings
 @item set print sevenbit-strings on
+@cindex eight-bit characters in strings
+@cindex octal escapes in strings
 Print using only seven-bit characters; if this option is set,
 @value{GDBN} displays any eight-bit characters (in strings or
 character values) using the notation @code{\}@var{nnn}.  This setting is
@@ -5512,19 +5496,17 @@ high-order bit of characters as a marker or ``meta'' bit.
 Print full eight-bit characters.  This allows the use of more
 international character sets, and is the default.
 
-@kindex show print sevenbit-strings
 @item show print sevenbit-strings
 Show whether or not @value{GDBN} is printing only seven-bit characters.
 
-@kindex set print union
 @item set print union on
+@cindex unions in structures, printing
 Tell @value{GDBN} to print unions which are contained in structures.  This
 is the default setting.
 
 @item set print union off
 Tell @value{GDBN} not to print unions which are contained in structures.
 
-@kindex show print union
 @item show print union
 Ask @value{GDBN} whether or not it will print unions which are contained in
 structures.
@@ -5568,31 +5550,26 @@ $1 = @{it = Tree, form = @{...@}@}
 These settings are of interest when debugging C@t{++} programs:
 
 @table @code
-@cindex demangling
-@kindex set print demangle
+@cindex demangling C@t{++} names
 @item set print demangle
 @itemx set print demangle on
 Print C@t{++} names in their source form rather than in the encoded
 (``mangled'') form passed to the assembler and linker for type-safe
 linkage.  The default is on.
 
-@kindex show print demangle
 @item show print demangle
 Show whether C@t{++} names are printed in mangled or demangled form.
 
-@kindex set print asm-demangle
 @item set print asm-demangle
 @itemx set print asm-demangle on
 Print C@t{++} names in their source form rather than their mangled form, even
 in assembler code printouts such as instruction disassemblies.
 The default is off.
 
-@kindex show print asm-demangle
 @item show print asm-demangle
 Show whether C@t{++} names in assembly listings are printed in mangled
 or demangled form.
 
-@kindex set demangle-style
 @cindex C@t{++} symbol decoding style
 @cindex symbol decoding style, C@t{++}
 @item set demangle-style @var{style}
@@ -5622,13 +5599,12 @@ require further enhancement to permit that.
 @end table
 If you omit @var{style}, you will see a list of possible formats.
 
-@kindex show demangle-style
 @item show demangle-style
 Display the encoding style currently in use for decoding C@t{++} symbols.
 
-@kindex set print object
 @item set print object
 @itemx set print object on
+@cindex derived type of an object, printing
 When displaying a pointer to an object, identify the @emph{actual}
 (derived) type of the object rather than the @emph{declared} type, using
 the virtual function table.
@@ -5637,26 +5613,24 @@ the virtual function table.
 Display only the declared type of objects, without reference to the
 virtual function table.  This is the default setting.
 
-@kindex show print object
 @item show print object
 Show whether actual, or declared, object types are displayed.
 
-@kindex set print static-members
 @item set print static-members
 @itemx set print static-members on
+@cindex static members of C@t{++} objects
 Print static members when displaying a C@t{++} object.  The default is on.
 
 @item set print static-members off
 Do not print static members when displaying a C@t{++} object.
 
-@kindex show print static-members
 @item show print static-members
 Show whether C@t{++} static members are printed, or not.
 
 @c These don't work with HP ANSI C++ yet.
-@kindex set print vtbl
 @item set print vtbl
 @itemx set print vtbl on
+@cindex pretty print C@t{++} virtual function tables
 Pretty print C@t{++} virtual function tables.  The default is off.
 (The @code{vtbl} commands do not work on programs compiled with the HP
 ANSI C@t{++} compiler (@code{aCC}).)
@@ -5664,7 +5638,6 @@ ANSI C@t{++} compiler (@code{aCC}).)
 @item set print vtbl off
 Do not pretty print C@t{++} virtual function tables.
 
-@kindex show print vtbl
 @item show print vtbl
 Show whether C@t{++} virtual function tables are pretty printed, or not.
 @end table
@@ -6475,9 +6448,9 @@ Show the results of expanding all preprocessor macro invocations in
 not parse the result, @var{expression} need not be a valid expression;
 it can be any string of tokens.
 
-@kindex macro expand-once
 @item macro expand-once @var{expression}
 @itemx macro exp1 @var{expression}
+@cindex expand macro once
 @i{(This command is not yet implemented.)}  Show the results of
 expanding those preprocessor macro invocations that appear explicitly in
 @var{expression}.  Macro invocations appearing in that expansion are
@@ -7450,14 +7423,13 @@ you can abbreviate this as @code{ov} or @code{ovly}.  The commands are:
 
 @table @code
 @item overlay off
-@kindex overlay off
+@kindex overlay
 Disable @value{GDBN}'s overlay support.  When overlay support is
 disabled, @value{GDBN} assumes that all functions and variables are
 always present at their mapped addresses.  By default, @value{GDBN}'s
 overlay support is disabled.
 
 @item overlay manual
-@kindex overlay manual
 @cindex manual overlay debugging
 Enable @dfn{manual} overlay debugging.  In this mode, @value{GDBN}
 relies on you to tell it which overlays are mapped, and which are not,
@@ -7466,7 +7438,6 @@ commands described below.
 
 @item overlay map-overlay @var{overlay}
 @itemx overlay map @var{overlay}
-@kindex overlay map-overlay
 @cindex map an overlay
 Tell @value{GDBN} that @var{overlay} is now mapped; @var{overlay} must
 be the name of the object file section containing the overlay.  When an
@@ -7477,7 +7448,6 @@ that any other overlays whose mapped ranges overlap that of
 
 @item overlay unmap-overlay @var{overlay}
 @itemx overlay unmap @var{overlay}
-@kindex overlay unmap-overlay
 @cindex unmap an overlay
 Tell @value{GDBN} that @var{overlay} is no longer mapped; @var{overlay}
 must be the name of the object file section containing the overlay.
@@ -7485,7 +7455,6 @@ When an overlay is unmapped, @value{GDBN} assumes it can find the
 overlay's functions and variables at their load addresses.
 
 @item overlay auto
-@kindex overlay auto
 Enable @dfn{automatic} overlay debugging.  In this mode, @value{GDBN}
 consults a data structure the overlay manager maintains in the inferior
 to see which overlays are mapped.  For details, see @ref{Automatic
@@ -7493,7 +7462,6 @@ Overlay Debugging}.
 
 @item overlay load-target
 @itemx overlay load
-@kindex overlay load-target
 @cindex reloading the overlay table
 Re-read the overlay table from the inferior.  Normally, @value{GDBN}
 re-reads the table @value{GDBN} automatically each time the inferior
@@ -7830,8 +7798,6 @@ The following commands help you find out which language is the
 working language, and also what language source files were written in.
 
 @kindex show language
-@kindex info frame@r{, show the source language}
-@kindex info source@r{, show the source language}
 @table @code
 @item show language
 Display the current working language.  This is the
@@ -7839,12 +7805,14 @@ language you can use with commands such as @code{print} to
 build and compute expressions that may involve variables in your program.
 
 @item info frame
+@kindex info frame@r{, show the source language}
 Display the source language for this frame.  This language becomes the
 working language if you use an identifier from this frame.
 @xref{Frame Info, ,Information about a frame}, to identify the other
 information listed here.
 
 @item info source
+@kindex info source@r{, show the source language}
 Display the source language of this source file.
 @xref{Symbols, ,Examining the Symbol Table}, to identify the other
 information listed here.
@@ -7939,7 +7907,6 @@ details on specific languages.
 
 @value{GDBN} provides some additional commands for controlling the type checker:
 
-@kindex set check@r{, type}
 @kindex set check type
 @kindex show check type
 @table @code
@@ -8000,7 +7967,6 @@ Supported languages}, for further details on specific languages.
 
 @value{GDBN} provides some additional commands for controlling the range checker:
 
-@kindex set check@r{, range}
 @kindex set check range
 @kindex show check range
 @table @code
@@ -9924,9 +9890,9 @@ symbol table.  It cannot be shared across multiple host platforms.
 @c (eg rooted in val of env var GDBSYMS) could exist for mappable symbol
 @c files.
 
-@kindex core
 @kindex core-file
 @item core-file @r{[} @var{filename} @r{]}
+@itemx core
 Specify the whereabouts of a core dump file to be used as the ``contents
 of memory''.  Traditionally, core files contain only some parts of the
 address space of the process that generated them; @value{GDBN} can access the
@@ -10344,7 +10310,7 @@ polynomials, reversals, byte ordering, etc.), the simplest way to
 describe the CRC used in @code{.gnu_debuglink} sections is to give the
 complete code for a function that computes it:
 
-@kindex @code{gnu_debuglink_crc32}
+@kindex gnu_debuglink_crc32
 @smallexample
 unsigned long
 gnu_debuglink_crc32 (unsigned long crc,
@@ -10616,22 +10582,24 @@ Use the @code{show gnutarget} command to display what file format
 and @code{show gnutarget} displays @samp{The current BDF target is "auto"}.
 @end table
 
+@cindex common targets
 Here are some common targets (available, or not, depending on the GDB
 configuration):
 
 @table @code
-@kindex target exec
+@kindex target
 @item target exec @var{program}
+@cindex executable file target
 An executable file.  @samp{target exec @var{program}} is the same as
 @samp{exec-file @var{program}}.
 
-@kindex target core
 @item target core @var{filename}
+@cindex core dump file target
 A core dump file.  @samp{target core @var{filename}} is the same as
 @samp{core-file @var{filename}}.
 
-@kindex target remote
 @item target remote @var{dev}
+@cindex remote target
 Remote serial target in GDB-specific protocol.  The argument @var{dev}
 specifies what serial device to use for the connection (e.g.
 @file{/dev/ttya}). @xref{Remote, ,Remote debugging}.  @code{target remote}
@@ -10639,8 +10607,8 @@ supports the @code{load} command.  This is only useful if you have
 some other way of getting the stub to the target system, and you can put
 it somewhere in memory where it won't get clobbered by the download.
 
-@kindex target sim
 @item target sim
+@cindex built-in simulator target
 Builtin CPU simulator.  @value{GDBN} includes simulators for most architectures.
 In general,
 @smallexample
@@ -10661,8 +10629,8 @@ Some configurations may include these targets as well:
 
 @table @code
 
-@kindex target nrom
 @item target nrom @var{dev}
+@cindex NetROM ROM emulator target
 NetROM ROM emulator.  This target only supports downloading.
 
 @end table
@@ -10711,15 +10679,13 @@ which to use.  However, you may still find it useful to adjust
 @value{GDBN}'s idea of processor endian-ness manually.
 
 @table @code
-@kindex set endian big
+@kindex set endian
 @item set endian big
 Instruct @value{GDBN} to assume the target is big-endian.
 
-@kindex set endian little
 @item set endian little
 Instruct @value{GDBN} to assume the target is little-endian.
 
-@kindex set endian auto
 @item set endian auto
 Instruct @value{GDBN} to use the byte order associated with the
 executable.
@@ -11192,14 +11158,14 @@ subroutines:
 
 @table @code
 @item set_debug_traps
-@kindex set_debug_traps
+@findex set_debug_traps
 @cindex remote serial stub, initialization
 This routine arranges for @code{handle_exception} to run when your
 program stops.  You must call this subroutine explicitly near the
 beginning of your program.
 
 @item handle_exception
-@kindex handle_exception
+@findex handle_exception
 @cindex remote serial stub, main routine
 This is the central workhorse, but your program never calls it
 explicitly---the setup code arranges for @code{handle_exception} to
@@ -11247,13 +11213,13 @@ serial port.
 
 @table @code
 @item int getDebugChar()
-@kindex getDebugChar
+@findex getDebugChar
 Write this subroutine to read a single character from the serial port.
 It may be identical to @code{getchar} for your target system; a
 different name is used to allow you to distinguish the two if you wish.
 
 @item void putDebugChar(int)
-@kindex putDebugChar
+@findex putDebugChar
 Write this subroutine to write a single character to the serial port.
 It may be identical to @code{putchar} for your target system; a
 different name is used to allow you to distinguish the two if you wish.
@@ -11276,7 +11242,7 @@ Other routines you need to supply are:
 
 @table @code
 @item void exceptionHandler (int @var{exception_number}, void *@var{exception_address})
-@kindex exceptionHandler
+@findex exceptionHandler
 Write this function to install @var{exception_address} in the exception
 handling tables.  You need to do this because the stub does not have any
 way of knowing what the exception handling tables on your target system
@@ -11298,7 +11264,7 @@ should be at privilege level 0 (the most privileged level).  The
 help from @code{exceptionHandler}.
 
 @item void flush_i_cache()
-@kindex flush_i_cache
+@findex flush_i_cache
 On @sc{sparc} and @sc{sparclite} only, write this subroutine to flush the
 instruction cache, if any, on your target machine.  If there is no
 instruction cache, this subroutine may be a no-op.
@@ -11312,7 +11278,7 @@ You must also make sure this library routine is available:
 
 @table @code
 @item void *memset(void *, int, int)
-@kindex memset
+@findex memset
 This is the standard library function @code{memset} that sets an area of
 memory to a known value.  If you have one of the free versions of
 @code{libc.a}, @code{memset} can be found there; otherwise, you must
@@ -11920,7 +11886,7 @@ The following information on connecting to VxWorks was current when
 this manual was produced; newer releases of VxWorks may use revised
 procedures.
 
-@kindex INCLUDE_RDB
+@findex INCLUDE_RDB
 To use @value{GDBN} with VxWorks, you must rebuild your VxWorks kernel
 to include the remote debugging interface routines in the VxWorks
 library @file{rdb.a}.  To do this, define @code{INCLUDE_RDB} in the
@@ -12580,49 +12546,39 @@ or Data.  For example:
 
 @code{hwatch ($LEA == my_var) && ($LDATA < 50) || ($SEA == my_var) && ($SDATA >= 50)}
 
-@kindex htrace info
+@kindex htrace
 @item htrace info
 Display information about current HW trace configuration.
 
-@kindex htrace trigger
 @item htrace trigger @var{conditional}
 Set starting criteria for HW trace.
 
-@kindex htrace qualifier
 @item htrace qualifier @var{conditional}
 Set acquisition qualifier for HW trace.
 
-@kindex htrace stop
 @item htrace stop @var{conditional}
 Set HW trace stopping criteria.
 
-@kindex htrace record
 @item htrace record [@var{data}]*
 Selects the data to be recorded, when qualifier is met and HW trace was
 triggered.
 
-@kindex htrace enable
 @item htrace enable
-@kindex htrace disable
 @itemx htrace disable
 Enables/disables the HW trace.
 
-@kindex htrace rewind
 @item htrace rewind [@var{filename}]
 Clears currently recorded trace data.
 
 If filename is specified, new trace file is made and any newly collected data
 will be written there.
 
-@kindex htrace print
 @item htrace print [@var{start} [@var{len}]]
 Prints trace buffer, using current record configuration.
 
-@kindex htrace mode continuous
 @item htrace mode continuous
 Set continuous trace mode.
 
-@kindex htrace mode suspend
 @item htrace mode suspend
 Set suspend trace mode.
 
@@ -13115,7 +13071,7 @@ history facility.
 @cindex history substitution
 @cindex history file
 @kindex set history filename
-@kindex GDBHISTFILE
+@cindex @env{GDBHISTFILE}, environment variable
 @item set history filename @var{fname}
 Set the name of the @value{GDBN} command history file to @var{fname}.
 This is the file where @value{GDBN} reads an initial command history
@@ -13127,7 +13083,7 @@ to the value of the environment variable @code{GDBHISTFILE}, or to
 is not set.
 
 @cindex history save
-@kindex set history save
+@kindex set history
 @item set history save
 @itemx set history save on
 Record command history in a file, whose name may be specified with the
@@ -13137,7 +13093,6 @@ Record command history in a file, whose name may be specified with the
 Stop recording command history in a file.
 
 @cindex history size
-@kindex set history size
 @item set history size @var{size}
 Set the number of commands which @value{GDBN} keeps in its history list.
 This defaults to the value of the environment variable
@@ -13161,9 +13116,9 @@ history facilities do not attempt substitution on the strings
 The commands to control history expansion are:
 
 @table @code
-@kindex set history expansion
 @item set history expansion on
 @itemx set history expansion
+@cindex history expansion
 Enable history expansion.  History expansion is off by default.
 
 @item set history expansion off
@@ -13450,87 +13405,79 @@ Displays state of confirmation requests.
 
 @node Debugging Output
 @section Optional messages about internal happenings
+@cindex optional debugging messages
+
 @table @code
-@kindex set debug arch
+@kindex set debug
+@cindex gdbarch debugging info
 @item set debug arch
 Turns on or off display of gdbarch debugging info. The default is off
-@kindex show debug arch
+@kindex show debug
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
-@kindex set debug event
 @item set debug event
+@cindex event debugging info
 Turns on or off display of @value{GDBN} event debugging info. The
 default is off.
-@kindex show debug event
 @item show debug event
 Displays the current state of displaying @value{GDBN} event debugging
 info.
-@kindex set debug expression
 @item set debug expression
+@cindex expression debugging info
 Turns on or off display of @value{GDBN} expression debugging info. The
 default is off.
-@kindex show debug expression
 @item show debug expression
 Displays the current state of displaying @value{GDBN} expression
 debugging info.
-@kindex set debug frame
 @item set debug frame
+@cindex frame debugging info
 Turns on or off display of @value{GDBN} frame debugging info.  The
 default is off.
-@kindex show debug frame
 @item show debug frame
 Displays the current state of displaying @value{GDBN} frame debugging
 info.
-@kindex set debug observer
 @item set debug observer
+@cindex observer debugging info
 Turns on or off display of @value{GDBN} observer debugging.  This
 includes info such as the notification of observable events.
-@kindex show debug observer
 @item show debug observer
 Displays the current state of observer debugging.
-@kindex set debug overload
 @item set debug overload
+@cindex C@t{++} overload debugging info
 Turns on or off display of @value{GDBN} C@t{++} overload debugging
 info. This includes info such as ranking of functions, etc. The default
 is off.
-@kindex show debug overload
 @item show debug overload
 Displays the current state of displaying @value{GDBN} C@t{++} overload
 debugging info.
-@kindex set debug remote
 @cindex packets, reporting on stdout
 @cindex serial connections, debugging
 @item set debug remote
 Turns on or off display of reports on all packets sent back and forth across
 the serial line to the remote machine.  The info is printed on the
 @value{GDBN} standard output stream. The default is off.
-@kindex show debug remote
 @item show debug remote
 Displays the state of display of remote packets.
-@kindex set debug serial
 @item set debug serial
 Turns on or off display of @value{GDBN} serial debugging info. The
 default is off.
-@kindex show debug serial
 @item show debug serial
 Displays the current state of displaying @value{GDBN} serial debugging
 info.
-@kindex set debug target
 @item set debug target
+@cindex target debugging info
 Turns on or off display of @value{GDBN} target debugging info. This info
 includes what is going on at the target level of GDB, as it happens. The
 default is 0.  Set it to 1 to track events, and to 2 to also track the
 value of large memory transfers.  Changes to this flag do not take effect
 until the next time you connect to a target or use the @code{run} command.
-@kindex show debug target
 @item show debug target
 Displays the current state of displaying @value{GDBN} target debugging
 info.
-@kindex set debug varobj
 @item set debug varobj
+@cindex variable object debugging info
 Turns on or off display of @value{GDBN} variable object debugging
 info. The default is off.
-@kindex show debug varobj
 @item show debug varobj
 Displays the current state of displaying @value{GDBN} variable object
 debugging info.
@@ -13659,7 +13606,6 @@ messages when used in a user-defined command.
 @cindex hooks, pre-command
 
 @kindex hook
-@kindex hook-
 You may define @dfn{hooks}, which are a special kind of user-defined
 command.  Whenever you run the command @samp{foo}, if the user-defined
 command @samp{hook-foo} exists, it is executed (with no arguments)
@@ -13667,7 +13613,6 @@ before that command.
 
 @cindex hooks, post-command
 @kindex hookpost
-@kindex hookpost-
 A hook may also be defined which is run after the command you executed.
 Whenever you run the command @samp{foo}, if the user-defined command
 @samp{hookpost-foo} exists, it is executed (with no arguments) after
@@ -14288,27 +14233,22 @@ in the TUI mode.
 List and give the size of all displayed windows.
 
 @item layout next
-@kindex layout next
+@kindex layout
 Display the next layout.
 
 @item layout prev
-@kindex layout prev
 Display the previous layout.
 
 @item layout src
-@kindex layout src
 Display the source window only.
 
 @item layout asm
-@kindex layout asm
 Display the assembly window only.
 
 @item layout split
-@kindex layout split
 Display the source and assembly window.
 
 @item layout regs
-@kindex layout regs
 Display the register window together with the source or assembly window.
 
 @item focus next | prev | src | asm | regs | split
