@@ -7,6 +7,14 @@ Wed Apr 16 12:43:32 1997  Martin Hunt  <hunt@cygnus.com>
 end-sanitize-d30v	
 Wed Apr 16 14:02:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	From Gordon W. Ross <gwr@mc.com>:
+	* netbsd.h (N_SHARED_LIB): Define.
+	(SEGMENT_SIZE): Don't define.
+	* m68knetbsd.c (SEGMENT_SIZE): Don't define (revert change of
+	April 11).
+	* sparcnetbsd.c (TARGET_PAGE_SIZE): Define as 0x2000.
+	(SEGMENT_SIZE): Don't define.
+
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Set .rela.bss size
 	to sizeof Rela structure, not sizeof Rel structure.  From Gary
 	Thomas <g.thomas@opengroup.org>.
@@ -59,7 +67,7 @@ Fri Apr 11 15:43:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* sparclynx.c (sparclynx_aout_backend): Likewise.
 	* netbsd.h (SEGMENT_SIZE): Define if not defined.
 	(MY_entry_is_text_address): Define.
-	* m68knetbsd.c (SEGMENT_SIZE): Define as 0x20000
+	* m68knetbsd.c (SEGMENT_SIZE): Define as 0x20000.
 
 	* xcofflink.c (bfd_xcoff_import_symbol): Handle importing a symbol
 	whose name starts with `.'.
