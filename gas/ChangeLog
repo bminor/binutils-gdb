@@ -1,5 +1,8 @@
 2000-08-04  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-sparc.c (md_begin): Fix typo in recent formatting
+	work.
+
 	* doc/as.texinfo (Pseudo Ops): Update to include descriptions
 	of .popsection, .previous, .pushsection, .subsection,
 	.version, .vtable_entry, .vtable_inherit and .weak.

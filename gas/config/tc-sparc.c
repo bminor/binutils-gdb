@@ -786,9 +786,9 @@ md_begin ()
   for (i = 0; native_op_table[i].name; i++)
     {
       const struct sparc_opcode *insn;
-      char *name = sparc_arch_size == (32
-				       ? native_op_table[i].name32
-				       : native_op_table[i].name64);
+      char *name = ((sparc_arch_size == 32)
+		    ? native_op_table[i].name32
+		    : native_op_table[i].name64);
       insn = (struct sparc_opcode *) hash_find (op_hash, name);
       if (insn == NULL)
 	{
