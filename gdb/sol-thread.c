@@ -17,6 +17,34 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* This module implements a sort of half target that sits between the
+   machine-independent parts of GDB and the /proc interface (procfs.c) to
+   provide access to the Solaris user-mode thread implementation.
+
+   Solaris threads are true user-mode threads, which are invoked via the thr_*
+   and pthread_* (native and Posix respectivly) interfaces.  These are mostly
+   implemented in user-space, with all thread context kept in various
+   structures that live in the user's heap.  These should not be confused with
+   lightweight processes (LWPs), which are implemented by the kernel, and
+   scheduled without explicit intervention by the process.
+
+   Just to confuse things a little, Solaris threads (both native and Posix) are
+   actually implemented using LWPs.  In general, there are going to be more
+   threads than LWPs.  There is no fixed correspondence between a thread and an
+   LWP.  When a thread wants to run, it gets scheduled onto the first available
+   LWP and can therefore migrate from one LWP to another as time goes on.  A
+   sleeping thread may not be associated with an LWP at all!
+
+   To make it possible to mess with threads, Sun provides a library called
+   libthread_db.so.1 (not to be confused with libthread_db.so.0, which doesn't
+   have a published interface).  This interface has an upper part, which it
+   provides, and a lower part which I provide.  The upper part consists of the
+   td_* routines, which allow me to find all the threads, query their state,
+   etc...  The lower part consists of all of the ps_*, which are used by the
+   td_* routines to read/write memory, manipulate LWPs, lookup symbols, etc...
+   The ps_* routines actually do most of their work by calling functions in
+   procfs.c.  */
+
 #include "defs.h"
 
 /* Undefine gregset_t and fpregset_t to avoid conflict with defs in xm file. */
@@ -44,10 +72,23 @@ extern struct target_ops sol_thread_ops; /* Forward declaration */
 extern int procfs_suppress_run;
 extern struct target_ops procfs_ops; /* target vector for procfs.c */
 
+/* Note that these prototypes differ slightly from those used in procfs.c
+   for of two reasons.  One, we can't use gregset_t, as that's got a whole
+   different meaning under Solaris (also, see above).  Two, we can't use the
+   pointer form here as these are actually arrays of ints (for Sparc's at
+   least), and are automatically coerced into pointers to ints when used as
+   parameters.  That makes it impossible to avoid a compiler warning when
+   passing pr{g fp}regset_t's from a parameter to an argument of one of
+   these functions.  */
+
 extern void supply_gregset PARAMS ((const prgregset_t));
 extern void fill_gregset PARAMS ((prgregset_t, int));
 extern void supply_fpregset PARAMS ((const prfpregset_t));
 extern void fill_fpregset PARAMS ((prfpregset_t, int));
+
+/* This struct is defined by us, but mainly used for the proc_service interface.
+   We don't have much use for it, except as a handy place to get a real pid
+   for memory accesses.  */
 
 struct ps_prochandle
 {
@@ -246,8 +287,27 @@ thread_to_lwp (thread_id, default_lwp)
 
   return lwp;
 }
+
+/*
 
-/* Convert an LWP id to a thread. */
+LOCAL FUNCTION
+
+	lwp_to_thread - Convert a LWP id to a Posix or Solaris thread id.
+
+SYNOPSIS
+
+	int lwp_to_thread (lwp_id)
+
+DESCRIPTION
+
+	This function converts a lightweight process id to a Posix or Solaris
+	thread id.  If thread_id is non-existent, that's an error.
+
+NOTES
+
+	This function probably shouldn't call error()...
+
+ */
 
 static int
 lwp_to_thread (lwp)
@@ -281,6 +341,34 @@ lwp_to_thread (lwp)
   return thread_id;
 }
 
+/*
+
+LOCAL FUNCTION
+
+	save_inferior_pid - Save inferior_pid on the cleanup list
+	restore_inferior_pid - Restore inferior_pid from the cleanup list
+
+SYNOPSIS
+
+	struct cleanup *save_inferior_pid ()
+	void restore_inferior_pid (int pid)
+
+DESCRIPTION
+
+	These two functions act in unison to restore inferior_pid in
+	case of an error.
+
+NOTES
+
+	inferior_pid is a global variable that needs to be changed by many of
+	these routines before calling functions in procfs.c.  In order to
+	guarantee that inferior_pid gets restored (in case of errors), you
+	need to call save_inferior_pid before changing it.  At the end of the
+	function, you should invoke do_cleanups to restore it.
+
+ */
+
+
 static struct cleanup *
 save_inferior_pid ()
 {
@@ -294,6 +382,11 @@ restore_inferior_pid (pid)
   inferior_pid = pid;
 }
 
+
+/* Most target vector functions from here on actually just pass through to
+   procfs.c, as they don't need to do anything specific for threads.  */
+
+
 /* ARGSUSED */
 static void
 sol_thread_open (arg, from_tty)
@@ -334,7 +427,8 @@ sol_thread_detach (args, from_tty)
 
 /* Resume execution of process PID.  If STEP is nozero, then
    just single step it.  If SIGNAL is nonzero, restart it with that
-   signal activated.  */
+   signal activated.  We may have to convert pid from a thread-id to an LWP id
+   for procfs.  */
 
 static void
 sol_thread_resume (pid, step, signo)
@@ -349,14 +443,19 @@ sol_thread_resume (pid, step, signo)
   inferior_pid = thread_to_lwp (inferior_pid, main_ph.pid);
 
   if (pid != -1)
-    pid = thread_to_lwp (pid, -1);
+    {
+      pid = thread_to_lwp (pid, -2);
+      if (pid == -2)		/* Inactive thread */
+	error ("This version of Solaris can't start inactive threads.");
+    }
 
   procfs_ops.to_resume (pid, step, signo);
 
   do_cleanups (old_chain);
 }
 
-/* Wait for any LWPs to stop */
+/* Wait for any threads to stop.  We may have to convert PID from a thread id
+   to a LWP id, and vice versa on the way out.  */
 
 static int
 sol_thread_wait (pid, ourstatus)
@@ -366,9 +465,6 @@ sol_thread_wait (pid, ourstatus)
   int rtnval;
   int save_pid;
   struct cleanup *old_chain;
-
-  if (!sol_thread_active)
-    return procfs_ops.to_wait (pid, ourstatus);
 
   save_pid = inferior_pid;
   old_chain = save_inferior_pid ();
@@ -414,13 +510,6 @@ sol_thread_fetch_registers (regno)
   int xregsize;
   caddr_t xregset;
 #endif
-
-  if (!sol_thread_active
-      || is_lwp (inferior_pid))
-    {
-      procfs_ops.to_fetch_registers (regno);
-      return;
-    }
 
   /* Convert inferior_pid into a td_thrhandle_t */
 
@@ -494,13 +583,6 @@ sol_thread_store_registers (regno)
   int xregsize;
   caddr_t xregset;
 #endif
-
-  if (!sol_thread_active
-      || is_lwp (inferior_pid))
-    {
-      procfs_ops.to_store_registers (regno);
-      return;
-    }
 
   /* Convert inferior_pid into a td_thrhandle_t */
 
@@ -646,7 +728,10 @@ sol_thread_create_inferior (exec_file, allargs, env)
 }
 
 /* This routine is called whenever a new symbol table is read in, or when all
-   symbol tables are removed.  */
+   symbol tables are removed.  libthread_db can only be initialized when it
+   finds the right variables in libthread.so.  Since it's a shared library,
+   those variables don't show up until the library gets mapped and the symbol
+   table is read in.  */
 
 void
 sol_thread_new_objfile (objfile)
@@ -687,34 +772,33 @@ sol_thread_mourn_inferior ()
 }
 
 /* Mark our target-struct as eligible for stray "run" and "attach" commands.  */
+
 static int
 sol_thread_can_run ()
 {
   return procfs_suppress_run;
 }
 
-int
+static int
 sol_thread_alive (pid)
      int pid;
 {
   return 1;
 }
 
-void
+static void
 sol_thread_stop ()
 {
   procfs_ops.to_stop ();
 }
+
+/* These routines implement the lower half of the thread_db interface.  Ie: the
+   ps_* routines.  */
 
-/* Service routines we must supply to libthread_db */
-
-struct lwp_map
-{
-  struct lwp_map *next;
-  pid_t pid;
-  lwpid_t lwp;
-  int lwpfd;
-};
+/* The next four routines are called by thread_db to tell us to stop and stop
+   a particular process or lwp.  Since GDB ensures that these are all stopped
+   by the time we call anything in thread_db, these routines need to do
+   nothing.  */
 
 ps_err_e
 ps_pstop (const struct ps_prochandle *ph)
@@ -755,6 +839,8 @@ ps_pglobal_lookup (const struct ps_prochandle *ph, const char *ld_object_name,
 
   return PS_OK;
 }
+
+/* Common routine for reading and writing memory.  */
 
 static ps_err_e
 rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
@@ -817,6 +903,8 @@ ps_ptwrite (const struct ps_prochandle *ph, paddr_t addr, char *buf, int size)
   return rw_common (1, ph, addr, buf, size);
 }
 
+/* Get integer regs */
+
 ps_err_e
 ps_lgetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 	     prgregset_t gregset)
@@ -834,6 +922,8 @@ ps_lgetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 
   return PS_OK;
 }
+
+/* Set integer regs */
 
 ps_err_e
 ps_lsetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
@@ -863,6 +953,8 @@ ps_plog (const char *fmt, ...)
   vfprintf_filtered (gdb_stderr, fmt, args);
 }
 
+/* Get size of extra register set.  Currently a noop.  */
+
 ps_err_e
 ps_lgetxregsize (const struct ps_prochandle *ph, lwpid_t lwpid, int *xregsize)
 {
@@ -889,6 +981,8 @@ ps_lgetxregsize (const struct ps_prochandle *ph, lwpid_t lwpid, int *xregsize)
   return PS_OK;
 }
 
+/* Get extra register set.  Currently a noop.  */
+
 ps_err_e
 ps_lgetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 {
@@ -909,6 +1003,8 @@ ps_lgetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 
   return PS_OK;
 }
+
+/* Set extra register set.  Currently a noop.  */
 
 ps_err_e
 ps_lsetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
@@ -931,6 +1027,8 @@ ps_lsetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
   return PS_OK;
 }
 
+/* Get floating-point regs.  */
+
 ps_err_e
 ps_lgetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
@@ -948,6 +1046,8 @@ ps_lgetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 
   return PS_OK;
 }
+
+/* Set floating-point regs.  */
 
 ps_err_e
 ps_lsetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
@@ -967,6 +1067,8 @@ ps_lsetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
   return PS_OK;
 }
 
+/* Convert a pid to printable form. */
+
 char *
 solaris_pid_to_str (pid)
      int pid;

@@ -1,3 +1,13 @@
+Mon May 13 16:17:36 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* sol-thread.c:  More cleanup, add comments.
+	* (sol_thread_resume):  Prevent people from trying to step
+	inactive threads.
+	* (sol_thread_wait sol_thread_fetch_registers
+	sol_thread_store_registers):  Remove unnecessary check for
+	sol_thread_active.  These routines won't get called unless threads
+	are active.
+
 Mon May 13 11:29:37 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	SH3-E support from Allan Tajii <atajii@hmsi.com>:
