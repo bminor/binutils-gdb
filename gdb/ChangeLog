@@ -1,5 +1,9 @@
 2004-02-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (ALLDEPFILES): Add amd64-nat.c, amd64bsd-nat.c,
+	amdfbsd-nat.c, amd64-fbsd-tdep.c, amd64nbsd-nat.c and
+	amd64nbsd-tdep.c.
+
 	* i386obsd-tdep.c (i386obsd_aout_regset_from_core_section): Make
 	static.  Remove extraneous whitespace.	
 	* i386nbsd-tdep.c (i386nbsd_aout_regset_from_core_section): Make

@@ -1264,6 +1264,8 @@ ALLDEPFILES = \
 	alpha-nat.c alphabsd-nat.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c alpha-mdebug-tdep.c \
+	amd64-nat.c amd64bsd-nat.c amdfbsd-nat.c amd64-fbsd-tdep.c \
+	amd64nbsd-nat.c amd64nbsd-tdep.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
 	avr-tdep.c \
