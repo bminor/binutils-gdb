@@ -1,3 +1,36 @@
+Wed Sep 18 09:13:25 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* d10v_sim.h (DEBUG_INSTRUCTION): New debug value to include line
+	numbers and function names in debug trace.
+	(DEBUG): If not defined, set to DEBUG_TRACE, DEBUG_VALUES, and
+	DEBUG_LINE_NUMBER. 
+	(SIG_D10V_{STOP,EXIT}): Values to represent the stop instruction
+	and exit system call trap being executed.
+
+	* interp.c (sim_stop_reason): Set exit code correctly for stop
+	instruction and exit system call trap.
+
+	* configure.in (--enable-sim-cflags): Remove trace case.
+	(--enable-sim-debug): New switch to set the debug values.
+	* configure: Regenerate.
+
+	* simops.c (trace_{input,output}_func): Rename from
+	trace_{input,output}.
+	(trace_{input,output}): Call trace_{input,output}_func if
+	d10v_debug is non-zero.
+	(SIZE_INSTRUCTION): Cut down to 8.
+	(SIZE_OPERANDS): Cut down to 18.
+	(SIZE_LOCATION): New value for size of line number, function name
+	field.
+	(init_text_p,text{,_start,_end}): New static variables for
+	printing line number and function name.
+	(sim_bfd): New external that run.c sets.
+	(trace_input_func): Print line number and function name if
+	available and if desired.
+	(OP_4E09): Don't print out DBT message.
+	(OP_5FE0): Set exception field to SIG_D10V_STOP.
+	(OP_5F00): Set exception field to SIG_D10V_EXIT.	
+
 Sat Sep 14 22:18:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* interp.c (do_2_short): If the instruction encodes jump->ins,

@@ -7,6 +7,7 @@
 #include "d10v_sim.h"
 #include "simops.h"
 #include "sys/syscall.h"
+#include "bfd.h"
 
 enum op_types {
   OP_VOID,
@@ -33,27 +34,41 @@ enum op_types {
 };
 
 #ifdef DEBUG
-static void trace_input PARAMS ((char *name,
-				 enum op_types in1,
-				 enum op_types in2,
-				 enum op_types in3));
+static void trace_input_func PARAMS ((char *name,
+				      enum op_types in1,
+				      enum op_types in2,
+				      enum op_types in3));
 
-static void trace_output PARAMS ((enum op_types result));
+#define trace_input(name, in1, in2, in3) do { if (d10v_debug) trace_input_func (name, in1, in2, in3); } while (0)
+
+static void trace_output_func PARAMS ((enum op_types result));
+
+#define trace_output(result) do { if (d10v_debug) trace_output_func (result); } while (0)
+
+static int init_text_p = 0;
+static asection *text;
+static bfd_vma text_start;
+static bfd_vma text_end;
+extern bfd *sim_bfd;
 
 #ifndef SIZE_INSTRUCTION
-#define SIZE_INSTRUCTION 10
+#define SIZE_INSTRUCTION 8
 #endif
 
 #ifndef SIZE_OPERANDS
-#define SIZE_OPERANDS 24
+#define SIZE_OPERANDS 18
 #endif
 
 #ifndef SIZE_VALUES
 #define SIZE_VALUES 13
 #endif
 
+#ifndef SIZE_LOCATION
+#define SIZE_LOCATION 20
+#endif
+
 static void
-trace_input (name, in1, in2, in3)
+trace_input_func (name, in1, in2, in3)
      char *name;
      enum op_types in1;
      enum op_types in2;
@@ -62,10 +77,15 @@ trace_input (name, in1, in2, in3)
   char *comma;
   enum op_types in[3];
   int i;
-  char buf[80];
+  char buf[1024];
   char *p;
   long tmp;
   char *type;
+  asection *s;
+  const char *filename;
+  const char *functionname;
+  unsigned int linenumber;
+  bfd_vma byte_pc;
 
   if ((d10v_debug & DEBUG_TRACE) == 0)
     return;
@@ -81,10 +101,67 @@ trace_input (name, in1, in2, in3)
     case INS_LONG:		type = " B"; break;
     }
 
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "0x%.6x %s:  %-*s",
-				     (unsigned)PC, type,
-				     SIZE_INSTRUCTION, name);
+  if ((d10v_debug & DEBUG_LINE_NUMBER) == 0)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "0x%.6x %s: %-*s",
+				       (unsigned)PC, type,
+				       SIZE_INSTRUCTION, name);
+
+  else
+    {
+      buf[0] = '\0';
+      if (!init_text_p)
+	{
+	  init_text_p = 1;
+	  for (s = sim_bfd->sections; s; s = s->next)
+	    if (strcmp (bfd_get_section_name (sim_bfd, s), ".text") == 0)
+	      {
+		text = s;
+		text_start = bfd_get_section_vma (sim_bfd, s);
+		text_end = text_start + bfd_section_size (sim_bfd, s);
+		break;
+	      }
+	}
+
+      byte_pc = (bfd_vma)PC << 2;
+      if (text && byte_pc >= text_start && byte_pc < text_end)
+	{
+	  filename = (const char *)0;
+	  functionname = (const char *)0;
+	  linenumber = 0;
+	  if (bfd_find_nearest_line (sim_bfd, text, (struct symbol_cache_entry **)0, byte_pc - text_start,
+				     &filename, &functionname, &linenumber))
+	    {
+	      p = buf;
+	      if (linenumber)
+		{
+		  sprintf (p, "#%-4d ", linenumber);
+		  p += strlen (p);
+		}
+
+	      if (functionname)
+		{
+		  sprintf (p, "%s ", functionname);
+		  p += strlen (p);
+		}
+	      else if (filename)
+		{
+		  char *q = (char *) strrchr (filename, '/');
+		  sprintf (p, "%s ", (q) ? q+1 : filename);
+		  p += strlen (p);
+		}
+
+	      if (*p == ' ')
+		*p = '\0';
+	    }
+	}
+
+      (*d10v_callback->printf_filtered) (d10v_callback,
+					 "0x%.6x %s: %-*.*s %-*s",
+					 (unsigned)PC, type,
+					 SIZE_LOCATION, SIZE_LOCATION, buf,
+					 SIZE_INSTRUCTION, name);
+    }
 
   in[0] = in1;
   in[1] = in2;
@@ -286,7 +363,7 @@ trace_input (name, in1, in2, in3)
 }
 
 static void
-trace_output (result)
+trace_output_func (result)
      enum op_types result;
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
@@ -865,7 +942,7 @@ OP_4E09 ()
 void
 OP_5F20 ()
 {
-  d10v_callback->printf_filtered(d10v_callback, "***** DBT *****  PC=%x\n",PC);
+  /* d10v_callback->printf_filtered(d10v_callback, "***** DBT *****  PC=%x\n",PC); */
   State.exception = SIGTRAP;
 }
 
@@ -2233,7 +2310,7 @@ void
 OP_5FE0 ()
 {
   trace_input ("stop", OP_VOID, OP_VOID, OP_VOID);
-  State.exception = SIGQUIT;
+  State.exception = SIG_D10V_STOP;
   trace_output (OP_VOID);
 }
 
@@ -2545,9 +2622,7 @@ OP_5F00 ()
 	    RETVAL = d10v_callback->open (d10v_callback, MEMPTR (PARM1), PARM2);
 	    break;
 	  case SYS_exit:
-	    /* EXIT - caller can look in PARM1 to work out the 
-	       reason */
-	    State.exception = SIGQUIT;
+	    State.exception = SIG_D10V_EXIT;
 	    break;
 
 	  case SYS_stat:

@@ -492,15 +492,22 @@ sim_stop_reason (reason, sigrc)
 {
 /*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_stop_reason:  PC=0x%x\n",PC<<2); */
 
-  if (State.exception == SIGQUIT)
+  switch (State.exception)
     {
+    case SIG_D10V_STOP:			/* stop instruction */
       *reason = sim_exited;
-      *sigrc = State.exception;
-    }
-  else
-    {
+      *sigrc = 0;
+      break;
+
+    case SIG_D10V_EXIT:			/* exit trap */
+      *reason = sim_exited;
+      *sigrc = State.regs[2];
+      break;
+
+    default:				/* some signal */
       *reason = sim_stopped;
       *sigrc = State.exception;
+      break;
     } 
 }
 
