@@ -1,3 +1,19 @@
+Fri Apr 24 11:14:13 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (autoconf-common autoheader-common): Pass `-l
+	../common' to autoconf and autoheader.  Unconditionally run
+	autoconf in every subdir.
+	(autoconf-changelog autoheader-changelog): Unconditionally run
+	commands in every subdir.
+	(autoconf-install autoheader-install): Likewise.
+
+Tue Mar 24 17:12:43 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
+
+	* Makefile.in:  Get SHELL from configure.
+	* (FLAGS_TO_PASS):  Pass down SHELL.
+	* configure:  Regenerate with autoconf 2.12.1 to fix shell issues for
+	NT native builds.
+
 Tue Mar 24 11::18:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* configure.in (extra_subdirs): Enable igen for mn10300.

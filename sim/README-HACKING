@@ -8,6 +8,8 @@ Contents
 - TAGS support
 - Generating "configure" files
 - tconfig.in
+- C Language Assumptions
+- "dump" commands under gdb
 
 The "common" directory
 ======================
@@ -37,7 +39,6 @@ The configure.in of a simulator using the common framework should look like:
 
 --- snip ---
 dnl Process this file with autoconf to produce a configure script.
-sinclude(../common/aclocal.m4)
 AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 
@@ -128,30 +129,30 @@ Generating "configure" files
 ============================
 
 For target's using the common framework, "configure" can be generated
-by running autoconf.  This works because configure.in contains
-"sinclude(../common/aclocal.m4)".
+by running `autoconf -l ../common'.  This will ensure that the
+qaclocal.m4 from the `common' directory is found.
 
 To regenerate the configure files for all targets using the common framework:
 
 	$  cd devo/sim
-	$  make -f Makefile.in autoconf-common
+	$  make -f Makefile.in SHELL=/bin/sh autoconf-common
 
 To add a change-log entry to the ChangeLog file for each updated
 directory (WARNING - check the modified new-ChangeLog files before
 renaming):
 
-	$  make -f Makefile.in autoconf-changelog
+	$  make -f Makefile.in SHELL=/bin/sh autoconf-changelog
 	$  more */new-ChangeLog
-	$  make -f Makefile.in autoconf-install
+	$  make -f Makefile.in SHELL=/bin/sh autoconf-install
 
 In a similar vein, both the configure and config.in files can be
 updated using the sequence:
 
 	$  cd devo/sim
-	$  make -f Makefile.in autoheader-common
-	$  make -f Makefile.in autoheader-changelog
+	$  make -f Makefile.in SHELL=/bin/sh autoheader-common
+	$  make -f Makefile.in SHELL=/bin/sh autoheader-changelog
 	$  more */new-ChangeLog
-	$  make -f Makefile.in autoheader-install
+	$  make -f Makefile.in SHELL=/bin/sh autoheader-install
 
 tconfig.in
 ==========
@@ -179,10 +180,47 @@ ANSI C compiler that supports a 64 bit data type.  Consequently:
 
 	o	The type `unsigned' is valid.
 
-However, the user should not assume:
+However, the user should be aware of the following:
 
-	o	`<number>LL' is acceptable.  Microsoft-C
-		doesn't reconize it.
+	o	GCC's `<number>LL' is NOT acceptable.
+		Microsoft-C doesn't reconize it.
 
-	o	`long long' or `_int64' provides a 64 bit
-		integer data type.
+	o	MSC's `<number>i64' is NOT acceptable.
+		GCC doesn't reconize it.
+
+	o	GCC's `long long' MSC's `_int64' can
+		NOT be used to define 64 bit integer data
+		types.
+
+	o	An empty array (eg int a[0]) is not valid.
+
+When building with GCC it is effectivly a requirement that
+--enable-sim-warnings be specified during configuration.
+
+"dump" commands under gdb
+=========================
+
+gdbinit.in contains the following
+
+define dump
+set sim_debug_dump ()
+end
+
+Simulators that define the sim_debug_dump function can then have their
+internal state pretty printed from gdb.
+
+FIXME: This can obviously be made more elaborate.  As needed it will be.
+
+"dump" commands under gdb
+=========================
+
+gdbinit.in contains the following
+
+define dump
+set sim_debug_dump ()
+end
+
+Simulators that define the sim_debug_dump function can then have their
+internal state pretty printed from gdb.
+
+FIXME: This can obviously be made more elaborate.  As needed it will be.

@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the sim library.
-#    Copyright (C) 1993, 1995, 1997 Free Software Foundation, Inc.
+#    Copyright (C) 1993, 1995, 1997, 1998 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -45,7 +45,7 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -93,7 +93,8 @@ FLAGS_TO_PASS = \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
+	"SHELL=$(SHELL)"
 
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
 # duplicating the lengthy definition.
@@ -210,16 +211,13 @@ autoconf-common autoheader-common:
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \
 	    then \
-		if grep SIM_AC_COMMON $$d/configure.in >/dev/null ; \
-		then \
-		    echo "Running autoconf in $$d ..." ; \
-		    (cd $$d && autoconf) ; \
-		    if [ $* = autoheader-common ] ; \
-		    then \
-		      echo "Running autoheader in $$d ..." ; \
-		      (cd $$d && autoheader) ; \
-		    fi ; \
-		fi ; \
+		 echo "Running autoconf in $$d ..." ; \
+		 (cd $$d && autoconf -l ../common) ; \
+		 if [ $@ = autoheader-common ] ; \
+		 then \
+		   echo "Running autoheader in $$d ..." ; \
+		   (cd $$d && autoheader -l ../common) ; \
+		 fi ; \
 	    fi ; \
 	done
 
@@ -233,20 +231,17 @@ autoconf-changelog autoheader-changelog:
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \
 	    then \
-		if grep SIM_AC_COMMON $$d/configure.in >/dev/null ; \
-		then \
-		    echo "Creating new-ChangeLog in $$d ..." ; \
-		    ( echo "$$date  $$name  <$$id@$$host>" ; \
-		      echo "" ; \
-		      echo "	* configure: Regenerated to track ../common/aclocal.m4 changes." ; \
-		      if [ $* = autoheader-changelog ] ; \
-		      then \
-		        echo "	* config.in: Ditto." ; \
-		      fi ; \
-		      echo "" ; \
-		      cat $$d/ChangeLog \
-		    ) > $$d/new-ChangeLog ; \
-		fi ; \
+		 echo "Creating new-ChangeLog in $$d ..." ; \
+		 ( echo "$$date  $$name  <$$id@$$host>" ; \
+		   echo "" ; \
+		   echo "	* configure: Regenerated to track ../common/aclocal.m4 changes." ; \
+		   if [ $@ = autoheader-changelog ] ; \
+		   then \
+		     echo "	* config.in: Ditto." ; \
+		   fi ; \
+		   echo "" ; \
+		   cat $$d/ChangeLog \
+		 ) > $$d/new-ChangeLog ; \
 	    fi ; \
 	done
 
@@ -255,10 +250,7 @@ autoconf-install autoheader-install:
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \
 	    then \
-		if grep SIM_AC_COMMON $$d/configure.in >/dev/null ; \
-		then \
-		    echo "Moving $$d/new-ChangeLog to $$d/ChangeLog ..." ; \
-		    mv $$d/new-ChangeLog $$d/ChangeLog ; \
-		fi ; \
+		 echo "Moving $$d/new-ChangeLog to $$d/ChangeLog ..." ; \
+		 mv $$d/new-ChangeLog $$d/ChangeLog ; \
 	    fi ; \
 	done
