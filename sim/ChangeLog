@@ -1,3 +1,23 @@
+Wed Nov  4 19:11:43 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* configure.in: Added case for fr30-*-*.
+	* configure: Regenerated.
+
+Fri Sep 25 10:12:19 1998  Christopher Faylor <cgf@cygnus.com>
+
+	* ppc/Makefile.in: Add EXEEXT to installed powerpc-eabi-run program
+	to allow successful operation on Windows.
+
+Thu May 28 14:59:46 1998 Jillian Ye <jillian@cygnus.com>
+
+        * Makefile.in: Take RUNTEST out of FLAG_TO_PASS
+                       so that make check can be invoked recursively.
+
+Wed Apr 29 12:38:53 1998  Mark Alexander  <marka@cygnus.com>
+
+	* configure.in: Build simulator on sparclite and sparc86x targets.
+	* configure: Regenerate.
+
 Sun Apr 26 15:21:01 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (autoconf-common autoheader-common): Don't pass -l
@@ -127,11 +147,9 @@ Wed Apr  2 14:25:52 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 Wed Mar 19 14:26:21 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
-start-sanitize-d30v
 	* configure.in (extra_subdirs): Include testsuite for d30v.
 	* configure: Regenerate.
 	
-end-sanitize-d30v
 	* Makefile.in (RUNTEST, RUNTESTFLAGS): Borrow test rules from
  	../gdb/Makefile.in
 	(check): New rules - drive the testsuite.
@@ -146,17 +164,13 @@ Wed Feb 19 10:34:20 1997  Andrew Cagney  <cagney@critters.cygnus.com>
 
 	* configure.in (extra_subdirs): Generalize common sub directory
  	into a list.
-start-sanitize-d30v
 	(extra_subdirs): For d30v add igen to the list to be built.
 
-end-sanitize-d30v
-start-sanitize-d30v
 Sun Feb 16 16:37:47 1997  Andrew Cagney  <cagney@critters.cygnus.com>
 
 	* configure.in (d30v): New target.
 	* configure: Regenerated.
 	
-end-sanitize-d30v
 Wed Feb 19 23:17:13 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Don't require GCC to build the mn10200
