@@ -1,5 +1,7 @@
 Sun Mar 20 11:26:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* Makefile.in: Avoid bug in hpux sed.
+
 	* objcopy.c: Changes to keep it from stripping symbols used
 	in output relocations.
 	(mark_symbols_used_in_relocations): New function.  Mark symbols
