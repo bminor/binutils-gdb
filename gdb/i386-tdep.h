@@ -71,7 +71,12 @@ struct gdbarch_tdep
   /* Get address of sigcontext for sigtramp.  */
   CORE_ADDR (*sigcontext_addr) (struct frame_info *);
 
-  /* Offset of saved PC and SP in `struct sigcontext'.  */
+  /* Offset of registers in `struct sigcontext'.  */
+  int *sc_reg_offset;
+  int sc_num_regs;
+
+  /* Offset of saved PC and SP in `struct sigcontext'.  Usage of these
+     is deprecated, please use `sc_reg_offset' instead.  */
   int sc_pc_offset;
   int sc_sp_offset;
 };
@@ -136,6 +141,16 @@ extern int i386_mxcsr_regnum_p (int regnum);
 #define FCOFF_REGNUM FIOFF_REGNUM
 #define FDS_REGNUM FOSEG_REGNUM
 #define FDOFF_REGNUM FOOFF_REGNUM
+
+/* Register numbers of various important registers.  */
+
+#define I386_EAX_REGNUM		0 /* %eax */
+#define I386_EDX_REGNUM		2 /* %edx */
+#define I386_ESP_REGNUM		4 /* %esp */
+#define I386_EBP_REGNUM		5 /* %ebp */
+#define I386_EIP_REGNUM		8 /* %eip */
+#define I386_EFLAGS_REGNUM	9 /* %eflags */
+#define I386_ST0_REGNUM		16 /* %st(0) */
 
 #define I386_NUM_GREGS	16
 #define I386_NUM_FREGS	16

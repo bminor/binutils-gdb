@@ -439,6 +439,27 @@ i386_linux_svr4_fetch_link_map_offsets (void)
 }
 
 
+/* From <asm/sigcontext.h>.  */
+static int i386_linux_sc_reg_offset[I386_NUM_GREGS] =
+{
+  11 * 4,			/* %eax */
+  10 * 4,			/* %ecx */
+  9 * 4,			/* %edx */
+  8 * 4,			/* %ebx */
+  7 * 4,			/* %esp */
+  6 * 4,			/* %ebp */
+  5 * 4,			/* %esi */
+  4 * 4,			/* %edi */
+  14 * 4,			/* %eip */
+  16 * 4,			/* %eflags */
+  15 * 4,			/* %cs */
+  18 * 4,			/* %ss */
+  3 * 4,			/* %ds */
+  2 * 4,			/* %es */
+  1 * 4,			/* %fs */
+  0 * 4				/* %gs */
+};
+
 static void
 i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -462,8 +483,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 
   tdep->sigcontext_addr = i386_linux_sigcontext_addr;
-  tdep->sc_pc_offset = 14 * 4;	/* From <asm/sigcontext.h>.  */
-  tdep->sc_sp_offset = 7 * 4;
+  tdep->sc_reg_offset = i386_linux_sc_reg_offset;
+  tdep->sc_num_regs = I386_NUM_GREGS;
 
   /* When the i386 Linux kernel calls a signal handler, the return
      address points to a bit of code on the stack.  This function is

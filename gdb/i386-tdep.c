@@ -47,16 +47,6 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 
-/* Register numbers of various important registers.  */
-
-#define I386_EAX_REGNUM		0 /* %eax */
-#define I386_EDX_REGNUM		2 /* %edx */
-#define I386_ESP_REGNUM		4 /* %esp */
-#define I386_EBP_REGNUM		5 /* %ebp */
-#define I386_EIP_REGNUM		8 /* %eip */
-#define I386_EFLAGS_REGNUM	9 /* %eflags */
-#define I386_ST0_REGNUM		16 /* %st(0) */
-
 /* Names of the registers.  The first 10 registers match the register
    numbering scheme used by GCC for stabs and DWARF.  */
 
@@ -248,7 +238,7 @@ i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 
 /* The maximum number of saved registers.  This should include all
    registers mentioned above, and %eip.  */
-#define I386_NUM_SAVED_REGS	9
+#define I386_NUM_SAVED_REGS	I386_NUM_GREGS
 
 struct i386_frame_cache
 {
@@ -884,8 +874,21 @@ i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->base = extract_unsigned_integer (buf, 4) - 4;
 
   addr = tdep->sigcontext_addr (next_frame);
-  cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
-  cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
+  if (tdep->sc_reg_offset)
+    {
+      int i;
+
+      gdb_assert (tdep->sc_num_regs <= I386_NUM_SAVED_REGS);
+
+      for (i = 0; i < tdep->sc_num_regs; i++)
+	if (tdep->sc_reg_offset[i] != -1)
+	  cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
+    }
+  else
+    {
+      cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
+      cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
+    }
 
   *this_cache = cache;
   return cache;
@@ -1621,6 +1624,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;
   tdep->sigcontext_addr = NULL;
+  tdep->sc_reg_offset = NULL;
   tdep->sc_pc_offset = -1;
   tdep->sc_sp_offset = -1;
 

@@ -86,8 +86,25 @@ i386bsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 /* Traditional BSD (4.3 BSD, still used for BSDI and 386BSD).  */
 
 /* From <machine/signal.h>.  */
-int i386bsd_sc_pc_offset = 20;
-int i386bsd_sc_sp_offset = 8;
+int i386bsd_sc_reg_offset[I386_NUM_GREGS] =
+{
+  -1,				/* %eax */
+  -1,				/* %ecx */
+  -1,				/* %edx */
+  -1,				/* %ebx */
+  8 + 0 * 4,			/* %esp */
+  8 + 1 * 4,			/* %ebp */
+  -1,				/* %esi */
+  -1,				/* %edi */
+  8 + 3 * 4,			/* %eip */
+  8 + 4 * 4,			/* %eflags */
+  -1,				/* %cs */
+  -1,				/* %ss */
+  -1,				/* %ds */
+  -1,				/* %es */
+  -1,				/* %fs */
+  -1				/* %gs */
+};
 
 void
 i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -109,14 +126,35 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigtramp_start = 0xfdbfdfc0;
   tdep->sigtramp_end = 0xfdbfe000;
   tdep->sigcontext_addr = i386bsd_sigcontext_addr;
-  tdep->sc_pc_offset = i386bsd_sc_pc_offset;
-  tdep->sc_sp_offset = i386bsd_sc_sp_offset;
+  tdep->sc_reg_offset = i386bsd_sc_reg_offset;
+  tdep->sc_num_regs = I386_NUM_GREGS;
 }
 
 /* FreeBSD 3.0-RELEASE or later.  */
 
 CORE_ADDR i386fbsd_sigtramp_start = 0xbfbfdf20;
 CORE_ADDR i386fbsd_sigtramp_end = 0xbfbfdff0;
+
+/* From <machine/signal.h>.  */
+int i386fbsd_sc_reg_offset[I386_NUM_GREGS] =
+{
+  8 + 14 * 4,			/* %eax */
+  8 + 13 * 4,			/* %ecx */
+  8 + 12 * 4,			/* %edx */
+  8 + 11 * 4,			/* %ebx */
+  8 + 0 * 4,                    /* %esp */
+  8 + 1 * 4,                    /* %ebp */
+  8 + 10 * 4,                   /* %esi */
+  8 + 9 * 4,                    /* %edi */
+  8 + 3 * 4,                    /* %eip */
+  8 + 4 * 4,                    /* %eflags */
+  8 + 7 * 4,                    /* %cs */
+  8 + 8 * 4,                    /* %ss */
+  8 + 6 * 4,                    /* %ds */
+  8 + 5 * 4,                    /* %es */
+  8 + 15 * 4,			/* %fs */
+  8 + 16 * 4			/* %gs */
+};
 
 static void
 i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -132,6 +170,10 @@ i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FreeBSD uses a different memory layout.  */
   tdep->sigtramp_start = i386fbsd_sigtramp_start;
   tdep->sigtramp_end = i386fbsd_sigtramp_end;
+
+  /* FreeBSD has a more complete `struct sigcontext'.  */
+  tdep->sc_reg_offset = i386fbsd_sc_reg_offset;
+  tdep->sc_num_regs = I386_NUM_GREGS;
 }
 
 static void
@@ -151,8 +193,25 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 /* FreeBSD 4.0-RELEASE or later.  */
 
 /* From <machine/signal.h>.  */
-int i386fbsd4_sc_pc_offset = 76;
-int i386fbsd4_sc_sp_offset = 88;
+int i386fbsd4_sc_reg_offset[I386_NUM_GREGS] =
+{
+  20 + 11 * 4,			/* %eax */
+  20 + 10 * 4,			/* %ecx */
+  20 + 9 * 4,			/* %edx */
+  20 + 8 * 4,			/* %ebx */
+  20 + 17 * 4,			/* %esp */
+  20 + 6 * 4,			/* %ebp */
+  20 + 5 * 4,			/* %esi */
+  20 + 4 * 4,			/* %edi */
+  20 + 14 * 4,			/* %eip */
+  20 + 16 * 4,			/* %eflags */
+  20 + 15 * 4,			/* %cs */
+  20 + 18 * 4,			/* %ss */
+  20 + 3 * 4,			/* %ds */
+  20 + 2 * 4,			/* %es */
+  20 + 1 * 4,			/* %fs */
+  20 + 0 * 4			/* %gs */
+};
 
 static void
 i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -164,8 +223,8 @@ i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386fbsd_init_abi (info, gdbarch);
 
   /* FreeBSD 4.0 introduced a new `struct sigcontext'.  */
-  tdep->sc_pc_offset = i386fbsd4_sc_pc_offset;
-  tdep->sc_sp_offset = i386fbsd4_sc_sp_offset;
+  tdep->sc_reg_offset = i386fbsd4_sc_reg_offset;
+  tdep->sc_num_regs = I386_NUM_GREGS;
 }
 
 

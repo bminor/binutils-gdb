@@ -1,3 +1,49 @@
+2003-05-31  Mark Kettenis  <kettenis@gnu.org>
+
+	From Michal Ludvig  <mludvig@suse.cz>:
+	* i386-tdep.h (struct gdbarch_tdep): Add members `sc_reg_offset'
+	and `sc_num_regs'.
+	(I386_EAX_REGNUM, I386_EDX_REGNUM, I386_ESP_REGNUM,
+	I386_EBP_REGNUM, I386_EIP_REGNUM, I386_EFLAGS_REGNUM,
+	I386_ST0_REGNUM): Move here from...
+	* i386-tdep.c: ... here.
+	(I386_NUM_SAVED_REGS): Define to I386_NUM_REGS.
+	(i386_sigtramp_frame_cache): Use `sc_reg_offset' to find saved
+	registers if possible.
+	(i386_gdbarch_init): Initialize TDEP->sc_reg_offset.
+	* i386bsd-tdep.c (i386bsd_sc_pc_offset, i386bsd_sc_sp_offset):
+	Remove variables.
+	(i386bsd_sc_reg_offset): New variable.
+	(i386bsd_init_abi): Initialize TDEP->sc_reg_offset and
+	TDEP->sc_num_regs instead of TDEP->sc_pc_offset and
+	TDEP->sc_sp_offset.
+	(i386fbsd_sc_reg_offset): New variable.
+	(i386fbsdaout_init_abi): Initialize TDEP->sc_reg_offset and
+	TDEP->sc_num_regs.
+	(i386fbsd4_sc_pc_offset, i386fbsd4_sc_sp_offset): Remove
+	variables.
+	(i386fbsd4_sc_reg_offset): New variable.
+	(i3864bsd4_init_abi): Initialize TDEP->sc_reg_offset and
+	TDEP->sc_num_regs instead of TDEP->sc_pc_offset and
+	TDEP->sc_sp_offset.
+	* i386-linux-tdep.c (i386_linux_sc_reg_offset): New variable.
+	(i386_linux_init_abi): Set TDEP->sc_reg_offset and TDEP->sc_num_regs.
+	* i386nbsd-tdep.c (i386nbsd_sc_pc_offset, i386nbsd_sc_sp_offset):
+	Remove variables.
+	(i386nbsd_sc_reg_offset): New variable.
+	(i386nbsd_init_abi): Initialize TDEP->sc_reg_offset and
+	TDEP->sc_num_regs instead of TDEP->sc_pc_offset and
+	TDEP->sc_sp_offset.
+	* i386obsd-tdep.c (i386obsd_sc_pc_offset, i386obsd_sc_sp_offset):
+	Remove variables.
+	(i386obsd_sc_reg_offset): New variable.
+	(i386obsd_init_abi): Initialize TDEP->sc_reg_offset and
+	TDEP->sc_num_regs instead of TDEP->sc_pc_offset and
+	TDEP->sc_sp_offset.
+	* i386bsd-nat.c (_initialize_i386bsd_nat): Adjust for changes in
+	i386bsd-tdep.c, i386nbsd-tdep.c and i386obsd-tdep.c.  Add check
+	for frame pointer offset in `struct sigcontext'.
+
 2003-05-31  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Do not set the deprecated
