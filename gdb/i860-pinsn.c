@@ -1,6 +1,7 @@
 /* Print i860 instructions for GDB, the GNU debugger.
+   Copyright status of this module is unclear!!!
    Copyright (C) 1992 Free Software Foundation, Inc.
-   Contributed by Peggy Fieland (pfieland@stratus.com)
+   SVR4 changes Contributed by Peggy Fieland (pfieland@stratus.com)
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone

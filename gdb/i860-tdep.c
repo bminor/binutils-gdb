@@ -1,8 +1,7 @@
-/* Machine-dependent code which would otherwise be in inflow.c and core.c,
-   for GDB, the GNU debugger.
+/* Target-dependent code for the i860 for GDB, the GNU debugger.
+   Copyright is unclear on this module!!!
    Copyright (C) 1992 Free Software Foundation, Inc.
-   This code is for the i860 cpu.
-   Contributed by Peggy Fieland (pfieland@stratus.com)
+   SVR4 and ELF/DWARF changes Contributed by Peggy Fieland (pfieland@stratus.com)
    
    GDB is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY.  No author or distributor accepts responsibility to anyone
