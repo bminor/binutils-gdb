@@ -1,3 +1,23 @@
+Tue Jul 11 19:06:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c (mips_request): Change all arguments to ULONGEST.
+	(mips_exit_debug, mips_resume, mips_initialize, mips_wait,
+ 	mips_fetch_registers, mips_store_registers, mips_fetch_word):
+ 	Update.
+	(mips_xfer_memory): When mask_address_p, mask MEMADDR down to just
+ 	32 bits.
+	(_initialize_remote_mips): Add ``set mask-address'' command.
+
+	* mips-tdep.c (_initialize_mips_tdep): Replace "set mask-address"
+ 	with "set mips mask-address".  Implement using
+ 	add_set_auto_boolean_cmd.
+	(struct gdbarch_tdep): Add default_mask_address_p.
+	(mips_mask_address_p, show_mask_address): New functions.
+	(mips_addr_bits_remove): Use mips_mask_address_p() to determine if
+ 	masking is needed.
+	(mips_gdbarch_init): Set default_mask_address_p to zero.
+	(mips_dump_tdep): Print value of mask_address_p.
+
 Tue Jul 11 18:32:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* printcmd.c (print_scalar_formatted): Move masking of 'a' address

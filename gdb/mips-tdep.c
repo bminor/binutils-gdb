@@ -124,6 +124,7 @@ struct gdbarch_tdep
     int mips_regs_have_home_p;
     int mips_default_stack_argsize;
     int gdb_target_is_mips64;
+    int default_mask_address_p;
   };
 
 #if GDB_MULTI_ARCH
@@ -466,7 +467,46 @@ mips_register_convert_to_raw (virtual_type, n, virt_buf, raw_buf)
 }
 
 /* Should the upper word of 64-bit addresses be zeroed? */
-static int mask_address_p = 1;
+enum cmd_auto_boolean mask_address_var = CMD_AUTO_BOOLEAN_AUTO;
+
+static int
+mips_mask_address_p (void)
+{
+  switch (mask_address_var)
+    {
+    case CMD_AUTO_BOOLEAN_TRUE:
+      return 1;
+    case CMD_AUTO_BOOLEAN_FALSE:
+      return 0;
+      break;
+    case CMD_AUTO_BOOLEAN_AUTO:
+      return gdbarch_tdep (current_gdbarch)->default_mask_address_p;
+    default:
+      internal_error ("mips_mask_address_p: bad switch");
+      return -1;
+    }      
+}
+
+static void
+show_mask_address (char *cmd, int from_tty)
+{
+  switch (mask_address_var)
+    {
+    case CMD_AUTO_BOOLEAN_TRUE:
+      printf_filtered ("The 32 bit mips address mask is enabled\n");
+      break;
+    case CMD_AUTO_BOOLEAN_FALSE:
+      printf_filtered ("The 32 bit mips address mask is disabled\n");
+      break;
+    case CMD_AUTO_BOOLEAN_AUTO:
+      printf_filtered ("The 32 bit address mask is set automatically.  Currently %s\n",
+		       mips_mask_address_p () ? "enabled" : "disabled");
+      break;
+    default:
+      internal_error ("show_mask_address: bad switch");
+      break;
+    }      
+}
 
 /* Should call_function allocate stack space for a struct return?  */
 int
@@ -1315,7 +1355,7 @@ mips_addr_bits_remove (addr)
 {
   if (GDB_TARGET_IS_MIPS64)
     {
-      if (mask_address_p && (addr >> 32 == (CORE_ADDR) 0xffffffff))
+      if (mips_mask_address_p () && (addr >> 32 == (CORE_ADDR) 0xffffffff))
 	{
 	  /* This hack is a work-around for existing boards using
 	     PMON, the simulator, and any other 64-bit targets that
@@ -1324,17 +1364,22 @@ mips_addr_bits_remove (addr)
 	     hardware.  Thus, the PC or SP are likely to have been
 	     sign extended to all 1s by instruction sequences that
 	     load 32-bit addresses.  For example, a typical piece of
-	     code that loads an address is this: lui $r2, <upper 16
-	     bits> ori $r2, <lower 16 bits> But the lui sign-extends
-	     the value such that the upper 32 bits may be all 1s.  The
-	     workaround is simply to mask off these bits.  In the
-	     future, gcc may be changed to support true 64-bit
-	     addressing, and this masking will have to be disabled.  */
+	     code that loads an address is this:
+	         lui $r2, <upper 16 bits>
+	         ori $r2, <lower 16 bits>
+	     But the lui sign-extends the value such that the upper 32
+	     bits may be all 1s.  The workaround is simply to mask off
+	     these bits.  In the future, gcc may be changed to support
+	     true 64-bit addressing, and this masking will have to be
+	     disabled.  */
 	  addr &= (CORE_ADDR) 0xffffffff;
 	}
     }
-  else
+  else if (mips_mask_address_p ())
     {
+      /* FIXME: This is wrong!  mips_addr_bits_remove() shouldn't be
+         masking off bits, instead, the actual target should be asking
+         for the address to be converted to a valid pointer. */
       /* Even when GDB is configured for some 32-bit targets
 	 (e.g. mips-elf), BFD is configured to handle 64-bit targets,
 	 so CORE_ADDR is 64 bits.  So we still have to mask off
@@ -4046,6 +4091,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 15;
       tdep->mips_regs_have_home_p = 1;
       tdep->gdb_target_is_mips64 = 0;
+      tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -4058,6 +4104,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 15;
       tdep->mips_regs_have_home_p = 1;
       tdep->gdb_target_is_mips64 = 1;
+      tdep->default_mask_address_p = 0; 
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -4070,6 +4117,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 0;
       tdep->gdb_target_is_mips64 = 0;
+      tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -4082,6 +4130,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 0;
       tdep->gdb_target_is_mips64 = 1;
+      tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -4094,6 +4143,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 0;
       tdep->gdb_target_is_mips64 = 0;
+      tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -4106,6 +4156,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 1;
       tdep->gdb_target_is_mips64 = 0;
+      tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -4252,6 +4303,10 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
       fprintf_unfiltered (file,
 			  "mips_dump_tdep: tdep->mips_abi = %d\n",
 			  tdep->mips_abi);
+      fprintf_unfiltered (file,
+			  "mips_dump_tdep: mips_mask_address_p() %d (default %d)\n",
+			  mips_mask_address_p (),
+			  tdep->default_mask_address_p);
     }
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: FP_REGISTER_DOUBLE = %d\n",
@@ -4732,12 +4787,13 @@ search.  The only need to set it is when debugging a stripped executable.",
 
   /* Allow the user to control whether the upper bits of 64-bit
      addresses should be zeroed.  */
-  add_show_from_set
-    (add_set_cmd ("mask-address", no_class, var_boolean, (char *) &mask_address_p,
-		  "Set zeroing of upper 32 bits of 64-bit addresses.\n\
-Use \"on\" to enable the masking, and \"off\" to disable it.\n\
-Without an argument, zeroing of upper address bits is enabled.", &setlist),
-     &showlist);
+  c = add_set_auto_boolean_cmd ("mask-address", no_class, &mask_address_var,
+				"Set zeroing of upper 32 bits of 64-bit addresses.\n\
+Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to allow GDB to determine\n\
+the correct value.\n",
+				&setmipscmdlist);
+  add_cmd ("mask-address", no_class, show_mask_address,
+	       "Show current mask-address value", &showmipscmdlist);
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */

@@ -77,9 +77,8 @@ static void mips_send_command (const char *cmd, int prompt);
 
 static int mips_receive_packet (char *buff, int throw_error, int timeout);
 
-static CORE_ADDR mips_request (int cmd, CORE_ADDR addr,
-			       CORE_ADDR data, int *perr, int timeout,
-			       char *buff);
+static ULONGEST mips_request (int cmd, ULONGEST addr, ULONGEST data,
+			      int *perr, int timeout, char *buff);
 
 static void mips_initialize (void);
 
@@ -1247,14 +1246,13 @@ mips_receive_packet (buff, throw_error, timeout)
    occurs, it sets *PERR to 1 and sets errno according to what the
    target board reports.  */
 
-static CORE_ADDR
-mips_request (cmd, addr, data, perr, timeout, buff)
-     int cmd;
-     CORE_ADDR addr;
-     CORE_ADDR data;
-     int *perr;
-     int timeout;
-     char *buff;
+static ULONGEST
+mips_request (int cmd,
+	      ULONGEST addr,
+	      ULONGEST data,
+	      int *perr,
+	      int timeout,
+	      char *buff)
 {
   char myBuff[DATA_MAXLEN + 1];
   int len;
@@ -1377,15 +1375,13 @@ mips_exit_debug ()
     {
       /* The DDB (NEC) and MiniRISC (LSI) versions of PMON exit immediately,
          so we do not get a reply to this command: */
-      mips_request ('x', (unsigned int) 0, (unsigned int) 0, NULL,
-		    mips_receive_wait, NULL);
+      mips_request ('x', 0, 0, NULL, mips_receive_wait, NULL);
       mips_need_reply = 0;
       if (!mips_expect (" break!"))
 	return -1;
     }
   else
-    mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
-		  mips_receive_wait, NULL);
+    mips_request ('x', 0, 0, &err, mips_receive_wait, NULL);
 
   if (!mips_expect (mips_monitor_prompt))
     return -1;
@@ -1525,8 +1521,7 @@ mips_initialize ()
   /* If this doesn't call error, we have connected; we don't care if
      the request itself succeeds or fails.  */
 
-  mips_request ('r', (unsigned int) 0, (unsigned int) 0, &err,
-		mips_receive_wait, NULL);
+  mips_request ('r', 0, 0, &err, mips_receive_wait, NULL);
   set_current_frame (create_new_frame (read_fp (), read_pc ()));
   select_frame (get_current_frame (), 0);
 }
@@ -1763,9 +1758,7 @@ mips_resume (pid, step, siggnal)
 
   /* LSI PMON requires returns a reply packet "0x1 s 0x0 0x57f" after
      a single step, so we wait for that.  */
-  mips_request (step ? 's' : 'c',
-		(unsigned int) 1,
-		(unsigned int) siggnal,
+  mips_request (step ? 's' : 'c', 1, siggnal,
 		mips_monitor == MON_LSI && step ? &err : (int *) NULL,
 		mips_receive_wait, NULL);
 }
@@ -1820,8 +1813,7 @@ mips_wait (pid, status)
 
   /* No timeout; we sit here as long as the program continues to execute.  */
   mips_wait_flag = 1;
-  rstatus = mips_request ('\000', (unsigned int) 0, (unsigned int) 0, &err, -1,
-			  buff);
+  rstatus = mips_request ('\000', 0, 0, &err, -1, buff);
   mips_wait_flag = 0;
   if (err)
     mips_error ("Remote failure: %s", safe_strerror (errno));
@@ -2017,11 +2009,11 @@ mips_fetch_registers (regno)
 	     compiled without the 64bit register access commands. This
 	     means we cannot get hold of the full register width. */
 	  if (mips_monitor == MON_DDB)
-	    val = (unsigned) mips_request ('t', (unsigned int) pmon_reg,
-			   (unsigned int) 0, &err, mips_receive_wait, NULL);
+	    val = (unsigned) mips_request ('t', pmon_reg, 0,
+					   &err, mips_receive_wait, NULL);
 	  else
-	    val = mips_request ('r', (unsigned int) pmon_reg,
-			   (unsigned int) 0, &err, mips_receive_wait, NULL);
+	    val = mips_request ('r', pmon_reg, 0,
+				&err, mips_receive_wait, NULL);
 	  if (err)
 	    mips_error ("Can't read register %d: %s", regno,
 			safe_strerror (errno));
@@ -2061,7 +2053,7 @@ mips_store_registers (regno)
       return;
     }
 
-  mips_request ('R', (unsigned int) mips_map_regno (regno),
+  mips_request ('R', mips_map_regno (regno),
 		read_register (regno),
 		&err, mips_receive_wait, NULL);
   if (err)
@@ -2077,14 +2069,11 @@ mips_fetch_word (addr)
   unsigned int val;
   int err;
 
-  /* FIXME! addr was cast to uint! */
-  val = mips_request ('d', addr, (unsigned int) 0, &err,
-		      mips_receive_wait, NULL);
+  val = mips_request ('d', addr, 0, &err, mips_receive_wait, NULL);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      /* FIXME! addr was cast to uint! */
-      val = mips_request ('i', addr, (unsigned int) 0, &err,
+      val = mips_request ('i', addr, 0, &err,
 			  mips_receive_wait, NULL);
       if (err)
 	mips_error ("Can't read address 0x%s: %s",
@@ -2107,14 +2096,12 @@ mips_store_word (addr, val, old_contents)
   int err;
   unsigned int oldcontents;
 
-  oldcontents = mips_request ('D', addr, (unsigned int) val,
-			      &err,
+  oldcontents = mips_request ('D', addr, val, &err,
 			      mips_receive_wait, NULL);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      oldcontents = mips_request ('I', addr,
-				  (unsigned int) val, &err,
+      oldcontents = mips_request ('I', addr, val, &err,
 				  mips_receive_wait, NULL);
       if (err)
 	return errno;
@@ -2131,6 +2118,8 @@ mips_store_word (addr, val, old_contents)
    for a longword, since it transfers values in ASCII.  We want the
    byte values, so we have to swap the longword values.  */
 
+static int mask_address_p = 1;
+
 static int
 mips_xfer_memory (memaddr, myaddr, len, write, ignore)
      CORE_ADDR memaddr;
@@ -2139,15 +2128,23 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
      int write;
      struct target_ops *ignore;
 {
-  register int i;
-  /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & ~3;
-  /* Round ending address up; get number of longwords that makes.  */
-  register int count = (((memaddr + len) - addr) + 3) / 4;
-  /* Allocate buffer of that many longwords.  */
-  register char *buffer = alloca (count * 4);
-
+  int i;
+  CORE_ADDR addr;
+  int count;
+  char *buffer;
   int status;
+
+  /* PMON targets do not cope well with 64 bit addresses.  Mask the
+     value down to 32 bits. */
+  if (mask_address_p)
+    memaddr &= (CORE_ADDR) 0xffffffff;
+
+  /* Round starting address down to longword boundary.  */
+  addr = memaddr & ~3;
+  /* Round ending address up; get number of longwords that makes.  */
+  count = (((memaddr + len) - addr) + 3) / 4;
+  /* Allocate buffer of that many longwords.  */
+  buffer = alloca (count * 4);
 
   if (write)
     {
@@ -3697,4 +3694,11 @@ synchronize with the remote system.  A value of -1 means that there is no limit\
 
   add_com ("pmon <command>", class_obscure, pmon_command,
 	   "Send a packet to PMON (must be in debug mode).");
+
+  add_show_from_set (add_set_cmd ("mask-address", no_class,
+				  var_boolean, &mask_address_p,
+				  "Set zeroing of upper 32 bits of 64-bit addresses when talking to PMON targets.\n\
+Use \"on\" to enable the masking and \"off\" to disable it.\n",
+				  &setlist),
+		     &showlist);
 }
