@@ -355,7 +355,7 @@ send_resp (desc, c)
      char c;
 {
   debug_serial_write (desc, &c, 1);
-  return readchar (desc, 2);
+  return readchar (desc, remote_timeout);
 }
 
 static void
@@ -623,15 +623,42 @@ download (target_name, args, from_tty, write_routine, start_routine)
     {
       if (bfd_get_section_flags (pbfd, section) & SEC_LOAD)
 	{
-	  bfd_vma section_address;
+	  bfd_vma	section_address;
 	  bfd_size_type section_size;
-	  file_ptr fptr;
+	  file_ptr	fptr;
+	  const char   *section_name;
+
+	  section_name = bfd_get_section_name(pbfd, section);
 
 	  section_address = bfd_get_section_vma (pbfd, section);
+
 	  /* Adjust sections from a.out files, since they don't
 	     carry their addresses with.  */
 	  if (bfd_get_flavour (pbfd) == bfd_target_aout_flavour)
-	    section_address += LOAD_ADDRESS;
+	    {
+	      if (strcmp (section_name, ".text") == 0)
+		section_address = bfd_get_start_address (pbfd);
+	      else if (strcmp (section_name, ".data") == 0)
+		{
+		  /* Read the first 8 bytes of the data section.
+		     There should be the string 'DaTa' followed by
+		     a word containing the actual section address. */
+		  struct data_marker
+		  {
+		    char signature[4];	/* 'DaTa' */
+		    unsigned char sdata[4];	/* &sdata */
+		  } marker;
+		  bfd_get_section_contents (pbfd, section, &marker, 0,
+					    sizeof (marker));
+		  if (strncmp (marker.signature, "DaTa", 4) == 0)
+		    {
+		      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+			section_address = bfd_getb32 (marker.sdata);
+		      else
+			section_address = bfd_getl32 (marker.sdata);
+		    }
+		}
+	    }
 
 	  section_size = bfd_get_section_size_before_reloc (section);
 
@@ -691,7 +718,7 @@ sparclite_serial_start (entry)
   store_unsigned_integer (buffer + 1, 4, entry);
 
   debug_serial_write (remote_desc, buffer, 1 + 4);
-  i = readchar (remote_desc, 2);
+  i = readchar (remote_desc, remote_timeout);
   if (i != 0x55)
     error ("Can't start SparcLite.  Error code %d\n", i);
 }
@@ -723,7 +750,7 @@ sparclite_serial_write (from_bfd, from_sec, from_addr, to_addr, len)
     error ("Bad response from load command (0x%x)", i);
 
   debug_serial_write (remote_desc, buffer, 4 + 4 + len);
-  i = readchar (remote_desc, 2);
+  i = readchar (remote_desc, remote_timeout);
 
   if (i != checksum)
     error ("Bad checksum from load command (0x%x)", i);

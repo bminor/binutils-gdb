@@ -1,3 +1,10 @@
+Wed Oct 28 08:01:38 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sparcl-tdep.c (send_resp, sparclite_serial_start,
+	sparclite_serial_write): Use remote_timeout instead of hardcoded
+	two second timeout.
+	(download): Fix adjustment of a.out load addresses.
+
 Wed Oct 28 12:32:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (--enable-build-warnings): Finish rename from
