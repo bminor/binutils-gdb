@@ -1,4 +1,14 @@
+<<<<<<< ChangeLog
 Thu Aug  5 08:58:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* ser-go32.c: Define job_control variable.
+=======
+Thu Aug  5 15:56:13 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: z8k-coff is the same as z8k-sim
+
+Thu Aug  5 08:58:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+>>>>>>> 1.1606
 
 	* 29k-share/udi/udip2soc.c: Include sys/types.h before sys/file.h.
 

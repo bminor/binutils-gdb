@@ -396,8 +396,9 @@ gdb_setpgid ()
   return 0;
 }
 
+int job_control = 0;
+
 _initialize_ser_go32 ()
 {
-  job_control = 0;
   serial_add_interface (&go32_ops);
 }
