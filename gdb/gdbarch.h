@@ -239,6 +239,19 @@ extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (NUM_PSEUDO_REGS)
+#define NUM_PSEUDO_REGS (0)
+#endif
+
+extern int gdbarch_num_pseudo_regs (struct gdbarch *gdbarch);
+extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo_regs);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (NUM_PSEUDO_REGS)
+#define NUM_PSEUDO_REGS (gdbarch_num_pseudo_regs (current_gdbarch))
+#endif
+#endif
+
 extern int gdbarch_sp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #if GDB_MULTI_ARCH

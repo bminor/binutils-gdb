@@ -59,15 +59,6 @@ extern void write_inferior_status_register (struct inferior_status
 #define ARCH_NUM_REGS NUM_REGS
 #endif
 
-/* This macro gives the number of pseudo-registers that live in the
-   register namespace but do not get fetched or stored on the target.
-   These pseudo-registers may be aliases for other registers, 
-   combinations of other registers, or they may be computed by GDB. 
-   FIXME: move into gdbarch.[ch] */
-#ifndef NUM_PSEUDO_REGS
-#define NUM_PSEUDO_REGS 0
-#endif
-
 /* This function is called when the value of a pseudo-register needs
    to be updated.  Typically it will be defined on a per-architecture
    basis.  FIXME: move into gdbarch.[ch].  */

@@ -1,3 +1,10 @@
+2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdbarch.sh: Add NUM_PSEUDO_REGS to the gdbarch structure.
+	* gdbarch.c: Regenerate. 
+	* gdbarch.h: Regenerate.
+	* inferior.h (NUM_PSEUDO_REGS): Delete macro.
+
 Sun Jul 23 21:40:55 2000  Anthony Green  <green@redhat.com>
 
 	* language.c: Include jv-lang.h.

@@ -145,6 +145,7 @@ struct gdbarch
   gdbarch_read_sp_ftype *read_sp;
   gdbarch_write_sp_ftype *write_sp;
   int num_regs;
+  int num_pseudo_regs;
   int sp_regnum;
   int fp_regnum;
   int pc_regnum;
@@ -252,6 +253,7 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (float),
   8 * sizeof (double),
   8 * sizeof (long double),
+  0,
   0,
   0,
   0,
@@ -479,6 +481,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->num_regs == -1))
     internal_error ("gdbarch: verify_gdbarch: num_regs invalid");
+  /* Skip verify of num_pseudo_regs, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->sp_regnum == -1))
     internal_error ("gdbarch: verify_gdbarch: sp_regnum invalid");
@@ -774,6 +777,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: NUM_REGS # %s\n",
                       XSTRING (NUM_REGS));
+#endif
+#ifdef NUM_PSEUDO_REGS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NUM_PSEUDO_REGS # %s\n",
+                      XSTRING (NUM_PSEUDO_REGS));
 #endif
 #ifdef SP_REGNUM
   fprintf_unfiltered (file,
@@ -1347,6 +1355,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: NUM_REGS = %ld\n",
                       (long) NUM_REGS);
+#endif
+#ifdef NUM_PSEUDO_REGS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NUM_PSEUDO_REGS = %ld\n",
+                      (long) NUM_PSEUDO_REGS);
 #endif
 #ifdef SP_REGNUM
   fprintf_unfiltered (file,
@@ -2166,6 +2179,22 @@ set_gdbarch_num_regs (struct gdbarch *gdbarch,
                       int num_regs)
 {
   gdbarch->num_regs = num_regs;
+}
+
+int
+gdbarch_num_pseudo_regs (struct gdbarch *gdbarch)
+{
+  /* Skip verify of num_pseudo_regs, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_num_pseudo_regs called\n");
+  return gdbarch->num_pseudo_regs;
+}
+
+void
+set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch,
+                             int num_pseudo_regs)
+{
+  gdbarch->num_pseudo_regs = num_pseudo_regs;
 }
 
 int

@@ -294,6 +294,11 @@ f:1:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:0
 f:1:TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:0
 #
 v:2:NUM_REGS:int:num_regs::::0:-1
+# This macro gives the number of pseudo-registers that live in the
+# register namespace but do not get fetched or stored on the target.
+# These pseudo-registers may be aliases for other registers, 
+# combinations of other registers, or they may be computed by GDB. 
+v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 v:2:SP_REGNUM:int:sp_regnum::::0:-1
 v:2:FP_REGNUM:int:fp_regnum::::0:-1
 v:2:PC_REGNUM:int:pc_regnum::::0:-1
