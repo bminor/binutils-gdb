@@ -1,3 +1,9 @@
+2003-05-30  Kris Warkentin <kewarken@qnx.com>
+
+	* elf.c (elfcore_grok_nto_status): Only set lwpid for the active or
+	signalled thread.
+	(elfcore_grok_nto_gregs): Only make .reg section for the active thread.
+
 2003-05-29  Nick Clifton  <nickc@redhat.com>
 
 	* pef.c: Include "safe-ctype.h" instead of <ctype.h>.

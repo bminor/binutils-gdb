@@ -7015,18 +7015,30 @@ elfcore_grok_nto_status (abfd, note, tid)
   char buf[100];
   char *name;
   asection *sect;
+  short sig;
+  unsigned flags;
 
   /* nto_procfs_status 'pid' field is at offset 0.  */
   elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, (bfd_byte *) ddata);
 
-  /* nto_procfs_status 'tid' field is at offset 4.  */
-  elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, (bfd_byte *) ddata + 4);
+  /* nto_procfs_status 'tid' field is at offset 4.  Pass it back.  */
+  *tid = bfd_get_32 (abfd, (bfd_byte *) ddata + 4);
+
+  /* nto_procfs_status 'flags' field is at offset 8.  */
+  flags = bfd_get_32 (abfd, (bfd_byte *) ddata + 8);
 
   /* nto_procfs_status 'what' field is at offset 14.  */
-  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, (bfd_byte *) ddata + 14);
+  if ((sig = bfd_get_16 (abfd, (bfd_byte *) ddata + 14)) > 0)
+    {
+      elf_tdata (abfd)->core_signal = sig;
+      elf_tdata (abfd)->core_lwpid = *tid;
+    }
 
-  /* Pass tid back.  */
-  *tid = elf_tdata (abfd)->core_lwpid;
+  /* _DEBUG_FLAG_CURTID (current thread) is 0x80.  Some cores
+     do not come from signals so we make sure we set the current
+     thread just in case.  */
+  if (flags & 0x00000080)
+    elf_tdata (abfd)->core_lwpid = *tid;
 
   /* Make a ".qnx_core_status/%d" section.  */
   sprintf (buf, ".qnx_core_status/%d", *tid);
@@ -7075,7 +7087,11 @@ elfcore_grok_nto_gregs (abfd, note, tid)
   sect->flags           = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
-  return elfcore_maybe_make_sect (abfd, ".reg", sect);
+  /* This is the current thread.  */
+  if (elf_tdata (abfd)->core_lwpid == tid)
+    return elfcore_maybe_make_sect (abfd, ".reg", sect);
+
+  return TRUE;
 }
 
 #define BFD_QNT_CORE_INFO	7
