@@ -1,3 +1,9 @@
+2000-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* sem.c: Regenerated.
+	* sem-switch.c: Regenerated.
+	* semx-switch.c: Regenerated.
+
 2000-08-28  Dave Brolley  <brolley@redhat.com>
 
 	* Makefile.in: Use of @true confuses VPATH. Remove it.
