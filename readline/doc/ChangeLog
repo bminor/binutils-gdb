@@ -1,3 +1,8 @@
+Fri Mar 24 18:04:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* inc-hist.texinfo: When GDBN omit the chapter/node.
+	* rluser.texinfo (Command Line Editing): Ditto.
+
 1999-08-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* hsuser.texinfo (Bash History Builtins): Comment out btindex

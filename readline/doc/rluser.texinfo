@@ -36,8 +36,10 @@ into another language, under the above conditions for modified versions.
 @comment If you are including this manual as an appendix, then set the
 @comment variable readline-appendix.
 
+@ifclear GDBN
 @node Command Line Editing
 @chapter Command Line Editing
+@end ifclear
 
 This chapter describes the basic features of the @sc{GNU}
 command line editing interface.

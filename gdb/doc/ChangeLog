@@ -1,3 +1,14 @@
+Fri Mar 24 18:06:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* annotate.texi (Annotations): When GDBN omit @chapter and @node
+ 	entry.
+
+	* gdb.texinfo: Check for @ifinfo instead of @ifnottex.
+	(rluser.texinfo, inc-hist.texinfo, annotate.texi): Add local
+ 	@chapter and @node entries.
+	
+	* gdb.texinfo: Link all top-level nodes.
+	
 Fri Mar 24 17:56:48 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (install-info): Create $(infodir) before installing

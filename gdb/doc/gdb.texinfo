@@ -110,8 +110,9 @@ into another language, under the above conditions for modified versions.
 @end titlepage
 @page
 
-@ifnottex
-@node Top
+
+@node Top, Summary, (dir), (dir)
+@ifinfo
 @top Debugging with @value{GDBN}
 
 This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
@@ -120,6 +121,7 @@ This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version
 @value{GDBVN}.
 
 Copyright (C) 1988-1999 Free Software Foundation, Inc.
+@end ifinfo
 @menu
 * Summary::                     Summary of @value{GDBN}
 * Sample Session::              A sample @value{GDBN} session
@@ -153,9 +155,7 @@ Copyright (C) 1988-1999 Free Software Foundation, Inc.
 * Index::                       Index
 @end menu
 
-@end ifnottex
-
-@node Summary
+@node Summary, Sample Session, Top, Top
 @unnumbered Summary of @value{GDBN}
 
 The purpose of a debugger such as @value{GDBN} is to allow you to see what is
@@ -205,7 +205,7 @@ underscore.
 * Contributors::                Contributors to GDB
 @end menu
 
-@node Free Software
+@node Free Software, Contributors, Summary, Summary
 @unnumberedsec Free software
 
 @value{GDBN} is @dfn{free software}, protected by the @sc{gnu} 
@@ -221,7 +221,7 @@ Fundamentally, the General Public License is a license which says that
 you have these freedoms and that you cannot take these freedoms away
 from anyone else.
 
-@node Contributors
+@node Contributors,  , Free Software, Summary
 @unnumberedsec Contributors to @value{GDBN}
 
 Richard Stallman was the original author of @value{GDBN}, and of many
@@ -360,7 +360,7 @@ Thomas, Michael Tiemann, Tom Tromey, Ron Unrau, Jim Wilson, and David
 Zuhn have made contributions both large and small.
 
 
-@node Sample Session
+@node Sample Session, Invocation, Summary, Top
 @chapter A Sample @value{GDBN} Session
 
 You can use this manual at your leisure to read all about @value{GDBN}.
@@ -630,7 +630,7 @@ session with the @value{GDBN} @code{quit} command.
 (@value{GDBP}) @b{quit}
 @end smallexample
 
-@node Invocation
+@node Invocation, Commands, Sample Session, Top
 @chapter Getting In and Out of @value{GDBN}
 
 This chapter discusses how to start @value{GDBN}, and how to get out of it.
@@ -648,7 +648,7 @@ type @kbd{quit} or @kbd{C-d} to exit.
 * Shell Commands::              How to use shell commands inside @value{GDBN}
 @end menu
 
-@node Invoking GDB
+@node Invoking GDB, Quitting GDB, Invocation, Invocation
 @section Invoking @value{GDBN}
 
 Invoke @value{GDBN} by running the program @code{@value{GDBP}}.  Once started,
@@ -725,7 +725,7 @@ in sequential order.  The order makes a difference when the
 * Mode Options::                Choosing modes
 @end menu
 
-@node File Options
+@node File Options, Mode Options, Invoking GDB, Invoking GDB
 @subsection Choosing files
 
 When @value{GDBN} starts, it reads any arguments other than options as
@@ -833,7 +833,7 @@ but build a @file{.syms} file for future use is:
 gdb -batch -nx -mapped -readnow programname
 @end example
 
-@node Mode Options
+@node Mode Options,  , File Options, Invoking GDB
 @subsection Choosing modes
 
 You can run @value{GDBN} in various alternative modes---for example, in
@@ -1014,7 +1014,7 @@ no-warranty blurb, and exit.
 
 @end table
 
-@node Quitting GDB
+@node Quitting GDB, Shell Commands, Invoking GDB, Invocation
 @section Quitting @value{GDBN}
 @cindex exiting @value{GDBN}
 @cindex leaving @value{GDBN}
@@ -1042,7 +1042,7 @@ If you have been using @value{GDBN} to control an attached process or
 device, you can release it with the @code{detach} command
 (@pxref{Attach, ,Debugging an already-running process}).
 
-@node Shell Commands
+@node Shell Commands,  , Quitting GDB, Invocation
 @section Shell commands
 
 If you need to execute occasional shell commands during your
@@ -1071,7 +1071,7 @@ Execute the @code{make} program with the specified
 arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 @end table
 
-@node Commands
+@node Commands, Running, Invocation, Top
 @chapter @value{GDBN} Commands
 
 You can abbreviate a @value{GDBN} command to the first few letters of the command
@@ -1086,7 +1086,7 @@ show you the alternatives available, if there is more than one possibility).
 * Help::                        How to ask @value{GDBN} for help
 @end menu
 
-@node Command Syntax
+@node Command Syntax, Completion, Commands, Commands
 @section Command syntax
 
 A @value{GDBN} command is a single line of input.  There is no limit on
@@ -1129,7 +1129,7 @@ Any text from a @kbd{#} to the end of the line is a comment; it does
 nothing.  This is useful mainly in command files (@pxref{Command
 Files,,Command files}).
 
-@node Completion
+@node Completion, Help, Command Syntax, Commands
 @section Command completion
 
 @cindex completion
@@ -1248,7 +1248,7 @@ overload-resolution off} to disable overload resolution;
 see @ref{Debugging C plus plus, ,@value{GDBN} features for C++}.
 
 
-@node Help
+@node Help,  , Completion, Commands
 @section Getting help
 @cindex online documentation
 @kindex help
@@ -1433,7 +1433,7 @@ if your version of @value{GDBN} comes with one.
 
 @end table
 
-@node Running
+@node Running, Stopping, Commands, Top
 @chapter Running Programs Under @value{GDBN}
 
 When you run a program under @value{GDBN}, you must first generate
@@ -1459,7 +1459,7 @@ kill a child process.
 * Processes::                   Debugging programs with multiple processes
 @end menu
 
-@node Compilation
+@node Compilation, Starting, Running, Running
 @section Compiling for debugging
 
 In order to debug a program effectively, you need to generate
@@ -1500,7 +1500,7 @@ Older versions of the @sc{gnu} C compiler permitted a variant option
 format; if your @sc{gnu} C compiler has this option, do not use it.
 
 @need 2000
-@node Starting
+@node Starting, Arguments, Compilation, Running
 @section Starting your program
 @cindex starting
 @cindex running
@@ -1576,7 +1576,7 @@ time @value{GDBN} read its symbols, @value{GDBN} discards its symbol
 table, and reads it again.  When it does this, @value{GDBN} tries to retain
 your current breakpoints.
 
-@node Arguments
+@node Arguments, Environment, Starting, Running
 @section Your program's arguments
 
 @cindex arguments (to your program)
@@ -1610,7 +1610,7 @@ it again without arguments.
 Show the arguments to give your program when it is started.
 @end table
 
-@node Environment
+@node Environment, Working Directory, Arguments, Running
 @section Your program's environment
 
 @cindex environment (of your program)
@@ -1693,7 +1693,7 @@ your program.  You may wish to move setting of environment variables to
 files that are only run when you sign on, such as @file{.login} or
 @file{.profile}.
 
-@node Working Directory
+@node Working Directory, Input/Output, Environment, Running
 @section Your program's working directory
 
 @cindex working directory (of your program)
@@ -1717,7 +1717,7 @@ Set the @value{GDBN} working directory to @var{directory}.
 Print the @value{GDBN} working directory.
 @end table
 
-@node Input/Output
+@node Input/Output, Attach, Working Directory, Running
 @section Your program's input and output
 
 @cindex redirection
@@ -1771,7 +1771,7 @@ When you use the @code{tty} command or redirect input in the @code{run}
 command, only the input @emph{for your program} is affected.  The input
 for @value{GDBN} still comes from your terminal.
 
-@node Attach
+@node Attach, Kill Process, Input/Output, Running
 @section Debugging an already-running process
 @kindex attach
 @cindex attach
@@ -1827,7 +1827,7 @@ control whether or not you need to confirm by using the @code{set
 confirm} command (@pxref{Messages/Warnings, ,Optional warnings and
 messages}).
 
-@node Kill Process
+@node Kill Process, Threads, Attach, Running
 @section Killing the child process
 
 @table @code
@@ -1852,7 +1852,7 @@ next type @code{run}, @value{GDBN} notices that the file has changed, and
 reads the symbol table again (while trying to preserve your current
 breakpoint settings).
 
-@node Threads
+@node Threads, Processes, Kill Process, Running
 @section Debugging programs with multiple threads
 
 @cindex threads of execution
@@ -2069,7 +2069,7 @@ programs with multiple threads.
 @xref{Set Watchpoints,,Setting watchpoints}, for information about
 watchpoints in programs with multiple threads.
 
-@node Processes
+@node Processes,  , Threads, Running
 @section Debugging programs with multiple processes
 
 @cindex fork, debugging programs which call
@@ -2146,7 +2146,7 @@ You can use the @code{catch} command to make @value{GDBN} stop whenever
 a @code{fork}, @code{vfork}, or @code{exec} call is made.  @xref{Set
 Catchpoints, ,Setting catchpoints}.
 
-@node Stopping
+@node Stopping, Stack, Running, Top
 @chapter Stopping and Continuing
 
 The principal purposes of using a debugger are so that you can stop your
@@ -2175,7 +2175,7 @@ running or not, what process it is, and why it stopped.
 * Thread Stops::                Stopping and starting multi-thread programs
 @end menu
 
-@node Breakpoints
+@node Breakpoints, Continuing and Stepping, Stopping, Stopping
 @section Breakpoints, watchpoints, and catchpoints
 
 @cindex breakpoints
@@ -2249,7 +2249,7 @@ all breakpoint in that range are operated on.
 * Error in Breakpoints::        ``Cannot insert breakpoints''
 @end menu
 
-@node Set Breaks
+@node Set Breaks, Set Watchpoints, Breakpoints, Breakpoints
 @subsection Setting breakpoints
 
 @c FIXME LMB what does GDB do if no code on line of breakpt?  
@@ -2481,7 +2481,7 @@ Shared library events.
 @end table
 
 
-@node Set Watchpoints
+@node Set Watchpoints, Set Catchpoints, Set Breaks, Breakpoints
 @subsection Setting watchpoints
 
 @cindex setting watchpoints
@@ -2624,7 +2624,7 @@ when a non-current thread's activity changes the expression.  (Hardware
 watchpoints, in contrast, watch an expression in all threads.)
 @end quotation
 
-@node Set Catchpoints
+@node Set Catchpoints, Delete Breaks, Set Watchpoints, Breakpoints
 @subsection Setting catchpoints
 @cindex catchpoints, setting
 @cindex exception handlers
@@ -2732,7 +2732,7 @@ breakpoints to stop your program when any of a number of exceptions are
 raised.
 
 
-@node Delete Breaks
+@node Delete Breaks, Disabling, Set Catchpoints, Breakpoints
 @subsection Deleting breakpoints
 
 @cindex clearing breakpoints, watchpoints, catchpoints
@@ -2777,7 +2777,7 @@ breakpoints (@value{GDBN} asks confirmation, unless you have @code{set
 confirm off}).  You can abbreviate this command as @code{d}.
 @end table
 
-@node Disabling
+@node Disabling, Conditions, Delete Breaks, Breakpoints
 @subsection Disabling breakpoints
 
 @kindex disable breakpoints
@@ -2850,7 +2850,7 @@ breakpoint of its own, but it does not change the state of your other
 breakpoints; see @ref{Continuing and Stepping, ,Continuing and
 stepping}.)
 
-@node Conditions
+@node Conditions, Break Commands, Disabling, Breakpoints
 @subsection Break conditions
 @cindex conditional breakpoints
 @cindex breakpoint conditions
@@ -2967,7 +2967,7 @@ variables}.
 Ignore counts apply to breakpoints, watchpoints, and catchpoints.
 
 
-@node Break Commands
+@node Break Commands, Breakpoint Menus, Conditions, Breakpoints
 @subsection Breakpoint command lists
 
 @cindex breakpoint commands
@@ -3048,7 +3048,7 @@ cont
 end
 @end example
 
-@node Breakpoint Menus
+@node Breakpoint Menus, Error in Breakpoints, Break Commands, Breakpoints
 @subsection Breakpoint menus
 @cindex overloading
 @cindex symbol overloading
@@ -3095,7 +3095,7 @@ Use the "delete" command to delete unwanted
 @end smallexample
 
 @c  @ifclear BARETARGET
-@node Error in Breakpoints
+@node Error in Breakpoints,  , Breakpoint Menus, Breakpoints
 @subsection ``Cannot insert breakpoints''
 @c
 @c  FIXME!! 14/6/95  Is there a real example of this?  Let's use it.
@@ -3148,7 +3148,7 @@ When this message is printed, you need to disable or remove some of the
 hardware-assisted breakpoints and watchpoints, and then continue.
 
 
-@node Continuing and Stepping
+@node Continuing and Stepping, Signals, Breakpoints, Stopping
 @section Continuing and stepping
 
 @cindex stepping
@@ -3350,7 +3350,7 @@ proceed until the function returns.
 An argument is a repeat count, as in @code{next}.
 @end table
 
-@node Signals
+@node Signals, Thread Stops, Continuing and Stepping, Stopping
 @section Signals
 @cindex signals
 
@@ -3446,7 +3446,7 @@ a result of the fatal signal once it saw the signal.  To prevent this,
 you can continue with @samp{signal 0}.  @xref{Signaling, ,Giving your
 program a signal}. 
 
-@node Thread Stops
+@node Thread Stops,  , Signals, Stopping
 @section Stopping and starting multi-thread programs
 
 When your program has multiple threads (@pxref{Threads,, Debugging
@@ -3531,7 +3531,7 @@ Display the current scheduler locking mode.
 @end table
 
 
-@node Stack
+@node Stack, Source, Stopping, Top
 @chapter Examining the Stack
 
 When your program has stopped, the first thing you need to know is where it
@@ -3570,7 +3570,7 @@ currently executing frame and describes it briefly, similar to the
 
 @end menu
 
-@node Frames
+@node Frames, Backtrace, Stack, Stack
 @section Stack frames
 
 @cindex frame, definition
@@ -3636,7 +3636,7 @@ to another without printing the frame.  This is the silent version of
 @code{frame}.
 @end table
 
-@node Backtrace
+@node Backtrace, Selection, Frames, Stack
 @section Backtraces
 
 @cindex backtraces
@@ -3699,7 +3699,7 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
-@node Selection
+@node Selection, Frame Info, Backtrace, Stack
 @section Selecting a frame
 
 Most commands for examining the stack and other data in your program work on
@@ -3785,7 +3785,7 @@ in @value{GDBN} command scripts, where the output might be unnecessary and
 distracting.
 @end table
 
-@node Frame Info
+@node Frame Info,  , Selection, Stack
 @section Information about a frame
 
 There are several other commands to print information about the selected
@@ -3861,7 +3861,7 @@ exception handlers, visit the associated frame (using the @code{up},
 @end table
 
 
-@node Source
+@node Source, Data, Stack, Top
 @chapter Examining Source Files
 
 @value{GDBN} can print parts of your program's source, since the debugging
@@ -3883,7 +3883,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 * Machine Code::                Source and machine code
 @end menu
 
-@node List
+@node List, Search, Source, Source
 @section Printing source lines
 
 @kindex list
@@ -4000,7 +4000,7 @@ Specifies the line containing the program address @var{address}.
 @var{address} may be any expression.
 @end table
 
-@node Search
+@node Search, Source Path, List, Source
 @section Searching source files
 @cindex searching
 @kindex reverse-search
@@ -4026,7 +4026,7 @@ for @var{regexp}.  It lists the line that is found.  You can abbreviate
 this command as @code{rev}.
 @end table
 
-@node Source Path
+@node Source Path, Machine Code, Search, Source
 @section Specifying source directories
 
 @cindex source path
@@ -4109,7 +4109,7 @@ directories you want in the source path.  You can add all the
 directories in one command.
 @end enumerate
 
-@node Machine Code
+@node Machine Code,  , Source Path, Source
 @section Source and machine code
 
 You can use the command @code{info line} to map source lines to program
@@ -4210,7 +4210,7 @@ assemblers for x86-based targets.
 @end table
 
 
-@node Data
+@node Data, Languages, Source, Top
 @chapter Examining Data
 
 @cindex printing data
@@ -4265,7 +4265,7 @@ Table}.
 * Floating Point Hardware::     Floating point hardware
 @end menu
 
-@node Expressions
+@node Expressions, Variables, Data, Data
 @section Expressions
 
 @cindex expressions
@@ -4318,7 +4318,7 @@ a cast).  This construct is allowed regardless of what kind of data is
 normally supposed to reside at @var{addr}.
 @end table
 
-@node Variables
+@node Variables, Arrays, Expressions, Data
 @section Program variables
 
 The most common kind of expression to use is the name of a variable
@@ -4439,7 +4439,7 @@ Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}, for more
 information.
 
 
-@node Arrays
+@node Arrays, Output Formats, Variables, Data
 @section Artificial arrays
 
 @cindex artificial array
@@ -4511,7 +4511,7 @@ p dtab[$i++]->fv
 @dots{}
 @end example
 
-@node Output Formats
+@node Output Formats, Memory, Arrays, Data
 @section Output formats
 
 @cindex formatted output
@@ -4580,7 +4580,7 @@ To reprint the last value in the value history with a different format,
 you can use the @code{print} command with just a format and no
 expression.  For example, @samp{p/x} reprints the last value in hex.
 
-@node Memory
+@node Memory, Auto Display, Output Formats, Data
 @section Examining memory
 
 You can use the command @code{x} (for ``examine'') to examine memory in
@@ -4685,7 +4685,7 @@ If the @code{x} command has a repeat count, the address and contents saved
 are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
 
-@node Auto Display
+@node Auto Display, Print Settings, Memory, Data
 @section Automatic display
 @cindex automatic display
 @cindex display of expressions
@@ -4781,7 +4781,7 @@ there is no variable @code{last_char}---the display is disabled
 automatically.  The next time your program stops where @code{last_char}
 is meaningful, you can enable the display expression once again.
 
-@node Print Settings
+@node Print Settings, Value History, Auto Display, Data
 @section Print settings
 
 @cindex format options
@@ -5142,7 +5142,7 @@ Do not pretty print C++ virtual function tables.
 Show whether C++ virtual function tables are pretty printed, or not.
 @end table
 
-@node Value History
+@node Value History, Convenience Vars, Print Settings, Data
 @section Value history
 
 @cindex value history
@@ -5219,7 +5219,7 @@ values are available, @code{show values +} produces no display.
 Pressing @key{RET} to repeat @code{show values @var{n}} has exactly the
 same effect as @samp{show values +}.
 
-@node Convenience Vars
+@node Convenience Vars, Registers, Value History, Data
 @section Convenience variables
 
 @cindex convenience variables
@@ -5305,7 +5305,7 @@ On HP-UX systems, if you refer to a function or variable name that
 begins with a dollar sign, @value{GDBN} searches for a user or system
 name first, before it searches for a convenience variable.
 
-@node Registers
+@node Registers, Floating Point Hardware, Convenience Vars, Data
 @section Registers
 
 @cindex registers
@@ -5404,7 +5404,7 @@ code generated by your compiler.  If some registers are not saved, or if
 @value{GDBN} is unable to locate the saved registers, the selected stack
 frame makes no difference.
 
-@node Floating Point Hardware
+@node Floating Point Hardware,  , Registers, Data
 @section Floating point hardware
 @cindex floating point
 
@@ -5420,7 +5420,7 @@ floating point chip.  Currently, @samp{info float} is supported on
 the ARM and x86 machines.
 @end table
 
-@node Languages
+@node Languages, Symbols, Data, Top
 @chapter Using @value{GDBN} with Different Languages
 @cindex languages
 
@@ -5446,7 +5446,7 @@ language}.
 * Support::                     Supported languages
 @end menu
 
-@node Setting
+@node Setting, Show, Languages, Languages
 @section Switching between source languages
 
 There are two ways to control the working language---either have @value{GDBN}
@@ -5480,7 +5480,7 @@ program, and will display that source code, not the generated C code.
 * Automatically::               Having @value{GDBN} infer the source language
 @end menu
 
-@node Filenames
+@node Filenames, Manually, Setting, Setting
 @subsection List of filename extensions and languages
 
 If a source file name ends in one of the following extensions, then
@@ -5520,7 +5520,7 @@ Assembler source file.  This actually behaves almost like C, but
 In addition, you may set the language associated with a filename
 extension.  @xref{Show, , Displaying the language}.
 
-@node Manually
+@node Manually, Automatically, Filenames, Setting
 @subsection Setting the working language
 
 If you allow @value{GDBN} to set the language automatically,
@@ -5552,7 +5552,7 @@ might not have the effect you intended.  In C, this means to add
 printed would be the value of @code{a}.  In Modula-2, this means to compare
 @code{a} to the result of @code{b+c}, yielding a @code{BOOLEAN} value.
 
-@node Automatically
+@node Automatically,  , Manually, Setting
 @subsection Having @value{GDBN} infer the source language
 
 To have @value{GDBN} set the working language automatically, use
@@ -5571,7 +5571,7 @@ written in one source language can be used by a main program written in
 a different source language.  Using @samp{set language auto} in this
 case frees you from having to set the working language manually.
 
-@node Show
+@node Show, Checks, Setting, Languages
 @section Displaying the language
 
 The following commands help you find out which language is the
@@ -5613,7 +5613,7 @@ the source language @var{language}.
 List all the filename extensions and the associated languages.
 @end table
 
-@node Checks
+@node Checks, Support, Show, Languages
 @section Type and range checking
 
 @quotation
@@ -5646,7 +5646,7 @@ for the default settings of supported languages.
 
 @cindex type checking
 @cindex checks, type
-@node Type Checking
+@node Type Checking, Range Checking, Checks, Checks
 @subsection An overview of type checking
 
 Some languages, such as Modula-2, are strongly typed, meaning that the
@@ -5717,7 +5717,7 @@ is setting it automatically.
 
 @cindex range checking
 @cindex checks, range
-@node Range Checking
+@node Range Checking,  , Type Checking, Checks
 @subsection An overview of range checking
 
 In some languages (such as Modula-2), it is an error to exceed the
@@ -5776,7 +5776,7 @@ Show the current setting of the range checker, and whether or not it is
 being set automatically by @value{GDBN}.
 @end table
 
-@node Support
+@node Support,  , Checks, Languages
 @section Supported languages
 
 @value{GDBN} supports C, C++, Fortran, Java, Chill, assembly, and Modula-2.
@@ -5801,7 +5801,7 @@ language reference or tutorial.
 * Chill::        Chill
 @end menu
 
-@node C
+@node C, Modula-2, Support, Support
 @subsection C and C++
 
 @cindex C and C++
@@ -5836,7 +5836,7 @@ CC, gcc.info, Using @sc{gnu} CC}, for more information.
 * Debugging C plus plus::       @value{GDBN} features for C++
 @end menu
 
-@node C Operators
+@node C Operators, C Constants, C, C
 @subsubsection C and C++ operators
 
 @cindex C and C++ operators
@@ -5996,7 +5996,7 @@ predefined meaning.
 * C Constants::             
 @end menu
 
-@node C Constants
+@node C Constants, C plus plus expressions, C Operators, C
 @subsubsection C and C++ constants
 
 @cindex C and C++ constants
@@ -6064,7 +6064,7 @@ and @samp{@{&"hi", &"there", &"fred"@}} is a three-element array of pointers.
 * Debugging C::                 
 @end menu
 
-@node C plus plus expressions
+@node C plus plus expressions, C Defaults, C Constants, C
 @subsubsection C++ expressions
 
 @cindex expressions in C++
@@ -6169,7 +6169,7 @@ calling virtual functions correctly, printing out virtual bases of
 objects, calling functions in a base subobject, casting objects, and
 invoking user-defined operators.
 
-@node C Defaults
+@node C Defaults, C Checks, C plus plus expressions, C
 @subsubsection C and C++ defaults
 
 @cindex C and C++ defaults
@@ -6190,7 +6190,7 @@ for further details.
 @c unimplemented.  If (b) changes, it might make sense to let this node
 @c appear even if Mod-2 does not, but meanwhile ignore it. roland 16jul93.
 
-@node C Checks
+@node C Checks, Debugging C, C Defaults, C
 @subsubsection C and C++ type and range checks
 
 @cindex C and C++ checks
@@ -6222,7 +6222,7 @@ Range checking, if turned on, is done on mathematical operations.  Array
 indices are not checked, since they are often used to index a pointer
 that is not itself an array.
 
-@node Debugging C
+@node Debugging C, Debugging C plus plus, C Checks, C
 @subsubsection @value{GDBN} and C
 
 The @code{set print union} and @code{show print union} commands apply to
@@ -6238,7 +6238,7 @@ with pointers and a memory allocation function.  @xref{Expressions,
 * Debugging C plus plus::       
 @end menu
 
-@node Debugging C plus plus
+@node Debugging C plus plus,  , Debugging C, C
 @subsubsection @value{GDBN} features for C++
 
 @cindex commands for C++
@@ -6321,7 +6321,7 @@ available choices, or to finish the type list for you.
 @xref{Completion,, Command completion}, for details on how to do this.
 @end table
 
-@node Modula-2
+@node Modula-2, Chill, C, Support
 @subsection Modula-2
 
 @cindex Modula-2, @value{GDBN} support
@@ -6345,7 +6345,7 @@ table.
 * GDB/M2::                      @value{GDBN} and Modula-2
 @end menu
 
-@node M2 Operators
+@node M2 Operators, Built-In Func/Proc, Modula-2, Modula-2
 @subsubsection Operators
 @cindex Modula-2 operators
 
@@ -6469,7 +6469,7 @@ treats the use of the operator @code{IN}, or the use of operators
 @end quotation
 
 @cindex Modula-2 built-ins
-@node Built-In Func/Proc
+@node Built-In Func/Proc, M2 Constants, M2 Operators, Modula-2
 @subsubsection Built-in functions and procedures
 
 Modula-2 also makes available several built-in procedures and functions.
@@ -6581,7 +6581,7 @@ an error.
 @end quotation
 
 @cindex Modula-2 constants
-@node M2 Constants
+@node M2 Constants, M2 Defaults, Built-In Func/Proc, Modula-2
 @subsubsection Constants
 
 @value{GDBN} allows you to express the constants of Modula-2 in the following
@@ -6630,7 +6630,7 @@ Pointer constants consist of integral values only.
 Set constants are not yet supported.
 @end itemize
 
-@node M2 Defaults
+@node M2 Defaults, Deviations, M2 Constants, Modula-2
 @subsubsection Modula-2 defaults
 @cindex Modula-2 defaults
 
@@ -6644,7 +6644,7 @@ code compiled from a file whose name ends with @file{.mod} sets the
 working language to Modula-2.  @xref{Automatically, ,Having @value{GDBN} set
 the language automatically}, for further details.
 
-@node Deviations
+@node Deviations, M2 Checks, M2 Defaults, Modula-2
 @subsubsection Deviations from standard Modula-2
 @cindex Modula-2, deviations from
 
@@ -6674,7 +6674,7 @@ argument.
 All built-in procedures both modify @emph{and} return their argument.
 @end itemize
 
-@node M2 Checks
+@node M2 Checks, M2 Scope, Deviations, Modula-2
 @subsubsection Modula-2 type and range checks
 @cindex Modula-2 checks
 
@@ -6702,7 +6702,7 @@ whose types are not equivalent is an error.
 Range checking is done on all mathematical operations, assignment, array
 index bounds, and all built-in functions and procedures.
 
-@node M2 Scope
+@node M2 Scope, GDB/M2, M2 Checks, Modula-2
 @subsubsection The scope operators @code{::} and @code{.}
 @cindex scope
 @kindex .
@@ -6742,7 +6742,7 @@ an error if the identifier @var{id} was not imported from definition
 module @var{module}, or if @var{id} is not an identifier in
 @var{module}.
 
-@node GDB/M2
+@node GDB/M2,  , M2 Scope, Modula-2
 @subsubsection @value{GDBN} and Modula-2
 
 Some @value{GDBN} commands have little use when debugging Modula-2 programs.
@@ -6763,7 +6763,7 @@ address can be specified by an integral constant, the construct
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
 
-@node Chill
+@node Chill,  , Modula-2, Support
 @subsection Chill
 
 The extensions made to @value{GDBN} to support Chill only support output
@@ -6785,7 +6785,7 @@ of @value{GDBN} which support these topics.
 * Chill defaults::
 @end menu
 
-@node How modes are displayed
+@node How modes are displayed, Locations, Chill, Chill
 @subsubsection How modes are displayed
 
 The Chill Datatype- (Mode) support of @value{GDBN} is directly related
@@ -6914,7 +6914,7 @@ type = STRUCT (
 @end smallexample
 @end table
 
-@node Locations
+@node Locations, Values and their Operations, How modes are displayed, Chill
 @subsubsection Locations and their accesses
 
 A location in Chill is an object which can contain values.
@@ -6995,7 +6995,7 @@ therefore the result can be quite confusing.
 (@value{GDBP}) print int (s(3 up 4)) XXX TO be filled in !! XXX
 @end smallexample
 
-@node Values and their Operations
+@node Values and their Operations, Chill type and range checks, Locations, Chill
 @subsubsection Values and their Operations
 
 Values are used to alter locations, to investigate complex structures in
@@ -7198,7 +7198,7 @@ Membership operator.
 @end table
 @end table
 
-@node Chill type and range checks
+@node Chill type and range checks, Chill defaults, Values and their Operations, Chill
 @subsubsection Chill type and range checks
 
 @value{GDBN} considers two Chill variables mode equivalent if the sizes
@@ -7224,7 +7224,7 @@ off}.
 see last paragraph ?
 @end ignore
 
-@node Chill defaults
+@node Chill defaults,  , Chill type and range checks, Chill
 @subsubsection Chill defaults
 
 If type and range checking are set automatically by @value{GDBN}, they
@@ -7237,7 +7237,7 @@ code compiled from a file whose name ends with @file{.ch} sets the
 working language to Chill.  @xref{Automatically, ,Having @value{GDBN} set
 the language automatically}, for further details.
 
-@node Symbols
+@node Symbols, Altering, Languages, Top
 @chapter Examining the Symbol Table
 
 The commands described in this chapter allow you to inquire about the
@@ -7459,7 +7459,7 @@ required for each object file from which @value{GDBN} has read some symbols.
 @value{GDBN} reads symbols (in the description of @code{symbol-file}).
 @end table
 
-@node Altering
+@node Altering, GDB Files, Symbols, Top
 @chapter Altering Execution
 
 Once you think you have found an error in your program, you might want to
@@ -7481,7 +7481,7 @@ address, or even return prematurely from a function.
 * Patching::                    Patching your program
 @end menu
 
-@node Assignment
+@node Assignment, Jumping, Altering, Altering
 @section Assignment to variables
 
 @cindex assignment
@@ -7587,7 +7587,7 @@ set @{int@}0x83040 = 4
 @noindent
 stores the value 4 into that memory location.
 
-@node Jumping
+@node Jumping, Signaling, Assignment, Altering
 @section Continuing at a different address
 
 Ordinarily, when you continue your program, you do so at the place where
@@ -7640,7 +7640,7 @@ that has already executed, in order to examine its execution in more
 detail.
 
 @c @group
-@node Signaling
+@node Signaling, Returning, Jumping, Altering
 @section Giving your program a signal
 
 @table @code
@@ -7669,7 +7669,7 @@ the signal handling tables (@pxref{Signals}).  The @code{signal} command
 passes the signal directly to your program.
 
 
-@node Returning
+@node Returning, Calling, Signaling, Altering
 @section Returning from a function
 
 @table @code
@@ -7700,7 +7700,7 @@ returned.  In contrast, the @code{finish} command (@pxref{Continuing
 and Stepping, ,Continuing and stepping}) resumes execution until the
 selected stack frame returns naturally.
 
-@node Calling
+@node Calling, Patching, Returning, Altering
 @section Calling program functions
 
 @cindex calling functions
@@ -7722,7 +7722,7 @@ calls a function in the target.  This is necessary because the usual
 method of putting the scratch area on the stack does not work in systems
 that have separate instruction and data spaces.
 
-@node Patching
+@node Patching,  , Calling, Altering
 @section Patching programs
 
 @cindex patching binaries
@@ -7757,7 +7757,7 @@ Display whether executable files and core files are opened for writing
 as well as reading.
 @end table
 
-@node GDB Files
+@node GDB Files, Targets, Altering, Top
 @chapter @value{GDBN} Files
 
 @value{GDBN} needs to know the file name of the program to be debugged,
@@ -7770,7 +7770,7 @@ program.  To debug a core dump of a previous run, you must also tell
 * Symbol Errors::               Errors reading symbol files
 @end menu
 
-@node Files
+@node Files, Symbol Errors, GDB Files, GDB Files
 @section Commands to specify files
 
 @cindex symbol table
@@ -8050,7 +8050,7 @@ Otherwise, symbols must be loaded manually, using the
 Display the current autoloading size threshold, in megabytes.
 @end table
 
-@node Symbol Errors
+@node Symbol Errors,  , Files, GDB Files
 @section Errors reading symbol files
 
 While reading a symbol file, @value{GDBN} occasionally encounters problems,
@@ -8139,7 +8139,7 @@ it.
 
 @end table
 
-@node Targets
+@node Targets, Configurations, GDB Files, Top
 @chapter Specifying a Debugging Target
 
 @cindex debugging target
@@ -8165,7 +8165,7 @@ command to specify one of the target types configured for @value{GDBN}
 
 @end menu
 
-@node Active Targets
+@node Active Targets, Target Commands, Targets, Targets
 @section Active targets
 
 @cindex stacking targets
@@ -8200,7 +8200,7 @@ files}).  To specify as a target a process that is already running, use
 the @code{attach} command (@pxref{Attach, ,Debugging an already-running
 process}).
 
-@node Target Commands
+@node Target Commands, Byte Order, Active Targets, Targets
 @section Commands for managing targets
 
 @table @code
@@ -8332,7 +8332,7 @@ specifies a fixed address.
 @code{load} does not repeat if you press @key{RET} again after using it.
 @end table
 
-@node Byte Order
+@node Byte Order, Remote, Target Commands, Targets
 @section Choosing target byte order
 
 @cindex choosing target byte order
@@ -8372,7 +8372,7 @@ Note that these commands merely adjust interpretation of symbolic
 data on the host, and that they have absolutely no effect on the
 target system.
 
-@node Remote
+@node Remote, KOD, Byte Order, Targets
 @section Remote debugging
 @cindex remote debugging
 
@@ -8396,7 +8396,7 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 * Remote Serial::               @value{GDBN} remote serial protocol
 @end menu
 
-@node Remote Serial
+@node Remote Serial,  , Remote, Remote
 @subsection The @value{GDBN} remote serial protocol
 
 @cindex remote serial debugging, overview
@@ -8494,7 +8494,7 @@ recently added stubs.
 * NetWare::                Using the `gdbserve.nlm' program
 @end menu
 
-@node Stub Contents
+@node Stub Contents, Bootstrapping, Remote Serial, Remote Serial
 @subsubsection What the stub can do for you
 
 @cindex remote serial stub
@@ -8545,7 +8545,7 @@ to make certain your program stops at a predetermined point for the
 start of your debugging session.
 @end table
 
-@node Bootstrapping
+@node Bootstrapping, Debug Session, Stub Contents, Remote Serial
 @subsubsection What you must do for the stub
 
 @cindex remote stub, support routines
@@ -8636,7 +8636,7 @@ but in general the stubs are likely to use any of the common library
 subroutines which @code{@value{GCC}} generates as inline code.
 
 
-@node Debug Session
+@node Debug Session, Protocol, Bootstrapping, Remote Serial
 @subsubsection Putting it all together
 
 @cindex remote serial debugging summary
@@ -8742,7 +8742,7 @@ If you type @kbd{y}, @value{GDBN} abandons the remote debugging session.
 remote} again to connect once more.)  If you type @kbd{n}, @value{GDBN}
 goes back to waiting.
 
-@node Protocol
+@node Protocol, Server, Debug Session, Remote Serial
 @subsubsection Communication protocol
 
 @cindex debugging stub, example
@@ -9547,7 +9547,7 @@ packet-debugging information is printed on the @value{GDBN} standard output
 stream.  @code{set remotedebug off} turns it off, and @code{show
 remotedebug} shows you its current state.
 
-@node Server
+@node Server, NetWare, Protocol, Remote Serial
 @subsubsection Using the @code{gdbserver} program
 
 @kindex gdbserver
@@ -9649,7 +9649,7 @@ text depends on the host system, but which usually looks something like
 @samp{Connection refused}.
 @end table
 
-@node NetWare
+@node NetWare,  , Server, Remote Serial
 @subsubsection Using the @code{gdbserve.nlm} program
 
 @kindex gdbserve.nlm
@@ -9706,7 +9706,7 @@ argument is a device name (usually a serial device, like
 communications with the server via serial line @file{/dev/ttyb}.
 @end table
 
-@node KOD
+@node KOD,  , Remote, Targets
 @section Kernel Object Display
 
 @cindex kernel object display
@@ -9745,7 +9745,7 @@ There is currently no way to determine whether a given operating system
 is supported other than to try it.
 
 
-@node Configurations
+@node Configurations, Controlling GDB, Targets, Top
 @chapter Configuration-Specific Information
 
 While nearly all @value{GDBN} commands are available for all native and
@@ -9765,7 +9765,7 @@ are quite different from each other.
 * Architectures::
 @end menu
 
-@node Native
+@node Native, Embedded OS, Configurations, Configurations
 @section Native
 
 This section describes details specific to particular native
@@ -9776,14 +9776,14 @@ configurations.
 * SVR4 Process Information::    SVR4 process information
 @end menu
 
-@node HP-UX
+@node HP-UX, SVR4 Process Information, Native, Native
 @subsection HP-UX
 
 On HP-UX systems, if you refer to a function or variable name that
 begins with a dollar sign, @value{GDBN} searches for a user or system
 name first, before it searches for a convenience variable.
 
-@node SVR4 Process Information
+@node SVR4 Process Information,  , HP-UX, Native
 @subsection SVR4 process information
 
 @kindex /proc
@@ -9828,7 +9828,7 @@ received.
 Show all the above information about the process.
 @end table
 
-@node Embedded OS
+@node Embedded OS, Embedded Processors, Native, Configurations
 @section Embedded Operating Systems
 
 This section describes configurations involving the debugging of
@@ -9842,7 +9842,7 @@ architectures.
 @value{GDBN} includes the ability to debug programs running on
 various real-time operating systems.
 
-@node VxWorks
+@node VxWorks,  , Embedded OS, Embedded OS
 @subsection Using @value{GDBN} with VxWorks
 
 @cindex VxWorks
@@ -9909,7 +9909,7 @@ run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}} (or
 * VxWorks Attach::              Running tasks
 @end menu
 
-@node VxWorks Connection
+@node VxWorks Connection, VxWorks Download, VxWorks, VxWorks
 @subsubsection Connecting to VxWorks
 
 The @value{GDBN} command @code{target} lets you connect to a VxWorks target on the
@@ -9942,7 +9942,7 @@ When this happens, add the appropriate directory to the search path with
 the @value{GDBN} command @code{path}, and execute the @code{target}
 command again.
 
-@node VxWorks Download
+@node VxWorks Download, VxWorks Attach, VxWorks Connection, VxWorks
 @subsubsection VxWorks download
 
 @cindex download to VxWorks
@@ -9988,7 +9988,7 @@ history.  (This is necessary in order to preserve the integrity of
 debugger's data structures that reference the target system's symbol
 table.)
 
-@node VxWorks Attach
+@node VxWorks Attach,  , VxWorks Download, VxWorks
 @subsubsection Running tasks
 
 @cindex running VxWorks tasks
@@ -10004,7 +10004,7 @@ where @var{task} is the VxWorks hexadecimal task ID.  The task can be running
 or suspended when you attach to it.  Running tasks are suspended at
 the time of attachment.
 
-@node Embedded Processors
+@node Embedded Processors, Architectures, Embedded OS, Configurations
 @section Embedded Processors
 
 This section goes into details specific to particular embedded
@@ -10029,7 +10029,7 @@ configurations.
 * Z8000::                       Zilog Z8000
 @end menu
 
-@node A29K Embedded
+@node A29K Embedded, ARM, Embedded Processors, Embedded Processors
 @subsection AMD A29K Embedded
 
 @menu
@@ -10057,7 +10057,7 @@ name of the program to be debugged, as it appears to DOS on the PC.
 
 @end table
 
-@node A29K UDI
+@node A29K UDI, A29K EB29K, A29K Embedded, A29K Embedded
 @subsubsection A29K UDI
 
 @cindex UDI
@@ -10081,7 +10081,7 @@ working directory, you must set the environment variable @samp{UDICONF}
 to its pathname.
 @end table
 
-@node A29K EB29K
+@node A29K EB29K, Comms (EB29K), A29K UDI, A29K Embedded
 @subsubsection EBMON protocol for AMD29K
 
 @cindex EB29K board
@@ -10096,7 +10096,7 @@ board) and a serial port on the Unix system.  In the following, we
 assume you've hooked the cable between the PC's @file{COM1} port and
 @file{/dev/ttya} on the Unix system.
 
-@node Comms (EB29K)
+@node Comms (EB29K), gdb-EB29K, A29K EB29K, A29K Embedded
 @subsubsection Communications setup
 
 The next step is to set up the PC's port, by doing something like this
@@ -10218,7 +10218,7 @@ other way---perhaps floppy-disk transfer---of getting the 29K program
 from the Unix system to the PC; @value{GDBN} does @emph{not} download it over the
 serial line.
 
-@node gdb-EB29K
+@node gdb-EB29K, Remote Log, Comms (EB29K), A29K Embedded
 @subsubsection EB29K cross-debugging
 
 Finally, @code{cd} to the directory containing an image of your 29K
@@ -10262,7 +10262,7 @@ once again, after your @value{GDBN} session has concluded, to attach to
 Type @kbd{CTTY con} to return command input to the main DOS console,
 and type @kbd{~.} to leave @code{tip} or @code{cu}.
 
-@node Remote Log
+@node Remote Log,  , gdb-EB29K, A29K Embedded
 @subsubsection Remote log
 @kindex eb.log
 @cindex log file for EB29K
@@ -10274,7 +10274,7 @@ of the commands sent to it.  Running @samp{tail -f} on this file in
 another window often helps to understand trouble with @code{EBMON}, or
 unexpected events on the PC side of the connection.
 
-@node ARM
+@node ARM, H8/300, A29K Embedded, Embedded Processors
 @subsection ARM
 
 @table @code
@@ -10291,7 +10291,7 @@ ARM Demon monitor.
 
 @end table
 
-@node H8/300
+@node H8/300, H8/500, ARM, Embedded Processors
 @subsection Hitachi H8/300
 
 @table @code
@@ -10348,7 +10348,7 @@ what speed to use over the serial device.
 * Hitachi Special::     Special @value{GDBN} commands for Hitachi micros.
 @end menu
 
-@node Hitachi Boards
+@node Hitachi Boards, Hitachi ICE, H8/300, H8/300
 @subsubsection Connecting to Hitachi boards
 
 @c only for Unix hosts
@@ -10461,7 +10461,7 @@ to detect program completion.
 In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
 
-@node Hitachi ICE
+@node Hitachi ICE, Hitachi Special, Hitachi Boards, H8/300
 @subsubsection Using the E7000 in-circuit emulator
 
 @kindex target e7000@r{, with Hitachi ICE}
@@ -10481,7 +10481,7 @@ If your E7000 is installed as a host on a TCP/IP network, you can just
 specify its hostname; @value{GDBN} uses @code{telnet} to connect.
 @end table
 
-@node Hitachi Special
+@node Hitachi Special,  , Hitachi ICE, H8/300
 @subsubsection Special @value{GDBN} commands for Hitachi micros
 
 Some @value{GDBN} commands are available only for the H8/300:
@@ -10498,7 +10498,7 @@ to check which variant is currently in effect.
 
 @end table
 
-@node H8/500
+@node H8/500, i960, H8/300, Embedded Processors
 @subsection H8/500
 
 @table @code
@@ -10514,7 +10514,7 @@ memory}.  The accepted values for @var{mod} are @code{small},
 
 @end table
 
-@node i960
+@node i960, M32R/D, H8/500, Embedded Processors
 @subsection Intel i960
 
 @table @code
@@ -10567,7 +10567,7 @@ downloads @var{filename} to the 960 as well as adding its symbols in
 * Nindy Reset::                 Nindy reset command
 @end menu
 
-@node Nindy Startup
+@node Nindy Startup, Nindy Options, i960, i960
 @subsubsection Startup with Nindy
 
 If you simply start @code{@value{GDBP}} without using any command-line
@@ -10585,7 +10585,7 @@ simply start up with no Nindy connection by responding to the prompt
 with an empty line.  If you do this and later wish to attach to Nindy,
 use @code{target} (@pxref{Target Commands, ,Commands for managing targets}).
 
-@node Nindy Options
+@node Nindy Options, Nindy Reset, Nindy Startup, i960
 @subsubsection Options for Nindy
 
 These are the startup options for beginning your @value{GDBN} session with a
@@ -10628,7 +10628,7 @@ The standard @samp{-b} option controls the line speed used on the serial
 port.
 
 @c @group
-@node Nindy Reset
+@node Nindy Reset,  , Nindy Options, i960
 @subsubsection Nindy reset command
 
 @table @code
@@ -10641,7 +10641,7 @@ a break is detected.
 @end table
 @c @end group
 
-@node M32R/D
+@node M32R/D, M68K, i960, Embedded Processors
 @subsection Mitsubishi M32R/D
 
 @table @code
@@ -10652,7 +10652,7 @@ Mitsubishi M32R/D ROM monitor.
 
 @end table
 
-@node M68K
+@node M68K, M88K, M32R/D, Embedded Processors
 @subsection M68k
 
 The Motorola m68k configuration includes ColdFire support, and
@@ -10703,7 +10703,7 @@ ROMBUG ROM monitor for OS/9000.
 
 @end table
 
-@node M88K
+@node M88K, MIPS Embedded, M68K, Embedded Processors
 @subsection M88K
 
 @table @code
@@ -10714,7 +10714,7 @@ BUG monitor, running on a MVME187 (m88k) board.
 
 @end table
 
-@node MIPS Embedded
+@node MIPS Embedded, PowerPC, M88K, Embedded Processors
 @subsection MIPS Embedded
 
 @cindex MIPS boards
@@ -10858,7 +10858,7 @@ forever because it has no way of knowing how long the program is going
 to run before stopping.
 @end table
 
-@node PowerPC
+@node PowerPC, PA, MIPS Embedded, Embedded Processors
 @subsection PowerPC
 
 @table @code
@@ -10879,7 +10879,7 @@ SDS monitor, running on a PowerPC board (such as Motorola's ADS).
 
 @end table
 
-@node PA
+@node PA, SH, PowerPC, Embedded Processors
 @subsection HP PA Embedded
 
 @table @code
@@ -10894,7 +10894,7 @@ W89K monitor, running on a Winbond HPPA board.
 
 @end table
 
-@node SH
+@node SH, Sparclet, PA, Embedded Processors
 @subsection Hitachi SH
 
 @table @code
@@ -10917,7 +10917,7 @@ Hitachi SH-3 and SH-3E target systems.
 
 @end table
 
-@node Sparclet
+@node Sparclet, Sparclite, SH, Embedded Processors
 @subsection Tsqware Sparclet
 
 @cindex Sparclet
@@ -10971,7 +10971,7 @@ run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}}
 * Sparclet Execution::           Running and debugging 
 @end menu
 
-@node Sparclet File
+@node Sparclet File, Sparclet Connection, Sparclet, Sparclet
 @subsubsection Setting file to debug
 
 The @value{GDBN} command @code{file} lets you choose with program to debug.
@@ -11001,7 +11001,7 @@ When this happens, add the appropriate directories to the search paths with
 the @value{GDBN} commands @code{path} and @code{dir}, and execute the 
 @code{target} command again.
 
-@node Sparclet Connection
+@node Sparclet Connection, Sparclet Download, Sparclet File, Sparclet
 @subsubsection Connecting to Sparclet
 
 The @value{GDBN} command @code{target} lets you connect to a Sparclet target.
@@ -11020,7 +11020,7 @@ main () at ../prog.c:3
 Connected to ttya.
 @end example
 
-@node Sparclet Download
+@node Sparclet Download, Sparclet Execution, Sparclet Connection, Sparclet
 @subsubsection Sparclet download
 
 @cindex download to Sparclet
@@ -11046,7 +11046,7 @@ If the code is loaded at a different address then what the program was linked
 to, you may need to use the @code{section} and @code{add-symbol-file} commands 
 to tell @value{GDBN} where to map the symbol table.
 
-@node Sparclet Execution
+@node Sparclet Execution,  , Sparclet Download, Sparclet
 @subsubsection Running and debugging
 
 @cindex running and debugging Sparclet programs
@@ -11066,7 +11066,7 @@ Breakpoint 1, main (argc=1, argv=0xeffff21c) at prog.c:3
 (gdbslet)                           
 @end example
 
-@node Sparclite
+@node Sparclite, ST2000, Sparclet, Embedded Processors
 @subsection Fujitsu Sparclite
 
 @table @code
@@ -11080,7 +11080,7 @@ remote protocol.
 
 @end table
 
-@node ST2000
+@node ST2000, Z8000, Sparclite, Embedded Processors
 @subsection Tandem ST2000
 
 @value{GDBN} may be used with a Tandem ST2000 phone switch, running Tandem's
@@ -11129,7 +11129,7 @@ sequences gets you back to the @value{GDBN} command prompt:
 @kbd{@key{RET}~@key{C-d}} (Return, followed by tilde and control-D).
 @end table
 
-@node Z8000
+@node Z8000,  , ST2000, Embedded Processors
 @subsection Zilog Z8000
 
 @cindex Z8000
@@ -11180,7 +11180,7 @@ conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
 conditional breakpoint that suspends only after at least 5000
 simulated clock ticks.
 
-@node Architectures
+@node Architectures,  , Embedded Processors, Configurations
 @section Architectures
 
 This section describes characteristics of architectures that affect
@@ -11192,7 +11192,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * MIPS::
 @end menu
 
-@node A29K
+@node A29K, Alpha, Architectures, Architectures
 @subsection A29K
 
 @table @code
@@ -11218,12 +11218,12 @@ processors.
 
 @end table
 
-@node Alpha
+@node Alpha, MIPS, A29K, Architectures
 @subsection Alpha
 
 See the following section.
 
-@node MIPS
+@node MIPS,  , Alpha, Architectures
 @subsection MIPS
 
 @cindex stack on Alpha
@@ -11258,7 +11258,7 @@ These commands are available @emph{only} when @value{GDBN} is configured
 for debugging programs on Alpha or MIPS processors.
 
 
-@node Controlling GDB
+@node Controlling GDB, Sequences, Configurations, Top
 @chapter Controlling @value{GDBN}
 
 You can alter the way @value{GDBN} interacts with you by using the
@@ -11275,7 +11275,7 @@ described here.
 * Messages/Warnings::           Optional warnings and messages
 @end menu
 
-@node Prompt
+@node Prompt, Editing, Controlling GDB, Controlling GDB
 @section Prompt
 
 @cindex prompt
@@ -11301,7 +11301,7 @@ Directs @value{GDBN} to use @var{newprompt} as its prompt string henceforth.
 Prints a line of the form: @samp{Gdb's prompt is: @var{your-prompt}}
 @end table
 
-@node Editing
+@node Editing, History, Prompt, Controlling GDB
 @section Command editing
 @cindex readline
 @cindex command line editing
@@ -11331,7 +11331,7 @@ Disable command line editing.
 Show whether command line editing is enabled.
 @end table
 
-@node History
+@node History, Screen Size, Editing, Controlling GDB
 @section Command history
 
 @value{GDBN} can keep track of the commands you type during your
@@ -11428,7 +11428,7 @@ Print ten commands centered on command number @var{n}.
 Print ten commands just after the commands last printed.
 @end table
 
-@node Screen Size
+@node Screen Size, Numbers, History, Controlling GDB
 @section Screen size
 @cindex size of screen
 @cindex pauses in output
@@ -11470,7 +11470,7 @@ Likewise, you can specify @samp{set width 0} to prevent @value{GDBN}
 from wrapping its output.
 @end table
 
-@node Numbers
+@node Numbers, Messages/Warnings, Screen Size, Controlling GDB
 @section Numbers
 @cindex number representation
 @cindex entering numbers
@@ -11517,7 +11517,7 @@ Display the current default base for numeric input.
 Display the current default base for numeric display.
 @end table
 
-@node Messages/Warnings
+@node Messages/Warnings,  , Numbers, Controlling GDB
 @section Optional warnings and messages
 
 By default, @value{GDBN} is silent about its inner workings.  If you are
@@ -11593,7 +11593,7 @@ Displays state of confirmation requests.
 
 @end table
 
-@node Sequences
+@node Sequences, Emacs, Controlling GDB, Top
 @chapter Canned Sequences of Commands
 
 Aside from breakpoint commands (@pxref{Break Commands, ,Breakpoint
@@ -11608,7 +11608,7 @@ files.
 * Output::                      Commands for controlled output
 @end menu
 
-@node Define
+@node Define, Hooks, Sequences, Sequences
 @section User-defined commands
 
 @cindex user-defined command
@@ -11701,7 +11701,7 @@ without asking when used inside a user-defined command.  Many @value{GDBN}
 commands that normally print messages to say what they are doing omit the 
 messages when used in a user-defined command.
 
-@node Hooks
+@node Hooks, Command Files, Define, Sequences
 @section User-defined command hooks
 @cindex command hooks
 @cindex hooks, for commands
@@ -11747,7 +11747,7 @@ If an error occurs during the execution of your hook, execution of
 If you try to define a hook which does not match any known command, you
 get a warning from the @code{define} command.
 
-@node Command Files
+@node Command Files, Output, Hooks, Sequences
 @section Command files
 
 @cindex command files
@@ -11810,7 +11810,7 @@ without asking when used in a command file.  Many @value{GDBN} commands that
 normally print messages to say what they are doing omit the messages
 when called from command files.
 
-@node Output
+@node Output,  , Command Files, Sequences
 @section Commands for controlled output
 
 During the execution of a command file or a user-defined command, normal
@@ -11890,7 +11890,7 @@ string are the simple ones that consist of backslash followed by a
 letter.
 @end table
 
-@node Emacs
+@node Emacs, Annotations, Sequences, Top
 @chapter Using @value{GDBN} under @sc{gnu} Emacs
 
 @cindex Emacs
@@ -12064,9 +12064,11 @@ environment.  Users of this environment can use a new command,
 each value is printed in its own window.
 @end ignore
 
+@node Annotations, GDB Bugs, Emacs, Top
+@chapter @value{GDBN} Annotations
 @include annotate.texi
 
-@node GDB Bugs
+@node GDB Bugs, Command Line Editing, Annotations, Top
 @chapter Reporting Bugs in @value{GDBN}
 @cindex bugs in @value{GDBN}
 @cindex reporting bugs in @value{GDBN}
@@ -12086,7 +12088,7 @@ information that enables us to fix the bug.
 * Bug Reporting::               How to report bugs
 @end menu
 
-@node Bug Criteria
+@node Bug Criteria, Bug Reporting, GDB Bugs, GDB Bugs
 @section Have you found a bug?
 @cindex bug criteria
 
@@ -12118,7 +12120,7 @@ If you are an experienced user of debugging tools, your suggestions
 for improvement of @value{GDBN} are welcome in any case.
 @end itemize
 
-@node Bug Reporting
+@node Bug Reporting,  , Bug Criteria, GDB Bugs
 @section How to report bugs
 @cindex bug reports
 @cindex @value{GDBN} bugs, reporting
@@ -12307,11 +12309,18 @@ things without first using the debugger to find the facts.
 @c     inc-hist.texinfo
 @c Use -I with makeinfo to point to the appropriate directory,
 @c environment var TEXINPUTS with TeX.
+
+@node Command Line Editing, Using History Interactively, GDB Bugs, Top
+@chapter Command Line Editing
 @include rluser.texinfo
+
+
+@node Using History Interactively, Formatting Documentation, Command Line Editing, Top
+@chapter Using History Interactively
 @include inc-hist.texinfo
 
 
-@node Formatting Documentation
+@node Formatting Documentation, Installing GDB, Using History Interactively, Top
 @appendix Formatting Documentation
 
 @cindex @value{GDBN} reference card
@@ -12397,7 +12406,7 @@ make gdb.dvi
 
 Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 
-@node Installing GDB
+@node Installing GDB, Index, Formatting Documentation, Top
 @appendix Installing @value{GDBN}
 @cindex configuring @value{GDBN}
 @cindex installation
@@ -12517,7 +12526,7 @@ let @value{GDBN} debug child processes whose programs are not readable.
 * Configure Options::           Summary of options for configure
 @end menu
 
-@node Separate Objdir
+@node Separate Objdir, Config Names, Installing GDB, Installing GDB
 @section Compiling @value{GDBN} in another directory
 
 If you want to run @value{GDBN} versions for several host or target machines,
@@ -12578,7 +12587,7 @@ directories, you can run @code{make} on them in parallel (for example,
 if they are NFS-mounted on each of the hosts); they will not interfere
 with each other.
 
-@node Config Names
+@node Config Names, Configure Options, Separate Objdir, Installing GDB
 @section Specifying names for hosts and targets
 
 The specifications used for hosts and targets in the @code{configure}
@@ -12620,7 +12629,7 @@ Invalid configuration `i986v': machine `i986v' not recognized
 @code{config.sub} is also distributed in the @value{GDBN} source
 directory (@file{gdb-@value{GDBVN}}, for version @value{GDBVN}).
 
-@node Configure Options
+@node Configure Options,  , Config Names, Installing GDB
 @section @code{configure} options
 
 Here is a summary of the @code{configure} options and arguments that
@@ -12689,7 +12698,7 @@ There is no convenient way to generate a list of all available hosts.
 There are many other options available as well, but they are generally
 needed for special purposes only.
  
-@node Index
+@node Index,  , Installing GDB, Top
 @unnumbered Index
 
 @printindex cp
