@@ -1366,7 +1366,8 @@ dnl provided by makefile fragments.
 dnl
 if test "${nativefile}" = ""; then
         < Makefile \
-        sed -e '/^NATDEPFILES[[ 	]]*=[[ 	]]*/s//# NATDEPFILES=/' \
+        sed -e '/^NATDEPFILES[[ 	]]*=.*\\$/,/[[^\\]]$/s/^/# /' \
+            -e '/^NATDEPFILES[[ 	]]*=/s/^/# /' \
         | sed -e '/^\(NATDEPFILES[[ 	]]*[[+]]=[[ 	]]*\)/s//# \1/' \
 	> Makefile.tem
 mv -f Makefile.tem Makefile

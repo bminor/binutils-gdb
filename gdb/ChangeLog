@@ -1,3 +1,10 @@
+2002-05-10  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	From Christian Limpach <chris@Pin.LU>
+	* configure.in: Change sed expression which comments out
+	NATDEPFILES to also comment out continuation lines.
+	* configure: Regenerate.
+
 2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
         * sh-tdep.c: Clean up code erroneously reintroduced by previous
