@@ -1832,6 +1832,22 @@ assumed to be 0. */
   BFD_RELOC_D10V_18_PCREL,
 /* end-sanitize-d10v */
 
+/* start-sanitize-m32r */
+
+/* Mitsubishi M32R relocs.
+This is a 10-bit reloc with the right 2 bits assumed to be 0. */
+  BFD_RELOC_M32R_10_PCREL,
+
+/* This is an 18-bit reloc with the right 2 bits assumed to be 0. */
+  BFD_RELOC_M32R_18_PCREL,
+
+/* This is an 26-bit reloc with the right 2 bits assumed to be 0. */
+  BFD_RELOC_M32R_26_PCREL,
+
+/* This is a 24 bit reloc. */
+  BFD_RELOC_M32R_24,
+/* end-sanitize-m32r */
+
 /* start-sanitize-v850 */
 
 /* This is a 9-bit reloc */

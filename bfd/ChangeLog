@@ -1,3 +1,10 @@
+start-sanitize-m32r
+Thu Sep 12 11:45:57 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* reloc.c: Add m32r relocs.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+end-sanitize-m32r
+
 Thu Sep 12 11:10:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_vec): Set symbol_leading_char field to '_'.
@@ -95,7 +102,7 @@ Tue Sep 10 16:18:30 1996  Fred Fish  <fnf@cygnus.com>
 	(copy_name): Ditto.
 	* syms.c (coff_section_type): Ditto.
 	
-start-sanitize-m324
+start-sanitize-m32r
 Mon Sep  9 22:36:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* bfd-in2.h: Rebuilt after m32r changes.
