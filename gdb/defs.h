@@ -443,6 +443,8 @@ extern void puts_filtered (const char *);
 
 extern void puts_unfiltered (const char *);
 
+extern void puts_filtered_tabular (char *string, int width, int right);
+
 extern void puts_debug (char *prefix, char *string, char *suffix);
 
 extern void vprintf_filtered (const char *, va_list) ATTR_FORMAT (printf, 1, 0);
