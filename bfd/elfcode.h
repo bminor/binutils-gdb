@@ -2327,7 +2327,7 @@ write_shdrs_and_ehdr (abfd)
     }
   if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0
       || (bfd_write ((PTR) x_shdrp, sizeof (*x_shdrp), i_ehdrp->e_shnum, abfd)
-	  != sizeof (*x_shdrp)))
+	  != sizeof (*x_shdrp) * i_ehdrp->e_shnum))
     return false;
 
   /* need to dump the string table too... */
