@@ -46,15 +46,9 @@ i[345]86-*-bsd)		targ_emul=i386bsd ;;
 i[345]86-*-bsd386)	targ_emul=i386bsd ;;
 i[345]86-*-bsdi*)	targ_emul=i386bsd ;;
 i[345]86-*-aout)	targ_emul=i386aout ;;
-i[345]86-*-linuxaout*)	targ_emul=i386linux
-			targ_extra_emuls="i386lelf elf_i386"
-			;;
-i[345]86-*-linuxoldld)	targ_emul=i386linux
-			targ_extra_emuls="i386lelf elf_i386"
-			;;
-i[345]86-*-linux*)	targ_emul=i386lelf
-			targ_extra_emuls="elf_i386 i386linux"
-			;;
+i[345]86-*-linuxaout*)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
+i[345]86-*-linuxoldld)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
+i[345]86-*-linux*)	targ_emul=elf_i386; targ_extra_emuls=i386linux ;;
 i[345]86-*-sysv4*)	targ_emul=elf_i386 ;;
 i[345]86-*-unixware)	targ_emul=elf_i386 ;;
 i[345]86-*-netbsd*)	targ_emul=i386nbsd ;;
