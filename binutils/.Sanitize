@@ -49,6 +49,7 @@ nm.c
 objdump.c
 ostrip.c
 ranlib.sh
+README
 size.c
 sparc-pinsn.c
 strip.c
@@ -61,7 +62,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.7  1991/10/10 11:59:09  rich
+# Revision 1.8  1991/11/05 20:53:19  sac
+# Added README to .Sanitize
+# Made Makefile.in install using ddestdir
+#
+# Revision 1.7  1991/10/10  11:59:09  rich
 # updating
 #
 # Revision 1.6  1991/10/08  01:50:59  gnu
