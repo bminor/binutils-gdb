@@ -9,12 +9,6 @@
 # before anything else is done.  Blank lines will also be squashed
 # out.
 
-# The lines between the "Do-first:" line and the "Things-to-keep:"
-# line are executed as a /bin/sh shell script before anything else is
-# done in this directory.
-
-Do-first:
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
