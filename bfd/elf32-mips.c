@@ -675,22 +675,11 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 0x0000ffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* start-sanitize-r5900 */
-  HOWTO (R_MIPS15_S3,		/* type */
-	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 15,			/* bitsize */
-	 false,			/* pc_relative */
-	 6,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_MIPS15_S3",		/* name */
-	 true,			/* partial_inplace */
-	 0x001fffc0,		/* src_mask */
-	 0x001fffc0,		/* dst_mask */
-	 false)			/* pcrel_offset */
-  /* end-sanitize-r5900 */
-
+  { R_MIPS_SCN_DISP },
+  { R_MIPS_REL16 },
+  { R_MIPS_ADD_IMMEDIATE },
+  { R_MIPS_PJUMP },
+  { R_MIPS_RELGOT }
 };
 
 /* The reloc used for BFD_RELOC_CTOR when doing a 64 bit link.  This
@@ -748,6 +737,23 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 0xffff,		/* dst_mask */
 	 false);		/* pcrel_offset */
 
+/* start-sanitize-r5900 */
+static reloc_howto_type elf_mips15_s3_howto =
+  HOWTO (R_MIPS15_S3,		/* type */
+	 3,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 15,			/* bitsize */
+	 false,			/* pc_relative */
+	 6,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS15_S3",		/* name */
+	 true,			/* partial_inplace */
+	 0x001fffc0,		/* src_mask */
+	 0x001fffc0,		/* dst_mask */
+	 false);		/* pcrel_offset */
+
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
 /* DVP relocations.
    Note that partial_inplace and pcrel_offset are backwards from the
@@ -1664,11 +1670,12 @@ elf_mips_mach (flags)
     case E_MIPS_MACH_4900:
       return bfd_mach_mips4900;
       /* end-sanitize-tx49 */
-      /* start-sanitize-vr5400 */
+      /* start-sanitize-cygnus */
+      /* CYGNUS LOCAL vr5400/raeburn */
 
     case E_MIPS_MACH_5400:
       return bfd_mach_mips5400;
-      /* end-sanitize-vr5400 */
+      /* end-sanitize-cygnus */
       /* start-sanitize-r5900 */
 
     case E_MIPS_MACH_5900:
@@ -1725,10 +1732,7 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_MIPS_GOT_HI16, R_MIPS_GOT_HI16 },
   { BFD_RELOC_MIPS_GOT_LO16, R_MIPS_GOT_LO16 },
   { BFD_RELOC_MIPS_CALL_HI16, R_MIPS_CALL_HI16 },
-  { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 },
-  /* start-sanitize-r5900 */
-  { BFD_RELOC_MIPS15_S3, R_MIPS15_S3 },
-  /* end-sanitize-r5900 */
+  { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 }
 };
 
 /* Given a BFD reloc type, return a howto structure.  */
@@ -1748,6 +1752,10 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
   switch (code)
     {
+    default:
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+
     case BFD_RELOC_CTOR:
       /* We need to handle BFD_RELOC_CTOR specially.
 	 Select the right relocation (R_MIPS_32 or R_MIPS_64) based on the
@@ -1761,6 +1769,10 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
       return &elf_mips16_jump_howto;
     case BFD_RELOC_MIPS16_GPREL:
       return &elf_mips16_gprel_howto;
+/* start-sanitize-r5900 */
+    case BFD_RELOC_MIPS15_S3:
+      return &elf_mips15_s3_howto;
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
     case BFD_RELOC_MIPS_DVP_11_PCREL:
       return &elf_mips_dvp_11_pcrel_howto;
@@ -1776,8 +1788,6 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
     }
-
-  return NULL;
 }
 
 /* Given a MIPS reloc type, fill in an arelent structure.  */
@@ -1799,6 +1809,11 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
     case R_MIPS16_GPREL:
       cache_ptr->howto = &elf_mips16_gprel_howto;
       break;
+/* start-sanitize-r5900 */
+    case R_MIPS15_S3:
+      cache_ptr->howto = &elf_mips15_s3_howto;
+      break;
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
     case R_MIPS_DVP_11_PCREL:
       cache_ptr->howto = &elf_mips_dvp_11_pcrel_howto;
@@ -2100,12 +2115,13 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_4900;
       break;
       /* end-sanitize-tx49 */
-      /* start-sanitize-vr5400 */
+      /* start-sanitize-cygnus */
+      /* CYGNUS LOCAL vr5400/raeburn */
 
     case bfd_mach_mips5400:
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_5400;
       break;
-      /* end-sanitize-vr5400 */
+      /* end-sanitize-cygnus */
       /* start-sanitize-r5900 */
 
     case bfd_mach_mips5900:
@@ -2397,7 +2413,7 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
   switch (hdr->sh_type)
     {
     case SHT_MIPS_LIBLIST:
-      if (strcmp (name, _(".liblist")) != 0)
+      if (strcmp (name, ".liblist") != 0)
 	return false;
       break;
     case SHT_MIPS_MSYM:
@@ -4928,6 +4944,9 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type == R_MIPS_GNU_VTENTRY)
 	continue;
       if ((r_type < 0 || r_type >= (int) R_MIPS_max)
+/* start-sanitize-r5900 */
+	  && r_type != R_MIPS15_S3
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
 	  && r_type != R_MIPS_DVP_11_PCREL
 	  && r_type != R_MIPS_DVP_27_S4
@@ -4944,6 +4963,10 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	howto = &elf_mips16_jump_howto;
       else if (r_type == R_MIPS16_GPREL)
 	howto = &elf_mips16_gprel_howto;
+/* start-sanitize-r5900 */
+      else if (r_type == R_MIPS15_S3)
+	howto = &elf_mips15_s3_howto;
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
       else if (r_type == R_MIPS_DVP_11_PCREL)
 	howto = &elf_mips_dvp_11_pcrel_howto;

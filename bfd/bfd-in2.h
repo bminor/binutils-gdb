@@ -1246,9 +1246,9 @@ enum bfd_architecture
 #define bfd_mach_mips4900              4900
   /* end-sanitize-tx49 */
 #define bfd_mach_mips5000              5000
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */ /* CYGNUS LOCAL vr5400/raeburn */
 #define bfd_mach_mips5400              5400
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
 #define bfd_mach_mips5900              5900
   /* end-sanitize-r5900 */
@@ -1722,7 +1722,7 @@ relocation types already defined. */
   BFD_RELOC_SPARC_REGISTER,
 
 /* SPARC little endian relocation */
-  BFD_RELOC_SPARC_32LE,
+  BFD_RELOC_SPARC_REV32,
 
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.

@@ -1,5 +1,5 @@
 /* bfd back-end for mips support
-   Copyright (C) 1990, 91-96, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91-97, 1998 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -38,64 +38,89 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     NEXT,						\
   }
 
+enum {
+I_mips3000, 
+I_mips3900, 
+I_mips4000, 
+I_mips4010, 
+I_mips4100, 
+I_mips4300, 
+I_mips4400, 
+I_mips4600, 
+I_mips4650, 
+I_mips5000, 
+I_mips6000, 
+I_mips8000, 
+I_mips10000,
+  /* start-sanitize-tx19 */
+I_mips1900,
+  /* end-sanitize-tx19 */
+  /* start-sanitize-vr4320 */
+I_mips4320,
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-tx49 */
+I_mips4900,
+  /* end-sanitize-tx49 */
+  /* start-sanitize-cygnus */
+  /* CYGNUS LOCAL vr5400/raeburn */
+I_mips5400,
+  /* end-sanitize-cygnus */
+  /* start-sanitize-r5900 */
+I_mips5900,
+  /* end-sanitize-r5900 */
+  /* start-sanitize-sky */
+I_dvp_dma,
+I_dvp_vif,
+I_dvp_vu,
+I_dvp_gif,
+  /* end-sanitize-sky */
+I_mips16
+};
 
-#define A 0
-#define B 0
-#define C 0
-#define D 0
+
+#define NN(index) (&arch_info_struct[(index)+1])
 
 static const bfd_arch_info_type arch_info_struct[] = 
 {
-  N (32, 32, bfd_mach_mips3000, "mips:3000", false, &arch_info_struct[1]),
-  N (32, 32, bfd_mach_mips3900, "mips:3900", false, &arch_info_struct[2]),
-  N (64, 64, bfd_mach_mips4000, "mips:4000", false, &arch_info_struct[3]),
-  N (64, 64, bfd_mach_mips4010, "mips:4010", false, &arch_info_struct[4]),
-  N (64, 64, bfd_mach_mips4100, "mips:4100", false, &arch_info_struct[5]),
-  N (64, 64, bfd_mach_mips4300, "mips:4300", false, &arch_info_struct[6]),
-  N (64, 64, bfd_mach_mips4400, "mips:4400", false, &arch_info_struct[7]),
-  N (64, 64, bfd_mach_mips4600, "mips:4600", false, &arch_info_struct[8]),
-  N (64, 64, bfd_mach_mips4650, "mips:4650", false, &arch_info_struct[9]),
-  N (64, 64, bfd_mach_mips5000, "mips:5000", false, &arch_info_struct[10]),
-  N (32, 32, bfd_mach_mips6000, "mips:6000", false, &arch_info_struct[11]),
-  N (64, 64, bfd_mach_mips8000, "mips:8000", false, &arch_info_struct[12]),
-  N (64, 64, bfd_mach_mips10000, "mips:10000", false, &arch_info_struct[13]),
+  N (32, 32, bfd_mach_mips3000, "mips:3000", false, NN(I_mips3000)),
+  N (32, 32, bfd_mach_mips3900, "mips:3900", false, NN(I_mips3900)),
+  N (64, 64, bfd_mach_mips4000, "mips:4000", false, NN(I_mips4000)),
+  N (64, 64, bfd_mach_mips4010, "mips:4010", false, NN(I_mips4010)),
+  N (64, 64, bfd_mach_mips4100, "mips:4100", false, NN(I_mips4100)),
+  N (64, 64, bfd_mach_mips4300, "mips:4300", false, NN(I_mips4300)),
+  N (64, 64, bfd_mach_mips4400, "mips:4400", false, NN(I_mips4400)),
+  N (64, 64, bfd_mach_mips4600, "mips:4600", false, NN(I_mips4600)),
+  N (64, 64, bfd_mach_mips4650, "mips:4650", false, NN(I_mips4650)),
+  N (64, 64, bfd_mach_mips5000, "mips:5000", false, NN(I_mips5000)),
+  N (32, 32, bfd_mach_mips6000, "mips:6000", false, NN(I_mips6000)),
+  N (64, 64, bfd_mach_mips8000, "mips:8000", false, NN(I_mips8000)),
+  N (64, 64, bfd_mach_mips10000, "mips:10000", false, NN(I_mips10000)),
 
   /* start-sanitize-tx19 */
-#undef A
-#define A 1
-  N (32, 32, bfd_mach_mips1900, "mips:1900", false, &arch_info_struct[13+A]),
+  N (32, 32, bfd_mach_mips1900, "mips:1900", false, NN(I_mips1900)),
   /* end-sanitize-tx19 */
+  /* start-sanitize-vr4320 */
+  N (64, 64, bfd_mach_mips4320, "mips:4320", false, NN(I_mips4320)),
+  /* end-sanitize-vr4320 */
   /* start-sanitize-tx49 */
-#undef B
-#define B 1
-  N (64, 64, bfd_mach_mips4900, "mips:4900", false, &arch_info_struct[13+A+B]),
+  N (64, 64, bfd_mach_mips4900, "mips:4900", false, NN(I_mips4900)),
   /* end-sanitize-tx49 */
-  /* start-sanitize-vr5400 */
-#undef C
-#define C 1
-  N (64, 64, bfd_mach_mips5400, "mips:5400", false, &arch_info_struct[13+A+B+C]),
-  /* end-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
+  /* CYGNUS LOCAL vr5400/raeburn */
+  N (64, 64, bfd_mach_mips5400, "mips:5400", false, NN(I_mips5400)),
+  /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
-#undef D
-#define D 1
-  N (64, 32, bfd_mach_mips5900, "mips:5900", false, &arch_info_struct[13+A+B+C+D]),
+  N (64, 32, bfd_mach_mips5900, "mips:5900", false, NN(I_mips5900)),
   /* end-sanitize-r5900 */
   /* start-sanitize-sky */
-#undef E
-#define E (A+B+C+D)
-  N (32, 32, bfd_mach_dvp_dma,   "dvp:dma",   false, &arch_info_struct[13+E+1]),
-  N (32, 32, bfd_mach_dvp_pke,   "dvp:pke",   false, &arch_info_struct[13+E+2]),
-  N (32, 32, bfd_mach_dvp_vu,    "dvp:vu",    false, &arch_info_struct[13+E+3]),
-  N (32, 32, bfd_mach_dvp_gpuif, "dvp:gpuif", false, &arch_info_struct[13+E+4]),
+  N (32, 32, bfd_mach_dvp_dma,  "dvp:dma",   false, NN(I_dvp_dma)),
+  N (32, 32, bfd_mach_dvp_vif,  "dvp:vif",   false, NN(I_dvp_vif)),
+  N (32, 32, bfd_mach_dvp_vu,   "dvp:vu",    false, NN(I_dvp_vu)),
+  N (32, 32, bfd_mach_dvp_gif,  "dvp:gif",   false, NN(I_dvp_gif)),
   /* end-sanitize-sky */
 
   N (64, 64, bfd_mach_mips16,   "mips:16",   false, 0),
 };
-
-#undef A
-#undef B
-#undef C
-#undef D
 
 /* The default architecture is mips:3000, but with a machine number of
    zero.  This lets the linker distinguish between a default setting

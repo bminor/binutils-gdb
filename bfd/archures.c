@@ -70,6 +70,14 @@ DESCRIPTION
 .  bfd_arch_unknown,   {* File arch not known *}
 .  bfd_arch_obscure,   {* Arch known, not one of these *}
 .  bfd_arch_m68k,      {* Motorola 68xxx *}
+.#define bfd_mach_m68000 1
+.#define bfd_mach_m68008 2
+.#define bfd_mach_m68010 3
+.#define bfd_mach_m68020 4
+.#define bfd_mach_m68030 5
+.#define bfd_mach_m68040 6
+.#define bfd_mach_m68060 7
+.#define bfd_mach_cpu32  8
 .  bfd_arch_vax,       {* DEC Vax *}   
 .  bfd_arch_i960,      {* Intel 960 *}
 .    {* The order of the following is important.
@@ -97,8 +105,9 @@ DESCRIPTION
 .#define bfd_mach_sparc_sparclite	3
 .#define bfd_mach_sparc_v8plus		4
 .#define bfd_mach_sparc_v8plusa		5 {* with ultrasparc add'ns *}
-.#define bfd_mach_sparc_v9		6
-.#define bfd_mach_sparc_v9a		7 {* with ultrasparc add'ns *}
+.#define bfd_mach_sparc_sparclite_le	6
+.#define bfd_mach_sparc_v9		7
+.#define bfd_mach_sparc_v9a		8 {* with ultrasparc add'ns *}
 .{* Nonzero if MACH has the v9 instruction set.  *}
 .#define bfd_mach_sparc_v9_p(mach) \
 .  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
@@ -122,9 +131,9 @@ DESCRIPTION
 .#define bfd_mach_mips4900		4900
 . {* end-sanitize-tx49 *}
 .#define bfd_mach_mips5000		5000
-. {* start-sanitize-vr5400 *}
+. {* start-sanitize-cygnus *} {* CYGNUS LOCAL vr5400/raeburn *}
 .#define bfd_mach_mips5400		5400
-. {* end-sanitize-vr5400 *}
+. {* end-sanitize-cygnus *}
 . {* start-sanitize-r5900 *}
 .#define bfd_mach_mips5900		5900
 . {* end-sanitize-r5900 *}
@@ -159,9 +168,7 @@ DESCRIPTION
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
 .  bfd_arch_hppa,      {* HP PA RISC *}
 .  bfd_arch_d10v,      {* Mitsubishi D10V *}
-. {* start-sanitize-d30v *}
 .  bfd_arch_d30v,      {* Mitsubishi D30V *}
-. {* end-sanitize-d30v *}
 .  bfd_arch_z8k,       {* Zilog Z8000 *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
@@ -170,9 +177,7 @@ DESCRIPTION
 .#define bfd_mach_sh            0
 .#define bfd_mach_sh3        0x30
 .#define bfd_mach_sh3e       0x3e
-.  {* start-sanitize-sh4 *}
 .#define bfd_mach_sh4        0x40
-.  {* end-sanitize-sh4 *}
 .  bfd_arch_alpha,     {* Dec Alpha *}
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .#define bfd_mach_arm_2		1
@@ -202,6 +207,10 @@ DESCRIPTION
 . {* end-sanitize-m32rx *}
 .  bfd_arch_mn10200,   {* Matsushita MN10200 *}
 .  bfd_arch_mn10300,   {* Matsushita MN10300 *}
+.#define bfd_mach_mn10300		300
+. {* start-sanitize-am33 *}
+.#define bfd_mach_am33		330
+. {* end-sanitize-am33 *}
 .  bfd_arch_last
 .  };
 
@@ -245,9 +254,7 @@ extern const bfd_arch_info_type bfd_alpha_arch;
 extern const bfd_arch_info_type bfd_arc_arch;
 extern const bfd_arch_info_type bfd_arm_arch;
 extern const bfd_arch_info_type bfd_d10v_arch;
-/* start-sanitize-d30v */
 extern const bfd_arch_info_type bfd_d30v_arch;
-/* end-sanitize-d30v */
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
@@ -285,9 +292,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_arc_arch,
   &bfd_arm_arch,
   &bfd_d10v_arch,
-/* start-sanitize-d30v */
   &bfd_d30v_arch,
-/* end-sanitize-d30v */
   &bfd_h8300_arch,
   &bfd_h8500_arch,
   &bfd_hppa_arch,
@@ -700,18 +705,20 @@ bfd_default_scan (info, string)
     {
       int strlen_arch_name = strlen (info->arch_name);
       if (strncasecmp (string, info->arch_name, strlen_arch_name) == 0)
-	if (string[strlen_arch_name] == ':')
-	  {
-	    if (strcasecmp (string + strlen_arch_name + 1,
-			    info->printable_name) == 0)
-	      return true;
-	  }
-	else
-	  {
-	    if (strcasecmp (string + strlen_arch_name,
-			    info->printable_name) == 0)
-	      return true;
-	  }
+	{
+	  if (string[strlen_arch_name] == ':')
+	    {
+	      if (strcasecmp (string + strlen_arch_name + 1,
+			      info->printable_name) == 0)
+		return true;
+	    }
+	  else
+	    {
+	      if (strcasecmp (string + strlen_arch_name,
+			      info->printable_name) == 0)
+		return true;
+	    }
+	}
     }
 
   /* Given that PRINTABLE_NAME has the form: <arch> ":" <mach>;
@@ -756,7 +763,7 @@ bfd_default_scan (info, string)
     }
 
   number = 0;
-  while (isdigit(*ptr_src))
+  while (isdigit ((unsigned char) *ptr_src))
     {
       number = number * 10 + *ptr_src  - '0';
       ptr_src++;
@@ -767,14 +774,34 @@ bfd_default_scan (info, string)
 
   switch (number) 
     {
-    case 68010:
-    case 68020:
-    case 68030:
-    case 68040:
-    case 68332:
-    case 68050:        
+      /* FIXME: These are needed to parse IEEE objects.  */
     case 68000: 
-      arch = bfd_arch_m68k; 
+      arch = bfd_arch_m68k;
+      number = bfd_mach_m68000;
+      break;
+    case 68010:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_m68010;
+      break;
+    case 68020:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_m68020;
+      break;
+    case 68030:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_m68030;
+      break;
+    case 68040:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_m68040;
+      break;
+    case 68060:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_m68060;
+      break;
+    case 68332:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_cpu32;
       break;
 
     case 32000:
