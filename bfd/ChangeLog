@@ -1,3 +1,8 @@
+2005-04-04  Eric Christopher  <echristo@redhat.com>
+
+	* elfxx-mips.c (_bfd_elf_mips_get_relocated_section_contents):
+	Clean up gp handling code.
+
 2005-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (bfd_elf_set_group_contents): Ignore linker created

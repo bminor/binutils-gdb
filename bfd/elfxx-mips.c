@@ -8754,30 +8754,21 @@ _bfd_elf_mips_get_relocated_section_contents
 	  /* Specific to MIPS: Deal with relocation types that require
 	     knowing the gp of the output bfd.  */
 	  asymbol *sym = *(*parent)->sym_ptr_ptr;
-	  if (bfd_is_abs_section (sym->section) && abfd)
-	    {
-	      /* The special_function wouldn't get called anyway.  */
-	    }
-	  else if (!gp_found)
-	    {
-	      /* The gp isn't there; let the special function code
-		 fall over on its own.  */
-	    }
-	  else if ((*parent)->howto->special_function
-		   == _bfd_mips_elf32_gprel16_reloc)
-	    {
-	      /* bypass special_function call */
-	      r = _bfd_mips_elf_gprel16_with_gp (input_bfd, sym, *parent,
-						 input_section, relocatable,
-						 data, gp);
-	      goto skip_bfd_perform_relocation;
-	    }
-	  /* end mips specific stuff */
 
-	  r = bfd_perform_relocation (input_bfd, *parent, data, input_section,
-				      relocatable ? abfd : NULL,
-				      &error_message);
-	skip_bfd_perform_relocation:
+	  /* If we've managed to find the gp and have a special
+	     function for the relocation then go ahead, else default
+	     to the generic handling.  */
+	  if (gp_found
+	      && (*parent)->howto->special_function
+	      == _bfd_mips_elf32_gprel16_reloc)
+	    r = _bfd_mips_elf_gprel16_with_gp (input_bfd, sym, *parent,
+					       input_section, relocatable,
+					       data, gp);
+	  else
+	    r = bfd_perform_relocation (input_bfd, *parent, data, 
+					input_section,
+					relocatable ? abfd : NULL,
+					&error_message);
 
 	  if (relocatable)
 	    {
