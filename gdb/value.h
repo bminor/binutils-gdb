@@ -128,9 +128,7 @@ struct value
        list.  */
     struct value *next;
 
-    /* Register number if the value is from a register.  Is not kept
-       if you take a field of a structure that is stored in a
-       register.  Shouldn't it be?  */
+    /* Register number if the value is from a register.  */
     short regno;
     /* If zero, contents of this value are in the contents field.
        If nonzero, contents are in inferior memory at address

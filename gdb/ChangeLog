@@ -1,5 +1,10 @@
 2003-03-30  Andrew Cagney  <cagney@redhat.com>
 
+	2002-11-10 Klee Dienes <kdienes@apple.com>
+        * value.h (struct value): Update comment.
+
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
 	* d10v-tdep.c: Replace _FP_REGNUM and FP_REGNUM with
 	D10V_FP_REGNUM.
 	(d10v_gdbarch_init): Do not set fp_regnum.
