@@ -1,3 +1,12 @@
+2003-06-04  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c (s_alpha_usepv): New.
+	(md_pseudo_table): Add it.
+	(alpha_cfi_frame_initial_instructions): New.
+	* config/tc-alpha.h (TARGET_USE_CFIPOP): New.
+	(tc_cfi_frame_initial_instructions): New.
+	* doc/c-alpha.texi: Document .usepv.
+
 2003-06-04  Jakub Jelinek  <jakub@redhat.com>
 
 	* as.c (show_usage): Document --execstack and --noexecstack.

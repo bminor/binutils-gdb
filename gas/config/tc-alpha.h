@@ -161,6 +161,11 @@ do {									\
 	     (long) FIX->tc_fix_data.next_reloc);			\
 } while (0)
 
+#define TARGET_USE_CFIPOP 1
+
+#define tc_cfi_frame_initial_instructions alpha_cfi_frame_initial_instructions
+extern void alpha_cfi_frame_initial_instructions(void);
+
 #define DWARF2_LINE_MIN_INSN_LENGTH	4
 #define DWARF2_DEFAULT_RETURN_COLUMN	26
 #define DWARF2_CIE_DATA_ALIGNMENT	-8

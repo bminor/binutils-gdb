@@ -379,6 +379,18 @@ to perform a load of the GP register; 2 indicates that @code{$27} is
 used in some non-standard way and so the linker cannot elide the load of
 the procedure vector during relaxation.
 
+@item .usepv @var{function}, @var{which}
+Used to indicate the use of the @code{$27} register, similar to 
+@code{.prologue}, but without the other semantics of needing to 
+be inside an open @code{.ent}/@code{.end} block.
+
+The @var{which} argument should be either @code{no}, indicating that
+@code{$27} is not used, or @code{std}, indicating that the first two
+instructions of the function perform a GP load.
+
+One might use this directive instead of @code{.prologue} if you are
+also using dwarf2 CFI directives.
+
 @item .gprel32 @var{expression}
 Computes the difference between the address in @var{expression} and the
 GP for the current object file, and stores it in 4 bytes.  In addition

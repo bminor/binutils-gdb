@@ -267,6 +267,7 @@ static void s_alpha_file PARAMS ((int));
 static void s_alpha_loc PARAMS ((int));
 static void s_alpha_stab PARAMS ((int));
 static void s_alpha_coff_wrapper PARAMS ((int));
+static void s_alpha_usepv PARAMS ((int));
 #endif
 #ifdef OBJ_EVAX
 static void s_alpha_section PARAMS ((int));
@@ -4822,7 +4823,64 @@ alpha_elf_md_end (void)
 	cfi_end_fde (p->func_end_sym);
       }
 }
+
+static void
+s_alpha_usepv (int unused ATTRIBUTE_UNUSED)
+{
+  char *name, name_end;
+  char *which, which_end;
+  symbolS *sym;
+  int other;
+
+  name = input_line_pointer;
+  name_end = get_symbol_end ();
+
+  if (! is_name_beginner (*name))
+    {
+      as_bad (_(".usepv directive has no name"));
+      *input_line_pointer = name_end;
+      ignore_rest_of_line ();
+      return;
+    }
+
+  sym = symbol_find_or_make (name);
+  *input_line_pointer++ = name_end;
+
+  if (name_end != ',')
+    {
+      as_bad (_(".usepv directive has no type"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  SKIP_WHITESPACE ();
+  which = input_line_pointer;
+  which_end = get_symbol_end ();
+
+  if (strcmp (which, "no") == 0)
+    other = STO_ALPHA_NOPV;
+  else if (strcmp (which, "std") == 0)
+    other = STO_ALPHA_STD_GPLOAD;
+  else
+    {
+      as_bad (_("unknown argument for .usepv"));
+      other = 0;
+    }
+  
+  *input_line_pointer = which_end;
+  demand_empty_rest_of_line ();
+
+  S_SET_OTHER (sym, other | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
+}
 #endif /* OBJ_ELF */
+
+/* Standard calling conventions leaves the CFA at $30 on entry.  */
+
+void
+alpha_cfi_frame_initial_instructions ()
+{
+  cfi_add_CFA_def_cfa_register (30);
+}
 
 #ifdef OBJ_EVAX
 
@@ -5669,6 +5727,7 @@ const pseudo_typeS md_pseudo_table[] = {
   {"loc", s_alpha_loc, 9},
   {"stabs", s_alpha_stab, 's'},
   {"stabn", s_alpha_stab, 'n'},
+  {"usepv", s_alpha_usepv, 0},
   /* COFF debugging related pseudos.  */
   {"begin", s_alpha_coff_wrapper, 0},
   {"bend", s_alpha_coff_wrapper, 1},
