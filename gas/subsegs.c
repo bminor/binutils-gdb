@@ -426,7 +426,7 @@ subseg_get (segname, force_new)
   if (! seginfo)
     {
       /* Check whether output_section is set first because secptr may
-         be bfd_abs_section_ptr.  */
+	 be bfd_abs_section_ptr.  */
       if (secptr->output_section != secptr)
 	secptr->output_section = secptr;
       seginfo = (segment_info_type *) xmalloc (sizeof (*seginfo));
@@ -529,13 +529,13 @@ section_symbol (sec)
   if (! EMIT_SECTION_SYMBOLS || symbol_table_frozen)
     {
       /* Here we know it won't be going into the symbol table.  */
-      s = symbol_create (sec->name, sec, 0, &zero_address_frag);
+      s = symbol_create (sec->symbol->name, sec, 0, &zero_address_frag);
     }
   else
     {
-      s = symbol_find_base (sec->name, 0);
+      s = symbol_find_base (sec->symbol->name, 0);
       if (s == NULL)
-	s = symbol_new (sec->name, sec, 0, &zero_address_frag);
+	s = symbol_new (sec->symbol->name, sec, 0, &zero_address_frag);
       else
 	{
 	  if (S_GET_SEGMENT (s) == undefined_section)
