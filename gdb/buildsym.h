@@ -351,7 +351,8 @@ end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
 		     struct partial_symtab **, int));
 
 extern void
-process_one_symbol PARAMS ((int, int, CORE_ADDR, char *, int));
+process_one_symbol PARAMS ((int, int, CORE_ADDR, char *, int,
+			    struct objfile *));
 
 extern int
 hashname PARAMS ((char *));

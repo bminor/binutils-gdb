@@ -2327,7 +2327,8 @@ psymtab_to_symtab_1(pst, filename)
 		CORE_ADDR valu = sh->value;
 		if (MIPS_IS_STAB(sh)) {
 		    int type_code = MIPS_UNMARK_STAB(sh->index);
-		    process_one_symbol (type_code, 0, valu, name, /*FIXME*/ 0);
+		    process_one_symbol (type_code, 0, valu, name, /*FIXME*/ 0,
+					pst->objfile);
 		}
 		else if (sh->st == stLabel && sh->index != indexNil) {
 		    /* Handle encoded stab line number. */
