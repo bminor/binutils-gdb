@@ -1,5 +1,20 @@
 Fri Sep  8 16:32:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	Add Linux style directory searching.
+	* configure.tgt: Add i386lelf to targ_extra_emuls for
+	i[345]86-*-linuxaout* and i[345]86-*-linuxoldld.  For
+	i[345]86-*-linux*, set targ_emul to i386lelf, and add elf_i386 to
+	targ_extra_emuls.
+	* emulparams/i386lelf.sh: New file, a copy of elf_i386.sh.
+	* emultempl/elf32.em: If TARGET_IS_i386lelf, use autoconf
+	recommended mechanism to define DIR and struct dirent.
+	(libcmp): New static function use only when TARGET_IS_i386lelf.
+	(gld${EMULATION_NAME}_open_dynamic_archive): Likewise.
+	* Makefile.in (ALL_EMULATIONS): Add ei386lelf.o
+	(ei386lelf.c): New target.
+
+	* Makefile.in (config.status): Depend upon configure.tgt.
+
 	* ldemul.h (ldemul_set_symbols): Declare.
 	(ldemul_parse_args): Declare.
 	* ldemul.c (ldemul_parse_args): Fix indentation.

@@ -34,7 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 
 #include "ld.h"
-#include "config.h"
 #include "ldmain.h"
 #include "ldemul.h"
 #include "ldfile.h"
@@ -43,9 +42,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldlang.h"
 #include "ldgram.h"
 
+#ifdef TARGET_IS_i386lelf
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+#else
+# define dirent direct
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
+#endif
+
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static boolean gld${EMULATION_NAME}_open_dynamic_archive
-  PARAMS ((const char *, lang_input_statement_type *));
+  PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
 static void gld${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld${EMULATION_NAME}_check_needed
   PARAMS ((lang_input_statement_type *));
@@ -69,20 +85,39 @@ gld${EMULATION_NAME}_before_parse()
   config.dynamic_link = ${DYNAMIC_LINK-true};
 }
 
+#ifndef TARGET_IS_i386lelf
+
 /* Try to open a dynamic archive.  This is where we know that ELF
    dynamic libraries have an extension of .so.  */
 
 static boolean
-gld${EMULATION_NAME}_open_dynamic_archive (arch, entry)
+gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
      const char *arch;
+     search_dirs_type *search;
      lang_input_statement_type *entry;
 {
   const char *filename;
+  char *string;
+
+  if (! entry->is_archive)
+    return false;
 
   filename = entry->filename;
 
-  if (! ldfile_open_file_search (arch, entry, "lib", ".so"))
-    return false;
+  string = (char *) xmalloc (strlen (search->name)
+			     + strlen (filename)
+			     + strlen (arch)
+			     + sizeof "/lib.so");
+
+  sprintf (string, "%s/lib%s%s.so", search->name, filename, arch);
+
+  if (! ldfile_try_open_bfd (string, entry))
+    {
+      free (string);
+      return false;
+    }
+
+  entry->filename = string;
 
   /* We have found a dynamic object to include in the link.  The ELF
      backend linker will create a DT_NEEDED entry in the .dynamic
@@ -112,6 +147,121 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, entry)
 
   return true;
 }
+
+#else /* TARGET_IS_i386lelf */
+
+/* Linux deviates from the SVR4 standard in that its archives use
+   version numbers in the file name.  I think this is bogus, but
+   H.J. Lu insists that it be done this way.  */
+
+static int libcmp PARAMS ((const char *, const char *));
+
+/* Choose between two library names.  This is like a string
+   comparison, except that numbers are compared by value.  */
+
+static int
+libcmp (p1, p2)
+     const char *p1;
+     const char *p2;
+{
+  while (*p1 != '\0')
+    {
+      if (isdigit (*p1) && isdigit (*p2))
+	{
+	  unsigned long v1, v2;
+
+	  v1 = strtoul (p1, (char **) &p1, 10);
+	  v2 = strtoul (p2, (char **) &p2, 10);
+	  if (v1 < v2)
+	    return -1;
+	  else if (v1 > v2)
+	    return 1;
+	}
+      else if (*p1 < *p2)
+	return -1;
+      else if (*p1 > *p2)
+	return 1;
+      else
+	{
+	  ++p1;
+	  ++p2;
+	}
+    }
+
+  if (*p2 != '\0')
+    return -1;
+
+  return 0;
+}
+
+/* Search for the library to open.  */
+
+/*ARGSUSED*/
+static boolean
+gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
+     const char *arch;
+     search_dirs_type *search;
+     lang_input_statement_type *entry;
+{
+  size_t len;
+  char *found;
+  DIR *dir;
+  struct dirent *ent;
+  char *string;
+
+  len = strlen (entry->filename);
+
+  found = NULL;
+
+  dir = opendir (search->name);
+  if (dir == NULL)
+    return false;
+
+  while ((ent = readdir (dir)) != NULL)
+    {
+      if (strncmp (ent->d_name, "lib", 3) != 0
+	  || strncmp (ent->d_name + 3, entry->filename, len) != 0
+	  || strncmp (ent->d_name + len + 3, ".so", 3) != 0)
+	continue;
+
+      if (found != NULL)
+	{
+	  if (libcmp (ent->d_name + len + 6, found + len + 6) < 0)
+	    continue;
+	  free (found);
+	}
+
+      found = (char *) xmalloc (strlen (ent->d_name) + 1);
+      strcpy (found, ent->d_name);
+    }
+
+  closedir (dir);
+
+  if (found == NULL)
+    return false;
+
+  string = (char *) xmalloc (strlen (search->name) + strlen (found) + 2);
+  sprintf (string, "%s/%s", search->name, found);
+  if (! ldfile_try_open_bfd (string, entry))
+    {
+      free (found);
+      return false;
+    }
+
+  entry->filename = string;
+
+  if (bfd_check_format (entry->the_bfd, bfd_object)
+      && (entry->the_bfd->flags & DYNAMIC) != 0)
+    {
+      ASSERT (entry->is_archive && entry->search_dirs_flag);
+      bfd_elf_set_dt_needed_name (entry->the_bfd, found);
+    }
+
+  return true;
+
+}
+
+#endif /* TARGET_IS_i386lelf */
 
 /* These variables are required to pass information back and forth
    between after_open and check_needed.  */
@@ -279,6 +429,17 @@ gld${EMULATION_NAME}_check_needed (s)
   if (s->filename != NULL
       && strcmp (s->filename, global_needed->name) == 0)
     global_found = true;
+  else if (s->search_dirs_flag
+	   && s->filename != NULL
+	   && strchr (global_needed->name, '/') == NULL)
+    {
+      const char *f;
+
+      f = strrchr (s->filename, '/');
+      if (f != NULL
+	  && strcmp (f + 1, global_needed->name) == 0)
+	global_found = true;
+    }
 }
 
 /* This is called after the sections have been attached to output
@@ -338,7 +499,8 @@ gld${EMULATION_NAME}_before_allocation ()
 	  einfo ("%F%B: Can't read contents of section .gnu.warning: %E\n",
 		 is->the_bfd);
 	msg[sz] = '\0';
-	ret = link_info.callbacks->warning (&link_info, msg);
+	ret = link_info.callbacks->warning (&link_info, msg, is->the_bfd,
+					    (asection *) NULL, (bfd_vma) 0);
 	ASSERT (ret);
 	free (msg);
 
@@ -490,6 +652,17 @@ gld${EMULATION_NAME}_place_orphan (file, s)
     }
 
   secname = bfd_get_section_name (s->owner, s);
+
+  /* If this is a final link, then always put .gnu.warning.SYMBOL
+     sections into the .text section to get them out of the way.  */
+  if (! link_info.shared
+      && ! link_info.relocateable
+      && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
+      && hold_text != NULL)
+    {
+      wild_doit (&hold_text->children, s, hold_text, file);
+      return true;
+    }
 
   /* Decide which segment the section should go in based on the
      section name and section flags.  */
