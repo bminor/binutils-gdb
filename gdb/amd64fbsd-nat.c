@@ -218,7 +218,7 @@ store_inferior_registers (int regnum)
 void _initialize_amd64fbsd_nat (void);
 
 void
-_initialize_am64fbsd_nat (void)
+_initialize_amd64fbsd_nat (void)
 {
   int offset;
 

@@ -1,3 +1,8 @@
+2003-09-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): Rename from
+	_initialize_am64fbsd_nat.
+
 2003-09-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_pc_bounds): Complain if offset
@@ -58,6 +63,14 @@
 	* linux-nat.h (target_waitstatus): Declare opaque.
 
 2003-09-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (DEPRECATED_REG_STRUCT_HAS_ADDR): Add comment.
+	(stabs_argument_has_addr): New architecture method.
+	* arch-utils.h (default_stabs_argument_has_addr): New prototype.
+	* arch-utils.c: Include "buildsym.h".
+	(default_stabs_argument_has_addr): New function.
+	* stabsread.c (define_symbol): Use stabs_argument_has_addr
+	instead of DEPRECATED_REG_STRUCT_HAS_ADDR.
 
 	* cris-tdep.c (cris_gdbarch_init): Set
 	deprecated_reg_struct_has_addr instead of reg_struct_has_addr.
