@@ -104,8 +104,10 @@
 	struct _model_data {
 	  const char *name;				/* model name */
 	  const model_time *timing;			/* timing information */
-	  unsigned_word old_program_counter;		/* previous PC */
 	  unsigned nr_branches;				/* # branches */
+	  unsigned nr_branches_fallthrough;		/* # conditional branches that fell through */
+	  unsigned nr_branch_predict_trues;		/* # branches predicted correctly */
+	  unsigned nr_branch_predict_falses;		/* # branches predicted incorrectly */
 	  unsigned nr_units[nr_ppc_function_units];	/* function unit counts */
 	  unsigned16 busy[nr_ppc_function_units];	/* how long until free */
 	};
@@ -139,10 +141,6 @@ void::model-function::model_init:cpu *processor, model_data *model_ptr
 void::model-function::model_halt:cpu *processor, model_data *model_ptr
 
 void::model-function::model_issue:itable_index index, cpu *processor, model_data *model_ptr, unsigned_word cia
-	if (model_ptr->old_program_counter+4 != cia)
-	  model_ptr->nr_branches++;
-
-	model_ptr->old_program_counter = cia;
 	model_ptr->nr_units[ (int)model_ptr->timing[ (int)index ].first_unit ]++;
 
 	/* Assume that any instruction we don't know about is illegal for this
@@ -161,6 +159,33 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	tail->name = "branch";
 	tail->suffix_plural = "es";
 	tail->suffix_singular = "";
+
+	if (model_ptr->nr_branches_fallthrough) {
+	  tail->next = ZALLOC(model_print);
+	  tail = tail->next;
+	  tail->count = model_ptr->nr_branches_fallthrough;
+	  tail->name = "conditional branch";
+	  tail->suffix_plural = "es fell through";
+	  tail->suffix_singular = " fell through";
+	}
+
+	if (model_ptr->nr_branch_predict_trues) {
+	  tail->next = ZALLOC(model_print);
+	  tail = tail->next;
+	  tail->count = model_ptr->nr_branch_predict_trues;
+	  tail->name = "successful branch prediction";
+	  tail->suffix_plural = "s";
+	  tail->suffix_singular = "";
+	}
+
+	if (model_ptr->nr_branch_predict_falses) {
+	  tail->next = ZALLOC(model_print);
+	  tail = tail->next;
+	  tail->count = model_ptr->nr_branch_predict_falses;
+	  tail->name = "unsuccessful branch prediction";
+	  tail->suffix_plural = "s";
+	  tail->suffix_singular = "";
+	}
 
 	for (i = PPC_UNIT_BAD; i < nr_ppc_function_units; i++) {
 	  if (model_ptr->nr_units[i]) {
@@ -185,6 +210,17 @@ void::model-function::model_mon_info_free:model_data *model_ptr, model_print *pt
 	  ptr = next;
 	}
 
+void::model-function::model_branches:model_data *model_ptr, int failed
+	if (failed)
+	  model_ptr->nr_branches_fallthrough++;
+	else
+	  model_ptr->nr_branches++;
+
+void::model-function::model_branch_predict:model_data *model_ptr, int success
+	if (success)
+	  model_ptr->nr_branch_predict_trues++;
+	else
+	  model_ptr->nr_branch_predict_falses++;
 
 # The following (illegal) instruction is `known' by gen and is
 # called when ever an illegal instruction is encountered
@@ -668,43 +704,77 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (AA) NIA = IEA(EXTS(LI_0b00));
 	else    NIA = IEA(CIA + EXTS(LI_0b00));
 	if (LK) LR = (spreg)CIA+4;
+	model_branches(cpu_model(processor), 1);
+
 0.16,6.BO,11.BI,16.BD,30.AA,31.LK:B:t::Branch Conditional
 *601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
-	int M, ctr_ok, cond_ok;
+	int M, ctr_ok, cond_ok, succeed;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
 	if (!BO{2}) CTR = CTR - 1;
 	ctr_ok = BO{2} || ((MASKED(CTR, M, 63) != 0) != (BO{3}));
 	cond_ok = BO{0} || ((CR{BI}) == (BO{1}));
-	if (ctr_ok && cond_ok)
+	if (ctr_ok && cond_ok) {
 	  if (AA) NIA = IEA(EXTS(BD_0b00));
 	  else    NIA = IEA(CIA + EXTS(BD_0b00));
+	  succeed = 1;
+	}
+	else
+	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
+	model_branches(cpu_model(processor), succeed);
+	if (! BO{0}) {
+	  int reverse;
+	  if (BO{4}) {	/* branch prediction bit set, reverse sense of test */
+	    reverse = EXTS(BD_0b00) < 0;
+	  } else {	/* branch prediction bit not set */
+	    reverse = EXTS(BD_0b00) >= 0;
+	  }
+	  model_branch_predict(cpu_model(processor), reverse ? !succeed : succeed);
+	}
+
 0.19,6.BO,11.BI,16./,21.16,31.LK:XL:t::Branch Conditional to Link Register
 *601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
-	int M, ctr_ok, cond_ok;
+	int M, ctr_ok, cond_ok, succeed;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
 	if (!BO{2}) CTR = CTR - 1;
 	ctr_ok = BO{2} || ((MASKED(CTR, M, 63) != 0) != BO{3});
 	cond_ok = BO{0} || (CR{BI} == BO{1});
-	if (ctr_ok && cond_ok) NIA = IEA(LR_0b00);
+	if (ctr_ok && cond_ok) {
+	  NIA = IEA(LR_0b00);
+	  succeed = 1;
+	}
+	else
+	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
+	model_branches(cpu_model(processor), succeed);
+	if (! BO{0})
+	  model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
+
 0.19,6.BO,11.BI,16./,21.528,31.LK:XL:t::Branch Conditional to Count Register
 *601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
-	int cond_ok;
+	int cond_ok, succeed;
 	cond_ok = BO{0} || (CR{BI} == BO{1});
-	if (cond_ok) NIA = IEA(CTR_0b00);
+	if (cond_ok) {
+	  NIA = IEA(CTR_0b00);
+	  succeed = 1;
+	}
+	else
+	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
+	model_branches(cpu_model(processor), succeed);
+	if (! BO{0})
+	  model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
 
 #
 # I.2.4.2 System Call Instruction

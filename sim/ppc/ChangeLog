@@ -22,6 +22,32 @@ Thu Nov 16 09:52:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* mon.c (mon_issue): Pass processor argument to model_issue.
 
+	* Makefile.in: Delete all function unit support, since the newer
+	table driven model support replaces it.
+	* cpu.{c,h}: Ditto.
+	* mon.c: Ditto.
+	* inline.{c,h}: Ditto.
+	* std-config.h: Ditto.
+	* options.c: Ditto.
+	* configure{,.in}: Ditto.
+	* Makefile.in: Ditto.
+	* psim.c: Ditto.
+	* function_unit.{c,h}: Delete these now usused files.
+
+	* std-config.h (WITH_MODEL_ISSUE): Add new macro on whether to
+	trace instructions in a model specific manor.
+	* options.c (print_options): Print it out.
+	* configure{,.in}: Add --enable-sim-model-issue option.
+	* Makefile.in: Add --enable-sim-model-issue flags.
+	* igen.c (lf_print_c_semantic): Add call to mon_issue here.  Check
+	for WITH_MODEL_ISSUE.
+	* mon.c (mon_issue): Remove call to mon_issue_here.
+
+	* ppc-instructions: Move branch tracing to the actual branch
+	instructions, rather than testing it in model_issue.  Add code to
+	code successful/unsuccessful branch predictions, and the number of
+	conditional branches that fell through.
+
 Wed Nov 15 17:32:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* cpu.h (cpu_model): Add declaration.

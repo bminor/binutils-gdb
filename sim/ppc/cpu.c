@@ -62,9 +62,6 @@ struct _cpu {
   event_queue *events;
   int cpu_nr;
 
-  /* Current functional unit information */
-  function_unit *func_unit;
-
   /* Current CPU model information */
   model_data *model_ptr;
 
@@ -107,10 +104,6 @@ cpu_create(psim *system,
   processor->cpu_nr = cpu_nr;
   processor->monitor = monitor;
 
-  /* Create function unit if desired */
-  if (WITH_FUNCTION_UNIT)
-    processor->func_unit = function_unit_create ();
-
   return processor;
 }
 
@@ -120,9 +113,6 @@ cpu_init(cpu *processor)
 {
   memset(&processor->regs, 0, sizeof(processor->regs));
   /* FIXME - should any of VM be inited also ? */
-
-  if (WITH_FUNCTION_UNIT)
-    function_unit_init (processor->func_unit);
 
   model_init (processor, processor->model_ptr);
 }
@@ -152,12 +142,6 @@ INLINE_CPU cpu_mon *
 cpu_monitor(cpu *processor)
 {
   return processor->monitor;
-}
-
-INLINE_CPU function_unit *
-cpu_function_unit(cpu *processor)
-{
-  return processor->func_unit;
 }
 
 INLINE_CPU model_data *
@@ -263,9 +247,6 @@ cpu_halt(cpu *processor,
 	  signal);
   }
   else {
-    if (WITH_FUNCTION_UNIT)
-      function_unit_halt(processor, processor->func_unit);
-
     model_halt(processor, processor->model_ptr);
     processor->program_counter = cia;
     psim_halt(processor->system, processor->cpu_nr, cia, reason, signal);

@@ -63,7 +63,6 @@ struct _cpu_mon {
   unsigned unaligned_read_count;
   unsigned unaligned_write_count;
   unsigned event_count[nr_mon_events];
-  function_unit_print *func_unit_print;
 };
 
 struct _mon {
@@ -107,7 +106,6 @@ mon_issue(itable_index index,
   cpu_mon *monitor = cpu_monitor(processor);
   ASSERT(index <= nr_itable_entries);
   monitor->issue_count[index] += 1;
-  model_issue(index, processor, cpu_model(processor), cia);
 }
 
 

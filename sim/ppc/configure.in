@@ -329,17 +329,6 @@ if test x"$silent" != x"yes" && test x"$sim_mon" != x""; then
   echo "Setting monitor flags = $sim_mon" 6>&1
 fi],[sim_mon=""])dnl
 
-AC_ARG_ENABLE(sim-function-unit,
-[  --enable-sim-function-unit		Specify whether detailed functional unit support is built.],
-[case "${enableval}" in
-  yes)	sim_func="-DWITH_FUNCTION_UNIT=1";;
-  no)	sim_func="-DWITH_FUNCTION_UNIT=0";;
-  *)	AC_MSG_ERROR("--enable-sim-function-unit does not take a value"); sim_func="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_func" != x""; then
-  echo "Setting function-unit flags = $sim_func" 6>&1
-fi],[sim_func=""])dnl
-
 AC_ARG_ENABLE(sim-model,
 [  --enable-sim-model=which		Specify PowerPC to model.],
 [case "${enableval}" in
@@ -359,6 +348,17 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
   echo "Setting default-model flags = $sim_default_model" 6>&1
 fi],[sim_model=""])dnl
+
+AC_ARG_ENABLE(sim-model-issue,
+[  --enable-sim-model-issue		Specify whether to simulate model specific actions],
+[case "${enableval}" in
+  yes)	sim_model_issue="-DWITH_MODEL_ISSUE=1";;
+  no)	sim_model_issue="-DWITH_MODEL_ISSUE=0";;
+  *)	AC_MSG_ERROR("--enable-sim-model-issue does not take a value"); sim_model_issue="";;
+esac
+if test x"$silent" != x"yes"; then
+  echo "Setting model-issue flags = $sim_model_issue" 6>&1
+fi],[sim_model_issue=""])dnl
 
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
@@ -398,9 +398,9 @@ AC_SUBST(sim_trace)
 AC_SUBST(sim_assert)
 AC_SUBST(sim_reserved)
 AC_SUBST(sim_monitor)
-AC_SUBST(sim_func)
 AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)
+AC_SUBST(sim_model_issue)
 
 AC_CHECK_FUNCS(getrusage)
 

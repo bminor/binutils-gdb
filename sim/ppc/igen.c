@@ -2119,16 +2119,26 @@ lf_print_c_semantic(lf *file,
   if (!idecode_cache)
     lf_print_c_validate(file, instruction, opcodes);
 
-  /* generate the profileing call - this is delayed until after the
+  /* generate the profiling call - this is delayed until after the
      instruction has been verified */
   lf_printf(file, "\n");
-  lf_printf(file, "if (WITH_MON & MONITOR_INSTRUCTION_ISSUE)\n");
+  lf_printf(file, "if (WITH_MON & MONITOR_INSTRUCTION_ISSUE) {\n");
   lf_printf(file, "  mon_issue(");
   lf_print_function_name(file,
 			 instruction->file_entry->fields[insn_name],
 			 NULL,
 			 function_name_prefix_itable);
   lf_printf(file, ", processor, cia);\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "  if (WITH_MODEL_ISSUE)\n");
+  lf_printf(file, "    model_issue(");
+  lf_print_function_name(file,
+			 instruction->file_entry->fields[insn_name],
+			 NULL,
+			 function_name_prefix_itable);
+  lf_printf(file, ", processor, cpu_model(processor), cia);\n");
+  lf_printf(file, "}\n");
+  lf_printf(file, "\n");
 
   /* generate the code (or at least something */
   if (instruction->file_entry->annex != NULL) {
