@@ -1,3 +1,13 @@
+Wed Nov 29 12:42:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-alpha.c (alpha_ecoff_swap_reloc_in): Don't abort if
+	r_symndx is RELOC_SECTION_NONE for an ALPHA_R_IGNORE reloc.
+	Change a RELOC_SECTION_LITA symndx to RELOC_SECTION_ABS.
+	(alpha_ecoff_swap_reloc_out): Change RELOC_SECTION_ABS to
+	RELOC_SECTION_LITA for ALPHA_R_IGNORE.
+	(alpha_adjust_reloc_out): For ALPHA_R_IGNORE, don't change
+	RELOC_SECTION_ABS to RELOC_SECTION_NONE.
+
 Tue Nov 28 16:59:50 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf-bfd.h (struct elf_obj_tdata): Add segment_map field.

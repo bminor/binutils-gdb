@@ -553,11 +553,10 @@ alpha_ecoff_swap_reloc_in (abfd, ext_ptr, intern)
       /* The IGNORE reloc generally follows a GPDISP reloc, and is
 	 against the .lita section.  The section is irrelevant.  */
       if (! intern->r_extern &&
-	  (intern->r_symndx == RELOC_SECTION_NONE
-	   || intern->r_symndx == RELOC_SECTION_ABS))
+	  intern->r_symndx == RELOC_SECTION_ABS)
 	abort ();
       if (! intern->r_extern && intern->r_symndx == RELOC_SECTION_LITA)
-	intern->r_symndx = RELOC_SECTION_NONE;
+	intern->r_symndx = RELOC_SECTION_ABS;
     }
 }
 
@@ -582,7 +581,7 @@ alpha_ecoff_swap_reloc_out (abfd, intern, dst)
     }
   else if (intern->r_type == ALPHA_R_IGNORE
 	   && ! intern->r_extern
-	   && intern->r_symndx == RELOC_SECTION_NONE)
+	   && intern->r_symndx == RELOC_SECTION_ABS)
     {
       symndx = RELOC_SECTION_LITA;
       size = intern->r_size;
@@ -721,8 +720,6 @@ alpha_adjust_reloc_out (abfd, rel, intern)
 
     case ALPHA_R_IGNORE:
       intern->r_vaddr = rel->address;
-      if (intern->r_symndx == RELOC_SECTION_ABS)
-	intern->r_symndx = RELOC_SECTION_NONE;
       break;
 
     default:
