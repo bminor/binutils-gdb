@@ -1655,7 +1655,6 @@ extern int gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch);
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PUSH_DUMMY_FRAME)
 #define DEPRECATED_PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "DEPRECATED_PUSH_DUMMY_FRAME"), 0)
-#define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
 #endif
 
 typedef void (gdbarch_deprecated_push_dummy_frame_ftype) (void);
@@ -1730,7 +1729,6 @@ extern int gdbarch_pop_frame_p (struct gdbarch *gdbarch);
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (POP_FRAME)
 #define POP_FRAME (internal_error (__FILE__, __LINE__, "POP_FRAME"), 0)
-#define POP_FRAME (gdbarch_pop_frame (current_gdbarch))
 #endif
 
 typedef void (gdbarch_pop_frame_ftype) (void);

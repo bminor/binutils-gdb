@@ -939,7 +939,6 @@ do
 		if [ "x${actual}" = "x-" ]
 		then
 		    printf "#define ${macro} (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
-		    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
 		else
 		    printf "#define ${macro}(${actual}) (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
 		fi
