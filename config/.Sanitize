@@ -51,21 +51,22 @@ mh-lynxos
 mh-lynxrs6k
 mh-ncr3000
 mh-ncrsvr43
+mh-papic
 mh-riscos
 mh-sco
 mh-solaris
+mh-sparcpic
 mh-sun
 mh-sun3
 mh-sysv
 mh-sysv4
 mh-vaxult2
-mt-v810
-mt-x86pic
+mh-x86pic
+mt-netware
 mt-papic
 mt-sparcpic
-mh-papic
-mh-x86pic
-mh-sparcpic
+mt-v810
+mt-x86pic
 
 Things-to-lose:
 
