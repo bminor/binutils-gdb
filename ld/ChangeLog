@@ -1,3 +1,8 @@
+Fri Sep  3 20:17:08 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparams/elf64hppa.sh (MAXPAGESIZE): Define.
+	(OTHER_READONLY_SECTIONS, DATA_PLT): Likewise.
+
 Thu Sep  2 14:32:03 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparams/elf64hppa.sh: New file.
