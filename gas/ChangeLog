@@ -1,4 +1,12 @@
-2001-08-04  Richard Henderson  <rth@redhat.com>
+2001-09-05  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-ia64.c (FUNC_IPLT_RELOC): New.
+	(pseudo_func): Add @iplt.
+	(pseudo_opcode): Add data16 and data16.ua.
+	(md_begin): Set iplt pseudo.
+	(ia64_cons_fix_new): Handle 16 byte iplt reloc specially.
+
+2001-09-04  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.c (struct alpha_insn): Make sequence scalar long.
 	(MACRO_LITERAL, MACRO_BASE, MACRO_BYTOFF, MACRO_JSR): Remove.

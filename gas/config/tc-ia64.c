@@ -85,6 +85,7 @@ enum reloc_func
     FUNC_SEG_RELATIVE,
     FUNC_LTV_RELATIVE,
     FUNC_LT_FPTR_RELATIVE,
+    FUNC_IPLT_RELOC,
   };
 
 enum reg_symbol
@@ -483,6 +484,7 @@ pseudo_func[] =
     { "segrel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "ltv",	PSEUDO_FUNC_RELOC, { 0 } },
     { "", 0, { 0 } },	/* placeholder for FUNC_LT_FPTR_RELATIVE */
+    { "iplt",	PSEUDO_FUNC_RELOC, { 0 } },
 
     /* mbtype4 constants:  */
     { "alt",	PSEUDO_FUNC_CONST, { 0xa } },
@@ -4796,6 +4798,7 @@ pseudo_opcode[] =
     { "data2", cons, 2 },
     { "data4", cons, 4 },
     { "data8", cons, 8 },
+    { "data16", cons, 16 },
     { "real4", stmt_float_cons, 'f' },
     { "real8", stmt_float_cons, 'd' },
     { "real10", stmt_float_cons, 'x' },
@@ -4806,6 +4809,7 @@ pseudo_opcode[] =
     { "data2.ua", stmt_cons_ua, 2 },
     { "data4.ua", stmt_cons_ua, 4 },
     { "data8.ua", stmt_cons_ua, 8 },
+    { "data16.ua", stmt_cons_ua, 16 },
     { "real4.ua", float_cons, 'f' },
     { "real8.ua", float_cons, 'd' },
     { "real10.ua", float_cons, 'x' },
@@ -6379,6 +6383,10 @@ md_begin ()
 
   pseudo_func[FUNC_LT_FPTR_RELATIVE].u.sym =
     symbol_new (".<ltoff.fptr>", undefined_section, FUNC_LT_FPTR_RELATIVE,
+		&zero_address_frag);
+
+  pseudo_func[FUNC_IPLT_RELOC].u.sym =
+    symbol_new (".<iplt>", undefined_section, FUNC_IPLT_RELOC,
 		&zero_address_frag);
 
   /* Compute the table of best templates.  We compute goodness as a
@@ -9826,6 +9834,21 @@ ia64_cons_fix_new (f, where, nbytes, exp)
 	code = BFD_RELOC_IA64_DIR64LSB;
       break;
 
+    case 16:
+      if (exp->X_op == O_pseudo_fixup
+	  && exp->X_op_symbol
+	  && S_GET_VALUE (exp->X_op_symbol) == FUNC_IPLT_RELOC)
+	{
+	  if (target_big_endian)
+	    code = BFD_RELOC_IA64_IPLTMSB;
+	  else
+	    code = BFD_RELOC_IA64_IPLTLSB;
+
+	  exp->X_op = O_symbol;
+	  break;
+	}
+      /* FALLTHRU */
+
     default:
       as_bad ("Unsupported fixup size %d", nbytes);
       ignore_rest_of_line ();
@@ -9837,6 +9860,7 @@ ia64_cons_fix_new (f, where, nbytes, exp)
       exp->X_op = O_symbol;
       code = ia64_gen_real_reloc_type (exp->X_op_symbol, code);
     }
+
   fix = fix_new_exp (f, where, nbytes, exp, 0, code);
   /* We need to store the byte order in effect in case we're going
      to fix an 8 or 16 bit relocation (for which there no real
@@ -9964,6 +9988,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	  break;
 	}
       break;
+
     default:
       abort ();
     }
