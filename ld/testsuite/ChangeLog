@@ -1,3 +1,9 @@
+2003-01-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-alpha/tlsbin.sd: Cope with truncated address in data dumps.
+	* ld-alpha/tlsbin.td: Likewise.
+	* ld-alpha/tlsbinr.sd: Likewise.
+
 2003-01-21  Richard Henderson  <rth@redhat.com>
 
 	* ld-alpha/alpha.exp: New.
