@@ -4875,18 +4875,6 @@ hppa_cannot_store_register (int regnum)
 }
 
 CORE_ADDR
-hppa_frame_args_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-CORE_ADDR
-hppa_frame_locals_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-CORE_ADDR
 hppa_smash_text_address (CORE_ADDR addr)
 {
   /* The low two bits of the PC on the PA contain the privilege level.
@@ -4972,8 +4960,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation
     (gdbarch, hppa_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, hppa_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);

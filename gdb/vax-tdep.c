@@ -182,12 +182,6 @@ vax_frame_args_address (struct frame_info *frame)
   return 0;
 }
 
-static CORE_ADDR
-vax_frame_locals_address (struct frame_info *frame)
-{
-  return (get_frame_base (frame));
-}
-
 static int
 vax_frame_num_args (struct frame_info *fi)
 {
@@ -391,7 +385,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, vax_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, vax_frame_locals_address);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, vax_frame_init_saved_regs);
 

@@ -306,20 +306,6 @@ arm_frameless_function_invocation (struct frame_info *fi)
   return frameless;
 }
 
-/* The address of the arguments in the frame.  */
-static CORE_ADDR
-arm_frame_args_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-/* The address of the local variables in the frame.  */
-static CORE_ADDR
-arm_frame_locals_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
 /* A typical Thumb prologue looks like this:
    push    {r7, lr}
    add     sp, sp, #-28
@@ -2936,8 +2922,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation
     (gdbarch, arm_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, arm_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, arm_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, arm_frame_locals_address);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
   set_gdbarch_deprecated_pop_frame (gdbarch, arm_pop_frame);

@@ -1,5 +1,25 @@
 2003-06-09  Andrew Cagney  <cagney@redhat.com>
 
+	* vax-tdep.c (vax_frame_locals_address): Delete function.
+	(vax_gdbarch_init): Do not set frame_locals_address.
+	* m68hc11-tdep.c (m68hc11_frame_locals_address): Delete function.
+	(m68hc11_gdbarch_init): Do not set frame_locals_address.
+	* s390-tdep.c (s390_frame_args_address): Delete function.
+	(s390_gdbarch_init): Do not set frame_args_address or
+	frame_locals_address.
+	* ns32k-tdep.c (ns32k_frame_locals_address): Delete.
+	(ns32k_gdbarch_init): Do not set frame_locals_address.
+	* hppa-tdep.c (hppa_frame_args_address): Delete function.
+	(hppa_frame_locals_address): Delete function.
+	(hppa_gdbarch_init): Do not set frame_args_address, or
+	frame_locals_address.
+	* arm-tdep.c (arm_frame_args_address): Delete.
+	(arm_frame_locals_address): Delete.
+	(arm_gdbarch_init): Do not set frame_args_address, or
+	frame_locals_address.
+
+2003-06-09  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (FRAME_NUM_ARGS): Change to function with predicate.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* arch-utils.h (frame_num_args_unknown): Delete both declarations.

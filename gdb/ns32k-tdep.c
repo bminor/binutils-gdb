@@ -357,12 +357,6 @@ ns32k_frame_args_address (struct frame_info *frame)
   return (read_register (SP_REGNUM) - 4);
 }
 
-static CORE_ADDR
-ns32k_frame_locals_address (struct frame_info *frame)
-{
-  return (get_frame_base (frame));
-}
-
 /* Code to initialize the addresses of the saved registers of frame described
    by FRAME_INFO.  This includes special registers such as pc and fp saved in
    special ways in the stack frame.  sp is even more special: the address we
@@ -576,7 +570,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, ns32k_frame_locals_address);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
 
