@@ -474,10 +474,6 @@ struct field_info
     int nfnfields;
   };
 
-/* FIXME: Kludge to mark a varargs function type for C++ member function
-   argument processing.  */
-#define TYPE_FLAG_VARARGS	(1 << 10)
-
 /* Dwarf2 has no clean way to discern C++ static and non-static member
    functions. G++ helps GDB by marking the first parameter for non-static
    member functions (which is the this pointer) as artificial.

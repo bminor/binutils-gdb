@@ -1,5 +1,11 @@
 2001-12-08  Fred Fish  <fnf@redhat.com>
 
+	* dwarf2read.c (TYPE_FLAG_VARARGS): Remove from here.
+	* gdbtypes.h (TYPE_FLAG_VARARGS): Add here and change value to
+	not collide with other flag bits.
+
+2001-12-08  Fred Fish  <fnf@redhat.com>
+
 	* dwarf2read.c (read_base_type): Rename is_unsigned to type_flags.
 	For unsigned types set TYPE_FLAG_UNSIGNED and pass it to
 	init_type().

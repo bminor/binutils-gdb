@@ -228,6 +228,12 @@ enum type_code
 #define TYPE_FLAG_CODE_SPACE (1 << 9)
 #define TYPE_FLAG_DATA_SPACE (1 << 10)
 
+/* FIXME: Kludge to mark a varargs function type for C++ member
+   function argument processing.  Currently only used in dwarf2read.c,
+   but put it here so we won't accidentally overload the bit with
+   another flag.  */
+
+#define TYPE_FLAG_VARARGS (1 << 11)
 
 struct type
   {
