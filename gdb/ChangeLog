@@ -1,3 +1,7 @@
+Sun Jun 27 08:58:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (ALLPARAM): Add config/mips/{x,n}-{news-mips,riscos}.h.
+
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m68k/tm-m68k.h: Remove obsolete comment about duplicating
