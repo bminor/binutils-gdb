@@ -108,7 +108,12 @@ SECTIONS
     *(.gnu.linkonce.d*)
     ${CONSTRUCTING+CONSTRUCTORS}
   } ${RELOCATING+ >DATA}
-  .data1 ${RELOCATING-0} : { *(.data1) } ${RELOCATING+ >DATA}
+
+  .data1 ${RELOCATING-0} : {
+    *(.data1)
+    *(.data1.*)
+  } ${RELOCATING+ >DATA}
+
   ${RELOCATING+${CTOR} >DATA}
   ${RELOCATING+${DTOR} >DATA}
 
