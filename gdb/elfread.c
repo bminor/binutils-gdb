@@ -311,7 +311,29 @@ elf_symtab_read (abfd, addr, objfile)
 	      /* For non-absolute symbols, use the type of the section
 		 they are relative to, to intuit text/data.  Bfd provides
 		 no way of figuring this out for absolute symbols. */
-	      if (sym -> section == &bfd_abs_section)
+	      if (sym -> section == &bfd_und_section
+		  && (sym -> flags & BSF_GLOBAL)
+		  && (sym -> flags & BSF_FUNCTION))
+		{
+		  /* Symbol is a reference to a function defined in
+		     a shared library.
+		     If its value is non zero then it is usually the
+		     absolute address of the corresponding entry in
+		     the procedure linkage table.
+		     If its value is zero then the dynamic linker has to
+		     resolve the symbol. We are unable to find any
+		     meaningful address for this symbol in the
+		     executable file, so we skip it.
+		     Irix 5 has a zero value for all shared library functions
+		     in the main symbol table. The dynamic symbol table
+		     would provide the right values, but BFD currently
+		     cannot handle dynamic ELF symbol tables.  */
+		  ms_type = mst_solib_trampoline;
+		  symaddr = sym -> value;
+		  if (symaddr == 0)
+		    continue;
+		}
+	      else if (sym -> section == &bfd_abs_section)
 		{
 		  ms_type = mst_abs;
 		}

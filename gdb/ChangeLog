@@ -1,3 +1,16 @@
+Fri Apr  1 00:44:00 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	For SVR4 targets, enable gdb to set breakpoints in shared
+	library functions before the executable is run.
+	* elfread.c (elf_symtab_read):  Handle symbols for shared library
+	functions.
+	* sparc-tdep.c (in_solib_trampoline):  Renamed to in_plt_section
+	and moved to objfiles.c.
+	* objfiles.c (in_plt_section):  Moved to here from sparc-tdep.
+	* config/tm-sysv4.h (IN_SOLIB_TRAMPOLINE):  Use new in_plt_section.
+	* config/sparc/tm-sun4sol2.h (IN_SOLIB_TRAMPOLINE):  Removed,
+	the new generic definition from tm-sysv4.h works for Solaris.
+
 Wed Mar 30 16:14:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfread.c (elf_symtab_read): Change storage_needed,
