@@ -1,3 +1,12 @@
+Mon Dec 19 23:09:16 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (elf32_hppa_read_symext_info): Delete do_locals and
+	do_globals arguments, always read symbol extension information for
+	globals and locals.  All callers changed.
+	(elf32_hppa_size_stubs): Rework to only read symbol extension
+	information once for each input bfd.  10% improvement in linker
+	performance.
+
 Fri Dec 16 12:28:46 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (elf_section_from_bfd_section): Check
