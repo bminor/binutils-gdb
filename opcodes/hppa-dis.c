@@ -766,7 +766,7 @@ print_insn_hppa (memaddr, info)
 
 		case 'Z':
 		  /* addil %r1 implicit output.  */
-		  (*info->fprintf_func) (info->stream, "%r1");
+		  (*info->fprintf_func) (info->stream, "%%r1");
 		  break;
 		  
 		case '.':
@@ -778,7 +778,7 @@ print_insn_hppa (memaddr, info)
 				    GET_FIELD (insn, 22, 25));
 		  break;
 		case '!':
-		  (*info->fprintf_func) (info->stream, "%sar");
+		  (*info->fprintf_func) (info->stream, "%%sar");
 		  break;
 		case 'p':
 		  (*info->fprintf_func) (info->stream, "%d",
