@@ -251,7 +251,11 @@ const char FLT_CHARS[] = "dD";
 char FLT_CHARS[] = "rRsSfFdDxXpP";
 #endif
 
+#ifdef OBJ_EVAX
+const char *md_shortopts = "Fm:g+1h:H";
+#else
 const char *md_shortopts = "Fm:g";
+#endif
 
 struct option md_longopts[] = {
 #define OPTION_32ADDR (OPTION_MD_BASE)
@@ -262,6 +266,26 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof(md_longopts);
 
 
+#ifdef OBJ_EVAX
+#define AXP_REG_R0     0
+#define AXP_REG_R16    16
+#define AXP_REG_R17    17
+#undef AXP_REG_T9
+#define AXP_REG_T9     22
+#undef AXP_REG_T10
+#define AXP_REG_T10    23
+#undef AXP_REG_T11
+#define AXP_REG_T11    24
+#undef AXP_REG_T12
+#define AXP_REG_T12    25
+#define AXP_REG_AI     25
+#undef AXP_REG_FP
+#define AXP_REG_FP     29
+
+#undef AXP_REG_GP
+#define AXP_REG_GP AXP_REG_PV
+#endif /* OBJ_EVAX  */
+
 /* The cpu for which we are generating code */
 static unsigned alpha_target = AXP_OPCODE_ALL;
 static const char *alpha_target_name = "<all>";
@@ -337,7 +361,39 @@ unsigned long alpha_gprmask, alpha_fprmask;
 
 #ifdef OBJ_EVAX
 /* Collect information about current procedure here.  */
-static evaxProcT alpha_evax_proc;
+static struct {
+  symbolS *symbol;	/* proc pdesc symbol */
+  int pdsckind;
+  int framereg;		/* register for frame pointer */
+  int framesize;	/* size of frame */
+  int rsa_offset;
+  int ra_save;
+  int fp_save;
+  long imask;
+  long fmask;
+  int type;
+  int prologue;
+} alpha_evax_proc;
+
+static int alpha_flag_hash_long_names = 0;		/* -+ */
+static int alpha_flag_show_after_trunc = 0;		/* -H */
+static int alpha_flag_no_hash_mixed_case = 0;		/* -h NUM */
+
+/* Flag that determines how we map names.  This takes several values, and
+ * is set with the -h switch.  A value of zero implies names should be
+ * upper case, and the presence of the -h switch inhibits the case hack.
+ * No -h switch at all sets alpha_vms_name_mapping to 0, and allows case hacking.
+ * A value of 2 (set with -h2) implies names should be
+ * all lower case, with no case hack.  A value of 3 (set with -h3) implies
+ * that case should be preserved.  */
+
+/* If the -+ switch is given, then the hash is appended to any name that is
+ * longer than 31 characters, regardless of the setting of the -h switch.
+ */
+
+static char alpha_vms_name_mapping = 0;
+
+static int alpha_basereg_clobbered;
 #endif
 
 /* The macro table */
@@ -861,6 +917,23 @@ md_parse_option (c, arg)
       }
       break;
 
+#if OBJ_EVAX
+    case '+':			/* For g++.  Hash any name > 31 chars long. */
+      alpha_flag_hash_long_names = 1;
+      break;
+
+    case 'H':			/* Show new symbol after hash truncation */
+      alpha_flag_show_after_trunc = 1;
+      break;
+
+    case 'h':			/* No hashing of mixed-case names */
+      {
+	alpha_vms_name_mapping = atoi (arg);
+	alpha_flag_no_hash_mixed_case = 1;
+      }
+      break;
+#endif
+
     default:
       return 0;
     }
@@ -882,6 +955,15 @@ Alpha options:\n\
 -mev4 | -mev45 | -mev5 | -mev56 | -mall\n\
 			specify variant of Alpha architecture\n",
 	stream);
+#ifdef OBJ_EVAX
+  fputs ("\
+VMS options:\n\
+-+			hash encode names longer than 31 characters\n\
+-H			show new symbol after hash truncation\n\
+-h NUM			don't hash mixed-case names, and adjust case:\n\
+			0 = upper, 2 = lower, 3 = preserve case\n",
+	stream);
+#endif
 }
 
 /* Decide from what point a pc-relative relocation is relative to,
@@ -2107,6 +2189,16 @@ load_expression (targreg, exp, pbasereg, poffset)
 #ifdef OBJ_EVAX
 	offsetT link;
 
+	if (alpha_basereg_clobbered)
+	  {
+	    /* no basereg, reload basreg from 0(FP).  */
+	    set_tok_reg (newtok[0], targreg);
+	    set_tok_const (newtok[1], 0);
+	    set_tok_preg (newtok[2], AXP_REG_FP);
+	    basereg = targreg;
+	    assemble_tokens ("ldq", newtok, 3, 0);
+	  }
+
 	/* Find symbol or symbol pointer in link section.  */
 
 	if (exp->X_add_symbol == alpha_evax_proc.symbol)
@@ -2381,6 +2473,15 @@ emit_ir_load (tok, ntok, opname)
     }
 
   emit_insn (&insn);
+#if OBJ_EVAX
+    /* special hack. If the basereg is clobbered for a call  
+       all lda's before the call don't have a basereg.  */
+  if ((tok[0].X_op == O_register)
+     && (tok[0].X_add_number == alpha_gp_register))
+    {
+      alpha_basereg_clobbered = 1;
+    }
+#endif
 }
 
 /* Handle fp register loads, and both integer and fp register stores.
@@ -3002,6 +3103,8 @@ emit_jsrjmp (tok, ntok, vopname)
   emit_insn (&insn);
 
 #if OBJ_EVAX
+  alpha_basereg_clobbered = 0;
+
   /* reload PV from 0(FP) if it is our current base register.  */
   if (alpha_gp_register == AXP_REG_PV)
     {
@@ -3250,6 +3353,7 @@ static void
 s_alpha_prologue (ignore)
      int ignore;
 {
+  alpha_basereg_clobbered = 0;
   demand_empty_rest_of_line ();
 
   return;
@@ -3575,6 +3679,7 @@ s_alpha_end (ignore)
   *input_line_pointer = c;
   demand_empty_rest_of_line ();
   alpha_evax_proc.symbol = 0;
+  alpha_basereg_clobbered = 0;
 
   return;
 }
@@ -3584,12 +3689,24 @@ static void
 s_alpha_file (ignore)
      int ignore;
 {
-  char* s;
+  symbolS* s;
   int length;
+  static char case_hack[32];
+
   extern char *demand_copy_string PARAMS ((int *lenP));
 
+  sprintf (case_hack, "<CASE:%01d%01d%01d%01d>",
+	    alpha_flag_hash_long_names,
+	    alpha_flag_show_after_trunc,
+	    alpha_flag_no_hash_mixed_case,
+	    alpha_vms_name_mapping);
+
+  s = symbol_find_or_make (case_hack);
+  s->bsym->flags |= BSF_FILE;
+
   get_absolute_expression ();
-  s = demand_copy_string (&length);
+  s = symbol_find_or_make (demand_copy_string (&length));
+  s->bsym->flags |= BSF_FILE;
   demand_empty_rest_of_line ();
 
   return;
