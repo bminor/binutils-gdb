@@ -1,3 +1,9 @@
+Tue Dec 22 15:21:41 1998  Catherine Moore  <clm@cygnus.com>
+
+        * archures.c (bfd_mach_i386_i386_intel_syntax):  Define.
+        * bfd-in2.h:  Likewise.
+        * cpu-i386.c (bfd_i386_arch_intel_syntax):  New.
+
 start-sanitize-vr4xxx
 1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
 
@@ -21,14 +27,13 @@ start-sanitize-vr4xxx
 	* elf32-mips.c (elf_mips_mach): Same.
 	(_bfd_mips_elf_final_write_processing): Same.
 	
-start-sanitize-vr4xxx
+end-sanitize-vr4xxx
 1998-12-12  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* elf32-mips.c (_bfd_mips_elf_final_write_processing): 
 	Handle bfd_mach_mips4300.
 
 start-sanitize-sky
-Sat Dec 12 08:52:41 1998  Doug Evans  <devans@charmed.cygnus.com>
 
 	Mon Aug 10 18:59:42 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 
@@ -2244,10 +2249,14 @@ Sun Mar  8 23:37:26 1998  Stan Cox  <scox@equinox.cygnus.com>
 
 	* config.bfd (sparclite-*-elf*): Added.
 
-start-sanitize-vr4320
+start-sanitize-cygnus-never
 Tue Mar  3 11:24:05 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips-cpu.c: Reorganize sanitization.
+
+end-sanitize-cygnus-never
+start-sanitize-vr4320
+Tue Mar  3 11:24:05 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* archures.c, bfd-in2.h, mips-cpu.c : Added bfd_mach_mips4320.
 
