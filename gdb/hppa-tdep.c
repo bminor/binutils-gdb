@@ -1783,7 +1783,8 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
         and saved on the stack, the Save_SP flag is set.  We use this to
         decide whether to use the frame pointer for unwinding.
 	
-	fp should never be zero here; checking just in case. 
+	fp may be zero if it is not available in an inner frame because
+	it has been modified by not yet saved.
 	
         TODO: For the HP compiler, maybe we should use the alloca_frame flag 
 	instead of Save_SP.  */
@@ -1799,10 +1800,9 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [frame pointer] }",
  	    paddr_nz (cache->base));
       }
-     else if (frame_pc_unwind (next_frame) >= prologue_end)
+     else if (u->Save_SP 
+	      && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
       {
-        if (u->Save_SP && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
-          {
             /* Both we're expecting the SP to be saved and the SP has been
 	       saved.  The entry SP value is saved at this frame's SP
 	       address.  */
@@ -1811,29 +1811,17 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	    if (hppa_debug)
 	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [saved] }",
 			          paddr_nz (cache->base));
-          }
-        else
-          {
-            /* The prologue has been slowly allocating stack space.  Adjust
-	     the SP back.  */
-            cache->base = this_sp - frame_size;
-	    if (hppa_debug)
-	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [unwind adjust] } ",
-			          paddr_nz (cache->base));
-
-          }
       }
     else
       {
-	/* This frame has not yet been created. */
-        cache->base = this_sp;
-
+        /* The prologue has been slowly allocating stack space.  Adjust
+	   the SP back.  */
+        cache->base = this_sp - frame_size;
 	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [before prologue] } ",
+	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [unwind adjust] } ",
 			      paddr_nz (cache->base));
 
       }
-
     trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
   }
 
@@ -1859,6 +1847,14 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	  trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, rp);
 	}
     }
+
+  /* If the frame pointer was not saved in this frame, but we should be saving
+     it, set it to an invalid value so that another frame will not pick up the 
+     wrong frame pointer.  This can happen if we start unwinding after the 
+     frame pointer has been modified, but before we've saved it to the
+     stack.  */
+  if (u->Save_SP && !trad_frame_addr_p (cache->saved_regs, HPPA_FP_REGNUM))
+    trad_frame_set_value (cache->saved_regs, HPPA_FP_REGNUM, 0);
 
   {
     /* Convert all the offsets into addresses.  */
@@ -2015,28 +2011,6 @@ static const struct frame_unwind *
 hppa_fallback_unwind_sniffer (struct frame_info *next_frame)
 {
   return &hppa_fallback_frame_unwind;
-}
-
-static CORE_ADDR
-hppa_frame_base_address (struct frame_info *next_frame,
-				void **this_cache)
-{
-  struct hppa_frame_cache *info = hppa_frame_cache (next_frame,
-							   this_cache);
-  return info->base;
-}
-
-static const struct frame_base hppa_frame_base = {
-  &hppa_frame_unwind,
-  hppa_frame_base_address,
-  hppa_frame_base_address,
-  hppa_frame_base_address
-};
-
-static const struct frame_base *
-hppa_frame_base_sniffer (struct frame_info *next_frame)
-{
-  return &hppa_frame_base;
 }
 
 /* Stub frames, used for all kinds of call stubs.  */
@@ -2554,7 +2528,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_sniffer (gdbarch, hppa_stub_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, hppa_fallback_unwind_sniffer);
-  frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
 
   return gdbarch;
 }

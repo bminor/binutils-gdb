@@ -1,3 +1,13 @@
+2004-06-07  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_frame_cache): Handle the cases when we start
+	unwinding after sp has been saved to the stack but before the end
+	of the prologue, and after the fp has been modified but before it has
+	been saved to the stack.
+	(hppa_frame_base_address, hppa_frame_base, hppa_frame_base_sniffer): 
+	Remove superfluous definitions.
+	(hppa_gdbarch_init): Remove superfluous frame base sniffer.
+
 2004-06-07  Guy Martin  <gmsoft@gentoo.org>
 
 	Committed by Randolph Chung.
