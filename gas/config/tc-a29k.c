@@ -403,7 +403,8 @@ parse_operand (s, operandp)
   char *new;
 
   input_line_pointer = s;
-  if (expression (operandp) == O_absent)
+  expression (operandp);
+  if (operandp->X_op == O_absent)
     as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;

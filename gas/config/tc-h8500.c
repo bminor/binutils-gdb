@@ -286,7 +286,8 @@ parse_exp (s, op, page)
 
   input_line_pointer = s;
 
-  if (expression (op) == O_absent)
+  expression (op);
+  if (op->X_op == O_absent)
     as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
