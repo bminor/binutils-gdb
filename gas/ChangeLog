@@ -1,3 +1,9 @@
+2004-01-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (hilo_interlocks): Change definition
+	so that MIPS32, MIPS64 and later ISAs are included, along with
+	the already-included machines.  Update comments.
+
 2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/tc-arm.c (tc_gen_reloc): Improve error message for

@@ -325,15 +325,30 @@ static int mips_32bitmode = 0;
 /* True if CPU has a ror instruction.  */
 #define CPU_HAS_ROR(CPU)	CPU_HAS_DROR (CPU)
 
-/* Whether the processor uses hardware interlocks to protect
-   reads from the HI and LO registers, and thus does not
-   require nops to be inserted.  */
+/* True if mflo and mfhi can be immediately followed by instructions
+   which write to the HI and LO registers.
 
-#define hilo_interlocks (mips_opts.arch == CPU_R4010                       \
-                         || mips_opts.arch == CPU_VR5500                   \
-                         || mips_opts.arch == CPU_RM7000                   \
-                         || mips_opts.arch == CPU_SB1                      \
-                         )
+   According to MIPS specifications, MIPS ISAs I, II, and III need
+   (at least) two instructions between the reads of HI/LO and
+   instructions which write them, and later ISAs do not.  Contradicting
+   the MIPS specifications, some MIPS IV processor user manuals (e.g.
+   the UM for the NEC Vr5000) document needing the instructions between
+   HI/LO reads and writes, as well.  Therefore, we declare only MIPS32,
+   MIPS64 and later ISAs to have the interlocks, plus any specific
+   earlier-ISA CPUs for which CPU documentation declares that the
+   instructions are really interlocked.  */
+#define hilo_interlocks \
+  (mips_opts.isa == ISA_MIPS32                        \
+   || mips_opts.isa == ISA_MIPS32R2                   \
+   || mips_opts.isa == ISA_MIPS64                     \
+   || mips_opts.isa == ISA_MIPS64R2                   \
+   || mips_opts.arch == CPU_R4010                     \
+   || mips_opts.arch == CPU_R10000                    \
+   || mips_opts.arch == CPU_R12000                    \
+   || mips_opts.arch == CPU_RM7000                    \
+   || mips_opts.arch == CPU_SB1                       \
+   || mips_opts.arch == CPU_VR5500                    \
+   )
 
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs after they are loaded from memory, and thus does not
