@@ -115,8 +115,6 @@ static void
 ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* OpenBSD uses SVR4-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline
-    (gdbarch, generic_in_solib_call_trampoline);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
