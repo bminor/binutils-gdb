@@ -45,6 +45,7 @@ bucomm.c
 bucomm.h
 configure.bat
 configure.in
+config
 copy.c
 cplus-dem.c
 filemode.c
