@@ -22,7 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	SEGMENT_SIZE	4096
 #define TEXT_START_ADDR	0x0
 #define N_SHARED_LIB(x) 0
-#define ARCH 32
 #define BYTES_IN_WORD 4
 
 #include "bfd.h"
@@ -35,7 +34,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define DEFAULT_ARCH bfd_arch_i386
 #define MY(OP) CAT(i386linux_,OP)
-#define MY_text_includes_header 1
 #define TARGETNAME "a.out-i386-linux"
 
 /* We always generate QMAGIC files in preference to ZMAGIC files.  It
@@ -343,7 +341,8 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
 
   if (! info->relocateable
       && linux_hash_table (info)->dynobj == NULL
-      && strcmp (name, SHARABLE_CONFLICTS) == 0)
+      && strcmp (name, SHARABLE_CONFLICTS) == 0
+      && (flags & BSF_CONSTRUCTOR) != 0)
     {
       if (! linux_link_create_dynamic_sections (abfd, info))
 	return false;
@@ -351,7 +350,7 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
       insert = true;
     }
 
-  if (section == &bfd_abs_section
+  if (bfd_is_abs_section (section)
       && (IS_GOT_SYM (name) || IS_PLT_SYM (name)))
     {
       h = linux_link_hash_lookup (linux_hash_table (info), name, false,
@@ -359,12 +358,18 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
       if (h != NULL
 	  && h->root.root.type == bfd_link_hash_defined)
 	{
-	  if (new_fixup (info, h, value, ! IS_PLT_SYM(name)) == NULL)
+	  struct fixup *f;
+
+	  if (hashp != NULL)
+	    *hashp = (struct bfd_link_hash_entry *) h;
+
+	  f = new_fixup (info, h, value, ! IS_PLT_SYM (name));
+	  if (f == NULL)
 	    return false;
+	  f->jump = IS_PLT_SYM (name);
+
 	  return true;
 	}
-      if (hashp != NULL)
-	*hashp = (struct bfd_link_hash_entry *) h;
     }
 
   /* Do the usual procedure for adding a symbol.  */
@@ -413,6 +418,7 @@ linux_tally_symbols (h, data)
   struct fixup *f, *f1;
   int is_plt;
   struct linux_link_hash_entry *h1, *h2;
+  boolean exists;
 
   /* If this symbol is not a PLT/GOT, we do not even need to look at it */
   is_plt = IS_PLT_SYM (h->root.root.root.string);
@@ -440,38 +446,49 @@ linux_tally_symbols (h, data)
 	 from different shared libraries */
       if (h1 != NULL
 	  && ((h1->root.root.type == bfd_link_hash_defined
-	       && h1->root.root.u.def.section != &bfd_abs_section)
+	       && ! bfd_is_abs_section (h1->root.root.u.def.section))
 	      || h2->root.root.type == bfd_link_hash_indirect))
 	{
-	  f = new_fixup (info, h1, h->root.root.u.def.value, 0);
-	  if (f == NULL)
-	    {
-	      /* FIXME: No way to return error.  */
-	      abort ();
-	    }
-	  f->jump = is_plt;
-
 	  /* See if there is a "builtin" fixup already present
 	     involving this symbol.  If so, convert it to a regular
 	     fixup.  In the end, this relaxes some of the requirements
 	     about the order of performing fixups.  */
+	  exists = false;
 	  for (f1 = linux_hash_table (info)->fixup_list;
 	       f1 != NULL;
 	       f1 = f1->next)
 	    {
-	      if (f1 == f)
+	      if (f1->h != h
+		  || (! f1->builtin && ! f1->jump))
 		continue;
-	      if (f1->h != h)
-		continue;
+	      if (! exists
+		  && bfd_is_abs_section (h->root.root.u.def.section))
+		{
+		  f = new_fixup (info, h1, f1->h->root.root.u.def.value, 0);
+		  f->jump = is_plt;
+		}
 	      f1->h = h1;
 	      f1->jump = is_plt;
 	      f1->builtin = 0;
+	      exists = true;
+	    }
+	  if (! exists
+	      && bfd_is_abs_section (h->root.root.u.def.section))
+	    {
+	      f = new_fixup (info, h1, h->root.root.u.def.value, 0);
+	      if (f == NULL)
+		{
+		  /* FIXME: No way to return error.  */
+		  abort ();
+		}
+	      f->jump = is_plt;
 	    }
 	}
 
       /* Quick and dirty way of stripping these symbols from the
 	 symtab. */
-      h->root.written = true;
+      if (bfd_is_abs_section (h->root.root.u.def.section))
+	h->root.written = true;
     }
 
   return true;
@@ -696,5 +713,7 @@ linux_finish_dynamic_link (output_bfd, info)
 #define MY_bfd_link_hash_table_create linux_link_hash_table_create
 #define MY_add_one_symbol linux_add_one_symbol
 #define MY_finish_dynamic_link linux_finish_dynamic_link
+
+#define MY_zmagic_contiguous 1
 
 #include "aout-target.h"

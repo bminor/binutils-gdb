@@ -1,5 +1,10 @@
 Mon Aug 15 12:16:56 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* aout-target.h (MY_zmagic_contiguous): Define as 0 if not already
+	defined.
+	(MY(backend_data)): Use MY_zmagic_contiguous, not hardcoded 0.
+	* i386linux.c (MY_zmagic_contiguous): Define.
+
 	* elfcode.h (bfd_section_from_shdr): If a SHT_SYMTAB section in a
 	shared object has SHF_ALLOC set, create a BFD section for it.
 	(elf_section_from_bfd_section): There may be a BFD section for a

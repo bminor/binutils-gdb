@@ -27,11 +27,13 @@ extern CONST struct reloc_howto_struct * NAME(aout,reloc_type_lookup) ();
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
 #ifndef MY_callback
-static bfd_target *
+static const bfd_target *
 MY(callback) (abfd)
      bfd *abfd;
 {
   struct internal_exec *execp = exec_hdr (abfd);
+  unsigned int arch_align_power;
+  unsigned long arch_align;
 
   /* Calculate the file positions of the parts of a newly read aout header */
   obj_textsec (abfd)->_raw_size = N_TXTSIZE(*execp);
@@ -63,11 +65,22 @@ MY(callback) (abfd)
   /* Now that we know the architecture, set the alignments of the
      sections.  This is normally done by NAME(aout,new_section_hook),
      but when the initial sections were created the architecture had
-     not yet been set.  */
-  obj_textsec (abfd)->alignment_power =
-    obj_datasec (abfd)->alignment_power =
-      obj_bsssec (abfd)->alignment_power =
-	bfd_get_arch_info (abfd)->section_align_power;
+     not yet been set.  However, for backward compatibility, we don't
+     set the alignment power any higher than as required by the size
+     of the section.  */
+  arch_align_power = bfd_get_arch_info (abfd)->section_align_power;
+  arch_align = 1 << arch_align_power;
+  if ((BFD_ALIGN (obj_textsec (abfd)->_raw_size, arch_align)
+       == obj_textsec (abfd)->_raw_size)
+      && (BFD_ALIGN (obj_datasec (abfd)->_raw_size, arch_align)
+	  == obj_datasec (abfd)->_raw_size)
+      && (BFD_ALIGN (obj_bsssec (abfd)->_raw_size, arch_align)
+	  == obj_bsssec (abfd)->_raw_size))
+    {
+      obj_textsec (abfd)->alignment_power = arch_align_power;
+      obj_datasec (abfd)->alignment_power = arch_align_power;
+      obj_bsssec (abfd)->alignment_power = arch_align_power;
+    }
 
   /* Don't set sizes now -- can't be sure until we know arch & mach.
      Sizes get set in set_sizes callback, later.  */
@@ -88,13 +101,13 @@ MY(callback) (abfd)
 #ifndef MY_object_p
 /* Finish up the reading of an a.out file header */
 
-static bfd_target *
+static const bfd_target *
 MY(object_p) (abfd)
      bfd *abfd;
 {
   struct external_exec exec_bytes;	/* Raw exec header from file */
   struct internal_exec exec;		/* Cleaned-up exec header */
-  bfd_target *target;
+  const bfd_target *target;
 
   if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
@@ -115,6 +128,12 @@ MY(object_p) (abfd)
 #endif
 
   NAME(aout,swap_exec_header_in)(abfd, &exec_bytes, &exec);
+
+#ifdef SWAP_MAGIC
+  /* swap_exec_header_in read in a_info with the wrong byte order */
+  exec.a_info = SWAP_MAGIC (exec_bytes.e_info);
+#endif /* SWAP_MAGIC */
+
   target = NAME(aout,some_aout_object_p) (abfd, &exec, MY(callback));
 
 #ifdef ENTRY_CAN_BE_ZERO
@@ -217,11 +236,19 @@ MY(set_sizes) (abfd)
      bfd *abfd;
 {
   adata(abfd).page_size = PAGE_SIZE;
+
 #ifdef SEGMENT_SIZE
   adata(abfd).segment_size = SEGMENT_SIZE;
 #else
   adata(abfd).segment_size = PAGE_SIZE;
 #endif
+
+#ifdef ZMAGIC_DISK_BLOCK_SIZE
+  adata(abfd).zmagic_disk_block_size = ZMAGIC_DISK_BLOCK_SIZE;
+#else
+  adata(abfd).zmagic_disk_block_size = PAGE_SIZE;
+#endif
+
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
   return true;
 }
@@ -234,6 +261,9 @@ MY(set_sizes) (abfd)
 
 #ifndef MY_backend_data
 
+#ifndef MY_zmagic_contiguous
+#define MY_zmagic_contiguous 0
+#endif
 #ifndef MY_text_includes_header
 #define MY_text_includes_header 0
 #endif
@@ -257,7 +287,7 @@ MY(set_sizes) (abfd)
 #endif
 
 static CONST struct aout_backend_data MY(backend_data) = {
-  0,				/* zmagic contiguous */
+  MY_zmagic_contiguous,
   MY_text_includes_header,
   MY_exec_hdr_flags,
   0,				/* text vma? */
@@ -472,7 +502,7 @@ MY_bfd_final_link (abfd, info)
 #endif
 
 #ifndef MY_BFD_TARGET
-bfd_target MY(vec) =
+const bfd_target MY(vec) =
 {
   TARGETNAME,		/* name */
   bfd_target_aout_flavour,
