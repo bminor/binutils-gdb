@@ -180,7 +180,7 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
       print_keyword (cd, info, & m32r_cgen_opval_gr_names, fields->f_r1, 0);
       break;
     case M32R_OPERAND_HASH :
-      print_hash (cd, info, fields->f_nil, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_hash (cd, info, 0, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case M32R_OPERAND_HI16 :
       print_normal (cd, info, fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT), pc, length);

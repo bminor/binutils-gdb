@@ -1,3 +1,9 @@
+1999-08-04  Doug Evans  <devans@casey.cygnus.com>
+
+	* fr30-asm.c,fr30-desc.h,fr30-dis.c,fr30-ibld.c,fr30-opc.c: Rebuild.
+	* m32r-asm.c,m32r-desc.h,m32r-dis.c,m32r-ibld.c,m32r-opc.c: Rebuild.
+	* m32r-opinst.c: Rebuild.
+
 Sat Aug 28 00:27:24 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
         * hppa-dis.c (print_insn_hppa): Replace 'f' by 'v'.  Prefix float

@@ -798,43 +798,43 @@ static const CGEN_IFMT ifmt_bra24r = {
 };
 
 static const CGEN_IFMT ifmt_ld_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_ld_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_ldb_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_ldb_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_ldh_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_ldh_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_ldub_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_ldub_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_lduh_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_lduh_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_pop = {
@@ -846,35 +846,35 @@ static const CGEN_IFMT ifmt_ldi8a = {
 };
 
 static const CGEN_IFMT ifmt_ldi16a = {
-  32, 32, 0xf0ff0000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0ff0000, { F (F_OP1), F (F_OP2), F (F_R2), F (F_R1), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_st_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_st_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_stb_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_stb_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_sth_2 = {
-  16, 16, 0xf0f0, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0f0, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 static const CGEN_IFMT ifmt_sth_d2 = {
-  32, 32, 0xf0f00000, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), F (F_SIMM16), 0 }
+  32, 32, 0xf0f00000, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), F (F_SIMM16), 0 }
 };
 
 static const CGEN_IFMT ifmt_push = {
-  16, 16, 0xf0ff, { F (F_OP1), F (F_R1), F (F_OP2), F (F_R2), 0 }
+  16, 16, 0xf0ff, { F (F_OP1), F (F_OP2), F (F_R1), F (F_R2), 0 }
 };
 
 #undef F

@@ -216,7 +216,9 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
      const char ** strp;
      CGEN_FIELDS * fields;
 {
-  const char * errmsg;
+  const char * errmsg = NULL;
+  /* Used by scalar operands that still need to be parsed.  */
+  long junk;
 
   switch (opindex)
     {
@@ -248,7 +250,7 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_gr_names, & fields->f_r1);
       break;
     case M32R_OPERAND_HASH :
-      errmsg = parse_hash (cd, strp, M32R_OPERAND_HASH, &fields->f_nil);
+      errmsg = parse_hash (cd, strp, M32R_OPERAND_HASH, &junk);
       break;
     case M32R_OPERAND_HI16 :
       errmsg = parse_hi16 (cd, strp, M32R_OPERAND_HI16, &fields->f_hi16);

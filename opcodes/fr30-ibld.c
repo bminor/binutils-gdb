@@ -579,7 +579,7 @@ fr30_cgen_insert_operand (cd, opindex, fields, buffer, pc)
      CGEN_INSN_BYTES_PTR buffer;
      bfd_vma pc;
 {
-  const char * errmsg;
+  const char * errmsg = NULL;
   unsigned int total_length = CGEN_FIELDS_BITSIZE (fields);
 
   switch (opindex)
@@ -591,13 +591,10 @@ fr30_cgen_insert_operand (cd, opindex, fields, buffer, pc)
       errmsg = insert_normal (cd, fields->f_CRj, 0, 16, 8, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_R13 :
-      errmsg = insert_normal (cd, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_R14 :
-      errmsg = insert_normal (cd, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_R15 :
-      errmsg = insert_normal (cd, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_RI :
       errmsg = insert_normal (cd, fields->f_Ri, 0, 0, 12, 4, 16, total_length, buffer);
@@ -699,7 +696,6 @@ fr30_cgen_insert_operand (cd, opindex, fields, buffer, pc)
       }
       break;
     case FR30_OPERAND_PS :
-      errmsg = insert_normal (cd, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       errmsg = insert_normal (cd, fields->f_reglist_hi_ld, 0, 0, 8, 8, 16, total_length, buffer);
@@ -755,6 +751,8 @@ fr30_cgen_insert_operand (cd, opindex, fields, buffer, pc)
 }
 
 /* Main entry point for operand extraction.
+   The result is <= 0 for error, >0 for success.
+   ??? Actual values aren't well defined right now.
 
    This function is basically just a big switch statement.  Earlier versions
    used tables to look up the function to use, but
@@ -777,7 +775,8 @@ fr30_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
      CGEN_FIELDS * fields;
      bfd_vma pc;
 {
-  int length;
+  /* Assume success (for those operands that are nops).  */
+  int length = 1;
   unsigned int total_length = CGEN_FIELDS_BITSIZE (fields);
 
   switch (opindex)
@@ -789,13 +788,10 @@ fr30_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
       length = extract_normal (cd, ex_info, insn_value, 0, 16, 8, 4, 16, total_length, pc, & fields->f_CRj);
       break;
     case FR30_OPERAND_R13 :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 0, 0, 0, total_length, pc, & fields->f_nil);
       break;
     case FR30_OPERAND_R14 :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 0, 0, 0, total_length, pc, & fields->f_nil);
       break;
     case FR30_OPERAND_R15 :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 0, 0, 0, total_length, pc, & fields->f_nil);
       break;
     case FR30_OPERAND_RI :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 12, 4, 16, total_length, pc, & fields->f_Ri);
@@ -899,7 +895,6 @@ fr30_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
       }
       break;
     case FR30_OPERAND_PS :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 0, 0, 0, total_length, pc, & fields->f_nil);
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 8, 16, total_length, pc, & fields->f_reglist_hi_ld);
@@ -989,13 +984,13 @@ fr30_cgen_get_int_operand (cd, opindex, fields)
       value = fields->f_CRj;
       break;
     case FR30_OPERAND_R13 :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_R14 :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_R15 :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_RI :
       value = fields->f_Ri;
@@ -1058,7 +1053,7 @@ fr30_cgen_get_int_operand (cd, opindex, fields)
       value = fields->f_m4;
       break;
     case FR30_OPERAND_PS :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       value = fields->f_reglist_hi_ld;
@@ -1118,13 +1113,13 @@ fr30_cgen_get_vma_operand (cd, opindex, fields)
       value = fields->f_CRj;
       break;
     case FR30_OPERAND_R13 :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_R14 :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_R15 :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_RI :
       value = fields->f_Ri;
@@ -1187,7 +1182,7 @@ fr30_cgen_get_vma_operand (cd, opindex, fields)
       value = fields->f_m4;
       break;
     case FR30_OPERAND_PS :
-      value = fields->f_nil;
+      value = 0;
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       value = fields->f_reglist_hi_ld;
@@ -1251,13 +1246,10 @@ fr30_cgen_set_int_operand (cd, opindex, fields, value)
       fields->f_CRj = value;
       break;
     case FR30_OPERAND_R13 :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_R14 :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_R15 :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_RI :
       fields->f_Ri = value;
@@ -1320,7 +1312,6 @@ fr30_cgen_set_int_operand (cd, opindex, fields, value)
       fields->f_m4 = value;
       break;
     case FR30_OPERAND_PS :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       fields->f_reglist_hi_ld = value;
@@ -1377,13 +1368,10 @@ fr30_cgen_set_vma_operand (cd, opindex, fields, value)
       fields->f_CRj = value;
       break;
     case FR30_OPERAND_R13 :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_R14 :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_R15 :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_RI :
       fields->f_Ri = value;
@@ -1446,7 +1434,6 @@ fr30_cgen_set_vma_operand (cd, opindex, fields, value)
       fields->f_m4 = value;
       break;
     case FR30_OPERAND_PS :
-      fields->f_nil = value;
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       fields->f_reglist_hi_ld = value;

@@ -193,13 +193,13 @@ fr30_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
       print_keyword (cd, info, & fr30_cgen_opval_cr_names, fields->f_CRj, 0);
       break;
     case FR30_OPERAND_R13 :
-      print_keyword (cd, info, & fr30_cgen_opval_h_r13, fields->f_nil, 0);
+      print_keyword (cd, info, & fr30_cgen_opval_h_r13, 0, 0);
       break;
     case FR30_OPERAND_R14 :
-      print_keyword (cd, info, & fr30_cgen_opval_h_r14, fields->f_nil, 0);
+      print_keyword (cd, info, & fr30_cgen_opval_h_r14, 0, 0);
       break;
     case FR30_OPERAND_R15 :
-      print_keyword (cd, info, & fr30_cgen_opval_h_r15, fields->f_nil, 0);
+      print_keyword (cd, info, & fr30_cgen_opval_h_r15, 0, 0);
       break;
     case FR30_OPERAND_RI :
       print_keyword (cd, info, & fr30_cgen_opval_gr_names, fields->f_Ri, 0);
@@ -262,7 +262,7 @@ fr30_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
       print_m4 (cd, info, fields->f_m4, 0|(1<<CGEN_OPERAND_SIGNED)|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case FR30_OPERAND_PS :
-      print_keyword (cd, info, & fr30_cgen_opval_h_ps, fields->f_nil, 0);
+      print_keyword (cd, info, & fr30_cgen_opval_h_ps, 0, 0);
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       print_hi_register_list_ld (cd, info, fields->f_reglist_hi_ld, 0, pc, length);
