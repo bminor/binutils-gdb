@@ -1,3 +1,11 @@
+Fri Feb 25 16:35:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_get_symtab_upper_bound): Use "sizeof (asymbol *)"
+	not "sizeof (som_symbol_type *)".
+
+	* elfcode.h (elf_get_symtab_upper_bound): Use "sizeof (asymbol *)"
+	not "sizeof (asymbol").  Opps.
+
 Fri Feb 25 13:19:04 1994  Ted Lemon  (mellon@pepper.ncd.com)
 
 	* bfd.c (bfd_get_gp_size): Can't return gp value on an archive.

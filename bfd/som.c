@@ -3190,7 +3190,8 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
      for undefined or common symbols, but the HP linker will
      choke if it's not set to some "reasonable" value.  We
      use zero as a reasonable value.  */
-  if (sym->section == &bfd_com_section || sym->section == &bfd_und_section)
+  if (sym->section == &bfd_com_section || sym->section == &bfd_und_section
+      || sym->section == &bfd_abs_section)
     info->symbol_info = 0;
   /* For all other symbols, the symbol_info field contains the 
      subspace index of the space this symbol is contained in.  */
@@ -3334,7 +3335,7 @@ som_get_symtab_upper_bound (abfd)
   if (!som_slurp_symbol_table (abfd))
     return 0;
 
-  return (bfd_get_symcount (abfd) + 1) * (sizeof (som_symbol_type *));
+  return (bfd_get_symcount (abfd) + 1) * (sizeof (asymbol *));
 }
 
 /* Convert from a SOM subspace index to a BFD section.  */

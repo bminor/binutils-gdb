@@ -2742,7 +2742,7 @@ DEFUN (elf_get_symtab_upper_bound, (abfd), bfd * abfd)
 
   Elf_Internal_Shdr *hdr = &elf_tdata(abfd)->symtab_hdr;
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol));
+  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
 
   return symtab_size;
 }
@@ -3549,6 +3549,7 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
   Elf_External_Phdr x_phdr;	/* Program header table entry, external form */
   Elf_Internal_Phdr *i_phdrp;	/* Program header table, internal form */
   unsigned int phindex;
+  struct elf_backend_data *ebd;
 
   /* Read in the ELF header in external format.  */
 
@@ -3620,6 +3621,35 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
 #if DEBUG & 1
   elf_debug_file (i_ehdrp);
 #endif
+
+  ebd = get_elf_backend_data (abfd);
+
+  /* Check that the ELF e_machine field matches what this particular
+     BFD format expects.  */
+  if (ebd->elf_machine_code != i_ehdrp->e_machine)
+    {
+      bfd_target **target_ptr;
+
+      if (ebd->elf_machine_code != EM_NONE)
+	goto wrong;
+
+      /* This is the generic ELF target.  Let it match any ELF target
+	 for which we do not have a specific backend.  */
+      for (target_ptr = bfd_target_vector; *target_ptr != NULL; target_ptr++)
+	{
+	  struct elf_backend_data *back;
+
+	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
+	    continue;
+	  back = (struct elf_backend_data *) (*target_ptr)->backend_data;
+	  if (back->elf_machine_code == i_ehdrp->e_machine)
+	    {
+	      /* target_ptr is an ELF backend which matches this
+		 object file, so reject the generic ELF target.  */
+	      goto wrong;
+	    }
+	}
+    }
 
   /* If there is no program header, or the type is not a core file, then
      we are hosed. */
