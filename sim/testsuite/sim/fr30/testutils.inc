@@ -108,6 +108,12 @@ testr_gr\@:
 	test_h_gr \val r5
 	.endm
 
+; Test the value of an general register against a dedicated register
+	.macro testr_h_dr gr dr
+	mov \dr,r5
+	testr_h_gr \gr r5
+	.endm
+
 ; Compare an immediate with word in memory
 	.macro test_h_mem val addr
 	ldmem_h_gr \addr r5
@@ -118,6 +124,15 @@ testr_gr\@:
 	.macro set_cc mask
 	andccr	0xf0
 	orccr	\mask
+	.endm
+
+; Set the stack mode
+	.macro set_s_user
+	orccr	0x10
+	.endm
+
+	.macro set_s_system
+	andccr	0xef
 	.endm
 
 ; Test the condition codes
