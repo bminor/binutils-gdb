@@ -1,3 +1,8 @@
+2004-07-15  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-tdep.h (struct gdbarch_tdep): New member: ppc_sr0_regnum.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize it.
+
 2004-07-14  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (COMMON_UISA_NOFP_REGS): Delete; unused.

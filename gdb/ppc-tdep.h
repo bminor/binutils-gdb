@@ -158,6 +158,10 @@ struct gdbarch_tdep
     int ppc_fpscr_regnum;	/* Floating point status and condition
     				   register */
 
+    int ppc_sr0_regnum;         /* segment register 0, or -1 on
+                                   variants that have no segment
+                                   registers.  */
+
     int ppc_mq_regnum;		/* Multiply/Divide extension register */
     int ppc_vr0_regnum;		/* First AltiVec register */
     int ppc_vrsave_regnum;	/* Last AltiVec register */

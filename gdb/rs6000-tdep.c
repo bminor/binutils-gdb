@@ -2868,6 +2868,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->ppc_mq_regnum = -1;
   tdep->ppc_fp0_regnum = 32;
   tdep->ppc_fpscr_regnum = power ? 71 : 70;
+  tdep->ppc_sr0_regnum = 71;
   tdep->ppc_vr0_regnum = -1;
   tdep->ppc_vrsave_regnum = -1;
   tdep->ppc_ev0_regnum = -1;
@@ -2896,7 +2897,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->lr_frame_offset = 8;
 
-  if (v->arch == bfd_arch_powerpc)
+  if (v->arch == bfd_arch_rs6000)
+    tdep->ppc_sr0_regnum = -1;
+  else if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
       {
       case bfd_mach_ppc: 
@@ -2920,6 +2923,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev31_regnum = 38;
         tdep->ppc_fp0_regnum = -1;
         tdep->ppc_fpscr_regnum = -1;
+        tdep->ppc_sr0_regnum = -1;
         tdep->ppc_acc_regnum = 39;
         tdep->ppc_spefscr_regnum = 40;
         set_gdbarch_pc_regnum (gdbarch, 0);
@@ -2928,7 +2932,21 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
 	break;
+
+      case bfd_mach_ppc64:
+      case bfd_mach_ppc_620:
+      case bfd_mach_ppc_630:
+      case bfd_mach_ppc_a35:
+      case bfd_mach_ppc_rs64ii:
+      case bfd_mach_ppc_rs64iii:
+        /* These processor's register sets don't have segment registers.  */
+        tdep->ppc_sr0_regnum = -1;
+        break;
       }   
+  else
+    internal_error (__FILE__, __LINE__,
+                    "rs6000_gdbarch_init: "
+                    "received unexpected BFD 'arch' value");
 
   /* Sanity check on registers.  */
   gdb_assert (strcmp (tdep->regs[tdep->ppc_gp0_regnum].name, "r0") == 0);
