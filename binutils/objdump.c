@@ -1222,7 +1222,9 @@ objdump_sprintf (va_alist)
 /* The number of zeroes we want to see before we start skipping them.
    The number is arbitrarily chosen.  */
 
+#ifndef SKIP_ZEROES
 #define SKIP_ZEROES (8)
+#endif
 
 /* The number of zeroes to skip at the end of a section.  If the
    number of zeroes at the end is between SKIP_ZEROES_AT_END and
@@ -1231,7 +1233,9 @@ objdump_sprintf (va_alist)
    attempt to avoid disassembling zeroes inserted by section
    alignment.  */
 
+#ifndef SKIP_ZEROES_AT_END
 #define SKIP_ZEROES_AT_END (3)
+#endif
 
 /* Disassemble some data in memory between given values.  */
 

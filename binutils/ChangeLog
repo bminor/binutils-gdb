@@ -1,3 +1,8 @@
+2001-07-25  Dave Brolley  <brolley@redhat.com>
+
+	* objdump.c (SKIP_ZEROES): Only define it if it is not already defined.
+	(SKIP_ZEROES_AT_END): Only define it if it is not already defined.
+
 2001-07-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* README: Update for 2.11.  Change bug reporting email address.
