@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <bfd.h>
 #include <stdio.h>
+#include "bucomm.h"
 
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
@@ -57,7 +58,6 @@ static struct coff_ptr_struct *rawsyms;
 static int rawcount;
 static bfd *abfd;
 extern char *xcalloc ();
-extern char *xmalloc ();
 #define PTR_SIZE 	4
 #define SHORT_SIZE 	2
 #define INT_SIZE 	4
@@ -84,6 +84,7 @@ empty_symbol ()
 /*int l;*/
 static void
 push_scope (link)
+     int link;
 {
   struct coff_scope *n = empty_scope ();
   if (link)
@@ -371,6 +372,7 @@ do_type (i)
 	      last_struct = res;
 	      res->type = coff_structdef_type;
 	      res->u.astructdef.elements = empty_scope ();
+	      res->u.astructdef.idx = 0;
 	      res->u.astructdef.isstruct = (type & 0xf) == T_STRUCT;
 	      res->size = aux->x_sym.x_misc.x_lnsz.x_size;
 	    }
@@ -585,11 +587,14 @@ doit ()
 {
   int i;
   int infile = 0;
-  struct coff_ofile *head = (struct coff_ofile *) malloc (sizeof (struct coff_ofile));
+  struct coff_ofile *head =
+  (struct coff_ofile *) xmalloc (sizeof (struct coff_ofile));
   ofile = head;
   head->source_head = 0;
   head->source_tail = 0;
-
+  head->nsources = 0;
+  head->symbol_list_tail = 0;
+  head->symbol_list_head = 0;
   do_sections_p1 (head);
   push_scope (1);
 
@@ -723,6 +728,6 @@ coff_grok (inabfd)
   rawcount = obj_raw_syment_count (abfd);;
   tindex = (struct coff_symbol **) (xcalloc (sizeof (struct coff_symbol *), rawcount));
 
-  p = doit (abfd);
+  p = doit ();
   return p;
 }

@@ -1,3 +1,20 @@
+Wed Jan 18 12:24:14 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* coffdump.c (dump_coff_scope): Cast pointer to unsigned long for
+	printf.
+	* coffgrok.c: Include bucomm.h.  Don't declare xmalloc.
+	(push_scope): Declare type of parameter link.
+	* size.c: Include libiberty.h.
+	* srconv.c: Include bucomm.h.
+	(find_base): Declare at top of file.
+	(wr_hd): Add default case to architecture switch.
+	(wr_dps_start): Declare type of parameter nest.
+	(wr_du): Comment out variables used only in commented out blocks.
+	(wr_dus): Remove unused variable i.
+	(wr_sc): Remove unused variables myinfo, low, and high.
+	* strings.c: Include libiberty.h.
+	* sysdump.c: Include <ctype.h>.
+
 Tue Dec 20 19:13:44 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ar.c (main): Ignore 'f' modifier used on HP/UX 9.
