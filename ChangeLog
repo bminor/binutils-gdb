@@ -1,3 +1,7 @@
+Fri Apr 30 15:52:46 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* Makefile.in (all-gdb): gdb depends on sim.
+
 Thu Apr 29 23:30:48 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (gdb.tar.Z):  Make prototype gdb testsuite directory
