@@ -1,3 +1,7 @@
+2002-06-17  Keith Seitz  <keiths@redhat.com>
+
+	* gdbmi.texinfo: Update command examples with real MI behavior.
+
 2002-05-20  Keith Seitz  <keiths@redhat.com>
 
 	* mi-main.c (captured_mi_execute_command): Add uiout parameter.
