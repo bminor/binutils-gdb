@@ -1,3 +1,18 @@
+Fri Sep 25 15:13:44 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* remote.c (remote_wait):  Make regs be char to avoid picayune
+	ANSI compiler warnings.
+
+	* energize.h:  Move all external struct decls to inside of
+	__STDC__, add prototype for energize_shell_wait().
+	* energize.c (getpty):  Clean up, make us really get a controlling
+	terminal.
+	* (energize_initialize):  Disable SIGIO prior to setting up for
+	I/O interrupts.  Move setsid(), et. al. to getpty().
+	* (energize_shell_wait):  New routine to wait for things started
+	via the shell command, uses wait() instead of /dev/proc.
+	* Also, add prototype for execute_command_1().
+
 Fri Sep 25 12:09:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* inftarg.c (child_create_inferior, child_attach,

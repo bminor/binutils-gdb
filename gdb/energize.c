@@ -44,6 +44,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/errno.h>
 #include <termios.h>
 #include <string.h>
+#ifdef NCR486
+#include <sys/stropts.h>
+#endif
 
 /* Non-zero means that we're doing the energize interface. */
 int energize = 0;
@@ -86,6 +89,8 @@ static int command_line_length = 0;
 /* Flags returned by wait_for_events() */
 #define KERNEL_EVENT 1
 #define PTY_EVENT 2
+
+static void execute_command_1();
 
 
 /* This routine redirects the output of fputs_filtered to the kernel so that
@@ -884,69 +889,57 @@ getpty()
   struct stat statbuf; 
   struct termios termios;
 
-  if (stat("/dev/ptmx",&statbuf)) error ("getpty: can't locate master\n");
+  mfd = open("/dev/ptmx", O_RDWR); /* get the master */
+  if (mfd < 0)
+    error ("getpty: can't locate master\n");
 
-  /* Number of pseudo-terms is tuneable(16 - 255). System default is 16. */
-  for (i = 0; i < MAX_PTM_TRY; i++)
-    {
-      mfd = open("/dev/ptmx", O_RDWR); /* get the master */
+  if (grantpt(mfd) < 0)	/* get a slave */
+    error ("getpty: can't acquire slave");
 
-      if (mfd < 0)
-	continue;
+  unlockpt(mfd);
 
-      if (grantpt(mfd) < 0)	/* get a slave */
-	for (j = 0; j < MAX_GRANTPT_TRY; j++)
-	  if (grantpt(mfd) == 0 )
-	    {
-	      close(mfd);
-	      continue;
-	    }
+  slavename = ptsname(mfd); /* get the slave device name */
+  if (!slavename)
+    error ("getpty: can't get a pts\n");
 
-      if (unlockpt(mfd) < 0)
-	{			/* unlock the slave so he can be opened */
-	  close(mfd);
-	  continue;
-	}
+  /* Drop controlling tty, become pgrp master */
 
-      slavename = ptsname(mfd); /* get the slave device name */
-      if (slavename)
-	break;			/* Success! */
+  if (setpgid(0, getppid()) == -1)
+    perror("setpgid() failed: ");
 
-      close(mfd);
-      continue;
-    }
+  if (setsid() == -1)
+    perror("setsid() failed: ");
 
   sfd = open(slavename, O_RDWR);
-
   if (sfd < 0)
     {
       close(mfd);
       error ("getpty: can't open slave\n");
     }
 
-  if (slavename==NULL && i >= MAX_PTM_TRY)
-    error ("getpty: can't get a pts\n");
+
+  if (ioctl(sfd, I_PUSH, "ptem")) perror ("getpty: ioctl I_PUSH fails");
+  if (ioctl(sfd, I_PUSH, "ldterm")) perror ("getpty: ioctl I_PUSH fails");
 
   /* setup mty for non-blocking I/O. */
 
-  if ((n = fcntl(mfd, F_GETFL)) < 0)
+  n = fcntl(mfd, F_GETFL);
+  if (n < 0)
     perror ("getpty: fcntl F_GETFL failed");
-  else if (fcntl(mfd, F_SETFL, n|O_NDELAY) <0)
-    perror("getpty:fcntl F_SETFL fails");
+
+  if (fcntl(mfd, F_SETFL, n|O_NDELAY) <0)
+    perror("getpty: fcntl F_SETFL failed");
 
   /* set up for async i/o - V.4 will send SIGPOLL when data available */
 
   if (ioctl (mfd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
     perror ("getpty: ioctl I_SETSIG failed");
 
-  /* fcntl(mfd, F_SETOWN,getpid()); SVR4 does not support this */
-
-  if (ioctl(sfd, I_PUSH, "ptem")) perror ("getpty: ioctl I_PUSH fails");
-  if (ioctl(sfd, I_PUSH, "ldterm")) perror ("getpty: ioctl I_PUSH fails");
-
-  if (tcgetattr(sfd, &termios)) perror("getpty: tcgetattr fails");
+  if (tcgetattr(sfd, &termios))
+    perror("getpty: tcgetattr fails");
   termios.c_oflag &= ~OPOST;	/* no post-processing */
-  if (tcsetattr(sfd, TCSANOW, &termios)) perror("getpty: tcsetattr fails");
+  if (tcsetattr(sfd, TCSANOW, &termios))
+    perror("getpty: tcsetattr fails");
 
   inferior_pty=mfd;
   inferior_tty=sfd;
@@ -1472,6 +1465,8 @@ energize_initialize(energize_id, execarg)
 
   /* Setup for I/O interrupts when appropriate. */
 
+  signal(SIGIO, SIG_IGN);
+
 #ifdef NCR486
   if (ioctl (kerfd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
     perror ("getpty: ioctl I_SETSIG failed");
@@ -1543,10 +1538,6 @@ energize_initialize(energize_id, execarg)
 
   /* Tell the rest of the world that Energize is now set up. */
   energize = 1;
-
-  /* Drop controlling tty, become pgrp master */
-
-  setsid();
 
   getpty();			/* Setup the pty */
 
@@ -1624,6 +1615,7 @@ energize_wait(status)
      int *status;
 {
   int pid;
+  struct sigaction action;
   static sigset_t nullsigmask = {0};
 
   if (!energize)
@@ -1647,6 +1639,32 @@ energize_wait(status)
 #else
   pid = wait(status);
 #endif
+
+  signal(SIGIO, SIG_IGN);
+  return pid;
+}
+
+int
+energize_shell_wait(status)
+     int *status;
+{
+  int pid;
+  struct sigaction action;
+  static sigset_t nullsigmask = {0};
+
+  if (!energize)
+    return wait(status);
+
+#ifdef NCR486
+  action.sa_handler = iosig;
+  action.sa_mask = nullsigmask;
+  action.sa_flags = SA_RESTART;
+  sigaction(SIGIO, &action, NULL);
+#else
+  signal(SIGIO, iosig);
+#endif
+
+  pid = wait(status);
 
   signal(SIGIO, SIG_IGN);
   return pid;

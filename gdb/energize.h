@@ -20,6 +20,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (ENERGIZE_H)
 #define ENERGIZE_H 1
 
+#ifdef __STDC__
+struct cmd_list_element;
+struct symbol;
+struct type;
+struct objfile;
+struct breakpoint;
+#endif /* __STDC__ */
+
 /* Non-zero means that we're doing the energize interface. */
 extern int energize;
 
@@ -32,13 +40,14 @@ extern void energize_new_process PARAMS ((void));
 /* Low level wait routine for wait_for_inferior */
 extern int energize_wait PARAMS ((int *));
 
+/* Wait routine for processes spawned by the shell command */
+extern int energize_shell_wait PARAMS ((int *statusp));
+
 /* Initialize */
 extern void energize_initialize PARAMS ((char *, char *));
 
 /* Main loop for energize protocol driver */
 extern void energize_main_loop PARAMS ((void));
-
-struct cmd_list_element;
 
 /* Command hook for energize */
 extern void energize_call_command PARAMS ((struct cmd_list_element *,
@@ -46,9 +55,6 @@ extern void energize_call_command PARAMS ((struct cmd_list_element *,
 
 /* Read commands for the command command, and others */
 extern char *energize_command_line_input PARAMS ((char *, int));
-
-struct symbol;
-struct type;
 
 extern void energize_start_variable_annotation PARAMS ((char *,
 							struct symbol *,
@@ -60,7 +66,6 @@ extern void energize_end_variable_annotation PARAMS ((void));
 
 extern void energize_annotate_function PARAMS ((char *, int, int));
 
-struct objfile;
 extern void energize_symbol_file PARAMS ((struct objfile *));
 
 /*extern void energize_query PARAMS ((char *, ...));*/
@@ -70,7 +75,6 @@ extern void energize_acknowledge_query PARAMS ((char *));
 
 extern void energize_fputs PARAMS ((const char *));
 
-struct breakpoint;
 extern void energize_condition_breakpoint PARAMS ((struct breakpoint *));
 
 extern void energize_commands_breakpoint PARAMS ((struct breakpoint *));
