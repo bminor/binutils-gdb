@@ -1,3 +1,8 @@
+2000-03-09  Catherine Moore  <clm@cygnus.com>
+ 
+        * config/tc-m32r.c (m32r_fix_adjustable):  Look up the
+        relocation type based on the entry in the fixup structure.
+
 2000-03-08  H.J. Lu  (hjl@gnu.org)
 
 	* Makefile.am (install-exec-tooldir): Depend on

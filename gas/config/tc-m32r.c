@@ -1887,6 +1887,18 @@ m32r_fix_adjustable (fixP)
    fixS *fixP;
 {
 
+  bfd_reloc_code_real_type reloc_type;
+ 
+  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+    {
+      const CGEN_INSN *insn = NULL;
+      int opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+      const CGEN_OPERAND *operand = cgen_operand_lookup_by_num(gas_cgen_cpu_desc, opindex);
+      reloc_type = md_cgen_lookup_reloc (insn, operand, fixP);
+    }
+  else
+    reloc_type = fixP->fx_r_type;
+
   if (fixP->fx_addsy == NULL)
     return 1;
   
@@ -1897,8 +1909,8 @@ m32r_fix_adjustable (fixP)
     return 0;
   
   /* We need the symbol name for the VTABLE entries */
-  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+  if (reloc_type == BFD_RELOC_VTABLE_INHERIT
+      || reloc_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
 
   return 1;
