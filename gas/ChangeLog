@@ -1,3 +1,12 @@
+Thu Jul 13 21:16:43 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.h (UNDEFINED_DIFFERENCE_OK): Define for SOM.
+	* write.c (adjust_reloc_syms): Set sy_used_in_reloc for both
+	symbols in a fixup where a defined symbol is subtracted from an
+	undefined symbol (when UNDEFINED_DIFFERENCE_OK is defined).
+	(fixup_segment): Do nothing for the difference of two symbols if
+	UNDEFINED_DIFFERENCE_OK is defined.
+
 Wed Jul 12 23:33:40 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (fixup_segment): Support MD_APPLY_FIX3.
