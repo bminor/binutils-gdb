@@ -1786,24 +1786,29 @@ PRINT_FN (dma_next);
 
 const txvu_operand dma_operands[] =
 {
-  /* place holder (??? not sure if needed) */
+    /* place holder (??? not sure if needed) */
 #define DMA_UNUSED 128
-  { 0 },
+    { 0 },
 
-  /* dma tag flag bits */
+    /* dma tag flag bits */
 #define DMA_FLAGS (DMA_UNUSED + 1)
-  { 0, 0, TXVU_OPERAND_SUFFIX,
+    { 0, 0, TXVU_OPERAND_SUFFIX,
       parse_dma_flags, insert_dma_flags, extract_dma_flags, print_dma_flags },
 
-  /* dma data spec */
+    /* dma data spec */
 #define DMA_DATA (DMA_FLAGS + 1)
-  { 0, 0, 0,
-      parse_dma_data, insert_dma_data, extract_dma_data, print_dma_data },
+    { 0, 0, TXVU_OPERAND_DMA_COUNT,
+      0, insert_dma_data, extract_dma_data, print_dma_data },
 
-  /* dma next tag spec */
-#define DMA_NEXT (DMA_DATA + 1)
-  { 0, 0, 0,
-      parse_dma_next, insert_dma_next, extract_dma_next, print_dma_next },
+    /* dma data finalization spec */
+#define DMA_DATA2 (DMA_DATA + 1)
+    { 0, 0, TXVU_OPERAND_FAKE,
+      parse_dma_data2, 0, 0, 0},
+
+    /* dma next tag spec */
+#define DMA_ADDR (DMA_DATA2 + 1)
+    { 0, 0, 0,
+      parse_dma_addr, insert_dma_addr, extract_dma_addr, print_dma_addr},
 
 /* end of list place holder */
   { 0 }
@@ -1811,18 +1816,24 @@ const txvu_operand dma_operands[] =
 
 struct txvu_opcode dma_opcodes[] =
 {
-  /* ??? Some of these may take optional arguments.
-     The way to handle that is to have multiple table entries, those with and
-     those without the optional arguments.  */
-  { "dmacnt", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 1 },
-  { "dmanext", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 2 },
-  { "dmaref", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 3 },
-  { "dmarefs", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 4 },
-  { "dmacall", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 5 },
-  { "dmaret", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 6 },
-  { "dmaend", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 7 }
+    /* ??? Some of these may take optional arguments.
+    The way to handle that is to have multiple table entries, those with and
+    those without the optional arguments.  */
+/*TODO*/    { "dmacall", { DMA_FLAGS, SP, DMA_DATA, C, DMA_ADDR}, 0, 1},
+/*TODO*/    { "dmacnt", { DMA_FLAGS, SP, DMA_DATA, C, DMA_ADDR}, 0, 2},
+    { "dmaend", { DMA_FLAGS, SP, DMA_DATA, DMA_DATA2}, 0, 3},
+    { "dmaend", { DMA_FLAGS, SP, DMA_DATA, C, DMA_ADDR}, 0, 4},
+/*TODO*/    { "dmanext", { DMA_FLAGS, SP, DMA_DATA, C, DMA_ADDR}, 0, 5},
+/*TODO      { "dmaref", { DMA_FLAGS, SP, DMA_DATA, C, DMA_PTR_ADDR}, 0, 6},	*/
+/*TODO      { "dmarefs", { DMA_FLAGS, SP, DMA_DATA, C, DMA_PTR_ADDR}, 0, 7},	*/
+/*TODO*/    { "dmaret", { DMA_FLAGS, SP, DMA_DATA, DMA_DATA2}, 0, 8}
+/*TODO*/    { "dmaret", { DMA_FLAGS, SP, DMA_DATA, C, DMA_ADDR}, 0, 9}
 };
 const int dma_opcodes_count = sizeof (dma_opcodes) / sizeof (dma_opcodes[0]);
+
+/* Did the current DMA instruction has specify "*" as its length operand?
+-1=uninitialized, 0=no, 1=yes. */
+static int state_dma_operand_count_p;
 
 /* DMA parse,insert,extract,print helper fns.  */
 
@@ -1902,44 +1913,23 @@ print_dma_flags (opcode, operand, mods, insn, info, value)
     }
 }
 
-/* Parse a DMA data spec which can be either of '*' or a quad word count.  */
-
 static long
-parse_dma_data (opcode, operand, mods, pstr, errmsg)
-     const txvu_opcode *opcode;
-     const txvu_operand *operand;
-     int mods;
-     char **pstr;
-     const char **errmsg;
+parse_dma_data2( opcode, operand, mods, pstr, errmsg)
+    const txvu_opcode *opcode;
+    const txvu_operand *operand;
+    int mods;
+    char **pstr;
+    const char **errmsg;
 {
-  char *str = *pstr;
-  long count;
-
-  if (*str == '*')
-    {
-      ++*pstr;
-      /* -1 is a special marker to caller to tell it the count is to be
-	 computed from the data.  */
-      return -1;
-    }
-
-  if (isdigit (*str))
-    {
-      char *start = str;
-      while (*str && *str != ',')
-	++str;
-      if (*str != ',')
-	{
-	  *errmsg = "invalid dma count";
-	  return 0;
-	}
-      count = atoi (start);
-      *pstr = str;
-      return count;
-    }
-
-  *errmsg = "invalid dma count";
-  return 0;
+    /*
+    If txvu_dma_operand_count() < 0 error
+    if txvu_dma_operand_count() > 0
+	if dmaref || dmarefs
+	    compute from two related symbols
+	else
+	    compute from current addr and end symbol
+	store value to count field?
+    */
 }
 
 static void
@@ -1977,28 +1967,50 @@ print_dma_data (opcode, operand, mods, insn, info, value)
 }
 
 static long
-parse_dma_next (opcode, operand, mods, pstr, errmsg)
-     const txvu_opcode *opcode;
-     const txvu_operand *operand;
-     int mods;
-     char **pstr;
-     const char **errmsg;
+parse_dma_addr (opcode, operand, mods, pstr, errmsg)
+    const txvu_opcode *opcode;
+    const txvu_operand *operand;
+    int mods;
+    char **pstr;
+    const char **errmsg;
 {
-  char *start = *pstr;
-  char *end = scan_symbol (start);
+    char *start = *pstr;
+    char *end = scan_symbol( start);
 
-  if (end == start)
+    if( end == start )
     {
-      *errmsg = "invalid dma next tag";
-      return 0;
+	*errmsg = "invalid dma next tag";
+	return 0;
     }
-  /* FIXME: unfinished */
-  *pstr = end;
-  return 0;
+
+    /* FIXME: unfinished
+    if txvu_dma_operand_count() > 0
+	if dmaref || dmarefs
+	    this operand must be a symbol (vs an expression)
+	    lookup the symbol
+	    store the symbol's value in the addr field (relocs?)
+	    compute the end_symbol's name
+	    lookup the end_symbol
+	    if not found: error
+	    compute the length as _$<name>-<name>
+	else
+	    evaluate the operand as an expression
+	    store the value to the count field
+	    compute the length as _$EndDma-.
+	store the count field
+    else
+	evaluate the operand as an expression
+	store the value to the count field
+    */
+
+    parse_dma_data2( opcode, operand, mods, pstr, errmsg);
+
+    *pstr = end;
+    return 0;
 }
 
 static void
-insert_dma_next (opcode, operand, mods, insn, value, errmsg)
+insert_dma_addr (opcode, operand, mods, insn, value, errmsg)
      const txvu_opcode *opcode;
      const txvu_operand *operand;
      int mods;
@@ -2009,7 +2021,7 @@ insert_dma_next (opcode, operand, mods, insn, value, errmsg)
 }
 
 static long
-extract_dma_next (opcode, operand, mods, insn, pinvalid)
+extract_dma_addr (opcode, operand, mods, insn, pinvalid)
      const txvu_opcode *opcode;
      const txvu_operand *operand;
      int mods;
@@ -2020,7 +2032,7 @@ extract_dma_next (opcode, operand, mods, insn, pinvalid)
 }
 
 static void
-print_dma_next (opcode, operand, mods, insn, info, value)
+print_dma_addr (opcode, operand, mods, insn, info, value)
      const txvu_opcode *opcode;
      const txvu_operand *operand;
      int mods;
@@ -2435,6 +2447,27 @@ txvu_opcode_init_parse ()
   state_vu_mnemonic_bc = -1;
   state_pke_varlen_p = -1;
   state_pke_len = -1;
+  state_dma_operand_count_p = -1;
+}
+
+/*
+Query or set the current type of a DMA length operand, explicit or computed by "as".
+The return value is the setting before "action" is applied:
+    -1=uninitialized, 0=explicit, +1=computed
+The value of "action" is interpreted as:
+    -1=no change, 0=set explicit, +1=set computed
+*/
+int
+txvu_dma_operand_count( action)
+{
+    int result = state_dma_operand_count;
+
+    if( action == 0)
+	state_dma_operand_count = 0;
+    else if( action > 0)
+        state_dma_operand_count_p = 1;
+
+    return result;
 }
 
 /* Called by the disassembler before printing an instruction.  */

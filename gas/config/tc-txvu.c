@@ -87,17 +87,17 @@ static void s_vu PARAMS ((int));
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "dmadata", s_dmadata, 1 },
-  { "dmapackpke", s_dmapackpke, 0 },
-  { "enddirect", s_enddirect, 0 },
-  { "enddmadata", s_dmadata, 0 },
-  { "endgpuif", s_endgpuif, 0 },
-  { "endmpg", s_endmpg, 0 },
-  { "endunpack", s_endunpack, 0 },
-  /* .vu,.endvu added to simplify debugging */
-  { "vu", s_vu, 1 },
-  { "endvu", s_vu, 0 },
-  { NULL, NULL, 0 }
+    { "dmadata", s_dmadata, 1 },
+    { "dmapackpke", s_dmapackpke, 0 },
+    { "enddirect", s_enddirect, 0 },
+    { "enddmadata", s_dmadata, 0 },
+    { "endgpuif", s_endgpuif, 0 },
+    { "endmpg", s_endmpg, 0 },
+    { "endunpack", s_endunpack, 0 },
+    /* .vu,.endvu added to simplify debugging */
+    { "vu", s_vu, 1 },
+    { "endvu", s_vu, 0 },
+    { NULL, NULL, 0 }
 };
 
 void
@@ -541,8 +541,20 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 	      if (*str == '\0')
 		break;
 
+	      /* Is this the special DMA count operand? */
+	      if( operand->flags & TXVU_OPERAND_DMA_COUNT)
+		  txvu_dma_operand_count( 0);
+	      if( (operand->flags & TXVU_OPERAND_DMA_COUNT) && *str == '*')
+	      {
+		  /* Yes, it is!
+		  Remember that we must compute the length later
+		  when the dma-block label (second operand) is known. */
+		  ++*pstr;
+		  txvu_dma_operand_count( 1);
+	      }
+
 	      /* Parse the operand.  */
-	      if (operand->parse)
+	      else if (operand->parse)
 		{
 		  errmsg = NULL;
 		  value = (*operand->parse) (opcode, operand, mods,
@@ -1019,7 +1031,7 @@ txvu_insert_operand (insn, cpu, operand, mods, val, file, line)
 }
 
 static void
-s_dmadata( type)
+  s_dmadata( type)
     int type;
 {
     static short state = 0;
@@ -1028,9 +1040,10 @@ s_dmadata( type)
     const char *prevName;
     int temp;
 
-    switch( type) {
-    case 1:	/* .DmaData */
-    	if( state != 0)
+    switch( type )
+    {
+    case 1:				/* .DmaData */
+	if( state != 0 )
 	{
 	    as_bad( "DmaData blocks cannot be nested.");
 	    ignore_rest_of_line();
@@ -1038,14 +1051,14 @@ s_dmadata( type)
 	    break;
 	}
 	state = 1;
-	  
+
 	SKIP_WHITESPACE();		/* Leading whitespace is part of operand. */
 	name = input_line_pointer;
-      
+
 	if( !is_name_beginner( *name) )
 	{
 	    as_bad( "invalid identifier for \".DmaData\"");
-	    obstack_1grow (&cond_obstack, 0);
+	    obstack_1grow( &cond_obstack, 0);
 	    ignore_rest_of_line();
 	    break;
 	}
@@ -1054,15 +1067,15 @@ s_dmadata( type)
 	    char c;
 
 	    c = get_symbol_end();
-	    line_label = label = colon( name);	/* user-defined label */
+	    line_label = label = colon( name);	  /* user-defined label */
 	    *input_line_pointer = c;
 
 	    demand_empty_rest_of_line();
 	}				/* if a valid identifyer name */
 	break;
 
-    case 0:	/* .EndDmaData */
-    	if( state != 1)
+    case 0:				/* .EndDmaData */
+	if( state != 1 )
 	{
 	    as_warn( ".EndDmaData encountered outside a DmaData block -- ignored.");
 	    ignore_rest_of_line();
@@ -1081,7 +1094,7 @@ s_dmadata( type)
 	name = malloc( temp + 2);
 	name[ 0] = '_';
 	name[ 1] = '$';
-	memcpy( name+2, prevName, temp);	/* copy original name & \0 */
+	memcpy( name+2, prevName, temp);    /* copy original name & \0 */
 	colon( name);
 	free( name);
 	break;
@@ -1093,14 +1106,14 @@ s_dmadata( type)
 
 static void
 s_dmapackpke( ignore)
-     int ignore;
+    int ignore;
 {
     /* Syntax: .dmapackpke 0|1 */
     struct symbol *label;		/* Points to symbol */
     char *name;				/* points to name of symbol */
 
-    SKIP_WHITESPACE();		/* Leading whitespace is part of operand. */
-    switch( *input_line_pointer++)
+    SKIP_WHITESPACE();			/* Leading whitespace is part of operand. */
+    switch( *input_line_pointer++ )
     {
     case 0:
 	dma_pack_pke_p = 0;
@@ -1146,3 +1159,61 @@ s_vu (enable_p)
 {
   vu_mode_p = enable_p;
 }
+
+/* Parse a DMA data spec which can be either of '*' or a quad word count.  */
+
+static void
+parse_dma_count( pstr, errmsg)
+    char **pstr;
+    const char **errmsg;
+{
+    char *str = *pstr;
+    long count;
+
+    if( *str == '*' )
+    {
+	++*pstr;
+	/* -1 is a special marker to caller to tell it the count is to be
+	computed from the data. */
+	return -1;
+    }
+
+    expressionS exp;
+    expression( &exp);
+    if( exp.X_op == O_illegal
+	|| exp.X_op == O_absent )
+	break;
+    else if( exp.X_op == O_constant )
+	value = exp.X_add_number;
+    else if( exp.X_op == O_register )
+	as_fatal( "got O_register");
+    else
+    {
+	/* We need to generate a fixup for this expression.  */
+	if( fixup_count >= MAX_FIXUPS )
+	    as_fatal( "too many fixups");
+	fixups[fixup_count].exp = exp;
+	fixups[fixup_count].opindex = index;
+	++fixup_count;
+	value = 0;
+    }
+
+    if( isdigit( *str) )       ????????needs to accept an expression
+    {
+	char *start = str;
+	while( *str && *str != ',' )
+	    ++str;
+	if( *str != ',' )
+	{
+	    *errmsg = "invalid dma count";
+	    return 0;
+	}
+	count = atoi (start);
+	*pstr = str;
+	return(count);
+    }
+
+    *errmsg = "invalid dma count";
+    return 0;
+}
+
