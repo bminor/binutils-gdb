@@ -1,6 +1,6 @@
 #name: MIPS rel32 o32
 #source: rel32.s
-#as: -KPIC -32
+#as: -KPIC -EB -32
 #readelf: -x 6 -r
 #ld: -shared -melf32btsmip
 

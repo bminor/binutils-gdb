@@ -400,7 +400,7 @@ if { [istarget mips*-*-*] } then {
 	set tmips ""
     }
     if [istarget mips*el-*-*] {
-	set el el
+	set el "el"
     } {
 	set el ""
     }

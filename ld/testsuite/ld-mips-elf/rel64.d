@@ -1,6 +1,6 @@
 #name: MIPS rel64 n64
 #source: rel64.s
-#as: -KPIC -64
+#as: -KPIC -EB -64
 #readelf: -x 6 -r
 #ld: -shared -melf64btsmip
 
