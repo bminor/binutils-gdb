@@ -143,9 +143,9 @@ Disassembly of section .text:
  245:	66 0f 6f c8[ 	]+movdqa %xmm0,%xmm1
  249:	f3 0f 6f c8[ 	]+movdqu %xmm0,%xmm1
  24d:	f3 0f 6f c8[ 	]+movdqu %xmm0,%xmm1
- 251:	f2 0f d6 c8[ 	]+movdq2q %mm1,%mm0
- 255:	f3 0f d6 c8 66[ 	]+movq2dq %mm0,%xmm0
- 25a:	0f f4 c8[ 	]+pmuludq %mm0,%mm1
+ 251:	f2 0f d6 c8[ 	]+movdq2q %xmm0,%mm1
+ 255:	f3 0f d6 c8[ 	]+movq2dq %mm0,%xmm1
+ 25a:	66 0f f4 c8[ 	]+pmuludq %xmm0,%xmm1
  25d:	66 0f f4 c8[ 	]+pmuludq %xmm0,%xmm1
  261:	66 0f 70 c8 01[ 	]+pshufd \$0x1,%xmm0,%xmm1
  266:	f3 0f 70 c8 01[ 	]+pshufhw \$0x1,%xmm0,%xmm1

@@ -1,3 +1,8 @@
+2001-05-12  Alan Modra  <amodra@one.net.au>
+
+	* i386-dis.c (prefix_user_table): Correct movq2dq, movdq2q, and
+	movq operands.
+
 2001-05-04  Alan Modra  <amodra@one.net.au>
 
 	* i386-dis.c (Ev, Ed): Remove duplicate define.

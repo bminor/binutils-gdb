@@ -47,7 +47,7 @@ Disassembly of section .text:
 [ 	]+ca:	66 0f 6a 90 90 90 90 90 	punpckhdq 0x90909090\(%eax\),%xmm2
 [ 	]+d2:	66 0f 6b 90 90 90 90 90 	packssdw 0x90909090\(%eax\),%xmm2
 [ 	]+da:	66 0f 6e 90 90 90 90 90 	movd[ 	]+0x90909090\(%eax\),%xmm2
-[ 	]+e2:	f3 0f 7e 90 90 90 90 90 	movq[ 	]+%xmm2,0x90909090\(%eax\)
+[ 	]+e2:	f3 0f 7e 90 90 90 90 90 	movq[ 	]+0x90909090\(%eax\),%xmm2
 [ 	]+ea:	66 0f 71 d0 90[ 	]+psrlw[ 	]+\$0x90,%xmm0
 [ 	]+ef:	66 0f 72 d0 90[ 	]+psrld[ 	]+\$0x90,%xmm0
 [ 	]+f4:	66 0f 73 d0 90[ 	]+psrlq[ 	]+\$0x90,%xmm0
