@@ -1977,7 +1977,7 @@ xcoff_start_psymtab (objfile, section_offsets,
 
 static struct partial_symtab *xcoff_end_psymtab
   PARAMS ((struct partial_symtab *, char **, int, int,
-	   struct partial_symtab **, int));
+	   struct partial_symtab **, int, int));
 
 /* Close off the current usage of PST.  
    Returns PST, or NULL if the partial symtab was empty and thrown away.
@@ -1989,13 +1989,14 @@ static struct partial_symtab *xcoff_end_psymtab
 
 static struct partial_symtab *
 xcoff_end_psymtab (pst, include_list, num_includes, capping_symbol_number,
-		   dependency_list, number_dependencies)
+		   dependency_list, number_dependencies, textlow_not_set)
      struct partial_symtab *pst;
      char **include_list;
      int num_includes;
      int capping_symbol_number;
      struct partial_symtab **dependency_list;
      int number_dependencies;
+     int textlow_not_set;
 {
   int i;
   struct objfile *objfile = pst -> objfile;
@@ -2278,10 +2279,9 @@ scan_xcoff_symtab (section_offsets, objfile)
 			       each program csect, because their text
 			       sections need not be adjacent.  */
 			    xcoff_end_psymtab
-			      (pst, psymtab_include_list,
-			       includes_used,
-			       symnum_before,
-			       dependency_list, dependencies_used);
+			      (pst, psymtab_include_list, includes_used,
+			       symnum_before, dependency_list,
+			       dependencies_used, textlow_not_set);
 			    includes_used = 0;
 			    dependencies_used = 0;
 			    /* Give all psymtabs for this source file the same
@@ -2443,8 +2443,8 @@ scan_xcoff_symtab (section_offsets, objfile)
 	    if (pst)
 	      {
 		xcoff_end_psymtab (pst, psymtab_include_list, includes_used,
-				   symnum_before,
-				   dependency_list, dependencies_used);
+				   symnum_before, dependency_list,
+				   dependencies_used, textlow_not_set);
 		includes_used = 0;
 		dependencies_used = 0;
 	      }
@@ -2556,7 +2556,7 @@ scan_xcoff_symtab (section_offsets, objfile)
    called from DBXREAD_ONLY or N_SO code.  Likewise for the symnum
    variable.  */
 #define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms) 0
-#define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps)\
+#define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set)\
   do {} while (0)
 /* We have already set the namestring.  */
 #define SET_NAMESTRING() /* */
@@ -2568,8 +2568,8 @@ scan_xcoff_symtab (section_offsets, objfile)
   if (pst)
     {
       xcoff_end_psymtab (pst, psymtab_include_list, includes_used,
-			 ssymnum,
-			 dependency_list, dependencies_used);
+			 ssymnum, dependency_list,
+			 dependencies_used, textlow_not_set);
     }
 
   /* Record the toc offset value of this symbol table into ldinfo structure.

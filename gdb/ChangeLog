@@ -1,3 +1,9 @@
+Sat Jul 27 08:49:49 1996  Fred Fish  <fnf@cygnus.com>
+
+	* xcoffread.c (xcoff_end_psymtab): Add textlow_not_set parameter.
+	(END_PSYMTAB): Ditto.
+	(scan_xcoff_symtab): Call xcoff_end_psymtab with textlow_not_set.
+
 Fri Jul 26 14:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* printcmd.c (_initialize_printcmd): Initialize
