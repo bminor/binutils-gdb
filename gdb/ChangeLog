@@ -1,3 +1,8 @@
+2002-07-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Rename bfd/elf32-fr30.c and
+	bfd/elf32-frv.c.
+
 2002-07-24  Tom Tromey  <tromey@redhat.com>
 
 	* jv-exp.y: Marked all strings with _().
