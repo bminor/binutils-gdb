@@ -1,4 +1,11 @@
+2004-09-07  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	Merge from mainline:
+	2004-04-19  Jakub Jelinek  <jakub@redhat.com>
+	* gas/cfi/cfi-sparc64-1.d: Update.
+
 2004-08-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
 	* gas/mips/branch-swap.s: New testcase.
 	* gas/mips/branch-swap.d: New testcase.
 	* gas/mips/mips.exp: Run the testcase.
