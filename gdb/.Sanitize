@@ -95,9 +95,6 @@ i386-stub.c
 i386-tdep.c
 i386-xdep.c
 i387-tdep.c
-i860-opcode.h
-i860-pinsn.c
-i860-tdep.c
 i960-pinsn.c
 i960-tdep.c
 ieee-float.c
