@@ -50,8 +50,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
+#define R0_REGNUM  0
+#define R1_REGNUM  1
+#define R2_REGNUM  2
+#define R3_REGNUM  3
 #define R4_REGNUM  4
+#define R5_REGNUM  5
+#define R6_REGNUM  6
 #define R7_REGNUM  7
+#define R8_REGNUM  8
+#define R9_REGNUM  9
+#define R10_REGNUM  10
+#define R11_REGNUM  11
+#define R12_REGNUM  12
+#define R13_REGNUM  13
 #define FP_REGNUM 14		/* Frame pointer */
 #define SP_REGNUM 15		/* Stack pointer */
 #define PC_REGNUM 16		/* Program counter */
@@ -136,7 +148,11 @@ struct type;
 struct value;
 #endif
 
-#define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
+#define EXTRA_FRAME_INFO \
+  struct frame_saved_regs fsr;  \
+  int framesize;		\
+  int frameoffset;		\
+  int framereg;
 
 extern CORE_ADDR fr30_frame_chain PARAMS ((struct frame_info *fi));
 #define FRAME_CHAIN(fi) fr30_frame_chain (fi)

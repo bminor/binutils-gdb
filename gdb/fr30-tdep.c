@@ -28,11 +28,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
-niy(char *f, int l)
+__t(int l, char *s, int a)
 {
-	fprintf(stderr, "%s(%d): Not implemented yet\n", f, l);
+	fprintf(stderr, "(%d): %s: 0x%08x\n", l, s, a);
 }
-#define NIY() niy(__FILE__, __LINE__)
+#define T(s, a) __t(__LINE__, s, (int)(a))
 
 /* Function: pop_frame
    This routine gets called when either the user uses the `return'
@@ -78,8 +78,9 @@ fr30_skip_prologue(CORE_ADDR pc)
 
       sal = find_pc_line (func_addr, 0);
 
-      if (sal.line != 0 && sal.end < func_end)
+      if (sal.line != 0 && sal.end < func_end) {
 	return sal.end;
+	}
     }
 
 /* Either we didn't find the start of this function (nothing we can do),
@@ -188,28 +189,66 @@ _initialize_fr30_tdep()
 	tm_print_insn = print_insn_fr30;
 }
 
+/* Function: check_prologue_cache
+   Check if prologue for this frame's PC has already been scanned.
+   If it has, copy the relevant information about that prologue and
+   return non-zero.  Otherwise do not copy anything and return zero.
 
-/* Info gleaned from scanning a function's prologue.  */
+   The information saved in the cache includes:
+     * the frame register number;
+     * the size of the stack frame;
+     * the offsets of saved regs (relative to the old SP); and
+     * the offset from the stack pointer to the frame pointer
 
-struct pifsr			/* Info about one saved reg */
+   The cache contains only one entry, since this is adequate
+   for the typical sequence of prologue scan requests we get.
+   When performing a backtrace, GDB will usually ask to scan
+   the same function twice in a row (once to get the frame chain,
+   and once to fill in the extra frame information).
+*/
+
+static struct frame_info prologue_cache;
+
+static int
+check_prologue_cache (fi)
+     struct frame_info * fi;
 {
-  int framereg;			/* Frame reg (SP or FP) */
-  int offset;			/* Offset from framereg */
-  int cur_frameoffset;		/* Current frameoffset */
-  int reg;			/* Saved register number */
-};
+  int i;
 
-struct prologue_info
+  if (fi->pc == prologue_cache.pc)
+    {
+      fi->framereg = prologue_cache.framereg;
+      fi->framesize = prologue_cache.framesize;
+      fi->frameoffset = prologue_cache.frameoffset;
+      for (i = 0; i <= NUM_REGS; i++)
+	fi->fsr.regs[i] = prologue_cache.fsr.regs[i];
+      return 1;
+    }
+  else
+    return 0;
+}
+
+
+/* Function: save_prologue_cache
+   Copy the prologue information from fi to the prologue cache.
+*/
+
+static void
+save_prologue_cache (fi)
+     struct frame_info * fi;
 {
-  int framereg;
-  int frameoffset;
-  int start_function;
-  struct pifsr *pifsrs;
-};
+  int i;
 
-static CORE_ADDR fr30_scan_prologue PARAMS ((CORE_ADDR pc, 
-					     struct prologue_info *fs));
-
+  prologue_cache.pc          = fi->pc;
+  prologue_cache.framereg    = fi->framereg;
+  prologue_cache.framesize   = fi->framesize;
+  prologue_cache.frameoffset = fi->frameoffset;
+  
+  for (i = 0; i <= NUM_REGS; i++)
+    prologue_cache.fsr.regs[i] = fi->fsr.regs[i];
+}
+
+
 /* Function: scan_prologue
    Scan the prologue of the function that contains PC, and record what
    we find in PI.  PI->fsr must be zeroed by the called.  Returns the
@@ -219,208 +258,123 @@ static CORE_ADDR fr30_scan_prologue PARAMS ((CORE_ADDR pc,
    frame pointer yet.  In some circumstances, the frame pointer can't
    be determined till after we have scanned the prologue.  */
 
-static CORE_ADDR
-fr30_scan_prologue (pc, pi)
-     CORE_ADDR pc;
-     struct prologue_info *pi;
+static void
+fr30_scan_prologue (fi)
+     struct frame_info * fi;
 {
-  CORE_ADDR func_addr, prologue_end, current_pc;
-  struct pifsr *pifsr, *pifsr_tmp;
-  int fp_used;
-  int ep_used;
-  int reg;
-  CORE_ADDR save_pc, save_end;
-  int regsave_func_p;
-  int current_sp_size;
-  int r12_tmp;
+  int sp_offset, fp_offset;
+  CORE_ADDR prologue_start, prologue_end, current_pc;
 
-  /* First, figure out the bounds of the prologue so that we can limit the
-     search to something reasonable.  */
+  /* Check if this function is already in the cache of frame information. */
+  if (check_prologue_cache (fi))
+    return;
 
-  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+  /* Assume there is no frame until proven otherwise.  */
+  fi->framereg    = SP_REGNUM;
+  fi->framesize   = 0;
+  fi->frameoffset = 0;
+
+  /* Find the function prologue.  If we can't find the function in
+     the symbol table, peek in the stack frame to find the PC.  */
+  if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
     {
-      struct symtab_and_line sal;
+      /* Assume the prologue is everything between the first instruction
+         in the function and the first source line.  */
+      struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
-      sal = find_pc_line (func_addr, 0);
-
-      if (func_addr == entry_point_address ())
-	pi->start_function = 1;
-      else
-	pi->start_function = 0;
-
-#if 0
-      if (sal.line == 0)
-	prologue_end = pc;
-      else
-	prologue_end = sal.end;
-#else
-      prologue_end = pc;
-#endif
+      if (sal.line == 0)		/* no line info, use current PC */
+	prologue_end = fi->pc;
+      else if (sal.end < prologue_end)	/* next line begins after fn end */
+	prologue_end = sal.end;		/* (probably means no prologue)  */
     }
   else
-    {				/* We're in the boondocks */
-      func_addr = pc - 100;
-      prologue_end = pc;
+    {
+	T("NIY", 0);
+      /* XXX ??? Z.R. Get address of the stmfd in the prologue of the callee; the saved
+         PC is the address of the stmfd + 12.  */
+      prologue_start = (read_memory_integer (fi->frame, 4) & 0x03fffffc) - 12;
+      prologue_end = prologue_start + 40; /* FIXME: should be big enough */
     }
 
-  prologue_end = min (prologue_end, pc);
+  /* Now search the prologue looking for instructions that set up the
+     frame pointer, adjust the stack pointer, and save registers.  */
 
-  /* Now, search the prologue looking for instructions that setup fp, save
-     rp, adjust sp and such.  We also record the frame offset of any saved
-     registers. */ 
-
-  pi->frameoffset = 0;
-  pi->framereg = SP_REGNUM;
-  fp_used = 0;
-  ep_used = 0;
-  pifsr = pi->pifsrs;
-  regsave_func_p = 0;
-  save_pc = 0;
-  save_end = 0;
-  r12_tmp = 0;
-
-#ifdef DEBUG
-  printf_filtered ("Current_pc = 0x%.8lx, prologue_end = 0x%.8lx\n",
-		   (long)func_addr, (long)prologue_end);
-#endif
-
-  for (current_pc = func_addr; current_pc < prologue_end; current_pc += 2)
+  sp_offset = fp_offset = 0;
+  for (current_pc = prologue_start; current_pc < prologue_end; current_pc += 2)
     {
-      int insn;
-
-#ifdef DEBUG
-      printf_filtered ("0x%.8lx ", (long)current_pc);
-      (*tm_print_insn) (current_pc, &tm_print_insn_info);
-#endif
+      unsigned int insn;
 
       insn = read_memory_unsigned_integer (current_pc, 2);
 
-      if ((insn & 0xffc0) == ((10 << 11) | 0x0780) && !regsave_func_p)
-	{			/* jarl <func>,10 */
-	  long low_disp = read_memory_unsigned_integer (current_pc + 2, 2) & ~ (long) 1;
-	  long disp = (((((insn & 0x3f) << 16) + low_disp)
-			& ~ (long) 1) ^ 0x00200000) - 0x00200000;
-
-	  save_pc = current_pc;
-	  save_end = prologue_end;
-	  regsave_func_p = 1;
-	  current_pc += disp - 2;
-	  prologue_end = (current_pc
-			  + (2 * 3)	/* moves to/from ep */
-			  + 4		/* addi <const>,sp,sp */
-			  + 2		/* jmp [r10] */
-			  + (2 * 12)	/* sst.w to save r2, r20-r29, r31 */
-			  + 20);	/* slop area */
-
-#ifdef DEBUG
-	  printf_filtered ("\tfound jarl <func>,r10, disp = %ld, low_disp = %ld, new pc = 0x%.8lx\n",
-			   disp, low_disp, (long)current_pc + 2);
-#endif
-	  continue;
-	}
-      else if ((insn & 0xffe0) == 0x0060 && regsave_func_p)
-	{			/* jmp after processing register save function */
-	  current_pc = save_pc + 2;
-	  prologue_end = save_end;
-	  regsave_func_p = 0;
-#ifdef DEBUG
-	  printf_filtered ("\tfound jmp after regsave func");
-#endif
-	}
-      else if ((insn & 0x07c0) == 0x0780	/* jarl or jr */
-	       || (insn & 0xffe0) == 0x0060	/* jmp */
-	       || (insn & 0x0780) == 0x0580)	/* branch */
+      if ((insn & 0xfe00) == 0x8e00)			/* stm0 or stm1 */
 	{
-#ifdef DEBUG
-	  printf_filtered ("\n");
-#endif
-	  break;				/* Ran into end of prologue */
-	}
+	  int reg, mask = insn & 0xff;
 
-      else if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240))		/* add <imm>,sp */
-	pi->frameoffset += ((insn & 0x1f) ^ 0x10) - 0x10;
-      else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM))	/* addi <imm>,sp,sp */
-	pi->frameoffset += read_memory_integer (current_pc + 2, 2);
-      else if (insn == ((FP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,fp */
+	  /* scan in one sweep - create virtual 16-bit mask from either insn's mask */
+          if((insn & 0x0100) == 0)
+	    {
+	      mask <<= 8;  /* stm0 - move to upper byte in virtual mask */
+	    }
+
+	  /* Calculate offsets of saved registers (to be turned later into addresses). */
+	  for (reg = R4_REGNUM; reg <= R11_REGNUM; reg++)
+	    if (mask & (1 << (15 - reg)))
+	      {
+		sp_offset -= 4;
+		fi->fsr.regs[reg] = sp_offset;
+	      }
+	}
+      else if((insn & 0xff00) == 0x0f00)		/* enter */
+        {
+	  fp_offset = fi->fsr.regs[FP_REGNUM] = sp_offset - 4;
+	  sp_offset -= 4 * (insn & 0xff);
+	  fi->framereg = FP_REGNUM;
+	}
+      else if(insn == 0x1781)				/* st rp,@-sp */
 	{
-	  fp_used = 1;
-	  pi->framereg = FP_REGNUM;
+		sp_offset -= 4;
+		fi->fsr.regs[RP_REGNUM] = sp_offset;
 	}
-
-#if(0) /* Z.R. XXX */
-      else if (insn == ((R12_REGNUM << 11) | 0x0640 | R0_REGNUM))	/* movhi hi(const),r0,r12 */
-	r12_tmp = read_memory_integer (current_pc + 2, 2) << 16;
-      else if (insn == ((R12_REGNUM << 11) | 0x0620 | R12_REGNUM))	/* movea lo(const),r12,r12 */
-	r12_tmp += read_memory_integer (current_pc + 2, 2);
-      else if (insn == ((SP_REGNUM << 11) | 0x01c0 | R12_REGNUM) && r12_tmp) /* add r12,sp */
-	pi->frameoffset = r12_tmp;
-      else if (insn == ((EP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,ep */
-	ep_used = 1;
-      else if (insn == ((EP_REGNUM << 11) | 0x0000 | R1_REGNUM))	/* mov r1,ep */
-	ep_used = 0;
-      else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)			/* st.w <reg>,<offset>[sp] */
-		|| (fp_used
-		    && (insn & 0x07ff) == (0x0760 | FP_RAW_REGNUM)))	/* st.w <reg>,<offset>[fp] */
-	       && pifsr
-	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
-		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)
-		   || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
+      else if(insn == 0x170e)				/* st fp,@-sp */
 	{
-	  pifsr->reg = reg;
-	  pifsr->offset = read_memory_integer (current_pc + 2, 2) & ~1;
-	  pifsr->cur_frameoffset = pi->frameoffset;
-#ifdef DEBUG
-	  printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
-#endif
-	  pifsr++;
+		sp_offset -= 4;
+		fi->fsr.regs[FP_REGNUM] = sp_offset;
 	}
-
-      else if (ep_used						/* sst.w <reg>,<offset>[ep] */
-	       && ((insn & 0x0781) == 0x0501)
-	       && pifsr
-	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
-		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)
-		   || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
+      else if(insn == 0x8bfe)				/* mov sp,fp */
 	{
-	  pifsr->reg = reg;
-	  pifsr->offset = (insn & 0x007e) << 1;
-	  pifsr->cur_frameoffset = pi->frameoffset;
-#ifdef DEBUG
-	  printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
-#endif
-	  pifsr++;
+	  fi->framereg = FP_REGNUM;
 	}
-#endif /* Z.R. */
-
-      if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
-	current_pc += 2;
-
-#ifdef DEBUG
-      printf_filtered ("\n");
-#endif
+      else if((insn & 0xff00) == 0xa300)		/* addsp xx */
+	{
+	  sp_offset += 4 * (signed char)(insn & 0xff);
+	}
+      else if((insn & 0xff0f) == 0x9b00 &&		/* ldi:20 xx,r0 */
+	read_memory_unsigned_integer(current_pc+4, 2)
+	  == 0xac0f)					/* sub r0,sp */
+	{
+	  /* large stack adjustment */
+	  sp_offset -= (((insn & 0xf0) << 12) | read_memory_unsigned_integer(current_pc+2, 2));
+	  current_pc += 4;
+	}
+      else if(insn == 0x9f80 &&				/* ldi:32 xx,r0 */
+	read_memory_unsigned_integer(current_pc+6, 2)
+	  == 0xac0f)					/* sub r0,sp */
+	{
+	  /* large stack adjustment */
+	  sp_offset -=
+		(read_memory_unsigned_integer(current_pc+2, 2) << 16 |
+			read_memory_unsigned_integer(current_pc+4, 2));
+	  current_pc += 6;
+	}
     }
 
-  if (pifsr)
-    pifsr->framereg = 0;	/* Tie off last entry */
-
-  /* Fix up any offsets to the final offset.  If a frame pointer was created, use it
-     instead of the stack pointer.  */
-  for (pifsr_tmp = pi->pifsrs; pifsr_tmp && pifsr_tmp != pifsr; pifsr_tmp++)
-    {
-      pifsr_tmp->offset -= pi->frameoffset - pifsr_tmp->cur_frameoffset;
-      pifsr_tmp->framereg = pi->framereg;
-
-#ifdef DEBUG
-      printf_filtered ("Saved register r%d, offset = %d, framereg = r%d\n",
-		       pifsr_tmp->reg, pifsr_tmp->offset, pifsr_tmp->framereg);
-#endif
-    }
-
-#ifdef DEBUG
-  printf_filtered ("Framereg = r%d, frameoffset = %d\n", pi->framereg, pi->frameoffset);
-#endif
-
-  return current_pc;
+  /* The frame size is just the negative of the offset (from the original SP)
+     of the last thing thing we pushed on the stack.  The frame offset is
+     [new FP] - [new SP].  */
+  fi->framesize = -sp_offset;
+  fi->frameoffset = fp_offset - sp_offset;
+  
+  save_prologue_cache (fi);
 }
 
 /* Function: init_extra_frame_info
@@ -438,10 +392,8 @@ fr30_scan_prologue (pc, pi)
 
 void
 fr30_init_extra_frame_info (fi)
-     struct frame_info *fi;
+     struct frame_info * fi;
 {
-  struct prologue_info pi;
-  struct pifsr pifsrs[NUM_REGS + 1], *pifsr;
   int reg;
 
   if (fi->next)
@@ -449,25 +401,31 @@ fr30_init_extra_frame_info (fi)
 
   memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
 
-  /* The call dummy doesn't save any registers on the stack, so we can return
-     now.  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-      return;
-
-  pi.pifsrs = pifsrs;
-
-  fr30_scan_prologue (fi->pc, &pi);
-
-  if (!fi->next && pi.framereg == SP_REGNUM)
-    fi->frame = read_register (pi.framereg) - pi.frameoffset;
-
-  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
     {
-      fi->fsr.regs[pifsr->reg] = pifsr->offset + fi->frame;
-
-      if (pifsr->framereg == SP_REGNUM)
-	fi->fsr.regs[pifsr->reg] += pi.frameoffset;
+      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
+	 by assuming it's always FP.  */
+      fi->frame       = generic_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
+      fi->framesize   = 0;
+      fi->frameoffset = 0;
+      return;
     }
+      fr30_scan_prologue (fi);
+
+      if (!fi->next)			/* this is the innermost frame? */
+	fi->frame = read_register (fi->framereg);
+      else			 	/* not the innermost frame */
+	/* If we have an FP,  the callee saved it. */
+	if (fi->framereg == FP_REGNUM)
+	  if (fi->next->fsr.regs[fi->framereg] != 0)
+	    fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
+					     4);
+
+      /* Calculate actual addresses of saved registers using offsets determined
+         by fr30_scan_prologue.  */
+      for (reg = 0; reg < NUM_REGS; reg++)
+	if (fi->fsr.regs[reg] != 0)
+	  fi->fsr.regs[reg] += fi->frame + fi->framesize - fi->frameoffset;
 }
 
 /* Function: find_callers_reg
@@ -501,37 +459,52 @@ fr30_find_callers_reg (fi, regnum)
    just return the stack pointer that was in use at the time the
    function call was made.  */
 
+
 CORE_ADDR
 fr30_frame_chain (fi)
-     struct frame_info *fi;
+     struct frame_info * fi;
 {
-  struct prologue_info pi;
-  CORE_ADDR callers_pc, fp;
+  CORE_ADDR fn_start, callers_pc, fp;
+  struct frame_info caller_fi;
+  int framereg;
 
-  /* First, find out who called us */
-  callers_pc = FRAME_SAVED_PC (fi);
-  /* If caller is a call-dummy, then our FP bears no relation to his FP! */
+  /* is this a dummy frame? */
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    return fi->frame;	/* dummy frame same as caller's frame */
+
+  /* is caller-of-this a dummy frame? */
+  callers_pc = FRAME_SAVED_PC(fi);  /* find out who called us: */
   fp = fr30_find_callers_reg (fi, FP_REGNUM);
-  if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))
-    return fp;	/* caller is call-dummy: return oldest value of FP */
+  if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))	
+    return fp;		/* dummy frame's frame may bear no relation to ours */
 
-  /* Caller is NOT a call-dummy, so everything else should just work.
-     Even if THIS frame is a call-dummy! */
-  pi.pifsrs = NULL;
+  if (find_pc_partial_function (fi->pc, 0, &fn_start, 0))
+    if (fn_start == entry_point_address ())
+      return 0;		/* in _start fn, don't chain further */
 
-  fr30_scan_prologue (callers_pc, &pi);
+  framereg = fi->framereg;
 
-  if (pi.start_function)
-    return 0;			/* Don't chain beyond the start function */
+  /* If the caller is the startup code, we're at the end of the chain.  */
+  if (find_pc_partial_function (callers_pc, 0, &fn_start, 0))
+    if (fn_start == entry_point_address ())
+      return 0;
 
-  if (pi.framereg == FP_REGNUM)
-    return fr30_find_callers_reg (fi, pi.framereg);
+  memset (& caller_fi, 0, sizeof (caller_fi));
+  caller_fi.pc = callers_pc;
+  fr30_scan_prologue (& caller_fi);
+  framereg = caller_fi.framereg;
 
-  return fi->frame - pi.frameoffset;
+  /* If the caller used a frame register, return its value.
+     Otherwise, return the caller's stack pointer.  */
+  if (framereg == FP_REGNUM)
+    return fr30_find_callers_reg (fi, framereg);
+  else
+    return fi->frame + fi->framesize;
 }
+
 /* Function: push_arguments
    Setup arguments and RP for a call to the target.  First four args
-   go in R6->R9, subsequent args go into sp + 16 -> sp + ...  Structs
+   go in R4->R7, subsequent args go on stack...  Structs
    are passed by reference.  64 bit quantities (doubles and long
    longs) may be split between the regs and the stack.  When calling a
    function that returns a struct, a pointer to the struct is passed
@@ -631,6 +604,7 @@ fr30_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
+T("fr30_push_return_address", CALL_DUMMY_ADDRESS ());
   write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
