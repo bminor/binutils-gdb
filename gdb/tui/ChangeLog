@@ -1,3 +1,13 @@
+Mon Jan 31 18:12:43 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tui-file.c (enum streamtype, struct tui_stream, tui_file_new,
+ 	tui_file_delete, tui_fileopen, tui_sfileopen, tui_file_isatty,
+ 	tui_file_rewind, tui_file_put, tui_file_fputs,
+ 	tui_file_get_strbuf, tui_file_adjust_strbuf, tui_file_flush,
+ 	fputs_unfiltered_hook): Move to here from ../utils.c
+
+	* tui-file.h, tui-file.c: New files.
+
 Mon Nov  8 17:47:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* tuiRegs.c (_tuiRegisterFormat), tuiDisassem.c

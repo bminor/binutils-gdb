@@ -2400,6 +2400,43 @@ build_canonical_line_spec (sal, symname, canonical)
   canonical_arr[0] = canonical_name;
 }
 
+
+
+/* Find an instance of the character C in the string S that is outside
+   of all parenthesis pairs, single-quoted strings, and double-quoted
+   strings.  */
+static char *
+find_toplevel_char (char *s, char c)
+{
+  int quoted = 0;		/* zero if we're not in quotes;
+				   '"' if we're in a double-quoted string;
+				   '\'' if we're in a single-quoted string.  */
+  int depth = 0;		/* number of unclosed parens we've seen */
+  char *scan;
+
+  for (scan = s; *scan; scan++)
+    {
+      if (quoted)
+	{
+	  if (*scan == quoted)
+	    quoted = 0;
+	  else if (*scan == '\\' && *(scan + 1))
+	    scan++;
+	}
+      else if (*scan == c && ! quoted && depth == 0)
+	return scan;
+      else if (*scan == '"' || *scan == '\'')
+	quoted = *scan;
+      else if (*scan == '(')
+	depth++;
+      else if (*scan == ')' && depth > 0)
+	depth--;
+    }
+
+  return 0;
+}
+
+
 /* Parse a string that specifies a line number.
    Pass the address of a char * variable; that variable will be
    advanced over the characters actually parsed.
@@ -2576,9 +2613,14 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 
   /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
      and we must isolate the first half.  Outer layers will call again later
-     for the second half */
-  if ((ii = strchr (*argptr, ',')) != NULL)
-    has_comma = 1;
+     for the second half.
+
+     Don't count commas that appear in argument lists of overloaded
+     functions, or in quoted strings.  It's stupid to go to this much
+     trouble when the rest of the function is such an obvious roach hotel.  */
+  ii = find_toplevel_char (*argptr, ',');
+  has_comma = (ii != 0);
+
   /* Temporarily zap out second half to not
    * confuse the code below.
    * This is undone below. Do not change ii!!
@@ -2632,10 +2674,14 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
     }
   while (p[0] == ' ' || p[0] == '\t')
     p++;
+
   /* if the closing double quote was left at the end, remove it */
-  if (is_quote_enclosed && ((pp = strchr (p, '"')) != NULL))
-    if (!*(pp + 1))
-      *pp = '\0';
+  if (is_quote_enclosed)
+    {
+      char *closing_quote = strchr (p, '"');
+      if (closing_quote && closing_quote[1] == '\0')
+	*closing_quote = '\0';
+    }
 
   /* Now that we've safely parsed the first half,
    * put back ',' so outer layers can see it 
@@ -3067,6 +3113,9 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
     {
       p = skip_quoted (*argptr);
     }
+
+  if (is_quote_enclosed && **argptr == '"')
+    (*argptr)++;
 
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);

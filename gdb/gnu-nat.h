@@ -31,6 +31,9 @@ extern struct inf *current_inferior;
 /* Converts a GDB pid to a struct proc.  */
 struct proc *inf_tid_to_thread (struct inf *inf, int tid);
 
+/* Makes sure that INF's thread list is synced with the actual process.  */
+int inf_update_procs (struct inf *inf);
+
 /* A proc is either a thread, or the task (there can only be one task proc
    because it always has the same TID, PROC_TID_TASK).  */
 struct proc
@@ -75,7 +78,14 @@ struct proc
 
 extern int __proc_pid (struct proc *proc);
 
+/* Make sure that the state field in PROC is up to date, and return a
+   pointer to it, or 0 if something is wrong.  If WILL_MODIFY is true,
+   makes sure that the thread is stopped and aborted first, and sets
+   the state_changed field in PROC to true.  */
 extern thread_state_t proc_get_state (struct proc *proc, int will_modify);
+
+/* Return printable description of proc.  */
+extern char *proc_string (struct proc *proc);
 
 #define proc_debug(_proc, msg, args...) \
   do { struct proc *__proc = (_proc); \

@@ -5,4 +5,4 @@ XDEPFILES=
 
 NAT_FILE= nm-delta88v4.h
 NATDEPFILES= fork-child.o m88k-nat.o corelow.o core-regset.o solib.o \
-	procfs.o proc_api.o proc_events.o proc_flags.o proc_why.o
+	procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o

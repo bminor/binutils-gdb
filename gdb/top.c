@@ -376,10 +376,6 @@ int (*ui_loop_hook) PARAMS ((int));
 void (*command_loop_hook) PARAMS ((void));
 
 
-/* Called instead of fputs for all output.  */
-
-void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, GDB_FILE * stream));
-
 /* Called from print_frame_info to list the line we stopped in.  */
 
 void (*print_frame_info_listing_hook) PARAMS ((struct symtab * s, int line,

@@ -1292,6 +1292,7 @@ hand_function_call (function, nargs, args)
 {
   register CORE_ADDR sp;
   register int i;
+  int rc;
   CORE_ADDR start_sp;
   /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word
      is in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap it
@@ -1687,9 +1688,28 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     /* Execute the stack dummy routine, calling FUNCTION.
        When it is done, discard the empty frame
        after storing the contents of all regs into retbuf.  */
-    if (run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, retbuf))
+    rc = run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, retbuf);
+
+    if (rc == 1)
       {
-	/* We stopped somewhere besides the call dummy.  */
+	/* We stopped inside the FUNCTION because of a random signal.
+	   Further execution of the FUNCTION is not allowed. */
+
+	/* In this case, we must do the cleanups because we don't
+	   want the dummy anymore (the dummy frame has been poped already. */
+	do_cleanups (old_chain);
+
+	/* FIXME: Insert a bunch of wrap_here; name can be very long if it's
+	   a C++ name with arguments and stuff.  */
+	error ("\
+The program being debugged stopped while in a function called from GDB.\n\
+Evaluation of the expression containing the function (%s) will be abandoned.",
+	       name);
+      }
+
+    if (rc == 2)
+      {
+	/* We hit a breakpoint inside the FUNCTION. */
 
 	/* If we did the cleanups, we would print a spurious error
 	   message (Unable to restore previously selected frame),
@@ -1714,6 +1734,7 @@ stop (instead of continuing to evaluate the expression containing\n\
 the function call).", name);
       }
 
+    /* If we get here the called FUNCTION run to completion. */
     do_cleanups (old_chain);
 
     /* Figure out the value returned by the function.  */

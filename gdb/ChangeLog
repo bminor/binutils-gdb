@@ -1,3 +1,111 @@
+2000-01-31  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* config/alpha/alpha-osf2.mh, config/alpha/alpha-osf3.mh, 
+	config/i386/i386dgux.mh, config/i386/i386sol2.mh, 
+	config/i386/i386v4.mh, config/i386/i386v42mp.mh, 
+	config/i386/ncr3000.mh, config/m68k/m68kv4.mh, 
+	config/m88k/delta88v4.mh, config/mips/irix4.mh, 
+	config/mips/irix5.mh, config/mips/mipsv4.mh, 
+	config/powerpc/solaris.mh (NATDEPFILES): Change references to
+	proc_api.o, proc_events.o, proc_flags.o, and proc_why.o to 
+	proc-api.o, proc-events.o, proc-flags.o, and proc-why.o.
+
+Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (fputs_unfiltered_hook): Moved to tui/tui-file.c.
+
+	* main.c (captured_main): Only use the legacy tui_file code when
+ 	linking in older code such as the TUI.
+
+	* gdb-file.h, gdb-file.c: New files.
+	* utils.c, defs.h (struct gdb_file, gdb_file_new, gdb_file_delete,
+ 	null_file_isatty, null_file_rewind, null_file_put,
+ 	null_file_flush, null_file_write, null_file_fputs,
+ 	null_file_delete, gdb_file_data, gdb_flush, gdb_file_isatty,
+ 	gdb_file_rewind, gdb_file_put, gdb_file_write, fputs_unfiltered,
+ 	set_gdb_file_flush, set_gdb_file_isatty, set_gdb_file_rewind,
+ 	set_gdb_file_put, set_gdb_file_write, set_gdb_file_fputs,
+ 	set_gdb_file_data, struct accumulated_gdb_file,
+ 	do_gdb_file_xstrdup, gdb_file_xstrdup, struct mem_file):
+ 	mem_file_new, mem_file_delete, mem_fileopen, mem_file_rewind,
+ 	mem_file_put, mem_file_write, struct stdio_file): stdio_file_new,
+ 	stdio_file_delete, stdio_file_flush, stdio_file_write,
+ 	stdio_file_fputs, stdio_file_isatty, stdio_fileopen, gdb_fopen):
+ 	Moved to gdb-file.h and gdb-file.c.
+	* utils.c (enum streamtype, struct tui_stream, tui_file_new,
+ 	tui_file_delete, tui_fileopen, tui_sfileopen, tui_file_isatty,
+ 	tui_file_rewind, tui_file_put, tui_file_fputs,
+ 	tui_file_get_strbuf, tui_file_adjust_strbuf, tui_file_flush,
+	fputs_unfiltered_hook):
+ 	Moved to tui/tui-file.c and tui/tui-file.h.
+	
+	* Makefile.in (COMMON_OBS): Add gdb-file.o, tui-file.o.
+	(tui-file.o, gdb-file.o): Add dependencies.
+	(corefile.o, main.o, utils.o, simmisc.o): Update dependencies.
+	* main.c: #include tui/tui-file.h.
+
+2000-01-28  Fred Fish  <fnf@cygnus.com>
+
+	* findvar.c (value_from_register): Special case handling of D10V
+	pointer values fetched from registers.
+
+2000-01-28  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* arm-tdep.c (thumb_skip_prologue, thumb_scan_prologue): Add
+	support for new style thumb prologues. 
+
+2000-01-28  Nick Clifton  <nickc@redhat.com>
+
+	* arm-tdep.c: Remove extraneous dash at start of strings
+	introduced in previous delta.
+
+2000-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* arm-tdep.c: Replace uses of arm_toggle_renames() with
+	parse_arm_disassembler_option(). 
+
+2000-01-27  Jim Blandy  <jimb@cygnus.com>
+
+	* symtab.c (decode_line_1): Don't let commas that are within
+ 	quotes or parenthesis terminate the line spec.  Don't use pp when
+ 	removing the final double quote of a double-quoted string.  Don't
+ 	forget to skip the opening double quote.  I have no clue whether
+ 	this change is correct; probably we've just moved this function
+ 	from one buggy place to another buggy place, and never came within
+ 	an outhouse whiff of correctness.
+	(find_toplevel_char): New function.
+
+2000-01-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* arm-tdep.c (arm_push_arguments): Set the thumb mode bit when
+        passing the pointer to a thumb function as an argument.
+
+2000-01-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote-rdi.c (arm_rdi_mourn_inferior): Make sure breakpoints
+	are reinserted for another run.
+
+2000-01-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* infcmd.c (run_stack_dummy): Account for a random signal stopping
+	the inferior as well as breakpoints being hit while performing an
+	inferior function call.
+	* valops.c (hand_function_call): Ditto.
+
+2000-01-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386gnu.h (THREAD_STATE_FLAVOR): Define to
+	i386_REGS_SEGS_STATE.
+	(HAVE_I387_REGS): Define.
+	(FLOAT_INFO): Remove.
+	* i386gnu-nat.c: Almost completely rewritten to use new i386
+	register layout and `float info' implementation.
+	* gnu-nat.c (inf_update_procs, proc_get_state, proc_string):
+	Move prototypes from here.
+	* gnu-nat.h: To here.
+
 2000-01-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* utils.c (get_field, put_field): Fix buffer underruns and

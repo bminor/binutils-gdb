@@ -386,68 +386,7 @@ extern GDB_FILE *gdb_stdtarg;
 #include "tuiWin.h"
 #endif
 
-/* Create a generic gdb_file object with null methods. */
-
-extern struct gdb_file *gdb_file_new (void);
-
-/* Override methods used by specific implementations of a GDB_FILE
-   object. */
-
-typedef void (gdb_file_flush_ftype) (struct gdb_file * stream);
-extern void set_gdb_file_flush (struct gdb_file *stream, gdb_file_flush_ftype * flush);
-
-/* NOTE: Both fputs and write methods are available. Default
-   implementations that mapping one onto the other are included. */
-typedef void (gdb_file_write_ftype) (struct gdb_file * stream, const char *buf, long length_buf);
-extern void set_gdb_file_write (struct gdb_file *stream, gdb_file_write_ftype *fputs);
-
-typedef void (gdb_file_fputs_ftype) (const char *, struct gdb_file * stream);
-extern void set_gdb_file_fputs (struct gdb_file *stream, gdb_file_fputs_ftype * fputs);
-
-typedef int (gdb_file_isatty_ftype) (struct gdb_file * stream);
-extern void set_gdb_file_isatty (struct gdb_file *stream, gdb_file_isatty_ftype * isatty);
-
-typedef void (gdb_file_rewind_ftype) (struct gdb_file * stream);
-extern void set_gdb_file_rewind (struct gdb_file *stream, gdb_file_rewind_ftype * rewind);
-
-typedef void (gdb_file_put_method_ftype) (void *object, const char *buffer, long length_buffer);
-typedef void (gdb_file_put_ftype) (struct gdb_file *stream, gdb_file_put_method_ftype * method, void *context);
-extern void set_gdb_file_put (struct gdb_file *stream, gdb_file_put_ftype * put);
-
-typedef void (gdb_file_delete_ftype) (struct gdb_file * stream);
-extern void set_gdb_file_data (struct gdb_file *stream, void *data, gdb_file_delete_ftype * delete);
-
-extern void *gdb_file_data (struct gdb_file *file);
-
-
-/* Open the specified FILE as a gdb_file. */
-extern struct gdb_file *stdio_fileopen (FILE *file);
-
-/* Open NAME returning a GDB_FILE. */
-extern GDB_FILE *gdb_fopen (char *name, char *mode);
-
-/* Create/open a memory based file. Can be used as a scratch
-   buffer for collecting output. */
-extern struct gdb_file *mem_fileopen (void);
-
-extern void gdb_flush (GDB_FILE *);
-
-extern void gdb_file_delete (struct gdb_file *stream);
-
-extern void gdb_file_rewind (struct gdb_file *stream);
-
-extern int gdb_file_isatty (GDB_FILE *);
-
-extern void gdb_file_write (struct gdb_file *file, const char *buf, long length_buf);
-
-/* NOTE: copies left to right */
-extern void gdb_file_put (struct gdb_file *src, gdb_file_put_method_ftype *write, void *dest);
-
-/* Returns a freshly allocated buffer containing the entire contents
-   of FILE (as determined by gdb_file_put()) with a NUL character
-   appended.  LENGTH is set to the size of the buffer minus that
-   appended NUL. */
-extern char *gdb_file_xstrdup (struct gdb_file *file, long *length);
+#include "gdb-file.h"
 
 /* More generic printf like operations */
 
@@ -486,14 +425,6 @@ extern void vfprintf_unfiltered (GDB_FILE *, const char *, va_list) ATTR_FORMAT 
 extern void fprintf_unfiltered (GDB_FILE *, const char *, ...) ATTR_FORMAT (printf, 2, 3);
 
 extern void printf_unfiltered (const char *, ...) ATTR_FORMAT (printf, 1, 2);
-
-/* #if defined (TUI) */
-/* DEPRECATED: Only the TUI should use these methods. */
-extern struct gdb_file *tui_fileopen (FILE *);
-extern struct gdb_file *tui_sfileopen (int);
-extern char *tui_file_get_strbuf (struct gdb_file *);
-extern void tui_file_adjust_strbuf (int, struct gdb_file *);
-/* #endif */
 
 extern void print_spaces (int, GDB_FILE *);
 
@@ -1199,11 +1130,6 @@ extern void (*show_load_progress) (const char *section,
 				   unsigned long section_size, 
 				   unsigned long total_sent, 
 				   unsigned long total_size);
-/* NOTE: cagney/1999-10-14: fputs_unfiltered_hook is deprecated.
-   Instead code wanting to control GDB's output should be overriding
-   the gdb_std* files. */
-extern void (*fputs_unfiltered_hook) (const char *linebuffer,
-				      GDB_FILE * stream);
 extern void (*print_frame_info_listing_hook) (struct symtab * s,
 					      int line, int stopline,
 					      int noerror);

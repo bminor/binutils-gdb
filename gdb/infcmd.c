@@ -838,8 +838,13 @@ breakpoint_auto_delete_contents (arg)
    The dummy's frame is automatically popped whenever that break is hit.
    If that is the first time the program stops, run_stack_dummy
    returns to its caller with that frame already gone and returns 0.
-   Otherwise, run_stack-dummy returns 1 (the frame will eventually be popped
-   when we do hit that breakpoint).  */
+   
+   Otherwise, run_stack-dummy returns a non-zero value.
+   If the called function receives a random signal, we do not allow the user
+   to continue executing it as this may not work.  The dummy frame is poped
+   and we return 1.
+   If we hit a breakpoint, we leave the frame in place and return 2 (the frame
+   will eventually be popped when we do hit the dummy end breakpoint).  */
 
 int
 run_stack_dummy (addr, buffer)
@@ -907,10 +912,24 @@ run_stack_dummy (addr, buffer)
 
   discard_cleanups (old_cleanups);
 
+  if (stopped_by_random_signal)
+    {
+      /* If the inferior execution fails we need to restore our
+         stack.  It is not done by proceed() in this case. */
+      /* Pop the empty frame that contains the stack dummy.
+         POP_FRAME ends with a setting of the current frame, so we
+         can use that next. */
+      POP_FRAME;
+      return 1;
+    }
+    
+  /* We may also stop prematurely because we hit a breakpoint in the
+     called routine.  We do not pop the frame as the user may wish
+     to single step or continue from there. */
   if (!stop_stack_dummy)
-    return 1;
+    return 2;
 
-  /* On return, the stack dummy has been popped already.  */
+  /* On normal return, the stack dummy has been popped already.  */
 
   memcpy (buffer, stop_registers, REGISTER_BYTES);
   return 0;

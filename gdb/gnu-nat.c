@@ -1,4 +1,4 @@
-/* Interface GDB to the GNU Hurd
+/* Interface GDB to the GNU Hurd.
    Copyright (C) 1992, 1995, 1996, 1997, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -88,7 +88,6 @@ int gnu_debug_flag = 0;
 
 extern struct target_ops gnu_ops;
 
-int inf_update_procs (struct inf *inf);
 struct inf *make_inf ();
 void inf_clear_wait (struct inf *inf);
 void inf_cleanup (struct inf *inf);
@@ -116,7 +115,6 @@ void inf_continue (struct inf *inf);
        debug ("{inf %d %p}: " msg, __inf->pid, __inf , ##args); } while (0)
 
 void proc_abort (struct proc *proc, int force);
-thread_state_t proc_get_state (struct proc *proc, int force);
 struct proc *make_proc (struct inf *inf, mach_port_t port, int tid);
 struct proc *_proc_free (struct proc *proc);
 int proc_update_sc (struct proc *proc);
@@ -126,7 +124,6 @@ static mach_port_t _proc_get_exc_port (struct proc *proc);
 void proc_steal_exc_port (struct proc *proc, mach_port_t exc_port);
 void proc_restore_exc_port (struct proc *proc);
 int proc_trace (struct proc *proc, int set);
-char *proc_string (struct proc *proc);
 
 /* Evaluate RPC_EXPR in a scope with the variables MSGPORT and REFPORT bound
    to INF's msg port and task port respectively.  If it has no msg port,

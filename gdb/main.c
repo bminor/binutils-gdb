@@ -33,6 +33,11 @@
 
 #include "gdb_string.h"
 #include "event-loop.h"
+#if defined (TUI) || defined (GDBTK)
+/* FIXME: cagney/2000-01-31: This #include is to allow older code such
+   as that found in the TUI to continue to build. */
+#include "tui/tui-file.h"
+#endif
 
 /* If nonzero, display time usage both at startup and for each command.  */
 
@@ -187,16 +192,18 @@ captured_main (void *data)
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   current_directory = gdb_dirbuf;
 
-#if 0
-  /* not yet */
-  gdb_stdout = stdio_fileopen (stdout);
-  gdb_stderr = stdio_fileopen (stderr);
-  gdb_stdlog = gdb_stderr;	/* for moment */
-  gdb_stdtarg = gdb_stderr;	/* for moment */
-#else
+#if defined (TUI) || defined (GDBTK)
+  /* Older code uses the tui_file and fputs_unfiltered_hook().  It
+     should be using a customized GDB_FILE object and re-initializing
+     within its own _initialize function.  */
   gdb_stdout = tui_fileopen (stdout);
   gdb_stderr = tui_fileopen (stderr);
   gdb_stdlog = gdb_stdout;	/* for moment */
+  gdb_stdtarg = gdb_stderr;	/* for moment */
+#else
+  gdb_stdout = stdio_fileopen (stdout);
+  gdb_stderr = stdio_fileopen (stderr);
+  gdb_stdlog = gdb_stderr;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
 #endif
 

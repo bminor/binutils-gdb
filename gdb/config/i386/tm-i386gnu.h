@@ -1,4 +1,4 @@
-/* Macro definitions for i386, GNU Hurd
+/* Macro definitions for i386 running the GNU Hurd.
    Copyright (C) 1992, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,26 +21,26 @@
 #ifndef TM_I386GNU_H
 #define TM_I386GNU_H 1
 
-/* Include common definitions for gnu systems */
+/* Include common definitions for GNU systems.
+   FIXME: This does not belong here since this is supposed to contain
+   only native-dependent information.  */
 #include "nm-gnu.h"
 
 /* Thread flavors used in re-setting the T bit.
- * @@ this is also bad for cross debugging.
- */
-#define THREAD_STATE_FLAVOR		i386_THREAD_STATE
+   FIXME: This is native-dependent.  */
+#define THREAD_STATE_FLAVOR		i386_REGS_SEGS_STATE
 #define THREAD_STATE_SIZE		i386_THREAD_STATE_COUNT
 #define THREAD_STATE_SET_TRACED(state) \
   	((struct i386_thread_state *)state)->efl |= 0x100
 #define THREAD_STATE_CLEAR_TRACED(state) \
   	((((struct i386_thread_state *)state)->efl &= ~0x100), 1)
 
-/* we can do it */
+/* We can attach and detach.
+   FIXME: This is probably native-dependent too.  */
 #define ATTACH_DETACH 1
 
+#define HAVE_I387_REGS
 #include "i386/tm-i386.h"
-
-#undef FLOAT_INFO
-#define FLOAT_INFO { i386_mach3_float_info (); }
 
 /* Offset to saved PC in sigcontext.  */
 #define SIGCONTEXT_PC_OFFSET 68

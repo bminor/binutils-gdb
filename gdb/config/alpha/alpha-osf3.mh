@@ -3,5 +3,5 @@ XDEPFILES=
 XM_FILE= xm-alphaosf.h
 NAT_FILE= nm-osf3.h
 NATDEPFILES= infptrace.o inftarg.o corelow.o alpha-nat.o fork-child.o \
-	osfsolib.o procfs.o proc_api.o proc_events.o proc_flags.o proc_why.o
+	osfsolib.o procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o
 

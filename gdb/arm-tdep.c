@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright 1988, 1989, 1991, 1992, 1993, 1995-1999
+   Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1997, 1998, 1999, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -45,33 +45,33 @@ extern void _initialize_arm_tdep (void);
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
 /* Default register names as specified by APCS.  */
-static char *apcs_register_names[] =
+static char * atpcs_register_names[] =
 {"a1", "a2", "a3", "a4",	/*  0  1  2  3 */
  "v1", "v2", "v3", "v4",	/*  4  5  6  7 */
- "v5", "v6", "sl", "fp",	/*  8  9 10 11 */
- "ip", "sp", "lr", "pc",	/* 12 13 14 15 */
+ "v5", "v6", "v7", "v8",	/*  8  9 10 11 */
+ "IP", "SP", "LR", "PC",	/* 12 13 14 15 */
  "f0", "f1", "f2", "f3",	/* 16 17 18 19 */
  "f4", "f5", "f6", "f7",	/* 20 21 22 23 */
- "fps", "ps"} /* 24 25       */ ;
+ "FPS", "PS" }; 		/* 24 25       */
 
 /* Alternate set of registers names used by GCC.  */
-static char *additional_register_names[] =
-{"r0", "r1", "r2", "r3",	/*  0  1  2  3 */
- "r4", "r5", "r6", "r7",	/*  4  5  6  7 */
- "r8", "r9", "r10", "r11",	/*  8  9 10 11 */
- "r12", "r13", "r14", "pc",	/* 12 13 14 15 */
- "f0", "f1", "f2", "f3",	/* 16 17 18 19 */
- "f4", "f5", "f6", "f7",	/* 20 21 22 23 */
- "fps", "ps"} /* 24 25       */ ;
+static char * additional_register_names[] =
+{"r0",  "r1",  "r2",  "r3",	/*  0  1  2  3 */
+ "r4",  "r5",  "r6",  "r7",	/*  4  5  6  7 */
+ "r8",  "r9",  "r10", "r11",	/*  8  9 10 11 */
+ "r12", "sp",  "lr",  "pc",	/* 12 13 14 15 */
+ "f0",  "f1",  "f2",  "f3",	/* 16 17 18 19 */
+ "f4",  "f5",  "f6",  "f7",	/* 20 21 22 23 */
+ "fps", "ps" }; 		/* 24 25       */
 
 /* This is the variable that is set with "set disassembly-flavor".
    By default use the APCS registers names.  */
-char **arm_register_names = apcs_register_names;
+char ** arm_register_names = atpcs_register_names;
 
 /* Valid register name flavours.  */
 static char apcs_flavor[] = "apcs";
 static char r_prefix_flavor[] = "r-prefix";
-static char *valid_flavors[] =
+static char * valid_flavors[] =
 {
   apcs_flavor,
   r_prefix_flavor,
@@ -296,24 +296,65 @@ arm_frameless_function_invocation (struct frame_info *fi)
    add     sp, sp, #-28
    add     r7, sp, #12
    Sometimes the latter instruction may be replaced by:
-   mov     r7, sp 
+   mov     r7, sp
+   
+   or like this:
+   push    {r7, lr}
+   mov     r7, sp
+   sub	   sp, #12
+   
+   or, on tpcs, like this:
+   sub     sp,#16
+   push    {r7, lr}
+   (many instructions)
+   mov     r7, sp
+   sub	   sp, #12
+
+   There is always one instruction of three classes:
+   1 - push
+   2 - setting of r7
+   3 - adjusting of sp
+   
+   When we have found at least one of each class we are done with the prolog.
+   Note that the "sub sp, #NN" before the push does not count.
    */
 
 static CORE_ADDR
 thumb_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR current_pc;
+  int findmask = 0;  	/* findmask:
+      			   bit 0 - push { rlist }
+			   bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
+      			   bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
+			*/
 
-  for (current_pc = pc; current_pc < pc + 20; current_pc += 2)
+  for (current_pc = pc; current_pc < pc + 40; current_pc += 2)
     {
       unsigned short insn = read_memory_unsigned_integer (current_pc, 2);
 
-      if ((insn & 0xfe00) != 0xb400	/* push {..., r7, lr}   */
-	  && (insn & 0xff00) != 0xb000	/* add sp, #simm        */
-	  && (insn & 0xff00) != 0xaf00	/* add r7, sp, #imm     */
-	  && insn != 0x466f	/* mov r7, sp           */
-	  && (insn & 0xffc0) != 0x4640)		/* mov r0-r7, r8-r15    */
-	break;
+      if ((insn & 0xfe00) == 0xb400)	/* push { rlist } */
+	{
+	  findmask |= 1;  /* push found */
+	}
+      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  sub sp, #simm */
+	{
+	  if ((findmask & 1) == 0)  /* before push ? */
+	    continue;
+	  else
+	    findmask |= 4;  /* add/sub sp found */
+	}
+      else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
+	{
+	  findmask |= 2;  /* setting of r7 found */
+	}
+      else if (insn == 0x466f)			/* mov r7, sp */
+	{
+	  findmask |= 2;  /* setting of r7 found */
+	}
+      else
+	continue;	/* something in the prolog that we don't care about or some
+	  		   instruction from outside the prolog scheduled here for optimization */
     }
 
   return current_pc;
@@ -408,18 +449,18 @@ arm_skip_prologue (CORE_ADDR pc)
      4) the offset from the stack pointer to the frame pointer
    This information is stored in the "extra" fields of the frame_info.
 
-   A typical Thumb function prologue might look like this:
-	push {r7, lr}
-	sub  sp, #28,
-	add  r7, sp, #12
-   Which would create this stack frame (offsets relative to FP)
+   A typical Thumb function prologue would create this stack frame
+   (offsets relative to FP)
      old SP ->	24  stack parameters
 		20  LR
 		16  R7
      R7 ->       0  local variables (16 bytes)
      SP ->     -12  additional stack space (12 bytes)
    The frame size would thus be 36 bytes, and the frame offset would be
-   12 bytes.  The frame register is R7.  */
+   12 bytes.  The frame register is R7. 
+   
+   The comments for thumb_skip_prolog() describe the algorithm we use to detect
+   the end of the prolog */
 /* *INDENT-ON* */
 
 static void
@@ -429,6 +470,11 @@ thumb_scan_prologue (struct frame_info *fi)
   CORE_ADDR prologue_end;
   CORE_ADDR current_pc;
   int saved_reg[16];		/* which register has been copied to register n? */
+  int findmask = 0;  	/* findmask:
+      			   bit 0 - push { rlist }
+			   bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
+      			   bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
+			*/
   int i;
 
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
@@ -452,10 +498,13 @@ thumb_scan_prologue (struct frame_info *fi)
     saved_reg[i] = i;
 
   /* Search the prologue looking for instructions that set up the
-     frame pointer, adjust the stack pointer, and save registers.  */
+     frame pointer, adjust the stack pointer, and save registers.
+     Do this until all basic prolog instructions are found.  */
 
   fi->framesize = 0;
-  for (current_pc = prologue_start; current_pc < prologue_end; current_pc += 2)
+  for (current_pc = prologue_start;
+       (current_pc < prologue_end) && ((findmask & 7) != 7);
+       current_pc += 2)
     {
       unsigned short insn;
       int regno;
@@ -465,9 +514,11 @@ thumb_scan_prologue (struct frame_info *fi)
 
       if ((insn & 0xfe00) == 0xb400)	/* push { rlist } */
 	{
+	  int mask;
+	  findmask |= 1;  /* push found */
 	  /* Bits 0-7 contain a mask for registers R0-R7.  Bit 8 says
 	     whether to save LR (R14).  */
-	  int mask = (insn & 0xff) | ((insn & 0x100) << 6);
+	  mask = (insn & 0xff) | ((insn & 0x100) << 6);
 
 	  /* Calculate offsets of saved R0-R7 and LR. */
 	  for (regno = LR_REGNUM; regno >= 0; regno--)
@@ -478,20 +529,30 @@ thumb_scan_prologue (struct frame_info *fi)
 		saved_reg[regno] = regno;	/* reset saved register map */
 	      }
 	}
-      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm */
+      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  sub sp, #simm */
 	{
+	  if ((findmask & 1) == 0)  /* before push ? */
+	    continue;
+	  else
+	    findmask |= 4;  /* add/sub sp found */
+	  
 	  offset = (insn & 0x7f) << 2;	/* get scaled offset */
-	  if (insn & 0x80)	/* is it signed? */
-	    offset = -offset;
+	  if (insn & 0x80)	/* is it signed? (==subtracting) */
+	    {
+	      fi->frameoffset += offset;
+	      offset = -offset;
+	    }
 	  fi->framesize -= offset;
 	}
       else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
 	{
+	  findmask |= 2;  /* setting of r7 found */
 	  fi->framereg = THUMB_FP_REGNUM;
 	  fi->frameoffset = (insn & 0xff) << 2;		/* get scaled offset */
 	}
-      else if (insn == 0x466f)	/* mov r7, sp */
+      else if (insn == 0x466f)			/* mov r7, sp */
 	{
+	  findmask |= 2;  /* setting of r7 found */
 	  fi->framereg = THUMB_FP_REGNUM;
 	  fi->frameoffset = 0;
 	  saved_reg[THUMB_FP_REGNUM] = SP_REGNUM;
@@ -503,7 +564,8 @@ thumb_scan_prologue (struct frame_info *fi)
 	  saved_reg[lo_reg] = hi_reg;	/* remember hi reg was saved */
 	}
       else
-	break;			/* anything else isn't prologue */
+	continue;	/* something in the prolog that we don't care about or some
+	  		   instruction from outside the prolog scheduled here for optimization */
     }
 }
 
@@ -1170,7 +1232,10 @@ arm_push_arguments (int nargs, value_ptr * args, CORE_ADDR sp,
 	  val = (char *) &dbl_arg;
 	  len = sizeof (double);
 	}
-#if 0
+#if 1
+      /* I don't know why this code was disable. The only logical use
+         for a function pointer is to call that function, so setting
+         the mode bit is perfectly fine. FN */
       /* If the argument is a pointer to a function, and it is a Thumb
          function, set the low bit of the pointer.  */
       if (TYPE_CODE_PTR == typecode
@@ -1278,14 +1343,12 @@ set_disassembly_flavor (void)
 {
   if (disassembly_flavor == apcs_flavor)
     {
-      if (arm_toggle_regnames () == 0)
-	arm_toggle_regnames ();
-      arm_register_names = apcs_register_names;
+      parse_arm_disassembler_option ("reg-names-atpcs");
+      arm_register_names = atpcs_register_names;
     }
   else if (disassembly_flavor == r_prefix_flavor)
     {
-      if (arm_toggle_regnames () == 1)
-	arm_toggle_regnames ();
+      parse_arm_disassembler_option ("reg-names-std");
       arm_register_names = additional_register_names;
     }
 }
@@ -1917,9 +1980,7 @@ _initialize_arm_tdep (void)
   tm_print_insn = gdb_print_insn_arm;
 
   /* Sync the opcode insn printer with our register viewer: */
-
-  if (arm_toggle_regnames () != 1)
-    arm_toggle_regnames ();
+  parse_arm_disassembler_option ("reg-names-atpcs");
 
   /* Add the deprecated "othernames" command */
 

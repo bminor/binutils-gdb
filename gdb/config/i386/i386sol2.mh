@@ -5,4 +5,4 @@ XDEPFILES=
 
 NAT_FILE= nm-i386sol2.h
 NATDEPFILES= core-regset.o fork-child.o i386v4-nat.o corelow.o procfs.o \
-	proc_api.o proc_events.o proc_flags.o proc_why.o
+	proc-api.o proc-events.o proc-flags.o proc-why.o
