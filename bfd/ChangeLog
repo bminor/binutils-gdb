@@ -305,7 +305,7 @@ Thu Aug 31 22:49:30 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(SEGMENT_OVERLAPS_SEGMENT): New macro: Determine if two
 	segments overlap.
 
-200007-22  Jason Eckhardt  <jle@cygnus.com>
+2000-07-22  Jason Eckhardt  <jle@cygnus.com>
 
 	* cpu-i860.c: Added comments.
 
@@ -1296,14 +1296,14 @@ Thu May 18 10:55:47 2000  Jeffrey A Law  (law@cygnus.com)
 2000-05-17  S. Bharadwaj Yadavalli  <sby@scrugs.lkg.dec.com>
 	    Rick Gorton	            <gorton@scrugs.lkg.dec.com>
 	
-	* elflink.h: Add emitrelocations support: when enabled, relocation 
+	* elflink.h: Add emitrelocations support: when enabled, relocation
 	information and relocation sections are put into final output
 	executables.  If the emitrelocations flag is set, do the following:
 	(elf_bfd_final_link): Emit relocation sections.
 	(elf_link_input_bfd): Compute relocation section contents.
 	(elf_gc_sections): Don't clean relocation sections.
 
-2000-05-16  Catherine Moore  <clm@cygnux.com>
+2000-05-16  Catherine Moore  <clm@cygnus.com>
 
 	* som.c (som_decode_symclass):  Recognize weak symbols.
 
@@ -3909,53 +3909,53 @@ Mon Jul 19 14:03:44 1999  Mark P. Mitchell  <mark@codesourcery.com>
 	
 	* aix386-core.c: Initialise new field of bfd_target structure.
 	* aout-adobe.c: Initialise new field of bfd_target structure.
-	* aout-arm.c: Initialise new field of bfd_target structure. 
-	* aout-target.h: Initialise new field of bfd_target structure. 
-	* aout-tic30.c: Initialise new field of bfd_target structure. 
-	* binary.c: Initialise new field of bfd_target structure. 
-	* bout.c: Initialise new field of bfd_target structure. 
-	* cisco-core.c: Initialise new field of bfd_target structure. 
+	* aout-arm.c: Initialise new field of bfd_target structure.
+	* aout-target.h: Initialise new field of bfd_target structure.
+	* aout-tic30.c: Initialise new field of bfd_target structure.
+	* binary.c: Initialise new field of bfd_target structure.
+	* bout.c: Initialise new field of bfd_target structure.
+	* cisco-core.c: Initialise new field of bfd_target structure.
 	* coff-a29k.c: Use CREATE_BIG_COFF_TARGET_VEC.
-	* coff-alpha.c: Initialise new field of bfd_target structure. 
+	* coff-alpha.c: Initialise new field of bfd_target structure.
 	* coff-apollo.c: Use CREATE_BIG_COFF_TARGET_VEC.
 	* coff-arm.c: Use CREATE_{BIG|LITTLE}_COFF_TARGET_VEC.
 	* coff-h8300.c: Use CREATE_BIG_COFF_TARGET_VEC.
 	* coff-h8500.c: Use CREATE_BIG_COFF_TARGET_VEC.
-	* coff-i386.c: Initialise new field of bfd_target structure. 
-	* coff-i860.c: Initialise new field of bfd_target structure. 
+	* coff-i386.c: Initialise new field of bfd_target structure.
+	* coff-i860.c: Initialise new field of bfd_target structure.
 	* coff-i960.c: Use CREATE_LITTLE_COFF_TARGET_VEC.
 	* coff-m68k.c: Use CREATE_BIG_COFF_TARGET_VEC.
 	* coff-mcore.c: Use CREATE_{BIG|LITTLE}_COFF_TARGET_VEC.
-	* coff-mips.c: Initialise new field of bfd_target structure. 
-	* coff-ppc.c: Initialise new field of bfd_target structure. 
-	* coff-rs6000.c: Initialise new field of bfd_target structure. 
+	* coff-mips.c: Initialise new field of bfd_target structure.
+	* coff-ppc.c: Initialise new field of bfd_target structure.
+	* coff-rs6000.c: Initialise new field of bfd_target structure.
 	* coff-sh.c:  Use CREATE_{BIG|LITTLE}_COFF_TARGET_VEC.
 	* coff-sparc.c: Use CREATE_BIG_COFF_TARGET_VEC.
-	* coff-tic30.c: Initialise new field of bfd_target structure. 
+	* coff-tic30.c: Initialise new field of bfd_target structure.
 	* coff-tic80.c: Use CREATE_LITTLE_COFF_TARGET_VEC.
 	* coff-w65.c:   Use CREATE_LITTLE_COFF_TARGET_VEC.
 	* coff-we32k.c: Use CREATE_BIG_COFF_TARGET_VEC.
 	* coff-z8k.c:   Use CREATE_BIG_COFF_TARGET_VEC.
-	* hppabsd-core.c: Initialise new field of bfd_target structure. 
-	* hpux-core.c: Initialise new field of bfd_target structure. 
-	* i386msdos.c: Initialise new field of bfd_target structure. 
-	* i386os9k.c: Initialise new field of bfd_target structure. 
-	* ieee.c: Initialise new field of bfd_target structure. 
-	* ihex.c: Initialise new field of bfd_target structure. 
-	* irix-core.c: Initialise new field of bfd_target structure. 
-	* mipsbsd.c: Initialise new field of bfd_target structure. 
-	* netbsd-core.c: Initialise new field of bfd_target structure. 
-	* oasys.c: Initialise new field of bfd_target structure. 
-	* osf-core.c: Initialise new field of bfd_target structure. 
-	* ppcboot.c: Initialise new field of bfd_target structure. 
-	* ptrace-core.c: Initialise new field of bfd_target structure. 
-	* sco5-core.c: Initialise new field of bfd_target structure. 
-	* som.c: Initialise new field of bfd_target structure. 
-	* srec.c: Initialise new field of bfd_target structure. 
-	* tekhex.c: Initialise new field of bfd_target structure. 
-	* trad-core.c: Initialise new field of bfd_target structure. 
-	* versados.c: Initialise new field of bfd_target structure. 
-	* vms.c: Initialise new field of bfd_target structure. 
+	* hppabsd-core.c: Initialise new field of bfd_target structure.
+	* hpux-core.c: Initialise new field of bfd_target structure.
+	* i386msdos.c: Initialise new field of bfd_target structure.
+	* i386os9k.c: Initialise new field of bfd_target structure.
+	* ieee.c: Initialise new field of bfd_target structure.
+	* ihex.c: Initialise new field of bfd_target structure.
+	* irix-core.c: Initialise new field of bfd_target structure.
+	* mipsbsd.c: Initialise new field of bfd_target structure.
+	* netbsd-core.c: Initialise new field of bfd_target structure.
+	* oasys.c: Initialise new field of bfd_target structure.
+	* osf-core.c: Initialise new field of bfd_target structure.
+	* ppcboot.c: Initialise new field of bfd_target structure.
+	* ptrace-core.c: Initialise new field of bfd_target structure.
+	* sco5-core.c: Initialise new field of bfd_target structure.
+	* som.c: Initialise new field of bfd_target structure.
+	* srec.c: Initialise new field of bfd_target structure.
+	* tekhex.c: Initialise new field of bfd_target structure.
+	* trad-core.c: Initialise new field of bfd_target structure.
+	* versados.c: Initialise new field of bfd_target structure.
+	* vms.c: Initialise new field of bfd_target structure.
 
 1999-07-19  Andreas Schwab  <schwab@suse.de>
 
@@ -3966,11 +3966,11 @@ Sat Jul 17 02:28:28 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 	* elflink.h (elf_link_adjust_relocs): New function.
 	(elf_bfd_final_link): Use it.
-	(elf_link_input_bfd): Deal with the fact that there can be 
+	(elf_link_input_bfd): Deal with the fact that there can be
 	two relocation sections for a single section.
 	(elf_reloc_link_order): Likewise.
 
-	* elf32-mips.c (_bfd_mips_elf_final_link): Don't set GP for 
+	* elf32-mips.c (_bfd_mips_elf_final_link): Don't set GP for
 	a relocateable object.
 	(_bfd_mips_elf_relocate_section): Handle relocateable links.
 
@@ -4067,7 +4067,7 @@ Wed Jul 14 15:23:19 1999  Jim Wilson  <wilson@cygnus.com>
 	subwords when handling an R_MIPS16_26 relocation.
 	(mips_elf_perform_relocation): Don't be paranoid abour right-shift
 	semantics.
-	
+
 	* elf32-mips.c (elf_mips16_gprel_howto): Adjust src_mask and
 	dst_mask to match reality.
 	(_bfd_mips_elf_calculate_relocation): Handle R_MIPS16_GPREL.
@@ -4078,7 +4078,7 @@ Wed Jul 14 15:23:19 1999  Jim Wilson  <wilson@cygnus.com>
 1999-07-13  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Handle R_MIPS16_26.
-	(mips_elf_relocate_section): Adjust calling sequence for 
+	(mips_elf_relocate_section): Adjust calling sequence for
 	mips_elf_perform_relocation.
 	(mips_elf_perform_relocation): Take additional argument.  Handle
 	R_MIPS16_26.  Use bfd_put for convenience.
@@ -4237,7 +4237,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 	(_bfd_mips_elf_create_dynamic_sections): New function.
 	(_bfd_mips_elf_add_symbol_hook): Likewise.
 	(_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
-	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.	
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
 	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
 	(_bfd_mips_elf_gc_mark_hook): Likewise.
 	(_bfd_mips_elf_gc_sweep_hook): Likewise.
@@ -4307,7 +4307,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 	(_bfd_mips_elf_print_private_bfd_data): Print ABI=64 for 64-bit
 	ABI.
 	(_bfd_mips_elf_fake_sections): Remove duplicate handling of
-	.msym. 
+	.msym.
 	(mips_elf_global_got_index): Use MIPS_ELF_GOT_SIZE.
 	(mips_elf_got_offset_from_index): Use misp_elf_got_section.
 	(mips_elf_create_local_got_entry): Use MIPS_ELF_GOT_SIZE.
@@ -4328,7 +4328,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 	(mips_elf64_section_processing): Likewise.
 	Adjust elf backend entries to use _bfd_mips_elf variants now
 	publicly available.
-	
+
 	* elflink.h (elf_link_create_dynamic_sections): Handle non-standard
 	hash-entry sizes.
 	(size_dynamic_sections): Likewise.
@@ -4342,7 +4342,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 
 	* elf-bfd.h (elf_size_info): Add hash_entry_size,
 	int_rels_per_ext_rel, swap_dyn_out, swap_reloc_in, swap_reloc_out,
-	wap_reloca_in, and swap_reloca_out. 
+	wap_reloca_in, and swap_reloca_out.
 	* elflink.h (elf_link_read_relocs_from_section): Adjust to handle
 	multiple internal relocations per external relocation.
 	(link_read_relocs): Likewise.
@@ -4359,7 +4359,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 	(mips_elf64_be_swap_reloca_in): Likewise.
 	(mips_elf64_be_swap_reloca_out): Likewise.
 	(mips_elf64_size_info): Add entries for new fields.
-	
+
 1999-07-07  Ian Lance Taylor  <ian@zembu.com>
 
 	* elflink.h (elf_bfd_final_link): Assert that section reloc_count
@@ -4383,17 +4383,17 @@ Tue Jul  6 10:23:39 1999  Jeffrey A Law  (law@cygnus.com)
 1999-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* coffcode.h (coff_set_arch_mach_hook): Recognise arm 5
-	architectures. 
+	architectures.
 	(coff_set_flags): Recognise arm 5 architectures.
 
 	* cpu-arm.c: Add support for strongarm and arm9 cpus.
 	Add support for armv5 architecture.
 
 	* archures.c: Add bfd_mach_arm_5 and bfd_mach_arm_5T.
-	
+
 	* reloc.c: Add new, assembler only, ARM reloc:
 	BFD_RELOC_ARM_ADRL_IMMEDIATE.
-	
+
 	* bfd-in2.h: Regenerate.
 
 1999-07-02  Mark Mitchell  <mark@codesourcery.com>
@@ -4433,7 +4433,7 @@ Fri Jul  2 12:21:10 1999  Jeffrey A Law  (law@cygnus.com)
 	(elf_link_size_reloc_section): Likewise.
 	(elf_bfd_final_link): Use elf_link_size_reloc_section.
 	(elf_link_input_bfd): Use elf_link_output_relocs.
-	
+
 	* elf32-mips.c (_bfd_mips_elf_fake_sections): Use
 	_bfd_elf_init_reloc_shdr to initialize rel_hdr2.
 
@@ -4497,7 +4497,7 @@ Thu Jul  1 13:58:48 1999  Jeffrey A Law  (law@cygnus.com)
 	(mips_elf_finish_dynamic_sections): Correct off-by-one error
 	setting DT_MIPS_UNREFEXTNO.  Adjust setting of DT_MIPS_GOTSYM for
 	change to global_gotsym.  Set DT_MIPS_OPTIONS on IRIX6.
-		
+
 1999-06-30  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf32-mips.c (mips_elf_final_link): Don't set CPIC when doing a
@@ -4546,7 +4546,7 @@ Tue Jun 29 02:25:03 1999  Jeffrey A Law  (law@cygnus.com)
 	(mips_elf_finish_dynamic_symbol): Use MIPS_ELF_STUB_SECTION_NAME.
 	Don't assert the existence of .rld_map on IRIX6.
 	(mips_elf_finish_dynamic_sections): Use MIPS_ELF_STUB_SECTION_NAME.
-		
+
 	* elf32-mips.c (mips_elf_adjust_dynindx): Remove.
 	(mips_elf_size_dynamic_sections): Use _bfd_elf_link_adjust_dynindx
 	instead.
@@ -5007,7 +5007,7 @@ Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	no_pipeline_knowledge is false and the binary is from an old
 	toolchain.
 	(elf32_arm_merge_private_data): Generate an error if an attempt is
-	made to linl together big endian and little endian code.
+	made to link together big endian and little endian code.
 	(elf32_arm_post_process_headers): New function:  Initialise the
 	EI_OSABI and EI_ABIVERSION fields of the newly created ELF program
 	header.
