@@ -494,7 +494,7 @@ i386_get_frame_setup (CORE_ADDR pc)
 /* Return non-zero if we're dealing with a frameless signal, that is,
    a signal trampoline invoked from a frameless function.  */
 
-static int
+int
 i386_frameless_signal_p (struct frame_info *frame)
 {
   return (frame->next && frame->next->signal_handler_caller

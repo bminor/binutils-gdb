@@ -163,6 +163,7 @@ extern int i386_mxcsr_regnum_p (int regnum);
 
 /* Functions exported from i386-tdep.c.  */
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
+extern int i386_frameless_signal_p (struct frame_info *frame);
 
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);

@@ -1,3 +1,9 @@
+2002-11-08  Joel Brobecker  <brobecker@gnat.com>
+
+	* i386-tdep.c (i386_frameless_signal_p): Make non static for
+	the benefit of the interix target.
+	* i386-tdep.h (i386_frameless_signal_p): Declare.
+
 2002-11-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* i386-tdep.h (i386_linux_orig_eax_regnum_p): Delete stray
