@@ -2387,7 +2387,7 @@ floatformat_from_doublest (fmt, from, to)
       dfrom = -dfrom;
     }
 
-  if (dfrom + 1 == dfrom)	/* Result is Infinity */
+  if (dfrom + dfrom == dfrom && dfrom != 0.0)	/* Result is Infinity */
     {
       /* Infinity exponent is same as NaN's.  */
       put_field (uto, fmt->byteorder, fmt->totalsize, fmt->exp_start,

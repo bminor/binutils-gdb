@@ -1,3 +1,7 @@
+Thu Jun 19 08:18:48 1997  Mark Alexander  <marka@cygnus.com>
+
+	* utils.c (floatformat_from_doublest): Improve test for infinity.
+
 Wed Jun 18 13:47:52 1997  Fred Fish  <fnf@cygnus.com>
 
 	* dwarfread.c (isreg, optimized_out, offreg, basereg): Move
