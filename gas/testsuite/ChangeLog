@@ -1,4 +1,4 @@
-2002-12-29  Chris Demetriou  <cgd@broadcom.com>
+2002-12-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/cp0-names-mips32r2.d: New test.
 	* gas/mips/hwr-names-mips32r2.d: New test.
