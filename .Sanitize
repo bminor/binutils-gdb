@@ -92,6 +92,9 @@ Things-to-lose:
 
 Do-last:
 
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+
 if ( echo $* | egrep verbose > /dev/null ) ; then
 	verbose=true
 else
@@ -113,8 +116,6 @@ if [ -n "${verbose}" ] ; then
 	echo Thawing away the \"chill\"...
 fi
 
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
 if ( echo $* | grep keep\-chill > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
@@ -146,8 +147,6 @@ if [ -n "${verbose}" ] ; then
 	echo Removing traces of \"mpw\"...
 fi
 
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
@@ -179,10 +178,10 @@ if [ -n "${verbose}" ] ; then
 	echo Processing \"arc\"...
 fi
 
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
+arc_files="config.sub configure.in"
+
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	for i in * ; do
+	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
 				echo Keeping arc stuff in $i
@@ -197,6 +196,35 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-arc/,/end-\sanitize\-arc/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+psion_files="config.sub configure.in"
+
+if ( echo $* | grep keep\-psion > /dev/null ) ; then
+	for i in $psion_files; do
+		if test ! -d $i && (grep sanitize-psion $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping psion stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-psion $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"psion\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-psion/,/end-\sanitize\-psion/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

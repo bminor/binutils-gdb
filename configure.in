@@ -344,9 +344,16 @@ case "${target}" in
     ;;
 # start-sanitize-arc
   arc-*-*)
+    # Leave g++ for later.
     noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
     ;;
 # end-sanitize-arc
+# start-sanitize-psion
+  arm-*-pe*)
+    # Leave g++ for later.
+    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
+    ;;
+# end-sanitize-psion
   arm-*-*)
     noconfigdirs="$noconfigdirs ld"
     ;;
