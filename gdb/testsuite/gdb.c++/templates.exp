@@ -53,12 +53,12 @@ proc test_ptype_of_templates {} {
 
     send_gdb "ptype T5<int>\n"
     gdb_expect {
-	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const &\\);${ws}T5\\(int\\);${ws}T5\\(T5<int> const &\\);${ws}~T5\\(void\\);${ws}static void \\* operator new\\(unsigned (int|long)\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\(void\\);${ws}\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const ?&\\);${ws}T5\\(int\\);${ws}T5\\(T5<int> const ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned (int|long)\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype T5<int>"
 	}
-	-re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(int\\);${ws}static void \\* new \\(unsigned int\\);${ws}static void delete \\(void \\*\\);${ws}int value \\(void\\);${ws}\\}${ws}$gdb_prompt $" { pass "ptype T5<int> -- new with unsigned int" }
-	-re "type = class T5<int> \\{.*public:.*static int X;.*int x;.*int val;.*T5 \\(int\\);.*T5 \\(const class T5<int> &\\);.*void ~T5 \\(int\\);.*static void \\* new \\(unsigned long\\);.*static void delete \\(void \\*\\);.*int value \\(void\\);.*\\}\r\n$gdb_prompt $" { pass "ptype T5<int> -- new with unsigned long" }
-	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const &\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const &\\);)|(${ws}~T5\\(void\\);)|(${ws}static void \\* operator new\\(unsigned (int|long)\\);)|(${ws}static void operator delete\\(void \\*\\);)|(${ws}int value\\(void\\);))*${ws}\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(int\\);${ws}static void \\* new \\(unsigned int\\);${ws}static void delete \\(void \\*\\);${ws}int value \\((void|)\\);${ws}\\}${ws}$gdb_prompt $" { pass "ptype T5<int> -- new with unsigned int" }
+	-re "type = class T5<int> \\{.*public:.*static int X;.*int x;.*int val;.*T5 \\(int\\);.*T5 \\(const class T5<int> &\\);.*void ~T5 \\(int\\);.*static void \\* new \\(unsigned long\\);.*static void delete \\(void \\*\\);.*int value \\((void|)\\);.*\\}\r\n$gdb_prompt $" { pass "ptype T5<int> -- new with unsigned long" }
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const ?&\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const ?&\\);)|(${ws}~T5\\((void|)\\);)|(${ws}static void \\* operator new\\(unsigned (int|long)\\);)|(${ws}static void operator delete\\(void \\*\\);)|(${ws}int value\\((void|)\\);))*${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype T5<int> (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -71,16 +71,16 @@ proc test_ptype_of_templates {} {
 
     send_gdb "ptype t5i\n"
     gdb_expect {
-        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5\\(int\\);${ws}T5\\(T5<int> const &\\);${ws}~T5\\(void\\);${ws}static void \\* operator new\\(unsigned int\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\(void\\);${ws}\\}\r\n$gdb_prompt $" { pass "ptype T5<int> -- with several fixes from 4.17" }
-        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(int\\);${ws}static void \\* new \\(unsigned int\\);${ws}static void delete \\(void \\*\\);${ws}int value \\(void\\);${ws}\\}\r\n$gdb_prompt $" { pass "ptype t5i<int> -- new with unsigned int" }
-        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(int\\);${ws}static void \\* new \\(unsigned long\\);${ws}static void delete \\(void \\*\\);${ws}int value \\(void\\);${ws}\\}\r\n$gdb_prompt $" { pass "ptype t5i<int> -- new with unsigned long" }
-        -re "type = class T5<int> \{.*public:.*static int X;.*int x;.*int val;.*.*T5 \\(int\\);.*.*void ~T5 \\(int\\).*.*.*int value \\(void\\);.*\}.*$gdb_prompt $" { 
+        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5\\(int\\);${ws}T5\\(T5<int> const ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned int\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\((void|)\\);${ws}\\}\r\n$gdb_prompt $" { pass "ptype T5<int> -- with several fixes from 4.17" }
+        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(int\\);${ws}static void \\* new \\(unsigned int\\);${ws}static void delete \\(void \\*\\);${ws}int value \\((void|)\\);${ws}\\}\r\n$gdb_prompt $" { pass "ptype t5i<int> -- new with unsigned int" }
+        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(int\\);${ws}static void \\* new \\(unsigned long\\);${ws}static void delete \\(void \\*\\);${ws}int value \\((void|)\\);${ws}\\}\r\n$gdb_prompt $" { pass "ptype t5i<int> -- new with unsigned long" }
+        -re "type = class T5<int> \{.*public:.*static int X;.*int x;.*int val;.*.*T5 \\(int\\);.*.*void ~T5 \\(int\\).*.*.*int value \\((void|)\\);.*\}.*$gdb_prompt $" { 
             pass "ptype t5i"
         }
-	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const &\\);${ws}T5\\(int\\);${ws}T5\\(T5<int> const &\\);${ws}~T5\\(void\\);${ws}static void \\* operator new\\(unsigned (int|long)\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\(void\\);${ws}\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const ?&\\);${ws}T5\\(int\\);${ws}T5\\(T5<int> const ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned (int|long)\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype t5i"
 	}
-	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const &\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const &\\);)|(${ws}~T5\\(void\\);)|(${ws}static void \\* operator new\\(unsigned (int|long)\\);)|(${ws}static void operator delete\\(void \\*\\);)|(${ws}int value\\(void\\);))*${ws}\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const ?&\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const ?&\\);)|(${ws}~T5\\((void|)\\);)|(${ws}static void \\* operator new\\(unsigned (int|long)\\);)|(${ws}static void operator delete\\(void \\*\\);)|(${ws}int value\\((void|)\\);))*${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype t5i (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -104,12 +104,12 @@ proc test_template_breakpoints {} {
 
     send_gdb "break T5<int>::T5\n"
     gdb_expect {
-	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. T5<int>::T5\\(int\\) at .*\[\r\n\]*.3. T5<int>::T5\\(T5<int> const &\\) at .*\[\r\n\]*> $" {
+	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. T5<int>::T5\\(int\\) at .*\[\r\n\]*.3. T5<int>::T5\\(T5<int> const ?&\\) at .*\[\r\n\]*> $" {
 	    gdb_test "0" \
 		"canceled" \
 		"constructor breakpoint (obsolete format!)"
 	}
-	-re ".0. cancel\[\r\n\]*.1. all\[\r\n\]*.2. T5<int>::T5\\(T5<int> const &\\) at .*templates.cc:.*\[\r\n\]*.3. T5<int>::T5\\(int\\) at .*templates.cc:.*\[\r\n\]*> $" {
+	-re ".0. cancel\[\r\n\]*.1. all\[\r\n\]*.2. T5<int>::T5\\(T5<int> const ?&\\) at .*templates.cc:.*\[\r\n\]*.3. T5<int>::T5\\(int\\) at .*templates.cc:.*\[\r\n\]*> $" {
 	    gdb_test "0" \
 		"canceled" \
 		"constructor breakpoint"

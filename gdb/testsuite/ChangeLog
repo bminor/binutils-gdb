@@ -1,5 +1,8 @@
 2001-11-07  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.c++/templates.exp: Replace "const &" with "const ?&", 
+	making the whitespace optional.  Also replace "(void) with
+	"((void|)), making the keyword "void" optional.
 	* gdb.c++/virtfunc.exp: Replace "const &" with "const ?&", 
 	making the whitespace optional.  Also replace "(void) with
 	"((void|)), making the keyword "void" optional.
