@@ -1,4 +1,11 @@
 start-sanitize-armelf
+Mon Aug 10 12:51:12 1998  Catherine Moore  <clm@cygnus.com>
+
+        * arm-dis.c (print_insn_big_arm):  Fix indentation.
+        (print_insn_little_arm): Likewise.
+
+end-sanitize-armelf
+start-sanitize-armelf
 Sun Aug  9 20:17:28 1998  Catherine Moore  <clm@cygnus.com>
 
         * arm-dis.c (print_insn_big_arm):  Check for thumb symbol
