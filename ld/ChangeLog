@@ -1,3 +1,7 @@
+Tue Sep 14 05:26:34 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/elf64hppa.sh (OTHER_GOT_RELOC_SECTIONS): Add .rela.dlt.
+
 1999-09-13  Donn Terry  <donn@interix.com>
 
 	* emultempl/pe.em: Remove the output file at the start, in case it

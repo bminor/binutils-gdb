@@ -34,6 +34,9 @@ OTHER_READWRITE_SECTIONS='.dlt : { *(.plt) *(.dlt) *(.opd) }'
 # __TLS_SIZE to the size of the thread bss section.
 OTHER_BSS_SECTIONS='.hbss : { *(.hbss) } .tbss : { *(.tbss) } __TLS_SIZE = SIZEOF(.tbss);'
 
+# HPs use .dlt where systems use .got.  Sigh.
+OTHER_GOT_RELOC_SECTIONS='.rela.dlt : { *(.rela.dlt) }'
+
 # The linker is required to define these two symbols.
 EXECUTABLE_SYMBOLS='__SYSTEM_ID = 0x214; _FPU_STATUS = 0x0;'
 DATA_PLT=
