@@ -586,6 +586,7 @@ switch (CUR_SYMBOL_TYPE)
             memcpy (name, namestring, name_len);
             name[name_len] = '\0';
             complain (&function_outside_compilation_unit, name);
+            xfree (name);
           }
 	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef DBXREAD_ONLY
@@ -640,6 +641,7 @@ switch (CUR_SYMBOL_TYPE)
             memcpy (name, namestring, name_len);
             name[name_len] = '\0';
             complain (&function_outside_compilation_unit, name);
+            xfree (name);
           }
 	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef DBXREAD_ONLY

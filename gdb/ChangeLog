@@ -1,5 +1,8 @@
 2001-06-01  Jim Blandy  <jimb@redhat.com>
 
+	* partial-stab.h (case N_FUN: case 'f':, case N_FUN: case 'F':)
+	Fix memory leak.
+
 	* partial-stab.h: New complaint: function_outside_compilation_unit.
 	(case N_FUN: case 'f':, case N_FUN: case 'F':): If pst is zero,
 	complain, and don't try to set pst's start address.
