@@ -190,7 +190,7 @@ changequote([,])dnl
 
       arm-*-aout)			fmt=aout ;;
       arm-*-coff | thumb-*-coff)	fmt=coff ;;
-      arm-*-rtems | thumb-*-rtems)	fmt=elf ;;
+      arm-*-rtems* | thumb-*-rtems*)	fmt=elf ;;
       arm-*-elf | thumb-*-elf)		fmt=elf ;;
       arm-*-kaos*)			fmt=elf ;;
       arm*-*-conix*)			fmt=elf ;;
