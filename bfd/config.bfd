@@ -315,6 +315,7 @@ case "${targ}" in
     ;;
   i[3456]86-*-vxworks*)
     targ_defvec=i386aout_vec
+    targ_underscore=yes
     ;;
 
   i860-*-mach3* | i860-*-osf1* | i860-*-coff*)

@@ -1,3 +1,7 @@
+1999-07-21  H.J. Lu  <hjl@gnu.org>
+
+	* config.bfd (i[3456]86-*-vxworks*): Add targ_underscore=yes.
+
 1999-07-21  Philippe De Muyter  <phdm@macqel.be>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Issue an error
