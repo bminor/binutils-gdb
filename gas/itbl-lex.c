@@ -428,7 +428,8 @@ char *yytext;
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "itbl-parse.h"
+
+#include <itbl-parse.h>
 
 #ifdef DEBUG
 #define DBG(x) printf x
@@ -439,7 +440,7 @@ char *yytext;
 #endif
 
 int insntbl_line = 1;
-#line 443 "lex.yy.c"
+#line 444 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -601,10 +602,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 43 "itbl-lex.l"
+#line 44 "itbl-lex.l"
 
 
-#line 608 "lex.yy.c"
+#line 609 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -689,49 +690,49 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 45 "itbl-lex.l"
+#line 46 "itbl-lex.l"
 {
     return CREG;
   }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 48 "itbl-lex.l"
+#line 49 "itbl-lex.l"
 {
     return DREG;
   }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 51 "itbl-lex.l"
+#line 52 "itbl-lex.l"
 {
     return GREG;
   }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 54 "itbl-lex.l"
+#line 55 "itbl-lex.l"
 {
     return IMMED;
   }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 57 "itbl-lex.l"
+#line 58 "itbl-lex.l"
 {
     return ADDR;
   }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 60 "itbl-lex.l"
+#line 61 "itbl-lex.l"
 {
     return INSN;
   }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 63 "itbl-lex.l"
+#line 64 "itbl-lex.l"
 {
     yytext[yyleng] = 0;
     yylval.processor = strtoul (yytext+1, 0, 0);
@@ -740,7 +741,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 68 "itbl-lex.l"
+#line 69 "itbl-lex.l"
 {
     yytext[yyleng] = 0;
     yylval.num = strtoul (yytext, 0, 0);
@@ -749,7 +750,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 73 "itbl-lex.l"
+#line 74 "itbl-lex.l"
 {
     yytext[yyleng] = 0;
     yylval.num = strtoul (yytext, 0, 0);
@@ -758,7 +759,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 78 "itbl-lex.l"
+#line 79 "itbl-lex.l"
 {
     yytext[yyleng] = 0;
     yylval.str = strdup (yytext);
@@ -767,7 +768,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 83 "itbl-lex.l"
+#line 84 "itbl-lex.l"
 {
     int c;
     while ((c = input ()) !=  EOF) 
@@ -782,7 +783,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 94 "itbl-lex.l"
+#line 95 "itbl-lex.l"
 { 
     insntbl_line++; 
     MDBG (("in lex, NL = %d (x%x)\n", NL, NL));
@@ -791,13 +792,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 99 "itbl-lex.l"
+#line 100 "itbl-lex.l"
 { 
   }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 101 "itbl-lex.l"
+#line 102 "itbl-lex.l"
 {
     MDBG (("char = %x, %d\n", yytext[0], yytext[0]));
     return yytext[0];
@@ -805,10 +806,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 105 "itbl-lex.l"
+#line 106 "itbl-lex.l"
 ECHO;
 	YY_BREAK
-#line 812 "lex.yy.c"
+#line 813 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1698,7 +1699,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 105 "itbl-lex.l"
+#line 106 "itbl-lex.l"
 
 
 #ifndef yywrap

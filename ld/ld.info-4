@@ -761,11 +761,7 @@ use in linker script expressions.
           ... }
 
 `ALIGN(EXP)'
-     Return the location counter (`.') aligned to the next EXP
-     boundary.  EXP must be an expression whose value is a power of
-     two.  This is equivalent to
-          (. + EXP - 1) & ~(EXP - 1)
-
+     Return the location counter (`.') aligned to the next EXP boundary.
      `ALIGN' doesn't change the value of the location counter--it just
      does arithmetic on it.  Here is an example which aligns the output
      `.data' section to the next `0x2000' byte boundary after the

@@ -80,6 +80,7 @@ Index
 * --no-gc-sections:                      Options.
 * --no-keep-memory:                      Options.
 * --no-undefined:                        Options.
+* --no-undefined-version:                Options.
 * --no-warn-mismatch:                    Options.
 * --no-whole-archive:                    Options.
 * --noinhibit-exec:                      Options.

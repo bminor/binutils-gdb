@@ -791,7 +791,7 @@ static const short yycheck[] =
       10,    11,    51,    52,    53,    54,    55,    56
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/usr/share/bison/bison.simple"
+#line 3 "/usr/share/bison-1.35/bison.simple"
 
 /* Skeleton output parser for bison,
 
@@ -1104,7 +1104,7 @@ yystpcpy (yydest, yysrc)
 # endif
 #endif
 
-#line 315 "/usr/share/bison/bison.simple"
+#line 315 "/usr/share/bison-1.35/bison.simple"
 
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
@@ -1546,7 +1546,7 @@ case 21:
 	    yyval.acc.id = yyvsp[-2].il;
 	    yyval.acc.flags |= yyvsp[0].is;
 	    if ((yyval.acc.flags & ACC_VIRTKEY) == 0
-		&& (yyval.acc.flags & (ACC_SHIFT | ACC_CONTROL | ACC_ALT)) != 0)
+		&& (yyval.acc.flags & (ACC_SHIFT | ACC_CONTROL)) != 0)
 	      rcparse_warning (_("inappropriate modifiers for non-VIRTKEY"));
 	  }
     break;
@@ -3203,7 +3203,7 @@ case 244:
     break;
 }
 
-#line 705 "/usr/share/bison/bison.simple"
+#line 705 "/usr/share/bison-1.35/bison.simple"
 
 
   yyvsp -= yylen;

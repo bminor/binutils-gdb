@@ -176,11 +176,14 @@ Index
 * BFD_RELOC_386_TLS_DTPMOD32:            howto manager.
 * BFD_RELOC_386_TLS_DTPOFF32:            howto manager.
 * BFD_RELOC_386_TLS_GD:                  howto manager.
+* BFD_RELOC_386_TLS_GOTIE:               howto manager.
+* BFD_RELOC_386_TLS_IE:                  howto manager.
 * BFD_RELOC_386_TLS_IE_32:               howto manager.
 * BFD_RELOC_386_TLS_LDM:                 howto manager.
 * BFD_RELOC_386_TLS_LDO_32:              howto manager.
 * BFD_RELOC_386_TLS_LE:                  howto manager.
 * BFD_RELOC_386_TLS_LE_32:               howto manager.
+* BFD_RELOC_386_TLS_TPOFF:               howto manager.
 * BFD_RELOC_386_TLS_TPOFF32:             howto manager.
 * BFD_RELOC_390_12:                      howto manager.
 * BFD_RELOC_390_COPY:                    howto manager.

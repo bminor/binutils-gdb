@@ -337,10 +337,10 @@ Options
      `.arch' directive.
 
      The following processor names are recognized: `21064', `21064a',
-     `21066', `21068', `21164', `21164a', `21164pc', `21264', `ev4',
-     `ev5', `lca45', `ev5', `ev56', `pca56', `ev6'.  The special name
-     `all' may be used to allow the assembler to accept instructions
-     valid for any Alpha processor.
+     `21066', `21068', `21164', `21164a', `21164pc', `21264', `21264a',
+     `21264b', `ev4', `ev5', `lca45', `ev5', `ev56', `pca56', `ev6',
+     `ev67', `ev68'.  The special name `all' may be used to allow the
+     assembler to accept instructions valid for any Alpha processor.
 
      In order to support existing practice in OSF/1 with respect to
      `.arch', and existing practice within `MILO' (the Linux ARC
