@@ -1,5 +1,7 @@
 Tue Feb 13 14:04:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host: Set HDLFLAGS for *-*-hpux with --enable-shared.
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_stat_needed): Warn if
 	it looks like we might be linking in two different versions of the
 	same shared library.  Based on a patch from H J Lu <hjl@zoom.com>.
