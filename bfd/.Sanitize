@@ -54,7 +54,6 @@ coff-alpha.c
 coff-h8300.c
 coff-h8500.c
 coff-i386.c
-coff-i386lynx.c
 coff-i960.c
 coff-m68k.c
 coff-m88k.c
@@ -123,6 +122,7 @@ hpux-core.c
 i386aout.c
 i386bsd.c
 i386linux.c
+i386lynx-cf.c
 i386lynx.c
 i386mach3.c
 ieee.c
@@ -139,6 +139,7 @@ libhppa.h
 libieee.h
 libnlm.h
 liboasys.h
+m68klynx-cf.c
 m68klynx.c
 mipsbsd.c
 newsos3.c
