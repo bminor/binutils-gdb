@@ -1,3 +1,16 @@
+start-sanitize-v9
+Fri Jul 30 11:07:37 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* sp64-tdep.c (sparc64_frame_chain, sparc64_frame_saved_pc): Deleted.
+	(dump_ccreg, sparc_print_register_hook): New fns.
+	* remote-sim.h: New file.
+	* remote-sp64sim.h (sim_*): External fns.  (simif_*): Internal fns.
+
+	* config/sparc/sp64.mt: New file.
+	* config/sparc/tm-sp64.h (FRAME_CHAIN, FRAME_SAVED_PC): Deleted.
+	(PRINT_REGISTER_HOOK): Call new fn sparc_print_register_hook.
+end-sanitize-v9
+
 Fri Jul 30 10:15:01 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* Makefile.in (ALLCONFIG):  Add config/i386/ptx.mh
