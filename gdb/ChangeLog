@@ -1,3 +1,9 @@
+2000-04-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/xm-linux.h (HOST_LONG_DOUBLE_FORMAT): Define as
+	&floatformat_i387_ext.
+	* config/i386/xm-i386gnu.h (HOST_LONG_DOUBLE_FORMAT): Likewise.
+
 2000-03-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* findvar.c (extract_floating): Remove reference to

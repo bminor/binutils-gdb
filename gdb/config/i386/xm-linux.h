@@ -1,5 +1,5 @@
 /* Native support for GNU/Linux, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1992, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,8 @@
 #define HOST_I386
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
+
+#define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
 
 #define HAVE_TERMIOS
 
