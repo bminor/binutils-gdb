@@ -1,5 +1,5 @@
 # Expect script for ld-shared tests
-#   Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation
+#   Copyright (C) 1994, 1995, 1996, 1997, 1998, 2001 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ if { ![istarget i386-*-sysv4*] \
      && ![istarget sparc*-*-solaris2*] \
      && ![istarget sparc*-*-sunos4*] \
      && ![istarget sparc*-*-linux*] \
+     && ![istarget arm*-*-linux*] \
      && ![istarget rs6000*-*-aix*] \
      && ![istarget powerpc*-*-aix*] } {
     return
