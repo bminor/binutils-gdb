@@ -626,6 +626,7 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
 
+/* Implicit sizes */
 extern struct type *builtin_type_void;
 extern struct type *builtin_type_char;
 extern struct type *builtin_type_short;
@@ -642,6 +643,20 @@ extern struct type *builtin_type_long_double;
 extern struct type *builtin_type_complex;
 extern struct type *builtin_type_double_complex;
 extern struct type *builtin_type_string;
+
+/* Explicit sizes - see <intypes.h> for naming schema */
+extern struct type *builtin_type_int8;
+extern struct type *builtin_type_uint8;
+extern struct type *builtin_type_int16;
+extern struct type *builtin_type_uint16;
+extern struct type *builtin_type_int32;
+extern struct type *builtin_type_uint32;
+extern struct type *builtin_type_int64;
+extern struct type *builtin_type_uint64;
+/* start-sanitize-r5900 */
+extern struct type *builtin_type_int128;
+extern struct type *builtin_type_uint128;
+/* end-sanitize-r5900 */
 
 /* This type represents a type that was unrecognized in symbol
    read-in.  */

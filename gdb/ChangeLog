@@ -1,3 +1,27 @@
+Fri Mar 20 09:04:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+start-sanitize-r5900
+	* config/mips/tm-r5900.h (REGISTER_VIRTUAL_SIZE): Redefine as
+ 	expression from REGISTER_VIRTUAL_TYPE.
+	(REGISTER_RAW_SIZE): Ditto.
+	(REGISTER_VIRTUAL_TYPE): Redefine, use explicit size for 32 bit
+ 	registers.
+
+end-sanitize-r5900
+	* gdbtypes.h (builtin_type_{,u}int{8,16,32,64}): New gdb builtin
+ 	types.
+start-sanitize-r5900
+	(builtin_type_{,u}int128): Ditto.
+end-sanitize-r5900
+	
+	* gdbtypes.c (_initialize_gdbtypes): Initialize new types.
+
+	* mips-tdep.c (do_gp_register_row): Pad register value when GP
+ 	register is smaller than MIPS_REGSIZE.
+
+	* findvar.c (value_of_register): When raw and virtual register
+ 	values identical, check that sizes are consistent.
+
 Thu Mar 19 11:32:15 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* minsyms.c (compare_minimal_symbols): If addresses are identical,
