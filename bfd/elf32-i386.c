@@ -611,15 +611,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount == -1)
-		{
-		  /* Make sure this symbol is output as a dynamic symbol.  */
-		  if (h->dynindx == -1)
-		    {
-		      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-			return false;
-		    }
-		  h->got.refcount = 1;
-		}
+		h->got.refcount = 1;
 	      else
 		h->got.refcount += 1;
 	    }
@@ -725,12 +717,6 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		 this reloc.  */
 	      if (dynobj == NULL)
 		htab->root.dynobj = dynobj = abfd;
-
-	      if (h != NULL && h->dynindx == -1)
-		{
-		  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-		    return false;
-		}
 
 	      if (sreloc == NULL)
 		{
@@ -990,14 +976,6 @@ elf_i386_adjust_dynamic_symbol (info, h)
 	     linkage table, and we can just do a PC32 reloc instead.  */
 	  h->plt.refcount = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-	  return true;
-	}
-
-      /* Make sure this symbol is output as a dynamic symbol.  */
-      if (h->dynindx == -1)
-	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-	    return false;
 	}
 
       return true;
@@ -1115,6 +1093,7 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
   struct bfd_link_info *info;
   struct elf_i386_link_hash_table *htab;
   asection *s;
+  struct elf_i386_link_hash_entry *eh;
 
   if (h->root.type == bfd_link_hash_indirect
       || h->root.type == bfd_link_hash_warning)
@@ -1126,6 +1105,15 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
   if (htab->root.dynamic_sections_created
       && h->plt.refcount > 0)
     {
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
       s = htab->splt;
       if (s == NULL)
 	abort ();
@@ -1178,6 +1166,15 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
     {
       boolean dyn;
 
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
       s = htab->sgot;
       h->got.offset = s->_raw_size;
       s->_raw_size += 4;
@@ -1188,28 +1185,44 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  /* In the shared -Bsymbolic case, discard space allocated to copy
-     PC relative relocs against symbols which turn out to be defined
+  /* In the shared -Bsymbolic case, discard space allocated for
+     dynamic relocs against symbols which turn out to be defined
      in regular objects.  For the normal shared case, discard space
      for relocs that have become local due to symbol visibility
      changes.  For the non-shared case, discard space for symbols
      which turn out to need copy relocs or are not dynamic.  */
 
-  if ((info->shared
-       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-       && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	   || info->symbolic))
-      || (!info->shared
-	  && (h->dynindx == -1
-	      || (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) != 0
-	      || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-		  && h->root.type != bfd_link_hash_undefweak
-		  && h->root.type != bfd_link_hash_undefined))))
+  eh = (struct elf_i386_link_hash_entry *) h;
+  if (eh->dyn_relocs == NULL)
+    return true;
+
+  if (!info->shared
+      && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+      && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	  || h->root.type == bfd_link_hash_undefweak
+	  || h->root.type == bfd_link_hash_undefined))
     {
-      struct elf_i386_link_hash_entry *eh;
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
+      /* If that succeeded, we know we'll be keeping all the relocs.  */
+      if (h->dynindx != -1)
+	return true;
+    }
+
+  if (!info->shared
+      || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
+	      || info->symbolic)))
+    {
       struct elf_i386_dyn_relocs *c;
 
-      eh = (struct elf_i386_link_hash_entry *) h;
       for (c = eh->dyn_relocs; c != NULL; c = c->next)
 	c->section->_raw_size -= c->count * sizeof (Elf32_External_Rel);
     }
@@ -1290,9 +1303,8 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 			  allocate_plt_and_got_and_discard_relocs,
 			  (PTR) info);
 
-  /* The check_relocs and adjust_dynamic_symbol entry points have
-     determined the sizes of the various dynamic sections.  Allocate
-     memory for them.  */
+  /* We now have determined the sizes of the various dynamic sections.
+     Allocate memory for them.  */
   relocs = false;
   reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
@@ -1775,31 +1787,23 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  memset (&outrel, 0, sizeof outrel);
 		  relocate = false;
 		}
-	      else if (r_type == R_386_PC32)
+	      else if (h != NULL
+		       && h->dynindx != -1
+		       && (r_type == R_386_PC32
+			   || !info->shared
+			   || !info->symbolic
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
+
 		{
-		  BFD_ASSERT (h != NULL && h->dynindx != -1);
 		  relocate = false;
-		  outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_PC32);
+		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 		}
 	      else
 		{
-		  /* h->dynindx may be -1 if this symbol was marked to
-		     become local.  */
-		  if (h == NULL
-		      || (info->shared
-			  && (info->symbolic || h->dynindx == -1)
-			  && (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) != 0))
-		    {
-		      relocate = true;
-		      outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
-		    }
-		  else
-		    {
-		      BFD_ASSERT (h->dynindx != -1);
-		      relocate = false;
-		      outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_32);
-		    }
+		  /* This symbol is local, or marked to become local.  */
+		  relocate = true;
+		  outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
 		}
 
 	      bfd_elf32_swap_reloc_out (output_bfd, &outrel,

@@ -1,3 +1,14 @@
+2001-06-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_check_relocs): Don't make syms dynamic
+	here..
+	(elf_i386_adjust_dynamic_symbol): ..nor here..
+	(allocate_plt_and_got_and_discard_relocs): .. instead do so here
+	after gc has run.
+	(elf_i386_size_dynamic_sections): Fix a comment.
+	(elf_i386_relocate_section <R_386_32, R_386_PC32>): Rearrange code
+	involved in writing reloc out.
+
 2001-06-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_check_relocs <R_386_32, R_386_PC32>):
