@@ -1,3 +1,14 @@
+Thu Mar 17 12:55:51 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-configure: Conditionalize more Makefile insertions,
+	set MAYBE_TARGET_DEFAULT for gcc, set NATDEPFILES for gdb,
+	delete Makefile.tem, compute target_{cpu,vendor,os}.
+	* mpw-config.in: Forward-include most .h files in include into
+	extra-include.
+	(readline): Don't build.
+	mpw-build.in (install): Install GDB.
+	mpw-README: Update/add helpful comments.
+
 Sun Feb 27 16:05:15 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-configure (prefix, mpw_prefix): Handle it.
