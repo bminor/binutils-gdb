@@ -1,3 +1,11 @@
+2003-05-03  J. Brobecker  <brobecker@gnat.com>
+
+	From  Thierry Schneider  <tpschneider1@yahoo.com>:
+	* mi-cmds.h (mi_cmd_symbol_list_lines): Add declaration.
+	* mi-cmds.c (mi_cmds): Add entry for new MI command.
+	* mi-cmd-symbol.c (mi_cmd_symbol_list_lines): New source file
+	for all symbol-related commands.
+
 2003-04-02  Bob Rossi  <bob_rossi@cox.net>
 
 	* mi-cmd-file.c: New file to implement mi file commands.
