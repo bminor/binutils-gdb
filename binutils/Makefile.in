@@ -199,9 +199,6 @@ $(NM_PROG): $(ADDL_LIBS) nm.o demangle.o $(BFD)
 $(OBJDUMP_PROG): $(ADDL_LIBS) objdump.o $(BFD) $(OPCODES)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
-objdump.o: objdump.c config.status
-	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(ARCHDEFS) $(CFLAGS) $(srcdir)/objdump.c
-
 underscore.c:
 	echo "int xxy_us_dummy;" >dummy.c
 	$(CC) -c dummy.c
@@ -490,13 +487,15 @@ install: all
 	  $(INSTALL_XFORM1) $(srcdir)/$$i.1 $(man1dir)/$$i.1 ; \
 	done
 	-if [ -d $(tooldir) ]; then \
-	   if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	   for i in nm.new strip.new ar ranlib; do \
-	     rm -f $(tooldir)/bin/$$i; \
-	     ln $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "s/.new//" $$t` $(tooldir)/bin/`echo $$i | sed -e 's/.new//'` \
-	      || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$i; \
-	   done; \
-	 else true; fi		
+	  if [ -d $(tooldir)/bin ]; then true; else mkdir $(tooldir)/bin; fi; \
+	  for i in nm.new strip.new ar ranlib; do \
+	    j=`echo $$i | sed -e 's/.new//'`; \
+	    rm -f $(tooldir)/bin/$$j; \
+	    k=`t='$(program_transform_name)'; echo $$j | sed -e s/x/x/ $$t`; \
+	    ln $(bindir)/$$k $(tooldir)/bin/$$j >/dev/null 2>/dev/null \
+	     || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j; \
+	  done; \
+	 else true; fi
 
 # This little path search is required because in the FSF net releases,
 # the info files are included in the source tree, and that may not be
