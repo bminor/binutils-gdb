@@ -1,3 +1,8 @@
+Thu Feb 13 14:40:16 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* write.c (write_relocs): Correct text in as_fatal error message,
+	bfd_perform_relocation -> bfd_install_relocation.
+
 Thu Feb 13 14:48:03 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* config/tc-m68k.c (LEX_TILDE): Define if TE_DELTA.
