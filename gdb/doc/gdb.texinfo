@@ -1923,6 +1923,13 @@ Set the @value{GDBN} working directory to @var{directory}.
 Print the @value{GDBN} working directory.
 @end table
 
+It is generally impossible to find the current working directory of
+the process being debugged (since a program can change its directory
+during its run).  If you work on a system where @value{GDBN} is
+configured with the @file{/proc} support, you can use the @code{info
+proc} command (@pxref{SVR4 Process Information}) to find out the
+current working directory of the debuggee.
+
 @node Input/Output
 @section Your program's input and output
 
@@ -11782,28 +11789,62 @@ modern FreeBSD systems.
 
 @node SVR4 Process Information
 @subsection SVR4 process information
+@cindex /proc
+@cindex examine process image
+@cindex process info via @file{/proc}
 
-@kindex /proc
-@cindex process image
-
-Many versions of SVR4 provide a facility called @samp{/proc} that can be
-used to examine the image of a running process using file-system
-subroutines.  If @value{GDBN} is configured for an operating system with
-this facility, the command @code{info proc} is available to report on
-several kinds of information about the process running your program.
-@code{info proc} works only on SVR4 systems that include the
-@code{procfs} code.  This includes OSF/1 (Digital Unix), Solaris, Irix,
-and Unixware, but not HP-UX or @sc{gnu}/Linux, for example.
+Many versions of SVR4 and compatible systems provide a facility called
+@samp{/proc} that can be used to examine the image of a running
+process using file-system subroutines.  If @value{GDBN} is configured
+for an operating system with this facility, the command @code{info
+proc} is available to report information about the process running
+your program, or about any process running on your system.  @code{info
+proc} works only on SVR4 systems that include the @code{procfs} code.
+This includes, as of this writing, @sc{gnu}/Linux, OSF/1 (Digital
+Unix), Solaris, Irix, and Unixware, but not HP-UX, for example.
 
 @table @code
 @kindex info proc
+@cindex process ID
 @item info proc
-Summarize available information about the process.
+@itemx info proc @var{process-id}
+Summarize available information about any running process.  If a
+process ID is specified by @var{process-id}, display information about
+that process; otherwise display information about the program being
+debugged.  The summary includes the debugged process ID, the command
+line used to invoke it, its current working directory, and its
+executable file's absolute file name.
 
-@kindex info proc mappings
+On some systems, @var{process-id} can be of the form
+@samp{[@var{pid}]/@var{tid}} which specifies a certain thread ID
+within a process.  If the optional @var{pid} part is missing, it means
+a thread from the process being debugged (the leading @samp{/} still
+needs to be present, or else @value{GDBN} will interpret the number as
+a process ID rather than a thread ID).
+
 @item info proc mappings
-Report on the address ranges accessible in the program, with information
-on whether your program may read, write, or execute each range.
+@cindex memory address space mappings
+Report the memory address space ranges accessible in the program, with
+information on whether the process has read, write, or execute access
+rights to each range.  On @sc{gnu}/Linux systems, each memory range
+includes the object file which is mapped to that range, instead of the
+memory access rights to that range.
+
+@item info proc stat
+@itemx info proc status
+@cindex process detailed status information
+These subcommands are specific to @sc{gnu}/Linux systems.  They show
+the process-related information, including the user ID and group ID;
+how many threads are there in the process; its virtual memory usage;
+the signals that are pending, blocked, and ignored; its TTY; its
+consumption of system and user time; its stack size; its @samp{nice}
+value; etc.  For more information, see the @samp{proc(5)} man page
+(type @kbd{man 5 proc} from your shell prompt).
+
+@item info proc all
+Show all the information about the process described under all of the
+above @code{info proc} subcommands.
+
 @ignore
 @comment These sub-options of 'info proc' were not included when
 @comment procfs.c was re-written.  Keep their descriptions around
@@ -11817,15 +11858,6 @@ its children.
 @item info proc id
 Report on the process IDs related to your program: its own process ID,
 the ID of its parent, the process group ID, and the session ID.
-
-@kindex info proc status
-@item info proc status
-General information on the state of the process.  If the process is
-stopped, this report includes the reason for stopping, and any signal
-received.
-
-@item info proc all
-Show all the above information about the process.
 @end ignore
 @end table
 

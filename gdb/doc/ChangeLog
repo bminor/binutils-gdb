@@ -1,3 +1,9 @@
+2004-10-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (SVR4 Process Information): Document subcommands of
+	"info proc" that are already implemented.  Add index entries.
+	(Working Directory): Add a cross-reference to "info proc" command.
+
 2004-10-12  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbint.texinfo (Versions and Branches): New chapter.
