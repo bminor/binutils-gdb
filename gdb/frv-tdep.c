@@ -34,6 +34,10 @@
 #include "gdb/sim-frv.h"
 #include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
 #include "symtab.h"
+#include "elf-bfd.h"
+#include "elf/frv.h"
+#include "osabi.h"
+#include "frv-tdep.h"
 
 extern void _initialize_frv_tdep (void);
 
@@ -69,6 +73,8 @@ enum {
   psr_regnum = 129,
   ccr_regnum = 130,
   cccr_regnum = 131,
+  fdpic_loadmap_exec_regnum = 132,
+  fdpic_loadmap_interp_regnum = 133,
   tbr_regnum = 135,
   brr_regnum = 136,
   dbar0_regnum = 137,
@@ -129,6 +135,9 @@ struct frv_unwind_cache		/* was struct frame_extra_info */
    Fortran.  */
 struct gdbarch_tdep
 {
+  /* Which ABI is in use?  */
+  enum frv_abi frv_abi;
+
   /* How many general-purpose registers does this variant have?  */
   int num_gprs;
 
@@ -147,6 +156,41 @@ struct gdbarch_tdep
 
 #define CURRENT_VARIANT (gdbarch_tdep (current_gdbarch))
 
+/* Return the FR-V ABI associated with GDBARCH.  */
+enum frv_abi
+frv_abi (struct gdbarch *gdbarch)
+{
+  return gdbarch_tdep (gdbarch)->frv_abi;
+}
+
+/* Fetch the interpreter and executable loadmap addresses (for shared
+   library support) for the FDPIC ABI.  Return 0 if successful, -1 if
+   not.  (E.g, -1 will be returned if the ABI isn't the FDPIC ABI.)  */
+int
+frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
+                             CORE_ADDR *exec_addr)
+{
+  if (frv_abi (gdbarch) != FRV_ABI_FDPIC)
+    return -1;
+  else
+    {
+      if (interp_addr != NULL)
+	{
+	  ULONGEST val;
+	  regcache_cooked_read_unsigned (current_regcache,
+					 fdpic_loadmap_interp_regnum, &val);
+	  *interp_addr = val;
+	}
+      if (exec_addr != NULL)
+	{
+	  ULONGEST val;
+	  regcache_cooked_read_unsigned (current_regcache,
+					 fdpic_loadmap_exec_regnum, &val);
+	  *exec_addr = val;
+	}
+      return 0;
+    }
+}
 
 /* Allocate a new variant structure, and set up default values for all
    the fields.  */
@@ -160,6 +204,7 @@ new_variant (void)
   var = xmalloc (sizeof (*var));
   memset (var, 0, sizeof (*var));
   
+  var->frv_abi = FRV_ABI_EABI;
   var->num_gprs = 64;
   var->num_fprs = 64;
   var->num_hw_watchpoints = 0;
@@ -238,6 +283,13 @@ set_variant_num_fprs (struct gdbarch_tdep *var, int num_fprs)
     }
 }
 
+static void
+set_variant_abi_fdpic (struct gdbarch_tdep *var)
+{
+  var->frv_abi = FRV_ABI_FDPIC;
+  var->register_names[fdpic_loadmap_exec_regnum] = xstrdup ("loadmap_exec");
+  var->register_names[fdpic_loadmap_interp_regnum] = xstrdup ("loadmap_interp");
+}
 
 static const char *
 frv_register_name (int reg)
@@ -1276,6 +1328,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *var;
+  int elf_flags = 0;
 
   /* Check to see if we've already built an appropriate architecture
      object for this executable.  */
@@ -1305,7 +1358,14 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* Never heard of this variant.  */
       return 0;
     }
-  
+
+  /* Extract the ELF flags, if available.  */
+  if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    elf_flags = elf_elfheader (info.abfd)->e_flags;
+
+  if (elf_flags & EF_FRV_FDPIC)
+    set_variant_abi_fdpic (var);
+
   gdbarch = gdbarch_alloc (&info, var);
 
   set_gdbarch_short_bit (gdbarch, 16);

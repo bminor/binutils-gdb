@@ -569,6 +569,7 @@ elf_reloc_macros_h =	$(INCLUDE_DIR)/elf/reloc-macros.h
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
+elf_frv_h =	$(INCLUDE_DIR)/elf/frv.h $(elf_reloc_macros_h)
 libaout_h =	$(BFD_SRC)/libaout.h
 libbfd_h =	$(BFD_SRC)/libbfd.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
@@ -658,6 +659,7 @@ f_lang_h = f-lang.h
 frame_base_h = frame-base.h
 frame_h = frame.h
 frame_unwind_h = frame-unwind.h $(frame_h)
+frv_tdep_h = frv-tdep.h
 gdbarch_h = gdbarch.h
 gdb_assert_h = gdb_assert.h
 gdbcmd_h = gdbcmd.h $(command_h) $(ui_out_h)
@@ -1769,6 +1771,7 @@ frv-tdep.o: frv-tdep.c $(defs_h) $(gdb_string_h) $(inferior_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(dis_asm_h) $(gdb_assert_h) \
 	$(sim_regno_h) $(gdb_sim_frv_h) $(opcodes_frv_desc_h) $(symtab_h)
+	$(elf_bfd_h) $(elf_frv_h) $(osabi_h) $(frv_tdep_h)
 f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(f_lang_h) $(gdb_string_h)
