@@ -1,5 +1,7 @@
 Mon Jul 26 13:17:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* hppa-tdep.c (pc_in_linker_stub): Return 0 if can't read memory.
+
 	* stabsread.c (rs6000_builtin_type): Make `logical' be TYPE_CODE_BOOL.
 
 Sun Jul 25 23:41:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)

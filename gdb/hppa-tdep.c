@@ -306,6 +306,11 @@ pc_in_linker_stub (pc)
 {
   int found_magic_instruction = 0;
   int i;
+  char buf[4];
+
+  /* If unable to read memory, assume pc is not in a linker stub.  */
+  if (target_read_memory (pc, buf, 4) != 0)
+    return 0;
 
   /* We are looking for something like
 
