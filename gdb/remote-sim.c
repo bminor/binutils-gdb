@@ -48,6 +48,8 @@ static int gdb_os_write_stdout PARAMS ((host_callback *, const char *, int));
 
 static void gdb_os_printf_filtered PARAMS ((host_callback *, const char *, ...));
 
+static void gdb_os_error PARAMS ((host_callback *, const char *, ...));
+
 static void gdbsim_fetch_register PARAMS ((int regno));
 
 static void gdbsim_store_register PARAMS ((int regno));
@@ -127,9 +129,10 @@ init_callbacks ()
   if (! callbacks_initialized)
     {
       gdb_callback = default_callback;
-      default_callback.init (&gdb_callback);
-      default_callback.write_stdout = gdb_os_write_stdout;
-      default_callback.printf_filtered = gdb_os_printf_filtered;
+      gdb_callback.init (&gdb_callback);
+      gdb_callback.write_stdout = gdb_os_write_stdout;
+      gdb_callback.printf_filtered = gdb_os_printf_filtered;
+      gdb_callback.error = gdb_os_error;
       sim_set_callbacks (&gdb_callback);
       callbacks_initialized = 1;
     }
@@ -192,9 +195,43 @@ gdb_os_printf_filtered (p, va_alist)
   format = va_arg (args, char *);
 #endif
 
-  vfprintf_filtered (stdout, format, args);
+  vfprintf_filtered (gdb_stdout, format, args);
 
   va_end (args);
+}
+
+/* GDB version of error callback.  */
+
+/* VARARGS */
+static void
+#ifdef ANSI_PROTOTYPES
+gdb_os_error (host_callback *p, const char *format, ...)
+#else
+gdb_os_error (p, va_alist)
+     host_callback *p;
+     va_dcl
+#endif
+{
+  if (error_hook)
+    (*error_hook) ();
+  else 
+    {
+      va_list args;
+#ifdef ANSI_PROTOTYPES
+      va_start (args, format);
+#else
+      char *format;
+
+      va_start (args);
+      format = va_arg (args, char *);
+#endif
+
+      error_begin ();
+      vfprintf_filtered (gdb_stderr, format, args);
+      fprintf_filtered (gdb_stderr, "\n");
+      va_end (args);
+      return_to_top_level (RETURN_ERROR);
+    }
 }
 
 static void
@@ -283,7 +320,7 @@ gdbsim_load (prog, fromtty)
 
 /* Start an inferior process and set inferior_pid to its pid.
    EXEC_FILE is the file to run.
-   ALLARGS is a string containing the arguments to the program.
+   ARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().
    On VxWorks and various standalone systems, we ignore exec_file.  */
 /* This is called not only when we first attach, but also when the
@@ -315,7 +352,7 @@ gdbsim_create_inferior (exec_file, args, env)
   remove_breakpoints ();
   init_wait_for_inferior ();
 
-  len = 5 + strlen (exec_file) + 1 + strlen (args) + 1 + /*slop*/ 10;
+  len = strlen (exec_file) + 1 + strlen (args) + 1 + /*slop*/ 10;
   arg_buf = (char *) alloca (len);
   arg_buf[0] = '\0';
   strcat (arg_buf, exec_file);

@@ -1,5 +1,5 @@
 /* This file defines the interface between the simulator and gdb.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -32,28 +32,15 @@ typedef unsigned int SIM_ADDR;
 typedef CORE_ADDR_TYPE SIM_ADDR;
 #endif
 
-/* Callbacks.
-   The simulator may use the following callbacks (gdb routines) which the
-   standalone program must provide.
-
-   void error /-* noreturn *-/ (char *msg, ...);
-   void *xmalloc (long size);
-
-   I/O is done by using a pointer provided by GDB via the sim_set_callbacks
-   call, look in callbacks.c to see what can be done.
-*/
-
-/* Main simulator entry points ...
-
-   All functions that can get an error must call the gdb routine `error',
-   they can only return upon success.  */
+/* Main simulator entry points.  */
 
 /* Initialize the simulator.  This function is called when the simulator
-   is selected from the command line. ARGS is passed from the command line
+   is selected from the command line.  ARGS is passed from the command line
    and can be used to select whatever run time options the simulator provides.
    ARGS is the raw character string and must be parsed by the simulator,
-   which is trivial to do with the buildargv function in libiberty.
-   It is ok to do nothing.  */
+   which is trivial to do with the buildargv function in libiberty.  */
+/* FIXME: Eventually create a STATE and return its address and pass it to
+   all other main entry points.  */
 
 void sim_open PARAMS ((char *args));
 

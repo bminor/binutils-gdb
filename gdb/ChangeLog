@@ -1,3 +1,10 @@
+Sun Dec  8 18:02:57 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* remote-sim.h: Update some comments.
+	* remote-sim.c (gdb_os_error): New function.
+	(init_callbacks): Fix initializing of gdb_callback.  Add gdb_os_error.
+	(gdb_os_printf_filtered): Use gdb_stdout, not stdout.
+
 Sun Dec  8 00:36:31 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* irix5-nat.c (supply_gregset, fill_gregset):  Handle gregsets
