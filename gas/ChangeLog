@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Thu Feb 26 15:49:04 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-d30v.c (write_2_short): Delayed jsr instructions don't
+	require padding to the next long word boundary.
+
+end-sanitize-d30v
 start-sanitize-sky
 Fri Feb 27 10:06:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 
