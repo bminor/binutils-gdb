@@ -44,6 +44,8 @@ nm-news-mips.h
 nm-riscos.h
 riscos.mh
 tm-bigmips.h
+tm-idt.h
+tm-idtl.h
 tm-irix3.h
 tm-irix5.h
 tm-mips.h

@@ -1,5 +1,10 @@
 Tue Dec  7 15:41:32 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/mips/idt.mt: Use tm-idt.h instead of tm-bigmips.h.
+	* config/mips/idtl.mt: Use tm-idtl.h instead of tm-mips.h.
+	* config/mipos/tm-idt.h, config/mips/tm-idtl.h: New files; use
+	different BREAKPOINT value for IDT.
+
 	* mipsread.c: Include bfd.h and coff/sym.h.
 
 Mon Dec  6 16:34:10 1993  K. Richard Pixley  (rich@cygnus.com)
