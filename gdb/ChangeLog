@@ -1,5 +1,15 @@
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-tdep.h (gdbarch_tdep): Add vm_min_address member.
+	* alpha-tdep.c (heuristic_proc_start): Use vm_min_address
+	from gdbarch_tdep rather than a constant.
+	(alpha_gdbarch_init): Initialize tdep->vm_min_address to
+	the default text address for all Alpha Unix ABIs.
+	(alpha_dump_tdep): Report the value of tdep->vm_min_address.
+	* config/alpha/tm-alpha.h (VM_MIN_ADDRESS): Delete.
+
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alpha-tdep.h: New file.  Includes several Alpha target constants
 	taken from...
 	* config/alpha/tm-alpha.h: ...here.  Remove macros that we now

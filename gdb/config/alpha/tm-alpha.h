@@ -99,11 +99,6 @@ extern void alpha_print_extra_frame_info (struct frame_info *);
   alpha_setup_arbitrary_frame (argc, argv)
 extern struct frame_info *alpha_setup_arbitrary_frame (int, CORE_ADDR *);
 
-/* This is used by heuristic_proc_start.  It should be shot it the head.  */
-#ifndef VM_MIN_ADDRESS
-#define VM_MIN_ADDRESS (CORE_ADDR)0x120000000
-#endif
-
 /* If PC is in a shared library trampoline code, return the PC
    where the function itself actually starts.  If not, return 0.  */
 #define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)

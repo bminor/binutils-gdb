@@ -617,6 +617,7 @@ alpha_about_to_return (CORE_ADDR pc)
 static CORE_ADDR
 heuristic_proc_start (CORE_ADDR pc)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR start_pc = pc;
   CORE_ADDR fence = start_pc - heuristic_fence_post;
 
@@ -624,8 +625,8 @@ heuristic_proc_start (CORE_ADDR pc)
     return 0;
 
   if (heuristic_fence_post == UINT_MAX
-      || fence < VM_MIN_ADDRESS)
-    fence = VM_MIN_ADDRESS;
+      || fence < tdep->vm_min_address)
+    fence = tdep->vm_min_address;
 
   /* search back for previous return */
   for (start_pc -= 4;; start_pc -= 4)
@@ -639,7 +640,7 @@ heuristic_proc_start (CORE_ADDR pc)
 	  {
 	    static int blurb_printed = 0;
 
-	    if (fence == VM_MIN_ADDRESS)
+	    if (fence == tdep->vm_min_address)
 	      warning ("Hit beginning of text section without finding");
 	    else
 	      warning ("Hit heuristic-fence-post without finding");
@@ -1960,6 +1961,10 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->abi_name = "<invalid>";
     }
 
+  /* Lowest text address.  This is used by heuristic_proc_start() to
+     decide when to stop looking.  */
+  tdep->vm_min_address = (CORE_ADDR) 0x120000000;
+
   /* Type sizes */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
@@ -2073,6 +2078,10 @@ alpha_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
     internal_error (__FILE__, __LINE__,
 		    "alpha_dump_tdep: illegal setting of tdep->alpha_abi (%d)",
 		    (int) tdep->alpha_abi);
+
+  fprintf_unfiltered (file,
+                      "alpha_dump_tdep: vm_min_address = 0x%lx\n",
+		      (long) tdep->vm_min_address);
 }
 
 void

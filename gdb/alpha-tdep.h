@@ -94,6 +94,8 @@ struct gdbarch_tdep
 {
   enum alpha_abi alpha_abi;	/* OS/ABI of inferior.  */
   const char *abi_name;		/* Name of the above.  */
+
+  CORE_ADDR vm_min_address;	/* used by heuristic_proc_start */
 };
 
 #endif /* ALPHA_TDEP_H */
