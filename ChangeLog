@@ -1,5 +1,9 @@
 Mon Jun 16 11:11:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure: Set CFLAGS and CXXFLAGS, and substitute them into
+	Makefile.  From Jeff Makey <jeff@cts.com>.
+	* Makefile.in: Add comment for CFLAGS and CXXFLAGS.
+
 	* Makefile.in (DISTBISONFILES): Remove.
 	(taz): Don't futz with DISTBISONFILES.  Change BISON to use
 	$(DEFAULT_YACC).

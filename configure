@@ -760,7 +760,9 @@ t loop
   AS=${AS-${host_alias}-as}
   AS_FOR_TARGET=${AS_FOR_TARGET-${target_alias}-as}
   CC=${CC-${host_alias}-gcc}
+  CFLAGS=${CFLAGS-"-g -O2"}
   CXX=${CXX-${host_alias}-c++}
+  CXXFLAGS=${CXXFLAGS-"-g -O2"}
   CC_FOR_BUILD=${CC_FOR_BUILD-gcc}
   CC_FOR_TARGET=${CC_FOR_TARGET-${target_alias}-gcc}
   CXX_FOR_TARGET=${CXX_FOR_TARGET-${target_alias}-c++}
@@ -830,7 +832,16 @@ else
     for dir in $PATH; do
       test -z "$dir" && dir=.
       if test -f $dir/gcc; then
-	CC="gcc -O2"
+	CC="gcc"
+	echo 'void f(){}' > conftest.c
+	if test -z "`${CC} -g -c conftest.c 2>&1`"; then
+	  CFLAGS=${CFLAGS-"-g -O2"}
+	  CXXFLAGS=${CFLAGS-"-g -O2"}
+	else
+	  CFLAGS=${CFLAGS-"-O2"}
+	  CXXFLAGS=${CFLAGS-"-O2"}
+	fi
+	rm -f conftest*
 	break
       fi
     done
@@ -839,10 +850,14 @@ else
   fi
 
   CXX=${CXX-"c++"}
+  CFLAGS=${CFLAGS-"-g"}
+  CXXFLAGS=${CXXFLAGS-"-g -O2"}
 fi
 
 export CC
 export CXX
+export CFLAGS
+export CXXFLAGS
 
 case "$host" in
 	*go32*)
@@ -1120,6 +1135,20 @@ EOF
 			s/\\\\\\n//g
 			t loop2
 			s%^CXX[ 	]*=.*$%CXX = ${CXX}%
+			}" \
+		    -e "/^CFLAGS[ 	]*=/{
+			:loop3
+			/\\\\$/ N
+			s/\\\\\\n//g
+			t loop3
+			s%^CFLAGS[ 	]*=.*$%CFLAGS = ${CFLAGS}%
+			}" \
+		    -e "/^CXXFLAGS[ 	]*=/{
+			:loop4
+			/\\\\$/ N
+			s/\\\\\\n//g
+			t loop4
+			s%^CXXFLAGS[ 	]*=.*$%CXXFLAGS = ${CXXFLAGS}%
 			}" \
 		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \
 		    -e "s:^GDB_TK[	 ]*=.*$:GDB_TK = ${GDB_TK}:" \

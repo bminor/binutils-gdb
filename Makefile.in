@@ -62,9 +62,10 @@ HOST_CC = $(CC_FOR_BUILD)
 HOST_PREFIX = 
 HOST_PREFIX_1 = loser-
 
-# We don't specify -g -O because many compilers don't support -g -O,
-# and/or -O is broken in and of itself.
+# These flag values are normally overridden by the configure script.
 CFLAGS = -g
+CXXFLAGS = -g -O2
+
 LIBCFLAGS = $(CFLAGS)
 CFLAGS_FOR_TARGET = $(CFLAGS)
 LDFLAGS_FOR_TARGET = 
@@ -79,7 +80,6 @@ CHILL_LIB = -lchill
 CXX = c++
 
 # Use -O2 to stress test the compiler.
-CXXFLAGS = -g -O2
 LIBCXXFLAGS = $(CXXFLAGS) -fno-implicit-templates
 CXXFLAGS_FOR_TARGET = $(CXXFLAGS)
 LIBCXXFLAGS_FOR_TARGET = $(CXXFLAGS_FOR_TARGET) -fno-implicit-templates
