@@ -115,8 +115,11 @@ dump_insns (disassemble_info * di, CORE_ADDR low, CORE_ADDR high,
 	{
 	  /* We don't care now about line, filename and
 	     unmapped. But we might in the future. */
+	  ui_out_text (uiout, " <");
 	  ui_out_field_string (uiout, "func-name", name);
+	  ui_out_text (uiout, "+");
 	  ui_out_field_int (uiout, "offset", offset);
+	  ui_out_text (uiout, ">:\t");
 	}
       if (filename != NULL)
 	xfree (filename);
@@ -128,6 +131,7 @@ dump_insns (disassemble_info * di, CORE_ADDR low, CORE_ADDR high,
       ui_out_field_stream (uiout, "inst", stb);
       ui_file_rewind (stb->stream);
       ui_out_tuple_end (uiout);
+      ui_out_text (uiout, "\n");
     }
   return num_displayed;
 }
@@ -257,6 +261,7 @@ do_mixed_source_and_assembly (struct disassemble_info *di, int nlines,
 	{
 	  ui_out_list_end (uiout);
 	  ui_out_tuple_end (uiout);
+	  ui_out_text (uiout, "\n");
 	  close_list = 0;
 	}
       if (how_many >= 0)
