@@ -1,3 +1,9 @@
+2000-12-23  Ben Elliston  <bje@redhat.com>
+
+	* cgen-trace.c (trace_result): Handle 'f' type operands; output
+	them to the trace stream using sim_fpu_printn_fpu. Include
+	"sim-fpu.h".
+
 2000-12-15  Ben Elliston  <bje@redhat.com>
 
 	* sim-fpu.h (sim_fpu_printn_fpu): Declare.

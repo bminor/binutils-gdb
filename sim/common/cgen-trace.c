@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "dis-asm.h"
 #include "bfd.h"
 #include "sim-main.h"
+#include "sim-fpu.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -235,6 +236,19 @@ trace_result (SIM_CPU *cpu, char *name, int type, ...)
     default :
       cgen_trace_printf (cpu, "%s <- 0x%x", name, va_arg (args, int));
       break;
+    case 'f':
+      {
+	DI di;
+	sim_fpu f;
+
+	/* this is separated from previous line for sunos cc */
+	di = va_arg (args, DI);
+	sim_fpu_64to (&f, di);
+
+	cgen_trace_printf (cpu, "%s <- ", name);
+	sim_fpu_printn_fpu (&f, (sim_fpu_print_func *) cgen_trace_printf, 4, cpu);
+	break;
+      }
     case 'D' :
       {
 	DI di;
