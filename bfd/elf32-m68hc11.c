@@ -693,6 +693,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
       bfd_vma symval;
       bfd_vma value;
       Elf_Internal_Sym *isym;
+      asection *sym_sec;
 
       /* If this isn't something that can be relaxed, then ignore
 	 this reloc.  */
@@ -791,8 +792,6 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-          asection *sym_sec;
-
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
           sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	  symval = (isym->st_value
@@ -819,9 +818,11 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
 	      continue;
 	    }
 
+          isym = 0;
+          sym_sec = h->root.u.def.section;
 	  symval = (h->root.u.def.value
-		    + h->root.u.def.section->output_section->vma
-		    + h->root.u.def.section->output_offset);
+		    + sym_sec->output_section->vma
+		    + sym_sec->output_offset);
 	}
 
       if (ELF32_R_TYPE (irel->r_info) == (int) R_M68HC11_RL_GROUP)
@@ -838,6 +839,32 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
           continue;
         }
 
+      /* When we relax some bytes, the size of our section changes.
+         This affects the layout of next input sections that go in our
+         output section.  When the symbol is part of another section that
+         will go in the same output section as the current one, it's
+         final address may now be incorrect (too far).  We must let the
+         linker re-compute all section offsets before processing this
+         reloc.  Code example:
+
+                                Initial             Final
+         .sect .text            section size = 6    section size = 4
+         jmp foo
+         jmp bar
+         .sect .text.foo_bar    output_offset = 6   output_offset = 4
+         foo: rts
+         bar: rts
+
+         If we process the reloc now, the jmp bar is replaced by a
+         relative branch to the initial bar address (output_offset 6).  */
+      if (*again && sym_sec != sec
+          && sym_sec->output_section == sec->output_section)
+        {
+          prev_insn_group = 0;
+          prev_insn_branch = 0;
+          continue;
+        }
+      
       value = symval;
       /* Try to turn a far branch to a near branch.  */
       if (ELF32_R_TYPE (irel->r_info) == (int) R_M68HC11_16
@@ -883,6 +910,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
                                               irel->r_offset - 1, 3);
             }
           prev_insn_branch = 0;
+          *again = true;
         }
 
       /* Try to turn a 16 bit address into a 8 bit page0 address.  */
@@ -904,6 +932,8 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
 
           if (prev_insn_group)
             {
+              unsigned long old_sec_size = sec->_cooked_size;
+              
               /* Note that we've changed the reldection contents, etc.  */
               elf_section_data (sec)->relocs = internal_relocs;
               free_relocs = NULL;
@@ -921,6 +951,8 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
               prev_insn_group = 0;
               irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
                                            R_M68HC11_NONE);
+              if (sec->_cooked_size != old_sec_size)
+                *again = true;
               continue;
             }
           
@@ -956,8 +988,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
           irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
                                        R_M68HC11_8);
 
-          /* That will change things, so, we should relax again.
-             Note that this is not required, and it may be slow.  */
+          /* That will change things, so, we should relax again.  */
           *again = true;
         }
       else if (ELF32_R_TYPE (irel->r_info) == R_M68HC11_16)
@@ -999,6 +1030,8 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
                                                R_M68HC11_NONE);
                   m68hc11_elf_relax_delete_bytes (abfd, sec,
                                                   irel->r_offset + 1, 1);
+                  /* That will change things, so, we should relax again.  */
+                  *again = true;
                 }
             }
         }

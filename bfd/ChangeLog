@@ -1,5 +1,11 @@
 2002-10-12  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* elf32-m68hc11.c (m68hc11_elf_relax_section): Don't treat relocs
+	with symbols in other sections if we relaxed something;  the sections
+	output offsets must be re-computed before.
+
+2002-10-12  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* elf32-m68hc11.c (m68hc11_elf_relax_section): Update symbols
 	handling to use Elf_Internal_Sym.
 	(m68hc11_elf_relax_delete_bytes): Likewise.
