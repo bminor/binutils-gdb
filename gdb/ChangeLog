@@ -1,5 +1,11 @@
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-dump.h (fopen_with_cleanup): Make "filename" const.
+	* cli/cli-dump.c (dump_binary_file, dump_bfd_file): Make string
+	parameters const, change buf to a const bfd_byte.
+	(fopen_with_cleanup, bfd_openw_with_cleanup): Make all string
+	parameters const.
+
 	* corefile.c (write_memory): Update, make a copy of the read-only
 	buffer.
 	* target.c (target_read_memory): Update.

@@ -1,6 +1,6 @@
 /* Dump-to-file commands, for GDB, the GNU debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2005 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -118,7 +118,7 @@ scan_filename_with_cleanup (char **cmd, const char *defname)
 }
 
 FILE *
-fopen_with_cleanup (char *filename, const char *mode)
+fopen_with_cleanup (const char *filename, const char *mode)
 {
   FILE *file = fopen (filename, mode);
   if (file == NULL)
@@ -145,7 +145,8 @@ bfd_openr_with_cleanup (const char *filename, const char *target)
 }
 
 static bfd *
-bfd_openw_with_cleanup (char *filename, const char *target, char *mode)
+bfd_openw_with_cleanup (const char *filename, const char *target,
+			const char *mode)
 {
   bfd *obfd;
 
@@ -192,8 +193,8 @@ append_command (char *cmd, int from_tty)
 }
 
 static void
-dump_binary_file (char *filename, char *mode, 
-		  char *buf, int len)
+dump_binary_file (const char *filename, const char *mode, 
+		  const bfd_byte *buf, int len)
 {
   FILE *file;
   int status;
@@ -205,9 +206,9 @@ dump_binary_file (char *filename, char *mode,
 }
 
 static void
-dump_bfd_file (char *filename, char *mode, 
-	       char *target, CORE_ADDR vaddr, 
-	       char *buf, int len)
+dump_bfd_file (const char *filename, const char *mode, 
+	       const char *target, CORE_ADDR vaddr, 
+	       const bfd_byte *buf, int len)
 {
   bfd *obfd;
   asection *osection;
