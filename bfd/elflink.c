@@ -709,7 +709,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       bfd_boolean *type_change_ok,
 		       bfd_boolean *size_change_ok)
 {
-  asection *sec;
+  asection *sec, *oldsec;
   struct elf_link_hash_entry *h;
   struct elf_link_hash_entry *flip;
   int bind;
@@ -753,26 +753,31 @@ _bfd_elf_merge_symbol (bfd *abfd,
       return TRUE;
     }
 
-  /* OLDBFD is a BFD associated with the existing symbol.  */
+  /* OLDBFD and OLDSEC are a BFD and an ASECTION associated with the
+     existing symbol.  */
 
   switch (h->root.type)
     {
     default:
       oldbfd = NULL;
+      oldsec = NULL;
       break;
 
     case bfd_link_hash_undefined:
     case bfd_link_hash_undefweak:
       oldbfd = h->root.u.undef.abfd;
+      oldsec = NULL;
       break;
 
     case bfd_link_hash_defined:
     case bfd_link_hash_defweak:
       oldbfd = h->root.u.def.section->owner;
+      oldsec = h->root.u.def.section;
       break;
 
     case bfd_link_hash_common:
       oldbfd = h->root.u.c.p->section->owner;
+      oldsec = h->root.u.c.p->section;
       break;
     }
 
@@ -839,6 +844,54 @@ _bfd_elf_merge_symbol (bfd *abfd,
     olddef = FALSE;
   else
     olddef = TRUE;
+
+  /* Check TLS symbol.  */
+  if ((ELF_ST_TYPE (sym->st_info) == STT_TLS || h->type == STT_TLS)
+      && ELF_ST_TYPE (sym->st_info) != h->type)
+    {
+      bfd *ntbfd, *tbfd;
+      bfd_boolean ntdef, tdef;
+      asection *ntsec, *tsec;
+
+      if (h->type == STT_TLS)
+	{
+	  ntbfd = abfd; 
+	  ntsec = sec;
+	  ntdef = newdef;
+	  tbfd = oldbfd;
+	  tsec = oldsec;
+	  tdef = olddef;
+	}
+      else
+	{
+	  ntbfd = oldbfd;
+	  ntsec = oldsec;
+	  ntdef = olddef;
+	  tbfd = abfd;
+	  tsec = sec;
+	  tdef = newdef;
+	}
+
+      if (tdef && ntdef)
+	(*_bfd_error_handler)
+	  (_("%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
+	   tbfd, tsec, ntbfd, ntsec, h->root.root.string);
+      else if (!tdef && !ntdef)
+	(*_bfd_error_handler)
+	  (_("%s: TLS reference in %B mismatches non-TLS reference in %B"),
+	   tbfd, ntbfd, h->root.root.string);
+      else if (tdef)
+	(*_bfd_error_handler)
+	  (_("%s: TLS definition in %B section %A mismatches non-TLS reference in %B"),
+	   tbfd, tsec, ntbfd, h->root.root.string);
+      else
+	(*_bfd_error_handler)
+	  (_("%s: TLS reference in %B mismatches non-TLS definition in %B section %A"),
+	   tbfd, ntbfd, ntsec, h->root.root.string);
+
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   /* We need to remember if a symbol has a definition in a dynamic
      object or is weak in all dynamic objects. Internal and hidden
