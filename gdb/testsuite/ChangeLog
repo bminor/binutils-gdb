@@ -1,3 +1,14 @@
+Thu Nov  2 09:50:05 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Remove i*86-*-sysv4* and
+	i*86-*-linux* xfails for "backtrace through signal handler".
+	* gdb.base/corefile.exp: Add i*86-*-sysv4* xfail for
+	"print func2::coremaker_local".
+	* gdb.base/break.exp: Add i*86-*-sysv4*, sparc-sun-sunos4,
+ 	xfail for
+	"delete all breakpoints when none".
+	
+
 Wed Nov  1 15:57:16 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/break.exp: Change test that deletes all breakpoints

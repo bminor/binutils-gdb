@@ -67,10 +67,12 @@ expect {
     -re "Delete all breakpoints.*y or n. $"\
 	{ send "y\n"
 	    expect {
-		-re ".*$prompt $" {}
+		-re ".*$prompt $" {
+		    setup_xfail "i*86-*-sysv4*" "sparc-sun-sunos4*"
+		    fail "Delete all breakpoints when none"
+		}
 		timeout	{ fail "Delete all breakpoints when none (timeout)" }
 	    }
-	    fail "Delete all breakpoints when none (known pre 4.16 bug)"
 	}
     -re ".*$prompt $"       { pass "Delete all breakpoints when none" }
     timeout	            { fail "Delete all breakpoints when none" }
