@@ -1,3 +1,15 @@
+Tue Sep 23 00:26:39 1997  Felix Lee  <flee@yin.cygnus.com>
+
+	* sim-events.c (SIM_EVENTS_POLL_RATE): poll more often than once
+ 	an hour.
+	* sim-n-core.h (WITH_XOR_ENDIAN): MSVC barfs on
+	if (0) { 1 % 0; }
+	* sim-core.c (sim_core_xor_write_buffer): WITH_XOR_ENDIAN + 1.
+	(SIGBUS) define for Windows.
+	* sim-trace.c (trace_printf,debug_printf): added ALMOST_STDC.
+	* sim-resume.c: define SIGTRAP for windows.
+	* sim-xcat.h: use token pasting if ALMOST_STDC.
+
 Tue Sep 23 11:04:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Make-common.in (SIM_SCACHE, SIM_DEFAULT_MODEL): Assign

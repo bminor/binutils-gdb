@@ -24,7 +24,7 @@
 #ifndef _SIM_XCAT_H_
 #define _SIM_XCAT_H_
 
-#ifdef __STDC__
+#if defined __STDC__ || defined ALMOST_STDC
 #define CONCAT2(a,b)	 a##b
 #define CONCAT3(a,b,c)	 a##b##c
 #define CONCAT4(a,b,c,d) a##b##c##d
