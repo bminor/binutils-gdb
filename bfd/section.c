@@ -1065,8 +1065,10 @@ _bfd_strip_section_from_output (s)
 	break;
       }
 
-  /* If the output section is empty, remove it too.  */
-  if (!os->link_order_head)
+  /* If the output section is empty, remove it too.  Careful about sections
+     that have been discarded in the link script -- they are mapped to 
+     bfd_abs_section, which has no owner.  */
+  if (!os->link_order_head && os->owner)
     {
       for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
 	if (*spp == os)

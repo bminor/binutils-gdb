@@ -1,3 +1,8 @@
+Sun Jun 20 14:13:57 1999  Richard Henderson  <rth@cygnus.com>
+
+	* section.c (_bfd_strip_section_from_output): Ignore sections
+	DISCARDed by the link script.
+
 1999-06-19  Ian Lance Taylor  <ian@zembu.com>
 
 	* elflink.h (elf_link_remove_section_and_adjust_dynindices):
