@@ -671,6 +671,7 @@ dbx_create_type ()
 
   bzero (type, sizeof (struct type));
   TYPE_VPTR_FIELDNO (type) = -1;
+  TYPE_VPTR_BASETYPE (type) = 0;
   return type;
 }
 
@@ -1873,8 +1874,10 @@ read_dbx_symtab (symfile_name, addr,
 	  bufp->n_value += addr;		/* Relocate */
 	  SET_NAMESTRING ();
 	  /* Check for __DYNAMIC, which is used by Sun shared libraries. 
-	     Record it even if it's local, not global, so we can find it.  */
-	  if (namestring[8] == 'C' && (strcmp ("__DYNAMIC", namestring) == 0))
+	     Record it even if it's local, not global, so we can find it.
+	     Same with virtual function tables, both global and static.  */
+	  if ((namestring[8] == 'C' && (strcmp ("__DYNAMIC", namestring) == 0))
+	      || VTBL_PREFIX_P ((namestring+HASH_OFFSET)))
 	    {
 	      /* Not really a function here, but... */
 	      record_misc_function (namestring, bufp->n_value,
@@ -2871,8 +2874,7 @@ read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
 	{
 	  /* N_CATCH is not fixed up by the linker, and unfortunately,
 	     there's no other place to put it in the .stab map.  */
-	  /* FIXME, do we also have to add OFFSET or something? -- gnu@cygnus */
-	  bufp->n_value += text_offset;
+	  bufp->n_value += text_offset + offset;
 	}
       else if (type == N_TEXT || type == N_DATA || type == N_BSS)
 	bufp->n_value += offset;
@@ -3992,11 +3994,9 @@ read_type (pp)
 	  return_type = read_type (pp);
 	  if (*(*pp)++ != ';')
 	    complain (&invalid_member_complaint, symnum);
-	  type = lookup_function_type (return_type);
+	  type = allocate_stub_method (return_type);
 	  if (typenums[0] != -1)
 	    *dbx_lookup_type (typenums) = type;
-	  TYPE_CODE (type) = TYPE_CODE_METHOD;
-	  TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
 	}
       else
 	{
@@ -4134,7 +4134,7 @@ virtual_context (for_type, type, name, fn_type, offset)
 	      return TYPE_FN_FIELD_FCONTEXT (f, j);
 	}
     }
-  for (i = TYPE_N_BASECLASSES (type); i > 0; i--)
+  for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
       basetype = virtual_context (for_type, TYPE_BASECLASS (type, i), name,
 				  fn_type, offset);
@@ -4329,7 +4329,7 @@ read_struct_type (pp, type)
 	  /* Special GNU C++ name.  */
 	  if (*++p == 'v')
 	    {
-	      char *prefix, *name;	/* FIXME: NAME never set! */
+	      char *prefix, *name = 0;
 	      struct type *context;
 
 	      switch (*++p)
@@ -4349,6 +4349,7 @@ read_struct_type (pp, type)
 		{
 		  if (name == 0)
 		    error ("type name unknown at symtab pos %d.", symnum);
+		  /* FIXME-tiemann: when is `name' ever non-0?  */
 		  TYPE_NAME (context) = obsavestring (name, p - name - 1);
 		}
 	      list->field.name = obconcat (prefix, type_name_no_tag (context), "");
@@ -4422,7 +4423,9 @@ read_struct_type (pp, type)
       list->field.bitsize = read_number (pp, ';');
 
 #if 0
-      /* FIXME tiemann: what is the story here?  What does the compiler
+      /* FIXME-tiemann: Can't the compiler put out something which
+	 lets us distinguish these? (or maybe just not put out anything
+	 for the field).  What is the story here?  What does the compiler
 	really do?  Also, patch gdb.texinfo for this case; I document
 	it as a possible problem there.  Search for "DBX-style".  */
 
@@ -4536,8 +4539,8 @@ read_struct_type (pp, type)
 	      /* This lets the user type "break operator+".
 	         We could just put in "+" as the name, but that wouldn't
 		 work for "*".  */
-	      static char opname[32] = "operator";
-	      char *o = opname + 8;
+	      static char opname[32] = {'o', 'p', CPLUS_MARKER};
+	      char *o = opname + 3;
 
 	      /* Skip past '::'.  */
 	      p += 2;
@@ -4578,7 +4581,7 @@ read_struct_type (pp, type)
 	      *pp = p + 1;
 	      new_sublist->visibility = *(*pp)++ - '0';
 	      if (**pp == '\\') *pp = next_symbol_text ();
-	      /* FIXME: tiemann needs to add const/volatile info
+	      /* FIXME-tiemann: need to add const/volatile info
 		 to the methods.  For now, just skip the char.
 		 In future, here's what we need to implement:
 
@@ -4632,6 +4635,7 @@ read_struct_type (pp, type)
 		  /* **pp == '.'.  */
 		  /* normal member function.  */
 		  new_sublist->fn_field.voffset = 0;
+		  new_sublist->fn_field.fcontext = 0;
 		  break;
 		}
 
@@ -4733,7 +4737,14 @@ read_struct_type (pp, type)
 	  if (type == t)
 	    {
 	      if (TYPE_FIELD_NAME (t, TYPE_N_BASECLASSES (t)) == 0)
-		TYPE_VPTR_FIELDNO (type) = i = TYPE_N_BASECLASSES (t);
+		{
+		  /* FIXME-tiemann: what's this?  */
+#if 0
+		  TYPE_VPTR_FIELDNO (type) = i = TYPE_N_BASECLASSES (t);
+#else
+		  error_type (pp);
+#endif
+		}
 	      else for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); --i)
 		if (! strncmp (TYPE_FIELD_NAME (t, i), vptr_name, 
 			sizeof (vptr_name) -1))
@@ -4749,16 +4760,6 @@ read_struct_type (pp, type)
 	    TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
 	  *pp = p + 1;
 	}
-      else
-	{
-	  TYPE_VPTR_BASETYPE (type) = 0;
-	  TYPE_VPTR_FIELDNO (type) = -1;
-	}
-    }
-  else
-    {
-      TYPE_VPTR_BASETYPE (type) = 0;
-      TYPE_VPTR_FIELDNO (type) = -1;
     }
 
   return type;
@@ -5095,6 +5096,12 @@ read_range_type (pp, typenums)
 	  got_signed = 1;
 	  nbits = n2bits;
 	}
+
+      /* Check for "long long".  */
+      if (got_signed && nbits == TARGET_LONG_LONG_BIT)
+	return builtin_type_long_long;
+      if (got_unsigned && nbits == TARGET_LONG_LONG_BIT)
+	return builtin_type_unsigned_long_long;
 
       if (got_signed || got_unsigned)
 	{
