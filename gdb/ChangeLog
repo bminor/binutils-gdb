@@ -1,3 +1,12 @@
+2001-11-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* m88k-tdep.c (m88k_register_type): New function.
+	* config/m88k/tm-m88k.h (REGISTER_CONVERTIBLE): Delete.
+	(REGISTER_CONVERT_TO_VIRTUAL): Delete.
+	(REGISTER_CONVERT_TO_RAW): Delete.
+	(m88k_register_type): Declare.
+	(REGISTER_VIRTUAL_TYPE): Update.  Call m88k_register_type.
+
 2001-11-11  Mark Kettenis  <kettenis@elgar.my.domain>
 
 	* i386-tdep.h (FPU_REG_RAW_SIZE): Define unconditionally.

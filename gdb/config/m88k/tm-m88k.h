@@ -380,40 +380,11 @@ if (!target_is_m88110) \
 
 #define MAX_REGISTER_VIRTUAL_SIZE (REGISTER_RAW_SIZE(XFP_REGNUM))
 
-  /* Nonzero if register N requires conversion
-     from raw format to virtual format.  */
-
-#define REGISTER_CONVERTIBLE(N) ((N) >= XFP_REGNUM)
-
-#include "floatformat.h"
-
-/* Convert data from raw format for register REGNUM in buffer FROM
-   to virtual format with type TYPE in buffer TO.  */
-
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
-{ \
-  DOUBLEST val; \
-  floatformat_to_doublest (&floatformat_m88110_ext, (FROM), &val); \
-  store_floating ((TO), TYPE_LENGTH (TYPE), val); \
-}
-
-/* Convert data from virtual format with type TYPE in buffer FROM
-   to raw format for register REGNUM in buffer TO.  */
-
-#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
-{ \
-  DOUBLEST val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  floatformat_from_doublest (&floatformat_m88110_ext, &val, (TO)); \
-}
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
-#define REGISTER_VIRTUAL_TYPE(N) \
-((N) >= XFP_REGNUM \
- ? builtin_type_double \
- : ((N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM \
-    ? lookup_pointer_type (builtin_type_void) : builtin_type_int))
+struct type *m88k_register_type (int regnum);
+#define REGISTER_VIRTUAL_TYPE(N) m88k_register_type (N)
 
 /* The 88k call/return conventions call for "small" values to be returned
    into consecutive registers starting from r2.  */

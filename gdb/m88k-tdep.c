@@ -39,6 +39,19 @@ void frame_find_saved_regs ();
 
 int target_is_m88110 = 0;
 
+/* The type of a register.  */
+struct type *
+m88k_register_type (int regnum)
+{
+  if (regnum >= XFP_REGNUM)
+    return builtin_type_m88110_ext;
+  else if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
+    return builtin_type_void_func_ptr;
+  else
+    return builtin_type_int32;
+}
+
+
 /* The m88k kernel aligns all instructions on 4-byte boundaries.  The
    kernel also uses the least significant two bits for its own hocus
    pocus.  When gdb receives an address from the kernel, it needs to
