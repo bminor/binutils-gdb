@@ -369,7 +369,7 @@ case "${target}" in
   h8500-*-*)
     noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
     ;;
-  hppa*-*-*elf*) | \
+  hppa*-*-*elf* | \
   hppa*-*-lites*)
     # Do configure ld/binutils/gas for this case.
     ;;
