@@ -64,7 +64,13 @@ static char *gdb_completer_command_word_break_characters =
    break characters any characters that are commonly used in file
    names, such as '-', '+', '~', etc.  Otherwise, readline displays
    incorrect completion candidates.  */
-static char *gdb_completer_file_name_break_characters = " \t\n*|\"';:?/><";
+#ifdef __MSDOS__
+/* MS-DOS and MS-Windows use colon as part of the drive spec, and most
+   programs support @foo style response files.  */
+static char *gdb_completer_file_name_break_characters = " \t\n*|\"';?><@";
+#else
+static char *gdb_completer_file_name_break_characters = " \t\n*|\"';:?><";
+#endif
 
 /* Characters that can be used to quote completion strings.  Note that we
    can't include '"' because the gdb C parser treats such quoted sequences
@@ -348,10 +354,25 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 		    {
 		      /* It is a normal command; what comes after it is
 		         completed by the command's completer function.  */
-		      list = (*c->completer) (p, word);
 		      if (c->completer == filename_completer)
-			rl_completer_word_break_characters =
-			  gdb_completer_file_name_break_characters;
+			{
+			  /* Many commands which want to complete on
+			     file names accept several file names, as
+			     in "run foo bar >>baz".  So we don't want
+			     to complete the entire text after the
+			     command, just the last word.  To this
+			     end, we need to find the beginning of the
+			     file name starting at `word' and going
+			     backwards.  */
+			  for (p = word;
+			       p > tmp_command
+				 && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
+			       p--)
+			    ;
+			  rl_completer_word_break_characters =
+			    gdb_completer_file_name_break_characters;
+			}
+		      list = (*c->completer) (p, word);
 		    }
 		}
 	      else
@@ -397,10 +418,19 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 	      else
 		{
 		  /* It is a normal command.  */
-		  list = (*c->completer) (p, word);
 		  if (c->completer == filename_completer)
-		    rl_completer_word_break_characters =
-		      gdb_completer_file_name_break_characters;
+		    {
+		      /* See the commentary above about the specifics
+			 of file-name completion.  */
+		      for (p = word;
+			   p > tmp_command
+			     && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
+			   p--)
+			;
+		      rl_completer_word_break_characters =
+			gdb_completer_file_name_break_characters;
+		    }
+		  list = (*c->completer) (p, word);
 		}
 	    }
 	}

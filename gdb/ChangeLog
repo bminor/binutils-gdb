@@ -1,3 +1,12 @@
+2001-02-18  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* completer.c (gdb_completer_file_name_break_characters): Remove
+	slash from file-name break characters.
+	[__MSDOS__]: Special definition for DOS/Windows file names.
+	(line_completion_function): When completing on file names, bump
+	`p' to the first file-name constituent character of `word', before
+	invoking the completer.
+
 2001-02-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-nat.c: Include "i387-nat.h".  Use regnum instead of regno
