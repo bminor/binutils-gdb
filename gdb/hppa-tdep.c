@@ -1887,6 +1887,7 @@ static struct hppa_frame_cache *
 hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct hppa_frame_cache *cache;
+  unsigned int frame_size;
   CORE_ADDR pc, start_pc, end_pc, cur_pc;
 
   cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
@@ -1895,6 +1896,7 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   pc = frame_func_unwind (next_frame);
   cur_pc = frame_pc_unwind (next_frame);
+  frame_size = 0;
 
   find_pc_partial_function (pc, NULL, &start_pc, &end_pc);
 
@@ -1914,21 +1916,18 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 
       insn = read_memory_unsigned_integer (pc, 4);
 
+      frame_size += prologue_inst_adjust_sp (insn);
+
       /* There are limited ways to store the return pointer into the
 	 stack.  */
       if (insn == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
-	{
-	  cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
-	  break;
-	}
+	 cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
       else if (insn == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
-	{
-	  cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
-	  break;
-	}
+	 cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
     }
 
-  cache->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+  cache->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM) - frame_size;
+  trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
 
   if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
     {
@@ -2080,7 +2079,8 @@ hppa_stub_unwind_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
 
-  if (IN_SOLIB_CALL_TRAMPOLINE (pc, NULL)
+  if (pc == 0
+      || IN_SOLIB_CALL_TRAMPOLINE (pc, NULL)
       || IN_SOLIB_RETURN_TRAMPOLINE (pc, NULL))
     return &hppa_stub_frame_unwind;
   return NULL;
