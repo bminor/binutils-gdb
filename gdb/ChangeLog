@@ -26,6 +26,34 @@ Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 	* gdbtypes.c, ch-lang.c, ch-typeprint.c (numerous places):
 	Add check_typedef/CHECK_TYPEDEF as needed.
 
+	* ch-exp.y:  Replaced by ...
+	* ch-exp.c:  New file.  Use recursive-descent.
+	Recognize labelled array tuples and powerset ranges.
+	* Makefile.in:  Update for no longer using yacc for ch-exp.
+
+	* c-lang.c:  Make various functions non-static.
+	* c-lang.h:  Add bunches of prototypes.
+	* cp-valprint.c (cp_print_value_fields):  Also take address.
+	(cp_print_value):  Likewise.  Use baselcass_offset.
+	* stabsread.c (current_symbol):  New static variable.
+	(type_synonym_name):  Remove.
+	(read_type):  If copying, make copy be a TYPE_CODE_TYPEDEF.
+	(read_array_type):  Don't need to handle undefined element type here.
+	(cleanup_undefined_types):  Ditto.
+	(read_range_type):  Look for Chill ranges.
+	* valops.c (value_assign):  Fix case lval_internalvar - don't try
+	to assign into old value (which might be too small!).
+	(value_coerce_array):  No longer need special VALUE_REPEATED handling.
+	(value_arg_coerce):  Cleaner array->pointer decay mechanism.
+	(search_struct_field):  Use baseclass_offset rather than
+	baseclass_addr.
+	(value_slice):  Use get_discrete_bounds.
+	* value.h (COERCE_VARYING_ARRAY):  Take type argumnt as well.
+	* values.c (baseclass_offset):  Change parameter interface.
+	(baseclass_addr):  Removed.
+	* c-typeprint.c, c-valprint.c, ch-valprint.c, values.c, valops.c:
+	Add check_typedef/CHECK_TYPEDEF as needed.
+
 	* alpha-tdep.c, c-exp.y, h8500-tdep.c, f-exp.y, f-valprint.c,
 	findvar.c, hppa-tdep.c, infcmd.c, language.c, printcmd.c,
  	rs6000-tdep.c, symmisc.c, symtab.c, mdebugread.c:

@@ -26,40 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "demangle.h"
 #include "valprint.h"
 #include "language.h"
-
-/* BEGIN-FIXME */
-
-extern int vtblprint;		/* Controls printing of vtbl's */
-
-extern void
-cp_print_class_member PARAMS ((char *, struct type *, GDB_FILE *, char *));
-
-extern void
-cp_print_class_method PARAMS ((char *, struct type *, GDB_FILE *));
-
-extern void
-cp_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
-			       enum val_prettyprint, struct type **, int));
-
-extern int
-cp_is_vtbl_ptr_type PARAMS ((struct type *));
-
-extern int
-cp_is_vtbl_member PARAMS ((struct type *));
-
-/* END-FIXME */
-
-
-/* BEGIN-FIXME:  Hooks into c-typeprint.c */
-
-extern void
-c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
-
-extern void
-cp_type_print_method_args PARAMS ((struct type **, char *, char *, int,
-				   GDB_FILE *));
-/* END-FIXME */
-
+#include "c-lang.h"
 
 
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
@@ -94,12 +61,13 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   LONGEST val;
   CORE_ADDR addr;
 
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
-	  elttype = TYPE_TARGET_TYPE (type);
+	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	  eltlen = TYPE_LENGTH (elttype);
 	  len = TYPE_LENGTH (type) / eltlen;
 	  if (prettyprint_arrays)
@@ -169,11 +137,12 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 				 stream, demangle);
 	  break;
 	}
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
+      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      if (TYPE_CODE (elttype) == TYPE_CODE_METHOD)
 	{
 	  cp_print_class_method (valaddr, type, stream);
 	}
-      else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
+      else if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
 	{
 	  cp_print_class_member (valaddr,
 				 TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
@@ -183,7 +152,6 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	{
 	  addr = unpack_pointer (type, valaddr);
 	print_unpacked_pointer:
-	  elttype = TYPE_TARGET_TYPE (type);
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
@@ -266,10 +234,11 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       break;
 
     case TYPE_CODE_REF:
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
+      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
         {
 	  cp_print_class_member (valaddr,
-				 TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
+				 TYPE_DOMAIN_TYPE (elttype),
 				 stream, "");
 	  break;
 	}
@@ -285,7 +254,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       /* De-reference the reference.  */
       if (deref_ref)
 	{
-	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
+	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
 	    {
 	      value_ptr deref_val =
 		value_at
@@ -318,10 +287,10 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  print_address_demangle(*((int *) (valaddr +	/* FIXME bytesex */
 	      TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8)),
 	      stream, demangle);
-	  break;
 	}
-      cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
-			     NULL, 0);
+      else
+	cp_print_value_fields (type, valaddr, address, stream, format,
+			       recurse, pretty, NULL, 0);
       break;
 
     case TYPE_CODE_ENUM:

@@ -199,6 +199,7 @@ struct complaint stabs_general_complaint =
 static struct type **undef_types;
 static int undef_types_allocated;
 static int undef_types_length;
+static struct symbol *current_symbol = NULL;
 
 /* Check for and handle cretinous stabs symbol name continuation!  */
 #define STABS_CONTINUE(pp)				\
@@ -492,14 +493,6 @@ read_type_number (pp, typenums)
 }
 
 
-/* To handle GNU C++ typename abbreviation, we need to be able to
-   fill in a type's name as soon as space for that type is allocated.
-   `type_synonym_name' is the name of the type being allocated.
-   It is cleared as soon as it is used (lest all allocated types
-   get this name).  */
-
-static char *type_synonym_name;
-
 #if !defined (REG_STRUCT_HAS_ADDR)
 #define REG_STRUCT_HAS_ADDR(gcc_p,type) 0
 #endif
@@ -544,7 +537,7 @@ define_symbol (valu, string, desc, type, objfile)
      e.g. ":t10=*2" or a nameless enum like " :T16=ered:0,green:1,blue:2,;" */
   nameless = (p == string || ((string[0] == ' ') && (string[1] == ':')));
 
-  sym = (struct symbol *) 
+  current_symbol = sym = (struct symbol *) 
     obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
 
@@ -1120,23 +1113,13 @@ define_symbol (valu, string, desc, type, objfile)
       synonym = *p == 't';
 
       if (synonym)
-	{
-	  p++;
-	  type_synonym_name = obsavestring (SYMBOL_NAME (sym),
-					    strlen (SYMBOL_NAME (sym)),
-					    &objfile -> symbol_obstack);
-	}
+	p++;
       /* The semantics of C++ state that "struct foo { ... }" also defines 
 	 a typedef for "foo".  Unfortunately, cfront never makes the typedef
 	 when translating C++ into C.  We make the typedef here so that
 	 "ptype foo" works as expected for cfront translated code.  */
       else if (current_subfile->language == language_cplus)
-	{
-	  synonym = 1;
-	  type_synonym_name = obsavestring (SYMBOL_NAME (sym),
-					    strlen (SYMBOL_NAME (sym)),
-					    &objfile -> symbol_obstack);
-	}
+	synonym = 1;
 
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
 
@@ -1562,15 +1545,23 @@ read_type (pp, objfile)
 	       now anyway).  */
 
 	    type = alloc_type (objfile);
-	    memcpy (type, xtype, sizeof (struct type));
-
-	    /* The idea behind clearing the names is that the only purpose
-	       for defining a type to another type is so that the name of
-	       one can be different.  So we probably don't need to worry much
-	       about the case where the compiler doesn't give a name to the
-	       new type.  */
-	    TYPE_NAME (type) = NULL;
-	    TYPE_TAG_NAME (type) = NULL;
+	    if (SYMBOL_LINE (current_symbol) == 0)
+	      {
+		*type = *xtype;
+		/* The idea behind clearing the names is that the only purpose
+		   for defining a type to another type is so that the name of
+		   one can be different.  So we probably don't need to worry
+		   much about the case where the compiler doesn't give a name
+		   to the new type.  */
+		TYPE_NAME (type) = NULL;
+		TYPE_TAG_NAME (type) = NULL;
+	      }
+	    else
+	      {
+		TYPE_CODE (type) = TYPE_CODE_TYPEDEF;
+		TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
+		TYPE_TARGET_TYPE (type) = xtype;
+	      }
 	  }
 	if (typenums[0] != -1)
 	  *dbx_lookup_type (typenums) = type;
@@ -1718,11 +1709,6 @@ read_type (pp, objfile)
     case 's':				/* Struct type */
     case 'u':				/* Union type */
       type = dbx_alloc_type (typenums, objfile);
-      if (!TYPE_NAME (type))
-	{
-	  TYPE_NAME (type) = type_synonym_name;
-	}
-      type_synonym_name = NULL;
       switch (type_descriptor)
 	{
 	  case 's':
@@ -3049,15 +3035,6 @@ read_array_type (pp, type, objfile)
     create_range_type ((struct type *) NULL, index_type, lower, upper);
   type = create_array_type (type, element_type, range_type);
 
-  /* If we have an array whose element type is not yet known, but whose
-     bounds *are* known, record it to be adjusted at the end of the file.  */
-
-  if ((TYPE_FLAGS (element_type) & TYPE_FLAG_STUB) && !adjustable)
-    {
-      TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
-      add_undefined_type (type);
-    }
-
   return type;
 }
 
@@ -3497,7 +3474,7 @@ read_range_type (pp, typenums, objfile)
   if (self_subrange && n2 == 0 && n3 == 0)
     return init_type (TYPE_CODE_VOID, 1, 0, NULL, objfile);
 
-  /* If n3 is zero and n2 is not, we want a floating type,
+  /* If n3 is zero and n2 is positive, we want a floating type,
      and n2 is the width in bytes.
 
      Fortran programs appear to use this for complex types also,
@@ -3528,6 +3505,10 @@ read_range_type (pp, typenums, objfile)
      itself with range 0-127.  */
   else if (self_subrange && n2 == 0 && n3 == 127)
     return init_type (TYPE_CODE_INT, 1, 0, NULL, objfile);
+
+  else if (current_symbol && SYMBOL_LANGUAGE (current_symbol) == language_chill
+      && SYMBOL_LINE (current_symbol) > 0)
+    goto handle_true_range;
 
   /* We used to do this only for subrange of self or subrange of int.  */
   else if (n2 == 0)
@@ -3794,7 +3775,7 @@ cleanup_undefined_types ()
 	  case TYPE_CODE_ENUM:
 	  {
 	    /* Check if it has been defined since.  Need to do this here
-	       as well as in check_stub_type to deal with the (legitimate in
+	       as well as in check_typedef to deal with the (legitimate in
 	       C though not C++) case of several types with the same name
 	       in different source files.  */
 	    if (TYPE_FLAGS (*type) & TYPE_FLAG_STUB)
@@ -3828,43 +3809,6 @@ cleanup_undefined_types ()
 		      }
 		  }
 	      }
-	  }
-	  break;
-
-	case TYPE_CODE_ARRAY:
-	  {
-	    /* This is a kludge which is here for historical reasons
-	       because I suspect that check_stub_type does not get
-	       called everywhere it needs to be called for arrays.  Even
-	       with this kludge, those places are broken for the case
-	       where the stub type is defined in another compilation
-	       unit, but this kludge at least deals with it for the case
-	       in which it is the same compilation unit.
-
-	       Don't try to do this by calling check_stub_type; it might
-	       cause symbols to be read in lookup_symbol, and the symbol
-	       reader is not reentrant.  */
-
-	    struct type *range_type;
-	    int lower, upper;
-
-	    if (TYPE_LENGTH (*type) != 0)		/* Better be unknown */
-	      goto badtype;
-	    if (TYPE_NFIELDS (*type) != 1)
-	      goto badtype;
-	    range_type = TYPE_FIELD_TYPE (*type, 0);
-	    if (TYPE_CODE (range_type) != TYPE_CODE_RANGE)
-	      goto badtype;
-
-	    /* Now recompute the length of the array type, based on its
-	       number of elements and the target type's length.  */
-	    lower = TYPE_FIELD_BITPOS (range_type, 0);
-	    upper = TYPE_FIELD_BITPOS (range_type, 1);
-	    TYPE_LENGTH (*type) = (upper - lower + 1)
-	      * TYPE_LENGTH (TYPE_TARGET_TYPE (*type));
-
-	    /* If the target type is not a stub, we could be clearing
-	       TYPE_FLAG_TARGET_STUB for *type.  */
 	  }
 	  break;
 

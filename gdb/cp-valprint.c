@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "demangle.h"
 #include "annotate.h"
 #include "gdb_string.h"
+#include "c-lang.h"
 
 int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type
@@ -43,22 +44,8 @@ cp_print_static_field PARAMS ((struct type *, value_ptr, GDB_FILE *, int, int,
 			       enum val_prettyprint));
 
 static void
-cplus_print_value PARAMS ((struct type *, char *, GDB_FILE *, int, int,
-			   enum val_prettyprint, struct type **));
-
-/* BEGIN-FIXME:  Hooks into typeprint.c, find a better home for prototypes. */
-
-extern void
-c_type_print_base PARAMS ((struct type *, GDB_FILE *, int, int));
-
-extern void
-c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
-
-extern void
-cp_type_print_method_args PARAMS ((struct type **, char *, char *, int,
-				   GDB_FILE *));
-
-/* END-FIXME */
+cp_print_value PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
+			int, int, enum val_prettyprint, struct type **));
 
 void
 cp_print_class_method (valaddr, type, stream)
@@ -76,9 +63,9 @@ cp_print_class_method (valaddr, type, stream)
   struct symbol *sym;
   unsigned len;
   unsigned int i;
+  struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
-  check_stub_type (TYPE_TARGET_TYPE (type));
-  domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
+  domain = TYPE_DOMAIN_TYPE (target_type);
   if (domain == (struct type *)NULL)
     {
       fprintf_filtered (stream, "<unknown>");
@@ -204,20 +191,21 @@ cp_is_vtbl_member(type)
   return 0;
 }
 
-/* Mutually recursive subroutines of cplus_print_value and c_val_print to
-   print out a structure's fields: cp_print_value_fields and cplus_print_value.
-
-   TYPE, VALADDR, STREAM, RECURSE, and PRETTY have the
-   same meanings as in cplus_print_value and c_val_print.
+/* Mutually recursive subroutines of cp_print_value and c_val_print to
+   print out a structure's fields: cp_print_value_fields and cp_print_value.
+  
+   TYPE, VALADDR, ADDRESS, STREAM, RECURSE, and PRETTY have the
+   same meanings as in cp_print_value and c_val_print.
 
    DONT_PRINT is an array of baseclass types that we
    should not print, or zero if called from top level.  */
 
 void
-cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
+cp_print_value_fields (type, valaddr, address, stream, format, recurse, pretty,
 		       dont_print_vb, dont_print_statmem)
      struct type *type;
      char *valaddr;
+     CORE_ADDR address;
      GDB_FILE *stream;
      int format;
      int recurse;
@@ -229,7 +217,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
   struct obstack tmp_obstack;
   char *last_dont_print = obstack_next_free (&dont_print_statmem_obstack);
 
-  check_stub_type (type);
+  CHECK_TYPEDEF (type);
 
   fprintf_filtered (stream, "{");
   len = TYPE_NFIELDS (type);
@@ -238,8 +226,8 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
   /* Print out baseclasses such that we don't print
      duplicates of virtual baseclasses.  */
   if (n_baseclasses > 0)
-    cplus_print_value (type, valaddr, stream, format, recurse+1, pretty,
-		       dont_print_vb);
+    cp_print_value (type, valaddr, address, stream,
+		    format, recurse+1, pretty, dont_print_vb);
 
   if (!len && n_baseclasses == 1)
     fprintf_filtered (stream, "<No data fields>");
@@ -390,10 +378,11 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
    baseclasses.  */
 
 static void
-cplus_print_value (type, valaddr, stream, format, recurse, pretty,
-		   dont_print_vb)
+cp_print_value (type, valaddr, address, stream, format, recurse, pretty,
+		dont_print_vb)
      struct type *type;
      char *valaddr;
+     CORE_ADDR address;
      GDB_FILE *stream;
      int format;
      int recurse;
@@ -417,14 +406,9 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty,
 
   for (i = 0; i < n_baseclasses; i++)
     {
-      /* FIXME-32x64--assumes that a target pointer can fit in a char *.
-	 Fix it by nuking baseclass_addr.  */
-      char *baddr;
-      int err;
-      char *basename;
-
-      check_stub_type (TYPE_BASECLASS (type, i));
-      basename = TYPE_NAME (TYPE_BASECLASS (type, i));
+      int boffset;
+      struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+      char *basename = TYPE_NAME (baseclass);
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -435,17 +419,13 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty,
 	    - first_dont_print;
 
 	  while (--j >= 0)
-	    if (TYPE_BASECLASS (type, i) == first_dont_print[j])
+	    if (baseclass == first_dont_print[j])
 	      goto flush_it;
 
-	  obstack_ptr_grow (&dont_print_vb_obstack, TYPE_BASECLASS (type, i));
+	  obstack_ptr_grow (&dont_print_vb_obstack, baseclass);
 	}
 
-      /* Fix to use baseclass_offset instead. FIXME */
-      baddr = baseclass_addr (type, i, valaddr, 0, &err);
-      if (err == 0 && baddr == 0)
-	error ("could not find virtual baseclass %s\n",
-	       basename ? basename : "");
+      boffset = baseclass_offset (type, i , valaddr, address);
 
       if (pretty)
 	{
@@ -457,15 +437,11 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty,
 	 baseclass name.  */
       fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
-      if (err != 0)
-	{
-	  fprintf_filtered (stream, "<invalid address ");
-	  print_address_numeric ((CORE_ADDR) baddr, 1, stream);
-	  fprintf_filtered (stream, ">");
-	}
+      if (boffset == -1)
+	fprintf_filtered (stream, "<invalid address>");
       else
-	cp_print_value_fields (TYPE_BASECLASS (type, i), baddr, stream, format,
-			       recurse, pretty,
+	cp_print_value_fields (baseclass, valaddr + boffset, address + boffset,
+			       stream, format, recurse, pretty,
 			       (struct type **) obstack_base (&dont_print_vb_obstack),
 			       0);
       fputs_filtered (", ", stream);
@@ -526,10 +502,9 @@ cp_print_static_field (type, val, stream, format, recurse, pretty)
       obstack_grow (&dont_print_statmem_obstack, &VALUE_ADDRESS (val),
 		    sizeof (CORE_ADDR));
 
-      check_stub_type (type);
-      cp_print_value_fields (type, VALUE_CONTENTS (val),
-			     stream, format, recurse, pretty,
-			     NULL, 1);
+      CHECK_TYPEDEF (type);
+      cp_print_value_fields (type, VALUE_CONTENTS (val), VALUE_ADDRESS (val),
+			     stream, format, recurse, pretty, NULL, 1);
       return;
     }
   val_print (type, VALUE_CONTENTS (val), VALUE_ADDRESS (val),

@@ -50,9 +50,6 @@ cp_type_print_derivation_info PARAMS ((GDB_FILE *, struct type *));
 void
 c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
 
-void
-c_type_print_base PARAMS ((struct type *, GDB_FILE *, int, int));
-
 
 /* Print a description of a type in the format of a 
    typedef for the current language.
@@ -64,6 +61,7 @@ c_typedef_print (type, new, stream)
    struct symbol *new;
    GDB_FILE *stream;
 {
+  CHECK_TYPEDEF (type);
    switch (current_language->la_language)
    {
 #ifdef _LANG_c
@@ -117,6 +115,9 @@ c_print_type (type, varstring, stream, show, level)
 {
   register enum type_code code;
   int demangled_args;
+
+  if (show > 0)
+    CHECK_TYPEDEF (type);
 
   c_type_print_base (type, stream, show, level);
   code = TYPE_CODE (type);
@@ -315,6 +316,7 @@ c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_TYPEDEF:
       /* These types need no prefix.  They are listed here so that
 	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
@@ -453,6 +455,7 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_TYPEDEF:
       /* These types do not need a suffix.  They are listed so that
 	 gcc -Wall will report types that may not have been considered.  */
       break;
@@ -510,10 +513,11 @@ c_type_print_base (type, stream, show, level)
       return;
     }
 
-  check_stub_type (type);
+  CHECK_TYPEDEF (type);
 	  
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_TYPEDEF:
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_PTR:
     case TYPE_CODE_MEMBER:

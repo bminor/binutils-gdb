@@ -78,7 +78,7 @@ emit_char (c, stream, quoter)
     }
 }
 
-static void
+void
 c_printchar (c, stream)
      int c;
      GDB_FILE *stream;
@@ -93,7 +93,7 @@ c_printchar (c, stream)
    are printed as appropriate.  Print ellipses at the end if we
    had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
-static void
+void
 c_printstr (stream, string, length, force_ellipses)
      GDB_FILE *stream;
      char *string;
@@ -211,7 +211,7 @@ c_printstr (stream, string, length, force_ellipses)
    starts taking it's fundamental type information directly from the
    debugging information supplied by the compiler.  fnf@cygnus.com */
 
-static struct type *
+struct type *
 c_create_fundamental_type (objfile, typeid)
      struct objfile *objfile;
      int typeid;
@@ -333,7 +333,7 @@ c_create_fundamental_type (objfile, typeid)
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
 
-static const struct op_print c_op_print_tab[] =
+const struct op_print c_op_print_tab[] =
   {
     {",",  BINOP_COMMA, PREC_COMMA, 0},
     {"=",  BINOP_ASSIGN, PREC_ASSIGN, 1},

@@ -78,6 +78,7 @@ chill_print_type_scalar (type, val, stream)
     case TYPE_CODE_CHAR:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_TYPEDEF:
     default:
       break;
     }
@@ -114,7 +115,7 @@ chill_val_print_array_elements (type, valaddr, address, stream,
   unsigned int reps;
   LONGEST low_bound =  TYPE_FIELD_BITPOS (range_type, 0);
       
-  elttype = TYPE_TARGET_TYPE (type);
+  elttype = check_typedef (TYPE_TARGET_TYPE (type));
   eltlen = TYPE_LENGTH (elttype);
   len = TYPE_LENGTH (type) / eltlen;
 
@@ -205,6 +206,8 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   struct type *elttype;
   CORE_ADDR addr;
 
+  CHECK_TYPEDEF (type);
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
@@ -289,7 +292,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  break;
 	}
       addr = unpack_pointer (type, valaddr);
-      elttype = TYPE_TARGET_TYPE (type);
+      elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
       /* We assume a NULL pointer is all zeros ... */
       if (addr == 0)
@@ -338,7 +341,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_SET:
       elttype = TYPE_INDEX_TYPE (type);
-      check_stub_type (elttype);
+      CHECK_TYPEDEF (elttype);
       if (TYPE_FLAGS (elttype) & TYPE_FLAG_STUB)
 	{
 	  fprintf_filtered (stream, "<incomplete type>");
@@ -405,7 +408,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
     case TYPE_CODE_STRUCT:
       if (chill_varying_type (type))
 	{
-	  struct type *inner = TYPE_FIELD_TYPE (type, 1);
+	  struct type *inner = check_typedef (TYPE_FIELD_TYPE (type, 1));
 	  long length = unpack_long (TYPE_FIELD_TYPE (type, 0), valaddr);
 	  char *data_addr = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8;
 	  
@@ -509,7 +512,7 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
   int i, len;
   int fields_seen = 0;
 
-  check_stub_type (type);
+  CHECK_TYPEDEF (type);
 
   fprintf_filtered (stream, "[");
   len = TYPE_NFIELDS (type);
@@ -575,15 +578,14 @@ chill_value_print (val, stream, format, pretty)
      enum val_prettyprint pretty;
 {
   struct type *type = VALUE_TYPE (val);
+  struct type *real_type = check_typedef  (type);
 
   /* If it is a pointer, indicate what it points to.
 
-     Print type also if it is a reference.
+     Print type also if it is a reference. */
 
-     C++: if it is a member pointer, we will take care
-     of that when we print it.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR ||
-      TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_CODE (real_type) == TYPE_CODE_PTR ||
+      TYPE_CODE (real_type) == TYPE_CODE_REF)
     {
       char *valaddr = VALUE_CONTENTS (val);
       CORE_ADDR addr = unpack_pointer (type, valaddr);

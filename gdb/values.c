@@ -73,10 +73,9 @@ allocate_value (type)
      struct type *type;
 {
   register value_ptr val;
+  struct type *atype = check_typedef (type);
 
-  check_stub_type (type);
-
-  val = (struct value *) xmalloc (sizeof (struct value) + TYPE_LENGTH (type));
+  val = (struct value *) xmalloc (sizeof (struct value) + TYPE_LENGTH (atype));
   VALUE_NEXT (val) = all_values;
   all_values = val;
   VALUE_TYPE (val) = type;
@@ -621,6 +620,8 @@ unpack_long (type, valaddr)
 
   switch (code)
     {
+    case TYPE_CODE_TYPEDEF:
+      return unpack_long (check_typedef (type), valaddr);
     case TYPE_CODE_ENUM:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_INT:
@@ -666,6 +667,7 @@ unpack_double (type, valaddr, invp)
   register int nosign = TYPE_UNSIGNED (type);
 
   *invp = 0;			/* Assume valid.   */
+  CHECK_TYPEDEF (type);
   if (code == TYPE_CODE_FLT)
     {
 #ifdef INVALID_FLOAT
@@ -729,7 +731,7 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
   register value_ptr v;
   register struct type *type;
 
-  check_stub_type (arg_type);
+  CHECK_TYPEDEF (arg_type);
   type = TYPE_FIELD_TYPE (arg_type, fieldno);
 
   /* Handle packed fields */
@@ -835,6 +837,8 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
      int offset;
 {
   value_ptr arg1 = *arg1p;
+  struct type *type1 = check_typedef (VALUE_TYPE (arg1));
+  struct type *entry_type;
   /* First, get the virtual function table pointer.  That comes
      with a strange type, so cast it to type `pointer to long' (which
      should serve just fine as a function type).  Then, index into
@@ -852,10 +856,13 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
     fcontext = TYPE_VPTR_BASETYPE (type);
   context = lookup_pointer_type (fcontext);
   /* Now context is a pointer to the basetype containing the vtbl.  */
-  if (TYPE_TARGET_TYPE (context) != VALUE_TYPE (arg1))
-    arg1 = value_ind (value_cast (context, value_addr (arg1)));
+  if (TYPE_TARGET_TYPE (context) != type1)
+    {
+      arg1 = value_ind (value_cast (context, value_addr (arg1)));
+      type1 = check_typedef (VALUE_TYPE (arg1));
+    }
 
-  context = VALUE_TYPE (arg1);
+  context = type1;
   /* Now context is the basetype containing the vtbl.  */
 
   /* This type may have been defined before its virtual function table
@@ -875,8 +882,9 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
      time, e.g. if the user has set a conditional breakpoint calling
      a virtual function.  */
   entry = value_subscript (vtbl, vi);
+  entry_type = check_typedef (VALUE_TYPE (entry));
 
-  if (TYPE_CODE (VALUE_TYPE (entry)) == TYPE_CODE_STRUCT)
+  if (TYPE_CODE (entry_type) == TYPE_CODE_STRUCT)
     {
       /* Move the `this' pointer according to the virtual function table. */
       VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0));
@@ -889,7 +897,7 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
 
       vfn = value_field (entry, 2);
     }
-  else if (TYPE_CODE (VALUE_TYPE (entry)) == TYPE_CODE_PTR)
+  else if (TYPE_CODE (entry_type) == TYPE_CODE_PTR)
     vfn = entry;
   else
     error ("I'm confused:  virtual function table has bad type");
@@ -925,7 +933,7 @@ value_headof (in_arg, btype, dtype)
   struct minimal_symbol *msymbol;
 
   btype = TYPE_VPTR_BASETYPE (dtype);
-  check_stub_type (btype);
+  CHECK_TYPEDEF (btype);
   arg = in_arg;
   if (btype != dtype)
     arg = value_cast (lookup_pointer_type (btype), arg);
@@ -955,7 +963,7 @@ value_headof (in_arg, btype, dtype)
       entry = value_subscript (vtbl, value_from_longest (builtin_type_int, 
 						      (LONGEST) i));
       /* This won't work if we're using thunks. */
-      if (TYPE_CODE (VALUE_TYPE (entry)) != TYPE_CODE_STRUCT)
+      if (TYPE_CODE (check_typedef (VALUE_TYPE (entry))) != TYPE_CODE_STRUCT)
 	break;
       offset = longest_to_int (value_as_long (value_field (entry, 0)));
       /* If we use '<=' we can handle single inheritance
@@ -1066,19 +1074,19 @@ vb_match (type, index, basetype)
 }
 
 /* Compute the offset of the baseclass which is
-   the INDEXth baseclass of class TYPE, for a value ARG,
-   wih extra offset of OFFSET.
-   The result is the offste of the baseclass value relative
+   the INDEXth baseclass of class TYPE,
+   for value at VALADDR (in host) at ADDRESS (in target).
+   The result is the offset of the baseclass value relative
    to (the address of)(ARG) + OFFSET.
 
    -1 is returned on error. */
 
 int
-baseclass_offset (type, index, arg, offset)
+baseclass_offset (type, index, valaddr, address)
      struct type *type;
      int index;
-     value_ptr arg;
-     int offset;
+     char *valaddr;
+     CORE_ADDR address;
 {
   struct type *basetype = TYPE_BASECLASS (type, index);
 
@@ -1096,22 +1104,16 @@ baseclass_offset (type, index, arg, offset)
 	    {
 	      CORE_ADDR addr
 		= unpack_pointer (TYPE_FIELD_TYPE (type, i),
-				  VALUE_CONTENTS (arg) + VALUE_OFFSET (arg)
-				  + offset
-				  + (TYPE_FIELD_BITPOS (type, i) / 8));
+				  valaddr + (TYPE_FIELD_BITPOS (type, i) / 8));
 
-	      if (VALUE_LVAL (arg) != lval_memory)
-		  return -1;
-
-	      return addr -
-		  (LONGEST) (VALUE_ADDRESS (arg) + VALUE_OFFSET (arg) + offset);
+	      return addr - (LONGEST) address;
 	    }
 	}
       /* Not in the fields, so try looking through the baseclasses.  */
       for (i = index+1; i < n_baseclasses; i++)
 	{
 	  int boffset =
-	      baseclass_offset (type, i, arg, offset);
+	      baseclass_offset (type, i, valaddr, address);
 	  if (boffset)
 	    return boffset;
 	}
@@ -1121,95 +1123,6 @@ baseclass_offset (type, index, arg, offset)
 
   /* Baseclass is easily computed.  */
   return TYPE_BASECLASS_BITPOS (type, index) / 8;
-}
-
-/* Compute the address of the baseclass which is
-   the INDEXth baseclass of class TYPE.  The TYPE base
-   of the object is at VALADDR.
-
-   If ERRP is non-NULL, set *ERRP to be the errno code of any error,
-   or 0 if no error.  In that case the return value is not the address
-   of the baseclasss, but the address which could not be read
-   successfully.  */
-
-/* FIXME Fix remaining uses of baseclass_addr to use baseclass_offset */
-
-char *
-baseclass_addr (type, index, valaddr, valuep, errp)
-     struct type *type;
-     int index;
-     char *valaddr;
-     value_ptr *valuep;
-     int *errp;
-{
-  struct type *basetype = TYPE_BASECLASS (type, index);
-
-  if (errp)
-    *errp = 0;
-
-  if (BASETYPE_VIA_VIRTUAL (type, index))
-    {
-      /* Must hunt for the pointer to this virtual baseclass.  */
-      register int i, len = TYPE_NFIELDS (type);
-      register int n_baseclasses = TYPE_N_BASECLASSES (type);
-
-      /* First look for the virtual baseclass pointer
-	 in the fields.  */
-      for (i = n_baseclasses; i < len; i++)
-	{
-	  if (vb_match (type, i, basetype))
-	    {
-	      value_ptr val = allocate_value (basetype);
-	      CORE_ADDR addr;
-	      int status;
-
-	      addr
-		= unpack_pointer (TYPE_FIELD_TYPE (type, i),
-				  valaddr + (TYPE_FIELD_BITPOS (type, i) / 8));
-
-	      status = target_read_memory (addr,
-					   VALUE_CONTENTS_RAW (val),
-					   TYPE_LENGTH (basetype));
-	      VALUE_LVAL (val) = lval_memory;
-	      VALUE_ADDRESS (val) = addr;
-
-	      if (status != 0)
-		{
-		  if (valuep)
-		    *valuep = NULL;
-		  release_value (val);
-		  value_free (val);
-		  if (errp)
-		    *errp = status;
-		  return (char *)addr;
-		}
-	      else
-		{
-		  if (valuep)
-		    *valuep = val;
-		  return (char *) VALUE_CONTENTS (val);
-		}
-	    }
-	}
-      /* Not in the fields, so try looking through the baseclasses.  */
-      for (i = index+1; i < n_baseclasses; i++)
-	{
-	  char *baddr;
-
-	  baddr = baseclass_addr (type, i, valaddr, valuep, errp);
-	  if (baddr)
-	    return baddr;
-	}
-      /* Not found.  */
-      if (valuep)
-	*valuep = 0;
-      return 0;
-    }
-
-  /* Baseclass is easily computed.  */
-  if (valuep)
-    *valuep = 0;
-  return valaddr + TYPE_BASECLASS_BITPOS (type, index) / 8;
 }
 
 /* Unpack a field FIELDNO of the specified TYPE, from the anonymous object at
@@ -1321,11 +1234,17 @@ value_from_longest (type, num)
      register LONGEST num;
 {
   register value_ptr val = allocate_value (type);
-  register enum type_code code = TYPE_CODE (type);
-  register int len = TYPE_LENGTH (type);
+  register enum type_code code;
+  register int len;
+ retry:
+  code = TYPE_CODE (type);
+  len = TYPE_LENGTH (type);
 
   switch (code)
     {
+    case TYPE_CODE_TYPEDEF:
+      type = check_typedef (type);
+      goto retry;
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_ENUM:
@@ -1353,8 +1272,9 @@ value_from_double (type, num)
      double num;
 {
   register value_ptr val = allocate_value (type);
-  register enum type_code code = TYPE_CODE (type);
-  register int len = TYPE_LENGTH (type);
+  struct type *base_type = check_typedef (type);
+  register enum type_code code = TYPE_CODE (base_type);
+  register int len = TYPE_LENGTH (base_type);
 
   if (code == TYPE_CODE_FLT)
     {
@@ -1401,6 +1321,7 @@ value_being_returned (valtype, retbuf, struct_return)
 #endif
 
   val = allocate_value (valtype);
+  CHECK_TYPEDEF (valtype);
   EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
 
   return val;
@@ -1466,7 +1387,8 @@ void
 set_return_value (val)
      value_ptr val;
 {
-  register enum type_code code = TYPE_CODE (VALUE_TYPE (val));
+  struct type *type = check_typedef (VALUE_TYPE (val));
+  register enum type_code code = TYPE_CODE (type);
 
   if (code == TYPE_CODE_ERROR)
     error ("Function return type unknown.");
@@ -1475,7 +1397,7 @@ set_return_value (val)
       || code == TYPE_CODE_UNION)	/* FIXME, implement struct return.  */
     error ("GDB does not support specifying a struct or union return value.");
 
-  STORE_RETURN_VALUE (VALUE_TYPE (val), VALUE_CONTENTS (val));
+  STORE_RETURN_VALUE (type, VALUE_CONTENTS (val));
 }
 
 void
