@@ -1,3 +1,13 @@
+2001-02-13  H.J. Lu  <hjl@gnu.org>
+
+	* ldexp.h (node_type): Add etree_provided.
+	* ldexp.c (exp_fold_tree): Handle etree_provided. Set the node
+	type to etree_provided if defined by PROVIDE. Allow updating
+	for etree_provided. 
+	(exp_print_tree): Handle etree_provided.
+	* mpw-elfmips.c (gldelf32ebmip_find_exp_assignment): Handle
+	etree_provided.
+
 2001-02-09  David Mosberger  <davidm@hpl.hp.com>
 
 	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Add
