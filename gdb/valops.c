@@ -151,9 +151,9 @@ value_cast (type, arg2)
   if (current_language->c_style_arrays
       && (VALUE_REPEATED (arg2)
 	  || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_ARRAY))
-    arg2 = value_coerce_array (arg2);					\
+    arg2 = value_coerce_array (arg2);
 
-  if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_FUNC)                   \
+  if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_FUNC)
     arg2 = value_coerce_function (arg2);
 
   COERCE_VARYING_ARRAY (arg2);

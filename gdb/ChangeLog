@@ -1,3 +1,9 @@
+Mon Mar  6 15:03:59 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* valops.c (value_cast): Don't use backslash newline--pre-ANSI
+	compilers (such as SunOS4 /bin/cc) don't generally support it
+	except in some contexts.
+
 Fri Mar  3 17:42:48 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* valops.c (value_cast):  Check for cast to array type *before*
