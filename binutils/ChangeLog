@@ -1,3 +1,16 @@
+Tue Oct  6 14:22:56 1992  Per Bothner  (bothner at PersSony)
+
+	* Makefile.in (*clean rules): Some cleaning up.
+	* Makefile.in (dist): Make diststuff in gprof for a dist.
+
+	* ar.c (do_show_version):  New function.
+	* ar.c (main):  Fix so "ar -V" works.
+
+Thu Oct  1 22:44:45 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: now uses the cpu-vendor-os triple instead of
+	nested cases.
+
 Fri Sep 25 22:41:08 1992  John Gilmore  (gnu@cygnus.com)
 
 	* i960-pinsn.c:  Change bzero to memset.
