@@ -1,3 +1,8 @@
+Thu Jan 21 17:16:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* stack.c: Close open comment.
+	* symtab.c (find_pc_sect_line): Ditto.
+
 Thu Jan 21 17:51:51 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* procfs.c (init_procfs_ops): New function, fills in procfs_ops,
