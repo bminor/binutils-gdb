@@ -115,7 +115,7 @@ if [istarget sh*-linux-gnu] {
     exec sed -e s/_main/main/ -e s/_trap/trap/ -e s/_stack/stack/ \
 	    < $srcdir/$subdir/start.s >tmpdir/start.s
 } else {
-    exec $srcdir/$subdir/start.s tmpdir/start.s
+    exec cp $srcdir/$subdir/start.s tmpdir/start.s
 }
 
 if {![ld_assemble $as "-relax tmpdir/start.s" tmpdir/start.o] \
