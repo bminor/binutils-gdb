@@ -424,13 +424,17 @@ lwp_to_thread (int lwp)
 static struct cleanup *
 save_inferior_pid (void)
 {
-  return make_cleanup (restore_inferior_pid, (void *) inferior_pid);
+  int *saved_pid = xmalloc (sizeof (int));
+  *saved_pid = inferior_pid;
+  return make_cleanup (restore_inferior_pid, saved_pid);
 }
 
 static void
-restore_inferior_pid (void *pid)
+restore_inferior_pid (void *data)
 {
-  inferior_pid = (int) pid;
+  int *saved_pid = data;
+  inferior_pid = *saved_pid;
+  xfree (saved_pid);
 }
 
 

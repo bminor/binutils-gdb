@@ -215,14 +215,17 @@ make_cleanup_bfd_close (bfd *abfd)
 static void
 do_close_cleanup (void *arg)
 {
-  close ((int) arg);
+  int *fd = arg;
+  close (*fd);
+  xfree (fd);
 }
 
 struct cleanup *
 make_cleanup_close (int fd)
 {
-  /* int into void*. Outch!! */
-  return make_cleanup (do_close_cleanup, (void *) fd);
+  int *saved_fd = xmalloc (sizeof (fd));
+  *saved_fd = fd;
+  return make_cleanup (do_close_cleanup, saved_fd);
 }
 
 static void

@@ -1,5 +1,13 @@
 2001-02-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* sol-thread.c (restore_inferior_pid): Save the PID in a freshly
+ 	allocated buffer.
+	(save_inferior_pid): Restore the PID from that tempoary
+ 	buffer. Delete the buffer.
+	* utils.c (make_cleanup_close, do_close_cleanup): Ditto for FD.
+
+2001-02-06  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Add ``The Obvious Fix Rule''.
 
 2001-02-06  Andrew Cagney  <ac131313@redhat.com>
