@@ -210,7 +210,10 @@ You can use @value{GDBN} to debug programs written in C, C++, and
 Modula-2.
 @end ifset
 @ifset FORTRAN
-Fortran support will be added when a GNU Fortran compiler is ready.
+@value{GDBN} can be used to debug programs written in Fortran, although
+it does not yet support entering expressions, printing values, etc.
+using Fortran syntax.  It may be necessary to refer to some variables
+with a trailing underscore.
 @end ifset
 @end ifclear
 

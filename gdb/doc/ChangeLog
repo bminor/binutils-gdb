@@ -1,5 +1,7 @@
 Wed Sep  8 09:11:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.texinfo: Clarify how well it works with Fortran.
+
 	* stabs.texinfo (Stabs In ELF, Statics, ELF Transformations):
 	More on relocating stabs in ELF files.
 
