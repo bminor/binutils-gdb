@@ -275,7 +275,9 @@ The frame annotation begins with
 where @var{level} is the number of the frame (0 is the innermost frame,
 and other frames have positive numbers), @var{address} is the address of
 the code executing in that frame, and @var{level-string} is a string
-designed to convey the level to the user.  The frame ends with
+designed to convey the level to the user.  @var{address} is in the form
+@samp{0x} followed by one or more lowercase hex digits (note that this
+does not depend on the language).  The frame ends with
 
 @findex frame-end
 @example
@@ -325,9 +327,11 @@ interesting information for the user to see) begin with
 @end example
 
 where @var{address} is the address executing in the frame (the same
-address as in the @code{frame-begin} annotation), and
-@var{separator-string} is a string intended to separate this address
-from what follows for the user's benefit.
+address as in the @code{frame-begin} annotation, but printed in a form
+which is intended for user consumption---in particular, the syntax varies
+depending on the language), and @var{separator-string} is a string
+intended to separate this address from what follows for the user's
+benefit.
 
 @findex frame-function-name
 @findex frame-args
@@ -567,6 +571,9 @@ of:
 @var{commands}
 @end example
 
+Note that @var{address} is intended for user consumption---the syntax
+varies depending on the language.
+
 The output ends with
 
 @findex breakpoints-table-end
@@ -681,7 +688,9 @@ debug formats this will necessarily point to the beginning of a line),
 @var{middle} is @samp{middle} if @var{addr} is in the middle of the
 line, or @samp{beg} if @var{addr} is at the beginning of the line, and
 @var{addr} is the address in the target program associated with the
-source which is being displayed.
+source which is being displayed.  @var{addr} is in the form @samp{0x}
+followed by one or more lowercase hex digits (note that this does not
+depend on the language).
 
 @node TODO
 @chapter Annotations We Might Want in the Future

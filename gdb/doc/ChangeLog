@@ -1,3 +1,8 @@
+Tue Apr 11 11:41:49 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* annotate.texi: Clarify which addresses have differing formats
+	depending on the language and which do not.
+
 Tue Mar 28 16:56:22 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* remote.texi (NetWare): Changed example to use BOARD= instead of
