@@ -1,3 +1,9 @@
+2001-02-19  John Moore  <jmoore@redhat.com>
+
+	* gdb.base/commands.exp (infrun_breakpoint_command_test):
+	Converted HPUX fix for non-expected items following multiple
+	step commands into general solution for all platforms.
+
 2001-02-18  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.c++/classes.exp (do_tests): Change runto statements

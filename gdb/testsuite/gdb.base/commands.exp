@@ -172,6 +172,11 @@ proc if_while_breakpoint_command_test {} {
 }
 
 # Test that we can run the inferior from breakpoint commands.
+#
+# The expected behavior is that all commands after the first "step"
+# shall be ignored.  See the gdb manual, "Break Commands",
+# subsection "Breakpoint command lists".
+
 proc infrun_breakpoint_command_test {} {
     if [target_info exists noargs] { 
         verbose "Skipping infrun_breakpoint_command_test because of noargs."
@@ -199,29 +204,12 @@ proc infrun_breakpoint_command_test {} {
 	    fail "(timeout or eof) commands in infrun_breakpoint_command_test"
 	}
     }
-    gdb_test "step\nstep\nstep\nstep\nbt\nend" "" \
+    gdb_test "step\nstep\nstep\nstep\nend" "" \
 	"commands in infrun_breakpoint_command_test #2"
 
-    if { [istarget "hppa*-hp-hpux*"] } {
 	gdb_test "continue" \
 		"Continuing.*.*.*Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*\[0-9\]*\[      \]*if \\(value > 1\\) \{.*\[0-9\]*\[      \]*value \\*= factorial \\(value - 1\\);.*" \
 		"continue in infrun_breakpoint_command_test"
-    } else {
-	gdb_test "continue" \
-		"Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*
-\[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
-\[0-9\]*\[ 	\]*value \\*= factorial \\(value - 1\\);.*
-factorial \\(value=4\\) at.*\[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
-\[0-9\]*\[ 	\]*value \\*= factorial \\(value - 1\\);.*
-factorial \\(value=3\\) at .*
-\[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
-#0  factorial \\(value=3\\).*
-#1  \[0-9a-fx\]* in factorial \\(value=4\\).*
-#2  \[0-9a-fx\]* in factorial \\(value=5\\).*
-#3  \[0-9a-fx\]* in factorial \\(value=6\\).*
-#4  \[0-9a-fx\]* in main \\(.*\\).*" \
-		"continue in infrun_breakpoint_command_test";
-    }
 
     gdb_stop_suppressing_tests;
 }
