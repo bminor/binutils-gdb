@@ -22,6 +22,11 @@
 #if !defined (LEGACY_FRAME_H)
 #define LEGACY_FRAME_H 1
 
+/* Frame unwinder for legacy code.  */
+
+const struct frame_unwind *legacy_frame_unwind_p (CORE_ADDR pc);
+
+
 struct frame_info;
 struct regcache;
 struct frame_id;

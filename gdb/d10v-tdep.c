@@ -38,9 +38,13 @@
 #include "arch-utils.h"
 #include "regcache.h"
 
+#include "d10v-tdep.h"
 #include "floatformat.h"
 #include "gdb/sim-d10v.h"
 #include "sim-regno.h"
+
+#include "frame-unwind.h"
+#include "d10v-frame.h"
 
 #include "gdb_assert.h"
 
@@ -59,46 +63,17 @@ struct gdbarch_tdep
     unsigned long (*imap_register) (int nr);
   };
 
-/* These are the addresses the D10V-EVA board maps data and
-   instruction memory to. */
-
-enum memspace {
-  DMEM_START  = 0x2000000,
-  IMEM_START  = 0x1000000,
-  STACK_START = 0x200bffe
-};
-
-/* d10v register names. */
-
-enum
-  {
-    R0_REGNUM = 0,
-    R3_REGNUM = 3,
-    _FP_REGNUM = 11,
-    LR_REGNUM = 13,
-    _SP_REGNUM = 15,
-    PSW_REGNUM = 16,
-    _PC_REGNUM = 18,
-    NR_IMAP_REGS = 2,
-    NR_A_REGS = 2,
-    TS2_NUM_REGS = 37,
-    TS3_NUM_REGS = 42,
-    /* d10v calling convention. */
-    ARG1_REGNUM = R0_REGNUM,
-    ARGN_REGNUM = R3_REGNUM,
-    RET1_REGNUM = R0_REGNUM,
-  };
-
 #define NR_DMAP_REGS (gdbarch_tdep (current_gdbarch)->nr_dmap_regs)
-#define A0_REGNUM (gdbarch_tdep (current_gdbarch)->a0_regnum)
+
+int
+d10v_a0_regnum (struct gdbarch *gdbarch)
+{
+  return (gdbarch_tdep (current_gdbarch)->a0_regnum);
+}
 
 /* Local functions */
 
 extern void _initialize_d10v_tdep (void);
-
-static CORE_ADDR d10v_read_sp (void);
-
-static CORE_ADDR d10v_read_fp (void);
 
 static void d10v_eva_prepare_to_trace (void);
 
@@ -109,12 +84,12 @@ static int prologue_find_regs (unsigned short op, struct frame_info *fi,
 
 static void d10v_frame_init_saved_regs (struct frame_info *);
 
-static void do_d10v_pop_frame (struct frame_info *fi);
+void do_d10v_pop_frame (struct frame_info *fi);
 
 static int
 d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
-    return (get_frame_pc (frame) > IMEM_START);
+    return (get_frame_pc (frame) > D10V_IMEM_START);
 }
 
 static CORE_ADDR
@@ -298,12 +273,12 @@ d10v_ts2_register_sim_regno (int nr)
   if (legacy_register_sim_regno (nr) < 0)
     return legacy_register_sim_regno (nr);
   if (nr >= TS2_IMAP0_REGNUM
-      && nr < TS2_IMAP0_REGNUM + NR_IMAP_REGS)
+      && nr < TS2_IMAP0_REGNUM + D10V_NR_IMAP_REGS)
     return nr - TS2_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
   if (nr == TS2_DMAP_REGNUM)
     return nr - TS2_DMAP_REGNUM + SIM_D10V_TS2_DMAP_REGNUM;
   if (nr >= TS2_A0_REGNUM
-      && nr < TS2_A0_REGNUM + NR_A_REGS)
+      && nr < TS2_A0_REGNUM + D10V_NR_A_REGS)
     return nr - TS2_A0_REGNUM + SIM_D10V_A0_REGNUM;
   return nr;
 }
@@ -314,13 +289,13 @@ d10v_ts3_register_sim_regno (int nr)
   if (legacy_register_sim_regno (nr) < 0)
     return legacy_register_sim_regno (nr);
   if (nr >= TS3_IMAP0_REGNUM
-      && nr < TS3_IMAP0_REGNUM + NR_IMAP_REGS)
+      && nr < TS3_IMAP0_REGNUM + D10V_NR_IMAP_REGS)
     return nr - TS3_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
   if (nr >= TS3_DMAP0_REGNUM
       && nr < TS3_DMAP0_REGNUM + TS3_NR_DMAP_REGS)
     return nr - TS3_DMAP0_REGNUM + SIM_D10V_DMAP0_REGNUM;
   if (nr >= TS3_A0_REGNUM
-      && nr < TS3_A0_REGNUM + NR_A_REGS)
+      && nr < TS3_A0_REGNUM + D10V_NR_A_REGS)
     return nr - TS3_A0_REGNUM + SIM_D10V_A0_REGNUM;
   return nr;
 }
@@ -331,15 +306,15 @@ d10v_ts3_register_sim_regno (int nr)
 static int
 d10v_register_byte (int reg_nr)
 {
-  if (reg_nr < A0_REGNUM)
+  if (reg_nr < d10v_a0_regnum (current_gdbarch))
     return (reg_nr * 2);
-  else if (reg_nr < (A0_REGNUM + NR_A_REGS))
-    return (A0_REGNUM * 2
-	    + (reg_nr - A0_REGNUM) * 8);
+  else if (reg_nr < (d10v_a0_regnum (current_gdbarch) + D10V_NR_A_REGS))
+    return (d10v_a0_regnum (current_gdbarch) * 2
+	    + (reg_nr - d10v_a0_regnum (current_gdbarch)) * 8);
   else
-    return (A0_REGNUM * 2
-	    + NR_A_REGS * 8
-	    + (reg_nr - A0_REGNUM - NR_A_REGS) * 2);
+    return (d10v_a0_regnum (current_gdbarch) * 2
+	    + D10V_NR_A_REGS * 8
+	    + (reg_nr - d10v_a0_regnum (current_gdbarch) - D10V_NR_A_REGS) * 2);
 }
 
 /* Number of bytes of storage in the actual machine representation for
@@ -348,9 +323,9 @@ d10v_register_byte (int reg_nr)
 static int
 d10v_register_raw_size (int reg_nr)
 {
-  if (reg_nr < A0_REGNUM)
+  if (reg_nr < d10v_a0_regnum (current_gdbarch))
     return 2;
-  else if (reg_nr < (A0_REGNUM + NR_A_REGS))
+  else if (reg_nr < (d10v_a0_regnum (current_gdbarch) + D10V_NR_A_REGS))
     return 8;
   else
     return 2;
@@ -362,12 +337,12 @@ d10v_register_raw_size (int reg_nr)
 static struct type *
 d10v_register_virtual_type (int reg_nr)
 {
-  if (reg_nr == PC_REGNUM)
+  if (reg_nr == D10V_PC_REGNUM)
     return builtin_type_void_func_ptr;
-  if (reg_nr == _SP_REGNUM || reg_nr == _FP_REGNUM)
+  if (reg_nr == D10V_SP_REGNUM || reg_nr == D10V_FP_REGNUM)
     return builtin_type_void_data_ptr;
-  else if (reg_nr >= A0_REGNUM
-      && reg_nr < (A0_REGNUM + NR_A_REGS))
+  else if (reg_nr >= d10v_a0_regnum (current_gdbarch)
+      && reg_nr < (d10v_a0_regnum (current_gdbarch) + D10V_NR_A_REGS))
     return builtin_type_int64;
   else
     return builtin_type_int16;
@@ -376,28 +351,28 @@ d10v_register_virtual_type (int reg_nr)
 static int
 d10v_daddr_p (CORE_ADDR x)
 {
-  return (((x) & 0x3000000) == DMEM_START);
+  return (((x) & 0x3000000) == D10V_DMEM_START);
 }
 
 static int
 d10v_iaddr_p (CORE_ADDR x)
 {
-  return (((x) & 0x3000000) == IMEM_START);
+  return (((x) & 0x3000000) == D10V_IMEM_START);
 }
 
-static CORE_ADDR
+CORE_ADDR
 d10v_make_daddr (CORE_ADDR x)
 {
-  return ((x) | DMEM_START);
+  return ((x) | D10V_DMEM_START);
 }
 
-static CORE_ADDR
+CORE_ADDR
 d10v_make_iaddr (CORE_ADDR x)
 {
   if (d10v_iaddr_p (x))
     return x;	/* Idempotency -- x is already in the IMEM space. */
   else
-    return (((x) << 2) | IMEM_START);
+    return (((x) << 2) | D10V_IMEM_START);
 }
 
 static CORE_ADDR
@@ -465,7 +440,7 @@ d10v_integer_to_address (struct type *type, void *buf)
 static void
 d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
-  write_register (ARG1_REGNUM, (addr));
+  write_register (D10V_ARG1_REGNUM, (addr));
 }
 
 /* Write into appropriate registers a function return value
@@ -531,8 +506,8 @@ d10v_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 d10v_saved_pc_after_call (struct frame_info *frame)
 {
-  return ((read_register (LR_REGNUM) << 2)
-	  | IMEM_START);
+  return ((read_register (D10V_LR_REGNUM) << 2)
+	  | D10V_IMEM_START);
 }
 
 /* Discard from the stack the innermost frame, restoring all saved
@@ -542,46 +517,6 @@ static void
 d10v_pop_frame (void)
 {
   generic_pop_current_frame (do_d10v_pop_frame);
-}
-
-static void
-do_d10v_pop_frame (struct frame_info *fi)
-{
-  CORE_ADDR fp;
-  int regnum;
-  char raw_buffer[8];
-
-  fp = get_frame_base (fi);
-  /* fill out fsr with the address of where each */
-  /* register was stored in the frame */
-  d10v_frame_init_saved_regs (fi);
-
-  /* now update the current registers with the old values */
-  for (regnum = A0_REGNUM; regnum < A0_REGNUM + NR_A_REGS; regnum++)
-    {
-      if (get_frame_saved_regs (fi)[regnum])
-	{
-	  read_memory (get_frame_saved_regs (fi)[regnum], raw_buffer, REGISTER_RAW_SIZE (regnum));
-	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,
-					   REGISTER_RAW_SIZE (regnum));
-	}
-    }
-  for (regnum = 0; regnum < SP_REGNUM; regnum++)
-    {
-      if (get_frame_saved_regs (fi)[regnum])
-	{
-	  write_register (regnum, read_memory_unsigned_integer (get_frame_saved_regs (fi)[regnum], REGISTER_RAW_SIZE (regnum)));
-	}
-    }
-  if (get_frame_saved_regs (fi)[PSW_REGNUM])
-    {
-      write_register (PSW_REGNUM, read_memory_unsigned_integer (get_frame_saved_regs (fi)[PSW_REGNUM], REGISTER_RAW_SIZE (PSW_REGNUM)));
-    }
-
-  write_register (PC_REGNUM, read_register (LR_REGNUM));
-  write_register (SP_REGNUM, fp + get_frame_extra_info (fi)->size);
-  target_store_registers (-1);
-  flush_cached_frames ();
 }
 
 static int
@@ -695,7 +630,7 @@ d10v_frame_chain (struct frame_info *fi)
   d10v_frame_init_saved_regs (fi);
 
   
-  if (get_frame_extra_info (fi)->return_pc == IMEM_START
+  if (get_frame_extra_info (fi)->return_pc == D10V_IMEM_START
       || inside_entry_file (get_frame_extra_info (fi)->return_pc))
     {
       /* This is meant to halt the backtrace at "_start".
@@ -703,17 +638,17 @@ d10v_frame_chain (struct frame_info *fi)
       return (CORE_ADDR) 0;
     }
 
-  if (!get_frame_saved_regs (fi)[FP_REGNUM])
+  if (!get_frame_saved_regs (fi)[D10V_FP_REGNUM])
     {
-      if (!get_frame_saved_regs (fi)[SP_REGNUM]
-	  || get_frame_saved_regs (fi)[SP_REGNUM] == STACK_START)
+      if (!get_frame_saved_regs (fi)[D10V_SP_REGNUM]
+	  || get_frame_saved_regs (fi)[D10V_SP_REGNUM] == D10V_STACK_START)
 	return (CORE_ADDR) 0;
 
-      return get_frame_saved_regs (fi)[SP_REGNUM];
+      return get_frame_saved_regs (fi)[D10V_SP_REGNUM];
     }
 
-  addr = read_memory_unsigned_integer (get_frame_saved_regs (fi)[FP_REGNUM],
-				       REGISTER_RAW_SIZE (FP_REGNUM));
+  addr = read_memory_unsigned_integer (get_frame_saved_regs (fi)[D10V_FP_REGNUM],
+				       REGISTER_RAW_SIZE (D10V_FP_REGNUM));
   if (addr == 0)
     return (CORE_ADDR) 0;
 
@@ -869,31 +804,31 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
 	get_frame_saved_regs (fi)[i] = fp - (next_addr - get_frame_saved_regs (fi)[i]);
       }
 
-  if (get_frame_saved_regs (fi)[LR_REGNUM])
+  if (get_frame_saved_regs (fi)[D10V_LR_REGNUM])
     {
       CORE_ADDR return_pc 
-	= read_memory_unsigned_integer (get_frame_saved_regs (fi)[LR_REGNUM], 
-					REGISTER_RAW_SIZE (LR_REGNUM));
+	= read_memory_unsigned_integer (get_frame_saved_regs (fi)[D10V_LR_REGNUM], 
+					REGISTER_RAW_SIZE (D10V_LR_REGNUM));
       get_frame_extra_info (fi)->return_pc = d10v_make_iaddr (return_pc);
     }
   else
     {
-      get_frame_extra_info (fi)->return_pc = d10v_make_iaddr (read_register (LR_REGNUM));
+      get_frame_extra_info (fi)->return_pc = d10v_make_iaddr (read_register (D10V_LR_REGNUM));
     }
 
   /* The SP is not normally (ever?) saved, but check anyway */
-  if (!get_frame_saved_regs (fi)[SP_REGNUM])
+  if (!get_frame_saved_regs (fi)[D10V_SP_REGNUM])
     {
       /* if the FP was saved, that means the current FP is valid, */
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
-	get_frame_saved_regs (fi)[SP_REGNUM] 
+	get_frame_saved_regs (fi)[D10V_SP_REGNUM] 
 	  = d10v_read_fp () + get_frame_extra_info (fi)->size;
       else
 	{
-	  get_frame_saved_regs (fi)[SP_REGNUM] = fp + get_frame_extra_info (fi)->size;
+	  get_frame_saved_regs (fi)[D10V_SP_REGNUM] = fp + get_frame_extra_info (fi)->size;
 	  get_frame_extra_info (fi)->frameless = 1;
-	  get_frame_saved_regs (fi)[FP_REGNUM] = 0;
+	  get_frame_saved_regs (fi)[D10V_FP_REGNUM] = 0;
 	}
     }
 }
@@ -925,9 +860,9 @@ show_regs (char *args, int from_tty)
 {
   int a;
   printf_filtered ("PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
-		   (long) read_register (PC_REGNUM),
-		   (long) d10v_make_iaddr (read_register (PC_REGNUM)),
-		   (long) read_register (PSW_REGNUM),
+		   (long) read_register (D10V_PC_REGNUM),
+		   (long) d10v_make_iaddr (read_register (D10V_PC_REGNUM)),
+		   (long) read_register (D10V_PSW_REGNUM),
 		   (long) read_register (24),
 		   (long) read_register (25),
 		   (long) read_register (23));
@@ -949,7 +884,7 @@ show_regs (char *args, int from_tty)
 		   (long) read_register (13),
 		   (long) read_register (14),
 		   (long) read_register (15));
-  for (a = 0; a < NR_IMAP_REGS; a++)
+  for (a = 0; a < D10V_NR_IMAP_REGS; a++)
     {
       if (a > 0)
 	printf_filtered ("    ");
@@ -965,8 +900,8 @@ show_regs (char *args, int from_tty)
 	}
       printf_filtered ("\n");
     }
-  printf_filtered ("A0-A%d", NR_A_REGS - 1);
-  for (a = A0_REGNUM; a < A0_REGNUM + NR_A_REGS; a++)
+  printf_filtered ("A0-A%d", D10V_NR_A_REGS - 1);
+  for (a = d10v_a0_regnum (current_gdbarch); a < d10v_a0_regnum (current_gdbarch) + D10V_NR_A_REGS; a++)
     {
       char num[MAX_REGISTER_RAW_SIZE];
       int i;
@@ -989,7 +924,7 @@ d10v_read_pc (ptid_t ptid)
 
   save_ptid = inferior_ptid;
   inferior_ptid = ptid;
-  pc = (int) read_register (PC_REGNUM);
+  pc = (int) read_register (D10V_PC_REGNUM);
   inferior_ptid = save_ptid;
   retval = d10v_make_iaddr (pc);
   return retval;
@@ -1002,26 +937,26 @@ d10v_write_pc (CORE_ADDR val, ptid_t ptid)
 
   save_ptid = inferior_ptid;
   inferior_ptid = ptid;
-  write_register (PC_REGNUM, d10v_convert_iaddr_to_raw (val));
+  write_register (D10V_PC_REGNUM, d10v_convert_iaddr_to_raw (val));
   inferior_ptid = save_ptid;
 }
 
-static CORE_ADDR
+CORE_ADDR
 d10v_read_sp (void)
 {
-  return (d10v_make_daddr (read_register (SP_REGNUM)));
+  return (d10v_make_daddr (read_register (D10V_SP_REGNUM)));
 }
 
 static void
 d10v_write_sp (CORE_ADDR val)
 {
-  write_register (SP_REGNUM, d10v_convert_daddr_to_raw (val));
+  write_register (D10V_SP_REGNUM, d10v_convert_daddr_to_raw (val));
 }
 
-static CORE_ADDR
+CORE_ADDR
 d10v_read_fp (void)
 {
-  return (d10v_make_daddr (read_register (FP_REGNUM)));
+  return (d10v_make_daddr (read_register (D10V_FP_REGNUM)));
 }
 
 /* Function: push_return_address (pc)
@@ -1031,7 +966,7 @@ d10v_read_fp (void)
 static CORE_ADDR
 d10v_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (LR_REGNUM, d10v_convert_iaddr_to_raw (CALL_DUMMY_ADDRESS ()));
+  write_register (D10V_LR_REGNUM, d10v_convert_iaddr_to_raw (CALL_DUMMY_ADDRESS ()));
   return sp;
 }
 
@@ -1077,7 +1012,7 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
   int i;
-  int regnum = ARG1_REGNUM;
+  int regnum = D10V_ARG1_REGNUM;
   struct stack_item *si = NULL;
   long val;
 
@@ -1099,13 +1034,13 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       int aligned_regnum = (regnum + 1) & ~1;
 
       /* printf ("push: type=%d len=%d\n", TYPE_CODE (type), len); */
-      if (len <= 2 && regnum <= ARGN_REGNUM)
+      if (len <= 2 && regnum <= D10V_ARGN_REGNUM)
 	/* fits in a single register, do not align */
 	{
 	  val = extract_unsigned_integer (contents, len);
 	  write_register (regnum++, val);
 	}
-      else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
+      else if (len <= (D10V_ARGN_REGNUM - aligned_regnum + 1) * 2)
 	/* value fits in remaining registers, store keeping left
 	   aligned */
 	{
@@ -1125,7 +1060,7 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       else
 	{
 	  /* arg will go onto stack */
-	  regnum = ARGN_REGNUM + 1;
+	  regnum = D10V_ARGN_REGNUM + 1;
 	  si = push_stack_item (si, contents, len);
 	}
     }
@@ -1151,9 +1086,9 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
   int len;
 #if 0
   printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), 
-	 TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, 
-	 (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), 
-					 REGISTER_RAW_SIZE (RET1_REGNUM)));
+	 TYPE_LENGTH (type), D10V_RET1_REGNUM - R0_REGNUM, 
+	 (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(D10V_RET1_REGNUM), 
+					 REGISTER_RAW_SIZE (D10V_RET1_REGNUM)));
 #endif
   if (TYPE_LENGTH (type) == 1)
     {
@@ -1338,7 +1273,7 @@ d10v_eva_prepare_to_trace (void)
   if (!tracing)
     return;
 
-  last_pc = read_register (PC_REGNUM);
+  last_pc = read_register (D10V_PC_REGNUM);
 }
 
 /* Collect trace data from the target board and format it into a form
@@ -1520,10 +1455,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
-     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_d10v_ts2:
@@ -1620,7 +1551,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, d10v_frame_init_saved_regs);
-  set_gdbarch_init_extra_frame_info (gdbarch, d10v_init_extra_frame_info);
 
   set_gdbarch_pop_frame (gdbarch, d10v_pop_frame);
 
@@ -1644,6 +1574,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_sim_regno (gdbarch, d10v_register_sim_regno);
   set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
+
+  frame_unwind_append_predicate (gdbarch, d10v_frame_p);
 
   return gdbarch;
 }

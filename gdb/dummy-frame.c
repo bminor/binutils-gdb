@@ -24,6 +24,7 @@
 
 #include "defs.h"
 #include "dummy-frame.h"
+#include "frame-unwind.h"
 #include "regcache.h"
 #include "frame.h"
 #include "inferior.h"
@@ -360,5 +361,23 @@ dummy_frame_id_unwind (struct frame_info *frame,
     *id = null_frame_id;
   else
     *id = dummy->id;
+}
+
+static struct frame_unwind dummy_frame_unwind =
+{
+  dummy_frame_pc_unwind,
+  dummy_frame_id_unwind,
+  dummy_frame_register_unwind
+};
+
+const struct frame_unwind *
+dummy_frame_p (CORE_ADDR pc)
+{
+  if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+      ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
+      : pc_in_dummy_frame (pc))
+    return &dummy_frame_unwind;
+  else
+    return NULL;
 }
 

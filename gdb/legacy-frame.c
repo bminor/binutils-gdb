@@ -28,6 +28,8 @@
 #include "regcache.h"
 #include "target.h"
 #include "dummy-frame.h"	/* For generic_find_dummy_frame.  */
+#include "frame-unwind.h"
+
 
 /* Legacy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
@@ -298,4 +300,18 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
     *addrp = REGISTER_BYTE (regnum);
   if (raw_buffer)
     deprecated_read_register_gen (regnum, raw_buffer);
+}
+
+
+const struct frame_unwind legacy_frame_unwind =
+{
+  legacy_frame_pc_unwind,
+  legacy_frame_id_unwind,
+  legacy_frame_register_unwind
+};
+
+const struct frame_unwind *
+legacy_frame_unwind_p (CORE_ADDR pc)
+{
+  return &legacy_frame_unwind;
 }

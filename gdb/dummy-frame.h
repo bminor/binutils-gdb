@@ -22,6 +22,13 @@
 #if !defined (DUMMY_FRAME_H)
 #define DUMMY_FRAME_H 1
 
+/* Does the PC belong to a dummy frame?  If it does, return a dummy
+   frame unwind descriptor.  */
+
+struct frame_unwind;
+extern const struct frame_unwind *dummy_frame_p (CORE_ADDR pc);
+
+
 struct frame_info;
 struct regcache;
 struct frame_id;

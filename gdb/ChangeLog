@@ -1,3 +1,51 @@
+2003-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* d10v-tdep.c: Include "d10v-tdep.h".  Update to use D10V_
+	prefixed enums.
+	(do_d10v_pop_frame): Delete.  Use version in d10v-frame.c.
+
+	* frame.c (frame_read_unsigned_register): Do not use
+	get_next_frame.
+	(frame_read_signed_register): Do not use get_next_frame.
+	(get_frame_base): Use frame_id_unwind.
+
+	* d10v-tdep.h: New file.
+	* d10v-frame.h: New file.
+	* d10v-frame.c: New file.
+
+	* frame.c (frame_id_unwind): Update.
+	(create_sentinel_frame): Update.
+	(legacy_get_prev_frame): Use frame_unwind_find_by_pc.
+	(get_prev_frame): Ditto.
+
+	* frame.h (struct frame_info): Replace pc_unwind, id_unwind and
+	register_unwind with unwind structure.
+
+	* frame.c (set_unwind_by_pc): Delete function.
+	(create_new_frame): Use frame_unwind_find_by_pc;
+
+	* Makefile.in (frame_h): Add $(frame_unwind_h).
+	* frame.h: Include "frame-unwind.h".
+	(frame_register_unwind_ftype): Delete.
+	(frame_id_unwind_ftype): Delete.
+	(frame_pc_unwind_ftype): Delete.
+
+	* Makefile.in (dummy-frame.o): Update dependencies.
+	(legacy-frame.o): Update dependencies.
+
+	* dummy-frame.c: Include "frame-unwind.h".
+	(dummy_frame_unwind): New static variable.
+	(dummy_frame_p): New function.
+	* legacy-frame.c: Include "frame-unwind.h".
+	(legacy_frame_unwind): New static variable.
+	(legacy_frame_p): New function.
+	* legacy-frame.h (legacy_frame_p): Declare.
+	* dummy-frame.h (dummy_frame_p): Declare.
+
+	* Makefile.in (frame_unwind_h): Define.
+	* frame-unwind.h: New file.
+	* frame-unwind.c: New file.
+
 2003-01-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* d10v-tdep.c (d10v_init_extra_frame_info): Remove checks for a

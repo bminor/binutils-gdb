@@ -500,6 +500,7 @@ TARGET_FLAGS_TO_PASS = \
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	ax-general.c ax-gdb.c \
 	bcache.c blockframe.c breakpoint.c buildsym.c builtin-regs.c \
+	d10v-frame.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	charset.c cli-out.c coffread.c complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-valprint.c \
@@ -507,6 +508,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	dummy-frame.c dwarfread.c dwarf2read.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c frame.c \
+	frame-unwind.c \
 	gdbarch.c arch-utils.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
 	hpacc-abi.c \
 	inf-loop.c infcmd.c inflow.c infrun.c \
@@ -619,7 +621,8 @@ event_loop_h = event-loop.h
 event_top_h = event-top.h
 expression_h = expression.h $(symtab_h) $(doublest_h)
 f_lang_h = f-lang.h
-frame_h = frame.h
+frame_h = frame.h $(frame_unwind_h)
+frame_unwind_h = frame-unwind.h
 gdb_events_h = gdb-events.h
 gdb_stabs_h = gdb-stabs.h
 gdb_h = gdb.h
@@ -807,7 +810,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
-	charset.o disasm.o dummy-frame.o \
+	charset.o disasm.o dummy-frame.o d10v-frame.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
@@ -832,7 +835,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
-	frame.o doublest.o \
+	frame.o doublest.o frame-unwind.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
 	sentinel-frame.o \
 	reggroups.o legacy-frame.o
@@ -1605,6 +1608,7 @@ cris-tdep.o: cris-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(inferior_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(value_h) \
 	$(opcode_cris_h) $(arch_utils_h) $(regcache_h) $(symfile_h) \
 	$(solib_h) $(solib_svr4_h) $(gdb_string_h)
+d10v-frame.o: d10v-frame.c $(defs_h) $(frame_unwind_h)
 d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) $(inferior_h) \
 	$(dis_asm_h) $(symfile_h) $(objfiles_h) $(language_h) \
@@ -1631,7 +1635,7 @@ doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h)
 dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
-	$(frame_h) $(inferior_h) $(gdb_assert_h)
+	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h)
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(gdbcore_h) $(symtab_h) $(symfile_h) \
@@ -1685,6 +1689,8 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(sentinel_frame_h) \
 	$(legacy_frame_h) $(gdbcore_h) $(annotate_h) $(language_h) \
 	$(ui_out_h)
+frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
+	$(gdb_assert_h) $(dummy_frame_h) $(legacy_frame_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 gcore.o: gcore.c $(defs_h) $(cli_decode_h) $(inferior_h) $(gdbcore_h) \
@@ -1835,7 +1841,8 @@ language.o: language.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
 legacy-frame.o: legacy-frame.c $(defs_h) $(legacy_frame_h) $(gdb_assert_h) \
-	$(frame_h) $(gdbcore_h) $(regcache_h) $(target_h) $(dummy_frame_h)
+	$(frame_h) $(gdbcore_h) $(regcache_h) $(target_h) $(dummy_frame_h) \
+	$(frame_unwind_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(completer_h) \
 	$(cp_abi_h) $(source_h) $(parser_defs_h)

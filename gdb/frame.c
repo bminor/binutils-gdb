@@ -62,7 +62,7 @@ frame_id_unwind (struct frame_info *frame)
 {
   if (!frame->id_unwind_cache_p)
     {
-      frame->id_unwind (frame, &frame->unwind_cache, &frame->id_unwind_cache);
+      frame->unwind->id (frame, &frame->unwind_cache, &frame->id_unwind_cache);
       frame->id_unwind_cache_p = 1;
     }
   return frame->id_unwind_cache;
@@ -171,8 +171,8 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   gdb_assert (frame != NULL);
 
   /* Ask this frame to unwind its register.  */
-  frame->register_unwind (frame, &frame->unwind_cache, regnum,
-			  optimizedp, lvalp, addrp, realnump, bufferp);
+  frame->unwind->reg (frame, &frame->unwind_cache, regnum,
+		      optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 void
@@ -271,7 +271,7 @@ frame_read_unsigned_register (struct frame_info *frame, int regnum,
      on recursive frame calls (like the below code) when manipulating
      a frame chain.  */
   gdb_assert (frame != NULL);
-  frame_unwind_unsigned_register (get_next_frame (frame), regnum, val);
+  frame_unwind_unsigned_register (frame->next, regnum, val);
 }
 
 void
@@ -280,7 +280,7 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
 {
   /* See note in frame_read_unsigned_register().  */
   gdb_assert (frame != NULL);
-  frame_unwind_signed_register (get_next_frame (frame), regnum, val);
+  frame_unwind_signed_register (frame->next, regnum, val);
 }
 
 static void
@@ -409,9 +409,7 @@ create_sentinel_frame (struct regcache *regcache)
   frame->type = SENTINEL_FRAME;
   frame->level = -1;
   frame->unwind_cache = sentinel_frame_cache (regcache);
-  frame->pc_unwind = sentinel_frame_pc_unwind;
-  frame->id_unwind = sentinel_frame_id_unwind;
-  frame->register_unwind = sentinel_frame_register_unwind;
+  frame->unwind = sentinel_frame_unwind_p (0/* dummy value*/);
   /* Link this frame back to itself.  The frame is self referential
      (the unwound PC is the same as the pc for instance, so make it
      so.  */
@@ -554,42 +552,6 @@ select_frame (struct frame_info *fi)
     }
 }
 
-/* Using the PC, select a mechanism for unwinding a frame returning
-   the previous frame.  The register unwind function should, on
-   demand, initialize the ->context object.  */
-
-static void
-set_unwind_by_pc (CORE_ADDR pc,
-		  frame_register_unwind_ftype **unwind_register,
-		  frame_pc_unwind_ftype **unwind_pc,
-		  frame_id_unwind_ftype **unwind_id)
-{
-  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    {
-      /* Still need to set this to something.  The ``info frame'' code
-	 calls this function to find out where the saved registers are.
-	 Hopefully this is robust enough to stop any core dumps and
-	 return vaguely correct values..  */
-      *unwind_register = legacy_frame_register_unwind;
-      *unwind_pc = legacy_frame_pc_unwind;
-      *unwind_id = legacy_frame_id_unwind;
-    }
-  else if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-	   ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
-	   : pc_in_dummy_frame (pc))
-    {
-      *unwind_register = dummy_frame_register_unwind;
-      *unwind_pc = dummy_frame_pc_unwind;
-      *unwind_id = dummy_frame_id_unwind;
-    }
-  else
-    {
-      *unwind_register = legacy_frame_register_unwind;
-      *unwind_pc = legacy_frame_pc_unwind;
-      *unwind_id = legacy_frame_id_unwind;
-    }
-}
-
 /* Determine the frame's type based on its PC.  */
 
 static enum frame_type
@@ -633,8 +595,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
     INIT_EXTRA_FRAME_INFO (0, fi);
 
   /* Select/initialize an unwind function.  */
-  set_unwind_by_pc (fi->pc, &fi->register_unwind, &fi->pc_unwind,
-		    &fi->id_unwind);
+  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
 
   return fi;
 }
@@ -857,8 +818,8 @@ legacy_get_prev_frame (struct frame_info *next_frame)
      (and probably other architectural information).  The PC lets you
      check things like the debug info at that point (dwarf2cfi?) and
      use that to decide how the frame should be unwound.  */
-  set_unwind_by_pc (get_frame_pc (prev), &prev->register_unwind,
-		    &prev->pc_unwind, &prev->id_unwind);
+  prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					  get_frame_pc (prev));
 
   /* NOTE: cagney/2002-11-18: The code segments, found in
      create_new_frame and get_prev_frame(), that initializes the
@@ -1007,8 +968,8 @@ get_prev_frame (struct frame_info *next_frame)
   prev_frame->type = frame_type_from_pc (prev_frame->pc);
 
   /* Set the unwind functions based on that identified PC.  */
-  set_unwind_by_pc (prev_frame->pc, &prev_frame->register_unwind,
-		    &prev_frame->pc_unwind, &prev_frame->id_unwind);
+  prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
+						prev_frame->pc);
 
   /* Now figure out how to initialize this new frame.  Perhaphs one
      day, this will too, be selected by set_unwind_by_pc().  */
@@ -1062,7 +1023,7 @@ frame_pc_unwind (struct frame_info *frame)
 {
   if (!frame->pc_unwind_cache_p)
     {
-      frame->pc_unwind_cache = frame->pc_unwind (frame, &frame->unwind_cache);
+      frame->pc_unwind_cache = frame->unwind->pc (frame, &frame->unwind_cache);
       frame->pc_unwind_cache_p = 1;
     }
   return frame->pc_unwind_cache;
@@ -1114,7 +1075,8 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
-  return fi->frame;
+  struct frame_id id = frame_id_unwind (fi->next);
+  return id.base;
 }
 
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...
