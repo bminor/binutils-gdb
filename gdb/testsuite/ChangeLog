@@ -1,5 +1,6 @@
 Sat May 29 17:57:01 1993  Fred Fish  (fnf@cygnus.com)
 
+	* gdb.t00/default.exp:  Start with a fresh gdb.
 	* configure.in (configdirs):  Remove gdb.t31 until the chill
 	compiler works again.  It no longer is able to find chillrt0
 	since it isn't in libchill.a anymore.
