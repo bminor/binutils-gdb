@@ -290,6 +290,7 @@ typedef enum {
  SHIFT,                 /* perform a logical or arithmetic shift */
  TRAP,                  /* system exception generation */
  BREAK,                 /* system breakpoint exception generation */
+ SDBBP,                 /* software debug breakpoint exception generation */
  SYSCALL,               /* system exception generation */
  SYNC,                  /* system cache control */
  DECODE,                /* co-processor instruction */
@@ -823,6 +824,7 @@ struct instruction MIPS_DECODE[] = {
  {"SCD",     3,"111100sssssgggggeeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD | ATOMIC)},
  {"SD",      3,"111111sssssgggggeeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD)},
  {"SDC1",    2,"111101sssssttttteeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD | COPROC)},
+ {"SDBBP",  T3,"000000????????????????????001110",SPECIAL,SDBBP,    (NOARG)},
  {"SDC2",    2,"111110sssssttttteeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD | COPROC)},
  {"SDL",     3,"101100sssssgggggyyyyyyyyyyyyyyyy",NORMAL, STORE,    (DOUBLEWORD | LEFT)},
  {"SDR",     3,"101101sssssgggggyyyyyyyyyyyyyyyy",NORMAL, STORE,    (DOUBLEWORD | RIGHT)},
@@ -941,6 +943,7 @@ static const struct instruction MIPS16_DECODE[] = {
 {"NOT",     1, "11101dddyyy01111Z", RR,      OR,      NOT },
 {"OR",      1, "11101wwwyyy01101",  RR,      OR,      NONE },
 {"SB",      1, "11000xxxyyy55555",  RRI,     STORE,   BYTE },
+{"SDBBP",  T3, "11100??????00001",  RR,      SDBBP,   NOARG },
 {"SD",      3, "01111xxxyyyDDDDD",  RRI,     STORE,   DOUBLEWORD },
 {"SDSP",    3, "11111001yyyDDDDDs", RI64,    STORE,   DOUBLEWORD },
 {"SDRASP",  3, "11111010CCCCCCCCsQ", I64,    STORE,   DOUBLEWORD },
@@ -2416,6 +2419,10 @@ build_instruction (doisa, features, mips16, insn)
 
     case BREAK:
      printf("   SignalException(BreakPoint,instruction);\n");
+     break ;
+
+    case SDBBP:
+     printf("   SignalException(DebugBreakPoint,instruction);\n");
      break ;
 
     case TRAP:
@@ -4493,10 +4500,3 @@ my_strtoul(nptr, endptr, base)
 /*---------------------------------------------------------------------------*/
 
 /*> EOF gencode.c <*/
-
-
-
-
-
-
-

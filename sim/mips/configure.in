@@ -27,6 +27,14 @@ case "${target}" in
 esac
 AC_SUBST(SIMCONF)
 
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
+# end-sanitize-tx19
+  *)                    SIM_SUBTARGET="";;
+esac
+AC_SUBST(SIM_SUBTARGET)
+
 AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_FUNCS(aint anint sqrt)
