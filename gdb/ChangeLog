@@ -1,3 +1,8 @@
+1999-02-08  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.host: Add support for StrongARM host.
+	* configure.tgt: Add support for StrongARM target.
+
 Mon Feb  8 12:05:05 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* dsrec.c (make_srec): cast targ_addr to int in call to sprintf

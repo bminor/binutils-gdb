@@ -150,6 +150,8 @@ sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
 sparc-*-*)		gdb_host=sun4os4 ;;
 sparc64-*-*)		gdb_host=sun4sol2 ;;
 
+strongarm-*-*)		gdb_host=arm ;;
+
 tahoe-*-*)		gdb_host=tahoe ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;

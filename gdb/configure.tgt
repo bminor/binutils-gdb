@@ -25,6 +25,7 @@ pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
+strongarm*)		gdb_target_cpu=arm ;;
 v850*)			gdb_target_cpu=v850 ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
@@ -49,7 +50,7 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 
-arm-*-* | thumb-*-*)	gdb_target=arm
+arm-*-* | thumb-*-* | strongarm-*-*)	gdb_target=arm
 
 			# rdi doesn't work for wingdb yet
 			case $gdb_host in
