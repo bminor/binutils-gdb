@@ -494,8 +494,10 @@ if test "$FOUNDRY_LIB_BASE" != ""; then
     LIBIDE="${FOUNDRY_LIB_BASE}/lib/libide.a"
     IDE_DEPS="${FOUNDRY_LIB_BASE}/lib/libilu-Tk.a ${FOUNDRY_LIB_BASE}/lib/libilu-c.a ${FOUNDRY_LIB_BASE}/lib/libilu.a"
 else
+# end-sanitize-ide
     LIBGUI="../libgui/src/libgui.a"
     GUI_CFLAGS_X="-I${srcdir}/../libgui/src"
+# start-sanitize-ide
     if test x$enable_ide = xyes; then
         IDE_CFLAGS_X="-I${srcdir}/../libidetcl/src -I${srcdir}/../libide/src -DIDE -I${srcdir}/../ilu/runtime/mainloop"
 	IDE_X="-L../ilu/runtime/mainloop -lilu-Tk -L../ilu/runtime/c -lilu-c -L../ilu/runtime/kernel -lilu"
@@ -506,8 +508,11 @@ else
     LIBIDE="../libide/src/libide.a"
     IDE_DEPS="../ilu/runtime/mainloop/libilu-Tk.a ../ilu/runtime/c/libilu-c.a ../ilu/runtime/kernel/libilu.a"
 fi
+
+# end-sanitize-ide
 AC_SUBST(LIBGUI)
 AC_SUBST(GUI_CFLAGS_X)
+# start-sanitize-ide
 AC_SUBST(IDE_CFLAGS_X)
 AC_SUBST(IDE_X)
 AC_SUBST(LIBIDETCL)
