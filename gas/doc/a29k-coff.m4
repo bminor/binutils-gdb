@@ -7,4 +7,8 @@ _define__(<_AOUT__>,<0>)
 _define__(<_BOUT__>,<0>)
 _define__(<_COFF__>,<1>)
 _define__(<_ELF__>,<0>)
+_define__(<_DIFFTABKLUG__>,0)           NO difference-table kluge
+_define__(<_IEEEFLOAT__>,1)             IEEE floating point
+_define__(<_W32__>,1)			32-bit words
+_define__(<_W16__>,0)
 _divert__<>

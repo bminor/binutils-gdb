@@ -16,8 +16,15 @@ _define__(<_BOUT__>,<0>)
 _define__(<_COFF__>,<0>)
 _define__(<_ELF__>,<0>)
 
+                                        Properties of the assembler
+_define__(<_DIFFTABKLUG__>,1)           Do we use the difference-table kluge?
+_define__(<_IEEEFLOAT__>,0)             IEEE floating-point?
+_define__(<_W32__>,0)                   word is 32 bits
+_define__(<_W16__>,1)                   word is 16 bits
+
 _define__(<_A29K__>,<0>)		Specific architectures.  Note none
-_define__(<_I80386__>,<0>)		starts out on.
+_define__(<_H8__>,<0>)		        starts out on.
+_define__(<_I80386__>,<0>)
 _define__(<_I960__>,<0>)
 _define__(<_M680X0__>,<0>)
 _define__(<_SPARC__>,<0>)

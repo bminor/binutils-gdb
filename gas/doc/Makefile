@@ -69,6 +69,9 @@ as-a29k-coff.texinfo: as.texinfo pretex.m4 none.m4 a29k-coff.m4
 as-gen.texinfo: as.texinfo pretex.m4 none.m4 gen.m4
 	${M4} pretex.m4 none.m4 gen.m4 as.texinfo >as-gen.texinfo
 
+as-h8.texinfo: as.texinfo pretex.m4 none.m4 h8.m4
+	${M4} pretex.m4 none.m4 h8.m4 as.texinfo >as-h8.texinfo
+
 as-i80386.texinfo: as.texinfo pretex.m4 none.m4 i80386.m4
 	${M4} pretex.m4 none.m4 i80386.m4 as.texinfo >as-i80386.texinfo
 
