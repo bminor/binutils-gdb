@@ -116,6 +116,7 @@ vax.mt
 vsta.mt
 vxworks68.mt
 z8ksim.mt
+coff-w65.mt
 
 Things-to-lose:
 
