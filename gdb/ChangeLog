@@ -1,5 +1,12 @@
 2003-08-27  Andrew Cagney  <cagney@redhat.com>
 
+	* ppc-linux-tdep.c (ppc64_call_dummy_address): Delete function.
+	(ppc_linux_init_abi): For PPC64, do not set call_dummy_address.
+	* infcall.c (call_function_by_hand): Convert the entry point
+	address into a code address.
+
+2003-08-27  Andrew Cagney  <cagney@redhat.com>
+
 	* dsrec.c: Include "gdb_string.h".
 	* Makefile.in (dsrec.o): Update dependencies.
 

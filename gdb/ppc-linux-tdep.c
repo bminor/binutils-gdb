@@ -929,18 +929,6 @@ ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
 }
 
 
-/* On 64-bit PowerPC GNU/Linux, the ELF header's e_entry field is the
-   address of a function descriptor for the entry point function, not
-   the actual entry point itself.  So to find the actual address at
-   which execution should begin, we need to fetch the function's entry
-   point from that descriptor.  */
-static CORE_ADDR
-ppc64_call_dummy_address (void)
-{
-  return ppc64_desc_entry_point (entry_point_address ());
-}
-
-
 enum {
   ELF_NGREG = 48,
   ELF_NFPREG = 33,
@@ -1066,8 +1054,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
          function descriptors).  */
       set_gdbarch_convert_from_func_ptr_addr
         (gdbarch, ppc64_linux_convert_from_func_ptr_addr);
-
-      set_gdbarch_call_dummy_address (gdbarch, ppc64_call_dummy_address);
 
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
