@@ -1,3 +1,8 @@
+2002-01-10  Jason Merrill  <jason@redhat.com>
+
+	* dwarf2read.c (decode_locdesc): Implement DW_OP_litn, DW_OP_dup.
+	Fix DW_OP_minus.
+
 2002-01-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/djgpp/fnchange.lst: Add renames for bfd/ChangeLog-0001

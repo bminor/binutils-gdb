@@ -5807,6 +5807,41 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
       op = data[i++];
       switch (op)
 	{
+	case DW_OP_lit0:
+	case DW_OP_lit1:
+	case DW_OP_lit2:
+	case DW_OP_lit3:
+	case DW_OP_lit4:
+	case DW_OP_lit5:
+	case DW_OP_lit6:
+	case DW_OP_lit7:
+	case DW_OP_lit8:
+	case DW_OP_lit9:
+	case DW_OP_lit10:
+	case DW_OP_lit11:
+	case DW_OP_lit12:
+	case DW_OP_lit13:
+	case DW_OP_lit14:
+	case DW_OP_lit15:
+	case DW_OP_lit16:
+	case DW_OP_lit17:
+	case DW_OP_lit18:
+	case DW_OP_lit19:
+	case DW_OP_lit20:
+	case DW_OP_lit21:
+	case DW_OP_lit22:
+	case DW_OP_lit23:
+	case DW_OP_lit24:
+	case DW_OP_lit25:
+	case DW_OP_lit26:
+	case DW_OP_lit27:
+	case DW_OP_lit28:
+	case DW_OP_lit29:
+	case DW_OP_lit30:
+	case DW_OP_lit31:
+	  stack[++stacki] = op - DW_OP_lit0;
+	  break;
+
 	case DW_OP_reg0:
 	case DW_OP_reg1:
 	case DW_OP_reg2:
@@ -5965,6 +6000,11 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  i += bytes_read;
 	  break;
 
+	case DW_OP_dup:
+	  stack[stacki + 1] = stack[stacki];
+	  stacki++;
+	  break;
+
 	case DW_OP_plus:
 	  stack[stacki - 1] += stack[stacki];
 	  stacki--;
@@ -5976,7 +6016,7 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  break;
 
 	case DW_OP_minus:
-	  stack[stacki - 1] = stack[stacki] - stack[stacki - 1];
+	  stack[stacki - 1] -= stack[stacki];
 	  stacki--;
 	  break;
 
