@@ -1,3 +1,10 @@
+Fri Jul 25 10:54:43 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* tc-hppa.c (md_apply_fix): Improve warnings for out of range
+	unconditional branches.
+	(hppa_fix_adjustable): Don't adjust anything with a RR% or LR%
+	field selector.
+
 Thu Jul 24 15:21:49 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* tc-sparc.c (md_begin): Cast sparc_opcodes to PTR for hash_insert.
