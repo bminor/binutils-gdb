@@ -1,3 +1,11 @@
+Thu Oct 24 12:26:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (trace_input): Remove all references to SEXT7.
+	(OP_300, OP_400, OP_500, OP_380, OP_480, OP_501): Displacement
+	is zero extended for sst/sld instructions.
+	* v850_sim.h (SEX7): Delete.  It's no longer needed (and it
+	was incorrect anyway).
+
 Thu Oct 24 10:33:33 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in:  Get rid of srcroot.  Set all INSTALL macros via

@@ -159,11 +159,11 @@ trace_input (name, type, size)
       break;
 
     case OP_LOAD16:
-      sprintf (buf, "%d[r30],r%d", SEXT7 (OP[1]) * size, OP[0]);
+      sprintf (buf, "%d[r30],r%d", OP[1] * size, OP[0]);
       break;
 
     case OP_STORE16:
-      sprintf (buf, "r%d,%d[r30]", OP[0], SEXT7 (OP[1]) * size);
+      sprintf (buf, "r%d,%d[r30]", OP[0], OP[1] * size);
       break;
 
     case OP_LOAD32:
@@ -274,14 +274,14 @@ trace_input (name, type, size)
 	  break;
 
 	case OP_LOAD16:
-	  values[0] = SEXT7 (OP[1]) * size;
+	  values[0] = OP[1] * size;
 	  values[1] = State.regs[30];
 	  num_values = 2;
 	  break;
 
 	case OP_STORE16:
 	  values[0] = State.regs[OP[0]];
-	  values[1] = SEXT7 (OP[1]) * size;
+	  values[1] = OP[1] * size;
 	  values[2] = State.regs[30];
 	  num_values = 3;
 	  break;
@@ -423,7 +423,7 @@ OP_300 ()
 
   trace_input ("sld.b", OP_LOAD16, 1);
   temp = OP[1];
-  temp = SEXT7 (temp);
+  temp &= 0x7f;
   op2 = temp;
   result = load_mem (State.regs[30] + op2, 1);
   State.regs[OP[0]] = SEXT8 (result);
@@ -439,7 +439,7 @@ OP_400 ()
 
   trace_input ("sld.h", OP_LOAD16, 2);
   temp = OP[1];
-  temp = SEXT7 (temp);
+  temp &= 0x7f;
   op2 = temp << 1;
   result = load_mem (State.regs[30] + op2, 2);
   State.regs[OP[0]] = SEXT16 (result);
@@ -455,7 +455,7 @@ OP_500 ()
 
   trace_input ("sld.w", OP_LOAD16, 4);
   temp = OP[1];
-  temp = SEXT7 (temp);
+  temp &= 0x7f;
   op2 = temp << 2;
   result = load_mem (State.regs[30] + op2, 4);
   State.regs[OP[0]] = result;
@@ -472,7 +472,7 @@ OP_380 ()
   trace_input ("sst.b", OP_STORE16, 1);
   op0 = State.regs[OP[0]];
   temp = OP[1];
-  temp = SEXT7 (temp);
+  temp &= 0x7f;
   op1 = temp;
   store_mem (State.regs[30] + op1, 1, op0);
   trace_output (OP_STORE16);
@@ -488,7 +488,7 @@ OP_480 ()
   trace_input ("sst.h", OP_STORE16, 2);
   op0 = State.regs[OP[0]];
   temp = OP[1];
-  temp = SEXT7 (temp);
+  temp &= 0x7f;
   op1 = temp << 1;
   store_mem (State.regs[30] + op1, 2, op0);
   trace_output (OP_STORE16);
@@ -504,7 +504,7 @@ OP_501 ()
   trace_input ("sst.w", OP_STORE16, 4);
   op0 = State.regs[OP[0]];
   temp = OP[1];
-  temp = SEXT7 (temp);
+  temp &= 0x7f;
   op1 = temp << 2;
   store_mem (State.regs[30] + op1, 4, op0);
   trace_output (OP_STORE16);
