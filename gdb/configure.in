@@ -337,4 +337,4 @@ if [ "${nativefile}" = "" ] ; then
 	mv -f Makefile.tem Makefile
 fi
 
-cat ${srcdir}/alldeps.mak ${srcdir}/depend >>Makefile
+cat ${srcdir}/depend >>Makefile

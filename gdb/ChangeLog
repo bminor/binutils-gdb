@@ -1,5 +1,13 @@
 Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in (TAGFILES): Don't include YYFILES.
+
+	* Makefile.in (HFILES): Include monitor.h.
+
+	* Makefile.in: Include text that used to be in alldeps.mak.
+	Remove config/mips/{bigmips.mh,xm-bigmips} from it.
+	* Makefile.in, configure.in: Remove all traces of alldeps.mak.
+
 	* main.c (main): Print help message on stdout not stderr
 	per standards.texi.
 	New option --version per standards.texi.
