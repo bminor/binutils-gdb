@@ -1,3 +1,11 @@
+Mon Jun 20 23:54:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/list.exp:  Tweak alternate pattern for listing of an
+	included file to run under newer versions of expect.
+	* gdb.c++/demangle.exp:  Add spaces to the expect patterns between
+	consecutive >'s in templates to accomodate recent cplus-dem.c change.
+	Remove xfail for the virtual table of BDDHookV.
+
 Sat Jun 18 12:51:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* lib/gdb.exp (string_to_regexp): Set a default result.
