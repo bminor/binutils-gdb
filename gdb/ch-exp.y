@@ -367,6 +367,13 @@ expression_list	:	expression
 			}
 		;
 
+maybe_expression_list:	/* EMPTY */
+			{
+			  arglist_len = 0;
+			}
+		|	expression_list
+		;
+
 
 /* Z.200, 5.2.1 */
 
@@ -382,7 +389,7 @@ rparen		:	')'
 
 primitive_value	:
 			access_name
-		|	primitive_value_lparen expression_list rparen
+		|	primitive_value_lparen maybe_expression_list rparen
 			{
 			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
 			  write_exp_elt_longcst ($3);

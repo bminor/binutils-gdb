@@ -1,3 +1,8 @@
+Sun Feb 12 11:03:47 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-exp.y (maybe_expression_list):  New non-terminal.
+	(primitive_value):  Allow empty parameter list.
+
 Sun Feb 12 10:02:16 1995  Per Bothner  <bothner@cygnus.com>
 
 	* buildsym.c (finish_block):  If finishing a function without known
