@@ -733,18 +733,24 @@ static char *parse_and_eval_memrange PARAMS ((char *,
 
 static void 
 end_actions_pseudocommand (args, from_tty)
+     char *args;
+     int from_tty;
 {
   error ("This command cannot be used at the top level.");
 }
 
 static void
 while_stepping_pseudocommand (args, from_tty)
+     char *args;
+     int from_tty;
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
 
 static void
 collect_pseudocommand (args, from_tty)
+     char *args;
+     int from_tty;
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
@@ -883,6 +889,9 @@ validate_actionline (line, t)
   /* symbol lookup etc. */
   if (*p == '\0')	/* empty line: just prompt for another line. */
     return BADLINE;
+
+  if (*p == '#')	/* comment line */
+    return GENERIC;
 
   c = lookup_cmd (&p, cmdlist, "", -1, 1);
   if (c == 0)
@@ -1130,7 +1139,9 @@ memrange_sortmerge (memranges)
 	      memranges->list[b].start - memranges->list[a].end <= 
 	      MAX_REGISTER_VIRTUAL_SIZE)
 	    {
-	      memranges->list[a].end = memranges->list[b].end;
+	      /* memrange b starts before memrange a ends; merge them.  */
+	      if (memranges->list[b].end > memranges->list[a].end)
+		memranges->list[a].end = memranges->list[b].end;
 	      continue;		/* next b, same a */
 	    }
 	  a++;			/* next a */
@@ -1404,6 +1415,9 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
       action_exp = action->action;
       while (isspace (*action_exp))
 	action_exp++;
+
+      if (*action_exp == '#')	/* comment line */
+	return;
 
       cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
       if (cmd == 0)
@@ -2106,13 +2120,16 @@ tracepoint_save_command (args, from_tty)
 		actionline++;
 
 	      fprintf (fp, "%s%s\n", indent, actionline);
-	      cmd = lookup_cmd (&actionline, cmdlist, "", -1, 1);
-	      if (cmd == 0)
-		error ("Bad action list item: %s", actionline);
-	      if (cmd->function.cfunc == while_stepping_pseudocommand)
-		indent = i2;
-	      else if (cmd->function.cfunc == end_actions_pseudocommand)
-		indent = i1;
+	      if (*actionline != '#')	/* skip for comment lines */
+		{
+		  cmd = lookup_cmd (&actionline, cmdlist, "", -1, 1);
+		  if (cmd == 0)
+		    error ("Bad action list item: %s", actionline);
+		  if (cmd->function.cfunc == while_stepping_pseudocommand)
+		    indent = i2;
+		  else if (cmd->function.cfunc == end_actions_pseudocommand)
+		    indent = i1;
+		}
 	    }
 	}
     }
@@ -2315,6 +2332,9 @@ trace_dump_command (args, from_tty)
 
       /* The collection actions to be done while stepping are
 	 bracketed by the commands "while-stepping" and "end".  */
+
+      if (*action_exp == '#')	/* comment line */
+	continue;
 
       cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
       if (cmd == 0)

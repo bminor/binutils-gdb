@@ -1,3 +1,8 @@
+Mon Dec  8 14:28:49 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c (memrange_sortmerge): allow for memranges 
+	that overlap.  (collect_pseudocommand etc.) cleanup decls.
+
 Fri Dec  5 10:31:23 1997  Keith Seitz  <keiths@pizza.cygnus.com>
 
 	* gdbtk.c (gdbtk_init): add gdb_find_file to interpreter
