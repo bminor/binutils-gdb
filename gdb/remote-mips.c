@@ -1005,6 +1005,15 @@ device is attached to the target board (e.g., /dev/ttya).");
   if (mips_desc == (serial_t) NULL)
     perror_with_name (name);
 
+  if (baud_rate != -1)
+    {
+      if (SERIAL_SETBAUDRATE (mips_desc, baud_rate))
+        {
+          SERIAL_CLOSE (mips_desc);
+          perror_with_name (name);
+        }
+    }
+
   SERIAL_RAW (mips_desc);
 
   mips_is_open = 1;

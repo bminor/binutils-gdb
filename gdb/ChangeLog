@@ -1,3 +1,7 @@
+Wed Aug 10 10:33:20 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* remote-mips.c (mips_open): add code to handle baud rate.
+
 Tue Aug  9 09:44:42 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* infrun.c (wait_for_inferior):  Call target_resume() upon
