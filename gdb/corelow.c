@@ -417,8 +417,17 @@ struct target_ops core_ops = {
   OPS_MAGIC,			/* to_magic */
 };
 
+/* non-zero if we should not do the add_target call in
+   _initialize_corelow; not initialized (i.e., bss) so that
+   the target can initialize it (i.e., data) if appropriate.
+   This needs to be set at compile time because we don't know
+   for sure whether the target's initialize routine is called
+   before us or after us. */
+int coreops_suppress_target;
+
 void
 _initialize_corelow()
 {
-  add_target (&core_ops);
+  if (!coreops_suppress_target)
+    add_target (&core_ops);
 }

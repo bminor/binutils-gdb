@@ -70,9 +70,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcmd.h"
 
 extern struct target_ops sol_thread_ops; /* Forward declaration */
+extern struct target_ops sol_core_ops; /* Forward declaration */
+
+/* place to store core_ops before we overwrite it */
+static struct target_ops orig_core_ops;
 
 extern int procfs_suppress_run;
 extern struct target_ops procfs_ops; /* target vector for procfs.c */
+extern struct target_ops core_ops; /* target vector for corelow.c */
 extern char *procfs_pid_to_str PARAMS ((int pid));
 
 /* Note that these prototypes differ slightly from those used in procfs.c
@@ -117,6 +122,7 @@ static void sol_thread_resume PARAMS ((int pid, int step,
 				       enum target_signal signo));
 static int lwp_to_thread PARAMS ((int lwp));
 static int sol_thread_alive PARAMS ((int pid));
+static void sol_core_close PARAMS ((int quitting));
 
 #define THREAD_FLAG 0x80000000
 #define is_thread(ARG) (((ARG) & THREAD_FLAG) != 0)
@@ -604,7 +610,10 @@ sol_thread_fetch_registers (regno)
 
   if (!is_thread (inferior_pid))
     { /* LWP: pass the request on to procfs.c */
-      procfs_ops.to_fetch_registers (regno);
+      if (target_has_execution)
+	procfs_ops.to_fetch_registers (regno);
+      else
+	orig_core_ops.to_fetch_registers (regno);
       return;
     }
 
@@ -776,7 +785,11 @@ sol_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
     inferior_pid = procfs_first_available ();	/* Find any live lwp.  */
   /* Note: don't need to call switch_to_thread; we're just reading memory.  */
 
-  retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, target);
+  if (target_has_execution)
+    retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, target);
+  else
+    retval = orig_core_ops.to_xfer_memory (memaddr, myaddr, len,
+					   dowrite, target);
 
   do_cleanups (old_chain);
 
@@ -919,7 +932,12 @@ sol_thread_alive (pid)
       return 1;		/* known thread: return true */
     }
   else			/* kernel thread (LWP): let procfs test it */
-    return procfs_ops.to_thread_alive (pid);
+    {
+      if (target_has_execution)
+	return procfs_ops.to_thread_alive (pid);
+      else
+	return orig_core_ops.to_thread_alive (pid);
+    }
 }
 
 static void
@@ -995,7 +1013,10 @@ rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
     {
       int cc;
 
-      cc = procfs_ops.to_xfer_memory (addr, buf, size, dowrite, &procfs_ops);
+      if (target_has_execution)
+	cc = procfs_ops.to_xfer_memory (addr, buf, size, dowrite, &procfs_ops);
+      else
+	cc = orig_core_ops.to_xfer_memory (addr, buf, size, dowrite, &core_ops);
 
       if (cc < 0)
 	{
@@ -1053,7 +1074,10 @@ ps_lgetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
   
-  procfs_ops.to_fetch_registers (-1);
+  if (target_has_execution)
+    procfs_ops.to_fetch_registers (-1);
+  else
+    orig_core_ops.to_fetch_registers (-1);
   fill_gregset (gregset, -1);
 
   do_cleanups (old_chain);
@@ -1074,7 +1098,10 @@ ps_lsetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
   
   supply_gregset (gregset);
-  procfs_ops.to_store_registers (-1);
+  if (target_has_execution)
+    procfs_ops.to_store_registers (-1);
+  else
+    orig_core_ops.to_store_registers (-1);
 
   do_cleanups (old_chain);
 
@@ -1177,7 +1204,10 @@ ps_lgetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
 
-  procfs_ops.to_fetch_registers (-1);
+  if (target_has_execution)
+    procfs_ops.to_fetch_registers (-1);
+  else
+    orig_core_ops.to_fetch_registers (-1);
   fill_fpregset (*fpregset, -1);
 
   do_cleanups (old_chain);
@@ -1198,7 +1228,10 @@ ps_lsetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
   
   supply_fpregset (*fpregset);
-  procfs_ops.to_store_registers (-1);
+  if (target_has_execution)
+    procfs_ops.to_store_registers (-1);
+  else
+    orig_core_ops.to_store_registers (-1);
 
   do_cleanups (old_chain);
 
@@ -1276,6 +1309,37 @@ sol_find_new_threads()
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
 }
 
+static void
+sol_core_open (filename, from_tty)
+     char *filename;
+     int from_tty;
+{
+  orig_core_ops.to_open (filename, from_tty);
+}
+
+static void
+sol_core_close (quitting)
+     int quitting;
+{
+  orig_core_ops.to_close (quitting);
+}
+
+static void
+sol_core_detach (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  unpush_target (&core_ops);
+  orig_core_ops.to_detach (args, from_tty);
+}
+
+static void
+sol_core_files_info (t)
+     struct target_ops *t;
+{
+  orig_core_ops.to_files_info (t);
+}
+
 #ifdef MAINTENANCE_CMDS
 /* Worker bee for info sol-thread command.  This is a callback function that
    gets called once for each Solaris thread (ie. not kernel thread) in the 
@@ -1343,6 +1407,14 @@ info_solthreads (args, from_tty)
 }
 #endif /* MAINTENANCE_CMDS */
 
+static int
+ignore (addr, contents)
+     CORE_ADDR addr;
+     char *contents;
+{
+  return 0;
+}
+
 struct target_ops sol_thread_ops = {
   "solaris-threads",		/* to_shortname */
   "Solaris threads and pthread.", /* to_longname */
@@ -1385,6 +1457,55 @@ struct target_ops sol_thread_ops = {
   0,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
+
+struct target_ops sol_core_ops = {
+  "solaris-core",		/* to_shortname */
+  "Solaris core threads and pthread.", /* to_longname */
+  "Solaris threads and pthread support for core files.", /* to_doc */
+  sol_core_open,		/* to_open */
+  sol_core_close,		/* to_close */
+  sol_thread_attach,		/* XXX to_attach */
+  sol_core_detach, 		/* to_detach */
+  0,				/* to_resume */
+  0,				/* to_wait */
+  sol_thread_fetch_registers,	/* to_fetch_registers */
+  0,				/* to_store_registers */
+  0,				/* to_prepare_to_store */
+  sol_thread_xfer_memory,	/* XXX to_xfer_memory */
+  sol_core_files_info,		/* to_files_info */
+  ignore,			/* to_insert_breakpoint */
+  ignore,			/* to_remove_breakpoint */
+  0,				/* to_terminal_init */
+  0,		 		/* to_terminal_inferior */
+  0,				/* to_terminal_ours_for_output */
+  0,				/* to_terminal_ours */
+  0,				/* to_terminal_info */
+  0,				/* to_kill */
+  0,				/* to_load */
+  0,				/* to_lookup_symbol */
+  sol_thread_create_inferior,	/* XXX to_create_inferior */
+  0,				/* to_mourn_inferior */
+  0,				/* to_can_run */
+  0,				/* to_notice_signals */
+  0,				/* to_thread_alive */
+  0,				/* to_stop */
+  core_stratum,			/* to_stratum */
+  0,				/* to_next */
+  0,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  0,				/* to_has_execution */
+  0,				/* sections */
+  0,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
+};
+
+/* we suppress the call to add_target of core_ops in corelow because
+   if there are two targets in the stratum core_stratum, find_core_target
+   won't know which one to return.  see corelow.c for an additonal
+   comment on coreops_suppress_target. */
+int coreops_suppress_target = 1;
 
 void
 _initialize_sol_thread ()
@@ -1432,6 +1553,10 @@ _initialize_sol_thread ()
 	    "Show info on Solaris user threads.\n", &maintenanceinfolist);
 #endif /* MAINTENANCE_CMDS */
 
+  memcpy(&orig_core_ops, &core_ops, sizeof (struct target_ops));
+  memcpy(&core_ops, &sol_core_ops, sizeof (struct target_ops));
+  add_target (&core_ops);
+
   return;
 
  die:
@@ -1440,6 +1565,9 @@ _initialize_sol_thread ()
 
   if (dlhandle)
     dlclose (dlhandle);
+
+  /* allow the user to debug non-threaded core files */
+  add_target(&core_ops);
 
   return;
 }
