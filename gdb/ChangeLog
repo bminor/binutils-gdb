@@ -1,4 +1,8 @@
 2003-04-17  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* thread-db.c: Reindented.
+ 
+2003-04-17  Jeff Johnston  <jjohnstn@redhat.com>
  
  	* gdb_indent.sh: Recognize td_thrhandle_t, td_event_msg_t, 
  	td_thr_events_t, td_notify_t, td_thr_iter_f, and td_thrinfo_t
