@@ -158,6 +158,7 @@ changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/mipsmach3.h")
 	;;
+  mips-dec-netbsd*)	;;
   mips-dec-*)
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/decstation.h")

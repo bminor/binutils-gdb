@@ -1052,6 +1052,7 @@ EOF
 EOF
 
 	;;
+  mips-dec-netbsd*)	;;
   mips-dec-*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
@@ -1179,7 +1180,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1183 "configure"
+#line 1184 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
