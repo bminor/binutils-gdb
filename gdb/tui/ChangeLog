@@ -1,3 +1,23 @@
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiSourceWin.h: Remove unused declarations.
+	* tuiSourceWin.c (tui_vUpdateSourceWindowsWithAddr): Remove.
+	(tui_vUpdateSourceWindowsWithLine): Remove.
+	(tui_vAllSetHasBreakAt): Remove.
+
+	* tuiLayout.h (tui_set_layout): Declare.
+	(tui_vSetLayoutTo): Remove.
+	(tui_vAddWinToLayout): Remove.
+	* tuiLayout.c (_tuiLayout_command): Call tui_enable() to force TUI.
+	(_tuiToggleLayout_command): Remove.
+	(_tuiToggleSplitLayout_command): Remove.
+	(_tuiLayout_command): Remove.
+	(tui_vSetLayoutTo): Remove.
+	(tui_vAddWinToLayout): Remove.
+
+	* tuiDataWin.h (tui_vCheckDataValues): Remove.
+	* tuiDataWin.c (tui_vCheckDataValues): Remove.
+
 2001-07-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiWin.c (tuiStrDup): Remove, replaced by xstrdup.

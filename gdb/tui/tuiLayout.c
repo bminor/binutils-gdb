@@ -55,9 +55,7 @@ static TuiLayoutType _nextLayout (void);
 static TuiLayoutType _prevLayout (void);
 static void _tuiLayout_command (char *, int);
 static void _tuiToggleLayout_command (char *, int);
-static void _tui_vToggleLayout_command (va_list);
 static void _tuiToggleSplitLayout_command (char *, int);
-static void _tui_vToggleSplitLayout_command (va_list);
 static CORE_ADDR _extractDisplayStartAddr (void);
 static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
 
@@ -275,23 +273,6 @@ tuiSetLayout (TuiLayoutType layoutType,
   return status;
 }				/* tuiSetLayout */
 
-
-/*
-   ** tui_vSetLayoutTo()
-   **        Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA,
-   **        REGS, $REGS, $GREGS, $FREGS, $SREGS with arguments in a va_list
- */
-TuiStatus
-tui_vSetLayoutTo (va_list args)
-{
-  char *layoutName;
-
-  layoutName = va_arg (args, char *);
-
-  return (_tuiSetLayoutTo (layoutName));
-}				/* tui_vSetLayoutTo */
-
-
 /*
    ** tuiAddWinToLayout().
    **        Add the specified window to the layout in a logical way.
@@ -345,22 +326,6 @@ tuiAddWinToLayout (TuiWinType type)
 
   return;
 }				/* tuiAddWinToLayout */
-
-
-/*
-   ** tui_vAddWinToLayout().
-   **        Add the specified window to the layout in a logical way,
-   **        with arguments in a va_list.
- */
-void
-tui_vAddWinToLayout (va_list args)
-{
-  TuiWinType type = va_arg (args, TuiWinType);
-
-  tuiAddWinToLayout (type);
-
-  return;
-}				/* tui_vAddWinToLayout */
 
 
 /*
@@ -482,7 +447,7 @@ tui_set_layout (const char *layoutName)
       TuiRegisterDisplayType dpyType = TUI_UNDEFINED_REGS;
       TuiLayoutType curLayout = currentLayout ();
 
-      bufPtr = (char *) tuiStrDup (layoutName);
+      bufPtr = (char *) xstrdup (layoutName);
       for (i = 0; (i < strlen (layoutName)); i++)
 	bufPtr[i] = toupper (bufPtr[i]);
 
@@ -628,6 +593,8 @@ _tuiToggleLayout_command (char *arg, int fromTTY)
 {
   TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
 
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   if (layoutDef->displayMode == SRC_WIN)
     layoutDef->displayMode = DISASSEM_WIN;
   else
@@ -644,6 +611,8 @@ _tuiToggleSplitLayout_command (char *arg, int fromTTY)
 {
   TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
 
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   layoutDef->split = (!layoutDef->split);
   _tuiHandleXDBLayout (layoutDef);
 
@@ -653,6 +622,10 @@ _tuiToggleSplitLayout_command (char *arg, int fromTTY)
 static void
 _tuiLayout_command (char *arg, int fromTTY)
 {
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
+
+  /* Switch to the selected layout.  */
   if (tui_set_layout (arg) != TUI_SUCCESS)
     warning ("Invalid layout specified.\n%s", LAYOUT_USAGE);
 

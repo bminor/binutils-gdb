@@ -217,22 +217,6 @@ tuiUpdateSourceWindowsWithAddr (CORE_ADDR addr)
   return;
 }				/* tuiUpdateSourceWindowsWithAddr */
 
-
-/*
-   ** tui_vUpdateSourceWindowsWithAddr()
-   **        Update the source window with the address in a va_list
- */
-void
-tui_vUpdateSourceWindowsWithAddr (va_list args)
-{
-  Opaque addr = va_arg (args, Opaque);
-
-  tuiUpdateSourceWindowsWithAddr (addr);
-
-  return;
-}				/* tui_vUpdateSourceWindowsWithAddr */
-
-
 /*
    ** tuiUpdateSourceWindowsWithLine().
    **        Function to ensure that the source and/or disassemly windows
@@ -262,23 +246,6 @@ tuiUpdateSourceWindowsWithLine (struct symtab *s, int line)
 
   return;
 }				/* tuiUpdateSourceWindowsWithLine */
-
-
-/*
-   ** tui_vUpdateSourceWindowsWithLine()
-   **        Update the source window with the line number in a va_list
- */
-void
-tui_vUpdateSourceWindowsWithLine (va_list args)
-{
-  struct symtab *s = va_arg (args, struct symtab *);
-  int line = va_arg (args, int);
-
-  tuiUpdateSourceWindowsWithLine (s, line);
-
-  return;
-}				/* tui_vUpdateSourceWindowsWithLine */
-
 
 /*
    ** tuiClearSourceContent().
@@ -557,24 +524,6 @@ tuiAllSetHasBreakAt (struct breakpoint *bp, int hasBreak)
 }				/* tuiAllSetHasBreakAt */
 
 
-/*
-   ** tui_vAllSetHasBreakAt()
-   **        Set or clear the hasBreak flag in all displayed source windows,
-   **        with params in a va_list
- */
-void
-tui_vAllSetHasBreakAt (va_list args)
-{
-  struct breakpoint *bp = va_arg (args, struct breakpoint *);
-  int hasBreak = va_arg (args, int);
-
-  tuiAllSetHasBreakAt (bp, hasBreak);
-
-  return;
-}				/* tui_vAllSetHasBreakAt */
-
-
-
 /*********************************
 ** EXECUTION INFO FUNCTIONS        **
 *********************************/
@@ -769,7 +718,7 @@ tuiUpdateExecInfo (TuiWinInfoPtr winInfo)
 {
   tuiSetExecInfoContent (winInfo);
   tuiShowExecInfoContent (winInfo);
-}				/* tuiUpdateExecInfo
+}				/* tuiUpdateExecInfo */
 
 
 				   /*

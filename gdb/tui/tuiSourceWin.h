@@ -28,9 +28,7 @@ extern void tuiUpdateSourceWindow (TuiWinInfoPtr, struct symtab *, Opaque,
 extern void tuiUpdateSourceWindowAsIs (TuiWinInfoPtr, struct symtab *, Opaque,
 				       int);
 extern void tuiUpdateSourceWindowsWithAddr (CORE_ADDR);
-extern void tui_vUpdateSourceWindowsWithAddr (va_list);
 extern void tuiUpdateSourceWindowsWithLine (struct symtab *, int);
-extern void tui_vUpdateSourceWindowsWithLine (va_list);
 extern void tuiUpdateSourceWindowsFromLocator (void);
 extern void tuiClearSourceContent (TuiWinInfoPtr, int);
 extern void tuiClearAllSourceWinsContent (int);
@@ -56,7 +54,6 @@ extern void tuiUpdateAllExecInfos (void);
 extern void tuiSetIsExecPointAt (Opaque, TuiWinInfoPtr);
 extern void tuiSetHasBreakAt (struct breakpoint *, TuiWinInfoPtr, int);
 extern void tuiAllSetHasBreakAt (struct breakpoint *, int);
-extern void tui_vAllSetHasBreakAt (va_list);
 extern TuiStatus tuiAllocSourceBuffer (TuiWinInfoPtr);
 extern int tuiLineIsDisplayed (Opaque, TuiWinInfoPtr, int);
 
@@ -65,29 +62,6 @@ extern int tuiLineIsDisplayed (Opaque, TuiWinInfoPtr, int);
    ** Constant definitions
  */
 #define        SCROLL_THRESHOLD            2	/* threshold for lazy scroll */
-
-
-/*
-   ** Macros 
- */
-#define    m_tuiSetBreakAt(bp, winInfo)       tuiSetHasBreakAt((bp, winInfo, TRUE)
-#define    m_tuiClearBreakAt(bp, winInfo)     tuiSetHasBreakAt(bp, winInfo, FALSE)
-
-#define    m_tuiAllSetBreakAt(bp)             tuiAllSetHasBreakAt(bp, TRUE)
-#define    m_tuiAllClearBreakAt(bp)           tuiAllSetHasBreakAt(bp, FALSE)
-
-#define    m_tuiSrcLineDisplayed(lineNo)      tuiLineIsDisplayed((Opaque)(lineNo), srcWin, FALSE)
-#define    m_tuiSrcAddrDisplayed(addr)        tuiLineIsDisplayed((Opaque)(addr), disassemWin, FALSE)
-#define    m_tuiSrcLineDisplayedWithinThreshold(lineNo) \
-                                            tuiLineIsDisplayed((Opaque)(lineNo), srcWin, TRUE)
-#define    m_tuiSrcAddrDisplayedWithinThreshold(addr) \
-                                            tuiLineIsDisplayed((Opaque)(addr), disassemWin, TRUE)
-#define m_tuiLineDisplayedWithinThreshold(winInfo, lineOrAddr)                                 \
-                                    ( (winInfo == srcWin) ?                                    \
-                                        m_tuiSrcLineDisplayedWithinThreshold(lineOrAddr) :    \
-                                        m_tuiSrcAddrDisplayedWithinThreshold(lineOrAddr) )
-
-
 
 #endif
 /*_TUI_SOURCEWIN_H */

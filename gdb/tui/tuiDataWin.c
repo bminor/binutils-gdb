@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "tui.h"
 #include "tuiData.h"
+#include "tuiGeneralWin.h"
 #include "tuiRegs.h"
 
 
@@ -294,22 +295,6 @@ tuiCheckDataValues (struct frame_info *frame)
 	}
     }
 }				/* tuiCheckDataValues */
-
-
-/*
-   ** tui_vCheckDataValues().
-   **        Function to check the data values and hilite any that have
-   **        changed with args in a va_list
- */
-void
-tui_vCheckDataValues (va_list args)
-{
-  struct frame_info *frame = va_arg (args, struct frame_info *);
-
-  tuiCheckDataValues (frame);
-
-  return;
-}				/* tui_vCheckDataValues */
 
 
 /*
