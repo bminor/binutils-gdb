@@ -1,3 +1,8 @@
+Sat Nov 22 14:26:09 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c: Brought up to date with latest changes on arm
+	branch. 
+
 Sat Nov 22 15:50:09 1997  Klaus Kaempf  <kkaempf@progis.de>
 
 	* config-gas.com: Get version info from configure.in.
