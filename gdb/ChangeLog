@@ -1,3 +1,9 @@
+2002-07-23  Andrew Cagney  <ac131313@redhat.com>
+
+	GDB 5.2.1 released from 5.2 branch.
+	* NEWS: Mention changes in 5.2.1 including addition of AVR target.
+	* README: Update to mention 5.2.1.
+
 2002-07-23  Mark Salter  <msalter@redhat.com>
 
 	* remote.c (remote_read_bytes): Fix check for error.
