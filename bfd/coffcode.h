@@ -1487,7 +1487,6 @@ coff_set_alignment_hook (abfd, section, scnhdr)
     }
 #endif
 
-#ifdef COFF_WITH_PE
   /* In a PE image file, the s_paddr field holds the virtual size of a
      section, while the s_size field holds the raw size.  We also keep
      the original section flag value, since not every bit can be
@@ -1516,7 +1515,6 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   pei_section_data (abfd, section)->pe_flags = hdr->s_flags;
 
   section->lma = hdr->s_vaddr;
-#endif /* COFF_WITH_PE */
 }
 #undef ALIGN_SET
 #undef ELIFALIGN_SET
