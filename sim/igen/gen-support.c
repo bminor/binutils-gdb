@@ -135,11 +135,14 @@ support_c_function(insn_table *table,
   table_entry_print_cpp_line_nr (file, function);
   lf_printf (file, "{\n");
   lf_indent (file, +2);
-  lf_print__c_code (file, function->annex);
+  if (function->annex == NULL)
+    error ("%s:%d: Function without body (or null statement)",
+	   function->file_name,
+	   function->line_nr);
+    lf_print__c_code (file, function->annex);
   if (it_is ("internal", function->fields[insn_flags]))
     {
       lf_printf (file, "sim_io_error (sd, \"Internal function must longjump\\n\");\n");
-      lf_printf (file, "memset (&cia, 0, sizeof cia);\n");
       lf_printf (file, "return cia;\n");
     }
   lf_indent (file, -2);

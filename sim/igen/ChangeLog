@@ -1,3 +1,18 @@
+Wed Apr 30 17:35:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-support.c (support_c_function): Remove unnecessary memset of
+ 	cia.
+  	* gen-semantics.c (print_semantic_body): Wasn't closing
+ 	generated comment.
+
+Tue Apr 29 11:11:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (load_insn_table): Report instructions that do not
+ 	have at least a format and name.
+	(insn_table_find_opcode_field): Check progress is being made.
+
+	* gen-support.c (support_c_function): Report empty function body.
+
 Thu Apr 24 11:43:45 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ld-insn.c (insn_table_expand_opcode): Allow reserved fields to
