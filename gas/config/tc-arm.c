@@ -139,10 +139,11 @@ CONST char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 symbolS * GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
 #endif
 
-CONST int md_reloc_size = 8;		/* Size of relocation record */
+CONST int md_reloc_size = 8;	/* Size of relocation record */
 
-static int thumb_mode = 0;      /* non-zero if assembling thumb instructions */
-
+static int thumb_mode = 0;      /* 0: assemble for ARM, 1: assemble for Thumb,
+				   2: assemble for Thumb even though target cpu
+				   does not support thumb instructions */
 typedef struct arm_fix
 {
   int thumb_mode;
@@ -1260,7 +1261,7 @@ s_force_thumb (ignore)
      
   if (! thumb_mode)
     {
-      thumb_mode = 1;
+      thumb_mode = 2;
       
       record_alignment (now_seg, 1);
     }
@@ -6068,7 +6069,7 @@ md_assemble (str)
       if (opcode)
 	{
 	  /* Check that this instruction is supported for this CPU.  */
-	  if ((opcode->variants & cpu_variant) == 0)
+	  if (thumb_mode == 1 && (opcode->variants & cpu_variant) == 0)
 	     {
 	    	as_bad (_("selected processor does not support this opcode"));
 		return;

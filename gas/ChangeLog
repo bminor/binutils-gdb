@@ -1,3 +1,10 @@
+1999-11-29  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (thumb_mode): Turn into a tristate variable.
+	(s_force_thumb): Set thumb_mode to 2.
+	(md_assemble): Do not complain about thumb instructions on a
+	non-thumb target if thumb_mode is set to 2.
+
 1999-11-28  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-alpha.c (toplevel): Include struc-symbol.h.
