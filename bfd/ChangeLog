@@ -1,3 +1,10 @@
+2004-09-22  Brian Ford  <ford@vss.fsi.com>
+
+	* pei-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Enable 16 byte
+	alignment for .rdata sections so sse[2] code works with gcc >= 3.3.3
+	constants.
+	* pe-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
+
 2004-09-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_modify_segment_map): Delete.
