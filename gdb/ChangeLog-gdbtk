@@ -1,3 +1,12 @@
+1999-01-29  James Ingham  <jingham@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Set the fputs_unfiltered_hook to
+	gdbtk_fputs BEFORE you eval script.  The old code was setting it
+	to null until after you did this, but that is wrong, because it
+	will cause the output of CAUGHT errors to go to gdb_stderr, which
+	is wrong.  You only want to write errors to the console if the
+	eval generates an error.
+
 1999-01-29  Martin Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_get_breakpoint_info): When printing addresses,

@@ -558,7 +558,7 @@ proc gdbtk_find_main {} {\n\
 gdbtk_find_main";
 #endif /* NO_TCLPRO_DEBUGGER */
     
-    fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
+    /* fputs_unfiltered_hook = NULL; */ /* Force errors to stdout/stderr */
     
     /*
      * Set the variables for external editor, do this before eval'ing main.tcl
@@ -570,7 +570,9 @@ gdbtk_find_main";
     Tcl_SetVar (gdbtk_interp, "external_editor_command",
 		external_editor_command, 0);
     
-    if (Tcl_GlobalEval (gdbtk_interp, (char *) script) != TCL_OK)
+  fputs_unfiltered_hook = gdbtk_fputs;
+
+  if (Tcl_GlobalEval (gdbtk_interp, (char *) script) != TCL_OK)
       {
 	char *msg;
 	
@@ -592,10 +594,6 @@ gdbtk_find_main";
       }
   }
 
-/* Defer setup of fputs_unfiltered_hook to near the end so that error messages
-   prior to this point go to stdout/stderr.  */
-
-  fputs_unfiltered_hook = gdbtk_fputs;
   
   /* start-sanitize-ide */
 #ifdef IDE
