@@ -1,3 +1,7 @@
+2000-02-27 H.J. Lu  (hjl@gnu.org)
+
+	* lib/ld-lib.exp (default_ld_link): Added "$LIBS" to libs.
+
 1999-11-01  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-selective/selective.exp: Fix test to disable these checks for

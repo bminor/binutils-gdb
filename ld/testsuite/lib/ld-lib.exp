@@ -83,10 +83,11 @@ proc default_ld_link { ld target objects } {
     global HOSTING_EMU
     global HOSTING_CRT0
     global HOSTING_LIBS
+    global LIBS
     global host_triplet
     
     set objs "$HOSTING_CRT0 $objects"
-    set libs "$HOSTING_LIBS"
+    set libs "$LIBS $HOSTING_LIBS"
     
     if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
