@@ -3863,7 +3863,9 @@ sections containing any arbitrary data.  To use stabs in ELF object files,
 the tools create two custom sections, a ".stab" section which contains
 an array of fixed length structures, one struct per stab, and a ".stabstr"
 section containing all the variable length strings that are referenced by
-stabs in the ".stab" section.
+stabs in the ".stab" section.  The byte order of the stabs binary data
+matches the byte order of the ELF file itself, as determined from the
+EI_DATA field in the e_ident member of the ELF header.
 
 The first stab in the ".stab" section for each object file is a "synthetic
 stab", generated entirely by the assembler, with no corresponding ".stab"
