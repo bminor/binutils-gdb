@@ -1,3 +1,20 @@
+Thu Mar 17 16:20:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in: Built nm.new and strip.new to avoid problems with
+	collect when . is in PATH.
+	(STRIP_PROG): Change from strip to strip.new.
+	(NM_PROG): Change from nm to nm.new.
+	(install): Remove the .new when installing.
+
+start-sanitize-powerpc-netware
+Wed Mar 16 16:27:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (powerpc_build_stubs): Set BSF_DYNAMIC flag for each
+	symbol for which we build a stub.
+	(powerpc_mangle_relocs): Only reset TOC pointer for a call to a
+	symbol with BSF_DYNAMIC flag set.
+
+end-sanitize-powerpc-netware
 Tue Mar 15 23:04:13 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* objcopy.c (filter_symbols): Use bfd_is_local_label to determine

@@ -88,13 +88,13 @@ RANLIB_PROG=ranlib
 
 # objcopy and strip should be the same program
 OBJCOPY_PROG=objcopy
-STRIP_PROG=strip
+STRIP_PROG=strip.new
 
 STRINGS_PROG=strings
 
 # These should all be the same program too.
 SIZE_PROG=size
-NM_PROG=nm
+NM_PROG=nm.new
 OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
@@ -266,9 +266,7 @@ sysroff.c: sysinfo sysroff.info
 	./sysinfo -c <$(srcdir)/sysroff.info >sysroff.c
 	./sysinfo -i <$(srcdir)/sysroff.info >>sysroff.c
 	./sysinfo -g <$(srcdir)/sysroff.info >>sysroff.c
-	
-sysroff.h: sysinfo sysroff.info
-	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h
+	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h	
 
 sysinfo.c: sysinfo.y 
 	$(BISON) -tvd $(srcdir)/sysinfo.y
@@ -282,13 +280,13 @@ syslex.c : syslex.l
 sysinfo: sysinfo.o syslex.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o $(ADDL_LIBS) $(EXTRALIBS)
 
-srconv: sysroff.c srconv.o sysroff.c sysroff.h coffgrok.o $(ADDL_LIBS)
+srconv: sysroff.c srconv.o sysroff.c  coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
 coffdump: coffdump.o coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
-sysdump: sysroff.h sysroff.c sysdump.o $(ADDL_LIBS)
+sysdump: sysroff.c sysdump.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
 
 nlmheader.c: nlmheader.y
@@ -475,16 +473,16 @@ TAGS: force
 
 install: all
 	for i in $(PROGS) ; do \
-	  $(INSTALL_XFORM) $$i $(bindir)/$$i ; \
+	  $(INSTALL_XFORM) $$i $(bindir)/`echo $$i | sed -e 's/.new//'` ; \
 	done
 	for i in $(MANPAGES) ; do \
 	  $(INSTALL_XFORM1) $(srcdir)/$$i.1 $(man1dir)/$$i.1 ; \
 	done
 	-if [ -d $(tooldir) ]; then \
 	   if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	   for i in nm strip ar ranlib; do \
+	   for i in nm.new strip.new ar ranlib; do \
 	     rm -f $(tooldir)/bin/$$i; \
-	     ln $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` $(tooldir)/bin/$$i \
+	     ln $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "s/.new//" $$t` $(tooldir)/bin/`echo $$i | sed -e 's/.new//'` \
 	      || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$i; \
 	   done; \
 	 else true; fi		
