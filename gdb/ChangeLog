@@ -1,5 +1,10 @@
 2003-09-12  Andrew Cagney  <cagney@redhat.com>
 
+	* ppc-sysv-tdep.c (align_up, align_down): Replace "round2" macro.
+	(ppc_sysv_abi_push_dummy_call): Rewrite, use a two pass loop.
+
+2003-09-12  Andrew Cagney  <cagney@redhat.com>
+
 	* objfiles.h (struct entry_info): Deprecate "entry_file_lowpc" and
 	"entry_file_highpc".  Update comments.
 	* defs.h (deprecated_inside_entry_file): Rename
