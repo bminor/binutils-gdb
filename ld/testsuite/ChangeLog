@@ -1,3 +1,9 @@
+2003-04-29  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* ld-selective/3.cc (start): New function.
+	* ld-selective/4.cc: Likewise.
+	* ld-selective/5.cc: Likewise.
+
 2003-04-28  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp (picflag): Set PIC flag for compiler.
