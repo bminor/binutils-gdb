@@ -1,3 +1,8 @@
+Mon Apr 15 15:55:01 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* nlmconv.c (choose_temp_base{,_try}): Delete, in libiberty now.
+	(link_inputs): Update call to choose_temp_base.
+
 Mon Apr  8 14:40:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Permit --enable-shared to specify a list of
