@@ -198,6 +198,8 @@
 	  unsigned32 fp_busy;				/* floating point registers that are busy */
 	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
 	  signed16 spr_busy;				/* SPR register that is busy or PPC_NO_SPR */
+	  unsigned32 vr_busy;				/* AltiVec registers that are busy */
+	  signed16 vscr_busy;				/* AltiVec status register busy */
 	  signed16 issue;				/* # of cycles until unit can accept another insn */
 	  signed16 done;				/* # of cycles until insn is done */
 	  signed16 nr_writebacks;			/* # of registers this unit writes back */
@@ -228,6 +230,8 @@
 	  unsigned32 fp_busy;				/* floating point registers that are busy */
 	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
 	  unsigned8 spr_busy[nr_of_sprs];		/* SPR registers that are busy */
+	  unsigned32 vr_busy;				/* AltiVec registers that are busy */
+	  unsigned8 vscr_busy;				/* AltiVec SC register busy */
 	  unsigned8 busy[nr_ppc_function_units];	/* whether a function is busy or not */
 	};
 
@@ -320,6 +324,15 @@ void::model-static::model_trace_release:model_data *model_ptr, model_busy *busy
 	}
 	if (busy->spr_busy != PPC_NO_SPR)
 	  TRACE(trace_model, ("Register %s is now available.\n", spr_name(busy->spr_busy)));
+	if (busy->vr_busy) {
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & busy->vr_busy) != 0) {
+	      TRACE(trace_model, ("Register v%d is now available.\n", i));
+	    }
+	  }
+	}
+	if (busy->vscr_busy)
+	  TRACE(trace_model, ("VSCR Register is now available.\n", spr_name(busy->spr_busy)));
 
 # Trace making registers busy
 void::model-static::model_trace_make_busy:model_data *model_ptr, unsigned32 int_mask, unsigned32 fp_mask, unsigned32 cr_mask
@@ -398,6 +411,8 @@ void::model-internal::model_new_cycle:model_data *model_ptr
 	      model_ptr->cr_fpscr_busy &= ~cur_busy->cr_fpscr_busy;
 	      if (cur_busy->spr_busy != PPC_NO_SPR)
 		model_ptr->spr_busy[cur_busy->spr_busy] = 0;
+	      model_ptr->vr_busy &= ~cur_busy->vr_busy;
+	      model_ptr->vscr_busy = ~cur_busy->vscr_busy;
 
 	      if (WITH_TRACE && ppc_trace[trace_model])
 		model_trace_release(model_ptr, cur_busy);
@@ -454,6 +469,8 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	  busy->fp_busy = 0;
 	  busy->cr_fpscr_busy = 0;
 	  busy->nr_writebacks = 0;
+	  busy->vr_busy = 0;
+	  busy->vscr_busy = 0;
 	}
 
 	busy->unit = unit;
@@ -4973,3 +4990,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 0.31,6.RT,11.RA,16.RB,21.310,31./:X:earwax::External Control In Word Indexed
 
 0.31,6.RS,11.RA,16.RB,21.438,31./:X:earwax::External Control Out Word Indexed
+
+:include:::altivec.igen
+:include:::e500.igen

@@ -187,13 +187,15 @@ PSIM_H = \
 
 IDECODE_H = \
 	idecode.h \
-	idecode_expression.h \
+	idecode_expression.h e500_expression.h altivec_expression.h \
 	idecode_branch.h \
 	idecode_fields.h \
 	icache.h
 
 REGISTERS_H = \
 	registers.h \
+	e500_registers.h \
+	altivec_registers.h \
 	spreg.h
 
 CPU_H = \
@@ -459,8 +461,7 @@ tmp-dgen: dgen ppc-spr-table $(srcdir)/../../move-if-change
 	$(SHELL) $(srcdir)/../../move-if-change tmp-spreg.c spreg.c
 	touch tmp-dgen
 
-
-tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) $(srcdir)/../../move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
+tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcdir)/../../move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
 	./igen	$(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
 		-I $(srcdir) -i $(srcdir)/ppc-instructions \

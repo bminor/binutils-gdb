@@ -1,5 +1,39 @@
 2003-06-22  Andrew Cagney  <cagney@redhat.com>
 
+	Written by matthew green <mrg@redhat.com>, with fixes from Aldy
+	Hernandez <aldyh@redhat.com>, Jim Wilson <wilson@redhat.com>, and
+	Nick Clifton <nickc@redhat.com>.
+	
+	* ppc-instructions: Include altivec.igen and e500.igen.
+	(model_busy, model_data): Add vr_busy and vscr_busy.
+	(model_trace_release): Trace vr_busy and vscr_busy.
+	(model_new_cycle): Update vr_busy and vscr_busy.
+	(model_make_busy): Update vr_busy and vscr_busy.
+	* registers.c (register_description): Add Altivec and e500
+	registers.
+	* psim.c (psim_read_register, psim_read_register): Handle Altivec
+	and e500 registers.
+	* ppc-spr-table (SPEFSCR): Add VRSAVE and SPEFSCR registers.
+	* configure.in (sim_filter): When *altivec* add "av".  When *spe*
+	or *simd* add e500.
+	(sim_float): When *altivec* define WITH_ALTIVEC.  When *spe* add
+	WITH_E500.
+	* configure: Re-generate.
+	* e500.igen, altivec.igen: New files.
+	* e500_expression.h, altivec_expression.h: New files.
+	* idecode_expression.h: Update copyright.  Include
+	"e500_expression.h" and "altivec_expression.h".
+	* e500_registers.h, altivec_registers.h: New files.
+	* registers.h: Update copyright.  Include "e500_registers.h" and
+	"altivec_registers.h".
+	(registers): Add Altivec and e500 specific registers.
+	* Makefile.in (IDECODE_H): Add "idecode_e500.h" and
+	"idecode_altivec.h".
+	(REGISTERS_H): Add "e500_registers.h" and "altivec_registers.h".
+	(tmp-igen): Add dependencies on altivec.igen and e500.igen .
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
 	Problems reported by Joshua LeVasseur.
 	* emul_chirp.c: Update copyright.
 	(chirp_emul_nextprop): Return the first property.
