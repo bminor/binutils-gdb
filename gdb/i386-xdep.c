@@ -42,6 +42,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/reg.h>
 #include "ieee-float.h"
 
+#include "target.h"
+
 extern void print_387_control_word ();		/* i387-tdep.h */
 extern void print_387_status_word ();
 
@@ -180,14 +182,14 @@ i386_float_info ()
   struct fpstate *fpstatep;
   char buf[sizeof (struct fpstate) + 2 * sizeof (int)];
   unsigned int uaddr;
-  char fpvalid;
+  char fpvalid = 0;
   unsigned int rounded_addr;
   unsigned int rounded_size;
   extern int corechan;
   int skip;
   
   uaddr = (char *)&u.u_fpvalid - (char *)&u;
-  if (have_inferior_p()) 
+  if (target_has_execution)
     {
       unsigned int data;
       unsigned int mask;
@@ -198,6 +200,7 @@ i386_float_info ()
       
       fpvalid = ((data & mask) != 0);
     } 
+#if 0
   else 
     {
       if (lseek (corechan, uaddr, 0) < 0)
@@ -206,6 +209,7 @@ i386_float_info ()
 	perror ("read on core file");
       
     }
+#endif	/* no core support yet */
   
   if (fpvalid == 0) 
     {
@@ -214,7 +218,7 @@ i386_float_info ()
     }
   
   uaddr = (char *)&U_FPSTATE(u) - (char *)&u;
-  if (have_inferior_p ()) 
+  if (target_has_execution)
     {
       int *ip;
       
@@ -230,6 +234,7 @@ i386_float_info ()
 	  rounded_addr += sizeof (int);
 	}
     } 
+#if 0
   else 
     {
       if (lseek (corechan, uaddr, 0) < 0)
@@ -238,7 +243,8 @@ i386_float_info ()
 	perror_with_name ("read from core file");
       skip = 0;
     }
-  
+ #endif	/* 0 */ 
+
   fpstatep = (struct fpstate *)(buf + skip);
   print_387_status (fpstatep->status, (struct env387 *)fpstatep->state);
 }

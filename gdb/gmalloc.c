@@ -1093,17 +1093,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdlib.h>
 #endif /* __ONEFILE */
 
-#if 0
+#if defined(M_UNIX)
+/*
+ * M_UNIX is defined by the SCO compilers, including the port of gcc.
+ */
+
 /* On SunOS 4.1.1, <sys/param.h> typedefs size_t, which is bad since
    we typedef it above.  Maybe it's better just to have people compile
    -Dgetpagesize()=4096.  */
 /* Deal with page size.  */
-#ifdef BSD
-#ifndef BSD4_1
-#define HAVE_GETPAGESIZE
-#endif
-#endif
-
 #ifndef HAVE_GETPAGESIZE
 
 #include <sys/param.h>
@@ -1129,7 +1127,7 @@ DEFUN_VOID(__getpagesize)
   return PAGESIZE;
 }
 #endif /* not HAVE_GETPAGESIZE */
-#endif /* 0 */
+#endif /* M_UNIX */
 
 extern size_t EXFUN(__getpagesize, (NOARGS));
 

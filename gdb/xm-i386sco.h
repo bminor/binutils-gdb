@@ -29,9 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* All the job control definitions exist in SCO Unix, but the standard
    shells don't use them.  So we must disable job control. */
-#define NO_JOB_CONTROL
+/* This is no longer true with 3.2v2 and later */
+/* #define NO_JOB_CONTROL */
 
 /* SCO's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
 #undef CPLUS_MARKER
 #define CPLUS_MARKER '.'
+#define HAVE_STRSTR
