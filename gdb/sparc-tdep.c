@@ -2136,13 +2136,27 @@ sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 			   | (((fun - (pc + CALL_DUMMY_CALL_OFFSET)) >> 2)
 			      & 0x3fffffff)));
 
-  /* Comply with strange Sun cc calling convention for struct-returning
-     functions.  */
-  if (!using_gcc
-      && (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (value_type) == TYPE_CODE_UNION))
-    store_unsigned_integer (dummy + CALL_DUMMY_CALL_OFFSET + 8, 4,
-			    TYPE_LENGTH (value_type) & 0x1fff);
+  /* If the called function returns an aggregate value, fill in the UNIMP
+     instruction containing the size of the returned aggregate return value,
+     which follows the call instruction.
+     For details see the SPARC Architecture Manual Version 8, Appendix D.3.
+
+     Adjust the call_dummy_breakpoint_offset for the bp_call_dummy breakpoint
+     to the proper address in the call dummy, so that `finish' after a stop
+     in a call dummy works.
+     Tweeking current_gdbarch is not an optimal solution, but the call to
+     sparc_fix_call_dummy is immediately followed by a call to run_stack_dummy,
+     which is the only function where dummy_breakpoint_offset is actually
+     used, if it is non-zero.  */
+  if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
+       || TYPE_CODE (value_type) == TYPE_CODE_UNION)
+    {
+      store_unsigned_integer (dummy + CALL_DUMMY_CALL_OFFSET + 8, 4,
+			      TYPE_LENGTH (value_type) & 0x1fff);
+      set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 0x30);
+    }
+  else
+    set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 0x2c);
 
   if (!(GDB_TARGET_IS_SPARC64))
     {
@@ -2961,11 +2975,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_max_register_raw_size (gdbarch, 8);
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
-#ifdef DO_CALL_DUMMY_ON_STACK
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
-#else
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
-#endif
   set_gdbarch_pop_frame (gdbarch, sparc_pop_frame);
   set_gdbarch_push_return_address (gdbarch, sparc_push_return_address);
   set_gdbarch_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
@@ -2999,12 +3008,14 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* 32-bit machine types: */
 
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
+      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_call_dummy_length (gdbarch, 0x38);
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_32);
 #else
+      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);
@@ -3053,6 +3064,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     default:	/* Any new machine type is likely to be 64-bit.  */
 
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
+      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 8 * 4);
       set_gdbarch_call_dummy_length (gdbarch, 192);
@@ -3060,6 +3072,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_start_offset (gdbarch, 148);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_64);
 #else
+      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);

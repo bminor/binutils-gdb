@@ -1,3 +1,11 @@
+2000-10-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* sparc-tdep.c (sparc_fix_call_dummy):  Improve comments.
+	Adjust call_dummy_breakpoint_offset, so that `finish' after a stop
+	in a call dummy works.
+	(sparc_gdbarch_init):  Fix setting of pc_in_call_dummy, it depends
+	on SPARC32/64_CALL_DUMMY_ON_STACK, not DO_CALL_DUMMY_ON_STACK.
+
 2000-10-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-st.c (st2000_xfer_inferior_memory): Protoize.
