@@ -1346,52 +1346,10 @@ read_type (pp, objfile)
 	return dbx_alloc_type (typenums, objfile);
 
       /* Type is being defined here.  */
-      /* Skip the '='.  */
-      ++(*pp);
+      /* Skip the '='.
+	 Also skip the type descriptor - we get it below with (*pp)[-1].  */
+      (*pp)+=2;
 
-      while (**pp == '@')
-	{
-	  char *p = *pp + 1;
-	  /* It might be a type attribute or a member type.  */
-	  if (isdigit (*p) || *p ==  '(' || *p == '-')
-	    /* Member type.  */
-	    break;
-	  else
-	    {
-	      /* Type attributes.  */
-	      char *attr = p;
-
-	      /* Skip to the semicolon.  */
-	      while (*p != ';' && *p != '\0')
-		++p;
-	      *pp = p;
-	      if (*p == '\0')
-		return error_type (pp, objfile);
-	      else
-		/* Skip the semicolon.  */
-		++*pp;
-
-	      switch (*attr)
-		{
-		case 's':
-		  type_size = atoi (attr + 1);
-		  if (type_size <= 0)
-		    type_size = -1;
-		  break;
-
-		case 'S':
-		  is_string = 1;
-		  break;
-
-		default:
-		  /* Ignore unrecognized type attributes, so future compilers
-		     can invent new ones.  */
-		  break;
-		}
-	    }
-	}
-      /* Skip the type descriptor, we get it below with (*pp)[-1].  */
-      ++(*pp);
     }
   else
     {
@@ -1401,6 +1359,7 @@ read_type (pp, objfile)
       (*pp)++;
     }
 
+ again:
   type_descriptor = (*pp)[-1];
   switch (type_descriptor)
     {
@@ -1519,58 +1478,35 @@ read_type (pp, objfile)
     case '8':
     case '9':
     case '(':
+      (*pp)--;
 
-      {
-	char *pp_saved;
+      /* We deal with something like t(1,2)=(3,4)=... which
+	 the Lucid compiler and recent gcc versions (post 2.7.3) use. */
 
-	(*pp)--;
-	pp_saved = *pp;
-
-	/* Peek ahead at the number to detect void.  */
-	if (read_type_number (pp, xtypenums) != 0)
-	  return error_type (pp, objfile);
-
-	if (typenums[0] == xtypenums[0] && typenums[1] == xtypenums[1])
-	  /* It's being defined as itself.  That means it is "void".  */
-	  type = init_type (TYPE_CODE_VOID, 1, 0, NULL, objfile);
+      /* Allocate and enter the typedef type first.
+	 This handles recursive types. */
+      type = dbx_alloc_type (typenums, objfile);
+      TYPE_CODE (type) = TYPE_CODE_TYPEDEF;
+      { struct type *xtype = read_type (pp, objfile);
+	if (type == xtype)
+	  {
+	    /* It's being defined as itself.  That means it is "void".  */
+	    TYPE_CODE (type) = TYPE_CODE_VOID;
+	    TYPE_LENGTH (type) = 1;
+	  }
+	else if (type_size >= 0 || is_string)
+	  {
+	    *type = *xtype;
+	    TYPE_NAME (type) = NULL;
+	    TYPE_TAG_NAME (type) = NULL;
+	  }
 	else
 	  {
-	    struct type *xtype;
-
-	    /* Go back to the number and have read_type get it.  This means
-	       that we can deal with something like t(1,2)=(3,4)=... which
-	       the Lucid compiler uses.  */
-	    *pp = pp_saved;
-	    xtype = read_type (pp, objfile);
-
-	    /* The type is being defined to another type.  So we copy the type.
-	       This loses if we copy a C++ class and so we lose track of how
-	       the names are mangled (but g++ doesn't output stabs like this
-	       now anyway).  */
-
-	    type = alloc_type (objfile);
-	    if (SYMBOL_LINE (current_symbol) == 0)
-	      {
-		*type = *xtype;
-		/* The idea behind clearing the names is that the only purpose
-		   for defining a type to another type is so that the name of
-		   one can be different.  So we probably don't need to worry
-		   much about the case where the compiler doesn't give a name
-		   to the new type.  */
-		TYPE_NAME (type) = NULL;
-		TYPE_TAG_NAME (type) = NULL;
-	      }
-	    else
-	      {
-		TYPE_CODE (type) = TYPE_CODE_TYPEDEF;
-		TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
-		TYPE_TARGET_TYPE (type) = xtype;
-	      }
+	    TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
+	    TYPE_TARGET_TYPE (type) = xtype;
 	  }
-	if (typenums[0] != -1)
-	  *dbx_lookup_type (typenums) = type;
-	break;
       }
+      break;
 
     /* In the following types, we must be sure to overwrite any existing
        type that the typenums refer to, rather than allocating a new one
@@ -1628,21 +1564,54 @@ read_type (pp, objfile)
       /* FIXME! For now, we ignore const and volatile qualifiers.  */
       break;
 
-/* FIXME -- we should be doing smash_to_XXX types here.  */
-    case '@':				/* Member (class & variable) type */
-      {
-	struct type *domain = read_type (pp, objfile);
-	struct type *memtype;
+    case '@':
+      if (isdigit (**pp) || **pp ==  '(' || **pp == '-')
+	{ /* Member (class & variable) type */
+	  /* FIXME -- we should be doing smash_to_XXX types here.  */
 
-	if (**pp != ',')
-	  /* Invalid member type data format.  */
-	  return error_type (pp, objfile);
-	++*pp;
+	  struct type *domain = read_type (pp, objfile);
+	  struct type *memtype;
 
-	memtype = read_type (pp, objfile);
-	type = dbx_alloc_type (typenums, objfile);
-	smash_to_member_type (type, domain, memtype);
-      }
+	  if (**pp != ',')
+	    /* Invalid member type data format.  */
+	    return error_type (pp, objfile);
+	  ++*pp;
+
+	  memtype = read_type (pp, objfile);
+	  type = dbx_alloc_type (typenums, objfile);
+	  smash_to_member_type (type, domain, memtype);
+	}
+      else /* type attribute */
+	{
+	  char *attr = *pp;
+	  /* Skip to the semicolon.  */
+	  while (**pp != ';' && **pp != '\0')
+	    ++(*pp);
+	  if (**pp == '\0')
+	    return error_type (pp, objfile);
+	  else
+	    ++*pp;  /* Skip the semicolon.  */
+
+	  switch (*attr)
+	    {
+	    case 's':
+	      type_size = atoi (attr + 1);
+	      if (type_size <= 0)
+		type_size = -1;
+	      break;
+
+	    case 'S':
+	      is_string = 1;
+	      break;
+
+	    default:
+	      /* Ignore unrecognized type attributes, so future compilers
+		 can invent new ones.  */
+	      break;
+	    }
+	  ++*pp;
+	  goto again;
+	}
       break;
 
     case '#':				/* Method (class & fn) type */

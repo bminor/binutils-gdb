@@ -1,3 +1,10 @@
+Mon Apr 15 16:34:11 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* stabsread.c (read_type):  Move handling of '@' from type
+	number handling to handling of types proper (as emitted by gcc!).
+	For typedefs, allocate the typedef type before reading its
+	definition, to properly handling recursive types.
+
 Mon Apr 15 11:19:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* ch-exp.c (calculate_array_length): Fix prototype.
