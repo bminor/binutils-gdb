@@ -34,7 +34,7 @@ by the Free Software Foundation.
 @sp 10
 @titlefont{GNU Coding Standards}
 @author{Richard Stallman}
-@author{last updated 3 May 1992}
+@author{last updated 9 May 1992}
 @c Note date also appears below.
 @page
 
@@ -66,7 +66,7 @@ END-INFO-DIR-ENTRY
 @node Top, Reading Non-Free Code, (dir), (dir)
 @top Version
 
-Last updated 3 May 1992.
+Last updated 9 May 1992.
 @c Note date also appears above.
 @end ifinfo
 
@@ -305,8 +305,9 @@ normally aren't because the distribution comes with them.
 
 @item distclean
 Delete all files from the current directory that are created by
-configuring or building the program.  This should leave only the files
-that would be in the distribution.
+configuring or building the program.  If you have unpacked the source
+and built the program without creating any other files, @samp{make
+distclean} should leave only the files that were in the distribution.
 
 @item mostlyclean
 Like @samp{clean}, but may refrain from deleting a few files that people
@@ -572,7 +573,7 @@ For example, a Sun 3 might be @samp{m68k-sun-sunos4.1}.
 
 The @code{configure} script needs to be able to decode all plausible
 alternatives for how to describe a machine.  Thus, @samp{sun3-sunos4.1}
-would be a valid alias.  So would @samp{sun3-bsd4.2}, since Sunos is
+would be a valid alias.  So would @samp{sun3-bsd4.2}, since SunOS is
 basically @sc{BSD} and no other @sc{BSD} system is used on a Sun.  For many
 programs, @samp{vax-dec-ultrix} would be an alias for
 @samp{vax-dec-bsd}, simply because the differences between Ultrix and
@@ -1079,12 +1080,12 @@ for data that will not be changed.
 Try to avoid low-level interfaces to obscure Unix data structures (such
 as file directories, utmp, or the layout of kernel memory), since these
 are less likely to work compatibly.  If you need to find all the files
-in a directory, use @code{readdir} or some other high-level interface.  These
-will be supported compatibly by GNU.
+in a directory, use @code{readdir} or some other high-level interface.
+These will be supported compatibly by GNU.
 
-By default, the GNU system will provide the signal handling
-functions of @sc{BSD} and of @sc{POSIX}.  So GNU software should be
-written to use these.
+By default, the GNU system will provide the signal handling functions of
+@sc{BSD} and of @sc{POSIX}.  So GNU software should be written to use
+these.
 
 In error checks that detect ``impossible'' conditions, just abort.
 There is usually no point in printing any message.  These checks
