@@ -431,9 +431,16 @@ v:2:NUM_REGS:int:num_regs::::0:-1
 # These pseudo-registers may be aliases for other registers,
 # combinations of other registers, or they may be computed by GDB.
 v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
+
+# GDB's standard (or well known) register numbers.  These can map onto
+# a real register or a pseudo (computed) register or not be defined at
+# all (-1).  FIXME: cagney/2002-04-05: As of the time of writing, only
+# the PS_REGNUM was optional - code still depends on the others (fp,
+# pc, sp) designating registers.
 v:2:SP_REGNUM:int:sp_regnum::::0:-1
 v:2:FP_REGNUM:int:fp_regnum::::0:-1
 v:2:PC_REGNUM:int:pc_regnum::::0:-1
+v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
 v:2:NPC_REGNUM:int:npc_regnum::::0:-1::0
 v:2:NNPC_REGNUM:int:nnpc_regnum::::0:-1::0

@@ -456,6 +456,12 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 #endif
 #endif
 
+/* GDB's standard (or well known) register numbers.  These can map onto
+   a real register or a pseudo (computed) register or not be defined at
+   all (-1).  FIXME: cagney/2002-04-05: As of the time of writing, only
+   the PS_REGNUM was optional - code still depends on the others (fp,
+   pc, sp) designating registers. */
+
 extern int gdbarch_sp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SP_REGNUM)
@@ -486,6 +492,22 @@ extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PC_REGNUM)
 #define PC_REGNUM (gdbarch_pc_regnum (current_gdbarch))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PS_REGNUM)
+#define PS_REGNUM (-1)
+#endif
+
+extern int gdbarch_ps_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_ps_regnum (struct gdbarch *gdbarch, int ps_regnum);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PS_REGNUM)
+#error "Non multi-arch definition of PS_REGNUM"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PS_REGNUM)
+#define PS_REGNUM (gdbarch_ps_regnum (current_gdbarch))
 #endif
 #endif
 

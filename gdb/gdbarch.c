@@ -151,6 +151,7 @@ struct gdbarch
   int sp_regnum;
   int fp_regnum;
   int pc_regnum;
+  int ps_regnum;
   int fp0_regnum;
   int npc_regnum;
   int nnpc_regnum;
@@ -296,6 +297,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  -1,
   0,
   0,
   0,
@@ -459,6 +461,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->sp_regnum = -1;
   current_gdbarch->fp_regnum = -1;
   current_gdbarch->pc_regnum = -1;
+  current_gdbarch->ps_regnum = -1;
   current_gdbarch->fp0_regnum = -1;
   current_gdbarch->npc_regnum = -1;
   current_gdbarch->nnpc_regnum = -1;
@@ -592,6 +595,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->pc_regnum == -1))
     fprintf_unfiltered (log, "\n\tpc_regnum");
+  /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
   /* Skip verify of npc_regnum, invalid_p == 0 */
   /* Skip verify of nnpc_regnum, invalid_p == 0 */
@@ -1531,6 +1535,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: PROLOGUE_FRAMELESS_P = 0x%08lx\n",
                         (long) current_gdbarch->prologue_frameless_p
                         /*PROLOGUE_FRAMELESS_P ()*/);
+#endif
+#ifdef PS_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: PS_REGNUM # %s\n",
+                      XSTRING (PS_REGNUM));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: PS_REGNUM = %d\n",
+                      PS_REGNUM);
 #endif
 #ifdef PUSH_ARGUMENTS
   fprintf_unfiltered (file,
@@ -2584,6 +2596,22 @@ set_gdbarch_pc_regnum (struct gdbarch *gdbarch,
                        int pc_regnum)
 {
   gdbarch->pc_regnum = pc_regnum;
+}
+
+int
+gdbarch_ps_regnum (struct gdbarch *gdbarch)
+{
+  /* Skip verify of ps_regnum, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_ps_regnum called\n");
+  return gdbarch->ps_regnum;
+}
+
+void
+set_gdbarch_ps_regnum (struct gdbarch *gdbarch,
+                       int ps_regnum)
+{
+  gdbarch->ps_regnum = ps_regnum;
 }
 
 int

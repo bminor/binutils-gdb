@@ -1,5 +1,10 @@
 2002-04-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (PS_REGNUM): Add.  Document.  Default to -1.
+	* gdbarch.c, gdbarch.h: Re-generate.
+
+2002-04-06  Andrew Cagney  <ac131313@redhat.com>
+
 	* symtab.c (lookup_symtab): Remove ``const'' from ``rp''
 	declaration.  Fix -Werror.
 
