@@ -1,3 +1,10 @@
+start-sanitize-tic80
+Tue May 13 10:45:56 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80.c (md_apply_fix): Check PC relative relocations
+	for overflow/underflow, only insert lower 15 bits into instruction.
+
+end-sanitize-tic80
 Mon May 12 13:33:08 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* config/tc-i386.c (pi): Check for RegMMX.

@@ -917,6 +917,7 @@ md_apply_fix (fixP, val)
      long val;
 {
   char *dest =  fixP -> fx_frag -> fr_literal + fixP -> fx_where;
+  int overflow;
 
   switch (fixP -> fx_r_type)
     {
@@ -924,9 +925,18 @@ md_apply_fix (fixP, val)
       md_number_to_chars (dest, (valueT) val, 4);
       break;
     case R_MPPCR:
-      /* FIXME! - should check for overflow of the 15 bit field */
-      *dest++ = val >> 2;
-      *dest = (*dest & 0x80) | val >> 10;
+      overflow = (val < 0) ? !(val & 0x8000) : (val & 0x8000); 
+      if (overflow)
+	{
+	  as_bad_where (fixP -> fx_file, fixP -> fx_line, "PC relative target out of range");
+	}
+      else
+	{
+	  val >>= 2;
+	  *dest++ = val & 0xFF;
+	  val >>= 8;
+	  *dest = (*dest & 0x80) | (val & 0x7F);
+	}
       break;
     case R_ABS:
       md_number_to_chars (dest, (valueT) val, fixP -> fx_size);
