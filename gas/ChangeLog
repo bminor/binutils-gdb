@@ -1,3 +1,10 @@
+Tue Jan 14 15:07:27 1997  Robert Lipe <robertl@dgii.com>
+
+	* config/tc-i386.c (sco_id): Moved from here...
+	* config/obj-elf.c (sco_id): ...to here.  Adding the identifier
+	really is an SCO ELF specific thing, not just a SCO x86 specific
+	thing.
+
 start-sanitize-tic80
 Mon Jan 13 22:43:01 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
