@@ -43,6 +43,7 @@ config.h.bot
 config.h.in
 configure
 configure.in
+cross-build
 display.c
 doc
 emacs_keymap.c
