@@ -1,3 +1,14 @@
+2002-06-12  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf64-hppa.c (allocate_global_data_opd): We don't need an opd entry
+	for a symbol that has no output section.
+	(allocate_dynrel_entries): Correct comment.
+	(elf64_hppa_finalize_dynreloc): Likewise.  Don't create an opd entry
+	unless we want one.
+	(elf64_hppa_finalize_opd): Prevent segfault if dyn_h is NULL.
+	(elf64_hppa_finalize_dlt): Likewise.  Prevent segfault for symbols
+	with no section.  Remove unnecessary parentheses.
+
 2002-06-11  Tom Rix  <trix@redhat.com>
 
 	* coffcode.h (coff_compute_section_file_positions): Add data
