@@ -97,11 +97,6 @@
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from (FIX)
 #endif
 
-#ifndef WORKING_DOT_WORD
-extern const int md_short_jump_size;
-extern const int md_long_jump_size;
-#endif
-
 /* Used to control final evaluation of expressions.  */
 int finalize_syms = 0;
 

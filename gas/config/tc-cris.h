@@ -65,9 +65,6 @@ extern const char FLT_CHARS[];
 
 #define md_number_to_chars number_to_chars_littleendian
 
-extern const int md_short_jump_size;
-extern const int md_long_jump_size;
-
 /* There's no use having different functions for this; the sizes are the
    same.  Note that we can't #define md_short_jump_size here.  */
 #define md_create_short_jump md_create_long_jump

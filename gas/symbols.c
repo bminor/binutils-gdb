@@ -299,9 +299,6 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
       fragS *frag_tmp;
       char *frag_opcode;
 
-      extern const int md_short_jump_size;
-      extern const int md_long_jump_size;
-
       if (now_seg == absolute_section)
 	{
 	  as_bad (_("cannot define symbol `%s' in absolute section"), sym_name);

@@ -572,7 +572,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 /* Relocate byte stuff */
 
 /* This is for broken word.  */
-const int md_short_jump_size = 3;
+int md_short_jump_size = 3;
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
@@ -588,7 +588,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
   md_number_to_chars (ptr, offset, 2);
 }
 
-const int md_long_jump_size = 6;
+int md_long_jump_size = 6;
 const int md_reloc_size = 8;	/* Size of relocation record */
 
 void

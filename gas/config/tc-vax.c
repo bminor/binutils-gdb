@@ -3214,8 +3214,8 @@ mumble (text, value)
 
 /* end: vip_op.c */
 
-const int md_short_jump_size = 3;
-const int md_long_jump_size = 6;
+int md_short_jump_size = 3;
+int md_long_jump_size = 6;
 const int md_reloc_size = 8;	/* Size of relocation record */
 
 void

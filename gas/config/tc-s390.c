@@ -312,8 +312,8 @@ static flagword s390_flags = 0;
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
 
 #ifndef WORKING_DOT_WORD
-const int md_short_jump_size = 4;
-const int md_long_jump_size = 4;
+int md_short_jump_size = 4;
+int md_long_jump_size = 4;
 #endif
 
 const char *md_shortopts = "A:m:kVQ:";

@@ -1020,8 +1020,8 @@ md_convert_frag (headers, seg, fragP)
 {
 }
 
-const int md_short_jump_size = 2;
-const int md_long_jump_size = 4;
+int md_short_jump_size = 2;
+int md_long_jump_size = 4;
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)

@@ -341,8 +341,8 @@ const char *md_shortopts = "hHN";
    Note that we can't add relocs, because relaxation uses these fixed
    numbers, and md_create_short_jump is called after relaxation.  */
 
-const int md_short_jump_size = 6;
-const int md_long_jump_size = 6;
+int md_short_jump_size = 6;
+int md_long_jump_size = 6;
 
 /* Report output format.  Small changes in output format (like elf
    variants below) can happen until all options are parsed, but after

@@ -1,3 +1,17 @@
+2004-11-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* symbols.c (colon) [!WORKING_DOT_WORD]: Don't declare
+	md_short_jump_size, md_long_jump_size.
+	* write.c [!WORKING_DOT_WORD]: Ditto.
+	* tc.h [!WORKING_DOT_WORD]: Declare them here.  Drop const
+	qualifier.
+	* config/tc-cris.h (md_short_jump_size, md_long_jump_size): Don't
+	declare.
+	* config/tc-cris.c (md_short_jump_size, md_long_jump_size): Drop
+	const qualifier in these definitions.
+	* config/tc-i370.c, config/tc-m68k.c, config/tc-pdp11.c,
+	config/tc-s390.c, config/tc-tahoe.c, config/tc-vax.c: Ditto.
+
 2004-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2dbg.c (dwarf2_finish): Check for the existence of a file

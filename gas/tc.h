@@ -54,6 +54,10 @@ void   md_begin (void);
 void   md_number_to_chars (char *, valueT, int);
 void   md_apply_fix3 (fixS *, valueT *, segT);
 
+#ifndef WORKING_DOT_WORD
+extern int md_short_jump_size;
+extern int md_long_jump_size;
+#endif
 
 #ifndef md_create_long_jump
 void    md_create_long_jump (char *, addressT, addressT, fragS *, symbolS *);

@@ -425,8 +425,8 @@ static enum { SHLIB_NONE, SHLIB_PIC, SHILB_MRELOCATABLE } shlib = SHLIB_NONE;
 static flagword i370_flags = 0;
 
 #ifndef WORKING_DOT_WORD
-const int md_short_jump_size = 4;
-const int md_long_jump_size = 4;
+int md_short_jump_size = 4;
+int md_long_jump_size = 4;
 #endif
 
 #ifdef OBJ_ELF

@@ -5128,8 +5128,8 @@ tc_aout_fix_to_chars (char *where, fixS *fixP,
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
 #ifndef WORKING_DOT_WORD
-const int md_short_jump_size = 4;
-const int md_long_jump_size = 6;
+int md_short_jump_size = 4;
+int md_long_jump_size = 6;
 
 void
 md_create_short_jump (char *ptr, addressT from_addr, addressT to_addr,
