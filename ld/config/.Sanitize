@@ -47,6 +47,7 @@ m68k-coff.mt
 m68k.mt
 m68kv.mt
 m88k-bcs.mt
+mips-big.mt
 mips-lit.mt
 news.mt
 ose68.mt

@@ -102,6 +102,7 @@ m68kcoff.sh
 m88kbcs.sc-sh
 m88kbcs.sh
 mips.sc-sh
+mipsbig.sh
 mipslit.sh
 mri.c
 mri.h
@@ -132,7 +133,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.48  1993/01/22 22:30:34  ian
+# Revision 1.49  1993/02/03 17:11:08  ian
+# Keep forgetting those .Sanitize files.
+#
+# Revision 1.48  1993/01/22  22:30:34  ian
 # Fri Jan 22 14:22:44 1993  Ian Lance Taylor  (ian@cygnus.com)
 #
 # 	* mips.sc-sh: New file.  Ultrix, and hopefully other MIPS ECOFF
