@@ -1,5 +1,5 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -3414,6 +3414,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      relocation = sgot->output_offset + off - 4;
 	    }
+	  if (r_type == R_PPC_GOT16_HA)
+	    addend += ((relocation + addend) & 0x8000) << 1;
 	  break;
 
 	/* Indirect .sdata relocation */
@@ -3946,7 +3948,7 @@ ppc_elf_begin_write_processing (abfd, link_info)
       unsigned long	datum;
       char *		ptr;
 
-      
+
       asec = bfd_get_section_by_name (ibfd, APUINFO_SECTION_NAME);
       if (asec == NULL)
 	continue;
@@ -3957,7 +3959,7 @@ ppc_elf_begin_write_processing (abfd, link_info)
 	  error_message = _("corrupt or empty %s section in %s");
 	  goto fail;
 	}
-      
+
       if (bfd_seek (ibfd, asec->filepos, SEEK_SET) != 0
 	  || (bfd_bread (buffer + offset, length, ibfd) != length))
 	{
@@ -4011,7 +4013,7 @@ ppc_elf_begin_write_processing (abfd, link_info)
   if (! bfd_set_section_size  (abfd, asec, output_section_size))
     ibfd = abfd,
       error_message = _("warning: unable to set size of %s section in %s");
-  
+
  fail:
   free (buffer);
 
@@ -4071,7 +4073,7 @@ ppc_elf_final_write_processing (abfd, linker)
   bfd_put_32 (abfd, num_entries, buffer + 4);
   bfd_put_32 (abfd, 0x2, buffer + 8);
   strcpy (buffer + 12, APUINFO_LABEL);
-  
+
   length = 20;
   for (i = 0; i < num_entries; i++)
     {
@@ -4081,10 +4083,10 @@ ppc_elf_final_write_processing (abfd, linker)
 
   if (length != asec->_raw_size)
     _bfd_error_handler (_("failed to compute new APUinfo section."));
-  
+
   if (! bfd_set_section_contents (abfd, asec, buffer, (file_ptr) 0, length))
     _bfd_error_handler (_("failed to install new APUinfo section."));
-    
+
   free (buffer);
 
   apuinfo_list_finish ();

@@ -1,5 +1,5 @@
 /* PowerPC64-specific support for 64-bit ELF.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
 
@@ -5903,6 +5903,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC64_ADDR16_HA:
 	case R_PPC64_ADDR16_HIGHERA:
 	case R_PPC64_ADDR16_HIGHESTA:
+	case R_PPC64_GOT16_HA:
+	case R_PPC64_PLTGOT16_HA:
 	case R_PPC64_PLT16_HA:
 	case R_PPC64_TOC16_HA:
 	case R_PPC64_SECTOFF_HA:
