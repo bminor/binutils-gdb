@@ -354,16 +354,48 @@ CGEN_KEYWORD fr30_cgen_opval_h_dr =
   6
 };
 
-CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_cr_entries[] = 
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_ps_entries[] = 
 {
-  { "pc", 0 },
   { "ps", 1 }
 };
 
-CGEN_KEYWORD fr30_cgen_opval_h_cr = 
+CGEN_KEYWORD fr30_cgen_opval_h_ps = 
 {
-  & fr30_cgen_opval_h_cr_entries[0],
-  2
+  & fr30_cgen_opval_h_ps_entries[0],
+  1
+};
+
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r13_entries[] = 
+{
+  { "r13", 13 }
+};
+
+CGEN_KEYWORD fr30_cgen_opval_h_r13 = 
+{
+  & fr30_cgen_opval_h_r13_entries[0],
+  1
+};
+
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r14_entries[] = 
+{
+  { "r14", 14 }
+};
+
+CGEN_KEYWORD fr30_cgen_opval_h_r14 = 
+{
+  & fr30_cgen_opval_h_r14_entries[0],
+  1
+};
+
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r15_entries[] = 
+{
+  { "r15", 15 }
+};
+
+CGEN_KEYWORD fr30_cgen_opval_h_r15 = 
+{
+  & fr30_cgen_opval_h_r15_entries[0],
+  1
 };
 
 
@@ -380,7 +412,10 @@ static const CGEN_HW_ENTRY fr30_cgen_hw_entries[] =
   { HW_H_IADDR, & HW_ENT (HW_H_IADDR + 1), "h-iaddr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_GR, & HW_ENT (HW_H_GR + 1), "h-gr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_gr, { 0, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { 0 } } },
   { HW_H_DR, & HW_ENT (HW_H_DR + 1), "h-dr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_dr, { 0, 0, { 0 } } },
-  { HW_H_CR, & HW_ENT (HW_H_CR + 1), "h-cr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_cr, { 0, 0, { 0 } } },
+  { HW_H_PS, & HW_ENT (HW_H_PS + 1), "h-ps", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_ps, { 0, 0, { 0 } } },
+  { HW_H_R13, & HW_ENT (HW_H_R13 + 1), "h-r13", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_r13, { 0, 0, { 0 } } },
+  { HW_H_R14, & HW_ENT (HW_H_R14 + 1), "h-r14", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_r14, { 0, 0, { 0 } } },
+  { HW_H_R15, & HW_ENT (HW_H_R15 + 1), "h-r15", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_r15, { 0, 0, { 0 } } },
   { HW_H_NBIT, & HW_ENT (HW_H_NBIT + 1), "h-nbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_ZBIT, & HW_ENT (HW_H_ZBIT + 1), "h-zbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_VBIT, & HW_ENT (HW_H_VBIT + 1), "h-vbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
@@ -410,24 +445,42 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* Rs2: dedicated register */
   { "Rs2", & HW_ENT (HW_H_DR), 12, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* R13: General Register 13 */
+  { "R13", & HW_ENT (HW_H_R13), 0, 0,
+    { 0, 0, { 0 } }  },
+/* R14: General Register 14 */
+  { "R14", & HW_ENT (HW_H_R14), 0, 0,
+    { 0, 0, { 0 } }  },
+/* R15: General Register 15 */
+  { "R15", & HW_ENT (HW_H_R15), 0, 0,
+    { 0, 0, { 0 } }  },
 /* ps: Program Status register */
-  { "ps", & HW_ENT (HW_H_CR), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
+  { "ps", & HW_ENT (HW_H_PS), 0, 0,
+    { 0, 0, { 0 } }  },
 /* u4: 4  bit unsigned immediate */
   { "u4", & HW_ENT (HW_H_UINT), 8, 4,
     { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* m4: 4  bit negative immediate */
   { "m4", & HW_ENT (HW_H_UINT), 8, 4,
     { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
-/* i8: 8  bit unsigned immediate */
-  { "i8", & HW_ENT (HW_H_UINT), 4, 8,
-    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* u8: 8  bit unsigned immediate */
   { "u8", & HW_ENT (HW_H_UINT), 8, 8,
     { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
-/* o8: 8  bit signed   immediate */
-  { "o8", & HW_ENT (HW_H_SINT), 4, 8,
+/* i8: 8  bit unsigned immediate */
+  { "i8", & HW_ENT (HW_H_UINT), 4, 8,
     { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* udisp6: 6  bit unsigned immediate */
+  { "udisp6", & HW_ENT (HW_H_UINT), 8, 4,
+    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* disp8: 8  bit signed   immediate */
+  { "disp8", & HW_ENT (HW_H_SINT), 4, 8,
+    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), { 0 } }  },
+/* disp9: 9  bit signed   immediate */
+  { "disp9", & HW_ENT (HW_H_SINT), 4, 8,
+    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), { 0 } }  },
+/* disp10: 10 bit signed   immediate */
+  { "disp10", & HW_ENT (HW_H_SINT), 4, 8,
+    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), { 0 } }  },
 /* s10: 10 bit signed   immediate */
   { "s10", & HW_ENT (HW_H_SINT), 8, 8,
     { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), { 0 } }  },
@@ -1127,209 +1180,209 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ld @(R13,$Rj),$Ri */
+/* ld @($r13,$Rj),$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR13, "ldr13", "ld",
-    { { MNEM, ' ', '@', '(', 'R', '1', '3', ',', OP (RJ), ')', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', '(', OP (R13), ',', OP (RJ), ')', ',', OP (RI), 0 } },
     { 16, 16, 0xff00 }, 0x0,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* lduh @(R13,$Rj),$Ri */
+/* lduh @($r13,$Rj),$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR13UH, "ldr13uh", "lduh",
-    { { MNEM, ' ', '@', '(', 'R', '1', '3', ',', OP (RJ), ')', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', '(', OP (R13), ',', OP (RJ), ')', ',', OP (RI), 0 } },
     { 16, 16, 0xff00 }, 0x100,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ldub @(R13,$Rj),$Ri */
+/* ldub @($r13,$Rj),$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR13UB, "ldr13ub", "ldub",
-    { { MNEM, ' ', '@', '(', 'R', '1', '3', ',', OP (RJ), ')', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', '(', OP (R13), ',', OP (RJ), ')', ',', OP (RI), 0 } },
     { 16, 16, 0xff00 }, 0x200,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ld @(R14,$o8),$Ri */
+/* ld @($r14,$disp10),$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR14, "ldr14", "ld",
-    { { MNEM, ' ', '@', '(', 'R', '1', '4', ',', OP (O8), ')', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', '(', OP (R14), ',', OP (DISP10), ')', ',', OP (RI), 0 } },
     { 16, 16, 0xf000 }, 0x2000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* lduh @(R14,$o8),$Ri */
+/* lduh @($r14,$disp9),$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR14UH, "ldr14uh", "lduh",
-    { { MNEM, ' ', '@', '(', 'R', '1', '4', ',', OP (O8), ')', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', '(', OP (R14), ',', OP (DISP9), ')', ',', OP (RI), 0 } },
     { 16, 16, 0xf000 }, 0x4000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ldub @(R14,$o8),$Ri */
+/* ldub @($r14,$disp8),$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR14UB, "ldr14ub", "ldub",
-    { { MNEM, ' ', '@', '(', 'R', '1', '4', ',', OP (O8), ')', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', '(', OP (R14), ',', OP (DISP8), ')', ',', OP (RI), 0 } },
     { 16, 16, 0xf000 }, 0x6000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ld @(R15,$u4),$Ri */
+/* ld @($r15,$udisp6),$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR15, "ldr15", "ld",
-    { { MNEM, ' ', '@', '(', 'R', '1', '5', ',', OP (U4), ')', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', '(', OP (R15), ',', OP (UDISP6), ')', ',', OP (RI), 0 } },
     { 16, 16, 0xff00 }, 0x300,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ld @R15+,$Ri */
+/* ld @$r15+,$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR15GR, "ldr15gr", "ld",
-    { { MNEM, ' ', '@', 'R', '1', '5', '+', ',', OP (RI), 0 } },
+    { { MNEM, ' ', '@', OP (R15), '+', ',', OP (RI), 0 } },
     { 16, 16, 0xfff0 }, 0x700,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ld @R15+,$Rs2 */
+/* ld @$r15+,$Rs2 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR15DR, "ldr15dr", "ld",
-    { { MNEM, ' ', '@', 'R', '1', '5', '+', ',', OP (RS2), 0 } },
+    { { MNEM, ' ', '@', OP (R15), '+', ',', OP (RS2), 0 } },
     { 16, 16, 0xfff0 }, 0x780,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ld @R15+,ps */
+/* ld @$r15+,$ps */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDR15PS, "ldr15ps", "ld",
-    { { MNEM, ' ', '@', 'R', '1', '5', '+', ',', 'p', 's', 0 } },
+    { { MNEM, ' ', '@', OP (R15), '+', ',', OP (PS), 0 } },
     { 16, 16, 0xffff }, 0x790,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* st $Ri,@Rj */
+/* st $Ri,@$Rj */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_ST, "st", "st",
-    { { MNEM, ' ', OP (RI), ',', '@', 'R', 'j', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', OP (RJ), 0 } },
     { 16, 16, 0xff00 }, 0x1400,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* sth $Ri,@Rj */
+/* sth $Ri,@$Rj */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STH, "sth", "sth",
-    { { MNEM, ' ', OP (RI), ',', '@', 'R', 'j', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', OP (RJ), 0 } },
     { 16, 16, 0xff00 }, 0x1500,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* stb $Ri,@Rj */
+/* stb $Ri,@$Rj */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STB, "stb", "stb",
-    { { MNEM, ' ', OP (RI), ',', '@', 'R', 'j', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', OP (RJ), 0 } },
     { 16, 16, 0xff00 }, 0x1600,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* st $Ri,@(R13,$Rj) */
+/* st $Ri,@($r13,$Rj) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR13, "str13", "st",
-    { { MNEM, ' ', OP (RI), ',', '@', '(', 'R', '1', '3', ',', OP (RJ), ')', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', '(', OP (R13), ',', OP (RJ), ')', 0 } },
     { 16, 16, 0xff00 }, 0x1000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* sth $Ri,@(R13,$Rj) */
+/* sth $Ri,@($r13,$Rj) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR13H, "str13h", "sth",
-    { { MNEM, ' ', OP (RI), ',', '@', '(', 'R', '1', '3', ',', OP (RJ), ')', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', '(', OP (R13), ',', OP (RJ), ')', 0 } },
     { 16, 16, 0xff00 }, 0x1100,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* stb $Ri,@(R13,$Rj) */
+/* stb $Ri,@($r13,$Rj) */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_STR13B, "str13b", "stb",
-    { { MNEM, ' ', OP (RI), ',', '@', '(', 'R', '1', '3', ',', OP (RJ), ')', 0 } },
+    FR30_INSN_STR13B, "stR13b", "stb",
+    { { MNEM, ' ', OP (RI), ',', '@', '(', OP (R13), ',', OP (RJ), ')', 0 } },
     { 16, 16, 0xff00 }, 0x1200,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* st $Ri,@(R14,$o8) */
+/* st $Ri,@($r14,$disp10) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR14, "str14", "st",
-    { { MNEM, ' ', OP (RI), ',', '@', '(', 'R', '1', '4', ',', OP (O8), ')', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', '(', OP (R14), ',', OP (DISP10), ')', 0 } },
     { 16, 16, 0xf000 }, 0x3000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* sth $Ri,@(R14,$o8) */
+/* sth $Ri,@($r14,$disp9) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR14H, "str14h", "sth",
-    { { MNEM, ' ', OP (RI), ',', '@', '(', 'R', '1', '4', ',', OP (O8), ')', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', '(', OP (R14), ',', OP (DISP9), ')', 0 } },
     { 16, 16, 0xf000 }, 0x5000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* stb $Ri,@(R14,$o8) */
+/* stb $Ri,@($r14,$disp8) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR14B, "str14b", "stb",
-    { { MNEM, ' ', OP (RI), ',', '@', '(', 'R', '1', '4', ',', OP (O8), ')', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', '(', OP (R14), ',', OP (DISP8), ')', 0 } },
     { 16, 16, 0xf000 }, 0x7000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* st $Ri,@(R15,$u4) */
+/* st $Ri,@($r15,$udisp6) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR15, "str15", "st",
-    { { MNEM, ' ', OP (RI), ',', '@', '(', 'R', '1', '5', ',', OP (U4), ')', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', '(', OP (R15), ',', OP (UDISP6), ')', 0 } },
     { 16, 16, 0xff00 }, 0x1300,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* st $Ri,@-R15 */
+/* st $Ri,@-$r15 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR15GR, "str15gr", "st",
-    { { MNEM, ' ', OP (RI), ',', '@', '-', 'R', '1', '5', 0 } },
+    { { MNEM, ' ', OP (RI), ',', '@', '-', OP (R15), 0 } },
     { 16, 16, 0xfff0 }, 0x1700,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* st $Rs2,@-R15 */
+/* st $Rs2,@-$r15 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR15DR, "str15dr", "st",
-    { { MNEM, ' ', OP (RS2), ',', '@', '-', 'R', '1', '5', 0 } },
+    { { MNEM, ' ', OP (RS2), ',', '@', '-', OP (R15), 0 } },
     { 16, 16, 0xfff0 }, 0x1780,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* st ps,@-R15 */
+/* st $ps,@-$r15 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STR15PS, "str15ps", "st",
-    { { MNEM, ' ', 'p', 's', ',', '@', '-', 'R', '1', '5', 0 } },
+    { { MNEM, ' ', OP (PS), ',', '@', '-', OP (R15), 0 } },
     { 16, 16, 0xffff }, 0x1790,
     (PTR) 0,
     { 0, 0, { 0 } }
@@ -1352,11 +1405,11 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* mov ps,$Ri */
+/* mov $ps,$Ri */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_MOVPS, "movps", "mov",
-    { { MNEM, ' ', 'p', 's', ',', OP (RI), 0 } },
+    { { MNEM, ' ', OP (PS), ',', OP (RI), 0 } },
     { 16, 16, 0xfff0 }, 0x1710,
     (PTR) 0,
     { 0, 0, { 0 } }
@@ -1370,11 +1423,11 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* mov $Ri,ps */
+/* mov $Ri,$ps */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_MOV2PS, "mov2ps", "mov",
-    { { MNEM, ' ', OP (RI), ',', 'p', 's', 0 } },
+    { { MNEM, ' ', OP (RI), ',', OP (PS), 0 } },
     { 16, 16, 0xfff0 }, 0x710,
     (PTR) 0,
     { 0, 0, { 0 } }
@@ -1388,12 +1441,30 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
+/* jmp:D @$Ri */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_JMPD, "jmpd", "jmp:D",
+    { { MNEM, ' ', '@', OP (RI), 0 } },
+    { 16, 16, 0xfff0 }, 0x9f00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
 /* call $label12 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_CALL, "call", "call",
     { { MNEM, ' ', OP (LABEL12), 0 } },
     { 16, 16, 0xf400 }, 0xd000,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* call:D $label12 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_CALLD, "calld", "call:D",
+    { { MNEM, ' ', OP (LABEL12), 0 } },
+    { 16, 16, 0xf400 }, 0xd400,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
@@ -1406,12 +1477,30 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
+/* call:D @$Ri */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_CALLRD, "callrd", "call:D",
+    { { MNEM, ' ', '@', OP (RI), 0 } },
+    { 16, 16, 0xfff0 }, 0x9f10,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
 /* ret */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_RET, "ret", "ret",
     { { MNEM, 0 } },
     { 16, 16, 0xffff }, 0x9720,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* ret:D */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_RETD, "retd", "ret:D",
+    { { MNEM, 0 } },
+    { 16, 16, 0xffff }, 0x9f20,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
@@ -1424,10 +1513,10 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* int3 */
+/* inte */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_INTE, "inte", "int3",
+    FR30_INSN_INTE, "inte", "inte",
     { { MNEM, 0 } },
     { 16, 16, 0xffff }, 0x9f30,
     (PTR) 0,
@@ -1442,272 +1531,416 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
+/* bra $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BRA, "bra", "bra",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe000,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bno $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BNO, "bno", "bno",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe100,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* beq $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BEQ, "beq", "beq",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe200,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bne $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BNE, "bne", "bne",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe300,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bc $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BC, "bc", "bc",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe400,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bnc $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BNC, "bnc", "bnc",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe500,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bn $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BN, "bn", "bn",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe600,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bp $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BP, "bp", "bp",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe700,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bv $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BV, "bv", "bv",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe800,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bnv $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BNV, "bnv", "bnv",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xe900,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* blt $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BLT, "blt", "blt",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xea00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bge $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BGE, "bge", "bge",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xeb00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* ble $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BLE, "ble", "ble",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xec00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bgt $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BGT, "bgt", "bgt",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xed00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bls $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BLS, "bls", "bls",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xee00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* bhi $label9 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_BHI, "bhi", "bhi",
+    { { MNEM, ' ', OP (LABEL9), 0 } },
+    { 16, 16, 0xff00 }, 0xef00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
 /* bra:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BRA, "bra", "bra:D",
+    FR30_INSN_BRAD, "brad", "bra:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe000,
+    { 16, 16, 0xff00 }, 0xf000,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bno:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BNO, "bno", "bno:D",
+    FR30_INSN_BNOD, "bnod", "bno:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe100,
+    { 16, 16, 0xff00 }, 0xf100,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* beq:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BEQ, "beq", "beq:D",
+    FR30_INSN_BEQD, "beqd", "beq:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe200,
+    { 16, 16, 0xff00 }, 0xf200,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bne:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BNE, "bne", "bne:D",
+    FR30_INSN_BNED, "bned", "bne:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe300,
+    { 16, 16, 0xff00 }, 0xf300,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bc:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BC, "bc", "bc:D",
+    FR30_INSN_BCD, "bcd", "bc:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe400,
+    { 16, 16, 0xff00 }, 0xf400,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bnc:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BNC, "bnc", "bnc:D",
+    FR30_INSN_BNCD, "bncd", "bnc:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe500,
+    { 16, 16, 0xff00 }, 0xf500,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bn:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BN, "bn", "bn:D",
+    FR30_INSN_BND, "bnd", "bn:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe600,
+    { 16, 16, 0xff00 }, 0xf600,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bp:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BP, "bp", "bp:D",
+    FR30_INSN_BPD, "bpd", "bp:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe700,
+    { 16, 16, 0xff00 }, 0xf700,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bv:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BV, "bv", "bv:D",
+    FR30_INSN_BVD, "bvd", "bv:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe800,
+    { 16, 16, 0xff00 }, 0xf800,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bnv:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BNV, "bnv", "bnv:D",
+    FR30_INSN_BNVD, "bnvd", "bnv:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xe900,
+    { 16, 16, 0xff00 }, 0xf900,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* blt:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BLT, "blt", "blt:D",
+    FR30_INSN_BLTD, "bltd", "blt:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xea00,
+    { 16, 16, 0xff00 }, 0xfa00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bge:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BGE, "bge", "bge:D",
+    FR30_INSN_BGED, "bged", "bge:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xeb00,
+    { 16, 16, 0xff00 }, 0xfb00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* ble:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BLE, "ble", "ble:D",
+    FR30_INSN_BLED, "bled", "ble:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xec00,
+    { 16, 16, 0xff00 }, 0xfc00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bgt:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BGT, "bgt", "bgt:D",
+    FR30_INSN_BGTD, "bgtd", "bgt:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xed00,
+    { 16, 16, 0xff00 }, 0xfd00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bls:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BLS, "bls", "bls:D",
+    FR30_INSN_BLSD, "blsd", "bls:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xee00,
+    { 16, 16, 0xff00 }, 0xfe00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
 /* bhi:D $label9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_BHI, "bhi", "bhi:D",
+    FR30_INSN_BHID, "bhid", "bhi:D",
     { { MNEM, ' ', OP (LABEL9), 0 } },
-    { 16, 16, 0xff00 }, 0xef00,
+    { 16, 16, 0xff00 }, 0xff00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov @$dir10,R13 */
+/* dmov @$dir10,$R13 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R13, "dmov2r13", "dmov",
-    { { MNEM, ' ', '@', OP (DIR10), ',', 'R', '1', '3', 0 } },
+    { { MNEM, ' ', '@', OP (DIR10), ',', OP (R13), 0 } },
     { 16, 16, 0xff00 }, 0x800,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovh @$dir10,R13 */
+/* dmovh @$dir9,$R13 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R13H, "dmov2r13h", "dmovh",
-    { { MNEM, ' ', '@', OP (DIR10), ',', 'R', '1', '3', 0 } },
+    { { MNEM, ' ', '@', OP (DIR9), ',', OP (R13), 0 } },
     { 16, 16, 0xff00 }, 0x900,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovb @$dir10,R13 */
+/* dmovb @$dir8,$R13 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R13B, "dmov2r13b", "dmovb",
-    { { MNEM, ' ', '@', OP (DIR10), ',', 'R', '1', '3', 0 } },
+    { { MNEM, ' ', '@', OP (DIR8), ',', OP (R13), 0 } },
     { 16, 16, 0xff00 }, 0xa00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov R13,@$dir10 */
+/* dmov $R13,@$dir10 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOVR13, "dmovr13", "dmov",
-    { { MNEM, ' ', 'R', '1', '3', ',', '@', OP (DIR10), 0 } },
+    { { MNEM, ' ', OP (R13), ',', '@', OP (DIR10), 0 } },
     { 16, 16, 0xff00 }, 0x1800,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovh R13,@$dir10 */
+/* dmovh $R13,@$dir9 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOVR13H, "dmovr13h", "dmovh",
-    { { MNEM, ' ', 'R', '1', '3', ',', '@', OP (DIR10), 0 } },
+    { { MNEM, ' ', OP (R13), ',', '@', OP (DIR9), 0 } },
     { 16, 16, 0xff00 }, 0x1900,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovb R13,@$dir10 */
+/* dmovb $R13,@$dir8 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOVR13B, "dmovr13b", "dmovb",
-    { { MNEM, ' ', 'R', '1', '3', ',', '@', OP (DIR10), 0 } },
+    { { MNEM, ' ', OP (R13), ',', '@', OP (DIR8), 0 } },
     { 16, 16, 0xff00 }, 0x1a00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov @$dir10,R13+ */
+/* dmov @$dir10,@$R13+ */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R13PI, "dmov2r13pi", "dmov",
-    { { MNEM, ' ', '@', OP (DIR10), ',', 'R', '1', '3', '+', 0 } },
+    { { MNEM, ' ', '@', OP (DIR10), ',', '@', OP (R13), '+', 0 } },
     { 16, 16, 0xff00 }, 0xc00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovh @$dir10,R13+ */
+/* dmovh @$dir9,@$R13+ */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R13PIH, "dmov2r13pih", "dmovh",
-    { { MNEM, ' ', '@', OP (DIR10), ',', 'R', '1', '3', '+', 0 } },
+    { { MNEM, ' ', '@', OP (DIR9), ',', '@', OP (R13), '+', 0 } },
     { 16, 16, 0xff00 }, 0xd00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovb @$dir10,R13+ */
+/* dmovb @$dir8,@$R13+ */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R13PIB, "dmov2r13pib", "dmovb",
-    { { MNEM, ' ', '@', OP (DIR10), ',', 'R', '1', '3', '+', 0 } },
+    { { MNEM, ' ', '@', OP (DIR8), ',', '@', OP (R13), '+', 0 } },
     { 16, 16, 0xff00 }, 0xe00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov R13+,@$dir10 */
+/* dmov @$R13+,@$dir10 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_DMOV13PI, "dmov13pi", "dmov",
-    { { MNEM, ' ', 'R', '1', '3', '+', ',', '@', OP (DIR10), 0 } },
+    FR30_INSN_DMOVR13PI, "dmovr13pi", "dmov",
+    { { MNEM, ' ', '@', OP (R13), '+', ',', '@', OP (DIR10), 0 } },
     { 16, 16, 0xff00 }, 0x1c00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovh R13+,@$dir10 */
+/* dmovh @$R13+,@$dir9 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_DMOV13PIH, "dmov13pih", "dmovh",
-    { { MNEM, ' ', 'R', '1', '3', '+', ',', '@', OP (DIR10), 0 } },
+    FR30_INSN_DMOVR13PIH, "dmovr13pih", "dmovh",
+    { { MNEM, ' ', '@', OP (R13), '+', ',', '@', OP (DIR9), 0 } },
     { 16, 16, 0xff00 }, 0x1d00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmovb R13+,@$dir10 */
+/* dmovb @$R13+,@$dir8 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_DMOV13PIB, "dmov13pib", "dmovb",
-    { { MNEM, ' ', 'R', '1', '3', '+', ',', '@', OP (DIR10), 0 } },
+    FR30_INSN_DMOVR13PIB, "dmovr13pib", "dmovb",
+    { { MNEM, ' ', '@', OP (R13), '+', ',', '@', OP (DIR8), 0 } },
     { 16, 16, 0xff00 }, 0x1e00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov @$dir10,-R15 */
+/* dmov @$dir10,-$R15 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R15PD, "dmov2r15pd", "dmov",
-    { { MNEM, ' ', '@', OP (DIR10), ',', '-', 'R', '1', '5', 0 } },
+    { { MNEM, ' ', '@', OP (DIR10), ',', '-', OP (R15), 0 } },
     { 16, 16, 0xff00 }, 0xb00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov R15+,@$dir10 */
+/* dmov @$R15+,@$dir10 */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_DMOV15PI, "dmov15pi", "dmov",
-    { { MNEM, ' ', 'R', '1', '5', '+', ',', '@', OP (DIR10), 0 } },
+    FR30_INSN_DMOVR15PI, "dmovr15pi", "dmov",
+    { { MNEM, ' ', '@', OP (R15), '+', ',', '@', OP (DIR10), 0 } },
     { 16, 16, 0xff00 }, 0x1b00,
     (PTR) 0,
     { 0, 0, { 0 } }
@@ -1721,10 +1954,10 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* ldres $u4,@$Ri+ */
+/* stres $u4,@$Ri+ */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_STRES, "stres", "ldres",
+    FR30_INSN_STRES, "stres", "stres",
     { { MNEM, ' ', OP (U4), ',', '@', OP (RI), '+', 0 } },
     { 16, 16, 0xff00 }, 0xbd00,
     (PTR) 0,
@@ -2006,20 +2239,41 @@ fr30_cgen_get_int_operand (opindex, fields)
     case FR30_OPERAND_RS2 :
       value = fields->f_Rs2;
       break;
+    case FR30_OPERAND_R13 :
+      value = fields->f_nil;
+      break;
+    case FR30_OPERAND_R14 :
+      value = fields->f_nil;
+      break;
+    case FR30_OPERAND_R15 :
+      value = fields->f_nil;
+      break;
+    case FR30_OPERAND_PS :
+      value = fields->f_nil;
+      break;
     case FR30_OPERAND_U4 :
       value = fields->f_u4;
       break;
     case FR30_OPERAND_M4 :
       value = fields->f_m4;
       break;
-    case FR30_OPERAND_I8 :
-      value = fields->f_i8;
-      break;
     case FR30_OPERAND_U8 :
       value = fields->f_u8;
       break;
-    case FR30_OPERAND_O8 :
-      value = fields->f_o8;
+    case FR30_OPERAND_I8 :
+      value = fields->f_i8;
+      break;
+    case FR30_OPERAND_UDISP6 :
+      value = fields->f_udisp6;
+      break;
+    case FR30_OPERAND_DISP8 :
+      value = fields->f_disp8;
+      break;
+    case FR30_OPERAND_DISP9 :
+      value = fields->f_disp9;
+      break;
+    case FR30_OPERAND_DISP10 :
+      value = fields->f_disp10;
       break;
     case FR30_OPERAND_S10 :
       value = fields->f_s10;
@@ -2037,10 +2291,10 @@ fr30_cgen_get_int_operand (opindex, fields)
       value = fields->f_dir10;
       break;
     case FR30_OPERAND_LABEL9 :
-      value = fields->f_rel8;
+      value = fields->f_rel9;
       break;
     case FR30_OPERAND_LABEL12 :
-      value = fields->f_rel11;
+      value = fields->f_rel12;
       break;
     case FR30_OPERAND_CC :
       value = fields->f_cc;
@@ -2077,20 +2331,41 @@ fr30_cgen_get_vma_operand (opindex, fields)
     case FR30_OPERAND_RS2 :
       value = fields->f_Rs2;
       break;
+    case FR30_OPERAND_R13 :
+      value = fields->f_nil;
+      break;
+    case FR30_OPERAND_R14 :
+      value = fields->f_nil;
+      break;
+    case FR30_OPERAND_R15 :
+      value = fields->f_nil;
+      break;
+    case FR30_OPERAND_PS :
+      value = fields->f_nil;
+      break;
     case FR30_OPERAND_U4 :
       value = fields->f_u4;
       break;
     case FR30_OPERAND_M4 :
       value = fields->f_m4;
       break;
-    case FR30_OPERAND_I8 :
-      value = fields->f_i8;
-      break;
     case FR30_OPERAND_U8 :
       value = fields->f_u8;
       break;
-    case FR30_OPERAND_O8 :
-      value = fields->f_o8;
+    case FR30_OPERAND_I8 :
+      value = fields->f_i8;
+      break;
+    case FR30_OPERAND_UDISP6 :
+      value = fields->f_udisp6;
+      break;
+    case FR30_OPERAND_DISP8 :
+      value = fields->f_disp8;
+      break;
+    case FR30_OPERAND_DISP9 :
+      value = fields->f_disp9;
+      break;
+    case FR30_OPERAND_DISP10 :
+      value = fields->f_disp10;
       break;
     case FR30_OPERAND_S10 :
       value = fields->f_s10;
@@ -2108,10 +2383,10 @@ fr30_cgen_get_vma_operand (opindex, fields)
       value = fields->f_dir10;
       break;
     case FR30_OPERAND_LABEL9 :
-      value = fields->f_rel8;
+      value = fields->f_rel9;
       break;
     case FR30_OPERAND_LABEL12 :
-      value = fields->f_rel11;
+      value = fields->f_rel12;
       break;
     case FR30_OPERAND_CC :
       value = fields->f_cc;
@@ -2152,20 +2427,41 @@ fr30_cgen_set_int_operand (opindex, fields, value)
     case FR30_OPERAND_RS2 :
       fields->f_Rs2 = value;
       break;
+    case FR30_OPERAND_R13 :
+      fields->f_nil = value;
+      break;
+    case FR30_OPERAND_R14 :
+      fields->f_nil = value;
+      break;
+    case FR30_OPERAND_R15 :
+      fields->f_nil = value;
+      break;
+    case FR30_OPERAND_PS :
+      fields->f_nil = value;
+      break;
     case FR30_OPERAND_U4 :
       fields->f_u4 = value;
       break;
     case FR30_OPERAND_M4 :
       fields->f_m4 = value;
       break;
-    case FR30_OPERAND_I8 :
-      fields->f_i8 = value;
-      break;
     case FR30_OPERAND_U8 :
       fields->f_u8 = value;
       break;
-    case FR30_OPERAND_O8 :
-      fields->f_o8 = value;
+    case FR30_OPERAND_I8 :
+      fields->f_i8 = value;
+      break;
+    case FR30_OPERAND_UDISP6 :
+      fields->f_udisp6 = value;
+      break;
+    case FR30_OPERAND_DISP8 :
+      fields->f_disp8 = value;
+      break;
+    case FR30_OPERAND_DISP9 :
+      fields->f_disp9 = value;
+      break;
+    case FR30_OPERAND_DISP10 :
+      fields->f_disp10 = value;
       break;
     case FR30_OPERAND_S10 :
       fields->f_s10 = value;
@@ -2183,10 +2479,10 @@ fr30_cgen_set_int_operand (opindex, fields, value)
       fields->f_dir10 = value;
       break;
     case FR30_OPERAND_LABEL9 :
-      fields->f_rel8 = value;
+      fields->f_rel9 = value;
       break;
     case FR30_OPERAND_LABEL12 :
-      fields->f_rel11 = value;
+      fields->f_rel12 = value;
       break;
     case FR30_OPERAND_CC :
       fields->f_cc = value;
@@ -2220,20 +2516,41 @@ fr30_cgen_set_vma_operand (opindex, fields, value)
     case FR30_OPERAND_RS2 :
       fields->f_Rs2 = value;
       break;
+    case FR30_OPERAND_R13 :
+      fields->f_nil = value;
+      break;
+    case FR30_OPERAND_R14 :
+      fields->f_nil = value;
+      break;
+    case FR30_OPERAND_R15 :
+      fields->f_nil = value;
+      break;
+    case FR30_OPERAND_PS :
+      fields->f_nil = value;
+      break;
     case FR30_OPERAND_U4 :
       fields->f_u4 = value;
       break;
     case FR30_OPERAND_M4 :
       fields->f_m4 = value;
       break;
-    case FR30_OPERAND_I8 :
-      fields->f_i8 = value;
-      break;
     case FR30_OPERAND_U8 :
       fields->f_u8 = value;
       break;
-    case FR30_OPERAND_O8 :
-      fields->f_o8 = value;
+    case FR30_OPERAND_I8 :
+      fields->f_i8 = value;
+      break;
+    case FR30_OPERAND_UDISP6 :
+      fields->f_udisp6 = value;
+      break;
+    case FR30_OPERAND_DISP8 :
+      fields->f_disp8 = value;
+      break;
+    case FR30_OPERAND_DISP9 :
+      fields->f_disp9 = value;
+      break;
+    case FR30_OPERAND_DISP10 :
+      fields->f_disp10 = value;
       break;
     case FR30_OPERAND_S10 :
       fields->f_s10 = value;
@@ -2251,10 +2568,10 @@ fr30_cgen_set_vma_operand (opindex, fields, value)
       fields->f_dir10 = value;
       break;
     case FR30_OPERAND_LABEL9 :
-      fields->f_rel8 = value;
+      fields->f_rel9 = value;
       break;
     case FR30_OPERAND_LABEL12 :
-      fields->f_rel11 = value;
+      fields->f_rel12 = value;
       break;
     case FR30_OPERAND_CC :
       fields->f_cc = value;
