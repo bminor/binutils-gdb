@@ -1,3 +1,20 @@
+Fri Jul 22 16:48:34 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* nm.c (numeric_forward): Treat undefined symbols as "less than"
+	defined symbols with zero values.  If numeric values are equal, or
+	both symbols are undefined, sort alphabetically.  Don't assume
+	that the difference of two bfd_vma values will truncate to "int"
+	and still have the same sign.
+	(numeric_reverse): Call numeric_forward and negate the result.
+	(print_symbol_info_bsd): For undefined symbols, print leading
+	spaces equivalent to the width of a printed bfd_vma, rather than
+	assuming that 8 will look right.
+
+Fri Jul 22 10:09:53 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* nlmheader.y: Make "stack" and "stacksize" synonyms in the lexer
+	  rather than the parser.
+
 Thu Jul 21 10:25:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/mh-alphaosf, config/mh-apollo68v, config/mh-delta88:
