@@ -1,3 +1,8 @@
+2002-01-22  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* configure.host (hppa*64*-*-hpux*, hppa*64*-*-linux*): Add new
+	host defines.
+
 2002-01-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_32_GOTREL>:

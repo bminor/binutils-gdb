@@ -21,8 +21,11 @@ case "${host}" in
 
 alpha*-*-*)		host64=true; HOST_64BIT_TYPE=long ;;
 
+hppa*64*-*-hpux*)	HDEFINES=-DHOST_HPPAHPUX;
+			host64=true; HOST_64BIT_TYPE=long ;;
 hppa*-*-hpux*)		HDEFINES=-DHOST_HPPAHPUX ;;
 hppa*-*-hiux*)		HDEFINES=-DHOST_HPPAHPUX ;;
+hppa*64*-*-linux*)	host64=true; HOST_64BIT_TYPE=long ;;
 hppa*-*-mpeix*)		HDEFINES=-DHOST_HPPAMPEIX ;;
 hppa*-*-bsd*)		HDEFINES=-DHOST_HPPABSD ;;
 hppa*-*-osf*)		HDEFINES=-DHOST_HPPAOSF ;;
