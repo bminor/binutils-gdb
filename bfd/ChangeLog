@@ -1,3 +1,8 @@
+2003-11-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_type_of_stub): Disallow stubs other than
+	ppc_stub_plt_call to symbols defined in shared libs.
+
 2003-11-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-bfd.h (ELF_LINK_POINTER_EQUALITY_NEEDED): Define new flag.

@@ -6070,8 +6070,9 @@ ppc_type_of_stub (asection *input_sec,
 	      }
 	}
 
-      if (h->elf.root.type != bfd_link_hash_defined
-	  && h->elf.root.type != bfd_link_hash_defweak)
+      if (!(h->elf.root.type == bfd_link_hash_defined
+	    || h->elf.root.type == bfd_link_hash_defweak)
+	  || h->elf.root.u.def.section->output_section == NULL)
 	return ppc_stub_none;
     }
 
