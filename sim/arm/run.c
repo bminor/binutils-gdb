@@ -30,6 +30,7 @@ void usage();
 extern int optind;
 extern char *optarg;
 
+int verbose = 0;
 int target_byte_order;
 
 int
@@ -41,7 +42,6 @@ main (ac, av)
   bfd_vma start_address;
   asection *s;
   int i;
-  int verbose = 0;
   int trace = 0;
   char *name = "";
 
