@@ -153,11 +153,6 @@ Things-to-lose:
 Do-last:
 
 v9files="configure.in elfcode.h"
-if [ -n "${verbose}" ] ; then
-	say=echo
-else
-	say=true
-fi
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
 		echo Keeping v9 stuff in $v9files.
