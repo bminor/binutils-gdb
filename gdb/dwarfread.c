@@ -192,6 +192,11 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #define CHILL_PRODUCER "GNU Chill "
 #endif
 
+/* Provide a default mapping from a DWARF register number to a gdb REGNUM.  */
+#ifndef DWARF_REG_TO_REGNUM
+#define DWARF_REG_TO_REGNUM(num) (num)
+#endif
+
 /* Flags to target_to_host() that tell whether or not the data object is
    expected to be signed.  Used, for example, when fetching a signed
    integer in the target environment which is used as a signed integer
@@ -2210,8 +2215,10 @@ locval (loc)
 	    break;
 	  case OP_REG:
 	    /* push register (number) */
-	    stack[++stacki] = target_to_host (loc, loc_value_size,
-					      GET_UNSIGNED, current_objfile);
+	    stack[++stacki]
+	      = DWARF_REG_TO_REGNUM (target_to_host (loc, loc_value_size,
+						     GET_UNSIGNED,
+						     current_objfile));
 	    loc += loc_value_size;
 	    isreg = 1;
 	    break;

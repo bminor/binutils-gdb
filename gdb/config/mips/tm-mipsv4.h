@@ -39,3 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Use the alternate method of determining valid frame chains. */
 #define FRAME_CHAIN_VALID_ALTERNATE
+
+/* Convert a DWARF register number to a gdb REGNUM.  */
+#define DWARF_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)

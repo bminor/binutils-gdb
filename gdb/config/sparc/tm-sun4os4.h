@@ -1,5 +1,5 @@
 /* Macro definitions for GDB for a Sun 4 running sunos 4.
-   Copyright 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1992, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,6 +19,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "sparc/tm-sparc.h"
 #include "tm-sunos.h"
+
+/* Redefine SKIP_TRAMPOLINE_CODE to handle PIC compiled modules
+   in main executables.  */
+
+#undef SKIP_TRAMPOLINE_CODE
+#define SKIP_TRAMPOLINE_CODE(pc)  sunos4_skip_trampoline_code (pc)
+extern CORE_ADDR sunos4_skip_trampoline_code PARAMS ((CORE_ADDR));
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */

@@ -1,3 +1,26 @@
+Sat Dec 17 02:33:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-typeprint.c (c_type_print_base):  Use `show' of -1 to print
+	the return type of methods to avoid infinite loops with anonymous
+	types.
+	* valops.c (search_struct_field):  Handle anonymous unions.
+  
+	* sparc-tdep.c (sunos4_skip_trampoline_code):  New function
+	to correctly handle steps into -g compiled PIC objects in the
+	main executable.
+	* config/sparc/tm-sun4os4.h (SKIP_TRAMPOLINE_CODE):
+	Redefine to use sunos4_skip_trampoline_code.
+
+	* dwarfread.c (DWARF_REG_TO_REGNUM):  Provide a default mapping
+	from DWARF to GDB register numbering.
+	* dwarfread.c (locval):  Use DWARF_REG_TO_REGNUM to map the
+	register value.
+	* config/mips/tm-mipsv4.h (DWARF_REG_TO_REGNUM):  Define.
+
+Fri Dec 16 10:56:29 1994  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (uninstall): transform file names.
+
 Thu Dec 15 16:55:35 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* defs.h: Include progress.h.

@@ -1,5 +1,6 @@
 /* Support for printing C and C++ types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 1993, 1994
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -692,7 +693,7 @@ c_type_print_base (type, stream, show, level)
 		  else if (!is_constructor && !is_full_physname_constructor)
 		    {
 		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
-				  "", stream, 0);
+				  "", stream, -1);
 		      fputs_filtered (" ", stream);
 		    }
 		  if (TYPE_FN_FIELD_STUB (f, j))
