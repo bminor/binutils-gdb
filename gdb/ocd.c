@@ -1,4 +1,4 @@
-/* Remote target communications for the Macraigor Systems BDM Wiggler
+/* Target communications support for Macraigor Systems' On-Chip Debugging
    Copyright 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -37,9 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ocd.h"
 
 /* Prototypes for local functions */
-
-static int ocd_write_bytes PARAMS ((CORE_ADDR memaddr,
-				       char *myaddr, int len));
 
 static int ocd_read_bytes PARAMS ((CORE_ADDR memaddr,
 				      char *myaddr, int len));
@@ -101,16 +98,17 @@ ocd_error (s, error_code)
     case 0x1: s = "Unknown fault"; break;
     case 0x2: s = "Power failed"; break;
     case 0x3: s = "Cable disconnected"; break;
-    case 0x4: s = "Couldn't enter BDM"; break;
+    case 0x4: s = "Couldn't enter OCD mode"; break;
     case 0x5: s = "Target stuck in reset"; break;
-    case 0x6: s = "Port not configured"; break;
+    case 0x6: s = "OCD hasn't been initialized"; break;
     case 0x7: s = "Write verify failed"; break;
+    case 0x8: s = "Reg buff error (during MPC5xx fp reg read/write)"; break;
+    case 0x9: s = "Invalid CPU register access attempt failed"; break;
     case 0x11: s = "Bus error"; break;
     case 0x12: s = "Checksum error"; break;
     case 0x13: s = "Illegal command"; break;
     case 0x14: s = "Parameter error"; break;
     case 0x15: s = "Internal error"; break;
-    case 0x16: s = "Register buffer error"; break;
     case 0x80: s = "Flash erase error"; break;
     default:
       sprintf (buf, "Unknown error code %d", error_code);
@@ -160,15 +158,7 @@ ocd_start_remote (dummy)
 
   SERIAL_SEND_BREAK (ocd_desc); /* Wake up the wiggler */
 
-  ocd_do_command (OCD_AYT, &status, &pktlen);
-
-  p = ocd_do_command (OCD_GET_VERSION, &status, &pktlen);
-
-  printf_unfiltered ("[Wiggler version %x.%x, capability 0x%x]\n",
-		     p[0], p[1], (p[2] << 16) | p[3]);
-
-#if 1
-  speed = 0; /* 80;			/* Divide clock by 4000 */
+  speed = 0; /* 80; 			/* Divide clock by 4000 */
 
   buf[0] = OCD_INIT;
   buf[1] = speed >> 8;
@@ -185,7 +175,13 @@ ocd_start_remote (dummy)
 
   if (error_code != 0)
     ocd_error ("OCD_INIT:", error_code);
-#endif
+
+  ocd_do_command (OCD_AYT, &status, &pktlen);
+
+  p = ocd_do_command (OCD_GET_VERSION, &status, &pktlen);
+
+  printf_unfiltered ("[Wiggler version %x.%x, capability 0x%x]\n",
+		     p[0], p[1], (p[2] << 16) | p[3]);
 
 #if 0
   /* Reset the target */
@@ -233,6 +229,11 @@ ocd_start_remote (dummy)
 
   buf[0] = OCD_LOG_FILE;
   buf[1] = 3;   /* close existing WIGGLERS.LOG */
+  ocd_put_packet (buf, 2);
+  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
+
+  buf[0] = OCD_LOG_FILE;
+  buf[1] = 2;   /* append to existing WIGGLERS.LOG */
   ocd_put_packet (buf, 2);
   p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
 
@@ -606,7 +607,7 @@ ocd_prepare_to_store ()
 
 static int write_mem_command = OCD_WRITE_MEM;
 
-static int
+int
 ocd_write_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
@@ -1180,6 +1181,9 @@ ocd_do_command (cmd, statusp, lenp)
   int status, error_code;
   char errbuf[100];
 
+  unsigned char logbuf[100];
+  int logpktlen;
+
   buf[0] = cmd;
   ocd_put_packet (buf, 1);		/* Send command */
   p = ocd_get_packet (*buf, lenp, remote_timeout);
@@ -1202,6 +1206,16 @@ ocd_do_command (cmd, statusp, lenp)
     error ("BDM cable appears to be disconnected.");
 
   *statusp = status;
+
+  logbuf[0] = OCD_LOG_FILE;
+  logbuf[1] = 3;   /* close existing WIGGLERS.LOG */
+  ocd_put_packet (logbuf, 2);
+  ocd_get_packet (logbuf[0], &logpktlen, remote_timeout);
+
+  logbuf[0] = OCD_LOG_FILE;
+  logbuf[1] = 2;   /* append to existing WIGGLERS.LOG */
+  ocd_put_packet (logbuf, 2);
+  ocd_get_packet (logbuf[0], &logpktlen, remote_timeout);
 
   return p + 3;
 }
@@ -1264,9 +1278,17 @@ ocd_load (args, from_tty)
   clear_symtab_users ();
 }
 
+/* This should be defined in each targets tm.h file */
+/* But we want to be able to compile this file for some configurations
+   not yet supported fully */
+   
+#ifndef BDM_BREAKPOINT
+#define BDM_BREAKPOINT 0x4a, 0xfa /* BGND insn on CPU32*/
+#endif
+
 /* BDM (at least on CPU32) uses a different breakpoint */
 
-static int
+int
 ocd_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
@@ -1274,10 +1296,23 @@ ocd_insert_breakpoint (addr, contents_cache)
   static char break_insn[] = {BDM_BREAKPOINT};
   int val;
 
-  val = target_read_memory (addr, contents_cache, sizeof break_insn);
+  val = target_read_memory (addr, contents_cache, sizeof (break_insn));
 
   if (val == 0)
-    val = target_write_memory (addr, break_insn, sizeof break_insn);
+    val = target_write_memory (addr, break_insn, sizeof (break_insn));
+
+  return val;
+}
+
+int
+ocd_remove_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  static char break_insn[] = {BDM_BREAKPOINT};
+  int val;
+
+  val = target_write_memory (addr, contents_cache, sizeof (break_insn));
 
   return val;
 }

@@ -131,4 +131,9 @@ void ocd_write_bdm_register PARAMS ((int bdm_regno, CORE_ADDR reg));
 
 int ocd_wait PARAMS ((void));
 
+int ocd_insert_breakpoint PARAMS ((CORE_ADDR addr, char *contents_cache));
+int ocd_remove_breakpoint PARAMS ((CORE_ADDR addr, char *contents_cache));
+
+int ocd_write_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
+
 #endif /* OCD_H */

@@ -50,12 +50,23 @@ extern struct target_ops bdm_ppc_ops;	/* Forward decl */
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
+char nowatchdog[4] = {0xff,0xff,0xff,0x88};
+
 static void
 bdm_ppc_open (name, from_tty)
      char *name;
      int from_tty;
 {
+  CORE_ADDR watchdogaddr = 0xff000004;
+
   ocd_open (name, from_tty, OCD_TARGET_MOTO_PPC, &bdm_ppc_ops);
+
+  /* We want interrupts to drop us into debugging mode. */
+  /* Modify the DER register to accomplish this. */
+  ocd_write_bdm_register (149, 0x20024000);
+
+  /* Disable watchdog timer on the board */
+  ocd_write_bytes (watchdogaddr, nowatchdog, 4);
 }
 
 /* Wait until the remote machine stops, then return,
@@ -225,8 +236,8 @@ struct target_ops bdm_ppc_ops = {
   ocd_prepare_to_store,	/* to_prepare_to_store */
   ocd_xfer_memory,		/* to_xfer_memory */
   ocd_files_info,		/* to_files_info */
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
+  ocd_insert_breakpoint,	/* to_insert_breakpoint */
+  ocd_remove_breakpoint,	/* to_remove_breakpoint */
   NULL,				/* to_terminal_init */
   NULL,				/* to_terminal_inferior */
   NULL,				/* to_terminal_ours_for_output */

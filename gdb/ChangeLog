@@ -1,3 +1,24 @@
+Sun Aug 10 16:49:09 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* ocd.c: move ocd_write_bytes proto to ocd.h since it is used
+	by ppc-bdm.c, use OCD_LOG_FILE to help debugging, define
+	BDM_BREAKPOINT if not defined in tm.h
+	(ocd_error): add new error cases
+	(ocd_start_remote): send the OCD_INIT command before
+	OCD_AYT and OCD_GET_VERSION calls
+	(ocd_write_bytes): no longer static
+	(ocd_insert_breakpoint): no longer static
+	(ocd_remove_breakpoint): new
+	* ocd.h: add protos for ocd_write_bytes, ocd_insert_breakpoint,
+	and ocd_remove_breakpoint
+	* ppc-bdm.c: change bdm_ppc_ops so we call ocd_insert_breakpoint
+	and ocd_remove_breakpoint instead of memory_insert_breakpoint
+	and memory_remove_breakpoint.
+ 	(bdm_ppc_open): after calling ocd_open, modify DER
+	register so interrupts will drop us into debugging mode, finally
+	disable the watchdog timer on the board so we don't leave BDM
+	mode unexpectedly.
+
 Sat Aug  9 01:50:14 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* values.c (value_primitive_field):  Account for offset when
