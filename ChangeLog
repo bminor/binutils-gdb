@@ -1,3 +1,7 @@
+Thu May 20 14:19:18 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (taz): Fix modes on stuff in $(TOOL) dir also.
+
 Tue May 18 15:23:19 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Makefile.in (DISTSTUFFDIRS): Renamed from PROTODIRS.  Add ld and

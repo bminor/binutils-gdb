@@ -1055,7 +1055,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	./configure sun4
 	$(MAKE) clean
 	./configure -rm sun4
-	chmod og=u `find etc $(DEVO_SUPPORT) $(SUPPORT_FILES) -print`
+	chmod og=u `find etc $(DEVO_SUPPORT) $(SUPPORT_FILES) $(TOOL) -print`
 	# Make links, and run "make diststuff" when needed.
 	# The `echo' for setting `p' is to convert all whitespace to spaces.
 	# Then the `case' further below should tell whether $$d is in
