@@ -235,7 +235,7 @@ terminal_inferior ()
 #endif
 
 #ifdef HAVE_SGTTY
-	  result = ioctl (0, TIOCSPGRP, inferior_process_group);
+	  result = ioctl (0, TIOCSPGRP, &inferior_process_group);
 	  if (!attach_flag)
 	    OOPSY ("TIOCSPGRP");
 #endif
@@ -337,7 +337,7 @@ terminal_ours_1 (output_only)
 #endif /* termios */
 
 #ifdef HAVE_SGTTY
-	  result = ioctl (0, TIOCSPGRP, our_process_group);
+	  result = ioctl (0, TIOCSPGRP, &our_process_group);
 #endif
 	}
 

@@ -1,5 +1,8 @@
 Wed Oct 13 11:47:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* inflow.c: Pass pointer to process group, not process group itself,
+	to TIOCSPGRP ioctl.
+
 	* inflow.c (terminal_ours_1): Don't print warning on failure to
 	set process group.
 
