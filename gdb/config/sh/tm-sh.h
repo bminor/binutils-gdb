@@ -113,8 +113,8 @@ extern CORE_ADDR sh_skip_prologue ();
     "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15", \
     "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr", \
     "fpul", "fpscr", \
-    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7", \
-    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15" \
+    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",  \
+    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15", \
     "ssr",  "spc", \
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0", \
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1", \

@@ -1,3 +1,7 @@
+Fri Nov  8 14:30:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/tm-sh.h: Added a missing comma in middle of REGISTER_NAMES list.
+
 Fri Nov  8 12:29:51 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* monitor.c: Fix some formatting and comments.
