@@ -1,3 +1,9 @@
+2003-08-28  Andrew Cagney  <cagney@redhat.com>
+
+	* dv-glue.c (hw_glue_finish): Change %d to %ld to match sizeof.
+	* sim-options.c (print_help): Cast the format with specifier to
+	"int".
+
 2003-06-23  Michael Snyder  <msnyder@redhat.com>
 
 	* nrun.c (main): Delete h8/300 ifdef (sim now handles signals).
