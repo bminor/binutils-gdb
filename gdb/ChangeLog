@@ -1,5 +1,8 @@
 Tue Oct 12 08:59:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* blockframe.c (get_prev_frame_info): Don't error() if there are no
+	frames; just return NULL.
+
 	* xcoffsolib.h, xcoffexec.c: Undo the part of Fred's bfd->abfd
 	change which involved structure elements.  It was unnecessary and
 	was not consistently done.
