@@ -229,12 +229,12 @@ print_insn (cd, pc, info, buf, buflen)
      char *buf;
      int buflen;
 {
-  unsigned long insn_value;
+  CGEN_INSN_INT insn_value;
   const CGEN_INSN_LIST *insn_list;
   CGEN_EXTRACT_INFO ex_info;
 
   /* Extract base part of instruction, just in case CGEN_DIS_* uses it. */
-  insn_value = bfd_get_bits (buf, buflen * 8, info->endian == BFD_ENDIAN_BIG);
+  insn_value = cgen_get_insn_value (cd, buf, buflen * 8);
 
   /* Fill in ex_info fields like read_insn would.  Don't actually call
      read_insn, since the incoming buffer is already read (and possibly

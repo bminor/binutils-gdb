@@ -391,7 +391,35 @@ cgen_get_insn_value (cd, buf, length)
      unsigned char *buf;
      int length;
 {
-  return bfd_get_bits (buf, length, cd->insn_endian == CGEN_ENDIAN_BIG);
+  int big_p = (cd->insn_endian == CGEN_ENDIAN_BIG);
+  int insn_chunk_bitsize = cd->insn_chunk_bitsize;
+  CGEN_INSN_INT value = 0;
+
+  if (insn_chunk_bitsize != 0 && insn_chunk_bitsize < length)
+    {
+      /* We need to divide up the incoming value into insn_chunk_bitsize-length
+	 segments, and endian-convert them, one at a time. */
+      int i;
+
+      /* Enforce divisibility. */ 
+      if ((length % insn_chunk_bitsize) != 0)
+	abort ();
+
+      for (i = 0; i < length; i += insn_chunk_bitsize) /* NB: i == bits */
+	{
+	  int index;
+	  bfd_vma this_value;
+	  index = i; /* NB: not dependent on endianness; opposite of cgen_put_insn_value! */
+	  this_value = bfd_get_bits (& buf[index / 8], insn_chunk_bitsize, big_p);
+	  value = (value << insn_chunk_bitsize) | this_value;
+	}
+    }
+  else
+    {
+      value = bfd_get_bits (buf, length, cd->insn_endian == CGEN_ENDIAN_BIG);
+    }
+
+  return value;
 }
 
 /* Cover function to store an insn value properly byteswapped.  */
@@ -403,8 +431,31 @@ cgen_put_insn_value (cd, buf, length, value)
      int length;
      CGEN_INSN_INT value;
 {
-  bfd_put_bits ((bfd_vma) value, buf, length,
-		cd->insn_endian == CGEN_ENDIAN_BIG);
+  int big_p = (cd->insn_endian == CGEN_ENDIAN_BIG);
+  int insn_chunk_bitsize = cd->insn_chunk_bitsize;
+
+  if (insn_chunk_bitsize != 0 && insn_chunk_bitsize < length)
+    {
+      /* We need to divide up the incoming value into insn_chunk_bitsize-length
+	 segments, and endian-convert them, one at a time. */
+      int i;
+
+      /* Enforce divisibility. */ 
+      if ((length % insn_chunk_bitsize) != 0)
+	abort ();
+
+      for (i = 0; i < length; i += insn_chunk_bitsize) /* NB: i == bits */
+	{
+	  int index;
+	  index = (length - insn_chunk_bitsize - i); /* NB: not dependent on endianness! */
+	  bfd_put_bits ((bfd_vma) value, & buf[index / 8], insn_chunk_bitsize, big_p);
+	  value >>= insn_chunk_bitsize;
+	}
+    }
+  else
+    {
+      bfd_put_bits ((bfd_vma) value, buf, length, big_p);
+    }
 }
 
 /* Look up instruction INSN_*_VALUE and extract its fields.

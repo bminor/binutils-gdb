@@ -1,3 +1,10 @@
+2001-07-11  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cgen-dis.in (print_insn): Use cgen_get_insn_value instead of
+	bfd_get_bits.
+	* cgen-opc.c (cgen_get_insn_value, cgen_put_insn_value): Respect
+	non-zero CGEN_CPU_DESC->insn_chunk_bitsize.
+
 2001-07-09  Andreas Jaeger  <aj@suse.de>, Karsten Keil <kkeil@suse.de>
 
 	* i386-dis.c (set_op): Handle 64 bit and 32 bit mode.
