@@ -1,3 +1,26 @@
+2003-11-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.h (sparc32nbsd_gregset): Add extern declaration.
+	* sparcnbsd-nat.c: Rewrite.
+	* sparcnbsd-tdep.c (sparc32nbsd_gregset): Rename from
+	sparcnbsd_gregset.
+	(fetch_core_registers): Adjust.
+	(sparc32nbsd_init_abi): Rename from sparcnbsd_init_abi.
+	(sparc32nbsd_aout_init_abi): Rename from sparcbsd_aout_init_abi.
+	(sparc32nbsd_elf_init_abi): Rename from sparcbsd_elf_init_abi.
+	(_initialize_sparnbsd_tdep): Adjust.
+	* Makefile.in (ALLDEPFILES): Add sparcnbsd-nat.c.
+	(sparcnbsd-nat.o): New dependency.
+	* configure.host: Add sparc-*-netbsdelf*, sparc-*-netbsdaout* and
+	sparc-*-netbsd*.
+	* config/sparc/nm-nbsd.h: Don't include "regcache.h".
+	(CHILD_PREPARE_TO_STORE): Remove.
+	* config/sparc/nm-nbsdaout.h: Tweak some comments.
+	* config/sparc/nbsdelf.mh (NATDEPFILES): Add sparc-nat.o.
+	(XM_FILE): Delete.
+	* config/sparc/nbsdaout.mh (NATDEPFILES): Add sparc-nat.o
+	(XM_FILE): Delete.
+
 2003-11-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparcnbsd-tdep.c: Don't include "target.h", "value.h" and

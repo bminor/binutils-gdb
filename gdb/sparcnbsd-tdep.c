@@ -31,7 +31,7 @@
 #include "sparc-tdep.h"
 #include "nbsd-tdep.h"
 
-const struct sparc_gregset sparcnbsd_gregset =
+const struct sparc_gregset sparc32nbsd_gregset =
 {
   0 * 4,			/* %psr */
   1 * 4,			/* %pc */
@@ -59,7 +59,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
     case 0:  /* Integer registers.  */
       if (core_reg_size != reg_size)
 	warning ("Wrong size register set in core file.");
-      sparc32_supply_gregset (&sparcnbsd_gregset, current_regcache,
+      sparc32_supply_gregset (&sparc32nbsd_gregset, current_regcache,
 			      -1, core_reg_sect);
       break;
 
@@ -102,25 +102,25 @@ sparcnbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 }
 
 static void
-sparcnbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* NetBSD doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
 }
 
 static void
-sparcnbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+sparc32nbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparcnbsd_init_abi (info, gdbarch);
+  sparc32nbsd_init_abi (info, gdbarch);
 
   set_gdbarch_in_solib_call_trampoline
     (gdbarch, sparcnbsd_aout_in_solib_call_trampoline);
 }
 
 static void
-sparcnbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+sparc32nbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparcnbsd_init_abi (info, gdbarch);
+  sparc32nbsd_init_abi (info, gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
 
@@ -148,9 +148,9 @@ _initialize_sparnbsd_tdep (void)
 				  sparcnbsd_aout_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_AOUT,
-			  sparcnbsd_aout_init_abi);
+			  sparc32nbsd_aout_init_abi);
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_ELF,
-			  sparcnbsd_elf_init_abi);
+			  sparc32nbsd_elf_init_abi);
 
   add_core_fns (&sparcnbsd_core_fns);
   add_core_fns (&sparcnbsd_elfcore_fns);

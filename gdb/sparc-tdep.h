@@ -171,4 +171,9 @@ extern const struct sparc_gregset sparc32_sol2_gregset;
 extern void sparc32_sol2_init_abi (struct gdbarch_info info,
 				   struct gdbarch *gdbarch);
 
+/* Functions and variables exported from sparcnbsd-tdep.c.  */
+
+/* Register offsets for NetBSD.  */
+extern const struct sparc_gregset sparc32nbsd_gregset;
+
 #endif /* sparc-tdep.h */

@@ -1,5 +1,6 @@
-/* Native-dependent definitions for Sparc running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1999, 2000, 2002
+/* Native-dependent definitions for NetBSD/sparc.
+
+   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1999, 2000, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -22,14 +23,7 @@
 #ifndef NM_NBSD_H
 #define NM_NBSD_H
 
-#include "regcache.h"
-
-/* Get generic NetBSD native definitions. */
-
+/* Get generic NetBSD native definitions.  */
 #include "config/nm-nbsd.h"
 
-/* Before storing, we need to read all the registers.  */
-
-#define CHILD_PREPARE_TO_STORE() deprecated_read_register_bytes (0, NULL, DEPRECATED_REGISTER_BYTES)
-
-#endif /* NM_NBSD_H */
+#endif /* nm-nbsd.h */
