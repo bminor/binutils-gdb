@@ -1,3 +1,9 @@
+Mon Nov 11 20:50:29 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* Makefile.in: Use the MINUS_G no-debug convention
+	* readline.c: (many_places) move all the declarations of rindex to
+	only one place, to reduce the number of warnings it makes.
+
 Sat Nov  9 03:19:40 1991  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in:  Make a link for sysdep.h.  Specify commontargets.

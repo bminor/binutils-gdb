@@ -4,7 +4,7 @@
 
 
 srcdir = .
-destdir = /usr/local
+ddestdir = /usr/local
 
 INSTALL_PROG = install -c
 INSTALL_FILE = $(INSTALL_PROG)
@@ -19,8 +19,8 @@ INSTALL_FILE = $(INSTALL_PROG)
 
 # Destination installation directory.  The libraries are copied to DESTDIR
 # when you do a `make install', and the header files to INCDIR/readline/*.h.
-DESTDIR = $(destdir)/lib
-INCDIR = $(destdir)/include
+DESTDIR = $(ddestdir)/lib
+INCDIR = $(ddestdir)/include
 
 # Define TYPES as -DVOID_SIGHANDLER if your operating system uses
 # a return type of "void" for signal handlers.
@@ -36,7 +36,8 @@ TYPES = -DVOID_SIGHANDLER
 # the vi line editing mode and features.
 READLINE_DEFINES = $(TYPES) -DVI_MODE
 
-DEBUG_FLAGS = -g
+MINUS_G=-g
+DEBUG_FLAGS = $(MINUS_G)
 LDFLAGS = $(DEBUG_FLAGS) 
 CFLAGS = $(DEBUG_FLAGS) $(SYSV) -I.
 
@@ -146,5 +147,5 @@ force:
 
 # with the gnu make, this is done automatically.
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
