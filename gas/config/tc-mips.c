@@ -1007,8 +1007,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       /* The previous insn might require a delay slot, depending upon
 	 the contents of the current insn.  */
       if (mips_isa < 4
-	  && ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
-              && ! cop_interlocks
+	  && (((prev_pinfo & INSN_LOAD_COPROC_DELAY)
+               && ! cop_interlocks)
 	      || (mips_isa < 2
 		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))))
 	{
@@ -1025,8 +1025,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	    ++nops;
 	}
       else if (mips_isa < 4
-	       && ((prev_pinfo & INSN_COPROC_MOVE_DELAY)
-                   && ! cop_interlocks
+	       && (((prev_pinfo & INSN_COPROC_MOVE_DELAY)
+                    && ! cop_interlocks)
 		   || (mips_isa < 2
 		       && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))))
 	{
@@ -1147,10 +1147,16 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       /* Now emit the right number of NOP instructions.  */
       if (nops > 0)
 	{
+	  fragS *old_frag;
+	  unsigned long old_frag_offset;
 	  int i;
+
+	  old_frag = frag_now;
+	  old_frag_offset = frag_now_fix ();
 
 	  for (i = 0; i < nops; i++)
 	    emit_nop ();
+
 	  if (listing)
 	    {
 	      listing_prev_line ();
@@ -1164,12 +1170,18 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
                  all needed nop instructions themselves.  */
 	      frag_grow (40);
 	    }
+
 	  if (insn_label != NULL)
 	    {
 	      assert (S_GET_SEGMENT (insn_label) == now_seg);
 	      insn_label->sy_frag = frag_now;
 	      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
 	    }
+
+#ifndef NO_ECOFF_DEBUGGING
+	  if (ECOFF_DEBUGGING)
+	    ecoff_fix_loc (old_frag, old_frag_offset);
+#endif
 	}
     }
   

@@ -1,3 +1,15 @@
+Wed Jul  3 16:05:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patches from Tom Quiggle <quiggle@sgi.com>:
+	* ecoff.c (last_lineno): New static variable.
+	(add_procedure): Set last_lineno.
+	(ecoff_directive_loc): Likewise.
+	(ecoff_generate_asm_lineno): Likewise.
+	(ecoff_fix_loc): New function.
+	* ecoff.h (ecoff_fix_loc): Declare.
+	* config/tc-mips.c (append_insn): When inserting nops, and using
+	ECOFF debugging, call ecoff_fix_loc.
+
 Tue Jul  2 23:02:12 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (build_bytes): If an operand type is 
