@@ -1,3 +1,11 @@
+Tue Sep 16 14:20:27 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* reloc.c: Add BFR_RELOC_V850_TDA_16_16_OFFSET.
+
+	* elf32-v850.c (v850_elf_reloc, v850_elf_final_link_relocate,
+	v850_elf_howto_table, v850_elf_reloc_map): Add support for a 16
+	bit reloc in the tiny data area.
+
 start-sanitize-d30v
 Mon Sep 15 11:27:36 1997  Ken Raeburn  <raeburn@cygnus.com>
 

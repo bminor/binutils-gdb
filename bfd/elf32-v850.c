@@ -293,6 +293,21 @@ static reloc_howto_type v850_elf_howto_table[] =
 	 0x7f,				/* dst_mask */
 	 false),			/* pcrel_offset */
 
+  /* 16 bit offset from the tiny data area pointer!  */
+  HOWTO (R_V850_TDA_16_16_OFFSET,	/* type */
+	 0,				/* rightshift */
+	 1,				/* size (0 = byte, 1 = short, 2 = long) */
+	 16,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 v850_elf_reloc,		/* special_function */
+	 "R_V850_TDA_16_16_OFFSET",	/* name */
+	 false,				/* partial_inplace */
+	 0xffff,			/* src_mask */
+	 0xfff,				/* dst_mask */
+	 false),			/* pcrel_offset */
+
 /* start-sanitize-v850e */
   
   /* 5 bit offset from the tiny data area pointer.  */
@@ -384,6 +399,7 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
   { BFD_RELOC_V850_TDA_6_8_OFFSET,   R_V850_TDA_6_8_OFFSET },
   { BFD_RELOC_V850_TDA_7_8_OFFSET,   R_V850_TDA_7_8_OFFSET },
   { BFD_RELOC_V850_TDA_7_7_OFFSET,   R_V850_TDA_7_7_OFFSET },
+  { BFD_RELOC_V850_TDA_16_16_OFFSET, R_V850_TDA_16_16_OFFSET },
 /* start-sanitize-v850e */
   { BFD_RELOC_V850_TDA_4_5_OFFSET,         R_V850_TDA_4_5_OFFSET },
   { BFD_RELOC_V850_TDA_4_4_OFFSET,         R_V850_TDA_4_4_OFFSET },
@@ -520,6 +536,7 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 	case R_V850_TDA_6_8_OFFSET:
 	case R_V850_TDA_7_8_OFFSET:
 	case R_V850_TDA_7_7_OFFSET:
+	case R_V850_TDA_16_16_OFFSET:
 	  other = V850_OTHER_TDA;
 	  common = ".tcommon";
 	  /* fall through */
@@ -716,6 +733,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
       
     case R_V850_SDA_16_16_OFFSET:
     case R_V850_ZDA_16_16_OFFSET:
+    case R_V850_TDA_16_16_OFFSET:
       if ((long)relocation > 0x7fff || (long)relocation < -0x8000)
 	return bfd_reloc_overflow;
       bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
@@ -1115,6 +1133,31 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	return bfd_reloc_ok;
       }
     
+    case R_V850_TDA_16_16_OFFSET:
+      {
+	unsigned long                ep;
+	struct bfd_link_hash_entry * h;
+
+	/* Get the value of __ep.  */
+	h = bfd_link_hash_lookup (info->hash, "__ep", false, false, true);
+	if (h == (struct bfd_link_hash_entry *) NULL
+	    || h->type != bfd_link_hash_defined)
+	  return bfd_reloc_other;
+
+	ep = (h->u.def.value
+	      + h->u.def.section->output_section->vma
+	      + h->u.def.section->output_offset);
+	value -= ep;
+	
+	value += (short) bfd_get_16 (input_bfd, hit_data);
+
+	if ((long)value > 0x7fff || (long)value < -0x8000)
+	  return bfd_reloc_overflow;
+
+	bfd_put_16 (input_bfd, value, hit_data);
+	return bfd_reloc_ok;
+      }
+
 /* start-sanitize-v850e */
     case R_V850_TDA_4_5_OFFSET:
       {

@@ -781,6 +781,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_V850_TDA_6_8_OFFSET",
   "BFD_RELOC_V850_TDA_7_8_OFFSET",
   "BFD_RELOC_V850_TDA_7_7_OFFSET",
+  "BFD_RELOC_V850_TDA_16_16_OFFSET",
 /* start-sanitize-v850e */
   "BFD_RELOC_V850_TDA_4_5_OFFSET",
   "BFD_RELOC_V850_TDA_4_4_OFFSET",

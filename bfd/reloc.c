@@ -2414,6 +2414,10 @@ ENUM
   BFD_RELOC_V850_TDA_7_7_OFFSET
 ENUMDOC
   This is a 7 bit offset from the tiny data area pointer.
+ENUM
+  BFD_RELOC_V850_TDA_16_16_OFFSET
+ENUMDOC
+  This is a 16 bit offset from the tiny data area pointer.
 COMMENT
 {* start-sanitize-v850e *}
 ENUM

@@ -1989,6 +1989,9 @@ data area pointer. */
 
 /* This is a 7 bit offset from the tiny data area pointer. */
   BFD_RELOC_V850_TDA_7_7_OFFSET,
+
+/* This is a 16 bit offset from the tiny data area pointer. */
+  BFD_RELOC_V850_TDA_16_16_OFFSET,
 /* start-sanitize-v850e */
 
 /* This is a 5 bit offset (of which only 4 bits are used) from the tiny
