@@ -1,3 +1,7 @@
+2003-12-13  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/freebpcmd.exp, gdb.base/freebpcmd.c: New test.
+
 2003-12-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.asm/frv.inc: New file.
