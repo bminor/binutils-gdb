@@ -1,4 +1,15 @@
+Tue Jun 16 21:30:56 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* getopt.h: gratuitous white space changes merged from other prep
+	  releases.
+
+Thu Jun 11 01:10:55 1992  John Gilmore  (gnu at cygnus.com)
+
+	* bfd.h:  Regen'd from bfd.c after removing elf_core_tdata_struct.
+
 Mon May 18 17:29:03 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* getopt.h: merged changes from make-3.62.11.
 
 	* getopt.h: merged changes from grep-1.6 (alpha).
 
