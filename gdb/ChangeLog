@@ -1,3 +1,10 @@
+Wed Aug  2 18:00:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in (m68*-est-*): Use monitor target config.
+	* configure: Update.
+	* config/m68k/est.mt, config/m68k/tm-est.h: Delete.
+	* config/m68k/monitor.mt, config/m68k/tm-monitor.h: Fix comments.
+
 Tue Aug  1 22:52:53 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (VERSION): Bump to 4.14.2
