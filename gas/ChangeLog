@@ -1,3 +1,11 @@
+Fri Oct 22 20:40:56 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* messages.c: replaced all variables called Format with 'format',
+	  for consistency throughout
+
+	* configure.in: handle mips*- instead of mips, mips*el for little
+	endian configurations
+
 Fri Oct 22 14:45:49 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* input-scrub.c (physical_input_file, logical_input_file,
