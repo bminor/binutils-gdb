@@ -605,15 +605,12 @@ void
 OP_1200 ()
 {
   uint32 tmp;
-  uint32 tmp1 = (State.regs[OP[0]]) << 16 | State.regs[OP[0]+1];
-  uint32 tmp2 = (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1];
+  uint32 a = (State.regs[OP[0]]) << 16 | State.regs[OP[0]+1];
+  uint32 b = (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1];
 
   trace_input ("add2w", OP_DREG, OP_DREG, OP_VOID);
-  tmp = tmp1 + tmp2;
-  if ( (tmp < tmp1) || (tmp < tmp2) )
-    State.C = 1;
-  else
-    State.C = 0;
+  tmp = a + b;
+  State.C = (tmp < a);
   State.regs[OP[0]] = tmp >> 16;
   State.regs[OP[0]+1] = tmp & 0xFFFF;
   trace_output (OP_DREG);
@@ -623,14 +620,11 @@ OP_1200 ()
 void
 OP_1000000 ()
 {
-  uint16 tmp = State.regs[OP[0]];
-  State.regs[OP[0]] = State.regs[OP[1]] + OP[2];
+  uint16 tmp = State.regs[OP[1]];
+  State.regs[OP[0]] = tmp + OP[2];
 
   trace_input ("add3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
-  if ( tmp > State.regs[OP[0]])
-    State.C = 1;
-  else
-    State.C = 0;
+  State.C = (State.regs[OP[0]] < tmp);
   trace_output (OP_REG);
 }
 
@@ -727,12 +721,10 @@ OP_201 ()
   uint tmp = State.regs[OP[0]];
   if (OP[1] == 0)
     OP[1] = 16;
+
   trace_input ("addi", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] += OP[1];
-  if (tmp > State.regs[OP[0]])
-    State.C = 1;
-  else
-    State.C = 0;
+  State.C = (State.regs[OP[0]] < tmp);
   trace_output (OP_REG);
 }
 
@@ -2435,12 +2427,12 @@ OP_5FE0 ()
 void
 OP_0 ()
 {
-  int32 tmp;
+  uint16 tmp;
 
   trace_input ("sub", OP_REG, OP_REG, OP_VOID);
-  tmp = (int16)State.regs[OP[0]]- (int16)State.regs[OP[1]];
-  State.C = (tmp & 0xffff0000) ? 1 : 0;
-  State.regs[OP[0]] = tmp & 0xffff;
+  tmp = State.regs[OP[0]] - State.regs[OP[1]];
+  State.C = (tmp > State.regs[OP[0]]);
+  State.regs[OP[0]] = tmp;
   trace_output (OP_REG);
 }
 
@@ -2495,14 +2487,13 @@ OP_1003 ()
 void
 OP_1000 ()
 {
-  int64 tmp;
-  uint32 a,b;
+  uint32 tmp,a,b;
 
   trace_input ("sub2w", OP_DREG, OP_DREG, OP_VOID);
-  a = (int32)((State.regs[OP[0]] << 16) | State.regs[OP[0]+1]);
-  b = (int32)((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
-  tmp = (int64)a-b;
-  State.C = (tmp & 0xffffffff00000000LL) ? 1 : 0;  
+  a = (uint32)((State.regs[OP[0]] << 16) | State.regs[OP[0]+1]);
+  b = (uint32)((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
+  tmp = a-b;
+  State.C = (tmp > a);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
   trace_output (OP_DREG);
@@ -2598,14 +2589,14 @@ OP_17001002 ()
 void
 OP_1 ()
 {
-  int32 tmp;
+  uint16 tmp;
   if (OP[1] == 0)
     OP[1] = 16;
 
   trace_input ("subi", OP_REG, OP_CONSTANT16, OP_VOID);
-  tmp = (int16)State.regs[OP[0]] - OP[1];
-  State.C = (tmp & 0xffff0000) ? 1 : 0;
-  State.regs[OP[0]] = tmp & 0xffff;  
+  tmp = State.regs[OP[0]] - OP[1];
+  State.C = (tmp > State.regs[OP[0]]);
+  State.regs[OP[0]] = tmp;  
   trace_output (OP_REG);
 }
 

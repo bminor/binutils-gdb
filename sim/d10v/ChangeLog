@@ -3,6 +3,9 @@ Thu Mar 13 10:29:04 1997  Michael Meissner  <meissner@cygnus.com>
 	* simops.c (trace_{input,output}_func): Call flush_stdout from the
 	callback functions.
 	(OP_5F00): Ditto.
+	(OP_6{4,6,C,A}01): Test for post decrement on the stack pointer.
+	(OP_{1200,1000000,201,5FE0,1003,17001002}): Fix problems in
+	setting the carry bit after an add or a subtract.
 
 Wed Feb 12 16:04:15 1997  Michael Meissner  <meissner@cygnus.com>
 
