@@ -862,6 +862,7 @@ aix*)
 
     LDFLAGS=$LDFLAGS\ $gdb_cv_bigtoc
     AC_TRY_LINK([], [int i;], [], [gdb_cv_bigtoc=])
+    LDFLAGS="${SAVE_LDFLAGS}"
   ])
   CONFIG_LDFLAGS="${CONFIG_LDFLAGS} ${gdb_cv_bigtoc}"
   ;;
