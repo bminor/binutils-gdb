@@ -23,6 +23,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-options.h"
 #include "sim-assert.h"
 
+/* start-sanitize-am30 */
+#if WITH_HW
+#include "sim-hw.h"
+#endif
+/* end-sanitize-am30 */
+
 #include "libiberty.h"
 
 /* List of all modules.  */
@@ -50,11 +56,16 @@ static MODULE_INSTALL_FN * const modules[] = {
   scache_install,
 #endif
 #ifdef SIM_HAVE_MODEL
-  model_install,
+  sim_model_install,
 #endif
 #ifdef SIM_HAVE_BREAKPOINTS
   sim_break_install,
 #endif
+  /* start-sanitize-am30 */
+#if WITH_HW
+  sim_hw_install,
+#endif
+  /* end-sanitize-am30 */
   /* Configured in [simulator specific] additional modules.  */
 #ifdef MODULE_LIST
   MODULE_LIST

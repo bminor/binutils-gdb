@@ -1,3 +1,10 @@
+start-sanitize-am30
+Thu May 21 17:57:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-hw.c: Include ctype.h.
+	(do_hw_poll_read): Do not assume EAGAIN.
+
+end-sanitize-am30
 Wed May 20 04:37:57 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-trace.c (first_insn_p): New static local.
