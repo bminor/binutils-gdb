@@ -916,6 +916,9 @@ elf_link_add_object_symbols (abfd, info)
   Elf_External_Sym *esymend;
   struct elf_backend_data *bed;
   boolean dt_needed;
+  struct elf_link_hash_table * hash_table;
+
+  hash_table = elf_hash_table (info);
 
   bed = get_elf_backend_data (abfd);
   add_symbol_hook = bed->elf_add_symbol_hook;
@@ -970,7 +973,7 @@ elf_link_add_object_symbols (abfd, info)
 		{
 		  struct elf_link_hash_entry *h;
 
-		  h = elf_link_hash_lookup (elf_hash_table (info), name,
+		  h = elf_link_hash_lookup (hash_table, name,
 					    false, false, true);
 
 		  /* FIXME: What about bfd_link_hash_common?  */
@@ -1085,13 +1088,16 @@ elf_link_add_object_symbols (abfd, info)
          format.  FIXME: If there are no input BFD's of the same
          format as the output, we can't make a shared library.  */
       if (info->shared
-	  && ! elf_hash_table (info)->dynamic_sections_created
+	  && is_elf_hash_table (info)
+	  && ! hash_table->dynamic_sections_created
 	  && abfd->xvec == info->hash->creator)
 	{
 	  if (! elf_link_create_dynamic_sections (abfd, info))
 	    goto error_return;
 	}
     }
+  else if (! is_elf_hash_table (info))
+    goto error_return;
   else
     {
       asection *s;
@@ -1194,7 +1200,7 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = &elf_hash_table (info)->needed;
+		  for (pn = & hash_table->needed;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
@@ -1209,8 +1215,8 @@ elf_link_add_object_symbols (abfd, info)
 		     to clear runpath.  Do _NOT_ bfd_release, as that
 		     frees all more recently bfd_alloc'd blocks as
 		     well.  */
-		  if (rpath && elf_hash_table (info)->runpath)
-		    elf_hash_table (info)->runpath = NULL;
+		  if (rpath && hash_table->runpath)
+		    hash_table->runpath = NULL;
 
 		  n = ((struct bfd_link_needed_list *)
 		       bfd_alloc (abfd, sizeof (struct bfd_link_needed_list)));
@@ -1225,7 +1231,7 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = &elf_hash_table (info)->runpath;
+		  for (pn = & hash_table->runpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
@@ -1252,7 +1258,7 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = &elf_hash_table (info)->runpath;
+		  for (pn = & hash_table->runpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
@@ -1277,22 +1283,20 @@ elf_link_add_object_symbols (abfd, info)
 
       /* If this is the first dynamic object found in the link, create
 	 the special sections required for dynamic linking.  */
-      if (! elf_hash_table (info)->dynamic_sections_created)
-	{
-	  if (! elf_link_create_dynamic_sections (abfd, info))
-	    goto error_return;
-	}
+      if (! hash_table->dynamic_sections_created)
+	if (! elf_link_create_dynamic_sections (abfd, info))
+	  goto error_return;
 
       if (add_needed)
 	{
 	  /* Add a DT_NEEDED entry for this dynamic object.  */
-	  oldsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
-	  strindex = _bfd_stringtab_add (elf_hash_table (info)->dynstr, name,
+	  oldsize = _bfd_stringtab_size (hash_table->dynstr);
+	  strindex = _bfd_stringtab_add (hash_table->dynstr, name,
 					 true, false);
 	  if (strindex == (bfd_size_type) -1)
 	    goto error_return;
 
-	  if (oldsize == _bfd_stringtab_size (elf_hash_table (info)->dynstr))
+	  if (oldsize == _bfd_stringtab_size (hash_table->dynstr))
 	    {
 	      asection *sdyn;
 	      Elf_External_Dyn *dyncon, *dynconend;
@@ -1302,8 +1306,7 @@ elf_link_add_object_symbols (abfd, info)
 		 have already included this dynamic object in the
 		 link, just ignore it.  There is no reason to include
 		 a particular dynamic object more than once.  */
-	      sdyn = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
-					      ".dynamic");
+	      sdyn = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
 	      BFD_ASSERT (sdyn != NULL);
 
 	      dyncon = (Elf_External_Dyn *) sdyn->contents;
@@ -1313,8 +1316,7 @@ elf_link_add_object_symbols (abfd, info)
 		{
 		  Elf_Internal_Dyn dyn;
 
-		  elf_swap_dyn_in (elf_hash_table (info)->dynobj, dyncon,
-				   &dyn);
+		  elf_swap_dyn_in (hash_table->dynobj, dyncon, & dyn);
 		  if (dyn.d_tag == DT_NEEDED
 		      && dyn.d_un.d_val == strindex)
 		    {
@@ -1969,25 +1971,28 @@ elf_link_add_object_symbols (abfd, info)
 	      bfd_size_type oldsize;
 	      bfd_size_type strindex;
 
+	      if (! is_elf_hash_table (info))
+		goto error_return;
+
 	      /* The symbol from a DT_NEEDED object is referenced from
 	         the regular object to create a dynamic executable. We
 		 have to make sure there is a DT_NEEDED entry for it.  */
 
 	      dt_needed = false;
-	      oldsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
-	      strindex = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+	      oldsize = _bfd_stringtab_size (hash_table->dynstr);
+	      strindex = _bfd_stringtab_add (hash_table->dynstr,
 	      				     elf_dt_soname (abfd),
 					     true, false);
 	      if (strindex == (bfd_size_type) -1)
 		goto error_return;
 
 	      if (oldsize
-		  == _bfd_stringtab_size (elf_hash_table (info)->dynstr))
+		  == _bfd_stringtab_size (hash_table->dynstr))
 		{
 		  asection *sdyn;
 		  Elf_External_Dyn *dyncon, *dynconend;
 
-		  sdyn = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
+		  sdyn = bfd_get_section_by_name (hash_table->dynobj,
 						  ".dynamic");
 		  BFD_ASSERT (sdyn != NULL);
 
@@ -1998,7 +2003,7 @@ elf_link_add_object_symbols (abfd, info)
 		    {
 		      Elf_Internal_Dyn dyn;
 
-		      elf_swap_dyn_in (elf_hash_table (info)->dynobj,
+		      elf_swap_dyn_in (hash_table->dynobj,
 				       dyncon, &dyn);
 		      BFD_ASSERT (dyn.d_tag != DT_NEEDED ||
 				  dyn.d_un.d_val != strindex);
@@ -2155,6 +2160,7 @@ elf_link_add_object_symbols (abfd, info)
       && ! info->relocateable
       && ! info->traditional_format
       && info->hash->creator->flavour == bfd_target_elf_flavour
+      && is_elf_hash_table (info)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stab, *stabstr;
@@ -2170,7 +2176,7 @@ elf_link_add_object_symbols (abfd, info)
 
 	      secdata = elf_section_data (stab);
 	      if (! _bfd_link_section_stabs (abfd,
-					     &elf_hash_table (info)->stab_info,
+					     & hash_table->stab_info,
 					     stab, stabstr,
 					     &secdata->stab_info))
 		goto error_return;
@@ -2178,15 +2184,15 @@ elf_link_add_object_symbols (abfd, info)
 	}
     }
 
-  if (! info->relocateable && ! dynamic)
+  if (! info->relocateable && ! dynamic
+      && is_elf_hash_table (info))
     {
       asection *s;
 
       for (s = abfd->sections; s != NULL; s = s->next)
 	if ((s->flags & SEC_MERGE)
-	    && ! _bfd_merge_section (abfd,
-				     &elf_hash_table (info)->merge_info,
-				     s, &elf_section_data (s)->merge_info))
+	    && ! _bfd_merge_section (abfd, & hash_table->merge_info, s,
+				     & elf_section_data (s)->merge_info))
 	  goto error_return;
     }
 
@@ -2218,6 +2224,9 @@ elf_link_create_dynamic_sections (abfd, info)
   register asection *s;
   struct elf_link_hash_entry *h;
   struct elf_backend_data *bed;
+
+  if (! is_elf_hash_table (info))
+    return false;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     return true;
@@ -2343,6 +2352,9 @@ elf_add_dynamic_entry (info, tag, val)
   size_t newsize;
   bfd_byte *newcontents;
 
+  if (! is_elf_hash_table (info))
+    return false;
+
   dynobj = elf_hash_table (info)->dynobj;
 
   s = bfd_get_section_by_name (dynobj, ".dynamic");
@@ -2378,6 +2390,9 @@ elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
   Elf_External_Sym esym;
   unsigned long dynstr_index;
   char *name;
+
+  if (! is_elf_hash_table (info))
+    return false;
 
   /* See if the entry exists already.  */
   for (entry = elf_hash_table (info)->dynlocal; entry ; entry = entry->next)
@@ -2894,6 +2909,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
   if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return true;
+
+  if (! is_elf_hash_table (info))
+    return false;
 
   /* The backend may have to create some sections regardless of whether
      we're dynamic or not.  */
@@ -3542,12 +3560,14 @@ elf_fix_symbol_flags (h, eif)
      backend specifically; we can't just clear PLT-related data here.  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
       && eif->info->shared
+      && is_elf_hash_table (eif->info)
       && (eif->info->symbolic
 	  || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
 	  || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     {
       struct elf_backend_data *bed;
+
       bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
       if (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
 	  || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
@@ -3601,6 +3621,9 @@ elf_adjust_dynamic_symbol (h, data)
   /* Ignore indirect symbols.  These are added by the versioning code.  */
   if (h->root.type == bfd_link_hash_indirect)
     return true;
+
+  if (! is_elf_hash_table (eif->info))
+    return false;
 
   /* Fix the symbol flags.  */
   if (! elf_fix_symbol_flags (h, eif))
@@ -4511,6 +4534,9 @@ elf_bfd_final_link (abfd, info)
   boolean merged;
   size_t relativecount = 0;
   asection *reldyn = 0;
+
+  if (! is_elf_hash_table (info))
+    return false;
 
   if (info->shared)
     abfd->flags |= DYNAMIC;

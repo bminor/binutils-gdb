@@ -273,6 +273,10 @@ struct elf_link_hash_table
 /* Get the ELF linker hash table from a link_info structure.  */
 
 #define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
+
+/* Returns true if the hash table is a struct elf_link_hash_table.  */
+#define is_elf_hash_table(p)					      	\
+  ((p)->hash->type == bfd_link_elf_hash_table)
 
 /* Constant information held for an ELF backend.  */
 

@@ -483,6 +483,8 @@ _bfd_link_hash_table_init (table, abfd, newfunc)
   table->creator = abfd->xvec;
   table->undefs = NULL;
   table->undefs_tail = NULL;
+  table->type = bfd_link_generic_hash_table;
+
   return bfd_hash_table_init (&table->table, newfunc);
 }
 

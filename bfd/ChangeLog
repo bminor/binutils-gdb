@@ -1,3 +1,37 @@
+2001-08-24  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf-bfd.h (elf_hash_table): Revert definition.
+	(is_elf_hash_table): New macro.
+	* elflink.h (elf_link_add_object_symbols): Test
+	is_elf_hash_table before accessing ELF only fields in hash
+	structure.
+	(elf_link_create_dynamic_sections): Fail if not using an ELF
+	hash structure.
+	(elf_add_dynamic_entry): Fail if not using an ELF hash
+	structure.
+	(elf_link_record_local_dynamic_symbol): Fail if not using an
+	ELF hash structure.
+	(size_dynamic_sections): Fail if not using an ELF hash
+	structure.
+	(elf_adjust_dynamic_symbol): Fail if not using an ELF
+	hash structure.
+	(elf_bfd_final_link): Fail if not using an ELF hash
+	structure.
+
+2001-08-24  H.J. Lu  <hjl@gnu.org>
+
+	* elf-bfd.h (elf_hash_table): Return NULL if the linker hash
+	table is not an ELF linker hash table.
+
+	* elf.c (_bfd_elf_link_hash_table_init): Set the linker hash
+	table type to bfd_link_elf_hash_table.
+
+	* elfxx-target.h (bfd_elfNN_bfd_link_hash_table_create): Revert
+	the last change.
+
+	* linker.c (_bfd_link_hash_table_init): Set the linker hash
+	table type to bfd_link_generic_hash_table.
+
 2001-08-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* bfd.c (bfd_alt_mach_code): New function.

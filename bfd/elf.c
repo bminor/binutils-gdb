@@ -571,8 +571,15 @@ _bfd_elf_merge_sections (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  if (elf_hash_table (info)->merge_info)
-    _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info);
+  struct elf_link_hash_table * hash_table;
+
+  hash_table = elf_hash_table (info);
+
+  if (hash_table == NULL)
+    return false;
+
+  if (hash_table->merge_info)
+    _bfd_merge_sections (abfd, hash_table->merge_info);
   return true;
 }
 
@@ -1047,6 +1054,8 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
 						struct bfd_hash_table *,
 						const char *));
 {
+  boolean ret;
+
   table->dynamic_sections_created = false;
   table->dynobj = NULL;
   /* The first dynamic symbol is a dummy.  */
@@ -1059,7 +1068,10 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->stab_info = NULL;
   table->merge_info = NULL;
   table->dynlocal = NULL;
-  return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
+  ret = _bfd_link_hash_table_init (& table->root, abfd, newfunc);
+  table->root.type = bfd_link_elf_hash_table;
+
+  return ret;
 }
 
 /* Create an ELF linker hash table.  */
