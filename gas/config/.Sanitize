@@ -52,6 +52,7 @@ ho-sunos.h
 ho-sysv.h
 ho-vax.h
 i386aix.mt
+i386coff.mt
 m68k.mt
 m68kcoff.mt
 m88k-opcode.h
@@ -141,7 +142,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.27  1992/09/09 18:38:05  ian
+# Revision 1.28  1992/09/11 22:02:49  sac
+# Whoops, forgot this one
+#
+# Revision 1.27  1992/09/09  18:38:05  ian
 # Wed Sep  9 11:10:24 1992  Ian Lance Taylor  (ian@cygnus.com)
 #
 # 	* tc-m68k.c (m68k_ip, m68k_ip_op, get_num, try_moto_index): merge
