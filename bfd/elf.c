@@ -1616,7 +1616,7 @@ bfd_elf_get_needed_list (abfd, info)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (! is_elf_hash_table (info))
     return NULL;
   return elf_hash_table (info)->needed;
 }
@@ -1629,7 +1629,7 @@ bfd_elf_get_runpath_list (abfd, info)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (! is_elf_hash_table (info))
     return NULL;
   return elf_hash_table (info)->runpath;
 }

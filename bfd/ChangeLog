@@ -1,3 +1,9 @@
+2003-05-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (bfd_elf_get_needed_list): Use is_elf_hash_table to check
+	the type of the has table in the bfd_link_info structure.
+	(bfd_elf_get_runpath_list): Likewise.
+
 2003-05-19  Roland McGrath  <roland@redhat.com>
 
 	* elf.c (bfd_elf_bfd_from_remote_memory): New function.
