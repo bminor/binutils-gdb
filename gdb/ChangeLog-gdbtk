@@ -1,3 +1,10 @@
+1999-02-01  Martin Hunt  <hunt@cygnus.com>
+
+	* gdbtk-cmds.c: (gdb_set_bp): Change the "type" argument
+	to be ASCII instead of an integer. Currently accepts "temp"
+	or "normal".  Fixed error messages.
+	(gdb_set_bp_addr): Ditto.
+
 1999-01-29  James Ingham  <jingham@cygnus.com>
 
 	* gdbtk.c (gdbtk_init): Set the fputs_unfiltered_hook to

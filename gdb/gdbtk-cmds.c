@@ -135,12 +135,15 @@ static char old_regs[REGISTER_BYTES];
    of the breakpoint structure (respectively) into something gdbtk understands.
    They are also used in gdbtk-hooks.c */
 
-char *bptypes[] = {"breakpoint", "hardware breakpoint", "until",
-			      "finish", "watchpoint", "hardware watchpoint",
-			      "read watchpoint", "access watchpoint",
-			      "longjmp", "longjmp resume", "step resume",
-			      "through sigtramp", "watchpoint scope",
-			      "call dummy" };
+char *bptypes[] = {"none", "breakpoint", "hw breakpoint", "until",
+		   "finish", "watchpoint", "hw watchpoint",
+		   "read watchpoint", "acc watchpoint",
+		   "longjmp", "longjmp resume", "step resume",
+		   "sigtramp", "watchpoint scope",
+		   "call dummy", "shlib events", "catch load",
+		   "catch unload", "catch fork", "catch vfork",
+		   "catch exec", "catch catch", "catch throw"
+};
 char *bpdisp[] = {"delete", "delstop", "disable", "donttouch"};
 
 /*
@@ -2896,36 +2899,47 @@ gdb_set_bp (clientData, interp, objc, objv)
   Tcl_Interp *interp;
   int objc;
   Tcl_Obj *CONST objv[];
-
 {
   struct symtab_and_line sal;
-  int line, flags, ret, thread = -1;
+  int line, ret, thread = -1;
   struct breakpoint *b;
-  char buf[64];
+  char buf[64], *typestr;
   Tcl_DString cmd;
+  enum bpdisp disp;
 
   if (objc != 4 && objc != 5)
     {
-      Tcl_WrongNumArgs(interp, 1, objv, "filename line type [thread]");
+      Tcl_SetStringObj (result_ptr->obj_ptr, 
+	  "wrong number of args, should be \"filename line type [thread]\"", -1);
       return TCL_ERROR; 
     }
   
   sal.symtab = full_lookup_symtab (Tcl_GetStringFromObj( objv[1], NULL));
   if (sal.symtab == NULL)
     return TCL_ERROR;
-
+  
   if (Tcl_GetIntFromObj( interp, objv[2], &line) == TCL_ERROR)
     {
       result_ptr->flags = GDBTK_IN_TCL_RESULT;
       return TCL_ERROR;
     }
-
-  if (Tcl_GetIntFromObj( interp, objv[3], &flags) == TCL_ERROR)
+  
+  typestr = Tcl_GetStringFromObj( objv[3], NULL);
+  if (typestr == NULL)
     {
       result_ptr->flags = GDBTK_IN_TCL_RESULT;
       return TCL_ERROR;
     }
-
+  if (strncmp( typestr, "temp", 4 ) == 0)
+    disp = del;
+  else if (strncmp( typestr, "normal", 6 ) == 0)
+    disp = donttouch;
+  else
+    {
+      Tcl_SetStringObj (result_ptr->obj_ptr, "type must be \"temp\" or \"normal\"", -1);
+      return TCL_ERROR;
+    }
+  
   if (objc == 5)
     {
       if (Tcl_GetIntFromObj( interp, objv[4], &thread) == TCL_ERROR)
@@ -2943,8 +2957,8 @@ gdb_set_bp (clientData, interp, objc, objv)
   b = set_raw_breakpoint (sal);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->type = flags >> 2;
-  b->disposition = flags & 3;
+  b->type = bp_breakpoint;
+  b->disposition = disp;
   b->thread = thread;
 
   /* FIXME: this won't work for duplicate basenames! */
@@ -2996,15 +3010,17 @@ gdb_set_bp_addr (clientData, interp, objc, objv)
 
 {
   struct symtab_and_line sal;
-  int line, flags, ret, thread = -1;
+  int line, ret, thread = -1;
   long addr;
   struct breakpoint *b;
-  char *filename, buf[64];
+  char *filename, *typestr, buf[64];
   Tcl_DString cmd;
+  enum bpdisp disp;
 
   if (objc != 4 && objc != 3)
     {
-      Tcl_WrongNumArgs(interp, 1, objv, "addr type ?thread?");
+      Tcl_SetStringObj (result_ptr->obj_ptr, 
+	  "wrong number of args, should be \"address type [thread]\"", -1);
       return TCL_ERROR; 
     }
   
@@ -3013,13 +3029,23 @@ gdb_set_bp_addr (clientData, interp, objc, objv)
       result_ptr->flags = GDBTK_IN_TCL_RESULT;
       return TCL_ERROR;
     }
-
-  if (Tcl_GetIntFromObj( interp, objv[2], &flags) == TCL_ERROR)
+  
+  typestr = Tcl_GetStringFromObj( objv[2], NULL);
+  if (typestr == NULL)
     {
       result_ptr->flags = GDBTK_IN_TCL_RESULT;
       return TCL_ERROR;
     }
-
+  if (strncmp( typestr, "temp", 4 ) == 0)
+    disp = del;
+  else if (strncmp( typestr, "normal", 6 ) == 0)
+    disp = donttouch;
+  else
+    {
+      Tcl_SetStringObj (result_ptr->obj_ptr, "type must be \"temp\" or \"normal\"", -1);
+      return TCL_ERROR;
+    }
+  
   if (objc == 4)
     {
       if (Tcl_GetIntFromObj( interp, objv[3], &thread) == TCL_ERROR)
@@ -3034,8 +3060,8 @@ gdb_set_bp_addr (clientData, interp, objc, objv)
   b = set_raw_breakpoint (sal);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->type = flags >> 2;
-  b->disposition = flags & 3;
+  b->type = bp_breakpoint;
+  b->disposition = disp;
   b->thread = thread;
 
   sprintf (buf, "*(0x%lx)",addr);
