@@ -210,6 +210,7 @@ sce_test9.dvpasm
 sce_test9.vuasm
 sce_test9_out_gif.dat
 sky.ld
+t-cop2.s
 t-dma.c
 t-pke2.trc
 t-pke2.vif1expect
