@@ -1,3 +1,15 @@
+2000-12-01      Joel Sherrill <joel@OARcorp.com>
+
+        * configure.in (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
+        New targets.
+        (sparc*-*-rtemself*, sparc*-*-rtemsaout*): New targets.
+        (sparc*-*-rtems*): Switched from a.out to ELF.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* po/gas.pot: Regenerate.
+	
 2000-11-30  Philip Blundell  <pb@futuretv.com>
 
 	* config/obj-coff.c (obj_coff_weak): Use S_SET_WEAK if it exists,

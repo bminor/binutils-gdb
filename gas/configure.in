@@ -164,6 +164,7 @@ changequote([,])dnl
       a29k-amd-udi)         fmt=coff ;;
       a29k-amd-ebmon)       fmt=coff ;;
       a29k-nyu-sym1)        fmt=coff ;;
+      a29k-*-rtems*)        fmt=coff ;;
       a29k-*-vxworks*)      fmt=coff ;;
 
       alpha*-*-*vms*)	    fmt=evax ;;
@@ -178,6 +179,7 @@ changequote([,])dnl
 
       arm-*-aout)	                fmt=aout ;;
       arm-*-coff | thumb-*-coff)        fmt=coff ;;
+      arm-*-rtems | thumb-*-rtems)      fmt=elf ;;
       arm-*-elf | thumb-*-elf)          fmt=elf ;;
       arm*-*-conix*)			fmt=elf ;;
       arm-*-linux*aout*)	        fmt=aout em=linux ;;
@@ -221,6 +223,7 @@ changequote([,])dnl
       hppa-*-bsd*)          fmt=som em=hppa ;;
       hppa-*-hiux*)         fmt=som em=hppa ;;
 
+      h8300-*-rtems*)       fmt=coff ;;
       h8300-*-coff)         fmt=coff ;;
 
       i370-*-elf* | i370-*-linux*) fmt=elf ;;
@@ -383,7 +386,9 @@ changequote([,])dnl
       ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
       ns32k-pc532-openbsd*) fmt=aout em=nbsd532 ;;
 
-      sparc-*-rtems*)       fmt=aout ;;
+      sparc-*-rtemsaout*)   fmt=aout ;;
+      sparc-*-rtemself*)    fmt=elf ;;
+      sparc-*-rtems*)       fmt=elf ;;
       sparc-*-sunos4*)      fmt=aout em=sun3 ;;
       sparc-*-aout | sparc*-*-vxworks*)
 			    fmt=aout em=sparcaout ;;
