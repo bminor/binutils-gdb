@@ -1,3 +1,7 @@
+Wed Feb 16 16:35:49 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* rltty.c:  #if out some code if __GO32__.
+
 Tue Feb 15 14:07:08 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* readline.c (_rl_output_character_function), display.c:
