@@ -4,6 +4,8 @@
 	* sim-model.c (sim_mach_lookup_bfd_name): New function.
 	(sim_model_init): Call it.
 
+	* cgen-trace.c (trace_insn): Pass pc to trace_prefix for virtual insns.
+
 start-sanitize-gxsim
 1999-01-11  Frank Ch. Eigler  <fche@cygnus.com>
 

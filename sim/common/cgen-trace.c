@@ -165,7 +165,7 @@ trace_insn (SIM_CPU *cpu, const struct cgen_insn *opcode,
 
   if (CGEN_INSN_VIRTUAL_P (opcode))
     {
-      trace_prefix (CPU_STATE (cpu), cpu, NULL_CIA, (address_word) 0, 0,
+      trace_prefix (CPU_STATE (cpu), cpu, NULL_CIA, pc, 0,
 		    NULL, 0, CGEN_INSN_NAME (opcode));
       return;
     }
