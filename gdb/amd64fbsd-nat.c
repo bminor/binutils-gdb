@@ -289,7 +289,7 @@ Please report this to <bug-gdb@gnu.org>.",
      environment can be found.  */
   {
     int mib[2];
-    int ps_strings;
+    long ps_strings;
     size_t len;
 
     mib[0] = CTL_KERN;

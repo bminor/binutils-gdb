@@ -1,5 +1,8 @@
 2003-09-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): Change type of
+	ps_strings into a long.
+
 	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): Rename from
 	_initialize_am64fbsd_nat.
 
