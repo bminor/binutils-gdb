@@ -5426,59 +5426,47 @@ mips_coerce_float_to_double (struct type *formal, struct type *actual)
 
 static void
 mips_get_saved_register (char *raw_buffer,
-			 int *optimized,
+			 int *optimizedp,
 			 CORE_ADDR *addrp,
 			 struct frame_info *frame,
 			 int regnum,
-			 enum lval_type *lval)
+			 enum lval_type *lvalp)
 {
-  CORE_ADDR addr;
+  CORE_ADDR addrx;
+  enum lval_type lvalx;
+  int optimizedx;
+  int realnum;
 
   if (!target_has_registers)
     error ("No registers.");
 
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
+  /* Make certain that all needed parameters are present.  */
+  if (addrp == NULL)
+    addrp = &addrx;
+  if (lvalp == NULL)
+    lvalp = &lvalx;
+  if (optimizedp == NULL)
+    optimizedp = &optimizedx;
+  frame_register_unwind (get_next_frame (frame), regnum, optimizedp, lvalp,
+			 addrp, &realnum, raw_buffer);
+  /* FIXME: cagney/2002-09-13: This is just so bad.  The MIPS should
+     have a pseudo register range that correspons to the ABI's, rather
+     than the ISA's, view of registers.  These registers would then
+     implicitly describe their size and hence could be used without
+     the below munging.  */
+  if ((*lvalp) == lval_memory)
     {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
       if (raw_buffer != NULL)
 	{
-	  LONGEST val;
 	  if (regnum < 32)
-	    /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
-               saved. */
-	    val = read_memory_integer (addr, MIPS_SAVED_REGSIZE);
-	  else
-	    val = read_memory_integer (addr, REGISTER_RAW_SIZE (regnum));
-	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	    {
+	      /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
+		 saved. */
+	      LONGEST val = read_memory_integer ((*addrp), MIPS_SAVED_REGSIZE);
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	    }
 	}
     }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
 }
 
 /* Immediately after a function call, return the saved pc.
