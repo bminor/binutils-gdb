@@ -77,9 +77,9 @@ char *operator_chars (char *, char **);
 
 static int find_line_common (struct linetable *, int, int *);
 
-static struct partial_symbol *lookup_partial_symbol PARAMS
-  ((struct partial_symtab *, const char *,
-    int, namespace_enum));
+static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
+						     const char *, int,
+						     namespace_enum);
 
 static struct partial_symbol *fixup_psymbol_section (struct
 						     partial_symbol *,

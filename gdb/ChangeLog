@@ -1,3 +1,7 @@
+2000-06-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* ser-ocd.c, symtab.c: Eliminate use of PARAMS from these files.
+
 Tue Jun 13 09:21:23 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.host (hppa*64*): Renamed from hppa2.0w per

@@ -49,7 +49,7 @@ ocd_open (scb, name)
       if (handle == NULL)
 	error ("Can't load Wigglers.dll");
 
-      dll_do_command = ((int (*)PARAMS ((const char *, char *)))
+      dll_do_command = ((int (*) (const char *, char *))
 			GetProcAddress (handle, "do_command"));
       if (dll_do_command == NULL)
 	error ("Can't find do_command function in Wigglers.dll");
