@@ -962,6 +962,7 @@ coff_frob_symbol (symp, punt)
     {
       symbolS *real;
       if (!SF_GET_LOCAL (symp)
+	  && !SF_GET_STATICS (symp)
 	  && (real = symbol_find_base (S_GET_NAME (symp), DO_NOT_STRIP))
 	  && real != symp)
 	{
@@ -2600,6 +2601,7 @@ yank_symbols ()
 
 	  /* L* and C_EFCN symbols never merge. */
 	  if (!SF_GET_LOCAL (symbolP)
+	      && !SF_GET_STATICS (symbolP)
 	      && S_GET_STORAGE_CLASS (symbolP) != C_LABEL
 	      && symbolP->sy_value.X_op == O_constant
 	      && (real_symbolP = symbol_find_base (S_GET_NAME (symbolP), DO_NOT_STRIP))
