@@ -36,11 +36,11 @@
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */
 #include "elf-bfd.h"
-#include "elf.h"                /* for PT_IA64_UNWIND value */
 #include "dis-asm.h"
 #include "ia64-tdep.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
+#include "elf/ia64.h"           /* for PT_IA_64_UNWIND value */
 #include "libunwind-frame.h"
 #include "libunwind-ia64.h"
 #endif
