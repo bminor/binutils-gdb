@@ -404,7 +404,15 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
 	{
 	  mant_long <<= 1;
 	  mant_long &= 0xffffffffL;
-	  mant_bits -= 1;
+          /* If we are processing the top 32 mantissa bits of a doublest
+             so as to convert to a float value with implied integer bit,
+             we will only be putting 31 of those 32 bits into the
+             final value due to the discarding of the top bit.  In the 
+             case of a small float value where the number of mantissa 
+             bits is less than 32, discarding the top bit does not alter
+             the number of bits we will be adding to the result.  */
+          if (mant_bits == 32)
+            mant_bits -= 1;
 	}
 
       if (mant_bits < 32)

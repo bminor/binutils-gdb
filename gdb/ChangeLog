@@ -1,3 +1,9 @@
+2003-06-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* doublest.c (convert_doublest_to_floatformat): When dealing 
+	with the implied integer bit, only alter mant_bits if we are 
+	processing a full 32 bits of mantissa.
+
 2003-06-11  David Carlton  <carlton@bactrian.org>
 
 	* dictionary.h: New.
