@@ -1,3 +1,9 @@
+2002-02-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* valprint.c (print_floating): Allow non TYPE_CODE_FLT types.
+	Restore behavour broken by 2002-01-20 Andrew Cagney
+	<ac131313@redhat.com> IEEE_FLOAT removal.
+
 2002-02-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* c-valprint.c (c_val_print): Pass a proper valaddr to

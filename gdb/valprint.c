@@ -540,18 +540,21 @@ longest_to_int (LONGEST arg)
   return (rtnval);
 }
 
-/* Print a floating point value of type TYPE, pointed to in GDB by
-   VALADDR, on STREAM.  */
+/* Print a floating point value of type TYPE (not always a
+   TYPE_CODE_FLT), pointed to in GDB by VALADDR, on STREAM.  */
 
 void
 print_floating (char *valaddr, struct type *type, struct ui_file *stream)
 {
   DOUBLEST doub;
   int inv;
-  const struct floatformat *fmt = floatformat_from_type (type);
+  const struct floatformat *fmt = NULL;
   unsigned len = TYPE_LENGTH (type);
 
-  if (floatformat_is_nan (fmt, valaddr))
+  /* If it is a floating-point, check for obvious problems.  */
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    fmt = floatformat_from_type (type);
+  if (fmt != NULL && floatformat_is_nan (fmt, valaddr))
     {
       if (floatformat_is_negative (fmt, valaddr))
 	fprintf_filtered (stream, "-");
@@ -563,12 +566,14 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
       return;
     }
 
-  /* FIXME: cagney/2002-01-15: The simpler extract_typed_floating()
-     routine could be used here only that routine has no way of
-     indicating that the floating point it extracted was invalid (As
-     indicated by INVALID_FLOAT).  Instead, this code here could call
-     something like floating_invalid() to check for an invalid
-     floating point.  */
+  /* NOTE: cagney/2002-01-15: The TYPE passed into print_floating()
+     isn't necessarily a TYPE_CODE_FLT.  Consequently, unpack_double
+     needs to be used as that takes care of any necessary type
+     conversions.  Such conversions are of course direct to DOUBLEST
+     and disregard any possible target floating point limitations.
+     For instance, a u64 would be converted and displayed exactly on a
+     host with 80 bit DOUBLEST but with loss of information on a host
+     with 64 bit DOUBLEST.  */
 
   doub = unpack_double (type, valaddr, &inv);
   if (inv)
@@ -580,9 +585,10 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
   /* FIXME: kettenis/2001-01-20: The following code makes too much
      assumptions about the host and target floating point format.  */
 
-  /* FIXME: cagney/2002-01-15: The floatformat pointed to by FMT
-     should contain all the information needed to print the
-     floating-point value without host dependencies.  */
+  /* NOTE: cagney/2002-02-03: Since the TYPE of what was passed in may
+     not necessarially be a TYPE_CODE_FLT, the below ignores that and
+     instead uses the type's length to determine the precision of the
+     floating-point value being printed.  */
 
   if (len < sizeof (double))
       fprintf_filtered (stream, "%.9g", (double) doub);
