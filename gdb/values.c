@@ -739,7 +739,14 @@ unpack_double (struct type *type, const char *valaddr, int *invp)
 	 also not defined either.  Oops!
 
          Hopefully someone will add both the missing floatformat
-         definitions and floatformat_is_invalid() function.  */
+         definitions and the new cases for floatformat_is_valid ().  */
+
+      if (!floatformat_is_valid (floatformat_from_type (type), valaddr))
+	{
+	  *invp = 1;
+	  return 0.0;
+	}
+
       return extract_typed_floating (valaddr, type);
     }
   else if (nosign)
