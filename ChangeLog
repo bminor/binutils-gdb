@@ -1,3 +1,13 @@
+Thu Sep  7 20:03:41 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config.sub: Accept -lites* OS.  From Ian Dall.
+
+start-sanitize-sh3e
+Tue Sep  5 16:34:13 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* cfg-ml-com.in (sh-*-*): Add sh3e support.
+	
+end-sanitize-sh3e	
 Fri Sep  1 08:06:58 1995  James G. Smith  <jsmith@beauty.cygnus.com>
 
 	* config.sub: recognise mips64vr4300 and mips64vr4300el as valid
