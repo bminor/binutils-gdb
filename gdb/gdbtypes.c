@@ -684,9 +684,6 @@ lookup_struct_elt_type (type, name, noerr)
     int noerr;
 {
   int i;
-#if 0
-  char *typename;
-#endif
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR ||
       TYPE_CODE (type) == TYPE_CODE_REF)
@@ -709,9 +706,13 @@ lookup_struct_elt_type (type, name, noerr)
      the structure tag name is the same as the member name.  I.E. when doing
      "ptype bell->bar" for "struct foo { int bar; int foo; } bell;"
      Disabled by fnf. */
-  typename = type_name_no_tag (type);
-  if (typename != NULL && STREQ (typename, name))
-    return type;
+  {
+    char *typename;
+
+    typename = type_name_no_tag (type);
+    if (typename != NULL && STREQ (typename, name))
+      return type;
+  }
 #endif
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)

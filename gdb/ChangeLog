@@ -1,6 +1,11 @@
 Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	Gcc lint.
+	* infrun.c (wait_for_inferior): initialize stop_sp, prologue_pc.
+	  remove symtab, appears unused.
+	  (restore_selected_frame): return 1.
+	* mipsread.c (psymtab_to_symtab_1): initialize first_off.
+	  (fixup_sigtramp): initialize b0.
 	* printcmd.c (do_examine): initialize val_type.
 	  (print_frame_args): initialize b.
 	* ser-tcp.c (tcp_restore): comment out declaration.  Appears

@@ -2564,7 +2564,7 @@ psymtab_to_symtab_1 (pst, filename)
       char *pdr_ptr;
       char *pdr_end;
       int first_pdr;
-      unsigned long first_off;
+      unsigned long first_off = 0;
 
       /* This symbol table contains stabs-in-ecoff entries.  */
 
@@ -3305,7 +3305,7 @@ fixup_sigtramp ()
 {
   struct symbol *s;
   struct symtab *st;
-  struct block *b, *b0;
+  struct block *b, *b0 = NULL;
 
   sigtramp_address = -1;
 
