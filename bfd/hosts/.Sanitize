@@ -48,6 +48,7 @@ ncr3000.h
 news.h
 rs6000.h
 rtbsd.h
+solaris2.h
 sparc-ll.h
 sparc.h
 stratus.h
