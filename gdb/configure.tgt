@@ -261,6 +261,7 @@ rs6000-*-*)		gdb_target=rs6000 ;;
 sparc-*-aout*)		gdb_target=sparc-em ;;
 sparc-*-coff*)		gdb_target=sparc-em ;;
 sparc-*-elf*)		gdb_target=sparc-em ;;
+sparc-*-linux*)		gdb_target=linux ;;
 sparc-*-lynxos*)	gdb_target=sparclynx
 		configdirs="${configdirs} gdbserver" ;;
 sparc-*-netbsd*)	gdb_target=nbsd ;;

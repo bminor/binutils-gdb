@@ -1,3 +1,9 @@
+Sun Mar  2 15:16:13 1998 Richard Henderson  <rth@cygnus.com>         
+
+        * configure.host, configure.tgt: Add sparc-linux.               
+        * sparc-nat.c: Include <asm/reg.h> not <machine/reg.h> for Linux.
+        * config/sparc/*linux*: New files.                         
+
 Mon Mar  2 12:12:41 1998  Anthony Thompson   (athompso@cambridge.arm.com)
 
 	* arm-tdep.c (gdb_print_insn_arm): Call print_insn_big_arm

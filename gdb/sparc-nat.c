@@ -25,7 +25,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <signal.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
+#ifdef __linux__
+#include <asm/reg.h>
+#else
 #include <machine/reg.h>
+#endif
 #include <sys/user.h>
 
 /* We don't store all registers immediately when requested, since they
