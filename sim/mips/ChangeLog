@@ -1,3 +1,7 @@
+Wed Jul 19 18:50:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* m16.igen (break): Call SignalException not sim_engine_halt.
+
 Mon Jul  3 11:13:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Jason Eckhardt:

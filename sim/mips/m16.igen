@@ -1232,5 +1232,5 @@
     PC = cia - 2; /* reference the branch instruction */
   else
     PC = cia;
-  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
+  SignalException (BreakPoint, instruction_0);
 }
