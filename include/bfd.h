@@ -287,7 +287,8 @@ CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
 CAT(NAME,_bfd_get_relocated_section_contents),\
-CAT(NAME,_bfd_relax_section)
+CAT(NAME,_bfd_relax_section),\
+CAT(NAME,_bfd_seclet_link)
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 
@@ -1297,11 +1298,14 @@ bfd_get_size PARAMS ((bfd *));
 #define bfd_set_arch_mach(abfd, arch, mach)\
         BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 
-#define bfd_get_relocated_section_contents(abfd, seclet, data) \
-	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data))
+#define bfd_get_relocated_section_contents(abfd, seclet, data, relocateable) \
+	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data, relocateable))
  
 #define bfd_relax_section(abfd, section, symbols) \
        BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
+
+#define bfd_seclet_link(abfd, data, relocateable) \
+       BFD_SEND (abfd, _bfd_seclet_link, (abfd, data, relocateable))
 symindex 
 bfd_get_next_mapent PARAMS ((bfd *, symindex previous, carsym ** sym));
 
@@ -1415,10 +1419,14 @@ typedef struct bfd_target
   void       (*_bfd_debug_info_accumulate) PARAMS ((bfd *, struct sec *));
 
   bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
-                    struct bfd_seclet *, bfd_byte *data));
+                    struct bfd_seclet *, bfd_byte *data,
+                    boolean relocateable));
 
   boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
                     struct symbol_cache_entry **));
+
+  boolean    (*_bfd_seclet_link) PARAMS ((bfd *, PTR data,
+                     boolean relocateable));
   /* See documentation on reloc types.  */
  CONST struct reloc_howto_struct *
        (*reloc_type_lookup) PARAMS ((bfd *abfd,
