@@ -1,3 +1,8 @@
+2001-11-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.asm/asm-source.exp: Supress file, instead of skip, when not
+	implemented.
+
 2001-11-08  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/callfuncs.exp: Add tests for nested call dummies.

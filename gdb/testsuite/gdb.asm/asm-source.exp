@@ -38,8 +38,7 @@ if [istarget "d10v-*-*"] then {
     set asm-arch d10v
 }
 if { "${asm-arch}" == "" } {
-    verbose "Skipping assembly source test -- not implemented for this target."
-    return 
+    gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
 
 set testfile "asm-source"
