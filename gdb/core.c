@@ -231,6 +231,39 @@ read_memory_unsigned_integer (memaddr, len)
   return extract_unsigned_integer (buf, len);
 }
 
+/* The current default bfd target.  Points to storage allocated for
+   gnutarget_string.  */
+char *gnutarget;
+
+/* Same thing, except it is "auto" not NULL for the default case.  */
+static char *gnutarget_string;
+
+static void set_gnutarget_command
+  PARAMS ((char *, int, struct cmd_list_element *));
+
+static void
+set_gnutarget_command (ignore, from_tty, c)
+     char *ignore;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  if (STREQ (gnutarget_string, "auto"))
+    gnutarget = NULL;
+  else
+    gnutarget = gnutarget_string;
+}
+
+/* Set the gnutarget.  */
+void
+set_gnutarget (newtarget)
+     char *newtarget;
+{
+  if (gnutarget_string != NULL)
+    free (gnutarget_string);
+  gnutarget_string = savestring (newtarget, strlen (newtarget));
+  set_gnutarget_command (NULL, 0, NULL);
+}
+
 void
 _initialize_core()
 {
@@ -240,4 +273,17 @@ _initialize_core()
 No arg means have no core file.  This command has been superseded by the\n\
 `target core' and `detach' commands.", &cmdlist);
   c->completer = filename_completer;
+
+  c = add_set_cmd ("gnutarget", class_files, var_string_noescape,
+		  (char *) &gnutarget_string,
+		  "Set the current BFD target.\n\
+Use `set gnutarget auto' to specify automatic detection.",
+		  &setlist);
+  c->function.sfunc = set_gnutarget_command;
+  add_show_from_set (c, &showlist);
+
+  if (getenv ("GNUTARGET"))
+    set_gnutarget (getenv ("GNUTARGET"));
+  else
+    set_gnutarget ("auto");
 }

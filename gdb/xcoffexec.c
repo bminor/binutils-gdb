@@ -147,7 +147,7 @@ char *filename;
   	if (scratch_chan < 0)
 	  perror_with_name(filename);
 
-  	exec_bfd = bfd_fdopenr(scratch_pathname, NULL, scratch_chan);
+  	exec_bfd = bfd_fdopenr(scratch_pathname, gnutarget, scratch_chan);
   	if (!exec_bfd)
 	  error("Could not open `%s' as an executable file: %s"
   		      , scratch_pathname, bfd_errmsg(bfd_error));
@@ -426,9 +426,9 @@ add_vmap(ldi)
 	if (ldi->ldinfo_fd < 0)
 	  /* Note that this opens it once for every member; a possible
 	     enhancement would be to only open it once for every object.  */
-	  bfd = bfd_openr (objname, NULL);
+	  bfd = bfd_openr (objname, gnutarget);
 	else
-	  bfd = bfd_fdopenr(objname, NULL, ldi->ldinfo_fd);
+	  bfd = bfd_fdopenr(objname, gnutarget, ldi->ldinfo_fd);
 	if (!bfd)
 	  error("Could not open `%s' as an executable file: %s",
 					objname, bfd_errmsg(bfd_error));

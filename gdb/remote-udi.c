@@ -1038,7 +1038,7 @@ download(load_arg_string, from_tty)
 	}
     }
 
-  pbfd = bfd_openr (filename, 0);
+  pbfd = bfd_openr (filename, gnutarget);
 
   if (!pbfd) 
     perror_with_name (filename);

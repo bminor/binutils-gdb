@@ -1,3 +1,13 @@
+Mon Aug  9 09:53:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbcore.h: New variable gnutarget.
+	* core.c: Add commands to set and show it.
+	* Callers to bfd_*open*: Pass gnutarget instead of NULL as target.
+	* environ.c (set_in_environ): For GNUTARGET, use set_gnutarget not
+	putenv.
+
+	* symtab.c (decode_line_1): Give error on unmatched single quote.
+
 Sun Aug  8 13:59:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* ser-unix.c (hardwire_send_break) [HAVE_SGTTY]: Use select not usleep.

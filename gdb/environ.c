@@ -73,13 +73,13 @@ init_environ (e)
 				      (e->allocated + 1) * sizeof (char *));
     }
 
-  (void) memcpy (e->vector, environ, (i + 1) * sizeof (char *));
+  memcpy (e->vector, environ, (i + 1) * sizeof (char *));
 
   while (--i >= 0)
     {
       register int len = strlen (e->vector[i]);
       register char *new = (char *) xmalloc (len + 1);
-      (void) memcpy (new, e->vector[i], len + 1);
+      memcpy (new, e->vector[i], len + 1);
       e->vector[i] = new;
     }
 }
@@ -106,8 +106,7 @@ get_in_environ (e, var)
   register char *s;
 
   for (; (s = *vector) != NULL; vector++)
-    if (!strncmp (s, var, len)
-	&& s[len] == '=')
+    if (STREQN (s, var, len) && s[len] == '=')
       return &s[len + 1];
 
   return 0;
@@ -127,8 +126,7 @@ set_in_environ (e, var, value)
   register char *s;
 
   for (i = 0; (s = vector[i]) != NULL; i++)
-    if (!strncmp (s, var, len)
-	&& s[len] == '=')
+    if (STREQN (s, var, len) && s[len] == '=')
       break;
 
   if (s == 0)
@@ -152,14 +150,25 @@ set_in_environ (e, var, value)
   vector[i] = s;
 
   /* Certain variables get exported back to the parent (e.g. our) 
-     environment, too.  */
-  if (!strcmp(var, "PATH")			/* Object file location */
-   || !strcmp (var, "G960BASE") 		/* Intel 960 downloads */
-   || !strcmp (var, "G960BIN") 			/* Intel 960 downloads */
-   || !strcmp (var, "GNUTARGET")		/* BFD object file type */
-				) {
-    putenv (strsave (s));
-  }
+     environment, too.  FIXME: this is a hideous hack and should not be
+     allowed to live.  What if we want to change the environment we pass to
+     the program without affecting GDB's behavior?  */
+  if (STREQ(var, "PATH")		/* Object file location */
+      || STREQ (var, "G960BASE") 		/* Intel 960 downloads */
+      || STREQ (var, "G960BIN") 		/* Intel 960 downloads */
+      )
+    {
+      putenv (strsave (s));
+    }
+
+  /* This is a compatibility hack, since GDB 4.10 and older didn't have
+     `set gnutarget'.  Eventually it should go away, so that (for example)
+     you can debug objdump's handling of GNUTARGET without affecting GDB's
+     behavior.  */
+  if (STREQ (var, "GNUTARGET"))
+    {
+      set_gnutarget (value);
+    }
   return;
 }
 
@@ -175,13 +184,18 @@ unset_in_environ (e, var)
   register char *s;
 
   for (; (s = *vector) != NULL; vector++)
-    if (!strncmp (s, var, len)
-	&& s[len] == '=')
-      {
-	free (s);
-	(void) memcpy (vector, vector + 1,
-		       (e->allocated - (vector - e->vector)) * sizeof (char *));
-	e->vector[e->allocated - 1] = 0;
-	return;
-      }
+    {
+      if (STREQN (s, var, len) && s[len] == '=')
+	{
+	  free (s);
+	  /* Walk through the vector, shuffling args down by one, including
+	     the NULL terminator.  Can't use memcpy() here since the regions
+	     overlap, and memmove() might not be available. */
+	  while ((vector[0] = vector[1]) != NULL)
+	    {
+	      vector++;
+	    }
+	  break;
+	}
+    }
 }

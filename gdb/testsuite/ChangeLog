@@ -1,3 +1,7 @@
+Mon Aug  9 10:13:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t10/crossload.exp: Add `set gnutarget auto' at end of tests.
+
 Sun Aug  8 14:21:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t20/inherit.exp: Change message for "print tagless struct"

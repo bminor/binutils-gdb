@@ -412,7 +412,7 @@ hms_load (args, fromtty)
 
   dcache_flush ();
   inferior_pid = 0;
-  abfd = bfd_openr (args, 0);
+  abfd = bfd_openr (args, gnutarget);
   if (!abfd)
     {
       printf_filtered ("Unable to open file %s\n", args);

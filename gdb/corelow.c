@@ -114,7 +114,7 @@ core_open (filename, from_tty)
   if (scratch_chan < 0)
     perror_with_name (filename);
 
-  temp_bfd = bfd_fdopenr (filename, NULL, scratch_chan);
+  temp_bfd = bfd_fdopenr (filename, gnutarget, scratch_chan);
   if (temp_bfd == NULL)
     {
       perror_with_name (filename);

@@ -73,7 +73,7 @@ int	fromtty;
   asection *s;
 
   inferior_pid = 0;  
-  abfd = bfd_openr(args, (char*)0);
+  abfd = bfd_openr (args, (char*)gnutarget);
 
   if (!abfd) 
   {
