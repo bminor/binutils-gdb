@@ -1,3 +1,7 @@
+2004-06-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh: Doc fix.
+
 2004-06-21  Martin Hunt  <hunt@redhat.com>
 	Kevin Buettner <kevinb@redhat.com>
 

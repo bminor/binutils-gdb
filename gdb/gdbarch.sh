@@ -250,7 +250,7 @@ do
     macro ) : ;;
 
 	# The name of the legacy C macro by which this method can be
-	# accessed.  If empty, no macro is defined.  If "-", a macro
+	# accessed.  If empty, no macro is defined.  If "=", a macro
 	# formed from the upper-case function name is used.
 
     returntype ) : ;;
