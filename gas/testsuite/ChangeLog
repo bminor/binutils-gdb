@@ -1,5 +1,8 @@
 Mon Aug 14 16:03:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/mri/expr.d: Permit leading zeroes, in case we're using a
+        64-bit BFD.
+
 	* gasp/mri/*: New tests.
 	* gasp/gasp.exp: Run them.  Also, clean up the test names used in
 	pass and fail.
