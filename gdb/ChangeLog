@@ -1,5 +1,7 @@
 Wed Jul 21 11:37:30 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* Makefile.in (regex.o): Add dependency.
+
 	* hppa{b,h}-nat.c: Warning, not error, if can't access registers.
 
 	* config/pa/hppa{b,h}.h: Define ATTACH_DETACH.

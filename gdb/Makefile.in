@@ -1170,6 +1170,8 @@ pyr-pinsn.o: pyr-pinsn.c $(OP_INCLUDE)/pyr.h $(defs_h) $(gdbcore_h) \
 pyr-tdep.o: pyr-tdep.c $(defs_h) 
 pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
+regex.o: regex.c regex.h
+
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
 
