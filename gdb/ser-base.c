@@ -24,6 +24,9 @@
 #include "serial.h"
 #include "ser-unix.h"
 #include "event-loop.h"
+#ifdef WINAPI
+#include <winsock2.h>
+#endif
 
 static timer_handler_func push_event;
 static handler_func fd_event;
@@ -136,11 +139,7 @@ fd_event (int error, void *context)
          pull characters out of the buffer.  See also
          generic_readchar(). */
       int nr;
-      do
-	{
-	  nr = read (scb->fd, scb->buf, BUFSIZ);
-	}
-      while (nr == -1 && errno == EINTR);
+      nr = scb->ops->read_prim (scb, BUFSIZ);
       if (nr == 0)
 	{
 	  scb->bufcnt = SERIAL_EOF;
@@ -174,6 +173,185 @@ push_event (void *context)
   reschedule (scb);
 }
 
+/* Wait for input on scb, with timeout seconds.  Returns 0 on success,
+   otherwise SERIAL_TIMEOUT or SERIAL_ERROR. */
+
+static int
+ser_base_wait_for (struct serial *scb, int timeout)
+{
+  while (1)
+    {
+      int numfds;
+      struct timeval tv;
+      fd_set readfds, exceptfds;
+
+      /* NOTE: Some OS's can scramble the READFDS when the select()
+         call fails (ex the kernel with Red Hat 5.2).  Initialize all
+         arguments before each call. */
+
+      tv.tv_sec = timeout;
+      tv.tv_usec = 0;
+
+      FD_ZERO (&readfds);
+      FD_ZERO (&exceptfds);
+      FD_SET (scb->fd, &readfds);
+      FD_SET (scb->fd, &exceptfds);
+
+      if (timeout >= 0)
+	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, &tv);
+      else
+	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, 0);
+
+      if (numfds <= 0)
+	{
+	  if (numfds == 0)
+	    return SERIAL_TIMEOUT;
+	  else if (errno == EINTR)
+	    continue;
+	  else
+	    return SERIAL_ERROR;	/* Got an error from select or poll */
+	}
+
+      return 0;
+    }
+}
+
+/* Read a character with user-specified timeout.  TIMEOUT is number of seconds
+   to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
+   char if successful.  Returns -2 if timeout expired, EOF if line dropped
+   dead, or -3 for any other error (see errno in that case). */
+
+static int
+do_ser_base_readchar (struct serial *scb, int timeout)
+{
+  int status;
+  int delta;
+
+  /* We have to be able to keep the GUI alive here, so we break the
+     original timeout into steps of 1 second, running the "keep the
+     GUI alive" hook each time through the loop.
+
+     Also, timeout = 0 means to poll, so we just set the delta to 0,
+     so we will only go through the loop once.  */
+
+  delta = (timeout == 0 ? 0 : 1);
+  while (1)
+    {
+
+      /* N.B. The UI may destroy our world (for instance by calling
+         remote_stop,) in which case we want to get out of here as
+         quickly as possible.  It is not safe to touch scb, since
+         someone else might have freed it.  The
+         deprecated_ui_loop_hook signals that we should exit by
+         returning 1.  */
+
+      if (deprecated_ui_loop_hook)
+	{
+	  if (deprecated_ui_loop_hook (0))
+	    return SERIAL_TIMEOUT;
+	}
+
+      status = ser_base_wait_for (scb, delta);
+      if (timeout > 0)
+        timeout -= delta;
+
+      /* If we got a character or an error back from wait_for, then we can 
+         break from the loop before the timeout is completed. */
+
+      if (status != SERIAL_TIMEOUT)
+	{
+	  break;
+	}
+
+      /* If we have exhausted the original timeout, then generate
+         a SERIAL_TIMEOUT, and pass it out of the loop. */
+
+      else if (timeout == 0)
+	{
+	  status = SERIAL_TIMEOUT;
+	  break;
+	}
+    }
+
+  if (status < 0)
+    return status;
+
+  status = scb->ops->read_prim (scb, BUFSIZ);
+
+  if (status <= 0)
+    {
+      if (status == 0)
+	return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
+				   distinguish between EOF & timeouts
+				   someday] */
+      else
+	return SERIAL_ERROR;	/* Got an error from read */
+    }
+
+  scb->bufcnt = status;
+  scb->bufcnt--;
+  scb->bufp = scb->buf;
+  return *scb->bufp++;
+}
+
+/* Perform operations common to both old and new readchar. */
+
+/* Return the next character from the input FIFO.  If the FIFO is
+   empty, call the SERIAL specific routine to try and read in more
+   characters.
+
+   Initially data from the input FIFO is returned (fd_event()
+   pre-reads the input into that FIFO.  Once that has been emptied,
+   further data is obtained by polling the input FD using the device
+   specific readchar() function.  Note: reschedule() is called after
+   every read.  This is because there is no guarentee that the lower
+   level fd_event() poll_event() code (which also calls reschedule())
+   will be called. */
+
+int
+generic_readchar (struct serial *scb, int timeout,
+		  int (do_readchar) (struct serial *scb, int timeout))
+{
+  int ch;
+  if (scb->bufcnt > 0)
+    {
+      ch = *scb->bufp;
+      scb->bufcnt--;
+      scb->bufp++;
+    }
+  else if (scb->bufcnt < 0)
+    {
+      /* Some errors/eof are are sticky. */
+      ch = scb->bufcnt;
+    }
+  else
+    {
+      ch = do_readchar (scb, timeout);
+      if (ch < 0)
+	{
+	  switch ((enum serial_rc) ch)
+	    {
+	    case SERIAL_EOF:
+	    case SERIAL_ERROR:
+	      /* Make the error/eof stick. */
+	      scb->bufcnt = ch;
+	      break;
+	    case SERIAL_TIMEOUT:
+	      scb->bufcnt = 0;
+	      break;
+	    }
+	}
+    }
+  reschedule (scb);
+  return ch;
+}
+
+int
+ser_base_readchar (struct serial *scb, int timeout)
+{
+  return generic_readchar (scb, timeout, do_ser_base_readchar);
+}
+
 int
 ser_base_write (struct serial *scb, const char *str, int len)
 {
@@ -181,7 +359,7 @@ ser_base_write (struct serial *scb, const char *str, int len)
 
   while (len > 0)
     {
-      cc = write (scb->fd, str, len);
+      cc = scb->ops->write_prim (scb, str, len); 
 
       if (cc < 0)
 	return 1;
