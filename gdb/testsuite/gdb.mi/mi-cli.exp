@@ -53,8 +53,9 @@ mi_gdb_test "-interpreter-exec bogus command" \
   {\^error,msg="mi_cmd_interpreter_exec: could not find interpreter \\\"bogus\\\""} \
   "-interpreter-exec with bogus interpreter"
 
+set msg {Undefined command: \\\"bogus\\\"\.  Try \\\"help\\\"\.}
 mi_gdb_test "-interpreter-exec console bogus" \
-  {\^error,msg="Undefined command: \"bogus\".  Try \"help\"\."} \
+    "&\\\"$msg\\\\n\\\".*\\^error,msg=\\\"$msg\\\".*" \
   "-interpreter-exec console bogus"
 
 mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
@@ -77,10 +78,7 @@ mi_gdb_test "-interpreter-exec console \"info break\"" \
   {\~"Num[ \t]*Type[ \t]*Disp[ \t]*Enb[ \t]*Address[ \t]*What\\n".*~"1[ \t]*breakpoint[ \t]*keep[ \t]*y[ \t]*0x[0-9A-Fa-f]+[ \t]*in main at .*basics.c:[0-9]+\\n".*\^done} \
   "-interpreter-exec console \"info break\""
 
-# FIXME: Is this right? This doesn't work right now anyway...
-mi_gdb_test "-interpreter-exec console run" \
-  {\^running.*(=.*)*\*stopped,reason="breakpoint-hit",.*\^done} \
-  "-interpreter-exec console run"
+mi_run_to_main
 
 mi_gdb_test "-interpreter-exec console \"set listsize 1\"" \
   {\^done} \
