@@ -2217,7 +2217,6 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   flagword out_flags;
   flagword in_flags;
   bfd_boolean flags_compatible = TRUE;
-  bfd_boolean null_input_bfd = TRUE;
   asection *sec;
 
   /* Check if we have the same endianess.  */
@@ -2268,21 +2267,29 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   if (in_flags == out_flags)
     return TRUE;
 
-  /* Check to see if the input BFD actually contains any sections.
-     If not, its flags may not have been initialised either, but it cannot
-     actually cause any incompatibility.  */
-  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+  /* Check to see if the input BFD actually contains any sections.  If
+     not, its flags may not have been initialised either, but it
+     cannot actually cause any incompatibility.  Do not short-circuit
+     dynamic objects; their section list may be emptied by
+     elf_link_add_object_symbols.  */
+
+  if (!(ibfd->flags & DYNAMIC))
     {
-      /* Ignore synthetic glue sections.  */
-      if (strcmp (sec->name, ".glue_7")
-	  && strcmp (sec->name, ".glue_7t"))
+      bfd_boolean null_input_bfd = TRUE;
+
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
-	  null_input_bfd = FALSE;
-	  break;
+	  /* Ignore synthetic glue sections.  */
+	  if (strcmp (sec->name, ".glue_7")
+	      && strcmp (sec->name, ".glue_7t"))
+	    {
+	      null_input_bfd = FALSE;
+	      break;
+	    }
 	}
+      if (null_input_bfd)
+	return TRUE;
     }
-  if (null_input_bfd)
-    return TRUE;
 
   /* Complain about various flag mismatches.  */
   if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))

@@ -1,3 +1,8 @@
+2003-10-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Never skip dynamic
+	objects.
+
 2003-10-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (mips_elf_create_got_section): Initialize global_gotno.
