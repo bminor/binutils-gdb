@@ -155,7 +155,8 @@ void elf_hppa_final_processing PARAMS ((void));
   { \
     if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym)) \
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
-	    && ! S_IS_EXTERNAL (sym))) \
+	    && ! S_IS_EXTERNAL (sym)) \
+	|| strcmp (S_GET_NAME (sym), "$global$") == 0) \
       punt = 1; \
   }
 #endif
