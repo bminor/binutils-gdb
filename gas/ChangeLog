@@ -1,4 +1,15 @@
+Tue Jul 11 13:22:50 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (struct efdr): Add new field fake.
+	(init_file): Initialize fake.
+	(add_file): Add new parameter fake.  Change all callers.
+	(ecoff_build_debug): Don't warn about a missing .end for a fake
+	file.
+
 Mon Jul 10 16:01:31 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* doc/as.texinfo: Split out most cpu chapters...
+	* doc/c-*.texi: ...to here.
 
 	* read.c (po_hash): Now static.
 
