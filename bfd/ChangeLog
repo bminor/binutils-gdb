@@ -1,3 +1,16 @@
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* bfd-in2.h (bfd_mach_m6812): Rebuild.
+	* archures.c (bfd_mach_m6812_default, bfd_mach_m6812,
+	bfd_mach_m6812s): Declare.
+
+	* elf32-m68hc12.c (m68hc12_elf_set_mach_from_flags): New function.
+	(_bfd_m68hc12_elf_set_private_flags): Call it.
+	(_bfd_m68hc12_elf_print_private_bfd_data): Report processor version.
+	(_bfd_m68hc12_elf_merge_private_bfd_data): Merge the flags and
+	report microcontroller incompatibilities (HC12 vs HCS12).
+	(elf_backend_object_p): Update.
+
 2002-11-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (TRUE_FALSE_ALREADY_DEFINED, BFD_TRUE_FALSE): Delete.

@@ -633,6 +633,30 @@ elf32_m68hc11_gc_sweep_hook (abfd, info, sec, relocs)
 }
 
 
+static bfd_boolean
+m68hc12_elf_set_mach_from_flags (abfd)
+     bfd *abfd;
+{
+  flagword flags = elf_elfheader (abfd)->e_flags;
+
+  switch (flags & EF_M68HC11_MACH_MASK)
+    {
+    case EF_M68HC12_MACH:
+      bfd_default_set_arch_mach (abfd, bfd_arch_m68hc12, bfd_mach_m6812);
+      break;
+    case EF_M68HCS12_MACH:
+      bfd_default_set_arch_mach (abfd, bfd_arch_m68hc12, bfd_mach_m6812s);
+      break;
+    case EF_M68HC11_GENERIC:
+      bfd_default_set_arch_mach (abfd, bfd_arch_m68hc12,
+                                 bfd_mach_m6812_default);
+      break;
+    default:
+      return FALSE;
+    }
+  return TRUE;
+}
+
 /* Set and control ELF flags in ELF header.  */
 
 bfd_boolean
@@ -645,7 +669,7 @@ _bfd_m68hc12_elf_set_private_flags (abfd, flags)
 
   elf_elfheader (abfd)->e_flags = flags;
   elf_flags_init (abfd) = TRUE;
-  return TRUE;
+  return m68hc12_elf_set_mach_from_flags (abfd);
 }
 
 /* Merge backend specific data from an object file to the output
@@ -669,7 +693,6 @@ _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
     return TRUE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
-  elf_elfheader (obfd)->e_flags |= new_flags & EF_M68HC11_ABI;
   old_flags = elf_elfheader (obfd)->e_flags;
 
   if (! elf_flags_init (obfd))
@@ -707,10 +730,24 @@ _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
 	 bfd_archive_filename (ibfd));
       ok = FALSE;
     }
-  new_flags &= ~EF_M68HC11_ABI;
-  old_flags &= ~EF_M68HC11_ABI;
+
+  /* Processor compatibility.  */
+  if (!EF_M68HC11_CAN_MERGE_MACH (new_flags, old_flags))
+    {
+      (*_bfd_error_handler)
+	(_("%s: linking files compiled for HCS12 with "
+           "others compiled for HC12"),
+	 bfd_archive_filename (ibfd));
+      ok = FALSE;
+    }
+  new_flags = ((new_flags & ~EF_M68HC11_MACH_MASK)
+               | (EF_M68HC11_MERGE_MACH (new_flags, old_flags)));
+
+  elf_elfheader (obfd)->e_flags = new_flags;
 
   /* Warn about any other mismatches */
+  new_flags &= ~(EF_M68HC11_ABI | EF_M68HC11_MACH_MASK);
+  old_flags &= ~(EF_M68HC11_ABI | EF_M68HC11_MACH_MASK);
   if (new_flags != old_flags)
     {
       (*_bfd_error_handler)
@@ -750,17 +787,19 @@ _bfd_m68hc12_elf_print_private_bfd_data (abfd, ptr)
     fprintf (file, _("[abi=16-bit int,"));
 
   if (elf_elfheader (abfd)->e_flags & E_M68HC11_F64)
-    fprintf (file, _(" 64-bit double]"));
+    fprintf (file, _(" 64-bit double,"));
   else
-    fprintf (file, _(" 32-bit double]"));
+    fprintf (file, _(" 32-bit double,"));
 
+  if (elf_elfheader (abfd)->e_flags & EF_M68HCS12_MACH)
+    fprintf (file, _(" cpu=HCS12]"));
+  else
+    fprintf (file, _(" cpu=HC12]"));    
   fputc ('\n', file);
 
   return TRUE;
 }
 
-/* Below is the only difference between elf32-m68hc12.c and elf32-m68hc11.c.
-   The Motorola spec says to use a different Elf machine code.  */
 #define ELF_ARCH		bfd_arch_m68hc12
 #define ELF_MACHINE_CODE	EM_68HC12
 #define ELF_MAXPAGESIZE		0x1000
@@ -772,7 +811,7 @@ _bfd_m68hc12_elf_print_private_bfd_data (abfd, ptr)
 #define elf_info_to_howto_rel	m68hc11_info_to_howto_rel
 #define elf_backend_gc_mark_hook     elf32_m68hc11_gc_mark_hook
 #define elf_backend_gc_sweep_hook    elf32_m68hc11_gc_sweep_hook
-#define elf_backend_object_p	0
+#define elf_backend_object_p		m68hc12_elf_set_mach_from_flags
 #define elf_backend_final_write_processing	0
 /* Disabled as this backend uses the generic linker.  */
 #define elf_backend_can_gc_sections		0

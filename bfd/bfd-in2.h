@@ -1628,6 +1628,9 @@ enum bfd_architecture
   bfd_arch_dlx,       /* DLX */
   bfd_arch_m68hc11,   /* Motorola 68HC11 */
   bfd_arch_m68hc12,   /* Motorola 68HC12 */
+#define bfd_mach_m6812_default 0
+#define bfd_mach_m6812         1
+#define bfd_mach_m6812s        2
   bfd_arch_z8k,       /* Zilog Z8000 */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
