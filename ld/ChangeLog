@@ -1,3 +1,9 @@
+2000-07-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* scripttempl/elf.sc (.init): Only do ${INIT_START} and
+	${INIT_END} if relocating.
+	(.fini): Likewise ${FINI_START} and ${FINI_END}.
+
 2000-07-16  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* src/ld/emultempl/pe.em (gld_*_open_dynamic_archive): New search

@@ -198,9 +198,9 @@ SECTIONS
 
   .init        ${RELOCATING-0} : 
   { 
-    ${INIT_START}
+    ${RELOCATING+${INIT_START}}
     KEEP (*(.init))
-    ${INIT_END}
+    ${RELOCATING+${INIT_END}}
   } =${NOP-0}
 
   ${DATA_PLT-${BSS_PLT-${PLT}}}
@@ -217,9 +217,9 @@ SECTIONS
   } =${NOP-0}
   .fini    ${RELOCATING-0} :
   {
-    ${FINI_START}
+    ${RELOCATING+${FINI_START}}
     KEEP (*(.fini))
-    ${FINI_END}
+    ${RELOCATING+${FINI_END}}
   } =${NOP-0}
   ${RELOCATING+PROVIDE (__etext = .);}
   ${RELOCATING+PROVIDE (_etext = .);}
