@@ -87,7 +87,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 
 struct monitor_ops op50n_cmds = {
   1,					/* 1 for ASCII, 0 for binary */
-  ".\n",				/* monitor init string */
+  "\003.\n",				/* monitor init string */
   "g %x\n",				/* execute or usually GO command */
   "g\n",				/* continue command */
   "t\n",				/* single step */
