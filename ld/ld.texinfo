@@ -414,6 +414,13 @@ Set the maximum size of objects to be optimized using the GP register to
 MIPS ECOFF which supports putting large and small objects into different
 sections.  This is ignored for other object file formats.
 
+@kindex --gc-sections
+@cindex garbage collection
+@item --gc-sections
+Enable garbage collection of unused input sections.  It is ignored on
+targets that do not support this option.  This option is not compatible
+with @samp{-r}, nor should it be used with dynamic linking.
+
 @cindex runtime library name
 @kindex -h@var{name}
 @kindex -soname=@var{name}
@@ -877,8 +884,11 @@ in the program, such as relaxing address modes and synthesizing new
 instructions in the output object file.
 
 On some platforms these link time global optimizations may make symbolic
-debugging of the resulting executable impossible.  This is known to be
+debugging of the resulting executable impossible.
+@ifset GENERIC
+This is known to be
 the case for the Matsushita MN10200 and MN10300 family of processors.
+@end ifset
 
 @ifset GENERIC
 On platforms where this is not supported, @samp{--relax} is accepted,
@@ -1963,6 +1973,7 @@ map the input files into your memory layout.
 * Input Section Basics::	Input section basics
 * Input Section Wildcards::	Input section wildcard patterns
 * Input Section Common::	Input section for common symbols
+* Input Section Keep::		Input section and garbage collection
 * Input Section Example::	Input section example
 @end menu
 
@@ -2130,6 +2141,16 @@ locations.
 You will sometimes see @samp{[COMMON]} in old linker scripts.  This
 notation is now considered obsolete.  It is equivalent to
 @samp{*(COMMON)}.
+
+@node Input Section Keep
+@subsubsection Input section and garbage collection
+@cindex KEEP
+@cindex garbage collection
+When link-time garbage collection is in use (@samp{--gc-sections}),
+it is often useful to mark sections that should not be eliminated. 
+This is accomplished by surrounding an input section's wildcard entry
+with @code{KEEP()}, as in @code{KEEP(*(.init))} or
+@code{KEEP(SORT(*)(.ctors))}.
 
 @node Input Section Example
 @subsubsection Input section example
@@ -2319,6 +2340,7 @@ If you use anything other than an input section description as an output
 section command, such as a symbol assignment, then the output section
 will always be created, even if there are no matching input sections.
 
+@cindex /DISCARD/
 The special output section name @samp{/DISCARD/} may be used to discard
 input sections.  Any input sections which are assigned to an output
 section named @samp{/DISCARD/} are not included in the output file.

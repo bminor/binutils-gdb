@@ -1,3 +1,30 @@
+Wed Jul  1 19:40:34 1998  Richard Henderson <rth@cygnus.com>
+
+	* ld.h (args_type): Add gc_sections.
+	* ldgram.y (ldgram_had_keep, KEEP): New.
+	(input_section_spec_no_keep): Rename from old input_section_spec.
+	(input_section_spec): New.  Recognize KEEP.
+	* ldlang.c (wild_section): Handle keep sections.
+	(lang_gc_wild_section, lang_gc_wild_file, lang_gc_wild): New.
+	(lang_gc_sections_1, lang_gc_sections): New.
+	(lang_process): Invoke lang_gc_sections.
+	(lang_add_wild): Add keep argument.  Update all callers.
+	* ldlang.h (lang_wild_statement_struct): Add keep_sections.
+	* ldlex.l (KEEP): Match it.
+	* ldmain.c (main): Error on -r and --gc-sections.
+	* lexsup.c: Add --gc-sections.
+
+	* scripttempl/elf.sc: Merge .text.* etc sections appropriately.
+	Mark startup sections with KEEP.
+	* scripttempl/elfppc.sc: Likewise.
+
+	* ld.texinfo: Update for --gc-sections and KEEP.
+
+Wed Jul  1 15:21:20 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Peter Jordan <pjordan@chla.usc.edu>:
+	* scripttempl/i386go32.sc: Correct constructor handling for -u.
+
 Tue Jun 23 15:17:27 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (install-data-local): Make ldscripts subdirectory.

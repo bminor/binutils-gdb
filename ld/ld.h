@@ -138,6 +138,9 @@ typedef struct
   /* Name of shared object for whose symbol table this shared object
      is an auxiliary filter.  From the --auxiliary option.  */
   char **auxiliary_filters;
+
+  /* Remove unreferenced sections?  */
+  boolean gc_sections;
 } args_type;
 
 extern args_type command_line;
@@ -152,6 +155,12 @@ typedef struct
 
   /* If true, doing a dynamic link.  */
   boolean dynamic_link;
+
+  /* If true, -shared is supported.  */
+  /* ??? A better way to do this is perhaps to define this in the
+     ld_emulation_xfer_struct since this is really a target dependent
+     parameter.  */
+  boolean has_shared;
 
   /* If true, build constructors.  */
   boolean build_constructors;

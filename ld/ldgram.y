@@ -1,5 +1,6 @@
 /* A YACC grammer to parse a superset of the AT&T linker scripting languaue.
-   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
 This file is part of GNU ld.
@@ -47,15 +48,14 @@ static enum section_type sectype;
 
 lang_memory_region_type *region;
 
-
-char *current_file;
+struct wildcard_spec current_file;
 boolean ldgram_want_filename = true;
 boolean had_script = false;
 boolean force_make_executable = false;
 
 boolean ldgram_in_script = false;
 boolean ldgram_had_equals = false;
-
+boolean ldgram_had_keep = false;
 
 #define ERROR_NAME_MAX 20
 static char *error_names[ERROR_NAME_MAX];
@@ -66,6 +66,8 @@ static int error_index;
 %union {
   bfd_vma integer;
   char *name;
+  const char *cname;
+  struct wildcard_spec wildcard;
   int token;
   union etree_union *etree;
   struct phdr_info
@@ -76,16 +78,25 @@ static int error_index;
       union etree_union *flags;
     } phdr;
   struct lang_nocrossref *nocrossref;
+  struct lang_output_section_phdr_list *section_phdr;
+  struct bfd_elf_version_deps *deflist;
+  struct bfd_elf_version_expr *versyms;
+  struct bfd_elf_version_tree *versnode;
 }
 
 %type <etree> exp opt_exp_with_type mustbe_exp opt_at phdr_type phdr_val
+%type <etree> opt_exp_without_type
 %type <integer> fill_opt
 %type <name> memspec_opt casesymlist
+%type <cname> wildcard_name
+%type <wildcard> wildcard_spec
 %token <integer> INT  
 %token <name> NAME LNAME
 %type <integer> length
 %type <phdr> phdr_qualifiers
 %type <nocrossref> nocrossref_list
+%type <section_phdr> phdr_opt
+%type <integer> opt_nocrossrefs
 
 %right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ   ANDEQ OREQ 
 %right <token> '?' ':'
@@ -104,8 +115,8 @@ static int error_index;
 %right UNARY
 %token END 
 %left <token> '('
-%token <token> ALIGN_K BLOCK BIND QUAD LONG SHORT BYTE
-%token SECTIONS PHDRS
+%token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE
+%token SECTIONS PHDRS SORT
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token SIZEOF_HEADERS
@@ -113,7 +124,8 @@ static int error_index;
 %token MEMORY DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME LNAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY
-%token <integer> SIZEOF NEXT ADDR LOADADDR
+%token <integer> NEXT
+%token SIZEOF ADDR LOADADDR MAX MIN
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
@@ -123,12 +135,19 @@ static int error_index;
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
 %token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM CASE EXTERN START
+%token <name> VERS_TAG VERS_IDENTIFIER
+%token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT
+%token KEEP
+%type <versyms> vers_defns
+%type <versnode> vers_tag
+%type <deflist> verdep
 
 %%
 
 file:	
 		INPUT_SCRIPT script_file
 	|	INPUT_MRI_SCRIPT mri_script_file
+	|	INPUT_VERSION_SCRIPT version_script_file
 	|	INPUT_DEFSYM defsym_expr
 	;
 
@@ -148,7 +167,7 @@ defsym_expr:
 mri_script_file:
 		{
 		  ldlex_mri_script ();
-		  PUSH_ERROR ("MRI style script");
+		  PUSH_ERROR (_("MRI style script"));
 		}
 	     mri_script_lines
 		{
@@ -167,7 +186,7 @@ mri_script_command:
 		CHIP  exp 
 	|	CHIP  exp ',' exp
 	|	NAME 	{
-			einfo("%P%F: unrecognised keyword in MRI style script '%s'\n",$1);
+			einfo(_("%P%F: unrecognised keyword in MRI style script '%s'\n"),$1);
 			}
 	|	LIST  	{
 			config.map_filename = "-";
@@ -276,6 +295,7 @@ ifile_p1:
 	|	low_level_library
 	|	floating_point_support
 	|	statement_anywhere
+	|	version
         |	 ';'
 	|	TARGET_K '(' NAME ')'
 		{ lang_add_target($3); }
@@ -346,49 +366,79 @@ statement_anywhere:
 
 /* The '*' and '?' cases are there because the lexer returns them as
    separate tokens rather than as NAME.  */
-file_NAME_list:
+wildcard_name:
 		NAME
-			{ lang_add_wild ($1, current_file); }
+			{
+			  $$ = $1;
+			}
 	|	'*'
-			{ lang_add_wild ("*", current_file); }
+			{
+			  $$ = "*";
+			}
 	|	'?'
-			{ lang_add_wild ("?", current_file); }
-	|	file_NAME_list opt_comma NAME
-			{ lang_add_wild ($3, current_file); }
-	|	file_NAME_list opt_comma '*'
-			{ lang_add_wild ("*", current_file); }
-	|	file_NAME_list opt_comma '?'
-			{ lang_add_wild ("?", current_file); }
+			{
+			  $$ = "?";
+			}
+	;
+
+wildcard_spec:
+		wildcard_name
+			{
+			  $$.name = $1;
+			  $$.sorted = false;
+			}
+	|	SORT '(' wildcard_name ')'
+			{
+			  $$.name = $3;
+			  $$.sorted = true;
+			}
+	;
+
+file_NAME_list:
+		wildcard_spec
+			{
+			  lang_add_wild ($1.name, $1.sorted,
+					 current_file.name,
+					 current_file.sorted,
+					 ldgram_had_keep);
+			}
+	|	file_NAME_list opt_comma wildcard_spec
+			{
+			  lang_add_wild ($3.name, $3.sorted,
+					 current_file.name,
+					 current_file.sorted,
+					 ldgram_had_keep);
+			}
+	;
+
+input_section_spec_no_keep:
+		NAME
+			{
+			  lang_add_wild (NULL, false, $1, false,
+					 ldgram_had_keep);
+			}
+        |	'['
+			{
+			  current_file.name = NULL;
+			  current_file.sorted = false;
+			}
+		file_NAME_list ']'
+	|	wildcard_spec
+			{
+			  current_file = $1;
+			  /* '*' matches any file name.  */
+			  if (strcmp (current_file.name, "*") == 0)
+			    current_file.name = NULL;
+			}
+		'(' file_NAME_list ')'
 	;
 
 input_section_spec:
-		NAME
-		{
-		lang_add_wild((char *)NULL, $1);
-		}
-        |	'['
-			{
-			current_file = (char *)NULL;
-			}
-			file_NAME_list
-		']'
-	|	NAME
-			{
-			current_file = $1;
-			}
-		'(' file_NAME_list ')'
-	|	'?'
-		/* This case is needed because the lexer returns a
-                   single question mark as '?' rather than NAME.  */
-			{
-			current_file = "?";
-			}
-		'(' file_NAME_list ')'
-	|	'*'
-			{
-			current_file = (char *)NULL;
-			}
-		'(' file_NAME_list ')'
+		input_section_spec_no_keep
+	|	KEEP '('
+			{ ldgram_had_keep = true; }
+		input_section_spec_no_keep ')'
+			{ ldgram_had_keep = false; }
 	;
 
 statement:
@@ -431,6 +481,8 @@ statement_list_opt:
 
 length:
 		QUAD
+			{ $$ = $1; }
+	|	SQUAD
 			{ $$ = $1; }
 	|	LONG
 			{ $$ = $1; }
@@ -523,7 +575,9 @@ memory_spec: 		NAME
 		 region->origin =
 		 exp_get_vma($3, 0L,"origin", lang_first_phase_enum);
 }
-	; length_spec:
+	;
+
+length_spec:
              LENGTH '=' mustbe_exp
                { region->length = exp_get_vma($3,
 					       ~((bfd_vma)0),
@@ -535,7 +589,7 @@ memory_spec: 		NAME
 attributes_opt:
 		  '(' NAME ')'
 			{
-			lang_set_flags(&region->flags, $2);
+			lang_set_flags(region, $2);
 			}
 	|
   
@@ -678,6 +732,10 @@ exp	:
 			{ $$ = exp_unop(ALIGN_K,$3); }
 	|	NAME
 			{ $$ = exp_nameop(NAME,$1); }
+	|	MAX '(' exp ',' exp ')'
+			{ $$ = exp_binop (MAX, $3, $5 ); }
+	|	MIN '(' exp ',' exp ')'
+			{ $$ = exp_binop (MIN, $3, $5 ); }
 	;
 
 
@@ -699,9 +757,26 @@ section:	NAME 		{ ldlex_expression(); }
  		'}' { ldlex_popstate (); ldlex_expression (); }
 		memspec_opt phdr_opt fill_opt
 		{
-		  ldlex_popstate();
-		  lang_leave_output_section_statement($13, $11);
+		  ldlex_popstate ();
+		  lang_leave_output_section_statement ($13, $11, $12);
 		}
+		opt_comma
+	|	OVERLAY
+			{ ldlex_expression (); }
+		opt_exp_without_type opt_nocrossrefs opt_at
+			{ ldlex_popstate (); ldlex_script (); }
+		'{' 
+			{
+			  lang_enter_overlay ($3, $5, (int) $4);
+			}
+		overlay_section
+		'}'
+			{ ldlex_popstate (); ldlex_expression (); }
+		memspec_opt phdr_opt fill_opt
+			{
+			  ldlex_popstate ();
+			  lang_leave_overlay ($14, $12, $13);
+			}
 		opt_comma
 	|	/* The GROUP case is just enough to support the gcc
 		   svr3.ifile script.  It is not intended to be full
@@ -727,6 +802,7 @@ type:
 atype:
 	 	'(' type ')'
   	| 	/* EMPTY */ { sectype = normal_section; }
+  	| 	'(' ')' { sectype = normal_section; }
 	;
 
 opt_exp_with_type:
@@ -741,6 +817,18 @@ opt_exp_with_type:
 		{ $$ = $3; }
 	;
 
+opt_exp_without_type:
+		exp ':'		{ $$ = $1; }
+	|	':'		{ $$ = (etree_type *) NULL;  }
+	;
+
+opt_nocrossrefs:
+		/* empty */
+			{ $$ = 0; }
+	|	NOCROSSREFS
+			{ $$ = 1; }
+	;
+
 memspec_opt:
 		'>' NAME
 		{ $$ = $2; }
@@ -749,10 +837,38 @@ memspec_opt:
 
 phdr_opt:
 		/* empty */
+		{
+		  $$ = NULL;
+		}
 	|	phdr_opt ':' NAME
 		{
-		  lang_section_in_phdr ($3);
+		  struct lang_output_section_phdr_list *n;
+
+		  n = ((struct lang_output_section_phdr_list *)
+		       xmalloc (sizeof *n));
+		  n->name = $3;
+		  n->used = false;
+		  n->next = $1;
+		  $$ = n;
 		}
+	;
+
+overlay_section:
+		/* empty */
+	|	overlay_section
+		NAME
+			{
+			  ldlex_script ();
+			  lang_enter_overlay_section ($2);
+			}
+		'{' statement_list_opt '}'
+			{ ldlex_popstate (); ldlex_expression (); }
+		phdr_opt fill_opt
+			{
+			  ldlex_popstate ();
+			  lang_leave_overlay_section ($9, $8);
+			}
+		opt_comma
 	;
 
 phdrs:
@@ -819,7 +935,7 @@ phdr_qualifiers:
 		  else if (strcmp ($1, "FLAGS") == 0 && $2 != NULL)
 		    $$.flags = $2;
 		  else
-		    einfo ("%X%P:%S: PHDRS syntax error at `%s'\n", $1);
+		    einfo (_("%X%P:%S: PHDRS syntax error at `%s'\n"), $1);
 		}
 	|	AT '(' exp ')' phdr_qualifiers
 		{
@@ -839,13 +955,100 @@ phdr_val:
 		}
 	;
 
+/* This syntax is used within an external version script file.  */
+
+version_script_file:
+		{
+		  ldlex_version_file ();
+		  PUSH_ERROR (_("VERSION script"));
+		}
+		vers_nodes
+		{
+		  ldlex_popstate ();
+		  POP_ERROR ();
+		}
+	;
+
+/* This is used within a normal linker script file.  */
+
+version:
+		{
+		  ldlex_version_script ();
+		}
+		VERSIONK '{' vers_nodes '}'
+		{
+		  ldlex_popstate ();
+		}
+	;
+
+vers_nodes:
+		vers_node
+	|	vers_nodes vers_node
+	;
+
+vers_node:
+		VERS_TAG '{' vers_tag '}' ';'
+		{
+		  lang_register_vers_node ($1, $3, NULL);
+		}
+	|	VERS_TAG '{' vers_tag '}' verdep ';'
+		{
+		  lang_register_vers_node ($1, $3, $5);
+		}
+	;
+
+verdep:
+		VERS_TAG
+		{
+		  $$ = lang_add_vers_depend (NULL, $1);
+		}
+	|	verdep VERS_TAG
+		{
+		  $$ = lang_add_vers_depend ($1, $2);
+		}
+	;
+
+vers_tag:
+		/* empty */
+		{
+		  $$ = lang_new_vers_node (NULL, NULL);
+		}
+	|	vers_defns ';'
+		{
+		  $$ = lang_new_vers_node ($1, NULL);
+		}
+	|	GLOBAL ':' vers_defns ';'
+		{
+		  $$ = lang_new_vers_node ($3, NULL);
+		}
+	|	LOCAL ':' vers_defns ';'
+		{
+		  $$ = lang_new_vers_node (NULL, $3);
+		}
+	|	GLOBAL ':' vers_defns ';' LOCAL ':' vers_defns ';'
+		{
+		  $$ = lang_new_vers_node ($3, $7);
+		}
+	;
+
+vers_defns:
+		VERS_IDENTIFIER
+		{
+		  $$ = lang_new_vers_regex (NULL, $1);
+		}
+	|	vers_defns ';' VERS_IDENTIFIER
+		{
+		  $$ = lang_new_vers_regex ($1, $3);
+		}
+	;
+
 %%
 void
 yyerror(arg) 
      const char *arg;
 { 
   if (ldfile_assumed_script)
-    einfo ("%P:%s: file format not recognized; treating as linker script\n",
+    einfo (_("%P:%s: file format not recognized; treating as linker script\n"),
 	   ldfile_input_filename);
   if (error_index > 0 && error_index < ERROR_NAME_MAX)
      einfo ("%P%F:%S: %s in %s\n", arg, error_names[error_index-1]);

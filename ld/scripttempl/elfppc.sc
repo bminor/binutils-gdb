@@ -56,11 +56,23 @@ SECTIONS
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)  }
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)  }
   .rela.text   ${RELOCATING-0} :
-    { *(.rela.text) *(.rela.gnu.linkonce.t*) }
+    {
+      *(.rela.text)
+      ${RELOCATING+*(.rela.text.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.t*)}
+    }
   .rela.data   ${RELOCATING-0} :
-    { *(.rela.data) *(.rela.gnu.linkonce.d*) }
+    {
+      *(.rela.data)
+      ${RELOCATING+*(.rela.data.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.d*)}
+    }
   .rela.rodata ${RELOCATING-0} :
-    { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
+    {
+      *(.rela.rodata)
+      ${RELOCATING+*(.rela.rodata.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.r*)}
+    }
   .rela.got	${RELOCATING-0} : { *(.rela.got)	}
   .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
   .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
@@ -78,13 +90,19 @@ SECTIONS
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
+    ${RELOCATING+*(.text.*)}
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
-    *(.gnu.linkonce.t*)
+    ${RELOCATING+*(.gnu.linkonce.t*)}
   } =${NOP-0}
-  .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
-  .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
-  .rodata	${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
+  .init		${RELOCATING-0} : { KEEP (*(.init))	} =${NOP-0}
+  .fini		${RELOCATING-0} : { KEEP (*(.fini))	} =${NOP-0}
+  .rodata  ${RELOCATING-0} :
+  {
+    *(.rodata)
+    ${RELOCATING+*(.rodata.*)}
+    ${RELOCATING+*(.gnu.linkonce.r*)}
+  }
   .rodata1	${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
@@ -112,7 +130,8 @@ SECTIONS
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
-    *(.gnu.linkonce.d*)
+    ${RELOCATING+*(.data.*)}
+    ${RELOCATING+*(.gnu.linkonce.d*)}
     ${CONSTRUCTING+CONSTRUCTORS}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
@@ -139,16 +158,16 @@ SECTIONS
 			   wildcard.  The wildcard also means that it
 			   doesn't matter which directory crtbegin.o
 			   is in.  */
-			*crtbegin.o(.ctors)
-			*(SORT(.ctors.*))
-			*(.ctors) }
+			KEEP (*crtbegin.o(.ctors))
+			KEEP (*(SORT(.ctors.*)))
+			KEEP (*(.ctors)) }
 		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
   .dtors	${RELOCATING-0} : {
-			*crtbegin.o(.dtors)
-			*(SORT(.dtors.*))
-			*(.dtors) }
+			KEEP (*crtbegin.o(.dtors))
+			KEEP (*(SORT(.dtors.*)))
+			KEEP (*(.dtors)) }
 		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}

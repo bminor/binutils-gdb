@@ -111,6 +111,8 @@ int parsing_defsym = 0;
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
 #define OPTION_WRAP			(OPTION_WHOLE_ARCHIVE + 1)
 #define OPTION_FORCE_EXE_SUFFIX		(OPTION_WRAP + 1)
+#define OPTION_GC_SECTIONS		(OPTION_FORCE_EXE_SUFFIX + 1)
+#define OPTION_NO_GC_SECTIONS		(OPTION_GC_SECTIONS + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -163,6 +165,12 @@ static const struct ld_option ld_options[] =
       'F', N_("SHLIB"), N_("Filter for shared object symbol table"), TWO_DASHES },
   { {NULL, no_argument, NULL, '\0'},
       'g', NULL, N_("Ignored"), ONE_DASH },
+  { {"gc-sections", no_argument, NULL, OPTION_GC_SECTIONS},
+      '\0', NULL, N_("Remove unused sections on certain targets"),
+      TWO_DASHES },
+  { {"no-gc-sections", no_argument, NULL, OPTION_NO_GC_SECTIONS},
+      '\0', NULL, N_("(Don't) Remove unused sections on certain targets"),
+      TWO_DASHES },
   { {"gpsize", required_argument, NULL, 'G'},
       'G', N_("SIZE"), N_("Small data size (if no size, same as --shared)"),
       TWO_DASHES },
@@ -575,6 +583,9 @@ parse_args (argc, argv)
 	case 'g':
 	  /* Ignore.  */
 	  break;
+	case OPTION_GC_SECTIONS:
+	  command_line.gc_sections = true;
+	  break;
 	case OPTION_HELP:
 	  help ();
 	  xexit (0);
@@ -603,6 +614,9 @@ parse_args (argc, argv)
 	case 'n':
 	  config.magic_demand_paged = false;
 	  config.dynamic_link = false;
+	  break;
+	case OPTION_NO_GC_SECTIONS:
+	  command_line.gc_sections = false;
 	  break;
 	case OPTION_NO_KEEP_MEMORY:
 	  link_info.keep_memory = false;
@@ -701,7 +715,10 @@ parse_args (argc, argv)
 	  link_info.strip = strip_all;
 	  break;
 	case OPTION_SHARED:
-	  link_info.shared = true;
+	  if (config.has_shared)
+	    link_info.shared = true;
+	  else
+	    einfo (_("%P%F: -shared not supported\n"));
 	  break;
 	case 'h':		/* Used on Solaris.  */
 	case OPTION_SONAME:
