@@ -788,6 +788,10 @@ perform_an_assembly_pass (argc, argv)
      and sections already created, in BFD_ASSEMBLER mode.  */
   md_begin ();
 
+#ifdef obj_begin
+  obj_begin ();
+#endif
+
   argv++;			/* skip argv[0] */
   argc--;			/* skip argv[0] */
   while (argc--)

@@ -136,6 +136,20 @@ static const pseudo_typeS ecoff_debug_pseudo_table[] =
 #undef NO_RELOC
 #include "aout/aout64.h"
 
+/* This is called when the assembler starts.  */
+
+void
+elf_begin ()
+{
+  /* Add symbols for the known sections to the symbol table.  */
+  symbol_table_insert (section_symbol (bfd_get_section_by_name (stdoutput,
+								".text")));
+  symbol_table_insert (section_symbol (bfd_get_section_by_name (stdoutput,
+								".data")));
+  symbol_table_insert (section_symbol (bfd_get_section_by_name (stdoutput,
+								".bss")));
+}
+
 void
 elf_pop_insert ()
 {
@@ -499,6 +513,7 @@ obj_elf_section (xxx)
   int type, attr;
   int i;
   flagword flags;
+  symbolS *secsym;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -731,23 +746,32 @@ obj_elf_section (xxx)
 
   flags = (SEC_RELOC
 	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
-	   | ((attr & SHF_ALLOC) ? SEC_ALLOC | SEC_LOAD : 0)
+	   | ((attr & SHF_ALLOC) ? SEC_ALLOC : 0)
+	   | (((attr & SHF_ALLOC) && type != SHT_NOBITS) ? SEC_LOAD : 0)
 	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0));
-
-  if (type == SHT_PROGBITS)
-    flags |= SEC_ALLOC | SEC_LOAD;
-  else if (type == SHT_NOBITS)
+  if (special_sections[i].name == NULL)
     {
-      flags |= SEC_ALLOC;
-      flags &=~ SEC_LOAD;
-    }
+      if (type == SHT_PROGBITS)
+	flags |= SEC_ALLOC | SEC_LOAD;
+      else if (type == SHT_NOBITS)
+	{
+	  flags |= SEC_ALLOC;
+	  flags &=~ SEC_LOAD;
+	}
 
 #ifdef md_elf_section_flags
-  if (special_sections[i].name == NULL)
-    flags = md_elf_section_flags (flags, attr, type);
+      flags = md_elf_section_flags (flags, attr, type);
 #endif
+    }
 
   bfd_set_section_flags (stdoutput, sec, flags);
+
+  /* Add a symbol for this section to the symbol table.  */
+  secsym = symbol_find (string);
+  if (secsym != NULL)
+    secsym->bsym = sec->symbol;
+  else
+    symbol_table_insert (section_symbol (sec));
 
 #ifdef md_elf_section_change_hook
   md_elf_section_change_hook ();

@@ -51,6 +51,9 @@
 #define TRUE  !FALSE
 #endif
 
+#define obj_begin() elf_begin ()
+extern void elf_begin PARAMS ((void));
+
 /* should be conditional on address size! */
 #define elf_symbol(asymbol) ((elf_symbol_type *)(&(asymbol)->the_bfd))
 
@@ -91,6 +94,11 @@ extern void obj_elf_version PARAMS ((int));
    information.  */
 extern void obj_elf_init_stab_section PARAMS ((segT));
 #define INIT_STAB_SECTION(seg) obj_elf_init_stab_section (seg)
+
+/* For now, always set ECOFF_DEBUGGING for an Alpha target.  */
+#ifdef TC_ALPHA
+#define ECOFF_DEBUGGING 1
+#endif
 
 /* For now, always set ECOFF_DEBUGGING for a MIPS target.  */
 #ifdef TC_MIPS
