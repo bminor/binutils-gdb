@@ -30,8 +30,6 @@
 # VxWorks, because the test output would appear on the other port,
 # rather than being displayed by gdb.
 
-set prompt "\(gdb\)"
-
 load_lib remote.exp
 load_lib gdb.exp
 
@@ -61,20 +59,37 @@ proc gdb_load { arg } {
     global spawn_id
     global GDB
     global expect_out
+    global targetname
 
     set loadfile [file tail $arg]
     set loadpath [file dirname $arg]
-    gdb_unload
+
     send "file $arg\n"
     expect {
-	-re "A program is being debugged already.  Kill it\? \(y or n\)" {
+	-re "A program is being debugged already..*Kill it.*y or n. $" {
 	    send "y\n"
 	    exp_continue
 	}
-	-re "Reading symbols from.*done..*$prompt $" { }
+	-re "Reading symbols from.*done..*$prompt $" {}
 	-re "$prompt $" { perror "GDB couldn't read file" }
-	timeout { perror "(timeout) read symbol file" ; return }
+	timeout { perror "(timeout) read symbol file" ; return -1 }
     }
+
+    send "target mips $targetname\n"
+    set timeout 60
+    expect {
+	-re "Remote MIPS debugging.*$prompt $"	{
+	    if $verbose>1 then {
+		send_user "Set target to $targetname\n"
+	    }
+	}
+	timeout { 
+	    perror "Couldn't set MIPS target."
+	    set timeout 10
+	    return -1
+	}
+    }
+    
     send "load $arg\n"
     if $verbose>1 then {
 	send_user "Loading $arg into $GDB\n"
@@ -86,16 +101,15 @@ proc gdb_load { arg } {
 		send_user "Loaded $arg into $GDB\n"
 	    }
 	    set timeout 30
-	    return 1
 	}
 	-re "$prompt $"     {
 	    if $verbose>1 then {
-	 perror "GDB couldn't load."
+		 perror "GDB couldn't load."
 	    }
 	}
 	timeout {
 	    if $verbose>1 then {
-	 perror "Timed out trying to load $arg."
+		 perror "Timed out trying to load $arg."
 	    }
 	}
     }
@@ -129,7 +143,7 @@ proc gdb_start { } {
 	if ![info exists baud] then {
 	    set baud 9600
 	}
-	set shell_id [ eval $connectmode "$targetname" $baud ]
+	set shell_id [ eval $connectmode "$targetname" ]
 	send -i $shell_id "\n"
 	expect {
 	    -i $shell_id -re "<IDT>$" { }
@@ -160,14 +174,17 @@ proc gdb_start { } {
 	spawn $GDB
     }
     expect  {
-	-re "GDB.*$prompt $"   {
-	    if $verbose>1 then {
-		send_user "$GDB initialized for cross mode\n\n"
-	    }
+	-re ".*\r\n$prompt $" {
+	    verbose "GDB initialized."
 	}
-	-re "$prompt $"     { perror "GDB never initialized."; return -1 }
-	timeout             { perror "(timeout) GDB never initialized.";
-			      return -1 }
+	-re "$prompt $"	{
+	    perror "GDB never initialized."
+	    return -1
+	}
+	timeout		{
+	    perror "(timeout) GDB never initialized."
+	    return -1
+	}
     }
 
     # force the height to "unlimited", so no pagers get used
@@ -182,23 +199,23 @@ proc gdb_start { } {
     send "set mipsfpu off\n"
     expect -re ".*$prompt $" {}
 
-    if $verbose>1 then {
-	send_user "Setting up target, please wait...\n"
-    }
-    send "target mips $targetname\n"
-    set timeout 60
-    expect {
-	-re "Remote MIPS debugging.*$prompt $"	{
-	    if $verbose>1 then {
-		send_user "Set target to $targetname\n"
-	    }
-	}
-	timeout { 
-	    perror "Couldn't set MIPS target."
-	    set timeout 10
-	    return -1
-	}
-    }
+#    if $verbose>1 then {
+#	send_user "Setting up target, please wait...\n"
+#    }
+#    send "target mips $targetname\n"
+#    set timeout 60
+#    expect {
+#	-re "Remote MIPS debugging.*$prompt $"	{
+#	    if $verbose>1 then {
+#		send_user "Set target to $targetname\n"
+#	    }
+#	}
+#	timeout { 
+#	    perror "Couldn't set MIPS target."
+#	    set timeout 10
+#	    return -1
+#	}
+#    }
     set timeout 10
 }
 

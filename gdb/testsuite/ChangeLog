@@ -1,3 +1,10 @@
+Tue Feb 28 16:28:54 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config/mips-gdb.exp (gdb_load): In every test case, we need to do
+	'file' command firts, then 'target', then 'load', this is due to gdb
+	target set up.
+	* config/mips-gdb.exp: Fix a couple regular exp bugs.
+
 Thu Feb 23 17:44:55 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.disasm/hppa.s (fmemLRbug_tests): Add tests for the indexing
