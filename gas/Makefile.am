@@ -498,8 +498,7 @@ e-i386elf.o: $(srcdir)/config/e-i386elf.c
 
 # The m68k operand parser.
 
-# Commented out, doesn't work with recent automake.
-#EXTRA_as_new_SOURCES = config/m68k-parse.y
+EXTRA_as_new_SOURCES = config/m68k-parse.y
 
 m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/config/m68k-parse.y y.tab.c m68k-parse.c --

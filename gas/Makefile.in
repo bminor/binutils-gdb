@@ -259,6 +259,10 @@ RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then 		echo $${srcdir}/../d
 
 RUNTESTFLAGS = 
 
+# The m68k operand parser.
+
+EXTRA_as_new_SOURCES = config/m68k-parse.y
+
 # stand-alone itbl assembler & disassembler
 
 EXTRA_PROGRAMS = itbl-test
@@ -768,21 +772,23 @@ SCRIPTS =  $(noinst_SCRIPTS)
 
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LEXLIB = @LEXLIB@
+YLWRAP = $(top_srcdir)/../ylwrap
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README ./stamp-h.in COPYING ChangeLog Makefile.am \
-Makefile.in NEWS acconfig.h acinclude.m4 aclocal.m4 config.in configure \
-configure.in gdbinit.in itbl-lex.c itbl-parse.c
+Makefile.in NEWS acconfig.h acinclude.m4 aclocal.m4 config.in \
+config/m68k-parse.c configure configure.in gdbinit.in itbl-lex.c \
+itbl-parse.c
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(gasp_new_SOURCES)
+SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES) $(gasp_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS) $(gasp_new_OBJECTS)
 
 all: all-redirect
@@ -894,10 +900,8 @@ gasp-new$(EXEEXT): $(gasp_new_OBJECTS) $(gasp_new_DEPENDENCIES)
 .l.c:
 	$(LEX) $(AM_LFLAGS) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
 .y.c:
-	$(YACC) $(AM_YFLAGS) $(YFLAGS) $< && mv y.tab.c $*.c
-	if test -f y.tab.h; then \
-	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
-	else :; fi
+	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $*.c y.tab.h $*.h -- $(AM_YFLAGS) $(YFLAGS)
+config/m68k-parse.h: config/m68k-parse.c
 itbl-parse.h: itbl-parse.c
 
 
@@ -1116,7 +1120,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "itbl-lexlitbl-parsehitbl-parsec" || rm -f itbl-lexl itbl-parseh itbl-parsec
+	-test -z "itbl-lexlconfig/m68k-parsehconfig/m68k-parsecitbl-parsehitbl-parsec" || rm -f itbl-lexl config/m68k-parseh config/m68k-parsec itbl-parseh itbl-parsec
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-tags mostlyclean-generic
@@ -1255,11 +1259,6 @@ e-i386coff.o: $(srcdir)/config/e-i386coff.c
 	$(COMPILE) -c $(srcdir)/config/e-i386coff.c
 e-i386elf.o: $(srcdir)/config/e-i386elf.c
 	$(COMPILE) -c $(srcdir)/config/e-i386elf.c
-
-# The m68k operand parser.
-
-# Commented out, doesn't work with recent automake.
-#EXTRA_as_new_SOURCES = config/m68k-parse.y
 
 m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/config/m68k-parse.y y.tab.c m68k-parse.c --
